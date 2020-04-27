@@ -1,0 +1,380 @@
+# -*- mode: python -*-
+# DOOM build script
+# TTimo <ttimo@idsoftware.com>
+# http://scons.sourceforge.net
+
+import sys, os
+import scons_utils
+
+Import( 'GLOBALS' )
+Import( GLOBALS )
+
+jpeg_string = \
+		'jaricom.c \
+		jcapimin.c \
+		jcapistd.c \
+		jcarith.c \
+		jccoefct.c \
+		jccolor.c \
+		jcdctmgr.c \
+		jchuff.c \
+		jcinit.c \
+		jcmainct.c \
+		jcmarker.c \
+		jcmaster.c \
+		jcomapi.c \
+		jcparam.c \
+		jcprepct.c \
+		jcsample.c \
+		jctrans.c \
+		jdapimin.c \
+		jdapistd.c \
+		jdarith.c \
+		jdatadst.c \
+		jdatasrc.c \
+		jdcoefct.c \
+		jdcolor.c \
+		jddctmgr.c \
+		jdhuff.c \
+		jdinput.c \
+		jdmainct.c \
+		jdmarker.c \
+		jdmaster.c \
+		jdmerge.c \
+		jdpostct.c \
+		jdsample.c \
+		jdtrans.c \
+		jerror.c \
+		jfdctflt.c \
+		jfdctfst.c \
+		jfdctint.c \
+		jidctflt.c \
+		jidctfst.c \
+		jidctint.c \
+		jmemmgr.c \
+		jmemname.c \
+		jquant1.c \
+		jquant2.c \
+		jutils.c'
+
+jpeg_list = scons_utils.BuildList( '../../../../../../jpeg-8d/', jpeg_string )
+
+renderer_string = ' \
+	esTransform.c \
+	draw_glsl.cpp \
+	draw_common.cpp \
+	tr_backend.cpp \
+	tr_render.cpp \
+	tr_rendertools.cpp \
+	tr_trace.cpp \
+	Image_load.cpp \
+	etc_rg_etc1.cpp \
+	etc_android.cpp \
+	Image_files.cpp \
+	Image_init.cpp \
+	Image_process.cpp \
+	Image_program.cpp \
+	Cinematic.cpp \
+	GuiModel.cpp \
+	Interaction.cpp \
+	Material.cpp \
+	Model.cpp \
+	ModelDecal.cpp \
+	ModelManager.cpp \
+	ModelOverlay.cpp \
+	Model_beam.cpp \
+	Model_ase.cpp \
+	Model_liquid.cpp \
+	Model_lwo.cpp \
+	Model_ma.cpp \
+	Model_md3.cpp \
+	Model_md5.cpp \
+	Model_prt.cpp \
+	Model_sprite.cpp \
+	RenderEntity.cpp \
+	RenderSystem.cpp \
+	RenderSystem_init.cpp \
+	RenderWorld.cpp \
+	RenderWorld_demo.cpp \
+	RenderWorld_load.cpp \
+	RenderWorld_portals.cpp \
+	VertexCache.cpp \
+	tr_deform.cpp \
+	tr_font.cpp \
+	tr_guisurf.cpp \
+	tr_light.cpp \
+	tr_lightrun.cpp \
+	tr_main.cpp \
+	tr_orderIndexes.cpp \
+	tr_polytope.cpp \
+	tr_shadowbounds.cpp \
+	tr_stencilshadow.cpp \
+	tr_subview.cpp \
+	tr_trisurf.cpp \
+	tr_turboshadow.cpp'
+
+if ( local_opengl == 1 ):
+	renderer_string += ' \
+			MegaTexture.cpp \
+			draw_arb2.cpp'
+
+renderer_list = scons_utils.BuildList( 'renderer', renderer_string )
+
+framework_string = ' \
+	CVarSystem.cpp \
+	CmdSystem.cpp \
+	Common.cpp \
+	Compressor.cpp \
+	Console.cpp \
+	DemoFile.cpp \
+	DeclAF.cpp \
+	DeclEntityDef.cpp \
+	DeclFX.cpp \
+	DeclManager.cpp \
+	DeclParticle.cpp \
+	DeclPDA.cpp \
+	DeclSkin.cpp \
+	DeclTable.cpp \
+	EditField.cpp \
+	EventLoop.cpp \
+	File.cpp \
+	FileSystem.cpp \
+	KeyInput.cpp \
+	Unzip.cpp \
+	UsercmdGen.cpp \
+	Session_menu.cpp \
+	Session.cpp \
+	async/AsyncClient.cpp \
+	async/AsyncNetwork.cpp \
+	async/AsyncServer.cpp \
+	async/MsgChannel.cpp \
+	async/NetworkSystem.cpp \
+	async/ServerScan.cpp'
+
+framework_list = scons_utils.BuildList( 'framework', framework_string )
+
+cm_string = ' \
+	CollisionModel_contacts.cpp \
+	CollisionModel_contents.cpp \
+	CollisionModel_debug.cpp \
+	CollisionModel_files.cpp \
+	CollisionModel_load.cpp \
+	CollisionModel_rotate.cpp \
+	CollisionModel_trace.cpp \
+	CollisionModel_translate.cpp'
+cm_list = scons_utils.BuildList( 'cm', cm_string )
+
+dmap_string = ' \
+	dmap.cpp \
+	facebsp.cpp \
+	gldraw.cpp \
+	glfile.cpp \
+	leakfile.cpp \
+	map.cpp \
+	optimize.cpp \
+	output.cpp \
+	portals.cpp \
+	shadowopt3.cpp \
+	tritjunction.cpp \
+	tritools.cpp \
+	ubrush.cpp \
+	usurface.cpp'
+
+dmap_list = scons_utils.BuildList( 'tools/compilers/dmap', dmap_string )
+
+aas_string = ' \
+	AASBuild.cpp \
+	AASBuild_file.cpp \
+	AASBuild_gravity.cpp \
+	AASBuild_ledge.cpp \
+	AASBuild_merge.cpp \
+	AASCluster.cpp \
+	AASFile.cpp \
+	AASFile_optimize.cpp \
+	AASFile_sample.cpp \
+	AASReach.cpp \
+	AASFileManager.cpp \
+	Brush.cpp \
+	BrushBSP.cpp'
+	
+aas_list = scons_utils.BuildList( 'tools/compilers/aas', aas_string )
+
+roq_string = ' \
+	NSBitmapImageRep.cpp \
+	codec.cpp \
+	roq.cpp \
+	roqParam.cpp'
+
+roq_list = scons_utils.BuildList( 'tools/compilers/roqvq', roq_string )
+
+renderbump_list = [ 'tools/compilers/renderbump/renderbump.cpp' ]
+
+snd_string = ' \
+	snd_cache.cpp \
+	snd_decoder.cpp \
+	snd_efxfile.cpp \
+	snd_emitter.cpp \
+	snd_shader.cpp \
+	snd_system.cpp \
+	snd_wavefile.cpp \
+	snd_world.cpp'
+
+snd_list = scons_utils.BuildList( 'sound', snd_string )
+
+ui_string = ' \
+	BindWindow.cpp \
+	ChoiceWindow.cpp \
+	DeviceContext.cpp \
+	EditWindow.cpp \
+	FieldWindow.cpp \
+	GameBearShootWindow.cpp \
+	GameBustOutWindow.cpp \
+	GameSSDWindow.cpp \
+	GuiScript.cpp \
+	ListGUI.cpp \
+	ListWindow.cpp \
+	MarkerWindow.cpp \
+	RegExp.cpp \
+	RenderWindow.cpp \
+	SimpleWindow.cpp \
+	SliderWindow.cpp \
+	UserInterface.cpp \
+	Window.cpp \
+	Winvar.cpp'
+
+ui_list = scons_utils.BuildList( 'ui', ui_string )
+
+sys_string = ' \
+	sys_local.cpp \
+	posix/posix_net.cpp \
+	posix/posix_main.cpp \
+	posix/posix_signal.cpp \
+	posix/posix_threads.cpp \
+	linux/stack.cpp \
+	stub/util_stub.cpp'
+
+if g_os == 'Android':
+	sys_string += ' android/main.cpp'
+else:
+	sys_string += ' linux/main.cpp'
+
+if ( local_dedicated == 0 ):
+	sys_string += ' \
+		posix/posix_input.cpp \
+		linux/gl_extensions.cpp'
+	if g_os == 'Android':
+		sys_string += ' android/input.cpp'
+	else:
+		sys_string += ' linux/input.cpp'
+	if ( local_opengl == 0 ):
+		if g_os == 'Android':
+			sys_string += ' android/gles2.cpp'
+		else:
+			sys_string += ' linux/gles2.cpp'
+	else:
+		sys_string += ' linux/glimp.cpp'
+else:
+	sys_string += ' linux/dedicated.cpp'
+
+sys_list = scons_utils.BuildList( 'sys', sys_string )
+
+tools_string = ' \
+	guied/GEWindowWrapper_stub.cpp'
+
+tools_list = scons_utils.BuildList( 'tools', tools_string )
+
+core_list = framework_list + renderer_list + ui_list \
+	+ cm_list + dmap_list + renderbump_list + aas_list + roq_list \
+	+ snd_list + sys_list + tools_list + [ 'TypeInfo/TypeInfoGen.cpp' ]
+
+for i in range( len( core_list ) ):
+	core_list[ i ] = '../../' + core_list[ i ]
+
+local_env = g_env.Clone()
+
+if g_os == 'Android':
+	local_env.Append( CPPPATH = [ '../../sys/android/' ] )
+
+if ( local_dedicated == 1 ):
+	local_env.Append( CPPDEFINES = [ 'ID_DEDICATED' ] )
+	# don't enable alsa for a dedicated server binary
+	ALSA = '0'
+
+if ( local_gamedll == 1 ):
+	local_env.Append( CPPDEFINES = [ '__DOOM_DLL__' ] )
+
+if ( local_demo == 1 ):
+	local_env.Append( CPPDEFINES = [ 'ID_DEMO_BUILD' ] )
+
+if ( local_curl == 0 ):
+	local_env.Append( CPPDEFINES = [ 'ID_ENABLE_CURL=0' ] )
+else:
+	local_env.Append( LIBS = [ 'curl' ] )
+
+if ( local_opengl == 1 ):
+	local_env.Append( CPPDEFINES = [ 'ID_TARGET_OPENGL' ] )
+
+sound_env = local_env.Clone()
+if g_os == 'Android':
+	sound_list = [ '../android/sound.cpp' ]
+else:
+	sound_env.Append( CPPPATH = '/usr/local/lib/oss/include' )
+	# store a local copy of the include headers as well for holy build
+	sound_env.Append( CPPPATH = '../linux/oss/include' )
+	sound_list = [ '../linux/sound.cpp' ]
+if ( ALSA != '0' ):
+	if (g_os == 'Linux' ):
+		sound_list.append( '../../sys/linux/sound_alsa.cpp' )
+	else:
+		sound_env.Append( CPPDEFINES = 'NO_ALSA' )
+else:
+	sound_env.Append( CPPDEFINES = 'NO_ALSA' )
+
+sound_lib = sound_env.StaticLibrary( 'sound', sound_list )
+
+if g_os == 'Android':
+	jpeg_env = local_env.Clone()
+	jpeg_lib = jpeg_env.StaticLibrary( 'jpeg', jpeg_list )
+
+	local_env['CPPFLAGS' ] += [ '-I../jpeg-8d/' ]
+
+if g_os == 'Android':
+	local_env.Append( LIBS = [ 'dl', 'vorbisfile','vorbis', 'ogg', 'android' ] )
+else:
+	local_env.Append( LIBS = [ 'pthread', 'dl', 'vorbisfile', 'jpeg' ] )
+
+if ( local_dedicated == 0 ):
+	if g_os == 'Linux':
+		local_env.Append( LIBS = [ 'X11' ] )
+		local_env.Append( LIBPATH = [ '/usr/X11R6/lib' ] )
+		local_env.Append( LIBS = [ 'openal' ] )
+	if ( local_opengl == 0 ):
+		local_env.Append( LIBS = [ 'GLESv2', 'EGL' ] )
+		local_env.Append( LIBPATH = ['/prog/games/dante-es2/libogg/lib'] )
+	else:
+		local_env.Append( LIBS = [ 'GL' ] )
+
+source_list = core_list
+source_list += idlib_objects
+source_list += sound_lib
+
+if g_os == 'Android':
+	source_list += jpeg_lib
+else:
+	source_list += [ '../../openal/stubs.cpp' ]
+
+if g_os == 'Android':
+	local_env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME'] = 1
+	local_env['CPPFLAGS'] += [ '-shared' ]
+
+source_list += g_env_noopt.StaticObject( '../../tools/compilers/dmap/optimize_gcc.cpp' )
+
+if ( local_gamedll == 0 ):
+	source_list += game_objects
+
+if g_os == 'Android':
+	d3wm = local_env.SharedLibrary( target = 'dante', source = source_list )
+else:
+	d3wm = local_env.Program( target = 'dante', source = source_list )
+
+Return( 'd3wm' )

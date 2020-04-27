@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>        
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/launcher_tab1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+    
+    <LinearLayout
+    android:id="@+id/lay_tab1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+        
+    <TextView
+        android:id="@+id/tv_cmdline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Commandline:" />
+
+    <EditText
+        android:id="@+id/edt_cmdline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:imeOptions="flagNoExtractUi"
+        android:inputType="textNoSuggestions" >
+    </EditText>
+
+    <TextView
+        android:id="@+id/tv_path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Game working directory:" />
+
+    <EditText
+        android:id="@+id/edt_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:imeOptions="flagNoExtractUi"
+        android:inputType="textNoSuggestions" >
+    </EditText>
+    
+    <CheckBox
+        android:id="@+id/nolight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Disable lighting" />
+    
+    <CheckBox
+        android:id="@+id/usedxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Use DXT textures (tegra only, others - no effect)" />
+    
+    <CheckBox
+        android:id="@+id/useetc1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Use ETC1 (or RGBA4444) compression" />
+    
+    <CheckBox
+        android:id="@+id/useetc1cache"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Use ETC1 (or RGBA4444) cache" />
+    
+    <Button
+        android:id="@+id/support_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="support"
+        android:text="Support the developer" />  
+        
+    </LinearLayout>
+	<RelativeLayout
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:orientation="vertical"
+    	android:layout_below="@id/lay_tab1"
+    	android:layout_alignParentBottom="true">
+    	<include layout="@layout/adlayout"/>   
+    	</RelativeLayout> 
+</RelativeLayout>
+</ScrollView>

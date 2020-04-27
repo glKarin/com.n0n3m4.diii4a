@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/launcher_tab2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<LinearLayout    
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    
+    <TextView
+        android:id="@+id/tv_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="Note: Gamepads/Keyboards must be configured in-game (like on PC), not here" />
+
+    <Button
+        android:id="@+id/start_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="controls"
+        android:text="Configure on-screen controls" />
+    
+    <Button
+        android:id="@+id/start_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="resetcontrols"
+        android:text="Reset on-screen controls" />
+    
+    <CheckBox
+        android:id="@+id/smoothjoy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Smooth joystick" />
+    
+    <CheckBox
+        android:id="@+id/mapvol"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Map volume keys" />
+    
+    <CheckBox
+        android:id="@+id/secfinglmb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Multitouch shoot (left mouse button click on a second touch)" />
+
+    <TextView
+        android:id="@+id/tv_mprefs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mouse settings:" />
+
+    <CheckBox
+        android:id="@+id/hideonscr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hide onscreen buttons and enable mouse (Root required)" />
+    
+    <LinearLayout
+        	android:id="@+id/layout_mouseconfig" 
+      		android:layout_width="match_parent"
+    		android:layout_height="match_parent"
+    		android:orientation="vertical">
+    
+    <CheckBox
+        android:id="@+id/detectmouse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Autodetect mouse" />
+
+    <LinearLayout
+        	android:id="@+id/layout_manualmouseconfig" 
+      		android:layout_width="match_parent"
+    		android:layout_height="match_parent"
+    		android:orientation="vertical">
+    
+    <TextView
+        android:id="@+id/tv_evnt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mouse event device:" />
+
+    <EditText
+        android:id="@+id/edt_mouse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:imeOptions="flagNoExtractUi"
+        android:inputType="textNoSuggestions" >
+    </EditText>
+    
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_curpos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mouse cursor position:" />
+
+    <RadioGroup
+        android:id="@+id/rg_curpos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <RadioButton
+            android:id="@+id/cur_tl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top left corner" />
+
+        <RadioButton
+            android:id="@+id/cur_tr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top right corner" />
+
+        <RadioButton
+            android:id="@+id/cur_bl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bottom left corner" />
+
+        <RadioButton
+            android:id="@+id/cur_br"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Bottom right corner" />
+    </RadioGroup>
+    </LinearLayout>
+
+</LinearLayout>
+</ScrollView>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/launcher_tab3"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/tv_scrres"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Screen resolution:" />
+
+        <RadioGroup
+            android:id="@+id/rg_scrres"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <RadioButton
+                android:id="@+id/res_1x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Normal (1x)" />
+
+            <RadioButton
+                android:id="@+id/res_05x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Half (0.5x)" />
+
+            <RadioButton
+                android:id="@+id/res_2x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Double (2x)" />
+
+            <RadioButton
+                android:id="@+id/res_1080"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1080p" />
+
+            <RadioButton
+                android:id="@+id/res_custom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Custom" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/res_customlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:id="@+id/res_x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="640" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="X" />
+
+            <EditText
+                android:id="@+id/res_y"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="480" />
+        </LinearLayout>
+        
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MSAA: (Warning, Tegra doesn't support it)" />
+        <RadioGroup
+            android:id="@+id/rg_msaa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <RadioButton
+                android:id="@+id/msaa_1x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="1x (None)" />
+
+            <RadioButton
+                android:id="@+id/msaa_4x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4x" />
+
+            <RadioButton
+                android:id="@+id/msaa_16x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="16x" />
+        </RadioGroup>
+        
+    </LinearLayout>
+
+</ScrollView>

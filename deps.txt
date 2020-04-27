@@ -1,0 +1,1 @@
+Some dependencies are not included because they can be downloaded from official websites. If you still want to receive completely exact source code even for dependencies, email n0n3m4@gmail.com
