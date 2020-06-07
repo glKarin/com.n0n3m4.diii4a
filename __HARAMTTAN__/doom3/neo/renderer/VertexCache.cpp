@@ -46,7 +46,7 @@ idCVar idVertexCache::r_showVertexCache("r_showVertexCache", "0", CVAR_INTEGER|C
 idCVar idVertexCache::r_vertexBufferMegs("r_vertexBufferMegs", "32", CVAR_INTEGER|CVAR_RENDERER, "");
 
 //k
-static idCVar r_harmClearVertexBuffer("r_harmClearVertexBuffer", "1", CVAR_INTEGER|CVAR_RENDERER, "Clear vertex buffer on every frame. (0 - not clear, 1 - clear on end frame, 2 - clear on end frame and shotdown.)");
+static idCVar harm_r_clearVertexBuffer("harm_r_clearVertexBuffer", "1", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Clear vertex buffer on every frame. (0 - not clear, 1 - clear on every end frame, 2 - clear on every end frame and shotdown.)");
 
 idVertexCache		vertexCache;
 
@@ -89,7 +89,7 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 			glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
 #endif
 			// k
-			if(r_harmClearVertexBuffer.GetInteger() != 0)
+			if(harm_r_clearVertexBuffer.GetInteger() != 0)
 			{ // clear vertex buffer on graphics memory.
 				glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
 				glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW); // size = 0, work on modern OpenGL?
@@ -236,7 +236,7 @@ idVertexCache::Shutdown
 void idVertexCache::Shutdown()
 {
 	// k
-	if(r_harmClearVertexBuffer.GetInteger() == 2) PurgeAll();
+	if(harm_r_clearVertexBuffer.GetInteger() == 2) PurgeAll();
 //	PurgeAll();	// !@#: also purge the temp buffers
 
 	headerAllocator.Shutdown();

@@ -2818,6 +2818,8 @@ void idCommonLocal::Async(void)
 idCommonLocal::LoadGameDLL
 =================
 */
+//k
+static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library path.");
 void idCommonLocal::LoadGameDLL(void)
 {
 #ifdef __DOOM_DLL__
@@ -2828,11 +2830,63 @@ void idCommonLocal::LoadGameDLL(void)
 	GetGameAPI_t	GetGameAPI;
 
 #if defined(__ANDROID__)
-	#ifdef __ARM_NEON__
-	gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libgame_neon.so");
-	#else
-	gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libgame.so");
-	#endif
+	//k
+#define _K_D3XP
+#ifdef _K_D3XP
+	// First try to load user special game lib path. // FIXME: for Android N
+	idStr fsgame = cvarSystem->GetCVarString("harm_fs_gameLibPath");
+	if(fsgame.Length())
+	{
+		common->Printf("[Harmattan]: Load user game(%s).\n", fsgame.c_str());
+		gameDLL = sys->DLL_Load(fsgame);
+	}
+	// Second check `fs_game` cvar.
+	if(!gameDLL)
+	{
+		fsgame = cvarSystem->GetCVarString("fs_game");
+		if(fsgame.Length())
+		{
+			common->Printf("[Harmattan]: Load game from fs_game(%s).\n", fsgame.c_str());
+			// if fs_game cvar is `d3xp`.
+			if(!fsgame.Icmp("d3xp")) // load d3xp game so.
+			{
+				common->Printf("[Harmattan]: Load D3XP game.\n");
+#ifdef __ARM_NEON__
+				gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libd3xp_neon.so");
+#else
+				gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libd3xp.so");
+#endif
+			}
+			else // else find in fs_game cvar path.
+			{
+				fileSystem->FindDLL("game", dllPath, true);
+				if (!dllPath[ 0 ]) {
+					common->Printf("[Harmattan]: couldn't find game dynamic library");
+				}
+				else
+				{
+					common->Printf("[Harmattan]: Loading game DLL: '%s'\n", dllPath);
+					gameDLL = sys->DLL_Load(dllPath);
+				}
+			}
+		}
+#if 0
+		else
+#else
+			// last load base game library if all failed.
+			if(!gameDLL)
+#endif
+#endif
+			{
+				common->Printf("[Harmattan]: Load BASE game.\n");
+#ifdef __ARM_NEON__
+				gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libgame_neon.so");
+#else
+				gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libgame.so");
+#endif
+			}
+	}
+	//k
 #else
 	fileSystem->FindDLL("game", dllPath, true);
 

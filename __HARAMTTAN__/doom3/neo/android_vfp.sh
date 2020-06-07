@@ -19,6 +19,6 @@ scons \
 	\
 	NOCURL=1 \
 	TARGET_ANDROID=1 \
-	TARGET_D3XP=0 \
+	TARGET_D3XP=1 \
 	BASEFLAGS='-march=armv5te -fno-builtin-sin -fno-builtin-sinf -fno-builtin-cosf -fno-builtin-cos -mtune=xscale -mfpu=vfp -mfloat-abi=softfp -Wl,--no-undefined -fexceptions -frtti -I/prog/games/dante-es2/libogg/include -L/prog/games/dante-es2/libogg/lib'\
 	$*
