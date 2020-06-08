@@ -1,4 +1,5 @@
 #!/bin/bash
+# build soft-float neon
 set -e
 
 export TOOLCHAIN=/opt/ndk/android_gcc_32
@@ -20,5 +21,6 @@ scons \
 	NOCURL=1 \
 	TARGET_ANDROID=1 \
 	TARGET_D3XP=1 \
+	TARGET_CDOOM=1 \
 	BASEFLAGS='-march=armv7-a -fno-builtin-sin -fno-builtin-cos -fno-builtin-sinf -fno-builtin-cosf -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp -fexceptions -frtti -I/data/data/com.termux/files/usr/include/android'\
 	$*

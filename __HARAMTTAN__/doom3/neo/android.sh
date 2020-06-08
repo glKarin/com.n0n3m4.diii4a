@@ -1,4 +1,5 @@
 #!/bin/bash
+# test: build 64-bit soft-float neon
 set -e
 
 export TOOLCHAIN=/opt/ndk/android_gcc

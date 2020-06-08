@@ -1,4 +1,5 @@
 #!/bin/bash
+# build hard-float vfp
 set -e
 
 export TOOLCHAIN=/opt/ndk/android_gcc_32
