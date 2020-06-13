@@ -298,6 +298,8 @@ public class Q3EUtils {
 	public static final String pref_harm_run_background="q3e_harm_run_background"; //k
 	public static final String pref_harm_render_mem_status="q3e_harm_render_mem_status"; //k
 	public static final String pref_harm_r_harmclearvertexbuffer="q3e_r_harmclearvertexbuffer"; //k
+	public static final String pref_harm_fs_game="q3e_harm_fs_game";
+	public static final String pref_harm_hide_nav="q3e_harm_hide_nav";
 	
 	public static class UiElement
 	{

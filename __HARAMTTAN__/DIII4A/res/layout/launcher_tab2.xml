@@ -134,5 +134,16 @@
     </RadioGroup>
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Screen settings:" />
+
+    <CheckBox
+        android:id="@+id/hide_nav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hide navigation bar." />
+    
 </LinearLayout>
 </ScrollView>

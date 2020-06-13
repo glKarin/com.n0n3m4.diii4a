@@ -45,6 +45,7 @@ import android.graphics.Color;
 import android.app.ActivityManager;
 import android.os.Process;
 import android.os.Debug;
+import android.view.View;
 
 public class Q3EMain extends Activity {
 	public static Q3ECallbackObj mAudio;
@@ -82,6 +83,18 @@ public class Q3EMain extends Activity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 		
 		super.onCreate(savedInstanceState);
+        //k
+        if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Q3EUtils.pref_harm_hide_nav, false))
+        {
+            View decorView = getWindow().getDecorView();
+            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+        }
 		
 		if (Q3EUtils.q3ei==null)
 		{			

@@ -43,13 +43,43 @@
                 android:id="@+id/res_1080"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1080p" />
+                android:text="1080p (1920x1080)" />
 
             <RadioButton
                 android:id="@+id/res_custom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Custom" />
+            
+            <RadioButton
+                android:id="@+id/res_720"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="720p (1280x720)" />
+
+            <RadioButton
+                android:id="@+id/res_480"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="480p (720x480)" />
+
+            <RadioButton
+                android:id="@+id/res_360"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="360p (640x360)" />
+
+            <RadioButton
+                android:id="@+id/res_1p3x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="One third (1/3x)" />
+
+            <RadioButton
+                android:id="@+id/res_1p4x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quarter (1/4x)" />
         </RadioGroup>
 
         <LinearLayout
@@ -138,42 +168,6 @@
                 android:layout_height="wrap_content"
                 android:text="16Bits(RGBA4444)" />
         </RadioGroup>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/launcher_run_background"
-            android:text="Run background" />
-        <RadioGroup
-            android:id="@+id/rg_run_background"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <RadioButton
-                android:id="@+id/run_background_no"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="Not run on background" />
-
-            <RadioButton
-                android:id="@+id/run_background_without_sound"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Run on background without sound" />
-
-            <RadioButton
-                android:id="@+id/run_background_full"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Run on background" />
-        </RadioGroup>
-        
-        <CheckBox
-            android:id="@+id/setting_render_mem_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Render memory status" />
         
     </LinearLayout>
 

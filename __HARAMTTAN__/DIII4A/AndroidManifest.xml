@@ -42,5 +42,11 @@
             android:name="com.n0n3m4.q3e.Q3EUiConfig"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity> 
+
+        <activity android:label="@string/app_name"
+            android:launchMode="singleTask"             
+            android:name=".ConfigEditorActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+        </activity> 
     </application>    
 </manifest> 

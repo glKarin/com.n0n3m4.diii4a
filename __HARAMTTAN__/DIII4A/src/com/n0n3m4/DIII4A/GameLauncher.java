@@ -70,6 +70,11 @@ import android.widget.Toast;
 import android.app.ActivityManager;
 import android.app.LauncherActivity;
 import android.widget.RadioButton;
+import android.view.KeyEvent;
+import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toolbar.OnMenuItemClickListener;
 
 public class GameLauncher extends Activity{		
 	
@@ -368,14 +373,45 @@ public class GameLauncher extends Activity{
 		((CheckBox)findViewById(R.id.useetc1cache)).setChecked(getProp("r_useETC1cache"));
 		((CheckBox)findViewById(R.id.nolight)).setChecked(getProp("r_noLight"));
         
-        String str = GetProp("r_harmClearVertexBuffer");
+        String str = GetProp("harm_r_clearVertexBuffer");
         if(str != null)
         {
-            int index = Integer.valueOf(str);
+            int index = 2;
+            try
+            {
+                index = Integer.parseInt(str);   
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
             if(index < 0 || index > 2)
                 index = 2;
             RadioGroup group = (RadioGroup)findViewById(R.id.r_harmclearvertexbuffer);
             group.check(group.getChildAt(index).getId());
+        }
+        
+        str = GetProp("fs_game");
+        if(str != null)
+        {
+            int index = 0;
+            if("".equals(str))
+                index = 0;
+            else if("d3xp".equals(str))
+                index = 1;
+            else if("cdoom".equals(str))
+                index = 2;
+            else
+                index = 3;
+            RadioGroup group = (RadioGroup)findViewById(R.id.rg_fs_game);
+            group.check(group.getChildAt(index).getId());
+            if(index == 3)
+            {
+                EditText edit = (EditText)findViewById(R.id.edt_fs_game);
+                String cur = edit.getText().toString();
+                if(!str.equals(cur))
+                    edit.setText(str);
+            }
         }
 	}		
 	
@@ -435,9 +471,80 @@ public class GameLauncher extends Activity{
            public void onCheckedChanged(RadioGroup group, int val)
            {
                if(val != -1)
-               SetProp("r_harmClearVertexBuffer", group.indexOfChild(findViewById(val)));
+               SetProp("harm_r_clearVertexBuffer", group.indexOfChild(findViewById(val)));
+           }
+            });
+		((EditText)findViewById(R.id.edt_cmdline)).setOnEditorActionListener(new TextView.OnEditorActionListener(){
+           public boolean onEditorAction(TextView view, int id, KeyEvent ev)
+           {
+               if(ev.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+               {
+                   if(ev.getAction() == KeyEvent.ACTION_UP)
+                   {
+                       findViewById(R.id.edt_path).requestFocus();
+                   }
+                   return true;
+               }
+               return false;
            }
         });
+        findViewById(R.id.launcher_tab1_edit_autoexec).setOnClickListener(new View.OnClickListener(){
+           public void onClick(View view)
+           {
+               EditFile("autoexec.cfg");
+           }
+            });
+        findViewById(R.id.launcher_tab1_edit_doomconfig).setOnClickListener(new View.OnClickListener(){
+                public void onClick(View view)
+                {
+                    EditFile("DoomConfig.cfg");
+                }
+            });
+        String game = GetProp("fs_game");
+        if(game != null)
+        {
+            int index = 0;
+            if(game.isEmpty() || "base".equals(game))
+                index = 0;
+            else if("d3xp".equals(game))
+                index = 1;
+            else if("cdoom".equals(game))
+                index = 2;
+                else
+                    index = 3;
+            SelectCheckbox(R.id.rg_fs_game, index);
+        }
+        ((RadioGroup)findViewById(R.id.rg_fs_game)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
+                public void onCheckedChanged(RadioGroup group, int val)
+                {
+                    switch(val)
+                    {
+                        case R.id.fs_game_base:
+                           RemoveProp("fs_game");
+                            break;
+                            case R.id.fs_game_d3xp:
+                            SetProp("fs_game", "d3xp");
+                            break;
+                        case R.id.fs_game_cdoom:
+                            SetProp("fs_game", "cdoom");
+                            break;
+                        case R.id.fs_game_user:
+                            SetProp("fs_game", ((EditText)findViewById(R.id.edt_fs_game)).getText().toString());
+                                    break;
+                                    default:
+                                    return;
+                    }
+                }
+            });
+        ((EditText)findViewById(R.id.edt_fs_game)).addTextChangedListener(new TextWatcher() {           
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if(((RadioGroup)findViewById(R.id.rg_fs_game)).getCheckedRadioButtonId() == R.id.fs_game_user)
+                        SetProp("fs_game", s);
+                }           
+                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
+                public void afterTextChanged(Editable s) {}
+            });
+		((CheckBox)findViewById(R.id.hide_nav)).setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_hide_nav, false));
 		
 		((EditText)findViewById(R.id.res_x)).setText(mPrefs.getString(Q3EUtils.pref_resx, "640"));
 		((EditText)findViewById(R.id.res_y)).setText(mPrefs.getString(Q3EUtils.pref_resy, "480"));
@@ -477,10 +584,6 @@ public class GameLauncher extends Activity{
 		updatehacktings();
 		
 		Q3EUtils.LoadAds(this);
-        
-       // Log.e("maxxxxx", "" +Runtime.getRuntime().maxMemory()/1024/1024);
-       // ActivityManager activityManager = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
-       //Toast.makeText(this, activityManager.getMemoryClass() + " " + activityManager.getLargeMemoryClass(), Toast.LENGTH_SHORT).show();
 	}
 	
 	public void start(View vw)
@@ -497,6 +600,7 @@ public class GameLauncher extends Activity{
 		mEdtr.putInt(Q3EUtils.pref_harm_run_background, GetIdCheckbox(R.id.rg_run_background));
 		mEdtr.putBoolean(Q3EUtils.pref_harm_render_mem_status, ((CheckBox)findViewById(R.id.setting_render_mem_status)).isChecked());
 		mEdtr.putInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, GetIdCheckbox(R.id.r_harmclearvertexbuffer));
+		mEdtr.putBoolean(Q3EUtils.pref_harm_hide_nav, ((CheckBox)findViewById(R.id.hide_nav)).isChecked());
         
 		mEdtr.putBoolean(Q3EUtils.pref_analog, true);
 		mEdtr.putBoolean(Q3EUtils.pref_mapvol, ((CheckBox)findViewById(R.id.mapvol)).isChecked());
@@ -532,22 +636,24 @@ public class GameLauncher extends Activity{
 	}
 
     //k
-    public void SetProp(String name, int val)
+    private void SetProp(String name, Object val)
     {
         name=" +set "+name+" ";
         String str=((EditText)findViewById(R.id.edt_cmdline)).getText().toString();
         if (str.contains(name))
         {
-            String bef=str.substring(0,str.indexOf(name));
-            String aft=str.substring(str.indexOf(name)+name.length());
-            if (aft.length()>0) aft=aft.substring(1);
-            str=bef+aft;        
+            int start = str.indexOf(name);
+            int end = str.indexOf(' ', start + name.length());
+            if(end != -1)
+                str=str.substring(0, start) + str.substring(end);
+            else
+                str = str.substring(0, start);
         }       
         str+=name+ val;  
         ((EditText)findViewById(R.id.edt_cmdline)).setText(str);
 	}
 
-    public String GetProp(String name)
+    private String GetProp(String name)
     {
         name=" +set "+name+" ";
         String str=((EditText)findViewById(R.id.edt_cmdline)).getText().toString();
@@ -563,4 +669,94 @@ public class GameLauncher extends Activity{
         }
         return null;
 	}
+
+    private boolean RemoveProp(String name)
+    {
+        name=" +set "+name+" ";
+        EditText edit = (EditText)findViewById(R.id.edt_cmdline);
+        String str=edit.getText().toString();
+        if (str.contains(name))
+        {
+            int start = str.indexOf(name);
+            int end = str.indexOf(' ', start + name.length());
+            if(end != -1)
+                str=str.substring(0, start) + str.substring(end);
+            else
+                str = str.substring(0, start);
+            edit.setText(str);
+            return true;
+        }
+        return false;
+	}
+    
+    private void EditFile(String file)
+    {
+        String gamePath = ((EditText)findViewById(R.id.edt_path)).getText().toString();
+        String game = GetProp("fs_game");
+        if(game == null || game.isEmpty())
+            game = "base";
+        String basePath = gamePath + File.separator + game + File.separator + file;
+        File f = new File(basePath);
+        if(!f.isFile() || !f.canWrite() || !f.canRead())
+        {
+            Toast.makeText(this, "File can not access(" + basePath + ")!", Toast.LENGTH_LONG).show();
+            return;
+        }
+        
+        Intent intent = new Intent(this, ConfigEditorActivity.class);
+        intent.putExtra("CONST_FILE_PATH", basePath);
+        startActivity(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuItem item = menu.add("Support the developer");
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        item = menu.add("Changes");
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if("Support the developer".equals(item.getTitle()))
+        {
+            support(null);
+            return true;
+        }
+        else if("Changes".equals(item.getTitle()))
+        {
+            OpenChanges();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    
+    private void OpenChanges()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        StringBuffer sb = new StringBuffer();
+        final String CHANGES[] = {
+            "Compile `DOOM3 RoE` game library named `libd3xp`.",
+            "Compile `Classic DOOM3` game library named `libcdoom`.",
+            "Clear vertex buffer for out of graphics memory.",
+            "Skip visual vision for `Berserk Powerup` on `DOOM3`.",
+            "Skip visual vision for `Grabber` on `D3 RoE`.",
+            "Skip visual vision for `Helltime Powerup` on `D3 RoE`.",
+            "Add support to run on background.",
+            "Add support to hide navigation bar.",
+            "Add RGBA4444 16-bits color.",
+        };
+        builder.setTitle("Changes");
+        for(String str : CHANGES)
+        {
+            sb.append("  * " + str).append("\n");
+        }
+        builder.setMessage(sb.toString());
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }
