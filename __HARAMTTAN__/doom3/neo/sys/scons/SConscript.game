@@ -87,6 +87,11 @@ if ( local_d3xp ):
 	game_list = scons_utils.BuildList( 'd3xp', game_string )
 elif ( local_cdoom ):
 	game_list = scons_utils.BuildList( 'cdoom', game_string )
+elif ( local_d3le ):
+	game_string += ' \
+	Grabber.cpp \
+	physics/Force_Grab.cpp'
+	game_list = scons_utils.BuildList( 'd3le', game_string )
 else:
 	game_list = scons_utils.BuildList( 'game', game_string )
 
@@ -99,6 +104,9 @@ if ( local_d3xp ):
 
 if ( local_cdoom ):
 	local_env.Append( CPPDEFINES = [ '_CDOOM' ] )
+
+if ( local_d3le ):
+	local_env.Append( CPPDEFINES = [ '_D3LE', '_D3XP', 'CTF' ] )
 
 if ( local_demo == 1 ):
 	local_env.Append( CPPDEFINES = [ 'ID_DEMO_BUILD' ] )

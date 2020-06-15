@@ -54,6 +54,13 @@ public class Q3EMain extends Activity {
     // k
     private Timer m_timer = null;
     private boolean  m_lock = false;
+    private boolean m_hideNav = false;
+    private final int m_uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+    | View.SYSTEM_UI_FLAG_IMMERSIVE
+    | View.SYSTEM_UI_FLAG_FULLSCREEN;
 	
 	public void ShowMessage(String s)
 	{
@@ -80,21 +87,27 @@ public class Q3EMain extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		
 		if (Build.VERSION.SDK_INT>=9)
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            
+        m_hideNav = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Q3EUtils.pref_harm_hide_nav, false);
+        //k
+        if(m_hideNav)
+        {
+            final View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(m_uiOptions);// This code will always hide the navigation bar
+/*            decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener(){
+                    @Override
+                    public void  onSystemUiVisibilityChange(int visibility)
+                    {
+                        if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0)
+                        {
+                            decorView.setSystemUiVisibility(m_uiOptions);
+                        }
+                    }
+                });*/
+        }
 		
 		super.onCreate(savedInstanceState);
-        //k
-        if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Q3EUtils.pref_harm_hide_nav, false))
-        {
-            View decorView = getWindow().getDecorView();
-            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN;
-            decorView.setSystemUiVisibility(uiOptions);
-        }
 		
 		if (Q3EUtils.q3ei==null)
 		{			
@@ -237,4 +250,14 @@ public class Q3EMain extends Activity {
 			mAudio.resume();
 		}
 	}
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        super.onWindowFocusChanged(hasFocus);
+        if(m_hideNav)
+        {
+            getWindow().getDecorView().setSystemUiVisibility(m_uiOptions);
+        }
+    }
 }

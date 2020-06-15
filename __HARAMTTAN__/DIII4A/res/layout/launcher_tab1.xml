@@ -151,13 +151,19 @@
             android:id="@+id/fs_game_d3xp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DOOM3 Resurrection of Evil" />
+            android:text="DOOM3 Resurrection of Evil(d3xp)" />
 
         <RadioButton
             android:id="@+id/fs_game_cdoom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Classic DOOM" />
+            android:text="Classic DOOM(cdoom)" />
+
+        <RadioButton
+            android:id="@+id/fs_game_lost_mission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DOOM3-BFG Lost Mession(d3le)" />
 
         <RadioButton
             android:id="@+id/fs_game_user"
@@ -170,6 +176,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
+        android:hint="First input to this, then checked `User special` to enable."
         android:imeOptions="flagNoExtractUi"
         android:inputType="textNoSuggestions" >
     </EditText>

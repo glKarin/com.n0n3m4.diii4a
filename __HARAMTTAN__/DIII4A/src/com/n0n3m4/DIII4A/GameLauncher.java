@@ -401,11 +401,13 @@ public class GameLauncher extends Activity{
                 index = 1;
             else if("cdoom".equals(str))
                 index = 2;
-            else
+            else if("d3le".equals(str))
                 index = 3;
+            else
+                index = 4;
             RadioGroup group = (RadioGroup)findViewById(R.id.rg_fs_game);
             group.check(group.getChildAt(index).getId());
-            if(index == 3)
+            if(index == 4)
             {
                 EditText edit = (EditText)findViewById(R.id.edt_fs_game);
                 String cur = edit.getText().toString();
@@ -510,8 +512,10 @@ public class GameLauncher extends Activity{
                 index = 1;
             else if("cdoom".equals(game))
                 index = 2;
-                else
-                    index = 3;
+            else if("d3le".equals(game))
+                index = 3;
+            else
+                index = 4;
             SelectCheckbox(R.id.rg_fs_game, index);
         }
         ((RadioGroup)findViewById(R.id.rg_fs_game)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
@@ -520,19 +524,27 @@ public class GameLauncher extends Activity{
                     switch(val)
                     {
                         case R.id.fs_game_base:
-                           RemoveProp("fs_game");
+                            RemoveProp("fs_game");
+                            RemoveProp("fs_game_base");
                             break;
                             case R.id.fs_game_d3xp:
                             SetProp("fs_game", "d3xp");
+                            RemoveProp("fs_game_base");
                             break;
                         case R.id.fs_game_cdoom:
                             SetProp("fs_game", "cdoom");
+                            RemoveProp("fs_game_base");
+                            break;
+                        case R.id.fs_game_lost_mission:
+                            SetProp("fs_game", "d3le");
+                            SetProp("fs_game_base", "d3xp"); // must load d3xp pak
                             break;
                         case R.id.fs_game_user:
                             SetProp("fs_game", ((EditText)findViewById(R.id.edt_fs_game)).getText().toString());
-                                    break;
-                                    default:
-                                    return;
+                            RemoveProp("fs_game_base");
+                            break;
+                        default:
+                            return;
                     }
                 }
             });
@@ -739,8 +751,9 @@ public class GameLauncher extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         StringBuffer sb = new StringBuffer();
         final String CHANGES[] = {
-            "Compile `DOOM3 RoE` game library named `libd3xp`.",
-            "Compile `Classic DOOM3` game library named `libcdoom`.",
+            "Compile `DOOM3 RoE` game library named `libd3xp`, game path name is `d3xp`.",
+            "Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `https://www.moddb.com/mods/classic-doom-3`.",
+            "Compile `DOOM3-BFG:Lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `https://www.moddb.com/mods/the-lost-mission`.",
             "Clear vertex buffer for out of graphics memory.",
             "Skip visual vision for `Berserk Powerup` on `DOOM3`.",
             "Skip visual vision for `Grabber` on `D3 RoE`.",

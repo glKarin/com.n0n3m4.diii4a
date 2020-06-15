@@ -2866,6 +2866,15 @@ void idCommonLocal::LoadGameDLL(void)
 				gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libcdoom.so");
 #endif
 			}
+			else if(!fsgame.Icmp("d3le")) // load lost mission game so.
+			{
+				common->Printf("[Harmattan]: Load DOOM3-BFG Lost Mission game.\n");
+#ifdef __ARM_NEON__
+				gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libd3le_neon.so");
+#else
+				gameDLL = sys->DLL_Load("/data/data/com.n0n3m4.DIII4A/lib/libd3le.so");
+#endif
+			}
 			else // else find in fs_game cvar path.
 			{
 				fileSystem->FindDLL("game", dllPath, true);
