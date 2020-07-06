@@ -1216,6 +1216,10 @@ idGameLocal::InitFromNewMap
 */
 void idGameLocal::InitFromNewMap(const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, bool isServer, bool isClient, int randseed)
 {
+#ifdef _CDOOM
+	musicSpeakers.Clear(); // SnoopJeDi: new map, not reload, so clear the list
+	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "heartbeat\n" ); // SnoopJeDi - iddevnet fix to keep server from dropping off master list
+#endif
 
 	this->isServer = isServer;
 	this->isClient = isClient;
@@ -4575,7 +4579,11 @@ void idGameLocal::UpdateServerInfoFlags()
 {
 	gameType = GAME_SP;
 
+#ifdef _CDOOM
+	if ( ( ( idStr::Icmp( serverInfo.GetString( "si_gameType" ), "deathmatch" ) == 0 ) ) || ( ( idStr::Icmp( serverInfo.GetString( "si_gameType" ), "cdoomDM" ) == 0 ) )  ) {
+#else
 	if ((idStr::Icmp(serverInfo.GetString("si_gameType"), "deathmatch") == 0)) {
+#endif
 		gameType = GAME_DM;
 	} else if ((idStr::Icmp(serverInfo.GetString("si_gameType"), "Tourney") == 0)) {
 		gameType = GAME_TOURNEY;

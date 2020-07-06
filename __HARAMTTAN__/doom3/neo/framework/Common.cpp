@@ -2831,8 +2831,15 @@ void idCommonLocal::LoadGameDLL(void)
 
 #if defined(__ANDROID__)
 	//k
-#define _K_D3XP
-#ifdef _K_D3XP
+#define _K_D3_MOD
+#ifdef _K_D3_MOD
+	common->Printf("[Harmattan]: fpu = "
+#ifdef __ARM_NEON__
+			"neon"
+#else
+			"vfp"
+#endif
+			"\n");
 	// First try to load user special game lib path. // FIXME: for Android N
 	idStr fsgame = cvarSystem->GetCVarString("harm_fs_gameLibPath");
 	if(fsgame.Length())

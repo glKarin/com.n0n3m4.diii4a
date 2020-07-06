@@ -255,8 +255,10 @@ CORECPPPATH = [ ]
 CORELIBPATH = [ ]
 CORECPPFLAGS = [ ]
 GAMECPPFLAGS = [ ]
-BASELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
-CORELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
+BASELINKFLAGS = [ '-Wl,--no-undefined' ]
+CORELINKFLAGS = [ '-Wl,--no-undefined' ]
+#//k BASELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
+#//k CORELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
 
 # for release build, further optimisations that may not work on all files
 OPTCPPFLAGS = [ ]
@@ -293,7 +295,8 @@ if ( BUILD == 'debug-all' ):
 	if ( ID_MCHECK == '0' ):
 		ID_MCHECK = '1'
 elif ( BUILD == 'debug' ):
-	OPTCPPFLAGS = [ '-g', '-O1', '-D_DEBUG' ]
+#//k OPTCPPFLAGS = [ '-g', '-O1', '-D_DEBUG' ]
+	OPTCPPFLAGS = [ '-g', '-O0' ]
 	if ( ID_MCHECK == '0' ):
 		ID_MCHECK = '1'
 elif ( BUILD == 'release' ):

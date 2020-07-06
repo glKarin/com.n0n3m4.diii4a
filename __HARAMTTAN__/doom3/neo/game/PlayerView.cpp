@@ -630,7 +630,7 @@ void idPlayerView::BerserkVision(idUserInterface *hud, const renderView_t *view)
 	if(harm_g_skipBerserkVision.GetBool())
 	{
 		SingleView(hud, view);
-		return 1;
+		return;
 	}
 #endif
 	renderSystem->CropRenderSize(512, 256, true);

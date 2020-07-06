@@ -389,7 +389,7 @@ if ( local_dedicated == 0 ):
 		local_env.Append( LIBS = [ 'openal' ] )
 	if ( local_opengl == 0 ):
 		local_env.Append( LIBS = [ 'GLESv2', 'EGL' ] )
-		local_env.Append( LIBPATH = ['/data/data/com.termux/files/usr/lib'] )
+#//k local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32/arm-linux-androideabi/lib/armv7-a', '/opt/ndk/android_4_0_gcc_32/sysroot/use/lib' ] ) # TODO: Only for armeabi-v7a
 	else:
 		local_env.Append( LIBS = [ 'GL' ] )
 
