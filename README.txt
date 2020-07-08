@@ -1,4 +1,25 @@
 DIII4A, com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
+1.1.0harmattan2
+2020-07-08
+
+----------------------------------------------------------------------------------
+
+Updates:
+	* Compile `DOOM3:RoE` game library named `libd3xp`, game path name is `d3xp`, more view in `https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/`.
+	* Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `https://www.moddb.com/mods/classic-doom-3`.
+	* Compile `DOOM3-BFG:The lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `https://www.moddb.com/mods/the-lost-mission`(now fix stack overflow when load model `models/mapobjects/hell/hellintro.lwo` of level `game/le_hell` map on Android).
+	* Clear vertex buffer for graphics memory overflow(integer cvar `harm_r_clearVertexBuffer`).
+	* Skip visual vision for `Berserk Powerup` on `DOOM3`(bool cvar `harm_g_skipBerserkVision`).
+	* Skip visual vision for `Grabber` on `D3 RoE`(bool cvar `harm_g_skipWarpVision`).
+	* Skip visual vision for `Helltime Powerup` on `D3 RoE`(bool cvar `harm_g_skipHelltimeVision`).
+	* Add support to run on background.
+	* Add support to hide navigation bar.
+	* Add RGBA4444 16-bits color.
+	* Add config file editor.
+	
+About:
+	* All changes in folder `__HARAMTTAN__` on github, `/doom3/neo/cdoom` is Classic DOOM3 game library source, `/doom3/neo/d3le` is DOOM3:The Lost Mission game library source, 
+	* Source in `assets/source` folder in APK file.
 	
 ----------------------------------------------------------------------------------
 
@@ -11,7 +32,7 @@ DIII4A, com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
 	
 ----------------------------------------------------------------------------------
 
-	__HARAMTTAN__/doom3: 修改过的DOOM3源码, 支持clang++编译. 默认编译arm 32位库.
+	__HARAMTTAN__/doom3: 修改过的DOOM3源码, 可clang++编译. 默认编译arm 32位库.
 	__HARAMTTAN__/DIII4A: 修改过的DOOM3前端启动器源码.
 	__HARAMTTAN__/DIII4A/libs: 游戏动态库.
 	__HARAMTTAN__/Q3E: 修改过的DOOM3前端启动器依赖的源码.
