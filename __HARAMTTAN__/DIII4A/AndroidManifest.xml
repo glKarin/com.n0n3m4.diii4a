@@ -1,8 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.n0n3m4.DIII4A"    
-    android:versionCode="102"
-    android:versionName="1.1"
-    android:largeHeap="true"
+    android:versionCode="1102"
+    android:versionName="1.1.0harmattan2"
     android:installLocation="preferExternal">
     
     <uses-feature android:glEsVersion="0x00020000"></uses-feature>

@@ -75,6 +75,9 @@ import android.widget.TextView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toolbar.OnMenuItemClickListener;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 
 public class GameLauncher extends Activity{		
 	
@@ -95,7 +98,8 @@ public class GameLauncher extends Activity{
     final int UI_4 = 12;
     final int UI_5 = 13;
     final int UI_6 = 14;
-	final int UI_SIZE=UI_6+1;
+    final int UI_7 = 15;
+	final int UI_SIZE=UI_7+1;
 	
 	public void getgl2progs(String destname) {
         try {            
@@ -239,7 +243,7 @@ public class GameLauncher extends Activity{
 		q3ei.arg_table[UI_KBD*4+2]=0;
 		q3ei.arg_table[UI_KBD*4+3]=0;
 
-        for(int i = UI_4; i <= UI_6; i++)
+        for(int i = UI_4; i <= UI_7; i++)
         {
             q3ei.arg_table[i*4]=Q3EKeyCodes.KeyCodesD3BFG.K_4 + (i - UI_4);
             q3ei.arg_table[i*4+1]=0;
@@ -265,9 +269,10 @@ public class GameLauncher extends Activity{
 		q3ei.texture_table[UI_2]="btn_2.png";
 		q3ei.texture_table[UI_3]="btn_3.png";
 		q3ei.texture_table[UI_KBD]="btn_keyboard.png";
-		q3ei.texture_table[UI_4]="btn_foot.png";
-		q3ei.texture_table[UI_5]="btn_light.png";
-		q3ei.texture_table[UI_6]="btn_telescope.png";
+		q3ei.texture_table[UI_4]="btn_kick.png";
+		q3ei.texture_table[UI_5]="btn_activate.png";
+		q3ei.texture_table[UI_6]="btn_binocular.png";
+		q3ei.texture_table[UI_7]="btn_notepad.png";
 		
 		Q3EUtils.q3ei=q3ei;
 	}
@@ -374,9 +379,9 @@ public class GameLauncher extends Activity{
 		((CheckBox)findViewById(R.id.nolight)).setChecked(getProp("r_noLight"));
         
         String str = GetProp("harm_r_clearVertexBuffer");
+        int index = 2;
         if(str != null)
         {
-            int index = 2;
             try
             {
                 index = Integer.parseInt(str);   
@@ -387,14 +392,16 @@ public class GameLauncher extends Activity{
             }
             if(index < 0 || index > 2)
                 index = 2;
-            RadioGroup group = (RadioGroup)findViewById(R.id.r_harmclearvertexbuffer);
-            group.check(group.getChildAt(index).getId());
         }
+        else
+            SetProp("harm_r_clearVertexBuffer", 2);
+        RadioGroup group = (RadioGroup)findViewById(R.id.r_harmclearvertexbuffer);
+        group.check(group.getChildAt(index).getId());
         
+        index = 0;
         str = GetProp("fs_game");
         if(str != null)
         {
-            int index = 0;
             if("".equals(str))
                 index = 0;
             else if("d3xp".equals(str))
@@ -405,15 +412,15 @@ public class GameLauncher extends Activity{
                 index = 3;
             else
                 index = 4;
-            RadioGroup group = (RadioGroup)findViewById(R.id.rg_fs_game);
-            group.check(group.getChildAt(index).getId());
-            if(index == 4)
-            {
-                EditText edit = (EditText)findViewById(R.id.edt_fs_game);
-                String cur = edit.getText().toString();
-                if(!str.equals(cur))
-                    edit.setText(str);
-            }
+        }
+        group = (RadioGroup)findViewById(R.id.rg_fs_game);
+        group.check(group.getChildAt(index).getId());
+        if(index == 4)
+        {
+            EditText edit = (EditText)findViewById(R.id.edt_fs_game);
+            String cur = edit.getText().toString();
+            if(!str.equals(cur))
+                edit.setText(str);
         }
 	}		
 	
@@ -541,7 +548,7 @@ public class GameLauncher extends Activity{
                             break;
                         case R.id.fs_game_user:
                             SetProp("fs_game", ((EditText)findViewById(R.id.edt_fs_game)).getText().toString());
-                            RemoveProp("fs_game_base");
+                            //RemoveProp("fs_game_base");
                             break;
                         default:
                             return;
@@ -726,21 +733,29 @@ public class GameLauncher extends Activity{
         MenuItem item = menu.add("Support the developer");
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         item = menu.add("Changes");
-        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        item = menu.add("Source");
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if("Support the developer".equals(item.getTitle()))
+        String title = item.getTitle().toString();
+        if("Support the developer".equals(title))
         {
             support(null);
             return true;
         }
-        else if("Changes".equals(item.getTitle()))
+        else if("Changes".equals(title))
         {
             OpenChanges();
+            return true;
+        }
+        else if("Source".equals(title))
+        {
+            OpenAbout();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -748,28 +763,86 @@ public class GameLauncher extends Activity{
     
     private void OpenChanges()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         StringBuffer sb = new StringBuffer();
         final String CHANGES[] = {
-            "Compile `DOOM3 RoE` game library named `libd3xp`, game path name is `d3xp`.",
-            "Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `https://www.moddb.com/mods/classic-doom-3`.",
-            "Compile `DOOM3-BFG:Lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `https://www.moddb.com/mods/the-lost-mission`.",
-            "Clear vertex buffer for out of graphics memory.",
-            "Skip visual vision for `Berserk Powerup` on `DOOM3`.",
-            "Skip visual vision for `Grabber` on `D3 RoE`.",
-            "Skip visual vision for `Helltime Powerup` on `D3 RoE`.",
+            "Compile `DOOM3:RoE` game library named `libd3xp`, game path name is `d3xp`, more view in `" + GenLinkText("https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/", null) + "`.",
+            "Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `" + GenLinkText("https://www.moddb.com/mods/classic-doom-3", null) + "`.",
+            "Compile `DOOM3-BFG:The lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `" + GenLinkText("https://www.moddb.com/mods/the-lost-mission", null) + "`(now fix stack overflow when load model `models/mapobjects/hell/hellintro.lwo` of level `game/le_hell` map on Android).",
+            "Clear vertex buffer for out of graphics memory(integer cvar `harm_r_clearVertexBuffer`).",
+            "Skip visual vision for `Berserk Powerup` on `DOOM3`(bool cvar `harm_g_skipBerserkVision`).",
+            "Skip visual vision for `Grabber` on `D3 RoE`(bool cvar `harm_g_skipWarpVision`).",
+            "Skip visual vision for `Helltime Powerup` on `D3 RoE`(bool cvar `harm_g_skipHelltimeVision`).",
             "Add support to run on background.",
             "Add support to hide navigation bar.",
             "Add RGBA4444 16-bits color.",
+            "Add config file editor.",
         };
-        builder.setTitle("Changes");
         for(String str : CHANGES)
         {
-            sb.append("  * " + str).append("\n");
+            sb.append("  * " + str).append(GetDialogMessageEndl());
         }
-        builder.setMessage(sb.toString());
-        
+        OpenDialog("Changes", GetDialogMessage(sb.toString()));
+    }
+
+    private void OpenAbout()
+    {
+        StringBuffer sb = new StringBuffer();
+        final String CHANGES[] = {
+            "Changes by " + GenLinkText("mailto:beyondk2000@gmail.com", "Karin&lt;beyondk2000@gmail.com&gt;"),
+            "Source in `assets/source` folder in APK file. `doom3_droid.source.tgz` is DOOM3 source. `diii4a.source.tgz` is android frontend source.",
+            "Or view in github `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a", null) + "`, all changes on `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a/tree/master/__HARAMTTAN__", "__HARMATTAN__") + "` directory.",
+        };
+        for(String str : CHANGES)
+        {
+            sb.append("  * " + str).append(GetDialogMessageEndl());
+        }
+        OpenDialog("About", GetDialogMessage(sb.toString()));
+    }
+
+    private static final boolean USING_HTML = true;
+    private void OpenDialog(String title, CharSequence message)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+
         AlertDialog dialog = builder.create();
         dialog.show();
+
+        TextView messageText = (TextView)(dialog.findViewById(android.R.id.message));
+        if(messageText != null) // never
+        {
+            if(!USING_HTML)
+                messageText.setAutoLinkMask(Linkify.ALL);
+            messageText.setMovementMethod(LinkMovementMethod.getInstance());   
+        }
+    }
+  
+    private String GetDialogMessageEndl()
+    {
+        return USING_HTML ? "<br>" : "\n";
+    }
+    
+    private CharSequence GetDialogMessage(String text)
+    {
+        return USING_HTML ? Html.fromHtml(text) : text;      
+    }
+    
+    private String GenLinkText(String link, String name)
+    {
+        StringBuffer sb = new StringBuffer();
+        if(USING_HTML)
+        {
+            String nameText = name != null && !name.isEmpty() ? name : link;
+            sb.append("<a href='").append(link).append("'>").append(nameText).append("</a>");
+        }
+        else
+        {
+            if(name != null && !name.isEmpty())
+                sb.append(name).append('(').append(link).append(')');
+            else
+                sb.append(link);
+        }
+        return sb.toString();
     }
 }

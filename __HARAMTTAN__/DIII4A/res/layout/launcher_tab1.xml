@@ -151,7 +151,7 @@
             android:id="@+id/fs_game_d3xp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DOOM3 Resurrection of Evil(d3xp)" />
+            android:text="DOOM3:Resurrection of Evil(d3xp)" />
 
         <RadioButton
             android:id="@+id/fs_game_cdoom"
@@ -163,7 +163,7 @@
             android:id="@+id/fs_game_lost_mission"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DOOM3-BFG Lost Mession(d3le)" />
+            android:text="DOOM3-BFG:The Lost Mession(d3le)" />
 
         <RadioButton
             android:id="@+id/fs_game_user"
@@ -189,7 +189,7 @@
         android:id="@+id/setting_render_mem_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Render memory status(per 10 second to update)" />
+        android:text="Render memory status(5 seconds to update)" />
     
     <LinearLayout
         android:layout_width="match_parent"
