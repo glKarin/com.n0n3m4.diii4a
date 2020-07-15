@@ -575,8 +575,37 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer {
 				height=1080;
 				break;
 			case 4:
-				width=Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resx, "640"));
-				height=Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resy, "480"));
+				//k width=Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resx, "640"));
+                //k height=Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resy, "480"));
+                try
+                {
+                    width=Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resx, "0"));
+                }
+                catch(Exception e)
+                {
+                    width = 0;
+                }
+                try
+                {
+                    height=Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resy, "0"));   
+                }
+                catch(Exception e)
+                {
+                    height = 0;
+                }
+                if(width <= 0 && height <= 0)
+                {
+                    width = w;
+                    height = h;
+                }
+                if(width <= 0)
+                {
+                    width = (int)((float)height * (float)w / (float)h);
+                }
+                else if(height <= 0)
+                {
+                    height = (int)((float)width * (float)h / (float)w);
+                }
 				break;
 
                 //k

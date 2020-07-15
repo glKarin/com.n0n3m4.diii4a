@@ -78,6 +78,12 @@ import android.widget.Toolbar.OnMenuItemClickListener;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import android.os.Process;
+import android.os.Build;
+import android.os.Debug;
+import android.content.pm.ApplicationInfo;
 
 public class GameLauncher extends Activity{		
 	
@@ -427,6 +433,9 @@ public class GameLauncher extends Activity{
 	public void onCreate(Bundle savedInstanceState) 
 	{		
 		super.onCreate(savedInstanceState);				
+        //k
+        HandleUnexperted();
+        
 		setContentView(R.layout.main);
 		
 		Display display = getWindowManager().getDefaultDisplay(); 
@@ -730,12 +739,21 @@ public class GameLauncher extends Activity{
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        MenuItem item = menu.add("Support the developer");
+        MenuItem item;
+
+        item = menu.add("Support the developer");
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         item = menu.add("Changes");
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         item = menu.add("Source");
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        item = menu.add("Last runtime log");
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        if(BuildIsDebug())
+        {
+            item = menu.add("Last dalvik crash info");
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);   
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -756,6 +774,16 @@ public class GameLauncher extends Activity{
         else if("Source".equals(title))
         {
             OpenAbout();
+            return true;
+        }
+        else if("Last dalvik crash info".equals(title))
+        {
+            OpenCrashInfo();
+            return true;
+        }
+        else if("Last runtime log".equals(title))
+        {
+            OpenRuntimeLog();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -844,5 +872,145 @@ public class GameLauncher extends Activity{
                 sb.append(link);
         }
         return sb.toString();
+    }
+ 
+    private static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
+    private void HandleUnexperted()
+    {
+        final Thread.UncaughtExceptionHandler defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    try
+                    {
+                        StringBuffer sb = new StringBuffer();
+                        StackTraceElement arr[] = e.getStackTrace();
+
+                        sb.append("********** DUMP **********\n");
+                        sb.append("----- Time: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())).append('\n');
+                        sb.append('\n');
+
+                        sb.append("----- Thread: " + t).append('\n');
+                        sb.append("\tID: " + t.getId()).append('\n');
+                        sb.append("\tName: " + t.getName()).append('\n');
+                        sb.append('\n');
+
+                        sb.append("----- Throwable: " + e).append('\n');
+                        sb.append("\tInfo: " + e.getMessage()).append('\n');
+                        sb.append("\tStack: ").append('\n');
+                        for(StackTraceElement ste : arr)
+                        {
+                            sb.append("\t\t" + ste.toString()).append('\n');
+                        }
+                        sb.append('\n');
+
+                        sb.append("----- Memory:").append('\n');
+                        ActivityManager am = (ActivityManager)(GameLauncher.this.getSystemService(Context.ACTIVITY_SERVICE));
+                        int processs[] = {Process.myPid()};
+                        ActivityManager.MemoryInfo outInfo = new ActivityManager.MemoryInfo();
+                        am.getMemoryInfo(outInfo);
+
+                        sb.append("\tSystem: ").append('\n');
+                        sb.append("\t\tAvail: " + outInfo.availMem + " bytes").append('\n');
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) // 16
+                        {
+                            sb.append("\t\tTotal: " + outInfo.totalMem + " bytes").append('\n');
+                        }
+
+                        sb.append("\tApplication: ").append('\n');
+                        Debug.MemoryInfo memInfos[] = am.getProcessMemoryInfo(processs);
+                        Debug.MemoryInfo memInfo = memInfos[0];
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
+                        {
+                            sb.append("\t\tNative heap: " + memInfo.getMemoryStat("summary.native-heap") + " kb").append('\n');
+                            sb.append("\t\tDalvik heap: " + memInfo.getMemoryStat("summary.java-heap") + " kb").append('\n');
+                            sb.append("\t\tGraphics: " + memInfo.getMemoryStat("summary.graphics") + " kb").append('\n');   
+                            sb.append("\t\tStack: " + memInfo.getMemoryStat("summary.stack") + " kb").append('\n');
+                        }
+                        else
+                        {
+                            sb.append("\t\tNative heap: " + memInfo.nativePrivateDirty + " kb").append('\n');
+                            sb.append("\t\tDalvik heap: " + memInfo.dalvikPrivateDirty + " kb").append('\n');
+                        }
+                        sb.append('\n');
+                        
+                        sb.append("********** END **********\n");
+                        sb.append("Application exit.\n");
+                        
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
+                        editor.putString(CONST_PREFERENCE_APP_CRASH_INFO, sb.toString());
+                        editor.commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                    finally {
+                        if(defaultUncaughtExceptionHandler != null)
+                            defaultUncaughtExceptionHandler.uncaughtException(t, e);
+                    }
+                }
+            });
+    }
+
+    private void OpenCrashInfo()
+    {
+        OpenDialog("Last crash info", PreferenceManager.getDefaultSharedPreferences(this).getString(CONST_PREFERENCE_APP_CRASH_INFO, "None"));
+    }
+    
+    private void OpenRuntimeLog()
+    {
+        String path = ((EditText)findViewById(R.id.edt_path)).getText().toString() + File.separatorChar + "stdout.txt";
+        File file = new File(path);
+        if (file.isFile())
+        {
+            FileReader reader = null;
+            try
+            {
+                reader = new FileReader(file);
+                int BUF_SIZE = 1024;
+                char chars[] = new char[BUF_SIZE];
+                int len;
+                StringBuffer sb = new StringBuffer();
+                while ((len = reader.read(chars)) > 0)
+                    sb.append(chars, 0, len);
+                OpenDialog("Last runtime log", sb.toString());
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                Toast.makeText(this, "Log file read error(" + path + ")", Toast.LENGTH_LONG).show();
+            }
+            finally
+            {
+                try
+                {
+                    if (reader != null)
+                        reader.close();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        else
+        {
+            Toast.makeText(this, "Log file can not access(" + path + ")", Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    private boolean BuildIsDebug()
+    {
+        try
+        {
+            ApplicationInfo info = getApplicationInfo();
+            return (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false; // default is release
+        }
     }
 }

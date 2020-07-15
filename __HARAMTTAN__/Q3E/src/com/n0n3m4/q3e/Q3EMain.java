@@ -142,7 +142,8 @@ public class Q3EMain extends Activity {
                 mainLayout.addView(mGLSurfaceView, params);
                 final TextView memoryUsageText = new TextView(mainLayout.getContext());
                 memoryUsageText.setTextColor(Color.WHITE);
-                memoryUsageText.setTextAppearance(android.R.attr.textAppearanceMedium);
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
+                    memoryUsageText.setTextAppearance(android.R.attr.textAppearanceMedium);
                 memoryUsageText.setPadding(10, 5, 10, 5);
                 memoryUsageText.setAlpha(0.8f);
                 params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -285,28 +286,50 @@ public class Q3EMain extends Activity {
         private String GetMemText()
         {
             m_am.getMemoryInfo(m_outInfo);
-            int availMem = (int)(m_outInfo.availMem / UNIT2);
-            int totalMem = (int)(m_outInfo.totalMem / UNIT2);
-            int usedMem = (int)((m_outInfo.totalMem - m_outInfo.availMem) / UNIT2);
+            int availMem = -1;
+            int totalMem = -1;
+            int usedMem = -1;
+            int java_mem = -1;
+            int native_mem = -1;
+            int graphics_mem = -1;
+            
+            availMem = (int)(m_outInfo.availMem / UNIT2);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) // 16
+            {
+                totalMem = (int)(m_outInfo.totalMem / UNIT2);
+                usedMem = (int)((m_outInfo.totalMem - m_outInfo.availMem) / UNIT2);   
+            }
 
             Debug.MemoryInfo memInfos[] = m_am.getProcessMemoryInfo(m_processs);
             Debug.MemoryInfo memInfo = memInfos[0];
-            int java_mem = Integer.valueOf(memInfo.getMemoryStat("summary.java-heap")) / UNIT;
-            int native_mem = Integer.valueOf(memInfo.getMemoryStat("summary.native-heap")) / UNIT;
-            int graphics_mem = Integer.valueOf(memInfo.getMemoryStat("summary.graphics")) / UNIT;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
+            {
+                java_mem = Integer.valueOf(memInfo.getMemoryStat("summary.java-heap")) / UNIT;
+                native_mem = Integer.valueOf(memInfo.getMemoryStat("summary.native-heap")) / UNIT;
+                graphics_mem = Integer.valueOf(memInfo.getMemoryStat("summary.graphics")) / UNIT;   
+                //String stack_mem = memInfo.getMemoryStat("summary.stack");
+                //String code_mem = memInfo.getMemoryStat("summary.code");
+                //String others_mem = memInfo.getMemoryStat("summary.system");
+            }
+            else
+            {
+                java_mem = memInfo.dalvikPrivateDirty / UNIT;
+                native_mem = memInfo.nativePrivateDirty / UNIT;
+            }
 
-            //String stack_mem = memInfo.getMemoryStat("summary.stack");
-            //String code_mem = memInfo.getMemoryStat("summary.code");
-            //String others_mem = memInfo.getMemoryStat("summary.system");
+            int total_used = native_mem + java_mem;
+            String total_used_str = graphics_mem >= 0 ? "" + (total_used + graphics_mem) : (total_used + "<Excluding graphics memory>");
+            String graphics_mem_str = graphics_mem >= 0 ? "" + graphics_mem : "unknown";
+            String real_mem_str = graphics_mem >= 0 ? "-" + graphics_mem + '≈' + (availMem - graphics_mem) : "<Excluding graphics memory>";
+                
             StringBuffer sb = new StringBuffer();
-            //sb.append("Dalvik heap(").append(java_mem).append(") ");
-            sb.append("Native[+Dalvik] heap(").append(native_mem).append("[+").append(java_mem).append("]) ");
-            sb.append("Graphics(").append(graphics_mem).append(")");
-            sb.append(" [≈").append(graphics_mem + native_mem + java_mem).append("]\n");
-            sb.append("Usage(").append(usedMem).append('/').append(totalMem).append('=').append(availMem)
-            .append("[-").append(graphics_mem).append('≈').append(availMem - graphics_mem).append(']')
-            .append(")");
-
+            sb.append("Native[+Dalvik] heap(").append(native_mem).append("[+").append(java_mem).append("])");
+            sb.append(" Graphics(").append(graphics_mem_str).append(")");
+            sb.append(" [≈").append(total_used_str).append("]\n");
+            sb.append("Usage(").append(usedMem).append('/').append(totalMem).append('=').append(availMem);
+            //if(graphics_mem >= 0)
+                sb.append("[").append(real_mem_str).append(']');
+            sb.append(")");
 
             return sb.toString();
         }
