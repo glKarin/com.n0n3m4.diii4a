@@ -1,12 +1,34 @@
 DIII4A, com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
-1.1.0harmattan2
-2020-07-08
+1.1.0harmattan3
+2020-08-17
 
 ----------------------------------------------------------------------------------
+
+2020-08-17 Update 1.1.0harmattan3
+
+	* Uncheck 4 checkboxs, default value is 0(disabled).
+	* Hide software keyboard when open launcher activity.
+	* Check `WRITE_EXTERNAL_STORAGE` permission when start game or edit config file.
+	* Add game data directory chooser.
+	* Add `Save settings` menu if you only change settings but don't want to start game.
+	* UI editor can hide navigation bar if checked `Hide navigation bar`(the setting must be saved before do it).
+	* Add `Help` menu.
+	
+更新: Chinese
+	* 默认取消选中前4个选择框(默认禁用).
+	* 当进入程序界面时默认不打开软键盘.
+	* 当`开始游戏`或`编辑配置文件`时检查`外部存储`权限.
+	* 新增游戏文件目录选择器.
+	* 新增`保存配置`菜单, 当仅想修改配置而不想运行游戏时.
+	* 按键编辑界面可以隐藏导航栏, 当选中了`隐藏导航栏`时(需要先保存配置使之生效).
+	* 新增`帮助`菜单, 里面有些问题解决方案.
+
+----------------------------------------------------------------------------------
+
 2020-08-16
 Notification: Sorry for my bad English
 	* If you have installed other version apk(package name is `com.n0n3m4.diii4a`) of other sources, you first to uninstall the old version apk package named `com.n0n3m4.diii4a`, after install this new version apk. Because the apk package is same `com.n0n3m4.diii4a`, but certificate is different.
-	* If running is crash(white screen), first make sure to allow `WRITE_EXTERNAL_STORAGE` permission, alter please uncheck 4th checkbox named `Use ETC1(or RGBA4444) cache` or clear ETC1 texture cache file manual on resource folder(exam. /sdcard/diii4a/<base/d3xp/d3le/cdoom/or...>/dds).
+	* If app running crash(white screen), first make sure to allow `WRITE_EXTERNAL_STORAGE` permission, alter please uncheck 4th checkbox named `Use ETC1(or RGBA4444) cache` or clear ETC1 texture cache file manual on resource folder(exam. /sdcard/diii4a/<base/d3xp/d3le/cdoom/or...>/dds).
 	* `Clear vertex buffer` suggest to select 3rd or 2nd for clear vertex buffer every frame! If you select 1st, it will be same as original apk, maybe flash and crash with out of graphics memory! More view in game, on DOOM3 console, cvar named `harm_r_clearVertexBuffer`.
 	* TODO: `Classic DOOM` some trigger can not interact, exam last door of `E1M1`. I don't know what reason. But you can toggle `noclip` with console or shortcut key to through it.
 	

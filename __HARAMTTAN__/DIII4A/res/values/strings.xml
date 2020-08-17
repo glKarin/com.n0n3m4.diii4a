@@ -2,5 +2,6 @@
 
     <string name="app_name">DIII4A++</string>    
     <string name="menu_settings">Settings</string>    
+    <string name="config_editor_name">Config Editor</string>
 
 </resources>

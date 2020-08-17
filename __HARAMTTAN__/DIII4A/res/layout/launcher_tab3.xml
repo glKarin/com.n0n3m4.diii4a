@@ -49,7 +49,7 @@
                 android:id="@+id/res_custom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Custom" />
+                android:text="Custom(If both width and height are 0, will use screen width and height, else width or height is 0, will calculate it by screen aspect ratio)" />
             
             <RadioButton
                 android:id="@+id/res_720"

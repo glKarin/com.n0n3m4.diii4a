@@ -84,6 +84,13 @@ import android.os.Process;
 import android.os.Build;
 import android.os.Debug;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.provider.Settings;
+import android.Manifest;
+import java.util.List;
+import java.util.ArrayList;
+import android.os.Environment;
+import android.content.pm.PackageInfo;
 
 public class GameLauncher extends Activity{		
 	
@@ -379,10 +386,17 @@ public class GameLauncher extends Activity{
 	
 	public void updatehacktings()
 	{
-		((CheckBox)findViewById(R.id.usedxt)).setChecked(getProp("r_useDXT"));
-		((CheckBox)findViewById(R.id.useetc1)).setChecked(getProp("r_useETC1"));
-		((CheckBox)findViewById(R.id.useetc1cache)).setChecked(getProp("r_useETC1cache"));
-		((CheckBox)findViewById(R.id.nolight)).setChecked(getProp("r_noLight"));
+        //k
+		((CheckBox)findViewById(R.id.usedxt)).setChecked(getProp("r_useDXT", false));
+		((CheckBox)findViewById(R.id.useetc1)).setChecked(getProp("r_useETC1", false));
+		((CheckBox)findViewById(R.id.useetc1cache)).setChecked(getProp("r_useETC1cache", false));
+		((CheckBox)findViewById(R.id.nolight)).setChecked(getProp("r_noLight", false));
+        
+        //k fill commandline
+        if(!IsProp("r_useDXT")) setProp("r_useDXT", false);
+        if(!IsProp("r_useETC1")) setProp("r_useETC1", false);
+        if(!IsProp("r_useETC1cache")) setProp("r_useETC1cache", false);
+        if(!IsProp("r_noLight")) setProp("r_noLight", false);
         
         String str = GetProp("harm_r_clearVertexBuffer");
         int index = 2;
@@ -403,6 +417,7 @@ public class GameLauncher extends Activity{
             SetProp("harm_r_clearVertexBuffer", 2);
         RadioGroup group = (RadioGroup)findViewById(R.id.r_harmclearvertexbuffer);
         group.check(group.getChildAt(index).getId());
+        if(!IsProp("harm_r_clearVertexBuffer")) SetProp("harm_r_clearVertexBuffer", 2);
         
         index = 0;
         str = GetProp("fs_game");
@@ -576,6 +591,12 @@ public class GameLauncher extends Activity{
 		
 		((EditText)findViewById(R.id.res_x)).setText(mPrefs.getString(Q3EUtils.pref_resx, "640"));
 		((EditText)findViewById(R.id.res_y)).setText(mPrefs.getString(Q3EUtils.pref_resy, "480"));
+        findViewById(R.id.launcher_tab1_game_data_chooser_button).setOnClickListener(new View.OnClickListener(){
+            public void onClick(View view)
+            {
+                OpenFolderChooser();
+            }
+        });
 		
 		//DIII4A-specific					
 		((EditText)findViewById(R.id.edt_cmdline)).addTextChangedListener(new TextWatcher() {			
@@ -616,35 +637,19 @@ public class GameLauncher extends Activity{
 	
 	public void start(View vw)
 	{
-		Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(this).edit();
-		mEdtr.putString(Q3EUtils.pref_params, ((EditText)findViewById(R.id.edt_cmdline)).getText().toString());
-		mEdtr.putString(Q3EUtils.pref_eventdev, ((EditText)findViewById(R.id.edt_mouse)).getText().toString());
-		mEdtr.putString(Q3EUtils.pref_datapath, ((EditText)findViewById(R.id.edt_path)).getText().toString());
-		mEdtr.putBoolean(Q3EUtils.pref_hideonscr, ((CheckBox)findViewById(R.id.hideonscr)).isChecked());
-		//k mEdtr.putBoolean(Q3EUtils.pref_32bit, true);
-        int index = GetIdCheckbox(R.id.rg_color_bits) - 1;
-		mEdtr.putBoolean(Q3EUtils.pref_32bit, index == -1);
-		mEdtr.putInt(Q3EUtils.pref_harm_16bit, index);
-		mEdtr.putInt(Q3EUtils.pref_harm_run_background, GetIdCheckbox(R.id.rg_run_background));
-		mEdtr.putBoolean(Q3EUtils.pref_harm_render_mem_status, ((CheckBox)findViewById(R.id.setting_render_mem_status)).isChecked());
-		mEdtr.putInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, GetIdCheckbox(R.id.r_harmclearvertexbuffer));
-		mEdtr.putBoolean(Q3EUtils.pref_harm_hide_nav, ((CheckBox)findViewById(R.id.hide_nav)).isChecked());
+		//k
+        WritePreferences();
         
-		mEdtr.putBoolean(Q3EUtils.pref_analog, true);
-		mEdtr.putBoolean(Q3EUtils.pref_mapvol, ((CheckBox)findViewById(R.id.mapvol)).isChecked());
-		mEdtr.putBoolean(Q3EUtils.pref_analog, ((CheckBox)findViewById(R.id.smoothjoy)).isChecked());
-		mEdtr.putBoolean(Q3EUtils.pref_2fingerlmb, ((CheckBox)findViewById(R.id.secfinglmb)).isChecked());
-		mEdtr.putBoolean(Q3EUtils.pref_detectmouse, ((CheckBox)findViewById(R.id.detectmouse)).isChecked());
-		mEdtr.putInt(Q3EUtils.pref_mousepos, GetIdCheckbox(R.id.rg_curpos));
-		mEdtr.putInt(Q3EUtils.pref_scrres, GetIdCheckbox(R.id.rg_scrres));
-		mEdtr.putInt(Q3EUtils.pref_msaa, GetIdCheckbox(R.id.rg_msaa));
-		mEdtr.putString(Q3EUtils.pref_resx, ((EditText)findViewById(R.id.res_x)).getText().toString());
-		mEdtr.putString(Q3EUtils.pref_resy, ((EditText)findViewById(R.id.res_y)).getText().toString());
-		mEdtr.commit();
-		
 		String dir=((EditText)findViewById(R.id.edt_path)).getText().toString();
 		if ((new File(dir+"/base").exists())&&(!new File(dir+"/base/gl2progs").exists()))
 		getgl2progs(dir+"/base/");
+        
+        //k check external storage permission
+        int res = CheckPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE);
+        if(res == 2)
+            Toast.makeText(this, "Can't start game!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+        if(res != 0)
+            return;
 		
 		finish();
 		startActivity(new Intent(this,Q3EMain.class));
@@ -664,6 +669,22 @@ public class GameLauncher extends Activity{
 	}
 
     //k
+
+    public boolean getProp(String name, boolean defaultValueIfNotExists)
+    {
+        name=" +set "+name+" ";
+        String str=((EditText)findViewById(R.id.edt_cmdline)).getText().toString();
+        if (str.contains(name))
+        {
+            str=str.substring(str.indexOf(name)+name.length());
+            if (str.startsWith("0"))
+                return false;         
+            else
+                return true;
+        }
+        return defaultValueIfNotExists;
+	}
+    
     private void SetProp(String name, Object val)
     {
         name=" +set "+name+" ";
@@ -716,9 +737,22 @@ public class GameLauncher extends Activity{
         }
         return false;
 	}
+
+    private boolean IsProp(String name)
+    {
+        name=" +set "+name+" ";
+        String str=((EditText)findViewById(R.id.edt_cmdline)).getText().toString();
+        return(str.contains(name));
+	}
     
     private void EditFile(String file)
     {
+        int res = CheckPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE);
+        if(res == 2)
+            Toast.makeText(this, "Can't access file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+        if(res != 0)
+            return;
+        
         String gamePath = ((EditText)findViewById(R.id.edt_path)).getText().toString();
         String game = GetProp("fs_game");
         if(game == null || game.isEmpty())
@@ -743,9 +777,13 @@ public class GameLauncher extends Activity{
 
         item = menu.add("Support the developer");
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        item = menu.add("Save settings");
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         item = menu.add("Changes");
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         item = menu.add("Source");
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        item = menu.add("Help");
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         item = menu.add("Last runtime log");
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
@@ -753,6 +791,8 @@ public class GameLauncher extends Activity{
         {
             item = menu.add("Last dalvik crash info");
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);   
+            item = menu.add("TEST");
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);   
         }
         return super.onCreateOptionsMenu(menu);
     }
@@ -766,6 +806,12 @@ public class GameLauncher extends Activity{
             support(null);
             return true;
         }
+        else if("Save settings".equals(title))
+        {
+            WritePreferences();
+            Toast.makeText(this, "Preferences settings saved!", Toast.LENGTH_LONG).show();
+            return true;
+        }
         else if("Changes".equals(title))
         {
             OpenChanges();
@@ -774,6 +820,11 @@ public class GameLauncher extends Activity{
         else if("Source".equals(title))
         {
             OpenAbout();
+            return true;
+        }
+        else if("Help".equals(title))
+        {
+            OpenHelp();
             return true;
         }
         else if("Last dalvik crash info".equals(title))
@@ -786,6 +837,11 @@ public class GameLauncher extends Activity{
             OpenRuntimeLog();
             return true;
         }
+        else if("TEST".equals(title))
+        {
+            Test();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
     
@@ -793,6 +849,16 @@ public class GameLauncher extends Activity{
     {
         StringBuffer sb = new StringBuffer();
         final String CHANGES[] = {
+            "----- 2020-08-17 -----",
+            "Uncheck 4 checkboxs, default value is 0(disabled).",
+            "Hide software keyboard when open launcher activity.",
+            "Check `WRITE_EXTERNAL_STORAGE` permission when start game or edit config file.",
+            "Add game data directory chooser.",
+            "Add `Save settings` menu if you only change settings but don't want to start game.",
+            "UI editor can hide navigation bar if checked `Hide navigation bar`(the setting must be saved before do it).",
+            "Add `Help` menu.",
+            null,
+            "----- 2020-07-20 -----",
             "Compile `DOOM3:RoE` game library named `libd3xp`, game path name is `d3xp`, more view in `" + GenLinkText("https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/", null) + "`.",
             "Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `" + GenLinkText("https://www.moddb.com/mods/classic-doom-3", null) + "`.",
             "Compile `DOOM3-BFG:The lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `" + GenLinkText("https://www.moddb.com/mods/the-lost-mission", null) + "`(now fix stack overflow when load model `models/mapobjects/hell/hellintro.lwo` of level `game/le_hell` map on Android).",
@@ -805,9 +871,12 @@ public class GameLauncher extends Activity{
             "Add RGBA4444 16-bits color.",
             "Add config file editor.",
         };
+        String endl = GetDialogMessageEndl();
         for(String str : CHANGES)
         {
-            sb.append("  * " + str).append(GetDialogMessageEndl());
+            if(str != null)
+                sb.append("  * " + str);
+            sb.append(endl);
         }
         OpenDialog("Changes", GetDialogMessage(sb.toString()));
     }
@@ -815,24 +884,58 @@ public class GameLauncher extends Activity{
     private void OpenAbout()
     {
         StringBuffer sb = new StringBuffer();
+        String version = "UNKNOWN";
+        try
+        {
+            PackageManager manager = getPackageManager();
+            PackageInfo info = manager.getPackageInfo(getPackageName(), 0);
+            version = info.versionName;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         final String CHANGES[] = {
-            "Changes by " + GenLinkText("mailto:beyondk2000@gmail.com", "Karin&lt;beyondk2000@gmail.com&gt;"),
+            "Changes by " + GenLinkText("https://forum.xda-developers.com/member.php?u=10584229", "Karin")
+            + "&lt;" + GenLinkText("mailto:beyondk2000@gmail.com", "beyondk2000@gmail.com") + "&gt;",
+            "Update: " + version + (BuildIsDebug() ? "(debug)" : ""),
+            "Release: 2020-08-17",
+            null,
             "Source in `assets/source` folder in APK file. `doom3_droid.source.tgz` is DOOM3 source. `diii4a.source.tgz` is android frontend source.",
             "Or view in github `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a", null) + "`, all changes on `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a/tree/master/__HARAMTTAN__", "__HARMATTAN__") + "` directory.",
+            null,
+            "Special thanks: ",
+            GenLinkText("https://4pda.ru/forum/index.php?showuser=7653620", "Sir Cat") + "@" + GenLinkText("https://4pda.ru/forum/index.php?showtopic=929753", "4PDA forum"),
         };
+        String endl = GetDialogMessageEndl();
         for(String str : CHANGES)
         {
-            sb.append("  * " + str).append(GetDialogMessageEndl());
+            if(str != null)
+                sb.append("  * " + str);
+            sb.append(endl);
         }
         OpenDialog("About", GetDialogMessage(sb.toString()));
     }
 
     private static final boolean USING_HTML = true;
-    private void OpenDialog(String title, CharSequence message)
+    private AlertDialog.Builder CreateDialogBuilder(String title, CharSequence message)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(message);
+        builder.setPositiveButton("OK", new AlertDialog.OnClickListener() {          
+                @Override
+                public void onClick(DialogInterface dialog, int which) { 
+                    dialog.dismiss();
+                }
+            });
+            
+        return builder;
+    }
+    
+    private AlertDialog OpenDialog(String title, CharSequence message)
+    {
+        AlertDialog.Builder builder = CreateDialogBuilder(title, message);
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -844,6 +947,8 @@ public class GameLauncher extends Activity{
                 messageText.setAutoLinkMask(Linkify.ALL);
             messageText.setMovementMethod(LinkMovementMethod.getInstance());   
         }
+
+        return dialog;
     }
   
     private String GetDialogMessageEndl()
@@ -1012,5 +1117,190 @@ public class GameLauncher extends Activity{
             e.printStackTrace();
             return false; // default is release
         }
+    }
+
+    private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE = 1;
+    private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE = 2;
+    private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE = 3;
+    private int CheckPermission(String permission, int resultCode)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M
+        {
+            boolean granted = checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+            if(granted)
+                return 0;
+            if (false && !shouldShowRequestPermissionRationale(permission)) // do not ask
+            {
+                OpenAppSetting();
+                return 2; // goto app detail settings activity
+            }
+            requestPermissions(new String[] { permission }, resultCode);
+            return 1;
+        }
+        else
+            return 0; // other think has granted
+    }
+    
+    private void OpenAppSetting()
+    {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
+    }
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        List<String> list = null;
+        for(int i = 0; i < permissions.length; i++)
+        {
+            if(grantResults[i] != PackageManager.PERMISSION_GRANTED)
+            {
+                if(list == null)
+                    list = new ArrayList<String>();
+                list.add(permissions[i]);
+            }
+        }
+        if(list == null || list.isEmpty())
+            return;
+            
+        String opt = null;
+        switch(requestCode)
+        {
+            case CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE:
+                opt = "Start game";
+                break;
+            case CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE:
+                opt = "Edit config file";
+                break;
+            case CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE:
+                opt = "Choose game folder";
+                break;
+            default:
+                opt = "Operation";
+                break;
+        }
+        StringBuffer sb = new StringBuffer();
+        String endl = GetDialogMessageEndl();
+        for(String str : list)
+        {
+            if(str != null)
+                sb.append("  * " + str);
+            sb.append(endl);
+        }
+        AlertDialog.Builder builder = CreateDialogBuilder(opt + " request necessary permissions", GetDialogMessage(sb.toString()));
+        builder.setNeutralButton("Grant", new AlertDialog.OnClickListener() {          
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    OpenAppSetting();
+                    dialog.dismiss();
+                }
+            });
+        builder.create().show();
+	}
+    
+    private void OpenFolderChooser()
+    {
+        int res = CheckPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE);
+        if(res == 2)
+            Toast.makeText(this, "Can't choose folder!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+        if(res != 0)
+            return;
+
+        String defaultPath = Environment.getExternalStorageDirectory().getAbsolutePath(); //System.getProperty("user.home");
+        String gamePath = ((EditText)findViewById(R.id.edt_path)).getText().toString();
+        if(gamePath == null || gamePath.isEmpty())
+            gamePath = defaultPath;
+        File f = new File(gamePath);
+        if(!f.exists())
+        {
+            gamePath = defaultPath;
+            f = new File(gamePath);
+        }
+        if(!f.isDirectory())
+        {
+            gamePath = f.getParent();
+            f = f.getParentFile();
+        }
+        if(!f.canRead())
+        {
+            gamePath = defaultPath;
+            f = new File(gamePath);
+        }
+        
+        FileBrowserDialog dialog = new FileBrowserDialog(this);
+        dialog.SetupUI("Chooser data folder", gamePath);
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new AlertDialog.OnClickListener() {          
+                @Override
+                public void onClick(DialogInterface dialog, int which) { 
+                    dialog.dismiss();
+                }
+            });
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Choose current directory", new AlertDialog.OnClickListener() {          
+                @Override
+                public void onClick(DialogInterface dialog, int which) { 
+                    ((EditText)findViewById(R.id.edt_path)).setText(((FileBrowserDialog)dialog).Path());
+                    dialog.dismiss();
+                }
+            });
+            
+        dialog.show();
+    }
+    
+    private void WritePreferences()
+    {
+        Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(this).edit();
+        mEdtr.putString(Q3EUtils.pref_params, ((EditText)findViewById(R.id.edt_cmdline)).getText().toString());
+        mEdtr.putString(Q3EUtils.pref_eventdev, ((EditText)findViewById(R.id.edt_mouse)).getText().toString());
+        mEdtr.putString(Q3EUtils.pref_datapath, ((EditText)findViewById(R.id.edt_path)).getText().toString());
+        mEdtr.putBoolean(Q3EUtils.pref_hideonscr, ((CheckBox)findViewById(R.id.hideonscr)).isChecked());
+        //k mEdtr.putBoolean(Q3EUtils.pref_32bit, true);
+        int index = GetIdCheckbox(R.id.rg_color_bits) - 1;
+        mEdtr.putBoolean(Q3EUtils.pref_32bit, index == -1);
+        mEdtr.putInt(Q3EUtils.pref_harm_16bit, index);
+        mEdtr.putInt(Q3EUtils.pref_harm_run_background, GetIdCheckbox(R.id.rg_run_background));
+        mEdtr.putBoolean(Q3EUtils.pref_harm_render_mem_status, ((CheckBox)findViewById(R.id.setting_render_mem_status)).isChecked());
+        mEdtr.putInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, GetIdCheckbox(R.id.r_harmclearvertexbuffer));
+        mEdtr.putBoolean(Q3EUtils.pref_harm_hide_nav, ((CheckBox)findViewById(R.id.hide_nav)).isChecked());
+
+        mEdtr.putBoolean(Q3EUtils.pref_analog, true);
+        mEdtr.putBoolean(Q3EUtils.pref_mapvol, ((CheckBox)findViewById(R.id.mapvol)).isChecked());
+        mEdtr.putBoolean(Q3EUtils.pref_analog, ((CheckBox)findViewById(R.id.smoothjoy)).isChecked());
+        mEdtr.putBoolean(Q3EUtils.pref_2fingerlmb, ((CheckBox)findViewById(R.id.secfinglmb)).isChecked());
+        mEdtr.putBoolean(Q3EUtils.pref_detectmouse, ((CheckBox)findViewById(R.id.detectmouse)).isChecked());
+        mEdtr.putInt(Q3EUtils.pref_mousepos, GetIdCheckbox(R.id.rg_curpos));
+        mEdtr.putInt(Q3EUtils.pref_scrres, GetIdCheckbox(R.id.rg_scrres));
+        mEdtr.putInt(Q3EUtils.pref_msaa, GetIdCheckbox(R.id.rg_msaa));
+        mEdtr.putString(Q3EUtils.pref_resx, ((EditText)findViewById(R.id.res_x)).getText().toString());
+        mEdtr.putString(Q3EUtils.pref_resy, ((EditText)findViewById(R.id.res_y)).getText().toString());
+		mEdtr.commit();
+    }
+
+    private void OpenHelp()
+    {
+        StringBuffer sb = new StringBuffer();
+        final String CHANGES[] = {
+            "If game running crash(white screen): ",
+            " 1. Make sure to allow `WRITE_EXTERNAL_STORAGE` permission.",
+            " 2. Make sure `Game working directory` is right.",
+            " 3. Uncheck 4th checkbox named `Use ETC1(or RGBA4444) cache` or clear ETC1 texture cache file manual on resource folder(exam: /sdcard/diii4a/(base/d3xp/d3le/cdoom/or...)/dds).",
+            null,
+            "If game is crash with flash-screen when playing a period of time: ",
+            " 1. Out of graphics memory: `Clear vertex buffer` suggest to select 3rd or 2nd for clear vertex buffer every frame! If you select 1st, it will be same as original apk(ver 1.1.0 at 2013). It should work well on `Adreno` GPU of `Snapdragon`. More view in game, on DOOM3 console, cvar named `harm_r_clearVertexBuffer`.",
+        };
+        String endl = GetDialogMessageEndl();
+        for(String str : CHANGES)
+        {
+            if(str != null)
+                sb.append("  * " + str);
+            sb.append(endl);
+        }
+        OpenDialog("Help", GetDialogMessage(sb.toString()));
+    }
+    
+    private void Test()
+    {
+        OpenFolderChooser();
     }
 }

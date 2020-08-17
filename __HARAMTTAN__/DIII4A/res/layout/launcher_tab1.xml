@@ -38,14 +38,29 @@
         android:layout_height="wrap_content"
         android:text="Game working directory:" />
 
-    <EditText
-        android:id="@+id/edt_path"
+    <!-- //k -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:imeOptions="flagNoExtractUi"
-        android:inputType="textNoSuggestions" >
-    </EditText>
+        android:gravity="bottom"
+    >
+        <EditText
+            android:id="@+id/edt_path"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="textNoSuggestions" >
+        </EditText>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/launcher_tab1_game_data_chooser_button"
+            android:text="Chooser"
+            >
+        </Button>
+    </LinearLayout>
     
     <CheckBox
         android:id="@+id/nolight"
@@ -74,7 +89,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Clear vertex buffer(harm_r_clearVertexBuffer cvar)" />
+        android:text="Clear vertex buffer(cvar `harm_r_clearVertexBuffer`)" />
     <RadioGroup
         android:id="@+id/r_harmclearvertexbuffer"
         android:layout_width="wrap_content"
@@ -84,20 +99,20 @@
             android:id="@+id/r_harmclearvertexbuffer_0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Do not clear, also original(If run with no lighting, maybe no effect. but with lighting-shadow, maybe graphics out of memory, and application is crash with flash-screen.)" />
+            android:text="Don't clear and do nothing, like original(If run with no lighting, maybe no effect. but with lighting-shadow, maybe graphics out of memory, and application is crash with flash-screen.)" />
 
         <RadioButton
             android:id="@+id/r_harmclearvertexbuffer_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Clear vertex buffer on every end frame(If run with lighting-shadow, suggest to clear it for graphics memory alloc no limit)." />
+            android:text="Clear vertex buffer on every end frame(If run with lighting-shadow, suggest to clear it in order to avoid graphics memory allocate unlimited)" />
 
         <RadioButton
             android:id="@+id/r_harmclearvertexbuffer_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Clear vertex buffer on every end frame and render system shutdown." />
+            android:text="Clear vertex buffer on every end frame and render system shutdown(also like 2nd)" />
     </RadioGroup>
     
     <TextView
@@ -134,7 +149,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/launcher_fs_game"
-        android:text="Game(fs_game cvar)" />
+        android:text="Game(cvar `fs_game`)" />
     <RadioGroup
         android:id="@+id/rg_fs_game"
         android:layout_width="wrap_content"

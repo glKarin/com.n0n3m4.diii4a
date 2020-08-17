@@ -25,10 +25,22 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.view.View;
+import android.util.Log;
 
 public class Q3EUiConfig extends Activity {
 	
 	Q3EUiView vw;
+    //k
+    private boolean m_hideNav = false;
+    private int m_uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+    | View.SYSTEM_UI_FLAG_IMMERSIVE
+    | View.SYSTEM_UI_FLAG_FULLSCREEN;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +50,15 @@ public class Q3EUiConfig extends Activity {
 		
 		if (Build.VERSION.SDK_INT>=9)
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
+        //k
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        m_hideNav = preferences.getBoolean(Q3EUtils.pref_harm_hide_nav, false);
+        if(m_hideNav)
+        {
+            final View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(m_uiOptions);
+        }
 		
 		super.onCreate(savedInstanceState);
 		vw=new Q3EUiView(this);
@@ -55,4 +76,15 @@ public class Q3EUiConfig extends Activity {
 		vw.SaveAll();
 		super.onBackPressed();
 	}
+    
+    //k
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        super.onWindowFocusChanged(hasFocus);
+        if(m_hideNav)
+        {
+            getWindow().getDecorView().setSystemUiVisibility(m_uiOptions);
+        }
+    }
 }
