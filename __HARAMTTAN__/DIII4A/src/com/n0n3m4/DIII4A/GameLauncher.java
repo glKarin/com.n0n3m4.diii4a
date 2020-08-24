@@ -19,6 +19,8 @@
 
 package com.n0n3m4.DIII4A;
 
+// import com.karin.DIII4A_harmattan.R;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -91,6 +93,7 @@ import java.util.List;
 import java.util.ArrayList;
 import android.os.Environment;
 import android.content.pm.PackageInfo;
+import android.content.pm.ActivityInfo;
 
 public class GameLauncher extends Activity{		
 	
@@ -381,7 +384,8 @@ public class GameLauncher extends Activity{
 			str=bef+aft;		
 		}		
 		str+=name+((val)?"1":"0");	
-		((EditText)findViewById(R.id.edt_cmdline)).setText(str);
+		//k ((EditText)findViewById(R.id.edt_cmdline)).setText(str);
+        SetCmdText(str);
 	}
 	
 	public void updatehacktings()
@@ -434,8 +438,6 @@ public class GameLauncher extends Activity{
             else
                 index = 4;
         }
-        group = (RadioGroup)findViewById(R.id.rg_fs_game);
-        group.check(group.getChildAt(index).getId());
         if(index == 4)
         {
             EditText edit = (EditText)findViewById(R.id.edt_fs_game);
@@ -443,6 +445,8 @@ public class GameLauncher extends Activity{
             if(!str.equals(cur))
                 edit.setText(str);
         }
+        group = (RadioGroup)findViewById(R.id.rg_fs_game);
+        group.check(group.getChildAt(index).getId());
 	}		
 	
 	public void onCreate(Bundle savedInstanceState) 
@@ -450,6 +454,8 @@ public class GameLauncher extends Activity{
 		super.onCreate(savedInstanceState);				
         //k
         HandleUnexperted();
+		SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this);
+        SetScreenOrientation(mPrefs.getInt(Q3EUtils.pref_harm_launcher_orientation, 1));
         
 		setContentView(R.layout.main);
 		
@@ -463,8 +469,7 @@ public class GameLauncher extends Activity{
 		th.setup();					
 	    th.addTab(th.newTabSpec("tab1").setIndicator("General").setContent(R.id.launcher_tab1));	    
 	    th.addTab(th.newTabSpec("tab2").setIndicator("Controls").setContent(R.id.launcher_tab2));	    
-	    th.addTab(th.newTabSpec("tab3").setIndicator("Graphics").setContent(R.id.launcher_tab3));		
-		SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this);					
+	    th.addTab(th.newTabSpec("tab3").setIndicator("Graphics").setContent(R.id.launcher_tab3));							
 		
 		((EditText)findViewById(R.id.edt_cmdline)).setText(mPrefs.getString(Q3EUtils.pref_params, "game.arm"));
 		((EditText)findViewById(R.id.edt_mouse)).setText(mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???"));
@@ -497,7 +502,7 @@ public class GameLauncher extends Activity{
 		SelectCheckbox(R.id.rg_msaa,mPrefs.getInt(Q3EUtils.pref_msaa, 0));
         //k
 		SelectCheckbox(R.id.rg_color_bits, mPrefs.getInt(Q3EUtils.pref_harm_16bit, -1) + 1);
-		SelectCheckbox(R.id.rg_run_background, mPrefs.getInt(Q3EUtils.pref_harm_run_background, 0));
+		SelectCheckbox(R.id.rg_run_background, mPrefs.getInt(Q3EUtils.pref_harm_run_background, 1));
         ((CheckBox)findViewById(R.id.setting_render_mem_status)).setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_render_mem_status, false));
 		SelectCheckbox(R.id.r_harmclearvertexbuffer, mPrefs.getInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, 2));
         ((RadioGroup)findViewById(R.id.r_harmclearvertexbuffer)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
@@ -549,6 +554,7 @@ public class GameLauncher extends Activity{
                 index = 4;
             SelectCheckbox(R.id.rg_fs_game, index);
         }
+        findViewById(R.id.launcher_tab1_game_lib_button).setEnabled(((RadioGroup)findViewById(R.id.rg_fs_game)).getCheckedRadioButtonId() == R.id.fs_game_user);
         ((RadioGroup)findViewById(R.id.rg_fs_game)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
                 public void onCheckedChanged(RadioGroup group, int val)
                 {
@@ -557,22 +563,34 @@ public class GameLauncher extends Activity{
                         case R.id.fs_game_base:
                             RemoveProp("fs_game");
                             RemoveProp("fs_game_base");
+                            findViewById(R.id.launcher_tab1_game_lib_button).setEnabled(false);
+                            RemoveProp("harm_fs_gameLibPath");
                             break;
-                            case R.id.fs_game_d3xp:
+                        case R.id.fs_game_d3xp:
                             SetProp("fs_game", "d3xp");
                             RemoveProp("fs_game_base");
+                            findViewById(R.id.launcher_tab1_game_lib_button).setEnabled(false);
+                            RemoveProp("harm_fs_gameLibPath");
                             break;
                         case R.id.fs_game_cdoom:
                             SetProp("fs_game", "cdoom");
                             RemoveProp("fs_game_base");
+                            findViewById(R.id.launcher_tab1_game_lib_button).setEnabled(false);
+                            RemoveProp("harm_fs_gameLibPath");
                             break;
                         case R.id.fs_game_lost_mission:
                             SetProp("fs_game", "d3le");
                             SetProp("fs_game_base", "d3xp"); // must load d3xp pak
+                            findViewById(R.id.launcher_tab1_game_lib_button).setEnabled(false);
+                            RemoveProp("harm_fs_gameLibPath");
                             break;
                         case R.id.fs_game_user:
                             SetProp("fs_game", ((EditText)findViewById(R.id.edt_fs_game)).getText().toString());
                             //RemoveProp("fs_game_base");
+                            findViewById(R.id.launcher_tab1_game_lib_button).setEnabled(true);
+                            String lib = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getString(Q3EUtils.pref_harm_game_lib, "");
+                            if(lib != null && !lib.isEmpty())
+                                SetProp("harm_fs_gameLibPath", lib);
                             break;
                         default:
                             return;
@@ -587,7 +605,25 @@ public class GameLauncher extends Activity{
                 public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
                 public void afterTextChanged(Editable s) {}
             });
+        findViewById(R.id.launcher_tab1_game_lib_button).setOnClickListener(new View.OnClickListener(){
+                public void onClick(View view)
+                {
+                    OpenGameLibChooser();
+                }
+            });
 		((CheckBox)findViewById(R.id.hide_nav)).setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_hide_nav, false));
+        int lo = mPrefs.getInt(Q3EUtils.pref_harm_launcher_orientation, 1);
+		((CheckBox)findViewById(R.id.launcher_orientation)).setChecked(lo != 1 && lo != 2);
+        ((CheckBox)findViewById(R.id.launcher_orientation)).setOnCheckedChangeListener(new OnCheckedChangeListener() {           
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    int o = isChecked ? 0 : 1; // 2 lock landscape
+                    Editor editor = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
+                    editor.putInt(Q3EUtils.pref_harm_launcher_orientation, o);                    
+                    editor.commit();
+                    SetScreenOrientation(o);
+                }
+            });		
 		
 		((EditText)findViewById(R.id.res_x)).setText(mPrefs.getString(Q3EUtils.pref_resx, "640"));
 		((EditText)findViewById(R.id.res_y)).setText(mPrefs.getString(Q3EUtils.pref_resy, "480"));
@@ -633,6 +669,8 @@ public class GameLauncher extends Activity{
 		updatehacktings();
 		
 		Q3EUtils.LoadAds(this);
+        
+        OpenUpdate();
 	}
 	
 	public void start(View vw)
@@ -699,7 +737,8 @@ public class GameLauncher extends Activity{
                 str = str.substring(0, start);
         }       
         str+=name+ val;  
-        ((EditText)findViewById(R.id.edt_cmdline)).setText(str);
+        //k ((EditText)findViewById(R.id.edt_cmdline)).setText(str);
+        SetCmdText(str);
 	}
 
     private String GetProp(String name)
@@ -849,7 +888,15 @@ public class GameLauncher extends Activity{
     {
         StringBuffer sb = new StringBuffer();
         final String CHANGES[] = {
-            "----- 2020-08-17 -----",
+            "----- 2020-08-25 (R5) -----",
+            "Fix video playing.",
+            "Choose game library when load other game mod, more view in `Help` menu.",
+            null,
+            "----- 2020-08-21 (R3) -----",
+            "Fix game audio sound playing(Testing).",
+            "Add launcher orientation setting on `CONTROLS` tab.",
+            null,
+            "----- 2020-08-17 (R2) -----",
             "Uncheck 4 checkboxs, default value is 0(disabled).",
             "Hide software keyboard when open launcher activity.",
             "Check `WRITE_EXTERNAL_STORAGE` permission when start game or edit config file.",
@@ -858,7 +905,7 @@ public class GameLauncher extends Activity{
             "UI editor can hide navigation bar if checked `Hide navigation bar`(the setting must be saved before do it).",
             "Add `Help` menu.",
             null,
-            "----- 2020-07-20 -----",
+            "----- 2020-07-20 (R1) -----",
             "Compile `DOOM3:RoE` game library named `libd3xp`, game path name is `d3xp`, more view in `" + GenLinkText("https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/", null) + "`.",
             "Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `" + GenLinkText("https://www.moddb.com/mods/classic-doom-3", null) + "`.",
             "Compile `DOOM3-BFG:The lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `" + GenLinkText("https://www.moddb.com/mods/the-lost-mission", null) + "`(now fix stack overflow when load model `models/mapobjects/hell/hellintro.lwo` of level `game/le_hell` map on Android).",
@@ -884,22 +931,12 @@ public class GameLauncher extends Activity{
     private void OpenAbout()
     {
         StringBuffer sb = new StringBuffer();
-        String version = "UNKNOWN";
-        try
-        {
-            PackageManager manager = getPackageManager();
-            PackageInfo info = manager.getPackageInfo(getPackageName(), 0);
-            version = info.versionName;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
         final String CHANGES[] = {
-            "Changes by " + GenLinkText("https://forum.xda-developers.com/member.php?u=10584229", "Karin")
-            + "&lt;" + GenLinkText("mailto:beyondk2000@gmail.com", "beyondk2000@gmail.com") + "&gt;",
-            "Update: " + version + (BuildIsDebug() ? "(debug)" : ""),
-            "Release: 2020-08-17",
+            CONST_APP_NAME + "(" + CONST_CODE + ")",
+            "Changes by " + GenLinkText("https://forum.xda-developers.com/member.php?u=10584229", CONST_DEV)
+            + "&lt;" + GenLinkText("mailto:" + CONST_EMAIL, CONST_EMAIL) + "&gt;",
+            "Update: " + GetAppVersion() + (BuildIsDebug() ? "(debug)" : ""),
+            "Release: " + CONST_RELEASE + " (R" + CONST_UPDATE_RELEASE + ")",
             null,
             "Source in `assets/source` folder in APK file. `doom3_droid.source.tgz` is DOOM3 source. `diii4a.source.tgz` is android frontend source.",
             "Or view in github `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a", null) + "`, all changes on `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a/tree/master/__HARAMTTAN__", "__HARMATTAN__") + "` directory.",
@@ -1263,6 +1300,7 @@ public class GameLauncher extends Activity{
         mEdtr.putBoolean(Q3EUtils.pref_harm_render_mem_status, ((CheckBox)findViewById(R.id.setting_render_mem_status)).isChecked());
         mEdtr.putInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, GetIdCheckbox(R.id.r_harmclearvertexbuffer));
         mEdtr.putBoolean(Q3EUtils.pref_harm_hide_nav, ((CheckBox)findViewById(R.id.hide_nav)).isChecked());
+        mEdtr.putInt(Q3EUtils.pref_harm_launcher_orientation, ((CheckBox)findViewById(R.id.launcher_orientation)).isChecked() ? 0 : 1);     
 
         mEdtr.putBoolean(Q3EUtils.pref_analog, true);
         mEdtr.putBoolean(Q3EUtils.pref_mapvol, ((CheckBox)findViewById(R.id.mapvol)).isChecked());
@@ -1281,6 +1319,8 @@ public class GameLauncher extends Activity{
     {
         StringBuffer sb = new StringBuffer();
         final String CHANGES[] = {
+            "All special `CVAR`s are start with `harm_`.",
+            null,
             "If game running crash(white screen): ",
             " 1. Make sure to allow `WRITE_EXTERNAL_STORAGE` permission.",
             " 2. Make sure `Game working directory` is right.",
@@ -1288,6 +1328,11 @@ public class GameLauncher extends Activity{
             null,
             "If game is crash with flash-screen when playing a period of time: ",
             " 1. Out of graphics memory: `Clear vertex buffer` suggest to select 3rd or 2nd for clear vertex buffer every frame! If you select 1st, it will be same as original apk(ver 1.1.0 at 2013). It should work well on `Adreno` GPU of `Snapdragon`. More view in game, on DOOM3 console, cvar named `harm_r_clearVertexBuffer`.",
+            null,
+            "If want to load other mod: ",
+            " 1. Input folder name of game mod to editor that under `User special` checkbox.",
+            " 2. Check `User special` checkbox. `Commandline` will show `+set fs_game (the game mod)`.",
+            " 3. If may want to choose game library, click `GameLib` and choose a game library. `Commandline` will show `+set harm_fs_gameLibPath (selected library path)`.",
         };
         String endl = GetDialogMessageEndl();
         for(String str : CHANGES)
@@ -1299,8 +1344,127 @@ public class GameLauncher extends Activity{
         OpenDialog("Help", GetDialogMessage(sb.toString()));
     }
     
+    private void SetScreenOrientation(int o)
+    {
+        if(o == 2)
+            setRequestedOrientation(Build.VERSION.SDK_INT >= 9 ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        else if(o == 1)
+            setRequestedOrientation(Build.VERSION.SDK_INT >= 9 ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        else
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+    }
+    
+    private final static int CONST_UPDATE_RELEASE = 5;
+    private final static String CONST_RELEASE = "2020-08-25";
+    private final static String CONST_EMAIL = "beyondk2000@gmail.com";
+    private final static String CONST_DEV = "Karin";
+    private final static String CONST_CODE = "Harmattan";
+    private final static String CONST_APP_NAME = "DIII4A++";
+    private void OpenUpdate()
+    {
+        final String UPDATE_RELEASE = "UPDATE_RELEASE";
+        SharedPreferences pref =  PreferenceManager.getDefaultSharedPreferences(this);
+        int r = pref.getInt(UPDATE_RELEASE, 0);
+        if(r == CONST_UPDATE_RELEASE)
+            return;
+            
+        StringBuffer sb = new StringBuffer();
+        final String CHANGES[] = {
+            CONST_APP_NAME + "(" + CONST_CODE + ")",
+            "Update: " + GetAppVersion() + (BuildIsDebug() ? "(debug)" : ""),
+            "Release: " + CONST_RELEASE + " (R" + CONST_UPDATE_RELEASE + ")",
+            "Dev: " + GenLinkText("mailto:" + CONST_EMAIL, CONST_DEV),
+            "Changes: ",
+            "Fix video playing.",
+            "Choose game library when load other game mod, more view in `Help` menu.",
+        };
+        String endl = GetDialogMessageEndl();
+        for(String str : CHANGES)
+        {
+            if(str != null)
+                sb.append("  * " + str);
+            sb.append(endl);
+        }
+        OpenDialog("Update", GetDialogMessage(sb.toString()));
+        
+        pref.edit().putInt(UPDATE_RELEASE, CONST_UPDATE_RELEASE).commit();
+    }
+    
+    private String GetAppVersion()
+    {
+        String version = "UNKNOWN";
+        try
+        {
+            PackageManager manager = getPackageManager();
+            PackageInfo info = manager.getPackageInfo(getPackageName(), 0);
+            version = info.versionName;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return version;
+    }
+    
+    private void SetCmdText(String text)
+    {
+        EditText edit = ((EditText)findViewById(R.id.edt_cmdline));
+        int pos = edit.getSelectionStart();
+        edit.setText(text);
+        if(text != null && !text.isEmpty())
+        {
+            pos = Math.max(0, Math.min(pos, text.length()));
+            try
+            {
+                edit.setSelection(pos);      
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private void OpenGameLibChooser()
+    {
+        boolean is_neon = Q3EJNI.detectNeon();
+        final String LIBS[] = {
+           "game",
+           "d3xp",
+           "cdoom",
+           "d3le",
+        };
+        final String libPath = "/data/data/" + getPackageName() + "/lib/";
+        final String items[] = new String[LIBS.length];
+        String lib = PreferenceManager.getDefaultSharedPreferences(this).getString(Q3EUtils.pref_harm_game_lib, "");
+        int selected = 0;
+        for(int i = 0; i < LIBS.length; i++)
+        {
+            items[i] = "lib" + LIBS[i] + (is_neon ? "_neon" : "") + ".so";
+            if((libPath + items[i]).equals(lib))
+            {
+                selected = i;
+            }
+        }
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose game library(" + (is_neon ? "neon" : "vfp") + ")");
+        builder.setSingleChoiceItems(items, selected, new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int p)
+            {
+                String lib = libPath + items[p];
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
+                editor.putString(Q3EUtils.pref_harm_game_lib, lib).commit();
+                SetProp("harm_fs_gameLibPath", lib);
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    
     private void Test()
     {
-        OpenFolderChooser();
+        OpenGameLibChooser();
     }
 }

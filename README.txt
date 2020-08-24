@@ -1,6 +1,21 @@
 DIII4A, com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
-1.1.0harmattan3
-2020-08-17
+1.1.0harmattan6
+2020-08-25
+
+Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb
+
+2020-08-25 Update 1.1.0harmattan6
+
+	* Fix video playing - 1.1.0harmattan6.
+	* Choose game library when load other game mod, more view in `Help` menu - 1.1.0harmattan6.
+	* Fix game audio sound playing(Testing) - 1.1.0harmattan5.
+	* Add launcher orientation setting on `CONTROLS` tab - 1.1.0harmattan5.
+	
+更新: Chinese
+	* 修复游戏视频播放噪点(1.1.0harmattan6).
+	* 加载自定义mod时选择游戏动态库(1.1.0harmattan6).
+	* 修复音频播放(待测试)(1.1.0harmattan5).
+	* 新增启动器方向是否跟踪系统(1.1.0harmattan5).
 
 ----------------------------------------------------------------------------------
 

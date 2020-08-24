@@ -119,7 +119,8 @@ public class Q3EMain extends Activity {
 			finish();
 			try
 			{
-				startActivity(new Intent(this,Class.forName(getPackageName()+".GameLauncher")));//Dirty hack	
+				//k startActivity(new Intent(this,Class.forName(getPackageName()+".GameLauncher")));//Dirty hack	
+				startActivity(new Intent(this,Class.forName("com.n0n3m4.DIII4A.GameLauncher")));//Dirty hack	
 			}			
 			catch (Exception e){e.printStackTrace();};			
 			return;

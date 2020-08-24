@@ -300,6 +300,8 @@ public class Q3EUtils {
 	public static final String pref_harm_r_harmclearvertexbuffer="q3e_r_harmclearvertexbuffer"; //k
 	public static final String pref_harm_fs_game="q3e_harm_fs_game"; //k
 	public static final String pref_harm_hide_nav="q3e_harm_hide_nav"; //k
+	public static final String pref_harm_launcher_orientation="q3e_harm_launcher_orientation"; //k
+	public static final String pref_harm_game_lib="q3e_harm_game_lib"; //k
 	
 	public static class UiElement
 	{

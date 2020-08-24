@@ -1,4 +1,7 @@
 package com.n0n3m4.DIII4A;
+
+// import com.karin.DIII4A_harmattan.R;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -18,6 +21,10 @@ import android.text.Editable;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Build;
+import android.content.pm.ActivityInfo;
+import android.preference.PreferenceManager;
+import com.n0n3m4.q3e.Q3EUtils;
 
 public class ConfigEditorActivity extends Activity
 {
@@ -83,6 +90,8 @@ public class ConfigEditorActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        
+        SetScreenOrientation();
 
         setContentView(R.layout.editor_page);
 
@@ -256,4 +265,15 @@ public class ConfigEditorActivity extends Activity
         }
         return super.onKeyDown(keyCode, event);
 	}
+
+    private void SetScreenOrientation()
+    {
+        int o = PreferenceManager.getDefaultSharedPreferences(this).getInt(Q3EUtils.pref_harm_launcher_orientation, 1);
+        if(o == 2)
+            setRequestedOrientation(Build.VERSION.SDK_INT >= 9 ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        else if(o == 1)
+            setRequestedOrientation(Build.VERSION.SDK_INT >= 9 ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        else
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+    }
 }

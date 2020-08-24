@@ -46,7 +46,7 @@ idCVar idVertexCache::r_showVertexCache("r_showVertexCache", "0", CVAR_INTEGER|C
 idCVar idVertexCache::r_vertexBufferMegs("r_vertexBufferMegs", "32", CVAR_INTEGER|CVAR_RENDERER, "");
 
 //k
-static idCVar harm_r_clearVertexBuffer("harm_r_clearVertexBuffer", "1", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Clear vertex buffer on every frame. (0 - not clear, 1 - clear on every end frame, 2 - clear on every end frame and shotdown.)");
+static idCVar harm_r_clearVertexBuffer("harm_r_clearVertexBuffer", "2", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Clear vertex buffer on every frame. (0 - not clear, 1 - clear on every end frame, 2 - clear on every end frame and shotdown.)");
 
 idVertexCache		vertexCache;
 

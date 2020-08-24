@@ -389,7 +389,7 @@ if ( local_dedicated == 0 ):
 		local_env.Append( LIBS = [ 'openal' ] )
 	if ( local_opengl == 0 ):
 		local_env.Append( LIBS = [ 'GLESv2', 'EGL' ] )
-#//k local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32/arm-linux-androideabi/lib/armv7-a', '/opt/ndk/android_4_0_gcc_32/sysroot/use/lib' ] ) # TODO: Only for armeabi-v7a
+		local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32/arm-linux-androideabi/lib/armv7-a', '/opt/ndk/android_4_0_gcc_32/sysroot/use/lib' ] ) # //k TODO: Only for armeabi-v7a, comment this line when compile armeabi(v5e).
 	else:
 		local_env.Append( LIBS = [ 'GL' ] )
 

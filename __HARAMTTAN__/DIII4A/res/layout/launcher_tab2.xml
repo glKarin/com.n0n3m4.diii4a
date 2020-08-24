@@ -144,6 +144,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hide navigation bar." />
+    <CheckBox
+        android:id="@+id/launcher_orientation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Launcher orientation follow system." />
     
 </LinearLayout>
 </ScrollView>

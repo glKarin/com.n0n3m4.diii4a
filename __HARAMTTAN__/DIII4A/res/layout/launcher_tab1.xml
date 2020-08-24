@@ -186,15 +186,29 @@
             android:layout_height="wrap_content"
             android:text="User special" />
     </RadioGroup>
-    <EditText
-        android:id="@+id/edt_fs_game"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="bottom"
+    >
+    <EditText
+        android:id="@+id/edt_fs_game"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="First input to this, then checked `User special` to enable."
+        android:hint="First input this, then checked `User special` to enable."
         android:imeOptions="flagNoExtractUi"
         android:inputType="textNoSuggestions" >
     </EditText>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/launcher_tab1_game_lib_button"
+        android:text="GameLib"
+    >
+    </Button>
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"

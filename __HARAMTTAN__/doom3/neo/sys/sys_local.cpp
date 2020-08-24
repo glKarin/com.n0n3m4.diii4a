@@ -126,6 +126,7 @@ void idSysLocal::ShutdownSymbols(void)
 
 intptr_t idSysLocal::DLL_Load(const char *dllName)
 {
+	DebugPrintf("[Harmattan]: DLL_Load(%s)\n", dllName);
 	return Sys_DLL_Load(dllName);
 }
 
