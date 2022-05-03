@@ -25,6 +25,8 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
     * Add cvar `harm_r_shadowCarmackInverse` to change general Z-Fail stencil shadow or `Carmack-Inverse` Z-Fail stencil shadow.
     * DIII4A build on Android Studio now.
 
+    * Some changes from https://github.com/emileb/d3es-multithread
+
 更新:
     * 修复阴影被裁剪.
     * 修复天空盒.
