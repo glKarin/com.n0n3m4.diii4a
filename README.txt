@@ -1,8 +1,48 @@
-DIII4A, com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
-1.1.0harmattan6
-2020-08-25
+DIII4A++ (Harmattan)
+com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
+Lastest version: 1.1.0harmattan7
+Last update release: 2022-05-05
 
 Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb
+
+2022-05-05 Update 1.1.0harmattan7
+
+    * Fix shadow clipped.
+    * Fix sky box.
+    * Fix fog and blend light.
+    * Fix glass reflection.
+    * Add texgen shader for like `D3XP` hell level sky.
+    * Fix translucent object. i.e. window glass, transclucent Demon in `Classic DOOM` mod.
+    * Fix dynamic texture interaction. i.e. rotating fans.
+    * Fix `Berserk`, `Grabber`, `Helltime` vision effect(First set cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` and `harm_g_skipHelltimeVision` to 0).
+    * Fix screen capture image when quick save game or mission tips.
+    * Fix machine gun's ammo panel.
+    * Add light model setting with `Phong` and `Blinn-Phong` when render interaction shader pass(string cvar `harm_r_lightModel`).
+    * Add specular exponent setting in light model(float cvar `harm_r_specularExponent`).
+    * Default using program internal OpenGL shader.
+    * Reset extras virtual button size, and add Console(~) key.
+    * Add `Back` key function setting, add 3-Click to exit.
+    * DIII4A build on Android Studio now.
+
+更新:
+    * 修复阴影被裁剪.
+    * 修复天空盒.
+    * 修复雾.
+    * 修复镜面反射.
+    * 加入纹理坐标生成着色器, 针对`邪恶复苏`地狱关卡的出生点的天空.
+    * 修复透明物体渲染, 比如窗玻璃, `经典DOOM`的透明粉红魔.
+    * 修复动态纹理, 比如旋转风扇的影子.
+    * 修复`狂暴化`, `重力枪`, `地狱之心`的视觉效果(需要先设置 cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` and `harm_g_skipHelltimeVision` 为0).
+    * 修复截屏图像, 例如快速存档或任务提示的图片.
+    * 修复机枪的弹药量GUI.
+    * 新增光照模型切换cvar `harm_r_lightModel`, `Phong` 和 `Blinn-Phong`.
+    * 新增镜面指数cvar `harm_r_specularExponent`.
+    * 着色器现在内置源码中.
+    * 修改虚拟按键布局, 新增控制台按键.
+    * 新增返回键功能设置, 3次点击退出.
+    * DIII4A使用Android Studio打包, 代替Eclipse.
+
+----------------------------------------------------------------------------------
 
 2020-08-25 Update 1.1.0harmattan6
 
@@ -11,7 +51,7 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
 	* Fix game audio sound playing(Testing) - 1.1.0harmattan5.
 	* Add launcher orientation setting on `CONTROLS` tab - 1.1.0harmattan5.
 	
-更新: Chinese
+更新:
 	* 修复游戏视频播放噪点(1.1.0harmattan6).
 	* 加载自定义mod时选择游戏动态库(1.1.0harmattan6).
 	* 修复音频播放(待测试)(1.1.0harmattan5).
@@ -29,7 +69,7 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
 	* UI editor can hide navigation bar if checked `Hide navigation bar`(the setting must be saved before do it).
 	* Add `Help` menu.
 	
-更新: Chinese
+更新:
 	* 默认取消选中前4个选择框(默认禁用).
 	* 当进入程序界面时默认不打开软键盘.
 	* 当`开始游戏`或`编辑配置文件`时检查`外部存储`权限.
@@ -47,7 +87,7 @@ Notification: Sorry for my bad English
 	* `Clear vertex buffer` suggest to select 3rd or 2nd for clear vertex buffer every frame! If you select 1st, it will be same as original apk, maybe flash and crash with out of graphics memory! More view in game, on DOOM3 console, cvar named `harm_r_clearVertexBuffer`.
 	* TODO: `Classic DOOM` some trigger can not interact, exam last door of `E1M1`. I don't know what reason. But you can toggle `noclip` with console or shortcut key to through it.
 	
-告知: Chinese
+告知:
 	* 如果你已经安装了其他作者的apk包, 并且包名为`com.n0n3m4.diii4a`, 你需要先卸载原来的版本, 然后才能安装这个新版本. 如果你出现安装失败的情况, 可以按此操作尝试安装. 因为我在原作者的基础上修改的, 没有重新更换包名, 但是apk证书又不一致.
 	* 如果运行时点击开始出现白屏, 首先检查`存储空间`权限是否已经打开, 然后取消勾选`Use ETC1(or RGBA4444) cache`运行, 或者手动删除ETC1纹理缓存(缓存文件目录在/sdcard/diii4a/<base/d3xp/d3le/cdoom/取决于运行的游戏...>/dds).
 	* `Clear vertex buffer`选项建议选择第3个, 或者第2个亦可, 渲染每帧清理顶点缓冲区! 如果选择第1个, 则和原始的版本行为相同, 玩一会可能会爆显存闪屏崩溃! 对应的游戏控制台变量为`harm_r_clearVertexBuffer`, 可以查看该变量说明.
