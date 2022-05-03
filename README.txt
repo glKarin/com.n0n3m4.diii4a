@@ -22,6 +22,7 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
     * Default using program internal OpenGL shader.
     * Reset extras virtual button size, and add Console(~) key.
     * Add `Back` key function setting, add 3-Click to exit.
+    * Add cvar `harm_r_shadowCarmackInverse` to change general Z-Fail stencil shadow or `Carmack-Inverse` Z-Fail stencil shadow.
     * DIII4A build on Android Studio now.
 
 更新:
@@ -32,7 +33,7 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
     * 加入纹理坐标生成着色器, 针对`邪恶复苏`地狱关卡的出生点的天空.
     * 修复透明物体渲染, 比如窗玻璃, `经典DOOM`的透明粉红魔.
     * 修复动态纹理, 比如旋转风扇的影子.
-    * 修复`狂暴化`, `重力枪`, `地狱之心`的视觉效果(需要先设置 cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` and `harm_g_skipHelltimeVision` 为0).
+    * 修复`狂暴化`, `重力枪`, `地狱之心`的视觉效果(需要先设置之前的 cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` 和 `harm_g_skipHelltimeVision` 为0).
     * 修复截屏图像, 例如快速存档或任务提示的图片.
     * 修复机枪的弹药量GUI.
     * 新增光照模型切换cvar `harm_r_lightModel`, `Phong` 和 `Blinn-Phong`.
@@ -40,6 +41,7 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
     * 着色器现在内置源码中.
     * 修改虚拟按键布局, 新增控制台按键.
     * 新增返回键功能设置, 3次点击退出.
+    * 新增 cvar `harm_r_shadowCarmackInverse` 切换常用的或`卡马克反转`Z-Fail模板缓冲区阴影.
     * DIII4A使用Android Studio打包, 代替Eclipse.
 
 ----------------------------------------------------------------------------------
