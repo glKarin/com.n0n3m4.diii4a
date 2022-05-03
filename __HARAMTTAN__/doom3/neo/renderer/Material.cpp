@@ -1648,6 +1648,10 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
+#else
+			//HTODO: MC_underground/site3 glass
+				newStage.vertexProgram = -1;
+				newStage.fragmentProgram = -1;
 #endif
 			}
 
@@ -1658,6 +1662,9 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			if (src.ReadTokenOnLine(&token)) {
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
+#else
+			//HTODO: MC_underground/site3 glass
+			newStage.fragmentProgram = -1;
 #endif
 			}
 
@@ -1668,6 +1675,9 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			if (src.ReadTokenOnLine(&token)) {
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
+#else
+			//HTODO: MC_underground/site3 glass
+			newStage.vertexProgram = -1;
 #endif
 			}
 
@@ -1687,6 +1697,10 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, "megaTexture.vfp");
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, "megaTexture.vfp");
+#else
+			//HTODO: MC_underground/site3 glass
+				newStage.vertexProgram = -1;
+				newStage.fragmentProgram = -1;
 #endif
 				continue;
 			}
@@ -1694,16 +1708,18 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 
 		if (!token.Icmp("vertexParm")) {
-#if !defined(GL_ES_VERSION_2_0)
+			//HTODO: MC_underground/site3 glass
+//#if !defined(GL_ES_VERSION_2_0)
 			ParseVertexParm(src, &newStage);
-#endif
+//#endif
 			continue;
 		}
 
 		if (!token.Icmp("fragmentMap")) {
-#if !defined(GL_ES_VERSION_2_0)
+			//HTODO: MC_underground/site3 glass
+//#if !defined(GL_ES_VERSION_2_0)
 			ParseFragmentMap(src, &newStage);
-#endif
+//#endif
 			continue;
 		}
 
@@ -1715,6 +1731,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 
 	// if we are using newStage, allocate a copy of it
+	//HTODO: not support
 	if (newStage.fragmentProgram || newStage.vertexProgram) {
 		ss->newStage = (newShaderStage_t *)Mem_Alloc(sizeof(newStage));
 		*(ss->newStage) = newStage;

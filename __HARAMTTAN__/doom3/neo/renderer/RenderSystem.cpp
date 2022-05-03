@@ -968,7 +968,6 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 
 #if !defined(GL_ES_VERSION_2_0)
 	glReadBuffer(GL_BACK);
-#endif
 
 	// include extra space for OpenGL padding to word boundaries
 	int	c = (rc->width + 3) * rc->height;
@@ -984,6 +983,28 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 		data2[ i * 4 + 2 ] = data[ i * 3 + 2 ];
 		data2[ i * 4 + 3 ] = 0xff;
 	}
+#else // HTODO: capture, like quicksave, mission tips
+	/*
+	   GLint eReadFormat, eReadType;
+	   glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &eReadType); 
+	   glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &eReadFormat); 
+	   common->Printf("glReadPixels ava READ_FORMAT: 0x%x, READ_TYPE: %x\n", eReadFormat, eReadType);
+	   */
+	// Android: GL_RGBA && GL_UNSIGNED_BYTE
+	int	c = (rc->width + 4) * rc->height;
+	byte *data = (byte *)R_StaticAlloc(c * 4);
+
+	glReadPixels(rc->x, rc->y, rc->width, rc->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+	byte *data2 = (byte *)R_StaticAlloc(c * 4);
+
+	for (int i = 0 ; i < c ; i++) {
+		data2[ i * 4 ] = data[ i * 4 ];
+		data2[ i * 4 + 1 ] = data[ i * 4 + 1 ];
+		data2[ i * 4 + 2 ] = data[ i * 4 + 2 ];
+		data2[ i * 4 + 3 ] = 0xff;
+	}
+#endif
 
 	R_WriteTGA(fileName, data2, rc->width, rc->height, true);
 

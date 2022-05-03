@@ -1,0 +1,63 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<!--
+    <item android:id="@+id/menu_settings"
+        android:title="@string/menu_settings"
+	android:orderInCategory="100" />
+-->
+    
+    <item
+        android:id="@+id/main_menu_settings"
+        android:title="Settings"
+        android:showAsAction="never"/>
+    
+    <item
+		android:id="@+id/main_menu_changes"
+        android:title="Changes"
+        android:showAsAction="never"/>
+    <item
+		android:id="@+id/main_menu_source"
+        android:title="About"
+        android:showAsAction="never"/>
+    <item
+		android:id="@+id/main_menu_help"
+        android:title="Help"
+        android:showAsAction="never"/>
+    
+    <item
+        android:id="@+id/main_menu_other_menu"
+        android:title="Other"
+        android:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/main_menu_save_settings"
+                android:title="Save launcher settings"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_runtime_log"
+                android:title="Last runtime log"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_debug"
+                android:title="DEBUG"
+                android:showAsAction="never"/>
+        </menu>
+    </item>
+    
+    <item
+        android:id="@+id/main_menu_support_developer"
+        android:title="Support the developer"
+        android:showAsAction="never"/>
+    
+    <item
+        android:id="@+id/main_menu_dev_menu"
+        android:title="Dev"
+        android:visible="false"
+        android:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/main_menu_test"
+                android:title="TEST"
+                android:showAsAction="always"/>
+        </menu>
+    </item>
+</menu>

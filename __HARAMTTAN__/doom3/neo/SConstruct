@@ -18,7 +18,9 @@ serialized=['CC', 'CXX', 'JOBS', 'BUILD', 'IDNET_HOST', 'DEDICATED',
 	'TARGET_CDOOM',
 	'TARGET_D3LE',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS', 'SILENT', 'TARGET_OPENGL',
-	'TARGET_ANDROID', 'NDK' ]
+	'TARGET_ANDROID', 'NDK',
+	'LIB_PATH'
+]
 
 # help -------------------------------------------
 
@@ -185,6 +187,7 @@ NOCURL = '0'
 BUILD_GAMEPAK = '0'
 BASEFLAGS = ''
 SILENT = '0'
+LIB_PATH = ''
 
 # end default settings ---------------------------
 
@@ -289,6 +292,8 @@ if ( g_os == 'Linux' ):
 if ( TARGET_ANDROID == '1' ):
 	BASECPPFLAGS.append( '-D__ANDROID__')
 	g_os = 'Android'
+	if ( LIB_PATH != '' ):
+		CORELIBPATH.append( LIB_PATH.split() )
 
 if ( BUILD == 'debug-all' ):
 	OPTCPPFLAGS = [ '-g', '-D_DEBUG' ]

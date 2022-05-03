@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="run_background_labels">
+        <item>Run on background without sound</item>
+        <item>Run on background</item>
+        <item>Not run on background</item>
+    </string-array>
+
+    <string-array name="run_background_values">
+        <item>1</item>
+        <item>2</item>
+        <item>0</item>
+	</string-array>
+    
+    <string-array name="map_back_labels">
+        <item>Map Escape key</item>
+        <item>3-Click to Exit</item>
+    </string-array>
+
+    <string-array name="map_back_values">
+        <item>1</item>
+        <item>2</item>
+	</string-array>
+</resources>

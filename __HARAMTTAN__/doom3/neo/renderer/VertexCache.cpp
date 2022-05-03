@@ -91,9 +91,18 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 			// k
 			if(harm_r_clearVertexBuffer.GetInteger() != 0)
 			{ // clear vertex buffer on graphics memory.
-				glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-				glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW); // size = 0, work on modern OpenGL?
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				if(block->indexBuffer)
+				{
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+					glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+				}
+				else
+				{
+					glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+					glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+				}
 				glDeleteBuffers(1, &block->vbo);
 			}
 		} else if (block->virtMem) {

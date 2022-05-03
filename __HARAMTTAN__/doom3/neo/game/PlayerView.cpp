@@ -451,7 +451,7 @@ idPlayerView::SingleView
 ==================
 */
 #ifdef __ANDROID__ //k
-static idCVar	harm_g_skipBerserkVision("harm_g_skipBerserkVision", "1", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Skip render berserk vision for power up.");
+static idCVar	harm_g_skipBerserkVision("harm_g_skipBerserkVision", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Skip render berserk vision for power up.");
 #endif
 void idPlayerView::SingleView(idUserInterface *hud, const renderView_t *view)
 {

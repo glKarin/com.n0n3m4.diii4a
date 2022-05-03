@@ -845,6 +845,7 @@ myGlMultMatrix
 
 void myGlMultMatrix(const float a[16], const float b[16], float out[16])
 {
+#if 0 // HTODO: faster without loop
 int	i, j;
 
 for (i = 0 ; i < 4 ; i++) {
@@ -856,6 +857,24 @@ a [ i * 4 + 0 ] * b [ 0 * 4 + j ]
 + a [ i * 4 + 3 ] * b [ 3 * 4 + j ];
 }
 }
+#else
+	out[0*4+0] = a[0*4+0]*b[0*4+0] + a[0*4+1]*b[1*4+0] + a[0*4+2]*b[2*4+0] + a[0*4+3]*b[3*4+0];
+	out[0*4+1] = a[0*4+0]*b[0*4+1] + a[0*4+1]*b[1*4+1] + a[0*4+2]*b[2*4+1] + a[0*4+3]*b[3*4+1];
+	out[0*4+2] = a[0*4+0]*b[0*4+2] + a[0*4+1]*b[1*4+2] + a[0*4+2]*b[2*4+2] + a[0*4+3]*b[3*4+2];
+	out[0*4+3] = a[0*4+0]*b[0*4+3] + a[0*4+1]*b[1*4+3] + a[0*4+2]*b[2*4+3] + a[0*4+3]*b[3*4+3];
+	out[1*4+0] = a[1*4+0]*b[0*4+0] + a[1*4+1]*b[1*4+0] + a[1*4+2]*b[2*4+0] + a[1*4+3]*b[3*4+0];
+	out[1*4+1] = a[1*4+0]*b[0*4+1] + a[1*4+1]*b[1*4+1] + a[1*4+2]*b[2*4+1] + a[1*4+3]*b[3*4+1];
+	out[1*4+2] = a[1*4+0]*b[0*4+2] + a[1*4+1]*b[1*4+2] + a[1*4+2]*b[2*4+2] + a[1*4+3]*b[3*4+2];
+	out[1*4+3] = a[1*4+0]*b[0*4+3] + a[1*4+1]*b[1*4+3] + a[1*4+2]*b[2*4+3] + a[1*4+3]*b[3*4+3];
+	out[2*4+0] = a[2*4+0]*b[0*4+0] + a[2*4+1]*b[1*4+0] + a[2*4+2]*b[2*4+0] + a[2*4+3]*b[3*4+0];
+	out[2*4+1] = a[2*4+0]*b[0*4+1] + a[2*4+1]*b[1*4+1] + a[2*4+2]*b[2*4+1] + a[2*4+3]*b[3*4+1];
+	out[2*4+2] = a[2*4+0]*b[0*4+2] + a[2*4+1]*b[1*4+2] + a[2*4+2]*b[2*4+2] + a[2*4+3]*b[3*4+2];
+	out[2*4+3] = a[2*4+0]*b[0*4+3] + a[2*4+1]*b[1*4+3] + a[2*4+2]*b[2*4+3] + a[2*4+3]*b[3*4+3];
+	out[3*4+0] = a[3*4+0]*b[0*4+0] + a[3*4+1]*b[1*4+0] + a[3*4+2]*b[2*4+0] + a[3*4+3]*b[3*4+0];
+	out[3*4+1] = a[3*4+0]*b[0*4+1] + a[3*4+1]*b[1*4+1] + a[3*4+2]*b[2*4+1] + a[3*4+3]*b[3*4+1];
+	out[3*4+2] = a[3*4+0]*b[0*4+2] + a[3*4+1]*b[1*4+2] + a[3*4+2]*b[2*4+2] + a[3*4+3]*b[3*4+2];
+	out[3*4+3] = a[3*4+0]*b[0*4+3] + a[3*4+1]*b[1*4+3] + a[3*4+2]*b[2*4+3] + a[3*4+3]*b[3*4+3];
+#endif
 }
 
 /*
@@ -961,12 +980,13 @@ void R_SetupProjection(void)
 	//
 	// set up projection matrix
 	//
-	#ifndef ANDROID_NOZHACK
+	// #ifndef ANDROID_NOZHACK
+#if 0 // HTODO: fix shadow be cliped
 	zNear	= 8;
+	zFar = 4000;
 	#else
 	zNear = r_znear.GetFloat();
 	#endif
-	zFar = 4000;
 
 	if (tr.viewDef->renderView.cramZNear) {
 		zNear *= 0.25;
@@ -1003,7 +1023,8 @@ void R_SetupProjection(void)
 	// rasterize right at the wraparound point
 	tr.viewDef->projectionMatrix[2] = 0;
 	tr.viewDef->projectionMatrix[6] = 0;
-	#ifndef ANDROID_NOZHACK
+	// #ifndef ANDROID_NOZHACK
+#if 0 // HTODO: fix shadow be cliped
 	tr.viewDef->projectionMatrix[10] = (-zFar-zNear)/(zFar-zNear);//-0.999f;
 	tr.viewDef->projectionMatrix[14] = -2.0f*zFar*zNear/(zFar-zNear);
 	#else

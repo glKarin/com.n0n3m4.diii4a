@@ -1,0 +1,139 @@
+ECLIPSE ANDROID PROJECT IMPORT SUMMARY
+======================================
+
+Manifest Merging:
+-----------------
+Your project uses libraries that provide manifests, and your Eclipse
+project did not explicitly turn on manifest merging. In Android Gradle
+projects, manifests are always merged (meaning that contents from your
+libraries' manifests will be merged into the app manifest. If you had
+manually copied contents from library manifests into your app manifest
+you may need to remove these for the app to build correctly.
+
+Ignored Files:
+--------------
+The following files were *not* copied into the new Gradle project; you
+should evaluate whether these are still needed in your project and if
+so manually move them:
+
+From DIII4A:
+* .gradle\
+* .gradle\6.5\
+* .gradle\6.5\executionHistory\
+* .gradle\6.5\executionHistory\executionHistory.bin
+* .gradle\6.5\executionHistory\executionHistory.lock
+* .gradle\6.5\fileChanges\
+* .gradle\6.5\fileChanges\last-build.bin
+* .gradle\6.5\fileHashes\
+* .gradle\6.5\fileHashes\fileHashes.bin
+* .gradle\6.5\fileHashes\fileHashes.lock
+* .gradle\6.5\gc.properties
+* .gradle\buildOutputCleanup\
+* .gradle\buildOutputCleanup\buildOutputCleanup.lock
+* .gradle\buildOutputCleanup\cache.properties
+* .gradle\buildOutputCleanup\outputFiles.bin
+* .gradle\checksums\
+* .gradle\checksums\checksums.lock
+* .gradle\vcs-1\
+* .gradle\vcs-1\gc.properties
+* gradle\
+* gradle\wrapper\
+* gradle\wrapper\gradle-wrapper.jar
+* gradle\wrapper\gradle-wrapper.properties
+* gradlew
+* gradlew.bat
+* proguard-project.txt
+From Q3E:
+* .gradle\
+* .gradle\6.5\
+* .gradle\6.5\executionHistory\
+* .gradle\6.5\executionHistory\executionHistory.bin
+* .gradle\6.5\executionHistory\executionHistory.lock
+* .gradle\6.5\fileChanges\
+* .gradle\6.5\fileChanges\last-build.bin
+* .gradle\6.5\fileHashes\
+* .gradle\6.5\fileHashes\fileHashes.bin
+* .gradle\6.5\fileHashes\fileHashes.lock
+* .gradle\6.5\gc.properties
+* .gradle\buildOutputCleanup\
+* .gradle\buildOutputCleanup\buildOutputCleanup.lock
+* .gradle\buildOutputCleanup\cache.properties
+* .gradle\buildOutputCleanup\outputFiles.bin
+* .gradle\checksums\
+* .gradle\checksums\checksums.lock
+* .gradle\vcs-1\
+* .gradle\vcs-1\gc.properties
+* gradle\
+* gradle\wrapper\
+* gradle\wrapper\gradle-wrapper.jar
+* gradle\wrapper\gradle-wrapper.properties
+* gradlew
+* gradlew.bat
+* proguard-project.txt
+
+Replaced Jars with Dependencies:
+--------------------------------
+The importer recognized the following .jar files as third party
+libraries and replaced them with Gradle dependencies instead. This has
+the advantage that more explicit version information is known, and the
+libraries can be updated automatically. However, it is possible that
+the .jar file in your project was of an older version than the
+dependency we picked, which could render the project not compileable.
+You can disable the jar replacement in the import wizard and try again:
+
+android-support-v4.jar => com.android.support:support-v4:18.+
+
+Moved Files:
+------------
+Android Gradle projects use a different directory structure than ADT
+Eclipse projects. Here's how the projects were restructured:
+
+In Q3E:
+* AndroidManifest.xml => Q3E\src\main\AndroidManifest.xml
+* assets\ => Q3E\src\main\assets\
+* jni\ => Q3E\src\main\jni\
+* libs\ouya-sdk.jar => Q3E\libs\ouya-sdk.jar
+* libs\RootTools-2.4.jar => Q3E\libs\RootTools-2.4.jar
+* res\ => Q3E\src\main\res\
+* src\ => Q3E\src\main\java\
+In DIII4A:
+* AndroidManifest.xml => DIII4A\src\main\AndroidManifest.xml
+* assets\ => DIII4A\src\main\assets\
+* libs\armeabi-v7a\libcdoom.so => DIII4A\src\main\jniLibs\armeabi-v7a\libcdoom.so
+* libs\armeabi-v7a\libcdoom_neon.so => DIII4A\src\main\jniLibs\armeabi-v7a\libcdoom_neon.so
+* libs\armeabi-v7a\libd3le.so => DIII4A\src\main\jniLibs\armeabi-v7a\libd3le.so
+* libs\armeabi-v7a\libd3le_neon.so => DIII4A\src\main\jniLibs\armeabi-v7a\libd3le_neon.so
+* libs\armeabi-v7a\libd3xp.so => DIII4A\src\main\jniLibs\armeabi-v7a\libd3xp.so
+* libs\armeabi-v7a\libd3xp_neon.so => DIII4A\src\main\jniLibs\armeabi-v7a\libd3xp_neon.so
+* libs\armeabi-v7a\libdante.so => DIII4A\src\main\jniLibs\armeabi-v7a\libdante.so
+* libs\armeabi-v7a\libdante_neon.so => DIII4A\src\main\jniLibs\armeabi-v7a\libdante_neon.so
+* libs\armeabi-v7a\libgame.so => DIII4A\src\main\jniLibs\armeabi-v7a\libgame.so
+* libs\armeabi-v7a\libgame_neon.so => DIII4A\src\main\jniLibs\armeabi-v7a\libgame_neon.so
+* libs\armeabi\libcdoom.so => DIII4A\src\main\jniLibs\armeabi\libcdoom.so
+* libs\armeabi\libcdoom_neon.so => DIII4A\src\main\jniLibs\armeabi\libcdoom_neon.so
+* libs\armeabi\libd3le.so => DIII4A\src\main\jniLibs\armeabi\libd3le.so
+* libs\armeabi\libd3le_neon.so => DIII4A\src\main\jniLibs\armeabi\libd3le_neon.so
+* libs\armeabi\libd3xp.so => DIII4A\src\main\jniLibs\armeabi\libd3xp.so
+* libs\armeabi\libd3xp_neon.so => DIII4A\src\main\jniLibs\armeabi\libd3xp_neon.so
+* libs\armeabi\libdante.so => DIII4A\src\main\jniLibs\armeabi\libdante.so
+* libs\armeabi\libdante_neon.so => DIII4A\src\main\jniLibs\armeabi\libdante_neon.so
+* libs\armeabi\libgame.so => DIII4A\src\main\jniLibs\armeabi\libgame.so
+* libs\armeabi\libgame_neon.so => DIII4A\src\main\jniLibs\armeabi\libgame_neon.so
+* lint.xml => DIII4A\lint.xml
+* res\ => DIII4A\src\main\res\
+* src\ => DIII4A\src\main\java\
+
+Next Steps:
+-----------
+You can now build the project. The Gradle project needs network
+connectivity to download dependencies.
+
+Bugs:
+-----
+If for some reason your project does not build, and you determine that
+it is due to a bug or limitation of the Eclipse to Gradle importer,
+please file a bug at http://b.android.com with category
+Component-Tools.
+
+(This import summary is for your information only, and can be deleted
+after import once you are satisfied with the results.)
