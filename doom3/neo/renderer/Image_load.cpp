@@ -582,7 +582,11 @@ void rgba4444_convert_tex_image(
    const GLvoid *pixels)
 {
    unsigned char const *cpixels = (unsigned char const *)pixels;
+#ifdef _K_CLANG //k
+   unsigned short *rgba4444data = (unsigned short *)malloc(2*width*height+1);
+#else
    unsigned short *rgba4444data = malloc(2*width*height+1);
+#endif
    ((unsigned char*)rgba4444data)[0]=1;
    rgba4444data=(unsigned short *)((unsigned char*)rgba4444data+1);
    int i;
@@ -628,7 +632,11 @@ void etc1_compress_tex_image(
    unsigned char const *cpixels = (unsigned char const *)pixels;
    unsigned char *etc1data;
    unsigned int size=etc1_data_size(width,height);
+#ifdef _K_CLANG //k
+   etc1data = (unsigned char *)malloc(size+1);
+#else
    etc1data = malloc(size+1);
+#endif
    etc1data[0]=0;
    etc1data++;
    #ifdef USE_RG_ETC1
@@ -664,7 +672,11 @@ int uploadetc(char* cachefname,GLenum target, GLint level, GLint internalformat,
 {
 	char* tmp;
 	int failed=0;
+#ifdef _K_CLANG //k
+	int sz=fileSystem->ReadFile(cachefname,(void **)&tmp,0);
+#else
 	int sz=fileSystem->ReadFile(cachefname,&tmp,0);
+#endif
 	if (tmp[0]==0)
 	{
 	if (sz==etc1_data_size(width,height)+1)
@@ -2328,8 +2340,11 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 	potWidth = MakePowerOfTwo(imageWidth);
 	potHeight = MakePowerOfTwo(imageHeight);
 
+	//HTODO: berserk/double/grabber/helltime vision
+#if !defined(GL_ES_VERSION_2_0)
 	GetDownsize(imageWidth, imageHeight);
 	GetDownsize(potWidth, potHeight);
+#endif
 
 #if !defined(GL_ES_VERSION_2_0)
 	glReadBuffer(GL_BACK);
@@ -2343,14 +2358,23 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 		uploadHeight = potHeight;
 
 		if (potWidth == imageWidth && potHeight == imageHeight) {
+#if !defined(GL_ES_VERSION_2_0)
 			glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, x, y, imageWidth, imageHeight, 0);
+#else
+			glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, imageWidth, imageHeight, 0);
+#endif
 		} else {
 			byte	*junk;
 			// we need to create a dummy image with power of two dimensions,
 			// then do a glCopyTexSubImage2D of the data we want
 			// this might be a 16+ meg allocation, which could fail on _alloca
+#if !defined(GL_ES_VERSION_2_0)
 			junk = (byte *)Mem_Alloc(potWidth * potHeight * 4);
 			memset(junk, 0, potWidth * potHeight * 4);		//!@#
+#else
+			junk = (byte *)Mem_Alloc(potWidth * potHeight * 3);
+			memset(junk, 0, potWidth * potHeight * 3);		//!@#
+#endif
 #if 0 // Disabling because it's unnecessary and introduces a green strip on edge of _currentRender
 
 			for (int i = 0 ; i < potWidth * potHeight * 4 ; i+=4) {
@@ -2358,7 +2382,11 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 			}
 
 #endif
+#if !defined(GL_ES_VERSION_2_0)
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, potWidth, potHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, junk);
+#else
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, potWidth, potHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, junk);
+#endif
 			Mem_Free(junk);
 
 			glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, x, y, imageWidth, imageHeight);

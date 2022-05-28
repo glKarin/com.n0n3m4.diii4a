@@ -85,6 +85,13 @@ if ( local_d3xp ):
 	Grabber.cpp \
 	physics/Force_Grab.cpp'
 	game_list = scons_utils.BuildList( 'd3xp', game_string )
+elif ( local_cdoom ):
+	game_list = scons_utils.BuildList( 'cdoom', game_string )
+elif ( local_d3le ):
+	game_string += ' \
+	Grabber.cpp \
+	physics/Force_Grab.cpp'
+	game_list = scons_utils.BuildList( 'd3le', game_string )
 else:
 	game_list = scons_utils.BuildList( 'game', game_string )
 
@@ -94,6 +101,15 @@ for i in range( len( game_list ) ):
 local_env = g_game_env.Clone()
 if ( local_d3xp ):
 	local_env.Append( CPPDEFINES = [ '_D3XP', 'CTF' ] )
+
+if ( local_cdoom ):
+	local_env.Append( CPPDEFINES = [ '_CDOOM' ] )
+
+if ( local_d3le ):
+	local_env.Append( CPPDEFINES = [ '_D3LE', '_D3XP', 'CTF' ] )
+
+#local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32/arm-linux-androideabi/lib/armv7-a', '/opt/ndk/android_4_0_gcc_32/sysroot/usr/lib' ] ) # //k TODO: Only for armeabi-v7a, comment this line when compile armeabi(v5e).
+#local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32_v5/arm-linux-androideabi/lib', '/opt/ndk/android_4_0_gcc_32/sysroot/usr/lib' ] ) # //k TODO: Only for armeabi(v5e).
 
 if ( local_demo == 1 ):
 	local_env.Append( CPPDEFINES = [ 'ID_DEMO_BUILD' ] )

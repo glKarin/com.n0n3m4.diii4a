@@ -62,9 +62,10 @@ class idSysLocal : public idSys
 		virtual bool			LockMemory(void *ptr, int bytes);
 		virtual bool			UnlockMemory(void *ptr, int bytes);
 
-		virtual intptr_t		DLL_Load(const char *dllName);
-		virtual void 			*DLL_GetProcAddress(intptr_t dllHandle, const char *procName);
-		virtual void			DLL_Unload(intptr_t dllHandle);
+//k 64
+		virtual uintptr_t		DLL_Load(const char *dllName);
+		virtual void 			*DLL_GetProcAddress(uintptr_t dllHandle, const char *procName);
+		virtual void			DLL_Unload(uintptr_t dllHandle);
 		virtual void			DLL_GetFileName(const char *baseName, char *dllName, int maxLength);
 
 		virtual sysEvent_t		GenerateMouseButtonEvent(int button, bool down);

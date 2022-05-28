@@ -163,7 +163,11 @@ ID_INLINE int idVectorSet<type,dimension>::FindVector(const type &v, const float
 	}
 
 	hash.Add(hashKey, idList<type>::Num());
+#ifdef _K_CLANG //k
+	this->Append(v);
+#else
 	Append(v);
+#endif
 	return idList<type>::Num()-1;
 }
 

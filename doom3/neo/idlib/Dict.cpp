@@ -252,7 +252,8 @@ idDict::Checksum
 */
 int	idDict::Checksum(void) const
 {
-	unsigned long ret;
+	//k 64
+	unsigned int ret;
 	int i, n;
 
 	idList<idKeyValue> sorted = args;

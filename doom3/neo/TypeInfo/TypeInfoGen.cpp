@@ -871,7 +871,11 @@ void idTypeInfoGen::CreateTypeInfo(const char *path)
 	idFileList *files;
 	idParser src;
 
+#ifdef _K_CLANG //k
+	common->Printf("Type Info Generator v" TYPE_INFO_GEN_VERSION " (c) 2004 id Software\n");
+#else
 	common->Printf("Type Info Generator v"TYPE_INFO_GEN_VERSION" (c) 2004 id Software\n");
+#endif
 	common->Printf("%s\n", path);
 
 	files = fileSystem->ListFilesTree(path, ".cpp");
@@ -979,7 +983,11 @@ void idTypeInfoGen::WriteTypeInfo(const char *fileName) const
 	        "/*\n"
 	        "===================================================================================\n"
 	        "\n"
+#ifdef _K_CLANG //k
+	        "\tThis file has been generated with the Type Info Generator v" TYPE_INFO_GEN_VERSION " (c) 2004 id Software\n"
+#else
 	        "\tThis file has been generated with the Type Info Generator v"TYPE_INFO_GEN_VERSION" (c) 2004 id Software\n"
+#endif
 	        "\n"
 	        "\t%d constants\n"
 	        "\t%d enums\n"

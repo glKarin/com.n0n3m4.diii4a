@@ -15,8 +15,12 @@ conf_filename='site.conf'
 serialized=['CC', 'CXX', 'JOBS', 'BUILD', 'IDNET_HOST', 'DEDICATED',
 	'DEBUG_MEMORY', 'LIBC_MALLOC', 'ID_NOLANADDRESS', 'ID_MCHECK', 'ALSA',
 	'TARGET_CORE', 'TARGET_GAME', 'TARGET_D3XP', 'TARGET_MONO', 'TARGET_DEMO', 'NOCURL',
+	'TARGET_CDOOM',
+	'TARGET_D3LE',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS', 'SILENT', 'TARGET_OPENGL',
-	'TARGET_ANDROID', 'NDK' ]
+	'TARGET_ANDROID', 'NDK',
+	'LIB_PATH'
+]
 
 # help -------------------------------------------
 
@@ -54,6 +58,12 @@ TARGET_GAME (default 1)
 
 TARGET_D3XP (default 1)
 	Build the d3xp game code
+
+TARGET_CDOOM (default 0)
+	Build the classic doom game code
+
+TARGET_D3LE (default 0)
+	Build the lost mission game code
 
 BUILD_GAMEPAK (default 0)
 	Build a game pak
@@ -158,6 +168,8 @@ DEDICATED = '0'
 TARGET_CORE = '1'
 TARGET_GAME = '1'
 TARGET_D3XP = '1'
+TARGET_CDOOM = '0'
+TARGET_D3LE = '0'
 TARGET_MONO = '0'
 TARGET_DEMO = '0'
 TARGET_OPENGL = '0'
@@ -175,6 +187,7 @@ NOCURL = '0'
 BUILD_GAMEPAK = '0'
 BASEFLAGS = ''
 SILENT = '0'
+LIB_PATH = ''
 
 # end default settings ---------------------------
 
@@ -186,13 +199,13 @@ if ( not ARGUMENTS.has_key( 'NOCONF' ) or ARGUMENTS['NOCONF'] != '1' ):
 		site_file = open(conf_filename, 'r')
 		p = pickle.Unpickler(site_file)
 		site_dict = p.load()
-		print 'Loading build configuration from ' + conf_filename + ':'
+		print('Loading build configuration from ' + conf_filename + ':')
 		for k, v in site_dict.items():
 			exec_cmd = k + '=\'' + v + '\''
-			print '  ' + exec_cmd
+			print('  ' + exec_cmd)
 			exec(exec_cmd)
 else:
-	print 'Site settings ignored'
+	print('Site settings ignored')
 
 # end site settings ------------------------------
 
@@ -200,7 +213,7 @@ else:
 
 for k in ARGUMENTS.keys():
 	exec_cmd = k + '=\'' + ARGUMENTS[k] + '\''
-	print 'Command line: ' + exec_cmd
+	print('Command line: ' + exec_cmd)
 	exec( exec_cmd )
 
 # end command line settings ----------------------
@@ -247,6 +260,8 @@ CORECPPFLAGS = [ ]
 GAMECPPFLAGS = [ ]
 BASELINKFLAGS = [ '-Wl,--no-undefined' ]
 CORELINKFLAGS = [ '-Wl,--no-undefined' ]
+#//k BASELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
+#//k CORELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
 
 # for release build, further optimisations that may not work on all files
 OPTCPPFLAGS = [ ]
@@ -269,17 +284,24 @@ BASECPPFLAGS.append( '-fpermissive' )
 if ( g_os == 'Linux' ):
 	# gcc 4.x option only - only export what we mean to from the game SO
 	BASECPPFLAGS.append( '-fvisibility=hidden' )
+# //k
+	# BASECPPFLAGS.append('-D_K_CLANG')
+	BASECPPFLAGS.append('-D__arm__')
+# //k
 
 if ( TARGET_ANDROID == '1' ):
 	BASECPPFLAGS.append( '-D__ANDROID__')
 	g_os = 'Android'
+	if ( LIB_PATH != '' ):
+		CORELIBPATH.append( LIB_PATH.split() )
 
 if ( BUILD == 'debug-all' ):
 	OPTCPPFLAGS = [ '-g', '-D_DEBUG' ]
 	if ( ID_MCHECK == '0' ):
 		ID_MCHECK = '1'
 elif ( BUILD == 'debug' ):
-	OPTCPPFLAGS = [ '-g', '-O1', '-D_DEBUG' ]
+#//k OPTCPPFLAGS = [ '-g', '-O1', '-D_DEBUG' ]
+	OPTCPPFLAGS = [ '-g', '-O0' ]
 	if ( ID_MCHECK == '0' ):
 		ID_MCHECK = '1'
 elif ( BUILD == 'release' ):
@@ -295,7 +317,7 @@ elif ( BUILD == 'release' ):
 	if ( ID_MCHECK == '0' ):
 		ID_MCHECK = '2'
 else:
-	print 'Unknown build configuration ' + BUILD
+	print('Unknown build configuration ' + BUILD)
 	sys.exit(0)
 
 if ( DEBUG_MEMORY != '0' ):
@@ -336,7 +358,7 @@ g_env_noopt.Append( CPPFLAGS = '-fno-strict-aliasing' )
 g_game_env.Append( CPPFLAGS = '-fno-strict-aliasing' )
 
 if ( int(JOBS) > 1 ):
-	print 'Using buffered process output'
+	print('Using buffered process output')
 	silent = False
 	if ( SILENT == '1' ):
 		silent = True
@@ -358,10 +380,12 @@ local_curl = 0
 local_idlibpic = 0
 # switch between base game build and d3xp game build
 local_d3xp = 0
+local_cdoom = 0
+local_d3le = 0
 # OpenGL
 local_opengl = 0
 
-GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp local_opengl OPTCPPFLAGS NDK'
+GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp local_cdoom local_d3le local_opengl OPTCPPFLAGS NDK'
 
 # end general configuration ----------------------
 
@@ -417,7 +441,7 @@ if ( TARGET_CORE == '1' ):
 
 		InstallAs( '#doomded.' + cpu, doomded )
 
-if ( TARGET_GAME == '1' or TARGET_D3XP == '1' ):
+if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D3LE == '1' ):
 	local_gamedll = 1
 	local_demo = 0
 	local_dedicated = 0
@@ -427,6 +451,8 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' ):
 	idlib_objects = SConscript( g_build + '/game/sys/scons/SConscript.idlib' )
 	if ( TARGET_GAME == '1' ):
 		local_d3xp = 0
+		local_cdoom = 0
+		local_d3le = 0
 		Export( 'GLOBALS ' + GLOBALS )
 		game = SConscript( g_build + '/game/sys/scons/SConscript.game' )
 		game_base = InstallAs( '#game%s-base.so' % cpu, game )
@@ -435,12 +461,37 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' ):
 	if ( TARGET_D3XP == '1' ):
 		# uses idlib as compiled for game/
 		local_d3xp = 1
+		local_cdoom = 0
+		local_d3le = 0
 		VariantDir( g_build + '/d3xp', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		d3xp = SConscript( g_build + '/d3xp/sys/scons/SConscript.game' )
 		game_d3xp = InstallAs( '#game%s-d3xp.so' % cpu, d3xp )
 		if ( BUILD_GAMEPAK == '1' ):
 			Command( '#game01-d3xp.pk4', [ game_d3xp, d3xp ], Action( g_env.BuildGamePak ) )
+	if ( TARGET_CDOOM == '1' ):
+		# uses idlib as compiled for game/
+		local_cdoom = 1
+		local_d3xp = 0
+		local_d3le = 0
+		VariantDir( g_build + '/cdoom', '.', duplicate = 0 )
+		Export( 'GLOBALS ' + GLOBALS )
+		cdoom = SConscript( g_build + '/cdoom/sys/scons/SConscript.game' )
+		game_cdoom = InstallAs( '#game%s-cdoom.so' % cpu, cdoom )
+		if ( BUILD_GAMEPAK == '1' ):
+			Command( '#game01-cdoom.pk4', [ game_cdoom, cdoom ], Action( g_env.BuildGamePak ) )
+	if ( TARGET_D3LE == '1' ):
+		# uses idlib as compiled for game/
+		local_cdoom = 0
+		local_d3xp = 0
+		local_d3le = 1
+		VariantDir( g_build + '/d3le', '.', duplicate = 0 )
+		Export( 'GLOBALS ' + GLOBALS )
+		d3le = SConscript( g_build + '/d3le/sys/scons/SConscript.game' )
+		game_d3le = InstallAs( '#game%s-d3le.so' % cpu, d3le )
+		if ( BUILD_GAMEPAK == '1' ):
+			Command( '#game01-d3le.pk4', [ game_d3le, d3le ], Action( g_env.BuildGamePak ) )
+	
 	
 if ( TARGET_MONO == '1' ):
 	# NOTE: no D3XP atm. add a TARGET_MONO_D3XP
@@ -449,6 +500,8 @@ if ( TARGET_MONO == '1' ):
 	local_demo = 0
 	local_idlibpic = 0
 	local_d3xp = 0
+	local_cdoom = 0
+	local_d3le = 0
 	Export( 'GLOBALS ' + GLOBALS )
 	VariantDir( g_build + '/mono', '.', duplicate = 0 )
 	idlib_objects = SConscript( g_build + '/mono/sys/scons/SConscript.idlib' )
@@ -465,6 +518,8 @@ if ( TARGET_DEMO == '1' ):
 	local_idlibpic = 0
 	local_curl = 0
 	local_d3xp = 0
+	local_cdoom = 0
+	local_d3le = 0
 	Export( 'GLOBALS ' + GLOBALS )
 	VariantDir( g_build + '/demo', '.', duplicate = 0 )
 	idlib_objects = SConscript( g_build + '/demo/sys/scons/SConscript.idlib' )

@@ -1662,7 +1662,11 @@ void TestMemcpy(void)
 
 		for (j = 0; j < i; j++) {
 			if (test1[j] != test0[j]) {
+#ifdef _K_CLANG //k
+				idLib::common->Printf("   simd->Memcpy() " S_COLOR_RED "X\n");
+#else
 				idLib::common->Printf("   simd->Memcpy() "S_COLOR_RED"X\n");
+#endif
 				return;
 			}
 		}
@@ -1691,7 +1695,11 @@ void TestMemset(void)
 
 			for (k = 0; k < i; k++) {
 				if (test[k] != (byte)j) {
+#ifdef _K_CLANG //k
+					idLib::common->Printf("   simd->Memset() " S_COLOR_RED "X\n");
+#else
 					idLib::common->Printf("   simd->Memset() "S_COLOR_RED"X\n");
+#endif
 					return;
 				}
 			}

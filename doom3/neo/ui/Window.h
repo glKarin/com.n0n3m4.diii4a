@@ -310,7 +310,8 @@ class idWindow
 		bool RunScript(int n);
 		bool RunScriptList(idGuiScriptList *src);
 		void SetRegs(const char *key, const char *val);
-		int ParseExpression(idParser *src, idWinVar *var = NULL, int component = 0);
+//k 64
+		intptr_t ParseExpression(idParser *src, idWinVar *var = NULL, intptr_t component = 0);
 		int ExpressionConstant(float f);
 		idRegisterList *RegList() {
 			return &regList;
@@ -366,10 +367,11 @@ class idWindow
 
 		int ExpressionTemporary();
 		wexpOp_t *ExpressionOp();
-		int EmitOp(int a, int b, wexpOpType_t opType, wexpOp_t **opp = NULL);
-		int ParseEmitOp(idParser *src, int a, wexpOpType_t opType, int priority, wexpOp_t **opp = NULL);
-		int ParseTerm(idParser *src, idWinVar *var = NULL, int component = 0);
-		int ParseExpressionPriority(idParser *src, int priority, idWinVar *var = NULL, int component = 0);
+//k 64
+		intptr_t EmitOp(intptr_t a, intptr_t b, wexpOpType_t opType, wexpOp_t **opp = NULL);
+		intptr_t ParseEmitOp(idParser *src, intptr_t a, wexpOpType_t opType, int priority, wexpOp_t **opp = NULL);
+		intptr_t ParseTerm(idParser *src, idWinVar *var = NULL, intptr_t component = 0);
+		intptr_t ParseExpressionPriority(idParser *src, int priority, idWinVar *var = NULL, intptr_t component = 0);
 		void EvaluateRegisters(float *registers);
 		void SaveExpressionParseState();
 		void RestoreExpressionParseState();

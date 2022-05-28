@@ -463,7 +463,8 @@ class idFileSystemLocal : public idFileSystem
 
 	private:
 		void					ReplaceSeparators(idStr &path, char sep = PATHSEPERATOR_CHAR);
-		long					HashFileName(const char *fname) const;
+//k 64
+		int					HashFileName(const char *fname) const;
 		int						ListOSFiles(const char *directory, const char *extension, idStrList &list);
 		FILE 					*OpenOSFile(const char *name, const char *mode, idStr *caseSensitiveName = NULL);
 		FILE 					*OpenOSFileCorrectName(idStr &path, const char *mode);
@@ -542,10 +543,11 @@ idFileSystemLocal::HashFileName
 return a hash value for the filename
 ================
 */
-long idFileSystemLocal::HashFileName(const char *fname) const
+//k 64
+int idFileSystemLocal::HashFileName(const char *fname) const
 {
 	int		i;
-	long	hash;
+	int	hash;
 	char	letter;
 
 	hash = 0;
@@ -562,7 +564,8 @@ long idFileSystemLocal::HashFileName(const char *fname) const
 			letter = '/';		// damn path names
 		}
 
-		hash += (long)(letter) * (i+119);
+//k 64
+		hash += (int)(letter) * (i+119);
 		i++;
 	}
 
@@ -1057,7 +1060,8 @@ bool idFileSystemLocal::FileIsInPAK(const char *relativePath)
 	searchpath_t	*search;
 	pack_t			*pak;
 	fileInPack_t	*pakFile;
-	long			hash;
+//k 64
+	int			hash;
 
 	if (!searchPaths) {
 		common->FatalError("Filesystem call made without initialization\n");
@@ -1417,7 +1421,8 @@ pack_t *idFileSystemLocal::LoadZipFile(const char *zipfile)
 	char			filename_inzip[MAX_ZIPPED_FILE_NAME];
 	unz_file_info	file_info;
 	int				i;
-	long			hash;
+//k 64
+	int			hash;
 	int				fs_numHeaderLongs;
 	int 			*fs_headerLongs;
 	FILE			*f;
@@ -3491,7 +3496,8 @@ idFile *idFileSystemLocal::OpenFileReadFlags(const char *relativePath, int searc
 	pack_t 		*pak;
 	fileInPack_t 	*pakFile;
 	directory_t 	*dir;
-	long			hash;
+//k 64
+	int			hash;
 	FILE 			*fp;
 
 	if (!searchPaths) {
@@ -4532,13 +4538,28 @@ bool idFileSystemLocal::RunningD3XP(void)
 idFileSystemLocal::MakeTemporaryFile
 ===============
 */
+#ifdef __ANDROID__
+extern FILE * (*itmpfile)(void);
+#endif
 idFile *idFileSystemLocal::MakeTemporaryFile(void)
 {
 	FILE *f = tmpfile();
 
 	if (!f) {
 		common->Warning("idFileSystem::MakeTemporaryFile failed: %s", strerror(errno));
+#ifdef __ANDROID__
+		if(itmpfile)
+		{
+			common->Printf("Call JNI::tmpfile.\n");
+			f = itmpfile();
+			if (!f) {
+				common->Warning("JNI::itmpfile failed: %s", strerror(errno));
+				return NULL;
+			}
+		}
+#else
 		return NULL;
+#endif
 	}
 
 	idFile_Permanent *file = new idFile_Permanent();

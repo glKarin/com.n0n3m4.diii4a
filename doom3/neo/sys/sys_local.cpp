@@ -124,17 +124,21 @@ void idSysLocal::ShutdownSymbols(void)
 	Sys_ShutdownSymbols();
 }
 
-intptr_t idSysLocal::DLL_Load(const char *dllName)
+//k 64
+uintptr_t idSysLocal::DLL_Load(const char *dllName)
 {
+	DebugPrintf("[Harmattan]: DLL_Load(%s)\n", dllName);
 	return Sys_DLL_Load(dllName);
 }
 
-void *idSysLocal::DLL_GetProcAddress(intptr_t dllHandle, const char *procName)
+//k 64
+void *idSysLocal::DLL_GetProcAddress(uintptr_t dllHandle, const char *procName)
 {
 	return Sys_DLL_GetProcAddress(dllHandle, procName);
 }
 
-void idSysLocal::DLL_Unload(intptr_t dllHandle)
+//k 64
+void idSysLocal::DLL_Unload(uintptr_t dllHandle)
 {
 	Sys_DLL_Unload(dllHandle);
 }

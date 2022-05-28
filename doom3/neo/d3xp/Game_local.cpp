@@ -1455,7 +1455,11 @@ bool idGameLocal::InitFromSaveGame(const char *mapName, idRenderWorld *renderWor
 			CacheDictionaryMedia(&mapEnt->epairs);
 			const char *classname = mapEnt->epairs.GetString("classname");
 
+#ifdef _K_CLANG //k
+			if (classname != 0) {
+#else
 			if (classname != '\0') {
+#endif
 				FindEntityDef(classname, false);
 			}
 		}

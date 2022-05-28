@@ -1216,6 +1216,10 @@ idGameLocal::InitFromNewMap
 */
 void idGameLocal::InitFromNewMap(const char *mapName, idRenderWorld *renderWorld, idSoundWorld *soundWorld, bool isServer, bool isClient, int randseed)
 {
+#ifdef _CDOOM
+	musicSpeakers.Clear(); // SnoopJeDi: new map, not reload, so clear the list
+	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "heartbeat\n" ); // SnoopJeDi - iddevnet fix to keep server from dropping off master list
+#endif
 
 	this->isServer = isServer;
 	this->isClient = isClient;
@@ -1308,7 +1312,11 @@ bool idGameLocal::InitFromSaveGame(const char *mapName, idRenderWorld *renderWor
 			CacheDictionaryMedia(&mapEnt->epairs);
 			const char *classname = mapEnt->epairs.GetString("classname");
 
+#ifdef _K_CLANG //k
+			if (classname != 0) {
+#else
 			if (classname != '\0') {
+#endif
 				FindEntityDef(classname, false);
 			}
 		}
@@ -1698,7 +1706,11 @@ void idGameLocal::GetShakeSounds(const idDict *dict)
 
 	soundShaderName = dict->GetString("s_shader");
 
+#ifdef _K_CLANG //k
+	if (soundShaderName != "\0" && dict->GetFloat("s_shakes") != 0.0f) {
+#else
 	if (soundShaderName != '\0' && dict->GetFloat("s_shakes") != 0.0f) {
+#endif
 		soundShader = declManager->FindSound(soundShaderName);
 
 		for (int i = 0; i < soundShader->GetNumSounds(); i++) {
@@ -4567,7 +4579,11 @@ void idGameLocal::UpdateServerInfoFlags()
 {
 	gameType = GAME_SP;
 
+#ifdef _CDOOM
+	if ( ( ( idStr::Icmp( serverInfo.GetString( "si_gameType" ), "deathmatch" ) == 0 ) ) || ( ( idStr::Icmp( serverInfo.GetString( "si_gameType" ), "cdoomDM" ) == 0 ) )  ) {
+#else
 	if ((idStr::Icmp(serverInfo.GetString("si_gameType"), "deathmatch") == 0)) {
+#endif
 		gameType = GAME_DM;
 	} else if ((idStr::Icmp(serverInfo.GetString("si_gameType"), "Tourney") == 0)) {
 		gameType = GAME_TOURNEY;

@@ -1,12 +1,52 @@
 DIII4A++ (Harmattan)
 com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
-Lastest version: 1.1.0harmattan7
-Last update release: 2022-05-05
+Latest version: 1.1.0harmattan8(Natasha)
+Last update release: 2022-05-19
 
-Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb
+----------------------------------------------------------------------------------
 
-2022-05-05 Update 1.1.0harmattan7
+2022-05-19 Update 1.1.0harmattan8
 
+DIII4A++_harmattan.1.1.0.8.apk: include armv8-64 and armv7 32 neon library.
+DIII4A++_harmattan.1.1.0.8_only_armv7a.apk: only include armv7 32 neon library.
+
+Update:
+    * Compile armv8-a 64 bits library, and set FPU neon is default on armv7-a, and do not compile old armv5e library and armv7-a vfp.
+    * Fix input event when modal MessageBox is visible in game.
+    * Add cURL support for downloading in multiplayer game.
+    * Add weapon on-screen button panel.
+
+更新:
+    * 编译arm 64位库支持, armv7 32位默认启用NEON, 不再编译旧的armv5版本和armv7 VFP库支持.
+    * 修复输入事件拉取当游戏中模态消息框打开时.
+    * 新增cURL支持, 用于多人游戏的资源下载.
+    * 新增武器切换圆盘虚拟键.
+
+----------------------------------------------------------------------------------
+
+Directory(目录):
+	/DIII4A: DOOM3 frontend source(DOOM3前端启动器源码)
+	/doom3: DOOM3 source(DOOM3源码)
+	/__HARAMTTAN__: Other resources(额外资源)
+	    /*.apk: Latest update version(最近更新版本)
+	    /build: old version APK packages(旧版本的apk包)
+	    /screenshot: screenshot pictures(截屏)
+	    /cdoom: Original `Classic DOOM` changed source(https://www.moddb.com/mods/classic-doom-3)
+	    /d3le: Original `The Lost Mission` changed source(https://www.moddb.com/mods/the-lost-mission)
+
+Original old n0n3m4 version source in `n0n3m4_original_old_version` branch.
+
+----------------------------------------------------------------------------------
+Extras download:
+    Google: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb
+    Baidu: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w 提取码: pyyj
+----------------------------------------------------------------------------------
+Changed history:
+----------------------------------------------------------------------------------
+
+2022-05-05 1.1.0harmattan7
+
+Update:
     * Fix shadow clipped.
     * Fix sky box.
     * Fix fog and blend light.
@@ -24,8 +64,6 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
     * Add `Back` key function setting, add 3-Click to exit.
     * Add cvar `harm_r_shadowCarmackInverse` to change general Z-Fail stencil shadow or `Carmack-Inverse` Z-Fail stencil shadow.
     * DIII4A build on Android Studio now.
-
-    * Some changes from https://github.com/emileb/d3es-multithread
 
 更新:
     * 修复阴影被裁剪.
@@ -48,8 +86,9 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
 
 ----------------------------------------------------------------------------------
 
-2020-08-25 Update 1.1.0harmattan6
+2020-08-25 1.1.0harmattan6
 
+Update:
 	* Fix video playing - 1.1.0harmattan6.
 	* Choose game library when load other game mod, more view in `Help` menu - 1.1.0harmattan6.
 	* Fix game audio sound playing(Testing) - 1.1.0harmattan5.
@@ -63,8 +102,9 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
 
 ----------------------------------------------------------------------------------
 
-2020-08-17 Update 1.1.0harmattan3
+2020-08-17 1.1.0harmattan3
 
+Update:
 	* Uncheck 4 checkboxs, default value is 0(disabled).
 	* Hide software keyboard when open launcher activity.
 	* Check `WRITE_EXTERNAL_STORAGE` permission when start game or edit config file.
@@ -84,8 +124,9 @@ Download: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5Xo
 
 ----------------------------------------------------------------------------------
 
-2020-08-16
-Notification: Sorry for my bad English
+2020-08-16 1.1.0harmattan2
+
+Notification:
 	* If you have installed other version apk(package name is `com.n0n3m4.diii4a`) of other sources, you first to uninstall the old version apk package named `com.n0n3m4.diii4a`, after install this new version apk. Because the apk package is same `com.n0n3m4.diii4a`, but certificate is different.
 	* If app running crash(white screen), first make sure to allow `WRITE_EXTERNAL_STORAGE` permission, alter please uncheck 4th checkbox named `Use ETC1(or RGBA4444) cache` or clear ETC1 texture cache file manual on resource folder(exam. /sdcard/diii4a/<base/d3xp/d3le/cdoom/or...>/dds).
 	* `Clear vertex buffer` suggest to select 3rd or 2nd for clear vertex buffer every frame! If you select 1st, it will be same as original apk, maybe flash and crash with out of graphics memory! More view in game, on DOOM3 console, cvar named `harm_r_clearVertexBuffer`.
@@ -98,6 +139,8 @@ Notification: Sorry for my bad English
 	* 经典DOOM(Classic DOOM)中有些触发器无法交互, 像第一关`E1M1`最后的通关大门不能打开. 但是可以通关在控制台输入`noclip`或绑定`noclip`到快捷键, 穿过不能触发的门.
 
 ----------------------------------------------------------------------------------
+
+2020-08-16 1.1.0harmattan1
 
 Updates:
 	* Compile `DOOM3:RoE` game library named `libd3xp`, game path name is `d3xp`, more view in `https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/`.
@@ -115,32 +158,12 @@ Updates:
 About:
 	* All changes in folder `__HARAMTTAN__` on github, `/doom3/neo/cdoom` is Classic DOOM3 game library source, `/doom3/neo/d3le` is DOOM3:The Lost Mission game library source, 
 	* Source in `assets/source` folder in APK file.
-	
-----------------------------------------------------------------------------------
-
-目录:
-	assets: 图标资源+OpenGL着色器源码.
-	DIII4A: DOOM3前端启动器源码.
-	Q3E: DOOM3前端启动器依赖, 包括虚拟按键层, Native渲染层.
-	doom3: DOOM3源码, 没有直接创建Native Activity. 而是渲染到Q3E的GLSurfaceView.
-	__HARAMTTAN__: 经过修改的源码
-	
-----------------------------------------------------------------------------------
-
-	__HARAMTTAN__/doom3: 修改过的DOOM3源码, 可clang++编译. 默认编译arm 32位库.
-	__HARAMTTAN__/DIII4A: 修改过的DOOM3前端启动器源码.
-	__HARAMTTAN__/DIII4A/libs: 游戏动态库.
-	__HARAMTTAN__/Q3E: 修改过的DOOM3前端启动器依赖的源码.
-	__HARAMTTAN__/doom3/neo/cdoom: 经典DOOM(Classic DOOM)源码(https://www.moddb.com/mods/classic-doom-3).
-	__HARAMTTAN__/doom3/neo/d3le: DOOM3-BFG:Lost Mession资料片源码(https://www.moddb.com/mods/the-lost-mission).
-	
-----------------------------------------------------------------------------------
 
 更新:
 	* 需要Android 4.0(Ice Cream)以上版本.
 	* 编译邪恶复苏游戏库(DOOM3 RoE), 默认跳过地狱之心buf(Helltime)视觉特效/重力枪(Grabber)视觉特效.
 	* 编译经典DOOM游戏库(Classic DOOM).
-	* 编译DOOM3-BFG:The Lost Mession资料片游戏库, 修复载入le_hell关卡地图时models/mapobjects/hell/hellintro.lwo模型的栈溢出.
+	* 编译DOOM3-BFG:The Lost Mission资料片游戏库, 修复载入le_hell关卡地图时models/mapobjects/hell/hellintro.lwo模型的栈溢出.
 	* 跳过狂暴(Berserk)视觉特效.
 	* 新增选择OpenGL配置, RGBA8888 32位, RGBA4444 16位.
 	* 新增选择后台行为, 当前Activity不活动时不调用GLSurfaceView.onPaused/onResume, 不会出现之前的游戏切换到后台, 再回来时黑屏. 也可选择后台继续播放声音.

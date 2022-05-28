@@ -39,12 +39,18 @@ If you have questions concerning this license or the applicable additional terms
 #include "../posix/posix_public.h"
 #include "sound.h"
 
-const char	*s_driverArgs[]	= { NULL };
+const char	*s_driverArgs[]	= {
+	"AudioTrack", 
+	"OpenSLES", 
+	// "AAudio"
+	NULL };
 
 extern void (*initAudio)(void *buffer, int size);
-extern void (*writeAudio)(int offset, int length);
+extern int (*writeAudio)(int offset, int length);
 
 int m_buffer_size;
+
+static idCVar s_driver("s_driver", s_driverArgs[0], CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "sound driver. only `AudioTrack` is supported in this build", s_driverArgs, idCmdSystem::ArgCompletion_String<s_driverArgs>);
 
 class idAudioHardwareAndroid: public idAudioHardware
 {
@@ -60,6 +66,9 @@ class idAudioHardwareAndroid: public idAudioHardware
 		bool Initialize()
 		{
 		common->Printf("------ Android Sound Initialization ------\n");
+#ifdef __ANDROID__
+		common->Printf("[Harmattan]: active write audio.\n");
+#endif
 		m_channels = 2;
 		idSoundSystemLocal::s_numberOfSpeakers.SetInteger(2);
 		m_speed = PRIMARYFREQ;
@@ -87,8 +96,18 @@ class idAudioHardwareAndroid: public idAudioHardware
 
 		// try to write as many sound samples to the device as possible without blocking and prepare for a possible new mixing call
 		// returns wether there is *some* space for writing available
-		bool Flush(void){return true;};
-		void Write(bool flushing){};
+		bool Flush(void){
+#ifdef __ANDROID__
+			writeAudio(-1, 0);
+			//Write(true);
+#endif
+			return true;
+		};
+		void Write(bool flushing){
+#ifdef __ANDROID__
+			writeAudio(0, flushing ? -m_buffer_size : m_buffer_size);
+#endif
+		};
 
 		int GetNumberOfSpeakers(void)
 		{
@@ -106,9 +125,16 @@ class idAudioHardwareAndroid: public idAudioHardware
 
 idAudioHardware::~idAudioHardware() { }
 
+//#include "sound_opensles.cpp"
+
 idAudioHardware *idAudioHardware::Alloc()
 {
-	return new idAudioHardwareAndroid;
+#if 0
+	if(!idStr::Icmp(s_driver.GetString(), "OpenSLES"))
+		return new idAudioHardwareOpenSLES;
+	else
+#endif
+		return new idAudioHardwareAndroid;
 }
 
 /*
@@ -120,4 +146,3 @@ bool Sys_LoadOpenAL(void)
 {
 	return false;
 }
-

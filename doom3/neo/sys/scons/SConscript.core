@@ -9,6 +9,52 @@ import scons_utils
 Import( 'GLOBALS' )
 Import( GLOBALS )
 
+#//k curl
+curl_string = \
+    'base64.c \
+    connect.c \
+    cookie.c \
+    dict.c \
+    easy.c \
+    escape.c \
+    file.c \
+    formdata.c \
+    ftp.c \
+    getdate.c \
+    getenv.c \
+    getinfo.c \
+    hash.c \
+    hostip.c \
+    http.c \
+    http_chunks.c \
+    if2ip.c \
+    krb4.c \
+    ldap.c \
+    llist.c \
+    memdebug.c \
+    mprintf.c \
+    multi.c \
+    netrc.c \
+    progress.c \
+    security.c \
+    sendf.c \
+    share.c \
+    speedcheck.c \
+    ssluse.c \
+    strequal.c \
+    strtok.c \
+    telnet.c \
+    timeval.c \
+    transfer.c \
+    url.c \
+    version.c \
+    http_digest.c \
+    http_ntlm.c \
+    inet_pton.c \
+    md5.c \
+	content_encoding.c'
+curl_list = scons_utils.BuildList( '../../../../../../curl/lib/', curl_string )
+
 jpeg_string = \
 		'jaricom.c \
 		jcapimin.c \
@@ -58,6 +104,37 @@ jpeg_string = \
 		jutils.c'
 
 jpeg_list = scons_utils.BuildList( '../../../../../../jpeg-8d/', jpeg_string )
+
+libogg_string = ' \
+				bitwise.c \
+				framing.c \
+				   analysis.c \
+				   floor1.c \
+				   psy.c \
+				   tone.c \
+				   barkmel.c \
+				   info.c \
+				   vorbisenc.c \
+				   bitrate.c \
+				   lookup.c \
+				   registry.c \
+				   vorbisfile.c \
+				   block.c \
+				   lpc.c \
+				   res0.c \
+				   window.c \
+				   codebook.c \
+				   lsp.c \
+				   sharedbook.c \
+				   envelope.c \
+				   mapping0.c \
+				   smallft.c \
+				   floor0.c \
+				   mdct.c \
+				   synthesis.c'
+
+libogg_list = scons_utils.BuildList( '../../../../../../libogg/', libogg_string )
+
 
 renderer_string = ' \
 	esTransform.c \
@@ -309,7 +386,18 @@ if ( local_demo == 1 ):
 if ( local_curl == 0 ):
 	local_env.Append( CPPDEFINES = [ 'ID_ENABLE_CURL=0' ] )
 else:
-	local_env.Append( LIBS = [ 'curl' ] )
+#//k curl
+	if g_os == 'Android':
+		curl_env = local_env.Clone()
+		curl_env[ 'CPPFLAGS' ] += [ '-I../curl/include' ]
+		curl_env[ 'CPPFLAGS' ] += [ '-DHAVE_CONFIG_H' ]
+
+		curl_lib = curl_env.StaticLibrary( 'curl', curl_list )
+
+		local_env[ 'CPPFLAGS' ] += [ '-I../curl/include' ]
+		local_env.Append( LIBS = [ 'z' ] )
+	else:
+		local_env.Append( LIBS = [ 'curl' ] )
 
 if ( local_opengl == 1 ):
 	local_env.Append( CPPDEFINES = [ 'ID_TARGET_OPENGL' ] )
@@ -339,7 +427,15 @@ if g_os == 'Android':
 	local_env['CPPFLAGS' ] += [ '-I../jpeg-8d/' ]
 
 if g_os == 'Android':
-	local_env.Append( LIBS = [ 'dl', 'vorbisfile','vorbis', 'ogg', 'android' ] )
+	libogg_env = local_env.Clone()
+	libogg_env['CPPFLAGS' ] += [ '-I../libogg/' ]
+	libogg_lib = libogg_env.StaticLibrary( 'ogg', libogg_list )
+
+	local_env['CPPFLAGS' ] += [ '-I../libogg/' ]
+
+if g_os == 'Android':
+#local_env.Append( LIBS = [ 'dl', 'vorbisfile','vorbis', 'ogg', 'android' ] )
+	local_env.Append( LIBS = [ 'dl', 'android' ] )
 else:
 	local_env.Append( LIBS = [ 'pthread', 'dl', 'vorbisfile', 'jpeg' ] )
 
@@ -350,7 +446,8 @@ if ( local_dedicated == 0 ):
 		local_env.Append( LIBS = [ 'openal' ] )
 	if ( local_opengl == 0 ):
 		local_env.Append( LIBS = [ 'GLESv2', 'EGL' ] )
-		local_env.Append( LIBPATH = ['/prog/games/dante-es2/libogg/lib'] )
+#local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32/arm-linux-androideabi/lib/armv7-a', '/opt/ndk/android_4_0_gcc_32/sysroot/usr/lib' ] ) # //k TODO: Only for armeabi-v7a, comment this line when compile armeabi(v5e).
+#local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32_v5/arm-linux-androideabi/lib', '/opt/ndk/android_4_0_gcc_32/sysroot/usr/lib' ] ) # //k TODO: Only for armeabi(v5e).
 	else:
 		local_env.Append( LIBS = [ 'GL' ] )
 
@@ -360,6 +457,11 @@ source_list += sound_lib
 
 if g_os == 'Android':
 	source_list += jpeg_lib
+	source_list += libogg_lib
+#//k curl
+	if ( local_curl == 1 ):
+		source_list += curl_lib
+#source_list += libvorbis_lib
 else:
 	source_list += [ '../../openal/stubs.cpp' ]
 

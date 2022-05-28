@@ -68,8 +68,9 @@ If you have questions concerning this license or the applicable additional terms
 #define IDVEC4_OFFSET 4
 
 // Alignment tests
-#define IS_16BYTE_ALIGNED( x ) ( ( (unsigned long)&x & 0x0F ) == 0 )
-#define NOT_16BYTE_ALIGNED( x ) ( ( (unsigned long)&x & 0x0F) != 0 )
+//k 64
+#define IS_16BYTE_ALIGNED( x ) ( ( (unsigned int)&x & 0x0F ) == 0 )
+#define NOT_16BYTE_ALIGNED( x ) ( ( (unsigned int)&x & 0x0F) != 0 )
 
 // Aligned storing floats
 #define ALIGNED_STORE2( ADDR, V0, V1 )			\

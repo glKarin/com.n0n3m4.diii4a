@@ -314,15 +314,16 @@ const char 	*idSysLocal::GetCallStackCurStr(int depth)
 }
 void			idSysLocal::ShutdownSymbols(void) {}
 
-int				idSysLocal::DLL_Load(const char *dllName)
+//k 64
+uintptr_t				idSysLocal::DLL_Load(const char *dllName)
 {
 	return 0;
 }
-void 			*idSysLocal::DLL_GetProcAddress(int dllHandle, const char *procName)
+void 			*idSysLocal::DLL_GetProcAddress(uintptr_t dllHandle, const char *procName)
 {
 	return NULL;
 }
-void			idSysLocal::DLL_Unload(int dllHandle) { }
+void			idSysLocal::DLL_Unload(uintptr_t dllHandle) { }
 void			idSysLocal::DLL_GetFileName(const char *baseName, char *dllName, int maxLength) { }
 
 sysEvent_t		idSysLocal::GenerateMouseButtonEvent(int button, bool down)

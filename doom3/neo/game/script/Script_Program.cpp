@@ -37,7 +37,9 @@ idTypeDef	type_scriptevent(ev_scriptevent, &def_scriptevent, "scriptevent", size
 idTypeDef	type_namespace(ev_namespace, &def_namespace, "namespace", sizeof(intptr_t), NULL);
 idTypeDef	type_string(ev_string, &def_string, "string", MAX_STRING_LEN, NULL);
 idTypeDef	type_float(ev_float, &def_float, "float", sizeof(intptr_t), NULL);
-idTypeDef	type_vector(ev_vector, &def_vector, "vector", round_up(sizeof(idVec3), sizeof(intptr_t)), NULL);
+//k 64
+idTypeDef	type_vector(ev_vector, &def_vector, "vector", E_EVENT_SIZEOF_VEC, NULL);
+//idTypeDef	type_vector(ev_vector, &def_vector, "vector", round_up(sizeof(idVec3), sizeof(intptr_t)), NULL);
 idTypeDef	type_entity(ev_entity, &def_entity, "entity", sizeof(intptr_t), NULL);					// stored as entity number pointer
 idTypeDef	type_field(ev_field, &def_field, "field", sizeof(intptr_t), NULL);
 idTypeDef	type_function(ev_function, &def_function, "function", sizeof(intptr_t), &type_void);
@@ -961,7 +963,11 @@ idScriptObject::Save
 */
 void idScriptObject::Save(idSaveGame *savefile) const
 {
+#ifdef __ANDROID__
+	int size;
+#else
 	size_t size;
+#endif
 
 	if (type == &type_object && data == NULL) {
 		// Write empty string for uninitialized object

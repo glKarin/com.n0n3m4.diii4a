@@ -104,6 +104,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <errno.h>
 #include <math.h>
 
+//k 64
+#include <inttypes.h>
+
 #define round_up(x, y)	(((x) + ((y)-1)) & ~((y)-1))
 
 //-----------------------------------------------------
@@ -168,9 +171,29 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 
 // game
 #if defined(_D3XP)
-#include "../d3xp/Game.h"
+
+#ifdef __ANDROID__ //k: for lost mission
+	#ifdef _D3LE
+	#include "../d3le/Game.h"
+	#else
+	#include "../d3xp/Game.h"
+	#endif
 #else
-#include "../game/Game.h"
+	#include "../d3xp/Game.h"
+#endif
+
+#else
+
+#ifdef __ANDROID__ //k: for classic doom
+	#ifdef _CDOOM
+	#include "../cdoom/Game.h"
+	#else
+	#include "../game/Game.h"
+	#endif
+#else
+	#include "../game/Game.h"
+#endif
+
 #endif
 
 //-----------------------------------------------------
@@ -178,9 +201,29 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 #ifdef GAME_DLL
 
 #if defined(_D3XP)
+
+#ifdef __ANDROID__ //k: for lost mission
+	#ifdef _D3LE
+	#include "../d3le/Game_local.h"
+	#else
+	#include "../d3xp/Game_local.h"
+	#endif
+#else
 #include "../d3xp/Game_local.h"
+#endif
+
+#else
+
+#ifdef __ANDROID__ //k: for classic doom
+	#ifdef _CDOOM
+	#include "../cdoom/Game_local.h"
+	#else
+	#include "../game/Game_local.h"
+	#endif
 #else
 #include "../game/Game_local.h"
+#endif
+
 #endif
 
 #else

@@ -45,6 +45,9 @@ static const int	EXPAND_HEADERS = 1024;
 idCVar idVertexCache::r_showVertexCache("r_showVertexCache", "0", CVAR_INTEGER|CVAR_RENDERER, "");
 idCVar idVertexCache::r_vertexBufferMegs("r_vertexBufferMegs", "32", CVAR_INTEGER|CVAR_RENDERER, "");
 
+//k
+static idCVar harm_r_clearVertexBuffer("harm_r_clearVertexBuffer", "2", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Clear vertex buffer on every frame. (0 - not clear, 1 - force clear, 2 - force clear including shutdown)");
+
 idVertexCache		vertexCache;
 
 /*
@@ -85,6 +88,24 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 			glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
 			glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
 #endif
+			// k
+			int clearVBO = harm_r_clearVertexBuffer.GetInteger();
+			if(clearVBO != 0)
+			{ // clear vertex buffer on graphics memory.
+				if(block->indexBuffer)
+				{
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+					glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+				}
+				else
+				{
+					glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+					glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+				}
+				glDeleteBuffers(1, &block->vbo);
+			}
 		} else if (block->virtMem) {
 			Mem_Free(block->virtMem);
 			block->virtMem = NULL;
@@ -172,6 +193,8 @@ void idVertexCache::Init()
 		r_vertexBufferMegs.SetInteger(8);
 	}
 
+	//k
+	common->Printf("[Harmattan]: idVertexCache of this version support clear vertex buffer.\n");
 	// initialize the cache memory blocks
 	freeStaticHeaders.next = freeStaticHeaders.prev = &freeStaticHeaders;
 	staticHeaders.next = staticHeaders.prev = &staticHeaders;
@@ -222,6 +245,9 @@ idVertexCache::Shutdown
 */
 void idVertexCache::Shutdown()
 {
+	// k
+	int clearVBO = harm_r_clearVertexBuffer.GetInteger();
+	if(clearVBO == 2) PurgeAll();
 //	PurgeAll();	// !@#: also purge the temp buffers
 
 	headerAllocator.Shutdown();

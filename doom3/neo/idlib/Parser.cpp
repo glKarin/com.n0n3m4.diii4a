@@ -787,9 +787,17 @@ int idParser::ExpandBuiltinDefine(idToken *deftoken, define_t *define, idToken *
 			curtime = ctime(&t);
 			(*token) = "\"";
 			token->Append(curtime+4);
+#ifdef _K_CLANG //k
+			token[7] = "\0";
+#else
 			token[7] = '\0';
+#endif
 			token->Append(curtime+20);
+#ifdef _K_CLANG //k
+			token[10] = "\0";
+#else
 			token[10] = '\0';
+#endif
 			token->Append("\"");
 			free(curtime);
 			token->type = TT_STRING;
@@ -806,7 +814,11 @@ int idParser::ExpandBuiltinDefine(idToken *deftoken, define_t *define, idToken *
 			curtime = ctime(&t);
 			(*token) = "\"";
 			token->Append(curtime+11);
+#ifdef _K_CLANG //k
+			token[8] = "\0";
+#else
 			token[8] = '\0';
+#endif
 			token->Append("\"");
 			free(curtime);
 			token->type = TT_STRING;

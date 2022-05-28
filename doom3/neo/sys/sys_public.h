@@ -75,7 +75,8 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #define _alloca							alloca
-#define _alloca16( x )					((void *)((((intptr_t)alloca( (x)+15 )) + 15) & ~15))
+//k 64
+#define _alloca16( x )					((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
 
 #define ALIGN16( x )					x
 #define PACKED							__attribute__((packed))
@@ -286,9 +287,10 @@ const char 	*Sys_GetCallStackCurAddressStr(int depth);
 void			Sys_ShutdownSymbols(void);
 
 // DLL loading, the path should be a fully qualified OS path to the DLL file to be loaded
-intptr_t		Sys_DLL_Load(const char *dllName);
-void 			*Sys_DLL_GetProcAddress(intptr_t dllHandle, const char *procName);
-void			Sys_DLL_Unload(intptr_t dllHandle);
+//k 64
+uintptr_t		Sys_DLL_Load(const char *dllName);
+void 			*Sys_DLL_GetProcAddress(uintptr_t dllHandle, const char *procName);
+void			Sys_DLL_Unload(uintptr_t dllHandle);
 
 // event generation
 void			Sys_GenerateEvents(void);
@@ -528,9 +530,10 @@ class idSys
 		virtual const char 	*GetCallStackCurStr(int depth) = 0;
 		virtual void			ShutdownSymbols(void) = 0;
 
-		virtual intptr_t		DLL_Load(const char *dllName) = 0;
-		virtual void 			*DLL_GetProcAddress(intptr_t dllHandle, const char *procName) = 0;
-		virtual void			DLL_Unload(intptr_t dllHandle) = 0;
+//k 64
+		virtual uintptr_t		DLL_Load(const char *dllName) = 0;
+		virtual void 			*DLL_GetProcAddress(uintptr_t dllHandle, const char *procName) = 0;
+		virtual void			DLL_Unload(uintptr_t dllHandle) = 0;
 		virtual void			DLL_GetFileName(const char *baseName, char *dllName, int maxLength) = 0;
 
 		virtual sysEvent_t		GenerateMouseButtonEvent(int button, bool down) = 0;

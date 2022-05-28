@@ -54,7 +54,8 @@ class idCinematicLocal : public idCinematic
 		virtual void			ResetTime(int time);
 
 	private:
-		intptr_t			mcomp[256];
+//k 64
+		size_t			mcomp[256];
 		byte 					**qStatus[2];
 		idStr					fileName;
 		int						CIN_WIDTH, CIN_HEIGHT;
@@ -980,7 +981,7 @@ void idCinematicLocal::blitVQQuad32fs(byte **status, unsigned char *data)
 							data++;
 							break;
 						case	0x4000:										// motion compensation
-							//move4_32(status[index] + mcomp[(*data)], status[index], samplesPerLine);
+							move4_32(status[index] + mcomp[(*data)], status[index], samplesPerLine); //k uncomment
 							data++;
 							break;
 					}
@@ -990,7 +991,7 @@ void idCinematicLocal::blitVQQuad32fs(byte **status, unsigned char *data)
 
 				break;
 			case	0x4000:													// motion compensation
-				//move8_32(status[index] + mcomp[(*data)], status[index], samplesPerLine);
+				move8_32(status[index] + mcomp[(*data)], status[index], samplesPerLine); //k uncomment
 				data++;
 				index += 5;
 				break;
@@ -1850,8 +1851,13 @@ redump:
 	roq_id		 = framedata[0] + framedata[1]*256;
 	RoQFrameSize = framedata[2] + framedata[3]*256 + framedata[4]*65536;
 	roq_flags	 = framedata[6] + framedata[7]*256;
+#ifdef __ANDROID__ //k `char` is unsigned on Android
+	roqF0		 = (signed char)framedata[7];
+	roqF1		 = (signed char)framedata[6];
+#else
 	roqF0		 = (char)framedata[7];
 	roqF1		 = (char)framedata[6];
+#endif
 
 	if (RoQFrameSize>65536||roq_id==0x1084) {
 		common->DPrintf("roq_size>65536||roq_id==0x1084\n");

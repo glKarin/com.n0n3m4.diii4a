@@ -3043,7 +3043,8 @@ idWindow::EmitOp
 ================
 */
 
-int idWindow::EmitOp(int a, int b, wexpOpType_t opType, wexpOp_t **opp)
+//k 64
+intptr_t idWindow::EmitOp(intptr_t a, intptr_t b, wexpOpType_t opType, wexpOp_t **opp)
 {
 	wexpOp_t *op;
 	/*
@@ -3096,9 +3097,10 @@ int idWindow::EmitOp(int a, int b, wexpOpType_t opType, wexpOp_t **opp)
 idWindow::ParseEmitOp
 ================
 */
-int idWindow::ParseEmitOp(idParser *src, int a, wexpOpType_t opType, int priority, wexpOp_t **opp)
+//k 64
+intptr_t idWindow::ParseEmitOp(idParser *src, intptr_t a, wexpOpType_t opType, int priority, wexpOp_t **opp)
 {
-	int b = ParseExpressionPriority(src, priority);
+	intptr_t b = ParseExpressionPriority(src, priority);
 	return EmitOp(a, b, opType, opp);
 }
 
@@ -3110,7 +3112,8 @@ idWindow::ParseTerm
 Returns a register index
 =================
 */
-int idWindow::ParseTerm(idParser *src,	idWinVar *var, int component)
+//k 64
+intptr_t idWindow::ParseTerm(idParser *src,	idWinVar *var, intptr_t component)
 {
 	idToken token;
 	intptr_t	a, b;
@@ -3208,10 +3211,11 @@ Returns a register index
 =================
 */
 #define	TOP_PRIORITY 4
-int idWindow::ParseExpressionPriority(idParser *src, int priority, idWinVar *var, int component)
+//k 64
+intptr_t idWindow::ParseExpressionPriority(idParser *src, int priority, idWinVar *var, intptr_t component)
 {
 	idToken token;
-	int		a;
+	intptr_t		a;
 
 	if (priority == 0) {
 		return ParseTerm(src, var, component);
@@ -3279,7 +3283,7 @@ int idWindow::ParseExpressionPriority(idParser *src, int priority, idWinVar *var
 
 	if (priority == 4 && token == "?") {
 		wexpOp_t *oop = NULL;
-		int o = ParseEmitOp(src, a, WOP_TYPE_COND, priority, &oop);
+		intptr_t o = ParseEmitOp(src, a, WOP_TYPE_COND, priority, &oop);
 
 		if (!src->ReadToken(&token)) {
 			return o;
@@ -3308,7 +3312,8 @@ idWindow::ParseExpression
 Returns a register index
 ================
 */
-int idWindow::ParseExpression(idParser *src, idWinVar *var, int component)
+//k 64
+intptr_t idWindow::ParseExpression(idParser *src, idWinVar *var, intptr_t component)
 {
 	return ParseExpressionPriority(src, TOP_PRIORITY, var);
 }
@@ -3765,7 +3770,8 @@ void idWindow::WriteSaveGameTransition(idTransitionData &trans, idFile *savefile
 	idStr winName("");
 	dw.simp = NULL;
 	dw.win = NULL;
-	intptr_t offset = gui->GetDesktop()->GetWinVarOffset(trans.data, &dw);
+	//k 64 4bytes
+	int offset = gui->GetDesktop()->GetWinVarOffset(trans.data, &dw);
 
 	if (dw.win || dw.simp) {
 		winName = (dw.win) ? dw.win->GetName() : dw.simp->name.c_str();

@@ -622,6 +622,19 @@ int main(int argc, const char **argv)
 	}
 
 	Posix_LateInit();
+#ifdef __ANDROID__
+	common->Printf("Load "
+#ifdef __aarch64__
+	"armv8-a(64)"
+#else
+	#ifdef __ARM_NEON__
+		"armv7-a(neon)"
+	#else
+		"armv7-a(vfp)"
+	#endif
+#endif
+	" build\n");
+#endif
 }
 
 int screen_width=640;
@@ -638,20 +651,43 @@ void Q3E_OGLRestart()
 //	R_VidRestart_f();
 }
 
+#if defined(__ANDROID__)
+// For pull input event from Java when GLThread is looping in modal MessageBox of game.
+void (*pull_input_event)(int execCmd);
+// tmpfile function symbol for Android.
+FILE * (*itmpfile)(void);
+// APK's native library path on Android.
+char *native_library_dir = NULL;
+void Android_SetInteraction(void *ptr[])
+{
+	pull_input_event = ptr[0];
+	itmpfile = ptr[1];
+	if(ptr[2])
+		native_library_dir = strdup((char *)(ptr[2]));
+}
+#endif
+
 void (*initAudio)(void *buffer, int size);
-void (*writeAudio)(int offset, int length);
+int (*writeAudio)(int offset, int length);
 void (*setState)(int st);
 void Q3E_SetCallbacks(void *init_audio, void *write_audio, void *set_state)
 {
+#ifdef _K_CLANG
+    setState=(void(*)(int))set_state;
+    writeAudio = (int(*)(int, int))write_audio;
+    initAudio = (void(*)(void *, int))init_audio;
+#else
     setState=set_state;
     writeAudio = write_audio;
     initAudio = init_audio;
+#endif
 }
 
 extern int m_buffer_size;
 
 void Q3E_GetAudio()
 {
+#warning "UNUSED"
     writeAudio(0,m_buffer_size);
 }
 

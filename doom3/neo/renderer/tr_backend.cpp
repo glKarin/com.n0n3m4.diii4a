@@ -168,6 +168,10 @@ void GL_UseProgram(shaderProgram_t *program)
 		return;
 	}
 
+#ifdef _HARM_SHADER_NAME
+		common->Printf("Last shader program: %s, %p\n", backEnd.glState.currentProgram ? backEnd.glState.currentProgram->name : "NULL", backEnd.glState.currentProgram);
+		common->Printf("Current shader program: %s, %p\n", program ? program->name : "NULL", program);
+#endif
 	glUseProgram(program ? program->program : 0);
 	backEnd.glState.currentProgram = program;
 
@@ -243,6 +247,9 @@ void GL_EnableVertexAttribArray(GLuint index)
 
 	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) {
 		common->Printf("GL_EnableVertexAttribArray: unbound attribute index\n");
+#ifdef _HARM_SHADER_NAME
+		common->Printf("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
+#endif
 		__builtin_trap();
 		return;
 	}
@@ -267,6 +274,9 @@ void GL_DisableVertexAttribArray(GLuint index)
 
 	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) {
 		common->Printf("GL_DisableVertexAttribArray: unbound attribute index\n");
+#ifdef _HARM_SHADER_NAME
+		common->Printf("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
+#endif
 		__builtin_trap();
 		return;
 	}

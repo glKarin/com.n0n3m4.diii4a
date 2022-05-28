@@ -1380,7 +1380,7 @@ DRAW_GLSL
 ============================================================
 */
 
-
+//#define _HARM_SHADER_NAME
 typedef struct shaderProgram_s {
 	GLuint		program;
 
@@ -1394,6 +1394,11 @@ typedef struct shaderProgram_s {
 	GLint		modelViewProjectionMatrix;
 	GLint		modelMatrix;
 	GLint		textureMatrix;
+	// HTODO: modelView matrix
+	GLint		modelViewMatrix;
+	GLint		clipPlane;
+	GLint		fogMatrix;
+	GLint		fogColor;
 
 	GLint		windowCoords;
 	GLint		eyeOrigin;
@@ -1430,7 +1435,16 @@ typedef struct shaderProgram_s {
 	GLint		nonPowerOfTwo;
 
 	GLint		u_fragmentMap[MAX_FRAGMENT_IMAGES];
+	//HTODO: cubemap
+	GLint		u_fragmentCubeMap[MAX_FRAGMENT_IMAGES];
 	GLint		u_vertexParm[MAX_VERTEX_PARMS];
+	GLint		texgenS;
+	GLint		texgenT;
+	GLint		texgenQ;
+
+#ifdef _HARM_SHADER_NAME
+	char name[32];
+#endif
 } shaderProgram_t;
 
 
@@ -1444,6 +1458,15 @@ extern shaderProgram_t shadowShader;
 extern shaderProgram_t interactionShader;
 extern shaderProgram_t defaultShader;
 extern shaderProgram_t depthFillShader;
+//HTODO: skybox
+extern shaderProgram_t cubemapShader;
+extern shaderProgram_t reflectionCubemapShader;
+extern shaderProgram_t depthFillClipShader;
+extern shaderProgram_t fogShader;
+extern shaderProgram_t blendLightShader;
+extern shaderProgram_t interactionBlinnPhongShader;
+extern shaderProgram_t diffuseCubemapShader;
+extern shaderProgram_t texgenShader;
 
 
 /*
