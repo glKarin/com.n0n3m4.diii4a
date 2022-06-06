@@ -127,6 +127,8 @@ public final class TextHelper
 	{
         StringBuilder sb = new StringBuilder();
         final String CHANGES[] = {
+            "On Android 11+, because of `Scoped-Storage`, must grant `Allow management of all files` permission.",
+            null,
             "All special `CVAR`s are start with `harm_`.",
             null,
             "If game running crash(white screen): ",
@@ -184,6 +186,14 @@ public final class TextHelper
     {
         final ChangeLog CHANGES[] = {
         ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+            ChangeLog.Create("2022-05-19", 8,
+                    "Compile armv8-a 64 bits library.",
+                    "Set FPU neon is default on armv7-a, and do not compile old armv5e library and armv7-a vfp.",
+                    "Fix input event when modal MessageBox is visible in game.",
+                    "Add cURL support for downloading in multiplayer game.",
+                    "Add weapon on-screen button panel."
+            ),
 
             ChangeLog.Create("2022-05-05", 7, 
                              "Fix shadow clipped.",

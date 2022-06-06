@@ -1,7 +1,9 @@
 package com.harmattan.DIII4APlusPlus;
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Environment;
 import android.provider.Settings;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,6 +16,7 @@ import android.content.pm.ActivityInfo;
 import android.widget.TextView;
 import android.text.util.Linkify;
 import android.text.method.LinkMovementMethod;
+import android.widget.Toast;
 
 public final class ContextUtility
 {
@@ -173,6 +176,35 @@ public final class ContextUtility
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static int CheckFilePermission(Activity context, int resultCode)
+    {
+        String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11
+        {
+            if(Environment.isExternalStorageManager())
+                return CHECK_PERMISSION_RESULT_GRANTED;
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+            intent.setData(Uri.parse("package:" + context.getPackageName()));
+            context.startActivityForResult(intent, resultCode);
+            return CHECK_PERMISSION_RESULT_REQUEST;
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M
+        {
+            boolean granted = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+            if(granted)
+                return CHECK_PERMISSION_RESULT_GRANTED;
+            if (false && !context.shouldShowRequestPermissionRationale(permission)) // do not ask
+            {
+                ContextUtility.OpenAppSetting(context);
+                return CHECK_PERMISSION_RESULT_REJECT; // goto app detail settings activity
+            }
+            context.requestPermissions(new String[] { permission }, resultCode);
+            return CHECK_PERMISSION_RESULT_REQUEST;
+        }
+        else
+            return CHECK_PERMISSION_RESULT_GRANTED; // other think has granted
     }
     
 	private ContextUtility() {}

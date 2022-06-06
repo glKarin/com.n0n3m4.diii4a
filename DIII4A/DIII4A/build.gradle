@@ -1,16 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 32
-    buildToolsVersion '32.0.0'
+    compileSdk 30
+    buildToolsVersion '30.0.3'
     //compileOptions.encoding "gbk"
 
     defaultConfig {
         applicationId "com.n0n3m4.DIII4A"
         minSdkVersion 14
-        targetSdkVersion 32
-        versionCode 1108
-        versionName '1.1.0harmattan8'
+        targetSdkVersion 30
+        versionCode 1109
+        versionName '1.1.0harmattan9'
         versionNameSuffix 'Natasha'
     }
 
@@ -28,6 +28,17 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    signingConfigs {
+        debug {
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+        release {
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
     }
 }
 

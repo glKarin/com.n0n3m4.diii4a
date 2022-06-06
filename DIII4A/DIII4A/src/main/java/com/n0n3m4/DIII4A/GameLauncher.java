@@ -29,9 +29,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -61,6 +63,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -156,7 +160,7 @@ public class GameLauncher extends Activity{
 		}
 	};
 	
-	final String default_gamedata="/sdcard/diii4a";
+	final String default_gamedata= Environment.getExternalStorageDirectory() + "/diii4a";
 	
 	final int UI_JOYSTICK=0;
 	final int UI_SHOOT=1;
@@ -694,7 +698,7 @@ public class GameLauncher extends Activity{
         */
         
         //k check external storage permission
-        int res = ContextUtility.CheckPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE);
+        int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
             Toast.makeText(this, "Can't start game!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
@@ -820,7 +824,7 @@ public class GameLauncher extends Activity{
     
     private void EditFile(String file)
     {
-        int res = ContextUtility.CheckPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE);
+        int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
             Toast.makeText(this, "Can't access file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
@@ -937,47 +941,13 @@ public class GameLauncher extends Activity{
                 list.add(permissions[i]);
             }
         }
-        if(list == null || list.isEmpty())
-            return;
-            
-        String opt = null;
-        switch(requestCode)
-        {
-            case CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE:
-                opt = "Start game";
-                break;
-            case CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE:
-                opt = "Edit config file";
-                break;
-            case CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE:
-                opt = "Choose game folder";
-                break;
-            default:
-                opt = "Operation";
-                break;
-        }
-        StringBuilder sb = new StringBuilder();
-        String endl = TextHelper.GetDialogMessageEndl();
-        for(String str : list)
-        {
-            if(str != null)
-                sb.append("  * " + str);
-            sb.append(endl);
-        }
-        AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, opt + " request necessary permissions", TextHelper.GetDialogMessage(sb.toString()));
-        builder.setNeutralButton("Grant", new AlertDialog.OnClickListener() {          
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    ContextUtility.OpenAppSetting(GameLauncher.this);
-                    dialog.dismiss();
-                }
-            });
-        builder.create().show();
+
+		HandleGrantPermissionResult(requestCode, list);
 	}
     
     private void OpenFolderChooser()
     {
-        int res = ContextUtility.CheckPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE);
+        int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
             Toast.makeText(this, "Can't choose folder!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
@@ -1219,6 +1189,61 @@ public class GameLauncher extends Activity{
     {
         return m_cmdUpdateLock;
     }
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11 FS permission
+		{
+			if(requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE
+			|| requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE
+			|| requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE)
+			if (!Environment.isExternalStorageManager()) // reject
+			{
+				List<String> list = Collections.singletonList(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+				HandleGrantPermissionResult(requestCode, list);
+			}
+		}
+	}
+
+	private void HandleGrantPermissionResult(int requestCode, List<String> list)
+	{
+		if(null == list || list.isEmpty())
+			return;
+		String opt = null;
+		switch(requestCode)
+		{
+			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE:
+				opt = "Start game";
+				break;
+			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE:
+				opt = "Edit config file";
+				break;
+			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE:
+				opt = "Choose game folder";
+				break;
+			default:
+				opt = "Operation";
+				break;
+		}
+		StringBuilder sb = new StringBuilder();
+		String endl = TextHelper.GetDialogMessageEndl();
+		for(String str : list)
+		{
+			if(str != null)
+				sb.append("  * " + str);
+			sb.append(endl);
+		}
+		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, opt + " request necessary permissions", TextHelper.GetDialogMessage(sb.toString()));
+		builder.setNeutralButton("Grant", new AlertDialog.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				ContextUtility.OpenAppSetting(GameLauncher.this);
+				dialog.dismiss();
+			}
+		});
+		builder.create().show();
+	}
 
 	private class ViewHolder
 	{

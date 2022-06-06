@@ -1,7 +1,21 @@
 DIII4A++ (Harmattan)
 com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
-Latest version: 1.1.0harmattan8(Natasha)
-Last update release: 2022-05-19
+Latest version: 1.1.0harmattan9(Natasha)
+Last update release: 2022-06-15
+arm64 armv7-a
+Android 4.0+
+
+----------------------------------------------------------------------------------
+
+2022-06-15 Update 1.1.0harmattan9
+
+Update:
+    * Fix file access permission grant on Android 10/11+.
+    * Add Android 4.x apk package v1 sign.
+
+更新:
+    * 修复Android 10/11+文件访问授权.
+    * 添加Android4.x的apk包签名.
 
 ----------------------------------------------------------------------------------
 
