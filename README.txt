@@ -1,20 +1,37 @@
-DIII4A++ (Harmattan)
+DIII4A++ (Harmattan Edition)
 com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
-Latest version: 1.1.0harmattan9(Natasha)
-Last update release: 2022-06-15
+Latest version: 1.1.0harmattan10(Natasha)
+Last update release: 2022-06-23
 arm64 armv7-a
 Android 4.0+
+
+----------------------------------------------------------------------------------
+
+2022-06-23 Update 1.1.0harmattan10
+
+Update:
+    * Add `Rivensin` mod library support, game path name is `rivensin`, more view in `https://www.moddb.com/mods/ruiner`.
+    * The `Rivensin` game library support load DOOM3 base game map. But first must add include original DOOM3 all map script into `doom_main.script` of `Rivensin` mod file.
+    * Add weapon panel keys configure.
+    * Fix file access permission grant on Android 10(Sorry for I have not Android 10/11+ device to testing).
+
+更新:
+    * 编译`Rivensin`Mod游戏库支持, 游戏包路径为`rivensin`, Mod信息`https://www.moddb.com/mods/ruiner`.
+    * 此`Rivensin`库支持加载DOOM3源基础游戏地图关卡. 但是需要添加原基础游戏的地图脚本到`Rivensin`Mod的资源文件中的`doom_main.script`.
+    * 新增武器切换面板按键配置.
+    * 新增武器切换面板按键配置.
+    * 修复Android 10文件访问授权(由于没有设备, Android 10/11+仅模拟器测试, 实机请自测).
 
 ----------------------------------------------------------------------------------
 
 2022-06-15 Update 1.1.0harmattan9
 
 Update:
-    * Fix file access permission grant on Android 10/11+.
+    * Fix file access permission grant on Android 11+.
     * Add Android 4.x apk package v1 sign.
 
 更新:
-    * 修复Android 10/11+文件访问授权.
+    * 修复Android 11+文件访问授权.
     * 添加Android 4.x的apk包签名.
 
 ----------------------------------------------------------------------------------

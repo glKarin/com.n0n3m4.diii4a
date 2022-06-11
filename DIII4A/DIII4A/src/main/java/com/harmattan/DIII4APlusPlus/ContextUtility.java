@@ -190,7 +190,7 @@ public final class ContextUtility
             context.startActivityForResult(intent, resultCode);
             return CHECK_PERMISSION_RESULT_REQUEST;
         }
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M - Q
         {
             boolean granted = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
             if(granted)

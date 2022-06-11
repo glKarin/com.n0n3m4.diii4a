@@ -18,19 +18,28 @@
         android:text="Note: Gamepads/Keyboards must be configured in-game (like on PC), not here" />
 
     <Button
-        android:id="@+id/start_btn"
+        android:id="@+id/configure_onscreen_controls_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="controls"
+		android:textAllCaps="false"
         android:text="Configure on-screen controls" />
     
     <Button
-        android:id="@+id/start_btn"
+        android:id="@+id/reset_onscreen_controls_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="resetcontrols"
         android:textColor="#EF0000"
+		android:textAllCaps="false"
         android:text="Reset on-screen controls" />
+
+    <Button
+        android:id="@+id/configure_weapon_panel_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+		android:textAllCaps="false"
+        android:text="Configure weapon panel" />
     
     <CheckBox
         android:id="@+id/smoothjoy"

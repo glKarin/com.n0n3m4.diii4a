@@ -29,6 +29,7 @@ scons \
 	TARGET_D3XP=1 \
 	TARGET_CDOOM=1 \
 	TARGET_D3LE=1 \
+	TARGET_RIVENSIN=1 \
 	BASEFLAGS="-march=armv8-a -fno-builtin-sin -fno-builtin-cos -fno-builtin-sinf -fno-builtin-cosf -fexceptions -frtti ${DEFINES}" \
 	LIB_PATH="${LIB_PATH}" \
 	#$*

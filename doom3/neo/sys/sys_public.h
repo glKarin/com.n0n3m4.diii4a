@@ -47,6 +47,14 @@ If you have questions concerning this license or the applicable additional terms
 #define	BUILD_STRING				"android-x86"
 #define BUILD_OS_ID					2
 #define CPUSTRING					"x86"
+#elif defined(__x86_64__)
+#define	BUILD_STRING				"android-x86_64"
+#define BUILD_OS_ID					2
+#define CPUSTRING					"x86_64"
+#elif defined(__aarch64__)
+#define	BUILD_STRING				"android-arm64"
+#define CPUSTRING					"arm64"
+#define BUILD_OS_ID					2
 #elif defined(__arm__)
 #define	BUILD_STRING				"android-arm"
 #define CPUSTRING					"arm"

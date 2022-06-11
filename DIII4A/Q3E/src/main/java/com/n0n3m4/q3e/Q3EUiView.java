@@ -379,7 +379,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
         if (fn.target instanceof Disc)
         {
             final Disc tmp=(Disc)fn.target;         
-            final Disc newj=new Disc(tmp.view, uildr.gl, tmp.cx, tmp.cy, tmp.size/2,tmp.alpha);
+            final Disc newj=new Disc(tmp.view, uildr.gl, tmp.cx, tmp.cy, tmp.size/2,tmp.alpha, null);
             fn.target=newj;
             Disc.Move(newj, tmp);
             touch_elements.set(touch_elements.indexOf(tmp),newj);

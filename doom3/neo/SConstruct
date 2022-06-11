@@ -17,6 +17,7 @@ serialized=['CC', 'CXX', 'JOBS', 'BUILD', 'IDNET_HOST', 'DEDICATED',
 	'TARGET_CORE', 'TARGET_GAME', 'TARGET_D3XP', 'TARGET_MONO', 'TARGET_DEMO', 'NOCURL',
 	'TARGET_CDOOM',
 	'TARGET_D3LE',
+	'TARGET_RIVENSIN',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS', 'SILENT', 'TARGET_OPENGL',
 	'TARGET_ANDROID', 'NDK',
 	'LIB_PATH'
@@ -64,6 +65,9 @@ TARGET_CDOOM (default 0)
 
 TARGET_D3LE (default 0)
 	Build the lost mission game code
+
+TARGET_RIVENSIN (default 0)
+	Build rivensin game code
 
 BUILD_GAMEPAK (default 0)
 	Build a game pak
@@ -170,6 +174,7 @@ TARGET_GAME = '1'
 TARGET_D3XP = '1'
 TARGET_CDOOM = '0'
 TARGET_D3LE = '0'
+TARGET_RIVENSIN = '0'
 TARGET_MONO = '0'
 TARGET_DEMO = '0'
 TARGET_OPENGL = '0'
@@ -260,8 +265,6 @@ CORECPPFLAGS = [ ]
 GAMECPPFLAGS = [ ]
 BASELINKFLAGS = [ '-Wl,--no-undefined' ]
 CORELINKFLAGS = [ '-Wl,--no-undefined' ]
-#//k BASELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
-#//k CORELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
 
 # for release build, further optimisations that may not work on all files
 OPTCPPFLAGS = [ ]
@@ -286,7 +289,7 @@ if ( g_os == 'Linux' ):
 	BASECPPFLAGS.append( '-fvisibility=hidden' )
 # //k
 	# BASECPPFLAGS.append('-D_K_CLANG')
-	BASECPPFLAGS.append('-D__arm__')
+	#BASECPPFLAGS.append('-D__arm__')
 # //k
 
 if ( TARGET_ANDROID == '1' ):
@@ -382,10 +385,11 @@ local_idlibpic = 0
 local_d3xp = 0
 local_cdoom = 0
 local_d3le = 0
+local_rivensin = 0
 # OpenGL
 local_opengl = 0
 
-GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp local_cdoom local_d3le local_opengl OPTCPPFLAGS NDK'
+GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp local_cdoom local_d3le local_rivensin local_opengl OPTCPPFLAGS NDK'
 
 # end general configuration ----------------------
 
@@ -429,6 +433,7 @@ if ( TARGET_CORE == '1' ):
 		doom = SConscript( g_build + '/core/sys/scons/SConscript.core' )
 
 		InstallAs( '#doom.' + cpu, doom )
+		InstallAs( g_build + '/package/libdante.so', doom )
 		
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1
@@ -441,7 +446,7 @@ if ( TARGET_CORE == '1' ):
 
 		InstallAs( '#doomded.' + cpu, doomded )
 
-if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D3LE == '1' ):
+if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D3LE == '1' or TARGET_RIVENSIN == '1' ):
 	local_gamedll = 1
 	local_demo = 0
 	local_dedicated = 0
@@ -453,44 +458,65 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		local_d3xp = 0
 		local_cdoom = 0
 		local_d3le = 0
+		local_rivensin = 0
 		Export( 'GLOBALS ' + GLOBALS )
 		game = SConscript( g_build + '/game/sys/scons/SConscript.game' )
 		game_base = InstallAs( '#game%s-base.so' % cpu, game )
 		if ( BUILD_GAMEPAK == '1' ):
 			Command( '#game01-base.pk4', [ game_base, game ], Action( g_env.BuildGamePak ) )
+		InstallAs( g_build + '/package/libgame.so', game )
 	if ( TARGET_D3XP == '1' ):
 		# uses idlib as compiled for game/
 		local_d3xp = 1
 		local_cdoom = 0
 		local_d3le = 0
+		local_rivensin = 0
 		VariantDir( g_build + '/d3xp', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		d3xp = SConscript( g_build + '/d3xp/sys/scons/SConscript.game' )
 		game_d3xp = InstallAs( '#game%s-d3xp.so' % cpu, d3xp )
 		if ( BUILD_GAMEPAK == '1' ):
 			Command( '#game01-d3xp.pk4', [ game_d3xp, d3xp ], Action( g_env.BuildGamePak ) )
+		InstallAs( g_build + '/package/libd3xp.so', d3xp )
 	if ( TARGET_CDOOM == '1' ):
 		# uses idlib as compiled for game/
 		local_cdoom = 1
 		local_d3xp = 0
 		local_d3le = 0
+		local_rivensin = 0
 		VariantDir( g_build + '/cdoom', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		cdoom = SConscript( g_build + '/cdoom/sys/scons/SConscript.game' )
 		game_cdoom = InstallAs( '#game%s-cdoom.so' % cpu, cdoom )
 		if ( BUILD_GAMEPAK == '1' ):
 			Command( '#game01-cdoom.pk4', [ game_cdoom, cdoom ], Action( g_env.BuildGamePak ) )
+		InstallAs( g_build + '/package/libcdoom.so', cdoom )
 	if ( TARGET_D3LE == '1' ):
 		# uses idlib as compiled for game/
 		local_cdoom = 0
 		local_d3xp = 0
 		local_d3le = 1
+		local_rivensin = 0
 		VariantDir( g_build + '/d3le', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		d3le = SConscript( g_build + '/d3le/sys/scons/SConscript.game' )
 		game_d3le = InstallAs( '#game%s-d3le.so' % cpu, d3le )
 		if ( BUILD_GAMEPAK == '1' ):
 			Command( '#game01-d3le.pk4', [ game_d3le, d3le ], Action( g_env.BuildGamePak ) )
+		InstallAs( g_build + '/package/libd3le.so', d3le )
+	if ( TARGET_RIVENSIN == '1' ):
+		# uses idlib as compiled for game/
+		local_cdoom = 0
+		local_d3xp = 0
+		local_d3le = 0
+		local_rivensin = 1
+		VariantDir( g_build + '/rivensin', '.', duplicate = 0 )
+		Export( 'GLOBALS ' + GLOBALS )
+		rivensin = SConscript( g_build + '/rivensin/sys/scons/SConscript.game' )
+		game_rivensin = InstallAs( '#game%s-rivensin.so' % cpu, rivensin )
+		if ( BUILD_GAMEPAK == '1' ):
+			Command( '#game01-rivensin.pk4', [ game_rivensin, rivensin ], Action( g_env.BuildGamePak ) )
+		InstallAs( g_build + '/package/librivensin.so', rivensin )
 	
 	
 if ( TARGET_MONO == '1' ):
@@ -502,6 +528,7 @@ if ( TARGET_MONO == '1' ):
 	local_d3xp = 0
 	local_cdoom = 0
 	local_d3le = 0
+	local_rivensin = 0
 	Export( 'GLOBALS ' + GLOBALS )
 	VariantDir( g_build + '/mono', '.', duplicate = 0 )
 	idlib_objects = SConscript( g_build + '/mono/sys/scons/SConscript.idlib' )
@@ -520,6 +547,7 @@ if ( TARGET_DEMO == '1' ):
 	local_d3xp = 0
 	local_cdoom = 0
 	local_d3le = 0
+	local_rivensin = 0
 	Export( 'GLOBALS ' + GLOBALS )
 	VariantDir( g_build + '/demo', '.', duplicate = 0 )
 	idlib_objects = SConscript( g_build + '/demo/sys/scons/SConscript.idlib' )

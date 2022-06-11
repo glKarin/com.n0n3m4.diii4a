@@ -13,6 +13,26 @@ public final class TextHelper
 		return USING_HTML ? "<br>" : "\n";
 	}
 
+	public static String FormatDialogMessageSpace(String space)
+	{
+		return USING_HTML ? space.replaceAll(" ", "&nbsp;") : space;
+	}
+
+	public static String FormatDialogMessageHeaderSpace(String space)
+	{
+		if(!USING_HTML)
+			return space;
+		int i = 0;
+		for(; i < space.length(); i++)
+		{
+			if(space.charAt(i) != ' ')
+				break;
+		}
+		if(i == 0)
+			return space;
+		return FormatDialogMessageSpace(space.substring(0, i)) + space.substring(i);
+	}
+
     public static CharSequence GetDialogMessage(String text)
     {
         return USING_HTML ? Html.fromHtml(text) : text;      
@@ -48,14 +68,14 @@ public final class TextHelper
         public String GenString(String endl)
         {
             StringBuilder sb = new StringBuilder();
-            sb.append("----- ").append(date).append(" (R").append(release).append(") -----");
+            sb.append("------- ").append(date).append(" (R").append(release).append(") -------");
             sb.append(endl);
             if(logs != null && !logs.isEmpty())
             {
                 for(String str : logs)
                 {
                     if(str != null)
-                        sb.append("  * " + str);
+                        sb.append(FormatDialogMessageSpace("  * ") + str);
                     sb.append(endl);
                 }
             }
@@ -99,7 +119,7 @@ public final class TextHelper
 	public static CharSequence GetUpdateText(Context context)
 	{
         StringBuilder sb = new StringBuilder();
-        final String CHANGES[] = {
+        final String INFOS[] = {
             Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")",
             Constants.CONST_NAME,
             "Update: " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
@@ -108,16 +128,16 @@ public final class TextHelper
             "Changes: ",
         };
         String endl = GetDialogMessageEndl();
-        for(String str : CHANGES)
+        for(String str : INFOS)
         {
             if(str != null)
-                sb.append("  * " + str);
+                sb.append(str);
             sb.append(endl);
         }
         for(String str : Constants.CONST_CHANGES)
         {
             if(str != null)
-                sb.append("  * " + str);
+                sb.append(FormatDialogMessageSpace("  * ") + str);
             sb.append(endl);
         }
 		return GetDialogMessage(sb.toString());
@@ -134,7 +154,7 @@ public final class TextHelper
             "If game running crash(white screen): ",
             " 1. Make sure to allow `WRITE_EXTERNAL_STORAGE` permission.",
             " 2. Make sure `Game working directory` is right.",
-            " 3. Uncheck 4th checkbox named `Use ETC1(or RGBA4444) cache` or clear ETC1 texture cache file manual on resource folder(exam: /sdcard/diii4a/(base/d3xp/d3le/cdoom/or...)/dds).",
+            " 3. Uncheck 4th checkbox named `Use ETC1(or RGBA4444) cache` or clear ETC1 texture cache file manual on resource folder(exam: /sdcard/diii4a/(base/d3xp/d3le/cdoom/rivensin/or...)/dds).",
             null,
             "If game is crash with flash-screen when playing a period of time: ",
             " 1. Out of graphics memory: `Clear vertex buffer` suggest to select 3rd or 2nd for clear vertex buffer every frame! If you select 1st, it will be same as original apk(ver 1.1.0 at 2013). It should work well on `Adreno` GPU of `Snapdragon`. More view in game, on DOOM3 console, cvar named `harm_r_clearVertexBuffer`.",
@@ -143,12 +163,54 @@ public final class TextHelper
             " 1. Input folder name of game mod to editor that under `User special` checkbox.",
             " 2. Check `User special` checkbox. `Commandline` will show `+set fs_game (the game mod)`.",
             " 3. If may want to choose game library, click `GameLib` and choose a game library. `Commandline` will show `+set harm_fs_gameLibPath (selected library path)`.",
+			null,
+			"The `Rivensin` game library support load DOOM3 base game map. But first must add include original DOOM3 all map script into `doom_main.script` of `Rivensin` mod file.",
+			" 1. Edit `doom_main.script` in pak archive file(in `script/` folder) or external folder of file system.",
+			" 2. Add include all map's script to `doom_main.script`.",
+			"  2-1. Find text line `// map specific character scripts`",
+			"  2-2. Put these code below the commented line(These code can found in `script/doom_main.script` of DOOM3 base game pak archive): ",
+			"    #include \"script/map_admin1.script\"",
+			"    #include \"script/map_alphalabs1.script\"",
+			"    #include \"script/map_alphalabs2.script\"",
+			"    #include \"script/map_alphalabs3.script\"",
+			"    #include \"script/map_alphalabs4.script\"",
+			"    #include \"script/map_caves.script\"",
+			"    #include \"script/map_caves2.script\"",
+			"    #include \"script/map_comm1.script\"",
+			"    #include \"script/map_commoutside_lift.script\"",
+			"    #include \"script/map_commoutside.script\"",
+			"    #include \"script/map_cpu.script\"",
+			"    #include \"script/map_cpuboss.script\"",
+			"    #include \"script/map_delta1.script\"",
+			"    #include \"script/map_delta2a.script\"",
+			"    #include \"script/map_delta2b.script\"",
+			"    #include \"script/map_delta3.script\"",
+			"    #include \"script/map_delta5.script\"",
+			"    #include \"script/map_enpro.script\"",
+			"    #include \"script/map_hell1.script\"",
+			"    #include \"script/map_hellhole.script\"",
+			"    #include \"script/map_recycling1.script\"",
+			"    #include \"script/map_recycling2.script\"",
+			"    #include \"script/map_site3.script\"",
+			"    #include \"script/map_marscity1.script\"",
+			"    #include \"script/map_marscity2.script\"",
+			"    #include \"script/map_mc_underground.script\"",
+			"    #include \"script/map_monorail.script\"",
+			"  3-3. Choose `Rivensin` mod and start game in game launcher.",
+			"  3-4. Open console, and then using `map game/xxx` to load DOOM3 base game map.",
+			"  *. Some problems: ",
+			"    1. After end game level and change next map, the player view can change to First-person, need input `pm_thirdPerson 1` on console to change back Third-person player view.",
         };
         String endl = GetDialogMessageEndl();
         for(String str : CHANGES)
         {
             if(str != null)
-                sb.append("  * " + str);
+			{
+				if(str.startsWith(" "))
+					sb.append(FormatDialogMessageHeaderSpace(str));
+				else
+					sb.append("* " + str);
+			}
             sb.append(endl);
         }
 		return GetDialogMessage(sb.toString());
@@ -176,7 +238,7 @@ public final class TextHelper
         for(String str : CHANGES)
         {
             if(str != null)
-                sb.append("  * " + str);
+                sb.append(/*"  * " + */str);
             sb.append(endl);
         }
 		return GetDialogMessage(sb.toString());
@@ -187,13 +249,17 @@ public final class TextHelper
         final ChangeLog CHANGES[] = {
         ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
-            ChangeLog.Create("2022-05-19", 8,
-                    "Compile armv8-a 64 bits library.",
-                    "Set FPU neon is default on armv7-a, and do not compile old armv5e library and armv7-a vfp.",
-                    "Fix input event when modal MessageBox is visible in game.",
-                    "Add cURL support for downloading in multiplayer game.",
-                    "Add weapon on-screen button panel."
-            ),
+                ChangeLog.Create("2022-06-15", 9,
+						"Fix file access permission grant on Android 11+."
+                ),
+
+                ChangeLog.Create("2022-05-19", 8,
+                        "Compile armv8-a 64 bits library.",
+                        "Set FPU neon is default on armv7-a, and do not compile old armv5e library and armv7-a vfp.",
+                        "Fix input event when modal MessageBox is visible in game.",
+                        "Add cURL support for downloading in multiplayer game.",
+                        "Add weapon on-screen button panel."
+                ),
 
             ChangeLog.Create("2022-05-05", 7, 
                              "Fix shadow clipped.",

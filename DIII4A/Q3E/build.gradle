@@ -15,7 +15,7 @@ android {
         }
         externalNativeBuild {
             ndk {
-                abiFilters "armeabi-v7a", "arm64-v8a" /* "armeabi", "x86", "x86_64"*/
+                abiFilters "armeabi-v7a", "arm64-v8a" /*, "armeabi", "x86", "x86_64"*/
             }
         }
         versionCode 1

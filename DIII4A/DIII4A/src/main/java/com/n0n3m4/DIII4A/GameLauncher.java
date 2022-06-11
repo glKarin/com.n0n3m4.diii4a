@@ -77,6 +77,9 @@ import com.harmattan.DIII4APlusPlus.Constants;
 import com.harmattan.DIII4APlusPlus.DebugDialog;
 import com.harmattan.DIII4APlusPlus.LauncherSettingsDialog;
 import com.harmattan.DIII4APlusPlus.ConfigEditorActivity;
+import android.widget.ListView;
+import android.util.SparseBooleanArray;
+import android.widget.Adapter;
 
 public class GameLauncher extends Activity{		
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE = 1;
@@ -153,6 +156,9 @@ public class GameLauncher extends Activity{
 					break;
 				case R.id.launcher_tab1_game_data_chooser_button:
 					OpenFolderChooser();
+					break;
+				case R.id.configure_weapon_panel_btn:
+					OpenWeaponPanelKeysSetting();
 					break;
 				default:
 					break;
@@ -271,7 +277,7 @@ public class GameLauncher extends Activity{
 		for (int i=UI_SAVE+1;i<UI_SIZE;i++)
 		q3ei.type_table[i]=Q3EUtils.TYPE_BUTTON;		
         
-        q3ei.type_table[UI_WEAPON_PANEL] = 99;
+        q3ei.type_table[UI_WEAPON_PANEL] = Q3EUtils.TYPE_DISC;
 		
 		q3ei.arg_table[UI_SHOOT*4]=Q3EKeyCodes.KeyCodes.K_MOUSE1;
 		q3ei.arg_table[UI_SHOOT*4+1]=0;
@@ -545,10 +551,12 @@ public class GameLauncher extends Activity{
                 index = 2;
             else if("d3le".equals(str))
                 index = 3;
-            else
+            else if("rivensin".equals(str))
                 index = 4;
+            else
+                index = 5;
         }
-        if(index == 4)
+        if(index == 5)
         {
             EditText edit = V.edt_fs_game;
             String cur = edit.getText().toString();
@@ -638,8 +646,10 @@ public class GameLauncher extends Activity{
                 index = 2;
             else if("d3le".equals(game))
                 index = 3;
-            else
+            else if("rivensin".equals(game))
                 index = 4;
+            else
+                index = 5;
             SelectCheckbox(V.rg_fs_game, index);
         }
         V.launcher_tab1_game_lib_button.setEnabled(V.rg_fs_game.getCheckedRadioButtonId() == R.id.fs_game_user);
@@ -665,6 +675,7 @@ public class GameLauncher extends Activity{
 		V.res_x.setText(mPrefs.getString(Q3EUtils.pref_resx, "640"));
 		V.res_y.setText(mPrefs.getString(Q3EUtils.pref_resy, "480"));
         V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
+        V.configure_weapon_panel_btn.setOnClickListener(m_buttonClickListener);
 		
 		//DIII4A-specific					
 		V.edt_cmdline.addTextChangedListener(new TextWatcher() {			
@@ -1160,6 +1171,12 @@ public class GameLauncher extends Activity{
 				V.launcher_tab1_game_lib_button.setEnabled(false);
 				RemoveProp("harm_fs_gameLibPath");
 				break;
+			case R.id.fs_game_rivensin:
+				SetProp("fs_game", "rivensin");
+				RemoveProp("fs_game_base");
+				V.launcher_tab1_game_lib_button.setEnabled(false);
+				RemoveProp("harm_fs_gameLibPath");
+				break;
 			case R.id.fs_game_user:
 				SetProp("fs_game", V.edt_fs_game.getText().toString());
 				//RemoveProp("fs_game_base");
@@ -1245,6 +1262,65 @@ public class GameLauncher extends Activity{
 		builder.create().show();
 	}
 
+	private void OpenWeaponPanelKeysSetting()
+	{
+		final String[] Keys = {
+			"1", "2", "3", "4", "5", "6", "7", "8", "9", "q", "0",
+		};
+		final StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < Keys.length; i++)
+		{
+			sb.append(Keys[i]);
+			if(i < Keys.length - 1)
+				sb.append(",");
+		}
+		final boolean[] states = new boolean[Keys.length];
+
+		final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String curKeys = mPrefs.getString(Constants.PreferenceKey.WEAPON_PANEL_KEYS, sb.toString());
+		if(null != curKeys && !curKeys.isEmpty())
+		{
+			List<String> keyList = Arrays.asList(curKeys.split(","));
+			for(int i = 0; i < Keys.length; i++)
+			{
+				states[i] = keyList.contains(Keys[i]);
+			}
+		}
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Weapon panel keys");
+		builder.setMultiChoiceItems(Keys, states, null);
+		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id)
+            {
+                final ListView lst = ((AlertDialog)dialog).getListView();
+				SparseBooleanArray list = lst.getCheckedItemPositions();
+				String keyStr = "";
+				if(list.size() > 0)
+				{
+					Adapter adapter = lst.getAdapter();
+					StringBuilder tsb = new StringBuilder();
+					for(int i = 0; i < list.size(); i++)
+					{
+                        int key = list.keyAt(i);
+						if(!list.get(key))
+                            continue;
+                        tsb.append(adapter.getItem(key));
+				        tsb.append(",");
+					}
+                    int len = tsb.length();
+                    if(len > 0 && tsb.lastIndexOf(",") == len - 1)
+                        tsb.deleteCharAt(len - 1);
+					keyStr = tsb.toString();
+				}
+				mPrefs.edit().putString(Constants.PreferenceKey.WEAPON_PANEL_KEYS, keyStr).commit();
+            }
+        });
+		builder.setNegativeButton("Cancel", null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
 	private class ViewHolder
 	{
 		public EditText edt_cmdline;
@@ -1277,6 +1353,7 @@ public class GameLauncher extends Activity{
 		public RadioGroup rg_curpos;
 		public EditText edt_harm_r_specularExponent;
 		public RadioGroup rg_harm_r_lightModel;
+		public Button configure_weapon_panel_btn;
 
 		public void Setup()
 		{
@@ -1310,6 +1387,7 @@ public class GameLauncher extends Activity{
 			rg_curpos = (RadioGroup)findViewById(R.id.rg_curpos);
 			edt_harm_r_specularExponent = (EditText)findViewById(R.id.edt_harm_r_specularExponent);
 		    rg_harm_r_lightModel = (RadioGroup)findViewById(R.id.rg_harm_r_lightModel);
+			configure_weapon_panel_btn = (Button)findViewById(R.id.configure_weapon_panel_btn);
 		}
 	}
 }

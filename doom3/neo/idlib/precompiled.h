@@ -187,6 +187,8 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 #ifdef __ANDROID__ //k: for classic doom
 	#ifdef _CDOOM
 	#include "../cdoom/Game.h"
+	#elif defined _RIVENSIN
+	#include "../game/Game.h"
 	#else
 	#include "../game/Game.h"
 	#endif
@@ -217,6 +219,8 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 #ifdef __ANDROID__ //k: for classic doom
 	#ifdef _CDOOM
 	#include "../cdoom/Game_local.h"
+	#elif defined _RIVENSIN
+	#include "../rivensin/Game_local.h"
 	#else
 	#include "../game/Game_local.h"
 	#endif

@@ -82,6 +82,12 @@ class idBitMsg
 		void			WriteShort(int c);
 		void			WriteUShort(int c);
 		void			WriteLong(int c);
+#ifdef _RIVENSIN
+		void			WriteInt(int c);
+		int				ReadInt(void) const;
+		void			WriteDeltaInt(int oldValue, int newValue);
+		int				ReadDeltaInt(int oldValue) const;
+#endif
 		void			WriteFloat(float f);
 		void			WriteFloat(float f, int exponentBits, int mantissaBits);
 		void			WriteAngle8(float f);
@@ -516,6 +522,12 @@ class idBitMsgDelta
 		void			WriteShort(int c);
 		void			WriteUShort(int c);
 		void			WriteLong(int c);
+#ifdef _RIVENSIN
+		void			WriteInt(int c);
+		int				ReadInt(void) const;
+		void			WriteDeltaInt(int oldValue, int newValue);
+		int				ReadDeltaInt(int oldValue) const;
+#endif
 		void			WriteFloat(float f);
 		void			WriteFloat(float f, int exponentBits, int mantissaBits);
 		void			WriteAngle8(float f);
@@ -773,5 +785,48 @@ ID_INLINE float idBitMsgDelta::ReadDeltaFloat(float oldValue, int exponentBits, 
 	int newBits = ReadDelta(oldBits, 1 + exponentBits + mantissaBits);
 	return idMath::BitsToFloat(newBits, exponentBits, mantissaBits);
 }
+
+#ifdef _RIVENSIN
+ID_INLINE void idBitMsg::WriteInt(int c)
+{
+	WriteBits(c, 32);
+}
+
+ID_INLINE int idBitMsg::ReadInt(void) const
+{
+	return ReadBits(32);
+}
+
+ID_INLINE void idBitMsg::WriteDeltaInt(int oldValue, int newValue)
+{
+	WriteDelta(oldValue, newValue, 32);
+}
+
+ID_INLINE int idBitMsg::ReadDeltaInt(int oldValue) const
+{
+	return ReadDelta(oldValue, 32);
+}
+
+ID_INLINE void idBitMsgDelta::WriteInt(int c)
+{
+	WriteBits(c, 32);
+}
+
+ID_INLINE int idBitMsgDelta::ReadInt(void) const
+{
+	return ReadBits(32);
+}
+
+ID_INLINE void idBitMsgDelta::WriteDeltaInt(int oldValue, int newValue)
+{
+	WriteDelta(oldValue, newValue, 32);
+}
+
+ID_INLINE int idBitMsgDelta::ReadDeltaInt(int oldValue) const
+{
+	return ReadDelta(oldValue, 32);
+}
+
+#endif
 
 #endif /* !__BITMSG_H__ */

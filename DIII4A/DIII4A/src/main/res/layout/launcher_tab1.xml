@@ -59,6 +59,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:id="@+id/launcher_tab1_game_data_chooser_button"
+					android:textAllCaps="false"
 					android:text="Chooser">
 
 				</Button>
@@ -112,7 +113,7 @@
 					android:layout_marginLeft="32dp"
 					android:layout_marginTop="0dp"
 					android:layout_marginBottom="0dp"
-					android:textSize="12dp"
+					android:textSize="12sp"
 					android:text="It is default original. Graphics maybe and out of memory lead to crash with flash-screen."
 					android:textAppearance="?android:attr/textAppearanceSmall"/>
 
@@ -127,7 +128,7 @@
                     android:layout_marginLeft="32dp"
 					android:layout_marginTop="0dp"
 					android:layout_marginBottom="0dp"
-                    android:textSize="12dp"
+                    android:textSize="12sp"
                     android:text="If graphics out of memory and crash, suggest to force clear vertex buffer."
 					android:textAppearance="?android:attr/textAppearanceSmall"/>
 
@@ -143,7 +144,7 @@
                     android:layout_marginLeft="32dp"
 					android:layout_marginTop="0dp"
 					android:layout_marginBottom="0dp"
-                    android:textSize="12dp"
+                    android:textSize="12sp"
                     android:text="Also like 2nd."
 					android:textAppearance="?android:attr/textAppearanceSmall"/>
 
@@ -188,6 +189,12 @@
 					android:text="DOOM3-BFG:The Lost Mission(d3le)"/>
 
 				<RadioButton
+					android:id="@+id/fs_game_rivensin"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Rivensin(rivensin)"/>
+
+				<RadioButton
 					android:id="@+id/fs_game_user"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -216,6 +223,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:id="@+id/launcher_tab1_game_lib_button"
+					android:textAllCaps="false"
 					android:text="GameLib">
 
 				</Button>
@@ -283,6 +291,7 @@
 					android:layout_width="0dp"
 					android:layout_height="wrap_content"
 					android:layout_weight="0.5"
+					android:textAllCaps="false"
 					android:text="Edit autoexec.cfg"/>
 
 				<Button
@@ -290,6 +299,7 @@
 					android:layout_width="0dp"
 					android:layout_height="wrap_content"
 					android:layout_weight="0.5"
+					android:textAllCaps="false"
 					android:text="Edit DoomConfig.cfg"/>
 
 			</LinearLayout>

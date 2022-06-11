@@ -59,6 +59,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.graphics.RectF;
+import java.util.List;
 
 public class Q3EUtils {
 	
@@ -278,6 +279,7 @@ public class Q3EUtils {
 	public static final int TYPE_BUTTON=0;
 	public static final int TYPE_SLIDER=1;
 	public static final int TYPE_JOYSTICK=2;	
+	public static final int TYPE_DISC=99;	
 	
 	
 	public static final String pref_datapath="q3e_datapath";
@@ -396,8 +398,21 @@ public class Q3EUtils {
 			return new Joystick(ctx,gl,cx,cy,size,(float)alpha/100);
 		case TYPE_SLIDER:
                 return new Slider(ctx, gl, cx, cy, size, sh, q3ei.texture_table[id], q3ei.arg_table[id*4], q3ei.arg_table[id*4+1], q3ei.arg_table[id*4+2], q3ei.arg_table[id*4+3], (float)alpha/100);	
-            case 99:
-                return new Disc(ctx,gl,cx,cy,size,(float)alpha/100);
+            case TYPE_DISC:
+            {
+                String keysStr = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getString("harm_weapon_panel_keys", "1,2,3,4,5,6,7,8,9,q,0");
+                char[] keys = null;
+                if(null != keysStr && !keysStr.isEmpty())
+                {
+                    String[] arr = keysStr.split(",");
+                    keys = new char[arr.length];
+                    for(int i = 0; i < arr.length; i++)
+                    {
+                        keys[i] = arr[i].charAt(0);
+                    }
+                }
+                return new Disc(ctx,gl,cx,cy,size,(float)alpha/100, keys);
+            }
 		}						
 		return null;
 	}
@@ -1023,6 +1038,7 @@ public class Q3EUtils {
         int cx, cy;
         int tex_ind;
         private int m_circleWidth;
+        private char[] m_keys;
 
         int dotx,doty;
         boolean dotjoyenabled=false;
@@ -1121,6 +1137,8 @@ public class Q3EUtils {
             //main paint        
             super.Paint(gl);
             DrawVerts(gl,tex_ind,6,tex_p,verts_p,inds_p,0,0,red,green,blue,alpha);
+            if(null == m_parts || m_parts.length == 0)
+                return;
         
             if(dotjoyenabled)
             {
@@ -1135,7 +1153,7 @@ public class Q3EUtils {
             }
         }
 
-        public Disc(View vw,GL10 gl,int center_x,int center_y,int r,float a)
+        public Disc(View vw,GL10 gl,int center_x,int center_y,int r,float a, char[] keys)
         {           
             view=vw;
             cx=center_x;
@@ -1173,6 +1191,8 @@ public class Q3EUtils {
             m_fanVertexArray=ByteBuffer.allocateDirect(4*verts_back.length).order(ByteOrder.nativeOrder()).asFloatBuffer();          
             m_fanVertexArray.put(tmp2);
             m_fanVertexArray.position(0);
+            
+            m_keys = keys;
         }
 
         @Override
@@ -1192,16 +1212,20 @@ public class Q3EUtils {
             tex_ind=loadGLTexture(gl, bmp);
             bmp.recycle();
 
-            final char[] Keys = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', '0'};
-            m_parts = new Part[Keys.length];
-            for(int i = 0; i < Keys.length; i++)
+            if(null != m_keys && m_keys.length > 0)
             {
-                m_parts[i] = GenPart(i, Keys[i], Keys.length, gl);
+                m_parts = new Part[m_keys.length];
+                for(int i = 0; i < m_keys.length; i++)
+                {
+                    m_parts[i] = GenPart(i, m_keys[i], m_keys.length, gl);
+                }
             }
         } 
 
         @Override
         public void onTouchEvent(int x, int y, int act/* 1: Down, -1: Up */) { 
+            if(null == m_parts || m_parts.length == 0)
+                return;
             dotjoyenabled=true;
             dotx=x-cx;
             doty=y-cy;
@@ -1287,10 +1311,10 @@ public class Q3EUtils {
         private static float rad2deg(double rad)
         {
             double deg = rad / Math.PI * 180.0;
-            return formatAngle((float)deg);
+            return FormatAngle((float)deg);
         }
         
-        private static float formatAngle(float deg)
+        private static float FormatAngle(float deg)
         {
             while(deg > 360)
                 deg -= 360;

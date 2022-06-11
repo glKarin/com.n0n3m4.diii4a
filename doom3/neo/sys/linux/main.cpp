@@ -622,19 +622,6 @@ int main(int argc, const char **argv)
 	}
 
 	Posix_LateInit();
-#ifdef __ANDROID__
-	common->Printf("Load "
-#ifdef __aarch64__
-	"armv8-a(64)"
-#else
-	#ifdef __ARM_NEON__
-		"armv7-a(neon)"
-	#else
-		"armv7-a(vfp)"
-	#endif
-#endif
-	" build\n");
-#endif
 }
 
 int screen_width=640;
