@@ -1,5 +1,5 @@
-##DIII4A++ (Harmattan Edition)
-####com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
+## DIII4A++ (Harmattan Edition)
+#### com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
 **Latest version:**
 1.1.0harmattan11(Natasha)  
 **Last update release:**
@@ -10,7 +10,7 @@ arm64 armv7-a
 Android 4.0+
 
 ----------------------------------------------------------------------------------
-###Update
+### Update
 > 1.1.0harmattan11 (2022-06-30)
  * Add `Hardcorps` mod library support, game path name is `hardcorps`, if play the mod, first suggest to close `Smooth joystick` in `Controls` tab panel, more view in `https://www.moddb.com/mods/hardcorps`.
  * In `Rivensin` mod, add bool Cvar `harm_pm_doubleJump` to enable double-jump(From `hardcorps` mod source code, default disabled).
@@ -20,10 +20,11 @@ Android 4.0+
  * Add menu `Cvar list` in `Other` menu for list all new special `Cvar`.
 
 ----------------------------------------------------------------------------------
-###Screenshot
+### Screenshot
 > Game
 
-![Classic bathroom](https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_bathroom.png "Classic bathroom")
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_bathroom.png"alt="Classic bathroom">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_bathroom_jill_stars.png"alt="Classic bathroom in Rivensin mod">
 
 > Mod
 
@@ -32,7 +33,7 @@ Android 4.0+
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_hardcorps.png" width="50%" alt="Hardcorps">
 
 ----------------------------------------------------------------------------------
-###Changes
+### Changes
 
 ----------------------------------------------------------------------------------
 > 2022-06-23 Update 1.1.0harmattan10
@@ -208,7 +209,7 @@ About:
 	
 ----------------------------------------------------------------------------------
 
-###Directory(目录):
+### Directory:
 
 > * /DIII4A: DOOM3 frontend source(DOOM3前端启动器源码)
 > * /doom3: DOOM3 source(DOOM3源码)
@@ -222,7 +223,7 @@ About:
 Original old n0n3m4 version source in `n0n3m4_original_old_version` branch.
 
 ----------------------------------------------------------------------------------
-###Extras download:
+### Extras download:
 
 * [Google: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb](https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb)
 * [Baidu网盘: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w](https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w) 提取码: `pyyj`
