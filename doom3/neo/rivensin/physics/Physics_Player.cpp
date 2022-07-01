@@ -67,6 +67,13 @@ const int PMF_ALL_TIMES			= (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK
 
 int c_pmove = 0;
 
+//k double-jump
+#ifdef __ANDROID__
+const int DOUBLE_JUMP_MIN_DELAY		= 500;	// ms
+
+static idCVar	harm_pm_doubleJump("harm_pm_doubleJump", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Enable double-jump.");
+#endif
+
 /*
 ============
 idPhysics_Player::CmdScale
@@ -618,6 +625,16 @@ void idPhysics_Player::AirMove( void ) {
 	float		wishspeed;
 	float		scale;
 
+//k double-jump
+#ifdef __ANDROID__
+	if( 
+			harm_pm_doubleJump.GetBool() && 
+			//doubleJumpEnabled && 
+			!doubleJumpDone ){ //only one double jump and only if no wallJump has been done.
+		CheckDoubleJump();
+	}
+#endif
+	
 	idPhysics_Player::Friction();
 
 	scale = idPhysics_Player::CmdScale( command );
@@ -1212,6 +1229,13 @@ bool idPhysics_Player::CheckJump( void ) {
 	addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
 	current.velocity += addVelocity;
 
+//k double-jump
+#ifdef __ANDROID__
+	//reset double jump so that we can do it again
+	nextDoubleJump = gameLocal.time + DOUBLE_JUMP_MIN_DELAY;
+	doubleJumpDone = false;
+#endif
+
 	return true;
 }
 
@@ -1254,6 +1278,12 @@ bool idPhysics_Player::CheckWaterJump( void ) {
 	current.velocity = 200.0f * viewForward - 350.0f * gravityNormal;
 	current.movementFlags |= PMF_TIME_WATERJUMP;
 	current.movementTime = 2000;
+
+//k double-jump
+#ifdef __ANDROID__
+	nextDoubleJump = gameLocal.time + DOUBLE_JUMP_MIN_DELAY;
+	doubleJumpDone = false;
+#endif
 
 	return true;
 }
@@ -1616,6 +1646,13 @@ idPhysics_Player::idPhysics_Player( void ) {
 	delta.Zero(); //ivan
 	//animMoveGravityMultiplier = 1.0f; //ivan
 	//animMoveUseGravity = true; //ivan
+	
+//k double-jump
+#ifdef __ANDROID__
+	doubleJumpDone = false;
+	doubleJumpEnabled = true;
+	nextDoubleJump = 0;
+#endif
 }
 
 /*
@@ -2327,3 +2364,60 @@ void idPhysics_Player::SetGravityInAnimMove( float mult ) {
 Ivan end
 ****************************************************************************************
 */
+
+//ivan start
+
+//k double-jump
+#ifdef __ANDROID__
+/*
+=============
+idPhysics_Player::CheckDoubleJump
+=============
+*/
+bool idPhysics_Player::CheckDoubleJump( void ) {
+	idVec3 addVelocity;
+
+	if( nextDoubleJump > gameLocal.time ){
+		// not enough time passed by
+		return false;
+	}
+	/*
+	else if( gameLocal.time > nextDoubleJump + DOUBLE_JUMP_MIN_DELAY ){
+		//too much time passed by
+		return false;
+	}
+	*/
+
+	if ( command.upmove < 10 ) {
+		// not holding jump
+		return false;
+	}
+
+	// must wait for jump to be released
+	if ( current.movementFlags & PMF_JUMP_HELD ) {
+		return false;
+	}
+
+	// don't jump if we can't stand up
+	if ( current.movementFlags & PMF_DUCKED ) {
+		return false;
+	}
+
+	//common settings
+	groundPlane = false;		// jumping away
+	walking = false;
+	current.movementFlags |= PMF_JUMP_HELD | PMF_JUMPED;
+
+	//apply velocity
+	addVelocity = 1.5f * maxJumpHeight * -gravityVector; 
+	addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
+	current.velocity.z = addVelocity.z; 
+
+	//gameLocal.Printf("double jump\n");
+	doubleJumpDone = true;
+	return true;
+}
+#endif
+
+//ivan end
+

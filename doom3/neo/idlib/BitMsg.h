@@ -82,7 +82,7 @@ class idBitMsg
 		void			WriteShort(int c);
 		void			WriteUShort(int c);
 		void			WriteLong(int c);
-#ifdef _RIVENSIN
+#if (defined(_RIVENSIN) || defined(_HARDCORPS))
 		void			WriteInt(int c);
 		int				ReadInt(void) const;
 		void			WriteDeltaInt(int oldValue, int newValue);
@@ -522,7 +522,7 @@ class idBitMsgDelta
 		void			WriteShort(int c);
 		void			WriteUShort(int c);
 		void			WriteLong(int c);
-#ifdef _RIVENSIN
+#if (defined(_RIVENSIN) || defined(_HARDCORPS))
 		void			WriteInt(int c);
 		int				ReadInt(void) const;
 		void			WriteDeltaInt(int oldValue, int newValue);
@@ -786,7 +786,7 @@ ID_INLINE float idBitMsgDelta::ReadDeltaFloat(float oldValue, int exponentBits, 
 	return idMath::BitsToFloat(newBits, exponentBits, mantissaBits);
 }
 
-#ifdef _RIVENSIN
+#if (defined(_RIVENSIN) || defined(_HARDCORPS))
 ID_INLINE void idBitMsg::WriteInt(int c)
 {
 	WriteBits(c, 32);

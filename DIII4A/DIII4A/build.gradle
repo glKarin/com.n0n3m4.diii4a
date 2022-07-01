@@ -9,8 +9,8 @@ android {
         applicationId "com.n0n3m4.DIII4A"
         minSdkVersion 14
         targetSdkVersion 30
-        versionCode 11010
-        versionName '1.1.0harmattan10'
+        versionCode 11011
+        versionName '1.1.0harmattan11'
         versionNameSuffix 'Natasha'
     }
 

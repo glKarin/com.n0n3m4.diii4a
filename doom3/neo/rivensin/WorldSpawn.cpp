@@ -49,6 +49,9 @@ END_CLASS
 idWorldspawn::Spawn
 ================
 */
+#ifdef __ANDROID__ //k
+static idCVar	harm_pm_autoForceThirdPerson("harm_pm_autoForceThirdPerson", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Force set third person view after game level load end.");
+#endif
 void idWorldspawn::Spawn( void ) {
 	idStr				scriptname;
 	idThread			*thread;
@@ -91,6 +94,14 @@ void idWorldspawn::Spawn( void ) {
 		thread->DelayedStart( 0 );
 		kv = spawnArgs.MatchPrefix( "call", kv );
 	}
+
+#ifdef __ANDROID__ //k
+	if(harm_pm_autoForceThirdPerson.GetBool())
+	{
+		gameLocal.Printf( "[Harmattan]: Force set third person view.\n" );
+		cvarSystem->SetCVarBool( "pm_thirdPerson", true );
+	}
+#endif
 }
 
 /*

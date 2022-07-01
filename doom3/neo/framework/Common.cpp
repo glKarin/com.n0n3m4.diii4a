@@ -2841,6 +2841,7 @@ static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libd3le" ".so`, "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libcdoom" ".so`, "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "librivensin" ".so`, "
+		"`" _ANDROID_NATIVE_LIBRARY_DIR "libhardcorps" ".so`, "
 		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
 static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library directory path(default is empty, means using `" _ANDROID_NATIVE_LIBRARY_DIR "`).");
 void idCommonLocal::LoadGameDLL(void)
@@ -2929,6 +2930,14 @@ void idCommonLocal::LoadGameDLL(void)
 				common->Printf("[Harmattan]: Load Rivensin game......\n");
 				idStr dllFile(dir);
 				dllFile.AppendPath("librivensin.so");
+				gameDLL = sys->DLL_Load(dllFile);
+				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+			}
+			else if(!fsgame.Icmp("hardcorps")) // load hardcorps game so.
+			{
+				common->Printf("[Harmattan]: Load Hardcorps game......\n");
+				idStr dllFile(dir);
+				dllFile.AppendPath("libhardcorps.so");
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}

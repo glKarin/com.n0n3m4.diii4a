@@ -1186,7 +1186,7 @@ void idPlayerView::dnPostProcessManager::UpdateInteractionShader()
 #ifdef __ANDROID__
 	if(!r_HDR_postProcess.GetBool())
 	{
-		gameLocal.Printf("UpdateInteractionShader: r_HDR_postProcess already set false, uncheck r_HDR_enable state no longer.\n");
+		gameLocal.Printf("[Harmattan]: UpdateInteractionShader: r_HDR_postProcess already set false, uncheck r_HDR_enable state no longer.\n");
 		return;
 	}
 #endif

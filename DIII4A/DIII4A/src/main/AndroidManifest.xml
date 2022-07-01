@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.n0n3m4.DIII4A"
-    android:versionCode="11010"
-    android:versionName="1.1.0harmattan10"
+    android:versionCode="11011"
+    android:versionName="1.1.0harmattan11"
     android:installLocation="preferExternal"
     >
 
@@ -56,9 +56,15 @@
         <activity android:label="@string/config_editor_name"
             android:launchMode="singleTask"
             android:exported="true"
-            android:name="com.harmattan.DIII4APlusPlus.ConfigEditorActivity"
+            android:name="com.harmattan.DIII4Amm.ConfigEditorActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
-        </activity> 
+        </activity>
+        <activity android:label="@string/key_config_page_name"
+            android:launchMode="singleTask"
+            android:name="com.harmattan.DIII4Amm.OnScreenButtonConfigActivity"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+        </activity>
     </application>    
 </manifest> 

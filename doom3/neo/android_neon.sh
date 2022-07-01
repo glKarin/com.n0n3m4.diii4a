@@ -30,6 +30,7 @@ scons \
 	TARGET_CDOOM=1 \
 	TARGET_D3LE=1 \
 	TARGET_RIVENSIN=1 \
+	TARGET_HARDCORPS=1 \
 	BASEFLAGS="-march=armv7-a -fno-builtin-sin -fno-builtin-cos -fno-builtin-sinf -fno-builtin-cosf -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp -fexceptions -frtti ${DEFINES}" \
 	LIB_PATH="${LIB_PATH}" \
 	#$*

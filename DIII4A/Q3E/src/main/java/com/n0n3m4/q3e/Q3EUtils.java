@@ -62,6 +62,16 @@ import android.graphics.RectF;
 import java.util.List;
 
 public class Q3EUtils {
+	public static final int ONSCREEN_BUTTON_STYPE_FULL = 0;
+	public static final int ONSCREEN_BUTTON_STYPE_RIGHT_BOTTOM = 1;
+	public static final int ONSCREEN_BUTTON_STYPE_CENTER = 2;
+	public static final int ONSCREEN_BUTTON_STYPE_LEFT_TOP = 3;
+
+	public static final int ONSCRREN_BUTTON_NOT_HOLD = 0;
+	public static final int ONSCRREN_BUTTON_CAN_HOLD = 1;
+
+	public static final int ONSCRREN_SLIDER_STYLE_LEFT_RIGHT = 0;
+	public static final int ONSCRREN_SLIDER_STYLE_DOWN_RIGHT = 1;
 	
 	public static Q3EInterface q3ei;
 	public static boolean isOuya=false;
@@ -279,7 +289,7 @@ public class Q3EUtils {
 	public static final int TYPE_BUTTON=0;
 	public static final int TYPE_SLIDER=1;
 	public static final int TYPE_JOYSTICK=2;	
-	public static final int TYPE_DISC=99;	
+	public static final int TYPE_DISC=3;	
 	
 	
 	public static final String pref_datapath="q3e_datapath";
@@ -606,7 +616,8 @@ public class Q3EUtils {
 				}
 				}
 				
-				if (style==1)
+                //k
+				else if (style==1)
 				{
 				if ((y-starty>SLIDE_DIST) || (x-startx>SLIDE_DIST))
 				{

@@ -189,6 +189,8 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 	#include "../cdoom/Game.h"
 	#elif defined _RIVENSIN
 	#include "../game/Game.h"
+	#elif defined _HARDCORPS
+	#include "../game/Game.h"
 	#else
 	#include "../game/Game.h"
 	#endif
@@ -221,6 +223,8 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 	#include "../cdoom/Game_local.h"
 	#elif defined _RIVENSIN
 	#include "../rivensin/Game_local.h"
+	#elif defined _HARDCORPS
+	#include "../hardcorps/Game_local.h"
 	#else
 	#include "../game/Game_local.h"
 	#endif

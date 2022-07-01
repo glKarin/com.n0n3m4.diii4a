@@ -194,6 +194,12 @@
 					android:layout_height="wrap_content"
 					android:text="Rivensin(rivensin)"/>
 
+                <RadioButton
+                    android:id="@+id/fs_game_hardcorps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+					android:text="Hardcorps(hardcorps)"/>
+
 				<RadioButton
 					android:id="@+id/fs_game_user"
 					android:layout_width="wrap_content"

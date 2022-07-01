@@ -19,7 +19,6 @@
 
 package com.n0n3m4.DIII4A;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -52,7 +51,7 @@ import android.widget.RadioGroup;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.harmattan.DIII4APlusPlus.ContextUtility;
+import com.harmattan.DIII4Amm.ContextUtility;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3EKeyCodes;
@@ -63,23 +62,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import android.widget.RadioButton;
-import com.harmattan.DIII4APlusPlus.TextHelper;
-import com.harmattan.DIII4APlusPlus.UncaughtExceptionHandler;
-import com.harmattan.DIII4APlusPlus.FileUtility;
-import com.harmattan.DIII4APlusPlus.FileBrowserDialog;
-import com.harmattan.DIII4APlusPlus.Constants;
-import com.harmattan.DIII4APlusPlus.DebugDialog;
-import com.harmattan.DIII4APlusPlus.LauncherSettingsDialog;
-import com.harmattan.DIII4APlusPlus.ConfigEditorActivity;
-import android.widget.ListView;
-import android.util.SparseBooleanArray;
-import android.widget.Adapter;
+import com.harmattan.DIII4Amm.TextHelper;
+import com.harmattan.DIII4Amm.UncaughtExceptionHandler;
+import com.harmattan.DIII4Amm.FileUtility;
+import com.harmattan.DIII4Amm.FileBrowserDialog;
+import com.harmattan.DIII4Amm.Constants;
+import com.harmattan.DIII4Amm.DebugDialog;
+import com.harmattan.DIII4Amm.LauncherSettingsDialog;
+import com.harmattan.DIII4Amm.ConfigEditorActivity;
+import com.harmattan.DIII4Amm.OnScreenButtonConfigActivity;
+import java.util.Set;
 
 public class GameLauncher extends Activity{		
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE = 1;
@@ -157,8 +154,8 @@ public class GameLauncher extends Activity{
 				case R.id.launcher_tab1_game_data_chooser_button:
 					OpenFolderChooser();
 					break;
-				case R.id.configure_weapon_panel_btn:
-					OpenWeaponPanelKeysSetting();
+				case R.id.onscreen_button_setting:
+					OpenOnScreenButtonSetting();
 					break;
 				default:
 					break;
@@ -168,24 +165,24 @@ public class GameLauncher extends Activity{
 	
 	final String default_gamedata= Environment.getExternalStorageDirectory() + "/diii4a";
 	
-	final int UI_JOYSTICK=0;
-	final int UI_SHOOT=1;
-	final int UI_JUMP=2;
-	final int UI_CROUCH=3;
-	final int UI_RELOADBAR=4;	
-	final int UI_PDA=5;
-	final int UI_FLASHLIGHT=6;
-	final int UI_SAVE=7;
-	final int UI_1=8;
-	final int UI_2=9;
-	final int UI_3=10;	
-	final int UI_KBD=11;
-    final int UI_CONSOLE = 12;
-    final int UI_4 = 13;
-    final int UI_5 = 14;
-    final int UI_6 = 15;
-    final int UI_WEAPON_PANEL = 16;
-	final int UI_SIZE=UI_WEAPON_PANEL+1;
+	public static final int UI_JOYSTICK=0;
+	public static final int UI_SHOOT=1;
+	public static final int UI_JUMP=2;
+	public static final int UI_CROUCH=3;
+	public static final int UI_RELOADBAR=4;	
+	public static final int UI_PDA=5;
+	public static final int UI_FLASHLIGHT=6;
+	public static final int UI_SAVE=7;
+	public static final int UI_1=8;
+	public static final int UI_2=9;
+	public static final int UI_3=10;	
+	public static final int UI_KBD=11;
+    public static final int UI_CONSOLE = 12;
+    public static final int UI_RUN = 13;
+    public static final int UI_ZOOM = 14;
+    public static final int UI_INTERACT = 15;
+    public static final int UI_WEAPON_PANEL = 16;
+	public static final int UI_SIZE=UI_WEAPON_PANEL+1;
 	
 	public void getgl2progs(String destname) {
         try {            
@@ -274,8 +271,14 @@ public class GameLauncher extends Activity{
 		q3ei.type_table[UI_PDA]=Q3EUtils.TYPE_BUTTON;
 		q3ei.type_table[UI_FLASHLIGHT]=Q3EUtils.TYPE_BUTTON;
 		q3ei.type_table[UI_SAVE]=Q3EUtils.TYPE_SLIDER;
-		for (int i=UI_SAVE+1;i<UI_SIZE;i++)
-		q3ei.type_table[i]=Q3EUtils.TYPE_BUTTON;		
+		q3ei.type_table[UI_1]=Q3EUtils.TYPE_BUTTON;
+		q3ei.type_table[UI_2]=Q3EUtils.TYPE_BUTTON;
+		q3ei.type_table[UI_3]=Q3EUtils.TYPE_BUTTON;
+		q3ei.type_table[UI_KBD]=Q3EUtils.TYPE_BUTTON;
+		q3ei.type_table[UI_CONSOLE]=Q3EUtils.TYPE_BUTTON;
+		q3ei.type_table[UI_RUN]=Q3EUtils.TYPE_BUTTON;
+		q3ei.type_table[UI_ZOOM]=Q3EUtils.TYPE_BUTTON;
+		q3ei.type_table[UI_INTERACT]=Q3EUtils.TYPE_BUTTON;
         
         q3ei.type_table[UI_WEAPON_PANEL] = Q3EUtils.TYPE_DISC;
 		
@@ -290,14 +293,14 @@ public class GameLauncher extends Activity{
 		q3ei.arg_table[UI_JUMP*4+2]=0;
 		q3ei.arg_table[UI_JUMP*4+3]=0;
 		
-		q3ei.arg_table[UI_CROUCH*4]=Q3EKeyCodes.KeyCodesD3BFG.K_C;
+		q3ei.arg_table[UI_CROUCH*4]=Q3EKeyCodes.KeyCodesD3.K_C; // BFG
 		q3ei.arg_table[UI_CROUCH*4+1]=1;
 		q3ei.arg_table[UI_CROUCH*4+2]=1;
 		q3ei.arg_table[UI_CROUCH*4+3]=0;
 		
-		q3ei.arg_table[UI_RELOADBAR*4]=93;
-		q3ei.arg_table[UI_RELOADBAR*4+1]=114;
-		q3ei.arg_table[UI_RELOADBAR*4+2]=91;
+		q3ei.arg_table[UI_RELOADBAR*4]=Q3EKeyCodes.KeyCodesD3.K_BRACKET_RIGHT; // 93
+		q3ei.arg_table[UI_RELOADBAR*4+1]=Q3EKeyCodes.KeyCodesD3.K_R; // 114
+		q3ei.arg_table[UI_RELOADBAR*4+2]=Q3EKeyCodes.KeyCodesD3.K_BRACKET_LEFT; // 91
 		q3ei.arg_table[UI_RELOADBAR*4+3]=0;
 		
 		q3ei.arg_table[UI_PDA*4]=Q3EKeyCodes.KeyCodes.K_TAB;
@@ -305,7 +308,7 @@ public class GameLauncher extends Activity{
 		q3ei.arg_table[UI_PDA*4+2]=0;
 		q3ei.arg_table[UI_PDA*4+3]=0;
 		
-		q3ei.arg_table[UI_FLASHLIGHT*4]=Q3EKeyCodes.KeyCodesD3BFG.K_F;
+		q3ei.arg_table[UI_FLASHLIGHT*4]=Q3EKeyCodes.KeyCodesD3.K_F; // BFG
 		q3ei.arg_table[UI_FLASHLIGHT*4+1]=0;
 		q3ei.arg_table[UI_FLASHLIGHT*4+2]=0;
 		q3ei.arg_table[UI_FLASHLIGHT*4+3]=0;
@@ -340,14 +343,20 @@ public class GameLauncher extends Activity{
         q3ei.arg_table[UI_CONSOLE*4+2]=0;
 		q3ei.arg_table[UI_CONSOLE*4+3]=0;
 
-        final int start = UI_4;
-        for(int i = start; i <= UI_6; i++)
-        {
-            q3ei.arg_table[i*4]=Q3EKeyCodes.KeyCodesD3BFG.K_4 + (i - start);
-            q3ei.arg_table[i*4+1]=0;
-            q3ei.arg_table[i*4+2]=0;
-            q3ei.arg_table[i*4+3]=0;   
-        }
+        q3ei.arg_table[UI_RUN*4]=Q3EKeyCodes.KeyCodesD3.K_SHIFT;
+        q3ei.arg_table[UI_RUN*4+1]=1;
+        q3ei.arg_table[UI_RUN*4+2]=0;
+		q3ei.arg_table[UI_RUN*4+3]=0;
+
+        q3ei.arg_table[UI_ZOOM*4]=Q3EKeyCodes.KeyCodesD3.K_Z;
+        q3ei.arg_table[UI_ZOOM*4+1]=1;
+        q3ei.arg_table[UI_ZOOM*4+2]=0;
+		q3ei.arg_table[UI_ZOOM*4+3]=0;
+
+        q3ei.arg_table[UI_INTERACT*4]=Q3EKeyCodes.KeyCodesD3.K_MOUSE2;
+        q3ei.arg_table[UI_INTERACT*4+1]=0;
+        q3ei.arg_table[UI_INTERACT*4+2]=0;
+		q3ei.arg_table[UI_INTERACT*4+3]=0;
 		
 		q3ei.default_path=default_gamedata;		
         
@@ -367,11 +376,40 @@ public class GameLauncher extends Activity{
 		q3ei.texture_table[UI_3]="btn_3.png";
 		q3ei.texture_table[UI_KBD]="btn_keyboard.png";
 		q3ei.texture_table[UI_CONSOLE]="btn_notepad.png";
-		q3ei.texture_table[UI_4]="btn_activate.png";
-		q3ei.texture_table[UI_5]="btn_binocular.png";
-		q3ei.texture_table[UI_6]="btn_kick.png";
+		q3ei.texture_table[UI_INTERACT]="btn_activate.png";
+		q3ei.texture_table[UI_ZOOM]="btn_binocular.png";
+		q3ei.texture_table[UI_RUN]="btn_kick.png";
 
 		q3ei.texture_table[UI_WEAPON_PANEL]="";
+        
+        Constants.DumpDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
+
+        // index:type;23,1,2,0|...... 
+        try
+        {
+            Set<String> configs = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(Constants.PreferenceKey.ONSCREEN_BUTTON, null);
+            if(null != configs && !configs.isEmpty())
+            {
+                for(String str : configs)
+                {
+                    String[] subArr = str.split(":", 2);
+                    int index = Integer.parseInt(subArr[0]);
+                    subArr = subArr[1].split(";");
+                    q3ei.type_table[index] = Integer.parseInt(subArr[0]);
+                    String[] argArr = subArr[1].split(",");
+                    q3ei.arg_table[index * 4] = Integer.parseInt(argArr[0]);
+                    q3ei.arg_table[index * 4 + 1] = Integer.parseInt(argArr[1]);
+                    q3ei.arg_table[index * 4 + 2] = Integer.parseInt(argArr[2]);
+                    q3ei.arg_table[index * 4 + 3] = Integer.parseInt(argArr[3]);
+                }
+            }        
+        }
+        catch(Exception e)
+        {
+            //UncaughtExceptionHandler.DumpException(this, Thread.currentThread(), e);
+            e.printStackTrace();
+            Constants.RestoreDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
+        }
 		
 		Q3EUtils.q3ei=q3ei;
 	}
@@ -553,10 +591,12 @@ public class GameLauncher extends Activity{
                 index = 3;
             else if("rivensin".equals(str))
                 index = 4;
-            else
+            else if("hardcorps".equals(str))
                 index = 5;
+            else
+                index = 6;
         }
-        if(index == 5)
+        if(index == 6)
         {
             EditText edit = V.edt_fs_game;
             String cur = edit.getText().toString();
@@ -586,9 +626,9 @@ public class GameLauncher extends Activity{
 		
 		TabHost th=(TabHost)findViewById(R.id.tabhost);
 		th.setup();					
-	    th.addTab(th.newTabSpec("tab1").setIndicator("General").setContent(R.id.launcher_tab1));	    
-	    th.addTab(th.newTabSpec("tab2").setIndicator("Controls").setContent(R.id.launcher_tab2));	    
-	    th.addTab(th.newTabSpec("tab3").setIndicator("Graphics").setContent(R.id.launcher_tab3));							
+	    th.addTab(th.newTabSpec("tab1").setIndicator("General").setContent(R.id.launcher_tab1));
+	    th.addTab(th.newTabSpec("tab2").setIndicator("Controls").setContent(R.id.launcher_tab2));
+	    th.addTab(th.newTabSpec("tab3").setIndicator("Graphics").setContent(R.id.launcher_tab3));
 
 		V.Setup();
 		
@@ -648,8 +688,10 @@ public class GameLauncher extends Activity{
                 index = 3;
             else if("rivensin".equals(game))
                 index = 4;
-            else
+            else if("hardscorps".equals(game))
                 index = 5;
+            else
+                index = 6;
             SelectCheckbox(V.rg_fs_game, index);
         }
         V.launcher_tab1_game_lib_button.setEnabled(V.rg_fs_game.getCheckedRadioButtonId() == R.id.fs_game_user);
@@ -675,7 +717,7 @@ public class GameLauncher extends Activity{
 		V.res_x.setText(mPrefs.getString(Q3EUtils.pref_resx, "640"));
 		V.res_y.setText(mPrefs.getString(Q3EUtils.pref_resy, "480"));
         V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
-        V.configure_weapon_panel_btn.setOnClickListener(m_buttonClickListener);
+        V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
 		
 		//DIII4A-specific					
 		V.edt_cmdline.addTextChangedListener(new TextWatcher() {			
@@ -897,7 +939,10 @@ public class GameLauncher extends Activity{
                 return true;
         case R.id.main_menu_runtime_log:
             OpenRuntimeLog();
-            return true;
+                return true;
+            case R.id.main_menu_cvar_list:
+                OpenCvarListDetail();
+                return true;
             
         case R.id.main_menu_debug:
             OpenDebugDialog();
@@ -966,7 +1011,7 @@ public class GameLauncher extends Activity{
 
         String defaultPath = Environment.getExternalStorageDirectory().getAbsolutePath(); //System.getProperty("user.home");
         String gamePath = V.edt_path.getText().toString();
-        if(gamePath == null || gamePath.isEmpty())
+        if(null == gamePath || gamePath.isEmpty())
             gamePath = defaultPath;
         File f = new File(gamePath);
         if(!f.exists())
@@ -1081,7 +1126,7 @@ public class GameLauncher extends Activity{
     private void OpenGameLibChooser()
     {
         final String libPath = ContextUtility.NativeLibDir(this) + "/";
-        final String items[] = new String[Constants.LIBS.length];
+        final String[] items = new String[Constants.LIBS.length];
         String lib = PreferenceManager.getDefaultSharedPreferences(this).getString(Q3EUtils.pref_harm_game_lib, "");
         int selected = 0;
         for(int i = 0; i < Constants.LIBS.length; i++)
@@ -1177,6 +1222,12 @@ public class GameLauncher extends Activity{
 				V.launcher_tab1_game_lib_button.setEnabled(false);
 				RemoveProp("harm_fs_gameLibPath");
 				break;
+            case R.id.fs_game_hardcorps:
+                SetProp("fs_game", "hardcorps");
+                RemoveProp("fs_game_base");
+                V.launcher_tab1_game_lib_button.setEnabled(false);
+                RemoveProp("harm_fs_gameLibPath");
+				break;
 			case R.id.fs_game_user:
 				SetProp("fs_game", V.edt_fs_game.getText().toString());
 				//RemoveProp("fs_game_base");
@@ -1227,7 +1278,7 @@ public class GameLauncher extends Activity{
 	{
 		if(null == list || list.isEmpty())
 			return;
-		String opt = null;
+		String opt;
 		switch(requestCode)
 		{
 			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE:
@@ -1261,65 +1312,17 @@ public class GameLauncher extends Activity{
 		});
 		builder.create().show();
 	}
+    
+    private void OpenOnScreenButtonSetting()
+    {
+        Intent intent = new Intent(this, OnScreenButtonConfigActivity.class);
+        startActivity(intent);
+    }
 
-	private void OpenWeaponPanelKeysSetting()
-	{
-		final String[] Keys = {
-			"1", "2", "3", "4", "5", "6", "7", "8", "9", "q", "0",
-		};
-		final StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < Keys.length; i++)
-		{
-			sb.append(Keys[i]);
-			if(i < Keys.length - 1)
-				sb.append(",");
-		}
-		final boolean[] states = new boolean[Keys.length];
-
-		final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String curKeys = mPrefs.getString(Constants.PreferenceKey.WEAPON_PANEL_KEYS, sb.toString());
-		if(null != curKeys && !curKeys.isEmpty())
-		{
-			List<String> keyList = Arrays.asList(curKeys.split(","));
-			for(int i = 0; i < Keys.length; i++)
-			{
-				states[i] = keyList.contains(Keys[i]);
-			}
-		}
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Weapon panel keys");
-		builder.setMultiChoiceItems(Keys, states, null);
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id)
-            {
-                final ListView lst = ((AlertDialog)dialog).getListView();
-				SparseBooleanArray list = lst.getCheckedItemPositions();
-				String keyStr = "";
-				if(list.size() > 0)
-				{
-					Adapter adapter = lst.getAdapter();
-					StringBuilder tsb = new StringBuilder();
-					for(int i = 0; i < list.size(); i++)
-					{
-                        int key = list.keyAt(i);
-						if(!list.get(key))
-                            continue;
-                        tsb.append(adapter.getItem(key));
-				        tsb.append(",");
-					}
-                    int len = tsb.length();
-                    if(len > 0 && tsb.lastIndexOf(",") == len - 1)
-                        tsb.deleteCharAt(len - 1);
-					keyStr = tsb.toString();
-				}
-				mPrefs.edit().putString(Constants.PreferenceKey.WEAPON_PANEL_KEYS, keyStr).commit();
-            }
-        });
-		builder.setNegativeButton("Cancel", null);
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
+    private void OpenCvarListDetail()
+    {
+        ContextUtility.OpenMessageDialog(this, "Special Cvar List", TextHelper.GetCvarText());
+    }
 
 	private class ViewHolder
 	{
@@ -1353,7 +1356,7 @@ public class GameLauncher extends Activity{
 		public RadioGroup rg_curpos;
 		public EditText edt_harm_r_specularExponent;
 		public RadioGroup rg_harm_r_lightModel;
-		public Button configure_weapon_panel_btn;
+		public Button onscreen_button_setting;
 
 		public void Setup()
 		{
@@ -1387,7 +1390,7 @@ public class GameLauncher extends Activity{
 			rg_curpos = (RadioGroup)findViewById(R.id.rg_curpos);
 			edt_harm_r_specularExponent = (EditText)findViewById(R.id.edt_harm_r_specularExponent);
 		    rg_harm_r_lightModel = (RadioGroup)findViewById(R.id.rg_harm_r_lightModel);
-			configure_weapon_panel_btn = (Button)findViewById(R.id.configure_weapon_panel_btn);
+			onscreen_button_setting = (Button)findViewById(R.id.onscreen_button_setting);
 		}
 	}
 }

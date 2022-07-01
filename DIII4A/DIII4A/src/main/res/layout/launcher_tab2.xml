@@ -35,11 +35,11 @@
         android:text="Reset on-screen controls" />
 
     <Button
-        android:id="@+id/configure_weapon_panel_btn"
+        android:id="@+id/onscreen_button_setting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-		android:textAllCaps="false"
-        android:text="Configure weapon panel" />
+        android:textAllCaps="false"
+        android:text="On-screen button setting" />
     
     <CheckBox
         android:id="@+id/smoothjoy"

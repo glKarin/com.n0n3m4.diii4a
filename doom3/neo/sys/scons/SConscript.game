@@ -101,6 +101,14 @@ elif ( local_rivensin ):
 	ai/AI_bot.cpp \
 	physics/Force_Grab.cpp'
 	game_list = scons_utils.BuildList( 'rivensin', game_string )
+elif ( local_hardcorps ):
+	game_string += ' \
+	Liquid.cpp \
+	tracer.cpp \
+	TrailGenerator.cpp \
+	ai/AI_bot.cpp \
+	physics/Physics_Liquid.cpp'
+	game_list = scons_utils.BuildList( 'hardcorps', game_string )
 else:
 	game_list = scons_utils.BuildList( 'game', game_string )
 
@@ -119,6 +127,9 @@ if ( local_d3le ):
 
 if ( local_rivensin ):
 	local_env.Append( CPPDEFINES = [ '_RIVENSIN', '_DENTONMOD', '_PORTALSKY', '_HDR' ] )
+
+if ( local_hardcorps ):
+	local_env.Append( CPPDEFINES = [ '_HARDCORPS', '_DENTONMOD', '_PORTALSKY', '_WATER_PHYSICS' ] )
 
 #local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32/arm-linux-androideabi/lib/armv7-a', '/opt/ndk/android_4_0_gcc_32/sysroot/usr/lib' ] ) # //k TODO: Only for armeabi-v7a, comment this line when compile armeabi(v5e).
 #local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32_v5/arm-linux-androideabi/lib', '/opt/ndk/android_4_0_gcc_32/sysroot/usr/lib' ] ) # //k TODO: Only for armeabi(v5e).

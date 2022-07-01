@@ -23,11 +23,13 @@ scons \
 	CC=$CC \
 	CXX=$CXX \
 	\
-	NOCURL=1 \
+	NOCURL=0 \
 	TARGET_ANDROID=1 \
 	TARGET_D3XP=1 \
 	TARGET_CDOOM=1 \
 	TARGET_D3XP=1 \
+	TARGET_RIVENSIN=1 \
+	TARGET_HARDCORPS=1 \
 	BASEFLAGS="-march=armv5te -fno-builtin-sin -fno-builtin-sinf -fno-builtin-cosf -fno-builtin-cos -mtune=xscale -mfpu=vfp -mfloat-abi=softfp -Wl,--no-undefined -fexceptions -frtti ${DEFINES}" \
 	LIB_PATH="${LIB_PATH}" \
 	#$*

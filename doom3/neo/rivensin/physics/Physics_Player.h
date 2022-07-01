@@ -178,6 +178,13 @@ private:
 	//float					animMoveGravityMultiplier;
 	//bool					animMoveUseGravity;
 
+	//k double-jump
+#ifdef __ANDROID__
+	bool					doubleJumpDone;
+	bool					doubleJumpEnabled; 
+	int						nextDoubleJump;
+#endif
+
 private:
 	float					CmdScale( const usercmd_t &cmd ) const;
 	void					Accelerate( const idVec3 &wishdir, const float wishspeed, const float accel );
@@ -201,6 +208,10 @@ private:
 	void					SetWaterLevel( void );
 	void					DropTimers( void );
 	void					MovePlayer( int msec );
+	//k double-jump
+#ifdef __ANDROID__
+	bool					CheckDoubleJump( void );
+#endif
 
 	void					AnimMove( idVec3 &start, idVec3 &velocity, const idVec3 &delta ); //ivan - taken from idPhysics_Monster::StepMove
 	monsterMoveResult_t		AnimSlideMove( idVec3 &start, idVec3 &velocity, const idVec3 &delta ); //ivan - from idPhysics_Monster::SlideMove

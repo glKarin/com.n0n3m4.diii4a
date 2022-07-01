@@ -237,6 +237,12 @@ public static class KeyCodesD3
           
         //k
         public static final int K_CONSOLE = '~';	
+        public static final int K_C = 'c';	
+        public static final int K_F = 'f';	
+        public static final int K_R = 'r';	
+        public static final int K_BRACKET_LEFT = '[';	
+        public static final int K_BRACKET_RIGHT = ']';	
+        public static final int K_Z = 'z';	
 		
 		public static final int J_LEFT='a';
         public static final int J_RIGHT='d';

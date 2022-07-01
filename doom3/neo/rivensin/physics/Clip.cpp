@@ -1050,6 +1050,7 @@ void idClip::TranslationEntities( trace_t &results, const idVec3 &start, const i
 /*
 ============
 idClip::Translation
+istat
 ============
 */
 bool idClip::Translation( trace_t &results, const idVec3 &start, const idVec3 &end,

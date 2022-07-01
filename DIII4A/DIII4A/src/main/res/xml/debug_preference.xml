@@ -9,7 +9,7 @@
         android:key="debug"
         android:title="Debug"
     >
-        <com.harmattan.DIII4APlusPlus.SeekBarPreference
+        <com.harmattan.DIII4Amm.SeekBarPreference
             android:dialogTitle="Update interval(Second): 0 - Disable"
             android:key="harm_render_mem_status"
             android:summary="If you do not want to debug memory usage status, please do not check it! Because it is a taking-time operation!"
