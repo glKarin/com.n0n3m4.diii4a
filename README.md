@@ -30,8 +30,8 @@ Android 4.0+
 ### Screenshot
 > Game
 
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_bathroom.png"alt="Classic bathroom">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_bathroom_jill_stars.png"alt="Classic bathroom in Rivensin mod">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_bathroom.png" alt="Classic bathroom">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
 
 > Mod
 
