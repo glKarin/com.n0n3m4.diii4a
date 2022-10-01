@@ -9,9 +9,9 @@ Update
 
     1.1.0harmattan12 (2022-07-19)
 
-    Quake 4 in DOOM3 engine support. Also see https://github.com/jmarshall23/Quake4Doom. Now can play most levels, but some levels has error.",
+    Quake 4 in DOOM3 engine support. Also see https://github.com/jmarshall23/Quake4Doom. Now can play most levels, but some levels has error.
 
-    Quake 4 game data folder named q4base, also see https://store.steampowered.com/app/2210/Quake_4/.",
+    Quake 4 game data folder named q4base, also see https://store.steampowered.com/app/2210/Quake_4/.
 
     Fix Rivensin and Hardcorps mod load game from save game.
 
@@ -21,9 +21,9 @@ Update
 
     Add volume key map config(Enable Map volume keys to show it).
 
-    雷神之锤4 for 毁灭战士3引擎支持. 详情https://github.com/jmarshall23/Quake4Doom. 目前可以运行大部分关卡, 剩余部分关卡存在错误.",
+    雷神之锤4 for 毁灭战士3引擎支持. 详情https://github.com/jmarshall23/Quake4Doom. 目前可以运行大部分关卡, 剩余部分关卡存在错误.
 
-    雷神之锤4游戏数据文件目录为q4base, 游戏详情https://store.steampowered.com/app/2210/Quake_4/.",
+    雷神之锤4游戏数据文件目录为q4base, 游戏详情https://store.steampowered.com/app/2210/Quake_4/.
 
     修复Rivensin和Hardcorpsmod载入存档bug.
 
@@ -43,7 +43,7 @@ For playing Quake 4(jmarshall 's Quake4Doom). Now can play most levels, but some
         Quake 4 fonts with DOOM3 format by IlDucci.
         Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command addbot <bot_file> or fillbots after enter map in console).
 
-        Then Choose map level/Go main-menu/Start directly, most levels is working.",
+        Then Choose map level/Go main-menu/Start directly, most levels is working.
         Player is always run(can using bool cvar harm_g_alwaysRun to control), and gun-lighting default is opened.
 
 Problems and resolutions
@@ -53,10 +53,10 @@ Problems and resolutions
         Sound: It looks work well now(jmarshall's icedTech using DOOM3-BFG sound system).
         Loading-UI: It looks work well now.
         Multiplayer-Game: Now is working well with bots(jmarshall added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar harm_g_autoGenAASFileInMPGame to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to maps/mp folder).
-        Script error: Some maps have any script errors, and some errors is fatal.",
-        Particle system: Now is work incompleted(Quake4 using new advanced BSE particle system, jmarshall has realized and added by decompiling ETQW's BSE binary file, also see jmarshall23/Quake4BSE).",
-        Entity render: Some game entities render incorrect.",
-        Collision: Some incorrect collision(using noclip to pass).",
+        Script error: Some maps have any script errors, and some errors is fatal.
+        Particle system: Now is work incompleted(Quake4 using new advanced BSE particle system, jmarshall has realized and added by decompiling ETQW's BSE binary file, also see jmarshall23/Quake4BSE).
+        Entity render: Some game entities render incorrect.
+        Collision: Some incorrect collision(using noclip to pass).
 
 关于雷神之锤4
 运行雷神之锤4(jmarshall 's Quake4Doom). 目前可以运行大部分关卡, 剩余部分关卡存在错误..
@@ -68,7 +68,7 @@ Problems and resolutions
         毁灭战士3格式的雷神之锤4字体, IlDucci提供.
         雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令addbot <bot_file>或fillbots添加bot).
 
-        然后选择关卡或进入主菜单启动, 运行大部分可运行的关卡.",
+        然后选择关卡或进入主菜单启动, 运行大部分可运行的关卡.
         Player is always run(can using bool cvar harm_g_alwaysRun to control), and gun-lighting default is opened.
 
 问题和解决方案:
@@ -78,10 +78,10 @@ Problems and resolutions
         声音: 正常工作.
         游戏载入界面: 正常工作.
         多人游戏: 目前正常工作, 并且可以添加bot(jmarshall添加了雷神之锤3的bot支持, 但是需要先添加bot文件和多人游戏地图的AAS文件, 目前可以设置harm_g_autoGenAASFileInMPGame为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的maps/mp文件夹).
-        脚本错误: 部分脚本错误无关紧要, 但是有一些影响游戏进程或者崩溃.",
-        粒子系统: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统BSE, jmarshall通过反编译深入敌后: 雷神战争的BSE二进制实现了, 更多详情 jmarshall23/Quake4BSE).",
-        物体渲染: 存在一些物体错误的渲染结果.",
-        碰撞: 有一些错误的碰撞结果(可以使用noclip强制穿越).",
+        脚本错误: 部分脚本错误无关紧要, 但是有一些影响游戏进程或者崩溃.
+        粒子系统: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统BSE, jmarshall通过反编译深入敌后: 雷神战争的BSE二进制实现了, 更多详情 jmarshall23/Quake4BSE).
+        物体渲染: 存在一些物体错误的渲染结果.
+        碰撞: 有一些错误的碰撞结果(可以使用noclip强制穿越).
 
 Screenshot
 
