@@ -43,6 +43,15 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _RAVEN
+// jscott: renamed to prevent name clash
+#ifdef FLOAT_EPSILON
+#undef FLOAT_EPSILON
+#endif
+#define IEEE_FLT_SIGNBITSET( a )	(reinterpret_cast<const unsigned int &>(a) >> IEEE_FLT_SIGN_BIT)
+#define IEEE_FLT_SIGNBITNOTSET( a )	((~reinterpret_cast<const unsigned int &>(a)) >> IEEE_FLT_SIGN_BIT)
+#endif
+
 #ifdef INFINITY
 #undef INFINITY
 #endif
@@ -227,6 +236,35 @@ class idMath
 		static float				BitsToFloat(int i, int exponentBits, int mantissaBits);
 
 		static int					FloatHash(const float *array, const int numFloats);
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+	static idVec3				CreateVector(float x, float y, float z);
+	static float				AngleMod(float a);
+	static float				Distance(const idVec3 &p1, const idVec3 &p2);
+	static int					Rand()
+	{
+		return rand();
+	}
+	static float				FRand()
+	{
+		return Rand() / (float)RAND_MAX;
+	}
+	static float				FRandRange(float min, float max)
+	{
+		return min + (max - min) * FRand();
+	}
+
+// abahr
+	static float				Lerp( const idVec2& range, float frac );
+	static float				Lerp( float start, float end, float frac );
+	static float				MidPointLerp( float start, float mid, float end, float frac );
+
+ // jscott: for sound system
+ static float                dBToScale( float db );
+
+// jscott: renamed to prevent name clash
+	static const float			FLOAT_EPSILON;				// smallest positive number such that 1.0+FLT_EPSILON != 1.0
+#endif
 
 		static const float			PI;							// pi
 		static const float			TWO_PI;						// pi * 2
@@ -1082,5 +1120,61 @@ ID_INLINE int idMath::FloatHash(const float *array, const int numFloats)
 
 	return hash;
 }
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jscott: fast and reliable random routines
+
+// This is the VC libc version of rand() without multiple seeds per thread or 12 levels
+// of subroutine calls.
+// Both calls have been designed to minimise the inherent number of float <--> int 
+// conversions and the additional math required to get the desired value.
+// eg the typical tint = (rand() * 255) / 32768
+// becomes tint = rvRandom::irand( 0, 255 )
+
+class rvRandom {
+private:
+	static	unsigned/* 64long */int	mSeed;
+public:
+							rvRandom( void ) { mSeed = 0x89abcdef; }
+
+	// for a non seed based init
+	static	int				Init( void );
+
+	// Init the seed to a unique number
+	static	void			Init( unsigned/* 64long */int seed ) { mSeed = seed; }
+
+	// Returns a float min <= x < max (exclusive; will get max - 0.00001; but never max)
+	static	float			flrand( float min, float max );
+
+	// Returns a float min <= 0 < 1.0
+	static	float			flrand();
+
+	static	float			flrand( const idVec2& v );
+
+	// Returns an integer min <= x <= max (ie inclusive)
+	static	int				irand( int min, int max );
+};
+
+// RAVEN END
+
+// RAVEN BEGIN
+// abahr: I know its not correct but return 1 if zero
+template<class T> ID_INLINE T	SignZero( T f ) { return ( f > 0 ) ? 1 : ( ( f < 0 ) ? -1 : 1 ); }
+// RAVEN END
+#endif
+
+#ifdef _RAVEN // _QUAKE4
+/*
+========================
+idMath::Ftob
+========================
+*/
+ID_INLINE float idMath::AngleMod(float a)
+{
+	a = (360.0 / 65536) * ((int)(a * (65536 / 360.0)) & 65535);
+	return a;
+}
+#endif
 
 #endif /* !__MATH_MATH_H__ */

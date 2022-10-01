@@ -810,6 +810,10 @@ class idSoundSystemLocal : public idSoundSystem
 
 		virtual int				IsEAXAvailable(void);
 
+#ifdef _RAVEN
+	virtual idSoundWorld* GetSoundWorldFromId(int worldId);
+#endif
+
 		//-------------------------
 
 		int						GetCurrent44kHzTime(void) const;

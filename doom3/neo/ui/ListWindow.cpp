@@ -441,7 +441,14 @@ void idListWindow::PostParse()
 		r.w = (i < c - 1) ? tabStops[i+1] - r.x - tabBorder : -1;
 		r.align = (doAligns) ? tabAligns[i] : 0;
 
-		if (tabVAligns.Num() > 0) {
+#ifdef _RAVEN
+// jmarshall crash fix
+        if(tabVAligns.Num() > 0 && i < tabVAligns.Num())
+// jmarshall end
+#else
+		if (tabVAligns.Num() > 0)
+#endif
+        {
 			r.valign = tabVAligns[i];
 		} else {
 			r.valign = 0;
@@ -480,12 +487,21 @@ This is the same as in idEditWindow
 */
 void idListWindow::InitScroller(bool horizontal)
 {
+#ifdef _RAVEN // _QUAKE4
+	const char *thumbImage = "gfx/guis/scrollbar_thumb.tga";
+	const char *barImage = "gfx/guis/scrollbarv.tga";
+#else
 	const char *thumbImage = "guis/assets/scrollbar_thumb.tga";
 	const char *barImage = "guis/assets/scrollbarv.tga";
+#endif
 	const char *scrollerName = "_scrollerWinV";
 
 	if (horizontal) {
+#ifdef _RAVEN // _QUAKE4
+		barImage = "gfx/guis/scrollbarh.tga";
+#else
 		barImage = "guis/assets/scrollbarh.tga";
+#endif
 		scrollerName = "_scrollerWinH";
 	}
 

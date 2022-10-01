@@ -8672,3 +8672,146 @@ void idMatX::Test(void)
 		idLib::common->Warning("idMatX::Eigen_Solve failed");
 	}
 }
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+
+// idMat3::RotateAbsolute -- rotates around world x, y, or z
+void idMat3::RotateAbsolute(int whichAxis, float howManyDegrees)
+{
+	idMat3	rotation;
+
+// RAVEN BEGIN
+	float	sinVal, cosVal;
+
+	idMath::SinCos( DEG2RAD( howManyDegrees), sinVal, cosVal );
+// RAVEN END
+
+	rotation.Identity();
+	switch(whichAxis)
+	{
+	case 0:	// x-axis
+		rotation[1][1] = cosVal;
+		rotation[1][2] = sinVal;
+		rotation[2][1] = -sinVal;
+		rotation[2][2] = cosVal;
+		break;
+	case 1:	// y-axis
+		rotation[0][0] = cosVal;
+		rotation[0][2] = -sinVal;
+		rotation[2][0] = sinVal;
+		rotation[2][2] = cosVal;
+		break;
+	case 2:	// z-axis
+		rotation[0][0] = cosVal;
+		rotation[0][1] = sinVal;
+		rotation[1][0] = -sinVal;
+		rotation[1][1] = cosVal;
+		break;
+	default:
+		assert(!"idMat3::RotateAbsolute -- valid axis numbers are 0, 1, and 2");
+		return;
+	}
+	*this *= rotation;
+}
+
+// idMat3::RotateRelative -- rotates around the fwd, left, or up vector of the matrix
+void idMat3::RotateRelative(int whichAxis, float howManyDegrees)
+{
+	idMat3	rotation;
+
+// RAVEN BEGIN
+	float	sinVal, cosVal;
+
+	idMath::SinCos( DEG2RAD( howManyDegrees), sinVal, cosVal );
+// RAVEN END
+
+	rotation.Identity();
+	switch(whichAxis)
+	{
+	case 0:	// x-axis
+		rotation[1][1] = cosVal;
+		rotation[1][2] = sinVal;
+		rotation[2][1] = -sinVal;
+		rotation[2][2] = cosVal;
+		break;
+	case 1:	// y-axis
+		rotation[0][0] = cosVal;
+		rotation[0][2] = -sinVal;
+		rotation[2][0] = sinVal;
+		rotation[2][2] = cosVal;
+		break;
+	case 2:	// z-axis
+		rotation[0][0] = cosVal;
+		rotation[0][1] = sinVal;
+		rotation[1][0] = -sinVal;
+		rotation[1][1] = cosVal;
+		break;
+	default:
+		assert(!"idMat3::RotateRelative -- valid axis numbers are 0, 1, and 2");
+		return;
+	}
+	*this = rotation * (*this);
+}
+
+// idMat3::RotateArbitrary -- rotates around the given unit vector
+void idMat3::RotateArbitrary(const idVec3 &rotAxis, float howManyDegrees)
+{
+// RAVEN BEGIN
+	float	sinVal, cosVal;
+
+	idMath::SinCos( DEG2RAD( howManyDegrees), sinVal, cosVal );
+// RAVEN END
+
+	float	d = idMath::Sqrt(rotAxis[1]*rotAxis[1] + rotAxis[2]*rotAxis[2]);
+
+	// if the rotation axis turns out to be one of the world axes, just do a RotateAbsolute on it
+	if (rotAxis.Compare(idVec3(1, 0, 0)))
+	{
+		RotateAbsolute(0, howManyDegrees);
+		return;
+	}
+	if (rotAxis.Compare(idVec3(-1, 0, 0)))
+	{
+		RotateAbsolute(0, -howManyDegrees);
+		return;
+	}
+	if (rotAxis.Compare(idVec3(0, 1, 0)))
+	{
+		RotateAbsolute(1, howManyDegrees);
+		return;
+	}
+	if (rotAxis.Compare(idVec3(0, -1, 0)))
+	{
+		RotateAbsolute(1, -howManyDegrees);
+		return;
+	}
+	if (rotAxis.Compare(idVec3(0, 0, 1)))
+	{
+		RotateAbsolute(2, howManyDegrees);
+		return;
+	}
+	if (rotAxis.Compare(idVec3(0, 0, -1)))
+	{
+		RotateAbsolute(2, -howManyDegrees);
+		return;
+	}
+
+
+	idMat3	rotationX(1, 0, 0, 0, rotAxis[2]/d, rotAxis[1]/d, 0, -rotAxis[1]/d, rotAxis[2]/d);
+	idMat3	rotationY(d, 0, rotAxis[0], 0, 1, 0, -rotAxis[0], 0, d);
+	idMat3	rotationZ(cosVal, sinVal, 0, -sinVal, cosVal, 0, 0, 0, 1);
+	idMat3	rotationXinv = rotationX.Inverse();
+	idMat3	rotationYinv = rotationY.Inverse();
+	idMat3	tempMat;
+
+	tempMat = rotationYinv * rotationXinv;
+	tempMat = rotationZ * tempMat;
+	tempMat = rotationY * tempMat;
+	tempMat = rotationX * tempMat;
+	*this = *this * tempMat;
+}
+
+// RAVEN END
+
+#endif

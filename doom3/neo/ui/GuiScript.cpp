@@ -212,6 +212,9 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src)
 		//
 		//  added float variable
 		idWinFloat *val = NULL;
+#ifdef _RAVEN
+        idWinFloatPtr* valp = NULL;
+#endif
 
 		//
 		if (vec4 == NULL) {
@@ -226,13 +229,25 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src)
 			//
 		}
 
+#ifdef _RAVEN
+        if (val == NULL)
+        {
+            valp = dynamic_cast<idWinFloatPtr*>((*src)[0].var);
+        }
+#endif
+
 		idWinVec4 *from = dynamic_cast<idWinVec4 *>((*src)[1].var);
 		idWinVec4 *to = dynamic_cast<idWinVec4 *>((*src)[2].var);
 		idWinStr *timeStr = dynamic_cast<idWinStr *>((*src)[3].var);
 
 		//
 		//  added float variable
-		if (!((vec4 || rect || val) && from && to && timeStr)) {
+#ifdef _RAVEN // _QUAKE4
+        if (!((vec4 || rect || val || valp) && from && to && timeStr))
+#else
+		if (!((vec4 || rect || val) && from && to && timeStr))
+#endif
+		{
 			//
 			common->Warning("Bad transition in gui %s in window %s\n", window->GetGui()->GetSourceFile(), window->GetName());
 			return;
@@ -259,7 +274,16 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src)
 			val->SetEval(false);
 			window->AddTransition(val, *from, *to, time, ac, dc);
 			//
-		} else {
+		}
+#ifdef _RAVEN
+        else if (valp)
+        {
+            valp->SetEval(false);
+            window->AddTransition(valp, *from, *to, time, ac, dc);
+            //
+        }
+#endif
+		else {
 			rect->SetEval(false);
 			window->AddTransition(rect, *from, *to, time, ac, dc);
 		}
@@ -267,6 +291,129 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src)
 		window->StartTransition();
 	}
 }
+
+#ifdef _RAVEN
+/*
+=========================
+Script_EvalRegs
+=========================
+*/
+// jmarshall - Quake 4 gui implementation
+void Script_NamedEvent(idWindow* window, idList<idGSWinVar>* src)
+{
+    idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
+    idStr parmStr = parm->c_str();
+
+    int p = idStr::FindText(parm->c_str(), "::");
+    if (p <= 0)
+    {
+        window->RunNamedEvent(parm->c_str());
+    }
+    else
+    {
+        idStr windowName = parmStr.Mid(0, p);
+        idStr varName = parmStr.Mid(p + 2, parmStr.Length() - (p + 2));
+
+        //k drawWin_t* childWindow = window->FindChildByName(windowName);
+        drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
+        if (childWindow)
+        {
+            childWindow->win->RunNamedEvent(varName);
+        }
+        else
+        {
+            common->Warning("GUI: %s: unknown window %s for named event %s\n", window->GetName(), windowName.c_str(), varName.c_str());
+        }
+    }
+}
+
+/*
+=========================
+Script_StopTransitions
+=========================
+*/
+void Script_StopTransitions(idWindow* window, idList<idGSWinVar>* src)
+{
+    idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
+    idStr parmStr = parm->c_str();
+
+    //k drawWin_t* childWindow = window->FindChildByName(parmStr);
+    drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(parmStr);
+    if (childWindow)
+    {
+        childWindow->win->ClearTransitions();
+    }
+}
+
+/*
+=========================
+Script_ConsoleCmd
+=========================
+*/
+void Script_ConsoleCmd(idWindow* window, idList<idGSWinVar>* src)
+{
+    idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
+    idStr parmStr = parm->c_str();
+
+    cmdSystem->BufferCommandText(CMD_EXEC_NOW, parmStr.c_str());
+}
+
+/*
+===================
+Script_ResetVideo
+===================
+*/
+void Script_ResetVideo(idWindow* window, idList<idGSWinVar>* src)
+{
+    idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
+    idStr parmStr = parm->c_str();
+    drawWin_t* childWindow = window->FindChildByName(parmStr);
+    if (childWindow)
+    {
+        if (childWindow->win)
+        {
+            childWindow->win->ResetCinematics();
+            childWindow->win->EvalRegs(-1, true);
+        }
+        else
+        {
+            childWindow->simp->ResetCinematics();
+        }
+    }
+    else
+    {
+        window->ResetCinematics();
+        window->EvalRegs(-1, true);
+    }
+}
+
+/*
+===================
+Script_NonInteractive
+===================
+*/
+void Script_NonInteractive(idWindow* window, idList<idGSWinVar>* src)
+{
+    idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
+    int val = atoi(parm->c_str());
+
+    window->GetGui()->SetInteractive(!(val != 0)); //k: jmarshall is (val == 1)
+}
+// jmarshall end
+
+/*
+=========================
+Script_SetLightColor
+=========================
+*/
+//k TODO
+void Script_SetLightColor(idWindow* window, idList<idGSWinVar>* src)
+{
+	(void)window;
+	(void)src;
+}
+
+#endif
 
 typedef struct {
 	const char *name;
@@ -286,6 +433,17 @@ guiCommandDef_t commandList[] = {
 	{ "localSound", Script_LocalSound, 1, 1 },
 	{ "runScript", Script_RunScript, 1, 1 },
 	{ "evalRegs", Script_EvalRegs, 0, 0 }
+#ifdef _RAVEN
+// jmarshall - Quake 4 gui implementation
+    , { "namedevent", Script_NamedEvent, 1, 1},
+    { "stoptransitions", Script_StopTransitions, 1, 1},
+    { "consolecmd", Script_ConsoleCmd, 1, 1},
+    { "resetVideo", Script_ResetVideo, 1, 1},
+    { "nonInteractive", Script_NonInteractive, 1, 1}
+// jmarshall end
+    , { "setlightcolor", Script_SetLightColor, 1, 1}
+#endif
+
 };
 
 int	scriptCommandCount = sizeof(commandList) / sizeof(guiCommandDef_t);
@@ -600,7 +758,14 @@ void idGuiScript::FixupParms(idWindow *win)
 				idWindow *ownerparent;
 				idWindow *destparent;
 
-				if (owner) {
+#ifdef _RAVEN
+// jmarshall - quake 4 guis
+                if ( owner && destowner)
+// jmarshall end
+#else
+				if (owner)
+#endif
+                {
 					ownerparent = owner->simp?owner->simp->GetParent():owner->win->GetParent();
 					destparent  = destowner->simp?destowner->simp->GetParent():destowner->win->GetParent();
 

@@ -184,6 +184,14 @@ class idAsyncServer
 
 		void				PrintLocalServerInfo(void);
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+	int					AllocOpenClientSlotForAI(const char* botName, int maxPlayersOnServer);
+	int 				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);
+	void				InitLocalClient( int clientNum, bool isBot );
+// jmarshall end
+#endif
+
 	private:
 		bool				active;						// true if server is active
 		int					realTime;					// absolute time

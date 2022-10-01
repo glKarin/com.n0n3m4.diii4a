@@ -126,6 +126,18 @@ typedef enum {
 	TD_DEFAULT,				// will use compressed formats when possible
 	TD_BUMP,				// may be compressed with 8 bit lookup
 	TD_HIGH_QUALITY			// either 32 bit or a component format, no loss at all
+#ifdef _RAVEN
+		,
+// How is this texture used?  Determines the storage and color format
+	TD_LIGHT,				// Light image
+	TD_LOOKUP_TABLE_MONO,	// Mono lookup table (including alpha)
+	TD_LOOKUP_TABLE_ALPHA,	// Alpha lookup table with a white color channel
+	TD_LOOKUP_TABLE_RGB1,	// RGB lookup table with a solid white alpha
+	TD_LOOKUP_TABLE_RGBA,	// RGBA lookup table
+	TD_COVERAGE,			// coverage map for fill depth pass when YCoCG is used
+	TD_DEPTH,				// depth buffer copy for motion blur
+	TD_FONT = TD_HIGH_QUALITY,				// Font image
+#endif
 } textureDepth_t;
 
 typedef enum {

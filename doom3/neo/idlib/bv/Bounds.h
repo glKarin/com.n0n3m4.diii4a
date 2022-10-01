@@ -105,6 +105,18 @@ class idBounds
 
 		void			AxisProjection(const idVec3 &dir, float &min, float &max) const;
 		void			AxisProjection(const idVec3 &origin, const idMat3 &axis, const idVec3 &dir, float &min, float &max) const;
+#ifdef _RAVEN
+	float			ShortestDistance( const idVec3 &point ) const;
+			const idVec3	Size( void ) const;
+	bool			Contains( const idBounds &a ) const;
+// abahr: can be used to get width of bounds
+	idVec3			FindEdgePoint( const idVec3& dir ) const;
+	idVec3			FindEdgePoint( const idVec3& start, const idVec3& dir ) const;
+	idVec3			FindVectorToEdge( const idVec3& dir ) const;
+	idVec3			FindVectorToEdge( const idVec3& start, const idVec3& dir ) const;
+// jscott: for BSE
+	idBounds &		ExpandSelf( const idVec3 &d );					// expand bounds in all directions by the given vector
+#endif
 
 	private:
 		idVec3			b[2];
@@ -466,5 +478,44 @@ ID_INLINE void idBounds::AxisProjection(const idVec3 &origin, const idMat3 &axis
 	min = d1 - d2;
 	max = d1 + d2;
 }
+
+#ifdef _RAVEN
+
+ID_INLINE bool idBounds::Contains( const idBounds &a ) const
+{
+	int		i;
+
+	for( i = 0; i < 3; i++ ) {
+		if( a[1][i] > b[1][i] ) {
+			return( false );
+		}
+		if( a[0][i] < b[0][i] ) {
+			return( false );
+		}
+	}
+
+	return( true );
+}
+
+
+// RAVEN BEGIN
+// jscott: for BSE
+ID_INLINE idBounds &idBounds::ExpandSelf( const idVec3 &d )
+{
+	b[0][0] -= d[0];
+	b[0][1] -= d[1];
+	b[0][2] -= d[2];
+	b[1][0] += d[0];
+	b[1][1] += d[1];
+	b[1][2] += d[2];
+	return( *this );
+}
+// RAVEN END
+
+ID_INLINE const idVec3 idBounds::Size( void ) const
+{
+	return( b[1] - b[0] );
+}
+#endif
 
 #endif /* !__BV_BOUNDS_H__ */

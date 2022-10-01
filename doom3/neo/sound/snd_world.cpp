@@ -1473,9 +1473,15 @@ idSoundWorldLocal::EmitterForIndex
 */
 idSoundEmitter	*idSoundWorldLocal::EmitterForIndex(int index)
 {
+#ifdef _RAVEN //k todo
+	if (index <= 0) {
+		return NULL;
+	}
+#else
 	if (index == 0) {
 		return NULL;
 	}
+#endif
 
 	if (index >= emitters.Num()) {
 		common->Error("idSoundWorldLocal::EmitterForIndex: %i > %i", index, emitters.Num());
@@ -2275,3 +2281,4 @@ void idSoundWorldLocal::SetEnviroSuit(bool active)
 {
 	enviroSuitActive = active;
 }
+

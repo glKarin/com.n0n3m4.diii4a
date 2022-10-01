@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">idTech4A++</string>
+    <string name="app_title">idTech4A++</string>
+    <string name="menu_settings">Settings</string>    
+    <string name="config_editor_name">Config Editor</string>
+    <string name="key_config_page_name">OnScreen Button Config</string>
+
+</resources>

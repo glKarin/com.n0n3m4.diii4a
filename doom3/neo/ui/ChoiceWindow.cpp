@@ -449,6 +449,9 @@ void idChoiceWindow::Draw(int time, float x, float y)
 		color = hoverColor;
 	}
 
+#ifdef _RAVEN
+    if (choices.Num() > 0 && currentChoice < choices.Num())
+#endif
 	dc->DrawText(choices[currentChoice], textScale, textAlign, color, textRect, false, -1);
 }
 

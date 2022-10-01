@@ -200,6 +200,11 @@ void idSessionLocal::SetSaveGameGuiVars(void)
 	loadGameList.Clear();
 	fileList.Clear();
 	fileTimes.Clear();
+#ifdef _RAVENxxx // _QUAKE4
+// jmarshall - crash fix
+    return;
+// jmarshall end
+#endif
 
 	GetSaveGameList(fileList, fileTimes);
 
@@ -1143,6 +1148,39 @@ void idSessionLocal::HandleMainMenuCommands(const char *menuCommand)
 			SetPbMenuGuiVars();
 			continue;
 		}
+
+#ifdef _RAVEN
+		/*
+		 * e.g.
+		 set "cmd" "CVarStrcmp sys_lang curr_lang English Spanish French Italian" ;
+		// compare cvar 'sys_lang', store as gui variable 'curr_lang' and compare
+		// against languages. returns index value 0 for English, 1 Spanish, onward.
+		 */ 
+		if (!idStr::Icmp(cmd, "CVarStrcmp")) {
+			idStr cvar = args.Argv(icmd++);
+			idStr cvarVal = cvarSystem->GetCVarString(cvar);
+			idStr guiVar = args.Argv(icmd++);
+			int cmpIndex = -1;
+
+			for(int i = 0; icmd < args.Argc(); i++, icmd++)
+			{
+				if(cmpIndex != -1) // finded
+					continue;
+				idStr cmpTgt = args.Argv(icmd);
+				if(!cmpTgt.Icmp(cvarVal))
+					cmpIndex = i;
+			}
+
+			guiMainMenu->SetStateString(guiVar, va("%d", cmpIndex));
+
+			continue;
+		}
+		if (!idStr::Icmp(cmd, "getMOTD")) {
+			//k: TODO
+			continue;
+		}
+#endif
+
 	}
 }
 

@@ -766,3 +766,28 @@ void idDict::ListValues_f(const idCmdArgs &args)
 
 	idLib::common->Printf("%5d values\n", valueStrings.Num());
 }
+
+#ifdef _RAVEN
+/*
+================
+idDict::RandomPrefix
+================
+*/
+// RAVEN BEGIN
+// abahr: added default value param
+const char *idDict::RandomPrefix( const char *prefix, idRandom &random, const char* defaultValue ) const {
+	int count;
+	const int MAX_RANDOM_KEYS = 2048;
+	const char *list[MAX_RANDOM_KEYS];
+	const idKeyValue *kv;
+
+// RAVEN BEGIN
+// abahr: added defaultValue param
+	list[0] = defaultValue;
+// RAVEN END
+	for ( count = 0, kv = MatchPrefix( prefix ); kv && count < MAX_RANDOM_KEYS; kv = MatchPrefix( prefix, kv ) ) {
+		list[count++] = kv->GetValue().c_str();
+	}
+	return list[random.RandomInt( count )];
+}
+#endif

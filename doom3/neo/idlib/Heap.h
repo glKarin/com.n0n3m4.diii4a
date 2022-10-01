@@ -41,6 +41,45 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _RAVEN
+// jnewquist: memory tag stack for new/delete
+#if (defined(_DEBUG) || defined(_RV_MEM_SYS_SUPPORT)) && !defined(ENABLE_INTEL_SMP)
+class MemScopedTag {
+	byte mTag;
+	MemScopedTag *mPrev;
+	static MemScopedTag *mTop;
+public:
+	MemScopedTag( byte tag ) {
+		mTag = tag;
+		mPrev = mTop;
+		mTop = this;
+	}
+	~MemScopedTag() {
+		assert( mTop != NULL );
+		mTop = mTop->mPrev;
+	}
+	void SetTag( byte tag ) {
+		mTag = tag;
+	}
+	static byte GetTopTag( void ) {
+		if ( mTop ) {
+			return mTop->mTag;
+		} else {
+			return MA_OPNEW;
+		}
+	}
+};
+#define MemScopedTag_GetTopTag() MemScopedTag::GetTopTag()
+#define MEM_SCOPED_TAG(var, tag) MemScopedTag var(tag)
+#define MEM_SCOPED_TAG_SET(var, tag) var.SetTag(tag)
+#else
+#define MemScopedTag_GetTopTag() MA_OPNEW
+#define MEM_SCOPED_TAG(var, tag)
+#define MEM_SCOPED_TAG_SET(var, tag)
+#endif
+#endif
+
+// RAVEN END
 
 typedef struct {
 	int		num;
@@ -69,6 +108,10 @@ void		Mem_Free(void *ptr);
 char 		*Mem_CopyString(const char *in);
 void 		*Mem_Alloc16(const int size);
 void		Mem_Free16(void *ptr);
+#ifdef _RAVEN // unused tag
+ID_INLINE void 		*Mem_Alloc(const int size, byte tag) { (void)tag; return Mem_Alloc(size); }
+ID_INLINE void 		*Mem_ClearedAlloc(const int size, byte tag) { (void)tag; return Mem_ClearedAlloc(size); }
+#endif
 
 #ifdef ID_REDIRECT_NEWDELETE
 

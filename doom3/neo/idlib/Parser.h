@@ -180,6 +180,13 @@ class idParser
 		static void		RemoveAllGlobalDefines(void);
 		// set the base folder to load files from
 		static void		SetBaseFolder(const char *path);
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+	int				Parse1DMatrixLegacy(int x, float* m);
+// jmarshall end
+	int				Parse1DMatrix( int x, float *m, bool ravenMatrix/* = false //k*/ );
+#endif
+
 
 	private:
 		int				loaded;						// set when a source file is loaded from file or memory
@@ -228,9 +235,9 @@ class idParser
 		int				Directive_ifndef(void);
 		int				Directive_else(void);
 		int				Directive_endif(void);
-		int				EvaluateTokens(idToken *tokens, signed long int *intvalue, double *floatvalue, int integer);
-		int				Evaluate(signed long int *intvalue, double *floatvalue, int integer);
-		int				DollarEvaluate(signed long int *intvalue, double *floatvalue, int integer);
+		int				EvaluateTokens(idToken *tokens, signed/*64long*/ int *intvalue, double *floatvalue, int integer);
+		int				Evaluate(signed/*64long*/ int *intvalue, double *floatvalue, int integer);
+		int				DollarEvaluate(signed/*64long*/ int *intvalue, double *floatvalue, int integer);
 		int				Directive_define(void);
 		int				Directive_elif(void);
 		int				Directive_if(void);

@@ -1152,6 +1152,10 @@ bool idRenderWorldLocal::ModelTrace(modelTrace_t &trace, qhandle_t entityHandle,
 	const idMaterial *shader;
 
 	trace.fraction = 1.0f;
+#ifdef _RAVEN
+// jmarshall
+	trace.materialType = 0;
+#endif
 
 	if (entityHandle < 0 || entityHandle >= entityDefs.Num()) {
 //		common->Error( "idRenderWorld::ModelTrace: index = %i", entityHandle );
@@ -1222,6 +1226,11 @@ bool idRenderWorldLocal::ModelTrace(modelTrace_t &trace, qhandle_t entityHandle,
 			trace.normal = localTrace.normal * refEnt->axis;
 			trace.material = shader;
 			trace.entity = &def->parms;
+#ifdef _RAVEN
+// jmarshall
+			trace.materialType = trace.material->GetMaterialType();
+// jmarshall end
+#endif
 			trace.jointNumber = refEnt->hModel->NearestJoint(i, localTrace.indexes[0], localTrace.indexes[1], localTrace.indexes[2]);
 		}
 	}
@@ -2333,3 +2342,73 @@ const idMaterial *R_RemapShaderBySkin(const idMaterial *shader, const idDeclSkin
 
 	return skin->RemapShaderBySkin(shader);
 }
+
+#ifdef _RAVEN
+/*
+===================
+AddEffectDef
+===================
+*/
+qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int time) { 
+	int effectHandle = effectsDef.FindNull();
+	if (effectHandle == -1) {
+		effectHandle = effectsDef.Append(NULL);
+	}
+
+	if (effectsDef[effectHandle] == NULL) {
+		effectsDef[effectHandle] = new rvRenderEffectLocal();
+	}
+
+	effectsDef[effectHandle]->parms = *reffect;
+	effectsDef[effectHandle]->gameTime = time;
+
+	bse->PlayEffect(effectsDef[effectHandle], tr.frameShaderTime);
+
+	return effectHandle;
+}
+
+/*
+===================
+UpdateEffectDef
+===================
+*/
+bool idRenderWorldLocal::UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time) {
+	// create new slots if needed
+	if (effectHandle < 0 || effectHandle > LUDICROUS_INDEX) {
+		common->Error("idRenderWorld::UpdateEffectDef: index = %i", effectHandle);
+	}
+	//while (effectHandle >= effectsDef.Num()) {
+	//	effectsDef.Append(NULL);
+	//}
+
+	effectsDef[effectHandle]->parms = *reffect;
+	effectsDef[effectHandle]->gameTime = time;
+
+	return true; 
+}
+
+void idRenderWorldLocal::FreeEffectDef(qhandle_t effectHandle) {
+	bse->FreeEffect(effectsDef[effectHandle]);
+
+	if (effectsDef[effectHandle] != NULL)
+		delete effectsDef[effectHandle];
+	
+	effectsDef[effectHandle] = NULL;
+}
+
+void idRenderWorldLocal::StopEffectDef(qhandle_t effectHandle) { 
+	if (effectsDef[effectHandle] == NULL)
+		return;
+
+	bse->StopEffect(effectsDef[effectHandle]);
+}
+
+const class rvRenderEffectLocal* idRenderWorldLocal::GetEffectDef(qhandle_t effectHandle) const { 
+	return effectsDef[effectHandle]; 
+}
+
+bool idRenderWorldLocal::EffectDefHasSound(const renderEffect_s* reffect) { 
+	return false; 
+}
+
+#endif

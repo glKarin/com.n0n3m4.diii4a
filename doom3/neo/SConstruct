@@ -19,10 +19,11 @@ serialized=['CC', 'CXX', 'JOBS', 'BUILD', 'IDNET_HOST', 'DEDICATED',
 	'TARGET_D3LE',
 	'TARGET_RIVENSIN',
 	'TARGET_HARDCORPS',
+	'TARGET_QUAKE4',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS', 'SILENT', 'TARGET_OPENGL',
 	'TARGET_ANDROID', 'NDK',
 	'LIB_PATH'
-]
+    ]
 
 # help -------------------------------------------
 
@@ -72,6 +73,9 @@ TARGET_RIVENSIN (default 0)
 
 TARGET_HARDCORPS (default 0)
 	Build hardcorps game code
+
+TARGET_QUAKE4 (default 0)
+	Build quake4 game code
 
 BUILD_GAMEPAK (default 0)
 	Build a game pak
@@ -180,6 +184,7 @@ TARGET_CDOOM = '0'
 TARGET_D3LE = '0'
 TARGET_RIVENSIN = '0'
 TARGET_HARDCORPS = '0'
+TARGET_QUAKE4 = '0'
 TARGET_MONO = '0'
 TARGET_DEMO = '0'
 TARGET_OPENGL = '0'
@@ -270,6 +275,8 @@ CORECPPFLAGS = [ ]
 GAMECPPFLAGS = [ ]
 BASELINKFLAGS = [ '-Wl,--no-undefined' ]
 CORELINKFLAGS = [ '-Wl,--no-undefined' ]
+#//k BASELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
+#//k CORELINKFLAGS = [ '-Wl,--no-undefined', '-static-libstdc++' ]
 
 # for release build, further optimisations that may not work on all files
 OPTCPPFLAGS = [ ]
@@ -293,7 +300,7 @@ if ( g_os == 'Linux' ):
 	# gcc 4.x option only - only export what we mean to from the game SO
 	BASECPPFLAGS.append( '-fvisibility=hidden' )
 # //k
-	# BASECPPFLAGS.append('-D_K_CLANG')
+#BASECPPFLAGS.append('-D_K_CLANG')
 	#BASECPPFLAGS.append('-D__arm__')
 # //k
 
@@ -392,10 +399,11 @@ local_cdoom = 0
 local_d3le = 0
 local_rivensin = 0
 local_hardcorps = 0
+local_quake4 = 0
 # OpenGL
 local_opengl = 0
 
-GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp local_cdoom local_d3le local_rivensin local_hardcorps local_opengl OPTCPPFLAGS NDK'
+GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp local_cdoom local_d3le local_rivensin local_hardcorps local_quake4 local_opengl OPTCPPFLAGS NDK'
 
 # end general configuration ----------------------
 
@@ -432,6 +440,10 @@ if ( TARGET_CORE == '1' ):
 	if ( DEDICATED == '0' or DEDICATED == '2' ):
 		local_dedicated = 0
 		Export( 'GLOBALS ' + GLOBALS )
+# Raven Quake4
+		if ( TARGET_QUAKE4 == '1' ):
+			local_quake4 = 1
+			Export( 'GLOBALS ' + GLOBALS )
 		
 		VariantDir( g_build + '/core', '.', duplicate = 0 )
 		idlib_objects = SConscript( g_build + '/core/sys/scons/SConscript.idlib' )
@@ -444,6 +456,10 @@ if ( TARGET_CORE == '1' ):
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1
 		Export( 'GLOBALS ' + GLOBALS )
+# Raven Quake4
+		if ( TARGET_QUAKE4 == '1' ):
+			local_quake4 = 1
+			Export( 'GLOBALS ' + GLOBALS )
 		
 		VariantDir( g_build + '/dedicated', '.', duplicate = 0 )
 		idlib_objects = SConscript( g_build + '/dedicated/sys/scons/SConscript.idlib' )
@@ -452,7 +468,8 @@ if ( TARGET_CORE == '1' ):
 
 		InstallAs( '#doomded.' + cpu, doomded )
 
-if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D3LE == '1' or TARGET_RIVENSIN == '1' or TARGET_HARDCORPS == '1' ):
+
+if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D3LE == '1' or TARGET_RIVENSIN == '1' or TARGET_HARDCORPS == '1' or TARGET_QUAKE4 == '1' ):
 	local_gamedll = 1
 	local_demo = 0
 	local_dedicated = 0
@@ -466,6 +483,7 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		local_d3le = 0
 		local_rivensin = 0
 		local_hardcorps = 0
+		local_quake4 = 0
 		Export( 'GLOBALS ' + GLOBALS )
 		game = SConscript( g_build + '/game/sys/scons/SConscript.game' )
 		game_base = InstallAs( '#game%s-base.so' % cpu, game )
@@ -479,6 +497,7 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		local_d3le = 0
 		local_rivensin = 0
 		local_hardcorps = 0
+		local_quake4 = 0
 		VariantDir( g_build + '/d3xp', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		d3xp = SConscript( g_build + '/d3xp/sys/scons/SConscript.game' )
@@ -493,6 +512,7 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		local_d3le = 0
 		local_rivensin = 0
 		local_hardcorps = 0
+		local_quake4 = 0
 		VariantDir( g_build + '/cdoom', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		cdoom = SConscript( g_build + '/cdoom/sys/scons/SConscript.game' )
@@ -507,6 +527,7 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		local_d3le = 1
 		local_rivensin = 0
 		local_hardcorps = 0
+		local_quake4 = 0
 		VariantDir( g_build + '/d3le', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		d3le = SConscript( g_build + '/d3le/sys/scons/SConscript.game' )
@@ -521,6 +542,7 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		local_d3le = 0
 		local_rivensin = 1
 		local_hardcorps = 0
+		local_quake4 = 0
 		VariantDir( g_build + '/rivensin', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		rivensin = SConscript( g_build + '/rivensin/sys/scons/SConscript.game' )
@@ -535,6 +557,7 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		local_d3le = 0
 		local_rivensin = 0
 		local_hardcorps = 1
+		local_quake4 = 0
 		VariantDir( g_build + '/hardcorps', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		hardcorps = SConscript( g_build + '/hardcorps/sys/scons/SConscript.game' )
@@ -542,6 +565,21 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		if ( BUILD_GAMEPAK == '1' ):
 			Command( '#game01-hardcorps.pk4', [ game_hardcorps, hardcorps ], Action( g_env.BuildGamePak ) )
 		InstallAs( g_build + '/package/libhardcorps.so', hardcorps )
+	if ( TARGET_QUAKE4 == '1' ):
+		# uses idlib as compiled for game/
+		local_cdoom = 0
+		local_d3xp = 0
+		local_d3le = 0
+		local_rivensin = 0
+		local_hardcorps = 0
+		local_quake4 = 1
+		VariantDir( g_build + '/quake4', '.', duplicate = 0 )
+		Export( 'GLOBALS ' + GLOBALS )
+		quake4 = SConscript( g_build + '/quake4/sys/scons/SConscript.game' )
+		game_quake4 = InstallAs( '#game%s-q4base.so' % cpu, quake4 )
+		if ( BUILD_GAMEPAK == '1' ):
+			Command( '#game01-quake4.pk4', [ game_quake4, quake4 ], Action( g_env.BuildGamePak ) )
+		InstallAs( g_build + '/package/libq4base.so', quake4 )
 	
 	
 if ( TARGET_MONO == '1' ):
@@ -555,6 +593,7 @@ if ( TARGET_MONO == '1' ):
 	local_d3le = 0
 	local_rivensin = 0
 	local_hardcorps = 0
+	local_quake4 = 0
 	Export( 'GLOBALS ' + GLOBALS )
 	VariantDir( g_build + '/mono', '.', duplicate = 0 )
 	idlib_objects = SConscript( g_build + '/mono/sys/scons/SConscript.idlib' )
@@ -575,6 +614,7 @@ if ( TARGET_DEMO == '1' ):
 	local_d3le = 0
 	local_rivensin = 0
 	local_hardcorps = 0
+	local_quake4 = 0
 	Export( 'GLOBALS ' + GLOBALS )
 	VariantDir( g_build + '/demo', '.', duplicate = 0 )
 	idlib_objects = SConscript( g_build + '/demo/sys/scons/SConscript.idlib' )

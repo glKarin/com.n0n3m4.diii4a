@@ -1,0 +1,56 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdk 30
+    buildToolsVersion '30.0.3'
+    //compileOptions.encoding "gbk"
+
+    defaultConfig {
+        applicationId "com.karin.idTech4Amm"
+        minSdkVersion 14
+        targetSdkVersion 30
+        versionCode 11012
+        versionName '1.1.0harmattan12'
+        versionNameSuffix 'Natasha'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    ndkVersion '17.2.4988734'
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    /* not AIDE */
+    signingConfigs {
+        debug {
+            v1SigningEnabled true
+            v2SigningEnabled true
+            storeFile file('F:\\qobj\\droid\\idTech4Amm\\idtech4amm.keystore')
+            storePassword '741953'
+            keyAlias 'idtech4amm'
+            keyPassword '741953'
+        }
+        release {
+            v1SigningEnabled true
+            v2SigningEnabled true
+            storeFile file('F:\\qobj\\droid\\idTech4Amm\\idtech4amm.keystore')
+            storePassword '741953'
+            keyAlias 'idtech4amm'
+            keyPassword '741953'
+        }
+    }
+}
+
+dependencies {
+    compile project(':Q3E')
+}

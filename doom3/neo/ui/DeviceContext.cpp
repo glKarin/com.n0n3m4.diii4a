@@ -60,7 +60,9 @@ int idDeviceContext::FindFont(const char *name)
 
 	// If the font was not found, try to register it
 	idStr fileName = name;
+#if !defined(_RAVEN) // jmarshall
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()));
+#endif
 
 	fontInfoEx_t fontInfo;
 	int index = fonts.Append(fontInfo);
@@ -103,7 +105,11 @@ void idDeviceContext::Init()
 {
 	xScale = 0.0;
 	SetSize(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+#ifdef _RAVEN // _QUAKE4
+	whiteImage = declManager->FindMaterial("gfx/guis/white.tga");
+#else
 	whiteImage = declManager->FindMaterial("guis/assets/white.tga");
+#endif
 	whiteImage->SetSort(SS_GUI);
 	mbcs = false;
 	SetupFonts();
@@ -117,6 +123,17 @@ void idDeviceContext::Init()
 	colorWhite = idVec4(1, 1, 1, 1);
 	colorBlack = idVec4(0, 0, 0, 1);
 	colorNone = idVec4(0, 0, 0, 0);
+#ifdef _RAVEN // _QUAKE4
+	cursorImages[CURSOR_ARROW] = declManager->FindMaterial("gfx/guis/guicursor_arrow.tga");
+	cursorImages[CURSOR_HAND] = declManager->FindMaterial("gfx/guis/guicursor_hand.tga");
+	scrollBarImages[SCROLLBAR_HBACK] = declManager->FindMaterial("gfx/guis/scrollbarh.tga");
+	scrollBarImages[SCROLLBAR_VBACK] = declManager->FindMaterial("gfx/guis/scrollbarv.tga");
+	scrollBarImages[SCROLLBAR_THUMB] = declManager->FindMaterial("gfx/guis/scrollbar_thumb.tga");
+	scrollBarImages[SCROLLBAR_RIGHT] = declManager->FindMaterial("gfx/guis/scrollbar_right.tga");
+	scrollBarImages[SCROLLBAR_LEFT] = declManager->FindMaterial("gfx/guis/scrollbar_left.tga");
+	scrollBarImages[SCROLLBAR_UP] = declManager->FindMaterial("gfx/guis/scrollbar_up.tga");
+	scrollBarImages[SCROLLBAR_DOWN] = declManager->FindMaterial("gfx/guis/scrollbar_down.tga");
+#else
 	cursorImages[CURSOR_ARROW] = declManager->FindMaterial("ui/assets/guicursor_arrow.tga");
 	cursorImages[CURSOR_HAND] = declManager->FindMaterial("ui/assets/guicursor_hand.tga");
 	scrollBarImages[SCROLLBAR_HBACK] = declManager->FindMaterial("ui/assets/scrollbarh.tga");
@@ -126,6 +143,7 @@ void idDeviceContext::Init()
 	scrollBarImages[SCROLLBAR_LEFT] = declManager->FindMaterial("ui/assets/scrollbar_left.tga");
 	scrollBarImages[SCROLLBAR_UP] = declManager->FindMaterial("ui/assets/scrollbar_up.tga");
 	scrollBarImages[SCROLLBAR_DOWN] = declManager->FindMaterial("ui/assets/scrollbar_down.tga");
+#endif
 	cursorImages[CURSOR_ARROW]->SetSort(SS_GUI);
 	cursorImages[CURSOR_HAND]->SetSort(SS_GUI);
 	scrollBarImages[SCROLLBAR_HBACK]->SetSort(SS_GUI);

@@ -33,6 +33,12 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setRenderer
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Is64
   (JNIEnv *env, jclass c);
+  
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_shutdown(JNIEnv *env, jclass c);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetRedirectOutputToFile(JNIEnv *env, jclass c, jboolean enabled);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetNoHandleSignals(JNIEnv *env, jclass c, jboolean enabled);
 
 #ifdef __cplusplus
 }

@@ -435,8 +435,15 @@ static void WriteOutputSurfaces(int entityNum, int areaNum)
 
 
 	if (entityNum == 0) {
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - quake 4 proc format
+		procFile->WriteFloatString( "model { /* name = */ \"_area%i\" /* numSurfaces = */ %i /* sky */ 0\n\n", 
+			areaNum, numSurfaces );
+// jmarshall end
+#else
 		procFile->WriteFloatString("model { /* name = */ \"_area%i\" /* numSurfaces = */ %i\n\n",
 		                           areaNum, numSurfaces);
+#endif
 	} else {
 		const char *name;
 
@@ -446,8 +453,15 @@ static void WriteOutputSurfaces(int entityNum, int areaNum)
 			common->Error("Entity %i has surfaces, but no name key", entityNum);
 		}
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - quake 4 proc format
+		procFile->WriteFloatString( "model { /* name = */ \"%s\" /* numSurfaces = */ %i /* sky */ 0\n\n", 
+			name, numSurfaces );
+// jmarshall end
+#else
 		procFile->WriteFloatString("model { /* name = */ \"%s\" /* numSurfaces = */ %i\n\n",
 		                           name, numSurfaces);
+#endif
 	}
 
 	surfaceNum = 0;
@@ -697,7 +711,15 @@ void WriteOutputFile(void)
 		common->Error("Error opening %s", qpath.c_str());
 	}
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - Quake 4 proc support
+	procFile->WriteFloatString( "%s \"%s\"\n\n", PROC_FILE_ID, PROC_FILEVERSION);
+
+	procFile->WriteFloatString("%d\n", 1105723392); // Fake CRC
+// jmarshall end
+#else
 	procFile->WriteFloatString("%s\n\n", PROC_FILE_ID);
+#endif
 
 	// write the entity models and information, writing entities first
 	for (i=dmapGlobals.num_entities - 1 ; i >= 0 ; i--) {

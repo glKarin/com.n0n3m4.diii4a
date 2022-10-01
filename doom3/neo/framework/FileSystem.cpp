@@ -4539,7 +4539,7 @@ idFileSystemLocal::MakeTemporaryFile
 ===============
 */
 #ifdef __ANDROID__
-extern FILE * (*itmpfile)(void);
+extern FILE * itmpfile(void);
 #endif
 idFile *idFileSystemLocal::MakeTemporaryFile(void)
 {
@@ -4548,7 +4548,7 @@ idFile *idFileSystemLocal::MakeTemporaryFile(void)
 	if (!f) {
 		common->Warning("idFileSystem::MakeTemporaryFile failed: %s", strerror(errno));
 #ifdef __ANDROID__
-		if(itmpfile)
+		// if(1)
 		{
 			common->Printf("Call JNI::tmpfile.\n");
 			f = itmpfile();

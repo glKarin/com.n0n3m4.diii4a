@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-#define HARM_USE_PROGRAM_IN_PER_STAGE
+#define HARM_USE_PROGRAM_IN_PER_STAGE // switch shader program in per state or material. should be by state
 
 /*
 =====================
@@ -62,7 +62,8 @@ void RB_BakeTextureMatrixIntoTexgen(idPlane lightProject[3])
 	genMatrix[14] = lightProject[2][2];
 	genMatrix[15] = lightProject[2][3];
 
-#if 0 //HTODO: genMatrix * lightTextureMatrix ?? lightTextureMatrix * genMatrix
+//k: column-major matrix vs row-major matrix: genMatrix * lightTextureMatrix ?? lightTextureMatrix * genMatrix. e.g rotating fans
+#if 0
 	myGlMultMatrix(genMatrix, backEnd.lightTextureMatrix, final);
 #else
 	myGlMultMatrix(backEnd.lightTextureMatrix, genMatrix, final);
@@ -101,8 +102,10 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 		                       ac->normal.ToFloatPtr());
 	}
 
-	//HTODO
+	//k: add else
+#if 1
 	else
+#endif
 	if (pStage->texture.texgen == TG_SKYBOX_CUBE || pStage->texture.texgen == TG_WOBBLESKY_CUBE) {
 		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, 0,
 		                       vertexCache.Position(surf->dynamicTexCoords));
@@ -230,8 +233,10 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 	}
 #endif
 
-	//HTODO: reflect cubemap
+	//k: reflect cubemap
+#if 1
 	else
+#endif
 	if (pStage->texture.texgen == TG_REFLECT_CUBE) {
 #if 0
 		// see if there is also a bump map specified
@@ -268,7 +273,7 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 			glEnable(GL_VERTEX_PROGRAM_ARB);
 		}
 #else
-		//HTODO: reflection cubemap
+		//k: reflection cubemap
 		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), surf->space->modelViewMatrix);
 
@@ -292,7 +297,7 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 	}
 
 	if (pStage->texture.texgen == TG_DIFFUSE_CUBE || pStage->texture.texgen == TG_SKYBOX_CUBE
-			//HTODO: reflection map
+			//k: reflection cubemap
 	    || pStage->texture.texgen == TG_REFLECT_CUBE
 	    || pStage->texture.texgen == TG_WOBBLESKY_CUBE) {
 		 GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
@@ -857,7 +862,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			//
 			//--------------------------
 
-			//HTODO: not support
+			//k: unsupported new ambient
 			if (true || r_skipNewAmbient.GetBool()) {
 				continue;
 			}
@@ -974,12 +979,13 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			case TG_DIFFUSE_CUBE:
 				GL_UseProgram(&diffuseCubemapShader);
 				break;
-			//HTODO: d3xp using TG_SCREEN
+			//k: D3XP using TG_SCREEN in hell level, shader is texgen
 			case TG_SCREEN:
 			case TG_SCREEN2:
 				GL_UseProgram(&texgenShader);
 				usingTexCoord = false;
 				break;
+				//k: unused
 			case TG_GLASSWARP:
 				continue;
 			default:
@@ -1026,7 +1032,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 		if (pStage->vertexColor != SVC_IGNORE) {
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 		}
-//HTODO: when using default shader
+//k: when using default shader
 #ifndef HARM_USE_PROGRAM_IN_PER_STAGE
 		else
 			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
@@ -2245,14 +2251,14 @@ void	RB_STD_DrawView(void)
 	RB_STD_FillDepthBuffer(drawSurfs, numDrawSurfs);
 	// main light renderer
 	glEnable(GL_BLEND);
-	//HTODO: only gles2
+	//k: only gles2 renderer
 #if 0
 	switch (tr.backEndRenderer) {
 		case BE_GLSL:
 #endif
 			if (!r_noLight.GetBool())
 				RB_GLSL_DrawInteractions();
-	//HTODO: only gles2
+	//k: only gles2 renderer
 #if 0
 			break;
 	}
@@ -2277,4 +2283,10 @@ void	RB_STD_DrawView(void)
 	#ifndef ANDROID_NOGLERRHACK
 	RB_RenderDebugTools(drawSurfs, numDrawSurfs);
 	#endif
+
+#ifdef _RAVENxxx
+// jmarshall - stupid OpenGL
+	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO);
+// jmarshall end
+#endif
 }

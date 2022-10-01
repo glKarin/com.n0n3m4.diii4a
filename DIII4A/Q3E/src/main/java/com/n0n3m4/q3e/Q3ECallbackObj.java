@@ -35,7 +35,7 @@ public class Q3ECallbackObj {
 	public Q3EAudioTrack mAudioTrack;	
 	byte[] mAudioData;
 	public static boolean reqThreadrunning=true;	
-	public Q3EView vw;
+	public Q3EControlView vw;
 	
 	public void setState(int newstate)
 	{

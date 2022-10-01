@@ -437,6 +437,11 @@ void GL_State(int stateBits)
 			case GLS_SRCBLEND_ALPHA_SATURATE:
 				srcFactor = GL_SRC_ALPHA_SATURATE;
 				break;
+#ifdef _RAVEN
+			case GLS_SRCBLEND_SRC_COLOR:
+				srcFactor = GL_SRC_COLOR;
+				break;
+#endif
 			default:
 				srcFactor = GL_ONE;		// to get warning to shut up
 				common->Error("GL_State: invalid src blend state bits\n");

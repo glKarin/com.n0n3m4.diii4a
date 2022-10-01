@@ -124,7 +124,11 @@ const char *idSoundShader::DefaultDefinition() const
 {
 	return
 	        "{\n"
+#ifdef _RAVEN // _QUAKE4 sound/_default.ogg
+	        "\t"	"sound/_default.wav\n"
+#else
 	        "\t"	"_default.wav\n"
+#endif
 	        "}";
 }
 
@@ -208,11 +212,60 @@ bool idSoundShader::ParseShader(idLexer &src)
 		// mindistance
 		else if (!token.Icmp("mindistance")) {
 			parms.minDistance = src.ParseFloat();
+#ifdef _RAVEN
+			// jmarshall: scale to doom 3 distance
+			parms.minDistance /= 100.0f;
+#endif
 		}
 		// maxdistance
 		else if (!token.Icmp("maxdistance")) {
 			parms.maxDistance = src.ParseFloat();
+#ifdef _RAVEN
+			// jmarshall: scale to doom 3 distance
+			parms.maxDistance /= 100.0f;
+#endif
 		}
+#ifdef _RAVEN
+// jmarshall - quake 4 sound shader
+		else if (!token.Icmp("frequencyshift")) {
+			float shiftVal = src.ParseFloat();
+			src.ExpectTokenString(",");
+			float shiftVal2 = src.ParseFloat();
+		}
+		else if (!token.Icmp("volumeDb")) {
+			float db = src.ParseFloat();
+			parms.volume = idMath::dBToScale(db);
+		}
+		else if (!token.Icmp("useDoppler")) {
+
+		}
+		else if (!token.Icmp("noRandomStart")) {
+
+		}
+		else if (!token.Icmp("voForPlayer")) {
+
+		}
+		else if (!token.Icmp("frequentlyUsed")) {
+
+		}
+		else if (!token.Icmp("causeRumble")) {
+
+		}
+		else if (!token.Icmp("center")) {
+
+		}
+// jmarshall end
+		else if (!token.Icmp("shakeData"))
+		{
+			src.ExpectAnyToken(&token);
+			src.ExpectAnyToken(&token);
+		}
+		else if (!token.Icmp("no_shakes"))
+		{
+			//k TODO
+			parms.shakes = 0.0f;
+		}
+#endif
 		// shakes screen
 		else if (!token.Icmp("shakes")) {
 			src.ExpectAnyToken(&token);
@@ -351,6 +404,98 @@ bool idSoundShader::ParseShader(idLexer &src)
 				leadins[ numLeadins ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
 				numLeadins++;
 			}
+#ifdef _RAVEN // _QUAKE4
+		}
+		else if(token.IcmpPrefixPath("sound/") == 0)
+		{
+			// add to the wav list
+			if (soundSystemLocal.soundCache && numEntries < maxSamples) {
+				//k: if no extension, default set .wav
+				const bool hasExt = token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1;
+
+				token.BackSlashesToSlashes();
+				idStr lang = cvarSystem->GetCVarString("sys_lang");
+
+				//k: if speak/radio words
+				if (token.Find("sound/vo/", false) >= 0) {
+					idStr work = token;
+					work.ToLower();
+					work.StripLeading("sound/vo/");
+					work = va("sound/vo_%s/%s", lang.c_str(), work.c_str()); //k: in Quake4, is `sound/vo_{long}/...`, but in DOOM3, is `sound/vo/{lang}/...`
+
+					if(!hasExt)
+						work.SetFileExtension(".wav");
+
+					if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+						token = work;
+						parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
+					} else {
+						// also try to find it with the .ogg extension
+						work.SetFileExtension(".ogg");
+
+						if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+							token = work;
+							parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
+						}
+					}
+				}
+				else // other sound
+				{
+					idStr work = token;
+					work.ToLower();
+
+					if(!hasExt)
+						work.SetFileExtension(".wav");
+
+					if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+						token = work;
+						parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
+					} else {
+						// also try to find it with the .ogg extension
+						work.SetFileExtension(".ogg");
+
+						if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+							token = work;
+							parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
+						}
+					}
+				}
+				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
+				numEntries++;
+			}
+		} else if (token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1) {
+			// add to the wav list
+			if (soundSystemLocal.soundCache && numEntries < maxSamples) {
+				token.BackSlashesToSlashes();
+
+				idStr work = token;
+				work.ToLower();
+
+				if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+					token = work;
+				} else {
+					// also try to find it with the .ogg extension
+					work.SetFileExtension(".ogg");
+
+					if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+						token = work;
+					}
+				}
+
+				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
+				numEntries++;
+			}
+#if 0 //k jmarshall
+			if( token.IcmpPrefixPath( "sound/vo/" ) == 0 || token.IcmpPrefixPath( "sound/guis/" ) == 0 )
+			{
+				parms.soundShaderFlags |= SSF_VO;
+			}
+			if( token.IcmpPrefixPath( "sound/musical/" ) == 0 )
+			{
+				parms.soundShaderFlags |= SSF_MUSIC;
+			}
+#endif
+#else
 		} else if (token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1) {
 			// add to the wav list
 			if (soundSystemLocal.soundCache && numEntries < maxSamples) {
@@ -378,6 +523,7 @@ bool idSoundShader::ParseShader(idLexer &src)
 				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
 				numEntries++;
 			}
+#endif
 		} else {
 			src.Warning("unknown token '%s'", token.c_str());
 			return false;

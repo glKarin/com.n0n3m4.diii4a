@@ -164,6 +164,12 @@ class idDict
 		static void			ShowMemoryUsage_f(const idCmdArgs &args);
 		static void			ListKeys_f(const idCmdArgs &args);
 		static void			ListValues_f(const idCmdArgs &args);
+#ifdef _RAVEN
+// RAVEN BEGIN
+// abahr: added default value param
+	const char *		RandomPrefix( const char *prefix, idRandom &random, const char* defaultValue ) const;
+// RAVEN END
+#endif
 
 	private:
 		idList<idKeyValue>	args;

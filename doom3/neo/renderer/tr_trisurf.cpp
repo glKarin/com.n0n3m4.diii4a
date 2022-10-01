@@ -1424,14 +1424,12 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	tri->numVerts = totalVerts;
 }
 
-//HTODO: stack control
+//k: temp memory allocate in stack / heap control on Android
 #ifdef __ANDROID__
-#define HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
+#warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
+
 #ifdef HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
-static idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Control allocate temporary memory when load model data on Android, default value is `524288` bytes(Because stack memory is limited on Android, exam `game/le_hell` map's `models/mapobjects/hell/hellintro.lwo` in `DOOM3: The lost mission` mod). If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0 - Always heap, Negative - Always stack, Positive - Max stack memory limit).");
-	#define HARM_MAX_STACK_ALLOC_SIZE (harm_r_maxAllocStackMemory.GetInteger())
-#else
-	#define HARM_MAX_STACK_ALLOC_SIZE (1024 * 512)
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Control allocate temporary memory when load model data on Android, default value is `524288` bytes(Because stack memory is limited on Android, exam `game/le_hell` map's `models/mapobjects/hell/hellintro.lwo` in `DOOM3: The lost mission` mod). If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0 - Always heap, Negative - Always stack, Positive - Max stack memory limit).");
 #endif
 #endif
 /*
@@ -1476,23 +1474,8 @@ void R_DeriveTangentsWithoutNormals(srfTriangles_t *tri)
 	idDrawVert		*vert;
 
 #ifdef __ANDROID__
-	// Using heap memory. Also reset RLIMIT_STACK by call `setrlimit`.
-#warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-#define _alloca16_heap( x )					((void *)((((intptr_t)calloc( (x)+15 ,1 )) + 15) & ~15))
-
-	int alloc_size = sizeof(faceTangents[0]) * tri->numIndexes/3;
-	const int _HARM_MAX_STACK_ALLOC_SIZE = HARM_MAX_STACK_ALLOC_SIZE;
-	bool useHeapMem;
-	if(_HARM_MAX_STACK_ALLOC_SIZE > 0)
-		useHeapMem = alloc_size >= _HARM_MAX_STACK_ALLOC_SIZE;	
-	else if(_HARM_MAX_STACK_ALLOC_SIZE == 0)
-		useHeapMem = true;
-	else
-		useHeapMem = false;
-
-	faceTangents = (faceTangents_t *)(useHeapMem ? _alloca16_heap(alloc_size) : _alloca16(alloc_size));
-	if(useHeapMem)
-		common->Printf("[Harmattan]: Alloca on heap memory %p(%d bytes)\n", faceTangents, alloc_size);
+	const int alloc_size = sizeof(faceTangents[0]) * tri->numIndexes/3;
+	_DROID_ALLOC16(faceTangents_t, alloc_size, faceTangents, 0)
 #else
 	faceTangents = (faceTangents_t *)_alloca16_heap(sizeof(faceTangents[0]) * tri->numIndexes/3);
 #endif
@@ -1556,12 +1539,7 @@ void R_DeriveTangentsWithoutNormals(srfTriangles_t *tri)
 	tri->tangentsCalculated = true;
 
 #ifdef __ANDROID__
-	// free memory when not call alloca()
-	if(useHeapMem)
-	{
-		common->Printf("[Harmattan]: Free alloca heap memory %p\n", faceTangents);
-		free(faceTangents);
-	}
+	_DROID_FREE(faceTangents, 0)
 #endif
 }
 

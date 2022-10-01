@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdarg.h>
 #include "q3e.h"
 
 int  (*qmain)(int argc, char **argv);
@@ -39,11 +40,15 @@ void (*setCallbacks)(void *func, void *func2, void *func3);
 void (*setResolution)(int width, int height);
 void (*vidRestart)();
 
-void (*Android_SetInteraction)(void *ptr[]);
+intptr_t (*Q3E_Call)(int protocol, int size, ...);
 static void pull_input_event(int execCmd);
-static FILE * itmpfile(void);
+static FILE * android_tmpfile(void);
 static jmethodID android_PullEvent_method;
 static char *game_data_dir = NULL;
+static int redirect_output_to_file = 0;
+static int no_handle_signals = 0;
+void (*qexit)(void);
+intptr_t (*(*set_Android_Call)(intptr_t (*func)(int, int, ...)))(int, int, ...);
 
 jmethodID android_initAudio;
 jmethodID android_writeAudio;
@@ -53,6 +58,36 @@ static JavaVM *jVM;
 static jobject audioBuffer=0;
 static jobject q3eCallbackObj=0;
 static void *libdl;
+
+#define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
+#define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
+
+#define ANDROID_CALL_PROTOCOL_NATIVE_LINRARY_DIR 0x20001
+#define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
+#define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
+
+intptr_t Android_Call(int protocol, int size, ...)
+{
+	intptr_t res = 0;
+	va_list va;
+
+	va_start(va, size);
+	switch(protocol)
+	{
+		case ANDROID_CALL_PROTOCOL_TMPFILE:
+			res = (intptr_t)android_tmpfile();
+			break;
+		case ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT:
+			pull_input_event(va_arg(va, int));
+			res = 1;
+			break;
+		default:
+			break;
+	}
+	va_end(va);
+
+	return res;
+}
 
 static void loadLib(char* libpath)
 {
@@ -72,7 +107,9 @@ static void loadLib(char* libpath)
     setResolution = dlsym(libdl, "Q3E_SetResolution");
 	vidRestart = dlsym(libdl, "Q3E_OGLRestart");
     
-    Android_SetInteraction = dlsym(libdl, "Android_SetInteraction");
+    Q3E_Call = dlsym(libdl, "Q3E_Call");
+    qexit = dlsym(libdl, "Q3E_exit");
+	set_Android_Call = dlsym(libdl, "set_Android_Call");
 }
 
 void initAudio(void *buffer, int size)
@@ -234,18 +271,18 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
     setCallbacks(&initAudio,&writeAudio,&setState);    
     setResolution(width, height);
     
+	set_Android_Call(Android_Call);
     __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 native library file: %s", doom3_path);
-    if(Android_SetInteraction)
+    if(Q3E_Call)
     {
         char *ptr = strrchr(doom3_path, '/');
         if(ptr) *ptr = '\0';
         __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 native library dir: %s", doom3_path);
-	    void *funcs[] = {
-		    &pull_input_event,
-		    &itmpfile,
-            doom3_path,
-	    };
-        Android_SetInteraction(funcs);
+        (void)Q3E_Call(ANDROID_CALL_PROTOCOL_NATIVE_LINRARY_DIR, 1, doom3_path);
+        __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 redirect output to file: %d", redirect_output_to_file);
+        (void)Q3E_Call(ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE, 1, redirect_output_to_file);
+        __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 no handle signals: %d", no_handle_signals);
+        (void)Q3E_Call(ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS, 1, no_handle_signals);
     }
     
     qmain(argc, argv);
@@ -283,9 +320,26 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_vidRestart(JNIEnv *env, jclass
 	vidRestart();
 }
 
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_shutdown(JNIEnv *env, jclass c)
+{
+    if(qexit)  
+        qexit();
+}
+
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Is64(JNIEnv *env, jclass c)
 {    
     return sizeof(void *) == 8 ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetRedirectOutputToFile(JNIEnv *env, jclass c, jboolean enabled)
+{
+	redirect_output_to_file = enabled ? 1 : 0;
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetNoHandleSignals(JNIEnv *env, jclass c, jboolean enabled)
+{
+    no_handle_signals = enabled ? 1 : 0;
 }
 
 void pull_input_event(int execCmd)
@@ -300,8 +354,8 @@ void pull_input_event(int execCmd)
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_PullEvent_method, (jboolean)execCmd);
 }
 
-#define TMPFILE_NAME "diii4a_harmattan_tmpfile_XXXXXX"
-FILE * itmpfile(void)
+#define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"
+FILE * android_tmpfile(void)
 {
     const int Len = strlen(game_data_dir) + 1 + strlen(TMPFILE_NAME) + 1;
 	char *tmp_file = malloc(Len);
@@ -328,3 +382,4 @@ FILE * itmpfile(void)
     __android_log_print(ANDROID_LOG_DEBUG, "Q3E_JNI", "itmpfile create: %s", tmp_file);
 	return res;
 }
+

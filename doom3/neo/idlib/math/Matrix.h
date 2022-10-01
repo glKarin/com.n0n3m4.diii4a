@@ -457,6 +457,16 @@ class idMat3
 
 		friend void		TransposeMultiply(const idMat3 &inv, const idMat3 &b, idMat3 &dst);
 		friend idMat3	SkewSymmetric(idVec3 const &src);
+#ifdef _RAVEN
+	void			RotateAbsolute(int whichAxis, float	howManyDegrees);
+	void			RotateRelative(int whichAxis, float	howManyDegrees);
+	void			RotateArbitrary(const idVec3 &rotAxis, float howManyDegrees);
+
+// RAVEN BEGIN
+// abahr:
+	int				GetVec3Dimension( void ) const;
+// RAVEN END
+#endif
 
 	private:
 		idVec3			mat[ 3 ];
@@ -3586,5 +3596,12 @@ ID_INLINE float *idMatX::ToFloatPtr(void)
 {
 	return mat;
 }
+
+#ifdef _RAVEN
+// abahr: made version for when getting vectors
+ID_INLINE int idMat3::GetVec3Dimension( void ) const {
+	return 3;
+}
+#endif
 
 #endif /* !__MATH_MATRIX_H__ */

@@ -33,7 +33,33 @@ If you have questions concerning this license or the applicable additional terms
 
 //-----------------------------------------------------
 
+//#define _K_DEV
+#ifdef _K_DEV
+#define LOGI(fmt, args...) {common->Printf(fmt, ##args); common->Printf("\n");}
+#define LOGW(fmt, args...) common->Warning(fmt, ##args);
+#define LOGE(fmt, args...) common->Error(fmt, ##args);
+#endif
+
 #define ID_TIME_T time_t
+#ifdef _RAVEN
+typedef unsigned char		byte;		// 8 bits
+
+#ifndef BIT
+#define BIT( num )				BITT< num >::VALUE
+#endif
+
+#ifndef Q4BIT
+#define Q4BIT( num )				( 1 << ( num ) )
+#endif
+
+template< unsigned int B >
+class BITT {
+public:
+	typedef enum bitValue_e {
+		VALUE = 1 << B,
+	} bitValue_t;
+};
+#endif
 
 #ifdef _WIN32
 
@@ -116,6 +142,9 @@ If you have questions concerning this license or the applicable additional terms
 
 // id lib
 #include "../idlib/Lib.h"
+#ifdef _RAVEN
+#include "../raven/raven.h"
+#endif
 
 // framework
 #include "../framework/BuildVersion.h"
@@ -169,6 +198,10 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 #include "../tools/compilers/aas/AASFile.h"
 #include "../tools/compilers/aas/AASFileManager.h"
 
+#ifdef _RAVEN
+#include "../raven/raven_engine.h"
+#endif
+
 // game
 #if defined(_D3XP)
 
@@ -191,6 +224,10 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 	#include "../game/Game.h"
 	#elif defined _HARDCORPS
 	#include "../game/Game.h"
+	#elif defined _QUAKE4
+	#include "../quake4/Game.h"
+	#elif defined _RAVEN
+	#include "../quake4/Game.h"
 	#else
 	#include "../game/Game.h"
 	#endif
@@ -225,6 +262,10 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 	#include "../rivensin/Game_local.h"
 	#elif defined _HARDCORPS
 	#include "../hardcorps/Game_local.h"
+	#elif defined _QUAKE4
+	#include "../quake4/Game_local.h"
+	#elif defined _RAVEN
+	#include "../quake4/Game_local.h"
 	#else
 	#include "../game/Game_local.h"
 	#endif

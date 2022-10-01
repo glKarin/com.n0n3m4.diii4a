@@ -1039,7 +1039,11 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 					cvarSystem->ClearModifiedFlags(CVAR_USERINFO);   // don't emit back
 				}
 
+#ifdef _RAVEN // _QUAKE4
+				game->SetUserInfo(clientNum, info, true);
+#else
 				game->SetUserInfo(clientNum, info, true, false);
+#endif
 				break;
 			}
 			case SERVER_RELIABLE_MESSAGE_SYNCEDCVARS: {
@@ -1103,7 +1107,11 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 			}
 			case SERVER_RELIABLE_MESSAGE_ENTERGAME: {
 				SendUserInfoToServer();
+#ifdef _RAVEN // _QUAKE4
+				game->SetUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true);
+#else
 				game->SetUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true, false);
+#endif
 				cvarSystem->ClearModifiedFlags(CVAR_USERINFO);
 				break;
 			}
@@ -1978,7 +1986,11 @@ void idAsyncClient::RunFrame(void)
 	if (cvarSystem->GetModifiedFlags() & CVAR_USERINFO) {
 		game->ThrottleUserInfo();
 		SendUserInfoToServer();
+#ifdef _RAVEN // _QUAKE4
+		game->SetUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true);
+#else
 		game->SetUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true, false);
+#endif
 		cvarSystem->ClearModifiedFlags(CVAR_USERINFO);
 	}
 

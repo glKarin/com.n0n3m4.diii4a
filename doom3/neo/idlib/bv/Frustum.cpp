@@ -2668,10 +2668,26 @@ void idFrustum::ClipFrustumToBox(const idBox &box, float clipFractions[4], int c
 
 	for (i = 0; i < 4; i++) {
 
+#ifdef _RAVEN // rvlib
+// RAVEN BEGIN
+// jscott: made safe
+        clipFractions[i] = MAX_WORLD_COORD;
+        clipPlanes[i] = 1;
+
+        if( cornerVecs[i].x != 0.0f )
+        {
+#endif
 		index = FLOATSIGNBITNOTSET(cornerVecs[i].x);
 		f = (bounds[index].x - localOrigin.x) / cornerVecs[i].x;
 		clipFractions[i] = f;
 		clipPlanes[i] = 1 << index;
+
+#ifdef _RAVEN // rvlib
+        }
+
+        if( cornerVecs[i].y != 0.0f )
+        {
+#endif
 
 		index = FLOATSIGNBITNOTSET(cornerVecs[i].y);
 		f = (bounds[index].y - localOrigin.y) / cornerVecs[i].y;
@@ -2681,6 +2697,13 @@ void idFrustum::ClipFrustumToBox(const idBox &box, float clipFractions[4], int c
 			clipPlanes[i] = 4 << index;
 		}
 
+#ifdef _RAVEN // rvlib
+        }
+
+        if( cornerVecs[i].z != 0.0f )
+        {
+#endif
+
 		index = FLOATSIGNBITNOTSET(cornerVecs[i].z);
 		f = (bounds[index].z - localOrigin.z) / cornerVecs[i].z;
 
@@ -2688,6 +2711,11 @@ void idFrustum::ClipFrustumToBox(const idBox &box, float clipFractions[4], int c
 			clipFractions[i] = f;
 			clipPlanes[i] = 16 << index;
 		}
+
+#ifdef _RAVEN // rvlib
+        }
+// RAVEN END
+#endif
 
 		// make sure the frustum is not clipped between the frustum origin and the near plane
 		if (clipFractions[i] < minf) {

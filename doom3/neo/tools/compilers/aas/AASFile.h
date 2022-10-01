@@ -38,7 +38,11 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #define AAS_FILEID					"DewmAAS"
+#ifdef _RAVEN // _QUAKE4
+#define AAS_FILEVERSION				"1.08"
+#else
 #define AAS_FILEVERSION				"1.07"
+#endif
 
 // travel flags
 #define TFL_INVALID					BIT(0)		// not valid
@@ -159,6 +163,10 @@ typedef struct aasFace_s {
 	short						areas[2];			// area at the front and back of this face
 } aasFace_t;
 
+#ifdef _RAVEN
+struct rvMarker;
+#endif
+
 // area with a boundary of faces
 typedef struct aasArea_s {
 	int							numFaces;			// number of faces used for the boundary of the area
@@ -172,6 +180,16 @@ typedef struct aasArea_s {
 	int							travelFlags;		// travel flags for traveling through this area
 	idReachability 			*reach;				// reachabilities that start from this area
 	idReachability 			*rev_reach;			// reachabilities that lead to this area
+
+#ifdef _RAVEN
+	float						ceiling;			// top of the area
+	// cdr: AASTactical
+	unsigned short				numFeatures;		// number of features in this area
+	unsigned short				firstFeature;		// first feature in the feature index within this area
+
+	// cdr: Obstacle Avoidance
+	rvMarker*					firstMarker;		// first obstacle avoidance threat in this area (0 if none)
+#endif
 } aasArea_t;
 
 // nodes of the bsp tree
@@ -195,6 +213,27 @@ typedef struct aasCluster_s {
 	int							numPortals;			// number of cluster portals
 	int							firstPortal;		// first cluster portal in the index
 } aasCluster_t;
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// cdr: AASTactical
+typedef	struct aasFeature_s {
+	short						x;					// 2 Bytes
+	short						y;					// 2 Bytes
+	short						z;					// 2 Bytes
+	unsigned short				flags;				// 2 Bytes
+	unsigned char				normalx;			// 1 Byte
+	unsigned char				normaly;			// 1 Byte
+	unsigned char				height;				// 1 Byte
+	unsigned char				weight;				// 1 Byte
+
+	idVec3&			Normal();
+	idVec3&			Origin();
+
+	void			DrawDebugInfo( int index=-1 );
+  	int				GetLookPos( idVec3& lookPos, const idVec3& aimAtOrigin, const float leanDistance=16.0f );
+} aasFeature_t;										//--------------------------------
+#endif
 
 // trace through the world
 typedef struct aasTrace_s {
@@ -249,6 +288,15 @@ class idAASSettings
 		int							tt_startCrouching;
 		int							tt_waterJump;
 		int							tt_startWalkOffLedge;
+#ifdef _RAVEN
+// RAVEN BEGIN 
+// rjohnson: added more debug drawing
+	idVec4						debugColor;
+	bool						debugDraw;
+// cdr: AASTactical
+	bool						generateTacticalFeatures;
+// RAVEN END
+#endif
 
 	public:
 		idAASSettings(void);
@@ -400,6 +448,20 @@ class idAASFile
 		virtual void				PushPointIntoAreaNum(int areaNum, idVec3 &point) const = 0;
 		virtual bool				Trace(aasTrace_t &trace, const idVec3 &start, const idVec3 &end) const = 0;
 		virtual void				PrintInfo(void) const = 0;
+#ifdef _RAVEN
+	// RAVEN BEGIN
+		// cdr: AASTactical
+	virtual void					ClearTactical(void) { }
+
+	virtual	int						GetNumFeatureIndexes(void) const { return featureIndexes.Num(); }
+	virtual	aasIndex_t& GetFeatureIndex(int index) { return featureIndexes[index]; }
+	virtual int						AppendFeatureIndex(aasIndex_t& featureIdx) { return featureIndexes.Append(featureIdx); }
+
+	virtual	int						GetNumFeatures(void) const { return features.Num(); }
+	virtual	aasFeature_t& GetFeature(int index) { return features[index]; }
+	virtual int						AppendFeature(aasFeature_t& cluster) { return features.Append(cluster); }
+	// RAVEN END
+#endif
 
 	protected:
 		idStr						name;
@@ -416,6 +478,12 @@ class idAASFile
 		idList<aasPortal_t>			portals;
 		idList<aasIndex_t>			portalIndex;
 		idList<aasCluster_t>		clusters;
+#ifdef _RAVEN
+// jmarshall - AAS 1.08
+	idList<int>					featureIndexes;
+	idList<aasFeature_t>		features;
+// jmarshall end
+#endif
 		idAASSettings				settings;
 };
 

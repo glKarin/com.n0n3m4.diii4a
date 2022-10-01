@@ -52,6 +52,13 @@ idlib_string = ' \
 	Timer.cpp \
 	Heap.cpp'
 
+if ( local_quake4 ):
+	idlib_string += ' \
+	../raven/idlib/LexerFactory.cpp \
+	../raven/idlib/TextCompiler.cpp \
+	../raven/idlib/math/Radians.cpp \
+	'
+
 idlib_list = scons_utils.BuildList( 'idlib', idlib_string )
 
 for i in range( len( idlib_list ) ):

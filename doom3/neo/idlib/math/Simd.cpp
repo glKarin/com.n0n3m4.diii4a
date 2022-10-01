@@ -68,6 +68,11 @@ void idSIMD::InitProcessor(const char *module, bool forceGeneric)
 
 	cpuid = idLib::sys->GetProcessorId();
 
+#ifdef _RAVEN
+// jmarshall - temp disable SIMD
+	forceGeneric = true;
+// jmarshall end
+#endif
 	if (forceGeneric) {
 
 		newProcessor = generic;
@@ -144,7 +149,7 @@ void idSIMD::Shutdown(void)
 
 idSIMDProcessor *p_simd;
 idSIMDProcessor *p_generic;
-long baseClocks = 0;
+/* 64long */int baseClocks = 0;
 
 #ifdef _WIN32
 
@@ -152,7 +157,7 @@ long baseClocks = 0;
 
 #pragma warning(disable : 4731)     // frame pointer register 'ebx' modified by inline assembly code
 
-long saved_ebx = 0;
+/* 64long */int saved_ebx = 0;
 
 #define StartRecordTime( start )			\
 	__asm mov saved_ebx, ebx				\

@@ -92,6 +92,9 @@ class idUserInterfaceLocal : public idUserInterface
 			return timeStamp;
 		}
 
+#ifdef _RAVEN
+		virtual 
+#endif
 		idWindow 					*GetDesktop() const {
 			return desktop;
 		}
@@ -125,6 +128,9 @@ class idUserInterfaceLocal : public idUserInterface
 		idStr						&GetReturnCmd() {
 			return returnCmd;
 		};
+#ifdef _RAVEN
+	virtual void				SetInteractive(bool interactive);
+#endif
 
 	private:
 		bool						active;

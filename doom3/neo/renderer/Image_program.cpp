@@ -238,7 +238,11 @@ static void R_AddNormalMaps(byte *data1, int width1, int height1, byte *data2, i
 			len = n.LengthFast();
 
 			if (len < 1.0f) {
+#ifdef _RAVEN // _QUAKE4
+				n[2] = idMath::Sqrt(idMath::ClampFloat(0.0f, 1.0f, 1.0 - (n[0] * n[0]) - (n[1] * n[1])));
+#else
 				n[2] = idMath::Sqrt(1.0 - (n[0]*n[0]) - (n[1]*n[1]));
+#endif
 			}
 
 			n[0] += (d2[0] - 128) / 127.0;
@@ -590,6 +594,21 @@ static bool R_ParseImageProgram_r(idLexer &src, byte **pic, int *width, int *hei
 		MatchAndAppendToken(src, ")");
 		return true;
 	}
+
+#ifdef _RAVEN
+	// jmarshall - quake 4 support
+	if (!token.Icmp("downsize")) {
+		MatchAndAppendToken(src, "(");
+		R_ParseImageProgram_r(src, pic, width, height, timestamps, depth);
+		MatchAndAppendToken(src, ",");
+		src.ReadToken(&token);
+		AppendToken(token);
+
+		MatchAndAppendToken(src, ")");
+		return true;
+	}
+// jmarshall end
+#endif
 
 	if (!token.Icmp("makeAlpha")) {
 		int		i;

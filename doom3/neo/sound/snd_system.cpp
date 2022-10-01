@@ -1587,3 +1587,21 @@ int idSoundSystemLocal::IsEAXAvailable(void)
 	return 0;
 #endif
 }
+
+#ifdef _RAVEN
+// jmarshall: Quake 4 specific code
+idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
+	switch (worldId)
+	{
+	case SOUNDWORLD_GAME:
+	case SOUNDWORLD_ANY:
+		return session->sw;
+	case SOUNDWORLD_MENU:
+		return session->menuSoundWorld;
+
+	default:
+		return session->sw;
+	}
+}
+// jmarshall
+#endif

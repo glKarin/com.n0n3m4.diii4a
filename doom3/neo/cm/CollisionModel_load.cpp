@@ -118,6 +118,12 @@ void idCollisionModelManagerLocal::LoadProcBSP(const char *name)
 	idToken token;
 	idLexer *src;
 
+#ifdef _RAVEN
+// jmarshall
+    bool isLegacyWorldFile = false;
+// jmarshall end
+#endif
+
 	// load it
 	filename = name;
 	filename.SetFileExtension(PROC_FILE_EXT);
@@ -134,6 +140,20 @@ void idCollisionModelManagerLocal::LoadProcBSP(const char *name)
 		delete src;
 		return;
 	}
+
+#ifdef _RAVEN
+// jmarshall: quake 4 proc format
+    if (!src->ReadToken(&token) || token.Icmp(PROC_FILEVERSION))
+    {
+        common->Printf("idRenderWorldLocal::InitFromMap: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);
+        delete src;
+        return;
+    }
+
+    // Map CRC, we aren't going to use it.
+    src->ReadToken(&token);
+// jmarshall end
+#endif
 
 	// parse the file
 	while (1) {
@@ -198,6 +218,9 @@ void idCollisionModelManagerLocal::Clear(void)
 	contacts = NULL;
 	maxContacts = 0;
 	numContacts = 0;
+#ifdef _RAVEN
+    numInlinedProcClipModels = 0;
+#endif
 }
 
 /*
@@ -391,6 +414,13 @@ void idCollisionModelManagerLocal::FreeModel(cm_model_t *model)
 	cm_polygonRefBlock_t *polygonRefBlock, *nextPolygonRefBlock;
 	cm_brushRefBlock_t *brushRefBlock, *nextBrushRefBlock;
 	cm_nodeBlock_t *nodeBlock, *nextNodeBlock;
+#ifdef _RAVEN
+// jmarshall - quake 4 crash fix - trm models are shared.
+	if (model->isTrmModel) {
+		return;
+	}
+// jmarshall end
+#endif
 
 	// free the tree structure
 	if (model->node) {
@@ -837,6 +867,11 @@ void idCollisionModelManagerLocal::SetupTrmModelStructure(void)
 	trmBrushes[0]->b->checkcount = 0;
 	trmBrushes[0]->b->contents = -1;		// all contents
 	trmBrushes[0]->b->numPlanes = 0;
+#ifdef _RAVEN
+// jmarshall
+	model->isTrmModel = true;
+// jmarshall end
+#endif
 }
 
 /*
@@ -3295,7 +3330,12 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
 	// only load ASE and LWO models
 	idStr(fileName).ExtractFileExtension(extension);
 
-	if ((extension.Icmp("ase") != 0) && (extension.Icmp("lwo") != 0) && (extension.Icmp("ma") != 0)) {
+#ifdef _RAVEN // _QUAKE4
+	if ( ( extension.Icmp( "ase" ) != 0 ) && ( extension.Icmp( "lwo" ) != 0 ) && ( extension.Icmp( "mdr" ) != 0 ) && (extension.Icmp("obj") != 0) && (extension.Icmp("dae") != 0))
+#else
+	if ((extension.Icmp("ase") != 0) && (extension.Icmp("lwo") != 0) && (extension.Icmp("ma") != 0))
+#endif
+	{
 		return NULL;
 	}
 
@@ -3738,7 +3778,7 @@ idCollisionModelManagerLocal::GetModelName
 const char *idCollisionModelManagerLocal::GetModelName(cmHandle_t model) const
 {
 	if (model < 0 || model > MAX_SUBMODELS || model >= numModels || !models[model]) {
-		common->Printf("idCollisionModelManagerLocal::GetModelBounds: invalid model handle\n");
+		common->Printf("idCollisionModelManagerLocal::GetModelName: invalid model handle\n");
 		return "";
 	}
 
@@ -4070,3 +4110,216 @@ bool idCollisionModelManagerLocal::TrmFromModel(const char *modelName, idTraceMo
 
 	return TrmFromModel(models[ handle ], trm);
 }
+
+#ifdef _RAVEN
+/*
+================
+idCollisionModelManagerLocal::BuildModels
+================
+*/
+void idCollisionModelManagerLocal::BuildModels(const idMapFile *mapFile, bool forceCreateMap)
+{
+	int i;
+	const idMapEntity *mapEnt;
+
+	idTimer timer;
+	timer.Start();
+
+	if (forceCreateMap || !LoadCollisionModelFile(mapFile->GetName(), mapFile->GetGeometryCRC())) {
+
+		if (!mapFile->GetNumEntities()) {
+			return;
+		}
+
+		// load the .proc file bsp for data optimisation
+		LoadProcBSP(mapFile->GetName());
+
+		// convert brushes and patches to collision data
+		for (i = 0; i < mapFile->GetNumEntities(); i++) {
+			mapEnt = mapFile->GetEntity(i);
+
+			if (numModels >= MAX_SUBMODELS) {
+				common->Error("idCollisionModelManagerLocal::BuildModels: more than %d collision models", MAX_SUBMODELS);
+				break;
+			}
+
+			models[numModels] = CollisionModelForMapEntity(mapEnt);
+
+			if (models[ numModels]) {
+				numModels++;
+			}
+
+#ifdef _RAVEN
+			if (numInlinedProcClipModels && numModels == PROC_CLIPMODEL_INDEX_START) {
+				numModels += numInlinedProcClipModels;
+			}
+#endif
+		}
+
+		// free the proc bsp which is only used for data optimization
+		Mem_Free(procNodes);
+		procNodes = NULL;
+
+		// write the collision models to a file
+		WriteCollisionModelsToFile(mapFile->GetName(), 0, numModels, mapFile->GetGeometryCRC());
+	}
+
+	timer.Stop();
+
+	// print statistics on collision data
+	cm_model_t model;
+	AccumulateModelInfo(&model);
+	common->Printf("collision data:\n");
+	common->Printf("%6i models\n", numModels);
+	PrintModelInfo(&model);
+	common->Printf("%.0f msec to load collision data.\n", timer.Milliseconds());
+}
+
+/*
+================
+idCollisionModelManagerLocal::LoadMap
+================
+*/
+void idCollisionModelManagerLocal::LoadMap(const idMapFile *mapFile, bool forceCreateMap)
+{
+
+	if (mapFile == NULL) {
+		common->Error("idCollisionModelManagerLocal::LoadMap: NULL mapFile");
+	}
+
+	// check whether we can keep the current collision map based on the mapName and mapFileTime
+	if (loaded) {
+		if (mapName.Icmp(mapFile->GetName()) == 0) {
+			if (mapFile->GetFileTime() == mapFileTime) {
+				common->DPrintf("Using loaded version\n");
+				return;
+			}
+
+			common->DPrintf("Reloading modified map\n");
+		}
+
+		FreeMap(mapFile->GetName());
+	}
+
+	// clear the collision map
+	Clear();
+
+	// models
+	maxModels = MAX_SUBMODELS;
+	numModels = 0;
+	models = (cm_model_t **) Mem_ClearedAlloc((maxModels+1) * sizeof(cm_model_t *));
+
+	// setup hash to speed up finding shared vertices and edges
+	SetupHash();
+
+	// setup trace model structure
+	SetupTrmModelStructure();
+
+	// build collision models
+	BuildModels(mapFile, forceCreateMap);
+
+	// save name and time stamp
+	mapName = mapFile->GetName();
+	mapFileTime = mapFile->GetFileTime();
+	loaded = true;
+
+	// shutdown the hash
+	ShutdownHash();
+}
+
+
+/*
+================
+idCollisionModelManagerLocal::ModelFromTrm
+
+Trace models (item boxes, etc) are converted to collision models on the fly, using the last model slot
+as a reusable temporary buffer
+================
+*/
+cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const char* modelName, const idTraceModel &trm, const idMaterial *material ) {
+	int i, j;
+	cm_vertex_t *vertex;
+	cm_edge_t *edge;
+	cm_polygon_t *poly;
+	cm_model_t *model;
+	const traceModelVert_t *trmVert;
+	const traceModelEdge_t *trmEdge;
+	const traceModelPoly_t *trmPoly;
+
+	assert( models );
+
+	if ( material == NULL ){
+		material = trmMaterial;
+	}
+
+	model = models[MAX_SUBMODELS];
+	model->node->brushes = NULL;
+	model->node->polygons = NULL;
+	// if not a valid trace model
+	if ( trm.type == TRM_INVALID || !trm.numPolys ) {
+		return MAX_SUBMODELS;
+	}
+	// vertices
+	model->numVertices = trm.numVerts;
+	vertex = model->vertices;
+	trmVert = trm.verts;
+	for ( i = 0; i < trm.numVerts; i++, vertex++, trmVert++ ) {
+		vertex->p = *trmVert;
+		vertex->sideSet = 0;
+	}
+	// edges
+	model->numEdges = trm.numEdges;
+	edge = model->edges + 1;
+	trmEdge = trm.edges + 1;
+	for ( i = 0; i < trm.numEdges; i++, edge++, trmEdge++ ) {
+		edge->vertexNum[0] = trmEdge->v[0];
+		edge->vertexNum[1] = trmEdge->v[1];
+		edge->normal = trmEdge->normal;
+		edge->internal = false;
+		edge->sideSet = 0;
+	}
+	// polygons
+	model->numPolygons = trm.numPolys;
+	trmPoly = trm.polys;
+	for ( i = 0; i < trm.numPolys; i++, trmPoly++ ) {
+		poly = trmPolygons[i]->p;
+		poly->numEdges = trmPoly->numEdges;
+		for ( j = 0; j < trmPoly->numEdges; j++ ) {
+			poly->edges[j] = trmPoly->edges[j];
+		}
+		poly->plane.SetNormal( trmPoly->normal );
+		poly->plane.SetDist( trmPoly->dist );
+		poly->bounds = trmPoly->bounds;
+		poly->material = material;
+		// link polygon at node
+		trmPolygons[i]->next = model->node->polygons;
+		model->node->polygons = trmPolygons[i];
+	}
+	// if the trace model is convex
+	if ( trm.isConvex ) {
+		// setup brush for position test
+		trmBrushes[0]->b->numPlanes = trm.numPolys;
+		for ( i = 0; i < trm.numPolys; i++ ) {
+			trmBrushes[0]->b->planes[i] = trmPolygons[i]->p->plane;
+		}
+		trmBrushes[0]->b->bounds = trm.bounds;
+		// link brush at node
+		trmBrushes[0]->next = model->node->brushes;
+		model->node->brushes = trmBrushes[0];
+	}
+	// model bounds
+	model->bounds = trm.bounds;
+	// convex
+	model->isConvex = trm.isConvex;
+
+	return MAX_SUBMODELS;
+}
+
+void	idCollisionModelManagerLocal::FreeModel(cmHandle_t model)
+{
+	if (model < 0 || model > MAX_SUBMODELS || model >= numModels || !models[model]) {
+		return;
+	}
+	FreeModel(models[model]);
+}
+#endif

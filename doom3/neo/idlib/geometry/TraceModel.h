@@ -144,8 +144,15 @@ class idTraceModel
 		// calculate mass properties assuming an uniform density
 		void				GetMassProperties(const float density, float &mass, idVec3 &centerOfMass, idMat3 &inertiaTensor) const;
 
+#ifdef _RAVEN
+	public:
+#else
 	private:
+#endif
 		void				InitBox(void);
+#ifdef _RAVEN
+	private:
+#endif
 		void				InitOctahedron(void);
 		void				InitDodecahedron(void);
 		void				InitBone(void);

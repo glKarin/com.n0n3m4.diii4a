@@ -109,8 +109,11 @@ bool idLangDict::Load(const char *fileName, bool clear /* _D3XP */)
 			idLangKeyValue kv;
 			kv.key = tok;
 			kv.value = tok2;
+			// DG: D3LE has #font_ entries in english.lang, maybe from D3BFG? not supported here, just skip them
+			if(kv.key.Cmpn("#font_", 6) != 0) {
 			assert(kv.key.Cmpn(STRTABLE_ID, STRTABLE_ID_LENGTH) == 0);
 			hash.Add(GetHashKey(kv.key), args.Append(kv));
+			}
 		}
 	}
 
@@ -174,6 +177,42 @@ const char *idLangDict::GetString(const char *str) const
 		return str;
 	}
 
+#ifdef _RAVEN //k: Quake4 internal lang string is 6 digits ID, and startis with 1, e.g. #str_107018
+	idStr nstr(str);
+	const char *ptr = str;
+	bool changed = false;
+	if(nstr.Length() == STRTABLE_ID_LENGTH + 5) // DOOM3 lang key length
+	{
+		nstr = idStr(STRTABLE_ID) + "1" + nstr.Right(5); 
+		ptr = nstr.c_str();
+		changed = true;
+	}
+
+	int hashKey = GetHashKey(ptr);
+
+	for (int i = hash.First(hashKey); i != -1; i = hash.Next(i)) {
+		if (args[i].key.Cmp(ptr) == 0) {
+			return args[i].value;
+		}
+	}
+	// try DOOM3 key
+	if(changed)
+	{
+		hashKey = GetHashKey(ptr);
+
+		for (int i = hash.First(hashKey); i != -1; i = hash.Next(i)) {
+			if (args[i].key.Cmp(str) == 0) {
+				return args[i].value;
+			}
+		}
+	}
+
+	if(changed)
+		idLib::common->Warning("Unknown string id %s(Quake4 string id %s)", str, ptr);
+	else
+		idLib::common->Warning("Unknown string id %s", str);
+	return str;
+#else
 	int hashKey = GetHashKey(str);
 
 	for (int i = hash.First(hashKey); i != -1; i = hash.Next(i)) {
@@ -184,6 +223,7 @@ const char *idLangDict::GetString(const char *str) const
 
 	idLib::common->Warning("Unknown string id %s", str);
 	return str;
+#endif
 }
 
 /*
@@ -337,7 +377,9 @@ int idLangDict::GetHashKey(const char *str) const
 	int hashKey = 0;
 
 	for (str += STRTABLE_ID_LENGTH; str[0] != '\0'; str++) {
-		assert(str[0] >= '0' && str[0] <= '9');
+
+	//     (for D3LE mod that seems to have lots of entries like #str_adil_exis_pda_01_audio_info)
+		//k assert(str[0] >= '0' && str[0] <= '9');
 		hashKey = hashKey * 10 + str[0] - '0';
 	}
 

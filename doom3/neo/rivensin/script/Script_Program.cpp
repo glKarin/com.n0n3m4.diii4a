@@ -2033,8 +2033,12 @@ bool idProgram::Restore( idRestoreGame *savefile ) {
 	int saved_checksum, checksum;
 
 	savefile->ReadInt( saved_checksum );
+#ifndef __ANDROID__
 	bool isOldSavegame = savefile->GetBuildNumber() <= 1304;
 	checksum = CalculateChecksum(isOldSavegame);
+#else
+	checksum = CalculateChecksum();
+#endif
 
 	if ( saved_checksum != checksum ) {
 		gameLocal.Warning( "WARNING: Real Script checksum didn't match the one from the savegame!");

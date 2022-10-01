@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #define __TR_LOCAL_H__
 
 #include "Image.h"
+
 #include "MegaTexture.h"
 
 struct shaderProgram_s;
@@ -506,7 +507,6 @@ typedef struct {
 	idImage	*image;
 	int		cubeFace;					// when copying to a cubeMap
 } copyRenderCommand_t;
-
 
 //=======================================================================
 
@@ -1021,6 +1021,10 @@ const int GLS_SRCBLEND_ONE_MINUS_DST_ALPHA		= 0x00000008;
 const int GLS_SRCBLEND_ALPHA_SATURATE			= 0x00000009;
 const int GLS_SRCBLEND_BITS						= 0x0000000f;
 
+#ifdef _RAVEN
+const int GLS_SRCBLEND_SRC_COLOR				= 0x00000002;
+#endif
+
 const int GLS_DSTBLEND_ZERO						= 0x0;
 const int GLS_DSTBLEND_ONE						= 0x00000020;
 const int GLS_DSTBLEND_SRC_COLOR				= 0x00000030;
@@ -1209,6 +1213,10 @@ void R_ModulateLights_f(const idCmdArgs &args);
 void R_SetLightProject(idPlane lightProject[4], const idVec3 origin, const idVec3 targetPoint,
                        const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop);
 
+#ifdef _RAVEN
+void R_AddEffectSurfaces(void);
+#endif
+
 void R_AddLightSurfaces(void);
 void R_AddModelSurfaces(void);
 void R_RemoveUnecessaryViewLights(void);
@@ -1394,7 +1402,7 @@ typedef struct shaderProgram_s {
 	GLint		modelViewProjectionMatrix;
 	GLint		modelMatrix;
 	GLint		textureMatrix;
-	// HTODO: modelView matrix
+	//k: add modelView matrix uniform for GLSL vertex shader
 	GLint		modelViewMatrix;
 	GLint		clipPlane;
 	GLint		fogMatrix;
@@ -1435,14 +1443,14 @@ typedef struct shaderProgram_s {
 	GLint		nonPowerOfTwo;
 
 	GLint		u_fragmentMap[MAX_FRAGMENT_IMAGES];
-	//HTODO: cubemap
+	//k: cubemap texture units
 	GLint		u_fragmentCubeMap[MAX_FRAGMENT_IMAGES];
 	GLint		u_vertexParm[MAX_VERTEX_PARMS];
 	GLint		texgenS;
 	GLint		texgenT;
 	GLint		texgenQ;
 
-#ifdef _HARM_SHADER_NAME
+#ifdef _HARM_SHADER_NAME //k: restore shader name
 	char name[32];
 #endif
 } shaderProgram_t;
@@ -1458,15 +1466,14 @@ extern shaderProgram_t shadowShader;
 extern shaderProgram_t interactionShader;
 extern shaderProgram_t defaultShader;
 extern shaderProgram_t depthFillShader;
-//HTODO: skybox
-extern shaderProgram_t cubemapShader;
-extern shaderProgram_t reflectionCubemapShader;
-extern shaderProgram_t depthFillClipShader;
-extern shaderProgram_t fogShader;
-extern shaderProgram_t blendLightShader;
-extern shaderProgram_t interactionBlinnPhongShader;
-extern shaderProgram_t diffuseCubemapShader;
-extern shaderProgram_t texgenShader;
+extern shaderProgram_t cubemapShader; //k: skybox shader
+extern shaderProgram_t reflectionCubemapShader; //k: reflection shader
+extern shaderProgram_t depthFillClipShader; //k: z-fill clipped shader
+extern shaderProgram_t fogShader; //k: fog shader
+extern shaderProgram_t blendLightShader; //k: blend light shader
+extern shaderProgram_t interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
+extern shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
+extern shaderProgram_t texgenShader; //k: texgen shader
 
 
 /*
@@ -1770,5 +1777,56 @@ idScreenRect R_CalcIntersectionScissor(const idRenderLightLocal *lightDef,
 #include "RenderWorld_local.h"
 #include "GuiModel.h"
 #include "VertexCache.h"
+
+#ifdef __ANDROID__ //k for Android large stack memory allocate limit
+#define HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
+
+#ifdef HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
+extern idCVar harm_r_maxAllocStackMemory; // declare in tr_trisurf.cpp
+
+	#define HARM_MAX_STACK_ALLOC_SIZE (harm_r_maxAllocStackMemory.GetInteger())
+#else
+	#define HARM_MAX_STACK_ALLOC_SIZE (1024 * 512)
+#endif
+
+// alloc in heap memory
+#define _alloca16_heap( x )					((void *)((((intptr_t)calloc( (x)+15 ,1 )) + 15) & ~15))
+
+	// Using heap memory. Also reset RLIMIT_STACK by call `setrlimit`.
+#define _DROID_ALLOC16_DEF(T, alloc_size, varname, x) \
+	const int _HARM_MAX_STACK_ALLOC_SIZE##x = harm_r_maxAllocStackMemory.GetInteger(); \
+	bool useHeapMem##x; \
+	if(_HARM_MAX_STACK_ALLOC_SIZE##x > 0) \
+		useHeapMem##x = (alloc_size) >= _HARM_MAX_STACK_ALLOC_SIZE##x;	 \
+	else if(_HARM_MAX_STACK_ALLOC_SIZE##x == 0) \
+		useHeapMem##x = true; \
+	else \
+		useHeapMem##x = false; \
+	T *varname = (T *) (useHeapMem##x ? _alloca16_heap(alloc_size) : _alloca16(alloc_size)); \
+	if(useHeapMem##x) \
+		common->Printf("[Harmattan]: Alloca on heap memory %p(%d bytes)\n", varname, alloc_size);
+
+#define _DROID_ALLOC16(T, alloc_size, varname, x) \
+	const int _HARM_MAX_STACK_ALLOC_SIZE##x = harm_r_maxAllocStackMemory.GetInteger(); \
+	bool useHeapMem##x; \
+	if(_HARM_MAX_STACK_ALLOC_SIZE##x > 0) \
+		useHeapMem##x = (alloc_size) >= _HARM_MAX_STACK_ALLOC_SIZE##x;	 \
+	else if(_HARM_MAX_STACK_ALLOC_SIZE##x == 0) \
+		useHeapMem##x = true; \
+	else \
+		useHeapMem##x = false; \
+	varname = (T *) (useHeapMem##x ? _alloca16_heap(alloc_size) : _alloca16(alloc_size)); \
+	if(useHeapMem##x) \
+		common->Printf("[Harmattan]: Alloca on heap memory %p(%d bytes)\n", varname, alloc_size);
+
+	// free memory when not call alloca()
+#define _DROID_FREE(varname, x) \
+	if(useHeapMem##x) \
+	{ \
+		common->Printf("[Harmattan]: Free alloca heap memory %p\n", varname); \
+		free(varname); \
+	}
+
+#endif
 
 #endif /* !__TR_LOCAL_H__ */

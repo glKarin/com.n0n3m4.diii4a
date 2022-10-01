@@ -29,6 +29,50 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __NETWORKSYSTEM_H__
 #define __NETWORKSYSTEM_H__
 
+#ifdef _RAVEN
+    //RAVEN END
+    typedef enum {
+        SC_NONE = -1,
+        SC_FAVORITE,
+        SC_LOCKED,
+        SC_DEDICATED,
+        SC_PB,
+        SC_NAME,
+        SC_PING,
+        SC_REPEATER,
+        SC_PLAYERS,
+        SC_GAMETYPE,
+        SC_MAP,
+        SC_ALL,
+        NUM_SC
+    } sortColumn_t;
+   
+    typedef struct {
+        sortColumn_t            column;
+        idList<int>::cmp_t* compareFn;
+        idList<int>::filter_t* filterFn;
+        const char* description;
+    } sortInfo_t;
+
+typedef struct { 
+      netadr_t    adr; 
+      idDict      serverInfo; 
+      int         ping; 
+   
+      int         clients; 
+   
+      int         OSMask; 
+   
+      //RAVEN BEGIN 
+      // shouchard:  added favorite flag 
+      bool        favorite;   // true if this has been marked by a user as a favorite 
+      bool        dedicated; 
+      // shouchard:  added performance filtered flag 
+      bool        performanceFiltered;    // true if the client machine is too wimpy to have good perfo    rmance 
+  //RAVEN END 
+  } scannedServer_t;
+
+#endif
 
 /*
 ===============================================================================
@@ -59,6 +103,36 @@ class idNetworkSystem
 		virtual int				ClientGetOutgoingRate(void);
 		virtual int				ClientGetIncomingRate(void);
 		virtual float			ClientGetIncomingPacketLoss(void);
+
+#ifdef _RAVEN
+        // for MP games 
+        virtual void            SetLoadingText(const char* loadingText) { }
+        virtual void            AddLoadingIcon(const char* icon) { }
+
+		// server browser
+		virtual int             GetNumScannedServers(void) { return 0; }
+        virtual const scannedServer_t* GetScannedServerInfo(int serverNum) { return 0; }
+        virtual void            UseSortFunction(const sortInfo_t& sortInfo, bool use = true) { }
+        virtual void            AddSortFunction(const sortInfo_t& sortInfo) { }
+
+        virtual bool            RemoveSortFunction(const sortInfo_t& sortInfo) { return 0; }
+
+	virtual const char* GetClientGUID(int clientNum) { return 0; }
+
+// ddynerman: added some utility functions
+	// uses a static buffer, copy it before calling in game again
+	virtual const char* GetServerAddress(void) { return 0; }
+	virtual int				ServerGetClientNum(int clientId) { return 0; }
+	virtual	int				ServerGetServerTime(void) { return 0; }
+
+	virtual	void			AddFriend(int clientNum) { }
+	virtual void			RemoveFriend(int clientNum) { }
+#endif
+#ifdef _RAVEN // _QUAKE4
+	virtual int				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);
+	virtual int				AllocateClientSlotForBot(const char *botName, int maxPlayersOnServer);
+#endif
+
 };
 
 extern idNetworkSystem 	*networkSystem;

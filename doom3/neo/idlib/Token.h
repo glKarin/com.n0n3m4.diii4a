@@ -68,11 +68,21 @@ If you have questions concerning this license or the applicable additional terms
 // punctuation sub type is the punctuation id
 // name sub type is the length of the name
 
+#ifdef _RAVEN
+class Lexer;
+#endif
+
 class idToken : public idStr
 {
 
 		friend class idParser;
 		friend class idLexer;
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jsinger: added to allow Lexer direct access to token internals as well
+	friend class Lexer;
+// RAVEN END
+#endif
 
 	public:
 		int				type;								// token type
@@ -91,7 +101,7 @@ class idToken : public idStr
 
 		double			GetDoubleValue(void);				// double value of TT_NUMBER
 		float			GetFloatValue(void);				// float value of TT_NUMBER
-		unsigned long	GetUnsignedLongValue(void);		// unsigned long value of TT_NUMBER
+		unsigned/* 64long */ int	GetUnsignedLongValue(void);		// unsigned int 64long value of TT_NUMBER
 		int				GetIntValue(void);				// int value of TT_NUMBER
 		int				WhiteSpaceBeforeToken(void) const;  // returns length of whitespace before token
 		void			ClearTokenWhiteSpace(void);		// forget whitespace before token
@@ -99,7 +109,7 @@ class idToken : public idStr
 		void			NumberValue(void);				// calculate values for a TT_NUMBER
 
 	private:
-		unsigned long	intvalue;							// integer value
+		unsigned/* 64long */ int	intvalue;							// integer value
 		double			floatvalue;							// floating point value
 		const char 	*whiteSpaceStart_p;					// start of white space before token, only used by idLexer
 		const char 	*whiteSpaceEnd_p;					// end of white space before token, only used by idLexer
@@ -149,7 +159,7 @@ ID_INLINE float idToken::GetFloatValue(void)
 	return (float) GetDoubleValue();
 }
 
-ID_INLINE unsigned long	idToken::GetUnsignedLongValue(void)
+ID_INLINE unsigned/* 64long */ int	idToken::GetUnsignedLongValue(void)
 {
 	if (type != TT_NUMBER) {
 		return 0;
@@ -175,6 +185,14 @@ ID_INLINE int idToken::WhiteSpaceBeforeToken(void) const
 ID_INLINE void idToken::AppendDirty(const char a)
 {
 	EnsureAlloced(len + 2, true);
+#ifdef _RAVEN // rvlib
+// RAVEN BEGIN
+// jscott: I hate slashes nearly as much as KRABS
+	if( a == '\\' )
+		data[len++] = '/';
+	else
+// RAVEN END
+#endif
 	data[len++] = a;
 }
 

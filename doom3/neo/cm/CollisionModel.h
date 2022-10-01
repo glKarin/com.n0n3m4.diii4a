@@ -56,6 +56,15 @@ typedef enum {
 	CONTACT_TRMVERTEX						// trace model vertex hits model polygon
 } contactType_t;
 
+#ifdef _RAVEN
+#define WORLD_MODEL_NAME	"worldMap"		// name of world model
+
+#define PROC_CLIPMODEL_INDEX_START		1
+#define PROC_CLIPMODEL_STRING_PRFX		"inlined_proc_clip_"
+											//
+#include "../raven/framework/declMatType.h"
+#endif
+
 // contact info
 typedef struct {
 	contactType_t			type;			// contact type
@@ -68,6 +77,13 @@ typedef struct {
 	int						trmFeature;		// contact feature on trace model
 	int						entityNum;		// entity the contact surface is a part of
 	int						id;				// id of clip model the contact surface is part of
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jscott: for material type code
+// jmarshall: this really needs to be implemented!
+	const rvDeclMatType* materialType;	// material type of texture (possibly indirected though a hit map)
+// RAVEN END
+#endif
 } contactInfo_t;
 
 // trace result
@@ -93,6 +109,26 @@ class idCollisionModelManager
 		virtual void			LoadMap(const idMapFile *mapFile) = 0;
 		// Frees all the collision models.
 		virtual void			FreeMap(void) = 0;
+#ifdef _RAVEN
+	// Loads collision models from a map file.
+	virtual void			LoadMap( const idMapFile *mapFile, bool forceCreateMap ) = 0;
+	// Frees all the collision models.
+	virtual void			FreeMap(const char* mapName) = 0;
+
+	// Creates a trace model from a collision model, returns true if succesfull.
+	virtual bool			TrmFromModel(const char* mapName, const char *modelName, idTraceModel &trm ) = 0;
+
+	// Frees a collision model.
+	virtual void	FreeModel(cmHandle_t model) = 0;
+
+	// sets up a trace model for collision with other trace models
+	virtual cmHandle_t ModelFromTrm(const char* mapName, const char* modelName, const idTraceModel &trm, const idMaterial *material ) = 0;
+
+	virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) {  }
+
+	// Gets the clip handle for a model.
+	virtual cmHandle_t LoadModel(const char* mapName, const char *modelName, const bool precache ) = 0;
+#endif
 
 		// Gets the clip handle for a model.
 		virtual cmHandle_t		LoadModel(const char *modelName, const bool precache) = 0;
@@ -142,6 +178,10 @@ class idCollisionModelManager
 		virtual void			ListModels(void) = 0;
 		// Writes a collision model file for the given map entity.
 		virtual bool			WriteCollisionModelForMapEntity(const idMapEntity *mapEnt, const char *filename, const bool testTraceModel = true) = 0;
+#ifdef _RAVEN // _QUAKE4
+	virtual int				PointContents(const idVec3 p, cmHandle_t handle) = 0;
+#endif
+
 };
 
 extern idCollisionModelManager 		*collisionModelManager;

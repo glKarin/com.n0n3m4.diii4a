@@ -38,7 +38,6 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-
 // Contains variables specific to the OpenGL configuration being run right now.
 // These are constant once the OpenGL subsystem is initialized.
 typedef struct glconfig_s {
@@ -245,6 +244,7 @@ class idRenderSystem
 		// texture filter / mipmapping / repeat won't be modified by the upload
 		// returns false if the image wasn't found
 		virtual bool			UploadImage(const char *imageName, const byte *data, int width, int height) = 0;
+
 };
 
 extern idRenderSystem 			*renderSystem;

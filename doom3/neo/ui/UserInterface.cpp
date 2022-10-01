@@ -375,6 +375,10 @@ bool idUserInterfaceLocal::InitFromFile(const char *qpath, bool rebuild, bool ca
 		uiManagerLocal.guis.Append(this);
 	}
 
+#ifdef _RAVEN //k: GUI initilized event
+	desktop->RunScript(idWindow::ON_INIT);
+#endif
+
 	loading = false;
 
 	return true;
@@ -727,4 +731,10 @@ void idUserInterfaceLocal::SetCursor(float x, float y)
 	cursorX = x;
 	cursorY = y;
 }
+
+#ifdef _RAVEN
+void idUserInterfaceLocal::SetInteractive(bool interactive) {
+	this->interactive = interactive;
+}
+#endif
 

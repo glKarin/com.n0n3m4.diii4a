@@ -29,6 +29,25 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - Raven Decl Support
+//#include "../renderer/tr_local.h"
+#include "../raven/bse/BSE_Envelope.h"
+#include "../raven/bse/BSE_Particle.h"
+#include "../raven/bse/BSE.h"
+// jmarshall end
+
+// jmarshall: Quake 4 Guide(template) support
+struct rvGuideTemplate
+{
+    idStr name;
+    idList<idStr> parms;
+    idStr body;
+    bool inlineGuide;
+};
+// jmarshall end
+#endif
+
 /*
 
 GUIs and script remain separately parsed
@@ -113,7 +132,11 @@ class idDeclLocal : public idDeclBase
 	protected:
 		virtual bool				SetDefaultText(void);
 		virtual const char 		*DefaultDefinition(void) const;
+#ifdef _RAVEN
+		virtual bool			Parse(const char *text, const int textLength, bool precache);
+#else
 		virtual bool				Parse(const char *text, const int textLength);
+#endif
 		virtual void				FreeData(void);
 		virtual void				List(void) const;
 		virtual void				Print(void) const;
@@ -175,6 +198,12 @@ class idDeclFile
 		int							numLines;
 
 		idDeclLocal 				*decls;
+#ifdef _RAVEN // _QUAKE4
+// jmarshall: guide support
+private:
+    idStr						PreprocessGuides(const char* buffer, int length);
+// jmarshall end
+#endif
 };
 
 class idDeclManagerLocal : public idDeclManager
@@ -214,6 +243,54 @@ class idDeclManagerLocal : public idDeclManager
 		virtual const idMaterial 		*FindMaterial(const char *name, bool makeDefault = true);
 		virtual const idDeclSkin 		*FindSkin(const char *name, bool makeDefault = true);
 		virtual const idSoundShader 	*FindSound(const char *name, bool makeDefault = true);
+#ifdef _RAVEN
+		virtual const idDeclTable *		FindTable( const char *name, bool makeDefault = true );
+		// RAVEN BEGIN
+		// jscott: for new Raven decls
+		virtual const rvDeclMatType *	FindMaterialType( const char *name, bool makeDefault = true );
+		virtual	const rvDeclLipSync *	FindLipSync( const char *name, bool makeDefault = true );
+		virtual	const rvDeclPlayback *	FindPlayback( const char *name, bool makeDefault = true );
+		virtual	const rvDeclEffect *	FindEffect( const char *name, bool makeDefault = true );
+		// RAVEN END
+		// jscott: for new Raven decls
+		virtual const rvDeclMatType *	MaterialTypeByIndex( int index, bool forceParse = true );
+		virtual const rvDeclLipSync *	LipSyncByIndex( int index, bool forceParse = true );
+		virtual	const rvDeclPlayback *	PlaybackByIndex( int index, bool forceParse = true );
+		virtual const rvDeclEffect *	EffectByIndex( int index, bool forceParse = true );
+
+// RAVEN BEGIN
+// jscott: precache any guide (template) files
+    virtual void				ParseGuides(void);
+    virtual	void				ShutdownGuides(void) { }
+    virtual bool				EvaluateGuide(idStr& name, idLexer* src, idStr& definition)
+    {
+        return false;
+    }
+    virtual bool				EvaluateInlineGuide(idStr& name, idStr& definition)
+    {
+        return false;
+    }
+// RAVEN END
+
+// jmarshall
+    void						RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList);
+// jmarshall end
+
+	//k: find map def
+	virtual const idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) const {
+		return GetMapDef(mapName, entityFilter);
+	}
+	virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) {
+		return GetMapDef(mapName, entityFilter);
+	}
+	private:
+	idDeclEntityDef * GetMapDef(const char *mapName, const char *entityFilter);
+
+	public:
+		// jmarshall - Quake 4 guide(template) support
+		idList<rvGuideTemplate>		guides;
+		// jmarshall end
+#endif
 
 		virtual const idMaterial 		*MaterialByIndex(int index, bool forceParse = true);
 		virtual const idDeclSkin 		*SkinByIndex(int index, bool forceParse = true);
@@ -654,6 +731,12 @@ int idDeclFile::LoadAndParse()
 	idDeclLocal *newDecl;
 	bool		reparse;
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall: quake 4 guide support
+    bool		canUseGuides = strstr(fileName, ".mtr");
+// jmarshall end
+#endif
+
 	// load the text
 	common->DPrintf("...loading '%s'\n", fileName.c_str());
 	length = fileSystem->ReadFile(fileName, (void **)&buffer, &timestamp);
@@ -663,7 +746,31 @@ int idDeclFile::LoadAndParse()
 		return 0;
 	}
 
-	if (!src.LoadMemory(buffer, length, fileName)) {
+#ifdef _RAVEN // _QUAKE4
+// jmarshall: quake 4 guide support
+    idStr finalPreprocessedBuffer;
+
+    if (!canUseGuides)
+    {
+        finalPreprocessedBuffer = buffer;
+    }
+    else
+    {
+        finalPreprocessedBuffer = PreprocessGuides(buffer, length);
+    }
+
+    //fileSystem->WriteFile(va("generated/%s", fileName.c_str()), finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length());
+
+    //k Mem_Free(buffer);
+// jmarshall end
+#endif
+
+#ifdef _RAVEN // _QUAKE4
+	if (!src.LoadMemory(finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length(), fileName))
+#else
+	if (!src.LoadMemory(buffer, length, fileName))
+#endif
+	{
 		common->Error("Couldn't parse %s", fileName.c_str());
 		Mem_Free(buffer);
 		return 0;
@@ -676,7 +783,11 @@ int idDeclFile::LoadAndParse()
 
 	src.SetFlags(DECL_LEXER_FLAGS);
 
+#ifdef _RAVEN // _QUAKE4
+	checksum = MD5_BlockChecksum(finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length());
+#else
 	checksum = MD5_BlockChecksum(buffer, length);
+#endif
 
 	fileSize = length;
 
@@ -794,7 +905,11 @@ int idDeclFile::LoadAndParse()
 			newDecl->textSource = NULL;
 		}
 
+#ifdef _RAVEN // _QUAKE4
+		newDecl->SetTextLocal(finalPreprocessedBuffer.c_str() + startMarker, size);
+#else
 		newDecl->SetTextLocal(buffer + startMarker, size);
+#endif
 		newDecl->sourceFile = this;
 		newDecl->sourceTextOffset = startMarker;
 		newDecl->sourceTextLength = size;
@@ -854,6 +969,12 @@ void idDeclManagerLocal::Init(void)
 	ClearHuffmanFrequencies();
 #endif
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - template(guide) Support
+    ParseGuides();
+// jmarshall end
+#endif
+
 	// decls used throughout the engine
 	RegisterDeclType("table",				DECL_TABLE,			idDeclAllocator<idDeclTable>);
 	RegisterDeclType("material",			DECL_MATERIAL,		idDeclAllocator<idMaterial>);
@@ -870,9 +991,40 @@ void idDeclManagerLocal::Init(void)
 	RegisterDeclType("video",				DECL_VIDEO,			idDeclAllocator<idDeclVideo>);
 	RegisterDeclType("audio",				DECL_AUDIO,			idDeclAllocator<idDeclAudio>);
 
+#ifdef _RAVEN
+// jmarshall: Raven Decl Support
+    RegisterDeclType(  "materialType",		DECL_MATERIALTYPE,  idDeclAllocator<rvDeclMatType>);
+    RegisterDeclType(  "lipSync",			DECL_LIPSYNC,		idDeclAllocator<rvDeclLipSync>);
+    RegisterDeclType(  "playback",			DECL_PLAYBACK,		idDeclAllocator<rvDeclPlayback>);
+    RegisterDeclType(	"effect",			DECL_EFFECT,		idDeclAllocator<rvDeclEffect>);
+    RegisterDeclType(	"playerModel",		DECL_PLAYER_MODEL, idDeclAllocator<rvDeclPlayerModel>);
+// jmarshall end
+
+// jmarshall: Raven Decl Support
+    //RegisterDeclType( "fx",					DECL_FX,			idDeclAllocator<idDeclFX> );
+    //RegisterDeclType( "particle",			DECL_PARTICLE,		idDeclAllocator<idDeclParticle> );
+// jmarshall end
+
+// jmarshall: Raven Decl Support
+    //RegisterDeclType( "pda",				DECL_PDA,			idDeclAllocator<idDeclPDA> );
+    //RegisterDeclType( "email",				DECL_EMAIL,			idDeclAllocator<idDeclEmail> );
+    //RegisterDeclType( "video",				DECL_VIDEO,			idDeclAllocator<idDeclVideo> );
+    //RegisterDeclType( "audio",				DECL_AUDIO,			idDeclAllocator<idDeclAudio> );
+// jmarshall end
+#endif
+
 	RegisterDeclFolder("materials",		".mtr",				DECL_MATERIAL);
 	RegisterDeclFolder("skins",			".skin",			DECL_SKIN);
 	RegisterDeclFolder("sound",			".sndshd",			DECL_SOUND);
+
+#ifdef _RAVEN
+// jmarshall: Raven Decl Support
+    RegisterDeclFolder("materials/types",	".mtt",				DECL_MATERIALTYPE);
+    RegisterDeclFolder("lipsync",			".lipsync",			DECL_LIPSYNC);
+    RegisterDeclFolder("playbacks",			".playback",		DECL_PLAYBACK);
+    RegisterDeclFolder("effects",			".fx",				DECL_EFFECT);
+// jmarshall end
+#endif
 
 	// add console commands
 	cmdSystem->AddCommand("listDecls", ListDecls_f, CMD_FL_SYSTEM, "lists all decls");
@@ -1041,7 +1193,13 @@ void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *exte
 	int i, j;
 	idStr fileName;
 	idDeclFolder *declFolder;
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - decls subfolders
+    idList<idStr> fileList;
+// jmarshall end
+#else
 	idFileList *fileList;
+#endif
 	idDeclFile *df;
 
 	// check whether this folder / extension combination already exists
@@ -1062,11 +1220,29 @@ void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *exte
 	}
 
 	// scan for decl files
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - decls subfolders
+    RegisterDeclSubFolder(declFolder->folder, declFolder->extension, fileList);
+// jmarshall end
+#else
 	fileList = fileSystem->ListFiles(declFolder->folder, declFolder->extension, true);
+#endif
 
 	// load and parse decl files
-	for (i = 0; i < fileList->GetNumFiles(); i++) {
+#ifdef _RAVEN // _QUAKE4
+    for ( i = 0; i < fileList.Num(); i++ )
+#else
+	for (i = 0; i < fileList->GetNumFiles(); i++)
+#endif
+	{
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+        //fileName = declFolder->folder + "/" + fileList[ i ];
+        fileName = fileList[i];
+// jmarshall end
+#else
 		fileName = declFolder->folder + "/" + fileList->GetFile(i);
+#endif
 
 		// check whether this file has already been loaded
 		for (j = 0; j < loadedFiles.Num(); j++) {
@@ -1085,7 +1261,9 @@ void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *exte
 		df->LoadAndParse();
 	}
 
+#if !defined(_RAVEN)
 	fileSystem->FreeFileList(fileList);
+#endif
 }
 
 /*
@@ -2256,7 +2434,11 @@ const char *idDeclLocal::DefaultDefinition() const
 idDeclLocal::Parse
 =================
 */
+#ifdef _RAVEN // _QUAKE4
+bool idDeclLocal::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclLocal::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 
@@ -2395,3 +2577,239 @@ bool idDeclLocal::EverReferenced(void) const
 {
 	return everReferenced;
 }
+
+#ifdef _RAVEN
+/*
+================
+idDeclFile::PreprocessGuides
+================
+*/
+idStr idDeclFile::PreprocessGuides(const char* text, int textLength)
+{
+    idLexer src;
+    idToken	token, token2;
+
+    idStr finalBuffer = "";
+
+    src.LoadMemory(text, textLength, "", 0);
+    src.SetFlags(DECL_LEXER_FLAGS);
+
+    while (1)
+    {
+        if (!src.ReadToken(&token))
+        {
+            break;
+        }
+
+        if (token == "guide")
+        {
+            idToken name;
+            idStr newDecl;
+            rvGuideTemplate*guide = NULL;
+
+            src.ReadToken(&name);
+            src.ReadToken(&token);
+
+            for (int i = 0; i < declManagerLocal.guides.Num(); i++)
+            {
+                if (declManagerLocal.guides[i].name == token)
+                {
+                    guide = &declManagerLocal.guides[i];
+                    break;
+                }
+            }
+
+            if (guide == NULL)
+            {
+                common->FatalError("Failed to find guide %s\n", token.c_str());
+            }
+
+            newDecl = name;
+            newDecl += "\n";
+            newDecl += guide->body;
+
+            src.ExpectTokenString("(");
+            for (int i = 0; i < guide->parms.Num(); i++ )
+            {
+                src.ReadToken(&token);
+                newDecl.Replace(guide->parms[i].c_str(), token);
+            }
+            src.ExpectTokenString(")");
+
+            newDecl += "\n";
+
+            finalBuffer += newDecl;
+        }
+    }
+
+    finalBuffer += text;
+
+    finalBuffer.Replace("inlineGuide", "// inlineGuide"); // todo support me, corpse burn
+    finalBuffer.Replace("guide", "// guide");
+    return finalBuffer;
+}
+
+// RAVEN BEGIN
+// jscott: for new Raven decls
+const rvDeclMatType* idDeclManagerLocal::FindMaterialType(const char* name, bool makeDefault) {
+	return static_cast<const rvDeclMatType*>(FindType(DECL_MATERIALTYPE, name, makeDefault));
+}
+
+const rvDeclLipSync* idDeclManagerLocal::FindLipSync(const char* name, bool makeDefault) {
+	return static_cast<const rvDeclLipSync*>(FindType(DECL_LIPSYNC, name, makeDefault));
+}
+
+const rvDeclPlayback* idDeclManagerLocal::FindPlayback(const char* name, bool makeDefault) {
+	return static_cast<const rvDeclPlayback*>(FindType(DECL_PLAYBACK, name, makeDefault));
+}
+const rvDeclEffect* idDeclManagerLocal::FindEffect(const char* name, bool makeDefault) {
+	return static_cast<const rvDeclEffect*>(FindType(DECL_EFFECT, name, makeDefault));
+}
+
+const rvDeclMatType* idDeclManagerLocal::MaterialTypeByIndex(int index, bool forceParse) {
+	return static_cast<const rvDeclMatType*>(DeclByIndex(DECL_MATERIALTYPE, index, forceParse));
+}
+
+const rvDeclLipSync* idDeclManagerLocal::LipSyncByIndex(int index, bool forceParse) {
+	return static_cast<const rvDeclLipSync*>(DeclByIndex(DECL_LIPSYNC, index, forceParse));
+}
+
+const rvDeclPlayback* idDeclManagerLocal::PlaybackByIndex(int index, bool forceParse) {
+	return static_cast<const rvDeclPlayback*>(DeclByIndex(DECL_PLAYBACK, index, forceParse));
+}
+
+const rvDeclEffect* idDeclManagerLocal::EffectByIndex(int index, bool forceParse) {
+	return static_cast<const rvDeclEffect*>(DeclByIndex(DECL_EFFECT, index, forceParse));
+}
+
+const idDeclTable* idDeclManagerLocal::FindTable(const char* name, bool makeDefault) {
+	return static_cast<const idDeclTable*>(FindType(DECL_TABLE, name, makeDefault));
+}
+
+/*
+===================
+RegisterDeclSubFolder
+===================
+*/
+// jmarshall
+void idDeclManagerLocal::RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList)
+{
+    // Find all
+    {
+        idFileList* list = fileSystem->ListFiles(folder, extension, true);
+
+        for (int d = 0; d < list->GetNumFiles(); d++)
+        {
+            fileList.Append(va("%s/%s", folder, list->GetFile(d)));
+        }
+
+        fileSystem->FreeFileList(list);
+    }
+
+    idFileList* dirList = fileSystem->ListFiles(folder, "/", true);
+    for (int i = 0; i < dirList->GetNumFiles(); i++)
+    {
+        idStr dir = va("%s/%s", folder, dirList->GetFile(i));
+        RegisterDeclSubFolder(dir, extension, fileList);
+    }
+
+    fileSystem->FreeFileList(dirList);
+}
+// jmarshall end
+
+// jmarshall: Quake 4 Guide Support
+/*
+=========================
+idDeclManagerLocal::ParseGuides
+=========================
+*/
+void idDeclManagerLocal::ParseGuides(void) {
+	idFileList* fileList = fileSystem->ListFiles("guides", ".guide");
+
+	common->Printf("Parsing Guides...\n");
+
+	for (int i = 0; i < fileList->GetNumFiles(); i++)
+	{
+		idLexer src;
+		idToken	token;
+		idStr fileName = fileList->GetList()[i];
+
+		src.LoadFile(va("guides/%s", fileName.c_str()));
+		src.SetFlags(DECL_LEXER_FLAGS);
+
+		while (!src.EndOfFile())
+		{
+			src.ReadToken(&token);
+
+			if (token.Length() <= 0)
+				break;
+
+			if (token == "guide" || token == "inlineGuide")
+			{
+				rvGuideTemplate guide;
+
+				if (token == "inlineGuide")
+				{
+					guide.inlineGuide = true;
+				}
+				else
+				{
+					guide.inlineGuide = false;
+				}
+
+				src.ReadToken(&token);
+				guide.name = token;
+
+				src.ExpectTokenString("(");
+
+				while (!src.EndOfFile())
+				{
+					src.ReadToken(&token);
+
+					if (token == ")")
+					{
+						break;
+					}
+
+					guide.parms.Append(token);
+				}
+
+				src.ParseBracedSection(guide.body);
+
+				guides.Append(guide);
+			}
+			else
+			{
+				src.Error("Unexpected token in guide %s\n", token.c_str());
+			}
+		}
+	}
+
+	common->Printf("Found %d guides...\n", guides.Num());
+
+	fileSystem->FreeFileList(fileList);
+}
+
+// jmarshall end
+
+//k: find map def
+idDeclEntityDef * idDeclManagerLocal::GetMapDef(const char *mapName, const char *entityFilter)
+{
+	//const char *entityFilter = cvarSystem->GetCVarString("si_entityFilter");
+	idStr fullMapName(mapName);
+	if(entityFilter && entityFilter[0]) //k: game/map_entityFilter. e.g. game/process1 first
+	{
+		fullMapName += "_";
+		fullMapName += entityFilter;
+	}
+	// find mapDef
+	const idDecl *mapDecl = declManager->FindType(DECL_MAPDEF, fullMapName, false);
+	if(!mapDecl) // find by origin way
+		mapDecl = declManager->FindType(DECL_MAPDEF, mapName, false);
+
+	const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
+	return mapDef;
+}
+
+#endif
+

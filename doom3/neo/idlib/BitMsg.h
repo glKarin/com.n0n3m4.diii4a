@@ -140,6 +140,11 @@ class idBitMsg
 		static int		DirToBits(const idVec3 &dir, int numBits);
 		static idVec3	BitsToDir(int bits, int numBits);
 
+#ifdef _RAVEN
+	int				GetRemainingData( void ) const;			// number of bytes left to read
+	const byte *	GetReadData( void ) const;
+#endif
+
 	private:
 		byte 			*writeData;			// pointer to data for writing
 		const byte 	*readData;			// pointer to data for reading
@@ -511,6 +516,10 @@ class idBitMsgDelta
 	public:
 		idBitMsgDelta();
 		~idBitMsgDelta() {}
+#ifdef _RAVEN
+	void			InitWriting( const idBitMsg *base, idBitMsg *newBase, idBitMsg *delta ) { Init(base, newBase, delta); }
+	void			InitReading( const idBitMsg *base, idBitMsg *newBase, const idBitMsg *delta ) { Init(base, newBase, delta); }
+#endif
 
 		void			Init(const idBitMsg *base, idBitMsg *newBase, idBitMsg *delta);
 		void			Init(const idBitMsg *base, idBitMsg *newBase, const idBitMsg *delta);
@@ -527,6 +536,31 @@ class idBitMsgDelta
 		int				ReadInt(void) const;
 		void			WriteDeltaInt(int oldValue, int newValue);
 		int				ReadDeltaInt(int oldValue) const;
+#endif
+#ifdef _RAVEN
+// RAVEN BEGIN
+// abahr:
+	void			WriteVec3( const idVec3& v );
+	void			WriteDeltaVec3( const idVec3& oldValue, const idVec3& newValue );
+	void			WriteVec4( const idVec4& v );
+	void			WriteDeltaVec4( const idVec4& oldValue, const idVec4& newValue );
+	void			WriteQuat( const idQuat& q );
+	void			WriteDeltaQuat( const idQuat& oldValue, const idQuat& newValue );
+    void			WriteMat3( const idMat3& m );
+	void			WriteDeltaMat3( const idMat3& oldValue, const idMat3& newValue );
+// RAVEN END
+
+// RAVEN BEGIN
+// abahr
+	idVec3			ReadVec3( void ) const;
+	idVec3			ReadDeltaVec3( const idVec3& oldValue ) const;
+	idVec4			ReadVec4( void ) const;
+	idVec4			ReadDeltaVec4( const idVec4& oldValue ) const;
+	idQuat			ReadQuat( void ) const;
+	idQuat			ReadDeltaQuat( const idQuat& oldValue ) const;
+	idMat3			ReadMat3( void ) const;
+	idMat3			ReadDeltaMat3( const idMat3& oldValue ) const;
+// RAVEN END
 #endif
 		void			WriteFloat(float f);
 		void			WriteFloat(float f, int exponentBits, int mantissaBits);
@@ -826,6 +860,207 @@ ID_INLINE int idBitMsgDelta::ReadDeltaInt(int oldValue) const
 {
 	return ReadDelta(oldValue, 32);
 }
+
+#endif
+
+#ifdef _RAVEN
+
+ID_INLINE int idBitMsg::GetRemainingData( void ) const {
+	return curSize - readCount;
+}
+
+ID_INLINE const byte *idBitMsg::GetReadData( void ) const {
+	return ( readData + readCount );
+}
+
+
+
+// RAVEN BEGIN
+// abahr
+ID_INLINE void idBitMsgDelta::WriteVec3( const idVec3& v ) {
+	for( int ix = 0; ix < v.GetDimension(); ++ix ) {
+		WriteFloat( v[ix] );
+	}
+}
+
+ID_INLINE void idBitMsgDelta::WriteDeltaVec3( const idVec3& oldValue, const idVec3& newValue ) {
+	for( int ix = 0; ix < oldValue.GetDimension(); ++ix ) {
+		WriteDeltaFloat( oldValue[ix], newValue[ix] );
+	}
+}
+
+ID_INLINE void idBitMsgDelta::WriteVec4( const idVec4& v ) {
+	for( int ix = 0; ix < v.GetDimension(); ++ix ) {
+		WriteFloat( v[ix] );
+	}
+}
+
+ID_INLINE void idBitMsgDelta::WriteDeltaVec4( const idVec4& oldValue, const idVec4& newValue ) {
+	for( int ix = 0; ix < oldValue.GetDimension(); ++ix ) {
+		WriteDeltaFloat( oldValue[ix], newValue[ix] );
+	}
+}
+
+ID_INLINE void idBitMsgDelta::WriteQuat( const idQuat& q ) {
+	for( int ix = 0; ix < q.GetDimension(); ++ix ) {
+		WriteFloat( q[ix] );
+	}
+}
+
+ID_INLINE void idBitMsgDelta::WriteDeltaQuat( const idQuat& oldValue, const idQuat& newValue ) {
+	for( int ix = 0; ix < oldValue.GetDimension(); ++ix ) {
+		WriteDeltaFloat( oldValue[ix], newValue[ix] );
+	}
+}
+
+ID_INLINE void idBitMsgDelta::WriteMat3( const idMat3& m ) {
+	for( int ix = 0; ix < m.GetVec3Dimension(); ++ix ) {
+		WriteVec3( m[ix] );
+	}
+}
+
+ID_INLINE void idBitMsgDelta::WriteDeltaMat3( const idMat3& oldValue, const idMat3& newValue ) {
+	for( int ix = 0; ix < oldValue.GetDimension(); ++ix ) {
+		WriteDeltaVec3( oldValue[ix], newValue[ix] );
+	}
+}
+// RAVEN END
+
+// RAVEN BEGIN
+// abahr
+ID_INLINE idVec3 idBitMsgDelta::ReadVec3() const {
+	idVec3 v;
+	for( int ix = 0; ix < v.GetDimension(); ++ix ) {
+		v[ix] = ReadFloat();
+	}
+
+	return v;
+}
+
+ID_INLINE idVec3 idBitMsgDelta::ReadDeltaVec3( const idVec3& oldValue ) const {
+	idVec3 value;
+	for( int ix = 0; ix < value.GetDimension(); ++ix ) {
+		value[ix] = ReadDeltaFloat( oldValue[ix] );
+	}
+	return value;
+}
+
+ID_INLINE idVec4 idBitMsgDelta::ReadVec4( void ) const {
+	idVec4 v;
+	for( int ix = 0; ix < v.GetDimension(); ++ix ) {
+		v[ix] = ReadFloat();
+	}
+
+	return v;
+}
+
+ID_INLINE idVec4 idBitMsgDelta::ReadDeltaVec4( const idVec4& oldValue ) const {
+	idVec4 value;
+	for( int ix = 0; ix < value.GetDimension(); ++ix ) {
+		value[ix] = ReadDeltaFloat( oldValue[ix] );
+	}
+	return value;
+}
+
+ID_INLINE idQuat idBitMsgDelta::ReadQuat( void ) const {
+	idQuat q;
+	for( int ix = 0; ix < q.GetDimension(); ++ix ) {
+		q[ix] = ReadFloat();
+	}
+
+	return q;
+}
+
+ID_INLINE idQuat idBitMsgDelta::ReadDeltaQuat( const idQuat& oldValue ) const {
+	idQuat value;
+	for( int ix = 0; ix < value.GetDimension(); ++ix ) {
+		value[ix] = ReadDeltaFloat( oldValue[ix] );
+	}
+	return value;
+}
+
+ID_INLINE idMat3 idBitMsgDelta::ReadMat3() const {
+	idMat3 m;
+	
+	for( int ix = 0; ix < m.GetVec3Dimension(); ++ix ) {
+		m[ix] = ReadVec3();
+	}
+
+	return m;
+}
+
+ID_INLINE idMat3 idBitMsgDelta::ReadDeltaMat3( const idMat3& oldValue ) const {
+	idMat3 value;
+
+	for( int ix = 0; ix < value.GetVec3Dimension(); ++ix ) {
+		value[ix] = ReadDeltaVec3( oldValue[ix] );
+	}
+
+	return value;
+}
+// RAVEN END
+
+#define MAX_MSG_QUEUE_SIZE				16384		// must be a power of 2
+
+class idMsgQueue {
+public:
+					idMsgQueue();
+
+	void			Init( int sequence );
+
+	bool			Add( const byte *data, const int size, bool sequencing );
+	// prepend to a message without the need to a memcopy and readjust
+	bool			AddConcat( const byte *data1, const int size1, const byte *data2, const int size2, bool sequencing );
+	bool			Get( byte *data, int dataSize, int &size, bool sequencing );
+	int				GetTotalSize( void ) const;
+	int				GetSpaceLeft( void ) const;
+	int				GetFirst( void ) const { return first; }
+	int				GetLast( void ) const { return last; }
+	void			CopyToBuffer( byte *buf ) const;
+
+	void			WriteTo( idBitMsg &msg );
+	void			FlushTo( idBitMsg &msg );
+	void			ReadFrom( const idBitMsg &msg );
+
+	void			Save( idFile *file ) const;
+	void			Restore( idFile *file );
+
+private:
+	byte			buffer[MAX_MSG_QUEUE_SIZE];
+	int				first;			// sequence number of first message in queue
+	int				last;			// sequence number of last message in queue
+	int				startIndex;		// index pointing to the first byte of the first message
+	int				endIndex;		// index pointing to the first byte after the last message
+
+public:
+	void			WriteByte( byte b );
+	byte			ReadByte( void );
+	void			WriteShort( int s );
+	void			WriteUShort( int s );
+	int				ReadShort( void );
+	int				ReadUShort( void );
+	void			WriteLong( int l );
+	int				ReadLong( void );
+	void			WriteData( const byte *data, const int size );
+	void			ReadData( byte *data, const int size );
+};
+
+class idBitMsgQueue {
+public:
+					idBitMsgQueue();
+
+	void			Init( void );
+
+	void			Add( const idBitMsg &msg, const int timestamp );
+	bool			Get( idBitMsg &msg, int &timestamp );
+	bool			Get( idBitMsg &msg ) { int dummy; return Get( msg, dummy); }
+	bool			GetTimestamp( int &timestamp );
+
+private:
+	int				nextTimestamp;
+	bool			readTimestamp;
+	idLinkList<idMsgQueue>	writeList, readList;
+};
 
 #endif
 

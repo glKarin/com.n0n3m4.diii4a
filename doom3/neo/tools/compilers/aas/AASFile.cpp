@@ -157,6 +157,11 @@ idAASSettings::idAASSettings(void)
 	numBoundingBoxes = 1;
 	boundingBoxes[0] = idBounds(idVec3(-16, -16, 0), idVec3(16, 16, 72));
 	usePatches = false;
+#ifdef _RAVEN
+// jmarshall - aas 1.08
+	generateTacticalFeatures = false;
+// jmarshall end
+#endif
 	writeBrushMap = false;
 	playerFlood = false;
 	noOptimize = false;
@@ -306,6 +311,13 @@ bool idAASSettings::FromParser(idLexer &src)
 			if (!ParseBool(src, usePatches)) {
 				return false;
 			}
+#ifdef _RAVEN
+		}
+// jmarshall: AAS 1.08
+		else if (token == "generateTacticalFeatures") {
+			if (!ParseBool(src, generateTacticalFeatures)) { return false; }
+// jmarshall end
+#endif
 		} else if (token == "writeBrushMap") {
 			if (!ParseBool(src, writeBrushMap)) {
 				return false;
@@ -526,6 +538,12 @@ bool idAASSettings::WriteToFile(idFile *fp) const
 	fp->WriteFloatString("\tplayerFlood = %d\n", playerFlood);
 	fp->WriteFloatString("\tallowSwimReachabilities = %d\n", allowSwimReachabilities);
 	fp->WriteFloatString("\tallowFlyReachabilities = %d\n", allowFlyReachabilities);
+#ifdef _RAVEN
+// jmarshall - AAS 1.08
+	fp->WriteFloatString("\tgenerateAllFaces = 0\n");
+	fp->WriteFloatString("\tgenerateTacticalFeatures = 0\n");
+// jmarshall end
+#endif
 	fp->WriteFloatString("\tfileExtension = \"%s\"\n", fileExtension.c_str());
 	fp->WriteFloatString("\tgravity = (%f %f %f)\n", gravity.x, gravity.y, gravity.z);
 	fp->WriteFloatString("\tmaxStepHeight = %f\n", maxStepHeight);
@@ -768,8 +786,15 @@ bool idAASFileLocal::Write(const idStr &fileName, unsigned int mapFileCRC)
 			num++;
 		}
 
+#ifdef _RAVEN
+// jmarshall: AAS 1.08 - numFeatures/firstFeature
+		aasFile->WriteFloatString( "\t%d ( %d %d %d %d %d %d %d %d ) %d {\n", i, areas[i].flags, areas[i].contents,
+						areas[i].firstFace, areas[i].numFaces, areas[i].cluster, areas[i].clusterAreaNum, /*areas[i].numFeatures*/ 0, /*areas[i].firstFeature*/ 0, num );
+// jmarshall end
+#else
 		aasFile->WriteFloatString("\t%d ( %d %d %d %d %d %d ) %d {\n", i, areas[i].flags, areas[i].contents,
 		                          areas[i].firstFace, areas[i].numFaces, areas[i].cluster, areas[i].clusterAreaNum, num);
+#endif
 
 		for (reach = areas[i].reach; reach; reach = reach->next) {
 			Reachability_Write(aasFile, reach);
@@ -1095,6 +1120,12 @@ bool idAASFileLocal::ParseAreas(idLexer &src)
 		area.numFaces = src.ParseInt();
 		area.cluster = src.ParseInt();
 		area.clusterAreaNum = src.ParseInt();
+#ifdef _RAVEN
+// jmarshall - AAS 1.08 
+		area.numFeatures = src.ParseInt();
+		area.firstFeature = src.ParseInt();
+// jmarshall end
+#endif
 		src.ExpectTokenString(")");
 		areas.Append(area);
 		ParseReachabilities(src, i);
@@ -1120,6 +1151,14 @@ bool idAASFileLocal::ParseNodes(idLexer &src)
 	aasNode_t node;
 
 	numNodes = src.ParseInt();
+#ifdef _RAVEN
+// jmarshall - AAS 1.08
+	if (numNodes == 0)
+	{
+		return 0;
+	}
+// jmarshall end
+#endif
 	nodes.Resize(numNodes);
 
 	if (!src.ExpectTokenString("{")) {
@@ -1330,6 +1369,49 @@ bool idAASFileLocal::Load(const idStr &fileName, unsigned int mapFileCRC)
 			if (!ParseClusters(src)) {
 				return false;
 			}
+#ifdef _RAVEN
+		}
+// jmarshall - AAS 1.08
+		else if (token == "featureIndex") {
+			int numFeatureIndexes = src.ParseInt();
+			src.ExpectTokenString("{");
+
+			for (int d = 0; d < numFeatureIndexes; d++)
+			{
+				src.ParseInt();
+				src.ExpectTokenString("(");
+				featureIndexes.Append(src.ParseInt());
+				src.ExpectTokenString(")");
+			}
+
+			src.ExpectTokenString("}");
+		}
+		else if (token == "features") {
+			int numFeatures = src.ParseInt();
+			src.ExpectTokenString("{");
+
+			for (int d = 0; d < numFeatures; d++)
+			{
+				aasFeature_t feature = { };
+
+				src.ParseInt();
+				src.ExpectTokenString("(");
+				feature.flags = src.ParseInt();					// 2 Bytes
+				feature.height = src.ParseInt();					// 2 Bytes
+				feature.normalx = src.ParseInt();					// 2 Bytes
+				feature.normaly = src.ParseInt();				// 2 Bytes
+				feature.x = src.ParseInt();			// 1 Byte
+				feature.y = src.ParseInt();			// 1 Byte
+				feature.z = src.ParseInt();				// 1 Byte
+
+				features.Append(feature);
+				src.ExpectTokenString(")");
+			}
+
+			src.ExpectTokenString("}");
+// jmarshall end
+#endif
+
 		} else {
 			src.Error("idAASFileLocal::Load: bad token \"%s\"", token.c_str());
 			return false;

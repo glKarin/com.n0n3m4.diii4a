@@ -35,15 +35,14 @@ shaderProgram_t	interactionShader;
 shaderProgram_t	shadowShader;
 shaderProgram_t	defaultShader;
 shaderProgram_t	depthFillShader;
-//HTODO: skybox
-shaderProgram_t cubemapShader;
-shaderProgram_t reflectionCubemapShader;
-shaderProgram_t	depthFillClipShader;
-shaderProgram_t	fogShader;
-shaderProgram_t	blendLightShader;
-shaderProgram_t	interactionBlinnPhongShader;
-shaderProgram_t diffuseCubemapShader;
-shaderProgram_t texgenShader;
+shaderProgram_t cubemapShader; //k: skybox shader
+shaderProgram_t reflectionCubemapShader; //k: reflection shader
+shaderProgram_t	depthFillClipShader; //k: z-fill clipped shader
+shaderProgram_t	fogShader; //k: fog shader
+shaderProgram_t	blendLightShader; //k: blend light shader
+shaderProgram_t	interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
+shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
+shaderProgram_t texgenShader; //k: texgen shader
 
 #include "glsl_shader.h"
 #define HARM_INTERACTION_SHADER_PHONG "phong"
@@ -127,7 +126,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 
 	// material may be NULL for shadow volumes
 	float f;
-	//HTODO: user specular exponent
+	//k: dynamic setup user specular exponent by cvar
 	f = harm_r_specularExponent.GetFloat();
 	if(f <= 0.0f)
 
@@ -191,13 +190,13 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 
 	// perform setup here that will be constant for all interactions
 	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | 
-#if 1 //HTODO: translucent interactions
+#if 1 //k: fix translucent interactions
 			GLS_DEPTHMASK | 
 #endif
 			backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-	//HTODO: blinn phong / phong
+	//k: dynamic choose blinn-phong / phong lighting model shader
 	const char *lightModel = harm_r_lightModel.GetString();
 	if(lightModel && !idStr::Icmp(HARM_INTERACTION_SHADER_BLINNPHONG, lightModel))
 		GL_UseProgram(&interactionBlinnPhongShader);
@@ -463,7 +462,7 @@ static bool R_LinkGLSLShader(shaderProgram_t *shaderProgram, bool needsAttribute
 	}
 
 	if (!linked) {
-		//HTODO: will using internal shader
+		//k: if load external shader fail, now will using internal shader, so do not call Error
 #if 0
 		common->Error("R_LinkGLSLShader: program failed to link\n");
 #else
@@ -537,11 +536,15 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 
 	shader->modelMatrix = glGetUniformLocation(shader->program, "u_modelMatrix");
 	shader->textureMatrix = glGetUniformLocation(shader->program, "u_textureMatrix");
-	// HTODO: modelView matrix, clip plane, fog
+	//k: add modelView matrix uniform
 	shader->modelViewMatrix = glGetUniformLocation(shader->program, "u_modelViewMatrix");
+	//k: add clip plane uniform
 	shader->clipPlane = glGetUniformLocation(shader->program, "u_clipPlane");
+	//k: add fog matrix uniform
 	shader->fogMatrix = glGetUniformLocation(shader->program, "u_fogMatrix");
+	//k: add fog color uniform
 	shader->fogColor = glGetUniformLocation(shader->program, "u_fogColor");
+	//k: add texgen S T Q uniform
 	shader->texgenS = glGetUniformLocation(shader->program, "u_texgenS");
 	shader->texgenT = glGetUniformLocation(shader->program, "u_texgenT");
 	shader->texgenQ = glGetUniformLocation(shader->program, "u_texgenQ");
@@ -564,7 +567,7 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		glUniform1i(shader->u_fragmentMap[i], i);
 	}
 
-	//HTODO: cubemap
+	//k: add cubemap texture units
 	for ( i = 0; i < MAX_FRAGMENT_IMAGES; i++ ) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentCubeMap%d", i);
 		shader->u_fragmentCubeMap[i] = glGetUniformLocation(shader->program, buffer);
@@ -582,7 +585,7 @@ static bool RB_GLSL_InitShaders(void)
 	memset(&shadowShader, 0, sizeof(shaderProgram_t));
 	memset(&defaultShader, 0, sizeof(shaderProgram_t));
 	memset(&depthFillShader, 0, sizeof(shaderProgram_t));
-	//HTODO: skybox
+	//k: add new shaders
 	memset(&cubemapShader, 0, sizeof(shaderProgram_t));
 	memset(&reflectionCubemapShader, 0, sizeof(shaderProgram_t));
 	memset(&depthFillClipShader, 0, sizeof(shaderProgram_t));
@@ -660,8 +663,8 @@ static bool RB_GLSL_InitShaders(void)
 		RB_GLSL_GetUniformLocations(&depthFillShader);
 	}
 
-	// HTODO: skybox
-	// load cubemap shaders
+	//k: load new shaders
+	//k: load cubemap shader
 	R_LoadGLSLShader("cubemap.vert", &cubemapShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("cubemap.frag", &cubemapShader, GL_FRAGMENT_SHADER);
 
@@ -676,7 +679,7 @@ static bool RB_GLSL_InitShaders(void)
 		RB_GLSL_GetUniformLocations(&cubemapShader);
 	}
 
-	// load cubemap shaders
+	//k: load reflection shader
 	R_LoadGLSLShader("reflectionCubemap.vert", &reflectionCubemapShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("reflectionCubemap.frag", &reflectionCubemapShader, GL_FRAGMENT_SHADER);
 
@@ -691,6 +694,7 @@ static bool RB_GLSL_InitShaders(void)
 		RB_GLSL_GetUniformLocations(&reflectionCubemapShader);
 	}
 
+	//k: load z-fill clipped shader
 	R_LoadGLSLShader("zfillClip.vert", &depthFillClipShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("zfillClip.frag", &depthFillClipShader, GL_FRAGMENT_SHADER);
 
@@ -705,6 +709,7 @@ static bool RB_GLSL_InitShaders(void)
 		RB_GLSL_GetUniformLocations(&depthFillClipShader);
 	}
 
+	//k: load fog shader
 	R_LoadGLSLShader("fog.vert", &fogShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("fog.frag", &fogShader, GL_FRAGMENT_SHADER);
 
@@ -719,6 +724,7 @@ static bool RB_GLSL_InitShaders(void)
 		RB_GLSL_GetUniformLocations(&fogShader);
 	}
 
+	//k: load blend light shader
 	R_LoadGLSLShader("blendLight.vert", &blendLightShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("blendLight.frag", &blendLightShader, GL_FRAGMENT_SHADER);
 
@@ -733,6 +739,7 @@ static bool RB_GLSL_InitShaders(void)
 		RB_GLSL_GetUniformLocations(&blendLightShader);
 	}
 
+	//k: load BLINN-PHONG lighting model interaction shader
 	R_LoadGLSLShader("interaction_blinnphong.vert", &interactionBlinnPhongShader, GL_VERTEX_SHADER);
 	if (!glConfig.textureCompressionAvailable)
 		R_LoadGLSLShader("interaction_blinnphong_etc.frag", &interactionBlinnPhongShader, GL_FRAGMENT_SHADER);
@@ -751,6 +758,7 @@ static bool RB_GLSL_InitShaders(void)
 		RB_GLSL_GetUniformLocations(&interactionBlinnPhongShader);
 	}
 
+	//k: load diffuse cubemap shader
 	R_LoadGLSLShader("diffuseCubemap.vert", &diffuseCubemapShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("diffuseCubemap.frag", &diffuseCubemapShader, GL_FRAGMENT_SHADER);
 
@@ -765,6 +773,7 @@ static bool RB_GLSL_InitShaders(void)
 		RB_GLSL_GetUniformLocations(&diffuseCubemapShader);
 	}
 
+	//k: load texgen shader
 	R_LoadGLSLShader("texgen.vert", &texgenShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("texgen.frag", &texgenShader, GL_FRAGMENT_SHADER);
 

@@ -1,9 +1,9 @@
-## DIII4A++ (Harmattan Edition)
-#### com.n0n3m4.diii4a, DOOM III for Android, 毁灭战士3安卓移植版
+## idTech4A++ (Harmattan Edition)
+#### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake IV for Android, 毁灭战士3/雷神之锤4安卓移植版
 **Latest version:**
-1.1.0harmattan11(Natasha)  
+1.1.0harmattan12(Natasha)  
 **Last update release:**
-2022-06-30  
+2022-07-19  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -11,6 +11,82 @@ Android 4.0+
 
 ----------------------------------------------------------------------------------
 ### Update
+> 1.1.0harmattan12 (2022-07-19)
+ * `Quake 4` in DOOM3 engine support. Also see `https://github.com/jmarshall23/Quake4Doom`. Now can play most levels, but some levels has error.",
+ * Quake 4 game data folder named `q4base`, also see `https://store.steampowered.com/app/2210/Quake_4/`.",
+ * Fix `Rivensin` and `Hardcorps` mod load game from save game.
+ * Add console command history record.
+ * On-screen buttons layer's resolution always same to device screen.
+ * Add volume key map config(Enable `Map volume keys` to show it).
+ 
+ * 雷神之锤4 for 毁灭战士3引擎支持. 详情`https://github.com/jmarshall23/Quake4Doom`. 目前可以运行大部分关卡, 剩余部分关卡存在错误.",
+ * 雷神之锤4游戏数据文件目录为`q4base`, 游戏详情`https://store.steampowered.com/app/2210/Quake_4/`.",
+ * 修复`Rivensin`和`Hardcorps`mod载入存档bug.
+ * 控制台命令记录.
+ * 虚拟按键的分辨率不再依赖游戏分辨率.
+ * 音量键映射设置(启用`Map volume keys`时显示).
+
+----------------------------------------------------------------------------------
+#### About Quake IV
+###### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play most levels, but some levels has error.  
+> 1. Putting PC Quake 4 game data file to `q4base` folder.
+> 2. Click `START` to open Quake 4 map level dialog in game launcher.
+> 3. Suggest to extract Quake 4 patch resource to `q4base` game data folder first.
+> - Quake 4 fonts with DOOM3 format by [IlDucci](https://github.com/IlDucci).
+> - Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).
+> 4. Then Choose map level/Go main-menu/Start directly, most levels is working.",
+> 5. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened.
+
+###### Problems and resolutions  
+> 1. *Door-opening*: Now using set `harm_g_useSimpleTriggerClip` to 1 for force to using simple collision clip to resolve(default), it work all doors well.
+> 2. *Main-menu*: Now can show full main menu, but without background color. But can not New-Game(need using `map` or `devmap` for starting a map game in Singleplayer-Game), Create-Server(using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game), and can not interactive in some dialog.
+> 3. ~~Sound~~: It looks work well now(jmarshall's `icedTech` using DOOM3-BFG sound system).
+> 4. ~~Loading-UI~~: It looks work well now.
+> 5. *Multiplayer-Game*: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
+> 6. **Script error**: Some maps have any script errors, and some errors is fatal.",
+> 7. **Particle system**: Now is work incompleted(Quake4 using new advanced `BSE` particle system, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).",
+> 8. **Entity render**: Some game entities render incorrect.",
+> 9. **Collision**: Some incorrect collision(using `noclip` to pass).",
+
+#### 关于雷神之锤4
+###### 运行雷神之锤4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). 目前可以运行大部分关卡, 剩余部分关卡存在错误..  
+> 1. 将PC端雷神之锤4游戏文件放到`q4base`文件夹.
+> 2. 在启动器中点击`START`打开关卡地图选择器.
+> 3. 建议先解压雷神之锤4补丁资源到`q4base`资源目录.
+> - 毁灭战士3格式的雷神之锤4字体, [IlDucci](https://github.com/IlDucci)提供.
+> - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbot <bot_file>`或`fillbots`添加bot).
+> 4. 然后选择关卡或进入主菜单启动, 运行大部分可运行的关卡.",
+> 5. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened.
+
+###### 问题和解决方案:    
+> 1. *门打不开*: 目前通过设置`harm_g_useSimpleTriggerClip`为1, 强制使用简单碰撞检测解决, 基本没问题, 没有根本解决.
+> 2. *主菜单*: 目前可以正常显示, 去掉背景色. 开始新游戏不工作(可以通过`map`或`devmap`命令开始新单人游戏), 创建多人服务器不工作(可以通过`si_map`, `serverMapRestart`或`nextMap`命令开始多人游戏), 部分对话框无法交互.
+> 3. ~~声音~~: 正常工作.
+> 4. ~~游戏载入界面~~: 正常工作.
+> 5. *多人游戏*: 目前正常工作, 并且可以添加bot(`jmarshall`添加了雷神之锤3的bot支持, 但是需要先添加bot文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹).
+> 6. **脚本错误**: 部分脚本错误无关紧要, 但是有一些影响游戏进程或者崩溃.",
+> 7. **粒子系统**: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).",
+> 8. **物体渲染**: 存在一些物体错误的渲染结果.",
+> 9. **碰撞**: 有一些错误的碰撞结果(可以使用`noclip`强制穿越).",
+
+----------------------------------------------------------------------------------
+### Screenshot
+> Game
+
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_bathroom.png" alt="Classic bathroom">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_quake4_game_2.png" alt="Quake IV for DOOM3">
+
+> Mod
+
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_roe.png" width="50%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_the_lost_mission.png" width="50%" alt="The lost mission">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_classic_doom3.png" width="50%" alt="Classic DOOM"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_hardcorps.png" width="50%" alt="Hardcorps">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_quake4.png" width="50%" alt="Quake IV">
+
+----------------------------------------------------------------------------------
+### Changes
+
+----------------------------------------------------------------------------------
 > 1.1.0harmattan11 (2022-06-30)
  * Add `Hardcorps` mod library support, game path name is `hardcorps`, if play the mod, first suggest to close `Smooth joystick` in `Controls` tab panel, more view in `https://www.moddb.com/mods/hardcorps`.
  * In `Rivensin` mod, add bool Cvar `harm_pm_doubleJump` to enable double-jump(From `hardcorps` mod source code, default disabled).
@@ -27,22 +103,7 @@ Android 4.0+
  * 在`Other`菜单新增`Special Cvar list`列出所有新增加的特殊 `Cvar`.
 
 ----------------------------------------------------------------------------------
-### Screenshot
-> Game
 
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_bathroom.png" alt="Classic bathroom">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
-
-> Mod
-
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_roe.png" width="50%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_the_lost_mission.png" width="50%" alt="The lost mission">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_classic_doom3.png" width="50%" alt="Classic DOOM">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_hardcorps.png" width="50%" alt="Hardcorps">
-
-----------------------------------------------------------------------------------
-### Changes
-
-----------------------------------------------------------------------------------
 > 2022-06-23 Update 1.1.0harmattan10
 
 * Add `Rivensin` mod library support, game path name is `rivensin`, more view in `https://www.moddb.com/mods/ruiner`.

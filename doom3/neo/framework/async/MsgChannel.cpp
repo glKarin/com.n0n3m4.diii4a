@@ -55,6 +55,7 @@ All fragments will have the same sequence numbers.
 idCVar net_channelShowPackets("net_channelShowPackets", "0", CVAR_SYSTEM | CVAR_BOOL, "show all packets");
 idCVar net_channelShowDrop("net_channelShowDrop", "0", CVAR_SYSTEM | CVAR_BOOL, "show dropped packets");
 
+#if !defined(_RAVEN)
 /*
 ===============
 idMsgQueue::idMsgQueue
@@ -255,7 +256,7 @@ void idMsgQueue::ReadData(byte *data, const int size)
 		}
 	}
 }
-
+#endif
 
 /*
 ===============
@@ -408,7 +409,12 @@ bool idMsgChannel::ReadMessageData(idBitMsg &out, const idBitMsg &msg)
 
 	// remove acknowledged reliable messages
 	while (reliableSend.GetFirst() <= reliableAcknowledge) {
-		if (!reliableSend.Get(NULL, reliableMessageSize)) {
+#ifdef _RAVEN // _QUAKE4
+		if (!reliableSend.Get(0, 0, reliableMessageSize, false))
+#else
+		if (!reliableSend.Get(NULL, reliableMessageSize))
+#endif
+		{
 			break;
 		}
 	}
@@ -425,7 +431,11 @@ bool idMsgChannel::ReadMessageData(idBitMsg &out, const idBitMsg &msg)
 		reliableSequence = out.ReadLong();
 
 		if (reliableSequence == reliableReceive.GetLast() + 1) {
+#ifdef _RAVEN // _QUAKE4
+			reliableReceive.Add(out.GetData() + out.GetReadCount(), reliableMessageSize, false);
+#else
 			reliableReceive.Add(out.GetData() + out.GetReadCount(), reliableMessageSize);
+#endif
 		}
 
 		out.ReadData(NULL, reliableMessageSize);
@@ -711,13 +721,24 @@ bool idMsgChannel::SendReliableMessage(const idBitMsg &msg)
 {
 	bool result;
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+	if (remoteAddress.type == NA_BOT)
+		return false;
+// jmarshall end
+#endif
+
 	assert(remoteAddress.type != NA_BAD);
 
 	if (remoteAddress.type == NA_BAD) {
 		return false;
 	}
 
+#ifdef _RAVEN // _QUAKE4
+	result = reliableSend.Add(msg.GetData(), msg.GetSize(), false);
+#else
 	result = reliableSend.Add(msg.GetData(), msg.GetSize());
+#endif
 
 	if (!result) {
 		common->Warning("idMsgChannel::SendReliableMessage: overflowed");
@@ -737,7 +758,14 @@ bool idMsgChannel::GetReliableMessage(idBitMsg &msg)
 	int size;
 	bool result;
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+	result = reliableReceive.Get( msg.GetData(), msg.GetSize(), size, false );
+// jmarshall end
+#else
 	result = reliableReceive.Get(msg.GetData(), size);
+#endif
+
 	msg.SetSize(size);
 	msg.BeginReading();
 	return result;

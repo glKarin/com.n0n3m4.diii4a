@@ -599,6 +599,8 @@ void abrt_func(mcheck_status status)
 
 extern "C"
 {
+	// enable redirect stdout/stderr to file
+	static unsigned char redirect_output_to_file = 1;
 #pragma GCC visibility push(default)
 int main(int argc, const char **argv)
 {
@@ -608,10 +610,13 @@ int main(int argc, const char **argv)
 	Sys_Printf("memory consistency checking enabled\n");
 #endif
 
+	if(redirect_output_to_file)
+	{
 	freopen("stdout.txt","w",stdout);
 	setvbuf(stdout, NULL, _IONBF, 0);
 	freopen("stderr.txt","w",stderr);
 	setvbuf(stderr, NULL, _IONBF, 0);
+	}
 
 	Posix_EarlyInit();
 
@@ -637,22 +642,6 @@ void Q3E_OGLRestart()
 {
 //	R_VidRestart_f();
 }
-
-#if defined(__ANDROID__)
-// For pull input event from Java when GLThread is looping in modal MessageBox of game.
-void (*pull_input_event)(int execCmd);
-// tmpfile function symbol for Android.
-FILE * (*itmpfile)(void);
-// APK's native library path on Android.
-char *native_library_dir = NULL;
-void Android_SetInteraction(void *ptr[])
-{
-	pull_input_event = ptr[0];
-	itmpfile = ptr[1];
-	if(ptr[2])
-		native_library_dir = strdup((char *)(ptr[2]));
-}
-#endif
 
 void (*initAudio)(void *buffer, int size);
 int (*writeAudio)(int offset, int length);
@@ -711,7 +700,84 @@ analogx=x;
 analogy=y;
 }
 
+#if defined(__ANDROID__)
+#define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
+#define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
+
+#define ANDROID_CALL_PROTOCOL_NATIVE_LINRARY_DIR 0x20001
+#define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
+#define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
+
+// APK's native library path on Android.
+char *native_library_dir = NULL;
+
+// Do not catch signal
+unsigned char no_handle_signals = 0;
+
+// DOOM library call Android JNI
+intptr_t (*Android_Call)(int protocol, int size, ...);
+
+intptr_t (*set_Android_Call(intptr_t (*func)(int, int, ...)))(int, int, ...)
+{
+	intptr_t (*cur)(int, int, ...);
+	cur = Android_Call;
+	Android_Call = func;
+	return cur;
+}
+
+// Abdroid JNI call DOOM library
+intptr_t Q3E_Call(int protocol, int size, ...)
+{
+	intptr_t res = 0;
+	va_list va;
+
+	va_start(va, size);
+	switch(protocol)
+	{
+		case ANDROID_CALL_PROTOCOL_NATIVE_LINRARY_DIR:
+			native_library_dir = strdup(va_arg(va, char *));
+			res = (intptr_t)native_library_dir;
+			break;
+		case ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE:
+			redirect_output_to_file = va_arg(va, int) ? 1 : 0;
+			res = redirect_output_to_file;
+			break;
+		case ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS:
+			no_handle_signals = va_arg(va, int) ? 1 : 0;
+			res = no_handle_signals;
+			break;
+		default:
+			break;
+	}
+	va_end(va);
+
+	return res;
+}
+
+void Q3E_exit(void)
+{
+	if(common->IsInitialized())
+		common->Quit();
+}
+#endif
+
 #pragma GCC visibility pop
+}
+
+// For pull input event from Java when GLThread is looping in modal MessageBox of game.
+void pull_input_event(int execCmd)
+{
+	if(!Android_Call)
+		return;
+	(void)Android_Call(ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT, 1, execCmd);
+}
+
+// tmpfile function symbol for Android.
+FILE * itmpfile(void)
+{
+	if(!Android_Call)
+		return NULL;
+	return (FILE *)Android_Call(ANDROID_CALL_PROTOCOL_TMPFILE, 0);
 }
 
 #else

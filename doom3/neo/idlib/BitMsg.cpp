@@ -1169,3 +1169,441 @@ int idBitMsgDelta::ReadDeltaLongCounter(int oldValue) const
 
 	return value;
 }
+
+#ifdef _RAVEN
+
+/*
+===========================================================================
+idMsgQueue
+===========================================================================
+*/
+
+/*
+===============
+idMsgQueue::idMsgQueue
+===============
+*/
+idMsgQueue::idMsgQueue( void ) {
+	Init( 0 );
+}
+
+/*
+===============
+idMsgQueue::Init
+===============
+*/
+void idMsgQueue::Init( int sequence ) {
+	first = last = sequence;
+	startIndex = endIndex = 0;
+}
+
+/*
+===============
+idMsgQueue::Add
+===============
+*/
+bool idMsgQueue::Add( const byte *data, const int size, bool sequencing ) {
+	if ( GetSpaceLeft() < size + 8 ) {
+		return false;
+	}
+
+	assert( size );
+
+	WriteUShort( size );
+	if ( sequencing ) {
+		WriteLong( last );
+	}
+	last++;
+	WriteData( data, size );
+	return true;
+}
+
+/*
+===============
+idMsgQueue::AddConcat
+===============
+*/
+bool idMsgQueue::AddConcat( const byte *data1, const int size1, const byte *data2, const int size2, bool sequencing ) {
+	if ( GetSpaceLeft() < size1 + size2 + 8 ) {
+		return false;
+	}
+
+	assert( size1 && size2 );
+	
+	WriteUShort( size1 + size2 );
+	if ( sequencing ) {
+		WriteLong( last );
+	}
+	last++;
+	WriteData( data1, size1 );
+	WriteData( data2, size2 );
+	return true;
+}
+
+/*
+===============
+idMsgQueue::Get
+===============
+*/
+bool idMsgQueue::Get( byte *data, int dataSize, int &size, bool sequencing ) {
+	if ( sequencing ? ( first == last ) : ( startIndex == endIndex ) ) {
+		size = 0;
+		return false;
+	}
+	int sequence;
+	size = ReadUShort();
+	if ( data && size > dataSize ) {
+		common->Error( "idMsgQueue::Get  buffer size of %d < get size of %d", dataSize, size );
+	}
+
+	if ( sequencing ) {
+		sequence = ReadLong();
+		assert( sequence == first );
+	}
+	ReadData( data, size );
+	first++;
+	return true;
+}
+
+/*
+===============
+idMsgQueue::GetTotalSize
+===============
+*/
+int idMsgQueue::GetTotalSize( void ) const {
+	if ( startIndex <= endIndex ) {
+		return ( endIndex - startIndex );
+	} else {
+		return ( sizeof( buffer ) - startIndex + endIndex );
+	}
+}
+
+/*
+===============
+idMsgQueue::GetSpaceLeft
+===============
+*/
+int idMsgQueue::GetSpaceLeft( void ) const {
+	if ( startIndex <= endIndex ) {
+		return sizeof( buffer ) - ( endIndex - startIndex ) - 1;
+	} else {
+		return ( startIndex - endIndex ) - 1;
+	}
+}
+
+/*
+===============
+idMsgQueue::CopyToBuffer
+===============
+*/
+void idMsgQueue::CopyToBuffer( byte *buf ) const {
+	if ( startIndex <= endIndex ) {
+// RAVEN BEGIN
+// JSinger: Changed to call optimized memcpy
+		SIMDProcessor->Memcpy( buf, buffer + startIndex, endIndex - startIndex );
+// RAVEN END
+	} else {
+// RAVEN BEGIN
+// JSinger: Changed to call optimized memcpy
+		SIMDProcessor->Memcpy( buf, buffer + startIndex, sizeof( buffer ) - startIndex );
+		SIMDProcessor->Memcpy( buf + sizeof( buffer ) - startIndex, buffer, endIndex );
+// RAVEN END
+	}
+}
+
+/*
+===============
+idMsgQueue::WriteByte
+===============
+*/
+void idMsgQueue::WriteByte( byte b ) {
+	buffer[endIndex] = b;
+	endIndex = ( endIndex + 1 ) & ( MAX_MSG_QUEUE_SIZE - 1 );
+}
+
+/*
+===============
+idMsgQueue::ReadByte
+===============
+*/
+byte idMsgQueue::ReadByte( void ) {
+	byte b = buffer[startIndex];
+	startIndex = ( startIndex + 1 ) & ( MAX_MSG_QUEUE_SIZE - 1 );
+	return b;
+}
+
+/*
+===============
+idMsgQueue::WriteShort
+===============
+*/
+void idMsgQueue::WriteShort( int s ) {
+	WriteByte( ( s >>  0 ) & 255 );
+	WriteByte( ( s >>  8 ) & 255 );
+}
+
+/*
+===============
+idMsgQueue::WriteUShort
+===============
+*/
+void idMsgQueue::WriteUShort( int s ) {
+	WriteByte( ( s >>  0 ) & 255 );
+	WriteByte( ( s >>  8 ) & 255 );
+}
+
+/*
+===============
+idMsgQueue::ReadShort
+===============
+*/
+int idMsgQueue::ReadShort( void ) {
+// RAVEN BEGIN
+// ddynerman: removed side-effecting bitwise or
+	byte l = ReadByte();
+	byte h = ReadByte();
+	return (short)(l | ( h << 8 )); // sign extend
+// RAVEN LOW
+}
+
+/*
+===============
+idMsgQueue::ReadUShort
+===============
+*/
+int idMsgQueue::ReadUShort( void ) {
+// RAVEN BEGIN
+// ddynerman: removed side-effecting bitwise or
+	byte l = ReadByte();
+	byte h = ReadByte();
+	return l | ( h << 8 );
+// RAVEN LOW
+}
+
+/*
+===============
+idMsgQueue::WriteLong
+===============
+*/
+void idMsgQueue::WriteLong( int l ) {
+	WriteByte( ( l >>  0 ) & 255 );
+	WriteByte( ( l >>  8 ) & 255 );
+	WriteByte( ( l >> 16 ) & 255 );
+	WriteByte( ( l >> 24 ) & 255 );
+}
+
+/*
+===============
+idMsgQueue::ReadLong
+===============
+*/
+int idMsgQueue::ReadLong( void ) {
+// RAVEN BEGIN
+// ddynerman: removed side-effecting bitwise or
+	byte ll = ReadByte();
+	byte lh = ReadByte();
+	byte hl = ReadByte();
+	byte hh = ReadByte();
+	return ll | ( lh << 8 ) | ( hl << 16 ) | ( hh << 24 );
+// RAVEN END
+}
+
+/*
+===============
+idMsgQueue::WriteData
+===============
+*/
+void idMsgQueue::WriteData( const byte *data, const int size ) {
+	for ( int i = 0; i < size; i++ ) {
+		WriteByte( data[i] );
+	}
+}
+
+/*
+===============
+idMsgQueue::ReadData
+===============
+*/
+void idMsgQueue::ReadData( byte *data, const int size ) {
+	if ( data ) {
+		for ( int i = 0; i < size; i++ ) {
+			data[i] = ReadByte();
+		}
+	} else {
+		for ( int i = 0; i < size; i++ ) {
+			ReadByte();
+		}
+	}
+}
+
+/*
+===============
+idMsgQueue::WriteTo
+===============
+*/
+void idMsgQueue::WriteTo( idBitMsg &msg ) {
+	msg.WriteUShort( GetTotalSize() );
+	assert( startIndex == 0 );
+	msg.WriteData( buffer + startIndex, endIndex - startIndex );
+}
+
+/*
+===============
+idMsgQueue::FlushTo
+===============
+*/
+void idMsgQueue::FlushTo( idBitMsg &msg ) {
+	WriteTo( msg );
+	Init( 0 );
+}
+
+/*
+===============
+idMsgQueue::ReadFrom
+===============
+*/
+void idMsgQueue::ReadFrom( const idBitMsg &msg ) {
+	Init( 0 );
+	endIndex = msg.ReadUShort();
+	msg.ReadData( buffer, endIndex );
+}
+
+/*
+===============
+idMsgQueue::Save
+===============
+*/
+void idMsgQueue::Save( idFile *file ) const {
+	file->WriteInt( first );
+	file->WriteInt( last );
+	file->WriteInt( startIndex );
+	file->WriteInt( endIndex );
+	file->Write( buffer + startIndex, endIndex - startIndex );
+}
+/*
+===============
+idMsgQueue::Restore
+===============
+*/
+void idMsgQueue::Restore( idFile *file ) {
+	file->ReadInt( first );
+	file->ReadInt( last );
+	file->ReadInt( startIndex );
+	file->ReadInt( endIndex );
+	file->Read( buffer + startIndex, endIndex - startIndex );
+}
+
+/*
+===============
+idBitMsgQueue::idBitMsgQueue
+===============
+*/
+idBitMsgQueue::idBitMsgQueue( void ) {
+	Init();
+}
+
+/*
+===============
+idBitMsgQueue::Init
+===============
+*/
+void idBitMsgQueue::Init( void ) {
+	readTimestamp = false;
+	writeList.Clear();
+	readList.Clear();
+}
+
+/*
+===============
+idBitMsgQueue::Add
+===============
+*/
+void idBitMsgQueue::Add( const idBitMsg &msg, const int timestamp ) {
+	while ( writeList.NextNode() && writeList.Next()->GetSpaceLeft() < ( msg.GetSize() + 8+4 ) ) {
+		writeList.NextNode()->AddToEnd( readList );
+	}
+
+	if ( !writeList.NextNode() ) {
+		idLinkList< idMsgQueue > *node = new idLinkList< idMsgQueue >;
+		node->SetOwner( new idMsgQueue );
+		node->AddToEnd( writeList );
+	}
+
+	writeList.Next()->WriteLong( timestamp );
+	if ( !writeList.Next()->Add( msg.GetData(), msg.GetSize(), false ) ) {
+		assert( false );
+	}
+}
+
+/*
+===============
+idBitMsgQueue::Get
+===============
+*/
+bool idBitMsgQueue::Get( idBitMsg &msg, int &timestamp ) {
+	while ( readList.NextNode() && !readList.Next()->GetTotalSize() ) {
+		readList.Next()->Init( 0 );
+		readList.NextNode()->AddToEnd( writeList );
+	}
+
+	if ( readList.NextNode() ) {
+		int size;
+
+		timestamp = readTimestamp ? nextTimestamp : readList.Next()->ReadLong();
+		readTimestamp = true;
+		if ( readList.Next()->Get( msg.GetData(), msg.GetMaxSize(), size, false ) ) {
+			msg.SetSize( size );
+			msg.BeginReading();
+			readTimestamp = false;
+			return true;
+		}
+
+		assert( false );
+	} else if ( writeList.NextNode() && writeList.Next()->GetTotalSize() ) {
+		int size;
+
+		timestamp = readTimestamp ? nextTimestamp : writeList.Next()->ReadLong();
+		readTimestamp = true;
+		if ( writeList.Next()->Get( msg.GetData(), msg.GetMaxSize(), size, false ) ) {
+			msg.SetSize( size );
+			msg.BeginReading();
+			readTimestamp = false;
+			return true;
+		}
+
+		assert( false );
+	}
+
+	msg.SetSize( 0 );
+	return false;
+}
+
+/*
+===============
+idBitMsgQueue::GetTimestamp
+===============
+*/
+bool idBitMsgQueue::GetTimestamp( int &timestamp ) {
+	if ( readTimestamp ) {
+		timestamp = nextTimestamp;
+		return true;
+	}
+
+	while ( readList.NextNode() && !readList.Next()->GetTotalSize() ) {
+		readList.Next()->Init( 0 );
+		readList.NextNode()->AddToEnd( writeList );
+	}
+
+	if ( readList.NextNode() ) {
+		timestamp = nextTimestamp = readList.Next()->ReadLong();
+		readTimestamp = true;
+		return true;
+	} else if ( writeList.NextNode() && writeList.Next()->GetTotalSize() ) {
+		timestamp = nextTimestamp = writeList.Next()->ReadLong();
+		readTimestamp = true;
+		return true;
+	}
+
+	return false;
+}
+#endif

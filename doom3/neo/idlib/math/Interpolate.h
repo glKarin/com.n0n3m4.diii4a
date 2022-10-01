@@ -78,7 +78,14 @@ class idInterpolate
 			return endValue;
 		}
 
+#ifdef _RAVEN
+// RAVEN BEGIN
+// abahr: changed to protected
+protected:
+// RAVEN END
+#else
 	private:
+#endif
 		float				startTime;
 		float				duration;
 		type				startValue;

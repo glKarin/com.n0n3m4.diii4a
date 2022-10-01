@@ -99,6 +99,12 @@ class idAngles
 		const float 	*ToFloatPtr(void) const;
 		float 			*ToFloatPtr(void);
 		const char 	*ToString(int precision = 2) const;
+
+#ifdef _RAVEN
+	idAngles		Random( const idVec3& range, idRandom& random ) const;
+	idAngles&		Scale( const idAngles& scalar );
+	idAngles&		Remap( const int map[], const int dirMap[] );
+#endif
 };
 
 extern idAngles ang_zero;
@@ -287,5 +293,33 @@ ID_INLINE float *idAngles::ToFloatPtr(void)
 {
 	return &pitch;
 }
+
+#ifdef _RAVEN
+// abahr
+ID_INLINE idAngles idAngles::Random( const idVec3& range, idRandom& random ) const {
+	idAngles a( *this );
+	for( int ix = 0; ix < GetDimension(); ++ix ) {
+		a[ ix ] += a[ ix ] * range[ix] * random.CRandomFloat();
+	}
+	return a;
+}
+
+ID_INLINE idAngles& idAngles::Scale( const idAngles& scalar ) {
+	for( int ix = 0; ix < GetDimension(); ++ix ) {
+		(*this)[ix] *= scalar[ix];
+	}
+
+	return *this;
+}
+
+ID_INLINE idAngles& idAngles::Remap( const int map[], const int dirMap[] ) {
+	idAngles ang( *this );
+	for( int ix = 0; ix < GetDimension(); ++ix ) {
+		(*this)[ ix ] = SignZero(dirMap[ix]) * ang[ abs(map[ix]) ];
+	}
+
+	return *this;
+}
+#endif
 
 #endif /* !__MATH_ANGLES_H__ */

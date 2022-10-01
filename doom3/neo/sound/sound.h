@@ -29,6 +29,14 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SOUND__
 #define __SOUND__
 
+#ifdef _RAVEN
+#define SOUNDWORLD_ANY		-1
+#define SOUNDWORLD_NONE		0
+#define SOUNDWORLD_GAME		1
+#define SOUNDWORLD_MENU		2
+#define SOUNDWORLD_EDITOR	3
+#define SOUNDWORLD_MAX		4
+#endif
 /*
 ===============================================================================
 
@@ -64,6 +72,16 @@ typedef struct {
 	float					shakes;
 	int						soundShaderFlags;		// SSF_* bit flags
 	int						soundClass;				// for global fading of sounds
+													
+#ifdef _RAVEN
+	// RAVEN BEGIN
+// bdube: frequency shift
+// jmarshall: implement
+	float					frequencyShift;
+	float					wetLevel;
+	float					dryLevel;
+// RAVEN END
+#endif
 } soundShaderParms_t;
 
 
@@ -106,6 +124,11 @@ class idSoundShader : public idDecl
 		virtual const char 	*GetSound(int index) const;
 
 		virtual bool			CheckShakesAndOgg(void) const;
+#ifdef _RAVEN
+// jmarshall: eval
+	virtual bool			IsVO_ForPlayer(void) const { return false; }
+// jmarshall end
+#endif
 
 	private:
 		friend class idSoundWorldLocal;
@@ -161,6 +184,13 @@ class idSoundEmitter
 		// the parms specified will be the default overrides for all sounds started on this emitter.
 		// NULL is acceptable for parms
 		virtual void			UpdateEmitter(const idVec3 &origin, int listenerId, const soundShaderParms_t *parms) = 0;
+#ifdef _RAVEN
+// jmarshall - todo add velocity
+	virtual void			UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms) {
+		UpdateEmitter(origin, listenerId, parms);
+	}
+// jmarshalll end
+#endif
 
 		// returns the length of the started sound in msec
 		virtual int				StartSound(const idSoundShader *shader, const s_channelType channel, float diversity = 0, int shaderFlags = 0, bool allowSlow = true) = 0;
@@ -347,6 +377,47 @@ class idSoundSystem
 
 		// is EAX support present - -1: disabled at compile time, 0: no suitable hardware, 1: ok, 2: failed to load OpenAL DLL
 		virtual int				IsEAXAvailable(void) = 0;
+#ifdef _RAVEN
+	virtual idSoundWorld* GetSoundWorldFromId(int worldId) = 0;
+	idSoundEmitter* EmitterForIndex(int worldId, int index) {
+		return GetSoundWorldFromId(worldId)->EmitterForIndex(index);
+	}
+	virtual int				AllocSoundEmitter(int worldId) {
+		return GetSoundWorldFromId(worldId)->AllocSoundEmitter()->Index();
+	}
+	virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate) {
+
+	}
+
+	virtual void StopAllSounds(int worldId) {
+		GetSoundWorldFromId(worldId)->StopAllSounds();
+	}
+
+	virtual void SetActiveSoundWorld(bool val) {  }
+
+	void			FadeSoundClasses(int worldId, const int soundClass, const float to, const float over) {
+		GetSoundWorldFromId(worldId)->FadeSoundClasses(soundClass, to, over);
+	}
+
+	virtual	float			CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition) {
+		return 0.0f; // GetSoundWorldFromId(worldId)->CurrentShakeAmplitudeForPosition(time, listenerPosition);
+	}
+
+	void			PlayShaderDirectly(int worldId, const char* name, int channel = -1) {
+		GetSoundWorldFromId(worldId)->PlayShaderDirectly(name, channel);
+	}
+
+	void			PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName) {
+		GetSoundWorldFromId(SOUNDWORLD_GAME)->PlaceListener(origin, axis, listenerId, gameTime, areaName);
+	}
+
+	virtual void			WriteToSaveGame(int worldId, idFile* savefile) {
+		GetSoundWorldFromId(worldId)->WriteToSaveGame(savefile);
+	}
+	virtual void			ReadFromSaveGame(int worldId, idFile* savefile) {
+		GetSoundWorldFromId(worldId)->ReadFromSaveGame(savefile);
+	}
+#endif
 };
 
 extern idSoundSystem	*soundSystem;

@@ -64,6 +64,9 @@ class idConsoleLocal : public idConsole
 
 		const idMaterial 	*charSetShader;
 
+		virtual void		SaveHistory();
+		virtual void		LoadHistory();
+
 	private:
 		void				KeyDownEvent(int key);
 
@@ -415,7 +418,13 @@ the renderSystem is initialized
 */
 void idConsoleLocal::LoadGraphics()
 {
+#ifdef _RAVEN
+// jmarshall
+    charSetShader = declManager->FindMaterial( "fonts/english/bigchars" );
+// jmarshall end
+#else
 	charSetShader = declManager->FindMaterial("textures/bigchars");
+#endif
 	whiteShader = declManager->FindMaterial("_white");
 	consoleShader = declManager->FindMaterial("console");
 }
@@ -1270,3 +1279,43 @@ void	idConsoleLocal::Draw(bool forceFullScreen)
 		y = SCR_DrawSoundDecoders(y);
 	}
 }
+
+// command history
+#define CONSOLE_HISTORY_FILE ".console_history.dat"
+void idConsoleLocal::SaveHistory() {
+	idFile *f = fileSystem->OpenFileWrite( CONSOLE_HISTORY_FILE );
+	for ( int i=0; i < COMMAND_HISTORY; ++i ) {
+		// make sure the history is in the right order
+		int line = (nextHistoryLine + i) % COMMAND_HISTORY;
+		const char *s = historyEditLines[line].GetBuffer();
+		if ( s && s[0] ) {
+			f->WriteString(s);
+		}
+	}
+	fileSystem->CloseFile(f);
+	common->Printf("[Harmattan]: Console history saved -> %s\n", CONSOLE_HISTORY_FILE);
+}
+
+void idConsoleLocal::LoadHistory() {
+	idFile *f = fileSystem->OpenFileRead( CONSOLE_HISTORY_FILE );
+	if ( f == NULL ) // file doesn't exist
+	{
+		common->Printf("[Harmattan]: Console history not exists -> %s\n", CONSOLE_HISTORY_FILE);
+		return;
+	}
+
+	historyLine = 0;
+	idStr tmp;
+	for ( int i=0; i < COMMAND_HISTORY; ++i ) {
+		if ( f->Tell() >= f->Length() ) {
+			break; // EOF is reached
+		}
+		f->ReadString(tmp);
+		historyEditLines[i].SetBuffer(tmp.c_str());
+		++historyLine;
+	}
+	nextHistoryLine = historyLine;
+	fileSystem->CloseFile(f);
+	common->Printf("[Harmattan]: Console history loaded -> %s\n", CONSOLE_HISTORY_FILE);
+}
+

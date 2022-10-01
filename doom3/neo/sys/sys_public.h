@@ -369,6 +369,13 @@ typedef enum {
 	NA_LOOPBACK,
 	NA_BROADCAST,
 	NA_IP
+#ifdef _RAVEN // _QUAKE4
+		,
+// jmarshall
+	NA_BOT
+// jmarshall end
+#endif
+
 } netadrtype_t;
 
 typedef struct {
@@ -549,6 +556,9 @@ class idSys
 
 		virtual void			OpenURL(const char *url, bool quit) = 0;
 		virtual void			StartProcess(const char *exePath, bool quit) = 0;
+#ifdef _RAVEN
+	virtual int				Milliseconds(void) { return Sys_Milliseconds(); }
+#endif
 };
 
 extern idSys 				*sys;

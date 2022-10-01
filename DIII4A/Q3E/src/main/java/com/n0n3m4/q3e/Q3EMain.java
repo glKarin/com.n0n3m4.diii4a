@@ -57,7 +57,6 @@ public class Q3EMain extends Activity {
 	public static Q3EView mGLSurfaceView;
     public static String datadir;	
     // k
-    private MemDumpFunc m_memFunc = null;
     private boolean m_hideNav = true;
     private int m_runBackground = 1;
     private int m_renderMemStatus = 0;
@@ -68,6 +67,8 @@ public class Q3EMain extends Activity {
     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
     | View.SYSTEM_UI_FLAG_IMMERSIVE
     | View.SYSTEM_UI_FLAG_FULLSCREEN;
+    public static Q3EControlView mControlGLSurfaceView;
+    private MemInfoTextView memoryUsageText;
 	
 	public void ShowMessage(String s)
 	{
@@ -119,6 +120,9 @@ public class Q3EMain extends Activity {
                 });*/
 			}
         }
+        Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt("harm_volume_up_key", Q3EKeyCodes.KeyCodes.K_F3);
+        Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
+        Q3EUtils.q3ei.libname = Q3EUtils.q3ei.isQ4 ? "libdanteq4.so" : "libdante.so"; //k setup engine library here again
 		
 		super.onCreate(savedInstanceState);
 		
@@ -128,53 +132,45 @@ public class Q3EMain extends Activity {
 			try
 			{
 				//k startActivity(new Intent(this,Class.forName(getPackageName()+".GameLauncher")));//Dirty hack	
-				startActivity(new Intent(this,Class.forName("com.n0n3m4.DIII4A.GameLauncher")));//Dirty hack	
+				startActivity(new Intent(this,Class.forName("com.n0n3m4.DIII4A.GameLauncher")));//Dirty hack
 			}			
 			catch (Exception e){e.printStackTrace();};			
 			return;
 		}
 		
-		datadir=PreferenceManager.getDefaultSharedPreferences(this).getString(Q3EUtils.pref_datapath, Q3EUtils.q3ei.default_path);
+		datadir=preferences.getString(Q3EUtils.pref_datapath, Q3EUtils.q3ei.default_path);
 		if ((datadir.length()>0)&&(datadir.charAt(0)!='/'))//lolwtfisuserdoing?
 		{
 			datadir="/"+datadir;
-			PreferenceManager.getDefaultSharedPreferences(this).edit().putString(Q3EUtils.pref_datapath, datadir).commit();
+			preferences.edit().putString(Q3EUtils.pref_datapath, datadir).commit();
 		}
 		if(checkGameFiles())
 		{
+            Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean("harm_redirect_output_to_file", true));
+            Q3EJNI.SetNoHandleSignals(preferences.getBoolean("harm_no_handle_signals", false));
 			if (mGLSurfaceView==null)
-			mGLSurfaceView = new Q3EView(this);			
+                mGLSurfaceView = new Q3EView(this);
+			if (mControlGLSurfaceView==null)
+            mControlGLSurfaceView = new Q3EControlView(this);
+            mControlGLSurfaceView.RenderView(mGLSurfaceView);
+            RelativeLayout mainLayout = new RelativeLayout(this);
+            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            mainLayout.addView(mGLSurfaceView, params);
+            mainLayout.addView(mControlGLSurfaceView, params);
             if(m_renderMemStatus > 0) //k
             {
-                RelativeLayout mainLayout = new RelativeLayout(this);
-                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                mainLayout.addView(mGLSurfaceView, params);
-                final TextView memoryUsageText = new TextView(mainLayout.getContext());
-                memoryUsageText.setTextColor(Color.WHITE);
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
-                    memoryUsageText.setTextAppearance(android.R.attr.textAppearanceMedium);
-                memoryUsageText.setPadding(10, 5, 10, 5);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    memoryUsageText.setAlpha(0.75f);
-                }
+                memoryUsageText = new MemInfoTextView(mainLayout.getContext());
                 params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 mainLayout.addView(memoryUsageText, params);
                 memoryUsageText.setTypeface(Typeface.MONOSPACE);
-                setContentView(mainLayout);   
-                
-                m_memFunc = new 
-                MemDumpFunc_timer
-                //MemDumpFunc_handler
-                (memoryUsageText);
             }
-            else
-                setContentView(mGLSurfaceView);
-                
-			mGLSurfaceView.requestFocus();			
+            setContentView(mainLayout);
+
+            mControlGLSurfaceView.requestFocus();
 			if (mAudio==null)			
 			{
 			mAudio = new Q3ECallbackObj();
-			mAudio.vw=mGLSurfaceView;
+			mAudio.vw=mControlGLSurfaceView;
 			}
 			Q3EJNI.setCallbackObject(mAudio);
 		}
@@ -186,6 +182,8 @@ public class Q3EMain extends Activity {
 
 	@Override
 	protected void onDestroy() {
+        if(null != mGLSurfaceView)
+		    Q3EJNI.shutdown();    
 		super.onDestroy();		
 	}
 
@@ -194,8 +192,8 @@ public class Q3EMain extends Activity {
 		super.onPause();
         
         //k
-        if(m_memFunc != null)
-            m_memFunc.Stop();
+        if(memoryUsageText != null)
+            memoryUsageText.Stop();
 
         if(m_runBackground < 2)
 		if(mAudio != null)
@@ -204,10 +202,17 @@ public class Q3EMain extends Activity {
 		}
 
         if(m_runBackground < 1)
-		if(mGLSurfaceView != null)
-		{
-			mGLSurfaceView.onPause();
-		}		
+        {
+            if(mGLSurfaceView != null)
+            {
+                mGLSurfaceView.onPause();
+            }   
+
+            if(mControlGLSurfaceView != null)
+            {
+                mControlGLSurfaceView.onPause();
+            }		   
+        }
 	}
 
 	@Override
@@ -215,13 +220,17 @@ public class Q3EMain extends Activity {
 		super.onResume();						
 
         //k
-        if(m_memFunc != null && m_renderMemStatus > 0)
-            m_memFunc.Start(m_renderMemStatus * 1000);
+        if(memoryUsageText != null/* && m_renderMemStatus > 0*/)
+            memoryUsageText.Start(m_renderMemStatus * 1000);
 
         //k if(m_runBackground < 1)
 		if(mGLSurfaceView != null)
 		{
 			mGLSurfaceView.onResume();
+		}			
+        if(mControlGLSurfaceView != null)
+        {
+            mControlGLSurfaceView.onResume();
 		}			
 
         //k if(m_runBackground < 2)
@@ -241,228 +250,263 @@ public class Q3EMain extends Activity {
         }
     }
     
-    private abstract class MemDumpFunc
+    private class MemInfoTextView extends TextView
     {
-        private static final int UNIT = 1024;
-        private static final int UNIT2 = 1024 * 1024;
+        private MemDumpFunc m_memFunc = null;
         
-        private boolean  m_lock = false;
-        private ActivityManager m_am = null;
-        private int m_processs[] = {Process.myPid()};
-        private ActivityManager.MemoryInfo m_outInfo = new ActivityManager.MemoryInfo();
-        private TextView m_memoryUsageText = null;
-        protected Runnable m_runnable = new Runnable() {
-            @Override
-            public void run()
-            {
-                if (IsLock())
-                    return;
-                Lock();
-                final String text = GetMemText();
-                HandleMemText(text);
-            }
-        };
-        
-        public MemDumpFunc(TextView view)
+        public MemInfoTextView(Context context)
         {
-            m_memoryUsageText = view;
+            super(context);
+            setTextColor(Color.WHITE);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
+                 setTextAppearance(android.R.attr.textAppearanceMedium);
+            setPadding(10, 5, 10, 5);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                setAlpha(0.75f);
+            }
+            setTypeface(Typeface.MONOSPACE);
+            m_memFunc = new 
+                MemDumpFunc_timer
+            //MemDumpFunc_handler
+            (this);
         }
         
         public void Start(int interval)
         {
-            Stop();
-            m_am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
-            Unlock();
+            if(m_memFunc != null && interval > 0)
+                m_memFunc.Start(interval);
         }
         
         public void Stop()
         {
-            Unlock();
-        }
-        
-        private void Lock()
-        {
-            m_lock = true;
-        }
-        
-        private void Unlock()
-        {
-            m_lock = false;
-        }
-        
-        private boolean IsLock()
-        {
-            return m_lock;
-        }
-        
-        private String GetMemText()
-        {
-            m_am.getMemoryInfo(m_outInfo);
-            int availMem = -1;
-            int totalMem = -1;
-            int usedMem = -1;
-            int java_mem = -1;
-            int native_mem = -1;
-            int graphics_mem = -1;
-            
-            availMem = (int)(m_outInfo.availMem / UNIT2);
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) // 16
-            {
-                totalMem = (int)(m_outInfo.totalMem / UNIT2);
-                usedMem = (int)((m_outInfo.totalMem - m_outInfo.availMem) / UNIT2);
-            }
-
-            Debug.MemoryInfo memInfos[] = m_am.getProcessMemoryInfo(m_processs);
-            Debug.MemoryInfo memInfo = memInfos[0];
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
-            {
-                java_mem = Integer.valueOf(memInfo.getMemoryStat("summary.java-heap")) / UNIT;
-                native_mem = Integer.valueOf(memInfo.getMemoryStat("summary.native-heap")) / UNIT;
-                graphics_mem = Integer.valueOf(memInfo.getMemoryStat("summary.graphics")) / UNIT;   
-                //String stack_mem = memInfo.getMemoryStat("summary.stack");
-                //String code_mem = memInfo.getMemoryStat("summary.code");
-                //String others_mem = memInfo.getMemoryStat("summary.system");
-            }
-            else
-            {
-                java_mem = memInfo.dalvikPrivateDirty / UNIT;
-                native_mem = memInfo.nativePrivateDirty / UNIT;
-            }
-
-            int total_used = native_mem + java_mem;
-            String total_used_str = graphics_mem >= 0 ? "" + (total_used + graphics_mem) : (total_used + "<Excluding graphics memory>");
-            String graphics_mem_str = graphics_mem >= 0 ? "" + graphics_mem : "unknown";
-            int percent = Math.round(((float)usedMem / (float)totalMem) * 100);
-			availMem = totalMem - usedMem;
-                
-            StringBuilder sb = new StringBuilder();
-            sb.append("App->");
-            sb.append("Dalvik:").append(java_mem).append("|");
-            sb.append("Native:").append(native_mem).append("|");
-            sb.append("Graphics:").append(graphics_mem_str).append("|");
-            sb.append("≈").append(total_used_str).append("\n");
-
-            sb.append("Sys->");
-            sb.append("Used:").append(usedMem);
-            sb.append("/Total:").append(totalMem).append("|");
-            sb.append(percent + "%").append("|");
-            sb.append("≈").append(availMem);
-
-            /*
-            final int totalMem32 = 4 * 1024;
-			final boolean needShow32 = !Q3EJNI.IS_64 || totalMem > totalMem32;
-			if(needShow32)
-			{
-				percent = Math.round(Math.min(1.0f, ((float)usedMem / (float)totalMem32)) * 100);
-				availMem = totalMem32 - usedMem;
-				sb.append("\n  32:");
-				sb.append("Used:").append(usedMem);
-				sb.append("/Total:").append(totalMem32).append("|");
-				sb.append(percent + "%").append("|");
-				sb.append("≈").append(availMem);
-				sb.append("(+").append(totalMem - totalMem32).append(")");
-			}
-            */
-
-            return sb.toString();
-        }
-        
-        private void HandleMemText(final String text)
-        {
-            m_memoryUsageText.post(new Runnable(){
-                    public void run()
-                    {        
-                        m_memoryUsageText.setText(text);
-                        Unlock();
-                    }
-                });
-        }
-    }
-    
-    private class MemDumpFunc_timer extends MemDumpFunc
-    {
-        private Timer m_timer = null;
-        
-        public MemDumpFunc_timer(TextView view)
-        {
-            super(view);
+            if(m_memFunc != null)
+                m_memFunc.Stop();
         }
 
-        @Override
-        public void Start(int interval)
+        private abstract class MemDumpFunc
         {
-            super.Start(interval);
-            TimerTask task = new TimerTask(){
+            private static final int UNIT = 1024;
+            private static final int UNIT2 = 1024 * 1024;
+
+            private boolean  m_lock = false;
+            private ActivityManager m_am = null;
+            private int m_processs[] = {Process.myPid()};
+            private ActivityManager.MemoryInfo m_outInfo = new ActivityManager.MemoryInfo();
+            private TextView m_memoryUsageText = null;
+            protected Runnable m_runnable = new Runnable() {
                 @Override
                 public void run()
                 {
-                    m_runnable.run();
+                    if (IsLock())
+                        return;
+                    Lock();
+                    final String text = GetMemText();
+                    HandleMemText(text);
                 }
             };
 
-            m_timer = new Timer();
-            m_timer.scheduleAtFixedRate(task, 0, interval);
+            public MemDumpFunc(TextView view)
+            {
+                m_memoryUsageText = view;
+            }
+
+            public void Start(int interval)
+            {
+                Stop();
+                m_am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+                Unlock();
+            }
+
+            public void Stop()
+            {
+                Unlock();
+            }
+
+            private void Lock()
+            {
+                m_lock = true;
+            }
+
+            private void Unlock()
+            {
+                m_lock = false;
+            }
+
+            private boolean IsLock()
+            {
+                return m_lock;
+            }
+
+            private String GetMemText()
+            {
+                m_am.getMemoryInfo(m_outInfo);
+                int availMem = -1;
+                int totalMem = -1;
+                int usedMem = -1;
+                int java_mem = -1;
+                int native_mem = -1;
+                int graphics_mem = -1;
+
+                availMem = (int)(m_outInfo.availMem / UNIT2);
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) // 16
+                {
+                    totalMem = (int)(m_outInfo.totalMem / UNIT2);
+                    usedMem = (int)((m_outInfo.totalMem - m_outInfo.availMem) / UNIT2);
+                }
+
+                Debug.MemoryInfo memInfos[] = m_am.getProcessMemoryInfo(m_processs);
+                Debug.MemoryInfo memInfo = memInfos[0];
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
+                {
+                    java_mem = Integer.valueOf(memInfo.getMemoryStat("summary.java-heap")) / UNIT;
+                    native_mem = Integer.valueOf(memInfo.getMemoryStat("summary.native-heap")) / UNIT;
+                    graphics_mem = Integer.valueOf(memInfo.getMemoryStat("summary.graphics")) / UNIT;   
+                    //String stack_mem = memInfo.getMemoryStat("summary.stack");
+                    //String code_mem = memInfo.getMemoryStat("summary.code");
+                    //String others_mem = memInfo.getMemoryStat("summary.system");
+                }
+                else
+                {
+                    java_mem = memInfo.dalvikPrivateDirty / UNIT;
+                    native_mem = memInfo.nativePrivateDirty / UNIT;
+                }
+
+                int total_used = native_mem + java_mem;
+                String total_used_str = graphics_mem >= 0 ? "" + (total_used + graphics_mem) : (total_used + "<Excluding graphics memory>");
+                String graphics_mem_str = graphics_mem >= 0 ? "" + graphics_mem : "unknown";
+                int percent = Math.round(((float)usedMem / (float)totalMem) * 100);
+                availMem = totalMem - usedMem;
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("App->");
+                sb.append("Dalvik:").append(java_mem).append("|");
+                sb.append("Native:").append(native_mem).append("|");
+                sb.append("Graphics:").append(graphics_mem_str).append("|");
+                sb.append("≈").append(total_used_str).append("\n");
+
+                sb.append("Sys->");
+                sb.append("Used:").append(usedMem);
+                sb.append("/Total:").append(totalMem).append("|");
+                sb.append(percent + "%").append("|");
+                sb.append("≈").append(availMem);
+
+                /*
+                 final int totalMem32 = 4 * 1024;
+                 final boolean needShow32 = !Q3EJNI.IS_64 || totalMem > totalMem32;
+                 if(needShow32)
+                 {
+                 percent = Math.round(Math.min(1.0f, ((float)usedMem / (float)totalMem32)) * 100);
+                 availMem = totalMem32 - usedMem;
+                 sb.append("\n  32:");
+                 sb.append("Used:").append(usedMem);
+                 sb.append("/Total:").append(totalMem32).append("|");
+                 sb.append(percent + "%").append("|");
+                 sb.append("≈").append(availMem);
+                 sb.append("(+").append(totalMem - totalMem32).append(")");
+                 }
+                 */
+
+                return sb.toString();
+            }
+
+            private void HandleMemText(final String text)
+            {
+                m_memoryUsageText.post(new Runnable(){
+                        public void run()
+                        {        
+                            m_memoryUsageText.setText(text);
+                            Unlock();
+                        }
+                    });
+            }
         }
 
-        @Override
-        public void Stop()
+        private class MemDumpFunc_timer extends MemDumpFunc
         {
-            super.Stop();
-            if(m_timer != null)
+            private Timer m_timer = null;
+
+            public MemDumpFunc_timer(TextView view)
             {
-                m_timer.cancel();   
-                m_timer.purge();
-                m_timer = null;
+                super(view);
+            }
+
+            @Override
+            public void Start(int interval)
+            {
+                super.Start(interval);
+                TimerTask task = new TimerTask(){
+                    @Override
+                    public void run()
+                    {
+                        m_runnable.run();
+                    }
+                };
+
+                m_timer = new Timer();
+                m_timer.scheduleAtFixedRate(task, 0, interval);
+            }
+
+            @Override
+            public void Stop()
+            {
+                super.Stop();
+                if(m_timer != null)
+                {
+                    m_timer.cancel();   
+                    m_timer.purge();
+                    m_timer = null;
+                }
+            }
+        }
+
+        private class MemDumpFunc_handler extends MemDumpFunc
+        {
+            private HandlerThread m_thread = null;
+            private Handler m_handler = null;
+            private Runnable m_handlerCallback = null;
+
+            public MemDumpFunc_handler(TextView view)
+            {
+                super(view);
+            }
+
+            @Override
+            public void Start(final int interval)
+            {
+                super.Start(interval);
+                m_thread = new HandlerThread("MemDumpFunc_thread");
+                m_thread.start();
+                m_handler = new Handler(m_thread.getLooper());
+                m_handlerCallback = new Runnable(){
+                    public void run()
+                    {
+                        m_runnable.run();
+                        m_handler.postDelayed(m_handlerCallback, interval);
+                    }
+                };
+                m_handler.post(m_handlerCallback);
+            }
+
+            @Override
+            public void Stop()
+            {
+                super.Stop();
+                if(m_handler != null)
+                {
+                    if(m_handlerCallback != null)
+                    {
+                        m_handler.removeCallbacks(m_handlerCallback);
+                        m_handlerCallback = null;
+                    }
+                    m_handler = null;
+                }
+                if(m_thread != null)
+                {
+                    m_thread.quit();
+                    m_thread = null;
+                }
             }
         }
     }
-
-    private class MemDumpFunc_handler extends MemDumpFunc
-    {
-        private HandlerThread m_thread = null;
-        private Handler m_handler = null;
-        private Runnable m_handlerCallback = null;
-        
-        public MemDumpFunc_handler(TextView view)
-        {
-            super(view);
-        }
-
-        @Override
-        public void Start(final int interval)
-        {
-            super.Start(interval);
-            m_thread = new HandlerThread("MemDumpFunc_thread");
-            m_thread.start();
-            m_handler = new Handler(m_thread.getLooper());
-            m_handlerCallback = new Runnable(){
-                public void run()
-                {
-                    m_runnable.run();
-                    m_handler.postDelayed(m_handlerCallback, interval);
-                }
-            };
-            m_handler.post(m_handlerCallback);
-        }
-
-        @Override
-        public void Stop()
-        {
-            super.Stop();
-            if(m_handler != null)
-            {
-                if(m_handlerCallback != null)
-                {
-                    m_handler.removeCallbacks(m_handlerCallback);
-                    m_handlerCallback = null;
-                }
-                m_handler = null;
-            }
-            if(m_thread != null)
-            {
-                m_thread.quit();
-                m_thread = null;
-            }
-        }
-    }
+    
 }

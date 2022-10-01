@@ -94,7 +94,11 @@ idCVar cm_drawNormals("cm_drawNormals",		"0",		CVAR_GAME | CVAR_BOOL,	"draw poly
 idCVar cm_backFaceCull("cm_backFaceCull",		"0",		CVAR_GAME | CVAR_BOOL,	"cull back facing polygons");
 idCVar cm_debugCollision("cm_debugCollision",	"0",		CVAR_GAME | CVAR_BOOL,	"debug the collision detection");
 
+#ifdef _RAVEN
+idVec4 cm_color;
+#else
 static idVec4 cm_color;
+#endif
 
 /*
 ================

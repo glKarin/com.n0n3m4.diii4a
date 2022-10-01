@@ -33,6 +33,7 @@ public class Q3EInterface {
 	public boolean isQ3=false;
 	public boolean isD3=false;	
 	public boolean isD3BFG=false;
+    public boolean isQ4 = false;
 	
 	public String default_path;
 	
@@ -41,4 +42,8 @@ public class Q3EInterface {
 	//RTCW4A:
 	public final int RTCW4A_UI_ACTION=6;
 	public final int RTCW4A_UI_KICK=7;
+    
+    //k volume key map
+    public int VOLUME_UP_KEY_CODE = Q3EKeyCodes.KeyCodes.K_F3;
+    public int VOLUME_DOWN_KEY_CODE = Q3EKeyCodes.KeyCodes.K_F2;
 }

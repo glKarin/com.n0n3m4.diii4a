@@ -845,7 +845,7 @@ myGlMultMatrix
 
 void myGlMultMatrix(const float a[16], const float b[16], float out[16])
 {
-#if 0 // HTODO: faster without loop
+#if 0 //k: faster without loop
 int	i, j;
 
 for (i = 0 ; i < 4 ; i++) {
@@ -981,12 +981,12 @@ void R_SetupProjection(void)
 	// set up projection matrix
 	//
 	// #ifndef ANDROID_NOZHACK
-#if 0 // HTODO: fix shadow be cliped
+#if 0 //k: fix shadow be cliped
 	zNear	= 8;
 	zFar = 4000;
-	#else
+#else
 	zNear = r_znear.GetFloat();
-	#endif
+#endif
 
 	if (tr.viewDef->renderView.cramZNear) {
 		zNear *= 0.25;
@@ -1024,13 +1024,13 @@ void R_SetupProjection(void)
 	tr.viewDef->projectionMatrix[2] = 0;
 	tr.viewDef->projectionMatrix[6] = 0;
 	// #ifndef ANDROID_NOZHACK
-#if 0 // HTODO: fix shadow be cliped
+#if 0 //k: fix shadow be cliped
 	tr.viewDef->projectionMatrix[10] = (-zFar-zNear)/(zFar-zNear);//-0.999f;
 	tr.viewDef->projectionMatrix[14] = -2.0f*zFar*zNear/(zFar-zNear);
-	#else
+#else
 	tr.viewDef->projectionMatrix[10] = -0.999f;
 	tr.viewDef->projectionMatrix[14] = -2.0f*zNear;
-	#endif
+#endif
 
 	tr.viewDef->projectionMatrix[3] = 0;
 	tr.viewDef->projectionMatrix[7] = 0;
@@ -1217,6 +1217,10 @@ void R_RenderView(viewDef_t *parms)
 
 	// constrain the view frustum to the view lights and entities
 	R_ConstrainViewFrustum();
+
+#ifdef _RAVEN
+    R_AddEffectSurfaces();
+#endif
 
 	// make sure that interactions exist for all light / entity combinations
 	// that are visible

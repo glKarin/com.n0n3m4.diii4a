@@ -109,6 +109,130 @@ elif ( local_hardcorps ):
 	ai/AI_bot.cpp \
 	physics/Physics_Liquid.cpp'
 	game_list = scons_utils.BuildList( 'hardcorps', game_string )
+elif ( local_quake4 ):
+	game_string += ' \
+	Effect.cpp \
+	FreeView.cpp \
+	Game_Debug.cpp \
+	Game_Log.cpp \
+	Healing_Station.cpp \
+	IconManager.cpp \
+	Instance.cpp \
+	Playback.cpp \
+	Player_Cheats.cpp \
+	Player_States.cpp \
+	spawner.cpp \
+	SplineMover.cpp \
+	Icon.cpp \
+	LipSync.cpp \
+	TramGate.cpp \
+	gamesys/State.cpp \
+	script/ScriptFuncUtility.cpp \
+	vehicle/Vehicle.cpp \
+	vehicle/VehicleAnimated.cpp \
+	vehicle/VehicleController.cpp \
+	vehicle/VehicleDriver.cpp \
+	vehicle/VehicleMonster.cpp \
+	vehicle/VehicleParts.cpp \
+	vehicle/VehiclePosition.cpp \
+	vehicle/VehicleRigid.cpp \
+	vehicle/VehicleSpline.cpp \
+	vehicle/VehicleStatic.cpp \
+	vehicle/Vehicle_DropPod.cpp \
+	vehicle/Vehicle_Walker.cpp \
+	client/ClientAFEntity.cpp \
+	client/ClientEffect.cpp \
+	client/ClientEntity.cpp \
+	client/ClientModel.cpp \
+	client/ClientMoveable.cpp \
+	ai/AAS_Find.cpp \
+	ai/AASCallback_FindCoverArea.cpp \
+	ai/AASCallback_AvoidLocation.cpp \
+	ai/Monster_Berserker.cpp \
+	ai/Monster_BossBuddy.cpp \
+	ai/Monster_BossMakron.cpp \
+	ai/Monster_ConvoyGround.cpp \
+	ai/Monster_ConvoyHover.cpp \
+	ai/Monster_FailedTransfer.cpp \
+	ai/Monster_Fatty.cpp \
+	ai/Monster_Gladiator.cpp \
+	ai/Monster_Grunt.cpp \
+	ai/Monster_Gunner.cpp \
+	ai/Monster_Harvester.cpp \
+	ai/Monster_HarvesterDispersal.cpp \
+	ai/Monster_HeavyHoverTank.cpp \
+	ai/Monster_IronMaiden.cpp \
+	ai/Monster_LightTank.cpp \
+	ai/Monster_NetworkGuardian.cpp \
+	ai/Monster_RepairBot.cpp \
+	ai/Monster_Scientist.cpp \
+	ai/Monster_Sentry.cpp \
+	ai/Monster_SlimyTransfer.cpp \
+	ai/Monster_StreamProtector.cpp \
+	ai/Monster_StroggFlyer.cpp \
+	ai/Monster_StroggHover.cpp \
+	ai/Monster_StroggMarine.cpp \
+	ai/Monster_TeleportDropper.cpp \
+	ai/Monster_Turret.cpp \
+	ai/Monster_TurretFlying.cpp \
+	ai/AI_Actions.cpp \
+	ai/AI_Announcements.cpp \
+	ai/AI_Debug.cpp \
+	ai/AI_Manager.cpp \
+	ai/AI_Medic.cpp \
+	ai/AI_Move.cpp \
+	ai/AI_States.cpp \
+	ai/AI_Tactical.cpp \
+	ai/AI_Util.cpp \
+	ai/VehicleAI.cpp \
+	ai/AAS_tactical.cpp \
+	ai/ObstacleAvoidance.cpp \
+	weapon/WeaponBlaster.cpp \
+	weapon/WeaponGrenadeLauncher.cpp \
+	weapon/WeaponMachinegun.cpp \
+	weapon/WeaponRailgun.cpp \
+	weapon/WeaponDarkMatterGun.cpp \
+	weapon/WeaponHyperblaster.cpp \
+	weapon/WeaponNailgun.cpp \
+	weapon/WeaponRocketLauncher.cpp \
+	weapon/WeaponGauntlet.cpp \
+	weapon/WeaponLightningGun.cpp \
+	weapon/WeaponNapalmGun.cpp \
+	weapon/WeaponShotgun.cpp \
+	mp/Buying.cpp \
+	mp/CTF.cpp \
+	mp/GameState.cpp \
+	mp/Tourney.cpp \
+	mp/VoiceComms.cpp \
+	mp/stats/StatEvent.cpp \
+	mp/stats/StatManager.cpp \
+	mp/stats/StatWindow.cpp \
+	physics/Physics_Particle.cpp \
+	physics/Physics_VehicleMonster.cpp \
+	bots/Bot.cpp \
+	bots/Bot_char.cpp \
+	bots/Bot_chat.cpp \
+	bots/Bot_goal.cpp \
+	bots/Bot_Input.cpp \
+	bots/Bot_weapons.cpp \
+	bots/Bot_weights.cpp \
+	bots/BotAI.cpp \
+	bots/BotAI_Battle_Attacked.cpp \
+	bots/BotAI_Battle_Chase.cpp \
+	bots/BotAI_Battle_Fight.cpp \
+	bots/BotAI_Battle_NBG.cpp \
+	bots/BotAI_Battle_Retreat.cpp \
+	bots/BotAI_respawn.cpp \
+	bots/BotAI_Seek_NBG.cpp \
+	bots/BotAI_SeekLTG.cpp \
+	'
+# Game_render.cpp
+	game_string = game_string.replace('Fx.cpp ', '')
+	game_string = game_string.replace('PlayerIcon.cpp ', '')
+	game_string = game_string.replace('SmokeParticles.cpp ', '')
+	game_string = game_string.replace('ai/AI_Vagary.cpp ', '')
+	game_string = game_string.replace('gamesys/TypeInfo.cpp ', '')
+	game_list = scons_utils.BuildList( 'quake4', game_string )
 else:
 	game_list = scons_utils.BuildList( 'game', game_string )
 
@@ -131,8 +255,12 @@ if ( local_rivensin ):
 if ( local_hardcorps ):
 	local_env.Append( CPPDEFINES = [ '_HARDCORPS', '_DENTONMOD', '_PORTALSKY', '_WATER_PHYSICS' ] )
 
-#local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32/arm-linux-androideabi/lib/armv7-a', '/opt/ndk/android_4_0_gcc_32/sysroot/usr/lib' ] ) # //k TODO: Only for armeabi-v7a, comment this line when compile armeabi(v5e).
-#local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32_v5/arm-linux-androideabi/lib', '/opt/ndk/android_4_0_gcc_32/sysroot/usr/lib' ] ) # //k TODO: Only for armeabi(v5e).
+if ( local_quake4 ):
+	local_env.Append( CPPDEFINES = [ '_QUAKE4' ] )
+
+#local_env.Append( LIBPATH = [ '/data/data/com.termux/files/home/ndk/android_gcc32/arm-linux-androideabi/lib/armv7-a', '/data/data/com.termux/files/home/ndk/android_gcc32/sysroot/usr/lib' ] ) # //k armv7-a
+#local_env.Append( LIBPATH = [ '/data/data/com.termux/files/home/ndk/android-ndk-aide/toolchains/aarch64-linux-android-4.9/prebuilt/linux-arm64/lib/gcc/aarch64-linux-android/4.9.x', '/data/data/com.termux/files/home/ndk/android-ndk-aide/platforms/android-21/arch-arm64/usr/lib', '/data/data/com.termux/files/home/ndk/android-ndk-aide/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a' ] ) # //k arm64-v8a
+#local_env.Append( LIBS = [ 'supc++' ] )
 
 if ( local_demo == 1 ):
 	local_env.Append( CPPDEFINES = [ 'ID_DEMO_BUILD' ] )

@@ -2413,3 +2413,4 @@ void idImageManager::PrintMemInfo(MemInfo_t *mi)
 	f->Printf("\nTotal image bytes allocated: %s\n", idStr::FormatNumber(total).c_str());
 	fileSystem->CloseFile(f);
 }
+

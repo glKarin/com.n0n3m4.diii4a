@@ -142,6 +142,15 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 		src->Error("R_ParseModel: bad numSurfaces");
 	}
 
+#ifdef _RAVEN
+// jmarshall - quake 4 proc format
+    if (!src->PeekTokenString("{") && !src->PeekTokenString("}"))
+    {
+        int sky = src->ParseInt();
+    }
+// jmarshall end
+#endif
+
 	for (i = 0 ; i < numSurfaces ; i++) {
 		src->ExpectTokenString("{");
 
@@ -160,6 +169,37 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 		R_AllocStaticTriSurfVerts(tri, tri->numVerts);
 
 		for (j = 0 ; j < tri->numVerts ; j++) {
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - quake 4 proc format
+            //float	vec[8];
+            //src->Parse1DMatrix( 8, vec );
+
+            src->ExpectTokenString("(");
+
+            tri->verts[j].xyz[0] = src->ParseFloat();
+            tri->verts[j].xyz[1] = src->ParseFloat();
+            tri->verts[j].xyz[2] = src->ParseFloat();
+            tri->verts[j].st[0] = src->ParseFloat();
+            tri->verts[j].st[1] = src->ParseFloat();
+            tri->verts[j].normal[0] = src->ParseFloat();
+            tri->verts[j].normal[1] = src->ParseFloat();
+            tri->verts[j].normal[2] = src->ParseFloat();
+
+            if (src->PeekTokenString(")"))
+            {
+                src->ExpectTokenString(")");
+            }
+            else
+            {
+                while (!src->PeekTokenString(")"))
+                {
+                    src->ParseFloat(); // jmarshall: not sure what the extra values here are for.
+                }
+
+                src->ExpectTokenString(")");
+            }
+// jmarshall end
+#else
 			float	vec[8];
 
 			src->Parse1DMatrix(8, vec);
@@ -172,6 +212,7 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 			tri->verts[j].normal[0] = vec[5];
 			tri->verts[j].normal[1] = vec[6];
 			tri->verts[j].normal[2] = vec[7];
+#endif
 		}
 
 		R_AllocStaticTriSurfIndexes(tri, tri->numIndexes);
@@ -331,6 +372,27 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 			(*w)[j][3] = 0;
 			(*w)[j][4] = 0;
 		}
+
+#ifdef _RAVEN //k: Quake4 extras
+		idToken nextToken;
+		if(src->ReadTokenOnLine(&nextToken))
+		{
+			if(nextToken == "(")
+			{
+				//k: ("_black" 123.00 456.00)
+#if 0
+				src->ReadToken(&nextToken);
+				src->ParseFloat();
+				src->ParseFloat();
+				src->ExpectTokenString(")");
+#else
+				src->SkipUntilString(")");
+#endif
+			}
+			else
+				src->UnreadToken(&nextToken);
+		}
+#endif
 
 		// add the portal to a1
 		p = (portal_t *)R_ClearedStaticAlloc(sizeof(*p));
@@ -568,6 +630,19 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 		delete src;
 		return false;
 	}
+
+#ifdef _RAVEN // _QUAKE4
+// jmarshall: quake 4 proc format
+	if (!src->ReadToken(&token) || token.Icmp(PROC_FILEVERSION)) {
+		common->Printf("idRenderWorldLocal::InitFromMap: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);
+		delete src;
+		return false;
+	}
+
+	// Map CRC, we aren't going to use it.
+	src->ReadToken(&token);
+// jmarshall end
+#endif
 
 	// parse the file
 	while (1) {

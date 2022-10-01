@@ -34,7 +34,6 @@ If you have questions concerning this license or the applicable additional terms
 
 static const char *MD5_SnapshotName = "_MD5_Snapshot_";
 
-
 /***********************************************************************
 
 	idMD5Mesh
@@ -251,7 +250,13 @@ void idMD5Mesh::ParseMesh(idLexer &parser, int numJoints, const idJointMat *join
 	// build the information that will be common to all animations of this mesh:
 	// silhouette edge connectivity and normal / tangent generation information
 	//
+
+#ifdef __ANDROID__
+	const int alloc_size = texCoords.Num() * sizeof(idDrawVert);
+	_DROID_ALLOC16_DEF(idDrawVert, alloc_size, verts, 0)
+#else
 	idDrawVert *verts = (idDrawVert *) _alloca16(texCoords.Num() * sizeof(idDrawVert));
+#endif
 
 	for (i = 0; i < texCoords.Num(); i++) {
 		verts[i].Clear();
@@ -260,6 +265,10 @@ void idMD5Mesh::ParseMesh(idLexer &parser, int numJoints, const idJointMat *join
 
 	TransformVerts(verts, joints);
 	deformInfo = R_BuildDeformInfo(texCoords.Num(), verts, tris.Num(), tris.Ptr(), shader->UseUnsmoothedTangents());
+
+#ifdef __ANDROID__
+	_DROID_FREE(verts, 0)
+#endif
 }
 
 /*
@@ -376,11 +385,20 @@ idMD5Mesh::CalcBounds
 idBounds idMD5Mesh::CalcBounds(const idJointMat *entJoints)
 {
 	idBounds	bounds;
+#ifdef __ANDROID__
+	const int alloc_size = texCoords.Num() * sizeof(idDrawVert);
+	_DROID_ALLOC16_DEF(idDrawVert, alloc_size, verts, 0)
+#else
 	idDrawVert *verts = (idDrawVert *) _alloca16(texCoords.Num() * sizeof(idDrawVert));
+#endif
 
 	TransformVerts(verts, entJoints);
 
 	SIMDProcessor->MinMax(bounds[0], bounds[1], verts, texCoords.Num());
+
+#ifdef __ANDROID__
+	_DROID_FREE(verts, 0)
+#endif
 
 	return bounds;
 }

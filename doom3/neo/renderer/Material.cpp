@@ -112,6 +112,11 @@ void idMaterial::CommonInit()
 	suppressInSubview = false;
 	refCount = 0;
 	portalSky = false;
+#ifdef _RAVEN
+// jmarshall - quake 4
+	materialType = 0;
+// jmarshall end
+#endif
 
 	decalInfo.stayTime = 10000;
 	decalInfo.fadeTime = 4000;
@@ -291,6 +296,10 @@ static infoParm_t	infoParms[] = {
 	{"surftype13",	0,	SURFTYPE_13,	0 },
 	{"surftype14",	0,	SURFTYPE_14,	0 },
 	{"surftype15",	0,	SURFTYPE_15,	0 },
+
+#ifdef _RAVEN //k unsupported
+	{"vehicleclip",	0,	0,	0 },
+#endif
 };
 
 static const int numInfoParms = sizeof(infoParms) / sizeof(infoParms[0]);
@@ -848,6 +857,11 @@ int idMaterial::NameToSrcBlendMode(const idStr &name)
 	} else if (!name.Icmp("GL_SRC_ALPHA_SATURATE")) {
 		return GLS_SRCBLEND_ALPHA_SATURATE;
 	}
+#ifdef _RAVEN
+	else if (!name.Icmp("GL_SRC_COLOR")) {
+		return GLS_SRCBLEND_SRC_COLOR;
+	}
+#endif
 
 	common->Warning("unknown blend mode '%s' in material '%s'", name.c_str(), GetName());
 	SetMaterialFlag(MF_DEFAULTED);
@@ -1093,14 +1107,18 @@ void idMaterial::ParseFragmentMap(idLexer &src, newShaderStage_t *newStage)
 		}
 
 		if (!token.Icmp("forceHighQuality")) {
+#if !defined(_RAVEN)
 			td = TD_HIGH_QUALITY;
+#endif
 			continue;
 		}
 
 		if (!token.Icmp("uncompressed") || !token.Icmp("highquality")) {
+#if !defined(_RAVEN)
 			if (!globalImages->image_ignoreHighQuality.GetInteger()) {
 				td = TD_HIGH_QUALITY;
 			}
+#endif
 
 			continue;
 		}
@@ -1254,6 +1272,15 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			continue;
 		}
 
+#ifdef _RAVEN
+// jmarshall: quake 4 materials
+        if (!token.Icmp("nomips"))
+        {
+            continue;
+        }
+// jmarshall end
+#endif
+
 		if (!token.Icmp("remoteRenderMap")) {
 			ts->dynamic = DI_REMOTE_RENDER;
 			ts->width = src.ParseInt();
@@ -1377,15 +1404,19 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 
 		if (!token.Icmp("uncompressed") || !token.Icmp("highquality")) {
+#if !defined(_RAVEN)
 			if (!globalImages->image_ignoreHighQuality.GetInteger()) {
 				td = TD_HIGH_QUALITY;
 			}
+#endif
 
 			continue;
 		}
 
 		if (!token.Icmp("forceHighQuality")) {
+#if !defined(_RAVEN)
 			td = TD_HIGH_QUALITY;
+#endif
 			continue;
 		}
 
@@ -1649,7 +1680,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
 #else
-			//HTODO: MC_underground/site3 glass
+				//k: unsupported GL asm shader program
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
 #endif
@@ -1663,7 +1694,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
 #else
-			//HTODO: MC_underground/site3 glass
+			//k: unsupported GL asm shader program
 			newStage.fragmentProgram = -1;
 #endif
 			}
@@ -1676,7 +1707,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
 #else
-			//HTODO: MC_underground/site3 glass
+			//k: unsupported GL asm shader program
 			newStage.vertexProgram = -1;
 #endif
 			}
@@ -1698,7 +1729,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, "megaTexture.vfp");
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, "megaTexture.vfp");
 #else
-			//HTODO: MC_underground/site3 glass
+				//k: unsupported GL asm shader program
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
 #endif
@@ -1708,7 +1739,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 
 		if (!token.Icmp("vertexParm")) {
-			//HTODO: MC_underground/site3 glass
+			//k: fix some material load fail, unsupported token also must parsed. e.g MC_underground/site3 glass
 //#if !defined(GL_ES_VERSION_2_0)
 			ParseVertexParm(src, &newStage);
 //#endif
@@ -1716,13 +1747,34 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 
 		if (!token.Icmp("fragmentMap")) {
-			//HTODO: MC_underground/site3 glass
+			//k: fix some material load fail, unsupported token also must parsed. e.g MC_underground/site3 glass
 //#if !defined(GL_ES_VERSION_2_0)
 			ParseFragmentMap(src, &newStage);
 //#endif
 			continue;
 		}
 
+#ifdef _RAVEN //k unsupported GLSL shader program in material
+		if (!token.Icmp("glslProgram")) {
+			idStr tStr;
+			if (src.ReadRestOfLine(tStr)) {
+			}
+			SetMaterialFlag(MF_DEFAULTED); // as default
+			continue;
+		}
+		if (!token.Icmp("shaderParm")) {
+			idStr tStr;
+			if (src.ReadRestOfLine(tStr)) {
+			}
+			continue;
+		}
+		if (!token.Icmp("shaderTexture")) {
+			idStr tStr;
+			if (src.ReadRestOfLine(tStr)) {
+			}
+			continue;
+		}
+#endif
 
 		common->Warning("unknown token '%s' in material '%s'", token.c_str(), GetName());
 		SetMaterialFlag(MF_DEFAULTED);
@@ -1731,7 +1783,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 
 	// if we are using newStage, allocate a copy of it
-	//HTODO: not support
+	//k: unsupported GL asm shader program
 	if (newStage.fragmentProgram || newStage.vertexProgram) {
 		ss->newStage = (newShaderStage_t *)Mem_Alloc(sizeof(newStage));
 		*(ss->newStage) = newStage;
@@ -2036,6 +2088,15 @@ void idMaterial::ParseMaterial(idLexer &src)
 			src.SkipRestOfLine();
 			continue;
 		}
+#ifdef _RAVEN
+// jmarshall - quake 4 materials.
+        else if (!token.Icmp("materialImage"))
+        {
+            src.ReadTokenOnLine(&token);
+            continue;
+        }
+// jmarshall end
+#endif
 		// description
 		else if (!token.Icmp("description")) {
 			src.ReadTokenOnLine(&token);
@@ -2065,10 +2126,71 @@ void idMaterial::ParseMaterial(idLexer &src)
 		else if (!token.Icmp("noShadows")) {
 			SetMaterialFlag(MF_NOSHADOWS);
 			continue;
-		} else if (!token.Icmp("suppressInSubview")) {
+		}
+#ifdef _RAVEN
+// jmarshall - possible legacy optimisations that aren't needed for current hardware.
+        else if (!token.Icmp("notfix"))
+        {
+            // Unknown what this is used for.
+            continue;
+        }
+        else if (!token.Icmp("sightClip"))
+        {
+            // Unknown what this is used for.
+            continue;
+        }
+        else if (!token.Icmp("sky"))
+        {
+            // Unknown what this is used for.
+            continue;
+        }
+        else if (!token.Icmp("needCurrentRender"))
+        {
+            // Unknown what this is used for.
+            continue;
+        }
+// jmarshall end
+#endif
+		else if (!token.Icmp("suppressInSubview")) {
 			suppressInSubview = true;
 			continue;
-		} else if (!token.Icmp("portalSky")) {
+		}
+#ifdef _RAVEN
+// jmarshall
+        else if (!token.Icmp("materialType"))
+        {
+            src.ReadToken(&token);
+            materialType = declManager->FindMaterialType(token);
+            continue;
+        }
+// jmarshall end
+#endif
+#ifdef _RAVEN
+		else if (!token.Icmp("bounce")) {
+			continue;
+		}
+		else if (!token.Icmp("shotclip")) {
+			continue;
+		}
+		else if (!token.Icmp("notacticalfeatures")) {
+			continue;
+		}
+		else if (!token.Icmp("largeshotclip")) {
+			continue;
+		}
+		else if (!token.Icmp("projectileClip")) {
+			continue;
+		}
+		else if (!token.Icmp("portalDistanceNear")) {
+			(void)src.ParseFloat(); // a number
+			continue;
+		}
+		else if (!token.Icmp("portalDistanceFar")) {
+			(void)src.ParseFloat(); // a number
+			continue;
+		}
+#endif
+		else if (!token.Icmp("portalSky")) {
 			portalSky = true;
 			continue;
 		}
@@ -2226,8 +2348,16 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// diffusemap for stage shortcut
 		else if (!token.Icmp("diffusemap")) {
+#ifdef _RAVENxxx
+// jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
+			idStr nstr;
+            src.ReadRestOfLine(nstr);
+			idStr::snPrintf(buffer, sizeof(buffer), "blend diffusemap\nmap %s\n}\n", nstr.c_str());
+// jmarshall end
+#else
 			str = R_ParsePastImageProgram(src);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend diffusemap\nmap %s\n}\n", str);
+#endif
 			newSrc.LoadMemory(buffer, strlen(buffer), "diffusemap");
 			newSrc.SetFlags(LEXFL_NOFATALERRORS | LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES);
 			ParseStage(newSrc, trpDefault);
@@ -2236,8 +2366,16 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// specularmap for stage shortcut
 		else if (!token.Icmp("specularmap")) {
+#ifdef _RAVENxxx
+// jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
+			idStr nstr;
+            src.ReadRestOfLine(nstr);
+			idStr::snPrintf(buffer, sizeof(buffer), "blend specularmap\nmap %s\n}\n", nstr.c_str());
+// jmarshall end
+#else
 			str = R_ParsePastImageProgram(src);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend specularmap\nmap %s\n}\n", str);
+#endif
 			newSrc.LoadMemory(buffer, strlen(buffer), "specularmap");
 			newSrc.SetFlags(LEXFL_NOFATALERRORS | LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES);
 			ParseStage(newSrc, trpDefault);
@@ -2246,8 +2384,16 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// normalmap for stage shortcut
 		else if (!token.Icmp("bumpmap")) {
+#ifdef _RAVENxxx
+// jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
+			idStr nstr;
+            src.ReadRestOfLine(nstr);
+			idStr::snPrintf(buffer, sizeof(buffer), "blend bumpmap\nmap %s\n}\n", nstr.c_str());
+// jmarshall end
+#else
 			str = R_ParsePastImageProgram(src);
 			idStr::snPrintf(buffer, sizeof(buffer), "blend bumpmap\nmap %s\n}\n", str);
+#endif
 			newSrc.LoadMemory(buffer, strlen(buffer), "bumpmap");
 			newSrc.SetFlags(LEXFL_NOFATALERRORS | LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES);
 			ParseStage(newSrc, trpDefault);

@@ -1694,7 +1694,7 @@ bool idImage::CheckPrecompressedImage(bool fullLoad)
 
 	fileSystem->CloseFile(f);
 
-	unsigned long magic = LittleLong(*(unsigned long *)data);
+	unsigned long magic = LittleLong(*(unsigned long *)data); //k: 64long???
 	ddsFileHeader_t	*_header = (ddsFileHeader_t *)(data + 4);
 	int ddspf_dwFlags = LittleLong(_header->ddspf.dwFlags);
 
@@ -2340,7 +2340,7 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 	potWidth = MakePowerOfTwo(imageWidth);
 	potHeight = MakePowerOfTwo(imageHeight);
 
-	//HTODO: berserk/double/grabber/helltime vision
+	//k: fix berserk/double/grabber/helltime vision
 #if !defined(GL_ES_VERSION_2_0)
 	GetDownsize(imageWidth, imageHeight);
 	GetDownsize(potWidth, potHeight);

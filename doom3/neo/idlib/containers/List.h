@@ -91,6 +91,9 @@ class idList
 
 		typedef int		cmp_t(const type *, const type *);
 		typedef type	new_t(void);
+#ifdef _RAVEN
+		typedef int     filter_t( const type * );
+#endif
 
 		idList(int newgranularity = 16);
 		idList(const idList<type> &other);
@@ -135,6 +138,21 @@ class idList
 		void			SortSubSection(int startIndex, int endIndex, cmp_t *compare = (cmp_t *)&idListSortCompare<type>);
 		void			Swap(idList<type> &other);						// swap the contents of the lists
 		void			DeleteContents(bool clear);						// delete the contents of the list
+#ifdef _RAVEN
+	// gcc 4.0: see ListGame.h
+	void			RemoveContents( bool clear );
+	void                    RemoveNull();
+// ddynerman: range remove
+	bool			RemoveRange( int low, int high );
+	int				TypeSize() const { return sizeof(type); }
+
+// cdr : added Heap & Stack & Sort functionality
+	void			StackAdd( const type & obj );						// add to the stack
+	void			StackPop( void );									// remove from the stack
+	type &			StackTop( void );									// get the top element of the stack
+	void			HeapAdd( const type & obj );						// add to the heap, and resort
+	void			HeapPop( void );									// pop off the top of the heap & resort
+#endif
 
 	private:
 		int				num;
@@ -1011,5 +1029,164 @@ ID_INLINE void idList<type>::Swap(idList<type> &other)
 	idSwap(granularity, other.granularity);
 	idSwap(list, other.list);
 }
+
+#ifdef _RAVEN
+
+/*
+================
+idList<type>::StackAdd
+
+Adds a value to the list as if the list was a stack
+
+================
+*/
+template< class type >
+ID_INLINE void idList<type>::StackAdd( const type & obj ) {
+	Append( obj );
+}
+
+/*
+================
+idList<type>::StackPop
+
+Removes a value to the list as if the list was a stack
+
+================
+*/
+template< class type >
+ID_INLINE void idList<type>::StackPop( void ) {
+#if 0
+	assert(num>0);
+	if (num<=0)
+	{
+		return;
+	}
+
+// RAVEN BEGIN
+// jsinger: Without this, this container will leak any dynamically allocated members from
+//          contained class instances
+// TTimo: that would cause a double destructor when the list is deleted in Clear()
+	list[num].~type();
+// RAVEN END
+	num--;
+#else
+	RemoveIndex( num - 1 );
+#endif
+}
+
+template< class type >
+ID_INLINE type& idList<type>::StackTop( void ){
+	assert( num > 0 );
+	return list[ num-1 ];
+}
+
+/*
+================
+idList<type>::HeapAdd
+
+Adds a value to the list as if the list was a heap by doing a bubble swap sort
+First it appends the object, then swaps up the heap at successive parent positions
+as needed
+
+Complexity: O[n log n]
+================
+*/
+template< class type >
+ID_INLINE void idList<type>::HeapAdd( const type & obj ) {
+
+	int pos = Append( obj );
+
+	while (pos && list[((pos-1)/2)]<list[pos])
+	{
+		idSwap(list[((pos-1)/2)], list[pos]);
+		pos = ((pos-1)/2);
+	}
+}
+
+/*
+================
+idList<type>::HeapPop
+
+Removes the top element from the heap and 
+First swaps the top element of the heap with the lowest
+element, destroys the lowest element (wich was the top),
+and then sorts the new top element down the heap as
+needed
+
+Complexity: O[n log n]
+================
+*/
+template< class type >
+ID_INLINE void idList<type>::HeapPop( void ) {
+
+	assert(num>0);
+	if (num<=0)
+	{
+		return;
+	}
+
+	idSwap(list[0], list[num-1]);
+	num--;
+
+	int pos = 0;
+
+	int largestChild = pos;
+	if (((2*pos)+1)<num)
+	{
+		if (((2*pos)+2)<num)
+		{
+			largestChild = ( (list[((2*pos)+2)] < list[((2*pos)+1)]) ? (((2*pos)+1)) : (((2*pos)+2)) );
+		}
+		largestChild = ((2*pos)+1);
+	}
+
+	while (largestChild!=pos && list[pos]<list[largestChild])
+	{
+		idSwap(list[largestChild], list[pos]);
+		pos = largestChild;
+
+		largestChild = pos;
+		if (((2*pos)+1)<num)
+		{
+			if (((2*pos)+2)<num)
+			{
+				largestChild = ( (list[((2*pos)+2)] < list[((2*pos)+1)]) ? (((2*pos)+1)) : (((2*pos)+2)) );
+			}
+			largestChild = ((2*pos)+1);
+		}
+	}
+}
+
+/*
+================
+idList<type>::RemoveRange
+
+Removes the specified range of elements [low, high]
+Only copies down the array once.
+================
+*/
+template< class type >
+ID_INLINE bool idList<type>::RemoveRange( int low, int high ) {
+	int i;
+
+	assert( list != NULL );
+	assert( low >= 0 );
+	assert( high < num );
+	assert( low <= high );
+
+	if ( ( low < 0 ) || ( high >= num ) || ( low > high ) ) {
+		return false;
+	}
+
+	int range = (high - low) + 1;
+	num -= range;
+	for( i = low; i < num; i++ ) {
+		list[ i ] = list[ i + range ];
+	}
+
+	return true;
+}
+
+#endif
 
 #endif /* !__LIST_H__ */

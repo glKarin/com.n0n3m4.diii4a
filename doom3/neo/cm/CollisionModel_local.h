@@ -81,16 +81,16 @@ Collision model
 typedef struct cm_vertex_s {
 	idVec3					p;					// vertex point
 	int						checkcount;			// for multi-check avoidance
-	unsigned long			side;				// each bit tells at which side this vertex passes one of the trace model edges
-	unsigned long			sideSet;			// each bit tells if sidedness for the trace model edge has been calculated yet
+	unsigned/* 64long */int			side;				// each bit tells at which side this vertex passes one of the trace model edges
+	unsigned/* 64long */int			sideSet;			// each bit tells if sidedness for the trace model edge has been calculated yet
 } cm_vertex_t;
 
 typedef struct cm_edge_s {
 	int						checkcount;			// for multi-check avoidance
 	unsigned short			internal;			// a trace model can never collide with internal edges
 	unsigned short			numUsers;			// number of polygons using this edge
-	unsigned long			side;				// each bit tells at which side of this edge one of the trace model vertices passes
-	unsigned long			sideSet;			// each bit tells if sidedness for the trace model vertex has been calculated yet
+	unsigned/* 64long */int			side;				// each bit tells at which side of this edge one of the trace model vertices passes
+	unsigned/* 64long */int			sideSet;			// each bit tells if sidedness for the trace model vertex has been calculated yet
 	int						vertexNum[2];		// start and end point of edge
 	idVec3					normal;				// edge normal
 } cm_edge_t;
@@ -191,6 +191,10 @@ typedef struct cm_model_s {
 	int						numRemovedPolys;
 	int						numMergedPolys;
 	int						usedMemory;
+
+#ifdef _RAVEN
+	bool					isTrmModel;
+#endif
 } cm_model_t;
 
 /*
@@ -297,6 +301,25 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			LoadMap(const idMapFile *mapFile);
 		// frees all the collision models
 		void			FreeMap(void);
+#ifdef _RAVEN
+		virtual void	FreeModel(cmHandle_t model);
+		void			FreeMap(const char* mapName) { FreeMap(); };
+		// Loads collision models from a map file.
+		void			LoadMap( const idMapFile *mapFile, bool forceCreateMap );
+
+		// create trace model from a collision model, returns true if succesfull
+		bool			TrmFromModel(const char* mapName, const char *modelName, idTraceModel &trm ) { (void)mapName; return TrmFromModel(modelName, trm); }; //k DIFF_IMPL
+
+		// sets up a trace model for collision with other trace models
+		cmHandle_t ModelFromTrm(const char* mapName, const char* modelName, const idTraceModel &trm, const idMaterial *material );
+
+		// get clip handle for model
+		virtual cmHandle_t LoadModel(const char* mapName, const char *modelName, const bool precache ) {
+			(void)mapName;
+			return LoadModel(modelName, precache);
+		}
+		virtual int     GetNumInlinedProcClipModels(void) { return numInlinedProcClipModels; }
+#endif
 
 		// get clip handle for model
 		cmHandle_t		LoadModel(const char *modelName, const bool precache);
@@ -467,6 +490,9 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			OptimizeArrays(cm_model_t *model);
 		void			FinishModel(cm_model_t *model);
 		void			BuildModels(const idMapFile *mapFile);
+#ifdef _RAVEN
+	void			BuildModels( const idMapFile *mapFile, bool forceCreateMap);
+#endif
 		cmHandle_t		FindModel(const char *name);
 		cm_model_t 	*CollisionModelForMapEntity(const idMapEntity *mapEnt);	// brush/patch model from .map
 		cm_model_t 	*LoadRenderModel(const char *fileName);					// ASE/LWO models
@@ -497,8 +523,19 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			DrawEdge(cm_model_t *model, int edgeNum, const idVec3 &origin, const idMat3 &axis);
 		void			DrawPolygon(cm_model_t *model, cm_polygon_t *p, const idVec3 &origin, const idMat3 &axis,
 		                                    const idVec3 &viewOrigin);
+#ifdef _RAVEN
+	public:
+#endif
 		void			DrawNodePolygons(cm_model_t *model, cm_node_t *node, const idVec3 &origin, const idMat3 &axis,
 		                const idVec3 &viewOrigin, const float radius);
+#ifdef _RAVEN
+	private:
+		//k v3 .cm file parse
+		bool			ParseCollisionModel_v3(idLexer *src);
+		void			ParsePolygons_v3(idLexer *src, cm_model_t *model);
+		void			ParseBrushes_v3(idLexer *src, cm_model_t *model);
+	int				numInlinedProcClipModels;
+#endif
 
 	private:			// collision map data
 		idStr			mapName;

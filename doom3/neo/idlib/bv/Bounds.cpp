@@ -357,10 +357,30 @@ idBounds BoundsForPointRotation(const idVec3 &start, const idRotation &rotation)
 		if ((v1[i] > 0.0f && v2[i] < 0.0f) || (v1[i] < 0.0f && v2[i] > 0.0f)) {
 			if ((0.5f *(start[i] + end[i]) - origin[i]) > 0.0f) {
 				bounds[0][i] = Min(start[i], end[i]);
+#ifdef _RAVEN // rvlib
+// RAVEN BEGIN
+                bounds[1][i] = origin[i];
+                if( axis[i] * axis[i] < 1.0f )
+                {
+                    bounds[1][i] += idMath::Sqrt( radiusSqr * ( 1.0f - axis[i] * axis[i] ) );
+                }
+// RAVEN END
+#else
 				bounds[1][i] = origin[i] + idMath::Sqrt(radiusSqr * (1.0f - axis[i] * axis[i]));
+#endif
 			} else {
 				bounds[0][i] = origin[i] - idMath::Sqrt(radiusSqr * (1.0f - axis[i] * axis[i]));
+#ifdef _RAVEN // rvlib
+// RAVEN BEGIN
+                bounds[0][i] = origin[i];
+                if( axis[i] * axis[i] < 1.0f )
+                {
+                    bounds[0][i] -= idMath::Sqrt( radiusSqr * ( 1.0f - axis[i] * axis[i] ) );
+                }
+// RAVEN END
+#else
 				bounds[1][i] = Max(start[i], end[i]);
+#endif
 			}
 		} else if (start[i] > end[i]) {
 			bounds[0][i] = end[i];
@@ -445,3 +465,65 @@ void idBounds::ToPoints(idVec3 points[8]) const
 		points[i][2] = b[(i>>2)&1][2];
 	}
 }
+
+#ifdef _RAVEN
+
+// jscott: for BSE attenuation
+/*
+================
+idBounds::ShortestDistance
+================
+*/
+float idBounds::ShortestDistance( const idVec3 &point ) const {
+
+	int		i;
+	float	delta, distance;
+
+	if( ContainsPoint( point ) ) {
+
+		return( 0.0f );
+	}
+
+	distance = 0.0f;
+	for( i = 0; i < 3; i++ ) {
+
+		if( point[i] < b[0][i] ) {
+
+			delta = b[0][i] - point[i];
+			distance += delta * delta;
+
+		} else if ( point[i] > b[1][i] ) {
+
+			delta = point[i] - b[1][i];
+			distance += delta * delta;
+		}
+	}
+
+	return( idMath::Sqrt( distance ) );
+}
+
+// abahr:
+idVec3 idBounds::FindEdgePoint( const idVec3& dir ) const {
+	return FindEdgePoint( GetCenter(), dir );
+}
+
+idVec3 idBounds::FindEdgePoint( const idVec3& start, const idVec3& dir ) const {
+	idVec3 center( GetCenter() );
+	float radius = GetRadius( center );
+	idVec3 point( start + dir * radius );
+	float scale = 0.0f;
+
+    RayIntersection( point, -dir, scale );
+
+	idVec3 p = point + -dir * scale;
+	return p;
+}
+
+idVec3 idBounds::FindVectorToEdge( const idVec3& dir ) const {
+	return idVec3( FindVectorToEdge(GetCenter(), dir) );
+}
+
+idVec3 idBounds::FindVectorToEdge( const idVec3& start, const idVec3& dir ) const {
+	return idVec3( FindEdgePoint(start, dir) - start );
+}
+#endif

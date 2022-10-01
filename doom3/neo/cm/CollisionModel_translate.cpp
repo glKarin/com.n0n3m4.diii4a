@@ -904,6 +904,12 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 	tw.trace.fraction = 1.0f;
 	tw.trace.c.contents = 0;
 	tw.trace.c.type = CONTACT_NONE;
+#ifdef _RAVEN // _QUAKE4
+	tw.trace.c.id = 0; // jmarshall: fix so we don't get garbage values.
+// jmarshall - quake 4
+	tw.trace.c.materialType = 0;
+// jmarshall end
+#endif
 	tw.contents = contentMask;
 	tw.isConvex = true;
 	tw.rotation = false;
@@ -979,6 +985,19 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 			results->c.dist += modelOrigin * results->c.normal;
 		}
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - quake 4
+		if (results->c.material)
+		{
+			results->c.materialType = results->c.material->GetMaterialType();
+		}
+		else
+		{
+			results->c.materialType = NULL;
+		}
+// jmarshall end
+#endif
+
 		idCollisionModelManagerLocal::numContacts = tw.numContacts;
 		return;
 	}
@@ -995,6 +1014,12 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 		if (session->rw) {
 			session->rw->DebugArrow(colorRed, start, end, 1);
 		}
+
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - quaake 4
+		results->c.materialType = NULL;
+// jmarshall end
+#endif
 
 		common->Printf("idCollisionModelManagerLocal::Translation: huge translation\n");
 		return;
@@ -1208,6 +1233,19 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 			results->c.dist += modelOrigin * results->c.normal;
 		}
 	}
+
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - quake 4
+	if (results->c.material)
+	{
+		results->c.materialType = results->c.material->GetMaterialType();
+	}
+	else
+	{
+		results->c.materialType = NULL;
+	}
+// jmarshall end
+#endif
 
 #ifdef _DEBUG
 

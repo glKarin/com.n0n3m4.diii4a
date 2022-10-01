@@ -159,6 +159,10 @@ class idSession
 		idDemoFile 	*readDemo;
 		idDemoFile 	*writeDemo;
 		int				renderdemoVersion;
+
+#ifdef _RAVEN
+	idSoundWorld*	menuSoundWorld;			// so the game soundWorld can be muted
+#endif
 };
 
 extern	idSession 	*session;

@@ -306,6 +306,10 @@ public class Q3EUtils {
 	public static final String pref_32bit="q3e_32bit";
 	public static final String pref_msaa="q3e_msaa";
 	public static final String pref_2fingerlmb="q3e_2fingerlmb";
+	public static final String pref_nolight="q3e_nolight";
+	public static final String pref_useetc1="q3e_useetc1";
+	public static final String pref_usedxt="q3e_usedxt";
+	public static final String pref_useetc1cache="q3e_useetc1cache";
 	public static final String pref_controlprefix="q3e_controls_";
 	public static final String pref_harm_16bit="q3e_harm_16bit"; //k
 	public static final String pref_harm_r_harmclearvertexbuffer="q3e_r_harmclearvertexbuffer"; //k
@@ -314,6 +318,10 @@ public class Q3EUtils {
 	public static final String pref_harm_r_specularExponent="q3e_harm_r_specularExponent"; //k
 	public static final String pref_harm_r_lightModel="q3e_harm_r_lightModel"; //k
 	public static final String pref_harm_mapBack="q3e_harm_map_back"; //k
+	public static final String pref_harm_game="q3e_harm_game"; //k
+    public static final String pref_harm_q4_fs_game="q3e_harm_q4_fs_game"; //k
+	public static final String pref_harm_q4_game_lib="q3e_harm_q4_game_lib"; //k
+	public static final String pref_harm_user_mod="q3e_harm_user_mod"; //k
 	
 	public static class UiElement
 	{
@@ -600,19 +608,19 @@ public class Q3EUtils {
 				{
 				if (x-startx<-SLIDE_DIST)
 				{
-				((Q3EView)(view)).sendKeyEvent(true,lkey,0);
-				((Q3EView)(view)).sendKeyEvent(false,lkey,0);
+				((Q3EControlView)(view)).sendKeyEvent(true,lkey,0);
+				((Q3EControlView)(view)).sendKeyEvent(false,lkey,0);
 				}
 				else
 				if (x-startx>SLIDE_DIST)
 				{
-					((Q3EView)(view)).sendKeyEvent(true,rkey,0);
-					((Q3EView)(view)).sendKeyEvent(false,rkey,0);
+					((Q3EControlView)(view)).sendKeyEvent(true,rkey,0);
+					((Q3EControlView)(view)).sendKeyEvent(false,rkey,0);
 				}
 				else
 				{					
-					((Q3EView)(view)).sendKeyEvent(true,ckey,0);
-					((Q3EView)(view)).sendKeyEvent(false,ckey,0);		
+					((Q3EControlView)(view)).sendKeyEvent(true,ckey,0);
+					((Q3EControlView)(view)).sendKeyEvent(false,ckey,0);
 				}
 				}
 				
@@ -624,19 +632,19 @@ public class Q3EUtils {
 					double ang=Math.abs(Math.atan2(y-starty, x-startx));
 					if (ang>Math.PI/4 && ang<Math.PI*3/4)
 					{					
-					((Q3EView)(view)).sendKeyEvent(true,lkey,0);
-					((Q3EView)(view)).sendKeyEvent(false,lkey,0);
+					((Q3EControlView)(view)).sendKeyEvent(true,lkey,0);
+					((Q3EControlView)(view)).sendKeyEvent(false,lkey,0);
 					}
 					else					
                     { //k
-					((Q3EView)(view)).sendKeyEvent(true,rkey,0);
-                        ((Q3EView)(view)).sendKeyEvent(false,rkey,0);
+					((Q3EControlView)(view)).sendKeyEvent(true,rkey,0);
+                        ((Q3EControlView)(view)).sendKeyEvent(false,rkey,0);
                     } //k
 				}
 				else
 				{					
-					((Q3EView)(view)).sendKeyEvent(true,ckey,0);
-					((Q3EView)(view)).sendKeyEvent(false,ckey,0);					
+					((Q3EControlView)(view)).sendKeyEvent(true,ckey,0);
+					((Q3EControlView)(view)).sendKeyEvent(false,ckey,0);
 				}
 				}
 			}			
@@ -721,13 +729,13 @@ public class Q3EUtils {
 			{
 			if (!heldarr.contains(keycode))
 			{
-				((Q3EView)(view)).sendKeyEvent(true,keycode,0);
+				((Q3EControlView)(view)).sendKeyEvent(true,keycode,0);
 				heldarr.add(keycode);
 				alpha=Math.min(initalpha*2, 1f);
 			}
 			else
 			{
-				((Q3EView)(view)).sendKeyEvent(false,keycode,0);
+				((Q3EControlView)(view)).sendKeyEvent(false,keycode,0);
 				heldarr.remove(Integer.valueOf(keycode));
 				alpha=initalpha;
 			}
@@ -745,20 +753,20 @@ public class Q3EUtils {
 			if (act==1) 
 			{				
 				lx=x;ly=y;
-				((Q3EView)(view)).sendKeyEvent(true,keycode,0);
+				((Q3EControlView)(view)).sendKeyEvent(true,keycode,0);
 			}
 			if (act==-1) 
-				((Q3EView)(view)).sendKeyEvent(false,keycode,0);
+				((Q3EControlView)(view)).sendKeyEvent(false,keycode,0);
 			if (keycode==KeyCodes.K_MOUSE1)
 			{
-				if (((Q3EView)(view)).notinmenu)
+				if (((Q3EControlView)(view)).notinmenu)
 				{
-				((Q3EView)(view)).sendMotionEvent(x-lx,y-ly);
+				((Q3EControlView)(view)).sendMotionEvent(x-lx,y-ly);
 				lx=x;ly=y;
 				}
 				else
 				{
-				((Q3EView)(view)).sendMotionEvent(0,0);//???
+				((Q3EControlView)(view)).sendMotionEvent(0,0);//???
 				}
 			}
 		}
@@ -901,7 +909,7 @@ public class Q3EUtils {
 			if ((keys[ind]!=b))
 			{
 				keys[ind]=b;
-				((Q3EView)(view)).sendKeyEvent(b,codes[ind],0);				
+				((Q3EControlView)(view)).sendKeyEvent(b,codes[ind],0);
 			}		
 		}
 		
@@ -917,9 +925,9 @@ public class Q3EUtils {
 		public void onTouchEvent(int x, int y, int act) {
 			if (act!=-1)
 			{				
-			if (((Q3EView)(view)).notinmenu)
+			if (((Q3EControlView)(view)).notinmenu)
 			{														
-			if (((Q3EView)(view)).analog)
+			if (((Q3EControlView)(view)).analog)
 			{
 			dotjoyenabled=true;
 			dotx=x-cx;
@@ -935,7 +943,7 @@ public class Q3EUtils {
 				dotx=(int)(dotx*internalsize/dist);
 				doty=(int)(doty*internalsize/dist);
 			}			
-			((Q3EView)(view)).sendAnalog(true,analogx,analogy);
+			((Q3EControlView)(view)).sendAnalog(true,analogx,analogy);
 			}
 			else
 			{
@@ -967,10 +975,10 @@ public class Q3EUtils {
 			}
 			else
 			{
-				if (((Q3EView)(view)).analog)
+				if (((Q3EControlView)(view)).analog)
 				{
 				dotjoyenabled=false;	
-				((Q3EView)(view)).sendAnalog(false,0,0);
+				((Q3EControlView)(view)).sendAnalog(false,0,0);
 				}
 				dot_pos=-1;
 				enarr[0]=false;
@@ -989,11 +997,11 @@ public class Q3EUtils {
 	
 	public static class MouseControl implements TouchListener
 	{
-		private Q3EView view;
+		private Q3EControlView view;
 		private boolean alreadydown;
 		private int lx;private int ly;
 		private boolean isleftbutton;
-		public MouseControl(Q3EView vw, boolean islmb) {
+		public MouseControl(Q3EControlView vw, boolean islmb) {
 			view=vw;
 			alreadydown=false;
 			isleftbutton=islmb;
@@ -1004,7 +1012,7 @@ public class Q3EUtils {
 			if (act==1)		
 			{
 			if (isleftbutton)
-			((Q3EView)(view)).sendKeyEvent(true,KeyCodes.K_MOUSE1,0);//Can be sent twice, unsafe.
+			((Q3EControlView)(view)).sendKeyEvent(true,KeyCodes.K_MOUSE1,0);//Can be sent twice, unsafe.
 			alreadydown=true;			
 			}
 			else
@@ -1016,7 +1024,7 @@ public class Q3EUtils {
 			if (act==-1)
 			{
 			if (isleftbutton)
-				((Q3EView)(view)).sendKeyEvent(false,KeyCodes.K_MOUSE1,0);//Can be sent twice, unsafe.
+				((Q3EControlView)(view)).sendKeyEvent(false,KeyCodes.K_MOUSE1,0);//Can be sent twice, unsafe.
 			alreadydown=false;
 			}
 		}
@@ -1261,8 +1269,8 @@ public class Q3EUtils {
                                     if(p.pressed)
                                     {
                                         has = true;
-                                        ((Q3EView)(view)).sendKeyEvent(true, p.key, 0);   
-                                        ((Q3EView)(view)).sendKeyEvent(false, p.key, 0);   
+                                        ((Q3EControlView)(view)).sendKeyEvent(true, p.key, 0);
+                                        ((Q3EControlView)(view)).sendKeyEvent(false, p.key, 0);
                                     }
                                 }
                                 p.pressed = false;

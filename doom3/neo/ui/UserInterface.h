@@ -87,6 +87,17 @@ class idUserInterface
 		virtual void				SetStateInt(const char *varName, const int value) = 0;
 		virtual void				SetStateFloat(const char *varName, const float value) = 0;
 
+#ifdef _RAVEN
+	virtual void				SetStateVec4( const char *varName, const idVec4& vector ) { }
+	virtual idVec4				GetLightColor(void) { idVec4 zero; zero.Zero(); return zero; }
+
+// RAVEN BEGIN
+// bdube: added
+								// Changes the interactive of the gui
+	virtual void				SetInteractive ( bool interactive ) = 0 ;
+// RAVEN END
+#endif
+
 		// Gets a gui state variable
 		virtual const char			*GetStateString(const char *varName, const char *defaultString = "") const = 0;
 		virtual bool				GetStateBool(const char *varName, const char *defaultString = "0") const  = 0;
@@ -157,6 +168,10 @@ class idUserInterfaceManager
 
 		// De-allocates a list gui
 		virtual void				FreeListGUI(idListGUI *listgui) = 0;
+#ifdef _RAVEN
+//// bdube: embedded icons
+	virtual void				RegisterIcon ( const char* code, const char* shader, int x = -1, int y = -1, int w = -1, int h = -1 ) { }
+#endif
 };
 
 extern idUserInterfaceManager 	*uiManager;

@@ -299,6 +299,12 @@ class idFileSystem
 
 		// ignore case and seperator char distinctions
 		virtual bool			FilenameCompare(const char *s1, const char *s2) const = 0;
+#ifdef _RAVEN
+	// mekberg: is file loading allowed?
+// jmarshall - doesn't need implementation
+	virtual void			SetIsFileLoadingAllowed(bool mode) { }
+// jmarshall end
+#endif
 };
 
 extern idFileSystem 		*fileSystem;

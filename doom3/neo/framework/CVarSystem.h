@@ -100,6 +100,12 @@ typedef enum {
 	CVAR_ROM				= BIT(16),	// display only, cannot be set by user at all
 	CVAR_ARCHIVE			= BIT(17),	// set to cause it to be saved to a config file
 	CVAR_MODIFIED			= BIT(18)	// set when the variable is modified
+#ifdef _RAVEN
+	, CVAR_INFO				= BIT(19),	// sent as part of the MOTD packet
+	CVAR_NORESET			= BIT(20),	// don't reset the contents on cvar system restart
+	CVAR_CASE_SENSITIVE		= BIT(21),	// a change in case of the string contents sets the modified flag
+	CVAR_SPECIAL_CONCAT		= BIT(22),	// special concatination of the incoming string to the cvar system, will remove space between ^ and the code that is produced by tokenzier
+#endif
 } cvarFlags_t;
 
 

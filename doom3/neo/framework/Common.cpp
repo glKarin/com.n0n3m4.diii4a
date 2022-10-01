@@ -2598,9 +2598,17 @@ void idCommonLocal::PrintLoadingMessage(const char *msg)
 	}
 
 	renderSystem->BeginFrame(renderSystem->GetScreenWidth(), renderSystem->GetScreenHeight());
+#ifdef _RAVEN // _QUAKE4
+	renderSystem->DrawStretchPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, declManager->FindMaterial("gfx/splashScreen"));
+#else
 	renderSystem->DrawStretchPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, declManager->FindMaterial("splashScreen"));
+#endif
 	int len = strlen(msg);
+#ifdef _RAVEN // _QUAKE4
+	renderSystem->DrawSmallStringExt((640 - len * SMALLCHAR_WIDTH) / 2, 410, msg, idVec4(0.94f, 0.62f, 0.05f, 1.0f), true, declManager->FindMaterial("fonts/english/bigchars"));
+#else
 	renderSystem->DrawSmallStringExt((640 - len * SMALLCHAR_WIDTH) / 2, 410, msg, idVec4(0.0f, 0.81f, 0.94f, 1.0f), true, declManager->FindMaterial("textures/bigchars"));
+#endif
 	renderSystem->EndFrame(NULL, NULL);
 }
 
@@ -2687,13 +2695,13 @@ idCommonLocal::GUIFrame
 =================
 */
 #if defined(__ANDROID__)
-extern void (*pull_input_event)(int execCmd);
+extern void pull_input_event(int execCmd);
 #endif
 void idCommonLocal::GUIFrame(bool execCmd, bool network)
 {
 	Sys_GenerateEvents();
 #if defined(__ANDROID__)
-	if(pull_input_event)
+	// if(0)
 		pull_input_event(1);
 #endif
 	eventLoop->RunEventLoop(execCmd);	// and execute any commands
@@ -2827,21 +2835,32 @@ idCommonLocal::LoadGameDLL
 =================
 */
 #if defined(__ANDROID__) //k
-#ifndef _ANDROID_PACKAGE_NAME
-#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
+
+#ifdef _RAVEN // _QUAKE4
+#define _HARM_BASE_GAME_DLL "q4game"
+#else
+#define _HARM_BASE_GAME_DLL "game"
 #endif
+
+#ifndef _ANDROID_PACKAGE_NAME
+//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
+#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
+#endif
+
 #define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
 #endif
 //k
 #define _ANDROID_NATIVE_LIBRARY_DIR "<Android APK native library directory path>/"
 extern char *native_library_dir;
 static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. Includes "
-		"`" _ANDROID_NATIVE_LIBRARY_DIR "libgame" ".so`, "
+		"`" _ANDROID_NATIVE_LIBRARY_DIR "lib" _HARM_BASE_GAME_DLL ".so`, "
+#if !defined(_RAVEN)
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libd3xp" ".so`, "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libd3le" ".so`, "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libcdoom" ".so`, "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "librivensin" ".so`, "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libhardcorps" ".so`, "
+#endif
 		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
 static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library directory path(default is empty, means using `" _ANDROID_NATIVE_LIBRARY_DIR "`).");
 void idCommonLocal::LoadGameDLL(void)
@@ -2900,6 +2919,16 @@ void idCommonLocal::LoadGameDLL(void)
 		{
 			common->Printf("[Harmattan]: Load game `%s` from cvar `fs_game`.\n", fsgame.c_str());
 
+#ifdef _RAVEN // _QUAKE4
+			if(!fsgame.Icmp("q4base")) // load Quake4 game so.
+			{
+				common->Printf("[Harmattan]: Load Quake4 game......\n");
+				idStr dllFile(dir);
+				dllFile.AppendPath("libq4game.so");
+				gameDLL = sys->DLL_Load(dllFile);
+				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+			}
+#else
 			// if fs_game cvar is `d3xp`.
 			if(!fsgame.Icmp("d3xp")) // load d3xp game so.
 			{
@@ -2941,9 +2970,10 @@ void idCommonLocal::LoadGameDLL(void)
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
+#endif
 			else // else find in fs_game cvar path.
 			{
-				fileSystem->FindDLL("game", dllPath, true);
+				fileSystem->FindDLL(_HARM_BASE_GAME_DLL, dllPath, true);
 				if (!dllPath[ 0 ]) {
 					common->Printf("[Harmattan]: couldn't find game dynamic library\n");
 				}
@@ -2965,7 +2995,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load BASE game......\n");
 				idStr dllFile(dir);
-				dllFile.AppendPath("libgame.so");
+				dllFile.AppendPath("lib" _HARM_BASE_GAME_DLL ".so");
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load BASE dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -3011,6 +3041,9 @@ void idCommonLocal::LoadGameDLL(void)
 	gameImport.declManager				= ::declManager;
 	gameImport.AASFileManager			= ::AASFileManager;
 	gameImport.collisionModelManager	= ::collisionModelManager;
+#ifdef _RAVEN // _QUAKE4
+	gameImport.bse						= ::bse;
+#endif
 
 	gameExport							= *GetGameAPI(&gameImport);
 
@@ -3204,6 +3237,8 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 
 		ClearCommandLine();
 
+		console->LoadHistory();
+
 		com_fullyInitialized = true;
 	}
 
@@ -3225,6 +3260,8 @@ void idCommonLocal::Shutdown(void)
 
 	idAsyncNetwork::server.Kill();
 	idAsyncNetwork::client.Shutdown();
+
+	console->SaveHistory();
 
 	// game specific shut down
 	ShutdownGame(false);

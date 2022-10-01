@@ -1297,6 +1297,8 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	savegame.ReadBuildNumber();
 
+	//k not in original DOOM3
+#ifndef __ANDROID__
 //rev 2021 dhewm 3 1.5.1 updates.
 	// DG: I enhanced the information in savegames a bit for dhewm3 1.5.1
 	//     for which I bumped th BUILD_NUMBER to 1305
@@ -1328,6 +1330,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	}
 	// DG end	
 //rev 2021 dhewm 3 1.5.1 updates END.
+#endif
 
 	// Create the list of all objects in the game
 	savegame.CreateObjects();

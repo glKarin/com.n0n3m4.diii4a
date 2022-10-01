@@ -1484,3 +1484,28 @@ int idFile_InZip::Seek(long offset, fsOrigin_t origin)
 
 	return -1;
 }
+
+#ifdef _RAVEN
+/*
+ =================
+ idFile::ReadVec5
+ =================
+ */
+int idFile::ReadVec5(idVec5& vec) {
+	int result = Read(&vec, sizeof(vec));
+	LittleRevBytes(&vec, sizeof(float), sizeof(vec) / sizeof(float));
+	return result;
+}
+
+
+/*
+ =================
+ idFile::WriteVec5
+ =================
+ */
+int idFile::WriteVec5(const idVec5& vec) {
+	idVec5 v = vec;
+	LittleRevBytes(&v, sizeof(float), sizeof(v) / sizeof(float));
+	return Write(&v, sizeof(v));
+}
+#endif

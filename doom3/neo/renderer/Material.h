@@ -291,6 +291,13 @@ typedef enum {
 	CONTENTS_AREAPORTAL			= BIT(20),	// portal separating renderer areas
 	CONTENTS_NOCSG				= BIT(21),	// don't cut this brush with CSG operations in the editor
 
+#ifdef _RAVEN // _QUAKE4
+// jmarshall - todo
+	CONTENTS_FOG				= BIT(25),
+	CONTENTS_LAVA				= BIT(26),
+	CONTENTS_SLIME				= BIT(27),
+// jmarshall end
+#endif
 	CONTENTS_REMOVE_UTIL		= ~(CONTENTS_AREAPORTAL|CONTENTS_NOCSG)
 } contentsFlags_t;
 
@@ -334,6 +341,9 @@ typedef enum {
 	SURF_DISCRETE				= BIT(10),	// not clipped or merged by utilities
 	SURF_NOFRAGMENT				= BIT(11),	// dmap won't cut surface at each bsp boundary
 	SURF_NULLNORMAL				= BIT(12)	// renderbump will draw this surface as 0x80 0x80 0x80, which
+#ifdef _RAVEN
+		, SURF_BOUNCE = BIT(13),  // projectiles should bounce off this surface
+#endif
 	// won't collect light from any angle
 } surfaceFlags_t;
 
@@ -686,6 +696,9 @@ class idMaterial : public idDecl
 			return portalSky;
 		};
 		void				AddReference();
+#ifdef _RAVEN
+	const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
+#endif
 
 	private:
 		// parse the entire material
@@ -725,6 +738,25 @@ class idMaterial : public idDecl
 		int					entityGui;			// draw a gui with the idUserInterface from the renderEntity_t
 		// non zero will draw gui, gui2, or gui3 from renderEnitty_t
 		mutable idUserInterface	*gui;			// non-custom guis are shared by all users of a material
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jscott: for material types
+	const rvDeclMatType* materialType;
+	byte* materialTypeArray;	// an array of material type indices generated from the hit image
+	idStr				materialTypeArrayName;
+	int					MTAWidth;
+	int					MTAHeight;
+
+	// rjohnson: started tracking image/material usage
+	int					useCount;
+	int					globalUseCount;
+
+	// AReis: New portal distance culling stuff.
+	float				portalDistanceNear;
+	float				portalDistanceFar;
+	idImage* portalImage;
+// RAVEN END
+#endif
 
 		bool				noFog;				// surface does not create fog interactions
 

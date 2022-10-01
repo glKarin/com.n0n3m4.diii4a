@@ -56,16 +56,60 @@ bool idWindow::registerIsTemporary[MAX_EXPRESSION_REGISTERS];		// statics to ass
 idCVar idWindow::gui_debug("gui_debug", "0", CVAR_GUI | CVAR_BOOL, "");
 idCVar idWindow::gui_edit("gui_edit", "0", CVAR_GUI | CVAR_BOOL, "");
 
+#ifdef _RAVEN //k: for main menu gui
+const char *Default_Args[]	= { "default", NULL };
+
+idCVar net_menulanserver("net_menulanserver", Default_Args[0], CVAR_SYSTEM | CVAR_ARCHIVE, "net_menulanserver(unsupported, only for compat.)", Default_Args);
+idCVar net_serverMenuDedicated("net_serverMenuDedicated", Default_Args[0], CVAR_SYSTEM | CVAR_ARCHIVE, "net_serverMenuDedicated(unsupported, only for compat.)", Default_Args);
+idCVar r_skipSky("r_skipSky", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "r_skipSky(unsupported, only for compat.)");
+idCVar r_forceAmbient("r_forceAmbient", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "r_forceAmbient(unsupported, only for compat.)");
+idCVar r_useSmp("r_useSmp", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "r_useSmp(unsupported, only for compat.)");
+idCVar s_deviceName("s_deviceName", Default_Args[0], CVAR_SYSTEM | CVAR_ARCHIVE, "s_deviceName(unsupported, only for compat.)", Default_Args);
+idCVar s_volume("s_volume", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "s_volume(unsupported, only for compat.)");
+idCVar s_musicVolume("s_musicVolume", "100", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "s_musicVolume(unsupported, only for compat.)");
+idCVar s_speakerFraction("s_speakerFraction", "100", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "s_speakerFraction(unsupported, only for compat.)");
+#endif
+
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
 
 //  made RegisterVars a member of idWindow
 const idRegEntry idWindow::RegisterVars[] = {
 	{ "forecolor", idRegister::VEC4 },
+#ifdef _RAVEN
+    { "forecolor_r", idRegister::FLOAT },
+    { "forecolor_g", idRegister::FLOAT },
+    { "forecolor_b", idRegister::FLOAT },
+    { "forecolor_w", idRegister::FLOAT },
+#endif
 	{ "hovercolor", idRegister::VEC4 },
+#ifdef _RAVEN
+    { "hovercolor_r", idRegister::FLOAT },
+    { "hovercolor_g", idRegister::FLOAT },
+    { "hovercolor_b", idRegister::FLOAT },
+    { "hovercolor_w", idRegister::FLOAT },
+#endif
 	{ "backcolor", idRegister::VEC4 },
+#ifdef _RAVEN
+    { "backcolor_r", idRegister::FLOAT },
+    { "backcolor_g", idRegister::FLOAT },
+    { "backcolor_b", idRegister::FLOAT },
+    { "backcolor_w", idRegister::FLOAT },
+#endif
 	{ "bordercolor", idRegister::VEC4 },
+#ifdef _RAVEN
+    { "bordercolor_r", idRegister::FLOAT },
+    { "bordercolor_g", idRegister::FLOAT },
+    { "bordercolor_b", idRegister::FLOAT },
+    { "bordercolor_w", idRegister::FLOAT },
+#endif
 	{ "rect", idRegister::RECTANGLE },
 	{ "matcolor", idRegister::VEC4 },
+#ifdef _RAVEN
+    { "matcolor_r", idRegister::FLOAT },
+    { "matcolor_g", idRegister::FLOAT },
+    { "matcolor_b", idRegister::FLOAT },
+    { "matcolor_w", idRegister::FLOAT },
+#endif
 	{ "scale", idRegister::VEC2 },
 	{ "translate", idRegister::VEC2 },
 	{ "rotate", idRegister::FLOAT },
@@ -86,6 +130,14 @@ const idRegEntry idWindow::RegisterVars[] = {
 	{ "lightColor", idRegister::VEC4 },
 	{ "viewOffset", idRegister::VEC4 },
 	{ "hideCursor", idRegister::BOOL}
+#ifdef _RAVEN
+    , { "maxchars", idRegister::INT},
+    { "backgroundHover", idRegister::STRING },
+    { "backgroundFocus", idRegister::STRING },
+    { "backgroundLine", idRegister::STRING },
+    { "itemheight", idRegister::INT },
+#endif
+
 };
 
 const int idWindow::NumRegisterVars = sizeof(RegisterVars) / sizeof(idRegEntry);
@@ -102,6 +154,29 @@ const char *idWindow::ScriptNames[] = {
 	"onActionRelease",
 	"onEnter",
 	"onEnterRelease"
+#ifdef _RAVEN
+// jmarshall - quake 4
+    , "onBackAction",
+    "onTabRelease",
+    "onGainFocus",
+    "onLoseFocus",
+    "onSelChange",
+    "onInit",
+    "onJoyStart",
+    "onJoySelect",
+    "onJoyBack",
+    "onJoyLShoulder",
+    "onJoyRShoulder",
+    "onJoyUp",
+    "onJoyDown",
+    "onJoyLeft",
+    "onJoyRight",
+    "onJoyButton1",
+    "onJoyButton2",
+    "onJoyBackButton"
+// jmarshall end
+#endif
+
 };
 
 /*
@@ -155,6 +230,34 @@ void idWindow::CommonInit()
 	}
 
 	hideCursor = false;
+#ifdef _RAVEN
+// jmarshall - gui crash
+    numOps = 0;
+	memset(ops, 0, sizeof(ops));
+
+    backColor_r.Bind(backColor, 0);
+    backColor_g.Bind(backColor, 1);
+    backColor_b.Bind(backColor, 2);
+    backColor_w.Bind(backColor, 3);
+    matColor_r.Bind(matColor, 0);
+    matColor_g.Bind(matColor, 1);
+    matColor_b.Bind(matColor, 2);
+    matColor_w.Bind(matColor, 3);
+    foreColor_r.Bind(foreColor, 0);
+    foreColor_g.Bind(foreColor, 1);
+    foreColor_b.Bind(foreColor, 2);
+    foreColor_w.Bind(foreColor, 3);
+    hoverColor_r.Bind(hoverColor, 0);
+    hoverColor_g.Bind(hoverColor, 1);
+    hoverColor_b.Bind(hoverColor, 2);
+    hoverColor_w.Bind(hoverColor, 3);
+    borderColor_r.Bind(borderColor, 0);
+    borderColor_g.Bind(borderColor, 1);
+    borderColor_b.Bind(borderColor, 2);
+    borderColor_w.Bind(borderColor, 3);
+// jmarshall end
+#endif
+
 }
 
 /*
@@ -269,6 +372,12 @@ void idWindow::CleanUp()
 	children.DeleteContents(true);
 	definedVars.DeleteContents(true);
 	timeLineEvents.DeleteContents(true);
+
+#ifdef _RAVEN
+// jmarshall
+    updateVars.Clear();
+// jmarshall end
+#endif
 
 	for (i = 0; i < SCRIPT_COUNT; i++) {
 		delete scripts[i];
@@ -569,7 +678,12 @@ void idWindow::StateChanged(bool redraw)
 
 	UpdateWinVars();
 
-	if (expressionRegisters.Num() && ops.Num()) {
+#ifdef _RAVEN
+	if (expressionRegisters.Num() && numOps)
+#else
+	if (expressionRegisters.Num() && ops.Num())
+#endif
+	{
 		EvalRegs();
 	}
 
@@ -662,7 +776,14 @@ bool idWindow::RunTimeEvents(int time)
 
 	UpdateWinVars();
 
-	if (expressionRegisters.Num() && ops.Num()) {
+#ifdef _RAVEN
+// jmarshall - gui crash.
+    if (expressionRegisters.Num() && numOps)
+// jmarshall end
+#else
+	if (expressionRegisters.Num() && ops.Num())
+#endif
+    {
 		EvalRegs();
 	}
 
@@ -705,7 +826,14 @@ void idWindow::RunNamedEvent(const char *eventName)
 		UpdateWinVars();
 
 		// Make sure we got all the current values for stuff
-		if (expressionRegisters.Num() && ops.Num()) {
+#ifdef _RAVEN
+// jmarshall - gui crash
+        if (expressionRegisters.Num() && numOps)
+// jmarshall end
+#else
+		if (expressionRegisters.Num() && ops.Num())
+#endif
+        {
 			EvalRegs(-1, true);
 		}
 
@@ -757,12 +885,17 @@ void idWindow::AddCommand(const char *_cmd)
 {
 	idStr str = cmd;
 
+#ifdef _RAVEN //k: cmd string combined???
+	str += _cmd;
+	str += " ; ";
+#else
 	if (str.Length()) {
 		str += " ; ";
 		str += _cmd;
 	} else {
 		str = _cmd;
 	}
+#endif
 
 	cmd = str;
 }
@@ -783,7 +916,12 @@ const char *idWindow::HandleEvent(const sysEvent_t *event, bool *updateVisuals)
 		actionDownRun = false;
 		actionUpRun = false;
 
-		if (expressionRegisters.Num() && ops.Num()) {
+#ifdef _RAVEN
+        if (expressionRegisters.Num() && numOps)
+#else
+		if (expressionRegisters.Num() && ops.Num())
+#endif
+		{
 			EvalRegs();
 		}
 
@@ -1116,12 +1254,21 @@ void idWindow::Transition()
 		idWinRectangle *r = NULL;
 		idWinVec4 *v4 = dynamic_cast<idWinVec4 *>(data->data);
 		idWinFloat *val = NULL;
+#ifdef _RAVEN
+        idWinFloatPtr* valp = NULL;
+#endif
 
 		if (v4 == NULL) {
 			r = dynamic_cast<idWinRectangle *>(data->data);
 
 			if (!r) {
 				val = dynamic_cast<idWinFloat *>(data->data);
+#ifdef _RAVEN
+				if (!val)
+                {
+                    valp = dynamic_cast<idWinFloatPtr*>(data->data);
+                }
+#endif
 			}
 		}
 
@@ -1130,6 +1277,12 @@ void idWindow::Transition()
 				*v4 = data->interp.GetEndValue();
 			} else if (val) {
 				*val = data->interp.GetEndValue()[0];
+#ifdef _RAVEN
+            }
+            else if (valp)
+            {
+                *valp = data->interp.GetEndValue()[0];
+#endif
 			} else {
 				*r = data->interp.GetEndValue();
 			}
@@ -1141,6 +1294,12 @@ void idWindow::Transition()
 					*v4 = data->interp.GetCurrentValue(gui->GetTime());
 				} else if (val) {
 					*val = data->interp.GetCurrentValue(gui->GetTime())[0];
+#ifdef _RAVEN
+                }
+                else if (valp)
+                {
+                    *valp = data->interp.GetCurrentValue(gui->GetTime())[0];
+#endif
 				} else {
 					*r = data->interp.GetCurrentValue(gui->GetTime());
 				}
@@ -1226,9 +1385,11 @@ idWindow::DrawBackground
 */
 void idWindow::DrawBackground(const idRectangle &drawRect)
 {
+#if !defined(_RAVEN) //k: don't draw background color for main menu black screen.
 	if (backColor.w()) {
 		dc->DrawFilledRect(drawRect.x, drawRect.y, drawRect.w, drawRect.h, backColor);
 	}
+#endif
 
 	if (background && matColor.w()) {
 		float scalex, scaley;
@@ -1975,21 +2136,126 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &backColor;
 	}
 
+#ifdef _RAVEN
+// jmarshall
+    if (idStr::Icmp(_name, "backColor_r") == 0)
+    {
+        retVar = &backColor_r;
+    }
+    if (idStr::Icmp(_name, "backColor_g") == 0)
+    {
+        retVar = &backColor_g;
+    }
+    if (idStr::Icmp(_name, "backColor_b") == 0)
+    {
+        retVar = &backColor_b;
+    }
+    if (idStr::Icmp(_name, "backColor_w") == 0)
+    {
+        retVar = &backColor_w;
+    }
+// jmarshall end
+#endif
+
 	if (idStr::Icmp(_name, "matColor") == 0) {
 		retVar = &matColor;
 	}
+
+#ifdef _RAVEN
+// jmarshall
+    if (idStr::Icmp(_name, "matColor_r") == 0)
+    {
+        retVar = &matColor_r;
+    }
+    if (idStr::Icmp(_name, "matColor_g") == 0)
+    {
+        retVar = &matColor_g;
+    }
+    if (idStr::Icmp(_name, "matColor_b") == 0)
+    {
+        retVar = &matColor_b;
+    }
+    if (idStr::Icmp(_name, "matColor_w") == 0)
+    {
+        retVar = &matColor_w;
+    }
+// jmarshall end
+#endif
 
 	if (idStr::Icmp(_name, "foreColor") == 0) {
 		retVar = &foreColor;
 	}
 
+#ifdef _RAVEN
+// jmarshall
+    if (idStr::Icmp(_name, "foreColor_r") == 0)
+    {
+        retVar = &foreColor_r;
+    }
+    if (idStr::Icmp(_name, "foreColor_g") == 0)
+    {
+        retVar = &foreColor_g;
+    }
+    if (idStr::Icmp(_name, "foreColor_b") == 0)
+    {
+        retVar = &foreColor_b;
+    }
+    if (idStr::Icmp(_name, "foreColor_w") == 0)
+    {
+        retVar = &foreColor_w;
+    }
+// jmarshall end
+#endif
+
 	if (idStr::Icmp(_name, "hoverColor") == 0) {
 		retVar = &hoverColor;
 	}
 
+#ifdef _RAVEN
+// jmarshall
+    if (idStr::Icmp(_name, "hoverColor_r") == 0)
+    {
+        retVar = &hoverColor_r;
+    }
+    if (idStr::Icmp(_name, "hoverColor_g") == 0)
+    {
+        retVar = &hoverColor_g;
+    }
+    if (idStr::Icmp(_name, "hoverColor_b") == 0)
+    {
+        retVar = &hoverColor_b;
+    }
+    if (idStr::Icmp(_name, "hoverColor_w") == 0)
+    {
+        retVar = &hoverColor_w;
+    }
+// jmarshall end
+#endif
+
 	if (idStr::Icmp(_name, "borderColor") == 0) {
 		retVar = &borderColor;
 	}
+
+#ifdef _RAVEN
+// jmarshall
+    if (idStr::Icmp(_name, "borderColor_r") == 0)
+    {
+        retVar = &borderColor_r;
+    }
+    if (idStr::Icmp(_name, "borderColor_g") == 0)
+    {
+        retVar = &borderColor_g;
+    }
+    if (idStr::Icmp(_name, "borderColor_b") == 0)
+    {
+        retVar = &borderColor_b;
+    }
+    if (idStr::Icmp(_name, "borderColor_w") == 0)
+    {
+        retVar = &borderColor_w;
+    }
+// jmarshall end
+#endif
 
 	if (idStr::Icmp(_name, "textScale") == 0) {
 		retVar = &textScale;
@@ -2014,6 +2280,64 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 	if (idStr::Icmp(_name, "hidecursor") == 0) {
 		retVar = &hideCursor;
 	}
+
+#ifdef _RAVEN
+// jmarshall
+    if (idStr::Icmp(_name, "textspacing") == 0)
+    {
+        retVar = &textspacing;
+    }
+
+    if (idStr::Icmp(_name, "textstyle") == 0)
+    {
+        retVar = &textstyle;
+    }
+
+    if (idStr::Icmp(_name, "itemheight") == 0)
+    {
+        retVar = &itemheight;
+    }
+    if (idStr::Icmp(_name, "scrollbar") == 0)
+    {
+        retVar = &scrollbar;
+    }
+
+    if (idStr::Icmp(_name, "backgroundHover") == 0)
+    {
+        retVar = &backgroundHover;
+    }
+
+    if (idStr::Icmp(_name, "backgroundFocus") == 0)
+    {
+        retVar = &backgroundFocus;
+    }
+
+    if (idStr::Icmp(_name, "backgroundLine") == 0)
+    {
+        retVar = &backgroundLine;
+    }
+
+    if (idStr::Icmp(_name, "tabTextScales") == 0)
+    {
+        retVar = &tabTextScales;
+    }
+
+    if (idStr::Icmp(_name, "cvarMin") == 0)
+    {
+        retVar = &cvarMin;
+    }
+
+    if (idStr::Icmp(_name, "model1") == 0)
+    {
+        retVar = &model1;
+    }
+
+    if (idStr::Icmp(_name, "skin") == 0)
+    {
+        retVar = &skin;
+    }
+// jmarshall end
+#endif
 
 	idStr key = _name;
 	bool guiVar = (key.Find(VAR_GUIPREFIX) >= 0);
@@ -2162,6 +2486,16 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 		return true;
 	}
 
+#ifdef _RAVEN
+// jmarshall - quake 4
+    if (idStr::Icmp(_name, "textSpacing") == 0)
+    {
+        src->ParseFloat(); //k: jmarshall is ParseInt
+        return true;
+    }
+// jmarshall end
+#endif
+
 	if (idStr::Icmp(_name, "shadow") == 0) {
 		textShadow = src->ParseInt();
 		return true;
@@ -2195,6 +2529,16 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 		shear.y = src->ParseFloat();
 		return true;
 	}
+
+#ifdef _RAVEN
+// jmarshall - quake 4
+    if (idStr::Icmp(_name, "textStyle") == 0)
+    {
+        src->ParseInt();
+        return true;
+    }
+// jmarshall end
+#endif
 
 	if (idStr::Icmp(_name, "wantenter") == 0) {
 		if (src->ParseBool()) {
@@ -2243,6 +2587,21 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 
 		return true;
 	}
+
+#ifdef _RAVEN
+// jmarshall - quake 4
+    if (idStr::Icmp(_name, "alwaysThink") == 0)
+    {
+        src->ParseInt();
+        return true;
+    }
+    if (idStr::Icmp(_name, "chatWindow") == 0)
+    {
+        src->ParseInt();
+        return true;
+    }
+// jmarshall end
+#endif
 
 	if (idStr::Icmp(_name, "invertrect") == 0) {
 		if (src->ParseBool()) {
@@ -2599,9 +2958,34 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 				return false;
 			}
 
+#ifdef _RAVEN
+// jmarshall - quake 4 guis
+//k: `+` means add last???
+			int lastEventTime = 0;
+            if (token == "+")
+            {
+                if (!src->ReadToken(&token))
+                {
+                    src->Error("Unexpected end of file");
+                    return false;
+                }
+				const int timeLineEventsNum = timeLineEvents.Num();
+				if(timeLineEventsNum > 0)
+				{
+					const idTimeLineEvent *lastTimeLineEvent = timeLineEvents[timeLineEventsNum - 1];
+					lastEventTime = lastTimeLineEvent->time;
+				}
+            }
+// jmarshall end
+#endif
+
 			idTimeLineEvent *ev = new idTimeLineEvent;
 
+#ifdef _RAVEN // _QUAKE4
+			ev->time = lastEventTime + atoi(token.c_str());
+#else
 			ev->time = atoi(token.c_str());
+#endif
 
 			// reset the mark since we dont want it to include the time
 			src->SetMarker();
@@ -2690,9 +3074,20 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 				src->GetStringFromMarker(str, true);
 				rvGEWindowWrapper::GetWrapper(this)->GetVariableDict().Set(va("definevec4\t\"%s\"",token.c_str()), str);
 			}
-
 #endif
-		} else if (token == "float") {
+		}
+#ifdef _RAVEN
+// jmarshall - quake 4 guis
+        else if (token == "defineicon")
+        {
+            // TODO needs implementation
+            src->ReadToken(&token); // key
+            src->ReadToken(&token); // value
+        }
+// jmarshall end
+#endif
+
+		else if (token == "float") {
 			src->ReadToken(&token);
 			work = token;
 			work.ToLower();
@@ -3026,15 +3421,28 @@ idWindow::ExpressionOp
 */
 wexpOp_t *idWindow::ExpressionOp()
 {
-	if (ops.Num() == MAX_EXPRESSION_OPS) {
+#ifdef _RAVEN
+// jmarshall - gui crash
+    if (numOps == MAX_EXPRESSION_OPS )
+#else
+	if (ops.Num() == MAX_EXPRESSION_OPS)
+#endif
+	{
 		common->Warning("expressionOp: gui %s hit MAX_EXPRESSION_OPS", gui->GetSourceFile());
 		return &ops[0];
 	}
 
+#ifdef _RAVEN
+    wexpOp_t *wop = &ops[numOps++];
+	memset(wop, 0, sizeof(wexpOp_t));
+	return wop;
+// jmarshall end
+#else
 	wexpOp_t wop;
 	memset(&wop, 0, sizeof(wexpOp_t));
 	int i = ops.Append(wop);
 	return &ops[i];
+#endif
 }
 
 /*
@@ -3346,7 +3754,11 @@ void idWindow::EvaluateRegisters(float *registers)
 	idVec4 v;
 
 	int erc = expressionRegisters.Num();
+#ifdef _RAVEN
+    int oc = numOps;
+#else
 	int oc = ops.Num();
+#endif
 
 	// copy the constants
 	for (i = WEXP_REG_NUM_PREDEFINED ; i < erc ; i++) {
@@ -3619,7 +4031,11 @@ void idWindow::ReadFromDemoFile(class idDemoFile *f, bool rebuild)
 			f->ReadInt(w.b);
 			f->ReadInt(w.c);
 			f->ReadInt(w.d);
+#ifdef _RAVEN // _QUAKE4
+			ops[i] = w;
+#else
 			ops.Append(w);
+#endif
 		}
 
 		f->ReadInt(c);
@@ -4246,7 +4662,11 @@ void idWindow::FixupParms()
 		namedEvents[i]->mEvent->FixupParms(this);
 	}
 
+#ifdef _RAVEN
+    c = numOps;
+#else
 	c = ops.Num();
+#endif
 
 	for (i = 0; i < c; i++) {
 		if (ops[i].b == -2) {
@@ -4273,13 +4693,23 @@ idWindow::IsSimple
 */
 bool idWindow::IsSimple()
 {
+#ifdef _RAVEN
+// jmarshall - quake 4 guis
+    return false;
+// jmarshall end
+#else
 
 	// dont do simple windows when in gui editor
 	if (com_editors & EDITOR_GUI) {
 		return false;
 	}
 
-	if (ops.Num()) {
+#ifdef _RAVEN // _QUAKE4
+	if (numOps)
+#else
+	if (ops.Num())
+#endif
+	{
 		return false;
 	}
 
@@ -4306,6 +4736,7 @@ bool idWindow::IsSimple()
 	}
 
 	return true;
+#endif
 }
 
 /*
@@ -4615,7 +5046,11 @@ bool idWindow::UpdateFromDictionary(idDict &dict)
 	// Clear all registers since they will get recreated
 	regList.Reset();
 	expressionRegisters.Clear();
+#ifdef _RAVEN
+    numOps = 0;
+#else
 	ops.Clear();
+#endif
 
 	for (i = 0; i < dict.GetNumKeyVals(); i ++) {
 		kv = dict.GetKeyVal(i);

@@ -983,14 +983,14 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 		data2[ i * 4 + 2 ] = data[ i * 3 + 2 ];
 		data2[ i * 4 + 3 ] = 0xff;
 	}
-#else // HTODO: capture, like quicksave, mission tips
+#else //k: fix capture screen picture. e.g quicksave, mission tips
+	// Android: GL_RGBA && GL_UNSIGNED_BYTE
 	/*
 	   GLint eReadFormat, eReadType;
 	   glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &eReadType); 
 	   glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &eReadFormat); 
 	   common->Printf("glReadPixels ava READ_FORMAT: 0x%x, READ_TYPE: %x\n", eReadFormat, eReadType);
 	   */
-	// Android: GL_RGBA && GL_UNSIGNED_BYTE
 	int	c = (rc->width + 4) * rc->height;
 	byte *data = (byte *)R_StaticAlloc(c * 4);
 
@@ -1075,3 +1075,4 @@ bool idRenderSystemLocal::UploadImage(const char *imageName, const byte *data, i
 	image->SetImageFilterAndRepeat();
 	return true;
 }
+

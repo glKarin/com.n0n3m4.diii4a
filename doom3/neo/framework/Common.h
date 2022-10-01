@@ -51,7 +51,22 @@ typedef enum {
 	EDITOR_PDA					= BIT(10),
 	EDITOR_AAS					= BIT(11),
 	EDITOR_MATERIAL				= BIT(12)
+#ifdef _RAVEN
+	, EDITOR_FX = BIT(13), // 9
+#endif
 } toolFlag_t;
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// mekberg: added more save types
+typedef enum {
+	ST_REGULAR,
+	ST_QUICK,
+	ST_AUTO,
+	ST_CHECKPOINT,
+} saveType_t;
+// RAVEN END
+#endif
 
 #define STRTABLE_ID				"#str_"
 #define STRTABLE_ID_LENGTH		5
@@ -107,6 +122,13 @@ struct MemInfo_t {
 	int				imageAssetsTotal;
 	int				modelAssetsTotal;
 	int				soundAssetsTotal;
+#ifdef _RAVEN
+	int				animsAssetsCount;
+	int				animsAssetsTotal;
+
+	int				aasAssetsCount;
+	int				aasAssetsTotal;
+#endif
 };
 
 class idCommon
@@ -197,6 +219,13 @@ class idCommon
 
 		// Returns a pointer to the dictionary with language specific strings.
 		virtual const idLangDict 	*GetLanguageDict(void) = 0;
+
+#ifdef _RAVEN
+		const char* GetLocalizedString(const char* key, int langIndex) { return GetLanguageDict()->GetString(key); }
+		const char* GetLocalizedString(const char* key) { return GetLanguageDict()->GetString(key); }
+		int GetUserCmdMSec(void) { return 16; } 
+		int GetUserCmdHz(void) { return 60; }
+#endif
 
 		// Returns key bound to the command
 		virtual const char 		*KeysFromBinding(const char *bind) = 0;

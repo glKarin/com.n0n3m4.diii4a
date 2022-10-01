@@ -179,6 +179,28 @@ class idWindow
 			ON_ACTIONRELEASE,
 			ON_ENTER,
 			ON_ENTERRELEASE,
+#ifdef _RAVEN
+// jmarshall - quake 4 guis
+        ON_BACKACTION,
+        ON_TABRELEASE,
+        ON_GAINFOCUS,
+        ON_LOSEFOCUS,
+        ON_SELCHANGE,
+        ON_INIT,
+        ON_JOYSTART,
+        ON_JOYSELECT,
+        ON_JOYBACK,
+        ON_JOYLSHOULDER,
+        ON_JOYRSHOULDER,
+        ON_JOYUP,
+        ON_JOYDOWN,
+        ON_JOYLEFT,
+        ON_JOYRIGHT,
+        ON_JOYBUTTON1,
+        ON_JOYBUTTON2,
+        ON_JOYBACKBUTTON,
+// jmarshall end
+#endif
 			SCRIPT_COUNT
 		};
 
@@ -254,6 +276,17 @@ class idWindow
 			return name;
 		};
 
+#ifdef _RAVEN
+// jmarshall - quake 4 gui
+    void ClearTransitions(void)
+    {
+        transitions.Clear();
+		transitions.SetNum(0, false);
+		flags &= ~WIN_INTRANSITION;
+    }
+// jmarshall end
+#endif
+
 		virtual bool Parse(idParser *src, bool rebuild = true);
 		virtual const char *HandleEvent(const sysEvent_t *event, bool *updateVisuals);
 		void	CalcRects(float x, float y);
@@ -296,7 +329,13 @@ class idWindow
 		void GetScriptString(const char *name, idStr &out);
 		void SetScriptParams();
 		bool HasOps() {
+#ifdef _RAVEN
+// jmarshall - gui crash.
+        return (numOps > 0);
+// jmarshall end
+#else
 			return (ops.Num() > 0);
+#endif
 		};
 		float EvalRegs(int test = -1, bool force = false);
 		void StartTransition();
@@ -416,14 +455,57 @@ class idWindow
 		idWinBool	noEvents;
 		idWinRectangle rect;				// overall rect
 		idWinVec4	backColor;
+#ifdef _RAVEN
+    idWinFloatPtr	backColor_r;
+    idWinFloatPtr	backColor_g;
+    idWinFloatPtr	backColor_b;
+    idWinFloatPtr	backColor_w;
+#endif
 		idWinVec4	matColor;
+#ifdef _RAVEN
+    idWinFloatPtr	matColor_r;
+    idWinFloatPtr	matColor_g;
+    idWinFloatPtr	matColor_b;
+    idWinFloatPtr	matColor_w;
+#endif
 		idWinVec4	foreColor;
+#ifdef _RAVEN
+    idWinFloatPtr	foreColor_r;
+    idWinFloatPtr	foreColor_g;
+    idWinFloatPtr	foreColor_b;
+    idWinFloatPtr	foreColor_w;
+#endif
 		idWinVec4	hoverColor;
+#ifdef _RAVEN
+    idWinFloatPtr	hoverColor_r;
+    idWinFloatPtr	hoverColor_g;
+    idWinFloatPtr	hoverColor_b;
+    idWinFloatPtr	hoverColor_w;
+#endif
 		idWinVec4	borderColor;
+#ifdef _RAVEN
+    idWinFloatPtr	borderColor_r;
+    idWinFloatPtr	borderColor_g;
+    idWinFloatPtr	borderColor_b;
+    idWinFloatPtr	borderColor_w;
+#endif
 		idWinFloat	textScale;
 		idWinFloat	rotate;
 		idWinStr	text;
 		idWinBackground	backGroundName;			//
+#ifdef _RAVEN
+    idWinFloat textspacing;
+    idWinFloat textstyle;
+    idWinInt itemheight;
+    idWinInt scrollbar;
+    idWinStr backgroundHover;
+    idWinStr backgroundFocus;
+    idWinStr backgroundLine;
+    idWinStr tabTextScales;
+    idWinInt cvarMin;
+    idWinStr model1;
+    idWinStr skin;
+#endif
 
 		idList<idWinVar *> definedVars;
 		idList<idWinVar *> updateVars;
@@ -455,7 +537,13 @@ class idWindow
 
 		static bool registerIsTemporary[MAX_EXPRESSION_REGISTERS]; // statics to assist during parsing
 
+#ifdef _RAVEN// jmarshall - gui crash
+    wexpOp_t ops[MAX_EXPRESSION_OPS];			   	// evaluate to make expressionRegisters
+    int numOps;
+// jmarshall end
+#else
 		idList<wexpOp_t> ops;			   	// evaluate to make expressionRegisters
+#endif
 		idList<float> expressionRegisters;
 		idList<wexpOp_t> *saveOps;			   	// evaluate to make expressionRegisters
 		idList<rvNamedEvent *>		namedEvents;		//  added named events

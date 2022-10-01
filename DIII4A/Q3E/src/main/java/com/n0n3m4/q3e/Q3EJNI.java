@@ -32,7 +32,10 @@ public class Q3EJNI {
 	public static native void sendMotionEvent(float x, float y);	
 	public static native void requestAudioData();
 	public static native void vidRestart();
+    public static native void shutdown();
     public static native boolean Is64();
+    public static native void SetRedirectOutputToFile(boolean enabled);
+    public static native void SetNoHandleSignals(boolean enabled);
 	
     public static boolean IS_NEON = false; // only armv7-a 32. arm64 always support, but using hard
     public static boolean IS_64 = false;

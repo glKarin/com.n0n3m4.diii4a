@@ -29,8 +29,15 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
+// dhewm/dhewm3
+// DG: idDynamicBlockAlloc isn't thread-safe and idStr is used both in the main thread
+//     and the async thread! For some reason this seems to cause lots of problems on
+//     newer Linux distros if dhewm3 is built with GCC9 or newer (see #391).
+//     No idea why it apparently didn't cause that (noticeable) issues before..
+#if 0 // !defined(_RAVEN) //k: Quake4 not work
 #if !defined( ID_REDIRECT_NEWDELETE ) && !defined( MACOS_X )
 #define USE_STRING_DATA_ALLOCATOR
+#endif
 #endif
 
 #ifdef USE_STRING_DATA_ALLOCATOR
@@ -758,7 +765,7 @@ idStr::FileNameHash
 int idStr::FileNameHash(void) const
 {
 	int		i;
-	long	hash;
+	/* 64long */int	hash;
 	char	letter;
 
 	hash = 0;
@@ -775,7 +782,7 @@ int idStr::FileNameHash(void) const
 			letter = '/';
 		}
 
-		hash += (long)(letter)*(i+119);
+		hash += (/* 64long */int)(letter)*(i+119);
 		i++;
 	}
 
@@ -1922,4 +1929,237 @@ idStr idStr::FormatNumber(int number)
 
 	return string;
 }
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// abahr
+/*
+================
+idStr::Split
+================
+*/
+void idStr::Split( const char* source, idList<idStr>& list, const char delimiter, const char groupDelimiter  ) {
+	const idStr localSource( source );
+	int sourceLength = localSource.Length();
+	idStr element;
+	int startIndex = 0;
+	int endIndex = -1;
+	char currentChar = '\0';
+
+	list.Clear();
+	while( startIndex < sourceLength ) {
+		currentChar = localSource[ startIndex ];
+		if( currentChar == groupDelimiter ) {
+			endIndex = localSource.Find( groupDelimiter, ++startIndex );
+			if( endIndex == -1 ) {
+				common->Error( "Couldn't find expected char %c in idStr::Split\n", groupDelimiter );
+			}
+			element = localSource.Mid( startIndex, endIndex );
+			element.Strip( groupDelimiter );
+			list.Append( element );
+			element.Clear();
+			startIndex = endIndex + 1;
+			continue;
+		} else if( currentChar == delimiter ) {
+			element += '\0';
+			list.Append( element );
+			element.Clear();
+			endIndex = ++startIndex;
+			continue;
+		}
+
+		startIndex++;
+		element += currentChar;
+	}
+
+	if( element.Length() ) {
+		element += '\0';
+		list.Append( element );
+	}
+}
+
+ // RAVEN BEGIN
+ 
+
+/*
+================
+idStr::IsEscape
+================
+*/
+ // bdube: escape codes
+int idStr::IsEscape( const char *s, int* type )  {
+	if ( !s || *s != C_COLOR_ESCAPE || *(s+1) == C_COLOR_ESCAPE ) {
+		return 0;
+	}
+	if ( type ) {
+		*type = S_ESCAPE_UNKNOWN;
+	}
+	switch ( *(s+1) ) {
+		case '0': case '1': case '2': case '3': case '4':
+		case '5': case '6': case '7': case '8': case '9':
+		case ':':
+			if ( type ) {
+				*type = S_ESCAPE_COLORINDEX;
+			}
+			return 2;
+
+		case '-': case '+':
+			if ( type ) {
+				*type = S_ESCAPE_COLOR;
+			}
+			return 2;
+			
+		case 'r': case 'R': 
+			if ( type ) {			
+				*type = S_ESCAPE_COMMAND;
+			}
+			return 2;
+			
+		case 'c': case 'C':
+			if ( *(s+2) ) {
+				if ( *(s+3) ) {
+					if ( *(s+4) ) {
+						if ( type ) {
+							*type = S_ESCAPE_COLOR;
+						}
+						return 5;
+					}
+				}
+			}
+			return 0;
+			
+		case 'n': case 'N':
+			if ( type ) {
+				*type = S_ESCAPE_COMMAND;
+			}
+			if ( *(s+2) ) {
+				return 3;
+			}
+			return 0;
+			
+		case 'i': case 'I':
+			if ( *(s+2) && *(s+3) && *(s+4) ) {
+				if ( type ) {
+					*type = S_ESCAPE_ICON;
+				}
+				return 5;
+			}
+			return 0;		
+	}			
+	return 0;
+}
+
+ int idStr::IcmpNoEscape ( const char *s1, const char *s2 ) {
+     int c1, c2, d;
+
+     do {
+         for ( d = idStr::IsEscape( s1 ); d; d = idStr::IsEscape( s1 ) ) {
+             s1 += d;
+         }
+         for ( d = idStr::IsEscape( s2 ); d; d = idStr::IsEscape( s2 ) ) {
+             s2 += d;
+         }
+ // RAVEN END
+         c1 = *s1++;
+         c2 = *s2++;
+
+        while( d ) { 
+             if ( c1 <= 'Z' && c1 >= 'A' ) { 
+                 d += ('a' - 'A'); 
+                 if ( !d ) { 
+                     break; 
+                 } 
+             } 
+             if ( c2 <= 'Z' && c2 >= 'A' ) { 
+                 d -= ('a' - 'A'); 
+                 if ( !d ) { 
+                     break; 
+                 } 
+             } 
+             return ( INTSIGNBITNOTSET( d ) << 1 ) - 1; 
+         } 
+     } while( c1 ); 
+  
+     return 0;       // strings are equal 
+ }
+
+
+/*
+================
+idStr::RemoveEscapes
+================
+*/
+char *idStr::RemoveEscapes( char *string, int escapes ) {
+	char *d;
+	char *s;
+	int c;
+
+	s = string;
+	d = string;
+	while( (c = *s) != 0 ) {
+		int esc;
+		int type;
+		esc = idStr::IsEscape( s, &type );
+		if ( esc && (type & escapes) ) {
+			s += esc;
+			continue;
+		}
+		else {
+			*d++ = c;
+			if ( c == C_COLOR_ESCAPE && *(s+1) ) {
+				s++;
+			}
+		}
+		s++;
+	}
+	*d = '\0';
+
+	return string;
+}
+
+
+/*
+============
+idStr::ReplaceChar
+============
+*/
+
+idStr &idStr::ReplaceChar( const char from, const char to ) {
+	int i;
+
+	for ( i = 0; i < len; i++ ) {
+		if ( data[ i ] == from ) {
+			data[ i ] = to;
+		}
+	}
+	return *this;
+}
+#endif
+
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+/*
+===================
+idStr::StripDoubleQuotes
+===================
+*/
+void idStr::StripDoubleQuotes(void)
+{
+	idStr temp = *this;
+	char* string = (char*)temp.c_str();
+
+	if (*string == '\"')
+	{
+		strcpy(string, string + 1);
+	}
+
+	if (string[strlen(string) - 1] == '\"')
+	{
+		string[strlen(string) - 1] = '\0';
+	}
+
+	*this = string;
+}
+// jmarshall end
+#endif
 

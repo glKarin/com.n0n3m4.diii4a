@@ -480,7 +480,11 @@ public:
 	// save games
 	void										Save( idSaveGame *savefile ) const;
 	bool										Restore( idRestoreGame *savefile );
-	int											CalculateChecksum( bool forOldSavegame ) const;		// Used to insure program code has not
+	int											CalculateChecksum( bool forOldSavegame
+#ifdef __ANDROID__
+			 = false 
+#endif
+			) const;		// Used to insure program code has not
 																						//    changed between savegames
 
 	void										Startup( const char *defaultScript );

@@ -44,7 +44,11 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 const int OLD_MAP_VERSION					= 1;
+#ifdef _RAVEN // _QUAKE4
+const int CURRENT_MAP_VERSION				= 3;
+#else
 const int CURRENT_MAP_VERSION				= 2;
+#endif
 const int DEFAULT_CURVE_SUBDIVISION			= 4;
 const float DEFAULT_CURVE_MAX_ERROR			= 4.0f;
 const float DEFAULT_CURVE_MAX_ERROR_CD		= 24.0f;
@@ -66,6 +70,12 @@ class idMapPrimitive
 		int						GetType(void) const {
 			return type;
 		}
+#ifdef _RAVEN
+// RAVEN BEGIN
+// rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
+	virtual void			AdjustOrigin( idVec3 &delta ) { }
+// RAVEN END
+#endif
 
 	protected:
 		int						type;
@@ -127,8 +137,16 @@ class idMapBrush : public idMapPrimitive
 		~idMapBrush(void) {
 			sides.DeleteContents(true);
 		}
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+	static idMapBrush *		Parse( Lexer &src, const idVec3 &origin, bool newFormat = true, int version = CURRENT_MAP_VERSION );
+	static idMapBrush *		ParseQ3( Lexer &src, const idVec3 &origin );
+// RAVEN END
+#else
 		static idMapBrush 		*Parse(idLexer &src, const idVec3 &origin, bool newFormat = true, float version = CURRENT_MAP_VERSION);
 		static idMapBrush 		*ParseQ3(idLexer &src, const idVec3 &origin);
+#endif
 		bool					Write(idFile *fp, int primitiveNum, const idVec3 &origin) const;
 		int						GetNumSides(void) const {
 			return sides.Num();
@@ -140,6 +158,13 @@ class idMapBrush : public idMapPrimitive
 			return sides[i];
 		}
 		unsigned int			GetGeometryCRC(void) const;
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
+    virtual void			AdjustOrigin( idVec3 &delta );
+// RAVEN END
+#endif
 
 	protected:
 		int						numSides;
@@ -153,7 +178,14 @@ class idMapPatch : public idMapPrimitive, public idSurface_Patch
 		idMapPatch(void);
 		idMapPatch(int maxPatchWidth, int maxPatchHeight);
 		~idMapPatch(void) { }
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+	static idMapPatch *		Parse( Lexer &src, const idVec3 &origin, bool patchDef3 = true, int version = CURRENT_MAP_VERSION );
+// RAVEN END
+#else
 		static idMapPatch 		*Parse(idLexer &src, const idVec3 &origin, bool patchDef3 = true, float version = CURRENT_MAP_VERSION);
+#endif
 		bool					Write(idFile *fp, int primitiveNum, const idVec3 &origin) const;
 		const char 			*GetMaterial(void) const {
 			return material;
@@ -180,6 +212,13 @@ class idMapPatch : public idMapPrimitive, public idSurface_Patch
 			explicitSubdivisions = b;
 		}
 		unsigned int			GetGeometryCRC(void) const;
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
+    virtual void			AdjustOrigin( idVec3 &delta );
+// RAVEN END
+#endif
 
 	protected:
 		idStr					material;
@@ -225,7 +264,14 @@ class idMapEntity
 		~idMapEntity(void) {
 			primitives.DeleteContents(true);
 		}
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+	static idMapEntity *	Parse( Lexer &src, bool worldSpawn = false, int version = CURRENT_MAP_VERSION );
+// RAVEN END
+#else
 		static idMapEntity 	*Parse(idLexer &src, bool worldSpawn = false, float version = CURRENT_MAP_VERSION);
+#endif
 		bool					Write(idFile *fp, int entityNum) const;
 		int						GetNumPrimitives(void) const {
 			return primitives.Num();
@@ -291,6 +337,24 @@ class idMapFile
 		bool					HasPrimitiveData() {
 			return hasPrimitiveData;
 		}
+#ifdef _RAVEN
+		// RAVEN BEGIN
+// rjohnson: added resolve
+        void                                    Resolve( void );
+// rhummer: added boolean to dictate if the Resolve function has been run on this map.
+        bool                                    HasBeenResloved() { return mHasBeenResolved; }
+// rjohnson: added export
+        bool                                    Write( const char *fileName, const char *ext, bool fromBasePath, bool exportOnly );
+// RAVEN END
+
+		// RAVEN BEGIN
+// rjohnson: added export
+        bool                                    WriteExport( const char *fileName, bool fromBasePath = true );
+        bool                                    ParseExport( const char *filename, bool osPath = false );
+
+        bool                                    HasExportEntities(void) { return mHasExportEntities; }
+// RAVEN END
+#endif
 
 	protected:
 		float					version;
@@ -299,6 +363,17 @@ class idMapFile
 		idList<idMapEntity *>	entities;
 		idStr					name;
 		bool					hasPrimitiveData;
+#ifdef _RAVEN
+// RAVEN BEGIN
+// rjohnson: added export
+        idList<idMapEntity *>   mExportEntities;
+        bool                                    mHasExportEntities;
+// rhummer: Added to inform if func_groups some how disappeared between the loading and saving of the map file.
+        bool                                    mHasFuncGroups;
+// rhummer: Added to notify that this map has been resloved, so func_groups have been removed.
+        bool                                    mHasBeenResolved;
+// RAVEN END
+#endif
 
 	private:
 		void					SetGeometryCRC(void);
@@ -311,6 +386,12 @@ ID_INLINE idMapFile::idMapFile(void)
 	geometryCRC = 0;
 	entities.Resize(1024, 256);
 	hasPrimitiveData = false;
+#ifdef _RAVEN
+// RAVEN BEGIN
+// rhummer: Used to make sure func_groups don't disappear.
+	mHasFuncGroups = false;
+// RAVEN END
+#endif
 }
 
 #endif /* !__MAPFILE_H__ */

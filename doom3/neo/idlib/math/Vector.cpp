@@ -36,6 +36,10 @@ idVec5 vec5_origin(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 idVec6 vec6_origin(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 idVec6 vec6_infinity(idMath::INFINITY, idMath::INFINITY, idMath::INFINITY, idMath::INFINITY, idMath::INFINITY, idMath::INFINITY);
 
+#ifdef _RAVEN
+idVec4 vec4_one( 1.0f, 1.0f, 1.0f, 1.0f );
+#endif
+
 
 //===============================================================
 //
@@ -425,3 +429,39 @@ const char *idVecX::ToString(int precision) const
 {
 	return idStr::FloatArrayToString(ToFloatPtr(), GetDimension(), precision);
 }
+
+#ifdef _RAVEN
+
+/*
+=============
+idVec3::ToMat3
+=============
+*/
+// RAVEN BEGIN
+// abahr: added axis so we can create matrix with non-x vector
+idMat3 idVec3::ToMat3( int axis ) const {
+	idMat3	mat;
+	float	d;
+	int		index_x = axis % GetDimension();
+	int		index_y = (axis + 1) % GetDimension();
+	int		index_z = (axis + 2) % GetDimension();
+	float	local_x = (*this)[index_x];
+	float	local_y = (*this)[index_y];
+
+	mat[axis] = *this;
+	d = local_x * local_x + local_y * local_y;
+	if ( !d ) {
+		mat[index_y][index_x] = 1.0f;
+		mat[index_y][index_y] = 0.0f;
+		mat[index_y][index_z] = 0.0f;
+	} else {
+		d = idMath::InvSqrt( d );
+		mat[index_y][index_x] = -local_y * d;
+		mat[index_y][index_y] = local_x * d;
+		mat[index_y][index_z] = 0.0f;
+	}
+	mat[index_z] = Cross( mat[index_y] );
+
+	return mat;
+}
+#endif

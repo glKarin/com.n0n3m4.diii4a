@@ -103,6 +103,18 @@ const int C_COLOR_BLACK				= '9';
 #define S_COLOR_GRAY				"^8"
 #define S_COLOR_BLACK				"^9"
 
+#ifdef _RAVEN
+// RAVEN BEGIN
+// bdube: string escape codes
+#define S_ESCAPE_UNKNOWN			BIT(0)
+#define S_ESCAPE_COLOR				BIT(1)
+#define S_ESCAPE_COLORINDEX			BIT(2)
+#define S_ESCAPE_ICON				BIT(3)
+#define S_ESCAPE_COMMAND			BIT(4)
+#define	S_ESCAPE_ALL				( S_ESCAPE_COLOR | S_ESCAPE_COLORINDEX | S_ESCAPE_ICON | S_ESCAPE_COMMAND )
+// RAVEN END
+#endif
+
 // make idStr a multiple of 16 bytes long
 // don't make too large to keep memory requirements to a minimum
 const int STR_ALLOC_BASE			= 20;
@@ -177,6 +189,30 @@ class idStr
 		int					Icmp(const char *text) const;
 		int					Icmpn(const char *text, int n) const;
 		int					IcmpPrefix(const char *text) const;
+#ifdef _RAVEN
+		// RAVEN BEGIN
+  // bdube: changed to escapes
+      int                 IcmpNoEscape( const char *text ) const;
+  // RAVEN END
+  // RAVEN BEGIN 
+// bdube: escape codes
+	static int			IsEscape( const char *s, int* type = NULL );
+  // bdube: escapes 
+	int					IsEscape( int* type = NULL ) const;
+      static int          IcmpNoEscape( const char *s1, const char *s2 );
+
+	static char *		RemoveEscapes( char *s, int escapes = S_ESCAPE_ALL );
+	idStr &				RemoveEscapes ( int escapes = S_ESCAPE_ALL );
+  // RAVEN END
+  //
+	idStr &				ReplaceChar( const char from, const char to );
+#endif
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+	void				StripDoubleQuotes(void);
+// jmarshall end
+#endif
+
 
 		// case insensitive compare ignoring color
 		int					IcmpNoColor(const char *text) const;
@@ -205,6 +241,14 @@ class idStr
 		bool				HasUpper(void) const;
 		int					LengthWithoutColors(void) const;
 		idStr 				&RemoveColors(void);
+#ifdef _RAVEN
+// RAVEN BEGIN
+// abahr
+	void				Split( idList<idStr>& list, const char delimiter = ',', const char groupDelimiter = '\''  ) { Split( c_str(), list, delimiter, groupDelimiter ); }
+	static void			Split( const char* source, idList<idStr>& list, const char delimiter = ',', const char groupDelimiter = '\''  );
+// RAVEN END
+		bool				Filter(const char *filter) const { return Filter(filter, true); }
+#endif
 		void				CapLength(int);
 		void				Fill(const char ch, int newlen);
 
@@ -1182,5 +1226,24 @@ ID_INLINE int idStr::DynamicMemoryUsed() const
 {
 	return (data == baseBuffer) ? 0 : alloced;
 }
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+  // bdube: escapes
+ID_INLINE int idStr::IsEscape( int* type ) const {
+	return idStr::IsEscape( data, type );
+}
+  ID_INLINE int idStr::IcmpNoEscape( const char *text ) const {
+      assert( text );
+      return idStr::IcmpNoEscape( data, text );
+  }
+
+ID_INLINE idStr &idStr::RemoveEscapes ( int escapes ) {
+	idStr::RemoveEscapes( data, escapes );
+	len = Length( c_str() );
+	return *this;
+}
+  // RAVEN END
+#endif
 
 #endif /* !__STR_H__ */

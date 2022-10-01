@@ -44,7 +44,14 @@ idParser::SetBaseFolder
 */
 void idParser::SetBaseFolder(const char *path)
 {
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+	Lexer::SetBaseFolder(path);
+// RAVEN END
+#else
 	idLexer::SetBaseFolder(path);
+#endif
 }
 
 /*
@@ -1072,6 +1079,12 @@ int idParser::Directive_include(void)
 		// try relative to the current file
 		path = scriptstack->GetFileName();
 		path.StripFilename();
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jscott: avoid the leading slash
+		if( path.Length() )
+// RAVEN END
+#endif
 		path += "/";
 		path += token;
 
@@ -1468,7 +1481,7 @@ typedef struct operator_s {
 } operator_t;
 
 typedef struct value_s {
-	signed long int intvalue;
+	signed/* 64long */ int intvalue;
 	double floatvalue;
 	int parentheses;
 	struct value_s *prev, *next;
@@ -1563,7 +1576,7 @@ int PC_OperatorPriority(int op)
 
 #define FreeOperator(op)
 
-int idParser::EvaluateTokens(idToken *tokens, signed long int *intvalue, double *floatvalue, int integer)
+int idParser::EvaluateTokens(idToken *tokens, signed/* 64long */ int *intvalue, double *floatvalue, int integer)
 {
 	operator_t *o, *firstoperator, *lastoperator;
 	value_t *v, *firstvalue, *lastvalue, *v1, *v2;
@@ -2077,7 +2090,7 @@ int idParser::EvaluateTokens(idToken *tokens, signed long int *intvalue, double 
 idParser::Evaluate
 ================
 */
-int idParser::Evaluate(signed long int *intvalue, double *floatvalue, int integer)
+int idParser::Evaluate(signed/* 64long*/ int *intvalue, double *floatvalue, int integer)
 {
 	idToken token, *firsttoken, *lasttoken;
 	idToken *t, *nexttoken;
@@ -2184,7 +2197,7 @@ int idParser::Evaluate(signed long int *intvalue, double *floatvalue, int intege
 idParser::DollarEvaluate
 ================
 */
-int idParser::DollarEvaluate(signed long int *intvalue, double *floatvalue, int integer)
+int idParser::DollarEvaluate(signed/* 64long*/ int *intvalue, double *floatvalue, int integer)
 {
 	int indent, defined = false;
 	idToken token, *firsttoken, *lasttoken;
@@ -2306,7 +2319,7 @@ idParser::Directive_elif
 */
 int idParser::Directive_elif(void)
 {
-	signed long int value;
+	signed/* 64long */ int value;
 	int type, skip;
 
 	idParser::PopIndent(&type, &skip);
@@ -2332,7 +2345,7 @@ idParser::Directive_if
 */
 int idParser::Directive_if(void)
 {
-	signed long int value;
+	signed/* 64long */ int value;
 	int skip;
 
 	if (!idParser::Evaluate(&value, NULL, true)) {
@@ -2441,7 +2454,7 @@ idParser::Directive_eval
 */
 int idParser::Directive_eval(void)
 {
-	signed long int value;
+	signed/* 64long */ int value;
 	idToken token;
 	char buf[128];
 
@@ -2576,7 +2589,7 @@ idParser::DollarDirective_evalint
 */
 int idParser::DollarDirective_evalint(void)
 {
-	signed long int value;
+	signed/* 64long */ int value;
 	idToken token;
 	char buf[128];
 
@@ -2628,7 +2641,7 @@ int idParser::DollarDirective_evalfloat(void)
 	token = buf;
 	token.type = TT_NUMBER;
 	token.subtype = TT_FLOAT | TT_LONG | TT_DECIMAL | TT_VALUESVALID;
-	token.intvalue = (unsigned long) fabs(value);
+	token.intvalue = (unsigned/* 64long */ int) fabs(value);
 	token.floatvalue = fabs(value);
 	idParser::UnreadSourceToken(&token);
 
@@ -3404,7 +3417,13 @@ void idParser::SetIncludePath(const char *path)
 	// add trailing path seperator
 	if (idParser::includepath[idParser::includepath.Length()-1] != '\\' &&
 	    idParser::includepath[idParser::includepath.Length()-1] != '/') {
+#ifdef _RAVEN // rvlib
+// RAVEN BEGIN
+        idParser::includepath += "/";
+// RAVEN END
+#else
 		idParser::includepath += PATHSEPERATOR_STR;
+#endif
 	}
 }
 
@@ -3713,4 +3732,74 @@ idParser::~idParser(void)
 {
 	idParser::FreeSource(false);
 }
+
+#ifdef _RAVEN // _QUAKE4
+/*
+================
+idParser::Parse1DMatrixLegacy
+================
+*/
+// jmarshall
+int idParser::Parse1DMatrixLegacy(int x, float* m)
+{
+	int i;
+
+	if (!idParser::ExpectTokenString("{"))
+	{
+		return false;
+	}
+
+	for (i = 0; i < x; i++)
+	{
+		m[i] = idParser::ParseFloat();
+
+		if (i < x - 1)
+		{
+			if (!idParser::ExpectTokenString(","))
+			{
+				return false;
+			}
+		}
+	}
+
+	if (!idParser::ExpectTokenString("}"))
+	{
+		return false;
+	}
+	return true;
+}
+// jmarshall end
+
+/*
+================
+idParser::Parse1DMatrix
+================
+*/
+int idParser::Parse1DMatrix( int x, float *m, bool ravenMatrix) {
+	int i;
+
+	if (!ravenMatrix)
+	{
+		if (!idParser::ExpectTokenString("(")) {
+			return false;
+		}
+	}
+
+	for ( i = 0; i < x; i++ ) {
+		m[i] = idParser::ParseFloat();
+
+		if (ravenMatrix && i < x - 1) {
+			idParser::ExpectTokenString(",");
+		}
+	}
+
+	if (!ravenMatrix)
+	{
+		if (!idParser::ExpectTokenString(")")) {
+			return false;
+		}
+	}
+	return true;
+}
+#endif
 

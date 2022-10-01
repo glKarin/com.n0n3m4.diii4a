@@ -115,7 +115,14 @@ void idMapBrushSide::GetTextureVectors(idVec4 v[2]) const
 idMapPatch::Parse
 =================
 */
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+idMapPatch *idMapPatch::Parse(Lexer &src, const idVec3 &origin, bool patchDef3, int version)
+// RAVEN END
+#else
 idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3, float version)
+#endif
 {
 	float		info[7];
 	idDrawVert *vert;
@@ -148,7 +155,12 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 	idMapPatch *patch = new idMapPatch(info[0], info[1]);
 	patch->SetSize(info[0], info[1]);
 
-	if (version < 2.0f) {
+#ifdef _RAVEN // _QUAKE4
+	if (version < 2)
+#else
+	if (version < 2.0f)
+#endif
+	{
 		patch->SetMaterial("textures/" + token);
 	} else {
 		patch->SetMaterial(token);
@@ -204,12 +216,20 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 		}
 	}
 
-	if (!src.ExpectTokenString(")")) {
+#ifdef _RAVEN // _QUAKE4
+	if ( !src.ExpectTokenString( ")" ) ||
+			!src.ExpectTokenString( "}" ) ||
+				!src.ExpectTokenString( "}" ) )
+#else
+	if (!src.ExpectTokenString(")"))
+#endif
+	{
 		src.Error("idMapPatch::Parse: unable to parse patch control points, no closure");
 		delete patch;
 		return NULL;
 	}
 
+#if !defined(_RAVEN)
 	// read any key/value pairs
 	while (src.ReadToken(&token)) {
 		if (token == "}") {
@@ -223,6 +243,7 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 			patch->epairs.Set(key, token);
 		}
 	}
+#endif
 
 	return patch;
 }
@@ -294,7 +315,14 @@ unsigned int idMapPatch::GetGeometryCRC(void) const
 idMapBrush::Parse
 =================
 */
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+idMapBrush *idMapBrush::Parse( Lexer &src, const idVec3 &origin, bool newFormat, int version )
+// RAVEN END
+#else
 idMapBrush *idMapBrush::Parse(idLexer &src, const idVec3 &origin, bool newFormat, float version)
+#endif
 {
 	int i;
 	idVec3 planepts[3];
@@ -396,12 +424,31 @@ idMapBrush *idMapBrush::Parse(idLexer &src, const idVec3 &origin, bool newFormat
 		}
 
 		// we had an implicit 'textures/' in the old format...
-		if (version < 2.0f) {
+#ifdef _RAVEN // _QUAKE4
+		if (version < 2)
+#else
+		if (version < 2.0f)
+#endif
+		{
 			side->material = "textures/" + token;
 		} else {
 			side->material = token;
 		}
 
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jscott: make sure the material is properly parsed
+		declManager->FindMaterial( token );
+// RAVEN END
+#endif
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jscott: removed these in later versions
+		if( version < 3 )
+		{
+// RAVEN END
+#endif
 		// Q2 allowed override of default flags and values, but we don't any more
 		if (src.ReadTokenOnLine(&token)) {
 			if (src.ReadTokenOnLine(&token)) {
@@ -409,6 +456,9 @@ idMapBrush *idMapBrush::Parse(idLexer &src, const idVec3 &origin, bool newFormat
 				}
 			}
 		}
+#ifdef _RAVEN
+		}
+#endif
 	} while (1);
 
 	if (!src.ExpectTokenString("}")) {
@@ -432,7 +482,14 @@ idMapBrush *idMapBrush::Parse(idLexer &src, const idVec3 &origin, bool newFormat
 idMapBrush::ParseQ3
 =================
 */
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+idMapBrush *idMapBrush::ParseQ3( Lexer &src, const idVec3 &origin )
+// RAVEN END
+#else
 idMapBrush *idMapBrush::ParseQ3(idLexer &src, const idVec3 &origin)
+#endif
 {
 	int i, shift[2], rotate;
 	float scale[2];
@@ -526,7 +583,13 @@ bool idMapBrush::Write(idFile *fp, int primitiveNum, const idVec3 &origin) const
 	for (i = 0; i < GetNumSides(); i++) {
 		side = GetSide(i);
 		fp->WriteFloatString("  ( %f %f %f %f ) ", side->plane[0], side->plane[1], side->plane[2], side->plane[3]);
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+		fp->WriteFloatString( "( ( %f %f %f ) ( %f %f %f ) ) \"%s\"\n",
+// RAVEN END
+#else
 		fp->WriteFloatString("( ( %f %f %f ) ( %f %f %f ) ) \"%s\" 0 0 0\n",
+#endif
 		                     side->texMat[0][0], side->texMat[0][1], side->texMat[0][2],
 		                     side->texMat[1][0], side->texMat[1][1], side->texMat[1][2],
 		                     side->material.c_str());
@@ -568,7 +631,14 @@ unsigned int idMapBrush::GetGeometryCRC(void) const
 idMapEntity::Parse
 ================
 */
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
+idMapEntity *idMapEntity::Parse( Lexer &src, bool worldSpawn, int version )
+// RAVEN END
+#else
 idMapEntity *idMapEntity::Parse(idLexer &src, bool worldSpawn, float version)
+#endif
 {
 	idToken	token;
 	idMapEntity *mapEnt;
@@ -747,9 +817,19 @@ unsigned int idMapEntity::GetGeometryCRC(void) const
 		switch (mapPrim->GetType()) {
 			case idMapPrimitive::TYPE_BRUSH:
 				crc ^= static_cast<idMapBrush *>(mapPrim)->GetGeometryCRC();
+#ifdef _RAVEN
+				if ( epairs.GetString( "model" ) ) {
+					crc ^= StringCRC( epairs.GetString( "model" ) );
+				}
+#endif
 				break;
 			case idMapPrimitive::TYPE_PATCH:
 				crc ^= static_cast<idMapPatch *>(mapPrim)->GetGeometryCRC();
+#ifdef _RAVEN
+				if ( epairs.GetString( "model" ) ) {
+					crc ^= StringCRC( epairs.GetString( "model" ) );
+				}
+#endif
 				break;
 		}
 	}
@@ -765,7 +845,16 @@ idMapFile::Parse
 bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 {
 	// no string concatenation for epairs and allow path names for materials
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// jsinger: Done this way to reduce the amount of code change.  The auto pointer will
+// delete the lexer when this method exits
+	idAutoPtr<Lexer> lexer(LexerFactory::MakeLexer( LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES ));
+	Lexer &src(*lexer);
+// RAVEN END
+#else
 	idLexer src(LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES);
+#endif
 	idToken token;
 	idStr fullName;
 	idMapEntity *mapEnt;
@@ -799,7 +888,11 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 
 	if (src.CheckTokenString("Version")) {
 		src.ReadTokenOnLine(&token);
+#ifdef _RAVEN // _QUAKE4
+		version = token.GetIntValue();
+#else
 		version = token.GetFloatValue();
+#endif
 	}
 
 	while (1) {
@@ -809,11 +902,29 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 			break;
 		}
 
+#ifdef _RAVEN
+// RAVEN BEGIN
+// rhummer: Check to see if there are func_groups in the map file.
+		if ( !mHasFuncGroups && !idStr::Icmp( mapEnt->epairs.GetString( "classname" ), "func_group" ) ) {
+			mHasFuncGroups = true;
+		}
+// RAVEN END
+#endif
+
 		entities.Append(mapEnt);
 	}
 
+#ifdef _RAVEN
+    ParseExport(filename, osPath);
+#endif
+
 	SetGeometryCRC();
 
+#ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+    mHasBeenResolved = false;
+// RAVEN END
+#else
 	// if the map has a worldspawn
 	if (entities.Num()) {
 
@@ -877,6 +988,7 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 			}
 		}
 	}
+#endif
 
 	hasPrimitiveData = true;
 	return true;
@@ -1037,3 +1149,463 @@ bool idMapFile::NeedsReload()
 
 	return true;
 }
+
+#ifdef _RAVEN
+
+// RAVEN BEGIN
+// rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
+void idMapFile::Resolve( void )
+{
+	int i, j, k;
+	idMapEntity *mapEnt;
+
+	if ( !hasPrimitiveData ) {
+		return;
+	}
+
+	// if the map has a worldspawn
+	if ( entities.Num() ) {
+
+		// "removeEntities" "classname" can be set in the worldspawn to remove all entities with the given classname
+		const idKeyValue *removeEntities = entities[0]->epairs.MatchPrefix( "removeEntities", NULL );
+		while ( removeEntities ) {
+			RemoveEntities( removeEntities->GetValue() );
+			removeEntities = entities[0]->epairs.MatchPrefix( "removeEntities", removeEntities );
+		}
+
+		// "overrideMaterial" "material" can be set in the worldspawn to reset all materials
+		idStr material;
+		if ( entities[0]->epairs.GetString( "overrideMaterial", "", material ) ) {
+			for ( i = 0; i < entities.Num(); i++ ) {
+				mapEnt = entities[i];
+				for ( j = 0; j < mapEnt->GetNumPrimitives(); j++ ) {
+					idMapPrimitive *mapPrimitive = mapEnt->GetPrimitive( j );
+					switch( mapPrimitive->GetType() ) {
+						case idMapPrimitive::TYPE_BRUSH: {
+							idMapBrush *mapBrush = static_cast<idMapBrush *>(mapPrimitive);
+							for ( k = 0; k < mapBrush->GetNumSides(); k++ ) {
+								mapBrush->GetSide( k )->SetMaterial( material );
+							}
+							break;
+						}
+						case idMapPrimitive::TYPE_PATCH: {
+							static_cast<idMapPatch *>(mapPrimitive)->SetMaterial( material );
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		// force all entities to have a name key/value pair
+		if ( entities[0]->epairs.GetBool( "forceEntityNames" ) ) {
+			for ( i = 1; i < entities.Num(); i++ ) {
+				mapEnt = entities[i];
+				if ( !mapEnt->epairs.FindKey( "name" ) ) {
+					mapEnt->epairs.Set( "name", va( "%s%d", mapEnt->epairs.GetString( "classname", "forcedName" ), i ) );
+				}
+			}
+		}
+
+		// move the primitives of any func_group entities to the worldspawn
+		for ( i = 1; i < entities.Num(); i++ ) {
+			mapEnt = entities[i];
+			if ( idStr::Icmp( mapEnt->epairs.GetString( "classname" ), "func_group" ) == 0 ) {
+				idVec3	delta;
+				
+				mapEnt->epairs.GetVector( "origin", "0 0 0", delta );
+
+				for( j = 0; j < mapEnt->primitives.Num(); j++ ) {
+					idMapPrimitive	*mapPrim = mapEnt->primitives[j];
+
+					mapPrim->AdjustOrigin( delta );
+				}
+				entities[0]->primitives.Append( mapEnt->primitives );
+				mapEnt->primitives.Clear();
+			}
+		}
+		RemoveEntities( "func_group" );
+	}
+// rhummer:
+	mHasBeenResolved = true;
+	if ( cvarSystem->GetCVarBool( "developer" ) ) {
+		common->Printf( "^2idMapFile::Resolve has been run on ^0%s^2 so no func_groups exist.\n", name.c_str() );
+	}
+}
+
+// rjohnson: added export
+bool idMapFile::WriteExport( const char *fileName, bool fromBasePath )
+{
+	int			i, j;
+	idDict		newPairs;
+
+	for ( i = 0; i < entities.Num(); i++ ) 
+	{
+		idMapEntity *ent = entities[i];
+
+		if ( ent->epairs.GetInt("export") == 1 )
+		{
+/*			for ( j = 0; j < ent->epairs.GetNumKeyVals(); j++) 
+			{
+				const idKeyValue	*kv = ent->epairs.GetKeyVal(j);
+
+				if (kv->key.CmpPrefix("export_") == 0)
+				{
+					ent->epairs.Delete(kv->key.c_str());
+					j--;
+					continue;
+				}
+			}
+*/
+			newPairs.Clear();
+
+			for ( j = 0; j < ent->epairs.GetNumKeyVals(); j++) 
+			{
+				const idKeyValue	*kv = ent->epairs.GetKeyVal(j);
+
+				if (kv->GetKey().CmpPrefix("export_") != 0)
+				{
+					char				newName[1024];
+
+					sprintf(newName, "export_%s", kv->GetKey().c_str());
+
+					if (!ent->epairs.GetString(newName, 0))
+					{	// don't overwrite an existing export
+						newPairs.Set (newName, kv->GetValue().c_str());
+					}
+				}
+			}
+
+			ent->epairs.Copy(newPairs);
+		}
+	}
+
+	return Write(fileName, "export", fromBasePath, true);
+}
+
+// rjohnson: added export
+/*
+============
+idMapFile::Write
+============
+*/
+bool idMapFile::Write( const char *fileName, const char *ext, bool fromBasePath, bool exportOnly ) {
+	int i;
+	idStr qpath;
+	idFile *fp;
+// RAVEN BEGIN
+// rhummer: Used to verify func_groups didn't disappear somehow.
+	bool funcGroupFound = false;
+// RAVEN END
+
+	qpath = fileName;
+	qpath.SetFileExtension( ext );
+
+	idLib::common->Printf( "writing %s...\n", qpath.c_str() );
+
+	if ( fromBasePath ) {
+		fp = idLib::fileSystem->OpenFileWrite( qpath, "fs_devpath" );
+	}
+	else {
+		fp = idLib::fileSystem->OpenExplicitFileWrite( qpath );
+	}
+
+	if ( !fp ) {
+		idLib::common->Warning( "Couldn't open %s\n", qpath.c_str() );
+		return false;
+	}
+
+	fp->WriteFloatString( "Version %d\n", CURRENT_MAP_VERSION );
+
+	if (exportOnly)
+	{
+		for ( i = 0; i < entities.Num(); i++ )
+		{
+			if (entities[i]->epairs.GetInt("export"))
+			{
+				entities[i]->Write( fp, i );
+			}
+		}
+	}
+	else
+	{
+		for ( i = 0; i < entities.Num(); i++ ) {
+			entities[i]->Write( fp, i );
+// RAVEN BEGIN
+// rhummer: See if there are func_groups, there should be if there was during loading..
+			if ( !idStr::Icmp( entities[i]->epairs.GetString( "classname" ), "func_group" ) ) {
+				funcGroupFound = true;
+			}
+// RAVEN END
+		}
+	}
+
+// RAVEN BEGIN
+// rhummer: If this is true..something bad happened to cause all func_groups to go away between loading and saving.
+	if ( mHasFuncGroups && !funcGroupFound && cvarSystem->GetCVarBool( "developer" ) ) {
+		common->Warning( "^5Did not find any ^2func_groups^0 during save, but there were ^2func_groups^0 found during loading.  Was this intended?\n");
+	}
+// RAVEN END
+
+	idLib::fileSystem->CloseFile( fp );
+
+	return true;
+}
+// RAVEN END
+
+
+bool idMapFile::ParseExport( const char *filename, bool osPath )
+{
+    // no string concatenation for epairs and allow path names for materials
+// RAVEN BEGIN
+// jsinger: Done this way to reduce the amount of code to change.
+//          The auto pointer will delete the lexer when this method exits.
+    idAutoPtr<Lexer>		lexer(LexerFactory::MakeLexer( LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES ) );
+    Lexer &src(*lexer);
+// RAVEN END
+    idToken		token;
+    idStr		fullName;
+    idMapEntity *mapEnt;
+    int			i, j;
+    int			numMerged, numNotMerged, numAdded, numRemoved;
+
+    numMerged = numNotMerged = numAdded = numRemoved = 0;
+    mHasExportEntities = false;
+
+    fullName = filename;
+    fullName.StripFileExtension();
+    fullName.SetFileExtension( "export" );
+    src.LoadFile( fullName, osPath );
+    if ( !src.IsLoaded() )
+    {
+        // didn't get anything at all
+        return false;
+    }
+
+    version = OLD_MAP_VERSION;
+    fileTime = src.GetFileTime();
+    mExportEntities.DeleteContents( true );
+
+    if ( src.CheckTokenString( "Version" ) )
+    {
+        src.ReadTokenOnLine( &token );
+        version = token.GetIntValue();
+    }
+
+    while( 1 )
+    {
+        mapEnt = idMapEntity::Parse( src, false, version );
+        if ( !mapEnt )
+        {
+            break;
+        }
+        mExportEntities.Append( mapEnt );
+    }
+
+    if (mExportEntities.Num())
+    {
+        mHasExportEntities = true;
+    }
+
+    for(i=0; i<mExportEntities.Num(); i++)
+    {
+        idMapEntity *ent = mExportEntities[i];
+        idMapEntity *mapEnt;
+        const char	*name;
+
+        name = ent->epairs.GetString("name");
+        mapEnt = FindEntity(name);
+
+        if (!mapEnt)
+        {
+            // check to see if we have an export_name
+            name = ent->epairs.GetString("export_name", 0);
+            if (!name || ent->epairs.GetInt("original") )
+            {
+                // this is a new entity
+                ent->epairs.SetInt("export", 2);			// 2 = when re-exporting, don't duplicated the export_ fields
+                ent->epairs.SetInt("merged", 1);
+                ent->epairs.SetInt("original", 0);			// 0 = now the entity in map is always treated as master
+                entities.Append(ent);
+                mExportEntities.RemoveIndex(i);
+                i--;
+                numAdded++;
+                continue;
+            }
+            else
+            {
+                mapEnt = FindEntity(name);
+            }
+        }
+
+        if (!mapEnt)
+        {
+            // this export entity has been removed from the original map
+            numNotMerged++;
+        }
+        else
+        {
+            // exists in both, do a merge!
+            mapEnt->epairs.SetInt("export", 2);			// 2 = when re-exporting, don't duplicated the export_ fields
+            mapEnt->epairs.SetInt("merged", 1);
+            for ( j = 0; j < ent->epairs.GetNumKeyVals(); j++)
+            {
+                char				origName[1024];
+                const idKeyValue	*exportKV = ent->epairs.GetKeyVal(j);
+                const idKeyValue	*origKV, *mapKV;
+
+                if (exportKV->GetKey().CmpPrefix("export_") != 0)
+                {
+                    sprintf(origName, "export_%s", exportKV->GetKey().c_str());
+                    origKV = ent->epairs.FindKey(origName);
+                    mapKV = mapEnt->epairs.FindKey(exportKV->GetKey().c_str());
+
+                    if (origKV && mapKV)
+                    {
+                        // keys exist in all spots, compare
+                        if (origKV->GetValue() == exportKV->GetValue())
+                        {
+                            // export hasn't change
+                        }
+                        else if (mapKV->GetValue() == origKV->GetValue())
+                        {
+                            // map is same as the orig, yet export has changed, so bring it over
+                            mapEnt->epairs.Set(exportKV->GetKey().c_str(), exportKV->GetValue().c_str());
+                        }
+                    }
+                    else if (origKV)
+                    {
+                        // map has removed this key, so we shouldn't merge it
+                    }
+                    else if (mapKV)
+                    {
+                        // map has added this key, so we'll ignore the exported value, which has also been added
+                    }
+                    else
+                    {
+                        // this was added to the export, so merge it in
+                        mapEnt->epairs.Set(exportKV->GetKey().c_str(), exportKV->GetValue().c_str());
+                    }
+                }
+                else
+                {
+                    mapEnt->epairs.Set(exportKV->GetKey().c_str(), exportKV->GetValue().c_str());
+                }
+            }
+            numMerged++;
+        }
+    }
+
+    // check for any entities that have been marked as exported in the original map but have been removed from the export file
+    for(i=0; i<entities.Num(); i++)
+    {
+        idMapEntity *ent = entities[i];
+
+        if (ent->epairs.GetInt("export"))
+        {
+            if (!ent->epairs.GetInt("merged"))
+            {
+                entities.RemoveIndex(i);
+                numRemoved++;
+                i--;
+            }
+            else
+            {
+                ent->epairs.Delete("merged");
+            }
+        }
+    }
+
+    common->Printf("Export Merge: %d added, %d merged, %d not merged, %d removed\n", numAdded, numMerged, numNotMerged, numRemoved);
+
+    mExportEntities.DeleteContents( true );
+
+    return true;
+}
+
+// RAVEN BEGIN
+// rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
+/*
+===============
+idMapPatch::AdjustOrigin
+===============
+*/
+void idMapPatch::AdjustOrigin( idVec3 &delta ) {
+	TranslateSelf( delta );
+}
+// RAVEN END
+
+// RAVEN BEGIN
+// rjohnson: added resolve for handling func_groups and other aspects.  Before, radiant would do this processing on a map destroying the original data
+
+// This is taken from tools/radiant/EditorBrushPrimit.cpp
+float SarrusDet(idVec3 a, idVec3 b, idVec3 c) {
+	return (float)a[0] * (float)b[1] * (float)c[2] + (float)b[0] * (float)c[1] * (float)a[2] + (float)c[0] * (float)a[1] * (float)b[2] - (float)c[0] * (float)b[1] * (float)a[2] - (float)a[1] * (float)b[0] * (float)c[2] -	(float)a[0] * (float)b[2] * (float)c[1];
+}
+
+/*
+===============
+idMapBrush::AdjustOrigin
+===============
+*/
+void idMapBrush::AdjustOrigin( idVec3 &delta ) {
+	int				i;
+	idMapBrushSide	*mapSide;
+
+	for ( i = 0; i < GetNumSides(); i++ ) {
+		mapSide = GetSide(i);
+
+		mapSide->SetPlane( mapSide->GetPlane().Translate( delta ) );
+
+		// This is taken from Face_MoveTexture_BrushPrimit() in tools/radiant/EditorBrushPrimit.cpp
+		idVec3	texS, texT;
+		float	tx, ty;
+		idVec3	M[3];	// columns of the matrix .. easier that way
+		float	det;
+		idVec3	D[2];
+
+		// compute plane axis base ( doesn't change with translation )
+		ComputeAxisBase( mapSide->GetPlane().Normal(), texS, texT);
+
+		// compute translation vector in plane axis base
+		tx = DotProduct(delta, texS);
+		ty = DotProduct(delta, texT);
+
+		// fill the data vectors
+		M[0][0] = tx;
+		M[0][1] = 1.0f + tx;
+		M[0][2] = tx;
+		M[1][0] = ty;
+		M[1][1] = ty;
+		M[1][2] = 1.0f + ty;
+		M[2][0] = 1.0f;
+		M[2][1] = 1.0f;
+		M[2][2] = 1.0f;
+
+		idVec3	tm[2];
+		mapSide->GetTextureMatrix( tm[0], tm[1] );
+
+		D[0][0] = tm[0][2];
+		D[0][1] = tm[0][0] + tm[0][2];
+		D[0][2] = tm[0][1] + tm[0][2];
+		D[1][0] = tm[1][2];
+		D[1][1] = tm[1][0] + tm[1][2];
+		D[1][2] = tm[1][1] + tm[1][2];
+
+		// solve
+		det = SarrusDet(M[0], M[1], M[2]);
+		if ( det != 0. ) {
+			tm[0][0] = SarrusDet(D[0], M[1], M[2]) / det;
+			tm[0][1] = SarrusDet(M[0], D[0], M[2]) / det;
+			tm[0][2] = SarrusDet(M[0], M[1], D[0]) / det;
+			tm[1][0] = SarrusDet(D[1], M[1], M[2]) / det;
+			tm[1][1] = SarrusDet(M[0], D[1], M[2]) / det;
+			tm[1][2] = SarrusDet(M[0], M[1], D[1]) / det;
+			mapSide->SetTextureMatrix(tm);
+		}
+	}
+}
+// RAVEN END
+
+#endif
+

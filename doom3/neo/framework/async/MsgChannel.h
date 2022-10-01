@@ -50,6 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #define CONNECTIONLESS_MESSAGE_ID		-1			// id for connectionless messages
 #define CONNECTIONLESS_MESSAGE_ID_MASK	0x7FFF		// value to mask away connectionless message id
 
+#if !defined(_RAVEN)
 #define MAX_MSG_QUEUE_SIZE				16384		// must be a power of 2
 
 
@@ -88,6 +89,7 @@ class idMsgQueue
 		void			WriteData(const byte *data, const int size);
 		void			ReadData(byte *data, const int size);
 };
+#endif
 
 
 class idMsgChannel

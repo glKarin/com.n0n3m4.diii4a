@@ -323,7 +323,11 @@ void idAsyncNetwork::SpawnServer_f(const idCmdArgs &args)
 
 	// don't let a server spawn with singleplayer game type - it will crash
 	if (idStr::Icmp(cvarSystem->GetCVarString("si_gameType"), "singleplayer") == 0) {
+#ifdef _RAVEN // _QUAKE4
+		cvarSystem->SetCVarString("si_gameType", "dm");
+#else
 		cvarSystem->SetCVarString("si_gameType", "deathmatch");
+#endif
 	}
 
 	com_asyncInput.SetBool(false);

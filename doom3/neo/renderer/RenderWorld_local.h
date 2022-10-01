@@ -134,6 +134,21 @@ class idRenderWorldLocal : public idRenderWorld
 		virtual void			DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align = 1, const int lifetime = 0, bool depthTest = false);
 
 		//-----------------------
+#ifdef _RAVEN
+	virtual bool			HasSkybox(int areaNum) { return true; }
+
+	// jscott: handling of effects
+	virtual qhandle_t		AddEffectDef(const renderEffect_t* reffect, int time);
+	virtual bool			UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time);
+	virtual void			StopEffectDef(qhandle_t effectHandle);
+	virtual const class rvRenderEffectLocal* GetEffectDef(qhandle_t effectHandle) const;
+	virtual void			FreeEffectDef(qhandle_t effectHandle);
+	virtual bool			EffectDefHasSound(const renderEffect_s* reffect);
+
+// jmarshall: BSE
+	idList<rvRenderEffectLocal*>	effectsDef;
+// jmarshll end
+#endif
 
 		idStr					mapName;				// ie: maps/tim_dm2.proc, written to demoFile
 		ID_TIME_T					mapTimeStamp;			// for fast reloads of the same level

@@ -49,6 +49,12 @@ const int BUTTON_MLOOK			= BIT(4);
 const int BUTTON_5				= BIT(5);
 const int BUTTON_6				= BIT(6);
 const int BUTTON_7				= BIT(7);
+#ifdef _RAVEN
+// ddynerman: stats
+const int BUTTON_INGAMESTATS = BUTTON_5;
+// twhitaker: strafe
+const int BUTTON_STRAFE = BIT(8);
+#endif
 
 // usercmd_t->impulse commands
 const int IMPULSE_0				= 0;			// weap 0
@@ -87,6 +93,48 @@ const int IMPULSE_30			= 30;			// SnoopJeDi - Toggle Stats Debug
 	#endif
 #endif
 const int IMPULSE_40			= 40;			// use vehicle
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// bdube: added flashlight
+const int IMPULSE_50			= 50;			// activate flashlight
+const int IMPULSE_51			= 51;			// switch to last weapon
+// ddynerman: mp stats
+const int IMPULSE_52			= 52;			// mp statistics
+// RAVEN END
+
+// RITUAL BEGIN
+// squirrel: Mode-agnostic buymenus
+const int IMPULSE_100			= 100;			// Buy weapon_shotgun
+const int IMPULSE_101			= 101;			// Buy weapon_machinegun
+const int IMPULSE_102			= 102;			// Buy weapon_hyperblaster
+const int IMPULSE_103			= 103;			// Buy weapon_grenadelauncher
+const int IMPULSE_104			= 104;			// Buy weapon_nailgun
+const int IMPULSE_105			= 105;			// Buy weapon_rocketlauncher
+const int IMPULSE_106			= 106;			// Buy weapon_railgun
+const int IMPULSE_107			= 107;			// Buy weapon_lightninggun
+const int IMPULSE_108			= 108;			// UNUSED
+const int IMPULSE_109			= 109;			// Buy weapon_napalmgun
+const int IMPULSE_110			= 110;			// Buy weapon_dmg
+const int IMPULSE_111			= 111;			// UNUSED
+const int IMPULSE_112			= 112;			// UNUSED
+const int IMPULSE_113			= 113;			// UNUSED
+const int IMPULSE_114			= 114;			// UNUSED
+const int IMPULSE_115			= 115;			// UNUSED
+const int IMPULSE_116			= 116;			// UNUSED
+const int IMPULSE_117			= 117;			// UNUSED
+const int IMPULSE_118			= 118;			// Buy item_armor_small
+const int IMPULSE_119			= 119;			// Buy item_armor_large
+const int IMPULSE_120			= 120;			// Buy ammorefill
+const int IMPULSE_121			= 121;			// UNUSED
+const int IMPULSE_122			= 122;			// UNUSED
+const int IMPULSE_123			= 123;			// Buy team powerup: ammo_regen
+const int IMPULSE_124			= 124;			// Buy team powerup: health_regen
+const int IMPULSE_125			= 125;			// Buy team powerup: damage_boost
+const int IMPULSE_126			= 126;			// UNUSED
+const int IMPULSE_127			= 127;			// UNUSED
+// RITUAL END
+#endif
 
 // usercmd_t->flags
 const int UCF_IMPULSE_SEQUENCE	= 0x0001;		// toggled every time an impulse command is sent

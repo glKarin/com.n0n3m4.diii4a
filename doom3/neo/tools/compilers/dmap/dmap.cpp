@@ -377,7 +377,10 @@ void Dmap(const idCmdArgs &args)
 
 		if (!noAAS && !region) {
 			// create AAS files
+//#ifndef _RAVEN
 			RunAAS_f(args);
+//#endif
+
 		}
 	}
 

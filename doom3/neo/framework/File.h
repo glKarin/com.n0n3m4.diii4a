@@ -111,6 +111,15 @@ class idFile
 		virtual int				WriteVec4(const idVec4 &vec);
 		virtual int				WriteVec6(const idVec6 &vec);
 		virtual int				WriteMat3(const idMat3 &mat);
+#ifdef _RAVEN
+	virtual int				WriteVec5(const idVec5& vec);
+	virtual int				ReadVec5(idVec5& vec);
+	// jscott: for savegame and demo file syncing
+// jmarshall - needs implementation
+	virtual void			WriteSyncId(void) { }
+	virtual void			ReadSyncId(const char* detail = "unspecified", const char* classname = NULL) { }
+// jmarshall end
+#endif
 };
 
 

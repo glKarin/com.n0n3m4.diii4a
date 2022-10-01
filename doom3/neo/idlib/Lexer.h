@@ -61,6 +61,15 @@ typedef enum {
 	LEXFL_ALLOWMULTICHARLITERALS		= BIT(11),	// allow multi character literals
 	LEXFL_ALLOWBACKSLASHSTRINGCONCAT	= BIT(12),	// allow multiple strings seperated by '\' to be concatenated
 	LEXFL_ONLYSTRINGS					= BIT(13)	// parse as whitespace deliminated strings (quoted strings keep quotes)
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jsinger: added to support binary writing from the lexer in either byte swapped or non-byte swapped formats
+	,
+	LEXFL_READBINARY					= BIT(29),	// read a byte code compiled version of the file
+	LEXFL_BYTESWAP						= BIT(30),	// when writing the byte code compiled file, byte swap numbers
+	LEXFL_WRITEBINARY					= BIT(31)	// write out a byte code compiled version of the file
+// RAVEN END
+#endif
 } lexerFlags_t;
 
 // punctuation ids
@@ -125,6 +134,13 @@ typedef enum {
 
 #define P_PRECOMP					51
 #define P_DOLLAR					52
+#ifdef _RAVEN
+// RAVEN BEGIN
+#define P_INVERTED_PLING			53
+#define P_INVERTED_QUERY			54
+ // RAVEN END
+#endif
+
 
 // punctuation
 typedef struct punctuation_s {
@@ -242,6 +258,22 @@ class idLexer
 
 		// set the base folder to load files from
 		static void		SetBaseFolder(const char *path);
+#ifdef _RAVEN
+// RAVEN BEGIN
+// rjohnson: added vertex color support to proc files.  assume a default RGBA of 0x000000ff
+	int				Parse1DMatrixOpenEnded( int MaxCount, float *m );
+// RAVEN END
+
+// RAVEN BEGIN
+					// write a binary representation of a token
+	void			WriteBinaryToken(idToken *tok);
+// RAVEN END
+
+// RAVEN BEGIN
+// dluetscher: added method to parse a structure array that is made up of numerics (floats, ints), and stores them in the given storage
+	void			ParseNumericStructArray( int numStructElements, int tokenSubTypeStructElements[], int arrayCount, byte *arrayStorage );
+// RAVEN END
+#endif
 
 	private:
 		int				loaded;					// set when a script file is loaded from file or memory
@@ -279,6 +311,13 @@ class idLexer
 		int				ReadPrimitive(idToken *token);
 		int				CheckString(const char *str) const;
 		int				NumLinesCrossed(void);
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jsinger: This is the file that WriteBinaryToken will write to when the proper flags are set
+	idFile			*mBinaryFile;
+// RAVEN END
+#endif
 };
 
 ID_INLINE const char *idLexer::GetFileName(void)
@@ -310,6 +349,247 @@ ID_INLINE int idLexer::GetFlags(void)
 {
 	return idLexer::flags;
 }
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jsinger: defines used by the binary lexer and WriteBinaryToken method of idLexer
+
+// binary token types
+// low order 3 bits form the type
+#define BTT_STRING					0
+#define BTT_LITERAL					1
+#define BTT_NUMBER					2
+#define BTT_NAME					3
+#define BTT_PUNCTUATION				4
+#define BTT_PUNCTUATION2			5		// when punctuation, least significant bit is used as part of the punctuation type
+// 3 bits
+#define BTT_SUBTYPE_INT				0
+#define BTT_SUBTYPE_UNSIGNEDINT		1
+#define BTT_SUBTYPE_LONG			2
+#define BTT_SUBTYPE_UNSIGNEDLONG	3
+#define BTT_SUBTYPE_FLOAT			4
+#define BTT_SUBTYPE_DOUBLE			5
+#define BTT_SUBTYPE_IPADDRESS		6
+#define BTT_SUBTYPE_IPPORT			7
+
+// 2 bits
+#define BTT_STORED_1BYTE			0
+#define BTT_STORED_2BYTE			1
+#define BTT_STORED_4BYTE			2
+#define BTT_STORED_8BYTE			3
+
+// retrieval macros
+#define BTT_GET_TYPE(x)				((x) & 0x07)
+#define BTT_GET_SUBTYPE(x)			(((x) & 0x38)>>3)
+#define BTT_GET_STORED_SIZE(x)		(((x) & 0xC0)>>6)
+#define BTT_GET_STRING_LENGTH(x)	(((x) & 0xFC)>>3)
+#define BTT_GET_PUNCTUATION(x)		(((x)&1)|(((x)>>2)&~1))
+
+// punctuation types
+#define BTT_PUNC_ASNULLTERMINATED	0
+#define BTT_PUNC_RIGHTPAREN			1
+#define BTT_PUNC_LEFTBRACE			2
+#define BTT_PUNC_RIGHTBRACE			3
+#define BTT_PUNC_MINUS				4
+#define BTT_PUNC_PLUS				5
+#define BTT_PUNC_COMMA				6
+#define BTT_PUNC_PLUSPLUS			7
+#define BTT_PUNC_LEFTBRACKET		8
+#define BTT_PUNC_RIGHTBRACKET		9
+#define BTT_PUNC_EQUAL				10
+#define BTT_PUNC_EQUALEQUAL			11
+#define BTT_PUNC_NOTEQUAL			12
+#define BTT_PUNC_PERCENT			13
+#define BTT_PUNC_LESSTHAN			14
+#define BTT_PUNC_GREATERTHAN		15
+#define BTT_PUNC_LOGICALAND			16
+#define BTT_PUNC_AMPERSAND			17
+#define BTT_PUNC_MINUSMINUS			18
+#define BTT_PUNC_HASH				19
+#define BTT_PUNC_LESSOREQUAL		20
+#define BTT_PUNC_GREATEROREQUAL		21
+#define BTT_PUNC_FORWARDSLASH		22
+#define BTT_PUNC_SHIFTLEFT			23
+#define BTT_PUNC_SHIFTRIGHT			24
+#define BTT_PUNC_LEFTPAREN			25
+#define BTT_PUNC_SEMICOLON			26
+#define BTT_PUNC_ASTERISK			27
+#define BTT_PUNC_PERIOD				28
+#define BTT_PUNC_DOLLARSIGN			29
+#define BTT_PUNC_PLUSEQUAL			30
+#define BTT_PUNC_MINUSEQUAL			31
+#define BTT_PUNC_TILDE				32
+#define BTT_PUNC_EXCLAMATION		33
+#define BTT_PUNC_PIPE				34
+#define BTT_PUNC_BACKSLASH			35
+#define BTT_PUNC_DOUBLEHASH			36
+#define BTT_PUNC_DOUBLECOLON		37
+#define BTT_PUNC_TIMESEQUAL			38
+#define BTT_PUNC_DOUBLEPIPE			39
+#define BTT_PUNC_INVERTEDPLING		40
+#define BTT_PUNC_INVERTEDQUERY		41
+
+// set macro
+#define BTT_MAKENUMBER_PREFIX(type, subtype, storedsize) ((unsigned char)((type)|(subtype<<3)|(storedsize<<6)))
+#define BTT_MAKESTRING_PREFIX(type, length) ((unsigned char)((type)|((((length)<32)?(length):0)<<3)))
+#define BTT_MAKEPUNCTUATION_PREFIX(punc) (((punc<<2)&~7)|(punc&1))|BTT_PUNCTUATION
+// RAVEN END
+
+// this class is only necessary to parse binary files
+class Lexer {
+	friend class idParser;
+
+public:
+
+#ifdef LEXER_READ_AHEAD	
+	static void				BeginLevelLoad();
+	static void				EndLevelLoad();
+#endif
+
+							// constructors
+							Lexer( const char *filename, int flags = 0, bool OSPath = false );
+							Lexer(int flags=0);
+							Lexer( char const * const ptr, int length, char const * const name, int flags = 0);
+
+							//destructor
+							~Lexer();
+							// load a script from the given file at the given offset with the given length
+	int						LoadFile( const char *filename, bool OSPath = false );
+							// load a script from the given memory with the given length and a specified line offset,
+							// so source strings extracted from a file can still refer to proper line numbers in the file
+							// NOTE: the buffer is expect to be a valid C string: ptr[length] == '\0'
+	int						LoadMemory( const char *ptr, int length, const char *name, int startLine = 1 );
+							// free the script
+	void					FreeSource( void );
+							// returns true if a script is loaded
+	int						IsLoaded( void );
+							// read a token
+	int						ReadToken( idToken *token );
+							// expect a certain token, reads the token when available
+	int						ExpectTokenString( const char *string );
+							// expect a certain token type
+	int						ExpectTokenType( int type, int subtype, idToken *token );
+							// expect a token
+	int						ExpectAnyToken( idToken *token );
+							// returns true when the token is available
+	int						CheckTokenString( const char *string );
+							// returns true an reads the token when a token with the given type is available
+	int						CheckTokenType( int type, int subtype, idToken *token );
+							// skip tokens until the given token string is read
+	int						SkipUntilString( const char *string );
+							// skip the rest of the current line
+	int						SkipRestOfLine( void );
+							// skip the braced section
+	int						SkipBracedSection( bool parseFirstBrace = true );
+							// unread the given token
+	void					UnreadToken( const idToken *token );
+							// read a token only if on the same line
+	int						ReadTokenOnLine( idToken *token );
+							// read a signed integer
+	int						ParseInt( void );
+							// read a boolean
+	bool					ParseBool( void );
+							// read a floating point number.  If errorFlag is NULL, a non-numeric token will
+							// issue an Error().  If it isn't NULL, it will issue a Warning() and set *errorFlag = true
+	float					ParseFloat( bool *errorFlag = NULL );
+							// parse matrices with floats
+	int						Parse1DMatrix( int x, float *m );
+	int						Parse1DMatrixOpenEnded( int MaxCount, float *m );
+	int						Parse2DMatrix( int y, int x, float *m );
+	int						Parse3DMatrix( int z, int y, int x, float *m );
+							// parse a braced section into a string
+	const char *			ParseBracedSection( idStr &out );
+							// parse a braced section into a string, maintaining indents and newlines
+	const char *			ParseBracedSectionExact ( idStr &out, int tabs = -1 );
+							// parse the rest of the line
+	const char *			ParseRestOfLine( idStr &out );
+							// retrieves the white space characters before the last read token
+	int						GetLastWhiteSpace( idStr &whiteSpace ) const;
+							// returns start index into text buffer of last white space
+	int						GetLastWhiteSpaceStart( void ) const;
+							// returns end index into text buffer of last white space
+	int						GetLastWhiteSpaceEnd( void ) const;
+							// set an array with punctuations, NULL restores default C/C++ set, see default_punctuations for an example
+	void					SetPunctuations( const punctuation_t *p );
+							// returns a pointer to the punctuation with the given id
+	const char *			GetPunctuationFromId( int id );
+							// get the id for the given punctuation
+	int						GetPunctuationId( const char *p );
+							// set lexer flags
+	void					SetFlags( int flags );
+							// get lexer flags
+	int						GetFlags( void );
+							// reset the lexer
+	void					Reset( void );
+							// returns true if at the end of the file
+	int						EndOfFile( void );
+							// returns the current filename
+	const char *			GetFileName( void );
+							// get offset in script
+	const int				GetFileOffset( void );
+							// get file time
+	const unsigned int		GetFileTime( void );
+							// returns the current line number
+	const int				GetLineNum( void );
+							// print an error message
+	void					Error( const char *str, ... );
+							// print a warning message
+	void					Warning( const char *str, ... );
+							// returns true if Error() was called with LEXFL_NOFATALERRORS or LEXFL_NOERRORS set
+	bool					HadError( void ) const;
+
+							// write a binary representation of a token
+	void					WriteBinaryToken(idToken *tok);
+
+	static void				SetBaseFolder(char const * const);
+
+// RAVEN BEGIN
+// dluetscher: added method to parse a structure array that is made up of numerics (floats, ints), and stores them in the given storage
+	void					ParseNumericStructArray( int numStructElements, int tokenSubTypeStructElements[], int arrayCount, byte *arrayStorage );
+// RAVEN END
+
+	// suffix that should be appended to the normal file extension to signify that the file is binary
+	static idStr const		sCompiledFileSuffix;
+
+protected:
+	static char				baseFolder[256];
+
+private:
+	bool					OpenFile(char const *filename, bool OSPath);
+	
+#ifdef LEXER_READ_AHEAD
+	LexerIOWrapper			mLexerIOWrapper;
+#else
+	idFile					*mFile;
+#endif
+	
+	unsigned int			offset;
+	idToken					unreadToken;
+	unsigned int			unreadSize;
+	bool					tokenAvailable;
+	idLexer					*mDelegate;
+	int						mFlags;
+};
+
+#endif
+
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+class rvmScopedLexerBaseFolder
+{
+public:
+	rvmScopedLexerBaseFolder(const char* baseFolder)
+	{
+		idLexer::SetBaseFolder(baseFolder);
+	}
+
+	~rvmScopedLexerBaseFolder()
+	{
+		idLexer::SetBaseFolder("");
+	}
+};
+// jmarshall end
+#endif
 
 #endif /* !__LEXER_H__ */
 

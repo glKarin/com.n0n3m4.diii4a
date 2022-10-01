@@ -132,3 +132,119 @@ float idMath::BitsToFloat(int i, int exponentBits, int mantissaBits)
 	value = sign << IEEE_FLT_SIGN_BIT | (exponent + IEEE_FLT_EXPONENT_BIAS) << IEEE_FLT_MANTISSA_BITS | mantissa;
 	return *reinterpret_cast<float *>(&value);
 }
+
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jscott: renamed to prevent name clash
+const float idMath::FLOAT_EPSILON	= 1.192092896e-07f;
+
+// abahr:
+float idMath::Lerp( const idVec2& range, float frac ) {
+	return Lerp( range[0], range[1], frac );
+}
+
+// abahr:
+float idMath::Lerp( float start, float end, float frac ) {
+	if( frac >= 1.0f ) {
+		return end;
+	}
+
+	if( frac <= 0.0f ) {
+		return start;
+	}
+
+	return start + (end - start) * frac;
+}
+
+// abahr:
+float idMath::MidPointLerp( float start, float mid, float end, float frac ) {
+	if( frac < 0.5f ) {
+		return Lerp( start, mid, 2.0f * frac );
+	}
+
+	return Lerp( mid, end, 2.0f * (frac - 0.5f) );
+}
+
+float idMath::dBToScale( float db ) {
+
+	if( db < -60.0f ) {
+
+		return( 0.0f );
+
+	} else {
+
+		return( powf( 2.0f, db * ( 1.0f / 6.0f ) ) );
+	}
+}
+
+
+// ================================================================================================
+// jscott: fast and reliable random routines
+// ================================================================================================
+
+unsigned/* 64long */int rvRandom::mSeed;
+
+float rvRandom::flrand( float min, float max )
+{
+	float	result;
+
+	mSeed = ( mSeed * 214013L ) + 2531011;
+	// Note: the shift and divide cannot be combined as this breaks the routine
+	result = ( float )( mSeed >> 17 );						// 0 - 32767 range
+	result = ( ( result * ( max - min ) ) * ( 1.0f / 32768.0f ) ) + min;
+	return( result );
+}
+
+float rvRandom::flrand() {
+	return flrand( 0.0f, 1.0f );
+}
+
+float rvRandom::flrand( const idVec2& v ) {
+	return flrand( v[0], v[1] );
+}
+
+int rvRandom::irand( int min, int max )
+{
+	int		result;
+
+	max++;
+	mSeed = ( mSeed * 214013L ) + 2531011;
+	result = mSeed >> 17;
+	result = ( ( result * ( max - min ) ) >> 15 ) + min;
+	return( result );
+}
+
+// Try to get a seed independent of the random number system
+
+int rvRandom::Init( void )
+{
+	mSeed *= ( unsigned/* 64long */int )sys->Milliseconds();
+
+	return( mSeed );
+}
+
+#ifdef _RAVEN // _QUAKE4
+// jmarshall
+/*
+===================
+idMath::Distance
+===================
+*/
+float idMath::Distance(const idVec3 &p1, const idVec3 &p2)
+{
+	idVec3 v = p2 - p1;
+	return v.Length();
+}
+
+/*
+========================
+idMath::CreateVector
+========================
+*/
+idVec3 idMath::CreateVector(float x, float y, float z)
+{
+	return idVec3(x, y, z);
+}
+#endif
+
+#endif

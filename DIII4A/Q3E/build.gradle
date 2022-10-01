@@ -31,7 +31,8 @@ android {
     sourceSets {
         main {
             //jniLibs.srcDirs=['libs']
-            jni.srcDirs('src/main/jni')
+            //jni.srcDirs('src/main/jni')
+            jniLibs.srcDirs=[]
         }
     }
     externalNativeBuild {
