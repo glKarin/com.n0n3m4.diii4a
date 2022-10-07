@@ -559,7 +559,7 @@ void idGameLocal::Init( void ) {
 
 	gamestate = GAMESTATE_NOMAP;
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 // jmarshall
 	// load in the bot itemtable.
 	botItemTable = FindEntityDef("bot_itemtable", false);
@@ -2066,7 +2066,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 	animationLib->FlushUnusedAnims();
 // RAVEN END
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 // jmarshall
 	if (gameLocal.IsMultiplayer() && gameLocal.isServer)
 	{
@@ -6230,10 +6230,12 @@ void idGameLocal::SetCamera( idCamera *cam ) {
 
 	camera = cam;
 	if ( camera ) {
+#ifdef _QUAKE4 //k: no editor
+		inCinematic = true;
+#else
 // RAVEN BEGIN
 // bdube: tool support
 		inCinematic = false;
-#if 0 //k
 		if( !( gameLocal.editors & ( EDITOR_MODVIEW | EDITOR_PLAYBACKS ) ) ) {
 			inCinematic = true;
 		}

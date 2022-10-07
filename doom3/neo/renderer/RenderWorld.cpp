@@ -31,6 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _RAVEN
+#include "Model_local.h"
+#endif
+
 /*
 ===================
 R_ListRenderLightDefs_f
@@ -1079,9 +1083,27 @@ guiPoint_t	idRenderWorldLocal::GuiTrace(qhandle_t entityHandle, const idVec3 sta
 
 	model = def->parms.hModel;
 
+#ifdef _RAVEN //k: for GUI view of dynamic model. e.g. strogg health station
+	if (!def->parms.hModel || def->parms.hModel->IsDynamicModel() == DM_CONTINUOUS) {
+		return pt;
+	}
+	if (def->parms.callback && def->parms.hModel->IsDynamicModel() == DM_STATIC) {
+		return pt;
+	}
+	//k: md5 dynamic model
+	if (def->parms.hModel->IsDynamicModel() == DM_CACHED) {
+		idRenderModelMD5 *md5_model = dynamic_cast<idRenderModelMD5*>(model);
+		if(!md5_model)
+			return pt;
+		model = md5_model->staticModel;
+		if(!model)
+			return pt;
+	}
+#else
 	if (def->parms.callback || !def->parms.hModel || def->parms.hModel->IsDynamicModel() != DM_STATIC) {
 		return pt;
 	}
+#endif
 
 	// transform the points into local space
 	R_GlobalPointToLocal(def->modelMatrix, start, localStart);

@@ -3045,7 +3045,7 @@ void Cmd_ClientOverflowReliable_f( const idCmdArgs& args ) {
 }
 #endif
 
-#ifdef _QUAKE4 //jmarshall bot
+#ifdef _QUAKE4 // bot
 // jmarshall
 void Cmd_AddBot_f(const idCmdArgs& args)
 {
@@ -3086,7 +3086,7 @@ void idGameLocal::InitConsoleCommands( void ) {
 //	cmdSystem->AddCommand( "testSaveGame",			TestSaveGame_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"test a save game for a level" );
 // RAVEN END
 
-#ifdef _QUAKE4 //jmarshall bot
+#ifdef _QUAKE4 // bot
 // jmarshall
 	cmdSystem->AddCommand("addbot", Cmd_AddBot_f, CMD_FL_GAME, "adds a multiplayer bot");
 	cmdSystem->AddCommand("fillbots", Cmd_FillBots_f, CMD_FL_GAME, "fill bots");

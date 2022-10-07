@@ -552,6 +552,10 @@ void idRenderModelMD5::LoadModel()
 	idMD5Joint	*joint;
 	idJointMat *poseMat3;
 
+#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+	this->staticModel = 0;
+#endif
+
 	if (!purged) {
 		PurgeModel();
 	}
@@ -798,6 +802,10 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEnti
 	idMD5Mesh			*mesh;
 	idRenderModelStatic	*staticModel;
 
+#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+	this->staticModel = 0;
+#endif
+
 	if (cachedModel && !r_useCachedDynamicModels.GetBool()) {
 		delete cachedModel;
 		cachedModel = NULL;
@@ -880,6 +888,10 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEnti
 		staticModel->bounds.AddPoint(surf->geometry->bounds[0]);
 		staticModel->bounds.AddPoint(surf->geometry->bounds[1]);
 	}
+
+#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+	this->staticModel = staticModel;
+#endif
 
 	return staticModel;
 }
@@ -1015,6 +1027,9 @@ void idRenderModelMD5::PurgeModel()
 	joints.Clear();
 	defaultPose.Clear();
 	meshes.Clear();
+#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+	staticModel = 0;
+#endif
 }
 
 /*

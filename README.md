@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake IV for Android, 毁灭战士3/雷神之锤4安卓移植版
 **Latest version:**
-1.1.0harmattan12(Natasha)  
+1.1.0harmattan13(Natasha)  
 **Last update release:**
-2022-07-19  
+2022-10-23  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -11,20 +11,34 @@ Android 4.0+
 
 ----------------------------------------------------------------------------------
 ### Update
-> 1.1.0harmattan12 (2022-07-19)
- * `Quake 4` in DOOM3 engine support. Also see `https://github.com/jmarshall23/Quake4Doom`. Now can play most levels, but some levels has error.
- * Quake 4 game data folder named `q4base`, also see `https://store.steampowered.com/app/2210/Quake_4/`.
- * Fix `Rivensin` and `Hardcorps` mod load game from save game.
- * Add console command history record.
- * On-screen buttons layer's resolution always same to device screen.
- * Add volume key map config(Enable `Map volume keys` to show it).
+> 1.1.0harmattan13 (2022-10-23)
+ * Fixup Strogg health station GUI interactive in `Quake 4`.
+ * Fixup skip cinematic in `Quake 4`.
+ * If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.
+ * Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).
+> 1. `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`.
+> 2. `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload.
+> 3. `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`.
+> 4. `game/putra`: Script fatal error has fixed. But can not down on broken floor, using `noclip`.
+> 5. `game/waste`: Script fatal error has fixed.
+> 6. `game/process1 first`: Last elevator has ins collision cause killing player. Using `god`. If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.
+> 7. `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`.
+> 8. `game/core1`: Fixup first elevator platform not go up.
+> 9. `game/core2`: Fixup entity rotation.
  
- * 雷神之锤4 for 毁灭战士3引擎支持. 详情`https://github.com/jmarshall23/Quake4Doom`. 目前可以运行大部分关卡, 剩余部分关卡存在错误.
- * 雷神之锤4游戏数据文件目录为`q4base`, 游戏详情`https://store.steampowered.com/app/2210/Quake_4/`.
- * 修复`Rivensin`和`Hardcorps`mod载入存档bug.
- * 控制台命令记录.
- * 虚拟按键的分辨率不再依赖游戏分辨率.
- * 音量键映射设置(启用`Map volume keys`时显示).
+ * 修复`雷神之锤4`Strogg血站GUI交互.
+ * 修复`雷神之锤4`跳过影片过场动画.
+ * `雷神之锤4`中如果`harm_g_alwaysRun`为1(启用自动跑), 按住`Walk`键行走.
+ * 修复`雷神之锤4`关卡地图脚本的致命错误和bug(所有关卡地图不再有严重错误, 但是一些bug依然存在.).
+> 1. `game/mcc_landing`: 最后一个电梯到顶时, 玩家依然会卡住. 可以在电梯快到顶时提前跳跃, 或者使用`noclip`.
+> 2. `game/mcc_1`: 上个关卡通关时, 载入该关卡程序会崩溃. 使用`map game/mcc_1`重新加载.
+> 3. `game/convoy1`: State error不再中止地图脚本. 下载具时有时会卡主, 使用`noclip`.
+> 4. `game/putra`: 修复脚本致命错误. 但是不能跳下最后的破损的地板, 使用`noclip`.
+> 5. `game/waste`: 修复脚本致命错误.
+> 6. `game/process1 first`: 最后的电梯有错误的碰撞, 会杀死玩家. 使用`god`. 如果最后的塔电梯GUI不工作, 只能使用`teleport tgr_endlevel`直接通关.
+> 7. `game/process1 second`: 第二个电梯有错误的碰撞, 会杀死玩家(和`game/process1 first`一样). 使用`god`.
+> 8. `game/core1`: 修复开始的电梯平台不能自动上升.
+> 9. `game/core2`: 修复物体旋转错误.
 
 ----------------------------------------------------------------------------------
 #### About Quake IV
@@ -87,6 +101,23 @@ Android 4.0+
 ### Changes
 
 ----------------------------------------------------------------------------------
+> 1.1.0harmattan12 (2022-07-19)
+ * `Quake 4` in DOOM3 engine support. Also see `https://github.com/jmarshall23/Quake4Doom`. Now can play most levels, but some levels has error.
+ * Quake 4 game data folder named `q4base`, also see `https://store.steampowered.com/app/2210/Quake_4/`.
+ * Fix `Rivensin` and `Hardcorps` mod load game from save game.
+ * Add console command history record.
+ * On-screen buttons layer's resolution always same to device screen.
+ * Add volume key map config(Enable `Map volume keys` to show it).
+ 
+ * 雷神之锤4 for 毁灭战士3引擎支持. 详情`https://github.com/jmarshall23/Quake4Doom`. 目前可以运行大部分关卡, 剩余部分关卡存在错误.
+ * 雷神之锤4游戏数据文件目录为`q4base`, 游戏详情`https://store.steampowered.com/app/2210/Quake_4/`.
+ * 修复`Rivensin`和`Hardcorps`mod载入存档bug.
+ * 控制台命令记录.
+ * 虚拟按键的分辨率不再依赖游戏分辨率.
+ * 音量键映射设置(启用`Map volume keys`时显示).
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan11 (2022-06-30)
  * Add `Hardcorps` mod library support, game path name is `hardcorps`, if play the mod, first suggest to close `Smooth joystick` in `Controls` tab panel, more view in `https://www.moddb.com/mods/hardcorps`.
  * In `Rivensin` mod, add bool Cvar `harm_pm_doubleJump` to enable double-jump(From `hardcorps` mod source code, default disabled).

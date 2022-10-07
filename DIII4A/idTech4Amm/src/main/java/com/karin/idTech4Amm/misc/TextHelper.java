@@ -282,6 +282,15 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+            ChangeLog.Create("2022-07-19", 12,
+                             "`Quake 4` in DOOM3 engine support. Also see `" + TextHelper.GenLinkText("https://github.com/jmarshall23/Quake4Doom", null) + "`. Now can play most levels, but some levels has error.",
+                             "Quake 4 game data folder named `q4base`, also see `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2210/Quake_4/", null) + "`.",
+                             "Fix `Rivensin` and `Hardcorps` mod load game from save game.",
+                             "Add console command history record.",
+                             "On-screen buttons layer's resolution always same to device screen.",
+                             "Add volume key map config(Enable `Map volume keys` to show it)."
+                             ),
+                             
             ChangeLog.Create("2022-06-30", 11,
                              "Add `Hardcorps` mod library support, game path name is `hardcorps`, if play the mod, first suggest to close `Smooth joystick` in `Controls` tab panel, more view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/hardcorps", null) + "`.",
                              "In `Rivensin` mod, add bool Cvar `harm_pm_doubleJump` to enable double-jump(From `hardcorps` mod source code, default disabled).",

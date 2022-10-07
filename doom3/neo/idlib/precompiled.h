@@ -33,8 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 
 //-----------------------------------------------------
 
-//#define _K_DEV
-#ifdef _K_DEV
+#if defined(_DEBUG)
 #define LOGI(fmt, args...) {common->Printf(fmt, ##args); common->Printf("\n");}
 #define LOGW(fmt, args...) common->Warning(fmt, ##args);
 #define LOGE(fmt, args...) common->Error(fmt, ##args);

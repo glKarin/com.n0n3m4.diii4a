@@ -195,6 +195,11 @@ class idRenderModelMD5 : public idRenderModelStatic
 		void						GetFrameBounds(const renderEntity_t *ent, idBounds &bounds) const;
 		void						DrawJoints(const renderEntity_t *ent, const struct viewDef_s *view) const;
 		void						ParseJoint(idLexer &parser, idMD5Joint *joint, idJointQuat *defaultPose);
+
+#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+	public:
+		idRenderModelStatic *staticModel;
+#endif
 };
 
 /*

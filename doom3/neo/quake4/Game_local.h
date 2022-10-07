@@ -1458,5 +1458,24 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 //k
 #include "../raven/idlib/containers/ListGame.h"
 #include "bots/Bot.h"
+#ifdef _QUAKE4
+extern idCVar harm_g_alwaysRun;
+extern idCVar in_alwaysRun;
+#define usercmd_buttons_and_BUTTON_RUN (harm_g_alwaysRun.GetBool() ? ((gameLocal.isMultiplayer && in_alwaysRun.GetBool()) || !(usercmd.buttons & BUTTON_RUN)) : (usercmd.buttons & BUTTON_RUN)
+#define not_usercmd_buttons_and_BUTTON_RUN (harm_g_alwaysRun.GetBool() ? ((gameLocal.isMultiplayer && !in_alwaysRun.GetBool()) || (usercmd.buttons & BUTTON_RUN)) : !(usercmd.buttons & BUTTON_RUN)
+#endif
+
+
+#ifdef _QUAKE4
+extern idCVar harm_g_alwaysRun;
+#if 1
+extern idCVar harm_in_alwaysRun;
+#define in_alwaysRun_GetBool() harm_in_alwaysRun.GetBool()
+#else
+#define in_alwaysRun_GetBool() cvarSystem->GetCVarBool("in_alwaysRun")
+#endif
+#define usercmd_buttons_and_BUTTON_RUN (harm_g_alwaysRun.GetBool() ? ((gameLocal.isMultiplayer && in_alwaysRun_GetBool()) || !(usercmd.buttons & BUTTON_RUN)) : (usercmd.buttons & BUTTON_RUN))
+#define not_usercmd_buttons_and_BUTTON_RUN (!(usercmd_buttons_and_BUTTON_RUN))
+#endif
 
 #endif	/* !__GAME_LOCAL_H__ */

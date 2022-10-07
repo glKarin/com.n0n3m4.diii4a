@@ -8750,7 +8750,12 @@ void idPlayer::EvaluateControls( void ) {
 idPlayer::AdjustSpeed
 ==============
 */
-static idCVar harm_g_alwaysRun( "harm_g_alwaysRun", "1", CVAR_BOOL | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Force always run automitic." );
+#ifdef _QUAKE4 //k: default run
+idCVar harm_g_alwaysRun( "harm_g_alwaysRun", "1", CVAR_BOOL | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Force always run automitic." );
+#if 1
+idCVar harm_in_alwaysRun("in_alwaysRun", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in MP");
+#endif
+#endif
 void idPlayer::AdjustSpeed( void ) {
 	float speed;
 
@@ -8763,8 +8768,11 @@ void idPlayer::AdjustSpeed( void ) {
  	} else if ( !physicsObj.OnLadder()
 // jmarshall - force run, eval.
 			&& ( 
-				harm_g_alwaysRun.GetBool() || //k: can control
+#ifdef _QUAKE4 //k: default run
+				(usercmd_buttons_and_BUTTON_RUN) //k: default is run, but if shift down, change to walk
+#else
 				(usercmd.buttons & BUTTON_RUN)
+#endif
 				)
 			// jmarshall end
 			&& ( usercmd.forwardmove || usercmd.rightmove ) && ( usercmd.upmove >= 0 ) ) {
@@ -10218,7 +10226,7 @@ void idPlayer::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &di
  	// inform the attacker that they hit someone
  	attacker->DamageFeedback( this, inflictor, damage );
 	
-#ifdef _QUAKE4 //jmarshall bot
+#ifdef _QUAKE4
 // jmarshall
 	if (gameLocal.IsMultiplayer() && gameLocal.isServer) {
 		if (attacker->IsType(rvmBot::GetClassType()) || attacker->IsType(idPlayer::GetClassType()))

@@ -444,7 +444,12 @@ stateResult_t idPlayer::State_Legs_Idle ( const stateParms_t& parms ) {
 				PostAnimState ( ANIMCHANNEL_LEGS, "Legs_Fall", 4 );
 				return SRESULT_DONE;
 			}else if ( pfl.forward && !pfl.backward ) {
-				if( usercmd.buttons & BUTTON_RUN ) {
+#ifdef _RAVEN //k: always run
+				if( usercmd_buttons_and_BUTTON_RUN ) 
+#else
+				if( usercmd.buttons & BUTTON_RUN ) 
+#endif
+				{
  					PlayCycle( ANIMCHANNEL_LEGS, "run_forward", parms.blendFrames );
 					PostAnimState ( ANIMCHANNEL_LEGS, "Legs_Run_Forward", parms.blendFrames );
 				} else {
@@ -454,7 +459,12 @@ stateResult_t idPlayer::State_Legs_Idle ( const stateParms_t& parms ) {
 				
 				return SRESULT_DONE;
 			} else if ( pfl.backward && !pfl.forward ) {
-				if( usercmd.buttons & BUTTON_RUN ) {
+#ifdef _RAVEN //k: always run
+				if( usercmd_buttons_and_BUTTON_RUN ) 
+#else
+				if( usercmd.buttons & BUTTON_RUN ) 
+#endif
+				{
 					PlayCycle( ANIMCHANNEL_LEGS, "run_backwards", parms.blendFrames );
 					PostAnimState ( ANIMCHANNEL_LEGS, "Legs_Run_Backward", parms.blendFrames );
 				} else {
@@ -464,7 +474,12 @@ stateResult_t idPlayer::State_Legs_Idle ( const stateParms_t& parms ) {
 			
 				return SRESULT_DONE;
 			} else if ( pfl.strafeLeft && !pfl.strafeRight ) {
-				if( usercmd.buttons & BUTTON_RUN ) {
+#ifdef _RAVEN //k: always run
+				if( usercmd_buttons_and_BUTTON_RUN ) 
+#else
+				if( usercmd.buttons & BUTTON_RUN ) 
+#endif
+				{
 					PlayCycle( ANIMCHANNEL_LEGS, "run_strafe_left", parms.blendFrames );
 					PostAnimState ( ANIMCHANNEL_LEGS, "Legs_Run_Left", parms.blendFrames );
 				} else {
@@ -474,7 +489,12 @@ stateResult_t idPlayer::State_Legs_Idle ( const stateParms_t& parms ) {
 				
 				return SRESULT_DONE;
 			} else if ( pfl.strafeRight && !pfl.strafeLeft ) {
-				if( usercmd.buttons & BUTTON_RUN ) {
+#ifdef _RAVEN //k: always run
+				if( usercmd_buttons_and_BUTTON_RUN ) 
+#else
+				if( usercmd.buttons & BUTTON_RUN ) 
+#endif
+				{
 					PlayCycle( ANIMCHANNEL_LEGS, "run_strafe_right", parms.blendFrames );
 					PostAnimState ( ANIMCHANNEL_LEGS, "Legs_Run_Right", parms.blendFrames );
 				} else {
@@ -582,7 +602,12 @@ idPlayer::State_Legs_Run_Forward
 */
 stateResult_t idPlayer::State_Legs_Run_Forward ( const stateParms_t& parms ) {
 	if ( !pfl.jump && pfl.onGround && !pfl.crouch && !pfl.backward && pfl.forward ) {
-		if( usercmd.buttons & BUTTON_RUN ) {
+#ifdef _RAVEN //k: always run
+		if( usercmd_buttons_and_BUTTON_RUN ) 
+#else
+		if( usercmd.buttons & BUTTON_RUN ) 
+#endif
+		{
 			return SRESULT_WAIT;
 		} else {
 			PlayCycle( ANIMCHANNEL_LEGS, "walk_forward", parms.blendFrames );
@@ -601,7 +626,12 @@ idPlayer::State_Legs_Run_Backward
 */
 stateResult_t idPlayer::State_Legs_Run_Backward ( const stateParms_t& parms ) {
 	if ( !pfl.jump && pfl.onGround && !pfl.crouch && !pfl.forward && pfl.backward ) {
-		if( usercmd.buttons & BUTTON_RUN ) {
+#ifdef _RAVEN //k: always run
+		if( usercmd_buttons_and_BUTTON_RUN ) 
+#else
+		if( usercmd.buttons & BUTTON_RUN ) 
+#endif
+		{
 			return SRESULT_WAIT;
 		} else {
 			PlayCycle( ANIMCHANNEL_LEGS, "walk_backwards", parms.blendFrames );
@@ -620,7 +650,12 @@ idPlayer::State_Legs_Run_Left
 */
 stateResult_t idPlayer::State_Legs_Run_Left ( const stateParms_t& parms ) {
 	if ( !pfl.jump && pfl.onGround && !pfl.crouch && (pfl.forward == pfl.backward) && pfl.strafeLeft && !pfl.strafeRight ) {
-		if( usercmd.buttons & BUTTON_RUN ) {
+#ifdef _RAVEN //k: always run
+		if( usercmd_buttons_and_BUTTON_RUN ) 
+#else
+		if( usercmd.buttons & BUTTON_RUN ) 
+#endif
+		{
 			return SRESULT_WAIT;
 		} else {
 			PlayCycle( ANIMCHANNEL_LEGS, "walk_left", parms.blendFrames );
@@ -639,7 +674,12 @@ idPlayer::State_Legs_Run_Right
 */
 stateResult_t idPlayer::State_Legs_Run_Right ( const stateParms_t& parms ) {
 	if ( !pfl.jump && pfl.onGround && !pfl.crouch && (pfl.forward == pfl.backward) && pfl.strafeRight && !pfl.strafeLeft ) {
-		if( usercmd.buttons & BUTTON_RUN ) {
+#ifdef _RAVEN //k: always run
+		if( usercmd_buttons_and_BUTTON_RUN ) 
+#else
+		if( usercmd.buttons & BUTTON_RUN )
+#endif
+		{
 			return SRESULT_WAIT;
 		} else {
 			PlayCycle( ANIMCHANNEL_LEGS, "walk_right", parms.blendFrames );
@@ -658,7 +698,12 @@ idPlayer::State_Legs_Walk_Forward
 */
 stateResult_t idPlayer::State_Legs_Walk_Forward ( const stateParms_t& parms ) {
 	if ( !pfl.jump && pfl.onGround && !pfl.crouch && !pfl.backward && pfl.forward ) {
-		if( !(usercmd.buttons & BUTTON_RUN) ) {
+#ifdef _RAVEN //k: always run
+		if( not_usercmd_buttons_and_BUTTON_RUN ) 
+#else
+		if( !(usercmd.buttons & BUTTON_RUN) ) 
+#endif
+		{
 			return SRESULT_WAIT;
 		} else {
 			PlayCycle( ANIMCHANNEL_LEGS, "run_forward", parms.blendFrames );
@@ -677,7 +722,12 @@ idPlayer::State_Legs_Walk_Backward
 */
 stateResult_t idPlayer::State_Legs_Walk_Backward ( const stateParms_t& parms ) {
 	if ( !pfl.jump && pfl.onGround && !pfl.crouch && !pfl.forward && pfl.backward ) {
-		if( !(usercmd.buttons & BUTTON_RUN) ) {
+#ifdef _RAVEN //k: always run
+		if( not_usercmd_buttons_and_BUTTON_RUN ) 
+#else
+		if( !(usercmd.buttons & BUTTON_RUN) ) 
+#endif
+		{
 			return SRESULT_WAIT;
 		} else {
 			PlayCycle( ANIMCHANNEL_LEGS, "run_backwards", parms.blendFrames );
@@ -696,7 +746,12 @@ idPlayer::State_Legs_Walk_Left
 */
 stateResult_t idPlayer::State_Legs_Walk_Left ( const stateParms_t& parms ) {
 	if ( !pfl.jump && pfl.onGround && !pfl.crouch && (pfl.forward == pfl.backward) && pfl.strafeLeft && !pfl.strafeRight ) {
-		if( !(usercmd.buttons & BUTTON_RUN) ) {
+#ifdef _RAVEN //k: always run
+		if( not_usercmd_buttons_and_BUTTON_RUN ) 
+#else
+		if( !(usercmd.buttons & BUTTON_RUN) ) 
+#endif
+		{
 			return SRESULT_WAIT;
 		} else {
 			PlayCycle( ANIMCHANNEL_LEGS, "run_strafe_left", parms.blendFrames );
@@ -715,7 +770,12 @@ idPlayer::State_Legs_Walk_Right
 */
 stateResult_t idPlayer::State_Legs_Walk_Right ( const stateParms_t& parms ) {
 	if ( !pfl.jump && pfl.onGround && !pfl.crouch && (pfl.forward == pfl.backward) && pfl.strafeRight && !pfl.strafeLeft ) {
-		if( !(usercmd.buttons & BUTTON_RUN) ) {
+#ifdef _RAVEN //k: always run
+		if( not_usercmd_buttons_and_BUTTON_RUN ) 
+#else
+		if( !(usercmd.buttons & BUTTON_RUN) ) 
+#endif
+		{
 			return SRESULT_WAIT;
 		} else {
 			PlayCycle( ANIMCHANNEL_LEGS, "run_strafe_right", parms.blendFrames );

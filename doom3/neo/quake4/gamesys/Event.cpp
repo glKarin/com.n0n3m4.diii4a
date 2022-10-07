@@ -65,15 +65,15 @@ idEventDef::idEventDef( const char *command, const char *formatspec, char return
 		switch( formatspec[ i ] ) {
 		case D_EVENT_FLOAT :
 			bits |= 1 << i;
-			argsize += sizeof( intptr_t ); //k jmarshall float
+			argsize += sizeof( intptr_t ); //k 32 float
 			break;
 
 		case D_EVENT_INTEGER :
-			argsize += sizeof( intptr_t ); //k jmarshall int
+			argsize += sizeof( intptr_t ); //k 32 int
 			break;
 
 		case D_EVENT_VECTOR :
-			argsize += E_EVENT_SIZEOF_VEC; //k jmarshall sizeof(idVec3)
+			argsize += E_EVENT_SIZEOF_VEC; //k 32 sizeof(idVec3)
 			break;
 
 		case D_EVENT_STRING :
@@ -81,11 +81,11 @@ idEventDef::idEventDef( const char *command, const char *formatspec, char return
 			break;
 
 		case D_EVENT_ENTITY :
-			argsize += sizeof( intptr_t ); //k jmarshall idEntityPtr<idEntity>
+			argsize += sizeof( intptr_t ); //k 32 idEntityPtr<idEntity>
 			break;
 
 		case D_EVENT_ENTITY_NULL :
-			argsize += sizeof( intptr_t ); //k jmarshall idEntityPtr<idEntity>
+			argsize += sizeof( intptr_t ); //k 32 idEntityPtr<idEntity>
 			break;
 
 		case D_EVENT_TRACE :
@@ -350,7 +350,7 @@ idEvent *idEvent::Alloc( const idEventDef *evdef, int numargs, va_list args ) {
 idEvent::CopyArgs
 ================
 */
-void idEvent::CopyArgs( const idEventDef *evdef, int numargs, va_list args, intptr_t data[ D_EVENT_MAXARGS ] ) { //k jmarshall int
+void idEvent::CopyArgs( const idEventDef *evdef, int numargs, va_list args, intptr_t data[ D_EVENT_MAXARGS ] ) { //k 32 int
 	int			i;
 	const char	*format;
 	idEventArg	*arg;
@@ -517,7 +517,7 @@ idEvent::ServiceEvents
 void idEvent::ServiceEvents( void ) {
 	idEvent		*event;
 	int			num;
-	intptr_t			args[ D_EVENT_MAXARGS ]; //k jmarshall int
+	intptr_t			args[ D_EVENT_MAXARGS ]; //k 32 int
 	int			offset;
 	int			i;
 	int			numargs;
@@ -795,7 +795,7 @@ void CreateEventCallbackHandler( void ) {
 					string1 += "const float";
 					string2 += va( "*( float * )&data[ %d ]", k );
 				} else {
-					string1 += "const int";
+					string1 += "const intptr_t"; //k: 64 int
 					string2 += va( "data[ %d ]", k );
 				}
 

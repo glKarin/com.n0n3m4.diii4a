@@ -31,6 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _RAVEN
+#include "Model_local.h"
+#endif
+
 /*
 
 
@@ -718,6 +722,15 @@ void R_FreeEntityDefDerivedData(idRenderEntityLocal *def, bool keepDecals, bool 
 		// put it back on the free list for reuse
 		def->world->areaReferenceAllocator.Free(ref);
 	}
+
+#ifdef _RAVEN //k: md5 model ref def->dynamicModel, set to 0
+	if(def->parms.hModel)
+	{
+		idRenderModelMD5 *md5_model = dynamic_cast<idRenderModelMD5*>(def->parms.hModel);
+		if(md5_model)
+			md5_model->staticModel = 0;
+	}
+#endif
 
 	def->entityRefs = NULL;
 }

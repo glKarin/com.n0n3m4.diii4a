@@ -1781,7 +1781,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			int client = msg.ReadByte();
 			int spawnId = msg.ReadLong();
 			if ( !entities[ client ] ) {
-#ifdef _QUAKE4 //jmarshall bot
+#ifdef _QUAKE4 // bot
 				SpawnPlayer( client, false, NULL);
 #else
 				SpawnPlayer( client );
@@ -3329,7 +3329,7 @@ void idGameLocal::ReadNetworkInfo( int gameTime, idFile* file, int clientNum ) {
 		int icl, spawnId;
 		file->ReadInt( icl );
 		file->ReadInt( spawnId );
-#ifdef _QUAKE4 //jmarshall bot
+#ifdef _QUAKE4 // bot
 		SpawnPlayer( icl, false, NULL);
 #else
 		SpawnPlayer( icl );
@@ -3522,7 +3522,7 @@ idPlayerStart *idGameLocal::RandomSpawn( void ) {
 	return spawnSpots[ random.RandomInt( spawnSpots.Num() ) ];
 }
 
-#ifdef _QUAKE4 //jmarshall bot
+#ifdef _QUAKE4 // bot
 /*
 ================
 idGameLocal::ServerClientBegin

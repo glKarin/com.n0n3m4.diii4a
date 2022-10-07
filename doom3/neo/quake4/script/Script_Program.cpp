@@ -1156,7 +1156,7 @@ idScriptObject::Save
 ================
 */
 void idScriptObject::Save( idSaveGame *savefile ) const {
-	size_t size;
+	int size; //k: 64 size_t
 
 	if ( type == &type_object && data == NULL ) {
 		// Write empty string for uninitialized object
@@ -1176,7 +1176,7 @@ idScriptObject::Restore
 */
 void idScriptObject::Restore( idRestoreGame *savefile ) {
 	idStr typeName;
-	size_t size;
+	int size; //k: 64 size_t
 
 	savefile->ReadString( typeName );
 
@@ -1189,7 +1189,7 @@ void idScriptObject::Restore( idRestoreGame *savefile ) {
 		savefile->Error( "idScriptObject::Restore: failed to restore object of type '%s'.", typeName.c_str() );
 	}
 
-	savefile->ReadInt( (int &)size );
+	savefile->ReadInt( size );
 	if ( size != type->Size() ) {
 		savefile->Error( "idScriptObject::Restore: size of object '%s' doesn't match size in save game.", typeName.c_str() );
 	}
@@ -1532,12 +1532,66 @@ idVarDef *idProgram::AllocDef( idTypeDef *type, const char *name, idVarDef *scop
 
 			sprintf( element, "%s_y", def->Name() );
 			def_y = AllocDef( type, element, scope, constant );
-			def_y->value.ptrOffset = def_x->value.ptrOffset + type_float.Size();
+			def_y->value.ptrOffset = def_x->value.ptrOffset + sizeof(float) /*//k:32 type_float.Size()*/;
 
 			sprintf( element, "%s_z", def->Name() );
 			def_z = AllocDef( type, element, scope, constant );
-			def_z->value.ptrOffset = def_y->value.ptrOffset + type_float.Size();
+			def_z->value.ptrOffset = def_y->value.ptrOffset + sizeof(float) /*//k: 32type_float.Size()*/;
 		} else {
+#ifdef _QUAKE4 //k: 64 vector, resolved map game/putra and game/waste
+            idTypeDef	newtype(ev_float, &def_float, "float vector", 0, NULL);
+            idTypeDef	*_type = GetType(newtype, true);
+
+            // make automatic defs for the vectors elements
+            // origin can be accessed as origin_x, origin_y, and origin_z
+            sprintf(element, "%s_x", def->Name());
+            def_x = AllocDef(_type, element, scope, constant);
+
+            sprintf(element, "%s_y", def->Name());
+            def_y = AllocDef(_type, element, scope, constant);
+
+            sprintf(element, "%s_z", def->Name());
+            def_z = AllocDef(_type, element, scope, constant);
+
+            // point the vector def to the coordinates
+            if (scope->Type() == ev_function)
+            {
+                //
+                // stack variable
+                //
+                def->value.stackOffset	= scope->value.functionPtr->locals;
+                def->initialized		= idVarDef::stackVariable;
+
+                scope->value.functionPtr->locals += type->Size();
+
+                def_x->value.stackOffset = def->value.stackOffset;
+                def_y->value.stackOffset = def_x->value.stackOffset + sizeof(float);
+                def_z->value.stackOffset = def_y->value.stackOffset + sizeof(float);
+            }
+            else
+            {
+                //
+                // global variable
+                //
+				//k: call AllocMem in DOOM3
+                def->value.bytePtr = &variables[ numVariables ];
+				numVariables += type->Size();
+
+				if (numVariables > sizeof(variables)) {
+					throw idCompileError(va("Exceeded global memory size (%zd bytes)", sizeof(variables)));
+				}
+
+				memset(def->value.bytePtr, 0, type->Size());
+
+                def_x->value.bytePtr = def->value.bytePtr;
+                def_y->value.bytePtr = def_x->value.bytePtr + sizeof(float);
+                def_z->value.bytePtr = def_y->value.bytePtr + sizeof(float);
+            }
+
+            def_x->initialized = def->initialized;
+            def_y->initialized = def->initialized;
+            def_z->initialized = def->initialized;
+#else
 			// make automatic defs for the vectors elements
 			// origin can be accessed as origin_x, origin_y, and origin_z
 			sprintf( element, "%s_x", def->Name() );
@@ -1552,6 +1606,7 @@ idVarDef *idProgram::AllocDef( idTypeDef *type, const char *name, idVarDef *scop
 			// point the vector def to the x coordinate
 			def->value			= def_x->value;
 			def->initialized	= def_x->initialized;
+#endif
 		}
 	} else if ( scope->TypeDef()->Inherits( &type_object ) ) {
 		//

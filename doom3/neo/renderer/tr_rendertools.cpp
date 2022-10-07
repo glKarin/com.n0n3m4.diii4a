@@ -927,7 +927,6 @@ Debugging tool
 */
 static void RB_ShowViewEntitys(viewEntity_t *vModels)
 {
-#if !defined(GL_ES_VERSION_2_0)
 	if (!r_showViewEntitys.GetBool()) {
 		return;
 	}
@@ -943,6 +942,7 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 		return;
 	}
 
+#if !defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
 	glDisable(GL_TEXTURE_2D);

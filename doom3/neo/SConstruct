@@ -316,7 +316,7 @@ if ( BUILD == 'debug-all' ):
 		ID_MCHECK = '1'
 elif ( BUILD == 'debug' ):
 #//k OPTCPPFLAGS = [ '-g', '-O1', '-D_DEBUG' ]
-	OPTCPPFLAGS = [ '-g', '-O0' ]
+	OPTCPPFLAGS = [ '-g', '-O0', '-D_DEBUG' ]
 	if ( ID_MCHECK == '0' ):
 		ID_MCHECK = '1'
 elif ( BUILD == 'release' ):
@@ -576,10 +576,10 @@ if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D
 		VariantDir( g_build + '/quake4', '.', duplicate = 0 )
 		Export( 'GLOBALS ' + GLOBALS )
 		quake4 = SConscript( g_build + '/quake4/sys/scons/SConscript.game' )
-		game_quake4 = InstallAs( '#game%s-q4base.so' % cpu, quake4 )
+		game_quake4 = InstallAs( '#game%s-q4game.so' % cpu, quake4 )
 		if ( BUILD_GAMEPAK == '1' ):
 			Command( '#game01-quake4.pk4', [ game_quake4, quake4 ], Action( g_env.BuildGamePak ) )
-		InstallAs( g_build + '/package/libq4base.so', quake4 )
+		InstallAs( g_build + '/package/libq4game.so', quake4 )
 	
 	
 if ( TARGET_MONO == '1' ):
