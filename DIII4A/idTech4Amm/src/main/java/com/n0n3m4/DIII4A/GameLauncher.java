@@ -86,6 +86,11 @@ import android.app.ActionBar;
 import android.widget.Spinner;
 import android.widget.AdapterView;
 import java.util.Map;
+import com.n0n3m4.q3e.Q3EControlView;
+import com.karin.idTech4Amm.lib.D3CommandUtility;
+import android.util.Log;
+import java.util.LinkedList;
+import android.graphics.Point;
 
 @SuppressLint({"ApplySharedPref", "NonConstantResourceId", "CommitPrefEdits"})
 public class GameLauncher extends Activity{		
@@ -157,6 +162,12 @@ public class GameLauncher extends Activity{
                         PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
                             .putBoolean(Q3EUtils.pref_harm_user_mod, isChecked)
                             .commit();
+						break;
+                    case R.id.launcher_tab2_enable_gyro:
+                        PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+                            .putBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, isChecked)
+                            .commit();
+                        UpdateEnableGyro(isChecked);
 						break;
 					default:
 						break;
@@ -356,33 +367,41 @@ public class GameLauncher extends Activity{
             e.printStackTrace();
         }
     }
-	
-	public void InitQ3E(Context cnt, int width, int height)
-	{			
-		Q3EKeyCodes.InitD3Keycodes();
-		Q3EInterface q3ei=new Q3EInterface();
-		q3ei.isD3=true;
-		q3ei.isD3BFG=true;
-		q3ei.UI_SIZE=UI_SIZE;
-		
-		int r=Q3EUtils.dip2px(cnt,75);
-		int rightoffset=r*3/4;
-		int sliders_width=Q3EUtils.dip2px(cnt,125);
-				
-		q3ei.defaults_table=new String[UI_SIZE];
-		q3ei.defaults_table[UI_JOYSTICK] =(r*4/3)+" "+(height-r*4/3)+" "+r+" "+30;
-		q3ei.defaults_table[UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+30;
-		q3ei.defaults_table[UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+30;
-		q3ei.defaults_table[UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+30;
-		q3ei.defaults_table[UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+30;		
-		q3ei.defaults_table[UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+30;
-		q3ei.defaults_table[UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+30;
-		q3ei.defaults_table[UI_SAVE]     =sliders_width/2+" "+sliders_width/2+" "+sliders_width+" "+30;
-        
-		for (int i=UI_SAVE+1;i<UI_SIZE;i++)
-			q3ei.defaults_table[i]=(r/2+r*(i-UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+30;
-            
-		q3ei.defaults_table[UI_WEAPON_PANEL] =(width - sliders_width - r - rightoffset)+" "+(r)+" "+(r / 3)+" "+30;
+    
+    private void InitUILayout(Q3EInterface q3ei, boolean full)
+    {
+        Display display = getWindowManager().getDefaultDisplay(); 
+        Point realSize = new Point();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+			display.getRealSize(realSize);
+		}
+		else
+		{
+			realSize.set(display.getWidth(), display.getHeight());
+		}
+		int w = full ? realSize.x : display.getWidth();
+        int h = full ? realSize.y : display.getHeight();
+        int width = Math.max(w, h);
+		int height = Math.min(w, h);		
+
+        int r=Q3EUtils.dip2px(this,75);
+        int rightoffset=r*3/4;
+        int sliders_width=Q3EUtils.dip2px(this,125);
+
+        q3ei.defaults_table=new String[UI_SIZE];
+        q3ei.defaults_table[UI_JOYSTICK] =(r*4/3)+" "+(height-r*4/3)+" "+r+" "+30;
+        q3ei.defaults_table[UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+30;
+        q3ei.defaults_table[UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+30;
+        q3ei.defaults_table[UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+30;
+        q3ei.defaults_table[UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+30;       
+        q3ei.defaults_table[UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+30;
+        q3ei.defaults_table[UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+30;
+        q3ei.defaults_table[UI_SAVE]     =sliders_width/2+" "+sliders_width/2+" "+sliders_width+" "+30;
+
+        for (int i=UI_SAVE+1;i<UI_SIZE;i++)
+            q3ei.defaults_table[i]=(r/2+r*(i-UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+30;
+
+        q3ei.defaults_table[UI_WEAPON_PANEL] =(width - sliders_width - r - rightoffset)+" "+(r)+" "+(r / 3)+" "+30;
 
         //k
         final int sr = r / 6 * 5;
@@ -390,10 +409,20 @@ public class GameLauncher extends Activity{
         q3ei.defaults_table[UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, 30);
         q3ei.defaults_table[UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, 30);
         q3ei.defaults_table[UI_KBD] = String.format("%d %d %d %d", sliders_width + sr / 2, sr / 2, sr, 30);
-        q3ei.defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, 30);
-		
+        q3ei.defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, 30);	
+    }
+	
+	public void InitQ3E()
+	{			
+		Q3EKeyCodes.InitD3Keycodes();
+		Q3EInterface q3ei=new Q3EInterface();
+		q3ei.isD3=true;
+		q3ei.isD3BFG=true;
 		q3ei.arg_table=new int[UI_SIZE*4];
-		q3ei.type_table=new int[UI_SIZE];		
+		q3ei.type_table=new int[UI_SIZE];	
+        q3ei.UI_SIZE=UI_SIZE;
+        
+        InitUILayout(q3ei, false);
 		
 		q3ei.type_table[UI_JOYSTICK]=Q3EUtils.TYPE_JOYSTICK;
 		q3ei.type_table[UI_SHOOT]=Q3EUtils.TYPE_BUTTON;
@@ -657,12 +686,12 @@ public class GameLauncher extends Activity{
 	
 	public boolean getProp(String name)
 	{
-        return "1".equals(GetProp(name));
+        return D3CommandUtility.GetBoolProp(GetCmdText(), name, false);
 	}
     
 	public void setProp(String name,boolean val)
 	{
-        SetProp(name, val ? "1" : "0");
+        SetProp(name, D3CommandUtility.btostr(val));
 	}
 	
 	public void updatehacktings()
@@ -723,11 +752,16 @@ public class GameLauncher extends Activity{
 			    {
 				    if("q4base".equals(str) || "".equals(str))
 					    index = 0;   
+                    else
+                    {
+                        RemoveProp("fs_game");
+                        RemoveProp("fs_game_base");
+                    }
 				    SelectCheckbox(V.rg_fs_q4game, index);
 			    }
 			    else
 			    {
-				    if("".equals(str))
+				    if("".equals(str) || "base".equals(str))
 					    index = 0;
 				    else if("d3xp".equals(str))
 					    index = 1;
@@ -739,6 +773,11 @@ public class GameLauncher extends Activity{
 					    index = 4;
 				    else if("hardcorps".equals(str))
 					    index = 5;
+                    else
+                    {
+                        RemoveProp("fs_game");
+                        RemoveProp("fs_game_base");
+                    }
                     SelectCheckbox(V.rg_fs_game, index);
 			    }
             }
@@ -749,8 +788,91 @@ public class GameLauncher extends Activity{
                     V.edt_fs_game.setText(str);
             }
 		}
+        else
+        {
+            if(Q3EUtils.q3ei.isQ4)
+            {
+                SelectCheckbox(V.rg_fs_q4game, 0);
+            }
+            else
+            {
+                SelectCheckbox(V.rg_fs_game, 0);
+            }
+        }
         GameLauncher.this.UpdateCustomerResulotion(V.rg_scrres.getCheckedRadioButtonId() == R.id.res_custom);
 	}	
+    
+    private LinkedList<String> m_debugTextHistory = null;
+    private boolean m_revTextHistory = true;
+    private void DebugText(Object format, Object...args)
+    {
+        String str;
+        if(null == format)
+            str = "NULL";
+        else if(format instanceof String)
+            str = String.format((String)format, args);
+        else
+            str = format.toString();
+        Log.e("xxxxx", str);
+        Toast.makeText(this, str, Toast.LENGTH_LONG).show();
+        if(null == m_debugTextHistory)
+            m_debugTextHistory = new LinkedList<>();
+        m_debugTextHistory.add(str);
+    }
+
+	private CharSequence MakeDebugTextHistoryText(Boolean rev)
+	{
+		StringBuilder sb = new StringBuilder();
+		final String endl = TextHelper.GetDialogMessageEndl();
+		for(int i = 0; i < m_debugTextHistory.size(); i++)
+		{
+			sb.append("[");
+			String str;
+			if(rev)
+			{
+				sb.append(m_debugTextHistory.size() - i);
+				str = m_debugTextHistory.get(m_debugTextHistory.size() - i - 1);
+			}
+			else
+			{
+				sb.append(i + 1);
+				str = m_debugTextHistory.get(i);
+			}
+			sb.append("]: ").append(str).append(endl);
+		}
+		return TextHelper.GetDialogMessage(sb.toString());
+	}
+
+    private void ShowDebugTextHistoryDialog()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Debug text history")
+        .setMessage(MakeDebugTextHistoryText(m_revTextHistory))
+        .setPositiveButton("OK", null)
+            .setNegativeButton("Clear", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int p)
+                {
+                    m_debugTextHistory.clear();
+                    ((AlertDialog)dialog).setMessage("");
+                }
+            })
+            .setNeutralButton("Rev", null)
+            ;
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(final DialogInterface dialog) {
+                    ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                m_revTextHistory = !m_revTextHistory;
+                                ((AlertDialog)dialog).setMessage(MakeDebugTextHistoryText(m_revTextHistory));
+                            }
+                        });
+                }
+            });
+        dialog.show();
+    }
 
     private void UpdateUserGame(boolean on)
     {
@@ -759,18 +881,23 @@ public class GameLauncher extends Activity{
 
         if(Q3EUtils.q3ei.isQ4)
         {
-            int index = 0;
+            int index = -1;
+            if("q4base".equals(game))
+                game = "";
             if(game.isEmpty() || "q4base".equals(game))
                 index = 0;   
-            SelectCheckbox(V.rg_fs_q4game, index);
-            if(index <= 0 && !game.isEmpty())
+            if(index >= 0)
+                SelectCheckbox(V.rg_fs_q4game, index);
+            if(index > 0 && !game.isEmpty())
                 SetProp("fs_game", game);   
             else
                 RemoveProp("fs_game");
         }
         else
         {
-            int index = 0;
+            int index = -1;
+            if("base".equals(game))
+                game = "";
             if(game.isEmpty() || "base".equals(game))
                 index = 0;
             else if("d3xp".equals(game))
@@ -782,9 +909,10 @@ public class GameLauncher extends Activity{
             else if("rivensin".equals(game))
                 index = 4;
             else if("hardscorps".equals(game))
-                index = 5;
-            SelectCheckbox(V.rg_fs_game, index);
-            if(index <= 5 && !game.isEmpty())
+                index = 5;   
+            if(index >= 0)
+                SelectCheckbox(V.rg_fs_game, index);
+            if(index > 0 && !game.isEmpty())
                 SetProp("fs_game", game);   
             else
                 RemoveProp("fs_game");
@@ -820,12 +948,9 @@ public class GameLauncher extends Activity{
         
 		setContentView(R.layout.main);
 		
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-		Display display = getWindowManager().getDefaultDisplay(); 
-		int width = Math.max(display.getWidth(),display.getHeight());
-		int height = Math.min(display.getWidth(),display.getHeight());						
+        getActionBar().setDisplayHomeAsUpEnabled(true);						
 		
-		InitQ3E(this, width, height);
+		InitQ3E();
 		
 		TabHost th=(TabHost)findViewById(R.id.tabhost);
 		th.setup();					
@@ -871,6 +996,7 @@ public class GameLauncher extends Activity{
         V.r_harmclearvertexbuffer.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		SelectCheckbox(V.rg_harm_r_lightModel, "blinn_phong".equalsIgnoreCase(mPrefs.getString(Q3EUtils.pref_harm_r_lightModel, "phong")) ? 1 : 0);
         V.rg_harm_r_lightModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
+        V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false));
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener(){
            public boolean onEditorAction(TextView view, int id, KeyEvent ev)
            {
@@ -921,7 +1047,7 @@ public class GameLauncher extends Activity{
         V.rg_fs_game.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.edt_fs_game.addTextChangedListener(new TextWatcher() {           
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    if(mPrefs.getBoolean(Q3EUtils.pref_harm_user_mod, false))
+                    if(V.fs_game_user.isChecked())
                         SetProp("fs_game", s);
                 }           
                 public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
@@ -944,7 +1070,7 @@ public class GameLauncher extends Activity{
 		
 		//DIII4A-specific					
 		V.edt_cmdline.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_params, "game.arm") {			
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean cond = V.edt_cmdline.isInputMethodTarget() && !IsCmdUpdateLocked();
                 if(cond)
 				    updatehacktings();
@@ -958,7 +1084,7 @@ public class GameLauncher extends Activity{
                 public void afterTextChanged(Editable s) {
                     String value = s.length() == 0 ? "4.0" : s.toString();
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putFloat(Q3EUtils.pref_harm_r_specularExponent, Float.parseFloat(value))
+                        .putFloat(Q3EUtils.pref_harm_r_specularExponent, Utility.parseFloat_s(value, 4.0f))
                         .commit();
                 }
             });
@@ -975,6 +1101,30 @@ public class GameLauncher extends Activity{
         UpdateMapVol(V.mapvol.isChecked());
         V.launcher_tab2_volume_up_map_config_keys.setOnItemSelectedListener(m_spinnerItemSelectedListener);
         V.launcher_tab2_volume_down_map_config_keys.setOnItemSelectedListener(m_spinnerItemSelectedListener);
+        V.launcher_tab2_enable_gyro.setOnCheckedChangeListener(m_checkboxChangeListener);
+        V.launcher_tab2_gyro_x_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
+        V.launcher_tab2_gyro_y_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
+        UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
+        V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {           
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}           
+                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
+                public void afterTextChanged(Editable s) {
+                    String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_X_AXIS_SENS : s.toString();
+                    PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+                        .putFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
+                        .commit();
+                }
+            });
+        V.launcher_tab2_gyro_y_axis_sens.addTextChangedListener(new TextWatcher() {           
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}           
+                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
+                public void afterTextChanged(Editable s) {
+                    String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_Y_AXIS_SENS : s.toString();
+                    PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+                        .putFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
+                        .commit();
+                }
+            });
 
 		updatehacktings();
 		
@@ -1008,19 +1158,28 @@ public class GameLauncher extends Activity{
 		finish();
 		startActivity(new Intent(this,Q3EMain.class));
 	}
-	
+
+	public void ResetControlsLayout(boolean full)
+	{
+		InitUILayout(Q3EUtils.q3ei, full);
+		SharedPreferences.Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
+		for (int i=0;i<UI_SIZE;i++)
+			mEdtr.putString(Q3EUtils.pref_controlprefix+i, full ? Q3EUtils.q3ei.defaults_table[i] : null);
+		mEdtr.commit();
+		Toast.makeText(GameLauncher.this, "On-screen controls has reset.", Toast.LENGTH_SHORT).show();
+	}
+
 	public void resetcontrols(View vw)
 	{
         ContextUtility.Confirm(this, "Warning", "Reset on-screen controls?", new Runnable() {
-            public void run()
-            {
-                SharedPreferences.Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
-                for (int i=0;i<UI_SIZE;i++)
-                    mEdtr.putString(Q3EUtils.pref_controlprefix+i, null);
-                mEdtr.commit();
-                Toast.makeText(GameLauncher.this, "On-screen controls has reset.", Toast.LENGTH_SHORT).show();
+            public void run() {
+				ResetControlsLayout(false);
             }
-        }, null);
+            }, null, "OK(Fullscreen)", new Runnable() {
+                public void run() {
+					ResetControlsLayout(true);
+            }
+        });
 	}
 	
 	public void controls(View vw)
@@ -1040,79 +1199,30 @@ public class GameLauncher extends Activity{
     private void SetProp(String name, Object val)
     {
         boolean lock = LockCmdUpdate();
-        name = " +set " + name + " ";
-        String str = GetCmdText();
-		String insertCmd = val.toString().trim();
-        if (str.contains(name))
-        {
-            int start = str.indexOf(name) + name.length();
-            int end = str.indexOf(" +", start);
-            if(end != -1)
-            {
-                str = str.substring(0, start) + insertCmd + str.substring(end);
-            }
-            else
-                str = str.substring(0, start) + insertCmd;
-        }
-        else
-            str += name + insertCmd;
-        SetCmdText(str);
+        SetCmdText(D3CommandUtility.SetProp(GetCmdText(), name, val));
         if(lock) UnlockCmdUpdate();
 	}
 
     private String GetProp(String name)
     {
-        name = " +set " + name + " ";
-        String str = GetCmdText();
-        if (str.contains(name))
-        {
-            int start = str.indexOf(name) + name.length();
-            int end = str.indexOf(" +", start);
-            if(end != -1)
-            {
-                String val = str.substring(start, end).trim();
-                if(val.isEmpty()) // ""
-                    return null;
-                else
-                    str = val;
-            }
-            else
-                str = str.substring(start).trim();
-            return str;
-        }
-        return null;
+		return D3CommandUtility.GetProp(GetCmdText(), name);
 	}
 
     private boolean RemoveProp(String name)
     {
         boolean lock = LockCmdUpdate();
-        name = " +set " + name + " ";
-        EditText edit = V.edt_cmdline;
-        String str = edit.getText().toString();
-        boolean res = false;
-        if (str.contains(name))
-        {
-            int start = str.indexOf(name);
-            int len = start + name.length();
-            int end = str.indexOf(" +", len);
-            if(end != -1)
-            {
-                str = str.substring(0, start) + str.substring(end);
-            }
-            else
-                str = str.substring(0, start);
-            edit.setText(str);
-            res = true;
-        }
+		boolean[] res = { false };
+        String str0 = GetCmdText();
+		String str = D3CommandUtility.RemoveProp(GetCmdText(), name, res);
+		if(res[0])
+			SetCmdText(str);
         if(lock) UnlockCmdUpdate();
-        return res;
+        return res[0];
 	}
 
     private boolean IsProp(String name)
     {
-        name=" +set "+name+" ";
-        String str=GetCmdText();
-        return(str.contains(name));
+        return D3CommandUtility.IsProp(GetCmdText(), name);
 	}
     
     private void EditFile(String file)
@@ -1198,6 +1308,9 @@ public class GameLauncher extends Activity{
 				return true;
 			case R.id.main_menu_show_preference:
 				ShowPreferenceDialog();
+				return true;
+            case R.id.main_menu_debug_text_history:
+                ShowDebugTextHistoryDialog();
 				return true;
 			case android.R.id.home:
 				ChangeGame();
@@ -1314,7 +1427,7 @@ public class GameLauncher extends Activity{
         mEdtr.putInt(Q3EUtils.pref_harm_16bit, index);
         mEdtr.putInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
         mEdtr.putString(Q3EUtils.pref_harm_r_lightModel, GetCheckboxIndex(V.rg_harm_r_lightModel) == 1 ? "blinn_phong" : "phong");
-		mEdtr.putFloat(Q3EUtils.pref_harm_r_specularExponent, Float.parseFloat(V.edt_harm_r_specularExponent.getText().toString()));
+		mEdtr.putFloat(Q3EUtils.pref_harm_r_specularExponent, Utility.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 4.0f));
 
         mEdtr.putBoolean(Q3EUtils.pref_mapvol, V.mapvol.isChecked());
         mEdtr.putBoolean(Q3EUtils.pref_analog, V.smoothjoy.isChecked());
@@ -1331,6 +1444,9 @@ public class GameLauncher extends Activity{
         mEdtr.putBoolean(Q3EUtils.pref_nolight, V.nolight.isChecked());
         mEdtr.putBoolean(Q3EUtils.pref_harm_user_mod, V.fs_game_user.isChecked());
         mEdtr.putString(Q3EUtils.pref_harm_game, Q3EUtils.q3ei.isQ4 ? Constants.GAME_QUAKE4 : Constants.GAME_DOOM3);
+        mEdtr.putBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, V.launcher_tab2_enable_gyro.isChecked());
+		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
+		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
 		mEdtr.commit();
     }
 
@@ -1359,6 +1475,8 @@ public class GameLauncher extends Activity{
     private void SetCmdText(String text)
     {
         EditText edit = V.edt_cmdline;
+        if(edit.getText().toString().equals(text))
+            return;
         int pos = edit.getSelectionStart();
         edit.setText(text);
         if(text != null && !text.isEmpty())
@@ -1458,7 +1576,7 @@ public class GameLauncher extends Activity{
 	private void SetGameDLL(int val)
 	{
         SharedPreferences preference =  PreferenceManager.getDefaultSharedPreferences(this);
-        boolean userMod = preference.getBoolean(Q3EUtils.pref_harm_user_mod, false);
+        boolean userMod = V.fs_game_user.isChecked(); //preference.getBoolean(Q3EUtils.pref_harm_user_mod, false);
         String game = "";
 		switch(val)
 		{
@@ -1519,16 +1637,21 @@ public class GameLauncher extends Activity{
             case R.id.fs_game_quake4:
                 if(!userMod)
                 {
-                    SetProp("fs_game", "q4base");
+                    RemoveProp("fs_game");
                     RemoveProp("fs_game_base");
                     RemoveProp("harm_fs_gameLibPath");
                 }
-                game = "q4base";
 				break;
 			default:
 				break;
 		}
-        V.edt_fs_game.setText(game);
+        if(userMod)
+        {
+            SetProp("fs_game", game);
+            RemoveProp("fs_game_base");
+            RemoveProp("harm_fs_gameLibPath");
+            V.edt_fs_game.setText(game);
+        }
         preference.edit().putString(Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_fs_game : Q3EUtils.pref_harm_fs_game, game).commit();
 	}
 
@@ -1657,7 +1780,8 @@ public class GameLauncher extends Activity{
                 switch(game)
                 {
                     case "q4base":
-                        SetProp("fs_game", "q4base");
+                        // SetProp("fs_game", "q4base");
+                        RemoveProp("fs_game");
                         RemoveProp("fs_game_base");
                         RemoveProp("harm_fs_gameLibPath");
                         index = 0;
@@ -1864,72 +1988,24 @@ public class GameLauncher extends Activity{
     private boolean RemoveParam(String name)
     {
         boolean lock = LockCmdUpdate();
-        name = " +" + name + " ";
-        EditText edit = V.edt_cmdline;
-        String str = edit.getText().toString();
-        boolean res = false;
-        if (str.contains(name))
-        {
-            int start = str.indexOf(name);
-            int len = start + name.length();
-            int end = str.indexOf(" +", len);
-            if(end != -1)
-            {
-                str = str.substring(0, start) + str.substring(end);
-            }
-            else
-                str = str.substring(0, start);
-            edit.setText(str);
-            res = true;
-        }
+		boolean[] res = { false };
+		String str = D3CommandUtility.RemoveParam(GetCmdText(), name, res);
+		if(res[0])
+			SetCmdText(str);
         if(lock) UnlockCmdUpdate();
-        return res;
+        return res[0];
 	}
 
     private void SetParam(String name, Object val)
     {
         boolean lock = LockCmdUpdate();
-        name = " +" + name + " ";
-        String str = GetCmdText();
-        String insertCmd = val.toString().trim();
-        if (str.contains(name))
-        {
-            int start = str.indexOf(name) + name.length();
-            int end = str.indexOf(" +", start);
-            if(end != -1)
-            {
-                str = str.substring(0, start) + insertCmd + str.substring(end);
-            }
-            else
-                str = str.substring(0, start) + insertCmd;
-        }
-        else
-            str += name + insertCmd;
-        SetCmdText(str);
+        SetCmdText(D3CommandUtility.SetParam(GetCmdText(), name, val));
         if(lock) UnlockCmdUpdate();
 	}
 
     private String GetParam(String name)
     {
-        name = " +" + name + " ";
-        String str = GetCmdText();
-        if (str.contains(name))
-        {
-            int start = str.indexOf(name) + name.length();
-            int end = str.indexOf(" +", start);
-            if(end != -1)
-            {
-                String val = str.substring(start, end).trim();
-                if(val.isEmpty()) // ""
-                    return null;
-                else
-                    str = val;
-            }
-            else
-                str = str.substring(start).trim();
-            return str;
-        }
-        return null;
+		return D3CommandUtility.GetParam(GetCmdText(), name);
 	}
     
     private void ShowPreferenceDialog()
@@ -1957,6 +2033,16 @@ public class GameLauncher extends Activity{
         V.launcher_tab2_volume_up_map_config_keys.setSelection(Utility.ArrayIndexOf(keyCodes, key));
         key = preference.getInt(Constants.PreferenceKey.VOLUME_DOWN_KEY, Q3EKeyCodes.KeyCodes.K_F2);
         V.launcher_tab2_volume_down_map_config_keys.setSelection(Utility.ArrayIndexOf(keyCodes, key));
+    }
+
+    private void UpdateEnableGyro(boolean on)
+    {
+        V.launcher_tab2_enable_gyro_layout.setVisibility(on ? View.VISIBLE : View.GONE);
+        SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
+        float f = preference.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS);
+        V.launcher_tab2_gyro_x_axis_sens.setText("" + f);
+        f = preference.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
+        V.launcher_tab2_gyro_y_axis_sens.setText("" + f);
     }
     
     
@@ -2002,6 +2088,10 @@ public class GameLauncher extends Activity{
         public Spinner launcher_tab2_volume_up_map_config_keys;
         public Spinner launcher_tab2_volume_down_map_config_keys;
         public View main_ad_layout;
+        public CheckBox launcher_tab2_enable_gyro;
+        public LinearLayout launcher_tab2_enable_gyro_layout;
+        public EditText launcher_tab2_gyro_x_axis_sens;
+        public EditText launcher_tab2_gyro_y_axis_sens;
 
 		public void Setup()
 		{
@@ -2043,6 +2133,10 @@ public class GameLauncher extends Activity{
             launcher_tab2_volume_up_map_config_keys = findViewById(R.id.launcher_tab2_volume_up_map_config_keys);
             launcher_tab2_volume_down_map_config_keys = findViewById(R.id.launcher_tab2_volume_down_map_config_keys);
             main_ad_layout = findViewById(R.id.main_ad_layout);
+            launcher_tab2_enable_gyro = findViewById(R.id.launcher_tab2_enable_gyro);
+            launcher_tab2_enable_gyro_layout = findViewById(R.id.launcher_tab2_enable_gyro_layout);
+            launcher_tab2_gyro_x_axis_sens = findViewById(R.id.launcher_tab2_gyro_x_axis_sens);
+            launcher_tab2_gyro_y_axis_sens = findViewById(R.id.launcher_tab2_gyro_y_axis_sens);
 		}
 	}
 }

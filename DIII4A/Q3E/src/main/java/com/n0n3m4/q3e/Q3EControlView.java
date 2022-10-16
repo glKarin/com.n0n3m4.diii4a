@@ -67,8 +67,12 @@ import javax.microedition.khronos.opengles.GL11;
 
 import tv.ouya.console.api.OuyaController;
 import java.util.LinkedList;
+import android.hardware.SensorManager;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorEvent;
+import android.hardware.Sensor;
 
-class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer
+public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer, SensorEventListener
 {
 
 	public Handler mHandler;
@@ -525,7 +529,8 @@ class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer
 			analog = mPrefs.getBoolean(Q3EUtils.pref_analog, true);
 			boolean detectMouse=mPrefs.getBoolean(Q3EUtils.pref_detectmouse, true);
 
-			mouse_name = hideonscr ?(detectMouse ?detectmouse(): mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???")): null;
+			//k: first check su
+			mouse_name = hideonscr && RootTools.isRootAvailable() ?(detectMouse ?detectmouse(): mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???")): null;
 			mouse_corner = mPrefs.getInt(Q3EUtils.pref_mousepos, 3);
 
 			orig_width = w;
@@ -889,7 +894,10 @@ class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer
                     m_renderView.PushUIEvent(new Runnable() {
                        public void run()
                        {
-                           ((Activity)getContext()).finishAffinity();
+                           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                               ((Activity)getContext()).finishAffinity();
+                           else
+                               ((Activity)getContext()).finish();
                            System.exit(0);   
                        }
                     });
@@ -905,5 +913,99 @@ class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer
     {
         m_renderView = view;
         view.ControlView(this);
+    }
+
+	private boolean m_gyroInited = false;
+    private SensorManager m_sensorManager = null;
+	private Sensor m_gyroSensor = null;
+    private boolean m_enableGyro = false;
+    public static final float GYROSCOPE_X_AXIS_SENS = 18;
+    public static final float GYROSCOPE_Y_AXIS_SENS = 18;
+    private float m_xAxisGyroSens = GYROSCOPE_X_AXIS_SENS;
+    private float m_yAxisGyroSens = GYROSCOPE_Y_AXIS_SENS;
+    
+    public boolean EnableGyroscopeControl(boolean...b)
+    {
+        if(b.length > 0)
+            m_enableGyro = b[0];
+        return m_enableGyro;
+    }
+    
+    public float XAxisSens(float...f)
+    {
+        if(f.length > 0)
+            m_xAxisGyroSens = f[0];
+        return m_xAxisGyroSens;
+    }
+
+    public float yAxisSens(float...f)
+    {
+        if(f.length > 0)
+            m_yAxisGyroSens = f[0];
+        return m_yAxisGyroSens;
+    }
+    
+    public void SetGyroscopeSens(float x, float y)
+    {
+        XAxisSens(x);
+        yAxisSens(y);
+    }
+    
+	private boolean InitGyroscopeSensor()
+	{
+		if(m_gyroInited)
+			return null != m_gyroSensor;
+		m_gyroInited = true;
+        m_sensorManager = (SensorManager)getContext().getSystemService(Context.SENSOR_SERVICE);
+		if(null == m_sensorManager)
+			return false;
+		m_gyroSensor = m_sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+		if(null == m_gyroSensor)
+			return false;
+		return true;
+	}
+
+	public void StartGyroscope()
+	{
+		InitGyroscopeSensor();
+        if (null != m_gyroSensor)
+            m_sensorManager.registerListener(this, m_gyroSensor, SensorManager.SENSOR_DELAY_GAME);
+    }
+
+    public void StopGyroscope()
+	{
+        if (null != m_gyroSensor)
+			m_sensorManager.unregisterListener(this, m_gyroSensor);
+	}
+
+    @Override
+    public void onSensorChanged(SensorEvent event)
+	{
+        if(notinmenu)
+        {
+			sendMotionEvent(-event.values[0] * m_xAxisGyroSens, event.values[1] * m_yAxisGyroSens);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy)
+	{
+
+	}
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if(m_enableGyro)
+            StartGyroscope();
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        if(m_enableGyro)
+            StopGyroscope();
     }
 }

@@ -1170,7 +1170,7 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 		int oldTime;
 
 		
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 // jmarshall
 		if (space->entityDef && space->entityDef->parms.timeGroup) {
 			oldFloatTime = tr.viewDef->floatTime;
@@ -1183,7 +1183,7 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 
 		shader->EvaluateRegisters(regs, shaderParms, tr.viewDef, renderEntity->referenceSound);
 
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 // jmarshall
 		if (space->entityDef && space->entityDef->parms.timeGroup) {
 			tr.viewDef->floatTime = oldFloatTime;
@@ -1230,7 +1230,7 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 		oldFloatTime = tr.viewDef->floatTime;
 		oldTime = tr.viewDef->renderView.time;
 
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 // jmarshall - gui time
 		tr.viewDef->floatTime = game->GetTimeGroupTime(1) * 0.001;
 		tr.viewDef->renderView.time = game->GetTimeGroupTime(1);
@@ -1427,7 +1427,7 @@ void R_AddModelSurfaces(void)
 		float oldFloatTime;
 		int oldTime;
 
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 // jmarshall
 		game->SelectTimeGroup(vEntity->entityDef->parms.timeGroup);
 
@@ -1461,7 +1461,7 @@ void R_AddModelSurfaces(void)
 			model = R_EntityDefDynamicModel(vEntity->entityDef);
 
 			if (model == NULL || model->NumSurfaces() <= 0) {
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 // jmarshall
 				if (vEntity->entityDef->parms.timeGroup) {
 					tr.viewDef->floatTime = oldFloatTime;
@@ -1481,7 +1481,7 @@ void R_AddModelSurfaces(void)
 		//
 		// for all the entity / light interactions on this entity, add them to the view
 		//
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 // jmarshall
 		if (tr.viewDef->isXraySubview) {
 			if (vEntity->entityDef->parms.xrayIndex == 2) {
@@ -1511,12 +1511,12 @@ void R_AddModelSurfaces(void)
 
 				inter->AddActiveInteraction();
 			}
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 // jmarshall
 		}
 #endif
 
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 // jmarshall
 		if (vEntity->entityDef->parms.timeGroup) {
 			tr.viewDef->floatTime = oldFloatTime;

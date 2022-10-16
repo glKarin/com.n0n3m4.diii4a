@@ -355,7 +355,8 @@ void Script_ConsoleCmd(idWindow* window, idList<idGSWinVar>* src)
     idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
     idStr parmStr = parm->c_str();
 
-    cmdSystem->BufferCommandText(CMD_EXEC_NOW, parmStr.c_str());
+    //cmdSystem->BufferCommandText(CMD_EXEC_NOW, parmStr.c_str()); //k: change to append, start game is work
+    cmdSystem->BufferCommandText(CMD_EXEC_APPEND, parmStr.c_str());
 }
 
 /*

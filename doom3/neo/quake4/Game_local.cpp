@@ -2548,12 +2548,16 @@ void idGameLocal::MapShutdown( void ) {
 	gamestate = GAMESTATE_SHUTDOWN;
 
 	if ( soundSystem ) {
-		//soundSystem->ResetListener();
+#if 0 //k: not implement
+		soundSystem->ResetListener();
+#endif
 	}
 
 // RAVEN BEGIN
 // rjohnson: new blur special effect
-	//renderSystem->ShutdownSpecialEffects();
+#if 0 //k: not implement
+	renderSystem->ShutdownSpecialEffects();
+#endif
 // RAVEN END
 
 	// clear out camera if we're in a cinematic
@@ -2817,14 +2821,12 @@ void idGameLocal::CacheDictionaryMedia( const idDict *dict ) {
 				// precache the render model
 				renderModelManager->FindModel( kv->GetValue() );
 				// precache .cm files only
-				//collisionModelManager->PreCacheModel( GetMapName(), kv->GetValue() );
-
 #ifdef _QUAKE4
-				// precache .cm files only
 // jmarshall: caching code is different in Doom 3
-				//collisionModelManager->PreCacheModel( GetMapName(), kv->GetValue() );
 				collisionModelManager->LoadModel(GetMapName(), kv->GetValue(), true);
 // jmarshall end
+#else
+				//collisionModelManager->PreCacheModel( GetMapName(), kv->GetValue() );
 #endif
 			}
 		} else if ( MATCH( "s_shader" ) ) {
@@ -3636,12 +3638,12 @@ TIME_THIS_SCOPE("idGameLocal::RunFrame - gameDebug.BeginFrame()");
 		}
 
 		// If modview is running then let it think
-#if 0 //k
+#if 0 //k: not implement
 		common->ModViewThink( );
 #endif
 
 		// rjohnson: added option for guis to always think
-#if 0 //k
+#if 0 //k: not implement
 		common->RunAlwaysThinkGUIs( time );
 #endif
 
@@ -3863,7 +3865,9 @@ TIME_THIS_SCOPE("idGameLocal::RunFrame - gameDebug.BeginFrame()");
 
 	ret.syncNextGameFrame = skipCinematic;
 	if ( skipCinematic ) {
-		//soundSystem->EndCinematic();
+#if 0 //k: not implement
+		soundSystem->EndCinematic();
+#endif
 		soundSystem->SetMute( false );
 		skipCinematic = false;		
 	}
@@ -8666,14 +8670,14 @@ idGameLocal::GetBotItemEntry
 int idGameLocal::GetBotItemEntry( const char* name )
 {
 #ifdef _QUAKE4
-	if(!botItemTable)
+	if(!botItemTable || !name || !*name)
 		return 9;
 #endif
 
 	const idKeyValue* keyvalue = botItemTable->dict.FindKey( name );
 	if( !keyvalue )
 	{
-		gameLocal.Warning( "GetBotItemModelIndex: Doesn't have key %s\n", name );
+		gameLocal.Warning( "GetBotItemModelIndex: Doesn't have key '%s'", name );
 		return 9;
 	}
 
@@ -8866,7 +8870,7 @@ void idGameLocal::SpawnPlayer(int clientNum, bool isBot, const char* botName) {
 
 #endif
 
-#ifdef _QUAKE4 //k: from D3XP::MultiplayerGame
+#ifdef _RAVEN //k: from D3XP::MultiplayerGame
 void idGameLocal::GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ])
 {
 	idStr aux = GetBestMPGametype(map, gametype);
@@ -8903,6 +8907,17 @@ idStr idGameLocal::GetBestMPGametype(const char *map, const char *gametype) cons
 	//For testing a new map let it play any gametpye
 	return gametype;
 }
+
+/*
+===========
+idGameLocal::GetTimeGroupTime
+============
+*/
+int idGameLocal::GetTimeGroupTime(int timeGroup)
+{
+	return gameLocal.time;
+}
+
 #endif
 
 // RAVEN END

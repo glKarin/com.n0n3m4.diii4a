@@ -92,6 +92,20 @@ void idRenderWindow::BuildAnimation(int time)
 
 void idRenderWindow::PreRender()
 {
+#ifdef _RAVEN
+	const char *nu = needUpdate.c_str();
+	if(nu && nu[0])
+	{
+		bool b = GetGui()->GetStateBool(nu, "false");
+		if(b/* != needsRender */)
+		{
+			needsRender = b;
+			//if(b)
+				GetGui()->SetStateBool(nu, false);
+		}
+	}
+#endif
+
 	if (needsRender) {
 		world->InitFromMap(NULL);
 		idDict spawnArgs;
@@ -121,6 +135,10 @@ void idRenderWindow::PreRender()
 			worldEntity.shaderParms[2] = 1;
 			worldEntity.shaderParms[3] = 1;
 			modelDef = world->AddEntityDef(&worldEntity);
+
+#ifdef _RAVEN
+			updateAnimation = true;
+#endif
 		}
 
 		needsRender = false;
@@ -236,6 +254,13 @@ bool idRenderWindow::ParseInternalVar(const char *_name, idParser *src)
 		ParseString(src, animClass);
 		return true;
 	}
+
+#ifdef _RAVEN
+	if (idStr::Icmp(_name, "needUpdate") == 0) {
+		ParseString(src, needUpdate);
+		return true;
+	}
+#endif
 
 	return idWindow::ParseInternalVar(_name, src);
 }

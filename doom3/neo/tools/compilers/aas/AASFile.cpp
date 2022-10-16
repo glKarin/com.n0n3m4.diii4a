@@ -540,7 +540,7 @@ bool idAASSettings::WriteToFile(idFile *fp) const
 	fp->WriteFloatString("\tallowFlyReachabilities = %d\n", allowFlyReachabilities);
 #ifdef _RAVEN
 // jmarshall - AAS 1.08
-	fp->WriteFloatString("\tgenerateAllFaces = 0\n");
+	//k fp->WriteFloatString("\tgenerateAllFaces = 0\n");
 	fp->WriteFloatString("\tgenerateTacticalFeatures = 0\n");
 // jmarshall end
 #endif

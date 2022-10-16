@@ -297,8 +297,12 @@ static infoParm_t	infoParms[] = {
 	{"surftype14",	0,	SURFTYPE_14,	0 },
 	{"surftype15",	0,	SURFTYPE_15,	0 },
 
-#ifdef _RAVEN //k unsupported
-	{"vehicleclip",	0,	0,	0 },
+#ifdef _RAVEN
+	{"vehicleclip",	0,	0,	CONTENTS_VEHICLECLIP },
+	{"flyclip",	0,	0,	CONTENTS_FLYCLIP },
+	{"largeshotclip",	0,	0,	CONTENTS_LARGESHOTCLIP },
+	{"shotclip",	0,	0,	0 },
+	{"projectileClip",	0,	0,	CONTENTS_PROJECTILECLIP },
 #endif
 };
 
@@ -668,6 +672,21 @@ int idMaterial::ParseTerm(idLexer &src)
 		pd->registersAreConstant = false;
 		return EXP_REG_GLOBAL7;
 	}
+
+#ifdef _RAVEN
+	if (!token.Icmp("glslPrograms")) {
+		return GetExpressionConstant(0);
+	}
+	if (!token.Icmp("DecalLife")) {
+		return GetExpressionConstant(9.0f);
+	}
+	if (!token.Icmp("IsMultiplayer")) {
+		return GetExpressionConstant(game->IsMultiplayer()); // constant???
+	}
+	if (!token.Icmp("VertexRandomizer")) {
+		return GetExpressionConstant(0.0f);
+	}
+#endif
 
 	if (!token.Icmp("fragmentPrograms")) {
 		return GetExpressionConstant((float) glConfig.ARBFragmentProgramAvailable);
@@ -1107,14 +1126,14 @@ void idMaterial::ParseFragmentMap(idLexer &src, newShaderStage_t *newStage)
 		}
 
 		if (!token.Icmp("forceHighQuality")) {
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 			td = TD_HIGH_QUALITY;
 #endif
 			continue;
 		}
 
 		if (!token.Icmp("uncompressed") || !token.Icmp("highquality")) {
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 			if (!globalImages->image_ignoreHighQuality.GetInteger()) {
 				td = TD_HIGH_QUALITY;
 			}
@@ -1404,7 +1423,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 
 		if (!token.Icmp("uncompressed") || !token.Icmp("highquality")) {
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 			if (!globalImages->image_ignoreHighQuality.GetInteger()) {
 				td = TD_HIGH_QUALITY;
 			}
@@ -1414,7 +1433,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 
 		if (!token.Icmp("forceHighQuality")) {
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 			td = TD_HIGH_QUALITY;
 #endif
 			continue;
@@ -2169,16 +2188,7 @@ void idMaterial::ParseMaterial(idLexer &src)
 		else if (!token.Icmp("bounce")) {
 			continue;
 		}
-		else if (!token.Icmp("shotclip")) {
-			continue;
-		}
 		else if (!token.Icmp("notacticalfeatures")) {
-			continue;
-		}
-		else if (!token.Icmp("largeshotclip")) {
-			continue;
-		}
-		else if (!token.Icmp("projectileClip")) {
 			continue;
 		}
 		else if (!token.Icmp("portalDistanceNear")) {
@@ -2189,6 +2199,29 @@ void idMaterial::ParseMaterial(idLexer &src)
 			(void)src.ParseFloat(); // a number
 			continue;
 		}
+		else if (!token.Icmp("portalImage")) {
+			idToken unusedToken;
+			src.ReadToken(&unusedToken); // a image
+			(void)unusedToken;
+			continue;
+		}
+		/*
+		else if (!token.Icmp("shotclip")) {
+			continue;
+		}
+		else if (!token.Icmp("largeshotclip")) {
+			continue;
+		}
+		else if (!token.Icmp("projectileClip")) {
+			continue;
+		}
+		else if (!token.Icmp("flyclip")) {
+			continue;
+		}
+		else if (!token.Icmp("vehicleclip")) {
+			continue;
+		}
+		*/
 #endif
 		else if (!token.Icmp("portalSky")) {
 			portalSky = true;

@@ -3956,7 +3956,7 @@ const char* idMultiplayerGame::HandleGuiCommands( const char *_menuCommand ) {
 				cmdSystem->BufferCommandText( CMD_EXEC_NOW,	"setMachineSpec\n" );
 			}
 
-#if 0
+#if 0 //k: ???
 // RAVEN BEGIN
 // mekberg: set the r_mode.
 			cvarSystem->SetCVarInteger( "r_aspectRatio", 0 );
@@ -5378,7 +5378,7 @@ idMultiplayerGame::AddChatLine
 ===============
 */
 void idMultiplayerGame::AddChatLine( const char *fmt, ... ) {
-#if 0
+#if 0 //k: UserInterface not implememnt wrapInfo_t
 	idStr temp;
 	va_list argptr;
 

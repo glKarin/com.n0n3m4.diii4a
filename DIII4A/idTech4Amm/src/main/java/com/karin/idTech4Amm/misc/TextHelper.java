@@ -164,15 +164,16 @@ public final class TextHelper
             " (b). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).",
             " 4. Then Choose map level/Go main-menu/Start directly, most levels is working.",
             " *. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened.",
+            " *. If running crash on arm32 device, trying to check `Use ETC1 compression` for decreasing memory usage.",
             null,
 			" Some problems and resolutions: ",
 			" 1. Door-opening: Now using set `harm_g_useSimpleTriggerClip` to 1 for force to using simple collision clip to resolve(default), it work all doors well.",
-			" 2. Main-menu: Now can show full main menu, but without background color. But can not New-Game(need using `map` or `devmap` for starting a map game in Singleplayer-Game) and Create-Server(using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game), and can not interactive in some dialog.",
+			" 2. Main-menu: Now can show full main menu, but without background color. But can not Create-Server(using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game), and can not interactive in some dialog.",
 			" 3. Sound: It looks work well now(jmarshall's `icedTech` using DOOM3-BFG sound system).",
 			" 4. Loading-UI: It looks work well now.",
 			" 5. Multiplayer-Game: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
 			" 6. script errors: Some maps have any script errors, and some errors is fatal.",
-			" 7. Particle system: Now is work incompleted(Quake4 using new advanced `BSE` particle system, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`).",
+			" 7. Particle system: Now is work incompleted(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`).",
 			" 8. Entity render: Some game entities render incorrect.",
 			" 9. Collision: Some incorrect collision(can using `noclip` to pass).",
 			" *. And other more bugs or errors...",
@@ -260,9 +261,10 @@ public final class TextHelper
             "Release: " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
             null,
             "Rename from `DIII4A++`, base on original `n0n3m4`'s `DIII4A`.",
+            "idTech4 engine's games support on Android, e.g. `DOOM 3`, `DOOM 3 RoE` and `Quake 4`, and some mods.",
             "Source in `assets/source` folder in APK file. `doom3_droid.source.tgz` is DOOM3 source. `diii4a.source.tgz` is android frontend source.",
             "OpenGL shader source is in `assets/gl2progs.zip`.",
-            "Or view in github `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a", null) + "`, all changes on `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a", "master") + "` branch.",
+            "Or view in github `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a", null) + "`, all new changes on `" + GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a", "master") + "` branch.",
             null,
             "Special thanks: ",
             GenLinkText("https://4pda.ru/forum/index.php?showuser=7653620", "Sir Cat") + "@" + GenLinkText("https://4pda.ru/forum/index.php?showtopic=929753", "4PDA forum"),
@@ -281,6 +283,22 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+            ChangeLog.Create("2022-10-29", 13,
+                             "Fixup Strogg health station GUI interactive in `Quake 4`.",
+                             "Fixup skip cinematic in `Quake 4`.",
+                             "If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.",
+                             "Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).",
+                             " `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`.",
+                             " `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload.",
+                             " `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`.",
+                             " `game/putra`: Script fatal error has fixed. But can not down on broken floor, using `noclip`(Fixed in version 15).",
+                             " `game/waste`: Script fatal error has fixed.",
+                             " `game/process1 first`: Last elevator has ins collision cause killing player. Using `god`. If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.",
+                             " `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`.",
+                             " `game/core1`: Fixup first elevator platform not go up.",
+                             " `game/core2`: Fixup entity rotation."
+                             ),
 
             ChangeLog.Create("2022-07-19", 12,
                              "`Quake 4` in DOOM3 engine support. Also see `" + TextHelper.GenLinkText("https://github.com/jmarshall23/Quake4Doom", null) + "`. Now can play most levels, but some levels has error.",
@@ -544,6 +562,8 @@ public final class TextHelper
                         "1", "Force to use simple trigger clip(for doors touched opening)."),
             Cvar.Create("harm_g_alwaysRun", "bool", "1", "Force to always run automatic."),
             Cvar.Create("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic."),
+            Cvar.Create("harm_g_flashlightOn", "bool", "1", "Automitic make flash light on initial."),
+            Cvar.Create("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movment."),
         };
         
         Map<String, Cvar[]> cvarMap = new LinkedHashMap<>();

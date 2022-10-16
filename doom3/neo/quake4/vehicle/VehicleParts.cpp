@@ -1546,7 +1546,7 @@ void rvVehicleTurret::Spawn ( void ) {
 
 
 // jmarshall - sound parts causing a crash, disabling for now.
-#if 0
+#if 1
 	// Find the vehicle part for the turret sound
 	if ( *spawnArgs.GetString ( "snd_loop", "" ) ) {
 		soundPart = position->AddPart ( rvVehicleSound::GetClassType(), spawnArgs );

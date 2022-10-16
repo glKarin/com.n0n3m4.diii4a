@@ -219,7 +219,8 @@ bool idAnimState::AnimDone( int blendFrames ) const {
 	
 	animDoneTime = animator->CurrentAnim( channel )->GetEndTime();
 	if ( animDoneTime < 0 ) {
-		// playing ae;
+		// playing a cycle
+		return false;
 	} else if ( animDoneTime - FRAME2MS( blendFrames ) <= gameLocal.time ) {
 		return true;
 	} else {

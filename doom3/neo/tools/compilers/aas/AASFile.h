@@ -165,6 +165,21 @@ typedef struct aasFace_s {
 
 #ifdef _RAVEN
 struct rvMarker;
+
+// RAVEN BEGIN
+// cdr: AASTactical 
+
+// feature bits
+#define FEATURE_COVER				BIT(0)		// provides cover
+#define FEATURE_LOOK_LEFT			BIT(1)		// attack by leaning left
+#define FEATURE_LOOK_RIGHT			BIT(2)		// attack by leaning right
+#define FEATURE_LOOK_OVER			BIT(3)		// attack by leaning over the cover
+#define FEATURE_CORNER_LEFT			BIT(4)		// is a left corner
+#define FEATURE_CORNER_RIGHT		BIT(5)		// is a right corner
+#define FEATURE_PINCH				BIT(6)		// is a tight area connecting two larger areas
+#define FEATURE_VANTAGE				BIT(7)		// provides a good view of the sampled area as a whole
+// RAVEN END
+
 #endif
 
 // area with a boundary of faces

@@ -38,6 +38,8 @@ public class Q3EInterface {
 	public String default_path;
 	
 	public String libname;
+    
+    public boolean view_motion_control_gyro = false;
 	
 	//RTCW4A:
 	public final int RTCW4A_UI_ACTION=6;
@@ -46,4 +48,8 @@ public class Q3EInterface {
     //k volume key map
     public int VOLUME_UP_KEY_CODE = Q3EKeyCodes.KeyCodes.K_F3;
     public int VOLUME_DOWN_KEY_CODE = Q3EKeyCodes.KeyCodes.K_F2;
+    
+    public static final int VIEW_MOTION_CONTROL_TOUCH = 1;
+    public static final int VIEW_MOTION_CONTROL_GYROSCOPE = 1 << 1;
+    public static final int VIEW_MOTION_CONTROL_ALL = VIEW_MOTION_CONTROL_TOUCH | VIEW_MOTION_CONTROL_GYROSCOPE;
 }

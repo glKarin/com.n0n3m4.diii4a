@@ -925,10 +925,11 @@ private:
 	idList<idClip*>			clip;					// collision detection
 	idList<rvInstance*>		instances;
 // RAVEN END
-#ifdef _QUAKE4
+#ifdef _RAVEN
 	virtual void				GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ]);
 private:
 	idStr GetBestMPGametype(const char *map, const char *gametype) const;
+		int						GetTimeGroupTime(int timeGroup);
 #endif
 
 	// keep watermarks on the high entity index
@@ -1458,13 +1459,6 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 //k
 #include "../raven/idlib/containers/ListGame.h"
 #include "bots/Bot.h"
-#ifdef _QUAKE4
-extern idCVar harm_g_alwaysRun;
-extern idCVar in_alwaysRun;
-#define usercmd_buttons_and_BUTTON_RUN (harm_g_alwaysRun.GetBool() ? ((gameLocal.isMultiplayer && in_alwaysRun.GetBool()) || !(usercmd.buttons & BUTTON_RUN)) : (usercmd.buttons & BUTTON_RUN)
-#define not_usercmd_buttons_and_BUTTON_RUN (harm_g_alwaysRun.GetBool() ? ((gameLocal.isMultiplayer && !in_alwaysRun.GetBool()) || (usercmd.buttons & BUTTON_RUN)) : !(usercmd.buttons & BUTTON_RUN)
-#endif
-
 
 #ifdef _QUAKE4
 extern idCVar harm_g_alwaysRun;

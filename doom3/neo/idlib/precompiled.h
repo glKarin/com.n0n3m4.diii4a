@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 
 //-----------------------------------------------------
 
-#if defined(_DEBUG)
+#if defined(_K_DEV)
 #define LOGI(fmt, args...) {common->Printf(fmt, ##args); common->Printf("\n");}
 #define LOGW(fmt, args...) common->Warning(fmt, ##args);
 #define LOGE(fmt, args...) common->Error(fmt, ##args);
@@ -141,8 +141,21 @@ public:
 
 // id lib
 #include "../idlib/Lib.h"
-#ifdef _RAVEN
-#include "../raven/raven.h"
+#ifdef _RAVEN // raven.h
+#include "../raven/idlib/containers/Pair.h"
+#include "../raven/idlib/math/Interpolate.h"
+#include "../raven/idlib/rvMemSys.h"
+// RAVEN BEGIN
+// jsinger: add AutoPtr and text-to-binary compiler support
+#include "../raven/idlib/AutoPtr.h"
+#include "../raven/idlib/LexerFactory.h"
+// jsinger: AutoCrit.h contains classes which aid in code synchronization
+//          AutoAcquire.h contains a class that aids in thread acquisition of the direct3D device for xenon
+//          Both compile out completely if the #define's above are not present
+#include "../raven/idlib/threads/AutoCrit.h"
+// RAVEN END
+
+class ThreadedAlloc;		// class that is only used to expand the AutoCrit template to tag allocs/frees called from inside the R_AddModelSurfaces call graph
 #endif
 
 // framework
@@ -197,8 +210,24 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 #include "../tools/compilers/aas/AASFile.h"
 #include "../tools/compilers/aas/AASFileManager.h"
 
-#ifdef _RAVEN
-#include "../raven/raven_engine.h"
+#ifdef _RAVEN // raven_engine.h
+#include "../raven/idlib/TextCompiler.h"
+#include "../raven/idlib/math/Radians.h"
+// RAVEN BEGIN
+// jscott: Effects system interface
+#include "../raven/bse/BSEInterface.h"
+// RAVEN END
+
+#include "../raven/framework/DeclPlayerModel.h"
+// RAVEN BEGIN
+// jscott: new decl types
+#include "../raven/framework/declLipSync.h"
+#include "../raven/framework/declMatType.h"
+#include "../raven/framework/declPlayback.h"
+// RAVEN END
+
+// Sanity check for any axis in bounds
+const float MAX_BOUND_SIZE = 65536.0f;
 #endif
 
 // game

@@ -68,6 +68,10 @@
                 android:title="Show preference"
                 android:showAsAction="never"/>
             <item
+                android:id="@+id/main_menu_debug_text_history"
+                android:title="Debug text history"
+                android:showAsAction="never"/>
+            <item
                 android:id="@+id/main_menu_test"
                 android:title="TEST"
                 android:showAsAction="never"/>

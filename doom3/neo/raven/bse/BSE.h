@@ -346,7 +346,7 @@ public:
 
 	virtual bool					SetDefaultText(void);
 	virtual const char* DefaultDefinition(void) const;
-	virtual bool					Parse(const char* text, const int textLength) override;
+	virtual bool					Parse(const char* text, const int textLength);
 	virtual void					FreeData(void);
 	virtual size_t					Size(void) const;
 

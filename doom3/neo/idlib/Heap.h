@@ -42,6 +42,46 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #ifdef _RAVEN
+// RAVEN BEGIN
+// amccarthy:  tags for memory allocation tracking.  When updating this list please update the
+// list of discriptions in Heap.cpp as well.
+typedef enum {
+	MA_NONE = 0,	
+	
+	MA_OPNEW,
+	MA_DEFAULT,
+	MA_LEXER,
+	MA_PARSER,
+	MA_AAS,
+	MA_CLASS,
+	MA_SCRIPT,
+	MA_CM,
+	MA_CVAR,
+	MA_DECL,
+	MA_FILESYS,
+	MA_IMAGES,
+	MA_MATERIAL,
+	MA_MODEL,
+	MA_FONT,
+	MA_RENDER,
+	MA_VERTEX,
+	MA_SOUND,
+	MA_WINDOW,
+	MA_EVENT,
+	MA_MATH,
+	MA_ANIM,
+	MA_DYNAMICBLOCK,
+	MA_STRING,
+	MA_GUI,
+	MA_EFFECT,
+	MA_ENTITY,
+	MA_PHYSICS,
+	MA_AI,
+	MA_NETWORK,
+
+	MA_DO_NOT_USE,		// neither of the two remaining enumerated values should be used (no use of MA_DO_NOT_USE prevents the second dword in a memory block from getting the value 0xFFFFFFFF)
+	MA_MAX				// <- this enumerated value is a count and cannot exceed 32 (5 bits are used to encode tag within memory block with rvHeap.cpp)
+} Mem_Alloc_Types_t;
 // jnewquist: memory tag stack for new/delete
 #if (defined(_DEBUG) || defined(_RV_MEM_SYS_SUPPORT)) && !defined(ENABLE_INTEL_SMP)
 class MemScopedTag {

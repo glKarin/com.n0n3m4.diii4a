@@ -23,4 +23,23 @@ public final class Utility
         }
         return 0;
     }
+    
+    public static float parseFloat_s(String str, float...def)
+    {
+        float defVal = def.length > 0 ? def[0] : 0.0f;
+        if(null == str)
+            return defVal;
+        str = str.trim();
+        if(str.isEmpty())
+            return defVal;
+        try
+        {
+            return Float.parseFloat(str);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return defVal;
+        }
+    }
 }

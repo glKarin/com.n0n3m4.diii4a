@@ -1536,23 +1536,32 @@ idVarDef *idProgram::AllocDef( idTypeDef *type, const char *name, idVarDef *scop
 
 			sprintf( element, "%s_z", def->Name() );
 			def_z = AllocDef( type, element, scope, constant );
-			def_z->value.ptrOffset = def_y->value.ptrOffset + sizeof(float) /*//k: 32type_float.Size()*/;
+			def_z->value.ptrOffset = def_y->value.ptrOffset + sizeof(float) /*//k: 32 type_float.Size()*/;
 		} else {
 #ifdef _QUAKE4 //k: 64 vector, resolved map game/putra and game/waste
             idTypeDef	newtype(ev_float, &def_float, "float vector", 0, NULL);
             idTypeDef	*_type = GetType(newtype, true);
 
+#define AllocVarDef(type, name, scope, def) \
+{ \
+	def = new idVarDef(type); \
+	def->scope		= scope; \
+	def->numUsers	= 1; \
+	def->num		= varDefs.Append(def); \
+	AddDefToNameList(def, name); \
+}
             // make automatic defs for the vectors elements
             // origin can be accessed as origin_x, origin_y, and origin_z
             sprintf(element, "%s_x", def->Name());
-            def_x = AllocDef(_type, element, scope, constant);
+            AllocVarDef(_type, element, scope, def_x);
 
             sprintf(element, "%s_y", def->Name());
-            def_y = AllocDef(_type, element, scope, constant);
+            AllocVarDef(_type, element, scope, def_y);
 
             sprintf(element, "%s_z", def->Name());
-            def_z = AllocDef(_type, element, scope, constant);
+            AllocVarDef(_type, element, scope, def_z);
 
+#undef AllocVarDef
             // point the vector def to the coordinates
             if (scope->Type() == ev_function)
             {

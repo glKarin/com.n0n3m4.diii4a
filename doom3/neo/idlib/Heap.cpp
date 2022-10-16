@@ -51,6 +51,13 @@ If you have questions concerning this license or the applicable additional terms
 #define SMALL_ALIGN( bytes )	( ALIGN_SIZE( (bytes) + SMALL_HEADER_SIZE ) - SMALL_HEADER_SIZE )
 #define MEDIUM_SMALLEST_SIZE	( ALIGN_SIZE( 256 ) + ALIGN_SIZE( MEDIUM_HEADER_SIZE ) )
 
+#ifdef _RAVEN
+// jnewquist: memory tag stack for new/delete
+#if defined(_DEBUG) && !defined(ENABLE_INTEL_SMP)
+MemScopedTag* MemScopedTag::mTop = NULL;
+#endif
+#endif
+
 
 class idHeap
 {

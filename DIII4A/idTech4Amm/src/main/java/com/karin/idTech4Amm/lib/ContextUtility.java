@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
+import android.widget.Magnifier.Builder;
 
 public final class ContextUtility
 {
@@ -142,7 +144,7 @@ public final class ContextUtility
         }
     }
     
-    public static void Confirm(Context context, CharSequence title, CharSequence message, final Runnable yes, final Runnable no)
+    public static void Confirm(Context context, CharSequence title, CharSequence message, final Runnable yes, final Runnable no, final Object...opt)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
@@ -163,7 +165,34 @@ public final class ContextUtility
                             no.run();
                         dialog.dismiss();
                     }
-                });   
+                });
+        if(opt.length > 0 && null != opt[0])
+        {
+            final Object arg1 = opt[0];
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && arg1 instanceof Consumer)
+                ((Consumer<AlertDialog.Builder>)arg1).accept(builder);
+            else if(arg1 instanceof Runnable)
+            {
+                builder.setNeutralButton("Other", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int v)
+                        {
+                            ((Runnable)arg1).run();
+                            dialog.dismiss();
+                        }
+                    });
+            }
+            else
+            {
+                builder.setNeutralButton(arg1.toString(), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int v)
+                        {
+                            if(null != opt[1])
+                                ((Runnable)opt[1]).run();
+                            dialog.dismiss();
+                        }
+                    });
+            }
+        }
         builder.create().show();
     }
     

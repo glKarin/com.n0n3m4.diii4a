@@ -4841,8 +4841,7 @@ void idDoor::Event_Touch( idEntity *other, trace_t *trace ) {
 		return;
 	}
 
-	if ( trigger && trace->c.id == trigger->GetId() )
-	{
+	if ( trigger && trace->c.id == trigger->GetId() ) {
 		if ( !IsNoTouch() && !IsLocked() && GetMoverState() != MOVER_1TO2 ) {
 // RAVEN BEGIN
 // abahr: allowing animated door frames

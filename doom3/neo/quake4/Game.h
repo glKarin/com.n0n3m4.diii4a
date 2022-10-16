@@ -377,6 +377,10 @@ public:
 	//k compat
 	virtual void				GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ]) = 0;
 	virtual void				GetMapLoadingGUI(char gui[ MAX_STRING_CHARS ]) { (void)gui; }
+	
+		// Used to manage divergent time-lines
+		virtual void				SelectTimeGroup(int timeGroup) { };
+		virtual int					GetTimeGroupTime(int timeGroup) = 0;
 #endif
 
 };

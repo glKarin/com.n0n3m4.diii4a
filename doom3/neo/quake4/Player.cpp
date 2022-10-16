@@ -1492,6 +1492,9 @@ void idPlayer::SetupWeaponEntity( void ) {
 idPlayer::Init
 ==============
 */
+#ifdef _QUAKE4
+idCVar harm_g_flashlightOn( "harm_g_flashlightOn", "1", CVAR_BOOL | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Automitic make flash light on initial." );
+#endif
 void idPlayer::Init( void ) {
 	const char			*value;
 	
@@ -1566,7 +1569,7 @@ void idPlayer::Init( void ) {
 	
 #ifdef _QUAKE4 //k
 	// jmarshall - engine pushed IMPULSE_50 to force on the flashlight, makes more sense just to enable it here(since it was on initially). 
-	flashlightOn	  = true;
+	flashlightOn	  = harm_g_flashlightOn.GetBool(); //k: control it
 // jmarshall end
 #else
 	flashlightOn	  = false;
@@ -12260,7 +12263,7 @@ void idPlayer::PredictionErrorDecay( void ) {
 			predictionErrorTime = gameLocal.time;
 
 			if ( net_showPredictionError.GetInteger() == entityNumber ) {
-#if 0
+#if 0 //k: not implement
 				renderSystem->DebugGraph( predictionOriginError.Length(), 0.0f, 100.0f, colorGreen );
 				renderSystem->DebugGraph( predictionAnglesError.Length(), 0.0f, 180.0f, colorBlue );
 #endif

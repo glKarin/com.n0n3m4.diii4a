@@ -503,10 +503,10 @@ void idUserInterfaceLocal::StateChanged(int _time, bool redraw)
 
 	if (desktop) {
 		desktop->StateChanged(redraw);
-#ifdef _RAVEN //k: GUI initilized event
+#ifdef _RAVEN //k: GUI initilized event here now
 		if(IsInit)
 		{
-			// LOGI("GUI Initing -> %s::%s", GetStateString("name"), (const char *)desktop->GetName())
+			//LOGI("GUI Initing -> %s::%s", GetStateString("name"), (const char *)desktop->GetName())
 			desktop->RunScript(idWindow::ON_INIT);
 		}
 #endif

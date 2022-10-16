@@ -500,7 +500,6 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view, i
 	}
 
 	if ( !( RF_GUI_ONLY & renderFlags ) ) {
-#if 1 //k using orig render
 		// jscott: portal sky rendering with KRABS
 		idCamera *portalSky = gameLocal.GetPortalSky();
 		if( portalSky ) {
@@ -509,9 +508,6 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view, i
 			gameRenderWorld->RenderScene( &portalSkyView/*, ( renderFlags & ( ~RF_PRIMARY_VIEW ) ) | RF_DEFER_COMMAND_SUBMIT | RF_PORTAL_SKY */);
 		}
 		gameRenderWorld->RenderScene( view/*, renderFlags | RF_PENUMBRA_MAP*/ );
-#else
-		gameLocal.RenderScene(view, gameRenderWorld, gameLocal.GetPortalSky());
-#endif
 	}
 
 	if ( RF_NO_GUI & renderFlags ) {
@@ -628,7 +624,7 @@ void idPlayerView::DoubleVision( idUserInterface *hud, const renderView_t *view,
 	renderSystem->SetColor4( color.x, color.y, color.z, 1.0f );
 // RAVEN BEGIN
 // jnewquist: Call DrawStretchCopy, which will flip the texcoords for D3D
-#if 0
+#if 0 //k: not implement
 	renderSystem->DrawStretchCopy( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, shift, 1, 1, 0, dvMaterial );
 	renderSystem->DrawStretchCopy( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, 1-shift, 0, dvMaterialBlend );
 #else

@@ -295,7 +295,7 @@ stateResult_t rvStateThread::Execute ( void ) {
 				return SRESULT_ERROR;				
 		}
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 		if (lastResult == SRESULT_DONE) {
 			owner->StateThreadChanged();
 		}
@@ -325,6 +325,9 @@ stateResult_t rvStateThread::Execute ( void ) {
 	}
 	
 	// Runaway state loop?
+#ifdef _QUAKE4 //k: for map game/convoy1
+	if(0)
+#endif
 	if ( count >= HISTORY_COUNT ) {
 		idFile *file;
 
@@ -349,9 +352,6 @@ stateResult_t rvStateThread::Execute ( void ) {
 			fileSystem->CloseFile( file );	
 		}
 
-#ifdef _QUAKE4 //k: for map game/convoy1
-		if(0)
-#endif
 		gameLocal.Error ( "rvStateThread: run away state loop '%s'", name.c_str() );
 	}
 

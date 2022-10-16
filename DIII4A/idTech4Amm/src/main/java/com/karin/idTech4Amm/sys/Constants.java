@@ -9,28 +9,25 @@ public final class Constants
     public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
-    public static final int CONST_UPDATE_RELEASE = 13;
-    public static final String CONST_RELEASE = "2022-10-23";
+    public static final int CONST_UPDATE_RELEASE = 15;
+    public static final String CONST_RELEASE = "2022-10-15";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
-    public static final String CONST_NAME = "DOOM III for Android(Harmattan Edition)";
+    public static final String CONST_NAME = "DOOM III/Quake IV for Android(Harmattan Edition)";
 	public static final String[] CONST_CHANGES = {
-		"Fixup Strogg health station GUI interactive in `Quake 4`.",
-		"Fixup skip cinematic in `Quake 4`.",
-		"If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.",
-		"Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).",
-		" `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`.",
-		" `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload.",
-		" `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`.",
-		" `game/putra`: Script fatal error has fixed. But can not down on broken floor, using `noclip`.",
-		" `game/waste`: Script fatal error has fixed.",
-		//" `game/storage1 first`: Last end level elevator call GUI not work. Using `god` and jump into elevator, then run `trigger ontoElevatorTrig` command, and click trigger GUI for end level.",
-		" `game/process1 first`: Last elevator has ins collision cause killing player. Using `god`. If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.",
-		" `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`.",
-		" `game/core1`: Fixup first elevator platform not go up.",
-		" `game/core2`: Fixup entity rotation.",
+        "Add gyroscope control support.",
+        "Add reset onscreen buttton layout with fullscreen.",
+        "If running Quake 4 crash on arm32 device, trying to check `Use ETC1 compression` for decreasing memory usage.",
+        "Fixup some Quake 4 bugs: ",
+        " Fixup start new game in main menu, now start new game is work.",
+        " Fixup loading zombie material in level `game/waste`.",
+        " Fixup AI `Singer` can not move when opening the door in level `game/building_b`.",
+        " Fixup jump down on broken floor in level `game/putra`.",
+        " Fixup player model choice and view in `Settings` menu in Multiplayer game.",
+        " Add bool cvar `harm_g_flashlightOn` for controling gun-lighting is open/close initial, default is 1(open).",
+        " Add bool cvar `harm_g_vehicleWalkerMoveNormalize` for re-normalize `vehicle walker` movment if enable `Smooth joystick` in launcher, default is 1(re-normalize), it can fix up move left-right.",
 	};
 	public static final String[] LIBS = {
 		"game",

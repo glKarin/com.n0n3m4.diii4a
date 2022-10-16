@@ -292,6 +292,21 @@ typedef enum {
 	CONTENTS_NOCSG				= BIT(21),	// don't cut this brush with CSG operations in the editor
 
 #ifdef _RAVEN // _QUAKE4
+// RAVEN BEGIN
+// bdube: new clip that blocks monster visibility
+	CONTENTS_SIGHTCLIP			= BIT(16),	// used for blocking sight for actors and cameras
+	CONTENTS_LARGESHOTCLIP		= BIT(17),	// used to block large shots (fence that allows bullets through but not rockets for example)
+// cdr: AASTactical
+	CONTENTS_NOTACTICALFEATURES	= BIT(18),	// don't place tactical features here
+	CONTENTS_VEHICLECLIP		= BIT(19),	// solid to vehicles
+
+	CONTENTS_FLYCLIP			= BIT(22),	// solid to vehicles
+
+// mekberg: added
+	CONTENTS_ITEMCLIP			= BIT(23),	// so items can collide
+	CONTENTS_PROJECTILECLIP		= BIT(24),  // unlike contents_projectile, projectiles only NOT hitscans
+// RAVEN END
+
 // jmarshall - todo
 	CONTENTS_FOG				= BIT(25),
 	CONTENTS_LAVA				= BIT(26),

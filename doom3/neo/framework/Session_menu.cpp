@@ -1179,6 +1179,81 @@ void idSessionLocal::HandleMainMenuCommands(const char *menuCommand)
 			//k: TODO
 			continue;
 		}
+		if (!idStr::Icmp(cmd, "initMPSettings")) {
+			idStr	buildValues, buildNames;
+
+			int numModels = declManager->GetNumDecls( DECL_PLAYER_MODEL );
+			for( int i = 0; i < numModels; i++ ) {
+				const rvDeclPlayerModel* playerModel = (const rvDeclPlayerModel*)declManager->DeclByIndex( DECL_PLAYER_MODEL, i, false );
+
+				if( !playerModel ) {
+					continue;
+				}
+
+				const char *resultValue = playerModel->GetName();
+
+				if ( !resultValue || !resultValue[0] ) {
+					continue;
+				}
+
+				const char *team = playerModel->team.c_str();
+
+				if ( team && team[0] ) {
+					continue; // only non team
+				}
+
+				if ( i ) {
+					buildValues += ";";
+					buildNames += ";";
+				}
+				buildValues += resultValue;
+
+				const char *resultName = common->GetLocalizedString( playerModel->description.c_str() );
+
+				if ( !resultName || !resultName[0] ) {
+					buildNames += resultValue;
+				} else {
+					buildNames += resultName;
+				}
+			}
+
+			guiMainMenu->SetStateString( "model_values", buildValues.c_str() );
+			guiMainMenu->SetStateString( "model_names", buildNames.c_str() );
+			guiMainMenu->SetStateBool( "player_model_updated", true );
+
+			const char *model = cvarSystem->GetCVarString("ui_model");
+			const rvDeclPlayerModel* playerModel = (const rvDeclPlayerModel*)declManager->FindType( DECL_PLAYER_MODEL, model, false );
+			if ( playerModel ) {
+				guiMainMenu->SetStateString( "player_model_name", playerModel->model.c_str() );
+				guiMainMenu->SetStateString( "player_head_model_name", playerModel->uiHead.c_str() );
+				guiMainMenu->SetStateString( "player_skin_name", playerModel->skin.c_str() );
+				if( playerModel->uiHead.Length() ) {
+					const idDeclEntityDef* head = (const idDeclEntityDef*)declManager->FindType( DECL_ENTITYDEF, playerModel->uiHead.c_str(), false );
+					if( head && head->dict.GetString( "skin" ) ) {
+						guiMainMenu->SetStateString( "player_head_skin_name", head->dict.GetString( "skin" ) );
+					}
+				}
+				guiMainMenu->SetStateBool( "need_update", true );
+			}
+			continue;
+		}
+		if (!idStr::Icmp(cmd, "update_model")) {
+			const char *model = cvarSystem->GetCVarString("ui_model");
+			const rvDeclPlayerModel* playerModel = (const rvDeclPlayerModel*)declManager->FindType( DECL_PLAYER_MODEL, model, false );
+			if ( playerModel ) {
+				guiMainMenu->SetStateString( "player_model_name", playerModel->model.c_str() );
+				guiMainMenu->SetStateString( "player_head_model_name", playerModel->uiHead.c_str() );
+				guiMainMenu->SetStateString( "player_skin_name", playerModel->skin.c_str() );
+				if( playerModel->uiHead.Length() ) {
+					const idDeclEntityDef* head = (const idDeclEntityDef*)declManager->FindType( DECL_ENTITYDEF, playerModel->uiHead.c_str(), false );
+					if( head && head->dict.GetString( "skin" ) ) {
+						guiMainMenu->SetStateString( "player_head_skin_name", head->dict.GetString( "skin" ) );
+					}
+				}
+				guiMainMenu->SetStateBool( "need_update", true );
+			}
+			continue;
+		}
 #endif
 
 	}

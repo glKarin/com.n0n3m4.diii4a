@@ -127,15 +127,62 @@ void rvVehicleWalker::Restore ( idRestoreGame *savefile ) {
 rvVehicleWalker::UpdateState
 ================
 */
+#ifdef _QUAKE4
+idCVar harm_g_vehicleWalkerMoveNormalize( "harm_g_vehicleWalkerMoveNormalize", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: Re-normalize vehicle walker movment." );
+#endif
 void rvVehicleWalker::UpdateState ( void ) {
 	rvVehiclePosition& pos = positions[0];
 	usercmd_t& cmd	= pos.mInputCmd;
 
 	vfl.driver		= pos.IsOccupied();
-  	vfl.forward		= (vfl.driver && cmd.forwardmove > 0);
+#ifdef _QUAKE4 //k: for in smooth joystick on Android
+	if(harm_g_vehicleWalkerMoveNormalize.GetBool())
+	{
+		if(cmd.forwardmove != 0 || cmd.rightmove != 0)
+		{
+			float a = (float)atan2(cmd.rightmove, cmd.forwardmove);
+			a = RAD2DEG(a);
+			if (a >= 360.0f || a < 0.0f) {
+				a -= floor(a/ 360.0f) * 360.0f;
+				if (a >= 360.0f) {
+					a -= 360.0f;
+				}
+				else if (a < 0.0f) {
+					a += 360.0f;
+				}
+			}
+#define _AVA_DEG 60
+#define _INCR_AVA_DEG(x) ((x) + _AVA_DEG)
+#define _DECR_AVA_DEG(x) ((x) - _AVA_DEG)
+			vfl.forward		= (vfl.driver && ((a >= 0 && a <= _INCR_AVA_DEG(0)) || (a >= _DECR_AVA_DEG(360) && a <= 360)));
+			vfl.backward		= (vfl.driver && (a >= _DECR_AVA_DEG(180) && a <= _INCR_AVA_DEG(180)));
+			vfl.right		= (vfl.driver && (a > _DECR_AVA_DEG(270) && a < _INCR_AVA_DEG(270)));
+			vfl.left		= (vfl.driver && (a > _DECR_AVA_DEG(90) && a < _INCR_AVA_DEG(90)));
+		}
+#undef _AVA_DEG
+#undef _INCR_AVA_DEG
+#undef _DECR_AVA_DEG
+		else
+		{
+			vfl.forward = false;
+			vfl.backward = false;
+			vfl.right = false;
+			vfl.left = false;
+		}
+	}
+	else
+	{
+		vfl.forward		= (vfl.driver && cmd.forwardmove > 0);
+		vfl.backward	= (vfl.driver && cmd.forwardmove < 0);
+		vfl.right		= (vfl.driver && cmd.rightmove < 0);
+		vfl.left		= (vfl.driver && cmd.rightmove > 0);	
+	}
+#else
+	vfl.forward		= (vfl.driver && cmd.forwardmove > 0);
   	vfl.backward	= (vfl.driver && cmd.forwardmove < 0);
   	vfl.right		= (vfl.driver && cmd.rightmove < 0);
   	vfl.left		= (vfl.driver && cmd.rightmove > 0);	
+#endif
 	vfl.strafe		= (vfl.driver && cmd.buttons & BUTTON_STRAFE );
 
 	if ( g_vehicleMode.GetInteger() != 0 ) {

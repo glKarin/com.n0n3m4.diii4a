@@ -101,6 +101,7 @@ typedef enum {
 	CVAR_ARCHIVE			= BIT(17),	// set to cause it to be saved to a config file
 	CVAR_MODIFIED			= BIT(18)	// set when the variable is modified
 #ifdef _RAVEN
+#define PC_CVAR_ARCHIVE CVAR_ARCHIVE
 	, CVAR_INFO				= BIT(19),	// sent as part of the MOTD packet
 	CVAR_NORESET			= BIT(20),	// don't reset the contents on cvar system restart
 	CVAR_CASE_SENSITIVE		= BIT(21),	// a change in case of the string contents sets the modified flag
@@ -122,7 +123,9 @@ class idCVar
 	public:
 		// Never use the default constructor.
 		idCVar(void) {
+#if !defined(_DEBUG)
 			assert(typeid(this) != typeid(idCVar));
+#endif
 		}
 
 		// Always use one of the following constructors.

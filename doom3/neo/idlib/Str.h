@@ -104,6 +104,29 @@ const int C_COLOR_BLACK				= '9';
 #define S_COLOR_BLACK				"^9"
 
 #ifdef _RAVEN
+// ddynerman: team colors
+#define S_COLOR_MARINE				"^c683"
+#define S_COLOR_STROGG				"^c950"
+#define S_COLOR_ALERT				"^c920"
+// ddynerman: MP icons
+#define I_VOICE_ENABLED				"^ivce"
+#define I_VOICE_DISABLED			"^ivcd"
+#define I_FRIEND_ENABLED			"^ifde"
+#define I_FRIEND_DISABLED			"^ifdd"
+#define I_FLAG_MARINE				"^iflm"
+#define I_FLAG_STROGG				"^ifls"
+#define I_READY						"^iyrd"
+#define I_NOT_READY					"^inrd"
+// ddynerman: MP icons
+#define I_VOICE_ENABLED				"^ivce"
+#define I_VOICE_DISABLED			"^ivcd"
+#define I_FRIEND_ENABLED			"^ifde"
+#define I_FRIEND_DISABLED			"^ifdd"
+#define I_FLAG_MARINE				"^iflm"
+#define I_FLAG_STROGG				"^ifls"
+#define I_READY						"^iyrd"
+#define I_NOT_READY					"^inrd"
+
 // RAVEN BEGIN
 // bdube: string escape codes
 #define S_ESCAPE_UNKNOWN			BIT(0)

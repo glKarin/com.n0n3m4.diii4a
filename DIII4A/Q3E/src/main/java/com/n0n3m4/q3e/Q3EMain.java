@@ -123,6 +123,7 @@ public class Q3EMain extends Activity {
         Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt("harm_volume_up_key", Q3EKeyCodes.KeyCodes.K_F3);
         Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
         Q3EUtils.q3ei.libname = Q3EUtils.q3ei.isQ4 ? "libdanteq4.so" : "libdante.so"; //k setup engine library here again
+        Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
 		
 		super.onCreate(savedInstanceState);
 		
@@ -151,7 +152,12 @@ public class Q3EMain extends Activity {
 			if (mGLSurfaceView==null)
                 mGLSurfaceView = new Q3EView(this);
 			if (mControlGLSurfaceView==null)
-            mControlGLSurfaceView = new Q3EControlView(this);
+               mControlGLSurfaceView = new Q3EControlView(this);
+            mControlGLSurfaceView.EnableGyroscopeControl(Q3EUtils.q3ei.view_motion_control_gyro);
+            float gyroXSens = preferences.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS); 
+            float gyroYSens = preferences.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
+            if(Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
+                mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
             mControlGLSurfaceView.RenderView(mGLSurfaceView);
             RelativeLayout mainLayout = new RelativeLayout(this);
             ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);

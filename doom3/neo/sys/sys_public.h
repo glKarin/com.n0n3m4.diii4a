@@ -566,4 +566,14 @@ extern idSys 				*sys;
 bool Sys_LoadOpenAL(void);
 void Sys_FreeOpenAL(void);
 
+#ifdef _RAVEN
+#define TIME_THIS_SCOPE(name) // placeholder
+
+#define STRINGIZE_INDIRECT(F, X) F(X)
+#define STRINGIZE(X) #X
+#define __LINESTR__ STRINGIZE_INDIRECT(STRINGIZE, __LINE__)
+#define __FILELINEFUNC__ (__FILE__ " " __LINESTR__ " " __FUNCTION__)
+#define __FUNCLINE__ ( __FUNCTION__ " " __LINESTR__ )
+#endif
+
 #endif /* !__SYS_PUBLIC__ */

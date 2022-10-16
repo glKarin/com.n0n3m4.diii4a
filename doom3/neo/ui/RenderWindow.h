@@ -73,6 +73,10 @@ class idRenderWindow : public idWindow
 		int animLength;
 		int animEndTime;
 		bool updateAnimation;
+
+#ifdef _RAVEN
+		idStr needUpdate;
+#endif
 };
 
 #endif // __RENDERWINDOW_H

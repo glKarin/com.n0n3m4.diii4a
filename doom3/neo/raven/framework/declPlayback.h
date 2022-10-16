@@ -142,7 +142,7 @@ public:
 			//bool			GetCurrentData( int control, float localTime, float lastTime, rvDeclPlaybackData *pbd ) const;
 
 	virtual const char		*DefaultDefinition( void ) const;
-	virtual bool			Parse( const char *text, const int textLength ) override;
+	virtual bool			Parse( const char *text, const int textLength );
 	virtual void			FreeData( void );
 	//virtual	bool			RebuildTextSource( void ) ;
 	virtual size_t			Size( void ) const;

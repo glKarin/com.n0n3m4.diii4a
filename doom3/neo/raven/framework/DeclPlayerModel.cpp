@@ -83,9 +83,15 @@ bool rvDeclPlayerModel::Parse(const char* text, const int textLength) {
 			model = token;
 			continue;
 		}
+		else if (token == "skin")
+		{
+			src.ReadToken(&token);
+			skin = token;
+			continue;
+		}
 		else
 		{
-			src.Error("Invalid or unexpected token %s\n", token.c_str());
+			src.Error("Invalid or unexpected token '%s'\n", token.c_str());
 			return false;
 		}
 	}

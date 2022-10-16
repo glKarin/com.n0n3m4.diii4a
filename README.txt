@@ -1,11 +1,45 @@
 idTech4A++ (Harmattan Edition)
 DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake IV for Android, 毁灭战士3/雷神之锤4安卓移植版
 
-Latest version: 1.1.0harmattan13(Natasha)
-Last update release: 2022-10-23
+Latest version: 1.1.0harmattan15(Natasha)
+Last update release: 2022-10-15
 Arch: arm64 armv7-a
 Platform: Android 4.0+
 Update
+
+    1.1.0harmattan15 (2022-10-15)
+
+    Add gyroscope control support.
+
+    Add reset onscreen buttton layout with fullscreen.
+
+    If running Quake 4 crash on arm32 device, trying to check Use ETC1 compression for decreasing memory usage.
+
+    Fixup some Quake 4 bugs:
+
+            Fixup start new game in main menu, now start new game is work.
+            Fixup loading zombie material in level game/waste.
+            Fixup AI Singer can not move when opening the door in level game/building_b.
+            Fixup jump down on broken floor in level game/putra.
+            Fixup player model choice and view in Settings menu in Multiplayer game.
+            Add bool cvar harm_g_flashlightOn for controling gun-lighting is open/close initial, default is 1(open).
+            Add bool cvar harm_g_vehicleWalkerMoveNormalize for re-normalize vehicle walker movment if enable Smooth joystick in launcher, default is 1(re-normalize), it can fix up move left-right.
+
+    新增陀螺仪支持.
+
+    重置按键新增按全屏分辨率.
+
+    如果在32位设备上运行雷神之锤4崩溃, 尝试勾选Use ETC1 compression以减少内存使用.
+
+    修复一些雷神之锤4Bug:
+
+            修复主菜单的开始游戏, 现在可以再主菜单开始新游戏.
+            修复关卡game/waste僵尸材质加载错误.
+            修复关卡game/building_b的AI Singer在打开门后不会移动.
+            修复关卡game/putra的破损地板可以跳下.
+            修复设置界面多人游戏玩家模型选择预览.
+            新增布尔型cvar harm_g_flashlightOn, 可以控制枪灯的初始状态是否打开, 默认是1(打开).
+            新增布尔型cvar harm_g_vehicleWalkerMoveNormalize, 重新规范机器人载具的移动方向, 如果启动器启用了Smooth joystick会有效果, 默认是1(启用), 这可以修复机器人载具左右移动的问题.
 
     1.1.0harmattan13 (2022-10-23)
 
@@ -20,7 +54,7 @@ Update
             game/mcc_landing: Player collision error on last elevator. You can jump before elevator ending or using noclip.
             game/mcc_1: Loading crash after last level ending. Using map game/mcc_1 to reload.
             game/convoy1: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using noclip.
-            game/putra: Script fatal error has fixed. But can not down on broken floor, using noclip.
+            game/putra: Script fatal error has fixed. But can not down on broken floor, using noclip(Fixed in version 15).
             game/waste: Script fatal error has fixed.
             game/process1 first: Last elevator has ins collision cause killing player. Using god. If tower's elevator GUI not work, using teleport tgr_endlevel to next level directly.
             game/process1 second: Second elevator has incorrect collision cause killing player(same as game/process1 first level). Using god.
@@ -38,7 +72,7 @@ Update
             game/mcc_landing: 最后一个电梯到顶时, 玩家依然会卡住. 可以在电梯快到顶时提前跳跃, 或者使用noclip.
             game/mcc_1: 上个关卡通关时, 载入该关卡程序会崩溃. 使用map game/mcc_1重新加载.
             game/convoy1: State error不再中止地图脚本. 下载具时有时会卡主, 使用noclip.
-            game/putra: 修复脚本致命错误. 但是不能跳下最后的破损的地板, 使用noclip.
+            game/putra: 修复脚本致命错误. 但是不能跳下最后的破损的地板, 使用noclip(版本15已修复).
             game/waste: 修复脚本致命错误.
             game/process1 first: 最后的电梯有错误的碰撞, 会杀死玩家. 使用god. 如果最后的塔电梯GUI不工作, 只能使用teleport tgr_endlevel直接通关.
             game/process1 second: 第二个电梯有错误的碰撞, 会杀死玩家(和game/process1 first一样). 使用god.

@@ -120,6 +120,71 @@
 			android:layout_height="wrap_content"
 			android:text="Multitouch shoot (left mouse button click on a second touch)"/>
 
+        <CheckBox
+            android:id="@+id/launcher_tab2_enable_gyro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable gyroscope"/>
+
+        <LinearLayout
+            android:id="@+id/launcher_tab2_enable_gyro_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+			android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="X-Axis sensitivity"
+                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                <EditText
+                    android:id="@+id/launcher_tab2_gyro_x_axis_sens"
+                    android:inputType="numberDecimal|textNoSuggestions"
+                    android:ems="10"
+                    android:hint="Input X-Axis sensitivity for gyroscope."
+                    android:imeOptions="flagNoExtractUi"
+                    android:text="18.0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center_vertical"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="Y-Axis sensitivity"
+                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                <EditText
+                    android:id="@+id/launcher_tab2_gyro_y_axis_sens"
+                    android:inputType="numberDecimal|textNoSuggestions"
+                    android:ems="10"
+                    android:hint="Input Y-Axis sensitivity for gyroscope."
+                    android:imeOptions="flagNoExtractUi"
+                    android:text="18.0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center_vertical"/>
+            </LinearLayout>
+        </LinearLayout>
+
 		<TextView
 			android:id="@+id/tv_mprefs"
 			android:layout_width="wrap_content"
@@ -130,7 +195,7 @@
 			android:id="@+id/hideonscr"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Hide onscreen buttons and enable mouse (Root required)"/>
+			android:text="Hide onscreen buttons(not need root) and enable mouse (Root required)"/>
 
 		<LinearLayout
 			android:id="@+id/layout_mouseconfig"
