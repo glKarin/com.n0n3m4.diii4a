@@ -1,5 +1,6 @@
 package com.karin.idTech4Amm.lib;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileReader;
@@ -118,6 +119,17 @@ public final class FileUtility
         }
 
         return size;
+    }
+
+    public static byte[] readStream(InputStream in, int...bufferSizeArg)
+    {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        long size = Copy(os, in, bufferSizeArg);
+        byte[] res = null;
+        if(size >= 0)
+            res = os.toByteArray();
+        CloseStream(os);
+        return res;
     }
     
     private FileUtility() {}

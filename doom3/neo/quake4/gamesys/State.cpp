@@ -326,7 +326,7 @@ stateResult_t rvStateThread::Execute ( void ) {
 	
 	// Runaway state loop?
 #ifdef _QUAKE4 //k: for map game/convoy1
-	if(0)
+	if(0) //k: now fixed, do not need it no longer
 #endif
 	if ( count >= HISTORY_COUNT ) {
 		idFile *file;

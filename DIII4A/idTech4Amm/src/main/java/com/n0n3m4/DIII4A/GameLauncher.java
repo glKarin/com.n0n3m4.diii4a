@@ -22,16 +22,20 @@ package com.n0n3m4.DIII4A;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.Editable;
@@ -48,6 +52,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -73,6 +78,10 @@ import com.n0n3m4.q3e.Q3EUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -92,11 +101,22 @@ import android.util.Log;
 import java.util.LinkedList;
 import android.graphics.Point;
 
+import org.json.JSONObject;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 @SuppressLint({"ApplySharedPref", "NonConstantResourceId", "CommitPrefEdits"})
 public class GameLauncher extends Activity{		
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE = 1;
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE = 2;
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE = 3;
+    private static final int CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY = 30;
      
 	private ViewHolder V = new ViewHolder();
     private boolean m_cmdUpdateLock = false;
@@ -168,6 +188,15 @@ public class GameLauncher extends Activity{
                             .putBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, isChecked)
                             .commit();
                         UpdateEnableGyro(isChecked);
+						break;
+					case R.id.auto_quick_load:
+						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+								.putBoolean(Q3EUtils.pref_harm_auto_quick_load, isChecked)
+								.commit();
+						if(isChecked)
+							SetParam_temp("loadGame", "QuickSave");
+						else
+							RemoveParam_temp("loadGame");
 						break;
 					default:
 						break;
@@ -250,6 +279,9 @@ public class GameLauncher extends Activity{
 					break;
 				case R.id.onscreen_button_setting:
 					OpenOnScreenButtonSetting();
+					break;
+				case R.id.setup_onscreen_button_opacity:
+					OpenOnScreenButtonOpacitySetting();
 					break;
 				default:
 					break;
@@ -387,29 +419,30 @@ public class GameLauncher extends Activity{
         int r=Q3EUtils.dip2px(this,75);
         int rightoffset=r*3/4;
         int sliders_width=Q3EUtils.dip2px(this,125);
+        int alpha = CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
 
         q3ei.defaults_table=new String[UI_SIZE];
-        q3ei.defaults_table[UI_JOYSTICK] =(r*4/3)+" "+(height-r*4/3)+" "+r+" "+30;
-        q3ei.defaults_table[UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+30;
-        q3ei.defaults_table[UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+30;
-        q3ei.defaults_table[UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+30;
-        q3ei.defaults_table[UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+30;       
-        q3ei.defaults_table[UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+30;
-        q3ei.defaults_table[UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+30;
-        q3ei.defaults_table[UI_SAVE]     =sliders_width/2+" "+sliders_width/2+" "+sliders_width+" "+30;
+        q3ei.defaults_table[UI_JOYSTICK] =(r*4/3)+" "+(height-r*4/3)+" "+r+" "+alpha;
+        q3ei.defaults_table[UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+alpha;
+        q3ei.defaults_table[UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+alpha;
+        q3ei.defaults_table[UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+alpha;
+        q3ei.defaults_table[UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+alpha;
+        q3ei.defaults_table[UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
+        q3ei.defaults_table[UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
+        q3ei.defaults_table[UI_SAVE]     =sliders_width/2+" "+sliders_width/2+" "+sliders_width+" "+alpha;
 
         for (int i=UI_SAVE+1;i<UI_SIZE;i++)
-            q3ei.defaults_table[i]=(r/2+r*(i-UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+30;
+            q3ei.defaults_table[i]=(r/2+r*(i-UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+alpha;
 
-        q3ei.defaults_table[UI_WEAPON_PANEL] =(width - sliders_width - r - rightoffset)+" "+(r)+" "+(r / 3)+" "+30;
+        q3ei.defaults_table[UI_WEAPON_PANEL] =(width - sliders_width - r - rightoffset)+" "+(r)+" "+(r / 3)+" "+alpha;
 
         //k
         final int sr = r / 6 * 5;
-        q3ei.defaults_table[UI_1] = String.format("%d %d %d %d", width - sr / 2 - sr * 2, (sliders_width * 5 / 8 + sr / 2), sr, 30);
-        q3ei.defaults_table[UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, 30);
-        q3ei.defaults_table[UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, 30);
-        q3ei.defaults_table[UI_KBD] = String.format("%d %d %d %d", sliders_width + sr / 2, sr / 2, sr, 30);
-        q3ei.defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, 30);	
+        q3ei.defaults_table[UI_1] = String.format("%d %d %d %d", width - sr / 2 - sr * 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+        q3ei.defaults_table[UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+        q3ei.defaults_table[UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+        q3ei.defaults_table[UI_KBD] = String.format("%d %d %d %d", sliders_width + sr / 2, sr / 2, sr, alpha);
+        q3ei.defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, alpha);
     }
 	
 	public void InitQ3E()
@@ -997,6 +1030,10 @@ public class GameLauncher extends Activity{
 		SelectCheckbox(V.rg_harm_r_lightModel, "blinn_phong".equalsIgnoreCase(mPrefs.getString(Q3EUtils.pref_harm_r_lightModel, "phong")) ? 1 : 0);
         V.rg_harm_r_lightModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false));
+        boolean autoQuickLoad = mPrefs.getBoolean(Q3EUtils.pref_harm_auto_quick_load, false);
+		V.auto_quick_load.setChecked(autoQuickLoad);
+		if(autoQuickLoad)
+			SetParam_temp("loadGame", "QuickSave");
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener(){
            public boolean onEditorAction(TextView view, int id, KeyEvent ev)
            {
@@ -1067,6 +1104,7 @@ public class GameLauncher extends Activity{
         V.res_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_resy, "480"));
         V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
         V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
+		V.setup_onscreen_button_opacity.setOnClickListener(m_buttonClickListener);
 		
 		//DIII4A-specific					
 		V.edt_cmdline.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_params, "game.arm") {			
@@ -1125,12 +1163,19 @@ public class GameLauncher extends Activity{
                         .commit();
                 }
             });
+		V.auto_quick_load.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		updatehacktings();
 		
 		Q3EUtils.LoadAds(this);
         
         OpenUpdate();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		StopCheckForUpdate();
 	}
 	
 	public void start(View vw)
@@ -1150,11 +1195,11 @@ public class GameLauncher extends Activity{
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
 		
-            if(Q3EUtils.q3ei.isQ4)
-            {
-                OpenQuake4LevelDialog();
-                return;
-            }
+		if(Q3EUtils.q3ei.isQ4 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.OPEN_QUAKE4_HELPER, true))
+		{
+			OpenQuake4LevelDialog();
+			return;
+		}
 		finish();
 		startActivity(new Intent(this,Q3EMain.class));
 	}
@@ -1296,6 +1341,9 @@ public class GameLauncher extends Activity{
 			case R.id.main_menu_cvar_list:
 				OpenCvarListDetail();
 				return true;
+			case R.id.main_menu_extract_quake4_resource:
+				OpenQuake4ResourceDialog();
+				return true;
 
 			case R.id.main_menu_debug:
 				OpenDebugDialog();
@@ -1312,6 +1360,10 @@ public class GameLauncher extends Activity{
             case R.id.main_menu_debug_text_history:
                 ShowDebugTextHistoryDialog();
 				return true;
+			case R.id.main_menu_check_for_update:
+				OpenCheckForUpdateDialog();
+				return true;
+
 			case android.R.id.home:
 				ChangeGame();
 				return true;
@@ -1447,6 +1499,7 @@ public class GameLauncher extends Activity{
         mEdtr.putBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, V.launcher_tab2_enable_gyro.isChecked());
 		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
 		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
+		mEdtr.putBoolean(Q3EUtils.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
 		mEdtr.commit();
     }
 
@@ -1746,11 +1799,6 @@ public class GameLauncher extends Activity{
         Q3EUtils.q3ei.libname = isQ4 ? "libdanteq4.so" : "libdante.so"; //k armv7-a only support neon now
         m_mainConfigFileName = isQ4 ? "Quake4Config.cfg" : "DoomConfig.cfg";
         V.launcher_tab1_edit_doomconfig.setText("Edit " + m_mainConfigFileName);
-        // if(!isQ4)
-        {
-            RemoveParam("map");
-            RemoveParam("devmap");   
-        }
         if(null != V.main_menu_game)
             V.main_menu_game.setTitle(isQ4 ? "Quake 4" : "DOOM 3");
         ActionBar actionBar = getActionBar();
@@ -1877,7 +1925,8 @@ public class GameLauncher extends Activity{
 		final AlertDialog dialog = builder.setTitle("Quake 4 Level")
 				.setItems(levels, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int p) {
-						GameLauncher.this.SetParam("map", "game/" + Constants.QUAKE4_MAPS[p]);
+						GameLauncher.this.RemoveParam_temp("loadGame");
+						GameLauncher.this.SetParam_temp("map", "game/" + Constants.QUAKE4_MAPS[p]);
 						finish();
 						startActivity(new Intent(GameLauncher.this, Q3EMain.class));
 					}
@@ -1888,14 +1937,7 @@ public class GameLauncher extends Activity{
 						startActivity(new Intent(GameLauncher.this, Q3EMain.class));
 					}
 				})
-				.setNegativeButton("Main menu", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int p) {
-						GameLauncher.this.RemoveParam("map");
-						GameLauncher.this.RemoveParam("devmap");
-						finish();
-						startActivity(new Intent(GameLauncher.this, Q3EMain.class));
-					}
-				})
+				.setNegativeButton("Cancel", null)
 				.setNeutralButton("Extract resource", null)
 				.create();
 		dialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -2007,6 +2049,20 @@ public class GameLauncher extends Activity{
     {
 		return D3CommandUtility.GetParam(GetCmdText(), name);
 	}
+
+	private boolean RemoveParam_temp(String name)
+	{
+		boolean[] res = { false };
+		String str = D3CommandUtility.RemoveParam(Q3EUtils.q3ei.start_temporary_extra_command, name, res);
+		if(res[0])
+			Q3EUtils.q3ei.start_temporary_extra_command = str;
+		return res[0];
+	}
+
+	private void SetParam_temp(String name, Object val)
+	{
+		Q3EUtils.q3ei.start_temporary_extra_command = (D3CommandUtility.SetParam(Q3EUtils.q3ei.start_temporary_extra_command, name, val));
+	}
     
     private void ShowPreferenceDialog()
     {
@@ -2044,8 +2100,282 @@ public class GameLauncher extends Activity{
         f = preference.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
         V.launcher_tab2_gyro_y_axis_sens.setText("" + f);
     }
-    
-    
+
+    private void SetupOnScreenButtonOpacity(int alpha)
+	{
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
+		SharedPreferences.Editor mEdtr = preferences.edit();
+		for (int i = 0; i < UI_SIZE; i++)
+		{
+			String str = Q3EUtils.q3ei.defaults_table[i];
+			int index = str.lastIndexOf(' ');
+			str = str.substring(0, index) + ' ' + alpha;
+			Q3EUtils.q3ei.defaults_table[i] = str;
+
+			String key = Q3EUtils.pref_controlprefix + i;
+			if(!preferences.contains(key))
+				continue;
+			str = preferences.getString(key, Q3EUtils.q3ei.defaults_table[i]);
+			index = str.lastIndexOf(' ');
+			str = str.substring(0, index) + ' ' + alpha;
+			mEdtr.putString(key, str);
+		}
+		mEdtr.commit();
+		Toast.makeText(GameLauncher.this, "Setup on-screen buttons opacity done.", Toast.LENGTH_SHORT).show();
+	}
+
+    private void OpenOnScreenButtonOpacitySetting()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Setup on-screen button opacity");
+		View seekBarWidget = getLayoutInflater().inflate(R.layout.seek_bar_dialog_preference, null, false);
+		builder.setView(seekBarWidget);
+		final SeekBar seekBar = seekBarWidget.findViewById(R.id.seek_bar_dialog_preference_layout_seekbar);
+		final TextView min = seekBarWidget.findViewById(R.id.seek_bar_dialog_preference_layout_min);
+		final TextView max = seekBarWidget.findViewById(R.id.seek_bar_dialog_preference_layout_max);
+		final TextView progress = seekBarWidget.findViewById(R.id.seek_bar_dialog_preference_layout_progress);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			seekBar.setMin(0);
+		}
+		seekBar.setMax(100);
+		seekBar.setProgress(CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			min.setText("" + seekBar.getMin());
+		else
+			min.setText("0");
+		max.setText("" + seekBar.getMax());
+		progress.setText("" + seekBar.getProgress());
+		seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			public void onProgressChanged(SeekBar seekBar, int p, boolean fromUser)
+			{
+				progress.setText("" + p);
+			}
+			public void onStartTrackingTouch(SeekBar seekBar)
+			{
+				progress.setTextColor(Color.RED);
+			}
+			public void onStopTrackingTouch(SeekBar seekBar)
+			{
+				progress.setTextColor(Color.BLACK);
+			}
+		});
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				SetupOnScreenButtonOpacity(seekBar.getProgress());
+			}
+		})
+				.setNeutralButton("Reset", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						SetupOnScreenButtonOpacity(CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
+					}
+				})
+				.setNegativeButton("Cancel", null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
+	private ProgressDialog m_progressDialog = null;
+    private HandlerThread m_handlerThread = null;
+    private Handler m_handler = null;
+
+    private void OpenCheckForUpdateDialog()
+	{
+		if(null != m_handlerThread || null != m_handler || null != m_progressDialog)
+			return;
+		ProgressDialog dialog = new ProgressDialog(this);
+		dialog.setTitle("Check for update");
+		dialog.setMessage("Network for GitHub......");
+		dialog.setCancelable(false);
+		dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+		});
+		dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				m_progressDialog = null;
+				StopCheckForUpdate();
+			}
+		});
+		dialog.show();
+		m_progressDialog = dialog;
+		m_handlerThread = new HandlerThread("CHECK_FOR_UPDATE");
+		m_handlerThread.start();
+		m_handler = new Handler(m_handlerThread.getLooper());
+		m_handler.post(new Runnable() {
+			@Override
+			public void run() {
+				CheckForUpdate();
+			}
+		});
+	}
+
+	// non-main thread
+	private void CheckForUpdate()
+	{
+		final int TimeOut = 60000;
+		HttpsURLConnection conn = null;
+		InputStream inputStream = null;
+		OutputStream outputStream = null;
+		final String[] error = { "Unknown error" };
+
+		try
+		{
+			URL url = new URL(Constants.CONST_CHECK_FOR_UPDATE_URL);
+			conn = (HttpsURLConnection)url.openConnection();
+			conn.setRequestMethod("GET");
+			conn.setConnectTimeout(TimeOut);
+			HttpsURLConnection.setFollowRedirects(true);
+			SSLContext sc = SSLContext.getInstance("TLS");
+			sc.init(null, new TrustManager[]{
+					new X509TrustManager() {
+						@Override
+						public X509Certificate[] getAcceptedIssuers() {
+							return new X509Certificate[]{};
+						}
+						@Override
+						public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException { }
+						@Override
+						public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException { }
+					}
+				}, new java.security.SecureRandom());
+			SSLSocketFactory newFactory = sc.getSocketFactory();
+			conn.setSSLSocketFactory(newFactory);
+			conn.setHostnameVerifier(new HostnameVerifier() {
+				@Override
+				public boolean verify(String hostname, SSLSession session) {
+					return true;
+				}
+			});
+			conn.setDoInput(true); // 总是读取结果
+			conn.setUseCaches(false);
+			conn.connect();
+
+			int respCode = conn.getResponseCode();
+			if(respCode == HttpsURLConnection.HTTP_OK)
+			{
+				inputStream = conn.getInputStream();
+				byte[] data = FileUtility.readStream(inputStream);
+				if(null != data && data.length > 0)
+				{
+					String text = new String(data);
+					JSONObject json = new JSONObject(text);
+					final int release = json.getInt("release");
+					final String update = json.getString("update");
+					final String version = json.getString("version");
+					final String apk_url = json.getString("apk_url");
+					final String changes = json.getString("changes");
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							OpenCheckForUpdateResult(release, version, update, apk_url, changes);
+						}
+					});
+					return;
+				}
+				error[0] = "Empty response data";
+			}
+			else
+				error[0] = "Network unexpected response: " + respCode;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			error[0] = e.getMessage();
+		}
+		finally {
+			FileUtility.CloseStream(inputStream);
+			FileUtility.CloseStream(outputStream);
+		}
+
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				OpenCheckForUpdateResult(-1, null, null, null, error[0]);
+			}
+		});
+	}
+
+	private void OpenCheckForUpdateResult(int release, String version, String update, final String apk_url, String changes)
+	{
+		StopCheckForUpdate();
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		if(release <= 0)
+		{
+			builder.setTitle("Error")
+					.setMessage(changes)
+			.setNegativeButton("Close", null)
+			;
+		}
+		else if(release > Constants.CONST_UPDATE_RELEASE)
+		{
+			StringBuilder sb = new StringBuilder();
+			final String endl = TextHelper.GetDialogMessageEndl();
+			sb.append("Version: ").append(version).append(endl);
+			sb.append("Update: ").append(update).append(endl);
+			sb.append("Changes: ").append(endl);
+			if(null != changes && !changes.isEmpty())
+			{
+				String[] changesArr = changes.split("\n");
+				for(String str : changesArr)
+				{
+					if(null != str)
+						sb.append(str);
+					sb.append(endl);
+				}
+			}
+			CharSequence msg = TextHelper.GetDialogMessage(sb.toString());
+			builder.setTitle("New update release(" + release + ")")
+					.setMessage(msg)
+			.setPositiveButton("Download", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					ContextUtility.OpenUrlExternally(GameLauncher.this, apk_url);
+				}
+			})
+			.setNeutralButton("View", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					ContextUtility.OpenUrlExternally(GameLauncher.this, Constants.CONST_MAIN_PAGE);
+				}
+			})
+			.setNegativeButton("Cancel", null)
+			;
+		}
+		else
+		{
+			builder.setTitle("No update release")
+					.setMessage("Current version is newest.")
+					.setPositiveButton("OK", null)
+			;
+		}
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
+	private void StopCheckForUpdate()
+	{
+		if(null != m_handler)
+		{
+			m_handler = null;
+		}
+		if(null != m_handlerThread)
+		{
+			m_handlerThread.quit();
+			m_handlerThread = null;
+		}
+		if(null != m_progressDialog)
+		{
+			m_progressDialog.dismiss();
+			m_progressDialog = null;
+		}
+	}
+
+
 
 	private class ViewHolder
 	{
@@ -2092,6 +2422,8 @@ public class GameLauncher extends Activity{
         public LinearLayout launcher_tab2_enable_gyro_layout;
         public EditText launcher_tab2_gyro_x_axis_sens;
         public EditText launcher_tab2_gyro_y_axis_sens;
+		public CheckBox auto_quick_load;
+		public Button setup_onscreen_button_opacity;
 
 		public void Setup()
 		{
@@ -2137,6 +2469,8 @@ public class GameLauncher extends Activity{
             launcher_tab2_enable_gyro_layout = findViewById(R.id.launcher_tab2_enable_gyro_layout);
             launcher_tab2_gyro_x_axis_sens = findViewById(R.id.launcher_tab2_gyro_x_axis_sens);
             launcher_tab2_gyro_y_axis_sens = findViewById(R.id.launcher_tab2_gyro_y_axis_sens);
+			auto_quick_load = findViewById(R.id.auto_quick_load);
+			setup_onscreen_button_opacity = findViewById(R.id.setup_onscreen_button_opacity);
 		}
 	}
 }

@@ -9,25 +9,23 @@ public final class Constants
     public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
-    public static final int CONST_UPDATE_RELEASE = 15;
-    public static final String CONST_RELEASE = "2022-10-15";
+    public static final int CONST_UPDATE_RELEASE = 16;
+    public static final String CONST_RELEASE = "2022-10-22";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
     public static final String CONST_NAME = "DOOM III/Quake IV for Android(Harmattan Edition)";
+	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
+	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
-        "Add gyroscope control support.",
-        "Add reset onscreen buttton layout with fullscreen.",
-        "If running Quake 4 crash on arm32 device, trying to check `Use ETC1 compression` for decreasing memory usage.",
-        "Fixup some Quake 4 bugs: ",
-        " Fixup start new game in main menu, now start new game is work.",
-        " Fixup loading zombie material in level `game/waste`.",
-        " Fixup AI `Singer` can not move when opening the door in level `game/building_b`.",
-        " Fixup jump down on broken floor in level `game/putra`.",
-        " Fixup player model choice and view in `Settings` menu in Multiplayer game.",
-        " Add bool cvar `harm_g_flashlightOn` for controling gun-lighting is open/close initial, default is 1(open).",
-        " Add bool cvar `harm_g_vehicleWalkerMoveNormalize` for re-normalize `vehicle walker` movment if enable `Smooth joystick` in launcher, default is 1(re-normalize), it can fix up move left-right.",
+			"Add automatic load `QuickSave` when start game.",
+			"Add control Quake 4 helper dialog visible when start Quake 4 in Settings, and add `Extract Quake 4 resource` in `Other` menu.",
+			"Add setup all on-screen button opacity.",
+			"Support checking for update from GitHub.",
+			"Fixup some Quake 4 bugs: ",
+			" Fixup collision, e.g. trigger, vehicle, AI, elevator, health-station. So fixed block on last elevator in level `game/mcc_landing` and fixed incorrect collision cause killing player on elevator in `game/process1 first` and `game/process1 second` and fixed block when player jumping form vehicle in `game/convoy1`. And cvar `harm_g_useSimpleTriggerClip` is removed.",
+			" Fixup game level load fatal error and crash in `game/mcc_1` and `game/tram1b`. So all levels have not fatal error now."
 	};
 	public static final String[] LIBS = {
 		"game",
@@ -124,6 +122,7 @@ public final class Constants
         public static final String VOLUME_UP_KEY = "harm_volume_up_key";
         public static final String VOLUME_DOWN_KEY = "harm_volume_down_key";
         public static final String HIDE_AD_BAR = "harm_hide_ad_bar";
+		public static final String OPEN_QUAKE4_HELPER = "harm_open_quake4_helper";
         
         private PreferenceKey() {}
     }

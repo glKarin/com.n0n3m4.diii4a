@@ -117,7 +117,7 @@ void idClipModel::ClearTraceModelCache( void ) {
 
 	for ( i = 0; i < traceModelCache.Num(); i++ ) {
 // jmarshall
-#if 0
+#if 1
 		collisionModelManager->FreeModel( traceModelCache[i]->collisionModel );
 #endif
 // jmarshall
@@ -210,7 +210,7 @@ void idClipModel::ReplaceTraceModel( int index, const idTraceModel &trm, const i
 	entry->material = material;
 
 // jmarshall
-#if 0
+#if 1
 	if(entry->collisionModel)
 	{
 		collisionModelManager->FreeModel( entry->collisionModel );
@@ -353,7 +353,7 @@ void idClipModel::FreeModel( void ) {
 
 	if ( collisionModel > 0 ) {
 // jmarshall
-#if 0
+#if 1
 		collisionModelManager->FreeModel( collisionModel );
 #endif
 // jmarshall

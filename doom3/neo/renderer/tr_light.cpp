@@ -270,7 +270,7 @@ viewEntity_t *R_SetEntityDefViewEntity(idRenderEntityLocal *def)
 	// copy the model and weapon depth hack for back-end use
 	vModel->modelDepthHack = def->parms.modelDepthHack;
 
-#ifdef _RAVENxxx //k jmarshall
+#if !defined(_RAVENxxx) //k jmarshall
 	vModel->weaponDepthHack = def->parms.weaponDepthHack;
 #endif
 

@@ -269,6 +269,13 @@ public final class ContextUtility
             FileUtility.CloseStream(is);
         }
     }
+
+    public static void OpenUrlExternally(Context context, String url)
+    {
+        Uri uri = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        context.startActivity(intent);
+    }
     
 	private ContextUtility() {}
 }

@@ -307,6 +307,12 @@
                     android:text="4.0" />
             </LinearLayout>
 
+			<CheckBox
+				android:id="@+id/auto_quick_load"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Load QuickSave when start game"/>
+
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -329,7 +335,6 @@
 					android:text="Edit DoomConfig.cfg"/>
 
 			</LinearLayout>
-
 		</LinearLayout>
 
 	</RelativeLayout>

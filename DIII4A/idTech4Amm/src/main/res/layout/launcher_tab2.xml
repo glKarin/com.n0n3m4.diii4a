@@ -41,6 +41,13 @@
 			android:textAllCaps="false"
 			android:text="On-screen button setting"/>
 
+		<Button
+			android:id="@+id/setup_onscreen_button_opacity"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textAllCaps="false"
+			android:text="Setup on-screen button opacity"/>
+
 		<CheckBox
 			android:id="@+id/smoothjoy"
 			android:layout_width="wrap_content"

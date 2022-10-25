@@ -451,7 +451,10 @@ if ( TARGET_CORE == '1' ):
 		doom = SConscript( g_build + '/core/sys/scons/SConscript.core' )
 
 		InstallAs( '#doom.' + cpu, doom )
-		InstallAs( g_build + '/package/libdante.so', doom )
+        if ( TARGET_QUAKE4 == '1' ):
+            InstallAs( g_build + '/package/libdanteq4.so', doom )
+        else:
+            InstallAs( g_build + '/package/libdante.so', doom )
 		
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1

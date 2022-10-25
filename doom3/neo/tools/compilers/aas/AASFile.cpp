@@ -651,6 +651,10 @@ idAASFileLocal::idAASFileLocal(void)
 	portals.SetGranularity(AAS_LIST_GRANULARITY);
 	portalIndex.SetGranularity(AAS_INDEX_GRANULARITY);
 	clusters.SetGranularity(AAS_LIST_GRANULARITY);
+#ifdef _RAVEN
+	featureIndexes.SetGranularity(AAS_INDEX_GRANULARITY);
+	features.SetGranularity(AAS_LIST_GRANULARITY);
+#endif
 }
 
 /*
@@ -689,6 +693,10 @@ void idAASFileLocal::Clear(void)
 	portals.Clear();
 	portalIndex.Clear();
 	clusters.Clear();
+#ifdef _RAVEN
+	featureIndexes.Clear();
+	features.Clear();
+#endif
 }
 
 /*
@@ -1153,7 +1161,7 @@ bool idAASFileLocal::ParseNodes(idLexer &src)
 	numNodes = src.ParseInt();
 #ifdef _RAVEN
 // jmarshall - AAS 1.08
-	if (numNodes == 0)
+	if (numNodes <= 1) //k: at least 2
 	{
 		return 0;
 	}
@@ -1451,6 +1459,10 @@ int idAASFileLocal::MemorySize(void) const
 	size += portals.Size();
 	size += portalIndex.Size();
 	size += clusters.Size();
+#ifdef _RAVEN
+	size += featureIndexes.Size();
+	size += features.Size();
+#endif
 	size += sizeof(idReachability_Walk) * NumReachabilities();
 
 	return size;

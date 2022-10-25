@@ -73,7 +73,7 @@ public class Q3EUtils {
 	public static final int ONSCRREN_SLIDER_STYLE_LEFT_RIGHT = 0;
 	public static final int ONSCRREN_SLIDER_STYLE_DOWN_RIGHT = 1;
 	
-	public static Q3EInterface q3ei;
+	public static Q3EInterface q3ei = new Q3EInterface(); //k: new
 	public static boolean isOuya=false;
 	
 	static
@@ -325,6 +325,7 @@ public class Q3EUtils {
 	public static final String pref_harm_view_motion_control_gyro="q3e_harm_mouse_move_control_gyro"; //k
 	public static final String pref_harm_view_motion_gyro_x_axis_sens="q3e_harm_view_motion_gyro_x_axis_sens"; //k
 	public static final String pref_harm_view_motion_gyro_y_axis_sens="q3e_harm_view_motion_gyro_y_axis_sens"; //k
+	public static final String pref_harm_auto_quick_load="q3e_harm_auto_quick_load"; //k
 	
 	public static class UiElement
 	{

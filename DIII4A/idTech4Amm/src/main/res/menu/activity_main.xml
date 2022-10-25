@@ -46,6 +46,10 @@
                 android:title="Last runtime log"
                 android:showAsAction="never"/>
             <item
+                android:id="@+id/main_menu_extract_quake4_resource"
+                android:title="Extract Quake 4 resource"
+                android:showAsAction="never"/>
+            <item
                 android:id="@+id/main_menu_debug"
                 android:title="DEBUG"
                 android:showAsAction="never"/>
@@ -55,6 +59,11 @@
     <item
         android:id="@+id/main_menu_support_developer"
         android:title="Support the developer"
+        android:showAsAction="never"/>
+
+    <item
+        android:id="@+id/main_menu_check_for_update"
+        android:title="Check for update"
         android:showAsAction="never"/>
     
     <item

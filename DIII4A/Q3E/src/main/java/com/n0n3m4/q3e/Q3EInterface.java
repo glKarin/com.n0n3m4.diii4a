@@ -40,6 +40,7 @@ public class Q3EInterface {
 	public String libname;
     
     public boolean view_motion_control_gyro = false;
+    public String start_temporary_extra_command = "";
 	
 	//RTCW4A:
 	public final int RTCW4A_UI_ACTION=6;

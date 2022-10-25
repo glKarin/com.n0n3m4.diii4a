@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake IV for Android, 毁灭战士3/雷神之锤4安卓移植版
 **Latest version:**
-1.1.0harmattan15(Natasha)  
+1.1.0harmattan16(Natasha)  
 **Last update release:**
-2022-10-15  
+2022-10-22  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -11,12 +11,94 @@ Android 4.0+
 
 ----------------------------------------------------------------------------------
 ### Update
+
+> 1.1.0harmattan16 (2022-10-22)
+
+* Add automatic load `QuickSave` when start game.
+* Add control Quake 4 helper dialog visible when start Quake 4 in Settings, and add `Extract Quake 4 resource` in `Other` menu.
+* Add setup all on-screen button opacity.
+* Support checking for update from GitHub.
+* Fixup some Quake 4 bugs: 
+> 1. Fixup collision, e.g. trigger, vehicle, AI, elevator, health-station. So fixed block on last elevator in level `game/mcc_landing` and fixed incorrect collision cause killing player on elevator in `game/process1 first` and `game/process1 second` and fixed block when player jumping form vehicle in `game/convoy1`. And cvar `harm_g_useSimpleTriggerClip` is removed.
+> 2. Fixup game level load fatal error and crash in `game/mcc_1` and `game/tram1b`. So all levels have not fatal error now.
+
+* 新增启动时自动加载`快速存档`.
+* 新增设置控制雷神之锤4启动帮助对话框是否显示, `其他`菜单新增`解压雷神之锤4资源`.
+* 新增一次性设置全部虚拟按键的透明度.
+* 新增与GitHub检查更新.
+* 修复雷神之锤4bug:
+> 1. 修复碰撞, 例如触发器, 载具, AI, 电梯, 血站. 因此也修复了关卡`game/mcc_landing`的最后一个电梯卡住, 修复了`game/process1 first`第一个电梯和`game/process1 second`最后一个电梯运行时卡死玩家, 修复了`game/convoy1`下载具后卡住. 移除之前的临时解决开门的cvar `harm_g_useSimpleTriggerClip`.
+> 2. 修复载入关卡`game/mcc_1`和`game/tram1b`引起的崩溃. 现在所有关卡不会有崩溃发生.
+
+----------------------------------------------------------------------------------
+
+#### About Quake IV
+###### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play all levels, but some levels has bugs.  
+> 1. Putting PC Quake 4 game data file to `q4base` folder.
+> 2. Click `START` to open Quake 4 map level dialog in game launcher.
+> 3. Suggest to extract Quake 4 patch resource to `q4base` game data folder first.
+> - Quake 4 fonts with DOOM3 format by [IlDucci](https://github.com/IlDucci).
+> - Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).
+> 4. Then Choose map level/Start directly, all levels is working, and `New Game` s working.
+> 5. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).
+
+###### Problems and resolutions  
+> 1. ~~Door-opening~~: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, health-station, all doors can be opened.
+> 2. *Main-menu*: Now can show full main menu, but without background color. But can not Create-Server(using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game), and can not interactive in some dialog.
+> 3. ~~Sound~~: It looks work well now(jmarshall's `icedTech` using DOOM3-BFG sound system).
+> 4. ~~Loading-UI~~: It looks work well now.
+> 5. *Multiplayer-Game*: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
+> 6. **Script error**: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
+> 7. **Particle system**: Now is work incompleted(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
+> 8. **Entity render**: Some game entities render incorrect.
+> 9. ~~Collision~~: Now collision bug has fixed.
+
+#### 关于雷神之锤4
+###### 运行雷神之锤4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). 目前可以运行全部关卡, 部分关卡存在bug.  
+> 1. 将PC端雷神之锤4游戏文件放到`q4base`文件夹.
+> 2. 在启动器中点击`START`打开关卡地图选择器.
+> 3. 建议先解压雷神之锤4补丁资源到`q4base`资源目录.
+> - 毁灭战士3格式的雷神之锤4字体, [IlDucci](https://github.com/IlDucci)提供.
+> - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbot <bot_file>`或`fillbots`添加bot).
+> 4. 然后选择关卡或进入主菜单启动, 可运行全部的关卡, 也可以从主菜单启动新游戏.
+> 5. 玩家默认总是跑动(可以设置布尔型cvar `harm_g_alwaysRun` 控制), 枪灯默认打开(可以设置布尔型cvar `harm_g_flashlightOn` 控制).
+
+###### 问题和解决方案:    
+> 1. ~~门打不开~~: 碰撞问题已经修复, 例如触发器, 载具, AI, 电梯, 血站, 所有门都可正常打开.
+> 2. *主菜单*: 目前可以正常显示, 去掉背景色. 创建多人服务器不工作(可以通过`si_map`, `serverMapRestart`或`nextMap`命令开始多人游戏), 部分对话框无法交互.
+> 3. ~~声音~~: 正常工作.
+> 4. ~~游戏载入界面~~: 正常工作.
+> 5. *多人游戏*: 目前正常工作, 并且可以添加bot(`jmarshall`添加了雷神之锤3的bot支持, 但是需要先添加bot文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹).
+> 6. **脚本错误**: 部分地图存在脚本错误, 虽然不会使程序崩溃, 但是可能会影响游戏进程.
+> 7. **粒子系统**: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, 非开源, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
+> 8. **物体渲染**: 存在一些物体错误的渲染结果.
+> 9. ~~碰撞~~: 碰撞问题已经修复.
+
+----------------------------------------------------------------------------------
+### Screenshot
+> Game
+
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_bathroom.png" alt="Classic bathroom">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4_game_2.png" alt="Quake IV on DOOM3">
+
+> Mod
+
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_roe.png" width="50%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_the_lost_mission.png" width="50%" alt="The lost mission">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_classic_doom3.png" width="50%" alt="Classic DOOM"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_hardcorps.png" width="50%" alt="Hardcorps">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" width="50%" alt="Quake IV">
+
+----------------------------------------------------------------------------------
+### Changes
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan15 (2022-10-15)
 
- * Add gyroscope control support.
- * Add reset onscreen buttton layout with fullscreen.
- * If running Quake 4 crash on arm32 device, trying to check `Use ETC1 compression` for decreasing memory usage.
- * Fixup some Quake 4 bugs: 
+* Add gyroscope control support.
+* Add reset onscreen buttton layout with fullscreen.
+* If running Quake 4 crash on arm32 device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.
+* Fixup some Quake 4 bugs:
 > 1. Fixup start new game in main menu, now start new game is work.
 > 2. Fixup loading zombie material in level `game/waste`.
 > 3. Fixup AI `Singer` can not move when opening the door in level `game/building_b`.
@@ -25,10 +107,10 @@ Android 4.0+
 > 6. Add bool cvar `harm_g_flashlightOn` for controling gun-lighting is open/close initial, default is 1(open).
 > 7. Add bool cvar `harm_g_vehicleWalkerMoveNormalize` for re-normalize `vehicle walker` movment if enable `Smooth joystick` in launcher, default is 1(re-normalize), it can fix up move left-right.
 
- * 新增陀螺仪支持.
- * 重置按键新增按全屏分辨率.
- * 如果在32位设备上运行雷神之锤4崩溃, 尝试勾选`Use ETC1 compression`以减少内存使用.
- * 修复一些雷神之锤4Bug: 
+* 新增陀螺仪支持.
+* 重置按键新增按全屏分辨率.
+* 如果在32位设备上运行雷神之锤4崩溃, 尝试勾选`Use ETC1 compression`或`Disable lighting`以减少内存使用.
+* 修复一些雷神之锤4Bug:
 > 1. 修复主菜单的开始游戏, 现在可以再主菜单开始新游戏.
 > 2. 修复关卡`game/waste`僵尸材质加载错误.
 > 3. 修复关卡`game/building_b`的AI `Singer`在打开门后不会移动.
@@ -40,96 +122,41 @@ Android 4.0+
 ----------------------------------------------------------------------------------
 
 > 1.1.0harmattan13 (2022-10-23)
- * Fixup Strogg health station GUI interactive in `Quake 4`.
- * Fixup skip cinematic in `Quake 4`.
- * If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.
- * Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).
-> 1. `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`.
-> 2. `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload.
-> 3. `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`.
+
+* Fixup Strogg health station GUI interactive in `Quake 4`.
+* Fixup skip cinematic in `Quake 4`.
+* If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.
+* Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).
+> 1. `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`(Fixed in version 16).
+> 2. `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload(Fixed in version 16).
+> 3. `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`(Fixed in version 16).
 > 4. `game/putra`: Script fatal error has fixed. But can not down on broken floor, using `noclip`(Fixed in version 15).
 > 5. `game/waste`: Script fatal error has fixed.
-> 6. `game/process1 first`: Last elevator has ins collision cause killing player. Using `god`. If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.
-> 7. `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`.
-> 8. `game/core1`: Fixup first elevator platform not go up.
-> 9. `game/core2`: Fixup entity rotation.
- 
- * 修复`雷神之锤4`Strogg血站GUI交互.
- * 修复`雷神之锤4`跳过影片过场动画.
- * `雷神之锤4`中如果`harm_g_alwaysRun`为1(启用自动跑), 按住`Walk`键行走.
- * 修复`雷神之锤4`关卡地图脚本的致命错误和bug(所有关卡地图不再有严重错误, 但是一些bug依然存在.).
-> 1. `game/mcc_landing`: 最后一个电梯到顶时, 玩家依然会卡住. 可以在电梯快到顶时提前跳跃, 或者使用`noclip`.
-> 2. `game/mcc_1`: 上个关卡通关时, 载入该关卡程序会崩溃. 使用`map game/mcc_1`重新加载.
-> 3. `game/convoy1`: State error不再中止地图脚本. 下载具时有时会卡主, 使用`noclip`.
-> 4. `game/putra`: 修复脚本致命错误. 但是不能跳下最后的破损的地板, 使用`noclip`(版本15已修复).
+> 6. `game/process1 first`: Last elevator has ins collision cause killing player(Fixed in version 16). Using `god`. If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.
+> 7. `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`(Fixed in version 16).
+> 8. `game/tram_1b`: Loading crash after last level ending. Using `map game/tram_1b` to reload(Fixed in version 16).
+> 9. `game/core1`: Fixup first elevator platform not go up.
+> 10. `game/core2`: Fixup entity rotation.
+
+* 修复`雷神之锤4`Strogg血站GUI交互.
+* 修复`雷神之锤4`跳过影片过场动画.
+* `雷神之锤4`中如果`harm_g_alwaysRun`为1(启用自动跑), 按住`Walk`键行走.
+* 修复`雷神之锤4`关卡地图脚本的致命错误和bug(所有关卡地图不再有严重错误, 但是一些bug依然存在.).
+> 1. `game/mcc_landing`: 最后一个电梯到顶时, 玩家依然会卡住. 可以在电梯快到顶时提前跳跃, 或者使用`noclip`(版本16修复).
+> 2. `game/mcc_1`: 上个关卡通关时, 载入该关卡程序会崩溃. 使用`map game/mcc_1`重新加载(版本16修复).
+> 3. `game/convoy1`: State error不再中止地图脚本. 下载具时有时会卡主, 使用`noclip`(版本16修复).
+> 4. `game/putra`: 修复脚本致命错误. 但是不能跳下最后的破损的地板, 使用`noclip`(版本15修复).
 > 5. `game/waste`: 修复脚本致命错误.
-> 6. `game/process1 first`: 最后的电梯有错误的碰撞, 会杀死玩家. 使用`god`. 如果最后的塔电梯GUI不工作, 只能使用`teleport tgr_endlevel`直接通关.
-> 7. `game/process1 second`: 第二个电梯有错误的碰撞, 会杀死玩家(和`game/process1 first`一样). 使用`god`.
-> 8. `game/core1`: 修复开始的电梯平台不能自动上升.
-> 9. `game/core2`: 修复物体旋转错误.
+> 6. `game/process1 first`: 最后的电梯有错误的碰撞, 会杀死玩家. 使用`god`(版本16修复). 如果最后的塔电梯GUI不工作, 只能使用`teleport tgr_endlevel`直接通关.
+> 7. `game/process1 second`: 第二个电梯有错误的碰撞, 会杀死玩家(和`game/process1 first`一样). 使用`god`(版本16修复).
+> 8. `game/tram_1b`: 上个关卡通关时, 载入该关卡程序会崩溃. 使用`map game/tram_1b`重新加载(版本16修复).
+> 9. `game/core1`: 修复开始的电梯平台不能自动上升.
+> 10. `game/core2`: 修复物体旋转错误.
 
 ----------------------------------------------------------------------------------
-#### About Quake IV
-###### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play most levels, but some levels has error.  
-> 1. Putting PC Quake 4 game data file to `q4base` folder.
-> 2. Click `START` to open Quake 4 map level dialog in game launcher.
-> 3. Suggest to extract Quake 4 patch resource to `q4base` game data folder first.
-> - Quake 4 fonts with DOOM3 format by [IlDucci](https://github.com/IlDucci).
-> - Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).
-> 4. Then Choose map level/Go main-menu/Start directly, most levels is working.
-> 5. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened.
 
-###### Problems and resolutions  
-> 1. *Door-opening*: Now using set `harm_g_useSimpleTriggerClip` to 1 for force to using simple collision clip to resolve(default), it work all doors well.
-> 2. *Main-menu*: Now can show full main menu, but without background color. But can not New-Game(need using `map` or `devmap` for starting a map game in Singleplayer-Game), Create-Server(using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game), and can not interactive in some dialog.
-> 3. ~~Sound~~: It looks work well now(jmarshall's `icedTech` using DOOM3-BFG sound system).
-> 4. ~~Loading-UI~~: It looks work well now.
-> 5. *Multiplayer-Game*: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
-> 6. **Script error**: Some maps have any script errors, and some errors is fatal.
-> 7. **Particle system**: Now is work incompleted(Quake4 using new advanced `BSE` particle system, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
-> 8. **Entity render**: Some game entities render incorrect.
-> 9. **Collision**: Some incorrect collision(using `noclip` to pass).
-
-#### 关于雷神之锤4
-###### 运行雷神之锤4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). 目前可以运行大部分关卡, 剩余部分关卡存在错误..  
-> 1. 将PC端雷神之锤4游戏文件放到`q4base`文件夹.
-> 2. 在启动器中点击`START`打开关卡地图选择器.
-> 3. 建议先解压雷神之锤4补丁资源到`q4base`资源目录.
-> - 毁灭战士3格式的雷神之锤4字体, [IlDucci](https://github.com/IlDucci)提供.
-> - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbot <bot_file>`或`fillbots`添加bot).
-> 4. 然后选择关卡或进入主菜单启动, 运行大部分可运行的关卡.
-> 5. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened.
-
-###### 问题和解决方案:    
-> 1. *门打不开*: 目前通过设置`harm_g_useSimpleTriggerClip`为1, 强制使用简单碰撞检测解决, 基本没问题, 没有根本解决.
-> 2. *主菜单*: 目前可以正常显示, 去掉背景色. 开始新游戏不工作(可以通过`map`或`devmap`命令开始新单人游戏), 创建多人服务器不工作(可以通过`si_map`, `serverMapRestart`或`nextMap`命令开始多人游戏), 部分对话框无法交互.
-> 3. ~~声音~~: 正常工作.
-> 4. ~~游戏载入界面~~: 正常工作.
-> 5. *多人游戏*: 目前正常工作, 并且可以添加bot(`jmarshall`添加了雷神之锤3的bot支持, 但是需要先添加bot文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹).
-> 6. **脚本错误**: 部分脚本错误无关紧要, 但是有一些影响游戏进程或者崩溃.
-> 7. **粒子系统**: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
-> 8. **物体渲染**: 存在一些物体错误的渲染结果.
-> 9. **碰撞**: 有一些错误的碰撞结果(可以使用`noclip`强制穿越).
-
-----------------------------------------------------------------------------------
-### Screenshot
-> Game
-
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_bathroom.png" alt="Classic bathroom">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_quake4_game_2.png" alt="Quake IV for DOOM3">
-
-> Mod
-
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_roe.png" width="50%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_the_lost_mission.png" width="50%" alt="The lost mission">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_classic_doom3.png" width="50%" alt="Classic DOOM"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_hardcorps.png" width="50%" alt="Hardcorps">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/__HARAMTTAN__/screenshot/Screenshot_quake4.png" width="50%" alt="Quake IV">
-
-----------------------------------------------------------------------------------
-### Changes
-
-----------------------------------------------------------------------------------
 > 1.1.0harmattan12 (2022-07-19)
+
  * `Quake 4` in DOOM3 engine support. Also see `https://github.com/jmarshall23/Quake4Doom`. Now can play most levels, but some levels has error.
  * Quake 4 game data folder named `q4base`, also see `https://store.steampowered.com/app/2210/Quake_4/`.
  * Fix `Rivensin` and `Hardcorps` mod load game from save game.
@@ -147,6 +174,7 @@ Android 4.0+
 ----------------------------------------------------------------------------------
 
 > 1.1.0harmattan11 (2022-06-30)
+
  * Add `Hardcorps` mod library support, game path name is `hardcorps`, if play the mod, first suggest to close `Smooth joystick` in `Controls` tab panel, more view in `https://www.moddb.com/mods/hardcorps`.
  * In `Rivensin` mod, add bool Cvar `harm_pm_doubleJump` to enable double-jump(From `hardcorps` mod source code, default disabled).
  * In `Rivensin` mod, add bool Cvar `harm_pm_autoForceThirdPerson` for auto set `pm_thirdPerson` to 1 after level load end when play original DOOM3 maps(Default disabled).

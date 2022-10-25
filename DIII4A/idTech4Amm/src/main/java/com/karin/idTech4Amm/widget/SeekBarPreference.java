@@ -87,9 +87,8 @@ public class SeekBarPreference extends DialogPreference
         V.seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
                 {
-                    V.progress.setText("" + V.seek_bar.getProgress());
+                    V.progress.setText("" + progress);
                 }
-
                 public void onStartTrackingTouch(SeekBar seekBar)
                 {
                     V.progress.setTextColor(Color.RED);

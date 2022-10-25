@@ -658,7 +658,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 return true;
             if((m_mapBack & ENUM_BACK_EXIT) != 0 && HandleBackPress())
                 return true;
-        }			
+        }
         int qKeyCode;
         switch(keyCode)
         {
@@ -708,7 +708,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 	        x = getCenteredAxis(event, MotionEvent.AXIS_Z);
 	        y = getCenteredAxis(event, MotionEvent.AXIS_RZ);	      	        
 	        last_joystick_x = x;
-		    last_joystick_y = y;	        	       
+		    last_joystick_y = y;
 			return true;
 		}
 	    return false;
@@ -755,7 +755,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 		{
 			int pid=event.getPointerId(event.getActionIndex());
 			fingers[pid].target = null;
-		}		
+		}
 
 		return true;
 	}

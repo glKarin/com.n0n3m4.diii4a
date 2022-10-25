@@ -41,7 +41,11 @@ If you have questions concerning this license or the applicable additional terms
 #define CM_MAX_POLYGON_EDGES				64
 #define CIRCLE_APPROXIMATION_LENGTH			64.0f
 
+#ifdef _RAVEN
+#define	MAX_SUBMODELS						4096 //k: include trace models
+#else
 #define	MAX_SUBMODELS						2048
+#endif
 #define	TRACE_MODEL_HANDLE					MAX_SUBMODELS
 
 #define VERTEX_HASH_BOXSIZE					(1<<6)	// must be power of 2
@@ -194,6 +198,7 @@ typedef struct cm_model_s {
 
 #ifdef _RAVEN
 	bool					isTrmModel;
+	bool markRemove; //k: if ture, marked can replace
 #endif
 } cm_model_t;
 

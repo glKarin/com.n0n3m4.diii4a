@@ -379,7 +379,8 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
                     //k
 			} 			
 
-			Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, Q3EMain.datadir + "/" + mPrefs.getString(Q3EUtils.pref_params, Q3EUtils.q3ei.libname)/* + " +set harm_fs_gameLibDir " + lib_dir*/);						
+			String cmd = Q3EMain.datadir + "/" + mPrefs.getString(Q3EUtils.pref_params, Q3EUtils.q3ei.libname) + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
+			Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd);
 
 			mInit = true;
 			mHandler.post(new Runnable() {				

@@ -303,6 +303,8 @@ static infoParm_t	infoParms[] = {
 	{"largeshotclip",	0,	0,	CONTENTS_LARGESHOTCLIP },
 	{"shotclip",	0,	0,	0 },
 	{"projectileClip",	0,	0,	CONTENTS_PROJECTILECLIP },
+	{"notacticalfeatures",	0,	0,	CONTENTS_NOTACTICALFEATURES },
+	{"bounce",	0,	SURF_BOUNCE,	0 },
 #endif
 };
 
@@ -2185,12 +2187,6 @@ void idMaterial::ParseMaterial(idLexer &src)
 // jmarshall end
 #endif
 #ifdef _RAVEN
-		else if (!token.Icmp("bounce")) {
-			continue;
-		}
-		else if (!token.Icmp("notacticalfeatures")) {
-			continue;
-		}
 		else if (!token.Icmp("portalDistanceNear")) {
 			(void)src.ParseFloat(); // a number
 			continue;
@@ -2206,6 +2202,12 @@ void idMaterial::ParseMaterial(idLexer &src)
 			continue;
 		}
 		/*
+		else if (!token.Icmp("bounce")) {
+			continue;
+		}
+		else if (!token.Icmp("notacticalfeatures")) {
+			continue;
+		}
 		else if (!token.Icmp("shotclip")) {
 			continue;
 		}

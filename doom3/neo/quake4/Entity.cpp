@@ -4556,9 +4556,7 @@ idEntity::TouchTriggers
 ============
 */
 #ifdef _QUAKE4
-static idCVar harm_g_useSimpleTriggerClip( "harm_g_useSimpleTriggerClip", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Using simple trigger clip for player/AI/vehicle touching triggers, it can optimize some solutions for doors can' open in Quake4Doom. "
-		"0 - don't force(like original). "
-		"1 - force to use simple trigger clip(for doors touched opening). "
+static idCVar harm_g_useSimpleTriggerClipForce( "harm_g_useSimpleTriggerClipForce", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Force to Using simple trigger clip for player/AI/vehicle touching triggers, it can optimize some solutions for doors can' open in Quake4Doom(not need enable no longer, collision has been fixed). "
 		);
 #endif
 bool idEntity::TouchTriggers( const idTypeInfo* ownerType ) const {
@@ -4597,7 +4595,9 @@ bool idEntity::TouchTriggers( const idTypeInfo* ownerType ) const {
 		}
 
 #ifdef _QUAKE4 //k: force using simple clip, so has touched now
-		if(!harm_g_useSimpleTriggerClip.GetBool())
+		if(!harm_g_useSimpleTriggerClipForce.GetBool()
+				|| ent->IsType(idTrigger_Hurt::GetClassType()) //k: some hurt trigger is danger
+				)
 		{
 #endif
 // RAVEN BEGIN

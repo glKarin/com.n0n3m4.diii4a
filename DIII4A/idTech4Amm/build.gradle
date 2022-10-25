@@ -5,31 +5,6 @@ android {
     buildToolsVersion '30.0.3'
     //compileOptions.encoding "gbk"
 
-    defaultConfig {
-        applicationId "com.karin.idTech4Amm"
-        minSdkVersion 14
-        targetSdkVersion 30
-        versionCode 11015
-        versionName '1.1.0harmattan15'
-        versionNameSuffix 'Natasha'
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-        }
-    }
-    ndkVersion '17.2.4988734'
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
     /* not AIDE */
     signingConfigs {
         debug {
@@ -49,8 +24,33 @@ android {
             keyPassword '741953'
         }
     }
+
+    defaultConfig {
+        applicationId "com.karin.idTech4Amm"
+        minSdkVersion 14
+        targetSdkVersion 30
+        versionCode 11016
+        versionName '1.1.0harmattan16'
+        versionNameSuffix 'Natasha'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    ndkVersion '17.2.4988734'
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
-    compile project(':Q3E')
+    implementation project(':Q3E')
 }
