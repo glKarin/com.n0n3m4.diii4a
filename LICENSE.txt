@@ -1,0 +1,4 @@
+Source from release:
+com.n0n3m4.diii4a: GPLv2 license
+doom3: GPLv2 license
+quake4-sdk
