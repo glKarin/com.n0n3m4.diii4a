@@ -60,7 +60,7 @@ int idDeviceContext::FindFont(const char *name)
 
 	// If the font was not found, try to register it
 	idStr fileName = name;
-#if !defined(_RAVEN) // jmarshall
+#if !defined(_RAVENxxx) // jmarshall
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()));
 #endif
 

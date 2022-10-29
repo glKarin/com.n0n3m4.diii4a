@@ -1163,7 +1163,7 @@ bool idAASFileLocal::ParseNodes(idLexer &src)
 // jmarshall - AAS 1.08
 	if (numNodes <= 1) //k: at least 2
 	{
-		return 0;
+		return false;
 	}
 // jmarshall end
 #endif

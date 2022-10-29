@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
+#ifdef _RAVEN
+#include "../ui/Window.h"
+#endif
 #include "Session_local.h"
 
 idCVar	idSessionLocal::com_showAngles("com_showAngles", "0", CVAR_SYSTEM | CVAR_BOOL, "");
@@ -861,6 +864,24 @@ static void Session_ExitCmdDemo_f(const idCmdArgs &args)
 	common->Printf("Command demo exited at logIndex %i\n", sessLocal.logIndex);
 	sessLocal.cmdDemoFile = NULL;
 }
+
+#ifdef _RAVEN
+static void Session_EndOfGame_f(const idCmdArgs &args)
+{
+	sessLocal.Stop();
+	sessLocal.StartMenu();
+
+	if (soundSystem) {
+		soundSystem->SetMute(false);
+	}
+
+	if (sessLocal.guiActive) {
+		drawWin_t *dw = sessLocal.guiActive->GetDesktop()->FindChildByName("main_b_credits");
+		if(dw && dw->win)
+			dw->win->RunScript(idWindow::ON_ACTION);
+	}
+}
+#endif
 
 /*
 ================
@@ -3252,6 +3273,11 @@ void idSessionLocal::RunGameTic()
 		} else if (!idStr::Icmp(args.Argv(0), "endOfDemo")) {
 			cmdSystem->BufferCommandText(CMD_EXEC_NOW, "endOfDemo");
 		}
+#ifdef _RAVEN
+		else if (!idStr::Icmp(args.Argv(0), "endOfGame")) {
+			cmdSystem->BufferCommandText(CMD_EXEC_INSERT, "stoprecording ; disconnect ; endOfGame");
+		}
+#endif
 	}
 }
 
@@ -3313,6 +3339,10 @@ void idSessionLocal::Init()
 	cmdSystem->AddCommand("promptKey", Session_PromptKey_f, CMD_FL_SYSTEM, "prompt and sets the CD Key");
 
 	cmdSystem->AddCommand("hitch", Session_Hitch_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "hitches the game");
+
+#ifdef _RAVEN
+	cmdSystem->AddCommand("endOfGame", Session_EndOfGame_f, CMD_FL_SYSTEM, "ends the game");
+#endif
 
 	// the same idRenderWorld will be used for all games
 	// and demos, insuring that level specific models

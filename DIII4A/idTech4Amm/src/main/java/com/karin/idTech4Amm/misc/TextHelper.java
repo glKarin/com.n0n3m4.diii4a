@@ -159,9 +159,8 @@ public final class TextHelper
 			"For playing Quake 4(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/Quake4Doom", "Quake4Doom") + "`): ",
 			" 1. Putting PC Quake 4 game data file to `q4base` folder.",
             " 2. Click `START` to open Quake 4 map level dialog in game launcher.",
-            " 3. Extract Quake 4 patch resource to `q4base` game data folder first.",
-            " (a). Quake 4 fonts with DOOM3 format by `" + GenLinkText("https://github.com/IlDucci", "IlDucci") + "`",
-            " (b). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).",
+            " 3. Extract Quake 4 patch resource to `q4base` game data folder if need(D3 format font files is not necessary now).",
+            " (a). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).",
             " 4. Then Choose map level/Start directly, all levels is working, and `New Game` s working.",
             " *. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).",
             " *. If running crash on arm32 or low-momery device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
@@ -175,6 +174,7 @@ public final class TextHelper
 			" 6. script errors: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.",
 			" 7. Particle system: Now is work incompleted(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`).",
 			" 8. Entity render: Some game entities render incorrect.",
+            " 9. Font: Support Q4 format fonts now. " + GenLinkText("https://github.com/IlDucci", "IlDucci") + "'s DOOM3-format fonts of Quake 4 is not need on longer.",
             null,
             null,
             "On Android 11+, because of `Scoped-Storage`, must grant `Allow management of all files` permission.",
@@ -281,6 +281,16 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+                ChangeLog.Create("2022-10-22", 16,
+                        "Add automatic load `QuickSave` when start game.",
+                        "Add control Quake 4 helper dialog visible when start Quake 4 in Settings, and add `Extract Quake 4 resource` in `Other` menu.",
+                        "Add setup all on-screen button opacity.",
+                        "Support checking for update from GitHub.",
+                        "Fixup some Quake 4 bugs: ",
+                        " Fixup collision, e.g. trigger, vehicle, AI, elevator, health-station. So fixed block on last elevator in level `game/mcc_landing` and fixed incorrect collision cause killing player on elevator in `game/process1 first` and `game/process1 second` and fixed block when player jumping form vehicle in `game/convoy1`. And cvar `harm_g_useSimpleTriggerClip` is removed.",
+                        " Fixup game level load fatal error and crash in `game/mcc_1` and `game/tram1b`. So all levels have not fatal error now."
+                ),
 
                 ChangeLog.Create("2022-10-15", 15,
                         "Add gyroscope control support.",

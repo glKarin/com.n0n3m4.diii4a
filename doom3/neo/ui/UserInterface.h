@@ -95,6 +95,9 @@ class idUserInterface
 // bdube: added
 								// Changes the interactive of the gui
 	virtual void				SetInteractive ( bool interactive ) = 0 ;
+
+// jscott: added
+	virtual class idWindow *	GetDesktop( void ) const = 0;
 // RAVEN END
 #endif
 

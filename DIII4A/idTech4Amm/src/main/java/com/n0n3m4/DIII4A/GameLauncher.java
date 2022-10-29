@@ -1954,18 +1954,19 @@ public class GameLauncher extends Activity{
 		dialog.show();
     }
 
-    private static final int Q4_RESOURCE_FONT = 1;
+    //private static final int Q4_RESOURCE_FONT = 1;
     private static final int Q4_RESOURCE_BOT = 1 << 1;
     private static final int Q4_RESOURCE_ALL = ~(1 << 31);
     
     private void OpenQuake4ResourceDialog()
     {
+    	// D3-format fonts don't need on longer
         final int[] Types = {
-            Q4_RESOURCE_FONT,
+            //Q4_RESOURCE_FONT,
             Q4_RESOURCE_BOT,
         };
         final String[] Names = {
-            "Font(D3 format)",
+            // "Font(D3 format)",
             "Bot(Q3 support in MP game)",
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -2003,7 +2004,7 @@ public class GameLauncher extends Activity{
 		final String BasePath = gamePath + File.separator;
     	StringBuilder sb = new StringBuilder();
     	boolean r = true;
-        if(Utility.MASK(mask, Q4_RESOURCE_FONT))
+/*        if(Utility.MASK(mask, Q4_RESOURCE_FONT))
 		{
 			String fileName = "q4base/q4_fonts_idtech4amm.pk4";
 			String outPath = BasePath + fileName;
@@ -2011,7 +2012,7 @@ public class GameLauncher extends Activity{
 			sb.append("Extract Quake 4 fonts(DOOM3 format) patch file to ").append(fileName).append(" ");
 			sb.append(ok ? "success" : "fail");
 			r = r && ok;
-		}
+		}*/
         if(Utility.MASK(mask, Q4_RESOURCE_BOT))
 		{
 			String fileName = "q4base/q4_botfiles_idtech4amm.pk4";

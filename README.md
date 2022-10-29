@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake IV for Android, 毁灭战士3/雷神之锤4安卓移植版
 **Latest version:**
-1.1.0harmattan16(Natasha)  
+1.1.0harmattan17(Natasha)  
 **Last update release:**
-2022-10-22  
+2022-10-29  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -12,23 +12,13 @@ Android 4.0+
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan16 (2022-10-22)
+> 1.1.0harmattan17 (2022-10-29)
 
-* Add automatic load `QuickSave` when start game.
-* Add control Quake 4 helper dialog visible when start Quake 4 in Settings, and add `Extract Quake 4 resource` in `Other` menu.
-* Add setup all on-screen button opacity.
-* Support checking for update from GitHub.
-* Fixup some Quake 4 bugs: 
-> 1. Fixup collision, e.g. trigger, vehicle, AI, elevator, health-station. So fixed block on last elevator in level `game/mcc_landing` and fixed incorrect collision cause killing player on elevator in `game/process1 first` and `game/process1 second` and fixed block when player jumping form vehicle in `game/convoy1`. And cvar `harm_g_useSimpleTriggerClip` is removed.
-> 2. Fixup game level load fatal error and crash in `game/mcc_1` and `game/tram1b`. So all levels have not fatal error now.
+* Support Quake 4 format fonts. Other language patches will work. D3-format fonts do not need to extract no longer.
+* Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`.
 
-* 新增启动时自动加载`快速存档`.
-* 新增设置控制雷神之锤4启动帮助对话框是否显示, `其他`菜单新增`解压雷神之锤4资源`.
-* 新增一次性设置全部虚拟按键的透明度.
-* 新增与GitHub检查更新.
-* 修复雷神之锤4bug:
-> 1. 修复碰撞, 例如触发器, 载具, AI, 电梯, 血站. 因此也修复了关卡`game/mcc_landing`的最后一个电梯卡住, 修复了`game/process1 first`第一个电梯和`game/process1 second`最后一个电梯运行时卡死玩家, 修复了`game/convoy1`下载具后卡住. 移除之前的临时解决开门的cvar `harm_g_useSimpleTriggerClip`.
-> 2. 修复载入关卡`game/mcc_1`和`game/tram1b`引起的崩溃. 现在所有关卡不会有崩溃发生.
+* 支持雷神之锤4格式的字体. 支持其他语言包, D3格式字体不再需要解压.
+* 雷神之锤4游戏中一些GUI无法交互的解决方案, 可以先`quicksave`, 再`quickload`, GUI将可以交互. 比如, 1. `game/tram1`关卡桥头的门的开关GUI, 2. `game/process2`有怪下来的电梯的开关GUI.
 
 ----------------------------------------------------------------------------------
 
@@ -37,21 +27,20 @@ Android 4.0+
 > 1. Putting PC Quake 4 game data file to `q4base` folder.
 > 2. Click `START` to open Quake 4 map level dialog in game launcher.
 > 3. Suggest to extract Quake 4 patch resource to `q4base` game data folder first.
-> - Quake 4 fonts with DOOM3 format by [IlDucci](https://github.com/IlDucci).
 > - Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).
 > 4. Then Choose map level/Start directly, all levels is working, and `New Game` s working.
 > 5. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).
 
 ###### Problems and resolutions  
-> 1. ~~Door-opening~~: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, health-station, all doors can be opened.
+> 1. ~~Door-opening/Collision~~: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, health-station, all doors can be opened.
 > 2. *Main-menu*: Now can show full main menu, but without background color. But can not Create-Server(using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game), and can not interactive in some dialog.
 > 3. ~~Sound~~: It looks work well now(jmarshall's `icedTech` using DOOM3-BFG sound system).
 > 4. ~~Loading-UI~~: It looks work well now.
 > 5. *Multiplayer-Game*: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
-> 6. **Script error**: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
+> 6. *Script error*: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
 > 7. **Particle system**: Now is work incompleted(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
-> 8. **Entity render**: Some game entities render incorrect.
-> 9. ~~Collision~~: Now collision bug has fixed.
+> 8. *Entity render*: Some game entities render incorrect.
+> 9. ~~Font~~: Support Q4 format fonts now. [IlDucci](https://github.com/IlDucci)'s DOOM3-format fonts of Quake 4 is not need on longer.
 
 #### 关于雷神之锤4
 ###### 运行雷神之锤4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). 目前可以运行全部关卡, 部分关卡存在bug.  
@@ -92,6 +81,24 @@ Android 4.0+
 ### Changes
 
 ----------------------------------------------------------------------------------
+
+> 1.1.0harmattan16 (2022-10-22)
+
+* Add automatic load `QuickSave` when start game.
+* Add control Quake 4 helper dialog visible when start Quake 4 in Settings, and add `Extract Quake 4 resource` in `Other` menu.
+* Add setup all on-screen button opacity.
+* Support checking for update from GitHub.
+* Fixup some Quake 4 bugs:
+> 1. Fixup collision, e.g. trigger, vehicle, AI, elevator, health-station. So fixed block on last elevator in level `game/mcc_landing` and fixed incorrect collision cause killing player on elevator in `game/process1 first` and `game/process1 second` and fixed block when player jumping form vehicle in `game/convoy1`. And cvar `harm_g_useSimpleTriggerClip` is removed.
+> 2. Fixup game level load fatal error and crash in `game/mcc_1` and `game/tram1b`. So all levels have not fatal error now.
+
+* 新增启动时自动加载`快速存档`.
+* 新增设置控制雷神之锤4启动帮助对话框是否显示, `其他`菜单新增`解压雷神之锤4资源`.
+* 新增一次性设置全部虚拟按键的透明度.
+* 新增与GitHub检查更新.
+* 修复雷神之锤4bug:
+> 1. 修复碰撞, 例如触发器, 载具, AI, 电梯, 血站. 因此也修复了关卡`game/mcc_landing`的最后一个电梯卡住, 修复了`game/process1 first`第一个电梯和`game/process1 second`最后一个电梯运行时卡死玩家, 修复了`game/convoy1`下载具后卡住. 移除之前的临时解决开门的cvar `harm_g_useSimpleTriggerClip`.
+> 2. 修复载入关卡`game/mcc_1`和`game/tram1b`引起的崩溃. 现在所有关卡不会有崩溃发生.
 
 > 1.1.0harmattan15 (2022-10-15)
 

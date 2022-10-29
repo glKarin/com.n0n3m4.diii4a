@@ -395,7 +395,8 @@ Script_NonInteractive
 */
 void Script_NonInteractive(idWindow* window, idList<idGSWinVar>* src)
 {
-    idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
+    //idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
+    idWinVar* parm = (*src)[0].var;
     int val = atoi(parm->c_str());
 
     window->GetGui()->SetInteractive(!(val != 0)); //k: jmarshall is (val == 1)
