@@ -1,7 +1,7 @@
 {
-    "release":17,
-    "update":"2022-10-29",
-    "version":"1.1.0harmattan17",
-    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.17.apk",
-    "changes":"  * Support Quake 4 format fonts. Other language patches will work. D3-format fonts do not need to extract no longer.\n  * Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`."
+    "release":18,
+    "update":"2022-11-11",
+    "version":"1.1.0harmattan18",
+    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.18.apk",
+    "changes":"  * Implement some debug render functions.\n  * Add player focus GUI bracket and interactive text on HUD in Quake 4.\n  * Automatic generating AAS file for bot of Multiplayer-Game maps is not need enable net_allowCheats when set cvar `harm_g_autoGenAASFileInMPGame` to 1 in Quake 4.\n  * Fixed restart menu action in Quake 4.\n  * Fixed a memory bug that can cause crash in Quake 4."
 }
