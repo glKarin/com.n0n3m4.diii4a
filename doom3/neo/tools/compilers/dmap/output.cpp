@@ -435,7 +435,7 @@ static void WriteOutputSurfaces(int entityNum, int areaNum)
 
 
 	if (entityNum == 0) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 proc file
 // jmarshall - quake 4 proc format
 		procFile->WriteFloatString( "model { /* name = */ \"_area%i\" /* numSurfaces = */ %i /* sky */ 0\n\n", 
 			areaNum, numSurfaces );
@@ -453,7 +453,7 @@ static void WriteOutputSurfaces(int entityNum, int areaNum)
 			common->Error("Entity %i has surfaces, but no name key", entityNum);
 		}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 proc file
 // jmarshall - quake 4 proc format
 		procFile->WriteFloatString( "model { /* name = */ \"%s\" /* numSurfaces = */ %i /* sky */ 0\n\n", 
 			name, numSurfaces );
@@ -711,7 +711,7 @@ void WriteOutputFile(void)
 		common->Error("Error opening %s", qpath.c_str());
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 proc file
 // jmarshall - Quake 4 proc support
 	procFile->WriteFloatString( "%s \"%s\"\n\n", PROC_FILE_ID, PROC_FILEVERSION);
 

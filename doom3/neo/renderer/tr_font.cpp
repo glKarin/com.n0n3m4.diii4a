@@ -344,7 +344,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 		float glyphScale = 1.0f; 		// change the scale to be relative to 1 based on 72 dpi ( so dpi of 144 means a scale of .5 )
 		glyphScale *= 48.0f / pointSize;
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 font data file
 		idStr::snPrintf(name, sizeof(name), "%s_%i.fontdat", fontName, pointSize);
 #else
 		idStr::snPrintf(name, sizeof(name), "%s/fontImage_%i.dat", fontName, pointSize);
@@ -375,7 +375,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 		fdFile = reinterpret_cast<unsigned char *>(faceData);
 
 		for (i = 0; i < GLYPHS_PER_FONT; i++) {
-#ifdef _RAVEN //k: quake 4 font: 9 byte per char
+#ifdef _RAVEN //k: quake4 font: 9 float32 per char
 			outFont->glyphs[i].imageWidth	= readFloat();
 			outFont->glyphs[i].imageHeight	= readFloat();
 			outFont->glyphs[i].xSkip		= readFloat();
@@ -407,7 +407,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 #endif
 		}
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 font remain 5 float32
 		readFloat(); //k: 12 / 24 / 48
 		int mw = readFloat(); //k: max height?
 		int mh = readFloat(); //k: max width?
@@ -422,7 +422,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 #endif
 
 		for (i = GLYPH_START; i < GLYPH_END; i++) {
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 font material
 			idStr::snPrintf(name, sizeof(name), "%s", outFont->glyphs[i].shaderName);
 #else
 			idStr::snPrintf(name, sizeof(name), "%s/%s", fontName, outFont->glyphs[i].shaderName);

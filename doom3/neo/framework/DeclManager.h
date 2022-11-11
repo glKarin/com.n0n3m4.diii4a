@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DECLMANAGER_H__
 #define __DECLMANAGER_H__
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 new decl
 class rvDeclEffect;
 class rvDeclPlayback;
 class rvDeclLipSync;
@@ -88,7 +88,7 @@ typedef enum {
 
 	// new decl types can be added here
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 new decl
 	// RAVEN BEGIN
 // jscott: added new decls
         DECL_MATERIALTYPE,
@@ -158,7 +158,7 @@ class idDeclBase
 		virtual void			Print(void) const = 0;
 };
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 guide
 // RAVEN BEGIN
 // jscott: for guides
 #define MAX_GUIDE_PARMS				20

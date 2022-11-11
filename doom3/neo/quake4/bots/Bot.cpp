@@ -44,7 +44,7 @@ rvmBot::~rvmBot
 */
 rvmBot::~rvmBot()
 {
-#ifdef _QUAKE4
+#ifdef _QUAKE4 //k: free bot
 	if(bs.ws)
 	{
 		botWeaponInfoManager.BotFreeWeaponState(bs.ws);

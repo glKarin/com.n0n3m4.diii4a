@@ -381,11 +381,11 @@ void idGameEdit::ParseSpawnArgsToRefSound( const idDict *args, refSound_t *refSo
 
 // RAVEN BEGIN
 	refSound->parms.minDistance = args->GetFloat( "s_mindistance" );
-#ifdef _QUAKE4
+#ifdef _QUAKE4 //k: scale
 	refSound->parms.minDistance /= 100.0f; //k: scale to doom 3 distance
 #endif
 	refSound->parms.maxDistance = args->GetFloat( "s_maxdistance" );
-#ifdef _QUAKE4
+#ifdef _QUAKE4 //k: scale
 	refSound->parms.maxDistance /= 100.0f; //k: scale to doom 3 distance
 #endif
 	// WARNING: This overrides the volume; it does not modify it
@@ -4555,7 +4555,7 @@ idEntity::TouchTriggers
   Optionally only activate triggers of ownerType
 ============
 */
-#ifdef _QUAKE4
+#if defined(_QUAKE4xxx) // unused
 static idCVar harm_g_useSimpleTriggerClipForce( "harm_g_useSimpleTriggerClipForce", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Force to Using simple trigger clip for player/AI/vehicle touching triggers, it can optimize some solutions for doors can' open in Quake4Doom(not need enable no longer, collision has been fixed). "
 		);
 #endif
@@ -4594,7 +4594,7 @@ bool idEntity::TouchTriggers( const idTypeInfo* ownerType ) const {
 			continue;
 		}
 
-#ifdef _QUAKE4 //k: force using simple clip, so has touched now
+#if defined(_QUAKE4xxx) //k: force using simple clip, so has touched now
 		if(!harm_g_useSimpleTriggerClipForce.GetBool()
 				|| ent->IsType(idTrigger_Hurt::GetClassType()) //k: some hurt trigger is danger
 				)
@@ -4607,7 +4607,7 @@ bool idEntity::TouchTriggers( const idTypeInfo* ownerType ) const {
 // RAVEN END
 			continue;
 		}
-#ifdef _QUAKE4
+#if defined(_QUAKE4xxx) // unused
 		}
 #endif
 
@@ -6161,10 +6161,6 @@ void idEntity::DrawDebugEntityInfo( idBounds *viewBounds, idBounds *viewTextBoun
 	if ( !viewTextBounds || viewTextBounds->IntersectsBounds( entBounds ) ) {
 		gameRenderWorld->DrawText( name.c_str(), entBounds.GetCenter(), 0.1f, colorWhite, axis, 1 );
 		gameRenderWorld->DrawText( va( "#%d", entityNumber ), entBounds.GetCenter() + up, 0.1f, colorWhite, axis, 1 );
-
-#ifdef __ANDROID__
-		gameLocal.Printf( "[Entity]: %s#%d\n", name.c_str(), entityNumber );
-#endif
 
 		if ( gameLocal.GetLocalPlayer() && this != gameLocal.GetLocalPlayer() && teamMaster != gameLocal.GetLocalPlayer() ) {
 			gameRenderWorld->DebugLine ( colorRed, GetPhysics()->GetCenterMass(), GetPhysics()->GetCenterMass() + 50.0f * GetPhysics()->GetAxis()[0] );

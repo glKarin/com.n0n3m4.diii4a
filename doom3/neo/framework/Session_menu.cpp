@@ -200,11 +200,6 @@ void idSessionLocal::SetSaveGameGuiVars(void)
 	loadGameList.Clear();
 	fileList.Clear();
 	fileTimes.Clear();
-#ifdef _RAVENxxx // _QUAKE4
-// jmarshall - crash fix
-    return;
-// jmarshall end
-#endif
 
 	GetSaveGameList(fileList, fileTimes);
 
@@ -556,6 +551,18 @@ void idSessionLocal::HandleRestartMenuCommands(const char *menuCommand)
 
 			continue;
 		}
+#ifdef _RAVEN //k: disconnect [menu_name [named_event]]
+		if (!idStr::Icmp(cmd, "disconnect")) {
+			idStr disconnectCmdStr("stoprecording ; disconnect");
+			for(int i = 1; i < args.Argc(); i++)
+			{
+				disconnectCmdStr += " ";
+				disconnectCmdStr += args.Argv(i);
+			}
+			cmdSystem->BufferCommandText(CMD_EXEC_INSERT, disconnectCmdStr);
+			continue;
+		}
+#endif
 	}
 }
 
@@ -1149,7 +1156,7 @@ void idSessionLocal::HandleMainMenuCommands(const char *menuCommand)
 			continue;
 		}
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 gui cmd
 		/*
 		 * e.g.
 		 set "cmd" "CVarStrcmp sys_lang curr_lang English Spanish French Italian" ;

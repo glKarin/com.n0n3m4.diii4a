@@ -270,8 +270,8 @@ public:
 
 	void						ClearStats( void );
 
-	int							DamageGiven( int playerNum, int lowerBound = /*idMath::*/INT_MIN, int upperBound = /*idMath::*/INT_MAX ); //k
-	int							DamageTaken( int playerNum, int lowerBound = /*idMath::*/INT_MIN, int upperBound = /*idMath::*/INT_MAX ); //k
+	int							DamageGiven( int playerNum, int lowerBound = /*idMath::*/INT_MIN, int upperBound = /*idMath::*/INT_MAX );
+	int							DamageTaken( int playerNum, int lowerBound = /*idMath::*/INT_MIN, int upperBound = /*idMath::*/INT_MAX );
 
 	void						UpdateInGameHud( idUserInterface* statHud, bool visible );
 	void						UpdateEndGameHud( idUserInterface* statHud, int clientNum );

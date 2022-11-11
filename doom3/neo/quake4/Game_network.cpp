@@ -1781,11 +1781,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			int client = msg.ReadByte();
 			int spawnId = msg.ReadLong();
 			if ( !entities[ client ] ) {
-#ifdef _QUAKE4 // bot
-				SpawnPlayer( client, false, NULL);
-#else
-				SpawnPlayer( client );
-#endif
+				SpawnPlayer( client ); // not bot
 				entities[ client ]->FreeModelDef();
 			}
 			// fix up the spawnId to match what the server says
@@ -3329,11 +3325,7 @@ void idGameLocal::ReadNetworkInfo( int gameTime, idFile* file, int clientNum ) {
 		int icl, spawnId;
 		file->ReadInt( icl );
 		file->ReadInt( spawnId );
-#ifdef _QUAKE4 // bot
-		SpawnPlayer( icl, false, NULL);
-#else
-		SpawnPlayer( icl );
-#endif
+		SpawnPlayer( icl ); // not bot
 		spawnIds[ icl ] = spawnId;
 		numClients = icl + 1;
 	}

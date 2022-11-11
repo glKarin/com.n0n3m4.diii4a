@@ -241,7 +241,7 @@ float idNetworkSystem::ClientGetIncomingPacketLoss(void)
 	return 0.0f;
 }
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 /*
 ==================
 idNetworkSystem::AllocateClientSlotForBot

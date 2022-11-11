@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #define PROC_FILE_EXT				"proc"
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 proc file
 #define PROC_FILE_ID					"PROC"
 #define PROC_FILEVERSION				"4" // jmarshall: changed to string. 
 #else
@@ -123,7 +123,7 @@ enum
 
 typedef bool(*deferredEntityCallback_t)(renderEntity_s *, const renderView_s *);
 
-#ifdef _RAVEN
+#ifdef _RAVEN // particle
 // RAVEN BEGIN
 // jscott: for handling of effects
 typedef struct renderEffect_s {
@@ -398,7 +398,7 @@ typedef struct modelTrace_s {
 	const idMaterial 		*material;			// material of hit surface
 	const renderEntity_t 	*entity;				// render entity that was hit
 	int						jointNumber;		// md5 joint nearest to the hit triangle
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 trace
 // RAVEN BEGIN
 // jscott: added block
 	const rvDeclMatType *	materialType;
@@ -407,7 +407,7 @@ typedef struct modelTrace_s {
 } modelTrace_t;
 
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // abahr: changed to 4 to include gravity
 static const int NUM_PORTAL_ATTRIBUTES = 4;

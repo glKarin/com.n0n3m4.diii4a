@@ -43,7 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 #define CM_FILEID			"CM"
 #define CM_FILEVERSION		"1.00"
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 cm file version
 #define CM_FILEVERSION_RAVEN		"3"
 #endif
 
@@ -554,7 +554,7 @@ bool idCollisionModelManagerLocal::ParseCollisionModel(idLexer *src)
 	src->ExpectTokenType(TT_STRING, 0, &token);
 	model->name = token;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 cm file
 	if (token.Cmpn(PROC_CLIPMODEL_STRING_PRFX, strlen(PROC_CLIPMODEL_STRING_PRFX)) == 0) {
 		numInlinedProcClipModels++;
 	}
@@ -644,7 +644,7 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 		return false;
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 cm file
 	if (!src->ReadToken(&token) || (token != CM_FILEVERSION
 #if 1
 				 && token != CM_FILEVERSION_RAVEN
@@ -684,7 +684,7 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 		}
 
 		if (token == "collisionModel") {
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 cm file
 			if(!version.Cmp(CM_FILEVERSION_RAVEN))
 			{
 				if (!ParseCollisionModel_v3(src)) {
@@ -710,7 +710,7 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 	return true;
 }
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 cm file
 /*
 ================
 idCollisionModelManagerLocal::ParseCollisionModel_v3
@@ -733,7 +733,7 @@ bool idCollisionModelManagerLocal::ParseCollisionModel_v3(idLexer *src)
 	src->ExpectTokenType(TT_STRING, 0, &token);
 	model->name = token;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	if (token.Cmpn(PROC_CLIPMODEL_STRING_PRFX, strlen(PROC_CLIPMODEL_STRING_PRFX)) == 0) {
 		numInlinedProcClipModels++;
 	}

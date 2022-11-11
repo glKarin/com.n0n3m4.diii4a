@@ -60,9 +60,7 @@ int idDeviceContext::FindFont(const char *name)
 
 	// If the font was not found, try to register it
 	idStr fileName = name;
-#if !defined(_RAVENxxx) // jmarshall
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()));
-#endif
 
 	fontInfoEx_t fontInfo;
 	int index = fonts.Append(fontInfo);
@@ -105,7 +103,7 @@ void idDeviceContext::Init()
 {
 	xScale = 0.0;
 	SetSize(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 assets
 	whiteImage = declManager->FindMaterial("gfx/guis/white.tga");
 #else
 	whiteImage = declManager->FindMaterial("guis/assets/white.tga");
@@ -123,7 +121,7 @@ void idDeviceContext::Init()
 	colorWhite = idVec4(1, 1, 1, 1);
 	colorBlack = idVec4(0, 0, 0, 1);
 	colorNone = idVec4(0, 0, 0, 0);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 assets
 	cursorImages[CURSOR_ARROW] = declManager->FindMaterial("gfx/guis/guicursor_arrow.tga");
 	cursorImages[CURSOR_HAND] = declManager->FindMaterial("gfx/guis/guicursor_hand.tga");
 	scrollBarImages[SCROLLBAR_HBACK] = declManager->FindMaterial("gfx/guis/scrollbarh.tga");

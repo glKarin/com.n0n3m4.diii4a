@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #define AAS_FILEID					"DewmAAS"
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 aas file
 #define AAS_FILEVERSION				"1.08"
 #else
 #define AAS_FILEVERSION				"1.07"

@@ -179,7 +179,7 @@ class idWindow
 			ON_ACTIONRELEASE,
 			ON_ENTER,
 			ON_ENTERRELEASE,
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui event
 // jmarshall - quake 4 guis
         ON_BACKACTION,
         ON_TABRELEASE,
@@ -276,7 +276,7 @@ class idWindow
 			return name;
 		};
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui function
 // jmarshall - quake 4 gui
     void ClearTransitions(void)
     {
@@ -455,35 +455,35 @@ class idWindow
 		idWinBool	noEvents;
 		idWinRectangle rect;				// overall rect
 		idWinVec4	backColor;
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     idWinFloatPtr	backColor_r;
     idWinFloatPtr	backColor_g;
     idWinFloatPtr	backColor_b;
     idWinFloatPtr	backColor_w;
 #endif
 		idWinVec4	matColor;
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     idWinFloatPtr	matColor_r;
     idWinFloatPtr	matColor_g;
     idWinFloatPtr	matColor_b;
     idWinFloatPtr	matColor_w;
 #endif
 		idWinVec4	foreColor;
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     idWinFloatPtr	foreColor_r;
     idWinFloatPtr	foreColor_g;
     idWinFloatPtr	foreColor_b;
     idWinFloatPtr	foreColor_w;
 #endif
 		idWinVec4	hoverColor;
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     idWinFloatPtr	hoverColor_r;
     idWinFloatPtr	hoverColor_g;
     idWinFloatPtr	hoverColor_b;
     idWinFloatPtr	hoverColor_w;
 #endif
 		idWinVec4	borderColor;
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     idWinFloatPtr	borderColor_r;
     idWinFloatPtr	borderColor_g;
     idWinFloatPtr	borderColor_b;
@@ -493,7 +493,7 @@ class idWindow
 		idWinFloat	rotate;
 		idWinStr	text;
 		idWinBackground	backGroundName;			//
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     idWinFloat textspacing;
     idWinFloat textstyle;
     idWinInt itemheight;

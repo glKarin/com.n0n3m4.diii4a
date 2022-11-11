@@ -185,7 +185,7 @@ ID_INLINE int idToken::WhiteSpaceBeforeToken(void) const
 ID_INLINE void idToken::AppendDirty(const char a)
 {
 	EnsureAlloced(len + 2, true);
-#ifdef _RAVEN // rvlib
+#ifdef _RAVEN // change \ to /
 // RAVEN BEGIN
 // jscott: I hate slashes nearly as much as KRABS
 	if( a == '\\' )

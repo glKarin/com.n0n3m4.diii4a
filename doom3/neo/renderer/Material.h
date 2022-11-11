@@ -291,7 +291,7 @@ typedef enum {
 	CONTENTS_AREAPORTAL			= BIT(20),	// portal separating renderer areas
 	CONTENTS_NOCSG				= BIT(21),	// don't cut this brush with CSG operations in the editor
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // bdube: new clip that blocks monster visibility
 	CONTENTS_SIGHTCLIP			= BIT(16),	// used for blocking sight for actors and cameras
@@ -711,7 +711,7 @@ class idMaterial : public idDecl
 			return portalSky;
 		};
 		void				AddReference();
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 material
 	const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
 #endif
 
@@ -753,7 +753,7 @@ class idMaterial : public idDecl
 		int					entityGui;			// draw a gui with the idUserInterface from the renderEntity_t
 		// non zero will draw gui, gui2, or gui3 from renderEnitty_t
 		mutable idUserInterface	*gui;			// non-custom guis are shared by all users of a material
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 material
 // RAVEN BEGIN
 // jscott: for material types
 	const rvDeclMatType* materialType;

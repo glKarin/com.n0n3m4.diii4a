@@ -610,7 +610,7 @@ idCVar net_warnStale( "net_warnStale", "1", CVAR_INTEGER | CVAR_GAME | CVAR_NOCH
 
 // RAVEN BEGIN
 // bdube: cvar helps
-#ifdef _QUAKE4 //k placeholder
+#ifdef _QUAKE4 //k: placeholder
 #define CVARHELP_GAME BIT(25)
 #define CVARHELP_AI BIT(26)
 #define CVARHELP_PHYSICS BIT(27)

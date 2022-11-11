@@ -112,7 +112,7 @@ void idMaterial::CommonInit()
 	suppressInSubview = false;
 	refCount = 0;
 	portalSky = false;
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 for trace
 // jmarshall - quake 4
 	materialType = 0;
 // jmarshall end
@@ -297,7 +297,7 @@ static infoParm_t	infoParms[] = {
 	{"surftype14",	0,	SURFTYPE_14,	0 },
 	{"surftype15",	0,	SURFTYPE_15,	0 },
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake 4 material flags
 	{"vehicleclip",	0,	0,	CONTENTS_VEHICLECLIP },
 	{"flyclip",	0,	0,	CONTENTS_FLYCLIP },
 	{"largeshotclip",	0,	0,	CONTENTS_LARGESHOTCLIP },
@@ -305,6 +305,7 @@ static infoParm_t	infoParms[] = {
 	{"projectileClip",	0,	0,	CONTENTS_PROJECTILECLIP },
 	{"notacticalfeatures",	0,	0,	CONTENTS_NOTACTICALFEATURES },
 	{"bounce",	0,	SURF_BOUNCE,	0 },
+	{"sightClip",	0,	0,	CONTENTS_SIGHTCLIP },
 #endif
 };
 
@@ -675,7 +676,7 @@ int idMaterial::ParseTerm(idLexer &src)
 		return EXP_REG_GLOBAL7;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 material property
 	if (!token.Icmp("glslPrograms")) {
 		return GetExpressionConstant(0);
 	}
@@ -878,7 +879,7 @@ int idMaterial::NameToSrcBlendMode(const idStr &name)
 	} else if (!name.Icmp("GL_SRC_ALPHA_SATURATE")) {
 		return GLS_SRCBLEND_ALPHA_SATURATE;
 	}
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 blend
 	else if (!name.Icmp("GL_SRC_COLOR")) {
 		return GLS_SRCBLEND_SRC_COLOR;
 	}
@@ -1128,18 +1129,14 @@ void idMaterial::ParseFragmentMap(idLexer &src, newShaderStage_t *newStage)
 		}
 
 		if (!token.Icmp("forceHighQuality")) {
-#if !defined(_RAVENxxx)
 			td = TD_HIGH_QUALITY;
-#endif
 			continue;
 		}
 
 		if (!token.Icmp("uncompressed") || !token.Icmp("highquality")) {
-#if !defined(_RAVENxxx)
 			if (!globalImages->image_ignoreHighQuality.GetInteger()) {
 				td = TD_HIGH_QUALITY;
 			}
-#endif
 
 			continue;
 		}
@@ -1293,7 +1290,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			continue;
 		}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 material property
 // jmarshall: quake 4 materials
         if (!token.Icmp("nomips"))
         {
@@ -1425,19 +1422,15 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 
 		if (!token.Icmp("uncompressed") || !token.Icmp("highquality")) {
-#if !defined(_RAVENxxx)
 			if (!globalImages->image_ignoreHighQuality.GetInteger()) {
 				td = TD_HIGH_QUALITY;
 			}
-#endif
 
 			continue;
 		}
 
 		if (!token.Icmp("forceHighQuality")) {
-#if !defined(_RAVENxxx)
 			td = TD_HIGH_QUALITY;
-#endif
 			continue;
 		}
 
@@ -1775,7 +1768,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			continue;
 		}
 
-#ifdef _RAVEN //k unsupported GLSL shader program in material
+#ifdef _RAVEN //k: unsupported GLSL shader program in material
 		if (!token.Icmp("glslProgram")) {
 			idStr tStr;
 			if (src.ReadRestOfLine(tStr)) {
@@ -2109,7 +2102,7 @@ void idMaterial::ParseMaterial(idLexer &src)
 			src.SkipRestOfLine();
 			continue;
 		}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 material property
 // jmarshall - quake 4 materials.
         else if (!token.Icmp("materialImage"))
         {
@@ -2148,18 +2141,20 @@ void idMaterial::ParseMaterial(idLexer &src)
 			SetMaterialFlag(MF_NOSHADOWS);
 			continue;
 		}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 material property
 // jmarshall - possible legacy optimisations that aren't needed for current hardware.
         else if (!token.Icmp("notfix"))
         {
             // Unknown what this is used for.
             continue;
         }
+				/*
         else if (!token.Icmp("sightClip"))
         {
             // Unknown what this is used for.
             continue;
         }
+				*/
         else if (!token.Icmp("sky"))
         {
             // Unknown what this is used for.
@@ -2176,7 +2171,7 @@ void idMaterial::ParseMaterial(idLexer &src)
 			suppressInSubview = true;
 			continue;
 		}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 material property
 // jmarshall
         else if (!token.Icmp("materialType"))
         {
@@ -2186,7 +2181,7 @@ void idMaterial::ParseMaterial(idLexer &src)
         }
 // jmarshall end
 #endif
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 material property
 		else if (!token.Icmp("portalDistanceNear")) {
 			(void)src.ParseFloat(); // a number
 			continue;
@@ -2383,7 +2378,7 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// diffusemap for stage shortcut
 		else if (!token.Icmp("diffusemap")) {
-#ifdef _RAVENxxx
+#if defined(_RAVENxxx)
 // jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
 			idStr nstr;
             src.ReadRestOfLine(nstr);
@@ -2401,7 +2396,7 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// specularmap for stage shortcut
 		else if (!token.Icmp("specularmap")) {
-#ifdef _RAVENxxx
+#if defined(_RAVENxxx)
 // jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
 			idStr nstr;
             src.ReadRestOfLine(nstr);
@@ -2419,7 +2414,7 @@ void idMaterial::ParseMaterial(idLexer &src)
 		}
 		// normalmap for stage shortcut
 		else if (!token.Icmp("bumpmap")) {
-#ifdef _RAVENxxx
+#if defined(_RAVENxxx)
 // jmarshall - calling ParsePastImageProgram twice is a perf hit on load, and causes parsing problems during the stage parse.
 			idStr nstr;
             src.ReadRestOfLine(nstr);

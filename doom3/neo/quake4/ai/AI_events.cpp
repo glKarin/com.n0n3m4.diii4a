@@ -585,7 +585,7 @@ void idAI::Event_ThrowMoveable( void ) {
 	}
 	if ( moveable ) {
 		moveable->Unbind();
-		moveable->PostEventMS( &EV_SetOwner, 200, 0/*NULL*/ ); //k 4th arg
+		moveable->PostEventMS( &EV_SetOwner, 200, NULL );
 	}
 }
 
@@ -609,7 +609,7 @@ void idAI::Event_ThrowAF( void ) {
 	}
 	if ( af ) {
 		af->Unbind();
-		af->PostEventMS( &EV_SetOwner, 200, 0/*NULL*/ ); //k 4th arg
+		af->PostEventMS( &EV_SetOwner, 200, NULL );
 	}
 }
 

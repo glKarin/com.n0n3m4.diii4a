@@ -371,7 +371,7 @@ public:
 
 	// Set any additional gui variables needed by the loading screen
 	virtual void				SetupLoadingGui( idUserInterface *gui ) = 0;
-#ifdef _RAVEN
+#ifdef _RAVEN // bot / compat
 	virtual void			ServerClientBegin( int clientNum, bool isBot, const char* botName) = 0;
 	virtual void				SpawnPlayer( int clientNum, bool isBot, const char* botName) = 0;
 	//k compat

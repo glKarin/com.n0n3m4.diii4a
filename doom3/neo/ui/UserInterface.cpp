@@ -369,7 +369,7 @@ bool idUserInterfaceLocal::InitFromFile(const char *qpath, bool rebuild, bool ca
 		common->Warning("Couldn't load gui: '%s'", qpath);
 	}
 
-#ifdef _RAVENxxx //k: GUI initilized event
+#ifdef _RAVENxxx //k: GUI initilized event, not here
 	desktop->RunScript(idWindow::ON_INIT);
 #endif
 
@@ -495,7 +495,7 @@ float idUserInterfaceLocal::GetStateFloat(const char *varName, const char *defau
 
 void idUserInterfaceLocal::StateChanged(int _time, bool redraw)
 {
-#ifdef _RAVEN
+#ifdef _RAVEN //k: run onInit gui script
 	const bool IsInit = time == 0;
 #endif
 
@@ -746,6 +746,7 @@ void idUserInterfaceLocal::SetCursor(float x, float y)
 
 #ifdef _RAVEN
 void idUserInterfaceLocal::SetInteractive(bool interactive) {
+	//SetStateString("noninteractive", interactive ? "0" : "1");
 	this->interactive = interactive;
 }
 #endif

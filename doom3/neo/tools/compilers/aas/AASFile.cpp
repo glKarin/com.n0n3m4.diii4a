@@ -311,7 +311,7 @@ bool idAASSettings::FromParser(idLexer &src)
 			if (!ParseBool(src, usePatches)) {
 				return false;
 			}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 aas file
 		}
 // jmarshall: AAS 1.08
 		else if (token == "generateTacticalFeatures") {
@@ -538,7 +538,7 @@ bool idAASSettings::WriteToFile(idFile *fp) const
 	fp->WriteFloatString("\tplayerFlood = %d\n", playerFlood);
 	fp->WriteFloatString("\tallowSwimReachabilities = %d\n", allowSwimReachabilities);
 	fp->WriteFloatString("\tallowFlyReachabilities = %d\n", allowFlyReachabilities);
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 aas file
 // jmarshall - AAS 1.08
 	//k fp->WriteFloatString("\tgenerateAllFaces = 0\n");
 	fp->WriteFloatString("\tgenerateTacticalFeatures = 0\n");
@@ -794,7 +794,7 @@ bool idAASFileLocal::Write(const idStr &fileName, unsigned int mapFileCRC)
 			num++;
 		}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 aas file
 // jmarshall: AAS 1.08 - numFeatures/firstFeature
 		aasFile->WriteFloatString( "\t%d ( %d %d %d %d %d %d %d %d ) %d {\n", i, areas[i].flags, areas[i].contents,
 						areas[i].firstFace, areas[i].numFaces, areas[i].cluster, areas[i].clusterAreaNum, /*areas[i].numFeatures*/ 0, /*areas[i].firstFeature*/ 0, num );
@@ -1128,7 +1128,7 @@ bool idAASFileLocal::ParseAreas(idLexer &src)
 		area.numFaces = src.ParseInt();
 		area.cluster = src.ParseInt();
 		area.clusterAreaNum = src.ParseInt();
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 aas file
 // jmarshall - AAS 1.08 
 		area.numFeatures = src.ParseInt();
 		area.firstFeature = src.ParseInt();
@@ -1159,7 +1159,7 @@ bool idAASFileLocal::ParseNodes(idLexer &src)
 	aasNode_t node;
 
 	numNodes = src.ParseInt();
-#ifdef _RAVEN
+#ifdef _RAVEN // in quake4 paks, have some invalid aas files with node num is 0 or 1
 // jmarshall - AAS 1.08
 	if (numNodes <= 1) //k: at least 2
 	{
@@ -1377,11 +1377,12 @@ bool idAASFileLocal::Load(const idStr &fileName, unsigned int mapFileCRC)
 			if (!ParseClusters(src)) {
 				return false;
 			}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 aas file
 		}
 // jmarshall - AAS 1.08
 		else if (token == "featureIndex") {
 			int numFeatureIndexes = src.ParseInt();
+			featureIndexes.Resize(numFeatureIndexes);
 			src.ExpectTokenString("{");
 
 			for (int d = 0; d < numFeatureIndexes; d++)
@@ -1396,11 +1397,12 @@ bool idAASFileLocal::Load(const idStr &fileName, unsigned int mapFileCRC)
 		}
 		else if (token == "features") {
 			int numFeatures = src.ParseInt();
+			features.Resize(numFeatures);
 			src.ExpectTokenString("{");
 
 			for (int d = 0; d < numFeatures; d++)
 			{
-				aasFeature_t feature = { };
+				aasFeature_t feature; // = { };
 
 				src.ParseInt();
 				src.ExpectTokenString("(");

@@ -1218,7 +1218,7 @@ void R_RenderView(viewDef_t *parms)
 	// constrain the view frustum to the view lights and entities
 	R_ConstrainViewFrustum();
 
-#ifdef _RAVEN
+#ifdef _RAVEN // particle
     R_AddEffectSurfaces();
 #endif
 

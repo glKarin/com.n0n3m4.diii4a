@@ -64,7 +64,7 @@ class idThread;
 class idEditEntities;
 class idLocationEntity;
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 // jmarshall
 class rvmBot;
 // jmarshall end
@@ -917,7 +917,7 @@ public:
 	void					ServerSetMinSpawnIndex( void );
 	void					ServerSetEntityIndexWatermark( int instanceID );
 
-#ifndef _QUAKE4
+#if !defined(_QUAKE4)
 private:
 #endif
 // RAVEN BEGIN
@@ -925,7 +925,7 @@ private:
 	idList<idClip*>			clip;					// collision detection
 	idList<rvInstance*>		instances;
 // RAVEN END
-#ifdef _RAVEN
+#ifdef _RAVEN // compat
 	virtual void				GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ]);
 private:
 	idStr GetBestMPGametype(const char *map, const char *gametype) const;
@@ -1115,7 +1115,7 @@ public:
 	pvsHandle_t				GetClientPVS( idPlayer *player, pvsType_t type );
 
 	int						GetCurrentDemoProtocol( void ) { return demo_protocol; }
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 // jmarshall
 	virtual void			ServerClientBegin( int clientNum, bool isBot, const char* botName);
 	virtual void			SpawnPlayer( int clientNum, bool isBot, const char* botName);
@@ -1460,7 +1460,7 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 #include "../raven/idlib/containers/ListGame.h"
 #include "bots/Bot.h"
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 //k: always run
 extern idCVar harm_g_alwaysRun;
 #if 1
 extern idCVar harm_in_alwaysRun;

@@ -127,7 +127,7 @@ void rvVehicleWalker::Restore ( idRestoreGame *savefile ) {
 rvVehicleWalker::UpdateState
 ================
 */
-#ifdef _QUAKE4
+#ifdef _QUAKE4 //k: renormalize walker movment
 idCVar harm_g_vehicleWalkerMoveNormalize( "harm_g_vehicleWalkerMoveNormalize", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: Re-normalize vehicle walker movment." );
 #endif
 void rvVehicleWalker::UpdateState ( void ) {

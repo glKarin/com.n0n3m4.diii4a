@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: dynamic model gui trace
 #include "Model_local.h"
 #endif
 

@@ -211,7 +211,7 @@ void idClipModel::ReplaceTraceModel( int index, const idTraceModel &trm, const i
 
 // jmarshall
 #if 1
-	if(entry->collisionModel)
+	if(entry->collisionModel > 0)
 	{
 		collisionModelManager->FreeModel( entry->collisionModel );
 	}
@@ -383,7 +383,7 @@ idClipModel::LoadModel
 bool idClipModel::LoadModel( const char *name ) {
 	FreeModel();
 // jmarshall: added precache flag
-#ifdef _QUAKE4
+#if 1
 	collisionModel = collisionModelManager->LoadModel( gameLocal.GetMapName(), name, false );
 #else
 	collisionModel = collisionModelManager->LoadModel( gameLocal.GetMapName(), name );
@@ -515,7 +515,7 @@ idClipModel::idClipModel( const idClipModel *model ) {
 	collisionModel = 0;
 	if ( model->collisionModel > 0 ) {
 // jmarshall - added precache flag
-#ifdef _QUAKE4
+#if 1
 		collisionModel = collisionModelManager->LoadModel( gameLocal.GetMapName(), collisionModelManager->GetModelName(model->collisionModel), false );
 #else
 		collisionModel = collisionModelManager->LoadModel( gameLocal.GetMapName(), model->collisionModel->GetName() );
@@ -595,7 +595,7 @@ void idClipModel::Restore( idRestoreGame *savefile ) {
 	savefile->ReadString( collisionModelName );
 	if ( collisionModelName.Length() ) {
 // jmarshall - added precache flag
-#ifdef _QUAKE4
+#if 1
 		collisionModel = collisionModelManager->LoadModel( gameLocal.GetMapName(), collisionModelName, false );
 #else
 		collisionModel = collisionModelManager->LoadModel( gameLocal.GetMapName(), collisionModelName );
@@ -889,7 +889,7 @@ void idClip::Init( void ) {
 
 	// get world map bounds
 // jmarshall - added precache flag
-#ifdef _QUAKE4
+#if 1
 	world = collisionModelManager->LoadModel( gameLocal.GetMapName(), WORLD_MODEL_NAME, false );
 #else
 	world = collisionModelManager->LoadModel( gameLocal.GetMapName(), WORLD_MODEL_NAME );
@@ -2037,7 +2037,7 @@ bool idClip::GetModelContactFeature( const contactInfo_t &contact, const idClipM
 	}
 
 	// if contact with a collision model
-	if ( model >= 0 ) {
+	if ( model > 0 ) { // >=
 		switch( contact.type ) {
 			case CONTACT_EDGE: {
 				// the model contact feature is a collision model edge

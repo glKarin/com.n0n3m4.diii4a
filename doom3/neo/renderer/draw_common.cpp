@@ -2284,7 +2284,7 @@ void	RB_STD_DrawView(void)
 	RB_RenderDebugTools(drawSurfs, numDrawSurfs);
 	#endif
 
-#ifdef _RAVENxxx
+#if defined(_RAVENxxx)
 // jmarshall - stupid OpenGL
 	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO);
 // jmarshall end

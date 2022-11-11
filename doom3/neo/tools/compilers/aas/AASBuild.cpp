@@ -157,7 +157,7 @@ bool idAASBuild::LoadProcBSP(const char *name, ID_TIME_T minFileTime)
 		return false;
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 proc file
 // jmarshall: quake 4 proc format
 	if (!src->ReadToken(&token) || token.Icmp(PROC_FILEVERSION)) {
 		common->Printf("idAASFileLocal::LoadProcBSP: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);
@@ -725,13 +725,9 @@ bool idAASBuild::Build(const idStr &fileName, const idAASSettings *settings)
 
 	// check if this map has any entities that use this AAS file
 	if (!CheckForEntities(mapFile, entityClassNames)) {
-//#ifndef _RAVEN
 		delete mapFile;
-//#endif
 		common->Printf("no entities in map that use %s\n", settings->fileExtension.c_str());
-//#ifndef _RAVEN
 		return true;
-//#endif
 	}
 
 	// load map file brushes

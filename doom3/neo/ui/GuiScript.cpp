@@ -242,7 +242,7 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src)
 
 		//
 		//  added float variable
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
         if (!((vec4 || rect || val || valp) && from && to && timeStr))
 #else
 		if (!((vec4 || rect || val) && from && to && timeStr))
@@ -435,7 +435,7 @@ guiCommandDef_t commandList[] = {
 	{ "localSound", Script_LocalSound, 1, 1 },
 	{ "runScript", Script_RunScript, 1, 1 },
 	{ "evalRegs", Script_EvalRegs, 0, 0 }
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui cmd
 // jmarshall - Quake 4 gui implementation
     , { "namedevent", Script_NamedEvent, 1, 1},
     { "stoptransitions", Script_StopTransitions, 1, 1},

@@ -223,7 +223,7 @@ int rvRandom::Init( void )
 	return( mSeed );
 }
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall
 /*
 ===================

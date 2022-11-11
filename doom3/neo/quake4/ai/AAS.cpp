@@ -224,7 +224,7 @@ idAASLocal::AreaBounds
 ============
 */
 idBounds & idAASLocal::AreaBounds( int areaNum ) const {
-#ifdef _QUAKE4
+#if 1
 	return const_cast<aasArea_t &>(file->GetArea( areaNum )).bounds;
 #else
 	return file->GetArea( areaNum ).bounds;
@@ -353,7 +353,7 @@ idAASCallback::testResult_t idAASCallback::Test ( class idAAS *aas, int areaNum,
 	}
 	
 	// Get area for edges
-#ifdef _QUAKE4
+#if 1
 	const 
 #endif
 	aasArea_t& area = file->GetArea ( areaNum );
@@ -393,7 +393,7 @@ idAASCallback::testResult_t idAASCallback::Test ( class idAAS *aas, int areaNum,
 	int	f;
 	int	e;
 	for ( f = 0; f < area.numFaces; f ++ ) {
-#ifdef _QUAKE4
+#if 1
 	const 
 #endif
 		aasFace_t& face = file->GetFace ( abs ( file->GetFaceIndex (area.firstFace + f ) ) );

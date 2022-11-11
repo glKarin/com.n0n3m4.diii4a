@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 guide
 // jmarshall - Raven Decl Support
 //#include "../renderer/tr_local.h"
 #include "../raven/bse/BSE_Envelope.h"
@@ -198,7 +198,7 @@ class idDeclFile
 		int							numLines;
 
 		idDeclLocal 				*decls;
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 guide
 // jmarshall: guide support
 private:
     idStr						PreprocessGuides(const char* buffer, int length);
@@ -731,7 +731,7 @@ int idDeclFile::LoadAndParse()
 	idDeclLocal *newDecl;
 	bool		reparse;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 guide
 // jmarshall: quake 4 guide support
     bool		canUseGuides = strstr(fileName, ".mtr");
 // jmarshall end
@@ -746,7 +746,7 @@ int idDeclFile::LoadAndParse()
 		return 0;
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 guide
 // jmarshall: quake 4 guide support
     idStr finalPreprocessedBuffer;
 
@@ -765,7 +765,7 @@ int idDeclFile::LoadAndParse()
 // jmarshall end
 #endif
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	if (!src.LoadMemory(finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length(), fileName))
 #else
 	if (!src.LoadMemory(buffer, length, fileName))
@@ -783,7 +783,7 @@ int idDeclFile::LoadAndParse()
 
 	src.SetFlags(DECL_LEXER_FLAGS);
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	checksum = MD5_BlockChecksum(finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length());
 #else
 	checksum = MD5_BlockChecksum(buffer, length);
@@ -905,7 +905,7 @@ int idDeclFile::LoadAndParse()
 			newDecl->textSource = NULL;
 		}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 		newDecl->SetTextLocal(finalPreprocessedBuffer.c_str() + startMarker, size);
 #else
 		newDecl->SetTextLocal(buffer + startMarker, size);
@@ -969,7 +969,7 @@ void idDeclManagerLocal::Init(void)
 	ClearHuffmanFrequencies();
 #endif
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 guide
 // jmarshall - template(guide) Support
     ParseGuides();
 // jmarshall end
@@ -991,7 +991,7 @@ void idDeclManagerLocal::Init(void)
 	RegisterDeclType("video",				DECL_VIDEO,			idDeclAllocator<idDeclVideo>);
 	RegisterDeclType("audio",				DECL_AUDIO,			idDeclAllocator<idDeclAudio>);
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 new decl
 // jmarshall: Raven Decl Support
     RegisterDeclType(  "materialType",		DECL_MATERIALTYPE,  idDeclAllocator<rvDeclMatType>);
     RegisterDeclType(  "lipSync",			DECL_LIPSYNC,		idDeclAllocator<rvDeclLipSync>);
@@ -1017,7 +1017,7 @@ void idDeclManagerLocal::Init(void)
 	RegisterDeclFolder("skins",			".skin",			DECL_SKIN);
 	RegisterDeclFolder("sound",			".sndshd",			DECL_SOUND);
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 new decl
 // jmarshall: Raven Decl Support
     RegisterDeclFolder("materials/types",	".mtt",				DECL_MATERIALTYPE);
     RegisterDeclFolder("lipsync",			".lipsync",			DECL_LIPSYNC);
@@ -1193,7 +1193,7 @@ void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *exte
 	int i, j;
 	idStr fileName;
 	idDeclFolder *declFolder;
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall - decls subfolders
     idList<idStr> fileList;
 // jmarshall end
@@ -1220,7 +1220,7 @@ void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *exte
 	}
 
 	// scan for decl files
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall - decls subfolders
     RegisterDeclSubFolder(declFolder->folder, declFolder->extension, fileList);
 // jmarshall end
@@ -1229,13 +1229,13 @@ void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *exte
 #endif
 
 	// load and parse decl files
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
     for ( i = 0; i < fileList.Num(); i++ )
 #else
 	for (i = 0; i < fileList->GetNumFiles(); i++)
 #endif
 	{
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall
         //fileName = declFolder->folder + "/" + fileList[ i ];
         fileName = fileList[i];
@@ -2434,7 +2434,7 @@ const char *idDeclLocal::DefaultDefinition() const
 idDeclLocal::Parse
 =================
 */
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 bool idDeclLocal::Parse(const char *text, const int textLength, bool noCaching)
 #else
 bool idDeclLocal::Parse(const char *text, const int textLength)
@@ -2578,7 +2578,7 @@ bool idDeclLocal::EverReferenced(void) const
 	return everReferenced;
 }
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 guide
 /*
 ================
 idDeclFile::PreprocessGuides

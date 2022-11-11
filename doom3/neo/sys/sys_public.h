@@ -369,7 +369,7 @@ typedef enum {
 	NA_LOOPBACK,
 	NA_BROADCAST,
 	NA_IP
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 		,
 // jmarshall
 	NA_BOT

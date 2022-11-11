@@ -184,7 +184,7 @@ class idAsyncServer
 
 		void				PrintLocalServerInfo(void);
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 // jmarshall
 	int					AllocOpenClientSlotForAI(const char* botName, int maxPlayersOnServer);
 	int 				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);

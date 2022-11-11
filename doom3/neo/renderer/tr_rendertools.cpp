@@ -78,6 +78,133 @@ int				rb_debugPolygonTime = 0;
 
 static void RB_DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align);
 
+#ifdef GL_ES_VERSION_2_0
+static GLenum type;
+static GLfloat color[4] = {0, 0, 0, 1};
+static idList<idVec3> vertex_list;
+static GLuint client_state = 1 | 0 | 4;
+static float	mvp_matrix[16] = {
+	1, 0, 0, 0, 
+	0, 1, 0, 0, 
+	0, 0, 1, 0, 
+	0, 0, 0, 1
+};
+
+#define BEGIN_RENDERTOOLS \
+{ \
+	GL_UseProgram(NULL); \
+	glBindBuffer(GL_ARRAY_BUFFER, 0); \
+	vertex_list.Clear(); \
+	client_state = 1 | 0 | 4; \
+	color[0] = color[1] = color[2] = 0; \
+	color[3] = 1; \
+	type = 0; \
+	myGlMultMatrix(mat4_identity.ToFloatPtr(), backEnd.viewDef->projectionMatrix, mvp_matrix); \
+}
+#define glDepthRange(a, b) glDepthRangef(a, b)
+#define GL_TEXTURE_COORD_ARRAY 1
+#define GL_COLOR_ARRAY 2
+
+static void glVertex3f(GLfloat x, GLfloat y, GLfloat z)
+{
+	vertex_list.Append(idVec3(x, y, z));
+}
+
+static void glVertex3fv(GLfloat *v)
+{
+	vertex_list.Append(idVec3(v[0], v[1], v[2]));
+}
+
+static void glColor3f(GLfloat r, GLfloat g, GLfloat b)
+{
+	color[0] = r;
+	color[1] = g;
+	color[2] = b;
+	color[3] = 1;
+}
+
+static void glColor3fv(GLfloat *v)
+{
+	color[0] = v[0];
+	color[1] = v[1];
+	color[2] = v[2];
+	color[3] = 1;
+}
+
+static void glColor4fv(GLfloat *v)
+{
+	color[0] = v[0];
+	color[1] = v[1];
+	color[2] = v[2];
+	color[3] = v[3];
+}
+
+static void glColor4ubv(GLubyte *v)
+{
+	color[0] = v[0] / 255.0f;
+	color[1] = v[1] / 255.0f;
+	color[2] = v[2] / 255.0f;
+	color[3] = v[3] / 255.0f;
+}
+
+static void glDisableClientState(int i)
+{
+	//client_state &= ~(1 << i); // `default` glsl shader must attr_Color is all [255, 255, 255, 255]
+}
+
+static void glLoadMatrixf(GLfloat modelViewMatrix[16])
+{
+	myGlMultMatrix(modelViewMatrix, backEnd.viewDef->projectionMatrix, mvp_matrix);
+}
+
+static void glBegin(GLenum t)
+{
+	type = t;
+}
+
+// draw func
+static void glEnd()
+{
+	int num = vertex_list.Num();
+	if(!type || !num)
+		return;
+
+	GL_UseProgram(&defaultShader);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+
+	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mvp_matrix);
+
+	globalImages->whiteImage->Bind();
+	GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
+	const GLfloat zero[4] = {0, 0, 0, 0};
+	GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
+	const GLfloat one[4] = {1, 1, 1, 1};
+	GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
+
+	GLfloat *vertex = (GLfloat *)malloc(sizeof(GLfloat) * num * 3);
+	GLubyte *color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
+	memset(color, 0xFF, sizeof(GLubyte) * num * 4);
+	for(int i = 0; i < num; i++)
+	{
+		const idVec3 &v3 = vertex_list[i];
+		vertex[i * 3] = v3[0];
+		vertex[i * 3 + 1] = v3[1];
+		vertex[i * 3 + 2] = v3[2];
+	}
+	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, 0, vertex);
+	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, 0, color);
+	glDrawArrays(type, 0, num);
+	free(vertex);
+	free(color);
+	vertex_list.Clear();
+	type = 0;
+	GL_UseProgram(NULL);
+}
+#endif
+
 /*
 ================
 RB_DrawBounds
@@ -85,7 +212,7 @@ RB_DrawBounds
 */
 void RB_DrawBounds(const idBounds &bounds)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	if (bounds.IsCleared()) {
 		return;
 	}
@@ -116,7 +243,7 @@ void RB_DrawBounds(const idBounds &bounds)
 	glVertex3f(bounds[1][0], bounds[1][1], bounds[0][2]);
 	glVertex3f(bounds[1][0], bounds[1][1], bounds[1][2]);
 	glEnd();
-#endif
+//#endif
 }
 
 
@@ -127,13 +254,13 @@ RB_SimpleSurfaceSetup
 */
 void RB_SimpleSurfaceSetup(const drawSurf_t *drawSurf)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	// change the matrix if needed
 	if (drawSurf->space != backEnd.currentSpace) {
 		glLoadMatrixf(drawSurf->space->modelViewMatrix);
 		backEnd.currentSpace = drawSurf->space;
 	}
-#endif
+//#endif
 
 	// change the scissor if needed
 	if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
@@ -153,9 +280,9 @@ RB_SimpleWorldSetup
 void RB_SimpleWorldSetup(void)
 {
 	backEnd.currentSpace = &backEnd.viewDef->worldSpace;
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	glLoadMatrixf(backEnd.viewDef->worldSpace.modelViewMatrix);
-#endif
+//#endif
 
 	backEnd.currentScissor = backEnd.viewDef->scissor;
 	glScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
@@ -881,7 +1008,7 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 		return;
 	}
 
-#if !defined(GL_ES_VERSION_2_0)
+#if 1 //!defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
 	glDisable(GL_TEXTURE_2D);
@@ -892,7 +1019,9 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 	GL_State(GLS_POLYMODE_LINE);
 
 	glPolygonOffset(-1, -2);
+#if !defined(GL_ES_VERSION_2_0)
 	glEnable(GL_POLYGON_OFFSET_LINE);
+#endif
 
 	idVec3	trans[3];
 	float	matrix[16];
@@ -906,7 +1035,9 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 	                          0.35f, colorBlue, tr.primaryView->renderView.viewaxis);
 
 	glEnable(GL_DEPTH_TEST);
+#if !defined(GL_ES_VERSION_2_0)
 	glDisable(GL_POLYGON_OFFSET_LINE);
+#endif
 
 	glDepthRange(0, 1);
 	GL_State(GLS_DEFAULT);
@@ -942,7 +1073,7 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 		return;
 	}
 
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	globalImages->BindNull();
 	glDisable(GL_TEXTURE_2D);
@@ -960,9 +1091,7 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 	for (; vModels ; vModels = vModels->next) {
 		idBounds	b;
 
-#if !defined(GL_ES_VERSION_2_0)
 		glLoadMatrixf(vModels->modelViewMatrix);
-#endif
 
 		if (!vModels->entityDef) {
 			continue;
@@ -987,12 +1116,14 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 	}
 
 	glEnable(GL_DEPTH_TEST);
+#if !defined(GL_ES_VERSION_2_0)
 	glDisable(GL_POLYGON_OFFSET_LINE);
+#endif
 
 	glDepthRange(0, 1);
 	GL_State(GLS_DEFAULT);
 	GL_Cull(CT_FRONT_SIDED);
-#endif
+//#endif
 }
 
 /*
@@ -1206,7 +1337,7 @@ Draw each triangle with the solid vertex colors
 */
 static void RB_ShowVertexColor(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int		i, j;
 	drawSurf_t	*drawSurf;
 	const srfTriangles_t	*tri;
@@ -1246,7 +1377,7 @@ static void RB_ShowVertexColor(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	GL_State(GLS_DEFAULT);
-#endif
+//#endif
 }
 
 
@@ -1259,7 +1390,7 @@ Debugging tool
 */
 static void RB_ShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i, j;
 	drawSurf_t	*drawSurf;
 	idVec3		end;
@@ -1350,7 +1481,7 @@ static void RB_ShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	glEnable(GL_STENCIL_TEST);
-#endif
+//#endif
 }
 
 
@@ -1363,7 +1494,7 @@ Debugging tool
 */
 static void RB_AltShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i, j, k;
 	drawSurf_t	*drawSurf;
 	idVec3		end;
@@ -1431,7 +1562,7 @@ static void RB_AltShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
-#endif
+//#endif
 }
 
 
@@ -1445,7 +1576,7 @@ Draw texture vectors in the center of each triangle
 */
 static void RB_ShowTextureVectors(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i, j;
 	drawSurf_t	*drawSurf;
 	const srfTriangles_t	*tri;
@@ -1536,7 +1667,7 @@ static void RB_ShowTextureVectors(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 		glEnd();
 	}
-#endif
+//#endif
 }
 
 /*
@@ -1548,7 +1679,7 @@ Draw lines from each vertex to the dominant triangle center
 */
 static void RB_ShowDominantTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i, j;
 	drawSurf_t	*drawSurf;
 	const srfTriangles_t	*tri;
@@ -1561,7 +1692,9 @@ static void RB_ShowDominantTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	glPolygonOffset(-1, -2);
+#if !defined(GL_ES_VERSION_2_0)
 	glEnable(GL_POLYGON_OFFSET_LINE);
+#endif
 
 	globalImages->BindNull();
 
@@ -1602,8 +1735,10 @@ static void RB_ShowDominantTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 		glEnd();
 	}
 
+#if !defined(GL_ES_VERSION_2_0)
 	glDisable(GL_POLYGON_OFFSET_LINE);
 #endif
+//#endif
 }
 
 /*
@@ -1615,7 +1750,7 @@ Debugging tool
 */
 static void RB_ShowEdges(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i, j, k, m, n, o;
 	drawSurf_t	*drawSurf;
 	const srfTriangles_t	*tri;
@@ -1710,7 +1845,7 @@ static void RB_ShowEdges(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	glEnable(GL_DEPTH_TEST);
-#endif
+//#endif
 }
 
 /*
@@ -1803,9 +1938,55 @@ RB_ShowPortals
 Debugging tool, won't work correctly with SMP or when mirrors are present
 =====================
 */
+#if defined(GL_ES_VERSION_2_0) // from RenderWorld_portal.cpp
+static void idRenderWorldLocal__ShowPortals()
+{
+	int			i, j;
+	portalArea_t	*area;
+	portal_t	*p;
+	idWinding	*w;
+	idRenderWorldLocal *renderWorld = (idRenderWorldLocal *)backEnd.viewDef->renderWorld;
+	portalArea_t 			*portalAreas = renderWorld->portalAreas;
+	int						numPortalAreas = renderWorld->numPortalAreas;
+
+	// flood out through portals, setting area viewCount
+	for (i = 0 ; i < numPortalAreas ; i++) {
+		area = &portalAreas[i];
+
+		if (area->viewCount != tr.viewCount) {
+			continue;
+		}
+
+		for (p = area->portals ; p ; p = p->next) {
+			w = p->w;
+
+			if (!w) {
+				continue;
+			}
+
+			if (portalAreas[ p->intoArea ].viewCount != tr.viewCount) {
+				// red = can't see
+				glColor3f(1, 0, 0);
+			} else {
+				// green = see through
+				glColor3f(0, 1, 0);
+			}
+
+			glBegin(GL_LINE_LOOP);
+
+			for (j = 0 ; j < w->GetNumPoints() ; j++) {
+				glVertex3fv((*w)[j].ToFloatPtr());
+			}
+
+			glEnd();
+		}
+	}
+}
+#endif
+
 void RB_ShowPortals(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	if (!r_showPortals.GetBool()) {
 		return;
 	}
@@ -1818,10 +1999,14 @@ void RB_ShowPortals(void)
 
 	GL_State(GLS_DEFAULT);
 
+#if !defined(GL_ES_VERSION_2_0)
 	((idRenderWorldLocal *)backEnd.viewDef->renderWorld)->ShowPortals();
+#else
+	idRenderWorldLocal__ShowPortals();
+#endif
 
 	glEnable(GL_DEPTH_TEST);
-#endif
+//#endif
 }
 
 /*
@@ -1831,7 +2016,7 @@ RB_ClearDebugText
 */
 void RB_ClearDebugText(int time)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i;
 	int			num;
 	debugText_t	*text;
@@ -1865,7 +2050,7 @@ void RB_ClearDebugText(int time)
 	}
 
 	rb_numDebugText = num;
-#endif
+//#endif
 }
 
 /*
@@ -1875,7 +2060,7 @@ RB_AddDebugText
 */
 void RB_AddDebugText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align, const int lifetime, const bool depthTest)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	debugText_t *debugText;
 
 	if (rb_numDebugText < MAX_DEBUG_TEXT) {
@@ -1889,7 +2074,7 @@ void RB_AddDebugText(const char *text, const idVec3 &origin, float scale, const 
 		debugText->lifeTime		= rb_debugTextTime + lifetime;
 		debugText->depthTest	= depthTest;
 	}
-#endif
+//#endif
 }
 
 /*
@@ -1901,7 +2086,7 @@ RB_DrawTextLength
 */
 float RB_DrawTextLength(const char *text, float scale, int len)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int i, num, index, charIndex;
 	float spacing, textLen = 0.0f;
 
@@ -1940,7 +2125,7 @@ float RB_DrawTextLength(const char *text, float scale, int len)
 	}
 
 	return textLen;
-#endif
+//#endif
 }
 
 /*
@@ -1953,7 +2138,7 @@ RB_DrawText
 */
 static void RB_DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int i, j, len, num, index, charIndex, line;
 	float textLen, spacing;
 	idVec3 org, p1, p2;
@@ -2030,7 +2215,7 @@ static void RB_DrawText(const char *text, const idVec3 &origin, float scale, con
 
 		glEnd();
 	}
-#endif
+//#endif
 }
 
 /*
@@ -2040,7 +2225,7 @@ RB_ShowDebugText
 */
 void RB_ShowDebugText(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i;
 	int			width;
 	debugText_t	*text;
@@ -2092,7 +2277,7 @@ void RB_ShowDebugText(void)
 
 	glLineWidth(1);
 	GL_State(GLS_DEFAULT);
-#endif
+//#endif
 }
 
 /*
@@ -2102,7 +2287,7 @@ RB_ClearDebugLines
 */
 void RB_ClearDebugLines(int time)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i;
 	int			num;
 	debugLine_t	*line;
@@ -2129,7 +2314,7 @@ void RB_ClearDebugLines(int time)
 	}
 
 	rb_numDebugLines = num;
-#endif
+//#endif
 }
 
 /*
@@ -2139,7 +2324,7 @@ RB_AddDebugLine
 */
 void RB_AddDebugLine(const idVec4 &color, const idVec3 &start, const idVec3 &end, const int lifeTime, const bool depthTest)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	debugLine_t *line;
 
 	if (rb_numDebugLines < MAX_DEBUG_LINES) {
@@ -2150,7 +2335,7 @@ void RB_AddDebugLine(const idVec4 &color, const idVec3 &start, const idVec3 &end
 		line->depthTest = depthTest;
 		line->lifeTime	= rb_debugLineTime + lifeTime;
 	}
-#endif
+//#endif
 }
 
 /*
@@ -2160,7 +2345,7 @@ RB_ShowDebugLines
 */
 void RB_ShowDebugLines(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int			i;
 	int			width;
 	debugLine_t	*line;
@@ -2224,7 +2409,7 @@ void RB_ShowDebugLines(void)
 
 	glLineWidth(1);
 	GL_State(GLS_DEFAULT);
-#endif
+//#endif
 }
 
 /*
@@ -2234,7 +2419,7 @@ RB_ClearDebugPolygons
 */
 void RB_ClearDebugPolygons(int time)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int				i;
 	int				num;
 	debugPolygon_t	*poly;
@@ -2262,7 +2447,7 @@ void RB_ClearDebugPolygons(int time)
 	}
 
 	rb_numDebugPolygons = num;
-#endif
+//#endif
 }
 
 /*
@@ -2272,7 +2457,7 @@ RB_AddDebugPolygon
 */
 void RB_AddDebugPolygon(const idVec4 &color, const idWinding &winding, const int lifeTime, const bool depthTest)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	debugPolygon_t *poly;
 
 	if (rb_numDebugPolygons < MAX_DEBUG_POLYGONS) {
@@ -2282,7 +2467,7 @@ void RB_AddDebugPolygon(const idVec4 &color, const idWinding &winding, const int
 		poly->depthTest = depthTest;
 		poly->lifeTime	= rb_debugPolygonTime + lifeTime;
 	}
-#endif
+//#endif
 }
 
 /*
@@ -2292,7 +2477,7 @@ RB_ShowDebugPolygons
 */
 void RB_ShowDebugPolygons(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int				i, j;
 	debugPolygon_t	*poly;
 
@@ -2310,6 +2495,7 @@ void RB_ShowDebugPolygons(void)
 
 	glEnable(GL_DEPTH_TEST);
 
+#if !defined(GL_ES_VERSION_2_0)
 	if (r_debugPolygonFilled.GetBool()) {
 		GL_State(GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_DEPTHMASK);
 		glPolygonOffset(-1, -2);
@@ -2319,6 +2505,7 @@ void RB_ShowDebugPolygons(void)
 		glPolygonOffset(-1, -2);
 		glEnable(GL_POLYGON_OFFSET_LINE);
 	}
+#endif
 
 	poly = rb_debugPolygons;
 
@@ -2327,7 +2514,11 @@ void RB_ShowDebugPolygons(void)
 
 		glColor4fv(poly->rgb.ToFloatPtr());
 
+#if !defined(GL_ES_VERSION_2_0)
 		glBegin(GL_POLYGON);
+#else
+		glBegin(GL_LINE_LOOP);
+#endif
 
 		for (j = 0; j < poly->winding.GetNumPoints(); j++) {
 			glVertex3fv(poly->winding[j].ToFloatPtr());
@@ -2339,15 +2530,17 @@ void RB_ShowDebugPolygons(void)
 
 	GL_State(GLS_DEFAULT);
 
+#if !defined(GL_ES_VERSION_2_0)
 	if (r_debugPolygonFilled.GetBool()) {
 		glDisable(GL_POLYGON_OFFSET_FILL);
 	} else {
 		glDisable(GL_POLYGON_OFFSET_LINE);
 	}
+#endif
 
 	glDepthRange(0, 1);
 	GL_State(GLS_DEFAULT);
-#endif
+//#endif
 }
 
 /*
@@ -2612,7 +2805,6 @@ void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	RB_LogComment("---------- RB_RenderDebugTools ----------\n");
-
 	GL_State(GLS_DEFAULT);
 	backEnd.currentScissor = backEnd.viewDef->scissor;
 	glScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
@@ -2662,9 +2854,9 @@ RB_ShutdownDebugTools
 */
 void RB_ShutdownDebugTools(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	for (int i = 0; i < MAX_DEBUG_POLYGONS; i++) {
 		rb_debugPolygons[i].winding.Clear();
 	}
-#endif
+//#endif
 }

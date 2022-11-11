@@ -397,4 +397,18 @@ class idRenderModelSprite : public idRenderModelStatic
 		virtual	idBounds		Bounds(const struct renderEntity_s *ent) const;
 };
 
+#ifdef _RAVEN // bse model
+/*
+======================
+rvRenderModelBSE
+======================
+*/
+class rvRenderModelBSE : public idRenderModelStatic {
+public:
+	virtual void				InitFromFile(const char* fileName);
+	virtual void				FinishSurfaces(bool useMikktspace);
+};
+
+#endif
+
 #endif /* !__MODEL_LOCAL_H__ */

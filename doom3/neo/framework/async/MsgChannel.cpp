@@ -55,7 +55,7 @@ All fragments will have the same sequence numbers.
 idCVar net_channelShowPackets("net_channelShowPackets", "0", CVAR_SYSTEM | CVAR_BOOL, "show all packets");
 idCVar net_channelShowDrop("net_channelShowDrop", "0", CVAR_SYSTEM | CVAR_BOOL, "show dropped packets");
 
-#if !defined(_RAVEN)
+#if !defined(_RAVEN) // quake4 in idlib/BitMsg
 /*
 ===============
 idMsgQueue::idMsgQueue
@@ -409,7 +409,7 @@ bool idMsgChannel::ReadMessageData(idBitMsg &out, const idBitMsg &msg)
 
 	// remove acknowledged reliable messages
 	while (reliableSend.GetFirst() <= reliableAcknowledge) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 		if (!reliableSend.Get(0, 0, reliableMessageSize, false))
 #else
 		if (!reliableSend.Get(NULL, reliableMessageSize))
@@ -431,7 +431,7 @@ bool idMsgChannel::ReadMessageData(idBitMsg &out, const idBitMsg &msg)
 		reliableSequence = out.ReadLong();
 
 		if (reliableSequence == reliableReceive.GetLast() + 1) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 			reliableReceive.Add(out.GetData() + out.GetReadCount(), reliableMessageSize, false);
 #else
 			reliableReceive.Add(out.GetData() + out.GetReadCount(), reliableMessageSize);
@@ -721,7 +721,7 @@ bool idMsgChannel::SendReliableMessage(const idBitMsg &msg)
 {
 	bool result;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 // jmarshall
 	if (remoteAddress.type == NA_BOT)
 		return false;
@@ -734,7 +734,7 @@ bool idMsgChannel::SendReliableMessage(const idBitMsg &msg)
 		return false;
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	result = reliableSend.Add(msg.GetData(), msg.GetSize(), false);
 #else
 	result = reliableSend.Add(msg.GetData(), msg.GetSize());
@@ -758,7 +758,7 @@ bool idMsgChannel::GetReliableMessage(idBitMsg &msg)
 	int size;
 	bool result;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall
 	result = reliableReceive.Get( msg.GetData(), msg.GetSize(), size, false );
 // jmarshall end

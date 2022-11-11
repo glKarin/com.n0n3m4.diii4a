@@ -9,8 +9,8 @@ public final class Constants
     public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
-    public static final int CONST_UPDATE_RELEASE = 17;
-    public static final String CONST_RELEASE = "2022-10-29";
+    public static final int CONST_UPDATE_RELEASE = 18;
+    public static final String CONST_RELEASE = "2022-11-11";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -19,8 +19,11 @@ public final class Constants
 	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
-			"Support Quake 4 format fonts. Other language patches will work. D3-format fonts do not need to extract no longer.",
-			"Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`.",
+			"Implement some debug render functions.",
+			"Add player focus GUI bracket and interactive text on HUD in Quake 4.",
+			"Automatic generating AAS file for bot of Multiplayer-Game maps is not need enable net_allowCheats when set cvar `harm_g_autoGenAASFileInMPGame` to 1 in Quake 4.",
+			"Fixed restart menu action in Quake 4.",
+			"Fixed a memory bug that can cause crash in Quake 4.",
 	};
 	public static final String[] LIBS = {
 		"game",

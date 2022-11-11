@@ -180,7 +180,7 @@ class idParser
 		static void		RemoveAllGlobalDefines(void);
 		// set the base folder to load files from
 		static void		SetBaseFolder(const char *path);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall
 	int				Parse1DMatrixLegacy(int x, float* m);
 // jmarshall end

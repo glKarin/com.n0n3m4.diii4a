@@ -4702,6 +4702,18 @@ void idFileSystemLocal::FindMapScreenshot(const char *path, char *buf, int len)
 	idFile	*file;
 	idStr	mapname = path;
 
+#ifdef _RAVEN //k: quake4 loading image
+	mapname.StripFileExtension();
+	const char *entityFilter = cvarSystem->GetCVarString("si_entityFilter");
+	idStr bgimg("gfx/guis/loadscreens/generic");
+	// find mapDef
+	const idDeclEntityDef *mapDef = declManager->FindMapDef(mapname, entityFilter);
+	if (mapDef) {
+		bgimg = mapDef->dict.GetString("loadimage", bgimg.c_str());
+	}
+	bgimg.SetFileExtension(".tga");
+	idStr::Copynz(buf, bgimg.c_str(), len);
+#else
 	mapname.StripPath();
 	mapname.StripFileExtension();
 
@@ -4724,4 +4736,5 @@ void idFileSystemLocal::FindMapScreenshot(const char *path, char *buf, int len)
 			idStr::Copynz(buf, "guis/assets/splash/pdtempa", len);
 		}
 	}
+#endif
 }

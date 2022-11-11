@@ -259,7 +259,7 @@ ID_INLINE void idInterpreter::NextInstruction( int position ) {
 	instructionPointer = position - 1;
 }
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // 64bit
 /*
 ====================
 idInterpreter::PushVector

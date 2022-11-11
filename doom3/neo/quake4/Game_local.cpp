@@ -572,7 +572,7 @@ void idGameLocal::Init( void ) {
 #endif
 	}
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 	else
 	{
 #endif
@@ -581,7 +581,7 @@ void idGameLocal::Init( void ) {
 	botFuzzyWeightManager.Init();
 	botWeaponInfoManager.Init();
 	botGoalManager.BotSetupGoalAI();
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 	}
 #endif
 // jmarshall end
@@ -1329,7 +1329,7 @@ void idGameLocal::SetServerInfo( const idDict &_serverInfo ) {
 	}
 }
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 //k: auto gen aas file for mp game map with bot
 static idCVar harm_g_autoGenAASFileInMPGame( "harm_g_autoGenAASFileInMPGame", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic.");
 #endif
 /*
@@ -1546,7 +1546,7 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 			if(!aasFileExists)
 			{
 				Printf("[Harmattan]: Generate AAS file %s......\n", mapFileName.c_str());
-				cmdSystem->BufferCommandText( CMD_EXEC_NOW, va("runAAS %s", mapFileName.c_str()) );
+				cmdSystem->BufferCommandText( CMD_EXEC_NOW, va("harm_runAAS %s", mapFileName.c_str()) );
 				Printf("[Harmattan]: Generate AAS file %s completed. Try reload AAS.\n", mapFileName.c_str());
 				aasLoadSuc = false;
 				for( i = 0; i < aasNames.Num(); i++ ) {
@@ -2821,12 +2821,12 @@ void idGameLocal::CacheDictionaryMedia( const idDict *dict ) {
 				// precache the render model
 				renderModelManager->FindModel( kv->GetValue() );
 				// precache .cm files only
-#ifdef _QUAKE4
+#if 1
 // jmarshall: caching code is different in Doom 3
 				collisionModelManager->LoadModel(GetMapName(), kv->GetValue(), true);
 // jmarshall end
 #else
-				//collisionModelManager->PreCacheModel( GetMapName(), kv->GetValue() );
+				collisionModelManager->PreCacheModel( GetMapName(), kv->GetValue() );
 #endif
 			}
 		} else if ( MATCH( "s_shader" ) ) {
@@ -5736,7 +5736,7 @@ void idGameLocal::AlertAI( idEntity *ent ) {
 // RAVEN BEGIN
 // bdube: merged
 	if ( ent ) {
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 // jmarshall
 		// Alert any bots near were we just exploded.
 		if (gameLocal.IsMultiplayer() && gameLocal.isServer)
@@ -7769,11 +7769,6 @@ idEntity* idGameLocal::HitScan(
 				TracePoint( owner, tr, start, end, contents, additionalIgnore );
 			}
 
-#ifdef _QUAKE4
-			if (tr.c.materialType) {
-				tr.c.materialType = tr.c.materialType;
-			}
-#endif
 			//gameRenderWorld->DebugArrow( colorRed, start, end, 10, 5000 );
 // RAVEN END
 			
@@ -8661,7 +8656,7 @@ void operator delete[]( void *p ) {
 #endif	// #else #ifdef ID_DEBUG_MEMORY
 #endif	// #if defined(ID_REDIRECT_NEWDELETE) || defined(_RV_MEM_SYS_SUPPORT)
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 /*
 ===============
 idGameLocal::GetBotItemEntry
@@ -8669,7 +8664,7 @@ idGameLocal::GetBotItemEntry
 */
 int idGameLocal::GetBotItemEntry( const char* name )
 {
-#ifdef _QUAKE4
+#if 1 //k: check name
 	if(!botItemTable || !name || !*name)
 		return 9;
 #endif
@@ -8747,7 +8742,12 @@ idGameLocal::AddBot
 void idGameLocal::AddBot(const char *botName) {
 	int clientNum;
 
-	if (aasList.Num() == 0) {
+#if 1
+		if(!GetBotAAS())
+#else
+	if (aasList.Num() == 0) 
+#endif
+	{
 		common->Warning("idGameLocal::AddBot: No AAS file loaded for map\n");
 		return;
 	}
@@ -8841,7 +8841,8 @@ void idGameLocal::SpawnPlayer(int clientNum, bool isBot, const char* botName) {
 			gameLocal.Error("Bots not supported in singleplayer games!\n");
 		}
 // jmarshall end
-		args.Set("classname", idPlayer::GetSpawnClassname());
+		else
+			args.Set("classname", idPlayer::GetSpawnClassname());
 	}
 // RAVEN END
 	
@@ -8870,7 +8871,7 @@ void idGameLocal::SpawnPlayer(int clientNum, bool isBot, const char* botName) {
 
 #endif
 
-#ifdef _RAVEN //k: from D3XP::MultiplayerGame
+#ifdef _RAVEN //k: from D3XP::MultiplayerGame or compat
 void idGameLocal::GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ])
 {
 	idStr aux = GetBestMPGametype(map, gametype);

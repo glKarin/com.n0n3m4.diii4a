@@ -418,7 +418,7 @@ the renderSystem is initialized
 */
 void idConsoleLocal::LoadGraphics()
 {
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 bigchar font
 // jmarshall
     charSetShader = declManager->FindMaterial( "fonts/english/bigchars" );
 // jmarshall end

@@ -995,7 +995,7 @@ bool idInterpreter::Execute( void ) {
 		instructionPointer++;
 
 		if ( !--runaway ) {
-#if 0 //def _QUAKE4xxx //k: for map game/waste no longer
+#if 0 //k: for map game/waste no longer
 			break;
 #endif
 			Error( "runaway loop error" );
@@ -1874,7 +1874,7 @@ bool idInterpreter::Execute( void ) {
 
 		case OP_PUSH_V:
 			var_a = GetVariable( st->a );
-#ifdef _QUAKE4 //jmarshall
+#ifdef _QUAKE4 // 64bit
 			PushVector(*var_a.vectorPtr);
 #else
 			Push( *reinterpret_cast<int *>( &var_a.vectorPtr->x ) );

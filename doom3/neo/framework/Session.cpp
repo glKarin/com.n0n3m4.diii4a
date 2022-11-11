@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: for play credits in mainmenu
 #include "../ui/Window.h"
 #endif
 #include "Session_local.h"
@@ -825,6 +825,17 @@ static void Session_Disconnect_f(const idCmdArgs &args)
 	if (soundSystem) {
 		soundSystem->SetMute(false);
 	}
+#ifdef _RAVEN //k: second argument is GUI name, third argument is empty or named event.
+	const int argc = args.Argc();
+	if(argc > 1)
+	{
+		if(!idStr::Icmp(args.Argv(1), "mainmenu") && sessLocal.guiActive && sessLocal.guiActive == sessLocal.guiMainMenu)
+		{
+			if(argc > 2)
+				sessLocal.guiMainMenu->HandleNamedEvent(args.Argv(2));
+		}
+	}
+#endif
 }
 
 #ifdef ID_DEMO_BUILD
@@ -865,7 +876,7 @@ static void Session_ExitCmdDemo_f(const idCmdArgs &args)
 	sessLocal.cmdDemoFile = NULL;
 }
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: endOfGame game cmd
 static void Session_EndOfGame_f(const idCmdArgs &args)
 {
 	sessLocal.Stop();
@@ -1034,7 +1045,7 @@ void idSessionLocal::StartPlayingRenderDemo(idStr demoName)
 
 	// bring up the loading screen manually, since demos won't
 	// call ExecuteMapChange()
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 loading gui
 // jmarshall - quake 4 loading gui
     guiLoading = uiManager->FindGui( "guis/loading/generic.gui", true, false, true );
 // jmarshall end
@@ -1349,7 +1360,7 @@ idSessionLocal::GetAutoSaveName
 */
 idStr idSessionLocal::GetAutoSaveName(const char *mapName) const
 {
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 map entity filter
 	const char *entityFilter = cvarSystem->GetCVarString("si_entityFilter");
 	idStr showMapName(mapName);
 	if(entityFilter && entityFilter[0])
@@ -1364,7 +1375,7 @@ idStr idSessionLocal::GetAutoSaveName(const char *mapName) const
 #endif
 
 	if (mapDef) {
-#ifdef _RAVEN
+#ifdef _RAVEN //k: map title
 		mapName = common->GetLanguageDict()->GetString(mapDef->dict.GetString("name", showMapName));
 #else
 		mapName = common->GetLanguageDict()->GetString(mapDef->dict.GetString("name", mapName));
@@ -1519,7 +1530,7 @@ void idSessionLocal::StartPlayingCmdDemo(const char *demoName)
 		return;
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 loading gui
 // jmarshall - quake 4 loading gui
     guiLoading = uiManager->FindGui("guis/loading/generic.gui", true, false, true);
 // jmarshall end
@@ -1629,7 +1640,7 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 	if (uiManager->CheckGui(guiMap)) {
 		guiLoading = uiManager->FindGui(guiMap, true, false, true);
 	} else {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN //k: quake4 map entity filter
 			  //k: setup map level loading screen
 			  //k: multilevel in one map
 		const char *entityFilter = cvarSystem->GetCVarString("si_entityFilter");
@@ -1682,7 +1693,7 @@ idSessionLocal::GetBytesNeededForMapLoad
 */
 int idSessionLocal::GetBytesNeededForMapLoad(const char *mapName)
 {
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 map entity filter
 	const char *entityFilter = cvarSystem->GetCVarString("si_entityFilter");
 	const idDeclEntityDef *mapDef = declManager->FindMapDef(mapName, entityFilter);
 #else
@@ -1708,7 +1719,7 @@ idSessionLocal::SetBytesNeededForMapLoad
 */
 void idSessionLocal::SetBytesNeededForMapLoad(const char *mapName, int bytesNeeded)
 {
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 map entity filter
 	const char *entityFilter = cvarSystem->GetCVarString("si_entityFilter");
 	idDeclEntityDef *mapDef = declManager->FindMapDef(mapName, entityFilter);
 #else
@@ -1863,7 +1874,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 
 	// set the user info
 	for (i = 0; i < numClients; i++) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 		game->SetUserInfo( i, mapSpawnData.userInfo[i], false );
 #else
 		game->SetUserInfo(i, mapSpawnData.userInfo[i], idAsyncNetwork::client.IsActive(), false);
@@ -1873,7 +1884,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 
 	// load and spawn all other entities ( from a savegame possibly )
 	if (loadingSaveGame && savegameFile) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 		if (game->InitFromSaveGame(fullMapName + ".map", rw, savegameFile) == false)
 #else
 		if (game->InitFromSaveGame(fullMapName + ".map", rw, sw, savegameFile) == false)
@@ -1885,7 +1896,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 			savegameFile = NULL;
 
 			game->SetServerInfo(mapSpawnData.serverInfo);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 			game->InitFromNewMap(fullMapName + ".map", rw, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive(), Sys_Milliseconds());
 #else
 			game->InitFromNewMap(fullMapName + ".map", rw, sw, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive(), Sys_Milliseconds());
@@ -1893,7 +1904,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 		}
 	} else {
 		game->SetServerInfo(mapSpawnData.serverInfo);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 		game->InitFromNewMap(fullMapName + ".map", rw, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive(), Sys_Milliseconds());
 #else
 		game->InitFromNewMap(fullMapName + ".map", rw, sw, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive(), Sys_Milliseconds());
@@ -1903,11 +1914,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	if (!idAsyncNetwork::IsActive() && !loadingSaveGame) {
 		// spawn players
 		for (i = 0; i < numClients; i++) {
-#ifdef _RAVEN // _QUAKE4
-			game->SpawnPlayer(i, false, 0);
-#else
-			game->SpawnPlayer(i);
-#endif
+			game->SpawnPlayer(i); // not bot
 		}
 	}
 
@@ -1924,7 +1931,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	if (!idAsyncNetwork::IsActive() && !loadingSaveGame) {
 		// run a few frames to allow everything to settle
 		for (i = 0; i < 10; i++) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 			game->RunFrame(mapSpawnData.mapSpawnUsercmd, 0, true, 0); // serverGameFrame isn't used
 #else
 			game->RunFrame(mapSpawnData.mapSpawnUsercmd);
@@ -2299,7 +2306,7 @@ bool idSessionLocal::SaveGame(const char *saveName, bool autosave)
 	description.Replace("\\", "\\\\");
 	description.Replace("\"", "\\\"");
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN //k: quake4 map entity filter
 	const char *entityFilter = cvarSystem->GetCVarString("si_entityFilter");
 	idStr showMapName(mapName);
 	if(entityFilter && entityFilter[0]) //k: game/map_entityFilter. e.g. game/process1 first
@@ -2314,7 +2321,7 @@ bool idSessionLocal::SaveGame(const char *saveName, bool autosave)
 #endif
 
 	if (mapDef) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // map title
 		mapName = common->GetLanguageDict()->GetString(mapDef->dict.GetString("name", showMapName.c_str()));
 #else
 		mapName = common->GetLanguageDict()->GetString(mapDef->dict.GetString("name", mapName));
@@ -2328,7 +2335,7 @@ bool idSessionLocal::SaveGame(const char *saveName, bool autosave)
 		idStr sshot = mapSpawnData.serverInfo.GetString("si_map");
 		sshot.StripPath();
 		sshot.StripFileExtension();
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // savegame thumb
 		idStr savethumb("gfx/guis/loadscreens/");
 		savethumb += sshot;
 		//idStr savethumb(va("gfx/guis/mainmenu/save_%s", sshot.c_str()));
@@ -2619,7 +2626,7 @@ void idSessionLocal::AdvanceRenderDemo(bool singleFrameOnly)
 		}
 
 		if (ds == DS_RENDER) {
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 			// jmarshall - demos
 			if (rw->ProcessDemoCommand(readDemo, &currentDemoRenderView, &demoTimeOffset)) {
 				// a view is ready to render
@@ -2917,7 +2924,7 @@ void idSessionLocal::Frame()
 			int c = aviDemoFrameCount - aviTicStart;
 
 			while (c--) {
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 				renderSystem->TakeScreenshot(com_aviDemoWidth.GetInteger(), com_aviDemoHeight.GetInteger(), name, com_aviDemoSamples.GetInteger(), NULL);
 #endif
 				name = va("demos/%s/%s_%05i.tga", aviDemoShortName.c_str(), aviDemoShortName.c_str(), ++aviTicStart);
@@ -2929,7 +2936,7 @@ void idSessionLocal::Frame()
 		// remove any printed lines at the top before taking the screenshot
 		console->ClearNotifyLines();
 
-#if !defined(_RAVEN)
+#if !defined(_RAVENxxx)
 		// this will call Draw, possibly multiple times if com_aviDemoSamples is > 1
 		renderSystem->TakeScreenshot(com_aviDemoWidth.GetInteger(), com_aviDemoHeight.GetInteger(), name, com_aviDemoSamples.GetInteger(), NULL);
 #endif
@@ -3058,7 +3065,7 @@ void idSessionLocal::Frame()
 	// check for user info changes
 	if (cvarSystem->GetModifiedFlags() & CVAR_USERINFO) {
 		mapSpawnData.userInfo[0] = *cvarSystem->MoveCVarsToDict(CVAR_USERINFO);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 		game->SetUserInfo(0, mapSpawnData.userInfo[0], false);
 #else
 		game->SetUserInfo(0, mapSpawnData.userInfo[0], false, false);
@@ -3180,7 +3187,7 @@ void idSessionLocal::RunGameTic()
 
 	// run the game logic every player move
 	int	start = Sys_Milliseconds();
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	gameReturn_t	ret = game->RunFrame(&cmd, 0, true, 0); // jmarshall: serverGameFrame isn't used
 #else
 	gameReturn_t	ret = game->RunFrame(&cmd);
@@ -3273,7 +3280,7 @@ void idSessionLocal::RunGameTic()
 		} else if (!idStr::Icmp(args.Argv(0), "endOfDemo")) {
 			cmdSystem->BufferCommandText(CMD_EXEC_NOW, "endOfDemo");
 		}
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 game cmd
 		else if (!idStr::Icmp(args.Argv(0), "endOfGame")) {
 			cmdSystem->BufferCommandText(CMD_EXEC_INSERT, "stoprecording ; disconnect ; endOfGame");
 		}
@@ -3340,7 +3347,7 @@ void idSessionLocal::Init()
 
 	cmdSystem->AddCommand("hitch", Session_Hitch_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "hitches the game");
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 game cmd callback
 	cmdSystem->AddCommand("endOfGame", Session_EndOfGame_f, CMD_FL_SYSTEM, "ends the game");
 #endif
 

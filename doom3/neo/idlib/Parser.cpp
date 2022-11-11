@@ -44,7 +44,7 @@ idParser::SetBaseFolder
 */
 void idParser::SetBaseFolder(const char *path)
 {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
 	Lexer::SetBaseFolder(path);
@@ -3417,7 +3417,7 @@ void idParser::SetIncludePath(const char *path)
 	// add trailing path seperator
 	if (idParser::includepath[idParser::includepath.Length()-1] != '\\' &&
 	    idParser::includepath[idParser::includepath.Length()-1] != '/') {
-#ifdef _RAVEN // rvlib
+#ifdef _RAVEN // change \ to /
 // RAVEN BEGIN
         idParser::includepath += "/";
 // RAVEN END
@@ -3733,7 +3733,7 @@ idParser::~idParser(void)
 	idParser::FreeSource(false);
 }
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 /*
 ================
 idParser::Parse1DMatrixLegacy

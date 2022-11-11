@@ -44,7 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 const int OLD_MAP_VERSION					= 1;
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 map file version
 const int CURRENT_MAP_VERSION				= 3;
 #else
 const int CURRENT_MAP_VERSION				= 2;
@@ -137,7 +137,7 @@ class idMapBrush : public idMapPrimitive
 		~idMapBrush(void) {
 			sides.DeleteContents(true);
 		}
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
 	static idMapBrush *		Parse( Lexer &src, const idVec3 &origin, bool newFormat = true, int version = CURRENT_MAP_VERSION );
@@ -178,7 +178,7 @@ class idMapPatch : public idMapPrimitive, public idSurface_Patch
 		idMapPatch(void);
 		idMapPatch(int maxPatchWidth, int maxPatchHeight);
 		~idMapPatch(void) { }
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
 	static idMapPatch *		Parse( Lexer &src, const idVec3 &origin, bool patchDef3 = true, int version = CURRENT_MAP_VERSION );
@@ -264,7 +264,7 @@ class idMapEntity
 		~idMapEntity(void) {
 			primitives.DeleteContents(true);
 		}
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
 	static idMapEntity *	Parse( Lexer &src, bool worldSpawn = false, int version = CURRENT_MAP_VERSION );

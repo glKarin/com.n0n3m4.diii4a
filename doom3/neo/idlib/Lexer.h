@@ -573,7 +573,7 @@ private:
 
 #endif
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall
 class rvmScopedLexerBaseFolder
 {

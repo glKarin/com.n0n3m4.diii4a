@@ -421,7 +421,7 @@ class idWinFloat : public idWinVar
 	protected:
 		float data;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	friend class idWinFloatPtr;
 #endif
 };
@@ -712,7 +712,7 @@ class idWinVec4 : public idWinVar
 	protected:
 		idVec4 data;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	friend class idWinFloatPtr;
 #endif
 };
@@ -960,7 +960,7 @@ class idMultiWinVar : public idList< idWinVar * >
 		void SetGuiInfo(idDict *dict);
 };
 
-#ifdef _RAVEN
+#ifdef _RAVEN // float pointer var to a vector element
 class idWinFloatPtr : public idWinVar {
 public:
 	idWinFloatPtr() : idWinVar() {};

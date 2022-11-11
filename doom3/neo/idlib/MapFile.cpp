@@ -115,7 +115,7 @@ void idMapBrushSide::GetTextureVectors(idVec4 v[2]) const
 idMapPatch::Parse
 =================
 */
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
 idMapPatch *idMapPatch::Parse(Lexer &src, const idVec3 &origin, bool patchDef3, int version)
@@ -155,7 +155,7 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 	idMapPatch *patch = new idMapPatch(info[0], info[1]);
 	patch->SetSize(info[0], info[1]);
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 map file
 	if (version < 2)
 #else
 	if (version < 2.0f)
@@ -216,7 +216,7 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 		}
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 map file
 	if ( !src.ExpectTokenString( ")" ) ||
 			!src.ExpectTokenString( "}" ) ||
 				!src.ExpectTokenString( "}" ) )
@@ -229,7 +229,7 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 		return NULL;
 	}
 
-#if !defined(_RAVEN)
+#if !defined(_RAVEN) // quake4 map file
 	// read any key/value pairs
 	while (src.ReadToken(&token)) {
 		if (token == "}") {
@@ -315,7 +315,7 @@ unsigned int idMapPatch::GetGeometryCRC(void) const
 idMapBrush::Parse
 =================
 */
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
 idMapBrush *idMapBrush::Parse( Lexer &src, const idVec3 &origin, bool newFormat, int version )
@@ -424,7 +424,7 @@ idMapBrush *idMapBrush::Parse(idLexer &src, const idVec3 &origin, bool newFormat
 		}
 
 		// we had an implicit 'textures/' in the old format...
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 map file
 		if (version < 2)
 #else
 		if (version < 2.0f)
@@ -435,14 +435,14 @@ idMapBrush *idMapBrush::Parse(idLexer &src, const idVec3 &origin, bool newFormat
 			side->material = token;
 		}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 map file
 // RAVEN BEGIN
 // jscott: make sure the material is properly parsed
 		declManager->FindMaterial( token );
 // RAVEN END
 #endif
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 map file
 // RAVEN BEGIN
 // jscott: removed these in later versions
 		if( version < 3 )
@@ -456,7 +456,7 @@ idMapBrush *idMapBrush::Parse(idLexer &src, const idVec3 &origin, bool newFormat
 				}
 			}
 		}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 map file
 		}
 #endif
 	} while (1);
@@ -482,7 +482,7 @@ idMapBrush *idMapBrush::Parse(idLexer &src, const idVec3 &origin, bool newFormat
 idMapBrush::ParseQ3
 =================
 */
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
 idMapBrush *idMapBrush::ParseQ3( Lexer &src, const idVec3 &origin )
@@ -583,7 +583,7 @@ bool idMapBrush::Write(idFile *fp, int primitiveNum, const idVec3 &origin) const
 	for (i = 0; i < GetNumSides(); i++) {
 		side = GetSide(i);
 		fp->WriteFloatString("  ( %f %f %f %f ) ", side->plane[0], side->plane[1], side->plane[2], side->plane[3]);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 map file
 // RAVEN BEGIN
 		fp->WriteFloatString( "( ( %f %f %f ) ( %f %f %f ) ) \"%s\"\n",
 // RAVEN END
@@ -631,7 +631,7 @@ unsigned int idMapBrush::GetGeometryCRC(void) const
 idMapEntity::Parse
 ================
 */
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: changed to be Lexer instead of idLexer so that we have the ability to read binary files
 idMapEntity *idMapEntity::Parse( Lexer &src, bool worldSpawn, int version )
@@ -817,7 +817,7 @@ unsigned int idMapEntity::GetGeometryCRC(void) const
 		switch (mapPrim->GetType()) {
 			case idMapPrimitive::TYPE_BRUSH:
 				crc ^= static_cast<idMapBrush *>(mapPrim)->GetGeometryCRC();
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 map file
 				if ( epairs.GetString( "model" ) ) {
 					crc ^= StringCRC( epairs.GetString( "model" ) );
 				}
@@ -825,7 +825,7 @@ unsigned int idMapEntity::GetGeometryCRC(void) const
 				break;
 			case idMapPrimitive::TYPE_PATCH:
 				crc ^= static_cast<idMapPatch *>(mapPrim)->GetGeometryCRC();
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 map file
 				if ( epairs.GetString( "model" ) ) {
 					crc ^= StringCRC( epairs.GetString( "model" ) );
 				}
@@ -845,7 +845,7 @@ idMapFile::Parse
 bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 {
 	// no string concatenation for epairs and allow path names for materials
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: Done this way to reduce the amount of code change.  The auto pointer will
 // delete the lexer when this method exits
@@ -888,7 +888,7 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 
 	if (src.CheckTokenString("Version")) {
 		src.ReadTokenOnLine(&token);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 map file
 		version = token.GetIntValue();
 #else
 		version = token.GetFloatValue();
@@ -902,7 +902,7 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 			break;
 		}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 map file
 // RAVEN BEGIN
 // rhummer: Check to see if there are func_groups in the map file.
 		if ( !mHasFuncGroups && !idStr::Icmp( mapEnt->epairs.GetString( "classname" ), "func_group" ) ) {
@@ -920,7 +920,7 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 
 	SetGeometryCRC();
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // RAVEN BEGIN
     mHasBeenResolved = false;
 // RAVEN END

@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4
 
 // rjohnson: this is the name of the game we are making
 #define GAME_NAME						"Quake4"			// appears on window titles and errors

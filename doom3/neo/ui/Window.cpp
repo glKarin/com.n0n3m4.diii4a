@@ -80,28 +80,28 @@ extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surface
 //  made RegisterVars a member of idWindow
 const idRegEntry idWindow::RegisterVars[] = {
 	{ "forecolor", idRegister::VEC4 },
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     { "forecolor_r", idRegister::FLOAT },
     { "forecolor_g", idRegister::FLOAT },
     { "forecolor_b", idRegister::FLOAT },
     { "forecolor_w", idRegister::FLOAT },
 #endif
 	{ "hovercolor", idRegister::VEC4 },
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     { "hovercolor_r", idRegister::FLOAT },
     { "hovercolor_g", idRegister::FLOAT },
     { "hovercolor_b", idRegister::FLOAT },
     { "hovercolor_w", idRegister::FLOAT },
 #endif
 	{ "backcolor", idRegister::VEC4 },
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     { "backcolor_r", idRegister::FLOAT },
     { "backcolor_g", idRegister::FLOAT },
     { "backcolor_b", idRegister::FLOAT },
     { "backcolor_w", idRegister::FLOAT },
 #endif
 	{ "bordercolor", idRegister::VEC4 },
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     { "bordercolor_r", idRegister::FLOAT },
     { "bordercolor_g", idRegister::FLOAT },
     { "bordercolor_b", idRegister::FLOAT },
@@ -109,7 +109,7 @@ const idRegEntry idWindow::RegisterVars[] = {
 #endif
 	{ "rect", idRegister::RECTANGLE },
 	{ "matcolor", idRegister::VEC4 },
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     { "matcolor_r", idRegister::FLOAT },
     { "matcolor_g", idRegister::FLOAT },
     { "matcolor_b", idRegister::FLOAT },
@@ -135,7 +135,7 @@ const idRegEntry idWindow::RegisterVars[] = {
 	{ "lightColor", idRegister::VEC4 },
 	{ "viewOffset", idRegister::VEC4 },
 	{ "hideCursor", idRegister::BOOL}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
     , { "maxchars", idRegister::INT},
     { "backgroundHover", idRegister::STRING },
     { "backgroundFocus", idRegister::STRING },
@@ -165,7 +165,7 @@ const char *idWindow::ScriptNames[] = {
 	"onActionRelease",
 	"onEnter",
 	"onEnterRelease"
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui event
 // jmarshall - quake 4
     , "onBackAction",
     "onTabRelease",
@@ -241,7 +241,7 @@ void idWindow::CommonInit()
 	}
 
 	hideCursor = false;
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall - gui crash
     numOps = 0;
 	memset(ops, 0, sizeof(ops));
@@ -1396,11 +1396,12 @@ idWindow::DrawBackground
 */
 void idWindow::DrawBackground(const idRectangle &drawRect)
 {
-#if !defined(_RAVEN) //k: don't draw background color for main menu black screen.
+#ifdef _RAVEN //k: don't draw background color for main menu black screen.
+	if(parent && parent->parent) //k: only non-root directly children. for draw brackets
+#endif
 	if (backColor.w()) {
 		dc->DrawFilledRect(drawRect.x, drawRect.y, drawRect.w, drawRect.h, backColor);
 	}
-#endif
 
 	if (background && matColor.w()) {
 		float scalex, scaley;
@@ -2147,7 +2148,7 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &backColor;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall
     if (idStr::Icmp(_name, "backColor_r") == 0)
     {
@@ -2172,7 +2173,7 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &matColor;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall
     if (idStr::Icmp(_name, "matColor_r") == 0)
     {
@@ -2197,7 +2198,7 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &foreColor;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall
     if (idStr::Icmp(_name, "foreColor_r") == 0)
     {
@@ -2222,7 +2223,7 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &hoverColor;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall
     if (idStr::Icmp(_name, "hoverColor_r") == 0)
     {
@@ -2247,7 +2248,7 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &borderColor;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall
     if (idStr::Icmp(_name, "borderColor_r") == 0)
     {
@@ -2292,7 +2293,7 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &hideCursor;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall
     if (idStr::Icmp(_name, "textspacing") == 0)
     {
@@ -2497,7 +2498,7 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 		return true;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall - quake 4
     if (idStr::Icmp(_name, "textSpacing") == 0)
     {
@@ -2541,7 +2542,7 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 		return true;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall - quake 4
     if (idStr::Icmp(_name, "textStyle") == 0)
     {
@@ -2599,7 +2600,7 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 		return true;
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui var
 // jmarshall - quake 4
     if (idStr::Icmp(_name, "alwaysThink") == 0)
     {
@@ -2969,7 +2970,7 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 				return false;
 			}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui onTime +
 // jmarshall - quake 4 guis
 //k: `+` means add last???
 			int lastEventTime = 0;
@@ -2992,7 +2993,7 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 
 			idTimeLineEvent *ev = new idTimeLineEvent;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 gui onTime +
 			ev->time = lastEventTime + atoi(token.c_str());
 #else
 			ev->time = atoi(token.c_str());
@@ -3087,7 +3088,7 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 			}
 #endif
 		}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui define
 // jmarshall - quake 4 guis
         else if (token == "defineicon")
         {
@@ -4042,7 +4043,7 @@ void idWindow::ReadFromDemoFile(class idDemoFile *f, bool rebuild)
 			f->ReadInt(w.b);
 			f->ReadInt(w.c);
 			f->ReadInt(w.d);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 			ops[i] = w;
 #else
 			ops.Append(w);
@@ -4715,7 +4716,7 @@ bool idWindow::IsSimple()
 		return false;
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	if (numOps)
 #else
 	if (ops.Num())
@@ -5090,3 +5091,4 @@ bool idWindow::UpdateFromDictionary(idDict &dict)
 
 	return true;
 }
+

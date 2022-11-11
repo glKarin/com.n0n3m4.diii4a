@@ -196,9 +196,12 @@ typedef struct cm_model_s {
 	int						numMergedPolys;
 	int						usedMemory;
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 trm
 	bool					isTrmModel;
 	bool markRemove; //k: if ture, marked can replace
+	bool isTraceModel; //k: if true, returned by ModelFromTrm
+	cm_polygonRef_t *_trmPolygons[MAX_TRACEMODEL_POLYS];
+	cm_brushRef_t *_trmBrushes[1];
 #endif
 } cm_model_t;
 
@@ -533,7 +536,7 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 #endif
 		void			DrawNodePolygons(cm_model_t *model, cm_node_t *node, const idVec3 &origin, const idMat3 &axis,
 		                const idVec3 &viewOrigin, const float radius);
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 cm file
 	private:
 		//k v3 .cm file parse
 		bool			ParseCollisionModel_v3(idLexer *src);

@@ -49,7 +49,7 @@ const int BUTTON_MLOOK			= BIT(4);
 const int BUTTON_5				= BIT(5);
 const int BUTTON_6				= BIT(6);
 const int BUTTON_7				= BIT(7);
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 user cmd
 // ddynerman: stats
 const int BUTTON_INGAMESTATS = BUTTON_5;
 // twhitaker: strafe
@@ -94,7 +94,7 @@ const int IMPULSE_30			= 30;			// SnoopJeDi - Toggle Stats Debug
 #endif
 const int IMPULSE_40			= 40;			// use vehicle
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 user cmd
 // RAVEN BEGIN
 // bdube: added flashlight
 const int IMPULSE_50			= 50;			// activate flashlight

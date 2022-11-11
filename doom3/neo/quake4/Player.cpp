@@ -1492,7 +1492,7 @@ void idPlayer::SetupWeaponEntity( void ) {
 idPlayer::Init
 ==============
 */
-#ifdef _QUAKE4
+#ifdef _QUAKE4 //k: control flash light on
 idCVar harm_g_flashlightOn( "harm_g_flashlightOn", "1", CVAR_BOOL | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Automitic make flash light on initial." );
 #endif
 void idPlayer::Init( void ) {
@@ -1567,7 +1567,7 @@ void idPlayer::Init( void ) {
 	currentWeapon = -1;
 	previousWeapon = -1;
 	
-#ifdef _QUAKE4 //k
+#ifdef _QUAKE4 //k: auto flash light on
 	// jmarshall - engine pushed IMPULSE_50 to force on the flashlight, makes more sense just to enable it here(since it was on initially). 
 	flashlightOn	  = harm_g_flashlightOn.GetBool(); //k: control it
 // jmarshall end
@@ -7315,7 +7315,17 @@ void idPlayer::UpdateFocus( void ) {
 				focusBracketsTime = gameLocal.time + 2000;
 			}
 		}
+#ifdef _QUAKE4 //k: focus gui, because calc 2d coord before this, so add harm_2d_calc for mark
+		if(focusBrackets->GetStateBool("harm_2d_calc"))
+		{
+			focusBrackets->SetStateBool ( "harm_2d_calc", false );
+			focusBrackets->SetStateBool ( "2d_calc", false );
+		}
+		else
+			focusBrackets->SetStateBool ( "2d_calc", true );
+#else
 		focusBrackets->SetStateBool ( "2d_calc", true );
+#endif
 	}	
 
  	if ( cursor && ( oldTalkCursor != talkCursor ) ) {
@@ -8167,8 +8177,6 @@ GetItemBuyImpulse
 */
 int GetItemBuyImpulse( const char* itemName )
 {
-// jmarshall - multiplayer
-#if 1
 	struct ItemBuyImpulse
 	{
 		const char*	itemName;
@@ -8216,8 +8224,6 @@ int GetItemBuyImpulse( const char* itemName )
 		}
 	}
 
-#endif
-// jmarshall end
 	return 0;
 }
 
@@ -8582,8 +8588,6 @@ void idPlayer::PerformImpulse( int impulse ) {
 			break;
 		}
 
-// jmarshall - buy menu impulse items? Multiplayer only I assume
-#if 1
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
 		case IMPULSE_100:	AttemptToBuyItem( "weapon_shotgun" );				break;
@@ -8616,8 +8620,6 @@ void idPlayer::PerformImpulse( int impulse ) {
 		case IMPULSE_127:	break; // Unused
 // RITUAL END
 
-#endif
-// jmarshall end
 		case IMPULSE_50: {
 			ToggleFlashlight ( );
 			break;
@@ -14127,7 +14129,7 @@ int idPlayer::CanSelectWeapon(const char* weaponName)
 	return weaponNum;
 }
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 // jmarshall
 const char* idPlayer::GetNetName(void) {
 	if (!gameLocal.IsMultiplayer()) {

@@ -20,7 +20,7 @@ Event are used for scheduling tasks and for linking script commands.
 
 #define MAX_EVENTS					8192		// Upped from 4096
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // 64bit
 // jmarshall - 64bit
 #define D_EVENT_INTEGER64bit		'y'
 // jmarshall end

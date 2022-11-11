@@ -2850,7 +2850,7 @@ void idMultiplayerGame::CommonRun( void ) {
 	int oldRank = -1;
 	int oldLeadingTeam = -1;
 	bool wasTied = false;
-	int oldHighScore = /*idMath::*/INT_MIN; //k limits.h
+	int oldHighScore = /*idMath::*/INT_MIN;
 
 	if( player && rankedPlayers.Num() ) {
 		if( gameLocal.gameType == GAME_DM ) {
@@ -4708,8 +4708,6 @@ const char* idMultiplayerGame::HandleGuiCommands( const char *_menuCommand ) {
 			for ( i = 0; i < num; i++ ) {
 				dict = fileSystem->GetMapDecl( i );
 				if ( dict ) {
-#if 1
-// jmarshall - mp game list
 					// any MP gametype supported
 					bool isMP = false;
 					int igt = GAME_SP + 1;
@@ -4731,8 +4729,6 @@ const char* idMultiplayerGame::HandleGuiCommands( const char *_menuCommand ) {
 							mapList->SetSelection( mapList->Num() - 1 );
 						}
 					}
-// jmarshall end
-#endif
 				}
 			}
 			// set the current level shot
@@ -7012,7 +7008,7 @@ void idMultiplayerGame::JoinTeam( const char* team ) {
 			}
 		}
 
-		int minCount = /*idMath::*/INT_MAX; //k limits.h
+		int minCount = /*idMath::*/INT_MAX;
 		int minCountTeam = -1;
 		for( int i = 0; i < TEAM_MAX; i++ ) {
 			if( teamCount[ i ] < minCount ) {

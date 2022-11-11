@@ -48,6 +48,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef FLOAT_EPSILON
 #undef FLOAT_EPSILON
 #endif
+
 #define IEEE_FLT_SIGNBITSET( a )	(reinterpret_cast<const unsigned int &>(a) >> IEEE_FLT_SIGN_BIT)
 #define IEEE_FLT_SIGNBITNOTSET( a )	((~reinterpret_cast<const unsigned int &>(a)) >> IEEE_FLT_SIGN_BIT)
 #endif
@@ -236,7 +237,7 @@ class idMath
 		static float				BitsToFloat(int i, int exponentBits, int mantissaBits);
 
 		static int					FloatHash(const float *array, const int numFloats);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall
 	static idVec3				CreateVector(float x, float y, float z);
 	static float				AngleMod(float a);
@@ -1164,7 +1165,7 @@ template<class T> ID_INLINE T	SignZero( T f ) { return ( f > 0 ) ? 1 : ( ( f < 0
 // RAVEN END
 #endif
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 /*
 ========================
 idMath::Ftob

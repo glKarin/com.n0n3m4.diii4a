@@ -1538,7 +1538,7 @@ idVarDef *idProgram::AllocDef( idTypeDef *type, const char *name, idVarDef *scop
 			def_z = AllocDef( type, element, scope, constant );
 			def_z->value.ptrOffset = def_y->value.ptrOffset + sizeof(float) /*//k: 32 type_float.Size()*/;
 		} else {
-#ifdef _QUAKE4 //k: 64 vector, resolved map game/putra and game/waste
+#ifdef _QUAKE4 //k: 64bit vector3, resolved map game/putra and game/waste
             idTypeDef	newtype(ev_float, &def_float, "float vector", 0, NULL);
             idTypeDef	*_type = GetType(newtype, true);
 

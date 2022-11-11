@@ -193,9 +193,7 @@ rvVehicleSound::RunPostPhysics
 =====================
 */
 void rvVehicleSound::RunPostPhysics ( void ) {
-#ifndef _QUAKE4xxx
 	Update ( );
-#endif
 }
 
 /*
@@ -1545,14 +1543,11 @@ void rvVehicleTurret::Spawn ( void ) {
 	parentStuck = false;
 
 
-// jmarshall - sound parts causing a crash, disabling for now.
-#if 1
 	// Find the vehicle part for the turret sound
 	if ( *spawnArgs.GetString ( "snd_loop", "" ) ) {
 		soundPart = position->AddPart ( rvVehicleSound::GetClassType(), spawnArgs );
 		static_cast<rvVehicleSound*>(position->GetPart(soundPart))->SetAutoActivate ( false );
 	}
-#endif
 }
 
 /*

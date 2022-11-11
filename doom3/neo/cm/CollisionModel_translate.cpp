@@ -904,11 +904,12 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 	tw.trace.fraction = 1.0f;
 	tw.trace.c.contents = 0;
 	tw.trace.c.type = CONTACT_NONE;
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 trace
 	tw.trace.c.id = 0; // jmarshall: fix so we don't get garbage values.
 // jmarshall - quake 4
 	tw.trace.c.materialType = 0;
 // jmarshall end
+	tw.trace.c.material = NULL; //kc
 #endif
 	tw.contents = contentMask;
 	tw.isConvex = true;
@@ -985,7 +986,7 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 			results->c.dist += modelOrigin * results->c.normal;
 		}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 trace
 // jmarshall - quake 4
 		if (results->c.material)
 		{
@@ -1015,10 +1016,11 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 			session->rw->DebugArrow(colorRed, start, end, 1);
 		}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 trace
 // jmarshall - quaake 4
 		results->c.materialType = NULL;
 // jmarshall end
+		results->c.material = NULL; //kc
 #endif
 
 		common->Printf("idCollisionModelManagerLocal::Translation: huge translation\n");
@@ -1234,7 +1236,7 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 		}
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 trace
 // jmarshall - quake 4
 	if (results->c.material)
 	{

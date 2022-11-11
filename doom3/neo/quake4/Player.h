@@ -799,7 +799,7 @@ public:
 	void					ResetCash();
 // RITUAL END
 
-#ifdef _QUAKE4
+#ifdef _QUAKE4 // bot
 // jmarshall
 	const char*				GetNetName(void);
 	virtual bool			IsBot(void) { return false; }

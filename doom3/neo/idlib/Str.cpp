@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 //     and the async thread! For some reason this seems to cause lots of problems on
 //     newer Linux distros if dhewm3 is built with GCC9 or newer (see #391).
 //     No idea why it apparently didn't cause that (noticeable) issues before..
-#if 0 // !defined(_RAVEN) //k: Quake4 not work
+#if 0 // !defined(_RAVEN) //k: quake4 not work
 #if !defined( ID_REDIRECT_NEWDELETE ) && !defined( MACOS_X )
 #define USE_STRING_DATA_ALLOCATOR
 #endif
@@ -2136,7 +2136,7 @@ idStr &idStr::ReplaceChar( const char from, const char to ) {
 }
 #endif
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall
 /*
 ===================

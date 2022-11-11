@@ -59,7 +59,7 @@ class idSimpleWindow
 
 		virtual void	WriteToSaveGame(idFile *savefile);
 		virtual void	ReadFromSaveGame(idFile *savefile);
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 gui function
 // jmarshall - quake 4 gui
     void			ResetCinematics(void);
 // jmarshall end

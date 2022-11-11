@@ -142,7 +142,7 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 		src->Error("R_ParseModel: bad numSurfaces");
 	}
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 proc file
 // jmarshall - quake 4 proc format
     if (!src->PeekTokenString("{") && !src->PeekTokenString("}"))
     {
@@ -169,7 +169,7 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 		R_AllocStaticTriSurfVerts(tri, tri->numVerts);
 
 		for (j = 0 ; j < tri->numVerts ; j++) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 proc file
 // jmarshall - quake 4 proc format
             //float	vec[8];
             //src->Parse1DMatrix( 8, vec );
@@ -373,7 +373,7 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 			(*w)[j][4] = 0;
 		}
 
-#ifdef _RAVEN //k: Quake4 extras
+#ifdef _RAVEN //k: quake4 extras
 		idToken nextToken;
 		if(src->ReadTokenOnLine(&nextToken))
 		{
@@ -631,7 +631,7 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 		return false;
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 proc file
 // jmarshall: quake 4 proc format
 	if (!src->ReadToken(&token) || token.Icmp(PROC_FILEVERSION)) {
 		common->Printf("idRenderWorldLocal::InitFromMap: bad version '%s' instead of '%s'\n", token.c_str(), PROC_FILEVERSION);

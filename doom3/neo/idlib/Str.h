@@ -230,7 +230,7 @@ class idStr
   //
 	idStr &				ReplaceChar( const char from, const char to );
 #endif
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 // jmarshall
 	void				StripDoubleQuotes(void);
 // jmarshall end

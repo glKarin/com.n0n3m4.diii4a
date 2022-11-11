@@ -2519,6 +2519,9 @@ void idCommonLocal::InitCommands(void)
 	cmdSystem->AddCommand("dmap", Dmap_f, CMD_FL_TOOL, "compiles a map", idCmdSystem::ArgCompletion_MapName);
 	cmdSystem->AddCommand("renderbump", RenderBump_f, CMD_FL_TOOL, "renders a bump map", idCmdSystem::ArgCompletion_ModelName);
 	cmdSystem->AddCommand("renderbumpFlat", RenderBumpFlat_f, CMD_FL_TOOL, "renders a flat bump map", idCmdSystem::ArgCompletion_ModelName);
+#ifdef _RAVEN //k: for generate AAS file of mp game map and bot.
+	cmdSystem->AddCommand("harm_runAAS", RunAAS_f, CMD_FL_GAME, "compiles an AAS file for a map for Quake 4 multiplayer-game", idCmdSystem::ArgCompletion_MapName);
+#endif
 	cmdSystem->AddCommand("runAAS", RunAAS_f, CMD_FL_TOOL, "compiles an AAS file for a map", idCmdSystem::ArgCompletion_MapName);
 	cmdSystem->AddCommand("runAASDir", RunAASDir_f, CMD_FL_TOOL, "compiles AAS files for all maps in a folder", idCmdSystem::ArgCompletion_MapName);
 	cmdSystem->AddCommand("runReach", RunReach_f, CMD_FL_TOOL, "calculates reachability for an AAS file", idCmdSystem::ArgCompletion_MapName);
@@ -2598,13 +2601,13 @@ void idCommonLocal::PrintLoadingMessage(const char *msg)
 	}
 
 	renderSystem->BeginFrame(renderSystem->GetScreenWidth(), renderSystem->GetScreenHeight());
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 splash
 	renderSystem->DrawStretchPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, declManager->FindMaterial("gfx/splashScreen"));
 #else
 	renderSystem->DrawStretchPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, declManager->FindMaterial("splashScreen"));
 #endif
 	int len = strlen(msg);
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 bigchar font
 	renderSystem->DrawSmallStringExt((640 - len * SMALLCHAR_WIDTH) / 2, 410, msg, idVec4(0.94f, 0.62f, 0.05f, 1.0f), true, declManager->FindMaterial("fonts/english/bigchars"));
 #else
 	renderSystem->DrawSmallStringExt((640 - len * SMALLCHAR_WIDTH) / 2, 410, msg, idVec4(0.0f, 0.81f, 0.94f, 1.0f), true, declManager->FindMaterial("textures/bigchars"));
@@ -2836,7 +2839,7 @@ idCommonLocal::LoadGameDLL
 */
 #if defined(__ANDROID__) //k
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 game dll
 #define _HARM_BASE_GAME_DLL "q4game"
 #else
 #define _HARM_BASE_GAME_DLL "game"
@@ -2854,7 +2857,7 @@ idCommonLocal::LoadGameDLL
 extern char *native_library_dir;
 static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. Includes "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "lib" _HARM_BASE_GAME_DLL ".so`, "
-#if !defined(_RAVEN)
+#if !defined(_RAVEN) // doom3 mod dll
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libd3xp" ".so`, "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libd3le" ".so`, "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "libcdoom" ".so`, "
@@ -2919,7 +2922,7 @@ void idCommonLocal::LoadGameDLL(void)
 		{
 			common->Printf("[Harmattan]: Load game `%s` from cvar `fs_game`.\n", fsgame.c_str());
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 base game dll
 			if(!fsgame.Icmp("q4base")) // load Quake4 game so.
 			{
 				common->Printf("[Harmattan]: Load Quake4 game......\n");
@@ -3041,7 +3044,7 @@ void idCommonLocal::LoadGameDLL(void)
 	gameImport.declManager				= ::declManager;
 	gameImport.AASFileManager			= ::AASFileManager;
 	gameImport.collisionModelManager	= ::collisionModelManager;
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bse
 	gameImport.bse						= ::bse;
 #endif
 

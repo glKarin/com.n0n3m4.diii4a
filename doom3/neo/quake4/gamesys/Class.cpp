@@ -1429,7 +1429,7 @@ void idClass::RegisterClasses( void )
 	REGISTER(WeaponNapalmGun);	// ..\..\code\game\weapon\WeaponNapalmGun.cpp
 // RITUAL END
 
-#ifdef _QUAKE4 //jmarshall bot
+#ifdef _QUAKE4 // bot
 // jmarshall
 	REGISTER(rvmBot);
 // jmarshall end

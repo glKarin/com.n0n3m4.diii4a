@@ -1631,7 +1631,7 @@ bool idBrushBSP::FloodFromEntities(const idMapFile *mapFile, int contents, const
 		common->Warning("reached outside from entity %d (%s)", i, classname.c_str());
 	}
 
-#ifdef _RAVEN //k: make sure gen aas file
+#ifdef _RAVEN //k: make sure gen aas file for mp game map
 	return true;
 #endif
 	return (inside && !outside->occupied);

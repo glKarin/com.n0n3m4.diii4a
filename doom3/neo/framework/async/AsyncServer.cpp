@@ -336,7 +336,7 @@ void idAsyncServer::ExecuteMapChange(void)
 	memset(userCmds, 0, sizeof(userCmds));
 
 	if (idAsyncNetwork::serverDedicated.GetInteger() == 0) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 		InitLocalClient(0, false);
 #else
 		InitLocalClient(0);
@@ -349,7 +349,7 @@ void idAsyncServer::ExecuteMapChange(void)
 	for (i = 0; i < MAX_ASYNC_CLIENTS; i++) {
 		if (clients[i].clientState >= SCS_PUREWAIT && i != localClientNum) {
 
-#ifdef _RAVEN
+#ifdef _RAVEN // bot
 	if (clients[i].channel.GetRemoteAddress().type == NA_BOT)
 		{
 			// clear the user info
@@ -813,7 +813,7 @@ idAsyncServer::BeginLocalClient
 void idAsyncServer::BeginLocalClient(void)
 {
 	game->SetLocalClient(localClientNum);
-#ifdef _RAVEN // _QUAKE4 
+#ifdef _RAVEN // bot
 	game->SetUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum], false);
 	game->ServerClientBegin(localClientNum, false, 0);
 #else
@@ -901,7 +901,7 @@ void idAsyncServer::SendReliableMessage(int clientNum, const idBitMsg &msg)
 		return;
 	}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 // jmarshall
 	if (clients[clientNum].channel.GetRemoteAddress().type == NA_BOT)
 		return;
@@ -933,7 +933,7 @@ void idAsyncServer::CheckClientTimeouts(void)
 			continue;
 		}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 // jmarshall
 		if (client.channel.GetRemoteAddress().type == NA_BOT)
 			continue;
@@ -1015,7 +1015,7 @@ void idAsyncServer::SendUserInfoBroadcast(int userInfoNum, const idDict &info, b
 	const idDict	*gameInfo;
 	bool			gameModifiedInfo;
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	gameInfo = game->SetUserInfo(userInfoNum, info, false);
 #else
 	gameInfo = game->SetUserInfo(userInfoNum, info, false, true);
@@ -1288,7 +1288,7 @@ bool idAsyncServer::SendSnapshotToClient(int clientNum)
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 	usercmd_t 	*last;
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	dword		clientInPVS[MAX_ASYNC_CLIENTS >> 3];
 #else
 	byte		clientInPVS[MAX_ASYNC_CLIENTS >> 3];
@@ -1318,7 +1318,7 @@ bool idAsyncServer::SendSnapshotToClient(int clientNum)
 	msg.WriteShort(idMath::ClampShort(client.clientAheadTime));
 
 	// write the game snapshot
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, msg, clientInPVS, MAX_ASYNC_CLIENTS, 0);
 #else
 	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, msg, clientInPVS, MAX_ASYNC_CLIENTS);
@@ -1433,7 +1433,7 @@ void idAsyncServer::ProcessUnreliableClientMessage(int clientNum, const idBitMsg
 		SendEnterGameToClient(clientNum);
 
 		// get the client running in the game
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 		game->ServerClientBegin(clientNum, false, 0);
 #else
 		game->ServerClientBegin(clientNum);
@@ -1979,7 +1979,7 @@ void idAsyncServer::ProcessConnectMessage(const netadr_t from, const idBitMsg &m
 	// but meanwhile, the max players may have been reached
 	msg.ReadString(password, sizeof(password));
 	char reason[MAX_STRING_CHARS];
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	allowReply_t reply = game->ServerAllowClient(clientId, numClients, Sys_NetAdrToString(from), guid, password, password, reason);
 #else
 	allowReply_t reply = game->ServerAllowClient(numClients, Sys_NetAdrToString(from), guid, password, reason);
@@ -2710,7 +2710,7 @@ void idAsyncServer::RunFrame(void)
 		DuplicateUsercmds(gameFrame, gameTime);
 
 		// advance game
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 		gameReturn_t ret = game->RunFrame(userCmds[gameFrame & (MAX_USERCMD_BACKUP - 1)], 0, true, gameFrame);
 #else
 		gameReturn_t ret = game->RunFrame(userCmds[gameFrame & (MAX_USERCMD_BACKUP - 1)]);
@@ -2735,7 +2735,7 @@ void idAsyncServer::RunFrame(void)
 			continue;
 		}
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 // jmarshall - Don't send update packets to bots.
 		if (client.channel.GetRemoteAddress().type == NA_BOT)
 			continue;
@@ -3111,7 +3111,7 @@ void idAsyncServer::ProcessDownloadRequestMessage(const netadr_t from, const idB
 	}
 }
 
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // bot
 // jmarshall
 /*
 ===============

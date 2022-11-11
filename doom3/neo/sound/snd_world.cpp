@@ -1473,7 +1473,7 @@ idSoundWorldLocal::EmitterForIndex
 */
 idSoundEmitter	*idSoundWorldLocal::EmitterForIndex(int index)
 {
-#ifdef _RAVEN //k todo
+#ifdef _RAVEN //k: todo
 	if (index <= 0) {
 		return NULL;
 	}

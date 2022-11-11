@@ -56,7 +56,7 @@ typedef enum {
 	CONTACT_TRMVERTEX						// trace model vertex hits model polygon
 } contactType_t;
 
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 cm file
 #define WORLD_MODEL_NAME	"worldMap"		// name of world model
 
 #define PROC_CLIPMODEL_INDEX_START		1
@@ -178,7 +178,7 @@ class idCollisionModelManager
 		virtual void			ListModels(void) = 0;
 		// Writes a collision model file for the given map entity.
 		virtual bool			WriteCollisionModelForMapEntity(const idMapEntity *mapEnt, const char *filename, const bool testTraceModel = true) = 0;
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN
 	virtual int				PointContents(const idVec3 p, cmHandle_t handle) = 0;
 #endif
 

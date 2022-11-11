@@ -487,7 +487,7 @@ This is the same as in idEditWindow
 */
 void idListWindow::InitScroller(bool horizontal)
 {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 assets
 	const char *thumbImage = "gfx/guis/scrollbar_thumb.tga";
 	const char *barImage = "gfx/guis/scrollbarv.tga";
 #else
@@ -497,7 +497,7 @@ void idListWindow::InitScroller(bool horizontal)
 	const char *scrollerName = "_scrollerWinV";
 
 	if (horizontal) {
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN // quake4 assets
 		barImage = "gfx/guis/scrollbarh.tga";
 #else
 		barImage = "guis/assets/scrollbarh.tga";

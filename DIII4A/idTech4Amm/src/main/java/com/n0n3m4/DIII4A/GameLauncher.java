@@ -2230,7 +2230,7 @@ public class GameLauncher extends Activity{
 			conn = (HttpsURLConnection)url.openConnection();
 			conn.setRequestMethod("GET");
 			conn.setConnectTimeout(TimeOut);
-			HttpsURLConnection.setFollowRedirects(true);
+			conn.setInstanceFollowRedirects(true);
 			SSLContext sc = SSLContext.getInstance("TLS");
 			sc.init(null, new TrustManager[]{
 					new X509TrustManager() {

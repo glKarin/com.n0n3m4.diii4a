@@ -282,6 +282,11 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2022-10-29", 17,
+                        "Support Quake 4 format fonts. Other language patches will work. D3-format fonts do not need to extract no longer.",
+                        "Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`."
+                ),
+
                 ChangeLog.Create("2022-10-22", 16,
                         "Add automatic load `QuickSave` when start game.",
                         "Add control Quake 4 helper dialog visible when start Quake 4 in Settings, and add `Extract Quake 4 resource` in `Other` menu.",

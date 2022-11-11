@@ -1021,7 +1021,7 @@ const int GLS_SRCBLEND_ONE_MINUS_DST_ALPHA		= 0x00000008;
 const int GLS_SRCBLEND_ALPHA_SATURATE			= 0x00000009;
 const int GLS_SRCBLEND_BITS						= 0x0000000f;
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: quake4 blend
 const int GLS_SRCBLEND_SRC_COLOR				= 0x00000002;
 #endif
 
@@ -1213,7 +1213,7 @@ void R_ModulateLights_f(const idCmdArgs &args);
 void R_SetLightProject(idPlane lightProject[4], const idVec3 origin, const idVec3 targetPoint,
                        const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop);
 
-#ifdef _RAVEN
+#ifdef _RAVEN // particle
 void R_AddEffectSurfaces(void);
 #endif
 

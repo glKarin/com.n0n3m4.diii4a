@@ -270,9 +270,7 @@ viewEntity_t *R_SetEntityDefViewEntity(idRenderEntityLocal *def)
 	// copy the model and weapon depth hack for back-end use
 	vModel->modelDepthHack = def->parms.modelDepthHack;
 
-#if !defined(_RAVENxxx) //k jmarshall
 	vModel->weaponDepthHack = def->parms.weaponDepthHack;
-#endif
 
 	R_AxisToModelMatrix(def->parms.axis, def->parms.origin, vModel->modelMatrix);
 
@@ -1586,7 +1584,7 @@ void R_RemoveUnecessaryViewLights(void)
 	}
 }
 
-#ifdef _RAVEN
+#ifdef _RAVEN // particle
 /*
 ===============
 R_AddEffectSurfaces

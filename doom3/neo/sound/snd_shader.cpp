@@ -124,7 +124,7 @@ const char *idSoundShader::DefaultDefinition() const
 {
 	return
 	        "{\n"
-#ifdef _RAVEN // _QUAKE4 sound/_default.ogg
+#ifdef _RAVEN //k: default is sound/_default.ogg
 	        "\t"	"sound/_default.wav\n"
 #else
 	        "\t"	"_default.wav\n"
@@ -212,7 +212,7 @@ bool idSoundShader::ParseShader(idLexer &src)
 		// mindistance
 		else if (!token.Icmp("mindistance")) {
 			parms.minDistance = src.ParseFloat();
-#ifdef _RAVEN
+#ifdef _RAVEN // scale
 			// jmarshall: scale to doom 3 distance
 			parms.minDistance /= 100.0f;
 #endif
@@ -220,12 +220,12 @@ bool idSoundShader::ParseShader(idLexer &src)
 		// maxdistance
 		else if (!token.Icmp("maxdistance")) {
 			parms.maxDistance = src.ParseFloat();
-#ifdef _RAVEN
+#ifdef _RAVEN // scale
 			// jmarshall: scale to doom 3 distance
 			parms.maxDistance /= 100.0f;
 #endif
 		}
-#ifdef _RAVEN
+#ifdef _RAVEN // quake4 snd file
 // jmarshall - quake 4 sound shader
 		else if (!token.Icmp("frequencyshift")) {
 			float shiftVal = src.ParseFloat();
@@ -404,7 +404,7 @@ bool idSoundShader::ParseShader(idLexer &src)
 				leadins[ numLeadins ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
 				numLeadins++;
 			}
-#ifdef _RAVEN // _QUAKE4
+#ifdef _RAVEN //k: quake4 snd get sound file
 		}
 		else if(token.IcmpPrefixPath("sound/") == 0)
 		{
