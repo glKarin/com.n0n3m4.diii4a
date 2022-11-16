@@ -9,8 +9,8 @@ public final class Constants
     public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
-    public static final int CONST_UPDATE_RELEASE = 18;
-    public static final String CONST_RELEASE = "2022-11-11";
+    public static final int CONST_UPDATE_RELEASE = 19;
+    public static final String CONST_RELEASE = "2022-11-16";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -19,11 +19,8 @@ public final class Constants
 	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
-			"Implement some debug render functions.",
-			"Add player focus GUI bracket and interactive text on HUD in Quake 4.",
-			"Automatic generating AAS file for bot of Multiplayer-Game maps is not need enable net_allowCheats when set cvar `harm_g_autoGenAASFileInMPGame` to 1 in Quake 4.",
-			"Fixed restart menu action in Quake 4.",
-			"Fixed a memory bug that can cause crash in Quake 4.",
+			"Fixup middle bridge door GUI not interactive of level `game/tram1` in Quake 4.",
+			"Fixup elevator 1 with a monster GUI not interactive of level `game/process2` in Quake 4.",
 	};
 	public static final String[] LIBS = {
 		"game",

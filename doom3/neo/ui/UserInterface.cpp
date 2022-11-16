@@ -217,7 +217,12 @@ idUserInterface *idUserInterfaceManagerLocal::FindGui(const char *qpath, bool au
 		idUserInterfaceLocal *gui = guis[i];
 
 		if (!idStr::Icmp(guis[i]->GetSourceFile(), qpath)) {
-			if (!forceNOTUnique && (needUnique || guis[i]->IsInteractive())) {
+#ifdef _RAVEN //k: for Quake4 level `tram1` middle bridge door gui and `process2` elevator 1 gui not work
+			if (!forceNOTUnique && (needUnique || guis[i]->IsDesktopInteractive())) 
+#else
+			if (!forceNOTUnique && (needUnique || guis[i]->IsInteractive())) 
+#endif
+			{
 				break;
 			}
 
@@ -374,6 +379,9 @@ bool idUserInterfaceLocal::InitFromFile(const char *qpath, bool rebuild, bool ca
 #endif
 
 	interactive = desktop->Interactive();
+#ifdef _RAVEN //k: maybe not need
+	SetStateBool("noninteractive", !interactive);
+#endif
 
 	if (uiManagerLocal.guis.Find(this) == NULL) {
 		uiManagerLocal.guis.Append(this);
@@ -746,8 +754,13 @@ void idUserInterfaceLocal::SetCursor(float x, float y)
 
 #ifdef _RAVEN
 void idUserInterfaceLocal::SetInteractive(bool interactive) {
-	//SetStateString("noninteractive", interactive ? "0" : "1");
+	SetStateBool("noninteractive", !interactive); //k: maybe not need
 	this->interactive = interactive;
+}
+
+bool idUserInterfaceLocal::IsDesktopInteractive() const
+{
+	return interactive || (desktop && desktop->Interactive());
 }
 #endif
 

@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake IV for Android, 毁灭战士3/雷神之锤4安卓移植版
 **Latest version:**
-1.1.0harmattan18(Natasha)  
+1.1.0harmattan19(natasha)  
 **Last update release:**
-2022-11-11 
+2022-11-16  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -12,19 +12,13 @@ Android 4.0+
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan18 (2022-11-11)
+> 1.1.0harmattan19 (2022-11-16)
 
-* Implement some debug render functions.
-* Add player focus GUI bracket and interactive text on HUD in Quake 4.
-* Automatic generating AAS file for bot of Multiplayer-Game maps is not need enable net_allowCheats when set cvar `harm_g_autoGenAASFileInMPGame` to 1 in Quake 4.
-* Fixed restart menu action in Quake 4.
-* Fixed a memory bug that can cause crash in Quake 4.
+* Fixup middle bridge door GUI not interactive of level `game/tram1` in Quake 4.
+* Fixup elevator 1 with a monster GUI not interactive of level `game/process2` in Quake 4.
 
-* 实现了一些用于调试的渲染函数.
-* 雷神之锤4中新增玩家视角的可交互的GUI的高亮括号.
-* 雷神之锤4中加载多人游戏时, 当启用cvar `harm_g_autoGenAASFileInMPGame`为1自动生成用于bot的aas文件时, 不再需要启用作弊cvar net_allowCheats.
-* 雷神之锤4中修复了重新开始菜单的按键功能.
-* 雷神之锤4中修复了一个引起崩溃的内存错误.
+* 雷神之锤4中修复了关卡`game/tram1`的中部桥的门的开关UI不能交互.
+* 雷神之锤4中修复了关卡`game/process2`的有怪的电梯1的启动开关UI不能交互.
 
 ----------------------------------------------------------------------------------
 
@@ -44,7 +38,7 @@ Android 4.0+
 > 4. ~~Loading-UI~~: It looks work well now.
 > 5. *Multiplayer-Game*: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
 > 6. *Script error*: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
-> 7. **Particle system**: Now is work incompleted(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
+> 7. **Particle system**: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
 > 8. *Entity render*: Some game entities render incorrect.
 > 9. ~~Font~~: Support Q4 format fonts now. [IlDucci](https://github.com/IlDucci)'s DOOM3-format fonts of Quake 4 is not need on longer.
 
@@ -87,6 +81,20 @@ Android 4.0+
 ### Changes
 
 ----------------------------------------------------------------------------------
+
+> 1.1.0harmattan18 (2022-11-11)
+
+* Implement some debug render functions.
+* Add player focus GUI bracket and interactive text on HUD in Quake 4.
+* Automatic generating AAS file for bot of Multiplayer-Game maps is not need enable net_allowCheats when set cvar `harm_g_autoGenAASFileInMPGame` to 1 in Quake 4.
+* Fixed restart menu action in Quake 4.
+* Fixed a memory bug that can cause crash in Quake 4.
+
+* 实现了一些用于调试的渲染函数.
+* 雷神之锤4中新增玩家视角的可交互的GUI的高亮括号.
+* 雷神之锤4中加载多人游戏时, 当启用cvar `harm_g_autoGenAASFileInMPGame`为1自动生成用于bot的aas文件时, 不再需要启用作弊cvar net_allowCheats.
+* 雷神之锤4中修复了重新开始菜单的按键功能.
+* 雷神之锤4中修复了一个引起崩溃的内存错误.
 
 > 1.1.0harmattan17 (2022-10-29)
 
@@ -163,13 +171,13 @@ Android 4.0+
 * 修复`雷神之锤4`跳过影片过场动画.
 * `雷神之锤4`中如果`harm_g_alwaysRun`为1(启用自动跑), 按住`Walk`键行走.
 * 修复`雷神之锤4`关卡地图脚本的致命错误和bug(所有关卡地图不再有严重错误, 但是一些bug依然存在.).
-> 1. `game/mcc_landing`: 最后一个电梯到顶时, 玩家依然会卡住. 可以在电梯快到顶时提前跳跃, 或者使用`noclip`(版本16修复).
+> 1. `game/mcc_landing`: 最后一个电梯到顶时, 玩家依然会卡住. 可以在电梯快到顶时提前跳跃, 或者使用`noclip`(版本18修复).
 > 2. `game/mcc_1`: 上个关卡通关时, 载入该关卡程序会崩溃. 使用`map game/mcc_1`重新加载(版本16修复).
-> 3. `game/convoy1`: State error不再中止地图脚本. 下载具时有时会卡主, 使用`noclip`(版本16修复).
+> 3. `game/convoy1`: State error不再中止地图脚本. 下载具时有时会卡主, 使用`noclip`(版本18修复).
 > 4. `game/putra`: 修复脚本致命错误. 但是不能跳下最后的破损的地板, 使用`noclip`(版本15修复).
 > 5. `game/waste`: 修复脚本致命错误.
-> 6. `game/process1 first`: 最后的电梯有错误的碰撞, 会杀死玩家. 使用`god`(版本16修复). 如果最后的塔电梯GUI不工作, 只能使用`teleport tgr_endlevel`直接通关.
-> 7. `game/process1 second`: 第二个电梯有错误的碰撞, 会杀死玩家(和`game/process1 first`一样). 使用`god`(版本16修复).
+> 6. `game/process1 first`: 最后的电梯有错误的碰撞, 会杀死玩家. 使用`god`(版本18修复). 如果最后的塔电梯GUI不工作, 只能使用`teleport tgr_endlevel`直接通关.
+> 7. `game/process1 second`: 第二个电梯有错误的碰撞, 会杀死玩家(和`game/process1 first`一样). 使用`god`(版本18修复).
 > 8. `game/tram_1b`: 上个关卡通关时, 载入该关卡程序会崩溃. 使用`map game/tram_1b`重新加载(版本16修复).
 > 9. `game/core1`: 修复开始的电梯平台不能自动上升.
 > 10. `game/core2`: 修复物体旋转错误.
@@ -377,18 +385,25 @@ About:
 	
 ----------------------------------------------------------------------------------
 
-### Directory:
+### Branch:
 
+> `master`:
 > * /DIII4A: DOOM3 frontend source(DOOM3前端启动器源码)
 > * /doom3: DOOM3 source(DOOM3源码)
-> * /__HARAMTTAN__: Other resources(额外资源)
-> > * /*.apk: Latest update version(最近更新版本)
-> > * /build: old version APK packages(旧版本的apk包)
-> > * /screenshot: screenshot pictures(截屏)
-> > * /cdoom: Original `Classic DOOM` changed source(https://www.moddb.com/mods/classic-doom-3)
-> > * /d3le: Original `The Lost Mission` changed source(https://www.moddb.com/mods/the-lost-mission)
+> * /*.apk: Latest update version(最近更新版本)
 
-Original old n0n3m4 version source in `n0n3m4_original_old_version` branch.
+> `package`: Builds
+> * /*.apk: all version build
+> * /screenshot: screenshot pictures
+> * /source: Reference source
+> * /pak: Game resource
+> * /CHECK_FOR_UPDATE.json: Check for update config JSON
+
+> `n0n3m4_original_old_version`:
+> * Original old n0n3m4 version source.
+
+> `diii4amm`:
+> * Old latest DIII4A++ source until version 12.
 
 ----------------------------------------------------------------------------------
 ### Extras download:

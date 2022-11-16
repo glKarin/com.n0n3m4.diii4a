@@ -163,7 +163,7 @@ public final class TextHelper
             " (a). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).",
             " 4. Then Choose map level/Start directly, all levels is working, and `New Game` s working.",
             " *. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).",
-            " *. If running crash on arm32 or low-momery device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
+            " *. If running crash on arm32 or low-memory device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
             null,
 			" Some problems and resolutions: ",
 			" 1. Door-opening: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, all doors can be opened.",
@@ -172,7 +172,7 @@ public final class TextHelper
 			" 4. Loading-UI: It looks work well now.",
 			" 5. Multiplayer-Game: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
 			" 6. script errors: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.",
-			" 7. Particle system: Now is work incompleted(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`).",
+			" 7. Particle system: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`).",
 			" 8. Entity render: Some game entities render incorrect.",
             " 9. Font: Support Q4 format fonts now. " + GenLinkText("https://github.com/IlDucci", "IlDucci") + "'s DOOM3-format fonts of Quake 4 is not need on longer.",
             null,
@@ -282,9 +282,17 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2022-11-11", 18,
+                        "Implement some debug render functions.",
+                        "Add player focus GUI bracket and interactive text on HUD in Quake 4.",
+                        "Automatic generating AAS file for bot of Multiplayer-Game maps is not need enable net_allowCheats when set cvar `harm_g_autoGenAASFileInMPGame` to 1 in Quake 4.",
+                        "Fixed restart menu action in Quake 4.",
+                        "Fixed a memory bug that can cause crash in Quake 4."
+                ),
+
                 ChangeLog.Create("2022-10-29", 17,
                         "Support Quake 4 format fonts. Other language patches will work. D3-format fonts do not need to extract no longer.",
-                        "Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`."
+                        "Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`(Fixed in version 19)."
                 ),
 
                 ChangeLog.Create("2022-10-22", 16,
@@ -316,13 +324,13 @@ public final class TextHelper
                              "Fixup skip cinematic in `Quake 4`.",
                              "If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.",
                              "Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).",
-                             " `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`(Fixed in version 16).",
+                             " `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`(Fixed in version 18).",
                              " `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload(Fixed in version 16).",
-                             " `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`(Fixed in version 16).",
+                             " `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`(Fixed in version 18).",
                              " `game/putra`: Script fatal error has fixed. But can not down on broken floor, using `noclip`(Fixed in version 15).",
                              " `game/waste`: Script fatal error has fixed.",
-                             " `game/process1 first`: Last elevator has ins collision cause killing player. Using `god`(Fixed in version 16). If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.",
-                             " `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`(Fixed in version 16).",
+                             " `game/process1 first`: Last elevator has ins collision cause killing player. Using `god`(Fixed in version 18). If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.",
+                             " `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`(Fixed in version 18).",
                              " `game/tram_1b`: Loading crash after last level ending. Using `map game/tram_1b` to reload(Fixed in version 16).",
                              " `game/core1`: Fixup first elevator platform not go up.",
                              " `game/core2`: Fixup entity rotation."
@@ -585,7 +593,6 @@ public final class TextHelper
             Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
         };
         final Cvar[] QUAKE4_CVARS = {
-            Cvar.Create("harm_g_useSimpleTriggerClipForce", "bool", "1", "Using simple trigger clip for player/AI/vehicle touching triggers, it can optimize some solutions for doors can' open in Quake4Doom. Now it is deprecated."),
             Cvar.Create("harm_g_alwaysRun", "bool", "1", "Force to always run automatic."),
             Cvar.Create("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic."),
             Cvar.Create("harm_g_flashlightOn", "bool", "1", "Automitic make flash light on initial."),

@@ -92,7 +92,7 @@ class idUserInterfaceLocal : public idUserInterface
 			return timeStamp;
 		}
 
-#ifdef _RAVEN
+#ifdef _RAVEN //k: Quake4 idWindow is using externally
 		virtual 
 #endif
 		idWindow 					*GetDesktop() const {
@@ -128,11 +128,14 @@ class idUserInterfaceLocal : public idUserInterface
 		idStr						&GetReturnCmd() {
 			return returnCmd;
 		};
-#ifdef _RAVEN
+#ifdef _RAVEN //k: for Quake4 gui script
 	virtual void				SetInteractive(bool interactive);
 #endif
 
 	private:
+#ifdef _RAVEN //k: check UI is interactive or desktop is interactive
+	bool IsDesktopInteractive() const;
+#endif
 		bool						active;
 		bool						loading;
 		bool						interactive;
