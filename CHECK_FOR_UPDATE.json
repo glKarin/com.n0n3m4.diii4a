@@ -1,7 +1,7 @@
 {
-    "release":19,
-    "update":"2022-11-16",
-    "version":"1.1.0harmattan19",
-    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.19.apk",
-    "changes":"  * Fixup middle bridge door GUI not interactive of level `game/tram1` in Quake 4.\n  * Fixup elevator 1 with a monster GUI not interactive of level `game/process2` in Quake 4."
+    "release":20,
+    "update":"2022-11-18",
+    "version":"1.1.0harmattan20",
+    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.20.apk",
+    "changes":"  * Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.\n  * Implement show surface/hide surface for fixup entity render incorrect in Quake 4, e.g. AI's weapons, weapons in player view and Makron in boss level."
 }
