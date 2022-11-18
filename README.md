@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake IV for Android, 毁灭战士3/雷神之锤4安卓移植版
 **Latest version:**
-1.1.0harmattan19(natasha)  
+1.1.0harmattan20(natasha)  
 **Last update release:**
-2022-11-16  
+2022-11-18  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -12,13 +12,13 @@ Android 4.0+
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan19 (2022-11-16)
+> 1.1.0harmattan20 (2022-11-18)
 
-* Fixup middle bridge door GUI not interactive of level `game/tram1` in Quake 4.
-* Fixup elevator 1 with a monster GUI not interactive of level `game/process2` in Quake 4.
+* Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.
+* Implement show surface/hide surface for fixup entity render incorrect in Quake 4, e.g. AI's weapons, weapons in player view and Makron in boss level.
 
-* 雷神之锤4中修复了关卡`game/tram1`的中部桥的门的开关UI不能交互.
-* 雷神之锤4中修复了关卡`game/process2`的有怪的电梯1的启动开关UI不能交互.
+* 雷神之锤4中新增默认字体配置, 使用cvar `harm_gui_defaultFont`设置, 默认为`chain`.
+* 雷神之锤4中实现了显示/隐藏模型层, 修复了物体渲染错误. 例如: AI的枪支外观模型, 玩家视角的枪支, 和boss关卡中的Makron.
 
 ----------------------------------------------------------------------------------
 
@@ -81,6 +81,14 @@ Android 4.0+
 ### Changes
 
 ----------------------------------------------------------------------------------
+
+> 1.1.0harmattan19 (2022-11-16)
+
+* Fixup middle bridge door GUI not interactive of level `game/tram1` in Quake 4.
+* Fixup elevator 1 with a monster GUI not interactive of level `game/process2` in Quake 4.
+
+* 雷神之锤4中修复了关卡`game/tram1`的中部桥的门的开关UI不能交互.
+* 雷神之锤4中修复了关卡`game/process2`的有怪的电梯1的启动开关UI不能交互.
 
 > 1.1.0harmattan18 (2022-11-11)
 

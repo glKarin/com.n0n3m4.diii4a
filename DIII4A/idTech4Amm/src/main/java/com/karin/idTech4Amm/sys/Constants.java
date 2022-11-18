@@ -9,8 +9,8 @@ public final class Constants
     public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
-    public static final int CONST_UPDATE_RELEASE = 19;
-    public static final String CONST_RELEASE = "2022-11-16";
+    public static final int CONST_UPDATE_RELEASE = 20;
+    public static final String CONST_RELEASE = "2022-11-18";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -19,8 +19,8 @@ public final class Constants
 	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
-			"Fixup middle bridge door GUI not interactive of level `game/tram1` in Quake 4.",
-			"Fixup elevator 1 with a monster GUI not interactive of level `game/process2` in Quake 4.",
+			"Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.",
+			"Implement show surface/hide surface for fixup entity render incorrect in Quake 4, e.g. AI's weapons, weapons in player view and Makron in boss level.",
 	};
 	public static final String[] LIBS = {
 		"game",

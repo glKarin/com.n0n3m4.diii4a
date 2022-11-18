@@ -282,6 +282,11 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2022-11-16", 19,
+                        "Fixup middle bridge door GUI not interactive of level `game/tram1` in Quake 4.",
+                        "Fixup elevator 1 with a monster GUI not interactive of level `game/process2` in Quake 4."
+                ),
+
                 ChangeLog.Create("2022-11-11", 18,
                         "Implement some debug render functions.",
                         "Add player focus GUI bracket and interactive text on HUD in Quake 4.",
@@ -597,6 +602,14 @@ public final class TextHelper
             Cvar.Create("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic."),
             Cvar.Create("harm_g_flashlightOn", "bool", "1", "Automitic make flash light on initial."),
             Cvar.Create("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movment."),
+            Cvar.Create("harm_gui_defaultFont", "string", "chain", "Default font name.",
+                    "chain", "fonts/chain",
+                    "lowpixel", "fonts/lowpixel",
+                    "marine", "fonts/marine",
+                    "profont", "fonts/profont",
+                    "r_strogg", "fonts/r_strogg",
+                    "strogg", "fonts/strogg"
+            ),
         };
         
         Map<String, Cvar[]> cvarMap = new LinkedHashMap<>();
