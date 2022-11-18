@@ -312,6 +312,11 @@ class idRenderModel
 		// Writing to and reading from a demo file.
 		virtual void				ReadFromDemoFile(class idDemoFile *f) = 0;
 		virtual void				WriteToDemoFile(class idDemoFile *f) = 0;
+#ifdef _RAVEN
+// RAVEN BEGIN
+// bdube: surface flag manipulation
+	virtual int					GetSurfaceMask ( const char* surface ) const = 0;;
+#endif
 };
 
 #endif /* !__MODEL_H__ */

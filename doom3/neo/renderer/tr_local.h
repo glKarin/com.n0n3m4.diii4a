@@ -1829,4 +1829,9 @@ extern idCVar harm_r_maxAllocStackMemory; // declare in tr_trisurf.cpp
 
 #endif
 
+#ifdef _RAVEN //k: macros for renderEffect_s::suppressSurfaceMask
+#define SUPPRESS_SURFACE_MASK(x) (1 << (x))
+#define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
+#endif
+
 #endif /* !__TR_LOCAL_H__ */

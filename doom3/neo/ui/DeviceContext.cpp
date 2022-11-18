@@ -48,6 +48,17 @@ idCVar gui_mediumFontLimit("gui_mediumFontLimit", "0.60", CVAR_GUI | CVAR_ARCHIV
 
 idList<fontInfoEx_t> idDeviceContext::fonts;
 
+#ifdef _RAVEN //k: I am not find Quake4 default font named "", so using cvar to control
+const char	*harm_gui_defaultFontArgs[]	= {
+	"chain", 
+	"lowpixel", 
+	"marine", 
+	"profont", 
+	"r_strogg", 
+	"strogg", 
+	NULL };
+static idCVar harm_gui_defaultFont("harm_gui_defaultFont", harm_gui_defaultFontArgs[0], CVAR_ARCHIVE | CVAR_GUI, "[Harmattan]: Setup default GUI font. It will be available in next running.", harm_gui_defaultFontArgs, idCmdSystem::ArgCompletion_String<harm_gui_defaultFontArgs>);
+#endif
 int idDeviceContext::FindFont(const char *name)
 {
 	int c = fonts.Num();
@@ -60,6 +71,16 @@ int idDeviceContext::FindFont(const char *name)
 
 	// If the font was not found, try to register it
 	idStr fileName = name;
+#ifdef _RAVEN //k: Quake4 default font
+	if(!idStr::Icmp(fileName, "fonts"))
+	{
+		fileName = "fonts/";
+		const char *defFontName = harm_gui_defaultFont.GetString();
+		if(!defFontName || !defFontName[0])
+			defFontName = harm_gui_defaultFontArgs[0];
+		fileName += defFontName;
+	}
+#endif
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()));
 
 	fontInfoEx_t fontInfo;

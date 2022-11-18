@@ -165,7 +165,11 @@ class idInteraction
 
 	private:
 		// actually create the interaction
+#ifdef _RAVEN //k: for renderEntity_s::suppressSurfaceMask
+		void					CreateInteraction(const idRenderModel *model, int suppressSurfaceMask = 0);
+#else
 		void					CreateInteraction(const idRenderModel *model);
+#endif
 
 		// unlink from entity and light lists
 		void					Unlink(void);

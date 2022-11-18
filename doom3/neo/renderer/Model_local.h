@@ -102,6 +102,9 @@ class idRenderModelStatic : public idRenderModel
 		bool						DeleteSurfaceWithId(int id);
 		void						DeleteSurfacesWithNegativeId(void);
 		bool						FindSurfaceWithId(int id, int &surfaceNum);
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, static model using surfaces index as mask: 1 << index, name is shader material name
+		virtual int GetSurfaceMask(const char *name) const;
+#endif
 
 	public:
 		idList<modelSurface_t>		surfaces;
@@ -185,6 +188,9 @@ class idRenderModelMD5 : public idRenderModelStatic
 		virtual const char 		*GetJointName(jointHandle_t handle) const;
 		virtual const idJointQuat 	*GetDefaultPose(void) const;
 		virtual int					NearestJoint(int surfaceNum, int a, int b, int c) const;
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, md5 model using mesh index as mask: 1 << index, name is shader material name
+		virtual int GetSurfaceMask(const char *name) const;
+#endif
 
 	private:
 		idList<idMD5Joint>			joints;
@@ -197,6 +203,7 @@ class idRenderModelMD5 : public idRenderModelStatic
 		void						ParseJoint(idLexer &parser, idMD5Joint *joint, idJointQuat *defaultPose);
 
 #ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+		idList<idStr> surfaceShaderList;
 	public:
 		idRenderModelStatic *staticModel;
 #endif

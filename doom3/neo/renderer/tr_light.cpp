@@ -1282,6 +1282,11 @@ static void R_AddAmbientDrawsurfs(viewEntity_t *vEntity)
 	for (i = 0 ; i < total ; i++) {
 		const modelSurface_t	*surf = model->Surface(i);
 
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, shader mask is not 0 will skip render
+		if(SUPPRESS_SURFACE_MASK_CHECK(def->parms.suppressSurfaceMask, i))
+			continue;
+#endif
+
 		// for debugging, only show a single surface at a time
 		if (r_singleSurface.GetInteger() >= 0 && i != r_singleSurface.GetInteger()) {
 			continue;
@@ -1410,7 +1415,6 @@ void R_AddModelSurfaces(void)
 	// go through each entity that is either visible to the view, or to
 	// any light that intersects the view (for shadows)
 	for (vEntity = tr.viewDef->viewEntitys; vEntity; vEntity = vEntity->next) {
-
 		if (r_useEntityScissors.GetBool()) {
 			// calculate the screen area covered by the entity
 			idScreenRect scissorRect = R_CalcEntityScissorRectangle(vEntity);

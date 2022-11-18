@@ -2556,3 +2556,23 @@ void rvRenderModelBSE::FinishSurfaces(bool useMikktspace) {
 }
 #endif
 
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, static model using surfaces index as mask: 1 << index, name is shader material name
+int idRenderModelStatic::GetSurfaceMask(const char *name) const
+{
+	int i;
+	const modelSurface_t *surf;
+	if(!name || !name[0])
+		return 0;
+	for(i = 0; i < surfaces.Num(); i++)
+	{
+		if(i > 31) //k: greate than int bits, it should be happened, but if happen, return 0 for do nothing
+			break;
+		surf = &surfaces[i];
+		if(!surf || !surf->shader)
+			continue;
+		if(!idStr::Icmp(name, surf->shader->GetName()))
+			return SUPPRESS_SURFACE_MASK(i);
+	}
+	return 0;
+}
+#endif
