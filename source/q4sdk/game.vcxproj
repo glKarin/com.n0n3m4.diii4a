@@ -1,0 +1,496 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugInline|Win32">
+      <Configuration>DebugInline</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{49BEC5C6-B964-417A-851E-808886B57430}</ProjectGuid>
+    <RootNamespace>Game</RootNamespace>
+    <SccProjectName>Perforce Project</SccProjectName>
+    <SccAuxPath />
+    <SccLocalPath>..</SccLocalPath>
+    <SccProvider>MSSCCI:NXN alienbrain</SccProvider>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../$(Platform)/$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">../$(Platform)/$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">$(OutDir)</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../$(Platform)/$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;GAME_DLL;Q4SDK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)$(ProjectName)/</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName)x86.pdb</ProgramDataBaseFileName>
+      <BrowseInformationFile>$(IntDir)$(ProjectName)/</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/FIXED:no %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>$(IntDir)idLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(IntDir)$(ProjectName)x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>.\game\game.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(ProjectName)x86.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapFileName>
+      </MapFileName>
+      <MapExports>false</MapExports>
+      <SubSystem>NotSet</SubSystem>
+      <StackReserveSize>16000000</StackReserveSize>
+      <StackCommitSize>16000000</StackCommitSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <BaseAddress>0x20000000</BaseAddress>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_INLINEDEBUG;GAME_DLL;Q4SDK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)$(ProjectName)/</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName)x86.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)$(ProjectName)/</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(IntDir)idLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(IntDir)$(ProjectName)x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ModuleDefinitionFile>.\game\game.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(ProjectName)x86.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapFileName>
+      </MapFileName>
+      <MapExports>false</MapExports>
+      <SubSystem>NotSet</SubSystem>
+      <StackReserveSize>16000000</StackReserveSize>
+      <StackCommitSize>16000000</StackCommitSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <BaseAddress>0x20000000</BaseAddress>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <ResourceCompile>
+      <ShowProgress>true</ShowProgress>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <OmitFramePointers>false</OmitFramePointers>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_FINAL;GAME_DLL;Q4SDK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)$(ProjectName)/</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName)x86.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)$(ProjectName)/</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/MACHINE:I386 /fixed:no %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>$(IntDir)idLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(IntDir)$(ProjectName)x86.dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>.\game\game.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(ProjectName)x86.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)$(ProjectName)x86.map</MapFileName>
+      <MapExports>true</MapExports>
+      <SubSystem>NotSet</SubSystem>
+      <StackReserveSize>4194304</StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <BaseAddress>0x20000000</BaseAddress>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="game\Actor.cpp" />
+    <ClCompile Include="game\AF.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="game\AFEntity.cpp" />
+    <ClCompile Include="game\BrittleFracture.cpp" />
+    <ClCompile Include="game\Camera.cpp" />
+    <ClCompile Include="game\client\ClientAFEntity.cpp" />
+    <ClCompile Include="game\Effect.cpp" />
+    <ClCompile Include="game\Entity.cpp" />
+    <ClCompile Include="game\FreeView.cpp" />
+    <ClCompile Include="game\Game_Debug.cpp" />
+    <ClCompile Include="game\Game_local.cpp" />
+    <ClCompile Include="game\Game_Log.cpp" />
+    <ClCompile Include="game\Game_network.cpp" />
+    <ClCompile Include="game\GameEdit.cpp" />
+    <ClCompile Include="game\Healing_Station.cpp" />
+    <ClCompile Include="game\Icon.cpp" />
+    <ClCompile Include="game\IconManager.cpp" />
+    <ClCompile Include="game\IK.cpp" />
+    <ClCompile Include="game\Instance.cpp" />
+    <ClCompile Include="game\Item.cpp" />
+    <ClCompile Include="game\Light.cpp" />
+    <ClCompile Include="game\LipSync.cpp" />
+    <ClCompile Include="game\Misc.cpp" />
+    <ClCompile Include="game\Moveable.cpp" />
+    <ClCompile Include="game\Mover.cpp" />
+    <ClCompile Include="game\MultiplayerGame.cpp" />
+    <ClCompile Include="game\Playback.cpp" />
+    <ClCompile Include="game\Player_Cheats.cpp" />
+    <ClCompile Include="game\Projectile.cpp" />
+    <ClCompile Include="game\Pvs.cpp" />
+    <ClCompile Include="game\SecurityCamera.cpp" />
+    <ClCompile Include="game\Sound.cpp" />
+    <ClCompile Include="game\SplineMover.cpp" />
+    <ClCompile Include="game\Target.cpp" />
+    <ClCompile Include="game\TramGate.cpp" />
+    <ClCompile Include="game\Trigger.cpp" />
+    <ClCompile Include="game\WorldSpawn.cpp" />
+    <ClCompile Include="game\ai\AAS.cpp" />
+    <ClCompile Include="game\ai\AAS_debug.cpp" />
+    <ClCompile Include="game\ai\AAS_Find.cpp" />
+    <ClCompile Include="game\ai\AAS_pathing.cpp" />
+    <ClCompile Include="game\ai\AAS_routing.cpp" />
+    <ClCompile Include="game\ai\AAS_tactical.cpp" />
+    <ClCompile Include="game\ai\AI.cpp" />
+    <ClCompile Include="game\ai\AI_Actions.cpp" />
+    <ClCompile Include="game\ai\AI_Announcements.cpp" />
+    <ClCompile Include="game\ai\AI_Debug.cpp" />
+    <ClCompile Include="game\ai\AI_events.cpp" />
+    <ClCompile Include="game\ai\AI_Manager.cpp" />
+    <ClCompile Include="game\ai\AI_Medic.cpp" />
+    <ClCompile Include="game\ai\AI_Move.cpp" />
+    <ClCompile Include="game\ai\AI_pathing.cpp" />
+    <ClCompile Include="game\ai\AI_States.cpp" />
+    <ClCompile Include="game\ai\AI_Tactical.cpp" />
+    <ClCompile Include="game\ai\AI_Util.cpp" />
+    <ClCompile Include="game\ai\Monster_Berserker.cpp" />
+    <ClCompile Include="game\ai\Monster_BossBuddy.cpp" />
+    <ClCompile Include="game\ai\Monster_BossMakron.cpp" />
+    <ClCompile Include="game\ai\Monster_ConvoyGround.cpp" />
+    <ClCompile Include="game\ai\Monster_ConvoyHover.cpp" />
+    <ClCompile Include="game\ai\Monster_FailedTransfer.cpp" />
+    <ClCompile Include="game\ai\Monster_Fatty.cpp" />
+    <ClCompile Include="game\ai\Monster_Gladiator.cpp" />
+    <ClCompile Include="game\ai\Monster_Grunt.cpp" />
+    <ClCompile Include="game\ai\Monster_Gunner.cpp" />
+    <ClCompile Include="game\ai\Monster_Harvester.cpp" />
+    <ClCompile Include="game\ai\Monster_HarvesterDispersal.cpp" />
+    <ClCompile Include="game\ai\Monster_HeavyHoverTank.cpp" />
+    <ClCompile Include="game\ai\Monster_IronMaiden.cpp" />
+    <ClCompile Include="game\ai\Monster_LightTank.cpp" />
+    <ClCompile Include="game\ai\Monster_NetworkGuardian.cpp" />
+    <ClCompile Include="game\ai\Monster_RepairBot.cpp" />
+    <ClCompile Include="game\ai\Monster_Scientist.cpp" />
+    <ClCompile Include="game\ai\Monster_Sentry.cpp" />
+    <ClCompile Include="game\ai\Monster_SlimyTransfer.cpp" />
+    <ClCompile Include="game\ai\Monster_StreamProtector.cpp" />
+    <ClCompile Include="game\ai\Monster_StroggFlyer.cpp" />
+    <ClCompile Include="game\ai\Monster_StroggHover.cpp" />
+    <ClCompile Include="game\ai\Monster_StroggMarine.cpp" />
+    <ClCompile Include="game\ai\Monster_TeleportDropper.cpp" />
+    <ClCompile Include="game\ai\Monster_Turret.cpp" />
+    <ClCompile Include="game\ai\Monster_TurretFlying.cpp" />
+    <ClCompile Include="game\spawner.cpp" />
+    <ClCompile Include="game\ai\VehicleAI.cpp" />
+    <ClCompile Include="game\anim\Anim.cpp" />
+    <ClCompile Include="game\anim\Anim_Blend.cpp" />
+    <ClCompile Include="game\anim\Anim_Import.cpp" />
+    <ClCompile Include="game\anim\Anim_Testmodel.cpp" />
+    <ClCompile Include="game\client\ClientEffect.cpp" />
+    <ClCompile Include="game\client\ClientEntity.cpp" />
+    <ClCompile Include="game\client\ClientModel.cpp" />
+    <ClCompile Include="game\client\ClientMoveable.cpp" />
+    <ClCompile Include="game\gamesys\Class.cpp" />
+    <ClCompile Include="game\gamesys\DebugGraph.cpp" />
+    <ClCompile Include="game\gamesys\Event.cpp" />
+    <ClCompile Include="game\gamesys\SaveGame.cpp" />
+    <ClCompile Include="game\gamesys\State.cpp" />
+    <ClCompile Include="game\gamesys\SysCmds.cpp" />
+    <ClCompile Include="game\gamesys\SysCvar.cpp" />
+    <ClCompile Include="game\physics\Clip.cpp" />
+    <ClCompile Include="game\physics\Force.cpp" />
+    <ClCompile Include="game\physics\Force_Constant.cpp" />
+    <ClCompile Include="game\physics\Force_Drag.cpp" />
+    <ClCompile Include="game\physics\Force_Field.cpp" />
+    <ClCompile Include="game\physics\Force_Spring.cpp" />
+    <ClCompile Include="game\physics\Physics.cpp" />
+    <ClCompile Include="game\physics\Physics_Actor.cpp" />
+    <ClCompile Include="game\physics\Physics_AF.cpp" />
+    <ClCompile Include="game\physics\Physics_Base.cpp" />
+    <ClCompile Include="game\physics\Physics_Monster.cpp" />
+    <ClCompile Include="game\physics\Physics_Parametric.cpp" />
+    <ClCompile Include="game\physics\Physics_Particle.cpp" />
+    <ClCompile Include="game\physics\Physics_Player.cpp" />
+    <ClCompile Include="game\physics\Physics_RigidBody.cpp" />
+    <ClCompile Include="game\physics\Physics_Static.cpp" />
+    <ClCompile Include="game\physics\Physics_StaticMulti.cpp" />
+    <ClCompile Include="game\physics\Physics_VehicleMonster.cpp" />
+    <ClCompile Include="game\physics\Push.cpp" />
+    <ClCompile Include="game\Player.cpp" />
+    <ClCompile Include="game\Player_States.cpp" />
+    <ClCompile Include="game\PlayerView.cpp" />
+    <ClCompile Include="game\script\Script_Compiler.cpp" />
+    <ClCompile Include="game\script\Script_Interpreter.cpp" />
+    <ClCompile Include="game\script\Script_Program.cpp" />
+    <ClCompile Include="game\script\Script_Thread.cpp" />
+    <ClCompile Include="game\script\ScriptFuncUtility.cpp" />
+    <ClCompile Include="game\vehicle\Vehicle.cpp" />
+    <ClCompile Include="game\vehicle\Vehicle_DropPod.cpp" />
+    <ClCompile Include="game\vehicle\Vehicle_Walker.cpp" />
+    <ClCompile Include="game\vehicle\VehicleAnimated.cpp" />
+    <ClCompile Include="game\vehicle\VehicleController.cpp" />
+    <ClCompile Include="game\vehicle\VehicleDriver.cpp" />
+    <ClCompile Include="game\vehicle\VehicleMonster.cpp" />
+    <ClCompile Include="game\vehicle\VehicleParts.cpp" />
+    <ClCompile Include="game\vehicle\VehiclePosition.cpp" />
+    <ClCompile Include="game\vehicle\VehicleRigid.cpp" />
+    <ClCompile Include="game\vehicle\VehicleSpline.cpp" />
+    <ClCompile Include="game\vehicle\VehicleStatic.cpp" />
+    <ClCompile Include="game\Weapon.cpp" />
+    <ClCompile Include="game\weapon\WeaponBlaster.cpp" />
+    <ClCompile Include="game\weapon\WeaponDarkMatterGun.cpp" />
+    <ClCompile Include="game\weapon\WeaponGauntlet.cpp" />
+    <ClCompile Include="game\weapon\WeaponGrenadeLauncher.cpp" />
+    <ClCompile Include="game\weapon\WeaponHyperblaster.cpp" />
+    <ClCompile Include="game\weapon\WeaponLightningGun.cpp" />
+    <ClCompile Include="game\weapon\WeaponMachinegun.cpp" />
+    <ClCompile Include="game\weapon\WeaponNailgun.cpp" />
+    <ClCompile Include="game\weapon\WeaponNapalmGun.cpp" />
+    <ClCompile Include="game\weapon\WeaponRailgun.cpp" />
+    <ClCompile Include="game\weapon\WeaponRocketLauncher.cpp" />
+    <ClCompile Include="game\weapon\WeaponShotgun.cpp" />
+    <ClCompile Include="game\mp\Buying.cpp" />
+    <ClCompile Include="game\mp\CTF.cpp" />
+    <ClCompile Include="game\mp\GameState.cpp" />
+    <ClCompile Include="game\mp\Tourney.cpp" />
+    <ClCompile Include="game\mp\VoiceComms.cpp" />
+    <ClCompile Include="game\mp\stats\StatEvent.cpp" />
+    <ClCompile Include="game\mp\stats\StatManager.cpp" />
+    <ClCompile Include="game\mp\stats\StatWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="game\Actor.h" />
+    <ClInclude Include="game\AF.h" />
+    <ClInclude Include="game\AFEntity.h" />
+    <ClInclude Include="game\BrittleFracture.h" />
+    <ClInclude Include="game\Camera.h" />
+    <ClInclude Include="game\client\ClientAFEntity.h" />
+    <ClInclude Include="game\Effect.h" />
+    <ClInclude Include="game\Entity.h" />
+    <ClInclude Include="game\FreeView.h" />
+    <ClInclude Include="game\Fx.h" />
+    <ClInclude Include="game\Game.h" />
+    <ClInclude Include="game\Game_Debug.h" />
+    <ClInclude Include="game\Game_local.h" />
+    <ClInclude Include="game\Game_Log.h" />
+    <ClInclude Include="game\GameEdit.h" />
+    <ClInclude Include="game\Healing_Station.h" />
+    <ClInclude Include="game\Icon.h" />
+    <ClInclude Include="game\IconManager.h" />
+    <ClInclude Include="game\IK.h" />
+    <ClInclude Include="game\Instance.h" />
+    <ClInclude Include="game\Item.h" />
+    <ClInclude Include="game\Light.h" />
+    <ClInclude Include="game\LipSync.h" />
+    <ClInclude Include="game\Misc.h" />
+    <ClInclude Include="game\Moveable.h" />
+    <ClInclude Include="game\Mover.h" />
+    <ClInclude Include="game\MultiplayerGame.h" />
+    <ClInclude Include="game\Projectile.h" />
+    <ClInclude Include="game\Pvs.h" />
+    <ClInclude Include="game\SecurityCamera.h" />
+    <ClInclude Include="game\Sound.h" />
+    <ClInclude Include="game\SplineMover.h" />
+    <ClInclude Include="game\Target.h" />
+    <ClInclude Include="game\TramGate.h" />
+    <ClInclude Include="game\Trigger.h" />
+    <ClInclude Include="game\WorldSpawn.h" />
+    <ClInclude Include="game\ai\AAS.h" />
+    <ClInclude Include="game\ai\AAS_Find.h" />
+    <ClInclude Include="game\ai\AAS_local.h" />
+    <ClInclude Include="game\ai\AAS_tactical.h" />
+    <ClInclude Include="game\ai\AI.h" />
+    <ClInclude Include="game\ai\AI_Manager.h" />
+    <ClInclude Include="game\ai\AI_Medic.h" />
+    <ClInclude Include="game\ai\AI_Move.h" />
+    <ClInclude Include="game\ai\AI_Tactical.h" />
+    <ClInclude Include="game\ai\AI_Util.h" />
+    <ClInclude Include="game\spawner.h" />
+    <ClInclude Include="game\ai\VehicleAI.h" />
+    <ClInclude Include="game\anim\Anim.h" />
+    <ClInclude Include="game\anim\Anim_Testmodel.h" />
+    <ClInclude Include="game\client\ClientEffect.h" />
+    <ClInclude Include="game\client\ClientEntity.h" />
+    <ClInclude Include="game\client\ClientModel.h" />
+    <ClInclude Include="game\client\ClientMoveable.h" />
+    <ClInclude Include="game\gamesys\Class.h" />
+    <ClInclude Include="game\gamesys\DebugGraph.h" />
+    <ClInclude Include="game\gamesys\Event.h" />
+    <ClInclude Include="game\gamesys\SaveGame.h" />
+    <ClInclude Include="game\gamesys\State.h" />
+    <ClInclude Include="game\gamesys\SysCmds.h" />
+    <ClInclude Include="game\gamesys\SysCvar.h" />
+    <ClInclude Include="game\physics\Clip.h" />
+    <ClInclude Include="game\physics\Force.h" />
+    <ClInclude Include="game\physics\Force_Constant.h" />
+    <ClInclude Include="game\physics\Force_Drag.h" />
+    <ClInclude Include="game\physics\Force_Field.h" />
+    <ClInclude Include="game\physics\Force_Spring.h" />
+    <ClInclude Include="game\physics\Physics.h" />
+    <ClInclude Include="game\physics\Physics_Actor.h" />
+    <ClInclude Include="game\physics\Physics_AF.h" />
+    <ClInclude Include="game\physics\Physics_Base.h" />
+    <ClInclude Include="game\physics\Physics_Monster.h" />
+    <ClInclude Include="game\physics\Physics_Parametric.h" />
+    <ClInclude Include="game\physics\Physics_Particle.h" />
+    <ClInclude Include="game\physics\Physics_Player.h" />
+    <ClInclude Include="game\physics\Physics_RigidBody.h" />
+    <ClInclude Include="game\physics\Physics_Static.h" />
+    <ClInclude Include="game\physics\Physics_StaticMulti.h" />
+    <ClInclude Include="game\physics\Physics_VehicleMonster.h" />
+    <ClInclude Include="game\physics\Push.h" />
+    <ClInclude Include="game\Player.h" />
+    <ClInclude Include="game\PlayerView.h" />
+    <ClInclude Include="game\script\Script_Compiler.h" />
+    <ClInclude Include="game\script\Script_Interpreter.h" />
+    <ClInclude Include="game\script\Script_Program.h" />
+    <ClInclude Include="game\script\Script_Thread.h" />
+    <ClInclude Include="game\script\ScriptFuncUtility.h" />
+    <ClInclude Include="game\vehicle\Vehicle.h" />
+    <ClInclude Include="game\vehicle\VehicleAnimated.h" />
+    <ClInclude Include="game\vehicle\VehicleController.h" />
+    <ClInclude Include="game\vehicle\VehicleDriver.h" />
+    <ClInclude Include="game\vehicle\VehicleMonster.h" />
+    <ClInclude Include="game\vehicle\VehicleParts.h" />
+    <ClInclude Include="game\vehicle\VehicleRigid.h" />
+    <ClInclude Include="game\vehicle\VehicleSpline.h" />
+    <ClInclude Include="game\vehicle\VehicleStatic.h" />
+    <ClInclude Include="game\Weapon.h" />
+    <ClInclude Include="game\mp\Buying.h" />
+    <ClInclude Include="game\mp\CTF.h" />
+    <ClInclude Include="game\mp\GameState.h" />
+    <ClInclude Include="game\mp\Tourney.h" />
+    <ClInclude Include="game\mp\stats\StatEvent.h" />
+    <ClInclude Include="game\mp\stats\StatManager.h" />
+    <ClInclude Include="game\mp\stats\StatWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="game\Game.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="idlib.vcxproj">
+      <Project>{49bec5c6-b964-417a-851e-808886b57400}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,320 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugInline|Win32">
+      <Configuration>DebugInline</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{49BEC5C6-B964-417A-851E-808886B57400}</ProjectGuid>
+    <RootNamespace>idLib</RootNamespace>
+    <SccProjectName>Perforce Project</SccProjectName>
+    <SccAuxPath />
+    <SccLocalPath>..</SccLocalPath>
+    <SccProvider>MSSCCI:NXN alienbrain</SccProvider>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../$(Platform)/$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">../$(Platform)/$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">$(OutDir)</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../$(Platform)/$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>mssdk/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;Q4SDK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)$(ProjectName)/</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <BrowseInformationFile>$(IntDir)$(ProjectName)/</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>mssdk/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_INLINEDEBUG;Q4SDK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)$(ProjectName)/</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)$(ProjectName)/</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+    <ResourceCompile>
+      <ShowProgress>true</ShowProgress>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <OmitFramePointers>false</OmitFramePointers>
+      <AdditionalIncludeDirectories>mssdk/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_FINAL;Q4SDK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)$(ProjectName)/</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)$(ProjectName)/</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(IntDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="idlib\AutoPtr.h" />
+    <ClInclude Include="idlib\Base64.h" />
+    <ClInclude Include="idlib\BitMsg.h" />
+    <ClInclude Include="idlib\CmdArgs.h" />
+    <ClInclude Include="idlib\Dict.h" />
+    <ClInclude Include="idlib\Heap.h" />
+    <ClInclude Include="idlib\LangDict.h" />
+    <ClInclude Include="idlib\Lexer.h" />
+    <ClInclude Include="idlib\LexerFactory.h" />
+    <ClInclude Include="idlib\Lib.h" />
+    <ClInclude Include="idlib\MapFile.h" />
+    <ClInclude Include="idlib\Parser.h" />
+    <CustomBuildStep Include="idlib\precompiled.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </CustomBuildStep>
+    <ClInclude Include="idlib\rvHeap.h" />
+    <ClInclude Include="idlib\rvHeapArena.h" />
+    <ClInclude Include="idlib\rvMemSys.h" />
+    <ClInclude Include="idlib\Str.h" />
+    <ClInclude Include="idlib\TextCompiler.h" />
+    <ClInclude Include="idlib\Timer.h" />
+    <ClInclude Include="idlib\TimingCollection.h" />
+    <ClInclude Include="idlib\Token.h" />
+    <ClInclude Include="idlib\bv\Bounds.h" />
+    <ClInclude Include="idlib\bv\Box.h" />
+    <ClInclude Include="idlib\bv\Frustum.h" />
+    <ClInclude Include="idlib\bv\Sphere.h" />
+    <ClInclude Include="idlib\containers\BinSearch.h" />
+    <ClInclude Include="idlib\BTree.h" />
+    <ClInclude Include="idlib\containers\HashIndex.h" />
+    <ClInclude Include="idlib\containers\HashTable.h" />
+    <ClInclude Include="idlib\containers\Hierarchy.h" />
+    <ClInclude Include="idlib\containers\LinkList.h" />
+    <ClInclude Include="idlib\containers\List.h" />
+    <ClInclude Include="idlib\containers\Pair.h" />
+    <ClInclude Include="idlib\containers\PlaneSet.h" />
+    <ClInclude Include="idlib\containers\Queue.h" />
+    <ClInclude Include="idlib\containers\rvBlockPool.h" />
+    <ClInclude Include="idlib\containers\Stack.h" />
+    <ClInclude Include="idlib\containers\StaticList.h" />
+    <ClInclude Include="idlib\containers\StrList.h" />
+    <ClInclude Include="idlib\containers\StrPool.h" />
+    <ClInclude Include="idlib\containers\VectorSet.h" />
+    <ClInclude Include="idlib\geometry\DrawVert.h" />
+    <ClInclude Include="idlib\geometry\JointTransform.h" />
+    <ClInclude Include="idlib\geometry\rvVertex.h" />
+    <ClInclude Include="idlib\geometry\Surface.h" />
+    <ClInclude Include="idlib\geometry\Surface_Patch.h" />
+    <ClInclude Include="idlib\geometry\Surface_Polytope.h" />
+    <ClInclude Include="idlib\geometry\Surface_SweptSpline.h" />
+    <ClInclude Include="idlib\geometry\TraceModel.h" />
+    <ClInclude Include="idlib\geometry\Winding.h" />
+    <ClInclude Include="idlib\geometry\Winding2D.h" />
+    <ClInclude Include="idlib\math\Angles.h" />
+    <ClInclude Include="idlib\math\Complex.h" />
+    <ClInclude Include="idlib\math\Curve.h" />
+    <ClInclude Include="idlib\math\Extrapolate.h" />
+    <ClInclude Include="idlib\math\FFT.h" />
+    <ClInclude Include="idlib\math\Interpolate.h" />
+    <ClInclude Include="idlib\math\Lcp.h" />
+    <ClInclude Include="idlib\math\Math.h" />
+    <ClInclude Include="idlib\math\Matrix.h" />
+    <ClInclude Include="idlib\math\Ode.h" />
+    <ClInclude Include="idlib\math\Plane.h" />
+    <ClInclude Include="idlib\math\Pluecker.h" />
+    <ClInclude Include="idlib\math\Polynomial.h" />
+    <ClInclude Include="idlib\math\Quat.h" />
+    <ClInclude Include="idlib\math\Radians.h" />
+    <ClInclude Include="idlib\math\Random.h" />
+    <ClInclude Include="idlib\math\Rotation.h" />
+    <ClInclude Include="idlib\math\Simd.h" />
+    <ClInclude Include="idlib\math\Simd_3DNow.h" />
+    <ClInclude Include="idlib\math\Simd_Generic.h" />
+    <ClInclude Include="idlib\math\Simd_InstructionMacros.h" />
+    <ClInclude Include="idlib\math\Simd_MMX.h" />
+    <ClInclude Include="idlib\math\Simd_SSE.h" />
+    <ClInclude Include="idlib\math\Simd_SSE2.h" />
+    <ClInclude Include="idlib\math\Simd_SSE3.h" />
+    <ClInclude Include="idlib\math\Vector.h" />
+    <ClInclude Include="idlib\hashing\CRC16.h" />
+    <ClInclude Include="idlib\hashing\CRC32.h" />
+    <ClInclude Include="idlib\hashing\CRC8.h" />
+    <ClInclude Include="idlib\hashing\Honeyman.h" />
+    <ClInclude Include="idlib\hashing\MD4.h" />
+    <ClInclude Include="idlib\hashing\MD5.h" />
+    <ClInclude Include="idlib\threads\AutoCrit.h" />
+    <ClInclude Include="idlib\algorithms\MultifieldSort.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="idlib\Base64.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="idlib\BitMsg.cpp" />
+    <ClCompile Include="idlib\CmdArgs.cpp" />
+    <ClCompile Include="idlib\Dict.cpp" />
+    <ClCompile Include="idlib\Heap.cpp" />
+    <ClCompile Include="idlib\LangDict.cpp" />
+    <ClCompile Include="idlib\Lexer.cpp" />
+    <ClCompile Include="idlib\LexerFactory.cpp" />
+    <ClCompile Include="idlib\Lib.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugInline|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="idlib\mapfile.cpp" />
+    <ClCompile Include="idlib\Parser.cpp" />
+    <ClCompile Include="idlib\rvHeap.cpp" />
+    <ClCompile Include="idlib\rvHeapArena.cpp" />
+    <ClCompile Include="idlib\rvMemSys.cpp" />
+    <ClCompile Include="idlib\Str.cpp" />
+    <ClCompile Include="idlib\TextCompiler.cpp" />
+    <ClCompile Include="idlib\Timer.cpp" />
+    <ClCompile Include="idlib\TimingCollection.cpp" />
+    <ClCompile Include="idlib\Token.cpp" />
+    <ClCompile Include="idlib\bv\Bounds.cpp" />
+    <ClCompile Include="idlib\bv\Box.cpp" />
+    <ClCompile Include="idlib\bv\Frustum.cpp" />
+    <ClCompile Include="idlib\bv\Sphere.cpp" />
+    <ClCompile Include="idlib\containers\HashIndex.cpp" />
+    <ClCompile Include="idlib\geometry\JointTransform.cpp" />
+    <ClCompile Include="idlib\geometry\Surface.cpp" />
+    <ClCompile Include="idlib\geometry\Surface_Patch.cpp" />
+    <ClCompile Include="idlib\geometry\Surface_Polytope.cpp" />
+    <ClCompile Include="idlib\geometry\Surface_SweptSpline.cpp" />
+    <ClCompile Include="idlib\geometry\TraceModel.cpp" />
+    <ClCompile Include="idlib\geometry\Winding.cpp" />
+    <ClCompile Include="idlib\geometry\Winding2D.cpp" />
+    <ClCompile Include="idlib\math\Angles.cpp" />
+    <ClCompile Include="idlib\math\Complex.cpp" />
+    <ClCompile Include="idlib\math\FFT.cpp" />
+    <ClCompile Include="idlib\math\Lcp.cpp" />
+    <ClCompile Include="idlib\math\Math.cpp" />
+    <ClCompile Include="idlib\math\Matrix.cpp" />
+    <ClCompile Include="idlib\math\Ode.cpp" />
+    <ClCompile Include="idlib\math\Plane.cpp" />
+    <ClCompile Include="idlib\math\Pluecker.cpp" />
+    <ClCompile Include="idlib\math\Polynomial.cpp" />
+    <ClCompile Include="idlib\math\Quat.cpp" />
+    <ClCompile Include="idlib\math\Radians.cpp" />
+    <ClCompile Include="idlib\math\Rotation.cpp" />
+    <ClCompile Include="idlib\math\Simd.cpp" />
+    <ClCompile Include="idlib\math\Simd_3DNow.cpp" />
+    <ClCompile Include="idlib\math\Simd_generic.cpp" />
+    <ClCompile Include="idlib\math\Simd_MMX.cpp" />
+    <ClCompile Include="idlib\math\Simd_SSE.cpp" />
+    <ClCompile Include="idlib\math\Simd_SSE2.cpp" />
+    <ClCompile Include="idlib\math\Simd_SSE3.cpp" />
+    <ClCompile Include="idlib\math\Vector.cpp" />
+    <ClCompile Include="idlib\hashing\CRC16.cpp" />
+    <ClCompile Include="idlib\hashing\CRC32.cpp" />
+    <ClCompile Include="idlib\hashing\CRC8.cpp" />
+    <ClCompile Include="idlib\hashing\Honeyman.cpp" />
+    <ClCompile Include="idlib\hashing\MD4.cpp" />
+    <ClCompile Include="idlib\hashing\MD5.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

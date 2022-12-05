@@ -1,0 +1,837 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Game">
+      <UniqueIdentifier>{d7e8fd28-5a7a-4225-8b38-2beafa1ad2af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\AI">
+      <UniqueIdentifier>{c4aec32f-143c-4cc4-8c9b-0aaa554264ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Anim">
+      <UniqueIdentifier>{cc5d8cc4-43e7-4d67-adc2-11953e0f3233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Client">
+      <UniqueIdentifier>{65ec41d9-6cb6-43c1-a7ca-84983c084a6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\GameSys">
+      <UniqueIdentifier>{e29b25b2-ba07-4eef-bbed-046ee986e704}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Physics">
+      <UniqueIdentifier>{e5b32026-77f4-4b85-8f2c-43a0f5a302ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Player">
+      <UniqueIdentifier>{a5054af2-3dcc-41e7-bba6-11eef329c7d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Script">
+      <UniqueIdentifier>{1d6f8643-99a4-43a7-aeb1-1b1779d2707c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Vehicle">
+      <UniqueIdentifier>{d22bbe39-e466-478d-b58a-520e3231e4d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Weapon">
+      <UniqueIdentifier>{c3a0ee81-8f0c-447f-aadc-e035d6f7b92f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\MP">
+      <UniqueIdentifier>{31e4e951-5695-4bc2-9e8b-af53fb5954fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\MP\Stats">
+      <UniqueIdentifier>{e3f6880d-9bd6-4eda-b5e0-9ca8127f72f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Resource">
+      <UniqueIdentifier>{6196c0cc-25aa-405e-b0f2-17f91dd3b19c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mpgame\Actor.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\AF.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\AFEntity.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\BrittleFracture.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Camera.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Effect.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Entity.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Game_Debug.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Game_local.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Game_Log.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Game_network.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\GameEdit.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Healing_Station.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Icon.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\IconManager.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\IK.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Instance.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Item.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Light.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\LipSync.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Misc.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Moveable.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Mover.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\MultiplayerGame.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Playback.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Player_Cheats.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Projectile.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Pvs.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\SecurityCamera.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Sound.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\SplineMover.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Target.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\TramGate.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Trigger.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\WorldSpawn.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Lagometer.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AAS.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AAS_debug.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AAS_Find.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AAS_pathing.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AAS_routing.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AAS_tactical.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_Actions.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_Announcements.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_Debug.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_events.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_Manager.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_Medic.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_Move.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_pathing.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_States.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_Tactical.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\AI_Util.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Berserker.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_BossBuddy.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_BossMakron.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_ConvoyGround.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_ConvoyHover.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_FailedTransfer.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Fatty.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Gladiator.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Grunt.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Gunner.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Harvester.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_HarvesterDispersal.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_HeavyHoverTank.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_IronMaiden.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_LightTank.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_NetworkGuardian.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_RepairBot.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Scientist.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Sentry.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_SlimyTransfer.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_StreamProtector.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_StroggFlyer.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_StroggHover.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_StroggMarine.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_TeleportDropper.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_Turret.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\Monster_TurretFlying.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\spawner.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\ai\VehicleAI.cpp">
+      <Filter>Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\anim\Anim.cpp">
+      <Filter>Game\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\anim\Anim_Blend.cpp">
+      <Filter>Game\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\anim\Anim_Import.cpp">
+      <Filter>Game\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\anim\Anim_Testmodel.cpp">
+      <Filter>Game\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\client\ClientAFEntity.cpp">
+      <Filter>Game\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\client\ClientEffect.cpp">
+      <Filter>Game\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\client\ClientEntity.cpp">
+      <Filter>Game\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\client\ClientModel.cpp">
+      <Filter>Game\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\client\ClientMoveable.cpp">
+      <Filter>Game\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\gamesys\Class.cpp">
+      <Filter>Game\GameSys</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\gamesys\DebugGraph.cpp">
+      <Filter>Game\GameSys</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\gamesys\Event.cpp">
+      <Filter>Game\GameSys</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\gamesys\SaveGame.cpp">
+      <Filter>Game\GameSys</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\gamesys\State.cpp">
+      <Filter>Game\GameSys</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\gamesys\SysCmds.cpp">
+      <Filter>Game\GameSys</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\gamesys\SysCvar.cpp">
+      <Filter>Game\GameSys</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Clip.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Force.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Force_Constant.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Force_Drag.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Force_Field.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Force_Spring.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_Actor.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_AF.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_Base.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_Monster.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_Parametric.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_Particle.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_Player.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_RigidBody.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_Static.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_StaticMulti.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Physics_VehicleMonster.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\physics\Push.cpp">
+      <Filter>Game\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Player.cpp">
+      <Filter>Game\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Player_States.cpp">
+      <Filter>Game\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\PlayerView.cpp">
+      <Filter>Game\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\script\Script_Compiler.cpp">
+      <Filter>Game\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\script\Script_Interpreter.cpp">
+      <Filter>Game\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\script\Script_Program.cpp">
+      <Filter>Game\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\script\Script_Thread.cpp">
+      <Filter>Game\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\script\ScriptFuncUtility.cpp">
+      <Filter>Game\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\Vehicle.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\Vehicle_DropPod.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\Vehicle_Walker.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehicleAnimated.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehicleController.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehicleDriver.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehicleMonster.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehicleParts.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehiclePosition.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehicleRigid.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehicleSpline.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\vehicle\VehicleStatic.cpp">
+      <Filter>Game\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\Weapon.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponBlaster.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponDarkMatterGun.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponGauntlet.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponGrenadeLauncher.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponHyperblaster.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponLightningGun.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponMachinegun.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponNailgun.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponNapalmGun.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponRailgun.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponRocketLauncher.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\weapon\WeaponShotgun.cpp">
+      <Filter>Game\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\mp\Buying.cpp">
+      <Filter>Game\MP</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\mp\CTF.cpp">
+      <Filter>Game\MP</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\mp\GameState.cpp">
+      <Filter>Game\MP</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\mp\Tourney.cpp">
+      <Filter>Game\MP</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\mp\VoiceComms.cpp">
+      <Filter>Game\MP</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\mp\stats\StatEvent.cpp">
+      <Filter>Game\MP\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\mp\stats\StatManager.cpp">
+      <Filter>Game\MP\Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="mpgame\mp\stats\StatWindow.cpp">
+      <Filter>Game\MP\Stats</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mpgame\Actor.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\AF.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\AFEntity.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\BrittleFracture.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Camera.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Effect.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Entity.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Game.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Game_Debug.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Game_local.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Game_Log.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\GameEdit.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Healing_Station.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Icon.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\IconManager.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\IK.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Instance.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Item.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Light.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\LipSync.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Misc.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Moveable.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Mover.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\MultiplayerGame.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Projectile.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Pvs.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\SecurityCamera.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Sound.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\SplineMover.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Target.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\TramGate.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Trigger.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\WorldSpawn.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Lagometer.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AAS.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AAS_Find.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AAS_local.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AAS_tactical.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AI.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AI_Manager.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AI_Medic.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AI_Move.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AI_Tactical.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\AI_Util.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\spawner.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\ai\VehicleAI.h">
+      <Filter>Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\anim\Anim.h">
+      <Filter>Game\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\anim\Anim_Testmodel.h">
+      <Filter>Game\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\client\ClientAFEntity.h">
+      <Filter>Game\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\client\ClientEffect.h">
+      <Filter>Game\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\client\ClientEntity.h">
+      <Filter>Game\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\client\ClientModel.h">
+      <Filter>Game\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\client\ClientMoveable.h">
+      <Filter>Game\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\gamesys\Class.h">
+      <Filter>Game\GameSys</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\gamesys\DebugGraph.h">
+      <Filter>Game\GameSys</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\gamesys\Event.h">
+      <Filter>Game\GameSys</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\gamesys\SaveGame.h">
+      <Filter>Game\GameSys</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\gamesys\State.h">
+      <Filter>Game\GameSys</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\gamesys\SysCmds.h">
+      <Filter>Game\GameSys</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\gamesys\SysCvar.h">
+      <Filter>Game\GameSys</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Clip.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Force.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Force_Constant.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Force_Drag.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Force_Field.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Force_Spring.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_Actor.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_AF.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_Base.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_Monster.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_Parametric.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_Particle.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_Player.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_RigidBody.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_Static.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_StaticMulti.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Physics_VehicleMonster.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\physics\Push.h">
+      <Filter>Game\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Player.h">
+      <Filter>Game\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\PlayerView.h">
+      <Filter>Game\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\script\Script_Compiler.h">
+      <Filter>Game\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\script\Script_Interpreter.h">
+      <Filter>Game\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\script\Script_Program.h">
+      <Filter>Game\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\script\Script_Thread.h">
+      <Filter>Game\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\script\ScriptFuncUtility.h">
+      <Filter>Game\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\Vehicle.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\VehicleAnimated.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\VehicleController.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\VehicleDriver.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\VehicleMonster.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\VehicleParts.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\VehicleRigid.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\VehicleSpline.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\vehicle\VehicleStatic.h">
+      <Filter>Game\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\Weapon.h">
+      <Filter>Game\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\mp\Buying.h">
+      <Filter>Game\MP</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\mp\CTF.h">
+      <Filter>Game\MP</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\mp\GameState.h">
+      <Filter>Game\MP</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\mp\Tourney.h">
+      <Filter>Game\MP</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\mp\stats\StatEvent.h">
+      <Filter>Game\MP\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\mp\stats\StatManager.h">
+      <Filter>Game\MP\Stats</Filter>
+    </ClInclude>
+    <ClInclude Include="mpgame\mp\stats\StatWindow.h">
+      <Filter>Game\MP\Stats</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="mpgame\Game.def" />
+  </ItemGroup>
+</Project>
