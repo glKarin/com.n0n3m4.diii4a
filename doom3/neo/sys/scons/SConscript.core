@@ -458,7 +458,7 @@ if g_os == 'Android':
 if g_os == 'Android':
 #local_env.Append( LIBS = [ 'dl', 'vorbisfile','vorbis', 'ogg', 'android' ] )
 	local_env.Append( LIBS = [ 'dl', 'android' ] )
-	local_env.Append( LIBS = [ 'supc++' ] )
+#	local_env.Append( LIBS = [ 'supc++' ] )
 	local_env.Append( LIBS = [ 'OpenSLES' ] )
 #local_env.Append( LIBS = [ 'dl', 'android' ] )
 else:
