@@ -3,7 +3,7 @@
 **Latest version:**
 1.1.0harmattan21(natasha)  
 **Last update release:**
-2022-12-10 
+2022-12-10  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
