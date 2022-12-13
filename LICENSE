@@ -672,3 +672,9 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+Source from release:
+DIII4A n0n3m4 GPLv2
+DOOM3 idSoftware GLPv2
+q4sdk Quake4 SDK
+preysdk Prey SDK
