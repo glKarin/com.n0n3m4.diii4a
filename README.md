@@ -7,7 +7,9 @@
 **Arch:**
 arm64 armv7-a  
 **Platform:**
-Android 4.0+
+Android 4.0+  
+**License:**
+GPLv3
 
 ----------------------------------------------------------------------------------
 ### Update
@@ -439,9 +441,13 @@ About:
 > `diii4amm`:
 > * Old latest DIII4A++ source until version 12.
 
+> `quake4`:
+> * Old latest Quake4 idTech4A++ source until version 20.
+
 ----------------------------------------------------------------------------------
 ### Extras download:
 
 * [Google: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb](https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb)
 * [Baidu网盘: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w](https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w) 提取码: `pyyj`
+* [Baidu贴吧: BEYONDK2000](https://tieba.baidu.com/p/6825594793)
 ----------------------------------------------------------------------------------
