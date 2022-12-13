@@ -1,4 +1,6 @@
 package com.karin.idTech4Amm.ui;
+import android.content.SharedPreferences;
+import android.preference.EditTextPreference;
 import android.preference.PreferenceFragment;
 import android.os.Bundle;
 import android.preference.PreferenceScreen;
@@ -10,6 +12,8 @@ import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3EUtils;
 import java.util.Set;
 import com.n0n3m4.q3e.Q3EJNI;
+
+import android.util.Log;
 import android.view.View;
 
 public class LauncherSettingPreference extends PreferenceFragment implements Preference.OnPreferenceChangeListener
@@ -24,6 +28,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         findPreference(Constants.PreferenceKey.MAP_BACK).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.REDIRECT_OUTPUT_TO_FILE).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.HIDE_AD_BAR).setOnPreferenceChangeListener(this);
+        findPreference(Constants.PreferenceKey.CONTROLS_CONFIG_POSITION_UNIT).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -65,6 +70,21 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         {
 			Q3EJNI.SetRedirectOutputToFile((boolean)newValue);
             return true;
+        }
+        else if(Constants.PreferenceKey.CONTROLS_CONFIG_POSITION_UNIT.equals(key))
+        {
+            int i;
+            try
+            {
+                i = Integer.parseInt((String)newValue);
+                if(i >= 0)
+                    return true;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return false;
         }
         else
             return false;

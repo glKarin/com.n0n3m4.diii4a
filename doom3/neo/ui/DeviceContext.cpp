@@ -152,6 +152,16 @@ void idDeviceContext::Init()
 	scrollBarImages[SCROLLBAR_LEFT] = declManager->FindMaterial("gfx/guis/scrollbar_left.tga");
 	scrollBarImages[SCROLLBAR_UP] = declManager->FindMaterial("gfx/guis/scrollbar_up.tga");
 	scrollBarImages[SCROLLBAR_DOWN] = declManager->FindMaterial("gfx/guis/scrollbar_down.tga");
+#elif defined(_HUMANHEAD)
+	cursorImages[CURSOR_ARROW] = declManager->FindMaterial("guis/assets/guicursor_arrow.tga");
+	cursorImages[CURSOR_HAND] = declManager->FindMaterial("guis/assets/guicursor_hand.tga");
+	scrollBarImages[SCROLLBAR_HBACK] = declManager->FindMaterial("ui/assets/scrollbarh.tga");
+	scrollBarImages[SCROLLBAR_VBACK] = declManager->FindMaterial("guis/assets/scrollbarv.tga");
+	scrollBarImages[SCROLLBAR_THUMB] = declManager->FindMaterial("guis/assets/scrollbar_thumb.tga");
+	scrollBarImages[SCROLLBAR_RIGHT] = declManager->FindMaterial("ui/assets/scrollbar_right.tga");
+	scrollBarImages[SCROLLBAR_LEFT] = declManager->FindMaterial("ui/assets/scrollbar_left.tga");
+	scrollBarImages[SCROLLBAR_UP] = declManager->FindMaterial("ui/assets/scrollbar_up.tga");
+	scrollBarImages[SCROLLBAR_DOWN] = declManager->FindMaterial("ui/assets/scrollbar_down.tga");
 #else
 	cursorImages[CURSOR_ARROW] = declManager->FindMaterial("ui/assets/guicursor_arrow.tga");
 	cursorImages[CURSOR_HAND] = declManager->FindMaterial("ui/assets/guicursor_hand.tga");

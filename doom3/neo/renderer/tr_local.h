@@ -737,6 +737,30 @@ class idRenderSystemLocal : public idRenderSystem
 		virtual void			CaptureRenderToFile(const char *fileName, bool fixAlpha);
 		virtual void			UnCrop();
 		virtual bool			UploadImage(const char *imageName, const byte *data, int width, int height);
+#ifdef _HUMANHEAD
+    virtual void			SetEntireSceneMaterial(idMaterial* material) { }; // HUMANHEAD CJR
+    virtual bool			IsScopeView() {
+        return scopeView;
+    };// HUMANHEAD CJR
+    virtual void			SetScopeView(bool view) {
+		scopeView = view; 
+	} // HUMANHEAD CJR
+    virtual bool			IsShuttleView() {
+        return shuttleView;
+    };// HUMANHEAD CJR
+    virtual void			SetShuttleView(bool view) {
+		shuttleView = view;
+	}
+    virtual bool			SupportsFragmentPrograms(void) {
+        return false;
+    };// HUMANHEAD CJR
+    virtual int				VideoCardNumber(void) {
+        return 0;
+    }
+
+	bool scopeView;
+	bool shuttleView;
+#endif
 
 	public:
 		// internal functions

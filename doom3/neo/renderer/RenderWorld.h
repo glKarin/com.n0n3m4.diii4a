@@ -46,7 +46,11 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 // shader parms
+#ifdef _HUMANHEAD
+const int MAX_GLOBAL_SHADER_PARMS	= 13;	// HUMANHEAD pdm: increased from 12 (see also: MAX_ENTITY_SHADER_PARMS)
+#else
 const int MAX_GLOBAL_SHADER_PARMS	= 12;
+#endif
 
 const int SHADERPARM_RED			= 0;
 const int SHADERPARM_GREEN			= 1;
@@ -77,6 +81,48 @@ const int SHADERPARM_PARTICLE_STOPTIME = 8;	// don't spawn any more particles af
 
 // guis
 const int MAX_RENDERENTITY_GUI		= 3;
+
+#ifdef _HUMANHEAD
+// HUMANHEAD pdm
+const int SHADERPARM_MISC = 6; // aob
+const int SHADERPARM_ANY_DEFORM = 9; // Model deformation
+const int SHADERPARM_ANY_DEFORM_PARM1 = 10; // Model deformation parameter1
+const int SHADERPARM_ANY_DEFORM_PARM2 = 11; // Model deformation parameter2
+const int SHADERPARM_DISTANCE = 12; // CJR -- distance shader parm index
+// Always add to the end of the list so the old numbers don't change
+enum {
+	DEFORMTYPE_NONE = 0,
+	DEFORMTYPE_SCALE,
+	DEFORMTYPE_VERTEXCOLOR,
+	DEFORMTYPE_SPHERE,
+	DEFORMTYPE_RIPPLE,
+	DEFORMTYPE_PLANTSWAYX,
+	DEFORMTYPE_PLANTSWAYY,
+	DEFORMTYPE_FLATTEN,
+	DEFORMTYPE_VIBRATE,
+	DEFORMTYPE_SQUISH,
+	DEFORMTYPE_TURBULENT,	// 10
+	DEFORMTYPE_RAYS,
+	DEFORMTYPE_ALPHAGLOW,
+	DEFORMTYPE_FATTEN,
+	DEFORMTYPE_RIPPLECENTER,
+	DEFORMTYPE_MELT,
+	DEFORMTYPE_POD,
+	DEFORMTYPE_DEATHEFFECT,
+	DEFORMTYPE_WINDBLAST,
+	DEFORMTYPE_PINCHPOINT,
+	DEFORMTYPE_PORTAL
+	//NOTE: Any added here should also be added to prey_defs.script
+};
+// HUMANHEAD END
+
+// HUMANHEAD CJR:  Beam node information
+#define MAX_BEAM_NODES				32
+typedef struct hhBeamNodes_s {
+	idVec3		nodes[MAX_BEAM_NODES];
+} hhBeamNodes_t;
+// END HUMANHEAD
+#endif
 
 #ifdef _RAVEN
 // RAVEN BEGIN
@@ -265,6 +311,23 @@ typedef struct renderEntity_s {
 	bool					weaponDepthHack;		// squash depth range so view weapons don't poke into walls
 	// this automatically implies noShadow
 	int						forceUpdate;			// force an update (NOTE: not a bool to keep this struct a multiple of 4 bytes)
+#ifdef _HUMANHEAD
+	const hhDeclBeam*		declBeam;			// HUMANHEAD beam information
+	hhBeamNodes_t*			beamNodes;			// HUMANHEAD beam node array (sized to the number of beams in the system)
+												
+	//HUMANHEAD rww - moved other bools up here
+//#if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
+	bool					notInRenderDemos;		//if this is true, we will not record this renderentity
+//#endif //HUMANHEAD END
+	   
+	// HUMANHEAD:
+	bool				onlyVisibleInSpirit;	// True if this entity is only visible when spiritwalking or deathwalking
+	bool				onlyInvisibleInSpirit;	// True if this entity is only invisible when spiritwalking or deathwalking -tmj
+	bool				lowSkippable;			// bjk: True if skippable in low quality
+	float				eyeDistance;			// HUMANHEAD pdm: precalculated distance to eye
+	// HUMANHEAD END
+#endif
+
 	int						timeGroup;
 	int						xrayIndex;
 #ifdef _RAVEN
@@ -310,6 +373,10 @@ typedef struct renderLight_s {
 	// updates
 	bool					noShadows;			// (should we replace this with material parameters on the shader?)
 	bool					noSpecular;			// (should we replace this with material parameters on the shader?)
+
+#ifdef _HUMANHEAD
+	bool					lowSkippable;		// HUMANHEAD bjk: True if skippable in low quality
+#endif
 
 	bool					pointLight;			// otherwise a projection light (should probably invert the sense of this, because points are way more common)
 	bool					parallel;			// lightCenter gives the direction to the light at infinity
@@ -367,6 +434,13 @@ typedef struct renderView_s {
 	bool					cramZNear;			// for cinematics, we want to set ZNear much lower
 	bool					forceUpdate;		// for an update
 
+#ifdef _HUMANHEAD
+	bool			viewSpiritEntities; // HUMANHEAD cjr: this renderView can see all onlyVisibleInSpirit entities
+									   // tmj: this renderView cannot see onlyInvisibleInSpirit entities
+
+	float				frac;			// fraction of trace before hit
+#endif
+
 	// time in milliseconds for shader effects and other time dependent rendering issues
 	int						time;
 	float					shaderParms[MAX_GLOBAL_SHADER_PARMS];		// can be used in any way by shader
@@ -387,6 +461,9 @@ typedef struct {
 typedef struct {
 	float				x, y;			// 0.0 to 1.0 range if trace hit a gui, otherwise -1
 	int					guiId;			// id of gui ( 0, 1, or 2 ) that the trace happened against
+#ifdef _HUMANHEAD
+	float				frac;
+#endif
 } guiPoint_t;
 
 
@@ -412,6 +489,8 @@ typedef struct modelTrace_s {
 // abahr: changed to 4 to include gravity
 static const int NUM_PORTAL_ATTRIBUTES = 4;
 // RAVEN END
+#elif defined(_HUMANHEAD)
+static const int NUM_PORTAL_ATTRIBUTES = 4;		// HUMANHEAD pdm: Bumped from 3
 #else
 static const int NUM_PORTAL_ATTRIBUTES = 3;
 #endif
@@ -428,6 +507,11 @@ typedef enum {
 	PS_BLOCK_GRAVITY = 8,		// PS_BLOCK_ALL does not block gravity.  Must use info_gravityseperator
 
 	PS_BLOCK_ALL = PS_BLOCK_VIEW|PS_BLOCK_LOCATION|PS_BLOCK_AIR
+#elif defined(_HUMANHEAD)
+// HUMANHEAD pdm
+    PS_BLOCK_SOUND = 8,			// blocks sound completely, used on game portals
+// HUMANHEAD END
+	PS_BLOCK_ALL = (1<<NUM_PORTAL_ATTRIBUTES)-1
 #else
 	PS_BLOCK_ALL = (1<<NUM_PORTAL_ATTRIBUTES)-1
 #endif

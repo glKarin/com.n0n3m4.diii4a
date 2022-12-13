@@ -52,6 +52,9 @@ class idDeclTable : public idDecl
 // bdube: made virtual so it can be accessed in game
 	virtual
 #endif
+#ifdef _HUMANHEAD
+		virtual	//HUMANHEAD pdm: made virtual so it can be called from game code
+#endif
 		float					TableLookup(float index) const;
 
 	private:

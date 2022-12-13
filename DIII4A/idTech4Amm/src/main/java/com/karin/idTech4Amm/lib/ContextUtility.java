@@ -25,7 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Consumer;
-import android.widget.Magnifier.Builder;
+// import android.widget.Magnifier.Builder;
 
 public final class ContextUtility
 {
@@ -217,6 +217,7 @@ public final class ContextUtility
     public static int CheckFilePermission(Activity context, int resultCode)
     {
         String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+/*        Android SDK > 28
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11
         {
             if(Environment.isExternalStorageManager())
@@ -226,7 +227,8 @@ public final class ContextUtility
             context.startActivityForResult(intent, resultCode);
             return CHECK_PERMISSION_RESULT_REQUEST;
         }
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M - Q
+        else */
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M - Q
         {
             boolean granted = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
             if(granted)

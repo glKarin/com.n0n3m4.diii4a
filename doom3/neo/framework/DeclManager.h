@@ -106,6 +106,9 @@ typedef enum {
 	// new decl types can be added here
 	DECL_PLAYER_MODEL,
 #endif
+#ifdef _HUMANHEAD
+    DECL_BEAM, // HUMANHEAD CJR
+#endif
 	DECL_MAX_TYPES			= 32
 } declType_t;
 
@@ -378,6 +381,9 @@ class idDeclTable;
 //k for FindMapDef
 class idDeclEntityDef;
 #endif
+#ifdef _HUMANHEAD
+class hhDeclBeam; // HUMANHEAD CJR
+#endif
 
 class idDeclManager
 {
@@ -481,6 +487,15 @@ class idDeclManager
 		virtual const idMaterial 		*MaterialByIndex(int index, bool forceParse = true) = 0;
 		virtual const idDeclSkin 		*SkinByIndex(int index, bool forceParse = true) = 0;
 		virtual const idSoundShader 	*SoundByIndex(int index, bool forceParse = true) = 0;
+
+#ifdef _HUMANHEAD
+    //HUMANHEAD: aob
+    virtual const hhDeclBeam *		FindBeam( const char *name, bool makeDefault = true ) = 0; // HUMANHEAD CJR
+    virtual const hhDeclBeam *		BeamByIndex( int index, bool forceParse = true ) = 0; // HUMANHEAD CJR
+
+	virtual void					SetInsideLevelLoad(bool b) = 0;
+	virtual bool					GetInsideLevelLoad(void) = 0;
+#endif
 };
 
 extern idDeclManager 		*declManager;

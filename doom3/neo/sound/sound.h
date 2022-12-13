@@ -94,14 +94,96 @@ typedef struct {
 	float					dryLevel;
 // RAVEN END
 #endif
+
+#ifdef _HUMANHEAD
+	int						subIndex;
+	int						profanityIndex;			// HUMANHEAD pdm
+	float					profanityDelay;			// HUMANHEAD pdm
+	float					profanityDuration;		// HUMANHEAD pdm
+#endif
 } soundShaderParms_t;
+
+#ifdef _HUMANHEAD
+//HUMANHEAD: aob
+class hhSoundShaderParmsModifier {
+public:
+	hhSoundShaderParmsModifier() {
+		memset(&parms, 0, sizeof(soundShaderParms_t));
+		minDistanceIsSet = false;
+		maxDistanceIsSet = false;
+		volumeIsSet = false;
+		shakesIsSet = false;
+		soundShaderFlagsIsSet = false;
+	}
+
+
+	void				ModifyParms(soundShaderParms_t& parmsToModify) const {
+		if (MinDistanceIsSet()) {
+			parmsToModify.minDistance = parms.minDistance;
+		}
+
+		if (MaxDistanceIsSet()) {
+			parmsToModify.maxDistance = parms.maxDistance;
+		}
+
+		if (VolumeIsSet()) {
+			parmsToModify.volume = parms.volume;
+		}
+
+		if (ShakesIsSet()) {
+			parmsToModify.shakes = parms.shakes;
+		}
+
+		if (SoundShaderFlagsIsSet()) {
+			parmsToModify.soundShaderFlags = parms.soundShaderFlags;
+		}
+	}
+
+
+	void				SetMinDistance(const float minDistance) { parms.minDistance = minDistance; minDistanceIsSet = true; }
+	void				SetMaxDistance(const float maxDistance) { parms.maxDistance = maxDistance; maxDistanceIsSet = true; }
+	void				SetVolume(const float volume) { parms.volume = volume; volumeIsSet = true; }
+	void				SetShakes(const float shakes) { parms.shakes = shakes; shakesIsSet = true; }
+	void				SetSoundShaderFlags(const int soundShaderFlags) { parms.soundShaderFlags = soundShaderFlags; soundShaderFlagsIsSet = true; }
+
+	bool				MinDistanceIsSet() const { return minDistanceIsSet; }
+	bool				MaxDistanceIsSet() const { return maxDistanceIsSet; }
+	bool				VolumeIsSet() const { return volumeIsSet; }
+	bool				ShakesIsSet() const { return shakesIsSet; }
+	bool				SoundShaderFlagsIsSet() const { return soundShaderFlagsIsSet; }
+
+protected:
+	soundShaderParms_t	parms;
+	bool				minDistanceIsSet;
+	bool				maxDistanceIsSet;
+	bool				volumeIsSet;
+	bool				shakesIsSet;
+	bool				soundShaderFlagsIsSet;
+
+};
+//HUMANHEAD END
+#endif
 
 
 const int		SOUND_MAX_LIST_WAVS		= 32;
 
+#ifdef _HUMANHEAD
+// HUMANHEAD pdm: sound classes
+const int		SOUNDCLASS_NORMAL		= 0;
+const int		SOUNDCLASS_VOICEDUCKER	= 1;
+const int		SOUNDCLASS_SPIRITWALK	= 2;
+const int		SOUNDCLASS_VOICE		= 3;
+const int		SOUNDCLASS_MUSIC		= 4;
+// HUMANHEAD END
+#endif
+
 // sound classes are used to fade most sounds down inside cinematics, leaving dialog
 // flagged with a non-zero class full volume
+#ifdef _HUMANHEAD
+const int		SOUND_MAX_CLASSES		= 5;
+#else
 const int		SOUND_MAX_CLASSES		= 4;
+#endif
 
 // it is somewhat tempting to make this a virtual class to hide the private
 // details here, but that doesn't fit easily with the decl manager at the moment.
@@ -140,6 +222,10 @@ class idSoundShader : public idDecl
 // jmarshall: eval
 	virtual bool			IsVO_ForPlayer(void) const { return false; }
 // jmarshall end
+#endif
+
+#ifdef _HUMANHEAD
+	float					GetVolume(void) const { return parms.volume; }
 #endif
 
 	private:
@@ -225,6 +311,11 @@ class idSoundEmitter
 
 		// for save games.  Index will always be > 0
 		virtual	int				Index(void) const = 0;
+
+#ifdef _HUMANHEAD
+	virtual void		ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier) = 0;
+	virtual soundShaderParms_t* GetSoundParms(idSoundShader* shader, const s_channelType channel) = 0;
+#endif
 };
 
 /*

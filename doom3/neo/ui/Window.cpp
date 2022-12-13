@@ -74,6 +74,20 @@ idCVar s_voiceChatReceive("s_voiceChatReceive", "1", CVAR_SOUND | CVAR_ARCHIVE |
 idCVar s_micInputLevel("s_micInputLevel", "6", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "alerts the mic input level");
 idCVar ui_handicap("ui_handicap", "100", CVAR_GUI | CVAR_ARCHIVE | CVAR_INTEGER, "player damage output handicap");
 #endif
+#ifdef _HUMANHEAD
+idCVar gui_filter_pb("gui_filter_pb", "0", CVAR_GUI | CVAR_ARCHIVE | CVAR_INTEGER, "Punkbuster filter");
+idCVar g_subtitles("g_subtitles", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "Display subtitles");
+idCVar com_profanity("com_profanity", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "if off, blocks profanity");
+idCVar r_shaderlevel("r_shaderlevel", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "level of shadersto use");
+idCVar r_correctspecular("r_correctspecular", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "per pixel half angle calculation");
+idCVar r_normalizebumpmap("r_normalizebumpmap", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "per pixel renormalization of bumpmaps");
+idCVar r_skipGlowOverlay("r_skipGlowOverlay", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "if true, skip drawing the glow overlay");
+idCVar r_lowParticleDetail("r_lowParticleDetail", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "less detailed particles");
+idCVar r_useFastSkinning("r_useFastSkinning", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = normal, 1 = faster with tangents transformed, 2 = use single weight simple skinning");
+idCVar s_musicvolume_dB("s_musicvolume_dB", "0", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "music volume in dB");
+idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_INTEGER, "play music during level loads");
+idCVar s_deviceName("s_deviceName", "", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "OpenAL device name");
+#endif
 
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
 
@@ -149,6 +163,22 @@ const idRegEntry idWindow::RegisterVars[] = {
 	{ "animClass1", idRegister::STRING }, // idRenderWindow
 #endif
 
+#ifdef _HUMANHEAD
+	, { "margins", idRegister::VEC4 },
+	{ "cornerSize", idRegister::VEC2 },
+	{ "edgeSize", idRegister::VEC2 },
+	{ "hoverMatColor", idRegister::VEC4 },
+	{ "focusColor", idRegister::VEC4 },
+	{ "seperatorLines", idRegister::VEC4 },
+	{ "activeColor", idRegister::VEC4 },
+    { "seperatorMargin", idRegister::INT },
+    { "activeTab", idRegister::INT },
+	{ "sepColor", idRegister::VEC4 },
+	{ "hoverBorderColor", idRegister::VEC4 },
+	{ "tabMargins", idRegister::VEC2 },
+	{ "trailOffset", idRegister::FLOAT },
+	{ "splineIn", idRegister::INT },
+#endif
 };
 
 const int idWindow::NumRegisterVars = sizeof(RegisterVars) / sizeof(idRegEntry);
@@ -187,7 +217,12 @@ const char *idWindow::ScriptNames[] = {
     "onJoyBackButton"
 // jmarshall end
 #endif
-
+#ifdef _HUMANHEAD
+		, "onTabActivate",
+		"onStartup",
+		"onMaxChars",
+		"onSliderChange",
+#endif
 };
 
 /*
@@ -269,6 +304,9 @@ void idWindow::CommonInit()
 // jmarshall end
 #endif
 
+#ifdef _HUMANHEAD
+	translateFontNum = -1;
+#endif
 }
 
 /*
@@ -433,6 +471,11 @@ idWindow::SetFont
 */
 void idWindow::SetFont()
 {
+#ifdef _HUMANHEAD
+	if(translateFontNum >= 0)
+		dc->SetFont(translateFontNum);
+	else
+#endif
 	dc->SetFont(fontNum);
 }
 
@@ -1554,10 +1597,16 @@ void idWindow::Redraw(float x, float y)
 	}
 
 	if (r_skipGuiShaders.GetInteger() < 5) {
+#ifdef _HUMANHEAD //k: for hide first level intro text
+	if(foreColor.w() > 0.0 || backColor.w() > 0.0)
+#endif
 		Draw(time, x, y);
 	}
 
 	if (gui_debug.GetInteger()) {
+#ifdef _HUMANHEAD //k: for hide first level intro text
+	if(foreColor.w() > 0.0 || backColor.w() > 0.0)
+#endif
 		DebugDraw(time, x, y);
 	}
 
@@ -2350,6 +2399,64 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
     }
 // jmarshall end
 #endif
+#ifdef _HUMANHEAD
+    if (idStr::Icmp(_name, "margins") == 0)
+    {
+        retVar = &margins;
+    }
+    if (idStr::Icmp(_name, "cornerSize") == 0)
+    {
+        retVar = &cornerSize;
+    }
+    if (idStr::Icmp(_name, "edgeSize") == 0)
+    {
+        retVar = &edgeSize;
+    }
+    if (idStr::Icmp(_name, "hoverMatColor") == 0)
+    {
+        retVar = &hoverMatColor;
+    }
+    if (idStr::Icmp(_name, "focusColor") == 0)
+    {
+        retVar = &focusColor;
+    }
+	if (idStr::Icmp(_name, "seperatorLines") == 0)
+	{
+		retVar = &seperatorLines;
+	}
+    if (idStr::Icmp(_name, "activeColor") == 0)
+    {
+        retVar = &activeColor;
+    }
+    if (idStr::Icmp(_name, "seperatorMargin") == 0)
+    {
+        retVar = &seperatorMargin;
+    }
+    if (idStr::Icmp(_name, "activeTab") == 0)
+    {
+        retVar = &activeTab;
+    }
+    if (idStr::Icmp(_name, "sepColor") == 0)
+    {
+        retVar = &sepColor;
+    }
+    if (idStr::Icmp(_name, "hoverBorderColor") == 0)
+    {
+        retVar = &hoverBorderColor;
+    }
+    if (idStr::Icmp(_name, "tabMargins") == 0)
+    {
+        retVar = &tabMargins;
+    }
+    if (idStr::Icmp(_name, "trailOffset") == 0)
+    {
+        retVar = &trailOffset;
+    }
+    if (idStr::Icmp(_name, "splineIn") == 0)
+    {
+        retVar = &splineIn;
+    }
+#endif
 
 	idStr key = _name;
 	bool guiVar = (key.Find(VAR_GUIPREFIX) >= 0);
@@ -2529,7 +2636,23 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 	}
 
 	if (idStr::Icmp(_name, "shear") == 0) {
+#ifdef _HUMANHEAD
+		idToken tok2;
+		src->ReadToken(&tok2);
+		if(!idStr::Icmp(tok2, "("))
+		{
+			src->SkipUntilString(")"); //k: TODO a gui var
+			shear.x = 0;
+		}
+		else if(!idStr::Icmp(tok2, "-"))
+		{
+			shear.x = - src->ParseFloat();
+		}
+		else
+			shear.x = tok2.GetFloatValue();
+#else
 		shear.x = src->ParseFloat();
+#endif
 		idToken tok;
 		src->ReadToken(&tok);
 
@@ -2538,7 +2661,22 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
 			return false;
 		}
 
+#ifdef _HUMANHEAD
+		src->ReadToken(&tok2);
+		if(!idStr::Icmp(tok2, "("))
+		{
+			src->SkipUntilString(")"); //k: TODO a gui var
+			shear.y = 0;
+		}
+		else if(!idStr::Icmp(tok2, "-"))
+		{
+			shear.y = - src->ParseFloat();
+		}
+		else
+			shear.y = tok2.GetFloatValue();
+#else
 		shear.y = src->ParseFloat();
+#endif
 		return true;
 	}
 
@@ -2778,7 +2916,15 @@ bool idWindow::Parse(idParser *src, bool rebuild)
 		// track what was parsed so we can maintain it for the guieditor
 		src->SetMarker();
 
-		if (token == "windowDef" || token == "animationDef") {
+		if (token == "windowDef" || token == "animationDef"
+#ifdef _HUMANHEAD
+				 || token == "superWindowDef"
+				 || token == "buttonDef"
+				 || token == "creditDef"
+				 || token == "splineDef"
+				 || token == "tabContainerDef" || token == "tabDef" //k: TODO: tab
+#endif
+				) {
 			if (token == "animationDef") {
 				visible = false;
 				rect = idRectangle(0,0,0,0);
@@ -4784,6 +4930,12 @@ bool idWindow::Interactive()
 		return true;
 	}
 
+#ifdef _HUMANHEAD
+	if (scripts[ ON_ACTIONRELEASE ]) {
+		return true;
+	}
+#endif
+
 	int c = children.Num();
 
 	for (int i = 0; i < c; i++) {
@@ -5092,3 +5244,20 @@ bool idWindow::UpdateFromDictionary(idDict &dict)
 	return true;
 }
 
+#ifdef _HUMANHEAD
+void idWindow::Translate(int tFontNum)
+{
+	if(translateFontNum == tFontNum)
+		return;
+	translateFontNum = tFontNum;
+	int c = drawWindows.Num();
+
+	for (int i = 0; i < c; i++) {
+		if (drawWindows[i].win) {
+			drawWindows[i].win->Translate(tFontNum);
+		} else {
+			drawWindows[i].simp->Translate(tFontNum);
+		}
+	}
+}
+#endif

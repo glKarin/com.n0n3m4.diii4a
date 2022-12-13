@@ -307,6 +307,15 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 	public:
 		// load collision models from a map file
 		void			LoadMap(const idMapFile *mapFile);
+#ifdef _HUMANHEAD
+// HUMANHEAD pdm: Support for level appending
+	virtual const char *	ContentsName(const int contents) const { return StringFromContents(contents); }
+#if DEATHWALK_AUTOLOAD
+	virtual void			AppendMap( const idMapFile *mapFile );
+	virtual bool			WillUseAlreadyLoadedCollisionMap(const idMapFile *mapFile);
+#endif
+// HUMANHEAD END
+#endif
 		// frees all the collision models
 		void			FreeMap(void);
 #ifdef _RAVEN
@@ -376,6 +385,13 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			ListModels(void);
 		// write a collision model file for the map entity
 		bool			WriteCollisionModelForMapEntity(const idMapEntity *mapEnt, const char *filename, const bool testTraceModel = true);
+#ifdef _HUMANHEAD
+	//HUMANHEAD rww
+#if _HH_INLINED_PROC_CLIPMODELS
+	int				GetNumInlinedProcClipModels(void);
+#endif
+	//HUMANHEAD END
+#endif
 
 	private:			// CollisionMap_translate.cpp
 		int				TranslateEdgeThroughEdge(idVec3 &cross, idPluecker &l1, idPluecker &l2, float *fraction);
@@ -457,6 +473,13 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			FindContainedEdges(cm_model_t *model, cm_polygon_t *p);
 		// loading of proc BSP tree
 		void			ParseProcNodes(idLexer *src);
+#ifdef _HUMANHEAD
+	//HUMANHEAD rww
+#if _HH_INLINED_PROC_CLIPMODELS
+	void			CheckProcModelSurfClip(idLexer *src);
+#endif
+	//HUMANHEAD END
+#endif
 		void			LoadProcBSP(const char *name);
 		// removal of contained polygons
 		int				R_ChoppedAwayByProcBSP(int nodeNum, idFixedWinding *w, const idVec3 &normal, const idVec3 &origin, const float radius);
@@ -567,6 +590,15 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		contactInfo_t 	*contacts;
 		int				maxContacts;
 		int				numContacts;
+#ifdef _HUMANHEAD
+	//HUMANHEAD rww
+#if _HH_INLINED_PROC_CLIPMODELS
+	idList<const char *>	inlinedProcClipModelMats;
+	int						numInlinedProcClipModels;
+	bool					anyInlinedProcClipMats;
+#endif
+	//HUMANHEAD END
+#endif
 };
 
 // for debugging

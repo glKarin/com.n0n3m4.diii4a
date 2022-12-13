@@ -104,6 +104,12 @@ class idSimpleWindow
 		idWindow 		*mParent;
 
 		idWinBool	hideCursor;
+
+#ifdef _HUMANHEAD
+	private:
+	int translateFontNum;
+	void Translate(int tFontNum = -1);
+#endif
 };
 
 #endif /* !__SIMPLEWIN_H__ */

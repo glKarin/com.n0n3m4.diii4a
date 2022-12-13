@@ -214,6 +214,19 @@
 
 			</RadioGroup>
 
+			<RadioGroup
+				android:id="@+id/rg_fs_preygame"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+
+				<RadioButton
+					android:id="@+id/fs_game_prey"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Prey(preybase)"/>
+
+			</RadioGroup>
+
 
             <LinearLayout
                 android:layout_width="match_parent"

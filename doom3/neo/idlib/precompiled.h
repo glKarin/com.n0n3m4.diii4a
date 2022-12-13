@@ -132,6 +132,22 @@ public:
 //k 64
 #include <inttypes.h>
 
+#ifdef _HUMANHEAD
+#ifndef TRUE
+#define TRUE true
+#endif
+#ifndef FALSE
+#define FALSE false
+#endif
+#ifndef max
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+
+typedef intptr_t INT_PTR;
+typedef unsigned int DWORD;
+typedef bool BOOL;
+#endif
+
 #define round_up(x, y)	(((x) + ((y)-1)) & ~((y)-1))
 
 //-----------------------------------------------------
@@ -178,6 +194,9 @@ class ThreadedAlloc;		// class that is only used to expand the AutoCrit template
 #include "../framework/DeclParticle.h"
 #include "../framework/DeclAF.h"
 #include "../framework/DeclPDA.h"
+#ifdef _HUMANHEAD
+#include "../humanhead/framework/declPreyBeam.h" // HUMANHEAD CJR
+#endif
 
 // We have expression parsing and evaluation code in multiple places:
 // materials, sound shaders, and guis. We should unify them.
@@ -256,6 +275,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
 	#include "../quake4/Game.h"
 	#elif defined _RAVEN
 	#include "../quake4/Game.h"
+	#elif defined _HUMANHEAD
+	#include "../prey/Game.h"
 	#else
 	#include "../game/Game.h"
 	#endif
@@ -294,6 +315,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
 	#include "../quake4/Game_local.h"
 	#elif defined _RAVEN
 	#include "../quake4/Game_local.h"
+	#elif defined _HUMANHEAD
+	#include "../prey/Game_local.h"
 	#else
 	#include "../game/Game_local.h"
 	#endif

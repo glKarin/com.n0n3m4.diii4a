@@ -552,8 +552,8 @@ void idRenderModelMD5::LoadModel()
 	idMD5Joint	*joint;
 	idJointMat *poseMat3;
 
-#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-	this->staticModel = 0;
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+	this->staticModelInstance = 0;
 #endif
 
 	if (!purged) {
@@ -802,8 +802,8 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEnti
 	idMD5Mesh			*mesh;
 	idRenderModelStatic	*staticModel;
 
-#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-	this->staticModel = 0;
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+	this->staticModelInstance = 0;
 #endif
 
 	if (cachedModel && !r_useCachedDynamicModels.GetBool()) {
@@ -889,9 +889,11 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEnti
 		staticModel->bounds.AddPoint(surf->geometry->bounds[1]);
 	}
 
-#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-	this->staticModel = staticModel;
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+	this->staticModelInstance = staticModel;
+#endif
 
+#ifdef _RAVEN //k: show/hide surface
 	surfaceShaderList.Clear();
 	for(i = 0; i < staticModel->surfaces.Num(); i++)
 	{
@@ -1034,8 +1036,8 @@ void idRenderModelMD5::PurgeModel()
 	joints.Clear();
 	defaultPose.Clear();
 	meshes.Clear();
-#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-	staticModel = 0;
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: md5 model ref def->dynamicModel, set to 0
+	staticModelInstance = 0;
 #endif
 }
 

@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-#ifdef _RAVEN //k: dynamic model gui trace
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: dynamic model gui trace
 #include "Model_local.h"
 #endif
 
@@ -723,12 +723,12 @@ void R_FreeEntityDefDerivedData(idRenderEntityLocal *def, bool keepDecals, bool 
 		def->world->areaReferenceAllocator.Free(ref);
 	}
 
-#ifdef _RAVEN //k: md5 model ref def->dynamicModel, set to 0
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: md5 model ref def->dynamicModel, set to 0
 	if(def->parms.hModel)
 	{
 		idRenderModelMD5 *md5_model = dynamic_cast<idRenderModelMD5*>(def->parms.hModel);
 		if(md5_model)
-			md5_model->staticModel = 0;
+			md5_model->staticModelInstance = 0;
 	}
 #endif
 

@@ -9,99 +9,18 @@ public final class Constants
     public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
-    public static final int CONST_UPDATE_RELEASE = 20;
-    public static final String CONST_RELEASE = "2022-11-18";
+    public static final int CONST_UPDATE_RELEASE = 21;
+    public static final String CONST_RELEASE = "2022-12-10";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
-    public static final String CONST_NAME = "DOOM III/Quake IV for Android(Harmattan Edition)";
+    public static final String CONST_NAME = "DOOM III/Quake 4/Prey(2006) for Android(Harmattan Edition)";
 	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
-			"Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.",
-			"Implement show surface/hide surface for fixup entity render incorrect in Quake 4, e.g. AI's weapons, weapons in player view and Makron in boss level.",
-	};
-	public static final String[] LIBS = {
-		"game",
-		"d3xp",
-		"cdoom",
-		"d3le",
-		"rivensin",
-        "hardcorps",
-	};
-    public static final String[] Q4_LIBS = {
-        "q4game",
-	};
-    public static final String GAME_DOOM3 = "doom3";
-    public static final String GAME_QUAKE4 = "quake4";
-    
-    public static final String[] QUAKE4_MAPS = {
-		"airdefense1",
-		"airdefense2",
-		"hangar1",
-		"hangar2",
-		"mcc_landing",
-		"mcc_1",
-		"convoy1",
-		"building_b",
-		"convoy2",
-		"convoy2b",
-		"hub1",
-		"hub2",
-		"medlabs",
-		"walker",
-		"dispersal",
-		"recomp",
-		"putra",
-		"waste",
-		"mcc_2",
-		"storage1 first",
-		"storage2",
-		"storage1 second",
-		"tram1",
-		"tram1b",
-		"process1 first",
-		"process2",
-		"process1 second",
-		"network1",
-		"network2",
-		"core1",
-		"core2",
-	};
-
-    public static final String[] QUAKE4_LEVELS = {
-		"AIR DEFENSE BUNKER", // Act I
-		"AIR DEFENSE TRENCHES",
-		"HANGAR PERIMETER",
-		"INTERIOR HANGAR",
-		"MCC LANDING SITE",
-		"OPERATION: ADVANTAGE", // Act II
-		"CANYON",
-		"PERIMETER DEFENSE STATION",
-		"AQUEDUCTS",
-		"AQUEDUCTS ANNEX",
-		"NEXUS HUB TUNNELS",
-		"NEXUS HUB",
-		"STROGG MEDICAL FACILITIES", // Act III
-		"CONSTRUCTION ZONE",
-		"DISPERSAL FACILITY",
-		"RECOMPOSITION CENTER",
-		"PUTRIFICATION CENTER",
-		"WASTE PROCESSING FACILITY",
-		"OPERATION: LAST HOPE", // Act IV
-		"DATA STORAGE TERMINAL",
-		"DATA STORAGE SECURITY",
-		"DATA STORAGE TERMINAL",
-		"TRAM HUB STATION",
-		"TRAM RAIL",
-		"DATA PROCESSING TERMINAL",
-		"DATA PROCESSING SECURITY",
-		"DATA PROCESSING TERMINAL",
-		"DATA NETWORKING TERMINAL",
-		"DATA NETWORKING SECURITY",
-		"NEXUS CORE", // Act V
-		"THE NEXUS",
+	        "Prey(2006) for DOOM3 support, game data folder named `preybase`. All levels clear, but have some bugs.",
+			"Add setup On-screen buttons position unit when config controls layout.",
 	};
 
     public static final class PreferenceKey {
@@ -118,6 +37,7 @@ public final class Constants
         public static final String VOLUME_DOWN_KEY = "harm_volume_down_key";
         public static final String HIDE_AD_BAR = "harm_hide_ad_bar";
 		public static final String OPEN_QUAKE4_HELPER = "harm_open_quake4_helper";
+		public static final String CONTROLS_CONFIG_POSITION_UNIT = "harm_controls_config_position_unit";
         
         private PreferenceKey() {}
     }

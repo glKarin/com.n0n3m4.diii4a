@@ -338,7 +338,13 @@ void idCollisionModelManagerLocal::TranslateTrmEdgeThroughPolygon(cm_traceWork_t
 			dist = normal * trmEdge->start;
 			d1 = normal * start - dist;
 			d2 = normal * end - dist;
-			f1 = d1 / (d1 - d2);
+#ifdef _HUMANHEAD
+			if (d1 == d2) { //HUMANHEAD rww - CUFPF
+				f1 = 0.0f;
+			}
+			else
+#endif
+			f1 = d1 / ( d1 - d2 );
 			//assert( f1 >= 0.0f && f1 <= 1.0f );
 			tw->trace.c.point = start + f1 * (end - start);
 
@@ -911,6 +917,9 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 // jmarshall end
 	tw.trace.c.material = NULL; //kc
 #endif
+#ifdef _HUMANHEAD
+	tw.trace.c.id = 0;		// HUMANHEAD pdm: initialize so we don't get bogus values back
+#endif
 	tw.contents = contentMask;
 	tw.isConvex = true;
 	tw.rotation = false;
@@ -1024,6 +1033,9 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 #endif
 
 		common->Printf("idCollisionModelManagerLocal::Translation: huge translation\n");
+#ifdef _HUMANHEAD
+		common->Printf( " of entity: %s\n", tw.model->name.c_str() );	// HUMANHEAD
+#endif
 		return;
 	}
 

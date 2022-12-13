@@ -201,6 +201,13 @@ class idWindow
         ON_JOYBACKBUTTON,
 // jmarshall end
 #endif
+#ifdef _HUMANHEAD
+		//k: TODO tab
+		ON_TABACTIVATE,
+		ON_STARTUP,
+		ON_MAXCHARS,
+		ON_SLIDERCHANGE, // sliderDef idSliderWindow
+#endif
 			SCRIPT_COUNT
 		};
 
@@ -505,6 +512,26 @@ class idWindow
     idWinInt cvarMin;
     idWinStr model1;
     idWinStr skin;
+#endif
+#ifdef _HUMANHEAD
+	idWinVec4 margins;
+	idWinVec2 cornerSize;
+	idWinVec2 edgeSize;
+	idWinVec4 hoverMatColor;
+	idWinVec4 focusColor;
+	idWinVec4 activeColor;
+	idWinVec4 seperatorLines;
+	idWinInt seperatorMargin;
+	idWinVec4 hoverBorderColor;
+	//k: TODO tab window
+	idWinInt activeTab;
+	idWinVec4 sepColor;
+	idWinVec2 tabMargins;
+	idWinFloat trailOffset;
+	idWinInt splineIn;
+
+	int translateFontNum;
+	void Translate(int tFontNum = -1);
 #endif
 
 		idList<idWinVar *> definedVars;

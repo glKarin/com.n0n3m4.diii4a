@@ -288,6 +288,9 @@ idUserInterfaceLocal::idUserInterfaceLocal()
 	//so the reg eval in gui parsing doesn't get bogus values
 	time = 0;
 	refs = 1;
+#ifdef _HUMANHEAD
+	translateFont = -1;
+#endif
 }
 
 idUserInterfaceLocal::~idUserInterfaceLocal()
@@ -387,6 +390,9 @@ bool idUserInterfaceLocal::InitFromFile(const char *qpath, bool rebuild, bool ca
 		uiManagerLocal.guis.Append(this);
 	}
 
+#ifdef _HUMANHEAD
+	translateFont = -1;
+#endif
 	loading = false;
 
 	return true;
@@ -436,9 +442,20 @@ void idUserInterfaceLocal::Redraw(int _time)
 
 	if (!loading && desktop) {
 		time = _time;
+#ifdef _HUMANHEAD
+		if(translateFont >= 0)
+			desktop->Translate(translateFont);
+#endif
 		uiManagerLocal.dc.PushClipRect(uiManagerLocal.screenRect);
 		desktop->Redraw(0, 0);
 		uiManagerLocal.dc.PopClipRect();
+#ifdef _HUMANHEAD
+		if(translateFont >= 0)
+		{
+			translateFont = -1;
+			desktop->Translate();
+		}
+#endif
 	}
 }
 
@@ -764,3 +781,20 @@ bool idUserInterfaceLocal::IsDesktopInteractive() const
 }
 #endif
 
+#ifdef _HUMANHEAD
+void idUserInterfaceLocal::CallStartup(void)
+{
+	if(desktop)
+		desktop->RunScript(idWindow::ON_STARTUP);
+}
+
+void idUserInterfaceLocal::Translate(const char *fontname)
+{
+	if(!desktop)
+		return;
+	translateFont = -1;
+	if(!fontname || !fontname[0])
+		return;
+	translateFont = uiManagerLocal.dc.FindFont(fontname);
+}
+#endif

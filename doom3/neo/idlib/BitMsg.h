@@ -145,6 +145,18 @@ class idBitMsg
 	const byte *	GetReadData( void ) const;
 #endif
 
+#ifdef _HUMANHEAD
+	//HUMANHEAD: aob
+	void			WriteVec3( const idVec3& vector );
+	void			WriteMat3( const idMat3& axis );
+	void			WriteBool( bool boolean );
+
+	idVec3			ReadVec3() const;
+	idMat3			ReadMat3() const;
+	bool			ReadBool() const;
+	//HUMANHEAD END
+#endif
+
 	private:
 		byte 			*writeData;			// pointer to data for writing
 		const byte 	*readData;			// pointer to data for reading
@@ -1062,6 +1074,72 @@ private:
 	idLinkList<idMsgQueue>	writeList, readList;
 };
 
+#endif
+
+#ifdef _HUMANHEAD
+//HUMANHEAD rww
+#define MAX_MSG_QUEUE_SIZE				16384		// must be a power of 2
+//HUMANHEAD END
+
+//HUMANHEAD rww
+class idMsgQueue {
+public:
+					idMsgQueue();
+
+	void			Init( int sequence );
+
+	bool			Add( const byte *data, const int size );
+	bool			Get( byte *data, int &size );
+	int				GetTotalSize( void ) const;
+	int				GetSpaceLeft( void ) const;
+	int				GetFirst( void ) const { return first; }
+	int				GetLast( void ) const { return last; }
+	void			CopyToBuffer( byte *buf ) const;
+
+	void			WriteToMsg(idBitMsg &msg) const; //HUMANHEAD rww - write the queue to a bitmsg
+	void			ReadFromMsg(const idBitMsg &msg); //HUMANHEAD rww - read the queue from a bitmsg
+	bool			GetDirect( byte *data, int &size ); //HUMANHEAD rww - doesn't care about sequence
+
+private:
+	byte			buffer[MAX_MSG_QUEUE_SIZE];
+	int				first;			// sequence number of first message in queue
+	int				last;			// sequence number of last message in queue
+	int				startIndex;		// index pointing to the first byte of the first message
+	int				endIndex;		// index pointing to the first byte after the last message
+
+	void			WriteByte( byte b );
+	byte			ReadByte( void );
+	void			WriteShort( int s );
+	int				ReadShort( void );
+	void			WriteLong( int l );
+	int				ReadLong( void );
+	void			WriteData( const byte *data, const int size );
+	void			ReadData( byte *data, const int size );
+};
+//HUMANHEAD END
+
+//HUMANHEAD: aob
+ID_INLINE idVec3 idBitMsg::ReadVec3() const {
+	idVec3 vector;
+	vector[0] = ReadFloat();
+	vector[1] = ReadFloat();
+	vector[2] = ReadFloat();
+	return vector;
+}
+
+ID_INLINE idMat3 idBitMsg::ReadMat3() const {
+	idMat3 axis;
+	axis[0] = ReadVec3();
+	axis[1] = ReadVec3();
+	axis[2] = ReadVec3();
+	return axis;
+}
+
+ID_INLINE bool idBitMsg::ReadBool() const {
+	int boolean = ReadBits( 1 );
+	return *(bool*)&boolean;//We seem to get a performance warning unless I do this.  Ick!
+}
+//HUMANHEAD END
 #endif
 
 #endif /* !__BITMSG_H__ */

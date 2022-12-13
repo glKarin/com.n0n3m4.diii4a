@@ -133,6 +133,10 @@ typedef enum {
 	EXP_REG_GLOBAL6,
 	EXP_REG_GLOBAL7,
 
+#ifdef _HUMANHEAD
+	EXP_REG_DISTANCE, // HUMANHEAD: CJR
+#endif
+
 	EXP_REG_NUM_PREDEFINED
 } expRegister_t;
 
@@ -214,6 +218,17 @@ typedef struct {
 	float				privatePolygonOffset;	// a per-stage polygon offset
 
 	newShaderStage_t	*newStage;			// vertex / fragment program based stage
+
+#ifdef _HUMANHEAD
+    bool				isGlow; // HUMANHEAD CJR:  Glow overlay
+    bool				isScopeView; // HUMANHEAD CJR:  Scope view
+    bool				isShuttleView;	// HUMANHEAD pdm: shuttle view
+    bool				isNotScopeView; // HUMANHEAD CJR:  Does not show up in scope view
+    bool				isSpiritWalk; // HUMANHEAD CJR: Spiritwalk view
+    bool				isNotSpiritWalk; // HUMANHEAD CJR:  Does not show up in spirit view
+
+    //specData_t			specular;	//HUMANHEAD bjk: specular exponent
+#endif
 } shaderStage_t;
 
 typedef enum {
@@ -255,7 +270,11 @@ const int MAX_SHADER_STAGES			= 256;
 
 const int MAX_TEXGEN_REGISTERS		= 4;
 
+#ifdef _HUMANHEAD
+const int MAX_ENTITY_SHADER_PARMS	= 13; // HUMANHEAD pdm: increased from 12
+#else
 const int MAX_ENTITY_SHADER_PARMS	= 12;
+#endif
 
 // material flags
 typedef enum {
@@ -266,6 +285,11 @@ typedef enum {
 	MF_NOSELFSHADOW				= BIT(4),
 	MF_NOPORTALFOG				= BIT(5),	// this fog volume won't ever consider a portal fogged out
 	MF_EDITOR_VISIBLE			= BIT(6)	// in use (visible) per editor
+#ifdef _HUMANHEAD
+    //HUMANHEAD PCF rww 05/11/06 - can be used explicitly by surfaces which use alpha coverage but do not want collision anyway
+    , MF_SKIPCLIP = BIT(9)
+                  //HUMANHEAD END
+#endif
 } materialFlags_t;
 
 // contents flags, NOTE: make sure to keep the defines in doom_defs.script up to date with these!
@@ -313,6 +337,24 @@ typedef enum {
 	CONTENTS_SLIME				= BIT(27),
 // jmarshall end
 #endif
+	
+#ifdef _HUMANHEAD
+	// HUMANHEAD CJR: Content flags.  Note that for simplicity of merging, id's areaportal and nocsg flags were left as is
+	CONTENTS_FORCEFIELD = BIT(16),	// forcefield matter, only passable in spirit mode
+	CONTENTS_SPIRITBRIDGE = BIT(17),	// cjr - Collidable only by spiritwalking players
+	// END HUMANHEAD
+
+	// HUMANHEAD CJR: Content flags.  Note that for simplicity of merging, id's areaportal and nocsg flags were left as is
+	CONTENTS_BLOCK_RADIUSDAMAGE = BIT(18/*20*/),	// aob - used by objects like forcefields and chaff
+	CONTENTS_SHOOTABLE = BIT(19/*21*/),	// pdm - bullets collide with but not player or monsters
+	CONTENTS_DEATHVOLUME = BIT(22),	// AOB: used by death zones so the player can do a simple contents check
+	CONTENTS_VEHICLECLIP = BIT(23),	// PDM: used to clip off vehicle movement
+	CONTENTS_OWNER_TO_OWNER = BIT(24),	// bjk: used to disable owner to owner rejection for collision
+	CONTENTS_GAME_PORTAL = BIT(25),  // cjr: used for clipping against game portals (glow portals, etc)
+	CONTENTS_SHOOTABLEBYARROW = BIT(26),	// pdm: solid to spirit arrows specifically as opposed to other projectiles
+	CONTENTS_HUNTERCLIP,
+#endif
+
 	CONTENTS_REMOVE_UTIL		= ~(CONTENTS_AREAPORTAL|CONTENTS_NOCSG)
 } contentsFlags_t;
 
@@ -329,6 +371,16 @@ typedef enum {
 	SURFTYPE_CARDBOARD,
 	SURFTYPE_LIQUID,
 	SURFTYPE_GLASS,
+#ifdef _HUMANHEAD
+	SURFTYPE_TILE,
+	SURFTYPE_WALLWALK,
+	SURFTYPE_ALTMETAL,
+	SURFTYPE_FORCEFIELD,
+	SURFTYPE_PIPE,
+	SURFTYPE_SPIRIT,
+	SURFTYPE_CHAFF,
+	NUM_SURFACE_TYPES
+#else
 	SURFTYPE_PLASTIC,
 	SURFTYPE_RICOCHET,
 	SURFTYPE_10,
@@ -337,6 +389,7 @@ typedef enum {
 	SURFTYPE_13,
 	SURFTYPE_14,
 	SURFTYPE_15
+#endif
 } surfTypes_t;
 
 // surface flags

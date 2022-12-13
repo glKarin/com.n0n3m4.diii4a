@@ -55,7 +55,7 @@ All fragments will have the same sequence numbers.
 idCVar net_channelShowPackets("net_channelShowPackets", "0", CVAR_SYSTEM | CVAR_BOOL, "show all packets");
 idCVar net_channelShowDrop("net_channelShowDrop", "0", CVAR_SYSTEM | CVAR_BOOL, "show dropped packets");
 
-#if !defined(_RAVEN) // quake4 in idlib/BitMsg
+#if !defined(_RAVEN) && !defined(_HUMANHEAD) // quake4/prey in idlib/BitMsg
 /*
 ===============
 idMsgQueue::idMsgQueue

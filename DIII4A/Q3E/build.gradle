@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk 30
-    buildToolsVersion '30.0.3'
+    compileSdk 28
+    buildToolsVersion '28.0.3'
     //compileOptions.encoding "gbk"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 30
+        targetSdkVersion 28
 
         ndk {
             moduleName "q3eloader"

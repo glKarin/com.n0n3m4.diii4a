@@ -154,7 +154,11 @@ class idList
 	void			HeapPop( void );									// pop off the top of the heap & resort
 #endif
 
+#ifdef _HUMANHEAD
+	protected:
+#else
 	private:
+#endif
 		int				num;
 		int				size;
 		int				granularity;

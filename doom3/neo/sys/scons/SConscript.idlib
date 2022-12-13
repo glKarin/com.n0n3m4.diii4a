@@ -52,11 +52,15 @@ idlib_string = ' \
 	Timer.cpp \
 	Heap.cpp'
 
-if ( local_quake4 ):
+if ( local_raven ):
 	idlib_string += ' \
 	../raven/idlib/LexerFactory.cpp \
 	../raven/idlib/TextCompiler.cpp \
 	../raven/idlib/math/Radians.cpp \
+	'
+elif ( local_humanhead ):
+	idlib_string += ' \
+	../humanhead/idlib/math/prey_math.cpp \
 	'
 
 idlib_list = scons_utils.BuildList( 'idlib', idlib_string )
@@ -75,6 +79,14 @@ try:
 except:
 	pass
 local_env_noopt.Append( CPPFLAGS = flags )
+
+# RAVEN QUAKE4
+if ( local_raven ):
+	local_env.Append( CPPDEFINES = [ '_RAVEN' ] )
+	local_env_noopt.Append( CPPDEFINES = [ '_RAVEN' ] )
+elif ( local_humanhead ):
+	local_env.Append( CPPDEFINES = [ '_HUMANHEAD', 'HUMANHEAD' ] )
+	local_env_noopt.Append( CPPDEFINES = [ '_HUMANHEAD', 'HUMANHEAD' ] )
 
 ret_list = []
 if ( local_idlibpic == 0 ):

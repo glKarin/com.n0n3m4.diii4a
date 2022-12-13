@@ -39,14 +39,23 @@ If you have questions concerning this license or the applicable additional terms
 
 const int USERCMD_HZ			= 60;			// 60 frames per second
 const int USERCMD_MSEC			= 1000 / USERCMD_HZ;
+#ifdef _HUMANHEAD
+const float	USERCMD_ONE_OVER_HZ = (1.0f / USERCMD_HZ); // HUMANHEAD JRM
+#endif
 
 // usercmd_t->button bits
 const int BUTTON_ATTACK			= BIT(0);
 const int BUTTON_RUN			= BIT(1);
 const int BUTTON_ZOOM			= BIT(2);
+#ifdef _HUMANHEAD
+const int BUTTON_ATTACK_ALT		= BIT(3);
+const int BUTTON_SCORES			= BIT(4);
+const int BUTTON_MLOOK			= BIT(5);
+#else
 const int BUTTON_SCORES			= BIT(3);
 const int BUTTON_MLOOK			= BIT(4);
 const int BUTTON_5				= BIT(5);
+#endif
 const int BUTTON_6				= BIT(6);
 const int BUTTON_7				= BIT(7);
 #ifdef _RAVEN // quake4 user cmd

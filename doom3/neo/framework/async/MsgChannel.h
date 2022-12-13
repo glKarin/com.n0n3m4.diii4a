@@ -50,7 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #define CONNECTIONLESS_MESSAGE_ID		-1			// id for connectionless messages
 #define CONNECTIONLESS_MESSAGE_ID_MASK	0x7FFF		// value to mask away connectionless message id
 
-#if !defined(_RAVEN) // quake4 in idlib/BigMsg
+#if !defined(_RAVEN) && !defined(_HUMANHEAD) // quake4/prey in idlib/BigMsg
 #define MAX_MSG_QUEUE_SIZE				16384		// must be a power of 2
 
 

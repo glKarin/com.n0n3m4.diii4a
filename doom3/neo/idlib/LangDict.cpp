@@ -149,6 +149,13 @@ void idLangDict::Save(const char *fileName)
 			} else if (ch == '\n' || ch == '\r') {
 				outFile->Write(&slash, 1);
 				outFile->Write(&nl, 1);
+#ifdef _HUMANHEAD
+			}
+            else if ( ch == slash )
+            {
+                outFile->Write( &slash, 1 );
+                outFile->Write( &slash, 1 );
+#endif
 			} else {
 				outFile->Write(&ch, 1);
 			}
@@ -248,9 +255,14 @@ const char *idLangDict::AddString(const char *str)
 
 	int id = GetNextId();
 	idLangKeyValue kv;
+#ifdef _HUMANHEAD
+    //kv.key = va( "#str_%08i", id );
+    kv.key = va( "#str_%05i", id );	// HUMANHEAD pdm: changed back
+#else
 	// _D3XP
 	kv.key = va("#str_%08i", id);
 	// kv.key = va( "#str_%05i", id );
+#endif
 	kv.value = str;
 	c = args.Append(kv);
 	assert(kv.key.Cmpn(STRTABLE_ID, STRTABLE_ID_LENGTH) == 0);

@@ -162,6 +162,10 @@ typedef enum {
 	UB_IMPULSE62,
 	UB_IMPULSE63,
 
+#ifdef _HUMANHEAD
+	UB_ATTACK_ALT,
+#endif
+
 	UB_MAX_BUTTONS
 } usercmdButton_t;
 
@@ -262,6 +266,10 @@ userCmdString_t	userCmdStrings[] = {
 	{ "_impulse61",		UB_IMPULSE61 },
 	{ "_impulse62",		UB_IMPULSE62 },
 	{ "_impulse63",		UB_IMPULSE63 },
+
+#ifdef _HUMANHEAD
+	{ "_attackalt",		UB_ATTACK_ALT },
+#endif
 
 	{ NULL,				UB_NONE },
 };
@@ -784,6 +792,13 @@ void idUsercmdGenLocal::CmdButtons(void)
 	if (ButtonState(UB_MLOOK) ^ in_freeLook.GetInteger()) {
 		cmd.buttons |= BUTTON_MLOOK;
 	}
+
+#ifdef _HUMANHEAD
+	// check the alt attack button
+	if (ButtonState(UB_ATTACK_ALT)) {
+		cmd.buttons |= BUTTON_ATTACK_ALT;
+	}
+#endif
 }
 
 /*

@@ -295,7 +295,7 @@ void Script_Transition(idWindow *window, idList<idGSWinVar> *src)
 #ifdef _RAVEN
 /*
 =========================
-Script_EvalRegs
+Script_NamedEvent
 =========================
 */
 // jmarshall - Quake 4 gui implementation
@@ -417,6 +417,58 @@ void Script_SetLightColor(idWindow* window, idList<idGSWinVar>* src)
 
 #endif
 
+#ifdef _HUMANHEAD
+/*
+=========================
+Script_NamedEvent
+=========================
+*/
+void Script_NamedEvent(idWindow* window, idList<idGSWinVar>* src)
+{
+    idWinStr* parm = dynamic_cast<idWinStr*>((*src)[0].var);
+    idStr parmStr = parm->c_str();
+
+    int p = idStr::FindText(parm->c_str(), "::");
+    if (p <= 0)
+    {
+        window->RunNamedEvent(parm->c_str());
+    }
+    else
+    {
+        idStr windowName = parmStr.Mid(0, p);
+        idStr varName = parmStr.Mid(p + 2, parmStr.Length() - (p + 2));
+
+        //k drawWin_t* childWindow = window->FindChildByName(windowName);
+        drawWin_t* childWindow = window->GetGui()->GetDesktop()->FindChildByName(windowName);
+        if (childWindow)
+        {
+            childWindow->win->RunNamedEvent(varName);
+        }
+        else
+        {
+            common->Warning("GUI: %s: unknown window %s for named event %s\n", window->GetName(), windowName.c_str(), varName.c_str());
+        }
+    }
+}
+
+void Script_ResetCapture(idWindow* window, idList<idGSWinVar>* src)
+{
+	(void)window;
+	(void)src;
+}
+
+void Script_Inc(idWindow* window, idList<idGSWinVar>* src)
+{
+	idStr key, val;
+
+	int a = atoi((*src)[0].var->c_str());
+	int b = atoi((*src)[1].var->c_str());
+
+	(*src)[0].var->Set(va("%d", a + b));
+	(*src)[0].var->SetEval(false);
+}
+#endif
+
 typedef struct {
 	const char *name;
 	void (*handler)(idWindow *window, idList<idGSWinVar> *src);
@@ -443,9 +495,14 @@ guiCommandDef_t commandList[] = {
     { "resetVideo", Script_ResetVideo, 1, 1},
     { "nonInteractive", Script_NonInteractive, 1, 1}
 // jmarshall end
-    , { "setlightcolor", Script_SetLightColor, 1, 1}
+    , { "setlightcolor", Script_SetLightColor, 1, 1},
 #endif
 
+#ifdef _HUMANHEAD
+    , { "namedevent", Script_NamedEvent, 1, 1},
+    { "resetCapture", Script_ResetCapture, 1, 1},
+    { "inc", Script_Inc, 2, 2},
+#endif
 };
 
 int	scriptCommandCount = sizeof(commandList) / sizeof(guiCommandDef_t);
@@ -713,6 +770,13 @@ void idGuiScript::FixupParms(idWindow *win)
 							declManager->FindSound(token.c_str());
 						}
 					}
+#ifdef _HUMANHEAD
+					else if (token.Icmp("play2") == 0) {
+						if (parser.ReadToken(&token) && (token != "")) {
+							declManager->FindSound(token.c_str());
+						}
+					}
+#endif
 				}
 			}
 		}
@@ -853,3 +917,4 @@ void idGuiScriptList::ReadFromSaveGame(idFile *savefile)
 		list[i]->ReadFromSaveGame(savefile);
 	}
 }
+

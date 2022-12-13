@@ -291,6 +291,16 @@ class idDeclManagerLocal : public idDeclManager
 		idList<rvGuideTemplate>		guides;
 		// jmarshall end
 #endif
+#ifdef _HUMANHEAD
+    virtual const hhDeclBeam *		FindBeam( const char *name, bool makeDefault = true );
+    virtual const hhDeclBeam *		BeamByIndex( int index, bool forceParse = true );
+    virtual void					SetInsideLevelLoad(bool b) {
+        inLevelLoad = b;
+    }
+    virtual bool					GetInsideLevelLoad(void) {
+        return inLevelLoad;
+    }
+#endif
 
 		virtual const idMaterial 		*MaterialByIndex(int index, bool forceParse = true);
 		virtual const idDeclSkin 		*SkinByIndex(int index, bool forceParse = true);
@@ -322,6 +332,10 @@ class idDeclManagerLocal : public idDeclManager
 		bool						insideLevelLoad;
 
 		static idCVar				decl_show;
+
+#ifdef _HUMANHEAD
+    bool						inLevelLoad;
+#endif
 
 	private:
 		static void					ListDecls_f(const idCmdArgs &args);
@@ -961,6 +975,10 @@ void idDeclManagerLocal::Init(void)
 
 	checksum = 0;
 
+#ifdef _HUMANHEAD
+    inLevelLoad = false;
+#endif
+
 #ifdef USE_COMPRESSED_DECLS
 	SetupHuffman();
 #endif
@@ -1013,6 +1031,10 @@ void idDeclManagerLocal::Init(void)
 // jmarshall end
 #endif
 
+#ifdef _HUMANHEAD
+    RegisterDeclType(	"beam",			DECL_BEAM,		idDeclAllocator<hhDeclBeam>);
+#endif
+
 	RegisterDeclFolder("materials",		".mtr",				DECL_MATERIAL);
 	RegisterDeclFolder("skins",			".skin",			DECL_SKIN);
 	RegisterDeclFolder("sound",			".sndshd",			DECL_SOUND);
@@ -1024,6 +1046,10 @@ void idDeclManagerLocal::Init(void)
     RegisterDeclFolder("playbacks",			".playback",		DECL_PLAYBACK);
     RegisterDeclFolder("effects",			".fx",				DECL_EFFECT);
 // jmarshall end
+#endif
+
+#ifdef _HUMANHEAD
+    RegisterDeclFolder("beams",			".beam",				DECL_BEAM);
 #endif
 
 	// add console commands
@@ -2813,3 +2839,14 @@ idDeclEntityDef * idDeclManagerLocal::GetMapDef(const char *mapName, const char 
 
 #endif
 
+#ifdef _HUMANHEAD
+const hhDeclBeam *		idDeclManagerLocal::FindBeam( const char *name, bool makeDefault = true )
+{
+	return static_cast<const hhDeclBeam*>(FindType(DECL_BEAM, name, makeDefault));
+}
+
+const hhDeclBeam *		idDeclManagerLocal::BeamByIndex( int index, bool forceParse = true )
+{
+	return static_cast<const hhDeclBeam*>(DeclByIndex(DECL_BEAM, index, forceParse));
+}
+#endif

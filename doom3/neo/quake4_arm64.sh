@@ -31,7 +31,10 @@ scons \
 	TARGET_D3LE=0 \
 	TARGET_RIVENSIN=0 \
 	TARGET_HARDCORPS=0 \
+	TARGET_RAVEN=1 \
 	TARGET_QUAKE4=1 \
+	TARGET_HUMANHEAD=0 \
+	TARGET_PREY=0 \
 	BASEFLAGS="-march=armv8-a -fno-builtin-sin -fno-builtin-cos -fno-builtin-sinf -fno-builtin-cosf -fexceptions -frtti ${DEFINES}" \
 	LIB_PATH="${LIB_PATH}" \
 	#$*

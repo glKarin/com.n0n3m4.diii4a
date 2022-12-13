@@ -326,6 +326,11 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 	} else if (extension.Icmp("liquid") == 0) {
 		model = new idRenderModelLiquid;
 		model->InitFromFile(modelName);
+#ifdef _HUMANHEAD //k: TODO beam model
+	} else if (extension.Icmp("beam") == 0) {
+		model = new hhRenderModelBeam;
+		model->InitFromFile(modelName);
+#endif
 	} else {
 
 		if (extension.Length()) {

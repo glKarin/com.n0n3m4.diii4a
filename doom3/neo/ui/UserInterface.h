@@ -126,6 +126,13 @@ class idUserInterface
 		virtual void				SetCursor(float x, float y) = 0;
 		virtual float				CursorX() = 0;
 		virtual float				CursorY() = 0;
+#ifdef _HUMANHEAD
+    // HUMANHEAD pdm: Translation effect
+    //virtual void				SetDemoGuiSource(const char *sourceName) = 0;
+    virtual void				Translate(const char *fontname) = 0;
+    virtual void				CallStartup() = 0;
+    // HUMANHEAD END
+#endif
 };
 
 

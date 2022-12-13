@@ -3501,6 +3501,11 @@ int idParser::LoadFile(const char *filename, bool OSPath)
 		idParser::AddGlobalDefinesToSource();
 	}
 
+#ifdef _HUMANHEAD // for test
+	idFile *f = fileSystem->OpenFileWrite( va("gen/%s", filename) );
+	f->WriteString(script->buffer);
+	fileSystem->CloseFile(f);
+#endif
 	return true;
 }
 

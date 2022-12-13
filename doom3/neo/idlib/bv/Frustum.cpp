@@ -2677,16 +2677,24 @@ void idFrustum::ClipFrustumToBox(const idBox &box, float clipFractions[4], int c
         if( cornerVecs[i].x != 0.0f )
         {
 #endif
+#ifdef _HUMANHEAD
+        if (cornerVecs[i].x == 0.0f)   //HUMANHEAD rww
+        {
+            clipFractions[i] = idMath::INFINITY;
+            clipPlanes[i] = 0;
+        } //HUMANHEAD END
+        else
+        {
+#endif
 		index = FLOATSIGNBITNOTSET(cornerVecs[i].x);
 		f = (bounds[index].x - localOrigin.x) / cornerVecs[i].x;
 		clipFractions[i] = f;
 		clipPlanes[i] = 1 << index;
 
-#ifdef _RAVEN // rvlib
+#if defined(_RAVEN) || defined(_HUMANHEAD) // rvlib  //HUMANHEAD rww
         }
 
-        if( cornerVecs[i].y != 0.0f )
-        {
+        if( cornerVecs[i].y != 0.0f ) {
 #endif
 
 		index = FLOATSIGNBITNOTSET(cornerVecs[i].y);
@@ -2697,11 +2705,10 @@ void idFrustum::ClipFrustumToBox(const idBox &box, float clipFractions[4], int c
 			clipPlanes[i] = 4 << index;
 		}
 
-#ifdef _RAVEN // rvlib
+#if defined(_RAVEN) || defined(_HUMANHEAD) // rvlib  //HUMANHEAD rww
         }
 
-        if( cornerVecs[i].z != 0.0f )
-        {
+        if( cornerVecs[i].z != 0.0f ) {
 #endif
 
 		index = FLOATSIGNBITNOTSET(cornerVecs[i].z);
@@ -2712,7 +2719,7 @@ void idFrustum::ClipFrustumToBox(const idBox &box, float clipFractions[4], int c
 			clipPlanes[i] = 16 << index;
 		}
 
-#ifdef _RAVEN // rvlib
+#if defined(_RAVEN) || defined(_HUMANHEAD) // rvlib  //HUMANHEAD rww
         }
 // RAVEN END
 #endif

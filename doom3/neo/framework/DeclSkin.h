@@ -51,6 +51,9 @@ class idDeclSkin : public idDecl
 		virtual bool			Parse(const char *text, const int textLength);
 		virtual void			FreeData(void);
 
+#ifdef _HUMANHEAD
+		virtual //HUMANHEAD: aob - needed so this is added to vtable and callable from DLL
+#endif
 		const idMaterial 		*RemapShaderBySkin(const idMaterial *shader) const;
 
 		// model associations are just for the preview dialog in the editor

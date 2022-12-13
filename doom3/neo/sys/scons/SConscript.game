@@ -233,6 +233,178 @@ elif ( local_quake4 ):
 	game_string = game_string.replace('ai/AI_Vagary.cpp ', '')
 	game_string = game_string.replace('gamesys/TypeInfo.cpp ', '')
 	game_list = scons_utils.BuildList( 'quake4', game_string )
+elif ( local_prey ):
+	game_string += ' \
+	EntityAdditions.cpp \
+	physics/Physics_PreyPlayer.cpp \
+	Prey/ai_centurion.cpp \
+	Prey/ai_crawler.cpp \
+	Prey/ai_creaturex.cpp \
+	Prey/ai_droid.cpp \
+	Prey/ai_gasbag_simple.cpp \
+	Prey/ai_harvester_simple.cpp \
+	Prey/ai_hunter_simple.cpp \
+	Prey/ai_inspector.cpp \
+	Prey/ai_jetpack_harvester_simple.cpp \
+	Prey/ai_keeper_simple.cpp \
+	Prey/ai_mutate.cpp \
+	Prey/ai_mutilatedhuman.cpp \
+	Prey/ai_passageway.cpp \
+	Prey/ai_possessedTommy.cpp \
+	Prey/ai_reaction.cpp \
+	Prey/ai_spawncase.cpp \
+	Prey/ai_speech.cpp \
+	Prey/ai_sphereboss.cpp \
+	Prey/anim_baseanim.cpp \
+	Prey/force_converge.cpp \
+	Prey/game_afs.cpp \
+	Prey/game_alarm.cpp \
+	Prey/game_anim.cpp \
+	Prey/game_animBlend.cpp \
+	Prey/game_animDriven.cpp \
+	Prey/game_animatedentity.cpp \
+	Prey/game_animatedgui.cpp \
+	Prey/game_animator.cpp \
+	Prey/game_arcadegame.cpp \
+	Prey/game_barrel.cpp \
+	Prey/game_bindController.cpp \
+	Prey/game_blackjack.cpp \
+	Prey/game_cards.cpp \
+	Prey/game_cilia.cpp \
+	Prey/game_console.cpp \
+	Prey/game_damagetester.cpp \
+	Prey/game_dda.cpp \
+	Prey/game_deathwraith.cpp \
+	Prey/game_debrisspawner.cpp \
+	Prey/game_dock.cpp \
+	Prey/game_dockedgun.cpp \
+	Prey/game_door.cpp \
+	Prey/game_eggspawner.cpp \
+	Prey/game_energynode.cpp \
+	Prey/game_entityfx.cpp \
+	Prey/game_entityspawner.cpp \
+	Prey/game_events.cpp \
+	Prey/game_fixedpod.cpp \
+	Prey/game_forcefield.cpp \
+	Prey/game_fxinfo.cpp \
+	Prey/game_gibbable.cpp \
+	Prey/game_gravityswitch.cpp \
+	Prey/game_guihand.cpp \
+	Prey/game_gun.cpp \
+	Prey/game_hand.cpp \
+	Prey/game_handcontrol.cpp \
+	Prey/game_healthbasin.cpp \
+	Prey/game_healthspore.cpp \
+	Prey/game_inventory.cpp \
+	Prey/game_itemautomatic.cpp \
+	Prey/game_itemcabinet.cpp \
+	Prey/game_jukebox.cpp \
+	Prey/game_jumpzone.cpp \
+	Prey/game_light.cpp \
+	Prey/game_lightfixture.cpp \
+	Prey/game_mine.cpp \
+	Prey/game_misc.cpp \
+	Prey/game_modeldoor.cpp \
+	Prey/game_modeltoggle.cpp \
+	Prey/game_monster_ai.cpp \
+	Prey/game_monster_ai_events.cpp \
+	Prey/game_mountedgun.cpp \
+	Prey/game_moveable.cpp \
+	Prey/game_mover.cpp \
+	Prey/game_note.cpp \
+	Prey/game_organtrigger.cpp \
+	Prey/game_player.cpp \
+	Prey/game_playerview.cpp \
+	Prey/game_pod.cpp \
+	Prey/game_podspawner.cpp \
+	Prey/game_poker.cpp \
+	Prey/game_portal.cpp \
+	Prey/game_portalframe.cpp \
+	Prey/game_proxdoor.cpp \
+	Prey/game_rail.cpp \
+	Prey/game_railshuttle.cpp \
+	Prey/game_renderentity.cpp \
+	Prey/game_safeDeathVolume.cpp \
+	Prey/game_securityeye.cpp \
+	Prey/game_shuttle.cpp \
+	Prey/game_shuttledock.cpp \
+	Prey/game_shuttletransport.cpp \
+	Prey/game_skybox.cpp \
+	Prey/game_slots.cpp \
+	Prey/game_sphere.cpp \
+	Prey/game_spherepart.cpp \
+	Prey/game_spring.cpp \
+	Prey/game_sunCorona.cpp \
+	Prey/game_talon.cpp \
+	Prey/game_targetproxy.cpp \
+	Prey/game_targets.cpp \
+	Prey/game_trackmover.cpp \
+	Prey/game_trigger.cpp \
+	Prey/game_tripwire.cpp \
+	Prey/game_utils.cpp \
+	Prey/game_vehicle.cpp \
+	Prey/game_vomiter.cpp \
+	Prey/game_weaponHandState.cpp \
+	Prey/game_woundmanager.cpp \
+	Prey/game_wraith.cpp \
+	Prey/game_zone.cpp \
+	Prey/particles_particles.cpp \
+	Prey/physics_delta.cpp \
+	Prey/physics_preyai.cpp \
+	Prey/physics_preyparametric.cpp \
+	Prey/physics_simple.cpp \
+	Prey/physics_vehicle.cpp \
+	Prey/prey_animator.cpp \
+	Prey/prey_baseweapons.cpp \
+	Prey/prey_beam.cpp \
+	Prey/prey_bonecontroller.cpp \
+	Prey/prey_camerainterpolator.cpp \
+	Prey/prey_firecontroller.cpp \
+	Prey/prey_game.cpp \
+	Prey/prey_items.cpp \
+	Prey/prey_liquid.cpp \
+	Prey/prey_local.cpp \
+	Prey/prey_projectile.cpp \
+	Prey/prey_projectileautocannon.cpp \
+	Prey/prey_projectilebounce.cpp \
+	Prey/prey_projectilebug.cpp \
+	Prey/prey_projectilebugtrigger.cpp \
+	Prey/prey_projectilecocoon.cpp \
+	Prey/prey_projectilecrawlergrenade.cpp \
+	Prey/prey_projectilefreezer.cpp \
+	Prey/prey_projectilegasbagpod.cpp \
+	Prey/prey_projectilehiderweapon.cpp \
+	Prey/prey_projectilemine.cpp \
+	Prey/prey_projectilerifle.cpp \
+	Prey/prey_projectilerocketlauncher.cpp \
+	Prey/prey_projectileshuttle.cpp \
+	Prey/prey_projectilesoulcannon.cpp \
+	Prey/prey_projectilespiritarrow.cpp \
+	Prey/prey_projectiletracking.cpp \
+	Prey/prey_projectiletrigger.cpp \
+	Prey/prey_projectilewrench.cpp \
+	Prey/prey_script_thread.cpp \
+	Prey/prey_sound.cpp \
+	Prey/prey_soundleadincontroller.cpp \
+	Prey/prey_spiritbridge.cpp \
+	Prey/prey_spiritproxy.cpp \
+	Prey/prey_spiritsecret.cpp \
+	Prey/prey_vehiclefirecontroller.cpp \
+	Prey/prey_weapon.cpp \
+	Prey/prey_weaponautocannon.cpp \
+	Prey/prey_weaponcrawlergrenade.cpp \
+	Prey/prey_weaponfirecontroller.cpp \
+	Prey/prey_weaponhider.cpp \
+	Prey/prey_weaponrifle.cpp \
+	Prey/prey_weaponrocketlauncher.cpp \
+	Prey/prey_weaponsoulstripper.cpp \
+	Prey/prey_weaponspiritbow.cpp \
+	Prey/sys_debugger.cpp \
+	Prey/sys_preycmds.cpp \
+	'
+#Prey/ai_Navigator.cpp \
+	game_string = game_string.replace('ai/AI_Vagary.cpp ', '')
+	game_list = scons_utils.BuildList( 'prey', game_string )
 else:
 	game_list = scons_utils.BuildList( 'game', game_string )
 
@@ -255,12 +427,18 @@ if ( local_rivensin ):
 if ( local_hardcorps ):
 	local_env.Append( CPPDEFINES = [ '_HARDCORPS', '_DENTONMOD', '_PORTALSKY', '_WATER_PHYSICS' ] )
 
+if ( local_raven ):
+	local_env.Append( CPPDEFINES = [ '_RAVEN' ] )
 if ( local_quake4 ):
 	local_env.Append( CPPDEFINES = [ '_QUAKE4' ] )
+if ( local_humanhead ):
+	local_env.Append( CPPDEFINES = [ '_HUMANHEAD', 'HUMANHEAD' ] )
+if ( local_prey ):
+	local_env.Append( CPPDEFINES = [ '_PREY' ] )
 
 #local_env.Append( LIBPATH = [ '/data/data/com.termux/files/home/ndk/android_gcc32/arm-linux-androideabi/lib/armv7-a', '/data/data/com.termux/files/home/ndk/android_gcc32/sysroot/usr/lib' ] ) # //k armv7-a
 #local_env.Append( LIBPATH = [ '/data/data/com.termux/files/home/ndk/android-ndk-aide/toolchains/aarch64-linux-android-4.9/prebuilt/linux-arm64/lib/gcc/aarch64-linux-android/4.9.x', '/data/data/com.termux/files/home/ndk/android-ndk-aide/platforms/android-21/arch-arm64/usr/lib', '/data/data/com.termux/files/home/ndk/android-ndk-aide/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a' ] ) # //k arm64-v8a
-#local_env.Append( LIBS = [ 'supc++' ] )
+#local_env.Append( LIBS = [ 'supc++' ] ) # TODO
 
 if ( local_demo == 1 ):
 	local_env.Append( CPPDEFINES = [ 'ID_DEMO_BUILD' ] )

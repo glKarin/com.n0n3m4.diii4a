@@ -1,5 +1,6 @@
 package com.karin.idTech4Amm.misc;
 
+import android.os.Build;
 import android.text.Html;
 import android.content.Context;
 
@@ -156,26 +157,22 @@ public final class TextHelper
 	{
         StringBuilder sb = new StringBuilder();
         final String[] HELPS = {
+            "For playing Prey(2006)(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
+            " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
+            " *. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.",
+            " *. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw, some GUIs not work(Music CD in RoadHouse).",
+            null,
 			"For playing Quake 4(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/Quake4Doom", "Quake4Doom") + "`): ",
 			" 1. Putting PC Quake 4 game data file to `q4base` folder.",
             " 2. Click `START` to open Quake 4 map level dialog in game launcher.",
-            " 3. Extract Quake 4 patch resource to `q4base` game data folder if need(D3 format font files is not necessary now).",
+            " 3. Extract Quake 4 patch resource to `q4base` game data folder if need.",
             " (a). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).",
-            " 4. Then Choose map level/Start directly, all levels is working, and `New Game` s working.",
+            " 4. Then start game directly or choose map level, all levels is working.",
             " *. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).",
             " *. If running crash on arm32 or low-memory device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
-            null,
-			" Some problems and resolutions: ",
-			" 1. Door-opening: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, all doors can be opened.",
-			" 2. Main-menu: Now can show full main menu, but without background color. But can not Create-Server(using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game), and can not interactive in some dialog.",
-			" 3. Sound: It looks work well now.",
-			" 4. Loading-UI: It looks work well now.",
-			" 5. Multiplayer-Game: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
-			" 6. script errors: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.",
-			" 7. Particle system: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`).",
-			" 8. Entity render: Some game entities render incorrect.",
-            " 9. Font: Support Q4 format fonts now. " + GenLinkText("https://github.com/IlDucci", "IlDucci") + "'s DOOM3-format fonts of Quake 4 is not need on longer.",
-            null,
+            " *. Some problems has fixed: e.g. Door-opening and collision, New game on Main-menu, Q4 original fonts.",
+            " *. Exists bugs: e.g. Main-menu dialog interface, script error on some levels, particle system not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`)",
+			" *. Multiplayer-Game: using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game, and is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
             null,
             "On Android 11+, because of `Scoped-Storage`, must grant `Allow management of all files` permission.",
             null,
@@ -255,11 +252,11 @@ public final class TextHelper
             Constants.CONST_NAME,
             "Changes by " + GenLinkText("https://forum.xda-developers.com/member.php?u=10584229", Constants.CONST_DEV)
             + "&lt;" + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_EMAIL) + "&gt;",
-            "Update: " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
+            "Update: " + ContextUtility.GetAppVersion(context) + ("(API " + Build.VERSION.SDK_INT + ")") + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
             "Release: " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
             null,
             "Rename from `DIII4A++`, base on original `n0n3m4`'s `DIII4A`.",
-            "idTech4 engine's games support on Android, e.g. `DOOM 3`, `DOOM 3 RoE` and `Quake 4`, and some mods.",
+            "idTech4 engine's games support on Android, e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, Prey(2006), and some mods.",
             "Source in `assets/source` folder in APK file. `doom3_droid.source.tgz` is DOOM3 source. `diii4a.source.tgz` is android frontend source.",
             "OpenGL shader source is in `assets/gl2progs.zip`.",
             "Or view in github `" + GenLinkText(Constants.CONST_MAIN_PAGE, null) + "`, all new changes on `" + GenLinkText(Constants.CONST_MAIN_PAGE, "master") + "` branch.",
@@ -281,6 +278,11 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+                ChangeLog.Create("2022-11-18", 20,
+                        "Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.",
+                        "Implement show surface/hide surface for fixup entity render incorrect in Quake 4, e.g. AI's weapons, weapons in player view and Makron in boss level."
+                ),
 
                 ChangeLog.Create("2022-11-16", 19,
                         "Fixup middle bridge door GUI not interactive of level `game/tram1` in Quake 4.",
@@ -611,6 +613,13 @@ public final class TextHelper
                     "strogg", "fonts/strogg"
             ),
         };
+        final Cvar[] PREY_CVARS = {
+                Cvar.Create("harm_g_translateAlienFont", "string", "fonts", "Setup font name for automitic translate `alien` font text of GUI(empty to disable).",
+                        "fonts", "fonts",
+                        "fonts/menu", "fonts/menu",
+                        "\"\"", "Disable"
+                ),
+        };
         
         Map<String, Cvar[]> cvarMap = new LinkedHashMap<>();
         cvarMap.put("Renderer", RENDSRER_CVARS);
@@ -622,6 +631,7 @@ public final class TextHelper
         cvarMap.put("Rivensin mod", RIVENSIN_CVARS);
         cvarMap.put("Hardcorps mod", HARDCORPS_CVARS);
         cvarMap.put("Quake 4", QUAKE4_CVARS);
+        cvarMap.put("Prey(2006)", PREY_CVARS);
 
         StringBuilder sb = new StringBuilder();
         final String endl = GetDialogMessageEndl();

@@ -837,6 +837,34 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 	for (stage = 0; stage < shader->GetNumStages() ; stage++) {
 		pStage = shader->GetStage(stage);
 
+#ifdef _HUMANHEAD //k: scope view support
+		if(tr.IsScopeView())
+		{
+			if(pStage->isNotScopeView)
+				continue;
+		}
+		else
+		{
+			if(pStage->isScopeView)
+				continue;
+		}
+		if(!tr.IsShuttleView())
+		{
+			if(pStage->isShuttleView)
+				continue;
+		}
+		if (backEnd.viewDef->renderView.viewSpiritEntities)
+		{
+			if(pStage->isNotSpiritWalk)
+				continue;
+		}
+		else
+		{
+			if(pStage->isSpiritWalk)
+				continue;
+		}
+#endif
+
 		// check the enable condition
 		if (regs[ pStage->conditionRegister ] == 0) {
 			continue;

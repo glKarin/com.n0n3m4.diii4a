@@ -968,7 +968,13 @@ ID_INLINE void idStr::Insert(const char *text, int index)
 ID_INLINE void idStr::ToLower(void)
 {
 	for (int i = 0; data[i]; i++) {
-		if (CharIsUpper(data[i])) {
+#ifdef _HUMANHEAD
+        // HUMANHEAD pdm: cast to unsigned for the sake of western european characters, which use the sign bit
+        if ( CharIsUpper( (unsigned char)data[i] ) )
+#else
+		if (CharIsUpper(data[i]))
+#endif
+		{
 			data[i] += ('a' - 'A');
 		}
 	}
@@ -977,7 +983,13 @@ ID_INLINE void idStr::ToLower(void)
 ID_INLINE void idStr::ToUpper(void)
 {
 	for (int i = 0; data[i]; i++) {
-		if (CharIsLower(data[i])) {
+#ifdef _HUMANHEAD
+        // HUMANHEAD pdm: cast to unsigned for the sake of western european characters, which use the sign bit
+        if ( CharIsLower( (unsigned char)data[i] ) )
+#else
+		if (CharIsLower(data[i]))
+#endif
+		{
 			data[i] -= ('a' - 'A');
 		}
 	}
@@ -1114,7 +1126,13 @@ ID_INLINE int idStr::Length(const char *s)
 ID_INLINE char *idStr::ToLower(char *s)
 {
 	for (int i = 0; s[i]; i++) {
-		if (CharIsUpper(s[i])) {
+#ifdef _HUMANHEAD
+        // HUMANHEAD pdm: cast to unsigned for the sake of western european characters, which use the sign bit
+        if ( CharIsUpper( (unsigned char)s[i] ) )
+#else
+		if (CharIsUpper(s[i]))
+#endif
+		{
 			s[i] += ('a' - 'A');
 		}
 	}
@@ -1125,7 +1143,13 @@ ID_INLINE char *idStr::ToLower(char *s)
 ID_INLINE char *idStr::ToUpper(char *s)
 {
 	for (int i = 0; s[i]; i++) {
-		if (CharIsLower(s[i])) {
+#ifdef _HUMANHEAD
+        // HUMANHEAD pdm: cast to unsigned for the sake of western european characters, which use the sign bit
+        if ( CharIsLower( (unsigned char)s[i] ) )
+#else
+		if (CharIsLower(s[i]))
+#endif
+		{
 			s[i] -= ('a' - 'A');
 		}
 	}

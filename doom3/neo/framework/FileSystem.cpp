@@ -933,6 +933,31 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 	}
 
 #else
+#ifdef _HUMANHEAD //k: for windows game data path, e.g. C:\PREY\base/type/file.ext
+				  // first search standard prey path, and then search diii4a prey path
+#define RAW_BASE_GAMEDIR "base"
+	base = (char *)strstr(OSPath, RAW_BASE_GAMEDIR);
+
+	while (base) {
+		char c1 = '\0', c2;
+
+		if (base > OSPath) {
+			c1 = *(base - 1);
+		}
+
+		c2 = *(base + strlen(RAW_BASE_GAMEDIR));
+
+		if ((c1 == '/' || c1 == '\\') && (c2 == '/' || c2 == '\\')) {
+			break;
+		}
+
+		base = strstr(base + 1, RAW_BASE_GAMEDIR);
+	}
+
+	if(!base || !base[0])
+	{
+#endif
+
 	// look for the first complete directory name
 	base = (char *)strstr(OSPath, BASE_GAMEDIR);
 
@@ -952,6 +977,10 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 		base = strstr(base + 1, BASE_GAMEDIR);
 	}
 
+#ifdef _HUMANHEAD
+	}
+#endif
+
 #endif
 	// fs_game and fs_game_base support - look for first complete name with a mod path
 	// ( fs_game searched before fs_game_base )
@@ -964,6 +993,11 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 		} else if (igame == 1) {
 			fsgame = fs_game_base.GetString();
 		}
+
+#ifdef _HUMANHEAD
+		if(fsgame && !idStr::Icmp(fsgame, "preybase"))
+			fsgame = "";
+#endif
 
 		if (base == NULL && fsgame && strlen(fsgame)) {
 			base = (char *)strstr(OSPath, fsgame);

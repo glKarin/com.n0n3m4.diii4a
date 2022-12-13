@@ -1,33 +1,38 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11020"
-    android:versionName="1.1.0harmattan20"
+    android:versionCode="11021"
+    android:versionName="1.1.0harmattan21"
     android:installLocation="preferExternal"
     >
 
     <uses-feature android:glEsVersion="0x00020000" />
     <uses-sdk
-        android:targetSdkVersion="30"
+        android:targetSdkVersion="28"
         tools:ignore="GradleOverrides" />
 
     <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 9 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Android 10+ -->
+<!--
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+        android:requestLegacyExternalStorage="true"
+        -->
 	
 	<supports-screens android:smallScreens="true" 
                       android:normalScreens="true" 
                       android:largeScreens="true"
                       android:xlargeScreens="true"                       
                       android:anyDensity="true"/>
-	
+
     <application
         android:icon="@drawable/icon"
         android:largeHeap="true"
-        android:requestLegacyExternalStorage="true"
         android:label="@string/app_name">
         <activity            
             android:name="com.n0n3m4.DIII4A.GameLauncher"

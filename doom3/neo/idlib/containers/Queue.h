@@ -113,6 +113,8 @@ void idQueue<type, nodePtr>::Test(void) {
 	delete element;
 }
 
+#elif defined(_HUMANHEAD)
+#define idQueue( type, next )		idQueueTemplate<type, (int)(offsetof(type, next))>
 #else
 #define idQueue( type, next )		idQueueTemplate<type, (int)&(((type*)NULL)->next)>
 #endif

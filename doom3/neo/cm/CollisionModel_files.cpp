@@ -559,6 +559,17 @@ bool idCollisionModelManagerLocal::ParseCollisionModel(idLexer *src)
 		numInlinedProcClipModels++;
 	}
 #endif
+#ifdef _HUMANHEAD
+	//HUMANHEAD rww
+#if _HH_INLINED_PROC_CLIPMODELS
+	if (anyInlinedProcClipMats) {
+		if (token.Cmpn(PROC_CLIPMODEL_STRING_PRFX, strlen(PROC_CLIPMODEL_STRING_PRFX)) == 0) {
+			numInlinedProcClipModels++;
+		}
+	}
+#endif
+	//HUMANHEAD END
+#endif
 
 	src->ExpectTokenString("{");
 

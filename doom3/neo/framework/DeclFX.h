@@ -91,6 +91,12 @@ typedef struct {
 	bool					trackOrigin;
 } idFXSingleAction;
 
+#ifdef _HUMANHEAD
+// HUMANHEAD nla
+enum fxAxis { AXIS_CURRENT, AXIS_NORMAL, AXIS_BOUNCE, AXIS_INCOMING, AXIS_CUSTOMLOCAL };
+// HUMANHEAD END
+#endif
+
 //
 // grouped fx structures
 //
@@ -109,6 +115,11 @@ class idDeclFX : public idDecl
 
 	private:
 		void					ParseSingleFXAction(idLexer &src, idFXSingleAction &FXAction);
+#ifdef _HUMANHEAD
+    // HUMANHEAD nla
+    void	ParseUseAxis(idStr& text, idFXSingleAction& action) const;
+    // HUMANHEAD END
+#endif
 };
 
 #endif /* !__DECLFX_H__ */

@@ -67,5 +67,13 @@
                 android:defaultValue="false"
                 android:summary="Hide bottom ad bar in launcher"
             />
+            <EditTextPreference
+                android:title="On-screen buttons position unit"
+                android:key="harm_controls_config_position_unit"
+                android:persistent="true"
+                android:defaultValue="10"
+                android:inputType="number"
+                android:summary="Setup on-screen buttons position unit when config layout"
+                />
         </PreferenceCategory>
     </PreferenceScreen>

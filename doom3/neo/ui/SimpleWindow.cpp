@@ -67,6 +67,10 @@ idSimpleWindow::idSimpleWindow(idWindow *win)
 	shear = win->shear;
 	backGroundName = win->backGroundName;
 
+#ifdef _HUMANHEAD
+	translateFontNum = -1;
+#endif
+
 	if (backGroundName.Length()) {
 		background = declManager->FindMaterial(backGroundName);
 		background->SetSort(SS_GUI);
@@ -251,6 +255,11 @@ void idSimpleWindow::Redraw(float x, float y)
 	}
 
 	CalcClientRect(0, 0);
+#ifdef _HUMANHEAD
+	if(translateFontNum >= 0)
+		dc->SetFont(translateFontNum);
+	else
+#endif
 	dc->SetFont(fontNum);
 	drawRect.Offset(x, y);
 	clientRect.Offset(x, y);
@@ -501,5 +510,11 @@ void idSimpleWindow::ResetCinematics(void)
     }
 }
 // jmarshall end
+#endif
+#ifdef _HUMANHEAD
+void idSimpleWindow::Translate(int tFontNum)
+{
+	translateFontNum = tFontNum;
+}
 #endif
 

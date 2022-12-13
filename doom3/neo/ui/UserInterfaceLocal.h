@@ -131,6 +131,12 @@ class idUserInterfaceLocal : public idUserInterface
 #ifdef _RAVEN //k: for Quake4 gui script
 	virtual void				SetInteractive(bool interactive);
 #endif
+#ifdef _HUMANHEAD
+	virtual void CallStartup(void);
+    virtual void				Translate(const char *fontname);
+	private:
+	int translateFont;
+#endif
 
 	private:
 #ifdef _RAVEN //k: check UI is interactive or desktop is interactive

@@ -637,7 +637,9 @@ void idSessionLocal::HandleMainMenuCommands(const char *menuCommand)
 
 		// always let the game know the command is being run
 		if (game) {
+#if !defined(_HUMANHEAD)
 			game->HandleMainMenuCommands(cmd, guiActive);
+#endif
 		}
 
 		if (!idStr::Icmp(cmd, "startGame")) {
@@ -646,18 +648,26 @@ void idSessionLocal::HandleMainMenuCommands(const char *menuCommand)
 			if (icmd < args.Argc()) {
 				StartNewGame(args.Argv(icmd++));
 			} else {
+#ifdef _HUMANHEAD
+				StartNewGame("game/roadhouse");
+#else
+
 #ifndef ID_DEMO_BUILD
 				StartNewGame("game/mars_city1");
 #else
 				StartNewGame("game/demo_mars_city1");
+#endif
+
 #endif
 			}
 
 			// need to do this here to make sure com_frameTime is correct or the gui activates with a time that
 			// is "however long map load took" time in the past
 			common->GUIFrame(false, false);
+#if !defined(_HUMANHEAD)
 			SetGUI(guiIntro, NULL);
 			guiIntro->StateChanged(com_frameTime, true);
+#endif
 			// stop playing the game sounds
 			soundSystem->SetPlayingSoundWorld(menuSoundWorld);
 

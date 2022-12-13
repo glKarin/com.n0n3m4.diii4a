@@ -242,4 +242,15 @@ class idCommon
 
 extern idCommon 		*common;
 
+#ifdef _HUMANHEAD
+// Profiling not enabled, compile it out
+#define PROFILE_START(n, m)
+#define PROFILE_STOP(n, m)
+#define PROFILE_SCOPE(n, m)
+
+#define PROFILE_START_EXPENSIVE(n, m)
+#define PROFILE_STOP_EXPENSIVE(n, m)
+#define PROFILE_SCOPE_EXPENSIVE(n, m)
+#endif
+
 #endif /* !__COMMON_H__ */

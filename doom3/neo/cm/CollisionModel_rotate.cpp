@@ -338,6 +338,12 @@ int idCollisionModelManagerLocal::RotateEdgeThroughEdge(cm_traceWork_t *tw, cons
 		}
 
 		frac1 = q / a;
+#ifdef _HUMANHEAD
+		if (q == 0.0f) { //HUMANHEAD rww - CUFPF
+			frac2 = 0.0f;
+		}
+		else
+#endif
 		frac2 = c / q;
 	}
 

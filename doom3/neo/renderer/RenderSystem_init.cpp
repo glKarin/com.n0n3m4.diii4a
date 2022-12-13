@@ -2026,6 +2026,10 @@ void idRenderSystemLocal::Clear(void)
 	demoGuiModel = NULL;
 	memset(gammaTable, 0, sizeof(gammaTable));
 	takingScreenshot = false;
+#ifdef _HUMANHEAD
+	scopeView = false;
+	shuttleView = false;
+#endif
 }
 
 /*
@@ -2078,6 +2082,10 @@ void idRenderSystemLocal::Init(void)
 	identitySpace.modelMatrix[1*4+1] = 1.0f;
 	identitySpace.modelMatrix[2*4+2] = 1.0f;
 
+#ifdef _HUMANHEAD
+	scopeView = false;
+	shuttleView = false;
+#endif
 	common->Printf("renderSystem initialized.\n");
 	common->Printf("--------------------------------------\n");
 }

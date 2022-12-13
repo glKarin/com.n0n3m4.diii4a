@@ -285,6 +285,18 @@ static infoParm_t	infoParms[] = {
 	{"wood",		0,  SURFTYPE_WOOD,		0 },	// wood
 	{"cardboard",	0,	SURFTYPE_CARDBOARD,	0 },	// cardboard
 	{"liquid",		0,	SURFTYPE_LIQUID,	0 },	// liquid
+#ifdef _HUMANHEAD
+    {"wallwalk",	0,	SURFTYPE_WALLWALK,	0 },	// plastic
+    {"matter_altmetal",	0,	SURFTYPE_ALTMETAL,	0 },	// behaves like metal but causes a ricochet sound
+
+    // unassigned surface types
+    {"forcefield",	0,	SURFTYPE_FORCEFIELD,	CONTENTS_FORCEFIELD },
+    {"pipe",	0,	SURFTYPE_PIPE,	0 },
+    {"spirit",	0,	SURFTYPE_SPIRIT,	0 },
+	{"vehicleclip",	0,	0,	CONTENTS_VEHICLECLIP },
+	{"hunterClip",	0,	0,	CONTENTS_HUNTERCLIP },
+    {"forcefield_nobullets",	0,	SURFTYPE_FORCEFIELD,	CONTENTS_FORCEFIELD },
+#else
 	{"glass",		0,	SURFTYPE_GLASS,		0 },	// glass
 	{"plastic",		0,	SURFTYPE_PLASTIC,	0 },	// plastic
 	{"ricochet",	0,	SURFTYPE_RICOCHET,	0 },	// behaves like metal but causes a ricochet sound
@@ -296,6 +308,7 @@ static infoParm_t	infoParms[] = {
 	{"surftype13",	0,	SURFTYPE_13,	0 },
 	{"surftype14",	0,	SURFTYPE_14,	0 },
 	{"surftype15",	0,	SURFTYPE_15,	0 },
+#endif
 
 #ifdef _RAVEN //k: quake 4 material flags
 	{"vehicleclip",	0,	0,	CONTENTS_VEHICLECLIP },
@@ -691,6 +704,14 @@ int idMaterial::ParseTerm(idLexer &src)
 	}
 #endif
 
+#ifdef _HUMANHEAD
+	if (!token.Icmp("distance")) {
+		// return GetExpressionConstant(0);
+		pd->registersAreConstant = false;
+		return EXP_REG_DISTANCE;
+	}
+#endif
+
 	if (!token.Icmp("fragmentPrograms")) {
 		return GetExpressionConstant((float) glConfig.ARBFragmentProgramAvailable);
 	}
@@ -851,6 +872,13 @@ void idMaterial::ClearStage(shaderStage_t *ss)
 	        ss->color.registers[1] =
 	                ss->color.registers[2] =
 	                        ss->color.registers[3] = GetExpressionConstant(1);
+#ifdef _HUMANHEAD //k: scope view support
+	ss->isScopeView = false;
+	ss->isNotScopeView = false;
+	ss->isSpiritWalk = false;
+	ss->isNotSpiritWalk = false;
+	ss->isShuttleView = false;
+#endif
 }
 
 /*
@@ -882,6 +910,11 @@ int idMaterial::NameToSrcBlendMode(const idStr &name)
 #ifdef _RAVEN //k: quake4 blend
 	else if (!name.Icmp("GL_SRC_COLOR")) {
 		return GLS_SRCBLEND_SRC_COLOR;
+	}
+#endif
+#ifdef _HUMANHEAD
+	else if (!name.Icmp("shader")) {
+		return GLS_SRCBLEND_ONE;
 	}
 #endif
 
@@ -975,6 +1008,15 @@ void idMaterial::ParseBlend(idLexer &src, shaderStage_t *stage)
 
 	srcBlend = NameToSrcBlendMode(token);
 
+#ifdef _HUMANHEAD
+	const bool usingShader = !idStr::Icmp(token, "shader");
+	if(usingShader)
+	{
+		dstBlend = GLS_DSTBLEND_ONE;
+	}
+	else
+	{
+#endif
 	MatchToken(src, ",");
 
 	if (!src.ReadToken(&token)) {
@@ -982,6 +1024,9 @@ void idMaterial::ParseBlend(idLexer &src, shaderStage_t *stage)
 	}
 
 	dstBlend = NameToDstBlendMode(token);
+#ifdef _HUMANHEAD
+	}
+#endif
 
 	stage->drawStateBits = srcBlend | dstBlend;
 }
@@ -1145,6 +1190,12 @@ void idMaterial::ParseFragmentMap(idLexer &src, newShaderStage_t *newStage)
 			allowPicmip = false;
 			continue;
 		}
+
+#ifdef _HUMANHEAD
+		if (!token.Icmp("highres")) {
+			continue;
+		}
+#endif
 
 		// assume anything else is the image name
 		src.UnreadToken(&token);
@@ -1477,6 +1528,10 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				texGenRegisters[0] = ParseExpression(src);
 				texGenRegisters[1] = ParseExpression(src);
 				texGenRegisters[2] = ParseExpression(src);
+#ifdef _HUMANHEAD
+			} else if (!token.Icmp("screen")) {
+				ts->texgen = TG_SCREEN;
+#endif
 			} else {
 				common->Warning("bad texGen '%s' in material %s", token.c_str(), GetName());
 				SetMaterialFlag(MF_DEFAULTED);
@@ -1790,6 +1845,80 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 #endif
 
+#ifdef _HUMANHEAD
+        if (!token.Icmp("glowStage"))
+        {
+            continue;
+        }
+        if (!token.Icmp("specularEXP"))
+        {
+            idStr tmp;
+            src.ParseRestOfLine(tmp); // 2 float
+            continue;
+        }
+
+        if (!token.Icmp("fragmentparm")) {
+            src.SkipRestOfLine();
+            continue;
+        }
+        if (!token.Icmp("shaderFallback3")) {
+			continue;
+		}
+        if (!token.Icmp("shaderFallback2")) {
+			continue;
+		}
+        if (!token.Icmp("shaderFallback1")) {
+			continue;
+		}
+        if (!token.Icmp("scopeView")) { //k: scope view support
+			ss->isScopeView = true;
+			ss->isNotScopeView = false;
+			continue;
+		}
+        if (!token.Icmp("notScopeView")) { //k: scope view support
+			ss->isNotScopeView = true;
+			ss->isScopeView = false;
+			continue;
+		}
+        if (!token.Icmp("highres")) {
+			continue;
+		}
+        if (!token.Icmp("shaderLevel1")) {
+			continue;
+		}
+        if (!token.Icmp("shaderLevel2")) {
+			continue;
+		}
+        if (!token.Icmp("shaderLevel3")) {
+			continue;
+		}
+        if (!token.Icmp("shaderLevel1")) {
+			continue;
+		}
+        if (!token.Icmp("shuttleView")) {
+			ss->isShuttleView = true;
+			continue;
+		}
+        if (!token.Icmp("spiritWalk")) {
+			ss->isSpiritWalk = true;
+			ss->isNotSpiritWalk = false;
+			continue;
+		}
+        if (!token.Icmp("notSpiritWalk")) {
+			ss->isNotSpiritWalk = true;
+			ss->isSpiritWalk = false;
+			continue;
+		}
+        if (!token.Icmp("growIn")) { // it in color expression
+			src.SkipRestOfLine();
+			continue;
+		}
+        if (!token.Icmp("growOut")) { // it in color expression
+			src.SkipRestOfLine();
+			continue;
+		}
+#endif
+
 		common->Warning("unknown token '%s' in material '%s'", token.c_str(), GetName());
 		SetMaterialFlag(MF_DEFAULTED);
 		return;
@@ -1930,6 +2059,20 @@ void idMaterial::ParseDeform(idLexer &src)
 		deformDecl = declManager->FindType(DECL_PARTICLE, token.c_str(), true);
 		return;
 	}
+#ifdef _HUMANHEAD //k: TODO deform type
+	if (!token.Icmp("corona")) {
+		cullType = CT_TWO_SIDED;
+		src.SkipRestOfLine();
+		SetMaterialFlag(MF_NOSHADOWS);
+		return;
+	}
+	if (!token.Icmp("jitter")) {
+		cullType = CT_TWO_SIDED;
+		src.SkipRestOfLine();
+		SetMaterialFlag(MF_NOSHADOWS);
+		return;
+	}
+#endif
 
 	src.Warning("Bad deform type '%s'", token.c_str());
 	SetMaterialFlag(MF_DEFAULTED);
@@ -2446,6 +2589,34 @@ void idMaterial::ParseMaterial(idLexer &src)
 			// noShadows
 			SetMaterialFlag(MF_NOSHADOWS);
 			continue;
+#ifdef _HUMANHEAD
+		} else if (!token.Icmp("matter_metal")) {
+		} else if (!token.Icmp("matter_wood")) {
+		} else if (!token.Icmp("matter_cardboard")) {
+		} else if (!token.Icmp("matter_tile")) {
+		} else if (!token.Icmp("matter_stone")) {
+		} else if (!token.Icmp("matter_flesh")) {
+		} else if (!token.Icmp("matter_glass")) {
+		} else if (!token.Icmp("matter_pipe")) {
+		} else if (!token.Icmp("decal_alphatest_macro")) {
+		} else if (!token.Icmp("skipClip")) {
+			SetMaterialFlag(MF_SKIPCLIP);
+		} else if (!token.Icmp("noSeeThru")) {
+		} else if (!token.Icmp("seeThru")) {
+		} else if (!token.Icmp("overlay_macro")) {
+		} else if (!token.Icmp("scorch_macro")) {
+		} else if (!token.Icmp("glass_macro")) {
+			surfaceFlags |= SURFTYPE_GLASS;
+		} else if (!token.Icmp("skybox_macro")) {
+			surfaceFlags |= SURF_NOFRAGMENT;
+			coverage = MC_OPAQUE;
+			SetMaterialFlag(MF_NOSHADOWS);
+		} else if (!token.Icmp("lightWholeMesh")) {
+		} else if (!token.Icmp("skyboxportal")) {
+			src.SkipRestOfLine();
+		} else if (!token.Icmp("directportal")) {
+			src.SkipRestOfLine();
+#endif
 		} else if (token == "{") {
 			// create the new stage
 			ParseStage(src, trpDefault);
@@ -2854,6 +3025,9 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 	registers[EXP_REG_PARM9] = shaderParms[9];
 	registers[EXP_REG_PARM10] = shaderParms[10];
 	registers[EXP_REG_PARM11] = shaderParms[11];
+#ifdef _HUMANHEAD
+	registers[EXP_REG_DISTANCE] = shaderParms[12];
+#endif
 	registers[EXP_REG_GLOBAL0] = view->renderView.shaderParms[0];
 	registers[EXP_REG_GLOBAL1] = view->renderView.shaderParms[1];
 	registers[EXP_REG_GLOBAL2] = view->renderView.shaderParms[2];

@@ -202,10 +202,12 @@ class idRenderModelMD5 : public idRenderModelStatic
 		void						DrawJoints(const renderEntity_t *ent, const struct viewDef_s *view) const;
 		void						ParseJoint(idLexer &parser, idMD5Joint *joint, idJointQuat *defaultPose);
 
-#ifdef _RAVEN //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+#ifdef _RAVEN //k: show/hide surface
 		idList<idStr> surfaceShaderList;
+#endif
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
 	public:
-		idRenderModelStatic *staticModel;
+		idRenderModelStatic *staticModelInstance;
 #endif
 };
 
@@ -416,6 +418,33 @@ public:
 	virtual void				FinishSurfaces(bool useMikktspace);
 };
 
+#endif
+
+#ifdef _HUMANHEAD
+// HUMANHEAD: Beams
+class hhRenderModelBeam : public idRenderModelStatic {
+public:
+	void				InitFromFile( const char *fileName );
+	void				LoadModel();
+
+	dynamicModel_t		IsDynamicModel() const;
+	virtual idRenderModel*	InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel );
+	virtual idBounds	Bounds( const struct renderEntity_s *ent ) const;
+
+private:
+	void				UpdateSurface( const struct renderEntity_s *ent, const int index, const hhBeamNodes_t *beam, modelSurface_t *surf );
+	void				UpdateQuadSurface( const struct renderEntity_s *ent, const int index, int quadIndex, const hhBeamNodes_t *beam, modelSurface_t *surf );
+
+	struct deformInfo_s	*deformInfo;	// used to create srfTriangles_t from base frames and new vertexes						
+	idList<idDrawVert>	verts;
+
+	// endpoint quads
+	struct deformInfo_s *quadDeformInfo[2];
+	idList<idDrawVert>	quadVerts[2];
+
+	const hhDeclBeam	*declBeam;
+};
+// END HUMANHEAD
 #endif
 
 #endif /* !__MODEL_LOCAL_H__ */

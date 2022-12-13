@@ -323,7 +323,22 @@ bool idSoundShader::ParseShader(idLexer &src)
 		}
 		// soundClass
 		else if (!token.Icmp("soundClass")) {
+#ifdef _HUMANHEAD //k: macros in prey
+			idToken t;
+			src.ReadToken(&t);
+			if(!idStr::Icmp(t, "SC_MUSIC"))
+				parms.soundClass = 4;
+			else if(!idStr::Icmp(t, "SC_VOICE"))
+				parms.soundClass = 3;
+			else if(!idStr::Icmp(t, "SC_VOICEDUCKER"))
+				parms.soundClass = 1;
+			else if(!idStr::Icmp(t, "SC_SPIRIT"))
+				parms.soundClass = 2;
+			else
+				parms.soundClass = atoi(t.c_str());
+#else
 			parms.soundClass = src.ParseInt();
+#endif
 
 			if (parms.soundClass < 0 || parms.soundClass >= SOUND_MAX_CLASSES) {
 				src.Warning("SoundClass out of range");
@@ -391,6 +406,22 @@ bool idSoundShader::ParseShader(idLexer &src)
 			// no longer loading sounds on demand
 			//onDemand = true;
 		}
+#ifdef _HUMANHEAD
+		else if (!token.Icmp("bleep")) {
+			src.SkipRestOfLine();
+		}
+		else if (!token.IcmpPrefix("subtitle")) {
+			src.SkipRestOfLine();
+		}
+		else if (!token.Icmp("omniwhenclose")) {
+		}
+		else if (!token.Icmp("jawflap")) {
+		}
+		else if (!token.Icmp("NOREVERB")) {
+		}
+		else if (!token.Icmp("noportalflow")) {
+		}
+#endif
 
 		// the wave files
 		else if (!token.Icmp("leadin")) {

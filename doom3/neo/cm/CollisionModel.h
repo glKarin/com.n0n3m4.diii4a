@@ -100,6 +100,15 @@ typedef int cmHandle_t;
 #define CM_BOX_EPSILON		1.0f			// should always be larger than clip epsilon
 #define CM_MAX_TRACE_DIST	4096.0f			// maximum distance a trace model may be traced, point traces are unlimited
 
+#ifdef _HUMANHEAD
+//HUMANHEAD rww
+#if _HH_INLINED_PROC_CLIPMODELS
+#define PROC_CLIPMODEL_INDEX_START		1
+#define PROC_CLIPMODEL_STRING_PRFX		"inlined_proc_clip_"
+#endif
+//HUMANHEAD END
+#endif
+
 class idCollisionModelManager
 {
 	public:
@@ -128,6 +137,22 @@ class idCollisionModelManager
 
 	// Gets the clip handle for a model.
 	virtual cmHandle_t LoadModel(const char* mapName, const char *modelName, const bool precache ) = 0;
+#endif
+#ifdef _HUMANHEAD
+// HUMANHEAD pdm: Support for level appending
+	virtual const char *	ContentsName(const int contents) const = 0;
+	const char *	StringFromContents( const int contents ) const;
+#if DEATHWALK_AUTOLOAD
+	virtual void			AppendMap( const idMapFile *mapFile ) = 0;
+	virtual bool			WillUseAlreadyLoadedCollisionMap( const idMapFile *mapFile) = 0;
+#endif
+// HUMANHEAD END
+
+    //HUMANHEAD rww
+#if _HH_INLINED_PROC_CLIPMODELS
+    virtual int				GetNumInlinedProcClipModels(void) = 0;
+#endif
+    //HUMANHEAD END
 #endif
 
 		// Gets the clip handle for a model.

@@ -122,7 +122,7 @@ public class Q3EMain extends Activity {
         }
         Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt("harm_volume_up_key", Q3EKeyCodes.KeyCodes.K_F3);
         Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
-        Q3EUtils.q3ei.libname = Q3EUtils.q3ei.isQ4 ? "libdanteq4.so" : "libdante.so"; //k setup engine library here again
+        Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
 		
 		super.onCreate(savedInstanceState);

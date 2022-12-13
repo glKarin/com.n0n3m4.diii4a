@@ -228,12 +228,17 @@ framework_string = ' \
 	async/NetworkSystem.cpp \
 	async/ServerScan.cpp'
 
-if ( local_quake4 ):
+if ( local_raven ):
 	framework_string += ' \
 		../raven/framework/DeclLipSync.cpp \
 		../raven/framework/DeclPlayback.cpp \
 		../raven/framework/DeclMatType.cpp \
 		../raven/framework/DeclPlayerModel.cpp \
+		'
+
+if ( local_humanhead ):
+	framework_string += ' \
+		../humanhead/framework/declPreyBeam.cpp \
 		'
 
 framework_list = scons_utils.BuildList( 'framework', framework_string )
@@ -373,7 +378,7 @@ core_list = framework_list + renderer_list + ui_list \
 	+ snd_list + sys_list + tools_list + [ 'TypeInfo/TypeInfoGen.cpp' ]
 
 #//k _RAVEN _QUAKE4
-if ( local_quake4 ):
+if ( local_raven ):
 	bse_string = ' \
 		bse/BSE_Effect.cpp \
 		bse/BSE_EffectTemplate.cpp \
@@ -382,6 +387,7 @@ if ( local_quake4 ):
 		bse/BSE_ParseParticle2.cpp \
 		bse/BSE_Segment.cpp \
 		bse/BSE_SegmentTemplate.cpp \
+		bse/BSE_Light.cpp \
 		'
 	bse_list = scons_utils.BuildList( 'raven', bse_string )
 	core_list += bse_list
@@ -390,6 +396,13 @@ for i in range( len( core_list ) ):
 	core_list[ i ] = '../../' + core_list[ i ]
 
 local_env = g_env.Clone()
+
+# RAVEN QUAKE4
+if ( local_raven ):
+	local_env.Append( CPPDEFINES = [ '_RAVEN' ] )
+
+if ( local_humanhead ):
+	local_env.Append( CPPDEFINES = [ '_HUMANHEAD', 'HUMANHEAD' ] )
 
 if g_os == 'Android':
 	local_env.Append( CPPPATH = [ '../../sys/android/' ] )
@@ -458,7 +471,7 @@ if g_os == 'Android':
 if g_os == 'Android':
 #local_env.Append( LIBS = [ 'dl', 'vorbisfile','vorbis', 'ogg', 'android' ] )
 	local_env.Append( LIBS = [ 'dl', 'android' ] )
-#	local_env.Append( LIBS = [ 'supc++' ] )
+#local_env.Append( LIBS = [ 'supc++' ] )
 	local_env.Append( LIBS = [ 'OpenSLES' ] )
 #local_env.Append( LIBS = [ 'dl', 'android' ] )
 else:
@@ -473,7 +486,7 @@ if ( local_dedicated == 0 ):
 		local_env.Append( LIBS = [ 'GLESv2', 'EGL' ] )
 # local_env.Append( LIBPATH = [ '/opt/ndk/android_4_0_gcc_32/arm-linux-androideabi/lib/armv7-a', '/opt/ndk/android_4_0_gcc_32/sysroot/use/lib' ] )
 #	local_env.Append( LIBPATH = [ '/data/data/com.termux/files/home/ndk/android_gcc32/arm-linux-androideabi/lib/armv7-a', '/data/data/com.termux/files/home/ndk/android_gcc32/sysroot/usr/lib' ] ) # //k armv7-a
-#		local_env.Append( LIBPATH = [ '/data/data/com.termux/files/home/ndk/android-ndk-aide/toolchains/aarch64-linux-android-4.9/prebuilt/linux-arm64/lib/gcc/aarch64-linux-android/4.9.x', '/data/data/com.termux/files/home/ndk/android-ndk-aide/platforms/android-21/arch-arm64/usr/lib', '/data/data/com.termux/files/home/ndk/android-ndk-aide/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a' ] ) # //k arm64-v8a
+# local_env.Append( LIBPATH = [ '/data/data/com.termux/files/home/ndk/android-ndk-aide/toolchains/aarch64-linux-android-4.9/prebuilt/linux-arm64/lib/gcc/aarch64-linux-android/4.9.x', '/data/data/com.termux/files/home/ndk/android-ndk-aide/platforms/android-21/arch-arm64/usr/lib', '/data/data/com.termux/files/home/ndk/android-ndk-aide/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a' ] ) # //k arm64-v8a
 	else:
 		local_env.Append( LIBS = [ 'GL' ] )
 

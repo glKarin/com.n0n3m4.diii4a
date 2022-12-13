@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
-#### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake IV for Android, 毁灭战士3/雷神之锤4安卓移植版
+#### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan20(natasha)  
+1.1.0harmattan21(natasha)  
 **Last update release:**
-2022-11-18  
+2022-12-10 
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -12,13 +12,29 @@ Android 4.0+
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan20 (2022-11-18)
+> 1.1.0harmattan21 (2022-12-10)
 
-* Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.
-* Implement show surface/hide surface for fixup entity render incorrect in Quake 4, e.g. AI's weapons, weapons in player view and Makron in boss level.
+* Prey(2006) for DOOM3 support, game data folder named `preybase`. All levels clear, but have some bugs.
+* Add setup On-screen buttons position unit when config controls layout.
+* Android Target SDK level back to 28(Android 9), for avoid `Scoped-Storage` on Android 10+.
 
-* 雷神之锤4中新增默认字体配置, 使用cvar `harm_gui_defaultFont`设置, 默认为`chain`.
-* 雷神之锤4中实现了显示/隐藏模型层, 修复了物体渲染错误. 例如: AI的枪支外观模型, 玩家视角的枪支, 和boss关卡中的Makron.
+* 掠食(2006) for 毁灭战士3引擎支持, 游戏数据包文件夹命名为`preybase`. 所有关卡都可以通过, 但是存在一些bug.
+* 新增编辑虚拟按键时位置移动单位.
+* 安卓Target SDK 级别回退到28(Android 9), 为了避免安卓10以上的`沙盒存储`.
+
+----------------------------------------------------------------------------------
+
+#### About Prey(2006)
+###### For playing Prey(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). Now can play all levels, but some levels has bugs.
+> 1. Putting PC Prey game data file to `preybase` folder and START directly.
+> 2. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.
+> 3. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw, some GUIs not work(Music CD in RoadHouse).
+
+#### 关于掠食(2006)
+###### 运行掠食(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). 目前可以运行全部关卡, 部分关卡存在bug.
+> 1. 将PC端掠食(2006)游戏文件放到`preybase`文件夹, 然后直接启动游戏.
+> 2. 已知问题的解决方案: 例如. 使用cvar `harm_g_translateAlienFont`自动翻译GUI中的外星人文字.
+> 3. 已知bugs: 例如一些错误的碰撞检测(使用`noclip`), 错误的渲染(传送门, 天空盒等), 部分菜单的渲染, 部分GUI不工作(RoadHouse的CD播放器).
 
 ----------------------------------------------------------------------------------
 
@@ -70,17 +86,27 @@ Android 4.0+
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_bathroom.png" alt="Classic bathroom">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4_game_2.png" alt="Quake IV on DOOM3">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey_girlfriend.png" alt="Prey(2006) on DOOM3">
 
 > Mod
 
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_roe.png" width="50%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_the_lost_mission.png" width="50%" alt="The lost mission">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_classic_doom3.png" width="50%" alt="Classic DOOM"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_hardcorps.png" width="50%" alt="Hardcorps">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" width="50%" alt="Quake IV">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" width="50%" alt="Prey(2006)">
 
 ----------------------------------------------------------------------------------
 ### Changes
 
 ----------------------------------------------------------------------------------
+
+> 1.1.0harmattan20 (2022-11-18)
+
+* Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.
+* Implement show surface/hide surface for fixup entity render incorrect in Quake 4, e.g. AI's weapons, weapons in player view and Makron in boss level.
+
+* 雷神之锤4中新增默认字体配置, 使用cvar `harm_gui_defaultFont`设置, 默认为`chain`.
+* 雷神之锤4中实现了显示/隐藏模型层, 修复了物体渲染错误. 例如: AI的枪支外观模型, 玩家视角的枪支, 和boss关卡中的Makron.
 
 > 1.1.0harmattan19 (2022-11-16)
 

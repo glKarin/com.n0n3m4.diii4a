@@ -132,7 +132,9 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 
 	switch (din->surf->material->GetSurfaceType()) {
 		case SURFTYPE_METAL:
+#if !defined(_HUMANHEAD)
 		case SURFTYPE_RICOCHET:
+#endif
 			f = 4.0f;
 			break;
 		case SURFTYPE_STONE:
@@ -140,8 +142,10 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 		case SURFTYPE_WOOD:
 		case SURFTYPE_CARDBOARD:
 		case SURFTYPE_LIQUID:
+#if !defined(_HUMANHEAD)
 		case SURFTYPE_GLASS:
 		case SURFTYPE_PLASTIC:
+#endif
 		case SURFTYPE_NONE:
 		default:
 			f = 4.0f;

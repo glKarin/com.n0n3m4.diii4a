@@ -407,7 +407,14 @@ void idDeclFX::ParseSingleFXAction(idLexer &src, idFXSingleAction &FXAction)
 			continue;
 		}
 
-		src.Warning("FX File: bad token");
+#ifdef _HUMANHEAD
+		if (!token.Icmp("useAxis")) {
+			src.SkipRestOfLine();
+			continue;
+		}
+#endif
+
+		src.Warning("FX File: bad token: '%s'", token.c_str());
 		continue;
 	}
 }

@@ -51,6 +51,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TabHost;
@@ -269,7 +270,7 @@ public class GameLauncher extends Activity{
 					EditFile("autoexec.cfg");
 					break;
 				case R.id.launcher_tab1_edit_doomconfig:
-                    EditFile(m_mainConfigFileName);
+                    EditFile(Q3EUtils.q3ei.config_name);
 					break;
 				case R.id.launcher_tab1_game_lib_button:
                     OpenGameLibChooser();
@@ -554,7 +555,7 @@ public class GameLauncher extends Activity{
 		
 		q3ei.default_path=default_gamedata;		
         
-		q3ei.libname="libdante.so"; //k armv7-a only support neon now
+		q3ei.SetupDOOM3(); //k armv7-a only support neon now
         
 		q3ei.texture_table=new String[UI_SIZE];
 		q3ei.texture_table[UI_JOYSTICK]="";
@@ -792,6 +793,17 @@ public class GameLauncher extends Activity{
                     }
 				    SelectCheckbox(V.rg_fs_q4game, index);
 			    }
+				else if(Q3EUtils.q3ei.isPrey)
+				{
+					if("preybase".equals(str) || "".equals(str))
+						index = 0;
+					else
+					{
+						RemoveProp("fs_game");
+						RemoveProp("fs_game_base");
+					}
+					SelectCheckbox(V.rg_fs_preygame, index);
+				}
 			    else
 			    {
 				    if("".equals(str) || "base".equals(str))
@@ -823,14 +835,7 @@ public class GameLauncher extends Activity{
 		}
         else
         {
-            if(Q3EUtils.q3ei.isQ4)
-            {
-                SelectCheckbox(V.rg_fs_q4game, 0);
-            }
-            else
-            {
-                SelectCheckbox(V.rg_fs_game, 0);
-            }
+			SelectCheckbox(GetGameModRadioGroup(), 0);
         }
         GameLauncher.this.UpdateCustomerResulotion(V.rg_scrres.getCheckedRadioButtonId() == R.id.res_custom);
 	}	
@@ -910,7 +915,7 @@ public class GameLauncher extends Activity{
     private void UpdateUserGame(boolean on)
     {
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
-        String game = preference.getString(Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_fs_game : Q3EUtils.pref_harm_fs_game, "");
+        String game = preference.getString(GetGameModPreferenceKey(), "");
 
         if(Q3EUtils.q3ei.isQ4)
         {
@@ -926,6 +931,20 @@ public class GameLauncher extends Activity{
             else
                 RemoveProp("fs_game");
         }
+		else if(Q3EUtils.q3ei.isPrey)
+		{
+			int index = -1;
+			if("preybase".equals(game))
+				game = "";
+			if(game.isEmpty() || "preybase".equals(game))
+				index = 0;
+			if(index >= 0)
+				SelectCheckbox(V.rg_fs_preygame, index);
+			if(index > 0 && !game.isEmpty())
+				SetProp("fs_game", game);
+			else
+				RemoveProp("fs_game");
+		}
         else
         {
             int index = -1;
@@ -994,8 +1013,8 @@ public class GameLauncher extends Activity{
 		V.Setup();
 
         V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, false) ? View.GONE : View.VISIBLE);
-		
-		SetIsQ4(Constants.GAME_QUAKE4.equalsIgnoreCase(mPrefs.getString(Q3EUtils.pref_harm_game, Constants.GAME_DOOM3)));
+
+		SetGame(mPrefs.getString(Q3EUtils.pref_harm_game, Q3EInterface.GAME_DOOM3));
 		
 		V.edt_cmdline.setText(mPrefs.getString(Q3EUtils.pref_params, "game.arm"));
 		V.edt_mouse.setText(mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???"));
@@ -1062,6 +1081,13 @@ public class GameLauncher extends Activity{
                 index = 0;   
             SelectCheckbox(V.rg_fs_q4game, index);
 		}
+		else if(Q3EUtils.q3ei.isPrey)
+		{
+			String game = mPrefs.getString(Q3EUtils.pref_harm_prey_fs_game, "");
+			if(game.isEmpty() || "preybase".equals(game))
+				index = 0;
+			SelectCheckbox(V.rg_fs_preygame, index);
+		}
 		else
         {
 			String game = mPrefs.getString(Q3EUtils.pref_harm_fs_game, "");
@@ -1091,7 +1117,7 @@ public class GameLauncher extends Activity{
                 public void afterTextChanged(Editable s)
                 {
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putString(Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_fs_game : Q3EUtils.pref_harm_fs_game, s.toString())
+                        .putString(GetGameModPreferenceKey(), s.toString())
                         .commit();
                 }
             });
@@ -1281,7 +1307,7 @@ public class GameLauncher extends Activity{
         String gamePath = V.edt_path.getText().toString();
         String game = GetProp("fs_game");
         if(game == null || game.isEmpty())
-            game = Q3EUtils.q3ei.isQ4 ? "q4base" : "base";
+            game = Q3EUtils.q3ei.game_base;
         String basePath = gamePath + File.separator + game + File.separator + file;
         File f = new File(basePath);
         if(!f.isFile() || !f.canWrite() || !f.canRead())
@@ -1306,9 +1332,7 @@ public class GameLauncher extends Activity{
             menu.findItem(R.id.main_menu_dev_menu).setVisible(true);
         }
         V.main_menu_game = menu.findItem(R.id.main_menu_game);
-        String game = PreferenceManager.getDefaultSharedPreferences(this).getString(Q3EUtils.pref_harm_game, Constants.GAME_DOOM3);
-        boolean isQ4 = Constants.GAME_QUAKE4.equalsIgnoreCase(game);
-        V.main_menu_game.setTitle(isQ4 ? "Quake 4" : "DOOM 3");
+        V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -1351,9 +1375,6 @@ public class GameLauncher extends Activity{
 			case R.id.main_menu_test:
 				Test();
 				return true;
-			case R.id.main_menu_game:
-				ChangeGame();
-				return true;
 			case R.id.main_menu_show_preference:
 				ShowPreferenceDialog();
 				return true;
@@ -1362,6 +1383,19 @@ public class GameLauncher extends Activity{
 				return true;
 			case R.id.main_menu_check_for_update:
 				OpenCheckForUpdateDialog();
+				return true;
+
+/*			case R.id.main_menu_game:
+				ChangeGame();
+				return true;*/
+			case R.id.main_menu_game_doom3:
+				ChangeGame(Q3EInterface.GAME_DOOM3);
+				return true;
+			case R.id.main_menu_game_quake4:
+				ChangeGame(Q3EInterface.GAME_QUAKE4);
+				return true;
+			case R.id.main_menu_game_prey:
+				ChangeGame(Q3EInterface.GAME_PREY);
 				return true;
 
 			case android.R.id.home:
@@ -1495,7 +1529,7 @@ public class GameLauncher extends Activity{
         mEdtr.putBoolean(Q3EUtils.pref_usedxt, V.usedxt.isChecked());
         mEdtr.putBoolean(Q3EUtils.pref_nolight, V.nolight.isChecked());
         mEdtr.putBoolean(Q3EUtils.pref_harm_user_mod, V.fs_game_user.isChecked());
-        mEdtr.putString(Q3EUtils.pref_harm_game, Q3EUtils.q3ei.isQ4 ? Constants.GAME_QUAKE4 : Constants.GAME_DOOM3);
+        mEdtr.putString(Q3EUtils.pref_harm_game, Q3EUtils.q3ei.game);
         mEdtr.putBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, V.launcher_tab2_enable_gyro.isChecked());
 		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
 		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
@@ -1555,8 +1589,8 @@ public class GameLauncher extends Activity{
     {
 		final SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         final String libPath = ContextUtility.NativeLibDir(this) + "/";
-		final String[] Libs = Q3EUtils.q3ei.isQ4 ? Constants.Q4_LIBS : Constants.LIBS;
-		final String PreferenceKey = Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_game_lib : Q3EUtils.pref_harm_game_lib;
+		final String[] Libs = Q3EUtils.q3ei.libs;
+		final String PreferenceKey = GetGameModLibPreferenceKey();
         final String[] items = new String[Libs.length];
         String lib = preference.getString(PreferenceKey, "");
         int selected = -1;
@@ -1575,7 +1609,7 @@ public class GameLauncher extends Activity{
         else
             sb.append("armv7-a neon");
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle((Q3EUtils.q3ei.isQ4 ? "Quake 4" : "DOOM 3") + " game library(" + sb.toString() + ")");
+        builder.setTitle(Q3EUtils.q3ei.game_name + " game library(" + sb.toString() + ")");
         builder.setSingleChoiceItems(items, selected, new DialogInterface.OnClickListener(){
 			public void onClick(DialogInterface dialog, int p)
             {
@@ -1695,6 +1729,15 @@ public class GameLauncher extends Activity{
                     RemoveProp("harm_fs_gameLibPath");
                 }
 				break;
+
+			case R.id.fs_game_prey:
+				if(!userMod)
+				{
+					RemoveProp("fs_game");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+				}
+				break;
 			default:
 				break;
 		}
@@ -1705,7 +1748,7 @@ public class GameLauncher extends Activity{
             RemoveProp("harm_fs_gameLibPath");
             V.edt_fs_game.setText(game);
         }
-        preference.edit().putString(Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_fs_game : Q3EUtils.pref_harm_fs_game, game).commit();
+        preference.edit().putString(GetGameModPreferenceKey(), game).commit();
 	}
 
     private boolean LockCmdUpdate()
@@ -1728,6 +1771,7 @@ public class GameLauncher extends Activity{
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+/*		Android SDK > 28
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11 FS permission
 		{
 			if(requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE
@@ -1739,6 +1783,7 @@ public class GameLauncher extends Activity{
 				HandleGrantPermissionResult(requestCode, list);
 			}
 		}
+		*/
 	}
 
 	private void HandleGrantPermissionResult(int requestCode, List<String> list)
@@ -1790,114 +1835,174 @@ public class GameLauncher extends Activity{
     {
         ContextUtility.OpenMessageDialog(this, "Special Cvar List", TextHelper.GetCvarText());
     }
-
-    private String m_mainConfigFileName = "DoomConfig.cfg";
     
-    private void SetIsQ4(boolean isQ4)
+    private void SetGame(String game)
     {
-        Q3EUtils.q3ei.isQ4 = isQ4;
-        Q3EUtils.q3ei.libname = isQ4 ? "libdanteq4.so" : "libdante.so"; //k armv7-a only support neon now
-        m_mainConfigFileName = isQ4 ? "Quake4Config.cfg" : "DoomConfig.cfg";
-        V.launcher_tab1_edit_doomconfig.setText("Edit " + m_mainConfigFileName);
+		Q3EUtils.q3ei.SetupGame(game); //k armv7-a only support neon now
+        V.launcher_tab1_edit_doomconfig.setText("Edit " + Q3EUtils.q3ei.config_name);
         if(null != V.main_menu_game)
-            V.main_menu_game.setTitle(isQ4 ? "Quake 4" : "DOOM 3");
+            V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
         ActionBar actionBar = getActionBar();
 		Resources res = getResources();
-        actionBar.setBackgroundDrawable(new ColorDrawable(isQ4 ? res.getColor(R.color.theme_quake4_main_color) : res.getColor(R.color.theme_doom3_main_color)));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-			actionBar.setHomeAsUpIndicator(isQ4 ? R.drawable.q4_icon : R.drawable.d3_icon);
+		int colorId;
+		int iconId;
+		boolean d3Visible = false;
+		boolean q4Visible = false;
+		boolean preyVisible = false;
+		if(Q3EUtils.q3ei.isPrey)
+		{
+			colorId = R.color.theme_prey_main_color;
+			iconId = R.drawable.prey_icon;
+			preyVisible = true;
 		}
-		V.rg_fs_game.setVisibility(isQ4 ? View.GONE : View.VISIBLE);
-        V.rg_fs_q4game.setVisibility(isQ4 ? View.VISIBLE : View.GONE);
+		else if(Q3EUtils.q3ei.isQ4)
+		{
+			colorId = R.color.theme_quake4_main_color;
+			iconId = R.drawable.q4_icon;
+			q4Visible = true;
+		}
+		else
+		{
+			colorId = R.color.theme_doom3_main_color;
+			iconId = R.drawable.d3_icon;
+			d3Visible = true;
+		}
+        actionBar.setBackgroundDrawable(new ColorDrawable(res.getColor(colorId)));
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+			actionBar.setHomeAsUpIndicator(iconId);
+		}
+		V.rg_fs_game.setVisibility(d3Visible ? View.VISIBLE : View.GONE);
+        V.rg_fs_q4game.setVisibility(q4Visible ? View.VISIBLE : View.GONE);
+		V.rg_fs_preygame.setVisibility(preyVisible ? View.VISIBLE : View.GONE);
     }
     
-    private void ChangeGame()
+    private void ChangeGame(String...games)
     {
+    	String newGame = games.length > 0 ? games[0] : null;
+    	if(null == newGame || newGame.isEmpty())
+		{
+			final String[] Games = {
+					Q3EInterface.GAME_DOOM3,
+					Q3EInterface.GAME_QUAKE4,
+					Q3EInterface.GAME_PREY,
+			};
+			int i;
+			for(i = 0; i < Games.length; i++)
+			{
+				if(Games[i].equalsIgnoreCase(Q3EUtils.q3ei.game))
+					break;
+			}
+			if(i >= Games.length)
+				i = Games.length - 1;
+			newGame = Games[(i + 1) % 3];
+		}
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
-		final boolean willIsQ4 = !Q3EUtils.q3ei.isQ4;
-        preference.edit().putString(Q3EUtils.pref_harm_game, willIsQ4 ? Constants.GAME_QUAKE4 : Constants.GAME_DOOM3).commit();
-        SetIsQ4(willIsQ4);
+        preference.edit().putString(Q3EUtils.pref_harm_game, newGame).commit();
+        SetGame(newGame);
         preference.edit().putString(Q3EUtils.pref_harm_game_lib, "");
 
-        String game = preference.getString(willIsQ4 ? Q3EUtils.pref_harm_q4_fs_game : Q3EUtils.pref_harm_fs_game, "");
+        String game = preference.getString(GetGameModPreferenceKey(), "");
         V.edt_fs_game.setText(game);
         boolean userMod = preference.getBoolean(Q3EUtils.pref_harm_user_mod, false);
-            if(willIsQ4)
-            {
-                int index = 0;
-                switch(game)
-                {
-                    case "q4base":
-                        // SetProp("fs_game", "q4base");
-                        RemoveProp("fs_game");
-                        RemoveProp("fs_game_base");
-                        RemoveProp("harm_fs_gameLibPath");
-                        index = 0;
-                        break;
-                    default:
-                        if(userMod && !game.isEmpty())
-                            SetProp("fs_game", game);
-                        else
-                            RemoveProp("fs_game");
-                        RemoveProp("fs_game_base");
-                        RemoveProp("harm_fs_gameLibPath");
-                        break;
-                }
-                SelectCheckbox(V.rg_fs_q4game, index);
-            }
-            else
-            {
-                int index = 0;
-                switch(game)
-                {
-                    case "base":
-                    case "":
-                        RemoveProp("fs_game");
-                        RemoveProp("fs_game_base");
-                        RemoveProp("harm_fs_gameLibPath");
-                        index = 0;
-                        break;
-                    case "d3xp":
-                        SetProp("fs_game", "d3xp");
-                        RemoveProp("fs_game_base");
-                        RemoveProp("harm_fs_gameLibPath");
-                        index = 1;
-                        break;
-                    case "cdoom":
-                        SetProp("fs_game", "cdoom");
-                        RemoveProp("fs_game_base");
-                        RemoveProp("harm_fs_gameLibPath");
-                        index = 2;
-                        break;
-                    case "d3le":
-                        SetProp("fs_game", "d3le");
-                        SetProp("fs_game_base", "d3xp"); // must load d3xp pak
-                        RemoveProp("harm_fs_gameLibPath");
-                        index = 3;
-                        break;
-                    case "rivensin":
-                        SetProp("fs_game", "rivensin");
-                        RemoveProp("fs_game_base");
-                        RemoveProp("harm_fs_gameLibPath");
-                        index = 4;
-                        break;
-                    case "hardcorps":
-                        SetProp("fs_game", "hardcorps");
-                        RemoveProp("fs_game_base");
-                        RemoveProp("harm_fs_gameLibPath");
-                        index = 5;
-                        break;
-                    default:
-                        if(userMod && !game.isEmpty())
-                            SetProp("fs_game", game);
-                        else
-                            RemoveProp("fs_game");
-                        RemoveProp("fs_game_base");
-                        RemoveProp("harm_fs_gameLibPath");
-                        break;
-                }
-                SelectCheckbox(V.rg_fs_game, index);
-            }
+		if(Q3EUtils.q3ei.isQ4)
+		{
+			int index = 0;
+			switch(game)
+			{
+				case "q4base":
+					// SetProp("fs_game", "q4base");
+					RemoveProp("fs_game");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					index = 0;
+					break;
+				default:
+					if(userMod && !game.isEmpty())
+						SetProp("fs_game", game);
+					else
+						RemoveProp("fs_game");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					break;
+			}
+			SelectCheckbox(V.rg_fs_q4game, index);
+		}
+		else if(Q3EUtils.q3ei.isPrey)
+		{
+			int index = 0;
+			switch(game)
+			{
+				case "q4base":
+					// SetProp("fs_game", "preybase");
+					RemoveProp("fs_game");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					index = 0;
+					break;
+				default:
+					if(userMod && !game.isEmpty())
+						SetProp("fs_game", game);
+					else
+						RemoveProp("fs_game");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					break;
+			}
+			SelectCheckbox(V.rg_fs_preygame, index);
+		}
+		else
+		{
+			int index = 0;
+			switch(game)
+			{
+				case "base":
+				case "":
+					RemoveProp("fs_game");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					index = 0;
+					break;
+				case "d3xp":
+					SetProp("fs_game", "d3xp");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					index = 1;
+					break;
+				case "cdoom":
+					SetProp("fs_game", "cdoom");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					index = 2;
+					break;
+				case "d3le":
+					SetProp("fs_game", "d3le");
+					SetProp("fs_game_base", "d3xp"); // must load d3xp pak
+					RemoveProp("harm_fs_gameLibPath");
+					index = 3;
+					break;
+				case "rivensin":
+					SetProp("fs_game", "rivensin");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					index = 4;
+					break;
+				case "hardcorps":
+					SetProp("fs_game", "hardcorps");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					index = 5;
+					break;
+				default:
+					if(userMod && !game.isEmpty())
+						SetProp("fs_game", game);
+					else
+						RemoveProp("fs_game");
+					RemoveProp("fs_game_base");
+					RemoveProp("harm_fs_gameLibPath");
+					break;
+			}
+			SelectCheckbox(V.rg_fs_game, index);
+		}
     }
     
     private void OpenQuake4LevelDialog()
@@ -1909,10 +2014,10 @@ public class GameLauncher extends Activity{
             "I", "II", "III", "IV", "V",
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        String[] levels = new String[Constants.QUAKE4_LEVELS.length];
+        String[] levels = new String[Q3EInterface.QUAKE4_LEVELS.length];
         int m = 0;
         int n = 0;
-        for(int i = 0; i < Constants.QUAKE4_LEVELS.length; i++)
+        for(int i = 0; i < Q3EInterface.QUAKE4_LEVELS.length; i++)
         {
             if(n >= Acts[m])
             {
@@ -1920,13 +2025,13 @@ public class GameLauncher extends Activity{
                 m++;
             }
             n++;
-            levels[i] = String.format("%s%d.Act %s - %s(%s)", (i < 9 ? " " : ""), (i + 1), Act_Names[m], Constants.QUAKE4_LEVELS[i], Constants.QUAKE4_MAPS[i]);
+            levels[i] = String.format("%s%d.Act %s - %s(%s)", (i < 9 ? " " : ""), (i + 1), Act_Names[m], Q3EInterface.QUAKE4_LEVELS[i], Q3EInterface.QUAKE4_MAPS[i]);
         }
 		final AlertDialog dialog = builder.setTitle("Quake 4 Level")
 				.setItems(levels, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int p) {
 						GameLauncher.this.RemoveParam_temp("loadGame");
-						GameLauncher.this.SetParam_temp("map", "game/" + Constants.QUAKE4_MAPS[p]);
+						GameLauncher.this.SetParam_temp("map", "game/" + Q3EInterface.QUAKE4_MAPS[p]);
 						finish();
 						startActivity(new Intent(GameLauncher.this, Q3EMain.class));
 					}
@@ -2376,6 +2481,26 @@ public class GameLauncher extends Activity{
 		}
 	}
 
+	private String GetGameModPreferenceKey()
+	{
+		return Q3EUtils.q3ei.isPrey ? Q3EUtils.pref_harm_prey_fs_game
+				: (Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_fs_game
+				: Q3EUtils.pref_harm_fs_game);
+	}
+
+	private String GetGameModLibPreferenceKey()
+	{
+		return Q3EUtils.q3ei.isPrey ? Q3EUtils.pref_harm_prey_game_lib
+				: (Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_game_lib
+				: Q3EUtils.pref_harm_game_lib);
+	}
+
+	private RadioGroup GetGameModRadioGroup()
+	{
+		return Q3EUtils.q3ei.isPrey ? V.rg_fs_preygame
+				: (Q3EUtils.q3ei.isQ4 ? V.rg_fs_q4game
+				: V.rg_fs_game);
+	}
 
 
 	private class ViewHolder
@@ -2425,6 +2550,7 @@ public class GameLauncher extends Activity{
         public EditText launcher_tab2_gyro_y_axis_sens;
 		public CheckBox auto_quick_load;
 		public Button setup_onscreen_button_opacity;
+		public RadioGroup rg_fs_preygame;
 
 		public void Setup()
 		{
@@ -2472,6 +2598,7 @@ public class GameLauncher extends Activity{
             launcher_tab2_gyro_y_axis_sens = findViewById(R.id.launcher_tab2_gyro_y_axis_sens);
 			auto_quick_load = findViewById(R.id.auto_quick_load);
 			setup_onscreen_button_opacity = findViewById(R.id.setup_onscreen_button_opacity);
+			rg_fs_preygame = findViewById(R.id.rg_fs_preygame);
 		}
 	}
 }

@@ -197,7 +197,25 @@ void idDeclParticle::ParseParametric(idLexer &src, idParticleParm *parm)
 		return;
 	}
 
-	if (token.IsNumeric()) {
+#ifdef _HUMANHEAD
+#define NEG_NUMBER_TOKEN(token) \
+	if(!idStr::Cmp(token, "-")) { \
+		if(!src.ReadToken(&token)) { \
+			src.Error("`-` missing number"); \
+			return; \
+		} \
+	}
+#endif
+
+#ifdef _HUMANHEAD
+	if (token.IsNumeric() || !idStr::Cmp(token, "-"))
+#else
+	if (token.IsNumeric())
+#endif
+	{
+#ifdef _HUMANHEAD
+		NEG_NUMBER_TOKEN(token);
+#endif
 		// can have a to + 2nd parm
 		parm->from = parm->to = atof(token);
 
@@ -208,11 +226,31 @@ void idDeclParticle::ParseParametric(idLexer &src, idParticleParm *parm)
 					return;
 				}
 
+#ifdef _HUMANHEAD
+				NEG_NUMBER_TOKEN(token);
+#endif
 				parm->to = atof(token);
 			} else {
 				src.UnreadToken(&token);
 			}
 		}
+#ifdef _HUMANHEAD
+		if(src.ReadToken(&token)) // a to b with c
+		{
+			if(!idStr::Icmp(token, "with"))
+			{
+				NEG_NUMBER_TOKEN(token);
+				src.ReadToken(&token); // a number
+			}
+			else
+				src.UnreadToken(&token);
+		}
+		else
+			src.UnreadToken(&token);
+#endif
+#ifdef _HUMANHEAD
+#undef NEG_NUMBER_TOKEN
+#endif
 	} else {
 		// table
 		parm->table = static_cast<const idDeclTable *>(declManager->FindType(DECL_TABLE, token, false));
@@ -454,6 +492,13 @@ idParticleStage *idDeclParticle::ParseParticleStage(idLexer &src)
 			continue;
 		}
 
+#ifdef _HUMANHEAD
+		if (!token.Icmp("lowSkippable")) {
+			src.ReadToken(&token);
+			continue;
+		}
+#endif
+
 		src.Error("unknown token %s\n", token.c_str());
 	}
 
@@ -505,6 +550,18 @@ bool idDeclParticle::Parse(const char *text, const int textLength)
 			depthHack = src.ParseFloat();
 			continue;
 		}
+
+#ifdef _HUMANHEAD
+		if (!token.Icmp("bounds")) {
+			src.ParseFloat();
+			src.ParseFloat();
+			src.ParseFloat();
+			src.ParseFloat();
+			src.ParseFloat();
+			src.ParseFloat();
+			continue;
+		}
+#endif
 
 		src.Warning("bad token %s", token.c_str());
 		MakeDefault();

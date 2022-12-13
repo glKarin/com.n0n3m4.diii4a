@@ -1328,3 +1328,18 @@ void idSlowChannel::GatherChannelSamples(int sampleOffset44k, int sampleCount44k
 	if (state == PLAYBACK_ADVANCING)
 		curPosition = newPosition;
 }
+
+#ifdef _HUMANHEAD
+soundShaderParms_t* idSoundEmitterLocal::GetSoundParms(idSoundShader* shader, const s_channelType channel)
+{
+    idSoundChannel* chan = &channels[channel];
+
+    return &chan->parms; // jmarshall - I think this is right?
+}
+
+void idSoundEmitterLocal::ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier)
+{
+    // jmarshall - implement me!
+}
+#endif
+

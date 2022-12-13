@@ -1635,7 +1635,9 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 	char guiMap[ MAX_STRING_CHARS ];
 	strncpy(guiMap, va("guis/map/%s.gui", stripped.c_str()), MAX_STRING_CHARS);
 	// give the gamecode a chance to override
+#if !defined(_HUMANHEAD)
 	game->GetMapLoadingGUI(guiMap);
+#endif
 
 	if (uiManager->CheckGui(guiMap)) {
 		guiLoading = uiManager->FindGui(guiMap, true, false, true);
@@ -1680,6 +1682,15 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 		}
 #else
 		guiLoading = uiManager->FindGui("guis/map/loading.gui", true, false, true);
+#ifdef _HUMANHEAD
+		// bg image
+		guiLoading->SetStateString("image", idStr("guis/assets/loading/") + stripped + ".tga");
+		// title
+		const idDecl *mapDecl = declManager->FindType(DECL_MAPDEF, mapName, false);
+		const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
+		guiLoading->SetStateString("friendlyname", mapDef ? common->GetLanguageDict()->GetString(mapDef->dict.GetString("name")) : stripped.c_str());
+#endif
+
 #endif
 	}
 
@@ -2346,6 +2357,8 @@ bool idSessionLocal::SaveGame(const char *saveName, bool autosave)
 				savethumb = savethumb_str;
 		}
 		fileDesc->Printf("\"%s\"\n", savethumb.c_str());
+#elif defined(_HUMANHEAD)
+		fileDesc->Printf("\"guis/assets/loading/%s\"\n", sshot.c_str());
 #else
 		fileDesc->Printf("\"guis/assets/autosave/%s\"\n", sshot.c_str());
 #endif
@@ -2744,7 +2757,12 @@ void idSessionLocal::Draw()
 			guiLoading->Redraw(com_frameTime);
 		}
 
-		if (guiActive == guiMsg) {
+#ifdef _HUMANHEAD
+		if (guiActive == guiMsg && guiMsg) //k: gui not parse
+#else
+		if (guiActive == guiMsg)
+#endif
+		{
 			guiMsg->Redraw(com_frameTime);
 		}
 	} else if (guiTest) {
@@ -3369,7 +3387,9 @@ void idSessionLocal::Init()
 	guiMainMenu_MapList->Config(guiMainMenu, "mapList");
 	idAsyncNetwork::client.serverList.GUIConfig(guiMainMenu, "serverList");
 	guiRestartMenu = uiManager->FindGui("guis/restart.gui", true, false, true);
+#if !defined(_HUMANHEAD)
 	guiGameOver = uiManager->FindGui("guis/gameover.gui", true, false, true);
+#endif
 	guiMsg = uiManager->FindGui("guis/msg.gui", true, false, true);
 	guiTakeNotes = uiManager->FindGui("guis/takeNotes.gui", true, false, true);
 	guiIntro = uiManager->FindGui("guis/intro.gui", true, false, true);
