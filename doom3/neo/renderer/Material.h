@@ -352,7 +352,7 @@ typedef enum {
 	CONTENTS_OWNER_TO_OWNER = BIT(24),	// bjk: used to disable owner to owner rejection for collision
 	CONTENTS_GAME_PORTAL = BIT(25),  // cjr: used for clipping against game portals (glow portals, etc)
 	CONTENTS_SHOOTABLEBYARROW = BIT(26),	// pdm: solid to spirit arrows specifically as opposed to other projectiles
-	CONTENTS_HUNTERCLIP,
+	CONTENTS_HUNTERCLIP = BIT(27), // pdm: solid to hunters, but not hunters in vehicles
 #endif
 
 	CONTENTS_REMOVE_UTIL		= ~(CONTENTS_AREAPORTAL|CONTENTS_NOCSG)
