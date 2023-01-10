@@ -20,11 +20,22 @@ GPLv3
 * Add bad skybox render in Prey(2006).
 * Add bad portal render in Prey(2006).
 * Add `deathwalk` map append support in Prey(2006).
+* Because of tab window UI not support, Settings UI is not work, must edit `preyconfig.cfg` for binding extras key.
+> * bind "Your key of spirit walk" "_impulse54"
+> * bind "Your key of second mode attack of weapons" "_attackAlt"
+> * bind "Your key of toggle lighter" "_impulse16"
+> * bind "Your key of drop" "_impulse25"
+
 
 * 支持刘海屏/打孔屏的全屏.
 * 掠食(2006)增加天空盒渲染.
 * 掠食(2006)增加通道渲染.
 * 掠食(2006)支持`deathwalk`地图追加载.
+* 由于选项卡窗口UI组件暂不支持, 导致设置页面不工作, 必须通过编辑`preyconfig.cfg`来绑定额外按键.
+> * bind "幽灵行走按键" "_impulse54"
+> * bind "武器第2攻击键" "_attackAlt"
+> * bind "打火机开关键" "_impulse16"
+> * bind "仍物体键" "_impulse25"
 
 ----------------------------------------------------------------------------------
 
@@ -33,12 +44,22 @@ GPLv3
 > 1. Putting PC Prey game data file to `preybase` folder and START directly.
 > 2. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.
 > 3. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).
+> 4. Because of tab window UI not support, Settings UI is not work, must edit `preyconfig.cfg` for binding extras key.
+> > * bind "Your key of spirit walk" "_impulse54"
+> > * bind "Your key of second mode attack of weapons" "_attackAlt"
+> > * bind "Your key of toggle lighter" "_impulse16"
+> > * bind "Your key of drop" "_impulse25"
 
 #### 关于掠食(2006)
 ###### 运行掠食(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). 目前可以运行全部关卡, 部分关卡存在bug.
 > 1. 将PC端掠食(2006)游戏文件放到`preybase`文件夹, 然后直接启动游戏.
 > 2. 已知问题的解决方案: 例如. 使用cvar `harm_g_translateAlienFont`自动翻译GUI中的外星人文字.
 > 3. 已知bugs: 例如一些错误的碰撞检测(使用`noclip`), 错误的渲染(传送门, 天空盒等), 部分菜单的渲染, 部分GUI不工作(RoadHouse的CD播放器).
+> 4. 由于选项卡窗口UI组件暂不支持, 导致设置页面不工作, 必须通过编辑`preyconfig.cfg`来绑定额外按键.
+> > * bind "幽灵行走按键" "_impulse54"
+> > * bind "武器第2攻击键" "_attackAlt"
+> > * bind "打火机开关键" "_impulse16"
+> > * bind "仍物体键" "_impulse25"
 
 ----------------------------------------------------------------------------------
 
