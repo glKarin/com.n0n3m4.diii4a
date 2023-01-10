@@ -65,8 +65,11 @@ public class Q3EMain extends Activity {
     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-    | View.SYSTEM_UI_FLAG_IMMERSIVE
     | View.SYSTEM_UI_FLAG_FULLSCREEN;
+    @SuppressLint("InlinedApi")
+    private final int m_uiOptions_def = View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
     public static Q3EControlView mControlGLSurfaceView;
     private MemInfoTextView memoryUsageText;
 	
@@ -94,21 +97,30 @@ public class Q3EMain extends Activity {
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		
-		if (Build.VERSION.SDK_INT>=9)
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-            
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && preferences.getBoolean("harm_cover_edges", true))
+        {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(lp);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) // 9
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
         m_hideNav = preferences.getBoolean("harm_hide_nav", true);
         m_renderMemStatus = preferences.getInt("harm_render_mem_status", 0);
         m_runBackground = Integer.parseInt(preferences.getString("harm_run_background", "1"));
         //k
-        if(m_hideNav)
+        SetupUIFlags();
+/*        if(m_hideNav)
         {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 				final View decorView = getWindow().getDecorView();
 				decorView.setSystemUiVisibility(m_uiOptions);// This code will always hide the navigation bar
-/*            decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener(){
+            decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener(){
                     @Override
                     public void  onSystemUiVisibilityChange(int visibility)
                     {
@@ -117,9 +129,9 @@ public class Q3EMain extends Activity {
                             decorView.setSystemUiVisibility(m_uiOptions);
                         }
                     }
-                });*/
+                });
 			}
-        }
+        }*/
         Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt("harm_volume_up_key", Q3EKeyCodes.KeyCodes.K_F3);
         Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
@@ -250,10 +262,16 @@ public class Q3EMain extends Activity {
     public void onWindowFocusChanged(boolean hasFocus)
     {
         super.onWindowFocusChanged(hasFocus);
+        SetupUIFlags();
+    }
+
+    private void SetupUIFlags()
+    {
+        final View decorView = getWindow().getDecorView();
         if(m_hideNav)
-        {
-            getWindow().getDecorView().setSystemUiVisibility(m_uiOptions);
-        }
+            decorView.setSystemUiVisibility(m_uiOptions);
+        else
+            decorView.setSystemUiVisibility(m_uiOptions_def);
     }
     
     private class MemInfoTextView extends TextView

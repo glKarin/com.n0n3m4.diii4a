@@ -117,6 +117,10 @@ void idMaterial::CommonInit()
 	materialType = 0;
 // jmarshall end
 #endif
+#ifdef _HUMANHEAD
+	subviewClass = SC_MIRROR;
+	directPortalDistance = 0;
+#endif
 
 	decalInfo.stayTime = 10000;
 	decalInfo.fadeTime = 4000;
@@ -295,7 +299,7 @@ static infoParm_t	infoParms[] = {
     {"spirit",	0,	SURFTYPE_SPIRIT,	0 },
 	{"vehicleclip",	0,	0,	CONTENTS_VEHICLECLIP },
 	{"hunterClip",	0,	0,	CONTENTS_HUNTERCLIP },
-    {"forcefield_nobullets",	0,	SURFTYPE_FORCEFIELD,	CONTENTS_FORCEFIELD },
+    {"forcefield_nobullets",	0,	SURFTYPE_FORCEFIELD,	CONTENTS_SPIRITBRIDGE },
 #else
 	{"glass",		0,	SURFTYPE_GLASS,		0 },	// glass
 	{"plastic",		0,	SURFTYPE_PLASTIC,	0 },	// plastic
@@ -2590,14 +2594,21 @@ void idMaterial::ParseMaterial(idLexer &src)
 			SetMaterialFlag(MF_NOSHADOWS);
 			continue;
 #ifdef _HUMANHEAD
+#define _SURFTYPE(x) ((x) | (surfaceFlags & (~SURF_TYPE_MASK)))
 		} else if (!token.Icmp("matter_metal")) {
+			surfaceFlags = _SURFTYPE(SURFTYPE_METAL);
 		} else if (!token.Icmp("matter_wood")) {
+			surfaceFlags = _SURFTYPE(SURFTYPE_WOOD);
 		} else if (!token.Icmp("matter_cardboard")) {
 		} else if (!token.Icmp("matter_tile")) {
+			surfaceFlags = _SURFTYPE(SURFTYPE_TILE);
 		} else if (!token.Icmp("matter_stone")) {
 		} else if (!token.Icmp("matter_flesh")) {
+			surfaceFlags = _SURFTYPE(SURFTYPE_FLESH);
 		} else if (!token.Icmp("matter_glass")) {
+			surfaceFlags = _SURFTYPE(SURFTYPE_GLASS);
 		} else if (!token.Icmp("matter_pipe")) {
+			surfaceFlags = _SURFTYPE(SURFTYPE_PIPE);
 		} else if (!token.Icmp("decal_alphatest_macro")) {
 		} else if (!token.Icmp("skipClip")) {
 			SetMaterialFlag(MF_SKIPCLIP);
@@ -2606,16 +2617,29 @@ void idMaterial::ParseMaterial(idLexer &src)
 		} else if (!token.Icmp("overlay_macro")) {
 		} else if (!token.Icmp("scorch_macro")) {
 		} else if (!token.Icmp("glass_macro")) {
-			surfaceFlags |= SURFTYPE_GLASS;
+			surfaceFlags = _SURFTYPE(SURFTYPE_GLASS);
 		} else if (!token.Icmp("skybox_macro")) {
 			surfaceFlags |= SURF_NOFRAGMENT;
 			coverage = MC_OPAQUE;
+			allowOverlays = false;
 			SetMaterialFlag(MF_NOSHADOWS);
 		} else if (!token.Icmp("lightWholeMesh")) {
+			SetMaterialFlag(MF_LIGHT_WHOLE_MESH);
 		} else if (!token.Icmp("skyboxportal")) {
 			src.SkipRestOfLine();
+			sort = SS_SUBVIEW;
+			subviewClass = SC_PORTAL_SKYBOX;
 		} else if (!token.Icmp("directportal")) {
 			src.SkipRestOfLine();
+			//directportal = true;
+			sort = SS_SUBVIEW;
+			subviewClass = SC_PORTAL;
+			coverage = MC_OPAQUE;
+			SetMaterialFlag(MF_NOSHADOWS);
+			idToken t;
+			t = "discrete";
+			CheckSurfaceParm(&t);
+#undef _SURFTYPE
 #endif
 		} else if (token == "{") {
 			// create the new stage

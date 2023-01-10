@@ -42,6 +42,15 @@ class idCinematic;
 class idUserInterface;
 class idMegaTexture;
 
+#ifdef _HUMANHEAD
+// HUMANHEAD tmj: type of subview that this surface represents
+typedef enum {
+	SC_MIRROR,
+	SC_PORTAL,
+	SC_PORTAL_SKYBOX,
+} subviewClass_t;
+#endif
+
 // moved from image.h for default parm
 typedef enum {
 	TF_LINEAR,
@@ -75,6 +84,11 @@ typedef enum {
 	DFRM_EXPAND,
 	DFRM_MOVE,
 	DFRM_EYEBALL,
+#ifdef _HUMANHEADxxx
+	DFRM_BEAM,		// HUMANHEAD
+	DFRM_CORONA,	// HUMANHEAD
+	DFRM_JITTER,	// HUMANHEAD: Jitter the model
+#endif
 	DFRM_PARTICLE,
 	DFRM_PARTICLE2,
 	DFRM_TURB
@@ -86,6 +100,10 @@ typedef enum {
 	DI_CUBE_RENDER,
 	DI_MIRROR_RENDER,
 	DI_XRAY_RENDER,
+#ifdef _HUMANHEAD
+	DI_PORTAL_RENDER, // HUMANHEAD
+	DI_SKYBOX_RENDER, // HUMANHEAD tmj
+#endif
 	DI_REMOTE_RENDER
 } dynamicidImage_t;
 
@@ -106,6 +124,9 @@ typedef enum {
 	OP_TYPE_AND,
 	OP_TYPE_OR,
 	OP_TYPE_SOUND
+#ifdef _HUMANHEAD
+	, OP_TYPE_FRAGMENTPROGRAMS // HUMANHEAD CJR:  Added so fragment programs support can be toggled
+#endif
 } expOpType_t;
 
 typedef enum {
@@ -204,6 +225,15 @@ typedef struct {
 	idMegaTexture		*megaTexture;		// handles all the binding and parameter setting
 } newShaderStage_t;
 
+#ifdef _HUMANHEAD
+//HUMANHEAD bjk: specular exponent
+typedef struct {
+	float				exponent;
+	float				brightness;
+} specData_t;
+//HUMANHEAD END
+#endif
+
 typedef struct {
 	int					conditionRegister;	// if registers[conditionRegister] == 0, skip stage
 	stageLighting_t		lighting;			// determines which passes interact with lights
@@ -227,7 +257,7 @@ typedef struct {
     bool				isSpiritWalk; // HUMANHEAD CJR: Spiritwalk view
     bool				isNotSpiritWalk; // HUMANHEAD CJR:  Does not show up in spirit view
 
-    //specData_t			specular;	//HUMANHEAD bjk: specular exponent
+    specData_t			specular;	//HUMANHEAD bjk: specular exponent
 #endif
 } shaderStage_t;
 
@@ -286,9 +316,11 @@ typedef enum {
 	MF_NOPORTALFOG				= BIT(5),	// this fog volume won't ever consider a portal fogged out
 	MF_EDITOR_VISIBLE			= BIT(6)	// in use (visible) per editor
 #ifdef _HUMANHEAD
+	, MF_USESDISTANCE				= BIT(7),	// HUMANHEAD pdm: distance optimization
+	MF_LIGHT_WHOLE_MESH			= BIT(8),	// HUMANHEAD bjk: dont cull tris with light bounds
     //HUMANHEAD PCF rww 05/11/06 - can be used explicitly by surfaces which use alpha coverage but do not want collision anyway
-    , MF_SKIPCLIP = BIT(9)
-                  //HUMANHEAD END
+    MF_SKIPCLIP = BIT(9)
+		//HUMANHEAD END
 #endif
 } materialFlags_t;
 
@@ -348,11 +380,11 @@ typedef enum {
 	CONTENTS_BLOCK_RADIUSDAMAGE = BIT(18/*20*/),	// aob - used by objects like forcefields and chaff
 	CONTENTS_SHOOTABLE = BIT(19/*21*/),	// pdm - bullets collide with but not player or monsters
 	CONTENTS_DEATHVOLUME = BIT(22),	// AOB: used by death zones so the player can do a simple contents check
-	CONTENTS_VEHICLECLIP = BIT(23),	// PDM: used to clip off vehicle movement
-	CONTENTS_OWNER_TO_OWNER = BIT(24),	// bjk: used to disable owner to owner rejection for collision
-	CONTENTS_GAME_PORTAL = BIT(25),  // cjr: used for clipping against game portals (glow portals, etc)
-	CONTENTS_SHOOTABLEBYARROW = BIT(26),	// pdm: solid to spirit arrows specifically as opposed to other projectiles
-	CONTENTS_HUNTERCLIP = BIT(27), // pdm: solid to hunters, but not hunters in vehicles
+	CONTENTS_VEHICLECLIP		= BIT(23),	// PDM: used to clip off vehicle movement
+	CONTENTS_OWNER_TO_OWNER		= BIT(24),	// bjk: used to disable owner to owner rejection for collision
+	CONTENTS_GAME_PORTAL		= BIT(25),  // cjr: used for clipping against game portals (glow portals, etc)
+	CONTENTS_SHOOTABLEBYARROW	= BIT(26),	// pdm: solid to spirit arrows specifically as opposed to other projectiles
+	CONTENTS_HUNTERCLIP			= BIT(27),	// pdm: solid to hunters, but not hunters in vehicles
 #endif
 
 	CONTENTS_REMOVE_UTIL		= ~(CONTENTS_AREAPORTAL|CONTENTS_NOCSG)
@@ -767,6 +799,11 @@ class idMaterial : public idDecl
 #ifdef _RAVEN // quake4 material
 	const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
 #endif
+#ifdef _HUMANHEAD
+						// HUMANHEAD tmj: returns how the subview should be rendered (i.e. mirror/portal/skybox)
+	subviewClass_t		GetSubviewClass( void) const { return subviewClass; }
+	int					GetDirectPortalDistance() const { return directPortalDistance; } // HUMANHEAD CJR:  direct render portal distance cull
+#endif
 
 	private:
 		// parse the entire material
@@ -824,6 +861,10 @@ class idMaterial : public idDecl
 	float				portalDistanceFar;
 	idImage* portalImage;
 // RAVEN END
+#endif
+#ifdef _HUMANHEAD
+	subviewClass_t		subviewClass;		// HUMANHEAD tmj: Type of subview this surface points to
+	int					directPortalDistance; // HUMANHEAD:  Distance at which direct render portals are drawn
 #endif
 
 		bool				noFog;				// surface does not create fog interactions

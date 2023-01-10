@@ -161,6 +161,11 @@ idRenderWorldLocal::idRenderWorldLocal()
 	interactionTable = 0;
 	interactionTableWidth = 0;
 	interactionTableHeight = 0;
+#ifdef _HUMANHEAD
+#if DEATHWALK_AUTOLOAD
+	numAppendPortalAreas = 0;
+#endif
+#endif
 }
 
 /*
@@ -950,6 +955,7 @@ int idRenderWorldLocal::PointInArea(const idVec3 &point) const
 		} else {
 			nodeNum = node->children[1];
 		}
+		//LOGI("NNN %d | %s ^ %s = %f | %d", nodeNum, node->plane.ToString(), point.ToString(), d, nodeNum < 0 ? -1 - nodeNum : -1)
 
 		if (nodeNum == 0) {
 			return -1;		// in solid

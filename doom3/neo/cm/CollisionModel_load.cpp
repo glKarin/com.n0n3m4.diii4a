@@ -4018,7 +4018,6 @@ void idCollisionModelManagerLocal::BuildModels(const idMapFile *mapFile)
 #ifdef _HUMANHEAD
 // HUMANHEAD pdm: Support for level appending
 #if DEATHWALK_AUTOLOAD
-#if 0 //k: TODO
         bool bAppending = session->ShouldAppendLevel() && !idStr::Icmp(mapFile->GetName(), session->GetDeathwalkMapName());
         if (bAppending)
         {
@@ -4029,7 +4028,6 @@ void idCollisionModelManagerLocal::BuildModels(const idMapFile *mapFile)
                 models[firstModel]->name = "dw_worldMap";
             }
         }
-#endif
         WriteCollisionModelsToFile( mapFile->GetName(), firstModel, numModels, mapFile->GetGeometryCRC() );
 #endif
 #endif

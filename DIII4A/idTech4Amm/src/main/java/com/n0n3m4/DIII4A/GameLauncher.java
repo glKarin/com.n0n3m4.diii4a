@@ -41,11 +41,13 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -401,21 +403,38 @@ public class GameLauncher extends Activity{
         }
     }
     
-    private void InitUILayout(Q3EInterface q3ei, boolean full)
+    private void InitUILayout(Q3EInterface q3ei, boolean safety)
     {
-        Display display = getWindowManager().getDefaultDisplay(); 
-        Point realSize = new Point();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			display.getRealSize(realSize);
+        int safeInsetTop = ContextUtility.GetEdgeHeight(this);
+		int[] fullSize = ContextUtility.GetFullScreenSize(this);
+		int[] size = ContextUtility.GetNormalScreenSize(this);
+		int navBarHeight = fullSize[1] - size[1] - safeInsetTop;
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
+		boolean hideNav = preferences.getBoolean(Constants.PreferenceKey.HIDE_NAVIGATION_BAR, true);
+		boolean coverEdges = preferences.getBoolean(Constants.PreferenceKey.COVER_EDGES, true);
+		int w, h;
+		int X = 0;
+		if(safety)
+		{
+			w = fullSize[0];
+			h = fullSize[1];
+			h -= navBarHeight;
+			if(coverEdges)
+				X = safeInsetTop;
+			else
+				h -= safeInsetTop;
 		}
 		else
 		{
-			realSize.set(display.getWidth(), display.getHeight());
+			w = fullSize[0];
+			h = fullSize[1];
+			if(!hideNav)
+				h -= navBarHeight;
+			if(!coverEdges)
+				h -= safeInsetTop;
 		}
-		int w = full ? realSize.x : display.getWidth();
-        int h = full ? realSize.y : display.getHeight();
         int width = Math.max(w, h);
-		int height = Math.min(w, h);		
+		int height = Math.min(w, h);
 
         int r=Q3EUtils.dip2px(this,75);
         int rightoffset=r*3/4;
@@ -423,14 +442,14 @@ public class GameLauncher extends Activity{
         int alpha = CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
 
         q3ei.defaults_table=new String[UI_SIZE];
-        q3ei.defaults_table[UI_JOYSTICK] =(r*4/3)+" "+(height-r*4/3)+" "+r+" "+alpha;
+        q3ei.defaults_table[UI_JOYSTICK] =(X + r*4/3)+" "+(height-r*4/3)+" "+r+" "+alpha;
         q3ei.defaults_table[UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+alpha;
         q3ei.defaults_table[UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+alpha;
         q3ei.defaults_table[UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+alpha;
         q3ei.defaults_table[UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+alpha;
         q3ei.defaults_table[UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
         q3ei.defaults_table[UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
-        q3ei.defaults_table[UI_SAVE]     =sliders_width/2+" "+sliders_width/2+" "+sliders_width+" "+alpha;
+        q3ei.defaults_table[UI_SAVE]     =(X + sliders_width/2)+" "+sliders_width/2+" "+sliders_width+" "+alpha;
 
         for (int i=UI_SAVE+1;i<UI_SIZE;i++)
             q3ei.defaults_table[i]=(r/2+r*(i-UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+alpha;
@@ -442,8 +461,8 @@ public class GameLauncher extends Activity{
         q3ei.defaults_table[UI_1] = String.format("%d %d %d %d", width - sr / 2 - sr * 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
         q3ei.defaults_table[UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
         q3ei.defaults_table[UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-        q3ei.defaults_table[UI_KBD] = String.format("%d %d %d %d", sliders_width + sr / 2, sr / 2, sr, alpha);
-        q3ei.defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, alpha);
+        q3ei.defaults_table[UI_KBD] = String.format("%d %d %d %d", X + sliders_width + sr / 2, sr / 2, sr, alpha);
+        q3ei.defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", X + sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, alpha);
     }
 	
 	public void InitQ3E()
@@ -608,7 +627,13 @@ public class GameLauncher extends Activity{
 		
 		Q3EUtils.q3ei=q3ei;
 	}
-	
+
+	@Override
+	public void onAttachedToWindow() {
+		super.onAttachedToWindow();
+		InitUILayout(Q3EUtils.q3ei, false);
+	}
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		Q3EUtils.LoadAds(this);
@@ -1230,12 +1255,12 @@ public class GameLauncher extends Activity{
 		startActivity(new Intent(this,Q3EMain.class));
 	}
 
-	public void ResetControlsLayout(boolean full)
+	public void ResetControlsLayout(boolean safety)
 	{
-		InitUILayout(Q3EUtils.q3ei, full);
+		InitUILayout(Q3EUtils.q3ei, safety);
 		SharedPreferences.Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
 		for (int i=0;i<UI_SIZE;i++)
-			mEdtr.putString(Q3EUtils.pref_controlprefix+i, full ? Q3EUtils.q3ei.defaults_table[i] : null);
+			mEdtr.putString(Q3EUtils.pref_controlprefix+i, safety ? Q3EUtils.q3ei.defaults_table[i] : null);
 		mEdtr.commit();
 		Toast.makeText(GameLauncher.this, "On-screen controls has reset.", Toast.LENGTH_SHORT).show();
 	}
@@ -1246,7 +1271,7 @@ public class GameLauncher extends Activity{
             public void run() {
 				ResetControlsLayout(false);
             }
-            }, null, "OK(Fullscreen)", new Runnable() {
+            }, null, "OK(friendly)", new Runnable() {
                 public void run() {
 					ResetControlsLayout(true);
             }
@@ -1283,7 +1308,6 @@ public class GameLauncher extends Activity{
     {
         boolean lock = LockCmdUpdate();
 		boolean[] res = { false };
-        String str0 = GetCmdText();
 		String str = D3CommandUtility.RemoveProp(GetCmdText(), name, res);
 		if(res[0])
 			SetCmdText(str);
@@ -1771,8 +1795,8 @@ public class GameLauncher extends Activity{
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-/*		Android SDK > 28
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11 FS permission
+		// Android SDK > 28
+/*		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11 FS permission
 		{
 			if(requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE
 			|| requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE
@@ -1782,8 +1806,7 @@ public class GameLauncher extends Activity{
 				List<String> list = Collections.singletonList(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
 				HandleGrantPermissionResult(requestCode, list);
 			}
-		}
-		*/
+		}*/
 	}
 
 	private void HandleGrantPermissionResult(int requestCode, List<String> list)

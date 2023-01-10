@@ -562,8 +562,7 @@ public:
 	virtual void			PrintMemInfo( MemInfo_t *mi );
 
 // HUMANHEAD pdm: Support for level appending
-	// jmarshall - changed to false.
-	bool					DeathwalkMapLoaded() const	{	return false;	} // return bShouldAppend; jmarshall
+	bool					DeathwalkMapLoaded() const	{ return bShouldAppend; }
 #if DEATHWALK_AUTOLOAD
 	bool					bShouldAppend;			// Taken from serverinfo
 protected:

@@ -160,7 +160,7 @@ public final class TextHelper
             "For playing Prey(2006)(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
             " *. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.",
-            " *. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw, some GUIs not work(Music CD in RoadHouse).",
+            " *. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).",
             null,
 			"For playing Quake 4(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/Quake4Doom", "Quake4Doom") + "`): ",
 			" 1. Putting PC Quake 4 game data file to `q4base` folder.",
@@ -250,7 +250,7 @@ public final class TextHelper
         final String[] ABOUTS = {
             Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")",
             Constants.CONST_NAME,
-            "Changes by " + GenLinkText("https://forum.xda-developers.com/member.php?u=10584229", Constants.CONST_DEV)
+            "Changes by " + GenLinkText(Constants.CONST_DEVELOPER, Constants.CONST_DEV)
             + "&lt;" + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_EMAIL) + "&gt;",
             "Update: " + ContextUtility.GetAppVersion(context) + ("(API " + Build.VERSION.SDK_INT + ")") + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
             "Release: " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
@@ -278,6 +278,11 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+                ChangeLog.Create("2022-12-10", 21,
+                        "Prey(2006) for DOOM3 support, game data folder named `preybase`. All levels clear, but have some bugs.",
+                        "Add setup On-screen buttons position unit when config controls layout."
+                ),
 
                 ChangeLog.Create("2022-11-18", 20,
                         "Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.",
@@ -314,7 +319,7 @@ public final class TextHelper
 
                 ChangeLog.Create("2022-10-15", 15,
                         "Add gyroscope control support.",
-                        "Add reset onscreen buttton layout with fullscreen.",
+                        "Add reset onscreen button layout with fullscreen.",
                         "If running Quake 4 crash on arm32 device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
                         "Fixup some Quake 4 bugs: ",
                         " Fixup start new game in main menu, now start new game is work.",
@@ -322,8 +327,8 @@ public final class TextHelper
                         " Fixup AI `Singer` can not move when opening the door in level `game/building_b`.",
                         " Fixup jump down on broken floor in level `game/putra`.",
                         " Fixup player model choice and view in `Settings` menu in Multiplayer game.",
-                        " Add bool cvar `harm_g_flashlightOn` for controling gun-lighting is open/close initial, default is 1(open).",
-                        " Add bool cvar `harm_g_vehicleWalkerMoveNormalize` for re-normalize `vehicle walker` movment if enable `Smooth joystick` in launcher, default is 1(re-normalize), it can fix up move left-right."
+                        " Add bool cvar `harm_g_flashlightOn` for controlling gun-lighting is open/close initial, default is 1(open).",
+                        " Add bool cvar `harm_g_vehicleWalkerMoveNormalize` for re-normalize `vehicle walker` movement if enable `Smooth joystick` in launcher, default is 1(re-normalize), it can fix up move left-right."
                 ),
 
             ChangeLog.Create("2022-10-29", 13,
@@ -385,8 +390,8 @@ public final class TextHelper
                              "Fix sky box.",
                              "Fix fog and blend light.",
                              "Fix glass reflection.",
-                             "Add texgen shader for like `D3XP` hell level sky.",
-                             "Fix translucent object. i.e. window glass, transclucent Demon in `Classic DOOM` mod.",
+                             "Add `texgen` shader for like `D3XP` hell level sky.",
+                             "Fix translucent object. i.e. window glass, translucent Demon in `Classic DOOM` mod.",
                              "Fix dynamic texture interaction. i.e. rotating fans.",
                              "Fix `Berserk`, `Grabber`, `Helltime` vision effect(First set cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` and `harm_g_skipHelltimeVision` to 0).",
                              "Fix screen capture image when quick save game or mission tips.",
@@ -602,8 +607,8 @@ public final class TextHelper
         final Cvar[] QUAKE4_CVARS = {
             Cvar.Create("harm_g_alwaysRun", "bool", "1", "Force to always run automatic."),
             Cvar.Create("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic."),
-            Cvar.Create("harm_g_flashlightOn", "bool", "1", "Automitic make flash light on initial."),
-            Cvar.Create("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movment."),
+            Cvar.Create("harm_g_flashlightOn", "bool", "1", "Automatic make flash light on initial."),
+            Cvar.Create("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movement."),
             Cvar.Create("harm_gui_defaultFont", "string", "chain", "Default font name.",
                     "chain", "fonts/chain",
                     "lowpixel", "fonts/lowpixel",
@@ -614,7 +619,7 @@ public final class TextHelper
             ),
         };
         final Cvar[] PREY_CVARS = {
-                Cvar.Create("harm_g_translateAlienFont", "string", "fonts", "Setup font name for automitic translate `alien` font text of GUI(empty to disable).",
+                Cvar.Create("harm_g_translateAlienFont", "string", "fonts", "Setup font name for automatic translate `alien` font text of GUI(empty to disable).",
                         "fonts", "fonts",
                         "fonts/menu", "fonts/menu",
                         "\"\"", "Disable"

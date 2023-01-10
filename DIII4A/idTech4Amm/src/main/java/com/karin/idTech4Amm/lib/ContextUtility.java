@@ -1,9 +1,12 @@
 package com.karin.idTech4Amm.lib;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.Environment;
 import android.provider.Settings;
 import android.content.Intent;
@@ -14,6 +17,9 @@ import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.view.Display;
+import android.view.DisplayCutout;
+import android.view.WindowInsets;
 import android.widget.TextView;
 import android.text.util.Linkify;
 import android.text.method.LinkMovementMethod;
@@ -217,8 +223,8 @@ public final class ContextUtility
     public static int CheckFilePermission(Activity context, int resultCode)
     {
         String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-/*        Android SDK > 28
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11
+        // Android SDK > 28
+/*        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11
         {
             if(Environment.isExternalStorageManager())
                 return CHECK_PERMISSION_RESULT_GRANTED;
@@ -227,8 +233,7 @@ public final class ContextUtility
             context.startActivityForResult(intent, resultCode);
             return CHECK_PERMISSION_RESULT_REQUEST;
         }
-        else */
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M - Q
+        else*/ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M - Q
         {
             boolean granted = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
             if(granted)
@@ -277,6 +282,73 @@ public final class ContextUtility
         Uri uri = Uri.parse(url);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         context.startActivity(intent);
+    }
+
+    public static int[] GetNormalScreenSize(Activity activity)
+    {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+        {
+            display.getSize(size);
+            return new int[]{ size.x, size.y };
+        }
+        else
+        {
+            return new int[]{ display.getWidth(), display.getHeight() };
+        }
+    }
+
+    public static int[] GetFullScreenSize(Activity activity)
+    {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+        {
+            display.getRealSize(size);
+            return new int[]{ size.x, size.y };
+        }
+        else
+        {
+            return new int[]{ display.getWidth(), display.getHeight() };
+        }
+    }
+
+    public static int GetEdgeHeight(Activity activity)
+    {
+        int safeInsetTop = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+        {
+            WindowInsets rootWindowInsets = activity.getWindow().getDecorView().getRootWindowInsets();
+            if(null != rootWindowInsets)
+            {
+                DisplayCutout displayCutout = rootWindowInsets.getDisplayCutout();
+                if(null != displayCutout) {
+                    safeInsetTop = displayCutout.getSafeInsetTop();
+                }
+            }
+        }
+        return safeInsetTop;
+    }
+
+    public static int GetNavigationBarHeight(Activity activity)
+    {
+        int[] fullSize = GetFullScreenSize(activity);
+        int[] size = GetNormalScreenSize(activity);
+        return fullSize[1] - size[1] - GetEdgeHeight(activity);
+    }
+
+    public static int GetStatusBarHeight(Activity activity)
+    {
+        int result = 0;
+
+        Resources resources = activity.getResources();
+        int resourceId = resources.getIdentifier("status_bar_height","dimen", "android");
+
+        if (resourceId > 0)
+            result = resources.getDimensionPixelSize(resourceId);
+
+        return result;
     }
     
 	private ContextUtility() {}

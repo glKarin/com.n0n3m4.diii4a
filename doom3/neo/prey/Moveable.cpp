@@ -82,11 +82,14 @@ void idMoveable::Spawn( void ) {
 
 	if ( !collisionModelManager->TrmFromModel( clipModelName, trm ) ) {
 // jmarshall
+#if 0
+		gameLocal.Error("idMoveable '%s': cannot load collision model %s", name.c_str(), clipModelName.c_str());
+		return;
+#else
 		gameLocal.Warning("idMoveable '%s': cannot load collision model %s", name.c_str(), clipModelName.c_str());
-		//return;
-
 		idRenderModel* model = renderModelManager->FindModel(clipModelName);
 		trm.SetupBox(model->Bounds());
+#endif
 // jmarshall end
 		
 	}

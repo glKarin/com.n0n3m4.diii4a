@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan21(natasha)  
+1.1.0harmattan22(natasha)  
 **Last update release:**
-2022-12-10  
+2023-01-10  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -14,15 +14,17 @@ GPLv3
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan21 (2022-12-10)
+> 1.1.0harmattan22 (2023-01-10)
 
-* Prey(2006) for DOOM3 support, game data folder named `preybase`. All levels clear, but have some bugs.
-* Add setup On-screen buttons position unit when config controls layout.
-* Android Target SDK level back to 28(Android 9), for avoid `Scoped-Storage` on Android 10+.
+* Support screen top edges with fullscreen.
+* Add bad skybox render in Prey(2006).
+* Add bad portal render in Prey(2006).
+* Add `deathwalk` map append support in Prey(2006).
 
-* 掠食(2006) for 毁灭战士3引擎支持, 游戏数据包文件夹命名为`preybase`. 所有关卡都可以通过, 但是存在一些bug.
-* 新增编辑虚拟按键时位置移动单位.
-* 安卓Target SDK 级别回退到28(Android 9), 为了避免安卓10以上的`沙盒存储`.
+* 支持刘海屏/打孔屏的全屏.
+* 掠食(2006)增加天空盒渲染.
+* 掠食(2006)增加通道渲染.
+* 掠食(2006)支持`deathwalk`地图追加载.
 
 ----------------------------------------------------------------------------------
 
@@ -30,7 +32,7 @@ GPLv3
 ###### For playing Prey(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). Now can play all levels, but some levels has bugs.
 > 1. Putting PC Prey game data file to `preybase` folder and START directly.
 > 2. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.
-> 3. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw, some GUIs not work(Music CD in RoadHouse).
+> 3. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).
 
 #### 关于掠食(2006)
 ###### 运行掠食(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). 目前可以运行全部关卡, 部分关卡存在bug.
@@ -102,6 +104,18 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan21 (2022-12-10)
+
+* Prey(2006) for DOOM3 support, game data folder named `preybase`. All levels clear, but have some bugs.
+* Add setup On-screen buttons position unit when config controls layout.
+* Android Target SDK level back to 28(Android 9), for avoid `Scoped-Storage` on Android 10+.
+
+* 掠食(2006) for 毁灭战士3引擎支持, 游戏数据包文件夹命名为`preybase`. 所有关卡都可以通过, 但是存在一些bug.
+* 新增编辑虚拟按键时位置移动单位.
+* 安卓Target SDK 级别回退到28(Android 9), 为了避免安卓10以上的`沙盒存储`.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan20 (2022-11-18)
 
 * Add default font for somewhere missing text in Quake 4, using cvar `harm_gui_defaultFont` to control, default is `chain`.
@@ -161,7 +175,7 @@ GPLv3
 > 1.1.0harmattan15 (2022-10-15)
 
 * Add gyroscope control support.
-* Add reset onscreen buttton layout with fullscreen.
+* Add reset onscreen button layout with fullscreen.
 * If running Quake 4 crash on arm32 device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.
 * Fixup some Quake 4 bugs:
 > 1. Fixup start new game in main menu, now start new game is work.
@@ -169,8 +183,8 @@ GPLv3
 > 3. Fixup AI `Singer` can not move when opening the door in level `game/building_b`.
 > 4. Fixup jump down on broken floor in level `game/putra`.
 > 5. Fixup player model choice and view in `Settings` menu in Multiplayer game.
-> 6. Add bool cvar `harm_g_flashlightOn` for controling gun-lighting is open/close initial, default is 1(open).
-> 7. Add bool cvar `harm_g_vehicleWalkerMoveNormalize` for re-normalize `vehicle walker` movment if enable `Smooth joystick` in launcher, default is 1(re-normalize), it can fix up move left-right.
+> 6. Add bool cvar `harm_g_flashlightOn` for controlling gun-lighting is open/close initial, default is 1(open).
+> 7. Add bool cvar `harm_g_vehicleWalkerMoveNormalize` for re-normalize `vehicle walker` movement if enable `Smooth joystick` in launcher, default is 1(re-normalize), it can fix up move left-right.
 
 * 新增陀螺仪支持.
 * 重置按键新增按全屏分辨率.
@@ -305,8 +319,8 @@ Update:
 * Fix sky box.
 * Fix fog and blend light.
 * Fix glass reflection.
-* Add texgen shader for like `D3XP` hell level sky.
-* Fix translucent object. i.e. window glass, transclucent Demon in `Classic DOOM` mod.
+* Add `texgen` shader for like `D3XP` hell level sky.
+* Fix translucent object. i.e. window glass, translucent Demon in `Classic DOOM` mod.
 * Fix dynamic texture interaction. i.e. rotating fans.
 * Fix `Berserk`, `Grabber`, `Helltime` vision effect(First set cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` and `harm_g_skipHelltimeVision` to 0).
 * Fix screen capture image when quick save game or mission tips.

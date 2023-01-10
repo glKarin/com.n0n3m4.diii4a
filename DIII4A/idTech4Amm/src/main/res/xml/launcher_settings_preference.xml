@@ -4,17 +4,30 @@
         android:title="Launcher settings"
         >
 
+    <PreferenceCategory
+        android:key="screen"
+        android:title="Screen"
+        >
+        <CheckBoxPreference
+            android:title="Hide navigation bar"
+            android:key="harm_hide_nav"
+            android:persistent="true"
+            android:defaultValue="true"
+            android:summary="Control navigation bar is visible when game running"
+            />
+        <CheckBoxPreference
+            android:title="Cover screen edges"
+            android:key="harm_cover_edges"
+            android:persistent="true"
+            android:defaultValue="true"
+            android:summary="Cover screen edges in status bar"
+            />
+    </PreferenceCategory>
+
         <PreferenceCategory
             android:key="game"
             android:title="Game"
         >
-            <CheckBoxPreference
-                android:title="Hide navigation bar"
-                android:key="harm_hide_nav"
-                android:persistent="true"
-                android:defaultValue="true"
-                android:summary="Control navigation bar is visiblity when game running"
-            />
             <ListPreference
                 android:title="Run background"
                 android:key="harm_run_background"

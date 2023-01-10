@@ -1339,6 +1339,11 @@ void idSessionLocal::StartNewGame(const char *mapName, bool devmap)
 	mapSpawnData.serverInfo.Clear();
 	mapSpawnData.serverInfo = *cvarSystem->MoveCVarsToDict(CVAR_SERVERINFO);
 	mapSpawnData.serverInfo.Set("si_gameType", "singleplayer");
+#ifdef _HUMANHEAD
+	const char *deathwalkmap = GetDeathwalkMapName(mapName);
+	mapSpawnData.serverInfo.Set("deathwalkmap", deathwalkmap);
+	mapSpawnData.serverInfo.SetBool("shouldappendlevel", deathwalkmap && deathwalkmap[0]);
+#endif
 
 	// set the devmap key so any play testing items will be given at
 	// spawn time to set approximately the right weapons and ammo
@@ -1688,7 +1693,11 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 		// title
 		const idDecl *mapDecl = declManager->FindType(DECL_MAPDEF, mapName, false);
 		const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
-		guiLoading->SetStateString("friendlyname", mapDef ? common->GetLanguageDict()->GetString(mapDef->dict.GetString("name")) : stripped.c_str());
+		guiLoading->SetStateString("friendlyname", mapDef ? 
+			//mapSpawnData.serverInfo.GetBool("devmap") ? mapDef->dict.GetString("devname")
+			cvarSystem->GetCVarBool("developer") ? mapDef->dict.GetString("devname")
+			: (common->GetLanguageDict()->GetString(mapDef->dict.GetString("name")))
+				: stripped.c_str());
 #endif
 
 #endif
@@ -2476,6 +2485,11 @@ bool idSessionLocal::LoadGame(const char *saveName)
 		mapSpawnData.serverInfo.Set("si_gameType", "singleplayer");
 
 		mapSpawnData.serverInfo.Set("si_map", saveMap);
+#ifdef _HUMANHEAD
+		const char *deathwalkmap = GetDeathwalkMapName(saveMap);
+		mapSpawnData.serverInfo.Set("deathwalkmap", deathwalkmap);
+		mapSpawnData.serverInfo.SetBool("shouldappendlevel", deathwalkmap && deathwalkmap[0]);
+#endif
 
 		mapSpawnData.syncedCVars.Clear();
 		mapSpawnData.syncedCVars = *cvarSystem->MoveCVarsToDict(CVAR_NETWORKSYNC);
@@ -3847,3 +3861,32 @@ const char *idSessionLocal::GetAuthMsg(void)
 {
 	return authMsg.c_str();
 }
+
+#ifdef _HUMANHEAD
+bool idSessionLocal::ShouldAppendLevel(void) const
+{
+	return mapSpawnData.serverInfo.GetBool("shouldappendlevel");
+}
+
+const char * idSessionLocal::GetDeathwalkMapName(void) const
+{
+	idStr mapName = mapSpawnData.serverInfo.GetString("si_map");
+	return GetDeathwalkMapName(mapName);
+}
+
+const char * idSessionLocal::GetDeathwalkMapName(const char *mapName) const
+{
+	const idDecl *mapDecl = declManager->FindType(DECL_MAPDEF, mapName, false);
+#if 0
+	if(!mapDecl)
+		mapDecl = declManager->FindType(DECL_MAPDEF, "defaultMap", false);
+#endif
+	const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
+	const char *dwMap = mapDef->dict.GetString("deathwalkmap");
+	if(!dwMap || !dwMap[0])
+		return "";
+	if(!idStr::Icmp(dwMap, "none"))
+		return "";
+	return dwMap;
+}
+#endif

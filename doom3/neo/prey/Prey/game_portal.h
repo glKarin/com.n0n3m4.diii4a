@@ -96,7 +96,7 @@ protected:
 	void			TriggerTargets();
 
 private:
-#if 1 // GAMEPORTAL_PVS jmarshall
+#if 1 // GAMEPORTAL_PVS
 	qhandle_t			areaPortal;		// 0 = no portal
 #endif
 

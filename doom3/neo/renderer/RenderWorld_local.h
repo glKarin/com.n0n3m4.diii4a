@@ -275,6 +275,11 @@ class idRenderWorldLocal : public idRenderWorld
 		//-------------------------------
 		// tr_light.c
 		void					CreateLightDefInteractions(idRenderLightLocal *ldef);
+#ifdef _HUMANHEAD
+#if DEATHWALK_AUTOLOAD
+		int numAppendPortalAreas;
+#endif
+#endif
 };
 
 #endif /* !__RENDERWORLDLOCAL_H__ */

@@ -128,7 +128,17 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
 	srfTriangles_t	*tri;
 	modelSurface_t	surf;
 
+#ifdef _HUMANHEAD
+#if DEATHWALK_AUTOLOAD
+	src->ReadToken(&token);
+	if(token != "{")
+		src->UnreadToken(&token);
+#else
 	src->ExpectTokenString("{");
+#endif
+#else
+	src->ExpectTokenString("{");
+#endif
 
 	// parse the name
 	src->ExpectAnyToken(&token);
@@ -338,6 +348,11 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 		return;
 	}
 
+#ifdef _HUMANHEAD
+#if DEATHWALK_AUTOLOAD
+	numPortalAreas += numAppendPortalAreas;
+#endif
+#endif
 	portalAreas = (portalArea_t *)R_ClearedStaticAlloc(numPortalAreas * sizeof(portalAreas[0]));
 	areaScreenRect = (idScreenRect *) R_ClearedStaticAlloc(numPortalAreas * sizeof(idScreenRect));
 
@@ -644,6 +659,19 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 // jmarshall end
 #endif
 
+#ifdef _HUMANHEAD
+// HUMANHEAD pdm: Support for level appending
+#if DEATHWALK_AUTOLOAD
+	const char *dwMapName = session->GetDeathwalkMapName();
+	bool bAppending = dwMapName && dwMapName[0] && session->ShouldAppendLevel() && idStr::Icmp(name, dwMapName);
+	numAppendPortalAreas = bAppending ? 1 : 0;
+	if(bAppending)
+		common->Printf("[Harmattan]: Appending deathwalk proc: %s of %s\n", dwMapName, name);
+	else
+		common->Printf("[Harmattan]: no deathwalk map in %s\n", name);
+#endif
+#endif
+
 	// parse the file
 	while (1) {
 		if (!src->ReadToken(&token)) {
@@ -691,6 +719,185 @@ bool idRenderWorldLocal::InitFromMap(const char *name)
 	if (!numPortalAreas) {
 		ClearWorld();
 	}
+
+#ifdef _HUMANHEAD
+// HUMANHEAD pdm: Support for level appending
+#if DEATHWALK_AUTOLOAD
+	src = 0;
+	while (bAppending)
+	{
+		filename = dwMapName;
+		filename.SetFileExtension(PROC_FILE_EXT);
+		common->Printf("[Harmattan]: Appending deathwalk proc: %s\n", filename.c_str());
+		src = new idLexer(filename, LEXFL_NOSTRINGCONCAT | LEXFL_NODOLLARPRECOMPILE);
+
+		if (!src->IsLoaded()) {
+			numAppendPortalAreas = 0;
+			common->Warning("[Harmattan]: Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: %s not found\n", filename.c_str());
+			break;
+		}
+
+#if 0
+		// if we are writing a demo, archive the load command
+		if (session->writeDemo) {
+			WriteLoadMap();
+		}
+#endif
+
+		if (!src->ReadToken(&token) || token.Icmp(PROC_FILE_ID)) {
+			numAppendPortalAreas = 0;
+			common->Warning("[Harmattan]: Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: bad id '%s' instead of '%s'\n", token.c_str(), PROC_FILE_ID);
+			break;
+		}
+
+		// parse the file
+		while (1) {
+			if (!src->ReadToken(&token)) {
+				break;
+			}
+
+			if (token == "model") {
+				//k: replace `_areaXXX` name
+				src->ExpectTokenString("{");
+				idToken tmp;
+				src->ExpectAnyToken(&tmp);
+				if(!idStr::Icmpn(tmp, "_area", 5))
+				{
+					common->Printf("[Harmattan]: Appending deathwalk proc: parse area(%s) to portal area(%d)\n", tmp.c_str(), numPortalAreas - 1);
+					int areaNo = atoi(tmp.c_str() + 5);
+					tmp = va("_area%d", numPortalAreas - 1);
+				}
+				src->UnreadToken(&tmp);
+
+				lastModel = ParseModel(src);
+
+				// add it to the model manager list
+				renderModelManager->AddModel(lastModel);
+
+				// save it in the list to free when clearing this map
+				localModels.Append(lastModel);
+				continue;
+			}
+
+			if (token == "shadowModel") {
+				lastModel = ParseShadowModel(src);
+
+				// add it to the model manager list
+				renderModelManager->AddModel(lastModel);
+
+				// save it in the list to free when clearing this map
+				localModels.Append(lastModel);
+				continue;
+			}
+
+			if (token == "interAreaPortals") {
+				src->ExpectTokenString("{");
+				src->SkipBracedSection(false);
+				continue;
+			}
+
+			if (token == "nodes") {
+				src->ExpectTokenString("{");
+				src->SkipBracedSection(false);
+				continue;
+			}
+
+			src->Error("[Harmattan]: Appending deathwalk proc -> idRenderWorldLocal::InitFromMap: bad token \"%s\"", token.c_str());
+		}
+
+		//k: realloc nodes, add 6 nodes of deathwalk map to front, 6 nodes using deathwalk map bounds min/max points
+		idRenderModel *model = renderModelManager->CheckModel(va("_area%i", numPortalAreas - 1));
+		common->Printf("[Harmattan]: Appending deathwalk proc: find area model(%d %s)\n", numPortalAreas - 1, model ? model->Name() : "null");
+		if(model)
+		{
+			int numAreaNodes_orig = numAreaNodes;
+			numAreaNodes += 6;
+			common->Printf("[Harmattan]: Appending deathwalk proc: push 6 nodes to list front(%d -> %d)\n", numAreaNodes_orig, numAreaNodes);
+
+			areaNode_t *areaNodes_orig = areaNodes;
+			areaNodes = (areaNode_t *)R_ClearedStaticAlloc(numAreaNodes * sizeof(areaNodes[0]));
+
+			common->Printf("[Harmattan]: Appending deathwalk proc: copying area nodes(%d)\n", numAreaNodes_orig);
+			for (int i = 0 ; i < numAreaNodes_orig ; i++) {
+				areaNode_t	*node, *node_orig;
+
+				//k: make positive child index + 6
+				node = &areaNodes[i + 6];
+				node_orig = &areaNodes_orig[i];
+
+				node->plane = node_orig->plane;
+				node->children[0] = node_orig->children[0];
+				node->children[1] = node_orig->children[1];
+				if(node->children[0] > 0)
+					node->children[0] += 6;
+				if(node->children[1] > 0)
+					node->children[1] += 6;
+			}
+
+			R_StaticFree(areaNodes_orig); //k: free origin nodes
+
+			//k: add deathwalk map 6 nodes to front, last area is deathwalk map
+			idBounds bounds = model->Bounds();
+			areaNode_t	*node;
+			idVec3 dir;
+
+			common->Printf("[Harmattan]: Appending deathwalk proc: area bounds(%s, %s)\n", bounds[0].ToString(), bounds[1].ToString());
+
+			// 0: positive X direction, bounds min-X = next node(1), origin first node(now index is 6)
+			node = &areaNodes[0];
+			dir = idVec3(1, 0, 0);
+			node->plane = idPlane(dir, bounds[0][0]);
+			node->children[0] = 1;
+			node->children[1] = 6;
+			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 0, node->plane.ToString(), node->children[0], node->children[1]);
+
+			// 1: positive Y direction, bounds min-Y = next node(2), origin first node(now index is 6)
+			node = &areaNodes[1];
+			dir = idVec3(0, 1, 0);
+			node->plane = idPlane(dir, bounds[0][1]);
+			node->children[0] = 2;
+			node->children[1] = 6;
+			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 1, node->plane.ToString(), node->children[0], node->children[1]);
+
+			// 2: positive Z direction, bounds min-Z = next node(3), origin first node(now index is 6)
+			node = &areaNodes[2];
+			dir = idVec3(0, 0, 1);
+			node->plane = idPlane(dir, bounds[0][2]);
+			node->children[0] = 3;
+			node->children[1] = 6;
+			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 2, node->plane.ToString(), node->children[0], node->children[1]);
+
+			// 3: negative X direction, bounds max-X = next node(4), origin first node(now index is 6)
+			node = &areaNodes[3];
+			dir = idVec3(-1, 0, 0);
+			node->plane = idPlane(dir, -bounds[1][0]);
+			node->children[0] = 4;
+			node->children[1] = 6;
+			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 3, node->plane.ToString(), node->children[0], node->children[1]);
+
+			// 4: negative Y direction, bounds max-Y = next node(5), origin first node(now index is 6)
+			node = &areaNodes[4];
+			dir = idVec3(0, -1, 0);
+			node->plane = idPlane(dir, -bounds[1][1]);
+			node->children[0] = 5;
+			node->children[1] = 6;
+			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 4, node->plane.ToString(), node->children[0], node->children[1]);
+
+			// 5: negative Z direction, bounds max-Z = deathwalk portal area index, origin first node(now index is 6)
+			node = &areaNodes[5];
+			dir = idVec3(0, 0, -1);
+			node->plane = idPlane(dir, -bounds[1][2]);
+			node->children[0] = -1 - (numPortalAreas - 1);
+			node->children[1] = 6;
+			common->Printf("[Harmattan]: Appending deathwalk proc: \"/* node %d */ ( %s ) %d %d\"\n", 5, node->plane.ToString(), node->children[0], node->children[1]);
+		}
+
+		common->Printf("[Harmattan]: Appending deathwalk proc finish\n");
+		break;
+	}
+	delete src;
+#endif
+#endif
 
 	// find the points where we can early-our of reference pushing into the BSP tree
 	CommonChildrenArea_r(&areaNodes[0]);

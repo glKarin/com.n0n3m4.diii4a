@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11021"
-    android:versionName="1.1.0harmattan21"
+    android:versionCode="11022"
+    android:versionName="1.1.0harmattan22"
     android:installLocation="preferExternal"
     >
 
@@ -23,7 +23,7 @@
         tools:ignore="ScopedStorage" />
         android:requestLegacyExternalStorage="true"
         -->
-	
+
 	<supports-screens android:smallScreens="true" 
                       android:normalScreens="true" 
                       android:largeScreens="true"
