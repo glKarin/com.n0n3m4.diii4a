@@ -19,7 +19,7 @@ GPLv3
 * Support screen top edges with fullscreen.
 * Add bad skybox render in Prey(2006).
 * Add bad portal render in Prey(2006).
-* Add `deathwalk` map append support in Prey(2006).
+* Add `deathwalk` map append support in Prey(2006), but now has a bug so don't save game when player in `deathwalk` status.
 * Because of tab window UI not support, Settings UI is not work, must edit `preyconfig.cfg` for binding extras key.
 > * bind "Your key of spirit walk" "_impulse54"
 > * bind "Your key of second mode attack of weapons" "_attackAlt"
@@ -30,7 +30,7 @@ GPLv3
 * 支持刘海屏/打孔屏的全屏.
 * 掠食(2006)增加天空盒渲染.
 * 掠食(2006)增加通道渲染.
-* 掠食(2006)支持`deathwalk`(玩家死亡后行走空间)地图追加载.
+* 掠食(2006)支持`deathwalk`(玩家死亡后行走空间)地图追加载, 但是现在有bug, 不要在玩家在`deathwalk`状态时保存游戏.
 * 由于选项卡窗口UI组件暂不支持, 导致设置页面不工作, 必须通过编辑`preyconfig.cfg`来绑定额外按键.
 > * bind "幽灵行走按键" "_impulse54"
 > * bind "武器第2攻击键" "_attackAlt"
