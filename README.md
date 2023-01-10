@@ -25,6 +25,7 @@ GPLv3
 > * bind "Your key of second mode attack of weapons" "_attackAlt"
 > * bind "Your key of toggle lighter" "_impulse16"
 > * bind "Your key of drop" "_impulse25"
+* If not sound when start new game and load `roadhouse` map, try to press `ESC` key back to main menu and then press `ESC` key to back game, then sound can be played.
 
 
 * 支持刘海屏/打孔屏的全屏.
@@ -36,6 +37,7 @@ GPLv3
 > * bind "武器第2攻击键" "_attackAlt"
 > * bind "打火机开关键" "_impulse16"
 > * bind "扔物体键" "_impulse25"
+* 如果开始新游戏和载入第一关地图后没有声音, 可以尝试按`ESC`键返回主菜单, 然后再按次`ESC`键返回游戏, 就会有声音.
 
 ----------------------------------------------------------------------------------
 
@@ -49,6 +51,7 @@ GPLv3
 > > * bind "Your key of second mode attack of weapons" "_attackAlt"
 > > * bind "Your key of toggle lighter" "_impulse16"
 > > * bind "Your key of drop" "_impulse25"
+> 5. If not sound when start new game and load `roadhouse` map, try to press `ESC` key back to main menu and press `ESC` key to back game, then sound can be played.
 
 #### 关于掠食(2006)
 ###### 运行掠食(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). 目前可以运行全部关卡, 部分关卡存在bug.
@@ -60,6 +63,7 @@ GPLv3
 > > * bind "武器第2攻击键" "_attackAlt"
 > > * bind "打火机开关键" "_impulse16"
 > > * bind "扔物体键" "_impulse25"
+> 5. 如果开始新游戏和载入第一关地图后没有声音, 可以尝试按`ESC`键返回主菜单, 然后再按次`ESC`键返回游戏, 就会有声音.
 
 ----------------------------------------------------------------------------------
 
