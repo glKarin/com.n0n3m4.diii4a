@@ -378,8 +378,8 @@ FILE * android_tmpfile(void)
 		return NULL;
 	}
 	unlink(tmp_file);
-	free(tmp_file);
     __android_log_print(ANDROID_LOG_DEBUG, "Q3E_JNI", "itmpfile create: %s", tmp_file);
+	free(tmp_file);
 	return res;
 }
 
