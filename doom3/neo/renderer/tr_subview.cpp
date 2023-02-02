@@ -551,14 +551,25 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				if (!parms) {
 					return false;
 				}
+
+#if 0 // cull???
+				idPlane			originalPlane, plane;
+				R_PlaneForSurface(drawSurf->geo, originalPlane);
+				R_LocalPlaneToGlobal(drawSurf->space->modelMatrix, originalPlane, plane);
+				idVec3 dir;
+				tr.viewDef->renderView.viewaxis.ToAngles().ToVectors(&dir);
+				float scale = 0.0f;
+				if(!plane.RayIntersection(tr.viewDef->renderView.vieworg, dir, scale))
+					return false;
+#endif
+
 				*parms = *tr.viewDef;
 
 				parms->isSubview = true;
 				parms->isMirror = false;
 
-				parms->renderView = *drawSurf->space->entityDef->parms.remoteRenderView;
+				const renderView_t *remoteRenderView = drawSurf->space->entityDef->parms.remoteRenderView;
 				parms->renderView.viewID = 0;	// clear to allow player bodies to show up, and suppress view weapons
-				//LOGI("PPP %s | %s | %s | %f %f", shader->GetName(), parms->renderView.vieworg.ToString(), parms->renderView.viewaxis.ToString(), parms->renderView.fov_x, parms->renderView.fov_y)
 
 				idVec3 forward, left, up, forward2, left2, up2;
 				idVec3 pos, pos2;
@@ -572,8 +583,8 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 
 				//k: add a clip plane in remote camera
 				parms->numClipPlanes = 1;
-				parms->clipPlanes[0] = parms->renderView.viewaxis[0];
-				parms->clipPlanes[0][3] = -(parms->renderView.vieworg * parms->clipPlanes[0].Normal());
+				parms->clipPlanes[0] = remoteRenderView->viewaxis[0];
+				parms->clipPlanes[0][3] = -(remoteRenderView->vieworg * parms->clipPlanes[0].Normal());
 
 				//k: transform current render view origin and axis to surface model coordonate system
 				R_GlobalVectorToLocal(mm, tr.viewDef->renderView.viewaxis[0], forward);
@@ -583,41 +594,25 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 
 				//k: transform local origin and axis to remote view coordonate system
 				float mmm[16];
-				R_AxisToModelMatrix(parms->renderView.viewaxis, parms->renderView.vieworg, mmm);
+				R_AxisToModelMatrix(remoteRenderView->viewaxis, remoteRenderView->vieworg, mmm);
 				R_LocalVectorToGlobal(mmm, forward, forward2);
 				R_LocalVectorToGlobal(mmm, left, left2);
 				R_LocalVectorToGlobal(mmm, up, up2);
 				R_LocalPointToGlobal(mmm, pos, pos2);
+				pos2 += forward2 * 8; //k: offset TODO: I do not known why can recursion R_GenerateSubViews sometime.
 
 				//k: setup remote view origin and axis
 				idMat3 hh3(forward2, left2, up2);
 				parms->renderView.viewaxis = hh3;
-				parms->initialViewAreaOrigin = parms->renderView.vieworg;
+				parms->initialViewAreaOrigin = remoteRenderView->vieworg;
 				//parms->initialViewAreaOrigin = pos2;
 				parms->renderView.vieworg = pos2;
 
-				//parms->renderView.fov_x = 45;
-				//parms->renderView.fov_y = 45;
-				tr.CropRenderSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-				parms->renderView.x = 0;
-				parms->renderView.y = 0;
-				parms->renderView.width = SCREEN_WIDTH;
-				parms->renderView.height = SCREEN_HEIGHT;
-
-				tr.RenderViewToViewport(&parms->renderView, &parms->viewport);
-
-				parms->scissor.x1 = 0;
-				parms->scissor.y1 = 0;
-				parms->scissor.x2 = parms->viewport.x2 - parms->viewport.x1;
-				parms->scissor.y2 = parms->viewport.y2 - parms->viewport.y1;
-				//parms->scissor = scissor;
 				parms->superView = tr.viewDef;
 				parms->subviewSurface = drawSurf;
 
 				// generate render commands for it
 				R_RenderView(parms);
-				tr.UnCrop();
 				return true;
 			}
 		case SC_PORTAL_SKYBOX:
@@ -636,34 +631,16 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				parms->isSubview = true;
 				parms->isMirror = false;
 
-				parms->renderView = *drawSurf->space->entityDef->parms.remoteRenderView;
+				const renderView_t *remoteRenderView = drawSurf->space->entityDef->parms.remoteRenderView;
 				parms->renderView.viewID = 0;	// clear to allow player bodies to show up, and suppress view weapons
-				//LOGI("KKK %s | %s | %s | %f %f", shader->GetName(), parms->renderView.vieworg.ToString(), parms->renderView.viewaxis.ToString(), parms->renderView.fov_x, parms->renderView.fov_y)
-				parms->initialViewAreaOrigin = parms->renderView.vieworg;
-				parms->renderView.viewaxis = tr.viewDef->renderView.viewaxis;
-				//parms->renderView.fov_x = 45;
-				//parms->renderView.fov_y = 45;
-				tr.CropRenderSize(glConfig.vidWidth, glConfig.vidHeight);
+				parms->initialViewAreaOrigin = remoteRenderView->vieworg;
+				parms->renderView.vieworg = remoteRenderView->vieworg;
 
-				//idVec3 v = (drawSurf->geo->bounds[1] + drawSurf->geo->bounds[0]);
-				parms->renderView.x = 0;
-				parms->renderView.y = 0;
-				parms->renderView.width = glConfig.vidWidth;
-				parms->renderView.height = glConfig.vidHeight;
-
-				tr.RenderViewToViewport(&parms->renderView, &parms->viewport);
-
-				parms->scissor.x1 = 0;
-				parms->scissor.y1 = 0;
-				parms->scissor.x2 = parms->viewport.x2 - parms->viewport.x1;
-				parms->scissor.y2 = parms->viewport.y2 - parms->viewport.y1;
-				//parms->scissor = scissor;
 				parms->superView = tr.viewDef;
 				parms->subviewSurface = drawSurf;
 
 				// generate render commands for it
 				R_RenderView(parms);
-				tr.UnCrop();
 				return true;
 			}
 		case SC_MIRROR:
