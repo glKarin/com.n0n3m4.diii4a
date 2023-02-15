@@ -894,6 +894,13 @@ static void Session_EndOfGame_f(const idCmdArgs &args)
 }
 #endif
 
+#ifdef _HUMANHEAD //k: for sound in new game
+static void Session_ExitMenu_f(const idCmdArgs &args)
+{
+	sessLocal.ExitMenu();
+}
+#endif
+
 /*
 ================
 idSessionLocal::StartRecordingRenderDemo
@@ -1355,6 +1362,9 @@ void idSessionLocal::StartNewGame(const char *mapName, bool devmap)
 	mapSpawnData.syncedCVars = *cvarSystem->MoveCVarsToDict(CVAR_NETWORKSYNC);
 
 	MoveToNewMap(mapName);
+#endif
+#ifdef _HUMANHEAD //k: for sound in new game by lvonasek
+	cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exitMenu");
 #endif
 }
 
@@ -2653,7 +2663,6 @@ void idSessionLocal::AdvanceRenderDemo(bool singleFrameOnly)
 		}
 
 		if (ds == DS_RENDER) {
-#if !defined(_RAVENxxx)
 			// jmarshall - demos
 			if (rw->ProcessDemoCommand(readDemo, &currentDemoRenderView, &demoTimeOffset)) {
 				// a view is ready to render
@@ -2661,7 +2670,6 @@ void idSessionLocal::AdvanceRenderDemo(bool singleFrameOnly)
 				numDemoFrames++;
 			}
 // jmarshall end
-#endif
 			continue;
 		}
 
@@ -2956,9 +2964,7 @@ void idSessionLocal::Frame()
 			int c = aviDemoFrameCount - aviTicStart;
 
 			while (c--) {
-#if !defined(_RAVENxxx)
 				renderSystem->TakeScreenshot(com_aviDemoWidth.GetInteger(), com_aviDemoHeight.GetInteger(), name, com_aviDemoSamples.GetInteger(), NULL);
-#endif
 				name = va("demos/%s/%s_%05i.tga", aviDemoShortName.c_str(), aviDemoShortName.c_str(), ++aviTicStart);
 			}
 		}
@@ -2968,10 +2974,8 @@ void idSessionLocal::Frame()
 		// remove any printed lines at the top before taking the screenshot
 		console->ClearNotifyLines();
 
-#if !defined(_RAVENxxx)
 		// this will call Draw, possibly multiple times if com_aviDemoSamples is > 1
 		renderSystem->TakeScreenshot(com_aviDemoWidth.GetInteger(), com_aviDemoHeight.GetInteger(), name, com_aviDemoSamples.GetInteger(), NULL);
-#endif
 	}
 
 	// at startup, we may be backwards
@@ -3381,6 +3385,9 @@ void idSessionLocal::Init()
 
 #ifdef _RAVEN //k: quake4 game cmd callback
 	cmdSystem->AddCommand("endOfGame", Session_EndOfGame_f, CMD_FL_SYSTEM, "ends the game");
+#endif
+#ifdef _HUMANHEAD //k: for sound in new game
+	cmdSystem->AddCommand("exitMenu", Session_ExitMenu_f, CMD_FL_SYSTEM, "exit menu");
 #endif
 
 	// the same idRenderWorld will be used for all games
