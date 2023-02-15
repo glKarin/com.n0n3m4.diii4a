@@ -552,17 +552,6 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 					return false;
 				}
 
-#if 0 // cull???
-				idPlane			originalPlane, plane;
-				R_PlaneForSurface(drawSurf->geo, originalPlane);
-				R_LocalPlaneToGlobal(drawSurf->space->modelMatrix, originalPlane, plane);
-				idVec3 dir;
-				tr.viewDef->renderView.viewaxis.ToAngles().ToVectors(&dir);
-				float scale = 0.0f;
-				if(!plane.RayIntersection(tr.viewDef->renderView.vieworg, dir, scale))
-					return false;
-#endif
-
 				*parms = *tr.viewDef;
 
 				parms->isSubview = true;
@@ -574,7 +563,7 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				idVec3 forward, left, up, forward2, left2, up2;
 				idVec3 pos, pos2;
 				const float *dsm = drawSurf->space->modelMatrix;
-				float mm[16] = {
+				float mm[16] = { //k: inverse forward and left
 					-dsm[0], -dsm[1], -dsm[2], dsm[3],
 					-dsm[4], -dsm[5], -dsm[6], dsm[7],
 					dsm[8], dsm[9], dsm[10], dsm[11],
@@ -599,14 +588,12 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				R_LocalVectorToGlobal(mmm, left, left2);
 				R_LocalVectorToGlobal(mmm, up, up2);
 				R_LocalPointToGlobal(mmm, pos, pos2);
-				pos2 += forward2 * 8; //k: offset TODO: I do not known why can recursion R_GenerateSubViews sometime.
 
 				//k: setup remote view origin and axis
 				idMat3 hh3(forward2, left2, up2);
 				parms->renderView.viewaxis = hh3;
-				parms->initialViewAreaOrigin = remoteRenderView->vieworg;
-				//parms->initialViewAreaOrigin = pos2;
-				parms->renderView.vieworg = pos2;
+				parms->initialViewAreaOrigin = remoteRenderView->vieworg + remoteRenderView->viewaxis[0] * 16; //k: offset TODO how many???, this value will be using find areaNum
+				parms->renderView.vieworg = pos2; // + forward2 * 8; //k: offset TODO: how many???;
 
 				parms->superView = tr.viewDef;
 				parms->subviewSurface = drawSurf;
