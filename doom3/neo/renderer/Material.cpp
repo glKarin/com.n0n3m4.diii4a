@@ -299,7 +299,7 @@ static infoParm_t	infoParms[] = {
     {"spirit",	0,	SURFTYPE_SPIRIT,	0 },
 	{"vehicleclip",	0,	0,	CONTENTS_VEHICLECLIP },
 	{"hunterClip",	0,	0,	CONTENTS_HUNTERCLIP },
-    {"forcefield_nobullets",	0,	SURFTYPE_FORCEFIELD,	CONTENTS_SPIRITBRIDGE },
+    {"forcefield_nobullets",	1,	SURFTYPE_FORCEFIELD,	CONTENTS_FORCEFIELD },
 #else
 	{"glass",		0,	SURFTYPE_GLASS,		0 },	// glass
 	{"plastic",		0,	SURFTYPE_PLASTIC,	0 },	// plastic

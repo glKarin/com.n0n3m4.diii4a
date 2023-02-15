@@ -315,7 +315,7 @@ class idRenderModel
 #ifdef _RAVEN
 // RAVEN BEGIN
 // bdube: surface flag manipulation
-	virtual int					GetSurfaceMask ( const char* surface ) const = 0;;
+	virtual int					GetSurfaceMask ( const char* surface ) const = 0;
 #endif
 };
 
