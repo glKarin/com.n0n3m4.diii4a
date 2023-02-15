@@ -42,6 +42,19 @@ VERTEX CACHE GENERATORS
 ===========================================================================================
 */
 
+#ifdef _HUMANHEAD
+static float R_CalcViewAndEntityDistance(const viewDef_t *viewDef, const renderEntity_t *entity)
+{
+	//idVec3 origin = idVec3(space->modelMatrix[12], space->modelMatrix[13], space->modelMatrix[14]);
+	return (viewDef->renderView.vieworg - entity->origin).LengthFast();
+}
+
+static float R_CalcViewAndLightDistance(const viewDef_t *viewDef, const renderLight_t *light)
+{
+	return (viewDef->renderView.vieworg - light->origin).LengthFast();
+}
+#endif
+
 /*
 ==================
 R_CreateAmbientCache
@@ -584,6 +597,9 @@ void R_LinkLightSurf(const drawSurf_t **link, const srfTriangles_t *tri, const v
 			// FIXME: share with the ambient surface?
 			float *regs = (float *)R_FrameAlloc(shader->GetNumRegisters() * sizeof(float));
 			drawSurf->shaderRegisters = regs;
+#ifdef _HUMANHEAD
+			space->entityDef->parms.shaderParms[SHADERPARM_DISTANCE] = R_CalcViewAndEntityDistance(tr.viewDef, &space->entityDef->parms);
+#endif
 			shader->EvaluateRegisters(regs, space->entityDef->parms.shaderParms, tr.viewDef, space->entityDef->parms.referenceSound);
 		}
 	}
@@ -805,6 +821,9 @@ void R_AddLightSurfaces(void)
 		// evaluate the light shader registers
 		float *lightRegs =(float *)R_FrameAlloc(lightShader->GetNumRegisters() * sizeof(float));
 		vLight->shaderRegisters = lightRegs;
+#ifdef _HUMANHEAD
+		light->parms.shaderParms[SHADERPARM_DISTANCE] = R_CalcViewAndLightDistance(tr.viewDef, &light->parms);
+#endif
 		lightShader->EvaluateRegisters(lightRegs, light->parms.shaderParms, tr.viewDef, light->parms.referenceSound);
 
 		// if this is a purely additive light and no stage in the light shader evaluates
@@ -1179,6 +1198,9 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 		}
 #endif
 
+#ifdef _HUMANHEAD
+		((float *)shaderParms)[SHADERPARM_DISTANCE] = R_CalcViewAndEntityDistance(tr.viewDef, renderEntity);
+#endif
 		shader->EvaluateRegisters(regs, shaderParms, tr.viewDef, renderEntity->referenceSound);
 
 #if !defined(_RAVENxxx)
