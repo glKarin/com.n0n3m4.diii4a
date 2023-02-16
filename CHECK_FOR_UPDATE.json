@@ -1,7 +1,7 @@
 {
-    "release":22,
-    "update":"2023-01-10",
-    "version":"1.1.0harmattan22",
-    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.22.apk",
-    "changes":"  * Support screen top edges with fullscreen.\n  * Add bad skybox render in Prey(2006).\n  * Add bad portal render in Prey(2006).\n  * Add `deathwalk` map append support in Prey(2006)."
+    "release":23,
+    "update":"2023-02-16",
+    "version":"1.1.0harmattan23",
+    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.23.apk",
+    "changes":"  * Multi-threading support(Testing), using `d3es-multithread`.\n  * Fixup portal/skybox view in Prey(2006).\n  * Fixup intro sound playing when start new game in Prey(2006) by `lvonasek/PreyVR`.\n  * Fixup player can not through first wall with spirit walk mode in game/spindlea beginning in Prey(2006).\n  * Fixup render Tommy's original body when in spirit walk mode in Prey(2006).\n  * Do not render on-screen buttons when game is loading."
 }
