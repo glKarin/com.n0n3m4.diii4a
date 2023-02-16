@@ -25,6 +25,7 @@ GPLv3
 
 
 * 多线程支持(测试), 使用[d3es-multithread](https://github.com/emileb/d3es-multithread).
+* 掠食(2006)修复开始新游戏加载第一个关卡后intro部分的声音播放 by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
 * 掠食(2006)修复通道和天空盒渲染.
 * 掠食(2006)修复关卡`game/spindlea`幽灵行走模式无法穿过玩家初始位置前的空气墙.
 * 掠食(2006)修复幽灵行走模式下无法看到Tommy的躯壳本体.
