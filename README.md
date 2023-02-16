@@ -16,7 +16,7 @@ GPLv3
 
 > 1.1.0harmattan23 (2023-02-16)
 
-* Multi-threading support(Testing), DO NOT SUPPORT TO CHANGE WITH MULTI-THREAD AND SINGLE THREAD IN GAME AT PRESENT!!! ONLY CAN SETTING IN LAUNCHER!!!, using [d3es-multithread](https://github.com/emileb/d3es-multithread).
+* Multi-threading support(Testing), DO NOT SUPPORT TO CHANGE WITH MULTI-THREAD AND SINGLE-THREAD IN GAME AT PRESENT!!! ONLY CAN SETTING IN LAUNCHER!!!, using [d3es-multithread](https://github.com/emileb/d3es-multithread).
 * Fixup portal/skybox view in Prey(2006).
 * Fixup intro sound playing when start new game in Prey(2006) by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
 * Fixup player can not through first wall with spirit walk mode in `game/spindlea` beginning in Prey(2006).
