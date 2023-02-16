@@ -233,7 +233,8 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
 	public void onDrawFrame(GL10 gl)
     {
         //k
-        m_controlView.PullEvent(false);
+        if(!Q3EUtils.q3ei.multithread)
+        Q3EUtils.q3ei.callbackObj.PullEvent(false);
         
 		if (usesCSAA)
 		{
@@ -427,6 +428,13 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
     
     public void Shutdown(final Runnable andThen)
     {
+        if(Q3EUtils.q3ei.multithread)
+        {
+            Q3EJNI.shutdown();
+            if(null != andThen)
+                andThen.run();
+            return;
+        }
         queueEvent(new Runnable() {
             public void run()
             {

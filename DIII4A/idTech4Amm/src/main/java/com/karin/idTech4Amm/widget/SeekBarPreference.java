@@ -15,6 +15,9 @@ import android.os.Build;
 
 import com.karin.idTech4Amm.R;
 
+/**
+ * SeekBar preference widget
+ */
 public class SeekBarPreference extends DialogPreference
 {
     private Map<String, Object> m_initValues = null;

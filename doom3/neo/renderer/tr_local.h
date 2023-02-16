@@ -123,6 +123,9 @@ typedef struct drawSurf_s {
 	int						dsFlags;			// DSF_VIEW_INSIDE_SHADOW, etc
 	struct vertCache_s		*dynamicTexCoords;	// float * in vertex cache memory
 	// specular directions for non vertex program cards, skybox texcoords, etc
+#ifdef _MULTITHREAD //k: only for frontend in multithread, like memory address ==
+	const srfTriangles_t *origGeo;
+#endif
 } drawSurf_t;
 
 
@@ -1856,6 +1859,22 @@ extern idCVar harm_r_maxAllocStackMemory; // declare in tr_trisurf.cpp
 #ifdef _RAVEN //k: macros for renderEffect_s::suppressSurfaceMask
 #define SUPPRESS_SURFACE_MASK(x) (1 << (x))
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
+#endif
+
+#ifdef _MULTITHREAD
+extern bool multithreadActive; // sys/android/main
+#define NUM_FRAME_DATA 2
+
+#define BACKEND_RENDERER_INTENT_DRAW 0
+#define BACKEND_RENDERER_INTENT_MAKE_CURRENT 1
+//#define BACKEND_RENDERER_INTENT_CAPTURE_TO_FILE 2
+
+extern volatile int backend_renderer_intent; // renderer/RenderSystem
+extern "C" {
+	extern void BackendThreadWait(void); // renderer/RenderSystem
+	extern void BackendThreadTask(void); // renderer/RenderSystem
+	extern void setup_backend_renderer_intent(int intent, bool wait = false); // renderer/RenderSystem
+}
 #endif
 
 #endif /* !__TR_LOCAL_H__ */

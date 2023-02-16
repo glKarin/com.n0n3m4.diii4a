@@ -39,6 +39,11 @@ If you have questions concerning this license or the applicable additional terms
 
 //====================================================================
 
+#ifdef _MULTITHREAD
+frameData_t             *smpFrameData[NUM_FRAME_DATA];
+volatile unsigned int   smpFrame;
+#endif
+
 /*
 ======================
 idScreenRect::Clear
@@ -207,6 +212,13 @@ void R_ToggleSmpFrame(void)
 		return;
 	}
 
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		smpFrame++;
+		frameData = smpFrameData[smpFrame % NUM_FRAME_DATA];
+	}
+#endif
 	R_FreeDeferredTriSurfs(frameData);
 
 	// clear frame-temporary data
@@ -244,11 +256,20 @@ void R_ShutdownFrameData(void)
 	frameData_t *frame;
 	frameMemoryBlock_t *block;
 
+#ifdef _MULTITHREAD
+	for( int n = 0; n < NUM_FRAME_DATA; n++ )
+	{
+		frameData_t *frameData = smpFrameData[n];
+#endif
 	// free any current data
 	frame = frameData;
 
 	if (!frame) {
+#ifdef _MULTITHREAD
+		continue;
+#else
 		return;
+#endif
 	}
 
 	R_FreeDeferredTriSurfs(frame);
@@ -261,6 +282,10 @@ void R_ShutdownFrameData(void)
 	}
 
 	Mem_Free(frame);
+#ifdef _MULTITHREAD
+		smpFrameData[n] = NULL;
+	}
+#endif
 	frameData = NULL;
 }
 
@@ -277,6 +302,11 @@ void R_InitFrameData(void)
 
 	R_ShutdownFrameData();
 
+#ifdef _MULTITHREAD
+	for( int n = 0; n < NUM_FRAME_DATA; n++ )
+	{
+		frameData_t *frameData;
+#endif
 	frameData = (frameData_t *)Mem_ClearedAlloc(sizeof(*frameData));
 	frame = frameData;
 	size = MEMORY_BLOCK_SIZE;
@@ -291,6 +321,13 @@ void R_InitFrameData(void)
 	block->next = NULL;
 	frame->memory = block;
 	frame->memoryHighwater = 0;
+#ifdef _MULTITHREAD
+	smpFrameData[n] = frame;
+	}
+
+	smpFrame = 0;
+	::frameData = smpFrameData[0];
+#endif
 
 	R_ToggleSmpFrame();
 }

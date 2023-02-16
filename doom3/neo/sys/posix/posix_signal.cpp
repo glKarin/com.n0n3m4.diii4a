@@ -130,7 +130,7 @@ Posix_InitSigs
 ================
 */
 #ifdef __ANDROID__
-extern unsigned char no_handle_signals;
+extern bool no_handle_signals;
 #endif
 void Posix_InitSigs()
 {

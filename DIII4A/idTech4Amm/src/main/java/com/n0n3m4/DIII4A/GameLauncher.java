@@ -201,6 +201,12 @@ public class GameLauncher extends Activity{
 						else
 							RemoveParam_temp("loadGame");
 						break;
+					case R.id.multithreading:
+						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+								.putBoolean(Q3EUtils.pref_harm_multithreading, isChecked)
+								.commit();
+						Q3EUtils.q3ei.multithread = isChecked;
+						break;
 					default:
 						break;
 				}
@@ -1078,6 +1084,9 @@ public class GameLauncher extends Activity{
 		V.auto_quick_load.setChecked(autoQuickLoad);
 		if(autoQuickLoad)
 			SetParam_temp("loadGame", "QuickSave");
+		boolean multithreading = mPrefs.getBoolean(Q3EUtils.pref_harm_multithreading, false);
+		V.multithreading.setChecked(multithreading);
+		Q3EUtils.q3ei.multithread = multithreading;
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener(){
            public boolean onEditorAction(TextView view, int id, KeyEvent ev)
            {
@@ -1215,6 +1224,7 @@ public class GameLauncher extends Activity{
                 }
             });
 		V.auto_quick_load.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		updatehacktings();
 		
@@ -1558,6 +1568,7 @@ public class GameLauncher extends Activity{
 		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
 		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
 		mEdtr.putBoolean(Q3EUtils.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
+		mEdtr.putBoolean(Q3EUtils.pref_harm_multithreading, V.multithreading.isChecked());
 		mEdtr.commit();
     }
 
@@ -2574,6 +2585,7 @@ public class GameLauncher extends Activity{
 		public CheckBox auto_quick_load;
 		public Button setup_onscreen_button_opacity;
 		public RadioGroup rg_fs_preygame;
+		public CheckBox multithreading;
 
 		public void Setup()
 		{
@@ -2622,6 +2634,7 @@ public class GameLauncher extends Activity{
 			auto_quick_load = findViewById(R.id.auto_quick_load);
 			setup_onscreen_button_opacity = findViewById(R.id.setup_onscreen_button_opacity);
 			rg_fs_preygame = findViewById(R.id.rg_fs_preygame);
+			multithreading = findViewById(R.id.multithreading);
 		}
 	}
 }

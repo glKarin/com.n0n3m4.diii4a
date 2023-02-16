@@ -56,21 +56,14 @@ void Sys_GrabMouseCursor(bool grabIt)
 {
 }
 
-extern void (*setState)(int st);
-#include "../../framework/Session_local.h"
+#if defined(__ANDROID__)
+extern void pull_input_event(int execCmd);
+#endif
 void Posix_PollInput()
 {
-    static int prev_state = -1;
-    static int state = -1;
-    if (session!=0)
-    {
-    state = (sessLocal.GetActiveMenu()==0) << 1;
-    if (state != prev_state)
-    {
-        setState(state);
-        prev_state = state;
-    }
-    }
+#if defined(__ANDROID__)
+	pull_input_event(1);
+#endif
 }
 
 void Sys_ShutdownInput(void)

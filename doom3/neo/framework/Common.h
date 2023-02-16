@@ -238,9 +238,21 @@ class idCommon
 
 		// Directly sample a keystate.
 		virtual int					KeyState(int key) = 0;
+
+		virtual int				Init_stage_1(int argc = 0, const char **argv = 0, const char *cmdline = 0) = 0; // until render system Initialized
+		virtual int				Init_stage_2(void) = 0; // until initialization done
 };
 
 extern idCommon 		*common;
+
+#define HARM_INIT_STAGE_ERROR -1
+#define HARM_INIT_STAGE_NONE 0
+#define HARM_INIT_STAGE_RENDERER 1
+#define HARM_INIT_STAGE_FRAMEWORK 2
+#define HARM_INIT_STAGE_EXIT_FRONTEND 3
+#define HARM_INIT_STAGE_EXIT_FRAMEWORK 4
+#define HARM_RENDERER_INITED() (initStage == HARM_INIT_STAGE_RENDERER)
+extern volatile int initStage;
 
 #ifdef _HUMANHEAD
 // Profiling not enabled, compile it out

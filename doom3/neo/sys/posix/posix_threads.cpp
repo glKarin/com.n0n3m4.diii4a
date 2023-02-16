@@ -197,6 +197,9 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadPriority priority,
 		common->DPrintf("WARNING: MAX_THREADS reached\n");
 	}
 
+#if defined(__ANDROID__)
+	info.threadCancel = false;
+#endif
 	Sys_LeaveCriticalSection();
 }
 

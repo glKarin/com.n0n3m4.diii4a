@@ -1,5 +1,8 @@
 package com.karin.idTech4Amm.lib;
 
+/**
+ * idTech4 command line utility
+ */
 public final class D3CommandUtility
 {
     public static String btostr(boolean b)

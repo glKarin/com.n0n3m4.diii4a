@@ -32,6 +32,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _RAVEN //k: for play credits in mainmenu
 #include "../ui/Window.h"
 #endif
+#ifdef _MULTITHREAD
+extern volatile bool backendFinished;
+extern unsigned char multithreadActive;
+#endif
 #include "Session_local.h"
 
 idCVar	idSessionLocal::com_showAngles("com_showAngles", "0", CVAR_SYSTEM | CVAR_BOOL, "");
@@ -2741,6 +2745,10 @@ void idSessionLocal::PacifierUpdate()
 		return;
 	}
 
+#ifdef _MULTITHREAD
+	if(multithreadActive && !idStr::Icmp("main", Sys_GetThreadName(0))) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
+		return;
+#endif
 	int	time = eventLoop->Milliseconds();
 
 	if (time - lastPacifierTime < 100) {
@@ -2770,6 +2778,9 @@ void idSessionLocal::PacifierUpdate()
 idSessionLocal::Draw
 ===============
 */
+#if defined(__ANDROID__)
+extern void sync_state(void);
+#endif
 void idSessionLocal::Draw()
 {
 	bool fullConsole = false;
@@ -2878,6 +2889,10 @@ void idSessionLocal::Draw()
 	if (!fullConsole) {
 		console->Draw(false);
 	}
+
+#if defined(__ANDROID__)
+	sync_state();
+#endif
 }
 
 /*

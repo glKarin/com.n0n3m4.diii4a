@@ -10,6 +10,9 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.os.Process;
 
+/**
+ * Unexpected exception handler
+ */
 public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
 {
     private Context m_context;

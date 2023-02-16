@@ -465,6 +465,9 @@ void R_XrayRender(drawSurf_t *surf, textureStage_t *stage, idScreenRect scissor)
 R_GenerateSurfaceSubview
 ==================
 */
+#if 0 //k: In original Prey, material has a dynamic variant named `distance`, portal subview render is blend with black texture with different distance, but not implement now.
+static idCVar harm_r_maxPortalDistanceLimit("harm_r_maxPortalDistanceLimit", "-1", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Max portal diatance limit with view position. If distance of view position and portal great than this value, the portal is not be rendered subview.(0 - Always not render, Negative - Always render(default), Positive - Max distance limit).");
+#endif
 bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 {
 	idBounds		ndcBounds;
@@ -486,7 +489,11 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 	// already seeing through
 	for (parms = tr.viewDef ; parms ; parms = parms->superView) {
 		if (parms->subviewSurface
+#ifdef _MULTITHREAD
+		    && (parms->subviewSurface->geo == drawSurf->geo || (multithreadActive && parms->subviewSurface->origGeo == drawSurf->origGeo)) //k: Because different with d3es-multithread, `geo` is realloc for backend, `origGeo` is original srfTriangles of model surface from frontend with DIII4A-multithread. So single-thread and d3es-multithread not need this line.
+#else
 		    && parms->subviewSurface->geo == drawSurf->geo
+#endif
 		    && parms->subviewSurface->space->entityDef == drawSurf->space->entityDef) {
 			break;
 		}
@@ -545,6 +552,17 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				if (!drawSurf->space->entityDef->parms.remoteRenderView) {
 					return false;
 				}
+
+#if 0 //k: If more portals, it makes FPS decrement sometimes.
+				int maxPortalDistanceLimit = harm_r_maxPortalDistanceLimit.GetInteger();
+				if(maxPortalDistanceLimit == 0)
+					return;
+				else if(maxPortalDistanceLimit > 0)
+				{
+					if((tr.viewDef->renderView.vieworg - drawSurf->space->entityDef->parms.origin).LengthFast() > maxPortalDistanceLimit)
+						return;
+				}
+#endif
 
 				// copy the viewport size from the original
 				parms = (viewDef_t *)R_FrameAlloc(sizeof(*parms));

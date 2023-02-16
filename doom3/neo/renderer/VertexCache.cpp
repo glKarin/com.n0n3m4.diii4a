@@ -39,6 +39,30 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_DYNAMIC_DRAW	GL_DYNAMIC_DRAW_ARB
 #endif
 
+#ifdef _MULTITHREAD
+#define _VBO_IS_VALID != -1
+#define _VBO_IS_INVALID == -1
+#else
+#define _VBO_IS_INVALID
+#define _VBO_IS_VALID
+#endif
+
+static volatile int current_frame = 0;
+//static volatile int render_frame = 0;
+//volatile int renderFrame = 0;
+#ifdef _MULTITHREAD
+#define deferredFreeList deferredFreeLists[current_frame]
+#define dynamicHeaders dynamicHeaderss[current_frame]
+#define dynamicAllocThisFrame dynamicAllocThisFrames[current_frame]
+
+#define _freeStaticHeaders freeStaticHeaderss[0]
+#define _freeStaticIndexHeaders freeStaticHeaderss[1]
+#define _staticHeaders staticHeaderss[0]
+#define _staticIndexHeaders staticHeaderss[1]
+
+#define BI(x) ((x) ? 1 : 0)
+#define BFOR(x) for(int x = 0; x < 2; x++)
+#endif
 static const int	FRAME_MEMORY_BYTES = 0x200000;
 static const int	EXPAND_HEADERS = 1024;
 
@@ -46,7 +70,7 @@ idCVar idVertexCache::r_showVertexCache("r_showVertexCache", "0", CVAR_INTEGER|C
 idCVar idVertexCache::r_vertexBufferMegs("r_vertexBufferMegs", "32", CVAR_INTEGER|CVAR_RENDERER, "");
 
 //k
-static idCVar harm_r_clearVertexBuffer("harm_r_clearVertexBuffer", "2", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Clear vertex buffer on every frame. (0 - not clear, 1 - force clear, 2 - force clear including shutdown)");
+static idCVar harm_r_clearVertexBuffer("harm_r_clearVertexBuffer", "2", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Clear vertex buffer on every frame. (0 - not clear, 1 - only free memory, 2 - delete VBO handle)");
 
 idVertexCache		vertexCache;
 
@@ -82,7 +106,7 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 		staticAllocTotal -= block->size;
 		staticCountTotal--;
 
-		if (block->vbo) {
+		if (block->vbo _VBO_IS_VALID) {
 #if 0		// this isn't really necessary, it will be reused soon enough
 			// filling with zero length data is the equivalent of freeing
 			glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
@@ -95,15 +119,18 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 				if(block->indexBuffer)
 				{
 					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
-					glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
+					glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW); // GL_DYNAMIC_DRAW
 					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 				}
 				else
 				{
 					glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-					glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
+					glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW); // GL_DYNAMIC_DRAW
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}
+#ifdef _MULTITHREAD
+				if(!multithreadActive && clearVBO == 2)
+#endif
 				glDeleteBuffers(1, &block->vbo);
 			}
 		} else if (block->virtMem) {
@@ -113,6 +140,17 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 	}
 
 	block->tag = TAG_FREE;		// mark as free
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		if(block->virtMem)
+		{
+			Mem_Free(block->virtMem);
+			block->virtMem = NULL;
+		}
+		block->virtMemDirty = true;
+	}
+#endif
 
 	// unlink stick it back on the free list
 	block->next->prev = block->prev;
@@ -120,8 +158,13 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 
 #if 1
 	// stick it on the front of the free list so it will be reused immediately
+#ifdef _MULTITHREAD
+	block->next = freeStaticHeaderss[BI(block->indexBuffer)].next;
+	block->prev = &freeStaticHeaderss[BI(block->indexBuffer)];
+#else
 	block->next = freeStaticHeaders.next;
 	block->prev = &freeStaticHeaders;
+#endif
 #else
 	// stick it on the back of the free list so it won't be reused soon (just for debugging)
 	block->next = &freeStaticHeaders;
@@ -149,8 +192,15 @@ void *idVertexCache::Position(vertCache_t *buffer)
 		common->FatalError("idVertexCache::Position: bad vertCache_t");
 	}
 
+#ifdef _MULTITHREAD
+	// Create VBO if does not exist
+	if(multithreadActive && buffer->vbo _VBO_IS_INVALID)
+	{
+		glGenBuffers(1, &buffer->vbo);
+    }
+#endif
 	// the vertex object just uses an offset
-	if (buffer->vbo) {
+	if (buffer->vbo _VBO_IS_VALID) {
 		if (r_showVertexCache.GetInteger() == 2) {
 			if (buffer->tag == TAG_TEMP) {
 				common->Printf("GL_ARRAY_BUFFER = %i + %i (%i bytes)\n", buffer->vbo, buffer->offset, buffer->size);
@@ -165,6 +215,17 @@ void *idVertexCache::Position(vertCache_t *buffer)
 			glBindBuffer(GL_ARRAY_BUFFER, buffer->vbo);
 		}
 
+#ifdef _MULTITHREAD
+		// Update any new data
+		if (multithreadActive && buffer->virtMemDirty){
+			if (buffer->indexBuffer) {
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer->size, buffer->virtMem, GL_STATIC_DRAW);
+			} else {
+				glBufferData(GL_ARRAY_BUFFER, buffer->size, buffer->virtMem, GL_STATIC_DRAW);
+			}
+			buffer->virtMemDirty = false;
+		}
+#endif
 		return (void *)buffer->offset;
 	}
 
@@ -196,11 +257,19 @@ void idVertexCache::Init()
 	//k
 	common->Printf("[Harmattan]: idVertexCache of this version support clear vertex buffer.\n");
 	// initialize the cache memory blocks
+#ifdef _MULTITHREAD
+	BFOR(i)
+	{
+		freeStaticHeaderss[i].next = freeStaticHeaderss[i].prev = &freeStaticHeaderss[i];
+		staticHeaderss[i].next = staticHeaderss[i].prev = &staticHeaderss[i];
+	}
+#else
 	freeStaticHeaders.next = freeStaticHeaders.prev = &freeStaticHeaders;
 	staticHeaders.next = staticHeaders.prev = &staticHeaders;
-	freeDynamicHeaders.next = freeDynamicHeaders.prev = &freeDynamicHeaders;
 	dynamicHeaders.next = dynamicHeaders.prev = &dynamicHeaders;
 	deferredFreeList.next = deferredFreeList.prev = &deferredFreeList;
+#endif
+	freeDynamicHeaders.next = freeDynamicHeaders.prev = &freeDynamicHeaders;
 
 	// set up the dynamic frame memory
 	frameBytes = FRAME_MEMORY_BYTES;
@@ -209,13 +278,29 @@ void idVertexCache::Init()
 	byte	*junk = (byte *)Mem_Alloc(frameBytes);
 
 	for (int i = 0 ; i < NUM_VERTEX_FRAMES ; i++) {
-		allocatingTempBuffer = true;	// force the alloc to use GL_STREAM_DRAW
-		Alloc(junk, frameBytes, &tempBuffers[i]);
-		allocatingTempBuffer = false;
-		tempBuffers[i]->tag = TAG_FIXED;
-		// unlink these from the static list, so they won't ever get purged
-		tempBuffers[i]->next->prev = tempBuffers[i]->prev;
-		tempBuffers[i]->prev->next = tempBuffers[i]->next;
+#ifdef _MULTITHREAD
+		if(multithreadActive)
+		{
+			tempBuffers[i] = CreateTempVbo(frameBytes);
+		}
+		else
+		{
+#endif
+			allocatingTempBuffer = true;	// force the alloc to use GL_STREAM_DRAW
+			Alloc(junk, frameBytes, &tempBuffers[i]);
+			allocatingTempBuffer = false;
+			tempBuffers[i]->tag = TAG_FIXED;
+			// unlink these from the static list, so they won't ever get purged
+			tempBuffers[i]->next->prev = tempBuffers[i]->prev;
+			tempBuffers[i]->prev->next = tempBuffers[i]->next;
+#ifdef _MULTITHREAD
+		}
+#endif
+
+#ifdef _MULTITHREAD
+		dynamicHeaderss[i].next = dynamicHeaderss[i].prev = &dynamicHeaderss[i];
+		deferredFreeLists[i].next = deferredFreeLists[i].prev = &deferredFreeLists[i];
+#endif
 	}
 
 	Mem_Free(junk);
@@ -233,9 +318,17 @@ the cached data isn't valid
 */
 void idVertexCache::PurgeAll()
 {
+#ifdef _MULTITHREAD
+	BFOR(i)
+	{
+		vertCache_t &staticHeaders = staticHeaderss[i];
+#endif
 	while (staticHeaders.next != &staticHeaders) {
 		ActuallyFree(staticHeaders.next);
 	}
+#ifdef _MULTITHREAD
+	}
+#endif
 }
 
 /*
@@ -246,8 +339,10 @@ idVertexCache::Shutdown
 void idVertexCache::Shutdown()
 {
 	// k
+	/*
 	int clearVBO = harm_r_clearVertexBuffer.GetInteger();
 	if(clearVBO == 2) PurgeAll();
+	*/
 //	PurgeAll();	// !@#: also purge the temp buffers
 
 	headerAllocator.Shutdown();
@@ -270,6 +365,10 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 	*buffer = NULL;
 
 	// if we don't have any remaining unused headers, allocate some more
+#ifdef _MULTITHREAD
+	vertCache_t &freeStaticHeaders = freeStaticHeaderss[BI(indexBuffer)];
+	vertCache_t &staticHeaders = staticHeaderss[BI(indexBuffer)];
+#endif
 	if (freeStaticHeaders.next == &freeStaticHeaders) {
 
 		for (int i = 0; i < EXPAND_HEADERS; i++) {
@@ -279,6 +378,15 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 			block->next->prev = block;
 			block->prev->next = block;
 
+#ifdef _MULTITHREAD
+			if(multithreadActive)
+			{
+				block->virtMem = NULL;
+				block->virtMemDirty = false;
+				block->vbo = -1;
+			}
+			else
+#endif
 			glGenBuffers(1, & block->vbo);
 		}
 	}
@@ -313,8 +421,30 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 
 	block->indexBuffer = indexBuffer;
 
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		if(allocatingTempBuffer)
+		{
+			block->virtMem = Mem_Alloc(size);
+			block->virtMemDirty = false;
+			glGenBuffers(1, &block->vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+			glBufferData(GL_ARRAY_BUFFER, (GLsizei)size, 0, GL_STREAM_DRAW);
+		}
+		else
+		{
+			if( block->virtMem )
+				Mem_Free(block->virtMem);
+			block->virtMem = Mem_Alloc(size);
+			SIMDProcessor->Memcpy(block->virtMem, data, size);
+			block->virtMemDirty = true;
+		}
+		return;
+	}
+#endif
 	// copy the data
-	if (block->vbo) {
+	if (block->vbo _VBO_IS_VALID) {
 		if (indexBuffer) {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
@@ -358,6 +488,9 @@ void idVertexCache::Touch(vertCache_t *block)
 	block->next->prev = block->prev;
 	block->prev->next = block->next;
 
+#ifdef _MULTITHREAD
+	vertCache_t &staticHeaders = staticHeaderss[BI(block->indexBuffer)];
+#endif
 	block->next = staticHeaders.next;
 	block->prev = &staticHeaders;
 	staticHeaders.next->prev = block;
@@ -445,6 +578,10 @@ vertCache_t	*idVertexCache::AllocFrameTemp(void *data, int size)
 	block->next->prev = block;
 	block->prev->next = block;
 
+#ifdef _MULTITHREAD
+	block->virtMem = NULL;
+	block->virtMemDirty = false;
+#endif
 	block->size = size;
 	block->tag = TAG_TEMP;
 	block->indexBuffer = false;
@@ -455,10 +592,19 @@ vertCache_t	*idVertexCache::AllocFrameTemp(void *data, int size)
 	block->frameUsed = 0;
 
 	// copy the data
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		block->vbo = tempBuffers[listNum]->vbo;
+		block->virtMem = tempBuffers[listNum]->virtMem;
+		SIMDProcessor->Memcpy((byte *)block->virtMem + block->offset, data, size);
+		return block;
+	}
+#endif
 	block->virtMem = tempBuffers[listNum]->virtMem;
 	block->vbo = tempBuffers[listNum]->vbo;
 
-	if (block->vbo) {
+	if (block->vbo _VBO_IS_VALID) {
 		glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
 		glBufferSubData(GL_ARRAY_BUFFER, block->offset, (GLsizei)size, data);
 	} else {
@@ -480,6 +626,9 @@ void idVertexCache::EndFrame()
 		int	staticUseCount = 0;
 		int staticUseSize = 0;
 
+#ifdef _MULTITHREAD
+		vertCache_t &staticHeaders = _staticHeaders;
+#endif
 		for (vertCache_t *block = staticHeaders.next ; block != &staticHeaders ; block = block->next) {
 			if (block->frameUsed == currentFrame) {
 				staticUseCount++;
@@ -506,12 +655,24 @@ void idVertexCache::EndFrame()
 
 #endif
 
+#ifdef _MULTITHREAD
+	if(!multithreadActive)
+	{
+#endif
 	// unbind vertex buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+#ifdef _MULTITHREAD
+	}
+	//renderFrame = currentFrame;
+#endif
 
 	currentFrame = tr.frameCount;
 	listNum = currentFrame % NUM_VERTEX_FRAMES;
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+		current_frame = listNum;
+#endif
 	staticAllocThisFrame = 0;
 	staticCountThisFrame = 0;
 	dynamicAllocThisFrame = 0;
@@ -551,6 +712,14 @@ void idVertexCache::List(void)
 
 	vertCache_t *block;
 
+	int	numFreeStaticHeaders = 0;
+
+#ifdef _MULTITHREAD
+	BFOR(i)
+	{
+		vertCache_t &staticHeaders = staticHeaderss[i];
+		vertCache_t &freeStaticHeaders = freeStaticHeaderss[i];
+#endif
 	for (block = staticHeaders.next ; block != &staticHeaders ; block = block->next) {
 		numActive++;
 
@@ -561,11 +730,13 @@ void idVertexCache::List(void)
 		}
 	}
 
-	int	numFreeStaticHeaders = 0;
 
 	for (block = freeStaticHeaders.next ; block != &freeStaticHeaders ; block = block->next) {
 		numFreeStaticHeaders++;
 	}
+#ifdef _MULTITHREAD
+	}
+#endif
 
 	int	numFreeDynamicHeaders = 0;
 
@@ -579,3 +750,87 @@ void idVertexCache::List(void)
 	common->Printf("%5i free static headers\n", numFreeStaticHeaders);
 	common->Printf("%5i free dynamic headers\n", numFreeDynamicHeaders);
 }
+
+#ifdef _MULTITHREAD
+void  idVertexCache::BeginBackEnd(int which)
+{
+	// Transfer current frame temp data to GPU
+	if(multithreadActive)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, tempBuffers[which]->vbo);
+		glBufferData(GL_ARRAY_BUFFER, dynamicAllocThisFrames[which], tempBuffers[which]->virtMem, GL_STREAM_DRAW);
+		//render_frame = which;
+	}
+}
+
+void idVertexCache::EndBackEnd(int which)
+{
+	// Clear deferred free data's GPU memory
+	int clearVBO = harm_r_clearVertexBuffer.GetInteger();
+	if(multithreadActive && clearVBO != 0)
+	{
+		for (vertCache_t *block = deferredFreeLists[which].next; block && block != &deferredFreeLists[which]; block = block->next) {
+			// temp blocks are in a shared space that won't be freed
+			if (block->tag != TAG_TEMP) {
+				if (block->vbo _VBO_IS_VALID) {
+					if(block->indexBuffer)
+					{
+						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+						glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
+						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+					}
+					else
+					{
+						glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+						glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
+						glBindBuffer(GL_ARRAY_BUFFER, 0);
+					}
+					if(clearVBO == 2)
+					{
+						glDeleteBuffers(1, &block->vbo);
+						block->vbo = -1;
+					}
+				}
+			}
+		}
+	}
+}
+
+vertCache_t* idVertexCache::CreateTempVbo(int bytes, bool indexBuffer)
+{
+	vertCache_t* block = headerAllocator.Alloc();
+
+	block->next = NULL;
+    block->prev = NULL;
+    block->virtMem = NULL;
+	block->offset = 0;
+	block->tag = TAG_FIXED;
+	block->indexBuffer = indexBuffer;
+	block->virtMemDirty = false;
+
+	block->size = bytes;
+	block->user = NULL;
+
+	block->virtMem = Mem_Alloc(bytes);
+
+	glGenBuffers(1, &block->vbo);
+
+	if (indexBuffer) {
+	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)bytes, 0, GL_STREAM_DRAW);
+	}
+	else{
+	    glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+	    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)bytes, 0, GL_STREAM_DRAW);
+	}
+
+	return block;
+}
+
+int idVertexCache::GetNextListNum(void) const
+{
+	return (listNum + 1) % NUM_VERTEX_FRAMES;
+}
+
+#endif
+

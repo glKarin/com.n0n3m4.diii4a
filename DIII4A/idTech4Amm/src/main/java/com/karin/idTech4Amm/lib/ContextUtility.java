@@ -33,6 +33,9 @@ import java.io.InputStream;
 import java.util.function.Consumer;
 // import android.widget.Magnifier.Builder;
 
+/**
+ * Android context/activity utility
+ */
 public final class ContextUtility
 {
     public static final int CHECK_PERMISSION_RESULT_GRANTED = 0;

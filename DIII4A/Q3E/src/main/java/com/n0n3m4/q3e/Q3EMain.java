@@ -136,10 +136,11 @@ public class Q3EMain extends Activity {
         Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
+        Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EUtils.pref_harm_multithreading, false);
 		
 		super.onCreate(savedInstanceState);
 		
-		if (Q3EUtils.q3ei==null)
+/*//k		if (Q3EUtils.q3ei==null)
 		{			
 			finish();
 			try
@@ -149,7 +150,7 @@ public class Q3EMain extends Activity {
 			}			
 			catch (Exception e){e.printStackTrace();};			
 			return;
-		}
+		}*/
 		
 		datadir=preferences.getString(Q3EUtils.pref_datapath, Q3EUtils.q3ei.default_path);
 		if ((datadir.length()>0)&&(datadir.charAt(0)!='/'))//lolwtfisuserdoing?
@@ -161,10 +162,18 @@ public class Q3EMain extends Activity {
 		{
             Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean("harm_redirect_output_to_file", true));
             Q3EJNI.SetNoHandleSignals(preferences.getBoolean("harm_no_handle_signals", false));
+            Q3EJNI.SetMultiThread(Q3EUtils.q3ei.multithread);
 			if (mGLSurfaceView==null)
                 mGLSurfaceView = new Q3EView(this);
 			if (mControlGLSurfaceView==null)
                mControlGLSurfaceView = new Q3EControlView(this);
+            if (mAudio==null)
+            {
+                mAudio = new Q3ECallbackObj();
+                mAudio.vw=mControlGLSurfaceView;
+            }
+            Q3EJNI.setCallbackObject(mAudio);
+            Q3EUtils.q3ei.callbackObj = mAudio;
             mControlGLSurfaceView.EnableGyroscopeControl(Q3EUtils.q3ei.view_motion_control_gyro);
             float gyroXSens = preferences.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS); 
             float gyroYSens = preferences.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
@@ -185,12 +194,6 @@ public class Q3EMain extends Activity {
             setContentView(mainLayout);
 
             mControlGLSurfaceView.requestFocus();
-			if (mAudio==null)			
-			{
-			mAudio = new Q3ECallbackObj();
-			mAudio.vw=mControlGLSurfaceView;
-			}
-			Q3EJNI.setCallbackObject(mAudio);
 		}
 		else
 		{
@@ -380,7 +383,19 @@ public class Q3EMain extends Activity {
 
                 Debug.MemoryInfo memInfos[] = m_am.getProcessMemoryInfo(m_processs);
                 Debug.MemoryInfo memInfo = memInfos[0];
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                    Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
+                    Debug.getMemoryInfo(memoryInfo);
+                    java_mem = Integer.valueOf(memoryInfo.getMemoryStat("summary.java-heap")) / UNIT;
+                    native_mem = Integer.valueOf(memoryInfo.getMemoryStat("summary.native-heap")) / UNIT;
+                    //String code = memoryInfo.getMemoryStat("summary.code");
+                    //String stack = memoryInfo.getMemoryStat("summary.stack");
+                    graphics_mem = Integer.valueOf(memoryInfo.getMemoryStat("summary.graphics")) / UNIT;
+                    //String privateOther = memoryInfo.getMemoryStat("summary.private-other");
+                    //String system = memoryInfo.getMemoryStat("summary.system");
+                    //String swap = memoryInfo.getMemoryStat("summary.total-swap");
+                }
+                else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23 // > Android P, slow frequency
                 {
                     java_mem = Integer.valueOf(memInfo.getMemoryStat("summary.java-heap")) / UNIT;
                     native_mem = Integer.valueOf(memInfo.getMemoryStat("summary.native-heap")) / UNIT;

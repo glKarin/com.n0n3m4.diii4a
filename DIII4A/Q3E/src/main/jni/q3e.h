@@ -40,6 +40,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetRedirectOutputToFile(JNIEnv
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetNoHandleSignals(JNIEnv *env, jclass c, jboolean enabled);
 
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetMultiThread(JNIEnv *env, jclass c, jboolean enabled);
+
 #ifdef __cplusplus
 }
 #endif

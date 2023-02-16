@@ -47,6 +47,7 @@ static jmethodID android_PullEvent_method;
 static char *game_data_dir = NULL;
 static int redirect_output_to_file = 0;
 static int no_handle_signals = 0;
+static int multithread = 0;
 void (*qexit)(void);
 intptr_t (*(*set_Android_Call)(intptr_t (*func)(int, int, ...)))(int, int, ...);
 
@@ -62,9 +63,10 @@ static void *libdl;
 #define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
 #define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
 
-#define ANDROID_CALL_PROTOCOL_NATIVE_LINRARY_DIR 0x20001
+#define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
 #define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
 #define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
+#define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
 
 intptr_t Android_Call(int protocol, int size, ...)
 {
@@ -116,7 +118,10 @@ void initAudio(void *buffer, int size)
 {
     JNIEnv *env;
     jobject tmp;
-    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+    {
+        (*jVM)->AttachCurrentThread(jVM,&env, NULL);
+    }
     tmp = (*env)->NewDirectByteBuffer(env, buffer, size);
     audioBuffer = (jobject)(*env)->NewGlobalRef(env, tmp);
     return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
@@ -140,7 +145,11 @@ int writeAudio(int offset, int length)
 void setState(int state)
 {
     JNIEnv *env;
-    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+    {
+        (*jVM)->AttachCurrentThread(jVM,&env, NULL);
+    }
+    //(*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_setState, state);
 }
 
@@ -278,11 +287,13 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
         char *ptr = strrchr(doom3_path, '/');
         if(ptr) *ptr = '\0';
         __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 native library dir: %s", doom3_path);
-        (void)Q3E_Call(ANDROID_CALL_PROTOCOL_NATIVE_LINRARY_DIR, 1, doom3_path);
+        (void)Q3E_Call(ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR, 1, doom3_path);
         __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 redirect output to file: %d", redirect_output_to_file);
         (void)Q3E_Call(ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE, 1, redirect_output_to_file);
         __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 no handle signals: %d", no_handle_signals);
         (void)Q3E_Call(ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS, 1, no_handle_signals);
+		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 multi-thread: %d", multithread);
+		(void)Q3E_Call(ANDROID_CALL_PROTOCOL_MULTITHREAD, 1, multithread);
     }
     
     qmain(argc, argv);
@@ -342,6 +353,11 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetNoHandleSignals(JNIEnv *env
     no_handle_signals = enabled ? 1 : 0;
 }
 
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetMultiThread(JNIEnv *env, jclass c, jboolean enabled)
+{
+	multithread = enabled ? 1 : 0;
+}
+
 void pull_input_event(int execCmd)
 {
     JNIEnv *env = 0;
@@ -349,7 +365,10 @@ void pull_input_event(int execCmd)
     if(!android_PullEvent_method)
 		return;
 
-    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+    {
+        (*jVM)->AttachCurrentThread(jVM,&env, NULL);
+    }
 
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_PullEvent_method, (jboolean)execCmd);
 }

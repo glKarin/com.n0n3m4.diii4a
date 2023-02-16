@@ -1118,12 +1118,20 @@ void idImage::Reload(bool checkPrecompressed, bool force)
 
 	common->DPrintf("reloading %s.\n", imgName.c_str());
 
-	PurgeImage();
+	PurgeImage(
+#ifdef _MULTITHREAD
+			true // AddPurgeList
+#endif
+			);
 
 	// force no precompressed image check, which will cause it to be reloaded
 	// from source, and another precompressed file generated.
 	// Load is from the front end, so the back end must be synced
-	ActuallyLoadImage(checkPrecompressed, false);
+	ActuallyLoadImage(checkPrecompressed, false
+#ifdef _MULTITHREAD
+			, true // AddAllocList
+#endif
+			);
 }
 
 /*
@@ -1587,7 +1595,11 @@ idImage *idImageManager::ImageFromFunction(const char *_name, void (*generatorFu
 	if (image_preload.GetBool()) {
 		// check for precompressed, load is from the front end
 		image->referencedOutsideLevelLoad = true;
-		image->ActuallyLoadImage(true, false);
+		image->ActuallyLoadImage(true, false
+#ifdef _MULTITHREAD
+				, true // AddAllocList
+#endif
+				);
 	}
 
 	return image;
@@ -1686,7 +1698,11 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 
 			if (image_preload.GetBool() && !insideLevelLoad) {
 				image->referencedOutsideLevelLoad = true;
-				image->ActuallyLoadImage(true, false);	// check for precompressed, load is from front end
+				image->ActuallyLoadImage(true, false
+#ifdef _MULTITHREAD
+						, true // AddAllocList
+#endif
+						);	// check for precompressed, load is from front end
 				declManager->MediaPrint("%ix%i %s (reload for mixed referneces)\n", image->uploadWidth, image->uploadHeight, image->imgName.c_str());
 			}
 
@@ -1738,7 +1754,12 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 		image->precompressedFile = true;
 
 		if (image_preload.GetBool() && !insideLevelLoad) {
-			image->partialImage->ActuallyLoadImage(true, false);	// check for precompressed, load is from front end
+			image->referencedOutsideLevelLoad = true;
+			image->partialImage->ActuallyLoadImage(true, false
+#ifdef _MULTITHREAD
+					, true // AddAllocList
+#endif
+					);	// check for precompressed, load is from front end
 			declManager->MediaPrint("%ix%i %s\n", image->partialImage->uploadWidth, image->partialImage->uploadHeight, image->imgName.c_str());
 		} else {
 			declManager->MediaPrint("%s\n", image->imgName.c_str());
@@ -1750,7 +1771,11 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 	// load it if we aren't in a level preload
 	if (image_preload.GetBool() && !insideLevelLoad) {
 		image->referencedOutsideLevelLoad = true;
-		image->ActuallyLoadImage(true, false);	// check for precompressed, load is from front end
+		image->ActuallyLoadImage(true, false
+#ifdef _MULTITHREAD
+				, true // AddAllocList
+#endif
+				);	// check for precompressed, load is from front end
 		declManager->MediaPrint("%ix%i %s\n", image->uploadWidth, image->uploadHeight, image->imgName.c_str());
 	} else {
 		declManager->MediaPrint("%s\n", image->imgName.c_str());
@@ -1806,7 +1831,11 @@ void idImageManager::PurgeAllImages()
 
 	for (i = 0; i < images.Num() ; i++) {
 		image = images[i];
-		image->PurgeImage();
+		image->PurgeImage(
+#ifdef _MULTITHREAD
+				true // AddPurgeList
+#endif
+				);
 	}
 }
 
@@ -2117,6 +2146,10 @@ void idImageManager::Init()
 	memset(imageHashTable, 0, sizeof(imageHashTable));
 
 	images.Resize(1024, 1024);
+#ifdef _MULTITHREAD
+	imagesAlloc.Resize( 1024, 1024 );
+	imagesPurge.Resize( 1024, 1024 );
+#endif
 
 	// clear the cached LRU
 	cacheLRU.cacheUsageNext = &cacheLRU;
@@ -2167,6 +2200,17 @@ Shutdown
 void idImageManager::Shutdown()
 {
 	images.DeleteContents(true);
+#ifdef _MULTITHREAD
+	while(imagesAlloc.Num() > 0)
+	{
+		imagesAlloc.RemoveIndex( 0 );
+	}
+
+	while(imagesPurge.Num() > 0)
+	{
+		imagesPurge.RemoveIndex( 0 );
+	}
+#endif
 }
 
 /*
@@ -2192,7 +2236,11 @@ void idImageManager::BeginLevelLoad()
 		}
 
 		if (com_purgeAll.GetBool()) {
-			image->PurgeImage();
+			image->PurgeImage(
+#ifdef _MULTITHREAD
+					true // AddPurgeList
+#endif
+					);
 		}
 
 		image->levelLoadReferenced = false;
@@ -2240,7 +2288,11 @@ void idImageManager::EndLevelLoad()
 		if (!image->levelLoadReferenced && !image->referencedOutsideLevelLoad) {
 //			common->Printf( "Purging %s\n", image->imgName.c_str() );
 			purgeCount++;
-			image->PurgeImage();
+			image->PurgeImage(
+#ifdef _MULTITHREAD
+					true // AddPurgeList
+#endif
+					);
 		} else if (image->texnum != idImage::TEXTURE_NOT_LOADED) {
 //			common->Printf( "Keeping %s\n", image->imgName.c_str() );
 			keepCount++;
@@ -2255,10 +2307,19 @@ void idImageManager::EndLevelLoad()
 			continue;
 		}
 
-		if (image->levelLoadReferenced && image->texnum == idImage::TEXTURE_NOT_LOADED && !image->partialImage) {
+#ifdef _MULTITHREAD
+		if (image->levelLoadReferenced && (image->texnum == idImage::TEXTURE_NOT_LOADED || image->purgePending) && !image->partialImage)
+#else
+		if (image->levelLoadReferenced && image->texnum == idImage::TEXTURE_NOT_LOADED && !image->partialImage)
+#endif
+		{
 //			common->Printf( "Loading %s\n", image->imgName.c_str() );
 			loadCount++;
-			image->ActuallyLoadImage(true, false);
+			image->ActuallyLoadImage(true, false
+#ifdef _MULTITHREAD
+					, true // AddAllocList
+#endif
+					);
 
 			if ((loadCount & 15) == 0) {
 				session->PacifierUpdate();
@@ -2414,3 +2475,73 @@ void idImageManager::PrintMemInfo(MemInfo_t *mi)
 	fileSystem->CloseFile(f);
 }
 
+#ifdef _MULTITHREAD
+void idImageManager::AddAllocList( idImage * image, bool checkForPrecompressed, bool fromBackEnd )
+{
+	// Front and backend threads can add images, protect this
+	Sys_EnterCriticalSection( CRITICAL_SECTION_TWO );
+
+	if(image)
+	{
+		imagesAlloc.Append( ActuallyLoadImage_data_t(image, checkForPrecompressed, fromBackEnd) );
+	}
+
+	Sys_LeaveCriticalSection( CRITICAL_SECTION_TWO );
+}
+
+
+void idImageManager::AddPurgeList( idImage * image )
+{
+	if(image)
+	{
+		imagesPurge.Append( image );
+		image->purgePending = true;
+	}
+}
+
+bool idImageManager::GetNextAllocImage(ActuallyLoadImage_data_t &img)
+{
+	if(imagesAlloc.Num() > 0)
+	{
+		const ActuallyLoadImage_data_t &ref = imagesAlloc[0];
+		img.image = ref.image;
+		img.checkForPrecompressed = ref.checkForPrecompressed;
+		img.fromBackEnd = ref.fromBackEnd;
+		imagesAlloc.RemoveIndex(0);
+		return true;
+	}
+
+	return false;
+}
+
+idImage * idImageManager::GetNextPurgeImage()
+{
+	idImage * img = NULL;
+
+	if(imagesPurge.Num() > 0)
+	{
+		img = imagesPurge[0];
+		imagesPurge.Remove( img );
+		img->purgePending = false;
+	}
+
+	return img;
+}
+
+void idImageManager::HandlePendingImage(void)
+{
+	// Purge all images
+	idImage * img;
+	while( (img = GetNextPurgeImage()) != NULL )
+	{
+		img->PurgeImage();
+	}
+
+	// Load all images
+	ActuallyLoadImage_data_t imgData;
+	while(GetNextAllocImage(imgData))
+	{
+		imgData.image->ActuallyLoadImage( imgData.checkForPrecompressed, false ); // false
+	}
+}
+#endif

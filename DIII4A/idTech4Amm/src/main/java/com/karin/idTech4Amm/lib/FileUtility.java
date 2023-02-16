@@ -9,6 +9,9 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Local file IO utility
+ */
 public final class FileUtility
 {
     public static final int DEFAULT_BUFFER_SIZE = 8192;

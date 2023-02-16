@@ -165,13 +165,21 @@ class idImage
 		// automatically enables or disables cube mapping or texture3D
 		// May perform file loading if the image was not preloaded.
 		// May start a background image read.
+#ifdef _MULTITHREAD
+		void		Bind(bool *res = 0);
+#else
 		void		Bind();
+#endif
 
 		// for use with fragment programs, doesn't change any enable2D/3D/cube states
 		void		BindFragment();
 
 		// deletes the texture object, but leaves the structure so it can be reloaded
+#ifdef _MULTITHREAD
+		void		PurgeImage(bool pending = false);
+#else
 		void		PurgeImage();
+#endif
 
 		// used by callback functions to specify the actual data
 		// data goes from the bottom to the top line of the image, as OpenGL expects it
@@ -224,7 +232,11 @@ class idImage
 		void		WritePrecompressedImage();
 		bool		CheckPrecompressedImage(bool fullLoad);
 		void		UploadPrecompressedImage(byte *data, int len);
+#ifdef _MULTITHREAD
+		void		ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd, bool pending = false);
+#else
 		void		ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd);
+#endif
 		void		StartBackgroundImageLoad();
 		int			BitsForInternalFormat(int internalFormat) const;
 		void		UploadCompressedNormalMap(int width, int height, const byte *rgba, int mipLevel);
@@ -275,6 +287,13 @@ class idImage
 		idImage 			*hashNext;				// for hash chains to speed lookup
 
 		int					refCount;				// overall ref count
+#ifdef _MULTITHREAD
+	//If bound to a cinematic
+	idCinematic *		cinematic;
+	int					cinmaticNextTime;
+
+	bool				purgePending;
+#endif
 };
 
 ID_INLINE idImage::idImage()
@@ -307,6 +326,11 @@ ID_INLINE idImage::idImage()
 	cacheUsagePrev = cacheUsageNext = NULL;
 	hashNext = NULL;
 	refCount = 0;
+#ifdef _MULTITHREAD
+	purgePending = false;
+	cinematic = NULL;
+	cinmaticNextTime = 0;
+#endif
 }
 
 
@@ -317,6 +341,24 @@ void	R_WritePalTGA(const char *filename, const byte *data, const byte *palette, 
 // data is in top-to-bottom raster order unless flipVertical is set
 
 
+#ifdef _MULTITHREAD
+typedef struct ActuallyLoadImage_data_s
+{
+	idImage *image;
+	bool checkForPrecompressed;
+	bool fromBackEnd;
+	ActuallyLoadImage_data_s(idImage *image, bool checkForPrecompressed, bool fromBackEnd)
+		: image(image),
+		checkForPrecompressed(checkForPrecompressed),
+		fromBackEnd(fromBackEnd)
+	{}
+	ActuallyLoadImage_data_s() 
+		: image(0),
+		checkForPrecompressed(false),
+		fromBackEnd(false)
+	{}
+} ActuallyLoadImage_data_t;
+#endif
 class idImageManager
 {
 	public:
@@ -462,6 +504,18 @@ class idImageManager
 
 		int	numActiveBackgroundImageLoads;
 		const static int MAX_BACKGROUND_IMAGE_LOADS = 8;
+
+#ifdef _MULTITHREAD
+	idList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
+	idList<idImage*>	imagesPurge; //List for the backend thread
+
+	void				AddAllocList(idImage * image, bool checkForPrecompressed, bool fromBackEnd);
+	void				AddPurgeList(idImage * image);
+
+	bool				GetNextAllocImage(ActuallyLoadImage_data_t &ret);
+	idImage *			GetNextPurgeImage();
+	void HandlePendingImage(void);
+#endif
 };
 
 extern idImageManager	*globalImages;		// pointer to global list for the rest of the system

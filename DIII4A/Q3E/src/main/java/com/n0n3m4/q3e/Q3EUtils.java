@@ -328,6 +328,7 @@ public class Q3EUtils {
 	public static final String pref_harm_auto_quick_load="q3e_harm_auto_quick_load"; //k
 	public static final String pref_harm_prey_fs_game="q3e_harm_prey_fs_game"; //k
 	public static final String pref_harm_prey_game_lib="q3e_harm_prey_game_lib"; //k
+	public static final String pref_harm_multithreading="q3e_harm_multithreading"; //k
 	
 	public static class UiElement
 	{
@@ -765,7 +766,7 @@ public class Q3EUtils {
 				((Q3EControlView)(view)).sendKeyEvent(false,keycode,0);
 			if (keycode==KeyCodes.K_MOUSE1)
 			{
-				if (((Q3EControlView)(view)).notinmenu)
+				if (Q3EUtils.q3ei.callbackObj.notinmenu)
 				{
 				((Q3EControlView)(view)).sendMotionEvent(x-lx,y-ly);
 				lx=x;ly=y;
@@ -908,6 +909,7 @@ public class Q3EUtils {
 		}
 		
 		int[] codes={Q3EKeyCodes.KeyCodes.J_UP,Q3EKeyCodes.KeyCodes.J_RIGHT,Q3EKeyCodes.KeyCodes.J_DOWN,Q3EKeyCodes.KeyCodes.J_LEFT};
+		private final static int[] Menu_Codes={Q3EKeyCodes.KeyCodes.K_UPARROW, KeyCodes.K_RIGHTARROW,Q3EKeyCodes.KeyCodes.K_DOWNARROW, KeyCodes.K_LEFTARROW};
 		boolean[] keys={false,false,false,false};				
 		
 		public void setenabled(int ind,boolean b)
@@ -915,7 +917,7 @@ public class Q3EUtils {
 			if ((keys[ind]!=b))
 			{
 				keys[ind]=b;
-				((Q3EControlView)(view)).sendKeyEvent(b,codes[ind],0);
+				((Q3EControlView)(view)).sendKeyEvent(b,(Q3EUtils.q3ei.callbackObj.notinmenu ? codes : Menu_Codes)[ind],0);
 			}		
 		}
 		
@@ -931,7 +933,7 @@ public class Q3EUtils {
 		public void onTouchEvent(int x, int y, int act) {
 			if (act!=-1)
 			{				
-			if (((Q3EControlView)(view)).notinmenu)
+			if (Q3EUtils.q3ei.callbackObj.notinmenu)
 			{														
 			if (((Q3EControlView)(view)).analog)
 			{

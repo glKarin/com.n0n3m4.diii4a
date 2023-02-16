@@ -23,6 +23,9 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.sys.Constants;
 
+/**
+ * cfg file editor
+ */
 @SuppressLint("NonConstantResourceId")
 public class ConfigEditorActivity extends Activity
 {

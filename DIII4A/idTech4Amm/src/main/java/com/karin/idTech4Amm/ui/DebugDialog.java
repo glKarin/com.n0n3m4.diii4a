@@ -9,6 +9,9 @@ import android.app.Dialog;
 
 import com.karin.idTech4Amm.R;
 
+/**
+ * Debug dialog
+ */
 public class DebugDialog extends DialogFragment
 {
 

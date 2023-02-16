@@ -20,6 +20,9 @@ import java.util.HashSet;
 import android.util.Log;
 import android.graphics.Color;
 
+/**
+ * Simple file chooser
+ */
 public class FileBrowserDialog extends AlertDialog {
     private static final String TAG = "FileBrowserDialog";
 

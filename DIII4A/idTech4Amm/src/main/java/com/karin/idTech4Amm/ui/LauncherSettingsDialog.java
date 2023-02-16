@@ -9,6 +9,9 @@ import android.app.Dialog;
 
 import com.karin.idTech4Amm.R;
 
+/**
+ * Launcher settings dialog
+ */
 public class LauncherSettingsDialog extends DialogFragment
 {
 

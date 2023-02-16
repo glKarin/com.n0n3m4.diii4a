@@ -387,7 +387,6 @@ if ( local_raven ):
 		bse/BSE_ParseParticle2.cpp \
 		bse/BSE_Segment.cpp \
 		bse/BSE_SegmentTemplate.cpp \
-		bse/BSE_Light.cpp \
 		'
 	bse_list = scons_utils.BuildList( 'raven', bse_string )
 	core_list += bse_list

@@ -1413,6 +1413,14 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 			ts->cinematic = idCinematic::Alloc();
 			ts->cinematic->InitFromFile(token.c_str(), loop);
+#ifdef _MULTITHREAD
+			if(multithreadActive)
+			{
+				// Due to multithreading we create an image for each cinematic so they can be updated cleanly
+				ts->image = globalImages->AllocImage("cinematic_temp");
+				ts->image->cinematic = ts->cinematic;
+			}
+#endif
 			continue;
 		}
 
@@ -1913,11 +1921,11 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			ss->isSpiritWalk = false;
 			continue;
 		}
-        if (!token.Icmp("growIn")) { // it in color expression
+        if (!token.Icmp("growIn")) { // it is color expression
 			src.SkipRestOfLine();
 			continue;
 		}
-        if (!token.Icmp("growOut")) { // it in color expression
+        if (!token.Icmp("growOut")) { // it is color expression
 			src.SkipRestOfLine();
 			continue;
 		}
@@ -2631,7 +2639,6 @@ void idMaterial::ParseMaterial(idLexer &src)
 			subviewClass = SC_PORTAL_SKYBOX;
 		} else if (!token.Icmp("directportal")) {
 			src.SkipRestOfLine();
-			//directportal = true;
 			sort = SS_SUBVIEW;
 			subviewClass = SC_PORTAL;
 			coverage = MC_OPAQUE;
@@ -3188,11 +3195,18 @@ idMaterial::UpdateCinematic
 */
 void idMaterial::UpdateCinematic(int time) const
 {
+#ifdef _MULTITHREAD
+	if(!multithreadActive)
+	{
+#endif
 	if (!stages || !stages[0].texture.cinematic || !backEnd.viewDef) {
 		return;
 	}
 
 	stages[0].texture.cinematic->ImageForTime(tr.primaryRenderView.time);
+#ifdef _MULTITHREAD
+	}
+#endif
 }
 
 /*

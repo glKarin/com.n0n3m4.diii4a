@@ -36,9 +36,27 @@ public class Q3ECallbackObj {
 	byte[] mAudioData;
 	public static boolean reqThreadrunning=true;	
 	public Q3EControlView vw;
+	public int state = STATE_NONE;
+	public static final int STATE_NONE = 0;
+    public static final int STATE_ACT = 1; // RTCW4A-specific, keep
+    public static final int STATE_GAME = 1 << 1; // map spawned
+    public static final int STATE_KICK = 1 << 2; // RTCW4A-specific, keep
+    public static final int STATE_LOADING = 1 << 3; // current GUI is guiLoading
+    public static final int STATE_CONSOLE = 1 << 4; // fullscreen or not
+    public static final int STATE_MENU = 1 << 5; // any menu excludes guiLoading
+    public static final int STATE_DEMO = 1 << 6; // demo
+
+    private final LinkedList<Runnable> m_eventQueue = new LinkedList<>();
+    public boolean notinmenu = true;
+    public boolean inLoading = true;
+    public boolean inConsole = false;
 	
 	public void setState(int newstate)
 	{
+        state = newstate;
+        inConsole = (newstate & Q3ECallbackObj.STATE_CONSOLE) == Q3ECallbackObj.STATE_CONSOLE;
+        notinmenu = ((newstate & STATE_GAME) == STATE_GAME) && !inConsole;
+        inLoading = (newstate & Q3ECallbackObj.STATE_LOADING) == Q3ECallbackObj.STATE_LOADING;
 		vw.setState(newstate);
 	}
 	
@@ -195,10 +213,26 @@ public class Q3ECallbackObj {
             mAudioTrack = null;
         }
     }
-    
+
+    // It is will run on GLThread. Call by DOOM from JNI, for some MessageBox in game.
     public void PullEvent(boolean execCmd)
     {
-        vw.PullEvent(execCmd);
+        synchronized(m_eventQueue) {
+            if(execCmd)
+            {
+                while(!m_eventQueue.isEmpty())
+                    m_eventQueue.removeFirst().run();
+            }
+            else
+                m_eventQueue.clear();
+        }
+    }
+
+    public void PushEvent(Runnable r)
+    {
+        synchronized(m_eventQueue) {
+            m_eventQueue.add(r);
+        }
     }
     
     private class AudioOptRunnable implements Runnable

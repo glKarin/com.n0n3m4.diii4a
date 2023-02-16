@@ -573,6 +573,16 @@ void R_LinkLightSurf(const drawSurf_t **link, const srfTriangles_t *tri, const v
 
 	drawSurf = (drawSurf_t *)R_FrameAlloc(sizeof(*drawSurf));
 
+#ifdef _MULTITHREAD
+	drawSurf->origGeo = tri;
+	if(multithreadActive) //k: alloc a frame copy, because Model::geometry will free in next frame on CPU
+	{
+		srfTriangles_t *newTri = (srfTriangles_t *)R_FrameAlloc(sizeof(srfTriangles_t));
+		*newTri = *tri;
+		drawSurf->geo = newTri;
+	}
+	else
+#endif
 	drawSurf->geo = tri;
 	drawSurf->space = space;
 	drawSurf->material = shader;
@@ -1120,6 +1130,16 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 	float			generatedShaderParms[MAX_ENTITY_SHADER_PARMS];
 
 	drawSurf = (drawSurf_t *)R_FrameAlloc(sizeof(*drawSurf));
+#ifdef _MULTITHREAD
+	drawSurf->origGeo = tri;
+	if(multithreadActive) //k: alloc a frame copy, because Model::geometry will free in next frame on CPU
+	{
+		srfTriangles_t *newTri = (srfTriangles_t *)R_FrameAlloc(sizeof(srfTriangles_t));
+		*newTri = *tri;
+		drawSurf->geo = newTri;
+	}
+	else
+#endif
 	drawSurf->geo = tri;
 	drawSurf->space = space;
 	drawSurf->material = shader;

@@ -411,10 +411,14 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 				gl.glClear(0x8000); //Yeah, I know, it doesn't work in 1.1
 			else
 				GLES20.glClear(0x8000);
-		}					
+		}
 
 		if (Q3EUtils.q3ei.isD3BFG)
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_STENCIL_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        //k: not render in game loading
+        if(Q3EUtils.q3ei.callbackObj.inLoading)
+            return;
 
 		//Onscreen buttons:		
 		//save state
@@ -607,14 +611,12 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
 	}
 
-	boolean notinmenu=true;
 	public void setState(int st)
 	{				
 		if (actbutton != null)
             actbutton.alpha = ((st & 1) == 1) ?Math.min(actbutton.initalpha * 2, 1f): actbutton.initalpha;		
 		if (kickbutton != null)
             kickbutton.alpha = ((st & 4) == 4) ?Math.min(kickbutton.initalpha * 2, 1f): kickbutton.initalpha;
-		notinmenu = ((st & 2) == 2);
 	}
 
 	public int getCharacter(int keyCode, KeyEvent event)
@@ -767,7 +769,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 	}
 
 	public boolean sendAnalog(final boolean down, final float x, final float y)
-	{			
+	{
         queueEvent(new __Runnable(){
                 public void __run()
                 {            	
@@ -777,7 +779,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 	}
 
 	public boolean sendKeyEvent(final boolean down, final int keycode, final int charcode)
-	{			
+	{
         queueEvent(new __Runnable(){
                 public void __run()
                 {            	
@@ -816,8 +818,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         return true;
 	}
 
-    //k 
-    // Once Runnable
+    //k: Once Runnable
     private static abstract class __Runnable implements Runnable
     {
         private boolean m_handle = false;
@@ -832,34 +833,16 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         
         protected abstract void __run();
     }
-    
-    private LinkedList<Runnable> m_eventQueue = new LinkedList<>();
-    private Object m_eventQueueLock = new Object();
 
     public void queueEvent(Runnable r)
     {
-        m_renderView.PushEvent(r);
-        synchronized(m_eventQueueLock) {
-            m_eventQueue.add(r);
-        }
-    }
-    
-    // It is will run on GLThread. Call by DOOM from JNI, for some MessageBox in game.
-    public void PullEvent(boolean execCmd)
-    {
-        synchronized(m_eventQueueLock) {
-            if(execCmd)
-            {
-                while(!m_eventQueue.isEmpty())
-                    m_eventQueue.removeFirst().run();   
-            }
-            else
-                m_eventQueue.clear();
-        }
+        if(!Q3EUtils.q3ei.multithread)
+            m_renderView.queueEvent(r);
+        Q3EUtils.q3ei.callbackObj.PushEvent(r);
     }
 
     private int m_mapBack = ENUM_BACK_ALL;
-    private long m_laskPressBackTime = -1;
+    private long m_lastPressBackTime = -1;
     private int m_pressBackCount = 0;
     private static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL = 1000;
     private static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT = 3;
@@ -873,7 +856,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             return false;
         boolean res = false;
         long now = System.currentTimeMillis();
-        if(m_laskPressBackTime > 0 && now - m_laskPressBackTime <= CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL)
+        if(m_lastPressBackTime > 0 && now - m_lastPressBackTime <= CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL)
         {
             m_pressBackCount++;
             res = true;
@@ -883,9 +866,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             m_pressBackCount = 1;
             res = (m_mapBack & ENUM_BACK_ESCAPE) != 0 ? false : true;
         }
-        m_laskPressBackTime = now;
+        m_lastPressBackTime = now;
         if(m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT - 1)
-            Toast.makeText(getContext(), "Click back again to exit......", CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL).show();
+            Toast.makeText(getContext(), "Click back again to exit......", Toast.LENGTH_LONG).show();
         else if(m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
         {
             m_renderView.Shutdown(new Runnable() {
@@ -981,7 +964,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     @Override
     public void onSensorChanged(SensorEvent event)
 	{
-        if(notinmenu)
+        if(Q3EUtils.q3ei.callbackObj.notinmenu && !Q3EUtils.q3ei.callbackObj.inLoading)
         {
 			sendMotionEvent(-event.values[0] * m_xAxisGyroSens, event.values[1] * m_yAxisGyroSens);
         }

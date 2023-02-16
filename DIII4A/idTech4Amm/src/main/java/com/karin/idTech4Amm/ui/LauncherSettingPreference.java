@@ -16,6 +16,9 @@ import com.n0n3m4.q3e.Q3EJNI;
 import android.util.Log;
 import android.view.View;
 
+/**
+ * Launcher preference fragment
+ */
 public class LauncherSettingPreference extends PreferenceFragment implements Preference.OnPreferenceChangeListener
 {
 

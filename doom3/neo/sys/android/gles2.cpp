@@ -74,13 +74,46 @@ bool GLimp_SpawnRenderThread(void (*a)())
 	return false;
 }
 
+static EGLDisplay display = EGL_NO_DISPLAY;
+static EGLSurface surface_draw = EGL_NO_SURFACE;
+static EGLSurface surface_read = EGL_NO_SURFACE;
+static EGLContext context = EGL_NO_CONTEXT;
+// Initializing EGL context from EGLSurfaceView
+static bool init_egl_context(bool force = false)
+{
+	if(force)
+		context = EGL_NO_CONTEXT;
+	if(context)
+		return true;
+	surface_draw = EGL_NO_SURFACE;
+	surface_read = EGL_NO_SURFACE;
+	context = EGL_NO_CONTEXT;
+	display = eglGetCurrentDisplay();
+	if(!display)
+		return false;
+	surface_draw = eglGetCurrentSurface(EGL_DRAW);
+	surface_read = eglGetCurrentSurface(EGL_READ);
+	context = eglGetCurrentContext();
+	common->Printf("[Harmattan]: EGLDisplay(%p), EGLSurface(DRAW: %p, READ: %p), EGLContext(%p)\n", display, surface_draw, surface_read, context);
+	return true;
+}
+
 void GLimp_ActivateContext()
 {
-
+#ifdef __ANDROID__
+	if(display == EGL_NO_DISPLAY)
+		return;
+#endif
+	eglMakeCurrent(display, surface_draw, surface_read, context);
 }
 
 void GLimp_DeactivateContext()
 {
+#ifdef __ANDROID__
+	if(!init_egl_context(true))
+		return;
+#endif
+	eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 }
 
 /*
@@ -119,14 +152,17 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 
 void GLimp_Shutdown()
 {
+#if !defined(__ANDROID__)
 	GLimp_DeactivateContext();
+#endif
 }
 
 bool scndswp=0;
 void GLimp_SwapBuffers()
 {
-if (scndswp) eglSwapBuffers(eglGetCurrentDisplay(), eglGetCurrentSurface(EGL_DRAW));
-scndswp=1;
+	//k: In GLSurfaceView, swap buffers on every frame end, but in DOOM3 renderer, swap buffers on every frame start, so first swap buffer not process on every frame.
+	if (scndswp) eglSwapBuffers(eglGetCurrentDisplay(), eglGetCurrentSurface(EGL_DRAW));
+	scndswp=1;
 }
 
 bool GLimp_OpenDisplay(void)
@@ -174,7 +210,11 @@ int GLES_Init(glimpParms_t a)
 	glConfig.depthBits = depthbits;
 	glConfig.stencilBits = stencilbits;
 	
+#if !defined(__ANDROID__)
 	GLimp_ActivateContext();
+#else
+	init_egl_context();
+#endif
 
 	glstring = (const char *) glGetString(GL_RENDERER);
 	common->Printf("GL_RENDERER: %s\n", glstring);

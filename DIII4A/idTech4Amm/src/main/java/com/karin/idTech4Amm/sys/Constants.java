@@ -1,14 +1,19 @@
 package com.karin.idTech4Amm.sys;
 
+import com.karin.idTech4Amm.misc.TextHelper;
+
 import java.util.Arrays;
 
+/**
+ * Constants define
+ */
 public final class Constants
 {
     public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
-    public static final int CONST_UPDATE_RELEASE = 22;
-    public static final String CONST_RELEASE = "2023-01-10";
+    public static final int CONST_UPDATE_RELEASE = 23;
+    public static final String CONST_RELEASE = "2023-02-16";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -19,12 +24,16 @@ public final class Constants
     public static final String CONST_DEVELOPER_XDA = "https://forum.xda-developers.com/member.php?u=10584229";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
-			"Support screen top edges with fullscreen.",
-            "Add bad skybox render in Prey(2006).",
-            "Add bad portal render in Prey(2006).",
-            "Add `deathwalk` map append support in Prey(2006).",
+			"Multi-threading support(Testing).",
+            "Fixup portal/skybox view in Prey(2006).",
+            "Fixup intro sound playing when start new game in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
+            "Fixup player can not through first wall with spirit walk mode in `game/spindlea` beginning in Prey(2006).",
+            "Fixup render Tommy's original body when in spirit walk mode in Prey(2006).",
+            "Do not render on-screen buttons when game is loading.",
 	};
+    public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
 
+	// Launcher preference keys
     public static final class PreferenceKey {
         public static final String LAUNCHER_ORIENTATION = "harm_launcher_orientation";
         public static final String RUN_BACKGROUND = "harm_run_background";

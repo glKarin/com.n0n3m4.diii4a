@@ -1,5 +1,8 @@
 package com.karin.idTech4Amm.lib;
 
+/**
+ * Common utility
+ */
 public final class Utility
 {
     private Utility() {}

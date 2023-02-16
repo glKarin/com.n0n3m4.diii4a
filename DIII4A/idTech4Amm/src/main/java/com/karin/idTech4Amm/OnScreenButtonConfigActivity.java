@@ -41,6 +41,9 @@ import java.util.Set;
 import java.util.LinkedHashSet;
 import android.content.res.Resources;
 
+/**
+ * On-screen button config
+ */
 @SuppressLint({"ApplySharedPref", "NonConstantResourceId"})
 public class OnScreenButtonConfigActivity extends Activity
 {

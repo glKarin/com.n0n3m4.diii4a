@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_RGB8	GL_RGBA
 #define GL_RGBA8	GL_RGBA
 #define GL_ALPHA8 GL_ALPHA
-#define GL_RGB5	GL_RGBA
+#define GL_RGB5	GL_RGB5_A1 // GL_RGBA
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83f2
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83f3
 #endif
@@ -2029,10 +2029,49 @@ int idImage::GenerateImageETC(int width, int height,
 	return (failed==0);
 }
 
+#ifdef _MULTITHREAD
+void	idImage::ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd, bool pending)
+#else
 void	idImage::ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd)
+#endif
 {
 	int		width, height;
 	byte	*pic;
+
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		if(pending)
+		{
+			globalImages->AddAllocList(this, checkForPrecompressed, fromBackEnd);
+			return;
+		}
+		if(fromBackEnd)
+		{
+			//LOGI("ERROR!! CAN NOT LOAD IMAGE FROM BIND");
+			globalImages->AddAllocList( this, checkForPrecompressed, fromBackEnd );
+			return;
+		}
+
+		if( cinematic )
+		{
+			cinData_t	cin;
+
+			cin = cinematic->ImageForTime( cinmaticNextTime );
+
+			if( texnum == TEXTURE_NOT_LOADED )
+				glGenTextures( 1, &texnum );
+
+			if ( cin.image ) {
+				UploadScratch( cin.image, cin.imageWidth, cin.imageHeight );
+			} else {
+				//globalImages->blackImage->Bind();
+			}
+
+			return;
+		}
+	}
+#endif
 
 	// this is the ONLY place generatorFunction will ever be called
 	if (generatorFunction) {
@@ -2133,8 +2172,19 @@ void	idImage::ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd)
 PurgeImage
 ===============
 */
+#ifdef _MULTITHREAD
+void idImage::PurgeImage(bool pending)
+#else
 void idImage::PurgeImage()
+#endif
 {
+#ifdef _MULTITHREAD
+	if(multithreadActive && pending)
+	{
+		globalImages->AddPurgeList(this);
+		return;
+	}
+#endif
 	if (texnum != TEXTURE_NOT_LOADED) {
 		glDeleteTextures(1, &texnum);	// this should be the ONLY place it is ever called!
 		texnum = TEXTURE_NOT_LOADED;
@@ -2155,7 +2205,11 @@ Bind
 Automatically enables 2D mapping, cube mapping, or 3D texturing if needed
 ==============
 */
+#ifdef _MULTITHREAD
+void idImage::Bind(bool *res)
+#else
 void idImage::Bind()
+#endif
 {
 	if (tr.logFile) {
 		RB_LogComment("idImage::Bind( %s )\n", imgName.c_str());
@@ -2193,6 +2247,17 @@ void idImage::Bind()
 
 		// load the image on demand here, which isn't our normal game operating mode
 		ActuallyLoadImage(true, true);	// check for precompressed, load is from back end
+#ifdef _MULTITHREAD
+		if(multithreadActive)
+		{
+			// Load a black image to reduce flicker
+			if(this != globalImages->blackImage)
+				globalImages->blackImage->Bind();
+			if(res)
+				*res = false;
+			return;
+		}
+#endif
 	}
 
 

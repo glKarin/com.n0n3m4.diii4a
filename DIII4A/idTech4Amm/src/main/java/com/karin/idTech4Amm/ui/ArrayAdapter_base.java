@@ -7,6 +7,9 @@ import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import java.util.Collection;
 
+/**
+ * Simple ArrayAdapter implements
+ */
 public abstract class ArrayAdapter_base<T> extends ArrayAdapter<T>
 {
     private int m_resource = 0;

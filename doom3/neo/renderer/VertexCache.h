@@ -49,6 +49,9 @@ typedef struct vertCache_s {
 	struct vertCache_s		**user;				// will be set to zero when purged
 	struct vertCache_s *next, *prev;	// may be on the static list or one of the frame lists
 	int				frameUsed;			// it can't be purged if near the current frame
+#ifdef _MULTITHREAD
+	bool virtMemDirty;
+#endif
 } vertCache_t;
 
 
@@ -100,6 +103,14 @@ class idVertexCache
 
 		// listVertexCache calls this
 		void			List();
+#ifdef _MULTITHREAD
+	int GetListNum(void) const { return listNum; }
+	int GetNextListNum(void) const;
+	void BeginBackEnd(int which);
+	void EndBackEnd(int which); // clear VBO
+	private:
+	vertCache_t* CreateTempVbo(int bytes, bool indexBuffer = false);
+#endif
 
 	private:
 		void			InitMemoryBlocks(int size);
@@ -113,7 +124,11 @@ class idVertexCache
 
 		int				staticAllocThisFrame;	// debug counter
 		int				staticCountThisFrame;
+#ifdef _MULTITHREAD
+		int				dynamicAllocThisFrames[NUM_VERTEX_FRAMES];
+#else
 		int				dynamicAllocThisFrame;
+#endif
 		int				dynamicCountThisFrame;
 
 		int				currentFrame;			// for purgable block tracking
@@ -126,14 +141,25 @@ class idVertexCache
 
 		idBlockAlloc<vertCache_t,1024>	headerAllocator;
 
+#ifdef _MULTITHREAD
+		vertCache_t		freeStaticHeaderss[2];		// head of doubly linked list
+		vertCache_t		dynamicHeaderss[NUM_VERTEX_FRAMES];			// head of doubly linked list
+		vertCache_t		deferredFreeLists[NUM_VERTEX_FRAMES];		// head of doubly linked list
+		vertCache_t		staticHeaderss[2];			// head of doubly linked list in MRU order,
+#else
 		vertCache_t		freeStaticHeaders;		// head of doubly linked list
-		vertCache_t		freeDynamicHeaders;		// head of doubly linked list
 		vertCache_t		dynamicHeaders;			// head of doubly linked list
 		vertCache_t		deferredFreeList;		// head of doubly linked list
 		vertCache_t		staticHeaders;			// head of doubly linked list in MRU order,
+#endif
+		vertCache_t		freeDynamicHeaders;		// head of doubly linked list
 		// staticHeaders.next is most recently used
 
 		int				frameBytes;				// for each of NUM_VERTEX_FRAMES frames
+
+#if 0
+	int currentBoundVBO;
+#endif
 };
 
 extern	idVertexCache	vertexCache;

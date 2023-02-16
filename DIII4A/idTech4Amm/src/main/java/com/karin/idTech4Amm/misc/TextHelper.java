@@ -14,6 +14,9 @@ import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Collection;
 
+/**
+ * Global text define
+ */
 public final class TextHelper
 {
 	public static final boolean USING_HTML = true;
@@ -161,6 +164,12 @@ public final class TextHelper
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
             " *. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.",
             " *. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).",
+            " *. Because of tab window UI not support, Settings UI is not work, must edit `preyconfig.cfg` for binding extras key.",
+            "  bind \"Your key of spirit walk\" \"_impulse54\"",
+            "  bind \"Your key of second mode attack of weapons\" \"_attackAlt\"",
+            "  bind \"Your key of toggle lighter\" \"_impulse16\"",
+            "  bind \"Your key of drop\" \"_impulse25\"",
+            " *. If not sound when start new game and load `roadhouse` map, try to press `ESC` key back to main menu and then press `ESC` key to back game, then sound can be played.",
             null,
 			"For playing Quake 4(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/Quake4Doom", "Quake4Doom") + "`): ",
 			" 1. Putting PC Quake 4 game data file to `q4base` folder.",
@@ -174,7 +183,10 @@ public final class TextHelper
             " *. Exists bugs: e.g. Main-menu dialog interface, script error on some levels, particle system not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`)",
 			" *. Multiplayer-Game: using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game, and is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
             null,
-            "On Android 11+, because of `Scoped-Storage`, must grant `Allow management of all files` permission.",
+            "Multi-threading and some GLSL shader using `" + GenLinkText("https://github.com/emileb/d3es-multithread", "emileb/d3es-multithread") + "`.",
+            null,
+            // "On Android 11+, because of `Scoped-Storage`, must grant `Allow management of all files` permission.",
+            "On Android 10+, if game files loading slowly, suggest to set game data directory is under `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/`.",
             null,
             "All special `CVAR`s are start with `harm_`.",
             "More Cvar's detail view in menu `Other` -> `Cvar list`.",
@@ -278,6 +290,13 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+                ChangeLog.Create("2023-01-10", 22,
+                        "Support screen top edges with fullscreen.",
+                        "Add bad skybox render in Prey(2006).",
+                        "Add bad portal render in Prey(2006).",
+                        "Add `deathwalk` map append support in Prey(2006)."
+                ),
 
                 ChangeLog.Create("2022-12-10", 21,
                         "Prey(2006) for DOOM3 support, game data folder named `preybase`. All levels clear, but have some bugs.",

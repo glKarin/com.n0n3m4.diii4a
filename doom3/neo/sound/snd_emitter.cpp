@@ -1340,6 +1340,9 @@ soundShaderParms_t* idSoundEmitterLocal::GetSoundParms(idSoundShader* shader, co
 void idSoundEmitterLocal::ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier)
 {
     // jmarshall - implement me!
+    idSoundChannel* chan = &channels[channel];
+	if(chan)
+	parmModifier.ModifyParms(chan->parms);
 }
 #endif
 

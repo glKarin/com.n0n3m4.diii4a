@@ -704,15 +704,19 @@ analogy=y;
 #define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
 #define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
 
-#define ANDROID_CALL_PROTOCOL_NATIVE_LINRARY_DIR 0x20001
+#define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
 #define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
 #define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
+#define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
 
 // APK's native library path on Android.
 char *native_library_dir = NULL;
 
 // Do not catch signal
 unsigned char no_handle_signals = 0;
+
+// multi-thread
+unsigned char multithread = 0;
 
 // DOOM library call Android JNI
 intptr_t (*Android_Call)(int protocol, int size, ...);
@@ -734,7 +738,7 @@ intptr_t Q3E_Call(int protocol, int size, ...)
 	va_start(va, size);
 	switch(protocol)
 	{
-		case ANDROID_CALL_PROTOCOL_NATIVE_LINRARY_DIR:
+		case ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR:
 			native_library_dir = strdup(va_arg(va, char *));
 			res = (intptr_t)native_library_dir;
 			break;
@@ -745,6 +749,10 @@ intptr_t Q3E_Call(int protocol, int size, ...)
 		case ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS:
 			no_handle_signals = va_arg(va, int) ? 1 : 0;
 			res = no_handle_signals;
+			break;
+		case ANDROID_CALL_PROTOCOL_MULTITHREAD:
+			multithread = va_arg(va, int) ? 1 : 0;
+			res = multithread;
 			break;
 		default:
 			break;
@@ -758,6 +766,14 @@ void Q3E_exit(void)
 {
 	if(common->IsInitialized())
 		common->Quit();
+}
+
+void Q3E_BackEndRender(void)
+{
+	if(multithread)
+	{
+		common->Printf("MULTITHREAD\n");
+	}
 }
 #endif
 

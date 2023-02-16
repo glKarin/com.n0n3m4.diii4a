@@ -2799,6 +2799,10 @@ RB_RenderDebugTools
 */
 void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+		return; // not implement frontend and backend at present
+#endif
 	// don't do anything if this was a 2D rendering
 	if (!backEnd.viewDef->viewEntitys) {
 		return;

@@ -33,6 +33,34 @@ If you have questions concerning this license or the applicable additional terms
 idRenderSystemLocal	tr;
 idRenderSystem	*renderSystem = &tr;
 
+#ifdef _MULTITHREAD
+volatile bool backendFinished = true;
+volatile frameData_t	*fdToRender = NULL;
+volatile int			vertListToRender = 0;
+// These are set if the backend should save pixels
+volatile renderCrop_t	*pixelsCrop = NULL;
+volatile byte           *pixels = NULL;
+volatile int backend_renderer_intent = BACKEND_RENDERER_INTENT_DRAW;
+
+// waiting backend render finished
+extern "C" {
+void BackendThreadWait(void)
+{
+	while(/*multithreadActive &&*/ !backendFinished)
+    {
+        //usleep(1000 * 3);
+        Sys_WaitForEvent(TRIGGER_EVENT_BACKEND_FINISHED);
+        //usleep(500);
+    }
+}
+
+void setup_backend_renderer_intent(int intent, bool wait)
+{
+	BackendThreadWait();
+	backend_renderer_intent = intent;
+}
+}
+#endif
 
 /*
 =====================
@@ -131,6 +159,54 @@ R_IssueRenderCommands
 Called by R_EndFrame each frame
 ====================
 */
+#ifdef _MULTITHREAD
+static void R_IssueRenderCommands(volatile frameData_t *fd)
+{
+	if (fd->cmdHead->commandId == RC_NOP
+	    && !fd->cmdHead->next) {
+		// nothing to issue
+		return;
+	}
+
+	// r_skipBackEnd allows the entire time of the back end
+	// to be removed from performance measurements, although
+	// nothing will be drawn to the screen.  If the prints
+	// are going to a file, or r_skipBackEnd is later disabled,
+	// usefull data can be received.
+
+	// r_skipRender is usually more usefull, because it will still
+	// draw 2D graphics
+	if (!r_skipBackEnd.GetBool()) {
+		RB_ExecuteBackEndCommands(fd->cmdHead);
+	}
+}
+
+static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
+{
+	BackendThreadWait();
+	vertListToRender = vertexCache.GetListNum();
+	fdToRender = frameData;
+
+	//Save the potential pixel
+	pixelsCrop = pc;
+	pixels = pix;
+
+	backendFinished = false;
+	Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
+
+	Sys_WaitForEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
+
+	if(pix)
+	{
+		BackendThreadWait();
+	}
+
+	R_ToggleSmpFrame();
+	vertexCache.EndFrame();
+	R_ClearCommandChain();
+}
+#endif
+
 static void R_IssueRenderCommands(void)
 {
 	if (frameData->cmdHead->commandId == RC_NOP
@@ -732,6 +808,14 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	cmd = (emptyCommand_t *)R_GetCommandBuffer(sizeof(*cmd));
 	cmd->commandId = RC_SWAP_BUFFERS;
 
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		RenderCommands();
+	}
+	else
+	{
+#endif
 	// start the back end up again with the new command list
 	R_IssueRenderCommands();
 
@@ -741,6 +825,9 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 
 	// we can now release the vertexes used this frame
 	vertexCache.EndFrame();
+#ifdef _MULTITHREAD
+	}
+#endif
 
 	if (session->writeDemo) {
 		session->writeDemo->WriteInt(DS_RENDER);
@@ -964,26 +1051,12 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 
 	guiModel->EmitFullScreen();
 	guiModel->Clear();
+#ifdef _MULTITHREAD
+	if(!multithreadActive)
+#endif
 	R_IssueRenderCommands();
 
-#if !defined(GL_ES_VERSION_2_0)
-	glReadBuffer(GL_BACK);
-
-	// include extra space for OpenGL padding to word boundaries
-	int	c = (rc->width + 3) * rc->height;
-	byte *data = (byte *)R_StaticAlloc(c * 3);
-
-	glReadPixels(rc->x, rc->y, rc->width, rc->height, GL_RGB, GL_UNSIGNED_BYTE, data);
-
-	byte *data2 = (byte *)R_StaticAlloc(c * 4);
-
-	for (int i = 0 ; i < c ; i++) {
-		data2[ i * 4 ] = data[ i * 3 ];
-		data2[ i * 4 + 1 ] = data[ i * 3 + 1 ];
-		data2[ i * 4 + 2 ] = data[ i * 3 + 2 ];
-		data2[ i * 4 + 3 ] = 0xff;
-	}
-#else //k: fix capture screen picture. e.g quicksave, mission tips
+	//k: fix capture screen picture. e.g quicksave, mission tips
 	// Android: GL_RGBA && GL_UNSIGNED_BYTE
 	/*
 	   GLint eReadFormat, eReadType;
@@ -994,6 +1067,14 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 	int	c = (rc->width + 4) * rc->height;
 	byte *data = (byte *)R_StaticAlloc(c * 4);
 
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		// This will render the commands and will block untill finished and has the pixel data
+		RenderCommands(rc, data);
+	}
+	else
+#endif
 	glReadPixels(rc->x, rc->y, rc->width, rc->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	byte *data2 = (byte *)R_StaticAlloc(c * 4);
@@ -1004,7 +1085,6 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 		data2[ i * 4 + 2 ] = data[ i * 4 + 2 ];
 		data2[ i * 4 + 3 ] = 0xff;
 	}
-#endif
 
 	R_WriteTGA(fileName, data2, rc->width, rc->height, true);
 
@@ -1076,3 +1156,55 @@ bool idRenderSystemLocal::UploadImage(const char *imageName, const byte *data, i
 	return true;
 }
 
+#ifdef _MULTITHREAD
+extern "C" {
+void BackendThreadTask(void) // BackendThread -> 
+{
+	while(true)
+	{
+		// waiting start
+		Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
+		// If reloading engine, deactivate GL context and wait game thread deactivate GL context, finally reactivate GL context. If no GL context, this thread do not return.
+		switch(backend_renderer_intent)
+		{
+			case BACKEND_RENDERER_INTENT_MAKE_CURRENT:
+				GLimp_DeactivateContext();
+				Sys_TriggerEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
+				Sys_WaitForEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
+				GLimp_ActivateContext();
+				break;
+
+			case BACKEND_RENDERER_INTENT_DRAW:
+			default: 
+				{
+					// Purge all images,  Load all images
+					globalImages->HandlePendingImage();
+					// image process finished
+					Sys_TriggerEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
+
+					int backendVertexCache = vertListToRender;
+					vertexCache.BeginBackEnd(backendVertexCache);
+					R_IssueRenderCommands(fdToRender);
+
+					bool exit = true;
+					// Take screen shot
+					if(pixels) // if block backend rendering, do not exit backend render function, because it will be swap buffers in GLSurfaceView
+					{
+						glReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
+						pixels = NULL;
+						pixelsCrop = NULL;
+						exit = false;
+					}
+
+					vertexCache.EndBackEnd(backendVertexCache);
+					backendFinished = true;
+					Sys_TriggerEvent(TRIGGER_EVENT_BACKEND_FINISHED);
+					if(exit)
+						return;
+				}
+				break;
+		}
+	}
+}
+}
+#endif

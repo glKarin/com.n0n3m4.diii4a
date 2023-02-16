@@ -14,6 +14,9 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3EJNI;
 
+/**
+ * Debug preference fragment
+ */
 public class DebugPreference extends PreferenceFragment implements Preference.OnPreferenceChangeListener
 {
 
