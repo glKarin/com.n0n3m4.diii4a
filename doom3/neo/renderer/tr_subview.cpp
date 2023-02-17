@@ -465,9 +465,6 @@ void R_XrayRender(drawSurf_t *surf, textureStage_t *stage, idScreenRect scissor)
 R_GenerateSurfaceSubview
 ==================
 */
-#if 0 //k: In original Prey, material has a dynamic variant named `distance`, portal subview render is blend with black texture with different distance, but not implement now.
-static idCVar harm_r_maxPortalDistanceLimit("harm_r_maxPortalDistanceLimit", "-1", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Max portal diatance limit with view position. If distance of view position and portal great than this value, the portal is not be rendered subview.(0 - Always not render, Negative - Always render(default), Positive - Max distance limit).");
-#endif
 bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 {
 	idBounds		ndcBounds;
@@ -553,16 +550,14 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 					return false;
 				}
 
-#if 0 //k: If more portals, it makes FPS decrement sometimes.
-				int maxPortalDistanceLimit = harm_r_maxPortalDistanceLimit.GetInteger();
-				if(maxPortalDistanceLimit == 0)
-					return;
-				else if(maxPortalDistanceLimit > 0)
+				//k: idMaterial::directPortalDistance may be max distance for render, also see `materials/portals.mtr`.
+				int index = shader->GetDirectPortalDistance();
+				if(index >= 0 && index < EXP_REG_NUM_PREDEFINED)
 				{
+					float maxPortalDistanceLimit = drawSurf->space->entityDef->parms.shaderParms[index];
 					if((tr.viewDef->renderView.vieworg - drawSurf->space->entityDef->parms.origin).LengthFast() > maxPortalDistanceLimit)
 						return;
 				}
-#endif
 
 				// copy the viewport size from the original
 				parms = (viewDef_t *)R_FrameAlloc(sizeof(*parms));

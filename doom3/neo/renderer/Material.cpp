@@ -119,7 +119,7 @@ void idMaterial::CommonInit()
 #endif
 #ifdef _HUMANHEAD
 	subviewClass = SC_MIRROR;
-	directPortalDistance = 0;
+	directPortalDistance = -1;
 #endif
 
 	decalInfo.stayTime = 10000;
@@ -2637,8 +2637,8 @@ void idMaterial::ParseMaterial(idLexer &src)
 			src.SkipRestOfLine();
 			sort = SS_SUBVIEW;
 			subviewClass = SC_PORTAL_SKYBOX;
-		} else if (!token.Icmp("directportal")) {
-			src.SkipRestOfLine();
+		} else if (!token.Icmp("directportal")) { // with a parm: e.g. directportal parm5
+			directPortalDistance = ParseExpression(src);
 			sort = SS_SUBVIEW;
 			subviewClass = SC_PORTAL;
 			coverage = MC_OPAQUE;

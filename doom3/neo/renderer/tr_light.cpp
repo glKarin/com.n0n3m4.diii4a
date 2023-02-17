@@ -43,13 +43,13 @@ VERTEX CACHE GENERATORS
 */
 
 #ifdef _HUMANHEAD
-static float R_CalcViewAndEntityDistance(const viewDef_t *viewDef, const renderEntity_t *entity)
+static ID_INLINE float R_CalcViewAndEntityDistance(const viewDef_t *viewDef, const renderEntity_t *entity)
 {
 	//idVec3 origin = idVec3(space->modelMatrix[12], space->modelMatrix[13], space->modelMatrix[14]);
 	return (viewDef->renderView.vieworg - entity->origin).LengthFast();
 }
 
-static float R_CalcViewAndLightDistance(const viewDef_t *viewDef, const renderLight_t *light)
+static ID_INLINE float R_CalcViewAndLightDistance(const viewDef_t *viewDef, const renderLight_t *light)
 {
 	return (viewDef->renderView.vieworg - light->origin).LengthFast();
 }
