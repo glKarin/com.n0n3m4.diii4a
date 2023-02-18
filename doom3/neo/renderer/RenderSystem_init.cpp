@@ -65,7 +65,7 @@ idCVar r_useInfiniteFarZ("r_useInfiniteFarZ", "1", CVAR_RENDERER | CVAR_BOOL, "u
 
 idCVar r_znear("r_znear", "3", CVAR_RENDERER | CVAR_FLOAT, "near Z clip plane distance", 0.001f, 200.0f);
 
-idCVar r_noLight("r_noLight", "1", CVAR_RENDERER | CVAR_BOOL, "lighting disable hack");
+idCVar r_noLight("r_noLight", "0", CVAR_RENDERER | CVAR_BOOL, "lighting disable hack");
 idCVar r_useETC1("r_useETC1", "1", CVAR_RENDERER | CVAR_BOOL, "use ETC1 compression");
 idCVar r_useETC1Cache("r_useETC1cache", "1", CVAR_RENDERER | CVAR_BOOL, "use ETC1 compression");
 idCVar r_useDXT("r_useDXT", "1", CVAR_RENDERER | CVAR_BOOL, "use DXT compression if possible");
