@@ -1853,7 +1853,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 		renderSystem->BeginLevelLoad();
 		soundSystem->BeginLevelLoad();
 	}
-#ifdef _HUMANHEAD
+#ifdef _HUMANHEAD //k: play level music when map loading
 	soundSystem->SetMute(false);
 	soundSystem->SetPlayingSoundWorld(menuSoundWorld);
 	const idDecl *mapDecl = declManager->FindType(DECL_MAPDEF, mapString.c_str(), false);
