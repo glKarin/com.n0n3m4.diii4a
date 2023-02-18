@@ -555,7 +555,7 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				if(index >= 0 && index < EXP_REG_NUM_PREDEFINED)
 				{
 					float maxPortalDistanceLimit = drawSurf->space->entityDef->parms.shaderParms[index];
-					if((tr.viewDef->renderView.vieworg - drawSurf->space->entityDef->parms.origin).LengthFast() > maxPortalDistanceLimit)
+					if(maxPortalDistanceLimit > 0.0f && (tr.viewDef->renderView.vieworg - drawSurf->space->entityDef->parms.origin).LengthFast() > maxPortalDistanceLimit) //k: maybe parm == 0
 						return;
 				}
 
