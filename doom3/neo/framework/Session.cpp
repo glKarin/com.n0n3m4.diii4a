@@ -3315,6 +3315,11 @@ void idSessionLocal::RunGameTic()
 				mapSpawnData.serverInfo.Set("si_entityFilter", "");
 			}
 #endif
+#ifdef _HUMANHEAD
+			const char *deathwalkmap = GetDeathwalkMapName(args.Argv(1));
+			mapSpawnData.serverInfo.Set("deathwalkmap", deathwalkmap);
+			mapSpawnData.serverInfo.SetBool("shouldappendlevel", deathwalkmap && deathwalkmap[0]);
+#endif
 			// go to the next map
 			MoveToNewMap(args.Argv(1));
 		} else if (!idStr::Icmp(args.Argv(0), "devmap")) {
@@ -3332,6 +3337,11 @@ void idSessionLocal::RunGameTic()
 				cvarSystem->SetCVarString("si_entityFilter", "");
 				mapSpawnData.serverInfo.Set("si_entityFilter", "");
 			}
+#endif
+#ifdef _HUMANHEAD
+			const char *deathwalkmap = GetDeathwalkMapName(args.Argv(1));
+			mapSpawnData.serverInfo.Set("deathwalkmap", deathwalkmap);
+			mapSpawnData.serverInfo.SetBool("shouldappendlevel", deathwalkmap && deathwalkmap[0]);
 #endif
 			MoveToNewMap(args.Argv(1));
 		} else if (!idStr::Icmp(args.Argv(0), "died")) {
