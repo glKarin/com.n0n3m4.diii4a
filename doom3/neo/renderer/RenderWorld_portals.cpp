@@ -643,7 +643,7 @@ void idRenderWorldLocal::AddAreaEntityRefs(int areaNum, const portalStack_t *ps)
 		// remove decals that are completely faded away
 		R_FreeEntityDefFadedDecals(entity, tr.viewDef->renderView.time);
 
-#ifdef _MULTITHREAD //k: if in spirit walk mode, skip all entities of only invisible in spirit, else skip all entities of only visible in spirit.
+#ifdef _HUMANHEAD //k: if in spirit walk mode, skip all entities of only invisible in spirit, else skip all entities of only visible in spirit.
 		if(tr.viewDef->renderView.viewSpiritEntities)
 		{
 			if(entity->parms.onlyInvisibleInSpirit)
