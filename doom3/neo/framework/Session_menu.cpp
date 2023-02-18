@@ -1140,6 +1140,9 @@ void idSessionLocal::HandleMainMenuCommands(const char *menuCommand)
 		}
 
 		if (!idStr::Icmp(cmd, "checkKeys")) {
+#ifdef _HUMANHEAD //k: play main menu music, also see in `guis/mainmenu.gui::Anim_MenuMusic`
+			menuSoundWorld->PlayShaderDirectly("guisounds_menu_music", 2);
+#endif
 #if ID_ENFORCE_KEY
 
 			// not a strict check so you silently auth in the background without bugging the user
