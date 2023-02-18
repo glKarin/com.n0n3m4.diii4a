@@ -1853,6 +1853,18 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 		renderSystem->BeginLevelLoad();
 		soundSystem->BeginLevelLoad();
 	}
+#ifdef _HUMANHEAD
+	soundSystem->SetMute(false);
+	soundSystem->SetPlayingSoundWorld(menuSoundWorld);
+	const idDecl *mapDecl = declManager->FindType(DECL_MAPDEF, mapString.c_str(), false);
+	if(mapDecl)
+	{
+		const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
+		const char *loadMusic = mapDef->dict.GetString("snd_loadmusic");
+		if(loadMusic && loadMusic[0])
+			menuSoundWorld->PlayShaderDirectly(loadMusic, 2);
+	}
+#endif
 
 	uiManager->BeginLevelLoad();
 	uiManager->Reload(true);
@@ -3902,6 +3914,9 @@ const char * idSessionLocal::GetDeathwalkMapName(const char *mapName) const
 #if 0
 	if(!mapDecl)
 		mapDecl = declManager->FindType(DECL_MAPDEF, "defaultMap", false);
+#else
+	if(!mapDecl)
+		return "";
 #endif
 	const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
 	const char *dwMap = mapDef->dict.GetString("deathwalkmap");
