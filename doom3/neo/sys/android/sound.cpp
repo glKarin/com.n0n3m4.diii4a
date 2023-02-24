@@ -41,7 +41,9 @@ If you have questions concerning this license or the applicable additional terms
 
 const char	*s_driverArgs[]	= {
 	"AudioTrack", 
-	"OpenSLES", 
+#ifdef _OPENSLES
+	"OpenSLES",
+#endif
 	// "AAudio"
 	NULL };
 
@@ -50,7 +52,11 @@ extern int (*writeAudio)(int offset, int length);
 
 int m_buffer_size;
 
-static idCVar s_driver("s_driver", s_driverArgs[0], CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "sound driver. only `AudioTrack` is supported in this build", s_driverArgs, idCmdSystem::ArgCompletion_String<s_driverArgs>);
+static idCVar s_driver("s_driver", s_driverArgs[0], CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "sound driver. only `AudioTrack`"
+#ifdef _OPENSLES
+		", `OpenSLES`"
+#endif
+		" be supported in this build", s_driverArgs, idCmdSystem::ArgCompletion_String<s_driverArgs>);
 
 class idAudioHardwareAndroid: public idAudioHardware
 {
@@ -65,7 +71,7 @@ class idAudioHardwareAndroid: public idAudioHardware
 
 		bool Initialize()
 		{
-		common->Printf("------ Android Sound Initialization ------\n");
+		common->Printf("------ Android AudioTrack Sound Initialization ------\n");
 #ifdef __ANDROID__
 		common->Printf("[Harmattan]: active write audio.\n");
 #endif
@@ -125,11 +131,12 @@ class idAudioHardwareAndroid: public idAudioHardware
 
 idAudioHardware::~idAudioHardware() { }
 
-//#include "sound_opensles.cpp"
-
+#ifdef _OPENSLES
+#include "sound_opensles.cpp"
+#endif
 idAudioHardware *idAudioHardware::Alloc()
 {
-#if 0
+#ifdef _OPENSLES
 	if(!idStr::Icmp(s_driver.GetString(), "OpenSLES"))
 		return new idAudioHardwareOpenSLES;
 	else

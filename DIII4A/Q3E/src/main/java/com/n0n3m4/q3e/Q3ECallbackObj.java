@@ -294,3 +294,19 @@ class Q3EAudioTrack extends AudioTrack
 		super.play();		
 	}
 }
+
+//k: Once Runnable
+abstract class __Runnable implements Runnable
+{
+    private boolean m_handle = false;
+
+    @Override
+    public void run()
+    {
+        if(m_handle) return;
+        __run();
+        m_handle = true;
+    }
+
+    protected abstract void __run();
+}

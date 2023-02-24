@@ -53,13 +53,13 @@
                 android:defaultValue="true"
                 android:summary="Save game runtime output log to stdout.txt/stderr.txt"
             />
-            <CheckBoxPreference
-                android:title="Open Quake 4 helper dialog"
-                android:key="harm_open_quake4_helper"
+<!--            <CheckBoxPreference
+                android:title="Multi-thread"
+                android:key="q3e_harm_multithreading"
                 android:persistent="true"
-                android:defaultValue="true"
-                android:summary="Open helper dialog when start Quake 4"
-                />
+                android:defaultValue="false"
+                android:summary="Using render thread and game thread"
+                />-->
         </PreferenceCategory>
         
         <PreferenceCategory
@@ -80,6 +80,13 @@
                 android:defaultValue="false"
                 android:summary="Hide bottom ad bar in launcher"
             />
+            <CheckBoxPreference
+                android:title="Open Quake 4 helper dialog"
+                android:key="harm_open_quake4_helper"
+                android:persistent="true"
+                android:defaultValue="true"
+                android:summary="Open helper dialog when start Quake 4"
+                />
             <EditTextPreference
                 android:title="On-screen buttons position unit"
                 android:key="harm_controls_config_position_unit"

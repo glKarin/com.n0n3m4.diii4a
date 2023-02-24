@@ -39,7 +39,9 @@ extern bool multithreadActive; // sys/android/main
 
 extern void GLimp_ActivateContext(void);
 extern void GLimp_DeactivateContext(void);
-//#define _HARM_DEBUG_MULTITHREAD
+#ifdef _K_DEV
+#define _HARM_DEBUG_MULTITHREAD
+#endif
 
 #define BACKEND_RENDERER_INTENT_DRAW 0
 #define BACKEND_RENDERER_INTENT_MAKE_CURRENT 1

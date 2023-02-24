@@ -25,7 +25,8 @@ serialized=['CC', 'CXX', 'JOBS', 'BUILD', 'IDNET_HOST', 'DEDICATED',
 	'TARGET_PREY',
 	'BUILD_ROOT', 'BUILD_GAMEPAK', 'BASEFLAGS', 'SILENT', 'TARGET_OPENGL',
 	'TARGET_ANDROID', 'NDK',
-	'LIB_PATH'
+	'LIB_PATH',
+	'MULTITHREAD', 'OPENSLES'
     ]
 
 # help -------------------------------------------
@@ -88,6 +89,12 @@ TARGET_PREY (default 0)
 
 TARGET_HUMANHEAD (default 0)
 	Build the core(HumanHead)
+
+MULTITHREAD (default 1)
+	Multi-threading support
+
+OPENSLES (default 1)
+	OpenSLES support
 
 BUILD_GAMEPAK (default 0)
 	Build a game pak
@@ -218,6 +225,8 @@ BUILD_GAMEPAK = '0'
 BASEFLAGS = ''
 SILENT = '0'
 LIB_PATH = ''
+MULTITHREAD = '1'
+OPENSLES = '1'
 
 # end default settings ---------------------------
 
@@ -366,8 +375,8 @@ if ( ID_MCHECK == '1' ):
 	BASECPPFLAGS.append( '-DID_MCHECK' )
 	
 # create the build environements
-g_base_env = Environment( ENV = os.environ, CC = CC, CXX = CXX, LINK = LINK, CPPFLAGS = BASECPPFLAGS, LINKFLAGS = BASELINKFLAGS, CPPPATH = CORECPPPATH, LIBPATH = CORELIBPATH, NDK = NDK )
-scons_utils.SetupUtils( g_base_env )
+g_base_env = Environment( ENV = os.environ, CC = CC, CXX = CXX, LINK = LINK, CPPFLAGS = BASECPPFLAGS, LINKFLAGS = BASELINKFLAGS, CPPPATH = CORECPPPATH, LIBPATH = CORELIBPATH, NDK = NDK, MULTITHREAD = MULTITHREAD, OPENSLES = OPENSLES )
+scons_utils.SetupUtils( g_base_env ) 
 
 g_env = g_base_env.Clone()
 
@@ -421,7 +430,7 @@ local_humanhead = 0
 # OpenGL
 local_opengl = 0
 
-GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp local_cdoom local_d3le local_rivensin local_hardcorps local_quake4 local_raven local_prey local_humanhead local_opengl OPTCPPFLAGS NDK'
+GLOBALS = 'g_env g_env_noopt g_game_env g_os ID_MCHECK ALSA idlib_objects game_objects local_dedicated local_gamedll local_demo local_idlibpic local_curl local_d3xp local_cdoom local_d3le local_rivensin local_hardcorps local_quake4 local_raven local_prey local_humanhead local_opengl OPTCPPFLAGS NDK MULTITHREAD OPENSLES'
 
 # end general configuration ----------------------
 

@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan23(natasha)  
+1.1.0harmattan25(natasha)  
 **Last update release:**
-2023-02-16  
+2023-02-20  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -14,22 +14,22 @@ GPLv3
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan23 (2023-02-16)
+> 1.1.0harmattan25 (2023-02-22)
 
-* Multi-threading support(Testing), DO NOT SUPPORT TO CHANGE WITH MULTI-THREAD AND SINGLE-THREAD IN GAME AT PRESENT!!! ONLY CAN SETTING IN LAUNCHER!!!, using [d3es-multithread](https://github.com/emileb/d3es-multithread).
-* Fixup portal/skybox view in Prey(2006).
-* Fixup intro sound playing when start new game in Prey(2006) by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
-* Fixup player can not through first wall with spirit walk mode in `game/spindlea` beginning in Prey(2006).
-* Fixup render Tommy's original body when in spirit walk mode in Prey(2006).
-* Do not render on-screen buttons when game is loading.
+* Sound with OpenSLES support(Testing).
+* Add backup/restore preferences support.
+* Add menu music playing in Prey(2006).
+* Add map loading music playing in Prey(2006).
+* Add entity visible/invisible in spirit walk mode in Prey(2006), e.g. spirit bridge.
+* Optimize portal render with view distance in Prey(2006).
 
 
-* 多线程支持(测试)当前不支持在游戏中切换多线程和单线程!!! 只可以在启动器中设置!!!, 使用[d3es-multithread](https://github.com/emileb/d3es-multithread).
-* 掠食(2006)修复开始新游戏加载第一个关卡后intro部分的声音播放 by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
-* 掠食(2006)修复通道和天空盒渲染.
-* 掠食(2006)修复关卡`game/spindlea`幽灵行走模式无法穿过玩家初始位置前的空气墙.
-* 掠食(2006)修复幽灵行走模式下无法看到Tommy的躯壳本体.
-* 游戏加载时不渲染虚拟按键.
+* OpenSLES音频播放(测试).
+* 新增启动器偏好设置备份和恢复.
+* 掠食(2006)新增主菜单背景音乐播放.
+* 掠食(2006)新增关卡载入时的背景音乐播放.
+* 掠食(2006)支持灵魂行走状态时的物体可见/隐藏, 例如幽灵桥.
+* 掠食(2006)使用视图距离控制是否渲染传送门.
 
 ----------------------------------------------------------------------------------
 
@@ -118,6 +118,26 @@ GPLv3
 ### Changes
 
 ----------------------------------------------------------------------------------
+
+> 1.1.0harmattan23 (2023-02-16)
+
+* Multi-threading support(Testing, NO `r_multithread` cvar, DO NOT SUPPORT TO CHANGE WITH MULTI-THREAD AND SINGLE-THREAD IN GAME AT PRESENT!!! ONLY CAN SETTING IN LAUNCHER!!!), using [d3es-multithread](https://github.com/emileb/d3es-multithread).
+* Fixup portal/skybox view in Prey(2006).
+* Fixup intro sound playing when start new game in Prey(2006) by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
+* Fixup player can not through first wall with spirit walk mode in `game/spindlea` beginning in Prey(2006).
+* Fixup render Tommy's original body when in spirit walk mode in Prey(2006).
+* Do not render on-screen buttons when game is loading.
+
+
+* 多线程支持(测试, 当前不支持cvar `r_multithread`, 不支持在游戏中切换多线程和单线程!!! 只可以在启动器中设置!!!)使用[d3es-multithread](https://github.com/emileb/d3es-multithread).
+* 掠食(2006)修复开始新游戏加载第一个关卡后intro部分的声音播放 by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
+* 掠食(2006)修复通道和天空盒渲染.
+* 掠食(2006)修复关卡`game/spindlea`幽灵行走模式无法穿过玩家初始位置前的空气墙.
+* 掠食(2006)修复幽灵行走模式下无法看到Tommy的躯壳本体.
+* 游戏加载时不渲染虚拟按键.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan22 (2023-01-10)
 
 * Support screen top edges with fullscreen.

@@ -40,12 +40,12 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
 {	
 
-	public Handler mHandler;
 	public boolean usesCSAA=false;
 
 
@@ -171,8 +171,6 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
     {
 		super(context);
 
-		mHandler = new Handler();
-
 		Q3EUtils.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
 		int msaa=PreferenceManager.getDefaultSharedPreferences(this.getContext()).getInt(Q3EUtils.pref_msaa, 0);
 		switch (msaa)
@@ -213,7 +211,7 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
 		}
 
 		if (Q3EUtils.usegles20)
-            setEGLContextClientVersion(2);				
+            setEGLContextClientVersion(2);
 
 		setRenderer(this);
 
@@ -221,13 +219,13 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
 		setFocusableInTouchMode(false);
 	}
 
-	public static boolean mInit=false;
-	public static int width;
-	public static int height;
 
-	public static int orig_width;
-	public static int orig_height;
+    public static boolean mInit=false;
+    public static int width;
+    public static int height;
 
+    public static int orig_width;
+    public static int orig_height;
 
 	@Override
 	public void onDrawFrame(GL10 gl)
@@ -291,26 +289,23 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
 			return context.getCacheDir().getAbsolutePath().replace("cache", "lib");		//k old, can work with armv5 and armv7-a
         }
     }
-    
+
 	@Override
 	public void onSurfaceChanged(GL10 gl, int w, int h)
     {
-		if (mInit == false)
-		{
-			String lib_dir = GetGameLibDir();		
+        if(!mInit)
+        {
+            SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this.getContext());
+            orig_width = w;
+            orig_height = h;
 
-			SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this.getContext());
-
-			orig_width = w;
-			orig_height = h;
-
-			switch (mPrefs.getInt(Q3EUtils.pref_scrres, 0))
+            switch (mPrefs.getInt(Q3EUtils.pref_scrres, 0))
             {
                 case 0:
                     width = w;
                     height = h;
                     break;
-                case 1:	
+                case 1:
                     width = w / 2;
                     height = h / 2;
                     break;
@@ -335,7 +330,7 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
                     }
                     try
                     {
-                        height = Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resy, "0"));   
+                        height = Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resy, "0"));
                     }
                     catch (Exception e)
                     {
@@ -356,7 +351,7 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
                     }
                     break;
 
-                    //k
+                //k
                 case 5: // 720p
                     width = 1280;
                     height = 720;
@@ -377,30 +372,38 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
                     width = w / 4;
                     height = h / 4;
                     break;
-                    //k
-			} 			
+                //k
+                default:
+                    width = w;
+                    height = h;
+                    break;
+            }
 
-			String cmd = Q3EMain.datadir + "/" + mPrefs.getString(Q3EUtils.pref_params, Q3EUtils.q3ei.libname) + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
-			Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd);
+            String lib_dir = GetGameLibDir();
+            String cmd = Q3EMain.datadir + "/" + mPrefs.getString(Q3EUtils.pref_params, Q3EUtils.q3ei.libname) + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
+            Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd);
 
-			mInit = true;
-			mHandler.post(new Runnable() {				
+            mInit = true;
+
+            if ((orig_width != width) || (orig_height != height))
+            {
+                post(new Runnable() {
                     @Override
                     public void run()
                     {
-                        if ((orig_width != width) || (orig_height != height))
-                            getHolder().setFixedSize(width, height);					
+                        getHolder().setFixedSize(width, height);
                     }
                 });
-		}
+            }
+        }
 	}
 
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config)
     {
 
-		if (Q3EUtils.usegles20)
-			Q3EUtils.initGL20();
+/*		if (Q3EUtils.usegles20)
+			Q3EUtils.initGL20();*/
 
 		if (mInit)
 		{						
@@ -411,14 +414,14 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
     
     public void PushUIEvent(Runnable event)
     {
-        mHandler.post(event);
+        post(event);
     }
 
     public void PushEvent(Runnable event)
     {
         queueEvent(event);
     }
-    
+
     private Q3EControlView m_controlView;
     
     public void ControlView(Q3EControlView view)
@@ -435,6 +438,7 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
                 andThen.run();
             return;
         }
+        else
         queueEvent(new Runnable() {
             public void run()
             {
@@ -443,6 +447,34 @@ class Q3EView extends GLSurfaceView implements GLSurfaceView.Renderer
                     andThen.run();
             }
         });
+    }
+
+    public void Pause()
+    {
+        if(!mInit)
+            return;
+        Runnable runnable = new __Runnable() {
+            public void __run() {
+                Q3EJNI.OnPause();
+            }
+        };
+        if(!Q3EUtils.q3ei.multithread)
+            queueEvent(runnable);
+        Q3EUtils.q3ei.callbackObj.PushEvent(runnable);
+    }
+
+    public void Resume()
+    {
+        if(!mInit)
+            return;
+        Runnable runnable = new __Runnable() {
+            public void __run() {
+                Q3EJNI.OnResume();
+            }
+        };
+        if(!Q3EUtils.q3ei.multithread)
+            queueEvent(runnable);
+        Q3EUtils.q3ei.callbackObj.PushEvent(runnable);
     }
 
     /*

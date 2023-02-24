@@ -326,6 +326,34 @@
                     android:text="4.0" />
             </LinearLayout>
 
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/launcher_s_driver"
+				android:layout_marginTop="1dp"
+				android:layout_marginBottom="1dp"
+				android:text="Sound implementation"/>
+
+			<RadioGroup
+				android:id="@+id/rg_s_driver"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+
+				<RadioButton
+					android:id="@+id/s_driver_audiotrack"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:checked="true"
+					android:text="AudioTrack"/>
+
+				<RadioButton
+					android:id="@+id/s_driver_opensles"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="OpenSLES"/>
+
+			</RadioGroup>
+
 			<CheckBox
 				android:id="@+id/auto_quick_load"
 				android:layout_width="wrap_content"

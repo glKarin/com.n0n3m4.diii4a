@@ -42,16 +42,32 @@
 		android:id="@+id/main_menu_help"
         android:title="Help"
         android:showAsAction="never"/>
-    
+
     <item
-        android:id="@+id/main_menu_other_menu"
-        android:title="Other"
+        android:id="@+id/main_menu_preferences"
+        android:title="Preference"
         android:showAsAction="never">
         <menu>
             <item
                 android:id="@+id/main_menu_save_settings"
                 android:title="Save launcher settings"
                 android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_backup_settings"
+                android:title="Backup settings"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_restore_settings"
+                android:title="Restore settings"
+                android:showAsAction="never"/>
+        </menu>
+    </item>
+    
+    <item
+        android:id="@+id/main_menu_other_menu"
+        android:title="Other"
+        android:showAsAction="never">
+        <menu>
             <item
                 android:id="@+id/main_menu_cvar_list"
                 android:title="Special Cvar list"

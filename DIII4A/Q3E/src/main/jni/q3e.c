@@ -39,6 +39,8 @@ void (*onAudio)();
 void (*setCallbacks)(void *func, void *func2, void *func3);
 void (*setResolution)(int width, int height);
 void (*vidRestart)();
+void (*on_pause)(void);
+void (*on_resume)(void);
 
 intptr_t (*Q3E_Call)(int protocol, int size, ...);
 static void pull_input_event(int execCmd);
@@ -108,7 +110,9 @@ static void loadLib(char* libpath)
     setCallbacks = dlsym(libdl, "Q3E_SetCallbacks");
     setResolution = dlsym(libdl, "Q3E_SetResolution");
 	vidRestart = dlsym(libdl, "Q3E_OGLRestart");
-    
+
+    on_pause = dlsym(libdl, "Q3E_OnPause");
+    on_resume = dlsym(libdl, "Q3E_OnResume");
     Q3E_Call = dlsym(libdl, "Q3E_Call");
     qexit = dlsym(libdl, "Q3E_exit");
 	set_Android_Call = dlsym(libdl, "set_Android_Call");
@@ -356,6 +360,18 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetNoHandleSignals(JNIEnv *env
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetMultiThread(JNIEnv *env, jclass c, jboolean enabled)
 {
 	multithread = enabled ? 1 : 0;
+}
+
+JNIEXPORT void JNICALL
+Java_com_n0n3m4_q3e_Q3EJNI_OnPause(JNIEnv *env, jclass clazz)
+{
+    on_pause();
+}
+
+JNIEXPORT void JNICALL
+Java_com_n0n3m4_q3e_Q3EJNI_OnResume(JNIEnv *env, jclass clazz)
+{
+    on_resume();
 }
 
 void pull_input_event(int execCmd)

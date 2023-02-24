@@ -12,111 +12,123 @@
 		common->Warning(msg, ##args); \
 	}
 
-struct harmBufferData
-{
-	harmBufferData *next;
-	char *data;
-	int length;
-	explicit harmBufferData()
-		: next(0),
-		data(0),
-		length(0)
-	{
-	}
+#define BUFFER_FRAME_COUNT 3
 
-	explicit harmBufferData(const char *d, int len)
-		: next(0),
-		data(0),
-		length(0)
-	{
-		if(d && len > 0)
-		{
-			data = malloc(len);
-			memcpy(data, d, len);
-		}
-	}
+extern bool paused;
+static idCVar harm_s_OpenSLESBufferCount("harm_s_OpenSLESBufferCount", "3", CVAR_SOUND | CVAR_ARCHIVE | CVAR_ROM, "Audio buffer count for OpenSLES, min is 3");
 
-	~harmBufferData()
-	{
-		free(data);
-	}
-
-#if 0
-	private:
-	explicit harmBufferData(const harmBufferData &other);
-	harmBufferData & operator==(const harmBufferData &other);
-#endif
-};
-
-template< class type, int nextOffset >
-class idDeque
+class idOpenSLESAudioBuffer
 {
 	public:
-		idDeque(void)
-			: size(0)
-		{
-			first = last = NULL;
-		}
-
-		void					Add(type *element)
-		{
-			QUEUE_NEXT_PTR(element) = NULL;
-
-			if (last) {
-				QUEUE_NEXT_PTR(last) = element;
-			} else {
-				first = element;
-			}
-
-			last = element;
-			size++;
-		}
-
-		type 					*Get(void)
-		{
-			type *element;
-
-			element = first;
-
-			if (element) {
-				first = QUEUE_NEXT_PTR(first);
-
-				if (last == element) {
-					last = NULL;
-				}
-
-				QUEUE_NEXT_PTR(element) = NULL;
-				size--;
-			}
-
-			return element;
-		}
-
-		void					AddToFront(type *element)
-		{
-			QUEUE_NEXT_PTR(element) = first;
-
-			first = element;
-		}
-
-		void Clear()
-		{
-			type *f = first;
-			first = last = NULL;
-			while(f)
+		idOpenSLESAudioBuffer(int size, int count);
+		virtual ~idOpenSLESAudioBuffer();
+		void * GetWriteBuffer(bool ifBlockReturn0 = false);
+		void * GetReadBuffer(bool ifBlockReturn0 = false);
+		void NextWriteFrame(void);
+		void NextReadFrame(void);
+		void DiscardUnreadBuffer(void);
+		void SkipUnreadBuffer(void);
+		void * BufferData() { return m_buffer; }
+		void WaitReadFinished(void) {
+			while(!m_readFinished)
 			{
-				type *t = QUEUE_NEXT_PTR(f);
-				delete f;
-				f = t;
+				Sys_WaitForEvent(TRIGGER_EVENT_SOUND_BACKEND_READ_FINISHED);
 			}
-			size = 0;
+		}
+		void WaitWriteFinished(void) {
+			while(!m_writeFinished)
+			{
+				Sys_WaitForEvent(TRIGGER_EVENT_SOUND_FRONTEND_WRITE_FINISHED);
+			}
 		}
 
-	//private:
-		type 					*first;
-		type 					*last;
-		int size;
+	private:
+		int NormalizeFrame(int frame) const {
+			return (frame) % m_count;
+		}
+
+	private:
+		void *m_buffer;
+		int m_size;
+		int m_count;
+		volatile int m_writeFrame;
+		volatile int m_readFrame;
+		volatile bool m_writeFinished;
+		volatile bool m_readFinished;
 };
+
+idOpenSLESAudioBuffer::idOpenSLESAudioBuffer(int size, int count)
+	: m_buffer(0),
+	m_size(size),
+	m_count(count),
+	m_writeFrame(2),
+	m_readFrame(0),
+	m_writeFinished(true),
+	m_readFinished(true)
+{
+	m_buffer = malloc(size * count);
+	memset(m_buffer, 0, size * count);
+}
+
+idOpenSLESAudioBuffer::~idOpenSLESAudioBuffer()
+{
+	free(m_buffer);
+}
+
+ID_INLINE void * idOpenSLESAudioBuffer::GetWriteBuffer(bool ifBlockReturn0)
+{
+	while(NormalizeFrame(m_writeFrame + 1) == m_readFrame)
+	{
+		if(ifBlockReturn0)
+			return 0;
+		//LOGI("WWWFFF %d %d", m_writeFrame, m_readFrame);
+		WaitReadFinished();
+		DiscardUnreadBuffer();
+		//SkipUnreadBuffer();
+	}
+	m_writeFinished = false;
+	return (char *)m_buffer + m_size * m_writeFrame;
+}
+
+ID_INLINE void idOpenSLESAudioBuffer::NextWriteFrame(void)
+{
+	m_writeFrame = NormalizeFrame(m_writeFrame + 1);
+	m_writeFinished = true;
+	Sys_TriggerEvent(TRIGGER_EVENT_SOUND_FRONTEND_WRITE_FINISHED);
+}
+
+ID_INLINE void * idOpenSLESAudioBuffer::GetReadBuffer(bool ifBlockReturn0)
+{
+	while(NormalizeFrame(m_readFrame + 1) == m_writeFrame)
+	{
+		if(ifBlockReturn0)
+			return 0;
+		WaitWriteFinished();
+		//LOGI("WWWBBB %d %d", m_writeFrame, m_readFrame);
+	}
+	m_readFinished = false;
+	return (char *)m_buffer + m_size * m_readFrame;
+}
+
+ID_INLINE void idOpenSLESAudioBuffer::NextReadFrame(void)
+{
+	m_readFrame = NormalizeFrame(m_readFrame + 1);
+	m_readFinished = true;
+	Sys_TriggerEvent(TRIGGER_EVENT_SOUND_BACKEND_READ_FINISHED);
+}
+
+ID_INLINE void idOpenSLESAudioBuffer::DiscardUnreadBuffer(void)
+{
+	m_readFrame = NormalizeFrame(m_writeFrame - 1);
+	memset((char *)m_buffer + NormalizeFrame(m_readFrame) * m_size, 0, m_size);
+	//LOGI("RRR %d %d", m_writeFrame, m_readFrame);
+}
+
+ID_INLINE void idOpenSLESAudioBuffer::SkipUnreadBuffer(void)
+{
+	m_writeFrame = NormalizeFrame(m_readFrame + 1);
+	//LOGI("RRR %d %d", m_writeFrame, m_readFrame);
+}
 
 static void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bq, void *context);
 
@@ -128,6 +140,7 @@ class idAudioHardwareOpenSLES : public idAudioHardware
 		virtual ~idAudioHardwareOpenSLES();
 
 		bool Initialize();
+		void Release();
 
 		bool Lock(void **pDSLockedBuffer, ulong *dwDSLockedBufferSize)
 		{
@@ -146,37 +159,57 @@ class idAudioHardwareOpenSLES : public idAudioHardware
 
 		// try to write as many sound samples to the device as possible without blocking and prepare for a possible new mixing call
 		// returns wether there is *some* space for writing available
-		bool Flush(void){
-			//Write(true);
-			return true;
-		};
-		void Write(bool flushing){
-#if 0
-			if(flushing)
+		bool Flush(void)
+		{
+			if(paused && m_playing)
 			{
-				//queue.Clear();
-				SLresult result = (*simpleBufferQueueItf)->Clear(simpleBufferQueueItf);
-				//common->Printf("SLAndroidSimpleBufferQueueItf::Clear() -> %d", result);
-				if (SL_RESULT_SUCCESS != result)
-				{
-					common->Warning("(SLAndroidSimpleBufferQueueItf)simpleBufferQueueItf::Clear() -> %d", result);
-				}
+				m_buffer->WaitReadFinished();
+				m_playing = false;
+				(*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PAUSED);
+				common->Printf("[Harmattan]: OpenSLES paused.\n");
 			}
-#endif
-			queue.Add(new harmBufferData((char *)m_buffer, this->m_buffer_size));
-		};
+			else if(!paused && !m_playing)
+			{
+				m_buffer->WaitReadFinished();
+				m_playing = true;
+				(*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PLAYING);
+				common->Printf("[Harmattan]: OpenSLES playing.\n");
+			}
+			return true;
+		}
+		void Write(bool flushing) // write finish in idSoundSystem::UpdateAsyncWrite
+		{
+			if(m_playing)
+				m_buffer->NextWriteFrame();
+		}
+
+		int GetMixBufferSize(void)
+		{
+			return this->m_buffer_size;
+		}
+		short *GetMixBuffer(void) // start write in idSoundSystem::UpdateAsyncWrite
+		{
+			return (short *)m_buffer->GetWriteBuffer();
+		}
 
 		int GetNumberOfSpeakers(void)
 		{
 			return m_channels;
 		}
-		int GetMixBufferSize(void)
+
+		bool GetBackendBuffer(void **ebuffer, int *buffer_size) // call by backend
 		{
-			return this->m_buffer_size;
+			if(!m_playing)
+				return false;
+
+			*ebuffer = m_buffer->GetReadBuffer();
+			*buffer_size = m_buffer_size;
+			return true;
 		}
-		short *GetMixBuffer(void)
+
+		void UpdateBackendFrame()
 		{
-			return (short *)m_buffer;
+			m_buffer->NextReadFrame();
 		}
 
 	private:
@@ -206,11 +239,9 @@ class idAudioHardwareOpenSLES : public idAudioHardware
 		unsigned int m_speed;
 
 	public:
-		void *m_buffer;
-		void *m_ebuffer;
+		idOpenSLESAudioBuffer *m_buffer;
 		int m_buffer_size;
-		idDeque<harmBufferData, offsetof(harmBufferData, next)> queue;
-
+		volatile bool m_playing;
 };
 
 idAudioHardwareOpenSLES::idAudioHardwareOpenSLES()
@@ -225,26 +256,62 @@ idAudioHardwareOpenSLES::idAudioHardwareOpenSLES()
 	m_channels(2),
 	m_speed(PRIMARYFREQ),
 	m_buffer(0),
-	m_buffer_size(MIXBUFFER_SAMPLES * m_channels * 2)
+	m_buffer_size(MIXBUFFER_SAMPLES * m_channels * 2),
+	m_playing(false)
 {
 }
 
 idAudioHardwareOpenSLES::~idAudioHardwareOpenSLES()
 {
+	common->Printf("----------- Android OpenSLES Shutdown ------------\n");
+	Release();
+	common->Printf("--------------------------------------\n");
+}
+
+void idAudioHardwareOpenSLES::Release()
+{
+	m_playing = false;
+	if(playItf)
+	{
+		(*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
+		playItf = NULL;
+		simpleBufferQueueItf = NULL;
+	}
+	if(pcmPlayerObject)
+	{
+		(*pcmPlayerObject)->Destroy(pcmPlayerObject);
+		pcmPlayerObject = NULL;
+		simpleBufferQueueItf = NULL;
+	}
+	if(outputmixObject)
+	{
+		(*outputmixObject)->Destroy(outputmixObject);
+		outputmixObject = NULL;
+		outputEnvironmentalReverbItf = NULL;
+	}
+	if(engineObject)
+	{
+		(*engineObject)->Destroy(engineObject);
+		engineObject = NULL;
+		engineItf = NULL;
+	}
+
+	delete m_buffer;
+	m_buffer = 0;
 }
 
 bool idAudioHardwareOpenSLES::Initialize()
 {
-	common->Printf("------ Android Sound Initialization ------\n");
+	common->Printf("------ Android OpenSLES Sound Initialization ------\n");
 
 	m_channels = 2;
 	idSoundSystemLocal::s_numberOfSpeakers.SetInteger(2);
 	m_speed = PRIMARYFREQ;
 	this->m_buffer_size = MIXBUFFER_SAMPLES * m_channels * 2;
-	m_buffer = malloc(this->m_buffer_size);
-	memset(m_buffer,0,this->m_buffer_size);
-	m_ebuffer = malloc(this->m_buffer_size);
-	memset(m_ebuffer,0,this->m_buffer_size);
+	int bufferCount = harm_s_OpenSLESBufferCount.GetInteger();
+	if(bufferCount < BUFFER_FRAME_COUNT)
+		bufferCount = BUFFER_FRAME_COUNT;
+	m_buffer = new idOpenSLESAudioBuffer(m_buffer_size, bufferCount);
 
 	InitSLEngine();
 	InitSLMix();
@@ -259,15 +326,15 @@ bool idAudioHardwareOpenSLES::InitSLEngine()
 
 	//初始化引擎对象并由对象得到接口
 	result = slCreateEngine(&engineObject, 0, 0, 0, 0, 0);
-	HARM_CHECK_RESULT(result, false, "slCreateEngine() -> %d", result)
+	HARM_CHECK_RESULT(result, false, "slCreateEngine() -> %d", result);
 
 	result = (*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
-	HARM_CHECK_RESULT(result, false, "(SLObjectItf)engineObject::Realize() -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLObjectItf)engineObject::Realize() -> %d", result);
 
 	result = (*engineObject)->GetInterface(engineObject, SL_IID_ENGINE, &engineItf);
-	HARM_CHECK_RESULT(result, false, "(SLObjectItf)engineObject::GetInterface(SL_IID_ENGINE) -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLObjectItf)engineObject::GetInterface(SL_IID_ENGINE) -> %d", result);
 
-		return true;
+	return true;
 }
 
 bool idAudioHardwareOpenSLES::InitSLMix()
@@ -276,24 +343,24 @@ bool idAudioHardwareOpenSLES::InitSLMix()
 	const SLInterfaceID mid[1] = {SL_IID_ENVIRONMENTALREVERB};
 	const SLboolean mird[1] = {SL_BOOLEAN_FALSE};
 	SLresult result;
-	
+
 	//混音器对象创建
 	result = (*engineItf)->CreateOutputMix(engineItf, &outputmixObject,1,mid,mird);
-	HARM_CHECK_RESULT(result, false, "(SLEngineItf)engineItf::CreateOutputMix(SL_IID_ENVIRONMENTALREVERB) -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLEngineItf)engineItf::CreateOutputMix(SL_IID_ENVIRONMENTALREVERB) -> %d", result);
 
 	//得到上面声明的处理功能的接口
 	result = (*outputmixObject)->Realize(outputmixObject,SL_BOOLEAN_FALSE);
-	HARM_CHECK_RESULT(result, false, "(SLObjectItf)outputmixObject::Realize() -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLObjectItf)outputmixObject::Realize() -> %d", result);
 
-		//混音器接口创建
+	//混音器接口创建
 	result = (*outputmixObject)->GetInterface(outputmixObject,SL_IID_ENVIRONMENTALREVERB,&outputEnvironmentalReverbItf);
-	HARM_CHECK_RESULT(result, false, "(SLObjectItf)outputmixObject::GetInterface(SL_IID_ENVIRONMENTALREVERB) -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLObjectItf)outputmixObject::GetInterface(SL_IID_ENVIRONMENTALREVERB) -> %d", result);
 
-		return true;
+	return true;
 	//混音器环境属性设置
-		const SLEnvironmentalReverbSettings reverbSettings = SL_I3DL2_ENVIRONMENT_PRESET_DEFAULT;
+	const SLEnvironmentalReverbSettings reverbSettings = SL_I3DL2_ENVIRONMENT_PRESET_DEFAULT;
 	result = (*outputEnvironmentalReverbItf)->SetEnvironmentalReverbProperties(outputEnvironmentalReverbItf,&reverbSettings);
-	HARM_CHECK_RESULT_NORETURN(result, "(SLEnvironmentalReverbItf)outputEnvironmentalReverbItf::SetEnvironmentalReverbProperties(SL_I3DL2_ENVIRONMENT_PRESET_STONECORRIDOR) -> %d", result)
+	HARM_CHECK_RESULT_NORETURN(result, "(SLEnvironmentalReverbItf)outputEnvironmentalReverbItf::SetEnvironmentalReverbProperties(SL_I3DL2_ENVIRONMENT_PRESET_STONECORRIDOR) -> %d", result);
 
 	return true;
 }
@@ -321,38 +388,40 @@ bool idAudioHardwareOpenSLES::CreateSLPlayer()
 	SLDataSink audiosnk = {&outputMix,NULL};
 	//要实现的功能
 	const SLInterfaceID ids[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE, SL_IID_ANDROIDCONFIGURATION};//队列播放
-	const SLboolean irds[] = {SL_BOOLEAN_FALSE, SL_BOOLEAN_FALSE};
+	const SLboolean irds[] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
 	result = (*engineItf)->CreateAudioPlayer(engineItf,&pcmPlayerObject,&dataSource,&audiosnk,2,ids,irds);
-	HARM_CHECK_RESULT(result, false, "(SLEngineItf)engineItf::CreateAudioPlayer() -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLEngineItf)engineItf::CreateAudioPlayer() -> %d", result);
 	(*pcmPlayerObject)->Realize(pcmPlayerObject,SL_BOOLEAN_FALSE);
-	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::Realize() -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::Realize() -> %d", result);
 
-		SLAndroidConfigurationItf inputConfig;
+	SLAndroidConfigurationItf inputConfig;
 	result = (*pcmPlayerObject)->GetInterface(pcmPlayerObject, SL_IID_ANDROIDCONFIGURATION, &inputConfig);
-	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::GetInterface() -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::GetInterface() -> %d", result);
 
-		SLuint32 presetValue =SL_ANDROID_PERFORMANCE_LATENCY;
+#if __ANDROID_API__ >= 25
+	SLuint32 presetValue =SL_ANDROID_PERFORMANCE_LATENCY;
 	result = (*inputConfig)->SetConfiguration(inputConfig, SL_ANDROID_KEY_PERFORMANCE_MODE, &presetValue, sizeof(SLuint32));
-	//HARM_CHECK_RESULT(result, false, "(SLAndroidConfigurationItf)inputConfig::SetConfiguration() -> %d", result)
+	//HARM_CHECK_RESULT(result, false, "(SLAndroidConfigurationItf)inputConfig::SetConfiguration() -> %d", result);
+#endif
 
 	//创建播放接口
 	result = (*pcmPlayerObject)->GetInterface(pcmPlayerObject,SL_IID_PLAY,&playItf);
-	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::GetInterface(SL_IID_PLAY) -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::GetInterface(SL_IID_PLAY) -> %d", result);
 
 	//得到Androidbufferqueue接口
 	result = (*pcmPlayerObject)->GetInterface(pcmPlayerObject,SL_IID_ANDROIDSIMPLEBUFFERQUEUE,&simpleBufferQueueItf);
-	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::GetInterface(SL_IID_BUFFERQUEUE) -> %d", result)
-#if 1
+	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::GetInterface(SL_IID_BUFFERQUEUE) -> %d", result);
 	//注册回掉函数
 	result = (*simpleBufferQueueItf)->RegisterCallback(simpleBufferQueueItf,pcmBufferCallBack, this);
-	HARM_CHECK_RESULT(result, false, "(SLAndroidSimpleBufferQueueItf)simpleBufferQueueItf::RegisterCallback() -> %d", result)
-#endif
+	HARM_CHECK_RESULT(result, false, "(SLAndroidSimpleBufferQueueItf)simpleBufferQueueItf::RegisterCallback() -> %d", result);
 	//第一次手动调用回掉函数 开始播放
+	m_playing = true;
 	pcmBufferCallBack(simpleBufferQueueItf, this);
+	//k result = (*simpleBufferQueueItf)->Enqueue(simpleBufferQueueItf, m_buffer->BufferData(), m_buffer_size);
 
 	//设置播放状态
 	result = (*playItf)->SetPlayState(playItf,SL_PLAYSTATE_PLAYING);
-	HARM_CHECK_RESULT(result, false, "(SLPlayItf)playItf::SetPlayState(SL_PLAYSTATE_PLAYING) -> %d", result)
+	HARM_CHECK_RESULT(result, false, "(SLPlayItf)playItf::SetPlayState(SL_PLAYSTATE_PLAYING) -> %d", result);
 
 	return true;
 }
@@ -361,21 +430,20 @@ bool idAudioHardwareOpenSLES::CreateSLPlayer()
 void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bq, void *context)
 {
 	idAudioHardwareOpenSLES *object = (idAudioHardwareOpenSLES *)context;
-	harmBufferData *data = object->queue.Get();
-	int c = 0;
-	if(data)
-	{
-		SLresult result;
-		result = (*bq)->Enqueue(bq, data->data, data->length);
-		//common->Printf("SLAndroidSimpleBufferQueueItf::Enqueue() -> %d  %p : %d\n", object->queue.size, data, result);
-		if (SL_RESULT_SUCCESS != result) {
-			//pthread_mutex_unlock(&audioEngineLock);
-			//common->Warning("(SLAndroidSimpleBufferQueueItf)bq::Enqueue() -> %d", result);
-		}
-		delete data;
-		c++;
+	SLresult result;
+	void *ebuffer;
+	int buffer_size;
+
+	if(!object->GetBackendBuffer(&ebuffer, &buffer_size))
+		return;
+
+	result = (*bq)->Enqueue(bq, ebuffer, buffer_size);
+	//common->Printf("SLAndroidSimpleBufferQueueItf::Enqueue() -> %d\n", result);
+#ifdef _DEBUG
+	if (SL_RESULT_SUCCESS != result) {
+		common->Warning("(SLAndroidSimpleBufferQueueItf)bq::Enqueue() -> %d", result);
 	}
-	if(c == 0)
-		(*bq)->Enqueue(bq, object->m_ebuffer, object->m_buffer_size);
+#endif
+	object->UpdateBackendFrame();
 }
 

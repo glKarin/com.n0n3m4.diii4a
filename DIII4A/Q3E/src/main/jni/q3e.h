@@ -42,7 +42,15 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetNoHandleSignals(JNIEnv *env
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetMultiThread(JNIEnv *env, jclass c, jboolean enabled);
 
+JNIEXPORT void JNICALL
+Java_com_n0n3m4_q3e_Q3EJNI_OnPause(JNIEnv *env, jclass clazz);
+
+JNIEXPORT void JNICALL
+Java_com_n0n3m4_q3e_Q3EJNI_OnResume(JNIEnv *env, jclass clazz);
+
 #ifdef __cplusplus
 }
 #endif
 #endif
+
+

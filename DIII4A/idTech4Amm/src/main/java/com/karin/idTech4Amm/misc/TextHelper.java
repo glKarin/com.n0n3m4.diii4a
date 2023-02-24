@@ -291,6 +291,15 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2023-02-16", 23,
+                        "Multi-threading support(Testing).",
+                        "Fixup portal/skybox view in Prey(2006).",
+                        "Fixup intro sound playing when start new game in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
+                        "Fixup player can not through first wall with spirit walk mode in `game/spindlea` beginning in Prey(2006).",
+                        "Fixup render Tommy's original body when in spirit walk mode in Prey(2006).",
+                        "Do not render on-screen buttons when game is loading."
+                ),
+
                 ChangeLog.Create("2023-01-10", 22,
                         "Support screen top edges with fullscreen.",
                         "Add bad skybox render in Prey(2006).",

@@ -20,7 +20,9 @@
 package com.n0n3m4.DIII4A;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -66,6 +68,7 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.lib.Utility;
+import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.UncaughtExceptionHandler;
@@ -119,7 +122,10 @@ public class GameLauncher extends Activity{
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE = 1;
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE = 2;
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE = 3;
-    private static final int CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY = 30;
+	private static final int CONST_REQUEST_EXTRACT_QUAKE4_PATCH_RESOURCE_RESULT_CODE = 4;
+	private static final int CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE = 5;
+	private static final int CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE = 6;
+	private static final int CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY = 30;
      
 	private ViewHolder V = new ViewHolder();
     private boolean m_cmdUpdateLock = false;
@@ -262,6 +268,13 @@ public class GameLauncher extends Activity{
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
                         .putInt(Q3EUtils.pref_mousepos, index)
                         .commit();
+					break;
+				case R.id.rg_s_driver:
+					String value2 = GetCheckboxIndex(radioGroup, id) == 1 ? "OpenSLES" : "AudioTrack";
+					SetProp("s_driver", value2);
+					PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+							.putString(Q3EUtils.pref_harm_s_driver, value2)
+							.commit();
 					break;
 				default:
 					break;
@@ -806,6 +819,15 @@ public class GameLauncher extends Activity{
         if(null != str)
             V.edt_harm_r_specularExponent.setText(str);
         if(!IsProp("harm_r_specularExponent")) SetProp("harm_r_specularExponent", "4.0");
+
+		str = GetProp("s_driver");
+		index = 0;
+		if(str != null)
+		{
+			if("OpenSLES".equalsIgnoreCase(str))
+				index = 1;
+		}
+		SelectCheckbox(V.rg_s_driver, index);
         
         index = 0;
         str = GetProp("fs_game");
@@ -1079,6 +1101,8 @@ public class GameLauncher extends Activity{
         V.r_harmclearvertexbuffer.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		SelectCheckbox(V.rg_harm_r_lightModel, "blinn_phong".equalsIgnoreCase(mPrefs.getString(Q3EUtils.pref_harm_r_lightModel, "phong")) ? 1 : 0);
         V.rg_harm_r_lightModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EUtils.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
+		V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false));
         boolean autoQuickLoad = mPrefs.getBoolean(Q3EUtils.pref_harm_auto_quick_load, false);
 		V.auto_quick_load.setChecked(autoQuickLoad);
@@ -1377,10 +1401,6 @@ public class GameLauncher extends Activity{
 			case R.id.main_menu_support_developer:
 				support(null);
 				return true;
-			case R.id.main_menu_save_settings:
-				WritePreferences();
-				Toast.makeText(this, "Preferences settings saved!", Toast.LENGTH_LONG).show();
-				return true;
 			case R.id.main_menu_changes:
 				OpenChanges();
 				return true;
@@ -1401,6 +1421,17 @@ public class GameLauncher extends Activity{
 				return true;
 			case R.id.main_menu_extract_quake4_resource:
 				OpenQuake4ResourceDialog();
+				return true;
+
+			case R.id.main_menu_save_settings:
+				WritePreferences();
+				Toast.makeText(this, "Preferences settings saved!", Toast.LENGTH_LONG).show();
+				return true;
+			case R.id.main_menu_backup_settings:
+				RequestBackupPreferences();
+				return true;
+			case R.id.main_menu_restore_settings:
+				RequestRestorePreferences();
 				return true;
 
 			case R.id.main_menu_debug:
@@ -1548,6 +1579,7 @@ public class GameLauncher extends Activity{
         mEdtr.putInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
         mEdtr.putString(Q3EUtils.pref_harm_r_lightModel, GetCheckboxIndex(V.rg_harm_r_lightModel) == 1 ? "blinn_phong" : "phong");
 		mEdtr.putFloat(Q3EUtils.pref_harm_r_specularExponent, Utility.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 4.0f));
+		mEdtr.putString(Q3EUtils.pref_harm_s_driver, GetCheckboxIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
 
         mEdtr.putBoolean(Q3EUtils.pref_mapvol, V.mapvol.isChecked());
         mEdtr.putBoolean(Q3EUtils.pref_analog, V.smoothjoy.isChecked());
@@ -1818,6 +1850,18 @@ public class GameLauncher extends Activity{
 				HandleGrantPermissionResult(requestCode, list);
 			}
 		}*/
+		if(resultCode == RESULT_OK)
+		{
+			switch (requestCode)
+			{
+				case CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE:
+					BackupPreferences(data.getData());
+					break;
+				case CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE:
+					RestorePreferences(data.getData());
+					break;
+			}
+		}
 	}
 
 	private void HandleGrantPermissionResult(int requestCode, List<String> list)
@@ -2133,7 +2177,7 @@ public class GameLauncher extends Activity{
     	if(0 == mask)
     		return false;
 
-		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE);
+		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTRACT_QUAKE4_PATCH_RESOURCE_RESULT_CODE);
 		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
 			Toast.makeText(this, "Can't access file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
 		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
@@ -2536,6 +2580,99 @@ public class GameLauncher extends Activity{
 				: V.rg_fs_game);
 	}
 
+	private String GenDefaultBackupFileName()
+	{
+		return getPackageName() + "_preferences_backup.xml";
+	}
+
+	@TargetApi(Build.VERSION_CODES.KITKAT)
+	private void RequestBackupPreferences()
+	{
+		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
+		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
+			Toast.makeText(this, "Can't choose save preferences file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
+			return;
+		Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+		intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+		intent.setType("*/*"); // application/xml
+		intent.addCategory(Intent.CATEGORY_OPENABLE);
+		intent.putExtra(Intent.EXTRA_TITLE, GenDefaultBackupFileName());
+
+		startActivityForResult(intent, CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
+	}
+
+	private void BackupPreferences(Uri uri)
+	{
+		try
+		{
+			OutputStream os = getContentResolver().openOutputStream(uri);
+			PreferenceBackup backup = new PreferenceBackup(this);
+			if(backup.Dump(os))
+				Toast.makeText(this, "Backup preferences file success.", Toast.LENGTH_LONG).show();
+			else
+			{
+				String[] args = {""};
+				backup.GetError(args);
+				Toast.makeText(this, "Backup preferences file fail: " + args[0], Toast.LENGTH_LONG).show();
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Toast.makeText(this, "Backup preferences file error.", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private void RequestRestorePreferences()
+	{
+		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
+		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
+			Toast.makeText(this, "Can't choose restore preferences file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
+			return;
+		Intent intent = null;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+			intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+		else
+			intent = new Intent(Intent.ACTION_GET_CONTENT);
+		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+		intent.setType("*/*"); // application/xml
+		intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+		startActivityForResult(intent, CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
+	}
+
+	private void RestorePreferences(Uri uri)
+	{
+		try
+		{
+			InputStream is = getContentResolver().openInputStream(uri);
+			PreferenceBackup backup = new PreferenceBackup(this);
+			if(backup.Restore(is))
+			{
+				Toast.makeText(this, "Restore preferences file success. App will reboot!", Toast.LENGTH_LONG).show();
+				new Handler().postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						ContextUtility.RestartApp(GameLauncher.this);
+					}
+				}, 1000);
+			}
+			else
+			{
+				String[] args = {""};
+				backup.GetError(args);
+				Toast.makeText(this, "Restore preferences file fail: " + args[0], Toast.LENGTH_LONG).show();
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Toast.makeText(this, "Restore preferences file error.", Toast.LENGTH_LONG).show();
+		}
+	}
+
 
 	private class ViewHolder
 	{
@@ -2586,6 +2723,7 @@ public class GameLauncher extends Activity{
 		public Button setup_onscreen_button_opacity;
 		public RadioGroup rg_fs_preygame;
 		public CheckBox multithreading;
+		public RadioGroup rg_s_driver;
 
 		public void Setup()
 		{
@@ -2635,6 +2773,7 @@ public class GameLauncher extends Activity{
 			setup_onscreen_button_opacity = findViewById(R.id.setup_onscreen_button_opacity);
 			rg_fs_preygame = findViewById(R.id.rg_fs_preygame);
 			multithreading = findViewById(R.id.multithreading);
+			rg_s_driver = findViewById(R.id.rg_s_driver);
 		}
 	}
 }

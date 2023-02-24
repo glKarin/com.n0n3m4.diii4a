@@ -75,7 +75,6 @@ import android.hardware.Sensor;
 public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer, SensorEventListener
 {
 
-	public Handler mHandler;
 	public boolean usesCSAA=false;
 
 
@@ -200,8 +199,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 	public Q3EControlView(Context context)
     {
 		super(context);
-
-		mHandler = new Handler();				
 
 		try
         {					            
@@ -584,7 +581,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 			}
 
 			mInit = true;
-            mHandler.post(new Runnable() {              
+            post(new Runnable() {
                     @Override
                     public void run()
                     {
@@ -818,22 +815,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         return true;
 	}
 
-    //k: Once Runnable
-    private static abstract class __Runnable implements Runnable
-    {
-        private boolean m_handle = false;
-
-        @Override
-        public void run()
-        {
-            if(m_handle) return;
-            __run();
-            m_handle = true;
-        }
-        
-        protected abstract void __run();
-    }
-
     public void queueEvent(Runnable r)
     {
         if(!Q3EUtils.q3ei.multithread)
@@ -980,15 +961,25 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public void onResume()
     {
         super.onResume();
-        if(m_enableGyro)
-            StartGyroscope();
+        Resume();
     }
 
     @Override
     public void onPause()
     {
         super.onPause();
+        Pause();
+    }
+
+    public void Pause()
+    {
         if(m_enableGyro)
             StopGyroscope();
+    }
+
+    public void Resume()
+    {
+        if(m_enableGyro)
+            StartGyroscope();
     }
 }

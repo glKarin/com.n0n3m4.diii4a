@@ -37,7 +37,9 @@ public class Q3EJNI {
     public static native void SetRedirectOutputToFile(boolean enabled);
     public static native void SetNoHandleSignals(boolean enabled);
     public static native void SetMultiThread(boolean enabled);
-	
+    public static native void OnPause();
+    public static native void OnResume();
+
     public static boolean IS_NEON = false; // only armv7-a 32. arm64 always support, but using hard
     public static boolean IS_64 = false;
     public static boolean SYSTEM_64 = false;

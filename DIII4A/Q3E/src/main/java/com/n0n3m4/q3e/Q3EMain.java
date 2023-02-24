@@ -163,17 +163,17 @@ public class Q3EMain extends Activity {
             Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean("harm_redirect_output_to_file", true));
             Q3EJNI.SetNoHandleSignals(preferences.getBoolean("harm_no_handle_signals", false));
             Q3EJNI.SetMultiThread(Q3EUtils.q3ei.multithread);
+            if (mAudio==null)
+            {
+                mAudio = new Q3ECallbackObj();
+            }
+            Q3EUtils.q3ei.callbackObj = mAudio;
+            Q3EJNI.setCallbackObject(mAudio);
 			if (mGLSurfaceView==null)
                 mGLSurfaceView = new Q3EView(this);
 			if (mControlGLSurfaceView==null)
                mControlGLSurfaceView = new Q3EControlView(this);
-            if (mAudio==null)
-            {
-                mAudio = new Q3ECallbackObj();
-                mAudio.vw=mControlGLSurfaceView;
-            }
-            Q3EJNI.setCallbackObject(mAudio);
-            Q3EUtils.q3ei.callbackObj = mAudio;
+            mAudio.vw=mControlGLSurfaceView;
             mControlGLSurfaceView.EnableGyroscopeControl(Q3EUtils.q3ei.view_motion_control_gyro);
             float gyroXSens = preferences.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS); 
             float gyroYSens = preferences.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
@@ -222,17 +222,14 @@ public class Q3EMain extends Activity {
 			mAudio.pause();			
 		}
 
-        if(m_runBackground < 1)
+        if(mGLSurfaceView != null)
         {
-            if(mGLSurfaceView != null)
-            {
-                mGLSurfaceView.onPause();
-            }   
+            mGLSurfaceView.Pause();
+        }
 
-            if(mControlGLSurfaceView != null)
-            {
-                mControlGLSurfaceView.onPause();
-            }		   
+        if(mControlGLSurfaceView != null)
+        {
+            mControlGLSurfaceView.Pause();
         }
 	}
 
@@ -247,11 +244,11 @@ public class Q3EMain extends Activity {
         //k if(m_runBackground < 1)
 		if(mGLSurfaceView != null)
 		{
-			mGLSurfaceView.onResume();
+			mGLSurfaceView.Resume();
 		}			
         if(mControlGLSurfaceView != null)
         {
-            mControlGLSurfaceView.onResume();
+            mControlGLSurfaceView.Resume();
 		}			
 
         //k if(m_runBackground < 2)

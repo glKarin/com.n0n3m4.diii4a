@@ -251,8 +251,8 @@ public class Q3EUtils {
 		    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texid);		    
 		    GLES20.glUniform1i(gl20tx, 0);
-		    GLES20.glUniform4f(gl20sc, 2.0f/Q3EView.orig_width, -2.0f/Q3EView.orig_height,0.0f,1.0f);
-		    GLES20.glUniform4f(gl20tr, -Q3EView.orig_width/2+trax, -Q3EView.orig_height/2+tray,0.0f,0.0f);
+		    GLES20.glUniform4f(gl20sc, 2.0f/Q3EControlView.orig_width, -2.0f/Q3EControlView.orig_height,0.0f,1.0f);
+		    GLES20.glUniform4f(gl20tr, -Q3EControlView.orig_width/2.0f+trax, -Q3EControlView.orig_height/2.0f+tray,0.0f,0.0f);
 		    GLES20.glUniform4f(gl20cl,r,g,b,a);
 		    GLES20.glDrawElements(GLES20.GL_TRIANGLES, cnt, GLES20.GL_UNSIGNED_BYTE, inds);
 		    if ((!Q3EUtils.q3ei.isQ1)&&(!Q3EUtils.q3ei.isD3BFG))
@@ -329,6 +329,7 @@ public class Q3EUtils {
 	public static final String pref_harm_prey_fs_game="q3e_harm_prey_fs_game"; //k
 	public static final String pref_harm_prey_game_lib="q3e_harm_prey_game_lib"; //k
 	public static final String pref_harm_multithreading="q3e_harm_multithreading"; //k
+	public static final String pref_harm_s_driver="q3e_harm_s_driver"; //k
 	
 	public static class UiElement
 	{

@@ -2,6 +2,7 @@ package com.karin.idTech4Amm.lib;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -352,6 +353,14 @@ public final class ContextUtility
             result = resources.getDimensionPixelSize(resourceId);
 
         return result;
+    }
+
+    public static void RestartApp(Activity activity)
+    {
+        activity.finish();
+        Intent intent = activity.getPackageManager().getLaunchIntentForPackage(activity.getPackageName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        activity.startActivity(intent);
     }
     
 	private ContextUtility() {}

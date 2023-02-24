@@ -605,6 +605,8 @@ extern "C"
 // multi-thread
 bool multithreadActive = false;
 
+bool paused = false;
+
 #ifdef _MULTITHREAD
 #define GAME_MAIN_THREAD_STARTED() (game_main_thread.threadHandle != 0 && !game_main_thread.threadCancel)
 #define GAME_MAIN_THREAD_NAME "game_main_thread"
@@ -661,7 +663,6 @@ static void init_game_main_thread(void)
 	Sys_CreateThread(game_main_thread_runner, common, THREAD_HIGHEST, game_main_thread, GAME_MAIN_THREAD_NAME, g_threads, &g_thread_count);
 	common->Printf("[Harmattan]: Game main loop thread start -> %lu(%s)\n", game_main_thread.threadHandle, GAME_MAIN_THREAD_NAME);
 }
-
 #endif
 
 #pragma GCC visibility push(default)
@@ -869,12 +870,20 @@ intptr_t Q3E_Call(int protocol, int size, ...)
 
 void Q3E_exit(void)
 {
-	if(multithreadActive)
-	{
-		shutdown_game_main_thread();
-	}
 	if(common->IsInitialized())
 		common->Quit();
+}
+
+void Q3E_OnPause(void)
+{
+	if(common->IsInitialized())
+		paused = true;
+}
+
+void Q3E_OnResume(void)
+{
+	if(common->IsInitialized())
+		paused = false;
 }
 
 #endif
