@@ -187,10 +187,10 @@ bool hhDeclBeam::Parse( const char *text, const int textLength )
 			src.ExpectTokenString("{");
 			if(!parse_beam(src, this, i))
 			{
-				shader[i] = declManager->FindMaterial(token);
 				src.Warning("Invalid or unexpected token '%s' in decl '%s'\n", token.c_str(), GetName());
 				return false;
 			}
+			shader[i] = declManager->FindMaterial(token);
 			i++;
 		}
 	}

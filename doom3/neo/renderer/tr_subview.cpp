@@ -556,7 +556,7 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				{
 					float maxPortalDistanceLimit = drawSurf->space->entityDef->parms.shaderParms[index];
 					if(maxPortalDistanceLimit > 0.0f && (tr.viewDef->renderView.vieworg - drawSurf->space->entityDef->parms.origin).LengthFast() > maxPortalDistanceLimit) //k: maybe parm == 0
-						return;
+						return false;
 				}
 
 				// copy the viewport size from the original
@@ -620,12 +620,18 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				if (!drawSurf->space->entityDef->parms.remoteRenderView) {
 					return false;
 				}
+				
+				//lvonasek: Allow max 1 skybox per frame
+				static int lastRenderSkybox = -1;
+				if(tr.frameCount == lastRenderSkybox)
+					return false;
 
 				// copy the viewport size from the original
 				parms = (viewDef_t *)R_FrameAlloc(sizeof(*parms));
 				if (!parms) {
 					return false;
 				}
+				lastRenderSkybox = tr.frameCount;
 				*parms = *tr.viewDef;
 
 				parms->isSubview = true;

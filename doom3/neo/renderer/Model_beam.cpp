@@ -223,52 +223,5 @@ idBounds idRenderModelBeam::Bounds(const struct renderEntity_s *renderEntity) co
 
 
 #ifdef _HUMANHEAD
-void hhRenderModelBeam::InitFromFile( const char *fileName )
-{
-	name = fileName;
-	declBeam = static_cast<const hhDeclBeam *>(declManager->FindType(DECL_BEAM, fileName));
-}
-
-void hhRenderModelBeam::LoadModel()
-{
-}
-
-
-dynamicModel_t hhRenderModelBeam::IsDynamicModel() const
-{
-	return DM_CONTINUOUS;	// regenerate for every view
-}
-
-idRenderModel* hhRenderModelBeam::InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel )
-{
-	if (cachedModel) {
-		delete cachedModel;
-		cachedModel = NULL;
-	}
-
-	return NULL;
-}
-
-idBounds hhRenderModelBeam::Bounds( const struct renderEntity_s *ent ) const
-{
-	return idBounds();
-}
-
-void hhRenderModelBeam::UpdateSurface( const struct renderEntity_s *ent, const int index, const hhBeamNodes_t *beam, modelSurface_t *surf )
-{
-	(void)ent;
-	(void)index;
-	(void)beam;
-	(void)surf;
-}
-
-void hhRenderModelBeam::UpdateQuadSurface( const struct renderEntity_s *ent, const int index, int quadIndex, const hhBeamNodes_t *beam, modelSurface_t *surf )
-{
-	(void)ent;
-	(void)index;
-	(void)quadIndex;
-	(void)beam;
-	(void)surf;
-}
-
+#include "Model_hhBeam.cpp"
 #endif
