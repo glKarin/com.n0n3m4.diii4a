@@ -227,8 +227,8 @@ idBounds hhRenderModelBeam::Bounds( const struct renderEntity_s *renderEntity ) 
 void hhRenderModelBeam::UpdateSurface( const struct renderEntity_s *renderEntity, const int index, const hhBeamNodes_t *beam, modelSurface_t *surf )
 {
 	srfTriangles_t *tri = surf->geometry;
-	idVec3 up = current_view->renderView.viewaxis[2];
-	//renderEntity->axis.ProjectVector(current_view->renderView.viewaxis[2], up);
+	idVec3 up;
+	renderEntity->axis.ProjectVector(current_view->renderView.viewaxis[2], up);
 
 	int numLines = declBeam->numNodes - 1;
 	for(int i = 0; i < numLines; i++)
@@ -245,11 +245,13 @@ void hhRenderModelBeam::UpdateSurface( const struct renderEntity_s *renderEntity
 	}
 }
 
-void hhRenderModelBeam::UpdateQuadSurface( const struct renderEntity_s *ent, const int index, int quadIndex, const hhBeamNodes_t *beam, modelSurface_t *surf )
+void hhRenderModelBeam::UpdateQuadSurface( const struct renderEntity_s *renderEntity, const int index, int quadIndex, const hhBeamNodes_t *beam, modelSurface_t *surf )
 {
 	srfTriangles_t *tri = surf->geometry;
-	idVec3 up = current_view->renderView.viewaxis[2];
-	idVec3 right = current_view->renderView.viewaxis[1];
+	idVec3 up;
+	idVec3 right;
+	renderEntity->axis.ProjectVector(current_view->renderView.viewaxis[2], up);
+	renderEntity->axis.ProjectVector(current_view->renderView.viewaxis[1], right);
 	idVec3 target = quadIndex == 0 ? beam->nodes[0] : beam->nodes[declBeam->numNodes - 1];
 
 	idVec3 upw = up * declBeam->quadSize[index][quadIndex] * 0.5f;
