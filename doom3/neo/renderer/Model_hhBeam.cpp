@@ -44,7 +44,6 @@ idRenderModel* hhRenderModelBeam::InstantiateDynamicModel( const struct renderEn
 	if (cachedModel != NULL) {
 
 		assert(dynamic_cast<idRenderModelStatic *>(cachedModel) != NULL);
-		assert(idStr::Icmp(cachedModel->Name(), beam_SnapshotName) == 0);
 
 		staticModel = static_cast<idRenderModelStatic *>(cachedModel);
 	} else {
