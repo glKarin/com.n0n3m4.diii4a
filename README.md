@@ -526,6 +526,12 @@ About:
 > `quake4`:
 > * Old latest Quake4 idTech4A++ source until version 20.
 
+> `single_thread`:
+> * Old latest single-thread render source until version 22.
+
+> `GLSurfaceView_multithread`:
+> * Old latest multithread render with GLSurfaceView source until version 25.
+
 ----------------------------------------------------------------------------------
 ### Extras download:
 
