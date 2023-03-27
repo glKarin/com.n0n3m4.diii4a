@@ -113,9 +113,7 @@ void idMaterial::CommonInit()
 	refCount = 0;
 	portalSky = false;
 #ifdef _RAVEN // quake4 for trace
-// jmarshall - quake 4
 	materialType = 0;
-// jmarshall end
 #endif
 #ifdef _HUMANHEAD
 	subviewClass = SC_MIRROR;
@@ -695,13 +693,13 @@ int idMaterial::ParseTerm(idLexer &src)
 
 #ifdef _RAVEN //k: quake4 material property
 	if (!token.Icmp("glslPrograms")) {
-		return GetExpressionConstant(0);
+		return GetExpressionConstant(0.0f);
 	}
 	if (!token.Icmp("DecalLife")) {
-		return GetExpressionConstant(9.0f);
+		return GetExpressionConstant(0.0f);
 	}
 	if (!token.Icmp("IsMultiplayer")) {
-		return GetExpressionConstant(game->IsMultiplayer()); // constant???
+		return GetExpressionConstant(0.0f); // ((float)game->IsMultiplayer()); // constant???
 	}
 	if (!token.Icmp("VertexRandomizer")) {
 		return GetExpressionConstant(0.0f);
@@ -1346,12 +1344,10 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		}
 
 #ifdef _RAVEN // quake4 material property
-// jmarshall: quake 4 materials
         if (!token.Icmp("nomips"))
         {
             continue;
         }
-// jmarshall end
 #endif
 
 		if (!token.Icmp("remoteRenderMap")) {
@@ -1837,22 +1833,33 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 #ifdef _RAVEN //k: unsupported GLSL shader program in material
 		if (!token.Icmp("glslProgram")) {
-			idStr tStr;
-			if (src.ReadRestOfLine(tStr)) {
-			}
-			SetMaterialFlag(MF_DEFAULTED); // as default
+			src.SkipRestOfLine();
+			//SetMaterialFlag(MF_DEFAULTED); // as default
+			/*
+			 blend blend
+			 // colored
+			 */
+			ss->drawStateBits = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
+			/*
+			ss->color.registers[0] = EXP_REG_PARM0;
+			ss->color.registers[1] = EXP_REG_PARM1;
+			ss->color.registers[2] = EXP_REG_PARM2;
+			ss->color.registers[3] = EXP_REG_PARM3;
+			pd->registersAreConstant = false;
+			*/
 			continue;
 		}
 		if (!token.Icmp("shaderParm")) {
-			idStr tStr;
-			if (src.ReadRestOfLine(tStr)) {
-			}
+			src.SkipRestOfLine();
 			continue;
 		}
 		if (!token.Icmp("shaderTexture")) {
-			idStr tStr;
-			if (src.ReadRestOfLine(tStr)) {
-			}
+			src.SkipRestOfLine();
+			/*
+			idToken t;
+			while(src.ReadTokenOnLine(&t))
+				idStr::Copynz(imageName, t.c_str(), sizeof(imageName));
+				*/
 			continue;
 		}
 #endif
@@ -2264,13 +2271,11 @@ void idMaterial::ParseMaterial(idLexer &src)
 			continue;
 		}
 #ifdef _RAVEN // quake4 material property
-// jmarshall - quake 4 materials.
         else if (!token.Icmp("materialImage"))
         {
             src.ReadTokenOnLine(&token);
             continue;
         }
-// jmarshall end
 #endif
 		// description
 		else if (!token.Icmp("description")) {
@@ -2326,23 +2331,12 @@ void idMaterial::ParseMaterial(idLexer &src)
             // Unknown what this is used for.
             continue;
         }
-// jmarshall end
-#endif
-		else if (!token.Icmp("suppressInSubview")) {
-			suppressInSubview = true;
-			continue;
-		}
-#ifdef _RAVEN // quake4 material property
-// jmarshall
         else if (!token.Icmp("materialType"))
         {
             src.ReadToken(&token);
             materialType = declManager->FindMaterialType(token);
             continue;
         }
-// jmarshall end
-#endif
-#ifdef _RAVEN // quake4 material property
 		else if (!token.Icmp("portalDistanceNear")) {
 			(void)src.ParseFloat(); // a number
 			continue;
@@ -2357,30 +2351,12 @@ void idMaterial::ParseMaterial(idLexer &src)
 			(void)unusedToken;
 			continue;
 		}
-		/*
-		else if (!token.Icmp("bounce")) {
-			continue;
-		}
-		else if (!token.Icmp("notacticalfeatures")) {
-			continue;
-		}
-		else if (!token.Icmp("shotclip")) {
-			continue;
-		}
-		else if (!token.Icmp("largeshotclip")) {
-			continue;
-		}
-		else if (!token.Icmp("projectileClip")) {
-			continue;
-		}
-		else if (!token.Icmp("flyclip")) {
-			continue;
-		}
-		else if (!token.Icmp("vehicleclip")) {
-			continue;
-		}
-		*/
+// jmarshall end
 #endif
+		else if (!token.Icmp("suppressInSubview")) {
+			suppressInSubview = true;
+			continue;
+		}
 		else if (!token.Icmp("portalSky")) {
 			portalSky = true;
 			continue;

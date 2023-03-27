@@ -2808,7 +2808,7 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 	// Force players to use bounding boxes when in multiplayer
 	if ( gameLocal.isMultiplayer ) {
 // jmarshall - breaks multiplayer.
-#if 0
+#if 1
 		use_combat_bbox = true;
 #endif
 // jmarshall end
@@ -8755,12 +8755,6 @@ void idPlayer::EvaluateControls( void ) {
 idPlayer::AdjustSpeed
 ==============
 */
-#ifdef _QUAKE4 //k: default run
-idCVar harm_g_alwaysRun( "harm_g_alwaysRun", "1", CVAR_BOOL | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Force always run automitic." );
-#if 1
-idCVar harm_in_alwaysRun("in_alwaysRun", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in MP");
-#endif
-#endif
 void idPlayer::AdjustSpeed( void ) {
 	float speed;
 
@@ -8770,17 +8764,7 @@ void idPlayer::AdjustSpeed( void ) {
 	} else if ( noclip ) {
 		speed = pm_noclipspeed.GetFloat();
 		bobFrac = 0.0f;
- 	} else if ( !physicsObj.OnLadder()
-// jmarshall - force run, eval.
-			&& ( 
-#ifdef _QUAKE4 //k: default run
-				(usercmd_buttons_and_BUTTON_RUN) //k: default is run, but if shift down, change to walk
-#else
-				(usercmd.buttons & BUTTON_RUN)
-#endif
-				)
-			// jmarshall end
-			&& ( usercmd.forwardmove || usercmd.rightmove ) && ( usercmd.upmove >= 0 ) ) {
+ 	} else if ( !physicsObj.OnLadder() && (usercmd.buttons & BUTTON_RUN) && ( usercmd.forwardmove || usercmd.rightmove ) && ( usercmd.upmove >= 0 ) ) {
 		bobFrac = 1.0f;
 		speed = pm_speed.GetFloat();
 	} else {

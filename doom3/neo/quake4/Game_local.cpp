@@ -560,30 +560,21 @@ void idGameLocal::Init( void ) {
 	gamestate = GAMESTATE_NOMAP;
 
 #ifdef _QUAKE4 // bot
-// jmarshall
+// jmarshall: bot
 	// load in the bot itemtable.
 	botItemTable = FindEntityDef("bot_itemtable", false);
 	if (botItemTable == NULL)
 	{
-#ifdef _QUAKE4 //k: make it not nessary
 		common->Warning("Failed to find bot_itemtable decl!\n");
-#else
-		common->FatalError("Failed to find bot_itemtable decl!\n");
-#endif
 	}
-
-#ifdef _QUAKE4 // bot
 	else
 	{
-#endif
 	// init all the bot systems.
 	botCharacterStatsManager.Init();
 	botFuzzyWeightManager.Init();
 	botWeaponInfoManager.Init();
 	botGoalManager.BotSetupGoalAI();
-#ifdef _QUAKE4 // bot
 	}
-#endif
 // jmarshall end
 #endif
 
@@ -1993,7 +1984,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 // RAVEN END
 	this->isMultiplayer = isServer || isClient;
 
-// jmarshall
+// jmarshall: mpgame
 #if 0
 	if ( this->isMultiplayer )
 		gameLocal.Error( "This mod is for singleplayer only" );
@@ -2067,7 +2058,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 // RAVEN END
 
 #ifdef _QUAKE4 // bot
-// jmarshall
+// jmarshall: bot
 	if (gameLocal.IsMultiplayer() && gameLocal.isServer)
 	{
 		botGoalManager.InitLevelItems();
@@ -2821,13 +2812,7 @@ void idGameLocal::CacheDictionaryMedia( const idDict *dict ) {
 				// precache the render model
 				renderModelManager->FindModel( kv->GetValue() );
 				// precache .cm files only
-#if 1
-// jmarshall: caching code is different in Doom 3
-				collisionModelManager->LoadModel(GetMapName(), kv->GetValue(), true);
-// jmarshall end
-#else
 				collisionModelManager->PreCacheModel( GetMapName(), kv->GetValue() );
-#endif
 			}
 		} else if ( MATCH( "s_shader" ) ) {
 			
@@ -5737,7 +5722,7 @@ void idGameLocal::AlertAI( idEntity *ent ) {
 // bdube: merged
 	if ( ent ) {
 #ifdef _QUAKE4 // bot
-// jmarshall
+// jmarshall: bot
 		// Alert any bots near were we just exploded.
 		if (gameLocal.IsMultiplayer() && gameLocal.isServer)
 		{
@@ -8765,7 +8750,7 @@ void idGameLocal::AddBot(const char *botName) {
 idGameLocal::AlertBots
 ===================
 */
-// jmarshall
+// jmarshall: bot
 void idGameLocal::AlertBots(idPlayer* player, idVec3 alert_position)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -8870,55 +8855,4 @@ void idGameLocal::SpawnPlayer(int clientNum, bool isBot, const char* botName) {
 // jmarshall end
 
 #endif
-
-#ifdef _RAVEN //k: from D3XP::MultiplayerGame or compat
-void idGameLocal::GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ])
-{
-	idStr aux = GetBestMPGametype(map, gametype);
-	strncpy(buf, aux.c_str(), MAX_STRING_CHARS);
-	buf[ MAX_STRING_CHARS - 1 ] = '\0';
-}
-
-idStr idGameLocal::GetBestMPGametype(const char *map, const char *gametype) const
-{
-
-	int num = declManager->GetNumDecls(DECL_MAPDEF);
-	int i, j;
-
-	for (i = 0; i < num; i++) {
-		const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(declManager->DeclByIndex(DECL_MAPDEF, i));
-
-		if (mapDef && idStr::Icmp(mapDef->GetName(), map) == 0) {
-			if (mapDef->dict.GetBool(gametype)) {
-				// dont change gametype
-				return gametype;
-			}
-
-			for (j = 1; si_gameTypeArgs[ j ]; j++) {
-				if (mapDef->dict.GetBool(si_gameTypeArgs[ j ])) {
-					return si_gameTypeArgs[ j ];
-				}
-			}
-
-			// error out, no valid gametype
-			return "DM";
-		}
-	}
-
-	//For testing a new map let it play any gametpye
-	return gametype;
-}
-
-/*
-===========
-idGameLocal::GetTimeGroupTime
-============
-*/
-int idGameLocal::GetTimeGroupTime(int timeGroup)
-{
-	return gameLocal.time;
-}
-
-#endif
-
 // RAVEN END

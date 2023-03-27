@@ -38,7 +38,7 @@ void hhGameLocal::Init( void ) {
 	P_InitConsoleCommands();
 
 	//HUMANHEAD rww - check lglcd validity and reset values
-	logitechLCDEnabled = false; // sys->LGLCD_Valid() jmarshall
+	logitechLCDEnabled = sys->LGLCD_Valid();
 	logitechLCDDisplayAlt = false;
 	logitechLCDButtonsLast = 0;
 	logitechLCDUpdateTime = 0;
@@ -110,7 +110,7 @@ void hhGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 	
 	//HUMANHEAD rww - throw up the prey logo if using the logitech lcd screen
 	if (logitechLCDEnabled) {
-	//	sys->LGLCD_UploadImage(NULL, -1, -1, false, true); // jmarshall
+		sys->LGLCD_UploadImage(NULL, -1, -1, false, true);
 	}
 	//HUMANHEAD END
 
@@ -573,91 +573,93 @@ void hhGameLocal::RadiusPush( const idVec3 &origin, const float radius, const fl
 	}
 }
 
-//HUMANHEAD rww // jmarshall
+//HUMANHEAD rww // jmarshall: unimplement
 void hhGameLocal::LogitechLCDUpdate(void) {
-//	hhPlayer *pl = (hhPlayer *)GetLocalPlayer();
-//	if (!pl) {
-//		return;
-//	}
-//
-//	DWORD buttons;
-////	sys->LGLCD_ReadSoftButtons(&buttons);
-//	if (logitechLCDButtonsLast != buttons && buttons) {
-//		logitechLCDDisplayAlt = !logitechLCDDisplayAlt;
-//	}
-//	logitechLCDButtonsLast = buttons;
-//
-//	if (logitechLCDUpdateTime >= gameLocal.time) { //only update the screen at 20fps
-//		return;
-//	}
-//	logitechLCDUpdateTime = gameLocal.time + 50;
-//
-//	//sys->LGLCD_DrawBegin();
-//		if (logitechLCDDisplayAlt) { //primary/secondary ammo
-//			char *ammoStr =		va("%s%s", common->GetLanguageDict()->GetString("#str_41150"), common->GetLanguageDict()->GetString("#str_41152")); //"Ammo:      N/A";
-//			char *ammoAltStr =	va("%s%s", common->GetLanguageDict()->GetString("#str_41151"), common->GetLanguageDict()->GetString("#str_41152")); //"Alt. Ammo: N/A";
-//			if (pl->weapon.IsValid()) {
-//				int a = pl->weapon->AmmoAvailable();
-//				if (a >= 0) {
-//					if (a > 999) {
-//						a = 999;
-//					}
-//					ammoStr =			va("%s%i", common->GetLanguageDict()->GetString("#str_41150"), a); //"Ammo:      %i"
-//				}
-//				if (pl->weapon->GetAmmoType() != pl->weapon->GetAltAmmoType()) {
-//					a = pl->weapon->AltAmmoAvailable();
-//					if (a >= 0) {
-//						if (a > 999) {
-//							a = 999;
-//						}
-//						ammoAltStr =	va("%s%i", common->GetLanguageDict()->GetString("#str_41151"), a); //"Alt. Ammo: %i"
-//					}
-//				}
-//			}
-//
-//			//sys->LGLCD_DrawText(ammoStr, 46, 6, true);
-//			//sys->LGLCD_DrawText(ammoAltStr, 46, 22, true);
-//
-//			//draw the weapon icon (disabled for now, since it isn't very..recognizable)
-//			//sys->LGLCD_DrawShape(3, 54, 0, 0, 0, 0, true);
-//		}
-//		else { //health/spirit
-//			int v;
-//			v = pl->health;
-//			if (v > 999) {
-//				v = 999;
-//			}
-//			else if (v < 0) {
-//				v = 0;
-//			}
-//			//sys->LGLCD_DrawText(va("%s%i", common->GetLanguageDict()->GetString("#str_41153"), v), 70, 6, true); //"Health: %i"
-//			v = pl->GetSpiritPower();
-//			if (v > 999) {
-//				v = 999;
-//			}
-//			else if (v < 0) {
-//				v = 0;
-//			}
-//			//sys->LGLCD_DrawText(va("%s%i", common->GetLanguageDict()->GetString("#str_41154"), v), 70, 22, true); //"Spirit: %i"
-//
-//			//draw the tommy and talon
-//			float eyePitch;
-//			if (pl->InVehicle()) {
-//				eyePitch = 0.0f;
-//			}
-//			else {
-//				eyePitch = pl->GetEyeAxis()[2].ToAngles().pitch+90.0f;
-//				if (eyePitch < 1.0f && eyePitch > -1.0f) {
-//					eyePitch = 0.0f;
-//				}
-//			}
-//			//sys->LGLCD_DrawShape(2, 42, 0, 0, 0, (int)eyePitch, true);
-//		}
-//
-//		//draw the compass
-//		//sys->LGLCD_DrawShape(0, 0, 0, 0, 0, 0, false); //base
-//		//sys->LGLCD_DrawShape(1, 21, 21, 13, 1, (int)-pl->GetViewAngles().yaw, true); //line
-//		//sys->LGLCD_DrawFinish(false);
+#if 0
+	hhPlayer *pl = (hhPlayer *)GetLocalPlayer();
+	if (!pl) {
+		return;
+	}
+
+	DWORD buttons;
+	sys->LGLCD_ReadSoftButtons(&buttons);
+	if (logitechLCDButtonsLast != buttons && buttons) {
+		logitechLCDDisplayAlt = !logitechLCDDisplayAlt;
+	}
+	logitechLCDButtonsLast = buttons;
+
+	if (logitechLCDUpdateTime >= gameLocal.time) { //only update the screen at 20fps
+		return;
+	}
+	logitechLCDUpdateTime = gameLocal.time + 50;
+
+	sys->LGLCD_DrawBegin();
+		if (logitechLCDDisplayAlt) { //primary/secondary ammo
+			char *ammoStr =		va("%s%s", common->GetLanguageDict()->GetString("#str_41150"), common->GetLanguageDict()->GetString("#str_41152")); //"Ammo:      N/A";
+			char *ammoAltStr =	va("%s%s", common->GetLanguageDict()->GetString("#str_41151"), common->GetLanguageDict()->GetString("#str_41152")); //"Alt. Ammo: N/A";
+			if (pl->weapon.IsValid()) {
+				int a = pl->weapon->AmmoAvailable();
+				if (a >= 0) {
+					if (a > 999) {
+						a = 999;
+					}
+					ammoStr =			va("%s%i", common->GetLanguageDict()->GetString("#str_41150"), a); //"Ammo:      %i"
+				}
+				if (pl->weapon->GetAmmoType() != pl->weapon->GetAltAmmoType()) {
+					a = pl->weapon->AltAmmoAvailable();
+					if (a >= 0) {
+						if (a > 999) {
+							a = 999;
+						}
+						ammoAltStr =	va("%s%i", common->GetLanguageDict()->GetString("#str_41151"), a); //"Alt. Ammo: %i"
+					}
+				}
+			}
+
+			sys->LGLCD_DrawText(ammoStr, 46, 6, true);
+			sys->LGLCD_DrawText(ammoAltStr, 46, 22, true);
+
+			//draw the weapon icon (disabled for now, since it isn't very..recognizable)
+			//sys->LGLCD_DrawShape(3, 54, 0, 0, 0, 0, true);
+		}
+		else { //health/spirit
+			int v;
+			v = pl->health;
+			if (v > 999) {
+				v = 999;
+			}
+			else if (v < 0) {
+				v = 0;
+			}
+			sys->LGLCD_DrawText(va("%s%i", common->GetLanguageDict()->GetString("#str_41153"), v), 70, 6, true); //"Health: %i"
+			v = pl->GetSpiritPower();
+			if (v > 999) {
+				v = 999;
+			}
+			else if (v < 0) {
+				v = 0;
+			}
+			sys->LGLCD_DrawText(va("%s%i", common->GetLanguageDict()->GetString("#str_41154"), v), 70, 22, true); //"Spirit: %i"
+
+			//draw the tommy and talon
+			float eyePitch;
+			if (pl->InVehicle()) {
+				eyePitch = 0.0f;
+			}
+			else {
+				eyePitch = pl->GetEyeAxis()[2].ToAngles().pitch+90.0f;
+				if (eyePitch < 1.0f && eyePitch > -1.0f) {
+					eyePitch = 0.0f;
+				}
+			}
+			sys->LGLCD_DrawShape(2, 42, 0, 0, 0, (int)eyePitch, true);
+		}
+
+		//draw the compass
+		sys->LGLCD_DrawShape(0, 0, 0, 0, 0, 0, false); //base
+		sys->LGLCD_DrawShape(1, 21, 21, 13, 1, (int)-pl->GetViewAngles().yaw, true); //line
+		sys->LGLCD_DrawFinish(false);
+#endif
 }
 //HUMANHEAD END
 
@@ -1389,7 +1391,7 @@ void hhGameLocal::GetTip(const char *binding, idStr &keyMaterialString, idStr &k
 	keyMaterial[0] = '\0';
 	key[0] = '\0';
 	if (binding) {
-	//	common->MaterialKeyForBinding(binding, keyMaterial, key, isWide); // jmarshall
+		common->MaterialKeyForBinding(binding, keyMaterial, key, isWide);
 		keyMaterialString = keyMaterial;
 		keyString = key;
 	}

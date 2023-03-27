@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan25(natasha)  
+1.1.0harmattan26(natasha)  
 **Last update release:**
-2023-02-20  
+2023-03-25  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -14,22 +14,20 @@ GPLv3
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan25 (2023-02-22)
+> 1.1.0harmattan26 (2023-03-25)
 
-* Sound with OpenSLES support(Testing).
-* Add backup/restore preferences support.
-* Add menu music playing in Prey(2006).
-* Add map loading music playing in Prey(2006).
-* Add entity visible/invisible in spirit walk mode in Prey(2006), e.g. spirit bridge.
-* Optimize portal render with view distance in Prey(2006).
+* Using SurfaceView for rendering, remove GLSurfaceView(Testing).
+* Using DOOM3's Fx/Particle system implement Quake4's BSE incompletely for effects in Quake 4. The effects are bad now. Using set `bse_enabled` to 0 for disable effects.
+* Remove my cvar `harm_g_alwaysRun`, so set original `in_alwaysRun` to 1 for run in Quake 4.
+* Add simple beam model render in Prey(2006).
+* Optimize skybox render in Prey(2006) by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
 
 
-* OpenSLES音频播放(测试).
-* 新增启动器偏好设置备份和恢复.
-* 掠食(2006)新增主菜单背景音乐播放.
-* 掠食(2006)新增关卡载入时的背景音乐播放.
-* 掠食(2006)支持灵魂行走状态时的物体可见/隐藏, 例如幽灵桥.
-* 掠食(2006)使用视图距离控制是否渲染传送门.
+* 使用SurfaceView代替GLSurfaceView创建OpenGL渲染环境(测试).
+* 雷神之锤4中, 使用毁灭战士3的粒子特效系统来实现BSE粒子特效系统. 目前效果略差, 可以设置`bse_enabled`为0禁用粒子特效.
+* 雷神之锤4移除cvar `harm_g_alwaysRun`, 使用原来的`in_alwaysRun`, 设为1自动跑.
+* 掠食(2006)新增简单的线条模型渲染.
+* 掠食(2006)优化天空盒渲染 by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
 
 ----------------------------------------------------------------------------------
 
@@ -64,7 +62,7 @@ GPLv3
 > 3. Suggest to extract Quake 4 patch resource to `q4base` game data folder first.
 > - Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).
 > 4. Then Choose map level/Start directly, all levels is working, and `New Game` s working.
-> 5. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).
+> 5. Gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).
 
 ###### Problems and resolutions  
 > 1. ~~Door-opening/Collision~~: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, health-station, all doors can be opened.
@@ -73,7 +71,7 @@ GPLv3
 > 4. ~~Loading-UI~~: It looks work well now.
 > 5. *Multiplayer-Game*: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
 > 6. *Script error*: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
-> 7. **Particle system**: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
+> 7. **Particle system**: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
 > 8. *Entity render*: Some game entities render incorrect.
 > 9. ~~Font~~: Support Q4 format fonts now. [IlDucci](https://github.com/IlDucci)'s DOOM3-format fonts of Quake 4 is not need on longer.
 
@@ -85,7 +83,7 @@ GPLv3
 > - 毁灭战士3格式的雷神之锤4字体, [IlDucci](https://github.com/IlDucci)提供.
 > - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbot <bot_file>`或`fillbots`添加bot).
 > 4. 然后选择关卡或进入主菜单启动, 可运行全部的关卡, 也可以从主菜单启动新游戏.
-> 5. 玩家默认总是跑动(可以设置布尔型cvar `harm_g_alwaysRun` 控制), 枪灯默认打开(可以设置布尔型cvar `harm_g_flashlightOn` 控制).
+> 5. 枪灯默认打开(可以设置布尔型cvar `harm_g_flashlightOn` 控制).
 
 ###### 问题和解决方案:    
 > 1. ~~门打不开~~: 碰撞问题已经修复, 例如触发器, 载具, AI, 电梯, 血站, 所有门都可正常打开.
@@ -94,7 +92,7 @@ GPLv3
 > 4. ~~游戏载入界面~~: 正常工作.
 > 5. *多人游戏*: 目前正常工作, 并且可以添加bot(`jmarshall`添加了雷神之锤3的bot支持, 但是需要先添加bot文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹).
 > 6. **脚本错误**: 部分地图存在脚本错误, 虽然不会使程序崩溃, 但是可能会影响游戏进程.
-> 7. **粒子系统**: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, 非开源, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)).
+> 7. **粒子系统**: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, 非开源, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), 但是至今不工作. 现在实现了一个基于毁灭战士3的粒子特效系统的开源BSE, 可以渲染一些, 但是效果不是很理想.
 > 8. **物体渲染**: 存在一些物体错误的渲染结果.
 > 9. ~~碰撞~~: 碰撞问题已经修复.
 
@@ -116,6 +114,25 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 ### Changes
+
+----------------------------------------------------------------------------------
+
+> 1.1.0harmattan25 (2023-02-22)
+
+* Sound with OpenSLES support(Testing).
+* Add backup/restore preferences support.
+* Add menu music playing in Prey(2006).
+* Add map loading music playing in Prey(2006).
+* Add entity visible/invisible in spirit walk mode in Prey(2006), e.g. spirit bridge.
+* Optimize portal render with view distance in Prey(2006).
+
+
+* OpenSLES音频播放(测试).
+* 新增启动器偏好设置备份和恢复.
+* 掠食(2006)新增主菜单背景音乐播放.
+* 掠食(2006)新增关卡载入时的背景音乐播放.
+* 掠食(2006)支持灵魂行走状态时的物体可见/隐藏, 例如幽灵桥.
+* 掠食(2006)使用视图距离控制是否渲染传送门.
 
 ----------------------------------------------------------------------------------
 
@@ -200,10 +217,10 @@ GPLv3
 > 1.1.0harmattan17 (2022-10-29)
 
 * Support Quake 4 format fonts. Other language patches will work. D3-format fonts do not need to extract no longer.
-* Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`.
+* Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`(Fixed in version 19).
 
 * 支持雷神之锤4格式的字体. 支持其他语言包, D3格式字体不再需要解压.
-* 雷神之锤4游戏中一些GUI无法交互的解决方案, 可以先`quicksave`, 再`quickload`, GUI将可以交互. 比如, 1. `game/tram1`关卡桥头的门的开关GUI, 2. `game/process2`有怪下来的电梯的开关GUI.
+* 雷神之锤4游戏中一些GUI无法交互的解决方案, 可以先`quicksave`, 再`quickload`, GUI将可以交互. 比如, 1. `game/tram1`关卡桥头的门的开关GUI, 2. `game/process2`有怪下来的电梯的开关GUI(版本19修复).
 
 > 1.1.0harmattan16 (2022-10-22)
 
@@ -255,7 +272,7 @@ GPLv3
 
 * Fixup Strogg health station GUI interactive in `Quake 4`.
 * Fixup skip cinematic in `Quake 4`.
-* If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.
+* If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`(Removed in version 26, using original `in_alwaysRun`).
 * Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).
 > 1. `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`(Fixed in version 16).
 > 2. `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload(Fixed in version 16).
@@ -270,7 +287,7 @@ GPLv3
 
 * 修复`雷神之锤4`Strogg血站GUI交互.
 * 修复`雷神之锤4`跳过影片过场动画.
-* `雷神之锤4`中如果`harm_g_alwaysRun`为1(启用自动跑), 按住`Walk`键行走.
+* `雷神之锤4`中如果`harm_g_alwaysRun`为1(启用自动跑), 按住`Walk`键行走(版本26移除, 使用原来的`in_alwaysRun`代替).
 * 修复`雷神之锤4`关卡地图脚本的致命错误和bug(所有关卡地图不再有严重错误, 但是一些bug依然存在.).
 > 1. `game/mcc_landing`: 最后一个电梯到顶时, 玩家依然会卡住. 可以在电梯快到顶时提前跳跃, 或者使用`noclip`(版本18修复).
 > 2. `game/mcc_1`: 上个关卡通关时, 载入该关卡程序会崩溃. 使用`map game/mcc_1`重新加载(版本16修复).

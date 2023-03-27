@@ -2637,7 +2637,7 @@ hhPlayer::SetViewAnglesSensitivity
 void hhPlayer::SetViewAnglesSensitivity( float factor ) {
 	viewAnglesSensitivity = factor;
 	if (gameLocal.localClientNum == entityNumber) {
-		//common->SetGameSensitivityFactor(factor); // jmarshall
+		common->SetGameSensitivityFactor(factor);
 	}
 }
 

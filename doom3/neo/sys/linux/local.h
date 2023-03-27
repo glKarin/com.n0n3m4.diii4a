@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).  
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ extern glconfig_t glConfig;
 #if defined( ID_ENABLE_DGA )
 #include <X11/extensions/xf86dga.h>
 #endif
+#include <X11/extensions/xf86vmode.h>
 #include <X11/XKBlib.h>
 
 extern Display *dpy;
@@ -50,5 +51,13 @@ void Sys_XUninstallGrabs();
 #define KEY_MASK (KeyPressMask | KeyReleaseMask)
 #define MOUSE_MASK (ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ButtonMotionMask )
 #define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | StructureNotifyMask )
+
+#ifndef ID_GL_HARDLINK
+bool GLimp_dlopen();
+void GLimp_dlclose();
+
+void GLimp_BindLogging();
+void GLimp_BindNative();
+#endif
 
 #endif

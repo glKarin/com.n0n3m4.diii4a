@@ -19,7 +19,7 @@ android {
             }
         }
         versionCode 1
-        versionName '1.0'
+        versionName '1.0.0harmattan2'
     }
 
     buildTypes {

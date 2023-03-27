@@ -66,8 +66,7 @@ void hhLiquid::Disturb( const idVec3 &point, const idBounds &bounds, const float
 #endif
 
 		// Pass in bounds in model coords
-		//renderEntity.hModel->IntersectBounds( bounds.Translate(relativeToModel), magnitude );
-		renderEntity.hModel->Bounds().IntersectsBounds(bounds.Translate(relativeToModel)); // jmarshall - modified.
+		renderEntity.hModel->IntersectBounds( bounds.Translate(relativeToModel), magnitude );
 	}
 }
 

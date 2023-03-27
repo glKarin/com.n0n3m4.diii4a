@@ -174,7 +174,7 @@ bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int systemS
 //HUMANHEAD rww
 #if _HH_RENDERDEMO_HACKS
  #if !_HH_OLD_RENDERDEMO_PARTICLES
-	//gameRenderWorld->DemoSmokeEvent(smoke, gameLocal.time-systemStartTime, diversity, origin, axis); // jmarshall
+	gameRenderWorld->DemoSmokeEvent(smoke, gameLocal.time-systemStartTime, diversity, origin, axis);
  #endif
 #endif
 //HUMANHEAD END

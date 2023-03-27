@@ -163,7 +163,7 @@ public final class TextHelper
             "For playing Prey(2006)(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
             " *. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.",
-            " *. Exists bugs: e.g. some incorrect collision(using `noclip`), incorrect render(portals, skybox), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).",
+            " *. Exists bugs: e.g. some incorrect collision(using `noclip`), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).",
             " *. Because of tab window UI not support, Settings UI is not work, must edit `preyconfig.cfg` for binding extras key.",
             "  bind \"Your key of spirit walk\" \"_impulse54\"",
             "  bind \"Your key of second mode attack of weapons\" \"_attackAlt\"",
@@ -177,10 +177,11 @@ public final class TextHelper
             " 3. Extract Quake 4 patch resource to `q4base` game data folder if need.",
             " (a). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).",
             " 4. Then start game directly or choose map level, all levels is working.",
-            " *. Player is always run(can using bool cvar `harm_g_alwaysRun` to control), and gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).",
+            " *. Player's gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).",
             " *. If running crash on arm32 or low-memory device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
             " *. Some problems has fixed: e.g. Door-opening and collision, New game on Main-menu, Q4 original fonts.",
-            " *. Exists bugs: e.g. Main-menu dialog interface, script error on some levels, particle system not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`)",
+            " *. Exists bugs: e.g. Main-menu dialog interface, script error on some levels",
+            " *. Effect system: Quake4 using new advanced `BSE` particle system, it not open-source(`jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`, but it not work yet.). Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.",
 			" *. Multiplayer-Game: using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game, and is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
             null,
             "Multi-threading and some GLSL shader using `" + GenLinkText("https://github.com/emileb/d3es-multithread", "emileb/d3es-multithread") + "`.",
@@ -291,6 +292,15 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2023-02-20", 25,
+                        "Sound with OpenSLES support(Testing).",
+                        "Add backup/restore preferences support.",
+                        "Add menu music playing in Prey(2006).",
+                        "Add map loading music playing in Prey(2006).",
+                        "Add entity visible/invisible in spirit walk mode in Prey(2006), e.g. spirit bridge.",
+                        "Optimize portal render with view distance in Prey(2006)."
+                ),
+
                 ChangeLog.Create("2023-02-16", 23,
                         "Multi-threading support(Testing).",
                         "Fixup portal/skybox view in Prey(2006).",
@@ -302,8 +312,8 @@ public final class TextHelper
 
                 ChangeLog.Create("2023-01-10", 22,
                         "Support screen top edges with fullscreen.",
-                        "Add bad skybox render in Prey(2006).",
-                        "Add bad portal render in Prey(2006).",
+                        "Add bad skybox render in Prey(2006)(Fixed in version 23).",
+                        "Add bad portal render in Prey(2006)(Fixed in version 23).",
                         "Add `deathwalk` map append support in Prey(2006)."
                 ),
 
@@ -362,7 +372,7 @@ public final class TextHelper
             ChangeLog.Create("2022-10-29", 13,
                              "Fixup Strogg health station GUI interactive in `Quake 4`.",
                              "Fixup skip cinematic in `Quake 4`.",
-                             "If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.",
+                             "If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`(Removed in version 26, using original `in_alwaysRun`).",
                              "Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).",
                              " `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`(Fixed in version 18).",
                              " `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload(Fixed in version 16).",
@@ -633,7 +643,6 @@ public final class TextHelper
             Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
         };
         final Cvar[] QUAKE4_CVARS = {
-            Cvar.Create("harm_g_alwaysRun", "bool", "1", "Force to always run automatic."),
             Cvar.Create("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic."),
             Cvar.Create("harm_g_flashlightOn", "bool", "1", "Automatic make flash light on initial."),
             Cvar.Create("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movement."),

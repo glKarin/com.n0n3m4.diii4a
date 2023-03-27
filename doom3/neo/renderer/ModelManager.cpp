@@ -326,6 +326,13 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 	} else if (extension.Icmp("liquid") == 0) {
 		model = new idRenderModelLiquid;
 		model->InitFromFile(modelName);
+#ifdef _RAVEN
+#ifdef _RAVEN_FX
+	} else if (extension.Icmp("bse") == 0) {
+		model = new rvRenderModelBSE;
+		model->InitFromFile(modelName);
+#endif
+#endif
 #ifdef _HUMANHEAD //k: TODO beam model
 	} else if (extension.Icmp("beam") == 0) {
 		model = new hhRenderModelBeam;

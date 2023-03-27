@@ -371,16 +371,9 @@ public:
 
 	// Set any additional gui variables needed by the loading screen
 	virtual void				SetupLoadingGui( idUserInterface *gui ) = 0;
-#ifdef _RAVEN // bot / compat
+#ifdef _RAVEN // bot
 	virtual void			ServerClientBegin( int clientNum, bool isBot, const char* botName) = 0;
 	virtual void				SpawnPlayer( int clientNum, bool isBot, const char* botName) = 0;
-	//k compat
-	virtual void				GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ]) = 0;
-	virtual void				GetMapLoadingGUI(char gui[ MAX_STRING_CHARS ]) { (void)gui; }
-	
-		// Used to manage divergent time-lines
-		virtual void				SelectTimeGroup(int timeGroup) { };
-		virtual int					GetTimeGroupTime(int timeGroup) = 0;
 #endif
 
 };

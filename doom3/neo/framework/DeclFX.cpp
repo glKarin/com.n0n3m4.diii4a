@@ -140,6 +140,10 @@ void idDeclFX::ParseSingleFXAction(idLexer &src, idFXSingleAction &FXAction)
 	FXAction.particleTrackVelocity = false;
 	FXAction.trackOrigin = false;
 	FXAction.soundStarted = false;
+#ifdef _HUMANHEAD
+	FXAction.useAxis = AXIS_CURRENT;
+	FXAction.dir = vec3_origin;
+#endif
 
 	while (1) {
 		if (!src.ReadToken(&token)) {
@@ -409,6 +413,8 @@ void idDeclFX::ParseSingleFXAction(idLexer &src, idFXSingleAction &FXAction)
 
 #ifdef _HUMANHEAD
 		if (!token.Icmp("useAxis")) {
+			if(src.ReadTokenOnLine(&token))
+				ParseUseAxis(token, FXAction);
 			src.SkipRestOfLine();
 			continue;
 		}
@@ -491,3 +497,20 @@ void idDeclFX::FreeData(void)
 {
 	events.Clear();
 }
+
+#ifdef _HUMANHEAD
+void	idDeclFX::ParseUseAxis(idStr& text, idFXSingleAction& action) const
+{
+	if(!idStr::Icmp(text, "current"))
+		action.useAxis = AXIS_CURRENT;
+	else if(!idStr::Icmp(text, "normal"))
+		action.useAxis = AXIS_NORMAL;
+	else if(!idStr::Icmp(text, "bounce"))
+		action.useAxis = AXIS_BOUNCE;
+	else if(!idStr::Icmp(text, "incoming"))
+		action.useAxis = AXIS_INCOMING;
+	else if(!idStr::Icmp(text, "customlocal"))
+		action.useAxis = AXIS_CUSTOMLOCAL;
+	else; // 1
+}
+#endif

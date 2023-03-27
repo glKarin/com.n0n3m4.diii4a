@@ -55,7 +55,7 @@ public:
 	virtual void			ClientPredictionThink( void );
 
 	void					SetOwner(hhVehicle *v)		{	owner = v;		}
-	void					SetSmoker(bool s, idVec3 &offset, const idVec3 &dir); //k: 3 const
+	void					SetSmoker(bool s, idVec3 &offset, const idVec3 &dir); // 3 const
 	void					SetThruster(bool on);
 	void					Update( const idVec3 &vel );
 	void					SetDying(bool dying);

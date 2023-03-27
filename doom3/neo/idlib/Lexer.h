@@ -574,7 +574,6 @@ private:
 #endif
 
 #ifdef _RAVEN
-// jmarshall
 class rvmScopedLexerBaseFolder
 {
 public:
@@ -588,7 +587,6 @@ public:
 		idLexer::SetBaseFolder("");
 	}
 };
-// jmarshall end
 #endif
 
 #endif /* !__LEXER_H__ */

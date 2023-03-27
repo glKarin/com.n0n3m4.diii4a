@@ -81,7 +81,7 @@ void idMoveable::Spawn( void ) {
 	}
 
 	if ( !collisionModelManager->TrmFromModel( clipModelName, trm ) ) {
-// jmarshall
+// jmarshall: cm load fail
 #if 0
 		gameLocal.Error("idMoveable '%s': cannot load collision model %s", name.c_str(), clipModelName.c_str());
 		return;
@@ -91,7 +91,6 @@ void idMoveable::Spawn( void ) {
 		trm.SetupBox(model->Bounds());
 #endif
 // jmarshall end
-		
 	}
 
 	// if the model should be shrinked

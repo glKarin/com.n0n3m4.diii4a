@@ -60,14 +60,29 @@ public class Q3ECallbackObj {
 		vw.setState(newstate);
 	}
 	
-	public void init_OLD(int size)
+	int sync=0;
+	
+	public void pause()
 	{
-		if(mAudioTrack != null) return;		
-		if ((Q3EUtils.q3ei.isQ3)||(Q3EUtils.q3ei.isRTCW)||(Q3EUtils.q3ei.isQ1)||(Q3EUtils.q3ei.isQ2)) size/=8;		
-		
-		mAudioData=new byte[size];		
-		int sampleFreq = 44100;							
-		
+		if(mAudioTrack == null)
+			return;				
+		mAudioTrack.pause();	
+		reqThreadrunning=false;
+	}
+	
+	public void resume()
+	{
+		if(mAudioTrack == null)
+			return;				
+		mAudioTrack.play();	
+		reqThreadrunning=true;
+	}
+
+    private static final String TAG = "Q3EAudio";
+    private HandlerThread m_thread;
+    private Handler m_handler;
+    public void init(int size)
+    {
 		/*                        _.---"'"""""'`--.._
                              _,.-'                   `-._
                          _,."                            -.
@@ -102,58 +117,7 @@ public class Q3ECallbackObj {
   /... _.`:.________,.'              `._,.-..|        "'
  `.__.'                                 `._  /
                                            "' */
-		
-		int bufferSize = Math.max((Q3EUtils.isOuya)?0:3*size,AudioTrack.getMinBufferSize(sampleFreq, AudioFormat.CHANNEL_CONFIGURATION_STEREO, AudioFormat.ENCODING_PCM_16BIT));		
-		mAudioTrack = new Q3EAudioTrack(AudioManager.STREAM_MUSIC,sampleFreq,AudioFormat.CHANNEL_CONFIGURATION_STEREO,
-		AudioFormat.ENCODING_PCM_16BIT,bufferSize,AudioTrack.MODE_STREAM);
-		mAudioTrack.play();
-		long sleeptime=(size*1000000000l)/(2*2*sampleFreq);
-		ScheduledThreadPoolExecutor stpe=new ScheduledThreadPoolExecutor(5);
-		stpe.scheduleAtFixedRate(new Runnable() {			
-			@Override
-			public void run() {
-				if (reqThreadrunning)
-				{						
-				Q3EJNI.requestAudioData();
-				}							
-			}
-		}, 0, sleeptime, TimeUnit.NANOSECONDS);		
-	}
-	
-	int sync=0;
 
-	public void writeAudio_OLD(ByteBuffer audioData, int offset, int len)
-	{
-		if(mAudioTrack == null)
-			return;			
-		audioData.position(offset);
-		audioData.get(mAudioData, 0, len);
-		if (sync++%128==0)
-		mAudioTrack.flush();
-		mAudioTrack.write(mAudioData, 0, len);
-	}
-	
-	public void pause()
-	{
-		if(mAudioTrack == null)
-			return;				
-		mAudioTrack.pause();	
-		reqThreadrunning=false;
-	}
-	
-	public void resume()
-	{
-		if(mAudioTrack == null)
-			return;				
-		mAudioTrack.play();	
-		reqThreadrunning=true;
-	}
-
-    private static final String TAG = "Q3EAudio";
-    private HandlerThread m_thread;
-    private Handler m_handler;
-    public void init(int size)
-    {
         if(mAudioTrack != null) return;     
         if ((Q3EUtils.q3ei.isQ3)||(Q3EUtils.q3ei.isRTCW)||(Q3EUtils.q3ei.isQ1)||(Q3EUtils.q3ei.isQ2)) size/=8;      
 

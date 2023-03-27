@@ -2137,7 +2137,6 @@ idStr &idStr::ReplaceChar( const char from, const char to ) {
 #endif
 
 #ifdef _RAVEN
-// jmarshall
 /*
 ===================
 idStr::StripDoubleQuotes
@@ -2160,6 +2159,5 @@ void idStr::StripDoubleQuotes(void)
 
 	*this = string;
 }
-// jmarshall end
 #endif
 

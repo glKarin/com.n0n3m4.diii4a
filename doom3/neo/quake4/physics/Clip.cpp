@@ -116,11 +116,7 @@ void idClipModel::ClearTraceModelCache( void ) {
 	int i;
 
 	for ( i = 0; i < traceModelCache.Num(); i++ ) {
-// jmarshall
-#if 1
 		collisionModelManager->FreeModel( traceModelCache[i]->collisionModel );
-#endif
-// jmarshall
 		traceModelCache[i]->collisionModel = 0;
 	}
 	traceModelCache.DeleteContents( true );
@@ -209,14 +205,10 @@ void idClipModel::ReplaceTraceModel( int index, const idTraceModel &trm, const i
 	entry->hash = 0xffffffff;
 	entry->material = material;
 
-// jmarshall
-#if 1
 	if(entry->collisionModel > 0)
 	{
 		collisionModelManager->FreeModel( entry->collisionModel );
 	}
-#endif
-// jmarshall
 	entry->collisionModel = collisionModelManager->ModelFromTrm( gameLocal.GetMapName(), va( "traceModel%d", index ), trm, material );
 }
 
@@ -352,11 +344,7 @@ void idClipModel::FreeModel( void ) {
 	}
 
 	if ( collisionModel > 0 ) {
-// jmarshall
-#if 1
 		collisionModelManager->FreeModel( collisionModel );
-#endif
-// jmarshall
 		collisionModel = 0;
 	}
 

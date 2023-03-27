@@ -17,8 +17,8 @@ class hhBoneController {
 		void				SetRotationFactor( idAngles& RotationFactor );
 		const idAngles&		GetRotationFactor() const { return m_Factor; }
 
-		void				Setup( idEntity *pOwner, const char *pJointname, const idAngles &MinAngles, const idAngles &MaxAngles, const idAngles& Rate, const idAngles& Factor ); //k: 3 4 5 6 const
-		void				Setup( idEntity *pOwner, jointHandle_t Joint, const idAngles &MinAngles, const idAngles &MaxAngles, const idAngles& Rate, const idAngles& Factor ); //k: 3 4 5 6 const
+		void				Setup( idEntity *pOwner, const char *pJointname, const idAngles &MinAngles, const idAngles &MaxAngles, const idAngles& Rate, const idAngles& Factor ); // 3 4 5 6 const
+		void				Setup( idEntity *pOwner, jointHandle_t Joint, const idAngles &MinAngles, const idAngles &MaxAngles, const idAngles& Rate, const idAngles& Factor ); // 3 4 5 6 const
 		void				Update( int iCurrentTime );
 		bool				TurnTo( idAngles &Target );
 		bool				AimAt( idVec3 &Target );

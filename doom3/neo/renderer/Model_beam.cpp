@@ -220,8 +220,3 @@ idBounds idRenderModelBeam::Bounds(const struct renderEntity_s *renderEntity) co
 	return b;
 }
 
-
-
-#ifdef _HUMANHEAD
-#include "Model_hhBeam.cpp"
-#endif

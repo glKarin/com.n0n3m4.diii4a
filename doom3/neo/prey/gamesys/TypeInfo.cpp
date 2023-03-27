@@ -12,11 +12,11 @@
 #include "../Game_local.h"
 #include "../Prey/prey_local.h"	// HUMANHEAD tmj: Prey types should be included in parse
 
-//#ifdef ID_DEBUG_MEMORY
-//#include "GameTypeInfo.h"				// Make sure this is up to date!
-//#else
+#if 0 // #ifdef ID_DEBUG_MEMORY
+#include "GameTypeInfo.h"				// Make sure this is up to date!
+#else
 #include "NoGameTypeInfo.h"
-//#endif
+#endif
 
 // disabled because it's adds about 64MB to state dumps and takes a really long time
 //#define DUMP_GAMELOCAL

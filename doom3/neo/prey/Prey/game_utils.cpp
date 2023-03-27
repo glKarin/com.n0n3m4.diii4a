@@ -235,7 +235,7 @@ float hhUtils::RandomSign() {
 	return gameLocal.random.RandomFloat() < 0.5f ? -1.0f : 1.0f;
 }
 
-idVec3 hhUtils::RandomPointInBounds(const idBounds &bounds) { //k: const
+idVec3 hhUtils::RandomPointInBounds(const idBounds &bounds) { // const
 	idVec3 point;
 	point.x = bounds[0].x + (bounds[1].x - bounds[0].x) * gameLocal.random.RandomFloat();
 	point.y = bounds[0].y + (bounds[1].y - bounds[0].y) * gameLocal.random.RandomFloat();

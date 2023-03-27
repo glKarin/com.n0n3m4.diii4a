@@ -82,7 +82,7 @@ public:
 	static float			RandomSign();
 	static idVec3			RandomSpreadDir( const idMat3& baseAxis, const float spread );
 
-	static idVec3			RandomPointInBounds(const idBounds &bounds); //k: const
+	static idVec3			RandomPointInBounds(const idBounds &bounds); // const
 	static idVec3			RandomPointInShell( const float innerRadius, const float outerRadius );
 
 	static void				SplitString( const idCmdArgs& input, idList<idStr>& pieces );
@@ -168,7 +168,7 @@ class hhCycleList {
 		virtual			~hhCycleList();
 
 		void			Clear();
-		void			Append( const Type& obj ); //k const
+		void			Append( const Type& obj ); // const
 		void			AddUnique( Type& obj );
 		const Type&		Next();
 		const Type&		Previous();
@@ -223,7 +223,7 @@ hhCycleList::Append
 ===============
 */
 template< class Type >
-ID_INLINE void hhCycleList<Type>::Append( const Type& obj ) { //k: const
+ID_INLINE void hhCycleList<Type>::Append( const Type& obj ) { // const
 	list.Append( obj );
 }
 

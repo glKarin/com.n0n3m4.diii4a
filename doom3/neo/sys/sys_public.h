@@ -61,6 +61,10 @@ If you have questions concerning this license or the applicable additional terms
 #define BUILD_OS_ID					2
 #endif
 
+#ifdef _MULTITHREAD
+#define RENDER_THREAD_NAME "render_thread"
+#define IN_RENDER_THREAD() (!idStr::Icmp(RENDER_THREAD_NAME, Sys_GetThreadName()))
+#endif
 #else
 
 #if defined(__i386__)
@@ -371,7 +375,7 @@ typedef enum {
 	NA_IP
 #ifdef _RAVEN // bot
 		,
-// jmarshall
+// jmarshall: bot
 	NA_BOT
 // jmarshall end
 #endif
@@ -574,6 +578,15 @@ class idSys
 		virtual void			StartProcess(const char *exePath, bool quit) = 0;
 #ifdef _RAVEN
 	virtual int				Milliseconds(void) { return Sys_Milliseconds(); }
+#endif
+#ifdef _HUMANHEAD
+	//HUMANHEAD rww
+	//logitech lcd keyboard interface functions
+	virtual bool			LGLCD_Valid(void) {
+		return false;
+	}
+	virtual void			LGLCD_UploadImage(unsigned char *pixels, int w, int h, bool highPriority, bool flipColor) {}
+	//HUMANHEAD END
 #endif
 };
 

@@ -47,7 +47,7 @@ static idStr	basepath;
 static idStr	savepath;
 
 #if defined(__ANDROID__)
-extern void GLimp_AndroidInit(ANativeWindow *win);
+extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit();
 
 extern void Posix_EarlyInit();
@@ -596,101 +596,123 @@ void abrt_func(mcheck_status status)
 #endif
 
 #if defined(__ANDROID__)
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 
-extern "C"
-{
-	// enable redirect stdout/stderr to file
-	static bool redirect_output_to_file = true;
+#define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
+#define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
+#define ANDROID_CALL_PROTOCOL_ATTACH_THREAD 0x10003
+
+#define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
+#define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
+#define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
+#define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
+
+// APK's native library path on Android.
+char *native_library_dir = NULL;
+
+// Do not catch signal
+bool no_handle_signals = false;
+
+// DOOM library call Android JNI
+intptr_t (*Android_Call)(int protocol, int size, ...);
+
+// Surface window
+volatile ANativeWindow *window = NULL;
+static volatile bool window_changed = false;
+
+// OpenGL attributes
+int gl_format = 0x8888;
+int gl_msaa = 0;
+
+// command line arguments
+static int argc = 0;
+static char **argv = 0;
+
+// game main thread
+static pthread_t				main_thread;
+
+// enable redirect stdout/stderr to file
+static bool redirect_output_to_file = true;
 
 // multi-thread
 bool multithreadActive = false;
+volatile bool backendThreadShutdown = false;
 
+// app paused
 bool paused = false;
 
-#ifdef _MULTITHREAD
-#define GAME_MAIN_THREAD_STARTED() (game_main_thread.threadHandle != 0 && !game_main_thread.threadCancel)
-#define GAME_MAIN_THREAD_NAME "game_main_thread"
+// app exit
+static volatile bool running = false;
 
-static xthreadInfo				game_main_thread = {0};
+extern void GLimp_ActivateContext();
+extern void GLimp_DeactivateContext();
+
+#ifdef _MULTITHREAD
+#define RENDER_THREAD_STARTED() (render_thread.threadHandle && !render_thread.threadCancel)
+
+// render thread
+static xthreadInfo				render_thread = {0};
+
 extern void BackendThreadWait();
 extern void BackendThreadTask();
 
-static void shutdown_game_main_thread(void)
+void BackendThreadShutdown(void)
 {
 	if(!multithreadActive)
 		return;
-	if (!GAME_MAIN_THREAD_STARTED())
+	if (!RENDER_THREAD_STARTED())
 		return;
-	Sys_DestroyThread(game_main_thread);
-	common->Printf("[Harmattan]: Game main loop thread finish -> %s\n", GAME_MAIN_THREAD_NAME);
+	BackendThreadWait();
+	backendThreadShutdown = true;
+	Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
+	Sys_DestroyThread(render_thread);
+	GLimp_ActivateContext();
+	common->Printf("[Harmattan]: Render thread shutdown -> %s\n", RENDER_THREAD_NAME);
 }
 
-// main game looper, no OpenGL render context. Render thread using GLSurfaceView context
-static void game_main_thread_runner(void *data)
+static void BackendThread(void *data)
 {
+	Sys_Printf("[Harmattan]: Enter doom3 render thread -> %s\n", Sys_GetThreadName());
+	GLimp_ActivateContext();
 	while(true)
 	{
-		if(game_main_thread.threadCancel)
-		{
-			BackendThreadWait();
-			return;
-		}
-		idCommon *comm = (idCommon *)data;
-		if(HARM_RENDERER_INITED()) // RenderSystem initilized, but framework is not initilized, continue initilization
-		{
-			common->Init_stage_2();
-			Posix_LateInit();
-		}
-		if(comm->IsInitialized()) // framework is initilization
-			comm->Frame();
-
-		if(initStage == HARM_INIT_STAGE_EXIT_FRONTEND)
-		{
-			BackendThreadWait();
-			initStage = HARM_INIT_STAGE_EXIT_FRAMEWORK;
-			return;
-		}
+		BackendThreadTask();
+		if(render_thread.threadCancel)
+			break;
+		if(backendThreadShutdown)
+			break;
 	}
+	GLimp_DeactivateContext();
+	Sys_Printf("[Harmattan]: Leave doom3 render thread -> %s\n", RENDER_THREAD_NAME);
 }
 
-// start main game thread by render thread of GLSurfaceView
-static void init_game_main_thread(void)
+void BackendThreadExecute(void)
 {
 	if(!multithreadActive)
 		return;
-	if (GAME_MAIN_THREAD_STARTED())
+	if (RENDER_THREAD_STARTED())
 		return;
-	Sys_CreateThread(game_main_thread_runner, common, THREAD_HIGHEST, game_main_thread, GAME_MAIN_THREAD_NAME, g_threads, &g_thread_count);
-	common->Printf("[Harmattan]: Game main loop thread start -> %lu(%s)\n", game_main_thread.threadHandle, GAME_MAIN_THREAD_NAME);
+	GLimp_DeactivateContext();
+	backendThreadShutdown = false;
+	Sys_CreateThread(BackendThread, common, THREAD_HIGHEST, render_thread, RENDER_THREAD_NAME, g_threads, &g_thread_count);
+	common->Printf("[Harmattan]: Render thread start -> %lu(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
 }
 #endif
 
-#pragma GCC visibility push(default)
-int main(int argc, const char **argv)
+static void doom3_main(void *data)
 {
+	(void)Android_Call(ANDROID_CALL_PROTOCOL_ATTACH_THREAD, 0);
 #ifdef ID_MCHECK
 	// must have -lmcheck linkage
 	mcheck(abrt_func);
 	Sys_Printf("memory consistency checking enabled\n");
 #endif
-
-	if(redirect_output_to_file)
-	{
-	freopen("stdout.txt","w",stdout);
-	setvbuf(stdout, NULL, _IONBF, 0);
-	freopen("stderr.txt","w",stderr);
-	setvbuf(stderr, NULL, _IONBF, 0);
-	}
+	GLimp_AndroidInit(window);
 
 	Posix_EarlyInit();
+	Sys_Printf("[Harmattan]: Enter doom3 main thread -> %s\n", Sys_GetThreadName());
 
-#if 1 // 2 stage initilization, only initilize RenderSystem in the present
-	if (argc > 1) {
-		common->Init_stage_1(argc-1, &argv[1], NULL);
-	} else {
-		common->Init_stage_1();
-	}
-#else
 	if (argc > 1) {
 		common->Init(argc-1, &argv[1], NULL);
 	} else {
@@ -698,7 +720,113 @@ int main(int argc, const char **argv)
 	}
 
 	Posix_LateInit();
+
+	for(int i = 0; i < argc; i++)
+	{
+		free(argv[i]);
+	}
+	free(argv);
+
+	while (1) {
+		if(window_changed)
+		{
+#ifdef _MULTITHREAD
+			if(multithreadActive)
+				BackendThreadShutdown();
 #endif
+			if(window) // if set new window, create EGLSurface
+			{
+				GLimp_AndroidInit(window);
+				window_changed = false;
+			}
+			else // if window is null, release old window, and notify JNI, and wait new window set
+			{
+				GLimp_AndroidQuit();
+				window_changed = false;
+				Sys_TriggerEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
+				Sys_WaitForEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
+				window_changed = false;
+				GLimp_AndroidInit(window);
+			}
+		}
+		if(!running) // exit
+			break;
+		common->Frame();
+	}
+
+	common->Quit();
+	GLimp_AndroidQuit();
+	main_thread = 0;
+	window = NULL;
+	Sys_Printf("[Harmattan]: Leave doom3 main thread.\n");
+	return 0;
+}
+
+static void Q3E_StartGameMainThread(void)
+{
+	if(main_thread)
+		return;
+
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+
+	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) != 0) {
+		Sys_Printf("[Harmattan]: ERROR: pthread_attr_setdetachstate doom3 main thread failed\n");
+		exit(1);
+	}
+
+	if (pthread_create((pthread_t *)&main_thread, &attr, doom3_main, NULL) != 0) {
+		Sys_Printf("[Harmattan]: ERROR: pthread_create doom3 main thread failed\n");
+		exit(1);
+	}
+
+	pthread_attr_destroy(&attr);
+
+	running = true;
+	Sys_Printf("[Harmattan]: doom3 main thread start.\n");
+}
+
+static void Q3E_StopGameMainThread(void)
+{
+	if(!main_thread)
+		return;
+
+	running = false;
+	if (pthread_join(main_thread, NULL) != 0) {
+		Sys_Printf("[Harmattan]: ERROR: pthread_join doom3 main thread failed\n");
+	}
+	main_thread = 0;
+	Sys_Printf("[Harmattan]: doom3 main thread quit.\n");
+}
+
+extern "C"
+{
+
+#pragma GCC visibility push(default)
+int main(int argc, const char **argv)
+{
+	::argc = argc;
+	::argv = malloc(sizeof(char *) * argc);
+	for(int i = 0; i < argc; i++)
+	{
+		::argv[i] = strdup(argv[i]);
+	}
+
+	if(redirect_output_to_file)
+	{
+		freopen("stdout.txt","w",stdout);
+		setvbuf(stdout, NULL, _IONBF, 0);
+		freopen("stderr.txt","w",stderr);
+		setvbuf(stderr, NULL, _IONBF, 0);
+	}
+
+	Sys_Printf("[Harmattan]: doom3 command line arguments: %d.\n", argc);
+	for(int i = 0; i < argc; i++)
+	{
+		Sys_Printf("    %d: %s\n", i, argv[i]);
+	}
+	Q3E_StartGameMainThread();
+	return 0;
 }
 
 int screen_width=640;
@@ -741,62 +869,24 @@ void Q3E_GetAudio()
 
 void Q3E_KeyEvent(int state,int key,int character)
 {
-Posix_QueEvent(SE_KEY, key, state, 0, NULL);
-if ((character!=0)&&(state==1))
-{
-Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
-}
-Posix_AddKeyboardPollEvent(key, state);
+	Posix_QueEvent(SE_KEY, key, state, 0, NULL);
+	if ((character!=0)&&(state==1))
+	{
+		Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
+	}
+	Posix_AddKeyboardPollEvent(key, state);
 }
 
 void Q3E_MotionEvent(float dx, float dy)
 {
-Posix_QueEvent(SE_MOUSE, dx, dy, 0, NULL);
-Posix_AddMousePollEvent(M_DELTAX, dx);
-Posix_AddMousePollEvent(M_DELTAY, dy);
+	Posix_QueEvent(SE_MOUSE, dx, dy, 0, NULL);
+	Posix_AddMousePollEvent(M_DELTAX, dx);
+	Posix_AddMousePollEvent(M_DELTAY, dy);
 }
-extern bool scndswp;
-extern void backend_render(void);
+
 void Q3E_DrawFrame()
 {
-	scndswp=0;
-#ifdef _MULTITHREAD
-	if(multithreadActive) // only render in multithreading
-	{
-		if(GAME_MAIN_THREAD_STARTED()) // when game main thread has started, start render
-		{
-			if(initStage == HARM_INIT_STAGE_FRAMEWORK || initStage == HARM_INIT_STAGE_RENDERER)
-				BackendThreadTask();
-			else if(initStage == HARM_INIT_STAGE_EXIT_FRONTEND)
-			{
-				BackendThreadTask();
-				//while(initStage == HARM_INIT_STAGE_EXIT_FRONTEND) usleep(500);
-			}
-			else if(initStage == HARM_INIT_STAGE_EXIT_FRAMEWORK)
-			{
-				shutdown_game_main_thread();
-				common->Quit();
-				initStage = HARM_INIT_STAGE_NONE;
-			}
-		}
-		else
-		{
-			if(HARM_RENDERER_INITED()) // if RenderSystem has initilized, start game main thread
-				init_game_main_thread();
-		}
-	}
-	else
-	{
-#endif
-		if(HARM_RENDERER_INITED()) // if RenderSystem has initilized, continue initilize framework
-		{
-			common->Init_stage_2();
-			Posix_LateInit();
-		}
-		common->Frame();
-#ifdef _MULTITHREAD
-	}
-#endif
+	common->Frame();
 }
 
 float analogx=0.0f;
@@ -804,28 +894,10 @@ float analogy=0.0f;
 int analogenabled=0;
 void Q3E_Analog(int enable,float x,float y)
 {
-analogenabled=enable;
-analogx=x;
-analogy=y;
+	analogenabled=enable;
+	analogx=x;
+	analogy=y;
 }
-
-#if defined(__ANDROID__)
-#define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
-#define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
-
-#define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
-#define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
-#define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
-#define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
-
-// APK's native library path on Android.
-char *native_library_dir = NULL;
-
-// Do not catch signal
-bool no_handle_signals = false;
-
-// DOOM library call Android JNI
-intptr_t (*Android_Call)(int protocol, int size, ...);
 
 intptr_t (*set_Android_Call(intptr_t (*func)(int, int, ...)))(int, int, ...)
 {
@@ -835,7 +907,7 @@ intptr_t (*set_Android_Call(intptr_t (*func)(int, int, ...)))(int, int, ...)
 	return cur;
 }
 
-// Abdroid JNI call DOOM library
+// Android JNI call DOOM library
 intptr_t Q3E_Call(int protocol, int size, ...)
 {
 	intptr_t res = 0;
@@ -868,25 +940,68 @@ intptr_t Q3E_Call(int protocol, int size, ...)
 	return res;
 }
 
+// Request exit
 void Q3E_exit(void)
 {
+	running = false;
 	if(common->IsInitialized())
+	{
+		Sys_TriggerEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT); // if doom3 main thread is waiting new window
+		Q3E_StopGameMainThread();
 		common->Quit();
+	}
+	if(window)
+		window = NULL;
+	GLimp_AndroidQuit();
+	Sys_Printf("[Harmattan]: doom3 exit.\n");
 }
 
+// View paused
 void Q3E_OnPause(void)
 {
 	if(common->IsInitialized())
 		paused = true;
 }
 
+// View resume
 void Q3E_OnResume(void)
 {
 	if(common->IsInitialized())
 		paused = false;
 }
 
-#endif
+// Setup OpenGL context variables
+void Android_SetGLContext(ANativeWindow *w, int size, ...)
+{
+	va_list va;
+
+	if(size > 0)
+	{
+		va_start(va, size);
+		gl_format = va_arg(va, int);
+		gl_msaa = va_arg(va, int);
+		va_end(va);
+	}
+	// if engine has started, w is null, means Surfece destroyed, w not null, means Surface has changed.
+	if(common->IsInitialized())
+	{
+		if(!w) // set window is null, and wait doom3 main thread deactive OpenGL render context.
+		{
+			window = NULL;
+			window_changed = true;
+			while(window_changed)
+				Sys_WaitForEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
+		}
+		else // set new window, notify doom3 main thread active OpenGL render context
+		{
+			window = w;
+			window_changed = true;
+			Sys_TriggerEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
+		}
+	}
+	else
+		window = w;
+}
 
 #pragma GCC visibility pop
 }

@@ -426,7 +426,7 @@ void idItem::Spawn( void ) {
 // RAVEN END
 
 #ifdef _QUAKE4
-// jmarshall
+// jmarshall: bot
 	modelindex = gameLocal.GetBotItemEntry(spawnArgs.GetString("modelindex"));
 // jmarshall end
 #endif

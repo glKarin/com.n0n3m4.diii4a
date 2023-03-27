@@ -142,7 +142,11 @@ void idPVS::CreatePVSData( void ) {
 			p = &pvsPortals[cp++];
 			
 			//HUMANHEAD rww - check to see if this is a game portal
-			p->gamePortal = false; // gameRenderWorld->IsGamePortal(portal.portalHandle); // jmarshall
+#if 1
+			p->gamePortal = false;
+#else
+			p->gamePortal = gameRenderWorld->IsGamePortal(portal.portalHandle);
+#endif
 			p->mightSeeGamePortal = p->gamePortal;
 
 			// the winding goes counter clockwise seen from this area

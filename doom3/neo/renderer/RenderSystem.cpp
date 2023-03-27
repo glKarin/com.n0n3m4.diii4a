@@ -40,26 +40,6 @@ volatile int			vertListToRender = 0;
 // These are set if the backend should save pixels
 volatile renderCrop_t	*pixelsCrop = NULL;
 volatile byte           *pixels = NULL;
-volatile int backend_renderer_intent = BACKEND_RENDERER_INTENT_DRAW;
-
-// waiting backend render finished
-extern "C" {
-void BackendThreadWait(void)
-{
-	while(/*multithreadActive &&*/ !backendFinished)
-    {
-        //usleep(1000 * 3);
-        Sys_WaitForEvent(TRIGGER_EVENT_BACKEND_FINISHED);
-        //usleep(500);
-    }
-}
-
-void setup_backend_renderer_intent(int intent, bool wait)
-{
-	BackendThreadWait();
-	backend_renderer_intent = intent;
-}
-}
 #endif
 
 /*
@@ -192,6 +172,8 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 	pixels = pix;
 
 	backendFinished = false;
+	BackendThreadExecute();
+
 	Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
 
 	Sys_WaitForEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
@@ -1157,54 +1139,42 @@ bool idRenderSystemLocal::UploadImage(const char *imageName, const byte *data, i
 }
 
 #ifdef _MULTITHREAD
-extern "C" {
 void BackendThreadTask(void) // BackendThread -> 
 {
-	while(true)
+	// waiting start
+	Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
+	// Purge all images,  Load all images
+	globalImages->HandlePendingImage();
+	// image process finished
+	Sys_TriggerEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
+
+	int backendVertexCache = vertListToRender;
+	vertexCache.BeginBackEnd(backendVertexCache);
+	R_IssueRenderCommands(fdToRender);
+
+	bool exit = true;
+	// Take screen shot
+	if(pixels) // if block backend rendering, do not exit backend render function, because it will be swap buffers in GLSurfaceView
 	{
-		// waiting start
-		Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
-		// If reloading engine, deactivate GL context and wait game thread deactivate GL context, finally reactivate GL context. If no GL context, this thread do not return.
-		switch(backend_renderer_intent)
-		{
-			case BACKEND_RENDERER_INTENT_MAKE_CURRENT:
-				GLimp_DeactivateContext();
-				Sys_TriggerEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
-				Sys_WaitForEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
-				GLimp_ActivateContext();
-				break;
-
-			case BACKEND_RENDERER_INTENT_DRAW:
-			default: 
-				{
-					// Purge all images,  Load all images
-					globalImages->HandlePendingImage();
-					// image process finished
-					Sys_TriggerEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
-
-					int backendVertexCache = vertListToRender;
-					vertexCache.BeginBackEnd(backendVertexCache);
-					R_IssueRenderCommands(fdToRender);
-
-					bool exit = true;
-					// Take screen shot
-					if(pixels) // if block backend rendering, do not exit backend render function, because it will be swap buffers in GLSurfaceView
-					{
-						glReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
-						pixels = NULL;
-						pixelsCrop = NULL;
-						exit = false;
-					}
-
-					vertexCache.EndBackEnd(backendVertexCache);
-					backendFinished = true;
-					Sys_TriggerEvent(TRIGGER_EVENT_BACKEND_FINISHED);
-					if(exit)
-						return;
-				}
-				break;
-		}
+		glReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
+		pixels = NULL;
+		pixelsCrop = NULL;
+		exit = false;
 	}
+
+	vertexCache.EndBackEnd(backendVertexCache);
+	backendFinished = true;
+	Sys_TriggerEvent(TRIGGER_EVENT_BACKEND_FINISHED);
 }
+
+// waiting backend render finished
+void BackendThreadWait(void)
+{
+	while(/*multithreadActive &&*/ !backendFinished)
+    {
+        //usleep(1000 * 3);
+        Sys_WaitForEvent(TRIGGER_EVENT_BACKEND_FINISHED);
+        //usleep(500);
+    }
 }
 #endif

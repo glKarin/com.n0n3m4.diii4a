@@ -34,7 +34,7 @@ hhBoneController::hhBoneController() {
 hhBoneController::Setup
 ================
 */
-void hhBoneController::Setup( idEntity *pOwner, const char *pJointname, const idAngles &MinAngles, const idAngles &MaxAngles, const idAngles& Rate, const idAngles& Factor ) { //k: 3 4 5 6 const
+void hhBoneController::Setup( idEntity *pOwner, const char *pJointname, const idAngles &MinAngles, const idAngles &MaxAngles, const idAngles& Rate, const idAngles& Factor ) { // 3 4 5 6 const
 	jointHandle_t Joint = ( pOwner ) ? pOwner->GetAnimator()->GetJointHandle( pJointname ) : INVALID_JOINT;
 
 	Setup( pOwner, Joint, MinAngles, MaxAngles, Rate, Factor );
@@ -45,7 +45,7 @@ void hhBoneController::Setup( idEntity *pOwner, const char *pJointname, const id
 hhBoneController::Setup
 ================
 */
-void hhBoneController::Setup( idEntity *pOwner, jointHandle_t Joint, const idAngles &MinAngles, const idAngles &MaxAngles, const idAngles& Rate, const idAngles& Factor ) { //k: 3 4 5 6 const
+void hhBoneController::Setup( idEntity *pOwner, jointHandle_t Joint, const idAngles &MinAngles, const idAngles &MaxAngles, const idAngles& Rate, const idAngles& Factor ) { // 3 4 5 6 const
 	m_IdealAng.Zero();
 	m_CurrentAng.Zero();
 	m_Fraction.Zero();

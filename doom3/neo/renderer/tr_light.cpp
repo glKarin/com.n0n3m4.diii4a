@@ -1207,29 +1207,27 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 		int oldTime;
 
 		
-#if !defined(_RAVENxxx)
-// jmarshall
 		if (space->entityDef && space->entityDef->parms.timeGroup) {
 			oldFloatTime = tr.viewDef->floatTime;
 			oldTime = tr.viewDef->renderView.time;
 
+#ifdef _RAVEN
+			tr.viewDef->floatTime = tr.viewDef->renderView.time * 0.001;
+#else
 			tr.viewDef->floatTime = game->GetTimeGroupTime(space->entityDef->parms.timeGroup) * 0.001;
 			tr.viewDef->renderView.time = game->GetTimeGroupTime(space->entityDef->parms.timeGroup);
-		}
 #endif
+		}
 
 #ifdef _HUMANHEAD
 		((float *)shaderParms)[SHADERPARM_DISTANCE] = R_CalcViewAndEntityDistance(tr.viewDef, renderEntity);
 #endif
 		shader->EvaluateRegisters(regs, shaderParms, tr.viewDef, renderEntity->referenceSound);
 
-#if !defined(_RAVENxxx)
-// jmarshall
 		if (space->entityDef && space->entityDef->parms.timeGroup) {
 			tr.viewDef->floatTime = oldFloatTime;
 			tr.viewDef->renderView.time = oldTime;
 		}
-#endif
 	}
 
 	// check for deformations
@@ -1270,8 +1268,9 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 		oldFloatTime = tr.viewDef->floatTime;
 		oldTime = tr.viewDef->renderView.time;
 
-#if !defined(_RAVENxxx)
-// jmarshall - gui time
+#ifdef _RAVEN
+		tr.viewDef->floatTime = tr.viewDef->renderView.time * 0.001;
+#else
 		tr.viewDef->floatTime = game->GetTimeGroupTime(1) * 0.001;
 		tr.viewDef->renderView.time = game->GetTimeGroupTime(1);
 #endif
@@ -1471,16 +1470,20 @@ void R_AddModelSurfaces(void)
 		float oldFloatTime;
 		int oldTime;
 
-#if !defined(_RAVENxxx)
-// jmarshall
+#if !defined(_RAVEN)
 		game->SelectTimeGroup(vEntity->entityDef->parms.timeGroup);
+#endif
 
 		if (vEntity->entityDef->parms.timeGroup) {
 			oldFloatTime = tr.viewDef->floatTime;
 			oldTime = tr.viewDef->renderView.time;
 
+#ifdef _RAVEN
+			tr.viewDef->floatTime = tr.viewDef->renderView.time * 0.001;
+#else
 			tr.viewDef->floatTime = game->GetTimeGroupTime(vEntity->entityDef->parms.timeGroup) * 0.001;
 			tr.viewDef->renderView.time = game->GetTimeGroupTime(vEntity->entityDef->parms.timeGroup);
+#endif
 		}
 
 		if (tr.viewDef->isXraySubview && vEntity->entityDef->parms.xrayIndex == 1) {
@@ -1498,20 +1501,16 @@ void R_AddModelSurfaces(void)
 
 			continue;
 		}
-#endif
 
 		// add the ambient surface if it has a visible rectangle
 		if (!vEntity->scissorRect.IsEmpty()) {
 			model = R_EntityDefDynamicModel(vEntity->entityDef);
 
 			if (model == NULL || model->NumSurfaces() <= 0) {
-#if !defined(_RAVENxxx)
-// jmarshall
 				if (vEntity->entityDef->parms.timeGroup) {
 					tr.viewDef->floatTime = oldFloatTime;
 					tr.viewDef->renderView.time = oldTime;
 				}
-#endif
 
 				continue;
 			}
@@ -1525,8 +1524,6 @@ void R_AddModelSurfaces(void)
 		//
 		// for all the entity / light interactions on this entity, add them to the view
 		//
-#if !defined(_RAVENxxx)
-// jmarshall
 		if (tr.viewDef->isXraySubview) {
 			if (vEntity->entityDef->parms.xrayIndex == 2) {
 				for (inter = vEntity->entityDef->firstInteraction; inter != NULL && !inter->IsEmpty(); inter = next) {
@@ -1540,7 +1537,6 @@ void R_AddModelSurfaces(void)
 				}
 			}
 		} else {
-#endif
 			// all empty interactions are at the end of the list so once the
 			// first is encountered all the remaining interactions are empty
 			for (inter = vEntity->entityDef->firstInteraction; inter != NULL && !inter->IsEmpty(); inter = next) {
@@ -1555,18 +1551,12 @@ void R_AddModelSurfaces(void)
 
 				inter->AddActiveInteraction();
 			}
-#if !defined(_RAVENxxx)
-// jmarshall
 		}
-#endif
 
-#if !defined(_RAVENxxx)
-// jmarshall
 		if (vEntity->entityDef->parms.timeGroup) {
 			tr.viewDef->floatTime = oldFloatTime;
 			tr.viewDef->renderView.time = oldTime;
 		}
-#endif
 
 	}
 }

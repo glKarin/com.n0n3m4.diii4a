@@ -25,11 +25,11 @@ const int IMPULSE_DELAY = 150;
 			v = &hackedView;
 		}
 
-	//	renderSystem->LogViewRender(v); // jmarshall
+		renderSystem->LogViewRender(v);
 	}
 
 	void RENDER_DEMO_VIEWRENDER_END(void) {
-		//renderSystem->LogViewRender(NULL); // jmarshall
+		renderSystem->LogViewRender(NULL);
 	}
 #endif
 //HUMANHEAD END

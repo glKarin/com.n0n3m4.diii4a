@@ -1589,7 +1589,6 @@ int idSoundSystemLocal::IsEAXAvailable(void)
 }
 
 #ifdef _RAVEN
-// jmarshall: Quake 4 specific code
 idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
 	switch (worldId)
 	{
@@ -1603,5 +1602,4 @@ idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
 		return session->sw;
 	}
 }
-// jmarshall
 #endif

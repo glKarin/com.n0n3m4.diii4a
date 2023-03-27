@@ -817,8 +817,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     public void queueEvent(Runnable r)
     {
-        if(!Q3EUtils.q3ei.multithread)
-            m_renderView.queueEvent(r);
         Q3EUtils.q3ei.callbackObj.PushEvent(r);
     }
 
@@ -852,31 +850,21 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             Toast.makeText(getContext(), "Click back again to exit......", Toast.LENGTH_LONG).show();
         else if(m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
         {
-            m_renderView.Shutdown(new Runnable() {
-                public void run()
-                {
-                    m_renderView.PushUIEvent(new Runnable() {
-                       public void run()
-                       {
-                           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                               ((Activity)getContext()).finishAffinity();
-                           else
-                               ((Activity)getContext()).finish();
-                           System.exit(0);   
-                       }
-                    });
-                }
-            });
+            m_renderView.Shutdown();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                ((Activity)getContext()).finishAffinity();
+            else
+                ((Activity)getContext()).finish();
+            System.exit(0);
             return true;
         }
         return res;
     }
-    
+
     private Q3EView m_renderView;
     public void RenderView(Q3EView view)
     {
         m_renderView = view;
-        view.ControlView(this);
     }
 
 	private boolean m_gyroInited = false;

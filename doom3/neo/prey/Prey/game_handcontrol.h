@@ -18,7 +18,7 @@ public:
 	virtual void		ReadFromSnapshot( const idBitMsgDelta &msg );
 	virtual void		ClientPredictionThink( void );
 
-	void				UpdateControlDirection(const idVec3 &dir); //k: const
+	void				UpdateControlDirection(const idVec3 &dir); // const
 	virtual void		Ready();
 	virtual void		Raise();
 	virtual void		PutAway();

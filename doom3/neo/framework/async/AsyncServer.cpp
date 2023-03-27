@@ -246,6 +246,9 @@ void idAsyncServer::Kill(void)
 	session->Stop();
 }
 
+#ifdef _RAVEN
+static void GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ]);
+#endif
 /*
 ==================
 idAsyncServer::ExecuteMapChange
@@ -267,7 +270,9 @@ void idAsyncServer::ExecuteMapChange(void)
 	fileSystem->ClearPureChecksums();
 
 	// make sure the map/gametype combo is good
-#ifdef _HUMANHEAD
+#ifdef _RAVEN
+	GetBestGameType(cvarSystem->GetCVarString("si_map"), cvarSystem->GetCVarString("si_gametype"), bestGameType);
+#elif defined(_HUMANHEAD)
 	game->GetBestGameType(cvarSystem->GetCVarString("si_map"), cvarSystem->GetCVarString("si_gametype"));
 #else
 	game->GetBestGameType(cvarSystem->GetCVarString("si_map"), cvarSystem->GetCVarString("si_gametype"), bestGameType);
@@ -910,7 +915,7 @@ void idAsyncServer::SendReliableMessage(int clientNum, const idBitMsg &msg)
 	}
 
 #ifdef _RAVEN // bot
-// jmarshall
+// jmarshall: bot
 	if (clients[clientNum].channel.GetRemoteAddress().type == NA_BOT)
 		return;
 // jmarshall end
@@ -942,7 +947,7 @@ void idAsyncServer::CheckClientTimeouts(void)
 		}
 
 #ifdef _RAVEN // bot
-// jmarshall
+// jmarshall: bot
 		if (client.channel.GetRemoteAddress().type == NA_BOT)
 			continue;
 // jmarshall end
@@ -3120,7 +3125,7 @@ void idAsyncServer::ProcessDownloadRequestMessage(const netadr_t from, const idB
 }
 
 #ifdef _RAVEN // bot
-// jmarshall
+// jmarshall: bot
 /*
 ===============
 idAsyncServer::ServerSetBotUserCommand
@@ -3205,7 +3210,6 @@ void idAsyncServer::InitLocalClient( int clientNum, bool isBot ) {
 
 	InitClient( clientNum, 0, 0 );
 	memset( &badAddress, 0, sizeof( badAddress ) );
-// jmarshall
 	if (isBot)
 	{
 		badAddress.type = NA_BOT;
@@ -3215,11 +3219,51 @@ void idAsyncServer::InitLocalClient( int clientNum, bool isBot ) {
 		badAddress.type = NA_BAD;
 		localClientNum = clientNum;
 	}
-// jmarshall end
 	clients[clientNum].channel.Init( badAddress, serverId );
 	clients[clientNum].clientState = SCS_INGAME;
 	sessLocal.mapSpawnData.userInfo[clientNum] = *cvarSystem->MoveCVarsToDict( CVAR_USERINFO );
 }
 // jmarshall end
+
+static idStr GetBestMPGametype(const char *map, const char *gametype)
+{
+	// from q4sdk::game/gamesys/SysCvar.cpp
+	const char *si_gameTypeArgs[]		= { "singleplayer", "DM", "Tourney", "Team DM", "CTF", "Arena CTF", "DeadZone", NULL };
+	const int si_numGameTypeArgs = sizeof( si_gameTypeArgs ) / sizeof( si_gameTypeArgs[0] );
+
+	int num = declManager->GetNumDecls(DECL_MAPDEF);
+	int i, j;
+
+	for (i = 0; i < num; i++) {
+		const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(declManager->DeclByIndex(DECL_MAPDEF, i));
+
+		if (mapDef && idStr::Icmp(mapDef->GetName(), map) == 0) {
+			if (mapDef->dict.GetBool(gametype)) {
+				// dont change gametype
+				return gametype;
+			}
+
+			for (j = 1; si_gameTypeArgs[ j ]; j++) {
+				if (mapDef->dict.GetBool(si_gameTypeArgs[ j ])) {
+					return si_gameTypeArgs[ j ];
+				}
+			}
+
+			// error out, no valid gametype
+			return "DM";
+		}
+	}
+
+	//For testing a new map let it play any gametpye
+	return gametype;
+}
+
+void GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ])
+{
+	idStr aux = GetBestMPGametype(map, gametype);
+	strncpy(buf, aux.c_str(), MAX_STRING_CHARS);
+	buf[ MAX_STRING_CHARS - 1 ] = '\0';
+}
+
 #endif
 

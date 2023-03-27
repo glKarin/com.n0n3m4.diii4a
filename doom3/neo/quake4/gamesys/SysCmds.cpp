@@ -1779,8 +1779,6 @@ Cmd_CollisionModelInfo_f
 ==================
 */
 static void Cmd_CollisionModelInfo_f( const idCmdArgs &args ) {
-// jmarshall - extra debug.
-#if 0
 	const char *value;
 
 	if ( !gameLocal.CheatsOk() ) {
@@ -1799,7 +1797,6 @@ static void Cmd_CollisionModelInfo_f( const idCmdArgs &args ) {
 	} else {
 		collisionModelManager->ModelInfo( atoi(value) );
 	}
-#endif
 }
 
 /*
@@ -3046,7 +3043,7 @@ void Cmd_ClientOverflowReliable_f( const idCmdArgs& args ) {
 #endif
 
 #ifdef _QUAKE4 // bot
-// jmarshall
+// jmarshall: bot
 void Cmd_AddBot_f(const idCmdArgs& args)
 {
 	if (args.Argc() < 2)

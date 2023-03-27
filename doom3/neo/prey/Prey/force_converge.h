@@ -15,7 +15,7 @@ public:
 	virtual				~hhForce_Converge( void );
 	void				Save( idSaveGame *savefile ) const;
 	void				Restore( idRestoreGame *savefile );
-	void				SetTarget(const idVec3 &newTarget); //k: const
+	void				SetTarget(const idVec3 &newTarget); // const
 	void				SetEntity(idEntity *entity, int id=0, const idVec3 &point=vec3_origin);
 	idEntity *			GetEntity() const				{ return ent.GetEntity();				}
 	void				SetRestoreTime( float time );

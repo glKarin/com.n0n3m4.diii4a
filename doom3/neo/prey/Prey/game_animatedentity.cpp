@@ -310,12 +310,12 @@ void hhAnimatedEntity::JawFlap(hhAnimator *theAnimator) {
 	if (IsType(idActor::Type)) {
 		headEntity = static_cast<idActor*>(this)->GetHead();
 		if (headEntity && headEntity->GetSoundEmitter()) {
-			amplitude = 0; // headEntity->GetSoundEmitter()->CurrentVoiceAmplitude(SND_CHANNEL_VOICE); // jmarshall
+			amplitude = headEntity->GetSoundEmitter()->CurrentVoiceAmplitude(SND_CHANNEL_VOICE);
 		}
 	}
 
 	if( amplitude == 0.0f && GetSoundEmitter() ) {
-		amplitude = 0; // GetSoundEmitter()->CurrentVoiceAmplitude(SND_CHANNEL_VOICE); // jmarshall
+		amplitude = GetSoundEmitter()->CurrentVoiceAmplitude(SND_CHANNEL_VOICE);
 	}
 
 	if (amplitude != 0.0f || lastAmplitude != 0.0f) {

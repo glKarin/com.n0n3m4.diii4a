@@ -260,7 +260,7 @@ ID_INLINE void idScriptVariable<type, etype, returnType>::Unlink( void ) {
 template<class type, etype_t etype, class returnType>
 ID_INLINE void idScriptVariable<type, etype, returnType>::LinkTo( idScriptObject &obj, const char *name ) {
 	data = ( type * )obj.GetVariable( name, etype );
-#if 0 //k: forward decl
+#if 0 //karin: ignore error
 	if ( !data ) {
 		gameLocal.Error( "Missing '%s' field in script object '%s'", name, obj.GetTypeName() );
 	}

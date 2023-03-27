@@ -3744,7 +3744,6 @@ idParser::~idParser(void)
 idParser::Parse1DMatrixLegacy
 ================
 */
-// jmarshall
 int idParser::Parse1DMatrixLegacy(int x, float* m)
 {
 	int i;
@@ -3773,7 +3772,6 @@ int idParser::Parse1DMatrixLegacy(int x, float* m)
 	}
 	return true;
 }
-// jmarshall end
 
 /*
 ================

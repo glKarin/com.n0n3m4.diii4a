@@ -1802,18 +1802,16 @@ void R_VidRestart_f(const idCmdArgs &args)
 		}
 	}
 
-#ifdef _MULTITHREAD
-	if(multithreadActive)
-	{
-		setup_backend_renderer_intent(BACKEND_RENDERER_INTENT_MAKE_CURRENT, true);
-		Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
-		Sys_WaitForEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
-		GLimp_ActivateContext();
-	}
-#endif
 	// this could take a while, so give them the cursor back ASAP
 	Sys_GrabMouseCursor(false);
 
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		BackendThreadShutdown();
+		common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
+	}
+#endif
 	// dump ambient caches
 	renderModelManager->FreeModelVertexCaches();
 
@@ -1860,16 +1858,6 @@ void R_VidRestart_f(const idCmdArgs &args)
 		parms.stereo = false;
 		GLimp_SetScreenParms(parms);
 	}
-
-#ifdef _MULTITHREAD
-	if(multithreadActive)
-	{
-		GLimp_DeactivateContext();
-		setup_backend_renderer_intent(BACKEND_RENDERER_INTENT_MAKE_CURRENT, false);
-		Sys_TriggerEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
-		BackendThreadWait();
-	}
-#endif
 
 
 	// make sure the regeneration doesn't use anything no longer valid
@@ -2124,7 +2112,15 @@ idRenderSystemLocal::Shutdown
 */
 void idRenderSystemLocal::Shutdown(void)
 {
+
 	common->Printf("idRenderSystem::Shutdown()\n");
+#ifdef _MULTITHREAD
+	if(multithreadActive)
+	{
+		BackendThreadShutdown();
+		common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
+	}
+#endif
 
 	R_DoneFreeType();
 

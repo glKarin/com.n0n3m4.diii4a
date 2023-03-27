@@ -1014,6 +1014,9 @@ cm_brush_t *idCollisionModelManagerLocal::AllocBrush(cm_model_t *model, int numP
 	} else {
 		brush = (cm_brush_t *) Mem_Alloc(size);
 	}
+#ifdef _RAVEN
+	brush->material = NULL;
+#endif
 
 	return brush;
 }
@@ -4679,6 +4682,8 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 	model->_trmBrushes[0]->b->contents = -1;		// all contents
 	model->_trmBrushes[0]->b->numPlanes = 0;
 
+	model->_trmBrushes[0]->b->material = 0; //k = material
+
 	model->node->brushes = NULL;
 	model->node->polygons = NULL;
 
@@ -4724,6 +4729,7 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 		model->node->polygons = model->_trmPolygons[i];
 	}
 	// if the trace model is convex
+	model->_trmBrushes[0]->b->material = 0; //k
 	if ( trm.isConvex ) {
 		// setup brush for position test
 		model->_trmBrushes[0]->b->numPlanes = trm.numPolys;
@@ -4734,12 +4740,15 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 		// link brush at node
 		model->_trmBrushes[0]->next = model->node->brushes;
 		model->node->brushes = model->_trmBrushes[0];
+		model->_trmBrushes[0]->b->material = 0; //k = material
 	}
 	// model bounds
 	model->bounds = trm.bounds;
 	// convex
 	model->isConvex = trm.isConvex;
+
 #else
+
 	if(model)
 		FreeModel(model);
 	else
@@ -4799,6 +4808,7 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 	model->_trmBrushes[0]->b->checkcount = 0;
 	model->_trmBrushes[0]->b->contents = -1;		// all contents
 	model->_trmBrushes[0]->b->numPlanes = 0;
+	model->_trmBrushes[0]->b->material = 0; //k = material;
 
 	model->node->brushes = NULL;
 	model->node->polygons = NULL;
@@ -4846,6 +4856,7 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 		model->node->polygons = model->_trmPolygons[i];
 	}
 	// if the trace model is convex
+	model->_trmBrushes[0]->b->material = 0; //k
 	if ( trm.isConvex ) {
 		// setup brush for position test
 		model->_trmBrushes[0]->b->numPlanes = trm.numPolys;
@@ -4856,6 +4867,7 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 		// link brush at node
 		model->_trmBrushes[0]->next = model->node->brushes;
 		model->node->brushes = model->_trmBrushes[0];
+		model->_trmBrushes[0]->b->material = 0; //k = material;
 	}
 	// model bounds
 	model->bounds = trm.bounds;

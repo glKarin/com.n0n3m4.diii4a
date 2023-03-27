@@ -207,6 +207,10 @@ class idRenderSystem
 	virtual void			SetShuttleView(bool view) = 0;// HUMANHEAD pdm
 	virtual bool			SupportsFragmentPrograms(void) = 0; // HUMANHEAD CJR
 	virtual int				VideoCardNumber(void) = 0; // HUMANHEAD CJR
+												
+#if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
+	virtual void			LogViewRender(const struct renderView_s *view) {}
+#endif //HUMANHEAD END
 #endif
 
 		// dump all 2D drawing so far this frame to the demo file

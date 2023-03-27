@@ -336,6 +336,10 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 			return LoadModel(modelName, precache);
 		}
 		virtual int     GetNumInlinedProcClipModels(void) { return numInlinedProcClipModels; }
+		virtual cmHandle_t PreCacheModel(const char* mapName, const char *modelName ) {
+			(void)mapName;
+			return LoadModel(modelName, true);
+		}
 #endif
 
 		// get clip handle for model

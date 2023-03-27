@@ -218,7 +218,7 @@ void hhBeamSystem::SetTargetLocation(idVec3 newLoc) {
 // NOTE: The offset can be used as an offset from the joint as well.
 //==========================================================================
 
-void hhBeamSystem::SetTargetEntity( idEntity *ent, int traceId, const idVec3 &offset ) { //k: 3 const
+void hhBeamSystem::SetTargetEntity( idEntity *ent, int traceId, const idVec3 &offset ) { // 3 const
 	idVec3 origin;
 	idMat3 axis;
 
@@ -248,7 +248,7 @@ void hhBeamSystem::SetTargetEntity( idEntity *ent, int traceId, const idVec3 &of
 // Bone name version
 //==========================================================================
 
-void hhBeamSystem::SetTargetEntity( idEntity *ent, const char *boneName, const idVec3 &offset ) { //k: 3 const
+void hhBeamSystem::SetTargetEntity( idEntity *ent, const char *boneName, const idVec3 &offset ) { // 3 const
 	idVec3 origin;
 	idMat3 axis;
 
@@ -490,7 +490,7 @@ void hhBeamSystem::Think( void ) {
 	if (thinkFlags & TH_UPDATEPARTICLES) {
 
 		if( targets.Num() > 0 ) {
-			SetTargetEntity( targets[0].GetEntity(), (const char *)NULL ); //k: 2 cast const char *
+			SetTargetEntity( targets[0].GetEntity(), (const char *)NULL ); // 2 cast const char *
 		}
 
 		// Update the beamAxis to correctly reflect the target

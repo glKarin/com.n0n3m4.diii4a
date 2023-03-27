@@ -407,17 +407,7 @@ class idRenderModelSprite : public idRenderModelStatic
 };
 
 #ifdef _RAVEN // bse model
-/*
-======================
-rvRenderModelBSE
-======================
-*/
-class rvRenderModelBSE : public idRenderModelStatic {
-public:
-	virtual void				InitFromFile(const char* fileName);
-	virtual void				FinishSurfaces(bool useMikktspace);
-};
-
+#include "../raven/bse/Model_bse.h"
 #endif
 
 #ifdef _HUMANHEAD

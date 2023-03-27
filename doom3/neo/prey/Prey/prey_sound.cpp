@@ -153,10 +153,9 @@ hhSound::GetCurrentAmplitude
 ================
 */
 float hhSound::GetCurrentAmplitude(const s_channelType channel) {
-// jmarshall
-	//if (refSound.referenceSound && refSound.referenceSound->CurrentlyPlaying()) {
-	//	return refSound.referenceSound->CurrentAmplitude(channel);
-	//}
+	if (refSound.referenceSound && refSound.referenceSound->CurrentlyPlaying()) {
+		return refSound.referenceSound->CurrentAmplitude(channel);
+	}
 	return 0.0f;
 }
 

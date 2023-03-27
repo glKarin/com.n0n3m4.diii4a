@@ -576,7 +576,7 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				idVec3 forward, left, up, forward2, left2, up2;
 				idVec3 pos, pos2;
 				const float *dsm = drawSurf->space->modelMatrix;
-				float mm[16] = { //k: inverse forward and left
+				float mm[16] = { //karin: inverse forward and right
 					-dsm[0], -dsm[1], -dsm[2], dsm[3],
 					-dsm[4], -dsm[5], -dsm[6], dsm[7],
 					dsm[8], dsm[9], dsm[10], dsm[11],
@@ -606,7 +606,7 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				idMat3 hh3(forward2, left2, up2);
 				parms->renderView.viewaxis = hh3;
 				parms->initialViewAreaOrigin = remoteRenderView->vieworg + remoteRenderView->viewaxis[0] * 16; //k: offset TODO how many???, this value will be using find areaNum
-				parms->renderView.vieworg = pos2; // + forward2 * 8; //k: offset TODO: how many???;
+				parms->renderView.vieworg = pos2;
 
 				parms->superView = tr.viewDef;
 				parms->subviewSurface = drawSurf;
@@ -620,10 +620,10 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				if (!drawSurf->space->entityDef->parms.remoteRenderView) {
 					return false;
 				}
-				
+
 				//lvonasek: Allow max 1 skybox per frame
 				static int lastRenderSkybox = -1;
-				if(tr.frameCount == lastRenderSkybox)
+				if(tr.frameCount == lastRenderSkybox || tr.viewDef->isSubview)
 					return false;
 
 				// copy the viewport size from the original

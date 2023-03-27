@@ -4555,10 +4555,6 @@ idEntity::TouchTriggers
   Optionally only activate triggers of ownerType
 ============
 */
-#if defined(_QUAKE4xxx) // unused
-static idCVar harm_g_useSimpleTriggerClipForce( "harm_g_useSimpleTriggerClipForce", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Force to Using simple trigger clip for player/AI/vehicle touching triggers, it can optimize some solutions for doors can' open in Quake4Doom(not need enable no longer, collision has been fixed). "
-		);
-#endif
 bool idEntity::TouchTriggers( const idTypeInfo* ownerType ) const {
 	int				i, numClipModels, numEntities;
 	idClipModel *	cm;
@@ -4594,12 +4590,6 @@ bool idEntity::TouchTriggers( const idTypeInfo* ownerType ) const {
 			continue;
 		}
 
-#if defined(_QUAKE4xxx) //k: force using simple clip, so has touched now
-		if(!harm_g_useSimpleTriggerClipForce.GetBool()
-				|| ent->IsType(idTrigger_Hurt::GetClassType()) //k: some hurt trigger is danger
-				)
-		{
-#endif
 // RAVEN BEGIN
 // abahr: needed so tram car can has collision model and touch triggers
 		bool useSimpleClip = spawnArgs.GetBool("useSimpleTriggerClip");
@@ -4607,9 +4597,6 @@ bool idEntity::TouchTriggers( const idTypeInfo* ownerType ) const {
 // RAVEN END
 			continue;
 		}
-#if defined(_QUAKE4xxx) // unused
-		}
-#endif
 
 		numEntities++;
 
@@ -6859,7 +6846,6 @@ bool idEntity::GetBool(const char* key)
 	return spawnArgs.GetBool(key, "0");
 }
 
-// jmarshall
 /*
 ================
 idEntity::GetOrigin
@@ -6869,6 +6855,5 @@ idVec3 idEntity::GetOrigin(void)
 {
 	return GetLocalCoordinates(GetPhysics()->GetOrigin());
 }
-// jmarshall end
 #endif
 

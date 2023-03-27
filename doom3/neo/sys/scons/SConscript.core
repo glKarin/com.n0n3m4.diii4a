@@ -195,6 +195,15 @@ if ( local_opengl == 1 ):
 			MegaTexture.cpp \
 			draw_arb2.cpp'
 
+if ( local_raven ):
+	renderer_string += ' \
+			../raven/bse/Model_bse.cpp'
+
+if ( local_humanhead ):
+	renderer_string += ' \
+		../humanhead/renderer/Model_hhBeam.cpp \
+		'
+
 renderer_list = scons_utils.BuildList( 'renderer', renderer_string )
 
 framework_string = ' \
@@ -378,16 +387,19 @@ core_list = framework_list + renderer_list + ui_list \
 	+ snd_list + sys_list + tools_list + [ 'TypeInfo/TypeInfoGen.cpp' ]
 
 #//k _RAVEN _QUAKE4
+local_raven_fx_bse = 1 #karin: OpenBSE by DOOM3 FX
 if ( local_raven ):
-	bse_string = ' \
-		bse/BSE_Effect.cpp \
-		bse/BSE_EffectTemplate.cpp \
-		bse/BSE_Envelopes.cpp \
-		bse/BSE_Manager.cpp \
-		bse/BSE_ParseParticle2.cpp \
-		bse/BSE_Segment.cpp \
-		bse/BSE_SegmentTemplate.cpp \
-		'
+	if ( local_raven_fx_bse ):
+		bse_string = ' \
+			bse/BSE_Fx.cpp \
+			bse/BSE_Manager.cpp \
+			bse/BSE_Decl.cpp \
+			bse/BSE_Particle.cpp \
+			'
+	else:
+		bse_string = ' \
+			bse/BSE_Null.cpp \
+			'
 	bse_list = scons_utils.BuildList( 'raven', bse_string )
 	core_list += bse_list
 
@@ -399,6 +411,8 @@ local_env = g_env.Clone()
 # RAVEN QUAKE4
 if ( local_raven ):
 	local_env.Append( CPPDEFINES = [ '_RAVEN' ] )
+	if ( local_raven_fx_bse ):
+		local_env.Append( CPPDEFINES = [ '_RAVEN_FX' ] )
 
 if ( local_humanhead ):
 	local_env.Append( CPPDEFINES = [ '_HUMANHEAD', 'HUMANHEAD', ] )

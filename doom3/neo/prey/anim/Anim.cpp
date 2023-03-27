@@ -1227,7 +1227,7 @@ void idAnimManager::PrintMemInfo( MemInfo_t *mi ) {
 	}
 
 	delete[] sortIndex;
-	//mi->animAssetsTotal = totalMem; // jmarshall
+	mi->animAssetsTotal = totalMem;
 
 	f->Printf( "\nTotal anim bytes allocated: %s\n", idStr::FormatNumber( totalMem ).c_str() );
 	fileSystem->CloseFile( f );

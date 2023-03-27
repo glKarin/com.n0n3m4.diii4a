@@ -2316,7 +2316,6 @@ idProgram::ReturnEntity
 */
 void idProgram::ReturnEntity( idEntity *ent ) {
 	if ( ent ) {
-		assert(ent->entityNumber + 1 <= MAX_GENTITIES);
 		*returnDef->value.entityNumberPtr = ent->entityNumber + 1;
 	} else {
 		*returnDef->value.entityNumberPtr = 0;

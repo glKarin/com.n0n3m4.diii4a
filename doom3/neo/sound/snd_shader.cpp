@@ -226,7 +226,6 @@ bool idSoundShader::ParseShader(idLexer &src)
 #endif
 		}
 #ifdef _RAVEN // quake4 snd file
-// jmarshall - quake 4 sound shader
 		else if (!token.Icmp("frequencyshift")) {
 			float shiftVal = src.ParseFloat();
 			src.ExpectTokenString(",");
@@ -254,7 +253,6 @@ bool idSoundShader::ParseShader(idLexer &src)
 		else if (!token.Icmp("center")) {
 
 		}
-// jmarshall end
 		else if (!token.Icmp("shakeData"))
 		{
 			src.ExpectAnyToken(&token);
@@ -516,16 +514,6 @@ bool idSoundShader::ParseShader(idLexer &src)
 				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
 				numEntries++;
 			}
-#if 0 //k jmarshall
-			if( token.IcmpPrefixPath( "sound/vo/" ) == 0 || token.IcmpPrefixPath( "sound/guis/" ) == 0 )
-			{
-				parms.soundShaderFlags |= SSF_VO;
-			}
-			if( token.IcmpPrefixPath( "sound/musical/" ) == 0 )
-			{
-				parms.soundShaderFlags |= SSF_MUSIC;
-			}
-#endif
 #else
 		} else if (token.Find(".wav", false) != -1 || token.Find(".ogg", false) != -1) {
 			// add to the wav list

@@ -2284,25 +2284,27 @@ static void Cmd_RecordViewNotes_f( const idCmdArgs &args ) {
 	// Argv(3) = comments
 
 	// HUMANHEAD pdm: prepended p:/base/
-	//idStr str = "p:/base/";
-	//str += args.Argv(1);
-	//str.SetFileExtension( ".txt" );
-	//// HUMANHEAD pdm: made explicit so we can write to P drive
-	//idFile *file = fileSystem->OpenExplicitFileAppend( str );
-	//if ( file ) {
-	//	file->WriteFloatString( "\"view\"\t( %s )\t( %s )\r\n", origin.ToString(), axis.ToString() );
-	//	file->WriteFloatString( "\"comments\"\t\"%s: %s\"\r\n\r\n", args.Argv(2), args.Argv(3) );
-	//	fileSystem->CloseFile( file );
-	//}
-	//
-	//idStr viewComments = args.Argv(1);
-	//viewComments.StripLeading("viewnotes/");
-	//viewComments += " -- Loc: ";
-	//viewComments += origin.ToString();
-	//viewComments += "\n";
-	//viewComments += args.Argv(3);
-	//player->hud->SetStateString( "viewcomments", viewComments );
-	//player->hud->HandleNamedEvent( "showViewComments" );
+#if 0 //karin: unused
+	idStr str = "p:/base/";
+	str += args.Argv(1);
+	str.SetFileExtension( ".txt" );
+	// HUMANHEAD pdm: made explicit so we can write to P drive
+	idFile *file = fileSystem->OpenExplicitFileAppend( str );
+	if ( file ) {
+		file->WriteFloatString( "\"view\"\t( %s )\t( %s )\r\n", origin.ToString(), axis.ToString() );
+		file->WriteFloatString( "\"comments\"\t\"%s: %s\"\r\n\r\n", args.Argv(2), args.Argv(3) );
+		fileSystem->CloseFile( file );
+	}
+	
+	idStr viewComments = args.Argv(1);
+	viewComments.StripLeading("viewnotes/");
+	viewComments += " -- Loc: ";
+	viewComments += origin.ToString();
+	viewComments += "\n";
+	viewComments += args.Argv(3);
+	player->hud->SetStateString( "viewcomments", viewComments );
+	player->hud->HandleNamedEvent( "showViewComments" );
+#endif
 }
 
 /*

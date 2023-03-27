@@ -317,6 +317,17 @@ class idRenderModel
 // bdube: surface flag manipulation
 	virtual int					GetSurfaceMask ( const char* surface ) const = 0;
 #endif
+#ifdef _HUMANHEAD
+	// HUMANHEAD pdm: Game access to liquid models
+	virtual void				IntersectBounds( const idBounds &bounds, float displacement ) {
+		Bounds().IntersectsBounds(bounds);
+	}
+	// HUMANHEAD END
+
+#if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
+	virtual void					SetGameUpdatedModel(bool gum) {}
+#endif //HUMANHEAD END
+#endif
 };
 
 #endif /* !__MODEL_H__ */

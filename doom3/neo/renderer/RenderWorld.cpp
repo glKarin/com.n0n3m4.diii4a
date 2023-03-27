@@ -1238,9 +1238,8 @@ bool idRenderWorldLocal::ModelTrace(modelTrace_t &trace, qhandle_t entityHandle,
 
 	trace.fraction = 1.0f;
 #ifdef _RAVEN // quake4 trace
-// jmarshall
 	trace.materialType = 0;
-	trace.material = NULL; //kc
+	trace.material = NULL;
 #endif
 
 	if (entityHandle < 0 || entityHandle >= entityDefs.Num()) {
@@ -1313,9 +1312,7 @@ bool idRenderWorldLocal::ModelTrace(modelTrace_t &trace, qhandle_t entityHandle,
 			trace.material = shader;
 			trace.entity = &def->parms;
 #ifdef _RAVEN // quake4 trace
-// jmarshall
 			trace.materialType = trace.material->GetMaterialType();
-// jmarshall end
 #endif
 			trace.jointNumber = refEnt->hModel->NearestJoint(i, localTrace.indexes[0], localTrace.indexes[1], localTrace.indexes[2]);
 		}
@@ -1481,6 +1478,9 @@ bool idRenderWorldLocal::Trace(modelTrace_t &trace, const idVec3 &start, const i
 					R_LocalPointToGlobal(modelMatrix, localTrace.point, trace.point);
 					trace.normal = localTrace.normal * def->parms.axis;
 					trace.material = shader;
+#ifdef _RAVEN
+					trace.materialType = trace.material->GetMaterialType();
+#endif
 					trace.entity = &def->parms;
 					trace.jointNumber = model->NearestJoint(j, localTrace.indexes[0], localTrace.indexes[1], localTrace.indexes[2]);
 
@@ -2430,12 +2430,45 @@ const idMaterial *R_RemapShaderBySkin(const idMaterial *shader, const idDeclSkin
 }
 
 #ifdef _RAVEN // particle
+
+#ifdef _RAVEN_FX
+static void rvRenderEffectLocal_Init(rvRenderEffectLocal *a)
+{
+	a->gameTime = 0;
+	a->serviceTime = 0;
+	a->newEffect = false;
+	a->expired = false;
+	a->effect = NULL;
+	a->world = NULL;
+	a->lastModifiedFrameNum = 0;
+	a->archived = false;
+	a->viewCount = 0;
+	a->visibleCount = 0;
+	a->remove = false;
+	a->updateFramenum = 0;
+	a->index = -1;
+	a->dynamicModel = NULL;
+	a->dynamicModelFrameCount = 0;
+	memset(&a->parms, 0, sizeof(a->parms));
+	a->referenceBounds.Clear();
+	esMatrixLoadIdentity((ESMatrix *)a->modelMatrix);
+}
+
+#define ASSERT_EFFECT_HANDLE(effectHandle) \
+	if (effectHandle < 0 || effectHandle > LUDICROUS_INDEX) { \
+		common->Error("idRenderWorld::%s: index = %i in [0, %d)", __func__, effectHandle, LUDICROUS_INDEX); \
+	}
+#include "../raven/bse/BSE.h"
+#endif
+
 /*
 ===================
 AddEffectDef
 ===================
 */
 qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int time) { 
+#ifdef _RAVEN_FX
+	BSE_VERBOSE("AddEffectDef %p %d %f %f\n", reffect, time, reffect->startTime, tr.frameShaderTime);
 	int effectHandle = effectsDef.FindNull();
 	if (effectHandle == -1) {
 		effectHandle = effectsDef.Append(NULL);
@@ -2445,12 +2478,21 @@ qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int ti
 		effectsDef[effectHandle] = new rvRenderEffectLocal();
 	}
 
-	effectsDef[effectHandle]->parms = *reffect;
-	effectsDef[effectHandle]->gameTime = time;
+	rvRenderEffectLocal *effect = effectsDef[effectHandle];
+	rvRenderEffectLocal_Init(effect);
+	effect->parms = *reffect;
+	effect->gameTime = time;
+	effect->world = this;
+	effect->index = effectHandle;
 
-	bse->PlayEffect(effectsDef[effectHandle], tr.frameShaderTime);
+	float sec = MS2SEC(time);
+	bse->PlayEffect(effect, reffect->startTime); // last renderView->time
+	bse->ServiceEffect(effect, sec);
 
 	return effectHandle;
+#else
+	return -1; // if < 0, will remove rvClientEffect
+#endif
 }
 
 /*
@@ -2459,42 +2501,58 @@ UpdateEffectDef
 ===================
 */
 bool idRenderWorldLocal::UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time) {
-	// create new slots if needed
-	if (effectHandle < 0 || effectHandle > LUDICROUS_INDEX) {
-		common->Error("idRenderWorld::UpdateEffectDef: index = %i", effectHandle);
-	}
-	//while (effectHandle >= effectsDef.Num()) {
-	//	effectsDef.Append(NULL);
-	//}
+	// return true will remove effect
+#ifdef _RAVEN_FX
+	BSE_VERBOSE("UpdateEffectDef %d %p %d %f\n", effectHandle, reffect, time, tr.frameShaderTime);
+	ASSERT_EFFECT_HANDLE(effectHandle);
 
 	effectsDef[effectHandle]->parms = *reffect;
 	effectsDef[effectHandle]->gameTime = time;
-
-	return true; 
+	float sec = MS2SEC(time);
+	return bse->ServiceEffect(effectsDef[effectHandle], sec);
+#else
+	return true;
+#endif
 }
 
 void idRenderWorldLocal::FreeEffectDef(qhandle_t effectHandle) {
+#ifdef _RAVEN_FX
+	BSE_VERBOSE("FreeEffectDef %d\n", effectHandle);
+	ASSERT_EFFECT_HANDLE(effectHandle);
+
 	bse->FreeEffect(effectsDef[effectHandle]);
 
 	if (effectsDef[effectHandle] != NULL)
 		delete effectsDef[effectHandle];
 	
 	effectsDef[effectHandle] = NULL;
+#endif
 }
 
 void idRenderWorldLocal::StopEffectDef(qhandle_t effectHandle) { 
+#ifdef _RAVEN_FX
+	BSE_VERBOSE("StopEffectDef %d\n", effectHandle);
+	ASSERT_EFFECT_HANDLE(effectHandle);
+
 	if (effectsDef[effectHandle] == NULL)
 		return;
 
 	bse->StopEffect(effectsDef[effectHandle]);
+#endif
 }
 
 const class rvRenderEffectLocal* idRenderWorldLocal::GetEffectDef(qhandle_t effectHandle) const { 
+#ifdef _RAVEN_FX
+	ASSERT_EFFECT_HANDLE(effectHandle);
+
 	return effectsDef[effectHandle]; 
+#else
+	return NULL;
+#endif
 }
 
 bool idRenderWorldLocal::EffectDefHasSound(const renderEffect_s* reffect) { 
-	return false; 
+	return bse->CheckDefForSound(reffect); 
 }
 
 #endif

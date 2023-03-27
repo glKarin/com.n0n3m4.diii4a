@@ -354,7 +354,7 @@ idVec2 MoveForDirection(int dir) {
 	return idVec2(0,0);
 }
 
-bool hhArcadeGame::MoveIsValid(const idVec2 &move, MovingGamePiece &piece) { //k: 1 const
+bool hhArcadeGame::MoveIsValid(const idVec2 &move, MovingGamePiece &piece) { //karin: 1 const
 	int newX = piece.x + move.x;
 	int newY = piece.y + move.y;
 	int cell = grid[newX][newY].GetType();
@@ -519,7 +519,7 @@ void hhArcadeGame::CheckForCollisions(MovingGamePiece &piece) {
 	}
 }
 
-bool hhArcadeGame::DoMove(const idVec2 &move, MovingGamePiece &piece) { //k: 1 const
+bool hhArcadeGame::DoMove(const idVec2 &move, MovingGamePiece &piece) { //karin: 1 const
 
 	bool bMoved = move.x || move.y;
 	piece.Move(move);

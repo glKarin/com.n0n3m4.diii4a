@@ -137,6 +137,7 @@ class idCollisionModelManager
 
 	// Gets the clip handle for a model.
 	virtual cmHandle_t LoadModel(const char* mapName, const char *modelName, const bool precache ) = 0;
+	virtual cmHandle_t PreCacheModel(const char* mapName, const char *modelName ) = 0;
 #endif
 #ifdef _HUMANHEAD
 // HUMANHEAD pdm: Support for level appending

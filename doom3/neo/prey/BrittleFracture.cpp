@@ -162,7 +162,7 @@ void idBrittleFracture::Restore( idRestoreGame *savefile ) {
 #endif //HUMANHEAD END
 
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	//renderEntity.hModel->SetGameUpdatedModel(true);
+	renderEntity.hModel->SetGameUpdatedModel(true);
 #endif //HUMANHEAD END
 	renderEntity.callback = idBrittleFracture::ModelCallback;
 	renderEntity.noShadow = true;
@@ -301,7 +301,7 @@ void idBrittleFracture::Spawn( void ) {
 #endif //HUMANHEAD END
 
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	//renderEntity.hModel->SetGameUpdatedModel(true);
+	renderEntity.hModel->SetGameUpdatedModel(true);
 #endif //HUMANHEAD END
 	renderEntity.callback = idBrittleFracture::ModelCallback;
 	renderEntity.noShadow = true;

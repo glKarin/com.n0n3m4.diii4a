@@ -19,13 +19,23 @@
 
 package com.n0n3m4.q3e;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.view.Surface;
+import android.view.SurfaceView;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
 public class Q3EJNI {	
 	public static native void setCallbackObject(Object obj);	
-	public static native void init(String LibPath,int width, int height, String GameDir, String Args);	
+	public static native void init(String LibPath, int width, int height, String GameDir, String Args,
+                                   Surface view,
+                                   int format, // 0x8888, 0x4444, 0x5551, 0x565
+                                   int msaa // 0, 4, 16
+                                   );
 	public static native void drawFrame();
 	public static native void sendKeyEvent(int state,int key,int character);
 	public static native void sendAnalog(int enable,float x,float y);
@@ -39,6 +49,7 @@ public class Q3EJNI {
     public static native void SetMultiThread(boolean enabled);
     public static native void OnPause();
     public static native void OnResume();
+    public static native void SetSurface(Surface view);
 
     public static boolean IS_NEON = false; // only armv7-a 32. arm64 always support, but using hard
     public static boolean IS_64 = false;
@@ -99,6 +110,24 @@ public class Q3EJNI {
         }
         return _is_detected;
 	}
+
+    public static String GetGameLibDir(Context context)
+    {
+        try
+        {
+            ApplicationInfo ainfo = context.getApplicationContext().getPackageManager().getApplicationInfo
+                    (
+                            context.getPackageName(),
+                            PackageManager.GET_SHARED_LIBRARY_FILES
+                    );
+            return ainfo.nativeLibraryDir; //k for arm64-v8a apk install
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return context.getCacheDir().getAbsolutePath().replace("cache", "lib");		//k old, can work with armv5 and armv7-a
+        }
+    }
 
 	static {
 		System.loadLibrary("q3eloader");

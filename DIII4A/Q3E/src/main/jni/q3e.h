@@ -11,7 +11,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject
   (JNIEnv *, jclass, jobject);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init
-  (JNIEnv *, jclass, jstring, jint, jint, jstring, jstring);
+  (JNIEnv *, jclass, jstring, jint, jint, jstring, jstring, jobject, jint, jint);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_drawFrame
   (JNIEnv *, jclass);
@@ -48,9 +48,13 @@ Java_com_n0n3m4_q3e_Q3EJNI_OnPause(JNIEnv *env, jclass clazz);
 JNIEXPORT void JNICALL
 Java_com_n0n3m4_q3e_Q3EJNI_OnResume(JNIEnv *env, jclass clazz);
 
+JNIEXPORT void JNICALL
+Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view);
+
 #ifdef __cplusplus
 }
 #endif
 #endif
+
 
 

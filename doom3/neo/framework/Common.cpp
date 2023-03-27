@@ -36,26 +36,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef _MULTITHREAD
 extern bool multithreadActive; // sys/android/main
-
-extern void GLimp_ActivateContext(void);
-extern void GLimp_DeactivateContext(void);
 #ifdef _K_DEV
 #define _HARM_DEBUG_MULTITHREAD
 #endif
-
-#define BACKEND_RENDERER_INTENT_DRAW 0
-#define BACKEND_RENDERER_INTENT_MAKE_CURRENT 1
-#define BACKEND_RENDERER_MAKE_CURRENT_NULL() (backend_renderer_intent == BACKEND_RENDERER_INTENT_MAKE_CURRENT)
-//#define BACKEND_RENDERER_INTENT_CAPTURE_TO_FILE 2
-
-extern volatile int backend_renderer_intent; // renderer/RenderSystem
-extern "C" {
-	extern void BackendThreadWait(void); // renderer/RenderSystem
-	extern void setup_backend_renderer_intent(int intent, bool wait = false); // renderer/RenderSystem
-}
+#include <pthread.h>
 #endif
-
-volatile int initStage = HARM_INIT_STAGE_NONE;
 
 typedef enum {
 	ERP_NONE,
@@ -183,9 +168,6 @@ class idCommonLocal : public idCommon
 		void						LocalizeSpecificMapData(const char *fileName, idLangDict &langDict, const idLangDict &replaceArgs);
 
 		void						SetMachineSpec(void);
-
-		virtual int				Init_stage_1(int argc = 0, const char **argv = 0, const char *cmdline = 0);
-		virtual int				Init_stage_2(void);
 
 	private:
 		void						InitCommands(void);
@@ -392,7 +374,8 @@ void idCommonLocal::VPrintf(const char *fmt, va_list args)
 #ifdef _HARM_DEBUG_MULTITHREAD
 	if(fmt[0] != '\n')
 	{
-		sprintf(msg + timeLength, "[%s]: ", Sys_GetThreadName(0));
+		sprintf(msg + timeLength, "[%s]: ", Sys_GetThreadName());
+		//sprintf(msg + timeLength, "[%ld]: ", pthread_self());
 		timeLength = strlen(msg);
 	}
 #endif
@@ -476,10 +459,10 @@ void idCommonLocal::VPrintf(const char *fmt, va_list args)
 	// don't trigger any updates if we are in the process of doing a fatal error
 	if (com_errorEntered != ERP_FATAL) {
 		// update the console if we are in a long-running command, like dmap
-#ifdef _MULTITHREAD
-		if(!multithreadActive)
-#endif
 		if (com_refreshOnPrint) {
+#ifdef _MULTITHREAD
+			if(!multithreadActive/* || !IN_RENDER_THREAD()*/)
+#endif
 			session->UpdateScreen();
 		}
 
@@ -853,14 +836,6 @@ idCommonLocal::Quit
 */
 void idCommonLocal::Quit(void)
 {
-#ifdef _MULTITHREAD
-	if(multithreadActive && initStage == HARM_INIT_STAGE_FRAMEWORK)
-	{
-		initStage = HARM_INIT_STAGE_EXIT_FRONTEND;
-		return;
-	}
-#endif
-
 #ifdef ID_ALLOW_TOOLS
 
 	if (com_editors & EDITOR_RADIANT) {
@@ -1692,12 +1667,6 @@ void Com_ReloadEngine_f(const idCmdArgs &args)
 		menu = true;
 	}
 
-#ifdef _MULTITHREAD
-	if(multithreadActive)
-	{
-		setup_backend_renderer_intent(BACKEND_RENDERER_INTENT_MAKE_CURRENT, true);
-	}
-#endif
 	common->Printf("============= ReloadEngine start =============\n");
 
 	if (!menu) {
@@ -2634,20 +2603,6 @@ void idCommonLocal::InitRenderSystem(void)
 		return;
 	}
 
-#ifdef _MULTITHREAD
-	if(multithreadActive && BACKEND_RENDERER_MAKE_CURRENT_NULL())
-	{
-		Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
-		Sys_WaitForEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
-		GLimp_ActivateContext();
-		renderSystem->InitOpenGL();
-		GLimp_DeactivateContext();
-		setup_backend_renderer_intent(BACKEND_RENDERER_INTENT_DRAW, false);
-		Sys_TriggerEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
-		BackendThreadWait();
-	}
-	else
-#endif
 	renderSystem->InitOpenGL();
 	PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04343"));
 }
@@ -2659,10 +2614,6 @@ idCommonLocal::PrintLoadingMessage
 */
 void idCommonLocal::PrintLoadingMessage(const char *msg)
 {
-#ifdef _MULTITHREAD
-	if(initStage == HARM_INIT_STAGE_NONE || BACKEND_RENDERER_MAKE_CURRENT_NULL()) // Init render system in DIII4A GLSurfaceView::onSurfaceChanged, onDraw not be called.
-		return;
-#endif
 	if (!(msg && *msg)) {
 		return;
 	}
@@ -3550,19 +3501,6 @@ void idCommonLocal::ShutdownGame(bool reloading)
 	eventLoop->Shutdown();
 
 	// shut down the renderSystem
-#ifdef _MULTITHREAD
-	if(multithreadActive && BACKEND_RENDERER_MAKE_CURRENT_NULL())
-	{
-		Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
-		Sys_WaitForEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
-		GLimp_ActivateContext();
-		renderSystem->Shutdown();
-		GLimp_DeactivateContext();
-		Sys_TriggerEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
-		BackendThreadWait();
-	}
-	else
-#endif
 	renderSystem->Shutdown();
 
 	// shutdown the decl manager
@@ -3581,269 +3519,4 @@ void idCommonLocal::ShutdownGame(bool reloading)
 	// shut down the file system
 	fileSystem->Shutdown(reloading);
 }
-
-int idCommonLocal::Init_stage_1(int argc, const char **argv, const char *cmdline)
-{
-	if(initStage != HARM_INIT_STAGE_NONE) // Init RenderSystem has finished
-		return initStage;
-
-	try {
-		// set interface pointers used by idLib
-		idLib::sys			= sys;
-		idLib::common		= common;
-		idLib::cvarSystem	= cvarSystem;
-		idLib::fileSystem	= fileSystem;
-
-		// initialize idLib
-		idLib::Init();
-
-		// clear warning buffer
-		ClearWarnings(GAME_NAME " initialization");
-
-		// parse command line options
-		idCmdArgs args;
-
-		if (cmdline) {
-			// tokenize if the OS doesn't do it for us
-			args.TokenizeString(cmdline, true);
-			argv = args.GetArgs(&argc);
-		}
-
-		ParseCommandLine(argc, argv);
-
-		// init console command system
-		cmdSystem->Init();
-
-		// init CVar system
-		cvarSystem->Init();
-
-		// start file logging right away, before early console or whatever
-		StartupVariable("win_outputDebugString", false);
-
-		// register all static CVars
-		idCVar::RegisterStaticVars();
-
-		// print engine version
-		Printf("%s\n", version.string);
-
-		// initialize key input/binding, done early so bind command exists
-		idKeyInput::Init();
-
-		// init the console so we can take prints
-		console->Init();
-
-		// get architecture info
-		Sys_Init();
-
-		// initialize networking
-		Sys_InitNetworking();
-
-		// override cvars from command line
-		StartupVariable(NULL, false);
-
-		if (!idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning()) {
-			Sys_Quit();
-		}
-
-		// initialize processor specific SIMD implementation
-		InitSIMD();
-
-		// init commands
-		InitCommands();
-
-#ifdef ID_WRITE_VERSION
-		config_compressor = idCompressor::AllocArithmetic();
-#endif
-
-		// game specific initialization
-		//InitGame() //k: expand under
-		// initialize the file system
-		fileSystem->Init();
-
-		// initialize the declaration manager
-		declManager->Init();
-
-		// force r_fullscreen 0 if running a tool
-		CheckToolMode();
-
-		idFile *file = fileSystem->OpenExplicitFileRead(fileSystem->RelativePathToOSPath(CONFIG_SPEC, "fs_savepath"));
-		bool sysDetect = (file == NULL);
-
-		if (file) {
-			fileSystem->CloseFile(file);
-		} else {
-			file = fileSystem->OpenFileWrite(CONFIG_SPEC);
-			fileSystem->CloseFile(file);
-		}
-
-		idCmdArgs args2;
-
-		if (sysDetect) {
-			SetMachineSpec();
-			Com_ExecMachineSpec_f(args2);
-		}
-
-		// initialize the renderSystem data structures, but don't start OpenGL yet
-		renderSystem->Init();
-
-		// initialize string database right off so we can use it for loading messages
-		InitLanguageDict();
-
-		PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04344"));
-
-		// load the font, etc
-		console->LoadGraphics();
-
-		// init journalling, etc
-		eventLoop->Init();
-
-		PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04345"));
-
-		// exec the startup scripts
-		cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec editor.cfg\n");
-		cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec default.cfg\n");
-
-		// skip the config file if "safe" is on the command line
-		if (!SafeMode()) {
-			cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec " CONFIG_FILE "\n");
-		}
-
-		cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec autoexec.cfg\n");
-
-		// reload the language dictionary now that we've loaded config files
-		cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "reloadLanguage\n");
-
-		// run cfg execution
-		cmdSystem->ExecuteCommandBuffer();
-
-		// re-override anything from the config files with command line args
-		StartupVariable(NULL, false);
-
-		// if any archived cvars are modified after this, we will trigger a writing of the config file
-		cvarSystem->ClearModifiedFlags(CVAR_ARCHIVE);
-
-		// cvars are initialized, but not the rendering system. Allow preference startup dialog
-		Sys_DoPreferences();
-
-		// init the user command input code
-		usercmdGen->Init();
-
-		PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04346"));
-
-		// start the sound system, but don't do any hardware operations yet
-		soundSystem->Init();
-
-		PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04347"));
-
-		// init async network
-		idAsyncNetwork::Init();
-
-#ifdef	ID_DEDICATED
-		idAsyncNetwork::server.InitPort();
-		cvarSystem->SetCVarBool("s_noSound", true);
-#else
-
-		if (idAsyncNetwork::serverDedicated.GetInteger() == 1) {
-			idAsyncNetwork::server.InitPort();
-			cvarSystem->SetCVarBool("s_noSound", true);
-		} else {
-			// init OpenGL, which will open a window and connect sound and input hardware
-			PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04348"));
-			InitRenderSystem();
-		}
-
-#endif
-
-		initStage = HARM_INIT_STAGE_RENDERER;
-		Printf("[Harmattan]: DIII4A initialization stage 1 finished -> renderer\n");
-		return HARM_INIT_STAGE_RENDERER;
-
-	}
-	catch (idException &) {
-		Sys_Error("[Harmattan]: Error during stage 1 initialization -> %d", initStage);
-		return HARM_INIT_STAGE_ERROR;
-	}
-}
-
-int idCommonLocal::Init_stage_2(void)
-{
-	if(initStage != HARM_INIT_STAGE_RENDERER) // Init framework has finished
-		return initStage;
-
-	try {
-		PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04349"));
-
-		// initialize the user interfaces
-		uiManager->Init();
-
-		// startup the script debugger
-		// DebuggerServerInit();
-
-		PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04350"));
-
-		// load the game dll
-		LoadGameDLL();
-
-		PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04351"));
-
-		// init the session
-		session->Init();
-
-		// have to do this twice.. first one sets the correct r_mode for the renderer init
-		// this time around the backend is all setup correct.. a bit fugly but do not want
-		// to mess with all the gl init at this point.. an old vid card will never qualify for
-		idFile *file = fileSystem->OpenExplicitFileRead(fileSystem->RelativePathToOSPath(CONFIG_SPEC, "fs_savepath"));
-		bool sysDetect = (file == NULL);
-
-		if (file) {
-			fileSystem->CloseFile(file);
-		}
-		if (sysDetect) {
-			idCmdArgs args2;
-			SetMachineSpec();
-			Com_ExecMachineSpec_f(args2);
-			cvarSystem->SetCVarInteger("s_numberOfSpeakers", 6);
-			cmdSystem->BufferCommandText(CMD_EXEC_NOW, "s_restart\n");
-			cmdSystem->ExecuteCommandBuffer();
-		}
-
-
-		// don't add startup commands if no CD key is present
-#if ID_ENFORCE_KEY
-
-		if (!session->CDKeysAreValid(false) || !AddStartupCommands()) {
-#else
-
-			if (!AddStartupCommands()) {
-#endif
-				// if the user didn't give any commands, run default action
-				session->StartMenu(true);
-			}
-
-			Printf("--- Common Initialization Complete ---\n");
-
-			// print all warnings queued during initialization
-			PrintWarnings();
-
-#ifdef	ID_DEDICATED
-			Printf("\nType 'help' for dedicated server info.\n\n");
-#endif
-
-			// remove any prints from the notify lines
-			console->ClearNotifyLines();
-
-			ClearCommandLine();
-
-			console->LoadHistory();
-
-			com_fullyInitialized = true;
-			initStage = HARM_INIT_STAGE_FRAMEWORK;
-			Printf("[Harmattan]: DIII4A initialization stage 2 finished -> framework\n");
-			return HARM_INIT_STAGE_FRAMEWORK;
-		}
-		catch (idException &) {
-			Sys_Error("[Harmattan]: Error during stage 2 initialization -> %d", initStage);
-			return HARM_INIT_STAGE_ERROR;
-		}
-	}
 

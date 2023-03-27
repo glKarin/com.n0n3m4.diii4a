@@ -2,11 +2,9 @@
 ===========================================================================
 
 Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
-Copyright (C) 2012 Krzysztof Klinikowski <kkszysiu@gmail.com>
-Copyright (C) 2012 Havlena Petr <havlenapetr@gmail.com>
+Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).  
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,35 +44,13 @@ If you have questions concerning this license or the applicable additional terms
 static idStr	basepath;
 static idStr	savepath;
 
-#if defined(__ANDROID__)
-extern void GLimp_AndroidInit(ANativeWindow *win);
-extern void GLimp_AndroidQuit();
-
-extern void Posix_EarlyInit();
-extern void Posix_LateInit();
-extern bool Posix_AddMousePollEvent(int action, int value);
-extern void Posix_QueEvent(sysEventType_t type, int value, int value2,
-                           int ptrLength, void *ptr);
-#endif
-
 /*
 ===========
 Sys_InitScanTable
 ===========
 */
-
-void * __attribute__((weak)) __dso_handle=0;
-
-const char *workdir()
-{
-static char wd[256];
-getcwd(wd,256);
-return wd;
-}
-
-void Sys_InitScanTable(void)
-{
-	common->DPrintf("TODO: Sys_InitScanTable\n");
+void Sys_InitScanTable( void ) {
+	common->DPrintf( "TODO: Sys_InitScanTable\n" );
 }
 
 /*
@@ -82,47 +58,57 @@ void Sys_InitScanTable(void)
 Sys_AsyncThread
 =================
 */
-void *Sys_AsyncThread(void *p)
-{
+void Sys_AsyncThread( void ) {
 	int now;
-	int start, end;
+	int next;
+	int	want_sleep;
+
+	// multi tick compensate for poor schedulers (Linux 2.4)
 	int ticked, to_ticked;
-
-#if defined(__ANDROID__)
-	xthreadInfo *threadInfo = static_cast<xthreadInfo *>(p);
-	assert(threadInfo);
-#endif
-
-	start = Sys_Milliseconds();
-	ticked = start >> 4;
-
+	now = Sys_Milliseconds();
+	ticked = now >> 4;
 	while (1) {
-		start = Sys_Milliseconds();
-		to_ticked = start >> 4;
-
-		while (ticked < to_ticked) {
+		// sleep
+		now = Sys_Milliseconds();		
+		next = ( now & 0xFFFFFFF0 ) + 0x10;
+		want_sleep = ( next-now-1 ) * 1000;
+		if ( want_sleep > 0 ) {
+			usleep( want_sleep ); // sleep 1ms less than true target
+		}
+		
+		// compensate if we slept too long
+		now = Sys_Milliseconds();
+		to_ticked = now >> 4;
+		
+		// show ticking statistics - every 100 ticks, print a summary
+		#if 0
+			#define STAT_BUF 100
+			static int stats[STAT_BUF];
+			static int counter = 0;
+			// how many ticks to play
+			stats[counter] = to_ticked - ticked;
+			counter++;
+			if (counter == STAT_BUF) {
+				Sys_DebugPrintf("\n");
+				for( int i = 0; i < STAT_BUF; i++) {
+					if ( ! (i & 0xf) ) {
+						Sys_DebugPrintf("\n");
+					}
+					Sys_DebugPrintf( "%d ", stats[i] );
+				}
+				Sys_DebugPrintf("\n");
+				counter = 0;
+			}
+		#endif
+		
+		while ( ticked < to_ticked ) {
 			common->Async();
 			ticked++;
-			Sys_TriggerEvent(TRIGGER_EVENT_ONE);
+			Sys_TriggerEvent( TRIGGER_EVENT_ONE );
 		}
-
-		// sleep
-		end = Sys_Milliseconds() - start;
-		if (end < 16) {
-			usleep(16 - end);
-		}
-
 		// thread exit
-#if defined(__ANDROID__)
-		if (threadInfo->threadCancel) {
-			break;
-		}
-#else
 		pthread_testcancel();
-#endif
 	}
-
-	return NULL;
 }
 
 /*
@@ -130,16 +116,11 @@ void *Sys_AsyncThread(void *p)
  Sys_DefaultSavePath
  ==============
  */
-const char *Sys_DefaultSavePath(void)
-{
-#if defined(__ANDROID__)
-	sprintf(savepath, workdir());
-#else
+const char *Sys_DefaultSavePath(void) {
 #if defined( ID_DEMO_BUILD )
-	sprintf(savepath, "%s/.doom3-demo", getenv("HOME"));
+	sprintf( savepath, "%s/.doom3-demo", getenv( "HOME" ) );
 #else
-	sprintf(savepath, "%s/.doom3", getenv("HOME"));
-#endif
+	sprintf( savepath, "%s/.doom3", getenv( "HOME" ) );
 #endif
 	return savepath.c_str();
 }
@@ -148,21 +129,18 @@ const char *Sys_DefaultSavePath(void)
 Sys_EXEPath
 ==============
 */
-const char *Sys_EXEPath(void)
-{
+const char *Sys_EXEPath( void ) {
 	static char	buf[ 1024 ];
 	idStr		linkpath;
 	int			len;
 
 	buf[ 0 ] = '\0';
-	sprintf(linkpath, "/proc/%d/exe", getpid());
-	len = readlink(linkpath.c_str(), buf, sizeof(buf));
-
-	if (len == -1) {
+	sprintf( linkpath, "/proc/%d/exe", getpid() );
+	len = readlink( linkpath.c_str(), buf, sizeof( buf ) );
+	if ( len == -1 ) {
 		Sys_Printf("couldn't stat exe path link %s\n", linkpath.c_str());
 		buf[ len ] = '\0';
 	}
-
 	return buf;
 }
 
@@ -177,45 +155,30 @@ Get the default base path
 Try to be intelligent: if there is no BASE_GAMEDIR, try the next path
 ================
 */
-
-const char *Sys_DefaultBasePath(void)
-{
-#if defined(__ANDROID__)
-	return workdir();
-#else
+const char *Sys_DefaultBasePath(void) {
 	struct stat st;
 	idStr testbase;
 	basepath = Sys_EXEPath();
-
-	if (basepath.Length()) {
+	if ( basepath.Length() ) {
 		basepath.StripFilename();
-		testbase = basepath;
-		testbase += "/";
-		testbase += BASE_GAMEDIR;
-
-		if (stat(testbase.c_str(), &st) != -1 && S_ISDIR(st.st_mode)) {
+		testbase = basepath; testbase += "/"; testbase += BASE_GAMEDIR;
+		if ( stat( testbase.c_str(), &st ) != -1 && S_ISDIR( st.st_mode ) ) {
 			return basepath.c_str();
 		} else {
-			common->Printf("no '%s' directory in exe path %s, skipping\n", BASE_GAMEDIR, basepath.c_str());
+			common->Printf( "no '%s' directory in exe path %s, skipping\n", BASE_GAMEDIR, basepath.c_str() );
 		}
 	}
-
-	if (basepath != Posix_Cwd()) {
+	if ( basepath != Posix_Cwd() ) {
 		basepath = Posix_Cwd();
-		testbase = basepath;
-		testbase += "/";
-		testbase += BASE_GAMEDIR;
-
-		if (stat(testbase.c_str(), &st) != -1 && S_ISDIR(st.st_mode)) {
+		testbase = basepath; testbase += "/"; testbase += BASE_GAMEDIR;
+		if ( stat( testbase.c_str(), &st ) != -1 && S_ISDIR( st.st_mode ) ) {
 			return basepath.c_str();
 		} else {
 			common->Printf("no '%s' directory in cwd path %s, skipping\n", BASE_GAMEDIR, basepath.c_str());
 		}
 	}
-
-	common->Printf("WARNING: using hardcoded default base path\n");
+	common->Printf( "WARNING: using hardcoded default base path\n" );
 	return LINUX_DEFAULT_PATH;
-#endif
 }
 
 /*
@@ -223,8 +186,7 @@ const char *Sys_DefaultBasePath(void)
 Sys_GetConsoleKey
 ===============
 */
-unsigned char Sys_GetConsoleKey(bool shifted)
-{
+unsigned char Sys_GetConsoleKey( bool shifted ) {
 	return shifted ? '~' : '`';
 }
 
@@ -233,8 +195,7 @@ unsigned char Sys_GetConsoleKey(bool shifted)
 Sys_Shutdown
 ===============
 */
-void Sys_Shutdown(void)
-{
+void Sys_Shutdown( void ) {
 	basepath.Clear();
 	savepath.Clear();
 	Posix_Shutdown();
@@ -245,8 +206,7 @@ void Sys_Shutdown(void)
 Sys_GetProcessorId
 ===============
 */
-cpuid_t Sys_GetProcessorId(void)
-{
+cpuid_t Sys_GetProcessorId( void ) {
 	return CPUID_GENERIC;
 }
 
@@ -255,8 +215,7 @@ cpuid_t Sys_GetProcessorId(void)
 Sys_GetProcessorString
 ===============
 */
-const char *Sys_GetProcessorString(void)
-{
+const char *Sys_GetProcessorString( void ) {
 	return "generic";
 }
 
@@ -265,8 +224,7 @@ const char *Sys_GetProcessorString(void)
 Sys_FPU_EnableExceptions
 ===============
 */
-void Sys_FPU_EnableExceptions(int exceptions)
-{
+void Sys_FPU_EnableExceptions( int exceptions ) {
 }
 
 /*
@@ -274,10 +232,9 @@ void Sys_FPU_EnableExceptions(int exceptions)
 Sys_FPE_handler
 ===============
 */
-void Sys_FPE_handler(int signum, siginfo_t *info, void *context)
-{
-	assert(signum == SIGFPE);
-	Sys_Printf("FPE\n");
+void Sys_FPE_handler( int signum, siginfo_t *info, void *context ) {
+	assert( signum == SIGFPE );
+	Sys_Printf( "FPE\n" );
 }
 
 /*
@@ -285,24 +242,22 @@ void Sys_FPE_handler(int signum, siginfo_t *info, void *context)
 Sys_GetClockticks
 ===============
 */
-double Sys_GetClockTicks(void)
-{
+double Sys_GetClockTicks( void ) {
 #if defined( __i386__ )
 	unsigned long lo, hi;
 
-	__asm__ __volatile__(
-	        "push %%ebx\n"			\
-	        "xor %%eax,%%eax\n"		\
-	        "cpuid\n"					\
-	        "rdtsc\n"					\
-	        "mov %%eax,%0\n"			\
-	        "mov %%edx,%1\n"			\
-	        "pop %%ebx\n"
-	        : "=r"(lo), "=r"(hi));
+	__asm__ __volatile__ (
+						  "push %%ebx\n"			\
+						  "xor %%eax,%%eax\n"		\
+						  "cpuid\n"					\
+						  "rdtsc\n"					\
+						  "mov %%eax,%0\n"			\
+						  "mov %%edx,%1\n"			\
+						  "pop %%ebx\n"
+						  : "=r" (lo), "=r" (hi) );
 	return (double) lo + (double) 0xFFFFFFFF * hi;
 #else
-#warning unsupported CPU
-	return 0;
+#error unsupported CPU
 #endif
 }
 
@@ -311,13 +266,12 @@ double Sys_GetClockTicks(void)
 MeasureClockTicks
 ===============
 */
-double MeasureClockTicks(void)
-{
+double MeasureClockTicks( void ) {
 	double t0, t1;
 
-	t0 = Sys_GetClockTicks();
-	Sys_Sleep(1000);
-	t1 = Sys_GetClockTicks();
+	t0 = Sys_GetClockTicks( );
+	Sys_Sleep( 1000 );
+	t1 = Sys_GetClockTicks( );	
 	return t1 - t0;
 }
 
@@ -326,77 +280,54 @@ double MeasureClockTicks(void)
 Sys_ClockTicksPerSecond
 ===============
 */
-double Sys_ClockTicksPerSecond(void)
-{
+double Sys_ClockTicksPerSecond(void) {
 	static bool		init = false;
 	static double	ret;
 
 	int		fd, len, pos, end;
 	char	buf[ 4096 ];
 
-	if (init) {
+	if ( init ) {
 		return ret;
 	}
 
-#if defined(__ANDROID__)
-	fd = open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", O_RDONLY);
-#else
-	fd = open("/proc/cpuinfo", O_RDONLY);
-#endif
-
-	if (fd == -1) {
-		//common->Printf("couldn't read /proc/cpuinfo\n");
+	fd = open( "/proc/cpuinfo", O_RDONLY );
+	if ( fd == -1 ) {
+		common->Printf( "couldn't read /proc/cpuinfo\n" );
 		ret = MeasureClockTicks();
 		init = true;
-		//common->Printf("measured CPU frequency: %g MHz\n", ret / 1000000.0);
-		return ret;
+		common->Printf( "measured CPU frequency: %g MHz\n", ret / 1000000.0 );
+		return ret;		
 	}
-
-	len = read(fd, buf, 4096);
-	close(fd);
-
-#if defined(__ANDROID__)
-	if (len > 0) {
-		ret = atof(buf);
-		common->Printf("/proc/cpuinfo CPU frequency: %g MHz", ret / 1000.0);
-		ret *= 1000;
-		init = true;
-		return ret;
-	}
-#else
+	len = read( fd, buf, 4096 );
+	close( fd );
 	pos = 0;
-
-	while (pos < len) {
-		if (!idStr::Cmpn(buf + pos, "cpu MHz", 7)) {
-			pos = strchr(buf + pos, ':') - buf + 2;
-			end = strchr(buf + pos, '\n') - buf;
-
-			if (pos < len && end < len) {
+	while ( pos < len ) {
+		if ( !idStr::Cmpn( buf + pos, "cpu MHz", 7 ) ) {
+			pos = strchr( buf + pos, ':' ) - buf + 2;
+			end = strchr( buf + pos, '\n' ) - buf;
+			if ( pos < len && end < len ) {
 				buf[end] = '\0';
-				ret = atof(buf + pos);
+				ret = atof( buf + pos );
 			} else {
-				common->Printf("failed parsing /proc/cpuinfo\n");
+				common->Printf( "failed parsing /proc/cpuinfo\n" );
 				ret = MeasureClockTicks();
 				init = true;
-				common->Printf("measured CPU frequency: %g MHz\n", ret / 1000000.0);
-				return ret;
+				common->Printf( "measured CPU frequency: %g MHz\n", ret / 1000000.0 );
+				return ret;		
 			}
-
-			common->Printf("/proc/cpuinfo CPU frequency: %g MHz\n", ret);
+			common->Printf( "/proc/cpuinfo CPU frequency: %g MHz\n", ret );
 			ret *= 1000000;
 			init = true;
 			return ret;
 		}
-
-		pos = strchr(buf + pos, '\n') - buf + 1;
+		pos = strchr( buf + pos, '\n' ) - buf + 1;
 	}
-#endif
-
-	common->Printf("failed parsing /proc/cpuinfo\n");
+	common->Printf( "failed parsing /proc/cpuinfo\n" );
 	ret = MeasureClockTicks();
 	init = true;
-	common->Printf("measured CPU frequency: %g MHz\n", ret / 1000000.0);
-	return ret;
+	common->Printf( "measured CPU frequency: %g MHz\n", ret / 1000000.0 );
+	return ret;		
 }
 
 /*
@@ -405,28 +336,23 @@ Sys_GetSystemRam
 returns in megabytes
 ================
 */
-int Sys_GetSystemRam(void)
-{
+int Sys_GetSystemRam( void ) {
 	long	count, page_size;
 	int		mb;
 
-	count = sysconf(_SC_PHYS_PAGES);
-
-	if (count == -1) {
-		common->Printf("GetSystemRam: sysconf _SC_PHYS_PAGES failed\n");
+	count = sysconf( _SC_PHYS_PAGES );
+	if ( count == -1 ) {
+		common->Printf( "GetSystemRam: sysconf _SC_PHYS_PAGES failed\n" );
+		return 512;
+	}	
+	page_size = sysconf( _SC_PAGE_SIZE );
+	if ( page_size == -1 ) {
+		common->Printf( "GetSystemRam: sysconf _SC_PAGE_SIZE failed\n" );
 		return 512;
 	}
-
-	page_size = sysconf(_SC_PAGE_SIZE);
-
-	if (page_size == -1) {
-		common->Printf("GetSystemRam: sysconf _SC_PAGE_SIZE failed\n");
-		return 512;
-	}
-
-	mb= (int)((double)count * (double)page_size / (1024 * 1024));
+	mb= (int)( (double)count * (double)page_size / ( 1024 * 1024 ) );
 	// round to the nearest 16Mb
-	mb = (mb + 8) & ~15;
+	mb = ( mb + 8 ) & ~15;
 	return mb;
 }
 
@@ -439,58 +365,51 @@ the no-fork lets you keep the terminal when you're about to spawn an installer
 if the command contains spaces, system() is used. Otherwise the more straightforward execl ( system() blows though )
 ==================
 */
-void Sys_DoStartProcess(const char *exeName, bool dofork)
-{
+void Sys_DoStartProcess( const char *exeName, bool dofork ) {	
 	bool use_system = false;
-
-	if (strchr(exeName, ' ')) {
+	if ( strchr( exeName, ' ' ) ) {
 		use_system = true;
 	} else {
 		// set exec rights when it's about a single file to execute
 		struct stat buf;
-
-		if (stat(exeName, &buf) == -1) {
-			printf("stat %s failed: %s\n", exeName, strerror(errno));
+		if ( stat( exeName, &buf ) == -1 ) {
+			printf( "stat %s failed: %s\n", exeName, strerror( errno ) );
 		} else {
-			if (chmod(exeName, buf.st_mode | S_IXUSR) == -1) {
-				printf("cmod +x %s failed: %s\n", exeName, strerror(errno));
+			if ( chmod( exeName, buf.st_mode | S_IXUSR ) == -1 ) {
+				printf( "cmod +x %s failed: %s\n", exeName, strerror( errno ) );
 			}
 		}
 	}
-
-	if (dofork) {
-		switch (fork()) {
-			case -1:
-				// main thread
-				break;
-			case 0:
-
-				if (use_system) {
-					printf("system %s\n", exeName);
-					system(exeName);
-					_exit(0);
-				} else {
-					printf("execl %s\n", exeName);
-					execl(exeName, exeName, NULL);
-					printf("execl failed: %s\n", strerror(errno));
-					_exit(-1);
-				}
-
-				break;
+	if ( dofork ) {
+		switch ( fork() ) {
+		case -1:
+			// main thread
+			break;
+		case 0:
+			if ( use_system ) {
+				printf( "system %s\n", exeName );
+				system( exeName );
+				_exit( 0 );
+			} else {
+				printf( "execl %s\n", exeName );
+				execl( exeName, exeName, NULL );
+				printf( "execl failed: %s\n", strerror( errno ) );
+				_exit( -1 );
+			}
+			break;
 		}
 	} else {
-		if (use_system) {
-			printf("system %s\n", exeName);
-			system(exeName);
-			sleep(1);	// on some systems I've seen that starting the new process and exiting this one should not be too close
+		if ( use_system ) {
+			printf( "system %s\n", exeName );
+			system( exeName );
+			sleep( 1 );	// on some systems I've seen that starting the new process and exiting this one should not be too close
 		} else {
-			printf("execl %s\n", exeName);
-			execl(exeName, exeName, NULL);
-			printf("execl failed: %s\n", strerror(errno));
+			printf( "execl %s\n", exeName );
+			execl( exeName, exeName, NULL );
+			printf( "execl failed: %s\n", strerror( errno ) );
 		}
-
 		// terminate
-		_exit(0);
+		_exit( 0 );
 	}
 }
 
@@ -499,50 +418,46 @@ void Sys_DoStartProcess(const char *exeName, bool dofork)
 Sys_OpenURL
 =================
 */
-void idSysLocal::OpenURL(const char *url, bool quit)
-{
+void idSysLocal::OpenURL( const char *url, bool quit ) {
 	const char	*script_path;
 	idFile		*script_file;
 	char		cmdline[ 1024 ];
 
 	static bool	quit_spamguard = false;
 
-	if (quit_spamguard) {
-		common->DPrintf("Sys_OpenURL: already in a doexit sequence, ignoring %s\n", url);
+	if ( quit_spamguard ) {
+		common->DPrintf( "Sys_OpenURL: already in a doexit sequence, ignoring %s\n", url );
 		return;
 	}
 
-	common->Printf("Open URL: %s\n", url);
-	// opening an URL on *nix can mean a lot of things ..
+	common->Printf( "Open URL: %s\n", url );
+	// opening an URL on *nix can mean a lot of things .. 
 	// just spawn a script instead of deciding for the user :-)
 
 	// look in the savepath first, then in the basepath
-	script_path = fileSystem->BuildOSPath(cvarSystem->GetCVarString("fs_savepath"), "", "openurl.sh");
-	script_file = fileSystem->OpenExplicitFileRead(script_path);
-
-	if (!script_file) {
-		script_path = fileSystem->BuildOSPath(cvarSystem->GetCVarString("fs_basepath"), "", "openurl.sh");
-		script_file = fileSystem->OpenExplicitFileRead(script_path);
+	script_path = fileSystem->BuildOSPath( cvarSystem->GetCVarString( "fs_savepath" ), "", "openurl.sh" );
+	script_file = fileSystem->OpenExplicitFileRead( script_path );
+	if ( !script_file ) {
+		script_path = fileSystem->BuildOSPath( cvarSystem->GetCVarString( "fs_basepath" ), "", "openurl.sh" );
+		script_file = fileSystem->OpenExplicitFileRead( script_path );
 	}
-
-	if (!script_file) {
-		common->Printf("Can't find URL script 'openurl.sh' in either savepath or basepath\n");
-		common->Printf("OpenURL '%s' failed\n", url);
+	if ( !script_file ) {
+		common->Printf( "Can't find URL script 'openurl.sh' in either savepath or basepath\n" );
+		common->Printf( "OpenURL '%s' failed\n", url );
 		return;
 	}
-
-	fileSystem->CloseFile(script_file);
+	fileSystem->CloseFile( script_file );
 
 	// if we are going to quit, only accept a single URL before quitting and spawning the script
-	if (quit) {
+	if ( quit ) {
 		quit_spamguard = true;
 	}
 
-	common->Printf("URL script: %s\n", script_path);
+	common->Printf( "URL script: %s\n", script_path );
 
 	// StartProcess is going to execute a system() call with that - hence the &
-	idStr::snPrintf(cmdline, 1024, "%s '%s' &",  script_path, url);
-	sys->StartProcess(cmdline, quit);
+	idStr::snPrintf( cmdline, 1024, "%s '%s' &",  script_path, url );
+	sys->StartProcess( cmdline, quit );
 }
 
 /*
@@ -550,15 +465,29 @@ void idSysLocal::OpenURL(const char *url, bool quit)
  Sys_DoPreferences
  ==================
  */
-void Sys_DoPreferences(void) { }
+void Sys_DoPreferences( void ) { }
 
 /*
 ================
 Sys_FPU_SetDAZ
 ================
 */
-void Sys_FPU_SetDAZ(bool enable)
-{
+void Sys_FPU_SetDAZ( bool enable ) {
+	/*
+	DWORD dwData;
+
+	_asm {
+		movzx	ecx, byte ptr enable
+		and		ecx, 1
+		shl		ecx, 6
+		STMXCSR	dword ptr dwData
+		mov		eax, dwData
+		and		eax, ~(1<<6)	// clear DAX bit
+		or		eax, ecx		// set the DAZ bit
+		mov		dwData, eax
+		LDMXCSR	dword ptr dwData
+	}
+	*/
 }
 
 /*
@@ -566,8 +495,22 @@ void Sys_FPU_SetDAZ(bool enable)
 Sys_FPU_SetFTZ
 ================
 */
-void Sys_FPU_SetFTZ(bool enable)
-{
+void Sys_FPU_SetFTZ( bool enable ) {
+	/*
+	DWORD dwData;
+
+	_asm {
+		movzx	ecx, byte ptr enable
+		and		ecx, 1
+		shl		ecx, 15
+		STMXCSR	dword ptr dwData
+		mov		eax, dwData
+		and		eax, ~(1<<15)	// clear FTZ bit
+		or		eax, ecx		// set the FTZ bit
+		mov		dwData, eax
+		LDMXCSR	dword ptr dwData
+	}
+	*/
 }
 
 /*
@@ -586,216 +529,37 @@ const char *mcheckstrings[] = {
 	"MCHECK_TAIL"	// memory after the block was clobbered
 };
 
-void abrt_func(mcheck_status status)
-{
-	Sys_Printf("memory consistency failure: %s\n", mcheckstrings[ status + 1 ]);
-	Posix_SetExit(EXIT_FAILURE);
+void abrt_func( mcheck_status status ) {
+	Sys_Printf( "memory consistency failure: %s\n", mcheckstrings[ status + 1 ] );
+	Posix_SetExit( EXIT_FAILURE );
 	common->Quit();
 }
 
 #endif
 
-#if defined(__ANDROID__)
-
-extern "C"
-{
-	// enable redirect stdout/stderr to file
-	static unsigned char redirect_output_to_file = 1;
-#pragma GCC visibility push(default)
-int main(int argc, const char **argv)
-{
+/*
+===============
+main
+===============
+*/
+int main(int argc, const char **argv) {
 #ifdef ID_MCHECK
 	// must have -lmcheck linkage
-	mcheck(abrt_func);
-	Sys_Printf("memory consistency checking enabled\n");
+	mcheck( abrt_func );
+	Sys_Printf( "memory consistency checking enabled\n" );
 #endif
+	
+	Posix_EarlyInit( );
 
-	if(redirect_output_to_file)
-	{
-	freopen("stdout.txt","w",stdout);
-	setvbuf(stdout, NULL, _IONBF, 0);
-	freopen("stderr.txt","w",stderr);
-	setvbuf(stderr, NULL, _IONBF, 0);
-	}
-
-	Posix_EarlyInit();
-
-	if (argc > 1) {
-		common->Init(argc-1, &argv[1], NULL);
+	if ( argc > 1 ) {
+		common->Init( argc-1, &argv[1], NULL );
 	} else {
-		common->Init(0, NULL, NULL);
+		common->Init( 0, NULL, NULL );
 	}
 
-	Posix_LateInit();
-}
+	Posix_LateInit( );
 
-int screen_width=640;
-int screen_height=480;
-
-void Q3E_SetResolution(int width, int height)
-{
-	screen_width=width;
-	screen_height=height;
-}
-
-void Q3E_OGLRestart()
-{
-//	R_VidRestart_f();
-}
-
-void (*initAudio)(void *buffer, int size);
-int (*writeAudio)(int offset, int length);
-void (*setState)(int st);
-void Q3E_SetCallbacks(void *init_audio, void *write_audio, void *set_state)
-{
-#ifdef _K_CLANG
-    setState=(void(*)(int))set_state;
-    writeAudio = (int(*)(int, int))write_audio;
-    initAudio = (void(*)(void *, int))init_audio;
-#else
-    setState=set_state;
-    writeAudio = write_audio;
-    initAudio = init_audio;
-#endif
-}
-
-extern int m_buffer_size;
-
-void Q3E_GetAudio()
-{
-#warning "UNUSED"
-    writeAudio(0,m_buffer_size);
-}
-
-void Q3E_KeyEvent(int state,int key,int character)
-{
-Posix_QueEvent(SE_KEY, key, state, 0, NULL);
-if ((character!=0)&&(state==1))
-{
-Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
-}
-Posix_AddKeyboardPollEvent(key, state);
-}
-
-void Q3E_MotionEvent(float dx, float dy)
-{
-Posix_QueEvent(SE_MOUSE, dx, dy, 0, NULL);
-Posix_AddMousePollEvent(M_DELTAX, dx);
-Posix_AddMousePollEvent(M_DELTAY, dy);
-}
-extern bool scndswp;
-void Q3E_DrawFrame()
-{
-scndswp=0;
-common->Frame();
-}
-
-float analogx=0.0f;
-float analogy=0.0f;
-int analogenabled=0;
-void Q3E_Analog(int enable,float x,float y)
-{
-analogenabled=enable;
-analogx=x;
-analogy=y;
-}
-
-#if defined(__ANDROID__)
-#define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
-#define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
-
-#define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
-#define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
-#define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
-#define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
-
-// APK's native library path on Android.
-char *native_library_dir = NULL;
-
-// Do not catch signal
-unsigned char no_handle_signals = 0;
-
-// multi-thread
-unsigned char multithread = 0;
-
-// DOOM library call Android JNI
-intptr_t (*Android_Call)(int protocol, int size, ...);
-
-intptr_t (*set_Android_Call(intptr_t (*func)(int, int, ...)))(int, int, ...)
-{
-	intptr_t (*cur)(int, int, ...);
-	cur = Android_Call;
-	Android_Call = func;
-	return cur;
-}
-
-// Abdroid JNI call DOOM library
-intptr_t Q3E_Call(int protocol, int size, ...)
-{
-	intptr_t res = 0;
-	va_list va;
-
-	va_start(va, size);
-	switch(protocol)
-	{
-		case ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR:
-			native_library_dir = strdup(va_arg(va, char *));
-			res = (intptr_t)native_library_dir;
-			break;
-		case ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE:
-			redirect_output_to_file = va_arg(va, int) ? 1 : 0;
-			res = redirect_output_to_file;
-			break;
-		case ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS:
-			no_handle_signals = va_arg(va, int) ? 1 : 0;
-			res = no_handle_signals;
-			break;
-		case ANDROID_CALL_PROTOCOL_MULTITHREAD:
-			multithread = va_arg(va, int) ? 1 : 0;
-			res = multithread;
-			break;
-		default:
-			break;
-	}
-	va_end(va);
-
-	return res;
-}
-
-void Q3E_exit(void)
-{
-	if(common->IsInitialized())
-		common->Quit();
-}
-
-void Q3E_BackEndRender(void)
-{
-	if(multithread)
-	{
-		common->Printf("MULTITHREAD\n");
+	while (1) {
+		common->Frame();
 	}
 }
-#endif
-
-#pragma GCC visibility pop
-}
-
-// For pull input event from Java when GLThread is looping in modal MessageBox of game.
-void pull_input_event(int execCmd)
-{
-	if(!Android_Call)
-		return;
-	(void)Android_Call(ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT, 1, execCmd);
-}
-
-// tmpfile function symbol for Android.
-FILE * itmpfile(void)
-{
-	if(!Android_Call)
-		return NULL;
-	return (FILE *)Android_Call(ANDROID_CALL_PROTOCOL_TMPFILE, 0);
-}
-
-#else
-
-#endif

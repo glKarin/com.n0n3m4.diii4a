@@ -158,7 +158,6 @@ void idMultiplayerGame::Reset() {
 	scoreBoard = uiManager->FindGui( "guis/scoreboard.gui", true, false, true );
 	spectateGui = uiManager->FindGui( "guis/spectate.gui", true, false, true );
 	guiChat = uiManager->FindGui( "guis/chat.gui", true, false, true );
-	mainGui = guiChat;
 	mainGui = uiManager->FindGui( "guis/mpmain.gui", true, false, true );
 #ifdef _GUITEST_SERVERWAIT
 	serverWaitGui = uiManager->FindGui( "guis/mpserverwait.gui", true, false, true ); //HUMANHEAD rww
@@ -2515,16 +2514,13 @@ void idMultiplayerGame::UpdateHud( idPlayer *player, idUserInterface *hud ) {
 			keyMaterial[0] = '\0';
 			key[0] = '\0';
 			bool keywide;
-			// jmarshall
-			//common->MaterialKeyForBinding("_impulse17", keyMaterial, key, keywide);
-			//material = keyMaterial;
-			// jmarshall
+			common->MaterialKeyForBinding("_impulse17", keyMaterial, key, keywide);
+			material = keyMaterial;
 			if (material) {
 				hud->SetStateBool( "readytipvisible", true );
 				hud->SetStateBool( "readykeywide", keywide );
 				hud->SetStateString( "readykey", key ? key : "" );
-// jmarshall
-				//hud->SetStateString( "readykeyMaterial", keyMaterial ? keyMaterial : "" );
+				hud->SetStateString( "readykeyMaterial", keyMaterial ? keyMaterial : "" );
 			}
 		}
 		// HUMANHEAD END

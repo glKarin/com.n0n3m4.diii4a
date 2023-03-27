@@ -1057,9 +1057,7 @@ void idSessionLocal::StartPlayingRenderDemo(idStr demoName)
 	// bring up the loading screen manually, since demos won't
 	// call ExecuteMapChange()
 #ifdef _RAVEN // quake4 loading gui
-// jmarshall - quake 4 loading gui
     guiLoading = uiManager->FindGui( "guis/loading/generic.gui", true, false, true );
-// jmarshall end
 #else
 	guiLoading = uiManager->FindGui("guis/map/loading.gui", true, false, true);
 #endif
@@ -1550,9 +1548,7 @@ void idSessionLocal::StartPlayingCmdDemo(const char *demoName)
 	}
 
 #ifdef _RAVEN // quake4 loading gui
-// jmarshall - quake 4 loading gui
     guiLoading = uiManager->FindGui("guis/loading/generic.gui", true, false, true);
-// jmarshall end
 #else
 	guiLoading = uiManager->FindGui("guis/map/loading.gui", true, false, true);
 #endif
@@ -1654,7 +1650,7 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 	char guiMap[ MAX_STRING_CHARS ];
 	strncpy(guiMap, va("guis/map/%s.gui", stripped.c_str()), MAX_STRING_CHARS);
 	// give the gamecode a chance to override
-#if !defined(_HUMANHEAD)
+#if !defined(_RAVEN) && !defined(_HUMANHEAD) // k: quake4 and prey loading gui is generic
 	game->GetMapLoadingGUI(guiMap);
 #endif
 
@@ -1693,9 +1689,7 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 		}
 		else
 		{
-			// jmarshall - quake 4 loading gui
 			guiLoading = uiManager->FindGui("guis/loading/generic.gui", true, false, true);
-			// jmarshall end
 			guiLoading->SetStateString("loading_levelname", name.c_str());
 			guiLoading->SetStateString("loading_bkgnd", bgimg.c_str());
 		}
@@ -2679,13 +2673,11 @@ void idSessionLocal::AdvanceRenderDemo(bool singleFrameOnly)
 		}
 
 		if (ds == DS_RENDER) {
-			// jmarshall - demos
 			if (rw->ProcessDemoCommand(readDemo, &currentDemoRenderView, &demoTimeOffset)) {
 				// a view is ready to render
 				skipFrames--;
 				numDemoFrames++;
 			}
-// jmarshall end
 			continue;
 		}
 
@@ -2758,7 +2750,7 @@ void idSessionLocal::PacifierUpdate()
 	}
 
 #ifdef _MULTITHREAD
-	if(multithreadActive && !idStr::Icmp("main", Sys_GetThreadName(0))) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
+	if(multithreadActive && IN_RENDER_THREAD()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
 		return;
 #endif
 	int	time = eventLoop->Milliseconds();

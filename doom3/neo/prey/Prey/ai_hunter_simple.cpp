@@ -1435,31 +1435,33 @@ bool hhHunterSimple::CanSee( idEntity *ent, bool useFov ) {
 		if ( tr.fraction >= 1.0f || ( gameLocal.GetTraceEntity( tr ) == ent ) ) {
 			return true;
 		} 
-// jmarshall
-		//else if ( bSeeThroughPortals && aas ) {
-		//	shootTarget = NULL;
-		//	int myArea = gameRenderWorld->PointInArea( GetOrigin() );
-		//	int numPortals = gameRenderWorld->NumGamePortalsInArea( myArea );
-		//	if ( numPortals > 0 ) {
-		//		int enemyArea = gameRenderWorld->PointInArea( ent->GetOrigin() );
-		//		for ( int i=0;i<numPortals;i++ ) {
-		//			//if portal's destination area is the same as monster's enemy's area
-		//			{
-		//				//find the portal and set it as this monster's shoottarget
-		//				idEntity *spawnedEnt = NULL;
-		//				for( spawnedEnt = gameLocal.spawnedEntities.Next(); spawnedEnt != NULL; spawnedEnt = spawnedEnt->spawnNode.Next() ) {
-		//					if ( !spawnedEnt->IsType( hhPortal::Type ) ) {
-		//						continue;
-		//					}
-		//	 				if ( gameRenderWorld->PointInArea( spawnedEnt->GetOrigin() ) == myArea) {
-		//						shootTarget = spawnedEnt;
-		//						return true;
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
+// jmarshall: unimplement
+#if 0
+		else if ( bSeeThroughPortals && aas ) {
+			shootTarget = NULL;
+			int myArea = gameRenderWorld->PointInArea( GetOrigin() );
+			int numPortals = gameRenderWorld->NumGamePortalsInArea( myArea );
+			if ( numPortals > 0 ) {
+				int enemyArea = gameRenderWorld->PointInArea( ent->GetOrigin() );
+				for ( int i=0;i<numPortals;i++ ) {
+					//if portal's destination area is the same as monster's enemy's area
+					{
+						//find the portal and set it as this monster's shoottarget
+						idEntity *spawnedEnt = NULL;
+						for( spawnedEnt = gameLocal.spawnedEntities.Next(); spawnedEnt != NULL; spawnedEnt = spawnedEnt->spawnNode.Next() ) {
+							if ( !spawnedEnt->IsType( hhPortal::Type ) ) {
+								continue;
+							}
+			 				if ( gameRenderWorld->PointInArea( spawnedEnt->GetOrigin() ) == myArea) {
+								shootTarget = spawnedEnt;
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+#endif
 	}
 
 	return false;

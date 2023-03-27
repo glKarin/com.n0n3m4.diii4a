@@ -30,12 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #ifdef _RAVEN // quake4 guide
-// jmarshall - Raven Decl Support
-//#include "../renderer/tr_local.h"
-#include "../raven/bse/BSE_Envelope.h"
-#include "../raven/bse/BSE_Particle.h"
 #include "../raven/bse/BSE.h"
-// jmarshall end
 
 // jmarshall: Quake 4 Guide(template) support
 struct rvGuideTemplate
@@ -283,6 +278,7 @@ class idDeclManagerLocal : public idDeclManager
 	virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) {
 		return GetMapDef(mapName, entityFilter);
 	}
+
 	private:
 	idDeclEntityDef * GetMapDef(const char *mapName, const char *entityFilter);
 
@@ -1016,18 +1012,6 @@ void idDeclManagerLocal::Init(void)
     RegisterDeclType(  "playback",			DECL_PLAYBACK,		idDeclAllocator<rvDeclPlayback>);
     RegisterDeclType(	"effect",			DECL_EFFECT,		idDeclAllocator<rvDeclEffect>);
     RegisterDeclType(	"playerModel",		DECL_PLAYER_MODEL, idDeclAllocator<rvDeclPlayerModel>);
-// jmarshall end
-
-// jmarshall: Raven Decl Support
-    //RegisterDeclType( "fx",					DECL_FX,			idDeclAllocator<idDeclFX> );
-    //RegisterDeclType( "particle",			DECL_PARTICLE,		idDeclAllocator<idDeclParticle> );
-// jmarshall end
-
-// jmarshall: Raven Decl Support
-    //RegisterDeclType( "pda",				DECL_PDA,			idDeclAllocator<idDeclPDA> );
-    //RegisterDeclType( "email",				DECL_EMAIL,			idDeclAllocator<idDeclEmail> );
-    //RegisterDeclType( "video",				DECL_VIDEO,			idDeclAllocator<idDeclVideo> );
-    //RegisterDeclType( "audio",				DECL_AUDIO,			idDeclAllocator<idDeclAudio> );
 // jmarshall end
 #endif
 

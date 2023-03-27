@@ -101,7 +101,7 @@ void hhDeck::Shuffle() {
 	}
 }
 
-bool hhDeck::HasCard(const hhCard &card) { //k: const
+bool hhDeck::HasCard(const hhCard &card) { // const
 	int numCards = cards.Num();
 	for (int ix=0; ix<numCards; ix++) {
 		if (cards[ix] == card) {

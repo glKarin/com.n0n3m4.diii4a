@@ -129,6 +129,9 @@ struct MemInfo_t {
 	int				aasAssetsCount;
 	int				aasAssetsTotal;
 #endif
+#ifdef _HUMANHEAD
+	int				animAssetsTotal;	// HUMANHEAD pdm
+#endif
 };
 
 class idCommon
@@ -239,20 +242,20 @@ class idCommon
 		// Directly sample a keystate.
 		virtual int					KeyState(int key) = 0;
 
-		virtual int				Init_stage_1(int argc = 0, const char **argv = 0, const char *cmdline = 0) = 0; // until render system Initialized
-		virtual int				Init_stage_2(void) = 0; // until initialization done
+#ifdef _HUMANHEAD
+	// HUMANHEAD pdm
+	virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) {}
+	virtual void				MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound) {
+		isBound = false;
+	}
+
+	//HUMANHEAD rww
+	virtual void				SetGameSensitivityFactor(float factor) {} //allows game logic to set a sensitivity factor for input
+	//HUMANHEAD END
+#endif
 };
 
 extern idCommon 		*common;
-
-#define HARM_INIT_STAGE_ERROR -1
-#define HARM_INIT_STAGE_NONE 0
-#define HARM_INIT_STAGE_RENDERER 1
-#define HARM_INIT_STAGE_FRAMEWORK 2
-#define HARM_INIT_STAGE_EXIT_FRONTEND 3
-#define HARM_INIT_STAGE_EXIT_FRAMEWORK 4
-#define HARM_RENDERER_INITED() (initStage == HARM_INIT_STAGE_RENDERER)
-extern volatile int initStage;
 
 #ifdef _HUMANHEAD
 // Profiling not enabled, compile it out

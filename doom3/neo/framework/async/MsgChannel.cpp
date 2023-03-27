@@ -722,7 +722,7 @@ bool idMsgChannel::SendReliableMessage(const idBitMsg &msg)
 	bool result;
 
 #ifdef _RAVEN // bot
-// jmarshall
+// jmarshall: bot
 	if (remoteAddress.type == NA_BOT)
 		return false;
 // jmarshall end
@@ -759,9 +759,7 @@ bool idMsgChannel::GetReliableMessage(idBitMsg &msg)
 	bool result;
 
 #ifdef _RAVEN
-// jmarshall
 	result = reliableReceive.Get( msg.GetData(), msg.GetSize(), size, false );
-// jmarshall end
 #else
 	result = reliableReceive.Get(msg.GetData(), size);
 #endif

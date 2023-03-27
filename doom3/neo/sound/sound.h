@@ -75,6 +75,11 @@ static const int        SSF_CENTER = BIT(15);   // sound through center channel 
 static const int        SSF_HILITE = BIT(16);   // display debug info for this emitter
 // RAVEN END
 #endif
+#ifdef _HUMANHEAD
+static const int	SSF_VOICEAMPLITUDE =	BIT(10);// HUMANHEAD pdm: include in findamplitude queries
+static const int	SSF_OMNI_WHEN_CLOSE =	BIT(11);// HUMANHEAD pdm: make omni when within the mindistance
+static const int	SSF_NOREVERB =			BIT(12);// HUMANHEAD pdm: reverb exclusion
+#endif
 
 // these options can be overriden from sound shader defaults on a per-emitter and per-channel basis
 typedef struct {
@@ -88,7 +93,6 @@ typedef struct {
 #ifdef _RAVEN
 	// RAVEN BEGIN
 // bdube: frequency shift
-// jmarshall: implement
 	float					frequencyShift;
 	float					wetLevel;
 	float					dryLevel;
@@ -284,9 +288,7 @@ class idSoundEmitter
 		virtual void			UpdateEmitter(const idVec3 &origin, int listenerId, const soundShaderParms_t *parms) = 0;
 #ifdef _RAVEN
 // jmarshall - todo add velocity
-	virtual void			UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms) {
-		UpdateEmitter(origin, listenerId, parms);
-	}
+	virtual void			UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms) = 0;
 // jmarshalll end
 #endif
 
@@ -313,8 +315,14 @@ class idSoundEmitter
 		virtual	int				Index(void) const = 0;
 
 #ifdef _HUMANHEAD
+	//HUMANHEAD: aob
 	virtual void		ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier) = 0;
 	virtual soundShaderParms_t* GetSoundParms(idSoundShader* shader, const s_channelType channel) = 0;
+	virtual float			CurrentAmplitude( const s_channelType channel ) { return 0.0f; }
+	virtual float			CurrentVoiceAmplitude( const s_channelType channel ) {
+		return 0.0f;
+	}
+	//HUMANHEAD END
 #endif
 };
 
@@ -391,6 +399,16 @@ class idSoundWorld
 		virtual void			SetSlowmo(bool active) = 0;
 		virtual void			SetSlowmoSpeed(float speed) = 0;
 		virtual void			SetEnviroSuit(bool active) = 0;
+
+#ifdef _HUMANHEAD
+	//HUMANHEAD
+	virtual void			RegisterLocation(int area, const char *locationName) {}
+	virtual void			ClearAreaLocations() {}
+	//HUMANHEAD END
+
+	virtual void			SetSpiritWalkEffect( bool active ) {}	// HUMANHEAD pdm
+	virtual void			SetVoiceDucker( bool active ) {}		// HUMANHEAD pdm
+#endif
 };
 
 
@@ -489,7 +507,9 @@ class idSoundSystem
 		return GetSoundWorldFromId(worldId)->AllocSoundEmitter()->Index();
 	}
 	virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate) {
-
+		idSoundEmitter *emitter = GetSoundWorldFromId(worldId)->EmitterForIndex(handle);
+		if(emitter)
+			emitter->Free(immediate);
 	}
 
 	virtual void StopAllSounds(int worldId) {

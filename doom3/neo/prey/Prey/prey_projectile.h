@@ -135,7 +135,7 @@ class hhProjectile : public idProjectile {
 
 		virtual bool			ProcessAllowCollisionEvent( const trace_t* collision );
 
-	public: //k protected
+	public: // protected:
 		void					Event_Collision_Explode( const trace_t* collision, const idVec3& velocity );
 		void					Event_Collision_Impact( const trace_t* collision, const idVec3& velocity );
 		void					Event_Collision_DisturbLiquid( const trace_t* collision, const idVec3& velocity );

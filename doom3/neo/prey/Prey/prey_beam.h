@@ -139,8 +139,8 @@ public:
 	virtual void	InitSystem( const char* modelName );
 	virtual float	GetBeamTime( void ) { return beamTime; }
 	virtual void	SetTargetLocation(idVec3 newLoc);
-	virtual void	SetTargetEntity( idEntity *ent, int traceId=0, const idVec3 &offset=vec3_origin ); //k: 3 const
-	virtual void	SetTargetEntity( idEntity *ent, const char *boneName, const idVec3 &offset=vec3_origin ); //k: 3 const
+	virtual void	SetTargetEntity( idEntity *ent, int traceId=0, const idVec3 &offset=vec3_origin ); // 3 const
+	virtual void	SetTargetEntity( idEntity *ent, const char *boneName, const idVec3 &offset=vec3_origin ); // 3 const
 
 	virtual bool	IsActivated() const { return bActive; }
 	virtual void	Activate( const bool bActivate );

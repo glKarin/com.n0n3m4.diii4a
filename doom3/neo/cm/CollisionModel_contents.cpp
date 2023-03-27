@@ -108,6 +108,10 @@ bool idCollisionModelManagerLocal::TestTrmVertsInBrush(cm_traceWork_t *tw, cm_br
 			tw->trace.c.dist = b->planes[bestPlane].Dist();
 			tw->trace.c.contents = b->contents;
 			tw->trace.c.material = b->material;
+#ifdef _RAVEN
+			if(b->material)
+				tw->trace.c.materialType = b->material->GetMaterialType();
+#endif
 			tw->trace.c.point = *p;
 			tw->trace.c.modelFeature = 0;
 			tw->trace.c.trmFeature = j;
@@ -243,6 +247,10 @@ bool idCollisionModelManagerLocal::TestTrmInPolygon(cm_traceWork_t *tw, cm_polyg
 					tw->trace.c.dist = -tw->polys[bestPlane].plane.Dist();
 					tw->trace.c.contents = p->contents;
 					tw->trace.c.material = p->material;
+#ifdef _RAVEN
+					if(p->material)
+						tw->trace.c.materialType = p->material->GetMaterialType();
+#endif
 					tw->trace.c.point = v->p;
 					tw->trace.c.modelFeature = edge->vertexNum[j];
 					tw->trace.c.trmFeature = 0;
@@ -328,6 +336,10 @@ bool idCollisionModelManagerLocal::TestTrmInPolygon(cm_traceWork_t *tw, cm_polyg
 			tw->trace.c.dist = p->plane.Dist();
 			tw->trace.c.contents = p->contents;
 			tw->trace.c.material = p->material;
+#ifdef _RAVEN
+			if(p->material)
+				tw->trace.c.materialType = p->material->GetMaterialType();
+#endif
 			tw->trace.c.point = tw->vertices[tw->edges[i].vertexNum[ !flip ]].p;
 			tw->trace.c.modelFeature = *reinterpret_cast<int *>(&p);
 			tw->trace.c.trmFeature = i;
@@ -419,6 +431,10 @@ bool idCollisionModelManagerLocal::TestTrmInPolygon(cm_traceWork_t *tw, cm_polyg
 				tw->trace.c.dist = -tw->polys[j].plane.Dist();
 				tw->trace.c.contents = p->contents;
 				tw->trace.c.material = p->material;
+#ifdef _RAVEN
+				if(p->material)
+					tw->trace.c.materialType = p->material->GetMaterialType();
+#endif
 				tw->trace.c.point = tw->model->vertices[edge->vertexNum[ !flip ]].p;
 				tw->trace.c.modelFeature = edgeNum;
 				tw->trace.c.trmFeature = j;

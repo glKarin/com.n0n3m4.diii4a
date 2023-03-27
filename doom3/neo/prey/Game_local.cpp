@@ -1003,7 +1003,7 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 	nextSteamTime	= 0; // HUMANHEAD mdl
 
 	//HUMANHEAD rww - check lglcd validity and reset values
-	logitechLCDEnabled = false; // sys->LGLCD_Valid();
+	logitechLCDEnabled = sys->LGLCD_Valid();
 	logitechLCDDisplayAlt = false;
 	logitechLCDButtonsLast = 0;
 	logitechLCDUpdateTime = 0;
@@ -1789,11 +1789,12 @@ void idGameLocal::DumpOggSounds( void ) {
 
 				// don't OGG sounds that cause a shake because that would
 				// cause continuous seeking on the OGG file which is expensive
-// jmarshall
-				//if ( parms->shakes != 0.0f || (parms->soundShaderFlags & SSF_VOICEAMPLITUDE)) {
-				//	shakeSounds.AddUnique( soundName );
-				//	continue;
-				//}
+#if 1 // jmarshall
+				if ( parms->shakes != 0.0f || (parms->soundShaderFlags & SSF_VOICEAMPLITUDE)) {
+					shakeSounds.AddUnique( soundName );
+					continue;
+				}
+#endif
 
 #if HUMANHEAD	// HUMANHEAD mdc - our version of skip logic (to account for our naming conventions)
 
@@ -5353,35 +5354,32 @@ void idGameLocal::PrintMemInfo( MemInfo_t *mi ) {
 
 // HUMANHEAD pdm: Register locations for eax
 void idGameLocal::RegisterLocationsWithSoundWorld() {
-// jmarshall
-	//int numAreas = gameRenderWorld->NumAreas();
-	//gameSoundWorld->ClearAreaLocations();
-	//for (int ix=0; ix<numAreas; ix++) {
-	//	if (locationEntities[ix]) {
-	//		gameSoundWorld->RegisterLocation(ix, locationEntities[ix]->GetLocation());
-	//	}
-	//}
+	int numAreas = gameRenderWorld->NumAreas();
+	gameSoundWorld->ClearAreaLocations();
+	for (int ix=0; ix<numAreas; ix++) {
+		if (locationEntities[ix]) {
+			gameSoundWorld->RegisterLocation(ix, locationEntities[ix]->GetLocation());
+		}
+	}
 }
 
 // HUMANHEAD pdm: call sound system to set the spiritwalk effects
 void idGameLocal::SpiritWalkSoundMode(bool active) {
-// jmarshall
-	//if (gameSoundWorld) {
-	//	if (active) {
-	//		gameSoundWorld->FadeSoundClasses( SOUNDCLASS_NORMAL, -8.0f, 1.0f );
-	//		gameSoundWorld->SetSpiritWalkEffect( true );
-	//	}
-	//	else {
-	//		gameSoundWorld->FadeSoundClasses( SOUNDCLASS_NORMAL, 0.0f, 0.5f );
-	//		gameSoundWorld->SetSpiritWalkEffect( false );
-	//	}
-	//}
+	if (gameSoundWorld) {
+		if (active) {
+			gameSoundWorld->FadeSoundClasses( SOUNDCLASS_NORMAL, -8.0f, 1.0f );
+			gameSoundWorld->SetSpiritWalkEffect( true );
+		}
+		else {
+			gameSoundWorld->FadeSoundClasses( SOUNDCLASS_NORMAL, 0.0f, 0.5f );
+			gameSoundWorld->SetSpiritWalkEffect( false );
+		}
+	}
 }
 
 void idGameLocal::DialogSoundMode(bool active) {
 	if (gameSoundWorld) {
-		// jmarshall
-	//	gameSoundWorld->SetVoiceDucker(active);
+		gameSoundWorld->SetVoiceDucker(active);
 	}
 }
 

@@ -45,7 +45,7 @@ class hhWraith : public hhMonsterAI {
 		void			PlayAnimMoveEnd();
 		void			TurnTowardEnemy();
 
-	public: //k: public
+	public: // protected:
 		void			Event_FindEnemy( int useFOV );
 		void			Event_TurnTowardEnemy();
 		void			Event_Flee();
@@ -54,7 +54,7 @@ class hhWraith : public hhMonsterAI {
 
 		virtual void	Event_EnemyIsSpirit( hhPlayer *player, hhSpiritProxy *proxy );
 		virtual void	Event_EnemyIsPhysical( hhPlayer *player, hhSpiritProxy *proxy );
-	protected: //k
+	protected: // protected:
 
 		virtual void	TeleportIn( idEntity *activator );
 		virtual void	StartDisposeCountdown() { } // Doesn't apply to wraiths

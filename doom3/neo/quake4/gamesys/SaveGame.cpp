@@ -1853,7 +1853,16 @@ void idRestoreGame::ReadRenderEntity( renderEntity_t &renderEntity, const idDict
 	ReadBool( renderEntity.noSelfShadow );
 	ReadBool( renderEntity.noShadow );
 	ReadBool( renderEntity.noDynamicInteractions );
-	ReadBool( (bool &)renderEntity.forceUpdate ); // int& -> bool&
+#if 1
+	/*
+	bool b = false;
+	ReadBool( b );
+	renderEntity.forceUpdate = b;
+	*/
+	ReadBool( (bool &)renderEntity.forceUpdate ); //k: int& -> bool&
+#else
+	ReadBool( renderEntity.forceUpdate );
+#endif
 
 	ReadInt( renderEntity.weaponDepthHackInViewID );
 	ReadFloat( renderEntity.shadowLODDistance );
@@ -1988,7 +1997,16 @@ void idRestoreGame::ReadUsercmd( usercmd_t &usercmd ) {
 	ReadInt( usercmd.duplicateCount );
 // RAVEN BEGIN
 // ddynerman: larger button bitfield
-	ReadShort( (short &)usercmd.buttons ); //k byte& -> short&
+#if 1
+	/*
+	short b = 0;
+	ReadShort( b );
+	usercmd.buttons = (byte)b;
+	*/
+	ReadShort( (short &)usercmd.buttons ); //k: byte& -> short&
+#else
+	ReadShort( usercmd.buttons );
+#endif
 // RAVEN END
 	ReadSignedChar( usercmd.forwardmove );
 	ReadSignedChar( usercmd.rightmove );

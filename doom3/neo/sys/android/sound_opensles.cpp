@@ -28,7 +28,7 @@ class idOpenSLESAudioBuffer
 		void NextReadFrame(void);
 		void DiscardUnreadBuffer(void);
 		void SkipUnreadBuffer(void);
-		void * BufferData() { return m_buffer; }
+		void * BufferData() { return m_data; }
 		void WaitReadFinished(void) {
 			while(!m_readFinished)
 			{
@@ -41,6 +41,7 @@ class idOpenSLESAudioBuffer
 				Sys_WaitForEvent(TRIGGER_EVENT_SOUND_FRONTEND_WRITE_FINISHED);
 			}
 		}
+		void Release(void);
 
 	private:
 		int NormalizeFrame(int frame) const {
@@ -48,7 +49,7 @@ class idOpenSLESAudioBuffer
 		}
 
 	private:
-		void *m_buffer;
+		void *m_data;
 		int m_size;
 		int m_count;
 		volatile int m_writeFrame;
@@ -58,7 +59,7 @@ class idOpenSLESAudioBuffer
 };
 
 idOpenSLESAudioBuffer::idOpenSLESAudioBuffer(int size, int count)
-	: m_buffer(0),
+	: m_data(0),
 	m_size(size),
 	m_count(count),
 	m_writeFrame(2),
@@ -66,13 +67,23 @@ idOpenSLESAudioBuffer::idOpenSLESAudioBuffer(int size, int count)
 	m_writeFinished(true),
 	m_readFinished(true)
 {
-	m_buffer = malloc(size * count);
-	memset(m_buffer, 0, size * count);
+	m_data = malloc(size * count);
+	memset(m_data, 0, size * count);
 }
 
 idOpenSLESAudioBuffer::~idOpenSLESAudioBuffer()
 {
-	free(m_buffer);
+	free(m_data);
+}
+
+void idOpenSLESAudioBuffer::Release(void)
+{
+	m_writeFrame = 2;
+	m_readFrame = 0;
+	m_writeFinished = true;
+	m_readFinished = true;
+	Sys_TriggerEvent(TRIGGER_EVENT_SOUND_BACKEND_READ_FINISHED);
+	Sys_TriggerEvent(TRIGGER_EVENT_SOUND_FRONTEND_WRITE_FINISHED);
 }
 
 ID_INLINE void * idOpenSLESAudioBuffer::GetWriteBuffer(bool ifBlockReturn0)
@@ -87,7 +98,7 @@ ID_INLINE void * idOpenSLESAudioBuffer::GetWriteBuffer(bool ifBlockReturn0)
 		//SkipUnreadBuffer();
 	}
 	m_writeFinished = false;
-	return (char *)m_buffer + m_size * m_writeFrame;
+	return (char *)m_data + m_size * m_writeFrame;
 }
 
 ID_INLINE void idOpenSLESAudioBuffer::NextWriteFrame(void)
@@ -107,7 +118,7 @@ ID_INLINE void * idOpenSLESAudioBuffer::GetReadBuffer(bool ifBlockReturn0)
 		//LOGI("WWWBBB %d %d", m_writeFrame, m_readFrame);
 	}
 	m_readFinished = false;
-	return (char *)m_buffer + m_size * m_readFrame;
+	return (char *)m_data + m_size * m_readFrame;
 }
 
 ID_INLINE void idOpenSLESAudioBuffer::NextReadFrame(void)
@@ -120,7 +131,7 @@ ID_INLINE void idOpenSLESAudioBuffer::NextReadFrame(void)
 ID_INLINE void idOpenSLESAudioBuffer::DiscardUnreadBuffer(void)
 {
 	m_readFrame = NormalizeFrame(m_writeFrame - 1);
-	memset((char *)m_buffer + NormalizeFrame(m_readFrame) * m_size, 0, m_size);
+	memset((char *)m_data + NormalizeFrame(m_readFrame) * m_size, 0, m_size);
 	//LOGI("RRR %d %d", m_writeFrame, m_readFrame);
 }
 
@@ -203,6 +214,9 @@ class idAudioHardwareOpenSLES : public idAudioHardware
 				return false;
 
 			*ebuffer = m_buffer->GetReadBuffer();
+			if(!m_playing)
+				return false;
+
 			*buffer_size = m_buffer_size;
 			return true;
 		}
@@ -271,6 +285,8 @@ idAudioHardwareOpenSLES::~idAudioHardwareOpenSLES()
 void idAudioHardwareOpenSLES::Release()
 {
 	m_playing = false;
+	if(m_buffer)
+		m_buffer->Release();
 	if(playItf)
 	{
 		(*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);

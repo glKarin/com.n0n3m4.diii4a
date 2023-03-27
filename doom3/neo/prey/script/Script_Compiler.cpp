@@ -2280,7 +2280,7 @@ void idCompiler::ParseVariableDef( idTypeDef *type, const char *name ) {
 			} else if ( ( type == &type_float ) && ( def2->TypeDef() == &type_boolean ) ) {
 				EmitOpcode( OP_STORE_BOOLTOF, def2, def );
 #ifdef _PREY
-			} else if ( ( type == &type_float ) && ( def2->TypeDef()->Type() == type_float.Type() ) ) { //k: for: float fvar = vec3_x;
+			} else if ( ( type == &type_float ) && ( def2->TypeDef()->Type() == type_float.Type() ) ) { //karin: e.g. float fvar = vec3_x;
 				EmitOpcode( OP_STORE_F, def2, def );
 #endif
 			} else {

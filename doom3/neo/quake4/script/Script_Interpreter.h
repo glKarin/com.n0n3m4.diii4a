@@ -4,13 +4,9 @@
 
 #define MAX_STACK_DEPTH 	64
 
-#if 0 //k jmarshall
-#define LOCALSTACK_SIZE 	6144
-#else
 // RB: doubled local stack size
 #define LOCALSTACK_SIZE 	(6144 * 2)
 // RB end
-#endif
 
 typedef struct prstack_s {
 	int 				s;

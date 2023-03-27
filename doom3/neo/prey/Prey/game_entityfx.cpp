@@ -374,15 +374,17 @@ HUMANHEAD: aob
 idMat3 hhEntityFx::DetermineAxis( const idFXSingleAction& fxaction ) {
 	idVec3 fxDir;
 // jmarshall - fix
-	//if( fxaction.explicitAxis ) {
-	//	if (fxaction.useAxis == AXIS_CUSTOMLOCAL) {
-	//		// When customlocal is set, axis is the specifed axis, untransformed by the entities axis
-	//		return fxaction.dir.ToMat3();
-	//	}
-	//	return (fxaction.dir[0] * GetAxis()[0] + fxaction.dir[1] * GetAxis()[1] + fxaction.dir[2] * GetAxis()[2]).ToMat3();
-	//} else if( fxInfo.GetAxisFor(fxaction.useAxis, fxDir) ) {
-	//	return fxDir.ToMat3();
-	//}
+#if 0
+	if( fxaction.explicitAxis ) {
+		if (fxaction.useAxis == AXIS_CUSTOMLOCAL) {
+			// When customlocal is set, axis is the specifed axis, untransformed by the entities axis
+			return fxaction.dir.ToMat3();
+		}
+		return (fxaction.dir[0] * GetAxis()[0] + fxaction.dir[1] * GetAxis()[1] + fxaction.dir[2] * GetAxis()[2]).ToMat3();
+	} else if( fxInfo.GetAxisFor(fxaction.useAxis, fxDir) ) {
+		return fxDir.ToMat3();
+	}
+#endif
 // jmarshall end
 	return GetAxis();
 }

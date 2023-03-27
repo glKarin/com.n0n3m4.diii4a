@@ -40,6 +40,7 @@ public:
 
 	virtual	bool				PlayEffect( class rvRenderEffectLocal *def, float time ) = 0;
 	virtual	bool				ServiceEffect( class rvRenderEffectLocal *def, float time ) = 0;
+	virtual	bool				ServiceEffect( class rvRenderEffectLocal *def, float time, bool &forcePush ) = 0;
 	virtual	void				StopEffect( rvRenderEffectLocal *def ) = 0;
 	virtual	void				FreeEffect( rvRenderEffectLocal *def ) = 0;
 	virtual	float				EffectDuration( const rvRenderEffectLocal *def ) = 0;
@@ -59,6 +60,20 @@ public:
 	virtual int							AddTraceModel(idTraceModel* model) = 0;
 	virtual idTraceModel*				GetTraceModel(int index) = 0;
 	virtual void						FreeTraceModel(int index) = 0;
+
+	virtual const idVec3&		GetCubeNormals( int index ) = 0;
+
+	virtual void				SetShakeParms( float time, float scale ) = 0;
+	virtual void				SetTunnelParms( float time, float scale ) = 0;
+
+	virtual const idMat3&		GetModelToBSE() = 0;
+
+	virtual bool				IsTimeLocked() const = 0;
+	virtual float				GetLockedTime() const = 0;
+
+	virtual void				MakeEditable( class rvParticleTemplate *particle ) = 0;
+
+	virtual void				CopySegment( class rvSegmentTemplate *dest, class rvSegmentTemplate *src ) = 0;
 };
 
 extern	rvBSEManager			*bse;

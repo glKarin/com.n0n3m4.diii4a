@@ -177,6 +177,19 @@ float idMath::dBToScale( float db ) {
 	}
 }
 
+float idMath::ScaleToDb( float scale ) {
+
+	if( scale <= 0.0f ) {
+
+		return( -60.0f );
+
+	} else {
+
+		return( 6.0f * idMath::Log( scale ) / idMath::Log( 2 ) );
+	}
+}
+
+
 
 // ================================================================================================
 // jscott: fast and reliable random routines
@@ -222,9 +235,9 @@ int rvRandom::Init( void )
 
 	return( mSeed );
 }
+#endif
 
 #ifdef _RAVEN
-// jmarshall
 /*
 ===================
 idMath::Distance
@@ -245,6 +258,4 @@ idVec3 idMath::CreateVector(float x, float y, float z)
 {
 	return idVec3(x, y, z);
 }
-#endif
-
 #endif

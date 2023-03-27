@@ -12,8 +12,8 @@ public final class Constants
     public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
-    public static final int CONST_UPDATE_RELEASE = 25;
-    public static final String CONST_RELEASE = "2023-02-20";
+    public static final int CONST_UPDATE_RELEASE = 26;
+    public static final String CONST_RELEASE = "2023-03-25";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -24,12 +24,11 @@ public final class Constants
     public static final String CONST_DEVELOPER_XDA = "https://forum.xda-developers.com/member.php?u=10584229";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
-			"Sound with OpenSLES support(Testing).",
-            "Add backup/restore preferences support.",
-            "Add menu music playing in Prey(2006).",
-            "Add map loading music playing in Prey(2006).",
-            "Add entity visible/invisible in spirit walk mode in Prey(2006), e.g. spirit bridge.",
-            "Optimize portal render with view distance in Prey(2006).",
+			"Using SurfaceView for rendering, remove GLSurfaceView(Testing).",
+            "Using DOOM3's Fx/Particle system implement Quake4's BSE incompletely for effects in Quake 4. The effects are bad now. Using set `bse_enabled` to 0 for disable effects.",
+            "Remove my cvar `harm_g_alwaysRun`, so set original `in_alwaysRun` to 1 for run in Quake 4.",
+            "Add simple beam model render in Prey(2006).",
+            "Optimize skybox render in Prey(2006) by " + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
 	};
     public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
 

@@ -363,11 +363,9 @@ typedef enum {
 	CONTENTS_PROJECTILECLIP		= BIT(24),  // unlike contents_projectile, projectiles only NOT hitscans
 // RAVEN END
 
-// jmarshall - todo
 	CONTENTS_FOG				= BIT(25),
 	CONTENTS_LAVA				= BIT(26),
 	CONTENTS_SLIME				= BIT(27),
-// jmarshall end
 #endif
 	
 #ifdef _HUMANHEAD

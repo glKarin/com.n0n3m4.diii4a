@@ -43,7 +43,7 @@ void Cmd_TestText_f( const idCmdArgs &args ) {
 		gameLocal.Printf("Usage: testtext <text>\n");
 		return;
 	}
-	//common->FixupKeyTranslations(args.Argv(1), translated, 1024);	// No passing idStr between game and engine // jmarshall
+	common->FixupKeyTranslations(args.Argv(1), translated, 1024);	// No passing idStr between game and engine
 	gameLocal.Printf("%s\n", translated);
 }
 

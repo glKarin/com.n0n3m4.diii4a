@@ -1865,16 +1865,10 @@ extern idCVar harm_r_maxAllocStackMemory; // declare in tr_trisurf.cpp
 extern bool multithreadActive; // sys/android/main
 #define NUM_FRAME_DATA 2
 
-#define BACKEND_RENDERER_INTENT_DRAW 0
-#define BACKEND_RENDERER_INTENT_MAKE_CURRENT 1
-//#define BACKEND_RENDERER_INTENT_CAPTURE_TO_FILE 2
-
-extern volatile int backend_renderer_intent; // renderer/RenderSystem
-extern "C" {
-	extern void BackendThreadWait(void); // renderer/RenderSystem
-	extern void BackendThreadTask(void); // renderer/RenderSystem
-	extern void setup_backend_renderer_intent(int intent, bool wait = false); // renderer/RenderSystem
-}
+extern void BackendThreadWait(void); // renderer/RenderSystem
+extern void BackendThreadTask(void); // renderer/RenderSystem
+extern void BackendThreadExecute(void);
+extern void BackendThreadShutdown(void);
 #endif
 
 #endif /* !__TR_LOCAL_H__ */

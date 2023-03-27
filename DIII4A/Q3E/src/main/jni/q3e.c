@@ -28,6 +28,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 #include "q3e.h"
 
 int  (*qmain)(int argc, char **argv);
@@ -41,6 +43,7 @@ void (*setResolution)(int width, int height);
 void (*vidRestart)();
 void (*on_pause)(void);
 void (*on_resume)(void);
+void (*set_gl_context)(ANativeWindow *window, int size, ...);
 
 intptr_t (*Q3E_Call)(int protocol, int size, ...);
 static void pull_input_event(int execCmd);
@@ -61,9 +64,11 @@ static JavaVM *jVM;
 static jobject audioBuffer=0;
 static jobject q3eCallbackObj=0;
 static void *libdl;
+static ANativeWindow *window = NULL;
 
 #define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
 #define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
+#define ANDROID_CALL_PROTOCOL_ATTACH_THREAD 0x10003
 
 #define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
 #define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
@@ -74,6 +79,7 @@ intptr_t Android_Call(int protocol, int size, ...)
 {
 	intptr_t res = 0;
 	va_list va;
+	JNIEnv *env = 0;
 
 	va_start(va, size);
 	switch(protocol)
@@ -83,6 +89,13 @@ intptr_t Android_Call(int protocol, int size, ...)
 			break;
 		case ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT:
 			pull_input_event(va_arg(va, int));
+			res = 1;
+			break;
+		case ANDROID_CALL_PROTOCOL_ATTACH_THREAD:
+			if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0)
+			{
+				(*jVM)->AttachCurrentThread(jVM, &env, NULL);
+			}
 			res = 1;
 			break;
 		default:
@@ -116,6 +129,7 @@ static void loadLib(char* libpath)
     Q3E_Call = dlsym(libdl, "Q3E_Call");
     qexit = dlsym(libdl, "Q3E_exit");
 	set_Android_Call = dlsym(libdl, "set_Android_Call");
+	set_gl_context = dlsym(libdl, "Android_SetGLContext");
 }
 
 void initAudio(void *buffer, int size)
@@ -257,7 +271,7 @@ static int ParseCommandLine(char *cmdline, char **argv)
 }
 
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jint width, jint height, jstring GameDir, jstring Cmdline)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jint width, jint height, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa)
 {
     char **argv;
     int argc=0;
@@ -299,6 +313,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 multi-thread: %d", multithread);
 		(void)Q3E_Call(ANDROID_CALL_PROTOCOL_MULTITHREAD, 1, multithread);
     }
+	window = ANativeWindow_fromSurface(env, view);
+	set_gl_context(window, 2, format, msaa);
     
     qmain(argc, argv);
 	free(argv);
@@ -374,12 +390,22 @@ Java_com_n0n3m4_q3e_Q3EJNI_OnResume(JNIEnv *env, jclass clazz)
     on_resume();
 }
 
+JNIEXPORT void JNICALL
+Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
+	if(window)
+	{
+		window = NULL;
+	}
+	if(view)
+	{
+		window = ANativeWindow_fromSurface(env, view);
+	}
+	set_gl_context(window, 0);
+}
+
 void pull_input_event(int execCmd)
 {
     JNIEnv *env = 0;
-
-    if(!android_PullEvent_method)
-		return;
 
     if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
     {
@@ -417,4 +443,3 @@ FILE * android_tmpfile(void)
 	free(tmp_file);
 	return res;
 }
-

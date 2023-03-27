@@ -215,7 +215,7 @@ bool hhGun::ValidEnemy() {
 	return (enemy.IsValid()) ? enemy->GetHealth() > 0 : false;
 }
 
-void hhGun::Fire(const idMat3 &axis) { //k: const
+void hhGun::Fire(const idMat3 &axis) { // const
 	if (health > 0) {
 		hhUtils::LaunchProjectile(this, spawnArgs.GetString("def_projectile"), axis, GetOrigin());
 		StartSound( "snd_fire", SND_CHANNEL_ANY );

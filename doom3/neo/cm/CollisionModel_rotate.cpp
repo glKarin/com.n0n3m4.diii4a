@@ -629,6 +629,10 @@ void idCollisionModelManagerLocal::RotateTrmEdgeThroughPolygon(cm_traceWork_t *t
 
 		tw->trace.c.contents = poly->contents;
 		tw->trace.c.material = poly->material;
+#ifdef _RAVEN
+		if(poly->material)
+			tw->trace.c.materialType = poly->material->GetMaterialType();
+#endif
 		tw->trace.c.type = CONTACT_EDGE;
 		tw->trace.c.modelFeature = edgeNum;
 		tw->trace.c.trmFeature = trmEdge - tw->edges;
@@ -1017,6 +1021,10 @@ void idCollisionModelManagerLocal::RotateTrmVertexThroughPolygon(cm_traceWork_t 
 		tw->trace.c.dist = poly->plane.Dist();
 		tw->trace.c.contents = poly->contents;
 		tw->trace.c.material = poly->material;
+#ifdef _RAVEN
+		if(poly->material)
+			tw->trace.c.materialType = poly->material->GetMaterialType();
+#endif
 		tw->trace.c.type = CONTACT_TRMVERTEX;
 		tw->trace.c.modelFeature = *reinterpret_cast<int *>(&poly);
 		tw->trace.c.trmFeature = v - tw->vertices;
@@ -1089,6 +1097,10 @@ void idCollisionModelManagerLocal::RotateVertexThroughTrmPolygon(cm_traceWork_t 
 		tw->trace.c.dist = tw->trace.c.normal * v->p;
 		tw->trace.c.contents = poly->contents;
 		tw->trace.c.material = poly->material;
+#ifdef _RAVEN
+		if(poly->material)
+			tw->trace.c.materialType = poly->material->GetMaterialType();
+#endif
 		tw->trace.c.type = CONTACT_MODELVERTEX;
 		tw->trace.c.modelFeature = v - tw->model->vertices;
 		tw->trace.c.trmFeature = trmpoly - tw->polys;

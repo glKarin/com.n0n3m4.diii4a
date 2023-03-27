@@ -1001,7 +1001,7 @@ bool idClass::ProcessEventArgPtr( const idEventDef *ev, intptr_t *data ) {
 
 	callback = c->eventMap[ num ];
 
-#if 1 //k jmarshall !CPU_EASYARGS
+#if 1 //k !CPU_EASYARGS
 
 /*
 on ppc architecture, floats are passed in a seperate set of registers
@@ -1430,7 +1430,7 @@ void idClass::RegisterClasses( void )
 // RITUAL END
 
 #ifdef _QUAKE4 // bot
-// jmarshall
+// jmarshall: bot
 	REGISTER(rvmBot);
 // jmarshall end
 #endif

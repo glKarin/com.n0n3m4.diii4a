@@ -2311,10 +2311,4 @@ void	RB_STD_DrawView(void)
 	#ifndef ANDROID_NOGLERRHACK
 	RB_RenderDebugTools(drawSurfs, numDrawSurfs);
 	#endif
-
-#if defined(_RAVENxxx)
-// jmarshall - stupid OpenGL
-	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO);
-// jmarshall end
-#endif
 }
