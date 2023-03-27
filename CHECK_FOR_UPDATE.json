@@ -1,7 +1,7 @@
 {
-    "release":25,
-    "update":"2023-02-20",
-    "version":"1.1.0harmattan25",
-    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.25.apk",
-    "changes":"  * Sound with OpenSLES support(Testing).\n  * Add backup/restore preferences support.\n  * Add menu music playing in Prey(2006).\n  * Add map loading music playing in Prey(2006).\n  * Add entity visible/invisible in spirit walk mode in Prey(2006), e.g. spirit bridge.\n  * Optimize portal render with view distance in Prey(2006)."
+    "release":26,
+    "update":"2023-03-25",
+    "version":"1.1.0harmattan26",
+    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.26.apk",
+    "changes":"  * Using SurfaceView for rendering, remove GLSurfaceView(Testing).\n  * Using DOOM3's Fx/Particle system implement Quake4's BSE incompletely for effects in Quake 4. The effects are bad now. Using set `bse_enabled` to 0 for disable effects.\n  * Remove my cvar `harm_g_alwaysRun`, so set original `in_alwaysRun` to 1 for run in Quake 4.\n  * Add simple beam model render in Prey(2006).\n  * Optimize skybox render in Prey(2006) by lvonasek."
 }
