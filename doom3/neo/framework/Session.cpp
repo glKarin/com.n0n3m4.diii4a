@@ -896,6 +896,13 @@ static void Session_EndOfGame_f(const idCmdArgs &args)
 			dw->win->RunScript(idWindow::ON_ACTION);
 	}
 }
+
+static void Session_GuiEvent_f(const idCmdArgs &args)
+{
+	if (sessLocal.guiActive) {
+		sessLocal.guiActive->HandleNamedEvent(args.Argv(1));
+	}
+}
 #endif
 
 #ifdef _HUMANHEAD //k: for sound in new game
@@ -3414,6 +3421,7 @@ void idSessionLocal::Init()
 
 #ifdef _RAVEN //k: quake4 game cmd callback
 	cmdSystem->AddCommand("endOfGame", Session_EndOfGame_f, CMD_FL_SYSTEM, "ends the game");
+	cmdSystem->AddCommand("GuiEvent", Session_GuiEvent_f, CMD_FL_SYSTEM, "handle GUI event");
 #endif
 #ifdef _HUMANHEAD //k: for sound in new game
 	cmdSystem->AddCommand("exitMenu", Session_ExitMenu_f, CMD_FL_SYSTEM, "exit menu");

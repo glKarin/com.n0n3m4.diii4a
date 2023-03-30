@@ -1777,19 +1777,58 @@ void idSessionLocal::HandleMsgCommands(const char *menuCommand)
 		return;
 	}
 
-	if (idStr::Icmp(menuCommand, "mid") == 0 || idStr::Icmp(menuCommand, "left") == 0) {
+#ifdef _RAVEN //karin: Quake4 is left/mid/right OTHER_CMD OTHER_CMD_ARGUMENTS
+	idStr cmd = menuCommand;
+	cmd.ReplaceChar(';', ' ');
+	cmd.StripTrailingWhitespace();
+	idCmdArgs args(cmd, false);
+	const char *menuCommand_new = args.Argv(0);
+	int icmd = 1;
+#endif
+#ifdef _RAVEN
+	if (idStr::Icmp(menuCommand_new, "mid") == 0 || idStr::Icmp(menuCommand_new, "left") == 0)
+#else
+	if (idStr::Icmp(menuCommand, "mid") == 0 || idStr::Icmp(menuCommand, "left") == 0) 
+#endif
+	{
 		guiActive = guiMsgRestore;
 		guiMsgRestore = NULL;
 		msgRunning = false;
 		msgRetIndex = 0;
 		DispatchCommand(guiActive, msgFireBack[ 0 ].c_str());
-	} else if (idStr::Icmp(menuCommand, "right") == 0) {
+	} 
+#ifdef _RAVEN
+	else if (idStr::Icmp(menuCommand_new, "right") == 0) 
+#else
+	else if (idStr::Icmp(menuCommand, "right") == 0) 
+#endif
+	{
 		guiActive = guiMsgRestore;
 		guiMsgRestore = NULL;
 		msgRunning = false;
 		msgRetIndex = 1;
 		DispatchCommand(guiActive, msgFireBack[ 1 ].c_str());
 	}
+#ifdef _RAVEN
+	else if (idStr::Icmp(menuCommand_new, "play") == 0) 
+	{
+		if (args.Argc() - icmd >= 1) {
+			idStr snd = args.Argv(icmd++);
+			sw->PlayShaderDirectly(snd);
+		}
+	}
+
+	if(icmd < args.Argc())
+	{
+		cmd.Clear();
+		for(int i = icmd; i < args.Argc(); i++)
+		{
+			cmd += args.Argv(i);
+			cmd.Append(' ');
+		}
+		HandleMsgCommands(cmd.c_str());
+	}
+#endif
 }
 
 /*
