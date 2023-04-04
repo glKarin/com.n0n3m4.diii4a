@@ -197,6 +197,7 @@ class idDeclFile
 // jmarshall: guide support
 private:
     idStr						PreprocessGuides(const char* buffer, int length);
+    idStr						PreprocessInlineGuides(const char* buffer, int length);
 // jmarshall end
 #endif
 };
@@ -2594,6 +2595,54 @@ bool idDeclLocal::EverReferenced(void) const
 idDeclFile::PreprocessGuides
 ================
 */
+//karin: helper struct
+struct rvGuidePlaceholder
+{
+	// [start, end)
+	int start; // include
+	int end; // exclude
+	idStr replaceStr;
+
+	rvGuidePlaceholder(int start = 0, int end = 0, const idStr &str = idStr())
+		: start(start),
+		end(end),
+		replaceStr(str)
+	{ }
+	void ReplaceSpace(idStr &str)
+	{
+		for(int m = start; m < end; m++)
+		{
+			if(!isspace(str[m])) //karin: keep raw format for debug
+				str[m] = ' ';
+		}
+	}
+	int Replace(int offset, idStr &toStr)
+	{
+		int length = end - start;
+		int newLength = replaceStr.Length();
+		idStr front = toStr.Left(start + offset);
+		idStr back = toStr.Right(toStr.Length() - end - offset);
+		toStr = front + replaceStr + back;
+		return newLength - length;
+	}
+};
+struct rvGuidePlaceholderList : public idList<rvGuidePlaceholder>
+{
+	void ReplaceSpace(idStr &str)
+	{
+		for(int i = 0; i < Num(); i++)
+			this->operator[](i).ReplaceSpace(str);
+	}
+	void Replace(idStr &str)
+	{
+		int offset = 0;
+		for(int i = 0; i < Num(); i++)
+		{
+			offset += this->operator[](i).Replace(offset, str);
+		}
+	}
+};
+
 idStr idDeclFile::PreprocessGuides(const char* text, int textLength)
 {
     idLexer src;
@@ -2603,6 +2652,7 @@ idStr idDeclFile::PreprocessGuides(const char* text, int textLength)
 
     src.LoadMemory(text, textLength, "", 0);
     src.SetFlags(DECL_LEXER_FLAGS);
+	rvGuidePlaceholderList guideRanges; //karin: record a pair of read guide characters offset: start, end, characters in range will be replaced ' '
 
     while (1)
     {
@@ -2613,6 +2663,7 @@ idStr idDeclFile::PreprocessGuides(const char* text, int textLength)
 
         if (token == "guide")
         {
+			int range_start = src.GetFileOffset() - 5; //karin: record range start before next `ReadToken`
             idToken name;
             idStr newDecl;
             rvGuideTemplate*guide = NULL;
@@ -2631,7 +2682,7 @@ idStr idDeclFile::PreprocessGuides(const char* text, int textLength)
 
             if (guide == NULL)
             {
-                common->FatalError("Failed to find guide %s\n", token.c_str());
+                common->FatalError("Failed to find guide '%s'\n", token.c_str());
             }
 
             newDecl = name;
@@ -2649,13 +2700,79 @@ idStr idDeclFile::PreprocessGuides(const char* text, int textLength)
             newDecl += "\n";
 
             finalBuffer += newDecl;
+			int range_end = src.GetFileOffset(); //karin: record range end after last `ReadToken`
+			guideRanges.Append(rvGuidePlaceholder(range_start, range_end));
         }
     }
 
-    finalBuffer += text;
+	//karin: replace all old guide source to space
+	idStr oldText(text);
+	guideRanges.ReplaceSpace(oldText);
+    finalBuffer += oldText;
 
-    finalBuffer.Replace("inlineGuide", "// inlineGuide"); // todo support me, corpse burn
-    finalBuffer.Replace("guide", "// guide");
+    //finalBuffer.Replace("inlineGuide", "// inlineGuide"); // todo support me, corpse burn
+    //finalBuffer.Replace("guide", "// guide");
+    return PreprocessInlineGuides(finalBuffer.c_str(), finalBuffer.Length());
+}
+
+idStr idDeclFile::PreprocessInlineGuides(const char* text, int textLength)
+{
+    idLexer src;
+    idToken	token, token2;
+
+    idStr finalBuffer(text);
+
+    src.LoadMemory(text, textLength, "", 0);
+    src.SetFlags(DECL_LEXER_FLAGS);
+	rvGuidePlaceholderList guideRanges; //karin: record a pair of read guide characters offset: start, end, characters in range will be replaced to new source
+
+    while (1)
+    {
+        if (!src.ReadToken(&token))
+        {
+            break;
+        }
+
+        if (!idStr::Icmp(token, "inlineGuide"))
+        {
+			int range_start = src.GetFileOffset() - 11; //karin: record range start before next `ReadToken`
+            idStr newDecl;
+            rvGuideTemplate*guide = NULL;
+
+            src.ReadToken(&token);
+
+            for (int i = 0; i < declManagerLocal.guides.Num(); i++)
+            {
+                if (declManagerLocal.guides[i].name == token)
+                {
+                    guide = &declManagerLocal.guides[i];
+                    break;
+                }
+            }
+
+            if (guide == NULL)
+            {
+                common->FatalError("Failed to find inlineGuide '%s'\n", token.c_str());
+            }
+
+            newDecl = guide->body;
+
+            src.ExpectTokenString("(");
+            for (int i = 0; i < guide->parms.Num(); i++ )
+            {
+                src.ReadToken(&token);
+                newDecl.Replace(guide->parms[i].c_str(), token);
+            }
+            src.ExpectTokenString(")");
+
+			int range_end = src.GetFileOffset(); //karin: record range end after last `ReadToken`
+			guideRanges.Append(rvGuidePlaceholder(range_start, range_end, newDecl));
+        }
+    }
+
+	//karin: replace all old inline guide source to new source
+	guideRanges.Replace(finalBuffer);
+
     return finalBuffer;
 }
 
@@ -2785,6 +2902,12 @@ void idDeclManagerLocal::ParseGuides(void) {
 				}
 
 				src.ParseBracedSection(guide.body);
+				if(guide.inlineGuide) //karin: inline guide remove start/end braces
+				{
+					guide.body.StripTrailingWhitespace();
+					guide.body.StripLeadingOnce("{");
+					guide.body.StripTrailingOnce("}");
+				}
 
 				guides.Append(guide);
 			}
