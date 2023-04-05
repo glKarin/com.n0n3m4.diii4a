@@ -1,7 +1,7 @@
 {
-    "release":26,
-    "update":"2023-03-25",
-    "version":"1.1.0harmattan26",
-    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.26.apk",
-    "changes":"  * Using SurfaceView for rendering, remove GLSurfaceView(Testing).\n  * Using DOOM3's Fx/Particle system implement Quake4's BSE incompletely for effects in Quake 4. The effects are bad now. Using set `bse_enabled` to 0 for disable effects.\n  * Remove my cvar `harm_g_alwaysRun`, so set original `in_alwaysRun` to 1 for run in Quake 4.\n  * Add simple beam model render in Prey(2006).\n  * Optimize skybox render in Prey(2006) by lvonasek."
+    "release":27,
+    "update":"2023-04-05",
+    "version":"1.1.0harmattan27",
+    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.27.apk",
+    "changes":"  * Fixup some line effects in Quake 4. e.g. monster body disappear effect, lines net.\n  * Fixup radio icon in player HUD right-top corner in Quake 4.\n  * Fixup dialog interactive in Quake 4. e.g. dialog of creating MP game server.\n  * Fixup MP game loading GUI and MP game main menu in Quake 4.\n  * Add integer cvar named `harm_si_autoFillBots` for automatic fill bots after map loaded in MP game in Quake 4(0 to disable). `fillbots` command support append bot num argument.\n  * Add automatic set bot's team in MP team game, random bot model, and fixup some bot's bugs in Quake 4.\n  * Add `SABot`'s aas file pak of MP game maps in `Quake 4 helper dialog`."
 }
