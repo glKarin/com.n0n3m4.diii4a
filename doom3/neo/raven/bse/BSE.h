@@ -314,6 +314,9 @@ public:
 
 	virtual void					CopySegment( class rvSegmentTemplate *dest, class rvSegmentTemplate *src ) {}
 
+#ifdef _RAVEN_FX
+	static idRandom random;
+#endif
 private:
 #ifdef _RAVEN_FX
 	static		idBlockAlloc<rvBSE, 256/*, 0 //k*/>	effects;

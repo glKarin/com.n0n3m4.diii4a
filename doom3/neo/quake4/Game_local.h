@@ -1137,6 +1137,9 @@ public:
 	}
 	void					AddBot(const char* botName);
 	void					AlertBots(idPlayer* player, idVec3 alert_position);
+	int NumBot(void) const {
+		return registeredBots.Num();
+	}
 // jmarshall end
 
 private:

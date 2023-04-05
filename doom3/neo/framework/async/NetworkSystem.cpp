@@ -241,6 +241,48 @@ float idNetworkSystem::ClientGetIncomingPacketLoss(void)
 	return 0.0f;
 }
 
+#ifdef _RAVEN
+#include "../Session_local.h"
+extern idSessionLocal		sessLocal;
+
+void idNetworkSystem::SetLoadingText(const char* loadingText)
+{
+	if(sessLocal.guiLoading)
+		sessLocal.guiLoading->SetStateString("server_loadinfo", loadingText);
+}
+
+void idNetworkSystem::AddLoadingIcon(const char* icon)
+{
+	const char *name;
+	int i;
+
+	if(sessLocal.guiLoading)
+	{
+		for(i = 0; i < MAX_MP_LOADING_GUI_ICONS; i++)
+		{
+			name = va("load_icon_%d", i + 1);
+			if(sessLocal.guiLoading->GetStateBool(name))
+				continue; // used
+			sessLocal.guiLoading->SetStateBool(name, true);
+			name = va("load_icon_img_%d", i + 1);
+			sessLocal.guiLoading->SetStateString(name, icon);
+			break;
+		}
+		sessLocal.guiLoading->SetStateFloat("load_icons", Min(i + 1, MAX_MP_LOADING_GUI_ICONS));
+	}
+}
+
+const char* idNetworkSystem::GetServerAddress(void)
+{
+	if(idAsyncNetwork::client.IsActive())
+		return Sys_NetAdrToString(idAsyncNetwork::client.serverAddress);
+	else if(idAsyncNetwork::server.IsActive())
+		return Sys_NetAdrToString(idAsyncNetwork::server.serverPort.GetAdr());
+	else
+		return "";
+}
+#endif
+
 #ifdef _RAVEN // bot
 /*
 ==================

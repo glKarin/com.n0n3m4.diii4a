@@ -1465,7 +1465,11 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 		if ( !idGameLocal::InhibitEntitySpawn( mapEnt->epairs ) ) { // HUMANHEAD mdl:  Need this to call the original function
 			CacheDictionaryMedia( &mapEnt->epairs );
 			const char *classname = mapEnt->epairs.GetString( "classname" );
+#ifdef _K_CLANG //k
+			if ( classname && classname[0] ) {
+#else
 			if ( classname != '\0' ) {
+#endif
 				FindEntityDef( classname, false );
 			}
 		}
@@ -1929,7 +1933,11 @@ void idGameLocal::GetShakeSounds( const idDict *dict ) {
 	idStr soundName;
 
 	soundShaderName = dict->GetString( "s_shader" );
+#ifdef _K_CLANG //k
+	if ( soundShaderName && soundShaderName[0] && dict->GetFloat("s_shakes") != 0.0f ) {
+#else
 	if ( soundShaderName != '\0' && dict->GetFloat( "s_shakes" ) != 0.0f ) {
+#endif
 		soundShader = declManager->FindSound( soundShaderName );
 
 		for ( int i = 0; i < soundShader->GetNumSounds(); i++ ) {

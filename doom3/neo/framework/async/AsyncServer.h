@@ -130,6 +130,9 @@ typedef struct serverClient_s {
 
 class idAsyncServer
 {
+#ifdef _RAVEN
+	friend class idNetworkSystem;
+#endif
 	public:
 		idAsyncServer();
 
@@ -188,7 +191,6 @@ class idAsyncServer
 // jmarshall
 	int					AllocOpenClientSlotForAI(const char* botName, int maxPlayersOnServer);
 	int 				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);
-	void				InitLocalClient( int clientNum, bool isBot );
 // jmarshall end
 #endif
 

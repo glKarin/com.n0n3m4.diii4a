@@ -2139,6 +2139,7 @@ public class GameLauncher extends Activity{
 
     //private static final int Q4_RESOURCE_FONT = 1;
     private static final int Q4_RESOURCE_BOT = 1 << 1;
+	private static final int Q4_RESOURCE_MP_GAME_MAP_AAS = 1 << 2;
     private static final int Q4_RESOURCE_ALL = ~(1 << 31);
     
     private void OpenQuake4ResourceDialog()
@@ -2147,10 +2148,12 @@ public class GameLauncher extends Activity{
         final int[] Types = {
             //Q4_RESOURCE_FONT,
             Q4_RESOURCE_BOT,
+			Q4_RESOURCE_MP_GAME_MAP_AAS,
         };
         final String[] Names = {
             // "Font(D3 format)",
             "Bot(Q3 support in MP game)",
+			"MP game map aas files",
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Quake 4 extra patch resource")
@@ -2204,6 +2207,17 @@ public class GameLauncher extends Activity{
 			if(sb.length() > 0)
 				sb.append("\n");
 			sb.append("Extract Quake 4 bot files(Quake3) patch file to ").append(fileName).append(" ");
+			sb.append(ok ? "success" : "fail");
+			r = r && ok;
+		}
+		if(Utility.MASK(mask, Q4_RESOURCE_MP_GAME_MAP_AAS))
+		{
+			String fileName = "q4base/q4_mp_game_map_aas_idtech4amm.pk4";
+			String outPath = BasePath + fileName;
+			boolean ok = ContextUtility.ExtractAsset(this, "pak/q4base/mp_game_map_aas.pk4", outPath);
+			if(sb.length() > 0)
+				sb.append("\n");
+			sb.append("Extract Quake 4 MP game map aas files(Quake3) patch file to ").append(fileName).append(" ");
 			sb.append(ok ? "success" : "fail");
 			r = r && ok;
 		}

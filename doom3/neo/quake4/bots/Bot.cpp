@@ -11,6 +11,64 @@ idCVar bot_showstate( "bot_showstate", "0", CVAR_BOOL | CVAR_CHEAT, "draws the b
 idCVar bot_debug( "bot_debug", "0", CVAR_BOOL | CVAR_CHEAT, "shows debug info for the bot" );
 idCVar bot_skill("bot_skill", "3", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "");
 
+#ifdef _QUAKE4
+//karin: from idMultiplayerGame::VerifyTeamSwitch
+int Bot_VerifyTeamSwitch( int wantTeam, idPlayer *player ) {
+	idEntity* ent;
+	int teamCount[ TEAM_MAX ];
+	int balanceTeam = -1;
+
+	teamCount[ TEAM_MARINE ] = teamCount[ TEAM_STROGG ] = 0;
+
+	for( int i = 0; i < gameLocal.numClients; i++ ) {
+		ent = gameLocal.entities[ i ];
+		if ( ent && ent->IsType( idPlayer::GetClassType() ) ) {
+			if ( ent != player ) {
+				teamCount[ static_cast< idPlayer * >( ent )->team ]++;
+			}
+		}
+	}
+
+	balanceTeam = -1;
+	if ( teamCount[ TEAM_MARINE ] > teamCount[ TEAM_STROGG ] ) {
+		balanceTeam = TEAM_STROGG;
+	} else if ( teamCount[ TEAM_STROGG ] > teamCount[ TEAM_MARINE ] ) {
+		balanceTeam = TEAM_MARINE;
+	}
+
+	return (balanceTeam == -1) ? wantTeam : balanceTeam;
+}
+
+static int Bot_GetPlayerModelNames(idStrList &list, int team = TEAM_NONE)
+{
+	int i;
+	int num = 0;
+	int numPlayerModel;
+
+	numPlayerModel = declManager->GetNumDecls(DECL_PLAYER_MODEL);
+	for(i = 0; i < numPlayerModel; i++)
+	{
+		const idDecl *decl = declManager->DeclByIndex(DECL_PLAYER_MODEL, i, false);
+		if(!decl)
+			continue;
+		const rvDeclPlayerModel *playerModel = static_cast<const rvDeclPlayerModel *>(decl);
+		if(team == TEAM_STROGG)
+		{
+			if(idStr::Icmp(playerModel->team , "strogg"))
+				continue;
+		}
+		else if(team == TEAM_MARINE)
+		{
+			if(!idStr::Icmp(playerModel->team , "strogg"))
+				continue;
+		}
+		list.Append(playerModel->GetName());
+		num++;
+	}
+	return num;
+}
+#endif
+
 CLASS_DECLARATION( idPlayer, rvmBot )
 END_CLASS
 
@@ -31,6 +89,9 @@ rvmBot::rvmBot
 ===================
 */
 rvmBot::rvmBot()
+#ifdef _QUAKE4
+	: aas(NULL)
+#endif
 {
 	//bs.action = NULL;
 	hasSpawned = false;
@@ -55,6 +116,8 @@ rvmBot::~rvmBot()
 	}
 	if(bs.character)
 		botCharacterStatsManager.FreeCharacterFile(bs.character);
+
+	BOT_DEBUG("~rvmBot: %p: %s\n", this, spawnArgs.GetString("botname"));
 #endif
 
 	gameLocal.UnRegisterBot( this );
@@ -130,6 +193,41 @@ void rvmBot::Spawn( void )
 
 	stateThread.SetOwner(this);
 
+#ifdef _QUAKE4 //karin: setup random player model
+	idStrList playerModelNames;
+	int numMarinePlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_MARINE);
+	if(numMarinePlayerModel > 0)
+	{
+		int index = gameLocal.random.RandomInt(numMarinePlayerModel);
+		const char *modelName = playerModelNames[index];
+		spawnArgs.Set("model", modelName);
+		spawnArgs.Set("model_marine", modelName);
+		spawnArgs.Set("ui_model", modelName);
+		spawnArgs.Set("ui_model_marine", modelName);
+		spawnArgs.Set("def_default_model", modelName);
+		spawnArgs.Set("def_default_model_marine", modelName);
+		BOT_DEBUG("set bot marine model: %s\n", modelName);
+	}
+	int numStroggPlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_STROGG);
+	if(numStroggPlayerModel > 0)
+	{
+		int index = gameLocal.random.RandomInt(numStroggPlayerModel) + numMarinePlayerModel;
+		const char *modelName = playerModelNames[index];
+		spawnArgs.Set("model_strogg", modelName);
+		spawnArgs.Set("ui_model_strogg", modelName);
+		spawnArgs.Set("def_default_model_strogg", modelName);
+		BOT_DEBUG("set bot strogg model: %s\n", modelName);
+	}
+	if(playerModelNames.Num() > 0)
+	{
+		int index = gameLocal.random.RandomInt(playerModelNames.Num());
+		const char *modelName = playerModelNames[index];
+		spawnArgs.Set("model", modelName);
+		spawnArgs.Set("ui_model", modelName);
+		spawnArgs.Set("def_default_model", modelName);
+		BOT_DEBUG("set bot default model: %s\n", modelName);
+	}
+#endif
 	idPlayer::Spawn();
 
 	if( gameLocal.isServer )
@@ -158,10 +256,18 @@ void rvmBot::Spawn( void )
 		if( !bs.character )
 		{
 			gameLocal.Error( "Failed to load character file for bot %s\n", botName.c_str() );
+			return;
 		}
 
 		// Allocate the goal state.
 		bs.gs = botGoalManager.BotAllocGoalState( entityNumber );
+#ifdef _QUAKE4
+		if(!bs.gs)
+		{
+			gameLocal.Error( "Failed to alloc goal state for bot %s\n", botName.c_str() );
+			return;
+		}
+#endif
 
 		// Get the bot items weights file name.
 		botCharacterStatsManager.Characteristic_String( bs.character, CHARACTERISTIC_ITEMWEIGHTS, filename, 256 );
@@ -175,6 +281,13 @@ void rvmBot::Spawn( void )
 
 		//allocate a weapon state
 		bs.ws = botWeaponInfoManager.BotAllocWeaponState();
+#ifdef _QUAKE4
+		if(!bs.ws)
+		{
+			gameLocal.Error( "Failed to alloc weapon state for bot %s\n", botName.c_str() );
+			return;
+		}
+#endif
 
 		//load the weapon weights
 		botCharacterStatsManager.Characteristic_String( bs.character, CHARACTERISTIC_WEAPONWEIGHTS, filename, 256 );
@@ -197,6 +310,11 @@ void rvmBot::Spawn( void )
 
 		stateThread.SetState("state_Respawn");
 	}
+	else
+		gameLocal.Error( "Spawn bot withoud MP game server\n" );
+#ifdef _QUAKE4
+	BOT_DEBUG("rvmBot::new: %p: %s\n", this, spawnArgs.GetString("botname"));
+#endif
 }
 
 /*
@@ -437,3 +555,17 @@ void rvmBot::Think( void )
 
 	idPlayer::Think();
 }
+
+#ifdef _QUAKE4 //karin: head model render for bot
+void rvmBot::SetupHead( const char* headModel, idVec3 headOffset ) {
+	if( gameLocal.isMultiplayer ) {
+		idActor::SetupHead( headModel, headOffset );
+
+		if ( head ) {
+			head->fl.persistAcrossInstances = true;
+		}
+	} else {
+		gameLocal.Error("Call rvmBot::SetupHead in non-multiplayer mode.");
+	}
+}
+#endif

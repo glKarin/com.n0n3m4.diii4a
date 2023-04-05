@@ -75,6 +75,9 @@ typedef struct {
 
 class idAsyncClient
 {
+#ifdef _RAVEN
+	friend class idNetworkSystem;
+#endif
 	public:
 		idAsyncClient();
 

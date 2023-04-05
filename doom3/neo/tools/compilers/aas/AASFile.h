@@ -308,6 +308,8 @@ class idAASSettings
 // rjohnson: added more debug drawing
 	idVec4						debugColor;
 	bool						debugDraw;
+// bkreimeier
+	bool						generateAllFaces;
 // cdr: AASTactical
 	bool						generateTacticalFeatures;
 // RAVEN END

@@ -621,6 +621,12 @@ int rvmBot::BotFindEnemy( bot_state_t* bs, int curenemy )
 			continue;
 		}
 
+		//karin: team game
+		if(gameLocal.IsTeamGame())
+		{
+			if(clientEnt->team == entinfo->team)
+				continue;
+		}
 		// jmarshall - teams!
 		//if on the same team
 		//if (BotSameTeam(bs, i))
@@ -1348,6 +1354,13 @@ void rvmBot::BotCheckAttack( bot_state_t* bs )
 	{
 		if( trace.c.entityNum != attackentity )
 		{
+			//karin: team game
+			if(gameLocal.IsTeamGame())
+			{
+				idPlayer *o = gameLocal.entities[trace.c.entityNum]->Cast<idPlayer>();
+				if(o && self->team == o->team)
+					return;
+			}
 			// jmarshall - teams
 			//if a teammate is hit
 			//if (BotSameTeam(bs, trace.entityNum))

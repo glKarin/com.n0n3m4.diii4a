@@ -95,6 +95,8 @@ idCVar com_videoRam("com_videoRam", "64", CVAR_INTEGER | CVAR_SYSTEM | CVAR_NOCH
 
 idCVar com_product_lang_ext("com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files.");
 
+idCVar harm_com_consoleHistory("harm_com_consoleHistory", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Save/load console history(0: disable; 1: loading in engine initialization, and saving in engine shutdown; 2: loading in engine initialization, and saving in every e executing).");
+
 // com_speeds times
 int				time_gameFrame;
 int				time_gameDraw;
@@ -3262,7 +3264,8 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 
 		ClearCommandLine();
 
-		console->LoadHistory();
+		if(harm_com_consoleHistory.GetInteger() != 0)
+			console->LoadHistory();
 
 		com_fullyInitialized = true;
 	}
@@ -3286,7 +3289,8 @@ void idCommonLocal::Shutdown(void)
 	idAsyncNetwork::server.Kill();
 	idAsyncNetwork::client.Shutdown();
 
-	console->SaveHistory();
+	if(harm_com_consoleHistory.GetInteger() == 1)
+		console->SaveHistory();
 
 	// game specific shut down
 	ShutdownGame(false);

@@ -610,6 +610,7 @@ KeyDownEvent
 Handles history and console scrollback
 ====================
 */
+extern idCVar harm_com_consoleHistory;
 void idConsoleLocal::KeyDownEvent(int key)
 {
 
@@ -637,6 +638,9 @@ void idConsoleLocal::KeyDownEvent(int key)
 		historyEditLines[nextHistoryLine % COMMAND_HISTORY] = consoleField;
 		nextHistoryLine++;
 		historyLine = nextHistoryLine;
+
+		if(harm_com_consoleHistory.GetInteger() == 2)
+			SaveHistory();
 
 		consoleField.Clear();
 		consoleField.SetWidthInChars(LINE_WIDTH);

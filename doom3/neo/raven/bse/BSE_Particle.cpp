@@ -1215,28 +1215,8 @@ static int ParticleVerts_line(rvBSEParticleStage *stage, rvBSE_particleGen_t *g,
 
 		verts[0].xyz = origin + minor;
 		verts[1].xyz = origin + localTarget + minor;
-		verts[2].xyz = origin + -minor;
+		verts[2].xyz = origin - minor;
 		verts[3].xyz = origin + localTarget - minor;
-#if 0
-
-		idVec3	left, up, forward;
-
-		g->renderEnt->axis.ProjectVector(g->renderView->viewaxis[0], forward);
-		g->renderEnt->axis.ProjectVector(g->renderView->viewaxis[1], left);
-		g->renderEnt->axis.ProjectVector(g->renderView->viewaxis[2], up);
-
-		forward *= stage->customPathParms[2];
-		if (stage->customPathParms[0] != 0.0f)
-		{
-			left *= stage->customPathParms[0] * 0.5;
-			up *= stage->customPathParms[0] * 0.5;
-		}
-
-		verts[0].xyz = origin - left + up;
-		verts[1].xyz = origin + left + up + forward;
-		verts[2].xyz = origin - left - up;
-		verts[3].xyz = origin + left - up + forward;
-#endif
 	}
 
 	return 4;

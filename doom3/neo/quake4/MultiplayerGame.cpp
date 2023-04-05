@@ -8973,6 +8973,11 @@ int idMultiplayerGame::VerifyTeamSwitch( int wantTeam, idPlayer *player ) {
 	int teamCount[ TEAM_MAX ];
 	int balanceTeam = -1;
 
+#ifdef _QUAKE4
+	extern int Bot_VerifyTeamSwitch( int wantTeam, idPlayer *player );
+	if(player->IsType(rvmBot::GetClassType()))
+		return Bot_VerifyTeamSwitch(wantTeam, player);
+#endif
 	if( !gameLocal.serverInfo.GetBool( "si_autoBalance" ) ) {
 		return wantTeam;
 	}

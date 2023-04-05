@@ -1456,7 +1456,7 @@ bool idGameLocal::InitFromSaveGame(const char *mapName, idRenderWorld *renderWor
 			const char *classname = mapEnt->epairs.GetString("classname");
 
 #ifdef _K_CLANG //k
-			if (classname != 0) {
+			if (classname && classname[0]) {
 #else
 			if (classname != '\0') {
 #endif
@@ -1901,7 +1901,11 @@ void idGameLocal::GetShakeSounds(const idDict *dict)
 
 	soundShaderName = dict->GetString("s_shader");
 
+#ifdef _K_CLANG //k
+	if (soundShaderName && soundShaderName[0] && dict->GetFloat("s_shakes") != 0.0f) {
+#else
 	if (soundShaderName != '\0' && dict->GetFloat("s_shakes") != 0.0f) {
+#endif
 		soundShader = declManager->FindSound(soundShaderName);
 
 		for (int i = 0; i < soundShader->GetNumSounds(); i++) {

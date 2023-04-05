@@ -63,7 +63,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef _MULTITHREAD
 #define RENDER_THREAD_NAME "render_thread"
+#if 0
 #define IN_RENDER_THREAD() (!idStr::Icmp(RENDER_THREAD_NAME, Sys_GetThreadName()))
+#else
+extern bool Sys_InRenderThread(void);
+#define IN_RENDER_THREAD() Sys_InRenderThread()
+#endif
 #endif
 #else
 

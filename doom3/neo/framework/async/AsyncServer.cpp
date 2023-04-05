@@ -345,11 +345,7 @@ void idAsyncServer::ExecuteMapChange(void)
 	memset(userCmds, 0, sizeof(userCmds));
 
 	if (idAsyncNetwork::serverDedicated.GetInteger() == 0) {
-#ifdef _RAVEN // bot
-		InitLocalClient(0, false);
-#else
 		InitLocalClient(0);
-#endif
 	} else {
 		localClientNum = -1;
 	}
@@ -826,13 +822,12 @@ idAsyncServer::BeginLocalClient
 void idAsyncServer::BeginLocalClient(void)
 {
 	game->SetLocalClient(localClientNum);
-#ifdef _RAVEN // bot
+#ifdef _RAVEN
 	game->SetUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum], false);
-	game->ServerClientBegin(localClientNum, false, 0);
 #else
 	game->SetUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum], false, false);
-	game->ServerClientBegin(localClientNum);
 #endif
+	game->ServerClientBegin(localClientNum);
 }
 
 /*
@@ -1446,11 +1441,7 @@ void idAsyncServer::ProcessUnreliableClientMessage(int clientNum, const idBitMsg
 		SendEnterGameToClient(clientNum);
 
 		// get the client running in the game
-#ifdef _RAVEN // bot
-		game->ServerClientBegin(clientNum, false, 0);
-#else
 		game->ServerClientBegin(clientNum);
-#endif
 
 		// write any reliable messages to initialize the client game state
 		game->ServerWriteInitialReliableMessages(clientNum);
@@ -3188,7 +3179,15 @@ int idAsyncServer::AllocOpenClientSlotForAI(const char* botName, int maxPlayersO
 		return -1;
 	}
 
-	idAsyncServer::InitLocalClient(botClientId, true);
+	{
+		netadr_t badAddress;
+		InitClient( botClientId, 0, 0 );
+		memset( &badAddress, 0, sizeof( badAddress ) );
+		badAddress.type = NA_BOT;
+		clients[botClientId].channel.Init( badAddress, serverId );
+		clients[botClientId].clientState = SCS_INGAME;
+		sessLocal.mapSpawnData.userInfo[botClientId] = *cvarSystem->MoveCVarsToDict( CVAR_USERINFO );
+	}
 
 	// Set all the spawn args for the new bot.
 	spawnArgs.Set("ui_name", botName);
@@ -3200,29 +3199,6 @@ int idAsyncServer::AllocOpenClientSlotForAI(const char* botName, int maxPlayersO
 	return 1;
 }
 
-/*
-==================
-idAsyncServer::InitLocalClient
-==================
-*/
-void idAsyncServer::InitLocalClient( int clientNum, bool isBot ) {
-	netadr_t badAddress;
-
-	InitClient( clientNum, 0, 0 );
-	memset( &badAddress, 0, sizeof( badAddress ) );
-	if (isBot)
-	{
-		badAddress.type = NA_BOT;
-	}
-	else
-	{
-		badAddress.type = NA_BAD;
-		localClientNum = clientNum;
-	}
-	clients[clientNum].channel.Init( badAddress, serverId );
-	clients[clientNum].clientState = SCS_INGAME;
-	sessLocal.mapSpawnData.userInfo[clientNum] = *cvarSystem->MoveCVarsToDict( CVAR_USERINFO );
-}
 // jmarshall end
 
 static idStr GetBestMPGametype(const char *map, const char *gametype)

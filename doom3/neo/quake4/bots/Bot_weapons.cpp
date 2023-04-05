@@ -336,8 +336,18 @@ void idBotWeaponInfoManager::BotFreeWeaponWeights( int weaponstate )
 	{
 		return;
 	}
-//	if (ws->weaponweightconfig)
-//		FreeWeightConfig(ws->weaponweightconfig);
+#ifdef _QUAKE4
+	if (ws->weaponweightconfig)
+	{
+		botFuzzyWeightManager.FreeWeightConfig(ws->weaponweightconfig);
+	}
+#endif
+#ifdef _QUAKE4
+	BOT_DEBUG("BotFreeWeaponWeights: %p: %p %d/%d\n", ws, ws->weaponweightconfig, weaponstate, MAX_CLIENTS);
+#endif
+#ifdef _QUAKE4
+	ws->Reset();
+#endif
 	//	if (ws->weaponweightindex) FreeMemory(ws->weaponweightindex);
 }
 
@@ -478,6 +488,9 @@ int idBotWeaponInfoManager::BotAllocWeaponState( void )
 		{
 			botweaponstates[i].Reset();
 			botweaponstates[i].inUse = true;
+#ifdef _QUAKE4
+			BOT_DEBUG("BotAllocWeaponState: %p: %d/%d\n", &botweaponstates[i], i, MAX_CLIENTS);
+#endif
 			return i;
 		}
 	}
@@ -492,9 +505,12 @@ idBotWeaponInfoManager::BotAllocWeaponState
 void idBotWeaponInfoManager::BotFreeWeaponState( int ws )
 {
 	botweaponstates[ws].inUse = false;
-	botweaponstates[ws].Reset();
-
 #ifdef _QUAKE4 //k: free in state free
 	BotFreeWeaponWeights( ws );
+#endif
+	botweaponstates[ws].Reset();
+
+#ifdef _QUAKE4
+	BOT_DEBUG("BotFreeWeaponState: %p: %d/%d\n", &botweaponstates[ws], ws, MAX_CLIENTS);
 #endif
 }

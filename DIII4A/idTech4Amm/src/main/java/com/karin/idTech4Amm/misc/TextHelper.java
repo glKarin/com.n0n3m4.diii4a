@@ -175,14 +175,14 @@ public final class TextHelper
 			" 1. Putting PC Quake 4 game data file to `q4base` folder.",
             " 2. Click `START` to open Quake 4 map level dialog in game launcher.",
             " 3. Extract Quake 4 patch resource to `q4base` game data folder if need.",
-            " (a). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console).",
+            "  (a). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console, or set `harm_si_autoFillBots` to 1 for automatic fill bots).",
+            "  (b). `SABot` MP game map aas files(for bots in MP game).",
             " 4. Then start game directly or choose map level, all levels is working.",
             " *. Player's gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).",
             " *. If running crash on arm32 or low-memory device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
-            " *. Some problems has fixed: e.g. Door-opening and collision, New game on Main-menu, Q4 original fonts.",
-            " *. Exists bugs: e.g. Main-menu dialog interface, script error on some levels",
+            " *. Exists bugs: e.g. some GUIs interface, script error on some levels",
             " *. Effect system: Quake4 using new advanced `BSE` particle system, it not open-source(`jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`, but it not work yet.). Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.",
-			" *. Multiplayer-Game: using `si_map` and `serverMapRestart` or `nextMap` for starting a MP map game in Multiplayer-Game, and is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
+			" *. Multiplayer-Game: It is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
             null,
             "Multi-threading and some GLSL shader using `" + GenLinkText("https://github.com/emileb/d3es-multithread", "emileb/d3es-multithread") + "`.",
             null,
@@ -291,6 +291,14 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+                ChangeLog.Create("2023-03-25", 26,
+                        "Using SurfaceView for rendering, remove GLSurfaceView(Testing).",
+                        "Using DOOM3's Fx/Particle system implement Quake4's BSE incompletely for effects in Quake 4. The effects are bad now. Using set `bse_enabled` to 0 for disable effects.",
+                        "Remove my cvar `harm_g_alwaysRun`, so set original `in_alwaysRun` to 1 for run in Quake 4.",
+                        "Add simple beam model render in Prey(2006).",
+                        "Optimize skybox render in Prey(2006) by " + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`."
+                ),
 
                 ChangeLog.Create("2023-02-20", 25,
                         "Sound with OpenSLES support(Testing).",
@@ -618,6 +626,11 @@ public final class TextHelper
         final Cvar[] COMMON_CVARS = {
             Cvar.Create("harm_fs_gameLibPath", "string", "", "Special game dynamic library."),
             Cvar.Create("harm_fs_gameLibDir", "string", "", "Special game dynamic library directory path(default is empty, means using apk install libs directory path."),
+            Cvar.Create("harm_com_consoleHistory", "integer", "1", "Save/load console history.",
+                "0", "disable",
+                "1", "loading in engine initialization, and saving in engine shutdown",
+                "2", "loading in engine initialization, and saving in every e executing"
+            ),
         };
         final Cvar[] GAME_CVARS = {
             Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
@@ -654,6 +667,9 @@ public final class TextHelper
                     "r_strogg", "fonts/r_strogg",
                     "strogg", "fonts/strogg"
             ),
+            Cvar.Create("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0: disable; other number: bot num)."),
+            Cvar.Create("addbot", "string", "", "adds a multiplayer bot(support `tab` complete, exam. addbot bot_name1 bot_name2 ...)."),
+            Cvar.Create("fillbots", "integer", "", "fill bots(empty argument to fill max bots num, exam. fillbots 8)."),
         };
         final Cvar[] PREY_CVARS = {
                 Cvar.Create("harm_g_translateAlienFont", "string", "fonts", "Setup font name for automatic translate `alien` font text of GUI(empty to disable).",

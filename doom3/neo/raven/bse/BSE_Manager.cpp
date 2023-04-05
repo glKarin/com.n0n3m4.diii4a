@@ -45,6 +45,7 @@ idCVar bse_rateCost("bse_rateCost", "1", CVAR_FLOAT, "rate cost multiplier for s
 float effectCosts[EC_MAX] = { 0, 2, 0.1 }; // dd 0.0, 2 dup(0.1)
 #endif
 
+idRandom	rvBSEManagerLocal::random;
 idBlockAlloc<rvBSE, 256/*, 0 //k*/>	rvBSEManagerLocal::effects;
 #if 0
 idVec3						rvBSEManagerLocal::mCubeNormals[6];
@@ -85,6 +86,8 @@ rvBSEManagerLocal::Init
 bool rvBSEManagerLocal::Init(void) {
 	common->Printf("----------------- BSE Init ------------------\n");
 
+	random.SetSeed(Sys_Milliseconds() ^ 2003 ^ 2005 ^ 2009 ^ 2010 ^ 2014 ^ 2015 ^ 2020);
+	random.SetSeed(random.RandomInt() ^ 2003 ^ 2005 ^ 2009 ^ 2010 ^ 2014 ^ 2015 ^ 2020);
 	common->Printf("--------- BSE Created Successfully ----------\n");
 	return true;
 }

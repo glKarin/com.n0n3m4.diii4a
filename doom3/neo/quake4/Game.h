@@ -373,7 +373,6 @@ public:
 	virtual void				SetupLoadingGui( idUserInterface *gui ) = 0;
 #ifdef _RAVEN // bot
 	virtual void			ServerClientBegin( int clientNum, bool isBot, const char* botName) = 0;
-	virtual void				SpawnPlayer( int clientNum, bool isBot, const char* botName) = 0;
 #endif
 
 };

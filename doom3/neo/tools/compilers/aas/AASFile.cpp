@@ -159,6 +159,7 @@ idAASSettings::idAASSettings(void)
 	usePatches = false;
 #ifdef _RAVEN
 // jmarshall - aas 1.08
+	generateAllFaces = false;
 	generateTacticalFeatures = false;
 // jmarshall end
 #endif
@@ -312,10 +313,11 @@ bool idAASSettings::FromParser(idLexer &src)
 				return false;
 			}
 #ifdef _RAVEN // quake4 aas file
-		}
 // jmarshall: AAS 1.08
-		else if (token == "generateTacticalFeatures") {
+		} else if (token == "generateTacticalFeatures") {
 			if (!ParseBool(src, generateTacticalFeatures)) { return false; }
+		} else if (token == "generateAllFaces") {
+			if (!ParseBool(src, generateAllFaces)) { return false; }
 // jmarshall end
 #endif
 		} else if (token == "writeBrushMap") {
@@ -1063,6 +1065,27 @@ bool idAASFileLocal::ParseReachabilities(idLexer &src, int areaNum)
 	for (j = 0; j < num; j++) {
 		Reachability_Read(src, &reach);
 
+#ifdef _RAVEN //karin: aas1.08
+		if (reach.travelType & TFL_SPECIAL) {
+			newReach = special = new idReachability_Special();
+			Reachability_Special_Read(src, special);
+		}
+		else
+		{
+			newReach = new idReachability();
+			//karin: skip {...}
+			idToken t;
+			if(src.ReadToken(&t))
+			{
+				if(!t.Cmp("{"))
+				{
+					src.SkipBracedSection(false);
+				}
+				else
+					src.UnreadToken(&t);
+			}
+		}
+#else
 		switch (reach.travelType) {
 			case TFL_SPECIAL:
 				newReach = special = new idReachability_Special();
@@ -1072,6 +1095,7 @@ bool idAASFileLocal::ParseReachabilities(idLexer &src, int areaNum)
 				newReach = new idReachability();
 				break;
 		}
+#endif
 
 		newReach->CopyBase(reach);
 		newReach->fromAreaNum = areaNum;

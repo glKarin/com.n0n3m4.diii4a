@@ -29,6 +29,9 @@ fuzzyseperator_t* idBotFuzzyWeightManager::AllocFuzzyWeight( void )
 		{
 			memset( &fuzzyseperators[i], 0, sizeof( fuzzyseperator_t ) );
 			fuzzyseperators[i].inUse = true;
+#ifdef _QUAKE4
+			//BOT_DEBUG("AllocFuzzyWeight: %p: %d/%d\n", &fuzzyseperators[i], i, MAX_FUZZY_OPERATORS);
+#endif
 			return &fuzzyseperators[i];
 		}
 	}
@@ -151,13 +154,22 @@ void idBotFuzzyWeightManager::FreeFuzzySeperators_r( fuzzyseperator_t* fs )
 	if( fs->child )
 	{
 		FreeFuzzySeperators_r( fs->child );
+#ifdef _QUAKE4
+		fs->child = NULL;
+#endif
 	}
 	if( fs->next )
 	{
 		FreeFuzzySeperators_r( fs->next );
+#ifdef _QUAKE4
+		fs->next = NULL;
+#endif
 	}
 
 	fs->inUse = false;
+#ifdef _QUAKE4
+	//BOT_DEBUG("FreeFuzzySeperators_r: %p\n", fs);
+#endif
 }
 
 /*
@@ -177,6 +189,9 @@ void idBotFuzzyWeightManager::FreeWeightConfig2( weightconfig_t* config )
 		//	FreeMemory(config->weights[i].name);
 		// jmarshall end
 	}
+#ifdef _QUAKE4
+	config->Reset();
+#endif
 
 }
 
@@ -191,6 +206,9 @@ void idBotFuzzyWeightManager::FreeWeightConfig( weightconfig_t* config )
 	//	return;
 
 	FreeWeightConfig2( config );
+#ifdef _QUAKE4
+	BOT_DEBUG("FreeWeightConfig: %p: %s\n", config, config->filename.c_str());
+#endif
 }
 
 /*
@@ -385,6 +403,9 @@ weightconfig_t* idBotFuzzyWeightManager::ReadWeightConfig( char* filename )
 
 		if( config->filename == filename )
 		{
+#ifdef _QUAKE4
+			BOT_DEBUG("ReadWeightConfig::exists: %p: %s %d/%d\n", config, filename, n, MAX_WEIGHT_FILES);
+#endif
 			return config;
 		}
 
@@ -498,6 +519,9 @@ weightconfig_t* idBotFuzzyWeightManager::ReadWeightConfig( char* filename )
 		}
 	}
 
+#ifdef _QUAKE4
+	BOT_DEBUG("ReadWeightConfig::new: %p: %s %d/%d\n", config, filename, avail, MAX_WEIGHT_FILES);
+#endif
 	//if the file was located in a pak file
 	common->Printf( "idBotFuzzyWeightManager::ReadWeightConfig: loaded %s\n", filename );
 	config->inUse = true;
@@ -909,5 +933,8 @@ void idBotFuzzyWeightManager::BotShutdownWeights( void )
 		//	FreeWeightConfig2(weightFileList[i]);
 		//	weightFileList[i] = NULL;
 		//}
+#ifdef _QUAKE4
+		BOT_DEBUG("BotShutdownWeights: %p: %s %d/%d\n", &weightFileList[i], weightFileList[i].filename.c_str(), i, MAX_WEIGHT_FILES);
+#endif
 	}
 }

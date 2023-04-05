@@ -1248,16 +1248,16 @@ void R_RenderView(viewDef_t *parms)
 	// portal-to-screen scissor box calculations
 	R_SetupProjection();
 
+#ifdef _RAVENxxx // particle
+    R_AddEffectSurfaces();
+#endif
+
 	// identify all the visible portalAreas, and the entityDefs and
 	// lightDefs that are in them and pass culling.
 	static_cast<idRenderWorldLocal *>(parms->renderWorld)->FindViewLightsAndEntities();
 
 	// constrain the view frustum to the view lights and entities
 	R_ConstrainViewFrustum();
-
-#ifdef _RAVENxxx // particle
-    R_AddEffectSurfaces();
-#endif
 
 	// make sure that interactions exist for all light / entity combinations
 	// that are visible

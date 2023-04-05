@@ -45,6 +45,9 @@ bot_character_t* idBotCharacterStatsManager::AllocBotCharacter( void )
 		{
 			charStatsList[i].inUse = true;
 			ch = &charStatsList[i];
+#ifdef _QUAKE4
+			BOT_DEBUG("AllocBotCharacter: %p: %d/%d\n", &charStatsList[i], i, MAX_CHAR_STATS);
+#endif
 			break;
 		}
 	}
@@ -81,6 +84,9 @@ idBotCharacterStatsManager::FreeCharacterFile
 void idBotCharacterStatsManager::FreeCharacterFile( bot_character_t* ch )
 {
 	ch->inUse = false;
+#ifdef _QUAKE4
+	BOT_DEBUG("FreeCharacterFile: %p\n", ch);
+#endif
 }
 
 /*

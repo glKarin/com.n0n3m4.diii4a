@@ -223,9 +223,34 @@ class idSoundShader : public idDecl
 
 		virtual bool			CheckShakesAndOgg(void) const;
 #ifdef _RAVEN
-// jmarshall: eval
-	virtual bool			IsVO_ForPlayer(void) const { return false; }
-// jmarshall end
+// RAVEN BEGIN
+// jscott: required access functions
+			bool			IsPrivateSound( void ) const { return( !!( parms.soundShaderFlags & SSF_PRIVATE_SOUND ) ); }
+			bool			IsAntiPrivateSound( void ) const { return( !!( parms.soundShaderFlags & SSF_ANTI_PRIVATE_SOUND ) ); }
+			bool			IsNoOcclusion( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_OCCLUSION ) ); }
+			bool			IsGlobal( void ) const { return( !!( parms.soundShaderFlags & SSF_GLOBAL ) ); }
+			bool			IsOmnidirectional( void ) const { return( !!( parms.soundShaderFlags & SSF_OMNIDIRECTIONAL ) ); }
+			bool			IsLooping( void ) const { return( !!( parms.soundShaderFlags & SSF_LOOPING ) ); }
+			bool			IsPlayOnce( void ) const { return( !!( parms.soundShaderFlags & SSF_PLAY_ONCE ) ); }
+			bool			IsUnclamped( void ) const { return( !!( parms.soundShaderFlags & SSF_UNCLAMPED ) ); }
+			bool			IsNoFlicker( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_FLICKER ) ); }
+			bool			IsNoDupes( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_DUPS ) ); }
+			bool			IsDoppler( void ) const { return( !!( parms.soundShaderFlags & SSF_USEDOPPLER ) ); }
+			bool			IsNoRandomStart( void ) const { return( !!( parms.soundShaderFlags & SSF_NO_RANDOMSTART ) ); }
+			bool			IsVO_ForPlayer( void ) const { return( !!( parms.soundShaderFlags & SSF_VO_FOR_PLAYER ) ); }
+			bool			IsVO( void ) const { return( !!( parms.soundShaderFlags & SSF_IS_VO ) ); }
+			bool			IsCauseRumble( void ) const { return( !!( parms.soundShaderFlags & SSF_CAUSE_RUMBLE ) ); }
+			bool			IsCenter( void ) const { return( !!( parms.soundShaderFlags & SSF_CENTER ) ); }
+
+			float			GetVolume( void ) const { return( parms.volume ); }
+			float			GetShakes( void ) const { return( parms.shakes ); }
+			void			GetParms( soundShaderParms_t *out ) const { *out = parms; }
+			void			SetNoShakes( bool in ) { noShakes = in; }
+			bool			GetNoShakes( void ) const { return( noShakes ); }
+
+			void			IncPlayCount( void ) { playCount++; }
+			int				GetPlayCount( void ) const { return( playCount ); }
+// RAVEN END
 #endif
 
 #ifdef _HUMANHEAD
@@ -252,6 +277,19 @@ class idSoundShader : public idDecl
 		int						numLeadins;
 		idSoundSample 	*entries[SOUND_MAX_LIST_WAVS];
 		int						numEntries;
+#ifdef _RAVEN
+// RAVEN BEGIN
+	bool					noShakes;					// Don't generate shake data
+	bool					frequentlyUsed;				// Expand this to pcm data no matter how long it is
+// RAVEN END
+// RAVEN BEGIN
+// bdube: frequency shift code from splash
+	float					minFrequencyShift;
+	float					maxFrequencyShift;
+
+	int						playCount;					// For profiling
+// RAVEN END
+#endif
 
 	private:
 		void					Init(void);

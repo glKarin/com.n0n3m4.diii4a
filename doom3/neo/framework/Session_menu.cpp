@@ -1376,8 +1376,14 @@ void idSessionLocal::DispatchCommand(idUserInterface *gui, const char *menuComma
 
 		if (!cmd) {
 			guiActive = NULL;
+#ifdef _RAVEN //karin: append event name
+		} else if (strstr(cmd, "main ") == cmd) {
+			StartMenu();
+			guiMainMenu->HandleNamedEvent(cmd + 5);
+#else
 		} else if (idStr::Icmp(cmd, "main") == 0) {
 			StartMenu();
+#endif
 		} else if (strstr(cmd, "sound ") == cmd) {
 			// pipe the GUI sound commands not handled by the game to the main menu code
 			HandleMainMenuCommands(cmd);

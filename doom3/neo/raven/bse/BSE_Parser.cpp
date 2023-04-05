@@ -686,7 +686,7 @@ idVec3 rvDeclEffectParser::ParseOffset(rvBSEParticleStage *stage)
 		idBounds b;
 		b.Zero();
 		ParseBox(b);
-		res = (b[1] + b[0]) / 2.0;
+		res = b[0];
 		stage->offset = res;
 	}
 	else
@@ -884,7 +884,7 @@ void rvDeclEffectParser::ParseStage(rvFXSingleAction &FXAction, rvBSEParticleSta
 		}
 
 		if (!token.Icmp("length")) {
-			FXAction.length = ParseLength(stage, &FXAction.useEndOrigin) / 2.0;
+			FXAction.length = ParseLength(stage, &FXAction.useEndOrigin)/* / 2.0*/;
 			continue;
 		}
 
@@ -987,6 +987,8 @@ void rvDeclEffectParser::ParseLine(rvFXSingleAction &FXAction)
 
 		if (!token.Icmp("end")) {
 			ParseStage(action, stage, STAGE_END);
+			//stage->customPathParms[0] = action.size;
+			stage->customPathParms[2] = action.length;
 			continue;
 		}
 
@@ -1494,6 +1496,11 @@ void rvDeclEffectParser::ParseInnerLight(rvFXSingleAction &FXAction)
 			continue;
 		}
 
+		if (!token.Icmp("shadows")) {
+			FXAction.noshadows = false;
+			continue;
+		}
+
 		if (!token.Icmp("start")) {
 			ParseStage(FXAction, 0, STAGE_START);
 			FXAction.lightRadius = FXAction.size;
@@ -1532,6 +1539,7 @@ void rvDeclEffectParser::ParseLight(rvFXSingleAction &FXAction)
 	src.ExpectTokenString("{");
 	FXAction.type = FX_LIGHT;
 	FXAction.seg = SEG_LIGHT;
+	FXAction.noshadows = true;
 	while (1) {
 		if (!src.ReadToken(&token)) {
 			break;

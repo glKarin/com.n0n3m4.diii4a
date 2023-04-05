@@ -3,8 +3,6 @@
 
 #include "BSE.h"
 
-static idRandom2 fx_random(time(0) ^ 2003 ^ 2005 ^ 2009 ^ 2010 ^ 2014 ^ 2015 ^ 2020);
-
 static int bseSegmentNameToEnum(const char *name)
 {
 	if(!name || !name[0])
@@ -92,7 +90,7 @@ void rvBSE::Setup(const char *fx)
 			idFXLocalAction &laction = actions[i];
 
 			if (fxaction.random1 || fxaction.random2) {
-				laction.delay = fxaction.random1 + fx_random.RandomFloat() * (fxaction.random2 - fxaction.random1);
+				laction.delay = fxaction.random1 + rvBSEManagerLocal::random.RandomFloat() * (fxaction.random2 - fxaction.random1);
 			} else {
 				laction.delay = fxaction.delay;
 			}
@@ -144,6 +142,8 @@ void rvBSE::CleanUp(void)
 		idFXLocalAction &laction = actions[i];
 		CleanUpSingleAction(fxaction, laction);
 	}
+	if(referenceSound)
+		referenceSound->StopSound(SND_CHANNEL_ANY);
 }
 
 /*
@@ -344,7 +344,7 @@ void rvBSE::Run(int time)
 
 			if (loop && fxaction.restart) {
 				if (fxaction.random1 || fxaction.random2) {
-					totalDelay = fxaction.random1 + fx_random.RandomFloat() * (fxaction.random2 - fxaction.random1);
+					totalDelay = fxaction.random1 + rvBSEManagerLocal::random.RandomFloat() * (fxaction.random2 - fxaction.random1);
 				} else {
 					totalDelay = fxaction.delay;
 				}
@@ -444,7 +444,9 @@ void rvBSE::Run(int time)
 				break;
 			}
 			case FX_SOUND: {
-				if (!useAction->soundStarted) {
+				if (!useAction->soundStarted
+						&& referenceSound
+						) {
 					useAction->soundStarted = true;
 					const idSoundShader *shader = declManager->FindSound(fxaction.data);
 					StartSoundShader(shader, SND_CHANNEL_ANY, 0, false, NULL);
@@ -559,8 +561,8 @@ rvBSE::rvBSE
 rvBSE::rvBSE()
 	: time(0),
 	loop(false),
-	referenceSound(0),
-	gameRenderWorld(0)
+	referenceSound(NULL),
+	gameRenderWorld(NULL)
 {
 	fxEffect = NULL;
 	started = -1;
@@ -646,7 +648,7 @@ void rvBSE::ProjectDecal(const idVec3 &origin, const idVec3 &dir, float depth, b
 #endif
 
 	// randomly rotate the decal winding
-	idMath::SinCos16((angle) ? angle : fx_random.RandomFloat() * idMath::TWO_PI, s, c);
+	idMath::SinCos16((angle) ? angle : rvBSEManagerLocal::random.RandomFloat() * idMath::TWO_PI, s, c);
 
 	// winding orientation
 	axis[2] = dir;
@@ -708,7 +710,7 @@ bool rvBSE::StartSoundShader(const idSoundShader *shader, const s_channelType ch
 
 	// set a random value for diversity unless one was parsed from the entity
 	//if (refSound.diversity < 0.0f) {
-		diversity = fx_random.RandomFloat();
+		diversity = rvBSEManagerLocal::random.RandomFloat();
 	//} else {
 	//	diversity = refSound.diversity;
 	//}
@@ -732,7 +734,7 @@ void rvBSE::Init(const rvDeclEffect* declEffect, renderEffect_s* parms, idRender
 	Sync(parms);
 	this->gameRenderWorld = world;
 	this->started = -1;
-	if(parms->referenceSoundHandle >= 0)
+	if(parms->referenceSoundHandle > 0) // >= ???
 	{
 		referenceSound = soundSystem->EmitterForIndex(SOUNDWORLD_GAME, parms->referenceSoundHandle);
 	}
@@ -785,7 +787,7 @@ void rvBSE::Setup(const rvDeclEffect *fx)
 			idFXLocalAction &laction = actions[i];
 
 			if (fxaction.random1 || fxaction.random2) {
-				laction.delay = fxaction.random1 + fx_random.RandomFloat() * (fxaction.random2 - fxaction.random1);
+				laction.delay = fxaction.random1 + rvBSEManagerLocal::random.RandomFloat() * (fxaction.random2 - fxaction.random1);
 			} else {
 				laction.delay = fxaction.delay;
 			}

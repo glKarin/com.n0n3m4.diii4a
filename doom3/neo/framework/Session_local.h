@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SESSIONLOCAL_H__
 #define __SESSIONLOCAL_H__
 
+#ifdef _RAVEN
+#define MAX_MP_LOADING_GUI_ICONS 20
+#endif
 /*
 
 IsConnectedToServer();

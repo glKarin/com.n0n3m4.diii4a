@@ -29,14 +29,65 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#ifdef _RAVEN //k: for play credits in mainmenu
-#include "../ui/Window.h"
-#endif
+#include "Session_local.h"
+
 #ifdef _MULTITHREAD
 extern volatile bool backendFinished;
 extern unsigned char multithreadActive;
 #endif
-#include "Session_local.h"
+
+#ifdef _RAVEN //k: for play credits in mainmenu
+#include "../ui/Window.h"
+const char * Com_LocalizeGametype( const char *gameType ) { // from MultiplayerGame.cpp
+	const char *localisedGametype = gameType;
+
+	if( !idStr::Icmp( gameType, "DM" ) ) {
+		localisedGametype = common->GetLocalizedString( "#str_110011" );
+	}
+	else if( !idStr::Icmp( gameType, "Tourney" ) ) {
+		localisedGametype = common->GetLocalizedString( "#str_110012" );
+	}
+	else if( !idStr::Icmp( gameType, "Team DM" ) ) {
+		localisedGametype = common->GetLocalizedString( "#str_110013" );
+	}
+	else if( !idStr::Icmp( gameType, "CTF" ) ) {
+		localisedGametype = common->GetLocalizedString( "#str_110014" );
+	}
+	else if( !idStr::Icmp( gameType, "Arena CTF" ) ) {
+		localisedGametype = common->GetLocalizedString( "#str_110015" );
+	}
+	else if( !idStr::Icmp( gameType, "DeadZone" ) ) {
+		localisedGametype = common->GetLocalizedString( "#str_122001" ); // Squirrel@Ritual - Localized for 1.2 Patch
+	}
+
+	return localisedGametype;
+}
+
+const char * Com_LocalizeGameLimit( const char *gameType, idDict &serverInfo ) { // from MultiplayerGame.cpp
+	const char *localisedGameLimit = "";
+
+	if( !idStr::Icmp( gameType, "DM" ) ) {
+		localisedGameLimit = va( "%s: %d", common->GetLocalizedString( "#str_107660" ), serverInfo.GetInt( "si_fragLimit" ) );		
+	}
+	else if( !idStr::Icmp( gameType, "Tourney" ) ) {
+		localisedGameLimit = va( "%s: %d", common->GetLocalizedString( "#str_107660" ), serverInfo.GetInt( "si_fragLimit" ) );		
+	}
+	else if( !idStr::Icmp( gameType, "Team DM" ) ) {
+		localisedGameLimit = va( "%s: %d", common->GetLocalizedString( "#str_107660" ), serverInfo.GetInt( "si_fragLimit" ) );		
+	}
+	else if( !idStr::Icmp( gameType, "CTF" ) ) {
+		localisedGameLimit = va( "%s: %d", common->GetLocalizedString( "#str_107661" ), serverInfo.GetInt( "si_captureLimit" ) );
+	}
+	else if( !idStr::Icmp( gameType, "Arena CTF" ) ) {
+		localisedGameLimit = va( "%s: %d", common->GetLocalizedString( "#str_107661" ), serverInfo.GetInt( "si_captureLimit" ) );
+	}
+	else if( !idStr::Icmp( gameType, "DeadZone" ) ) {
+		localisedGameLimit = va( "%s: %d", common->GetLocalizedString( "#str_122008" ), serverInfo.GetInt( "si_controlTime" ) );		
+	}
+
+	return localisedGameLimit;
+}
+#endif
 
 idCVar	idSessionLocal::com_showAngles("com_showAngles", "0", CVAR_SYSTEM | CVAR_BOOL, "");
 idCVar	idSessionLocal::com_minTics("com_minTics", "1", CVAR_SYSTEM, "");
@@ -1064,7 +1115,10 @@ void idSessionLocal::StartPlayingRenderDemo(idStr demoName)
 	// bring up the loading screen manually, since demos won't
 	// call ExecuteMapChange()
 #ifdef _RAVEN // quake4 loading gui
-    guiLoading = uiManager->FindGui( "guis/loading/generic.gui", true, false, true );
+	if(IsMultiplayer())
+		guiLoading = uiManager->FindGui( "guis/loading/mplevel.gui", true, false, true );
+	else
+		guiLoading = uiManager->FindGui( "guis/loading/generic.gui", true, false, true );
 #else
 	guiLoading = uiManager->FindGui("guis/map/loading.gui", true, false, true);
 #endif
@@ -1696,9 +1750,24 @@ void idSessionLocal::LoadLoadingGui(const char *mapName)
 		}
 		else
 		{
-			guiLoading = uiManager->FindGui("guis/loading/generic.gui", true, false, true);
+			if(IsMultiplayer())
+				guiLoading = uiManager->FindGui("guis/loading/mplevel.gui", true, false, true);
+			else
+				guiLoading = uiManager->FindGui("guis/loading/generic.gui", true, false, true);
 			guiLoading->SetStateString("loading_levelname", name.c_str());
 			guiLoading->SetStateString("loading_bkgnd", bgimg.c_str());
+			if(IsMultiplayer())
+			{
+				guiLoading->SetStateString("server_name", mapSpawnData.serverInfo.GetString("si_name"));
+				guiLoading->SetStateString("server_ip", networkSystem->GetServerAddress());
+				guiLoading->SetStateString("server_gametype", Com_LocalizeGametype(mapSpawnData.serverInfo.GetString("si_gameType")));
+				guiLoading->SetStateString("server_limit", Com_LocalizeGameLimit(mapSpawnData.serverInfo.GetString("si_gameType"), mapSpawnData.serverInfo));
+				for(int i = 0; i < MAX_MP_LOADING_GUI_ICONS; i++)
+				{
+					guiLoading->SetStateBool(va("load_icon_%d", i + 1), false);
+					guiLoading->SetStateString(va("load_icon_img_%d", i + 1), "");
+				}
+			}
 		}
 #else
 		guiLoading = uiManager->FindGui("guis/map/loading.gui", true, false, true);
@@ -2801,12 +2870,7 @@ void idSessionLocal::Draw()
 			guiLoading->Redraw(com_frameTime);
 		}
 
-#ifdef _HUMANHEAD
-		if (guiActive == guiMsg && guiMsg) //k: gui not parse
-#else
-		if (guiActive == guiMsg)
-#endif
-		{
+		if (guiActive == guiMsg) {
 			guiMsg->Redraw(com_frameTime);
 		}
 	} else if (guiTest) {

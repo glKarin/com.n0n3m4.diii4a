@@ -1627,13 +1627,21 @@ R_AddEffectSurfaces
 ===============
 */
 void R_AddEffectSurfaces(void) {
+#if 1 //karin: once
+	static int lastServiceTime = -1;
+	if(tr.frameCount == lastServiceTime)
+		return;
+	lastServiceTime = tr.frameCount;
+#endif
 	idRenderWorldLocal* world = tr.viewDef->renderWorld;
+	rvRenderEffectLocal *effect;
 
 	for (int i = 0; i < world->effectsDef.Num(); i++) {
-		if (world->effectsDef[i] == NULL)
+		effect = world->effectsDef[i];
+		if (effect == NULL)
 			continue;
 
-		bse->ServiceEffect(world->effectsDef[i], tr.frameShaderTime);
+		bse->ServiceEffect(effect, MS2SEC(effect->gameTime)/*tr.frameShaderTime*/);
 	}
 }
 #endif

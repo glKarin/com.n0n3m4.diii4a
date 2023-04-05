@@ -249,11 +249,7 @@ itemconfig_t* idBotGoalManager::LoadItemConfig( char* filename )
 		common->Warning( "no item info loaded\n" );
 	}
 
-#if 0 //k
-	common->DPrintf( "loaded %s\n", path );
-#else
 	common->DPrintf( "loaded %s\n", path.c_str() );
-#endif
 	itemconfiglocal = ic;
 	itemconfig = &itemconfiglocal;
 
@@ -1931,6 +1927,12 @@ void idBotGoalManager::BotFreeItemWeights( int goalstate )
 	{
 		botFuzzyWeightManager.FreeWeightConfig( gs->itemweightconfig );
 	}
+#ifdef _QUAKE4
+	BOT_DEBUG("BotFreeItemWeights: %p: %p %d/%d\n", gs, gs->itemweightconfig, goalstate, MAX_CLIENTS);
+#endif
+#ifdef _QUAKE4
+	gs->Reset();
+#endif
 	// jmarshall - eval
 	//if (gs->itemweightindex)
 	//	FreeMemory(gs->itemweightindex);
@@ -1952,6 +1954,9 @@ int idBotGoalManager::BotAllocGoalState( int client )
 		{
 			botgoalstates[i].Reset();
 			botgoalstates[i].client = client;
+#ifdef _QUAKE4
+			BOT_DEBUG("BotAllocGoalState: %p: %d/%d\n", &botgoalstates[i], i, MAX_CLIENTS);
+#endif
 			return i;
 		}
 	}
@@ -1982,6 +1987,9 @@ void idBotGoalManager::BotFreeGoalState( int handle )
 	//FreeMemory(botgoalstates[handle]);
 	// jmarshall end
 	botgoalstates[handle].Reset();
+#ifdef _QUAKE4
+	BOT_DEBUG("BotFreeGoalState: %p: %d/%d\n", &botgoalstates[handle], handle, MAX_CLIENTS);
+#endif
 }
 
 /*

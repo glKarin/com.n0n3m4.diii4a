@@ -1509,7 +1509,7 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 	}
 
 #ifdef _QUAKE4 //k: in MP game, auto gen AAS file for map
-	if(isMultiplayer && isServer && harm_g_autoGenAASFileInMPGame.GetBool())
+	if(CAN_ADD_BOT() && harm_g_autoGenAASFileInMPGame.GetBool())
 	{
 		Printf("[Harmattan]: Check AAS load result......\n");
 		bool aasLoadSuc = false;
@@ -1972,6 +1972,9 @@ void idGameLocal::MapPopulate( int instance ) {
 idGameLocal::InitFromNewMap
 ===================
 */
+#ifdef _QUAKE4 //karin: auto fill bots in MP-game
+static idCVar harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Automatic fill bots after map loaded in multiplayer game(0: disable; other number: bot num).", 0, MAX_BOT );
+#endif
 void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorld, bool isServer, bool isClient, int randseed ) {
 
 	TIME_THIS_SCOPE( __FUNCLINE__);
@@ -2059,7 +2062,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 
 #ifdef _QUAKE4 // bot
 // jmarshall: bot
-	if (gameLocal.IsMultiplayer() && gameLocal.isServer)
+	if (CAN_ADD_BOT())
 	{
 		botGoalManager.InitLevelItems();
 	}
@@ -2068,6 +2071,14 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 
 	gamestate = GAMESTATE_ACTIVE;
 
+#ifdef _QUAKE4 //karin: auto fill bots in MP-game
+	if (CAN_ADD_BOT())
+	{
+		int botCount = harm_si_autoFillBots.GetInteger();
+		if(botCount > 0)
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("fillbots %d\n", botCount) );
+	}
+#endif
 	Printf( "---------------------------------------------\n" );
 }
 
@@ -2125,7 +2136,11 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 		if ( !InhibitEntitySpawn( mapEnt->epairs ) ) {
 			CacheDictionaryMedia( &mapEnt->epairs );
 			const char *classname = mapEnt->epairs.GetString( "classname" );
+#ifdef _K_CLANG //k
+			if ( classname && classname[0] ) {
+#else
 			if ( classname != '\0' ) {
+#endif
 				FindEntityDef( classname, false );
 			}
 		}
@@ -2747,7 +2762,11 @@ void idGameLocal::GetShakeSounds( const idDict *dict ) {
 	idStr soundName;
 
 	soundShaderName = dict->GetString( "s_shader" );
+#ifdef _K_CLANG //k
+	if ( soundShaderName && soundShaderName[0] && dict->GetFloat("s_shakes") != 0.0f ) {
+#else
 	if ( soundShaderName != '\0' && dict->GetFloat( "s_shakes" ) != 0.0f ) {
+#endif
 		soundShader = declManager->FindSound( soundShaderName );
 
 		for ( int i = 0; i < soundShader->GetNumSounds(); i++ ) {
@@ -5724,7 +5743,7 @@ void idGameLocal::AlertAI( idEntity *ent ) {
 #ifdef _QUAKE4 // bot
 // jmarshall: bot
 		// Alert any bots near were we just exploded.
-		if (gameLocal.IsMultiplayer() && gameLocal.isServer)
+		if (CAN_ADD_BOT())
 		{
 			idPlayer* player = ent->Cast<idPlayer>();
 			if (player)
@@ -8737,7 +8756,7 @@ void idGameLocal::AddBot(const char *botName) {
 		return;
 	}
 
-	clientNum = networkSystem->AllocateClientSlotForBot(botName,  8);
+	clientNum = networkSystem->AllocateClientSlotForBot(botName,  MAX_BOT + 1);
 	if (clientNum == -1) {
 		return;
 	}

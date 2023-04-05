@@ -46,6 +46,13 @@ void idSoundShader::Init(void)
 	numLeadins = 0;
 	leadinVolume = 0;
 	altSound = NULL;
+#ifdef _RAVEN
+	noShakes = false;
+	frequentlyUsed = false;
+	minFrequencyShift = 0;
+	maxFrequencyShift = 0;
+	playCount = 0;
+#endif
 }
 
 /*
@@ -227,31 +234,31 @@ bool idSoundShader::ParseShader(idLexer &src)
 		}
 #ifdef _RAVEN // quake4 snd file
 		else if (!token.Icmp("frequencyshift")) {
-			float shiftVal = src.ParseFloat();
+			minFrequencyShift = src.ParseFloat();
 			src.ExpectTokenString(",");
-			float shiftVal2 = src.ParseFloat();
+			maxFrequencyShift = src.ParseFloat();
 		}
 		else if (!token.Icmp("volumeDb")) {
 			float db = src.ParseFloat();
 			parms.volume = idMath::dBToScale(db);
 		}
 		else if (!token.Icmp("useDoppler")) {
-
+			parms.soundShaderFlags |= SSF_USEDOPPLER;
 		}
 		else if (!token.Icmp("noRandomStart")) {
-
+			parms.soundShaderFlags |= SSF_NO_RANDOMSTART;
 		}
 		else if (!token.Icmp("voForPlayer")) {
-
-		}
-		else if (!token.Icmp("frequentlyUsed")) {
-
+			parms.soundShaderFlags |= SSF_VO_FOR_PLAYER;
 		}
 		else if (!token.Icmp("causeRumble")) {
-
+			parms.soundShaderFlags |= SSF_CAUSE_RUMBLE;
 		}
 		else if (!token.Icmp("center")) {
-
+			parms.soundShaderFlags |= SSF_CENTER;
+		}
+		else if (!token.Icmp("frequentlyUsed")) {
+			frequentlyUsed = true;
 		}
 		else if (!token.Icmp("shakeData"))
 		{
@@ -260,8 +267,8 @@ bool idSoundShader::ParseShader(idLexer &src)
 		}
 		else if (!token.Icmp("no_shakes"))
 		{
-			//k TODO
 			parms.shakes = 0.0f;
+			noShakes = true;
 		}
 #endif
 		// shakes screen
@@ -412,10 +419,12 @@ bool idSoundShader::ParseShader(idLexer &src)
 			src.SkipRestOfLine();
 		}
 		else if (!token.Icmp("omniwhenclose")) {
+			parms.soundShaderFlags |= SSF_OMNI_WHEN_CLOSE;
 		}
 		else if (!token.Icmp("jawflap")) {
 		}
 		else if (!token.Icmp("NOREVERB")) {
+			parms.soundShaderFlags |= SSF_NOREVERB;
 		}
 		else if (!token.Icmp("noportalflow")) {
 		}

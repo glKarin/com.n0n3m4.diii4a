@@ -657,6 +657,16 @@ static xthreadInfo				render_thread = {0};
 extern void BackendThreadWait();
 extern void BackendThreadTask();
 
+bool Sys_InRenderThread(void)
+{
+	return render_thread.threadHandle && pthread_equal(render_thread.threadHandle, pthread_self()) != 0;
+}
+
+bool Sys_InMainThread(void)
+{
+	return main_thread && pthread_equal(main_thread, pthread_self()) != 0;
+}
+
 void BackendThreadShutdown(void)
 {
 	if(!multithreadActive)
@@ -849,7 +859,7 @@ void (*setState)(int st);
 void Q3E_SetCallbacks(void *init_audio, void *write_audio, void *set_state)
 {
 #ifdef _K_CLANG
-    setState=(void(*)(int))set_state;
+    setState = (void(*)(int))set_state;
     writeAudio = (int(*)(int, int))write_audio;
     initAudio = (void(*)(void *, int))init_audio;
 #else

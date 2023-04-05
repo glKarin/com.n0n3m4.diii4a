@@ -3,6 +3,14 @@
 
 class rvmBotAIBotActionBase;
 
+#define MAX_BOT 15
+#define CAN_ADD_BOT() (gameLocal.isMultiplayer && gameLocal.isServer)
+#ifdef _K_DEV
+#define BOT_DEBUG(fmt, args...)  { common->Printf(fmt, ##args); }
+#else
+#define BOT_DEBUG(fmt, args...)
+#endif
+
 // These need to match items.def
 #define INVENTORY_ARMOR				1
 #define INVENTORY_GAUNTLET			4
@@ -906,6 +914,10 @@ protected:
 	static int	WP_SHOTGUN;
 	static int	WP_PLASMAGUN;
 	static int	WP_ROCKET_LAUNCHER;
+
+#ifdef _QUAKE4
+	virtual void					SetupHead( const char* modelKeyName = "", idVec3 headOffset = idVec3(0, 0, 0) );
+#endif
 public:
 	stateResult_t	state_Chase(const stateParms_t& parms);
 	stateResult_t	state_BattleFight(const stateParms_t& parms);

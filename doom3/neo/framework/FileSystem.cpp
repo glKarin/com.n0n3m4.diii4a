@@ -871,7 +871,9 @@ const char *idFileSystemLocal::BuildOSPath(const char *base, const char *game, c
 
 		if (testPath.HasUpper()) {
 
+#if defined(__ANDROID__) && !defined(_K_DEV)
 			common->Warning("Non-portable: path contains uppercase characters: %s", testPath.c_str());
+#endif
 
 			// attempt a fixup on the fly
 			if (fs_caseSensitiveOS.GetBool()) {
