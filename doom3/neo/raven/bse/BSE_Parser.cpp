@@ -1848,6 +1848,12 @@ bool rvDeclEffectParser::Parse(void)
 			continue;
 		}
 
+		if (!token.Icmp("effect")) {
+			src.ReadToken(&token);
+			src.SkipBracedSection(true);
+			continue;
+		}
+
 		if (!token.Icmp("delay")) {
 			src.ReadToken(&token);
 			src.SkipBracedSection(true);
