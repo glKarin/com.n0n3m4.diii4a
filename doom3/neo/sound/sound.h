@@ -537,47 +537,18 @@ class idSoundSystem
 		// is EAX support present - -1: disabled at compile time, 0: no suitable hardware, 1: ok, 2: failed to load OpenAL DLL
 		virtual int				IsEAXAvailable(void) = 0;
 #ifdef _RAVEN
-	virtual idSoundWorld* GetSoundWorldFromId(int worldId) = 0;
-	idSoundEmitter* EmitterForIndex(int worldId, int index) {
-		return GetSoundWorldFromId(worldId)->EmitterForIndex(index);
-	}
-	virtual int				AllocSoundEmitter(int worldId) {
-		return GetSoundWorldFromId(worldId)->AllocSoundEmitter()->Index();
-	}
-	virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate) {
-		idSoundEmitter *emitter = GetSoundWorldFromId(worldId)->EmitterForIndex(handle);
-		if(emitter)
-			emitter->Free(immediate);
-	}
-
-	virtual void StopAllSounds(int worldId) {
-		GetSoundWorldFromId(worldId)->StopAllSounds();
-	}
-
-	virtual void SetActiveSoundWorld(bool val) {  }
-
-	void			FadeSoundClasses(int worldId, const int soundClass, const float to, const float over) {
-		GetSoundWorldFromId(worldId)->FadeSoundClasses(soundClass, to, over);
-	}
-
-	virtual	float			CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition) {
-		return 0.0f; // GetSoundWorldFromId(worldId)->CurrentShakeAmplitudeForPosition(time, listenerPosition);
-	}
-
-	void			PlayShaderDirectly(int worldId, const char* name, int channel = -1) {
-		GetSoundWorldFromId(worldId)->PlayShaderDirectly(name, channel);
-	}
-
-	void			PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName) {
-		GetSoundWorldFromId(SOUNDWORLD_GAME)->PlaceListener(origin, axis, listenerId, gameTime, areaName);
-	}
-
-	virtual void			WriteToSaveGame(int worldId, idFile* savefile) {
-		GetSoundWorldFromId(worldId)->WriteToSaveGame(savefile);
-	}
-	virtual void			ReadFromSaveGame(int worldId, idFile* savefile) {
-		GetSoundWorldFromId(worldId)->ReadFromSaveGame(savefile);
-	}
+		virtual idSoundWorld* GetSoundWorldFromId(int worldId) = 0;
+		virtual idSoundEmitter* EmitterForIndex(int worldId, int index) = 0;
+		virtual int				AllocSoundEmitter(int worldId) = 0;
+		virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate) = 0;
+		virtual void StopAllSounds(int worldId) = 0;
+		virtual void SetActiveSoundWorld(bool val) = 0;
+		virtual void			FadeSoundClasses(int worldId, const int soundClass, const float to, const float over) = 0;
+		virtual	float			CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition) = 0;
+		virtual void			PlayShaderDirectly(int worldId, const char* name, int channel = -1) = 0;
+		virtual void			PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName) = 0;
+		virtual void			WriteToSaveGame(int worldId, idFile* savefile) = 0;
+		virtual void			ReadFromSaveGame(int worldId, idFile* savefile) = 0;
 #endif
 };
 

@@ -820,123 +820,134 @@ class idSoundSystemLocal : public idSoundSystem
 		virtual int				IsEAXAvailable(void);
 
 #ifdef _RAVEN
-	virtual idSoundWorld* GetSoundWorldFromId(int worldId);
+		virtual idSoundWorld* GetSoundWorldFromId(int worldId);
+		virtual idSoundEmitter* EmitterForIndex(int worldId, int index);
+		virtual int				AllocSoundEmitter(int worldId);
+		virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate);
+		virtual void StopAllSounds(int worldId);
+		virtual void SetActiveSoundWorld(bool val) { }
+		virtual void			FadeSoundClasses(int worldId, const int soundClass, const float to, const float over);
+		virtual	float			CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition);
+		virtual void			PlayShaderDirectly(int worldId, const char* name, int channel = -1);
+		virtual void			PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName);
+		virtual void			WriteToSaveGame(int worldId, idFile* savefile);
+		virtual void			ReadFromSaveGame(int worldId, idFile* savefile);
 #endif
 
-		//-------------------------
+	//-------------------------
 
-		int						GetCurrent44kHzTime(void) const;
-		float					dB2Scale(const float val) const;
-		int						SamplesToMilliseconds(int samples) const;
-		int						MillisecondsToSamples(int ms) const;
+	int						GetCurrent44kHzTime(void) const;
+	float					dB2Scale(const float val) const;
+	int						SamplesToMilliseconds(int samples) const;
+	int						MillisecondsToSamples(int ms) const;
 
-		void					DoEnviroSuit(float *samples, int numSamples, int numSpeakers);
+	void					DoEnviroSuit(float *samples, int numSamples, int numSpeakers);
 
-		ALuint					AllocOpenALSource(idSoundChannel *chan, bool looping, bool stereo);
-		void					FreeOpenALSource(ALuint handle);
+	ALuint					AllocOpenALSource(idSoundChannel *chan, bool looping, bool stereo);
+	void					FreeOpenALSource(ALuint handle);
 
-		idAudioHardware 		*snd_audio_hw;
-		idSoundCache 			*soundCache;
+	idAudioHardware 		*snd_audio_hw;
+	idSoundCache 			*soundCache;
 
-		idSoundWorldLocal 		*currentSoundWorld;	// the one to mix each async tic
+	idSoundWorldLocal 		*currentSoundWorld;	// the one to mix each async tic
 
-		int						olddwCurrentWritePos;	// statistics
-		int						buffers;				// statistics
-		int						CurrentSoundTime;		// set by the async thread and only used by the main thread
+	int						olddwCurrentWritePos;	// statistics
+	int						buffers;				// statistics
+	int						CurrentSoundTime;		// set by the async thread and only used by the main thread
 
-		unsigned int			nextWriteBlock;
+	unsigned int			nextWriteBlock;
 
-		float 					realAccum[6*MIXBUFFER_SAMPLES+16];
-		float 					*finalMixBuffer;			// points inside realAccum at a 16 byte aligned boundary
+	float 					realAccum[6*MIXBUFFER_SAMPLES+16];
+	float 					*finalMixBuffer;			// points inside realAccum at a 16 byte aligned boundary
 
-		bool					isInitialized;
-		bool					muted;
-		bool					shutdown;
+	bool					isInitialized;
+	bool					muted;
+	bool					shutdown;
 
-		s_stats					soundStats;				// NOTE: updated throughout the code, not displayed anywhere
+	s_stats					soundStats;				// NOTE: updated throughout the code, not displayed anywhere
 
-		int						meterTops[256];
-		int						meterTopsTime[256];
+	int						meterTops[256];
+	int						meterTopsTime[256];
 
-		dword 					*graph;
+	dword 					*graph;
 
-		float					volumesDB[1200];		// dB to float volume conversion
+	float					volumesDB[1200];		// dB to float volume conversion
 
-		idList<SoundFX *>		fxList;
+	idList<SoundFX *>		fxList;
 
 #if !defined(__ANDROID__)
-		ALCdevice				*openalDevice;
-		ALCcontext				*openalContext;
-		ALsizei					openalSourceCount;
-		openalSource_t			openalSources[256];
-		EAXSet					alEAXSet;
-		EAXGet					alEAXGet;
-		EAXSetBufferMode		alEAXSetBufferMode;
-		EAXGetBufferMode		alEAXGetBufferMode;
-		idEFXFile				EFXDatabase;
+	ALCdevice				*openalDevice;
+	ALCcontext				*openalContext;
+	ALsizei					openalSourceCount;
+	openalSource_t			openalSources[256];
+	EAXSet					alEAXSet;
+	EAXGet					alEAXGet;
+	EAXSetBufferMode		alEAXSetBufferMode;
+	EAXGetBufferMode		alEAXGetBufferMode;
+	idEFXFile				EFXDatabase;
 #endif
-		bool					efxloaded;
-		// latches
-		static bool				useOpenAL;
-		static bool				useEAXReverb;
-		// mark available during initialization, or through an explicit test
-		static int				EAXAvailable;
+	bool					efxloaded;
+	// latches
+	static bool				useOpenAL;
+	static bool				useEAXReverb;
+	// mark available during initialization, or through an explicit test
+	static int				EAXAvailable;
 
 
-		static idCVar			s_noSound;
-		static idCVar			s_quadraticFalloff;
-		static idCVar			s_drawSounds;
-		static idCVar			s_minVolume6;
-		static idCVar			s_dotbias6;
-		static idCVar			s_minVolume2;
-		static idCVar			s_dotbias2;
-		static idCVar			s_spatializationDecay;
-		static idCVar			s_showStartSound;
-		static idCVar			s_maxSoundsPerShader;
-		static idCVar			s_reverse;
-		static idCVar			s_showLevelMeter;
-		static idCVar			s_meterTopTime;
-		static idCVar			s_volume;
-		static idCVar			s_constantAmplitude;
-		static idCVar			s_playDefaultSound;
-		static idCVar			s_useOcclusion;
-		static idCVar			s_subFraction;
-		static idCVar			s_globalFraction;
-		static idCVar			s_doorDistanceAdd;
-		static idCVar			s_singleEmitter;
-		static idCVar			s_numberOfSpeakers;
-		static idCVar			s_force22kHz;
-		static idCVar			s_clipVolumes;
-		static idCVar			s_realTimeDecoding;
-		static idCVar			s_libOpenAL;
-		static idCVar			s_useOpenAL;
-		static idCVar			s_useEAXReverb;
-		static idCVar			s_muteEAXReverb;
-		static idCVar			s_decompressionLimit;
+	static idCVar			s_noSound;
+	static idCVar			s_quadraticFalloff;
+	static idCVar			s_drawSounds;
+	static idCVar			s_minVolume6;
+	static idCVar			s_dotbias6;
+	static idCVar			s_minVolume2;
+	static idCVar			s_dotbias2;
+	static idCVar			s_spatializationDecay;
+	static idCVar			s_showStartSound;
+	static idCVar			s_maxSoundsPerShader;
+	static idCVar			s_reverse;
+	static idCVar			s_showLevelMeter;
+	static idCVar			s_meterTopTime;
+	static idCVar			s_volume;
+	static idCVar			s_constantAmplitude;
+	static idCVar			s_playDefaultSound;
+	static idCVar			s_useOcclusion;
+	static idCVar			s_subFraction;
+	static idCVar			s_globalFraction;
+	static idCVar			s_doorDistanceAdd;
+	static idCVar			s_singleEmitter;
+	static idCVar			s_numberOfSpeakers;
+	static idCVar			s_force22kHz;
+	static idCVar			s_clipVolumes;
+	static idCVar			s_realTimeDecoding;
+	static idCVar			s_libOpenAL;
+	static idCVar			s_useOpenAL;
+	static idCVar			s_useEAXReverb;
+	static idCVar			s_muteEAXReverb;
+	static idCVar			s_decompressionLimit;
 
-		static idCVar			s_slowAttenuate;
+	static idCVar			s_slowAttenuate;
 
-		static idCVar			s_enviroSuitCutoffFreq;
-		static idCVar			s_enviroSuitCutoffQ;
-		static idCVar			s_enviroSuitSkipLowpass;
-		static idCVar			s_enviroSuitSkipReverb;
+	static idCVar			s_enviroSuitCutoffFreq;
+	static idCVar			s_enviroSuitCutoffQ;
+	static idCVar			s_enviroSuitSkipLowpass;
+	static idCVar			s_enviroSuitSkipReverb;
 
-		static idCVar			s_reverbTime;
-		static idCVar			s_reverbFeedback;
-		static idCVar			s_enviroSuitVolumeScale;
-		static idCVar			s_skipHelltimeFX;
+	static idCVar			s_reverbTime;
+	static idCVar			s_reverbFeedback;
+	static idCVar			s_enviroSuitVolumeScale;
+	static idCVar			s_skipHelltimeFX;
 };
 
 extern	idSoundSystemLocal	soundSystemLocal;
 
 
 /*
-===================================================================================
+   ===================================================================================
 
-  This class holds the actual wavefile bitmap, size, and info.
+   This class holds the actual wavefile bitmap, size, and info.
 
-===================================================================================
-*/
+   ===================================================================================
+   */
 
 const int SCACHE_SIZE = MIXBUFFER_SAMPLES*20;	// 1/2 of a second (aroundabout)
 
@@ -973,12 +984,12 @@ class idSoundSample
 
 
 /*
-===================================================================================
+   ===================================================================================
 
-  Sound sample decoder.
+   Sound sample decoder.
 
-===================================================================================
-*/
+   ===================================================================================
+   */
 
 class idSampleDecoder
 {
@@ -999,12 +1010,12 @@ class idSampleDecoder
 
 
 /*
-===================================================================================
+   ===================================================================================
 
-  The actual sound cache.
+   The actual sound cache.
 
-===================================================================================
-*/
+   ===================================================================================
+   */
 
 class idSoundCache
 {

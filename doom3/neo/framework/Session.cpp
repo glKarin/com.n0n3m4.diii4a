@@ -2048,7 +2048,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 		// run a few frames to allow everything to settle
 		for (i = 0; i < 10; i++) {
 #ifdef _RAVEN
-			game->RunFrame(mapSpawnData.mapSpawnUsercmd, 0, true, 0); // serverGameFrame isn't used
+			game->RunFrame(mapSpawnData.mapSpawnUsercmd, 0, false, 0); // serverGameFrame isn't used
 #else
 			game->RunFrame(mapSpawnData.mapSpawnUsercmd);
 #endif
@@ -2114,6 +2114,9 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	// restart entity sound playback
 	soundSystem->SetMute(false);
 
+#ifdef _RAVENxxx //karin: TODO: why has noise sound when enable effects???
+	sw->StopAllSounds();
+#endif
 	// we are valid for game draws now
 	mapSpawned = true;
 	Sys_ClearEvents();

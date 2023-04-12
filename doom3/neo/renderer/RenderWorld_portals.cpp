@@ -113,7 +113,11 @@ bool idRenderWorldLocal::PortalIsFoggedOut(const portal_t *p)
 	int		size = sizeof(float) *lightShader->GetNumRegisters();
 	float	*regs =(float *)_alloca(size);
 
+#ifdef _RAVEN //karin: quake4 using handle
+	lightShader->EvaluateRegisters(regs, ldef->parms.shaderParms, tr.viewDef, ldef->parms.referenceSoundHandle);
+#else
 	lightShader->EvaluateRegisters(regs, ldef->parms.shaderParms, tr.viewDef, ldef->parms.referenceSound);
+#endif
 
 	const shaderStage_t	*stage = lightShader->GetStage(0);
 

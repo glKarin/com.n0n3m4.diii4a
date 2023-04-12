@@ -1608,7 +1608,7 @@ void idEntity::Present( void ) {
 	// if there is no handle yet, go ahead and add it, ignoring the last predict frame early out
 	// if not, that causes next render frame to have a bunch of spurious primitive draws ( r_showPrimitives )
 	// ( we suspect this is because TH_UPDATEVISUALS doesn't get cleared? )
-#if 0 //k jmarshall
+#if 1 //k jmarshall
 	if ( !gameLocal.isLastPredictFrame && modelDefHandle != -1 ) {
 		return;
 	}

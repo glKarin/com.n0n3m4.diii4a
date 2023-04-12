@@ -610,7 +610,11 @@ void R_LinkLightSurf(const drawSurf_t **link, const srfTriangles_t *tri, const v
 #ifdef _HUMANHEAD
 			space->entityDef->parms.shaderParms[SHADERPARM_DISTANCE] = R_CalcViewAndEntityDistance(tr.viewDef, &space->entityDef->parms);
 #endif
+#ifdef _RAVEN //karin: quake4 using handle
+			shader->EvaluateRegisters(regs, space->entityDef->parms.shaderParms, tr.viewDef, space->entityDef->parms.referenceSoundHandle);
+#else
 			shader->EvaluateRegisters(regs, space->entityDef->parms.shaderParms, tr.viewDef, space->entityDef->parms.referenceSound);
+#endif
 		}
 	}
 
@@ -834,7 +838,11 @@ void R_AddLightSurfaces(void)
 #ifdef _HUMANHEAD
 		light->parms.shaderParms[SHADERPARM_DISTANCE] = R_CalcViewAndLightDistance(tr.viewDef, &light->parms);
 #endif
+#ifdef _RAVEN //karin: quake4 using handle
+		lightShader->EvaluateRegisters(lightRegs, light->parms.shaderParms, tr.viewDef, light->parms.referenceSoundHandle);
+#else
 		lightShader->EvaluateRegisters(lightRegs, light->parms.shaderParms, tr.viewDef, light->parms.referenceSound);
+#endif
 
 		// if this is a purely additive light and no stage in the light shader evaluates
 		// to a positive light value, we can completely skip the light
@@ -1189,7 +1197,11 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 			// evaluate the reference shader to find our shader parms
 			const shaderStage_t *pStage;
 
+#ifdef _RAVEN //karin: quake4 using handle
+			renderEntity->referenceShader->EvaluateRegisters(refRegs, renderEntity->shaderParms, tr.viewDef, renderEntity->referenceSoundHandle);
+#else
 			renderEntity->referenceShader->EvaluateRegisters(refRegs, renderEntity->shaderParms, tr.viewDef, renderEntity->referenceSound);
+#endif
 			pStage = renderEntity->referenceShader->GetStage(0);
 
 			memcpy(generatedShaderParms, renderEntity->shaderParms, sizeof(generatedShaderParms));
@@ -1222,7 +1234,11 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 #ifdef _HUMANHEAD
 		((float *)shaderParms)[SHADERPARM_DISTANCE] = R_CalcViewAndEntityDistance(tr.viewDef, renderEntity);
 #endif
+#ifdef _RAVEN //karin: quake4 using handle
+		shader->EvaluateRegisters(regs, shaderParms, tr.viewDef, renderEntity->referenceSoundHandle);
+#else
 		shader->EvaluateRegisters(regs, shaderParms, tr.viewDef, renderEntity->referenceSound);
+#endif
 
 		if (space->entityDef && space->entityDef->parms.timeGroup) {
 			tr.viewDef->floatTime = oldFloatTime;

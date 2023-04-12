@@ -142,8 +142,7 @@ void rvBSE::CleanUp(void)
 		idFXLocalAction &laction = actions[i];
 		CleanUpSingleAction(fxaction, laction);
 	}
-	if(referenceSound)
-		referenceSound->StopSound(SND_CHANNEL_ANY);
+	SetReferenceSound(-1);
 }
 
 /*
@@ -415,7 +414,7 @@ void rvBSE::Run(int time)
 						useAction->renderLight.shaderParms[ SHADERPARM_BLUE ]	= fxaction.lightColor.z;
 						useAction->renderLight.shaderParms[ SHADERPARM_TIMESCALE ]	= 1.0f;
 						useAction->renderLight.shaderParms[ SHADERPARM_TIMEOFFSET ] = -MS2SEC(time);
-						useAction->renderLight.referenceSound = referenceSound;
+						useAction->renderLight.referenceSoundHandle = referenceSoundHandle;
 						useAction->renderLight.pointLight = true;
 
 						if (fxaction.noshadows) {
@@ -438,6 +437,8 @@ void rvBSE::Run(int time)
 				else if (fxaction.trackOrigin) {
 					useAction->renderLight.origin = origin + fxaction.offset;
 					useAction->renderLight.axis = axis;
+
+					useAction->renderLight.referenceSoundHandle = referenceSoundHandle;
 				}
 
 				ApplyFade(fxaction, *useAction, time, actualStart);
@@ -445,7 +446,7 @@ void rvBSE::Run(int time)
 			}
 			case FX_SOUND: {
 				if (!useAction->soundStarted
-						&& referenceSound
+						&& referenceSoundHandle > 0
 						) {
 					useAction->soundStarted = true;
 					const idSoundShader *shader = declManager->FindSound(fxaction.data);
@@ -455,7 +456,7 @@ void rvBSE::Run(int time)
 						idFXLocalAction &laction2 = actions[j];
 
 						if (laction2.lightDefHandle != -1) {
-							laction2.renderLight.referenceSound = referenceSound;
+							laction2.renderLight.referenceSoundHandle = referenceSoundHandle;
 							gameRenderWorld->UpdateLightDef(laction2.lightDefHandle, &laction2.renderLight);
 						}
 					}
@@ -517,6 +518,10 @@ void rvBSE::Run(int time)
 					useAction->renderEntity.shaderParms[ SHADERPARM_BEAM_END_Z ]		= endOrigin.z;
 				}
 
+				useAction->renderEntity.shaderParms[ SHADERPARM_RED ]		= color[0];
+				useAction->renderEntity.shaderParms[ SHADERPARM_GREEN ]		= color[1];
+				useAction->renderEntity.shaderParms[ SHADERPARM_BLUE ]		= color[2];
+				useAction->renderEntity.shaderParms[ SHADERPARM_ALPHA ]		= color[3];
 				ApplyFade(fxaction, *useAction, time, actualStart);
 				break;
 			}
@@ -561,12 +566,13 @@ rvBSE::rvBSE
 rvBSE::rvBSE()
 	: time(0),
 	loop(false),
-	referenceSound(NULL),
+	referenceSoundHandle(-1),
 	gameRenderWorld(NULL)
 {
 	fxEffect = NULL;
 	started = -1;
 	nextTriggerTime = -1;
+	color = vec4_one;
 }
 
 /*
@@ -593,20 +599,28 @@ void rvBSE::Spawn(void)
 	axis.Identity();
 	gravity.Set(0.0f, 0.0f, -1.0f);
 	endOrigin.Zero();
-	referenceSound = NULL;
+	referenceSoundHandle = -1;
 	gameRenderWorld = NULL;
 	fxEffect = NULL;
 	actions.Clear();
 	started = -1;
 	loop = false;
+	color = vec4_one;
 }
 
 void rvBSE::Event_Remove(void)
 {
 	//LOGI("rvBSE::~ %p %s", this, fxEffect ? fxEffect->GetName() : "<NULL>");
 	CleanUp();
+#if 0 //karin: see in quake4/client/ClientEffect.cpp::~rvClientEffect
+	if(referenceSoundHandle > 0)
+	{
+		idSoundEmitter *referenceSound = soundSystem->EmitterForIndex(SOUNDWORLD_GAME, referenceSoundHandle);
+		referenceSound->Free(false);
+	}
+#endif
+	referenceSoundHandle = -1;
 	started = -1;
-	referenceSound = NULL;
 	gameRenderWorld = NULL;
 	fxEffect = NULL;
 }
@@ -684,12 +698,16 @@ bool rvBSE::StartSoundShader(const idSoundShader *shader, const s_channelType ch
 		*length = 0;
 	}
 
-	if(!referenceSound)
+	if(referenceSoundHandle <= 0)
 		return false;
 
 	if (!shader) {
 		return false;
 	}
+
+	idSoundEmitter *referenceSound = soundSystem->EmitterForIndex(SOUNDWORLD_GAME, referenceSoundHandle);
+	if(!referenceSound)
+		return false;
 
 #if 0
 	if (!gameLocal.isNewFrame) {
@@ -734,10 +752,7 @@ void rvBSE::Init(const rvDeclEffect* declEffect, renderEffect_s* parms, idRender
 	Sync(parms);
 	this->gameRenderWorld = world;
 	this->started = -1;
-	if(parms->referenceSoundHandle > 0) // >= ???
-	{
-		referenceSound = soundSystem->EmitterForIndex(SOUNDWORLD_GAME, parms->referenceSoundHandle);
-	}
+	SetReferenceSound(parms->referenceSoundHandle);
 	//LOGI("Fx::Init %d %p %s %d", started, declEffect, declEffect ? declEffect->GetName() : "<NULL>", declEffect ? declEffect->events.Num() : -1);
 	Setup(declEffect);
 	Start(time);
@@ -751,11 +766,15 @@ void rvBSE::Update(renderEffect_s* parms, int time)
 
 void rvBSE::Sync(renderEffect_s* parms)
 {
-	this->origin = parms->origin;
-	this->axis = parms->axis;
-	this->gravity = parms->gravity;
-	this->endOrigin = parms->endOrigin;
-	this->loop = parms->loop;
+	origin = parms->origin;
+	axis = parms->axis;
+	gravity = parms->gravity;
+	endOrigin = parms->endOrigin;
+	loop = parms->loop;
+	color[0] = parms->shaderParms[SHADERPARM_RED];
+	color[1] = parms->shaderParms[SHADERPARM_GREEN];
+	color[2] = parms->shaderParms[SHADERPARM_BLUE];
+	color[3] = parms->shaderParms[SHADERPARM_ALPHA];
 }
 
 void rvBSE::Setup(const rvDeclEffect *fx)
@@ -803,3 +822,20 @@ void rvBSE::Setup(const rvDeclEffect *fx)
 	}
 }
 
+void rvBSE::SetReferenceSound(int handle)
+{
+	idSoundEmitter *referenceSound;
+
+	if(handle <= 0)
+		handle = -1;
+	if(referenceSoundHandle == handle)
+		return;
+
+	if(referenceSoundHandle > 0)
+	{
+		referenceSound = soundSystem->EmitterForIndex(SOUNDWORLD_GAME, referenceSoundHandle);
+		referenceSound->StopSound(SND_CHANNEL_ANY);
+		//referenceSoundHandle = -1;
+	}
+	referenceSoundHandle = handle;
+}

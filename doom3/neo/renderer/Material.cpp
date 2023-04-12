@@ -3389,3 +3389,23 @@ void idMaterial::ReloadImages(bool force) const
 		}
 	}
 }
+
+#ifdef _RAVEN
+#include "../sound/snd_local.h"
+void idMaterial::EvaluateRegisters( float *regs, const float entityParms[MAX_ENTITY_SHADER_PARMS], const struct viewDef_s *view, int soundEmitter, idVec3 *randomizer ) const
+{
+	(void)randomizer;
+	idSoundEmitter *emitter = NULL;
+
+	if(soundEmitter > 0)
+	{
+		idSoundWorld *soundWorld = soundSystem->GetSoundWorldFromId(SOUNDWORLD_GAME);
+		if(soundEmitter < static_cast<idSoundWorldLocal *>(soundWorld)->emitters.Num()) //??? safety ???
+		{
+			emitter = soundSystem->EmitterForIndex(SOUNDWORLD_GAME, soundEmitter);
+		}
+	}
+
+	this->EvaluateRegisters(regs, entityParms, view, emitter);
+}
+#endif

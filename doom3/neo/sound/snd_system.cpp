@@ -1602,4 +1602,47 @@ idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
 		return session->sw;
 	}
 }
+
+idSoundEmitter * idSoundSystemLocal::EmitterForIndex(int worldId, int index) {
+	return GetSoundWorldFromId(worldId)->EmitterForIndex(index);
+}
+
+int idSoundSystemLocal::AllocSoundEmitter(int worldId) {
+	return GetSoundWorldFromId(worldId)->AllocSoundEmitter()->Index();
+}
+
+void idSoundSystemLocal::FreeSoundEmitter(int worldId, int handle, bool immediate) {
+	idSoundEmitter *emitter = GetSoundWorldFromId(worldId)->EmitterForIndex(handle);
+	if(emitter)
+		emitter->Free(immediate);
+}
+
+void idSoundSystemLocal::StopAllSounds(int worldId) {
+	GetSoundWorldFromId(worldId)->StopAllSounds();
+}
+
+void idSoundSystemLocal::FadeSoundClasses(int worldId, const int soundClass, const float to, const float over) {
+	GetSoundWorldFromId(worldId)->FadeSoundClasses(soundClass, to, over);
+}
+
+float idSoundSystemLocal::CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition) {
+	//return 0.0f;
+	return GetSoundWorldFromId(worldId)->CurrentShakeAmplitudeForPosition(time, listenerPosition);
+}
+
+void idSoundSystemLocal::PlayShaderDirectly(int worldId, const char* name, int channel = -1) {
+	GetSoundWorldFromId(worldId)->PlayShaderDirectly(name, channel);
+}
+
+void idSoundSystemLocal::PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName) {
+	GetSoundWorldFromId(SOUNDWORLD_GAME)->PlaceListener(origin, axis, listenerId, gameTime, areaName);
+}
+
+void idSoundSystemLocal::WriteToSaveGame(int worldId, idFile* savefile) {
+	GetSoundWorldFromId(worldId)->WriteToSaveGame(savefile);
+}
+
+void idSoundSystemLocal::ReadFromSaveGame(int worldId, idFile* savefile) {
+	GetSoundWorldFromId(worldId)->ReadFromSaveGame(savefile);
+}
 #endif

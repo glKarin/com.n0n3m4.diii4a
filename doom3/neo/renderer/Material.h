@@ -796,6 +796,12 @@ class idMaterial : public idDecl
 		void				AddReference();
 #ifdef _RAVEN // quake4 material
 	const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
+// RAVEN BEGIN
+// rjohnson: added vertex randomizing
+						// regs should point to a float array large enough to hold GetNumRegisters() floats
+	void				EvaluateRegisters( float *regs, const float entityParms[MAX_ENTITY_SHADER_PARMS], 
+											const struct viewDef_s *view, int soundEmitter = 0, idVec3 *randomizer = NULL ) const;
+// RAVEN END
 #endif
 #ifdef _HUMANHEAD
 						// HUMANHEAD tmj: returns how the subview should be rendered (i.e. mirror/portal/skybox)

@@ -43,6 +43,9 @@ class rvBSE
 		void Init(const rvDeclEffect* declEffect, renderEffect_s* parms, idRenderWorld *world, int time);
 		void Update(renderEffect_s* parms, int time);
 		void Event_Remove(void);
+		ID_INLINE void Destroy(void) {
+			Event_Remove();
+		}
 
 	protected:
 		void ProjectDecal(const idVec3 &origin, const idVec3 &dir, float depth, bool parallel, float size, const char *material, float angle = 0.0f);
@@ -55,6 +58,7 @@ class rvBSE
 		void					CleanUp(void);
 		void					CleanUpSingleAction(const rvFXSingleAction &fxaction, idFXLocalAction &laction);
 		void					ApplyFade(const rvFXSingleAction &fxaction, idFXLocalAction &laction, const int time, const int actualStart);
+		void SetReferenceSound(int handle);
 
 		int						started;
 		int						nextTriggerTime;
@@ -69,7 +73,8 @@ class rvBSE
 		idVec3 gravity;
 		idVec3					endOrigin;
 		bool loop;
-		idSoundEmitter *referenceSound;
+		idVec4 color;
+		int referenceSoundHandle;
 		idRenderWorld *gameRenderWorld;
 };
 
