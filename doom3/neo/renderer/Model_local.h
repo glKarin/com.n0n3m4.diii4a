@@ -105,6 +105,14 @@ class idRenderModelStatic : public idRenderModel
 #ifdef _RAVEN //k: for ShowSurface/HideSurface, static model using surfaces index as mask: 1 << index, name is shader material name
 		virtual int GetSurfaceMask(const char *name) const;
 #endif
+#ifdef _HUMANHEAD
+	virtual void				IntersectBounds( const idBounds &bounds, float displacement ) { }
+
+#if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
+	bool						IsGameUpdatedModel(void) { return bIsGUM; }
+	void					SetGameUpdatedModel(bool gum) { bIsGUM = gum; }
+#endif //HUMANHEAD END
+#endif
 
 	public:
 		idList<modelSurface_t>		surfaces;
@@ -129,6 +137,11 @@ class idRenderModelStatic : public idRenderModel
 		static idCVar				r_slopVertex;			// merge xyz coordinates this far apart
 		static idCVar				r_slopTexCoord;			// merge texture coordinates this far apart
 		static idCVar				r_slopNormal;			// merge normals that dot less than this
+#ifdef _HUMANHEAD
+#if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
+	bool						bIsGUM;
+#endif //HUMANHEAD END
+#endif
 };
 
 /*
@@ -258,6 +271,9 @@ class idRenderModelLiquid : public idRenderModelStatic
 		virtual idBounds			Bounds(const struct renderEntity_s *ent) const;
 
 		virtual void				Reset();
+#ifdef _HUMANHEAD
+		virtual // HUMANHEAD pdm
+#endif
 		void						IntersectBounds(const idBounds &bounds, float displacement);
 
 	private:

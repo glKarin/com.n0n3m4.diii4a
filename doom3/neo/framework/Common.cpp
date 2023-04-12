@@ -220,6 +220,14 @@ class idCommonLocal : public idCommon
 		virtual int GetUserCmdMSec(void) { return 16; } 
 		virtual int GetUserCmdHz(void) { return 60; }
 #endif
+#ifdef _HUMANHEAD
+	virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) { (void) src; (void)dst; (void)lengthAllocated; }
+	virtual void				MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound) {
+		(void)binding; (void)keyMaterial; (void)key;
+		isBound = false;
+	}
+	virtual void				SetGameSensitivityFactor(float factor) { (void) factor; }
+#endif
 };
 
 idCommonLocal	commonLocal;

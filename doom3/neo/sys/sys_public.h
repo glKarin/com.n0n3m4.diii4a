@@ -587,10 +587,8 @@ class idSys
 #ifdef _HUMANHEAD
 	//HUMANHEAD rww
 	//logitech lcd keyboard interface functions
-	virtual bool			LGLCD_Valid(void) {
-		return false;
-	}
-	virtual void			LGLCD_UploadImage(unsigned char *pixels, int w, int h, bool highPriority, bool flipColor) {}
+	virtual bool			LGLCD_Valid(void) = 0;
+	virtual void			LGLCD_UploadImage(unsigned char *pixels, int w, int h, bool highPriority, bool flipColor) = 0;
 	//HUMANHEAD END
 #endif
 };

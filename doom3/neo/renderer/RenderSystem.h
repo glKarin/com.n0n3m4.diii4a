@@ -209,7 +209,7 @@ class idRenderSystem
 	virtual int				VideoCardNumber(void) = 0; // HUMANHEAD CJR
 												
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	virtual void			LogViewRender(const struct renderView_s *view) {}
+	virtual void			LogViewRender(const struct renderView_s *view) = 0;
 #endif //HUMANHEAD END
 #endif
 

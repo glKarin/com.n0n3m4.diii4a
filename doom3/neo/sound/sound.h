@@ -356,10 +356,8 @@ class idSoundEmitter
 	//HUMANHEAD: aob
 	virtual void		ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier) = 0;
 	virtual soundShaderParms_t* GetSoundParms(idSoundShader* shader, const s_channelType channel) = 0;
-	virtual float			CurrentAmplitude( const s_channelType channel ) { return 0.0f; }
-	virtual float			CurrentVoiceAmplitude( const s_channelType channel ) {
-		return 0.0f;
-	}
+	virtual float			CurrentAmplitude( const s_channelType channel ) = 0;
+	virtual float			CurrentVoiceAmplitude( const s_channelType channel ) = 0;
 	//HUMANHEAD END
 #endif
 };
@@ -440,12 +438,12 @@ class idSoundWorld
 
 #ifdef _HUMANHEAD
 	//HUMANHEAD
-	virtual void			RegisterLocation(int area, const char *locationName) {}
-	virtual void			ClearAreaLocations() {}
+	virtual void			RegisterLocation(int area, const char *locationName) = 0;
+	virtual void			ClearAreaLocations() = 0;
 	//HUMANHEAD END
 
-	virtual void			SetSpiritWalkEffect( bool active ) {}	// HUMANHEAD pdm
-	virtual void			SetVoiceDucker( bool active ) {}		// HUMANHEAD pdm
+	virtual void			SetSpiritWalkEffect( bool active ) = 0;	// HUMANHEAD pdm
+	virtual void			SetVoiceDucker( bool active ) = 0;		// HUMANHEAD pdm
 #endif
 };
 

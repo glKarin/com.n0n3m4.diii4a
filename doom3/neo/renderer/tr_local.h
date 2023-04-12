@@ -741,7 +741,7 @@ class idRenderSystemLocal : public idRenderSystem
 		virtual void			UnCrop();
 		virtual bool			UploadImage(const char *imageName, const byte *data, int width, int height);
 #ifdef _HUMANHEAD
-    virtual void			SetEntireSceneMaterial(idMaterial* material) { }; // HUMANHEAD CJR
+    virtual void			SetEntireSceneMaterial(idMaterial* material) { (void)material; }; // HUMANHEAD CJR
     virtual bool			IsScopeView() {
         return scopeView;
     };// HUMANHEAD CJR
@@ -760,6 +760,9 @@ class idRenderSystemLocal : public idRenderSystem
     virtual int				VideoCardNumber(void) {
         return 0;
     }
+#if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
+	virtual void			LogViewRender(const struct renderView_s *view) { (void)view; }
+#endif //HUMANHEAD END
 
 	bool scopeView;
 	bool shuttleView;

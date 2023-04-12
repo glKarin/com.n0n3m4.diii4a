@@ -319,13 +319,12 @@ class idRenderModel
 #endif
 #ifdef _HUMANHEAD
 	// HUMANHEAD pdm: Game access to liquid models
-	virtual void				IntersectBounds( const idBounds &bounds, float displacement ) {
-		Bounds().IntersectsBounds(bounds);
-	}
+	virtual void				IntersectBounds( const idBounds &bounds, float displacement ) = 0;
 	// HUMANHEAD END
 
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-	virtual void					SetGameUpdatedModel(bool gum) {}
+	virtual bool					IsGameUpdatedModel(void) = 0;
+	virtual void					SetGameUpdatedModel(bool gum) = 0;
 #endif //HUMANHEAD END
 #endif
 };

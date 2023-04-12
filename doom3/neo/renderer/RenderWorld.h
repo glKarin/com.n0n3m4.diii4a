@@ -695,7 +695,7 @@ class idRenderWorld
 #ifdef _HUMANHEAD
 	//HUMANHEAD rww
 #if _HH_RENDERDEMO_HACKS
-	virtual void			DemoSmokeEvent(const idDeclParticle *smoke, const int systemTimeOffset, const float diversity, const idVec3 &origin, const idMat3 &axis) {}
+	virtual void			DemoSmokeEvent(const idDeclParticle *smoke, const int systemTimeOffset, const float diversity, const idVec3 &origin, const idMat3 &axis) = 0;
 #endif
 	//HUMANHEAD END
 #endif

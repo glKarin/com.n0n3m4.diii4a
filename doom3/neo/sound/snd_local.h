@@ -551,6 +551,8 @@ class idSoundEmitterLocal : public idSoundEmitter
 #ifdef _HUMANHEAD
     virtual void		ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier);
     virtual soundShaderParms_t* GetSoundParms(idSoundShader* shader, const s_channelType channel);
+	virtual float			CurrentAmplitude( const s_channelType channel ) { (void)channel; return 0.0f; }
+	virtual float			CurrentVoiceAmplitude( const s_channelType channel ) { (void)channel; return 0.0f; }
 #endif
 
 		virtual bool		CurrentlyPlaying(void) const;
@@ -720,6 +722,13 @@ class idSoundWorldLocal : public idSoundWorld
 		void					ResolveOrigin(const int stackDepth, const soundPortalTrace_t *prevStack, const int soundArea, const float dist, const idVec3 &soundOrigin, idSoundEmitterLocal *def);
 		float					FindAmplitude(idSoundEmitterLocal *sound, const int localTime, const idVec3 *listenerPosition, const s_channelType channel, bool shakesOnly);
 
+#ifdef _HUMANHEAD
+	virtual void			RegisterLocation(int area, const char *locationName) { (void)area; (void)locationName; }
+	virtual void			ClearAreaLocations() {}
+
+	virtual void			SetSpiritWalkEffect( bool active ) { (void)active; }
+	virtual void			SetVoiceDucker( bool active ) { (void)active; }
+#endif
 		//============================================
 
 		idRenderWorld 			*rw;				// for portals and debug drawing

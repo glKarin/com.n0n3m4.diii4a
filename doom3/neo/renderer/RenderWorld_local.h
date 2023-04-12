@@ -289,6 +289,10 @@ class idRenderWorldLocal : public idRenderWorld
 		// tr_light.c
 		void					CreateLightDefInteractions(idRenderLightLocal *ldef);
 #ifdef _HUMANHEAD
+#if _HH_RENDERDEMO_HACKS
+	virtual void			DemoSmokeEvent(const idDeclParticle *smoke, const int systemTimeOffset, const float diversity, const idVec3 &origin, const idMat3 &axis) { (void)smoke; (void)systemTimeOffset; (void) diversity; (void)origin; (void)axis; }
+#endif
+
 #if DEATHWALK_AUTOLOAD
 		int numAppendPortalAreas;
 #endif
