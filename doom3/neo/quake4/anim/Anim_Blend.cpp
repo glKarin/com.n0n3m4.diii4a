@@ -10,6 +10,10 @@
 #include "../../game/Projectile.h"
 #include "../ai/AI.h"
 
+#ifdef _QUAKE4 //karin: mute player footstep sound
+idCVar harm_g_mutePlayerFootStep( "harm_g_mutePlayerFootStep", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: Mute player's footstep sound." );
+#define MUTE_PLAYER_FOOTSTEP(ent) (harm_g_mutePlayerFootStep.GetBool() && ent->IsType(idPlayer::GetClassType()) && ent->entityNumber == gameLocal.localClientNum)
+#endif
 static const char *channelNames[ ANIM_NumAnimChannels ] = {
 	"all", "torso", "legs", "head", "eyelids"
 };
@@ -820,7 +824,6 @@ idAnim::CallFrameCommandSound
 =====================
 */
 void idAnim::CallFrameCommandSound ( const frameCommand_t& command, idEntity* ent, const s_channelType channel ) const {
-
 	int flags = 0;
 	if( channel == ( FC_SOUND_GLOBAL - FC_SOUND ) ) {
 		flags = SSF_PRIVATE_SOUND;
@@ -915,6 +918,10 @@ void idAnim::CallFrameCommands( idEntity *ent, int from, int to ) const {
 				case FC_SOUND_ITEM:
 				case FC_SOUND_GLOBAL:
 				case FC_SOUND_CHATTER:
+#ifdef _QUAKE4 //karin: mute player footstep sound
+											if(command.type == FC_SOUND_GLOBAL && MUTE_PLAYER_FOOTSTEP(ent))
+												break;
+#endif
 					CallFrameCommandSound ( command, ent, (const s_channelType)(command.type - FC_SOUND) );
 					break;
 // RAVEN END
@@ -995,14 +1002,26 @@ void idAnim::CallFrameCommands( idEntity *ent, int from, int to ) const {
 					break;
 				}
 				case FC_FOOTSTEP : {
+#ifdef _QUAKE4 //karin: mute player footstep sound
+									   if(MUTE_PLAYER_FOOTSTEP(ent))
+										   break;
+#endif
 					ent->ProcessEvent( &EV_Footstep );
 					break;
 				}
 				case FC_LEFTFOOT: {
+#ifdef _QUAKE4 //karin: mute player footstep sound
+									   if(MUTE_PLAYER_FOOTSTEP(ent))
+										   break;
+#endif
 					ent->ProcessEvent( &EV_FootstepLeft );
 					break;
 				}
 				case FC_RIGHTFOOT: {
+#ifdef _QUAKE4 //karin: mute player footstep sound
+									   if(MUTE_PLAYER_FOOTSTEP(ent))
+										   break;
+#endif
 					ent->ProcessEvent( &EV_FootstepRight );
 					break;
 				}
