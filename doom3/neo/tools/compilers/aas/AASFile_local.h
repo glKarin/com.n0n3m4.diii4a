@@ -87,6 +87,17 @@ class idAASFileLocal : public idAASFile
 		bool						ParseNodes(idLexer &src);
 		bool						ParsePortals(idLexer &src);
 		bool						ParseClusters(idLexer &src);
+#ifdef _RAVEN
+	virtual void					ClearTactical(void) { }
+
+	virtual	int						GetNumFeatureIndexes(void) const { return featureIndexes.Num(); }
+	virtual	aasIndex_t& GetFeatureIndex(int index) { return featureIndexes[index]; }
+	virtual int						AppendFeatureIndex(aasIndex_t& featureIdx) { return featureIndexes.Append(featureIdx); }
+
+	virtual	int						GetNumFeatures(void) const { return features.Num(); }
+	virtual	aasFeature_t& GetFeature(int index) { return features[index]; }
+	virtual int						AppendFeature(aasFeature_t& cluster) { return features.Append(cluster); }
+#endif
 
 	private:
 		int							BoundsReachableAreaNum_r(int nodeNum, const idBounds &bounds, const int areaFlags, const int excludeTravelFlags) const;

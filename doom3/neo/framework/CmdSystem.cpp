@@ -65,6 +65,9 @@ class idCmdSystemLocal : public idCmdSystem
 
 		virtual void			ArgCompletion_FolderExtension(const idCmdArgs &args, void(*callback)(const char *s), const char *folder, bool stripFolder, ...);
 		virtual void			ArgCompletion_DeclName(const idCmdArgs &args, void(*callback)(const char *s), int type);
+#ifdef _RAVEN
+		virtual void		ArgCompletion_Models( const idCmdArgs &args, void(*callback)( const char *s ), bool strogg, bool marine );
+#endif
 
 		virtual void			BufferCommandArgs(cmdExecution_t exec, const idCmdArgs &args);
 
@@ -849,3 +852,30 @@ bool idCmdSystemLocal::PostReloadEngine(void)
 	postReload.Clear();
 	return true;
 }
+
+#ifdef _RAVEN
+void idCmdSystemLocal::ArgCompletion_Models( const idCmdArgs &args, void(*callback)( const char *s ), bool strogg, bool marine )
+{
+	int i;
+	int numPlayerModel;
+	bool check;
+
+	idStr prefix = args.Argv(0);
+	prefix.Append(' ');
+	numPlayerModel = declManager->GetNumDecls(DECL_PLAYER_MODEL);
+	for(i = 0; i < numPlayerModel; i++)
+	{
+		const idDecl *decl = declManager->DeclByIndex(DECL_PLAYER_MODEL, i, false);
+		if(!decl)
+			continue;
+		const rvDeclPlayerModel *playerModel = static_cast<const rvDeclPlayerModel *>(decl);
+		check = false;
+		if(strogg && !idStr::Icmp(playerModel->team , "strogg"))
+			check = true;
+		if(marine && idStr::Icmp(playerModel->team , "strogg"))
+			check = true;
+		if(check)
+			callback(prefix + playerModel->GetName());
+	}
+}
+#endif

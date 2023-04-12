@@ -301,7 +301,7 @@ class idFileSystem
 		virtual bool			FilenameCompare(const char *s1, const char *s2) const = 0;
 #ifdef _RAVEN
 	// mekberg: is file loading allowed?
-	virtual void			SetIsFileLoadingAllowed(bool mode) { }
+	virtual void			SetIsFileLoadingAllowed(bool mode) = 0;
 // jmarshall end
 #endif
 };

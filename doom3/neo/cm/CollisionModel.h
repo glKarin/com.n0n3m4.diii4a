@@ -133,7 +133,7 @@ class idCollisionModelManager
 	// sets up a trace model for collision with other trace models
 	virtual cmHandle_t ModelFromTrm(const char* mapName, const char* modelName, const idTraceModel &trm, const idMaterial *material ) = 0;
 
-	virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) {  }
+	virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) = 0;
 
 	// Gets the clip handle for a model.
 	virtual cmHandle_t LoadModel(const char* mapName, const char *modelName, const bool precache ) = 0;

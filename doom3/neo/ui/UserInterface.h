@@ -88,8 +88,8 @@ class idUserInterface
 		virtual void				SetStateFloat(const char *varName, const float value) = 0;
 
 #ifdef _RAVEN
-	virtual void				SetStateVec4( const char *varName, const idVec4& vector ) { }
-	virtual idVec4				GetLightColor(void) { idVec4 zero; zero.Zero(); return zero; }
+	virtual void				SetStateVec4( const char *varName, const idVec4& vector ) = 0;
+	virtual idVec4				GetLightColor(void) = 0;
 
 // RAVEN BEGIN
 // bdube: added
@@ -180,7 +180,7 @@ class idUserInterfaceManager
 		virtual void				FreeListGUI(idListGUI *listgui) = 0;
 #ifdef _RAVEN
 //// bdube: embedded icons
-	virtual void				RegisterIcon ( const char* code, const char* shader, int x = -1, int y = -1, int w = -1, int h = -1 ) { }
+	virtual void				RegisterIcon ( const char* code, const char* shader, int x = -1, int y = -1, int w = -1, int h = -1 ) = 0;
 #endif
 };
 

@@ -42,9 +42,6 @@ class idRenderModelManagerLocal : public idRenderModelManager
 		virtual void			Init();
 		virtual void			Shutdown();
 		virtual idRenderModel 	*AllocModel();
-#ifdef _RAVEN // bse model
-	virtual rvRenderModelBSE* AllocBSEModel();
-#endif
 		virtual void			FreeModel(idRenderModel *model);
 		virtual idRenderModel 	*FindModel(const char *modelName);
 		virtual idRenderModel 	*CheckModel(const char *modelName);
@@ -671,15 +668,4 @@ void idRenderModelManagerLocal::PrintMemInfo(MemInfo_t *mi)
 	f->Printf("\nTotal model bytes allocated: %s\n", idStr::FormatNumber(totalMem).c_str());
 	fileSystem->CloseFile(f);
 }
-
-#ifdef _RAVEN // bse model
-/*
-=================
-idRenderModelManagerLocal::AllocBSEModel
-=================
-*/
-rvRenderModelBSE* idRenderModelManagerLocal::AllocBSEModel() {
-	return new rvRenderModelBSE;
-}
-#endif
 

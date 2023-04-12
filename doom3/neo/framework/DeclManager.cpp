@@ -272,6 +272,13 @@ class idDeclManagerLocal : public idDeclManager
     void						RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList);
 // jmarshall end
 
+	virtual bool					GetPlaybackData( const rvDeclPlayback *playback, int control, int now, int last, class rvDeclPlaybackData *pbd ) { (void)playback; (void)control; (void)now; (void)last; (void) pbd; return false; }
+	virtual bool					SetPlaybackData(rvDeclPlayback* playback, int now, int control, class rvDeclPlaybackData* pbd) { (void)playback; (void)control; (void)now; (void) pbd; return false; }
+	virtual void					StartPlaybackRecord(rvDeclPlayback* playback) { (void)playback; }
+	virtual bool					FinishPlayback( rvDeclPlayback *playback ) { (void)playback; return false; }
+
+	virtual const idDecl *	FindType( declType_t type, const char *name, bool makeDefault, bool noCaching ) { (void)noCaching; return FindType(type, name, makeDefault); }
+
 	//k: find map def
 	virtual const idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) const {
 		return GetMapDef(mapName, entityFilter);

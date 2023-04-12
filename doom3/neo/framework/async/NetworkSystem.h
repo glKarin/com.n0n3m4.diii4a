@@ -110,23 +110,23 @@ class idNetworkSystem
         virtual void            AddLoadingIcon(const char* icon);
 
 		// server browser
-		virtual int             GetNumScannedServers(void) { return 0; }
-        virtual const scannedServer_t* GetScannedServerInfo(int serverNum) { return 0; }
-        virtual void            UseSortFunction(const sortInfo_t& sortInfo, bool use = true) { }
-        virtual void            AddSortFunction(const sortInfo_t& sortInfo) { }
+		virtual int             GetNumScannedServers(void);
+        virtual const scannedServer_t* GetScannedServerInfo(int serverNum);
+        virtual void            UseSortFunction(const sortInfo_t& sortInfo, bool use = true);
+        virtual void            AddSortFunction(const sortInfo_t& sortInfo);
 
-        virtual bool            RemoveSortFunction(const sortInfo_t& sortInfo) { return 0; }
+        virtual bool            RemoveSortFunction(const sortInfo_t& sortInfo);
 
-	virtual const char* GetClientGUID(int clientNum) { return 0; }
+	virtual const char* GetClientGUID(int clientNum);
 
 // ddynerman: added some utility functions
 	// uses a static buffer, copy it before calling in game again
 	virtual const char* GetServerAddress(void);
-	virtual int				ServerGetClientNum(int clientId) { return 0; }
-	virtual	int				ServerGetServerTime(void) { return 0; }
+	virtual int				ServerGetClientNum(int clientId);
+	virtual	int				ServerGetServerTime(void);
 
-	virtual	void			AddFriend(int clientNum) { }
-	virtual void			RemoveFriend(int clientNum) { }
+	virtual	void			AddFriend(int clientNum);
+	virtual void			RemoveFriend(int clientNum);
 #endif
 #ifdef _RAVEN // bot
 	virtual int				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);

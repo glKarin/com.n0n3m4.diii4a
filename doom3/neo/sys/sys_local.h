@@ -62,8 +62,7 @@ class idSysLocal : public idSys
 		virtual bool			LockMemory(void *ptr, int bytes);
 		virtual bool			UnlockMemory(void *ptr, int bytes);
 
-//k 64
-		virtual uintptr_t		DLL_Load(const char *dllName);
+		virtual uintptr_t		DLL_Load(const char *dllName); //k 64
 		virtual void 			*DLL_GetProcAddress(uintptr_t dllHandle, const char *procName);
 		virtual void			DLL_Unload(uintptr_t dllHandle);
 		virtual void			DLL_GetFileName(const char *baseName, char *dllName, int maxLength);
@@ -73,6 +72,9 @@ class idSysLocal : public idSys
 
 		virtual void			OpenURL(const char *url, bool quit);
 		virtual void			StartProcess(const char *exeName, bool quit);
+#ifdef _RAVEN
+		virtual int				Milliseconds(void) { return Sys_Milliseconds(); }
+#endif
 };
 
 #endif /* !__SYS_LOCAL__ */

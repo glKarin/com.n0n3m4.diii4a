@@ -130,6 +130,8 @@ class idUserInterfaceLocal : public idUserInterface
 		};
 #ifdef _RAVEN //k: for Quake4 gui script
 	virtual void				SetInteractive(bool interactive);
+	virtual void				SetStateVec4( const char *varName, const idVec4& vector );
+	virtual idVec4				GetLightColor(void) { return vec4_one; }
 #endif
 #ifdef _HUMANHEAD
 	virtual void CallStartup(void);
@@ -186,6 +188,9 @@ class idUserInterfaceManagerLocal : public idUserInterfaceManager
 		virtual idUserInterface 	*FindDemoGui(const char *qpath);
 		virtual	idListGUI 			*AllocListGUI(void) const;
 		virtual void				FreeListGUI(idListGUI *listgui);
+#ifdef _RAVEN
+		virtual void				RegisterIcon ( const char* code, const char* shader, int x = -1, int y = -1, int w = -1, int h = -1 ) { (void)code; (void)shader; (void)x; (void)y; (void)w; (void)h; }
+#endif
 
 	private:
 		idRectangle					screenRect;

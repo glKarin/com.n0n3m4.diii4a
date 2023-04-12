@@ -779,6 +779,11 @@ bool idUserInterfaceLocal::IsDesktopInteractive() const
 {
 	return interactive || (desktop && desktop->Interactive());
 }
+
+void idUserInterfaceLocal::SetStateVec4( const char *varName, const idVec4& vector )
+{
+	state.SetVec4(varName, vector);
+}
 #endif
 
 #ifdef _HUMANHEAD

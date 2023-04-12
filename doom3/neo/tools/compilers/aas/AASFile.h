@@ -468,15 +468,15 @@ class idAASFile
 #ifdef _RAVEN
 	// RAVEN BEGIN
 		// cdr: AASTactical
-	virtual void					ClearTactical(void) { }
+	virtual void					ClearTactical(void) = 0;
 
-	virtual	int						GetNumFeatureIndexes(void) const { return featureIndexes.Num(); }
-	virtual	aasIndex_t& GetFeatureIndex(int index) { return featureIndexes[index]; }
-	virtual int						AppendFeatureIndex(aasIndex_t& featureIdx) { return featureIndexes.Append(featureIdx); }
+	virtual	int						GetNumFeatureIndexes(void) const = 0;
+	virtual	aasIndex_t& GetFeatureIndex(int index) = 0;
+	virtual int						AppendFeatureIndex(aasIndex_t& featureIdx) = 0;
 
-	virtual	int						GetNumFeatures(void) const { return features.Num(); }
-	virtual	aasFeature_t& GetFeature(int index) { return features[index]; }
-	virtual int						AppendFeature(aasFeature_t& cluster) { return features.Append(cluster); }
+	virtual	int						GetNumFeatures(void) const = 0;
+	virtual	aasFeature_t& GetFeature(int index) = 0;
+	virtual int						AppendFeature(aasFeature_t& cluster) = 0;
 	// RAVEN END
 #endif
 

@@ -582,7 +582,7 @@ class idSys
 		virtual void			OpenURL(const char *url, bool quit) = 0;
 		virtual void			StartProcess(const char *exePath, bool quit) = 0;
 #ifdef _RAVEN
-	virtual int				Milliseconds(void) { return Sys_Milliseconds(); }
+	virtual int				Milliseconds(void) = 0;
 #endif
 #ifdef _HUMANHEAD
 	//HUMANHEAD rww

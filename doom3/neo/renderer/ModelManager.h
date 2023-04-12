@@ -29,10 +29,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MODELMANAGER_H__
 #define __MODELMANAGER_H__
 
-#ifdef _RAVEN // bse model
-class rvRenderModelBSE;
-#endif
-
 /*
 ===============================================================================
 
@@ -78,11 +74,6 @@ class idRenderModelManager
 
 		// world map parsing will add all the inline models with this call
 		virtual	void			AddModel(idRenderModel *model) = 0;
-
-#ifdef _RAVEN // bse model
-	// Allocates a BSE model(this was in sdRenderUtilities).
-	virtual rvRenderModelBSE* AllocBSEModel() = 0;
-#endif
 
 		// when a world map unloads, it removes its internal models from the list
 		// before freeing them.

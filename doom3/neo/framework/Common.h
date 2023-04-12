@@ -133,6 +133,9 @@ struct MemInfo_t {
 	int				animAssetsTotal;	// HUMANHEAD pdm
 #endif
 };
+#ifdef _RAVEN
+typedef MemInfo_t MemInfo;
+#endif
 
 class idCommon
 {
@@ -224,10 +227,10 @@ class idCommon
 		virtual const idLangDict 	*GetLanguageDict(void) = 0;
 
 #ifdef _RAVEN
-		const char* GetLocalizedString(const char* key, int langIndex) { return GetLanguageDict()->GetString(key); }
-		const char* GetLocalizedString(const char* key) { return GetLanguageDict()->GetString(key); }
-		int GetUserCmdMSec(void) { return 16; } 
-		int GetUserCmdHz(void) { return 60; }
+		virtual const char* GetLocalizedString(const char* key, int langIndex) = 0;
+		virtual const char* GetLocalizedString(const char* key) = 0;
+		virtual int GetUserCmdMSec(void) = 0;
+		virtual int GetUserCmdHz(void) = 0;
 #endif
 
 		// Returns key bound to the command

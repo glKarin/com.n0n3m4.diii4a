@@ -415,6 +415,9 @@ class idFileSystemLocal : public idFileSystem
 		static void				Path_f(const idCmdArgs &args);
 		static void				TouchFile_f(const idCmdArgs &args);
 		static void				TouchFileList_f(const idCmdArgs &args);
+#ifdef _RAVEN
+		virtual void			SetIsFileLoadingAllowed(bool mode) { (void)mode; }
+#endif
 
 	private:
 		friend void			*BackgroundDownloadThread(void *parms);

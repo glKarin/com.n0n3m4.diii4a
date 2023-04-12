@@ -135,7 +135,20 @@ class idRenderWorldLocal : public idRenderWorld
 
 		//-----------------------
 #ifdef _RAVEN
-	virtual bool			HasSkybox(int areaNum) { return true; }
+	virtual bool			HasSkybox(int areaNum) { (void)areaNum; return true; }
+
+	virtual void			DebugClear(int time) {
+		DebugClearLines(time);
+		DebugClearPolygons(time);
+	};
+
+// jscott: want to be able to specify depth test
+	virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) {
+		(void)depthTest;
+		DebugBox(color, idBox(bounds) + org, lifetime);
+	}
+
+	virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot, float nearDist, float alpha, int lifetime) { (void)color; (void)origin; (void)dir; (void)farDot; (void)farDist; (void)nearDot; (void)nearDist; (void)alpha; (void)lifetime; }
 
 	// jscott: handling of effects
 	virtual qhandle_t		AddEffectDef(const renderEffect_t* reffect, int time);

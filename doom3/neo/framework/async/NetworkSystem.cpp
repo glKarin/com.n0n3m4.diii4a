@@ -281,6 +281,26 @@ const char* idNetworkSystem::GetServerAddress(void)
 	else
 		return "";
 }
+
+int idNetworkSystem::GetNumScannedServers(void) { return 0; }
+
+const scannedServer_t* idNetworkSystem::GetScannedServerInfo(int serverNum) { (void)serverNum; return 0; }
+
+void idNetworkSystem::UseSortFunction(const sortInfo_t& sortInfo, bool use) { (void)sortInfo; (void)use; }
+
+void idNetworkSystem::AddSortFunction(const sortInfo_t& sortInfo) { (void)sortInfo; }
+
+bool idNetworkSystem::RemoveSortFunction(const sortInfo_t& sortInfo) { (void)sortInfo; return 0; }
+
+const char* idNetworkSystem::GetClientGUID(int clientNum) { (void)clientNum; return 0; }
+
+int idNetworkSystem::ServerGetClientNum(int clientId) { (void)clientId; return 0; }
+
+int idNetworkSystem::ServerGetServerTime(void) { return 0; }
+
+void idNetworkSystem::AddFriend(int clientNum) { (void)clientNum; }
+
+void idNetworkSystem::RemoveFriend(int clientNum) { (void)clientNum; }
 #endif
 
 #ifdef _RAVEN // bot

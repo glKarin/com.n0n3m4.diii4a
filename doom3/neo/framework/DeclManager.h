@@ -468,17 +468,17 @@ class idDeclManager
 	virtual const rvDeclLipSync *	LipSyncByIndex( int index, bool forceParse = true ) = 0;
 	virtual	const rvDeclPlayback *	PlaybackByIndex( int index, bool forceParse = true ) = 0;
 	virtual const rvDeclEffect *	EffectByIndex( int index, bool forceParse = true ) = 0;
-	virtual bool					GetPlaybackData( const rvDeclPlayback *playback, int control, int now, int last, class rvDeclPlaybackData *pbd ) { return false; }
 
-	virtual bool					SetPlaybackData(rvDeclPlayback* playback, int now, int control, class rvDeclPlaybackData* pbd) { return false; }
-	virtual void					StartPlaybackRecord(rvDeclPlayback* playback) { }
-	virtual bool					FinishPlayback( rvDeclPlayback *playback ) { return false; }
+	virtual bool					GetPlaybackData( const rvDeclPlayback *playback, int control, int now, int last, class rvDeclPlaybackData *pbd ) = 0;
+	virtual bool					SetPlaybackData(rvDeclPlayback* playback, int now, int control, class rvDeclPlaybackData* pbd) = 0;
+	virtual void					StartPlaybackRecord(rvDeclPlayback* playback) = 0;
+	virtual bool					FinishPlayback( rvDeclPlayback *playback ) = 0;
 // RAVEN END
 
 							// If makeDefault is true, a default decl of appropriate type will be created
 							// if an explicit one isn't found. If makeDefault is false, NULL will be returned
 							// if the decl wasn't explcitly defined.
-	virtual const idDecl *	FindType( declType_t type, const char *name, bool makeDefault, bool noCaching ) { return FindType(type, name, makeDefault); }
+	virtual const idDecl *	FindType( declType_t type, const char *name, bool makeDefault, bool noCaching ) = 0;
 	//k: find map def
 	virtual const idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) const = 0;
 	virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) = 0;

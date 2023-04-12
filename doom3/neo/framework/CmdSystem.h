@@ -125,9 +125,11 @@ class idCmdSystem
 		static void			ArgCompletion_SaveGame(const idCmdArgs &args, void(*callback)(const char *s));
 		static void			ArgCompletion_DemoName(const idCmdArgs &args, void(*callback)(const char *s));
 #ifdef _RAVEN
-	static void			ArgCompletion_ForceModel( const idCmdArgs &args, void(*callback)( const char *s ) ) {}
-	static void			ArgCompletion_ForceModelStrogg( const idCmdArgs &args, void(*callback)( const char *s ) ) {}
-	static void			ArgCompletion_ForceModelMarine( const idCmdArgs &args, void(*callback)( const char *s ) ) {}
+	virtual void		ArgCompletion_Models( const idCmdArgs &args, void(*callback)( const char *s ), bool strogg, bool marine ) = 0;
+
+	static void			ArgCompletion_ForceModel( const idCmdArgs &args, void(*callback)( const char *s ) );
+	static void			ArgCompletion_ForceModelStrogg( const idCmdArgs &args, void(*callback)( const char *s ) );
+	static void			ArgCompletion_ForceModelMarine( const idCmdArgs &args, void(*callback)( const char *s ) );
 #endif
 };
 
@@ -204,4 +206,17 @@ ID_INLINE void idCmdSystem::ArgCompletion_DemoName(const idCmdArgs &args, void(*
 	cmdSystem->ArgCompletion_FolderExtension(args, callback, "demos/", true, ".demo", NULL);
 }
 
+#ifdef _RAVEN
+ID_INLINE void idCmdSystem::ArgCompletion_ForceModel( const idCmdArgs &args, void(*callback)( const char *s ) ) {
+	cmdSystem->ArgCompletion_Models( args, callback, true, true );
+}
+
+ID_INLINE void idCmdSystem::ArgCompletion_ForceModelStrogg( const idCmdArgs &args, void(*callback)( const char *s ) ) {
+	cmdSystem->ArgCompletion_Models( args, callback, true, false );
+}
+
+ID_INLINE void idCmdSystem::ArgCompletion_ForceModelMarine( const idCmdArgs &args, void(*callback)( const char *s ) ) {
+	cmdSystem->ArgCompletion_Models( args, callback, false, true );
+}
+#endif
 #endif /* !__CMDSYSTEM_H__ */

@@ -214,6 +214,12 @@ class idCommonLocal : public idCommon
 #ifdef ID_WRITE_VERSION
 		idCompressor 				*config_compressor;
 #endif
+#ifdef _RAVEN
+		virtual const char* GetLocalizedString(const char* key, int langIndex) { return GetLanguageDict()->GetString(key); }
+		virtual const char* GetLocalizedString(const char* key) { return GetLanguageDict()->GetString(key); }
+		virtual int GetUserCmdMSec(void) { return 16; } 
+		virtual int GetUserCmdHz(void) { return 60; }
+#endif
 };
 
 idCommonLocal	commonLocal;

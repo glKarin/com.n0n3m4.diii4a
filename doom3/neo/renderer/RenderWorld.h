@@ -585,6 +585,11 @@ class idRenderWorld
 	virtual const class rvRenderEffectLocal* GetEffectDef( qhandle_t effectHandle ) const = 0;
 	virtual void			FreeEffectDef( qhandle_t effectHandle ) = 0;
 	virtual bool			EffectDefHasSound( const renderEffect_s *reffect ) = 0;
+
+	virtual void			DebugClear(int time) = 0;		// a time of 0 will clear all lines and text
+// jscott: want to be able to specify depth test
+	virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) = 0;
+	virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot = 1.0f, float nearDist = 0.0f, float alpha = 0.3f, int lifetime = 0) = 0;
 #endif
 		// rendering a scene may actually render multiple subviews for mirrors and portals, and
 		// may render composite textures for gui console screens and light projections
@@ -669,16 +674,6 @@ class idRenderWorld
 
 		// Line drawing for debug visualization
 		virtual void			DebugClearLines(int time) = 0;		// a time of 0 will clear all lines and text
-#ifdef _RAVEN
-	virtual void			DebugClear(int time) { DebugClearLines(0); };		// a time of 0 will clear all lines and text
-
-// jscott: want to be able to specify depth test
-	virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) {
-		DebugBox(color, idBox(bounds) + org, lifetime);
-	}
-
-	virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot = 1.0f, float nearDist = 0.0f, float alpha = 0.3f, int lifetime = 0) { }
-#endif
 		virtual void			DebugLine(const idVec4 &color, const idVec3 &start, const idVec3 &end, const int lifetime = 0, const bool depthTest = false) = 0;
 		virtual void			DebugArrow(const idVec4 &color, const idVec3 &start, const idVec3 &end, int size, const int lifetime = 0) = 0;
 		virtual void			DebugWinding(const idVec4 &color, const idWinding &w, const idVec3 &origin, const idMat3 &axis, const int lifetime = 0, const bool depthTest = false) = 0;
