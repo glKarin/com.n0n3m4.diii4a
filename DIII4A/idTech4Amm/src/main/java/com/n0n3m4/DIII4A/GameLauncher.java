@@ -1279,12 +1279,13 @@ public class GameLauncher extends Activity{
             Toast.makeText(this, "Can't start game!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
-		
+		/*
 		if(Q3EUtils.q3ei.isQ4 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.OPEN_QUAKE4_HELPER, true))
 		{
 			OpenQuake4LevelDialog();
 			return;
 		}
+		*/
 		finish();
 		startActivity(new Intent(this,Q3EMain.class));
 	}
@@ -1419,8 +1420,8 @@ public class GameLauncher extends Activity{
 			case R.id.main_menu_cvar_list:
 				OpenCvarListDetail();
 				return true;
-			case R.id.main_menu_extract_quake4_resource:
-				OpenQuake4ResourceDialog();
+			case R.id.main_menu_extract_resource:
+				OpenResourceFileDialog();
 				return true;
 
 			case R.id.main_menu_save_settings:
@@ -2129,7 +2130,7 @@ public class GameLauncher extends Activity{
 				dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						OpenQuake4ResourceDialog();
+						OpenResourceFileDialog();
 					}
 				});
 			}
@@ -2142,7 +2143,7 @@ public class GameLauncher extends Activity{
 	private static final int Q4_RESOURCE_MP_GAME_MAP_AAS = 1 << 2;
     private static final int Q4_RESOURCE_ALL = ~(1 << 31);
     
-    private void OpenQuake4ResourceDialog()
+    private void OpenResourceFileDialog()
     {
     	// D3-format fonts don't need on longer
         final int[] Types = {
@@ -2152,7 +2153,7 @@ public class GameLauncher extends Activity{
         };
         final String[] Names = {
             // "Font(D3 format)",
-            "Bot(Q3 support in MP game)",
+            "Bot(Q3 bot support in MP game)",
 			"MP game map aas files",
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

@@ -69,16 +69,16 @@
         android:showAsAction="never">
         <menu>
             <item
+                android:id="@+id/main_menu_extract_resource"
+                android:title="Extract resource"
+                android:showAsAction="never"/>
+            <item
                 android:id="@+id/main_menu_cvar_list"
                 android:title="Special Cvar list"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_runtime_log"
                 android:title="Last runtime log"
-                android:showAsAction="never"/>
-            <item
-                android:id="@+id/main_menu_extract_quake4_resource"
-                android:title="Extract Quake 4 resource"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_debug"

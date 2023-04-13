@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan27(natasha)  
+1.1.0harmattan28(natasha)  
 **Last update release:**
-2023-04-05  
+2023-04-13  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -14,15 +14,12 @@ GPLv3
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan27 (2023-04-05)
+> 1.1.0harmattan28 (2023-04-13)
 
-* Fixup some line effects in Quake 4. e.g. monster body disappear effect, lines net.
-* Fixup radio icon in player HUD right-top corner in Quake 4.
-* Fixup dialog interactive in Quake 4. e.g. dialog of creating MP game server.
-* Fixup MP game loading GUI and MP game main menu in Quake 4.
-* Add integer cvar named `harm_si_autoFillBots` for automatic fill bots after map loaded in MP game in Quake 4(0 to disable). `fillbots` command support append bot num argument.
-* Add automatic set bot's team in MP team game, random bot model, and fixup some bot's bugs in Quake 4.
-* Add `SABot`'s aas file pak of MP game maps in `Quake 4 helper dialog`.
+* Add bool cvar `harm_g_mutePlayerFootStep` to control mute player footstep sound(default on) in Quake 4.
+* Fix some light's brightness depend on sound amplitude in Quake 4. e.g. in most levels like `airdefense2`, at some dark passages, it should has a repeat-flashing lighting.
+* Remove Quake 4 helper dialog when start Quake 4, if want to extract resource files, open `Other` -> `Extract resource` in menu.
+* (Bug)In Quake 4, if load some levels has noise with effects on, typed `bse_enable` to 0, and then typed `bse_enable` back to 1 in console, noise can resolved.
 
 ----------------------------------------------------------------------------------
 
@@ -41,13 +38,10 @@ GPLv3
 
 #### About Quake IV
 ###### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play all levels, but some levels has bugs.  
-> 1. Putting PC Quake 4 game data file to `q4base` folder.
-> 2. Click `START` to open Quake 4 map level dialog in game launcher.
-> 3. Suggest to extract Quake 4 patch resource to `q4base` game data folder first.
+> 1. Putting PC Quake 4 game data file to `q4base` folder and START directly.
+> 2. Suggest to extract Quake 4 patch resource to `q4base` game data folder first(in menu `Other` -> `Extract resource`).
 > - Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file> <bot_file> ...` or `fillbots` after enter map in console, or set `harm_si_autoFillBots` to 1 for automatic fill bots).
 > - `SABot` MP game map aas files(for bots in MP game).
-> 4. Then Choose map level/Start directly, all levels is working, and `New Game` s working.
-> 5. Gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).
 
 ###### Problems and resolutions  
 > 1. ~~Door-opening/Collision~~: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, health-station, all doors can be opened.
@@ -56,7 +50,7 @@ GPLv3
 > 4. ~~Loading-UI~~: It looks work well now.
 > 5. ~~Multiplayer-Game~~: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
 > 6. *Script error*: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
-> 7. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
+> 7. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render(If load some levels has noise with effects on, typed `bse_enable` to 0, and then typed `bse_enable` back to 1 in console, noise can resolved).
 > 8. *Entity render*: Some game entities render incorrect.
 > 9. ~~Font~~: Support Q4 format fonts now. [IlDucci](https://github.com/IlDucci)'s DOOM3-format fonts of Quake 4 is not need on longer.
 

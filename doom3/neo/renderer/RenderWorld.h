@@ -286,7 +286,30 @@ typedef struct renderEntity_s {
 	const idMaterial 		*customShader;			// if non-0, all surfaces will use this
 	const idMaterial 		*referenceShader;		// used so flares can reference the proper light shader
 	const idDeclSkin 		*customSkin;				// 0 for no remappings
+#ifdef _RAVEN
+// RAVEN BEGIN
+	int						referenceSoundHandle;	// for shader sound tables, allowing effects to vary with sounds
+// RAVEN END	
+// RAVEN BEGIN
+// bdube: hiding surfaces
+	// Mask of surfaces which should be suppresesed when rendering the entity
+	int						suppressSurfaceMask;
+// RAVEN END	
+// RAVEN BEGIN
+// ddynerman: Wolf LOD code
+	float					shadowLODDistance;
+	int						suppressLOD;
+// RAVEN END
+// RAVEN BEGIN
+// bdube: overlay shaders
+	const idMaterial *		overlayShader;			// overlays the model on top of itself with this shader (originally for powerups)
+
+// bdube: weapon depth hack only in a given view id
+	int						weaponDepthHackInViewID;// squash depth range so view weapons don't poke into walls
+// RAVEN END
+#else
 	class idSoundEmitter 	*referenceSound;			// for shader sound tables, allowing effects to vary with sounds
+#endif
 	float					shaderParms[ MAX_ENTITY_SHADER_PARMS ];	// can be used in any way by shader or model generation
 
 	// networking: see WriteGUIToSnapshot / ReadGUIFromSnapshot
@@ -331,28 +354,6 @@ typedef struct renderEntity_s {
 
 	int						timeGroup;
 	int						xrayIndex;
-#ifdef _RAVEN
-// RAVEN BEGIN
-	int						referenceSoundHandle;	// for shader sound tables, allowing effects to vary with sounds
-// RAVEN END	
-// RAVEN BEGIN
-// bdube: hiding surfaces
-	// Mask of surfaces which should be suppresesed when rendering the entity
-	int						suppressSurfaceMask;
-// RAVEN END	
-// RAVEN BEGIN
-// ddynerman: Wolf LOD code
-	float					shadowLODDistance;
-	int						suppressLOD;
-// RAVEN END
-// RAVEN BEGIN
-// bdube: overlay shaders
-	const idMaterial *		overlayShader;			// overlays the model on top of itself with this shader (originally for powerups)
-
-// bdube: weapon depth hack only in a given view id
-	int						weaponDepthHackInViewID;// squash depth range so view weapons don't poke into walls
-// RAVEN END
-#endif
 } renderEntity_t;
 
 
@@ -405,7 +406,6 @@ typedef struct renderLight_s {
 
 	const idMaterial 		*shader;				// NULL = either lights/defaultPointLight or lights/defaultProjectedLight
 	float					shaderParms[MAX_ENTITY_SHADER_PARMS];		// can be used in any way by shader
-	idSoundEmitter 		*referenceSound;		// for shader sound tables, allowing effects to vary with sounds
 #ifdef _RAVEN
 // RAVEN BEGIN
 // dluetscher: added a min light detail level setting that describes when this light is visible
@@ -416,6 +416,8 @@ typedef struct renderLight_s {
 	bool					globalLight;		// Whether this is a global light or not.
 
 	int						referenceSoundHandle;		// for shader sound tables, allowing effects to vary with sounds
+#else
+	idSoundEmitter 		*referenceSound;		// for shader sound tables, allowing effects to vary with sounds
 #endif
 } renderLight_t;
 

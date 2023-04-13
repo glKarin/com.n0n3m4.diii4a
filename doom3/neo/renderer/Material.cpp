@@ -3400,7 +3400,7 @@ void idMaterial::EvaluateRegisters( float *regs, const float entityParms[MAX_ENT
 	if(soundEmitter > 0)
 	{
 		idSoundWorld *soundWorld = soundSystem->GetSoundWorldFromId(SOUNDWORLD_GAME);
-		if(soundEmitter < static_cast<idSoundWorldLocal *>(soundWorld)->emitters.Num()) //??? safety ???
+		if(soundWorld && soundEmitter < static_cast<idSoundWorldLocal *>(soundWorld)->emitters.Num()) //??? safety ???
 		{
 			emitter = soundSystem->EmitterForIndex(SOUNDWORLD_GAME, soundEmitter);
 		}

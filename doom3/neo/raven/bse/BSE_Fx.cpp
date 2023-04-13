@@ -2,6 +2,7 @@
 #pragma hdrstop
 
 #include "BSE.h"
+#include "../../sound/snd_local.h"
 
 static int bseSegmentNameToEnum(const char *name)
 {
@@ -828,14 +829,23 @@ void rvBSE::SetReferenceSound(int handle)
 
 	if(handle <= 0)
 		handle = -1;
+#if 0
+	else
+	{
+		idSoundWorld *soundWorld = soundSystem->GetSoundWorldFromId(SOUNDWORLD_GAME);
+		if(handle >= static_cast<idSoundWorldLocal *>(soundWorld)->emitters.Num()) //??? safety ???
+		handle = -1;
+	}
+#endif
+
 	if(referenceSoundHandle == handle)
 		return;
 
 	if(referenceSoundHandle > 0)
 	{
 		referenceSound = soundSystem->EmitterForIndex(SOUNDWORLD_GAME, referenceSoundHandle);
-		referenceSound->StopSound(SND_CHANNEL_ANY);
-		//referenceSoundHandle = -1;
+		if(referenceSound)
+			referenceSound->StopSound(SND_CHANNEL_ANY);
 	}
 	referenceSoundHandle = handle;
 }

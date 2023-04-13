@@ -480,7 +480,11 @@ void	idRenderWorldLocal::WriteRenderLight(qhandle_t handle, const renderLight_t 
 	for (int i = 0; i < MAX_ENTITY_SHADER_PARMS; i++)
 		session->writeDemo->WriteFloat(light->shaderParms[i]);
 
+#ifdef _RAVEN //karin: quake4 using handle
+	session->writeDemo->WriteInt(light->referenceSoundHandle > 0 ? 1 : 0);
+#else
 	session->writeDemo->WriteInt(light->referenceSound ? 1 : 0);
+#endif
 
 	if (light->prelightModel) {
 		session->writeDemo->WriteHashString(light->prelightModel->Name());
@@ -490,10 +494,17 @@ void	idRenderWorldLocal::WriteRenderLight(qhandle_t handle, const renderLight_t 
 		session->writeDemo->WriteHashString(light->shader->GetName());
 	}
 
+#ifdef _RAVEN //karin: quake4 using handle
+	if (light->referenceSoundHandle > 0) {
+		int	index = light->referenceSoundHandle;
+		session->writeDemo->WriteInt(index);
+	}
+#else
 	if (light->referenceSound) {
 		int	index = light->referenceSound->Index();
 		session->writeDemo->WriteInt(index);
 	}
+#endif
 
 	if (r_showDemo.GetBool()) {
 		common->Printf("write DC_UPDATE_LIGHTDEF: %i\n", handle);
@@ -551,11 +562,19 @@ void	idRenderWorldLocal::ReadRenderLight()
 		light.shader = declManager->FindMaterial(session->readDemo->ReadHashString());
 	}
 
+#ifdef _RAVEN //karin: quake4 using handle
+	light.referenceSoundHandle = -1;
+#else
 	light.referenceSound = NULL;
+#endif
 	if (referenceSound) {
 		int	index;
 		session->readDemo->ReadInt(index);
+#ifdef _RAVEN //karin: quake4 using handle
+		light.referenceSoundHandle = index;
+#else
 		light.referenceSound = session->sw->EmitterForIndex(index);
+#endif
 	}
 
 	UpdateLightDef(index, &light);
@@ -599,7 +618,11 @@ void	idRenderWorldLocal::WriteRenderEntity(qhandle_t handle, const renderEntity_
 	session->writeDemo->WriteInt(ent->customShader ? 1 : 0);
 	session->writeDemo->WriteInt(ent->referenceShader ? 1 : 0);
 	session->writeDemo->WriteInt(ent->customSkin ? 1 : 0);
+#ifdef _RAVEN //karin: quake4 using handle
+	session->writeDemo->WriteInt(ent->referenceSoundHandle > 0 ? 1 : 0);
+#else
 	session->writeDemo->WriteInt(ent->referenceSound ? 1 : 0);
+#endif
 
 	for (int i = 0; i < MAX_ENTITY_SHADER_PARMS; i++)
 		session->writeDemo->WriteFloat(ent->shaderParms[i]);
@@ -633,10 +656,17 @@ void	idRenderWorldLocal::WriteRenderEntity(qhandle_t handle, const renderEntity_
 		session->writeDemo->WriteHashString(ent->referenceShader->GetName());
 	}
 
+#ifdef _RAVEN //karin: quake4 using handle
+	if (ent->referenceSoundHandle > 0) {
+		int	index = ent->referenceSoundHandle;
+		session->writeDemo->WriteInt(index);
+	}
+#else
 	if (ent->referenceSound) {
 		int	index = ent->referenceSound->Index();
 		session->writeDemo->WriteInt(index);
 	}
+#endif
 
 	if (ent->numJoints) {
 		for (int i = 0; i < ent->numJoints; i++) {
@@ -758,11 +788,19 @@ void	idRenderWorldLocal::ReadRenderEntity()
 		ent.referenceShader = declManager->FindMaterial(session->readDemo->ReadHashString());
 	}
 
+#ifdef _RAVEN //karin: quake4 using handle
+	ent.referenceSoundHandle = -1;
+#else
 	ent.referenceSound = NULL;
+#endif
 	if (referenceSound) {
 		int	index;
 		session->readDemo->ReadInt(index);
+#ifdef _RAVEN //karin: quake4 using handle
+		ent.referenceSoundHandle = index;
+#else
 		ent.referenceSound = session->sw->EmitterForIndex(index);
+#endif
 	}
 
 	ent.remoteRenderView = NULL;
