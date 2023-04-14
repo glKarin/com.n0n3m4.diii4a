@@ -19,7 +19,7 @@ GPLv3
 * Add bool cvar `harm_g_mutePlayerFootStep` to control mute player footstep sound(default on) in Quake 4.
 * Fix some light's brightness depend on sound amplitude in Quake 4. e.g. in most levels like `airdefense2`, at some dark passages, it should has a repeat-flashing lighting.
 * Remove Quake 4 helper dialog when start Quake 4, if want to extract resource files, open `Other` -> `Extract resource` in menu.
-* (Bug)In Quake 4, if load some levels has noise with effects on, typed `bse_enable` to 0, and then typed `bse_enable` back to 1 in console, noise can resolved.
+* (Bug)In Quake 4, if load some levels has noise with effects on, typed `bse_enabled` to 0, and then typed `bse_enabled` back to 1 in console, noise can resolved.
 
 ----------------------------------------------------------------------------------
 
