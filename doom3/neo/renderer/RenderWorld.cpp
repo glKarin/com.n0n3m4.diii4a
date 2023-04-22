@@ -1157,7 +1157,7 @@ guiPoint_t	idRenderWorldLocal::GuiTrace(qhandle_t entityHandle, const idVec3 sta
 			pt.guiId = shader->GetEntityGui();
 
 #ifdef _RAVEN //k: player focus gui
-			if (tri->silEdges && tri->verts) {
+			if (tri->silEdges && tri->verts && tr.primaryView) {
 				idScreenRect	r;
 				idVec3			v;
 				idVec3			ndc;
