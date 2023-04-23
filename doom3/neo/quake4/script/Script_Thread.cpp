@@ -1223,15 +1223,11 @@ void idThread::Event_RandomInt( float range ) const {
 
 // rjohnson: new blur special effect
 void idThread::Event_SetSpecialEffect( int Effect, int Enabled ) {
-#if 0 //k: not implement
 	renderSystem->SetSpecialEffect( (ESpecialEffectType)Effect, !!Enabled );
-#endif
 }
 
 void idThread::Event_SetSpecialEffectParm( int Effect, int Parm, float Value ) {
-#if 0 //k: not implement
 	renderSystem->SetSpecialEffectParm( (ESpecialEffectType)Effect, Parm, Value );
-#endif
 }
 
 // RAVEN END
@@ -2259,15 +2255,11 @@ void idThread::Event_SetMatSort( const char *name, const char *val ) const {
 	if ( mat ) {
 		int srt = SS_DECAL;
 		if ( idStr::Icmp( val, "SS_MIN" ) == 0 ) {
-#if 0 //k: not
 			srt = SS_MIN;
-#endif
 		} else if ( idStr::Icmp( val, "SS_SUBVIEW" ) == 0 ) {
 			srt = SS_SUBVIEW;		
 		} else if ( idStr::Icmp( val, "SS_PREGUI" ) == 0 ) {
-#if 0 //k: not
 			srt = SS_PREGUI;		
-#endif
 		} else if ( idStr::Icmp( val, "SS_GUI" ) == 0 ) {
 			srt = SS_GUI;		
 		} else if ( idStr::Icmp( val, "SS_BAD" ) == 0 ) {

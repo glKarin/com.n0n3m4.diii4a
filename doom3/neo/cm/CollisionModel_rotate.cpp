@@ -1340,6 +1340,12 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 	cm_trmVertex_t *vert;
 	ALIGN16(static cm_traceWork_t tw);
 
+#ifdef _RAVEN
+	if (!model) {
+		common->Printf("idCollisionModelManagerLocal::Rotation180: invalid model\n");
+		return;
+	}
+#else
 	if (model < 0 || model > MAX_SUBMODELS || model > idCollisionModelManagerLocal::maxModels) {
 		common->Printf("idCollisionModelManagerLocal::Rotation180: invalid model handle\n");
 		return;
@@ -1349,6 +1355,7 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 		common->Printf("idCollisionModelManagerLocal::Rotation180: invalid model\n");
 		return;
 	}
+#endif
 
 	idCollisionModelManagerLocal::checkCount++;
 
@@ -1364,7 +1371,11 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 	tw.angle = endAngle - startAngle;
 	assert(tw.angle > -180.0f && tw.angle < 180.0f);
 	tw.maxTan = initialTan = idMath::Fabs(tan((idMath::PI / 360.0f) * tw.angle));
+#ifdef _RAVEN
+	tw.model = static_cast<cm_model_t *>(model);
+#else
 	tw.model = idCollisionModelManagerLocal::models[model];
+#endif
 	tw.start = start - modelOrigin;
 	// rotation axis, axis is assumed to be normalized
 	tw.axis = axis;

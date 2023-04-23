@@ -39,7 +39,15 @@ If you have questions concerning this license or the applicable additional terms
 
 
 typedef bool (*exporterDLLEntry_t)(int version, idCommon *common, idSys *sys);
+#ifdef _RAVEN
+// RAVEN END
+// RAVEN BEGIN
+// bdube: default src and dest ospath's
+typedef const char *( *exporterInterface_t )( const char *src_ospath, const char* dst_ospath, const char *commandline );
+// RAVEN END
+#else
 typedef const char *(*exporterInterface_t)(const char *ospath, const char *commandline);
+#endif
 typedef void (*exporterShutdown_t)(void);
 
 #endif /* !__MAYA_MAIN_H__ */

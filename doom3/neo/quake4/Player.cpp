@@ -1492,9 +1492,6 @@ void idPlayer::SetupWeaponEntity( void ) {
 idPlayer::Init
 ==============
 */
-#ifdef _QUAKE4 //k: control flash light on
-idCVar harm_g_flashlightOn( "harm_g_flashlightOn", "1", CVAR_BOOL | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Automitic make flash light on initial." );
-#endif
 void idPlayer::Init( void ) {
 	const char			*value;
 	
@@ -1567,13 +1564,7 @@ void idPlayer::Init( void ) {
 	currentWeapon = -1;
 	previousWeapon = -1;
 	
-#ifdef _QUAKE4 //k: auto flash light on
-	// jmarshall - engine pushed IMPULSE_50 to force on the flashlight, makes more sense just to enable it here(since it was on initially). 
-	flashlightOn	  = harm_g_flashlightOn.GetBool(); //k: control it
-// jmarshall end
-#else
 	flashlightOn	  = false;
-#endif
 
 	idealLegsYaw = 0.0f;
 	legsYaw = 0.0f;
@@ -2807,10 +2798,8 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 
 	// Force players to use bounding boxes when in multiplayer
 	if ( gameLocal.isMultiplayer ) {
-// jmarshall - breaks multiplayer.
-#if 1
+// jmarshall - breaks multiplayer. #if 0
 		use_combat_bbox = true;
-#endif
 // jmarshall end
 
 		// Make sure the combat model is unlinked
@@ -3676,7 +3665,7 @@ void idPlayer::DrawHUD( idUserInterface *_hud ) {
 
 	// Draw the cinematic hud when in a cinematic
 	if ( gameLocal.GetCamera( ) ) {
-		if ( cinematicHud/* && !(gameLocal.editors & EDITOR_MODVIEW)*/ ) {
+		if ( cinematicHud && !(gameLocal.editors & EDITOR_MODVIEW) ) {
 			cinematicHud->Redraw( gameLocal.time );
 		}
 		return;
@@ -9334,7 +9323,7 @@ void idPlayer::Think( void ) {
 #endif
 
  	// Dont do any thinking if we are in modview
-	if ( /*gameLocal.editors & EDITOR_MODVIEW ||*/ gameEdit->PlayPlayback() ) {
+	if ( gameLocal.editors & EDITOR_MODVIEW || gameEdit->PlayPlayback() ) {
 		// calculate the exact bobbed view position, which is used to
 		// position the view weapon, among other things
 		CalculateFirstPersonView();
@@ -10989,8 +10978,7 @@ spectate follow?
 ==================
 */
 void idPlayer::SmoothenRenderView( bool firstPerson ) {
-	// jmarshall - new demo support?
-#if 0
+	// karin: usercmd_t::realTime is not valid now. gameLocal::GetDemoState() always return DEMO_NONE
 	int d1, d2;
 	idAngles angles, anglesDelta, newAngles;
 
@@ -11025,7 +11013,6 @@ void idPlayer::SmoothenRenderView( bool firstPerson ) {
 			firstPersonViewAxis = renderView->viewaxis;
 		}
 	}
-#endif
 }
 
 /*
@@ -12249,10 +12236,8 @@ void idPlayer::PredictionErrorDecay( void ) {
 			predictionErrorTime = gameLocal.time;
 
 			if ( net_showPredictionError.GetInteger() == entityNumber ) {
-#if 0 //k: not implement
 				renderSystem->DebugGraph( predictionOriginError.Length(), 0.0f, 100.0f, colorGreen );
 				renderSystem->DebugGraph( predictionAnglesError.Length(), 0.0f, 180.0f, colorBlue );
-#endif
 			}
 		}
 

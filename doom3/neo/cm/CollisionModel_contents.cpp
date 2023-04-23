@@ -484,7 +484,11 @@ int idCollisionModelManagerLocal::PointContents(const idVec3 p, cmHandle_t model
 	cm_brush_t *b;
 	idPlane *plane;
 
+#ifdef _RAVEN
+	node = idCollisionModelManagerLocal::PointNode(p, static_cast<cm_model_t *>(model));
+#else
 	node = idCollisionModelManagerLocal::PointNode(p, idCollisionModelManagerLocal::models[model]);
+#endif
 
 	for (bref = node->brushes; bref; bref = bref->next) {
 		b = bref->b;
@@ -583,7 +587,11 @@ int idCollisionModelManagerLocal::ContentsTrm(trace_t *results, const idVec3 &st
 	tw.pointTrace = false;
 	tw.quickExit = false;
 	tw.numContacts = 0;
+#ifdef _RAVEN
+	tw.model = static_cast<cm_model_t *>(model);
+#else
 	tw.model = idCollisionModelManagerLocal::models[model];
+#endif
 	tw.start = start - modelOrigin;
 	tw.end = tw.start;
 
@@ -711,6 +719,12 @@ int idCollisionModelManagerLocal::Contents(const idVec3 &start,
 {
 	trace_t results;
 
+#ifdef _RAVEN
+	if(!model) {
+		common->Printf("idCollisionModelManagerLocal::Contents: invalid model\n");
+		return 0;
+	}
+#else
 	if (model < 0 || model > idCollisionModelManagerLocal::maxModels || model > MAX_SUBMODELS) {
 		common->Printf("idCollisionModelManagerLocal::Contents: invalid model handle\n");
 		return 0;
@@ -720,6 +734,7 @@ int idCollisionModelManagerLocal::Contents(const idVec3 &start,
 		common->Printf("idCollisionModelManagerLocal::Contents: invalid model\n");
 		return 0;
 	}
+#endif
 
 	return ContentsTrm(&results, start, trm, trmAxis, contentMask, model, modelOrigin, modelAxis);
 }

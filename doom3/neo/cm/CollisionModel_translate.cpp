@@ -886,6 +886,12 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 
 	memset(results, 0, sizeof(*results));
 
+#ifdef _RAVEN
+	if (!model) {
+		common->Printf("idCollisionModelManagerLocal::Translation: invalid model\n");
+		return;
+	}
+#else
 	if (model < 0 || model > MAX_SUBMODELS || model > idCollisionModelManagerLocal::maxModels) {
 		common->Printf("idCollisionModelManagerLocal::Translation: invalid model handle\n");
 		return;
@@ -895,6 +901,7 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 		common->Printf("idCollisionModelManagerLocal::Translation: invalid model\n");
 		return;
 	}
+#endif
 
 	// if case special position test
 	if (start[0] == end[0] && start[1] == end[1] && start[2] == end[2]) {
@@ -945,7 +952,11 @@ void idCollisionModelManagerLocal::Translation(trace_t *results, const idVec3 &s
 	tw.contacts = idCollisionModelManagerLocal::contacts;
 	tw.maxContacts = idCollisionModelManagerLocal::maxContacts;
 	tw.numContacts = 0;
+#ifdef _RAVEN
+	tw.model = static_cast<cm_model_t *>(model);
+#else
 	tw.model = idCollisionModelManagerLocal::models[model];
+#endif
 	tw.start = start - modelOrigin;
 	tw.end = end - modelOrigin;
 	tw.dir = end - start;

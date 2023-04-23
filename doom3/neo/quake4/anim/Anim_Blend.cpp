@@ -876,11 +876,9 @@ void idAnim::CallFrameCommands( idEntity *ent, int from, int to ) const {
 							 command.string?command.string->c_str():"???" );
 			}
 
-#if 0
 			if ( ( gameLocal.editors & EDITOR_MODVIEW ) && !frameCommandInfo[command.type].modview ) {
 				continue;
 			}
-#endif
 // RAVEN END			
 
 			switch( command.type ) {
@@ -2608,7 +2606,7 @@ void idDeclModelDef::SetupJoints( int *numJoints, idJointMat **jointList, idBoun
 	// set up initial pose for model (with no pose, model is just a jumbled mess)
 //RAVEN BEGIN
 //amccarthy: Added allocation tag
-	list = (idJointMat *) Mem_Alloc16( num * sizeof( list[0] )/*, MA_ANIM //k*/ );
+	list = (idJointMat *) Mem_Alloc16( num * sizeof( list[0] ), MA_ANIM );
 //RAVEN END
 	pose = GetDefaultPose();
 
@@ -3557,7 +3555,7 @@ void idAnimator::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( numJoints );
 //RAVEN BEGIN
 //amccarthy: Added allocation tag
-	joints = (idJointMat *) Mem_Alloc16( numJoints * sizeof( joints[0] )/*, MA_ANIM //k*/ );
+	joints = (idJointMat *) Mem_Alloc16( numJoints * sizeof( joints[0] ), MA_ANIM );
 //RAVEN END
 	savefile->Read( joints, numJoints * sizeof( joints[0] ) );
 
@@ -3579,7 +3577,7 @@ void idAnimator::Restore( idRestoreGame *savefile ) {
 	savefile->Read( AFPoseJointMods.Ptr(), AFPoseJointMods.MemoryUsed() );
 
 	savefile->ReadInt( AFPoseJointFrameSize );
-	AFPoseJointFrame = (idJointQuat *)Mem_Alloc16( AFPoseJointFrameSize * sizeof( AFPoseJointFrame[0] )/*, MA_ANIM //k*/ );
+	AFPoseJointFrame = (idJointQuat *)Mem_Alloc16( AFPoseJointFrameSize * sizeof( AFPoseJointFrame[0] ), MA_ANIM );
 	savefile->Read( AFPoseJointFrame, AFPoseJointFrameSize * sizeof( AFPoseJointFrame[0] ) );
 
 	savefile->ReadBounds( AFPoseBounds );
@@ -4528,7 +4526,7 @@ void idAnimator::InitAFPose( void ) {
 
 	if ( AFPoseJointFrame == NULL || AFPoseJointFrameSize != modelDef->Joints().Num() ) {
 		Mem_Free16( AFPoseJointFrame );
-		AFPoseJointFrame = (idJointQuat *) Mem_Alloc16( modelDef->Joints().Num() * sizeof( AFPoseJointFrame[0] )/*, MA_ANIM //k*/ );
+		AFPoseJointFrame = (idJointQuat *) Mem_Alloc16( modelDef->Joints().Num() * sizeof( AFPoseJointFrame[0] ), MA_ANIM );
 		AFPoseJointFrameSize = modelDef->Joints().Num();
 	}
 }
@@ -5922,12 +5920,12 @@ idRenderModel *idGameEdit::ANIM_CreateMeshForAnim( idRenderModel *model, const c
 	ent.numJoints = model->NumJoints();
 //RAVEN BEGIN
 //amccarthy: Added allocation tag
-	ent.joints = ( idJointMat * )Mem_Alloc16( ent.numJoints * sizeof( *ent.joints )/*, MA_ANIM //k*/ );
+	ent.joints = ( idJointMat * )Mem_Alloc16( ent.numJoints * sizeof( *ent.joints ), MA_ANIM );
 //RAVEN END
 
 	ANIM_CreateAnimFrame( model, md5anim, ent.numJoints, ent.joints, FRAME2MS( frame ), offset, remove_origin_offset );
 
-	newmodel = model->InstantiateDynamicModel( &ent, NULL, NULL/*, ~SURF_COLLISION*/ );
+	newmodel = model->InstantiateDynamicModel( &ent, NULL, NULL, ~SURF_COLLISION );
 
 	Mem_Free16( ent.joints );
 	ent.joints = NULL;

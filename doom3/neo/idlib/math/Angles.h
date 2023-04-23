@@ -104,6 +104,7 @@ class idAngles
 	idAngles		Random( const idVec3& range, idRandom& random ) const;
 	idAngles&		Scale( const idAngles& scalar );
 	idAngles&		Remap( const int map[], const int dirMap[] );
+	float			Length( void ) const;
 #endif
 };
 
@@ -319,6 +320,10 @@ ID_INLINE idAngles& idAngles::Remap( const int map[], const int dirMap[] ) {
 	}
 
 	return *this;
+}
+
+ID_INLINE float idAngles::Length( void ) const {
+		return idMath::Sqrt( yaw * yaw + pitch * pitch + roll * roll );
 }
 #endif
 

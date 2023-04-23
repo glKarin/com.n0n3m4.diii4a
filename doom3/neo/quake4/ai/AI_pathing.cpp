@@ -67,7 +67,7 @@ void pathNode_s::Init() {
 
 // RAVEN BEGIN
 // jnewquist: Mark memory tags for idBlockAlloc
-idBlockAlloc<pathNode_t, 128/*, MA_AI //k */>	pathNodeAllocator;
+idBlockAlloc<pathNode_t, 128, MA_AI>	pathNodeAllocator;
 // RAVEN END
 
 /*

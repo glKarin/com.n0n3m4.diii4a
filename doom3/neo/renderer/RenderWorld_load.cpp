@@ -396,9 +396,9 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 			{
 				//k: ("_black" 123.00 456.00)
 #if 0
-				src->ReadToken(&nextToken);
-				src->ParseFloat();
-				src->ParseFloat();
+				src->ReadToken(&nextToken); // fadeImage
+				src->ParseFloat(); // distanceNear
+				src->ParseFloat(); // distanceFar
 				src->ExpectTokenString(")");
 #else
 				src->SkipUntilString(")");

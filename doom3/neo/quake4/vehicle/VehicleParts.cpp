@@ -180,11 +180,7 @@ void rvVehicleSound::Spawn ( void ) {
 	volume[0] = idMath::dBToScale( volume[0] );
 	volume[1] = idMath::dBToScale( volume[1] );
 
-#if 0
 	declManager->FindSound ( soundName )->GetParms ( &refSound.parms );
-#else
-	refSound.parms = *declManager->FindSound ( soundName )->GetParms ();
-#endif
 }
 
 /*

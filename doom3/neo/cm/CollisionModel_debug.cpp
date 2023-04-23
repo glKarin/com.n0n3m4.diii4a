@@ -419,7 +419,12 @@ void idCollisionModelManagerLocal::DrawModel(cmHandle_t handle, const idVec3 &mo
 	cm_model_t *model;
 	idVec3 viewPos;
 
-	if (handle < 0 && handle >= numModels) {
+#ifdef _RAVEN
+	if(!handle)
+#else
+	if (handle < 0 && handle >= numModels)
+#endif
+	{
 		return;
 	}
 
@@ -428,7 +433,11 @@ void idCollisionModelManagerLocal::DrawModel(cmHandle_t handle, const idVec3 &mo
 		cm_drawColor.ClearModified();
 	}
 
+#ifdef _RAVEN
+	model = static_cast<cm_model_t *>(handle);
+#else
 	model = models[ handle ];
+#endif
 	viewPos = (viewOrigin - modelOrigin) * modelAxis.Transpose();
 	checkCount++;
 	DrawNodePolygons(model, model->node, modelOrigin, modelAxis, viewPos, radius);

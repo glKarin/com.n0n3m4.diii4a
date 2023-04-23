@@ -42,6 +42,19 @@ If you have questions concerning this license or the applicable additional terms
 
 #define ENGINE_VERSION					"DOOM 1.3.1"	// printed in console
 
+// jnewquist: build type
+#if defined(_DEBUG)
+#define GAME_BUILD_TYPE					"Debug"
+#elif defined(_MPBETA)
+#define GAME_BUILD_TYPE					"MPBeta"
+#elif defined(_FINAL)
+#define GAME_BUILD_TYPE					""
+#elif defined(_RELEASE)
+#define	GAME_BUILD_TYPE					""
+#else
+#define	GAME_BUILD_TYPE					""
+#endif
+
 // paths
 #define	CD_BASEDIR						"Quake4"
 #ifdef ID_DEMO_BUILD

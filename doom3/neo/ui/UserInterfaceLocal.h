@@ -132,6 +132,14 @@ class idUserInterfaceLocal : public idUserInterface
 	virtual void				SetInteractive(bool interactive);
 	virtual void				SetStateVec4( const char *varName, const idVec4& vector );
 	virtual idVec4				GetLightColor(void) { return vec4_one; }
+	virtual void				ClearState( void ) { }
+	virtual bool				GetMaxTextIndex( const char *windowName, const char *text, wrapInfo_t& wrapInfo ) const {
+		(void)windowName;
+		(void)text;
+		wrapInfo.lastWhitespace = -1;
+		wrapInfo.maxIndex = -1;
+		return false;
+	}
 #endif
 #ifdef _HUMANHEAD
 	virtual void CallStartup(void);

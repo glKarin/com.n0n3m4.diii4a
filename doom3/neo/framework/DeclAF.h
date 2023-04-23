@@ -196,6 +196,12 @@ class idDeclAF : public idDecl
 		bool					selfCollision;
 		idList<idDeclAF_Body *>			bodies;
 		idList<idDeclAF_Constraint *>	constraints;
+#ifdef _RAVEN
+// RAVEN BEGIN
+// rjohnson: fast AF eval to skip some things that are not needed for specific circumstances
+	bool					fastEval;
+// RAVEN END
+#endif
 
 	private:
 		bool					ParseContents(idLexer &src, int &c) const;

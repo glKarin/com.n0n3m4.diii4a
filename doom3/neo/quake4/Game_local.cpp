@@ -40,10 +40,8 @@ idCVar *					idCVar::staticVars = NULL;
 
 // RAVEN BEGIN
 // rjohnson: new help system for cvar ui
-#if 0 //k
 idCVarHelp *				idCVarHelp::staticCVarHelps = NULL;
 idCVarHelp *				idCVarHelp::staticCVarHelpsTail = NULL;
-#endif
 // RAVEN END
 
 idCVar com_forceGenericSIMD( "com_forceGenericSIMD", "0", CVAR_BOOL|CVAR_SYSTEM, "force generic platform independent SIMD" );
@@ -459,9 +457,7 @@ void idGameLocal::Init( void ) {
 
 // RAVEN BEGIN
 // rjohnson: new help system for cvar ui
-#if 0 //k
 	idCVarHelp::RegisterStatics();
-#endif
 
 // jsinger: added to support serialization/deserialization of binary decls
 #ifdef RV_BINARYDECLS
@@ -1141,12 +1137,10 @@ void idGameLocal::Error( const char *fmt, ... ) const {
 
 // RAVEN BEGIN
 // scork: some model errors arrive here during validation which kills the whole process, so let's just warn about them instead...
-#if 0 //k
 	if ( common->DoingDeclValidation() ) {
 		this->Warning( "%s", text );
 		return;
 	}
-#endif
 // RAVEN END
 
 	thread = idThread::CurrentThread();
@@ -2554,16 +2548,12 @@ void idGameLocal::MapShutdown( void ) {
 	gamestate = GAMESTATE_SHUTDOWN;
 
 	if ( soundSystem ) {
-#if 0 //k: not implement
 		soundSystem->ResetListener();
-#endif
 	}
 
 // RAVEN BEGIN
 // rjohnson: new blur special effect
-#if 0 //k: not implement
 	renderSystem->ShutdownSpecialEffects();
-#endif
 // RAVEN END
 
 	// clear out camera if we're in a cinematic
@@ -3588,12 +3578,6 @@ idGameLocal::RunFrame
 
 	assert( !isClient );
 
-#ifdef _QUAKE4
-	if (gameRenderWorld) {
-		gameRenderWorld->DebugClear(0);
-	}
-#endif
-
 	player = GetLocalPlayer();
 
 	if ( !isMultiplayer && g_stopTime.GetBool() ) {
@@ -3642,14 +3626,10 @@ TIME_THIS_SCOPE("idGameLocal::RunFrame - gameDebug.BeginFrame()");
 		}
 
 		// If modview is running then let it think
-#if 0 //k: not implement
 		common->ModViewThink( );
-#endif
 
 		// rjohnson: added option for guis to always think
-#if 0 //k: not implement
 		common->RunAlwaysThinkGUIs( time );
-#endif
 
 		// nmckenzie: Let AI System stuff update itself.
 		if ( !isMultiplayer ) {
@@ -3869,9 +3849,7 @@ TIME_THIS_SCOPE("idGameLocal::RunFrame - gameDebug.BeginFrame()");
 
 	ret.syncNextGameFrame = skipCinematic;
 	if ( skipCinematic ) {
-#if 0 //k: not implement
 		soundSystem->EndCinematic();
-#endif
 		soundSystem->SetMute( false );
 		skipCinematic = false;		
 	}
@@ -4544,11 +4522,7 @@ void idGameLocal::RunDebugInfo( void ) {
 	}
 
 	// collision map debug output
-	collisionModelManager->DebugOutput( player->GetEyePosition()
-#if 0 //k
-			, mat3_identity
-#endif
-			);
+	collisionModelManager->DebugOutput( player->GetEyePosition(), mat3_identity);
 
 // RAVEN BEGIN
 // jscott: for debugging playbacks
@@ -6238,9 +6212,6 @@ void idGameLocal::SetCamera( idCamera *cam ) {
 
 	camera = cam;
 	if ( camera ) {
-#ifdef _QUAKE4 //k: no editor
-		inCinematic = true;
-#else
 // RAVEN BEGIN
 // bdube: tool support
 		inCinematic = false;
@@ -6248,7 +6219,6 @@ void idGameLocal::SetCamera( idCamera *cam ) {
 			inCinematic = true;
 		}
 // RAVEN END
-#endif
 
 		if ( skipCinematic && camera->spawnArgs.GetBool( "disconnect" ) ) {
 			camera->spawnArgs.SetBool( "disconnect", false );
@@ -8165,7 +8135,7 @@ bool idGameLocal::TraceBounds( const idEntity* ent, trace_t &results, const idVe
 idGameLocal::TranslationModel
 ===================
 */
-void idGameLocal::TranslationModel( const idEntity* ent, trace_t &results, const idVec3 &start, const idVec3 &end, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) {
+void idGameLocal::TranslationModel( const idEntity* ent, trace_t &results, const idVec3 &start, const idVec3 &end, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) {
 	idClip* clipWorld = GetEntityClipWorld( ent );
 	
 	if( clipWorld ) {
@@ -8178,7 +8148,7 @@ void idGameLocal::TranslationModel( const idEntity* ent, trace_t &results, const
 idGameLocal::RotationModel
 ===================
 */
-void idGameLocal::RotationModel( const idEntity* ent, trace_t &results, const idVec3 &start, const idRotation &rotation, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) {
+void idGameLocal::RotationModel( const idEntity* ent, trace_t &results, const idVec3 &start, const idRotation &rotation, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) {
 	idClip* clipWorld = GetEntityClipWorld( ent );
 	
 	if( clipWorld ) {
@@ -8191,7 +8161,7 @@ void idGameLocal::RotationModel( const idEntity* ent, trace_t &results, const id
 idGameLocal::ContactsModel
 ===================
 */
-int idGameLocal::ContactsModel( const idEntity* ent, contactInfo_t *contacts, const int maxContacts, const idVec3 &start, const idVec6 &dir, const float depth, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) {
+int idGameLocal::ContactsModel( const idEntity* ent, contactInfo_t *contacts, const int maxContacts, const idVec3 &start, const idVec6 &dir, const float depth, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) {
 	idClip* clipWorld = GetEntityClipWorld( ent );
 	
 	if( clipWorld ) {
@@ -8206,7 +8176,7 @@ int idGameLocal::ContactsModel( const idEntity* ent, contactInfo_t *contacts, co
 idGameLocal::ContentsModel
 ===================
 */
-int idGameLocal::ContentsModel( const idEntity* ent, const idVec3 &start, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) {
+int idGameLocal::ContentsModel( const idEntity* ent, const idVec3 &start, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) {
 	idClip* clipWorld = GetEntityClipWorld( ent );
 	
 	if( clipWorld ) {

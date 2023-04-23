@@ -94,7 +94,29 @@ typedef struct trace_s {
 	contactInfo_t			c;				// contact information, only valid if fraction < 1.0
 } trace_t;
 
+#ifdef _RAVEN
+// collision model
+class idCollisionModel {
+public:
+	virtual						~idCollisionModel() { }
+								// Returns the name of the model.
+	virtual const char *		GetName( void ) const = 0;
+								// Gets the bounds of the model.
+	virtual bool				GetBounds( idBounds &bounds ) const = 0;
+								// Gets all contents flags of brushes and polygons of the model ored together.
+	virtual bool				GetContents( int &contents ) const = 0;
+								// Gets a vertex of the model.
+	virtual bool				GetVertex( int vertexNum, idVec3 &vertex ) const = 0;
+								// Gets an edge of the model.
+	virtual bool				GetEdge( int edgeNum, idVec3 &start, idVec3 &end ) const = 0;
+								// Gets a polygon of the model.
+	virtual bool				GetPolygon( int polygonNum, idFixedWinding &winding ) const = 0;
+};
+
+typedef idCollisionModel* cmHandle_t;
+#else
 typedef int cmHandle_t;
+#endif
 
 #define CM_CLIP_EPSILON		0.25f			// always stay this distance away from any model
 #define CM_BOX_EPSILON		1.0f			// should always be larger than clip epsilon
@@ -136,8 +158,10 @@ class idCollisionModelManager
 	virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) = 0;
 
 	// Gets the clip handle for a model.
-	virtual cmHandle_t LoadModel(const char* mapName, const char *modelName, const bool precache ) = 0;
+	virtual cmHandle_t LoadModel(const char* mapName, const char *modelName, const bool precache = false ) = 0;
 	virtual cmHandle_t PreCacheModel(const char* mapName, const char *modelName ) = 0;
+
+	virtual void				DebugOutput( const idVec3 &viewOrigin, const idMat3 &viewAxis ) = 0;
 #endif
 #ifdef _HUMANHEAD
 // HUMANHEAD pdm: Support for level appending

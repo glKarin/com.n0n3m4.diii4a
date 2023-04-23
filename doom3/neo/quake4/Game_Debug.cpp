@@ -100,9 +100,7 @@ void rvGameDebug::BeginFrame ( void ) {
 		currentHud = hud[hudIndex];	
 	}
 	
-#if 0
 	currentHud->ClearState ( );
-#endif
 		
 	// IF there is an override entity just use that, otherwise find one that
 	// is in front of the players crosshair	
@@ -169,9 +167,7 @@ void rvGameDebug::DrawHud ( void ) {
 		idDict	tempState;
 		
 		tempState.Copy ( currentHud->State() );
-#if 0
 		currentHud->ClearState ( );
-#endif
 		
 		for ( index = 0; index < tempState.GetNumKeyVals(); index ++ ) {
 			const idKeyValue* kv;

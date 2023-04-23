@@ -269,7 +269,15 @@ typedef enum {
 } materialCoverage_t;
 
 typedef enum {
+#ifdef _RAVEN
+	SS_MIN = -10000,
+// RAVEN BEGIN
+	SS_SUBVIEW = -4,	// mirrors, viewscreens, etc
+	SS_PREGUI = -3,		// guis
+// RAVEN END
+#else
 	SS_SUBVIEW = -3,	// mirrors, viewscreens, etc
+#endif
 	SS_GUI = -2,		// guis
 	SS_BAD = -1,
 	SS_OPAQUE,			// opaque

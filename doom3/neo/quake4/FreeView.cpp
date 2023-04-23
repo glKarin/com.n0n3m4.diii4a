@@ -110,9 +110,9 @@ void idFreeView::Draw( void ) {
 	if ( portalSky ) {
 		renderView_t portalSkyView = view;
 		portalSky->GetViewParms( &portalSkyView );
-		gameRenderWorld->RenderScene( &portalSkyView/*, RF_DEFER_COMMAND_SUBMIT | RF_PORTAL_SKY //k*/ );
+		gameRenderWorld->RenderScene( &portalSkyView, RF_DEFER_COMMAND_SUBMIT | RF_PORTAL_SKY );
 	}
-	gameRenderWorld->RenderScene( &view/*, RF_PRIMARY_VIEW //k*/ );
+	gameRenderWorld->RenderScene( &view, RF_PRIMARY_VIEW );
 }
 
 /*

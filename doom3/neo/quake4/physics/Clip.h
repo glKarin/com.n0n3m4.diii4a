@@ -80,7 +80,7 @@ public:
 	bool					IsLinked( void ) const;				// returns true if the clip model is linked
 	bool					IsEnabled( void ) const;			// returns true if enabled for collision detection
 	bool					IsEqual( const idTraceModel &trm ) const;
-	cmHandle_t		GetCollisionModel( void ) const;	// returns handle used to collide vs this model
+	idCollisionModel *		GetCollisionModel( void ) const;	// returns handle used to collide vs this model
 	const idTraceModel *	GetTraceModel( void ) const;
 	void					GetMassProperties( const float density, float &mass, idVec3 &centerOfMass, idMat3 &inertiaTensor ) const;
 
@@ -102,7 +102,7 @@ private:
 	idBounds				bounds;					// bounds
 	idBounds				absBounds;				// absolute bounds
 	int						contents;				// all contents ored together
-	cmHandle_t		collisionModel;			// handle to collision model
+	idCollisionModel *		collisionModel;			// handle to collision model
 	int						traceModelIndex;		// trace model used for collision detection
 	int						renderModelHandle;		// render model def handle
 
@@ -119,7 +119,7 @@ private:
 	static void				FreeTraceModel( int traceModelIndex );
 	static int				CopyTraceModel( const int traceModelIndex );
 	static idTraceModel *	GetCachedTraceModel( int traceModelIndex );
-	static cmHandle_t GetCachedCollisionModel( int traceModelIndex );
+	static idCollisionModel * GetCachedCollisionModel( int traceModelIndex );
 	static int				GetTraceModelHashKey( const idTraceModel &trm );
 };
 
@@ -266,16 +266,16 @@ public:
 	// clip versus a specific model
 	void					TranslationModel( trace_t &results, const idVec3 &start, const idVec3 &end,
 								const idClipModel *mdl, const idMat3 &trmAxis, int contentMask,
-								cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+								idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
 	void					RotationModel( trace_t &results, const idVec3 &start, const idRotation &rotation,
 								const idClipModel *mdl, const idMat3 &trmAxis, int contentMask,
-								cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+								idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
 	int						ContactsModel( contactInfo_t *contacts, const int maxContacts, const idVec3 &start, const idVec6 &dir, const float depth,
 								const idClipModel *mdl, const idMat3 &trmAxis, int contentMask,
-								cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+								idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
 	int						ContentsModel( const idVec3 &start,
 								const idClipModel *mdl, const idMat3 &trmAxis, int contentMask,
-								cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+								idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
 
 	// clip versus all entities but not the world
 // RAVEN BEGIN
@@ -297,7 +297,7 @@ public:
 // RAVEN END
 
 	const idBounds &		GetWorldBounds( void ) const;
-	cmHandle_t 		GetWorldCollisionModel( void ) const { return world; }
+	idCollisionModel * 		GetWorldCollisionModel( void ) const { return world; }
 
 // RAVEN BEGIN
 // ddynerman: change to static
@@ -342,7 +342,7 @@ private:
 	static idClipModel		defaultClipModel;
 // RAVEN END
 	struct clipSector_s *	clipSectors;
-	cmHandle_t		world;
+	idCollisionModel *		world;
 	idBounds				worldBounds;
 	idClipModel				temporaryClipModel;
 

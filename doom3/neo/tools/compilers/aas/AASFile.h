@@ -397,7 +397,12 @@ class idAASFile
 		int							GetNumFaces(void) const {
 			return faces.Num();
 		}
-		const aasFace_t 			&GetFace(int index) const {
+#ifdef _RAVEN
+		aasFace_t 			&GetFace(int index)
+#else
+		const aasFace_t 			&GetFace(int index) const 
+#endif
+		{
 			return faces[index];
 		}
 		int							GetNumFaceIndexes(void) const {
@@ -409,7 +414,12 @@ class idAASFile
 		int							GetNumAreas(void) const {
 			return areas.Num();
 		}
-		const aasArea_t 			&GetArea(int index) {
+#ifdef _RAVEN
+		aasArea_t 			&GetArea(int index)
+#else
+		const aasArea_t 			&GetArea(int index)
+#endif
+		{
 			return areas[index];
 		}
 		int							GetNumNodes(void) const {
@@ -477,6 +487,10 @@ class idAASFile
 	virtual	int						GetNumFeatures(void) const = 0;
 	virtual	aasFeature_t& GetFeature(int index) = 0;
 	virtual int						AppendFeature(aasFeature_t& cluster) = 0;
+
+// jscott: added
+	virtual size_t					GetMemorySize( void ) = 0;
+	virtual bool					IsDummyFile( unsigned int mapFileCRC ) = 0;
 	// RAVEN END
 #endif
 

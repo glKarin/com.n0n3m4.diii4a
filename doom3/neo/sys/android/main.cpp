@@ -647,12 +647,14 @@ static volatile bool running = false;
 
 extern void GLimp_ActivateContext();
 extern void GLimp_DeactivateContext();
+extern void GLimp_WaitEGLInitialized(void);
 
 #ifdef _MULTITHREAD
 #define RENDER_THREAD_STARTED() (render_thread.threadHandle && !render_thread.threadCancel)
 
 // render thread
 static xthreadInfo				render_thread = {0};
+static volatile bool render_thread_finished = false;
 
 extern void BackendThreadWait();
 extern void BackendThreadTask();
@@ -677,12 +679,15 @@ void BackendThreadShutdown(void)
 	backendThreadShutdown = true;
 	Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
 	Sys_DestroyThread(render_thread);
+	while(!render_thread_finished)
+		Sys_WaitForEvent(TRIGGER_EVENT_RENDER_THREAD_FINISHED);
 	GLimp_ActivateContext();
 	common->Printf("[Harmattan]: Render thread shutdown -> %s\n", RENDER_THREAD_NAME);
 }
 
 static void BackendThread(void *data)
 {
+	render_thread_finished = false;
 	Sys_Printf("[Harmattan]: Enter doom3 render thread -> %s\n", Sys_GetThreadName());
 	GLimp_ActivateContext();
 	while(true)
@@ -695,6 +700,40 @@ static void BackendThread(void *data)
 	}
 	GLimp_DeactivateContext();
 	Sys_Printf("[Harmattan]: Leave doom3 render thread -> %s\n", RENDER_THREAD_NAME);
+	render_thread_finished = true;
+	Sys_TriggerEvent(TRIGGER_EVENT_RENDER_THREAD_FINISHED);
+}
+
+// because SurfaceView may be destroy or create new ANativeWindow
+void CheckEGLInitialized(void)
+{
+	if(window_changed)
+	{
+#ifdef _MULTITHREAD
+		// shutdown render thread
+		if(multithreadActive)
+		{
+			Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
+			BackendThreadShutdown();
+		}
+#endif
+		if(window) // if set new window, create EGLSurface
+		{
+			GLimp_AndroidInit(window);
+			window_changed = false;
+		}
+		else // if window is null, release old window, and notify JNI, and wait new window set
+		{
+			GLimp_AndroidQuit();
+			window_changed = false;
+			Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_DESTROYED);
+			// wait new ANativeWindow created
+			while(!window_changed)
+				Sys_WaitForEvent(TRIGGER_EVENT_WINDOW_CREATED);
+			window_changed = false;
+			GLimp_AndroidInit(window);
+		}
+	}
 }
 
 void BackendThreadExecute(void)
@@ -738,27 +777,6 @@ static void doom3_main(void *data)
 	free(argv);
 
 	while (1) {
-		if(window_changed)
-		{
-#ifdef _MULTITHREAD
-			if(multithreadActive)
-				BackendThreadShutdown();
-#endif
-			if(window) // if set new window, create EGLSurface
-			{
-				GLimp_AndroidInit(window);
-				window_changed = false;
-			}
-			else // if window is null, release old window, and notify JNI, and wait new window set
-			{
-				GLimp_AndroidQuit();
-				window_changed = false;
-				Sys_TriggerEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
-				Sys_WaitForEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
-				window_changed = false;
-				GLimp_AndroidInit(window);
-			}
-		}
 		if(!running) // exit
 			break;
 		common->Frame();
@@ -956,7 +974,7 @@ void Q3E_exit(void)
 	running = false;
 	if(common->IsInitialized())
 	{
-		Sys_TriggerEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT); // if doom3 main thread is waiting new window
+		Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_CREATED); // if doom3 main thread is waiting new window
 		Q3E_StopGameMainThread();
 		common->Quit();
 	}
@@ -995,18 +1013,19 @@ void Android_SetGLContext(ANativeWindow *w, int size, ...)
 	// if engine has started, w is null, means Surfece destroyed, w not null, means Surface has changed.
 	if(common->IsInitialized())
 	{
+		Sys_Printf("[Harmattan]: ANativeWindow changed: %p\n", w);
 		if(!w) // set window is null, and wait doom3 main thread deactive OpenGL render context.
 		{
 			window = NULL;
 			window_changed = true;
 			while(window_changed)
-				Sys_WaitForEvent(TRIGGER_EVENT_DEACTIVATE_CONTEXT);
+				Sys_WaitForEvent(TRIGGER_EVENT_WINDOW_DESTROYED);
 		}
 		else // set new window, notify doom3 main thread active OpenGL render context
 		{
 			window = w;
 			window_changed = true;
-			Sys_TriggerEvent(TRIGGER_EVENT_ACTIVATE_CONTEXT);
+			Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_CREATED);
 		}
 	}
 	else

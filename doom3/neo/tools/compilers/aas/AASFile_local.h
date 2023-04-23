@@ -97,6 +97,10 @@ class idAASFileLocal : public idAASFile
 	virtual	int						GetNumFeatures(void) const { return features.Num(); }
 	virtual	aasFeature_t& GetFeature(int index) { return features[index]; }
 	virtual int						AppendFeature(aasFeature_t& cluster) { return features.Append(cluster); }
+	virtual bool					IsDummyFile( unsigned int mapFileCRC ) { (void)mapFileCRC; return false; }
+	virtual size_t					GetMemorySize( void ) {
+		return MemorySize();
+	}
 #endif
 
 	private:

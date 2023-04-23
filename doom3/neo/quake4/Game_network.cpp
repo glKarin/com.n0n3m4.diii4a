@@ -1781,7 +1781,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			int client = msg.ReadByte();
 			int spawnId = msg.ReadLong();
 			if ( !entities[ client ] ) {
-				SpawnPlayer( client ); // not bot
+				SpawnPlayer( client );
 				entities[ client ]->FreeModelDef();
 			}
 			// fix up the spawnId to match what the server says
@@ -3325,7 +3325,7 @@ void idGameLocal::ReadNetworkInfo( int gameTime, idFile* file, int clientNum ) {
 		int icl, spawnId;
 		file->ReadInt( icl );
 		file->ReadInt( spawnId );
-		SpawnPlayer( icl ); // not bot
+		SpawnPlayer( icl );
 		spawnIds[ icl ] = spawnId;
 		numClients = icl + 1;
 	}

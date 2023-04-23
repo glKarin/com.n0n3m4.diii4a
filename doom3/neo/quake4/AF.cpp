@@ -850,9 +850,7 @@ bool idAF::Load( idEntity *ent, const char *fileName, bool purgeAF /* = false */
 	physicsObj.SetSelfCollision( file->selfCollision );
 // RAVEN BEGIN
 // rjohnson: fast AF eval to skip some things that are not needed for specific circumstances
-#if 0 //k: idDeclAF no fastEval
 	physicsObj.SetFastEval( file->fastEval );
-#endif
 // RAVEN END
 
 	// clear the list with transforms from joints to bodies

@@ -2104,7 +2104,6 @@ int idRestoreGame::GetBuildNumber( void ) {
 
 void Cmd_CheckSave_f( const idCmdArgs &args )
 {
-#if 0 //k: not implement
 	idPlayer	*lp = gameLocal.GetLocalPlayer();
 	idFile		*mp = fileSystem->GetNewFileMemory();
 	idSaveGame	sg( mp );
@@ -2117,6 +2116,5 @@ void Cmd_CheckSave_f( const idCmdArgs &args )
 	idRestoreGame	rg( mp );
 
 	rg.CallRestore_r( test.GetType(), &test );
-#endif
 }
 

@@ -172,6 +172,9 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 	pixels = pix;
 
 	backendFinished = false;
+
+	CheckEGLInitialized(); // check/wait EGL context
+
 	BackendThreadExecute();
 
 	Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
@@ -798,6 +801,8 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	else
 	{
 #endif
+	CheckEGLInitialized(); // check/wait EGL context
+
 	// start the back end up again with the new command list
 	R_IssueRenderCommands();
 

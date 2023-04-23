@@ -3355,7 +3355,11 @@ void Maya_Shutdown(void)
 Maya_ConvertModel
 ===============
 */
+#ifdef _RAVEN
+const char *Maya_ConvertModel(const char *src_ospath, const char* ospath, const char *commandline)
+#else
 const char *Maya_ConvertModel(const char *ospath, const char *commandline)
+#endif
 {
 
 	errorMessage = "Ok";

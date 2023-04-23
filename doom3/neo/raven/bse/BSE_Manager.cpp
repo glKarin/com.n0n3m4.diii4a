@@ -87,7 +87,7 @@ bool rvBSEManagerLocal::Init(void) {
 	common->Printf("----------------- BSE Init ------------------\n");
 
 	random.SetSeed(Sys_Milliseconds() ^ 2003 ^ 2005 ^ 2009 ^ 2010 ^ 2014 ^ 2015 ^ 2020);
-	random.SetSeed(random.RandomInt() ^ 2003 ^ 2005 ^ 2009 ^ 2010 ^ 2014 ^ 2015 ^ 2020);
+	random.SetSeed(random.RandomInt() ^ 2020 ^ 2015 ^ 2014 ^ 2010 ^ 2009 ^ 2005 ^ 2003);
 	common->Printf("--------- BSE Created Successfully ----------\n");
 	return true;
 }

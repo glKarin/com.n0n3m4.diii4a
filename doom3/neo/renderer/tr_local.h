@@ -776,6 +776,19 @@ class idRenderSystemLocal : public idRenderSystem
 		void					Clear(void);
 		void					SetBackEndRenderer();			// sets tr.backEndRenderer based on cvars
 		void					RenderViewToViewport(const renderView_t *renderView, idScreenRect *viewport);
+#ifdef _RAVEN
+#ifndef _CONSOLE
+	virtual void			TrackTextureUsage( TextureTrackCommand command, int frametime = 0, const char *name=NULL ) { (void)command; (void)frametime; (void)name; }
+#endif
+// RAVEN END
+	virtual void			SetSpecialEffect( ESpecialEffectType Which, bool Enabled ) { (void)Which; (void)Enabled; }
+	virtual void			SetSpecialEffectParm( ESpecialEffectType Which, int Parm, float Value ) { (void)Which; (void)Parm; (void)Value; }
+	virtual void			ShutdownSpecialEffects( void ) { }
+		virtual void			DrawStretchCopy( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material ) {
+			DrawStretchPic(x, y, w, h, s1, t1, s2, t2, material);
+		}
+	virtual void			DebugGraph( float cur, float min, float max, const idVec4 &color ) { (void)cur, (void)min; (void)max; (void)color; }
+#endif
 
 	public:
 		// renderer globals
@@ -1870,8 +1883,9 @@ extern bool multithreadActive; // sys/android/main
 
 extern void BackendThreadWait(void); // renderer/RenderSystem
 extern void BackendThreadTask(void); // renderer/RenderSystem
-extern void BackendThreadExecute(void);
-extern void BackendThreadShutdown(void);
+extern void BackendThreadExecute(void); // sys/android/main
+extern void BackendThreadShutdown(void); // sys/android/main
+extern void CheckEGLInitialized(void); // sys/android/main
 #endif
 
 #endif /* !__TR_LOCAL_H__ */

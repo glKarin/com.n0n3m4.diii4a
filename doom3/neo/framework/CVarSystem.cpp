@@ -489,6 +489,10 @@ class idCVarSystemLocal : public idCVarSystem
 
 		virtual const idDict 	*MoveCVarsToDict(int flags) const;
 		virtual void			SetCVarsFromDict(const idDict &dict);
+#ifdef _RAVEN
+		virtual void			Register( const idCVarHelp *cvarHelp ) { (void)cvarHelp; }
+		virtual idCVarHelp *	GetHelps( cvarHelpCategory_t category ) { (void)category; return NULL; }
+#endif
 
 		void					RegisterInternal(idCVar *cvar);
 		idInternalCVar 		*FindInternal(const char *name) const;

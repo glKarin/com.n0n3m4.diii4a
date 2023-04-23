@@ -302,7 +302,9 @@ class idFileSystem
 #ifdef _RAVEN
 	// mekberg: is file loading allowed?
 	virtual void			SetIsFileLoadingAllowed(bool mode) = 0;
-// jmarshall end
+
+	// jscott: new functions for tools
+	virtual idFile *		GetNewFileMemory( void ) = 0;
 #endif
 };
 

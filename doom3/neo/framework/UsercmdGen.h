@@ -164,6 +164,9 @@ class usercmd_t
 		signed char impulse;						// impulse command
 		byte		flags;							// additional flags
 		int			sequence;						// just for debugging
+#ifdef _RAVEN
+		int			realTime;						// real game time
+#endif
 
 	public:
 		void		ByteSwap();						// on big endian systems, byte swap the shorts and ints

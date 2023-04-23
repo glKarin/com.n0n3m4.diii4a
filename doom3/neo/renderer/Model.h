@@ -316,6 +316,11 @@ class idRenderModel
 // RAVEN BEGIN
 // bdube: surface flag manipulation
 	virtual int					GetSurfaceMask ( const char* surface ) const = 0;
+
+// RAVEN BEGIN
+// dluetscher: added surface mask parameter
+	virtual idRenderModel *		InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask/* = ~SURF_COLLISION */ ) = 0;
+// RAVEN END
 #endif
 #ifdef _HUMANHEAD
 	// HUMANHEAD pdm: Game access to liquid models

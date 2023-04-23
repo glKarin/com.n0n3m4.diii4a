@@ -34,7 +34,7 @@ struct MayaConversionCleaner
 	{
 		if ( Maya_ConvertModel )
 		{
-			Maya_ConvertModel( NULL, NULL/*, NULL //k*/ );
+			Maya_ConvertModel( NULL, NULL, NULL );
 		}
 		g_bMayaConversionCleanerRunning = false;
 	}
@@ -168,12 +168,10 @@ void idModelExport::LoadMayaDll( void ) {
 		gameLocal.Error( "Export DLL init failed." );
 		return;
 	}
-#if 0 //k Maya dll load
 // RAVEN BEGIN
 // jscott: maya needs the source control in the tools dll
 	common->LoadToolsDLL();
 // RAVEN END
-#endif
 }
 
 /*
@@ -228,7 +226,7 @@ bool idModelExport::ConvertMayaToMD5( void ) {
 // RAVEN END
 
 	// get the destination file's time
-	if ( !force && ( fileSystem->ReadFile( dest, /*NULL //k*/(void**)0, (ID_TIME_T *)&destTime ) >= 0 ) ) {
+	if ( !force && ( fileSystem->ReadFile( dest, NULL, (ID_TIME_T *)&destTime ) >= 0 ) ) {
 		idParser parser( LEXFL_ALLOWPATHNAMES | LEXFL_NOSTRINGESCAPECHARS );
 
 		parser.LoadFile( dest );
@@ -285,7 +283,7 @@ bool idModelExport::ConvertMayaToMD5( void ) {
 // scork: if this assert ever triggers it means there's a call to ConvertMayaToMD5() that doesn't have a 'MayaConversionCleaner' object above it. Go and put one in. Now.
 	assert( g_bMayaConversionCleanerRunning );
 // bdube: support src and dest ospath
-	Maya_Error = Maya_ConvertModel( /*cvarSystem->GetCVarString ( "fs_importpath" ), //k Maya import*/ path, commandLine );
+	Maya_Error = Maya_ConvertModel( cvarSystem->GetCVarString ( "fs_importpath" ), path, commandLine );
 // RAVEN END
 	common->SetRefreshOnPrint( false );
 	if ( Maya_Error != "Ok" ) {

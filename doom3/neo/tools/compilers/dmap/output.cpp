@@ -635,7 +635,11 @@ static void WriteOutputPortals(uEntity_t *e)
 
 	procFile->WriteFloatString("interAreaPortals { /* numAreas = */ %i /* numIAP = */ %i\n\n",
 	                           e->numAreas, numInterAreaPortals);
+#ifdef _RAVEN
+	procFile->WriteFloatString("/* interAreaPortal format is: numPoints positiveSideArea negativeSideArea ( point) ... ( point ) [( fadeImage distanceNear distanceFar )] */\n");
+#else
 	procFile->WriteFloatString("/* interAreaPortal format is: numPoints positiveSideArea negativeSideArea ( point) ... */\n");
+#endif
 
 	for (i = 0 ; i < numInterAreaPortals ; i++) {
 		iap = &interAreaPortals[i];

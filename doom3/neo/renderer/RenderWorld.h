@@ -592,6 +592,8 @@ class idRenderWorld
 // jscott: want to be able to specify depth test
 	virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) = 0;
 	virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot = 1.0f, float nearDist = 0.0f, float alpha = 0.3f, int lifetime = 0) = 0;
+		virtual void			RenderScene(const renderView_t *renderView, int renderFlags/* = RF_NORMAL */) = 0;
+// AReis: Modified RenderScene() signature to include renderFlags variable.
 #endif
 		// rendering a scene may actually render multiple subviews for mirrors and portals, and
 		// may render composite textures for gui console screens and light projections

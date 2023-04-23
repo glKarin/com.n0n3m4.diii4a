@@ -2486,7 +2486,12 @@ qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int ti
 	effect->index = effectHandle;
 
 	float sec = MS2SEC(time);
-	bse->PlayEffect(effect, reffect->startTime); // last renderView->time
+	if(!bse->PlayEffect(effect, reffect->startTime)) // last renderView->time
+	{
+		delete effectsDef[effectHandle];
+		effectsDef[effectHandle] = NULL;
+		return -1;
+	}
 	bse->ServiceEffect(effect, sec);
 
 	return effectHandle;

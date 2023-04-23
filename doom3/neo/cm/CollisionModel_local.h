@@ -163,7 +163,12 @@ typedef struct cm_nodeBlock_s {
 	struct cm_nodeBlock_s *next;				// next block with nodes
 } cm_nodeBlock_t;
 
-typedef struct cm_model_s {
+#ifdef _RAVEN
+struct cm_model_t : public idCollisionModel
+#else
+typedef struct cm_model_s 
+#endif
+{
 	idStr					name;				// model name
 	idBounds				bounds;				// model bounds
 	int						contents;			// all contents of the model ored together
@@ -202,8 +207,20 @@ typedef struct cm_model_s {
 	bool isTraceModel; //k: if true, returned by ModelFromTrm
 	cm_polygonRef_t *_trmPolygons[MAX_TRACEMODEL_POLYS];
 	cm_brushRef_t *_trmBrushes[1];
+	int refCount;
+
+	virtual const char *		GetName( void ) const;
+	virtual bool				GetBounds( idBounds &bounds ) const;
+	virtual bool				GetContents( int &contents ) const;
+	virtual bool				GetVertex( int vertexNum, idVec3 &vertex ) const;
+	virtual bool				GetEdge( int edgeNum, idVec3 &start, idVec3 &end ) const;
+	virtual bool				GetPolygon( int polygonNum, idFixedWinding &winding ) const;
 #endif
-} cm_model_t;
+}
+#if !defined(_RAVEN)
+ cm_model_t
+#endif
+ ;
 
 /*
 ===============================================================================
@@ -340,6 +357,11 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 			(void)mapName;
 			return LoadModel(modelName, true);
 		}
+
+	virtual void				DebugOutput( const idVec3 &viewOrigin, const idMat3 &viewAxis ) {
+		(void)viewAxis;
+		DebugOutput(viewOrigin);
+	}
 		virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) { (void)handle; (void)modelOrigin; (void)modelAxis; (void)viewOrigin; (void)viewAxis; (void)radius; }
 #endif
 
@@ -464,7 +486,13 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			FreePolygon(cm_model_t *model, cm_polygon_t *poly);
 		void			FreeBrush(cm_model_t *model, cm_brush_t *brush);
 		void			FreeTree_r(cm_model_t *model, cm_node_t *headNode, cm_node_t *node);
+#ifdef _RAVEN
+		cm_model_t 	*AllocModel(cm_model_t * &model);
+		void ClearModel(cm_model_t *model);
+		void			FreeModel_memory(cm_model_t *model); // from FreeModel(cm_model_t *) rename, because CollisionModeh.h::FreeModel(idCollisionModel *)
+#else
 		void			FreeModel(cm_model_t *model);
+#endif
 		// merging polygons
 		void			ReplacePolygons(cm_model_t *model, cm_node_t *node, cm_polygon_t *p1, cm_polygon_t *p2, cm_polygon_t *newp);
 		cm_polygon_t 	*TryMergePolygons(cm_model_t *model, cm_polygon_t *p1, cm_polygon_t *p2);
@@ -570,6 +598,8 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		bool			ParseCollisionModel_v3(idLexer *src);
 		void			ParsePolygons_v3(idLexer *src, cm_model_t *model);
 		void			ParseBrushes_v3(idLexer *src, cm_model_t *model);
+		cmHandle_t		FindModelAndIndex(const char *name, int &index);
+
 	int				numInlinedProcClipModels;
 #endif
 

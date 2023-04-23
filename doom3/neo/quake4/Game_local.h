@@ -277,7 +277,7 @@ private:
 	entityNetEvent_t *					end;
 // RAVEN BEGIN
 // jnewquist: Mark memory tags for idBlockAlloc
-	idBlockAlloc<entityNetEvent_t,32/*,MA_EVENT*/>	eventAllocator; //k
+	idBlockAlloc<entityNetEvent_t,32,MA_EVENT>	eventAllocator;
 // RAVEN END
 };
 
@@ -827,10 +827,10 @@ public:
 	bool					TracePoint	( const idEntity* ent, trace_t &results, const idVec3 &start, const idVec3 &end, int contentMask, const idEntity *passEntity );
 	bool					TraceBounds	( const idEntity* ent, trace_t &results, const idVec3 &start, const idVec3 &end, const idBounds &bounds, int contentMask, const idEntity *passEntity );
 	// clip versus a specific model
-	void					TranslationModel( const idEntity* ent, trace_t &results, const idVec3 &start, const idVec3 &end, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
-	void					RotationModel	( const idEntity* ent, trace_t &results, const idVec3 &start, const idRotation &rotation, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
-	int						ContactsModel	( const idEntity* ent, contactInfo_t *contacts, const int maxContacts, const idVec3 &start, const idVec6 &dir, const float depth, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
-	int						ContentsModel	( const idEntity* ent, const idVec3 &start, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+	void					TranslationModel( const idEntity* ent, trace_t &results, const idVec3 &start, const idVec3 &end, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+	void					RotationModel	( const idEntity* ent, trace_t &results, const idVec3 &start, const idRotation &rotation, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+	int						ContactsModel	( const idEntity* ent, contactInfo_t *contacts, const int maxContacts, const idVec3 &start, const idVec6 &dir, const float depth, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+	int						ContentsModel	( const idEntity* ent, const idVec3 &start, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
 	// clip versus all entities but not the world
 	void					TranslationEntities( const idEntity* ent, trace_t &results, const idVec3 &start, const idVec3 &end, const idClipModel *mdl, const idMat3 &trmAxis, int contentMask, const idEntity *passEntity, const idEntity *passEntity2 = 0 );
 	// get a contact feature
@@ -989,8 +989,8 @@ private:
 	snapshot_t *			clientSnapshots[MAX_CLIENTS+1];
 // RAVEN BEGIN
 // jnewquist: Mark memory tags for idBlockAlloc
-	idBlockAlloc<entityState_t,256/*,MA_ENTITY*/> entityStateAllocator; //k
-	idBlockAlloc<snapshot_t,64/*,MA_ENTITY*/> snapshotAllocator; //k
+	idBlockAlloc<entityState_t,256,MA_ENTITY> entityStateAllocator;
+	idBlockAlloc<snapshot_t,64,MA_ENTITY> snapshotAllocator;
 // RAVEN END
 
 	idEventQueue			eventQueue;

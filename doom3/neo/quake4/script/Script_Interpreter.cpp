@@ -995,7 +995,7 @@ bool idInterpreter::Execute( void ) {
 		instructionPointer++;
 
 		if ( !--runaway ) {
-#if 0 //k: for map game/waste no longer
+#if 0 //k: for map game/waste, not need now
 			break;
 #endif
 			Error( "runaway loop error" );
@@ -1006,13 +1006,10 @@ bool idInterpreter::Execute( void ) {
 
 
 // jmarshall - reval
-#if 1
 // RAVEN BEGIN
 // bdube: if the debugger is running then we need to check to see if any breakpoints have beeng hit
 		if ( gameLocal.editors & EDITOR_DEBUGGER ) {
-#if 0
 			common->DebuggerCheckBreakpoint ( this, &gameLocal.program, instructionPointer );
-#endif
 		} else if ( g_debugScript.GetBool ( ) ) {
 			static int lastLineNumber = -1;
 			if ( lastLineNumber != gameLocal.program.GetStatement ( instructionPointer ).linenumber ) {				
@@ -1024,7 +1021,6 @@ bool idInterpreter::Execute( void ) {
 			}
 		}
 // RAVEN END
-#endif
 
 		switch( st->op ) {
 		case OP_RETURN:

@@ -417,6 +417,7 @@ class idFileSystemLocal : public idFileSystem
 		static void				TouchFileList_f(const idCmdArgs &args);
 #ifdef _RAVEN
 		virtual void			SetIsFileLoadingAllowed(bool mode) { (void)mode; }
+		virtual idFile *		GetNewFileMemory( void );
 #endif
 
 	private:
@@ -4777,3 +4778,13 @@ void idFileSystemLocal::FindMapScreenshot(const char *path, char *buf, int len)
 	}
 #endif
 }
+
+#ifdef _RAVEN
+idFile * idFileSystemLocal::GetNewFileMemory( void )
+{
+	static idFile_Memory _fileMemory("*raven_getnewfilememory*");
+	_fileMemory.Rewind();
+	_fileMemory.Clear(false);
+	return &_fileMemory;
+}
+#endif

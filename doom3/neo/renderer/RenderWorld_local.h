@@ -135,6 +135,10 @@ class idRenderWorldLocal : public idRenderWorld
 
 		//-----------------------
 #ifdef _RAVEN
+	virtual void			RenderScene( const renderView_t *renderView, int renderFlags/* = RF_NORMAL */) {
+		(void)renderFlags;
+		RenderScene(renderView);
+	}
 	virtual bool			HasSkybox(int areaNum) { (void)areaNum; return true; }
 
 	virtual void			DebugClear(int time) {

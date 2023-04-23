@@ -32,7 +32,7 @@ const char *ui_teamArgs[]			= { "Marine", "Strogg", NULL };
 // RAVEN END
 
 struct gameVersion_s {
-	gameVersion_s( void ) { sprintf( string, "%s %s V%s %s %s", GAME_NAME, /*GAME_BUILD_TYPE //k*/BUILD_DEBUG, VERSION_STRING_DOTTED, BUILD_STRING, __DATE__ ); }
+	gameVersion_s( void ) { sprintf( string, "%s %s V%s %s %s", GAME_NAME, GAME_BUILD_TYPE, VERSION_STRING_DOTTED, BUILD_STRING, __DATE__ ); }
 	char	string[256];
 } gameVersion;
 
@@ -610,15 +610,6 @@ idCVar net_warnStale( "net_warnStale", "1", CVAR_INTEGER | CVAR_GAME | CVAR_NOCH
 
 // RAVEN BEGIN
 // bdube: cvar helps
-#ifdef _QUAKE4 //k: placeholder
-#define CVARHELP_GAME BIT(25)
-#define CVARHELP_AI BIT(26)
-#define CVARHELP_PHYSICS BIT(27)
-struct idCVarHelp
-{
-	idCVarHelp(const char *, const char *, const char *, const char *, int){}
-};
-#endif
 static	idCVarHelp	help_g_showHud ( "g_showHud", "Show Player HUD", "Off;On", "0;1", CVARHELP_GAME );
 static	idCVarHelp	help_g_showGun ( "g_showGun", "Show Player Weapon", "Off;On", "0;1", CVARHELP_GAME );
 static	idCVarHelp	help_g_showTargets ( "g_showTargets", "Show Targets", "Off;On", "0;1", CVARHELP_GAME );

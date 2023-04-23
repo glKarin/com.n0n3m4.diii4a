@@ -695,7 +695,6 @@ void	rvAASTacticalSensorLocal::Update()
 	const idVec3&	ownerOrigin			= mOwner->GetPhysics()->GetOrigin();
 	int				ownerAreaNum		= mOwnerAI ? mOwnerAI->PointReachableAreaNum ( ownerOrigin ) : aas->PointReachableAreaNum(ownerOrigin, mOwner->GetPhysics()->GetBounds(), (AREA_REACHABLE_WALK|AREA_REACHABLE_FLY) );
 	aasFeature_t*	feature				= 0;
-	const //k const
 	aasArea_t&		area				= file->GetArea(ownerAreaNum);
 	idActor*		teammate			= NULL;
 	float			featureDistance		= 0.0f;

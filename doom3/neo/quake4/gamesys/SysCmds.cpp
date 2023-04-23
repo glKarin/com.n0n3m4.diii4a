@@ -2987,8 +2987,6 @@ void Cmd_SetPMCVars_f ( const idCmdArgs &args ) {
 
 void Cmd_FadeSound_f( const idCmdArgs &args )	{
 
-// jmarshall: eval is this needed?
-#if 0
 	if( args.Argc() < 2)	{
 		return;
 	}
@@ -3003,8 +3001,6 @@ void Cmd_FadeSound_f( const idCmdArgs &args )	{
 	fadeTime = atof( _fadeTime );
 
 	soundSystem->FadeSoundClasses( SOUNDWORLD_GAME, SOUND_CLASS_MUSICAL, 0.0f - fadeDB, fadeTime );
-#endif
-// jmarshall end
 
 }
 

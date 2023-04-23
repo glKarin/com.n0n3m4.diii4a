@@ -52,7 +52,23 @@ typedef enum {
 	EDITOR_AAS					= BIT(11),
 	EDITOR_MATERIAL				= BIT(12)
 #ifdef _RAVEN
-	, EDITOR_FX = BIT(13), // 9
+	,
+	EDITOR_REVERB				= BIT(13),
+	EDITOR_PLAYBACKS			= BIT(14),
+	EDITOR_MODVIEW				= BIT(15),
+	EDITOR_LOGVIEW				= BIT(16),
+	EDITOR_ENTVIEW				= BIT(17),
+
+	// Just flags to prevent caching of unneeded assets
+	EDITOR_RENDERBUMP			= BIT(18),
+	EDITOR_SPAWN_GUI			= BIT(19),
+
+	// Specifies that a decl validation run is happening
+	EDITOR_DECL_VALIDATING		= BIT(20),
+
+	EDITOR_FX = BIT(21), // 9
+
+	EDITOR_ALL					= -1
 #endif
 } toolFlag_t;
 
@@ -135,6 +151,11 @@ struct MemInfo_t {
 };
 #ifdef _RAVEN
 typedef MemInfo_t MemInfo;
+
+// RAVEN BEGIN
+// bdube: forward declarations
+class idInterpreter;
+class idProgram;
 #endif
 
 class idCommon
@@ -231,6 +252,22 @@ class idCommon
 		virtual const char* GetLocalizedString(const char* key) = 0;
 		virtual int GetUserCmdMSec(void) = 0;
 		virtual int GetUserCmdHz(void) = 0;
+
+// RAVEN BEGIN
+// bdube: new exports
+								// Modview thinks in the middle of a game frame
+	virtual void				ModViewThink ( void ) = 0;
+
+// rjohnson: added option for guis to always think
+	virtual void				RunAlwaysThinkGUIs ( int time ) = 0;
+
+								// Debbugger hook to check if a breakpoint has been hit
+	virtual void				DebuggerCheckBreakpoint ( idInterpreter* interpreter, idProgram* program, int instructionPointer ) = 0;
+
+// scork: need to test if validating to catch some model errors that would stop the validation and convert to warnings...
+	virtual bool				DoingDeclValidation( void ) = 0;
+
+	virtual void				LoadToolsDLL( void ) = 0;
 #endif
 
 		// Returns key bound to the command

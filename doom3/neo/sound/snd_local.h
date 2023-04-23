@@ -841,6 +841,8 @@ class idSoundSystemLocal : public idSoundSystem
 		virtual void			PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName);
 		virtual void			WriteToSaveGame(int worldId, idFile* savefile);
 		virtual void			ReadFromSaveGame(int worldId, idFile* savefile);
+	virtual void			ResetListener( void ) { }
+	virtual void			EndCinematic() { }
 #endif
 
 	//-------------------------

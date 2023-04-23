@@ -5374,7 +5374,6 @@ idMultiplayerGame::AddChatLine
 ===============
 */
 void idMultiplayerGame::AddChatLine( const char *fmt, ... ) {
-#if 0 //k: UserInterface not implememnt wrapInfo_t
 	idStr temp;
 	va_list argptr;
 
@@ -5468,7 +5467,6 @@ void idMultiplayerGame::AddChatLine( const char *fmt, ... ) {
 		gameLocal.GetLocalPlayer()->StartSound( chatSound, SND_CHANNEL_ANY, 0, false, NULL );
 	}
 	
-#endif
 }
 
 void idMultiplayerGame::DrawStatSummary( void ) {	

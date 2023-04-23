@@ -63,7 +63,6 @@ bool idAASLocal::Init( const idStr &mapName, unsigned int mapFileCRC ) {
 			common->DWarning( "Couldn't load AAS file: '%s'", mapName.c_str() );
 			return false;
 		}
-#if 0
 // RAVEN BEGIN
 // rhummer: Check if this is a dummy file, since it really has no valid data dump it.
 		else if ( file->IsDummyFile( mapFileCRC ) ) {
@@ -72,7 +71,6 @@ bool idAASLocal::Init( const idStr &mapName, unsigned int mapFileCRC ) {
 			return false;
 		}
 // RAVEN END
-#endif
 		SetupRouting();
 	}
 	return true;
@@ -126,7 +124,7 @@ size_t idAASLocal::StatsSummary( void ) const {
 			+ ( areaCacheIndexSize * sizeof( idRoutingCache * ) ) 
 			+ ( portalCacheIndexSize * sizeof( idRoutingCache * ) );
 
-	return( /*file->GetMemorySize() + */ size );
+	return( file->GetMemorySize() + size );
 }
 // RAVEN END
 
@@ -224,11 +222,7 @@ idAASLocal::AreaBounds
 ============
 */
 idBounds & idAASLocal::AreaBounds( int areaNum ) const {
-#if 1
-	return const_cast<aasArea_t &>(file->GetArea( areaNum )).bounds;
-#else
 	return file->GetArea( areaNum ).bounds;
-#endif
 }
 /*
 ============
@@ -353,9 +347,6 @@ idAASCallback::testResult_t idAASCallback::Test ( class idAAS *aas, int areaNum,
 	}
 	
 	// Get area for edges
-#if 1
-	const 
-#endif
 	aasArea_t& area = file->GetArea ( areaNum );
 
 	if ( ai_debugTactical.GetInteger ( ) > 1 ) {
@@ -393,9 +384,6 @@ idAASCallback::testResult_t idAASCallback::Test ( class idAAS *aas, int areaNum,
 	int	f;
 	int	e;
 	for ( f = 0; f < area.numFaces; f ++ ) {
-#if 1
-	const 
-#endif
 		aasFace_t& face = file->GetFace ( abs ( file->GetFaceIndex (area.firstFace + f ) ) );
 		
 		// for each edge test a point between the center of the edge and the center

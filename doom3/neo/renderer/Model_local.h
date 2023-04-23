@@ -104,6 +104,10 @@ class idRenderModelStatic : public idRenderModel
 		bool						FindSurfaceWithId(int id, int &surfaceNum);
 #ifdef _RAVEN //k: for ShowSurface/HideSurface, static model using surfaces index as mask: 1 << index, name is shader material name
 		virtual int GetSurfaceMask(const char *name) const;
+		virtual idRenderModel *		InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel, dword surfMask/* = ~SURF_COLLISION */ ) {
+			(void)surfMask;
+			return InstantiateDynamicModel(ent, view, cachedModel);
+		}
 #endif
 #ifdef _HUMANHEAD
 	virtual void				IntersectBounds( const idBounds &bounds, float displacement ) { }

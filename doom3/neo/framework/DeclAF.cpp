@@ -1704,6 +1704,9 @@ void idDeclAF::FreeData(void)
 	clipMask = CONTENTS_SOLID | CONTENTS_CORPSE;
 	bodies.DeleteContents(true);
 	constraints.DeleteContents(true);
+#ifdef _RAVEN
+	fastEval = false;
+#endif
 }
 
 /*

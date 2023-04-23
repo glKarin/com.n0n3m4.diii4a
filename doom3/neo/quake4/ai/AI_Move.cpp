@@ -3526,11 +3526,7 @@ struct rvObstacleFinder {
 			if (gameLocal.GetAAS(i)) {
 				idAASFile* file = gameLocal.GetAAS(i)->GetFile();
 				for (int a=0; a<file->GetNumAreas(); a++) {
-#if 0 //k const
 					file->GetArea(a).firstMarker = NULL;
-#else
-					const_cast<aasArea_s &>(file->GetArea(a)).firstMarker = NULL;
-#endif
 				}
 			}
 		}

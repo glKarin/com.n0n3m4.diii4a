@@ -38,6 +38,17 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _RAVEN
+struct wrapInfo_t {
+	int lastWhitespace;
+	int maxIndex;
+	wrapInfo_t ( void ) {
+		lastWhitespace = -1;
+		maxIndex = -1;
+	}
+};
+#endif
+
 class idFile;
 class idDemoFile;
 
@@ -99,6 +110,15 @@ class idUserInterface
 // jscott: added
 	virtual class idWindow *	GetDesktop( void ) const = 0;
 // RAVEN END
+
+// RAVEN BEGIN
+// bdube: added way to clear state
+	virtual void				ClearState( void ) = 0;
+// rjohnson: added
+
+// RAVEN BEGIN
+// mekberg: Returns the index of the string where width in pixels <= specified val. Can return index of last whitespace.
+	virtual bool				GetMaxTextIndex( const char *windowName, const char *text, wrapInfo_t& wrapInfo ) const = 0;
 #endif
 
 		// Gets a gui state variable

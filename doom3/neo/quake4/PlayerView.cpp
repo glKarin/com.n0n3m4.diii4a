@@ -505,9 +505,9 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view, i
 		if( portalSky ) {
 			renderView_t portalSkyView = *view;
 			portalSky->GetViewParms( &portalSkyView );
-			gameRenderWorld->RenderScene( &portalSkyView/*, ( renderFlags & ( ~RF_PRIMARY_VIEW ) ) | RF_DEFER_COMMAND_SUBMIT | RF_PORTAL_SKY */);
+			gameRenderWorld->RenderScene( &portalSkyView, ( renderFlags & ( ~RF_PRIMARY_VIEW ) ) | RF_DEFER_COMMAND_SUBMIT | RF_PORTAL_SKY );
 		}
-		gameRenderWorld->RenderScene( view/*, renderFlags | RF_PENUMBRA_MAP*/ );
+		gameRenderWorld->RenderScene( view, renderFlags | RF_PENUMBRA_MAP );
 	}
 
 	if ( RF_NO_GUI & renderFlags ) {
@@ -624,13 +624,8 @@ void idPlayerView::DoubleVision( idUserInterface *hud, const renderView_t *view,
 	renderSystem->SetColor4( color.x, color.y, color.z, 1.0f );
 // RAVEN BEGIN
 // jnewquist: Call DrawStretchCopy, which will flip the texcoords for D3D
-#if 0 //k: not implement
 	renderSystem->DrawStretchCopy( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, shift, 1, 1, 0, dvMaterial );
 	renderSystem->DrawStretchCopy( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, 1-shift, 0, dvMaterialBlend );
-#else
-	renderSystem->DrawStretchPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, shift, 1, 1, 0, dvMaterial);
-	renderSystem->DrawStretchPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, 1-shift, 0, dvMaterialBlend);
-#endif
 // RAVEN END
 }
 

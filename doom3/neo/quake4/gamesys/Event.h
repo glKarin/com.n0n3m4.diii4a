@@ -76,7 +76,7 @@ private:
 
 	idLinkList<idEvent>			eventNode;
 
-	static idDynamicBlockAlloc<byte, 16 * 1024, 256/*, MA_EVENT //k*/> eventDataAllocator;
+	static idDynamicBlockAlloc<byte, 16 * 1024, 256, MA_EVENT> eventDataAllocator;
 
 
 public:

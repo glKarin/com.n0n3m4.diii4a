@@ -219,6 +219,12 @@ class idCommonLocal : public idCommon
 		virtual const char* GetLocalizedString(const char* key) { return GetLanguageDict()->GetString(key); }
 		virtual int GetUserCmdMSec(void) { return 16; } 
 		virtual int GetUserCmdHz(void) { return 60; }
+
+	virtual void				ModViewThink ( void ) { }
+	virtual void				RunAlwaysThinkGUIs ( int time ) { (void)time; }
+	virtual void				DebuggerCheckBreakpoint ( idInterpreter* interpreter, idProgram* program, int instructionPointer ) { (void)interpreter; (void)program; (void)instructionPointer; }
+	virtual bool				DoingDeclValidation( void ) { return false; }
+	virtual void				LoadToolsDLL( void ) { }
 #endif
 #ifdef _HUMANHEAD
 	virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) { (void) src; (void)dst; (void)lengthAllocated; }
@@ -388,7 +394,7 @@ void idCommonLocal::VPrintf(const char *fmt, va_list args)
 	}
 
 #ifdef _HARM_DEBUG_MULTITHREAD
-	if(fmt[0] != '\n')
+	if(multithreadActive && fmt[0] != '\n')
 	{
 		sprintf(msg + timeLength, "[%s]: ", Sys_GetThreadName());
 		//sprintf(msg + timeLength, "[%ld]: ", pthread_self());

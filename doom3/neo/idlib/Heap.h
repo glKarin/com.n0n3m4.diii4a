@@ -151,6 +151,7 @@ void		Mem_Free16(void *ptr);
 #ifdef _RAVEN // unused tag
 ID_INLINE void 		*Mem_Alloc(const int size, byte tag) { (void)tag; return Mem_Alloc(size); }
 ID_INLINE void 		*Mem_ClearedAlloc(const int size, byte tag) { (void)tag; return Mem_ClearedAlloc(size); }
+ID_INLINE void 		*Mem_Alloc16(const int size, byte tag) { (void)tag; return Mem_Alloc16(size); }
 #endif
 
 #ifdef ID_REDIRECT_NEWDELETE
@@ -245,7 +246,11 @@ __inline void operator delete[](void *p)
 ===============================================================================
 */
 
+#ifdef _RAVEN
+template<class type, int blockSize, byte memoryTag = MA_NONE>
+#else
 template<class type, int blockSize>
+#endif
 class idBlockAlloc
 {
 	public:
@@ -283,22 +288,37 @@ class idBlockAlloc
 		int						active;
 };
 
+#ifdef _RAVEN
+template<class type, int blockSize, byte memoryTag>
+idBlockAlloc<type,blockSize, memoryTag>::idBlockAlloc(void)
+#else
 template<class type, int blockSize>
 idBlockAlloc<type,blockSize>::idBlockAlloc(void)
+#endif
 {
 	blocks = NULL;
 	free = NULL;
 	total = active = 0;
 }
 
+#ifdef _RAVEN
+template<class type, int blockSize, byte memoryTag>
+idBlockAlloc<type,blockSize, memoryTag>::~idBlockAlloc(void)
+#else
 template<class type, int blockSize>
 idBlockAlloc<type,blockSize>::~idBlockAlloc(void)
+#endif
 {
 	Shutdown();
 }
 
+#ifdef _RAVEN
+template<class type, int blockSize, byte memoryTag>
+type *idBlockAlloc<type,blockSize, memoryTag>::Alloc(void)
+#else
 template<class type, int blockSize>
 type *idBlockAlloc<type,blockSize>::Alloc(void)
+#endif
 {
 	if (!free) {
 		block_t *block = new block_t;
@@ -320,8 +340,13 @@ type *idBlockAlloc<type,blockSize>::Alloc(void)
 	return &element->t;
 }
 
+#ifdef _RAVEN
+template<class type, int blockSize, byte memoryTag>
+void idBlockAlloc<type,blockSize, memoryTag>::Free(type *t)
+#else
 template<class type, int blockSize>
 void idBlockAlloc<type,blockSize>::Free(type *t)
+#endif
 {
 	element_t *element = (element_t *) t;
 	element->next = free;
@@ -329,8 +354,13 @@ void idBlockAlloc<type,blockSize>::Free(type *t)
 	active--;
 }
 
+#ifdef _RAVEN
+template<class type, int blockSize, byte memoryTag>
+void idBlockAlloc<type,blockSize, memoryTag>::Shutdown(void)
+#else
 template<class type, int blockSize>
 void idBlockAlloc<type,blockSize>::Shutdown(void)
+#endif
 {
 	while (blocks) {
 		block_t *block = blocks;
@@ -355,7 +385,11 @@ void idBlockAlloc<type,blockSize>::Shutdown(void)
 ==============================================================================
 */
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag = MA_NONE>
+#else
 template<class type, int baseBlockSize, int minBlockSize>
+#endif
 class idDynamicAlloc
 {
 	public:
@@ -406,31 +440,56 @@ class idDynamicAlloc
 		void							Clear(void);
 };
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::idDynamicAlloc(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicAlloc<type, baseBlockSize, minBlockSize>::idDynamicAlloc(void)
+#endif
 {
 	Clear();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::~idDynamicAlloc(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicAlloc<type, baseBlockSize, minBlockSize>::~idDynamicAlloc(void)
+#endif
 {
 	Shutdown();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Init(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Init(void)
+#endif
 {
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Shutdown(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Shutdown(void)
+#endif
 {
 	Clear();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+type *idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Alloc(const int num)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 type *idDynamicAlloc<type, baseBlockSize, minBlockSize>::Alloc(const int num)
+#endif
 {
 	numAllocs++;
 
@@ -443,8 +502,13 @@ type *idDynamicAlloc<type, baseBlockSize, minBlockSize>::Alloc(const int num)
 	return Mem_Alloc16(num * sizeof(type));
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+type *idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Resize(type *ptr, const int num)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 type *idDynamicAlloc<type, baseBlockSize, minBlockSize>::Resize(type *ptr, const int num)
+#endif
 {
 
 	numResizes++;
@@ -462,8 +526,13 @@ type *idDynamicAlloc<type, baseBlockSize, minBlockSize>::Resize(type *ptr, const
 	return ptr;
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Free(type *ptr)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Free(type *ptr)
+#endif
 {
 	numFrees++;
 
@@ -474,14 +543,24 @@ void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Free(type *ptr)
 	Mem_Free16(ptr);
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+const char *idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::CheckMemory(const type *ptr) const
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 const char *idDynamicAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(const type *ptr) const
+#endif
 {
 	return NULL;
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Clear(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Clear(void)
+#endif
 {
 	numUsedBlocks = 0;
 	usedBlockMemory = 0;
@@ -534,7 +613,11 @@ class idDynamicBlock
 		idBTreeNode<idDynamicBlock<type>,int> *node;			// node in the B-Tree with free blocks
 };
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag = MA_NONE>
+#else
 template<class type, int baseBlockSize, int minBlockSize>
+#endif
 class idDynamicBlockAlloc
 {
 	public:
@@ -603,26 +686,46 @@ class idDynamicBlockAlloc
 		void							CheckMemory(void) const;
 };
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::idDynamicBlockAlloc(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::idDynamicBlockAlloc(void)
+#endif
 {
 	Clear();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::~idDynamicBlockAlloc(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::~idDynamicBlockAlloc(void)
+#endif
 {
 	Shutdown();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Init(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Init(void)
+#endif
 {
 	freeTree.Init();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Shutdown(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Shutdown(void)
+#endif
 {
 	idDynamicBlock<type> *block;
 
@@ -648,8 +751,13 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Shutdown(void)
 	Clear();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::SetFixedBlocks(int numBlocks)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::SetFixedBlocks(int numBlocks)
+#endif
 {
 	idDynamicBlock<type> *block;
 
@@ -686,14 +794,24 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::SetFixedBlocks(int 
 	allowAllocs = false;
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::SetLockMemory(bool lock)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::SetLockMemory(bool lock)
+#endif
 {
 	lockMemory = lock;
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::FreeEmptyBaseBlocks(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::FreeEmptyBaseBlocks(void)
+#endif
 {
 	idDynamicBlock<type> *block, *next;
 
@@ -730,8 +848,13 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::FreeEmptyBaseBlocks
 #endif
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+int idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::GetNumEmptyBaseBlocks(void) const
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 int idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::GetNumEmptyBaseBlocks(void) const
+#endif
 {
 	int numEmptyBaseBlocks;
 	idDynamicBlock<type> *block;
@@ -747,8 +870,13 @@ int idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::GetNumEmptyBaseBlock
 	return numEmptyBaseBlocks;
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Alloc(const int num)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Alloc(const int num)
+#endif
 {
 	idDynamicBlock<type> *block;
 
@@ -780,8 +908,13 @@ type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Alloc(const int nu
 	return block->GetMemory();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Resize(type *ptr, const int num)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Resize(type *ptr, const int num)
+#endif
 {
 
 	numResizes++;
@@ -814,8 +947,13 @@ type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Resize(type *ptr, 
 	return block->GetMemory();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Free(type *ptr)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Free(type *ptr)
+#endif
 {
 
 	numFrees++;
@@ -836,8 +974,13 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Free(type *ptr)
 #endif
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+const char *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::CheckMemory(const type *ptr) const
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 const char *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(const type *ptr) const
+#endif
 {
 	idDynamicBlock<type> *block;
 
@@ -880,8 +1023,13 @@ const char *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(
 	return NULL;
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Clear(void)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Clear(void)
+#endif
 {
 	firstBlock = lastBlock = NULL;
 	allowAllocs = true;
@@ -903,8 +1051,13 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Clear(void)
 #endif
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::AllocInternal(const int num)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::AllocInternal(const int num)
+#endif
 {
 	idDynamicBlock<type> *block;
 	int alignedBytes = (num * sizeof(type) + 15) & ~15;
@@ -945,8 +1098,13 @@ idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Al
 	return block;
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::ResizeInternal(idDynamicBlock<type> *block, const int num)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::ResizeInternal(idDynamicBlock<type> *block, const int num)
+#endif
 {
 	int alignedBytes = (num * sizeof(type) + 15) & ~15;
 
@@ -1017,8 +1175,13 @@ idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Re
 	return block;
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::FreeInternal(idDynamicBlock<type> *block)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::FreeInternal(idDynamicBlock<type> *block)
+#endif
 {
 
 	assert(block->node == NULL);
@@ -1062,16 +1225,26 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::FreeInternal(idDyna
 	}
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::LinkFreeInternal(idDynamicBlock<type> *block)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::LinkFreeInternal(idDynamicBlock<type> *block)
+#endif
 {
 	block->node = freeTree.Add(block, block->GetSize());
 	numFreeBlocks++;
 	freeBlockMemory += block->GetSize();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::UnlinkFreeInternal(idDynamicBlock<type> *block)
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::UnlinkFreeInternal(idDynamicBlock<type> *block)
+#endif
 {
 	freeTree.Remove(block->node);
 	block->node = NULL;
@@ -1079,8 +1252,13 @@ ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::UnlinkFre
 	freeBlockMemory -= block->GetSize();
 }
 
+#ifdef _RAVEN
+template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::CheckMemory(void) const
+#else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(void) const
+#endif
 {
 	idDynamicBlock<type> *block;
 

@@ -189,6 +189,10 @@ const int		SOUND_MAX_CLASSES		= 5;
 const int		SOUND_MAX_CLASSES		= 4;
 #endif
 
+#ifdef _RAVEN
+const int		SOUND_CLASS_MUSICAL		= 3;
+#endif
+
 // it is somewhat tempting to make this a virtual class to hide the private
 // details here, but that doesn't fit easily with the decl manager at the moment.
 class idSoundShader : public idDecl
@@ -547,6 +551,11 @@ class idSoundSystem
 		virtual void			PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName) = 0;
 		virtual void			WriteToSaveGame(int worldId, idFile* savefile) = 0;
 		virtual void			ReadFromSaveGame(int worldId, idFile* savefile) = 0;
+
+	// reset the listener portal to invalid during level transitions
+	virtual void			ResetListener( void ) = 0;
+
+	virtual void			EndCinematic() = 0;
 #endif
 };
 

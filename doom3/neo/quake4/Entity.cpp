@@ -4395,9 +4395,7 @@ void idEntity::ShowSurface ( const char* surface ) {
 		return;
 	}
 
-#if 1 //k: implement
 	renderEntity.suppressSurfaceMask &= (~renderEntity.hModel->GetSurfaceMask ( surface ));
-#endif
 }
 
 /*
@@ -4419,9 +4417,7 @@ void idEntity::HideSurface ( const char* surface ) {
 		return;
 	}
 
-#if 1 //k: implement
 	renderEntity.suppressSurfaceMask |= renderEntity.hModel->GetSurfaceMask ( surface ) ;
-#endif
 }
 
 /*
