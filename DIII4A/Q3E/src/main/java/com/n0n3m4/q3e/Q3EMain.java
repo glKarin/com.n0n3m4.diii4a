@@ -82,7 +82,7 @@ public class Q3EMain extends Activity {
 	}
 
 	public boolean checkGameFiles()
-	{		
+	{
 		if(!new File(datadir).exists())
 		{
 			ShowMessage("Game files weren't found: put game files to "+datadir);
@@ -184,9 +184,16 @@ public class Q3EMain extends Activity {
                 mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
             mControlGLSurfaceView.RenderView(mGLSurfaceView);
             mainLayout = new RelativeLayout(this);
-            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            ViewGroup.LayoutParams params;
+
+            params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
             mainLayout.addView(mGLSurfaceView, params);
+
+            //mControlGLSurfaceView.setZOrderOnTop();
+            mControlGLSurfaceView.setZOrderMediaOverlay(true);
             mainLayout.addView(mControlGLSurfaceView, params);
+
             if(m_renderMemStatus > 0) //k
             {
                 memoryUsageText = new DebugTextView(mainLayout.getContext());
@@ -194,6 +201,7 @@ public class Q3EMain extends Activity {
                 mainLayout.addView(memoryUsageText, params);
                 memoryUsageText.setTypeface(Typeface.MONOSPACE);
             }
+
             setContentView(mainLayout);
 
             mControlGLSurfaceView.requestFocus();
