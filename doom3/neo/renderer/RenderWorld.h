@@ -579,6 +579,7 @@ class idRenderWorld
 #ifdef _RAVEN
 // jscott: for portal skies
 	virtual bool			HasSkybox( int areaNum ) = 0;
+	virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas ) = 0;
 
 // jscott: handling of effects
 	virtual qhandle_t		AddEffectDef( const renderEffect_t *reffect, int time ) = 0;

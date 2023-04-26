@@ -139,7 +139,7 @@ class idRenderWorldLocal : public idRenderWorld
 		(void)renderFlags;
 		RenderScene(renderView);
 	}
-	virtual bool			HasSkybox(int areaNum) { (void)areaNum; return true; }
+	virtual bool			HasSkybox(int areaNum);
 
 	virtual void			DebugClear(int time) {
 		DebugClearLines(time);
@@ -153,6 +153,9 @@ class idRenderWorldLocal : public idRenderWorld
 	}
 
 	virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot, float nearDist, float alpha, int lifetime) { (void)color; (void)origin; (void)dir; (void)farDot; (void)farDist; (void)nearDot; (void)nearDist; (void)alpha; (void)lifetime; }
+
+	virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas );
+	void					FindVisibleAreas_r(const idVec3 &origin, int areaNum, const struct portalStack_s *ps, bool *visibleAreas);
 
 	// jscott: handling of effects
 	virtual qhandle_t		AddEffectDef(const renderEffect_t* reffect, int time);

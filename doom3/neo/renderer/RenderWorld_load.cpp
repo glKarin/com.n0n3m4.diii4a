@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _RAVEN
+#include "Model_local.h"
+#endif
 
 /*
 ================
@@ -157,6 +160,7 @@ idRenderModel *idRenderWorldLocal::ParseModel(idLexer *src)
     if (!src->PeekTokenString("{") && !src->PeekTokenString("}"))
     {
         int sky = src->ParseInt();
+		(static_cast<idRenderModelStatic *>(model))->sky = sky ? true : false;
     }
 // jmarshall end
 #endif
@@ -1018,3 +1022,12 @@ bool idRenderWorldLocal::CheckAreaForPortalSky(int areaNum)
 
 	return false;
 }
+
+#ifdef _RAVEN
+bool idRenderWorldLocal::HasSkybox(int areaNum)
+{
+	assert(areaNum >= 0 && areaNum < numPortalAreas);
+	const idRenderModel *model = renderModelManager->CheckModel(va("_area%i", areaNum));
+	return model ? static_cast<const idRenderModelStatic *>(model)->sky : false;
+}
+#endif

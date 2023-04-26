@@ -204,7 +204,7 @@ rvBSEManagerLocal::StopEffect
 void rvBSEManagerLocal::StopEffect(rvRenderEffectLocal* def) {
 	if(!def)
 		return;
-	if (def->index >= 0 && def->effect)
+	if (def->effect)
 	{
 		if (bse_debug.GetInteger())
 		{
@@ -231,7 +231,7 @@ void rvBSEManagerLocal::FreeEffect(rvRenderEffectLocal* def)
 
 	if(!def)
 		return;
-	if (def->index >= 0 && def->effect)
+	if (def->effect)
 	{
 		if (bse_debug.GetInteger())
 		{

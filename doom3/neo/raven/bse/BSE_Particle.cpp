@@ -1501,7 +1501,11 @@ void rvBSEParticleStage::ParticleColors(rvBSE_particleGen_t *g, idDrawVert *vert
 	}
 
 	for (int i = 0 ; i < 4 ; i++) {
+#if 0
 		float	fcolor = ((entityColor) ? g->renderEnt->shaderParms[i] : color[i]) * fadeFraction + fadeColor[i] * (1.0f - fadeFraction);
+#else
+		float fcolor = (g->renderEnt->shaderParms[i] * color[i]) * fadeFraction + fadeColor[i] * (1.0f - fadeFraction);
+#endif
 		int		icolor = idMath::FtoiFast(fcolor * 255.0f);
 
 		if (icolor < 0) {

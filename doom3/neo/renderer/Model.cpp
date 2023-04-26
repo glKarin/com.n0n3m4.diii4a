@@ -60,6 +60,9 @@ idRenderModelStatic::idRenderModelStatic()
 	reloadable = true;
 	levelLoadReferenced = false;
 	timeStamp = 0;
+#ifdef _RAVEN
+	sky = false;
+#endif
 }
 
 /*

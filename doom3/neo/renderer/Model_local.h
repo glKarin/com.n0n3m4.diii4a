@@ -108,6 +108,8 @@ class idRenderModelStatic : public idRenderModel
 			(void)surfMask;
 			return InstantiateDynamicModel(ent, view, cachedModel);
 		}
+
+		bool sky;
 #endif
 #ifdef _HUMANHEAD
 	virtual void				IntersectBounds( const idBounds &bounds, float displacement ) { }

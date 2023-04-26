@@ -3235,7 +3235,7 @@ bool idGameLocal::SetupPortalSkyPVS( idPlayer *player ) {
 		return( false );
 	}
 
-#if 0
+#if 1 //karin: testing
 	// Allocate room for the area flags
 	numAreas = gameRenderWorld->NumAreas();
 	visibleAreas = ( bool * )_alloca( numAreas );

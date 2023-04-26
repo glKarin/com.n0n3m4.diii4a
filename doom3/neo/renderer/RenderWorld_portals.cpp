@@ -1164,3 +1164,160 @@ void idRenderWorldLocal::ShowPortals()
 	}
 #endif
 }
+
+#ifdef _RAVEN
+void idRenderWorldLocal::FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas )
+{
+	portalStack_t	ps;
+	int				i;
+
+	assert(areaNum >= 0 && areaNum < numPortalAreas);
+
+#if 0
+	if(r_singleArea.GetBool())
+	{
+		visibleAreas[areaNum] = true;
+		return;
+	}
+#endif
+
+	ps.next = NULL;
+	ps.p = NULL;
+
+	ps.numPortalPlanes = 0;
+	ps.rect.Clear();
+	ps.rect.AddPoint(0, 0);
+	ps.rect.AddPoint(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+#if 0
+	for (i = 0; i < numPortalAreas; i++) {
+		areaScreenRect[i].Clear();
+	}
+#endif
+
+	// flood out through portals, setting area viewCount
+	FindVisibleAreas_r(origin, areaNum, &ps, visibleAreas);
+#if 0
+	int num = 0;
+	int numSky = 0;
+	for(i = 0; i < numPortalAreas; i++)
+	{
+		if(visibleAreas[i])
+		{
+			bool b = HasSkybox(i);
+			LOGI("visible area: %d %d", i, b);
+			num++;
+			if(b)
+				numSky++;
+		}
+	}
+	LOGI("Total visible: %d %d, skys: %d\n", areaNum, num, numSky);
+#endif
+}
+
+void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, const struct portalStack_s *ps, bool *visibleAreas)
+{
+	portal_t		*p;
+	float			d;
+	portalArea_t 	*area;
+	const portalStack_t	*check;
+	portalStack_t	newStack;
+	int				i, j;
+	idVec3			v1, v2;
+	int				addPlanes;
+	idFixedWinding	w;		// we won't overflow because MAX_PORTAL_PLANES = 20
+
+	area = &portalAreas[ areaNum ];
+	if(!visibleAreas[areaNum])
+		visibleAreas[areaNum] = true;
+
+#if 0
+	if (areaScreenRect[areaNum].IsEmpty()) {
+		areaScreenRect[areaNum] = ps->rect;
+	} else {
+		areaScreenRect[areaNum].Union(ps->rect);
+	}
+#endif
+
+	// go through all the portals
+	for (p = area->portals; p; p = p->next) {
+		// an enclosing door may have sealed the portal off
+		if (p->doublePortal->blockingBits & PS_BLOCK_VIEW) {
+			continue;
+		}
+
+		// make sure this portal is facing away from the view
+		d = p->plane.Distance(origin);
+
+		if (d < -0.1f) {
+			continue;
+		}
+
+		// make sure the portal isn't in our stack trace,
+		// which would cause an infinite loop
+		for (check = ps; check; check = check->next) {
+			if (check->p == p) {
+				break;		// don't recursively enter a stack
+			}
+		}
+
+		if (check) {
+			continue;	// already in stack
+		}
+
+		// if we are very close to the portal surface, don't bother clipping
+		// it, which tends to give epsilon problems that make the area vanish
+		if (d < 1.0f) {
+
+			// go through this portal
+			newStack = *ps;
+			newStack.p = p;
+			newStack.next = ps;
+			FindVisibleAreas_r(origin, p->intoArea, &newStack, visibleAreas);
+			continue;
+		}
+
+		// clip the portal winding to all of the planes
+		w = *p->w;
+
+		if (!w.GetNumPoints()) {
+			continue;	// portal not visible
+		}
+
+		// go through this portal
+		newStack.p = p;
+		newStack.next = ps;
+
+		// find the screen pixel bounding box of the remaining portal
+		// so we can scissor things outside it
+		if(tr.primaryView)
+		{
+			idVec3			v;
+			idVec3			ndc;
+
+			newStack.rect.Clear();
+
+			for (int i = 0 ; i < w.GetNumPoints() ; i++) {
+				R_LocalPointToGlobal(tr.identitySpace.modelMatrix, w[i].ToVec3(), v);
+				R_GlobalToNormalizedDeviceCoordinates(v, ndc);
+
+
+				newStack.rect.AddPoint(
+						/*float windowX = */0.5f * (1.0f + ndc[0]) * (SCREEN_WIDTH/* - 0*/),
+						/*float windowY = */0.5f * (1.0f + ndc[1]) * (SCREEN_HEIGHT/* - 0*/)
+				);
+			}
+
+			newStack.rect.Expand();
+		}
+
+		// slop might have spread it a pixel outside, so trim it back
+		newStack.rect.Intersect(ps->rect);
+
+		// generate a set of clipping planes that will further restrict
+		// the visible view beyond just the scissor rect
+
+		FindVisibleAreas_r(origin, p->intoArea, &newStack, visibleAreas);
+	}
+}
+#endif

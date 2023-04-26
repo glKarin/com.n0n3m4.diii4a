@@ -502,7 +502,7 @@ idVec3 rvDeclEffectParser::ParseTint(rvBSEParticleStage *stage, int n)
 		stage->color[1] = p[1];
 		stage->color[2] = p[2];
 		stage->color[3] = 1.0;
-		stage->entityColor = false;
+		//stage->entityColor = false; // comment it, for line lighting
 	}
 #if 0
 	else
@@ -988,6 +988,7 @@ void rvDeclEffectParser::ParseLine(rvFXSingleAction &FXAction)
 		if (!token.Icmp("end")) {
 			ParseStage(action, stage, STAGE_END);
 			//stage->customPathParms[0] = action.size;
+			if(stage->customPathParms[2] == 0.0 && action.length != 0.0 && action.length < stage->customPathParms[2])
 			stage->customPathParms[2] = action.length;
 			continue;
 		}
