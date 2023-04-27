@@ -59,6 +59,7 @@ class rvBSE
 		void					CleanUpSingleAction(const rvFXSingleAction &fxaction, idFXLocalAction &laction);
 		void					ApplyFade(const rvFXSingleAction &fxaction, idFXLocalAction &laction, const int time, const int actualStart);
 		void SetReferenceSound(int handle);
+		void UpdateSound(void);
 
 		int						started;
 		int						nextTriggerTime;
@@ -68,13 +69,7 @@ class rvBSE
 		int time;
 
 	private:
-		idVec3 origin;
-		idMat3 axis;
-		idVec3 gravity;
-		idVec3					endOrigin;
-		bool loop;
-		idVec4 color;
-		int referenceSoundHandle;
+		renderEffect_t parms;
 		idRenderWorld *gameRenderWorld;
 };
 
