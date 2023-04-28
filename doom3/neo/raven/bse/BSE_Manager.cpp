@@ -34,12 +34,12 @@ idCVar bse_render("bse_render", "1", CVAR_BOOL, "disable effect rendering");
 idCVar bse_enabled("bse_enabled", "1", CVAR_BOOL | CVAR_ARCHIVE, "set to false to disable all effects");
 idCVar bse_debug("bse_debug", "0", CVAR_INTEGER, "display debug info about effect");
 idCVar bse_singleEffect("bse_singleEffect", "", 0, "set to the name of the effect that is only played", bse_singleEffectArgs, idCmdSystem::ArgCompletion_String<bse_singleEffectArgs>);
+//idCVar bse_rateLimit("bse_rateLimit", "1", CVAR_FLOAT, "rate limit for spawned effects");
 #if 0
 idCVar bse_showBounds("bse_showbounds", "0", CVAR_BOOL, "display debug bounding boxes effect");
 idCVar bse_physics("bse_physics", "1", CVAR_BOOL, "disable effect physics");
 idCVar bse_debris("bse_debris", "1", CVAR_BOOL, "disable effect debris");
 idCVar bse_speeds("bse_speeds", "0", CVAR_INTEGER, "print bse frame statistics");
-idCVar bse_rateLimit("bse_rateLimit", "1", CVAR_FLOAT, "rate limit for spawned effects");
 idCVar bse_rateCost("bse_rateCost", "1", CVAR_FLOAT, "rate cost multiplier for spawned effects");
 
 float effectCosts[EC_MAX] = { 0, 2, 0.1 }; // dd 0.0, 2 dup(0.1)
@@ -75,6 +75,7 @@ rvBSEManagerLocal::CanPlayRateLimited
 */
 bool rvBSEManagerLocal::CanPlayRateLimited(effectCategory_t category)
 {
+	//return bse_rateLimit.GetFloat() > 0.0;
 	return false;
 }
 
@@ -239,7 +240,7 @@ void rvBSEManagerLocal::FreeEffect(rvRenderEffectLocal* def)
 			common->Printf("Freeing effect %s\n", effectName.c_str());
 		}
 		bse = def->effect;
-		bse->Stop();
+		//bse->Stop();
 		bse->Event_Remove();
 		effects.Free(def->effect);
 		def->effect = NULL;

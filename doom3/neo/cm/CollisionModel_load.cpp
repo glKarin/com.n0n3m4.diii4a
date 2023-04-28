@@ -64,27 +64,6 @@ idHashIndex 					*cm_edgeHash;
 idBounds						cm_modelBounds;
 int								cm_vertexShift;
 
-#ifdef _RAVEN
-#ifdef _K_DEV
-static idCVar	harm_cm_debugTraceMemory("harm_cm_debugTraceMemory", "0", CVAR_SYSTEM | CVAR_BOOL, "");
-#define CM_DEBUG_TRACE(model, what) \
-{ \
-	if(harm_cm_debugTraceMemory.GetBool()) { \
-		LOGI("ModelFromTrm: '%s' " what ", reference(%d), trace(%d).", model->name.c_str(), model->refCount, model->isTraceModel); \
-	} \
-}
-#define CM_DEBUG_TRACE_NAME(name, what) \
-{ \
-	if(harm_cm_debugTraceMemory.GetBool()) { \
-		LOGI("ModelFromTrm: '%s' " what ".", name); \
-	} \
-}
-#else
-#define CM_DEBUG_TRACE(model, what)
-#define CM_DEBUG_TRACE_NAME(model, what)
-#endif
-#endif
-
 /*
 ===============================================================================
 
@@ -4699,7 +4678,6 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 		model->refCount++;
 		if(!model->markRemove)
 		{
-			CM_DEBUG_TRACE(model, "found");
 			return handle;
 		}
 	}
@@ -4727,7 +4705,6 @@ cmHandle_t idCollisionModelManagerLocal::ModelFromTrm(const char* mapName, const
 	{
 		handleIndex = numModels++;
 		models[handleIndex] = model;
-		CM_DEBUG_TRACE_NAME(modelName, "new");
 	}
 	handle = model;
 	model->name = modelName;
@@ -4850,7 +4827,6 @@ void	idCollisionModelManagerLocal::FreeModel(cmHandle_t modelHandle)
 	//if(!model->isTraceModel) return;
 	model->markRemove = true;
 	model->refCount--;
-	CM_DEBUG_TRACE(model, "free");
 #ifdef _K_DEV
 	if(model->isTraceModel && model->refCount < 0)
 		common->Warning("idCollisionModelManager::FreeModel -> model '%s' over-unreference(%d).\n", model->name.c_str(), model->refCount);
@@ -4915,7 +4891,6 @@ cm_model_t 	* idCollisionModelManagerLocal::AllocModel(cm_model_t * &model)
 	memset(model->_trmPolygons, 0, sizeof(cm_polygonRef_t *) * MAX_TRACEMODEL_POLYS);
 	model->_trmBrushes[0] = 0;
 	model->refCount++;
-	CM_DEBUG_TRACE(model, "realloc");
 
 	return model;
 }
@@ -4986,7 +4961,6 @@ void idCollisionModelManagerLocal::ClearModel(cm_model_t *model)
 	model->isTraceModel = false;
 	memset(model->_trmPolygons, 0, sizeof(cm_polygonRef_t *) * MAX_TRACEMODEL_POLYS);
 	model->_trmBrushes[0] = 0;
-	CM_DEBUG_TRACE(model, "clear");
 }
 #endif
 

@@ -545,7 +545,11 @@ class idSoundEmitterLocal : public idSoundEmitter
 		virtual void		FadeSound(const s_channelType channel, float to, float over);
 
 #ifdef _RAVEN
-	virtual void			UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms);
+	virtual void			UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms) {
+		// TODO: velocity for Miles doppler
+		(void)velocity;
+		UpdateEmitter(origin, listenerId, parms);
+	}
 #endif
 
 #ifdef _HUMANHEAD
@@ -828,19 +832,42 @@ class idSoundSystemLocal : public idSoundSystem
 
 		virtual int				IsEAXAvailable(void);
 
-#ifdef _RAVEN
+#ifdef _RAVEN //karin: quake4 hide idSoundEmitter, and using handle
 		virtual idSoundWorld* GetSoundWorldFromId(int worldId);
-		virtual idSoundEmitter* EmitterForIndex(int worldId, int index);
-		virtual int				AllocSoundEmitter(int worldId);
-		virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate);
-		virtual void StopAllSounds(int worldId);
-		virtual void SetActiveSoundWorld(bool val) { }
-		virtual void			FadeSoundClasses(int worldId, const int soundClass, const float to, const float over);
-		virtual	float			CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition);
-		virtual void			PlayShaderDirectly(int worldId, const char* name, int channel = -1);
-		virtual void			PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName);
-		virtual void			WriteToSaveGame(int worldId, idFile* savefile);
-		virtual void			ReadFromSaveGame(int worldId, idFile* savefile);
+		virtual idSoundEmitter* EmitterForIndex(int worldId, int index) {
+			return GetSoundWorldFromId(worldId)->EmitterForIndex(index);
+		}
+		virtual int				AllocSoundEmitter(int worldId) {
+			return GetSoundWorldFromId(worldId)->AllocSoundEmitter()->Index();
+		}
+		virtual void			FreeSoundEmitter(int worldId, int handle, bool immediate) {
+			idSoundEmitter *emitter = GetSoundWorldFromId(worldId)->EmitterForIndex(handle);
+			if(emitter)
+				emitter->Free(immediate);
+		}
+		virtual void StopAllSounds(int worldId) {
+			GetSoundWorldFromId(worldId)->StopAllSounds();
+		}
+		virtual void SetActiveSoundWorld(bool val) { (void)val; }
+		virtual void			FadeSoundClasses(int worldId, const int soundClass, const float to, const float over) {
+			GetSoundWorldFromId(worldId)->FadeSoundClasses(soundClass, to, over);
+		}
+		virtual	float			CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition) {
+			//return 0.0f;
+			return GetSoundWorldFromId(worldId)->CurrentShakeAmplitudeForPosition(time, listenerPosition);
+		}
+		virtual void			PlayShaderDirectly(int worldId, const char* name, int channel = -1) {
+			GetSoundWorldFromId(worldId)->PlayShaderDirectly(name, channel);
+		}
+		virtual void			PlaceListener(const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime, const idStr& areaName) {
+			GetSoundWorldFromId(SOUNDWORLD_GAME)->PlaceListener(origin, axis, listenerId, gameTime, areaName);
+		}
+		virtual void			WriteToSaveGame(int worldId, idFile* savefile) {
+			GetSoundWorldFromId(worldId)->WriteToSaveGame(savefile);
+		}
+		virtual void			ReadFromSaveGame(int worldId, idFile* savefile) {
+			GetSoundWorldFromId(worldId)->ReadFromSaveGame(savefile);
+		}
 	virtual void			ResetListener( void ) { }
 	virtual void			EndCinematic() { }
 #endif

@@ -177,10 +177,9 @@ public final class TextHelper
             "  (a). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console, or set `harm_si_autoFillBots` to 1 for automatic fill bots).",
             "  (b). `SABot` MP game map aas files(for bots in MP game).",
             " 3. Then start game directly or choose map level, all levels is working.",
-            " *. Player's gun-lighting default is opened(can using bool cvar `harm_g_flashlightOn` to control).",
             " *. If running crash on arm32 or low-memory device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
             " *. Exists bugs: e.g. some GUIs interface, script error on some levels",
-            " *. Effect system: Quake4 using new advanced `BSE` particle system, it not open-source(`jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`, but it not work yet.). Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render(If load some levels has noise with effects on, typed `bse_enable` to 0, and then typed `bse_enable` back to 1 in console, noise can resolved.).",
+            " *. Effect system: Quake4 using new advanced `BSE` particle system, it not open-source(`jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`, but it not work yet.). Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.",
 			" *. Multiplayer-Game: It is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
             null,
             "Multi-threading and some GLSL shader using `" + GenLinkText("https://github.com/emileb/d3es-multithread", "emileb/d3es-multithread") + "`.",
@@ -297,6 +296,13 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2023-04-13", 28,
+                        "Add bool cvar `harm_g_mutePlayerFootStep` to control mute player footstep sound(default on) in Quake 4.",
+                        "Fix some light's brightness depend on sound amplitude in Quake 4. e.g. in most levels like `airdefense2`, at some dark passages, it should has a repeat-flashing lighting.",
+                        "Remove Quake 4 helper dialog when start Quake 4, if want to extract resource files, open `Other` -> `Extract resource` in menu.",
+                        "(Bug)In Quake 4, if load some levels has noise with effects on, typed `bse_enable` to 0, and then typed `bse_enable` back to 1 in console, noise can resolved."
+                ),
+
                 ChangeLog.Create("2023-04-05", 27,
                         "Fixup some line effects in Quake 4. e.g. monster body disappear effect, lines net.",
                         "Fixup radio icon in player HUD right-top corner in Quake 4.",
@@ -335,8 +341,8 @@ public final class TextHelper
 
                 ChangeLog.Create("2023-01-10", 22,
                         "Support screen top edges with fullscreen.",
-                        "Add bad skybox render in Prey(2006)(Fixed in version 23).",
-                        "Add bad portal render in Prey(2006)(Fixed in version 23).",
+                        "Add bad skybox render in Prey(2006).",
+                        "Add bad portal render in Prey(2006).",
                         "Add `deathwalk` map append support in Prey(2006)."
                 ),
 
@@ -365,7 +371,7 @@ public final class TextHelper
 
                 ChangeLog.Create("2022-10-29", 17,
                         "Support Quake 4 format fonts. Other language patches will work. D3-format fonts do not need to extract no longer.",
-                        "Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`(Fixed in version 19)."
+                        "Solution of some GUIs can not interactive in Quake 4, you can try `quicksave`, and then `quickload`, the GUI can interactive. E.g. 1. A door's control GUI on bridge of level `game/tram1`, 2. A elevator's control GUI with a monster of `game/process2`."
                 ),
 
                 ChangeLog.Create("2022-10-22", 16,
@@ -395,16 +401,16 @@ public final class TextHelper
             ChangeLog.Create("2022-10-29", 13,
                              "Fixup Strogg health station GUI interactive in `Quake 4`.",
                              "Fixup skip cinematic in `Quake 4`.",
-                             "If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`(Removed in version 26, using original `in_alwaysRun`).",
+                             "If `harm_g_alwaysRun` is 1, hold `Walk` key to walk in `Quake 4`.",
                              "Fixup level map script fatal error or bug in `Quake 4`(All maps have not fatal errors no longer, but have some bugs yet.).",
-                             " `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`(Fixed in version 18).",
-                             " `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload(Fixed in version 16).",
-                             " `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`(Fixed in version 18).",
-                             " `game/putra`: Script fatal error has fixed. But can not down on broken floor, using `noclip`(Fixed in version 15).",
+                             " `game/mcc_landing`: Player collision error on last elevator. You can jump before elevator ending or using `noclip`.",
+                             " `game/mcc_1`: Loading crash after last level ending. Using `map game/mcc_1` to reload.",
+                             " `game/convoy1`: State error is not care no longer and ignore. But sometimes has player collision error when jumping form vehicle, using `noclip`.",
+                             " `game/putra`: Script fatal error has fixed. But can not down on broken floor, using `noclip`.",
                              " `game/waste`: Script fatal error has fixed.",
-                             " `game/process1 first`: Last elevator has ins collision cause killing player. Using `god`(Fixed in version 18). If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.",
-                             " `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`(Fixed in version 18).",
-                             " `game/tram_1b`: Loading crash after last level ending. Using `map game/tram_1b` to reload(Fixed in version 16).",
+                             " `game/process1 first`: Last elevator has ins collision cause killing player. Using `god`. If tower's elevator GUI not work, using `teleport tgr_endlevel` to next level directly.",
+                             " `game/process1 second`: Second elevator has incorrect collision cause killing player(same as `game/process1 first` level). Using `god`.",
+                             " `game/tram_1b`: Loading crash after last level ending. Using `map game/tram_1b` to reload.",
                              " `game/core1`: Fixup first elevator platform not go up.",
                              " `game/core2`: Fixup entity rotation."
                              ),
@@ -672,7 +678,6 @@ public final class TextHelper
         };
         final Cvar[] QUAKE4_CVARS = {
             Cvar.Create("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic."),
-            Cvar.Create("harm_g_flashlightOn", "bool", "1", "Automatic make flash light on initial."),
             Cvar.Create("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movement."),
             Cvar.Create("harm_gui_defaultFont", "string", "chain", "Default font name.",
                     "chain", "fonts/chain",

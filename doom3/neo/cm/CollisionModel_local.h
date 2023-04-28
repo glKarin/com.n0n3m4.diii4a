@@ -489,7 +489,7 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 #ifdef _RAVEN
 		cm_model_t 	*AllocModel(cm_model_t * &model);
 		void ClearModel(cm_model_t *model);
-		void			FreeModel_memory(cm_model_t *model); // from FreeModel(cm_model_t *) rename, because CollisionModeh.h::FreeModel(idCollisionModel *)
+		void			FreeModel_memory(cm_model_t *model);
 #else
 		void			FreeModel(cm_model_t *model);
 #endif

@@ -1329,15 +1329,6 @@ void idSlowChannel::GatherChannelSamples(int sampleOffset44k, int sampleCount44k
 		curPosition = newPosition;
 }
 
-#ifdef _RAVEN
-void			idSoundEmitterLocal::UpdateEmitter(const idVec3& origin, const idVec3& velocity, int listenerId, const soundShaderParms_t* parms)
-{
-	UpdateEmitter(origin, listenerId, parms);
-	// TODO: velocity for Miles doppler
-	(void)velocity;
-}
-#endif
-
 #ifdef _HUMANHEAD
 soundShaderParms_t* idSoundEmitterLocal::GetSoundParms(idSoundShader* shader, const s_channelType channel)
 {

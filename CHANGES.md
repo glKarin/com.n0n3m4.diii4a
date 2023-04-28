@@ -1,8 +1,19 @@
 ## Change logs
-**1.1.0harmattan28(natasha)** - **2023-04-13**
+**1.1.0harmattan29(natasha)** - **2023-05-01**
 
 ----------------------------------------------------------------------------------
 ### Update
+
+> 1.1.0harmattan29 (2023-05-01)
+
+* Fixup crash in game loading when change app to background.
+* Fixup effects with noise and other effects in Quake 4.
+* Optimize sky render in Quake 4.
+* Remove cvar `harm_g_flashlightOn` in Quake 4.
+* Fixup on-screen buttons layer render error on some devices.
+
+----------------------------------------------------------------------------------
+### History
 
 > 1.1.0harmattan28 (2023-04-13)
 
@@ -12,7 +23,6 @@
 * (Bug)In Quake 4, if load some levels has noise with effects on, typed `bse_enabled` to 0, and then typed `bse_enabled` back to 1 in console, noise can resolved.
 
 ----------------------------------------------------------------------------------
-### History
 
 > 1.1.0harmattan27 (2023-04-05)
 

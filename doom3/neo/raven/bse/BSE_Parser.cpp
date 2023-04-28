@@ -97,7 +97,8 @@ class rvDeclEffectParser
 		// Debris defined in .def files can be used in place of models, in the event of more complex debris interactions. This segment allows the placement of Debris in an effect.
 		void ParseDebris(rvFXSingleAction &FXAction);
 		// Effects can be nested inside one another. By pressing the + plus button in the properties for this effect you can add complete effects to this segment, while the – minus button removes effects.
-		void ParseEffect(rvFXSingleAction &FXAction) { Skip(); }
+		void ParseEffect(void);
+		void ParseInnerEffect(const char *name);
 		// By using a delay, an entire effect can have its looping state altered to include a delay. A delay segment affects every segment within an effect.
 		void ParseDelay(rvFXSingleAction &FXAction);
 		void AppendDeclParticle(const char *name, rvBSEParticle *particle);
@@ -108,6 +109,7 @@ class rvDeclEffectParser
 		int ParseLine(idBounds &res, int *parmsCount = 0); // parse line geometry parmeters
 		int ParseSphere(idSphere &res, int *parmsCount = 0);
 		int ParseCylinder(idSphere &res, int *parmsCount = 0);
+		int ParseSpiral(idBounds &res, int *parmsCount = 0);
 		void ParseVelocity(rvBSEParticleStage *stage, int n);
 		void ParseFade(rvBSEParticleStage *stage, int n);
 		idVec3 ParseTint(rvBSEParticleStage *stage, int n);
@@ -243,6 +245,42 @@ int rvDeclEffectParser::ParsePoint(idVec3 &res, int *parmsCount)
 		res[0] = vec[0];
 		res[1] = 0.0;
 		res[2] = 0.0;
+		return 1;
+	}
+	return 0;
+}
+
+int rvDeclEffectParser::ParseSpiral(idBounds &res, int *parmsCount)
+{
+	int count = ParseVec(parmsCount);
+	if(count == 6)
+	{
+		res[0][0] = vec[0];
+		res[0][1] = vec[1];
+		res[0][2] = vec[2];
+		res[1][0] = vec[3];
+		res[1][1] = vec[4];
+		res[1][2] = vec[5];
+		return 3;
+	}
+	else if(count == 4)
+	{
+		res[0][0] = vec[0];
+		res[0][1] = vec[1];
+		res[0][2] = 0.0;
+		res[1][0] = vec[2];
+		res[1][1] = vec[3];
+		res[1][2] = 0.0;
+		return 2;
+	}
+	else if(count == 2)
+	{
+		res[0][0] = vec[0];
+		res[0][1] = 0.0;
+		res[0][2] = 0.0;
+		res[1][0] = vec[1];
+		res[1][1] = 0.0;
+		res[1][2] = 0.0;
 		return 1;
 	}
 	return 0;
@@ -577,7 +615,15 @@ void rvDeclEffectParser::ParseVelocity(rvBSEParticleStage *stage, int n)
 		if(n == STAGE_END)
 			stage->speed.to = p.LengthFast();
 		else
-			stage->speed.from = p.LengthFast();
+		{
+			float v = p.LengthFast();
+			stage->speed.from = v;
+			if(stage->customPathType == PPATH_HELIX)
+			{
+				stage->customPathParms[3] = v;
+				stage->customPathParms[4] = v;
+			}
+		}
 	}
 	else if(!idStr::Icmp(token, "box"))
 	{
@@ -588,7 +634,15 @@ void rvDeclEffectParser::ParseVelocity(rvBSEParticleStage *stage, int n)
 		if(n == STAGE_END)
 			stage->speed.to = p.LengthFast();
 		else
-			stage->speed.from = p.LengthFast();
+		{
+			float v = p.LengthFast();
+			stage->speed.from = v;
+			if(stage->customPathType == PPATH_HELIX)
+			{
+				stage->customPathParms[3] = v;
+				stage->customPathParms[4] = v;
+			}
+		}
 	}
 	else
 	{
@@ -659,6 +713,16 @@ void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
 		stage->distributionParms[2] = v[2];
 		stage->distributionParms[3] = s.GetRadius();
 		stage->distributionType = PDIST_CYLINDER;
+	}
+	else if(!idStr::Icmp(token, "spiral"))
+	{
+		idBounds b;
+		b.Zero();
+		ParseSpiral(b);
+		stage->customPathType = PPATH_HELIX;
+		stage->customPathParms[0] = b[0][0];
+		stage->customPathParms[1] = b[0][1];
+		stage->customPathParms[2] = b[0][2];
 	}
 	else
 	{
@@ -884,7 +948,7 @@ void rvDeclEffectParser::ParseStage(rvFXSingleAction &FXAction, rvBSEParticleSta
 		}
 
 		if (!token.Icmp("length")) {
-			FXAction.length = ParseLength(stage, &FXAction.useEndOrigin)/* / 2.0*/;
+			FXAction.length = ParseLength(stage, &FXAction.useEndOrigin);
 			continue;
 		}
 
@@ -989,7 +1053,7 @@ void rvDeclEffectParser::ParseLine(rvFXSingleAction &FXAction)
 			ParseStage(action, stage, STAGE_END);
 			//stage->customPathParms[0] = action.size;
 			if(stage->customPathParms[2] == 0.0 && action.length != 0.0 && action.length < stage->customPathParms[2])
-			stage->customPathParms[2] = action.length;
+				stage->customPathParms[2] = action.length;
 			continue;
 		}
 
@@ -1217,6 +1281,44 @@ void rvDeclEffectParser::ParseSprite(rvFXSingleAction &FXAction)
 	FXAction.data = name + BSE_MODEL_SUFFIX;
 	FXAction.type = FX_PARTICLE;
 	AppendDeclParticle(FXAction.data, particle);
+}
+
+void rvDeclEffectParser::ParseInnerEffect(const char *name)
+{
+	rvDeclEffect *refEffect = declManager->FindEffect(name, false);
+	if(!refEffect)
+		return;
+	return; // TODO
+}
+
+void rvDeclEffectParser::ParseEffect(void)
+{
+	idToken token;
+
+	src.ExpectTokenString("{");
+	while (1) {
+		if (!src.ReadToken(&token)) {
+			break;
+		}
+
+		if (!token.Icmp("}")) {
+			break;
+		}
+
+		if (!token.Icmp("effect")) {
+			src.ReadToken(&token);
+			ParseInnerEffect(token);
+			continue;
+		}
+
+		if (!token.Icmp("start")) {
+			Skip();
+			continue;
+		}
+
+		LOGW_SKIP("Skip effect: %s -> %s", GetName(), token.c_str());
+		Skip();
+	}
 }
 
 void rvDeclEffectParser::ParseDebris(rvFXSingleAction &FXAction)
@@ -1849,12 +1951,6 @@ bool rvDeclEffectParser::Parse(void)
 			continue;
 		}
 
-		if (!token.Icmp("effect")) {
-			src.ReadToken(&token);
-			src.SkipBracedSection(true);
-			continue;
-		}
-
 		if (!token.Icmp("delay")) {
 			src.ReadToken(&token);
 			src.SkipBracedSection(true);
@@ -1867,6 +1963,11 @@ bool rvDeclEffectParser::Parse(void)
 			action.name = token;
 			ParseTrail(action);
 			decl->events.Append(action);
+			continue;
+		}
+		if (!token.Icmp("effect")) {
+			src.ReadToken(&token);
+			src.SkipBracedSection(true);
 			continue;
 		}
 
