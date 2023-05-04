@@ -4783,6 +4783,7 @@ void idFileSystemLocal::FindMapScreenshot(const char *path, char *buf, int len)
 idFile * idFileSystemLocal::GetNewFileMemory( void )
 {
 	static idFile_Memory _fileMemory("*raven_getnewfilememory*");
+	_fileMemory.mode |= (1 << FS_READ);
 	_fileMemory.Rewind();
 	_fileMemory.Clear(false);
 	return &_fileMemory;

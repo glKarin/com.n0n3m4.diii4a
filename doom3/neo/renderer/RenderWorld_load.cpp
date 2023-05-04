@@ -1024,9 +1024,13 @@ bool idRenderWorldLocal::CheckAreaForPortalSky(int areaNum)
 }
 
 #ifdef _RAVEN
+static idCVar r_skipSky("r_skipSky", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Dark sky");
 bool idRenderWorldLocal::HasSkybox(int areaNum)
 {
 	assert(areaNum >= 0 && areaNum < numPortalAreas);
+	if(r_skipSky.GetBool())
+		return false;
+
 	const idRenderModel *model = renderModelManager->CheckModel(va("_area%i", areaNum));
 	return model ? static_cast<const idRenderModelStatic *>(model)->sky : false;
 }

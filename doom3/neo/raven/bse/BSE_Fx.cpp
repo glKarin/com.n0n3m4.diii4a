@@ -480,8 +480,13 @@ void rvBSE::Run(int time)
 					idVec3 playerOrigin;
 					idMat3 playerAxis;
 					game->GetPlayerView(playerOrigin, playerAxis);
-					if ((playerOrigin - parms.origin).LengthSqr() < Square(fxaction.shakeDistance)) {
-						game->StartViewEffect(VIEWEFFECT_SHAKE, MS2SEC(time) + fxaction.duration, 1.0f);
+					if(!idStr::Icmp(fxaction.data, "doubleVision"))
+						game->StartViewEffect(VIEWEFFECT_DOUBLEVISION, MS2SEC(time) + fxaction.duration, fxaction.shakeAmplitude);
+					else
+					{
+						if ((playerOrigin - parms.origin).LengthSqr() < Square(fxaction.shakeDistance)) {
+							game->StartViewEffect(VIEWEFFECT_SHAKE, MS2SEC(time) + fxaction.duration, fxaction.shakeAmplitude);
+						}
 					}
 
 					useAction->shakeStarted = true;

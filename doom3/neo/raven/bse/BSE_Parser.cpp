@@ -89,6 +89,7 @@ class rvDeclEffectParser
 		void ParseSound(rvFXSingleAction &FXAction);
 		// Camera Shake, Double Vision and Tunnel Vision can all be added to an effect.
 		void ParseShake(rvFXSingleAction &FXAction);
+		void ParseDoubleVision(rvFXSingleAction &FXAction);
 		bool HasVecFlag(const char *name) const;
 		// Linked lines are used to have a set of lines linked together at their ends. Mostly used for arcing and curved effects attached to models or as projectiles such as the Quake4 Nailgun.
 		void ParseLinked(rvFXSingleAction &FXAction);
@@ -1427,6 +1428,8 @@ void rvDeclEffectParser::ParseShake(rvFXSingleAction &FXAction)
 	src.ExpectTokenString("{");
 	FXAction.type = FX_SHAKE;
 	FXAction.seg = SEG_SHAKE;
+	FXAction.data = "shake";
+	FXAction.shakeAmplitude = 1.0f;
 	while (1) {
 		if (!src.ReadToken(&token)) {
 			break;
@@ -1443,7 +1446,8 @@ void rvDeclEffectParser::ParseShake(rvFXSingleAction &FXAction)
 		}
 
 		if (!token.Icmp("scale")) {
-			src.SkipRestOfLine();
+			ParseVec();
+			FXAction.shakeAmplitude = vec[0];
 			continue;
 		}
 
@@ -1454,6 +1458,53 @@ void rvDeclEffectParser::ParseShake(rvFXSingleAction &FXAction)
 		}
 
 		LOGW_SKIP("Skip shake: %s -> %s", GetName(), token.c_str());
+		Skip();
+	}
+}
+
+void rvDeclEffectParser::ParseDoubleVision(rvFXSingleAction &FXAction)
+{
+	idToken token;
+
+	src.ExpectTokenString("{");
+	FXAction.type = FX_SHAKE;
+	FXAction.seg = SEG_SHAKE;
+	FXAction.data = "doubleVision";
+	FXAction.shakeAmplitude = 1.0f;
+	while (1) {
+		if (!src.ReadToken(&token)) {
+			break;
+		}
+
+		if (!token.Icmp("}")) {
+			break;
+		}
+		if(ParseGeneralParms(token, FXAction))
+			continue;
+
+		if (!token.Icmp("attenuateEmitter")) {
+			continue;
+		}
+
+		if (!token.Icmp("scale")) {
+			ParseVec();
+			FXAction.shakeAmplitude = vec[0];
+			continue;
+		}
+
+		if (!token.Icmp("attenuation")) {
+			ParseVec();
+			FXAction.shakeDistance = vec[1] - vec[0];
+			continue;
+		}
+
+		if (!token.Icmp("duration")) {
+			ParseVec();
+			FXAction.duration = vec[1] - vec[0];
+			continue;
+		}
+
+		LOGW_SKIP("Skip doubleVision: %s -> %s", GetName(), token.c_str());
 		Skip();
 	}
 }
@@ -1947,6 +1998,16 @@ bool rvDeclEffectParser::Parse(void)
 			Init_FXAction(action);
 			action.name = token;
 			ParseShake(action);
+			decl->events.Append(action);
+			continue;
+		}
+
+		if (!token.Icmp("doubleVision")) {
+			src.ReadToken(&token);
+			rvFXSingleAction action;
+			Init_FXAction(action);
+			action.name = token;
+			ParseDoubleVision(action);
 			decl->events.Append(action);
 			continue;
 		}

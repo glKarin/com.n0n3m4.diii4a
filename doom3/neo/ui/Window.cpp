@@ -59,7 +59,6 @@ idCVar idWindow::gui_edit("gui_edit", "0", CVAR_GUI | CVAR_BOOL, "");
 #ifdef _RAVEN //k: for main menu gui
 idCVar net_menulanserver("net_menuLANServer", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "menu cvar for config of lan servers");
 idCVar net_serverMenuDedicated("net_serverMenuDedicated", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "");
-idCVar r_skipSky("r_skipSky", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Dark sky");
 idCVar r_forceAmbient("r_forceAmbient", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "Force a single ambient light throughout the level if > 0 (intensity 0..1)");
 idCVar r_useSmp("r_useSMP", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Turn SMP on and off");
 idCVar s_deviceName("s_deviceName", "", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL device name");

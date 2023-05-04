@@ -7798,7 +7798,11 @@ idEntity* idGameLocal::HitScan(
 
 				continue;
 			// Reflect off a bounce target?
+#ifdef _QUAKE4 //karin: model == NULL
+			} else if ( tr.c.material && (tr.c.material->GetSurfaceFlags ( ) & SURF_BOUNCE) && !hitscanDict.GetBool ( "noBounce" ) ) {
+#else
 			} else if ( (tr.c.material->GetSurfaceFlags ( ) & SURF_BOUNCE) && !hitscanDict.GetBool ( "noBounce" ) ) {
+#endif
 				reflect++;
 			}
 
@@ -7861,6 +7865,9 @@ idEntity* idGameLocal::HitScan(
 				} else { 
 					if ( actualHitEnt
 						 && actualHitEnt != ent
+#ifdef _QUAKE4 //karin: model == NULL
+						 && tr.c.material
+#endif
 						 && (tr.c.material->GetSurfaceFlags ( ) & SURF_BOUNCE)
 						 && actualHitEnt->spawnArgs.GetBool( "takeBounceDamage" ) )
 						{//bleh...
