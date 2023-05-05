@@ -11,7 +11,7 @@
 #include "../ai/AI.h"
 
 #ifdef _QUAKE4 //karin: mute player footstep sound
-idCVar harm_g_mutePlayerFootStep( "harm_g_mutePlayerFootStep", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: Mute player's footstep sound." );
+idCVar harm_g_mutePlayerFootStep( "harm_g_mutePlayerFootStep", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: Mute player's footstep sound." );
 #define MUTE_PLAYER_FOOTSTEP(ent) (harm_g_mutePlayerFootStep.GetBool() && ent->IsType(idPlayer::GetClassType()) && ent->entityNumber == gameLocal.localClientNum)
 #endif
 static const char *channelNames[ ANIM_NumAnimChannels ] = {
