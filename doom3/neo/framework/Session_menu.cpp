@@ -445,6 +445,9 @@ bool idSessionLocal::HandleSaveGameMenuCommand(idCmdArgs &args, int &icmd)
 
 	if (!idStr::Icmp(cmd, "updateSaveGameInfo")) {
 		int choice = guiActive->State().GetInt("loadgame_sel_0");
+#ifdef _RAVEN
+		guiActive->SetStateInt("loadgame_listdef_count", loadGameList.Num());
+#endif
 
 		if (choice >= 0 && choice < loadGameList.Num()) {
 			const idMaterial *material;
