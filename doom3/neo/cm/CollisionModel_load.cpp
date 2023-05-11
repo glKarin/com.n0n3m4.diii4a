@@ -4965,6 +4965,38 @@ void idCollisionModelManagerLocal::ClearModel(cm_model_t *model)
 #endif
 
 #ifdef _RAVEN
+cm_model_t::cm_model_t(void)
+{
+	bounds.Zero();
+	contents = 0;
+	isConvex = false;
+	maxVertices = 0;
+	numVertices = 0;
+	vertices = NULL;
+	maxEdges = 0;
+	numEdges = 0;
+	edges= NULL;
+	node = NULL;
+	nodeBlocks = NULL;
+	polygonRefBlocks = NULL;
+	brushRefBlocks = NULL;
+	polygonBlock = NULL;
+	brushBlock = NULL;
+	numPolygons = polygonMemory =
+		numBrushes = brushMemory =
+		numNodes = numBrushRefs =
+		numPolygonRefs = numInternalEdges =
+		numSharpEdges = numRemovedPolys =
+		numMergedPolys = usedMemory = 0;
+
+	isTrmModel = false;
+	markRemove = false;
+	isTraceModel = false;
+	memset(_trmPolygons, 0, sizeof(cm_polygonRef_t *) * MAX_TRACEMODEL_POLYS);
+	_trmBrushes[0] = 0;
+	refCount = 0;
+}
+
 const char * cm_model_t::GetName( void ) const
 {
 	return name.c_str();

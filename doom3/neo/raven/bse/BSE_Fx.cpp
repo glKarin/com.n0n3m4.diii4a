@@ -477,18 +477,17 @@ void rvBSE::Run(int time)
 			}
 			case FX_SHAKE: {
 				if (!useAction->shakeStarted) {
-					idVec3 playerOrigin;
-					idMat3 playerAxis;
-					game->GetPlayerView(playerOrigin, playerAxis);
 					if(!idStr::Icmp(fxaction.data, "doubleVision"))
 						game->StartViewEffect(VIEWEFFECT_DOUBLEVISION, MS2SEC(time) + fxaction.duration, fxaction.shakeAmplitude);
 					else
 					{
+						idVec3 playerOrigin;
+						idMat3 playerAxis;
+						game->GetPlayerView(playerOrigin, playerAxis);
 						if ((playerOrigin - parms.origin).LengthSqr() < Square(fxaction.shakeDistance)) {
 							game->StartViewEffect(VIEWEFFECT_SHAKE, MS2SEC(time) + fxaction.duration, fxaction.shakeAmplitude);
 						}
 					}
-
 					useAction->shakeStarted = true;
 				}
 				break;
@@ -534,6 +533,7 @@ void rvBSE::Run(int time)
 				useAction->renderEntity.suppressSurfaceInViewID = parms.suppressSurfaceInViewID;
 				useAction->renderEntity.allowSurfaceInViewID = parms.allowSurfaceInViewID;
 				useAction->renderEntity.weaponDepthHackInViewID = parms.weaponDepthHackInViewID;
+				useAction->renderEntity.modelDepthHack = parms.modelDepthHack;
 
 				ApplyFade(fxaction, *useAction, time, actualStart);
 				break;

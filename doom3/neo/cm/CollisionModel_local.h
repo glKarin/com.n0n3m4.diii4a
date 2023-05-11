@@ -209,6 +209,8 @@ typedef struct cm_model_s
 	cm_brushRef_t *_trmBrushes[1];
 	int refCount;
 
+	cm_model_t(void);
+
 	virtual const char *		GetName( void ) const;
 	virtual bool				GetBounds( idBounds &bounds ) const;
 	virtual bool				GetContents( int &contents ) const;
