@@ -39,20 +39,25 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Bitmap.Config;
+import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.AlteredCharSequence;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -330,6 +335,8 @@ public class Q3EUtils {
 	public static final String pref_harm_prey_game_lib="q3e_harm_prey_game_lib"; //k
 	public static final String pref_harm_multithreading="q3e_harm_multithreading"; //k
 	public static final String pref_harm_s_driver="q3e_harm_s_driver"; //k
+	public static final String pref_harm_input_method_toolbar = "harm_input_method_toolbar"; //k
+	public static final String pref_harm_input_method_toolbar_y = "harm_input_method_toolbar_y"; //k
 	
 	public static class UiElement
 	{
@@ -485,11 +492,41 @@ public class Q3EUtils {
 	}
 	
 	public static final int K_VKBD=9000; 
-	
+
 	public static void togglevkbd(View vw)
 	{
-		InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);		
-		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+		InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		if(q3ei.input_method_toolbar)
+		{
+			boolean changed = imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
+			if(changed) // im from open to close
+				ToggleToolbar(false);
+			else // im is closed
+			{
+				//imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
+				imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+				ToggleToolbar(true);
+			}
+		}
+		else
+		{
+			imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+		}
+	}
+
+	public static void ToggleToolbar(boolean on)
+	{
+		if(null != q3ei.callbackObj.vw)
+			q3ei.callbackObj.vw.ToggleToolbar(on);
+	}
+
+	public static void CloseVKB()
+	{
+		if(null != q3ei.callbackObj.vw)
+		{
+			InputMethodManager imm = (InputMethodManager) q3ei.callbackObj.vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(q3ei.callbackObj.vw.getWindowToken(), 0);
+		}
 	}
 	
 	public static interface TouchListener
@@ -1350,5 +1387,69 @@ public class Q3EUtils {
                 deg += 360.0;
             return deg;
         }
-	}		
+	}
+
+	public static int[] GetNormalScreenSize(Activity activity)
+	{
+		Display display = activity.getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+		{
+			display.getSize(size);
+			return new int[]{ size.x, size.y };
+		}
+		else
+		{
+			return new int[]{ display.getWidth(), display.getHeight() };
+		}
+	}
+
+	public static int[] GetFullScreenSize(Activity activity)
+	{
+		Display display = activity.getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+		{
+			display.getRealSize(size);
+			return new int[]{ size.x, size.y };
+		}
+		else
+		{
+			return new int[]{ display.getWidth(), display.getHeight() };
+		}
+	}
+
+	public static int GetEdgeHeight(Activity activity, boolean landscape)
+	{
+		int safeInsetTop = 0;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+		{
+			WindowInsets rootWindowInsets = activity.getWindow().getDecorView().getRootWindowInsets();
+			if(null != rootWindowInsets)
+			{
+				DisplayCutout displayCutout = rootWindowInsets.getDisplayCutout();
+				if(null != displayCutout) {
+					safeInsetTop = landscape ? displayCutout.getSafeInsetLeft() : displayCutout.getSafeInsetTop();
+				}
+			}
+		}
+		return safeInsetTop;
+	}
+
+	public static int GetEndEdgeHeight(Activity activity, boolean landscape)
+	{
+		int safeInsetBottom = 0;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+		{
+			WindowInsets rootWindowInsets = activity.getWindow().getDecorView().getRootWindowInsets();
+			if(null != rootWindowInsets)
+			{
+				DisplayCutout displayCutout = rootWindowInsets.getDisplayCutout();
+				if(null != displayCutout) {
+					safeInsetBottom = landscape ? displayCutout.getSafeInsetRight() : displayCutout.getSafeInsetBottom();
+				}
+			}
+		}
+		return safeInsetBottom;
+	}
 }

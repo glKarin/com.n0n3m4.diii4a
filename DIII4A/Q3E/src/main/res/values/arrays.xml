@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="key_toolbar_names">
+        <item>Tab</item>
+        <item>←</item>
+        <item>↓</item>
+        <item>↑</item>
+        <item>→</item>
+        <item>Home</item>
+        <item>PageDown</item>
+        <item>PageUp</item>
+        <item>End</item>
+    </string-array>
+
+    <integer-array name="key_toolbar_codes">
+        <item>9</item>
+        <item>135</item>
+        <item>134</item>
+        <item>133</item>
+        <item>136</item>
+        <item>147</item>
+        <item>145</item>
+        <item>146</item>
+        <item>148</item>
+    </integer-array>
+</resources>

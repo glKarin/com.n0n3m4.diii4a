@@ -50,6 +50,7 @@ public class Q3EInterface {
     public boolean view_motion_control_gyro = false;
     public String start_temporary_extra_command = "";
 	public boolean multithread = false;
+	public boolean input_method_toolbar = false;
 	
 	//RTCW4A:
 	public final int RTCW4A_UI_ACTION=6;

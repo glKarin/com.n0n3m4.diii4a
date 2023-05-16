@@ -425,9 +425,10 @@ public class GameLauncher extends Activity{
     private void InitUILayout(Q3EInterface q3ei, boolean safety)
     {
         int safeInsetTop = ContextUtility.GetEdgeHeight(this);
+		int safeInsetBottom = ContextUtility.GetEdgeHeight_bottom(this);
 		int[] fullSize = ContextUtility.GetFullScreenSize(this);
 		int[] size = ContextUtility.GetNormalScreenSize(this);
-		int navBarHeight = fullSize[1] - size[1] - safeInsetTop;
+		int navBarHeight = fullSize[1] - size[1] - safeInsetTop - safeInsetBottom;
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
 		boolean hideNav = preferences.getBoolean(Constants.PreferenceKey.HIDE_NAVIGATION_BAR, true);
 		boolean coverEdges = preferences.getBoolean(Constants.PreferenceKey.COVER_EDGES, true);
@@ -441,7 +442,7 @@ public class GameLauncher extends Activity{
 			if(coverEdges)
 				X = safeInsetTop;
 			else
-				h -= safeInsetTop;
+				h -= (safeInsetTop + safeInsetBottom);
 		}
 		else
 		{
@@ -450,7 +451,7 @@ public class GameLauncher extends Activity{
 			if(!hideNav)
 				h -= navBarHeight;
 			if(!coverEdges)
-				h -= safeInsetTop;
+				h -= (safeInsetTop + safeInsetBottom);
 		}
         int width = Math.max(w, h);
 		int height = Math.min(w, h);
@@ -1286,6 +1287,7 @@ public class GameLauncher extends Activity{
 			return;
 		}
 		*/
+
 		finish();
 		startActivity(new Intent(this,Q3EMain.class));
 	}

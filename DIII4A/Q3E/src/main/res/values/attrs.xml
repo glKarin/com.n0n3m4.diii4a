@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+    
+<resources>
+    <declare-styleable name="HorizontalListView">
+        <attr name="horizontalSpacing" format="integer"/>
+        <attr name="columnWidth" format="integer"/>
+    </declare-styleable>
+
+    <dimen name="toolbarHeight">36dp</dimen>
+    <dimen name="toolButtonWidth">96dp</dimen>
+    <dimen name="toolButtonSpacing">2dp</dimen>
+    <dimen name="toolFunctionMargin">4dp</dimen>
+</resources>

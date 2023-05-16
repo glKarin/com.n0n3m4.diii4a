@@ -75,6 +75,7 @@ public class Q3EMain extends Activity {
     public static Q3EControlView mControlGLSurfaceView;
     private DebugTextView memoryUsageText;
     private RelativeLayout mainLayout;
+    private boolean m_coverEdges = true;
 	
 	public void ShowMessage(String s)
 	{
@@ -103,7 +104,8 @@ public class Q3EMain extends Activity {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && preferences.getBoolean("harm_cover_edges", true))
+        m_coverEdges = preferences.getBoolean("harm_cover_edges", true);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && m_coverEdges)
         {
             WindowManager.LayoutParams lp = getWindow().getAttributes();
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -140,6 +142,7 @@ public class Q3EMain extends Activity {
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
         Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EUtils.pref_harm_multithreading, false);
+        Q3EUtils.q3ei.input_method_toolbar = preferences.getBoolean(Q3EUtils.pref_harm_input_method_toolbar, false);
 		
 		super.onCreate(savedInstanceState);
 		
@@ -184,9 +187,9 @@ public class Q3EMain extends Activity {
                 mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
             mControlGLSurfaceView.RenderView(mGLSurfaceView);
             mainLayout = new RelativeLayout(this);
-            ViewGroup.LayoutParams params;
+            RelativeLayout.LayoutParams params;
 
-            params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
             mainLayout.addView(mGLSurfaceView, params);
 
@@ -194,10 +197,17 @@ public class Q3EMain extends Activity {
             mControlGLSurfaceView.setZOrderMediaOverlay(true);
             mainLayout.addView(mControlGLSurfaceView, params);
 
+            if(Q3EUtils.q3ei.input_method_toolbar)
+            {
+                params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
+                View key_toolbar = mControlGLSurfaceView.CreateToolbar();
+                mainLayout.addView(key_toolbar, params);
+            }
+
             if(m_renderMemStatus > 0) //k
             {
                 memoryUsageText = new DebugTextView(mainLayout.getContext());
-                params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 mainLayout.addView(memoryUsageText, params);
                 memoryUsageText.setTypeface(Typeface.MONOSPACE);
             }
@@ -212,7 +222,31 @@ public class Q3EMain extends Activity {
 		}
 	}
 
-	@Override
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        if(mControlGLSurfaceView != null)
+        {
+            View toolbar = mControlGLSurfaceView.Toolbar();
+            if(toolbar != null)
+            {
+                if(m_coverEdges)
+                {
+                    int x = Q3EUtils.GetEdgeHeight(this, true);
+                    if(x != 0)
+                        toolbar.setX(x);
+                }
+                int[] size = Q3EUtils.GetNormalScreenSize(this);
+                ViewGroup.LayoutParams layoutParams = toolbar.getLayoutParams();
+                layoutParams.width = size[0];
+                toolbar.setLayoutParams(layoutParams);
+                //mainLayout.requestLayout();
+            }
+        }
+    }
+
+    @Override
 	protected void onDestroy() {
         if(null != mGLSurfaceView)
             mGLSurfaceView.Shutdown();
@@ -244,6 +278,7 @@ public class Q3EMain extends Activity {
         {
             mControlGLSurfaceView.Pause();
         }
+        Q3EUtils.CloseVKB();
 	}
 
 	@Override
@@ -286,5 +321,4 @@ public class Q3EMain extends Activity {
         else
             decorView.setSystemUiVisibility(m_uiOptions_def);
     }
-    
 }

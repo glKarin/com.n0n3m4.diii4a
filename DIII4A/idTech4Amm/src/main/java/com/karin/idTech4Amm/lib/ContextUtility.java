@@ -335,11 +335,28 @@ public final class ContextUtility
         return safeInsetTop;
     }
 
+    public static int GetEdgeHeight_bottom(Activity activity)
+    {
+        int safeInsetBottom = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+        {
+            WindowInsets rootWindowInsets = activity.getWindow().getDecorView().getRootWindowInsets();
+            if(null != rootWindowInsets)
+            {
+                DisplayCutout displayCutout = rootWindowInsets.getDisplayCutout();
+                if(null != displayCutout) {
+                    safeInsetBottom = displayCutout.getSafeInsetBottom();
+                }
+            }
+        }
+        return safeInsetBottom;
+    }
+
     public static int GetNavigationBarHeight(Activity activity)
     {
         int[] fullSize = GetFullScreenSize(activity);
         int[] size = GetNormalScreenSize(activity);
-        return fullSize[1] - size[1] - GetEdgeHeight(activity);
+        return fullSize[1] - size[1] - GetEdgeHeight(activity) - GetEdgeHeight_bottom(activity);
     }
 
     public static int GetStatusBarHeight(Activity activity)

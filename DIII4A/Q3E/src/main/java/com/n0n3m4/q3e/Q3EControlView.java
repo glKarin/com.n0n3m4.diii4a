@@ -37,6 +37,8 @@ import android.preference.PreferenceManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.Q3EKeyCodes.KeyCodes;
@@ -76,6 +78,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 {
 
 	public boolean usesCSAA=false;
+    private boolean m_toolbarActive = true;
+    private View m_keyToolbar = null;
 
 
 	public class Q3EConfigChooser implements EGLConfigChooser
@@ -657,6 +661,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 return true;
             if((m_mapBack & ENUM_BACK_EXIT) != 0 && HandleBackPress())
                 return true;
+            Q3EUtils.ToggleToolbar(false);
         }
         int qKeyCode;
         switch(keyCode)
@@ -878,21 +883,21 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     
     public boolean EnableGyroscopeControl(boolean...b)
     {
-        if(b.length > 0)
+        if(null != b && b.length > 0)
             m_enableGyro = b[0];
         return m_enableGyro;
     }
     
     public float XAxisSens(float...f)
     {
-        if(f.length > 0)
+        if(null != f && f.length > 0)
             m_xAxisGyroSens = f[0];
         return m_xAxisGyroSens;
     }
 
     public float yAxisSens(float...f)
     {
-        if(f.length > 0)
+        if(null != f && f.length > 0)
             m_yAxisGyroSens = f[0];
         return m_yAxisGyroSens;
     }
@@ -963,11 +968,56 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         if(m_enableGyro)
             StopGyroscope();
+        ToggleToolbar(false);
     }
 
     public void Resume()
     {
         if(m_enableGyro)
             StartGyroscope();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        m_keyToolbar = null;
+        m_toolbarActive = true;
+    }
+
+    public View CreateToolbar()
+    {
+        if(Q3EUtils.q3ei.input_method_toolbar)
+        {
+            Context context = getContext();
+            m_keyToolbar = new KeyToolBar(context);
+            m_keyToolbar.setVisibility(View.GONE);
+            int y = PreferenceManager.getDefaultSharedPreferences(context).getInt(Q3EUtils.pref_harm_input_method_toolbar_y, 0);
+            if(y > 0)
+                m_keyToolbar.setY(y);
+        }
+        return m_keyToolbar;
+    }
+
+    public View Toolbar()
+    {
+        return m_keyToolbar;
+    }
+
+    public void ToggleToolbar()
+    {
+        ToggleToolbar(!m_toolbarActive);
+    }
+
+    public void ToggleToolbar(boolean b)
+    {
+        if(null != m_keyToolbar && Q3EUtils.q3ei.input_method_toolbar)
+        {
+            m_toolbarActive = b;
+            if(m_toolbarActive)
+                m_keyToolbar.setVisibility(View.VISIBLE);
+            else
+                m_keyToolbar.setVisibility(View.GONE);
+        }
     }
 }
