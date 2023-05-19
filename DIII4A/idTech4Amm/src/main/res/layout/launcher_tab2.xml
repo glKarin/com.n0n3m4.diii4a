@@ -127,6 +127,32 @@
 			android:layout_height="wrap_content"
 			android:text="Multitouch shoot (left mouse button click on a second touch)"/>
 
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:orientation="horizontal">
+			<TextView
+				android:layout_width="0dp"
+				android:layout_height="match_parent"
+				android:layout_weight="1"
+				android:gravity="center_vertical"
+				android:text="Joystick release radius's multiple(0 - disabled)"
+				android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+			<EditText
+				android:id="@+id/launcher_tab2_joystick_release_range"
+				android:inputType="numberDecimal|textNoSuggestions"
+				android:ems="10"
+				android:hint="Radius's multiple"
+				android:imeOptions="flagNoExtractUi"
+				android:text="0.0"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="right|center_vertical"
+				android:autofillHints="" />
+		</LinearLayout>
+
         <CheckBox
             android:id="@+id/launcher_tab2_enable_gyro"
             android:layout_width="wrap_content"
@@ -163,7 +189,8 @@
                     android:text="18.0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right|center_vertical"/>
+                    android:layout_gravity="right|center_vertical"
+					android:autofillHints="" />
             </LinearLayout>
 
             <LinearLayout
@@ -188,7 +215,8 @@
                     android:text="18.0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right|center_vertical"/>
+                    android:layout_gravity="right|center_vertical"
+					android:autofillHints="" />
             </LinearLayout>
         </LinearLayout>
 

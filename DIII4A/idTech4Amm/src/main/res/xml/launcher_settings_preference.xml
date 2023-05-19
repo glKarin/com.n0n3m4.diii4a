@@ -54,11 +54,20 @@
                 android:summary="Save game runtime output log to stdout.txt/stderr.txt"
             />
             <CheckBoxPreference
-                android:title="Input method toolbar"
-                android:key="harm_input_method_toolbar"
+                android:title="Function key toolbar"
+                android:key="harm_function_key_toolbar"
                 android:persistent="true"
                 android:defaultValue="false"
-                android:summary="Show input method toolbar"
+                android:summary="Show function key toolbar"
+                />
+            <EditTextPreference
+                android:title="Function key toolbar offset"
+                android:key="harm_function_key_toolbar_y"
+                android:persistent="true"
+                android:defaultValue="0"
+                android:inputType="number"
+                android:summary="Setup function key toolbar position offset"
+                android:dependency="harm_function_key_toolbar"
                 />
         </PreferenceCategory>
         

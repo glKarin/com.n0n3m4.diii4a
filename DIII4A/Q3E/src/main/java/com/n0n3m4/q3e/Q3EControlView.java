@@ -26,19 +26,15 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.Q3EKeyCodes.KeyCodes;
@@ -59,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -68,7 +63,7 @@ import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
 import tv.ouya.console.api.OuyaController;
-import java.util.LinkedList;
+
 import android.hardware.SensorManager;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorEvent;
@@ -749,11 +744,15 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
 		try
 		{
-            for (Finger f:fingers)
-                if (f.target != null) f.onTouchEvent(event);
+            for (Finger f : fingers) {
+                if (f.target != null)
+                {
+                    if(!f.onTouchEvent(event))
+                        f.target = null;
+                }
+            }
 		}
-		catch (Exception e)
-        {};
+		catch (Exception ignored) {}
 
 		if ((event.getActionMasked() == MotionEvent.ACTION_UP) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) || (event.getActionMasked() == MotionEvent.ACTION_CANCEL))
 		{
@@ -987,14 +986,21 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     public View CreateToolbar()
     {
-        if(Q3EUtils.q3ei.input_method_toolbar)
+        if(Q3EUtils.q3ei.function_key_toolbar)
         {
             Context context = getContext();
             m_keyToolbar = new KeyToolBar(context);
             m_keyToolbar.setVisibility(View.GONE);
-            int y = PreferenceManager.getDefaultSharedPreferences(context).getInt(Q3EUtils.pref_harm_input_method_toolbar_y, 0);
-            if(y > 0)
-                m_keyToolbar.setY(y);
+            try
+            {
+                int y = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EUtils.pref_harm_function_key_toolbar_y, "0"));
+                if(y > 0)
+                    m_keyToolbar.setY(y);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
         return m_keyToolbar;
     }
@@ -1011,7 +1017,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     public void ToggleToolbar(boolean b)
     {
-        if(null != m_keyToolbar && Q3EUtils.q3ei.input_method_toolbar)
+        if(null != m_keyToolbar && Q3EUtils.q3ei.function_key_toolbar)
         {
             m_toolbarActive = b;
             if(m_toolbarActive)

@@ -296,6 +296,14 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2023-05-01", 29,
+                        "Fixup crash in game loading when change app to background.",
+                        "Fixup effects with noise in Quake 4.",
+                        "Optimize sky render in Quake 4.",
+                        "Remove cvar `harm_g_flashlightOn` in Quake 4.",
+                        "Fixup on-screen buttons layer render error on some devices."
+                ),
+
                 ChangeLog.Create("2023-04-13", 28,
                         "Add bool cvar `harm_g_mutePlayerFootStep` to control mute player footstep sound(default on) in Quake 4.",
                         "Fix some light's brightness depend on sound amplitude in Quake 4. e.g. in most levels like `airdefense2`, at some dark passages, it should has a repeat-flashing lighting.",

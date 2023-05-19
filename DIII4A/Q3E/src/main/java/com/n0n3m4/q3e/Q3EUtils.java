@@ -41,16 +41,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Bitmap.Config;
-import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.text.AlteredCharSequence;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -59,12 +54,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.graphics.RectF;
-import java.util.List;
 
 public class Q3EUtils {
 	public static final int ONSCREEN_BUTTON_STYPE_FULL = 0;
@@ -335,8 +327,9 @@ public class Q3EUtils {
 	public static final String pref_harm_prey_game_lib="q3e_harm_prey_game_lib"; //k
 	public static final String pref_harm_multithreading="q3e_harm_multithreading"; //k
 	public static final String pref_harm_s_driver="q3e_harm_s_driver"; //k
-	public static final String pref_harm_input_method_toolbar = "harm_input_method_toolbar"; //k
-	public static final String pref_harm_input_method_toolbar_y = "harm_input_method_toolbar_y"; //k
+	public static final String pref_harm_function_key_toolbar = "harm_function_key_toolbar"; //k
+	public static final String pref_harm_function_key_toolbar_y = "harm_function_key_toolbar_y"; //k
+	public static final String pref_harm_joystick_release_range = "harm_joystick_release_range"; //k
 	
 	public static class UiElement
 	{
@@ -496,7 +489,7 @@ public class Q3EUtils {
 	public static void togglevkbd(View vw)
 	{
 		InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-		if(q3ei.input_method_toolbar)
+		if(q3ei.function_key_toolbar)
 		{
 			boolean changed = imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
 			if(changed) // im from open to close
@@ -531,7 +524,7 @@ public class Q3EUtils {
 	
 	public static interface TouchListener
 	{
-		public abstract void onTouchEvent(int x,int y,int act);
+		public abstract boolean onTouchEvent(int x,int y,int act);
 		public abstract boolean isInside(int x,int y);
 	}
 	
@@ -564,7 +557,7 @@ public class Q3EUtils {
 			id=myid;
 			target=tgt;
 		}
-		public void onTouchEvent(MotionEvent event)
+		public boolean onTouchEvent(MotionEvent event)
 		{
 			int act=0;
 			if (event.getPointerId(event.getActionIndex())==id)
@@ -574,7 +567,7 @@ public class Q3EUtils {
 				if ((event.getActionMasked()==MotionEvent.ACTION_UP)||(event.getActionMasked()==MotionEvent.ACTION_POINTER_UP)||(event.getActionMasked()==MotionEvent.ACTION_CANCEL))
 					act=-1;
 			}
-			target.onTouchEvent((int)event.getX(event.findPointerIndex(id)),(int)event.getY(event.findPointerIndex(id)),act);
+			return target.onTouchEvent((int)event.getX(event.findPointerIndex(id)),(int)event.getY(event.findPointerIndex(id)),act);
 		}
 	}
 	
@@ -641,66 +634,51 @@ public class Q3EUtils {
 		}
 
 		@Override
-		public void onTouchEvent(int x, int y, int act) {
-			if (act==1) 
-				{
-				startx=x;
-				starty=y;
-				}
-			if (act==-1)
-			{
-				if (style==0)
-				{
-				if (x-startx<-SLIDE_DIST)
-				{
-				((Q3EControlView)(view)).sendKeyEvent(true,lkey,0);
-				((Q3EControlView)(view)).sendKeyEvent(false,lkey,0);
-				}
-				else
-				if (x-startx>SLIDE_DIST)
-				{
-					((Q3EControlView)(view)).sendKeyEvent(true,rkey,0);
-					((Q3EControlView)(view)).sendKeyEvent(false,rkey,0);
-				}
-				else
-				{					
-					((Q3EControlView)(view)).sendKeyEvent(true,ckey,0);
-					((Q3EControlView)(view)).sendKeyEvent(false,ckey,0);
-				}
-				}
-				
-                //k
-				else if (style==1)
-				{
-				if ((y-starty>SLIDE_DIST) || (x-startx>SLIDE_DIST))
-				{
-					double ang=Math.abs(Math.atan2(y-starty, x-startx));
-					if (ang>Math.PI/4 && ang<Math.PI*3/4)
-					{					
-					((Q3EControlView)(view)).sendKeyEvent(true,lkey,0);
-					((Q3EControlView)(view)).sendKeyEvent(false,lkey,0);
+		public boolean onTouchEvent(int x, int y, int act) {
+			if (act == 1) {
+				startx = x;
+				starty = y;
+			}
+			if (act == -1) {
+				if (style == 0) {
+					if (x - startx < -SLIDE_DIST) {
+						((Q3EControlView) (view)).sendKeyEvent(true, lkey, 0);
+						((Q3EControlView) (view)).sendKeyEvent(false, lkey, 0);
+					} else if (x - startx > SLIDE_DIST) {
+						((Q3EControlView) (view)).sendKeyEvent(true, rkey, 0);
+						((Q3EControlView) (view)).sendKeyEvent(false, rkey, 0);
+					} else {
+						((Q3EControlView) (view)).sendKeyEvent(true, ckey, 0);
+						((Q3EControlView) (view)).sendKeyEvent(false, ckey, 0);
 					}
-					else					
-                    { //k
-					((Q3EControlView)(view)).sendKeyEvent(true,rkey,0);
-                        ((Q3EControlView)(view)).sendKeyEvent(false,rkey,0);
-                    } //k
 				}
-				else
-				{					
-					((Q3EControlView)(view)).sendKeyEvent(true,ckey,0);
-					((Q3EControlView)(view)).sendKeyEvent(false,ckey,0);
+
+				//k
+				else if (style == 1) {
+					if ((y - starty > SLIDE_DIST) || (x - startx > SLIDE_DIST)) {
+						double ang = Math.abs(Math.atan2(y - starty, x - startx));
+						if (ang > Math.PI / 4 && ang < Math.PI * 3 / 4) {
+							((Q3EControlView) (view)).sendKeyEvent(true, lkey, 0);
+							((Q3EControlView) (view)).sendKeyEvent(false, lkey, 0);
+						} else { //k
+							((Q3EControlView) (view)).sendKeyEvent(true, rkey, 0);
+							((Q3EControlView) (view)).sendKeyEvent(false, rkey, 0);
+						} //k
+					} else {
+						((Q3EControlView) (view)).sendKeyEvent(true, ckey, 0);
+						((Q3EControlView) (view)).sendKeyEvent(false, ckey, 0);
+					}
 				}
-				}
-			}			
+			}
+			return true;
 		}
 
 		@Override
 		public boolean isInside(int x, int y) {
-			if (style==0)
-			return ((2*Math.abs(cx-x)<width)&&(2*Math.abs(cy-y)<height));
+			if (style == 0)
+				return ((2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height));
 			else
-			return ((2*Math.abs(cx-x)<width)&&(2*Math.abs(cy-y)<height))&&(!((y>cy)&&(x>cx)));	
+				return ((2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height)) && (!((y > cy) && (x > cx)));
 		}	
 	}
 	
@@ -765,78 +743,67 @@ public class Q3EUtils {
 		}
 		
 		private int lx;private int ly;
-		
+
 		@Override
-		public void onTouchEvent(int x, int y, int act) {
-			if (canbeheld)
-			{
-			if (act==1)
-			{
-			if (!heldarr.contains(keycode))
-			{
-				((Q3EControlView)(view)).sendKeyEvent(true,keycode,0);
-				heldarr.add(keycode);
-				alpha=Math.min(initalpha*2, 1f);
+		public boolean onTouchEvent(int x, int y, int act) {
+			if (canbeheld) {
+				if (act == 1) {
+					if (!heldarr.contains(keycode)) {
+						((Q3EControlView) (view)).sendKeyEvent(true, keycode, 0);
+						heldarr.add(keycode);
+						alpha = Math.min(initalpha * 2, 1f);
+					} else {
+						((Q3EControlView) (view)).sendKeyEvent(false, keycode, 0);
+						heldarr.remove(Integer.valueOf(keycode));
+						alpha = initalpha;
+					}
+				}
+				return true;
 			}
-			else
-			{
-				((Q3EControlView)(view)).sendKeyEvent(false,keycode,0);
-				heldarr.remove(Integer.valueOf(keycode));
-				alpha=initalpha;
-			}
-			}			
-			return;
-			}
-			
-			if (keycode==K_VKBD)
-			{
-				if (act==1)
+
+			if (keycode == K_VKBD) {
+				if (act == 1)
 					togglevkbd(view);
-				return;
+				return true;
 			}
-			
-			if (act==1) 
-			{				
-				lx=x;ly=y;
-				((Q3EControlView)(view)).sendKeyEvent(true,keycode,0);
+
+			if (act == 1) {
+				lx = x;
+				ly = y;
+				((Q3EControlView) (view)).sendKeyEvent(true, keycode, 0);
 			}
-			if (act==-1) 
-				((Q3EControlView)(view)).sendKeyEvent(false,keycode,0);
-			if (keycode==KeyCodes.K_MOUSE1)
-			{
-				if (Q3EUtils.q3ei.callbackObj.notinmenu)
-				{
-				((Q3EControlView)(view)).sendMotionEvent(x-lx,y-ly);
-				lx=x;ly=y;
-				}
-				else
-				{
-				((Q3EControlView)(view)).sendMotionEvent(0,0);//???
+			if (act == -1)
+				((Q3EControlView) (view)).sendKeyEvent(false, keycode, 0);
+			if (keycode == KeyCodes.K_MOUSE1) {
+				if (Q3EUtils.q3ei.callbackObj.notinmenu) {
+					((Q3EControlView) (view)).sendMotionEvent(x - lx, y - ly);
+					lx = x;
+					ly = y;
+				} else {
+					((Q3EControlView) (view)).sendMotionEvent(0, 0);//???
 				}
 			}
+			return true;
 		}
 
 		@Override
 		public boolean isInside(int x, int y) {
-			if (style==0)
-			return 4*((cx-x)*(cx-x)+(cy-y)*(cy-y))<=width*width;
-			if (style==1)
-			{
-				int dx=x-cx;
-				int dy=cy-y;
-			return (((dy)<=(dx))&&(2*Math.abs(dx)<width)&&(2*Math.abs(dy)<height));
+			if (style == 0)
+				return 4 * ((cx - x) * (cx - x) + (cy - y) * (cy - y)) <= width * width;
+			if (style == 1) {
+				int dx = x - cx;
+				int dy = cy - y;
+				return (((dy) <= (dx)) && (2 * Math.abs(dx) < width) && (2 * Math.abs(dy) < height));
 			}
-			if (style==2)
-			{
-				int dx=x-cx;
-				int dy=cy-y;
-			return ((2*Math.abs(dx)<width)&&(2*Math.abs(dy)<height));
+			if (style == 2) {
+				int dx = x - cx;
+				int dy = cy - y;
+				return ((2 * Math.abs(dx) < width) && (2 * Math.abs(dy) < height));
 			}
-			if (style==3)
-			{
-				int dx=cx-x;
-				int dy=y-cy;
-			return (((dy)<=(dx))&&(2*Math.abs(dx)<width)&&(2*Math.abs(dy)<height));
+			if (style == 3) {
+				int dx = cx - x;
+				int dy = y - cy;
+				return (((dy) <= (dx)) && (2 * Math.abs(dx) < width) && (2 * Math.abs(dy) < height));
 			}
 			return false;
 		}
@@ -860,6 +827,8 @@ public class Q3EUtils {
 		int dotx,doty;
 		boolean dotjoyenabled=false;
 		View view;
+		private int m_joystickReleaseRange_2 = 0;
+		private int m_size_2 = 0;
 		
 		public void Paint(GL11 gl)
 		{																				
@@ -883,6 +852,14 @@ public class Q3EUtils {
 			size=r*2;
 			dot_size=size/3;
 			alpha=a;
+
+			if(q3ei.joystick_release_range >= 1.0f)
+			{
+				int jrr = Math.round(size * q3ei.joystick_release_range);
+				if(jrr >= size)
+					m_joystickReleaseRange_2 = jrr * jrr;
+			}
+			m_size_2 = size * size;
 			
 			for (int i=0;i<verts_back.length;i+=2)
 			{
@@ -968,76 +945,72 @@ public class Q3EUtils {
 		boolean[] enarr=new boolean[4];
 
 		@Override
-		public void onTouchEvent(int x, int y, int act) {
-			if (act!=-1)
-			{				
-			if (Q3EUtils.q3ei.callbackObj.notinmenu)
-			{														
-			if (((Q3EControlView)(view)).analog)
+		public boolean onTouchEvent(int x, int y, int act) {
+			boolean res = true;
+			if(m_joystickReleaseRange_2 > 0)
 			{
-			dotjoyenabled=true;
-			dotx=x-cx;
-			doty=y-cy;			
-			float analogx=(dotx)/internalsize;
-			float analogy=(-doty)/internalsize;
-			if (Math.abs(analogx)>1.0f) analogx=analogx/Math.abs(analogx);
-			if (Math.abs(analogy)>1.0f) analogy=analogy/Math.abs(analogy);
-			
-			double dist=Math.sqrt(dotx*dotx+doty*doty);			
-			if (dist>internalsize)
-			{
-				dotx=(int)(dotx*internalsize/dist);
-				doty=(int)(doty*internalsize/dist);
-			}			
-			((Q3EControlView)(view)).sendAnalog(true,analogx,analogy);
+				if(4 * ((cx - x) * (cx - x) + (cy - y) * (cy - y)) > m_joystickReleaseRange_2)
+					res = false;
 			}
-			else
-			{
-				int angle=(int)(112.5-180*(Math.atan2(cy-y, x-cx)/Math.PI));
-				if (angle<0) angle+=360;	
-				if (angle>=360) angle-=360;
-				dot_pos=(int)(angle/45);
-				enarr[0]=(dot_pos%7<2);
-				enarr[1]=(dot_pos>0)&&(dot_pos<4);
-				enarr[2]=(dot_pos>2)&&(dot_pos<6);
-				enarr[3]=(dot_pos>4);
-			}
-			
-			}
-			else
-			{
-				//IN MENU
-				int angle=(int)(135-180*(Math.atan2(cy-y, x-cx)/Math.PI));				
-				if (angle<0) angle+=360;
-				if (angle>=360) angle-=360;
-				dot_pos=(int)(angle/90);
-				enarr[0]=false;
-				enarr[1]=false;
-				enarr[2]=false;
-				enarr[3]=false;
-				enarr[dot_pos]=true;
-				dot_pos*=2;						
-			}			
-			}
-			else
-			{
-				if (((Q3EControlView)(view)).analog)
-				{
-				dotjoyenabled=false;	
-				((Q3EControlView)(view)).sendAnalog(false,0,0);
+			if (res && act != -1) {
+				if (Q3EUtils.q3ei.callbackObj.notinmenu) {
+					if (((Q3EControlView) (view)).analog) {
+						dotjoyenabled = true;
+						dotx = x - cx;
+						doty = y - cy;
+						float analogx = (dotx) / internalsize;
+						float analogy = (-doty) / internalsize;
+						if (Math.abs(analogx) > 1.0f) analogx = analogx / Math.abs(analogx);
+						if (Math.abs(analogy) > 1.0f) analogy = analogy / Math.abs(analogy);
+
+						double dist = Math.sqrt(dotx * dotx + doty * doty);
+						if (dist > internalsize) {
+							dotx = (int) (dotx * internalsize / dist);
+							doty = (int) (doty * internalsize / dist);
+						}
+						((Q3EControlView) (view)).sendAnalog(true, analogx, analogy);
+					} else {
+						int angle = (int) (112.5 - 180 * (Math.atan2(cy - y, x - cx) / Math.PI));
+						if (angle < 0) angle += 360;
+						if (angle >= 360) angle -= 360;
+						dot_pos = (int) (angle / 45);
+						enarr[0] = (dot_pos % 7 < 2);
+						enarr[1] = (dot_pos > 0) && (dot_pos < 4);
+						enarr[2] = (dot_pos > 2) && (dot_pos < 6);
+						enarr[3] = (dot_pos > 4);
+					}
+
+				} else {
+					//IN MENU
+					int angle = (int) (135 - 180 * (Math.atan2(cy - y, x - cx) / Math.PI));
+					if (angle < 0) angle += 360;
+					if (angle >= 360) angle -= 360;
+					dot_pos = (int) (angle / 90);
+					enarr[0] = false;
+					enarr[1] = false;
+					enarr[2] = false;
+					enarr[3] = false;
+					enarr[dot_pos] = true;
+					dot_pos *= 2;
 				}
-				dot_pos=-1;
-				enarr[0]=false;
-				enarr[1]=false;
-				enarr[2]=false;
-				enarr[3]=false;
-			}			
+			} else {
+				if (((Q3EControlView) (view)).analog) {
+					dotjoyenabled = false;
+					((Q3EControlView) (view)).sendAnalog(false, 0, 0);
+				}
+				dot_pos = -1;
+				enarr[0] = false;
+				enarr[1] = false;
+				enarr[2] = false;
+				enarr[3] = false;
+			}
 			setenabledarr(enarr);
+			return res;
 		}
 
 		@Override
 		public boolean isInside(int x, int y) {
-			return 4*((cx-x)*(cx-x)+(cy-y)*(cy-y))<=size*size;
+			return 4 * ((cx - x) * (cx - x) + (cy - y) * (cy - y)) <= m_size_2/*size * size*/;
 		}
 	}		
 	
@@ -1051,28 +1024,26 @@ public class Q3EUtils {
 			view=vw;
 			alreadydown=false;
 			isleftbutton=islmb;
-		}		
-		
+		}
+
 		@Override
-		public void onTouchEvent(int x, int y, int act) {
-			if (act==1)		
-			{
-			if (isleftbutton)
-			((Q3EControlView)(view)).sendKeyEvent(true,KeyCodes.K_MOUSE1,0);//Can be sent twice, unsafe.
-			alreadydown=true;			
+		public boolean onTouchEvent(int x, int y, int act) {
+			if (act == 1) {
+				if (isleftbutton)
+					((Q3EControlView) (view)).sendKeyEvent(true, KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
+				alreadydown = true;
+			} else {
+				view.sendMotionEvent(x - lx, y - ly);
 			}
-			else
-			{
-			view.sendMotionEvent(x-lx,y-ly);
+			lx = x;
+			ly = y;
+
+			if (act == -1) {
+				if (isleftbutton)
+					((Q3EControlView) (view)).sendKeyEvent(false, KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
+				alreadydown = false;
 			}
-			lx=x;ly=y;			
-			
-			if (act==-1)
-			{
-			if (isleftbutton)
-				((Q3EControlView)(view)).sendKeyEvent(false,KeyCodes.K_MOUSE1,0);//Can be sent twice, unsafe.
-			alreadydown=false;
-			}
+			return true;
 		}
 
 		@Override
@@ -1288,9 +1259,9 @@ public class Q3EUtils {
         } 
 
         @Override
-        public void onTouchEvent(int x, int y, int act/* 1: Down, -1: Up */) { 
+        public boolean onTouchEvent(int x, int y, int act/* 1: Down, -1: Up */) {
             if(null == m_parts || m_parts.length == 0)
-                return;
+                return true;
             dotjoyenabled=true;
             dotx=x-cx;
             doty=y-cy;
@@ -1360,6 +1331,7 @@ public class Q3EUtils {
                     }
                 break;
             }
+			return true;
         }
 
         @Override

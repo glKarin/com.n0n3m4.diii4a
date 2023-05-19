@@ -1,6 +1,4 @@
 package com.karin.idTech4Amm.ui;
-import android.content.SharedPreferences;
-import android.preference.EditTextPreference;
 import android.preference.PreferenceFragment;
 import android.os.Bundle;
 import android.preference.PreferenceScreen;
@@ -13,7 +11,6 @@ import com.n0n3m4.q3e.Q3EUtils;
 import java.util.Set;
 import com.n0n3m4.q3e.Q3EJNI;
 
-import android.util.Log;
 import android.view.View;
 
 /**
@@ -26,12 +23,15 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         addPreferencesFromResource(R.xml.launcher_settings_preference);
+
         findPreference(Constants.PreferenceKey.LAUNCHER_ORIENTATION).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.MAP_BACK).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.REDIRECT_OUTPUT_TO_FILE).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.HIDE_AD_BAR).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.CONTROLS_CONFIG_POSITION_UNIT).setOnPreferenceChangeListener(this);
+        findPreference(Q3EUtils.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -75,6 +75,21 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             return true;
         }
         else if(Constants.PreferenceKey.CONTROLS_CONFIG_POSITION_UNIT.equals(key))
+        {
+            int i;
+            try
+            {
+                i = Integer.parseInt((String)newValue);
+                if(i >= 0)
+                    return true;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return false;
+        }
+        else if(Q3EUtils.pref_harm_function_key_toolbar_y.equals(key))
         {
             int i;
             try

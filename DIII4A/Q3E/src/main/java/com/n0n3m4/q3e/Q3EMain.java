@@ -22,34 +22,16 @@ package com.n0n3m4.q3e;
 import java.io.File;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.widget.RelativeLayout;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import java.util.Timer;
-import java.util.TimerTask;
-import android.graphics.Color;
-import android.app.ActivityManager;
-import android.os.Process;
-import android.os.Debug;
 import android.view.View;
-import android.os.HandlerThread;
-import android.os.Handler;
 import android.content.SharedPreferences;
 import android.annotation.SuppressLint;
 import android.graphics.Typeface;
@@ -117,7 +99,12 @@ public class Q3EMain extends Activity {
 
         m_hideNav = preferences.getBoolean("harm_hide_nav", true);
         m_renderMemStatus = preferences.getInt("harm_render_mem_status", 0);
-        m_runBackground = Integer.parseInt(preferences.getString("harm_run_background", "1"));
+        String harm_run_background = preferences.getString("harm_run_background", "1");
+        if(null != harm_run_background)
+            m_runBackground = Integer.parseInt(harm_run_background);
+        else
+            m_runBackground = 1;
+        Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f);
         //k
         SetupUIFlags();
 /*        if(m_hideNav)
@@ -142,7 +129,7 @@ public class Q3EMain extends Activity {
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
         Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EUtils.pref_harm_multithreading, false);
-        Q3EUtils.q3ei.input_method_toolbar = preferences.getBoolean(Q3EUtils.pref_harm_input_method_toolbar, false);
+        Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EUtils.pref_harm_function_key_toolbar, false);
 		
 		super.onCreate(savedInstanceState);
 		
@@ -197,7 +184,7 @@ public class Q3EMain extends Activity {
             mControlGLSurfaceView.setZOrderMediaOverlay(true);
             mainLayout.addView(mControlGLSurfaceView, params);
 
-            if(Q3EUtils.q3ei.input_method_toolbar)
+            if(Q3EUtils.q3ei.function_key_toolbar)
             {
                 params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
                 View key_toolbar = mControlGLSurfaceView.CreateToolbar();

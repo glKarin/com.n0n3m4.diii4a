@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -251,7 +250,7 @@ public class KeyToolBar extends LinearLayout {
                             {
                                 setY(posy);
                                 getParent().requestLayout();
-                                PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putInt(Q3EUtils.pref_harm_input_method_toolbar_y, posy).commit();
+                                PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putString(Q3EUtils.pref_harm_function_key_toolbar_y, "" + posy).commit();
                             }
                         }
                         m_lastY = y;

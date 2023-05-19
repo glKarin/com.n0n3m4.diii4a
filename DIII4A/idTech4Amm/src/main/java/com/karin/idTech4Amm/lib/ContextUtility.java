@@ -318,7 +318,7 @@ public final class ContextUtility
         }
     }
 
-    public static int GetEdgeHeight(Activity activity)
+    public static int GetEdgeHeight(Activity activity, boolean landscape)
     {
         int safeInsetTop = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
@@ -328,14 +328,14 @@ public final class ContextUtility
             {
                 DisplayCutout displayCutout = rootWindowInsets.getDisplayCutout();
                 if(null != displayCutout) {
-                    safeInsetTop = displayCutout.getSafeInsetTop();
+                    safeInsetTop = landscape ? displayCutout.getSafeInsetLeft() : displayCutout.getSafeInsetTop();
                 }
             }
         }
         return safeInsetTop;
     }
 
-    public static int GetEdgeHeight_bottom(Activity activity)
+    public static int GetEdgeHeight_bottom(Activity activity, boolean landscape)
     {
         int safeInsetBottom = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
@@ -345,18 +345,18 @@ public final class ContextUtility
             {
                 DisplayCutout displayCutout = rootWindowInsets.getDisplayCutout();
                 if(null != displayCutout) {
-                    safeInsetBottom = displayCutout.getSafeInsetBottom();
+                    safeInsetBottom = landscape ? displayCutout.getSafeInsetRight() : displayCutout.getSafeInsetBottom();
                 }
             }
         }
         return safeInsetBottom;
     }
 
-    public static int GetNavigationBarHeight(Activity activity)
+    public static int GetNavigationBarHeight(Activity activity, boolean landscape)
     {
         int[] fullSize = GetFullScreenSize(activity);
         int[] size = GetNormalScreenSize(activity);
-        return fullSize[1] - size[1] - GetEdgeHeight(activity) - GetEdgeHeight_bottom(activity);
+        return fullSize[1] - size[1] - GetEdgeHeight(activity, landscape) - GetEdgeHeight_bottom(activity, landscape);
     }
 
     public static int GetStatusBarHeight(Activity activity)

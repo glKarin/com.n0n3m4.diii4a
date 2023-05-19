@@ -279,7 +279,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		}
 
 		@Override
-		public void onTouchEvent(int x, int y, int act) {
+		public boolean onTouchEvent(int x, int y, int act) {
 			if (act==1)
 			{
 			mover_down=true;
@@ -308,7 +308,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			}
 			if (act==-1)
 			mover_down=false;
-			
+			return true;
 		}
 
 		@Override

@@ -7,5 +7,4 @@
     android:gravity="center"
     android:layout_gravity="center"
     android:textAppearance="?android:attr/textAppearanceMedium"
-    android:textStyle="bold"
     />

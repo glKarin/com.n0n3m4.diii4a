@@ -424,8 +424,8 @@ public class GameLauncher extends Activity{
     
     private void InitUILayout(Q3EInterface q3ei, boolean safety)
     {
-        int safeInsetTop = ContextUtility.GetEdgeHeight(this);
-		int safeInsetBottom = ContextUtility.GetEdgeHeight_bottom(this);
+        int safeInsetTop = ContextUtility.GetEdgeHeight(this, false);
+		int safeInsetBottom = ContextUtility.GetEdgeHeight_bottom(this, false);
 		int[] fullSize = ContextUtility.GetFullScreenSize(this);
 		int[] size = ContextUtility.GetNormalScreenSize(this);
 		int navBarHeight = fullSize[1] - size[1] - safeInsetTop - safeInsetBottom;
@@ -1227,6 +1227,7 @@ public class GameLauncher extends Activity{
         V.launcher_tab2_enable_gyro.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.launcher_tab2_gyro_x_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
         V.launcher_tab2_gyro_y_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
+		V.launcher_tab2_joystick_release_range.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f));
         UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
         V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {           
                 public void onTextChanged(CharSequence s, int start, int before, int count) {}           
@@ -1248,6 +1249,16 @@ public class GameLauncher extends Activity{
                         .commit();
                 }
             });
+		V.launcher_tab2_joystick_release_range.addTextChangedListener(new TextWatcher() {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {}
+			public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
+			public void afterTextChanged(Editable s) {
+				String value = s.length() == 0 ? "0.0" : s.toString();
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putFloat(Q3EUtils.pref_harm_joystick_release_range, Utility.parseFloat_s(value, 0.0f))
+						.commit();
+			}
+		});
 		V.auto_quick_load.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
 
@@ -1604,6 +1615,7 @@ public class GameLauncher extends Activity{
 		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
 		mEdtr.putBoolean(Q3EUtils.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
 		mEdtr.putBoolean(Q3EUtils.pref_harm_multithreading, V.multithreading.isChecked());
+		mEdtr.putFloat(Q3EUtils.pref_harm_joystick_release_range, Utility.parseFloat_s(V.launcher_tab2_joystick_release_range.getText().toString(), 0.0f));
 		mEdtr.commit();
     }
 
@@ -2741,6 +2753,7 @@ public class GameLauncher extends Activity{
 		public RadioGroup rg_fs_preygame;
 		public CheckBox multithreading;
 		public RadioGroup rg_s_driver;
+		public EditText launcher_tab2_joystick_release_range;
 
 		public void Setup()
 		{
@@ -2791,6 +2804,7 @@ public class GameLauncher extends Activity{
 			rg_fs_preygame = findViewById(R.id.rg_fs_preygame);
 			multithreading = findViewById(R.id.multithreading);
 			rg_s_driver = findViewById(R.id.rg_s_driver);
+			launcher_tab2_joystick_release_range = findViewById(R.id.launcher_tab2_joystick_release_range);
 		}
 	}
 }
