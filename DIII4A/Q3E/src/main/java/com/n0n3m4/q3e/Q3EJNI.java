@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.view.Surface;
-import android.view.SurfaceView;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

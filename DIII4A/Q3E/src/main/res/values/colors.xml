@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="toolbar_key_text_released">#FF313131</color>
-    <color name="toolbar_key_bg_released">#FFFFFFFF</color>
+    <color name="toolbar_key_bg_released">#FFE4E7E9</color>
     <color name="toolbar_key_text_pressed">#FFFFFFFF</color>
-    <color name="toolbar_key_bg_pressed">#FF747775</color><!--0b57d0-->
+    <color name="toolbar_key_bg_pressed">#FFD4D8DA</color>
     <color name="toolbar_background">#FFEFF3FA</color>
 </resources>

@@ -7,7 +7,8 @@
     </declare-styleable>
 
     <dimen name="toolbarHeight">36dp</dimen>
-    <dimen name="toolButtonWidth">96dp</dimen>
+    <dimen name="toolButtonWidth">80dp</dimen>
     <dimen name="toolButtonSpacing">2dp</dimen>
     <dimen name="toolFunctionMargin">4dp</dimen>
+    <dimen name="toolKeyNameFontSize">16sp</dimen>
 </resources>

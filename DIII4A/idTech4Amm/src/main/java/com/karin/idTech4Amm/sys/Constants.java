@@ -1,7 +1,5 @@
 package com.karin.idTech4Amm.sys;
 
-import com.karin.idTech4Amm.misc.TextHelper;
-
 import java.util.Arrays;
 
 /**

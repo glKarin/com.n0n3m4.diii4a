@@ -29,7 +29,6 @@ import android.view.WindowManager;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.util.Log;
 
 public class Q3EUiConfig extends Activity {
 	
