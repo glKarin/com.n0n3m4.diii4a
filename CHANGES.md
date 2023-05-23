@@ -1,8 +1,17 @@
 ## Change logs
-**1.1.0harmattan29(natasha)** - **2023-05-01**
+**1.1.0harmattan30(natasha)** - **2023-05-23**
 
 ----------------------------------------------------------------------------------
 ### Update
+
+* Add function key toolbar for soft input method(default disabled, in `Settings`).
+* Add joystick release range setting in tab `CONTROLS`. The value is joystick radius's multiple, 0 to disable.
+* Fix crash when end intro cinematic in Quake 4.
+* Fix delete savegame menu action in Quake 4.
+
+----------------------------------------------------------------------------------
+
+### History
 
 > 1.1.0harmattan29 (2023-05-01)
 
@@ -13,7 +22,6 @@
 * Fixup on-screen buttons layer render error on some devices.
 
 ----------------------------------------------------------------------------------
-### History
 
 > 1.1.0harmattan28 (2023-04-13)
 

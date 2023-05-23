@@ -110,7 +110,7 @@ class rvDeclEffectParser
 		int ParseLine(idBounds &res, int *parmsCount = 0); // parse line geometry parmeters
 		int ParseSphere(idSphere &res, int *parmsCount = 0);
 		int ParseCylinder(idSphere &res, int *parmsCount = 0);
-		int ParseSpiral(idBounds &res, int *parmsCount = 0);
+		int ParseSpiral(idBounds &res, float &i7, int *parmsCount = 0);
 		void ParseVelocity(rvBSEParticleStage *stage, int n);
 		void ParseFade(rvBSEParticleStage *stage, int n);
 		idVec3 ParseTint(rvBSEParticleStage *stage, int n);
@@ -185,6 +185,12 @@ bool rvDeclEffectParser::ParseGeneralParms(idToken &token, rvFXSingleAction &FXA
 		FXAction.delay = vec[0];
 		return true;
 	}
+	if (!token.Icmp("density")) {
+		ParseVec();
+		if(FXAction.count == 0)
+			FXAction.count = vec[0];
+		return true;
+	}
 	return false;
 }
 
@@ -251,10 +257,10 @@ int rvDeclEffectParser::ParsePoint(idVec3 &res, int *parmsCount)
 	return 0;
 }
 
-int rvDeclEffectParser::ParseSpiral(idBounds &res, int *parmsCount)
+int rvDeclEffectParser::ParseSpiral(idBounds &res, float &i7, int *parmsCount)
 {
 	int count = ParseVec(parmsCount);
-	if(count == 6)
+	if(count == 7)
 	{
 		res[0][0] = vec[0];
 		res[0][1] = vec[1];
@@ -262,27 +268,8 @@ int rvDeclEffectParser::ParseSpiral(idBounds &res, int *parmsCount)
 		res[1][0] = vec[3];
 		res[1][1] = vec[4];
 		res[1][2] = vec[5];
+		i7 = vec[6];
 		return 3;
-	}
-	else if(count == 4)
-	{
-		res[0][0] = vec[0];
-		res[0][1] = vec[1];
-		res[0][2] = 0.0;
-		res[1][0] = vec[2];
-		res[1][1] = vec[3];
-		res[1][2] = 0.0;
-		return 2;
-	}
-	else if(count == 2)
-	{
-		res[0][0] = vec[0];
-		res[0][1] = 0.0;
-		res[0][2] = 0.0;
-		res[1][0] = vec[1];
-		res[1][1] = 0.0;
-		res[1][2] = 0.0;
-		return 1;
 	}
 	return 0;
 }
@@ -622,7 +609,7 @@ void rvDeclEffectParser::ParseVelocity(rvBSEParticleStage *stage, int n)
 			if(stage->customPathType == PPATH_HELIX)
 			{
 				stage->customPathParms[3] = v;
-				stage->customPathParms[4] = v;
+				//stage->customPathParms[4] = v;
 			}
 		}
 	}
@@ -641,7 +628,7 @@ void rvDeclEffectParser::ParseVelocity(rvBSEParticleStage *stage, int n)
 			if(stage->customPathType == PPATH_HELIX)
 			{
 				stage->customPathParms[3] = v;
-				stage->customPathParms[4] = v;
+				//stage->customPathParms[4] = v;
 			}
 		}
 	}
@@ -718,12 +705,15 @@ void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
 	else if(!idStr::Icmp(token, "spiral"))
 	{
 		idBounds b;
+		float i7 = 0.0;
 		b.Zero();
-		ParseSpiral(b);
+		ParseSpiral(b, i7);
 		stage->customPathType = PPATH_HELIX;
-		stage->customPathParms[0] = b[0][0];
-		stage->customPathParms[1] = b[0][1];
-		stage->customPathParms[2] = b[0][2];
+		idVec3 v = b.Size();
+		stage->customPathParms[0] = v[0];
+		stage->customPathParms[1] = v[1];
+		stage->customPathParms[2] = v[2];
+		stage->customPathParms[4] = i7;
 	}
 	else
 	{
@@ -965,6 +955,10 @@ void rvDeclEffectParser::ParseStage(rvFXSingleAction &FXAction, rvBSEParticleSta
 		LOGW_SKIP("Skip stage: %s -> %s", GetName(), token.c_str());
 		Skip();
 	}
+	if(stage && stage->customPathType == PPATH_HELIX)
+	{
+		FXAction.useEndOrigin = false;
+	}
 }
 
 void rvDeclEffectParser::Skip(void)
@@ -1039,9 +1033,9 @@ void rvDeclEffectParser::ParseLine(rvFXSingleAction &FXAction)
 
 		if (!token.Icmp("start")) {
 			ParseStage(action, stage, STAGE_START);
-			stage->customPathParms[0] = action.size;
-			stage->customPathParms[1] = action.useEndOrigin ? 0.0f : 1.0f;
-			stage->customPathParms[2] = action.length;
+			stage->customPathParms[5] = action.size;
+			stage->customPathParms[6] = action.useEndOrigin ? 0.0f : 1.0f;
+			stage->customPathParms[7] = action.length;
 			continue;
 		}
 
@@ -1052,9 +1046,9 @@ void rvDeclEffectParser::ParseLine(rvFXSingleAction &FXAction)
 
 		if (!token.Icmp("end")) {
 			ParseStage(action, stage, STAGE_END);
-			//stage->customPathParms[0] = action.size;
-			if(stage->customPathParms[2] == 0.0 && action.length != 0.0 && action.length < stage->customPathParms[2])
-				stage->customPathParms[2] = action.length;
+			//stage->customPathParms[5] = action.size;
+			if(stage->customPathParms[7] == 0.0 && action.length != 0.0 && action.length < stage->customPathParms[7])
+				stage->customPathParms[7] = action.length;
 			continue;
 		}
 

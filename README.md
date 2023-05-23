@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan29(natasha)  
+1.1.0harmattan30(natasha)  
 **Last update release:**
-2023-05-01  
+2023-05-23  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -14,13 +14,10 @@ GPLv3
 ----------------------------------------------------------------------------------
 ### Update
 
-> 1.1.0harmattan29 (2023-05-01)
-
-* Fixup crash in game loading when change app to background.
-* Fixup effects with noise and other effects in Quake 4.
-* Optimize sky render in Quake 4.
-* Remove cvar `harm_g_flashlightOn` in Quake 4.
-* Fixup on-screen buttons layer render error on some devices.
+* Add function key toolbar for soft input method(default disabled, in `Settings`).
+* Add joystick release range setting in tab `CONTROLS`. The value is joystick radius's multiple, 0 to disable.
+* Fix crash when end intro cinematic in Quake 4.
+* Fix delete savegame menu action in Quake 4.
 
 ----------------------------------------------------------------------------------
 

@@ -1164,7 +1164,7 @@ void R_LocalPointToGlobal(const float modelMatrix[16], const idVec3 &in, idVec3 
 
 static int ParticleVerts_line(rvBSEParticleStage *stage, rvBSE_particleGen_t *g, idVec3 origin, idDrawVert *verts)
 {
-	bool useEndOrigin = stage->customPathParms[1] < 1.0f;
+	bool useEndOrigin = stage->customPathParms[6] < 1.0f;
 
 	float	modelMatrix[16];
 
@@ -1184,8 +1184,8 @@ static int ParticleVerts_line(rvBSEParticleStage *stage, rvBSE_particleGen_t *g,
 		minor.Cross(major, dir);
 		minor.Normalize();
 
-		if (stage->customPathParms[0] != 0.0f) {
-			minor *= stage->customPathParms[0] * 0.5f;
+		if (stage->customPathParms[5] != 0.0f) {
+			minor *= stage->customPathParms[5] * 0.5f;
 		}
 
 		verts[0].xyz = minor;
@@ -1196,7 +1196,7 @@ static int ParticleVerts_line(rvBSEParticleStage *stage, rvBSE_particleGen_t *g,
 	else
 	{
 		idVec3	localView, localTarget;
-		idVec3 target = origin + g->renderEnt->axis[0] * stage->customPathParms[2];
+		idVec3 target = origin + g->renderEnt->axis[0] * stage->customPathParms[7];
 		R_AxisToModelMatrix(g->renderEnt->axis, origin, modelMatrix);
 		R_GlobalPointToLocal(modelMatrix, g->renderView->vieworg, localView);
 		R_GlobalPointToLocal(modelMatrix, target, localTarget);
@@ -1209,8 +1209,8 @@ static int ParticleVerts_line(rvBSEParticleStage *stage, rvBSE_particleGen_t *g,
 		minor.Cross(major, dir);
 		minor.Normalize();
 
-		if (stage->customPathParms[0] != 0.0f) {
-			minor *= stage->customPathParms[0] * 0.5f;
+		if (stage->customPathParms[5] != 0.0f) {
+			minor *= stage->customPathParms[5] * 0.5f;
 		}
 
 		verts[0].xyz = origin + minor;

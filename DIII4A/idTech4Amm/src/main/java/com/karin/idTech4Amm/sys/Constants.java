@@ -11,7 +11,7 @@ public final class Constants
     public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
 
     public static final int CONST_UPDATE_RELEASE = 30;
-    public static final String CONST_RELEASE = "2023-05-15";
+    public static final String CONST_RELEASE = "2023-05-23";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -25,6 +25,8 @@ public final class Constants
 	public static final String[] CONST_CHANGES = {
             "Add function key toolbar for soft input method(default disabled, in Settings).",
             "Add joystick release range setting in tab `CONTROLS`. The value is joystick radius's multiple, 0 to disable.",
+            "Fix crash when end intro cinematic in Quake 4.",
+            "Fix delete savegame menu action in Quake 4.",
 	};
     public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
 
