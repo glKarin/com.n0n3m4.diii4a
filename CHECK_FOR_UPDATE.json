@@ -1,7 +1,7 @@
 {
-    "release":29,
-    "update":"2023-05-01",
-    "version":"1.1.0harmattan29",
-    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan1.1.0.29.apk",
-    "changes":"  * Fixup crash in game loading when change app to background.\n  * Fixup effects with noise and other effects in Quake 4.\n  * Optimize sky render in Quake 4.\n  * Remove cvar harm_g_flashlightOn in Quake 4.\n  * Fixup on-screen buttons layer render error on some devices."
+    "release":30,
+    "update":"2023-05-23",
+    "version":"1.1.0harmattan30",
+    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan1.1.0.30.apk",
+    "changes":"  * Add function key toolbar for soft input method(default disabled, in Settings).\n  * Add joystick release range setting in tab CONTROLS. The value is joystick radius's multiple, 0 to disable.\n  * Fix crash when end intro cinematic in Quake 4.\n  * Fix delete savegame menu action in Quake 4."
 }
