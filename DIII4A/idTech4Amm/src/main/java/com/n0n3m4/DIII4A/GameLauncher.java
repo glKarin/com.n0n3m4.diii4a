@@ -22,10 +22,8 @@ package com.n0n3m4.DIII4A;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,23 +37,19 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowInsets;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TabHost;
@@ -89,7 +83,6 @@ import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -105,7 +98,6 @@ import com.n0n3m4.q3e.Q3EControlView;
 import com.karin.idTech4Amm.lib.D3CommandUtility;
 import android.util.Log;
 import java.util.LinkedList;
-import android.graphics.Point;
 
 import org.json.JSONObject;
 
@@ -125,11 +117,18 @@ public class GameLauncher extends Activity{
 	private static final int CONST_REQUEST_EXTRACT_QUAKE4_PATCH_RESOURCE_RESULT_CODE = 4;
 	private static final int CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE = 5;
 	private static final int CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE = 6;
+
 	private static final int CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY = 30;
+	private static final float CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE = 0.0f;
+	private static final boolean CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE = false;
+
+	private int m_onScreenButtonGlobalOpacity = CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
+	private float m_onScreenButtonGlobalSizeScale = CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE;
+	private boolean m_onScreenButtonFriendlyEdge = CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE;
      
-	private ViewHolder V = new ViewHolder();
+	private final ViewHolder V = new ViewHolder();
     private boolean m_cmdUpdateLock = false;
-	private CompoundButton.OnCheckedChangeListener m_checkboxChangeListener = new CompoundButton.OnCheckedChangeListener() {
+	private final CompoundButton.OnCheckedChangeListener m_checkboxChangeListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				switch(buttonView.getId())
@@ -218,7 +217,7 @@ public class GameLauncher extends Activity{
 				}
 			}
 		};
-	private RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener() {
+	private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener() {
 		@Override
 		public void onCheckedChanged(RadioGroup radioGroup, int id)
 		{
@@ -281,7 +280,7 @@ public class GameLauncher extends Activity{
 			}
 		}
 	};
-	private View.OnClickListener m_buttonClickListener = new View.OnClickListener(){
+	private final View.OnClickListener m_buttonClickListener = new View.OnClickListener(){
         @Override
 		public void onClick(View view)
 		{
@@ -305,6 +304,12 @@ public class GameLauncher extends Activity{
 				case R.id.setup_onscreen_button_opacity:
 					OpenOnScreenButtonOpacitySetting();
 					break;
+				case R.id.reset_onscreen_controls_btn:
+					resetcontrols(null);
+					break;
+				case R.id.setup_onscreen_button_size:
+					OpenOnScreenButtonSizeSetting();
+					break;
 				default:
 					break;
 			}
@@ -313,8 +318,8 @@ public class GameLauncher extends Activity{
 
 	private class SavePreferenceTextWatcher implements TextWatcher
 	{    
-		private String name;
-		private String defValue;
+		private final String name;
+		private final String defValue;
 		public SavePreferenceTextWatcher(String name, String defValue)
 		{
 			this.name = name;
@@ -335,7 +340,7 @@ public class GameLauncher extends Activity{
 		}
 	};
     
-    private AdapterView.OnItemSelectedListener m_spinnerItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+    private final AdapterView.OnItemSelectedListener m_spinnerItemSelectedListener = new AdapterView.OnItemSelectedListener() {
 		public void onItemSelected(AdapterView adapter, View view, int position, long id)
 		{
 			int[] keyCodes;
@@ -421,10 +426,10 @@ public class GameLauncher extends Activity{
             e.printStackTrace();
         }
     }
-    
-    private void InitUILayout(Q3EInterface q3ei, boolean safety)
-    {
-        int safeInsetTop = ContextUtility.GetEdgeHeight(this, false);
+
+	private String[] MakeUILayout(boolean friendly, float scale, int opacity)
+	{
+		int safeInsetTop = ContextUtility.GetEdgeHeight(this, false);
 		int safeInsetBottom = ContextUtility.GetEdgeHeight_bottom(this, false);
 		int[] fullSize = ContextUtility.GetFullScreenSize(this);
 		int[] size = ContextUtility.GetNormalScreenSize(this);
@@ -434,7 +439,7 @@ public class GameLauncher extends Activity{
 		boolean coverEdges = preferences.getBoolean(Constants.PreferenceKey.COVER_EDGES, true);
 		int w, h;
 		int X = 0;
-		if(safety)
+		if(friendly)
 		{
 			w = fullSize[0];
 			h = fullSize[1];
@@ -453,36 +458,55 @@ public class GameLauncher extends Activity{
 			if(!coverEdges)
 				h -= (safeInsetTop + safeInsetBottom);
 		}
-        int width = Math.max(w, h);
+		int width = Math.max(w, h);
 		int height = Math.min(w, h);
 
-        int r=Q3EUtils.dip2px(this,75);
-        int rightoffset=r*3/4;
-        int sliders_width=Q3EUtils.dip2px(this,125);
-        int alpha = CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
+		final boolean needScale = scale > 0.0f && scale != 1.0f;
+		int baseWidth = Q3EUtils.dip2px(this,75);
+		if(needScale)
+			baseWidth = Math.round((float)baseWidth * scale);
+		final int r = baseWidth;
+		int rightoffset=r*3/4;
+		int slidersWidth=Q3EUtils.dip2px(this,125);
+		if(needScale)
+			slidersWidth = Math.round((float)slidersWidth * scale);
+		final int sliders_width = slidersWidth;
+		final int alpha = opacity;
 
-        q3ei.defaults_table=new String[UI_SIZE];
-        q3ei.defaults_table[UI_JOYSTICK] =(X + r*4/3)+" "+(height-r*4/3)+" "+r+" "+alpha;
-        q3ei.defaults_table[UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+alpha;
-        q3ei.defaults_table[UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+alpha;
-        q3ei.defaults_table[UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+alpha;
-        q3ei.defaults_table[UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+alpha;
-        q3ei.defaults_table[UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
-        q3ei.defaults_table[UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
-        q3ei.defaults_table[UI_SAVE]     =(X + sliders_width/2)+" "+sliders_width/2+" "+sliders_width+" "+alpha;
+		String[] defaults_table=new String[UI_SIZE];
+		defaults_table[UI_JOYSTICK] =(X + r*4/3)+" "+(height-r*4/3)+" "+r+" "+alpha;
+		defaults_table[UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+alpha;
+		defaults_table[UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+alpha;
+		defaults_table[UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+alpha;
+		defaults_table[UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+alpha;
+		defaults_table[UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
+		defaults_table[UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
+		defaults_table[UI_SAVE]     =(X + sliders_width/2)+" "+sliders_width/2+" "+sliders_width+" "+alpha;
 
-        for (int i=UI_SAVE+1;i<UI_SIZE;i++)
-            q3ei.defaults_table[i]=(r/2+r*(i-UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+alpha;
+		for (int i=UI_SAVE+1;i<UI_SIZE;i++)
+			defaults_table[i]=(r/2+r*(i-UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+alpha;
 
-        q3ei.defaults_table[UI_WEAPON_PANEL] =(width - sliders_width - r - rightoffset)+" "+(r)+" "+(r / 3)+" "+alpha;
+		defaults_table[UI_WEAPON_PANEL] =(width - sliders_width - r - rightoffset)+" "+(r)+" "+(r / 3)+" "+alpha;
 
-        //k
-        final int sr = r / 6 * 5;
-        q3ei.defaults_table[UI_1] = String.format("%d %d %d %d", width - sr / 2 - sr * 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-        q3ei.defaults_table[UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-        q3ei.defaults_table[UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-        q3ei.defaults_table[UI_KBD] = String.format("%d %d %d %d", X + sliders_width + sr / 2, sr / 2, sr, alpha);
-        q3ei.defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", X + sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, alpha);
+		//k
+		final int sr = r / 6 * 5;
+		defaults_table[UI_1] = String.format("%d %d %d %d", width - sr / 2 - sr * 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+		defaults_table[UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+		defaults_table[UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+		defaults_table[UI_KBD] = String.format("%d %d %d %d", X + sliders_width + sr / 2, sr / 2, sr, alpha);
+		defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", X + sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, alpha);
+
+		return defaults_table;
+	}
+
+	private void InitUIDefaultLayout(Q3EInterface q3ei)
+	{
+		InitUILayout(q3ei, CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
+	}
+    
+    private void InitUILayout(Q3EInterface q3ei, boolean friendly, float scale, int opacity)
+    {
+        q3ei.defaults_table = MakeUILayout(friendly, scale, opacity);
     }
 	
 	public void InitQ3E()
@@ -494,8 +518,8 @@ public class GameLauncher extends Activity{
 		q3ei.arg_table=new int[UI_SIZE*4];
 		q3ei.type_table=new int[UI_SIZE];	
         q3ei.UI_SIZE=UI_SIZE;
-        
-        InitUILayout(q3ei, false);
+
+		InitUIDefaultLayout(q3ei);
 		
 		q3ei.type_table[UI_JOYSTICK]=Q3EUtils.TYPE_JOYSTICK;
 		q3ei.type_table[UI_SHOOT]=Q3EUtils.TYPE_BUTTON;
@@ -651,7 +675,7 @@ public class GameLauncher extends Activity{
 	@Override
 	public void onAttachedToWindow() {
 		super.onAttachedToWindow();
-		InitUILayout(Q3EUtils.q3ei, false);
+		InitUIDefaultLayout(Q3EUtils.q3ei);
 	}
 
 	@Override
@@ -1190,6 +1214,8 @@ public class GameLauncher extends Activity{
         V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
         V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_opacity.setOnClickListener(m_buttonClickListener);
+		V.reset_onscreen_controls_btn.setOnClickListener(m_buttonClickListener);
+		V.setup_onscreen_button_size.setOnClickListener(m_buttonClickListener);
 		
 		//DIII4A-specific					
 		V.edt_cmdline.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_params, "game.arm") {			
@@ -1303,27 +1329,88 @@ public class GameLauncher extends Activity{
 		startActivity(new Intent(this,Q3EMain.class));
 	}
 
-	public void ResetControlsLayout(boolean safety)
+	public void ResetControlsLayout(boolean friendly, float scale, int opacity)
 	{
-		InitUILayout(Q3EUtils.q3ei, safety);
+		InitUILayout(Q3EUtils.q3ei, friendly, scale, opacity);
 		SharedPreferences.Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
 		for (int i=0;i<UI_SIZE;i++)
-			mEdtr.putString(Q3EUtils.pref_controlprefix+i, safety ? Q3EUtils.q3ei.defaults_table[i] : null);
+			mEdtr.putString(Q3EUtils.pref_controlprefix+i, friendly ? Q3EUtils.q3ei.defaults_table[i] : null);
 		mEdtr.commit();
-		Toast.makeText(GameLauncher.this, "On-screen controls has reset.", Toast.LENGTH_SHORT).show();
 	}
 
 	public void resetcontrols(View vw)
 	{
-        ContextUtility.Confirm(this, "Warning", "Reset on-screen controls?", new Runnable() {
-            public void run() {
-				ResetControlsLayout(false);
-            }
-            }, null, "OK(friendly)", new Runnable() {
-                public void run() {
-					ResetControlsLayout(true);
-            }
-        });
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Reset on-screen controls");
+		View widget = getLayoutInflater().inflate(R.layout.onscreen_button_reset_dialog, null, false);
+
+		EditText sizeEdit = widget.findViewById(R.id.onscreen_button_reset_dialog_size);
+		sizeEdit.setText("" + m_onScreenButtonGlobalSizeScale);
+		sizeEdit.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				m_onScreenButtonGlobalSizeScale = Utility.parseFloat_s(s.toString(), CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE);
+			}
+		});
+
+		CheckBox friendly = widget.findViewById(R.id.onscreen_button_reset_dialog_friendly);
+		friendly.setChecked(m_onScreenButtonFriendlyEdge);
+		friendly.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				m_onScreenButtonFriendlyEdge = isChecked;
+			}
+		});
+
+		SeekBar opacity = widget.findViewById(R.id.onscreen_button_reset_dialog_opacity);
+		TextView opacityLabel = widget.findViewById(R.id.onscreen_button_reset_dialog_opacity_label);
+		opacity.setProgress(m_onScreenButtonGlobalOpacity);
+		opacityLabel.setText(String.format("Opacity(%3d)", opacity.getProgress()));
+		opacity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				if(fromUser)
+					m_onScreenButtonGlobalOpacity = progress;
+				opacityLabel.setText(String.format("Opacity(%3d)", progress));
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				opacityLabel.setTextColor(Color.RED);
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				opacityLabel.setTextColor(Color.BLACK);
+			}
+		});
+
+		builder.setView(widget);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				ResetControlsLayout(m_onScreenButtonFriendlyEdge, m_onScreenButtonGlobalSizeScale, m_onScreenButtonGlobalOpacity);
+				Toast.makeText(GameLauncher.this, "On-screen controls has reset.", Toast.LENGTH_SHORT).show();
+			}
+		})
+				.setNeutralButton("Default", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						ResetControlsLayout(m_onScreenButtonFriendlyEdge, CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
+						Toast.makeText(GameLauncher.this, "On-screen controls has reset.", Toast.LENGTH_SHORT).show();
+					}
+				})
+				.setNegativeButton("Cancel", null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 	
 	public void controls(View vw)
@@ -2334,13 +2421,13 @@ public class GameLauncher extends Activity{
 			mEdtr.putString(key, str);
 		}
 		mEdtr.commit();
-		Toast.makeText(GameLauncher.this, "Setup on-screen buttons opacity done.", Toast.LENGTH_SHORT).show();
+		Toast.makeText(GameLauncher.this, "Setup all on-screen buttons opacity done.", Toast.LENGTH_SHORT).show();
 	}
 
     private void OpenOnScreenButtonOpacitySetting()
 	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Setup on-screen button opacity");
+		builder.setTitle("Setup all on-screen button opacity");
 		View seekBarWidget = getLayoutInflater().inflate(R.layout.seek_bar_dialog_preference, null, false);
 		builder.setView(seekBarWidget);
 		final SeekBar seekBar = seekBarWidget.findViewById(R.id.seek_bar_dialog_preference_layout_seekbar);
@@ -2351,7 +2438,7 @@ public class GameLauncher extends Activity{
 			seekBar.setMin(0);
 		}
 		seekBar.setMax(100);
-		seekBar.setProgress(CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
+		seekBar.setProgress(m_onScreenButtonGlobalOpacity);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 			min.setText("" + seekBar.getMin());
 		else
@@ -2375,7 +2462,8 @@ public class GameLauncher extends Activity{
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				SetupOnScreenButtonOpacity(seekBar.getProgress());
+				m_onScreenButtonGlobalOpacity = seekBar.getProgress();
+				SetupOnScreenButtonOpacity(m_onScreenButtonGlobalOpacity);
 			}
 		})
 				.setNeutralButton("Reset", new DialogInterface.OnClickListener() {
@@ -2702,6 +2790,76 @@ public class GameLauncher extends Activity{
 		}
 	}
 
+	private void OpenOnScreenButtonSizeSetting()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Setup all on-screen button size");
+		View widget = getLayoutInflater().inflate(R.layout.edit_line, null, false);
+
+		EditText editText = widget.findViewById(R.id.edit_line_text);
+		editText.setText("" + m_onScreenButtonGlobalSizeScale);
+		editText.setEms(10);
+		editText.setInputType(EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+		editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+		editText.setHint("Size's scale factor");
+
+		TextView textView = widget.findViewById(R.id.edit_line_label);
+		textView.setText("Scale factor");
+
+		builder.setView(widget);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				m_onScreenButtonGlobalSizeScale = Utility.parseFloat_s(editText.getText().toString(), CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE);
+				SetupOnScreenButtonSize(m_onScreenButtonGlobalSizeScale);
+			}
+		})
+				.setNeutralButton("Reset", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						SetupOnScreenButtonSize(CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE);
+					}
+				})
+				.setNegativeButton("Cancel", null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
+	private void SetupOnScreenButtonSize(float scale)
+	{
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
+		SharedPreferences.Editor mEdtr = preferences.edit();
+		final String[] defs = MakeUILayout(CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
+		int[] defSizes = new int[defs.length];
+		for (int i = 0; i < defs.length; i++) {
+			String[] arr = defs[i].split(" ");
+			defSizes[i] = Integer.parseInt(arr[2]);
+		}
+		final boolean needScale = scale > 0.0f && scale != 1.0f;
+
+		for (int i = 0; i < UI_SIZE; i++)
+		{
+			int newSize = needScale ? Math.round((float)defSizes[i] * scale) : defSizes[i];
+
+			String str = Q3EUtils.q3ei.defaults_table[i];
+			String[] arr = str.split(" ");
+			arr[2] = "" + newSize;
+			str = Utility.Join(" ", arr);
+			Q3EUtils.q3ei.defaults_table[i] = str;
+
+			String key = Q3EUtils.pref_controlprefix + i;
+			if(!preferences.contains(key))
+				continue;
+			str = preferences.getString(key, Q3EUtils.q3ei.defaults_table[i]);
+			arr = str.split(" ");
+			arr[2] = "" + newSize;
+			str = Utility.Join(" ", arr);
+			mEdtr.putString(key, str);
+		}
+		mEdtr.commit();
+		Toast.makeText(GameLauncher.this, "Setup all on-screen buttons size done.", Toast.LENGTH_SHORT).show();
+	}
+
 
 	private class ViewHolder
 	{
@@ -2754,6 +2912,8 @@ public class GameLauncher extends Activity{
 		public CheckBox multithreading;
 		public RadioGroup rg_s_driver;
 		public EditText launcher_tab2_joystick_release_range;
+		public Button reset_onscreen_controls_btn;
+		public Button setup_onscreen_button_size;
 
 		public void Setup()
 		{
@@ -2805,6 +2965,8 @@ public class GameLauncher extends Activity{
 			multithreading = findViewById(R.id.multithreading);
 			rg_s_driver = findViewById(R.id.rg_s_driver);
 			launcher_tab2_joystick_release_range = findViewById(R.id.launcher_tab2_joystick_release_range);
+			reset_onscreen_controls_btn = findViewById(R.id.reset_onscreen_controls_btn);
+			setup_onscreen_button_size = findViewById(R.id.setup_onscreen_button_size);
 		}
 	}
 }

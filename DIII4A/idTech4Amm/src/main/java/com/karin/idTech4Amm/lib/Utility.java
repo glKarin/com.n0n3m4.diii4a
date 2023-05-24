@@ -45,4 +45,19 @@ public final class Utility
             return defVal;
         }
     }
+
+    public static String Join(String d, String...strs)
+    {
+        if(null == strs)
+            return null;
+        if(strs.length == 0)
+            return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < strs.length; i++) {
+            sb.append(strs[i]);
+            if(i < strs.length - 1)
+                sb.append(d);
+        }
+        return sb.toString();
+    }
 }

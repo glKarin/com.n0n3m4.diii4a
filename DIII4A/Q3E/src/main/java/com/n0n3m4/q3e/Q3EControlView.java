@@ -207,8 +207,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         catch (Exception e)
         {
     	}
-
-		Q3EUtils.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
 		
         setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, Q3EUtils.usegles20));        
         getHolder().setFormat(PixelFormat.RGBA_8888);

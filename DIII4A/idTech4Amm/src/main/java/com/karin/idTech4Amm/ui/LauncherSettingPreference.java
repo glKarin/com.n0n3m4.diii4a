@@ -80,7 +80,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             try
             {
                 i = Integer.parseInt((String)newValue);
-                if(i >= 0)
+                if(i >= 0 && i % 5 == 0)
                     return true;
             }
             catch (Exception e)

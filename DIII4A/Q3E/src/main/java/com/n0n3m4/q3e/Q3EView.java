@@ -41,7 +41,6 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
     {
 		super(context);
 
-		Q3EUtils.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
         getHolder().setFormat(GetPixelFormat());
 
         getHolder().addCallback(this);

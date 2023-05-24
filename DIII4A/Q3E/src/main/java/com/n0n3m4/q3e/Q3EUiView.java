@@ -39,23 +39,27 @@ import com.n0n3m4.q3e.Q3EUtils.UiElement;
 import com.n0n3m4.q3e.Q3EUtils.UiLoader;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
 
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
+	private static final int ON_SCREEN_BUTTON_MIN_SIZE = 0;
+	private static final int ON_SCREEN_BUTTON_HOLD_INTERVAL = 500; // 100
+
+	private boolean m_usingUnit = false;
+	private int m_unit = 0;
+	public final int step = Q3EUtils.dip2px(getContext(), 5);
+	private FloatBuffer m_gridBuffer = null;
+	private int m_numGridLine = 0;
 
 	public Q3EUiView(Context context) {
 		super(context);						
@@ -66,6 +70,13 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 		setFocusable(true);
 		setFocusableInTouchMode(true);
+
+		String unit = PreferenceManager.getDefaultSharedPreferences(context).getString("harm_controls_config_position_unit", "0");
+		if(null != unit)
+		{
+			m_unit = Integer.parseInt(unit);
+			m_usingUnit = m_unit > 0;
+		}
 	}
 
 	@Override
@@ -80,6 +91,17 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 						
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 		
+		if(null != m_gridBuffer && m_numGridLine > 0)
+		{
+			gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+			gl.glLineWidth(1);
+			gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
+			gl.glColor4f(1,1,1,0.382f);
+			gl.glVertexPointer(2, gl.GL_FLOAT, 0, m_gridBuffer);
+			gl.glDrawArrays(gl.GL_LINES, 0, m_numGridLine);
+		}
+		gl.glLineWidth(4);
+		
 		gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
 		gl.glColor4f(1,0,0,0.7f);
 		gl.glVertexPointer(2, gl.GL_FLOAT, 0, linebuffer);
@@ -87,18 +109,22 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		
 		gl.glColor4f(1,1,1,0.2f);
 		gl.glVertexPointer(2, gl.GL_FLOAT, 0, notifybuffer);
+		gl.glPushMatrix();
+		{
 		if (yoffset==0)
 		{
 			gl.glTranslatef(0, height-height/8, 0);
 			gl.glDrawArrays(gl.GL_TRIANGLE_STRIP, 0, 4);
-			gl.glTranslatef(0, -(height-height/8), 0);
+				//gl.glTranslatef(0, -(height-height/8), 0);
 		}
 		else
 		{
 			gl.glTranslatef(0, yoffset, 0);
 			gl.glDrawArrays(gl.GL_TRIANGLE_STRIP, 0, 4);
-			gl.glTranslatef(0, -yoffset, 0);
+				//gl.glTranslatef(0, -yoffset, 0);
 		}
+		}
+		gl.glPopMatrix();
 		
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);									
 		
@@ -135,8 +161,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			
 			float[] myvrts=new float[verts.length];
 			
-			for (int i=0;i<verts.length;i+=2)
-			{
+			for (int i = 0; i < verts.length; i += 2) {
 				myvrts[i]=verts[i]*width+cx;
 				myvrts[i+1]=verts[i+1]*height+cy;
 			}
@@ -204,8 +229,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			cy=y;						
 			fngr=new FingerUi(fn.target,9000);
 			float[] myvrts=new float[verts.length];
-			for (int i=0;i<verts.length;i+=2)
-			{
+			for (int i = 0; i < verts.length; i += 2) {
 				myvrts[i]=verts[i]*width+cx;
 				myvrts[i+1]=verts[i+1]*height+cy;
 			}
@@ -225,75 +249,110 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			gl.glDrawElements(GL10.GL_TRIANGLES, 6, GL10.GL_UNSIGNED_BYTE, inds_p);
 		}
 		
-		public void tgtresize(boolean dir)
+		public boolean tgtresize(boolean dir)
 		{	
 			Object o=fngr.target;
 			int st=dir?step:-step;
-			if (o instanceof Button)
-			{
+			if (o instanceof Button) {
 			Button tmp=(Button)o;
+				if(tmp.width <= 0)
+					return false;
 			float aspect=(float)tmp.height/tmp.width;
-			if (tmp.width+st>step)
-			{
+				if (tmp.width + st > step) {
 			tmp.width+=st;
 			tmp.height=(int)(aspect*tmp.width+0.5f);
 			}
+				else if(tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+					return false;
 			}
 			
-			if (o instanceof Slider)
-			{
+			if (o instanceof Slider) {
 			Slider tmp=(Slider)o;
+				if(tmp.width <= 0)
+					return false;
 			float aspect=(float)tmp.height/tmp.width;
-			if (tmp.width+st>step)
-			{
+				if (tmp.width + st > step) {
 			tmp.width+=st;
 			tmp.height=(int)(aspect*tmp.width+0.5f);
 			}
+				else if(tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+					return false;
 			}
 			
-			if (o instanceof Joystick)
-			{
+			if (o instanceof Joystick) {
 			Joystick tmp=(Joystick)o;
-			if (tmp.size+st>step)
-			{
+				if(tmp.size <= 0)
+					return false;
+				if (tmp.size + st > step) {
 			tmp.size+=st;
 			}
+				else if(tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+					return false;
 			}
             //k
             if (o instanceof Disc)
             {
                 Disc tmp=(Disc)o;
+				if(tmp.size <= 0)
+					return false;
                 if (tmp.size+st>step)
-                {
                     tmp.size+=st;
-                }
+				else if(tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+					return false;
 			}							
 			RefreshTgt(fngr);			
+            return true;
 		}
 		
-		public void tgtalpha(boolean dir)
+		public boolean tgtalpha(boolean dir) {
+			Paintable target = (Paintable) fngr.target;
+			target.alpha += dir ? 0.1 : -0.1;
+			if (target.alpha < 0.01)
+			{
+				target.alpha = 0.1f;
+				return false;
+			}
+			if (target.alpha > 1)
 		{
-			((Paintable)fngr.target).alpha+=dir?0.1:-0.1;
-			if (((Paintable)fngr.target).alpha<0.01) ((Paintable)fngr.target).alpha+=0.1;
-			if (((Paintable)fngr.target).alpha>1) ((Paintable)fngr.target).alpha-=0.1;
+				target.alpha = 1.0f;
+				return false;
+			}
+			return true;
 		}
 
 		@Override
 		public boolean onTouchEvent(int x, int y, int act) {
-			if (act==1)
-			{
+			if (act == 1) {
 			mover_down=true;
-			final Runnable rn;
-			if (y<cy)
-			{			
+				final ResultRunnable rn;
+				if (y < cy) {
 			if (x>cx) 
-				rn=new Runnable() {@Override public void run() {tgtresize(true);}};
-				else rn=new Runnable() {@Override public void run() {tgtresize(false);}};
+						rn = new ResultRunnable() {
+							@Override
+							public void run() {
+								SetResult(tgtresize(true));
 			}
+						};
 			else
-			{
-			if (x>cx) rn=new Runnable() {@Override public void run() {tgtalpha(true);}};
-			else rn=new Runnable() {@Override public void run() {tgtalpha(false);}};	
+						rn = new ResultRunnable() {
+						@Override
+						public void run() {
+							SetResult(tgtresize(false));
+						}
+					};
+				} else {
+					if (x > cx) rn = new ResultRunnable() {
+						@Override
+						public void run() {
+							SetResult(tgtalpha(true));
+						}
+					};
+					else rn = new ResultRunnable() {
+						@Override
+						public void run() {
+							SetResult(tgtalpha(false));
+						}
+					};
 			}
 			mHandler.post(new Runnable() {
 				
@@ -301,7 +360,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 				public void run() {
 					if (!mover_down) return;
 					rn.run();
-					mHandler.postDelayed(this, 100);
+						if(rn.GetResult()) mHandler.postDelayed(this, ON_SCREEN_BUTTON_HOLD_INTERVAL);
 				}
 			});
 			
@@ -332,7 +391,6 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 	public ArrayList<TouchListener> touch_elements=new ArrayList<Q3EUtils.TouchListener>(0);
 	public ArrayList<Paintable> paint_elements=new ArrayList<Q3EUtils.Paintable>(0);
 	
-	public final int step=Q3EUtils.dip2px(getContext(), 5);
 	
 	boolean mInit=false;
 	int width;int height;
@@ -348,8 +406,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 	
 	public void RefreshTgt(FingerUi fn)
 	{
-		if (fn.target instanceof Button)
-		{
+		if (fn.target instanceof Button) {
 			final Button tmp=(Button)fn.target;			
 			final Button newb=new Button(tmp.view, uildr.gl, tmp.cx, tmp.cy, tmp.width, tmp.height, tmp.tex_androidid, tmp.keycode, tmp.style, tmp.canbeheld,tmp.alpha);
 			fn.target=newb;								
@@ -358,8 +415,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			paint_elements.set(paint_elements.indexOf(tmp),newb);
 		}	
 		
-		if (fn.target instanceof Joystick)
-		{
+		if (fn.target instanceof Joystick) {
 			final Joystick tmp=(Joystick)fn.target;			
 			final Joystick newj=new Joystick(tmp.view, uildr.gl, tmp.cx, tmp.cy, tmp.size/2,tmp.alpha);
 			fn.target=newj;
@@ -368,8 +424,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			paint_elements.set(paint_elements.indexOf(tmp),newj);			
 		}
 		
-		if (fn.target instanceof Slider)
-		{
+		if (fn.target instanceof Slider) {
 			final Slider tmp=(Slider)fn.target;			
 			final Slider news=new Slider(tmp.view, uildr.gl, tmp.cx, tmp.cy, tmp.width, tmp.height, tmp.tex_androidid,tmp.lkey,tmp.ckey,tmp.rkey,tmp.style,tmp.alpha);
 			fn.target=news;
@@ -392,37 +447,42 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 	private boolean NormalizeTgtPosition(FingerUi fn)
 	{
-		int step = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("harm_controls_config_position_unit", "10"));
-		if(step <= 0)
+		if(!m_usingUnit)
 			return false;
 		//step = Q3EUtils.dip2px(getContext(), step);
 		if (fn.target instanceof Slider)
 		{
 			Slider tmp=(Slider)fn.target;
-			tmp.cx = Math.round((float)tmp.cx / (float)step) * step;
-			tmp.cy = Math.round((float)tmp.cy / (float)step) * step;
+			float halfw = (float)tmp.width / 2.0f;
+			float halfh = (float)tmp.height / 2.0f;
+			tmp.cx = Math.round(((float)tmp.cx - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			tmp.cy = Math.round(((float)tmp.cy - halfh) / (float)m_unit) * m_unit + Math.round(halfh);
 			return true;
 		}
 		else if (fn.target instanceof Button)
 		{
 			Button tmp=(Button)fn.target;
-			tmp.cx = Math.round((float)tmp.cx / (float)step) * step;
-			tmp.cy = Math.round((float)tmp.cy / (float)step) * step;
+			float halfw = (float)tmp.width / 2.0f;
+			float halfh = (float)tmp.height / 2.0f;
+			tmp.cx = Math.round(((float)tmp.cx - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			tmp.cy = Math.round(((float)tmp.cy - halfh) / (float)m_unit) * m_unit + Math.round(halfh);
 			return true;
 		}
 		else if (fn.target instanceof Joystick)
 		{
 			Joystick tmp=(Joystick)fn.target;
-			tmp.cx = Math.round((float)tmp.cx / (float)step) * step;
-			tmp.cy = Math.round((float)tmp.cy / (float)step) * step;
+			float halfw = (float)tmp.size / 2.0f;
+			tmp.cx = Math.round(((float)tmp.cx - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			tmp.cy = Math.round(((float)tmp.cy - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
 			return true;
 		}
 		//k
 		else if (fn.target instanceof Disc)
 		{
 			Disc tmp=(Disc)fn.target;
-			tmp.cx = Math.round((float)tmp.cx / (float)step) * step;
-			tmp.cy = Math.round((float)tmp.cy / (float)step) * step;
+			float halfw = (float)tmp.size / 2.0f;
+			tmp.cx = Math.round(((float)tmp.cx - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			tmp.cy = Math.round(((float)tmp.cy - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
 			return true;
 		}
 		return false;
@@ -430,20 +490,17 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 	public void ModifyTgt(FingerUi fn,int dx,int dy)
 	{
-		if (fn.target instanceof Slider)
-		{
+		if (fn.target instanceof Slider) {
 		Slider tmp=(Slider)fn.target;
 		tmp.cx+=dx;
 		tmp.cy+=dy;
 		}
-		if (fn.target instanceof Button)
-		{
+		if (fn.target instanceof Button) {
 		Button tmp=(Button)fn.target;
 		tmp.cx+=dx;
 		tmp.cy+=dy;
 		}
-		if (fn.target instanceof Joystick)
-		{
+		if (fn.target instanceof Joystick) {
 		Joystick tmp=(Joystick)fn.target;
 		tmp.cx+=dx;
 		tmp.cy+=dy;
@@ -460,8 +517,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 	public void UiOnTouchEvent(FingerUi fn, MotionEvent event)
 	{
 		int act=0;
-		if (event.getPointerId(event.getActionIndex())==fn.id)
-		{
+		if (event.getPointerId(event.getActionIndex()) == fn.id) {
 			if ((event.getActionMasked()==MotionEvent.ACTION_DOWN)||(event.getActionMasked()==MotionEvent.ACTION_POINTER_DOWN))
 				act=1;
 			if ((event.getActionMasked()==MotionEvent.ACTION_UP)||(event.getActionMasked()==MotionEvent.ACTION_POINTER_UP)||(event.getActionMasked()==MotionEvent.ACTION_CANCEL))
@@ -471,14 +527,12 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		int x=(int)event.getX(event.findPointerIndex(fn.id));
 		int y=(int)event.getY(event.findPointerIndex(fn.id));
 		
-		if (fn.target==mover)
-		{
+		if (fn.target == mover) {
 			fn.onTouchEvent(event);
 			return;
 		}
 		
-		if (act==1)
-		{
+		if (act == 1) {
 			fn.lastx=x;
 			fn.lasty=y;
 			fn.movd=false;			
@@ -488,15 +542,13 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		fn.lastx+=dx;
 		int dy=downtostep(y, fn.lasty);
 		fn.lasty+=dy;
-		if ((dx!=0)||(dy!=0))
-		{					
+		if ((dx != 0) || (dy != 0)) {
 		fn.movd=true;					
 		ModifyTgt(fn, dx, dy);
 		RefreshTgt(fn);
 		}
 		
-		if ((act==-1)&&(!fn.movd))
-		{
+		if ((act == -1) && (!fn.movd)) {
 			mover.show(x, y, fn);
 		}
 
@@ -513,20 +565,17 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
 		for (int i=0;i<touch_elements.size();i++)
 		{
-			if (touch_elements.get(i) instanceof Button)
-			{
+			if (touch_elements.get(i) instanceof Button) {
 			Button tmp=(Button)touch_elements.get(i);
 			mEdtr.putString(Q3EUtils.pref_controlprefix+i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int)(tmp.alpha*100)).SaveToString());
 			}
 			
-			if (touch_elements.get(i) instanceof Slider)
-			{
+			if (touch_elements.get(i) instanceof Slider) {
 			Slider tmp=(Slider)touch_elements.get(i);
 			mEdtr.putString(Q3EUtils.pref_controlprefix+i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int)(tmp.alpha*100)).SaveToString());
 			}
 			
-			if (touch_elements.get(i) instanceof Joystick)
-			{
+			if (touch_elements.get(i) instanceof Joystick) {
 			Joystick tmp=(Joystick)touch_elements.get(i);
 			mEdtr.putString(Q3EUtils.pref_controlprefix+i, new UiElement(tmp.cx, tmp.cy, tmp.size/2, (int)(tmp.alpha*100)).SaveToString());
 			}
@@ -549,8 +598,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		
 	@Override
 	public void onSurfaceChanged(GL10 gl, int w, int h) {
-		if(mInit == false)
-		{				
+		if (mInit == false) {
 			width=w;
 			height=h;
 			
@@ -579,8 +627,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			mover=new MenuOverlay(0, 0, width/4, width/6);
 			mover.loadtex(gl);			
 			
-			for (int i=0;i<Q3EUtils.q3ei.UI_SIZE;i++)
-			{
+			for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++) {
 				Object o=uildr.LoadElement(i);
 				touch_elements.add((TouchListener)o);
 				paint_elements.add((Paintable)o);				
@@ -591,6 +638,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			for (int i=0;i<fingers.length;i++)
 				fingers[i]=new FingerUi(null, i);								
 			
+			MakeGrid();
 			mInit = true;
 		}
 	}		
@@ -601,34 +649,26 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		
 		event.offsetLocation(0, yoffset);
 		
-		if ((event.getActionMasked()==MotionEvent.ACTION_DOWN)||(event.getActionMasked()==MotionEvent.ACTION_POINTER_DOWN))
-		{
+		if ((event.getActionMasked() == MotionEvent.ACTION_DOWN) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN)) {
 			int pid=event.getPointerId(event.getActionIndex());
 			int x=(int)event.getX(event.getActionIndex());
 			int y=(int)event.getY(event.getActionIndex());
 			
-			if (mover.isInside(x, y))
-			{
+			if (mover.isInside(x, y)) {
 				fingers[pid].target=mover;				
-			}
-			else
+			} else
 			for (TouchListener tl:touch_elements)
-			if (tl.isInside(x, y))
-			{
+					if (tl.isInside(x, y)) {
 				fingers[pid].target=tl;
 				break;
 			}
 			
-			if (fingers[pid].target==null)
-			{				
+			if (fingers[pid].target == null) {
 				mover.hide();
 								
-				if ((yoffset==0)&&(y>height-height/6))
-				{
+				if ((yoffset == 0) && (y > height - height / 6)) {
 					yoffset=height/3;					
-				}
-				else
-				{
+				} else {
 					if (y<yoffset+height/6)
 					yoffset=0;
 				}
@@ -637,16 +677,14 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		}
 		
 		for (FingerUi f:fingers)
-			if (f.target!=null)
-			{
+			if (f.target != null) {
 				if ((f.target instanceof TouchListener)&&(f.target!=mover)&&(touch_elements.indexOf((TouchListener)f.target)==-1))
 					f.target=null;
 				else
 					UiOnTouchEvent(f, event);
 			}
 		
-		if ((event.getActionMasked()==MotionEvent.ACTION_UP)||(event.getActionMasked()==MotionEvent.ACTION_POINTER_UP)||(event.getActionMasked()==MotionEvent.ACTION_CANCEL))
-		{
+		if ((event.getActionMasked() == MotionEvent.ACTION_UP) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) || (event.getActionMasked() == MotionEvent.ACTION_CANCEL)) {
 			int pid=event.getPointerId(event.getActionIndex());
 			fingers[pid].target=null;
 		}		
@@ -656,11 +694,64 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-		if (mInit)
-		{					
+		if (mInit) {
 		mover.loadtex(gl);
 		for (Paintable p:paint_elements) p.loadtex(gl);
 		}		
 	}
 
+	private void MakeGrid()
+	{
+		if(!m_usingUnit)
+			return;
+
+		final int countX = width / m_unit + (width % m_unit != 0 ? 1 : 0);
+		final int countY = height / m_unit + (height % m_unit != 0 ? 1 : 0);
+		if(countX <= 0 || countY == 0)
+			return;
+
+		m_numGridLine = (countX + 1) * (countY + 1);
+		m_gridBuffer = ByteBuffer.allocateDirect(2 * 2 * m_numGridLine).order(ByteOrder.nativeOrder()).asFloatBuffer();
+		int ptr = 0;
+		for(int i = 0; i <= countX; i++)
+		{
+			m_gridBuffer.put(ptr * 2 * 2, m_unit * i); // [(x,), ()]
+			m_gridBuffer.put(ptr * 2 * 2 + 1, yoffset); // [(, y), ()]
+			m_gridBuffer.put(ptr * 2 * 2 + 2, m_unit * i); // [(), (x, )]
+			m_gridBuffer.put(ptr * 2 * 2 + 3, yoffset + height); // [(), (, y)]
+			ptr++;
+		}
+		for(int i = 0; i <= countY; i++)
+		{
+			m_gridBuffer.put(ptr * 2 * 2, 0); // [(x,), ()]
+			m_gridBuffer.put(ptr * 2 * 2 + 1, yoffset + m_unit * i); // [(, y), ()]
+			m_gridBuffer.put(ptr * 2 * 2 + 2, width); // [(), (x, )]
+			m_gridBuffer.put(ptr * 2 * 2 + 3, yoffset + m_unit * i); // [(), (, y)]
+			ptr++;
+		}
+		m_gridBuffer.position(0);
+	}
+
+	private abstract static class ResultRunnable implements Runnable
+	{
+		private boolean m_result = false;
+
+		public boolean GetResult()
+		{
+			boolean res = m_result;
+			m_result = false;
+			return res;
+		}
+
+		public void SetResult(boolean result)
+		{
+			m_result = result;
+		}
+	}
+
+	@Override
+	protected void onDetachedFromWindow() {
+		super.onDetachedFromWindow();
+		Q3EUtils.usegles20 = true;
+	}
 }

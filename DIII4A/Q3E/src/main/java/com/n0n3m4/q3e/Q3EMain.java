@@ -86,6 +86,7 @@ public class Q3EMain extends Activity {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        Q3EUtils.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
         m_coverEdges = preferences.getBoolean("harm_cover_edges", true);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && m_coverEdges)
         {

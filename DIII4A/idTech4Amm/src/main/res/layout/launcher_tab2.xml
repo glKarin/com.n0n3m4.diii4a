@@ -29,10 +29,23 @@
 			android:id="@+id/reset_onscreen_controls_btn"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:onClick="resetcontrols"
 			android:textColor="#EF0000"
 			android:textAllCaps="false"
 			android:text="Reset on-screen controls"/>
+
+		<Button
+			android:id="@+id/setup_onscreen_button_opacity"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textAllCaps="false"
+			android:text="Setup all on-screen button opacity"/>
+
+		<Button
+			android:id="@+id/setup_onscreen_button_size"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textAllCaps="false"
+			android:text="Setup all on-screen button size"/>
 
 		<Button
 			android:id="@+id/onscreen_button_setting"
@@ -41,18 +54,41 @@
 			android:textAllCaps="false"
 			android:text="On-screen button setting"/>
 
-		<Button
-			android:id="@+id/setup_onscreen_button_opacity"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textAllCaps="false"
-			android:text="Setup on-screen button opacity"/>
-
 		<CheckBox
 			android:id="@+id/smoothjoy"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="Smooth joystick"/>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:orientation="horizontal"
+			android:paddingLeft="10dp"
+			android:paddingRight="10dp"
+			>
+			<TextView
+				android:layout_width="0dp"
+				android:layout_height="match_parent"
+				android:layout_weight="1"
+				android:gravity="center_vertical"
+				android:text="Joystick release radius's multiple(0 - disabled)"
+				android:textColor="#FF000000"
+				android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+			<EditText
+				android:id="@+id/launcher_tab2_joystick_release_range"
+				android:inputType="numberDecimal|textNoSuggestions"
+				android:ems="10"
+				android:hint="Radius's multiple"
+				android:imeOptions="flagNoExtractUi"
+				android:text="0.0"
+				android:layout_width="80dp"
+				android:layout_height="wrap_content"
+				android:layout_gravity="right|center_vertical"
+				android:autofillHints="" />
+		</LinearLayout>
 
 		<CheckBox
 			android:id="@+id/mapvol"
@@ -126,35 +162,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="Multitouch shoot (left mouse button click on a second touch)"/>
-
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_vertical"
-			android:orientation="horizontal"
-			android:paddingLeft="10dp"
-			android:paddingRight="10dp"
-			>
-			<TextView
-				android:layout_width="0dp"
-				android:layout_height="match_parent"
-				android:layout_weight="1"
-				android:gravity="center_vertical"
-				android:text="Joystick release radius's multiple(0 - disabled)"
-				android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-			<EditText
-				android:id="@+id/launcher_tab2_joystick_release_range"
-				android:inputType="numberDecimal|textNoSuggestions"
-				android:ems="10"
-				android:hint="Radius's multiple"
-				android:imeOptions="flagNoExtractUi"
-				android:text="0.0"
-				android:layout_width="80dp"
-				android:layout_height="wrap_content"
-				android:layout_gravity="right|center_vertical"
-				android:autofillHints="" />
-		</LinearLayout>
 
         <CheckBox
             android:id="@+id/launcher_tab2_enable_gyro"

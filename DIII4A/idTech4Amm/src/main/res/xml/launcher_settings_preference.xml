@@ -102,7 +102,7 @@
                 android:persistent="true"
                 android:defaultValue="10"
                 android:inputType="number"
-                android:summary="Setup on-screen buttons position unit when config layout"
+                android:summary="Config on-screen buttons layout with grid limit(multiple of 5)"
                 />
         </PreferenceCategory>
     </PreferenceScreen>

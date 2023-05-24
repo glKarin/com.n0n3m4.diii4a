@@ -296,6 +296,13 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2023-05-25", 30,
+                        "Add function key toolbar for soft input method(default disabled, in Settings).",
+                        "Add joystick release range setting in tab `CONTROLS`. The value is joystick radius's multiple, 0 to disable.",
+                        "Fix crash when end intro cinematic in Quake 4.",
+                        "Fix delete savegame menu action in Quake 4."
+                ),
+
                 ChangeLog.Create("2023-05-01", 29,
                         "Fixup crash in game loading when change app to background.",
                         "Fixup effects with noise in Quake 4.",
