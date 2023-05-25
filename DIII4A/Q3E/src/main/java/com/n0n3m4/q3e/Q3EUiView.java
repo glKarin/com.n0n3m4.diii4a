@@ -709,6 +709,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		if(countX <= 0 || countY <= 0)
 			return;
 
+		final int w = countX * m_unit;
+		final int h = countY * m_unit;
 		m_numGridLineVertex = ((countX + 1) + (countY + 1)) * 2;
 		final int numFloats = 2 * m_numGridLineVertex;
 		final int sizeof_float = 4;
@@ -720,15 +722,15 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			vertexBuf[ptr * 2 * 2] = m_unit * i; // [(x,), ()]
 			vertexBuf[ptr * 2 * 2 + 1] = 0; // [(, y), ()]
 			vertexBuf[ptr * 2 * 2 + 2] = m_unit * i; // [(), (x, )]
-			vertexBuf[ptr * 2 * 2 + 3] = height; // [(), (, y)]
+			vertexBuf[ptr * 2 * 2 + 3] = h; // [(), (, y)]
 			ptr++;
 		}
 		for(int i = 0; i <= countY; i++)
 		{
 			vertexBuf[ptr * 2 * 2] = 0; // [(x,), ()]
-			vertexBuf[ptr * 2 * 2 + 1] = yoffset + m_unit * i; // [(, y), ()]
-			vertexBuf[ptr * 2 * 2 + 2] = width; // [(), (x, )]
-			vertexBuf[ptr * 2 * 2 + 3] = yoffset + m_unit * i; // [(), (, y)]
+			vertexBuf[ptr * 2 * 2 + 1] = m_unit * i; // [(, y), ()]
+			vertexBuf[ptr * 2 * 2 + 2] = w; // [(), (x, )]
+			vertexBuf[ptr * 2 * 2 + 3] = m_unit * i; // [(), (, y)]
 			ptr++;
 		}
 		m_gridBuffer.put(vertexBuf);
