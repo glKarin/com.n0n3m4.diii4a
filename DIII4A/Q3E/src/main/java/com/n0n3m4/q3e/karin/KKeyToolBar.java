@@ -1,4 +1,4 @@
-package com.n0n3m4.q3e;
+package com.n0n3m4.q3e.karin;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -13,30 +13,30 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeyToolBar extends LinearLayout {
+public class KKeyToolBar extends LinearLayout {
     private int toolbar_key_text_released;
     private int toolbar_key_text_pressed;
     private int toolbar_key_bg_released;
     private int toolbar_key_bg_pressed;
     private KeyListAdapter m_keyListAdapter;
-    private HorizontalListView m_toolbar;
-    private ImageView m_movableView;
-    private ImageView m_closeView;
 
-    public KeyToolBar(Context context)
+    public KKeyToolBar(Context context)
     {
         super(context);
         Setup();
     }
-    public KeyToolBar(Context context, AttributeSet attrs)
+    public KKeyToolBar(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         Setup();
     }
-    public KeyToolBar(Context context, AttributeSet attrs, int defStyle) {
+    public KKeyToolBar(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         Setup();
     }
@@ -72,7 +72,8 @@ public class KeyToolBar extends LinearLayout {
                     return false;
             }
             post(m_updateToolBar);
-            return Q3EUtils.q3ei.callbackObj.vw.sendKeyEvent(down, key.keyCode, 0);
+            Q3EUtils.q3ei.callbackObj.vw.sendKeyEvent(down, key.keyCode, 0);
+            return true;
         }
     };
 
@@ -102,7 +103,7 @@ public class KeyToolBar extends LinearLayout {
         int w = resources.getDimensionPixelSize(R.dimen.toolButtonWidth);
         int s = resources.getDimensionPixelSize(R.dimen.toolButtonSpacing);
 
-        m_toolbar = new HorizontalListView(getContext());
+        KHorizontalListView m_toolbar = new KHorizontalListView(getContext());
         m_keyListAdapter = new KeyListAdapter(R.layout.tool_button);
         m_keyListAdapter.SetData(list);
         m_toolbar.SetAdapter(m_keyListAdapter);
@@ -112,13 +113,13 @@ public class KeyToolBar extends LinearLayout {
         LinearLayout.LayoutParams layoutParms = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1);
         addView(m_toolbar, layoutParms);
 
-        m_movableView = new ImageView(getContext());
+        ImageView m_movableView = new ImageView(getContext());
         m_movableView.setImageDrawable(resources.getDrawable(R.drawable.icon_m_up_down));
         layoutParms = new LinearLayout.LayoutParams(h, ViewGroup.LayoutParams.MATCH_PARENT);
         layoutParms.setMargins(m, m, m, m);
         addView(m_movableView, layoutParms);
 
-        m_closeView = new ImageView(getContext());
+        ImageView m_closeView = new ImageView(getContext());
         m_closeView.setImageDrawable(getResources().getDrawable(R.drawable.icon_m_close));
         layoutParms = new LinearLayout.LayoutParams(h, ViewGroup.LayoutParams.MATCH_PARENT);
         layoutParms.setMargins(m, m, m, m);

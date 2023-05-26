@@ -20,13 +20,10 @@
 package com.n0n3m4.q3e;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
 import android.os.Handler;
 import android.os.HandlerThread;
 import java.util.LinkedList;
@@ -36,15 +33,7 @@ public class Q3ECallbackObj {
 	byte[] mAudioData;
 	public static boolean reqThreadrunning=true;	
 	public Q3EControlView vw;
-	public int state = STATE_NONE;
-	public static final int STATE_NONE = 0;
-    public static final int STATE_ACT = 1; // RTCW4A-specific, keep
-    public static final int STATE_GAME = 1 << 1; // map spawned
-    public static final int STATE_KICK = 1 << 2; // RTCW4A-specific, keep
-    public static final int STATE_LOADING = 1 << 3; // current GUI is guiLoading
-    public static final int STATE_CONSOLE = 1 << 4; // fullscreen or not
-    public static final int STATE_MENU = 1 << 5; // any menu excludes guiLoading
-    public static final int STATE_DEMO = 1 << 6; // demo
+	public int state = Q3EGlobals.STATE_NONE;
 
     private final LinkedList<Runnable> m_eventQueue = new LinkedList<>();
     public boolean notinmenu = true;
@@ -54,9 +43,9 @@ public class Q3ECallbackObj {
 	public void setState(int newstate)
 	{
         state = newstate;
-        inConsole = (newstate & Q3ECallbackObj.STATE_CONSOLE) == Q3ECallbackObj.STATE_CONSOLE;
-        notinmenu = ((newstate & STATE_GAME) == STATE_GAME) && !inConsole;
-        inLoading = (newstate & Q3ECallbackObj.STATE_LOADING) == Q3ECallbackObj.STATE_LOADING;
+        inConsole = (newstate & Q3EGlobals.STATE_CONSOLE) == Q3EGlobals.STATE_CONSOLE;
+        notinmenu = ((newstate & Q3EGlobals.STATE_GAME) == Q3EGlobals.STATE_GAME) && !inConsole;
+        inLoading = (newstate & Q3EGlobals.STATE_LOADING) == Q3EGlobals.STATE_LOADING;
 		vw.setState(newstate);
 	}
 	
@@ -243,34 +232,3 @@ public class Q3ECallbackObj {
     }
 }
 
-class Q3EAudioTrack extends AudioTrack
-{	
-	public Q3EAudioTrack(int streamType, int sampleRateInHz,
-			int channelConfig, int audioFormat, int bufferSizeInBytes, int mode)
-			throws IllegalStateException {
-		super(streamType, sampleRateInHz, channelConfig, audioFormat,
-				bufferSizeInBytes, mode);
-	}
-	
-	@Override
-	public void play() throws IllegalStateException {				
-		flush();		
-		super.play();		
-	}
-}
-
-//k: Once Runnable
-abstract class __Runnable implements Runnable
-{
-    private boolean m_handle = false;
-
-    @Override
-    public void run()
-    {
-        if(m_handle) return;
-        __run();
-        m_handle = true;
-    }
-
-    protected abstract void __run();
-}

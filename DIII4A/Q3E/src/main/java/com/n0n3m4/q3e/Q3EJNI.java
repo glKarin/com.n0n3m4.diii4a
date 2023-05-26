@@ -19,9 +19,6 @@
 
 package com.n0n3m4.q3e;
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.view.Surface;
 
 import java.io.BufferedReader;
@@ -54,78 +51,47 @@ public class Q3EJNI {
     public static boolean IS_64 = false;
     public static boolean SYSTEM_64 = false;
     private static boolean _is_detected = false;
-	public static boolean detectNeon()
-	{
-        GetCpuInfo();
-        return IS_NEON;
-    }
-    
-    public static boolean DetectArch()
-    {
-        GetCpuInfo();
-        return IS_64;
-    }
     
     private static boolean GetCpuInfo()
     {
-        if(_is_detected)
+        if (_is_detected)
             return true;
         IS_64 = Is64();
         BufferedReader br = null;
-		try
-		{
-		br=new BufferedReader(new FileReader("/proc/cpuinfo"));
-		String l;
-		while ((l=br.readLine())!=null)
+        try
         {
-			if ((l.contains("Features")) && (l.contains("neon"))) 
-				{
-                    IS_NEON = true;
-				}
-            if(l.contains("Processor") && (l.contains("AArch64")))
+            br = new BufferedReader(new FileReader("/proc/cpuinfo"));
+            String l;
+            while ((l = br.readLine()) != null)
             {
-                SYSTEM_64 = true;   
-                IS_NEON = true;
-            }
+                if ((l.contains("Features")) && (l.contains("neon")))
+                {
+                    IS_NEON = true;
+                }
+                if (l.contains("Processor") && (l.contains("AArch64")))
+                {
+                    SYSTEM_64 = true;
+                    IS_NEON = true;
+                }
 
-        }
-		     _is_detected = true;
-		}
-		catch (Exception e){
+            }
+            _is_detected = true;
+        } catch (Exception e)
+        {
             e.printStackTrace();
             _is_detected = false;
-        }
-        finally
+        } finally
         {
             try
             {
-                if(br != null)
+                if (br != null)
                     br.close();
-            }
-            catch(IOException ioe)
+            } catch (IOException ioe)
             {
                 ioe.printStackTrace();
             }
         }
         return _is_detected;
-	}
-
-    public static String GetGameLibDir(Context context)
-    {
-        try
-        {
-            ApplicationInfo ainfo = context.getApplicationContext().getPackageManager().getApplicationInfo
-                    (
-                            context.getPackageName(),
-                            PackageManager.GET_SHARED_LIBRARY_FILES
-                    );
-            return ainfo.nativeLibraryDir; //k for arm64-v8a apk install
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            return context.getCacheDir().getAbsolutePath().replace("cache", "lib");		//k old, can work with armv5 and armv7-a
-        }
     }
 
 	static {

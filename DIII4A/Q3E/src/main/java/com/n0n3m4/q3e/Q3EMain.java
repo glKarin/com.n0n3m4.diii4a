@@ -36,6 +36,9 @@ import android.content.SharedPreferences;
 import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 
+import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.karin.KDebugTextView;
+
 public class Q3EMain extends Activity {
 	public static Q3ECallbackObj mAudio;
 	public static Q3EView mGLSurfaceView;
@@ -54,9 +57,8 @@ public class Q3EMain extends Activity {
     private final int m_uiOptions_def = View.SYSTEM_UI_FLAG_FULLSCREEN
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-    public static Q3EControlView mControlGLSurfaceView;
-    private DebugTextView memoryUsageText;
-    private RelativeLayout mainLayout;
+    public Q3EControlView mControlGLSurfaceView;
+    private KDebugTextView memoryUsageText;
     private boolean m_coverEdges = true;
 	
 	public void ShowMessage(String s)
@@ -86,7 +88,7 @@ public class Q3EMain extends Activity {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        Q3EUtils.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
+        GL.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
         m_coverEdges = preferences.getBoolean("harm_cover_edges", true);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && m_coverEdges)
         {
@@ -147,6 +149,8 @@ public class Q3EMain extends Activity {
 		}*/
 		
 		datadir=preferences.getString(Q3EUtils.pref_datapath, Q3EUtils.q3ei.default_path);
+		if(null == datadir)
+            datadir = Q3EUtils.q3ei.default_path;
 		if ((datadir.length()>0)&&(datadir.charAt(0)!='/'))//lolwtfisuserdoing?
 		{
 			datadir="/"+datadir;
@@ -174,7 +178,7 @@ public class Q3EMain extends Activity {
             if(Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
                 mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
             mControlGLSurfaceView.RenderView(mGLSurfaceView);
-            mainLayout = new RelativeLayout(this);
+            RelativeLayout mainLayout = new RelativeLayout(this);
             RelativeLayout.LayoutParams params;
 
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -194,7 +198,7 @@ public class Q3EMain extends Activity {
 
             if(m_renderMemStatus > 0) //k
             {
-                memoryUsageText = new DebugTextView(mainLayout.getContext());
+                memoryUsageText = new KDebugTextView(mainLayout.getContext());
                 params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 mainLayout.addView(memoryUsageText, params);
                 memoryUsageText.setTypeface(Typeface.MONOSPACE);

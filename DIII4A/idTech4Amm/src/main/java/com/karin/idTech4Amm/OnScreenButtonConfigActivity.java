@@ -16,6 +16,7 @@ import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -120,7 +121,7 @@ public class OnScreenButtonConfigActivity extends Activity
         for(int i = 0; i < GameLauncher.UI_SIZE; i++)
         {
             int type = q3ei.type_table[i];
-            if(type == Q3EUtils.TYPE_JOYSTICK || type == Q3EUtils.TYPE_DISC)
+            if(type == Q3EGlobals.TYPE_JOYSTICK || type == Q3EGlobals.TYPE_DISC)
                 continue;
             if(i == GameLauncher.UI_KBD || i == GameLauncher.UI_CONSOLE)
                 continue;
@@ -220,12 +221,12 @@ public class OnScreenButtonConfigActivity extends Activity
             System.arraycopy(arr, 0, this.key, 0, keys);
             switch(type)
             {
-                case Q3EUtils.TYPE_BUTTON:
-                    this.hold = arr[1] == Q3EUtils.ONSCRREN_BUTTON_CAN_HOLD;
+                case Q3EGlobals.TYPE_BUTTON:
+                    this.hold = arr[1] == Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
                     this.style = arr[2];
                     this.key[0] = arr[0];
                     break;
-                case Q3EUtils.TYPE_SLIDER:
+                case Q3EGlobals.TYPE_SLIDER:
                     this.style = arr[3];
                     this.key[0] = arr[0];
                     this.key[1] = arr[1];
@@ -253,10 +254,10 @@ public class OnScreenButtonConfigActivity extends Activity
             List<String> list = new ArrayList<>();
             switch(type)
             {
-                case Q3EUtils.TYPE_BUTTON:
+                case Q3EGlobals.TYPE_BUTTON:
                     list.add(m_keyMap.get(key[0]));
                     break;
-                case Q3EUtils.TYPE_SLIDER:
+                case Q3EGlobals.TYPE_SLIDER:
                     list.add(m_keyMap.get(key[0]));
                     list.add(m_keyMap.get(key[1]));
                     list.add(m_keyMap.get(key[2]));
@@ -272,12 +273,12 @@ public class OnScreenButtonConfigActivity extends Activity
             int[] res = new int[4];
             switch(type)
             {
-                case Q3EUtils.TYPE_BUTTON:
-                    res[1] = hold ? Q3EUtils.ONSCRREN_BUTTON_CAN_HOLD : Q3EUtils.ONSCRREN_BUTTON_NOT_HOLD;
+                case Q3EGlobals.TYPE_BUTTON:
+                    res[1] = hold ? Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD : Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
                     res[2] = style;
                     res[0] = key[0];
                     break;
-                case Q3EUtils.TYPE_SLIDER:
+                case Q3EGlobals.TYPE_SLIDER:
                     res[0] = key[0];
                     res[1] = key[1];
                     res[2] = key[2];
@@ -329,11 +330,11 @@ public class OnScreenButtonConfigActivity extends Activity
             TextView styleTextView = view.findViewById(R.id.onscreen_button_config_list_delegate_style);
             switch(data.type)
             {
-                case Q3EUtils.TYPE_BUTTON:
+                case Q3EGlobals.TYPE_BUTTON:
                     holdTextView.setText(data.hold ? "Toggle" : "Button");
 					styleTextView.setText(m_styleMap.get(data.style) != null ? m_styleMap.get(data.style) : "");
                     break;
-                case Q3EUtils.TYPE_SLIDER:
+                case Q3EGlobals.TYPE_SLIDER:
                     holdTextView.setText("Slider");
                     styleTextView.setText(m_sliderStyleMap.get(data.style) != null ? m_sliderStyleMap.get(data.style) : "");
                     break;
@@ -380,7 +381,7 @@ public class OnScreenButtonConfigActivity extends Activity
                 typeSpinner.setSelection(Utility.ArrayIndexOf(typeValues, btn.type));
                 switch(btn.type)
                 {
-                    case Q3EUtils.TYPE_BUTTON:
+                    case Q3EGlobals.TYPE_BUTTON:
                         holdLayout.setVisibility(View.VISIBLE);
                         styleLayout.setVisibility(View.VISIBLE);
                         keyLayout.setVisibility(View.VISIBLE);
@@ -391,7 +392,7 @@ public class OnScreenButtonConfigActivity extends Activity
                         styleSpinner.setSelection(Utility.ArrayIndexOf(styleValues, btn.style));
                         keySpinner.setSelection(Utility.ArrayIndexOf(keyCodes, btn.key[0]));
                         break;
-                    case Q3EUtils.TYPE_SLIDER:
+                    case Q3EGlobals.TYPE_SLIDER:
                         holdLayout.setVisibility(View.GONE);
                         styleLayout.setVisibility(View.GONE);
                         sliderStyleLayout.setVisibility(View.VISIBLE);
@@ -415,7 +416,7 @@ public class OnScreenButtonConfigActivity extends Activity
                int type = typeValues[position];
                switch(type)
                {
-                   case Q3EUtils.TYPE_BUTTON:
+                   case Q3EGlobals.TYPE_BUTTON:
                        holdLayout.setVisibility(View.VISIBLE);
                        styleLayout.setVisibility(View.VISIBLE);
                        keyLayout.setVisibility(View.VISIBLE);
@@ -423,7 +424,7 @@ public class OnScreenButtonConfigActivity extends Activity
                        key3Layout.setVisibility(View.GONE);
                        sliderStyleLayout.setVisibility(View.GONE);
                        break;
-                   case Q3EUtils.TYPE_SLIDER:
+                   case Q3EGlobals.TYPE_SLIDER:
                        holdLayout.setVisibility(View.GONE);
                        styleLayout.setVisibility(View.GONE);
                        sliderStyleLayout.setVisibility(View.VISIBLE);
@@ -449,12 +450,12 @@ public class OnScreenButtonConfigActivity extends Activity
                 btn.type = type;
                 switch(type)
                 {
-                    case Q3EUtils.TYPE_BUTTON:
+                    case Q3EGlobals.TYPE_BUTTON:
                         btn.hold = holdCheckBox.isChecked();
                         btn.style = styleValues[styleSpinner.getSelectedItemPosition()];
                         btn.key[0] = keyCodes[keySpinner.getSelectedItemPosition()];
                         break;
-                    case Q3EUtils.TYPE_SLIDER:
+                    case Q3EGlobals.TYPE_SLIDER:
                         btn.style = sliderStyleValues[sliderStyleSpinner.getSelectedItemPosition()];
                         btn.key[0] = keyCodes[keySpinner.getSelectedItemPosition()];
                         btn.key[1] = keyCodes[key2Spinner.getSelectedItemPosition()];

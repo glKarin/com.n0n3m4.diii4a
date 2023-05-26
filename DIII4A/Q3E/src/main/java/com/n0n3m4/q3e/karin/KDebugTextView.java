@@ -1,4 +1,4 @@
-package com.n0n3m4.q3e;
+package com.n0n3m4.q3e.karin;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -15,11 +15,11 @@ import android.widget.TextView;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class DebugTextView extends TextView {
+public class KDebugTextView extends TextView {
     private MemDumpFunc m_memFunc = null;
 
     @SuppressLint("ResourceType")
-    public DebugTextView(Context context)
+    public KDebugTextView(Context context)
     {
         super(context);
         setFocusable(false);
@@ -57,9 +57,9 @@ public class DebugTextView extends TextView {
 
         private boolean  m_lock = false;
         private ActivityManager m_am = null;
-        private int m_processs[] = {Process.myPid()};
-        private ActivityManager.MemoryInfo m_outInfo = new ActivityManager.MemoryInfo();
-        private TextView m_memoryUsageText = null;
+        private final int[] m_processs = {Process.myPid()};
+        private final ActivityManager.MemoryInfo m_outInfo = new ActivityManager.MemoryInfo();
+        private TextView m_memoryUsageText;
         protected Runnable m_runnable = new Runnable() {
             @Override
             public void run()
@@ -121,25 +121,25 @@ public class DebugTextView extends TextView {
                 usedMem = (int)((m_outInfo.totalMem - m_outInfo.availMem) / UNIT2);
             }
 
-            Debug.MemoryInfo memInfos[] = m_am.getProcessMemoryInfo(m_processs);
+            Debug.MemoryInfo[] memInfos = m_am.getProcessMemoryInfo(m_processs);
             Debug.MemoryInfo memInfo = memInfos[0];
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
                 Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
                 Debug.getMemoryInfo(memoryInfo);
-                java_mem = Integer.valueOf(memoryInfo.getMemoryStat("summary.java-heap")) / UNIT;
-                native_mem = Integer.valueOf(memoryInfo.getMemoryStat("summary.native-heap")) / UNIT;
+                java_mem = Integer.parseInt(memoryInfo.getMemoryStat("summary.java-heap")) / UNIT;
+                native_mem = Integer.parseInt(memoryInfo.getMemoryStat("summary.native-heap")) / UNIT;
                 //String code = memoryInfo.getMemoryStat("summary.code");
                 //String stack = memoryInfo.getMemoryStat("summary.stack");
-                graphics_mem = Integer.valueOf(memoryInfo.getMemoryStat("summary.graphics")) / UNIT;
+                graphics_mem = Integer.parseInt(memoryInfo.getMemoryStat("summary.graphics")) / UNIT;
                 //String privateOther = memoryInfo.getMemoryStat("summary.private-other");
                 //String system = memoryInfo.getMemoryStat("summary.system");
                 //String swap = memoryInfo.getMemoryStat("summary.total-swap");
             }
             else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23 // > Android P, slow frequency
             {
-                java_mem = Integer.valueOf(memInfo.getMemoryStat("summary.java-heap")) / UNIT;
-                native_mem = Integer.valueOf(memInfo.getMemoryStat("summary.native-heap")) / UNIT;
-                graphics_mem = Integer.valueOf(memInfo.getMemoryStat("summary.graphics")) / UNIT;
+                java_mem = Integer.parseInt(memInfo.getMemoryStat("summary.java-heap")) / UNIT;
+                native_mem = Integer.parseInt(memInfo.getMemoryStat("summary.native-heap")) / UNIT;
+                graphics_mem = Integer.parseInt(memInfo.getMemoryStat("summary.graphics")) / UNIT;
                 //String stack_mem = memInfo.getMemoryStat("summary.stack");
                 //String code_mem = memInfo.getMemoryStat("summary.code");
                 //String others_mem = memInfo.getMemoryStat("summary.system");
@@ -156,36 +156,17 @@ public class DebugTextView extends TextView {
             int percent = Math.round(((float)usedMem / (float)totalMem) * 100);
             availMem = totalMem - usedMem;
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("App->");
-            sb.append("Dalvik:").append(java_mem).append("|");
-            sb.append("Native:").append(native_mem).append("|");
-            sb.append("Graphics:").append(graphics_mem_str).append("|");
-            sb.append("≈").append(total_used_str).append("\n");
-
-            sb.append("Sys->");
-            sb.append("Used:").append(usedMem);
-            sb.append("/Total:").append(totalMem).append("|");
-            sb.append(percent + "%").append("|");
-            sb.append("≈").append(availMem);
-
-                /*
-                 final int totalMem32 = 4 * 1024;
-                 final boolean needShow32 = !Q3EJNI.IS_64 || totalMem > totalMem32;
-                 if(needShow32)
-                 {
-                 percent = Math.round(Math.min(1.0f, ((float)usedMem / (float)totalMem32)) * 100);
-                 availMem = totalMem32 - usedMem;
-                 sb.append("\n  32:");
-                 sb.append("Used:").append(usedMem);
-                 sb.append("/Total:").append(totalMem32).append("|");
-                 sb.append(percent + "%").append("|");
-                 sb.append("≈").append(availMem);
-                 sb.append("(+").append(totalMem - totalMem32).append(")");
-                 }
-                 */
-
-            return sb.toString();
+            String sb = "App->" +
+                    "Dalvik:" + java_mem + "|" +
+                    "Native:" + native_mem + "|" +
+                    "Graphics:" + graphics_mem_str + "|" +
+                    "≈" + total_used_str + "\n" +
+                    "Sys->" +
+                    "Used:" + usedMem +
+                    "/Total:" + totalMem + "|" +
+                    percent + "%" + "|" +
+                    "≈" + availMem;
+            return sb;
         }
 
         private void HandleMemText(final String text)

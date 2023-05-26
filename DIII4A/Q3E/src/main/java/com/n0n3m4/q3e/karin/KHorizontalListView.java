@@ -1,7 +1,6 @@
-package com.n0n3m4.q3e;
+package com.n0n3m4.q3e.karin;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -10,23 +9,23 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 
-public class HorizontalListView extends HorizontalScrollView {
+public class KHorizontalListView extends HorizontalScrollView {
 	private LinearLayout m_mainLayout;
     private GridView m_gridView;
     private int m_horizontalSpacing = 2;
     private int m_columnWidth = 256;
 
-    public HorizontalListView(Context context)
+    public KHorizontalListView(Context context)
     {
         super(context);
         Setup(null);
     }
-    public HorizontalListView(Context context, AttributeSet attrs)
+    public KHorizontalListView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         Setup(attrs);
     }
-    public HorizontalListView(Context context, AttributeSet attrs, int defStyle) {
+    public KHorizontalListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         Setup(attrs);
     }

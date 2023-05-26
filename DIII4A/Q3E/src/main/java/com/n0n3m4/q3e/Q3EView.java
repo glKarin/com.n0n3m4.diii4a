@@ -25,13 +25,11 @@ package com.n0n3m4.q3e;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
-import android.opengl.GLES20;
 import android.preference.PreferenceManager;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.n0n3m4.q3e.karin.KOnceRunnable;
 
 class Q3EView extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -78,8 +76,8 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
     {
         if(!mInit)
             return;
-        Runnable runnable = new __Runnable() {
-            public void __run() {
+        Runnable runnable = new KOnceRunnable() {
+            @Override public void Run() {
                 Q3EJNI.OnPause();
             }
         };
@@ -90,8 +88,8 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
     {
         if(!mInit)
             return;
-        Runnable runnable = new __Runnable() {
-            public void __run() {
+        Runnable runnable = new KOnceRunnable() {
+            @Override public void Run() {
                 Q3EJNI.OnResume();
             }
         };
@@ -132,7 +130,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                     break;
             }
 
-            String lib_dir = Q3EJNI.GetGameLibDir(getContext());
+            String lib_dir = Q3EUtils.GetGameLibDir(getContext());
             String cmd = Q3EMain.datadir + "/" + PreferenceManager.getDefaultSharedPreferences(this.getContext()).getString(Q3EUtils.pref_params, Q3EUtils.q3ei.libname) + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
             Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa);
 
@@ -182,8 +180,8 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
 
     private int[] GetFrameSize(int w, int h)
     {
-        int width = w;
-        int height = h;
+        int width;
+        int height;
         SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
         switch (mPrefs.getInt(Q3EUtils.pref_scrres, 0))
@@ -209,7 +207,10 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                 //k height=Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resy, "480"));
                 try
                 {
-                    width = Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resx, "0"));
+                    String str = mPrefs.getString(Q3EUtils.pref_resx, "0");
+                    if(null == str)
+                        str = "0";
+                    width = Integer.parseInt(str);
                 }
                 catch (Exception e)
                 {
@@ -217,7 +218,10 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                 }
                 try
                 {
-                    height = Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resy, "0"));
+                    String str = mPrefs.getString(Q3EUtils.pref_resy, "0");
+                    if(null == str)
+                        str = "0";
+                    height = Integer.parseInt(str);
                 }
                 catch (Exception e)
                 {

@@ -69,6 +69,8 @@ import com.karin.idTech4Amm.sys.UncaughtExceptionHandler;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.FileBrowserDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
+import com.n0n3m4.q3e.Q3EAd;
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3EKeyCodes;
@@ -521,24 +523,24 @@ public class GameLauncher extends Activity{
 
 		InitUIDefaultLayout(q3ei);
 		
-		q3ei.type_table[UI_JOYSTICK]=Q3EUtils.TYPE_JOYSTICK;
-		q3ei.type_table[UI_SHOOT]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_JUMP]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_CROUCH]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_RELOADBAR]=Q3EUtils.TYPE_SLIDER;		
-		q3ei.type_table[UI_PDA]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_FLASHLIGHT]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_SAVE]=Q3EUtils.TYPE_SLIDER;
-		q3ei.type_table[UI_1]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_2]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_3]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_KBD]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_CONSOLE]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_RUN]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_ZOOM]=Q3EUtils.TYPE_BUTTON;
-		q3ei.type_table[UI_INTERACT]=Q3EUtils.TYPE_BUTTON;
+		q3ei.type_table[UI_JOYSTICK]=Q3EGlobals.TYPE_JOYSTICK;
+		q3ei.type_table[UI_SHOOT]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_JUMP]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_CROUCH]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_RELOADBAR]=Q3EGlobals.TYPE_SLIDER;
+		q3ei.type_table[UI_PDA]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_FLASHLIGHT]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_SAVE]=Q3EGlobals.TYPE_SLIDER;
+		q3ei.type_table[UI_1]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_2]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_3]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_KBD]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_CONSOLE]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_RUN]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_ZOOM]=Q3EGlobals.TYPE_BUTTON;
+		q3ei.type_table[UI_INTERACT]=Q3EGlobals.TYPE_BUTTON;
         
-        q3ei.type_table[UI_WEAPON_PANEL] = Q3EUtils.TYPE_DISC;
+        q3ei.type_table[UI_WEAPON_PANEL] = Q3EGlobals.TYPE_DISC;
 		
 		q3ei.arg_table[UI_SHOOT*4]=Q3EKeyCodes.KeyCodes.K_MOUSE1;
 		q3ei.arg_table[UI_SHOOT*4+1]=0;
@@ -591,7 +593,7 @@ public class GameLauncher extends Activity{
 		q3ei.arg_table[UI_3*4+2]=0;
 		q3ei.arg_table[UI_3*4+3]=0;
 		
-		q3ei.arg_table[UI_KBD*4]=Q3EUtils.K_VKBD;
+		q3ei.arg_table[UI_KBD*4]=Q3EKeyCodes.K_VKBD;
 		q3ei.arg_table[UI_KBD*4+1]=0;
 		q3ei.arg_table[UI_KBD*4+2]=0;
 		q3ei.arg_table[UI_KBD*4+3]=0;
@@ -680,7 +682,7 @@ public class GameLauncher extends Activity{
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
-		Q3EUtils.LoadAds(this);
+		Q3EAd.LoadAds(this);
 		super.onConfigurationChanged(newConfig);
 	}
 	
@@ -1092,7 +1094,7 @@ public class GameLauncher extends Activity{
 
         V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, false) ? View.GONE : View.VISIBLE);
 
-		SetGame(mPrefs.getString(Q3EUtils.pref_harm_game, Q3EInterface.GAME_DOOM3));
+		SetGame(mPrefs.getString(Q3EUtils.pref_harm_game, Q3EGlobals.GAME_DOOM3));
 		
 		V.edt_cmdline.setText(mPrefs.getString(Q3EUtils.pref_params, "game.arm"));
 		V.edt_mouse.setText(mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???"));
@@ -1290,7 +1292,7 @@ public class GameLauncher extends Activity{
 
 		updatehacktings();
 		
-		Q3EUtils.LoadAds(this);
+		Q3EAd.LoadAds(this);
         
         OpenUpdate();
 	}
@@ -1555,13 +1557,13 @@ public class GameLauncher extends Activity{
 				ChangeGame();
 				return true;*/
 			case R.id.main_menu_game_doom3:
-				ChangeGame(Q3EInterface.GAME_DOOM3);
+				ChangeGame(Q3EGlobals.GAME_DOOM3);
 				return true;
 			case R.id.main_menu_game_quake4:
-				ChangeGame(Q3EInterface.GAME_QUAKE4);
+				ChangeGame(Q3EGlobals.GAME_QUAKE4);
 				return true;
 			case R.id.main_menu_game_prey:
-				ChangeGame(Q3EInterface.GAME_PREY);
+				ChangeGame(Q3EGlobals.GAME_PREY);
 				return true;
 
 			case android.R.id.home:
@@ -2062,9 +2064,9 @@ public class GameLauncher extends Activity{
     	if(null == newGame || newGame.isEmpty())
 		{
 			final String[] Games = {
-					Q3EInterface.GAME_DOOM3,
-					Q3EInterface.GAME_QUAKE4,
-					Q3EInterface.GAME_PREY,
+					Q3EGlobals.GAME_DOOM3,
+					Q3EGlobals.GAME_QUAKE4,
+					Q3EGlobals.GAME_PREY,
 			};
 			int i;
 			for(i = 0; i < Games.length; i++)
@@ -2194,10 +2196,10 @@ public class GameLauncher extends Activity{
             "I", "II", "III", "IV", "V",
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        String[] levels = new String[Q3EInterface.QUAKE4_LEVELS.length];
+        String[] levels = new String[Q3EGlobals.QUAKE4_LEVELS.length];
         int m = 0;
         int n = 0;
-        for(int i = 0; i < Q3EInterface.QUAKE4_LEVELS.length; i++)
+        for(int i = 0; i < Q3EGlobals.QUAKE4_LEVELS.length; i++)
         {
             if(n >= Acts[m])
             {
@@ -2205,13 +2207,13 @@ public class GameLauncher extends Activity{
                 m++;
             }
             n++;
-            levels[i] = String.format("%s%d.Act %s - %s(%s)", (i < 9 ? " " : ""), (i + 1), Act_Names[m], Q3EInterface.QUAKE4_LEVELS[i], Q3EInterface.QUAKE4_MAPS[i]);
+            levels[i] = String.format("%s%d.Act %s - %s(%s)", (i < 9 ? " " : ""), (i + 1), Act_Names[m], Q3EGlobals.QUAKE4_LEVELS[i], Q3EGlobals.QUAKE4_MAPS[i]);
         }
 		final AlertDialog dialog = builder.setTitle("Quake 4 Level")
 				.setItems(levels, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int p) {
 						GameLauncher.this.RemoveParam_temp("loadGame");
-						GameLauncher.this.SetParam_temp("map", "game/" + Q3EInterface.QUAKE4_MAPS[p]);
+						GameLauncher.this.SetParam_temp("map", "game/" + Q3EGlobals.QUAKE4_MAPS[p]);
 						finish();
 						startActivity(new Intent(GameLauncher.this, Q3EMain.class));
 					}
