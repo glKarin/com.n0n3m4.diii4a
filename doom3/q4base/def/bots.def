@@ -1,4 +1,0 @@
-entityDef player_marine_mp_bot {
-	"inherit"		"player_marine_mp"
-	"spawnclass"		"rvmBot"
-}					

@@ -23,7 +23,7 @@ import android.view.KeyEvent;
 
 import java.lang.reflect.Field;
 
-import tv.ouya.console.api.OuyaController;
+//import tv.ouya.console.api.OuyaController;
 
 public class Q3EKeyCodes
 {
@@ -665,9 +665,11 @@ public class Q3EKeyCodes
                 if (Q3EUtils.isOuya)
                     return KeyCodes.K_SPACE;
                 return 'l';//dunno why
-            case OuyaController.BUTTON_L3:
+            //case OuyaController.BUTTON_L3:
+            case 106:
                 return '[';
-            case OuyaController.BUTTON_R3:
+            //case OuyaController.BUTTON_R3:
+            case 107:
                 return ']';
 
         }

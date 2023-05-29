@@ -52,9 +52,6 @@ import com.n0n3m4.q3e.onscreen.MouseControl;
 import com.n0n3m4.q3e.onscreen.Paintable;
 import com.n0n3m4.q3e.onscreen.TouchListener;
 import com.n0n3m4.q3e.onscreen.UiLoader;
-import com.stericson.RootTools.Command;
-import com.stericson.RootTools.CommandCapture;
-import com.stericson.RootTools.RootTools;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -67,7 +64,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
-import tv.ouya.console.api.OuyaController;
+//import tv.ouya.console.api.OuyaController;
 
 public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer, SensorEventListener
 {
@@ -80,14 +77,14 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         super(context);
 
-        try
+        /*try
         {
             if (Q3EUtils.isOuya)
                 OuyaController.init(context);
         } catch (Exception e)
         {
             e.printStackTrace();
-        }
+        }*/
 
         setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, GL.usegles20));
         getHolder().setFormat(PixelFormat.RGBA_8888);
@@ -126,7 +123,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     public static String detectmouse()
     {
-        try
+        /*try
         {
             Command command = new Command(0, "cat /proc/bus/input/devices")
             {
@@ -146,6 +143,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     {
                         detectedname = "/dev/input/" + detectedtmp;
                     }
+                    super.commandOutput(id, line);
                 }
             };
             RootTools.getShell(true).add(command).waitForFinish();
@@ -154,7 +152,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         {
             t.printStackTrace();
             return null;
-        }
+        }*/
+        return null;
     }
 
     private int readmouse_dx = 0;
@@ -174,8 +173,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         {
             try
             {
-                CommandCapture command = new CommandCapture(0, "chmod 777 " + mouse_name);//insecure =(
-                RootTools.getShell(true).add(command).waitForFinish();
+                /*Command command = new Command(0, "chmod 777 " + mouse_name);//insecure =(
+                RootTools.getShell(true).add(command).waitForFinish();*/
 
                 FileInputStream fis = new FileInputStream(mouse_name);//.getChannel();
                 FileOutputStream fout = new FileOutputStream(mouse_name);//.getChannel();
@@ -411,7 +410,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             boolean detectMouse = mPrefs.getBoolean(Q3EUtils.pref_detectmouse, true);
 
             //k: first check su
-            mouse_name = hideonscr && RootTools.isRootAvailable() ? (detectMouse ? detectmouse() : mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???")) : null;
+            mouse_name = hideonscr /*&& RootTools.isRootAvailable()*/ ? (detectMouse ? detectmouse() : mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???")) : null;
             mouse_corner = mPrefs.getInt(Q3EUtils.pref_mousepos, 3);
 
             orig_width = w;

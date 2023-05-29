@@ -36,12 +36,12 @@ android {
         }
     }
     externalNativeBuild {
-    /*    cmake {
+        cmake {
             path "src/main/jni/CMakeLists.txt"
-        }*/
-        ndkBuild {
-            path file('src/main/jni/Android.mk')
         }
+        /*ndkBuild {
+            path file('src/main/jni/Android.mk')
+        }*/
     }
 
     ndkVersion '17.2.4988734'
@@ -57,6 +57,6 @@ android {
 
 dependencies {
     //compile 'com.android.support:support-v4:18.+'
-    implementation files('libs/ouya-sdk.jar')
-    implementation files('libs/RootTools-2.4.jar')
+    //implementation files('libs/ouya-sdk.jar')
+    //implementation files('libs/RootTools-2.4.jar')
 }
