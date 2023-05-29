@@ -31,7 +31,7 @@ android {
         targetSdkVersion 28
         versionCode 11031
         versionName '1.1.0harmattan31'
-        versionNameSuffix 'natasha'
+        //versionNameSuffix 'natasha'
     }
 
     buildTypes {
