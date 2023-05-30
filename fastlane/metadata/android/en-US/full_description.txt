@@ -1,0 +1,17 @@
+idTech4A++ is DOOM III/Quake 4/Prey(2006) idTech4 game runtime library and launcher for Android.
+
+  1. Putting your PC game data(external folder) to launcher setting `Game working directory`(default `/sdcard/diii4a`).
+  2. Click left icon or right game name text of launcher status bar for choosing game.
+  3. Finally START GAME.
+
+Folder name of games/mods:
+  DOOM3: base
+  DOOM3 - Resurrection of Evil: d3xp
+  DOOM3 - The lost mission: d3le
+  Classic DOOM3: cdoom
+  Rivensin: rivensin
+  Hardcorps: hardcorps
+
+  Quake4: q4base
+
+  Prey(2006): preybase
