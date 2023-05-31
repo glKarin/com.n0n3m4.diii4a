@@ -36,12 +36,12 @@ android {
         }
     }
     externalNativeBuild {
-    /*    cmake {
+        cmake {
             path "src/main/jni/CMakeLists.txt"
-        }*/
-        ndkBuild {
-            path file('src/main/jni/Android.mk')
         }
+        /*ndkBuild {
+            path file('src/main/jni/Android.mk')
+        }*/
     }
 
     ndkVersion '17.2.4988734'
