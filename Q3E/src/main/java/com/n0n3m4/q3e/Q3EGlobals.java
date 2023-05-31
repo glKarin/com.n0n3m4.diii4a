@@ -2,6 +2,26 @@ package com.n0n3m4.q3e;
 
 public final class Q3EGlobals
 {
+    // on-screen buttons index
+    public static final int UI_JOYSTICK=0;
+    public static final int UI_SHOOT=1;
+    public static final int UI_JUMP=2;
+    public static final int UI_CROUCH=3;
+    public static final int UI_RELOADBAR=4;
+    public static final int UI_PDA=5;
+    public static final int UI_FLASHLIGHT=6;
+    public static final int UI_SAVE=7;
+    public static final int UI_1=8;
+    public static final int UI_2=9;
+    public static final int UI_3=10;
+    public static final int UI_KBD=11;
+    public static final int UI_CONSOLE = 12;
+    public static final int UI_RUN = 13;
+    public static final int UI_ZOOM = 14;
+    public static final int UI_INTERACT = 15;
+    public static final int UI_WEAPON_PANEL = 16;
+    public static final int UI_SIZE=UI_WEAPON_PANEL+1;
+
     // on-screen item type
     public static final int TYPE_BUTTON = 0;
     public static final int TYPE_SLIDER = 1;

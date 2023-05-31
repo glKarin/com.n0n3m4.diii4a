@@ -25,6 +25,7 @@ import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.view.Window;
 import android.view.WindowManager;
@@ -86,6 +87,7 @@ public class Q3EMain extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        InitGlobalEnv();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         GL.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
@@ -107,7 +109,6 @@ public class Q3EMain extends Activity {
             m_runBackground = Integer.parseInt(harm_run_background);
         else
             m_runBackground = 1;
-        Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f);
         //k
         SetupUIFlags();
 /*        if(m_hideNav)
@@ -127,12 +128,6 @@ public class Q3EMain extends Activity {
                 });
 			}
         }*/
-        Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt("harm_volume_up_key", Q3EKeyCodes.KeyCodes.K_F3);
-        Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
-        Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
-        Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
-        Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EUtils.pref_harm_multithreading, false);
-        Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EUtils.pref_harm_function_key_toolbar, false);
 		
 		super.onCreate(savedInstanceState);
 		
@@ -312,5 +307,36 @@ public class Q3EMain extends Activity {
             decorView.setSystemUiVisibility(m_uiOptions);
         else
             decorView.setSystemUiVisibility(m_uiOptions_def);
+    }
+
+    private void InitGlobalEnv()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if(!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
+        {
+            Q3EKeyCodes.InitD3Keycodes();
+
+            Q3EUtils.q3ei.InitD3();
+
+            Q3EUtils.q3ei.InitDefaultsTable();
+
+            Q3EUtils.q3ei.default_path = Environment.getExternalStorageDirectory() + "/diii4a";
+
+            Q3EUtils.q3ei.SetupGame(preferences.getString(Q3EUtils.pref_harm_game, Q3EGlobals.GAME_DOOM3));
+
+            String extraCommand = "";
+            if(preferences.getBoolean(Q3EUtils.pref_harm_auto_quick_load, false))
+                extraCommand += "+loadGame QuickSave";
+            Q3EUtils.q3ei.start_temporary_extra_command = extraCommand;
+        }
+
+        Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f);
+        Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt("harm_volume_up_key", Q3EKeyCodes.KeyCodes.K_F3);
+        Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
+        Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
+        Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
+        Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EUtils.pref_harm_multithreading, false);
+        Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EUtils.pref_harm_function_key_toolbar, false);
     }
 }
