@@ -118,12 +118,12 @@ public class OnScreenButtonConfigActivity extends Activity
             "Weapon"
         };
         Q3EInterface q3ei = Q3EUtils.q3ei;
-        for(int i = 0; i < GameLauncher.UI_SIZE; i++)
+        for(int i = 0; i < Q3EGlobals.UI_SIZE; i++)
         {
             int type = q3ei.type_table[i];
             if(type == Q3EGlobals.TYPE_JOYSTICK || type == Q3EGlobals.TYPE_DISC)
                 continue;
-            if(i == GameLauncher.UI_KBD || i == GameLauncher.UI_CONSOLE)
+            if(i == Q3EGlobals.UI_KBD || i == Q3EGlobals.UI_CONSOLE)
                 continue;
             int[] arr = new int[4];
             System.arraycopy(q3ei.arg_table, i * 4, arr, 0, arr.length);

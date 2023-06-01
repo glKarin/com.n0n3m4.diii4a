@@ -3997,6 +3997,9 @@ const char * idSessionLocal::GetDeathwalkMapName(const char *mapName) const
 		return "";
 #endif
 	const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
+	if (!mapDef) {
+		return "";
+	}
 	const char *dwMap = mapDef->dict.GetString("deathwalkmap");
 	if(!dwMap || !dwMap[0])
 		return "";

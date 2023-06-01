@@ -369,25 +369,6 @@ public class GameLauncher extends Activity{
 	
 	final String default_gamedata= Environment.getExternalStorageDirectory() + "/diii4a";
 	
-	public static final int UI_JOYSTICK=0;
-	public static final int UI_SHOOT=1;
-	public static final int UI_JUMP=2;
-	public static final int UI_CROUCH=3;
-	public static final int UI_RELOADBAR=4;	
-	public static final int UI_PDA=5;
-	public static final int UI_FLASHLIGHT=6;
-	public static final int UI_SAVE=7;
-	public static final int UI_1=8;
-	public static final int UI_2=9;
-	public static final int UI_3=10;	
-	public static final int UI_KBD=11;
-    public static final int UI_CONSOLE = 12;
-    public static final int UI_RUN = 13;
-    public static final int UI_ZOOM = 14;
-    public static final int UI_INTERACT = 15;
-    public static final int UI_WEAPON_PANEL = 16;
-	public static final int UI_SIZE=UI_WEAPON_PANEL+1;
-	
 	public void getgl2progs(String destname) {
         try {            
             byte[] buf = new byte[4096];
@@ -395,7 +376,7 @@ public class GameLauncher extends Activity{
             InputStream bis;
             ZipEntry zipentry;
                         
-            bis=getAssets().open("gl2progs.zip");            
+            bis=getAssets().open("source/gl2progs.zip");
             zipinputstream=new ZipInputStream(bis);
             
             (new File(destname)).mkdirs();                               
@@ -475,28 +456,28 @@ public class GameLauncher extends Activity{
 		final int sliders_width = slidersWidth;
 		final int alpha = opacity;
 
-		String[] defaults_table=new String[UI_SIZE];
-		defaults_table[UI_JOYSTICK] =(X + r*4/3)+" "+(height-r*4/3)+" "+r+" "+alpha;
-		defaults_table[UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+alpha;
-		defaults_table[UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+alpha;
-		defaults_table[UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+alpha;
-		defaults_table[UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+alpha;
-		defaults_table[UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
-		defaults_table[UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
-		defaults_table[UI_SAVE]     =(X + sliders_width/2)+" "+sliders_width/2+" "+sliders_width+" "+alpha;
+		String[] defaults_table=new String[Q3EGlobals.UI_SIZE];
+		defaults_table[Q3EGlobals.UI_JOYSTICK] =(X + r*4/3)+" "+(height-r*4/3)+" "+r+" "+alpha;
+		defaults_table[Q3EGlobals.UI_SHOOT]    =(width-r/2-rightoffset)+" "+(height-r/2-rightoffset)+" "+r*3/2+" "+alpha;
+		defaults_table[Q3EGlobals.UI_JUMP]     =(width-r/2)+" "+(height-r-2*rightoffset)+" "+r+" "+alpha;
+		defaults_table[Q3EGlobals.UI_CROUCH]   =(width-r/2)+" "+(height-r/2)+" "+r+" "+alpha;
+		defaults_table[Q3EGlobals.UI_RELOADBAR]=(width-sliders_width/2-rightoffset/3)+" "+(sliders_width*3/8)+" "+sliders_width+" "+alpha;
+		defaults_table[Q3EGlobals.UI_PDA]   =(width-r-2*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
+		defaults_table[Q3EGlobals.UI_FLASHLIGHT]     =(width-r/2-4*rightoffset)+" "+(height-r/2)+" "+r+" "+alpha;
+		defaults_table[Q3EGlobals.UI_SAVE]     =(X + sliders_width/2)+" "+sliders_width/2+" "+sliders_width+" "+alpha;
 
-		for (int i=UI_SAVE+1;i<UI_SIZE;i++)
-			defaults_table[i]=(r/2+r*(i-UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+alpha;
+		for (int i=Q3EGlobals.UI_SAVE+1;i<Q3EGlobals.UI_SIZE;i++)
+			defaults_table[i]=(r/2+r*(i-Q3EGlobals.UI_SAVE-1))+" "+(height+r/2)+" "+r+" "+alpha;
 
-		defaults_table[UI_WEAPON_PANEL] =(width - sliders_width - r - rightoffset)+" "+(r)+" "+(r / 3)+" "+alpha;
+		defaults_table[Q3EGlobals.UI_WEAPON_PANEL] =(width - sliders_width - r - rightoffset)+" "+(r)+" "+(r / 3)+" "+alpha;
 
 		//k
 		final int sr = r / 6 * 5;
-		defaults_table[UI_1] = String.format("%d %d %d %d", width - sr / 2 - sr * 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-		defaults_table[UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-		defaults_table[UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-		defaults_table[UI_KBD] = String.format("%d %d %d %d", X + sliders_width + sr / 2, sr / 2, sr, alpha);
-		defaults_table[UI_CONSOLE] = String.format("%d %d %d %d", X + sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, alpha);
+		defaults_table[Q3EGlobals.UI_1] = String.format("%d %d %d %d", width - sr / 2 - sr * 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+		defaults_table[Q3EGlobals.UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+		defaults_table[Q3EGlobals.UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
+		defaults_table[Q3EGlobals.UI_KBD] = String.format("%d %d %d %d", X + sliders_width + sr / 2, sr / 2, sr, alpha);
+		defaults_table[Q3EGlobals.UI_CONSOLE] = String.format("%d %d %d %d", X + sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, alpha);
 
 		return defaults_table;
 	}
@@ -515,132 +496,14 @@ public class GameLauncher extends Activity{
 	{			
 		Q3EKeyCodes.InitD3Keycodes();
 		Q3EInterface q3ei=new Q3EInterface();
-		q3ei.isD3=true;
-		q3ei.isD3BFG=true;
-		q3ei.arg_table=new int[UI_SIZE*4];
-		q3ei.type_table=new int[UI_SIZE];	
-        q3ei.UI_SIZE=UI_SIZE;
+
+		q3ei.InitD3();
 
 		InitUIDefaultLayout(q3ei);
-		
-		q3ei.type_table[UI_JOYSTICK]=Q3EGlobals.TYPE_JOYSTICK;
-		q3ei.type_table[UI_SHOOT]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_JUMP]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_CROUCH]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_RELOADBAR]=Q3EGlobals.TYPE_SLIDER;
-		q3ei.type_table[UI_PDA]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_FLASHLIGHT]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_SAVE]=Q3EGlobals.TYPE_SLIDER;
-		q3ei.type_table[UI_1]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_2]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_3]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_KBD]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_CONSOLE]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_RUN]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_ZOOM]=Q3EGlobals.TYPE_BUTTON;
-		q3ei.type_table[UI_INTERACT]=Q3EGlobals.TYPE_BUTTON;
-        
-        q3ei.type_table[UI_WEAPON_PANEL] = Q3EGlobals.TYPE_DISC;
-		
-		q3ei.arg_table[UI_SHOOT*4]=Q3EKeyCodes.KeyCodes.K_MOUSE1;
-		q3ei.arg_table[UI_SHOOT*4+1]=0;
-		q3ei.arg_table[UI_SHOOT*4+2]=0;
-		q3ei.arg_table[UI_SHOOT*4+3]=0;
-		
-		
-		q3ei.arg_table[UI_JUMP*4]=Q3EKeyCodes.KeyCodes.K_SPACE;
-		q3ei.arg_table[UI_JUMP*4+1]=0;
-		q3ei.arg_table[UI_JUMP*4+2]=0;
-		q3ei.arg_table[UI_JUMP*4+3]=0;
-		
-		q3ei.arg_table[UI_CROUCH*4]=Q3EKeyCodes.KeyCodesD3.K_C; // BFG
-		q3ei.arg_table[UI_CROUCH*4+1]=1;
-		q3ei.arg_table[UI_CROUCH*4+2]=1;
-		q3ei.arg_table[UI_CROUCH*4+3]=0;
-		
-		q3ei.arg_table[UI_RELOADBAR*4]=Q3EKeyCodes.KeyCodesD3.K_BRACKET_RIGHT; // 93
-		q3ei.arg_table[UI_RELOADBAR*4+1]=Q3EKeyCodes.KeyCodesD3.K_R; // 114
-		q3ei.arg_table[UI_RELOADBAR*4+2]=Q3EKeyCodes.KeyCodesD3.K_BRACKET_LEFT; // 91
-		q3ei.arg_table[UI_RELOADBAR*4+3]=0;
-		
-		q3ei.arg_table[UI_PDA*4]=Q3EKeyCodes.KeyCodes.K_TAB;
-		q3ei.arg_table[UI_PDA*4+1]=0;
-		q3ei.arg_table[UI_PDA*4+2]=0;
-		q3ei.arg_table[UI_PDA*4+3]=0;
-		
-		q3ei.arg_table[UI_FLASHLIGHT*4]=Q3EKeyCodes.KeyCodesD3.K_F; // BFG
-		q3ei.arg_table[UI_FLASHLIGHT*4+1]=0;
-		q3ei.arg_table[UI_FLASHLIGHT*4+2]=0;
-		q3ei.arg_table[UI_FLASHLIGHT*4+3]=0;
-		
-		q3ei.arg_table[UI_SAVE*4]=Q3EKeyCodes.KeyCodes.K_F5;
-		q3ei.arg_table[UI_SAVE*4+1]=Q3EKeyCodes.KeyCodes.K_ESCAPE;
-		q3ei.arg_table[UI_SAVE*4+2]=Q3EKeyCodes.KeyCodes.K_F9;
-		q3ei.arg_table[UI_SAVE*4+3]=1;
-		
-		q3ei.arg_table[UI_1*4]=Q3EKeyCodes.KeyCodesD3BFG.K_1;
-		q3ei.arg_table[UI_1*4+1]=0;
-		q3ei.arg_table[UI_1*4+2]=0;
-		q3ei.arg_table[UI_1*4+3]=0;
-		
-		q3ei.arg_table[UI_2*4]=Q3EKeyCodes.KeyCodesD3BFG.K_2;
-		q3ei.arg_table[UI_2*4+1]=0;
-		q3ei.arg_table[UI_2*4+2]=0;
-		q3ei.arg_table[UI_2*4+3]=0;
-		
-		q3ei.arg_table[UI_3*4]=Q3EKeyCodes.KeyCodesD3BFG.K_3;
-		q3ei.arg_table[UI_3*4+1]=0;
-		q3ei.arg_table[UI_3*4+2]=0;
-		q3ei.arg_table[UI_3*4+3]=0;
-		
-		q3ei.arg_table[UI_KBD*4]=Q3EKeyCodes.K_VKBD;
-		q3ei.arg_table[UI_KBD*4+1]=0;
-		q3ei.arg_table[UI_KBD*4+2]=0;
-		q3ei.arg_table[UI_KBD*4+3]=0;
-
-        q3ei.arg_table[UI_CONSOLE*4]=Q3EKeyCodes.KeyCodesD3.K_CONSOLE;
-        q3ei.arg_table[UI_CONSOLE*4+1]=0;
-        q3ei.arg_table[UI_CONSOLE*4+2]=0;
-		q3ei.arg_table[UI_CONSOLE*4+3]=0;
-
-        q3ei.arg_table[UI_RUN*4]=Q3EKeyCodes.KeyCodesD3.K_SHIFT;
-        q3ei.arg_table[UI_RUN*4+1]=1;
-        q3ei.arg_table[UI_RUN*4+2]=0;
-		q3ei.arg_table[UI_RUN*4+3]=0;
-
-        q3ei.arg_table[UI_ZOOM*4]=Q3EKeyCodes.KeyCodesD3.K_Z;
-        q3ei.arg_table[UI_ZOOM*4+1]=1;
-        q3ei.arg_table[UI_ZOOM*4+2]=0;
-		q3ei.arg_table[UI_ZOOM*4+3]=0;
-
-        q3ei.arg_table[UI_INTERACT*4]=Q3EKeyCodes.KeyCodesD3.K_MOUSE2;
-        q3ei.arg_table[UI_INTERACT*4+1]=0;
-        q3ei.arg_table[UI_INTERACT*4+2]=0;
-		q3ei.arg_table[UI_INTERACT*4+3]=0;
 		
 		q3ei.default_path=default_gamedata;		
         
 		q3ei.SetupDOOM3(); //k armv7-a only support neon now
-        
-		q3ei.texture_table=new String[UI_SIZE];
-		q3ei.texture_table[UI_JOYSTICK]="";
-		q3ei.texture_table[UI_SHOOT]="btn_sht.png";
-		q3ei.texture_table[UI_JUMP]="btn_jump.png";
-		q3ei.texture_table[UI_CROUCH]="btn_crouch.png";
-		q3ei.texture_table[UI_RELOADBAR]="btn_reload.png";
-		q3ei.texture_table[UI_PDA]="btn_pda.png";
-		q3ei.texture_table[UI_FLASHLIGHT]="btn_flashlight.png";
-		q3ei.texture_table[UI_SAVE]="btn_pause.png";		
-		q3ei.texture_table[UI_1]="btn_1.png";
-		q3ei.texture_table[UI_2]="btn_2.png";
-		q3ei.texture_table[UI_3]="btn_3.png";
-		q3ei.texture_table[UI_KBD]="btn_keyboard.png";
-		q3ei.texture_table[UI_CONSOLE]="btn_notepad.png";
-		q3ei.texture_table[UI_INTERACT]="btn_activate.png";
-		q3ei.texture_table[UI_ZOOM]="btn_binocular.png";
-		q3ei.texture_table[UI_RUN]="btn_kick.png";
-
-		q3ei.texture_table[UI_WEAPON_PANEL]="";
         
         Constants.DumpDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
 
@@ -689,31 +552,55 @@ public class GameLauncher extends Activity{
 	public void support(View vw)
 	{
         AlertDialog.Builder bldr=new AlertDialog.Builder(this);
-        bldr.setTitle("Do you want to support the developer?");
-        bldr.setPositiveButton("Donate by PayPal", new AlertDialog.OnClickListener() {          
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent ppIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kosleb1169%40gmail%2ecom&lc=US&item_name=n0n3m4&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest"));
-                    ppIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                    startActivity(ppIntent);                
-                    dialog.dismiss();
-                }
-            });
-        bldr.setNegativeButton("Don't ask", new AlertDialog.OnClickListener() {         
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-        bldr.setNeutralButton("More apps by n0n3m4", new AlertDialog.OnClickListener() {            
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pub:n0n3m4"));
-                    marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                    startActivity(marketIntent);                
-                    dialog.dismiss();
-                }
-            });
+        if(Constants.CONST_IS_FDROID)
+		{
+			bldr.setTitle("Do you want to support the developer?");
+			bldr.setPositiveButton("Donate to F-Droid", new AlertDialog.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							ContextUtility.OpenUrlExternally(GameLauncher.this, "https://liberapay.com/F-Droid-Data/donate");
+							dialog.dismiss();
+						}
+					});
+			bldr.setNeutralButton("More apps in F-Droid", new AlertDialog.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if(!ContextUtility.OpenApp(GameLauncher.this, "org.fdroid.fdroid"))
+					{
+						ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/packages/");
+						dialog.dismiss();
+					}
+				}
+			});
+		}
+        else
+		{
+			bldr.setTitle("Do you want to support the developer?");
+			bldr.setPositiveButton("Donate to F-Droid" , new AlertDialog.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Intent ppIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kosleb1169%40gmail%2ecom&lc=US&item_name=n0n3m4&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest"));
+							ppIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+							startActivity(ppIntent);
+							dialog.dismiss();
+						}
+					});
+			bldr.setNeutralButton("More apps by n0n3m4", new AlertDialog.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pub:n0n3m4"));
+					marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+					startActivity(marketIntent);
+					dialog.dismiss();
+				}
+			});
+		}
+		bldr.setNegativeButton("Don't ask", new AlertDialog.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
         AlertDialog dl=bldr.create();
         dl.setCancelable(false);
 		dl.show();		
@@ -1092,7 +979,7 @@ public class GameLauncher extends Activity{
 
 		V.Setup();
 
-        V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, false) ? View.GONE : View.VISIBLE);
+        V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, Constants.CONST_IS_FDROID) ? View.GONE : View.VISIBLE);
 
 		SetGame(mPrefs.getString(Q3EUtils.pref_harm_game, Q3EGlobals.GAME_DOOM3));
 		
@@ -1335,7 +1222,7 @@ public class GameLauncher extends Activity{
 	{
 		InitUILayout(Q3EUtils.q3ei, friendly, scale, opacity);
 		SharedPreferences.Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
-		for (int i=0;i<UI_SIZE;i++)
+		for (int i=0;i<Q3EGlobals.UI_SIZE;i++)
 			mEdtr.putString(Q3EUtils.pref_controlprefix+i, friendly ? Q3EUtils.q3ei.defaults_table[i] : null);
 		mEdtr.commit();
 	}
@@ -2407,7 +2294,7 @@ public class GameLauncher extends Activity{
 	{
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
 		SharedPreferences.Editor mEdtr = preferences.edit();
-		for (int i = 0; i < UI_SIZE; i++)
+		for (int i = 0; i < Q3EGlobals.UI_SIZE; i++)
 		{
 			String str = Q3EUtils.q3ei.defaults_table[i];
 			int index = str.lastIndexOf(' ');
@@ -2839,7 +2726,7 @@ public class GameLauncher extends Activity{
 		}
 		final boolean needScale = scale > 0.0f && scale != 1.0f;
 
-		for (int i = 0; i < UI_SIZE; i++)
+		for (int i = 0; i < Q3EGlobals.UI_SIZE; i++)
 		{
 			int newSize = needScale ? Math.round((float)defSizes[i] * scale) : defSizes[i];
 

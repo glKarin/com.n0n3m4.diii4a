@@ -160,6 +160,21 @@ public final class TextHelper
 	{
         StringBuilder sb = new StringBuilder();
         final String[] HELPS = {
+                "Launch game: ",
+                " 1. Putting your PC game data files(external folder) to launcher setting `Game working directory`(default `/sdcard/diii4a`).",
+                " 2. Click left icon or right game name text of launcher status bar for choosing game, and select game mod in tab `GENERAL`'s `Game`.",
+                " 3. Finally START GAME.",
+                null,
+                "Folder name of games/mods:",
+                " DOOM3: base",
+                " DOOM3-Resurrection of Evil: d3xp",
+                " DOOM3-The lost mission: d3le",
+                " Classic DOOM3: cdoom",
+                " Rivensin: rivensin",
+                " Hardcorps: hardcorps",
+                " Quake4: q4base",
+                " Prey(2006): preybase",
+                null,
             "For playing Prey(2006)(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
             " *. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.",
@@ -237,8 +252,6 @@ public final class TextHelper
 			"    #include \"script/map_monorail.script\"",
 			"  3-3. Choose `Rivensin` mod and start game in game launcher.",
 			"  3-4. Open console, and then using `map game/xxx` to load DOOM3 base game map.",
-			"  *. Some problems: ",
-			"    1. After end game level and change next map, the player view can change to First-person, need input `pm_thirdPerson 1` on console to change back Third-person player view.",
         };
         final String endl = GetDialogMessageEndl();
         for(String str : HELPS)
@@ -270,8 +283,9 @@ public final class TextHelper
             "idTech4 engine's games support on Android.",
             "e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, Prey(2006), and some mods.",
             null,
-            "Source in `assets/source` folder in APK file. `doom3_droid.source.tgz` is DOOM3 source. `DIII4A.source.tgz` is launcher frontend source.",
-            "OpenGL shader source is in `assets/gl2progs.zip`.",
+            "Source in `assets/source` folder in APK file.",
+            " `DIII4A.source.tgz`: launcher frontend source and game source, game source in `/Q3E/src/main/jni/doom3` of archive package.",
+            " `gl2progs.zip`: OpenGLES2 shader source.",
             null,
             "Homepage: ",
             "Github: " + GenLinkText(Constants.CONST_MAIN_PAGE, null),
