@@ -1,1 +1,1 @@
-idTech4A++ is DOOM III/Quake 4/Prey(2006) game runtime library and launcher for Android.
+DOOM III/Quake 4/Prey(2006) game runtime library and launcher for Android

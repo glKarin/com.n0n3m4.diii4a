@@ -11,7 +11,7 @@
         android:targetSdkVersion="28"
         tools:ignore="GradleOverrides" />
 
-    <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
+    <!--<uses-permission android:name="android.permission.ACCESS_SUPERUSER" />-->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Android 9 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
