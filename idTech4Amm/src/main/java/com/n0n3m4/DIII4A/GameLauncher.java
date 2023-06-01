@@ -558,7 +558,7 @@ public class GameLauncher extends Activity{
 			bldr.setPositiveButton("Donate to F-Droid", new AlertDialog.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-							ContextUtility.OpenUrlExternally(GameLauncher.this, "https://liberapay.com/F-Droid-Data/donate");
+							ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/donate/");
 							dialog.dismiss();
 						}
 					});
