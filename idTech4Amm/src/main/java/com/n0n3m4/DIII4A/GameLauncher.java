@@ -576,7 +576,7 @@ public class GameLauncher extends Activity{
         else
 		{
 			bldr.setTitle("Do you want to support the developer?");
-			bldr.setPositiveButton("Donate to F-Droid" , new AlertDialog.OnClickListener() {
+			bldr.setPositiveButton("Donate by PayPal" , new AlertDialog.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							Intent ppIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kosleb1169%40gmail%2ecom&lc=US&item_name=n0n3m4&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest"));
