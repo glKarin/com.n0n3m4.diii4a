@@ -28,7 +28,6 @@ public final class Constants
             "Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.",
 	};
     public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
-    public static final boolean CONST_IS_FDROID = true;
 
 	// Launcher preference keys
     public static final class PreferenceKey {

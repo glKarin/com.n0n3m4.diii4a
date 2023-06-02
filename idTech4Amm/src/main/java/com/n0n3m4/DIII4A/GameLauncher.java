@@ -552,49 +552,43 @@ public class GameLauncher extends Activity{
 	public void support(View vw)
 	{
         AlertDialog.Builder bldr=new AlertDialog.Builder(this);
-        if(Constants.CONST_IS_FDROID)
-		{
-			bldr.setTitle("Do you want to support the developer?");
-			bldr.setPositiveButton("Donate to F-Droid", new AlertDialog.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/donate/");
-							dialog.dismiss();
-						}
-					});
-			bldr.setNeutralButton("More apps in F-Droid", new AlertDialog.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					if(!ContextUtility.OpenApp(GameLauncher.this, "org.fdroid.fdroid"))
-					{
-						ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/packages/");
+		bldr.setTitle("Do you want to support the developer?");
+		bldr.setPositiveButton("Donate to F-Droid", new AlertDialog.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/donate/");
 						dialog.dismiss();
 					}
-				}
-			});
-		}
-        else
-		{
-			bldr.setTitle("Do you want to support the developer?");
-			bldr.setPositiveButton("Donate by PayPal" , new AlertDialog.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							Intent ppIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kosleb1169%40gmail%2ecom&lc=US&item_name=n0n3m4&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest"));
-							ppIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-							startActivity(ppIntent);
-							dialog.dismiss();
-						}
-					});
-			bldr.setNeutralButton("More apps by n0n3m4", new AlertDialog.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pub:n0n3m4"));
-					marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-					startActivity(marketIntent);
+				});
+		bldr.setNeutralButton("More apps in F-Droid", new AlertDialog.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if(!ContextUtility.OpenApp(GameLauncher.this, "org.fdroid.fdroid"))
+				{
+					ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/packages/");
 					dialog.dismiss();
 				}
-			});
-		}
+			}
+		});
+		/*bldr.setTitle("Do you want to support the developer?");
+		bldr.setPositiveButton("Donate by PayPal" , new AlertDialog.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Intent ppIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kosleb1169%40gmail%2ecom&lc=US&item_name=n0n3m4&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest"));
+						ppIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+						startActivity(ppIntent);
+						dialog.dismiss();
+					}
+				});
+		bldr.setNeutralButton("More apps by n0n3m4", new AlertDialog.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pub:n0n3m4"));
+				marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+				startActivity(marketIntent);
+				dialog.dismiss();
+			}
+		});*/
 		bldr.setNegativeButton("Don't ask", new AlertDialog.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -979,7 +973,7 @@ public class GameLauncher extends Activity{
 
 		V.Setup();
 
-        V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, Constants.CONST_IS_FDROID) ? View.GONE : View.VISIBLE);
+        V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
 		SetGame(mPrefs.getString(Q3EUtils.pref_harm_game, Q3EGlobals.GAME_DOOM3));
 		
