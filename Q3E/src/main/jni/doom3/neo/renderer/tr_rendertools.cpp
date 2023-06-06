@@ -141,10 +141,10 @@ static void glColor4fv(const GLfloat *v)
 
 static void glColor4ubv(const GLubyte *v)
 {
-	color[0] = v[0] / 255.0f;
-	color[1] = v[1] / 255.0f;
-	color[2] = v[2] / 255.0f;
-	color[3] = v[3] / 255.0f;
+	color[0] = (float)v[0] / 255.0f;
+	color[1] = (float)v[1] / 255.0f;
+	color[2] = (float)v[2] / 255.0f;
+	color[3] = (float)v[3] / 255.0f;
 }
 
 static void glDisableClientState(int i)

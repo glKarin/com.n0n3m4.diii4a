@@ -650,7 +650,11 @@ void idRenderWorldLocal::ProjectDecal(qhandle_t entityHandle, const idFixedWindi
 		def->decals = idRenderModelDecal::Alloc();
 	}
 
-	def->decals->CreateDecal(model, localInfo);
+	def->decals->CreateDecal(model, localInfo
+#ifdef _RAVEN
+			, def->parms.suppressSurfaceMask
+#endif
+			);
 }
 
 /*
@@ -1120,6 +1124,10 @@ guiPoint_t	idRenderWorldLocal::GuiTrace(qhandle_t entityHandle, const idVec3 sta
 	const modelSurface_t *bestSurf = NULL;
 
 	for (j = 0 ; j < model->NumSurfaces() ; j++) {
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, shader mask is not 0 will skip GUI trace testing.
+		if(SUPPRESS_SURFACE_MASK_CHECK(def->parms.suppressSurfaceMask, j))
+			continue;
+#endif
 		const modelSurface_t *surf = model->Surface(j);
 
 		tri = surf->geometry;
@@ -1271,6 +1279,10 @@ bool idRenderWorldLocal::ModelTrace(modelTrace_t &trace, qhandle_t entityHandle,
 	collisionSurface = false;
 
 	for (i = 0; i < model->NumBaseSurfaces(); i++) {
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, shader mask is not 0 will skip model trace testing.
+		if(SUPPRESS_SURFACE_MASK_CHECK(refEnt->suppressSurfaceMask, i))
+			continue;
+#endif
 		surf = model->Surface(i);
 
 		shader = R_RemapShaderBySkin(surf->shader, def->parms.customSkin, def->parms.customShader);
@@ -1283,6 +1295,10 @@ bool idRenderWorldLocal::ModelTrace(modelTrace_t &trace, qhandle_t entityHandle,
 
 	// only use baseSurfaces, not any overlays
 	for (i = 0; i < model->NumBaseSurfaces(); i++) {
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, shader mask is not 0 will skip model trace testing.
+		if(SUPPRESS_SURFACE_MASK_CHECK(refEnt->suppressSurfaceMask, i))
+			continue;
+#endif
 		surf = model->Surface(i);
 
 		shader = R_RemapShaderBySkin(surf->shader, def->parms.customSkin, def->parms.customShader);
@@ -1424,6 +1440,10 @@ bool idRenderWorldLocal::Trace(modelTrace_t &trace, const idVec3 &start, const i
 
 			// check all model surfaces
 			for (j = 0; j < model->NumSurfaces(); j++) {
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, shader mask is not 0 will skip trace testing.
+				if(SUPPRESS_SURFACE_MASK_CHECK(def->parms.suppressSurfaceMask, j))
+					continue;
+#endif
 				const modelSurface_t *surf = model->Surface(j);
 
 				shader = R_RemapShaderBySkin(surf->shader, def->parms.customSkin, def->parms.customShader);

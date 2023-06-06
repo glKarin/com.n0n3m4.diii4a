@@ -6,11 +6,10 @@ add_definitions(-DNO_ALSA)
 add_definitions(-D__DOOM_DLL__)
 add_definitions(-DHAVE_CONFIG_H)
 add_definitions(-D_K_CLANG)
-add_definitions(-DID_ENABLE_CURL=0)
+add_definitions(-DID_ENABLE_CURL=1)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-#add_subdirectory (externlibs/libogg-1.3.4)
-
+# set(CMAKE_BUILD_TYPE "Release")
 # TODO
 
 # osx: place game .dylib's in the bundle (next to the binary)
@@ -169,7 +168,7 @@ endif()
 
 # build type
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 # precompiled libraries from the dhewm3-libs repo
@@ -193,8 +192,8 @@ if(CMAKE_MAJOR_VERSION LESS 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_V
 endif()
 
 # libs
-#[[find_package(ZLIB REQUIRED)
-include_directories(${ZLIB_INCLUDE_DIRS})]]
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
 
 if(REPRODUCIBLE_BUILD)
 	# don't use __DATE__ and __TIME__ macros so builds are reproducible
@@ -210,7 +209,8 @@ unset(CMAKE_REQUIRED_LIBRARIES)
 
 # compiler specific flags
 add_compile_options(-pipe)
-add_compile_options(-Wall)
+#add_compile_options(-Wall)
+add_compile_options(-w)
 
 if(NOT CMAKE_CROSSCOMPILING AND ONATIVE)
 	add_compile_options(-march=native)
@@ -246,9 +246,9 @@ add_compile_options(-Wno-sign-compare)
 add_compile_options(-Wno-switch)
 add_compile_options(-Wno-format-security)
 # ignore these
-add_compile_options(-Wunknown-pragmas)
-add_compile_options(-Wunused-private-field)
-add_compile_options(-Wunused-variable)
+add_compile_options(-Wno-unknown-pragmas)
+add_compile_options(-Wno-unused-private-field)
+add_compile_options(-Wno-unused-variable)
 
 CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 if(cxx_has_Woverload_virtual)
@@ -262,6 +262,8 @@ if(cxx_has_Wno-class-memaccess)
 endif()
 
 set(sys_libs ${sys_libs} dl)
+set(sys_libs ${sys_libs} GLESv2 EGL android z)
+set(local_libs ogg jpeg curl)
 
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -1270,6 +1272,7 @@ set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib})
 
 # raven
+if(RAVEN OR QUAKE4)
 set(src_idlib_raven
 		${src_idlib}
 		${raven_idlib_src}
@@ -1279,8 +1282,9 @@ set_target_properties(idlib_raven PROPERTIES COMPILE_FLAGS "-fPIC")
 set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_raven})
-
+endif()
 # humanhead
+if(HUMANHEAD OR PREY)
 set(src_idlib_humanhead
 		${src_idlib}
 		${humanhead_idlib_src}
@@ -1290,6 +1294,52 @@ set_target_properties(idlib_humanhead PROPERTIES COMPILE_FLAGS "-fPIC")
 set_target_properties(idlib_humanhead PROPERTIES COMPILE_DEFINITIONS "_HUMANHEAD;HUMANHEAD")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_humanhead})
+endif()
+
+if(CORE)
+	message(STATUS "Build core")
+endif()
+if(BASE)
+	message(STATUS "Build base")
+endif()
+if(D3XP)
+	message(STATUS "Build d3xp")
+endif()
+if(D3LE)
+	message(STATUS "Build d3le")
+endif()
+if(CDOOM)
+	message(STATUS "Build cdoom")
+endif()
+if(RIVENSIN)
+	message(STATUS "Build rivensin")
+endif()
+if(HARDCORPS)
+	message(STATUS "Build HARDCORPS")
+endif()
+if(RAVEN)
+	message(STATUS "Build raven core")
+endif()
+if(QUAKE4)
+	message(STATUS "Build q4base")
+endif()
+if(HUMANHEAD)
+	message(STATUS "Build humanhead core")
+endif()
+if(PREY)
+	message(STATUS "Build prey")
+endif()
+
+message(STATUS "C++ STL: ${CMAKE_ANDROID_STL_TYPE}")
+message(STATUS "arch ABI: ${CMAKE_ANDROID_ARCH_ABI}")
+message(STATUS "API level: ${CMAKE_SYSTEM_VERSION}")
+message(STATUS "arm mode: ${CMAKE_ANDROID_ARM_MODE}")
+message(STATUS "armv7-neon: ${CMAKE_ANDROID_ARM_NEON}")
+message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "-l: ${sys_libs}")
+message(STATUS "-l(static): ${local_libs}")
+
+#message(FATAL_ERROR "stop!!!!!!!!!!!!!!!!!!!!")
 
 if(CORE)
 	add_library(${DOOM3BINARY} SHARED
@@ -1307,14 +1357,7 @@ if(CORE)
 	target_link_libraries(${DOOM3BINARY}
 		idlib
 		${sys_libs}
-
-		ogg
-		jpeg
-		curl
-
-		"GLESv2"
-		EGL
-		android
+		${local_libs}
 	)
 
 	install(TARGETS ${DOOM3BINARY}
@@ -1483,14 +1526,7 @@ if(RAVEN)
 	target_link_libraries(${QUAKE4BINARY}
 			idlib_raven
 			${sys_libs}
-
-			ogg
-			jpeg
-			curl
-
-			"GLESv2"
-			EGL
-			android
+			${local_libs}
 			)
 
 	install(TARGETS ${QUAKE4BINARY}
@@ -1517,14 +1553,7 @@ if(HUMANHEAD)
 	target_link_libraries(${PREYBINARY}
 			idlib_humanhead
 			${sys_libs}
-
-			ogg
-			jpeg
-			curl
-
-			"GLESv2"
-			EGL
-			android
+			${local_libs}
 			)
 
 	install(TARGETS ${PREYBINARY}

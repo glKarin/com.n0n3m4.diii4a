@@ -76,7 +76,11 @@ class idRenderModelDecal
 		static void					GlobalProjectionInfoToLocal(decalProjectionInfo_t &localInfo, const decalProjectionInfo_t &info, const idVec3 &origin, const idMat3 &axis);
 
 		// Creates a deal on the given model.
-		void						CreateDecal(const idRenderModel *model, const decalProjectionInfo_t &localInfo);
+		void						CreateDecal(const idRenderModel *model, const decalProjectionInfo_t &localInfo
+#ifdef _RAVEN
+				, int suppressSurfaceMask = 0
+#endif
+				);
 
 		// Remove decals that are completely faded away.
 		static idRenderModelDecal 	*RemoveFadedDecals(idRenderModelDecal *decals, int time);
