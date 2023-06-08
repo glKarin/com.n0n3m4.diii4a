@@ -54,11 +54,31 @@
 			android:textAllCaps="false"
 			android:text="On-screen button setting"/>
 
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			>
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:text="Joystick settings:"
+				android:textColor="#FF000000"
+				android:paddingTop="5dp"
+				android:paddingBottom="5dp"
+				android:textAppearance="?android:attr/textAppearanceSmall"/>
 		<CheckBox
 			android:id="@+id/smoothjoy"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="Smooth joystick"/>
+
+			<CheckBox
+				android:id="@+id/launcher_tab2_joystick_unfixed"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Unfixed joystick"/>
 
 		<LinearLayout
 			android:layout_width="match_parent"
@@ -73,8 +93,7 @@
 				android:layout_height="match_parent"
 				android:layout_weight="1"
 				android:gravity="center_vertical"
-				android:text="Joystick release radius's multiple(0 - disabled)"
-				android:textColor="#FF000000"
+					android:text="Joystick outer range(radius's multiple, 0 - disable)"
 				android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 			<EditText
@@ -88,6 +107,71 @@
 				android:layout_height="wrap_content"
 				android:layout_gravity="right|center_vertical"
 				android:autofillHints="" />
+		</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:paddingLeft="20dp"
+				android:paddingRight="10dp"
+				>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:text="- Enable `Unfixed joystick`: the range is joystick allowed to start pressing(if less than 1.0, using joystick's radius)."
+					android:textAppearance="?android:attr/textAppearanceSmall"/>
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:text="- Disable `Unfixed joystick`: the range is joystick valid motion area."
+					android:textAppearance="?android:attr/textAppearanceSmall"/>
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:orientation="vertical"
+				android:paddingLeft="10dp"
+				android:paddingRight="10dp"
+				>
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:orientation="horizontal"
+					>
+					<TextView
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:layout_gravity="center_vertical"
+						android:text="Joystick inner dead zone(radius's percentage, 0 - disable)"
+						android:textAppearance="?android:attr/textAppearanceSmall"/>
+					<TextView
+						android:id="@+id/launcher_tab2_joystick_inner_dead_zone_label"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="center_vertical"
+						android:text="10%"
+						android:textColor="#FF000000"
+						android:textAppearance="?android:attr/textAppearanceSmall"/>
+				</LinearLayout>
+
+				<SeekBar
+					android:id="@+id/launcher_tab2_joystick_inner_dead_zone"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="5dp"
+					android:layout_marginBottom="5dp"
+					android:layout_gravity="right|center_vertical"
+					android:max="100"
+					android:progress="10"
+					/>
+			</LinearLayout>
 		</LinearLayout>
 
 		<CheckBox
@@ -230,23 +314,32 @@
             </LinearLayout>
         </LinearLayout>
 
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			>
+
 		<TextView
 			android:id="@+id/tv_mprefs"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Mouse settings:"/>
+				android:text="Mouse settings:"
+				/>
 
 		<CheckBox
 			android:id="@+id/hideonscr"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Hide onscreen buttons(not need root) and enable mouse (Root required)"/>
+				android:text="Hide onscreen buttons(not need root) and enable mouse (Root required)"
+				/>
 
 		<LinearLayout
 			android:id="@+id/layout_mouseconfig"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:orientation="vertical">
+				android:orientation="vertical"
+				>
 
 			<CheckBox
 				android:id="@+id/detectmouse"
@@ -315,6 +408,8 @@
 					android:text="Bottom right corner"/>
 
 			</RadioGroup>
+
+			</LinearLayout>
 
 		</LinearLayout>
 

@@ -13,6 +13,7 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3EJNI;
+import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 
 /**
  * Debug preference fragment
@@ -47,7 +48,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         else
             activity = getActivity();
         final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        String text = mPrefs.getString(Constants.CONST_PREFERENCE_APP_CRASH_INFO, null);
+        String text = mPrefs.getString(KUncaughtExceptionHandler.CONST_PREFERENCE_APP_CRASH_INFO, null);
         AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(activity, "Last crash info", text != null ? text : "None");
         if(text != null)
         {
@@ -55,7 +56,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
                     @Override
                     public void onClick(DialogInterface dialog, int id)
                     {
-                        mPrefs.edit().remove(Constants.CONST_PREFERENCE_APP_CRASH_INFO).commit();
+                        mPrefs.edit().remove(KUncaughtExceptionHandler.CONST_PREFERENCE_APP_CRASH_INFO).commit();
                         dialog.dismiss();
                     }
                 });

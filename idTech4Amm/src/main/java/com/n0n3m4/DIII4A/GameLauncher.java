@@ -65,7 +65,7 @@ import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
-import com.karin.idTech4Amm.sys.UncaughtExceptionHandler;
+import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.FileBrowserDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
@@ -213,6 +213,12 @@ public class GameLauncher extends Activity{
 								.putBoolean(Q3EUtils.pref_harm_multithreading, isChecked)
 								.commit();
 						Q3EUtils.q3ei.multithread = isChecked;
+						break;
+					case R.id.launcher_tab2_joystick_unfixed:
+						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+								.putBoolean(Q3EUtils.pref_harm_joystick_unfixed, isChecked)
+								.commit();
+						Q3EUtils.q3ei.joystick_unfixed = isChecked;
 						break;
 					default:
 						break;
@@ -376,7 +382,7 @@ public class GameLauncher extends Activity{
             InputStream bis;
             ZipEntry zipentry;
                         
-            bis=getAssets().open("gl2progs.zip");            
+            bis=getAssets().open("source/gl2progs.zip");
             zipinputstream=new ZipInputStream(bis);
             
             (new File(destname)).mkdirs();                               
@@ -553,29 +559,48 @@ public class GameLauncher extends Activity{
 	{
         AlertDialog.Builder bldr=new AlertDialog.Builder(this);
         bldr.setTitle("Do you want to support the developer?");
-        bldr.setPositiveButton("Donate by PayPal", new AlertDialog.OnClickListener() {          
+		bldr.setPositiveButton("Donate to F-Droid", new AlertDialog.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+						ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/donate/");
+                    dialog.dismiss();
+                }
+            });
+		bldr.setNeutralButton("More apps in F-Droid", new AlertDialog.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+				if(!ContextUtility.OpenApp(GameLauncher.this, "org.fdroid.fdroid"))
+				{
+					ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/packages/");
+					dialog.dismiss();
+				}
+			}
+		});
+		/*
+        bldr.setPositiveButton("Donate by PayPal", new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Intent ppIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kosleb1169%40gmail%2ecom&lc=US&item_name=n0n3m4&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest"));
                     ppIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                    startActivity(ppIntent);                
+                    startActivity(ppIntent);
                     dialog.dismiss();
                 }
             });
-        bldr.setNegativeButton("Don't ask", new AlertDialog.OnClickListener() {         
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-        bldr.setNeutralButton("More apps by n0n3m4", new AlertDialog.OnClickListener() {            
+        bldr.setNeutralButton("More apps by n0n3m4", new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pub:n0n3m4"));
                     marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                    startActivity(marketIntent);                
+                    startActivity(marketIntent);
                     dialog.dismiss();
                 }
+            });
+		 */
+		bldr.setNegativeButton("Don't ask", new AlertDialog.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
             });
         AlertDialog dl=bldr.create();
         dl.setCancelable(false);
@@ -803,6 +828,9 @@ public class GameLauncher extends Activity{
 
 	private CharSequence MakeDebugTextHistoryText(Boolean rev)
 	{
+		if(null == m_debugTextHistory)
+			return "<empty>";
+
 		StringBuilder sb = new StringBuilder();
 		final String endl = TextHelper.GetDialogMessageEndl();
 		for(int i = 0; i < m_debugTextHistory.size(); i++)
@@ -824,6 +852,11 @@ public class GameLauncher extends Activity{
 		return TextHelper.GetDialogMessage(sb.toString());
 	}
 
+	private void ThrowException()
+	{
+		((String)null).toString();
+	}
+
     private void ShowDebugTextHistoryDialog()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -833,6 +866,7 @@ public class GameLauncher extends Activity{
             .setNegativeButton("Clear", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
+                	if(null != m_debugTextHistory)
                     m_debugTextHistory.clear();
                     ((AlertDialog)dialog).setMessage("");
                 }
@@ -936,7 +970,7 @@ public class GameLauncher extends Activity{
 	{		
 		super.onCreate(savedInstanceState);				
         //k
-        HandleUnexperted();
+        KUncaughtExceptionHandler.HandleUnexpectedException(this);
         setTitle(R.string.app_title);
 		final SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this);
         ContextUtility.SetScreenOrientation(this, mPrefs.getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false) ? 0 : 1);
@@ -946,6 +980,10 @@ public class GameLauncher extends Activity{
         getActionBar().setDisplayHomeAsUpEnabled(true);						
 		
 		InitQ3E();
+		Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f);
+		Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EUtils.pref_harm_joystick_unfixed, false);
+		Q3EUtils.q3ei.joystick_inner_dead_zone = mPrefs.getFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, 0.0f);
+		Q3EUtils.q3ei.SetAppStoragePath(this);
 		
 		TabHost th=(TabHost)findViewById(R.id.tabhost);
 		th.setup();					
@@ -955,7 +993,7 @@ public class GameLauncher extends Activity{
 
 		V.Setup();
 
-        V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, false) ? View.GONE : View.VISIBLE);
+        V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
 		SetGame(mPrefs.getString(Q3EUtils.pref_harm_game, Q3EGlobals.GAME_DOOM3));
 		
@@ -970,6 +1008,7 @@ public class GameLauncher extends Activity{
 		V.mapvol.setChecked(mPrefs.getBoolean(Q3EUtils.pref_mapvol, false));
 		V.secfinglmb.setChecked(mPrefs.getBoolean(Q3EUtils.pref_2fingerlmb, false));
 		V.smoothjoy.setChecked(mPrefs.getBoolean(Q3EUtils.pref_analog, true));
+		V.launcher_tab2_joystick_unfixed.setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_joystick_unfixed, false));
 		V.detectmouse.setOnCheckedChangeListener(m_checkboxChangeListener);						
 		V.detectmouse.setChecked(mPrefs.getBoolean(Q3EUtils.pref_detectmouse, true));
 		
@@ -1107,6 +1146,7 @@ public class GameLauncher extends Activity{
 		V.useetc1cache.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.nolight.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.smoothjoy.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.launcher_tab2_joystick_unfixed.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.edt_path.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_datapath, default_gamedata));
 		V.edt_mouse.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_eventdev, "/dev/input/event???"));
         V.rg_curpos.setOnCheckedChangeListener(m_groupCheckChangeListener);
@@ -1119,6 +1159,9 @@ public class GameLauncher extends Activity{
         V.launcher_tab2_gyro_x_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
         V.launcher_tab2_gyro_y_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
 		V.launcher_tab2_joystick_release_range.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f));
+		int innerDeadZone = (int) (mPrefs.getFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, 0.0f) * 100);
+		V.launcher_tab2_joystick_inner_dead_zone.setProgress(innerDeadZone);
+		V.launcher_tab2_joystick_inner_dead_zone_label.setText(innerDeadZone + "%");
         UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
         V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {           
                 public void onTextChanged(CharSequence s, int start, int before, int count) {}           
@@ -1145,9 +1188,38 @@ public class GameLauncher extends Activity{
 			public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
 			public void afterTextChanged(Editable s) {
 				String value = s.length() == 0 ? "0.0" : s.toString();
+				float v = Utility.parseFloat_s(value, 0.0f);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putFloat(Q3EUtils.pref_harm_joystick_release_range, Utility.parseFloat_s(value, 0.0f))
+						.putFloat(Q3EUtils.pref_harm_joystick_release_range, v)
 						.commit();
+				Q3EUtils.q3ei.joystick_release_range = v;
+			}
+		});
+		V.launcher_tab2_joystick_inner_dead_zone.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+		{
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+			{
+				if(fromUser)
+					m_onScreenButtonGlobalOpacity = progress;
+				float v = (float) progress / 100.0f;
+				Q3EUtils.q3ei.joystick_inner_dead_zone = v;
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, v)
+						.commit();
+				V.launcher_tab2_joystick_inner_dead_zone_label.setText(progress + "%");
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar)
+			{
+				V.launcher_tab2_joystick_inner_dead_zone_label.setTextColor(Color.RED);
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar)
+			{
+				V.launcher_tab2_joystick_inner_dead_zone_label.setTextColor(Color.BLACK);
 			}
 		});
 		V.auto_quick_load.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -1412,6 +1484,9 @@ public class GameLauncher extends Activity{
             case R.id.main_menu_debug_text_history:
                 ShowDebugTextHistoryDialog();
 				return true;
+			case R.id.main_menu_gen_exception:
+				ThrowException();
+				return true;
 			case R.id.main_menu_check_for_update:
 				OpenCheckForUpdateDialog();
 				return true;
@@ -1447,11 +1522,6 @@ public class GameLauncher extends Activity{
         ContextUtility.OpenMessageDialog(this, "About " + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetAboutText(this));
     }
   
-    private void HandleUnexperted()
-    {
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
-    }
-    
     private void OpenRuntimeLog()
     {
         String path = V.edt_path.getText().toString() + File.separatorChar + "stdout.txt";
@@ -1568,6 +1638,7 @@ public class GameLauncher extends Activity{
 		mEdtr.putBoolean(Q3EUtils.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
 		mEdtr.putBoolean(Q3EUtils.pref_harm_multithreading, V.multithreading.isChecked());
 		mEdtr.putFloat(Q3EUtils.pref_harm_joystick_release_range, Utility.parseFloat_s(V.launcher_tab2_joystick_release_range.getText().toString(), 0.0f));
+		mEdtr.putBoolean(Q3EUtils.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
 		mEdtr.commit();
     }
 
@@ -2779,6 +2850,9 @@ public class GameLauncher extends Activity{
 		public EditText launcher_tab2_joystick_release_range;
 		public Button reset_onscreen_controls_btn;
 		public Button setup_onscreen_button_size;
+		public CheckBox launcher_tab2_joystick_unfixed;
+		public SeekBar launcher_tab2_joystick_inner_dead_zone;
+		public TextView launcher_tab2_joystick_inner_dead_zone_label;
 
 		public void Setup()
 		{
@@ -2832,6 +2906,9 @@ public class GameLauncher extends Activity{
 			launcher_tab2_joystick_release_range = findViewById(R.id.launcher_tab2_joystick_release_range);
 			reset_onscreen_controls_btn = findViewById(R.id.reset_onscreen_controls_btn);
 			setup_onscreen_button_size = findViewById(R.id.setup_onscreen_button_size);
+			launcher_tab2_joystick_unfixed = findViewById(R.id.launcher_tab2_joystick_unfixed);
+			launcher_tab2_joystick_inner_dead_zone = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone);
+			launcher_tab2_joystick_inner_dead_zone_label = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone_label);
 		}
 	}
 }

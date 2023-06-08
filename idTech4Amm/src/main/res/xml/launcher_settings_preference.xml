@@ -86,7 +86,7 @@
                 android:title="Hide ad bar"
                 android:key="harm_hide_ad_bar"
                 android:persistent="true"
-                android:defaultValue="false"
+                android:defaultValue="true"
                 android:summary="Hide bottom ad bar in launcher"
             />
             <!--<CheckBoxPreference

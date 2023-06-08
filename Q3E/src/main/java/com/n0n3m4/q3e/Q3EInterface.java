@@ -19,6 +19,10 @@
 
 package com.n0n3m4.q3e;
 
+import android.content.Context;
+import android.os.Environment;
+
+import java.io.File;
 import java.util.Arrays;
 
 public class Q3EInterface
@@ -55,6 +59,10 @@ public class Q3EInterface
 	public boolean multithread = false;
 	public boolean function_key_toolbar = false;
 	public float joystick_release_range = 0.0f;
+	public float joystick_inner_dead_zone = 0.0f;
+	public boolean joystick_unfixed = false;
+
+	public String app_storage_path;
 	
 	//RTCW4A:
 	public final int RTCW4A_UI_ACTION=6;
@@ -343,5 +351,14 @@ public class Q3EInterface
     public boolean IsInitGame()
 	{
 		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW;
+	}
+
+	public void SetAppStoragePath(Context context)
+	{
+		File externalFilesDir = context.getExternalFilesDir(null);
+		if(null != externalFilesDir)
+			Q3EUtils.q3ei.app_storage_path = externalFilesDir.getAbsolutePath();
+		else
+			Q3EUtils.q3ei.app_storage_path = Environment.getExternalStorageDirectory() + "/Android/data/" + Q3EGlobals.CONST_PACKAGE_NAME + "/files";
 	}
 }

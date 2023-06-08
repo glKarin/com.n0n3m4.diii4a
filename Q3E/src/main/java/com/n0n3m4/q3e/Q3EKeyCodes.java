@@ -21,9 +21,9 @@ package com.n0n3m4.q3e;
 
 import android.view.KeyEvent;
 
-import java.lang.reflect.Field;
+import com.n0n3m4.q3e.tv.Q3EOuya;
 
-import tv.ouya.console.api.OuyaController;
+import java.lang.reflect.Field;
 
 public class Q3EKeyCodes
 {
@@ -636,8 +636,7 @@ public class Q3EKeyCodes
             case KeyEvent.KEYCODE_BUTTON_B:
                 return 'r';
             case KeyEvent.KEYCODE_BUTTON_X:
-                if (Q3EUtils.isOuya)
-                    return KeyCodes.K_ENTER;//No enter button on ouya
+                if (Q3EUtils.isOuya) return KeyCodes.K_ENTER;//No enter button on ouya
                 return KeyCodes.K_SPACE;//Why not?
             case KeyEvent.KEYCODE_BUTTON_Y:
                 return 'f';//RTCW use
@@ -652,8 +651,7 @@ public class Q3EKeyCodes
             case KeyEvent.KEYCODE_BUTTON_SELECT:
                 return KeyCodes.K_ENTER;
             case KeyEvent.KEYCODE_MENU:
-                if (Q3EUtils.isOuya)
-                    return KeyCodes.K_ESCAPE;
+                if (Q3EUtils.isOuya) return KeyCodes.K_ESCAPE;
                 break;
             case KeyEvent.KEYCODE_BUTTON_L2:
                 return KeyCodes.K_MWHEELDOWN;
@@ -662,12 +660,11 @@ public class Q3EKeyCodes
             case KeyEvent.KEYCODE_BUTTON_R1:
                 return KeyCodes.K_MOUSE1;//Sometimes it is necessary
             case KeyEvent.KEYCODE_BUTTON_L1:
-                if (Q3EUtils.isOuya)
-                    return KeyCodes.K_SPACE;
+                if (Q3EUtils.isOuya) return KeyCodes.K_SPACE;
                 return 'l';//dunno why
-            case OuyaController.BUTTON_L3:
+            case Q3EOuya.BUTTON_L3:
                 return '[';
-            case OuyaController.BUTTON_R3:
+            case Q3EOuya.BUTTON_R3:
                 return ']';
 
         }

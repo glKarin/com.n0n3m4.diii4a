@@ -34,6 +34,8 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 
+import com.n0n3m4.q3e.tv.Q3EOuya;
+
 import java.io.InputStream;
 
 public class Q3EUtils
@@ -43,7 +45,7 @@ public class Q3EUtils
 
     static
     {
-        Q3EUtils.isOuya = "cardhu".equals(android.os.Build.DEVICE) || android.os.Build.DEVICE.contains("ouya");//Dunno wtf is cardhu
+        Q3EUtils.isOuya = Q3EOuya.IsValid();
     }
 
     public static final String pref_datapath = "q3e_datapath";
@@ -87,6 +89,8 @@ public class Q3EUtils
     public static final String pref_harm_function_key_toolbar = "harm_function_key_toolbar"; //k
     public static final String pref_harm_function_key_toolbar_y = "harm_function_key_toolbar_y"; //k
     public static final String pref_harm_joystick_release_range = "harm_joystick_release_range"; //k
+    public static final String pref_harm_joystick_unfixed = "harm_joystick_unfixed"; //k
+    public static final String pref_harm_joystick_inner_dead_zone = "harm_joystick_inner_dead_zone"; //k
 
     public static boolean isAppInstalled(Activity ctx, String nm)
     {
@@ -240,5 +244,30 @@ public class Q3EUtils
             e.printStackTrace();
             return context.getCacheDir().getAbsolutePath().replace("cache", "lib");		//k old, can work with armv5 and armv7-a
         }
+    }
+
+    public static <T extends Comparable> T Clamp(T target, T min, T max)
+    {
+        return target.compareTo(min) < 0 ? min : (target.compareTo(max) > 0 ? max : target);
+    }
+
+    public static float Clampf(float target, float min, float max)
+    {
+        return Math.max(min, Math.min(target, max));
+    }
+
+    public static float Rad2Deg(double rad)
+    {
+        double deg = rad / Math.PI * 180.0;
+        return FormatAngle((float) deg);
+    }
+
+    public static float FormatAngle(float deg)
+    {
+        while (deg > 360)
+            deg -= 360;
+        while (deg < 0)
+            deg += 360.0;
+        return deg;
     }
 }

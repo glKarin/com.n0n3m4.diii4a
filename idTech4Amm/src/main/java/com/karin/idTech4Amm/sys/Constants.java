@@ -7,11 +7,8 @@ import java.util.Arrays;
  */
 public final class Constants
 {
-    public static final String CONST_PREFERENCE_APP_CRASH_INFO = "_APP_CRASH_INFO";
-    public static final String CONST_PREFERENCE_EXCEPTION_DEBUG = "_EXCEPTION_DEBUG";
-
     public static final int CONST_UPDATE_RELEASE = 31;
-    public static final String CONST_RELEASE = "2023-05-25";
+    public static final String CONST_RELEASE = "2023-06-10";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -26,6 +23,7 @@ public final class Constants
             "Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.",
             "Add setup all on-screen buttons size in tab `CONTROLS`.",
             "Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.",
+            "Support unfixed-position joystick and inner dead zone.",
 	};
     public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
 

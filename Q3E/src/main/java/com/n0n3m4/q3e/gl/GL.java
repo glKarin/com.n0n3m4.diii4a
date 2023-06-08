@@ -97,7 +97,8 @@ public final class GL
                 GLES20.glDisableVertexAttribArray(mPositionHandle);
                 GLES20.glDisableVertexAttribArray(mTexHandle);
             }
-        } else
+        }
+        else
         {
             gl.glColor4f(r, g, b, a);
             gl.glBindTexture(GL10.GL_TEXTURE_2D, texid);
@@ -122,7 +123,8 @@ public final class GL
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-        } else
+        }
+        else
         {
             gl.glEnable(GL10.GL_TEXTURE_2D);
             gl.glGenTextures(1, t, 0);

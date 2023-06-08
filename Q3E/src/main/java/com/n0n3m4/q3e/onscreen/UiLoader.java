@@ -31,16 +31,16 @@ public class UiLoader
         //Set defaults table
     }
 
-    public Object LoadElement(int id)
+    public Object LoadElement(int id, boolean editMode)
     {
         SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
         String tmp = shp.getString(Q3EUtils.pref_controlprefix + id, null);
         if (tmp == null) tmp = defaults_table[id];
         UiElement el = new UiElement(tmp);
-        return LoadUiElement(id, el.cx, el.cy, el.size, el.alpha);
+        return LoadUiElement(id, el.cx, el.cy, el.size, el.alpha, editMode);
     }
 
-    private Object LoadUiElement(int id, int cx, int cy, int size, int alpha)
+    private Object LoadUiElement(int id, int cx, int cy, int size, int alpha, boolean editMode)
     {
         int bh = size;
         if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == 0)
@@ -61,8 +61,9 @@ public class UiLoader
         {
             case Q3EGlobals.TYPE_BUTTON:
                 return new Button(ctx, gl, cx, cy, size, bh, Q3EUtils.q3ei.texture_table[id], Q3EUtils.q3ei.arg_table[id * 4], Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 1] == 1, (float) alpha / 100);
-            case Q3EGlobals.TYPE_JOYSTICK:
-                return new Joystick(ctx, gl, cx, cy, size, (float) alpha / 100);
+            case Q3EGlobals.TYPE_JOYSTICK: {
+                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, editMode);
+            }
             case Q3EGlobals.TYPE_SLIDER:
                 return new Slider(ctx, gl, cx, cy, size, sh, Q3EUtils.q3ei.texture_table[id], Q3EUtils.q3ei.arg_table[id * 4], Q3EUtils.q3ei.arg_table[id * 4 + 1], Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 3], (float) alpha / 100);
             case Q3EGlobals.TYPE_DISC:

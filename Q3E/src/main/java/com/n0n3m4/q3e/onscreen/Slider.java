@@ -83,6 +83,7 @@ public class Slider extends Paintable implements TouchListener
     @Override
     public boolean onTouchEvent(int x, int y, int act)
     {
+        Q3EControlView controlView = (Q3EControlView) (this.view);
         if (act == 1)
         {
             startx = x;
@@ -94,16 +95,18 @@ public class Slider extends Paintable implements TouchListener
             {
                 if (x - startx < -SLIDE_DIST)
                 {
-                    ((Q3EControlView) (view)).sendKeyEvent(true, lkey, 0);
-                    ((Q3EControlView) (view)).sendKeyEvent(false, lkey, 0);
-                } else if (x - startx > SLIDE_DIST)
+                    controlView.sendKeyEvent(true, lkey, 0);
+                    controlView.sendKeyEvent(false, lkey, 0);
+                }
+                else if (x - startx > SLIDE_DIST)
                 {
-                    ((Q3EControlView) (view)).sendKeyEvent(true, rkey, 0);
-                    ((Q3EControlView) (view)).sendKeyEvent(false, rkey, 0);
-                } else
+                    controlView.sendKeyEvent(true, rkey, 0);
+                    controlView.sendKeyEvent(false, rkey, 0);
+                }
+                else
                 {
-                    ((Q3EControlView) (view)).sendKeyEvent(true, ckey, 0);
-                    ((Q3EControlView) (view)).sendKeyEvent(false, ckey, 0);
+                    controlView.sendKeyEvent(true, ckey, 0);
+                    controlView.sendKeyEvent(false, ckey, 0);
                 }
             }
 
@@ -115,17 +118,19 @@ public class Slider extends Paintable implements TouchListener
                     double ang = Math.abs(Math.atan2(y - starty, x - startx));
                     if (ang > Math.PI / 4 && ang < Math.PI * 3 / 4)
                     {
-                        ((Q3EControlView) (view)).sendKeyEvent(true, lkey, 0);
-                        ((Q3EControlView) (view)).sendKeyEvent(false, lkey, 0);
-                    } else
+                        controlView.sendKeyEvent(true, lkey, 0);
+                        controlView.sendKeyEvent(false, lkey, 0);
+                    }
+                    else
                     { //k
-                        ((Q3EControlView) (view)).sendKeyEvent(true, rkey, 0);
-                        ((Q3EControlView) (view)).sendKeyEvent(false, rkey, 0);
+                        controlView.sendKeyEvent(true, rkey, 0);
+                        controlView.sendKeyEvent(false, rkey, 0);
                     } //k
-                } else
+                }
+                else
                 {
-                    ((Q3EControlView) (view)).sendKeyEvent(true, ckey, 0);
-                    ((Q3EControlView) (view)).sendKeyEvent(false, ckey, 0);
+                    controlView.sendKeyEvent(true, ckey, 0);
+                    controlView.sendKeyEvent(false, ckey, 0);
                 }
             }
         }

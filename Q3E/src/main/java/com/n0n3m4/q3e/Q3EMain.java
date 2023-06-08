@@ -39,6 +39,8 @@ import android.graphics.Typeface;
 
 import com.n0n3m4.q3e.gl.GL;
 import com.n0n3m4.q3e.karin.KDebugTextView;
+import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
+import com.n0n3m4.q3e.tv.Q3EOuya;
 
 public class Q3EMain extends Activity {
 	public static Q3ECallbackObj mAudio;
@@ -87,6 +89,7 @@ public class Q3EMain extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        KUncaughtExceptionHandler.HandleUnexpectedException(this);
         InitGlobalEnv();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -156,6 +159,10 @@ public class Q3EMain extends Activity {
             Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean("harm_redirect_output_to_file", true));
             Q3EJNI.SetNoHandleSignals(preferences.getBoolean("harm_no_handle_signals", false));
             Q3EJNI.SetMultiThread(Q3EUtils.q3ei.multithread);
+
+            if(!Q3EOuya.Init(this))
+                Q3EUtils.isOuya = false;
+
             if (mAudio==null)
             {
                 mAudio = new Q3ECallbackObj();
@@ -332,11 +339,15 @@ public class Q3EMain extends Activity {
         }
 
         Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f);
+        Q3EUtils.q3ei.joystick_inner_dead_zone = preferences.getFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, 0.0f);
         Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt("harm_volume_up_key", Q3EKeyCodes.KeyCodes.K_F3);
         Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
         Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EUtils.pref_harm_multithreading, false);
         Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EUtils.pref_harm_function_key_toolbar, false);
+        Q3EUtils.q3ei.joystick_unfixed = preferences.getBoolean(Q3EUtils.pref_harm_joystick_unfixed, false);
+
+        Q3EUtils.q3ei.SetAppStoragePath(this);
     }
 }

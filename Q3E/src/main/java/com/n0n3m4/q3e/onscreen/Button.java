@@ -35,6 +35,7 @@ public class Button extends Paintable implements TouchListener
     public int style;
     public float initalpha;
     public boolean canbeheld = false;
+    private final int m_width_2;
 
     public Button(View vw, GL10 gl, int center_x, int center_y, int w, int h, String texid, int keyc, int stl, boolean canbheld, float a)
     {
@@ -67,6 +68,8 @@ public class Button extends Paintable implements TouchListener
         tex_p.position(0);
 
         tex_androidid = texid;
+
+        m_width_2 = width * width;
     }
 
     @Override
@@ -88,18 +91,20 @@ public class Button extends Paintable implements TouchListener
     @Override
     public boolean onTouchEvent(int x, int y, int act)
     {
+        Q3EControlView controlView = (Q3EControlView) (this.view);
         if (canbeheld)
         {
             if (act == 1)
             {
                 if (!heldarr.contains(keycode))
                 {
-                    ((Q3EControlView) (view)).sendKeyEvent(true, keycode, 0);
+                    controlView.sendKeyEvent(true, keycode, 0);
                     heldarr.add(keycode);
                     alpha = Math.min(initalpha * 2, 1f);
-                } else
+                }
+                else
                 {
-                    ((Q3EControlView) (view)).sendKeyEvent(false, keycode, 0);
+                    controlView.sendKeyEvent(false, keycode, 0);
                     heldarr.remove(Integer.valueOf(keycode));
                     alpha = initalpha;
                 }
@@ -110,7 +115,7 @@ public class Button extends Paintable implements TouchListener
         if (keycode == Q3EKeyCodes.K_VKBD)
         {
             if (act == 1)
-                Q3EUtils.togglevkbd(view);
+                Q3EUtils.togglevkbd(this.view);
             return true;
         }
 
@@ -118,20 +123,22 @@ public class Button extends Paintable implements TouchListener
         {
             lx = x;
             ly = y;
-            ((Q3EControlView) (view)).sendKeyEvent(true, keycode, 0);
+            controlView.sendKeyEvent(true, keycode, 0);
         }
-        if (act == -1)
-            ((Q3EControlView) (view)).sendKeyEvent(false, keycode, 0);
+        else if (act == -1)
+            controlView.sendKeyEvent(false, keycode, 0);
+
         if (keycode == Q3EKeyCodes.KeyCodes.K_MOUSE1)
         {
             if (Q3EUtils.q3ei.callbackObj.notinmenu)
             {
-                ((Q3EControlView) (view)).sendMotionEvent(x - lx, y - ly);
+                controlView.sendMotionEvent(x - lx, y - ly);
                 lx = x;
                 ly = y;
-            } else
+            }
+            else
             {
-                ((Q3EControlView) (view)).sendMotionEvent(0, 0);//???
+                controlView.sendMotionEvent(0, 0);//???
             }
         }
         return true;
@@ -141,20 +148,24 @@ public class Button extends Paintable implements TouchListener
     public boolean isInside(int x, int y)
     {
         if (style == 0)
-            return 4 * ((cx - x) * (cx - x) + (cy - y) * (cy - y)) <= width * width;
-        if (style == 1)
+        {
+            int dx = cx - x;
+            int dy = cy - y;
+            return 4 * (dx * dx + dy * dy) <= m_width_2;
+        }
+        else if (style == 1)
         {
             int dx = x - cx;
             int dy = cy - y;
             return (((dy) <= (dx)) && (2 * Math.abs(dx) < width) && (2 * Math.abs(dy) < height));
         }
-        if (style == 2)
+        else if (style == 2)
         {
             int dx = x - cx;
             int dy = cy - y;
             return ((2 * Math.abs(dx) < width) && (2 * Math.abs(dy) < height));
         }
-        if (style == 3)
+        else if (style == 3)
         {
             int dx = cx - x;
             int dy = y - cy;

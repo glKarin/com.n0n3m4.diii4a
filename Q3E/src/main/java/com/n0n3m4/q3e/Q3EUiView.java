@@ -161,9 +161,9 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 		if (fn.target instanceof Joystick) {
 			final Joystick tmp = (Joystick) fn.target;
-			final Joystick newj = new Joystick(tmp.view, uildr.gl, tmp.cx, tmp.cy, tmp.size / 2, tmp.alpha);
+			final Joystick newj = new Joystick(tmp.view, uildr.gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, true);
 			fn.target = newj;
-			newj.tex_ind = tmp.tex_ind;
+			Joystick.Move(newj, tmp);
 			touch_elements.set(touch_elements.indexOf(tmp), newj);
 			paint_elements.set(paint_elements.indexOf(tmp), newj);
 		}
@@ -216,8 +216,9 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		{
 			Joystick tmp=(Joystick)fn.target;
 			float halfw = (float)tmp.size / 2.0f;
-			tmp.cx = Math.round(((float)tmp.cx - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
-			tmp.cy = Math.round(((float)tmp.cy - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			int cx = Math.round(((float)tmp.cx - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			int cy = Math.round(((float)tmp.cy - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			tmp.SetPosition(cx, cy);
 			return true;
 		}
 		//k
@@ -225,8 +226,9 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		{
 			Disc tmp=(Disc)fn.target;
 			float halfw = (float)tmp.size / 2.0f;
-			tmp.cx = Math.round(((float)tmp.cx - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
-			tmp.cy = Math.round(((float)tmp.cy - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			int cx = Math.round(((float)tmp.cx - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			int cy = Math.round(((float)tmp.cy - halfw) / (float)m_unit) * m_unit + Math.round(halfw);
+			tmp.SetPosition(cx, cy);
 			return true;
 		}
 		return false;
@@ -246,8 +248,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		}
 		if (fn.target instanceof Joystick) {
 			Joystick tmp = (Joystick) fn.target;
-			tmp.cx += dx;
-			tmp.cy += dy;
+			tmp.Translate(dx, dy);
 		}
         //k
         if (fn.target instanceof Disc)
@@ -372,7 +373,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			mover.loadtex(gl);
 
 			for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++) {
-				Object o = uildr.LoadElement(i);
+				Object o = uildr.LoadElement(i, true);
 				touch_elements.add((TouchListener) o);
 				paint_elements.add((Paintable) o);
 			}

@@ -285,6 +285,7 @@ public final class ContextUtility
     {
         Uri uri = Uri.parse(url);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         context.startActivity(intent);
     }
 
@@ -378,6 +379,16 @@ public final class ContextUtility
         Intent intent = activity.getPackageManager().getLaunchIntentForPackage(activity.getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activity.startActivity(intent);
+    }
+
+    public static boolean OpenApp(Activity activity, String packageName)
+    {
+        final Intent intent = activity.getPackageManager().getLaunchIntentForPackage(packageName);
+        if(null == intent)
+            return false;
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        activity.startActivity(intent);
+        return true;
     }
     
 	private ContextUtility() {}
