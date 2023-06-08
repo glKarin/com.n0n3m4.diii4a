@@ -110,7 +110,11 @@ The material should be clamped, because entire triangles are added, some of whic
 may extend well past the 0.0 to 1.0 texture range
 =====================
 */
-void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr)
+void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr
+#ifdef _RAVEN
+		, int suppressSurfaceMask
+#endif
+		)
 {
 	int i, maxVerts, maxIndexes, surfNum;
 	idRenderModelOverlay *overlay = NULL;
@@ -137,6 +141,10 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 
 	// pull out the triangles we need from the base surfaces
 	for (surfNum = 0; surfNum < model->NumBaseSurfaces(); surfNum++) {
+#ifdef _RAVEN //k: for ShowSurface/HideSurface, shader mask is not 0 will skip make overlay surface.
+		if(SUPPRESS_SURFACE_MASK_CHECK(suppressSurfaceMask, surfNum))
+			continue;
+#endif
 		const modelSurface_t *surf = model->Surface(surfNum);
 		float d;
 

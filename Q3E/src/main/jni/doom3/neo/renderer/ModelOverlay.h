@@ -74,7 +74,11 @@ class idRenderModelOverlay
 		// light interaction shaders. Materials for overlays should always
 		// be clamped, because the projected texcoords can run well off the
 		// texture since no new clip vertexes are generated.
-		void						CreateOverlay(const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *material);
+		void						CreateOverlay(const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *material
+#ifdef _RAVEN
+				, int suppressSurfaceMask = 0
+#endif
+				);
 
 		// Creates new model surfaces for baseModel, which should be a static instantiation of a dynamic model.
 		void						AddOverlaySurfacesToModel(idRenderModel *baseModel);
