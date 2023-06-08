@@ -24,9 +24,10 @@ public class MouseControl implements TouchListener
         if (act == 1)
         {
             if (isleftbutton)
-                ((Q3EControlView) (view)).sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
+                view.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
             alreadydown = true;
-        } else
+        }
+        else
         {
             view.sendMotionEvent(x - lx, y - ly);
         }
@@ -36,7 +37,7 @@ public class MouseControl implements TouchListener
         if (act == -1)
         {
             if (isleftbutton)
-                ((Q3EControlView) (view)).sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
+                view.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
             alreadydown = false;
         }
         return true;

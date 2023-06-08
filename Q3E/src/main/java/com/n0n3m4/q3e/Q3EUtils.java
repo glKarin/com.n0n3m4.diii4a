@@ -253,4 +253,19 @@ public class Q3EUtils
     {
         return Math.max(min, Math.min(target, max));
     }
+
+    public static float Rad2Deg(double rad)
+    {
+        double deg = rad / Math.PI * 180.0;
+        return FormatAngle((float) deg);
+    }
+
+    public static float FormatAngle(float deg)
+    {
+        while (deg > 360)
+            deg -= 360;
+        while (deg < 0)
+            deg += 360.0;
+        return deg;
+    }
 }

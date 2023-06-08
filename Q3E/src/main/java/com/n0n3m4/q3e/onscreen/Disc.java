@@ -8,6 +8,7 @@ import android.graphics.RectF;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3EControlView;
+import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.GL;
 
 import java.nio.ByteBuffer;
@@ -44,10 +45,54 @@ public class Disc extends Paintable implements TouchListener
     int tex_ind;
     private int m_circleWidth;
     private final char[] m_keys;
+    private final int m_size_2;
 
     int dotx, doty;
     boolean dotjoyenabled = false;
     public View view;
+
+    public Disc(View vw, GL10 gl, int center_x, int center_y, int r, float a, char[] keys)
+    {
+        view = vw;
+        cx = center_x;
+        cy = center_y;
+        size = r * 2;
+        dot_size = size * 3;
+        alpha = a;
+        m_size_2 = size * size;
+
+        float[] tmp = new float[verts_back.length];
+        for (int i = 0; i < verts_back.length; i += 2)
+        {
+            tmp[i] = verts_back[i] * size + cx;
+            tmp[i + 1] = verts_back[i + 1] * size + cy;
+        }
+
+        verts_p = ByteBuffer.allocateDirect(4 * verts_back.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        verts_p.put(tmp);
+        verts_p.position(0);
+
+        inds_p = ByteBuffer.allocateDirect(indices.length);
+        inds_p.put(indices);
+        inds_p.position(0);
+
+        tex_p = ByteBuffer.allocateDirect(4 * texcoords.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        tex_p.put(texcoords);
+        tex_p.position(0);
+
+        float[] tmp2 = new float[verts_back.length];
+        for (int i = 0; i < verts_back.length; i += 2)
+        {
+            tmp2[i] = verts_back[i] * dot_size + cx;
+            tmp2[i + 1] = verts_back[i + 1] * dot_size + cy;
+        }
+
+        m_fanVertexArray = ByteBuffer.allocateDirect(4 * verts_back.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        m_fanVertexArray.put(tmp2);
+        m_fanVertexArray.position(0);
+
+        m_keys = keys;
+    }
 
     private Part GenPart(int index, char key, int total, GL10 gl)
     {
@@ -91,8 +136,8 @@ public class Disc extends Paintable implements TouchListener
 
         res.textureId = GL.loadGLTexture(gl, bmp);
 
-        res.start = rad2deg(start);
-        res.end = rad2deg(end);
+        res.start = Q3EUtils.Rad2Deg(start);
+        res.end = Q3EUtils.Rad2Deg(end);
 
         sw = m_circleWidth;
         bmp = Bitmap.createBitmap(dot_size, dot_size, Bitmap.Config.ARGB_8888);
@@ -156,48 +201,6 @@ public class Disc extends Paintable implements TouchListener
         }
     }
 
-    public Disc(View vw, GL10 gl, int center_x, int center_y, int r, float a, char[] keys)
-    {
-        view = vw;
-        cx = center_x;
-        cy = center_y;
-        size = r * 2;
-        dot_size = size * 3;
-        alpha = a;
-
-        float[] tmp = new float[verts_back.length];
-        for (int i = 0; i < verts_back.length; i += 2)
-        {
-            tmp[i] = verts_back[i] * size + cx;
-            tmp[i + 1] = verts_back[i + 1] * size + cy;
-        }
-
-        verts_p = ByteBuffer.allocateDirect(4 * verts_back.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        verts_p.put(tmp);
-        verts_p.position(0);
-
-        inds_p = ByteBuffer.allocateDirect(indices.length);
-        inds_p.put(indices);
-        inds_p.position(0);
-
-        tex_p = ByteBuffer.allocateDirect(4 * texcoords.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        tex_p.put(texcoords);
-        tex_p.position(0);
-
-        float[] tmp2 = new float[verts_back.length];
-        for (int i = 0; i < verts_back.length; i += 2)
-        {
-            tmp2[i] = verts_back[i] * dot_size + cx;
-            tmp2[i + 1] = verts_back[i + 1] * dot_size + cy;
-        }
-
-        m_fanVertexArray = ByteBuffer.allocateDirect(4 * verts_back.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        m_fanVertexArray.put(tmp2);
-        m_fanVertexArray.position(0);
-
-        m_keys = keys;
-    }
-
     @Override
     public void loadtex(GL10 gl)
     {
@@ -232,7 +235,7 @@ public class Disc extends Paintable implements TouchListener
         dotjoyenabled = true;
         dotx = x - cx;
         doty = y - cy;
-        boolean inside = 4 * (dotx * dotx + doty * doty) <= size * size;
+        boolean inside = 4 * (dotx * dotx + doty * doty) <= m_size_2;
 
         switch (act)
         {
@@ -253,8 +256,9 @@ public class Disc extends Paintable implements TouchListener
                                 if (p.pressed)
                                 {
                                     has = true;
-                                    ((Q3EControlView) (view)).sendKeyEvent(true, p.key, 0);
-                                    ((Q3EControlView) (view)).sendKeyEvent(false, p.key, 0);
+                                    Q3EControlView controlView = (Q3EControlView) (this.view);
+                                    controlView.sendKeyEvent(true, p.key, 0);
+                                    controlView.sendKeyEvent(false, p.key, 0);
                                 }
                             }
                             p.pressed = false;
@@ -274,7 +278,7 @@ public class Disc extends Paintable implements TouchListener
                 {
                     if (!inside)
                     {
-                        float t = rad2deg(Math.atan2(doty, dotx) + Math.PI / 2);
+                        float t = Q3EUtils.Rad2Deg(Math.atan2(doty, dotx) + Math.PI / 2);
                         boolean has = false;
                         for (Part p : m_parts)
                         {
@@ -304,28 +308,13 @@ public class Disc extends Paintable implements TouchListener
     @Override
     public boolean isInside(int x, int y)
     {
-        return 4 * ((cx - x) * (cx - x) + (cy - y) * (cy - y)) <= size * size;
+        return 4 * ((cx - x) * (cx - x) + (cy - y) * (cy - y)) <= m_size_2;
     }
 
     public static void Move(Disc target, Disc src)
     {
         target.tex_ind = src.tex_ind;
         target.m_parts = src.m_parts;
-    }
-
-    private static float rad2deg(double rad)
-    {
-        double deg = rad / Math.PI * 180.0;
-        return FormatAngle((float) deg);
-    }
-
-    private static float FormatAngle(float deg)
-    {
-        while (deg > 360)
-            deg -= 360;
-        while (deg < 0)
-            deg += 360.0;
-        return deg;
     }
 
     public void Translate(int dx, int dy)

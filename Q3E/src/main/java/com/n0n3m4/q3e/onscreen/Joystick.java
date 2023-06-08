@@ -201,11 +201,11 @@ public class Joystick extends Paintable implements TouchListener
         {
             GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
             if(null != m_outerVertexBuffer)
-                GL.DrawVerts(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                GL.DrawVerts(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
             else if(null != m_borderVertexBuffer)
-                GL.DrawVerts(gl, m_borderTexture, 6, tex_p, m_borderVertexBuffer, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                GL.DrawVerts(gl, m_borderTexture, 6, tex_p, m_borderVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
             if(null != m_innerVertexBuffer)
-                GL.DrawVerts(gl, m_innerTexture, 6, tex_p, m_innerVertexBuffer, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                GL.DrawVerts(gl, m_innerTexture, 6, tex_p, m_innerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */1, 0, 0, alpha);
         }
     }
 
@@ -254,14 +254,16 @@ public class Joystick extends Paintable implements TouchListener
     @Override
     public boolean isInside(int x, int y)
     {
-        if(!m_unfixed)
+        if(!m_unfixed || m_editMode)
         {
             int deltax = cx - x;
             int deltay = cy - y;
             return 4 * (deltax * deltax + deltay * deltay) <= m_size_2;
         }
         else
+        {
             return m_range.contains(x, y);
+        }
     }
 
     private boolean HandleEvent_fixed(int x, int y, int act)

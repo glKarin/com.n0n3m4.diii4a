@@ -60,7 +60,7 @@ public final class GLBitmapTexture
         c.drawARGB(0, 0, 0, 0);
         c.drawRect(rect, p);
         p.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
-        RectF rectf = new RectF(borderWidth, borderWidth, width - borderWidth * 2, height - borderWidth * 2);
+        RectF rectf = new RectF(borderWidth, borderWidth, width - borderWidth, height - borderWidth);
         c.drawRect(rectf, p);
 
         return GL.loadGLTexture(gl, bmp);
