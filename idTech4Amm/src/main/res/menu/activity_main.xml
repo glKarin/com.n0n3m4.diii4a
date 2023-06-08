@@ -112,6 +112,10 @@
                 android:title="Debug text history"
                 android:showAsAction="never"/>
             <item
+                android:id="@+id/main_menu_gen_exception"
+                android:title="Throw exception"
+                android:showAsAction="never"/>
+            <item
                 android:id="@+id/main_menu_test"
                 android:title="TEST"
                 android:showAsAction="never"/>

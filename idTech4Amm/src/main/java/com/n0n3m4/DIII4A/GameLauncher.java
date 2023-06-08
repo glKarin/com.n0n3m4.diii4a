@@ -1,6 +1,6 @@
 /*
 	Copyright (C) 2012 n0n3m4
-	
+
     This file is part of RTCW4A.
 
     RTCW4A is free software: you can redistribute it and/or modify
@@ -65,7 +65,7 @@ import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
-import com.karin.idTech4Amm.sys.UncaughtExceptionHandler;
+import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.FileBrowserDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
@@ -112,7 +112,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 @SuppressLint({"ApplySharedPref", "NonConstantResourceId", "CommitPrefEdits"})
-public class GameLauncher extends Activity{		
+public class GameLauncher extends Activity{
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE = 1;
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE = 2;
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE = 3;
@@ -127,7 +127,7 @@ public class GameLauncher extends Activity{
 	private int m_onScreenButtonGlobalOpacity = CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
 	private float m_onScreenButtonGlobalSizeScale = CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE;
 	private boolean m_onScreenButtonFriendlyEdge = CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE;
-     
+
 	private final ViewHolder V = new ViewHolder();
     private boolean m_cmdUpdateLock = false;
 	private final CompoundButton.OnCheckedChangeListener m_checkboxChangeListener = new CompoundButton.OnCheckedChangeListener() {
@@ -213,6 +213,12 @@ public class GameLauncher extends Activity{
 								.putBoolean(Q3EUtils.pref_harm_multithreading, isChecked)
 								.commit();
 						Q3EUtils.q3ei.multithread = isChecked;
+						break;
+					case R.id.launcher_tab2_joystick_unfixed:
+						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+								.putBoolean(Q3EUtils.pref_harm_joystick_unfixed, isChecked)
+								.commit();
+						Q3EUtils.q3ei.joystick_unfixed = isChecked;
 						break;
 					default:
 						break;
@@ -319,7 +325,7 @@ public class GameLauncher extends Activity{
 	};
 
 	private class SavePreferenceTextWatcher implements TextWatcher
-	{    
+	{
 		private final String name;
 		private final String defValue;
 		public SavePreferenceTextWatcher(String name, String defValue)
@@ -332,7 +338,7 @@ public class GameLauncher extends Activity{
 			this(name, null);
 		}
 		public void onTextChanged(CharSequence s, int start, int before, int count) {}
-		public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
+		public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
 		public void afterTextChanged(Editable s)
 		{
             String value = s.length() == 0 && null != defValue ? defValue : s.toString();
@@ -341,7 +347,7 @@ public class GameLauncher extends Activity{
 				.commit();
 		}
 	};
-    
+
     private final AdapterView.OnItemSelectedListener m_spinnerItemSelectedListener = new AdapterView.OnItemSelectedListener() {
 		public void onItemSelected(AdapterView adapter, View view, int position, long id)
 		{
@@ -366,41 +372,41 @@ public class GameLauncher extends Activity{
 		}
 		public void onNothingSelected(AdapterView adapter) {}
     };
-	
+
 	final String default_gamedata= Environment.getExternalStorageDirectory() + "/diii4a";
-	
+
 	public void getgl2progs(String destname) {
-        try {            
+        try {
             byte[] buf = new byte[4096];
             ZipInputStream zipinputstream = null;
             InputStream bis;
             ZipEntry zipentry;
-                        
+
             bis=getAssets().open("source/gl2progs.zip");
             zipinputstream=new ZipInputStream(bis);
-            
-            (new File(destname)).mkdirs();                               
-            while ((zipentry= zipinputstream.getNextEntry())!=null) 
-            {                	            	                
-            	String tmpname=zipentry.getName();                	                	
-            	
+
+            (new File(destname)).mkdirs();
+            while ((zipentry= zipinputstream.getNextEntry())!=null)
+            {
+            	String tmpname=zipentry.getName();
+
             	String entryName = destname + tmpname;
                 entryName = entryName.replace('/', File.separatorChar);
                 entryName = entryName.replace('\\', File.separatorChar);
-            	                                    
+
                 int n;
                 FileOutputStream fileoutputstream;
                 File newFile = new File(entryName);
                 if (zipentry.isDirectory()) {
                     if (!newFile.mkdirs()) {
-                    }                        
+                    }
                     continue;
                 }
-                fileoutputstream = new FileOutputStream(entryName);               
+                fileoutputstream = new FileOutputStream(entryName);
                 while ((n = zipinputstream.read(buf, 0, 4096)) > -1) {
-                    fileoutputstream.write(buf, 0, n);                    
-                }                                             
-                fileoutputstream.close();                                                     
+                    fileoutputstream.write(buf, 0, n);
+                }
+                fileoutputstream.close();
                 zipinputstream.closeEntry();
             }
 
@@ -486,28 +492,28 @@ public class GameLauncher extends Activity{
 	{
 		InitUILayout(q3ei, CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
 	}
-    
+
     private void InitUILayout(Q3EInterface q3ei, boolean friendly, float scale, int opacity)
     {
         q3ei.defaults_table = MakeUILayout(friendly, scale, opacity);
     }
-	
+
 	public void InitQ3E()
-	{			
+	{
 		Q3EKeyCodes.InitD3Keycodes();
 		Q3EInterface q3ei=new Q3EInterface();
 
 		q3ei.InitD3();
 
 		InitUIDefaultLayout(q3ei);
-		
-		q3ei.default_path=default_gamedata;		
-        
+
+		q3ei.default_path=default_gamedata;
+
 		q3ei.SetupDOOM3(); //k armv7-a only support neon now
-        
+
         Constants.DumpDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
 
-        // index:type;23,1,2,0|...... 
+        // index:type;23,1,2,0|......
         try
         {
             Set<String> configs = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(Constants.PreferenceKey.ONSCREEN_BUTTON, null);
@@ -525,7 +531,7 @@ public class GameLauncher extends Activity{
                     q3ei.arg_table[index * 4 + 2] = Integer.parseInt(argArr[2]);
                     q3ei.arg_table[index * 4 + 3] = Integer.parseInt(argArr[3]);
                 }
-            }        
+            }
         }
         catch(Exception e)
         {
@@ -533,7 +539,7 @@ public class GameLauncher extends Activity{
             e.printStackTrace();
             Constants.RestoreDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
         }
-		
+
 		Q3EUtils.q3ei=q3ei;
 	}
 
@@ -548,7 +554,7 @@ public class GameLauncher extends Activity{
 		Q3EAd.LoadAds(this);
 		super.onConfigurationChanged(newConfig);
 	}
-	
+
 	public void support(View vw)
 	{
         AlertDialog.Builder bldr=new AlertDialog.Builder(this);
@@ -597,19 +603,19 @@ public class GameLauncher extends Activity{
 		});
         AlertDialog dl=bldr.create();
         dl.setCancelable(false);
-		dl.show();		
+		dl.show();
 	}
-	
+
 	public void UpdateMouseMenu(boolean show)
 	{
 		V.layout_mouseconfig.setVisibility(show?LinearLayout.VISIBLE:LinearLayout.GONE);
 	}
-	
+
 	public void UpdateMouseManualMenu(boolean show)
 	{
 		V.layout_manualmouseconfig.setVisibility(show?LinearLayout.VISIBLE:LinearLayout.GONE);
 	}
-	
+
 	public void SelectCheckbox(RadioGroup rg, int index)
 	{
         for(int i = 0, j = 0; i < rg.getChildCount(); i++)
@@ -633,7 +639,7 @@ public class GameLauncher extends Activity{
     {
         return GetCheckboxIndex(rg, rg.getCheckedRadioButtonId());
     }
-	
+
 	public int GetCheckboxIndex(RadioGroup rg, int id)
 	{
         for(int i = 0, j = 0; i < rg.getChildCount(); i++)
@@ -669,17 +675,17 @@ public class GameLauncher extends Activity{
         return -1;
         //return rg.getChildAt(index).getId();
 	}
-	
+
 	public boolean getProp(String name)
 	{
         return D3CommandUtility.GetBoolProp(GetCmdText(), name, false);
 	}
-    
+
 	public void setProp(String name,boolean val)
 	{
         SetProp(name, D3CommandUtility.btostr(val));
 	}
-	
+
 	public void updatehacktings()
 	{
         //k
@@ -687,20 +693,20 @@ public class GameLauncher extends Activity{
 		V.useetc1.setChecked(getProp("r_useETC1", false));
 		V.useetc1cache.setChecked(getProp("r_useETC1cache", false));
 		V.nolight.setChecked(getProp("r_noLight", false));
-        
+
         //k fill commandline
         if(!IsProp("r_useDXT")) setProp("r_useDXT", false);
         if(!IsProp("r_useETC1")) setProp("r_useETC1", false);
         if(!IsProp("r_useETC1cache")) setProp("r_useETC1cache", false);
         if(!IsProp("r_noLight")) setProp("r_noLight", false);
-        
+
         String str = GetProp("harm_r_clearVertexBuffer");
         int index = 2;
         if(str != null)
         {
             try
             {
-                index = Integer.parseInt(str);   
+                index = Integer.parseInt(str);
             }
             catch(Exception e)
             {
@@ -713,7 +719,7 @@ public class GameLauncher extends Activity{
             SetProp("harm_r_clearVertexBuffer", 2);
         SelectCheckbox(V.r_harmclearvertexbuffer, index);
         if(!IsProp("harm_r_clearVertexBuffer")) SetProp("harm_r_clearVertexBuffer", 2);
-        
+
         str = GetProp("harm_r_lightModel");
         index = 0;
         if(str != null)
@@ -736,7 +742,7 @@ public class GameLauncher extends Activity{
 				index = 1;
 		}
 		SelectCheckbox(V.rg_s_driver, index);
-        
+
         index = 0;
         str = GetProp("fs_game");
 		if(str != null)
@@ -746,7 +752,7 @@ public class GameLauncher extends Activity{
 			    if(Q3EUtils.q3ei.isQ4)
 			    {
 				    if("q4base".equals(str) || "".equals(str))
-					    index = 0;   
+					    index = 0;
                     else
                     {
                         RemoveProp("fs_game");
@@ -799,8 +805,8 @@ public class GameLauncher extends Activity{
 			SelectCheckbox(GetGameModRadioGroup(), 0);
         }
         GameLauncher.this.UpdateCustomerResulotion(V.rg_scrres.getCheckedRadioButtonId() == R.id.res_custom);
-	}	
-    
+	}
+
     private LinkedList<String> m_debugTextHistory = null;
     private boolean m_revTextHistory = true;
     private void DebugText(Object format, Object...args)
@@ -821,6 +827,9 @@ public class GameLauncher extends Activity{
 
 	private CharSequence MakeDebugTextHistoryText(Boolean rev)
 	{
+		if(null == m_debugTextHistory)
+			return "<empty>";
+
 		StringBuilder sb = new StringBuilder();
 		final String endl = TextHelper.GetDialogMessageEndl();
 		for(int i = 0; i < m_debugTextHistory.size(); i++)
@@ -842,6 +851,11 @@ public class GameLauncher extends Activity{
 		return TextHelper.GetDialogMessage(sb.toString());
 	}
 
+	private void ThrowException()
+	{
+		((String)null).toString();
+	}
+
     private void ShowDebugTextHistoryDialog()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -851,7 +865,8 @@ public class GameLauncher extends Activity{
             .setNegativeButton("Clear", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
-                    m_debugTextHistory.clear();
+                	if(null != m_debugTextHistory)
+                    	m_debugTextHistory.clear();
                     ((AlertDialog)dialog).setMessage("");
                 }
             })
@@ -884,11 +899,11 @@ public class GameLauncher extends Activity{
             if("q4base".equals(game))
                 game = "";
             if(game.isEmpty() || "q4base".equals(game))
-                index = 0;   
+                index = 0;
             if(index >= 0)
                 SelectCheckbox(V.rg_fs_q4game, index);
             if(index > 0 && !game.isEmpty())
-                SetProp("fs_game", game);   
+                SetProp("fs_game", game);
             else
                 RemoveProp("fs_game");
         }
@@ -922,11 +937,11 @@ public class GameLauncher extends Activity{
             else if("rivensin".equals(game))
                 index = 4;
             else if("hardscorps".equals(game))
-                index = 5;   
+                index = 5;
             if(index >= 0)
                 SelectCheckbox(V.rg_fs_game, index);
             if(index > 0 && !game.isEmpty())
-                SetProp("fs_game", game);   
+                SetProp("fs_game", game);
             else
                 RemoveProp("fs_game");
         }
@@ -948,51 +963,56 @@ public class GameLauncher extends Activity{
         V.launcher_tab1_game_lib_button.setEnabled(on);
         V.edt_fs_game.setEnabled(on);
         V.launcher_tab1_user_game_layout.setVisibility(on ? View.VISIBLE : View.GONE);
-    }	
-	
-	public void onCreate(Bundle savedInstanceState) 
-	{		
-		super.onCreate(savedInstanceState);				
+    }
+
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
         //k
-        HandleUnexperted();
+        KUncaughtExceptionHandler.HandleUnexpectedException(this);
         setTitle(R.string.app_title);
 		final SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this);
         ContextUtility.SetScreenOrientation(this, mPrefs.getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false) ? 0 : 1);
-        
+
 		setContentView(R.layout.main);
-		
-        getActionBar().setDisplayHomeAsUpEnabled(true);						
-		
+
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
 		InitQ3E();
-		
+		Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f);
+		Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EUtils.pref_harm_joystick_unfixed, false);
+		Q3EUtils.q3ei.joystick_inner_dead_zone = mPrefs.getFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, 0.0f);
+		Q3EUtils.q3ei.SetAppStoragePath(this);
+
 		TabHost th=(TabHost)findViewById(R.id.tabhost);
-		th.setup();					
-	    th.addTab(th.newTabSpec("tab1").setIndicator("General").setContent(R.id.launcher_tab1));	    
-	    th.addTab(th.newTabSpec("tab2").setIndicator("Controls").setContent(R.id.launcher_tab2));	    
-	    th.addTab(th.newTabSpec("tab3").setIndicator("Graphics").setContent(R.id.launcher_tab3));							
+		th.setup();
+	    th.addTab(th.newTabSpec("tab1").setIndicator("General").setContent(R.id.launcher_tab1));
+	    th.addTab(th.newTabSpec("tab2").setIndicator("Controls").setContent(R.id.launcher_tab2));
+	    th.addTab(th.newTabSpec("tab3").setIndicator("Graphics").setContent(R.id.launcher_tab3));
 
 		V.Setup();
 
         V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
 		SetGame(mPrefs.getString(Q3EUtils.pref_harm_game, Q3EGlobals.GAME_DOOM3));
-		
+
 		V.edt_cmdline.setText(mPrefs.getString(Q3EUtils.pref_params, "game.arm"));
 		V.edt_mouse.setText(mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???"));
 		V.edt_path.setText(mPrefs.getString(Q3EUtils.pref_datapath, default_gamedata));
 		V.hideonscr.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.hideonscr.setChecked(mPrefs.getBoolean(Q3EUtils.pref_hideonscr, false));
-		
+
 		UpdateMouseMenu(V.hideonscr.isChecked());
-				
+
 		V.mapvol.setChecked(mPrefs.getBoolean(Q3EUtils.pref_mapvol, false));
 		V.secfinglmb.setChecked(mPrefs.getBoolean(Q3EUtils.pref_2fingerlmb, false));
 		V.smoothjoy.setChecked(mPrefs.getBoolean(Q3EUtils.pref_analog, true));
-		V.detectmouse.setOnCheckedChangeListener(m_checkboxChangeListener);						
+		V.launcher_tab2_joystick_unfixed.setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_joystick_unfixed, false));
+		V.detectmouse.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.detectmouse.setChecked(mPrefs.getBoolean(Q3EUtils.pref_detectmouse, true));
-		
+
 		UpdateMouseManualMenu(!V.detectmouse.isChecked());
-		
+
 		SelectCheckbox(V.rg_curpos,mPrefs.getInt(Q3EUtils.pref_mousepos, 3));
         V.rg_scrres.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		SelectCheckbox(V.rg_scrres,mPrefs.getInt(Q3EUtils.pref_scrres, 0));
@@ -1044,7 +1064,7 @@ public class GameLauncher extends Activity{
 		{
 			String game = mPrefs.getString(Q3EUtils.pref_harm_q4_fs_game, "");
             if(game.isEmpty() || "q4base".equals(game))
-                index = 0;   
+                index = 0;
             SelectCheckbox(V.rg_fs_q4game, index);
 		}
 		else if(Q3EUtils.q3ei.isPrey)
@@ -1074,12 +1094,12 @@ public class GameLauncher extends Activity{
         UpdateUserGame(userMod);
         V.fs_game_user.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.rg_fs_game.setOnCheckedChangeListener(m_groupCheckChangeListener);
-        V.edt_fs_game.addTextChangedListener(new TextWatcher() {           
+        V.edt_fs_game.addTextChangedListener(new TextWatcher() {
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if(V.fs_game_user.isChecked())
                         SetProp("fs_game", s);
-                }           
-                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
+                }
+                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
                 public void afterTextChanged(Editable s)
                 {
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -1089,7 +1109,7 @@ public class GameLauncher extends Activity{
             });
         V.launcher_tab1_game_lib_button.setOnClickListener(m_buttonClickListener);
 		V.edt_harm_r_specularExponent.setText(Float.toString(mPrefs.getFloat(Q3EUtils.pref_harm_r_specularExponent, 4.0f)));
-		
+
 		V.res_x.setText(mPrefs.getString(Q3EUtils.pref_resx, "640"));
 		V.res_y.setText(mPrefs.getString(Q3EUtils.pref_resy, "480"));
         V.res_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_resx, "640"));
@@ -1099,20 +1119,20 @@ public class GameLauncher extends Activity{
 		V.setup_onscreen_button_opacity.setOnClickListener(m_buttonClickListener);
 		V.reset_onscreen_controls_btn.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_size.setOnClickListener(m_buttonClickListener);
-		
-		//DIII4A-specific					
-		V.edt_cmdline.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_params, "game.arm") {			
+
+		//DIII4A-specific
+		V.edt_cmdline.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_params, "game.arm") {
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean cond = V.edt_cmdline.isInputMethodTarget() && !IsCmdUpdateLocked();
                 if(cond)
 				    updatehacktings();
-			}					
+			}
             });
-        V.edt_harm_r_specularExponent.addTextChangedListener(new TextWatcher() {           
+        V.edt_harm_r_specularExponent.addTextChangedListener(new TextWatcher() {
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     SetProp("harm_r_specularExponent", s);
-                }           
-                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
+                }
+                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
                 public void afterTextChanged(Editable s) {
                     String value = s.length() == 0 ? "4.0" : s.toString();
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -1125,6 +1145,7 @@ public class GameLauncher extends Activity{
 		V.useetc1cache.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.nolight.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.smoothjoy.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.launcher_tab2_joystick_unfixed.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.edt_path.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_datapath, default_gamedata));
 		V.edt_mouse.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_eventdev, "/dev/input/event???"));
         V.rg_curpos.setOnCheckedChangeListener(m_groupCheckChangeListener);
@@ -1137,10 +1158,13 @@ public class GameLauncher extends Activity{
         V.launcher_tab2_gyro_x_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
         V.launcher_tab2_gyro_y_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
 		V.launcher_tab2_joystick_release_range.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f));
+		int innerDeadZone = (int) (mPrefs.getFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, 0.0f) * 100);
+		V.launcher_tab2_joystick_inner_dead_zone.setProgress(innerDeadZone);
+		V.launcher_tab2_joystick_inner_dead_zone_label.setText(innerDeadZone + "%");
         UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
-        V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {           
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}           
-                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
+        V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
                 public void afterTextChanged(Editable s) {
                     String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_X_AXIS_SENS : s.toString();
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -1148,9 +1172,9 @@ public class GameLauncher extends Activity{
                         .commit();
                 }
             });
-        V.launcher_tab2_gyro_y_axis_sens.addTextChangedListener(new TextWatcher() {           
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}           
-                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}            
+        V.launcher_tab2_gyro_y_axis_sens.addTextChangedListener(new TextWatcher() {
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
                 public void afterTextChanged(Editable s) {
                     String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_Y_AXIS_SENS : s.toString();
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -1163,18 +1187,47 @@ public class GameLauncher extends Activity{
 			public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
 			public void afterTextChanged(Editable s) {
 				String value = s.length() == 0 ? "0.0" : s.toString();
+				float v = Utility.parseFloat_s(value, 0.0f);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putFloat(Q3EUtils.pref_harm_joystick_release_range, Utility.parseFloat_s(value, 0.0f))
+						.putFloat(Q3EUtils.pref_harm_joystick_release_range, v)
 						.commit();
+				Q3EUtils.q3ei.joystick_release_range = v;
+			}
+		});
+		V.launcher_tab2_joystick_inner_dead_zone.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+		{
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+			{
+				if(fromUser)
+					m_onScreenButtonGlobalOpacity = progress;
+				float v = (float) progress / 100.0f;
+				Q3EUtils.q3ei.joystick_inner_dead_zone = v;
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, v)
+						.commit();
+				V.launcher_tab2_joystick_inner_dead_zone_label.setText(progress + "%");
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar)
+			{
+				V.launcher_tab2_joystick_inner_dead_zone_label.setTextColor(Color.RED);
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar)
+			{
+				V.launcher_tab2_joystick_inner_dead_zone_label.setTextColor(Color.BLACK);
 			}
 		});
 		V.auto_quick_load.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		updatehacktings();
-		
+
 		Q3EAd.LoadAds(this);
-        
+
         OpenUpdate();
 	}
 
@@ -1183,7 +1236,7 @@ public class GameLauncher extends Activity{
 		super.onDestroy();
 		StopCheckForUpdate();
 	}
-	
+
 	public void start(View vw)
 	{
 		//k
@@ -1193,7 +1246,7 @@ public class GameLauncher extends Activity{
 		if ((new File(dir+"/base").exists())&&(!new File(dir+"/base/gl2progs").exists()))
 		getgl2progs(dir+"/base/");
         */
-        
+
         //k check external storage permission
         int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
@@ -1295,9 +1348,9 @@ public class GameLauncher extends Activity{
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
-	
+
 	public void controls(View vw)
-	{		
+	{
 		startActivity(new Intent(this,Q3EUiConfig.class));
 	}
 
@@ -1309,7 +1362,7 @@ public class GameLauncher extends Activity{
             return "1".equals(val);
         return defaultValueIfNotExists;
 	}
-    
+
     private void SetProp(String name, Object val)
     {
         boolean lock = LockCmdUpdate();
@@ -1337,7 +1390,7 @@ public class GameLauncher extends Activity{
     {
         return D3CommandUtility.IsProp(GetCmdText(), name);
 	}
-    
+
     private void EditFile(String file)
     {
         int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE);
@@ -1345,7 +1398,7 @@ public class GameLauncher extends Activity{
             Toast.makeText(this, "Can't access file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
-        
+
         String gamePath = V.edt_path.getText().toString();
         String game = GetProp("fs_game");
         if(game == null || game.isEmpty())
@@ -1357,7 +1410,7 @@ public class GameLauncher extends Activity{
             Toast.makeText(this, "File can not access(" + basePath + ")!", Toast.LENGTH_LONG).show();
             return;
         }
-        
+
         Intent intent = new Intent(this, ConfigEditorActivity.class);
         intent.putExtra("CONST_FILE_PATH", basePath);
         startActivity(intent);
@@ -1430,6 +1483,9 @@ public class GameLauncher extends Activity{
             case R.id.main_menu_debug_text_history:
                 ShowDebugTextHistoryDialog();
 				return true;
+			case R.id.main_menu_gen_exception:
+				ThrowException();
+				return true;
 			case R.id.main_menu_check_for_update:
 				OpenCheckForUpdateDialog();
 				return true;
@@ -1454,7 +1510,7 @@ public class GameLauncher extends Activity{
 				return super.onOptionsItemSelected(item);
         }
     }
-    
+
     private void OpenChanges()
     {
         ContextUtility.OpenMessageDialog(this, "Changes", TextHelper.GetChangesText());
@@ -1464,12 +1520,7 @@ public class GameLauncher extends Activity{
     {
         ContextUtility.OpenMessageDialog(this, "About " + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetAboutText(this));
     }
-  
-    private void HandleUnexperted()
-    {
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
-    }
-    
+
     private void OpenRuntimeLog()
     {
         String path = V.edt_path.getText().toString() + File.separatorChar + "stdout.txt";
@@ -1483,7 +1534,7 @@ public class GameLauncher extends Activity{
             Toast.makeText(this, "Log file can not access(" + path + ")", Toast.LENGTH_LONG).show();
         }
     }
-    
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -1500,7 +1551,7 @@ public class GameLauncher extends Activity{
 
 		HandleGrantPermissionResult(requestCode, list);
 	}
-    
+
     private void OpenFolderChooser()
     {
         int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE);
@@ -1529,26 +1580,26 @@ public class GameLauncher extends Activity{
             gamePath = defaultPath;
             f = new File(gamePath);
         }
-        
+
         FileBrowserDialog dialog = new FileBrowserDialog(this);
         dialog.SetupUI("Chooser data folder", gamePath);
-        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new AlertDialog.OnClickListener() {          
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new AlertDialog.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) { 
+                public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
                 }
             });
-        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Choose current directory", new AlertDialog.OnClickListener() {          
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Choose current directory", new AlertDialog.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) { 
+                public void onClick(DialogInterface dialog, int which) {
 					V.edt_path.setText(((FileBrowserDialog)dialog).Path());
                     dialog.dismiss();
                 }
             });
-            
+
         dialog.show();
     }
-    
+
     private void WritePreferences()
     {
         SharedPreferences.Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(this).edit();
@@ -1586,6 +1637,7 @@ public class GameLauncher extends Activity{
 		mEdtr.putBoolean(Q3EUtils.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
 		mEdtr.putBoolean(Q3EUtils.pref_harm_multithreading, V.multithreading.isChecked());
 		mEdtr.putFloat(Q3EUtils.pref_harm_joystick_release_range, Utility.parseFloat_s(V.launcher_tab2_joystick_release_range.getText().toString(), 0.0f));
+		mEdtr.putBoolean(Q3EUtils.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
 		mEdtr.commit();
     }
 
@@ -1593,9 +1645,9 @@ public class GameLauncher extends Activity{
     {
         ContextUtility.OpenMessageDialog(this, "Help", TextHelper.GetHelpText());
     }
-    
+
     private void OpenUpdate()
-    {       
+    {
         if(IsUpdateRelease())
             ContextUtility.OpenMessageDialog(this, "Update: " + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetUpdateText(this));
     }
@@ -1610,7 +1662,7 @@ public class GameLauncher extends Activity{
         pref.edit().putInt(UPDATE_RELEASE, Constants.CONST_UPDATE_RELEASE).commit();
         return true;
     }
-    
+
     private void SetCmdText(String text)
     {
         EditText edit = V.edt_cmdline;
@@ -1623,7 +1675,7 @@ public class GameLauncher extends Activity{
             pos = Math.max(0, Math.min(pos, text.length()));
             try
             {
-                edit.setSelection(pos);      
+                edit.setSelection(pos);
             }
             catch(Exception e)
             {
@@ -1636,7 +1688,7 @@ public class GameLauncher extends Activity{
     {
         return V.edt_cmdline.getText().toString();
     }
-    
+
     private void OpenGameLibChooser()
     {
 		final SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1654,7 +1706,7 @@ public class GameLauncher extends Activity{
                 selected = i;
             }
         }
-        
+
         StringBuilder sb = new StringBuilder();
         if(Q3EJNI.IS_64)
             sb.append("armv8-a 64");
@@ -1682,7 +1734,7 @@ public class GameLauncher extends Activity{
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    
+
     private void Test()
     {
         //((Object)null).toString();
@@ -1693,13 +1745,13 @@ public class GameLauncher extends Activity{
         LauncherSettingsDialog dialog = LauncherSettingsDialog.newInstance();
         dialog.show(getFragmentManager(), "LauncherSettingsDialog");
     }
-    
+
     private void OpenDebugDialog()
     {
         DebugDialog dialog = DebugDialog.newInstance();
         dialog.show(getFragmentManager(), "DebugDialog");
     }
-    
+
     private void UpdateCustomerResulotion(boolean enabled)
     {
         LinearLayout layout = V.res_customlayout;
@@ -1708,7 +1760,7 @@ public class GameLauncher extends Activity{
         {
             layout.getChildAt(i).setEnabled(enabled);
         }
-        
+
         layout.setEnabled(enabled);
     }
 
@@ -1772,7 +1824,7 @@ public class GameLauncher extends Activity{
                 }
                 game = "hardcorps";
 				break;
-                
+
             case R.id.fs_game_quake4:
                 if(!userMod)
                 {
@@ -1887,7 +1939,7 @@ public class GameLauncher extends Activity{
 		});
 		builder.create().show();
 	}
-    
+
     private void OpenOnScreenButtonSetting()
     {
         Intent intent = new Intent(this, OnScreenButtonConfigActivity.class);
@@ -1898,7 +1950,7 @@ public class GameLauncher extends Activity{
     {
         ContextUtility.OpenMessageDialog(this, "Special Cvar List", TextHelper.GetCvarText());
     }
-    
+
     private void SetGame(String game)
     {
 		Q3EUtils.q3ei.SetupGame(game); //k armv7-a only support neon now
@@ -1938,7 +1990,7 @@ public class GameLauncher extends Activity{
         V.rg_fs_q4game.setVisibility(q4Visible ? View.VISIBLE : View.GONE);
 		V.rg_fs_preygame.setVisibility(preyVisible ? View.VISIBLE : View.GONE);
     }
-    
+
     private void ChangeGame(String...games)
     {
     	String newGame = games.length > 0 ? games[0] : null;
@@ -2067,7 +2119,7 @@ public class GameLauncher extends Activity{
 			SelectCheckbox(V.rg_fs_game, index);
 		}
     }
-    
+
     private void OpenQuake4LevelDialog()
     {
         final int[] Acts = {
@@ -2126,7 +2178,7 @@ public class GameLauncher extends Activity{
     private static final int Q4_RESOURCE_BOT = 1 << 1;
 	private static final int Q4_RESOURCE_MP_GAME_MAP_AAS = 1 << 2;
     private static final int Q4_RESOURCE_ALL = ~(1 << 31);
-    
+
     private void OpenResourceFileDialog()
     {
     	// D3-format fonts don't need on longer
@@ -2159,7 +2211,7 @@ public class GameLauncher extends Activity{
             .show()
             ;
     }
-    
+
     private boolean ExtractQuake4PatchResource(int mask)
     {
     	if(0 == mask)
@@ -2246,7 +2298,7 @@ public class GameLauncher extends Activity{
 	{
 		Q3EUtils.q3ei.start_temporary_extra_command = (D3CommandUtility.SetParam(Q3EUtils.q3ei.start_temporary_extra_command, name, val));
 	}
-    
+
     private void ShowPreferenceDialog()
     {
         StringBuilder sb = new StringBuilder();
@@ -2262,7 +2314,7 @@ public class GameLauncher extends Activity{
         }
         ContextUtility.OpenMessageDialog(this, "Shared preferences", TextHelper.GetDialogMessage(sb.toString()));
     }
-    
+
     private void UpdateMapVol(boolean on)
     {
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
@@ -2797,6 +2849,9 @@ public class GameLauncher extends Activity{
 		public EditText launcher_tab2_joystick_release_range;
 		public Button reset_onscreen_controls_btn;
 		public Button setup_onscreen_button_size;
+		public CheckBox launcher_tab2_joystick_unfixed;
+		public SeekBar launcher_tab2_joystick_inner_dead_zone;
+		public TextView launcher_tab2_joystick_inner_dead_zone_label;
 
 		public void Setup()
 		{
@@ -2850,6 +2905,9 @@ public class GameLauncher extends Activity{
 			launcher_tab2_joystick_release_range = findViewById(R.id.launcher_tab2_joystick_release_range);
 			reset_onscreen_controls_btn = findViewById(R.id.reset_onscreen_controls_btn);
 			setup_onscreen_button_size = findViewById(R.id.setup_onscreen_button_size);
+			launcher_tab2_joystick_unfixed = findViewById(R.id.launcher_tab2_joystick_unfixed);
+			launcher_tab2_joystick_inner_dead_zone = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone);
+			launcher_tab2_joystick_inner_dead_zone_label = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone_label);
 		}
 	}
 }

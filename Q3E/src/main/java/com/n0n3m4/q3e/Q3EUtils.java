@@ -87,6 +87,8 @@ public class Q3EUtils
     public static final String pref_harm_function_key_toolbar = "harm_function_key_toolbar"; //k
     public static final String pref_harm_function_key_toolbar_y = "harm_function_key_toolbar_y"; //k
     public static final String pref_harm_joystick_release_range = "harm_joystick_release_range"; //k
+    public static final String pref_harm_joystick_unfixed = "harm_joystick_unfixed"; //k
+    public static final String pref_harm_joystick_inner_dead_zone = "harm_joystick_inner_dead_zone"; //k
 
     public static boolean isAppInstalled(Activity ctx, String nm)
     {
@@ -240,5 +242,15 @@ public class Q3EUtils
             e.printStackTrace();
             return context.getCacheDir().getAbsolutePath().replace("cache", "lib");		//k old, can work with armv5 and armv7-a
         }
+    }
+
+    public static <T extends Comparable> T Clamp(T target, T min, T max)
+    {
+        return target.compareTo(min) < 0 ? min : (target.compareTo(max) > 0 ? max : target);
+    }
+
+    public static float Clampf(float target, float min, float max)
+    {
+        return Math.max(min, Math.min(target, max));
     }
 }

@@ -52,14 +52,12 @@ public class KDebugTextView extends TextView {
 
     private abstract class MemDumpFunc
     {
-        private static final int UNIT = 1024;
-        private static final int UNIT2 = 1024 * 1024;
-
         private boolean  m_lock = false;
         private ActivityManager m_am = null;
         private final int[] m_processs = {Process.myPid()};
         private final ActivityManager.MemoryInfo m_outInfo = new ActivityManager.MemoryInfo();
-        private TextView m_memoryUsageText;
+        private final KMemoryInfo m_memoryInfo = new KMemoryInfo();
+        private final TextView m_memoryUsageText;
         protected Runnable m_runnable = new Runnable() {
             @Override
             public void run()
@@ -107,63 +105,24 @@ public class KDebugTextView extends TextView {
         private String GetMemText()
         {
             m_am.getMemoryInfo(m_outInfo);
-            int availMem = -1;
-            int totalMem = -1;
-            int usedMem = -1;
-            int java_mem = -1;
-            int native_mem = -1;
-            int graphics_mem = -1;
+            m_memoryInfo.Invalid();
+            m_memoryInfo.Get(m_am, m_processs, m_outInfo);
+            m_memoryInfo.Mb();
 
-            availMem = (int)(m_outInfo.availMem / UNIT2);
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) // 16
-            {
-                totalMem = (int)(m_outInfo.totalMem / UNIT2);
-                usedMem = (int)((m_outInfo.totalMem - m_outInfo.availMem) / UNIT2);
-            }
-
-            Debug.MemoryInfo[] memInfos = m_am.getProcessMemoryInfo(m_processs);
-            Debug.MemoryInfo memInfo = memInfos[0];
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
-                Debug.getMemoryInfo(memoryInfo);
-                java_mem = Integer.parseInt(memoryInfo.getMemoryStat("summary.java-heap")) / UNIT;
-                native_mem = Integer.parseInt(memoryInfo.getMemoryStat("summary.native-heap")) / UNIT;
-                //String code = memoryInfo.getMemoryStat("summary.code");
-                //String stack = memoryInfo.getMemoryStat("summary.stack");
-                graphics_mem = Integer.parseInt(memoryInfo.getMemoryStat("summary.graphics")) / UNIT;
-                //String privateOther = memoryInfo.getMemoryStat("summary.private-other");
-                //String system = memoryInfo.getMemoryStat("summary.system");
-                //String swap = memoryInfo.getMemoryStat("summary.total-swap");
-            }
-            else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23 // > Android P, slow frequency
-            {
-                java_mem = Integer.parseInt(memInfo.getMemoryStat("summary.java-heap")) / UNIT;
-                native_mem = Integer.parseInt(memInfo.getMemoryStat("summary.native-heap")) / UNIT;
-                graphics_mem = Integer.parseInt(memInfo.getMemoryStat("summary.graphics")) / UNIT;
-                //String stack_mem = memInfo.getMemoryStat("summary.stack");
-                //String code_mem = memInfo.getMemoryStat("summary.code");
-                //String others_mem = memInfo.getMemoryStat("summary.system");
-            }
-            else
-            {
-                java_mem = memInfo.dalvikPrivateDirty / UNIT;
-                native_mem = memInfo.nativePrivateDirty / UNIT;
-            }
-
-            int total_used = native_mem + java_mem;
-            String total_used_str = graphics_mem >= 0 ? "" + (total_used + graphics_mem) : (total_used + "<Excluding graphics memory>");
-            String graphics_mem_str = graphics_mem >= 0 ? "" + graphics_mem : "unknown";
-            int percent = Math.round(((float)usedMem / (float)totalMem) * 100);
-            availMem = totalMem - usedMem;
+            long app_total_used = m_memoryInfo.native_memory + m_memoryInfo.java_memory;
+            String total_used_str = m_memoryInfo.graphics_memory >= 0 ? "" + (app_total_used + m_memoryInfo.graphics_memory) : (app_total_used + "<Excluding graphics memory>");
+            String graphics_mem_str = m_memoryInfo.graphics_memory >= 0 ? "" + m_memoryInfo.graphics_memory : "unknown";
+            int percent = (int)Math.round(((double) m_memoryInfo.used_memory / (double)m_memoryInfo.total_memory) * 100);
+            long availMem = m_memoryInfo.total_memory - m_memoryInfo.used_memory;
 
             String sb = "App->" +
-                    "Dalvik:" + java_mem + "|" +
-                    "Native:" + native_mem + "|" +
+                    "Dalvik:" + m_memoryInfo.java_memory + "|" +
+                    "Native:" + m_memoryInfo.native_memory + "|" +
                     "Graphics:" + graphics_mem_str + "|" +
                     "≈" + total_used_str + "\n" +
                     "Sys->" +
-                    "Used:" + usedMem +
-                    "/Total:" + totalMem + "|" +
+                    "Used:" + m_memoryInfo.used_memory +
+                    "/Total:" + m_memoryInfo.total_memory + "|" +
                     percent + "%" + "|" +
                     "≈" + availMem;
             return sb;

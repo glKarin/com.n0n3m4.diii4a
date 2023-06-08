@@ -35,6 +35,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -47,9 +48,12 @@ import com.n0n3m4.q3e.gl.Q3EConfigChooser;
 import com.n0n3m4.q3e.karin.KKeyToolBar;
 import com.n0n3m4.q3e.karin.KOnceRunnable;
 import com.n0n3m4.q3e.onscreen.Button;
+import com.n0n3m4.q3e.onscreen.Disc;
 import com.n0n3m4.q3e.onscreen.Finger;
+import com.n0n3m4.q3e.onscreen.Joystick;
 import com.n0n3m4.q3e.onscreen.MouseControl;
 import com.n0n3m4.q3e.onscreen.Paintable;
+import com.n0n3m4.q3e.onscreen.Slider;
 import com.n0n3m4.q3e.onscreen.TouchListener;
 import com.n0n3m4.q3e.onscreen.UiLoader;
 
@@ -59,6 +63,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -420,7 +427,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
             for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
             {
-                Object o = uildr.LoadElement(i);
+                Object o = uildr.LoadElement(i, false);
                 touch_elements.add((TouchListener) o);
                 paint_elements.add((Paintable) o);
             }
@@ -443,6 +450,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             touch_elements.add(new MouseControl(this, false));
             touch_elements.add(new MouseControl(this, mPrefs.getBoolean(Q3EUtils.pref_2fingerlmb, false)));
             touch_elements.add(new MouseControl(this, false));
+
+            SortOnScreenButtons(); //k sort priority
 
             if (hideonscr)
             {
@@ -601,6 +610,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public static Finger[] fingers = new Finger[10];
     public static ArrayList<TouchListener> touch_elements = new ArrayList<TouchListener>(0);
     public static ArrayList<Paintable> paint_elements = new ArrayList<Paintable>(0);
+    public static TouchListener[] handle_elements = new TouchListener[10]; // handled elements in every touch event
 
     @SuppressLint("NewApi")
     @Override
@@ -614,36 +624,53 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             return true;
         }
 
+        int pid = event.getPointerId(event.getActionIndex());
         if ((event.getActionMasked() == MotionEvent.ACTION_DOWN) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN))
         {
-            int pid = event.getPointerId(event.getActionIndex());
             int x = (int) event.getX(event.getActionIndex());
             int y = (int) event.getY(event.getActionIndex());
             for (TouchListener tl : touch_elements)
+            {
                 if (tl.isInside(x, y))
                 {
                     fingers[pid].target = tl;
                     break;
                 }
+            }
         }
 
-        try
+        //k try
         {
+            Arrays.fill(handle_elements, null);
+            int handled = 0;
             for (Finger f : fingers)
             {
                 if (f.target != null)
                 {
+                    // check is handled: only once on a button
+                    int i = 0;
+                    while(i < handled)
+                    {
+                        if(null == handle_elements[i] || handle_elements[i] == f.target)
+                            break;
+                        i++;
+                    }
+                    if(i < handled)
+                        continue;
+                    handle_elements[handled] = f.target;
+                    handled++;
+
                     if (!f.onTouchEvent(event))
                         f.target = null;
                 }
             }
-        } catch (Exception ignored)
+        }
+        //k catch (Exception ignored)
         {
         }
 
         if ((event.getActionMasked() == MotionEvent.ACTION_UP) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) || (event.getActionMasked() == MotionEvent.ACTION_CANCEL))
         {
-            int pid = event.getPointerId(event.getActionIndex());
             fingers[pid].target = null;
         }
 
@@ -923,5 +950,42 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             else
                 m_keyToolbar.setVisibility(View.GONE);
         }
+    }
+
+    private int GetOnScreenType(TouchListener touchListener)
+    {
+        if(touchListener instanceof Button)
+            return Q3EGlobals.TYPE_BUTTON;
+        if(touchListener instanceof Slider)
+            return Q3EGlobals.TYPE_SLIDER;
+        if(touchListener instanceof Joystick)
+            return Q3EGlobals.TYPE_JOYSTICK;
+        if(touchListener instanceof Disc)
+            return Q3EGlobals.TYPE_DISC;
+        return Q3EGlobals.TYPE_MOUSE;
+    }
+
+    private void SortOnScreenButtons()
+    {
+        TouchListener[] touchListeners = touch_elements.toArray(new TouchListener[0]);
+        final List<Integer> Type_Priority = Arrays.asList(
+                Q3EGlobals.TYPE_BUTTON,
+                Q3EGlobals.TYPE_SLIDER,
+                Q3EGlobals.TYPE_DISC,
+                Q3EGlobals.TYPE_JOYSTICK,
+                Q3EGlobals.TYPE_MOUSE
+        );
+
+        Arrays.sort(touchListeners, new Comparator<TouchListener>() {
+            @Override
+            public int compare(TouchListener a, TouchListener b)
+            {
+                int ai = Type_Priority.indexOf(GetOnScreenType(a));
+                int bi = Type_Priority.indexOf(GetOnScreenType(b));
+                return ai - bi;
+            }
+        });
+        touch_elements.clear();
+        touch_elements.addAll(Arrays.asList(touchListeners));
     }
 }

@@ -18,11 +18,13 @@ public class Finger
         int act = 0;
         if (event.getPointerId(event.getActionIndex()) == id)
         {
-            if ((event.getActionMasked() == MotionEvent.ACTION_DOWN) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN))
+            final int actionMasked = event.getActionMasked();
+            if ((actionMasked == MotionEvent.ACTION_DOWN) || (actionMasked == MotionEvent.ACTION_POINTER_DOWN))
                 act = 1;
-            if ((event.getActionMasked() == MotionEvent.ACTION_UP) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) || (event.getActionMasked() == MotionEvent.ACTION_CANCEL))
+            else if ((actionMasked == MotionEvent.ACTION_UP) || (actionMasked == MotionEvent.ACTION_POINTER_UP) || (actionMasked == MotionEvent.ACTION_CANCEL))
                 act = -1;
         }
-        return target.onTouchEvent((int) event.getX(event.findPointerIndex(id)), (int) event.getY(event.findPointerIndex(id)), act);
+        final int pointerIndex = event.findPointerIndex(id);
+        return target.onTouchEvent((int) event.getX(pointerIndex), (int) event.getY(pointerIndex), act);
     }
 }

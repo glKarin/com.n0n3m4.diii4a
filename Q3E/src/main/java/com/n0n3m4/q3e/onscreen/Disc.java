@@ -90,7 +90,6 @@ public class Disc extends Paintable implements TouchListener
         c.drawText("" + Character.toUpperCase(key), r + (int) (x * mr), r + (int) (y * mr + (fontHeight)), p);
 
         res.textureId = GL.loadGLTexture(gl, bmp);
-        bmp.recycle();
 
         res.start = rad2deg(start);
         res.end = rad2deg(end);
@@ -132,7 +131,6 @@ public class Disc extends Paintable implements TouchListener
         c.drawArc(rect, (float) (start - 90), (float) (end - start), false, p);
 
         res.borderTextureId = GL.loadGLTexture(gl, bmp);
-        bmp.recycle();
 
         return res;
     }
@@ -215,7 +213,6 @@ public class Disc extends Paintable implements TouchListener
 
         m_circleWidth = size / 2 - internalsize;
         tex_ind = GL.loadGLTexture(gl, bmp);
-        bmp.recycle();
 
         if (null != m_keys && m_keys.length > 0)
         {
@@ -228,7 +225,7 @@ public class Disc extends Paintable implements TouchListener
     }
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act/* 1: Down, -1: Up */)
+    public boolean onTouchEvent(int x, int y, int act)
     {
         if (null == m_parts || m_parts.length == 0)
             return true;
@@ -239,11 +236,11 @@ public class Disc extends Paintable implements TouchListener
 
         switch (act)
         {
-            case 1:
+            case ACT_PRESS:
                 if (inside)
                     dotjoyenabled = true;
                 break;
-            case -1:
+            case ACT_RELEASE:
                 if (dotjoyenabled)
                 {
                     if (!inside)
@@ -262,7 +259,8 @@ public class Disc extends Paintable implements TouchListener
                             }
                             p.pressed = false;
                         }
-                    } else
+                    }
+                    else
                     {
                         for (Part p : m_parts)
                             p.pressed = false;
@@ -270,7 +268,7 @@ public class Disc extends Paintable implements TouchListener
                 }
                 dotjoyenabled = false;
                 break;
-            case 0:
+            case ACT_MOTION:
             default:
                 if (dotjoyenabled)
                 {
@@ -291,7 +289,8 @@ public class Disc extends Paintable implements TouchListener
                             }
                             p.pressed = b;
                         }
-                    } else
+                    }
+                    else
                     {
                         for (Part p : m_parts)
                             p.pressed = false;
@@ -327,5 +326,17 @@ public class Disc extends Paintable implements TouchListener
         while (deg < 0)
             deg += 360.0;
         return deg;
+    }
+
+    public void Translate(int dx, int dy)
+    {
+        cx += dx;
+        cy += dy;
+    }
+
+    public void SetPosition(int x, int y)
+    {
+        cx = x;
+        cy = y;
     }
 }
