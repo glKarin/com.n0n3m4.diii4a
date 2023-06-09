@@ -28,6 +28,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -41,6 +42,9 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Q3EUtils
 {
@@ -66,22 +70,10 @@ public class Q3EUtils
 
     public static Bitmap ResourceToBitmap(Context cnt, String assetname)
     {
-        InputStream is = null;
-        Bitmap b = null;
-        try
-        {
-            is = OpenResource(cnt, assetname);
-            b = BitmapFactory.decodeStream(is);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            Close(is);
-        }
-        return b;
+        String type = PreferenceManager.getDefaultSharedPreferences(cnt).getString(Q3EPreference.CONTROLS_THEME, "");
+        if(null == type)
+            type = "";
+        return LoadControlBitmap(cnt, assetname, type);
     }
 
     public static int dip2px(Context ctx, int dip)
@@ -267,6 +259,7 @@ public class Q3EUtils
         }
         return is;
     }
+
     public static InputStream OpenResource_assets(Context cnt, String assetname)
     {
         InputStream is = null;
@@ -305,5 +298,65 @@ public class Q3EUtils
         {
             e.printStackTrace();
         }
+    }
+
+    public static LinkedHashMap<String, String> GetControlsThemes(Context context)
+    {
+        LinkedHashMap<String, String> list = new LinkedHashMap<>();
+        list.put("/android_asset", "Default");
+        list.put("", "External");
+        String filePath = GetAppStoragePath(context, "/assets/controls_theme");
+        File dir = new File(filePath);
+        if(dir.exists() && dir.isDirectory())
+        {
+            File[] files = dir.listFiles();
+            for (File file : files)
+            {
+                if(file.isDirectory())
+                    list.put("controls_theme/" + file.getName(), file.getName());
+            }
+        }
+        return list;
+    }
+
+    public static Bitmap LoadControlBitmap(Context context, String path, String type)
+    {
+        InputStream is = null;
+        Bitmap texture = null;
+        switch (type)
+        {
+            case "/android_asset":
+                is = Q3EUtils.OpenResource_assets(context, path);
+                break;
+            case "":
+                is = Q3EUtils.OpenResource(context, path);
+                break;
+            default:
+                if(type.startsWith("/"))
+                {
+                    type = type.substring(1);
+                    is = Q3EUtils.OpenResource_assets(context, type + "/" + path);
+                }
+                else
+                {
+                    if((is = Q3EUtils.OpenResource(context, type + "/" + path)) == null)
+                        is = Q3EUtils.OpenResource_assets(context, path);
+                }
+                break;
+        }
+
+        try
+        {
+            texture = BitmapFactory.decodeStream(is);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            Q3EUtils.Close(is);
+        }
+        return texture;
     }
 }

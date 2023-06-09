@@ -91,33 +91,20 @@ public class OnScreenButtonConfigActivity extends Activity
 
     private void Reset()
     {
+        List<OnScreenButton> tmp = new ArrayList<>();
         if(null != m_list)
+        {
+            tmp.addAll(m_list);
             m_list.clear();
+        }
         m_adapter.notifyDataSetChanged();
+        for (OnScreenButton onScreenButton : tmp)
+            onScreenButton.Release();
     }
 
     private void LoadConfig()
     {
         Reset();
-        final String[] Names = {
-            "Joystick",
-            "Shoot",
-            "Jump",
-            "Crouch",
-            "Reload",
-            "PDA",
-            "Flashlight",
-            "Pause",
-            "Extra 1",
-            "Extra 2",
-            "Extra 3",
-            "Keyboard",
-            "Console",
-            "Run",
-            "Zoom",
-            "Interact",
-            "Weapon"
-        };
         Q3EInterface q3ei = Q3EUtils.q3ei;
         for(int i = 0; i < Q3EGlobals.UI_SIZE; i++)
         {
@@ -128,7 +115,7 @@ public class OnScreenButtonConfigActivity extends Activity
                 continue;
             int[] arr = new int[4];
             System.arraycopy(q3ei.arg_table, i * 4, arr, 0, arr.length);
-            m_list.add(new OnScreenButton(i, type, arr, q3ei.texture_table[i], Names[i]));
+            m_list.add(new OnScreenButton(i, type, arr, q3ei.texture_table[i], Q3EGlobals.CONTROLS_NAMES[i]));
         }
         m_adapter.notifyDataSetChanged();
     }
@@ -307,6 +294,15 @@ public class OnScreenButtonConfigActivity extends Activity
                     sb.append(",");
             }
             return sb.toString();
+        }
+
+        public void Release()
+        {
+            if(null != texture)
+            {
+                texture.recycle();
+                texture = null;
+            }
         }
     }
     

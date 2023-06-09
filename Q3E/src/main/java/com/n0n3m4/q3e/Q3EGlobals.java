@@ -165,5 +165,25 @@ public final class Q3EGlobals
             "THE NEXUS",
     };
 
+    public static final String[] CONTROLS_NAMES = {
+            "Joystick",
+            "Shoot",
+            "Jump",
+            "Crouch",
+            "Reload",
+            "PDA",
+            "Flashlight",
+            "Pause",
+            "Extra 1",
+            "Extra 2",
+            "Extra 3",
+            "Keyboard",
+            "Console",
+            "Run",
+            "Zoom",
+            "Interact",
+            "Weapon"
+    };
+
     private Q3EGlobals() {}
 }

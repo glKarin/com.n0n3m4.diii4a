@@ -60,6 +60,7 @@ public final class Q3EPreference
     public static final String NO_HANDLE_SIGNALS = "harm_no_handle_signals";
     public static final String REDIRECT_OUTPUT_TO_FILE = "harm_redirect_output_to_file";
     public static final String COVER_EDGES = "harm_cover_edges";
+    public static final String CONTROLS_THEME = "harm_controls_theme";
 
     public static float GetFloatFromString(Context context, String name, float defVal)
     {

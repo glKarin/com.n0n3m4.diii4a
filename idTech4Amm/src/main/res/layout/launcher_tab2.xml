@@ -54,6 +54,13 @@
 			android:textAllCaps="false"
 			android:text="On-screen button setting"/>
 
+		<Button
+			android:id="@+id/setup_onscreen_button_theme"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textAllCaps="false"
+			android:text="Setup on-screen button theme"/>
+
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

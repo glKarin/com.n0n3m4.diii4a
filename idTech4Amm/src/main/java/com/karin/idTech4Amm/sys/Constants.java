@@ -25,7 +25,7 @@ public final class Constants
             "Add setup all on-screen buttons size in tab `CONTROLS`.",
             "Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.",
             "Support unfixed-position joystick and inner dead zone.",
-            "Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets` as same file name, will using external image file instead of apk internal image file.",
+            "Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.",
 	};
 
 	// Launcher preference keys

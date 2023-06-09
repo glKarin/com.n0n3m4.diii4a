@@ -45,11 +45,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TabHost;
@@ -65,6 +67,7 @@ import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
+import com.karin.idTech4Amm.ui.ControlsThemeAdapter;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.karin.idTech4Amm.ui.DebugDialog;
@@ -86,6 +89,7 @@ import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -318,6 +322,9 @@ public class GameLauncher extends Activity{
 					break;
 				case R.id.setup_onscreen_button_size:
 					OpenOnScreenButtonSizeSetting();
+					break;
+				case R.id.setup_onscreen_button_theme:
+					OpenOnScreenButtonThemeSetting();
 					break;
 				default:
 					break;
@@ -1121,6 +1128,7 @@ public class GameLauncher extends Activity{
 		V.setup_onscreen_button_opacity.setOnClickListener(m_buttonClickListener);
 		V.reset_onscreen_controls_btn.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_size.setOnClickListener(m_buttonClickListener);
+		V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
 		
 		//DIII4A-specific					
 		V.edt_cmdline.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_params, "game.arm") {
@@ -2795,6 +2803,55 @@ public class GameLauncher extends Activity{
 		Toast.makeText(GameLauncher.this, "Setup all on-screen buttons size done.", Toast.LENGTH_SHORT).show();
 	}
 
+	private void OpenOnScreenButtonThemeSetting()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Controls theme");
+		View widget = getLayoutInflater().inflate(R.layout.controls_theme_dialog, null, false);
+		LinkedHashMap<String, String> schemes = Q3EUtils.GetControlsThemes(this);
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String type = preferences.getString(Q3EPreference.CONTROLS_THEME, "");
+		if(null == type)
+			type = "";
+		String[] theme = { type };
+		ArrayList<String> types = new ArrayList<>(schemes.keySet());
+
+		Spinner spinner = widget.findViewById(R.id.controls_theme_spinner);
+		final ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new ArrayList<>(schemes.values()));
+		typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(typeAdapter);
+		spinner.setSelection(types.indexOf(theme[0]));
+		ListView list = widget.findViewById(R.id.controls_theme_list);
+		ControlsThemeAdapter adapter = new ControlsThemeAdapter(widget.getContext());
+		list.setAdapter(adapter);
+		adapter.Update(theme[0]);
+		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+											  @Override
+											  public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+											  {
+												  theme[0] = types.get(position);
+												  adapter.Update(theme[0]);
+											  }
+
+											  @Override
+											  public void onNothingSelected(AdapterView<?> parent)
+											  {
+											  }
+										  });
+
+		builder.setView(widget);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				preferences.edit().putString(Q3EPreference.CONTROLS_THEME, theme[0]).commit();
+			}
+		})
+				.setNegativeButton("Cancel", null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
 
 	private class ViewHolder
 	{
@@ -2852,6 +2909,7 @@ public class GameLauncher extends Activity{
 		public CheckBox launcher_tab2_joystick_unfixed;
 		public SeekBar launcher_tab2_joystick_inner_dead_zone;
 		public TextView launcher_tab2_joystick_inner_dead_zone_label;
+		public Button setup_onscreen_button_theme;
 
 		public void Setup()
 		{
@@ -2908,6 +2966,7 @@ public class GameLauncher extends Activity{
 			launcher_tab2_joystick_unfixed = findViewById(R.id.launcher_tab2_joystick_unfixed);
 			launcher_tab2_joystick_inner_dead_zone = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone);
 			launcher_tab2_joystick_inner_dead_zone_label = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone_label);
+			setup_onscreen_button_theme = findViewById(R.id.setup_onscreen_button_theme);
 		}
 	}
 }
