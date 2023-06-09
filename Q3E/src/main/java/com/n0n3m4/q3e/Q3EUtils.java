@@ -27,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Build;
+import android.os.Environment;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -36,6 +37,9 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.n0n3m4.q3e.tv.Q3EOuya;
 
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 public class Q3EUtils
@@ -47,50 +51,6 @@ public class Q3EUtils
     {
         Q3EUtils.isOuya = Q3EOuya.IsValid();
     }
-
-    public static final String pref_datapath = "q3e_datapath";
-    public static final String pref_params = "q3e_params";
-    public static final String pref_hideonscr = "q3e_hideonscr";
-    public static final String pref_mapvol = "q3e_mapvol";
-    public static final String pref_analog = "q3e_analog";
-    public static final String pref_detectmouse = "q3e_detectmouse";
-    public static final String pref_eventdev = "q3e_eventdev";
-    public static final String pref_mousepos = "q3e_mousepos";
-    public static final String pref_scrres = "q3e_scrres";
-    public static final String pref_resx = "q3e_resx";
-    public static final String pref_resy = "q3e_resy";
-    public static final String pref_32bit = "q3e_32bit";
-    public static final String pref_msaa = "q3e_msaa";
-    public static final String pref_2fingerlmb = "q3e_2fingerlmb";
-    public static final String pref_nolight = "q3e_nolight";
-    public static final String pref_useetc1 = "q3e_useetc1";
-    public static final String pref_usedxt = "q3e_usedxt";
-    public static final String pref_useetc1cache = "q3e_useetc1cache";
-    public static final String pref_controlprefix = "q3e_controls_";
-    public static final String pref_harm_16bit = "q3e_harm_16bit"; //k
-    public static final String pref_harm_r_harmclearvertexbuffer = "q3e_r_harmclearvertexbuffer"; //k
-    public static final String pref_harm_fs_game = "q3e_harm_fs_game"; //k
-    public static final String pref_harm_game_lib = "q3e_harm_game_lib"; //k
-    public static final String pref_harm_r_specularExponent = "q3e_harm_r_specularExponent"; //k
-    public static final String pref_harm_r_lightModel = "q3e_harm_r_lightModel"; //k
-    public static final String pref_harm_mapBack = "q3e_harm_map_back"; //k
-    public static final String pref_harm_game = "q3e_harm_game"; //k
-    public static final String pref_harm_q4_fs_game = "q3e_harm_q4_fs_game"; //k
-    public static final String pref_harm_q4_game_lib = "q3e_harm_q4_game_lib"; //k
-    public static final String pref_harm_user_mod = "q3e_harm_user_mod"; //k
-    public static final String pref_harm_view_motion_control_gyro = "q3e_harm_mouse_move_control_gyro"; //k
-    public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
-    public static final String pref_harm_view_motion_gyro_y_axis_sens = "q3e_harm_view_motion_gyro_y_axis_sens"; //k
-    public static final String pref_harm_auto_quick_load = "q3e_harm_auto_quick_load"; //k
-    public static final String pref_harm_prey_fs_game = "q3e_harm_prey_fs_game"; //k
-    public static final String pref_harm_prey_game_lib = "q3e_harm_prey_game_lib"; //k
-    public static final String pref_harm_multithreading = "q3e_harm_multithreading"; //k
-    public static final String pref_harm_s_driver = "q3e_harm_s_driver"; //k
-    public static final String pref_harm_function_key_toolbar = "harm_function_key_toolbar"; //k
-    public static final String pref_harm_function_key_toolbar_y = "harm_function_key_toolbar_y"; //k
-    public static final String pref_harm_joystick_release_range = "harm_joystick_release_range"; //k
-    public static final String pref_harm_joystick_unfixed = "harm_joystick_unfixed"; //k
-    public static final String pref_harm_joystick_inner_dead_zone = "harm_joystick_inner_dead_zone"; //k
 
     public static boolean isAppInstalled(Activity ctx, String nm)
     {
@@ -106,14 +66,22 @@ public class Q3EUtils
 
     public static Bitmap ResourceToBitmap(Context cnt, String assetname)
     {
+        InputStream is = null;
+        Bitmap b = null;
         try
         {
-            InputStream is = cnt.getAssets().open(assetname);
-            Bitmap b = BitmapFactory.decodeStream(is);
-            is.close();
-            return b;
-        } catch (Exception ignored) {}
-        return null;
+            is = OpenResource(cnt, assetname);
+            b = BitmapFactory.decodeStream(is);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            Close(is);
+        }
+        return b;
     }
 
     public static int dip2px(Context ctx, int dip)
@@ -269,5 +237,73 @@ public class Q3EUtils
         while (deg < 0)
             deg += 360.0;
         return deg;
+    }
+
+    // 1. try find in /sdcard/Android/data/<package>/files/assets
+    // 2. try find in /<apk>/assets
+    public static InputStream OpenResource(Context cnt, String assetname)
+    {
+        InputStream is;
+        if((is = OpenResource_external(cnt, assetname)) == null)
+            is = OpenResource_assets(cnt, assetname);
+        return is;
+    }
+
+    public static InputStream OpenResource_external(Context cnt, String assetname)
+    {
+        InputStream is = null;
+        try
+        {
+            final String filePath = GetAppStoragePath(cnt, "/assets/" + assetname);
+            File file = new File(filePath);
+            if(file.exists() && file.isFile() && file.canRead())
+            {
+                is = new FileInputStream(file);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return is;
+    }
+    public static InputStream OpenResource_assets(Context cnt, String assetname)
+    {
+        InputStream is = null;
+        try
+        {
+            is = cnt.getAssets().open(assetname);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return is;
+    }
+
+    public static String GetAppStoragePath(Context context, String filename)
+    {
+        String path;
+        File externalFilesDir = context.getExternalFilesDir(null);
+        if(null != externalFilesDir)
+            path = externalFilesDir.getAbsolutePath();
+        else
+            path = Environment.getExternalStorageDirectory() + "/Android/data/" + Q3EGlobals.CONST_PACKAGE_NAME + "/files";
+        if(null != filename && !filename.isEmpty())
+            path += filename;
+        return path;
+    }
+
+    public static void Close(Closeable closeable)
+    {
+        try
+        {
+            if(null != closeable)
+                closeable.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

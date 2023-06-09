@@ -17,6 +17,7 @@ import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -494,7 +495,7 @@ public class OnScreenButtonConfigActivity extends Activity
         final boolean[] states = new boolean[Keys.length];
 
         final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String curKeys = mPrefs.getString(Constants.PreferenceKey.WEAPON_PANEL_KEYS, sb.toString());
+        String curKeys = mPrefs.getString(Q3EPreference.WEAPON_PANEL_KEYS, sb.toString());
         if(null != curKeys && !curKeys.isEmpty())
         {
             List<String> keyList = Arrays.asList(curKeys.split(","));
@@ -526,7 +527,7 @@ public class OnScreenButtonConfigActivity extends Activity
                         }
                         keyStr = TextHelper.Join(tsb, ",");
                     }
-                    mPrefs.edit().putString(Constants.PreferenceKey.WEAPON_PANEL_KEYS, keyStr).commit();
+                    mPrefs.edit().putString(Q3EPreference.WEAPON_PANEL_KEYS, keyStr).commit();
                 }
             });
         builder.setNegativeButton("Cancel", null);

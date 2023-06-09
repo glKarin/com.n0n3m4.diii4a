@@ -65,7 +65,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 
-		String unit = PreferenceManager.getDefaultSharedPreferences(context).getString("harm_controls_config_position_unit", "0");
+		String unit = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, "0");
 		if(null != unit)
 		{
 			m_unit = Integer.parseInt(unit);
@@ -312,23 +312,23 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		{
 			if (touch_elements.get(i) instanceof Button) {
 				Button tmp = (Button) touch_elements.get(i);
-				mEdtr.putString(Q3EUtils.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
+				mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
 			}
 
 			if (touch_elements.get(i) instanceof Slider) {
 				Slider tmp = (Slider) touch_elements.get(i);
-				mEdtr.putString(Q3EUtils.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
+				mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
 			}
 
 			if (touch_elements.get(i) instanceof Joystick) {
 				Joystick tmp = (Joystick) touch_elements.get(i);
-				mEdtr.putString(Q3EUtils.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString());
+				mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString());
 			}
             //k
             if (touch_elements.get(i) instanceof Disc)
             {
                 Disc tmp = (Disc)touch_elements.get(i);
-                mEdtr.putString(Q3EUtils.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int)(tmp.alpha * 100)).SaveToString());
+                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int)(tmp.alpha * 100)).SaveToString());
 			}
 		}
 		mEdtr.commit();

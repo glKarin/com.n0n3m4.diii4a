@@ -399,15 +399,15 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
             SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
-            hideonscr = mPrefs.getBoolean(Q3EUtils.pref_hideonscr, false);
-            mapvol = mPrefs.getBoolean(Q3EUtils.pref_mapvol, false);
-            m_mapBack = mPrefs.getInt(Q3EUtils.pref_harm_mapBack, ENUM_BACK_ALL); //k
-            analog = mPrefs.getBoolean(Q3EUtils.pref_analog, true);
-            boolean detectMouse = mPrefs.getBoolean(Q3EUtils.pref_detectmouse, true);
+            hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
+            mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
+            m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, ENUM_BACK_ALL); //k
+            analog = mPrefs.getBoolean(Q3EPreference.pref_analog, true);
+            boolean detectMouse = mPrefs.getBoolean(Q3EPreference.pref_detectmouse, true);
 
             //k: first check su
-            mouse_name = hideonscr && RootTools.isRootAvailable() ? (detectMouse ? detectmouse() : mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???")) : null;
-            mouse_corner = mPrefs.getInt(Q3EUtils.pref_mousepos, 3);
+            mouse_name = hideonscr && RootTools.isRootAvailable() ? (detectMouse ? detectmouse() : mPrefs.getString(Q3EPreference.pref_eventdev, "/dev/input/event???")) : null;
+            mouse_corner = mPrefs.getInt(Q3EPreference.pref_mousepos, 3);
 
             orig_width = w;
             orig_height = h;
@@ -437,7 +437,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             }
             //must be last
             touch_elements.add(new MouseControl(this, false));
-            touch_elements.add(new MouseControl(this, mPrefs.getBoolean(Q3EUtils.pref_2fingerlmb, false)));
+            touch_elements.add(new MouseControl(this, mPrefs.getBoolean(Q3EPreference.pref_2fingerlmb, false)));
             touch_elements.add(new MouseControl(this, false));
 
             SortOnScreenButtons(); //k sort priority
@@ -905,7 +905,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             m_keyToolbar.setVisibility(View.GONE);
             try
             {
-                String str = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EUtils.pref_harm_function_key_toolbar_y, "0");
+                String str = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_harm_function_key_toolbar_y, "0");
                 if(null == str)
                     str = "0";
                 int y = Integer.parseInt(str);

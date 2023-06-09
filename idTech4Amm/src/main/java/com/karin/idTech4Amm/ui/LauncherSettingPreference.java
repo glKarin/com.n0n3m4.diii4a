@@ -7,6 +7,7 @@ import android.preference.Preference;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import java.util.Set;
 import com.n0n3m4.q3e.Q3EJNI;
@@ -28,10 +29,10 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
 
         findPreference(Constants.PreferenceKey.LAUNCHER_ORIENTATION).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.MAP_BACK).setOnPreferenceChangeListener(this);
-        findPreference(Constants.PreferenceKey.REDIRECT_OUTPUT_TO_FILE).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.REDIRECT_OUTPUT_TO_FILE).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.HIDE_AD_BAR).setOnPreferenceChangeListener(this);
-        findPreference(Constants.PreferenceKey.CONTROLS_CONFIG_POSITION_UNIT).setOnPreferenceChangeListener(this);
-        findPreference(Q3EUtils.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             {
                 r |= Integer.parseInt(str);
             }
-            preference.getSharedPreferences().edit().putInt(Q3EUtils.pref_harm_mapBack, r).commit();
+            preference.getSharedPreferences().edit().putInt(Q3EPreference.pref_harm_mapBack, r).commit();
             return true;
         }
         else if(Constants.PreferenceKey.HIDE_AD_BAR.equals(key))
@@ -69,12 +70,12 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
                 view.setVisibility(b ? View.GONE : View.VISIBLE);
             return true;
         }
-        else if(Constants.PreferenceKey.REDIRECT_OUTPUT_TO_FILE.equals(key))
+        else if(Q3EPreference.REDIRECT_OUTPUT_TO_FILE.equals(key))
         {
 			Q3EJNI.SetRedirectOutputToFile((boolean)newValue);
             return true;
         }
-        else if(Constants.PreferenceKey.CONTROLS_CONFIG_POSITION_UNIT.equals(key))
+        else if(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT.equals(key))
         {
             int i;
             try
@@ -89,7 +90,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             }
             return false;
         }
-        else if(Q3EUtils.pref_harm_function_key_toolbar_y.equals(key))
+        else if(Q3EPreference.pref_harm_function_key_toolbar_y.equals(key))
         {
             int i;
             try

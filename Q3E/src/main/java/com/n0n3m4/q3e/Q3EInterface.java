@@ -355,10 +355,6 @@ public class Q3EInterface
 
 	public void SetAppStoragePath(Context context)
 	{
-		File externalFilesDir = context.getExternalFilesDir(null);
-		if(null != externalFilesDir)
-			Q3EUtils.q3ei.app_storage_path = externalFilesDir.getAbsolutePath();
-		else
-			Q3EUtils.q3ei.app_storage_path = Environment.getExternalStorageDirectory() + "/Android/data/" + Q3EGlobals.CONST_PACKAGE_NAME + "/files";
+		Q3EUtils.q3ei.app_storage_path = Q3EUtils.GetAppStoragePath(context, null);
 	}
 }

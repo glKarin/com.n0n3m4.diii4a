@@ -53,7 +53,7 @@ public class Q3EUiConfig extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && preferences.getBoolean("harm_cover_edges", true))
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && preferences.getBoolean(Q3EPreference.COVER_EDGES, true))
 		{
 			WindowManager.LayoutParams lp = getWindow().getAttributes();
 			lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -64,7 +64,7 @@ public class Q3EUiConfig extends Activity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
 		//k
-        m_hideNav = preferences.getBoolean("harm_hide_nav", true);
+        m_hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
 		SetupUIFlags();
 		
 		super.onCreate(savedInstanceState);

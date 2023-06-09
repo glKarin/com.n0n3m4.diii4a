@@ -13,6 +13,7 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3EJNI;
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 
 /**
@@ -26,7 +27,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
     {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.debug_preference);
-        findPreference(Constants.PreferenceKey.NO_HANDLE_SIGNALS).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.NO_HANDLE_SIGNALS).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
     public boolean onPreferenceChange(Preference preference, Object newValue)
     {
         String key = preference.getKey();
-        if(Constants.PreferenceKey.NO_HANDLE_SIGNALS.equals(key))
+        if(Q3EPreference.NO_HANDLE_SIGNALS.equals(key))
         {
             Q3EJNI.SetNoHandleSignals((boolean)newValue);
             return true;
