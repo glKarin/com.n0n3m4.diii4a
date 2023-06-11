@@ -11,6 +11,12 @@ Android 4.0+
 **License:**
 GPLv3
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
+
+Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
+
 ----------------------------------------------------------------------------------
 ### Update
 
