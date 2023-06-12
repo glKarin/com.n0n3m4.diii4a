@@ -29,6 +29,23 @@ public class ControlsThemeAdapter extends ArrayAdapter_base<ControlsTheme>
         super(context, R.layout.controls_theme_list_delegate);
 
         Q3EInterface q3ei = Q3EUtils.q3ei;
+        // joystick
+        String str = Q3EUtils.q3ei.texture_table[Q3EGlobals.UI_JOYSTICK];
+        if(null != str && !str.isEmpty())
+        {
+            String[] split = str.split(";");
+            String name = split[0];
+            ControlsTheme theme = new ControlsTheme();
+            theme.name = "Joystick background";
+            theme.path = name;
+            m_list.add(theme);
+            name = split[1];
+            theme = new ControlsTheme();
+            theme.name = "Joystick center";
+            theme.path = name;
+            m_list.add(theme);
+        }
+
         for(int i = 0; i < Q3EGlobals.UI_SIZE; i++)
         {
             int type = q3ei.type_table[i];
@@ -39,6 +56,20 @@ public class ControlsThemeAdapter extends ArrayAdapter_base<ControlsTheme>
             theme.name = Q3EGlobals.CONTROLS_NAMES[i];
             theme.path = name;
             m_list.add(theme);
+        }
+
+        // weapon panel
+        str = Q3EUtils.q3ei.texture_table[Q3EGlobals.UI_WEAPON_PANEL];
+        if(null != str && !str.isEmpty())
+        {
+            String[] split = str.split(";");
+            for (String name : split)
+            {
+                ControlsTheme theme = new ControlsTheme();
+                theme.name = "Weapon panel";
+                theme.path = name;
+                m_list.add(theme);
+            }
         }
         SetData(m_list);
     }

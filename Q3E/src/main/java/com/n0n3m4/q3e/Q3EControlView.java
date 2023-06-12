@@ -35,6 +35,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -625,7 +626,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     fingers[pid].target = tl;
                     break;
                 }
-        }
+            }
         }
 
         //k try

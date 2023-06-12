@@ -64,16 +64,17 @@ public class Joystick extends Paintable implements TouchListener
     private int m_deadZoneRadius = 0;
     private int m_joystickDeadZone_2 = 0;
 
-    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, float fullZonePercent, float deadZonePercent, boolean unfixed, boolean editMode)
+    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, float fullZonePercent, float deadZonePercent, boolean unfixed, boolean editMode, String texid, boolean b)
     {
         this(vw, gl, r, a, x, y,
                 fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0,
                 deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0,
                 unfixed, editMode
+                , texid
                 );
     }
 
-    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, int fullZoneRadius, int deadZoneRadius, boolean unfixed, boolean editMode)
+    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, int fullZoneRadius, int deadZoneRadius, boolean unfixed, boolean editMode, String texid)
     {
         view = vw;
         size = r * 2;
@@ -164,6 +165,8 @@ public class Joystick extends Paintable implements TouchListener
                 m_innerVertexBuffer.position(0);
             }
         }
+
+        tex_androidid = texid;
     }
 
     public void Paint(GL11 gl)
@@ -212,9 +215,20 @@ public class Joystick extends Paintable implements TouchListener
     @Override
     public void loadtex(GL10 gl)
     {
+        String[] m_textures = null;
+        if(null != tex_androidid && !tex_androidid.isEmpty())
+            m_textures = tex_androidid.split(";");
+
         final int[] color = {255, 255, 255, 255};
-        tex_ind = GLBitmapTexture.GenCircleRingTexture(gl, size, CalcRingWidth(), color);
-        texd_ind = GLBitmapTexture.GenCircleTexture(gl, dot_size, color);
+        if(null != m_textures && m_textures.length > 0)
+            tex_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+        if(tex_ind == 0)
+            tex_ind = GLBitmapTexture.GenCircleRingTexture(gl, size, CalcRingWidth(), color);
+
+        if(null != m_textures && m_textures.length > 1)
+            texd_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[1]));
+        if(texd_ind == 0)
+            texd_ind = GLBitmapTexture.GenCircleTexture(gl, dot_size, color);
 
         if(m_editMode)
         {

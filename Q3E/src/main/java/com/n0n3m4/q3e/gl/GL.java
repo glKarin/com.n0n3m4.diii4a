@@ -112,6 +112,9 @@ public final class GL
 
     public static int loadGLTexture(GL10 gl, Bitmap bmp)
     {
+        if(null == bmp)
+            return 0;
+
         int[] t = new int[1];
 
         if (usegles20)
