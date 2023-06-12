@@ -11,6 +11,12 @@ Android 4.0+
 **许可证:**
 GPLv3
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+alt="Get it on F-Droid"
+height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
+
+Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
+
 ----------------------------------------------------------------------------------
 ### 更新
 
@@ -74,6 +80,33 @@ GPLv3
 ### 更新:
 
 [更新日志](CHANGES.zh.md ':include')
+
+----------------------------------------------------------------------------------
+
+### 移植:
+
+#### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
+#### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).
+
+#### 雷神之锤4
+##### `_RAVEN`, `_QUAKE4`是补丁宏, 在`DIII4A`源码中查找.
+##### 所有新源码放置在`raven`文件夹.
+> 1. _RAVEN: 编译`core引擎 (毁灭战士3的源码)`和`idlib (毁灭战士3的源码)`.
+> 2. _QUAKE4: 编译`游戏 (雷神之锤4的SDK源码)`库.
+> 3. 构建core引擎: 声明宏`_RAVEN`, `_RAVEN_FX(如果需要OpenBSE, 非必须)`
+> 4. 构建游戏库: 声明宏`_RAVEN`, `_QUAKE4`
+##### 关于`BSE`
+由于`BSE`没开源, 所有我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
+##### 关于`BOT`
+bot不是必要的, 而是`jmarshall`额外添加的.
+
+#### 掠食(2006)
+##### `_HUMANHEAD`, `_PREY`是补丁宏, 在`DIII4A`源码中查找.
+##### 所有新源码放置在`humanhead`文件夹.
+> 1. _HUMANHEAD: 编译`core引擎(毁灭战士3的源码)`和`idlib (毁灭战士3的源码)`.
+> 2. _PREY: 编译`游戏 (掠食(2006)的SDK源码)`库.
+> 3. 构建core引擎: 声明宏`_HUMANHEAD`
+> 4. 构建游戏库: 声明宏`_HUMANHEAD`, `_PREY`, 和原来SDK的宏`HUMANHEAD`
 
 ----------------------------------------------------------------------------------
 

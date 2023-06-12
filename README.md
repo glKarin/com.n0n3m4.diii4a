@@ -82,6 +82,33 @@ Or download the latest APK from the [Releases Section](https://github.com/glKari
 
 ----------------------------------------------------------------------------------
 
+### Portable:
+
+#### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
+#### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
+
+#### Quake 4
+##### `_RAVEN`, `_QUAKE4` is patches macros, find them in `DIII4A` source code.
+##### All new sources files put on `raven` folder.
+> 1. _RAVEN: for compile `core engine (DOOM3 source code)` and `idlib (DOOM3 source code)`.
+> 2. _QUAKE4: for compile `game (Q4SDK source code)` library.
+> 3. Build core engine: define macro `_RAVEN`, `_RAVEN_FX(OpenBSE if need, unnecessary)`
+> 4. Build game library: define macro `_RAVEN`, `_QUAKE4`
+##### About `BSE`
+Because `BSE` not open-source, so I default supply a `NULL` implement and a uncompleted but working implement with DOOM3 Particle/Fx system(using macros `_RAVEN_FX` marked).
+##### About `BOT`
+It has some unnecessary source code for Bot by `jmarshall`.
+
+#### Prey(2006)
+##### `_HUMANHEAD`, `_PREY` is patches macros, find them in `DIII4A` source code.
+##### All new sources files put on `humanhead` folder.
+> 1. _HUMANHEAD: for compile `core engine (DOOM3 source code)` and `idlib (DOOM3 source code)`.
+> 2. _PREY: for compile `game (PreySDK source code)` library.
+> 3. Build core engine: define macro `_HUMANHEAD`
+> 4. Build game library: define macro `_HUMANHEAD`, `_PREY`, and original SDK macros `HUMANHEAD`
+
+----------------------------------------------------------------------------------
+
 ### About:
 
 * Source in `assets/source` folder in APK file.
