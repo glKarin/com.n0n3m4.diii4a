@@ -24,6 +24,8 @@
         android:requestLegacyExternalStorage="true"
         -->
 
+    <!--<uses-feature android:name="android.hardware.type.pc" android:required="false" />-->
+
 	<supports-screens android:smallScreens="true" 
                       android:normalScreens="true" 
                       android:largeScreens="true"

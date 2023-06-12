@@ -36,15 +36,13 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 
-import com.n0n3m4.q3e.tv.Q3EOuya;
+import com.n0n3m4.q3e.device.Q3EOuya;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 public class Q3EUtils
 {
@@ -358,5 +356,10 @@ public class Q3EUtils
             Q3EUtils.Close(is);
         }
         return texture;
+    }
+
+    public static int SupportMouse()
+    {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? Q3EGlobals.MOUSE_EVENT : Q3EGlobals.MOUSE_DEVICE;
     }
 }

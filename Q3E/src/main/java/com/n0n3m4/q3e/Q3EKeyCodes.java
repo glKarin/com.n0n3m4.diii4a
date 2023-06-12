@@ -21,7 +21,7 @@ package com.n0n3m4.q3e;
 
 import android.view.KeyEvent;
 
-import com.n0n3m4.q3e.tv.Q3EOuya;
+import com.n0n3m4.q3e.device.Q3EOuya;
 
 import java.lang.reflect.Field;
 

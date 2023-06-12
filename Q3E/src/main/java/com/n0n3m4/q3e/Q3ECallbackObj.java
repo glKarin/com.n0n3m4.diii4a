@@ -230,5 +230,20 @@ public class Q3ECallbackObj {
             m_data = null;
         }
     }
+
+    public void GrabMouse(boolean grab)
+    {
+        try
+        {
+            if(grab)
+                vw.GrabMouse();
+            else
+                vw.UnGrabMouse();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
 

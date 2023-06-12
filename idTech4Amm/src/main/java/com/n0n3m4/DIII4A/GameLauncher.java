@@ -171,7 +171,6 @@ public class GameLauncher extends Activity{
 						.commit();
 						break;
 					case R.id.hideonscr:
-						UpdateMouseMenu(isChecked);
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 							.putBoolean(Q3EPreference.pref_hideonscr, isChecked)
 						.commit();
@@ -224,6 +223,12 @@ public class GameLauncher extends Activity{
 								.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, isChecked)
 								.commit();
 						Q3EUtils.q3ei.joystick_unfixed = isChecked;
+						break;
+					case R.id.using_mouse:
+						UpdateMouseMenu(isChecked);
+						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+								.putBoolean(Q3EPreference.pref_harm_using_mouse, isChecked)
+								.commit();
 						break;
 					default:
 						break;
@@ -617,12 +622,16 @@ public class GameLauncher extends Activity{
 	
 	public void UpdateMouseMenu(boolean show)
 	{
-		V.layout_mouseconfig.setVisibility(show?LinearLayout.VISIBLE:LinearLayout.GONE);
+		final boolean supportGrabMouse = Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
+		V.tv_mprefs.setVisibility(supportGrabMouse ? LinearLayout.GONE : LinearLayout.VISIBLE);
+		V.layout_mouse_device.setVisibility(supportGrabMouse ? LinearLayout.GONE : LinearLayout.VISIBLE);
+		V.layout_mouseconfig.setVisibility(show ? LinearLayout.VISIBLE : LinearLayout.GONE);
 	}
 	
 	public void UpdateMouseManualMenu(boolean show)
 	{
-		V.layout_manualmouseconfig.setVisibility(show?LinearLayout.VISIBLE:LinearLayout.GONE);
+		final boolean supportGrabMouse = Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
+		V.layout_manualmouseconfig.setVisibility(!supportGrabMouse && show ? LinearLayout.VISIBLE : LinearLayout.GONE);
 	}
 	
 	public void SelectCheckbox(RadioGroup rg, int index)
@@ -1010,8 +1019,10 @@ public class GameLauncher extends Activity{
 		V.edt_path.setText(mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata));
 		V.hideonscr.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.hideonscr.setChecked(mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false));
+		V.using_mouse.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_using_mouse, false));
+		V.using_mouse.setOnCheckedChangeListener(m_checkboxChangeListener);
 		
-		UpdateMouseMenu(V.hideonscr.isChecked());
+		UpdateMouseMenu(V.using_mouse.isChecked());
 				
 		V.mapvol.setChecked(mPrefs.getBoolean(Q3EPreference.pref_mapvol, false));
 		V.secfinglmb.setChecked(mPrefs.getBoolean(Q3EPreference.pref_2fingerlmb, false));
@@ -1617,6 +1628,7 @@ public class GameLauncher extends Activity{
         mEdtr.putString(Q3EPreference.pref_eventdev, V.edt_mouse.getText().toString());
         mEdtr.putString(Q3EPreference.pref_datapath, V.edt_path.getText().toString());
         mEdtr.putBoolean(Q3EPreference.pref_hideonscr, V.hideonscr.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_using_mouse, V.using_mouse.isChecked());
         //k mEdtr.putBoolean(Q3EUtils.pref_32bit, true);
         int index = GetCheckboxIndex(V.rg_color_bits) - 1;
         mEdtr.putBoolean(Q3EPreference.pref_32bit, index == -1);
@@ -2910,6 +2922,9 @@ public class GameLauncher extends Activity{
 		public SeekBar launcher_tab2_joystick_inner_dead_zone;
 		public TextView launcher_tab2_joystick_inner_dead_zone_label;
 		public Button setup_onscreen_button_theme;
+		public CheckBox using_mouse;
+		public TextView tv_mprefs;
+		public LinearLayout layout_mouse_device;
 
 		public void Setup()
 		{
@@ -2967,6 +2982,9 @@ public class GameLauncher extends Activity{
 			launcher_tab2_joystick_inner_dead_zone = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone);
 			launcher_tab2_joystick_inner_dead_zone_label = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone_label);
 			setup_onscreen_button_theme = findViewById(R.id.setup_onscreen_button_theme);
+			using_mouse = findViewById(R.id.using_mouse);
+			tv_mprefs = findViewById(R.id.tv_mprefs);
+			layout_mouse_device = findViewById(R.id.layout_mouse_device);
 		}
 	}
 }

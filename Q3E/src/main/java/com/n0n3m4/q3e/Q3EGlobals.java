@@ -32,6 +32,10 @@ public final class Q3EGlobals
     public static final int TYPE_DISC = 3;
     public static final int TYPE_MOUSE = -1;
 
+    // mouse
+    public static final int MOUSE_EVENT = 1;
+    public static final int MOUSE_DEVICE = 2;
+
     // on-screen button type
     public static final int ONSCREEN_BUTTON_TYPE_FULL = 0;
     public static final int ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM = 1;

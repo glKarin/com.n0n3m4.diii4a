@@ -49,6 +49,7 @@ public final class Q3EPreference
     public static final String pref_harm_joystick_release_range = "harm_joystick_release_range"; //k
     public static final String pref_harm_joystick_unfixed = "harm_joystick_unfixed"; //k
     public static final String pref_harm_joystick_inner_dead_zone = "harm_joystick_inner_dead_zone"; //k
+    public static final String pref_harm_using_mouse = "harm_using_mouse"; //k
 
     public static final String RUN_BACKGROUND = "harm_run_background";
     public static final String RENDER_MEM_STATUS = "harm_render_mem_status";

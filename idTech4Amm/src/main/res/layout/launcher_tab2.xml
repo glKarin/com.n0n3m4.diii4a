@@ -321,100 +321,102 @@
             </LinearLayout>
         </LinearLayout>
 
+		<CheckBox
+			android:id="@+id/hideonscr"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Hide onscreen buttons"
+			/>
+
+		<CheckBox
+			android:id="@+id/using_mouse"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Using mouse(not need root on Android 8+)"
+			/>
+
 		<LinearLayout
+			android:id="@+id/layout_mouseconfig"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
 			>
 
-		<TextView
-			android:id="@+id/tv_mprefs"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-				android:text="Mouse settings:"
-				/>
-
-		<CheckBox
-			android:id="@+id/hideonscr"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-				android:text="Hide onscreen buttons(not need root) and enable mouse (Root required)"
-				/>
-
-		<LinearLayout
-			android:id="@+id/layout_mouseconfig"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-				android:orientation="vertical"
-				>
-
-			<CheckBox
-				android:id="@+id/detectmouse"
+			<TextView
+				android:id="@+id/tv_mprefs"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Autodetect mouse"/>
+				android:text="Mouse settings:"/>
 
 			<LinearLayout
-				android:id="@+id/layout_manualmouseconfig"
+				android:id="@+id/layout_mouse_device"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:orientation="vertical">
 
-				<TextView
-					android:id="@+id/tv_evnt"
+				<CheckBox
+					android:id="@+id/detectmouse"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Mouse event device:"/>
+					android:text="Autodetect mouse"/>
 
-				<EditText
-					android:id="@+id/edt_mouse"
+				<LinearLayout
+					android:id="@+id/layout_manualmouseconfig"
 					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:ems="10"
-					android:imeOptions="flagNoExtractUi"
-					android:inputType="textNoSuggestions">
+					android:layout_height="match_parent"
+					android:orientation="vertical">
 
-				</EditText>
+					<TextView
+						android:id="@+id/tv_evnt"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Mouse event device:"/>
 
-			</LinearLayout>
+					<EditText
+						android:id="@+id/edt_mouse"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:ems="10"
+						android:imeOptions="flagNoExtractUi"
+						android:inputType="textNoSuggestions"/>
+				</LinearLayout>
 
-			<TextView
-				android:id="@+id/tv_curpos"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="Mouse cursor position:"/>
-
-			<RadioGroup
-				android:id="@+id/rg_curpos"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content">
-
-				<RadioButton
-					android:id="@+id/cur_tl"
+				<TextView
+					android:id="@+id/tv_curpos"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Top left corner"/>
+					android:text="Mouse cursor position:"/>
 
-				<RadioButton
-					android:id="@+id/cur_tr"
+				<RadioGroup
+					android:id="@+id/rg_curpos"
 					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="Top right corner"/>
+					android:layout_height="wrap_content">
 
-				<RadioButton
-					android:id="@+id/cur_bl"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="Bottom left corner"/>
+					<RadioButton
+						android:id="@+id/cur_tl"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Top left corner"/>
 
-				<RadioButton
-					android:id="@+id/cur_br"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:checked="true"
-					android:text="Bottom right corner"/>
+					<RadioButton
+						android:id="@+id/cur_tr"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Top right corner"/>
 
-			</RadioGroup>
+					<RadioButton
+						android:id="@+id/cur_bl"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Bottom left corner"/>
+
+					<RadioButton
+						android:id="@+id/cur_br"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:checked="true"
+						android:text="Bottom right corner"/>
+				</RadioGroup>
 
 			</LinearLayout>
 

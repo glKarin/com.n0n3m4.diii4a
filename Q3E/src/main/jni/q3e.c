@@ -47,14 +47,17 @@ void (*set_gl_context)(ANativeWindow *window, int size, ...);
 
 intptr_t (*Q3E_Call)(int protocol, int size, ...);
 static void pull_input_event(int execCmd);
+static void grab_mouse(int grab);
 static FILE * android_tmpfile(void);
-static jmethodID android_PullEvent_method;
 static char *game_data_dir = NULL;
 static int redirect_output_to_file = 0;
 static int no_handle_signals = 0;
 static int multithread = 0;
 void (*qexit)(void);
 intptr_t (*(*set_Android_Call)(intptr_t (*func)(int, int, ...)))(int, int, ...);
+
+static jmethodID android_PullEvent_method;
+jmethodID android_GrabMouse_method;
 
 jmethodID android_initAudio;
 jmethodID android_writeAudio;
@@ -69,6 +72,7 @@ static ANativeWindow *window = NULL;
 #define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
 #define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
 #define ANDROID_CALL_PROTOCOL_ATTACH_THREAD 0x10003
+#define ANDROID_CALL_PROTOCOL_GRAB_MOUSE 0x10005
 
 #define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
 #define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
@@ -96,6 +100,10 @@ intptr_t Android_Call(int protocol, int size, ...)
 			{
 				(*jVM)->AttachCurrentThread(jVM, &env, NULL);
 			}
+			res = 1;
+			break;
+		case ANDROID_CALL_PROTOCOL_GRAB_MOUSE:
+			grab_mouse(va_arg(va, int));
 			res = 1;
 			break;
 		default:
@@ -198,7 +206,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_setState = (*env)->GetMethodID(env,q3eCallbackClass,"setState","(I)V");
 	
 	//k
-	android_PullEvent_method = (*env)->GetMethodID(env,q3eCallbackClass, "PullEvent", "(Z)V");
+	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(Z)V");
+	android_GrabMouse_method = (*env)->GetMethodID(env, q3eCallbackClass, "GrabMouse", "(Z)V");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -413,6 +422,18 @@ void pull_input_event(int execCmd)
     }
 
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_PullEvent_method, (jboolean)execCmd);
+}
+
+void grab_mouse(int grab)
+{
+	JNIEnv *env = 0;
+
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_GrabMouse_method, (jboolean)grab);
 }
 
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"

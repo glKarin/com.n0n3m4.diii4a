@@ -1,4 +1,4 @@
-package com.n0n3m4.q3e.tv;
+package com.n0n3m4.q3e.device;
 
 import android.content.Context;
 

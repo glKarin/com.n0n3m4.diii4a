@@ -35,6 +35,11 @@ idCVar in_mouse("in_mouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "");
 idCVar in_dgamouse("in_dgamouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "");
 idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "");
 
+#ifdef __ANDROID__
+extern void grab_mouse(int grab);
+extern void pull_input_event(int execCmd);
+#endif
+
 void IN_Clear_f(const idCmdArgs &args)
 {
 	idKeyInput::ClearStates();
@@ -54,11 +59,11 @@ void Sys_XUninstallGrabs(void)
 
 void Sys_GrabMouseCursor(bool grabIt)
 {
+#if defined(__ANDROID__)
+	grab_mouse(grabIt);
+#endif
 }
 
-#if defined(__ANDROID__)
-extern void pull_input_event(int execCmd);
-#endif
 void Posix_PollInput()
 {
 #if defined(__ANDROID__)

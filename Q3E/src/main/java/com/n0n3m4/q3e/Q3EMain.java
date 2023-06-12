@@ -40,7 +40,7 @@ import android.graphics.Typeface;
 import com.n0n3m4.q3e.gl.GL;
 import com.n0n3m4.q3e.karin.KDebugTextView;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
-import com.n0n3m4.q3e.tv.Q3EOuya;
+import com.n0n3m4.q3e.device.Q3EOuya;
 
 public class Q3EMain extends Activity {
 	public static Q3ECallbackObj mAudio;

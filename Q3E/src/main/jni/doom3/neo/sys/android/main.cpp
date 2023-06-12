@@ -602,6 +602,7 @@ void abrt_func(mcheck_status status)
 #define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
 #define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
 #define ANDROID_CALL_PROTOCOL_ATTACH_THREAD 0x10003
+#define ANDROID_CALL_PROTOCOL_GRAB_MOUSE 0x10005
 
 #define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
 #define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
@@ -1054,6 +1055,14 @@ FILE * itmpfile(void)
 	if(!Android_Call)
 		return NULL;
 	return (FILE *)Android_Call(ANDROID_CALL_PROTOCOL_TMPFILE, 0);
+}
+
+// grab mouse for Android
+void grab_mouse(int grab)
+{
+	if(!Android_Call)
+		return;
+	(void)Android_Call(ANDROID_CALL_PROTOCOL_GRAB_MOUSE, 1, grab);
 }
 
 #include "../../framework/Session_local.h"
