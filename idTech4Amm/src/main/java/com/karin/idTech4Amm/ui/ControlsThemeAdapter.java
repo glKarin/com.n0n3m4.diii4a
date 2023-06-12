@@ -63,13 +63,11 @@ public class ControlsThemeAdapter extends ArrayAdapter_base<ControlsTheme>
         if(null != str && !str.isEmpty())
         {
             String[] split = str.split(";");
-            for (String name : split)
-            {
-                ControlsTheme theme = new ControlsTheme();
-                theme.name = "Weapon panel";
-                theme.path = name;
-                m_list.add(theme);
-            }
+            String name = split[0];
+            ControlsTheme theme = new ControlsTheme();
+            theme.name = "Weapon panel";
+            theme.path = name;
+            m_list.add(theme);
         }
         SetData(m_list);
     }
