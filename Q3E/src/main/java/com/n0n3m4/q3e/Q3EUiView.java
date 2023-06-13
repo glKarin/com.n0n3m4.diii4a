@@ -45,7 +45,9 @@ import android.content.SharedPreferences.Editor;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.view.Gravity;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
@@ -54,6 +56,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 	public final int step = Q3EUtils.dip2px(getContext(), 5);
 	private FloatBuffer m_gridBuffer = null;
 	private int m_numGridLineVertex = 0;
+	private Toast m_info;
 
 	public Q3EUiView(Context context) {
 		super(context);						
@@ -65,7 +68,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 
-		String unit = PreferenceManager.getDefaultSharedPreferences(context).getString("harm_controls_config_position_unit", "0");
+		String unit = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, "0");
 		if(null != unit)
 		{
 			m_unit = Integer.parseInt(unit);
@@ -161,7 +164,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 		if (fn.target instanceof Joystick) {
 			final Joystick tmp = (Joystick) fn.target;
-			final Joystick newj = new Joystick(tmp.view, uildr.gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, true);
+			final Joystick newj = new Joystick(tmp.view, uildr.gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, true, tmp.tex_androidid, true);
 			fn.target = newj;
 			Joystick.Move(newj, tmp);
 			touch_elements.set(touch_elements.indexOf(tmp), newj);
@@ -181,12 +184,14 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
         if (fn.target instanceof Disc)
         {
             final Disc tmp = (Disc)fn.target;
-            final Disc newj = new Disc(tmp.view, uildr.gl, tmp.cx, tmp.cy, tmp.size/2,tmp.alpha, null);
+            final Disc newj = new Disc(tmp.view, uildr.gl, tmp.cx, tmp.cy, tmp.size/2,tmp.alpha, null, tmp.tex_androidid);
             fn.target = newj;
             Disc.Move(newj, tmp);
             touch_elements.set(touch_elements.indexOf(tmp), newj);
             paint_elements.set(paint_elements.indexOf(tmp), newj);
 		}
+
+		PrintInfo(fn);
 	}
 
 	private boolean NormalizeTgtPosition(FingerUi fn)
@@ -295,6 +300,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 		if ((act == -1) && (!fn.movd)) {
 			mover.show(x, y, fn);
+			PrintInfo(fn);
 		}
 
 		//k: renormalize position
@@ -312,23 +318,23 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		{
 			if (touch_elements.get(i) instanceof Button) {
 				Button tmp = (Button) touch_elements.get(i);
-				mEdtr.putString(Q3EUtils.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
+				mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
 			}
 
 			if (touch_elements.get(i) instanceof Slider) {
 				Slider tmp = (Slider) touch_elements.get(i);
-				mEdtr.putString(Q3EUtils.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
+				mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.width, (int) (tmp.alpha * 100)).SaveToString());
 			}
 
 			if (touch_elements.get(i) instanceof Joystick) {
 				Joystick tmp = (Joystick) touch_elements.get(i);
-				mEdtr.putString(Q3EUtils.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString());
+				mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int) (tmp.alpha * 100)).SaveToString());
 			}
             //k
             if (touch_elements.get(i) instanceof Disc)
             {
                 Disc tmp = (Disc)touch_elements.get(i);
-                mEdtr.putString(Q3EUtils.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int)(tmp.alpha * 100)).SaveToString());
+                mEdtr.putString(Q3EPreference.pref_controlprefix + i, new UiElement(tmp.cx, tmp.cy, tmp.size / 2, (int)(tmp.alpha * 100)).SaveToString());
 			}
 		}
 		mEdtr.commit();
@@ -495,5 +501,95 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			mHandler.postDelayed(runnable, delayed[0]);
 		else
 			mHandler.post(runnable);
+	}
+
+	public void PrintInfo(FingerUi fn)
+	{
+		if(null != m_info)
+		{
+			m_info.cancel();
+			m_info = null;
+		}
+
+		StringBuilder sb = new StringBuilder();
+		if (fn.target instanceof Slider)
+		{
+			Slider tmp=(Slider)fn.target;
+			sb.append("Position: ")
+					.append(tmp.cx)
+					.append(", ")
+					.append(tmp.cy)
+			;
+			sb.append("\n");
+			sb.append("Size: ")
+					.append(tmp.width)
+					.append("x")
+					.append(tmp.height)
+					;
+			sb.append("\n");
+			sb.append("Opacity: ")
+					.append(String.format("%.1f", tmp.alpha))
+			;
+		}
+		else if (fn.target instanceof Button)
+		{
+			Button tmp=(Button)fn.target;
+			sb.append("Position: ")
+					.append(tmp.cx)
+					.append(", ")
+					.append(tmp.cy)
+			;
+			sb.append("\n");
+			sb.append("Size: ")
+					.append(tmp.width)
+					.append("x")
+					.append(tmp.height)
+			;
+			sb.append("\n");
+			sb.append("Opacity: ")
+					.append(String.format("%.1f", tmp.alpha))
+			;
+		}
+		else if (fn.target instanceof Joystick)
+		{
+			Joystick tmp=(Joystick)fn.target;
+			sb.append("Position: ")
+					.append(tmp.cx)
+					.append(", ")
+					.append(tmp.cy)
+			;
+			sb.append("\n");
+			sb.append("Radius: ")
+					.append(tmp.size)
+			;
+			sb.append("\n");
+			sb.append("Opacity: ")
+					.append(String.format("%.1f", tmp.alpha))
+			;
+		}
+		//k
+		else if (fn.target instanceof Disc)
+		{
+			Disc tmp=(Disc)fn.target;
+			sb.append("Position: ")
+					.append(tmp.cx)
+					.append(", ")
+					.append(tmp.cy)
+			;
+			sb.append("\n");
+			sb.append("Center radius: ")
+					.append(tmp.size)
+			;
+			sb.append("\n");
+			sb.append("Opacity: ")
+					.append(String.format("%.1f", tmp.alpha))
+			;
+		}
+		if(sb.length() > 0)
+		{
+			m_info = Toast.makeText(getContext(), sb.toString(), Toast.LENGTH_SHORT);
+			m_info.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 0);
+			m_info.show();
+		}
 	}
 }

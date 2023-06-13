@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **最新版本:**
-1.1.0harmattan30(natasha)  
+1.1.0harmattan31(natasha)  
 **最新更新日期:**
-2023-05-23  
+2023-06-01  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -11,13 +11,22 @@ Android 4.0+
 **许可证:**
 GPLv3
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+alt="Get it on F-Droid"
+height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
+
+或者在[Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest)下载最新的APK.
+标签以`-free`结尾的仅为了F-Droid更新.
+
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 新增功能键工具条当输入法打开时(默认禁用, 在`Settings`菜单中).
-* 新增摇杆释放范围设置, 在`CONTROLS`选项卡下. 值为摇杆半径的倍数, 设为0禁用.
-* 修复雷神之锤4第一关动画播放完后游戏崩溃.
-* 修复雷神之锤4删除存档菜单功能.
+* 在`CONTROLS`选项卡下的`Reset on-screen controls`, 新增重置所有虚拟按键的缩放和透明度.
+* 在`CONTROLS`选项卡新增统一设置所有虚拟按键大小功能.
+* 在`CONTROLS`选项卡下的`Configure on-screen controls`, 新增网格辅助, 设置中`On-screen buttons position unit`大于0启用.
+* 支持不固定的虚拟摇杆和内部响应死区.
+* 支持自定义虚拟按键的图片. 如果`/sdcard/Android/data/com.karin.idTech4Amm/files/assets`路径下存在同名的虚拟按键图片, 将有限使用外部的代替自带的. 或者把虚拟按键图片放入一个命名好的文件夹中, 然后将文件夹放在`/sdcard/Android/data/com.karin.idTech4Amm/files/assets/controls_theme/`, 然后在`CONTROLS`选项卡下`Setup on-screen button theme`选择该文件夹名称.
+* 新的鼠标支持实现.
 
 ----------------------------------------------------------------------------------
 
@@ -77,6 +86,33 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 
+### 移植:
+
+#### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
+#### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).
+
+#### 雷神之锤4
+##### `_RAVEN`, `_QUAKE4`是补丁宏, 在`DIII4A`源码中查找.
+##### 所有新源码放置在`raven`文件夹.
+> 1. _RAVEN: 编译`core引擎 (毁灭战士3的源码)`和`idlib (毁灭战士3的源码)`.
+> 2. _QUAKE4: 编译`游戏 (雷神之锤4的SDK源码)`库.
+> 3. 构建core引擎: 声明宏`_RAVEN`, `_RAVEN_FX(如果需要OpenBSE, 非必须)`
+> 4. 构建游戏库: 声明宏`_RAVEN`, `_QUAKE4`
+##### 关于`BSE`
+由于`BSE`没开源, 所有我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
+##### 关于`BOT`
+bot不是必要的, 而是`jmarshall`额外添加的.
+
+#### 掠食(2006)
+##### `_HUMANHEAD`, `_PREY`是补丁宏, 在`DIII4A`源码中查找.
+##### 所有新源码放置在`humanhead`文件夹.
+> 1. _HUMANHEAD: 编译`core引擎(毁灭战士3的源码)`和`idlib (毁灭战士3的源码)`.
+> 2. _PREY: 编译`游戏 (掠食(2006)的SDK源码)`库.
+> 3. 构建core引擎: 声明宏`_HUMANHEAD`
+> 4. 构建游戏库: 声明宏`_HUMANHEAD`, `_PREY`, 和原来SDK的宏`HUMANHEAD`
+
+----------------------------------------------------------------------------------
+
 ### 关于:
 
 * 源码在apk里的`assets/source`目录下.
@@ -88,6 +124,9 @@ GPLv3
 > `master`:
 > * /DIII4A: 前端启动器源码
 > * /doom3: 游戏源码
+
+> `free`:
+> * F-Droid自由版本.
 
 > `package`:
 > * /*.apk: 所有构建
@@ -105,4 +144,5 @@ GPLv3
 * [Google: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb](https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb)
 * [Baidu网盘: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w](https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w) 提取码: `pyyj`
 * [Baidu贴吧: BEYONDK2000](https://tieba.baidu.com/p/6825594793)
+* [F-Droid(不同的签名)](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------

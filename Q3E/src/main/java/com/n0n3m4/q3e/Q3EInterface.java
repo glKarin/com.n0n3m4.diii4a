@@ -201,7 +201,7 @@ public class Q3EInterface
     {
         texture_table = new String[Q3EGlobals.UI_SIZE];
 
-        texture_table[Q3EGlobals.UI_JOYSTICK] = "";
+        texture_table[Q3EGlobals.UI_JOYSTICK] = "joystick_bg.png;joystick_center.png"; // "";
         texture_table[Q3EGlobals.UI_SHOOT] = "btn_sht.png";
         texture_table[Q3EGlobals.UI_JUMP] = "btn_jump.png";
         texture_table[Q3EGlobals.UI_CROUCH] = "btn_crouch.png";
@@ -218,7 +218,7 @@ public class Q3EInterface
         texture_table[Q3EGlobals.UI_ZOOM] = "btn_binocular.png";
         texture_table[Q3EGlobals.UI_RUN] = "btn_kick.png";
 
-        texture_table[Q3EGlobals.UI_WEAPON_PANEL] = "";
+        texture_table[Q3EGlobals.UI_WEAPON_PANEL] = "disc_weapon.png";
     }
 
     public void InitTypeTable()
@@ -355,10 +355,6 @@ public class Q3EInterface
 
 	public void SetAppStoragePath(Context context)
 	{
-		File externalFilesDir = context.getExternalFilesDir(null);
-		if(null != externalFilesDir)
-			Q3EUtils.q3ei.app_storage_path = externalFilesDir.getAbsolutePath();
-		else
-			Q3EUtils.q3ei.app_storage_path = Environment.getExternalStorageDirectory() + "/Android/data/" + Q3EGlobals.CONST_PACKAGE_NAME + "/files";
+		Q3EUtils.q3ei.app_storage_path = Q3EUtils.GetAppStoragePath(context, null);
 	}
 }

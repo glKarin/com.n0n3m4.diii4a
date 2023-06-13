@@ -26,6 +26,16 @@ public final class Utility
         }
         return 0;
     }
+
+    public static int ArrayIndexOf(Object[] arr, Object target)
+    {
+        for(int i = 0; i < arr.length; i++)
+        {
+            if(target.equals(arr[i]))
+                return i;
+        }
+        return 0;
+    }
     
     public static float parseFloat_s(String str, float...def)
     {

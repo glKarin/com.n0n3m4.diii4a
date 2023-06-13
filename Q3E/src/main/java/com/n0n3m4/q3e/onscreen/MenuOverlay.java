@@ -217,6 +217,7 @@ public class MenuOverlay extends Paintable implements TouchListener
             target.alpha = 1.0f;
             return false;
         }
+        ((Q3EUiView) view).PrintInfo(fngr);
         return true;
     }
 

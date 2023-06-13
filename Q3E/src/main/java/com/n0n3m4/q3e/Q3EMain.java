@@ -40,6 +40,7 @@ import android.graphics.Typeface;
 import com.n0n3m4.q3e.gl.GL;
 import com.n0n3m4.q3e.karin.KDebugTextView;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
+import com.n0n3m4.q3e.device.Q3EOuya;
 
 public class Q3EMain extends Activity {
 	public static Q3ECallbackObj mAudio;
@@ -93,7 +94,7 @@ public class Q3EMain extends Activity {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         GL.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
-        m_coverEdges = preferences.getBoolean("harm_cover_edges", true);
+        m_coverEdges = preferences.getBoolean(Q3EPreference.COVER_EDGES, true);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && m_coverEdges)
         {
             WindowManager.LayoutParams lp = getWindow().getAttributes();
@@ -104,9 +105,9 @@ public class Q3EMain extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) // 9
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
-        m_hideNav = preferences.getBoolean("harm_hide_nav", true);
-        m_renderMemStatus = preferences.getInt("harm_render_mem_status", 0);
-        String harm_run_background = preferences.getString("harm_run_background", "1");
+        m_hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
+        m_renderMemStatus = preferences.getInt(Q3EPreference.RENDER_MEM_STATUS, 0);
+        String harm_run_background = preferences.getString(Q3EPreference.RUN_BACKGROUND, "1");
         if(null != harm_run_background)
             m_runBackground = Integer.parseInt(harm_run_background);
         else
@@ -145,19 +146,23 @@ public class Q3EMain extends Activity {
 			return;
 		}*/
 		
-		datadir=preferences.getString(Q3EUtils.pref_datapath, Q3EUtils.q3ei.default_path);
+		datadir=preferences.getString(Q3EPreference.pref_datapath, Q3EUtils.q3ei.default_path);
 		if(null == datadir)
             datadir = Q3EUtils.q3ei.default_path;
 		if ((datadir.length()>0)&&(datadir.charAt(0)!='/'))//lolwtfisuserdoing?
 		{
 			datadir="/"+datadir;
-			preferences.edit().putString(Q3EUtils.pref_datapath, datadir).commit();
+			preferences.edit().putString(Q3EPreference.pref_datapath, datadir).commit();
 		}
 		if(checkGameFiles())
 		{
-            Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean("harm_redirect_output_to_file", true));
-            Q3EJNI.SetNoHandleSignals(preferences.getBoolean("harm_no_handle_signals", false));
+            Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true));
+            Q3EJNI.SetNoHandleSignals(preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false));
             Q3EJNI.SetMultiThread(Q3EUtils.q3ei.multithread);
+
+            if(!Q3EOuya.Init(this))
+                Q3EUtils.isOuya = false;
+
             if (mAudio==null)
             {
                 mAudio = new Q3ECallbackObj();
@@ -170,8 +175,8 @@ public class Q3EMain extends Activity {
                mControlGLSurfaceView = new Q3EControlView(this);
             mAudio.vw=mControlGLSurfaceView;
             mControlGLSurfaceView.EnableGyroscopeControl(Q3EUtils.q3ei.view_motion_control_gyro);
-            float gyroXSens = preferences.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS); 
-            float gyroYSens = preferences.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
+            float gyroXSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS);
+            float gyroYSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
             if(Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
                 mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
             mControlGLSurfaceView.RenderView(mGLSurfaceView);
@@ -325,23 +330,23 @@ public class Q3EMain extends Activity {
 
             Q3EUtils.q3ei.default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
-            Q3EUtils.q3ei.SetupGame(preferences.getString(Q3EUtils.pref_harm_game, Q3EGlobals.GAME_DOOM3));
+            Q3EUtils.q3ei.SetupGame(preferences.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3));
 
             String extraCommand = "";
-            if(preferences.getBoolean(Q3EUtils.pref_harm_auto_quick_load, false))
+            if(preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
                 extraCommand += "+loadGame QuickSave";
             Q3EUtils.q3ei.start_temporary_extra_command = extraCommand;
         }
 
-        Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f);
-        Q3EUtils.q3ei.joystick_inner_dead_zone = preferences.getFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, 0.0f);
-        Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt("harm_volume_up_key", Q3EKeyCodes.KeyCodes.K_F3);
-        Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt("harm_volume_down_key", Q3EKeyCodes.KeyCodes.K_F2);
+        Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
+        Q3EUtils.q3ei.joystick_inner_dead_zone = preferences.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
+        Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt(Q3EPreference.VOLUME_UP_KEY, Q3EKeyCodes.KeyCodes.K_F3);
+        Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt(Q3EPreference.VOLUME_DOWN_KEY, Q3EKeyCodes.KeyCodes.K_F2);
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
-        Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false);
-        Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EUtils.pref_harm_multithreading, false);
-        Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EUtils.pref_harm_function_key_toolbar, false);
-        Q3EUtils.q3ei.joystick_unfixed = preferences.getBoolean(Q3EUtils.pref_harm_joystick_unfixed, false);
+        Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false);
+        Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, false);
+        Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EPreference.pref_harm_function_key_toolbar, false);
+        Q3EUtils.q3ei.joystick_unfixed = preferences.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
 
         Q3EUtils.q3ei.SetAppStoragePath(this);
     }

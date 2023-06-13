@@ -54,6 +54,13 @@
 			android:textAllCaps="false"
 			android:text="On-screen button setting"/>
 
+		<Button
+			android:id="@+id/setup_onscreen_button_theme"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textAllCaps="false"
+			android:text="Setup on-screen button theme"/>
+
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -314,33 +321,38 @@
             </LinearLayout>
         </LinearLayout>
 
+		<CheckBox
+			android:id="@+id/hideonscr"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Hide onscreen buttons"
+			/>
+
+		<CheckBox
+			android:id="@+id/using_mouse"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Using mouse(not need root on Android 8+)"
+			/>
+
 		<LinearLayout
+			android:id="@+id/layout_mouseconfig"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
-			android:visibility="gone"
 			>
 
 			<TextView
 				android:id="@+id/tv_mprefs"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Mouse settings:"
-				/>
-
-			<CheckBox
-				android:id="@+id/hideonscr"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="Hide onscreen buttons(not need root) and enable mouse (Root required)"
-				/>
+				android:text="Mouse settings:"/>
 
 			<LinearLayout
-				android:id="@+id/layout_mouseconfig"
+				android:id="@+id/layout_mouse_device"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
-				android:orientation="vertical"
-				>
+				android:orientation="vertical">
 
 				<CheckBox
 					android:id="@+id/detectmouse"
@@ -366,10 +378,7 @@
 						android:layout_height="wrap_content"
 						android:ems="10"
 						android:imeOptions="flagNoExtractUi"
-						android:inputType="textNoSuggestions">
-
-					</EditText>
-
+						android:inputType="textNoSuggestions"/>
 				</LinearLayout>
 
 				<TextView

@@ -5,6 +5,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -34,7 +35,7 @@ public class UiLoader
     public Object LoadElement(int id, boolean editMode)
     {
         SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
-        String tmp = shp.getString(Q3EUtils.pref_controlprefix + id, null);
+        String tmp = shp.getString(Q3EPreference.pref_controlprefix + id, null);
         if (tmp == null) tmp = defaults_table[id];
         UiElement el = new UiElement(tmp);
         return LoadUiElement(id, el.cx, el.cy, el.size, el.alpha, editMode);
@@ -62,13 +63,13 @@ public class UiLoader
             case Q3EGlobals.TYPE_BUTTON:
                 return new Button(ctx, gl, cx, cy, size, bh, Q3EUtils.q3ei.texture_table[id], Q3EUtils.q3ei.arg_table[id * 4], Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 1] == 1, (float) alpha / 100);
             case Q3EGlobals.TYPE_JOYSTICK: {
-                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, editMode);
+                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, editMode, Q3EUtils.q3ei.texture_table[id], true);
             }
             case Q3EGlobals.TYPE_SLIDER:
                 return new Slider(ctx, gl, cx, cy, size, sh, Q3EUtils.q3ei.texture_table[id], Q3EUtils.q3ei.arg_table[id * 4], Q3EUtils.q3ei.arg_table[id * 4 + 1], Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 3], (float) alpha / 100);
             case Q3EGlobals.TYPE_DISC:
             {
-                String keysStr = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getString("harm_weapon_panel_keys", "1,2,3,4,5,6,7,8,9,q,0");
+                String keysStr = PreferenceManager.getDefaultSharedPreferences(ctx.getContext()).getString(Q3EPreference.WEAPON_PANEL_KEYS, "1,2,3,4,5,6,7,8,9,q,0");
                 char[] keys = null;
                 if (null != keysStr && !keysStr.isEmpty())
                 {
@@ -79,7 +80,7 @@ public class UiLoader
                         keys[i] = arr[i].charAt(0);
                     }
                 }
-                return new Disc(ctx, gl, cx, cy, size, (float) alpha / 100, keys);
+                return new Disc(ctx, gl, cx, cy, size, (float) alpha / 100, keys, Q3EUtils.q3ei.texture_table[id]);
             }
         }
         return null;

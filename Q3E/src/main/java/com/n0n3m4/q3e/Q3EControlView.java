@@ -22,7 +22,6 @@
 
 package com.n0n3m4.q3e;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -35,14 +34,13 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
-import com.n0n3m4.q3e.Q3EKeyCodes.KeyCodes;
+import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.gl.GL;
 import com.n0n3m4.q3e.gl.Q3EConfigChooser;
 import com.n0n3m4.q3e.karin.KKeyToolBar;
@@ -57,8 +55,6 @@ import com.n0n3m4.q3e.onscreen.Slider;
 import com.n0n3m4.q3e.onscreen.TouchListener;
 import com.n0n3m4.q3e.onscreen.UiLoader;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -79,6 +75,13 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public boolean usesCSAA = false;
     private boolean m_toolbarActive = true;
     private View m_keyToolbar = null;
+    private boolean m_usingMouse = false;
+    private float m_lastMousePosX = -1;
+    private float m_lastMousePosY = -1;
+    private boolean m_usingMouseDevice = false;
+    private Q3EMouseDevice m_mouseDevice = null;
+    private float m_lastTouchPadPosX = -1;
+    private float m_lastTouchPadPosY = -1;
 
     public Q3EControlView(Context context)
     {
@@ -103,6 +106,16 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
         setFocusable(true);
         setFocusableInTouchMode(true);
+
+        boolean usingMouse = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Q3EPreference.pref_harm_using_mouse, false);
+        if(usingMouse)
+        {
+            int mouse = Q3EUtils.SupportMouse();
+            if(mouse == Q3EGlobals.MOUSE_DEVICE)
+                m_usingMouseDevice = true;
+            else if(mouse == Q3EGlobals.MOUSE_EVENT)
+                m_usingMouse = true;
+        }
     }
 
     public static boolean mInit = false;
@@ -121,158 +134,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     //MOUSE
 
-    public static String detectedtmp;
-    public static String detectedname;
-    public static final String detecthnd = "Handlers=";
-    public static final String detectmouse = "mouse";
-    public static final String detectrel = "REL=";
-    public static boolean detectfoundpreferred = false;
-
-    public static String detectmouse()
-    {
-        /*try
-        {
-            Command command = new Command(0, "cat /proc/bus/input/devices")
-            {
-                @Override
-                public void output(int id, String line)
-                {
-                    if (line == null) return;
-                    if (line.contains(detecthnd) && (line.contains(detectmouse) || !detectfoundpreferred))
-                    {
-                        detectedtmp = line.substring(line.indexOf(detecthnd) + detecthnd.length());
-                        detectedtmp = detectedtmp.substring(detectedtmp.indexOf("event"));
-                        if (detectedtmp.contains(" "))
-                            detectedtmp = detectedtmp.substring(0, detectedtmp.indexOf(" "));
-                        detectfoundpreferred = line.contains(detectmouse);
-                    }
-                    if (line.contains(detectrel))
-                    {
-                        detectedname = "/dev/input/" + detectedtmp;
-                    }
-                    super.commandOutput(id, line);
-                }
-            };
-            RootTools.getShell(true).add(command).waitForFinish();
-            return detectedname;
-        } catch (Throwable t)
-        {
-            t.printStackTrace();
-            return null;
-        }*/
-        return null;
-    }
-
-    private int readmouse_dx = 0;
-    private int readmouse_dy = 0;
-    private int readmouse_keycode = 0;
-    private int readmouse_keystate = 0;
-    private boolean qevnt_available = true;
-    private int mouse_corner = 3;
     private boolean hideonscr;
-
-    private String mouse_name = null;
-
-    public Thread readmouse = new Thread(new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            try
-            {
-                /*Command command = new Command(0, "chmod 777 " + mouse_name);//insecure =(
-                RootTools.getShell(true).add(command).waitForFinish();*/
-
-                FileInputStream fis = new FileInputStream(mouse_name);//.getChannel();
-                FileOutputStream fout = new FileOutputStream(mouse_name);//.getChannel();
-                final int sizeofstruct = 8 + 2 + 2 + 4;
-                byte[] arr = new byte[sizeofstruct];
-                byte xcornr = (mouse_corner % 2 == 0) ? (byte) -127 : 127;
-                byte ycornr = (mouse_corner < 2) ? (byte) -127 : 127;
-                byte xargs = (xcornr < 0) ? (byte) -1 : 0;
-                byte yargs = (ycornr < 0) ? (byte) -1 : 0;
-                byte[] narr = {0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, xcornr, xargs, xargs, xargs,
-                        0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 0, ycornr, yargs, yargs, yargs,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 0};
-                Runnable qevnt_runnable = new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        Q3EJNI.sendMotionEvent(readmouse_dx, readmouse_dy);
-                        readmouse_dx = 0;
-                        readmouse_dy = 0;
-                        qevnt_available = true;
-                    }
-                };
-                Runnable qkeyevnt_runnable = new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        Q3EJNI.sendKeyEvent(readmouse_keystate, readmouse_keycode, 0);
-                    }
-                };
-                while (fis.read(arr, 0, sizeofstruct) != -1)
-                {
-                    if (!Q3ECallbackObj.reqThreadrunning)
-                    {
-                        Thread.yield();
-                        continue;
-                    }
-
-                    if ((arr[sizeofstruct - 4] == 127) || (arr[sizeofstruct - 4] == -127)) continue;
-
-                    if (arr[sizeofstruct - 8] == 0)
-                    {
-                        if (qevnt_available)
-                        {
-                            qevnt_available = false;
-                            queueEvent(qevnt_runnable);
-                        }
-                        fout.write(narr);
-                    }
-                    if (arr[sizeofstruct - 8] == 1)
-                    {
-                        readmouse_keycode = 0;
-                        if (arr[sizeofstruct - 6] == 16)
-                            readmouse_keycode = KeyCodes.K_MOUSE1;
-                        if (arr[sizeofstruct - 6] == 17)
-                            readmouse_keycode = KeyCodes.K_MOUSE2;
-                        if (arr[sizeofstruct - 6] == 18)
-                            readmouse_keycode = KeyCodes.K_MOUSE3;
-                        if (arr[sizeofstruct - 6] == 19)
-                            readmouse_keycode = KeyCodes.K_MOUSE4;
-                        if (arr[sizeofstruct - 6] == 20)
-                            readmouse_keycode = KeyCodes.K_MOUSE5;
-
-                        readmouse_keystate = arr[sizeofstruct - 4];
-                        if (readmouse_keycode != 0)
-                            queueEvent(qkeyevnt_runnable);
-                    }
-
-                    if (arr[sizeofstruct - 8] == 2)
-                    {
-                        if ((arr[sizeofstruct - 6]) == 0) readmouse_dx += arr[sizeofstruct - 4];
-                        if ((arr[sizeofstruct - 6]) == 1) readmouse_dy += arr[sizeofstruct - 4];
-                        if ((arr[sizeofstruct - 6]) == 8)
-                        {
-                            if (arr[sizeofstruct - 4] == 1)
-                                readmouse_keycode = KeyCodes.K_MWHEELUP;
-                            else
-                                readmouse_keycode = KeyCodes.K_MWHEELDOWN;
-                            readmouse_keystate = 1;
-                            queueEvent(qkeyevnt_runnable);
-                            Thread.sleep(25);
-                            readmouse_keystate = 0;
-                            queueEvent(qkeyevnt_runnable);
-                        }
-                    }
-                }
-
-            } catch (Throwable ignored) {}
-        }
-    });
 
     long oldtime = 0;
     long delta = 0;
@@ -410,15 +272,13 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
             SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
-            hideonscr = mPrefs.getBoolean(Q3EUtils.pref_hideonscr, false);
-            mapvol = mPrefs.getBoolean(Q3EUtils.pref_mapvol, false);
-            m_mapBack = mPrefs.getInt(Q3EUtils.pref_harm_mapBack, ENUM_BACK_ALL); //k
-            analog = mPrefs.getBoolean(Q3EUtils.pref_analog, true);
-            boolean detectMouse = mPrefs.getBoolean(Q3EUtils.pref_detectmouse, true);
+            hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
+            mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
+            m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, ENUM_BACK_ALL); //k
+            analog = mPrefs.getBoolean(Q3EPreference.pref_analog, true);
 
-            //k: first check su
-            mouse_name = hideonscr /*&& RootTools.isRootAvailable()*/ ? (detectMouse ? detectmouse() : mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???")) : null;
-            mouse_corner = mPrefs.getInt(Q3EUtils.pref_mousepos, 3);
+            if(m_usingMouseDevice)
+                m_mouseDevice = new Q3EMouseDevice(this);
 
             orig_width = w;
             orig_height = h;
@@ -448,7 +308,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             }
             //must be last
             touch_elements.add(new MouseControl(this, false));
-            touch_elements.add(new MouseControl(this, mPrefs.getBoolean(Q3EUtils.pref_2fingerlmb, false)));
+            touch_elements.add(new MouseControl(this, mPrefs.getBoolean(Q3EPreference.pref_2fingerlmb, false)));
             touch_elements.add(new MouseControl(this, false));
 
             SortOnScreenButtons(); //k sort priority
@@ -462,11 +322,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             for (int i = 0; i < fingers.length; i++)
                 fingers[i] = new Finger(null, i);
 
-            if (mouse_name != null)
-            {
-                readmouse.setPriority(7);
-                readmouse.start();
-            }
+            if(null != m_mouseDevice)
+                m_mouseDevice.Start();
 
             mInit = true;
             post(new Runnable()
@@ -572,7 +429,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     static float last_joystick_x = 0;
     static float last_joystick_y = 0;
 
-    @SuppressLint("NewApi")
     private static float getCenteredAxis(MotionEvent event,
                                          int axis)
     {
@@ -589,11 +445,12 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         return 0;
     }
 
-    @SuppressLint("NewApi")
     @Override
     public boolean onGenericMotionEvent(MotionEvent event)
     {
-        if (((event.getSource() == InputDevice.SOURCE_JOYSTICK) || (event.getSource() == InputDevice.SOURCE_GAMEPAD)) && (event.getAction() == MotionEvent.ACTION_MOVE))
+        int action = event.getAction();
+        int source = event.getSource();
+        if (((source == InputDevice.SOURCE_JOYSTICK) || (source == InputDevice.SOURCE_GAMEPAD)) && (action == MotionEvent.ACTION_MOVE))
         {
             float x = getCenteredAxis(event, MotionEvent.AXIS_X);
             float y = -getCenteredAxis(event, MotionEvent.AXIS_Y);
@@ -604,6 +461,77 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             last_joystick_y = y;
             return true;
         }
+        if(m_usingMouse && source == InputDevice.SOURCE_MOUSE)
+        {
+            int actionIndex = event.getActionIndex();
+            float x = event.getX(actionIndex);
+            float y = event.getY(actionIndex);
+            if(m_lastMousePosX < 0)
+                m_lastMousePosX = x;
+            if(m_lastMousePosY < 0)
+                m_lastMousePosY = y;
+            float deltaX = x - m_lastMousePosX;
+            float deltaY = y - m_lastMousePosY;
+            m_lastMousePosX = x;
+            m_lastMousePosY = y;
+            switch (action)
+            {
+                case MotionEvent.ACTION_BUTTON_PRESS: {
+                    int gameMouseButton = ConvMouseButton(event);
+                    if(gameMouseButton >= 0)
+                    {
+                        sendKeyEvent(true, gameMouseButton, 0);
+                    }
+                }
+                    break;
+                case MotionEvent.ACTION_BUTTON_RELEASE: {
+                    int gameMouseButton = ConvMouseButton(event);
+                    if(gameMouseButton >= 0)
+                    {
+                        sendKeyEvent(false, gameMouseButton, 0);
+                    }
+                    m_lastMousePosX = -1;
+                    m_lastMousePosY = -1;
+                }
+                    break;
+//                case MotionEvent.ACTION_HOVER_ENTER: break;
+//                case MotionEvent.ACTION_HOVER_EXIT: break;
+                case MotionEvent.ACTION_HOVER_MOVE:
+                    sendMotionEvent(deltaX, deltaY);
+                    break;
+                case MotionEvent.ACTION_SCROLL:
+                    float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
+                    if(scrollY > 0)
+                    {
+                        sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                        sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                    }
+                    else if(scrollY < 0)
+                    {
+
+                        sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                        sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                    }
+                    break;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onCapturedPointerEvent(MotionEvent event)
+    {
+        if(m_usingMouse)
+        {
+            switch (event.getSource())
+            {
+                case InputDevice.SOURCE_MOUSE_RELATIVE:
+                    return HandleCapturedPointerEvent(event, true);
+                case InputDevice.SOURCE_TOUCHPAD:
+                    return HandleCapturedPointerEvent(event, false);
+            }
+        }
         return false;
     }
 
@@ -612,23 +540,25 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public static ArrayList<Paintable> paint_elements = new ArrayList<Paintable>(0);
     public static TouchListener[] handle_elements = new TouchListener[10]; // handled elements in every touch event
 
-    @SuppressLint("NewApi")
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
         if (!mInit) return true;
 
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) && (hideonscr) && (event.getSource() == InputDevice.SOURCE_MOUSE))
+        int source = event.getSource();
+        if(source == InputDevice.SOURCE_MOUSE && (m_usingMouse || m_usingMouseDevice/* || hideonscr*/))
         {
             event.setAction(MotionEvent.ACTION_CANCEL);
             return true;
         }
 
-        int pid = event.getPointerId(event.getActionIndex());
-        if ((event.getActionMasked() == MotionEvent.ACTION_DOWN) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN))
+        int actionMasked = event.getActionMasked();
+        int actionIndex = event.getActionIndex();
+        int pid = event.getPointerId(actionIndex);
+        if ((actionMasked == MotionEvent.ACTION_DOWN) || (actionMasked == MotionEvent.ACTION_POINTER_DOWN))
         {
-            int x = (int) event.getX(event.getActionIndex());
-            int y = (int) event.getY(event.getActionIndex());
+            int x = (int) event.getX(actionIndex);
+            int y = (int) event.getY(actionIndex);
             for (TouchListener tl : touch_elements)
             {
                 if (tl.isInside(x, y))
@@ -669,7 +599,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         {
         }
 
-        if ((event.getActionMasked() == MotionEvent.ACTION_UP) || (event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) || (event.getActionMasked() == MotionEvent.ACTION_CANCEL))
+        if ((actionMasked == MotionEvent.ACTION_UP) || (actionMasked == MotionEvent.ACTION_POINTER_UP) || (actionMasked == MotionEvent.ACTION_CANCEL))
         {
             fingers[pid].target = null;
         }
@@ -916,7 +846,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             m_keyToolbar.setVisibility(View.GONE);
             try
             {
-                String str = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EUtils.pref_harm_function_key_toolbar_y, "0");
+                String str = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_harm_function_key_toolbar_y, "0");
                 if(null == str)
                     str = "0";
                 int y = Integer.parseInt(str);
@@ -987,5 +917,177 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         });
         touch_elements.clear();
         touch_elements.addAll(Arrays.asList(touchListeners));
+    }
+
+    private int ConvMouseButton(MotionEvent event)
+    {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+        {
+            int actionButton = event.getActionButton();
+            switch (actionButton)
+            {
+                case MotionEvent.BUTTON_PRIMARY:
+                case MotionEvent.BUTTON_STYLUS_PRIMARY:
+                    return Q3EKeyCodes.KeyCodes.K_MOUSE1;
+                case MotionEvent.BUTTON_SECONDARY:
+                case MotionEvent.BUTTON_STYLUS_SECONDARY:
+                    return Q3EKeyCodes.KeyCodes.K_MOUSE2;
+                case MotionEvent.BUTTON_TERTIARY:
+                    return Q3EKeyCodes.KeyCodes.K_MOUSE3;
+                default:
+                    return -1;
+            }
+        }
+        else
+        {
+            int buttonState = event.getButtonState();
+            if((buttonState & MotionEvent.BUTTON_PRIMARY) == MotionEvent.BUTTON_PRIMARY || (buttonState & MotionEvent.BUTTON_STYLUS_PRIMARY) == MotionEvent.BUTTON_STYLUS_PRIMARY)
+                return Q3EKeyCodes.KeyCodes.K_MOUSE1;
+            else if((buttonState & MotionEvent.BUTTON_SECONDARY) == MotionEvent.BUTTON_SECONDARY || (buttonState & MotionEvent.BUTTON_STYLUS_SECONDARY) == MotionEvent.BUTTON_STYLUS_SECONDARY)
+                return Q3EKeyCodes.KeyCodes.K_MOUSE2;
+            else if((buttonState & MotionEvent.BUTTON_TERTIARY) == MotionEvent.BUTTON_TERTIARY)
+                return Q3EKeyCodes.KeyCodes.K_MOUSE3;
+            else
+                return -1;
+        }
+    }
+
+    public void GrabMouse()
+    {
+        if(!m_usingMouse)
+            return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            Runnable runnable = new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    if (m_allowGrabMouse)
+                        requestPointerCapture();
+                    else
+                        m_requestGrabMouse = 1;
+                }
+            };
+            post(runnable);
+            //runnable.run();
+        }
+    }
+
+    public void UnGrabMouse()
+    {
+        if(!m_usingMouse)
+            return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            Runnable runnable = new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    if (m_allowGrabMouse)
+                        releasePointerCapture();
+                    else
+                        m_requestGrabMouse = -1;
+                }
+            };
+            post(runnable);
+            //runnable.run();
+        }
+    }
+
+    private int m_requestGrabMouse = 0;
+    private boolean m_allowGrabMouse = false;
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus)
+    {
+        super.onWindowFocusChanged(hasWindowFocus);
+
+        m_allowGrabMouse = hasWindowFocus;
+        if(hasWindowFocus)
+        {
+            if(m_requestGrabMouse > 0)
+            {
+                GrabMouse();
+                m_requestGrabMouse = 0;
+            }
+            else if(m_requestGrabMouse < 0)
+            {
+                UnGrabMouse();
+                m_requestGrabMouse = 0;
+            }
+        }
+    }
+
+    private boolean HandleCapturedPointerEvent(MotionEvent event, boolean absolute)
+    {
+        int action = event.getAction();
+        int actionIndex = event.getActionIndex();
+        switch (action)
+        {
+            case MotionEvent.ACTION_BUTTON_PRESS: {
+                int gameMouseButton = ConvMouseButton(event);
+                if(gameMouseButton >= 0)
+                {
+                    sendKeyEvent(true, gameMouseButton, 0);
+                }
+                m_lastTouchPadPosX = event.getAxisValue(MotionEvent.AXIS_X, actionIndex);
+                m_lastTouchPadPosY = event.getAxisValue(MotionEvent.AXIS_Y, actionIndex);
+            }
+            break;
+            case MotionEvent.ACTION_BUTTON_RELEASE: {
+                int gameMouseButton = ConvMouseButton(event);
+                if(gameMouseButton >= 0)
+                {
+                    sendKeyEvent(false, gameMouseButton, 0);
+                }
+                m_lastTouchPadPosX = -1;
+                m_lastTouchPadPosY = -1;
+            }
+            break;
+            case MotionEvent.ACTION_MOVE:
+                float deltaX;
+                float deltaY;
+                if(absolute)
+                {
+                    deltaX = event.getX(actionIndex);
+                    deltaY = event.getY(actionIndex);
+                }
+                else
+                {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    {
+                        deltaX = event.getAxisValue(MotionEvent.AXIS_RELATIVE_X, actionIndex);
+                        deltaY = event.getAxisValue(MotionEvent.AXIS_RELATIVE_Y, actionIndex);
+                    }
+                    else
+                    {
+                        float x = event.getAxisValue(MotionEvent.AXIS_X, actionIndex);
+                        float y = event.getAxisValue(MotionEvent.AXIS_Y, actionIndex);
+                        deltaX = x - m_lastTouchPadPosX;
+                        deltaY = y - m_lastTouchPadPosY;
+                        m_lastTouchPadPosX = x;
+                        m_lastTouchPadPosY = y;
+                    }
+                }
+                sendMotionEvent(deltaX, deltaY);
+                break;
+            case MotionEvent.ACTION_SCROLL:
+                // float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
+                float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
+                if(scrollY > 0)
+                {
+                    sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                    sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                }
+                else if(scrollY < 0)
+                {
+
+                    sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                    sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                }
+                break;
+        }
+        return true;
     }
 }

@@ -45,11 +45,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TabHost;
@@ -65,6 +67,8 @@ import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
+import com.karin.idTech4Amm.ui.ControlsThemeAdapter;
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.FileBrowserDialog;
@@ -85,6 +89,7 @@ import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -138,70 +143,69 @@ public class GameLauncher extends Activity{
 					case R.id.useetc1cache:
 						setProp("r_useETC1cache", isChecked);
                         PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                            .putBoolean(Q3EUtils.pref_useetc1cache, isChecked)
+                            .putBoolean(Q3EPreference.pref_useetc1cache, isChecked)
                             .commit();
 						break;
 					case R.id.nolight:
 						setProp("r_noLight", isChecked);
                         PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                            .putBoolean(Q3EUtils.pref_nolight, isChecked)
+                            .putBoolean(Q3EPreference.pref_nolight, isChecked)
                             .commit();
 						break;
 					case R.id.useetc1:
 						setProp("r_useETC1", isChecked);
                         PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                            .putBoolean(Q3EUtils.pref_useetc1, isChecked)
+                            .putBoolean(Q3EPreference.pref_useetc1, isChecked)
                             .commit();
 						break;
 					case R.id.usedxt:
 						setProp("r_useDXT", isChecked);
                         PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                            .putBoolean(Q3EUtils.pref_usedxt, isChecked)
+                            .putBoolean(Q3EPreference.pref_usedxt, isChecked)
                             .commit();
 						break;
 					case R.id.detectmouse:
 						UpdateMouseManualMenu(!isChecked);
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-							.putBoolean(Q3EUtils.pref_detectmouse, isChecked)
+							.putBoolean(Q3EPreference.pref_detectmouse, isChecked)
 						.commit();
 						break;
 					case R.id.hideonscr:
-						UpdateMouseMenu(isChecked);
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-							.putBoolean(Q3EUtils.pref_hideonscr, isChecked)
+							.putBoolean(Q3EPreference.pref_hideonscr, isChecked)
 						.commit();
 						break;
 					case R.id.smoothjoy:
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-							.putBoolean(Q3EUtils.pref_analog, isChecked)
+							.putBoolean(Q3EPreference.pref_analog, isChecked)
 						.commit();
 						break;
 					case R.id.mapvol:
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-							.putBoolean(Q3EUtils.pref_mapvol, isChecked)
+							.putBoolean(Q3EPreference.pref_mapvol, isChecked)
 						.commit();
                         UpdateMapVol(isChecked);
 						break;
 					case R.id.secfinglmb:
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-							.putBoolean(Q3EUtils.pref_2fingerlmb, isChecked)
+							.putBoolean(Q3EPreference.pref_2fingerlmb, isChecked)
 						.commit();
 						break;
                     case R.id.fs_game_user:
                         UpdateUserGame(isChecked);
                         PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                            .putBoolean(Q3EUtils.pref_harm_user_mod, isChecked)
+                            .putBoolean(Q3EPreference.pref_harm_user_mod, isChecked)
                             .commit();
 						break;
                     case R.id.launcher_tab2_enable_gyro:
                         PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                            .putBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, isChecked)
+                            .putBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, isChecked)
                             .commit();
                         UpdateEnableGyro(isChecked);
 						break;
 					case R.id.auto_quick_load:
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-								.putBoolean(Q3EUtils.pref_harm_auto_quick_load, isChecked)
+								.putBoolean(Q3EPreference.pref_harm_auto_quick_load, isChecked)
 								.commit();
 						if(isChecked)
 							SetParam_temp("loadGame", "QuickSave");
@@ -210,15 +214,21 @@ public class GameLauncher extends Activity{
 						break;
 					case R.id.multithreading:
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-								.putBoolean(Q3EUtils.pref_harm_multithreading, isChecked)
+								.putBoolean(Q3EPreference.pref_harm_multithreading, isChecked)
 								.commit();
 						Q3EUtils.q3ei.multithread = isChecked;
 						break;
 					case R.id.launcher_tab2_joystick_unfixed:
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-								.putBoolean(Q3EUtils.pref_harm_joystick_unfixed, isChecked)
+								.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, isChecked)
 								.commit();
 						Q3EUtils.q3ei.joystick_unfixed = isChecked;
+						break;
+					case R.id.using_mouse:
+						UpdateMouseMenu(isChecked);
+						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+								.putBoolean(Q3EPreference.pref_harm_using_mouse, isChecked)
+								.commit();
 						break;
 					default:
 						break;
@@ -236,21 +246,21 @@ public class GameLauncher extends Activity{
 					GameLauncher.this.UpdateCustomerResulotion(id == R.id.res_custom);
                     index = GetCheckboxIndex(radioGroup, id);
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putInt(Q3EUtils.pref_scrres, index)
+                        .putInt(Q3EPreference.pref_scrres, index)
                         .commit();
 					break;
 				case R.id.r_harmclearvertexbuffer:
                     index = GetCheckboxIndex(radioGroup, id);
 					SetProp("harm_r_clearVertexBuffer", index);
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                    .putInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, index)
+                    .putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, index)
                     .commit();
 					break;
                 case R.id.rg_harm_r_lightModel:
                     String value = GetCheckboxIndex(radioGroup, id) == 1 ? "blinn_phong" : "phong";
                     SetProp("harm_r_lightModel", value);
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putString(Q3EUtils.pref_harm_r_lightModel, value)
+                        .putString(Q3EPreference.pref_harm_r_lightModel, value)
                     .commit();
 					break;
 				case R.id.rg_fs_game:
@@ -260,27 +270,27 @@ public class GameLauncher extends Activity{
                 case R.id.rg_msaa:
                     index = GetCheckboxIndex(radioGroup, id);
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putInt(Q3EUtils.pref_msaa, index)
+                        .putInt(Q3EPreference.pref_msaa, index)
                         .commit();
                     break;
                 case R.id.rg_color_bits:
                     index = GetCheckboxIndex(radioGroup, id) - 1;
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                    .putBoolean(Q3EUtils.pref_32bit, index == -1)
-                    .putInt(Q3EUtils.pref_harm_16bit, index)
+                    .putBoolean(Q3EPreference.pref_32bit, index == -1)
+                    .putInt(Q3EPreference.pref_harm_16bit, index)
                         .commit();
                     break;
 				case R.id.rg_curpos:
                     index = GetCheckboxIndex(radioGroup, id);
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putInt(Q3EUtils.pref_mousepos, index)
+                        .putInt(Q3EPreference.pref_mousepos, index)
                         .commit();
 					break;
 				case R.id.rg_s_driver:
 					String value2 = GetCheckboxIndex(radioGroup, id) == 1 ? "OpenSLES" : "AudioTrack";
 					SetProp("s_driver", value2);
 					PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-							.putString(Q3EUtils.pref_harm_s_driver, value2)
+							.putString(Q3EPreference.pref_harm_s_driver, value2)
 							.commit();
 					break;
 				default:
@@ -317,6 +327,9 @@ public class GameLauncher extends Activity{
 					break;
 				case R.id.setup_onscreen_button_size:
 					OpenOnScreenButtonSizeSetting();
+					break;
+				case R.id.setup_onscreen_button_theme:
+					OpenOnScreenButtonThemeSetting();
 					break;
 				default:
 					break;
@@ -357,13 +370,13 @@ public class GameLauncher extends Activity{
 				case R.id.launcher_tab2_volume_up_map_config_keys:
 					keyCodes = getResources().getIntArray(R.array.key_map_codes);
 					PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putInt(Constants.PreferenceKey.VOLUME_UP_KEY, keyCodes[position])
+						.putInt(Q3EPreference.VOLUME_UP_KEY, keyCodes[position])
 						.commit();
 					break;
 				case R.id.launcher_tab2_volume_down_map_config_keys:
 					keyCodes = getResources().getIntArray(R.array.key_map_codes);
 					PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putInt(Constants.PreferenceKey.VOLUME_DOWN_KEY, keyCodes[position])
+						.putInt(Q3EPreference.VOLUME_DOWN_KEY, keyCodes[position])
 						.commit();
 					break;
 				default:
@@ -424,8 +437,8 @@ public class GameLauncher extends Activity{
 		int[] size = ContextUtility.GetNormalScreenSize(this);
 		int navBarHeight = fullSize[1] - size[1] - safeInsetTop - safeInsetBottom;
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
-		boolean hideNav = preferences.getBoolean(Constants.PreferenceKey.HIDE_NAVIGATION_BAR, true);
-		boolean coverEdges = preferences.getBoolean(Constants.PreferenceKey.COVER_EDGES, true);
+		boolean hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
+		boolean coverEdges = preferences.getBoolean(Q3EPreference.COVER_EDGES, true);
 		int w, h;
 		int X = 0;
 		if(friendly)
@@ -608,12 +621,16 @@ public class GameLauncher extends Activity{
 
 	public void UpdateMouseMenu(boolean show)
 	{
+		final boolean supportGrabMouse = Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
+		V.tv_mprefs.setVisibility(supportGrabMouse ? LinearLayout.GONE : LinearLayout.VISIBLE);
+		V.layout_mouse_device.setVisibility(supportGrabMouse ? LinearLayout.GONE : LinearLayout.VISIBLE);
 		V.layout_mouseconfig.setVisibility(show?LinearLayout.VISIBLE:LinearLayout.GONE);
 	}
 
 	public void UpdateMouseManualMenu(boolean show)
 	{
-		V.layout_manualmouseconfig.setVisibility(show?LinearLayout.VISIBLE:LinearLayout.GONE);
+		final boolean supportGrabMouse = Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
+		V.layout_manualmouseconfig.setVisibility(!supportGrabMouse && show ? LinearLayout.VISIBLE : LinearLayout.GONE);
 	}
 
 	public void SelectCheckbox(RadioGroup rg, int index)
@@ -945,7 +962,7 @@ public class GameLauncher extends Activity{
             else
                 RemoveProp("fs_game");
         }
-        preference.edit().putString(Q3EUtils.pref_harm_game_lib, "").commit();
+        preference.edit().putString(Q3EPreference.pref_harm_game_lib, "").commit();
         RemoveProp("harm_fs_gameLibPath");
         if(on)
         {
@@ -979,9 +996,9 @@ public class GameLauncher extends Activity{
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
 		InitQ3E();
-		Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f);
-		Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EUtils.pref_harm_joystick_unfixed, false);
-		Q3EUtils.q3ei.joystick_inner_dead_zone = mPrefs.getFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, 0.0f);
+		Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
+		Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
+		Q3EUtils.q3ei.joystick_inner_dead_zone = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
 		Q3EUtils.q3ei.SetAppStoragePath(this);
 
 		TabHost th=(TabHost)findViewById(R.id.tabhost);
@@ -994,49 +1011,51 @@ public class GameLauncher extends Activity{
 
         V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
-		SetGame(mPrefs.getString(Q3EUtils.pref_harm_game, Q3EGlobals.GAME_DOOM3));
+		SetGame(mPrefs.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3));
 
-		V.edt_cmdline.setText(mPrefs.getString(Q3EUtils.pref_params, "game.arm"));
-		V.edt_mouse.setText(mPrefs.getString(Q3EUtils.pref_eventdev, "/dev/input/event???"));
-		V.edt_path.setText(mPrefs.getString(Q3EUtils.pref_datapath, default_gamedata));
+		V.edt_cmdline.setText(mPrefs.getString(Q3EPreference.pref_params, "game.arm"));
+		V.edt_mouse.setText(mPrefs.getString(Q3EPreference.pref_eventdev, "/dev/input/event???"));
+		V.edt_path.setText(mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata));
 		V.hideonscr.setOnCheckedChangeListener(m_checkboxChangeListener);
-		V.hideonscr.setChecked(mPrefs.getBoolean(Q3EUtils.pref_hideonscr, false));
-
-		UpdateMouseMenu(V.hideonscr.isChecked());
-
-		V.mapvol.setChecked(mPrefs.getBoolean(Q3EUtils.pref_mapvol, false));
-		V.secfinglmb.setChecked(mPrefs.getBoolean(Q3EUtils.pref_2fingerlmb, false));
-		V.smoothjoy.setChecked(mPrefs.getBoolean(Q3EUtils.pref_analog, true));
-		V.launcher_tab2_joystick_unfixed.setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_joystick_unfixed, false));
+		V.hideonscr.setChecked(mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false));
+		V.using_mouse.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_using_mouse, false));
+		V.using_mouse.setOnCheckedChangeListener(m_checkboxChangeListener);
+		
+		UpdateMouseMenu(V.using_mouse.isChecked());
+				
+		V.mapvol.setChecked(mPrefs.getBoolean(Q3EPreference.pref_mapvol, false));
+		V.secfinglmb.setChecked(mPrefs.getBoolean(Q3EPreference.pref_2fingerlmb, false));
+		V.smoothjoy.setChecked(mPrefs.getBoolean(Q3EPreference.pref_analog, true));
+		V.launcher_tab2_joystick_unfixed.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false));
 		V.detectmouse.setOnCheckedChangeListener(m_checkboxChangeListener);
-		V.detectmouse.setChecked(mPrefs.getBoolean(Q3EUtils.pref_detectmouse, true));
+		V.detectmouse.setChecked(mPrefs.getBoolean(Q3EPreference.pref_detectmouse, true));
 
 		UpdateMouseManualMenu(!V.detectmouse.isChecked());
 
-		SelectCheckbox(V.rg_curpos,mPrefs.getInt(Q3EUtils.pref_mousepos, 3));
+		SelectCheckbox(V.rg_curpos,mPrefs.getInt(Q3EPreference.pref_mousepos, 3));
         V.rg_scrres.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		SelectCheckbox(V.rg_scrres,mPrefs.getInt(Q3EUtils.pref_scrres, 0));
-		SelectCheckbox(V.rg_msaa,mPrefs.getInt(Q3EUtils.pref_msaa, 0));
+		SelectCheckbox(V.rg_scrres,mPrefs.getInt(Q3EPreference.pref_scrres, 0));
+		SelectCheckbox(V.rg_msaa,mPrefs.getInt(Q3EPreference.pref_msaa, 0));
         V.rg_msaa.setOnCheckedChangeListener(m_groupCheckChangeListener);
         //k
-        V.usedxt.setChecked(mPrefs.getBoolean(Q3EUtils.pref_usedxt, false));
-        V.useetc1.setChecked(mPrefs.getBoolean(Q3EUtils.pref_useetc1, false));
-        V.useetc1cache.setChecked(mPrefs.getBoolean(Q3EUtils.pref_useetc1cache, false));
-        V.nolight.setChecked(mPrefs.getBoolean(Q3EUtils.pref_nolight, false));
-		SelectCheckbox(V.rg_color_bits, mPrefs.getInt(Q3EUtils.pref_harm_16bit, -1) + 1);
+        V.usedxt.setChecked(mPrefs.getBoolean(Q3EPreference.pref_usedxt, false));
+        V.useetc1.setChecked(mPrefs.getBoolean(Q3EPreference.pref_useetc1, false));
+        V.useetc1cache.setChecked(mPrefs.getBoolean(Q3EPreference.pref_useetc1cache, false));
+        V.nolight.setChecked(mPrefs.getBoolean(Q3EPreference.pref_nolight, false));
+		SelectCheckbox(V.rg_color_bits, mPrefs.getInt(Q3EPreference.pref_harm_16bit, -1) + 1);
         V.rg_color_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		SelectCheckbox(V.r_harmclearvertexbuffer, mPrefs.getInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, 2));
+		SelectCheckbox(V.r_harmclearvertexbuffer, mPrefs.getInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, 2));
         V.r_harmclearvertexbuffer.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		SelectCheckbox(V.rg_harm_r_lightModel, "blinn_phong".equalsIgnoreCase(mPrefs.getString(Q3EUtils.pref_harm_r_lightModel, "phong")) ? 1 : 0);
+		SelectCheckbox(V.rg_harm_r_lightModel, "blinn_phong".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_r_lightModel, "phong")) ? 1 : 0);
         V.rg_harm_r_lightModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EUtils.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
+		SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
 		V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
-        V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, false));
-        boolean autoQuickLoad = mPrefs.getBoolean(Q3EUtils.pref_harm_auto_quick_load, false);
+        V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false));
+        boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
 		V.auto_quick_load.setChecked(autoQuickLoad);
 		if(autoQuickLoad)
 			SetParam_temp("loadGame", "QuickSave");
-		boolean multithreading = mPrefs.getBoolean(Q3EUtils.pref_harm_multithreading, false);
+		boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
 		V.multithreading.setChecked(multithreading);
 		Q3EUtils.q3ei.multithread = multithreading;
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener(){
@@ -1056,27 +1075,27 @@ public class GameLauncher extends Activity{
         V.launcher_tab1_edit_autoexec.setOnClickListener(m_buttonClickListener);
         V.launcher_tab1_edit_doomconfig.setOnClickListener(m_buttonClickListener);
 
-        boolean userMod = mPrefs.getBoolean(Q3EUtils.pref_harm_user_mod, false);
+        boolean userMod = mPrefs.getBoolean(Q3EPreference.pref_harm_user_mod, false);
         V.fs_game_user.setChecked(userMod);
         int index = 0;
         // if(game != null)
 		if(Q3EUtils.q3ei.isQ4)
 		{
-			String game = mPrefs.getString(Q3EUtils.pref_harm_q4_fs_game, "");
+			String game = mPrefs.getString(Q3EPreference.pref_harm_q4_fs_game, "");
             if(game.isEmpty() || "q4base".equals(game))
                 index = 0;
             SelectCheckbox(V.rg_fs_q4game, index);
 		}
 		else if(Q3EUtils.q3ei.isPrey)
 		{
-			String game = mPrefs.getString(Q3EUtils.pref_harm_prey_fs_game, "");
+			String game = mPrefs.getString(Q3EPreference.pref_harm_prey_fs_game, "");
 			if(game.isEmpty() || "preybase".equals(game))
 				index = 0;
 			SelectCheckbox(V.rg_fs_preygame, index);
 		}
 		else
         {
-			String game = mPrefs.getString(Q3EUtils.pref_harm_fs_game, "");
+			String game = mPrefs.getString(Q3EPreference.pref_harm_fs_game, "");
             if(game.isEmpty() || "base".equals(game))
                 index = 0;
             else if("d3xp".equals(game))
@@ -1108,20 +1127,21 @@ public class GameLauncher extends Activity{
                 }
             });
         V.launcher_tab1_game_lib_button.setOnClickListener(m_buttonClickListener);
-		V.edt_harm_r_specularExponent.setText(Float.toString(mPrefs.getFloat(Q3EUtils.pref_harm_r_specularExponent, 4.0f)));
+		V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 4.0f));
 
-		V.res_x.setText(mPrefs.getString(Q3EUtils.pref_resx, "640"));
-		V.res_y.setText(mPrefs.getString(Q3EUtils.pref_resy, "480"));
-        V.res_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_resx, "640"));
-        V.res_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_resy, "480"));
+		V.res_x.setText(mPrefs.getString(Q3EPreference.pref_resx, "640"));
+		V.res_y.setText(mPrefs.getString(Q3EPreference.pref_resy, "480"));
+        V.res_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resx, "640"));
+        V.res_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resy, "480"));
         V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
         V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_opacity.setOnClickListener(m_buttonClickListener);
 		V.reset_onscreen_controls_btn.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_size.setOnClickListener(m_buttonClickListener);
+		V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
 
 		//DIII4A-specific
-		V.edt_cmdline.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_params, "game.arm") {
+		V.edt_cmdline.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_params, "game.arm") {
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean cond = V.edt_cmdline.isInputMethodTarget() && !IsCmdUpdateLocked();
                 if(cond)
@@ -1136,7 +1156,7 @@ public class GameLauncher extends Activity{
                 public void afterTextChanged(Editable s) {
                     String value = s.length() == 0 ? "4.0" : s.toString();
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putFloat(Q3EUtils.pref_harm_r_specularExponent, Utility.parseFloat_s(value, 4.0f))
+                        .putFloat(Q3EPreference.pref_harm_r_specularExponent, Utility.parseFloat_s(value, 4.0f))
                         .commit();
                 }
             });
@@ -1146,8 +1166,8 @@ public class GameLauncher extends Activity{
 		V.nolight.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.smoothjoy.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.launcher_tab2_joystick_unfixed.setOnCheckedChangeListener(m_checkboxChangeListener);
-		V.edt_path.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_datapath, default_gamedata));
-		V.edt_mouse.addTextChangedListener(new SavePreferenceTextWatcher(Q3EUtils.pref_eventdev, "/dev/input/event???"));
+		V.edt_path.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_datapath, default_gamedata));
+		V.edt_mouse.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_eventdev, "/dev/input/event???"));
         V.rg_curpos.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.secfinglmb.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.mapvol.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -1155,10 +1175,10 @@ public class GameLauncher extends Activity{
         V.launcher_tab2_volume_up_map_config_keys.setOnItemSelectedListener(m_spinnerItemSelectedListener);
         V.launcher_tab2_volume_down_map_config_keys.setOnItemSelectedListener(m_spinnerItemSelectedListener);
         V.launcher_tab2_enable_gyro.setOnCheckedChangeListener(m_checkboxChangeListener);
-        V.launcher_tab2_gyro_x_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
-        V.launcher_tab2_gyro_y_axis_sens.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
-		V.launcher_tab2_joystick_release_range.setText("" + mPrefs.getFloat(Q3EUtils.pref_harm_joystick_release_range, 0.0f));
-		int innerDeadZone = (int) (mPrefs.getFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, 0.0f) * 100);
+        V.launcher_tab2_gyro_x_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
+        V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
+		V.launcher_tab2_joystick_release_range.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_joystick_release_range, 0.0f));
+		int innerDeadZone = (int) (mPrefs.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f) * 100);
 		V.launcher_tab2_joystick_inner_dead_zone.setProgress(innerDeadZone);
 		V.launcher_tab2_joystick_inner_dead_zone_label.setText(innerDeadZone + "%");
         UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
@@ -1168,7 +1188,7 @@ public class GameLauncher extends Activity{
                 public void afterTextChanged(Editable s) {
                     String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_X_AXIS_SENS : s.toString();
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
+                        .putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
                         .commit();
                 }
             });
@@ -1178,7 +1198,7 @@ public class GameLauncher extends Activity{
                 public void afterTextChanged(Editable s) {
                     String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_Y_AXIS_SENS : s.toString();
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
+                        .putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
                         .commit();
                 }
             });
@@ -1189,7 +1209,7 @@ public class GameLauncher extends Activity{
 				String value = s.length() == 0 ? "0.0" : s.toString();
 				float v = Utility.parseFloat_s(value, 0.0f);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putFloat(Q3EUtils.pref_harm_joystick_release_range, v)
+						.putFloat(Q3EPreference.pref_harm_joystick_release_range, v)
 						.commit();
 				Q3EUtils.q3ei.joystick_release_range = v;
 			}
@@ -1204,7 +1224,7 @@ public class GameLauncher extends Activity{
 				float v = (float) progress / 100.0f;
 				Q3EUtils.q3ei.joystick_inner_dead_zone = v;
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putFloat(Q3EUtils.pref_harm_joystick_inner_dead_zone, v)
+						.putFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, v)
 						.commit();
 				V.launcher_tab2_joystick_inner_dead_zone_label.setText(progress + "%");
 			}
@@ -1270,7 +1290,7 @@ public class GameLauncher extends Activity{
 		InitUILayout(Q3EUtils.q3ei, friendly, scale, opacity);
 		SharedPreferences.Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit();
 		for (int i=0;i<Q3EGlobals.UI_SIZE;i++)
-			mEdtr.putString(Q3EUtils.pref_controlprefix+i, friendly ? Q3EUtils.q3ei.defaults_table[i] : null);
+			mEdtr.putString(Q3EPreference.pref_controlprefix+i, friendly ? Q3EUtils.q3ei.defaults_table[i] : null);
 		mEdtr.commit();
 	}
 
@@ -1603,41 +1623,42 @@ public class GameLauncher extends Activity{
     private void WritePreferences()
     {
         SharedPreferences.Editor mEdtr=PreferenceManager.getDefaultSharedPreferences(this).edit();
-        mEdtr.putString(Q3EUtils.pref_params, GetCmdText());
-        mEdtr.putString(Q3EUtils.pref_eventdev, V.edt_mouse.getText().toString());
-        mEdtr.putString(Q3EUtils.pref_datapath, V.edt_path.getText().toString());
-        mEdtr.putBoolean(Q3EUtils.pref_hideonscr, V.hideonscr.isChecked());
+        mEdtr.putString(Q3EPreference.pref_params, GetCmdText());
+        mEdtr.putString(Q3EPreference.pref_eventdev, V.edt_mouse.getText().toString());
+        mEdtr.putString(Q3EPreference.pref_datapath, V.edt_path.getText().toString());
+        mEdtr.putBoolean(Q3EPreference.pref_hideonscr, V.hideonscr.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_using_mouse, V.using_mouse.isChecked());
         //k mEdtr.putBoolean(Q3EUtils.pref_32bit, true);
         int index = GetCheckboxIndex(V.rg_color_bits) - 1;
-        mEdtr.putBoolean(Q3EUtils.pref_32bit, index == -1);
-        mEdtr.putInt(Q3EUtils.pref_harm_16bit, index);
-        mEdtr.putInt(Q3EUtils.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
-        mEdtr.putString(Q3EUtils.pref_harm_r_lightModel, GetCheckboxIndex(V.rg_harm_r_lightModel) == 1 ? "blinn_phong" : "phong");
-		mEdtr.putFloat(Q3EUtils.pref_harm_r_specularExponent, Utility.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 4.0f));
-		mEdtr.putString(Q3EUtils.pref_harm_s_driver, GetCheckboxIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
+        mEdtr.putBoolean(Q3EPreference.pref_32bit, index == -1);
+        mEdtr.putInt(Q3EPreference.pref_harm_16bit, index);
+        mEdtr.putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
+        mEdtr.putString(Q3EPreference.pref_harm_r_lightModel, GetCheckboxIndex(V.rg_harm_r_lightModel) == 1 ? "blinn_phong" : "phong");
+		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Utility.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 4.0f));
+		mEdtr.putString(Q3EPreference.pref_harm_s_driver, GetCheckboxIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
 
-        mEdtr.putBoolean(Q3EUtils.pref_mapvol, V.mapvol.isChecked());
-        mEdtr.putBoolean(Q3EUtils.pref_analog, V.smoothjoy.isChecked());
-        mEdtr.putBoolean(Q3EUtils.pref_2fingerlmb, V.secfinglmb.isChecked());
-        mEdtr.putBoolean(Q3EUtils.pref_detectmouse, V.detectmouse.isChecked());
-        mEdtr.putInt(Q3EUtils.pref_mousepos, GetCheckboxIndex(V.rg_curpos));
-        mEdtr.putInt(Q3EUtils.pref_scrres, GetCheckboxIndex(V.rg_scrres));
-        mEdtr.putInt(Q3EUtils.pref_msaa, GetCheckboxIndex(V.rg_msaa));
-        mEdtr.putString(Q3EUtils.pref_resx, V.res_x.getText().toString());
-        mEdtr.putString(Q3EUtils.pref_resy, V.res_y.getText().toString());
-        mEdtr.putBoolean(Q3EUtils.pref_useetc1cache, V.useetc1cache.isChecked());
-        mEdtr.putBoolean(Q3EUtils.pref_useetc1, V.useetc1.isChecked());
-        mEdtr.putBoolean(Q3EUtils.pref_usedxt, V.usedxt.isChecked());
-        mEdtr.putBoolean(Q3EUtils.pref_nolight, V.nolight.isChecked());
-        mEdtr.putBoolean(Q3EUtils.pref_harm_user_mod, V.fs_game_user.isChecked());
-        mEdtr.putString(Q3EUtils.pref_harm_game, Q3EUtils.q3ei.game);
-        mEdtr.putBoolean(Q3EUtils.pref_harm_view_motion_control_gyro, V.launcher_tab2_enable_gyro.isChecked());
-		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
-		mEdtr.putFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
-		mEdtr.putBoolean(Q3EUtils.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
-		mEdtr.putBoolean(Q3EUtils.pref_harm_multithreading, V.multithreading.isChecked());
-		mEdtr.putFloat(Q3EUtils.pref_harm_joystick_release_range, Utility.parseFloat_s(V.launcher_tab2_joystick_release_range.getText().toString(), 0.0f));
-		mEdtr.putBoolean(Q3EUtils.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
+        mEdtr.putBoolean(Q3EPreference.pref_mapvol, V.mapvol.isChecked());
+        mEdtr.putBoolean(Q3EPreference.pref_analog, V.smoothjoy.isChecked());
+        mEdtr.putBoolean(Q3EPreference.pref_2fingerlmb, V.secfinglmb.isChecked());
+        mEdtr.putBoolean(Q3EPreference.pref_detectmouse, V.detectmouse.isChecked());
+        mEdtr.putInt(Q3EPreference.pref_mousepos, GetCheckboxIndex(V.rg_curpos));
+        mEdtr.putInt(Q3EPreference.pref_scrres, GetCheckboxIndex(V.rg_scrres));
+        mEdtr.putInt(Q3EPreference.pref_msaa, GetCheckboxIndex(V.rg_msaa));
+        mEdtr.putString(Q3EPreference.pref_resx, V.res_x.getText().toString());
+        mEdtr.putString(Q3EPreference.pref_resy, V.res_y.getText().toString());
+        mEdtr.putBoolean(Q3EPreference.pref_useetc1cache, V.useetc1cache.isChecked());
+        mEdtr.putBoolean(Q3EPreference.pref_useetc1, V.useetc1.isChecked());
+        mEdtr.putBoolean(Q3EPreference.pref_usedxt, V.usedxt.isChecked());
+        mEdtr.putBoolean(Q3EPreference.pref_nolight, V.nolight.isChecked());
+        mEdtr.putBoolean(Q3EPreference.pref_harm_user_mod, V.fs_game_user.isChecked());
+        mEdtr.putString(Q3EPreference.pref_harm_game, Q3EUtils.q3ei.game);
+        mEdtr.putBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, V.launcher_tab2_enable_gyro.isChecked());
+		mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
+		mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Utility.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
+		mEdtr.putBoolean(Q3EPreference.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_multithreading, V.multithreading.isChecked());
+		mEdtr.putFloat(Q3EPreference.pref_harm_joystick_release_range, Utility.parseFloat_s(V.launcher_tab2_joystick_release_range.getText().toString(), 0.0f));
+		mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
 		mEdtr.commit();
     }
 
@@ -2012,13 +2033,13 @@ public class GameLauncher extends Activity{
 			newGame = Games[(i + 1) % 3];
 		}
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
-        preference.edit().putString(Q3EUtils.pref_harm_game, newGame).commit();
+        preference.edit().putString(Q3EPreference.pref_harm_game, newGame).commit();
         SetGame(newGame);
-        preference.edit().putString(Q3EUtils.pref_harm_game_lib, "");
+        preference.edit().putString(Q3EPreference.pref_harm_game_lib, "");
 
         String game = preference.getString(GetGameModPreferenceKey(), "");
         V.edt_fs_game.setText(game);
-        boolean userMod = preference.getBoolean(Q3EUtils.pref_harm_user_mod, false);
+        boolean userMod = preference.getBoolean(Q3EPreference.pref_harm_user_mod, false);
 		if(Q3EUtils.q3ei.isQ4)
 		{
 			int index = 0;
@@ -2320,9 +2341,9 @@ public class GameLauncher extends Activity{
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         int[] keyCodes = getResources().getIntArray(R.array.key_map_codes);
         V.launcher_tab2_volume_map_config_layout.setVisibility(on ? View.VISIBLE : View.GONE);
-        int key = preference.getInt(Constants.PreferenceKey.VOLUME_UP_KEY, Q3EKeyCodes.KeyCodes.K_F3);
+        int key = preference.getInt(Q3EPreference.VOLUME_UP_KEY, Q3EKeyCodes.KeyCodes.K_F3);
         V.launcher_tab2_volume_up_map_config_keys.setSelection(Utility.ArrayIndexOf(keyCodes, key));
-        key = preference.getInt(Constants.PreferenceKey.VOLUME_DOWN_KEY, Q3EKeyCodes.KeyCodes.K_F2);
+        key = preference.getInt(Q3EPreference.VOLUME_DOWN_KEY, Q3EKeyCodes.KeyCodes.K_F2);
         V.launcher_tab2_volume_down_map_config_keys.setSelection(Utility.ArrayIndexOf(keyCodes, key));
     }
 
@@ -2330,10 +2351,8 @@ public class GameLauncher extends Activity{
     {
         V.launcher_tab2_enable_gyro_layout.setVisibility(on ? View.VISIBLE : View.GONE);
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
-        float f = preference.getFloat(Q3EUtils.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS);
-        V.launcher_tab2_gyro_x_axis_sens.setText("" + f);
-        f = preference.getFloat(Q3EUtils.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
-        V.launcher_tab2_gyro_y_axis_sens.setText("" + f);
+        V.launcher_tab2_gyro_x_axis_sens.setText(Q3EPreference.GetStringFromFloat(preference, Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
+        V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(preference, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
     }
 
     private void SetupOnScreenButtonOpacity(int alpha)
@@ -2347,7 +2366,7 @@ public class GameLauncher extends Activity{
 			str = str.substring(0, index) + ' ' + alpha;
 			Q3EUtils.q3ei.defaults_table[i] = str;
 
-			String key = Q3EUtils.pref_controlprefix + i;
+			String key = Q3EPreference.pref_controlprefix + i;
 			if(!preferences.contains(key))
 				continue;
 			str = preferences.getString(key, Q3EUtils.q3ei.defaults_table[i]);
@@ -2573,13 +2592,18 @@ public class GameLauncher extends Activity{
 					ContextUtility.OpenUrlExternally(GameLauncher.this, apk_url);
 				}
 			})
-			.setNeutralButton("View", new DialogInterface.OnClickListener() {
+			.setNeutralButton("Github", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					ContextUtility.OpenUrlExternally(GameLauncher.this, Constants.CONST_MAIN_PAGE);
 				}
 			})
-			.setNegativeButton("Cancel", null)
+			.setNegativeButton("F-Droid", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					ContextUtility.OpenUrlExternally(GameLauncher.this, Constants.CONST_FDROID);
+				}
+			})
 			;
 		}
 		else
@@ -2613,16 +2637,16 @@ public class GameLauncher extends Activity{
 
 	private String GetGameModPreferenceKey()
 	{
-		return Q3EUtils.q3ei.isPrey ? Q3EUtils.pref_harm_prey_fs_game
-				: (Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_fs_game
-				: Q3EUtils.pref_harm_fs_game);
+		return Q3EUtils.q3ei.isPrey ? Q3EPreference.pref_harm_prey_fs_game
+				: (Q3EUtils.q3ei.isQ4 ? Q3EPreference.pref_harm_q4_fs_game
+				: Q3EPreference.pref_harm_fs_game);
 	}
 
 	private String GetGameModLibPreferenceKey()
 	{
-		return Q3EUtils.q3ei.isPrey ? Q3EUtils.pref_harm_prey_game_lib
-				: (Q3EUtils.q3ei.isQ4 ? Q3EUtils.pref_harm_q4_game_lib
-				: Q3EUtils.pref_harm_game_lib);
+		return Q3EUtils.q3ei.isPrey ? Q3EPreference.pref_harm_prey_game_lib
+				: (Q3EUtils.q3ei.isQ4 ? Q3EPreference.pref_harm_q4_game_lib
+				: Q3EPreference.pref_harm_game_lib);
 	}
 
 	private RadioGroup GetGameModRadioGroup()
@@ -2782,7 +2806,7 @@ public class GameLauncher extends Activity{
 			str = Utility.Join(" ", arr);
 			Q3EUtils.q3ei.defaults_table[i] = str;
 
-			String key = Q3EUtils.pref_controlprefix + i;
+			String key = Q3EPreference.pref_controlprefix + i;
 			if(!preferences.contains(key))
 				continue;
 			str = preferences.getString(key, Q3EUtils.q3ei.defaults_table[i]);
@@ -2793,6 +2817,55 @@ public class GameLauncher extends Activity{
 		}
 		mEdtr.commit();
 		Toast.makeText(GameLauncher.this, "Setup all on-screen buttons size done.", Toast.LENGTH_SHORT).show();
+	}
+
+	private void OpenOnScreenButtonThemeSetting()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Controls theme");
+		View widget = getLayoutInflater().inflate(R.layout.controls_theme_dialog, null, false);
+		LinkedHashMap<String, String> schemes = Q3EUtils.GetControlsThemes(this);
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String type = preferences.getString(Q3EPreference.CONTROLS_THEME, "");
+		if(null == type)
+			type = "";
+		String[] theme = { type };
+		ArrayList<String> types = new ArrayList<>(schemes.keySet());
+
+		Spinner spinner = widget.findViewById(R.id.controls_theme_spinner);
+		final ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new ArrayList<>(schemes.values()));
+		typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(typeAdapter);
+		spinner.setSelection(types.indexOf(theme[0]));
+		ListView list = widget.findViewById(R.id.controls_theme_list);
+		ControlsThemeAdapter adapter = new ControlsThemeAdapter(widget.getContext());
+		list.setAdapter(adapter);
+		adapter.Update(theme[0]);
+		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+											  @Override
+											  public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+											  {
+												  theme[0] = types.get(position);
+												  adapter.Update(theme[0]);
+											  }
+
+											  @Override
+											  public void onNothingSelected(AdapterView<?> parent)
+											  {
+											  }
+										  });
+
+		builder.setView(widget);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				preferences.edit().putString(Q3EPreference.CONTROLS_THEME, theme[0]).commit();
+			}
+		})
+				.setNegativeButton("Cancel", null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 
 
@@ -2852,6 +2925,10 @@ public class GameLauncher extends Activity{
 		public CheckBox launcher_tab2_joystick_unfixed;
 		public SeekBar launcher_tab2_joystick_inner_dead_zone;
 		public TextView launcher_tab2_joystick_inner_dead_zone_label;
+		public Button setup_onscreen_button_theme;
+		public CheckBox using_mouse;
+		public TextView tv_mprefs;
+		public LinearLayout layout_mouse_device;
 
 		public void Setup()
 		{
@@ -2908,6 +2985,10 @@ public class GameLauncher extends Activity{
 			launcher_tab2_joystick_unfixed = findViewById(R.id.launcher_tab2_joystick_unfixed);
 			launcher_tab2_joystick_inner_dead_zone = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone);
 			launcher_tab2_joystick_inner_dead_zone_label = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone_label);
+			setup_onscreen_button_theme = findViewById(R.id.setup_onscreen_button_theme);
+			using_mouse = findViewById(R.id.using_mouse);
+			tv_mprefs = findViewById(R.id.tv_mprefs);
+			layout_mouse_device = findViewById(R.id.layout_mouse_device);
 		}
 	}
 }

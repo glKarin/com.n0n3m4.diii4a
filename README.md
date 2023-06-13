@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan30(natasha)  
+1.1.0harmattan31(natasha)  
 **Last update release:**
-2023-05-23  
+2023-06-10  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -11,13 +11,22 @@ Android 4.0+
 **License:**
 GPLv3
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
+
+Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
+Tag with `-free` only for F-Droid update.
+
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add function key toolbar for soft input method(default disabled, in `Settings`).
-* Add joystick release range setting in tab `CONTROLS`. The value is joystick radius's multiple, 0 to disable.
-* Fix crash when end intro cinematic in Quake 4.
-* Fix delete savegame menu action in Quake 4.
+* Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.
+* Add setup all on-screen buttons size in tab `CONTROLS`.
+* Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.
+* Support unfixed-position joystick and inner dead zone.
+* Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/com.karin.idTech4Amm/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/com.karin.idTech4Amm/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.
+* New mouse support implement.
 
 ----------------------------------------------------------------------------------
 
@@ -76,6 +85,33 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 
+### Portable:
+
+#### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
+#### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
+
+#### Quake 4
+##### `_RAVEN`, `_QUAKE4` is patches macros, find them in `DIII4A` source code.
+##### All new sources files put on `raven` folder.
+> 1. _RAVEN: for compile `core engine (DOOM3 source code)` and `idlib (DOOM3 source code)`.
+> 2. _QUAKE4: for compile `game (Q4SDK source code)` library.
+> 3. Build core engine: define macro `_RAVEN`, `_RAVEN_FX(OpenBSE if need, unnecessary)`
+> 4. Build game library: define macro `_RAVEN`, `_QUAKE4`
+##### About `BSE`
+Because `BSE` not open-source, so I default supply a `NULL` implement and a uncompleted but working implement with DOOM3 Particle/Fx system(using macros `_RAVEN_FX` marked).
+##### About `BOT`
+It has some unnecessary source code for Bot by `jmarshall`.
+
+#### Prey(2006)
+##### `_HUMANHEAD`, `_PREY` is patches macros, find them in `DIII4A` source code.
+##### All new sources files put on `humanhead` folder.
+> 1. _HUMANHEAD: for compile `core engine (DOOM3 source code)` and `idlib (DOOM3 source code)`.
+> 2. _PREY: for compile `game (PreySDK source code)` library.
+> 3. Build core engine: define macro `_HUMANHEAD`
+> 4. Build game library: define macro `_HUMANHEAD`, `_PREY`, and original SDK macros `HUMANHEAD`
+
+----------------------------------------------------------------------------------
+
 ### About:
 
 * Source in `assets/source` folder in APK file.
@@ -87,6 +123,9 @@ GPLv3
 > `master`:
 > * /DIII4A: frontend source
 > * /doom3: game source
+
+> `free`:
+> * For F-Droid pure free version.
 
 > `package`:
 > * /*.apk: all version build
@@ -104,4 +143,5 @@ GPLv3
 * [Google: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb](https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb)
 * [Baidu网盘: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w](https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w) 提取码: `pyyj`
 * [Baidu贴吧: BEYONDK2000](https://tieba.baidu.com/p/6825594793)
+* [F-Droid(different signature)](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------

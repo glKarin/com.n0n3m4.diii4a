@@ -602,11 +602,13 @@ void abrt_func(mcheck_status status)
 #define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
 #define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
 #define ANDROID_CALL_PROTOCOL_ATTACH_THREAD 0x10003
+#define ANDROID_CALL_PROTOCOL_GRAB_MOUSE 0x10005
 
 #define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
 #define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
 #define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
 #define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
+#define ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT 0x20006
 
 // APK's native library path on Android.
 char *native_library_dir = NULL;
@@ -616,6 +618,7 @@ bool no_handle_signals = false;
 
 // DOOM library call Android JNI
 intptr_t (*Android_Call)(int protocol, int size, ...);
+void (*Android_pull_input_event)(int execCmd);
 
 // Surface window
 volatile ANativeWindow *window = NULL;
@@ -959,6 +962,10 @@ intptr_t Q3E_Call(int protocol, int size, ...)
 			multithreadActive = va_arg(va, int) ? true : false;
 			res = multithreadActive;
 			break;
+		case ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT:
+			Android_pull_input_event = (void (*)(int))va_arg(va, intptr_t);
+			res = (intptr_t)Android_pull_input_event;
+			break;
 		default:
 			break;
 	}
@@ -1054,6 +1061,14 @@ FILE * itmpfile(void)
 	if(!Android_Call)
 		return NULL;
 	return (FILE *)Android_Call(ANDROID_CALL_PROTOCOL_TMPFILE, 0);
+}
+
+// grab mouse for Android
+void grab_mouse(int grab)
+{
+	if(!Android_Call)
+		return;
+	(void)Android_Call(ANDROID_CALL_PROTOCOL_GRAB_MOUSE, 1, grab);
 }
 
 #include "../../framework/Session_local.h"

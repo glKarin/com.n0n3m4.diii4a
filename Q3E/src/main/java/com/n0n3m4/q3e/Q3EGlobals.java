@@ -32,6 +32,10 @@ public final class Q3EGlobals
     public static final int TYPE_DISC = 3;
     public static final int TYPE_MOUSE = -1;
 
+    // mouse
+    public static final int MOUSE_EVENT = 1;
+    public static final int MOUSE_DEVICE = 2;
+
     // on-screen button type
     public static final int ONSCREEN_BUTTON_TYPE_FULL = 0;
     public static final int ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM = 1;
@@ -163,6 +167,26 @@ public final class Q3EGlobals
             "DATA NETWORKING SECURITY",
             "NEXUS CORE", // Act V
             "THE NEXUS",
+    };
+
+    public static final String[] CONTROLS_NAMES = {
+            "Joystick",
+            "Shoot",
+            "Jump",
+            "Crouch",
+            "Reload",
+            "PDA",
+            "Flashlight",
+            "Pause",
+            "Extra 1",
+            "Extra 2",
+            "Extra 3",
+            "Keyboard",
+            "Console",
+            "Run",
+            "Zoom",
+            "Interact",
+            "Weapon"
     };
 
     private Q3EGlobals() {}

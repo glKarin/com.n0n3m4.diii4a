@@ -18,32 +18,25 @@ public final class Constants
     public static final String CONST_TIEBA = "https://tieba.baidu.com/p/6825594793";
 	public static final String CONST_DEVELOPER = "https://github.com/glKarin";
     public static final String CONST_DEVELOPER_XDA = "https://forum.xda-developers.com/member.php?u=10584229";
+    public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
+    public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
             "Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.",
             "Add setup all on-screen buttons size in tab `CONTROLS`.",
             "Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.",
             "Support unfixed-position joystick and inner dead zone.",
+            "Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.",
+            "New mouse support implement.",
 	};
-    public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
 
 	// Launcher preference keys
     public static final class PreferenceKey {
         public static final String LAUNCHER_ORIENTATION = "harm_launcher_orientation";
-        public static final String RUN_BACKGROUND = "harm_run_background";
-        public static final String HIDE_NAVIGATION_BAR = "harm_hide_nav";
-        public static final String RENDER_MEM_STATUS = "harm_render_mem_status";
         public static final String MAP_BACK = "harm_map_back";
-        public static final String WEAPON_PANEL_KEYS = "harm_weapon_panel_keys";
         public static final String ONSCREEN_BUTTON = "harm_onscreen_button";
-        public static final String REDIRECT_OUTPUT_TO_FILE = "harm_redirect_output_to_file";
-        public static final String NO_HANDLE_SIGNALS = "harm_no_handle_signals";
-        public static final String VOLUME_UP_KEY = "harm_volume_up_key";
-        public static final String VOLUME_DOWN_KEY = "harm_volume_down_key";
         public static final String HIDE_AD_BAR = "harm_hide_ad_bar";
 		//public static final String OPEN_QUAKE4_HELPER = "harm_open_quake4_helper";
-		public static final String CONTROLS_CONFIG_POSITION_UNIT = "harm_controls_config_position_unit";
-        public static final String COVER_EDGES = "harm_cover_edges";
         
         private PreferenceKey() {}
     }

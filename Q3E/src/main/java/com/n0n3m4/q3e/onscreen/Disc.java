@@ -10,6 +10,7 @@ import android.view.View;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.gl.GLBitmapTexture;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -51,7 +52,7 @@ public class Disc extends Paintable implements TouchListener
     boolean dotjoyenabled = false;
     public View view;
 
-    public Disc(View vw, GL10 gl, int center_x, int center_y, int r, float a, char[] keys)
+    public Disc(View vw, GL10 gl, int center_x, int center_y, int r, float a, char[] keys, String texid)
     {
         view = vw;
         cx = center_x;
@@ -92,6 +93,8 @@ public class Disc extends Paintable implements TouchListener
         m_fanVertexArray.position(0);
 
         m_keys = keys;
+
+        tex_androidid = texid;
     }
 
     private Part GenPart(int index, char key, int total, GL10 gl)
@@ -204,18 +207,17 @@ public class Disc extends Paintable implements TouchListener
     @Override
     public void loadtex(GL10 gl)
     {
-        Bitmap bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmp);
-        Paint p = new Paint();
-        p.setARGB(255, 255, 255, 255);
-        c.drawARGB(0, 0, 0, 0);
-        c.drawCircle(size / 2, size / 2, size / 2, p);
-        p.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
-        int internalsize = (size / 2 * 7 / 8);
-        c.drawCircle(size / 2, size / 2, internalsize, p);
+        String[] m_textures = null;
+        if(null != tex_androidid && !tex_androidid.isEmpty())
+            m_textures = tex_androidid.split(";");
 
+        int internalsize = size / 2 * 7 / 8;
         m_circleWidth = size / 2 - internalsize;
-        tex_ind = GL.loadGLTexture(gl, bmp);
+        final int[] color = {255, 255, 255, 255};
+        if(null != m_textures && m_textures.length > 0)
+            tex_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+        if(tex_ind == 0)
+            tex_ind = GLBitmapTexture.GenCircleRingTexture(gl, size, m_circleWidth, color);
 
         if (null != m_keys && m_keys.length > 0)
         {

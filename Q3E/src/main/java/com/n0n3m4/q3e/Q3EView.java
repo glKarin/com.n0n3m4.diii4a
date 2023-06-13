@@ -131,7 +131,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
             }
 
             String lib_dir = Q3EUtils.GetGameLibDir(getContext());
-            String cmd = Q3EMain.datadir + "/" + PreferenceManager.getDefaultSharedPreferences(this.getContext()).getString(Q3EUtils.pref_params, Q3EUtils.q3ei.libname) + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
+            String cmd = Q3EMain.datadir + "/" + PreferenceManager.getDefaultSharedPreferences(this.getContext()).getString(Q3EPreference.pref_params, Q3EUtils.q3ei.libname) + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
             Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa);
 
             mInit = true;
@@ -142,7 +142,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
 
     private int GetPixelFormat()
     {
-        if (PreferenceManager.getDefaultSharedPreferences(this.getContext()).getBoolean(Q3EUtils.pref_32bit, false))
+        if (PreferenceManager.getDefaultSharedPreferences(this.getContext()).getBoolean(Q3EPreference.pref_32bit, false))
         {
             return PixelFormat.RGBA_8888;
         }
@@ -152,7 +152,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
             //k setEGLConfigChooser(new Q3EConfigChooser(5, 6, 5, 0, msaa, Q3EUtils.usegles20));
             //k getHolder().setFormat(PixelFormat.RGB_565);
 
-            int harm16Bit = PreferenceManager.getDefaultSharedPreferences(this.getContext()).getInt(Q3EUtils.pref_harm_16bit, 0);
+            int harm16Bit = PreferenceManager.getDefaultSharedPreferences(this.getContext()).getInt(Q3EPreference.pref_harm_16bit, 0);
             switch (harm16Bit)
             {
                 case 1: // RGBA4444
@@ -168,7 +168,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
 
     private int GetMSAA()
     {
-        int msaa = PreferenceManager.getDefaultSharedPreferences(this.getContext()).getInt(Q3EUtils.pref_msaa, 0);
+        int msaa = PreferenceManager.getDefaultSharedPreferences(this.getContext()).getInt(Q3EPreference.pref_msaa, 0);
         switch (msaa)
         {
             case 0: msaa = 0;break;
@@ -184,7 +184,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
         int height;
         SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
-        switch (mPrefs.getInt(Q3EUtils.pref_scrres, 0))
+        switch (mPrefs.getInt(Q3EPreference.pref_scrres, 0))
         {
             case 0:
                 width = w;
@@ -207,7 +207,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                 //k height=Integer.parseInt(mPrefs.getString(Q3EUtils.pref_resy, "480"));
                 try
                 {
-                    String str = mPrefs.getString(Q3EUtils.pref_resx, "0");
+                    String str = mPrefs.getString(Q3EPreference.pref_resx, "0");
                     if(null == str)
                         str = "0";
                     width = Integer.parseInt(str);
@@ -218,7 +218,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                 }
                 try
                 {
-                    String str = mPrefs.getString(Q3EUtils.pref_resy, "0");
+                    String str = mPrefs.getString(Q3EPreference.pref_resy, "0");
                     if(null == str)
                         str = "0";
                     height = Integer.parseInt(str);

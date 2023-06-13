@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.R;
 
@@ -251,7 +252,7 @@ public class KKeyToolBar extends LinearLayout {
                             {
                                 setY(posy);
                                 getParent().requestLayout();
-                                PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putString(Q3EUtils.pref_harm_function_key_toolbar_y, "" + posy).commit();
+                                Q3EPreference.SetStringFromInt(getContext(), Q3EPreference.pref_harm_function_key_toolbar_y, posy);
                             }
                         }
                         m_lastY = y;
