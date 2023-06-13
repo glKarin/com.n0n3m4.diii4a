@@ -1,7 +1,7 @@
 {
-    "release":30,
-    "update":"2023-05-23",
-    "version":"1.1.0harmattan30",
-    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan1.1.0.30.apk",
-    "changes":"  * Add function key toolbar for soft input method(default disabled, in Settings).\n  * Add joystick release range setting in tab CONTROLS. The value is joystick radius's multiple, 0 to disable.\n  * Fix crash when end intro cinematic in Quake 4.\n  * Fix delete savegame menu action in Quake 4."
+    "release":31,
+    "update":"2023-06-10",
+    "version":"1.1.0harmattan31",
+    "apk_url":"https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/idTech4A++_harmattan.1.1.0.31.apk",
+    "changes":"  * Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.\n  * Add setup all on-screen buttons size in tab `CONTROLS`.\n  * Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.\n  * Support unfixed-position joystick and inner dead zone.\n  * Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/com.karin.idTech4Amm/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/com.karin.idTech4Amm/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.\n  * New mouse support implement."
 }
