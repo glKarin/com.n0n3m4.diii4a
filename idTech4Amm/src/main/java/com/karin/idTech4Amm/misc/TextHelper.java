@@ -93,7 +93,7 @@ public final class TextHelper
                 for(String str : logs)
                 {
                     if(str != null)
-                        sb.append(FormatDialogMessageSpace("  * ") + str);
+                        sb.append(FormatDialogMessageSpace("  * ")).append(str);
                     sb.append(endl);
                 }
             }
@@ -150,7 +150,7 @@ public final class TextHelper
         for(String str : Constants.CONST_CHANGES)
         {
             if(null != str)
-                sb.append(FormatDialogMessageSpace("  * ") + str);
+                sb.append(FormatDialogMessageSpace("  * ")).append(str);
             sb.append(endl);
         }
 		return GetDialogMessage(sb.toString());
@@ -261,7 +261,7 @@ public final class TextHelper
 				if(str.startsWith(" "))
 					sb.append(FormatDialogMessageHeaderSpace(str));
 				else
-					sb.append("* " + str);
+					sb.append("* ").append(str);
 			}
             sb.append(endl);
         }
@@ -289,8 +289,9 @@ public final class TextHelper
             null,
             "Homepage: ",
             "Github: " + GenLinkText(Constants.CONST_MAIN_PAGE, null),
-            "XDA: " + GenLinkText(Constants.CONST_DEVELOPER_XDA, "karin_zhao"),
+            "F-Droid: " + GenLinkText(Constants.CONST_FDROID, null),
             "Tieba: " + GenLinkText(Constants.CONST_TIEBA, null),
+            "XDA: " + GenLinkText(Constants.CONST_DEVELOPER_XDA, "karin_zhao"),
             null,
             "Special thanks: ",
             GenLinkText("https://4pda.ru/forum/index.php?showuser=7653620", "Sir Cat") + "@" + GenLinkText("https://4pda.ru/forum/index.php?showtopic=929753", "4PDA forum"),
@@ -626,7 +627,7 @@ public final class TextHelper
             {
                 for(Value str : values)
                 {
-                    sb.append(FormatDialogMessageSpace("    ") + str.GenString(endl));
+                    sb.append(FormatDialogMessageSpace("    ")).append(str.GenString(endl));
                 }
             }
             return sb.toString();

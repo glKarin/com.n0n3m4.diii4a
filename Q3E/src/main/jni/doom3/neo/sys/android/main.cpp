@@ -608,6 +608,7 @@ void abrt_func(mcheck_status status)
 #define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
 #define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
 #define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
+#define ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT 0x20006
 
 // APK's native library path on Android.
 char *native_library_dir = NULL;
@@ -617,6 +618,7 @@ bool no_handle_signals = false;
 
 // DOOM library call Android JNI
 intptr_t (*Android_Call)(int protocol, int size, ...);
+void (*Android_pull_input_event)(int execCmd);
 
 // Surface window
 volatile ANativeWindow *window = NULL;
@@ -959,6 +961,10 @@ intptr_t Q3E_Call(int protocol, int size, ...)
 		case ANDROID_CALL_PROTOCOL_MULTITHREAD:
 			multithreadActive = va_arg(va, int) ? true : false;
 			res = multithreadActive;
+			break;
+		case ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT:
+			Android_pull_input_event = (void (*)(int))va_arg(va, intptr_t);
+			res = (intptr_t)Android_pull_input_event;
 			break;
 		default:
 			break;

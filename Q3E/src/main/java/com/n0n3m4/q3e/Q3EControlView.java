@@ -77,6 +77,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private float m_lastMousePosY = -1;
     private boolean m_usingMouseDevice = false;
     private Q3EMouseDevice m_mouseDevice = null;
+    private float m_lastTouchPadPosX = -1;
+    private float m_lastTouchPadPosY = -1;
 
     public Q3EControlView(Context context)
     {
@@ -480,14 +482,24 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     m_lastMousePosY = -1;
                 }
                     break;
-                /*case MotionEvent.ACTION_HOVER_ENTER: break;
-                case MotionEvent.ACTION_HOVER_EXIT: break;*/
+//                case MotionEvent.ACTION_HOVER_ENTER: break;
+//                case MotionEvent.ACTION_HOVER_EXIT: break;
                 case MotionEvent.ACTION_HOVER_MOVE:
                     sendMotionEvent(deltaX, deltaY);
                     break;
                 case MotionEvent.ACTION_SCROLL:
-                    /*float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
-                    float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL);*/
+                    float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
+                    if(scrollY > 0)
+                    {
+                        sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                        sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                    }
+                    else if(scrollY < 0)
+                    {
+
+                        sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                        sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                    }
                     break;
             }
             return true;
@@ -500,81 +512,12 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         if(m_usingMouse)
         {
-            int source = event.getSource();
-            if(source == InputDevice.SOURCE_MOUSE_RELATIVE)
+            switch (event.getSource())
             {
-                int action = event.getAction();
-                int actionIndex = event.getActionIndex();
-                switch (action)
-                {
-                    case MotionEvent.ACTION_BUTTON_PRESS: {
-                        int gameMouseButton = ConvMouseButton(event);
-                        if(gameMouseButton >= 0)
-                        {
-                            sendKeyEvent(true, gameMouseButton, 0);
-                        }
-                    }
-                    break;
-                    case MotionEvent.ACTION_BUTTON_RELEASE: {
-                        int gameMouseButton = ConvMouseButton(event);
-                        if(gameMouseButton >= 0)
-                        {
-                            sendKeyEvent(false, gameMouseButton, 0);
-                        }
-                    }
-                    break;
-                    case MotionEvent.ACTION_MOVE:
-                        float deltaX = event.getX(actionIndex);
-                        float deltaY = event.getY(actionIndex);
-                        sendMotionEvent(deltaX, deltaY);
-                        break;
-                    case MotionEvent.ACTION_SCROLL:
-                        //float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
-                        /*float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
-                        if(scrollY > 0)
-                            sendKeyEvent(true, KeyCodes.K_MWHEELUP, 0);
-                        else if(scrollY < 0)
-                            sendKeyEvent(true, KeyCodes.K_MWHEELDOWN, 0);*/
-                        break;
-                }
-                return true;
-            }
-            else if(source == InputDevice.SOURCE_TOUCHPAD)
-            {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                {
-                    int action = event.getAction();
-                    int actionIndex = event.getActionIndex();
-                    switch (action)
-                    {
-                        case MotionEvent.ACTION_BUTTON_PRESS: {
-                            int gameMouseButton = ConvMouseButton(event);
-                            if(gameMouseButton >= 0)
-                            {
-                                sendKeyEvent(true, gameMouseButton, 0);
-                            }
-                        }
-                        break;
-                        case MotionEvent.ACTION_BUTTON_RELEASE: {
-                            int gameMouseButton = ConvMouseButton(event);
-                            if(gameMouseButton >= 0)
-                            {
-                                sendKeyEvent(false, gameMouseButton, 0);
-                            }
-                        }
-                        break;
-                        case MotionEvent.ACTION_MOVE:
-                            float deltaX = event.getAxisValue(MotionEvent.AXIS_RELATIVE_X, actionIndex);
-                            float deltaY = event.getAxisValue(MotionEvent.AXIS_RELATIVE_Y, actionIndex);
-                            sendMotionEvent(deltaX, deltaY);
-                            break;
-                        case MotionEvent.ACTION_SCROLL:
-                    /*float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
-                    float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL);*/
-                            break;
-                    }
-                    return true;
-                }
+                case InputDevice.SOURCE_MOUSE_RELATIVE:
+                    return HandleCapturedPointerEvent(event, true);
+                case InputDevice.SOURCE_TOUCHPAD:
+                    return HandleCapturedPointerEvent(event, false);
             }
         }
         return false;
@@ -1062,5 +1005,77 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 m_requestGrabMouse = 0;
             }
         }
+    }
+
+    private boolean HandleCapturedPointerEvent(MotionEvent event, boolean absolute)
+    {
+        int action = event.getAction();
+        int actionIndex = event.getActionIndex();
+        switch (action)
+        {
+            case MotionEvent.ACTION_BUTTON_PRESS: {
+                int gameMouseButton = ConvMouseButton(event);
+                if(gameMouseButton >= 0)
+                {
+                    sendKeyEvent(true, gameMouseButton, 0);
+                }
+                m_lastTouchPadPosX = event.getAxisValue(MotionEvent.AXIS_X, actionIndex);
+                m_lastTouchPadPosY = event.getAxisValue(MotionEvent.AXIS_Y, actionIndex);
+            }
+            break;
+            case MotionEvent.ACTION_BUTTON_RELEASE: {
+                int gameMouseButton = ConvMouseButton(event);
+                if(gameMouseButton >= 0)
+                {
+                    sendKeyEvent(false, gameMouseButton, 0);
+                }
+                m_lastTouchPadPosX = -1;
+                m_lastTouchPadPosY = -1;
+            }
+            break;
+            case MotionEvent.ACTION_MOVE:
+                float deltaX;
+                float deltaY;
+                if(absolute)
+                {
+                    deltaX = event.getX(actionIndex);
+                    deltaY = event.getY(actionIndex);
+                }
+                else
+                {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    {
+                        deltaX = event.getAxisValue(MotionEvent.AXIS_RELATIVE_X, actionIndex);
+                        deltaY = event.getAxisValue(MotionEvent.AXIS_RELATIVE_Y, actionIndex);
+                    }
+                    else
+                    {
+                        float x = event.getAxisValue(MotionEvent.AXIS_X, actionIndex);
+                        float y = event.getAxisValue(MotionEvent.AXIS_Y, actionIndex);
+                        deltaX = x - m_lastTouchPadPosX;
+                        deltaY = y - m_lastTouchPadPosY;
+                        m_lastTouchPadPosX = x;
+                        m_lastTouchPadPosY = y;
+                    }
+                }
+                sendMotionEvent(deltaX, deltaY);
+                break;
+            case MotionEvent.ACTION_SCROLL:
+                // float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
+                float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
+                if(scrollY > 0)
+                {
+                    sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                    sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                }
+                else if(scrollY < 0)
+                {
+
+                    sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                    sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                }
+                break;
+        }
+        return true;
     }
 }

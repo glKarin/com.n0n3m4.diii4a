@@ -78,6 +78,7 @@ static ANativeWindow *window = NULL;
 #define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
 #define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
 #define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
+#define ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT 0x20006
 
 intptr_t Android_Call(int protocol, int size, ...)
 {
@@ -321,6 +322,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
         (void)Q3E_Call(ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS, 1, no_handle_signals);
 		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 multi-thread: %d", multithread);
 		(void)Q3E_Call(ANDROID_CALL_PROTOCOL_MULTITHREAD, 1, multithread);
+
+		(void)Q3E_Call(ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT, 1, pull_input_event);
     }
 	window = ANativeWindow_fromSurface(env, view);
 	set_gl_context(window, 2, format, msaa);

@@ -38,6 +38,7 @@ idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "");
 #ifdef __ANDROID__
 extern void grab_mouse(int grab);
 extern void pull_input_event(int execCmd);
+extern void (*Android_pull_input_event)(int execCmd);
 #endif
 
 void IN_Clear_f(const idCmdArgs &args)
@@ -67,7 +68,9 @@ void Sys_GrabMouseCursor(bool grabIt)
 void Posix_PollInput()
 {
 #if defined(__ANDROID__)
-	pull_input_event(1);
+	//pull_input_event(1);
+	if(Android_pull_input_event)
+		Android_pull_input_event(1);
 #endif
 }
 

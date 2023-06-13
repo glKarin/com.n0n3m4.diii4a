@@ -19,6 +19,7 @@ public final class Constants
 	public static final String CONST_DEVELOPER = "https://github.com/glKarin";
     public static final String CONST_DEVELOPER_XDA = "https://forum.xda-developers.com/member.php?u=10584229";
     public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
+    public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
             "Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.",
@@ -26,6 +27,7 @@ public final class Constants
             "Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.",
             "Support unfixed-position joystick and inner dead zone.",
             "Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.",
+            "New mouse support implement.",
 	};
 
 	// Launcher preference keys
