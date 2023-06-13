@@ -2593,13 +2593,18 @@ public class GameLauncher extends Activity{
 					ContextUtility.OpenUrlExternally(GameLauncher.this, apk_url);
 				}
 			})
-			.setNeutralButton("View", new DialogInterface.OnClickListener() {
+			.setNeutralButton("Github", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					ContextUtility.OpenUrlExternally(GameLauncher.this, Constants.CONST_MAIN_PAGE);
 				}
 			})
-			.setNegativeButton("Cancel", null)
+			.setNegativeButton("F-Droid", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					ContextUtility.OpenUrlExternally(GameLauncher.this, Constants.CONST_FDROID);
+				}
+			})
 			;
 		}
 		else

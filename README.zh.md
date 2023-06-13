@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **最新版本:**
-1.1.0harmattan30(natasha)  
+1.1.0harmattan31(natasha)  
 **最新更新日期:**
-2023-05-23  
+2023-06-01  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -15,15 +15,18 @@ GPLv3
 alt="Get it on F-Droid"
 height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 
-Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
+或者在[Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest)下载最新的APK.
+标签以`-free`结尾的仅为了F-Droid更新.
 
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 新增功能键工具条当输入法打开时(默认禁用, 在`Settings`菜单中).
-* 新增摇杆释放范围设置, 在`CONTROLS`选项卡下. 值为摇杆半径的倍数, 设为0禁用.
-* 修复雷神之锤4第一关动画播放完后游戏崩溃.
-* 修复雷神之锤4删除存档菜单功能.
+* 在`CONTROLS`选项卡下的`Reset on-screen controls`, 新增重置所有虚拟按键的缩放和透明度.
+* 在`CONTROLS`选项卡新增统一设置所有虚拟按键大小功能.
+* 在`CONTROLS`选项卡下的`Configure on-screen controls`, 新增网格辅助, 设置中`On-screen buttons position unit`大于0启用.
+* 支持不固定的虚拟摇杆和内部响应死区.
+* 支持自定义虚拟按键的图片. 如果`/sdcard/Android/data/com.karin.idTech4Amm/files/assets`路径下存在同名的虚拟按键图片, 将有限使用外部的代替自带的. 或者把虚拟按键图片放入一个命名好的文件夹中, 然后将文件夹放在`/sdcard/Android/data/com.karin.idTech4Amm/files/assets/controls_theme/`, 然后在`CONTROLS`选项卡下`Setup on-screen button theme`选择该文件夹名称.
+* 新的鼠标支持实现.
 
 ----------------------------------------------------------------------------------
 
@@ -122,6 +125,9 @@ bot不是必要的, 而是`jmarshall`额外添加的.
 > * /DIII4A: 前端启动器源码
 > * /doom3: 游戏源码
 
+> `free`:
+> * F-Droid自由版本.
+
 > `package`:
 > * /*.apk: 所有构建
 > * /screenshot: 截图
@@ -138,4 +144,5 @@ bot不是必要的, 而是`jmarshall`额外添加的.
 * [Google: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb](https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb)
 * [Baidu网盘: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w](https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w) 提取码: `pyyj`
 * [Baidu贴吧: BEYONDK2000](https://tieba.baidu.com/p/6825594793)
+* [F-Droid(不同的签名)](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
