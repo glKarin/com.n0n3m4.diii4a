@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.Toast;
@@ -648,7 +649,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         synchronized (paint_elements)
         {
             Context context = getContext();
-            int[] defSizes = Q3EControls.GetDefaultSize((Activity) context);
+            int[] defSizes = Q3EControls.GetDefaultSize((Activity) context, true);
             for (int i = 0; i < paint_elements.size(); i++)
             {
                 Paintable p = paint_elements.get(i);
@@ -718,7 +719,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         synchronized (paint_elements)
         {
             Context context = getContext();
-            Point[] points = Q3EControls.GetDefaultPosition((Activity) context, friendly, scale);
+            Point[] points = Q3EControls.GetDefaultPosition((Activity) context, friendly, scale, true);
             for (int i = 0; i < paint_elements.size(); i++)
             {
                 Paintable p = paint_elements.get(i);

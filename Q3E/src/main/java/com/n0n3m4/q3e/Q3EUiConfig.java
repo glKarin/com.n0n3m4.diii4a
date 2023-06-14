@@ -53,9 +53,9 @@ import com.n0n3m4.q3e.onscreen.Q3EControls;
 @SuppressLint("NonConstantResourceId")
 public class Q3EUiConfig extends Activity
 {
-    private int m_onScreenButtonGlobalOpacity = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
-    private float m_onScreenButtonGlobalSizeScale = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE;
-    private boolean m_onScreenButtonFriendlyEdge = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE;
+    private static int m_onScreenButtonGlobalOpacity = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
+    private static float m_onScreenButtonGlobalSizeScale = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE;
+    private static boolean m_onScreenButtonFriendlyEdge = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE;
 
     Q3EUiView vw;
     //k
@@ -333,7 +333,7 @@ public class Q3EUiConfig extends Activity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser)
-                    m_onScreenButtonGlobalOpacity = progress;
+                    m_onScreenButtonGlobalOpacity = opacity.getProgress();
                 opacityLabel.setText(String.format("Opacity(%3d)", progress));
             }
 
@@ -371,7 +371,7 @@ public class Q3EUiConfig extends Activity
         if(scale <= 0.0f)
             scale = 1.0f;
         vw.UpdateOnScreenButtonsPosition(friendly);
-        vw.UpdateOnScreenButtonsOpacity(opacity);
+        vw.UpdateOnScreenButtonsOpacity((float)opacity / 100.0f);
         vw.UpdateOnScreenButtonsSize(scale);
         Toast.makeText(Q3EUiConfig.this, "On-screen controls has reset.", Toast.LENGTH_SHORT).show();
     }

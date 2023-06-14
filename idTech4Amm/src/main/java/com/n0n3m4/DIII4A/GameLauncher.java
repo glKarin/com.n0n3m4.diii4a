@@ -408,7 +408,7 @@ public class GameLauncher extends Activity{
     
     private void InitUILayout(Q3EInterface q3ei, boolean friendly, float scale, int opacity)
     {
-        q3ei.defaults_table = Q3EControls.GetDefaultLayout(this, friendly, scale, opacity);
+        q3ei.defaults_table = Q3EControls.GetDefaultLayout(this, friendly, scale, opacity, false);
     }
 	
 	public void InitQ3E()
