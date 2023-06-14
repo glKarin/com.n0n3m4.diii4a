@@ -145,4 +145,23 @@ public class Slider extends Paintable implements TouchListener
         else
             return ((2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height)) && (!((y > cy) && (x > cx)));
     }
+
+    public static Slider Move(Slider tmp, GL10 gl)
+    {
+        Slider news = new Slider(tmp.view, gl, tmp.cx, tmp.cy, tmp.width, tmp.height, tmp.tex_androidid, tmp.lkey, tmp.ckey, tmp.rkey, tmp.style, tmp.alpha);
+        news.tex_ind = tmp.tex_ind;
+        return news;
+    }
+
+    public void Translate(int dx, int dy)
+    {
+        cx += dx;
+        cy += dy;
+    }
+
+    public void SetPosition(int x, int y)
+    {
+        cx = x;
+        cy = y;
+    }
 }

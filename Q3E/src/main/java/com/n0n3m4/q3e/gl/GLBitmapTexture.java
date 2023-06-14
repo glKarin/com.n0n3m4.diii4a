@@ -16,6 +16,9 @@ public final class GLBitmapTexture
 
     public static int GenCircleRingTexture(GL10 gl, int width, float ringWidth, int[] rgba)
     {
+        if(width <= 0)
+            return 0;
+
         final float radius = (float)width / 2.0f;
         final float internalsize = radius - ringWidth;
 
@@ -34,6 +37,9 @@ public final class GLBitmapTexture
 
     public static int GenCircleTexture(GL10 gl, int width, int[] rgba)
     {
+        if(width <= 0)
+            return 0;
+
         final float radius = (float)width / 2.0f;
 
         Bitmap bmp = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
@@ -49,6 +55,9 @@ public final class GLBitmapTexture
 
     public static int GenRectBorderTexture(GL10 gl, int width, int height, float borderWidth, int[] rgba)
     {
+        if(width <= 0)
+            return 0;
+
         if(height <= 0)
             height = width;
         Rect rect = new Rect(0, 0, width, height);

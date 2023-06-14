@@ -159,11 +159,11 @@ public class MenuOverlay extends Paintable implements TouchListener
             {
                 tmp.width += st;
                 tmp.height = (int) (aspect * tmp.width + 0.5f);
-            } else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+            }
+            else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
                 return false;
         }
-
-        if (o instanceof Slider)
+        else if (o instanceof Slider)
         {
             Slider tmp = (Slider) o;
             if (tmp.width <= 0)
@@ -173,11 +173,11 @@ public class MenuOverlay extends Paintable implements TouchListener
             {
                 tmp.width += st;
                 tmp.height = (int) (aspect * tmp.width + 0.5f);
-            } else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+            }
+            else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
                 return false;
         }
-
-        if (o instanceof Joystick)
+        else if (o instanceof Joystick)
         {
             Joystick tmp = (Joystick) o;
             if (tmp.size <= 0)
@@ -185,11 +185,12 @@ public class MenuOverlay extends Paintable implements TouchListener
             if (tmp.size + st > step)
             {
                 tmp.size += st;
-            } else if (tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+            }
+            else if (tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
                 return false;
         }
         //k
-        if (o instanceof Disc)
+        else if (o instanceof Disc)
         {
             Disc tmp = (Disc) o;
             if (tmp.size <= 0)
@@ -199,6 +200,7 @@ public class MenuOverlay extends Paintable implements TouchListener
             else if (tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
                 return false;
         }
+        // else return false;
         ((Q3EUiView) view).RefreshTgt(fngr);
         return true;
     }
@@ -248,7 +250,8 @@ public class MenuOverlay extends Paintable implements TouchListener
                             return tgtresize(false);
                         }
                     };
-            } else
+            }
+            else
             {
                 if (x > cx) rn = new KResultRunnable()
                 {

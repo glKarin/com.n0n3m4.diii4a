@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -184,6 +185,26 @@ public class Q3EUtils
             }
         }
         return safeInsetBottom;
+    }
+
+    public static int GetStatusBarHeight(Activity activity)
+    {
+        int result = 0;
+
+        Resources resources = activity.getResources();
+        int resourceId = resources.getIdentifier("status_bar_height","dimen", "android");
+
+        if (resourceId > 0)
+            result = resources.getDimensionPixelSize(resourceId);
+
+        return result;
+    }
+
+    public static int GetNavigationBarHeight(Activity activity, boolean landscape)
+    {
+        int[] fullSize = GetFullScreenSize(activity);
+        int[] size = GetNormalScreenSize(activity);
+        return fullSize[1] - size[1] - GetEdgeHeight(activity, landscape) - GetEndEdgeHeight(activity, landscape);
     }
 
     public static String GetGameLibDir(Context context)
@@ -360,6 +381,41 @@ public class Q3EUtils
 
     public static int SupportMouse()
     {
+        // return Q3EGlobals.MOUSE_EVENT;
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? Q3EGlobals.MOUSE_EVENT : Q3EGlobals.MOUSE_DEVICE;
+    }
+
+    public static String Join(String d, String...strs)
+    {
+        if(null == strs)
+            return null;
+        if(strs.length == 0)
+            return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < strs.length; i++) {
+            sb.append(strs[i]);
+            if(i < strs.length - 1)
+                sb.append(d);
+        }
+        return sb.toString();
+    }
+
+    public static float parseFloat_s(String str, float...def)
+    {
+        float defVal = null != def && def.length > 0 ? def[0] : 0.0f;
+        if(null == str)
+            return defVal;
+        str = str.trim();
+        if(str.isEmpty())
+            return defVal;
+        try
+        {
+            return Float.parseFloat(str);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return defVal;
+        }
     }
 }

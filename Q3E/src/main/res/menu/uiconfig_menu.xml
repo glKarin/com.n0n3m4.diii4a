@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/uiconfig_menu_opacity"
+        android:title="Setup all opacity"/>
+    <item android:id="@+id/uiconfig_menu_size"
+        android:title="Setup all size"/>
+    <item android:id="@+id/reset_onscreen_controls_btn"
+        android:title="Reset on-screen controls"/>
+    <item android:id="@+id/uiconfig_save"
+        android:title="Save all"/>
+</menu>

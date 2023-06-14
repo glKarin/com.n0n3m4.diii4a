@@ -173,4 +173,23 @@ public class Button extends Paintable implements TouchListener
         }
         return false;
     }
+
+    public static Button Move(Button tmp, GL10 gl)
+    {
+        Button newb = new Button(tmp.view, gl, tmp.cx, tmp.cy, tmp.width, tmp.height, tmp.tex_androidid, tmp.keycode, tmp.style, tmp.canbeheld, tmp.alpha);
+        newb.tex_ind = tmp.tex_ind;
+        return newb;
+    }
+
+    public void Translate(int dx, int dy)
+    {
+        cx += dx;
+        cy += dy;
+    }
+
+    public void SetPosition(int x, int y)
+    {
+        cx = x;
+        cy = y;
+    }
 }

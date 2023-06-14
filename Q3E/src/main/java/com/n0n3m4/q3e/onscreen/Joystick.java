@@ -500,13 +500,15 @@ public class Joystick extends Paintable implements TouchListener
         return verts;
     }
 
-    public static void Move(Joystick target, Joystick src)
+    public static Joystick Move(Joystick tmp, GL10 gl)
     {
-        target.tex_ind = src.tex_ind;
-        target.texd_ind = src.texd_ind;
-        target.m_outerTexture = src.m_outerTexture;
-        target.m_innerTexture = src.m_innerTexture;
-        target.m_borderTexture = src.m_borderTexture;
+        Joystick newj = new Joystick(tmp.view, gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, true, tmp.tex_androidid, true);
+        newj.tex_ind = tmp.tex_ind;
+        newj.texd_ind = tmp.texd_ind;
+        newj.m_outerTexture = tmp.m_outerTexture;
+        newj.m_innerTexture = tmp.m_innerTexture;
+        newj.m_borderTexture = tmp.m_borderTexture;
+        return newj;
     }
 
     public void Translate(int dx, int dy)

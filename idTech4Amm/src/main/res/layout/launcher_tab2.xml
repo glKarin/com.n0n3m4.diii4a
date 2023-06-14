@@ -26,28 +26,6 @@
 			android:text="Configure on-screen controls"/>
 
 		<Button
-			android:id="@+id/reset_onscreen_controls_btn"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textColor="#EF0000"
-			android:textAllCaps="false"
-			android:text="Reset on-screen controls"/>
-
-		<Button
-			android:id="@+id/setup_onscreen_button_opacity"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textAllCaps="false"
-			android:text="Setup all on-screen button opacity"/>
-
-		<Button
-			android:id="@+id/setup_onscreen_button_size"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textAllCaps="false"
-			android:text="Setup all on-screen button size"/>
-
-		<Button
 			android:id="@+id/onscreen_button_setting"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

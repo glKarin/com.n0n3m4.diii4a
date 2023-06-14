@@ -144,4 +144,37 @@ public final class GL
         bmp.recycle();
         return t[0];
     }
+
+    public static int BitmapToGLTexture(GL10 gl, Bitmap bmp, int texture)
+    {
+        if(null == bmp)
+            return 0;
+
+        if(texture <= 0)
+        {
+            return loadGLTexture(gl, bmp);
+        }
+        else
+        {
+            boolean isTexture = true;
+            if (usegles20)
+                isTexture = GLES20.glIsTexture(texture);
+            if(!isTexture)
+                return loadGLTexture(gl, bmp);
+
+            if (usegles20)
+            {
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+            }
+            else
+            {
+                gl.glBindTexture(GL10.GL_TEXTURE_2D, texture);
+            }
+            Bitmap powerof2bmp = Bitmap.createScaledBitmap(bmp, Q3EUtils.nextpowerof2(bmp.getWidth()), Q3EUtils.nextpowerof2(bmp.getHeight()), true);
+
+            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, powerof2bmp, 0);
+            bmp.recycle();
+            return texture;
+        }
+    }
 }
