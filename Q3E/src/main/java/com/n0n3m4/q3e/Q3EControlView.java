@@ -82,6 +82,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private Q3EMouseDevice m_mouseDevice = null;
     private float m_lastTouchPadPosX = -1;
     private float m_lastTouchPadPosY = -1;
+    private int m_requestGrabMouse = 0;
+    private boolean m_allowGrabMouse = false;
 
     public Q3EControlView(Context context)
     {
@@ -996,13 +998,13 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         }
     }
 
-    private int m_requestGrabMouse = 0;
-    private boolean m_allowGrabMouse = false;
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus)
     {
         super.onWindowFocusChanged(hasWindowFocus);
 
+        if(!m_usingMouse)
+            return;
         m_allowGrabMouse = hasWindowFocus;
         if(hasWindowFocus)
         {

@@ -1,0 +1,17 @@
+安卓手机上的毁灭战士3/雷神之锤4/掠食(2006)运行环境
+
+  1. 把你的PC上的游戏数据(包括外部的文件夹)放到启动器中`Game working directory`所设置的目录下(默认为`/sdcard/diii4a`).
+  2. 点击顶部栏的左边图标或右边的游戏名称选择游戏, 然后在选项卡`GENERAL`下的`Game`选择游戏mod.
+  3. 点击`START GAME`开始游戏.
+
+游戏/mod文件夹名称:
+  毁灭战士3: base
+  毁灭战士3 - 邪恶复苏: d3xp
+  毁灭战士3 - 失落的任务: d3le
+  经典毁灭战士3: cdoom
+  Rivensin: rivensin
+  Hardcorps: hardcorps
+
+  雷神之锤4: q4base
+
+  掠食(2006): preybase

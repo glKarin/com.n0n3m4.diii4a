@@ -100,7 +100,7 @@
                 android:title="On-screen buttons position unit"
                 android:key="harm_controls_config_position_unit"
                 android:persistent="true"
-                android:defaultValue="10"
+                android:defaultValue="50"
                 android:inputType="number"
                 android:summary="Config on-screen buttons layout with grid limit(multiple of 5)"
                 />
