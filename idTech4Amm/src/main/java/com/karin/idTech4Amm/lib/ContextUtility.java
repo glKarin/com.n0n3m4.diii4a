@@ -4,11 +4,13 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Environment;
+import android.preference.PreferenceFragment;
 import android.provider.Settings;
 import android.content.Intent;
 import android.net.Uri;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 import android.text.util.Linkify;
 import android.text.method.LinkMovementMethod;
 
+import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.TextHelper;
 
 import java.io.File;
@@ -52,7 +55,7 @@ public final class ContextUtility
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setPositiveButton("OK", new AlertDialog.OnClickListener() {          
+        builder.setPositiveButton(R.string.ok, new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) { 
                     dialog.dismiss();
@@ -160,7 +163,7 @@ public final class ContextUtility
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setCancelable(true);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int v)
                     {
                         if(yes != null)
@@ -168,7 +171,7 @@ public final class ContextUtility
                         dialog.dismiss();
                     }
                 });   
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int v)
                     {
                         if(no != null)
@@ -183,7 +186,7 @@ public final class ContextUtility
                 ((Consumer<AlertDialog.Builder>)arg1).accept(builder);
             else if(arg1 instanceof Runnable)
             {
-                builder.setNeutralButton("Other", new DialogInterface.OnClickListener() {
+                builder.setNeutralButton(R.string.other, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int v)
                         {
                             ((Runnable)arg1).run();
@@ -261,8 +264,6 @@ public final class ContextUtility
         try
         {
             is = context.getAssets().open(path);
-            if(null == is)
-                return false;
             File out = new File(outPath);
             os = new FileOutputStream(out);
 
@@ -305,6 +306,14 @@ public final class ContextUtility
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         activity.startActivity(intent);
         return true;
+    }
+
+    public static Context GetContext(Fragment fragment)
+    {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+            return fragment.getContext();
+        else
+            return fragment.getActivity();
     }
     
 	private ContextUtility() {}

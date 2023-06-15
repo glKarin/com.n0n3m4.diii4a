@@ -94,6 +94,7 @@ public class Q3EUiConfig extends Activity
         SetupUIFlags();
 
         super.onCreate(savedInstanceState);
+        Q3ELang.Locale(this);
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         RelativeLayout.LayoutParams params;
@@ -108,7 +109,7 @@ public class Q3EUiConfig extends Activity
 		params = new RelativeLayout.LayoutParams(px, px);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP | RelativeLayout.CENTER_HORIZONTAL);
 		ImageView btn = new ImageView(this);
-		btn.setAlpha(0.75f);
+		//btn.setAlpha(0.75f);
 		btn.setFocusable(false);
 		btn.setFocusableInTouchMode(false);
 		btn.setImageDrawable(getResources().getDrawable(R.drawable.icon_m_settings));
@@ -188,13 +189,23 @@ public class Q3EUiConfig extends Activity
             SaveAll();
             return true;
         }
+        else if (itemId == R.id.uiconfig_joystick_setting)
+        {
+            OpenJoystickSetting();
+            return true;
+        }
+        else if (itemId == R.id.uiconfig_grid)
+        {
+            OpenOnScreenButtonPositionUnitSetting();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
     private void OpenOnScreenButtonSizeSetting()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Setup all on-screen button size");
+        builder.setTitle(R.string.setup_all_on_screen_button_size);
         View widget = getLayoutInflater().inflate(R.layout.edit_line, null, false);
 
         EditText editText = widget.findViewById(R.id.edit_line_text);
@@ -202,26 +213,26 @@ public class Q3EUiConfig extends Activity
         editText.setEms(10);
         editText.setInputType(EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
         editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
-        editText.setHint("Size's scale factor");
+        editText.setHint(R.string.size_s_scale_factor);
 
         TextView textView = widget.findViewById(R.id.edit_line_label);
-        textView.setText("Scale factor");
+        textView.setText(R.string.scale_factor);
 
         builder.setView(widget);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 m_onScreenButtonGlobalSizeScale = Q3EUtils.parseFloat_s(editText.getText().toString(), Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE);
                 SetupOnScreenButtonSize(m_onScreenButtonGlobalSizeScale);
             }
         })
-                .setNeutralButton("Reset", new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.reset, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         SetupOnScreenButtonSize(Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE);
                     }
                 })
-                .setNegativeButton("Cancel", null);
+                .setNegativeButton(R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -230,20 +241,20 @@ public class Q3EUiConfig extends Activity
     {
         //Q3EControls.SetupAllSize(this, scale, false);
         vw.UpdateOnScreenButtonsSize(scale);
-        Toast.makeText(this, "Setup all on-screen buttons size done.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.setup_all_on_screen_buttons_size_done, Toast.LENGTH_SHORT).show();
     }
 
     private void SetupOnScreenButtonOpacity(int alpha)
     {
         //Q3EControls.SetupAllOpacity(this, alpha, false);
         vw.UpdateOnScreenButtonsOpacity((float)alpha / 100.0f);
-        Toast.makeText(this, "Setup all on-screen buttons opacity done.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.setup_all_on_screen_buttons_opacity_done, Toast.LENGTH_SHORT).show();
     }
 
     private void OpenOnScreenButtonOpacitySetting()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Setup all on-screen button opacity");
+        builder.setTitle(R.string.setup_all_on_screen_button_opacity);
         View seekBarWidget = getLayoutInflater().inflate(R.layout.seek_bar_dialog_preference, null, false);
         builder.setView(seekBarWidget);
         final SeekBar seekBar = seekBarWidget.findViewById(R.id.seek_bar_dialog_preference_layout_seekbar);
@@ -275,20 +286,20 @@ public class Q3EUiConfig extends Activity
                 progress.setTextColor(Color.BLACK);
             }
         });
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 m_onScreenButtonGlobalOpacity = seekBar.getProgress();
                 SetupOnScreenButtonOpacity(m_onScreenButtonGlobalOpacity);
             }
         })
-                .setNeutralButton("Reset", new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.reset, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         SetupOnScreenButtonOpacity(Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
                     }
                 })
-                .setNegativeButton("Cancel", null);
+                .setNegativeButton(R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -296,7 +307,7 @@ public class Q3EUiConfig extends Activity
     public void resetcontrols(View vw)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Reset on-screen controls");
+        builder.setTitle(R.string.reset_on_screen_controls);
         View widget = getLayoutInflater().inflate(R.layout.onscreen_button_reset_dialog, null, false);
 
         EditText sizeEdit = widget.findViewById(R.id.onscreen_button_reset_dialog_size);
@@ -328,13 +339,13 @@ public class Q3EUiConfig extends Activity
         SeekBar opacity = widget.findViewById(R.id.onscreen_button_reset_dialog_opacity);
         TextView opacityLabel = widget.findViewById(R.id.onscreen_button_reset_dialog_opacity_label);
         opacity.setProgress(m_onScreenButtonGlobalOpacity);
-        opacityLabel.setText(String.format("Opacity(%3d)", opacity.getProgress()));
+        opacityLabel.setText(Q3ELang.tr(Q3EUiConfig.this, R.string.opacity_3d, opacity.getProgress()));
         opacity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser)
                     m_onScreenButtonGlobalOpacity = opacity.getProgress();
-                opacityLabel.setText(String.format("Opacity(%3d)", progress));
+                opacityLabel.setText(Q3ELang.tr(Q3EUiConfig.this, R.string.opacity_3d, progress));
             }
 
             @Override
@@ -349,19 +360,19 @@ public class Q3EUiConfig extends Activity
         });
 
         builder.setView(widget);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ResetControlsLayout(m_onScreenButtonFriendlyEdge, m_onScreenButtonGlobalSizeScale, m_onScreenButtonGlobalOpacity);
             }
         })
-                .setNeutralButton("Default", new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string._default, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         ResetControlsLayout(m_onScreenButtonFriendlyEdge, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY);
                     }
                 })
-                .setNegativeButton("Cancel", null);
+                .setNegativeButton(R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -373,12 +384,126 @@ public class Q3EUiConfig extends Activity
         vw.UpdateOnScreenButtonsPosition(friendly);
         vw.UpdateOnScreenButtonsOpacity((float)opacity / 100.0f);
         vw.UpdateOnScreenButtonsSize(scale);
-        Toast.makeText(Q3EUiConfig.this, "On-screen controls has reset.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(Q3EUiConfig.this, R.string.on_screen_controls_has_reset, Toast.LENGTH_SHORT).show();
     }
 
     private void SaveAll()
     {
         vw.SaveAll();
-        Toast.makeText(this, "All on-screen buttons configs saved.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.all_on_screen_buttons_configs_saved, Toast.LENGTH_SHORT).show();
+    }
+
+    public void OpenJoystickSetting()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.joystick_setting);
+        View widget = getLayoutInflater().inflate(R.layout.joystick_setting_dialog, null, false);
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        EditText sizeEdit = widget.findViewById(R.id.launcher_tab2_joystick_release_range);
+        sizeEdit.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_joystick_release_range, 0.0f));
+
+        int innerDeadZone = (int) (mPrefs.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f) * 100);
+        SeekBar dz = widget.findViewById(R.id.launcher_tab2_joystick_inner_dead_zone);
+        dz.setProgress(innerDeadZone);
+
+        TextView dzLabel = widget.findViewById(R.id.launcher_tab2_joystick_inner_dead_zone_label);
+        dzLabel.setText(innerDeadZone + "%");
+        dzLabel.setText(Q3ELang.tr(Q3EUiConfig.this, R.string.opacity_3d, dz.getProgress()));
+        dz.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                dzLabel.setText(Q3ELang.tr(Q3EUiConfig.this, R.string.opacity_3d, progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                dzLabel.setTextColor(Color.RED);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                dzLabel.setTextColor(Color.BLACK);
+            }
+        });
+
+        builder.setView(widget);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SetupJoystick(Q3EUtils.parseFloat_s(sizeEdit.getText().toString(), 0.0f), dz.getProgress() / 100.0f);
+            }
+        })
+                .setNeutralButton(R.string._default, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SetupJoystick(0.0f, 0.0f);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void SetupJoystick(float range, float dz)
+    {
+        if(range <= 1.0f)
+            range = 1.0f;
+        if(dz < 0.0f || dz >= 1.0f)
+            dz = 0.0f;
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, dz)
+                .putFloat(Q3EPreference.pref_harm_joystick_release_range, range)
+                .commit();
+        vw.UpdateJoystick(range, dz);
+    }
+
+    public void OpenOnScreenButtonPositionUnitSetting()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.on_screen_buttons_position_unit);
+        View widget = getLayoutInflater().inflate(R.layout.edit_line, null, false);
+
+        int unit = Q3EPreference.GetIntFromString(this, Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, 0);
+        EditText editText = widget.findViewById(R.id.edit_line_text);
+        editText.setText("" + unit);
+        editText.setEms(10);
+        editText.setInputType(EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+        editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+        editText.setHint(R.string.on_screen_buttons_layout_with_grid_limit_multiple_of_5);
+
+        TextView textView = widget.findViewById(R.id.edit_line_label);
+        textView.setText(R.string.position_unit);
+
+        builder.setView(widget);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SetupOnScreenButtonPositionUnit(Q3EUtils.parseInt_s(editText.getText().toString(), 0));
+            }
+        })
+                .setNeutralButton(R.string.reset, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SetupOnScreenButtonPositionUnit(50);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void SetupOnScreenButtonPositionUnit(int unit)
+    {
+        if(unit < 0)
+            unit = 0;
+        else if(unit % 5 != 0)
+        {
+            Toast.makeText(this, R.string.on_screen_buttons_position_unit_must_is_multiple_of_5_or_0, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Q3EPreference.SetStringFromInt(this, Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, unit);
+        vw.UpdateGrid(unit);
     }
 }

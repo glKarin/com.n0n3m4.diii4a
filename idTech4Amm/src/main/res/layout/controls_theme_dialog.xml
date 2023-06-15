@@ -20,7 +20,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Theme"
+            android:text="@string/theme"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         <Spinner
             android:id="@+id/controls_theme_spinner"

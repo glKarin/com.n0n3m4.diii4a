@@ -56,12 +56,12 @@ import javax.microedition.khronos.opengles.GL11;
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
 
-    private boolean m_usingUnit = false;
     private int m_unit = 0;
     public final int step = Q3EUtils.dip2px(getContext(), 5);
     private FloatBuffer m_gridBuffer = null;
     private int m_numGridLineVertex = 0;
     private Toast m_info;
+    private final Object m_gridLock = new Object();
 
     public Q3EUiView(Context context)
     {
@@ -78,7 +78,6 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         if (null != unit)
         {
             m_unit = Integer.parseInt(unit);
-            m_usingUnit = m_unit > 0;
         }
     }
 
@@ -95,14 +94,17 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 
-        if (null != m_gridBuffer && m_numGridLineVertex > 0)
+        synchronized (m_gridLock)
         {
-            gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-            gl.glLineWidth(1);
-            gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
-            gl.glColor4f(1, 1, 1, 0.382f);
-            gl.glVertexPointer(2, gl.GL_FLOAT, 0, m_gridBuffer);
-            gl.glDrawArrays(gl.GL_LINES, 0, m_numGridLineVertex);
+            if (null != m_gridBuffer && m_numGridLineVertex > 0)
+            {
+                gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+                gl.glLineWidth(1);
+                gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
+                gl.glColor4f(1, 1, 1, 0.382f);
+                gl.glVertexPointer(2, gl.GL_FLOAT, 0, m_gridBuffer);
+                gl.glDrawArrays(gl.GL_LINES, 0, m_numGridLineVertex);
+            }
         }
         gl.glLineWidth(4);
 
@@ -132,8 +134,10 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
-        for (Paintable p : paint_elements)
-            p.Paint((GL11) gl);
+        synchronized (paint_elements) {
+            for (Paintable p : paint_elements)
+                p.Paint((GL11) gl);
+        }
 
         mover.Paint((GL11) gl);
 
@@ -202,7 +206,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
     private boolean NormalizeTgtPosition(FingerUi fn)
     {
-        if (!m_usingUnit)
+        if (m_unit <= 0)
             return false;
 
         if (fn.target instanceof Slider)
@@ -484,7 +488,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
     private void MakeGrid()
     {
-        if (!m_usingUnit)
+        if (m_unit <= 0)
             return;
 
         final int countX = width / m_unit + (width % m_unit != 0 ? 1 : 0);
@@ -543,59 +547,60 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             m_info = null;
         }
 
+        Context context = getContext();
         StringBuilder sb = new StringBuilder();
         if (fn.target instanceof Slider)
         {
             Slider tmp = (Slider) fn.target;
-            sb.append("Position: ")
+            sb.append(Q3ELang.tr(context, R.string.position_))
                     .append(tmp.cx)
                     .append(", ")
                     .append(tmp.cy)
             ;
             sb.append("\n");
-            sb.append("Size: ")
+            sb.append(Q3ELang.tr(context, R.string.size_))
                     .append(tmp.width)
                     .append("x")
                     .append(tmp.height)
             ;
             sb.append("\n");
-            sb.append("Opacity: ")
+            sb.append(Q3ELang.tr(context, R.string.opacity_))
                     .append(String.format("%.1f", tmp.alpha))
             ;
         }
         else if (fn.target instanceof Button)
         {
             Button tmp = (Button) fn.target;
-            sb.append("Position: ")
+            sb.append(Q3ELang.tr(context, R.string.position_))
                     .append(tmp.cx)
                     .append(", ")
                     .append(tmp.cy)
             ;
             sb.append("\n");
-            sb.append("Size: ")
+            sb.append(Q3ELang.tr(context, R.string.size_))
                     .append(tmp.width)
                     .append("x")
                     .append(tmp.height)
             ;
             sb.append("\n");
-            sb.append("Opacity: ")
+            sb.append(Q3ELang.tr(context, R.string.opacity_))
                     .append(String.format("%.1f", tmp.alpha))
             ;
         }
         else if (fn.target instanceof Joystick)
         {
             Joystick tmp = (Joystick) fn.target;
-            sb.append("Position: ")
+            sb.append(Q3ELang.tr(context, R.string.position_))
                     .append(tmp.cx)
                     .append(", ")
                     .append(tmp.cy)
             ;
             sb.append("\n");
-            sb.append("Radius: ")
+            sb.append(Q3ELang.tr(context, R.string.radius_))
                     .append(tmp.size)
             ;
             sb.append("\n");
-            sb.append("Opacity: ")
+            sb.append(Q3ELang.tr(context, R.string.opacity_))
                     .append(String.format("%.1f", tmp.alpha))
             ;
         }
@@ -603,17 +608,17 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         else if (fn.target instanceof Disc)
         {
             Disc tmp = (Disc) fn.target;
-            sb.append("Position: ")
+            sb.append(Q3ELang.tr(context, R.string.position_))
                     .append(tmp.cx)
                     .append(", ")
                     .append(tmp.cy)
             ;
             sb.append("\n");
-            sb.append("Center radius: ")
+            sb.append(Q3ELang.tr(context, R.string.center_radius_))
                     .append(tmp.size)
             ;
             sb.append("\n");
-            sb.append("Opacity: ")
+            sb.append(Q3ELang.tr(context, R.string.opacity_))
                     .append(String.format("%.1f", tmp.alpha))
             ;
         }
@@ -747,6 +752,47 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     tmp.SetPosition(x, y);
                 }
             }
+        }
+
+        //requestRender();
+    }
+
+    public void UpdateJoystick(float range, float dz)
+    {
+        if (!mInit)
+            return;
+
+        if(range <= 1.0f)
+            range = 1.0f;
+        if(dz < 0.0f || dz >= 1.0f)
+            dz = 0.0f;
+
+        synchronized (paint_elements)
+        {
+            Paintable p = paint_elements.get(Q3EGlobals.UI_JOYSTICK);
+            Joystick tmp = (Joystick) p;
+
+            tmp.SetupFullZoneRadiusInEditMode(range);
+            tmp.SetupDeadZoneRadiusInEditMode(dz / 100.0f);
+        }
+
+        //requestRender();
+    }
+
+    public void UpdateGrid(int unit)
+    {
+        if (!mInit)
+            return;
+
+        if(unit < 0)
+            unit = 0;
+
+        synchronized (m_gridLock)
+        {
+            m_numGridLineVertex = 0;
+            m_gridBuffer = null;
+            m_unit = unit;
+            MakeGrid();
         }
 
         //requestRender();

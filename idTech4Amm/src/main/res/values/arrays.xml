@@ -56,6 +56,16 @@
         <item>1</item>
 	</integer-array>
 
+    <string-array name="lang_labels">
+        <item>System</item>
+        <item>English</item>
+    </string-array>
+
+    <string-array name="lang_values">
+        <item>system</item>
+        <item>en</item>
+    </string-array>
+
     <string-array name="key_map_names">
         <item>Mouse 1</item>
         <item>Mouse 2</item>

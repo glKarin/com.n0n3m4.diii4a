@@ -502,7 +502,7 @@ public class Joystick extends Paintable implements TouchListener
 
     public static Joystick Move(Joystick tmp, GL10 gl)
     {
-        Joystick newj = new Joystick(tmp.view, gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, true, tmp.tex_androidid, true);
+        Joystick newj = new Joystick(tmp.view, gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, tmp.m_fullZoneRadius, tmp.m_deadZoneRadius, tmp.m_unfixed, tmp.m_editMode, tmp.tex_androidid);
         newj.tex_ind = tmp.tex_ind;
         newj.texd_ind = tmp.texd_ind;
         newj.m_outerTexture = tmp.m_outerTexture;
@@ -545,5 +545,60 @@ public class Joystick extends Paintable implements TouchListener
     private int NormalizeDegree(int angle)
     {
         return angle < 0 ? angle + 360 : (angle >= 360 ? angle - 360 : angle);
+    }
+
+    public void SetupFullZoneRadiusInEditMode(float fullZonePercent)
+    {
+        if(!m_editMode)
+            return;
+        int r = size / 2;
+        int fullZoneRadius = fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0;
+        if(m_unfixed && fullZoneRadius < r) // if unfixed, min range is circle radius
+            fullZoneRadius = r;
+        if(fullZoneRadius == m_fullZoneRadius)
+            return;
+        this.m_fullZoneRadius = fullZoneRadius;
+        if (m_fullZoneRadius >= r)
+            m_joystickReleaseRange_2 = m_fullZoneRadius * m_fullZoneRadius * 4;
+
+        if(m_fullZoneRadius > 0)
+        {
+            float[] verts;
+            if(m_unfixed)
+            {
+                verts = MakeVertexArray(m_fullZoneRadius * 2.0f);
+                m_borderVertexBuffer = ByteBuffer.allocateDirect(4 * verts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+                m_borderVertexBuffer.put(verts);
+                m_borderVertexBuffer.position(0);
+            }
+            else
+            {
+                verts = MakeVertexArray(m_fullZoneRadius * 2.0f);
+                m_outerVertexBuffer = ByteBuffer.allocateDirect(4 * verts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+                m_outerVertexBuffer.put(verts);
+                m_outerVertexBuffer.position(0);
+            }
+        }
+    }
+
+    public void SetupDeadZoneRadiusInEditMode(float deadZonePercent)
+    {
+        if(!m_editMode)
+            return;
+        int r = size / 2;
+        int deadZoneRadius = deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0;
+        if(deadZoneRadius == m_deadZoneRadius)
+            return;
+        this.m_deadZoneRadius = deadZoneRadius;
+        if (m_deadZoneRadius > 0)
+            m_joystickDeadZone_2 = m_deadZoneRadius * m_deadZoneRadius * 4;
+
+        if(m_fullZoneRadius > 0)
+        {
+            float[] verts = MakeVertexArray(m_deadZoneRadius * 2.0f);
+            m_innerVertexBuffer = ByteBuffer.allocateDirect(4 * verts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+            m_innerVertexBuffer.put(verts);
+            m_innerVertexBuffer.position(0);
+        }
     }
 }

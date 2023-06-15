@@ -2,7 +2,6 @@ package com.karin.idTech4Amm.ui;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
@@ -10,13 +9,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.karin.idTech4Amm.OnScreenButtonConfigActivity;
 import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.Q3ELang;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,12 +34,12 @@ public class ControlsThemeAdapter extends ArrayAdapter_base<ControlsTheme>
             String[] split = str.split(";");
             String name = split[0];
             ControlsTheme theme = new ControlsTheme();
-            theme.name = "Joystick background";
+            theme.name = Q3ELang.tr(getContext(), R.string.joystick_background);
             theme.path = name;
             m_list.add(theme);
             name = split[1];
             theme = new ControlsTheme();
-            theme.name = "Joystick center";
+            theme.name = Q3ELang.tr(getContext(), R.string.joystick_center);
             theme.path = name;
             m_list.add(theme);
         }
@@ -65,7 +63,7 @@ public class ControlsThemeAdapter extends ArrayAdapter_base<ControlsTheme>
             String[] split = str.split(";");
             String name = split[0];
             ControlsTheme theme = new ControlsTheme();
-            theme.name = "Weapon panel";
+            theme.name = Q3ELang.tr(getContext(), R.string.weapon_panel);
             theme.path = name;
             m_list.add(theme);
         }

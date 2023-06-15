@@ -11,9 +11,9 @@ import android.content.DialogInterface;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
-import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3EPreference;
+import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 
 /**
@@ -43,17 +43,13 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
 
     private void OpenCrashInfo()
     {
-        Context activity;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
-            activity = getContext();
-        else
-            activity = getActivity();
+        Context activity = ContextUtility.GetContext(this);
         final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
         String text = mPrefs.getString(KUncaughtExceptionHandler.CONST_PREFERENCE_APP_CRASH_INFO, null);
-        AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(activity, "Last crash info", text != null ? text : "None");
+        AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(activity, Q3ELang.tr(activity, R.string.last_crash_info), text != null ? text : Q3ELang.tr(activity, R.string.none));
         if(text != null)
         {
-            builder.setNeutralButton("Clear", new DialogInterface.OnClickListener() {
+            builder.setNeutralButton(R.string.clear, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id)
                     {

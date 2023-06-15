@@ -15,7 +15,6 @@ import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
-import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -23,6 +22,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import com.n0n3m4.q3e.Q3EInterface;
+import com.n0n3m4.q3e.Q3ELang;
+
 import android.view.ViewGroup;
 import java.util.List;
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ public class OnScreenButtonConfigActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        Q3ELang.Locale(this);
 
         boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false);
         ContextUtility.SetScreenOrientation(this, o ? 0 : 1);
@@ -122,7 +124,7 @@ public class OnScreenButtonConfigActivity extends Activity
 
     private void RestoreConfig()
     {
-        ContextUtility.Confirm(this, "Warning", "Reset on-screen button config?", new Runnable() {
+        ContextUtility.Confirm(this, Q3ELang.tr(this, R.string.warning), Q3ELang.tr(this, R.string.reset_onscreen_button_config), new Runnable() {
                 public void run()
                 {
                     SharedPreferences.Editor mEdtr = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).edit();
@@ -130,7 +132,7 @@ public class OnScreenButtonConfigActivity extends Activity
                     mEdtr.commit();
                     Constants.RestoreDefaultOnScreenConfig(Q3EUtils.q3ei.arg_table, Q3EUtils.q3ei.type_table);
                     LoadConfig();
-                    Toast.makeText(OnScreenButtonConfigActivity.this, "On-screen button config has reset.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OnScreenButtonConfigActivity.this, R.string.onscreen_button_config_has_reset, Toast.LENGTH_SHORT).show();
                 }
             }, null);
     }
@@ -328,11 +330,11 @@ public class OnScreenButtonConfigActivity extends Activity
             switch(data.type)
             {
                 case Q3EGlobals.TYPE_BUTTON:
-                    holdTextView.setText(data.hold ? "Toggle" : "Button");
+                    holdTextView.setText(data.hold ? R.string.toggle : R.string.button);
 					styleTextView.setText(m_styleMap.get(data.style) != null ? m_styleMap.get(data.style) : "");
                     break;
                 case Q3EGlobals.TYPE_SLIDER:
-                    holdTextView.setText("Slider");
+                    holdTextView.setText(R.string.slider);
                     styleTextView.setText(m_sliderStyleMap.get(data.style) != null ? m_sliderStyleMap.get(data.style) : "");
                     break;
                 default:
@@ -441,7 +443,7 @@ public class OnScreenButtonConfigActivity extends Activity
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(btn.name);
         builder.setView(view);
-        builder.setPositiveButton("Save", new AlertDialog.OnClickListener() {
+        builder.setPositiveButton(R.string.save, new AlertDialog.OnClickListener() {
             public void onClick(DialogInterface dialog, int button) {
                 int type = typeValues[typeSpinner.getSelectedItemPosition()];
                 btn.type = type;
@@ -465,8 +467,8 @@ public class OnScreenButtonConfigActivity extends Activity
                 SaveConfig();
             }
         });
-        builder.setNegativeButton("Cancel", null);
-        builder.setNeutralButton("Restore", null);
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.setNeutralButton(R.string.restore, null);
         AlertDialog dialog = builder.create();
         dialog.show();
         dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
@@ -502,9 +504,9 @@ public class OnScreenButtonConfigActivity extends Activity
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Weapon panel keys");
+        builder.setTitle(R.string.weapon_panel_keys);
         builder.setMultiChoiceItems(Keys, states, null);
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id)
                 {
                     final ListView lst = ((AlertDialog)dialog).getListView();
@@ -526,7 +528,7 @@ public class OnScreenButtonConfigActivity extends Activity
                     mPrefs.edit().putString(Q3EPreference.WEAPON_PANEL_KEYS, keyStr).commit();
                 }
             });
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton(R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
 	}

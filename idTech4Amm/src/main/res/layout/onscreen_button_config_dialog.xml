@@ -25,7 +25,7 @@
 			android:layout_height="match_parent"
 			android:layout_weight="1"
 			android:gravity="center_vertical"
-            android:text="Toggle key"
+            android:text="@string/toggle_key"
 			android:textAppearance="?android:attr/textAppearanceMedium"/>
 
 		<CheckBox
@@ -46,7 +46,7 @@
             android:layout_height="match_parent"
 			android:layout_weight="1"
 			android:gravity="center_vertical"
-            android:text="Touch type"
+            android:text="@string/touch_type"
 			android:textAppearance="?android:attr/textAppearanceMedium"/>
 		<Spinner
 			android:id="@+id/onscreen_button_config_dialog_style"
@@ -68,7 +68,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Slider type"
+            android:text="@string/slider_type"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         <Spinner
             android:id="@+id/onscreen_button_config_dialog_slider_style"
@@ -90,7 +90,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Key"
+            android:text="@string/key"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         <Spinner
             android:id="@+id/onscreen_button_config_dialog_key"
@@ -112,7 +112,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Key 2"
+            android:text="@string/key_2"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         <Spinner
             android:id="@+id/onscreen_button_config_dialog_key2"
@@ -134,7 +134,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Key 3"
+            android:text="@string/key_3"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         <Spinner
             android:id="@+id/onscreen_button_config_dialog_key3"

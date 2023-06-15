@@ -311,6 +311,15 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2023-06-10", 31,
+                        "Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.",
+                        "Add setup all on-screen buttons size in tab `CONTROLS`.",
+                        "Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.",
+                        "Support unfixed-position joystick and inner dead zone.",
+                        "Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.",
+                        "New mouse support implement."
+                ),
+
                 ChangeLog.Create("2023-05-25", 30,
                         "Add function key toolbar for soft input method(default disabled, in Settings).",
                         "Add joystick release range setting in tab `CONTROLS`. The value is joystick radius's multiple, 0 to disable.",

@@ -43,7 +43,7 @@ public class DebugDialog extends DialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("Debug");
+        dialog.setTitle(R.string._debug);
         return dialog;
     }
 

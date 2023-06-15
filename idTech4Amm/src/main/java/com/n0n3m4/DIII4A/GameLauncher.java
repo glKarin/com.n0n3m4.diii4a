@@ -69,6 +69,7 @@ import com.karin.idTech4Amm.network.CheckUpdate;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.ui.ControlsThemeAdapter;
 import com.n0n3m4.q3e.Q3EPreference;
+import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.FileBrowserDialog;
@@ -471,15 +472,15 @@ public class GameLauncher extends Activity{
 	public void support(View vw)
 	{
         AlertDialog.Builder bldr=new AlertDialog.Builder(this);
-        bldr.setTitle("Do you want to support the developer?");
-		bldr.setPositiveButton("Donate to F-Droid", new AlertDialog.OnClickListener() {
+        bldr.setTitle(R.string.do_you_want_to_support_the_developer);
+		bldr.setPositiveButton(Q3ELang.tr(this, R.string.donate_to) + "F-Droid", new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 						ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/donate/");
                     dialog.dismiss();
                 }
             });
-		bldr.setNeutralButton("More apps in F-Droid", new AlertDialog.OnClickListener() {
+		bldr.setNeutralButton(Q3ELang.tr(this, R.string.more_apps_in) + "F-Droid", new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 				if(!ContextUtility.OpenApp(GameLauncher.this, "org.fdroid.fdroid"))
@@ -509,7 +510,7 @@ public class GameLauncher extends Activity{
                 }
             });
 		 */
-		bldr.setNegativeButton("Don't ask", new AlertDialog.OnClickListener() {
+		bldr.setNegativeButton(R.string.dont_ask, new AlertDialog.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
@@ -779,8 +780,8 @@ public class GameLauncher extends Activity{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Debug text history")
         .setMessage(MakeDebugTextHistoryText(m_revTextHistory))
-        .setPositiveButton("OK", null)
-            .setNegativeButton("Clear", new DialogInterface.OnClickListener() {
+        .setPositiveButton(R.string.ok, null)
+            .setNegativeButton(R.string.clear, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
                 	if(null != m_debugTextHistory)
@@ -877,7 +878,7 @@ public class GameLauncher extends Activity{
         V.edt_fs_game.setText(game);
         V.rg_fs_game.setEnabled(!on);
         V.rg_fs_q4game.setEnabled(!on);
-        V.fs_game_user.setText(on ? "Mod: " : "User mod");
+        V.fs_game_user.setText(on ? R.string.mod_ : R.string.user_mod);
         V.launcher_tab1_game_lib_button.setEnabled(on);
         V.edt_fs_game.setEnabled(on);
         V.launcher_tab1_user_game_layout.setVisibility(on ? View.VISIBLE : View.GONE);
@@ -885,7 +886,9 @@ public class GameLauncher extends Activity{
 	
 	public void onCreate(Bundle savedInstanceState) 
 	{		
-		super.onCreate(savedInstanceState);				
+		super.onCreate(savedInstanceState);
+		Q3ELang.Locale(this);
+
         //k
         KUncaughtExceptionHandler.HandleUnexpectedException(this);
         setTitle(R.string.app_title);
@@ -893,8 +896,10 @@ public class GameLauncher extends Activity{
         ContextUtility.SetScreenOrientation(this, mPrefs.getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false) ? 0 : 1);
         
 		setContentView(R.layout.main);
-		
-        getActionBar().setDisplayHomeAsUpEnabled(true);						
+
+		ActionBar actionBar = getActionBar();
+		if(null != actionBar)
+			actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		InitQ3E();
 		Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
@@ -904,9 +909,9 @@ public class GameLauncher extends Activity{
 		
 		TabHost th=(TabHost)findViewById(R.id.tabhost);
 		th.setup();					
-	    th.addTab(th.newTabSpec("tab1").setIndicator("General").setContent(R.id.launcher_tab1));	    
-	    th.addTab(th.newTabSpec("tab2").setIndicator("Controls").setContent(R.id.launcher_tab2));	    
-	    th.addTab(th.newTabSpec("tab3").setIndicator("Graphics").setContent(R.id.launcher_tab3));							
+	    th.addTab(th.newTabSpec("tab1").setIndicator(Q3ELang.tr(this, R.string.general)).setContent(R.id.launcher_tab1));
+	    th.addTab(th.newTabSpec("tab2").setIndicator(Q3ELang.tr(this, R.string.controls)).setContent(R.id.launcher_tab2));
+	    th.addTab(th.newTabSpec("tab3").setIndicator(Q3ELang.tr(this, R.string.graphics)).setContent(R.id.launcher_tab3));
 
 		V.Setup();
 
@@ -1075,10 +1080,6 @@ public class GameLauncher extends Activity{
         V.launcher_tab2_enable_gyro.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.launcher_tab2_gyro_x_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
         V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
-		V.launcher_tab2_joystick_release_range.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_joystick_release_range, 0.0f));
-		int innerDeadZone = (int) (mPrefs.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f) * 100);
-		V.launcher_tab2_joystick_inner_dead_zone.setProgress(innerDeadZone);
-		V.launcher_tab2_joystick_inner_dead_zone_label.setText(innerDeadZone + "%");
         UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
         V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {           
                 public void onTextChanged(CharSequence s, int start, int before, int count) {}           
@@ -1100,43 +1101,6 @@ public class GameLauncher extends Activity{
                         .commit();
                 }
             });
-		V.launcher_tab2_joystick_release_range.addTextChangedListener(new TextWatcher() {
-			public void onTextChanged(CharSequence s, int start, int before, int count) {}
-			public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
-			public void afterTextChanged(Editable s) {
-				String value = s.length() == 0 ? "0.0" : s.toString();
-				float v = Q3EUtils.parseFloat_s(value, 0.0f);
-				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putFloat(Q3EPreference.pref_harm_joystick_release_range, v)
-						.commit();
-				Q3EUtils.q3ei.joystick_release_range = v;
-			}
-		});
-		V.launcher_tab2_joystick_inner_dead_zone.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
-		{
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-			{
-				float v = (float) progress / 100.0f;
-				Q3EUtils.q3ei.joystick_inner_dead_zone = v;
-				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, v)
-						.commit();
-				V.launcher_tab2_joystick_inner_dead_zone_label.setText(progress + "%");
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar)
-			{
-				V.launcher_tab2_joystick_inner_dead_zone_label.setTextColor(Color.RED);
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar)
-			{
-				V.launcher_tab2_joystick_inner_dead_zone_label.setTextColor(Color.BLACK);
-			}
-		});
 		V.auto_quick_load.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
 
@@ -1294,7 +1258,7 @@ public class GameLauncher extends Activity{
 
 			case R.id.main_menu_save_settings:
 				WritePreferences();
-				Toast.makeText(this, "Preferences settings saved!", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.preferences_settings_saved, Toast.LENGTH_LONG).show();
 				return true;
 			case R.id.main_menu_backup_settings:
 				RequestBackupPreferences();
@@ -1345,12 +1309,12 @@ public class GameLauncher extends Activity{
     
     private void OpenChanges()
     {
-        ContextUtility.OpenMessageDialog(this, "Changes", TextHelper.GetChangesText());
+        ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.changes), TextHelper.GetChangesText());
     }
 
     private void OpenAbout()
     {
-        ContextUtility.OpenMessageDialog(this, "About " + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetAboutText(this));
+        ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.about) + " " + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetAboutText(this));
     }
   
     private void OpenRuntimeLog()
@@ -1359,7 +1323,7 @@ public class GameLauncher extends Activity{
         String text = FileUtility.file_get_contents(path);
         if (text != null)
         {
-            ContextUtility.OpenMessageDialog(this, "Last runtime log", text);
+            ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.last_runtime_log), text);
         }
         else
         {
@@ -1414,14 +1378,14 @@ public class GameLauncher extends Activity{
         }
         
         FileBrowserDialog dialog = new FileBrowserDialog(this);
-        dialog.SetupUI("Chooser data folder", gamePath);
-        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new AlertDialog.OnClickListener() {          
+        dialog.SetupUI(Q3ELang.tr(this, R.string.choose_data_folder), gamePath);
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, Q3ELang.tr(this, R.string.cancel), new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) { 
                     dialog.dismiss();
                 }
             });
-        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Choose current directory", new AlertDialog.OnClickListener() {          
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, Q3ELang.tr(this, R.string.choose_current_directory), new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) { 
 					V.edt_path.setText(((FileBrowserDialog)dialog).Path());
@@ -1469,14 +1433,13 @@ public class GameLauncher extends Activity{
 		mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EUtils.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
 		mEdtr.putBoolean(Q3EPreference.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_multithreading, V.multithreading.isChecked());
-		mEdtr.putFloat(Q3EPreference.pref_harm_joystick_release_range, Q3EUtils.parseFloat_s(V.launcher_tab2_joystick_release_range.getText().toString(), 0.0f));
 		mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
 		mEdtr.commit();
     }
 
     private void OpenHelp()
     {
-        ContextUtility.OpenMessageDialog(this, "Help", TextHelper.GetHelpText());
+        ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.help), TextHelper.GetHelpText());
     }
     
     private void OpenUpdate()
@@ -1556,7 +1519,7 @@ public class GameLauncher extends Activity{
                 dialog.dismiss();
             }
         });
-        builder.setNeutralButton("Unset", new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(R.string.unset, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int p)
             {
                 preference.edit().putString(PreferenceKey, "").commit();
@@ -1742,16 +1705,16 @@ public class GameLauncher extends Activity{
 		switch(requestCode)
 		{
 			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE:
-				opt = "Start game";
+				opt = Q3ELang.tr(this, R.string.start_game);
 				break;
 			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE:
-				opt = "Edit config file";
+				opt = Q3ELang.tr(this, R.string.edit_config_file);
 				break;
 			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE:
-				opt = "Choose game folder";
+				opt = Q3ELang.tr(this, R.string.choose_data_folder);
 				break;
 			default:
-				opt = "Operation";
+				opt = Q3ELang.tr(this, R.string.operation);
 				break;
 		}
 		StringBuilder sb = new StringBuilder();
@@ -1781,13 +1744,13 @@ public class GameLauncher extends Activity{
 
     private void OpenCvarListDetail()
     {
-        ContextUtility.OpenMessageDialog(this, "Special Cvar List", TextHelper.GetCvarText());
+        ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.special_cvar_list), TextHelper.GetCvarText());
     }
     
     private void SetGame(String game)
     {
 		Q3EUtils.q3ei.SetupGame(game); //k armv7-a only support neon now
-        V.launcher_tab1_edit_doomconfig.setText("Edit " + Q3EUtils.q3ei.config_name);
+        V.launcher_tab1_edit_doomconfig.setText(getString(R.string.edit_) + Q3EUtils.q3ei.config_name);
         if(null != V.main_menu_game)
             V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
         ActionBar actionBar = getActionBar();
@@ -1815,9 +1778,12 @@ public class GameLauncher extends Activity{
 			iconId = R.drawable.d3_icon;
 			d3Visible = true;
 		}
-        actionBar.setBackgroundDrawable(new ColorDrawable(res.getColor(colorId)));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-			actionBar.setHomeAsUpIndicator(iconId);
+		if(null != actionBar)
+		{
+			actionBar.setBackgroundDrawable(new ColorDrawable(res.getColor(colorId)));
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+				actionBar.setHomeAsUpIndicator(iconId);
+			}
 		}
 		V.rg_fs_game.setVisibility(d3Visible ? View.VISIBLE : View.GONE);
         V.rg_fs_q4game.setVisibility(q4Visible ? View.VISIBLE : View.GONE);
@@ -1984,14 +1950,14 @@ public class GameLauncher extends Activity{
 						startActivity(new Intent(GameLauncher.this, Q3EMain.class));
 					}
 				})
-				.setPositiveButton("Start", new DialogInterface.OnClickListener() {
+				.setPositiveButton(R.string.start, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int p) {
 						finish();
 						startActivity(new Intent(GameLauncher.this, Q3EMain.class));
 					}
 				})
-				.setNegativeButton("Cancel", null)
-				.setNeutralButton("Extract resource", null)
+				.setNegativeButton(R.string.cancel, null)
+				.setNeutralButton(R.string.extract_resource, null)
 				.create();
 		dialog.setOnShowListener(new DialogInterface.OnShowListener() {
 			@Override
@@ -2033,7 +1999,7 @@ public class GameLauncher extends Activity{
 					ExtractQuake4PatchResource(Types[p]);
                 }
             })
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.cancel, null)
             .setPositiveButton("Extract all", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
@@ -2176,10 +2142,10 @@ public class GameLauncher extends Activity{
 		if(null != m_handlerThread || null != m_handler || null != m_progressDialog)
 			return;
 		ProgressDialog dialog = new ProgressDialog(this);
-		dialog.setTitle("Check for update");
+		dialog.setTitle(R.string.check_for_update);
 		dialog.setMessage("Network for GitHub......");
 		dialog.setCancelable(false);
-		dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+		dialog.setButton(DialogInterface.BUTTON_NEGATIVE, Q3ELang.tr(this, R.string.cancel), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.cancel();
@@ -2253,7 +2219,7 @@ public class GameLauncher extends Activity{
 			CharSequence msg = TextHelper.GetDialogMessage(sb.toString());
 			builder.setTitle("New update release(" + release + ")")
 					.setMessage(msg)
-			.setPositiveButton("Download", new DialogInterface.OnClickListener() {
+			.setPositiveButton(R.string.download, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					ContextUtility.OpenUrlExternally(GameLauncher.this, apk_url);
@@ -2419,7 +2385,7 @@ public class GameLauncher extends Activity{
 	private void OpenOnScreenButtonThemeSetting()
 	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Controls theme");
+		builder.setTitle(R.string.controls_theme);
 		View widget = getLayoutInflater().inflate(R.layout.controls_theme_dialog, null, false);
 		LinkedHashMap<String, String> schemes = Q3EUtils.GetControlsThemes(this);
 
@@ -2454,13 +2420,13 @@ public class GameLauncher extends Activity{
 										  });
 
 		builder.setView(widget);
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				preferences.edit().putString(Q3EPreference.CONTROLS_THEME, theme[0]).commit();
 			}
 		})
-				.setNegativeButton("Cancel", null);
+				.setNegativeButton(R.string.cancel, null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
@@ -2515,10 +2481,7 @@ public class GameLauncher extends Activity{
 		public RadioGroup rg_fs_preygame;
 		public CheckBox multithreading;
 		public RadioGroup rg_s_driver;
-		public EditText launcher_tab2_joystick_release_range;
 		public CheckBox launcher_tab2_joystick_unfixed;
-		public SeekBar launcher_tab2_joystick_inner_dead_zone;
-		public TextView launcher_tab2_joystick_inner_dead_zone_label;
 		public Button setup_onscreen_button_theme;
 		public CheckBox using_mouse;
 		public TextView tv_mprefs;
@@ -2572,10 +2535,7 @@ public class GameLauncher extends Activity{
 			rg_fs_preygame = findViewById(R.id.rg_fs_preygame);
 			multithreading = findViewById(R.id.multithreading);
 			rg_s_driver = findViewById(R.id.rg_s_driver);
-			launcher_tab2_joystick_release_range = findViewById(R.id.launcher_tab2_joystick_release_range);
 			launcher_tab2_joystick_unfixed = findViewById(R.id.launcher_tab2_joystick_unfixed);
-			launcher_tab2_joystick_inner_dead_zone = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone);
-			launcher_tab2_joystick_inner_dead_zone_label = findViewById(R.id.launcher_tab2_joystick_inner_dead_zone_label);
 			setup_onscreen_button_theme = findViewById(R.id.setup_onscreen_button_theme);
 			using_mouse = findViewById(R.id.using_mouse);
 			tv_mprefs = findViewById(R.id.tv_mprefs);

@@ -15,7 +15,7 @@
 			android:layout_height="match_parent"
 			android:layout_weight="1"
 			android:gravity="center_vertical"
-			android:text="Friendly padding"
+			android:text="@string/friendly_padding"
 			android:textAppearance="?android:attr/textAppearanceMedium"/>
 		<CheckBox
 			android:id="@+id/onscreen_button_reset_dialog_friendly"
@@ -34,14 +34,14 @@
 			android:layout_height="match_parent"
 			android:layout_weight="1"
 			android:gravity="center_vertical"
-            android:text="Size's scale factor"
+            android:text="@string/size_s_scale_factor"
 			android:textAppearance="?android:attr/textAppearanceMedium"/>
 
 		<EditText
 			android:id="@+id/onscreen_button_reset_dialog_size"
 			android:inputType="numberDecimal|textNoSuggestions"
 			android:ems="10"
-			android:hint="Scale factor"
+			android:hint="@string/scale_factor"
 			android:imeOptions="flagNoExtractUi"
 			android:text="0.0"
 			android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
 			android:gravity="center_vertical"
-			android:text="Opacity"
+			android:text="@string/_opacity"
 			android:textAppearance="?android:attr/textAppearanceMedium"/>
 
 		<SeekBar

@@ -7,7 +7,7 @@
 
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="wrap_content"
 		android:orientation="vertical">
 
 		<TextView
@@ -15,7 +15,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textSize="16sp"
-			android:text="Note: Gamepads/Keyboards must be configured in-game (like on PC), not here"/>
+			android:text="@string/note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here"/>
 
 		<Button
 			android:id="@+id/configure_onscreen_controls_btn"
@@ -23,147 +23,39 @@
 			android:layout_height="wrap_content"
 			android:onClick="controls"
 			android:textAllCaps="false"
-			android:text="Configure on-screen controls"/>
+			android:text="@string/configure_on_screen_controls"/>
 
 		<Button
 			android:id="@+id/onscreen_button_setting"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:textAllCaps="false"
-			android:text="On-screen button setting"/>
+			android:text="@string/on_screen_button_setting"/>
 
 		<Button
 			android:id="@+id/setup_onscreen_button_theme"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:textAllCaps="false"
-			android:text="Setup on-screen button theme"/>
+			android:text="@string/setup_on_screen_button_theme"/>
 
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="vertical"
-			>
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:gravity="center_vertical"
-				android:text="Joystick settings:"
-				android:textColor="#FF000000"
-				android:paddingTop="5dp"
-				android:paddingBottom="5dp"
-				android:textAppearance="?android:attr/textAppearanceSmall"/>
 		<CheckBox
 			android:id="@+id/smoothjoy"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Smooth joystick"/>
+			android:text="@string/smooth_joystick"/>
 
-			<CheckBox
-				android:id="@+id/launcher_tab2_joystick_unfixed"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="Unfixed joystick"/>
-
-		<LinearLayout
-			android:layout_width="match_parent"
+		<CheckBox
+			android:id="@+id/launcher_tab2_joystick_unfixed"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_gravity="center_vertical"
-			android:orientation="horizontal"
-			android:paddingLeft="10dp"
-			android:paddingRight="10dp"
-			>
-			<TextView
-				android:layout_width="0dp"
-				android:layout_height="match_parent"
-				android:layout_weight="1"
-				android:gravity="center_vertical"
-					android:text="Joystick outer range(radius's multiple, 0 - disable)"
-				android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-			<EditText
-				android:id="@+id/launcher_tab2_joystick_release_range"
-				android:inputType="numberDecimal|textNoSuggestions"
-				android:ems="10"
-				android:hint="Radius's multiple"
-				android:imeOptions="flagNoExtractUi"
-				android:text="0.0"
-				android:layout_width="80dp"
-				android:layout_height="wrap_content"
-				android:layout_gravity="right|center_vertical"
-				android:autofillHints="" />
-		</LinearLayout>
-
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:orientation="vertical"
-				android:paddingLeft="20dp"
-				android:paddingRight="10dp"
-				>
-				<TextView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:gravity="center_vertical"
-					android:text="- Enable `Unfixed joystick`: the range is joystick allowed to start pressing(if less than 1.0, using joystick's radius)."
-					android:textAppearance="?android:attr/textAppearanceSmall"/>
-				<TextView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:gravity="center_vertical"
-					android:text="- Disable `Unfixed joystick`: the range is joystick valid motion area."
-					android:textAppearance="?android:attr/textAppearanceSmall"/>
-			</LinearLayout>
-
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center_vertical"
-				android:orientation="vertical"
-				android:paddingLeft="10dp"
-				android:paddingRight="10dp"
-				>
-				<LinearLayout
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_gravity="center_vertical"
-					android:orientation="horizontal"
-					>
-					<TextView
-						android:layout_width="0dp"
-						android:layout_height="wrap_content"
-						android:layout_weight="1"
-						android:layout_gravity="center_vertical"
-						android:text="Joystick inner dead zone(radius's percentage, 0 - disable)"
-						android:textAppearance="?android:attr/textAppearanceSmall"/>
-					<TextView
-						android:id="@+id/launcher_tab2_joystick_inner_dead_zone_label"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_gravity="center_vertical"
-						android:text="10%"
-						android:textColor="#FF000000"
-						android:textAppearance="?android:attr/textAppearanceSmall"/>
-				</LinearLayout>
-
-				<SeekBar
-					android:id="@+id/launcher_tab2_joystick_inner_dead_zone"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="5dp"
-					android:layout_marginBottom="5dp"
-					android:layout_gravity="right|center_vertical"
-					android:max="100"
-					android:progress="10"
-					/>
-			</LinearLayout>
-		</LinearLayout>
+			android:text="@string/unfixed_joystick"/>
 
 		<CheckBox
 			android:id="@+id/mapvol"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Map volume keys"/>
+			android:text="@string/map_volume_keys"/>
 
 		<LinearLayout
 			android:id="@+id/launcher_tab2_volume_map_config_layout"
@@ -186,7 +78,7 @@
 					android:layout_height="match_parent"
 					android:layout_weight="1"
 					android:gravity="center_vertical"
-					android:text="Volume Up"
+					android:text="@string/volume_up"
 					android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 				<Spinner
@@ -212,7 +104,7 @@
 					android:layout_height="match_parent"
 					android:layout_weight="1"
 					android:gravity="center_vertical"
-					android:text="Volume Down"
+					android:text="@string/volume_down"
 					android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 				<Spinner
@@ -230,13 +122,13 @@
 			android:id="@+id/secfinglmb"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Multitouch shoot (left mouse button click on a second touch)"/>
+			android:text="@string/multitouch_shoot_left_mouse_button_click_on_a_second_touch"/>
 
         <CheckBox
             android:id="@+id/launcher_tab2_enable_gyro"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Enable gyroscope"/>
+            android:text="@string/enable_gyroscope"/>
 
         <LinearLayout
             android:id="@+id/launcher_tab2_enable_gyro_layout"
@@ -256,14 +148,14 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:text="X-Axis sensitivity"
+                    android:text="@string/x_axis_sensitivity"
                     android:textAppearance="?android:attr/textAppearanceSmall"/>
 
                 <EditText
                     android:id="@+id/launcher_tab2_gyro_x_axis_sens"
                     android:inputType="numberDecimal|textNoSuggestions"
                     android:ems="10"
-                    android:hint="Input X-Axis sensitivity for gyroscope."
+                    android:hint="@string/x_axis_sensitivity_of_gyroscope"
                     android:imeOptions="flagNoExtractUi"
                     android:text="18.0"
                     android:layout_width="wrap_content"
@@ -282,14 +174,14 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:text="Y-Axis sensitivity"
+                    android:text="@string/y_axis_sensitivity"
                     android:textAppearance="?android:attr/textAppearanceSmall"/>
 
                 <EditText
                     android:id="@+id/launcher_tab2_gyro_y_axis_sens"
                     android:inputType="numberDecimal|textNoSuggestions"
                     android:ems="10"
-                    android:hint="Input Y-Axis sensitivity for gyroscope."
+                    android:hint="@string/y_axis_sensitivity_of_gyroscope"
                     android:imeOptions="flagNoExtractUi"
                     android:text="18.0"
                     android:layout_width="wrap_content"
@@ -303,14 +195,14 @@
 			android:id="@+id/hideonscr"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Hide onscreen buttons"
+			android:text="@string/hide_onscreen_buttons"
 			/>
 
 		<CheckBox
 			android:id="@+id/using_mouse"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Using mouse(not need root on Android 8+)"
+			android:text="@string/using_mouse_not_need_root_on_android_8"
 			/>
 
 		<LinearLayout
@@ -324,7 +216,7 @@
 				android:id="@+id/tv_mprefs"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Mouse settings:"/>
+				android:text="@string/mouse_settings"/>
 
 			<LinearLayout
 				android:id="@+id/layout_mouse_device"
@@ -336,7 +228,7 @@
 					android:id="@+id/detectmouse"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Autodetect mouse"/>
+					android:text="@string/autodetect_mouse"/>
 
 				<LinearLayout
 					android:id="@+id/layout_manualmouseconfig"
@@ -348,7 +240,7 @@
 						android:id="@+id/tv_evnt"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Mouse event device:"/>
+						android:text="@string/mouse_event_device"/>
 
 					<EditText
 						android:id="@+id/edt_mouse"
@@ -363,7 +255,7 @@
 					android:id="@+id/tv_curpos"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Mouse cursor position:"/>
+					android:text="@string/mouse_cursor_position"/>
 
 				<RadioGroup
 					android:id="@+id/rg_curpos"
@@ -374,26 +266,26 @@
 						android:id="@+id/cur_tl"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Top left corner"/>
+						android:text="@string/top_left_corner"/>
 
 					<RadioButton
 						android:id="@+id/cur_tr"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Top right corner"/>
+						android:text="@string/top_right_corner"/>
 
 					<RadioButton
 						android:id="@+id/cur_bl"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Bottom left corner"/>
+						android:text="@string/bottom_left_corner"/>
 
 					<RadioButton
 						android:id="@+id/cur_br"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:checked="true"
-						android:text="Bottom right corner"/>
+						android:text="@string/bottom_right_corner"/>
 				</RadioGroup>
 
 			</LinearLayout>

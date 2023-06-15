@@ -7,8 +7,8 @@ import java.util.Arrays;
  */
 public final class Constants
 {
-    public static final int CONST_UPDATE_RELEASE = 31;
-    public static final String CONST_RELEASE = "2023-06-10";
+    public static final int CONST_UPDATE_RELEASE = 32;
+    public static final String CONST_RELEASE = "2023-06-30";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -22,12 +22,8 @@ public final class Constants
     public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
 	public static final String[] CONST_CHANGES = {
-            "Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.",
-            "Add setup all on-screen buttons size in tab `CONTROLS`.",
-            "Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.",
-            "Support unfixed-position joystick and inner dead zone.",
-            "Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/" + CONST_PACKAGE + "/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.",
-            "New mouse support implement.",
+            "Add `zh` language.",
+            "Move some on-screen settings to `Configure on-screen controls` page.",
 	};
 
 	// Launcher preference keys

@@ -6,8 +6,10 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUiView;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.R;
 import com.n0n3m4.q3e.gl.GL;
 import com.n0n3m4.q3e.karin.KResultRunnable;
 
@@ -75,7 +77,7 @@ public class MenuOverlay extends Paintable implements TouchListener
         Canvas c = new Canvas(bmp);
         Paint p = new Paint();
         p.setTextSize(1);
-        String alphastr = "- opacity +";
+        String alphastr = "- " + Q3ELang.tr(view.getContext(), R.string.opacity) + " +";
         while (p.measureText(alphastr) < width)
             p.setTextSize(p.getTextSize() + 1);
         p.setTextSize(p.getTextSize() - 1);
@@ -86,7 +88,7 @@ public class MenuOverlay extends Paintable implements TouchListener
         p.setARGB(120, 255, 255, 255);
         c.drawRect(new Rect(0, 0, width, height), p);
         p.setARGB(255, 255, 255, 255);
-        String sizestr = "- size +";
+        String sizestr = "- " + Q3ELang.tr(view.getContext(), R.string.size) + " +";
         Rect bnd = new Rect();
 
         p.setStyle(Paint.Style.FILL);

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="setup_all_opacity">Setup all opacity</string>
+    <string name="setup_all_size">Setup all size</string>
+    <string name="reset_on_screen_controls">Reset on-screen controls</string>
+    <string name="save_all">Save all</string>
+    <string name="opacity">opacity</string>
+    <string name="size">size</string>
+    <string name="setup_all_on_screen_button_size">Setup all on-screen button size</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="reset">Reset</string>
+    <string name="_default">Default</string>
+    <string name="all_on_screen_buttons_configs_saved">All on-screen buttons configs saved.</string>
+    <string name="on_screen_controls_has_reset">On-screen controls has reset.</string>
+    <string name="opacity_3d">Opacity(%3d)</string>
+    <string name="setup_all_on_screen_button_opacity">Setup all on-screen button opacity</string>
+    <string name="setup_all_on_screen_buttons_opacity_done">Setup all on-screen buttons opacity done.</string>
+    <string name="setup_all_on_screen_buttons_size_done">Setup all on-screen buttons size done.</string>
+    <string name="size_s_scale_factor">Size\'s scale factor</string>
+    <string name="scale_factor">Scale factor</string>
+    <string name="friendly_padding">Friendly padding</string>
+    <string name="_opacity">Opacity</string>
+    <string name="click_back_again_to_exit">Click back again to exit......</string>
+    <string name="position_">Position:</string>
+    <string name="size_">Size:</string>
+    <string name="opacity_">Opacity:</string>
+    <string name="radius_">Radius:</string>
+    <string name="center_radius_">Center radius:</string>
+    <string name="game_files_weren_t_found_put_game_files_to">Game files weren\'t found: put game files to</string>
+    <string name="joystick_setting">Joystick setting</string>
+    <string name="joystick_outer_range_radius_s_multiple_0_disable">Joystick outer range(radius\'s multiple, 0 - disable)</string>
+    <string name="radius_s_multiple">Radius\'s multiple</string>
+    <string name="enable_unfixed_joystick_the_range_is_joystick_allowed_to_start_pressing_if_less_than_1_0_using_joystick_s_radius">- Enable `Unfixed joystick`: the range is joystick allowed to start pressing(if less than 1.0, using joystick\'s radius).</string>
+    <string name="disable_unfixed_joystick_the_range_is_joystick_valid_motion_area">- Disable `Unfixed joystick`: the range is joystick valid motion area.</string>
+    <string name="joystick_inner_dead_zone_radius_s_percentage_0_disable">Joystick inner dead zone(radius\'s percentage, 0 - disable)</string>
+    <string name="on_screen_buttons_position_unit">On-screen buttons position unit</string>
+    <string name="on_screen_buttons_layout_with_grid_limit_multiple_of_5">On-screen buttons layout with grid limit(multiple of 5)</string>
+    <string name="position_unit">Position unit</string>
+    <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">On-screen buttons position unit must is multiple of 5 or 0</string>
+</resources>

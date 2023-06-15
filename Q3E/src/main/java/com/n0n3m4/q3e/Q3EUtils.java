@@ -418,4 +418,23 @@ public class Q3EUtils
             return defVal;
         }
     }
+
+    public static int parseInt_s(String str, int...def)
+    {
+        int defVal = null != def && def.length > 0 ? def[0] : 0;
+        if(null == str)
+            return defVal;
+        str = str.trim();
+        if(str.isEmpty())
+            return defVal;
+        try
+        {
+            return Integer.parseInt(str);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return defVal;
+        }
+    }
 }

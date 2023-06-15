@@ -694,7 +694,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         }
         m_lastPressBackTime = now;
         if (m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT - 1)
-            Toast.makeText(getContext(), "Click back again to exit......", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), R.string.click_back_again_to_exit, Toast.LENGTH_LONG).show();
         else if (m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
         {
             m_renderView.Shutdown();

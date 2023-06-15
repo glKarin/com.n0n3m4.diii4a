@@ -74,7 +74,8 @@ public class Q3EAd
             MyHorizontalScrollView.maxscrollx = width * (ids.size()) + carouselcount * width / 2;
             MyHorizontalScrollView.minscrollx = width * carouselcount / 2;
             MyHorizontalScrollView.deltascrollx = width * ids.size();
-        } else
+        }
+        else
         {
             MyHorizontalScrollView.maxscrollx = 0;
             MyHorizontalScrollView.minscrollx = 0;
