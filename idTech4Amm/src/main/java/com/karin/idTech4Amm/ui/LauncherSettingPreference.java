@@ -32,7 +32,6 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         findPreference(Constants.PreferenceKey.MAP_BACK).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.REDIRECT_OUTPUT_TO_FILE).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.HIDE_AD_BAR).setOnPreferenceChangeListener(this);
-        findPreference(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.LANG).setOnPreferenceChangeListener(this);
     }
@@ -73,21 +72,6 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             case Q3EPreference.REDIRECT_OUTPUT_TO_FILE:
                 Q3EJNI.SetRedirectOutputToFile((boolean) newValue);
                 return true;
-            case Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT:
-            {
-                int i;
-                try
-                {
-                    i = Integer.parseInt((String) newValue);
-                    if (i >= 0 && i % 5 == 0)
-                        return true;
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                return false;
-            }
             case Q3EPreference.pref_harm_function_key_toolbar_y:
             {
                 int i;
