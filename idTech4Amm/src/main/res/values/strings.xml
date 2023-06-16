@@ -211,5 +211,6 @@
     <string name="game_library">game library</string>
     <string name="request_necessary_permissions">request necessary permissions</string>
     <string name="grant">Grant</string>
+    <string name="extract_path_resource_">Extract path resource: </string>
 
 </resources>

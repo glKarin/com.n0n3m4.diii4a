@@ -134,6 +134,26 @@ public final class FileUtility
         CloseStream(os);
         return res;
     }
+
+    public static String GetFileExtension(String fileName)
+    {
+        if(null == fileName)
+            return null;
+        int index = fileName.lastIndexOf(".");
+        if(index <= 0 || index == fileName.length() - 1)
+            return "";
+        return fileName.substring(index + 1);
+    }
+
+    public static String GetFileBaseName(String fileName)
+    {
+        if(null == fileName)
+            return null;
+        int index = fileName.lastIndexOf(".");
+        if(index <= 0 || index == fileName.length() - 1)
+            return fileName;
+        return fileName.substring(0, index);
+    }
     
     private FileUtility() {}
 }

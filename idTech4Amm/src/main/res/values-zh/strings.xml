@@ -203,9 +203,10 @@
     <string name="choose_folder">选择文件夹</string>
     <string name="update_">更新:</string>
     <string name="quake_4_level">雷神之锤4关卡</string>
-    <string name="startgame">start game</string>
-    <string name="file_can_not_access">File can not access:</string>
-    <string name="game_library">game library</string>
-    <string name="request_necessary_permissions">request necessary permissions</string>
-    <string name="grant">Grant</string>
+    <string name="startgame">启动游戏</string>
+    <string name="file_can_not_access">无法访问文件:</string>
+    <string name="game_library">游戏动态库</string>
+    <string name="request_necessary_permissions">请求必要的权限</string>
+    <string name="grant">授权</string>
+    <string name="extract_path_resource_">提取补丁资源: </string>
 </resources>

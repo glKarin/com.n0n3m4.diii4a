@@ -109,7 +109,7 @@ public class GameLauncher extends Activity{
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE = 1;
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE = 2;
     private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE = 3;
-	private static final int CONST_REQUEST_EXTRACT_QUAKE4_PATCH_RESOURCE_RESULT_CODE = 4;
+	private static final int CONST_REQUEST_EXTRACT_PATCH_RESOURCE_RESULT_CODE = 4;
 	private static final int CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE = 5;
 	private static final int CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE = 6;
      
@@ -1971,19 +1971,13 @@ public class GameLauncher extends Activity{
 		dialog.show();
     }
 
-    //private static final int Q4_RESOURCE_FONT = 1;
-    private static final int Q4_RESOURCE_BOT = 1 << 1;
-	private static final int Q4_RESOURCE_MP_GAME_MAP_AAS = 1 << 2;
-    private static final int RESOURCE_ALL = ~(1 << 31);
-    
+    private final String[] m_patchResources = {
+    		"q4base/botfiles_q3.pk4",
+			"q4base/mp_game_map_aas.pk4",
+	};
     private void OpenResourceFileDialog()
     {
     	// D3-format fonts don't need on longer
-        final int[] Types = {
-            //Q4_RESOURCE_FONT,
-            Q4_RESOURCE_BOT,
-			Q4_RESOURCE_MP_GAME_MAP_AAS,
-        };
         final String[] Names = {
             Q3ELang.tr(this, R.string.bot_q3_bot_support_in_mp_game),
 			Q3ELang.tr(this, R.string.mp_game_map_aas_files),
@@ -1993,59 +1987,46 @@ public class GameLauncher extends Activity{
             .setItems(Names, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
-					ExtractQuake4PatchResource(Types[p]);
+					ExtractQuake4PatchResource(m_patchResources[p]);
                 }
             })
             .setNegativeButton(R.string.cancel, null)
             .setPositiveButton(R.string.extract_all, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
-					ExtractQuake4PatchResource(RESOURCE_ALL);
+					ExtractQuake4PatchResource(m_patchResources);
                 }
             })
             .create()
             .show()
             ;
     }
-    
-    private boolean ExtractQuake4PatchResource(int mask)
-    {
-    	if(0 == mask)
-    		return false;
 
-		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTRACT_QUAKE4_PATCH_RESOURCE_RESULT_CODE);
+    private int ExtractQuake4PatchResource(String...fileName)
+    {
+    	if(null == fileName || fileName.length == 0)
+    		return -1;
+
+		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTRACT_PATCH_RESOURCE_RESULT_CODE);
 		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
 			Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.access_file)), Toast.LENGTH_LONG).show();
 		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
-			return false;
+			return -1;
 
+		int r = 0;
 		String gamePath = V.edt_path.getText().toString();
 		final String BasePath = gamePath + File.separator;
-    	StringBuilder sb = new StringBuilder();
-    	boolean r = true;
-        if(Utility.MASK(mask, Q4_RESOURCE_BOT))
+		for (String str : fileName)
 		{
-			String fileName = "q4base/q4_botfiles_idtech4amm.pk4";
-			String outPath = BasePath + fileName;
-			boolean ok = ContextUtility.ExtractAsset(this, "pak/q4base/botfiles_q3.pk4", outPath);
-			if(sb.length() > 0)
-				sb.append("\n");
-			sb.append("Extract Quake 4 bot files(Quake3) patch file to ").append(fileName).append(" ");
-			sb.append(ok ? Q3ELang.tr(this, R.string.success) : Q3ELang.tr(this, R.string.fail));
-			r = r && ok;
+			File f = new File(str);
+			String path = f.getParent();
+			String name = f.getName();
+			String newFileName = "z_" + FileUtility.GetFileBaseName(name) + "_idTech4Amm." + FileUtility.GetFileExtension(name);
+			boolean ok = ContextUtility.ExtractAsset(this, "pak/" + str, BasePath + path + File.separator + newFileName);
+			if(ok)
+				r++;
 		}
-		if(Utility.MASK(mask, Q4_RESOURCE_MP_GAME_MAP_AAS))
-		{
-			String fileName = "q4base/q4_mp_game_map_aas_idtech4amm.pk4";
-			String outPath = BasePath + fileName;
-			boolean ok = ContextUtility.ExtractAsset(this, "pak/q4base/mp_game_map_aas.pk4", outPath);
-			if(sb.length() > 0)
-				sb.append("\n");
-			sb.append("Extract Quake 4 MP game map aas files(Quake3) patch file to ").append(fileName).append(" ");
-			sb.append(ok ? Q3ELang.tr(this, R.string.success) : Q3ELang.tr(this, R.string.fail));
-			r = r && ok;
-		}
-        Toast.makeText(this, sb.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, Q3ELang.tr(this, R.string.extract_path_resource_) + r, Toast.LENGTH_SHORT).show();
         return r;
     }
 

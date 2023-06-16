@@ -20,6 +20,7 @@ import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.util.Log;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.WindowInsets;
@@ -265,6 +266,34 @@ public final class ContextUtility
         {
             is = context.getAssets().open(path);
             File out = new File(outPath);
+            os = new FileOutputStream(out);
+
+            long res = FileUtility.Copy(os, is);
+
+            return res > 0;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally {
+            FileUtility.CloseStream(os);
+            FileUtility.CloseStream(is);
+        }
+    }
+
+    public static boolean ExtractAssetToDirectory(Context context, String path, String outPath)
+    {
+        InputStream is = null;
+        FileOutputStream os = null;
+        File f = new File(path);
+        String name = f.getName();
+
+        try
+        {
+            is = context.getAssets().open(path);
+            File out = new File(outPath + File.separator + name);
             os = new FileOutputStream(out);
 
             long res = FileUtility.Copy(os, is);
