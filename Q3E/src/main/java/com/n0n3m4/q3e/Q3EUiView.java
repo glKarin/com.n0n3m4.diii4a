@@ -178,7 +178,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         if (fn.target instanceof Joystick)
         {
             final Joystick tmp = (Joystick) fn.target;
-            final Joystick newj = Joystick.Move(tmp, uildr.gl);
+            final Joystick newj = Joystick.Move(tmp, uildr.gl, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone);
             fn.target = newj;
             touch_elements.set(touch_elements.indexOf(tmp), newj);
             paint_elements.set(paint_elements.indexOf(tmp), newj);
@@ -688,7 +688,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                 {
                     Joystick tmp = (Joystick) p;
                     tmp.size = (int) (size * scale) * 2;
-                    final Joystick newj = Joystick.Move(tmp, uildr.gl);
+                    final Joystick newj = Joystick.Move(tmp, uildr.gl, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone);
                     newTL = newj;
                     newP = newj;
                 }

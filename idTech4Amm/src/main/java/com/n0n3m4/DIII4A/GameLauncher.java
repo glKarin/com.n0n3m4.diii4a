@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -52,7 +51,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioGroup;
-import android.widget.SeekBar;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -518,7 +516,7 @@ public class GameLauncher extends Activity{
             });
         AlertDialog dl=bldr.create();
         dl.setCancelable(false);
-		dl.show();		
+		dl.show();
 	}
 	
 	public void UpdateMouseMenu(boolean show)
@@ -1035,10 +1033,10 @@ public class GameLauncher extends Activity{
         V.launcher_tab1_game_lib_button.setOnClickListener(m_buttonClickListener);
 		V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 4.0f));
 		
-		V.res_x.setText(mPrefs.getString(Q3EPreference.pref_resx, "640"));
-		V.res_y.setText(mPrefs.getString(Q3EPreference.pref_resy, "480"));
-        V.res_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resx, "640"));
-        V.res_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resy, "480"));
+		V.res_x.setText(mPrefs.getString(Q3EPreference.pref_resx, "" + Q3EGlobals.SCREEN_WIDTH));
+		V.res_y.setText(mPrefs.getString(Q3EPreference.pref_resy, "" + Q3EGlobals.SCREEN_HEIGHT));
+        V.res_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resx, "" + Q3EGlobals.SCREEN_WIDTH));
+        V.res_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resy, "" + Q3EGlobals.SCREEN_HEIGHT));
         V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
         V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
@@ -1130,7 +1128,7 @@ public class GameLauncher extends Activity{
         //k check external storage permission
         int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast.makeText(this, "Can't start game!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.startgame)), Toast.LENGTH_LONG).show();
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
 		/*
@@ -1191,7 +1189,7 @@ public class GameLauncher extends Activity{
     {
         int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast.makeText(this, "Can't access file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.access_file)), Toast.LENGTH_LONG).show();
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
         
@@ -1203,7 +1201,7 @@ public class GameLauncher extends Activity{
         File f = new File(basePath);
         if(!f.isFile() || !f.canWrite() || !f.canRead())
         {
-            Toast.makeText(this, "File can not access(" + basePath + ")!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, Q3ELang.tr(this, R.string.file_can_not_access) + basePath, Toast.LENGTH_LONG).show();
             return;
         }
         
@@ -1327,7 +1325,7 @@ public class GameLauncher extends Activity{
         }
         else
         {
-            Toast.makeText(this, "Log file can not access(" + path + ")", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, Q3ELang.tr(this, R.string.file_can_not_access) + path, Toast.LENGTH_LONG).show();
         }
     }
     
@@ -1352,7 +1350,7 @@ public class GameLauncher extends Activity{
     {
         int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast.makeText(this, "Can't choose folder!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.choose_folder)), Toast.LENGTH_LONG).show();
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
 
@@ -1445,7 +1443,7 @@ public class GameLauncher extends Activity{
     private void OpenUpdate()
     {       
         if(IsUpdateRelease())
-            ContextUtility.OpenMessageDialog(this, "Update: " + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetUpdateText(this));
+            ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.update_) + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetUpdateText(this));
     }
 
     private boolean IsUpdateRelease()
@@ -1509,7 +1507,7 @@ public class GameLauncher extends Activity{
         else
             sb.append("armv7-a neon");
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " game library(" + sb.toString() + ")");
+        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(this, R.string.game_library) + "(" + sb.toString() + ")");
         builder.setSingleChoiceItems(items, selected, new DialogInterface.OnClickListener(){
 			public void onClick(DialogInterface dialog, int p)
             {
@@ -1725,8 +1723,8 @@ public class GameLauncher extends Activity{
 				sb.append("  * " + str);
 			sb.append(endl);
 		}
-		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, opt + " request necessary permissions", TextHelper.GetDialogMessage(sb.toString()));
-		builder.setNeutralButton("Grant", new AlertDialog.OnClickListener() {
+		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, opt + " " + Q3ELang.tr(this, R.string.request_necessary_permissions), TextHelper.GetDialogMessage(sb.toString()));
+		builder.setNeutralButton(R.string.grant, new AlertDialog.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				ContextUtility.OpenAppSetting(GameLauncher.this);
@@ -1941,7 +1939,7 @@ public class GameLauncher extends Activity{
             n++;
             levels[i] = String.format("%s%d.Act %s - %s(%s)", (i < 9 ? " " : ""), (i + 1), Act_Names[m], Q3EGlobals.QUAKE4_LEVELS[i], Q3EGlobals.QUAKE4_MAPS[i]);
         }
-		final AlertDialog dialog = builder.setTitle("Quake 4 Level")
+		final AlertDialog dialog = builder.setTitle(R.string.quake_4_level)
 				.setItems(levels, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int p) {
 						GameLauncher.this.RemoveParam_temp("loadGame");
@@ -1976,7 +1974,7 @@ public class GameLauncher extends Activity{
     //private static final int Q4_RESOURCE_FONT = 1;
     private static final int Q4_RESOURCE_BOT = 1 << 1;
 	private static final int Q4_RESOURCE_MP_GAME_MAP_AAS = 1 << 2;
-    private static final int Q4_RESOURCE_ALL = ~(1 << 31);
+    private static final int RESOURCE_ALL = ~(1 << 31);
     
     private void OpenResourceFileDialog()
     {
@@ -1987,12 +1985,11 @@ public class GameLauncher extends Activity{
 			Q4_RESOURCE_MP_GAME_MAP_AAS,
         };
         final String[] Names = {
-            // "Font(D3 format)",
-            "Bot(Q3 bot support in MP game)",
-			"MP game map aas files",
+            Q3ELang.tr(this, R.string.bot_q3_bot_support_in_mp_game),
+			Q3ELang.tr(this, R.string.mp_game_map_aas_files),
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Quake 4 extra patch resource")
+        builder.setTitle(R.string.game_patch_resource)
             .setItems(Names, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
@@ -2000,10 +1997,10 @@ public class GameLauncher extends Activity{
                 }
             })
             .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton("Extract all", new DialogInterface.OnClickListener() {
+            .setPositiveButton(R.string.extract_all, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
-					ExtractQuake4PatchResource(Q4_RESOURCE_ALL);
+					ExtractQuake4PatchResource(RESOURCE_ALL);
                 }
             })
             .create()
@@ -2018,7 +2015,7 @@ public class GameLauncher extends Activity{
 
 		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTRACT_QUAKE4_PATCH_RESOURCE_RESULT_CODE);
 		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-			Toast.makeText(this, "Can't access file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.access_file)), Toast.LENGTH_LONG).show();
 		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
 			return false;
 
@@ -2026,15 +2023,6 @@ public class GameLauncher extends Activity{
 		final String BasePath = gamePath + File.separator;
     	StringBuilder sb = new StringBuilder();
     	boolean r = true;
-/*        if(Utility.MASK(mask, Q4_RESOURCE_FONT))
-		{
-			String fileName = "q4base/q4_fonts_idtech4amm.pk4";
-			String outPath = BasePath + fileName;
-			boolean ok = ContextUtility.ExtractAsset(this, "pak/q4base/fonts_d3format.pk4", outPath);
-			sb.append("Extract Quake 4 fonts(DOOM3 format) patch file to ").append(fileName).append(" ");
-			sb.append(ok ? "success" : "fail");
-			r = r && ok;
-		}*/
         if(Utility.MASK(mask, Q4_RESOURCE_BOT))
 		{
 			String fileName = "q4base/q4_botfiles_idtech4amm.pk4";
@@ -2043,7 +2031,7 @@ public class GameLauncher extends Activity{
 			if(sb.length() > 0)
 				sb.append("\n");
 			sb.append("Extract Quake 4 bot files(Quake3) patch file to ").append(fileName).append(" ");
-			sb.append(ok ? "success" : "fail");
+			sb.append(ok ? Q3ELang.tr(this, R.string.success) : Q3ELang.tr(this, R.string.fail));
 			r = r && ok;
 		}
 		if(Utility.MASK(mask, Q4_RESOURCE_MP_GAME_MAP_AAS))
@@ -2054,7 +2042,7 @@ public class GameLauncher extends Activity{
 			if(sb.length() > 0)
 				sb.append("\n");
 			sb.append("Extract Quake 4 MP game map aas files(Quake3) patch file to ").append(fileName).append(" ");
-			sb.append(ok ? "success" : "fail");
+			sb.append(ok ? Q3ELang.tr(this, R.string.success) : Q3ELang.tr(this, R.string.fail));
 			r = r && ok;
 		}
         Toast.makeText(this, sb.toString(), Toast.LENGTH_SHORT).show();
@@ -2143,7 +2131,7 @@ public class GameLauncher extends Activity{
 			return;
 		ProgressDialog dialog = new ProgressDialog(this);
 		dialog.setTitle(R.string.check_for_update);
-		dialog.setMessage("Network for GitHub......");
+		dialog.setMessage(Q3ELang.tr(this, R.string.network_for_github));
 		dialog.setCancelable(false);
 		dialog.setButton(DialogInterface.BUTTON_NEGATIVE, Q3ELang.tr(this, R.string.cancel), new DialogInterface.OnClickListener() {
 			@Override
@@ -2194,9 +2182,9 @@ public class GameLauncher extends Activity{
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		if(release <= 0)
 		{
-			builder.setTitle("Error")
+			builder.setTitle(R.string.error)
 					.setMessage(changes)
-			.setNegativeButton("Close", null)
+			.setNegativeButton(R.string.close, null)
 			;
 		}
 		else if(release > Constants.CONST_UPDATE_RELEASE)
@@ -2241,9 +2229,9 @@ public class GameLauncher extends Activity{
 		}
 		else
 		{
-			builder.setTitle("No update release")
-					.setMessage("Current version is newest.")
-					.setPositiveButton("OK", null)
+			builder.setTitle(R.string.no_update_release)
+					.setMessage(R.string.current_version_is_newest)
+					.setPositiveButton(R.string.ok, null)
 			;
 		}
 		AlertDialog dialog = builder.create();
@@ -2318,18 +2306,18 @@ public class GameLauncher extends Activity{
 			OutputStream os = getContentResolver().openOutputStream(uri);
 			PreferenceBackup backup = new PreferenceBackup(this);
 			if(backup.Dump(os))
-				Toast.makeText(this, "Backup preferences file success.", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.backup_preferences_file_success, Toast.LENGTH_LONG).show();
 			else
 			{
 				String[] args = {""};
 				backup.GetError(args);
-				Toast.makeText(this, "Backup preferences file fail: " + args[0], Toast.LENGTH_LONG).show();
+				Toast.makeText(this, Q3ELang.tr(this, R.string.backup_preferences_file_fail) + args[0], Toast.LENGTH_LONG).show();
 			}
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Toast.makeText(this, "Backup preferences file error.", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.backup_preferences_file_error, Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -2337,7 +2325,7 @@ public class GameLauncher extends Activity{
 	{
 		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
 		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-			Toast.makeText(this, "Can't choose restore preferences file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.choose_restore_preferences_file)), Toast.LENGTH_LONG).show();
 		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
 			return;
 		Intent intent = null;
@@ -2360,7 +2348,7 @@ public class GameLauncher extends Activity{
 			PreferenceBackup backup = new PreferenceBackup(this);
 			if(backup.Restore(is))
 			{
-				Toast.makeText(this, "Restore preferences file success. App will reboot!", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.restore_preferences_file_success_app_will_reboot, Toast.LENGTH_LONG).show();
 				new Handler().postDelayed(new Runnable() {
 					@Override
 					public void run() {
@@ -2372,13 +2360,13 @@ public class GameLauncher extends Activity{
 			{
 				String[] args = {""};
 				backup.GetError(args);
-				Toast.makeText(this, "Restore preferences file fail: " + args[0], Toast.LENGTH_LONG).show();
+				Toast.makeText(this, Q3ELang.tr(this, R.string.restore_preferences_file_fail) + args[0], Toast.LENGTH_LONG).show();
 			}
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Toast.makeText(this, "Restore preferences file error.", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.restore_preferences_file_error, Toast.LENGTH_LONG).show();
 		}
 	}
 

@@ -65,18 +65,11 @@ public class Joystick extends Paintable implements TouchListener
     private int m_joystickDeadZone_2 = 0;
     private boolean m_updateTexture = false;
 
-    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, float fullZonePercent, float deadZonePercent, boolean unfixed, boolean editMode, String texid, boolean b)
+    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, float fullZonePercent, float deadZonePercent, boolean unfixed, boolean editMode, String texid)
     {
-        this(vw, gl, r, a, x, y,
-                fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0,
-                deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0,
-                unfixed, editMode
-                , texid
-                );
-    }
+        int fullZoneRadius = fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0;
+        int deadZoneRadius = deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0;
 
-    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, int fullZoneRadius, int deadZoneRadius, boolean unfixed, boolean editMode, String texid)
-    {
         view = vw;
         size = r * 2;
         alpha = a;
@@ -511,9 +504,9 @@ public class Joystick extends Paintable implements TouchListener
         return verts;
     }
 
-    public static Joystick Move(Joystick tmp, GL10 gl)
+    public static Joystick Move(Joystick tmp, GL10 gl, float fullZonePercent, float deadZonePercent)
     {
-        Joystick newj = new Joystick(tmp.view, gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, tmp.m_fullZoneRadius, tmp.m_deadZoneRadius, tmp.m_unfixed, tmp.m_editMode, tmp.tex_androidid);
+        Joystick newj = new Joystick(tmp.view, gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, fullZonePercent, deadZonePercent, tmp.m_unfixed, tmp.m_editMode, tmp.tex_androidid);
         newj.tex_ind = tmp.tex_ind;
         newj.texd_ind = tmp.texd_ind;
         newj.m_outerTexture = tmp.m_outerTexture;

@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ControlsThemeAdapter extends ArrayAdapter_base<ControlsTheme>
 {
-    private List<ControlsTheme> m_list = new ArrayList<>();
+    private final List<ControlsTheme> m_list = new ArrayList<>();
 
     public ControlsThemeAdapter(Context context)
     {

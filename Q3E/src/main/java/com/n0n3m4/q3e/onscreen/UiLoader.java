@@ -63,7 +63,7 @@ public class UiLoader
             case Q3EGlobals.TYPE_BUTTON:
                 return new Button(ctx, gl, cx, cy, size, bh, Q3EUtils.q3ei.texture_table[id], Q3EUtils.q3ei.arg_table[id * 4], Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 1] == 1, (float) alpha / 100);
             case Q3EGlobals.TYPE_JOYSTICK: {
-                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, editMode, Q3EUtils.q3ei.texture_table[id], true);
+                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, editMode, Q3EUtils.q3ei.texture_table[id]);
             }
             case Q3EGlobals.TYPE_SLIDER:
                 return new Slider(ctx, gl, cx, cy, size, sh, Q3EUtils.q3ei.texture_table[id], Q3EUtils.q3ei.arg_table[id * 4], Q3EUtils.q3ei.arg_table[id * 4 + 1], Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 3], (float) alpha / 100);

@@ -183,5 +183,33 @@
     <string name="language">Language</string>
     <string name="setup_launcher_language">Setup launcher language</string>
     <string name="be_available_on_reboot_the_next_time">Be available on reboot the next time</string>
+    <string name="bot_q3_bot_support_in_mp_game">Bot(Q3 bot support in MP game)</string>
+    <string name="mp_game_map_aas_files">MP game map aas files</string>
+    <string name="game_patch_resource">Game patch resource</string>
+    <string name="extract_all">Extract all</string>
+    <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Can\'t %s! Read/Write external storage permission is not granted!</string>
+    <string name="access_file">access file</string>
+    <string name="success">success</string>
+    <string name="fail">fail</string>
+    <string name="network_for_github">Network for GitHub......</string>
+    <string name="error">Error</string>
+    <string name="close">Close</string>
+    <string name="no_update_release">No update release</string>
+    <string name="current_version_is_newest">Current version is newest.</string>
+    <string name="backup_preferences_file_success">Backup preferences file success.</string>
+    <string name="backup_preferences_file_fail">Backup preferences file fail:</string>
+    <string name="backup_preferences_file_error">Backup preferences file error.</string>
+    <string name="restore_preferences_file_success_app_will_reboot">Restore preferences file success. App will reboot!</string>
+    <string name="restore_preferences_file_fail">Restore preferences file fail:</string>
+    <string name="restore_preferences_file_error">Restore preferences file error.</string>
+    <string name="choose_restore_preferences_file">choose restore preferences file</string>
+    <string name="choose_folder">choose folder</string>
+    <string name="update_">Update:</string>
+    <string name="quake_4_level">Quake 4 Level</string>
+    <string name="startgame">start game</string>
+    <string name="file_can_not_access">File can not access:</string>
+    <string name="game_library">game library</string>
+    <string name="request_necessary_permissions">request necessary permissions</string>
+    <string name="grant">Grant</string>
 
 </resources>
