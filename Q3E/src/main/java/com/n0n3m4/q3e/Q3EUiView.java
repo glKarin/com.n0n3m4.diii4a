@@ -136,12 +136,14 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
         synchronized (paint_elements) {
             for (Paintable p : paint_elements)
+            {
+                if(p instanceof Joystick)
+                    ((Joystick)p).UpdateTexture((GL11) gl);
                 p.Paint((GL11) gl);
+            }
         }
 
         mover.Paint((GL11) gl);
-
-
     }
 
     Handler mHandler = new Handler();
@@ -773,7 +775,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             Joystick tmp = (Joystick) p;
 
             tmp.SetupFullZoneRadiusInEditMode(range);
-            tmp.SetupDeadZoneRadiusInEditMode(dz / 100.0f);
+            tmp.SetupDeadZoneRadiusInEditMode(dz);
         }
 
         //requestRender();

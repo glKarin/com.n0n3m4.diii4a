@@ -409,11 +409,10 @@ public class Q3EUiConfig extends Activity
 
         TextView dzLabel = widget.findViewById(R.id.launcher_tab2_joystick_inner_dead_zone_label);
         dzLabel.setText(innerDeadZone + "%");
-        dzLabel.setText(Q3ELang.tr(Q3EUiConfig.this, R.string.opacity_3d, dz.getProgress()));
         dz.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                dzLabel.setText(Q3ELang.tr(Q3EUiConfig.this, R.string.opacity_3d, progress));
+                dzLabel.setText(progress + "%");
             }
 
             @Override
@@ -457,6 +456,7 @@ public class Q3EUiConfig extends Activity
                 .putFloat(Q3EPreference.pref_harm_joystick_release_range, range)
                 .commit();
         vw.UpdateJoystick(range, dz);
+        Toast.makeText(Q3EUiConfig.this, R.string.setup_joystick_done, Toast.LENGTH_SHORT).show();
     }
 
     public void OpenOnScreenButtonPositionUnitSetting()

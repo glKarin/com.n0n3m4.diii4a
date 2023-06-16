@@ -29,8 +29,6 @@ public final class Constants
 	// Launcher preference keys
     public static final class PreferenceKey {
         public static final String LAUNCHER_ORIENTATION = "harm_launcher_orientation";
-        public static final String MAP_BACK = "harm_map_back";
-        public static final String ONSCREEN_BUTTON = "harm_onscreen_button";
         public static final String HIDE_AD_BAR = "harm_hide_ad_bar";
 		//public static final String OPEN_QUAKE4_HELPER = "harm_open_quake4_helper";
         

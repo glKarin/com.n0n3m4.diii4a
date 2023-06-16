@@ -63,6 +63,8 @@ public final class Q3EPreference
     public static final String COVER_EDGES = "harm_cover_edges";
     public static final String CONTROLS_THEME = "harm_controls_theme";
     public static final String LANG = "harm_lang";
+    public static final String MAP_BACK = "harm_map_back";
+    public static final String ONSCREEN_BUTTON = "harm_onscreen_button";
 
     public static float GetFloatFromString(Context context, String name, float defVal)
     {

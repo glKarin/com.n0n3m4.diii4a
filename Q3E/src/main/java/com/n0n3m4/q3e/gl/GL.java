@@ -177,4 +177,19 @@ public final class GL
             return texture;
         }
     }
+
+    public static void glDeleteTexture(GL10 gl, int texture)
+    {
+        if(texture <= 0)
+            return;
+        final int[] ts = { texture };
+        if (usegles20)
+        {
+            GLES20.glDeleteTextures(1, ts, 0);
+        }
+        else
+        {
+            gl.glDeleteTextures(1, ts, 0);
+        }
+    }
 }

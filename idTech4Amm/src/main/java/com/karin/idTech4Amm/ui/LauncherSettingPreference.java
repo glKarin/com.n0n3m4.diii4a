@@ -29,7 +29,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         addPreferencesFromResource(R.xml.launcher_settings_preference);
 
         findPreference(Constants.PreferenceKey.LAUNCHER_ORIENTATION).setOnPreferenceChangeListener(this);
-        findPreference(Constants.PreferenceKey.MAP_BACK).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.MAP_BACK).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.REDIRECT_OUTPUT_TO_FILE).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.HIDE_AD_BAR).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
@@ -52,7 +52,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
                 int o = (boolean) newValue ? 0 : 1;
                 ContextUtility.SetScreenOrientation(getActivity(), o);
                 return true;
-            case Constants.PreferenceKey.MAP_BACK:
+            case Q3EPreference.MAP_BACK:
             {
                 Set<String> values = (Set<String>) newValue;
                 int r = 0;

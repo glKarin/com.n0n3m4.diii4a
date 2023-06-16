@@ -128,7 +128,7 @@ public class OnScreenButtonConfigActivity extends Activity
                 public void run()
                 {
                     SharedPreferences.Editor mEdtr = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).edit();
-                    mEdtr.remove(Constants.PreferenceKey.ONSCREEN_BUTTON);
+                    mEdtr.remove(Q3EPreference.ONSCREEN_BUTTON);
                     mEdtr.commit();
                     Constants.RestoreDefaultOnScreenConfig(Q3EUtils.q3ei.arg_table, Q3EUtils.q3ei.type_table);
                     LoadConfig();
@@ -161,7 +161,7 @@ public class OnScreenButtonConfigActivity extends Activity
             type[btn.index] = btn.type;
             list.add(btn.toString());
         }
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putStringSet(Constants.PreferenceKey.ONSCREEN_BUTTON, list).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putStringSet(Q3EPreference.ONSCREEN_BUTTON, list).commit();
         m_adapter.notifyDataSetChanged();
     }
 

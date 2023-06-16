@@ -430,7 +430,7 @@ public class GameLauncher extends Activity{
         // index:type;23,1,2,0|...... 
         try
         {
-            Set<String> configs = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(Constants.PreferenceKey.ONSCREEN_BUTTON, null);
+            Set<String> configs = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(Q3EPreference.ONSCREEN_BUTTON, null);
             if(null != configs && !configs.isEmpty())
             {
                 for(String str : configs)
