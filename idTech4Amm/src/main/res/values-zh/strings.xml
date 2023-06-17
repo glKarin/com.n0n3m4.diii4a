@@ -209,4 +209,10 @@
     <string name="request_necessary_permissions">请求必要的权限</string>
     <string name="grant">授权</string>
     <string name="extract_path_resource_">提取补丁资源: </string>
+    <string name="rivensin_play_original_doom3_level">Rivensin加载原毁灭战士3关卡</string>
+    <string name="save_preferences_file">保存偏好文件</string>
+    <string name="read_preferences_file">读取偏好文件</string>
+    <string name="version_">版本:</string>
+    <string name="changes_">变更:</string>
+    <string name="new_update_release">新版本更新</string>
 </resources>

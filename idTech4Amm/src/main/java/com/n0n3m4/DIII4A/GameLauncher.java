@@ -20,21 +20,16 @@
 package com.n0n3m4.DIII4A;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -43,52 +38,51 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.karin.idTech4Amm.ConfigEditorActivity;
 import com.karin.idTech4Amm.OnScreenButtonConfigActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.lib.Utility;
-import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.karin.idTech4Amm.misc.TextHelper;
-import com.karin.idTech4Amm.network.CheckUpdate;
 import com.karin.idTech4Amm.sys.Constants;
-import com.karin.idTech4Amm.ui.ControlsThemeAdapter;
+import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
+import com.n0n3m4.DIII4A.launcher.CheckForUpdateFunc;
+import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
+import com.n0n3m4.DIII4A.launcher.DebugPreferenceFunc;
+import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
+import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
+import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
+import com.n0n3m4.DIII4A.launcher.ChooseGameFolderFunc;
+import com.n0n3m4.DIII4A.launcher.RestorePreferenceFunc;
+import com.n0n3m4.DIII4A.launcher.SetupControlsThemeFunc;
+import com.n0n3m4.DIII4A.launcher.StartGameFunc;
+import com.n0n3m4.DIII4A.launcher.SupportDeveloperFunc;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.karin.idTech4Amm.ui.DebugDialog;
-import com.karin.idTech4Amm.ui.FileBrowserDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.n0n3m4.q3e.Q3EAd;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EInterface;
-import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EMain;
 import com.n0n3m4.q3e.Q3EUiConfig;
 import com.n0n3m4.q3e.Q3EUtils;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+
 import android.widget.RadioButton;
 import java.util.Set;
 import android.graphics.drawable.ColorDrawable;
@@ -96,23 +90,29 @@ import android.content.res.Resources;
 import android.app.ActionBar;
 import android.widget.Spinner;
 import android.widget.AdapterView;
-import java.util.Map;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.karin.idTech4Amm.lib.D3CommandUtility;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 
-import android.util.Log;
-import java.util.LinkedList;
-
 @SuppressLint({"ApplySharedPref", "NonConstantResourceId", "CommitPrefEdits"})
 public class GameLauncher extends Activity{		
-    private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE = 1;
-    private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE = 2;
-    private static final int CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE = 3;
-	private static final int CONST_REQUEST_EXTRACT_PATCH_RESOURCE_RESULT_CODE = 4;
-	private static final int CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE = 5;
-	private static final int CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE = 6;
-     
+    private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_START = 1;
+	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE = 2;
+	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER = 3;
+	private static final int CONST_RESULT_CODE_REQUEST_EXTRACT_PATCH_RESOURCE = 4;
+	private static final int CONST_RESULT_CODE_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE = 5;
+	private static final int CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE = 6;
+
+	// GameLauncher function
+	private ExtractPatchResourceFunc m_extractPatchResourceFunc;
+	private CheckForUpdateFunc m_checkForUpdateFunc;
+	private BackupPreferenceFunc m_backupPreferenceFunc;
+	private RestorePreferenceFunc m_restorePreferenceFunc;
+	private EditConfigFileFunc m_editConfigFileFunc;
+	private ChooseGameFolderFunc m_chooseGameFolderFunc;
+	private StartGameFunc m_startGameFunc;
+
+	final String default_gamedata= Environment.getExternalStorageDirectory() + "/diii4a";
 	private final ViewHolder V = new ViewHolder();
     private boolean m_cmdUpdateLock = false;
 	private final CompoundButton.OnCheckedChangeListener m_checkboxChangeListener = new CompoundButton.OnCheckedChangeListener() {
@@ -356,49 +356,6 @@ public class GameLauncher extends Activity{
 		}
 		public void onNothingSelected(AdapterView adapter) {}
     };
-	
-	final String default_gamedata= Environment.getExternalStorageDirectory() + "/diii4a";
-	
-	public void getgl2progs(String destname) {
-        try {            
-            byte[] buf = new byte[4096];
-            ZipInputStream zipinputstream = null;
-            InputStream bis;
-            ZipEntry zipentry;
-                        
-            bis=getAssets().open("source/gl2progs.zip");
-            zipinputstream=new ZipInputStream(bis);
-            
-            (new File(destname)).mkdirs();                               
-            while ((zipentry= zipinputstream.getNextEntry())!=null) 
-            {                	            	                
-            	String tmpname=zipentry.getName();                	                	
-            	
-            	String entryName = destname + tmpname;
-                entryName = entryName.replace('/', File.separatorChar);
-                entryName = entryName.replace('\\', File.separatorChar);
-            	                                    
-                int n;
-                FileOutputStream fileoutputstream;
-                File newFile = new File(entryName);
-                if (zipentry.isDirectory()) {
-                    if (!newFile.mkdirs()) {
-                    }                        
-                    continue;
-                }
-                fileoutputstream = new FileOutputStream(entryName);               
-                while ((n = zipinputstream.read(buf, 0, 4096)) > -1) {
-                    fileoutputstream.write(buf, 0, n);                    
-                }                                             
-                fileoutputstream.close();                                                     
-                zipinputstream.closeEntry();
-            }
-
-            zipinputstream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
 	private void InitUIDefaultLayout(Q3EInterface q3ei)
 	{
@@ -469,54 +426,7 @@ public class GameLauncher extends Activity{
 	
 	public void support(View vw)
 	{
-        AlertDialog.Builder bldr=new AlertDialog.Builder(this);
-        bldr.setTitle(R.string.do_you_want_to_support_the_developer);
-		bldr.setPositiveButton(Q3ELang.tr(this, R.string.donate_to) + "F-Droid", new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-						ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/donate/");
-                    dialog.dismiss();
-                }
-            });
-		bldr.setNeutralButton(Q3ELang.tr(this, R.string.more_apps_in) + "F-Droid", new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-				if(!ContextUtility.OpenApp(GameLauncher.this, "org.fdroid.fdroid"))
-				{
-					ContextUtility.OpenUrlExternally(GameLauncher.this, "https://f-droid.org/packages/");
-					dialog.dismiss();
-				}
-			}
-		});
-		/*
-        bldr.setPositiveButton("Donate by PayPal", new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent ppIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kosleb1169%40gmail%2ecom&lc=US&item_name=n0n3m4&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest"));
-                    ppIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                    startActivity(ppIntent);
-                    dialog.dismiss();
-                }
-            });
-        bldr.setNeutralButton("More apps by n0n3m4", new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pub:n0n3m4"));
-                    marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                    startActivity(marketIntent);
-                    dialog.dismiss();
-                }
-            });
-		 */
-		bldr.setNegativeButton(R.string.dont_ask, new AlertDialog.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-            });
-        AlertDialog dl=bldr.create();
-        dl.setCancelable(false);
-		dl.show();
+        new SupportDeveloperFunc(this).Start(new Bundle());
 	}
 	
 	public void UpdateMouseMenu(boolean show)
@@ -722,50 +632,6 @@ public class GameLauncher extends Activity{
 			SelectCheckbox(GetGameModRadioGroup(), 0);
         }
         GameLauncher.this.UpdateCustomerResulotion(V.rg_scrres.getCheckedRadioButtonId() == R.id.res_custom);
-	}	
-    
-    private LinkedList<String> m_debugTextHistory = null;
-    private boolean m_revTextHistory = true;
-    private void DebugText(Object format, Object...args)
-    {
-        String str;
-        if(null == format)
-            str = "NULL";
-        else if(format instanceof String)
-            str = String.format((String)format, args);
-        else
-            str = format.toString();
-        Log.e("xxxxx", str);
-        Toast.makeText(this, str, Toast.LENGTH_LONG).show();
-        if(null == m_debugTextHistory)
-            m_debugTextHistory = new LinkedList<>();
-        m_debugTextHistory.add(str);
-    }
-
-	private CharSequence MakeDebugTextHistoryText(Boolean rev)
-	{
-		if(null == m_debugTextHistory)
-			return "<empty>";
-
-		StringBuilder sb = new StringBuilder();
-		final String endl = TextHelper.GetDialogMessageEndl();
-		for(int i = 0; i < m_debugTextHistory.size(); i++)
-		{
-			sb.append("[");
-			String str;
-			if(rev)
-			{
-				sb.append(m_debugTextHistory.size() - i);
-				str = m_debugTextHistory.get(m_debugTextHistory.size() - i - 1);
-			}
-			else
-			{
-				sb.append(i + 1);
-				str = m_debugTextHistory.get(i);
-			}
-			sb.append("]: ").append(str).append(endl);
-		}
-		return TextHelper.GetDialogMessage(sb.toString());
 	}
 
 	private void ThrowException()
@@ -775,40 +641,15 @@ public class GameLauncher extends Activity{
 
     private void ShowDebugTextHistoryDialog()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Debug text history")
-        .setMessage(MakeDebugTextHistoryText(m_revTextHistory))
-        .setPositiveButton(R.string.ok, null)
-            .setNegativeButton(R.string.clear, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int p)
-                {
-                	if(null != m_debugTextHistory)
-                    m_debugTextHistory.clear();
-                    ((AlertDialog)dialog).setMessage("");
-                }
-            })
-            .setNeutralButton("Rev", null)
-            ;
-        AlertDialog dialog = builder.create();
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(final DialogInterface dialog) {
-                    ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                m_revTextHistory = !m_revTextHistory;
-                                ((AlertDialog)dialog).setMessage(MakeDebugTextHistoryText(m_revTextHistory));
-                            }
-                        });
-                }
-            });
-        dialog.show();
+    	new DebugTextHistoryFunc(this).Start(new Bundle());
     }
 
     private void UpdateUserGame(boolean on)
     {
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
         String game = preference.getString(GetGameModPreferenceKey(), "");
+        if(null == game)
+			game = "";
 
         if(Q3EUtils.q3ei.isQ4)
         {
@@ -1112,25 +953,14 @@ public class GameLauncher extends Activity{
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		StopCheckForUpdate();
+		if(null != m_checkForUpdateFunc)
+			m_checkForUpdateFunc.Reset();
 	}
 	
 	public void start(View vw)
 	{
 		//k
         WritePreferences();
-        /*
-		String dir=V.edt_path.getText().toString();
-		if ((new File(dir+"/base").exists())&&(!new File(dir+"/base/gl2progs").exists()))
-		getgl2progs(dir+"/base/");
-        */
-        
-        //k check external storage permission
-        int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE);
-        if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.startgame)), Toast.LENGTH_LONG).show();
-        if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
-            return;
 		/*
 		if(Q3EUtils.q3ei.isQ4 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.OPEN_QUAKE4_HELPER, true))
 		{
@@ -1139,8 +969,11 @@ public class GameLauncher extends Activity{
 		}
 		*/
 
-		finish();
-		startActivity(new Intent(this,Q3EMain.class));
+		if(null == m_startGameFunc)
+			m_startGameFunc = new StartGameFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_START);
+		Bundle bundle = new Bundle();
+		bundle.putString("path", V.edt_path.getText().toString());
+		m_startGameFunc.Start(bundle);
 	}
 	
 	public void controls(View vw)
@@ -1187,27 +1020,17 @@ public class GameLauncher extends Activity{
     
     private void EditFile(String file)
     {
-        int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE);
-        if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.access_file)), Toast.LENGTH_LONG).show();
-        if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
-            return;
-        
-        String gamePath = V.edt_path.getText().toString();
+    	if(null == m_editConfigFileFunc)
+			m_editConfigFileFunc = new EditConfigFileFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE);
+
+    	Bundle bundle = new Bundle();
         String game = GetProp("fs_game");
         if(game == null || game.isEmpty())
             game = Q3EUtils.q3ei.game_base;
-        String basePath = gamePath + File.separator + game + File.separator + file;
-        File f = new File(basePath);
-        if(!f.isFile() || !f.canWrite() || !f.canRead())
-        {
-            Toast.makeText(this, Q3ELang.tr(this, R.string.file_can_not_access) + basePath, Toast.LENGTH_LONG).show();
-            return;
-        }
-        
-        Intent intent = new Intent(this, ConfigEditorActivity.class);
-        intent.putExtra("CONST_FILE_PATH", basePath);
-        startActivity(intent);
+		bundle.putString("game", game);
+		bundle.putString("path", V.edt_path.getText().toString());
+		bundle.putString("file", file);
+		m_editConfigFileFunc.Start(bundle);
     }
 
     @Override
@@ -1348,50 +1171,17 @@ public class GameLauncher extends Activity{
     
     private void OpenFolderChooser()
     {
-        int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE);
-        if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.choose_folder)), Toast.LENGTH_LONG).show();
-        if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
-            return;
-
-        String defaultPath = Environment.getExternalStorageDirectory().getAbsolutePath(); //System.getProperty("user.home");
-        String gamePath = V.edt_path.getText().toString();
-        if(null == gamePath || gamePath.isEmpty())
-            gamePath = defaultPath;
-        File f = new File(gamePath);
-        if(!f.exists())
-        {
-            gamePath = defaultPath;
-            f = new File(gamePath);
-        }
-        if(!f.isDirectory())
-        {
-            gamePath = f.getParent();
-            f = f.getParentFile();
-        }
-        if(!f.canRead())
-        {
-            gamePath = defaultPath;
-            f = new File(gamePath);
-        }
-        
-        FileBrowserDialog dialog = new FileBrowserDialog(this);
-        dialog.SetupUI(Q3ELang.tr(this, R.string.choose_data_folder), gamePath);
-        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, Q3ELang.tr(this, R.string.cancel), new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) { 
-                    dialog.dismiss();
-                }
-            });
-        dialog.setButton(AlertDialog.BUTTON_POSITIVE, Q3ELang.tr(this, R.string.choose_current_directory), new AlertDialog.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) { 
-					V.edt_path.setText(((FileBrowserDialog)dialog).Path());
-                    dialog.dismiss();
-                }
-            });
-            
-        dialog.show();
+        if(null == m_chooseGameFolderFunc)
+			m_chooseGameFolderFunc = new ChooseGameFolderFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER,  new Runnable() {
+				@Override
+				public void run()
+				{
+					V.edt_path.setText(m_chooseGameFolderFunc.GetResult());
+				}
+			});
+        Bundle bundle = new Bundle();
+        bundle.putString("path", V.edt_path.getText().toString());
+		m_chooseGameFolderFunc.Start(bundle);
     }
     
     private void WritePreferences()
@@ -1485,48 +1275,30 @@ public class GameLauncher extends Activity{
     
     private void OpenGameLibChooser()
     {
-		final SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
-        final String libPath = ContextUtility.NativeLibDir(this) + "/";
-		final String[] Libs = Q3EUtils.q3ei.libs;
 		final String PreferenceKey = GetGameModLibPreferenceKey();
-        final String[] items = new String[Libs.length];
-        String lib = preference.getString(PreferenceKey, "");
-        int selected = -1;
-        for(int i = 0; i < Libs.length; i++)
-        {
-            items[i] = "lib" + Libs[i] + ".so";
-            if((libPath + items[i]).equals(lib))
-            {
-                selected = i;
-            }
-        }
-        
-        StringBuilder sb = new StringBuilder();
-        if(Q3EJNI.IS_64)
-            sb.append("armv8-a 64");
-        else
-            sb.append("armv7-a neon");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(this, R.string.game_library) + "(" + sb.toString() + ")");
-        builder.setSingleChoiceItems(items, selected, new DialogInterface.OnClickListener(){
-			public void onClick(DialogInterface dialog, int p)
-            {
-                String lib = libPath + items[p];
-                preference.edit().putString(PreferenceKey, lib).commit();
-                SetProp("harm_fs_gameLibPath", lib);
-                dialog.dismiss();
-            }
-        });
-        builder.setNeutralButton(R.string.unset, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int p)
-            {
-                preference.edit().putString(PreferenceKey, "").commit();
-                RemoveProp("harm_fs_gameLibPath");
-                dialog.dismiss();
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+		ChooseGameLibFunc chooseGameLibFunc = new ChooseGameLibFunc(this);
+		chooseGameLibFunc.SetCallback(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				final SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
+				String lib = chooseGameLibFunc.GetResult();
+				if(null != lib && !lib.isEmpty())
+				{
+					preference.edit().putString(PreferenceKey, lib).commit();
+					SetProp("harm_fs_gameLibPath", lib);
+				}
+				else
+				{
+					preference.edit().putString(PreferenceKey, "").commit();
+					RemoveProp("harm_fs_gameLibPath");
+				}
+			}
+		});
+		Bundle bundle = new Bundle();
+		bundle.putString("key", PreferenceKey);
+		chooseGameLibFunc.Start(bundle);
     }
     
     private void Test()
@@ -1685,11 +1457,21 @@ public class GameLauncher extends Activity{
 		{
 			switch (requestCode)
 			{
-				case CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE:
-					BackupPreferences(data.getData());
+				case CONST_RESULT_CODE_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE:
+					if(null != m_backupPreferenceFunc)
+					{
+						Bundle bundle = new Bundle();
+						bundle.putParcelable("uri", data.getData());
+						m_backupPreferenceFunc.Start(bundle);
+					}
 					break;
-				case CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE:
-					RestorePreferences(data.getData());
+				case CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE:
+					if(null != m_restorePreferenceFunc)
+					{
+						Bundle bundle = new Bundle();
+						bundle.putParcelable("uri", data.getData());
+						m_restorePreferenceFunc.Start(bundle);
+					}
 					break;
 			}
 		}
@@ -1698,18 +1480,59 @@ public class GameLauncher extends Activity{
 	private void HandleGrantPermissionResult(int requestCode, List<String> list)
 	{
 		if(null == list || list.isEmpty())
+		{
+			switch(requestCode)
+			{
+				case CONST_RESULT_CODE_REQUEST_EXTRACT_PATCH_RESOURCE:
+					if(null != m_extractPatchResourceFunc)
+						m_extractPatchResourceFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE:
+					if(null != m_backupPreferenceFunc)
+						m_backupPreferenceFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE:
+					if(null != m_restorePreferenceFunc)
+						m_restorePreferenceFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE:
+					if(null != m_editConfigFileFunc)
+						m_editConfigFileFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER:
+					if(null != m_chooseGameFolderFunc)
+						m_chooseGameFolderFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_START:
+					if(null != m_startGameFunc)
+						m_startGameFunc.run();
+					break;
+				default:
+					break;
+			}
 			return;
+		}
+		// not grant
 		String opt;
 		switch(requestCode)
 		{
-			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE:
+			case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_START:
 				opt = Q3ELang.tr(this, R.string.start_game);
 				break;
-			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE:
+			case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE:
 				opt = Q3ELang.tr(this, R.string.edit_config_file);
 				break;
-			case CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE:
+			case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER:
 				opt = Q3ELang.tr(this, R.string.choose_data_folder);
+				break;
+			case CONST_RESULT_CODE_REQUEST_EXTRACT_PATCH_RESOURCE:
+				opt = Q3ELang.tr(this, R.string.extract_resource);
+				break;
+			case CONST_RESULT_CODE_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE:
+				opt = Q3ELang.tr(this, R.string.backup_settings);
+				break;
+			case CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE:
+				opt = Q3ELang.tr(this, R.string.restore_settings);
 				break;
 			default:
 				opt = Q3ELang.tr(this, R.string.operation);
@@ -1720,7 +1543,7 @@ public class GameLauncher extends Activity{
 		for(String str : list)
 		{
 			if(str != null)
-				sb.append("  * " + str);
+				sb.append("  * ").append(str);
 			sb.append(endl);
 		}
 		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, opt + " " + Q3ELang.tr(this, R.string.request_necessary_permissions), TextHelper.GetDialogMessage(sb.toString()));
@@ -1814,6 +1637,8 @@ public class GameLauncher extends Activity{
         preference.edit().putString(Q3EPreference.pref_harm_game_lib, "");
 
         String game = preference.getString(GetGameModPreferenceKey(), "");
+        if(null == game)
+			game = "";
         V.edt_fs_game.setText(game);
         boolean userMod = preference.getBoolean(Q3EPreference.pref_harm_user_mod, false);
 		if(Q3EUtils.q3ei.isQ4)
@@ -1971,63 +1796,13 @@ public class GameLauncher extends Activity{
 		dialog.show();
     }
 
-    private final String[] m_patchResources = {
-    		"q4base/botfiles_q3.pk4",
-			"q4base/mp_game_map_aas.pk4",
-	};
     private void OpenResourceFileDialog()
     {
-    	// D3-format fonts don't need on longer
-        final String[] Names = {
-            Q3ELang.tr(this, R.string.bot_q3_bot_support_in_mp_game),
-			Q3ELang.tr(this, R.string.mp_game_map_aas_files),
-        };
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.game_patch_resource)
-            .setItems(Names, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int p)
-                {
-					ExtractQuake4PatchResource(m_patchResources[p]);
-                }
-            })
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.extract_all, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int p)
-                {
-					ExtractQuake4PatchResource(m_patchResources);
-                }
-            })
-            .create()
-            .show()
-            ;
-    }
-
-    private int ExtractQuake4PatchResource(String...fileName)
-    {
-    	if(null == fileName || fileName.length == 0)
-    		return -1;
-
-		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_EXTRACT_PATCH_RESOURCE_RESULT_CODE);
-		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-			Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.access_file)), Toast.LENGTH_LONG).show();
-		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
-			return -1;
-
-		int r = 0;
-		String gamePath = V.edt_path.getText().toString();
-		final String BasePath = gamePath + File.separator;
-		for (String str : fileName)
-		{
-			File f = new File(str);
-			String path = f.getParent();
-			String name = f.getName();
-			String newFileName = "z_" + FileUtility.GetFileBaseName(name) + "_idTech4Amm." + FileUtility.GetFileExtension(name);
-			boolean ok = ContextUtility.ExtractAsset(this, "pak/" + str, BasePath + path + File.separator + newFileName);
-			if(ok)
-				r++;
-		}
-        Toast.makeText(this, Q3ELang.tr(this, R.string.extract_path_resource_) + r, Toast.LENGTH_SHORT).show();
-        return r;
+    	if(null == m_extractPatchResourceFunc)
+			m_extractPatchResourceFunc = new ExtractPatchResourceFunc(this, CONST_RESULT_CODE_REQUEST_EXTRACT_PATCH_RESOURCE);
+		Bundle bundle = new Bundle();
+		bundle.putString("path", V.edt_path.getText().toString());
+		m_extractPatchResourceFunc.Start(bundle);
     }
 
     private boolean RemoveParam(String name)
@@ -2069,18 +1844,7 @@ public class GameLauncher extends Activity{
     
     private void ShowPreferenceDialog()
     {
-        StringBuilder sb = new StringBuilder();
-        SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
-        Map<String, ?> map = preference.getAll();
-        final String endl = TextHelper.GetDialogMessageEndl();
-        int i = 0;
-        for(Map.Entry<String, ?>  entry : map.entrySet())
-        {
-            sb.append(i++).append(". ").append(entry.getKey());
-            sb.append(": ").append(entry.getValue());
-            sb.append(endl);
-        }
-        ContextUtility.OpenMessageDialog(this, "Shared preferences", TextHelper.GetDialogMessage(sb.toString()));
+    	new DebugPreferenceFunc(this).Start(new Bundle());
     }
     
     private void UpdateMapVol(boolean on)
@@ -2102,139 +1866,11 @@ public class GameLauncher extends Activity{
         V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(preference, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
     }
 
-	private ProgressDialog m_progressDialog = null;
-    private HandlerThread m_handlerThread = null;
-    private Handler m_handler = null;
-
     private void OpenCheckForUpdateDialog()
 	{
-		if(null != m_handlerThread || null != m_handler || null != m_progressDialog)
-			return;
-		ProgressDialog dialog = new ProgressDialog(this);
-		dialog.setTitle(R.string.check_for_update);
-		dialog.setMessage(Q3ELang.tr(this, R.string.network_for_github));
-		dialog.setCancelable(false);
-		dialog.setButton(DialogInterface.BUTTON_NEGATIVE, Q3ELang.tr(this, R.string.cancel), new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();
-			}
-		});
-		dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				m_progressDialog = null;
-				StopCheckForUpdate();
-			}
-		});
-		dialog.show();
-		m_progressDialog = dialog;
-		m_handlerThread = new HandlerThread("CHECK_FOR_UPDATE");
-		m_handlerThread.start();
-		m_handler = new Handler(m_handlerThread.getLooper());
-		m_handler.post(new Runnable() {
-			@Override
-			public void run() {
-				CheckForUpdate();
-			}
-		});
-	}
-
-	// non-main thread
-	private void CheckForUpdate()
-	{
-		CheckUpdate checkUpdate = new CheckUpdate();
-
-		final boolean res = checkUpdate.CheckForUpdate();
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if(res)
-					OpenCheckForUpdateResult(checkUpdate.release, checkUpdate.version, checkUpdate.update, checkUpdate.apk_url, checkUpdate.changes);
-				else
-					OpenCheckForUpdateResult(checkUpdate.release, null, null, null, checkUpdate.error);
-			}
-		});
-	}
-
-	private void OpenCheckForUpdateResult(int release, String version, String update, final String apk_url, String changes)
-	{
-		StopCheckForUpdate();
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		if(release <= 0)
-		{
-			builder.setTitle(R.string.error)
-					.setMessage(changes)
-			.setNegativeButton(R.string.close, null)
-			;
-		}
-		else if(release > Constants.CONST_UPDATE_RELEASE)
-		{
-			StringBuilder sb = new StringBuilder();
-			final String endl = TextHelper.GetDialogMessageEndl();
-			sb.append("Version: ").append(version).append(endl);
-			sb.append("Update: ").append(update).append(endl);
-			sb.append("Changes: ").append(endl);
-			if(null != changes && !changes.isEmpty())
-			{
-				String[] changesArr = changes.split("\n");
-				for(String str : changesArr)
-				{
-					if(null != str)
-						sb.append(str);
-					sb.append(endl);
-				}
-			}
-			CharSequence msg = TextHelper.GetDialogMessage(sb.toString());
-			builder.setTitle("New update release(" + release + ")")
-					.setMessage(msg)
-			.setPositiveButton(R.string.download, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					ContextUtility.OpenUrlExternally(GameLauncher.this, apk_url);
-				}
-			})
-			.setNeutralButton("Github", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					ContextUtility.OpenUrlExternally(GameLauncher.this, Constants.CONST_MAIN_PAGE);
-				}
-			})
-			.setNegativeButton("F-Droid", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					ContextUtility.OpenUrlExternally(GameLauncher.this, Constants.CONST_FDROID);
-				}
-			})
-			;
-		}
-		else
-		{
-			builder.setTitle(R.string.no_update_release)
-					.setMessage(R.string.current_version_is_newest)
-					.setPositiveButton(R.string.ok, null)
-			;
-		}
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
-
-	private void StopCheckForUpdate()
-	{
-		if(null != m_handler)
-		{
-			m_handler = null;
-		}
-		if(null != m_handlerThread)
-		{
-			m_handlerThread.quit();
-			m_handlerThread = null;
-		}
-		if(null != m_progressDialog)
-		{
-			m_progressDialog.dismiss();
-			m_progressDialog = null;
-		}
+		if(null == m_checkForUpdateFunc)
+			m_checkForUpdateFunc = new CheckForUpdateFunc(this);
+		m_checkForUpdateFunc.Start(new Bundle());
 	}
 
 	private String GetGameModPreferenceKey()
@@ -2258,146 +1894,23 @@ public class GameLauncher extends Activity{
 				: V.rg_fs_game);
 	}
 
-	private String GenDefaultBackupFileName()
-	{
-		return getPackageName() + "_preferences_backup.xml";
-	}
-
-	@TargetApi(Build.VERSION_CODES.KITKAT)
 	private void RequestBackupPreferences()
 	{
-		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
-		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-			Toast.makeText(this, "Can't choose save preferences file!\nRead/Write external storage permission is not granted!", Toast.LENGTH_LONG).show();
-		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
-			return;
-		Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-		intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-		intent.setType("*/*"); // application/xml
-		intent.addCategory(Intent.CATEGORY_OPENABLE);
-		intent.putExtra(Intent.EXTRA_TITLE, GenDefaultBackupFileName());
-
-		startActivityForResult(intent, CONST_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
-	}
-
-	private void BackupPreferences(Uri uri)
-	{
-		try
-		{
-			OutputStream os = getContentResolver().openOutputStream(uri);
-			PreferenceBackup backup = new PreferenceBackup(this);
-			if(backup.Dump(os))
-				Toast.makeText(this, R.string.backup_preferences_file_success, Toast.LENGTH_LONG).show();
-			else
-			{
-				String[] args = {""};
-				backup.GetError(args);
-				Toast.makeText(this, Q3ELang.tr(this, R.string.backup_preferences_file_fail) + args[0], Toast.LENGTH_LONG).show();
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			Toast.makeText(this, R.string.backup_preferences_file_error, Toast.LENGTH_LONG).show();
-		}
+		if(null == m_backupPreferenceFunc)
+			m_backupPreferenceFunc = new BackupPreferenceFunc(this, CONST_RESULT_CODE_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE);
+		m_backupPreferenceFunc.Start(new Bundle());
 	}
 
 	private void RequestRestorePreferences()
 	{
-		int res = ContextUtility.CheckFilePermission(this, CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
-		if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-			Toast.makeText(this, Q3ELang.tr(this, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(this, R.string.choose_restore_preferences_file)), Toast.LENGTH_LONG).show();
-		if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
-			return;
-		Intent intent = null;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-			intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-		else
-			intent = new Intent(Intent.ACTION_GET_CONTENT);
-		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-		intent.setType("*/*"); // application/xml
-		intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-		startActivityForResult(intent, CONST_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE_RESULT_CODE);
-	}
-
-	private void RestorePreferences(Uri uri)
-	{
-		try
-		{
-			InputStream is = getContentResolver().openInputStream(uri);
-			PreferenceBackup backup = new PreferenceBackup(this);
-			if(backup.Restore(is))
-			{
-				Toast.makeText(this, R.string.restore_preferences_file_success_app_will_reboot, Toast.LENGTH_LONG).show();
-				new Handler().postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						ContextUtility.RestartApp(GameLauncher.this);
-					}
-				}, 1000);
-			}
-			else
-			{
-				String[] args = {""};
-				backup.GetError(args);
-				Toast.makeText(this, Q3ELang.tr(this, R.string.restore_preferences_file_fail) + args[0], Toast.LENGTH_LONG).show();
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			Toast.makeText(this, R.string.restore_preferences_file_error, Toast.LENGTH_LONG).show();
-		}
+		if(null == m_restorePreferenceFunc)
+			m_restorePreferenceFunc = new RestorePreferenceFunc(this, CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE);
+		m_restorePreferenceFunc.Start(new Bundle());
 	}
 
 	private void OpenOnScreenButtonThemeSetting()
 	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.controls_theme);
-		View widget = getLayoutInflater().inflate(R.layout.controls_theme_dialog, null, false);
-		LinkedHashMap<String, String> schemes = Q3EUtils.GetControlsThemes(this);
-
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String type = preferences.getString(Q3EPreference.CONTROLS_THEME, "");
-		if(null == type)
-			type = "";
-		String[] theme = { type };
-		ArrayList<String> types = new ArrayList<>(schemes.keySet());
-
-		Spinner spinner = widget.findViewById(R.id.controls_theme_spinner);
-		final ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new ArrayList<>(schemes.values()));
-		typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spinner.setAdapter(typeAdapter);
-		spinner.setSelection(types.indexOf(theme[0]));
-		ListView list = widget.findViewById(R.id.controls_theme_list);
-		ControlsThemeAdapter adapter = new ControlsThemeAdapter(widget.getContext());
-		list.setAdapter(adapter);
-		adapter.Update(theme[0]);
-		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-											  @Override
-											  public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-											  {
-												  theme[0] = types.get(position);
-												  adapter.Update(theme[0]);
-											  }
-
-											  @Override
-											  public void onNothingSelected(AdapterView<?> parent)
-											  {
-											  }
-										  });
-
-		builder.setView(widget);
-		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				preferences.edit().putString(Q3EPreference.CONTROLS_THEME, theme[0]).commit();
-			}
-		})
-				.setNegativeButton(R.string.cancel, null);
-		AlertDialog dialog = builder.create();
-		dialog.show();
+		new SetupControlsThemeFunc(this).Start(new Bundle());
 	}
 
 

@@ -1,0 +1,64 @@
+package com.n0n3m4.DIII4A.launcher;
+
+import android.content.Intent;
+import android.os.Bundle;
+
+import com.karin.idTech4Amm.ConfigEditorActivity;
+import com.karin.idTech4Amm.R;
+import com.karin.idTech4Amm.lib.ContextUtility;
+import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3ELang;
+
+import java.io.File;
+
+public final class EditConfigFileFunc extends GameLauncherFunc
+{
+    private final int m_code;
+    private String m_path;
+    private String m_game;
+    private String m_file;
+
+    public EditConfigFileFunc(GameLauncher gameLauncher, int code)
+    {
+        super(gameLauncher);
+        m_code = code;
+    }
+
+    public void Reset()
+    {
+    }
+
+    public void Start(Bundle data)
+    {
+        super.Start(data);
+        Reset();
+
+        m_path = data.getString("path");
+        m_game = data.getString("game");
+        m_file = data.getString("file");
+
+        int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
+        if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
+            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(m_gameLauncher, R.string.access_file)));
+        if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
+            return;
+        run();
+    }
+
+    public void run()
+    {
+        String gamePath = m_path;
+        String game = m_game;
+        String basePath = gamePath + File.separator + game + File.separator + m_file;
+        File f = new File(basePath);
+        if(!f.isFile() || !f.canWrite() || !f.canRead())
+        {
+            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.file_can_not_access) + basePath);
+            return;
+        }
+
+        Intent intent = new Intent(m_gameLauncher, ConfigEditorActivity.class);
+        intent.putExtra("CONST_FILE_PATH", basePath);
+        m_gameLauncher.startActivity(intent);
+    }
+}

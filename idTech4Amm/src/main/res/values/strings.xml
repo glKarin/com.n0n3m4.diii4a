@@ -183,8 +183,8 @@
     <string name="language">Language</string>
     <string name="setup_launcher_language">Setup launcher language</string>
     <string name="be_available_on_reboot_the_next_time">Be available on reboot the next time</string>
-    <string name="bot_q3_bot_support_in_mp_game">Bot(Q3 bot support in MP game)</string>
-    <string name="mp_game_map_aas_files">MP game map aas files</string>
+    <string name="bot_q3_bot_support_in_mp_game">Quake4 Bot(Q3 bot support in MP game)</string>
+    <string name="mp_game_map_aas_files">Quake4 MP game map aas files</string>
     <string name="game_patch_resource">Game patch resource</string>
     <string name="extract_all">Extract all</string>
     <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Can\'t %s! Read/Write external storage permission is not granted!</string>
@@ -212,5 +212,11 @@
     <string name="request_necessary_permissions">request necessary permissions</string>
     <string name="grant">Grant</string>
     <string name="extract_path_resource_">Extract path resource: </string>
+    <string name="rivensin_play_original_doom3_level">Rivensin play original DOOM3 level</string>
+    <string name="save_preferences_file">save preferences file</string>
+    <string name="read_preferences_file">read preferences file</string>
+    <string name="version_">Version:</string>
+    <string name="changes_">Changes:</string>
+    <string name="new_update_release">New update release</string>
 
 </resources>
