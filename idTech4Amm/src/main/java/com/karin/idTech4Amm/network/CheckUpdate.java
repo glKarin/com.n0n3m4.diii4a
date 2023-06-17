@@ -75,7 +75,7 @@ public final class CheckUpdate
             if(respCode == HttpsURLConnection.HTTP_OK)
             {
                 inputStream = conn.getInputStream();
-                byte[] data = FileUtility.readStream(inputStream);
+                byte[] data = FileUtility.ReadStream(inputStream);
                 if(null != data && data.length > 0)
                 {
                     String text = new String(data);

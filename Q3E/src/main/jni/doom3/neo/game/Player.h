@@ -703,6 +703,9 @@ class idPlayer : public idActor
 		void					Event_LevelTrigger(void);
 		void					Event_Gibbed(void);
 		void					Event_GetIdealWeapon(void);
+#ifdef _HARM_FULL_BODY_AWARENESS
+		idVec3 fullBodyAwarenessOffset;
+#endif
 };
 
 ID_INLINE bool idPlayer::IsReady(void)

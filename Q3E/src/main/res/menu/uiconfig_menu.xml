@@ -11,4 +11,6 @@
         android:title="@string/on_screen_buttons_position_unit"/>
     <item android:id="@+id/uiconfig_save"
         android:title="@string/save_all"/>
+    <item android:id="@+id/uiconfig_back"
+        android:title="@string/back"/>
 </menu>

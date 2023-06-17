@@ -266,6 +266,7 @@ public final class ContextUtility
         {
             is = context.getAssets().open(path);
             File out = new File(outPath);
+            FileUtility.mkdir(out.getParent(), true);
             os = new FileOutputStream(out);
 
             long res = FileUtility.Copy(os, is);
@@ -292,6 +293,7 @@ public final class ContextUtility
 
         try
         {
+            FileUtility.mkdir(outPath, true);
             is = context.getAssets().open(path);
             File out = new File(outPath + File.separator + name);
             os = new FileOutputStream(out);

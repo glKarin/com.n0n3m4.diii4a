@@ -27,6 +27,12 @@ import java.util.Arrays;
 
 public class Q3EInterface
 {
+	private static int[] _defaultArgs;
+	private static int[] _defaultType;
+	static {
+		InitDefaultTypeTable();
+		InitDefaultArgTable();
+	}
 	
 	public int UI_SIZE;
 	public String[] defaults_table;
@@ -223,107 +229,12 @@ public class Q3EInterface
 
     public void InitTypeTable()
     {
-        type_table = new int[Q3EGlobals.UI_SIZE];
-
-        type_table[Q3EGlobals.UI_JOYSTICK] = Q3EGlobals.TYPE_JOYSTICK;
-        type_table[Q3EGlobals.UI_SHOOT] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_JUMP] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_CROUCH] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_RELOADBAR] = Q3EGlobals.TYPE_SLIDER;
-        type_table[Q3EGlobals.UI_PDA] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_FLASHLIGHT] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_SAVE] = Q3EGlobals.TYPE_SLIDER;
-        type_table[Q3EGlobals.UI_1] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_2] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_3] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_KBD] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_CONSOLE] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_RUN] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_ZOOM] = Q3EGlobals.TYPE_BUTTON;
-        type_table[Q3EGlobals.UI_INTERACT] = Q3EGlobals.TYPE_BUTTON;
-
-        type_table[Q3EGlobals.UI_WEAPON_PANEL] = Q3EGlobals.TYPE_DISC;
+        type_table = Arrays.copyOf(_defaultType, _defaultType.length);
     }
 
     public void InitArgTable()
     {
-        arg_table = new int[Q3EGlobals.UI_SIZE * 4];
-
-        arg_table[Q3EGlobals.UI_SHOOT * 4] = Q3EKeyCodes.KeyCodes.K_MOUSE1;
-        arg_table[Q3EGlobals.UI_SHOOT * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_SHOOT * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_SHOOT * 4 + 3] = 0;
-
-
-        arg_table[Q3EGlobals.UI_JUMP * 4] = Q3EKeyCodes.KeyCodes.K_SPACE;
-        arg_table[Q3EGlobals.UI_JUMP * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_JUMP * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_JUMP * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_CROUCH * 4] = Q3EKeyCodes.KeyCodesD3.K_C; // BFG
-        arg_table[Q3EGlobals.UI_CROUCH * 4 + 1] = 1;
-        arg_table[Q3EGlobals.UI_CROUCH * 4 + 2] = 1;
-        arg_table[Q3EGlobals.UI_CROUCH * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_RELOADBAR * 4] = Q3EKeyCodes.KeyCodesD3.K_BRACKET_RIGHT; // 93
-        arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 1] = Q3EKeyCodes.KeyCodesD3.K_R; // 114
-        arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 2] = Q3EKeyCodes.KeyCodesD3.K_BRACKET_LEFT; // 91
-        arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_PDA * 4] = Q3EKeyCodes.KeyCodes.K_TAB;
-        arg_table[Q3EGlobals.UI_PDA * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_PDA * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_PDA * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_FLASHLIGHT * 4] = Q3EKeyCodes.KeyCodesD3.K_F; // BFG
-        arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_SAVE * 4] = Q3EKeyCodes.KeyCodes.K_F5;
-        arg_table[Q3EGlobals.UI_SAVE * 4 + 1] = Q3EKeyCodes.KeyCodes.K_ESCAPE;
-        arg_table[Q3EGlobals.UI_SAVE * 4 + 2] = Q3EKeyCodes.KeyCodes.K_F9;
-        arg_table[Q3EGlobals.UI_SAVE * 4 + 3] = 1;
-
-        arg_table[Q3EGlobals.UI_1 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_1;
-        arg_table[Q3EGlobals.UI_1 * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_1 * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_1 * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_2 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_2;
-        arg_table[Q3EGlobals.UI_2 * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_2 * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_2 * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_3 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_3;
-        arg_table[Q3EGlobals.UI_3 * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_3 * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_3 * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_KBD * 4] = Q3EKeyCodes.K_VKBD;
-        arg_table[Q3EGlobals.UI_KBD * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_KBD * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_KBD * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_CONSOLE * 4] = Q3EKeyCodes.KeyCodesD3.K_CONSOLE;
-        arg_table[Q3EGlobals.UI_CONSOLE * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_CONSOLE * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_CONSOLE * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_RUN * 4] = Q3EKeyCodes.KeyCodesD3.K_SHIFT;
-        arg_table[Q3EGlobals.UI_RUN * 4 + 1] = 1;
-        arg_table[Q3EGlobals.UI_RUN * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_RUN * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_ZOOM * 4] = Q3EKeyCodes.KeyCodesD3.K_Z;
-        arg_table[Q3EGlobals.UI_ZOOM * 4 + 1] = 1;
-        arg_table[Q3EGlobals.UI_ZOOM * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_ZOOM * 4 + 3] = 0;
-
-        arg_table[Q3EGlobals.UI_INTERACT * 4] = Q3EKeyCodes.KeyCodesD3.K_MOUSE2;
-        arg_table[Q3EGlobals.UI_INTERACT * 4 + 1] = 0;
-        arg_table[Q3EGlobals.UI_INTERACT * 4 + 2] = 0;
-        arg_table[Q3EGlobals.UI_INTERACT * 4 + 3] = 0;
+        arg_table = Arrays.copyOf(_defaultArgs, _defaultArgs.length);
     }
 
     public void InitDefaultsTable()
@@ -356,5 +267,126 @@ public class Q3EInterface
 	public void SetAppStoragePath(Context context)
 	{
 		Q3EUtils.q3ei.app_storage_path = Q3EUtils.GetAppStoragePath(context, null);
+	}
+
+	public static void DumpDefaultOnScreenConfig(int[] args, int[] type)
+	{
+		_defaultArgs = Arrays.copyOf(args, args.length);
+		_defaultType = Arrays.copyOf(type, args.length);
+	}
+
+	public static void RestoreDefaultOnScreenConfig(int[] args, int[] type)
+	{
+		System.arraycopy(_defaultArgs, 0, args, 0, args.length);
+		System.arraycopy(_defaultType, 0, type, 0, type.length);
+	}
+
+	private static void InitDefaultTypeTable()
+	{
+		int[] type_table = new int[Q3EGlobals.UI_SIZE];
+
+		type_table[Q3EGlobals.UI_JOYSTICK] = Q3EGlobals.TYPE_JOYSTICK;
+		type_table[Q3EGlobals.UI_SHOOT] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_JUMP] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_CROUCH] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_RELOADBAR] = Q3EGlobals.TYPE_SLIDER;
+		type_table[Q3EGlobals.UI_PDA] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_FLASHLIGHT] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_SAVE] = Q3EGlobals.TYPE_SLIDER;
+		type_table[Q3EGlobals.UI_1] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_2] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_3] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_KBD] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_CONSOLE] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_RUN] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_ZOOM] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_INTERACT] = Q3EGlobals.TYPE_BUTTON;
+
+		type_table[Q3EGlobals.UI_WEAPON_PANEL] = Q3EGlobals.TYPE_DISC;
+
+		_defaultType = Arrays.copyOf(type_table, type_table.length);
+	}
+
+	private static void InitDefaultArgTable()
+	{
+		int[] arg_table = new int[Q3EGlobals.UI_SIZE * 4];
+
+		arg_table[Q3EGlobals.UI_SHOOT * 4] = Q3EKeyCodes.KeyCodes.K_MOUSE1;
+		arg_table[Q3EGlobals.UI_SHOOT * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_SHOOT * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_SHOOT * 4 + 3] = 0;
+
+
+		arg_table[Q3EGlobals.UI_JUMP * 4] = Q3EKeyCodes.KeyCodes.K_SPACE;
+		arg_table[Q3EGlobals.UI_JUMP * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_JUMP * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_JUMP * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_CROUCH * 4] = Q3EKeyCodes.KeyCodesD3.K_C; // BFG
+		arg_table[Q3EGlobals.UI_CROUCH * 4 + 1] = 1;
+		arg_table[Q3EGlobals.UI_CROUCH * 4 + 2] = 1;
+		arg_table[Q3EGlobals.UI_CROUCH * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_RELOADBAR * 4] = Q3EKeyCodes.KeyCodesD3.K_BRACKET_RIGHT; // 93
+		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 1] = Q3EKeyCodes.KeyCodesD3.K_R; // 114
+		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 2] = Q3EKeyCodes.KeyCodesD3.K_BRACKET_LEFT; // 91
+		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_PDA * 4] = Q3EKeyCodes.KeyCodes.K_TAB;
+		arg_table[Q3EGlobals.UI_PDA * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_PDA * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_PDA * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4] = Q3EKeyCodes.KeyCodesD3.K_F; // BFG
+		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_SAVE * 4] = Q3EKeyCodes.KeyCodes.K_F5;
+		arg_table[Q3EGlobals.UI_SAVE * 4 + 1] = Q3EKeyCodes.KeyCodes.K_ESCAPE;
+		arg_table[Q3EGlobals.UI_SAVE * 4 + 2] = Q3EKeyCodes.KeyCodes.K_F9;
+		arg_table[Q3EGlobals.UI_SAVE * 4 + 3] = 1;
+
+		arg_table[Q3EGlobals.UI_1 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_1;
+		arg_table[Q3EGlobals.UI_1 * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_1 * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_1 * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_2 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_2;
+		arg_table[Q3EGlobals.UI_2 * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_2 * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_2 * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_3 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_3;
+		arg_table[Q3EGlobals.UI_3 * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_3 * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_3 * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_KBD * 4] = Q3EKeyCodes.K_VKBD;
+		arg_table[Q3EGlobals.UI_KBD * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_KBD * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_KBD * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_CONSOLE * 4] = Q3EKeyCodes.KeyCodesD3.K_CONSOLE;
+		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_RUN * 4] = Q3EKeyCodes.KeyCodesD3.K_SHIFT;
+		arg_table[Q3EGlobals.UI_RUN * 4 + 1] = 1;
+		arg_table[Q3EGlobals.UI_RUN * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_RUN * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_ZOOM * 4] = Q3EKeyCodes.KeyCodesD3.K_Z;
+		arg_table[Q3EGlobals.UI_ZOOM * 4 + 1] = 1;
+		arg_table[Q3EGlobals.UI_ZOOM * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_ZOOM * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_INTERACT * 4] = Q3EKeyCodes.KeyCodesD3.K_MOUSE2;
+		arg_table[Q3EGlobals.UI_INTERACT * 4 + 1] = 0;
+		arg_table[Q3EGlobals.UI_INTERACT * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_INTERACT * 4 + 3] = 0;
+
+		_defaultArgs = Arrays.copyOf(arg_table, arg_table.length);
 	}
 }

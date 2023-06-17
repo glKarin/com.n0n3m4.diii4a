@@ -423,7 +423,7 @@ public class GameLauncher extends Activity{
         
 		q3ei.SetupDOOM3(); //k armv7-a only support neon now
         
-        Constants.DumpDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
+        // Q3EInterface.DumpDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
 
         // index:type;23,1,2,0|...... 
         try
@@ -449,7 +449,7 @@ public class GameLauncher extends Activity{
         {
             //UncaughtExceptionHandler.DumpException(this, Thread.currentThread(), e);
             e.printStackTrace();
-            Constants.RestoreDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
+            Q3EInterface.RestoreDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
         }
 		
 		Q3EUtils.q3ei=q3ei;

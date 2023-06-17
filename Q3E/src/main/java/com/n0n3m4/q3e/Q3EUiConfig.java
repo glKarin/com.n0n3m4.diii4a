@@ -50,7 +50,6 @@ import android.widget.Toast;
 
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 
-@SuppressLint("NonConstantResourceId")
 public class Q3EUiConfig extends Activity
 {
     private static int m_onScreenButtonGlobalOpacity = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
@@ -197,6 +196,11 @@ public class Q3EUiConfig extends Activity
         else if (itemId == R.id.uiconfig_grid)
         {
             OpenOnScreenButtonPositionUnitSetting();
+            return true;
+        }
+        else if (itemId == R.id.uiconfig_back)
+        {
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);

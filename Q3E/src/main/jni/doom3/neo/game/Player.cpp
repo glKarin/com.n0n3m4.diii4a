@@ -1593,7 +1593,20 @@ void idPlayer::Spawn(void)
 	playerView.SetPlayerEntity(this);
 
 	// supress model in non-player views, but allow it in mirrors and remote views
+#ifdef _HARM_FULL_BODY_AWARENESS
+	idVec3 offset(0, 0, 0);
+	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+		fullBodyAwarenessOffset = offset;
+	else
+		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+
+	if(_FULLBODYAWARENESS_DISABLED())
+#endif
 	renderEntity.suppressSurfaceInViewID = entityNumber+1;
+#ifdef _HARM_FULL_BODY_AWARENESS
+	else
+		showWeaponViewModel = false;
+#endif
 
 	// don't project shadow on self or weapon
 	renderEntity.noSelfShadow = true;
@@ -5192,6 +5205,9 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 	// calculate position for view bobbing
 	viewBob.Zero();
 
+#ifdef _HARM_FULL_BODY_AWARENESS
+	if(_FULLBODYAWARENESS_DISABLED())
+#endif
 	if (physicsObj.HasSteppedUp()) {
 
 		// check for stepping up before a previous step is completed
@@ -5212,12 +5228,18 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 
 	idVec3 gravity = physicsObj.GetGravityNormal();
 
+#ifdef _HARM_FULL_BODY_AWARENESS
+	if(_FULLBODYAWARENESS_DISABLED()) {
+#endif
 	// if the player stepped up recently
 	deltaTime = gameLocal.time - stepUpTime;
 
 	if (deltaTime < STEPUP_TIME) {
 		viewBob += gravity * (stepUpDelta * (STEPUP_TIME - deltaTime) / STEPUP_TIME);
 	}
+#ifdef _HARM_FULL_BODY_AWARENESS
+	}
+#endif
 
 	// add bob height after any movement smoothing
 	bob = bobfracsin * xyspeed * pm_bobup.GetFloat();
@@ -6723,6 +6745,28 @@ Called every tic for each player
 */
 void idPlayer::Think(void)
 {
+#ifdef _HARM_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+	{
+		renderEntity.suppressSurfaceInViewID = entityNumber + 1;
+		showWeaponViewModel		= GetUserInfo()->GetBool("ui_showGun");
+	}
+	else
+	{
+		renderEntity.suppressSurfaceInViewID = 0;
+		showWeaponViewModel = false;
+
+		if(harm_pm_fullBodyAwarenessOffset.IsModified())
+		{
+			idVec3 offset(0, 0, 0);
+			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+				fullBodyAwarenessOffset = offset;
+			else
+				gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+			harm_pm_fullBodyAwarenessOffset.ClearModified();
+		}
+	}
+#endif
 	renderEntity_t *headRenderEnt;
 
 	UpdatePlayerIcons();
@@ -7832,7 +7876,12 @@ void idPlayer::GetViewPos(idVec3 &origin, idMat3 &axis) const
 	idAngles angles;
 
 	// if dead, fix the angle and don't add any kick
-	if (health <= 0) {
+#ifdef _HARM_FULL_BODY_AWARENESS
+	if( (_FULLBODYAWARENESS_DISABLED() ) && health <= 0 )
+#else
+	if (health <= 0)
+#endif
+	{
 		angles.yaw = viewAngles.yaw;
 		angles.roll = 40;
 		angles.pitch = -15;
@@ -7857,6 +7906,9 @@ idPlayer::CalculateFirstPersonView
 */
 void idPlayer::CalculateFirstPersonView(void)
 {
+#ifdef _HARM_FULL_BODY_AWARENESS
+	if(_FULLBODYAWARENESS_DISABLED()) {
+#endif
 	if ((pm_modelView.GetInteger() == 1) || ((pm_modelView.GetInteger() == 2) && (health <= 0))) {
 		//	Displays the view from the point of view of the "camera" joint in the player model
 
@@ -7879,6 +7931,44 @@ void idPlayer::CalculateFirstPersonView(void)
 		firstPersonViewAxis = firstPersonViewAxis * playerView.ShakeAxis();
 #endif
 	}
+#ifdef _HARM_FULL_BODY_AWARENESS
+	} else {
+		idVec3 firstPersonViewOrigin_orig;
+		GetViewPos( firstPersonViewOrigin_orig, firstPersonViewAxis );
+
+		if( af.IsActive() )
+		{
+			idAFBody* head = af.GetPhysics()->GetBody( "head" );
+			if( head )
+			{
+				firstPersonViewOrigin = head->GetWorldOrigin();
+				firstPersonViewAxis = head->GetWorldAxis();
+			}
+		}
+		else
+		{
+			// position camera at head
+			idMat3 axis;
+			idVec3 origin;
+			animator.GetJointTransform( animator.GetJointHandle( "Head" ), gameLocal.time, origin, axis );
+			firstPersonViewOrigin = ( origin + modelOffset ) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
+				+ viewBob
+				;
+		}
+		// custom offset
+		if(fullBodyAwarenessOffset.x != 0 || fullBodyAwarenessOffset.y != 0 || fullBodyAwarenessOffset.z != 0 )
+			firstPersonViewOrigin += fullBodyAwarenessOffset * viewAxis;
+
+		// clip
+		idBounds bounds(idVec3(-4, -4, -4), idVec3(4, 4, 4));
+		trace_t trace;
+		gameLocal.clip.TraceBounds(trace, firstPersonViewOrigin_orig, firstPersonViewOrigin, bounds, MASK_SOLID, this);
+
+		if (trace.fraction != 1.0f) {
+			firstPersonViewOrigin = trace.endpos;
+		}
+	}
+#endif
 }
 
 /*
@@ -7946,6 +8036,10 @@ void idPlayer::CalculateRenderView(void)
 			}
 		} else if (pm_thirdPerson.GetBool()) {
 			OffsetThirdPersonView(pm_thirdPersonAngle.GetFloat(), pm_thirdPersonRange.GetFloat(), pm_thirdPersonHeight.GetFloat(), pm_thirdPersonClip.GetBool());
+#ifdef _HARM_THIRD_PERSON
+			firstPersonViewOrigin = renderView->vieworg;
+			firstPersonViewAxis = renderView->viewaxis;
+#endif
 		} else if (pm_thirdPersonDeath.GetBool()) {
 			range = gameLocal.time < minRespawnTime ? (gameLocal.time + RAGDOLL_DEATH_TIME - minRespawnTime) * (120.0f / RAGDOLL_DEATH_TIME) : 120.0f;
 			OffsetThirdPersonView(0.0f, 20.0f + range, 0.0f, false);
@@ -9126,6 +9220,10 @@ idPlayer::CanShowWeaponViewmodel
 */
 bool idPlayer::CanShowWeaponViewmodel(void) const
 {
+#ifdef _HARM_FULL_BODY_AWARENESS
+	if(_FULLBODYAWARENESS_ENABLED())
+		return false;
+#endif
 	return showWeaponViewModel;
 }
 

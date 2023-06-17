@@ -694,6 +694,8 @@ public final class TextHelper
         };
         final Cvar[] GAME_CVARS = {
             Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
+                Cvar.Create("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness."),
+                Cvar.Create("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)."),
         };
         final Cvar[] D3XP_CVARS = {
             Cvar.Create("harm_g_skipWarpVision", "bool", "0", "Skip render warp vision for grabber dragging."),

@@ -124,7 +124,7 @@ public final class FileUtility
         return size;
     }
 
-    public static byte[] readStream(InputStream in, int...bufferSizeArg)
+    public static byte[] ReadStream(InputStream in, int...bufferSizeArg)
     {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         long size = Copy(os, in, bufferSizeArg);
@@ -153,6 +153,15 @@ public final class FileUtility
         if(index <= 0 || index == fileName.length() - 1)
             return fileName;
         return fileName.substring(0, index);
+    }
+
+    public static boolean mkdir(String path, boolean p)
+    {
+        File file = new File(path);
+        if(p)
+            return file.mkdirs();
+        else
+            return file.mkdir();
     }
     
     private FileUtility() {}

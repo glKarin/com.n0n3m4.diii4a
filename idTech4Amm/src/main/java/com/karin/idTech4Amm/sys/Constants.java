@@ -24,6 +24,7 @@ public final class Constants
 	public static final String[] CONST_CHANGES = {
             "Add `zh` language.",
             "Move some on-screen settings to `Configure on-screen controls` page.",
+            "DOOM3 add `full-body awareness` mod. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset.",
 	};
 
 	// Launcher preference keys
@@ -33,20 +34,6 @@ public final class Constants
 		//public static final String OPEN_QUAKE4_HELPER = "harm_open_quake4_helper";
         
         private PreferenceKey() {}
-    }
-
-    private static int[] _defaultArgs;
-    private static int[] _defaultType;
-    public static void DumpDefaultOnScreenConfig(int[] args, int[] type)
-    {
-        _defaultArgs = Arrays.copyOf(args, args.length);
-        _defaultType = Arrays.copyOf(type, args.length);
-    }
-
-    public static void RestoreDefaultOnScreenConfig(int[] args, int[] type)
-    {
-        System.arraycopy(_defaultArgs, 0, args, 0, args.length);
-        System.arraycopy(_defaultType, 0, type, 0, type.length);
     }
     
 	private Constants() {}
