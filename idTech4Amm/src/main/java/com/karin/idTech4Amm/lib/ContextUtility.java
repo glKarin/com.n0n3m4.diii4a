@@ -24,12 +24,14 @@ import android.util.Log;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.WindowInsets;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.text.util.Linkify;
 import android.text.method.LinkMovementMethod;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.TextHelper;
+import com.n0n3m4.q3e.Q3ELang;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -158,7 +160,7 @@ public final class ContextUtility
         }
     }
     
-    public static void Confirm(Context context, CharSequence title, CharSequence message, final Runnable yes, final Runnable no, final Object...opt)
+    public static void Confirm(Context context, CharSequence title, CharSequence message, final Runnable yes, final Runnable no, Runnable other, String otherName)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
@@ -180,32 +182,59 @@ public final class ContextUtility
                         dialog.dismiss();
                     }
                 });
-        if(opt.length > 0 && null != opt[0])
+        if(null != other)
         {
-            final Object arg1 = opt[0];
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && arg1 instanceof Consumer)
-                ((Consumer<AlertDialog.Builder>)arg1).accept(builder);
-            else if(arg1 instanceof Runnable)
+            builder.setNeutralButton(null != otherName ? otherName : Q3ELang.tr(context, R.string.other), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int v)
+                {
+                    other.run();
+                    dialog.dismiss();
+                }
+            });
+        }
+        builder.create().show();
+    }
+
+    public static void Input(Context context, CharSequence title, CharSequence message, String[] args, final Runnable yes, final Runnable no, Runnable other, String otherName)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        EditText editText = new EditText(context);
+        if(null != message)
+            editText.setHint(message);
+        builder.setView(editText);
+        builder.setCancelable(true);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int v)
             {
-                builder.setNeutralButton(R.string.other, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int v)
-                        {
-                            ((Runnable)arg1).run();
-                            dialog.dismiss();
-                        }
-                    });
+                if(null != args && args.length > 0)
+                    args[0] = editText.getText().toString();
+                if(yes != null)
+                    yes.run();
+                dialog.dismiss();
             }
-            else
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int v)
             {
-                builder.setNeutralButton(arg1.toString(), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int v)
-                        {
-                            if(null != opt[1])
-                                ((Runnable)opt[1]).run();
-                            dialog.dismiss();
-                        }
-                    });
+                if(null != args && args.length > 0)
+                    args[0] = editText.getText().toString();
+                if(no != null)
+                    no.run();
+                dialog.dismiss();
             }
+        });
+        if(null != other)
+        {
+            builder.setNeutralButton(null != otherName ? otherName : Q3ELang.tr(context, R.string.other), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int v)
+                {
+                    if(null != args && args.length > 0)
+                        args[0] = editText.getText().toString();
+                    other.run();
+                    dialog.dismiss();
+                }
+            });
         }
         builder.create().show();
     }

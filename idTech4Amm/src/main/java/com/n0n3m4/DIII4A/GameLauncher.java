@@ -55,18 +55,21 @@ import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
+import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.CheckForUpdateFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
 import com.n0n3m4.DIII4A.launcher.DebugPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
 import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
+import com.n0n3m4.DIII4A.launcher.EditExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameFolderFunc;
 import com.n0n3m4.DIII4A.launcher.RestorePreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.SetupControlsThemeFunc;
 import com.n0n3m4.DIII4A.launcher.StartGameFunc;
 import com.n0n3m4.DIII4A.launcher.SupportDeveloperFunc;
+import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
@@ -102,6 +105,9 @@ public class GameLauncher extends Activity{
 	private static final int CONST_RESULT_CODE_REQUEST_EXTRACT_PATCH_RESOURCE = 4;
 	private static final int CONST_RESULT_CODE_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE = 5;
 	private static final int CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE = 6;
+	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_LIBRARY = 7;
+	private static final int CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY = 8;
+	private static final int CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY = 9;
 
 	// GameLauncher function
 	private ExtractPatchResourceFunc m_extractPatchResourceFunc;
@@ -111,6 +117,9 @@ public class GameLauncher extends Activity{
 	private EditConfigFileFunc m_editConfigFileFunc;
 	private ChooseGameFolderFunc m_chooseGameFolderFunc;
 	private StartGameFunc m_startGameFunc;
+	private AddExternalLibraryFunc m_addExternalLibraryFunc;
+	private ChooseGameLibFunc m_chooseGameLibFunc;
+	private EditExternalLibraryFunc m_editExternalLibraryFunc;
 
 	final String default_gamedata= Environment.getExternalStorageDirectory() + "/diii4a";
 	private final ViewHolder V = new ViewHolder();
@@ -647,7 +656,7 @@ public class GameLauncher extends Activity{
     private void UpdateUserGame(boolean on)
     {
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
-        String game = preference.getString(GetGameModPreferenceKey(), "");
+        String game = preference.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
         if(null == game)
 			game = "";
 
@@ -717,10 +726,11 @@ public class GameLauncher extends Activity{
         V.edt_fs_game.setText(game);
         V.rg_fs_game.setEnabled(!on);
         V.rg_fs_q4game.setEnabled(!on);
+		V.rg_fs_preygame.setEnabled(!on);
         V.fs_game_user.setText(on ? R.string.mod_ : R.string.user_mod);
-        V.launcher_tab1_game_lib_button.setEnabled(on);
+        //V.launcher_tab1_game_lib_button.setEnabled(on);
         V.edt_fs_game.setEnabled(on);
-        V.launcher_tab1_user_game_layout.setVisibility(on ? View.VISIBLE : View.GONE);
+        //V.launcher_tab1_user_game_layout.setVisibility(on ? View.VISIBLE : View.GONE);
     }	
 	
 	public void onCreate(Bundle savedInstanceState) 
@@ -867,7 +877,7 @@ public class GameLauncher extends Activity{
                 public void afterTextChanged(Editable s)
                 {
                     PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putString(GetGameModPreferenceKey(), s.toString())
+                        .putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), s.toString())
                         .commit();
                 }
             });
@@ -1275,15 +1285,57 @@ public class GameLauncher extends Activity{
     
     private void OpenGameLibChooser()
     {
-		final String PreferenceKey = GetGameModLibPreferenceKey();
-		ChooseGameLibFunc chooseGameLibFunc = new ChooseGameLibFunc(this);
-		chooseGameLibFunc.SetCallback(new Runnable()
+		final String PreferenceKey = Q3EUtils.q3ei.GetGameModLibPreferenceKey();
+    	if(null == m_chooseGameLibFunc)
+		{
+			m_chooseGameLibFunc = new ChooseGameLibFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_LIBRARY);
+			m_chooseGameLibFunc.SetAddCallback(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if(null == m_addExternalLibraryFunc)
+						m_addExternalLibraryFunc = new AddExternalLibraryFunc(GameLauncher.this, new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								OpenGameLibChooser();
+							}
+						}, CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY);
+					Bundle bundle = new Bundle();
+					bundle.putString("path", GetExternalGameLibraryPath());
+					m_addExternalLibraryFunc.Start(bundle);
+				}
+			});
+			m_chooseGameLibFunc.SetEditCallback(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if(null == m_editExternalLibraryFunc)
+						m_editExternalLibraryFunc = new EditExternalLibraryFunc(GameLauncher.this, new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								OpenGameLibChooser();
+							}
+						}, CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY);
+					Bundle bundle = new Bundle();
+					bundle.putString("path", GetExternalGameLibraryPath());
+					m_editExternalLibraryFunc.Start(bundle);
+				}
+			});
+		}
+
+		m_chooseGameLibFunc.SetCallback(new Runnable()
 		{
 			@Override
 			public void run()
 			{
 				final SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
-				String lib = chooseGameLibFunc.GetResult();
+				String lib = m_chooseGameLibFunc.GetResult();
 				if(null != lib && !lib.isEmpty())
 				{
 					preference.edit().putString(PreferenceKey, lib).commit();
@@ -1298,7 +1350,8 @@ public class GameLauncher extends Activity{
 		});
 		Bundle bundle = new Bundle();
 		bundle.putString("key", PreferenceKey);
-		chooseGameLibFunc.Start(bundle);
+		bundle.putString("path", GetExternalGameLibraryPath());
+		m_chooseGameLibFunc.Start(bundle);
     }
     
     private void Test()
@@ -1418,7 +1471,7 @@ public class GameLauncher extends Activity{
             RemoveProp("harm_fs_gameLibPath");
             V.edt_fs_game.setText(game);
         }
-        preference.edit().putString(GetGameModPreferenceKey(), game).commit();
+        preference.edit().putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), game).commit();
 	}
 
     private boolean LockCmdUpdate()
@@ -1473,6 +1526,14 @@ public class GameLauncher extends Activity{
 						m_restorePreferenceFunc.Start(bundle);
 					}
 					break;
+				case CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY:
+					if(null != m_addExternalLibraryFunc)
+					{
+						Bundle bundle = new Bundle();
+						bundle.putParcelable("uri", data.getData());
+						m_addExternalLibraryFunc.Start(bundle);
+					}
+					break;
 			}
 		}
 	}
@@ -1507,6 +1568,18 @@ public class GameLauncher extends Activity{
 					if(null != m_startGameFunc)
 						m_startGameFunc.run();
 					break;
+				case CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY:
+					if(null != m_addExternalLibraryFunc)
+						m_addExternalLibraryFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_LIBRARY:
+					if(null != m_chooseGameLibFunc)
+						m_chooseGameLibFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY:
+					if(null != m_editExternalLibraryFunc)
+						m_editExternalLibraryFunc.run();
+					break;
 				default:
 					break;
 			}
@@ -1533,6 +1606,15 @@ public class GameLauncher extends Activity{
 				break;
 			case CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE:
 				opt = Q3ELang.tr(this, R.string.restore_settings);
+				break;
+			case CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY:
+				opt = Q3ELang.tr(this, R.string.add_external_game_library);
+				break;
+			case CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY:
+				opt = Q3ELang.tr(this, R.string.edit_external_game_library);
+				break;
+			case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_LIBRARY:
+				opt = Q3ELang.tr(this, R.string.access_external_game_library);
 				break;
 			default:
 				opt = Q3ELang.tr(this, R.string.operation);
@@ -1636,7 +1718,7 @@ public class GameLauncher extends Activity{
         SetGame(newGame);
         preference.edit().putString(Q3EPreference.pref_harm_game_lib, "");
 
-        String game = preference.getString(GetGameModPreferenceKey(), "");
+        String game = preference.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
         if(null == game)
 			game = "";
         V.edt_fs_game.setText(game);
@@ -1873,20 +1955,6 @@ public class GameLauncher extends Activity{
 		m_checkForUpdateFunc.Start(new Bundle());
 	}
 
-	private String GetGameModPreferenceKey()
-	{
-		return Q3EUtils.q3ei.isPrey ? Q3EPreference.pref_harm_prey_fs_game
-				: (Q3EUtils.q3ei.isQ4 ? Q3EPreference.pref_harm_q4_fs_game
-				: Q3EPreference.pref_harm_fs_game);
-	}
-
-	private String GetGameModLibPreferenceKey()
-	{
-		return Q3EUtils.q3ei.isPrey ? Q3EPreference.pref_harm_prey_game_lib
-				: (Q3EUtils.q3ei.isQ4 ? Q3EPreference.pref_harm_q4_game_lib
-				: Q3EPreference.pref_harm_game_lib);
-	}
-
 	private RadioGroup GetGameModRadioGroup()
 	{
 		return Q3EUtils.q3ei.isPrey ? V.rg_fs_preygame
@@ -1911,6 +1979,13 @@ public class GameLauncher extends Activity{
 	private void OpenOnScreenButtonThemeSetting()
 	{
 		new SetupControlsThemeFunc(this).Start(new Bundle());
+	}
+
+	private String GetExternalGameLibraryPath()
+	{
+		String arch = Q3EJNI.IS_64 ? "aarch64" : "arm";
+		String path = getFilesDir() + File.separator + arch;
+		return path;
 	}
 
 

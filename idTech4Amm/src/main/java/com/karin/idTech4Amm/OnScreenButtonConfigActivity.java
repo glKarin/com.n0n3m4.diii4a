@@ -134,7 +134,7 @@ public class OnScreenButtonConfigActivity extends Activity
                     LoadConfig();
                     Toast.makeText(OnScreenButtonConfigActivity.this, R.string.onscreen_button_config_has_reset, Toast.LENGTH_SHORT).show();
                 }
-            }, null);
+            }, null, null, null);
     }
 
     public Map<Integer, String> BuildKeyValueMapFromResource(int keysId, int valuesId)

@@ -67,6 +67,7 @@ public class Q3EInterface
 	public float joystick_release_range = 0.0f;
 	public float joystick_inner_dead_zone = 0.0f;
 	public boolean joystick_unfixed = false;
+	public boolean joystick_smooth = true;
 
 	public String app_storage_path;
 	
@@ -388,5 +389,19 @@ public class Q3EInterface
 		arg_table[Q3EGlobals.UI_INTERACT * 4 + 3] = 0;
 
 		_defaultArgs = Arrays.copyOf(arg_table, arg_table.length);
+	}
+
+	public String GetGameModPreferenceKey()
+	{
+		return isPrey ? Q3EPreference.pref_harm_prey_fs_game
+				: (isQ4 ? Q3EPreference.pref_harm_q4_fs_game
+				: Q3EPreference.pref_harm_fs_game);
+	}
+
+	public String GetGameModLibPreferenceKey()
+	{
+		return isPrey ? Q3EPreference.pref_harm_prey_game_lib
+				: (isQ4 ? Q3EPreference.pref_harm_q4_game_lib
+				: Q3EPreference.pref_harm_game_lib);
 	}
 }

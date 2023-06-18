@@ -13,13 +13,22 @@ import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 public final class ChooseGameLibFunc extends GameLauncherFunc
 {
     private String m_key;
+    private final int m_code;
+    private String m_path;
+    private Runnable m_addCallback;
+    private Runnable m_editCallback;
 
-    public ChooseGameLibFunc(GameLauncher gameLauncher)
+    public ChooseGameLibFunc(GameLauncher gameLauncher, int code)
     {
         super(gameLauncher);
+        m_code = code;
     }
 
     public void Reset()
@@ -32,8 +41,25 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
         Reset();
 
         m_key = data.getString("key");
+        m_path = data.getString("path");
+
+        int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
+        if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
+            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(m_gameLauncher, R.string.load_external_game_library)));
+        if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
+            return;
 
         run();
+    }
+
+    public void SetAddCallback(Runnable runnable)
+    {
+        m_addCallback  = runnable;
+    }
+
+    public void SetEditCallback(Runnable runnable)
+    {
+        m_editCallback  = runnable;
     }
 
     public void run()
@@ -42,18 +68,51 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
         final String libPath = ContextUtility.NativeLibDir(m_gameLauncher) + "/";
         final String[] Libs = Q3EUtils.q3ei.libs;
         final String PreferenceKey = m_key;
-        final String[] items = new String[Libs.length];
+        final List<CharSequence> items = new ArrayList<>();
+        final List<String> values = new ArrayList<>();
         String lib = preference.getString(PreferenceKey, "");
         int selected = -1;
-        for(int i = 0; i < Libs.length; i++)
+        int i = 0;
+
+        for(; i < Libs.length; i++)
         {
-            items[i] = "lib" + Libs[i] + ".so";
-            if((libPath + items[i]).equals(lib))
-            {
+            String n = "lib" + Libs[i] + ".so";
+            items.add(n);
+            String p = libPath + n;
+            values.add(p);
+            if(p.equals(lib))
                 selected = i;
-            }
         }
 
+        try
+        {
+            String path = m_path;
+            File file = new File(path);
+            if(file.isDirectory())
+            {
+                File[] files = file.listFiles();
+                for (File f : files)
+                {
+                    if(!f.isFile() || !f.canRead())
+                        continue;
+                    String n = f.getName();
+                    if(!n.endsWith(".so") && !n.startsWith("lib"))
+                        continue;
+                    items.add("<external>/" + n);
+                    String p = f.getCanonicalPath();
+                    values.add(p);
+                    if(p.equals(lib))
+                        selected = i;
+                    i++;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        boolean hasExternal = items.size() > Libs.length;
         StringBuilder sb = new StringBuilder();
         if(Q3EJNI.IS_64)
             sb.append("armv8-a 64");
@@ -61,16 +120,16 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
             sb.append("armv7-a neon");
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(m_gameLauncher, R.string.game_library) + "(" + sb.toString() + ")");
-        builder.setSingleChoiceItems(items, selected, new DialogInterface.OnClickListener(){
+        builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {
-                String lib = libPath + items[p];
+                String lib = values.get(p);
                 SetResult(lib);
                 Callback();
                 dialog.dismiss();
             }
         });
-        builder.setNeutralButton(R.string.unset, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.unset, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int p)
             {
                 SetResult("");
@@ -78,6 +137,23 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
                 dialog.dismiss();
             }
         });
+        builder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int p)
+            {
+                if(null != m_addCallback)
+                    m_addCallback.run();
+            }
+        });
+        if(hasExternal)
+        {
+            builder.setNeutralButton(R.string.edit, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int p)
+                {
+                    if(null != m_editCallback)
+                        m_editCallback.run();
+                }
+            });
+        }
         AlertDialog dialog = builder.create();
         dialog.show();
     }

@@ -55,6 +55,16 @@ public abstract class GameLauncherFunc implements Runnable
         Toast.makeText(m_gameLauncher, str, Toast.LENGTH_SHORT).show();
     }
 
+    protected void Toast_long(int resId)
+    {
+        Toast.makeText(m_gameLauncher, resId, Toast.LENGTH_LONG).show();
+    }
+
+    protected void Toast_short(int resId)
+    {
+        Toast.makeText(m_gameLauncher, resId, Toast.LENGTH_SHORT).show();
+    }
+
     public Bundle GetData()
     {
         return m_data;
@@ -70,6 +80,12 @@ public abstract class GameLauncherFunc implements Runnable
     {
         if(null != m_data)
             m_data.putString(CONST_RESULT_KEY, object);
+    }
+
+    protected void SetResult(boolean object)
+    {
+        if(null != m_data)
+            m_data.putBoolean(CONST_RESULT_KEY, object);
     }
 
     public <T> T GetResult()

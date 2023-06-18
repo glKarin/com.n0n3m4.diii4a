@@ -218,5 +218,17 @@
     <string name="version_">Version:</string>
     <string name="changes_">Changes:</string>
     <string name="new_update_release">New update release</string>
+    <string name="add">Add</string>
+    <string name="edit">Edit</string>
+    <string name="remove">Remove</string>
+    <string name="edit_external_game_library">Edit external game library</string>
+    <string name="add_external_game_library">Add external game library</string>
+    <string name="access_external_game_library">Access external game library</string>
+    <string name="load_external_game_library">load external game library</string>
+    <string name="input_external_library_name">Input external library name</string>
+    <string name="must_input_new_library_name">Must input new library name!</string>
+    <string name="e_g">e.g.</string>
+    <string name="add_game_library_file_success">Add game library file success.</string>
+    <string name="add_game_library_file_fail">Add game library file fail!</string>
 
 </resources>

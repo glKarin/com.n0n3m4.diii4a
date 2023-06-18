@@ -215,4 +215,16 @@
     <string name="version_">版本:</string>
     <string name="changes_">变更:</string>
     <string name="new_update_release">新版本更新</string>
+    <string name="add">添加</string>
+    <string name="edit">编辑</string>
+    <string name="remove">移除</string>
+    <string name="edit_external_game_library">编辑外部游戏运行库</string>
+    <string name="input_external_library_name">输入外部游戏运行库名称</string>
+    <string name="must_input_new_library_name">必须输入外部游戏运行库名称!</string>
+    <string name="e_g">例如:</string>
+    <string name="add_game_library_file_success">添加外部游戏运行库成功.</string>
+    <string name="add_game_library_file_fail">添加外部游戏运行库失败!</string>
+    <string name="add_external_game_library">添加外部游戏运行库</string>
+    <string name="access_external_game_library">访问外部游戏运行库</string>
+    <string name="load_external_game_library">载入外部游戏运行库</string>
 </resources>

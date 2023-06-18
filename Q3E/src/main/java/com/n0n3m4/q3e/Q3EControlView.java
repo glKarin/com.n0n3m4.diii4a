@@ -265,7 +265,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
             mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
             m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, ENUM_BACK_ALL); //k
-            analog = mPrefs.getBoolean(Q3EPreference.pref_analog, true);
+            analog = Q3EUtils.q3ei.joystick_smooth;
 
             if(m_usingMouseDevice)
                 m_mouseDevice = new Q3EMouseDevice(this);

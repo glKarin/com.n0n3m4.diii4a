@@ -354,6 +354,17 @@ public class Q3EMain extends Activity
         Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EPreference.pref_harm_function_key_toolbar, false);
         Q3EUtils.q3ei.joystick_unfixed = preferences.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
+        Q3EUtils.q3ei.joystick_smooth = preferences.getBoolean(Q3EPreference.pref_analog, true);
+        // DOOM 3: hardscorps mod template disable smooth joystick
+        /*if(Q3EUtils.q3ei.joystick_smooth)
+        {
+            if(!Q3EUtils.q3ei.isQ4 && !Q3EUtils.q3ei.isPrey)
+            {
+                String game = preferences.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
+                if("hardscorps".equals(game))
+                    Q3EUtils.q3ei.joystick_smooth = false;
+            }
+        }*/
 
         Q3EUtils.q3ei.SetAppStoragePath(this);
     }
