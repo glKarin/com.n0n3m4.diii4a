@@ -47,6 +47,19 @@ void R_LoadImage( const char *name, byte **pic, int *width, int *height, bool ma
  * You may also wish to include "jerror.h".
  */
 
+#ifdef _K_USING_STB
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_HDR
+#define STBI_NO_LINEAR
+#define STBI_ONLY_JPEG // at least for now, only use it for JPEG
+#define STBI_NO_STDIO  // images are passed as buffers
+
+#define STBI_ONLY_PNG
+
+#include "../externlibs/stb/stb_image.h"
+
+#else
+
 extern "C" {
 #include <jpeglib.h>
 
@@ -77,6 +90,7 @@ extern "C" {
 	}
 
 }
+#endif // end stb_jpeg
 
 
 /*
@@ -169,7 +183,65 @@ void R_WritePalTGA(const char *filename, const byte *data, const byte *palette, 
 static void LoadBMP(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 static void LoadTGA(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 static void LoadJPG(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+#ifdef _K_USING_STB
+static void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp)
+{
 
+	byte	*fbuffer;
+	int	len;
+
+	if (pic) {
+		*pic = NULL;		// until proven otherwise
+	}
+
+	{
+		idFile *f;
+
+		f = fileSystem->OpenFileRead(filename);
+
+		if (!f) {
+			return;
+		}
+
+		len = f->Length();
+
+		if (timestamp) {
+			*timestamp = f->Timestamp();
+		}
+
+		if (!pic) {
+			fileSystem->CloseFile(f);
+			return;	// just getting timestamp
+		}
+
+		fbuffer = (byte *)Mem_ClearedAlloc(len);
+		f->Read(fbuffer, len);
+		fileSystem->CloseFile(f);
+	}
+
+	int w=0, h=0, comp=0;
+	byte* decodedImageData = stbi_load_from_memory( fbuffer, len, &w, &h, &comp, STBI_rgb_alpha );
+
+	Mem_Free( fbuffer );
+
+	if ( decodedImageData == NULL ) {
+		common->Warning( "stb_image was unable to load PNG %s : %s\n",
+					filename, stbi_failure_reason());
+		return;
+	}
+
+	// *pic must be allocated with R_StaticAlloc(), but stb_image allocates with malloc()
+	// (and as there is no R_StaticRealloc(), #define STBI_MALLOC etc won't help)
+	// so the decoded data must be copied once
+	int size = w*h*4;
+	*pic = (byte *)R_StaticAlloc( size );
+	memcpy( *pic, decodedImageData, size );
+	*width = w;
+	*height = h;
+	// now that decodedImageData has been copied into *pic, it's not needed anymore
+	stbi_image_free( decodedImageData );
+}
+#endif
 
 /*
 ========================================================================
@@ -818,6 +890,61 @@ LoadJPG
 */
 static void LoadJPG(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp)
 {
+#ifdef _K_USING_STB
+	byte	*fbuffer;
+	int	len;
+
+	if (pic) {
+		*pic = NULL;		// until proven otherwise
+	}
+
+	{
+		idFile *f;
+
+		f = fileSystem->OpenFileRead(filename);
+
+		if (!f) {
+			return;
+		}
+
+		len = f->Length();
+
+		if (timestamp) {
+			*timestamp = f->Timestamp();
+		}
+
+		if (!pic) {
+			fileSystem->CloseFile(f);
+			return;	// just getting timestamp
+		}
+
+		fbuffer = (byte *)Mem_ClearedAlloc(len);
+		f->Read(fbuffer, len);
+		fileSystem->CloseFile(f);
+	}
+
+	int w=0, h=0, comp=0;
+	byte* decodedImageData = stbi_load_from_memory( fbuffer, len, &w, &h, &comp, STBI_rgb_alpha );
+
+	Mem_Free( fbuffer );
+
+	if ( decodedImageData == NULL ) {
+		common->Warning( "stb_image was unable to load JPG %s : %s\n",
+					filename, stbi_failure_reason());
+		return;
+	}
+
+	// *pic must be allocated with R_StaticAlloc(), but stb_image allocates with malloc()
+	// (and as there is no R_StaticRealloc(), #define STBI_MALLOC etc won't help)
+	// so the decoded data must be copied once
+	int size = w*h*4;
+	*pic = (byte *)R_StaticAlloc( size );
+	memcpy( *pic, decodedImageData, size );
+	*width = w;
+	*height = h;
+	// now that decodedImageData has been copied into *pic, it's not needed anymore
+	stbi_image_free( decodedImageData );
+#else
 	/* This struct contains the JPEG decompression parameters and pointers to
 	 * working space (which is allocated as needed by the JPEG library).
 	 */
@@ -993,6 +1120,7 @@ static void LoadJPG(const char *filename, unsigned char **pic, int *width, int *
 	 */
 
 	/* And we're done! */
+#endif
 }
 
 //===================================================================
@@ -1058,6 +1186,13 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 			name.StripFileExtension();
 			name.DefaultFileExtension(".jpg");
 			LoadJPG(name.c_str(), pic, width, height, timestamp);
+#ifdef _K_USING_STB
+			if ((pic && *pic == 0) || (timestamp && *timestamp == -1)) {
+				name.StripFileExtension();
+				name.DefaultFileExtension(".png");
+				LoadPNG(name.c_str(), pic, width, height, timestamp);
+			}
+#endif
 		}
 	} else if (ext == "pcx") {
 		LoadPCX32(name.c_str(), pic, width, height, timestamp);

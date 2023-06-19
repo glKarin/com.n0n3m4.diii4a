@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(doom3)
 
 add_definitions(-D__ANDROID__)
-add_definitions(-DNO_ALSA)
-add_definitions(-D__DOOM_DLL__)
-add_definitions(-DHAVE_CONFIG_H)
 add_definitions(-D_K_CLANG)
 add_definitions(-DID_ENABLE_CURL=1)
+#add_definitions(-DNO_ALSA)
+#add_definitions(-D__DOOM_DLL__)
+#add_definitions(-DHAVE_CONFIG_H)
 set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(CORE_DEFINES "__DOOM_DLL__;HAVE_CONFIG_H;NO_ALSA")
 
 # set(CMAKE_BUILD_TYPE "Release")
 # TODO
@@ -65,6 +67,7 @@ option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for
 
 option(OPENSLES			"OpenSLES support" ON)
 option(MULTITHREAD			"Multi-Thread support" ON)
+option(USING_STB			"Using stb" ON)
 
 option(D3LE			"Build the d3le game code" ON)
 option(CDOOM			"Build the cdoom game code" ON)
@@ -261,9 +264,77 @@ if(cxx_has_Wno-class-memaccess)
 	add_compile_options(-Wno-class-memaccess)
 endif()
 
+# I'm a bit sloppy with headers and just glob them in..
+# they're only handled in CMake at all so they turn up in Visual Studio solutions..
+
+# globs all the headers from ${PATHPREFIX}/ and adds them to ${SRCLIST}
+function(add_globbed_headers SRCLIST PATHPREFIX)
+	file(GLOB_RECURSE tmp_hdrs RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${PATHPREFIX}/*.h")
+	set(${SRCLIST} ${tmp_hdrs} ${${SRCLIST}})
+endfunction()
+
 set(sys_libs ${sys_libs} dl)
 set(sys_libs ${sys_libs} GLESv2 EGL android z)
-set(local_libs ogg jpeg curl)
+set(local_libs ogg curl)
+if(USING_STB)
+	set(CORE_DEFINES "${CORE_DEFINES};_K_USING_STB")
+	message(STATUS "Using stb jpeg image")
+endif()
+#//k jpeg
+set(src_jpeg
+		externlibs/jpeg-8d/jaricom.c
+		externlibs/jpeg-8d/jcapimin.c
+		externlibs/jpeg-8d/jcapistd.c
+		externlibs/jpeg-8d/jcarith.c
+		externlibs/jpeg-8d/jccoefct.c
+		externlibs/jpeg-8d/jccolor.c
+		externlibs/jpeg-8d/jcdctmgr.c
+		externlibs/jpeg-8d/jchuff.c
+		externlibs/jpeg-8d/jcinit.c
+		externlibs/jpeg-8d/jcmainct.c
+		externlibs/jpeg-8d/jcmarker.c
+		externlibs/jpeg-8d/jcmaster.c
+		externlibs/jpeg-8d/jcomapi.c
+		externlibs/jpeg-8d/jcparam.c
+		externlibs/jpeg-8d/jcprepct.c
+		externlibs/jpeg-8d/jcsample.c
+		externlibs/jpeg-8d/jctrans.c
+		externlibs/jpeg-8d/jdapimin.c
+		externlibs/jpeg-8d/jdapistd.c
+		externlibs/jpeg-8d/jdarith.c
+		externlibs/jpeg-8d/jdatadst.c
+		externlibs/jpeg-8d/jdatasrc.c
+		externlibs/jpeg-8d/jdcoefct.c
+		externlibs/jpeg-8d/jdcolor.c
+		externlibs/jpeg-8d/jddctmgr.c
+		externlibs/jpeg-8d/jdhuff.c
+		externlibs/jpeg-8d/jdinput.c
+		externlibs/jpeg-8d/jdmainct.c
+		externlibs/jpeg-8d/jdmarker.c
+		externlibs/jpeg-8d/jdmaster.c
+		externlibs/jpeg-8d/jdmerge.c
+		externlibs/jpeg-8d/jdpostct.c
+		externlibs/jpeg-8d/jdsample.c
+		externlibs/jpeg-8d/jdtrans.c
+		externlibs/jpeg-8d/jerror.c
+		externlibs/jpeg-8d/jfdctflt.c
+		externlibs/jpeg-8d/jfdctfst.c
+		externlibs/jpeg-8d/jfdctint.c
+		externlibs/jpeg-8d/jidctflt.c
+		externlibs/jpeg-8d/jidctfst.c
+		externlibs/jpeg-8d/jidctint.c
+		externlibs/jpeg-8d/jmemmgr.c
+		externlibs/jpeg-8d/jmemname.c
+		externlibs/jpeg-8d/jquant1.c
+		externlibs/jpeg-8d/jquant2.c
+		externlibs/jpeg-8d/jutils.c
+		)
+
+add_globbed_headers(src_jpeg "externlibs/jpeg-8d")
+include_directories("externlibs/jpeg-8d")
+add_library(jpeg STATIC ${src_jpeg})
+
+set(local_libs ${local_libs} jpeg)
 
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -357,15 +428,6 @@ set(src_renderer
 	renderer/tr_rendertools.cpp
 	renderer/esTransform.c
 )
-
-# I'm a bit sloppy with headers and just glob them in..
-# they're only handled in CMake at all so they turn up in Visual Studio solutions..
-
-# globs all the headers from ${PATHPREFIX}/ and adds them to ${SRCLIST}
-function(add_globbed_headers SRCLIST PATHPREFIX)
-	file(GLOB_RECURSE tmp_hdrs RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${PATHPREFIX}/*.h")
-	set(${SRCLIST} ${tmp_hdrs} ${${SRCLIST}})
-endfunction()
 
 add_globbed_headers(src_renderer "renderer")
 
@@ -1127,60 +1189,7 @@ add_globbed_headers(src_curl "externlibs/curl/lib")
 include_directories("externlibs/curl/lib")
 include_directories("externlibs/curl/include")
 add_library(curl STATIC ${src_curl})
-
-#//k jpeg
-set(src_jpeg
-	externlibs/jpeg-8d/jaricom.c
-	externlibs/jpeg-8d/jcapimin.c
-	externlibs/jpeg-8d/jcapistd.c
-	externlibs/jpeg-8d/jcarith.c
-	externlibs/jpeg-8d/jccoefct.c
-	externlibs/jpeg-8d/jccolor.c
-	externlibs/jpeg-8d/jcdctmgr.c
-	externlibs/jpeg-8d/jchuff.c
-	externlibs/jpeg-8d/jcinit.c
-	externlibs/jpeg-8d/jcmainct.c
-	externlibs/jpeg-8d/jcmarker.c
-	externlibs/jpeg-8d/jcmaster.c
-	externlibs/jpeg-8d/jcomapi.c
-	externlibs/jpeg-8d/jcparam.c
-	externlibs/jpeg-8d/jcprepct.c
-	externlibs/jpeg-8d/jcsample.c
-	externlibs/jpeg-8d/jctrans.c
-	externlibs/jpeg-8d/jdapimin.c
-	externlibs/jpeg-8d/jdapistd.c
-	externlibs/jpeg-8d/jdarith.c
-	externlibs/jpeg-8d/jdatadst.c
-	externlibs/jpeg-8d/jdatasrc.c
-	externlibs/jpeg-8d/jdcoefct.c
-	externlibs/jpeg-8d/jdcolor.c
-	externlibs/jpeg-8d/jddctmgr.c
-	externlibs/jpeg-8d/jdhuff.c
-	externlibs/jpeg-8d/jdinput.c
-	externlibs/jpeg-8d/jdmainct.c
-	externlibs/jpeg-8d/jdmarker.c
-	externlibs/jpeg-8d/jdmaster.c
-	externlibs/jpeg-8d/jdmerge.c
-	externlibs/jpeg-8d/jdpostct.c
-	externlibs/jpeg-8d/jdsample.c
-	externlibs/jpeg-8d/jdtrans.c
-	externlibs/jpeg-8d/jerror.c
-	externlibs/jpeg-8d/jfdctflt.c
-	externlibs/jpeg-8d/jfdctfst.c
-	externlibs/jpeg-8d/jfdctint.c
-	externlibs/jpeg-8d/jidctflt.c
-	externlibs/jpeg-8d/jidctfst.c
-	externlibs/jpeg-8d/jidctint.c
-	externlibs/jpeg-8d/jmemmgr.c
-	externlibs/jpeg-8d/jmemname.c
-	externlibs/jpeg-8d/jquant1.c
-	externlibs/jpeg-8d/jquant2.c
-	externlibs/jpeg-8d/jutils.c
-)
-
-add_globbed_headers(src_jpeg "externlibs/jpeg-8d")
-include_directories("externlibs/jpeg-8d")
-add_library(jpeg STATIC ${src_jpeg})
+set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 #//k ogg
 set(src_ogg
@@ -1351,7 +1360,7 @@ if(CORE)
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
-	set_target_properties(${DOOM3BINARY} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__;${TOOLS_DEFINES}")
+	set_target_properties(${DOOM3BINARY} PROPERTIES COMPILE_DEFINITIONS "${CORE_DEFINES}")
 	set_target_properties(${DOOM3BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 
 	target_link_libraries(${DOOM3BINARY}
@@ -1517,9 +1526,9 @@ if(RAVEN)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
 	if(RAVEN_BSE_FX)
-		set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__;_RAVEN;_RAVEN_FX;${TOOLS_DEFINES}")
+		set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "_RAVEN;_RAVEN_FX;${CORE_DEFINES}")
 	else()
-		set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__;_RAVEN;${TOOLS_DEFINES}")
+		set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${CORE_DEFINES}")
 	endif()
 	set_target_properties(${QUAKE4BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 
@@ -1547,7 +1556,7 @@ if(HUMANHEAD)
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_humanhead} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
-	set_target_properties(${PREYBINARY} PROPERTIES COMPILE_DEFINITIONS "__DOOM_DLL__;_HUMANHEAD;${TOOLS_DEFINES}")
+	set_target_properties(${PREYBINARY} PROPERTIES COMPILE_DEFINITIONS "_HUMANHEAD;${CORE_DEFINES}")
 	set_target_properties(${PREYBINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 
 	target_link_libraries(${PREYBINARY}
