@@ -62,6 +62,7 @@ public class Q3EInterface
     
     public boolean view_motion_control_gyro = false;
     public String start_temporary_extra_command = "";
+	public String cmd = "game.arm";
 	public boolean multithread = false;
 	public boolean function_key_toolbar = false;
 	public float joystick_release_range = 0.0f;

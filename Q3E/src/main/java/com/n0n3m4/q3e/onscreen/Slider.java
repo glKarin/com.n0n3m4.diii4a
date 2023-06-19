@@ -4,7 +4,7 @@ import android.view.View;
 
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EUtils;
-import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.gl.Q3EGL;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -70,14 +70,14 @@ public class Slider extends Paintable implements TouchListener
     @Override
     public void loadtex(GL10 gl)
     {
-        tex_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), tex_androidid));
+        tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), tex_androidid));
     }
 
     @Override
     public void Paint(GL11 gl)
     {
         super.Paint(gl);
-        GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
     }
 
     @Override

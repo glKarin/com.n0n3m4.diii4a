@@ -42,7 +42,9 @@ import com.n0n3m4.q3e.device.Q3EOuya;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.LinkedHashMap;
 
 public class Q3EUtils
@@ -436,5 +438,38 @@ public class Q3EUtils
             e.printStackTrace();
             return defVal;
         }
+    }
+
+    public static long Copy(OutputStream out, InputStream in, int...bufferSizeArg) throws RuntimeException
+    {
+        if(null == out)
+            return -1;
+        if(null == in)
+            return -1;
+
+        int bufferSize = bufferSizeArg.length > 0 ? bufferSizeArg[0] : 0;
+        if (bufferSize <= 0)
+            bufferSize = 8192;
+
+        byte[] buffer = new byte[bufferSize];
+
+        long size = 0L;
+
+        int readSize;
+        try
+        {
+            while((readSize = in.read(buffer)) != -1)
+            {
+                out.write(buffer, 0, readSize);
+                size += readSize;
+                out.flush();
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        return size;
     }
 }

@@ -25,7 +25,8 @@ public final class Constants
             "Add `zh` language.",
             "Move some on-screen settings to `Configure on-screen controls` page.",
             "DOOM3 add `full-body awareness` mod. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset.",
-            "Support add external game library in `GameLib` at tab `General`(Testing. Not sure available for all device and Android version. You can compile own game mod library(armv7/armv8) with DIII4A project and run it using original idTech4A++).",
+            "Support add external game library in `GameLib` at tab `General`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project and run it using original idTech4A++).",
+            "Support load external game library in `Game working directory`/`fs_game` folder instead of default game library of apk if enabled `Find game library in game data directory`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project, and then named `gameaarch64.so` or `libgameaarch64.so` on arm64 device or named `gamearm.so` or `libgamearm.so` on arm32 device, and then put it on `Game working directory`/`fs_game` folder).",
 	};
 
 	// Launcher preference keys

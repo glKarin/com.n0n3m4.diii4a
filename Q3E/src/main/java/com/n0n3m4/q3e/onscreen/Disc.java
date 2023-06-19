@@ -8,8 +8,8 @@ import android.view.View;
 
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EUtils;
-import com.n0n3m4.q3e.gl.GL;
-import com.n0n3m4.q3e.gl.GLBitmapTexture;
+import com.n0n3m4.q3e.gl.Q3EGL;
+import com.n0n3m4.q3e.gl.KGLBitmapTexture;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -141,7 +141,7 @@ public class Disc extends Paintable implements TouchListener
             int mr = (r + centerR) / 2;
             c.drawText("" + Character.toUpperCase(key), r + (int) (x * mr), r + (int) (y * mr + (fontHeight)), p);
 
-            res.textureId = GL.loadGLTexture(gl, bmp);
+            res.textureId = Q3EGL.loadGLTexture(gl, bmp);
 
             sw = m_circleWidth;
             bmp = Bitmap.createBitmap(dot_size, dot_size, Bitmap.Config.ARGB_8888);
@@ -179,7 +179,7 @@ public class Disc extends Paintable implements TouchListener
             rect = new RectF(0 + sw / 2, 0 + sw / 2, dot_size - sw / 2, dot_size - sw / 2);
             c.drawArc(rect, (float) (start - 90), (float) (end - start), false, p);
 
-            res.borderTextureId = GL.loadGLTexture(gl, bmp);
+            res.borderTextureId = Q3EGL.loadGLTexture(gl, bmp);
         }
 
         return res;
@@ -189,7 +189,7 @@ public class Disc extends Paintable implements TouchListener
     {
         //main paint
         super.Paint(gl);
-        GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
         if (null == m_parts || m_parts.length == 0)
             return;
 
@@ -199,9 +199,9 @@ public class Disc extends Paintable implements TouchListener
             {
                 //DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red,green,blue,p.pressed ? (float)Math.max(alpha, 0.9) : (float)(Math.min(alpha, 0.1)));
                 if (p.pressed)
-                    GL.DrawVerts(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+                    Q3EGL.DrawVerts(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
                 else
-                    GL.DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
+                    Q3EGL.DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
             }
         }
     }
@@ -217,9 +217,9 @@ public class Disc extends Paintable implements TouchListener
         m_circleWidth = size / 2 - internalsize;
         final int[] color = {255, 255, 255, 255};
         if (null != m_textures && m_textures.length > 0)
-            tex_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
         if (tex_ind == 0)
-            tex_ind = GLBitmapTexture.GenCircleRingTexture(gl, size, m_circleWidth, color);
+            tex_ind = KGLBitmapTexture.GenCircleRingTexture(gl, size, m_circleWidth, color);
 
         if (null != m_keys && m_keys.length > 0)
         {

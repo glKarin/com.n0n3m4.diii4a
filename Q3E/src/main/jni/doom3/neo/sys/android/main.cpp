@@ -664,6 +664,16 @@ static volatile bool render_thread_finished = false;
 extern void BackendThreadWait();
 extern void BackendThreadTask();
 
+const xthreadInfo * Sys_GetRenderThread(void)
+{
+	return &render_thread;
+}
+
+intptr_t Sys_GetMainThread(void)
+{
+	return main_thread;
+}
+
 bool Sys_InRenderThread(void)
 {
 	return render_thread.threadHandle && pthread_equal(render_thread.threadHandle, pthread_self()) != 0;

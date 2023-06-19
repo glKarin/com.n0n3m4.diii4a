@@ -239,35 +239,55 @@
                     android:layout_height="wrap_content"
 					android:text="@string/user_mod"/>
                 
-			<LinearLayout
+				<LinearLayout
                 android:id="@+id/launcher_tab1_user_game_layout"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:gravity="bottom">
 
-				<EditText
-					android:id="@+id/edt_fs_game"
-					android:layout_width="0dp"
-					android:layout_weight="1"
-					android:layout_height="wrap_content"
-					android:ems="10"
-					android:hint="@string/input_your_mod_folder_name"
-					android:imeOptions="flagNoExtractUi"
-					android:inputType="textNoSuggestions">
+					<EditText
+						android:id="@+id/edt_fs_game"
+						android:layout_width="0dp"
+						android:layout_weight="1"
+						android:layout_height="wrap_content"
+						android:ems="10"
+						android:hint="@string/input_your_mod_folder_name"
+						android:imeOptions="flagNoExtractUi"
+						android:inputType="textNoSuggestions">
 
-				</EditText>
+					</EditText>
 
-				<Button
+					<Button
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:id="@+id/launcher_tab1_game_lib_button"
+						android:textAllCaps="false"
+						android:text="@string/gamelib">
+
+					</Button>
+
+				</LinearLayout>
+            </LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical">
+				<CheckBox
+					android:id="@+id/find_dll"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:id="@+id/launcher_tab1_game_lib_button"
-					android:textAllCaps="false"
-					android:text="@string/gamelib">
-
-				</Button>
-
+					android:text="@string/find_game_library_in_game_data_directory"/>
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="32dp"
+					android:layout_marginTop="0dp"
+					android:layout_marginBottom="0dp"
+					android:textSize="12sp"
+					android:text="@string/if_game_library_file_named_gameaarch64_so_or_libgameaarch64_so_on_arm64_device_or_named_gamearm_so_or_libgamearm_so_on_arm32_device_found_at_game_working_directory_fs_game_folder_will_load_it_instead_of_default_game_library_of_apk"
+					android:textAppearance="?android:attr/textAppearanceSmall"/>
 			</LinearLayout>
-            </LinearLayout>
 
 			<CheckBox
 				android:id="@+id/multithreading"

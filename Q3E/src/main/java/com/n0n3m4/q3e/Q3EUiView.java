@@ -26,12 +26,11 @@ import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
-import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.onscreen.Button;
 import com.n0n3m4.q3e.onscreen.Disc;
 import com.n0n3m4.q3e.onscreen.FingerUi;
@@ -67,7 +66,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     {
         super(context);
 
-        GL.usegles20 = false;
+        Q3EGL.usegles20 = false;
 
         setRenderer(this);
 
@@ -530,7 +529,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     protected void onDetachedFromWindow()
     {
         super.onDetachedFromWindow();
-        GL.usegles20 = true;
+        Q3EGL.usegles20 = true;
     }
 
     public void Post(Runnable runnable, int... delayed)

@@ -41,7 +41,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
-import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.Q3EConfigChooser;
 import com.n0n3m4.q3e.karin.KKeyToolBar;
 import com.n0n3m4.q3e.karin.KOnceRunnable;
@@ -86,10 +86,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         super(context);
 
-        setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, GL.usegles20));
+        setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, Q3EGL.usegles20));
         getHolder().setFormat(PixelFormat.RGBA_8888);
 
-        if (GL.usegles20)
+        if (Q3EGL.usegles20)
             setEGLContextClientVersion(2);
 
         setRenderer(this);
@@ -143,7 +143,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
         if (usesCSAA)
         {
-            if (!GL.usegles20)
+            if (!Q3EGL.usegles20)
                 gl.glClear(0x8000); //Yeah, I know, it doesn't work in 1.1
             else
                 GLES20.glClear(0x8000);
@@ -159,7 +159,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         //Onscreen buttons:
         //save state
 
-        if (!GL.usegles20)
+        if (!Q3EGL.usegles20)
         {
 
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -331,9 +331,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public void onSurfaceCreated(GL10 gl, EGLConfig config)
     {
 
-        if (GL.usegles20)
+        if (Q3EGL.usegles20)
         {
-            GL.initGL20();
+            Q3EGL.initGL20();
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         }
 

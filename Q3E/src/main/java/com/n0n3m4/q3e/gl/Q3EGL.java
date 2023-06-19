@@ -13,7 +13,7 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
-public final class GL
+public final class Q3EGL
 {
     public static boolean usegles20 = true;
 

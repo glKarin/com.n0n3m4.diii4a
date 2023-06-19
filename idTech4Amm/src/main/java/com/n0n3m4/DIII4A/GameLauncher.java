@@ -94,7 +94,7 @@ import android.app.ActionBar;
 import android.widget.Spinner;
 import android.widget.AdapterView;
 import com.n0n3m4.q3e.Q3EControlView;
-import com.karin.idTech4Amm.lib.D3CommandUtility;
+import com.n0n3m4.q3e.karin.KidTech4Command;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 @SuppressLint({"ApplySharedPref", "NonConstantResourceId", "CommitPrefEdits"})
@@ -217,6 +217,11 @@ public class GameLauncher extends Activity{
 						UpdateMouseMenu(isChecked);
 						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 								.putBoolean(Q3EPreference.pref_harm_using_mouse, isChecked)
+								.commit();
+						break;
+					case R.id.find_dll:
+						PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+								.putBoolean(Q3EPreference.pref_harm_find_dll, isChecked)
 								.commit();
 						break;
 					default:
@@ -514,12 +519,12 @@ public class GameLauncher extends Activity{
 	
 	public boolean getProp(String name)
 	{
-        return D3CommandUtility.GetBoolProp(GetCmdText(), name, false);
+        return KidTech4Command.GetBoolProp(GetCmdText(), name, false);
 	}
     
 	public void setProp(String name,boolean val)
 	{
-        SetProp(name, D3CommandUtility.btostr(val));
+        SetProp(name, KidTech4Command.btostr(val));
 	}
 	
 	public void updatehacktings()
@@ -827,6 +832,8 @@ public class GameLauncher extends Activity{
                return false;
            }
         });
+		boolean findDll = mPrefs.getBoolean(Q3EPreference.pref_harm_find_dll, false);
+		V.find_dll.setChecked(findDll);
         V.launcher_tab1_edit_autoexec.setOnClickListener(m_buttonClickListener);
         V.launcher_tab1_edit_doomconfig.setOnClickListener(m_buttonClickListener);
 
@@ -952,6 +959,7 @@ public class GameLauncher extends Activity{
             });
 		V.auto_quick_load.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.find_dll.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		updatehacktings();
 		
@@ -1003,20 +1011,20 @@ public class GameLauncher extends Activity{
     private void SetProp(String name, Object val)
     {
         boolean lock = LockCmdUpdate();
-        SetCmdText(D3CommandUtility.SetProp(GetCmdText(), name, val));
+        SetCmdText(KidTech4Command.SetProp(GetCmdText(), name, val));
         if(lock) UnlockCmdUpdate();
 	}
 
     private String GetProp(String name)
     {
-		return D3CommandUtility.GetProp(GetCmdText(), name);
+		return KidTech4Command.GetProp(GetCmdText(), name);
 	}
 
     private boolean RemoveProp(String name)
     {
         boolean lock = LockCmdUpdate();
 		boolean[] res = { false };
-		String str = D3CommandUtility.RemoveProp(GetCmdText(), name, res);
+		String str = KidTech4Command.RemoveProp(GetCmdText(), name, res);
 		if(res[0])
 			SetCmdText(str);
         if(lock) UnlockCmdUpdate();
@@ -1025,7 +1033,7 @@ public class GameLauncher extends Activity{
 
     private boolean IsProp(String name)
     {
-        return D3CommandUtility.IsProp(GetCmdText(), name);
+        return KidTech4Command.IsProp(GetCmdText(), name);
 	}
     
     private void EditFile(String file)
@@ -1232,6 +1240,7 @@ public class GameLauncher extends Activity{
 		mEdtr.putBoolean(Q3EPreference.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_multithreading, V.multithreading.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
 		mEdtr.commit();
     }
 
@@ -1891,7 +1900,7 @@ public class GameLauncher extends Activity{
     {
         boolean lock = LockCmdUpdate();
 		boolean[] res = { false };
-		String str = D3CommandUtility.RemoveParam(GetCmdText(), name, res);
+		String str = KidTech4Command.RemoveParam(GetCmdText(), name, res);
 		if(res[0])
 			SetCmdText(str);
         if(lock) UnlockCmdUpdate();
@@ -1901,19 +1910,19 @@ public class GameLauncher extends Activity{
     private void SetParam(String name, Object val)
     {
         boolean lock = LockCmdUpdate();
-        SetCmdText(D3CommandUtility.SetParam(GetCmdText(), name, val));
+        SetCmdText(KidTech4Command.SetParam(GetCmdText(), name, val));
         if(lock) UnlockCmdUpdate();
 	}
 
     private String GetParam(String name)
     {
-		return D3CommandUtility.GetParam(GetCmdText(), name);
+		return KidTech4Command.GetParam(GetCmdText(), name);
 	}
 
 	private boolean RemoveParam_temp(String name)
 	{
 		boolean[] res = { false };
-		String str = D3CommandUtility.RemoveParam(Q3EUtils.q3ei.start_temporary_extra_command, name, res);
+		String str = KidTech4Command.RemoveParam(Q3EUtils.q3ei.start_temporary_extra_command, name, res);
 		if(res[0])
 			Q3EUtils.q3ei.start_temporary_extra_command = str;
 		return res[0];
@@ -1921,7 +1930,7 @@ public class GameLauncher extends Activity{
 
 	private void SetParam_temp(String name, Object val)
 	{
-		Q3EUtils.q3ei.start_temporary_extra_command = (D3CommandUtility.SetParam(Q3EUtils.q3ei.start_temporary_extra_command, name, val));
+		Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetParam(Q3EUtils.q3ei.start_temporary_extra_command, name, val));
 	}
     
     private void ShowPreferenceDialog()
@@ -1983,9 +1992,7 @@ public class GameLauncher extends Activity{
 
 	private String GetExternalGameLibraryPath()
 	{
-		String arch = Q3EJNI.IS_64 ? "aarch64" : "arm";
-		String path = getFilesDir() + File.separator + arch;
-		return path;
+		return getFilesDir() + File.separator + Q3EJNI.ARCH;
 	}
 
 
@@ -2043,6 +2050,7 @@ public class GameLauncher extends Activity{
 		public CheckBox using_mouse;
 		public TextView tv_mprefs;
 		public LinearLayout layout_mouse_device;
+		public CheckBox find_dll;
 
 		public void Setup()
 		{
@@ -2097,6 +2105,7 @@ public class GameLauncher extends Activity{
 			using_mouse = findViewById(R.id.using_mouse);
 			tv_mprefs = findViewById(R.id.tv_mprefs);
 			layout_mouse_device = findViewById(R.id.layout_mouse_device);
+			find_dll = findViewById(R.id.find_dll);
 		}
 	}
 }

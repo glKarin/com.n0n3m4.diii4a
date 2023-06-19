@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -36,11 +37,14 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.device.Q3EOuya;
-import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.karin.KDebugTextView;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
+import com.n0n3m4.q3e.karin.KidTech4Command;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 public class Q3EMain extends Activity
 {
@@ -95,7 +99,7 @@ public class Q3EMain extends Activity
         InitGlobalEnv();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        GL.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
+        Q3EGL.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
         m_coverEdges = preferences.getBoolean(Q3EPreference.COVER_EDGES, true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && m_coverEdges)
         {
@@ -149,14 +153,6 @@ public class Q3EMain extends Activity
 			return;
 		}*/
 
-        datadir = preferences.getString(Q3EPreference.pref_datapath, Q3EUtils.q3ei.default_path);
-        if (null == datadir)
-            datadir = Q3EUtils.q3ei.default_path;
-        if ((datadir.length() > 0) && (datadir.charAt(0) != '/'))//lolwtfisuserdoing?
-        {
-            datadir = "/" + datadir;
-            preferences.edit().putString(Q3EPreference.pref_datapath, datadir).commit();
-        }
         if (checkGameFiles())
         {
             Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true));
@@ -367,5 +363,84 @@ public class Q3EMain extends Activity
         }*/
 
         Q3EUtils.q3ei.SetAppStoragePath(this);
+
+        datadir = preferences.getString(Q3EPreference.pref_datapath, Q3EUtils.q3ei.default_path);
+        if (null == datadir)
+            datadir = Q3EUtils.q3ei.default_path;
+        if ((datadir.length() > 0) && (datadir.charAt(0) != '/'))//lolwtfisuserdoing?
+        {
+            datadir = "/" + datadir;
+            preferences.edit().putString(Q3EPreference.pref_datapath, datadir).commit();
+        }
+
+        String cmd = preferences.getString(Q3EPreference.pref_params, Q3EUtils.q3ei.libname);
+        if(null == cmd)
+            cmd = "game.arm";
+        if(preferences.getBoolean(Q3EPreference.pref_harm_find_dll, false))
+        {
+            KidTech4Command command = new KidTech4Command(cmd);
+            String fs_game = command.Prop("fs_game");
+            if(null == fs_game || fs_game.isEmpty())
+            {
+                switch (Q3EUtils.q3ei.game)
+                {
+                    case Q3EGlobals.GAME_PREY:
+                        fs_game = "preybase";
+                        break;
+                    case Q3EGlobals.GAME_QUAKE4:
+                        fs_game = "q4base";
+                        break;
+                    case Q3EGlobals.GAME_DOOM3:
+                    default:
+                        fs_game = "base";
+                        break;
+                }
+            }
+            String dll = FindDLL(fs_game);
+            if(null != dll)
+                command.SetProp("harm_fs_gameLibPath", dll);
+            cmd = command.toString();
+        }
+        cmd = datadir + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
+        Q3EUtils.q3ei.cmd = cmd;
+    }
+
+    private String FindDLL(String fs_game)
+    {
+        String DLLPath = datadir + File.separator + fs_game + File.separator; // /sdcard/diii4a/<fs_game>
+        String Suffix = "game" + Q3EJNI.ARCH + ".so"; // gameaarch64.so(64) / gamearm.so(32)
+        String[] guess = {
+                Suffix,
+                "lib" + Suffix,
+        };
+        String res = null;
+        String targetDir = getCacheDir() + File.separator; // /data/user/<package_name>/cache/
+        for (String f : guess)
+        {
+            File file = new File(DLLPath + f);
+            if(!file.isFile() || !file.canRead())
+                continue;
+            FileInputStream is = null;
+            FileOutputStream os = null;
+            String cacheFile = targetDir + Suffix;
+            try
+            {
+                is = new FileInputStream(file);
+                os = new FileOutputStream(cacheFile);
+                Q3EUtils.Copy(os, is);
+                res = cacheFile;
+                break;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            finally
+            {
+                Q3EUtils.Close(is);
+                Q3EUtils.Close(os);
+            }
+        }
+        return res;
     }
 }

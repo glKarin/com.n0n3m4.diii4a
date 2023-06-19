@@ -10,7 +10,7 @@ import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUiView;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.R;
-import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.karin.KResultRunnable;
 
 import java.nio.ByteBuffer;
@@ -105,7 +105,7 @@ public class MenuOverlay extends Paintable implements TouchListener
     @Override
     public void loadtex(GL10 gl)
     {
-        tex_ind = GL.loadGLTexture(gl, texbmp);
+        tex_ind = Q3EGL.loadGLTexture(gl, texbmp);
     }
 
     boolean hidden = true;

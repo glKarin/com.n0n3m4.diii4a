@@ -50,6 +50,7 @@ public class Q3EJNI {
     public static boolean IS_NEON = false; // only armv7-a 32. arm64 always support, but using hard
     public static boolean IS_64 = false;
     public static boolean SYSTEM_64 = false;
+    public static String ARCH = "";
     private static boolean _is_detected = false;
     
     private static boolean GetCpuInfo()
@@ -57,6 +58,7 @@ public class Q3EJNI {
         if (_is_detected)
             return true;
         IS_64 = Is64();
+        ARCH = IS_64 ? "aarch64" : "arm";
         BufferedReader br = null;
         try
         {

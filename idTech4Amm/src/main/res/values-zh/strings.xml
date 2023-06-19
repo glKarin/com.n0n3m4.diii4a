@@ -227,4 +227,6 @@
     <string name="add_external_game_library">添加外部游戏运行库</string>
     <string name="access_external_game_library">访问外部游戏运行库</string>
     <string name="load_external_game_library">载入外部游戏运行库</string>
+    <string name="find_game_library_in_game_data_directory">优先使用游戏数据文件夹下的游戏动态库</string>
+    <string name="if_game_library_file_named_gameaarch64_so_or_libgameaarch64_so_on_arm64_device_or_named_gamearm_so_or_libgamearm_so_on_arm32_device_found_at_game_working_directory_fs_game_folder_will_load_it_instead_of_default_game_library_of_apk">如果在`游戏运行目录`/`fs_game`目录下存在游戏动态库文件(arm64位系统命名为`gameaarch64.so`或`libgameaarch64.so`, arm32位系统命名为`gamearm.so`或`libgamearm.so`), 将加载该游戏动态库来代替apk内置游戏动态库.</string>
 </resources>
