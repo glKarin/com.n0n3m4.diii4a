@@ -232,5 +232,6 @@
     <string name="add_game_library_file_fail">Add game library file fail!</string>
     <string name="find_game_library_in_game_data_directory">Find game library in game data directory</string>
     <string name="if_game_library_file_named_gameaarch64_so_or_libgameaarch64_so_on_arm64_device_or_named_gamearm_so_or_libgamearm_so_on_arm32_device_found_at_game_working_directory_fs_game_folder_will_load_it_instead_of_default_game_library_of_apk">If game library file(named `gameaarch64.so` or `libgameaarch64.so` on arm64 device or named `gamearm.so` or `libgamearm.so` on arm32 device) found at `Game working directory`/`fs_game` folder, will load it instead of default game library of apk.</string>
+    <string name="not_supported">Not supported!</string>
 
 </resources>

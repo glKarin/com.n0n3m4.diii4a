@@ -1,9 +1,7 @@
 package com.n0n3m4.DIII4A.launcher;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -53,16 +51,22 @@ public final class BackupPreferenceFunc extends GameLauncherFunc
         run();
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     public void run()
     {
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        intent.setType("*/*"); // application/xml
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.putExtra(Intent.EXTRA_TITLE, GenDefaultBackupFileName());
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+        {
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            intent.setType("*/*"); // application/xml
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.putExtra(Intent.EXTRA_TITLE, GenDefaultBackupFileName());
 
-        m_gameLauncher.startActivityForResult(intent, m_code);
+            m_gameLauncher.startActivityForResult(intent, m_code);
+        }
+        else
+        {
+            Toast_long(m_gameLauncher.getString(R.string.not_supported));
+        }
     }
 
     private void BackupPreferences(Uri uri)

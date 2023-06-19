@@ -47,7 +47,7 @@ import android.content.res.Resources;
 /**
  * On-screen button config
  */
-@SuppressLint({"ApplySharedPref", "NonConstantResourceId"})
+@SuppressLint({"ApplySharedPref",})
 public class OnScreenButtonConfigActivity extends Activity
 {
     private List<OnScreenButton> m_list = new ArrayList<>();
@@ -55,7 +55,6 @@ public class OnScreenButtonConfigActivity extends Activity
     private ViewHolder V;
     private Map<Integer, String> m_styleMap;
     private Map<Integer, String> m_sliderStyleMap;
-    private Map<Integer, String> m_typeMap;
     private Map<Integer, String> m_keyMap;
 
     @Override
@@ -69,7 +68,7 @@ public class OnScreenButtonConfigActivity extends Activity
         
         m_styleMap = BuildKeyValueMapFromResource(R.array.onscreen_button_style_values, R.array.onscreen_button_style_labels);
         m_sliderStyleMap = BuildKeyValueMapFromResource(R.array.onscreen_slider_style_values, R.array.onscreen_slider_style_labels);
-        m_typeMap = BuildKeyValueMapFromResource(R.array.onscreen_type_values, R.array.onscreen_type_labels);
+        // Map<Integer, String> m_typeMap = BuildKeyValueMapFromResource(R.array.onscreen_type_values, R.array.onscreen_type_labels);
         m_keyMap = BuildKeyValueMapFromResource(R.array.key_map_codes, R.array.key_map_names);
 
         setContentView(R.layout.onscreen_button_config_page);
@@ -127,9 +126,9 @@ public class OnScreenButtonConfigActivity extends Activity
         ContextUtility.Confirm(this, Q3ELang.tr(this, R.string.warning), Q3ELang.tr(this, R.string.reset_onscreen_button_config), new Runnable() {
                 public void run()
                 {
-                    SharedPreferences.Editor mEdtr = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).edit();
-                    mEdtr.remove(Q3EPreference.ONSCREEN_BUTTON);
-                    mEdtr.commit();
+                    SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).edit();
+                    preferences.remove(Q3EPreference.ONSCREEN_BUTTON);
+                    preferences.commit();
                     Q3EInterface.RestoreDefaultOnScreenConfig(Q3EUtils.q3ei.arg_table, Q3EUtils.q3ei.type_table);
                     LoadConfig();
                     Toast.makeText(OnScreenButtonConfigActivity.this, R.string.onscreen_button_config_has_reset, Toast.LENGTH_SHORT).show();
@@ -176,16 +175,18 @@ public class OnScreenButtonConfigActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        switch(item.getItemId())
+        int itemId = item.getItemId();
+        if (itemId == R.id.onscreen_button_config_weapon_panel)
         {
-            case R.id.onscreen_button_config_weapon_panel:
-                OpenWeaponPanelKeysSetting();
-                break;
-            case R.id.onscreen_button_config_reset:
-                RestoreConfig();
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
+            OpenWeaponPanelKeysSetting();
+        }
+        else if (itemId == R.id.onscreen_button_config_reset)
+        {
+            RestoreConfig();
+        }
+        else
+        {
+            return super.onOptionsItemSelected(item);
         }
         return true;
     }

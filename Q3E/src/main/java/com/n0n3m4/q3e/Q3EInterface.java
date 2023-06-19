@@ -21,9 +21,11 @@ package com.n0n3m4.q3e;
 
 import android.content.Context;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Set;
 
 public class Q3EInterface
 {
@@ -49,7 +51,7 @@ public class Q3EInterface
     public boolean isQ4 = false;
 	public boolean isPrey = false;
 	
-	public String default_path;
+	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 	
 	public String libname;
 	public String config_name;
@@ -404,5 +406,35 @@ public class Q3EInterface
 		return isPrey ? Q3EPreference.pref_harm_prey_game_lib
 				: (isQ4 ? Q3EPreference.pref_harm_q4_game_lib
 				: Q3EPreference.pref_harm_game_lib);
+	}
+
+	public void LoadTypeAndArgTablePreference(Context context)
+	{
+		// index:type;23,1,2,0|......
+		try
+		{
+			Set<String> configs = PreferenceManager.getDefaultSharedPreferences(context).getStringSet(Q3EPreference.ONSCREEN_BUTTON, null);
+			if (null != configs && !configs.isEmpty())
+			{
+				for (String str : configs)
+				{
+					String[] subArr = str.split(":", 2);
+					int index = Integer.parseInt(subArr[0]);
+					subArr = subArr[1].split(";");
+					type_table[index] = Integer.parseInt(subArr[0]);
+					String[] argArr = subArr[1].split(",");
+					arg_table[index * 4] = Integer.parseInt(argArr[0]);
+					arg_table[index * 4 + 1] = Integer.parseInt(argArr[1]);
+					arg_table[index * 4 + 2] = Integer.parseInt(argArr[2]);
+					arg_table[index * 4 + 3] = Integer.parseInt(argArr[3]);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			//UncaughtExceptionHandler.DumpException(this, Thread.currentThread(), e);
+			e.printStackTrace();
+			RestoreDefaultOnScreenConfig(arg_table, type_table);
+		}
 	}
 }

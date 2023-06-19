@@ -27,7 +27,6 @@ import com.n0n3m4.q3e.Q3ELang;
 /**
  * cfg file editor
  */
-@SuppressLint("NonConstantResourceId")
 public class ConfigEditorActivity extends Activity
 {
     private final ViewHolder V = new ViewHolder();
@@ -184,37 +183,35 @@ public class ConfigEditorActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        switch(item.getItemId())
+        int itemId = item.getItemId();
+        if (itemId == R.id.config_editor_menu_save)
         {
-            case R.id.config_editor_menu_save:
-                if (IsValid())
+            if (IsValid())
+            {
+                if (SaveFile())
                 {
-                    if (SaveFile())  
-                    {
-                        m_edited = false;
-                        V.titleText.setText(m_filePath);
-                        V.titleText.setTextColor(Color.BLACK);
-                        if(V.saveBtn != null)
-                            V.saveBtn.setEnabled(false);
-                        if(V.reloadBtn != null)
-                            V.reloadBtn.setEnabled(false);
-                        Toast.makeText(ConfigEditorActivity.this, R.string.save_file_successful, Toast.LENGTH_LONG).show();
-                    }
-                    else
-                        Toast.makeText(ConfigEditorActivity.this, R.string.save_file_failed, Toast.LENGTH_LONG).show();
-
+                    m_edited = false;
+                    V.titleText.setText(m_filePath);
+                    V.titleText.setTextColor(Color.BLACK);
+                    if (V.saveBtn != null)
+                        V.saveBtn.setEnabled(false);
+                    if (V.reloadBtn != null)
+                        V.reloadBtn.setEnabled(false);
+                    Toast.makeText(ConfigEditorActivity.this, R.string.save_file_successful, Toast.LENGTH_LONG).show();
                 }
                 else
-                    Toast.makeText(ConfigEditorActivity.this, R.string.no_file, Toast.LENGTH_LONG).show();
-                break;
-                case R.id.config_editor_menu_reload:
-                if (IsValid())
-                    LoadFile(m_filePath);
-                else
-                    Toast.makeText(ConfigEditorActivity.this, R.string.no_file, Toast.LENGTH_LONG).show();
-                    break;
-                default:
-                break;
+                    Toast.makeText(ConfigEditorActivity.this, R.string.save_file_failed, Toast.LENGTH_LONG).show();
+
+            }
+            else
+                Toast.makeText(ConfigEditorActivity.this, R.string.no_file, Toast.LENGTH_LONG).show();
+        }
+        else if (itemId == R.id.config_editor_menu_reload)
+        {
+            if (IsValid())
+                LoadFile(m_filePath);
+            else
+                Toast.makeText(ConfigEditorActivity.this, R.string.no_file, Toast.LENGTH_LONG).show();
         }
         return super.onOptionsItemSelected(item);
     }

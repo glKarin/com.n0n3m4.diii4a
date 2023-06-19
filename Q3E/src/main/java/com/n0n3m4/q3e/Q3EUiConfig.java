@@ -59,16 +59,6 @@ public class Q3EUiConfig extends Activity
     Q3EUiView vw;
     //k
     private boolean m_hideNav = true;
-    @SuppressLint("InlinedApi")
-    private final int m_uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_FULLSCREEN;
-    @SuppressLint("InlinedApi")
-    private final int m_uiOptions_def = View.SYSTEM_UI_FLAG_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -151,9 +141,9 @@ public class Q3EUiConfig extends Activity
     {
         final View decorView = getWindow().getDecorView();
         if (m_hideNav)
-            decorView.setSystemUiVisibility(m_uiOptions);
+            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
         else
-            decorView.setSystemUiVisibility(m_uiOptions_def);
+            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_OPTIONS);
     }
 
     @Override

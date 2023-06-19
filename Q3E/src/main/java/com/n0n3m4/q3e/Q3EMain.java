@@ -55,16 +55,6 @@ public class Q3EMain extends Activity
     private boolean m_hideNav = true;
     private int m_runBackground = 1;
     private int m_renderMemStatus = 0;
-    @SuppressLint("InlinedApi")
-    private final int m_uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_FULLSCREEN;
-    @SuppressLint("InlinedApi")
-    private final int m_uiOptions_def = View.SYSTEM_UI_FLAG_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
     public Q3EControlView mControlGLSurfaceView;
     private KDebugTextView memoryUsageText;
     private boolean m_coverEdges = true;
@@ -314,9 +304,9 @@ public class Q3EMain extends Activity
     {
         final View decorView = getWindow().getDecorView();
         if (m_hideNav)
-            decorView.setSystemUiVisibility(m_uiOptions);
+            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
         else
-            decorView.setSystemUiVisibility(m_uiOptions_def);
+            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_OPTIONS);
     }
 
     private void InitGlobalEnv()
@@ -334,6 +324,8 @@ public class Q3EMain extends Activity
             Q3EUtils.q3ei.default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
             Q3EUtils.q3ei.SetupGame(preferences.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3));
+
+            Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
 
             String extraCommand = "";
             if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))

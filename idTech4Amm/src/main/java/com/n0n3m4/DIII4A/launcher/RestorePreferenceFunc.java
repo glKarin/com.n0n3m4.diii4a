@@ -1,6 +1,5 @@
 package com.n0n3m4.DIII4A.launcher;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -49,7 +48,6 @@ public final class RestorePreferenceFunc extends GameLauncherFunc
         run();
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     public void run()
     {
         Intent intent = null;

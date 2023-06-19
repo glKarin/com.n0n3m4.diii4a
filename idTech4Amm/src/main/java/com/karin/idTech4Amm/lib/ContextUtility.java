@@ -1,16 +1,10 @@
 package com.karin.idTech4Amm.lib;
 
 import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
-import android.graphics.Point;
-import android.os.Environment;
-import android.preference.PreferenceFragment;
 import android.provider.Settings;
 import android.content.Intent;
 import android.net.Uri;
@@ -20,10 +14,6 @@ import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
-import android.util.Log;
-import android.view.Display;
-import android.view.DisplayCutout;
-import android.view.WindowInsets;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.text.util.Linkify;
@@ -37,7 +27,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Consumer;
 // import android.widget.Magnifier.Builder;
 
 /**

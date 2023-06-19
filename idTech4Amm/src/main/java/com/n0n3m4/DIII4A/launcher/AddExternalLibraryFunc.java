@@ -1,20 +1,14 @@
 package com.n0n3m4.DIII4A.launcher;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
-import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.n0n3m4.DIII4A.GameLauncher;
-import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3ELang;
 
 import java.io.File;
@@ -56,7 +50,6 @@ public final class AddExternalLibraryFunc extends GameLauncherFunc
         run();
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     public void run()
     {
         Intent intent = null;
