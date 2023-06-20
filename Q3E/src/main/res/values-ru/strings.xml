@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="setup_all_opacity">Настройка прозрачности</string>
     <string name="setup_all_size">Общий размер кнопок</string>
     <string name="reset_on_screen_controls">Сбросить настройки</string>
