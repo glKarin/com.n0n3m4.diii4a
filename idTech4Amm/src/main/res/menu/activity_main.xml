@@ -96,6 +96,11 @@
         android:id="@+id/main_menu_check_for_update"
         android:title="@string/check_for_update"
         android:showAsAction="never"/>
+
+    <item
+        android:id="@+id/main_menu_translators"
+        android:title="@string/translators"
+        android:showAsAction="never"/>
     
     <item
         android:id="@+id/main_menu_dev_menu"

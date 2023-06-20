@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="run_background_labels">
+        <item>Работать в фоновом режиме без звука</item>
+        <item>Запуск в фоновом режиме</item>
+        <item>Не работать в фоновом режиме</item>
+    </string-array>
+
+    <string-array name="map_back_labels">
+        <item>Клавиша выхода из карты</item>
+        <item>3-Нажатия, чтобы выйти</item>
+    </string-array>
+
+    <string-array name="onscreen_button_style_labels">
+        <item>Везде</item>
+        <item>Справа-внизу</item>
+        <item>По центру</item>
+        <item>Слева-вверху</item>
+    </string-array>
+
+    <string-array name="onscreen_slider_style_labels">
+        <item>Лево-право</item>
+        <item>Вниз-право</item>
+    </string-array>
+
+    <string-array name="onscreen_type_labels">
+        <item>Кнопка</item>
+        <item>Ползунок</item>
+    </string-array>
+
+    <string-array name="lang_labels">
+        <item>Система</item>
+        <item>English</item>
+        <item>中文</item>
+        <item>Русский</item>
+    </string-array>
+</resources>

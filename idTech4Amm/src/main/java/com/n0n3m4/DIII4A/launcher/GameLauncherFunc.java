@@ -1,5 +1,6 @@
 package com.n0n3m4.DIII4A.launcher;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.widget.Toast;
@@ -91,5 +92,10 @@ public abstract class GameLauncherFunc implements Runnable
     public <T> T GetResult()
     {
         return null != m_data ? (T)m_data.get(CONST_RESULT_KEY) : null;
+    }
+
+    public Context getContext()
+    {
+        return m_gameLauncher;
     }
 }

@@ -73,10 +73,12 @@ import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
 import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
 import com.n0n3m4.DIII4A.launcher.EditExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
+import com.n0n3m4.DIII4A.launcher.OpenSourceLicenseFunc;
 import com.n0n3m4.DIII4A.launcher.RestorePreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.SetupControlsThemeFunc;
 import com.n0n3m4.DIII4A.launcher.StartGameFunc;
 import com.n0n3m4.DIII4A.launcher.SupportDeveloperFunc;
+import com.n0n3m4.DIII4A.launcher.TranslatorsFunc;
 import com.n0n3m4.q3e.Q3EAd;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EGlobals;
@@ -120,6 +122,7 @@ public class GameLauncher extends Activity
     private AddExternalLibraryFunc m_addExternalLibraryFunc;
     private ChooseGameLibFunc m_chooseGameLibFunc;
     private EditExternalLibraryFunc m_editExternalLibraryFunc;
+	private OpenSourceLicenseFunc m_openSourceLicenseFunc;
 
     final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -1017,6 +1020,8 @@ public class GameLauncher extends Activity
         super.onDestroy();
         if (null != m_checkForUpdateFunc)
             m_checkForUpdateFunc.Reset();
+		if (null != m_openSourceLicenseFunc)
+			m_openSourceLicenseFunc.Reset();
     }
 
     public void start(View vw)
@@ -1198,11 +1203,13 @@ public class GameLauncher extends Activity
 		{
 			OpenCheckForUpdateDialog();
 			return true;
-
-/*			case R.id.main_menu_game:
-				ChangeGame();
-				return true;*/
 		}
+		else if (itemId == R.id.main_menu_translators)
+		{
+			OpenTranslatorsDialog();
+			return true;
+		}
+
 		else if (itemId == R.id.main_menu_game_doom3)
 		{
 			ChangeGame(Q3EGlobals.GAME_DOOM3);
@@ -1233,8 +1240,27 @@ public class GameLauncher extends Activity
 
     private void OpenAbout()
     {
-        ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.about) + " " + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetAboutText(this));
-    }
+    	Object[] args = { null };
+		AlertDialog dialog = ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.about) + " " + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetAboutText(this), new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				AlertDialog.Builder builder = (AlertDialog.Builder)args[0];
+				builder.setNegativeButton(R.string.open_source_license, new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+						if (null == m_openSourceLicenseFunc)
+							m_openSourceLicenseFunc = new OpenSourceLicenseFunc(GameLauncher.this);
+						m_openSourceLicenseFunc.Start(new Bundle());
+					}
+				});
+			}
+		}, args);
+		dialog.show();
+	}
 
     private void OpenRuntimeLog()
     {
@@ -2088,6 +2114,11 @@ public class GameLauncher extends Activity
     {
         return getFilesDir() + File.separator + Q3EJNI.ARCH;
     }
+
+    private void OpenTranslatorsDialog()
+	{
+		new TranslatorsFunc(this).Start(new Bundle());
+	}
 
 
     private class ViewHolder

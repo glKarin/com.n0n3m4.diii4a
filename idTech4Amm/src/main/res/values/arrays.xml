@@ -59,11 +59,15 @@
     <string-array name="lang_labels">
         <item>System</item>
         <item>English</item>
+        <item>中文</item>
+        <item>Русский</item>
     </string-array>
 
     <string-array name="lang_values">
         <item>system</item>
         <item>en</item>
+        <item>zh</item>
+        <item>ru</item>
     </string-array>
 
     <string-array name="key_map_names">

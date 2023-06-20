@@ -3,6 +3,7 @@ package com.karin.idTech4Amm.lib;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.provider.Settings;
@@ -363,6 +364,68 @@ public final class ContextUtility
             return fragment.getContext();
         else
             return fragment.getActivity();
+    }
+
+    public static AlertDialog.Builder CreateMessageDialogBuilder(Context context, CharSequence title, CharSequence message, Runnable callback, Object[] args)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(R.string.ok, new AlertDialog.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        if(null != callback && null != args && args.length > 0)
+        {
+            args[0] = builder;
+            callback.run();
+        }
+
+        return builder;
+    }
+
+    public static AlertDialog OpenMessageDialog(Context context, CharSequence title, CharSequence message, Runnable callback, Object[] args)
+    {
+        AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(context, title, message, callback, args);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        TextView messageText = (TextView)(dialog.findViewById(android.R.id.message));
+        if(messageText != null) // never
+        {
+            if(!TextHelper.USING_HTML)
+                messageText.setAutoLinkMask(Linkify.ALL);
+            messageText.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+
+        return dialog;
+    }
+
+    public static ProgressDialog Progress(Context context, CharSequence title, CharSequence message, Runnable cancel)
+    {
+        ProgressDialog dialog = new ProgressDialog(context);
+        dialog.setTitle(title);
+        dialog.setMessage(message);
+        dialog.setCancelable(false);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, Q3ELang.tr(context, R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+        {
+            @Override
+            public void onCancel(DialogInterface dialog)
+            {
+                if(null != cancel)
+                    cancel.run();
+            }
+        });
+        return dialog;
     }
     
 	private ContextUtility() {}

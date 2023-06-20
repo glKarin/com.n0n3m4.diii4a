@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
@@ -18,8 +16,6 @@ import com.n0n3m4.q3e.Q3ELang;
 public final class CheckForUpdateFunc extends GameLauncherFunc
 {
     private ProgressDialog m_progressDialog = null;
-    private HandlerThread m_handlerThread = null;
-    private Handler m_handler = null;
     private CheckUpdate m_checkUpdate;
 
     public CheckForUpdateFunc(GameLauncher gameLauncher)
@@ -29,15 +25,6 @@ public final class CheckForUpdateFunc extends GameLauncherFunc
 
     public void Reset()
     {
-        if(null != m_handler)
-        {
-            m_handler = null;
-        }
-        if(null != m_handlerThread)
-        {
-            m_handlerThread.quit();
-            m_handlerThread = null;
-        }
         if(null != m_progressDialog)
         {
             m_progressDialog.dismiss();
@@ -50,16 +37,12 @@ public final class CheckForUpdateFunc extends GameLauncherFunc
         super.Start(data);
         Reset();
 
-        if(null != m_handlerThread || null != m_handler || null != m_progressDialog)
-            return;
-        ProgressDialog dialog = new ProgressDialog(m_gameLauncher);
-        dialog.setTitle(R.string.check_for_update);
-        dialog.setMessage(Q3ELang.tr(m_gameLauncher, R.string.network_for_github));
-        dialog.setCancelable(false);
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, Q3ELang.tr(m_gameLauncher, R.string.cancel), new DialogInterface.OnClickListener() {
+        ProgressDialog dialog = ContextUtility.Progress(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.check_for_update), Q3ELang.tr(m_gameLauncher, R.string.network_for_github), new Runnable()
+        {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
+            public void run()
+            {
+                m_checkUpdate = null;
             }
         });
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -71,25 +54,13 @@ public final class CheckForUpdateFunc extends GameLauncherFunc
         });
         dialog.show();
         m_progressDialog = dialog;
-        m_handlerThread = new HandlerThread("CHECK_FOR_UPDATE");
-        m_handlerThread.start();
-        m_handler = new Handler(m_handlerThread.getLooper());
-        m_handler.post(new Runnable() {
-            @Override
-            public void run() {
-                CheckForUpdate();
-            }
-        });
+        CheckForUpdate();
     }
 
-    // non-main thread
     private void CheckForUpdate()
     {
-        if(null == m_checkUpdate)
-            m_checkUpdate = new CheckUpdate();
-
-        m_checkUpdate.CheckForUpdate();
-        m_gameLauncher.runOnUiThread(this);
+        m_checkUpdate = new CheckUpdate(m_gameLauncher);
+        m_checkUpdate.CheckForUpdate(this);
     }
 
     public void run()
