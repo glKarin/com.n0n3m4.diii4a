@@ -1213,6 +1213,7 @@ void R_TransposeGLMatrix(const float in[16], float out[16]);
 void R_SetViewMatrix(viewDef_t *viewDef);
 
 void myGlMultMatrix(const float *a, const float *b, float *out);
+void RB_ComputeMVP( const drawSurf_t * const surf, float mvp[16] );
 
 /*
 ============================================================
@@ -1340,7 +1341,7 @@ void RB_FinishStageTexture(const textureStage_t *texture, const drawSurf_t *surf
 void RB_StencilShadowPass(const drawSurf_t *drawSurfs);
 void RB_STD_DrawView(void);
 void RB_STD_FogAllLights(void);
-void RB_BakeTextureMatrixIntoTexgen(idPlane lightProject[3]);
+void RB_BakeTextureMatrixIntoTexgen( idPlane lightProject[3], const float textureMatrix[16] );
 
 /*
 ============================================================
@@ -1350,10 +1351,10 @@ DRAW_*
 ============================================================
 */
 
-void	R_ARB2_Init(void);
-void	RB_ARB2_DrawInteractions(void);
+#ifndef GL_ES_VERSION_2_0
 void	R_ReloadARBPrograms_f(const idCmdArgs &args);
 int		R_FindARBProgram(GLenum target, const char *program);
+#endif
 
 typedef enum {
 	PROG_INVALID,

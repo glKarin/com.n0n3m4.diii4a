@@ -54,7 +54,6 @@ class idCinematicLocal : public idCinematic
 		virtual void			ResetTime(int time);
 
 	private:
-//k 64
 		size_t			mcomp[256];
 		byte 					**qStatus[2];
 		idStr					fileName;

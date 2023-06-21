@@ -882,7 +882,7 @@ myGlMultMatrix
 
 void myGlMultMatrix(const float a[16], const float b[16], float out[16])
 {
-#if 0 //k: faster without loop
+#if 0
 int	i, j;
 
 for (i = 0 ; i < 4 ; i++) {
@@ -1017,13 +1017,7 @@ void R_SetupProjection(void)
 	//
 	// set up projection matrix
 	//
-	// #ifndef ANDROID_NOZHACK
-#if 0 //k: fix shadow be cliped
-	zNear	= 8;
-	zFar = 4000;
-#else
 	zNear = r_znear.GetFloat();
-#endif
 
 	if (tr.viewDef->renderView.cramZNear) {
 		zNear *= 0.25;

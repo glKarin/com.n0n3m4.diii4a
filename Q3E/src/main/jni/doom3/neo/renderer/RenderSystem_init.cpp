@@ -554,9 +554,6 @@ void R_InitOpenGL(void)
 
 	// parse our vertex and fragment programs, possibly disably support for
 	// one of the paths if there was an error
-#if !defined(GL_ES_VERSION_2_0)
-	R_ARB2_Init();
-#endif
 	R_GLSL_Init();
 
 #if !defined(GL_ES_VERSION_2_0)

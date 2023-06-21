@@ -69,7 +69,6 @@ static const int	EXPAND_HEADERS = 1024;
 idCVar idVertexCache::r_showVertexCache("r_showVertexCache", "0", CVAR_INTEGER|CVAR_RENDERER, "");
 idCVar idVertexCache::r_vertexBufferMegs("r_vertexBufferMegs", "32", CVAR_INTEGER|CVAR_RENDERER, "");
 
-//k
 static idCVar harm_r_clearVertexBuffer("harm_r_clearVertexBuffer", "2", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Clear vertex buffer on every frame. (0 - not clear, 1 - only free memory, 2 - delete VBO handle)");
 
 idVertexCache		vertexCache;
@@ -254,7 +253,6 @@ void idVertexCache::Init()
 		r_vertexBufferMegs.SetInteger(8);
 	}
 
-	//k
 	common->Printf("[Harmattan]: idVertexCache of this version support clear vertex buffer.\n");
 	// initialize the cache memory blocks
 #ifdef _MULTITHREAD

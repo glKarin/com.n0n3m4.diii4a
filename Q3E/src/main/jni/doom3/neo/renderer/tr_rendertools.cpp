@@ -173,7 +173,6 @@ static void glEnd()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mvp_matrix);
 
@@ -201,6 +200,7 @@ static void glEnd()
 	free(color);
 	vertex_list.Clear();
 	type = 0;
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 	GL_UseProgram(NULL);
 }
 #endif
