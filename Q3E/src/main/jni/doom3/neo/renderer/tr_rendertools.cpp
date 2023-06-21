@@ -172,7 +172,8 @@ static void glEnd()
 	GL_UseProgram(&defaultShader);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mvp_matrix);
 
@@ -200,7 +201,8 @@ static void glEnd()
 	free(color);
 	vertex_list.Clear();
 	type = 0;
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 	GL_UseProgram(NULL);
 }
 #endif
