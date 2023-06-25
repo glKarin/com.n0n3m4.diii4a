@@ -676,11 +676,13 @@ Public License instead of this License.  But first, please read
 
 
 Source from release:
+
 DIII4A:
     author: n0n3m4
     license: GPLv2 or later version
 
 -----------------------------------------------------------------------------
+
 DOOM3:
     author: idSoftware
     license: GPLv3
@@ -1331,9 +1333,14 @@ UNDER NO CIRCUMSTANCES SHALL ANY COPYRIGHT HOLDER OR ITS AFFILIATES, OR ANY OTHE
 
 
 
+-----------------------------------------------------------------------------
+
 q4sdk:
     author: Raven Software
     Quake4 game SDK
+
+-----------------------------------------------------------------------------
+
 preysdk:
     author: HumanHead Studio
     Prey game SDK

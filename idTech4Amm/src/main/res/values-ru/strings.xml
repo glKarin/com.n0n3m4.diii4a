@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="menu_settings">Настройки</string>
-    <string name="config_editor_name">Редактировать конфиг</string>
+    <string name="config_editor_name">Редактировать</string>
     <string name="key_config_page_name">Настройки экранных кнопок</string>
 
     <string name="commandline">Команды:</string>
     <string name="game_working_directory">Путь к игровым файлам:</string>
     <string name="chooser">Chooser</string>
-    <string name="disable_lighting">Отключить освящение</string>
+    <string name="disable_lighting">Отключить освящение в игре</string>
     <string name="use_dxt_textures_tegra_only_others_no_effect">Использовать DXT текстуры (Работает только на Tegra)</string>
     <string name="use_etc1_or_rgba4444_compression">использовать ETC1 (или RGBA4444) сжатие</string>
     <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">Очистить буфер вершин(cvar `harm_r_clearVertexBuffer`)</string>
@@ -30,11 +30,11 @@
     <string name="user_mod">Пользовательский мод</string>
     <string name="input_your_mod_folder_name">Имя папки вашего мода</string>
     <string name="gamelib">GameLib</string>
-    <string name="multi_threading">Включить многопоточность</string>
+    <string name="multi_threading">Многопоточность</string>
     <string name="light_model_cvar_harm_r_lightmodel">Модель света(cvar `harm_r_lightModel`)</string>
     <string name="phong">Phong</string>
     <string name="blinn_phong">Blinn-Phong</string>
-    <string name="specular_exponent_cvar_harm_r_specularexponent">Зеркальный показатель(cvar `harm_r_specularExponent`):</string>
+    <string name="specular_exponent_cvar_harm_r_specularexponent">Зеркальность(cvar `harm_r_specularExponent`):</string>
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности в модели взаимодействия света(по умолчанию 4.0)</string>
     <string name="sound_implementation">Качество звука</string>
     <string name="load_quicksave_when_start_game">Загружать QuickSave при запуске игры</string>
@@ -69,8 +69,8 @@
     <string name="normal_1x">Стандартное (1x)</string>
     <string name="half_0_5x">Половина (0.5x)</string>
     <string name="double_2x">Двойное (2x)</string>
-    <string name="custom">Настроить</string>
-    <string name="custom2">Настроить2</string>
+    <string name="custom">Настроить вручную</string>
+    <string name="custom2">Настроить</string>
     <string name="_0_auto_using_screen_aspect_ratio">(0 - Автонастройка соотношения сторон экрана)</string>
     <string name="msaa_warning_tegra_doesn_t_support_it">MSAA: (Внимание, Tegra не поддерживает)</string>
     <string name="_1x_none">1x (Нет)</string>
@@ -112,7 +112,7 @@
     <string name="key_3">Клавиша 3</string>
     <string name="screen">Экран</string>
     <string name="hide_navigation_bar">Скрыть панель навигации</string>
-    <string name="hide_navigation_bar_in_game">Скрыть панель навигации в игре</string>
+    <string name="hide_navigation_bar_in_game">Скрыть панель навигации в лаунчере</string>
     <string name="cover_screen_edges">Края экрана</string>
     <string name="cover_screen_edges_in_status_bar">Обложка краев экрана в строке состояния</string>
     <string name="game">Игра</string>
@@ -138,10 +138,10 @@
     <string name="ok">OK</string>
     <string name="controls_theme">Тема кнопок</string>
     <string name="graphics">Графика</string>
-    <string name="controls">Элементы управления</string>
+    <string name="controls">Управление</string>
     <string name="do_you_want_to_support_the_developer">Хотите поддержать разработчика?</string>
-    <string name="donate_to">Пожертвовать</string>
-    <string name="more_apps_in">Больше приложений в</string>
+    <string name="donate_to">Пожертвовать </string>
+    <string name="more_apps_in">Больше приложений в </string>
     <string name="dont_ask">Закрыть</string>
     <string name="clear">Очистить</string>
     <string name="mod_">Мод: </string>
@@ -167,13 +167,13 @@
     <string name="file_chooser">Выбор файла</string>
     <string name="update_interval_second_0_disable">Интервал обновления (секунда): 0 - для отключения</string>
     <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">Если вы не хотите отлаживать состояние использования памяти, не включайте его! Потому что это длительная операция!</string>
-    <string name="render_memory_status_0_is_disable">Состояние памяти рендеринга (0 для отключения)</string>
+    <string name="render_memory_status_0_is_disable">Состояние памяти рендеринга</string>
     <string name="no_handle_signals">Не обрабатывать сигналы</string>
     <string name="do_not_handle_signals">Отключить обработку сигналов</string>
     <string name="last_dalvik_crash_info">Информация о последнем сбое dalvik</string>
     <string name="preferences_settings_saved">Настройки сохранены!</string>
     <string name="choose_data_folder">Выберите папку данных</string>
-    <string name="choose_current_directory">Выберите текущий каталог-</string>
+    <string name="choose_current_directory">Выберите текущий каталог</string>
     <string name="unset">Отменить</string>
     <string name="edit_config_file">Редактировать файл конфигурации</string>
     <string name="operation">Операция</string>
@@ -182,17 +182,17 @@
     <string name="setup_launcher_language">Выбрать язык лаунчера</string>
     <string name="be_available_on_reboot_the_next_time">Язык будет обновлен после перезагрузки лаунчера</string>
     <string name="bot_q3_bot_support_in_mp_game">Quake4 bot (поддержка бота Q3 в многопользовательской игре)</string>
-    <string name="mp_game_map_aas_files">Файлы карты игры Quake4 в формате "aas"</string>
-    <string name="game_patch_resource">Ресурсы игрового патча-</string>
+    <string name="mp_game_map_aas_files">Файлы игры Quake4 в формате "aas"</string>
+    <string name="game_patch_resource">Ресурсы игрового патча</string>
     <string name="extract_all">Извлечь все</string>
     <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Разрешение на чтение/запись внешнего хранилища не предоставлено!</string>
     <string name="access_file">доступ к файлу</string>
     <string name="success">Успех</string>
     <string name="fail">Неудачно</string>
-    <string name="network_for_github">Network for GitHub......</string>
+    <string name="network_for_github">Подключение к GitHub......</string>
     <string name="error">Ошибка</string>
     <string name="close">Закрыть</string>
-    <string name="no_update_release">Нет обновлений</string>
+    <string name="no_update_release">Обновлений нет</string>
     <string name="current_version_is_newest">Текущая версия самая новая.</string>
     <string name="backup_preferences_file_success">Успешное копирование настроек.</string>
     <string name="backup_preferences_file_fail">Сбой файла:</string>
@@ -210,7 +210,7 @@
     <string name="request_necessary_permissions">запросить необходимые разрешения</string>
     <string name="grant">Grant</string>
     <string name="extract_path_resource_">Извлечь ресурс пути: </string>
-    <string name="rivensin_play_original_doom3_level">Rivensin играть на оригинальном уровне DOOM3</string>
+    <string name="rivensin_play_original_doom3_level">Rivensin на оригинальном уровне DOOM3</string>
     <string name="save_preferences_file">сохранить файл настроек</string>
     <string name="read_preferences_file">прочитать файл настроек</string>
     <string name="version_">Версия:</string>
@@ -230,13 +230,13 @@
     <string name="add_game_library_file_fail">Не удалось добавить файл библиотеки игры!</string>
     <string name="find_game_library_in_game_data_directory">Найти игровую библиотеку в каталоге данных игры</string>
     <string name="if_game_library_file_named_gameaarch64_so_or_libgameaarch64_so_on_arm64_device_or_named_gamearm_so_or_libgamearm_so_on_arm32_device_found_at_game_working_directory_fs_game_folder_will_load_it_instead_of_default_game_library_of_apk">Файл библиотеки игры (с названием `gameaarch64.so` или `libgameaarch64.so` на устройстве arm64. И с названием `gamearm.so` или `libgamearm.so` на устройстве arm32) находится в `Рабочем каталоге игры`/`fs_game` папка, загрузит ее вместо игровой библиотеки apk по умолчанию.</string>
-    <string name="translators">Translators</string>
-    <string name="note">Note</string>
-    <string name="open_source_license">OPEN-SOURCE LICENSE</string>
-    <string name="network_error">Network error!</string>
-    <string name="empty_response_data">Empty response data!</string>
-    <string name="sorting_by_add_time">sorting by add time</string>
-    <string name="not_supported">Not supported!</string>
-    <string name="get_open_source_license">Getting OPEN-SOURCE LICENSE......</string>
+    <string name="translators">Переводчики</string>
+    <string name="note">Примечание</string>
+    <string name="open_source_license">OPEN-SOURCE ЛИЦЕНЗИЯ</string>
+    <string name="network_error">Ошибка сети!</string>
+    <string name="empty_response_data">Пустые данные!</string>
+    <string name="sorting_by_add_time">сортировка по времени добавления</string>
+    <string name="not_supported">Не поддерживается!</string>
+    <string name="get_open_source_license">Поиск OPEN-SOURCE ЛИЦЕНЗИЯ......</string>
 
 </resources>

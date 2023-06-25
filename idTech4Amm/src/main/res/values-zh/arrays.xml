@@ -29,7 +29,7 @@
     </string-array>
 
     <string-array name="lang_labels">
-        <item>系统</item>
+        <item>系统/System</item>
         <item>English</item>
         <item>中文</item>
         <item>Русский</item>

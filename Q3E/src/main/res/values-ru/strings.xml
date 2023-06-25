@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="setup_all_opacity">Настройка прозрачности</string>
+<resources> <string name="setup_all_opacity">Настройка прозрачности</string>
     <string name="setup_all_size">Общий размер кнопок</string>
     <string name="reset_on_screen_controls">Сбросить настройки</string>
     <string name="save_all">Сохранить</string>
     <string name="opacity">прозрачность</string>
-    <string name="size">размер</string>
-    <string name="setup_all_on_screen_button_size">Размер сетки</string>
+    <string name="size">Размер</string>
+    <string name="setup_all_on_screen_button_size">Размер всех кнопок</string>
     <string name="ok">OK</string>
     <string name="cancel">Отмена</string>
     <string name="reset">Сбросить</string>
     <string name="_default">По умолчанию</string>
     <string name="all_on_screen_buttons_configs_saved">Настройки  кнопок сохранены.</string>
     <string name="on_screen_controls_has_reset">Элементы управления сброшены.</string>
-    <string name="opacity_3d">-Прозрачность(%3d)</string>
+    <string name="opacity_3d">Прозрачность(%3d)</string>
     <string name="setup_all_on_screen_button_opacity">Настройка прозрачности всех кнопок</string>
     <string name="setup_all_on_screen_buttons_opacity_done">Настройка прозрачности всех кнопок выполнена.</string>
     <string name="setup_all_on_screen_buttons_size_done">Настройка размера всех кнопок выполнена.</string>
@@ -34,7 +33,7 @@
     <string name="enable_unfixed_joystick_the_range_is_joystick_allowed_to_start_pressing_if_less_than_1_0_using_joystick_s_radius">- Включить «Нефиксированный джойстик»: диапазон, в котором джойстик может начать нажатие (если меньше 1,0, с использованием радиуса джойстика).</string>
     <string name="disable_unfixed_joystick_the_range_is_joystick_valid_motion_area">- Отключить «Нефиксированный джойстик»: диапазон является допустимой областью движения джойстика.</string>
     <string name="joystick_inner_dead_zone_radius_s_percentage_0_disable">Внутренняя мертвая зона джойстика (процент радиуса, 0 - для отключения)</string>
-    <string name="on_screen_buttons_position_unit">Блок положения экранных кнопок</string>
+    <string name="on_screen_buttons_position_unit">Размер сетки</string>
     <string name="on_screen_buttons_layout_with_grid_limit_multiple_of_5">Расположение экранных кнопок с ограничением по сетке (кратно 5).</string>
     <string name="position_unit">Единица положения</string>
     <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">Единица позиции экранных кнопок должна быть кратна 5 или 0</string>
