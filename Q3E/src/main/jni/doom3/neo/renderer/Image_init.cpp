@@ -2120,7 +2120,7 @@ void idImageManager::BindNull()
 
 	tmu = &backEnd.glState.tmu[backEnd.glState.currenttmu];
 
-	RB_LogComment("BindNull()\n");
+	RB_LogComment("BindNull(%i)\n", backEnd.glState.currenttmu);
 
 #if !defined(GL_ES_VERSION_2_0)
 	if (tmu->textureType == TT_CUBIC) {
@@ -2130,6 +2130,8 @@ void idImageManager::BindNull()
 	} else if (tmu->textureType == TT_2D) {
 		glDisable(GL_TEXTURE_2D);
 	}
+#else
+	//glBindTexture( GL_TEXTURE_2D, 0 ); //k2023
 #endif
 
 	tmu->textureType = TT_DISABLED;

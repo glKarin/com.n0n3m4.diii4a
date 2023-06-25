@@ -357,6 +357,7 @@ static void R_CheckCvars(void)
 
 	// check for changes to logging state
 	GLimp_EnableLogging(r_logFile.GetInteger() != 0);
+	R_CheckGLSLCvars();
 }
 
 /*
@@ -634,38 +635,13 @@ void idRenderSystemLocal::SetBackEndRenderer()
 		return;
 	}
 
-	backEndRenderer = BE_BAD;
 
-	if (idStr::Icmp(r_renderer.GetString(), "arb2") == 0) {
-		if (glConfig.allowARB2Path) {
-			backEndRenderer = BE_ARB2;
-		}
-	} else if (idStr::Icmp(r_renderer.GetString(), "glsl") == 0) {
-		if (glConfig.allowGLSLPath) {
 			backEndRenderer = BE_GLSL;
-		}
-	} else if (idStr::Icmp(r_renderer.GetString(), "best") == 0) {
-		if (glConfig.allowGLSLPath) {
-			backEndRenderer = BE_GLSL;
-		} else if (glConfig.allowARB2Path) {
-			backEndRenderer = BE_ARB2;
-		}
-	}
 
 	backEndRendererMaxLight = 1.0;
 
-	switch (backEndRenderer) {
-		case BE_ARB2:
-			common->Printf("using ARB2 renderSystem\n");
-			backEndRendererMaxLight = 999;
-			break;
-		case BE_GLSL:
 			common->Printf("using GLSL renderSystem\n");
 			backEndRendererMaxLight = 999;
-			break;
-		default:
-			common->FatalError("SetbackEndRenderer: bad back end");
-	}
 
 	r_renderer.ClearModified();
 }

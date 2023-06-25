@@ -32,12 +32,16 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 
 #if defined(GL_ES_VERSION_2_0)
-#define GL_RGB8	GL_RGBA
+#define GL_RGB8	GL_RGB
 #define GL_RGBA8	GL_RGBA
 #define GL_ALPHA8 GL_ALPHA
 #define GL_RGB5	GL_RGB5_A1 // GL_RGBA
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83f2
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83f3
+
+#ifndef GL_DEPTH_COMPONENT
+#define GL_DEPTH_COMPONENT GL_DEPTH_COMPONENT24_OES
+#endif
 #endif
 
 /*
@@ -73,56 +77,7 @@ Used for determining memory utilization
 */
 int idImage::BitsForInternalFormat(int internalFormat) const
 {
-	switch (internalFormat) {
-#if !defined(GL_ES_VERSION_2_0)
-		case GL_INTENSITY8:
-		case 1:
 			return 8;
-		case 2:
-		case GL_LUMINANCE8_ALPHA8:
-			return 16;
-		case 3:
-			return 32;		// on some future hardware, this may actually be 24, but be conservative
-		case 4:
-			return 32;
-		case GL_LUMINANCE8:
-			return 8;
-		case GL_ALPHA8:
-			return 8;
-		case GL_RGBA8:
-			return 32;
-		case GL_RGB8:
-			return 32;		// on some future hardware, this may actually be 24, but be conservative
-		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-			return 4;
-		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-			return 4;
-		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-			return 8;
-		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			return 8;
-		case GL_RGBA4:
-			return 16;
-		case GL_RGB5:
-			return 16;
-		case GL_COLOR_INDEX8_EXT:
-			return 8;
-		case GL_COLOR_INDEX:
-			return 8;
-		case GL_COMPRESSED_RGB_ARB:
-			return 4;			// not sure
-		case GL_COMPRESSED_RGBA_ARB:
-			return 8;			// not sure
-#endif
-		default:
-#if !defined(GL_ES_VERSION_2_0)
-			common->Error("R_BitsForInternalFormat: BAD FORMAT:%i", internalFormat);
-#else
-			return 8;
-#endif
-	}
-
-	return 0;
 }
 
 /*
@@ -238,167 +193,6 @@ This may need to scan six cube map images
 GLenum idImage::SelectInternalFormat(const byte **dataPtrs, int numDataPtrs, int width, int height,
                                      textureDepth_t minimumDepth) const
 {
-#if 0
-	int		i, c;
-	const byte	*scan;
-	int		rgbOr, rgbAnd, aOr, aAnd;
-	int		rgbDiffer, rgbaDiffer;
-
-	// determine if the rgb channels are all the same
-	// and if either all rgb or all alpha are 255
-	c = width*height;
-	rgbDiffer = 0;
-	rgbaDiffer = 0;
-	rgbOr = 0;
-	rgbAnd = -1;
-	aOr = 0;
-	aAnd = -1;
-
-	for (int side = 0 ; side < numDataPtrs ; side++) {
-		scan = dataPtrs[side];
-
-		for (i = 0; i < c; i++, scan += 4) {
-			int		cor, cand;
-
-			aOr |= scan[3];
-			aAnd &= scan[3];
-
-			cor = scan[0] | scan[1] | scan[2];
-			cand = scan[0] & scan[1] & scan[2];
-
-			// if rgb are all the same, the or and and will match
-			rgbDiffer |= (cor ^ cand);
-
-			rgbOr |= cor;
-			rgbAnd &= cand;
-
-			cor |= scan[3];
-			cand &= scan[3];
-
-			rgbaDiffer |= (cor ^ cand);
-		}
-	}
-
-	// we assume that all 0 implies that the alpha channel isn't needed,
-	// because some tools will spit out 32 bit images with a 0 alpha instead
-	// of 255 alpha, but if the alpha actually is referenced, there will be
-	// different behavior in the compressed vs uncompressed states.
-	bool needAlpha;
-
-	if (aAnd == 255 || aOr == 0) {
-		needAlpha = false;
-	} else {
-		needAlpha = true;
-	}
-
-	// catch normal maps first
-	if (minimumDepth == TD_BUMP) {
-#if !defined(GL_ES_VERSION_2_0)
-		if (globalImages->image_useCompression.GetBool() && globalImages->image_useNormalCompression.GetInteger() == 1 && glConfig.sharedTexturePaletteAvailable) {
-			// image_useNormalCompression should only be set to 1 on nv_10 and nv_20 paths
-			return GL_COLOR_INDEX8_EXT;
-		} else
-#endif
-		if (globalImages->image_useCompression.GetBool() && globalImages->image_useNormalCompression.GetInteger() && glConfig.textureCompressionAvailable) {
-			// image_useNormalCompression == 2 uses rxgb format which produces really good quality for medium settings
-			return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		} else
-		{
-			// we always need the alpha channel for bump maps for swizzling
-			return GL_RGBA8;
-		}
-	}
-
-	// allow a complete override of image compression with a cvar
-	if (!globalImages->image_useCompression.GetBool()) {
-		minimumDepth = TD_HIGH_QUALITY;
-	}
-
-	if (minimumDepth == TD_SPECULAR) {
-		// we are assuming that any alpha channel is unintentional
-		if (glConfig.textureCompressionAvailable) {
-			return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-		} else
-		{
-			return GL_RGB5;
-		}
-	}
-
-	if (minimumDepth == TD_DIFFUSE) {
-		// we might intentionally have an alpha channel for alpha tested textures
-		if (glConfig.textureCompressionAvailable) {
-			if (!needAlpha) {
-				return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-			} else {
-				return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			}
-		} else
-		if ((aAnd == 255 || aOr == 0)) {
-			return GL_RGB5;
-		} else {
-			return GL_RGBA4;
-		}
-	}
-
-	// there will probably be some drivers that don't
-	// correctly handle the intensity/alpha/luminance/luminance+alpha
-	// formats, so provide a fallback that only uses the rgb/rgba formats
-	if (!globalImages->image_useAllFormats.GetBool()) {
-		// pretend rgb is varying and inconsistant, which
-		// prevents any of the more compact forms
-		rgbDiffer = 1;
-		rgbaDiffer = 1;
-		rgbAnd = 0;
-	}
-
-	// cases without alpha
-	if (!needAlpha) {
-		if (minimumDepth == TD_HIGH_QUALITY) {
-			return GL_RGB8;			// four bytes
-		}
-
-		if (glConfig.textureCompressionAvailable) {
-			return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;	// half byte
-		}
-
-		return GL_RGB5;			// two bytes
-	}
-
-	// cases with alpha
-	if (!rgbaDiffer) {
-		if (minimumDepth != TD_HIGH_QUALITY && glConfig.textureCompressionAvailable) {
-			return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;	// one byte
-		}
-
-		return GL_INTENSITY8;	// single byte for all channels
-	}
-
-#if 0
-
-	// we don't support alpha textures any more, because there
-	// is a discrepancy in the definition of TEX_ENV_COMBINE that
-	// causes them to be treated as 0 0 0 A, instead of 1 1 1 A as
-	// normal texture modulation treats them
-	if (rgbAnd == 255) {
-		return GL_ALPHA8;		// single byte, only alpha
-	}
-
-#endif
-
-	if (minimumDepth == TD_HIGH_QUALITY) {
-		return GL_RGBA8;	// four bytes
-	}
-
-	if (glConfig.textureCompressionAvailable) {
-		return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;	// one byte
-	}
-
-	if (!rgbDiffer) {
-		return GL_LUMINANCE8_ALPHA8;	// two bytes, max quality
-	}
-
-//	return GL_RGBA4;	// two bytes
-#endif
 	return GL_RGBA8;	// four bytes
 }
 
@@ -871,14 +665,18 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 	// if the image is precompressed ( either in palletized mode or true rxgb mode )
 	// then it is loaded above and the swap never happens here	
 	if (depth == TD_BUMP && globalImages->image_useNormalCompression.GetInteger() != 1) {
+#if 1 //k2023 texture2D().agb
+		if(1)
+#else
 		if (glConfig.textureCompressionAvailable)
+#endif
 		{
 		for (int i = 0; i < scaled_width * scaled_height * 4; i += 4) {
 			scaledBuffer[ i + 3 ] = scaledBuffer[ i ];
 			scaledBuffer[ i ] = 0;
 		}
 		}
-		else
+		else // texture2D().rgb
 		{
 		for (int i = 0; i < scaled_width * scaled_height * 4; i += 4) {
 			scaledBuffer[ i + 3 ] = 255;
@@ -2427,35 +2225,16 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 		uploadHeight = potHeight;
 
 		if (potWidth == imageWidth && potHeight == imageHeight) {
-#if !defined(GL_ES_VERSION_2_0)
-			glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, x, y, imageWidth, imageHeight, 0);
-#else
 			glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, imageWidth, imageHeight, 0);
-#endif
 		} else {
 			byte	*junk;
 			// we need to create a dummy image with power of two dimensions,
 			// then do a glCopyTexSubImage2D of the data we want
 			// this might be a 16+ meg allocation, which could fail on _alloca
-#if !defined(GL_ES_VERSION_2_0)
-			junk = (byte *)Mem_Alloc(potWidth * potHeight * 4);
-			memset(junk, 0, potWidth * potHeight * 4);		//!@#
-#else
 			junk = (byte *)Mem_Alloc(potWidth * potHeight * 3);
 			memset(junk, 0, potWidth * potHeight * 3);		//!@#
-#endif
-#if 0 // Disabling because it's unnecessary and introduces a green strip on edge of _currentRender
-
-			for (int i = 0 ; i < potWidth * potHeight * 4 ; i+=4) {
-				junk[i+1] = 255;
-			}
-
-#endif
-#if !defined(GL_ES_VERSION_2_0)
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, potWidth, potHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, junk);
-#else
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, potWidth, potHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, junk);
-#endif
+
 			Mem_Free(junk);
 
 			glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, x, y, imageWidth, imageHeight);
@@ -2498,11 +2277,7 @@ void idImage::CopyDepthbuffer(int x, int y, int imageWidth, int imageHeight)
 	// if the size isn't a power of 2, the image must be increased in size
 	int	potWidth, potHeight;
 
-#if !defined(GL_ES_VERSION_2_0)
-	GLenum depthComponent = GL_DEPTH_COMPONENT24;
-#else
-	GLenum depthComponent = GL_DEPTH_COMPONENT24_OES;
-#endif
+	GLenum depthComponent = GL_DEPTH_COMPONENT;
 
 	potWidth = MakePowerOfTwo(imageWidth);
 	potHeight = MakePowerOfTwo(imageHeight);
@@ -2561,7 +2336,7 @@ void idImage::UploadScratch(const byte *data, int cols, int rows)
 
 			// upload the base level
 			for (i = 0 ; i < 6 ; i++) {
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL_RGB8, cols, rows, 0,
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL_RGBA, cols, rows, 0,
 				              GL_RGBA, GL_UNSIGNED_BYTE, data + cols*rows*4*i);
 			}
 		} else {
@@ -2591,7 +2366,7 @@ void idImage::UploadScratch(const byte *data, int cols, int rows)
 		if (cols != uploadWidth || rows != uploadHeight) {
 			uploadWidth = cols;
 			uploadHeight = rows;
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		} else {
 			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
 			// it and don't try and do a texture compression
@@ -2706,13 +2481,11 @@ void idImage::Print() const
 	}
 
 	switch (internalFormat) {
-#if !defined(GL_ES_VERSION_2_0)
-		case GL_INTENSITY8:
 		case 1:
 			common->Printf("I     ");
 			break;
 		case 2:
-		case GL_LUMINANCE8_ALPHA8:
+		case GL_LUMINANCE_ALPHA:
 			common->Printf("LA    ");
 			break;
 		case 3:
@@ -2721,17 +2494,17 @@ void idImage::Print() const
 		case 4:
 			common->Printf("RGBA  ");
 			break;
-		case GL_LUMINANCE8:
+		case GL_LUMINANCE:
 			common->Printf("L     ");
 			break;
-		case GL_ALPHA8:
+		case GL_ALPHA:
 			common->Printf("A     ");
 			break;
-		case GL_RGBA8:
-			common->Printf("RGBA8 ");
+		case GL_RGBA:
+			common->Printf("RGBA  ");
 			break;
-		case GL_RGB8:
-			common->Printf("RGB8  ");
+		case GL_RGB:
+			common->Printf("RGB   ");
 			break;
 		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
 			common->Printf("DXT1  ");
@@ -2751,19 +2524,6 @@ void idImage::Print() const
 		case GL_RGB5:
 			common->Printf("RGB5  ");
 			break;
-		case GL_COLOR_INDEX8_EXT:
-			common->Printf("CI8   ");
-			break;
-		case GL_COLOR_INDEX:
-			common->Printf("CI    ");
-			break;
-		case GL_COMPRESSED_RGB_ARB:
-			common->Printf("RGBC  ");
-			break;
-		case GL_COMPRESSED_RGBA_ARB:
-			common->Printf("RGBAC ");
-			break;
-#endif
 		case 0:
 			common->Printf("      ");
 			break;

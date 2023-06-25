@@ -251,17 +251,11 @@ static void R_CheckPortableExtensions(void)
 #endif
 
 	// GL_ARB_multitexture
-	glConfig.multitextureAvailable = R_CheckExtension("GL_ARB_multitexture");
+	glConfig.multitextureAvailable = true; // R_CheckExtension("GL_ARB_multitexture");
 
-#if !defined(GL_ES_VERSION_2_0)
 	if (glConfig.multitextureAvailable)
-#endif
 	{
-#if !defined(GL_ES_VERSION_2_0)
-		glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, (GLint *)&glConfig.maxTextureUnits);
-#else
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureUnits);
-#endif
 
 		if (glConfig.maxTextureUnits > MAX_MULTITEXTURE_UNITS) {
 			glConfig.maxTextureUnits = MAX_MULTITEXTURE_UNITS;
@@ -271,29 +265,30 @@ static void R_CheckPortableExtensions(void)
 			glConfig.multitextureAvailable = false;	// shouldn't ever happen
 		}
 
-#if !defined(GL_ES_VERSION_2_0)
-		glGetIntegerv(GL_MAX_TEXTURE_COORDS_ARB, (GLint *)&glConfig.maxTextureCoords);
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS_ARB, (GLint *)&glConfig.maxTextureImageUnits);
-#else
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint *)&glConfig.maxTextureCoords);
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureImageUnits);
-#endif
 	}
 
 	// GL_ARB_texture_env_combine
-	glConfig.textureEnvCombineAvailable = R_CheckExtension("GL_ARB_texture_env_combine");
+	glConfig.textureEnvCombineAvailable = false; // R_CheckExtension("GL_ARB_texture_env_combine");
 
 	// GL_ARB_texture_cube_map
-	glConfig.cubeMapAvailable = R_CheckExtension("GL_ARB_texture_cube_map");
+	glConfig.cubeMapAvailable = true; // R_CheckExtension("GL_ARB_texture_cube_map");
 
 	// GL_ARB_texture_env_dot3
-	glConfig.envDot3Available = R_CheckExtension("GL_ARB_texture_env_dot3");
+	glConfig.envDot3Available = false; // R_CheckExtension("GL_ARB_texture_env_dot3");
 
 	// GL_ARB_texture_env_add
-	glConfig.textureEnvAddAvailable = R_CheckExtension("GL_ARB_texture_env_add");
+	glConfig.textureEnvAddAvailable = false; // R_CheckExtension("GL_ARB_texture_env_add");
 
 	// GL_ARB_texture_non_power_of_two
-	glConfig.textureNonPowerOfTwoAvailable = R_CheckExtension("GL_ARB_texture_non_power_of_two");
+	glConfig.textureNonPowerOfTwoAvailable = R_CheckExtension(
+#if !defined(GL_ES_VERSION_2_0)
+			"GL_ARB_texture_non_power_of_two"
+#else
+			"GL_OES_texture_npot"
+#endif
+			);
 
 	// GL_ARB_texture_compression + GL_S3_s3tc
 	// DRI drivers may have GL_ARB_texture_compression but no GL_EXT_texture_compression_s3tc
@@ -311,7 +306,6 @@ static void R_CheckPortableExtensions(void)
 		glConfig.textureCompressionAvailable = false;
 	}
 
-#if !defined(GL_ES_VERSION_2_0)
 	// GL_EXT_texture_filter_anisotropic
 	glConfig.anisotropicAvailable = R_CheckExtension("GL_EXT_texture_filter_anisotropic");
 
@@ -321,7 +315,6 @@ static void R_CheckPortableExtensions(void)
 	} else {
 		glConfig.maxTextureAnisotropy = 1;
 	}
-#endif
 
 	// GL_EXT_texture_lod_bias
 	// The actual extension is broken as specificed, storing the state in the texture unit instead
@@ -335,39 +328,39 @@ static void R_CheckPortableExtensions(void)
 	}
 
 	// GL_EXT_shared_texture_palette
-	glConfig.sharedTexturePaletteAvailable = R_CheckExtension("GL_EXT_shared_texture_palette");
+	glConfig.sharedTexturePaletteAvailable = false; // R_CheckExtension("GL_EXT_shared_texture_palette");
 
 	// GL_EXT_texture3D (not currently used for anything)
-	glConfig.texture3DAvailable = R_CheckExtension("GL_EXT_texture3D");
+	glConfig.texture3DAvailable = false; // R_CheckExtension("GL_EXT_texture3D");
 
 	// EXT_stencil_wrap
 	tr.stencilIncr = GL_INCR_WRAP;
 	tr.stencilDecr = GL_DECR_WRAP;
 
 	// ARB_vertex_buffer_object
-	glConfig.ARBVertexBufferObjectAvailable = R_CheckExtension("GL_ARB_vertex_buffer_object");
+	glConfig.ARBVertexBufferObjectAvailable = true; // R_CheckExtension("GL_ARB_vertex_buffer_object");
 
 	// ARB_vertex_program
-	glConfig.ARBVertexProgramAvailable = R_CheckExtension("GL_ARB_vertex_program");
+	glConfig.ARBVertexProgramAvailable = true; // R_CheckExtension("GL_ARB_vertex_program");
 
 	// ARB_fragment_program
 	if (r_inhibitFragmentProgram.GetBool()) {
 		glConfig.ARBFragmentProgramAvailable = false;
 	} else {
-		glConfig.ARBFragmentProgramAvailable = R_CheckExtension("GL_ARB_fragment_program");
+		glConfig.ARBFragmentProgramAvailable = true; // R_CheckExtension("GL_ARB_fragment_program");
 	}
 
-	// GL_ARB_shading_language_100
-	glConfig.GLSLAvailable = R_CheckExtension("GL_ARB_shading_language_100");
+	glConfig.depthBoundsTestAvailable = false; // R_CheckExtension("EXT_depth_bounds_test");
 
 #if !defined(GL_ES_VERSION_2_0)
 	// GL_EXT_depth_bounds_test
-	glConfig.depthBoundsTestAvailable = R_CheckExtension("EXT_depth_bounds_test");
 
 	if (glConfig.depthBoundsTestAvailable) {
 		qglDepthBoundsEXT = (void (GL_APIENTRY *)(GLclampd, GLclampd))GLimp_ExtensionPointer("glDepthBoundsEXT");
 	}
 #endif
+	// GL_ARB_shading_language_100
+	glConfig.GLSLAvailable = R_CheckExtension("GL_ARB_shading_language_100");
 }
 
 
@@ -556,10 +549,9 @@ void R_InitOpenGL(void)
 	// one of the paths if there was an error
 	R_GLSL_Init();
 
-#if !defined(GL_ES_VERSION_2_0)
+#define R_ReloadARBPrograms_f R_ReloadGLSLPrograms_f
 	cmdSystem->AddCommand("reloadARBprograms", R_ReloadARBPrograms_f, CMD_FL_RENDERER, "reloads ARB programs");
-	R_ReloadARBPrograms_f(idCmdArgs());
-#endif
+#undef R_ReloadARBPrograms_f
 
 	cmdSystem->AddCommand("reloadGLSLprograms", R_ReloadGLSLPrograms_f, CMD_FL_RENDERER, "reloads GLSL programs");
 	R_ReloadGLSLPrograms_f(idCmdArgs());
@@ -598,9 +590,9 @@ void GL_CheckErrors(void)
 	char	s[64];
 	int		i;
 
-	#ifndef ANDROID_NOGLERRHACK
+	if (r_ignoreGLErrors.GetBool()) {
 	return;
-	#endif
+	}
 
 	// check for up to 10 errors pending
 	for (i = 0 ; i < 10 ; i++) {
@@ -1344,7 +1336,7 @@ void R_StencilShot(void)
 #if !defined(GL_ES_VERSION_2_0)
 	GLenum stencilIndex = GL_STENCIL_INDEX;
 #else
-	GLenum stencilIndex = GL_STENCIL_INDEX4_OES;
+	GLenum stencilIndex = GL_STENCIL_INDEX8_OES; // GL_STENCIL_INDEX4_OES;
 #endif
 
 	glReadPixels(0, 0, width, height, stencilIndex, GL_UNSIGNED_BYTE, byteBuffer);

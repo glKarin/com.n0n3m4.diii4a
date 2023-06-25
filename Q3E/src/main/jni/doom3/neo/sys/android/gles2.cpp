@@ -141,6 +141,8 @@ void GLimp_WakeBackEnd(void *a)
 
 void GLimp_EnableLogging(bool log)
 {
+	extern FILE *f_stdout;
+	tr.logFile = log ? f_stdout : NULL;
 	//common->DPrintf("GLimp_EnableLogging stub\n");
 }
 

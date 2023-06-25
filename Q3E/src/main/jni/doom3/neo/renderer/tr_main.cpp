@@ -930,6 +930,21 @@ void R_TransposeGLMatrix(const float in[16], float out[16])
 	}
 }
 
+void R_TransposeGLMatrix(float out[16])
+{
+	int		i, j;
+	float f;
+
+	for (i = 0 ; i < 4 ; i++) {
+		for (j = i + 1 ; j < 4 ; j++) {
+			f = out[i*4+j];
+			out[i*4+j] = out[j*4+i];
+			out[j*4+i] = f;
+		}
+	}
+}
+
+
 /*
 =================
 R_SetViewMatrix

@@ -2198,6 +2198,13 @@ void idPlayer::Restore(idRestoreGame *savefile)
 
 	// create combat collision hull for exact collision detection
 	SetCombatModel();
+#ifdef _HARM_FULL_BODY_AWARENESS
+	idVec3 offset(0, 0, 0);
+	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+		fullBodyAwarenessOffset = offset;
+	else
+		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+#endif
 }
 
 /*
@@ -6762,7 +6769,7 @@ void idPlayer::Think(void)
 			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 				fullBodyAwarenessOffset = offset;
 			else
-				gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
 			harm_pm_fullBodyAwarenessOffset.ClearModified();
 		}
 	}
@@ -7955,9 +7962,9 @@ void idPlayer::CalculateFirstPersonView(void)
 				+ viewBob
 				;
 		}
-		// custom offset
-		if(fullBodyAwarenessOffset.x != 0 || fullBodyAwarenessOffset.y != 0 || fullBodyAwarenessOffset.z != 0 )
-			firstPersonViewOrigin += fullBodyAwarenessOffset * viewAxis;
+		// custom offset: when no focus GUI
+		if(!focusUI && (fullBodyAwarenessOffset.x != 0 || fullBodyAwarenessOffset.y != 0 || fullBodyAwarenessOffset.z != 0 ))
+			firstPersonViewOrigin += fullBodyAwarenessOffset * firstPersonViewAxis;
 
 		// clip
 		idBounds bounds(idVec3(-4, -4, -4), idVec3(4, 4, 4));
@@ -8036,10 +8043,6 @@ void idPlayer::CalculateRenderView(void)
 			}
 		} else if (pm_thirdPerson.GetBool()) {
 			OffsetThirdPersonView(pm_thirdPersonAngle.GetFloat(), pm_thirdPersonRange.GetFloat(), pm_thirdPersonHeight.GetFloat(), pm_thirdPersonClip.GetBool());
-#ifdef _HARM_THIRD_PERSON
-			firstPersonViewOrigin = renderView->vieworg;
-			firstPersonViewAxis = renderView->viewaxis;
-#endif
 		} else if (pm_thirdPersonDeath.GetBool()) {
 			range = gameLocal.time < minRespawnTime ? (gameLocal.time + RAGDOLL_DEATH_TIME - minRespawnTime) * (120.0f / RAGDOLL_DEATH_TIME) : 120.0f;
 			OffsetThirdPersonView(0.0f, 20.0f + range, 0.0f, false);

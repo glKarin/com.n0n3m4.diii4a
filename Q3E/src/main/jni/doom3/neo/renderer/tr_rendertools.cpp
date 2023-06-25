@@ -1035,6 +1035,23 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
 	tr.primaryWorld->DrawText(mt.material->GetName(), mt.point,
 	                          0.35f, colorBlue, tr.primaryView->renderView.viewaxis);
+#ifdef _K_DEV //karin: show stage texgen
+	idStr str;
+	const char *TG_NAMES[] = {
+		"TG_EXPLICIT",
+		"TG_DIFFUSE_CUBE",
+		"TG_REFLECT_CUBE",
+		"TG_SKYBOX_CUBE",
+		"TG_WOBBLESKY_CUBE",
+		"TG_SCREEN",
+		"TG_SCREEN2",
+		"TG_GLASSWARP",
+	};
+	for(int i = 0; i < mt.material->GetNumStages(); i++)
+		str += va("%d. %s\n", i, TG_NAMES[mt.material->GetStage(i)->texture.texgen]);
+	tr.primaryWorld->DrawText(str.c_str(), mt.point - tr.primaryView->renderView.viewaxis[2] * 12,
+	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
+#endif
 
 	glEnable(GL_DEPTH_TEST);
 #if !defined(GL_ES_VERSION_2_0)

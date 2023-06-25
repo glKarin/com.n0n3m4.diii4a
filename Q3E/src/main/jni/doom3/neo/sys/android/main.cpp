@@ -708,9 +708,7 @@ static void * BackendThread(void *data)
 	while(true)
 	{
 		BackendThreadTask();
-		if(render_thread.threadCancel)
-			break;
-		if(backendThreadShutdown)
+		if(render_thread.threadCancel || backendThreadShutdown)
 			break;
 	}
 	GLimp_DeactivateContext();
@@ -845,6 +843,7 @@ static void Q3E_StopGameMainThread(void)
 	Sys_Printf("[Harmattan]: doom3 main thread quit.\n");
 }
 
+FILE *f_stdout = NULL;
 extern "C"
 {
 
@@ -860,7 +859,7 @@ int main(int argc, const char **argv)
 
 	if(redirect_output_to_file)
 	{
-		freopen("stdout.txt","w",stdout);
+		f_stdout = freopen("stdout.txt","w",stdout);
 		setvbuf(stdout, NULL, _IONBF, 0);
 		freopen("stderr.txt","w",stderr);
 		setvbuf(stderr, NULL, _IONBF, 0);

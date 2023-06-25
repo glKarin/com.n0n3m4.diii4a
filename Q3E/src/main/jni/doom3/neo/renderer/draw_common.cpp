@@ -30,6 +30,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _K_DEV //karin: debug shader pass
+#define _HARM_SKIP_RENDER_SHADER_PASS
+#endif
+#ifdef _HARM_SKIP_RENDER_SHADER_PASS
+static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9000");
+#endif
+
 /*
 =====================
 RB_BakeTextureMatrixIntoTexgen
@@ -55,10 +62,10 @@ void RB_BakeTextureMatrixIntoTexgen( idPlane lightProject[3], const float textur
 	genMatrix[10] = 0;
 	genMatrix[14] = 0;
 
-	genMatrix[3] = lightProject[3][0];
-	genMatrix[7] = lightProject[3][1];
-	genMatrix[11] = lightProject[3][2];
-	genMatrix[15] = lightProject[3][3];
+	genMatrix[3] = lightProject[2][0];
+	genMatrix[7] = lightProject[2][1];
+	genMatrix[11] = lightProject[2][2];
+	genMatrix[15] = lightProject[2][3];
 
 	myGlMultMatrix( genMatrix, textureMatrix, final );
 
@@ -102,6 +109,7 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 
 	else if (pStage->texture.texgen == TG_SCREEN || pStage->texture.texgen == TG_SCREEN2)
 	{
+		RB_LoadShaderTextureMatrix(surf->shaderRegisters, &pStage->texture, true);
         float mat[16];
 		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
         
@@ -625,6 +633,19 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 
 		const int texgen = pStage->texture.texgen;
 		bool usingTexCoord = true;
+#ifdef _HARM_SKIP_RENDER_SHADER_PASS
+		int skipShaderPass = harm_r_skipShaderPass.GetInteger();
+		if(skipShaderPass == 9000 || skipShaderPass == texgen + 1)
+		{
+			RB_LogComment("skip\n");
+			continue;
+		}
+		if(skipShaderPass < 0 && -skipShaderPass != texgen + 1)
+		{
+			RB_LogComment("skip ~\n");
+			continue;
+		}
+#endif
 
 		switch(texgen)
 		{
@@ -788,6 +809,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	// surfaces won't draw any ambient passes
 	backEnd.currentSpace = NULL;
 
+	float	mat[16];
 	for (i = 0  ; i < numDrawSurfs ; i++) {
 		if (drawSurfs[i]->material->SuppressInSubview()) {
 			continue;
@@ -811,7 +833,6 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 		GL_SelectTexture(0);*/
 
 		// Change the MVP matrix if needed
-		float	mat[16];
 		if (drawSurfs[i]->space != backEnd.currentSpace) {
 			RB_ComputeMVP(drawSurfs[i], mat);
 			// We can't set the uniform now, as we still don't know which shader to use
@@ -864,6 +885,8 @@ static idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CV
 static void RB_T_Shadow(const drawSurf_t *surf)
 {
 	const srfTriangles_t	*tri;
+
+	tri = surf->geo;
 
 	if (!tri->shadowCache) {
 		return;
@@ -1466,11 +1489,7 @@ void RB_STD_LightScale(void)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-#if !defined(GL_ES_VERSION_2_0)
 	glOrtho(0, 1, 0, 1, -1, 1);
-#else
-	glOrthof(0, 1, 0, 1, -1, 1);
-#endif
 
 	GL_State(GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_SRC_COLOR);
 	GL_Cull(CT_TWO_SIDED);	// so mirror views also get it

@@ -44,6 +44,9 @@ shaderProgram_t	interactionBlinnPhongShader; //k: BLINN-PHONG lighting model int
 shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
 shaderProgram_t texgenShader; //k: texgen shader
 
+static bool r_usePhong = true;
+static float r_specularExponent = 4.0f;
+
 struct GLSLShaderProp
 {
 	const char *name;
@@ -52,7 +55,7 @@ struct GLSLShaderProp
 	const char *default_fragment_shader_source;
 	const char *vertex_shader_source_file;
 	const char *fragment_shader_source_file;
-	int etc; // 0 all, 1 - unused compress texture, 2 - using compress texture
+	int cond;
 };
 static int R_LoadGLSLShaderProgram(
 		const char *name,
@@ -61,7 +64,7 @@ static int R_LoadGLSLShaderProgram(
 		const char *default_fragment_shader_source,
 		const char *vertex_shader_source_file,
 		const char *fragment_shader_source_file,
-		int etc
+		int cond
 );
 
 #include "glsl_shader.h"
@@ -146,35 +149,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	GL_Uniform4fv(offsetof(shaderProgram_t, specularColor), din->specularColor.ToFloatPtr());
 
 	// material may be NULL for shadow volumes
-	float f;
-	f = harm_r_specularExponent.GetFloat();
-	if(f <= 0.0f)
-#if 1
-		f = 4.0f;
-#else
-	switch (din->surf->material->GetSurfaceType()) {
-		case SURFTYPE_METAL:
-#if !defined(_HUMANHEAD)
-		case SURFTYPE_RICOCHET:
-#endif
-			f = 4.0f;
-			break;
-		case SURFTYPE_STONE:
-		case SURFTYPE_FLESH:
-		case SURFTYPE_WOOD:
-		case SURFTYPE_CARDBOARD:
-		case SURFTYPE_LIQUID:
-#if !defined(_HUMANHEAD)
-		case SURFTYPE_GLASS:
-		case SURFTYPE_PLASTIC:
-#endif
-		case SURFTYPE_NONE:
-		default:
-			f = 4.0f;
-			break;
-	}
-#endif
-	GL_Uniform1fv(offsetof(shaderProgram_t, specularExponent), &f);
+	GL_Uniform1fv(offsetof(shaderProgram_t, specularExponent), &r_specularExponent);
 
 	// set the textures
 
@@ -223,11 +198,10 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 			backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-	const char *lightModel = harm_r_lightModel.GetString();
-	if(lightModel && !idStr::Icmp(HARM_INTERACTION_SHADER_BLINNPHONG, lightModel))
-		GL_UseProgram(&interactionBlinnPhongShader);
-	else
+	if(r_usePhong)
 		GL_UseProgram(&interactionShader);
+	else
+		GL_UseProgram(&interactionBlinnPhongShader);
 
 	// enable the vertex arrays
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
@@ -595,8 +569,7 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 static bool RB_GLSL_InitShaders(void)
 {
 	const GLSLShaderProp Props[] = {
-			{ "interaction", &interactionShader, INTERACTION_VERT, INTERACTION_FRAG, "interaction.vert", "interaction.frag", 2 },
-			{ "interaction_etc", &interactionShader, INTERACTION_VERT, INTERACTION_ETC_FRAG, "interaction.vert", "interaction_etc.frag", 1 },
+			{ "interaction", &interactionShader, INTERACTION_VERT, INTERACTION_FRAG, "interaction.vert", "interaction.frag", 1 },
 
 			{ "shadow", &shadowShader, SHADOW_VERT, SHADOW_FRAG, "shadow.vert", "shadow.frag", 0 },
 			{ "default", &defaultShader, DEFAULT_VERT, DEFAULT_FRAG, "default.vert", "default.frag", 0 },
@@ -609,11 +582,10 @@ static bool RB_GLSL_InitShaders(void)
 			{ "fog", &fogShader, FOG_VERT, FOG_FRAG, "fog.vert", "fog.frag", 0 },
 			{ "blendLight", &blendLightShader, BLENDLIGHT_VERT, FOG_FRAG, "blendLight.vert", "blendLight.frag", 0 },
 
-			{ "interaction_blinn_phong", &interactionBlinnPhongShader, INTERACTION_BLINNPHONG_VERT, INTERACTION_BLINNPHONG_FRAG, "interaction_blinnphong.vert", "interaction_blinnphong.frag", 2 },
-			{ "interaction_blinn_phong_etc", &interactionBlinnPhongShader, INTERACTION_BLINNPHONG_VERT, INTERACTION_BLINNPHONG_ETC_FRAG, "interaction_blinnphong.vert", "interaction_blinnphong_etc.frag", 1 },
+			{ "interaction_blinn_phong", &interactionBlinnPhongShader, INTERACTION_BLINNPHONG_VERT, INTERACTION_BLINNPHONG_FRAG, "interaction_blinnphong.vert", "interaction_blinnphong.frag", 1 },
 
 			{ "diffuseCubemap", &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "diffuseCubemap.vert", "diffuseCubemap.frag", 0 },
-			{ "texgen", &diffuseCubemapShader, TEXGEN_VERT, TEXGEN_FRAG, "texgen.vert", "texgen.frag", 0 },
+			{ "texgen", &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "texgen.vert", "texgen.frag", 0 },
 	};
 
 	for(int i = 0; i < sizeof(Props) / sizeof(Props[0]); i++)
@@ -626,7 +598,7 @@ static bool RB_GLSL_InitShaders(void)
 				prop->default_fragment_shader_source,
 				prop->vertex_shader_source_file,
 				prop->fragment_shader_source_file,
-				prop->etc
+				prop->cond
 				) < 0)
 			return false;
 	}
@@ -639,6 +611,17 @@ static bool RB_GLSL_InitShaders(void)
 R_ReloadGLSLPrograms_f
 ==================
 */
+static void R_InitGLSLCvars(void)
+{
+	const char *lightModel = harm_r_lightModel.GetString();
+	r_usePhong = !(lightModel && !idStr::Icmp(HARM_INTERACTION_SHADER_BLINNPHONG, lightModel));
+
+	float f = harm_r_specularExponent.GetFloat();
+	if(f <= 0.0f)
+		f = 4.0f;
+	r_specularExponent = f;
+}
+
 void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
 {
 	int		i;
@@ -667,6 +650,7 @@ void R_GLSL_Init(void)
 
 	common->Printf("Available.\n");
 
+	R_InitGLSLCvars();
 	common->Printf("---------------------------------\n");
 }
 
@@ -811,29 +795,12 @@ int R_LoadGLSLShaderProgram(
 		const char *default_fragment_shader_source,
 		const char *vertex_shader_source_file,
 		const char *fragment_shader_source_file,
-		int etc
+		int cond
 		)
 {
 	memset(program, 0, sizeof(shaderProgram_t));
 
 	common->Printf("[Harmattan]: Load GLSL shader program: %s\n", name);
-
-	if(!glConfig.textureCompressionAvailable) // unused compress texture
-	{
-		if(etc == 2)
-		{
-			common->Printf("[Harmattan]: Skip when unused compress texture\n\n");
-			return 0;
-		}
-	}
-	else // using compress texture
-	{
-		if(etc == 1)
-		{
-			common->Printf("[Harmattan]: Skip when using compress texture\n\n");
-			return 0;
-		}
-	}
 
 	common->Printf("[Harmattan]: 1. Load external shader source: Vertex(%s), Fragment(%s)\n", vertex_shader_source_file, fragment_shader_source_file);
 	R_LoadGLSLShader(vertex_shader_source_file, program, GL_VERTEX_SHADER);
@@ -860,3 +827,21 @@ int R_LoadGLSLShaderProgram(
 	}
 }
 
+void R_CheckGLSLCvars(void)
+{
+	if(harm_r_lightModel.IsModified())
+	{
+		const char *lightModel = harm_r_lightModel.GetString();
+		r_usePhong = !(lightModel && !idStr::Icmp(HARM_INTERACTION_SHADER_BLINNPHONG, lightModel));
+		harm_r_lightModel.ClearModified();
+	}
+
+	if(harm_r_specularExponent.IsModified())
+	{
+		float f = harm_r_specularExponent.GetFloat();
+		if(f <= 0.0f)
+			f = 4.0f;
+		r_specularExponent = f;
+		harm_r_specularExponent.ClearModified();
+	}
+}
