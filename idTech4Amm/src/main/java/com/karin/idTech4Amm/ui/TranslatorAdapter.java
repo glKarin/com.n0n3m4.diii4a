@@ -23,9 +23,9 @@ public class TranslatorAdapter extends ArrayAdapter_base<Translator>
         Translator tr;
 
         tr = new Translator();
-        tr.lang = "English";
+/*        tr.lang = "English";
         tr.author = "n0n3m4";
-        m_list.add(tr);
+        m_list.add(tr);*/
 
         tr = new Translator();
         tr.lang = "中文";
