@@ -25,6 +25,7 @@ public final class Q3EPreference
     public static final String pref_usedxt = "q3e_usedxt";
     public static final String pref_useetc1cache = "q3e_useetc1cache";
     public static final String pref_controlprefix = "q3e_controls_";
+
     public static final String pref_harm_16bit = "q3e_harm_16bit"; //k
     public static final String pref_harm_r_harmclearvertexbuffer = "q3e_r_harmclearvertexbuffer"; //k
     public static final String pref_harm_fs_game = "q3e_harm_fs_game"; //k

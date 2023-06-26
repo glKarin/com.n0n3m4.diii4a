@@ -8,7 +8,6 @@ import android.widget.ListView;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.misc.TextHelper;
-import com.karin.idTech4Amm.ui.TranslatorAdapter;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
 

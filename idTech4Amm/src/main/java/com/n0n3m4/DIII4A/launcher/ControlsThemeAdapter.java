@@ -1,4 +1,4 @@
-package com.karin.idTech4Amm.ui;
+package com.n0n3m4.DIII4A.launcher;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.karin.idTech4Amm.R;
+import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EUtils;

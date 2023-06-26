@@ -12,7 +12,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 
 import com.karin.idTech4Amm.R;
-import com.karin.idTech4Amm.ui.ControlsThemeAdapter;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;

@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
+import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
@@ -64,13 +65,14 @@ public final class RestorePreferenceFunc extends GameLauncherFunc
 
     private void RestorePreferences(Uri uri)
     {
+        InputStream is = null;
         try
         {
-            InputStream is = m_gameLauncher.getContentResolver().openInputStream(uri);
+            is = m_gameLauncher.getContentResolver().openInputStream(uri);
             PreferenceBackup backup = new PreferenceBackup(m_gameLauncher);
             if(backup.Restore(is))
             {
-                Toast.makeText(m_gameLauncher, R.string.restore_preferences_file_success_app_will_reboot, Toast.LENGTH_LONG).show();
+                Toast_long(R.string.restore_preferences_file_success_app_will_reboot);
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -82,13 +84,17 @@ public final class RestorePreferenceFunc extends GameLauncherFunc
             {
                 String[] args = {""};
                 backup.GetError(args);
-                Toast.makeText(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.restore_preferences_file_fail) + args[0], Toast.LENGTH_LONG).show();
+                Toast_long(Q3ELang.tr(m_gameLauncher, R.string.restore_preferences_file_fail) + args[0]);
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            Toast.makeText(m_gameLauncher, R.string.restore_preferences_file_error, Toast.LENGTH_LONG).show();
+            Toast_long(R.string.restore_preferences_file_error);
+        }
+        finally
+        {
+            FileUtility.CloseStream(is);
         }
     }
 }

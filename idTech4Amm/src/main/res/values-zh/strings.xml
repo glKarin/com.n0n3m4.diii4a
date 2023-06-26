@@ -237,4 +237,9 @@
     <string name="empty_response_data">响应数据为空!</string>
     <string name="sorting_by_add_time">按添加时间排序</string>
     <string name="get_open_source_license">正在获取开源许可证......</string>
+    <string name="opengles_shader">OpenGLES着色器</string>
+    <string name="extract_file_fail">提取文件失败!</string>
+    <string name="extract_file_success">提取文件成功.</string>
+    <string name="extract_file">提取文件</string>
+    <string name="extract_source">提取源码</string>
 </resources>

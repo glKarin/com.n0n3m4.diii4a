@@ -73,6 +73,7 @@ import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
 import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
 import com.n0n3m4.DIII4A.launcher.EditExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
+import com.n0n3m4.DIII4A.launcher.ExtractSourceFunc;
 import com.n0n3m4.DIII4A.launcher.OpenSourceLicenseFunc;
 import com.n0n3m4.DIII4A.launcher.RestorePreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.SetupControlsThemeFunc;
@@ -110,6 +111,7 @@ public class GameLauncher extends Activity
     private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_LIBRARY = 7;
     private static final int CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY = 8;
     private static final int CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY = 9;
+	private static final int CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE = 10;
 
     // GameLauncher function
     private ExtractPatchResourceFunc m_extractPatchResourceFunc;
@@ -123,6 +125,7 @@ public class GameLauncher extends Activity
     private ChooseGameLibFunc m_chooseGameLibFunc;
     private EditExternalLibraryFunc m_editExternalLibraryFunc;
 	private OpenSourceLicenseFunc m_openSourceLicenseFunc;
+	private ExtractSourceFunc m_extractSourceFunc;
 
     final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -1247,7 +1250,7 @@ public class GameLauncher extends Activity
 			public void run()
 			{
 				AlertDialog.Builder builder = (AlertDialog.Builder)args[0];
-				builder.setNegativeButton(R.string.open_source_license, new DialogInterface.OnClickListener()
+				builder.setNeutralButton(R.string.open_source_license, new DialogInterface.OnClickListener()
 				{
 					@Override
 					public void onClick(DialogInterface dialog, int which)
@@ -1255,6 +1258,16 @@ public class GameLauncher extends Activity
 						if (null == m_openSourceLicenseFunc)
 							m_openSourceLicenseFunc = new OpenSourceLicenseFunc(GameLauncher.this);
 						m_openSourceLicenseFunc.Start(new Bundle());
+					}
+				});
+				builder.setNegativeButton(R.string.extract_source, new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+						if (null == m_extractSourceFunc)
+							m_extractSourceFunc = new ExtractSourceFunc(GameLauncher.this, CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE);
+						m_extractSourceFunc.Start(new Bundle());
 					}
 				});
 			}
@@ -1652,7 +1665,15 @@ public class GameLauncher extends Activity
                         bundle.putParcelable("uri", data.getData());
                         m_addExternalLibraryFunc.Start(bundle);
                     }
-                    break;
+					break;
+				case CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE:
+					if (null != m_extractSourceFunc)
+					{
+						Bundle bundle = new Bundle();
+						bundle.putParcelable("uri", data.getData());
+						m_extractSourceFunc.Start(bundle);
+					}
+					break;
             }
         }
     }
@@ -1699,6 +1720,10 @@ public class GameLauncher extends Activity
                     if (null != m_editExternalLibraryFunc)
                         m_editExternalLibraryFunc.run();
                     break;
+				case CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE:
+					if (null != m_extractSourceFunc)
+						m_extractSourceFunc.run();
+					break;
                 default:
                     break;
             }

@@ -57,9 +57,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifdef __ANDROID__
 #define _HARM_FULL_BODY_AWARENESS
-
-#define _FULLBODYAWARENESS_DISABLED() ( !harm_pm_fullBodyAwareness.GetBool()/* || pm_thirdPerson.GetBool() */)
-#define _FULLBODYAWARENESS_ENABLED() ( harm_pm_fullBodyAwareness.GetBool() && !pm_thirdPerson.GetBool() )
 #endif
 extern idRenderWorld 				*gameRenderWorld;
 extern idSoundWorld 				*gameSoundWorld;

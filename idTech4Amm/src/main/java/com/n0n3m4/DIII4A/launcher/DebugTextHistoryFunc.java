@@ -104,7 +104,7 @@ public final class DebugTextHistoryFunc extends GameLauncherFunc
         else
             str = format.toString();
         Log.e("TAG xxxxx", str);
-        Toast.makeText(context, str, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
         if(null == m_debugTextHistory)
             m_debugTextHistory = new LinkedList<>();
         m_debugTextHistory.add(str);

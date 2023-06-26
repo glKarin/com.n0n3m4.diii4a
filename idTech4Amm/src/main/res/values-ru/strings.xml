@@ -238,5 +238,10 @@
     <string name="sorting_by_add_time">сортировка по времени добавления</string>
     <string name="not_supported">Не поддерживается!</string>
     <string name="get_open_source_license">Поиск OPEN-SOURCE ЛИЦЕНЗИЯ......</string>
+    <string name="opengles_shader">OpenGLES shader</string>
+    <string name="extract_file_fail">Extract file fail!</string>
+    <string name="extract_file_success">Extract file success.</string>
+    <string name="extract_file">extract file</string>
+    <string name="extract_source">Extract source</string>
 
 </resources>

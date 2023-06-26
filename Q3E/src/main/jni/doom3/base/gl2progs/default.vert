@@ -35,7 +35,7 @@ varying lowp vec4 var_Color;
 void main(void)
 {
 	// # glMatrixMode(GL_TEXTURE)
-	var_TexDiffuse = (attr_TexCoord * u_textureMatrix).xy;
+	var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
 
 	// # generate the vertex color, which can be 1.0, color, or 1.0 - color
 	var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;

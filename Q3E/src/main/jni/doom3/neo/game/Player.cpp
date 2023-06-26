@@ -1600,7 +1600,7 @@ void idPlayer::Spawn(void)
 	else
 		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
 
-	if(_FULLBODYAWARENESS_DISABLED())
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
 	renderEntity.suppressSurfaceInViewID = entityNumber+1;
 #ifdef _HARM_FULL_BODY_AWARENESS
@@ -5213,7 +5213,7 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 	viewBob.Zero();
 
 #ifdef _HARM_FULL_BODY_AWARENESS
-	if(_FULLBODYAWARENESS_DISABLED())
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
 	if (physicsObj.HasSteppedUp()) {
 
@@ -5236,7 +5236,7 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 	idVec3 gravity = physicsObj.GetGravityNormal();
 
 #ifdef _HARM_FULL_BODY_AWARENESS
-	if(_FULLBODYAWARENESS_DISABLED()) {
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) {
 #endif
 	// if the player stepped up recently
 	deltaTime = gameLocal.time - stepUpTime;
@@ -7728,7 +7728,11 @@ void idPlayer::CalculateViewWeaponPos(idVec3 &origin, idMat3 &axis)
 	int			delta;
 
 	// CalculateRenderView must have been called first
+#ifdef _HARM_FULL_BODY_AWARENESS
+	idVec3 viewOrigin = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() ? firstPersonViewOrigin : firstPersonViewOrigin_viewWeaponOrigin;
+#else
 	const idVec3 &viewOrigin = firstPersonViewOrigin;
+#endif
 	const idMat3 &viewAxis = firstPersonViewAxis;
 
 	// these cvars are just for hand tweaking before moving a value to the weapon def
@@ -7884,7 +7888,7 @@ void idPlayer::GetViewPos(idVec3 &origin, idMat3 &axis) const
 
 	// if dead, fix the angle and don't add any kick
 #ifdef _HARM_FULL_BODY_AWARENESS
-	if( (_FULLBODYAWARENESS_DISABLED() ) && health <= 0 )
+	if( (!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) && health <= 0 )
 #else
 	if (health <= 0)
 #endif
@@ -7914,7 +7918,7 @@ idPlayer::CalculateFirstPersonView
 void idPlayer::CalculateFirstPersonView(void)
 {
 #ifdef _HARM_FULL_BODY_AWARENESS
-	if(_FULLBODYAWARENESS_DISABLED()) {
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) {
 #endif
 	if ((pm_modelView.GetInteger() == 1) || ((pm_modelView.GetInteger() == 2) && (health <= 0))) {
 		//	Displays the view from the point of view of the "camera" joint in the player model
@@ -7958,10 +7962,14 @@ void idPlayer::CalculateFirstPersonView(void)
 			idMat3 axis;
 			idVec3 origin;
 			animator.GetJointTransform( animator.GetJointHandle( "Head" ), gameLocal.time, origin, axis );
-			firstPersonViewOrigin = ( origin + modelOffset ) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
+			firstPersonViewOrigin = ( origin + modelOffset) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
 				+ viewBob
 				;
 		}
+
+		firstPersonViewOrigin_playerViewOrigin = firstPersonViewOrigin;
+		firstPersonViewOrigin_viewWeaponOrigin = firstPersonViewOrigin;
+
 		// custom offset: when no focus GUI
 		if(!focusUI && (fullBodyAwarenessOffset.x != 0 || fullBodyAwarenessOffset.y != 0 || fullBodyAwarenessOffset.z != 0 ))
 			firstPersonViewOrigin += fullBodyAwarenessOffset * firstPersonViewAxis;
@@ -7974,6 +7982,13 @@ void idPlayer::CalculateFirstPersonView(void)
 		if (trace.fraction != 1.0f) {
 			firstPersonViewOrigin = trace.endpos;
 		}
+
+		// for weapon
+		const idVec3 &forward = firstPersonViewAxis[0];
+		const idPlane p(-forward, -forward * firstPersonViewOrigin_viewWeaponOrigin);
+		float scale = 0.0f;
+		if(p.RayIntersection(firstPersonViewOrigin, forward, scale))
+			firstPersonViewOrigin_viewWeaponOrigin = firstPersonViewOrigin + forward * scale;
 	}
 #endif
 }
@@ -9224,10 +9239,12 @@ idPlayer::CanShowWeaponViewmodel
 bool idPlayer::CanShowWeaponViewmodel(void) const
 {
 #ifdef _HARM_FULL_BODY_AWARENESS
-	if(_FULLBODYAWARENESS_ENABLED())
-		return false;
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
 	return showWeaponViewModel;
+#ifdef _HARM_FULL_BODY_AWARENESS
+	return false;
+#endif
 }
 
 /*

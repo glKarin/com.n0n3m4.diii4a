@@ -19,6 +19,7 @@ import java.util.List;
 public final class ExtractPatchResourceFunc extends GameLauncherFunc
 {
     private final String[] m_patchResources = {
+            "glslprogs.pk4",
             "q4base/botfiles_q3.pk4",
             "q4base/mp_game_map_aas.pk4",
             "rivensin/play_original_doom3_level.pk4"
@@ -49,6 +50,7 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
         m_path = data.getString("path");
         // D3-format fonts don't need on longer
         final String[] Names = {
+                Q3ELang.tr(m_gameLauncher, R.string.opengles_shader),
                 Q3ELang.tr(m_gameLauncher, R.string.bot_q3_bot_support_in_mp_game),
                 Q3ELang.tr(m_gameLauncher, R.string.mp_game_map_aas_files),
                 Q3ELang.tr(m_gameLauncher, R.string.rivensin_play_original_doom3_level),
@@ -99,12 +101,14 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
         {
             File f = new File(str);
             String path = f.getParent();
+            if(null == path)
+                path = "";
             String name = f.getName();
             String newFileName = "z_" + FileUtility.GetFileBaseName(name) + "_idTech4Amm." + FileUtility.GetFileExtension(name);
             boolean ok = ContextUtility.ExtractAsset(m_gameLauncher, "pak/" + str, BasePath + path + File.separator + newFileName);
             if(ok)
                 r++;
         }
-        Toast.makeText(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.extract_path_resource_) + r, Toast.LENGTH_SHORT).show();
+        Toast_short(Q3ELang.tr(m_gameLauncher, R.string.extract_path_resource_) + r);
     }
 }
