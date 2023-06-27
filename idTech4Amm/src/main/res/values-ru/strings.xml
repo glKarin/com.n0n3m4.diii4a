@@ -243,5 +243,6 @@
     <string name="extract_file_success">Extract file success.</string>
     <string name="extract_file">extract file</string>
     <string name="extract_source">Extract source</string>
+    <string name="tips">Tips</string>
 
 </resources>

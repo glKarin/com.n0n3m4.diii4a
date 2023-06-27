@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 
+import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
 
 import java.io.Closeable;
@@ -388,7 +389,7 @@ public class Q3EUtils
     public static int SupportMouse()
     {
         // return Q3EGlobals.MOUSE_EVENT;
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? Q3EGlobals.MOUSE_EVENT : Q3EGlobals.MOUSE_DEVICE;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O || !Q3EMouseDevice.DeviceIsRoot() ? Q3EGlobals.MOUSE_EVENT : Q3EGlobals.MOUSE_DEVICE;
     }
 
     public static String Join(String d, String...strs)
