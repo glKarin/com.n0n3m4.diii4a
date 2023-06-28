@@ -62,6 +62,8 @@ jmethodID android_GrabMouse_method;
 jmethodID android_initAudio;
 jmethodID android_writeAudio;
 jmethodID android_setState;
+jmethodID android_writeAudio_direct;
+static char *audio_track_buffer = NULL;
 
 static JavaVM *jVM;
 static jobject audioBuffer=0;
@@ -157,7 +159,7 @@ void initAudio(void *buffer, int size)
 //k NEW: 
 // if offset >= 0 and length > 0, only write.
 // if offset >= 0 and length < 0, length = -length, then write and flush.
-// If length == 0 and offset < 0, only flush.
+// If offset < 0 and length == 0, only flush.
 int writeAudio(int offset, int length)
 {
 	if (audioBuffer==0) return 0;
@@ -178,6 +180,44 @@ void setState(int state)
     }
     //(*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_setState, state);
+}
+
+void initAudio_direct(void *buffer, int size)
+{
+	JNIEnv *env;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+	audio_track_buffer = buffer;
+	return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
+}
+
+int writeAudio_direct(int offset, int length)
+{
+	if (!audio_track_buffer)
+		return 0;
+	JNIEnv *env;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+	jbyteArray buf = NULL;
+	if(offset >= 0)
+	{
+		int len = abs(length);
+		if(len > 0)
+		{
+			buf = (*env)->NewByteArray(env, len);
+			jbyte *buf_mem = (*env)->GetByteArrayElements(env, buf, NULL);
+			memcpy(buf_mem, audio_track_buffer + offset, len);
+			(*env)->ReleaseByteArrayElements(env, buf, buf_mem, JNI_ABORT);
+		}
+	}
+	jobject jbuf = (*env)->NewWeakGlobalRef(env, buf); // weak ref for auto release
+	(*env)->DeleteLocalRef(env, buf);
+	int r = (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio_direct, jbuf, offset, length);
+	return r;
 }
 
 int JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -205,6 +245,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
     android_initAudio = (*env)->GetMethodID(env,q3eCallbackClass,"init","(I)V");
     android_writeAudio = (*env)->GetMethodID(env,q3eCallbackClass,"writeAudio","(Ljava/nio/ByteBuffer;II)I");
 	android_setState = (*env)->GetMethodID(env,q3eCallbackClass,"setState","(I)V");
+	android_writeAudio_direct = (*env)->GetMethodID(env,q3eCallbackClass, "writeAudio_direct", "([BII)I");
 	
 	//k
 	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(Z)V");
@@ -305,8 +346,9 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 	loadLib(doom3_path);
 	(*env)->ReleaseStringUTFChars(env, LibPath, libpath);    
 
-    setCallbacks(&initAudio,&writeAudio,&setState);    
-    setResolution(width, height);
+    setCallbacks(&initAudio,&writeAudio,&setState);
+	//setCallbacks(&initAudio_direct,&writeAudio_direct,&setState);
+	setResolution(width, height);
     
 	set_Android_Call(Android_Call);
     __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 native library file: %s", doom3_path);
