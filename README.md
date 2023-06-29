@@ -27,9 +27,9 @@ Tag with `-free` only for F-Droid update.
 
 * Add `Chinese`, `Russian`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)) language.
 * Move some on-screen settings to `Configure on-screen controls` page.
-* DOOM3 add `full-body awareness` mod. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset.
+* Add `full-body awareness` mod in DOOM 3. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode).
 * Support add external game library in `GameLib` at tab `General`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project and run it using original idTech4A++).
-* Support load external game library in `Game working directory`/`fs_game` folder instead of default game library of apk if enabled `Find game library in game data directory`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project, and then named `gameaarch64.so` or `libgameaarch64.so` on arm64 device or named `gamearm.so` or `libgamearm.so` on arm32 device, and then put it on `Game working directory`/`fs_game` folder).
+* Support load external game library in `Game working directory`/`fs_game` folder instead of default game library of apk if enabled `Find game library in game data directory`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project, and then named `gameaarch64.so`/`libgameaarch64.so`(arm64 device) or named `gamearm.so`/`libgamearm.so`(arm32 device), and then put it on `Game working directory`/`fs_game` folder, and start game directly with original idTech4A++).
 * Support jpg/png image texture file.
 
 ----------------------------------------------------------------------------------

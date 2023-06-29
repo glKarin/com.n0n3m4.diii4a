@@ -1250,7 +1250,7 @@ public class GameLauncher extends Activity
 			public void run()
 			{
 				AlertDialog.Builder builder = (AlertDialog.Builder)args[0];
-				builder.setNeutralButton(R.string.open_source_license, new DialogInterface.OnClickListener()
+				builder.setNeutralButton(R.string.license, new DialogInterface.OnClickListener()
 				{
 					@Override
 					public void onClick(DialogInterface dialog, int which)

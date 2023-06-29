@@ -243,4 +243,5 @@
     <string name="extract_file">提取文件</string>
     <string name="extract_source">提取源码</string>
     <string name="tips">提示</string>
+    <string name="license">开源许可证</string>
 </resources>
