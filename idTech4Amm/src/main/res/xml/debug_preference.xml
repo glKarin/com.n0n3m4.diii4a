@@ -2,35 +2,35 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:title="Debug"
+    android:title="@string/debug"
 >
 
     <PreferenceCategory
         android:key="debug"
-        android:title="Debug"
+        android:title="@string/debug"
     >
         <com.karin.idTech4Amm.widget.SeekBarPreference
-            android:dialogTitle="Update interval(Second): 0 - Disable"
+            android:dialogTitle="@string/update_interval_second_0_disable"
             android:key="harm_render_mem_status"
-            android:summary="If you do not want to debug memory usage status, please do not check it! Because it is a taking-time operation!"
+            android:summary="@string/if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation"
             android:persistent="true"
             app:max="120"
             app:min="0"
             app:suffix="(s)"
-            android:title="Render memory status(0 is disable)"
+            android:title="@string/render_memory_status_0_is_disable"
             android:defaultValue="0"
         />
         <CheckBoxPreference
-            android:title="No handle signals"
+            android:title="@string/no_handle_signals"
             android:key="harm_no_handle_signals"
             android:persistent="true"
             android:defaultValue="false"
-            android:summary="Do not handle signals"
+            android:summary="@string/do_not_handle_signals"
         />
     <Preference
         android:key="last_dalvik_crash_info"
-        android:summary="Last dalvik crash info"
-        android:title="Last dalvik crash info"
+        android:title="@string/last_dalvik_crash_info"
+        android:summary="@string/last_dalvik_crash_info"
         android:persistent="false"/>
     </PreferenceCategory>
     

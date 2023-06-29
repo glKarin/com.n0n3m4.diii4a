@@ -3,14 +3,13 @@ package com.n0n3m4.q3e.onscreen;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EUtils;
-import com.n0n3m4.q3e.gl.GL;
-import com.n0n3m4.q3e.gl.GLBitmapTexture;
+import com.n0n3m4.q3e.gl.Q3EGL;
+import com.n0n3m4.q3e.gl.KGLBitmapTexture;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,8 +25,8 @@ public class Disc extends Paintable implements TouchListener
         public float start;
         public float end;
         public char key;
-        public int textureId;
-        public int borderTextureId;
+        public int textureId = 0;
+        public int borderTextureId = 0;
         public boolean pressed;
         public boolean disabled;
     }
@@ -111,74 +110,77 @@ public class Disc extends Paintable implements TouchListener
         int sw = m_circleWidth / 2;
         final int fontSize = 10;
 
-        Bitmap bmp = Bitmap.createBitmap(dot_size, dot_size, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmp);
-        Paint p = new Paint();
-        p.setAntiAlias(true);
-        p.setARGB(255, 255, 255, 255);
-        c.drawARGB(0, 0, 0, 0);
-        p.setStrokeWidth(sw);
-        p.setTextSize(sw * fontSize * 3 / 2);
-        p.setTextAlign(Paint.Align.CENTER);
-        Paint.FontMetrics fontMetrics = p.getFontMetrics();
-        float fontHeight = (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent;
-
-        double rad = start + offset;
-        double x = Math.cos(rad);
-        double y = Math.sin(rad);
-        c.drawLine(r + (int) (x * centerR), r + (int) (y * centerR), r + (int) (x * r), r + (int) (y * r), p);
-        rad = end + offset;
-        x = Math.cos(rad);
-        y = Math.sin(rad);
-        c.drawLine(r + (int) (x * centerR), r + (int) (y * centerR), r + (int) (x * r), r + (int) (y * r), p);
-
-        x = Math.cos(mid);
-        y = Math.sin(mid);
-        int mr = (r + centerR) / 2;
-        c.drawText("" + Character.toUpperCase(key), r + (int) (x * mr), r + (int) (y * mr + (fontHeight)), p);
-
-        res.textureId = GL.loadGLTexture(gl, bmp);
-
         res.start = Q3EUtils.Rad2Deg(start);
         res.end = Q3EUtils.Rad2Deg(end);
 
-        sw = m_circleWidth;
-        bmp = Bitmap.createBitmap(dot_size, dot_size, Bitmap.Config.ARGB_8888);
-        c = new Canvas(bmp);
-        p = new Paint();
-        p.setAntiAlias(true);
-        p.setARGB(255, 255, 255, 255);
-        c.drawARGB(0, 0, 0, 0);
-        p.setStrokeWidth(sw);
-        p.setTextSize(sw * fontSize);
-        p.setTextAlign(Paint.Align.CENTER);
-        fontMetrics = p.getFontMetrics();
-        fontHeight = (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent;
-        rad = start + offset;
-        x = Math.cos(rad);
-        y = Math.sin(rad);
-        centerR -= m_circleWidth;
-        c.drawLine(r + (int) (x * centerR), r + (int) (y * centerR), r + (int) (x * r), r + (int) (y * r), p);
-        rad = end + offset;
-        x = Math.cos(rad);
-        y = Math.sin(rad);
-        c.drawLine(r + (int) (x * centerR), r + (int) (y * centerR), r + (int) (x * r), r + (int) (y * r), p);
+        if(dot_size > 0)
+        {
+            Bitmap bmp = Bitmap.createBitmap(dot_size, dot_size, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmp);
+            Paint p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(255, 255, 255, 255);
+            c.drawARGB(0, 0, 0, 0);
+            p.setStrokeWidth(sw);
+            p.setTextSize(sw * fontSize * 3 / 2);
+            p.setTextAlign(Paint.Align.CENTER);
+            Paint.FontMetrics fontMetrics = p.getFontMetrics();
+            float fontHeight = (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent;
 
-        x = Math.cos(mid);
-        y = Math.sin(mid);
-        mr = (r + centerR) / 2;
-        c.drawText("" + Character.toUpperCase(key), r + (int) (x * mr), r + (int) (y * mr + (fontHeight)), p);
+            double rad = start + offset;
+            double x = Math.cos(rad);
+            double y = Math.sin(rad);
+            c.drawLine(r + (int) (x * centerR), r + (int) (y * centerR), r + (int) (x * r), r + (int) (y * r), p);
+            rad = end + offset;
+            x = Math.cos(rad);
+            y = Math.sin(rad);
+            c.drawLine(r + (int) (x * centerR), r + (int) (y * centerR), r + (int) (x * r), r + (int) (y * r), p);
 
-        p.setStyle(Paint.Style.STROKE);
-        start = start / Math.PI * 180;
-        end = end / Math.PI * 180;
-        RectF rect = new RectF(dot_size / 2 - size / 2 + sw / 2, dot_size / 2 - size / 2 + sw / 2, dot_size / 2 + size / 2 - sw / 2, dot_size / 2 + size / 2 - sw / 2);
-        c.drawArc(rect, (float) (start - 90), (float) (end - start), false, p);
+            x = Math.cos(mid);
+            y = Math.sin(mid);
+            int mr = (r + centerR) / 2;
+            c.drawText("" + Character.toUpperCase(key), r + (int) (x * mr), r + (int) (y * mr + (fontHeight)), p);
 
-        rect = new RectF(0 + sw / 2, 0 + sw / 2, dot_size - sw / 2, dot_size - sw / 2);
-        c.drawArc(rect, (float) (start - 90), (float) (end - start), false, p);
+            res.textureId = Q3EGL.loadGLTexture(gl, bmp);
 
-        res.borderTextureId = GL.loadGLTexture(gl, bmp);
+            sw = m_circleWidth;
+            bmp = Bitmap.createBitmap(dot_size, dot_size, Bitmap.Config.ARGB_8888);
+            c = new Canvas(bmp);
+            p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(255, 255, 255, 255);
+            c.drawARGB(0, 0, 0, 0);
+            p.setStrokeWidth(sw);
+            p.setTextSize(sw * fontSize);
+            p.setTextAlign(Paint.Align.CENTER);
+            fontMetrics = p.getFontMetrics();
+            fontHeight = (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent;
+            rad = start + offset;
+            x = Math.cos(rad);
+            y = Math.sin(rad);
+            centerR -= m_circleWidth;
+            c.drawLine(r + (int) (x * centerR), r + (int) (y * centerR), r + (int) (x * r), r + (int) (y * r), p);
+            rad = end + offset;
+            x = Math.cos(rad);
+            y = Math.sin(rad);
+            c.drawLine(r + (int) (x * centerR), r + (int) (y * centerR), r + (int) (x * r), r + (int) (y * r), p);
+
+            x = Math.cos(mid);
+            y = Math.sin(mid);
+            mr = (r + centerR) / 2;
+            c.drawText("" + Character.toUpperCase(key), r + (int) (x * mr), r + (int) (y * mr + (fontHeight)), p);
+
+            p.setStyle(Paint.Style.STROKE);
+            start = start / Math.PI * 180;
+            end = end / Math.PI * 180;
+            RectF rect = new RectF(dot_size / 2 - size / 2 + sw / 2, dot_size / 2 - size / 2 + sw / 2, dot_size / 2 + size / 2 - sw / 2, dot_size / 2 + size / 2 - sw / 2);
+            c.drawArc(rect, (float) (start - 90), (float) (end - start), false, p);
+
+            rect = new RectF(0 + sw / 2, 0 + sw / 2, dot_size - sw / 2, dot_size - sw / 2);
+            c.drawArc(rect, (float) (start - 90), (float) (end - start), false, p);
+
+            res.borderTextureId = Q3EGL.loadGLTexture(gl, bmp);
+        }
 
         return res;
     }
@@ -187,7 +189,7 @@ public class Disc extends Paintable implements TouchListener
     {
         //main paint
         super.Paint(gl);
-        GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
         if (null == m_parts || m_parts.length == 0)
             return;
 
@@ -197,9 +199,9 @@ public class Disc extends Paintable implements TouchListener
             {
                 //DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red,green,blue,p.pressed ? (float)Math.max(alpha, 0.9) : (float)(Math.min(alpha, 0.1)));
                 if (p.pressed)
-                    GL.DrawVerts(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+                    Q3EGL.DrawVerts(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
                 else
-                    GL.DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
+                    Q3EGL.DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
             }
         }
     }
@@ -208,16 +210,16 @@ public class Disc extends Paintable implements TouchListener
     public void loadtex(GL10 gl)
     {
         String[] m_textures = null;
-        if(null != tex_androidid && !tex_androidid.isEmpty())
+        if (null != tex_androidid && !tex_androidid.isEmpty())
             m_textures = tex_androidid.split(";");
 
         int internalsize = size / 2 * 7 / 8;
         m_circleWidth = size / 2 - internalsize;
         final int[] color = {255, 255, 255, 255};
-        if(null != m_textures && m_textures.length > 0)
-            tex_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
-        if(tex_ind == 0)
-            tex_ind = GLBitmapTexture.GenCircleRingTexture(gl, size, m_circleWidth, color);
+        if (null != m_textures && m_textures.length > 0)
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+        if (tex_ind == 0)
+            tex_ind = KGLBitmapTexture.GenCircleRingTexture(gl, size, m_circleWidth, color);
 
         if (null != m_keys && m_keys.length > 0)
         {
@@ -230,7 +232,7 @@ public class Disc extends Paintable implements TouchListener
     }
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act)
+    public boolean onTouchEvent(int x, int y, int act/* 1: Down, -1: Up */)
     {
         if (null == m_parts || m_parts.length == 0)
             return true;
@@ -313,10 +315,12 @@ public class Disc extends Paintable implements TouchListener
         return 4 * ((cx - x) * (cx - x) + (cy - y) * (cy - y)) <= m_size_2;
     }
 
-    public static void Move(Disc target, Disc src)
+    public static Disc Move(Disc tmp, GL10 gl)
     {
-        target.tex_ind = src.tex_ind;
-        target.m_parts = src.m_parts;
+        Disc newd = new Disc(tmp.view, gl, tmp.cx, tmp.cy, tmp.size / 2, tmp.alpha, null, tmp.tex_androidid);
+        newd.tex_ind = tmp.tex_ind;
+        newd.m_parts = tmp.m_parts;
+        return newd;
     }
 
     public void Translate(int dx, int dy)

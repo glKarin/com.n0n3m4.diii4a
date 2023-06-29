@@ -25,6 +25,7 @@ public final class Q3EPreference
     public static final String pref_usedxt = "q3e_usedxt";
     public static final String pref_useetc1cache = "q3e_useetc1cache";
     public static final String pref_controlprefix = "q3e_controls_";
+
     public static final String pref_harm_16bit = "q3e_harm_16bit"; //k
     public static final String pref_harm_r_harmclearvertexbuffer = "q3e_r_harmclearvertexbuffer"; //k
     public static final String pref_harm_fs_game = "q3e_harm_fs_game"; //k
@@ -50,6 +51,7 @@ public final class Q3EPreference
     public static final String pref_harm_joystick_unfixed = "harm_joystick_unfixed"; //k
     public static final String pref_harm_joystick_inner_dead_zone = "harm_joystick_inner_dead_zone"; //k
     public static final String pref_harm_using_mouse = "harm_using_mouse"; //k
+    public static final String pref_harm_find_dll = "harm_find_dll"; //k
 
     public static final String RUN_BACKGROUND = "harm_run_background";
     public static final String RENDER_MEM_STATUS = "harm_render_mem_status";
@@ -62,6 +64,9 @@ public final class Q3EPreference
     public static final String REDIRECT_OUTPUT_TO_FILE = "harm_redirect_output_to_file";
     public static final String COVER_EDGES = "harm_cover_edges";
     public static final String CONTROLS_THEME = "harm_controls_theme";
+    public static final String LANG = "harm_lang";
+    public static final String MAP_BACK = "harm_map_back";
+    public static final String ONSCREEN_BUTTON = "harm_onscreen_button";
 
     public static float GetFloatFromString(Context context, String name, float defVal)
     {

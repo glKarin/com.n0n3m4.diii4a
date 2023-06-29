@@ -284,8 +284,7 @@ public final class TextHelper
             "e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, Prey(2006), and some mods.",
             null,
             "Source in `assets/source` folder in APK file.",
-            " `DIII4A.source.tgz`: launcher frontend source and game source, game source in `/Q3E/src/main/jni/doom3` of archive package.",
-            " `gl2progs.zip`: OpenGLES2 shader source.",
+            " `DIII4A.source.tgz`: launcher frontend source and game source, game source and OpenGLES2.0 shader source in `/Q3E/src/main/jni/doom3` of archive package.",
             null,
             "Homepage: ",
             "Github: " + GenLinkText(Constants.CONST_MAIN_PAGE, null),
@@ -295,6 +294,7 @@ public final class TextHelper
             null,
             "Special thanks: ",
             GenLinkText("https://4pda.ru/forum/index.php?showuser=7653620", "Sir Cat") + "@" + GenLinkText("https://4pda.ru/forum/index.php?showtopic=929753", "4PDA forum"),
+            GenLinkText("https://4pda.ru/forum/index.php?showuser=5043340", "ALord7") + "@" + GenLinkText("https://4pda.to/forum/index.php?showtopic=330329", "4PDA forum"),
         };
         final String endl = GetDialogMessageEndl();
         for(String str : ABOUTS)
@@ -310,6 +310,15 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+                ChangeLog.Create("2023-06-10", 31,
+                        "Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.",
+                        "Add setup all on-screen buttons size in tab `CONTROLS`.",
+                        "Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.",
+                        "Support unfixed-position joystick and inner dead zone.",
+                        "Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.",
+                        "New mouse support implement."
+                ),
 
                 ChangeLog.Create("2023-05-25", 30,
                         "Add function key toolbar for soft input method(default disabled, in Settings).",
@@ -685,6 +694,8 @@ public final class TextHelper
         };
         final Cvar[] GAME_CVARS = {
             Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
+                Cvar.Create("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness."),
+                Cvar.Create("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)."),
         };
         final Cvar[] D3XP_CVARS = {
             Cvar.Create("harm_g_skipWarpVision", "bool", "0", "Skip render warp vision for grabber dragging."),

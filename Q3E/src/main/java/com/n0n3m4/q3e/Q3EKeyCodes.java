@@ -22,9 +22,8 @@ package com.n0n3m4.q3e;
 import android.view.KeyEvent;
 
 import com.n0n3m4.q3e.device.Q3EOuya;
-import java.lang.reflect.Field;
 
-//import tv.ouya.console.api.OuyaController;
+import java.lang.reflect.Field;
 
 public class Q3EKeyCodes
 {

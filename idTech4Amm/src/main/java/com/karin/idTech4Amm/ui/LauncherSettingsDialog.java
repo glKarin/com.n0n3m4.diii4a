@@ -42,7 +42,7 @@ public class LauncherSettingsDialog extends DialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("Settings");
+        dialog.setTitle(R.string.settings);
         return dialog;
     }
     

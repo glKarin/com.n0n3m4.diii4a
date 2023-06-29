@@ -38,7 +38,7 @@ varying lowp vec4 var_Color;
   
 void main(void)
 {
-	var_TexCoord = (vec4(attr_TexCoord, 0.0) * u_textureMatrix).xyz;
+	var_TexCoord = (u_textureMatrix * vec4(attr_TexCoord, 0.0)).xyz;
 
 	var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
 

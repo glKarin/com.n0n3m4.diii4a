@@ -22,19 +22,19 @@ import android.view.MenuItem;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.sys.Constants;
+import com.n0n3m4.q3e.Q3ELang;
 
 /**
  * cfg file editor
  */
-@SuppressLint("NonConstantResourceId")
 public class ConfigEditorActivity extends Activity
 {
-    private ViewHolder V = new ViewHolder();
+    private final ViewHolder V = new ViewHolder();
     private String m_filePath;
     private File m_file;
     private boolean m_edited = false;
 
-    private TextWatcher m_textWatcher = new TextWatcher() {           
+    private final TextWatcher m_textWatcher = new TextWatcher() {
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if(m_edited)
             return;
@@ -54,6 +54,7 @@ public class ConfigEditorActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        Q3ELang.Locale(this);
 
         boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false);
         ContextUtility.SetScreenOrientation(this, o ? 0 : 1);
@@ -156,11 +157,11 @@ public class ConfigEditorActivity extends Activity
                 }
             };
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Warning");
-            builder.setMessage("The text is modified since open, save changes to file?");
-            builder.setPositiveButton("Yes", listener);
-            builder.setNegativeButton("No", listener);
-            builder.setNeutralButton("Cancel", listener);
+            builder.setTitle(R.string.warning);
+            builder.setMessage(R.string.the_text_is_modified_since_open_save_changes_to_file);
+            builder.setPositiveButton(R.string.yes, listener);
+            builder.setNegativeButton(R.string.no, listener);
+            builder.setNeutralButton(R.string.cancel, listener);
             AlertDialog dialog = builder.create();
             dialog.show();
         }
@@ -182,37 +183,35 @@ public class ConfigEditorActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        switch(item.getItemId())
+        int itemId = item.getItemId();
+        if (itemId == R.id.config_editor_menu_save)
         {
-            case R.id.config_editor_menu_save:
-                if (IsValid())
+            if (IsValid())
+            {
+                if (SaveFile())
                 {
-                    if (SaveFile())  
-                    {
-                        m_edited = false;
-                        V.titleText.setText(m_filePath);
-                        V.titleText.setTextColor(Color.BLACK);
-                        if(V.saveBtn != null)
-                            V.saveBtn.setEnabled(false);
-                        if(V.reloadBtn != null)
-                            V.reloadBtn.setEnabled(false);
-                        Toast.makeText(ConfigEditorActivity.this, "Save file successful.", Toast.LENGTH_LONG).show();
-                    }
-                    else
-                        Toast.makeText(ConfigEditorActivity.this, "Save file failed!", Toast.LENGTH_LONG).show(); 
-
+                    m_edited = false;
+                    V.titleText.setText(m_filePath);
+                    V.titleText.setTextColor(Color.BLACK);
+                    if (V.saveBtn != null)
+                        V.saveBtn.setEnabled(false);
+                    if (V.reloadBtn != null)
+                        V.reloadBtn.setEnabled(false);
+                    Toast.makeText(ConfigEditorActivity.this, R.string.save_file_successful, Toast.LENGTH_LONG).show();
                 }
                 else
-                    Toast.makeText(ConfigEditorActivity.this, "No file!", Toast.LENGTH_LONG).show();
-                break;
-                case R.id.config_editor_menu_reload:
-                if (IsValid())
-                    LoadFile(m_filePath);
-                else
-                    Toast.makeText(ConfigEditorActivity.this, "No file!", Toast.LENGTH_LONG).show();
-                    break;
-                default:
-                break;
+                    Toast.makeText(ConfigEditorActivity.this, R.string.save_file_failed, Toast.LENGTH_LONG).show();
+
+            }
+            else
+                Toast.makeText(ConfigEditorActivity.this, R.string.no_file, Toast.LENGTH_LONG).show();
+        }
+        else if (itemId == R.id.config_editor_menu_reload)
+        {
+            if (IsValid())
+                LoadFile(m_filePath);
+            else
+                Toast.makeText(ConfigEditorActivity.this, R.string.no_file, Toast.LENGTH_LONG).show();
         }
         return super.onOptionsItemSelected(item);
     }

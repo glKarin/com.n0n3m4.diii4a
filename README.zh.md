@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **最新版本:**
-1.1.0harmattan31(natasha)  
+1.1.0harmattan32(natasha)  
 **最新更新日期:**
-2023-06-01  
+2023-06-30  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -18,15 +18,19 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 或者在[Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest)下载最新的APK.
 标签以`-free`结尾的仅为了F-Droid更新.
 
+| 功能支持 | Github | F-Droid |
+|:-|:-:|:-:|
+| Ouya TV | 是 | 否 |
+
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 在`CONTROLS`选项卡下的`Reset on-screen controls`, 新增重置所有虚拟按键的缩放和透明度.
-* 在`CONTROLS`选项卡新增统一设置所有虚拟按键大小功能.
-* 在`CONTROLS`选项卡下的`Configure on-screen controls`, 新增网格辅助, 设置中`On-screen buttons position unit`大于0启用.
-* 支持不固定的虚拟摇杆和内部响应死区.
-* 支持自定义虚拟按键的图片. 如果`/sdcard/Android/data/com.karin.idTech4Amm/files/assets`路径下存在同名的虚拟按键图片, 将有限使用外部的代替自带的. 或者把虚拟按键图片放入一个命名好的文件夹中, 然后将文件夹放在`/sdcard/Android/data/com.karin.idTech4Amm/files/assets/controls_theme/`, 然后在`CONTROLS`选项卡下`Setup on-screen button theme`选择该文件夹名称.
-* 新的鼠标支持实现.
+* 添加 `中文`, `俄语`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)).
+* 一些虚拟按键设置移植`Configure on-screen controls`页面.
+* 毁灭战士3新增`full-body awareness` mod. 通过设置cvar`harm_pm_fullBodyAwareness`为1开启, 并且可以使用cvar `harm_pm_fullBodyAwarenessOffset`来设置偏移.
+* 在选项卡`General`下的`GameLib`支持添加外部的游戏动态库(测试. 由于系统安全方案不确定是否对所有设备/安卓版本有效. 允许你通过DIII4A项目编译你自己的游戏mod动态库(armv7/armv8)然后运行在原版的idTech4A++).
+* 如果启用`Find game library in game data directory`, 则支持加载外部的位于`Game working directory`/`fs_game`文件夹下的游戏动态库来代替apk内置的游戏动态库(测试. 由于系统安全方案不确定是否对所有设备/安卓版本有效. 允许你通过DIII4A项目编译你自己的游戏mod动态库(armv7/armv8), 然后命名为`gameaarch64.so`或`libgameaarch64.so`(arm64设备)或命名为`gamearm.so`或`libgamearm.so`(arm32设备), 然后放入`Game working directory`/`fs_game`文件夹下, 将优先加载该mod文件夹下的游戏动态库).
+* 支持jpg/png图像纹理文件.
 
 ----------------------------------------------------------------------------------
 

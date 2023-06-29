@@ -13,7 +13,9 @@ import android.app.AlertDialog;
 import android.util.Log;
 import android.graphics.Color;
 
+import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.FileBrowser;
+import com.n0n3m4.q3e.Q3ELang;
 
 /**
  * Simple file chooser
@@ -25,12 +27,13 @@ public class FileBrowserDialog extends AlertDialog {
     private ListView m_listView;
     private String m_path;
     private String m_file;
-    private String m_title = "File chooser";
+    private String m_title;
     private FileBrowserDialogListener m_listener;
     
     public FileBrowserDialog(Context context)
     {
         super(context);
+        m_title = Q3ELang.tr(context, R.string.file_chooser);
     }
 
     @Override

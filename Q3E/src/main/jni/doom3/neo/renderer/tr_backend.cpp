@@ -169,8 +169,8 @@ void GL_UseProgram(shaderProgram_t *program)
 	}
 
 #ifdef _HARM_SHADER_NAME
-		common->Printf("Last shader program: %s, %p\n", backEnd.glState.currentProgram ? backEnd.glState.currentProgram->name : "NULL", backEnd.glState.currentProgram);
-		common->Printf("Current shader program: %s, %p\n", program ? program->name : "NULL", program);
+	RB_LogComment("Last shader program: %s, %p\n", backEnd.glState.currentProgram ? backEnd.glState.currentProgram->name : "NULL", backEnd.glState.currentProgram);
+	RB_LogComment("Current shader program: %s, %p\n", program ? program->name : "NULL", program);
 #endif
 	glUseProgram(program ? program->program : 0);
 	backEnd.glState.currentProgram = program;
@@ -248,7 +248,7 @@ void GL_EnableVertexAttribArray(GLuint index)
 	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) {
 		common->Printf("GL_EnableVertexAttribArray: unbound attribute index\n");
 #ifdef _HARM_SHADER_NAME
-		common->Printf("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
+		RB_LogComment("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
 #endif
 		__builtin_trap();
 		return;
@@ -275,7 +275,7 @@ void GL_DisableVertexAttribArray(GLuint index)
 	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) {
 		common->Printf("GL_DisableVertexAttribArray: unbound attribute index\n");
 #ifdef _HARM_SHADER_NAME
-		common->Printf("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
+		RB_LogComment("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
 #endif
 		__builtin_trap();
 		return;
@@ -828,4 +828,28 @@ void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds)
 		common->Printf("3d: %i, 2d: %i, SetBuf: %i, SwpBuf: %i, CpyRenders: %i, CpyFrameBuf: %i\n", c_draw3d, c_draw2d, c_setBuffers, c_swapBuffers, c_copyRenders, backEnd.c_copyFrameBuffer);
 		backEnd.c_copyFrameBuffer = 0;
 	}
+}
+
+/*
+=================
+RB_ComputeMVP
+
+Compute the model view matrix, with eventually required projection matrix depth hacks
+=================
+*/
+void RB_ComputeMVP( const drawSurf_t * const surf, float mvp[16] ) {
+	// Get the projection matrix
+	float localProjectionMatrix[16];
+	memcpy(localProjectionMatrix, backEnd.viewDef->projectionMatrix, sizeof(localProjectionMatrix));
+
+	// Quick and dirty hacks on the projection matrix
+	if ( surf->space->weaponDepthHack ) {
+		localProjectionMatrix[14] = backEnd.viewDef->projectionMatrix[14] * 0.25;
+	}
+	if ( surf->space->modelDepthHack != 0.0 ) {
+		localProjectionMatrix[14] = backEnd.viewDef->projectionMatrix[14] - surf->space->modelDepthHack;
+	}
+
+	// precompute the MVP
+	myGlMultMatrix(surf->space->modelViewMatrix, localProjectionMatrix, mvp);
 }

@@ -13,6 +13,7 @@ import java.util.Set;
 import com.n0n3m4.q3e.Q3EJNI;
 
 import android.view.View;
+import android.widget.Toast;
 
 /**
  * Launcher preference fragment
@@ -28,11 +29,11 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         addPreferencesFromResource(R.xml.launcher_settings_preference);
 
         findPreference(Constants.PreferenceKey.LAUNCHER_ORIENTATION).setOnPreferenceChangeListener(this);
-        findPreference(Constants.PreferenceKey.MAP_BACK).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.MAP_BACK).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.REDIRECT_OUTPUT_TO_FILE).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.HIDE_AD_BAR).setOnPreferenceChangeListener(this);
-        findPreference(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.LANG).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -45,67 +46,54 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
     public boolean onPreferenceChange(Preference preference, Object newValue)
     {
         String key = preference.getKey();
-        if(Constants.PreferenceKey.LAUNCHER_ORIENTATION.equals(key))
+        switch (key)
         {
-            int o = (boolean)newValue ? 0 : 1;
-            ContextUtility.SetScreenOrientation(getActivity(), o);
-            return true;
-        }
-        else if(Constants.PreferenceKey.MAP_BACK.equals(key))
-        {
-            Set<String> values = (Set<String>)newValue;
-            int r = 0;
-            for(String str : values)
+            case Constants.PreferenceKey.LAUNCHER_ORIENTATION:
+                int o = (boolean) newValue ? 0 : 1;
+                ContextUtility.SetScreenOrientation(getActivity(), o);
+                return true;
+            case Q3EPreference.MAP_BACK:
             {
-                r |= Integer.parseInt(str);
+                Set<String> values = (Set<String>) newValue;
+                int r = 0;
+                for (String str : values)
+                {
+                    r |= Integer.parseInt(str);
+                }
+                preference.getSharedPreferences().edit().putInt(Q3EPreference.pref_harm_mapBack, r).commit();
+                return true;
             }
-            preference.getSharedPreferences().edit().putInt(Q3EPreference.pref_harm_mapBack, r).commit();
-            return true;
-        }
-        else if(Constants.PreferenceKey.HIDE_AD_BAR.equals(key))
-        {
-            boolean b = (boolean)newValue;
-            View view = getActivity().findViewById(R.id.main_ad_layout);
-            if(null != view)
-                view.setVisibility(b ? View.GONE : View.VISIBLE);
-            return true;
-        }
-        else if(Q3EPreference.REDIRECT_OUTPUT_TO_FILE.equals(key))
-        {
-			Q3EJNI.SetRedirectOutputToFile((boolean)newValue);
-            return true;
-        }
-        else if(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT.equals(key))
-        {
-            int i;
-            try
+            case Constants.PreferenceKey.HIDE_AD_BAR:
+                boolean b = (boolean) newValue;
+                View view = getActivity().findViewById(R.id.main_ad_layout);
+                if (null != view)
+                    view.setVisibility(b ? View.GONE : View.VISIBLE);
+                return true;
+            case Q3EPreference.REDIRECT_OUTPUT_TO_FILE:
+                Q3EJNI.SetRedirectOutputToFile((boolean) newValue);
+                return true;
+            case Q3EPreference.pref_harm_function_key_toolbar_y:
             {
-                i = Integer.parseInt((String)newValue);
-                if(i >= 0 && i % 5 == 0)
-                    return true;
+                int i;
+                try
+                {
+                    i = Integer.parseInt((String) newValue);
+                    if (i >= 0)
+                        return true;
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                return false;
             }
-            catch (Exception e)
+            case Q3EPreference.LANG:
             {
-                e.printStackTrace();
+                Toast.makeText(ContextUtility.GetContext(this), R.string.be_available_on_reboot_the_next_time, Toast.LENGTH_SHORT).show();
+                return true;
             }
-            return false;
+            default:
+                return false;
         }
-        else if(Q3EPreference.pref_harm_function_key_toolbar_y.equals(key))
-        {
-            int i;
-            try
-            {
-                i = Integer.parseInt((String)newValue);
-                if(i >= 0)
-                    return true;
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            return false;
-        }
-        else
-            return false;
     }
 }

@@ -32,7 +32,7 @@ varying vec2 var_TexClip;
 
 void main(void)
 {
-	var_TexDiffuse = (attr_TexCoord * u_textureMatrix).xy;
+	var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
 
   var_TexClip = vec2( dot( u_clipPlane, attr_Vertex), 0.5 );
 

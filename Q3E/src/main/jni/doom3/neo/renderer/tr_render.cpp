@@ -260,6 +260,8 @@ void RB_RenderDrawSurfListWithFunction(drawSurf_t **drawSurfs, int numDrawSurfs,
 
 		backEnd.currentSpace = drawSurf->space;
 	}
+
+	backEnd.currentSpace = NULL; //k2023
 }
 
 /*
@@ -312,6 +314,8 @@ void RB_RenderDrawSurfChainWithFunction(const drawSurf_t *drawSurfs,
 
 		backEnd.currentSpace = drawSurf->space;
 	}
+
+	backEnd.currentSpace = NULL; //k2023
 }
 
 /*
@@ -320,36 +324,35 @@ RB_GetShaderTextureMatrix
 ======================
 */
 void RB_GetShaderTextureMatrix(const float *shaderRegisters,
-                               const textureStage_t *texture, float matrix[16])
+                               const textureStage_t *texture, float matrix[16]) //k2023
 {
 	matrix[0] = shaderRegisters[ texture->matrix[0][0] ];
-	matrix[1] = shaderRegisters[ texture->matrix[0][1] ];
-	matrix[2] = 0;
-	matrix[3] = shaderRegisters[ texture->matrix[0][2] ];
+	matrix[4] = shaderRegisters[ texture->matrix[0][1] ];
+	matrix[8] = 0;
+	matrix[12] = shaderRegisters[ texture->matrix[0][2] ];
 
 	// we attempt to keep scrolls from generating incredibly large texture values, but
 	// center rotations and center scales can still generate offsets that need to be > 1
-	if (matrix[3] < -40 || matrix[3] > 40) {
-		matrix[3] -= (int)matrix[3];
+	if ( matrix[12] < -40 || matrix[12] > 40 ) {
+		matrix[12] -= (int)matrix[12];
 	}
 
-	matrix[4] = shaderRegisters[ texture->matrix[1][0] ];
+	matrix[1] = shaderRegisters[ texture->matrix[1][0] ];
 	matrix[5] = shaderRegisters[ texture->matrix[1][1] ];
-	matrix[6] = 0;
-	matrix[7] = shaderRegisters[ texture->matrix[1][2] ];
-
-	if (matrix[7] < -40 || matrix[7] > 40) {
-		matrix[7] -= (int)matrix[7];
+	matrix[9] = 0;
+	matrix[13] = shaderRegisters[ texture->matrix[1][2] ];
+	if ( matrix[13] < -40 || matrix[13] > 40 ) {
+		matrix[13] -= (int)matrix[13];
 	}
 
-	matrix[8] = 0;
-	matrix[9] = 0;
+	matrix[2] = 0;
+	matrix[6] = 0;
 	matrix[10] = 1;
-	matrix[11] = 0;
-
-	matrix[12] = 0;
-	matrix[13] = 0;
 	matrix[14] = 0;
+
+	matrix[3] = 0;
+	matrix[7] = 0;
+	matrix[11] = 0;
 	matrix[15] = 1;
 }
 
@@ -364,6 +367,20 @@ void RB_LoadShaderTextureMatrix(const float *shaderRegisters, const textureStage
 
 	if (texture->hasMatrix) {
 		RB_GetShaderTextureMatrix(shaderRegisters, texture, matrix);
+		GL_UniformMatrix4fv(offsetof(shaderProgram_t, textureMatrix), matrix);
+	} else {
+		GL_UniformMatrix4fv(offsetof(shaderProgram_t, textureMatrix), mat4_identity.ToFloatPtr());
+	}
+}
+
+void RB_LoadShaderTextureMatrix(const float *shaderRegisters, const textureStage_t *texture, bool transpose)
+{
+	float	matrix[16];
+
+	if (texture->hasMatrix) {
+		RB_GetShaderTextureMatrix(shaderRegisters, texture, matrix);
+		if(transpose)
+			R_TransposeGLMatrix(matrix);
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, textureMatrix), matrix);
 	} else {
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, textureMatrix), mat4_identity.ToFloatPtr());
@@ -440,22 +457,6 @@ void RB_FinishStageTexture(const textureStage_t *texture, const drawSurf_t *surf
 		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert),
 		                       (void *)&(((idDrawVert *)vertexCache.Position(surf->geo->ambientCache))->st));
 	}
-
-#if !defined(GL_ES_VERSION_2_0)
-	if (texture->texgen == TG_REFLECT_CUBE) {
-		glDisable(GL_TEXTURE_GEN_S);
-		glDisable(GL_TEXTURE_GEN_T);
-		glDisable(GL_TEXTURE_GEN_R);
-		glTexGenf(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-		glTexGenf(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-		glTexGenf(GL_R, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-		glDisableClientState(GL_NORMAL_ARRAY);
-
-		glMatrixMode(GL_TEXTURE);
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-	}
-#endif
 
 	if (texture->hasMatrix) {
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, textureMatrix), mat4_identity.ToFloatPtr());
@@ -699,7 +700,6 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 
 	// change the matrix and light projection vectors if needed
 	if (surf->space != backEnd.currentSpace) {
-		backEnd.currentSpace = surf->space;
 
 		float	mat[16];
 		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
@@ -759,7 +759,7 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 		// now multiply the texgen by the light texture matrix
 		if (lightStage->texture.hasMatrix) {
 			RB_GetShaderTextureMatrix(lightRegs, &lightStage->texture, backEnd.lightTextureMatrix);
-			RB_BakeTextureMatrixIntoTexgen(reinterpret_cast<class idPlane *>(inter.lightProjection));
+			RB_BakeTextureMatrixIntoTexgen(reinterpret_cast<class idPlane *>(inter.lightProjection), backEnd.lightTextureMatrix); //k2023
 		}
 
 		inter.bumpImage = NULL;
@@ -848,6 +848,8 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 	if (surf->space->weaponDepthHack || surf->space->modelDepthHack != 0.0f) {
 		RB_LeaveDepthHack(surf);
 	}
+
+	backEnd.currentSpace = surf->space; //k2023
 }
 
 /*

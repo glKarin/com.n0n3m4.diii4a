@@ -1,93 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
     <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:title="Launcher settings"
+        android:title="@string/launcher_settings"
         >
 
     <PreferenceCategory
         android:key="screen"
-        android:title="Screen"
+        android:title="@string/screen"
         >
         <CheckBoxPreference
-            android:title="Hide navigation bar"
+            android:title="@string/hide_navigation_bar"
             android:key="harm_hide_nav"
             android:persistent="true"
             android:defaultValue="true"
-            android:summary="Control navigation bar is visible when game running"
+            android:summary="@string/hide_navigation_bar_in_game"
             />
         <CheckBoxPreference
-            android:title="Cover screen edges"
+            android:title="@string/cover_screen_edges"
             android:key="harm_cover_edges"
             android:persistent="true"
             android:defaultValue="true"
-            android:summary="Cover screen edges in status bar"
+            android:summary="@string/cover_screen_edges_in_status_bar"
             />
     </PreferenceCategory>
 
         <PreferenceCategory
             android:key="game"
-            android:title="Game"
+            android:title="@string/game"
         >
             <ListPreference
-                android:title="Run background"
+                android:title="@string/run_background"
                 android:key="harm_run_background"
                 android:persistent="true"
                 android:defaultValue="1"
-                android:summary="Control game state when application in background"
+                android:summary="@string/control_game_state_when_application_in_background"
                 android:entryValues="@array/run_background_values"
                 android:entries="@array/run_background_labels"
             />
             <MultiSelectListPreference
-                android:title="Map Back key"
+                android:title="@string/map_back_key"
                 android:key="harm_map_back"
                 android:persistent="true"
-                android:summary="Set Back key function"
+                android:summary="@string/setup_back_key_function"
                 android:entryValues="@array/map_back_values"
                 android:entries="@array/map_back_labels"
                 android:defaultValue="@array/map_back_values"
             />
             <CheckBoxPreference
-                android:title="Redirect output to file"
+                android:title="@string/redirect_output_to_file"
                 android:key="harm_redirect_output_to_file"
                 android:persistent="true"
                 android:defaultValue="true"
-                android:summary="Save game runtime output log to stdout.txt/stderr.txt"
+                android:summary="@string/save_game_runtime_output_log_to_stdout_txt_stderr_txt"
             />
             <CheckBoxPreference
-                android:title="Function key toolbar"
+                android:title="@string/function_key_toolbar"
                 android:key="harm_function_key_toolbar"
                 android:persistent="true"
                 android:defaultValue="false"
-                android:summary="Show function key toolbar"
+                android:summary="@string/show_function_key_toolbar_when_open_input_method"
                 />
             <EditTextPreference
-                android:title="Function key toolbar offset"
+                android:title="@string/function_key_toolbar_offset"
                 android:key="harm_function_key_toolbar_y"
                 android:persistent="true"
                 android:defaultValue="0"
                 android:inputType="number"
-                android:summary="Setup function key toolbar position offset"
+                android:summary="@string/setup_function_key_toolbar_position_offset"
                 android:dependency="harm_function_key_toolbar"
                 />
         </PreferenceCategory>
         
         <PreferenceCategory
             android:key="general"
-            android:title="General"
+            android:title="@string/general"
             >
             <CheckBoxPreference
-                android:title="Launcher orientation"
+                android:title="@string/launcher_orientation"
                 android:key="harm_launcher_orientation"
                 android:persistent="true"
                 android:defaultValue="false"
-                android:summary="Launcher orientation follow system"
+                android:summary="@string/launcher_orientation_follow_system"
             />
             <CheckBoxPreference
-                android:title="Hide ad bar"
+                android:title="@string/hide_ad_bar"
                 android:key="harm_hide_ad_bar"
                 android:persistent="true"
                 android:defaultValue="true"
-                android:summary="Hide bottom ad bar in launcher"
+                android:summary="@string/hide_navigation_bar_in_game"
             />
             <!--<CheckBoxPreference
                 android:title="Open Quake 4 helper dialog"
@@ -96,13 +96,14 @@
                 android:defaultValue="true"
                 android:summary="Open helper dialog when start Quake 4"
                 />-->
-            <EditTextPreference
-                android:title="On-screen buttons position unit"
-                android:key="harm_controls_config_position_unit"
+            <ListPreference
+                android:title="@string/language"
+                android:key="harm_lang"
                 android:persistent="true"
-                android:defaultValue="50"
-                android:inputType="number"
-                android:summary="Config on-screen buttons layout with grid limit(multiple of 5)"
+                android:defaultValue="system"
+                android:summary="@string/setup_launcher_language"
+                android:entryValues="@array/lang_values"
+                android:entries="@array/lang_labels"
                 />
         </PreferenceCategory>
     </PreferenceScreen>

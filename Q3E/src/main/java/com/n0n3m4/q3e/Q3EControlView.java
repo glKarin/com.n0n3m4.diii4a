@@ -41,7 +41,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
-import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.Q3EConfigChooser;
 import com.n0n3m4.q3e.karin.KKeyToolBar;
 import com.n0n3m4.q3e.karin.KOnceRunnable;
@@ -67,11 +67,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
-//import tv.ouya.console.api.OuyaController;
-
 public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer, SensorEventListener
 {
-
     public boolean usesCSAA = false;
     private boolean m_toolbarActive = true;
     private View m_keyToolbar = null;
@@ -80,28 +77,19 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private float m_lastMousePosY = -1;
     private boolean m_usingMouseDevice = false;
     private Q3EMouseDevice m_mouseDevice = null;
-    private float m_lastTouchPadPosX = -1;
-    private float m_lastTouchPadPosY = -1;
     private int m_requestGrabMouse = 0;
     private boolean m_allowGrabMouse = false;
+    private float m_lastTouchPadPosX = -1;
+    private float m_lastTouchPadPosY = -1;
 
     public Q3EControlView(Context context)
     {
         super(context);
 
-        /*try
-        {
-            if (Q3EUtils.isOuya)
-                OuyaController.init(context);
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-        }*/
-
-        setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, GL.usegles20));
+        setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, Q3EGL.usegles20));
         getHolder().setFormat(PixelFormat.RGBA_8888);
 
-        if (GL.usegles20)
+        if (Q3EGL.usegles20)
             setEGLContextClientVersion(2);
 
         setRenderer(this);
@@ -155,7 +143,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
         if (usesCSAA)
         {
-            if (!GL.usegles20)
+            if (!Q3EGL.usegles20)
                 gl.glClear(0x8000); //Yeah, I know, it doesn't work in 1.1
             else
                 GLES20.glClear(0x8000);
@@ -171,7 +159,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         //Onscreen buttons:
         //save state
 
-        if (!GL.usegles20)
+        if (!Q3EGL.usegles20)
         {
 
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -277,7 +265,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
             mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
             m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, ENUM_BACK_ALL); //k
-            analog = mPrefs.getBoolean(Q3EPreference.pref_analog, true);
+            analog = Q3EUtils.q3ei.joystick_smooth;
 
             if(m_usingMouseDevice)
                 m_mouseDevice = new Q3EMouseDevice(this);
@@ -343,9 +331,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public void onSurfaceCreated(GL10 gl, EGLConfig config)
     {
 
-        if (GL.usegles20)
+        if (Q3EGL.usegles20)
         {
-            GL.initGL20();
+            Q3EGL.initGL20();
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         }
 
@@ -706,7 +694,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         }
         m_lastPressBackTime = now;
         if (m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT - 1)
-            Toast.makeText(getContext(), "Click back again to exit......", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), R.string.click_back_again_to_exit, Toast.LENGTH_LONG).show();
         else if (m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
         {
             m_renderView.Shutdown();

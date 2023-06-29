@@ -6,9 +6,11 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUiView;
 import com.n0n3m4.q3e.Q3EUtils;
-import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.R;
+import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.karin.KResultRunnable;
 
 import java.nio.ByteBuffer;
@@ -75,7 +77,7 @@ public class MenuOverlay extends Paintable implements TouchListener
         Canvas c = new Canvas(bmp);
         Paint p = new Paint();
         p.setTextSize(1);
-        String alphastr = "- opacity +";
+        String alphastr = "- " + Q3ELang.tr(view.getContext(), R.string.opacity) + " +";
         while (p.measureText(alphastr) < width)
             p.setTextSize(p.getTextSize() + 1);
         p.setTextSize(p.getTextSize() - 1);
@@ -86,7 +88,7 @@ public class MenuOverlay extends Paintable implements TouchListener
         p.setARGB(120, 255, 255, 255);
         c.drawRect(new Rect(0, 0, width, height), p);
         p.setARGB(255, 255, 255, 255);
-        String sizestr = "- size +";
+        String sizestr = "- " + Q3ELang.tr(view.getContext(), R.string.size) + " +";
         Rect bnd = new Rect();
 
         p.setStyle(Paint.Style.FILL);
@@ -103,7 +105,7 @@ public class MenuOverlay extends Paintable implements TouchListener
     @Override
     public void loadtex(GL10 gl)
     {
-        tex_ind = GL.loadGLTexture(gl, texbmp);
+        tex_ind = Q3EGL.loadGLTexture(gl, texbmp);
     }
 
     boolean hidden = true;
@@ -159,11 +161,11 @@ public class MenuOverlay extends Paintable implements TouchListener
             {
                 tmp.width += st;
                 tmp.height = (int) (aspect * tmp.width + 0.5f);
-            } else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+            }
+            else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
                 return false;
         }
-
-        if (o instanceof Slider)
+        else if (o instanceof Slider)
         {
             Slider tmp = (Slider) o;
             if (tmp.width <= 0)
@@ -173,11 +175,11 @@ public class MenuOverlay extends Paintable implements TouchListener
             {
                 tmp.width += st;
                 tmp.height = (int) (aspect * tmp.width + 0.5f);
-            } else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+            }
+            else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
                 return false;
         }
-
-        if (o instanceof Joystick)
+        else if (o instanceof Joystick)
         {
             Joystick tmp = (Joystick) o;
             if (tmp.size <= 0)
@@ -185,11 +187,12 @@ public class MenuOverlay extends Paintable implements TouchListener
             if (tmp.size + st > step)
             {
                 tmp.size += st;
-            } else if (tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
+            }
+            else if (tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
                 return false;
         }
         //k
-        if (o instanceof Disc)
+        else if (o instanceof Disc)
         {
             Disc tmp = (Disc) o;
             if (tmp.size <= 0)
@@ -199,6 +202,7 @@ public class MenuOverlay extends Paintable implements TouchListener
             else if (tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
                 return false;
         }
+        // else return false;
         ((Q3EUiView) view).RefreshTgt(fngr);
         return true;
     }
@@ -248,7 +252,8 @@ public class MenuOverlay extends Paintable implements TouchListener
                             return tgtresize(false);
                         }
                     };
-            } else
+            }
+            else
             {
                 if (x > cx) rn = new KResultRunnable()
                 {

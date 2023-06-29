@@ -2,8 +2,6 @@ package com.n0n3m4.q3e.device;
 
 import android.content.Context;
 
-import java.lang.reflect.Method;
-
 public final class Q3EOuya
 {
     public static final int BUTTON_L3 = 106; // OuyaController.BUTTON_L3
@@ -21,9 +19,8 @@ public final class Q3EOuya
 
         try
         {
-            Class<?> clazz = Class.forName("tv.ouya.console.api.OuyaController");
-            Method init = clazz.getDeclaredMethod("init", android.content.Context.class);
-            init.invoke(null, context);
+            // tv.ouya.console.api.OuyaController.init(context);
+            Class.forName("tv.ouya.console.api.OuyaController").getDeclaredMethod("init", android.content.Context.class).invoke(null, context);
             return true;
         }
         catch (Exception e)

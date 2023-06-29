@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setup_all_opacity">设置全部透明度</string>
+    <string name="setup_all_size">设置全部大小</string>
+    <string name="reset_on_screen_controls">重置虚拟按键</string>
+    <string name="save_all">保存全部</string>
+    <string name="opacity">透明度</string>
+    <string name="size">大小</string>
+    <string name="setup_all_on_screen_button_size">设置所有虚拟按键大小</string>
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="reset">重置</string>
+    <string name="_default">默认</string>
+    <string name="all_on_screen_buttons_configs_saved">所有虚拟按键配置已重置.</string>
+    <string name="on_screen_controls_has_reset">虚拟按键已重置.</string>
+    <string name="opacity_3d">透明度(%3d)</string>
+    <string name="setup_all_on_screen_button_opacity">设置所有虚拟按键透明度</string>
+    <string name="setup_all_on_screen_buttons_opacity_done">所有虚拟按键透明度已设置完成.</string>
+    <string name="setup_all_on_screen_buttons_size_done">所有虚拟按键大小已设置完成.</string>
+    <string name="size_s_scale_factor">大小的缩放指数</string>
+    <string name="scale_factor">缩放指数</string>
+    <string name="friendly_padding">友好填充</string>
+    <string name="_opacity">透明度</string>
+    <string name="click_back_again_to_exit">再次点击返回键退出......</string>
+    <string name="position_">位置:</string>
+    <string name="size_">大小:</string>
+    <string name="opacity_">透明度:</string>
+    <string name="radius_">半径:</string>
+    <string name="center_radius_">中心半径:</string>
+    <string name="game_files_weren_t_found_put_game_files_to">游戏数据文件没有被发现: 将游戏数据文件放到</string>
+    <string name="joystick_setting">摇杆设置</string>
+    <string name="joystick_outer_range_radius_s_multiple_0_disable">摇杆外部范围(半径的倍数, 0 - 禁用)</string>
+    <string name="radius_s_multiple">半径的倍数</string>
+    <string name="enable_unfixed_joystick_the_range_is_joystick_allowed_to_start_pressing_if_less_than_1_0_using_joystick_s_radius">- 当启用`非固定摇杆`: 该外部范围是允许开始按下摇杆的有效范围(如果小于1.0, 则使用摇杆的半径).</string>
+    <string name="disable_unfixed_joystick_the_range_is_joystick_valid_motion_area">- 当禁用 `非固定摇杆`: 该外部范围是摇杆有效的移动的最大范围.</string>
+    <string name="joystick_inner_dead_zone_radius_s_percentage_0_disable">摇杆内部死区(半径的百分比, 0 - 禁用)</string>
+    <string name="on_screen_buttons_position_unit">虚拟按键位置单位</string>
+    <string name="on_screen_buttons_layout_with_grid_limit_multiple_of_5">虚拟按键位置布局单位网格限制(5的倍数)</string>
+    <string name="position_unit">位置单位</string>
+    <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">虚拟按键位置单位必须是5的倍数或0</string>
+    <string name="setup_joystick_done">摇杆设置完成.</string>
+    <string name="back">返回</string>
+</resources>

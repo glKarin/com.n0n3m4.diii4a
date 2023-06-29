@@ -143,7 +143,7 @@ void rvVehicleWalker::UpdateState ( void ) {
 			float a = (float)atan2(cmd.rightmove, cmd.forwardmove);
 			a = RAD2DEG(a);
 			if (a >= 360.0f || a < 0.0f) {
-				a -= floor(a/ 360.0f) * 360.0f;
+				a -= floor(a / 360.0f) * 360.0f;
 				if (a >= 360.0f) {
 					a -= 360.0f;
 				}

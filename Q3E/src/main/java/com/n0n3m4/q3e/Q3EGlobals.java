@@ -36,6 +36,10 @@ public final class Q3EGlobals
     public static final int MOUSE_EVENT = 1;
     public static final int MOUSE_DEVICE = 2;
 
+    // default size
+    public static final int SCREEN_WIDTH = 640;
+    public static final int SCREEN_HEIGHT = 480;
+
     // on-screen button type
     public static final int ONSCREEN_BUTTON_TYPE_FULL = 0;
     public static final int ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM = 1;

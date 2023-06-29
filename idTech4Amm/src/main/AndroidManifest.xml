@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11031"
-    android:versionName="1.1.0harmattan31"
+    android:versionCode="11032"
+    android:versionName="1.1.0harmattan32"
     android:installLocation="preferExternal"
     >
 
@@ -36,7 +36,10 @@
     <application
         android:icon="@drawable/icon"
         android:largeHeap="true"
-        android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:appCategory="game"
+        android:isGame="true"
+        tools:ignore="UnusedAttribute">
         <activity            
             android:name="com.n0n3m4.DIII4A.GameLauncher"
             android:label="@string/app_name"

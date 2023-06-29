@@ -525,17 +525,17 @@ enum {
 	TRIGGER_EVENT_TWO,
 	TRIGGER_EVENT_THREE
 	,
+	TRIGGER_EVENT_WINDOW_CREATED, // Android SurfaceView thread -> doom3/renderer thread: notify native window is set
+	TRIGGER_EVENT_WINDOW_DESTROYED, // doom3 thread/render thread -> Android SurfaceView thread: notify released OpenGL context
 #ifdef _MULTITHREAD
-	TRIGGER_EVENT_RUN_BACKEND,
-	TRIGGER_EVENT_BACKEND_FINISHED,
-	TRIGGER_EVENT_IMAGES_PROCESSES,
-	TRIGGER_EVENT_WINDOW_CREATED,
-	TRIGGER_EVENT_WINDOW_DESTROYED,
-	TRIGGER_EVENT_RENDER_THREAD_FINISHED,
+	TRIGGER_EVENT_RUN_BACKEND, // doom3 thread -> render thread: notify backend run render function
+	TRIGGER_EVENT_BACKEND_FINISHED, // render thread -> doom3 thread: notify frontend rendering finished
+	TRIGGER_EVENT_IMAGES_PROCESSES, // render thread -> doom3 thread: notify frontend texture's OpenGL function called
+	TRIGGER_EVENT_RENDER_THREAD_FINISHED, // render thread -> doom3 thread: notify render thread finished
 #endif
 #ifdef _OPENSLES
-	TRIGGER_EVENT_SOUND_FRONTEND_WRITE_FINISHED,
-	TRIGGER_EVENT_SOUND_BACKEND_READ_FINISHED,
+	TRIGGER_EVENT_SOUND_FRONTEND_WRITE_FINISHED, // doom3 sound thread -> OpenSLES thread: frontend write data finished, and notify backend allow read data
+	TRIGGER_EVENT_SOUND_BACKEND_READ_FINISHED, // OpenSLES thread -> doom3 sound thread: backend read data finished, and notify frontend allow write data
 #endif
 };
 

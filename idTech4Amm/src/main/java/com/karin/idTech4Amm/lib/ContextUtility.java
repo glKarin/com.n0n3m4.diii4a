@@ -1,14 +1,11 @@
 package com.karin.idTech4Amm.lib;
 
 import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
-import android.graphics.Point;
-import android.os.Environment;
 import android.provider.Settings;
 import android.content.Intent;
 import android.net.Uri;
@@ -18,20 +15,19 @@ import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
-import android.view.Display;
-import android.view.DisplayCutout;
-import android.view.WindowInsets;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.text.util.Linkify;
 import android.text.method.LinkMovementMethod;
 
+import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.TextHelper;
+import com.n0n3m4.q3e.Q3ELang;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Consumer;
 // import android.widget.Magnifier.Builder;
 
 /**
@@ -52,7 +48,7 @@ public final class ContextUtility
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setPositiveButton("OK", new AlertDialog.OnClickListener() {          
+        builder.setPositiveButton(R.string.ok, new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) { 
                     dialog.dismiss();
@@ -154,13 +150,13 @@ public final class ContextUtility
         }
     }
     
-    public static void Confirm(Context context, CharSequence title, CharSequence message, final Runnable yes, final Runnable no, final Object...opt)
+    public static void Confirm(Context context, CharSequence title, CharSequence message, final Runnable yes, final Runnable no, Runnable other, String otherName)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setCancelable(true);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int v)
                     {
                         if(yes != null)
@@ -168,7 +164,7 @@ public final class ContextUtility
                         dialog.dismiss();
                     }
                 });   
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int v)
                     {
                         if(no != null)
@@ -176,32 +172,59 @@ public final class ContextUtility
                         dialog.dismiss();
                     }
                 });
-        if(opt.length > 0 && null != opt[0])
+        if(null != other)
         {
-            final Object arg1 = opt[0];
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && arg1 instanceof Consumer)
-                ((Consumer<AlertDialog.Builder>)arg1).accept(builder);
-            else if(arg1 instanceof Runnable)
+            builder.setNeutralButton(null != otherName ? otherName : Q3ELang.tr(context, R.string.other), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int v)
+                {
+                    other.run();
+                    dialog.dismiss();
+                }
+            });
+        }
+        builder.create().show();
+    }
+
+    public static void Input(Context context, CharSequence title, CharSequence message, String[] args, final Runnable yes, final Runnable no, Runnable other, String otherName)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        EditText editText = new EditText(context);
+        if(null != message)
+            editText.setHint(message);
+        builder.setView(editText);
+        builder.setCancelable(true);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int v)
             {
-                builder.setNeutralButton("Other", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int v)
-                        {
-                            ((Runnable)arg1).run();
-                            dialog.dismiss();
-                        }
-                    });
+                if(null != args && args.length > 0)
+                    args[0] = editText.getText().toString();
+                if(yes != null)
+                    yes.run();
+                dialog.dismiss();
             }
-            else
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int v)
             {
-                builder.setNeutralButton(arg1.toString(), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int v)
-                        {
-                            if(null != opt[1])
-                                ((Runnable)opt[1]).run();
-                            dialog.dismiss();
-                        }
-                    });
+                if(null != args && args.length > 0)
+                    args[0] = editText.getText().toString();
+                if(no != null)
+                    no.run();
+                dialog.dismiss();
             }
+        });
+        if(null != other)
+        {
+            builder.setNeutralButton(null != otherName ? otherName : Q3ELang.tr(context, R.string.other), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int v)
+                {
+                    if(null != args && args.length > 0)
+                        args[0] = editText.getText().toString();
+                    other.run();
+                    dialog.dismiss();
+                }
+            });
         }
         builder.create().show();
     }
@@ -261,9 +284,37 @@ public final class ContextUtility
         try
         {
             is = context.getAssets().open(path);
-            if(null == is)
-                return false;
             File out = new File(outPath);
+            FileUtility.mkdir(out.getParent(), true);
+            os = new FileOutputStream(out);
+
+            long res = FileUtility.Copy(os, is);
+
+            return res > 0;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally {
+            FileUtility.CloseStream(os);
+            FileUtility.CloseStream(is);
+        }
+    }
+
+    public static boolean ExtractAssetToDirectory(Context context, String path, String outPath)
+    {
+        InputStream is = null;
+        FileOutputStream os = null;
+        File f = new File(path);
+        String name = f.getName();
+
+        try
+        {
+            FileUtility.mkdir(outPath, true);
+            is = context.getAssets().open(path);
+            File out = new File(outPath + File.separator + name);
             os = new FileOutputStream(out);
 
             long res = FileUtility.Copy(os, is);
@@ -289,90 +340,6 @@ public final class ContextUtility
         context.startActivity(intent);
     }
 
-    public static int[] GetNormalScreenSize(Activity activity)
-    {
-        Display display = activity.getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
-        {
-            display.getSize(size);
-            return new int[]{ size.x, size.y };
-        }
-        else
-        {
-            return new int[]{ display.getWidth(), display.getHeight() };
-        }
-    }
-
-    public static int[] GetFullScreenSize(Activity activity)
-    {
-        Display display = activity.getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-        {
-            display.getRealSize(size);
-            return new int[]{ size.x, size.y };
-        }
-        else
-        {
-            return new int[]{ display.getWidth(), display.getHeight() };
-        }
-    }
-
-    public static int GetEdgeHeight(Activity activity, boolean landscape)
-    {
-        int safeInsetTop = 0;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-        {
-            WindowInsets rootWindowInsets = activity.getWindow().getDecorView().getRootWindowInsets();
-            if(null != rootWindowInsets)
-            {
-                DisplayCutout displayCutout = rootWindowInsets.getDisplayCutout();
-                if(null != displayCutout) {
-                    safeInsetTop = landscape ? displayCutout.getSafeInsetLeft() : displayCutout.getSafeInsetTop();
-                }
-            }
-        }
-        return safeInsetTop;
-    }
-
-    public static int GetEdgeHeight_bottom(Activity activity, boolean landscape)
-    {
-        int safeInsetBottom = 0;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-        {
-            WindowInsets rootWindowInsets = activity.getWindow().getDecorView().getRootWindowInsets();
-            if(null != rootWindowInsets)
-            {
-                DisplayCutout displayCutout = rootWindowInsets.getDisplayCutout();
-                if(null != displayCutout) {
-                    safeInsetBottom = landscape ? displayCutout.getSafeInsetRight() : displayCutout.getSafeInsetBottom();
-                }
-            }
-        }
-        return safeInsetBottom;
-    }
-
-    public static int GetNavigationBarHeight(Activity activity, boolean landscape)
-    {
-        int[] fullSize = GetFullScreenSize(activity);
-        int[] size = GetNormalScreenSize(activity);
-        return fullSize[1] - size[1] - GetEdgeHeight(activity, landscape) - GetEdgeHeight_bottom(activity, landscape);
-    }
-
-    public static int GetStatusBarHeight(Activity activity)
-    {
-        int result = 0;
-
-        Resources resources = activity.getResources();
-        int resourceId = resources.getIdentifier("status_bar_height","dimen", "android");
-
-        if (resourceId > 0)
-            result = resources.getDimensionPixelSize(resourceId);
-
-        return result;
-    }
-
     public static void RestartApp(Activity activity)
     {
         activity.finish();
@@ -389,6 +356,76 @@ public final class ContextUtility
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         activity.startActivity(intent);
         return true;
+    }
+
+    public static Context GetContext(Fragment fragment)
+    {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+            return fragment.getContext();
+        else
+            return fragment.getActivity();
+    }
+
+    public static AlertDialog.Builder CreateMessageDialogBuilder(Context context, CharSequence title, CharSequence message, Runnable callback, Object[] args)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(R.string.ok, new AlertDialog.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        if(null != callback && null != args && args.length > 0)
+        {
+            args[0] = builder;
+            callback.run();
+        }
+
+        return builder;
+    }
+
+    public static AlertDialog OpenMessageDialog(Context context, CharSequence title, CharSequence message, Runnable callback, Object[] args)
+    {
+        AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(context, title, message, callback, args);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        TextView messageText = (TextView)(dialog.findViewById(android.R.id.message));
+        if(messageText != null) // never
+        {
+            if(!TextHelper.USING_HTML)
+                messageText.setAutoLinkMask(Linkify.ALL);
+            messageText.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+
+        return dialog;
+    }
+
+    public static ProgressDialog Progress(Context context, CharSequence title, CharSequence message, Runnable cancel)
+    {
+        ProgressDialog dialog = new ProgressDialog(context);
+        dialog.setTitle(title);
+        dialog.setMessage(message);
+        dialog.setCancelable(false);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, Q3ELang.tr(context, R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+        {
+            @Override
+            public void onCancel(DialogInterface dialog)
+            {
+                if(null != cancel)
+                    cancel.run();
+            }
+        });
+        return dialog;
     }
     
 	private ContextUtility() {}

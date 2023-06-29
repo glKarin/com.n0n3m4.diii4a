@@ -682,7 +682,6 @@ const int MAX_GUI_SURFACES	= 1024;		// default size of the drawSurfs list for gu
 // be automatically expanded as needed
 
 typedef enum {
-	BE_ARB2,
 	BE_GLSL,
 	BE_BAD
 } backEndName_t;
@@ -1209,10 +1208,12 @@ void R_TransformModelToClip(const idVec3 &src, const float *modelMatrix, const f
 void R_TransformClipToDevice(const idPlane &clip, const viewDef_t *view, idVec3 &normalized);
 
 void R_TransposeGLMatrix(const float in[16], float out[16]);
+void R_TransposeGLMatrix(float out[16]);
 
 void R_SetViewMatrix(viewDef_t *viewDef);
 
 void myGlMultMatrix(const float *a, const float *b, float *out);
+void RB_ComputeMVP( const drawSurf_t * const surf, float mvp[16] );
 
 /*
 ============================================================
@@ -1313,6 +1314,7 @@ void RB_RenderDrawSurfChainWithFunction(const drawSurf_t *drawSurfs,
                                         void (*triFunc_)(const drawSurf_t *));
 void RB_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs);
 void RB_LoadShaderTextureMatrix(const float *shaderRegisters, const textureStage_t *texture);
+void RB_LoadShaderTextureMatrix(const float *shaderRegisters, const textureStage_t *texture, bool transpose);
 void RB_GetShaderTextureMatrix(const float *shaderRegisters, const textureStage_t *texture, float matrix[16]);
 void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteraction)(const drawInteraction_t *));
 
@@ -1340,7 +1342,7 @@ void RB_FinishStageTexture(const textureStage_t *texture, const drawSurf_t *surf
 void RB_StencilShadowPass(const drawSurf_t *drawSurfs);
 void RB_STD_DrawView(void);
 void RB_STD_FogAllLights(void);
-void RB_BakeTextureMatrixIntoTexgen(idPlane lightProject[3]);
+void RB_BakeTextureMatrixIntoTexgen( idPlane lightProject[3], const float textureMatrix[16] );
 
 /*
 ============================================================
@@ -1350,10 +1352,10 @@ DRAW_*
 ============================================================
 */
 
-void	R_ARB2_Init(void);
-void	RB_ARB2_DrawInteractions(void);
+#ifndef GL_ES_VERSION_2_0
 void	R_ReloadARBPrograms_f(const idCmdArgs &args);
 int		R_FindARBProgram(GLenum target, const char *program);
+#endif
 
 typedef enum {
 	PROG_INVALID,
@@ -1505,6 +1507,9 @@ void R_GLSL_Init(void);
 void RB_GLSL_DrawInteractions(void);
 void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf);
 void RB_GLSL_DrawInteraction(const drawInteraction_t *din);
+
+void R_CheckGLSLCvars(void);
+
 extern shaderProgram_t shadowShader;
 extern shaderProgram_t interactionShader;
 extern shaderProgram_t defaultShader;

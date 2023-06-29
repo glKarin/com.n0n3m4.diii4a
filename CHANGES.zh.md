@@ -1,8 +1,21 @@
 ## 更新日志
-**1.1.0harmattan31(natasha)** - **2023-06-10**
+**1.1.0harmattan32(natasha)** - **2023-06-30**
 
 ----------------------------------------------------------------------------------
 ### 更新
+
+* 添加 `中文`, `俄语`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)).
+* 一些虚拟按键设置移植`Configure on-screen controls`页面.
+* 毁灭战士3新增`full-body awareness` mod. 通过设置cvar`harm_pm_fullBodyAwareness`为1开启, 并且可以使用cvar `harm_pm_fullBodyAwarenessOffset`来设置偏移.
+* 在选项卡`General`下的`GameLib`支持添加外部的游戏动态库(测试. 由于系统安全方案不确定是否对所有设备/安卓版本有效. 允许你通过DIII4A项目编译你自己的游戏mod动态库(armv7/armv8)然后运行在原版的idTech4A++).
+* 如果启用`Find game library in game data directory`, 则支持加载外部的位于`Game working directory`/`fs_game`文件夹下的游戏动态库来代替apk内置的游戏动态库(测试. 由于系统安全方案不确定是否对所有设备/安卓版本有效. 允许你通过DIII4A项目编译你自己的游戏mod动态库(armv7/armv8), 然后命名为`gameaarch64.so`或`libgameaarch64.so`(arm64设备)或命名为`gamearm.so`或`libgamearm.so`(arm32设备), 然后放入`Game working directory`/`fs_game`文件夹下, 将优先加载该mod文件夹下的游戏动态库).
+* 支持jpg/png图像纹理文件.
+
+----------------------------------------------------------------------------------
+
+### 历史
+
+> 1.1.0harmattan30 (2023-06-10)
 
 * 在`CONTROLS`选项卡下的`Reset on-screen controls`, 新增重置所有虚拟按键的缩放和透明度.
 * 在`CONTROLS`选项卡新增统一设置所有虚拟按键大小功能.
@@ -12,8 +25,6 @@
 * 新的鼠标支持实现.
 
 ----------------------------------------------------------------------------------
-
-### 历史
 
 > 1.1.0harmattan30 (2023-05-23)
 

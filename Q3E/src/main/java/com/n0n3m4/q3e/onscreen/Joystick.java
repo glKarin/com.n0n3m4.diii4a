@@ -6,8 +6,8 @@ import android.view.View;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
-import com.n0n3m4.q3e.gl.GL;
-import com.n0n3m4.q3e.gl.GLBitmapTexture;
+import com.n0n3m4.q3e.gl.Q3EGL;
+import com.n0n3m4.q3e.gl.KGLBitmapTexture;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -63,30 +63,24 @@ public class Joystick extends Paintable implements TouchListener
     private int m_borderTexture; // outer border texture
     private int m_deadZoneRadius = 0;
     private int m_joystickDeadZone_2 = 0;
+    private boolean m_updateTexture = false;
 
-    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, float fullZonePercent, float deadZonePercent, boolean unfixed, boolean editMode, String texid, boolean b)
+    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, float fullZonePercent, float deadZonePercent, boolean unfixed, boolean editMode, String texid)
     {
-        this(vw, gl, r, a, x, y,
-                fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0,
-                deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0,
-                unfixed, editMode
-                , texid
-                );
-    }
+        int fullZoneRadius = fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0;
+        int deadZoneRadius = deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0;
 
-    public Joystick(View vw, GL10 gl, int r, float a, int x, int y, int fullZoneRadius, int deadZoneRadius, boolean unfixed, boolean editMode, String texid)
-    {
         view = vw;
         size = r * 2;
         alpha = a;
         this.m_posX = x;
         this.m_posY = y;
-        this.m_deadZoneRadius = deadZoneRadius;
         this.m_editMode = editMode;
         if(unfixed && fullZoneRadius < r) // if unfixed, min range is circle radius
             fullZoneRadius = r;
+        if(deadZoneRadius >= r)
+            deadZoneRadius = 0;
 
-        this.m_fullZoneRadius = fullZoneRadius;
         this.m_range.set(
                 m_posX - fullZoneRadius,
                 m_posY - fullZoneRadius,
@@ -95,10 +89,16 @@ public class Joystick extends Paintable implements TouchListener
         );
         this.m_unfixed = unfixed;
 
-        if (m_fullZoneRadius >= r)
+        if (fullZoneRadius >= r)
+        {
+            this.m_fullZoneRadius = fullZoneRadius;
             m_joystickReleaseRange_2 = m_fullZoneRadius * m_fullZoneRadius * 4;
-        if (m_deadZoneRadius > 0)
+        }
+        if (deadZoneRadius > 0)
+        {
+            this.m_deadZoneRadius = deadZoneRadius;
             m_joystickDeadZone_2 = m_deadZoneRadius * m_deadZoneRadius * 4;
+        }
         m_size_2 = size * size;
 
         // if(m_editMode || !m_unfixed)
@@ -178,13 +178,13 @@ public class Joystick extends Paintable implements TouchListener
         {
             if(!m_unfixed)
             {
-                GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+                Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
 
                 // int dp = dot_pos;//Multithreading.
                 if (dotjoyenabled)
-                    GL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+                    Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
                 else if (dot_pos != CONST_INVALID_DIRECTION)
-                    GL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+                    Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
             }
             else
             {
@@ -192,23 +192,27 @@ public class Joystick extends Paintable implements TouchListener
                 {
                     // GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
                     if (dotjoyenabled)
-                        GL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+                        Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
                     else if (dot_pos != CONST_INVALID_DIRECTION)
-                        GL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+                        Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
                 }
                 else
-                    GL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                    Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
             }
         }
         else
         {
-            GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+            if(!m_unfixed)
+                Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+            else
+                Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+
             if(null != m_outerVertexBuffer)
-                GL.DrawVerts(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
+                Q3EGL.DrawVerts(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
             else if(null != m_borderVertexBuffer)
-                GL.DrawVerts(gl, m_borderTexture, 6, tex_p, m_borderVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
+                Q3EGL.DrawVerts(gl, m_borderTexture, 6, tex_p, m_borderVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
             if(null != m_innerVertexBuffer)
-                GL.DrawVerts(gl, m_innerTexture, 6, tex_p, m_innerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */1, 0, 0, alpha);
+                Q3EGL.DrawVerts(gl, m_innerTexture, 6, tex_p, m_innerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */1, 0, 0, alpha);
         }
     }
 
@@ -221,26 +225,26 @@ public class Joystick extends Paintable implements TouchListener
 
         final int[] color = {255, 255, 255, 255};
         if(null != m_textures && m_textures.length > 0)
-            tex_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
         if(tex_ind == 0)
-        tex_ind = GLBitmapTexture.GenCircleRingTexture(gl, size, CalcRingWidth(), color);
+            tex_ind = KGLBitmapTexture.GenCircleRingTexture(gl, size, CalcRingWidth(), color);
 
         if(null != m_textures && m_textures.length > 1)
-            texd_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[1]));
+            texd_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[1]));
         if(texd_ind == 0)
-        texd_ind = GLBitmapTexture.GenCircleTexture(gl, dot_size, color);
+            texd_ind = KGLBitmapTexture.GenCircleTexture(gl, dot_size, color);
 
         if(m_editMode)
         {
             if(m_fullZoneRadius > 0)
             {
                 if(m_unfixed)
-                    m_borderTexture = GLBitmapTexture.GenRectBorderTexture(gl, m_fullZoneRadius * 2, -1,CONST_HELPER_BORDER_WIDTH, color);
+                    m_borderTexture = KGLBitmapTexture.GenRectBorderTexture(gl, m_fullZoneRadius * 2, -1,CONST_HELPER_BORDER_WIDTH, color);
                 else
-                    m_outerTexture = GLBitmapTexture.GenCircleRingTexture(gl, m_fullZoneRadius * 2, CONST_HELPER_BORDER_WIDTH, color);
+                    m_outerTexture = KGLBitmapTexture.GenCircleRingTexture(gl, m_fullZoneRadius * 2, CONST_HELPER_BORDER_WIDTH, color);
             }
             if(m_deadZoneRadius > 0)
-                m_innerTexture = GLBitmapTexture.GenCircleRingTexture(gl, m_deadZoneRadius * 2, CONST_HELPER_BORDER_WIDTH, color);
+                m_innerTexture = KGLBitmapTexture.GenCircleRingTexture(gl, m_deadZoneRadius * 2, CONST_HELPER_BORDER_WIDTH, color);
         }
     }
 
@@ -288,7 +292,7 @@ public class Joystick extends Paintable implements TouchListener
         boolean res = true;
         if (NotInFullZone(deltax, deltay))
         {
-            res = false;
+                res = false;
         }
         if (res && act != ACT_RELEASE)
         {
@@ -324,12 +328,12 @@ public class Joystick extends Paintable implements TouchListener
                     );
                     dot_pos = (int) (angle / 45);
                     if(NotInDeadZone(deltax, deltay))
-                    {
-                        enarr[0] = (dot_pos % 7 < 2);
-                        enarr[1] = (dot_pos > 0) && (dot_pos < 4);
-                        enarr[2] = (dot_pos > 2) && (dot_pos < 6);
-                        enarr[3] = (dot_pos > 4);
-                    }
+                {
+                    enarr[0] = (dot_pos % 7 < 2);
+                    enarr[1] = (dot_pos > 0) && (dot_pos < 4);
+                    enarr[2] = (dot_pos > 2) && (dot_pos < 6);
+                    enarr[3] = (dot_pos > 4);
+                }
                     else
                     {
                         enarr[0] = enarr[1] = enarr[2] = enarr[3] = false;
@@ -360,10 +364,10 @@ public class Joystick extends Paintable implements TouchListener
                 controlView.sendAnalog(false, 0, 0);
             }
             dot_pos = CONST_INVALID_DIRECTION;
-            enarr[0] = false;
-            enarr[1] = false;
-            enarr[2] = false;
-            enarr[3] = false;
+                enarr[0] = false;
+                enarr[1] = false;
+                enarr[2] = false;
+                enarr[3] = false;
         }
         setenabledarr(enarr);
         return res;
@@ -463,10 +467,10 @@ public class Joystick extends Paintable implements TouchListener
                         enarr[0] = enarr[1] = enarr[2] = enarr[3] = false;
                         if(NotInDeadZone(deltax, deltay))
                         {
-                            enarr[dot_pos] = true;
+                enarr[dot_pos] = true;
                         }
-                        dot_pos *= 2;
-                    }
+                dot_pos *= 2;
+            }
                 }
                 break;
 
@@ -474,18 +478,17 @@ public class Joystick extends Paintable implements TouchListener
                 m_pressed = false;
 
                 if (controlView.analog)
-                {
-                    dotjoyenabled = false;
+            {
+                dotjoyenabled = false;
                     controlView.sendAnalog(false, 0, 0);
-                }
+            }
                 dot_pos = CONST_INVALID_DIRECTION;
-                enarr[0] = false;
-                enarr[1] = false;
-                enarr[2] = false;
-                enarr[3] = false;
+            enarr[0] = false;
+            enarr[1] = false;
+            enarr[2] = false;
+            enarr[3] = false;
                 break;
         }
-
         setenabledarr(enarr);
         return res;
     }
@@ -501,13 +504,15 @@ public class Joystick extends Paintable implements TouchListener
         return verts;
     }
 
-    public static void Move(Joystick target, Joystick src)
+    public static Joystick Move(Joystick tmp, GL10 gl, float fullZonePercent, float deadZonePercent)
     {
-        target.tex_ind = src.tex_ind;
-        target.texd_ind = src.texd_ind;
-        target.m_outerTexture = src.m_outerTexture;
-        target.m_innerTexture = src.m_innerTexture;
-        target.m_borderTexture = src.m_borderTexture;
+        Joystick newj = new Joystick(tmp.view, gl, tmp.size / 2, tmp.alpha, tmp.cx, tmp.cy, fullZonePercent, deadZonePercent, tmp.m_unfixed, tmp.m_editMode, tmp.tex_androidid);
+        newj.tex_ind = tmp.tex_ind;
+        newj.texd_ind = tmp.texd_ind;
+        newj.m_outerTexture = tmp.m_outerTexture;
+        newj.m_innerTexture = tmp.m_innerTexture;
+        newj.m_borderTexture = tmp.m_borderTexture;
+        return newj;
     }
 
     public void Translate(int dx, int dy)
@@ -544,5 +549,100 @@ public class Joystick extends Paintable implements TouchListener
     private int NormalizeDegree(int angle)
     {
         return angle < 0 ? angle + 360 : (angle >= 360 ? angle - 360 : angle);
+    }
+
+    public void SetupFullZoneRadiusInEditMode(float fullZonePercent)
+    {
+        if(!m_editMode)
+            return;
+        int r = size / 2;
+        int fullZoneRadius = fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0;
+        if(fullZoneRadius < r)
+        {
+            if(m_unfixed)
+                fullZoneRadius = r;
+            else
+                fullZoneRadius = 0;
+        }
+
+        if(fullZoneRadius == m_fullZoneRadius)
+            return;
+        this.m_fullZoneRadius = fullZoneRadius;
+
+        if(m_fullZoneRadius >= r)
+        {
+            float[] verts;
+            if(m_unfixed)
+            {
+                verts = MakeVertexArray(m_fullZoneRadius * 2.0f);
+                m_borderVertexBuffer = ByteBuffer.allocateDirect(4 * verts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+                m_borderVertexBuffer.put(verts);
+                m_borderVertexBuffer.position(0);
+            }
+            else
+            {
+                verts = MakeVertexArray(m_fullZoneRadius * 2.0f);
+                m_outerVertexBuffer = ByteBuffer.allocateDirect(4 * verts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+                m_outerVertexBuffer.put(verts);
+                m_outerVertexBuffer.position(0);
+            }
+            m_joystickReleaseRange_2 = m_fullZoneRadius * m_fullZoneRadius * 4;
+        }
+        else
+            m_joystickReleaseRange_2 = 0;
+        m_updateTexture = true;
+    }
+
+    public void SetupDeadZoneRadiusInEditMode(float deadZonePercent)
+    {
+        if(!m_editMode)
+            return;
+
+        int r = size / 2;
+        int deadZoneRadius = deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0;
+        if(deadZoneRadius >= r)
+            deadZoneRadius = 0;
+        if(deadZoneRadius == m_deadZoneRadius)
+            return;
+        this.m_deadZoneRadius = deadZoneRadius;
+
+        if(m_deadZoneRadius > 0)
+        {
+            float[] verts = MakeVertexArray(m_deadZoneRadius * 2.0f);
+            m_innerVertexBuffer = ByteBuffer.allocateDirect(4 * verts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
+            m_innerVertexBuffer.put(verts);
+            m_innerVertexBuffer.position(0);
+            m_joystickDeadZone_2 = m_deadZoneRadius * m_deadZoneRadius * 4;
+        }
+        else
+            m_joystickDeadZone_2 = 0;
+        m_updateTexture = true;
+    }
+
+    public void UpdateTexture(GL11 gl)
+    {
+        if(!m_updateTexture)
+            return;
+
+        Q3EGL.glDeleteTexture(gl, m_borderTexture);
+        Q3EGL.glDeleteTexture(gl, m_outerTexture);
+        Q3EGL.glDeleteTexture(gl, m_innerTexture);
+        final int[] color = {255, 255, 255, 255};
+        if(m_fullZoneRadius > 0)
+        {
+            if(m_unfixed)
+            {
+                m_borderTexture = KGLBitmapTexture.GenRectBorderTexture(gl, m_fullZoneRadius * 2, -1,CONST_HELPER_BORDER_WIDTH, color);
+            }
+            else
+            {
+                m_outerTexture = KGLBitmapTexture.GenCircleRingTexture(gl, m_fullZoneRadius * 2, CONST_HELPER_BORDER_WIDTH, color);
+            }
+        }
+        if(m_deadZoneRadius > 0)
+        {
+            m_innerTexture = KGLBitmapTexture.GenCircleRingTexture(gl, m_deadZoneRadius * 2, CONST_HELPER_BORDER_WIDTH, color);
+        }
+        m_updateTexture = false;
     }
 }

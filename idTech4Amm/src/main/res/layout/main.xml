@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="start"
-        android:text="Start game" />
+        android:text="@string/start_game" />
 
     <TabHost
         android:id="@+id/tabhost"

@@ -1,7 +1,0 @@
-idTech4Amm (1.1.0harmattan31.2) unstable; urgency=low
-
-  * 支持不固定的虚拟摇杆和内部响应死区.
-  * 支持自定义虚拟按键的图片. 如果`/sdcard/Android/data/com.karin.idTech4Amm/files/assets`路径下存在同名的虚拟按键图片, 将有限使用外部的代替自带的. 或者把虚拟按键图片放入一个命名好的文件夹中, 然后将文件夹放在`/sdcard/Android/data/com.karin.idTech4Amm/files/assets/controls_theme/`, 然后在`CONTROLS`选项卡下`Setup on-screen button theme`选择该文件夹名称.
-  * 新的鼠标支持实现.
-
- -- Karin Zhao <beyondk2000@gmail.com>  Sat, 10 Jnu 2023 00:00:00 +0800

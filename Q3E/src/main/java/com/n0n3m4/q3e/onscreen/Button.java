@@ -5,7 +5,7 @@ import android.view.View;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
-import com.n0n3m4.q3e.gl.GL;
+import com.n0n3m4.q3e.gl.Q3EGL;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -75,14 +75,14 @@ public class Button extends Paintable implements TouchListener
     @Override
     public void loadtex(GL10 gl)
     {
-        tex_ind = GL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), tex_androidid));
+        tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), tex_androidid));
     }
 
     @Override
     public void Paint(GL11 gl)
     {
         super.Paint(gl);
-        GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
     }
 
     private int lx;
@@ -172,5 +172,24 @@ public class Button extends Paintable implements TouchListener
             return (((dy) <= (dx)) && (2 * Math.abs(dx) < width) && (2 * Math.abs(dy) < height));
         }
         return false;
+    }
+
+    public static Button Move(Button tmp, GL10 gl)
+    {
+        Button newb = new Button(tmp.view, gl, tmp.cx, tmp.cy, tmp.width, tmp.height, tmp.tex_androidid, tmp.keycode, tmp.style, tmp.canbeheld, tmp.alpha);
+        newb.tex_ind = tmp.tex_ind;
+        return newb;
+    }
+
+    public void Translate(int dx, int dy)
+    {
+        cx += dx;
+        cy += dy;
+    }
+
+    public void SetPosition(int x, int y)
+    {
+        cx = x;
+        cy = y;
     }
 }

@@ -44,8 +44,6 @@ public class Q3EMouseDevice
         //k: first check su
         mouse_name = DeviceIsRoot() ? (detectMouse ? detectmouse() : mPrefs.getString(Q3EPreference.pref_eventdev, "/dev/input/event???")) : null;
         mouse_corner = mPrefs.getInt(Q3EPreference.pref_mousepos, 3);
-
-        mouse_name = null;
     }
 
     public void Start()
@@ -65,10 +63,19 @@ public class Q3EMouseDevice
         }
     }
 
-    private boolean DeviceIsRoot()
+    public static boolean DeviceIsRoot()
     {
-        //return com.stericson.RootTools.RootTools.isRootAvailable();
-        return false;
+        try
+        {
+            // return com.stericson.RootTools.RootTools.isRootAvailable();
+            Class<?> clazz = Class.forName("com.stericson.RootTools.RootTools");
+            return (boolean)clazz.getDeclaredMethod("isRootAvailable").invoke(null);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // comment these for pure-free
@@ -77,11 +84,16 @@ public class Q3EMouseDevice
         @Override
         public void run()
         {
-            /*
             try
             {
+                /*
                 com.stericson.RootTools.CommandCapture command = new com.stericson.RootTools.CommandCapture(0, "chmod 777 " + mouse_name);//insecure =(
                 com.stericson.RootTools.RootTools.getShell(true).add(command).waitForFinish();
+                 */
+                Object command = Class.forName("com.stericson.RootTools.CommandCapture").getDeclaredConstructor(int.class, String[].class).newInstance(0, new String[]{"chmod 777 " + mouse_name});//insecure =(
+                Object shell = Class.forName("com.stericson.RootTools.RootTools").getDeclaredMethod("getShell", boolean.class).invoke(null, true);
+                command = shell.getClass().getDeclaredMethod("add", Class.forName("com.stericson.RootTools.Command")).invoke(shell, command);
+                command.getClass().getDeclaredMethod("waitForFinish").invoke(command);
 
                 FileInputStream fis = new FileInputStream(mouse_name);//.getChannel();
                 FileOutputStream fout = new FileOutputStream(mouse_name);//.getChannel();
@@ -171,17 +183,14 @@ public class Q3EMouseDevice
                 }
 
             } catch (Throwable ignored) {}
-            */
         }
     });
 
     public static String detectmouse()
     {
-        return null;
-        /*
         try
         {
-            com.stericson.RootTools.Command command = new com.stericson.RootTools.Command(0, "cat /proc/bus/input/devices")
+            /*com.stericson.RootTools.Command command = new com.stericson.RootTools.Command(0, "cat /proc/bus/input/devices")
             {
                 @Override
                 public void output(int id, String line)
@@ -201,13 +210,35 @@ public class Q3EMouseDevice
                     }
                 }
             };
-            com.stericson.RootTools.RootTools.getShell(true).add(command).waitForFinish();
+            com.stericson.RootTools.RootTools.getShell(true).add(command).waitForFinish();*/
+            Object command = Class.forName("com.stericson.RootTools.CommandCapture").getDeclaredConstructor(int.class, String[].class).newInstance(0, new String[]{"cat /proc/bus/input/devices"});//insecure =(
+            Object shell = Class.forName("com.stericson.RootTools.RootTools").getDeclaredMethod("getShell", boolean.class).invoke(null, true);
+            command = shell.getClass().getDeclaredMethod("add", Class.forName("com.stericson.RootTools.Command")).invoke(shell, command);
+            command.getClass().getDeclaredMethod("waitForFinish").invoke(command);
+            String line = command.toString();
+            if (!line.isEmpty())
+            {
+                int index = line.indexOf("\n");
+                if(index != -1)
+                    line = line.substring(0, index);
+                if (line.contains(detecthnd) && (line.contains(detectmouse) || !detectfoundpreferred))
+                {
+                    detectedtmp = line.substring(line.indexOf(detecthnd) + detecthnd.length());
+                    detectedtmp = detectedtmp.substring(detectedtmp.indexOf("event"));
+                    if (detectedtmp.contains(" "))
+                        detectedtmp = detectedtmp.substring(0, detectedtmp.indexOf(" "));
+                    detectfoundpreferred = line.contains(detectmouse);
+                }
+                if (line.contains(detectrel))
+                {
+                    detectedname = "/dev/input/" + detectedtmp;
+                }
+            }
             return detectedname;
         } catch (Throwable t)
         {
             t.printStackTrace();
             return null;
         }
-        */
     }
 }

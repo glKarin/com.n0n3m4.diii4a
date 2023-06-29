@@ -763,6 +763,9 @@ void idWeapon::InitWorldModel(const idDeclEntityDef *def)
 		renderEntity_t *worldModelRenderEntity = ent->GetRenderEntity();
 
 		if (worldModelRenderEntity) {
+#ifdef _HARM_FULL_BODY_AWARENESS
+			if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+#endif
 			worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber+1;
 			worldModelRenderEntity->suppressShadowInViewID = owner->entityNumber+1;
 			worldModelRenderEntity->suppressShadowInLightID = LIGHTID_VIEW_MUZZLE_FLASH + owner->entityNumber;
@@ -1984,7 +1987,22 @@ idWeapon::PresentWeapon
 */
 void idWeapon::PresentWeapon(bool showViewModel)
 {
+#ifdef _HARM_FULL_BODY_AWARENESS
+	renderEntity_t* worldModelRenderEntity = worldModel.GetEntity()->GetRenderEntity();
+	bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool();
+	if(not_pm_fullBodyAwareness)
+		worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
+	else
+		worldModelRenderEntity->suppressSurfaceInViewID = 0;
+
+	// for melee weapon: always player original firstPersonViewOrigin
+	if(not_pm_fullBodyAwareness)
+#endif
 	playerViewOrigin = owner->firstPersonViewOrigin;
+#ifdef _HARM_FULL_BODY_AWARENESS
+    else
+        playerViewOrigin = owner->firstPersonViewOrigin_playerViewOrigin;
+#endif
 	playerViewAxis = owner->firstPersonViewAxis;
 
 	// calculate weapon position based on player movement bobbing
@@ -3084,8 +3102,20 @@ void idWeapon::Event_LaunchProjectiles(int num_projectiles, float spread, float 
 		GetGlobalJointTransform(true, barrelJointView, muzzleOrigin, muzzleAxis);
 	} else {
 		// go straight out of the view
-		muzzleOrigin = playerViewOrigin;
-		muzzleAxis = playerViewAxis;
+#ifdef _HARM_FULL_BODY_AWARENESS
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+		{
+#endif
+        muzzleOrigin = playerViewOrigin;
+        muzzleAxis = playerViewAxis;
+#ifdef _HARM_FULL_BODY_AWARENESS
+        }
+        else
+        {
+			muzzleOrigin = viewWeaponOrigin;
+			muzzleAxis = viewWeaponAxis;
+		}
+#endif
 	}
 
 	// add some to the kick time, incrementally moving repeat firing weapons back

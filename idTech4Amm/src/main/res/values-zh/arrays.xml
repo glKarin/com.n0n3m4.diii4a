@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="run_background_labels">
+        <item>后台运行(无声音)</item>
+        <item>后台运行</item>
+        <item>不后台运行</item>
+    </string-array>
+
+    <string-array name="map_back_labels">
+        <item>映射Esc键</item>
+        <item>3击退出</item>
+    </string-array>
+
+    <string-array name="onscreen_button_style_labels">
+        <item>完整</item>
+        <item>右下半边</item>
+        <item>中间一半</item>
+        <item>左上半边</item>
+    </string-array>
+
+    <string-array name="onscreen_slider_style_labels">
+        <item>左-右方向</item>
+        <item>下-右方向</item>
+    </string-array>
+
+    <string-array name="onscreen_type_labels">
+        <item>普通按键</item>
+        <item>滑动按键</item>
+    </string-array>
+
+    <string-array name="lang_labels">
+        <item>系统/System</item>
+        <item>English</item>
+        <item>中文</item>
+        <item>Русский</item>
+    </string-array>
+</resources>

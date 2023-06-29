@@ -664,6 +664,16 @@ static volatile bool render_thread_finished = false;
 extern void BackendThreadWait();
 extern void BackendThreadTask();
 
+const xthreadInfo * Sys_GetRenderThread(void)
+{
+	return &render_thread;
+}
+
+intptr_t Sys_GetMainThread(void)
+{
+	return main_thread;
+}
+
 bool Sys_InRenderThread(void)
 {
 	return render_thread.threadHandle && pthread_equal(render_thread.threadHandle, pthread_self()) != 0;
@@ -698,9 +708,7 @@ static void * BackendThread(void *data)
 	while(true)
 	{
 		BackendThreadTask();
-		if(render_thread.threadCancel)
-			break;
-		if(backendThreadShutdown)
+		if(render_thread.threadCancel || backendThreadShutdown)
 			break;
 	}
 	GLimp_DeactivateContext();
@@ -723,7 +731,7 @@ void BackendThreadExecute(void)
 }
 #endif
 
-// because SurfaceView may be destroy or create new ANativeWindow
+// because SurfaceView may be destroy or create new ANativeWindow in DOOM3 main thread
 void CheckEGLInitialized(void)
 {
     if(window_changed)
@@ -745,12 +753,10 @@ void CheckEGLInitialized(void)
         {
             GLimp_AndroidQuit();
             window_changed = false;
-#ifdef _MULTITHREAD
             Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_DESTROYED);
             // wait new ANativeWindow created
             while(!window_changed)
                 Sys_WaitForEvent(TRIGGER_EVENT_WINDOW_CREATED);
-#endif
             window_changed = false;
             GLimp_AndroidInit(window);
         }
@@ -835,6 +841,7 @@ static void Q3E_StopGameMainThread(void)
 	Sys_Printf("[Harmattan]: doom3 main thread quit.\n");
 }
 
+FILE *f_stdout = NULL;
 extern "C"
 {
 
@@ -850,7 +857,7 @@ int main(int argc, const char **argv)
 
 	if(redirect_output_to_file)
 	{
-		freopen("stdout.txt","w",stdout);
+		f_stdout = freopen("stdout.txt","w",stdout);
 		setvbuf(stdout, NULL, _IONBF, 0);
 		freopen("stderr.txt","w",stderr);
 		setvbuf(stderr, NULL, _IONBF, 0);
@@ -980,9 +987,7 @@ void Q3E_exit(void)
 	running = false;
 	if(common->IsInitialized())
 	{
-#ifdef _MULTITHREAD
 		Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_CREATED); // if doom3 main thread is waiting new window
-#endif
 		Q3E_StopGameMainThread();
 		common->Quit();
 	}
@@ -1006,7 +1011,7 @@ void Q3E_OnResume(void)
 		paused = false;
 }
 
-// Setup OpenGL context variables
+// Setup OpenGL context variables in Android SurfaceView's thread
 void Android_SetGLContext(ANativeWindow *w, int size, ...)
 {
 	va_list va;
@@ -1026,18 +1031,14 @@ void Android_SetGLContext(ANativeWindow *w, int size, ...)
 		{
 			window = NULL;
 			window_changed = true;
-#ifdef _MULTITHREAD
 			while(window_changed)
 				Sys_WaitForEvent(TRIGGER_EVENT_WINDOW_DESTROYED);
-#endif
 		}
 		else // set new window, notify doom3 main thread active OpenGL render context
 		{
 			window = w;
 			window_changed = true;
-#ifdef _MULTITHREAD
 			Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_CREATED);
-#endif
 		}
 	}
 	else

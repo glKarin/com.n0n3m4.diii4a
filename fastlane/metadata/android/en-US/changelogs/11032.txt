@@ -1,0 +1,13 @@
+idTech4Amm (1.1.0harmattan32) unstable; urgency=low
+
+  * Support unfixed-position joystick and inner dead zone.
+  * Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/com.karin.idTech4Amm/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/com.karin.idTech4Amm/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.
+  * New mouse support implement.
+  * Add `Chinese`, `Russian`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)) language.
+  * Move some on-screen settings to `Configure on-screen controls` page.
+  * Add `full-body awareness` mod in DOOM 3. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode).
+  * Support add external game library in `GameLib` at tab `General`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project and run it using original idTech4A++).
+  * Support load external game library in `Game working directory`/`fs_game` folder instead of default game library of apk if enabled `Find game library in game data directory`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project, and then named `gameaarch64.so`/`libgameaarch64.so`(arm64 device) or named `gamearm.so`/`libgamearm.so`(arm32 device), and then put it on `Game working directory`/`fs_game` folder, and start game directly with original idTech4A++).
+  * Support jpg/png image texture file.
+
+ -- Karin Zhao <beyondk2000@gmail.com>  Sat, 10 Jnu 2023 00:00:00 +0800

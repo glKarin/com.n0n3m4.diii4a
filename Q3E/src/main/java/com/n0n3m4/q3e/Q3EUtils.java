@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -36,22 +37,29 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 
+import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.LinkedHashMap;
 
 public class Q3EUtils
 {
     public static Q3EInterface q3ei = new Q3EInterface(); //k: new
     public static boolean isOuya = false;
+    public static int UI_FULLSCREEN_HIDE_NAV_OPTIONS = 0;
+    public static int UI_FULLSCREEN_OPTIONS = 0;
 
     static
     {
         Q3EUtils.isOuya = Q3EOuya.IsValid();
+        UI_FULLSCREEN_HIDE_NAV_OPTIONS = GetFullScreenFlags(true);
+        UI_FULLSCREEN_OPTIONS = GetFullScreenFlags(false);
     }
 
     public static boolean isAppInstalled(Activity ctx, String nm)
@@ -184,6 +192,26 @@ public class Q3EUtils
             }
         }
         return safeInsetBottom;
+    }
+
+    public static int GetStatusBarHeight(Activity activity)
+    {
+        int result = 0;
+
+        Resources resources = activity.getResources();
+        int resourceId = resources.getIdentifier("status_bar_height","dimen", "android");
+
+        if (resourceId > 0)
+            result = resources.getDimensionPixelSize(resourceId);
+
+        return result;
+    }
+
+    public static int GetNavigationBarHeight(Activity activity, boolean landscape)
+    {
+        int[] fullSize = GetFullScreenSize(activity);
+        int[] size = GetNormalScreenSize(activity);
+        return fullSize[1] - size[1] - GetEdgeHeight(activity, landscape) - GetEndEdgeHeight(activity, landscape);
     }
 
     public static String GetGameLibDir(Context context)
@@ -360,6 +388,126 @@ public class Q3EUtils
 
     public static int SupportMouse()
     {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? Q3EGlobals.MOUSE_EVENT : Q3EGlobals.MOUSE_DEVICE;
+        // return Q3EGlobals.MOUSE_EVENT;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O || !Q3EMouseDevice.DeviceIsRoot() ? Q3EGlobals.MOUSE_EVENT : Q3EGlobals.MOUSE_DEVICE;
+    }
+
+    public static String Join(String d, String...strs)
+    {
+        if(null == strs)
+            return null;
+        if(strs.length == 0)
+            return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < strs.length; i++) {
+            sb.append(strs[i]);
+            if(i < strs.length - 1)
+                sb.append(d);
+        }
+        return sb.toString();
+    }
+
+    public static float parseFloat_s(String str, float...def)
+    {
+        float defVal = null != def && def.length > 0 ? def[0] : 0.0f;
+        if(null == str)
+            return defVal;
+        str = str.trim();
+        if(str.isEmpty())
+            return defVal;
+        try
+        {
+            return Float.parseFloat(str);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return defVal;
+        }
+    }
+
+    public static int parseInt_s(String str, int...def)
+    {
+        int defVal = null != def && def.length > 0 ? def[0] : 0;
+        if(null == str)
+            return defVal;
+        str = str.trim();
+        if(str.isEmpty())
+            return defVal;
+        try
+        {
+            return Integer.parseInt(str);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return defVal;
+        }
+    }
+
+    public static long Copy(OutputStream out, InputStream in, int...bufferSizeArg) throws RuntimeException
+    {
+        if(null == out)
+            return -1;
+        if(null == in)
+            return -1;
+
+        int bufferSize = bufferSizeArg.length > 0 ? bufferSizeArg[0] : 0;
+        if (bufferSize <= 0)
+            bufferSize = 8192;
+
+        byte[] buffer = new byte[bufferSize];
+
+        long size = 0L;
+
+        int readSize;
+        try
+        {
+            while((readSize = in.read(buffer)) != -1)
+            {
+                out.write(buffer, 0, readSize);
+                size += readSize;
+                out.flush();
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        return size;
+    }
+
+    /*
+    @SuppressLint("InlinedApi")
+    private final int m_uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_FULLSCREEN;
+    @SuppressLint("InlinedApi")
+    private final int m_uiOptions_def = View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+     */
+    public static int GetFullScreenFlags(boolean hideNav)
+    {
+        int m_uiOptions = 0;
+
+        if(hideNav)
+        {
+            m_uiOptions |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            {
+                m_uiOptions |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+        {
+            m_uiOptions |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            m_uiOptions |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            m_uiOptions |= View.SYSTEM_UI_FLAG_FULLSCREEN;
+        }
+        return m_uiOptions;
     }
 }

@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan31(natasha)  
+1.1.0harmattan32(natasha)  
 **Last update release:**
-2023-06-10  
+2023-06-30  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -18,15 +18,19 @@ GPLv3
 Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
 Tag with `-free` only for F-Droid update.
 
+| Feature | Github | F-Droid |
+|:-|:-:|:-:|
+| Ouya TV | Yes | No |
+
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.
-* Add setup all on-screen buttons size in tab `CONTROLS`.
-* Add grid assist in tab `CONTROLS`'s `Configure on-screen controls` if setup `On-screen buttons position unit` of settings greater than 0.
-* Support unfixed-position joystick and inner dead zone.
-* Support custom on-screen button's texture image. If button image file exists in `/sdcard/Android/data/com.karin.idTech4Amm/files/assets` as same file name, will using external image file instead of apk internal image file. Or put button image files as a folder in `/sdcard/Android/data/com.karin.idTech4Amm/files/assets/controls_theme/`, and then select folder name with `Setup on-screen button theme` on `CONTROLS` tab.
-* New mouse support implement.
+* Add `Chinese`, `Russian`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)) language.
+* Move some on-screen settings to `Configure on-screen controls` page.
+* Add `full-body awareness` mod in DOOM 3. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode).
+* Support add external game library in `GameLib` at tab `General`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project and run it using original idTech4A++).
+* Support load external game library in `Game working directory`/`fs_game` folder instead of default game library of apk if enabled `Find game library in game data directory`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project, and then named `gameaarch64.so`/`libgameaarch64.so`(arm64 device) or named `gamearm.so`/`libgamearm.so`(arm32 device), and then put it on `Game working directory`/`fs_game` folder, and start game directly with original idTech4A++).
+* Support jpg/png image texture file.
 
 ----------------------------------------------------------------------------------
 

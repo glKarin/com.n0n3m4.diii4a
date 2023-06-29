@@ -320,6 +320,10 @@ class idPlayer : public idActor
 		idMat3					firstPersonViewAxis;
 
 		idDragEntity			dragEntity;
+#ifdef _HARM_FULL_BODY_AWARENESS
+		idVec3 firstPersonViewOrigin_playerViewOrigin; // melee
+		idVec3 firstPersonViewOrigin_viewWeaponOrigin; // launch
+#endif
 
 	public:
 		CLASS_PROTOTYPE(idPlayer);
@@ -703,6 +707,9 @@ class idPlayer : public idActor
 		void					Event_LevelTrigger(void);
 		void					Event_Gibbed(void);
 		void					Event_GetIdealWeapon(void);
+#ifdef _HARM_FULL_BODY_AWARENESS
+		idVec3 fullBodyAwarenessOffset;
+#endif
 };
 
 ID_INLINE bool idPlayer::IsReady(void)
