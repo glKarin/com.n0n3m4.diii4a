@@ -57,7 +57,7 @@
     <string name="x_axis_sensitivity_of_gyroscope">X-Axis sensitivity of gyroscope</string>
     <string name="y_axis_sensitivity_of_gyroscope">Y-Axis sensitivity of gyroscope</string>
     <string name="hide_onscreen_buttons">Hide onscreen buttons</string>
-    <string name="using_mouse_not_need_root_on_android_8">Using mouse(not need root on Android 8+)</string>
+    <string name="using_mouse">Using mouse</string>
     <string name="mouse_settings">Mouse settings:</string>
     <string name="autodetect_mouse">Autodetect mouse</string>
     <string name="mouse_event_device">Mouse event device:</string>

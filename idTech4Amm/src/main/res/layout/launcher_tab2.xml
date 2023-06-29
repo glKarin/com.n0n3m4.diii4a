@@ -202,7 +202,7 @@
 			android:id="@+id/using_mouse"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/using_mouse_not_need_root_on_android_8"
+			android:text="@string/using_mouse"
 			/>
 
 		<LinearLayout

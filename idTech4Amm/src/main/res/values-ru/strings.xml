@@ -55,7 +55,7 @@
     <string name="x_axis_sensitivity_of_gyroscope">Чувствительность гироскопа по оси X</string>
     <string name="y_axis_sensitivity_of_gyroscope">Чувствительность гироскопа по оси Y</string>
     <string name="hide_onscreen_buttons">Скрыть экранные кнопки</string>
-    <string name="using_mouse_not_need_root_on_android_8">Использование мыши(не требуется root для Android 8+)</string>
+    <string name="using_mouse">Использование мыши</string>
     <string name="mouse_settings">Настройки мыши:</string>
     <string name="autodetect_mouse">Автоопределение мыши</string>
     <string name="mouse_event_device">Устройство событий мыши:</string>

@@ -54,7 +54,7 @@
     <string name="x_axis_sensitivity_of_gyroscope">陀螺仪X轴灵敏度</string>
     <string name="y_axis_sensitivity_of_gyroscope">陀螺仪Y轴灵敏度</string>
     <string name="hide_onscreen_buttons">隐藏虚拟按键</string>
-    <string name="using_mouse_not_need_root_on_android_8">启用鼠标(Android 8+上不需要root)</string>
+    <string name="using_mouse">启用鼠标</string>
     <string name="mouse_settings">鼠标设置:</string>
     <string name="autodetect_mouse">自动探测鼠标文件</string>
     <string name="mouse_event_device">鼠标设备文件:</string>
