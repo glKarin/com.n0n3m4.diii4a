@@ -28,4 +28,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef ID_SND_BACKENDS
 #define ID_SND_BACKENDS
 
+#ifdef __ANDROID__
+extern void (*initAudio)(void *buffer, int size);
+extern int (*writeAudio)(int offset, int length);
+#endif
+
 #endif

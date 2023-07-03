@@ -2877,9 +2877,6 @@ void idSessionLocal::PacifierUpdate()
 idSessionLocal::Draw
 ===============
 */
-#if defined(__ANDROID__)
-extern void sync_state(void);
-#endif
 void idSessionLocal::Draw()
 {
 	bool fullConsole = false;
@@ -2985,7 +2982,7 @@ void idSessionLocal::Draw()
 	}
 
 #if defined(__ANDROID__)
-	sync_state();
+	Sys_SyncState();
 #endif
 }
 

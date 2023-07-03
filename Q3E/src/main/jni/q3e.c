@@ -32,20 +32,21 @@
 #include <android/native_window_jni.h>
 #include "q3e.h"
 
+#include "doom3/neo/sys/android/doom3_android.h"
+
 int  (*qmain)(int argc, char **argv);
 void (*onFrame)();
 void (*onKeyEvent)(int state, int key,int chr);
 void (*onAnalog)(int enable, float x, float y);
 void (*onMotionEvent)(float x, float y);
-void (*onAudio)();
-void (*setCallbacks)(void *func, void *func2, void *func3);
+void (*setCallbacks)(const void *func);
 void (*setResolution)(int width, int height);
 void (*vidRestart)();
 void (*on_pause)(void);
 void (*on_resume)(void);
-void (*set_gl_context)(ANativeWindow *window, int size, ...);
+void (*set_gl_context)(ANativeWindow *window);
 
-intptr_t (*Q3E_Call)(int protocol, int size, ...);
+void (*Q3E_SetInitialContext)(const void *context);
 static void pull_input_event(int execCmd);
 static void grab_mouse(int grab);
 static FILE * android_tmpfile(void);
@@ -54,7 +55,6 @@ static int redirect_output_to_file = 0;
 static int no_handle_signals = 0;
 static int multithread = 0;
 void (*qexit)(void);
-intptr_t (*(*set_Android_Call)(intptr_t (*func)(int, int, ...)))(int, int, ...);
 
 static jmethodID android_PullEvent_method;
 jmethodID android_GrabMouse_method;
@@ -71,50 +71,14 @@ static jobject q3eCallbackObj=0;
 static void *libdl;
 static ANativeWindow *window = NULL;
 
-#define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
-#define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
-#define ANDROID_CALL_PROTOCOL_ATTACH_THREAD 0x10003
-#define ANDROID_CALL_PROTOCOL_GRAB_MOUSE 0x10005
-
-#define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
-#define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
-#define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
-#define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
-#define ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT 0x20006
-
-intptr_t Android_Call(int protocol, int size, ...)
+static void Android_AttachThread(void)
 {
-	intptr_t res = 0;
-	va_list va;
 	JNIEnv *env = 0;
 
-	va_start(va, size);
-	switch(protocol)
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0)
 	{
-		case ANDROID_CALL_PROTOCOL_TMPFILE:
-			res = (intptr_t)android_tmpfile();
-			break;
-		case ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT:
-			pull_input_event(va_arg(va, int));
-			res = 1;
-			break;
-		case ANDROID_CALL_PROTOCOL_ATTACH_THREAD:
-			if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0)
-			{
-				(*jVM)->AttachCurrentThread(jVM, &env, NULL);
-			}
-			res = 1;
-			break;
-		case ANDROID_CALL_PROTOCOL_GRAB_MOUSE:
-			grab_mouse(va_arg(va, int));
-			res = 1;
-			break;
-		default:
-			break;
+		(*jVM)->AttachCurrentThread(jVM, &env, NULL);
 	}
-	va_end(va);
-
-	return res;
 }
 
 static void loadLib(char* libpath)
@@ -125,22 +89,46 @@ static void loadLib(char* libpath)
         __android_log_print(ANDROID_LOG_ERROR, "Q3E_JNI", "Unable to load library: %s\n", dlerror());
         return;
     }
+	void (*GetDOOM3API)(void *d3interface);
+
+	GetDOOM3API = dlsym(libdl, "GetDOOM3API");
+	Q3E_Interface_t d3interface;
+	GetDOOM3API(&d3interface);
+
+	qmain = (int (*)(int, char **)) d3interface.main;
+	setCallbacks = d3interface.setCallbacks;
+	Q3E_SetInitialContext = d3interface.setInitialContext;
+	setResolution = d3interface.setResolution;
+
+	on_pause = d3interface.pause;
+	on_resume = d3interface.resume;
+	qexit = d3interface.exit;
+
+	set_gl_context = d3interface.setGLContext;
+
+	onFrame = d3interface.frame;
+	vidRestart = d3interface.vidRestart;
+
+	onKeyEvent = d3interface.keyEvent;
+	onAnalog = d3interface.analogEvent;
+	onMotionEvent = d3interface.motionEvent;
+
+#if 0
     qmain = dlsym(libdl, "main");
     onFrame = dlsym(libdl, "Q3E_DrawFrame");
     onKeyEvent = dlsym(libdl, "Q3E_KeyEvent");
     onAnalog = dlsym(libdl, "Q3E_Analog");
     onMotionEvent = dlsym(libdl, "Q3E_MotionEvent");
-    onAudio = dlsym(libdl, "Q3E_GetAudio");
     setCallbacks = dlsym(libdl, "Q3E_SetCallbacks");
     setResolution = dlsym(libdl, "Q3E_SetResolution");
 	vidRestart = dlsym(libdl, "Q3E_OGLRestart");
 
     on_pause = dlsym(libdl, "Q3E_OnPause");
     on_resume = dlsym(libdl, "Q3E_OnResume");
-    Q3E_Call = dlsym(libdl, "Q3E_Call");
+	Q3E_SetInitialContext = dlsym(libdl, "Q3E_SetInitialContext");
     qexit = dlsym(libdl, "Q3E_exit");
-	set_Android_Call = dlsym(libdl, "set_Android_Call");
-	set_gl_context = dlsym(libdl, "Android_SetGLContext");
+	set_gl_context = dlsym(libdl, "Q3E_SetGLContext");
+#endif
 }
 
 void initAudio(void *buffer, int size)
@@ -321,6 +309,61 @@ static int ParseCommandLine(char *cmdline, char **argv)
 	return(argc);
 }
 
+static void setup_Q3E_callback(void)
+{
+	Q3E_Callback_t callback;
+	memset(&callback, 0, sizeof(callback));
+
+	callback.AudioTrack_init = &initAudio; // initAudio_direct
+	callback.AudioTrack_write = &writeAudio; // writeAudio_direct
+
+	callback.Input_grabMouse = &grab_mouse;
+	callback.Input_pullEvent = &pull_input_event;
+
+	callback.Sys_attachThread = &Android_AttachThread;
+
+	callback.set_state = &setState;
+	callback.Sys_tmpfile = &android_tmpfile;
+
+	setCallbacks(&callback);
+}
+
+static void setup_Q3E_initial_context(char *doom3_path, jint format, jint msaa)
+{
+	if(Q3E_SetInitialContext)
+	{
+		Q3E_InitialContext_t context;
+		memset(&context, 0, sizeof(context));
+
+		char *ptr = strrchr(doom3_path, '/');
+		char ch = '\0';
+		if(ptr)
+		{
+			ch = *ptr;
+			*ptr = '\0';
+		}
+
+		context.openGL_format = format;
+		context.openGL_msaa = msaa;
+
+		context.nativeLibraryDir = doom3_path;
+		context.redirectOutputToFile = redirect_output_to_file;
+		context.noHandleSignals = no_handle_signals;
+		context.multithread = multithread;
+
+		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 native library dir: %s", doom3_path);
+		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 redirect output to file: %d", redirect_output_to_file);
+		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 no handle signals: %d", no_handle_signals);
+		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 multi-thread: %d", multithread);
+		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 OpenGL format: 0x%X", format);
+		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 OpenGL MSAA: %d", msaa);
+
+		Q3E_SetInitialContext(&context);
+
+		if(ptr)
+			*ptr = ch;
+	}
+}
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jint width, jint height, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa)
 {
@@ -344,31 +387,16 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
                 env, LibPath, &iscopy);	
     char *doom3_path = strdup(libpath);
 	loadLib(doom3_path);
-	(*env)->ReleaseStringUTFChars(env, LibPath, libpath);    
+	(*env)->ReleaseStringUTFChars(env, LibPath, libpath);
 
-    setCallbacks(&initAudio,&writeAudio,&setState);
-	//setCallbacks(&initAudio_direct,&writeAudio_direct,&setState);
+	setup_Q3E_callback();
+
 	setResolution(width, height);
-    
-	set_Android_Call(Android_Call);
-    __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 native library file: %s", doom3_path);
-    if(Q3E_Call)
-    {
-        char *ptr = strrchr(doom3_path, '/');
-        if(ptr) *ptr = '\0';
-        __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 native library dir: %s", doom3_path);
-        (void)Q3E_Call(ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR, 1, doom3_path);
-        __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 redirect output to file: %d", redirect_output_to_file);
-        (void)Q3E_Call(ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE, 1, redirect_output_to_file);
-        __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 no handle signals: %d", no_handle_signals);
-        (void)Q3E_Call(ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS, 1, no_handle_signals);
-		__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 multi-thread: %d", multithread);
-		(void)Q3E_Call(ANDROID_CALL_PROTOCOL_MULTITHREAD, 1, multithread);
 
-		(void)Q3E_Call(ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT, 1, pull_input_event);
-    }
+    __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 native library file: %s", doom3_path);
+	setup_Q3E_initial_context(doom3_path, format, msaa);
 	window = ANativeWindow_fromSurface(env, view);
-	set_gl_context(window, 2, format, msaa);
+	set_gl_context(window);
     
     qmain(argc, argv);
 	free(argv);
@@ -393,11 +421,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent(JNIEnv *env, jclass c, jfloat x, jfloat y)
 {
     onMotionEvent(x, y);
-}
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_requestAudioData(JNIEnv *env, jclass c)
-{
-    onAudio();
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_vidRestart(JNIEnv *env, jclass c)
@@ -454,7 +477,7 @@ Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
 	{
 		window = ANativeWindow_fromSurface(env, view);
 	}
-	set_gl_context(window, 0);
+	set_gl_context(window);
 }
 
 void pull_input_event(int execCmd)
@@ -505,7 +528,7 @@ FILE * android_tmpfile(void)
 		return NULL;
 	}
 	unlink(tmp_file);
-    __android_log_print(ANDROID_LOG_DEBUG, "Q3E_JNI", "itmpfile create: %s", tmp_file);
+    __android_log_print(ANDROID_LOG_DEBUG, "Q3E_JNI", "android_tmpfile create: %s", tmp_file);
 	free(tmp_file);
 	return res;
 }

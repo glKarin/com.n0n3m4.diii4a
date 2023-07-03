@@ -4578,9 +4578,6 @@ bool idFileSystemLocal::RunningD3XP(void)
 idFileSystemLocal::MakeTemporaryFile
 ===============
 */
-#ifdef __ANDROID__
-extern FILE * itmpfile(void);
-#endif
 idFile *idFileSystemLocal::MakeTemporaryFile(void)
 {
 	FILE *f = tmpfile();
@@ -4588,15 +4585,7 @@ idFile *idFileSystemLocal::MakeTemporaryFile(void)
 	if (!f) {
 		common->Warning("idFileSystem::MakeTemporaryFile failed: %s", strerror(errno));
 #ifdef __ANDROID__
-		// if(1)
-		{
-			common->Printf("Call JNI::tmpfile.\n");
-			f = itmpfile();
-			if (!f) {
-				common->Warning("JNI::itmpfile failed: %s", strerror(errno));
-				return NULL;
-			}
-		}
+		f = Sys_tmpfile();
 #else
 		return NULL;
 #endif

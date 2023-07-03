@@ -30,4 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 
 extern glconfig_t glConfig;
 
+#ifdef __ANDROID__
+void Android_GrabMouseCursor(bool grabIt);
+void Android_PollInput(void);
+
+extern FILE *f_stdout;
+#endif
+
 #endif

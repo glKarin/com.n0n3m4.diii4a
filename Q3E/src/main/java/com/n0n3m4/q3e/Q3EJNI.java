@@ -35,8 +35,7 @@ public class Q3EJNI {
 	public static native void drawFrame();
 	public static native void sendKeyEvent(int state,int key,int character);
 	public static native void sendAnalog(int enable,float x,float y);
-	public static native void sendMotionEvent(float x, float y);	
-	public static native void requestAudioData();
+	public static native void sendMotionEvent(float x, float y);
 	public static native void vidRestart();
     public static native void shutdown();
     public static native boolean Is64();

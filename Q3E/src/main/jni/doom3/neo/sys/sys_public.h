@@ -613,4 +613,9 @@ void Sys_FreeOpenAL(void);
 #define __FUNCLINE__ ( __FUNCTION__ " " __LINESTR__ )
 #endif
 
+#ifdef __ANDROID__
+FILE * Sys_tmpfile(void);
+void Sys_SyncState(void);
+#endif
+
 #endif /* !__SYS_PUBLIC__ */

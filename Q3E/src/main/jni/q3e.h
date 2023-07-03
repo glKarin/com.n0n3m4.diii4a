@@ -22,9 +22,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent
   (JNIEnv *, jclass, jfloat, jfloat);
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_requestAudioData
-  (JNIEnv *, jclass);
-
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_vidRestart
   (JNIEnv *, jclass);    
   
