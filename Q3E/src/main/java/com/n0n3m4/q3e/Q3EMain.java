@@ -145,10 +145,6 @@ public class Q3EMain extends Activity
 
         if (checkGameFiles())
         {
-            Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true));
-            Q3EJNI.SetNoHandleSignals(preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false));
-            Q3EJNI.SetMultiThread(Q3EUtils.q3ei.multithread);
-
             if (!Q3EOuya.Init(this))
                 Q3EUtils.isOuya = false;
 

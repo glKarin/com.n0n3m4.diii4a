@@ -60,17 +60,10 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         }
         builder.create().show();
     }
-    
+
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue)
     {
-        String key = preference.getKey();
-        if(Q3EPreference.NO_HANDLE_SIGNALS.equals(key))
-        {
-            Q3EJNI.SetNoHandleSignals((boolean)newValue);
-            return true;
-        }
-        else
-            return false;
+        return true;
     }
 }

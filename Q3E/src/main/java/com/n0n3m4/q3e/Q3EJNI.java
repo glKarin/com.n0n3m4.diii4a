@@ -30,7 +30,10 @@ public class Q3EJNI {
 	public static native void init(String LibPath, int width, int height, String GameDir, String Args,
                                    Surface view,
                                    int format, // 0x8888, 0x4444, 0x5551, 0x565
-                                   int msaa // 0, 4, 16
+                                   int msaa, // 0, 4, 16
+                                   boolean redirect_output_to_file,
+                                   boolean no_handle_signals,
+                                   boolean multithread
                                    );
 	public static native void drawFrame();
 	public static native void sendKeyEvent(int state,int key,int character);
@@ -39,9 +42,6 @@ public class Q3EJNI {
 	public static native void vidRestart();
     public static native void shutdown();
     public static native boolean Is64();
-    public static native void SetRedirectOutputToFile(boolean enabled);
-    public static native void SetNoHandleSignals(boolean enabled);
-    public static native void SetMultiThread(boolean enabled);
     public static native void OnPause();
     public static native void OnResume();
     public static native void SetSurface(Surface view);

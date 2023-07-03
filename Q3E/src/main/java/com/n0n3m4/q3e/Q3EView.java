@@ -132,7 +132,11 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
 
             String lib_dir = Q3EUtils.GetGameLibDir(getContext());
             String cmd = Q3EUtils.q3ei.cmd;
-            Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+            boolean redirectOutputToFile = preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true);
+            boolean noHandleSignals = preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false);
+
+            Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa, redirectOutputToFile, noHandleSignals, Q3EUtils.q3ei.multithread);
 
             mInit = true;
 
