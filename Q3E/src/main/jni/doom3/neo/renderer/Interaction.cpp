@@ -1146,6 +1146,18 @@ void idInteraction::AddActiveInteraction(void)
 	if (model == NULL || model->NumSurfaces() <= 0) {
 		return;
 	}
+#ifdef _HUMANHEAD //k: shadow: if in spirit walk mode, skip all entities of only invisible in spirit, else skip all entities of only visible in spirit.
+	if(tr.viewDef->renderView.viewSpiritEntities)
+	{
+		if(entityDef->parms.onlyInvisibleInSpirit)
+			return;
+	}
+	else
+	{
+		if(entityDef->parms.onlyVisibleInSpirit)
+			return;
+	}
+#endif
 
 	// the dynamic model may have changed since we built the surface list
 	if (!IsDeferred() && entityDef->dynamicModelFrameCount != dynamicModelFrameCount) {
