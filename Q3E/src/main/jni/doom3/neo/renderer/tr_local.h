@@ -675,6 +675,10 @@ typedef struct {
 	glstate_t			glState;
 
 	int					c_copyFrameBuffer;
+#ifdef _HUMANHEAD //k: scope view support: in multithread
+	bool scopeView;
+	bool shuttleView;
+#endif
 } backEndState_t;
 
 

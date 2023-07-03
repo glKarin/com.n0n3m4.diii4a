@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #define _HARM_SKIP_RENDER_SHADER_PASS
 #endif
 #ifdef _HARM_SKIP_RENDER_SHADER_PASS
-static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9000");
+static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9000. All. greater than 0: skip, less than 0: only, 0 disabled.");
 #endif
 
 /*
@@ -558,7 +558,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		pStage = shader->GetStage(stage);
 
 #ifdef _HUMANHEAD //k: scope view support
-		if(tr.IsScopeView())
+		if(backEnd.scopeView /*tr.IsScopeView()*/)
 		{
 			if(pStage->isNotScopeView)
 				continue;
@@ -568,7 +568,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			if(pStage->isScopeView)
 				continue;
 		}
-		if(!tr.IsShuttleView())
+		if(!backEnd.shuttleView /*!tr.IsShuttleView()*/)
 		{
 			if(pStage->isShuttleView)
 				continue;

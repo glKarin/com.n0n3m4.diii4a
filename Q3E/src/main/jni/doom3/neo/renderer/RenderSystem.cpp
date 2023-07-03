@@ -170,6 +170,10 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 	//Save the potential pixel
 	pixelsCrop = pc;
 	pixels = pix;
+#ifdef _HUMANHEAD //k: scope view support in multithread
+	backEnd.scopeView = tr.IsScopeView();
+	backEnd.shuttleView = tr.IsShuttleView();
+#endif
 
 	backendFinished = false;
 
@@ -200,6 +204,10 @@ static void R_IssueRenderCommands(void)
 		return;
 	}
 
+#ifdef _HUMANHEAD //k: scope view support in multithread
+	backEnd.scopeView = tr.IsScopeView();
+	backEnd.shuttleView = tr.IsShuttleView();
+#endif
 	// r_skipBackEnd allows the entire time of the back end
 	// to be removed from performance measurements, although
 	// nothing will be drawn to the screen.  If the prints
