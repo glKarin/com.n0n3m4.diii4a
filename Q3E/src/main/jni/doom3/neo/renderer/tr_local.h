@@ -1887,7 +1887,6 @@ extern idCVar harm_r_maxAllocStackMemory; // declare in tr_trisurf.cpp
 #endif
 
 #ifdef _MULTITHREAD
-extern bool multithreadActive; // sys/android/main
 #define NUM_FRAME_DATA 2
 
 extern void BackendThreadWait(void); // renderer/RenderSystem
@@ -1896,5 +1895,6 @@ extern void BackendThreadExecute(void); // sys/android/main
 extern void BackendThreadShutdown(void); // sys/android/main
 #endif
 extern void CheckEGLInitialized(void); // sys/android/main
+extern volatile bool has_gl_context;
 
 #endif /* !__TR_LOCAL_H__ */

@@ -179,16 +179,23 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 
 	CheckEGLInitialized(); // check/wait EGL context
 
-	BackendThreadExecute();
+	if(has_gl_context)
+    {
+        BackendThreadExecute();
 
-	Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
+        Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
 
-	Sys_WaitForEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
+        Sys_WaitForEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
 
-	if(pix)
-	{
-		BackendThreadWait();
-	}
+        if(pix)
+        {
+            BackendThreadWait();
+        }
+    }
+	else
+    {
+        backendFinished = true;
+    }
 
 	R_ToggleSmpFrame();
 	vertexCache.EndFrame();
@@ -216,6 +223,7 @@ static void R_IssueRenderCommands(void)
 
 	// r_skipRender is usually more usefull, because it will still
 	// draw 2D graphics
+	if(has_gl_context)
 	if (!r_skipBackEnd.GetBool()) {
 		RB_ExecuteBackEndCommands(frameData->cmdHead);
 	}
@@ -1141,14 +1149,12 @@ void BackendThreadTask(void) // BackendThread ->
 	vertexCache.BeginBackEnd(backendVertexCache);
 	R_IssueRenderCommands(fdToRender);
 
-	bool exit = true;
 	// Take screen shot
 	if(pixels) // if block backend rendering, do not exit backend render function, because it will be swap buffers in GLSurfaceView
 	{
 		glReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
 		pixels = NULL;
 		pixelsCrop = NULL;
-		exit = false;
 	}
 
 	vertexCache.EndBackEnd(backendVertexCache);

@@ -32,6 +32,7 @@ typedef struct
     int redirectOutputToFile; // stdout/stderr redirect output to file
     int noHandleSignals; // don't handle signals
     int multithread; // enable multi-threading rendering
+    int continueWhenNoGLContext; // Continue when missing OpenGL context
 } Q3E_InitialContext_t;
 
 // Android::JNI call DOOM3 after main()

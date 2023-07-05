@@ -2137,7 +2137,7 @@ public class GameLauncher extends Activity
 
     private String GetExternalGameLibraryPath()
     {
-        return getFilesDir() + File.separator + Q3EJNI.ARCH;
+        return getFilesDir() + File.separator + Q3EUtils.q3ei.game + File.separator + Q3EJNI.ARCH;
     }
 
     private void OpenTranslatorsDialog()

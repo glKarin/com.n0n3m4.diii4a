@@ -35,7 +35,6 @@ If you have questions concerning this license or the applicable additional terms
 #define MAX_WARNING_LIST	256
 
 #ifdef _MULTITHREAD
-extern bool multithreadActive; // sys/android/main
 #ifdef _K_DEV
 #define _HARM_DEBUG_MULTITHREAD
 #endif
@@ -2889,7 +2888,6 @@ idCommonLocal::LoadGameDLL
 #endif
 //k
 #define _ANDROID_NATIVE_LIBRARY_DIR "<Android APK native library directory path>/"
-extern char *native_library_dir;
 static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. Includes "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "lib" _HARM_BASE_GAME_DLL ".so`, "
 #if !defined(_RAVEN) && !defined(_HUMANHEAD) // doom3 mod dll

@@ -33,7 +33,8 @@ public class Q3EJNI {
                                    int msaa, // 0, 4, 16
                                    boolean redirect_output_to_file,
                                    boolean no_handle_signals,
-                                   boolean multithread
+                                   boolean multithread,
+                                   boolean continueNoGLContext
                                    );
 	public static native void drawFrame();
 	public static native void sendKeyEvent(int state,int key,int character);

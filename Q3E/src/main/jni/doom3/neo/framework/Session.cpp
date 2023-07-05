@@ -31,11 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Session_local.h"
 
-#ifdef _MULTITHREAD
-extern volatile bool backendFinished;
-extern unsigned char multithreadActive;
-#endif
-
 #ifdef _RAVEN //k: for play credits in mainmenu
 #include "../ui/Window.h"
 const char * Com_LocalizeGametype( const char *gameType ) { // from MultiplayerGame.cpp

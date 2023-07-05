@@ -446,9 +446,6 @@ and model information functions.
 ==================
 */
 #ifdef __ANDROID__
-extern int screen_width;
-extern int screen_height;
-
 static void AndroidSetResolution(int32_t width, int32_t height)
 {
 	cvarSystem->SetCVarBool("r_fullscreen",  true);

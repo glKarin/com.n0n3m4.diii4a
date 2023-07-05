@@ -14,7 +14,6 @@
 
 #define BUFFER_FRAME_COUNT 3
 
-extern bool paused;
 static idCVar harm_s_OpenSLESBufferCount("harm_s_OpenSLESBufferCount", "3", CVAR_SOUND | CVAR_ARCHIVE | CVAR_ROM, "Audio buffer count for OpenSLES, min is 3");
 
 class idOpenSLESAudioBuffer

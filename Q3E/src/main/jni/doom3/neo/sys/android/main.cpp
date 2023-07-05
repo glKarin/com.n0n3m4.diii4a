@@ -623,6 +623,9 @@ char *native_library_dir = NULL;
 // Do not catch signal
 bool no_handle_signals = false;
 
+// Continue when missing OpenGL context
+volatile bool continue_when_no_gl_context = false;
+
 // Surface window
 volatile ANativeWindow *window = NULL;
 static volatile bool window_changed = false;
@@ -633,7 +636,7 @@ int gl_msaa = 0;
 
 // command line arguments
 static int argc = 0;
-static char **argv = 0;
+static char **argv = NULL;
 
 // game main thread
 static pthread_t				main_thread;
@@ -645,14 +648,13 @@ bool multithreadActive = false;
 static bool redirect_output_to_file = true;
 
 // app paused
-bool paused = false;
+volatile bool paused = false;
 
 // app exit
 static volatile bool running = false;
 
 extern void GLimp_ActivateContext();
 extern void GLimp_DeactivateContext();
-extern void GLimp_WaitEGLInitialized(void);
 
 
 
@@ -750,6 +752,7 @@ static void Q3E_PrintInitialContext(void)
 #ifdef _MULTITHREAD
 	printf("    Multi-thread: %d\n", multithreadActive);
 #endif
+    printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
 	printf("\n");
 
 	printf("DOOM3 callback\n");
@@ -797,6 +800,10 @@ void CheckEGLInitialized(void)
             GLimp_AndroidQuit();
             window_changed = false;
             Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_DESTROYED);
+            if(continue_when_no_gl_context)
+			{
+            	return;
+			}
             // wait new ANativeWindow created
             while(!window_changed)
                 Sys_WaitForEvent(TRIGGER_EVENT_WINDOW_CREATED);
@@ -976,6 +983,7 @@ void Q3E_SetInitialContext(const void *context)
 	redirect_output_to_file = ptr->redirectOutputToFile ? true : false;
 	no_handle_signals = ptr->noHandleSignals ? true : false;
 	multithreadActive = ptr->multithread ? true : false;
+	continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
 }
 
 // Request exit

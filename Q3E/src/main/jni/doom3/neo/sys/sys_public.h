@@ -614,6 +614,20 @@ void Sys_FreeOpenAL(void);
 #endif
 
 #ifdef __ANDROID__
+//n0n3m4
+
+extern float analogx;
+extern float analogy;
+extern int analogenabled;
+
+extern int screen_width;
+extern int screen_height;
+
+extern bool multithreadActive;
+
+extern char *native_library_dir;
+extern bool no_handle_signals;
+
 FILE * Sys_tmpfile(void);
 void Sys_SyncState(void);
 #endif

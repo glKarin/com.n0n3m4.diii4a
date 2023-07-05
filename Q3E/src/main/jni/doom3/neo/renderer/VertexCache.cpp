@@ -644,13 +644,11 @@ void idVertexCache::EndFrame()
 	}
 
 #if 0
-
 	// if our total static count is above our working memory limit, start purging things
 	while (staticAllocTotal > r_vertexBufferMegs.GetInteger() * 1024 * 1024) {
 		// free the least recently used
 
 	}
-
 #endif
 
 #ifdef _MULTITHREAD

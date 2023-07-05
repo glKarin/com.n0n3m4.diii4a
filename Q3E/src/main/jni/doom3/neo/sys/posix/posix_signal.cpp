@@ -129,9 +129,6 @@ static void sig_handler(int signum, siginfo_t *info, void *context)
 Posix_InitSigs
 ================
 */
-#ifdef __ANDROID__
-extern bool no_handle_signals;
-#endif
 void Posix_InitSigs()
 {
 #ifdef __ANDROID__

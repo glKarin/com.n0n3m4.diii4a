@@ -45,10 +45,7 @@ idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEG
 #define MAX_NUM_CONFIGS 4
 static bool window_seted = false;
 static volatile ANativeWindow *win;
-extern int gl_format;
-extern int gl_msaa;
-extern int screen_width;
-extern int screen_height;
+volatile bool has_gl_context = false;
 
 static EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 static EGLSurface eglSurface = EGL_NO_SURFACE;
@@ -115,11 +112,13 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 		GLimp_HandleError("eglMakeCurrent");
 		return;
 	}
+	has_gl_context = true;
 	Sys_Printf("[Harmattan]: EGL surface created and using EGL context.\n");
 }
 
 void GLimp_AndroidQuit()
 {
+	has_gl_context = false;
 	if(!win)
 		return;
 	if(eglDisplay != EGL_NO_DISPLAY)
@@ -208,6 +207,7 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 
 void GLimp_Shutdown()
 {
+	has_gl_context = false;
 	GLimp_DeactivateContext();
 	//eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	if(eglContext != EGL_NO_CONTEXT)
@@ -604,6 +604,7 @@ bool GLimp_Init(glimpParms_t a)
 		return false;
 	}
 
+	has_gl_context = true;
 	return true;
 }
 
