@@ -1034,6 +1034,8 @@ extern idCVar r_materialOverride;		// override all materials
 
 extern idCVar r_debugRenderToTexture;
 
+extern idCVar harm_r_maxFps;
+
 /*
 ====================================================================
 
@@ -1896,5 +1898,7 @@ extern void BackendThreadShutdown(void); // sys/android/main
 #endif
 extern void CheckEGLInitialized(void); // sys/android/main
 //extern volatile bool has_gl_context;
+extern unsigned int lastRenderTime;
+extern int r_maxFps;
 
 #endif /* !__TR_LOCAL_H__ */

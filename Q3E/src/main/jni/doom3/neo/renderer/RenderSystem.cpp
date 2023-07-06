@@ -42,6 +42,23 @@ volatile renderCrop_t	*pixelsCrop = NULL;
 volatile byte           *pixels = NULL;
 #endif
 
+// For FPS limiting
+unsigned int lastRenderTime = 0;
+int r_maxFps = 0;
+
+#include <unistd.h>
+#define FPS_LIMIT() \
+{ \
+    if(r_maxFps > 0) \
+    { \
+        unsigned int currentTime = Sys_Milliseconds(); \
+        int timeTook = currentTime - lastRenderTime; \
+        if(timeTook < r_maxFps) \
+            usleep((r_maxFps - timeTook) * 1000); \
+        lastRenderTime = Sys_Milliseconds(); \
+    } \
+}
+
 /*
 =====================
 R_PerformanceCounters
@@ -374,6 +391,13 @@ static void R_CheckCvars(void)
 	// check for changes to logging state
 	GLimp_EnableLogging(r_logFile.GetInteger() != 0);
 	R_CheckGLSLCvars();
+
+	if(harm_r_maxFps.IsModified())
+	{
+		int maxFps = harm_r_maxFps.GetInteger();
+		r_maxFps = maxFps > 0 ? 1000 / maxFps : 0;
+		harm_r_maxFps.ClearModified();
+	}
 }
 
 /*
@@ -784,6 +808,8 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	// add the swapbuffers command
 	cmd = (emptyCommand_t *)R_GetCommandBuffer(sizeof(*cmd));
 	cmd->commandId = RC_SWAP_BUFFERS;
+
+	FPS_LIMIT();
 
 #ifdef _MULTITHREAD
 	if(multithreadActive)

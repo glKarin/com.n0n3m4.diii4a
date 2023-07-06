@@ -210,6 +210,8 @@ idCVar r_materialOverride("r_materialOverride", "", CVAR_RENDERER, "overrides al
 
 idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVAR_INTEGER, "");
 
+idCVar harm_r_maxFps( "harm_r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
+
 #if !defined(GL_ES_VERSION_2_0)
 // GL_ARB_texture_compression + GL_S3_s3tc
 void (GL_APIENTRY *qglCompressedTexImage2DARB)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
@@ -1949,6 +1951,9 @@ R_InitCvars
 void R_InitCvars(void)
 {
 	// update latched cvars here
+
+	int maxFps = harm_r_maxFps.GetInteger();
+	r_maxFps = maxFps > 0 ? 1000 / maxFps : 0;
 }
 
 /*
