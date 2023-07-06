@@ -800,10 +800,12 @@ void CheckEGLInitialized(void)
             GLimp_AndroidQuit();
             window_changed = false;
             Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_DESTROYED);
+#if 0
             if(continue_when_no_gl_context)
 			{
             	return;
 			}
+#endif
             // wait new ANativeWindow created
             while(!window_changed)
                 Sys_WaitForEvent(TRIGGER_EVENT_WINDOW_CREATED);

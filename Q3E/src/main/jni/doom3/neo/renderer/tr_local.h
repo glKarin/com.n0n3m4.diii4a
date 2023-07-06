@@ -1895,6 +1895,6 @@ extern void BackendThreadExecute(void); // sys/android/main
 extern void BackendThreadShutdown(void); // sys/android/main
 #endif
 extern void CheckEGLInitialized(void); // sys/android/main
-extern volatile bool has_gl_context;
+//extern volatile bool has_gl_context;
 
 #endif /* !__TR_LOCAL_H__ */

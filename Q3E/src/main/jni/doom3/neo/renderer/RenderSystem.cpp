@@ -179,7 +179,7 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 
 	CheckEGLInitialized(); // check/wait EGL context
 
-	if(has_gl_context)
+	//if(has_gl_context)
     {
         BackendThreadExecute();
 
@@ -192,10 +192,10 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
             BackendThreadWait();
         }
     }
-	else
+/*	else
     {
         backendFinished = true;
-    }
+    }*/
 
 	R_ToggleSmpFrame();
 	vertexCache.EndFrame();
@@ -223,7 +223,7 @@ static void R_IssueRenderCommands(void)
 
 	// r_skipRender is usually more usefull, because it will still
 	// draw 2D graphics
-	if(has_gl_context)
+	//if(has_gl_context)
 	if (!r_skipBackEnd.GetBool()) {
 		RB_ExecuteBackEndCommands(frameData->cmdHead);
 	}

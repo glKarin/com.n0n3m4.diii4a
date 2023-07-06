@@ -78,6 +78,7 @@ option(QUAKE4			"Build the quake4 game code" ON)
 option(PREY			"Build the prey game code" ON)
 option(RAVEN			"Build the raven core" ON)
 option(HUMANHEAD			"Build the humanhead core" ON)
+option(OVERTHINKED			"Build the overthinked game code" ON)
 
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
@@ -754,6 +755,15 @@ list(APPEND src_hardcorps ${hardcorps_game_src})
 set_src_dir(src_hardcorps "hardcorps" ${src_hardcorps})
 add_globbed_headers(src_hardcorps "hardcorps")
 
+# overthinked
+set(src_overthinked ${base_game_src})
+set(overthinked_game_src
+		tracer.cpp
+		)
+list(APPEND src_overthinked ${overthinked_game_src})
+set_src_dir(src_overthinked "overthinked" ${src_overthinked})
+add_globbed_headers(src_overthinked "overthinked")
+
 # quake4
 set(src_quake4 ${base_game_src})
 set(quake4_game_src
@@ -1326,6 +1336,9 @@ endif()
 if(HARDCORPS)
 	message(STATUS "Build HARDCORPS")
 endif()
+if(OVERTHINKED)
+	message(STATUS "Build overthinked")
+endif()
 if(RAVEN)
 	message(STATUS "Build raven core")
 endif()
@@ -1474,6 +1487,23 @@ if(HARDCORPS)
 	target_link_libraries(hardcorps idlib)
 
 	install(TARGETS hardcorps
+			RUNTIME DESTINATION "${bindir}"
+			LIBRARY DESTINATION "${libdir}"
+			ARCHIVE DESTINATION "${libdir}"
+			)
+endif()
+
+if(OVERTHINKED)
+	add_library(overthinked SHARED ${src_overthinked})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_overthinked})
+	#set_target_properties(overthinked PROPERTIES PREFIX "")
+	set_target_properties(overthinked PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_OVERTHINKED;_DENTONMOD;_PORTALSKY")
+	target_include_directories(overthinked PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/overthinked")
+	set_target_properties(overthinked PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(overthinked PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(overthinked idlib)
+
+	install(TARGETS overthinked
 			RUNTIME DESTINATION "${bindir}"
 			LIBRARY DESTINATION "${libdir}"
 			ARCHIVE DESTINATION "${libdir}"
