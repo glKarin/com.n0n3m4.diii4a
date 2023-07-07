@@ -36,6 +36,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -97,7 +98,9 @@ import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @SuppressLint({"ApplySharedPref", "CommitPrefEdits"})
 public class GameLauncher extends Activity
@@ -279,7 +282,7 @@ public class GameLauncher extends Activity
 						.putString(Q3EPreference.pref_harm_r_lightModel, value)
 						.commit();
 			}
-			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game)
+			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame)
 			{
 				SetGameDLL(id);
 			}
@@ -554,22 +557,7 @@ public class GameLauncher extends Activity
         if (!IsProp("r_noLight")) setProp("r_noLight", false);
 
         String str = GetProp("harm_r_clearVertexBuffer");
-        int index = 2;
-        if (str != null)
-        {
-            try
-            {
-                index = Integer.parseInt(str);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            if (index < 0 || index > 2)
-                index = 2;
-        }
-        else
-            SetProp("harm_r_clearVertexBuffer", 2);
+        int index = Q3EUtils.parseInt_s(str, 2);
         SelectCheckbox(V.r_harmclearvertexbuffer, index);
         if (!IsProp("harm_r_clearVertexBuffer")) SetProp("harm_r_clearVertexBuffer", 2);
 
@@ -596,55 +584,26 @@ public class GameLauncher extends Activity
         }
         SelectCheckbox(V.rg_s_driver, index);
 
-        index = 0;
+		str = GetProp("harm_r_maxFps");
+		if (null != str)
+			V.edt_harm_r_maxFps.setText(str);
+		if (!IsProp("harm_r_maxFps")) SetProp("harm_r_maxFps", "0");
+
         str = GetProp("fs_game");
         if (str != null)
         {
             if (!V.fs_game_user.isChecked())
             {
-                if (Q3EUtils.q3ei.isQ4)
-                {
-                    if ("q4base".equals(str) || "".equals(str))
-                        index = 0;
-                    else
-                    {
-                        RemoveProp("fs_game");
-                        RemoveProp("fs_game_base");
-                    }
-                    SelectCheckbox(V.rg_fs_q4game, index);
-                }
-                else if (Q3EUtils.q3ei.isPrey)
-                {
-                    if ("preybase".equals(str) || "".equals(str))
-                        index = 0;
-                    else
-                    {
-                        RemoveProp("fs_game");
-                        RemoveProp("fs_game_base");
-                    }
-                    SelectCheckbox(V.rg_fs_preygame, index);
-                }
-                else
-                {
-                    if ("".equals(str) || "base".equals(str))
-                        index = 0;
-                    else if ("d3xp".equals(str))
-                        index = 1;
-                    else if ("cdoom".equals(str))
-                        index = 2;
-                    else if ("d3le".equals(str))
-                        index = 3;
-                    else if ("rivensin".equals(str))
-                        index = 4;
-                    else if ("hardcorps".equals(str))
-                        index = 5;
-                    else
-                    {
-                        RemoveProp("fs_game");
-                        RemoveProp("fs_game_base");
-                    }
-                    SelectCheckbox(V.rg_fs_game, index);
-                }
+				GameProp prop = ChangeGameMod(str, false);
+				if(prop.IsValid())
+				{
+					SelectCheckbox(GetGameModRadioGroup(), prop.index);
+				}
+/*				else
+				{
+					RemoveProp("fs_game");
+					RemoveProp("fs_game_base");
+				}*/
             }
             else
             {
@@ -655,7 +614,7 @@ public class GameLauncher extends Activity
         }
         else
         {
-            SelectCheckbox(GetGameModRadioGroup(), 0);
+            SelectCheckbox(GetGameModRadioGroup(), -1);
         }
         GameLauncher.this.UpdateCustomerResulotion(V.rg_scrres.getCheckedRadioButtonId() == R.id.res_custom);
     }
@@ -677,60 +636,16 @@ public class GameLauncher extends Activity
         if (null == game)
             game = "";
 
-        if (Q3EUtils.q3ei.isQ4)
-        {
-            int index = -1;
-            if ("q4base".equals(game))
-                game = "";
-            if (game.isEmpty() || "q4base".equals(game))
-                index = 0;
-            if (index >= 0)
-                SelectCheckbox(V.rg_fs_q4game, index);
-            if (index > 0 && !game.isEmpty())
-                SetProp("fs_game", game);
-            else
-                RemoveProp("fs_game");
-        }
-        else if (Q3EUtils.q3ei.isPrey)
-        {
-            int index = -1;
-            if ("preybase".equals(game))
-                game = "";
-            if (game.isEmpty() || "preybase".equals(game))
-                index = 0;
-            if (index >= 0)
-                SelectCheckbox(V.rg_fs_preygame, index);
-            if (index > 0 && !game.isEmpty())
-                SetProp("fs_game", game);
-            else
-                RemoveProp("fs_game");
-        }
-        else
-        {
-            int index = -1;
-            if ("base".equals(game))
-                game = "";
-            if (game.isEmpty() || "base".equals(game))
-                index = 0;
-            else if ("d3xp".equals(game))
-                index = 1;
-            else if ("cdoom".equals(game))
-                index = 2;
-            else if ("d3le".equals(game))
-                index = 3;
-            else if ("rivensin".equals(game))
-                index = 4;
-            else if ("hardscorps".equals(game))
-                index = 5;
-            if (index >= 0)
-                SelectCheckbox(V.rg_fs_game, index);
-            if (index > 0 && !game.isEmpty())
-                SetProp("fs_game", game);
-            else
-                RemoveProp("fs_game");
-        }
+		GameProp prop = ChangeGameMod(game, true);
+		if(prop.IsValid())
+			SelectCheckbox(GetGameModRadioGroup(), prop.index);
+		game = prop.fs_game;
+		if (!game.isEmpty())
+			SetProp("fs_game", game);
+		else
+			RemoveProp("fs_game");
+
         preference.edit().putString(Q3EPreference.pref_harm_game_lib, "").commit();
-        RemoveProp("harm_fs_gameLibPath");
         if (on)
         {
             SetProp("fs_game", game);
@@ -754,6 +669,7 @@ public class GameLauncher extends Activity
     {
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
+        InitGameProps();
 
         //k
         KUncaughtExceptionHandler.HandleUnexpectedException(this);
@@ -851,45 +767,11 @@ public class GameLauncher extends Activity
 
         boolean userMod = mPrefs.getBoolean(Q3EPreference.pref_harm_user_mod, false);
         V.fs_game_user.setChecked(userMod);
-        int index = 0;
-        // if(game != null)
-        if (Q3EUtils.q3ei.isQ4)
-        {
-            String game = mPrefs.getString(Q3EPreference.pref_harm_q4_fs_game, "");
-            if(null == game)
-            	game = "";
-            if (game.isEmpty() || "q4base".equals(game))
-                index = 0;
-            SelectCheckbox(V.rg_fs_q4game, index);
-        }
-        else if (Q3EUtils.q3ei.isPrey)
-        {
-            String game = mPrefs.getString(Q3EPreference.pref_harm_prey_fs_game, "");
-			if(null == game)
-				game = "";
-            if (game.isEmpty() || "preybase".equals(game))
-                index = 0;
-            SelectCheckbox(V.rg_fs_preygame, index);
-        }
-        else
-        {
-            String game = mPrefs.getString(Q3EPreference.pref_harm_fs_game, "");
-			if(null == game)
-				game = "";
-            if (game.isEmpty() || "base".equals(game))
-                index = 0;
-            else if ("d3xp".equals(game))
-                index = 1;
-            else if ("cdoom".equals(game))
-                index = 2;
-            else if ("d3le".equals(game))
-                index = 3;
-            else if ("rivensin".equals(game))
-                index = 4;
-            else if ("hardscorps".equals(game))
-                index = 5;
-            SelectCheckbox(V.rg_fs_game, index);
-        }
+		String game = mPrefs.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
+		if (null == game)
+			game = "";
+		GameProp prop = ChangeGameMod(game, userMod);
+		SelectCheckbox(GetGameModRadioGroup(), prop.index);
         UpdateUserGame(userMod);
         V.fs_game_user.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.rg_fs_game.setOnCheckedChangeListener(m_groupCheckChangeListener);
@@ -914,6 +796,7 @@ public class GameLauncher extends Activity
         });
         V.launcher_tab1_game_lib_button.setOnClickListener(m_buttonClickListener);
         V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 4.0f));
+		V.edt_harm_r_maxFps.setText(Q3EPreference.GetStringFromInt(mPrefs, Q3EPreference.pref_harm_r_maxFps, 0));
 
         V.res_x.setText(mPrefs.getString(Q3EPreference.pref_resx, "" + Q3EGlobals.SCREEN_WIDTH));
         V.res_y.setText(mPrefs.getString(Q3EPreference.pref_resy, "" + Q3EGlobals.SCREEN_HEIGHT));
@@ -947,11 +830,26 @@ public class GameLauncher extends Activity
             public void afterTextChanged(Editable s)
             {
                 String value = s.length() == 0 ? "4.0" : s.toString();
-                PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-                        .putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(value, 4.0f))
-                        .commit();
+				Q3EPreference.SetFloatFromString(GameLauncher.this, Q3EPreference.pref_harm_r_specularExponent, value, 4.0f);
             }
         });
+		V.edt_harm_r_maxFps.addTextChangedListener(new TextWatcher()
+		{
+			public void onTextChanged(CharSequence s, int start, int before, int count)
+			{
+				SetProp("harm_r_maxFps", s);
+			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count, int after)
+			{
+			}
+
+			public void afterTextChanged(Editable s)
+			{
+				String value = s.length() == 0 ? "0" : s.toString();
+				Q3EPreference.SetIntFromString(GameLauncher.this, Q3EPreference.pref_harm_r_maxFps, value, 0);
+			}
+		});
         V.usedxt.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.useetc1.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.useetc1cache.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -1339,6 +1237,7 @@ public class GameLauncher extends Activity
         mEdtr.putString(Q3EPreference.pref_harm_r_lightModel, GetCheckboxIndex(V.rg_harm_r_lightModel) == 1 ? "blinn_phong" : "phong");
         mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 4.0f));
         mEdtr.putString(Q3EPreference.pref_harm_s_driver, GetCheckboxIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
+		mEdtr.putInt(Q3EPreference.pref_harm_r_maxFps, Q3EUtils.parseInt_s(V.edt_harm_r_maxFps.getText().toString(), 0));
 
         mEdtr.putBoolean(Q3EPreference.pref_mapvol, V.mapvol.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_analog, V.smoothjoy.isChecked());
@@ -1520,86 +1419,41 @@ public class GameLauncher extends Activity
         String game = "";
 		if (val == R.id.fs_game_base)
 		{
-			if (!userMod)
-			{
-				RemoveProp("fs_game");
-				RemoveProp("fs_game_base");
-				RemoveProp("harm_fs_gameLibPath");
-			}
+			game = "base";
 		}
 		else if (val == R.id.fs_game_d3xp)
 		{
-			if (!userMod)
-			{
-				SetProp("fs_game", "d3xp");
-				RemoveProp("fs_game_base");
-				RemoveProp("harm_fs_gameLibPath");
-			}
 			game = "d3xp";
 		}
 		else if (val == R.id.fs_game_cdoom)
 		{
-			if (!userMod)
-			{
-				SetProp("fs_game", "cdoom");
-				RemoveProp("fs_game_base");
-				RemoveProp("harm_fs_gameLibPath");
-			}
 			game = "cdoom";
 		}
 		else if (val == R.id.fs_game_lost_mission)
 		{
-			if (!userMod)
-			{
-				SetProp("fs_game", "d3le");
-				SetProp("fs_game_base", "d3xp"); // must load d3xp pak
-				RemoveProp("harm_fs_gameLibPath");
-			}
 			game = "d3le";
 		}
 		else if (val == R.id.fs_game_rivensin)
 		{
-			if (!userMod)
-			{
-				SetProp("fs_game", "rivensin");
-				RemoveProp("fs_game_base");
-				RemoveProp("harm_fs_gameLibPath");
-			}
 			game = "rivensin";
 		}
 		else if (val == R.id.fs_game_hardcorps)
 		{
-			if (!userMod)
-			{
-				SetProp("fs_game", "hardcorps");
-				RemoveProp("fs_game_base");
-				RemoveProp("harm_fs_gameLibPath");
-			}
 			game = "hardcorps";
 		}
 		else if (val == R.id.fs_game_quake4)
 		{
-			if (!userMod)
-			{
-				RemoveProp("fs_game");
-				RemoveProp("fs_game_base");
-				RemoveProp("harm_fs_gameLibPath");
-			}
+			game = "q4base";
 		}
 		else if (val == R.id.fs_game_prey)
 		{
-			if (!userMod)
-			{
-				RemoveProp("fs_game");
-				RemoveProp("fs_game_base");
-				RemoveProp("harm_fs_gameLibPath");
-			}
+			game = "preybase";
 		}
+		GameProp prop = ChangeGameMod(game, userMod);
+		prop.Handle();
+
         if (userMod)
         {
-            SetProp("fs_game", game);
-            RemoveProp("fs_game_base");
-            RemoveProp("harm_fs_gameLibPath");
             V.edt_fs_game.setText(game);
         }
         preference.edit().putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), game).commit();
@@ -1870,105 +1724,10 @@ public class GameLauncher extends Activity
             game = "";
         V.edt_fs_game.setText(game);
         boolean userMod = preference.getBoolean(Q3EPreference.pref_harm_user_mod, false);
-        if (Q3EUtils.q3ei.isQ4)
-        {
-            int index = 0;
-            switch (game)
-            {
-                case "q4base":
-                    // SetProp("fs_game", "q4base");
-                    RemoveProp("fs_game");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    index = 0;
-                    break;
-                default:
-                    if (userMod && !game.isEmpty())
-                        SetProp("fs_game", game);
-                    else
-                        RemoveProp("fs_game");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    break;
-            }
-            SelectCheckbox(V.rg_fs_q4game, index);
-        }
-        else if (Q3EUtils.q3ei.isPrey)
-        {
-            int index = 0;
-            switch (game)
-            {
-                case "q4base":
-                    // SetProp("fs_game", "preybase");
-                    RemoveProp("fs_game");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    index = 0;
-                    break;
-                default:
-                    if (userMod && !game.isEmpty())
-                        SetProp("fs_game", game);
-                    else
-                        RemoveProp("fs_game");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    break;
-            }
-            SelectCheckbox(V.rg_fs_preygame, index);
-        }
-        else
-        {
-            int index = 0;
-            switch (game)
-            {
-                case "base":
-                case "":
-                    RemoveProp("fs_game");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    index = 0;
-                    break;
-                case "d3xp":
-                    SetProp("fs_game", "d3xp");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    index = 1;
-                    break;
-                case "cdoom":
-                    SetProp("fs_game", "cdoom");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    index = 2;
-                    break;
-                case "d3le":
-                    SetProp("fs_game", "d3le");
-                    SetProp("fs_game_base", "d3xp"); // must load d3xp pak
-                    RemoveProp("harm_fs_gameLibPath");
-                    index = 3;
-                    break;
-                case "rivensin":
-                    SetProp("fs_game", "rivensin");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    index = 4;
-                    break;
-                case "hardcorps":
-                    SetProp("fs_game", "hardcorps");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    index = 5;
-                    break;
-                default:
-                    if (userMod && !game.isEmpty())
-                        SetProp("fs_game", game);
-                    else
-                        RemoveProp("fs_game");
-                    RemoveProp("fs_game_base");
-                    RemoveProp("harm_fs_gameLibPath");
-                    break;
-            }
-            SelectCheckbox(V.rg_fs_game, index);
-        }
+
+		GameProp prop = ChangeGameMod(game, userMod);
+		prop.Handle();
+		SelectCheckbox(GetGameModRadioGroup(), prop.index);
     }
 
     private void OpenQuake4LevelDialog()
@@ -2201,6 +1960,7 @@ public class GameLauncher extends Activity
         public TextView tv_mprefs;
         public LinearLayout layout_mouse_device;
         public CheckBox find_dll;
+		public EditText edt_harm_r_maxFps;
 
         public void Setup()
         {
@@ -2256,6 +2016,145 @@ public class GameLauncher extends Activity
             tv_mprefs = findViewById(R.id.tv_mprefs);
             layout_mouse_device = findViewById(R.id.layout_mouse_device);
             find_dll = findViewById(R.id.find_dll);
+			edt_harm_r_maxFps = findViewById(R.id.edt_harm_r_maxFps);
         }
     }
+
+    private class GameProp
+	{
+		public int index = 0;
+		public String game = "";
+		public String fs_game = "";
+		public String fs_game_base = "";
+		//public boolean harm_fs_gameLibPath = true;
+		public boolean is_mod = false;
+
+		public GameProp(int index, String game, String fs_game, String fs_game_base, boolean is_mod)
+		{
+			this.index = index;
+			this.game = game;
+			this.fs_game = fs_game;
+			this.fs_game_base = fs_game_base;
+			this.is_mod = is_mod;
+		}
+
+		public void Handle()
+		{
+			if(is_mod)
+			{
+				if (!fs_game.isEmpty())
+					SetProp("fs_game", fs_game);
+				else
+					RemoveProp("fs_game");
+				RemoveProp("fs_game_base");
+				RemoveProp("harm_fs_gameLibPath");
+			}
+			else
+			{
+				if(null == fs_game || fs_game.isEmpty())
+					RemoveProp("fs_game");
+				else
+					SetProp("fs_game", fs_game);
+				if(null == fs_game_base || fs_game_base.isEmpty())
+					RemoveProp("fs_game_base");
+				else
+					SetProp("fs_game_base", fs_game_base);
+				RemoveProp("harm_fs_gameLibPath");
+			}
+		}
+
+		public boolean IsGame(String game)
+		{
+			if (null == game)
+				game = "";
+			if(game.equals(this.game))
+				return true;
+			if(index == 0 && game.isEmpty())
+				return true;
+			return false;
+		}
+
+		public boolean IsValid()
+		{
+			return index >= 0 && !game.isEmpty();
+		}
+
+		@Override
+		public String toString()
+		{
+			return "GameProp{" +
+					"index=" + index +
+					", game='" + game + '\'' +
+					", fs_game='" + fs_game + '\'' +
+					", fs_game_base='" + fs_game_base + '\'' +
+					", is_mod=" + is_mod +
+					'}';
+		}
+	}
+	private final Map<String, List<GameProp>> GameProps = new LinkedHashMap<>();
+
+    private void InitGameProps()
+	{
+		List<GameProp> props;
+		GameProp prop;
+
+		props = new ArrayList<>();
+		prop = new GameProp(0, "base", "", "", false);
+		props.add(prop);
+		prop = new GameProp(1, "d3xp", "d3xp", "", false);
+		props.add(prop);
+		prop = new GameProp(2, "cdoom", "cdoom", "", false);
+		props.add(prop);
+		prop = new GameProp(3, "d3le", "d3le", "d3xp", false);
+		props.add(prop);
+		prop = new GameProp(4, "rivensin", "rivensin", "", false);
+		props.add(prop);
+		prop = new GameProp(5, "hardcorps", "hardcorps", "", false);
+		props.add(prop);
+		GameProps.put(Q3EGlobals.GAME_DOOM3, props);
+
+		props = new ArrayList<>();
+		prop = new GameProp(0, "q4base", "", "", false);
+		props.add(prop);
+		GameProps.put(Q3EGlobals.GAME_QUAKE4, props);
+
+		props = new ArrayList<>();
+		prop = new GameProp(0, "preybase", "", "", false);
+		props.add(prop);
+		GameProps.put(Q3EGlobals.GAME_PREY, props);
+	}
+
+	private GameProp ChangeGameMod(String game, boolean userMod)
+	{
+		if (null == game)
+			game = "";
+
+		List<GameProp> list;
+		if (Q3EUtils.q3ei.isQ4)
+		{
+			list = GameProps.get(Q3EGlobals.GAME_QUAKE4);
+		}
+		else if (Q3EUtils.q3ei.isPrey)
+		{
+			list = GameProps.get(Q3EGlobals.GAME_PREY);
+		}
+		else
+		{
+			list = GameProps.get(Q3EGlobals.GAME_DOOM3);
+		}
+
+		GameProp res = null;
+		for (GameProp prop : list)
+		{
+			if(prop.IsGame(game))
+			{
+				res = prop;
+				break;
+			}
+		}
+		if(null == res)
+			res = new GameProp(0, "", game, "", userMod);
+		Log.e("Q3E", "ChangeGameMod: " + res);
+		return res;
+	}
 }

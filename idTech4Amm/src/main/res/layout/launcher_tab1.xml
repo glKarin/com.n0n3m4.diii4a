@@ -306,7 +306,9 @@
             <RadioGroup
                 android:id="@+id/rg_harm_r_lightModel"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				>
 
                 <RadioButton
                     android:id="@+id/harm_r_lightModel_phong"
@@ -327,7 +329,8 @@
                 android:id="@+id/launcher_layout_specular_exponent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+				>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -346,6 +349,30 @@
                     android:text="4.0" />
             </LinearLayout>
 
+			<LinearLayout
+				android:id="@+id/launcher_layout_max_fps"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				>
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:id="@+id/launcher_label_max_fps"
+					android:text="@string/maximum_fps_limit_0_unlimited"/>
+
+				<EditText
+					android:id="@+id/edt_harm_r_maxFps"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:inputType="number|textNoSuggestions"
+					android:ems="10"
+					android:hint="@string/limit_maximum_fps_default_is_0"
+					android:imeOptions="flagNoExtractUi"
+					android:text="0" />
+			</LinearLayout>
+
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -357,7 +384,9 @@
 			<RadioGroup
 				android:id="@+id/rg_s_driver"
 				android:layout_width="wrap_content"
-				android:layout_height="wrap_content">
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				>
 
 				<RadioButton
 					android:id="@+id/s_driver_audiotrack"

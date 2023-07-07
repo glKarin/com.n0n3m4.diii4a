@@ -52,6 +52,7 @@ public final class Q3EPreference
     public static final String pref_harm_joystick_inner_dead_zone = "harm_joystick_inner_dead_zone"; //k
     public static final String pref_harm_using_mouse = "harm_using_mouse"; //k
     public static final String pref_harm_find_dll = "harm_find_dll"; //k
+    public static final String pref_harm_r_maxFps = "q3e_harm_r_maxFps"; //k
 
     public static final String RUN_BACKGROUND = "harm_run_background";
     public static final String RENDER_MEM_STATUS = "harm_render_mem_status";
@@ -158,6 +159,36 @@ public final class Q3EPreference
     public static SharedPreferences.Editor SetStringFromFloat(SharedPreferences.Editor editor, String name, float val)
     {
         return editor.putString(name, "" + val);
+    }
+
+    public static void SetIntFromString(SharedPreferences preferences, String name, String val, int def)
+    {
+        SetIntFromString(preferences.edit(), name, val, def).commit();
+    }
+
+    public static void SetIntFromString(Context context, String name, String val, int def)
+    {
+        SetIntFromString(PreferenceManager.getDefaultSharedPreferences(context), name, val, def);
+    }
+
+    public static SharedPreferences.Editor SetIntFromString(SharedPreferences.Editor editor, String name, String val, int def)
+    {
+        return editor.putInt(name, Q3EUtils.parseInt_s(val, def));
+    }
+
+    public static void SetFloatFromString(SharedPreferences preferences, String name, String val, float def)
+    {
+        SetFloatFromString(preferences.edit(), name, val, def).commit();
+    }
+
+    public static void SetFloatFromString(Context context, String name, String val, float def)
+    {
+        SetFloatFromString(PreferenceManager.getDefaultSharedPreferences(context), name, val, def);
+    }
+
+    public static SharedPreferences.Editor SetFloatFromString(SharedPreferences.Editor editor, String name, String val, float def)
+    {
+        return editor.putFloat(name, Q3EUtils.parseFloat_s(val, def));
     }
 
     private Q3EPreference() {}

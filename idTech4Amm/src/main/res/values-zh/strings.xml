@@ -244,4 +244,6 @@
     <string name="extract_source">提取源码</string>
     <string name="tips">提示</string>
     <string name="license">开源许可证</string>
+    <string name="maximum_fps_limit_0_unlimited">最大FPS(0 不限制)</string>
+    <string name="limit_maximum_fps_default_is_0">限制最大FPS(默认0)</string>
 </resources>
