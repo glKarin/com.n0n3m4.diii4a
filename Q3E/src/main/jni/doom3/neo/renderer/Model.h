@@ -48,13 +48,8 @@ If you have questions concerning this license or the applicable additional terms
 // to support the large models that renderBump loads, they need to be 32 bits
 #if 1
 
-#if defined(GL_ES_VERSION_2_0)
-#define GL_INDEX_TYPE		GL_UNSIGNED_SHORT
-typedef short glIndex_t;
-#else
 #define GL_INDEX_TYPE		GL_UNSIGNED_INT
 typedef int glIndex_t;
-#endif
 
 #else
 

@@ -252,7 +252,7 @@ void idMD5Mesh::ParseMesh(idLexer &parser, int numJoints, const idJointMat *join
 	//
 
 #ifdef __ANDROID__
-	const int alloc_size = texCoords.Num() * sizeof(idDrawVert);
+	const size_t alloc_size = texCoords.Num() * sizeof(idDrawVert);
 	_DROID_ALLOC16_DEF(idDrawVert, alloc_size, verts, 0)
 #else
 	idDrawVert *verts = (idDrawVert *) _alloca16(texCoords.Num() * sizeof(idDrawVert));

@@ -837,7 +837,13 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 {
 	int i;
 
+#ifdef __ANDROID__
+	int *remap;
+	size_t alloc_size = tri->numVerts * sizeof(remap[0]);
+	_DROID_ALLOC16(int, alloc_size, remap, 0)
+#else
 	int *remap = (int *) _alloca16(tri->numVerts * sizeof(remap[0]));
+#endif
 
 	// initialize vertex remap in case there are unused verts
 	for (i = 0; i < tri->numVerts; i++) {
@@ -850,7 +856,13 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 	}
 
 	// create duplicate vertex index based on the vertex remap
+#ifdef __ANDROID__
+	int *tempDupVerts;
+	alloc_size = tri->numVerts * 2 * sizeof(tempDupVerts[0]);
+	_DROID_ALLOC16(int, alloc_size, tempDupVerts, 1)
+#else
 	int *tempDupVerts = (int *) _alloca16(tri->numVerts * 2 * sizeof(tempDupVerts[0]));
+#endif
 	tri->numDupVerts = 0;
 
 	for (i = 0; i < tri->numVerts; i++) {
@@ -863,6 +875,10 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 
 	tri->dupVerts = triDupVertAllocator.Alloc(tri->numDupVerts * 2);
 	memcpy(tri->dupVerts, tempDupVerts, tri->numDupVerts * 2 * sizeof(tri->dupVerts[0]));
+#ifdef __ANDROID__
+	_DROID_FREE(remap, 0)
+	_DROID_FREE(tempDupVerts, 1)
+#endif
 }
 
 /*
@@ -1351,7 +1367,12 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	int				totalVerts;
 	int				numMirror;
 
+#ifdef __ANDROID__
+	const size_t alloc_size = tri->numVerts * sizeof(*tverts);
+	_DROID_ALLOC16(tangentVert_t, alloc_size, tverts, 0)
+#else
 	tverts = (tangentVert_t *)_alloca16(tri->numVerts * sizeof(*tverts));
+#endif
 	memset(tverts, 0, tri->numVerts * sizeof(*tverts));
 
 	// determine texture polarity of each surface
@@ -1384,6 +1405,9 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	// now create the new list
 	if (totalVerts == tri->numVerts) {
 		tri->mirroredVerts = NULL;
+#ifdef __ANDROID__
+	_DROID_FREE(tverts, 0)
+#endif
 		return;
 	}
 
@@ -1422,6 +1446,9 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	}
 
 	tri->numVerts = totalVerts;
+#ifdef __ANDROID__
+	_DROID_FREE(tverts, 0)
+#endif
 }
 
 //k: temp memory allocate in stack / heap control on Android
@@ -1474,10 +1501,10 @@ void R_DeriveTangentsWithoutNormals(srfTriangles_t *tri)
 	idDrawVert		*vert;
 
 #ifdef __ANDROID__
-	const int alloc_size = sizeof(faceTangents[0]) * tri->numIndexes/3;
+	const size_t alloc_size = sizeof(faceTangents[0]) * tri->numIndexes/3;
 	_DROID_ALLOC16(faceTangents_t, alloc_size, faceTangents, 0)
 #else
-	faceTangents = (faceTangents_t *)_alloca16_heap(sizeof(faceTangents[0]) * tri->numIndexes/3);
+	faceTangents = (faceTangents_t *)_alloca16(sizeof(faceTangents[0]) * tri->numIndexes/3);
 #endif
 	R_DeriveFaceTangents(tri, faceTangents);
 
@@ -1791,7 +1818,12 @@ void R_DeriveTangents(srfTriangles_t *tri, bool allocFacePlanes)
 #if 1
 
 	if (!planes) {
+#ifdef __ANDROID__
+		const size_t alloc_size = (tri->numIndexes / 3) * sizeof(planes[0]);
+		_DROID_ALLOC16(idPlane, alloc_size, planes, 0)
+#else
 		planes = (idPlane *)_alloca16((tri->numIndexes / 3) * sizeof(planes[0]));
+#endif
 	}
 
 	SIMDProcessor->DeriveTangents(planes, tri->verts, tri->numVerts, tri->indexes, tri->numIndexes);
@@ -1955,6 +1987,9 @@ void R_DeriveTangents(srfTriangles_t *tri, bool allocFacePlanes)
 
 	tri->tangentsCalculated = true;
 	tri->facePlanesCalculated = true;
+#ifdef __ANDROID__
+	_DROID_FREE(planes, 0)
+#endif
 }
 
 /*

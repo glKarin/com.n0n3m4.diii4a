@@ -1843,43 +1843,75 @@ extern idCVar harm_r_maxAllocStackMemory; // declare in tr_trisurf.cpp
 	#define HARM_MAX_STACK_ALLOC_SIZE (1024 * 512)
 #endif
 
+struct idAllocAutoHeap {
+	public:
+
+		idAllocAutoHeap() 
+			: data(NULL)
+		{ }
+
+		~idAllocAutoHeap() {
+			Free();
+		}
+
+		void * Alloc(size_t size) {
+			Free();
+			data = calloc(size, 1);
+			common->Printf("[Harmattan]: %p alloca on heap memory %p(%d bytes)\n", this, data, size);
+			return data;
+		}
+
+		void * Alloc16(size_t size) {
+			Free();
+			data = calloc(size + 15, 1);
+			void *ptr = ((void *)(((intptr_t)data + 15) & ~15));
+			common->Printf("[Harmattan]: %p alloca16 on heap memory %p(%d bytes) <- %p(%d bytes)\n", this, ptr, size, data, size + 15);
+			return ptr;
+		}
+
+		bool IsAlloc(void) const {
+			return data != NULL;
+		}
+
+	private:
+		void *data;
+
+		void Free(void) {
+			if(data) {
+				common->Printf("[Harmattan]: %p free alloca16 heap memory %p\n", this, data);
+				free(data);
+				data = NULL;
+			}
+		}
+		void * operator new(size_t size);
+		void * operator new[](size_t size);
+		void operator delete(void *ptr);
+		void operator delete[](void *ptr);
+		idAllocAutoHeap(const idAllocAutoHeap &other);
+		idAllocAutoHeap & operator=(const idAllocAutoHeap &other);
+};
+
 // alloc in heap memory
 #define _alloca16_heap( x )					((void *)((((intptr_t)calloc( (x)+15 ,1 )) + 15) & ~15))
 
 	// Using heap memory. Also reset RLIMIT_STACK by call `setrlimit`.
 #define _DROID_ALLOC16_DEF(T, alloc_size, varname, x) \
-	const int _HARM_MAX_STACK_ALLOC_SIZE##x = harm_r_maxAllocStackMemory.GetInteger(); \
-	bool useHeapMem##x; \
-	if(_HARM_MAX_STACK_ALLOC_SIZE##x > 0) \
-		useHeapMem##x = (alloc_size) >= _HARM_MAX_STACK_ALLOC_SIZE##x;	 \
-	else if(_HARM_MAX_STACK_ALLOC_SIZE##x == 0) \
-		useHeapMem##x = true; \
-	else \
-		useHeapMem##x = false; \
-	T *varname = (T *) (useHeapMem##x ? _alloca16_heap(alloc_size) : _alloca16(alloc_size)); \
-	if(useHeapMem##x) \
-		common->Printf("[Harmattan]: Alloca on heap memory %p(%d bytes)\n", varname, alloc_size);
+	idAllocAutoHeap _allocAutoHeap##x; \
+	T *varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
+	if(_allocAutoHeap##x.IsAlloc()) \
+		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%d bytes)\n", #varname, varname, alloc_size);
 
 #define _DROID_ALLOC16(T, alloc_size, varname, x) \
-	const int _HARM_MAX_STACK_ALLOC_SIZE##x = harm_r_maxAllocStackMemory.GetInteger(); \
-	bool useHeapMem##x; \
-	if(_HARM_MAX_STACK_ALLOC_SIZE##x > 0) \
-		useHeapMem##x = (alloc_size) >= _HARM_MAX_STACK_ALLOC_SIZE##x;	 \
-	else if(_HARM_MAX_STACK_ALLOC_SIZE##x == 0) \
-		useHeapMem##x = true; \
-	else \
-		useHeapMem##x = false; \
-	varname = (T *) (useHeapMem##x ? _alloca16_heap(alloc_size) : _alloca16(alloc_size)); \
-	if(useHeapMem##x) \
-		common->Printf("[Harmattan]: Alloca on heap memory %p(%d bytes)\n", varname, alloc_size);
+	idAllocAutoHeap _allocAutoHeap##x; \
+	varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
+	if(_allocAutoHeap##x.IsAlloc()) \
+		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%d bytes)\n", #varname, varname, alloc_size);
 
 	// free memory when not call alloca()
-#define _DROID_FREE(varname, x) \
-	if(useHeapMem##x) \
+#define _DROID_FREE(varname, x)/* \
 	{ \
 		common->Printf("[Harmattan]: Free alloca heap memory %p\n", varname); \
-		free(varname); \
-	}
+	}*/
 
 #endif
 

@@ -254,6 +254,7 @@ void GL_EnableVertexAttribArray(GLuint index)
 		return;
 	}
 
+	//RB_LogComment("glEnableVertexAttribArray( %i );\n", index);
 	glEnableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
 
 	GL_CheckErrors();
@@ -307,6 +308,7 @@ void GL_VertexAttribPointer(GLuint index, GLint size, GLenum type,
 		return;
 	}
 
+	// RB_LogComment("glVertexAttribPointer( %i, %i, %i, %i, %i, %p );\n", index, size, type, normalized, stride, pointer);
 	glVertexAttribPointer(*(GLint *)((char *)backEnd.glState.currentProgram + index),
 	                      size, type, normalized, stride, pointer);
 
