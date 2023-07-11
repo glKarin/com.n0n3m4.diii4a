@@ -21,7 +21,7 @@
     <string name="force_delete_vertex_buffer_on_every_end_frame">Force delete vertex buffer on every end frame</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">Also like 2nd, and delete VBO handle, maybe slower, but memory safer.</string>
     <string name="game_cvar_fs_game">Game(cvar `fs_game`)</string>
-    <string name="doom_iii">DOOM III</string>
+    <string name="doom_iii">DOOM III(base)</string>
     <string name="doom3_resurrection_of_evil_d3xp">DOOM3:Resurrection of Evil(d3xp)</string>
     <string name="classic_doom_cdoom">Classic DOOM(cdoom)</string>
     <string name="doom3_bfg_the_lost_mission_d3le">DOOM3-BFG:The Lost Mission(d3le)</string>
@@ -252,5 +252,7 @@
     <string name="edit_cvar">Edit CVar</string>
     <string name="cvar_editor">CVar editor</string>
     <string name="skip_intro">Skip intro</string>
+    <string name="overthinked_overthinked">Overthinked(overthinked)</string>
+    <string name="sabot_sabot">SABot(sabot)</string>
 
 </resources>

@@ -206,6 +206,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
 					android:text="@string/hardcorps_hardcorps"/>
+				<RadioButton
+					android:id="@+id/fs_game_overthinked"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/overthinked_overthinked"/>
+				<RadioButton
+					android:id="@+id/fs_game_sabot"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/sabot_sabot"/>
 			</RadioGroup>
 
             <RadioGroup

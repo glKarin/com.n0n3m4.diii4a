@@ -1477,10 +1477,20 @@ public class GameLauncher extends Activity
 		{
 			game = "hardcorps";
 		}
+		else if (val == R.id.fs_game_overthinked)
+		{
+			game = "overthinked";
+		}
+		else if (val == R.id.fs_game_sabot)
+		{
+			game = "sabot";
+		}
+
 		else if (val == R.id.fs_game_quake4)
 		{
 			game = "q4base";
 		}
+
 		else if (val == R.id.fs_game_prey)
 		{
 			game = "preybase";
@@ -2188,6 +2198,10 @@ public class GameLauncher extends Activity
 		prop = new GameProp(4, "rivensin", "rivensin", "", false);
 		props.add(prop);
 		prop = new GameProp(5, "hardcorps", "hardcorps", "", false);
+		props.add(prop);
+		prop = new GameProp(6, "overthinked", "overthinked", "", false);
+		props.add(prop);
+		prop = new GameProp(7, "sabot", "sabot", "d3xp", false);
 		props.add(prop);
 		GameProps.put(Q3EGlobals.GAME_DOOM3, props);
 
