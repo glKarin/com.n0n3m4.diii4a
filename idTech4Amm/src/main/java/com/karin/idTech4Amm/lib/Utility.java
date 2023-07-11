@@ -34,6 +34,11 @@ public final class Utility
             if(target.equals(arr[i]))
                 return i;
         }
-        return 0;
+        return -1;
+    }
+
+    public static boolean ArrayContains(Object[] arr, Object target)
+    {
+        return ArrayIndexOf(arr, target) >= 0;
     }
 }

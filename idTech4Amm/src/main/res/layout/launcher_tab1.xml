@@ -409,6 +409,13 @@
 				android:layout_height="wrap_content"
 				android:text="@string/load_quicksave_when_start_game"/>
 
+			<Button
+				android:id="@+id/launcher_tab1_edit_cvar"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:textAllCaps="false"
+				android:text="@string/edit_cvar"/>
+
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"

@@ -30,7 +30,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 28
         versionCode 11032
-        versionName '1.1.0harmattan32'
+        versionName '1.1.0harmattan33'
         versionNameSuffix 'natasha'
     }
 

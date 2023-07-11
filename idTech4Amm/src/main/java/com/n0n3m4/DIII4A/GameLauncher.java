@@ -66,6 +66,7 @@ import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
+import com.n0n3m4.DIII4A.launcher.CVarEditorFunc;
 import com.n0n3m4.DIII4A.launcher.CheckForUpdateFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameFolderFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
@@ -348,6 +349,10 @@ public class GameLauncher extends Activity
 			{
 				OpenOnScreenButtonThemeSetting();
 			}
+			else if (id == R.id.launcher_tab1_edit_cvar)
+			{
+				EditCVar();
+			}
         }
     };
 
@@ -544,6 +549,9 @@ public class GameLauncher extends Activity
 
     public void updatehacktings()
     {
+		Log.e("Q3E", "updatehacktings: 1111111111");
+    	LockCmdUpdate();
+		Log.e("Q3E", "updatehacktings: 222222222222");
         //k
         V.usedxt.setChecked(getProp("r_useDXT", false));
         V.useetc1.setChecked(getProp("r_useETC1", false));
@@ -617,6 +625,8 @@ public class GameLauncher extends Activity
             SelectCheckbox(GetGameModRadioGroup(), -1);
         }
         GameLauncher.this.UpdateCustomerResulotion(V.rg_scrres.getCheckedRadioButtonId() == R.id.res_custom);
+
+		UnlockCmdUpdate();
     }
 
     private void ThrowException()
@@ -640,10 +650,6 @@ public class GameLauncher extends Activity
 		if(prop.IsValid())
 			SelectCheckbox(GetGameModRadioGroup(), prop.index);
 		game = prop.fs_game;
-		if (!game.isEmpty())
-			SetProp("fs_game", game);
-		else
-			RemoveProp("fs_game");
 
         preference.edit().putString(Q3EPreference.pref_harm_game_lib, "").commit();
         if (on)
@@ -653,6 +659,10 @@ public class GameLauncher extends Activity
         }
         else
         {
+			if (!prop.is_mod && !game.isEmpty())
+				SetProp("fs_game", game);
+			else
+				RemoveProp("fs_game");
             //RemoveProp("fs_game_base");
         }
         V.edt_fs_game.setText(game);
@@ -764,6 +774,7 @@ public class GameLauncher extends Activity
         V.find_dll.setChecked(findDll);
         V.launcher_tab1_edit_autoexec.setOnClickListener(m_buttonClickListener);
         V.launcher_tab1_edit_doomconfig.setOnClickListener(m_buttonClickListener);
+		V.launcher_tab1_edit_cvar.setOnClickListener(m_buttonClickListener);
 
         boolean userMod = mPrefs.getBoolean(Q3EPreference.pref_harm_user_mod, false);
         V.fs_game_user.setChecked(userMod);
@@ -960,9 +971,12 @@ public class GameLauncher extends Activity
 
     private void SetProp(String name, Object val)
     {
-        boolean lock = LockCmdUpdate();
+		Log.e("Q3E", "SetProp 11111: " + name + " -> " + val);
+		if(!LockCmdUpdate())
+			return;
         SetCmdText(KidTech4Command.SetProp(GetCmdText(), name, val));
-        if (lock) UnlockCmdUpdate();
+		Log.e("Q3E", "SetProp 22222: " + name + " -> " + val);
+        UnlockCmdUpdate();
     }
 
     private String GetProp(String name)
@@ -972,12 +986,13 @@ public class GameLauncher extends Activity
 
     private void RemoveProp(String name)
     {
-        boolean lock = LockCmdUpdate();
+		if(!LockCmdUpdate())
+			return;
         boolean[] res = {false};
         String str = KidTech4Command.RemoveProp(GetCmdText(), name, res);
         if (res[0])
             SetCmdText(str);
-        if (lock) UnlockCmdUpdate();
+        UnlockCmdUpdate();
     }
 
     private boolean IsProp(String name)
@@ -1286,8 +1301,10 @@ public class GameLauncher extends Activity
         return true;
     }
 
-    private void SetCmdText(String text)
+	public void SetCmdText(String text)
     {
+		if(null == text || text.isEmpty())
+			text = "game.arm";
         EditText edit = V.edt_cmdline;
         if (edit.getText().toString().equals(text))
             return;
@@ -1307,9 +1324,12 @@ public class GameLauncher extends Activity
         }
     }
 
-    private String GetCmdText()
+    public String GetCmdText()
     {
-        return V.edt_cmdline.getText().toString();
+		String s = V.edt_cmdline.getText().toString();
+		if(s.isEmpty())
+			s = "game.arm";
+		return s;
     }
 
     private void OpenGameLibChooser()
@@ -1454,16 +1474,17 @@ public class GameLauncher extends Activity
 
         if (userMod)
         {
-            V.edt_fs_game.setText(game);
+            V.edt_fs_game.setText(prop.fs_game);
         }
         preference.edit().putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), game).commit();
     }
 
     private boolean LockCmdUpdate()
     {
-        boolean res = m_cmdUpdateLock;
+    	if(m_cmdUpdateLock)
+    		return false;
         m_cmdUpdateLock = true;
-        return !res;
+        return true;
     }
 
     private void UnlockCmdUpdate()
@@ -1803,20 +1824,22 @@ public class GameLauncher extends Activity
 
     private boolean RemoveParam(String name)
     {
-        boolean lock = LockCmdUpdate();
+        if(!LockCmdUpdate())
+        	return false;
         boolean[] res = {false};
         String str = KidTech4Command.RemoveParam(GetCmdText(), name, res);
         if (res[0])
             SetCmdText(str);
-        if (lock) UnlockCmdUpdate();
+        UnlockCmdUpdate();
         return res[0];
     }
 
     private void SetParam(String name, Object val)
     {
-        boolean lock = LockCmdUpdate();
+		if(!LockCmdUpdate())
+			return;
         SetCmdText(KidTech4Command.SetParam(GetCmdText(), name, val));
-        if (lock) UnlockCmdUpdate();
+        UnlockCmdUpdate();
     }
 
     private String GetParam(String name)
@@ -1904,6 +1927,13 @@ public class GameLauncher extends Activity
 		new TranslatorsFunc(this).Start(new Bundle());
 	}
 
+	private void EditCVar()
+	{
+		Bundle bundle = new Bundle();
+		bundle.putString("game", GetProp("fs_game"));
+		new CVarEditorFunc(this).Start(bundle);
+	}
+
 
     private class ViewHolder
     {
@@ -1961,6 +1991,7 @@ public class GameLauncher extends Activity
         public LinearLayout layout_mouse_device;
         public CheckBox find_dll;
 		public EditText edt_harm_r_maxFps;
+		public Button launcher_tab1_edit_cvar;
 
         public void Setup()
         {
@@ -2017,6 +2048,7 @@ public class GameLauncher extends Activity
             layout_mouse_device = findViewById(R.id.layout_mouse_device);
             find_dll = findViewById(R.id.find_dll);
 			edt_harm_r_maxFps = findViewById(R.id.edt_harm_r_maxFps);
+			launcher_tab1_edit_cvar = findViewById(R.id.launcher_tab1_edit_cvar);
         }
     }
 
@@ -2051,11 +2083,11 @@ public class GameLauncher extends Activity
 			}
 			else
 			{
-				if(null == fs_game || fs_game.isEmpty())
+				if(null == fs_game || fs_game.isEmpty() || !IsValid())
 					RemoveProp("fs_game");
 				else
 					SetProp("fs_game", fs_game);
-				if(null == fs_game_base || fs_game_base.isEmpty())
+				if(null == fs_game_base || fs_game_base.isEmpty() || !IsValid())
 					RemoveProp("fs_game_base");
 				else
 					SetProp("fs_game_base", fs_game_base);
@@ -2078,19 +2110,8 @@ public class GameLauncher extends Activity
 		{
 			return index >= 0 && !game.isEmpty();
 		}
-
-		@Override
-		public String toString()
-		{
-			return "GameProp{" +
-					"index=" + index +
-					", game='" + game + '\'' +
-					", fs_game='" + fs_game + '\'' +
-					", fs_game_base='" + fs_game_base + '\'' +
-					", is_mod=" + is_mod +
-					'}';
-		}
 	}
+
 	private final Map<String, List<GameProp>> GameProps = new LinkedHashMap<>();
 
     private void InitGameProps()
@@ -2154,7 +2175,6 @@ public class GameLauncher extends Activity
 		}
 		if(null == res)
 			res = new GameProp(0, "", game, "", userMod);
-		Log.e("Q3E", "ChangeGameMod: " + res);
 		return res;
 	}
 }

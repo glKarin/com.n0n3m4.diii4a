@@ -9,8 +9,8 @@ import java.util.Arrays;
  */
 public final class Constants
 {
-    public static final int CONST_UPDATE_RELEASE = 32;
-    public static final String CONST_RELEASE = "2023-06-30";
+    public static final int CONST_UPDATE_RELEASE = 33;
+    public static final String CONST_RELEASE = "2023-07-29";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -25,12 +25,8 @@ public final class Constants
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
 	public static final String[] CONST_CHANGES = {
-            "Add `Chinese`, `Russian`(by " + TextHelper.GenLinkText("https://4pda.ru/forum/index.php?showuser=5043340", "ALord7") + ") language.",
-            "Move some on-screen settings to `Configure on-screen controls` page.",
-            "Add `full-body awareness` mod in DOOM 3. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode).",
-            "Support add external game library in `GameLib` at tab `General`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project and run it using original idTech4A++).",
-            "Support load external game library in `Game working directory`/`fs_game` folder instead of default game library of apk if enabled `Find game library in game data directory`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project, and then named `gameaarch64.so`/`libgameaarch64.so`(arm64 device) or named `gamearm.so`/`libgamearm.so`(arm32 device), and then put it on `Game working directory`/`fs_game` folder, and start game directly with original idTech4A++).",
-            "Support jpg/png image texture file.",
+	        "Add CVar editor.",
+            "Change OpenGL vertex index size to 4 bytes for large model.",
 	};
 
 	// Launcher preference keys
