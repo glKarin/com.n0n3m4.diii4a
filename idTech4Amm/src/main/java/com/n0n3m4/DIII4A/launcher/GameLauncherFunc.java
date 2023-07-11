@@ -91,8 +91,14 @@ public abstract class GameLauncherFunc implements Runnable
 
     public <T> T GetResult()
     {
-        return null != m_data ? (T)m_data.get(CONST_RESULT_KEY) : null;
+        return GetResultFromBundle(m_data);
     }
+
+    public static <T> T GetResultFromBundle(Bundle data)
+    {
+        return null != data ? (T)data.get(CONST_RESULT_KEY) : null;
+    }
+
 
     public Context getContext()
     {

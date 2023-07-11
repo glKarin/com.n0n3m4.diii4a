@@ -30,8 +30,15 @@
 				android:ems="10"
 				android:imeOptions="flagNoExtractUi"
 				android:inputType="textNoSuggestions|textMultiLine">
-
 			</EditText>
+			<TextView
+				android:id="@+id/edt_cmdline_temp"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:textColor="#FF000000"
+				android:textSize="14sp"
+				android:visibility="gone"
+				/>
 
 			<TextView
 				android:id="@+id/tv_path"

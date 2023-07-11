@@ -11,10 +11,12 @@ import com.n0n3m4.DIII4A.GameLauncher;
 public final class CVarEditorFunc extends GameLauncherFunc
 {
     private String m_game;
+    private String m_baseCommand;
+    private String m_command;
 
-    public CVarEditorFunc(GameLauncher gameLauncher)
+    public CVarEditorFunc(GameLauncher gameLauncher, Runnable callback)
     {
-        super(gameLauncher);
+        super(gameLauncher, callback);
     }
 
     public void Reset()
@@ -27,6 +29,8 @@ public final class CVarEditorFunc extends GameLauncherFunc
         Reset();
 
         m_game = data.getString("game");
+        m_command = data.getString("command");
+        m_baseCommand = data.getString("baseCommand");
 
         run();
     }
@@ -41,7 +45,7 @@ public final class CVarEditorFunc extends GameLauncherFunc
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
-                        m_gameLauncher.SetCmdText(widget.DumpCommand(m_gameLauncher.GetCmdText()));
+                        SetCmdText(widget.DumpCommand(GetCmdText()));
                     }
                 })
                 .setNegativeButton(R.string.remove, new DialogInterface.OnClickListener()
@@ -49,7 +53,7 @@ public final class CVarEditorFunc extends GameLauncherFunc
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
-                        m_gameLauncher.SetCmdText(widget.RemoveCommand(m_gameLauncher.GetCmdText()));
+                        SetCmdText(m_baseCommand);
                     }
                 })
                 .setNeutralButton(R.string.reset, new DialogInterface.OnClickListener()
@@ -57,14 +61,25 @@ public final class CVarEditorFunc extends GameLauncherFunc
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
-                        m_gameLauncher.SetCmdText(widget.ResetCommand(m_gameLauncher.GetCmdText()));
+                        SetCmdText(widget.ResetCommand(GetCmdText()));
                     }
                 })
         ;
         widget.SetGame(m_game);
-        widget.RestoreCommand(m_gameLauncher.GetCmdText());
+        widget.RestoreCommand(GetCmdText());
         builder.setView(widget);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private String GetCmdText()
+    {
+        return m_command;
+    }
+
+    private void SetCmdText(String str)
+    {
+        SetResult(str);
+        Callback();
     }
 }

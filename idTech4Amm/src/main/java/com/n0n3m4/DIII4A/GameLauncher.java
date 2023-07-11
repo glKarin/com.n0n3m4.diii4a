@@ -1301,7 +1301,7 @@ public class GameLauncher extends Activity
         return true;
     }
 
-	public void SetCmdText(String text)
+	private void SetCmdText(String text)
     {
 		if(null == text || text.isEmpty())
 			text = "game.arm";
@@ -1324,7 +1324,7 @@ public class GameLauncher extends Activity
         }
     }
 
-    public String GetCmdText()
+	private String GetCmdText()
     {
 		String s = V.edt_cmdline.getText().toString();
 		if(s.isEmpty())
@@ -1853,11 +1853,13 @@ public class GameLauncher extends Activity
         String str = KidTech4Command.RemoveParam(Q3EUtils.q3ei.start_temporary_extra_command, name, res);
         if (res[0])
             Q3EUtils.q3ei.start_temporary_extra_command = str;
+		UpdateTempCommand();
     }
 
     private void SetParam_temp(String name, Object val)
     {
         Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetParam(Q3EUtils.q3ei.start_temporary_extra_command, name, val));
+		UpdateTempCommand();
     }
 
     private void ShowPreferenceDialog()
@@ -1931,7 +1933,33 @@ public class GameLauncher extends Activity
 	{
 		Bundle bundle = new Bundle();
 		bundle.putString("game", GetProp("fs_game"));
-		new CVarEditorFunc(this).Start(bundle);
+		bundle.putString("command", Q3EUtils.q3ei.start_temporary_extra_command);
+		bundle.putString("baseCommand", GetTempBaseCommand());
+		CVarEditorFunc cVarEditorFunc = new CVarEditorFunc(this, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Q3EUtils.q3ei.start_temporary_extra_command = CVarEditorFunc.GetResultFromBundle(bundle);
+				UpdateTempCommand();
+			}
+		});
+		cVarEditorFunc.Start(bundle);
+	}
+
+	private String GetTempBaseCommand()
+	{
+		String tempCmd = "";
+		boolean quickSave = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
+		if (quickSave)
+			tempCmd += " +loadGame QuickSave";
+		return tempCmd.trim();
+	}
+
+	private void UpdateTempCommand()
+	{
+		V.edt_cmdline_temp.setText(Q3EUtils.q3ei.start_temporary_extra_command);
+		V.edt_cmdline_temp.setVisibility(Q3EUtils.q3ei.start_temporary_extra_command.length() > 0 ? View.VISIBLE : View.GONE);
 	}
 
 
@@ -1992,6 +2020,7 @@ public class GameLauncher extends Activity
         public CheckBox find_dll;
 		public EditText edt_harm_r_maxFps;
 		public Button launcher_tab1_edit_cvar;
+		public TextView edt_cmdline_temp;
 
         public void Setup()
         {
@@ -2049,6 +2078,7 @@ public class GameLauncher extends Activity
             find_dll = findViewById(R.id.find_dll);
 			edt_harm_r_maxFps = findViewById(R.id.edt_harm_r_maxFps);
 			launcher_tab1_edit_cvar = findViewById(R.id.launcher_tab1_edit_cvar);
+			edt_cmdline_temp = findViewById(R.id.edt_cmdline_temp);
         }
     }
 
