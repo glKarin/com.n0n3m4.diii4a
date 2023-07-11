@@ -249,5 +249,6 @@
     <string name="limit_maximum_fps_default_is_0">Limit maximum FPS(default is 0)</string>
     <string name="edit_cvar">Edit CVar</string>
     <string name="cvar_editor">CVar editor</string>
+    <string name="skip_intro">Skip intro</string>
 
 </resources>

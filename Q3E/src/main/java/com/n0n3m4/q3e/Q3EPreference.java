@@ -53,6 +53,7 @@ public final class Q3EPreference
     public static final String pref_harm_using_mouse = "harm_using_mouse"; //k
     public static final String pref_harm_find_dll = "harm_find_dll"; //k
     public static final String pref_harm_r_maxFps = "q3e_harm_r_maxFps"; //k
+    public static final String pref_harm_skip_intro = "q3e_harm_skip_intro"; //k
 
     public static final String RUN_BACKGROUND = "harm_run_background";
     public static final String RENDER_MEM_STATUS = "harm_render_mem_status";

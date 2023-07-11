@@ -250,6 +250,16 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_find_dll, isChecked)
 						.commit();
 			}
+			else if (id == R.id.skip_intro)
+			{
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_skip_intro, isChecked)
+						.commit();
+				if (isChecked)
+					SetParam_temp("disconnect");
+				else
+					RemoveParam_temp("disconnect");
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -753,6 +763,10 @@ public class GameLauncher extends Activity
         V.auto_quick_load.setChecked(autoQuickLoad);
         if (autoQuickLoad)
             SetParam_temp("loadGame", "QuickSave");
+		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
+		V.skip_intro.setChecked(skipIntro);
+		if (skipIntro)
+			SetParam_temp("disconnect");
         boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         V.multithreading.setChecked(multithreading);
         V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener()
@@ -916,6 +930,7 @@ public class GameLauncher extends Activity
             }
         });
         V.auto_quick_load.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.skip_intro.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.find_dll.setOnCheckedChangeListener(m_checkboxChangeListener);
 
@@ -1273,6 +1288,7 @@ public class GameLauncher extends Activity
         mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EUtils.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
         mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EUtils.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
         mEdtr.putBoolean(Q3EPreference.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_skip_intro, V.skip_intro.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_multithreading, V.multithreading.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
@@ -1862,6 +1878,11 @@ public class GameLauncher extends Activity
 		UpdateTempCommand();
     }
 
+	private void SetParam_temp(String name)
+	{
+		SetParam_temp(name, "");
+	}
+
     private void ShowPreferenceDialog()
     {
         new DebugPreferenceFunc(this).Start(new Bundle());
@@ -1949,10 +1970,14 @@ public class GameLauncher extends Activity
 
 	private String GetTempBaseCommand()
 	{
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
 		String tempCmd = "";
-		boolean quickSave = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
+		boolean quickSave = preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
 		if (quickSave)
 			tempCmd += " +loadGame QuickSave";
+		boolean skipIntro = preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
+		if (skipIntro)
+			tempCmd += " +disconnect";
 		return tempCmd.trim();
 	}
 
@@ -2021,6 +2046,7 @@ public class GameLauncher extends Activity
 		public EditText edt_harm_r_maxFps;
 		public Button launcher_tab1_edit_cvar;
 		public TextView edt_cmdline_temp;
+		public CheckBox skip_intro;
 
         public void Setup()
         {
@@ -2079,6 +2105,7 @@ public class GameLauncher extends Activity
 			edt_harm_r_maxFps = findViewById(R.id.edt_harm_r_maxFps);
 			launcher_tab1_edit_cvar = findViewById(R.id.launcher_tab1_edit_cvar);
 			edt_cmdline_temp = findViewById(R.id.edt_cmdline_temp);
+			skip_intro = findViewById(R.id.skip_intro);
         }
     }
 

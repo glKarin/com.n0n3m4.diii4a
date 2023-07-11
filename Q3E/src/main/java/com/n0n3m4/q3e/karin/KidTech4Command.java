@@ -186,6 +186,11 @@ public final class KidTech4Command
         return str;
     }
 
+    public static String SetCommand(String str, String name)
+    {
+        return SetParam(str, name, "");
+    }
+
     public static String GetParam(final String str, String name, String...def)
     {
         String nname = " +" + name;
@@ -272,6 +277,11 @@ public final class KidTech4Command
     {
         m_cmd = KidTech4Command.SetParam(m_cmd, name, val);
         return this;
+    }
+
+    public KidTech4Command SetCommand(String name)
+    {
+        return SetParam(name, "");
     }
 
     public String Param(String name, String...def)

@@ -325,8 +325,10 @@ public class Q3EMain extends Activity
 
             String extraCommand = "";
             if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
-                extraCommand += "+loadGame QuickSave";
-            Q3EUtils.q3ei.start_temporary_extra_command = extraCommand;
+                extraCommand += " +loadGame QuickSave";
+            if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
+                extraCommand += " +disconnect";
+            Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
         }
 
         Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
