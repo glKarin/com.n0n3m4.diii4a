@@ -87,6 +87,9 @@ ID_INLINE void idSwap(type &a, type &b)
 template< class type >
 class idList
 {
+#ifdef MOD_BOTS // cusTom3 - aas extensions - HACK to get around different heaps
+	friend class BotAASBuild;
+#endif
 	public:
 
 		typedef int		cmp_t(const type *, const type *);

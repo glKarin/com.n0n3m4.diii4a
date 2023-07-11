@@ -79,6 +79,7 @@ option(PREY			"Build the prey game code" ON)
 option(RAVEN			"Build the raven core" ON)
 option(HUMANHEAD			"Build the humanhead core" ON)
 option(OVERTHINKED			"Build the overthinked game code" ON)
+option(SABOT			"Build the sabot game code" ON)
 
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
@@ -764,6 +765,19 @@ list(APPEND src_overthinked ${overthinked_game_src})
 set_src_dir(src_overthinked "overthinked" ${src_overthinked})
 add_globbed_headers(src_overthinked "overthinked")
 
+# sabot
+set(src_sabot ${base_game_src})
+set(sabot_game_src
+		Grabber.cpp
+		physics/Force_Grab.cpp
+		bots/BotAASBuild.cpp
+		bots/BotAI.cpp
+		bots/BotSabot.cpp
+		)
+list(APPEND src_sabot ${sabot_game_src})
+set_src_dir(src_sabot "sabot" ${src_sabot})
+add_globbed_headers(src_sabot "sabot")
+
 # quake4
 set(src_quake4 ${base_game_src})
 set(quake4_game_src
@@ -1339,6 +1353,9 @@ endif()
 if(OVERTHINKED)
 	message(STATUS "Build overthinked")
 endif()
+if(SABOT)
+	message(STATUS "Build sabot")
+endif()
 if(RAVEN)
 	message(STATUS "Build raven core")
 endif()
@@ -1504,6 +1521,23 @@ if(OVERTHINKED)
 	target_link_libraries(overthinked idlib)
 
 	install(TARGETS overthinked
+			RUNTIME DESTINATION "${bindir}"
+			LIBRARY DESTINATION "${libdir}"
+			ARCHIVE DESTINATION "${libdir}"
+			)
+endif()
+
+if(SABOT)
+	add_library(sabot SHARED ${src_sabot})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_sabot})
+	#set_target_properties(sabot PROPERTIES PREFIX "")
+	set_target_properties(sabot PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_SABOT;MOD_BOTS;_PORTALSKY;_D3XP;CTF")
+	target_include_directories(sabot PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/sabot")
+	set_target_properties(sabot PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(sabot PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(sabot idlib)
+
+	install(TARGETS sabot
 			RUNTIME DESTINATION "${bindir}"
 			LIBRARY DESTINATION "${libdir}"
 			ARCHIVE DESTINATION "${libdir}"

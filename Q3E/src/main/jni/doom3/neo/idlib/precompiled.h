@@ -255,6 +255,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #ifdef __ANDROID__ //k: for lost mission
 	#ifdef _D3LE
 	#include "../d3le/Game.h"
+	#elif defined _SABOT
+	#include "../sabot/Game.h"
 	#else
 	#include "../d3xp/Game.h"
 	#endif
@@ -273,6 +275,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
 	#include "../game/Game.h"
 	#elif defined _OVERTHINKED
 	#include "../overthinked/Game.h"
+
 	#elif defined _QUAKE4
 	#include "../quake4/Game.h"
 	#elif defined _RAVEN
@@ -297,6 +300,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #ifdef __ANDROID__ //k: for lost mission
 	#ifdef _D3LE
 	#include "../d3le/Game_local.h"
+	#elif defined _SABOT
+	#include "../sabot/Game_local.h"
 	#else
 	#include "../d3xp/Game_local.h"
 	#endif
@@ -315,6 +320,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
 	#include "../hardcorps/Game_local.h"
 	#elif defined _OVERTHINKED
 	#include "../overthinked/Game_local.h"
+
 	#elif defined _QUAKE4
 	#include "../quake4/Game_local.h"
 	#elif defined _RAVEN

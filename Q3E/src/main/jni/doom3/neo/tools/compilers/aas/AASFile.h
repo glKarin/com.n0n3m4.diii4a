@@ -360,6 +360,9 @@ class idAASSettings
 
 class idAASFile
 {
+#ifdef MOD_BOTS // cusTom3 - aas extensions
+	friend class BotAASBuild;
+#endif
 	public:
 		virtual 					~idAASFile(void) {}
 
