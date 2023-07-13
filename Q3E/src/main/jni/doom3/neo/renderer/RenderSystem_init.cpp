@@ -65,10 +65,10 @@ idCVar r_useInfiniteFarZ("r_useInfiniteFarZ", "1", CVAR_RENDERER | CVAR_BOOL, "u
 
 idCVar r_znear("r_znear", "3", CVAR_RENDERER | CVAR_FLOAT, "near Z clip plane distance", 0.001f, 200.0f);
 
-idCVar r_noLight("r_noLight", "0", CVAR_RENDERER | CVAR_BOOL, "lighting disable hack");
-idCVar r_useETC1("r_useETC1", "1", CVAR_RENDERER | CVAR_BOOL, "use ETC1 compression");
-idCVar r_useETC1Cache("r_useETC1cache", "1", CVAR_RENDERER | CVAR_BOOL, "use ETC1 compression");
-idCVar r_useDXT("r_useDXT", "1", CVAR_RENDERER | CVAR_BOOL, "use DXT compression if possible");
+idCVar r_noLight("r_noLight", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "lighting disable hack");
+idCVar r_useETC1("r_useETC1", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use ETC1 compression");
+idCVar r_useETC1Cache("r_useETC1cache", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use ETC1 compression");
+idCVar r_useDXT("r_useDXT", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use DXT compression if possible");
 
 idCVar r_ignoreGLErrors("r_ignoreGLErrors", "1", CVAR_RENDERER | CVAR_BOOL, "ignore GL errors");
 idCVar r_finish("r_finish", "0", CVAR_RENDERER | CVAR_BOOL, "force a call to glFinish() every frame");
