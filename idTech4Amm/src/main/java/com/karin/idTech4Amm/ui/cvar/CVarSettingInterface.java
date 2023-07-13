@@ -1,6 +1,6 @@
 package com.karin.idTech4Amm.ui.cvar;
 
-import com.n0n3m4.q3e.karin.KCVar;
+import com.karin.idTech4Amm.lib.KCVar;
 
 public interface CVarSettingInterface
 {

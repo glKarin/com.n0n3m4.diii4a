@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-import com.n0n3m4.q3e.karin.KCVar;
-import com.n0n3m4.q3e.karin.KCVarSystem;
+import com.karin.idTech4Amm.lib.KCVar;
+import com.karin.idTech4Amm.lib.KCVarSystem;
 
 import java.util.List;
 

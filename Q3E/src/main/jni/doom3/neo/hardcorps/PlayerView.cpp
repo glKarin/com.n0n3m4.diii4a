@@ -446,9 +446,6 @@ idAngles idPlayerView::AngleOffset() const {
 idPlayerView::SingleView
 ==================
 */
-#ifdef __ANDROID__ //k
-static idCVar	harm_g_skipBerserkVision("harm_g_skipBerserkVision", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Skip render berserk vision for power up.");
-#endif
 void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) {
 
 	// normal rendering
@@ -562,10 +559,6 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 			renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 0.0f, 1.0f, 1.0f, tunnelMaterial );
 		}
 
-#ifdef __ANDROID__ //k
-	if(!harm_g_skipBerserkVision.GetBool())
-	{
-#endif
 		if ( player->PowerUpActive(BERSERK) ) {
 			int berserkTime = player->inventory.powerupEndTime[ BERSERK ] - gameLocal.time;
 			if ( berserkTime > 0 ) {
@@ -575,9 +568,6 @@ void idPlayerView::SingleView( idUserInterface *hud, const renderView_t *view ) 
 				renderSystem->DrawStretchPic( 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 0.0f, 1.0f, 1.0f, berserkMaterial );
 			}
 		}
-#ifdef __ANDROID__ //k
-	}
-#endif
 
 		if ( bfgVision ) {
 			renderSystem->SetColor4( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -649,13 +639,6 @@ idPlayerView::BerserkVision
 ===================
 */
 void idPlayerView::BerserkVision( idUserInterface *hud, const renderView_t *view ) {
-#ifdef __ANDROID__ //k
-	if(harm_g_skipBerserkVision.GetBool())
-	{
-		SingleView(hud, view);
-		return;
-	}
-#endif
 	renderSystem->CropRenderSize( 512, 256, true );
 	SingleView( hud, view );
 	renderSystem->CaptureRenderToImage( "_scratch" );

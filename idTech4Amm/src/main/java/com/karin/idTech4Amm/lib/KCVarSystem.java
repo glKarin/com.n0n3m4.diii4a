@@ -1,4 +1,4 @@
-package com.n0n3m4.q3e.karin;
+package com.karin.idTech4Amm.lib;
 
 import com.n0n3m4.q3e.Q3EUtils;
 
@@ -41,34 +41,14 @@ public final class KCVarSystem
                 );
         KCVar.Group GAME_CVARS = new KCVar.Group("DOOM3", false)
                 .AddCVar(
-                    KCVar.CreateCVar("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0)
                 );
-        KCVar.Group D3XP_CVARS = new KCVar.Group("DOOM3: RoE", false)
-                .AddCVar(
-                    KCVar.CreateCVar("harm_g_skipWarpVision", "bool", "0", "Skip render warp vision for grabber dragging", 0),
-                    KCVar.CreateCVar("harm_g_skipHelltimeVision", "bool", "0", "Skip render helltime vision for powerup", 0)
-                );
-        KCVar.Group D3LE_CVARS = new KCVar.Group("DOOM3: The lost mission", false)
-                .AddCVar(
-                    KCVar.CreateCVar("harm_g_skipWarpVision", "bool", "0", "Skip render warp vision for grabber dragging", 0),
-                    KCVar.CreateCVar("harm_g_skipHelltimeVision", "bool", "0", "Skip render helltime vision for powerup", 0)
-                );
-        KCVar.Group CDOOM_CVARS = new KCVar.Group("Classic DOOM3", false)
-                .AddCVar(
-                    KCVar.CreateCVar("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up", 0)
-                );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
-                    KCVar.CreateCVar("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up", 0),
                     KCVar.CreateCVar("harm_pm_doubleJump", "bool", "0", "Enable double-jump", 0),
                     KCVar.CreateCVar("harm_pm_autoForceThirdPerson", "bool", "0", "Force set third person view after game level load end", 0),
                     KCVar.CreateCVar("harm_pm_preferCrouchViewHeight", "float", "32", "Set prefer crouch view height in Third-Person(suggest 32 - 39, less or equals 0 to disable)", KCVar.FLAG_POSITIVE)
-                );
-        KCVar.Group HARDCORPS_CVARS = new KCVar.Group("Hardcorps", false)
-                .AddCVar(
-                    KCVar.CreateCVar("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up", 0)
                 );
 
         KCVar.Group QUAKE4_CVARS = new KCVar.Group("Quake4", false)
@@ -101,11 +81,7 @@ public final class KCVarSystem
         _cvars.put("RENDERER", RENDERER_CVARS);
         _cvars.put("FRAMEWORK", FRAMEWORK_CVARS);
         _cvars.put("base", GAME_CVARS);
-        _cvars.put("d3xp", D3XP_CVARS);
-        _cvars.put("cdoom", CDOOM_CVARS);
-        _cvars.put("d3le", D3LE_CVARS);
         _cvars.put("rivensin", RIVENSIN_CVARS);
-        _cvars.put("hardcorps", HARDCORPS_CVARS);
         _cvars.put("q4base", QUAKE4_CVARS);
         _cvars.put("preybase", PREY_CVARS);
 

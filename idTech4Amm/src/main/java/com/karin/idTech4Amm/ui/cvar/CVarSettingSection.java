@@ -1,13 +1,12 @@
 package com.karin.idTech4Amm.ui.cvar;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.n0n3m4.q3e.karin.KCVar;
+import com.karin.idTech4Amm.lib.KCVar;
 
 public class CVarSettingSection extends LinearLayout
 {

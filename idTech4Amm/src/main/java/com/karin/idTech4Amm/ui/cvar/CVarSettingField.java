@@ -3,12 +3,10 @@ package com.karin.idTech4Amm.ui.cvar;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.n0n3m4.q3e.karin.KCVar;
-import com.n0n3m4.q3e.karin.KidTech4Command;
+import com.karin.idTech4Amm.lib.KCVar;
 
 public class CVarSettingField extends LinearLayout
 {

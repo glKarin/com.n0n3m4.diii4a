@@ -3,12 +3,11 @@ package com.karin.idTech4Amm.ui.cvar;
 import android.content.Context;
 import android.text.InputType;
 import android.view.inputmethod.EditorInfo;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.n0n3m4.q3e.karin.KCVar;
+import com.karin.idTech4Amm.lib.KCVar;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 
 public class CVarSetting_edittext extends LinearLayout implements CVarSettingInterface

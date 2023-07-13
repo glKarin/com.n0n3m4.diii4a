@@ -1,11 +1,9 @@
 package com.karin.idTech4Amm.ui.cvar;
 
 import android.content.Context;
-import android.view.View;
 import android.widget.CheckBox;
-import android.widget.RadioButton;
 
-import com.n0n3m4.q3e.karin.KCVar;
+import com.karin.idTech4Amm.lib.KCVar;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 
 public class CVarSetting_checkbox extends CheckBox implements CVarSettingInterface

@@ -1,4 +1,4 @@
-package com.n0n3m4.q3e.karin;
+package com.karin.idTech4Amm.lib;
 
 import java.util.ArrayList;
 import java.util.Arrays;

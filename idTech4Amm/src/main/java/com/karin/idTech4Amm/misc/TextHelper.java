@@ -6,13 +6,12 @@ import android.content.Context;
 
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
-import com.n0n3m4.q3e.karin.KCVar;
-import com.n0n3m4.q3e.karin.KCVarSystem;
+import com.karin.idTech4Amm.lib.KCVar;
+import com.karin.idTech4Amm.lib.KCVarSystem;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Collection;
 
