@@ -180,7 +180,7 @@
     <string name="language">语言/Language</string>
     <string name="setup_launcher_language">设置启动器语言</string>
     <string name="be_available_on_reboot_the_next_time">重启或下次启动生效</string>
-    <string name="bot_q3_bot_support_in_mp_game">Bot(多人游戏中雷神之锤3Bot支持)</string>
+    <string name="bot_q3_bot_support_in_mp_game">Bot(SABot-a9 mod)</string>
     <string name="mp_game_map_aas_files">多人游戏地图aas文件</string>
     <string name="game_patch_resource">游戏补丁资源</string>
     <string name="extract_all">全部提取</string>

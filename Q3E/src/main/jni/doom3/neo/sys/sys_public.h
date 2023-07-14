@@ -91,9 +91,13 @@ extern bool Sys_InRenderThread(void);
 
 #endif
 
+#if 0 //#ifdef _K_DEV
+#define _alloca( x )							(Sys_Printf("_alloca(%d)\n", x),alloca( x ))
+#define _alloca16( x )					(Sys_Printf("_alloca16(%d)\n", x),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
+#else
 #define _alloca							alloca
-//k 64
 #define _alloca16( x )					((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
+#endif
 
 #define ALIGN16( x )					x
 #define PACKED							__attribute__((packed))
@@ -378,13 +382,6 @@ typedef enum {
 	NA_LOOPBACK,
 	NA_BROADCAST,
 	NA_IP
-#ifdef _RAVEN // bot
-		,
-// jmarshall: bot
-	NA_BOT
-// jmarshall end
-#endif
-
 } netadrtype_t;
 
 typedef struct {

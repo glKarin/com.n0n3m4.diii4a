@@ -246,8 +246,47 @@ void idAsyncServer::Kill(void)
 	session->Stop();
 }
 
-#ifdef _RAVEN
-static void GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ]);
+
+#ifdef _RAVEN // mp
+static idStr GetBestMPGametype(const char *map, const char *gametype)
+{
+	// from q4sdk::game/gamesys/SysCvar.cpp
+	const char *si_gameTypeArgs[]		= { "singleplayer", "DM", "Tourney", "Team DM", "CTF", "Arena CTF", "DeadZone", NULL };
+	const int si_numGameTypeArgs = sizeof( si_gameTypeArgs ) / sizeof( si_gameTypeArgs[0] );
+
+	int num = declManager->GetNumDecls(DECL_MAPDEF);
+	int i, j;
+
+	for (i = 0; i < num; i++) {
+		const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(declManager->DeclByIndex(DECL_MAPDEF, i));
+
+		if (mapDef && idStr::Icmp(mapDef->GetName(), map) == 0) {
+			if (mapDef->dict.GetBool(gametype)) {
+				// dont change gametype
+				return gametype;
+			}
+
+			for (j = 1; si_gameTypeArgs[ j ]; j++) {
+				if (mapDef->dict.GetBool(si_gameTypeArgs[ j ])) {
+					return si_gameTypeArgs[ j ];
+				}
+			}
+
+			// error out, no valid gametype
+			return "DM";
+		}
+	}
+
+	//For testing a new map let it play any gametpye
+	return gametype;
+}
+
+void GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ])
+{
+	idStr aux = GetBestMPGametype(map, gametype);
+	strncpy(buf, aux.c_str(), MAX_STRING_CHARS);
+	buf[ MAX_STRING_CHARS - 1 ] = '\0';
+}
 #endif
 /*
 ==================
@@ -353,43 +392,6 @@ void idAsyncServer::ExecuteMapChange(void)
 	// re-initialize all connected clients for the new map
 	for (i = 0; i < MAX_ASYNC_CLIENTS; i++) {
 		if (clients[i].clientState >= SCS_PUREWAIT && i != localClientNum) {
-
-#ifdef _RAVEN // bot
-	if (clients[i].channel.GetRemoteAddress().type == NA_BOT)
-		{
-			// clear the user info
-			sessLocal.mapSpawnData.userInfo[ i ].Clear();	// always start with a clean base
-
-			// clear the server client
-			serverClient_t &client = clients[i];
-			client.clientState = SCS_FREE;
-			client.clientPrediction = 0;
-			client.clientAheadTime = 0;
-			client.gameInitSequence = -1;
-			client.gameFrame = 0;
-			client.gameTime = 0;
-			client.channel.ResetRate();
-			int clientRate = client.clientRate;
-			client.clientRate = clientRate ? clientRate : idAsyncNetwork::serverMaxClientRate.GetInteger();
-			client.channel.SetMaxOutgoingRate(Min(idAsyncNetwork::serverMaxClientRate.GetInteger(), client.clientRate));
-			client.clientPing = 0;
-			client.lastConnectTime = serverTime;
-			client.lastEmptyTime = serverTime;
-			client.lastPingTime = serverTime;
-			client.lastSnapshotTime = serverTime;
-			client.lastPacketTime = serverTime;
-			client.lastInputTime = serverTime;
-			client.acknowledgeSnapshotSequence = 0;
-			client.numDuplicatedUsercmds = 0;
-
-			// clear the user commands
-			for (int m = 0; m < MAX_USERCMD_BACKUP; m++) {
-				memset(&userCmds[m][i], 0, sizeof(userCmds[m][i]));
-			}
-		}
-		else
-		{
-#endif
 			InitClient(i, clients[i].clientId, clients[i].clientRate);
 
 			SendGameInitToClient(i);
@@ -397,9 +399,6 @@ void idAsyncServer::ExecuteMapChange(void)
 			if (sessLocal.mapSpawnData.serverInfo.GetBool("si_pure")) {
 				clients[ i ].clientState = SCS_PUREWAIT;
 			}
-#ifdef _RAVEN
-		}
-#endif
 		}
 	}
 
@@ -909,13 +908,6 @@ void idAsyncServer::SendReliableMessage(int clientNum, const idBitMsg &msg)
 		return;
 	}
 
-#ifdef _RAVEN // bot
-// jmarshall: bot
-	if (clients[clientNum].channel.GetRemoteAddress().type == NA_BOT)
-		return;
-// jmarshall end
-#endif
-
 	if (!clients[ clientNum ].channel.SendReliableMessage(msg)) {
 		clients[ clientNum ].channel.ClearReliableMessages();
 		DropClient(clientNum, "#str_07136");
@@ -940,13 +932,6 @@ void idAsyncServer::CheckClientTimeouts(void)
 		if (i == localClientNum) {
 			continue;
 		}
-
-#ifdef _RAVEN // bot
-// jmarshall: bot
-		if (client.channel.GetRemoteAddress().type == NA_BOT)
-			continue;
-// jmarshall end
-#endif
 
 		if (client.lastPacketTime > serverTime) {
 			client.lastPacketTime = serverTime;
@@ -2739,13 +2724,6 @@ void idAsyncServer::RunFrame(void)
 			continue;
 		}
 
-#ifdef _RAVEN // bot
-// jmarshall - Don't send update packets to bots.
-		if (client.channel.GetRemoteAddress().type == NA_BOT)
-			continue;
-// jmarshall end
-#endif
-
 		// modify maximum rate if necesary
 		if (idAsyncNetwork::serverMaxClientRate.IsModified()) {
 			client.channel.SetMaxOutgoingRate(Min(client.clientRate, idAsyncNetwork::serverMaxClientRate.GetInteger()));
@@ -3114,132 +3092,4 @@ void idAsyncServer::ProcessDownloadRequestMessage(const netadr_t from, const idB
 		serverPort.SendPacket(from, outMsg.GetData(), outMsg.GetSize());
 	}
 }
-
-#ifdef _RAVEN // bot
-// jmarshall: bot
-/*
-===============
-idAsyncServer::ServerSetBotUserCommand
-===============
-*/
-int idAsyncServer::ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd) {
-	usercmd_t realcmd;
-
-	// Ensure this client is a bot.
-	if (clients[clientNum].channel.GetRemoteAddress().type != NA_BOT)
-		return -1;
-
-	realcmd = cmd;
-	realcmd.gameTime = gameFrame;
-	realcmd.duplicateCount = gameTime;
-
-	int index = gameFrame & (MAX_USERCMD_BACKUP - 1);
-	userCmds[index][clientNum] = realcmd;
-
-	return 1;
-}
-
-/*
-===============
-idAsyncServer::AllocOpenClientSlotForAI
-===============
-*/
-int idAsyncServer::AllocOpenClientSlotForAI(const char* botName, int maxPlayersOnServer) {
-	int numActivePlayers = 0;
-	int botClientId = -1;
-	idDict spawnArgs;
-
-	// Check to see how many active players we have.
-	for (int i = 0; i < MAX_ASYNC_CLIENTS; i++)
-	{
-		if (clients[i].clientState >= SCS_PUREWAIT)
-		{
-			numActivePlayers++;
-		}
-	}
-
-	if (numActivePlayers >= maxPlayersOnServer) {
-		common->Warning("idAsyncServer::AllocateClientSlotForBot: No open slots for bot\n");
-		return -1;
-	}
-
-	// Find a free slot for the bot.
-	for (int i = 0; i < MAX_ASYNC_CLIENTS; i++)
-	{
-		if (clients[i].clientState == SCS_FREE)
-		{
-			botClientId = i;
-			break;
-		}
-	}
-
-	if (botClientId == -1)
-	{
-		common->Warning("idAsyncServer::AllocateClientSlotForBot: Invalid client number\n");
-		return -1;
-	}
-
-	{
-		netadr_t badAddress;
-		InitClient( botClientId, 0, 0 );
-		memset( &badAddress, 0, sizeof( badAddress ) );
-		badAddress.type = NA_BOT;
-		clients[botClientId].channel.Init( badAddress, serverId );
-		clients[botClientId].clientState = SCS_INGAME;
-		sessLocal.mapSpawnData.userInfo[botClientId] = *cvarSystem->MoveCVarsToDict( CVAR_USERINFO );
-	}
-
-	// Set all the spawn args for the new bot.
-	spawnArgs.Set("ui_name", botName);
-
-	// Init the new client, and broadcast it to the rest of the players.
-	game->ServerClientBegin(botClientId, true, botName);
-	idAsyncServer::SendUserInfoBroadcast(botClientId, spawnArgs, true);
-
-	return 1;
-}
-
-// jmarshall end
-
-static idStr GetBestMPGametype(const char *map, const char *gametype)
-{
-	// from q4sdk::game/gamesys/SysCvar.cpp
-	const char *si_gameTypeArgs[]		= { "singleplayer", "DM", "Tourney", "Team DM", "CTF", "Arena CTF", "DeadZone", NULL };
-	const int si_numGameTypeArgs = sizeof( si_gameTypeArgs ) / sizeof( si_gameTypeArgs[0] );
-
-	int num = declManager->GetNumDecls(DECL_MAPDEF);
-	int i, j;
-
-	for (i = 0; i < num; i++) {
-		const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(declManager->DeclByIndex(DECL_MAPDEF, i));
-
-		if (mapDef && idStr::Icmp(mapDef->GetName(), map) == 0) {
-			if (mapDef->dict.GetBool(gametype)) {
-				// dont change gametype
-				return gametype;
-			}
-
-			for (j = 1; si_gameTypeArgs[ j ]; j++) {
-				if (mapDef->dict.GetBool(si_gameTypeArgs[ j ])) {
-					return si_gameTypeArgs[ j ];
-				}
-			}
-
-			// error out, no valid gametype
-			return "DM";
-		}
-	}
-
-	//For testing a new map let it play any gametpye
-	return gametype;
-}
-
-void GetBestGameType(const char *map, const char *gametype, char buf[ MAX_STRING_CHARS ])
-{
-	idStr aux = GetBestMPGametype(map, gametype);
-	strncpy(buf, aux.c_str(), MAX_STRING_CHARS);
-	buf[ MAX_STRING_CHARS - 1 ] = '\0';
-}
-
-#endif
 

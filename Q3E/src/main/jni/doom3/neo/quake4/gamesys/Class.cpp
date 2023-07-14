@@ -1428,13 +1428,10 @@ void idClass::RegisterClasses( void )
 	REGISTER(riDeadZonePowerup); // ..\..\code\game\Item.cpp
 	REGISTER(WeaponNapalmGun);	// ..\..\code\game\weapon\WeaponNapalmGun.cpp
 // RITUAL END
-
-#ifdef _QUAKE4 // bot
-// jmarshall: bot
-	REGISTER(rvmBot);
-// jmarshall end
+#ifdef MOD_BOTS
+	REGISTER(botAi);	// bots/BotAI.cpp
+	REGISTER(botSabot);	// bots/botSabot.cpp
 #endif
-
 #undef REGISTER
 }
 

@@ -555,25 +555,6 @@ void idGameLocal::Init( void ) {
 
 	gamestate = GAMESTATE_NOMAP;
 
-#ifdef _QUAKE4 // bot
-// jmarshall: bot
-	// load in the bot itemtable.
-	botItemTable = FindEntityDef("bot_itemtable", false);
-	if (botItemTable == NULL)
-	{
-		common->Warning("Failed to find bot_itemtable decl!\n");
-	}
-	else
-	{
-	// init all the bot systems.
-	botCharacterStatsManager.Init();
-	botFuzzyWeightManager.Init();
-	botWeaponInfoManager.Init();
-	botGoalManager.BotSetupGoalAI();
-	}
-// jmarshall end
-#endif
-
 	Printf( "...%d aas types\n", aasList.Num() );
 	Printf( "game initialized.\n" );
 	Printf( "---------------------------------------------\n" );
@@ -1314,9 +1295,6 @@ void idGameLocal::SetServerInfo( const idDict &_serverInfo ) {
 	}
 }
 
-#ifdef _QUAKE4 //k: auto gen aas file for mp game map with bot
-static idCVar harm_g_autoGenAASFileInMPGame( "harm_g_autoGenAASFileInMPGame", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic.");
-#endif
 /*
 ===================
 idGameLocal::LoadMap
@@ -1497,52 +1475,13 @@ void idGameLocal::LoadMap( const char *mapName, int randseed ) {
 	playerPVS.i = -1;
 	playerConnectedAreas.i = -1;
 
-	// load navigation system for all the different monster sizes
-	for( i = 0; i < aasNames.Num(); i++ ) {
-		aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() );
-	}
-
-#ifdef _QUAKE4 //k: in MP game, auto gen AAS file for map
-	if(CAN_ADD_BOT() && harm_g_autoGenAASFileInMPGame.GetBool())
-	{
-		Printf("[Harmattan]: Check AAS load result......\n");
-		bool aasLoadSuc = false;
-		for( i = 0; i < aasNames.Num(); i++ ) {
-			if(aasList[ i ]->GetSettings())
-			{
-				aasLoadSuc = true;
-				break;
-			}
-		}
-		Printf("[Harmattan]: AAS load %s.\n", aasLoadSuc ? "success" : "fail");
-		if(!aasLoadSuc)
-		{
-			Printf("[Harmattan]: Check AAS file exists......\n");
-			bool aasFileExists = false;
-			for( i = 0; i < aasNames.Num(); i++ ) {
-				idStr aasFilePath( mapFileName );
-				aasFilePath.SetFileExtension( aasNames[ i ] );
-				if (fileSystem->ReadFile(aasFilePath, NULL, NULL) > 0) {
-					aasFileExists = true;
-					break;
-				}
-			}
-			Printf("[Harmattan]: AAS file %s.\n", aasFileExists ? "exists" : "not found");
-			if(!aasFileExists)
-			{
-				Printf("[Harmattan]: Generate AAS file %s......\n", mapFileName.c_str());
-				cmdSystem->BufferCommandText( CMD_EXEC_NOW, va("harm_runAAS %s", mapFileName.c_str()) );
-				Printf("[Harmattan]: Generate AAS file %s completed. Try reload AAS.\n", mapFileName.c_str());
-				aasLoadSuc = false;
-				for( i = 0; i < aasNames.Num(); i++ ) {
-					if(aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() ))
-						aasLoadSuc = true;
-				}
-				Printf("[Harmattan]: AAS reload %s.\n", aasLoadSuc ? "success" : "fail");
-			}
-		}
-	}
+#ifdef MOD_BOTS // cusTom3 - aas extensions - moved to later in InitFromNewMap so entities are spawned
+	if(!BOT_ENABLED())
 #endif
+    // load navigation system for all the different monster sizes
+    for( i = 0; i < aasNames.Num(); i++ ) {
+        aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() );
+    }
 
 // RAVEN BEGIN
 // cdr: Obstacle Avoidance
@@ -1586,6 +1525,26 @@ void idGameLocal::LocalMapRestart( int instance ) {
 
 	gamestate = GAMESTATE_SHUTDOWN;
 
+#ifdef MOD_BOTS
+	if(BOT_ENABLED())
+	// TinMan: tell those who are going to stick around that they are restarting
+		for ( i = 0; i < MAX_GENTITIES; i++ )
+		{
+			if ( entities[ i ] )
+			{
+				if ( entities[ i ]->IsType( idPlayer::Type ) )
+				{
+					static_cast< idPlayer * >( entities[ i ] )->PrepareForRestart();
+				}
+				else if ( entities[ i ]->IsType( botAi::Type ) )
+				{
+					//Printf( "found bot to shutdown\n" ); // TinMan: *debug*
+					static_cast< botAi * >( entities[ i ] )->PrepareForRestart();
+				}
+			}
+		}
+    else
+#endif // cusTom3 - original version below
 	for ( i = 0; i < MAX_CLIENTS; i++ ) {
 // RAVEN BEGIN
 // jnewquist: Use accessor for static class type 
@@ -1622,13 +1581,34 @@ void idGameLocal::LocalMapRestart( int instance ) {
 	// (note that if there are no players in the game, we could just leave it at it's current value)
 	spawnCount = latchSpawnCount;
 
+#ifdef MOD_BOTS
+	if(BOT_ENABLED())
+	// TinMan: restartz0r clients and botz0rs
+		for ( i = 0; i < MAX_GENTITIES; i++ )
+		{
+			if ( entities[ i ] )
+			{
+				if ( entities[ i ]->IsType( idPlayer::Type ) )
+				{
+					static_cast< idPlayer * >( entities[ i ] )->Restart();
+				}
+				else if ( entities[ i ]->IsType( botAi::Type ) )
+				{
+					//Printf( "found bot to restart\n" ); // TinMan: *debug*
+					static_cast< botAi * >( entities[ i ] )->Restart();
+				}
+			}
+		}
+    else
+#endif
 	// setup the client entities again
-	for ( i = 0; i < MAX_CLIENTS; i++ ) {
+	for (i = 0; i < MAX_CLIENTS; i++) {
 // RAVEN BEGIN
 // jnewquist: Use accessor for static class type 
-		if ( entities[ i ] && entities[ i ]->IsType( idPlayer::GetClassType() ) && (isClient || instance == -1 || entities[ i ]->GetInstance() == instance ) ) {
+		if (entities[i] && entities[i]->IsType(idPlayer::GetClassType()) &&
+			(isClient || instance == -1 || entities[i]->GetInstance() == instance)) {
 // RAVEN END
-			static_cast< idPlayer * >( entities[ i ] )->Restart();
+			static_cast< idPlayer * >( entities[i] )->Restart();
 		}
 	}
 
@@ -1966,9 +1946,6 @@ void idGameLocal::MapPopulate( int instance ) {
 idGameLocal::InitFromNewMap
 ===================
 */
-#ifdef _QUAKE4 //karin: auto fill bots in MP-game
-static idCVar harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Automatic fill bots after map loaded in multiplayer game(0: disable; other number: bot num).", 0, MAX_BOT );
-#endif
 void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorld, bool isServer, bool isClient, int randseed ) {
 
 	TIME_THIS_SCOPE( __FUNCLINE__);
@@ -2037,6 +2014,58 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 
 	MapPopulate();
 
+#ifdef MOD_BOTS // cusTom3 - aas extensions - moved here from LoadMap so entities are spawned for botaas calculations
+	// load navigation system for all the different monster sizes
+	if(BOT_ENABLED()) {
+		int i;
+		for( i = 0; i < aasNames.Num(); i++ )
+		{
+			aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() );
+		}
+
+		//k: in MP game, auto gen AAS file for map
+		if(harm_g_autoGenAASFileInMPGame.GetBool())
+		{
+			Printf("[Harmattan]: Check AAS load result......\n");
+			bool aasLoadSuc = false;
+			for( i = 0; i < aasNames.Num(); i++ ) {
+				if(aasList[ i ]->GetSettings())
+				{
+					aasLoadSuc = true;
+					break;
+				}
+			}
+			Printf("[Harmattan]: AAS load %s.\n", aasLoadSuc ? "success" : "fail");
+			if(!aasLoadSuc)
+			{
+				Printf("[Harmattan]: Check AAS file exists......\n");
+				bool aasFileExists = false;
+				for( i = 0; i < aasNames.Num(); i++ ) {
+					idStr aasFilePath( mapFileName );
+					aasFilePath.SetFileExtension( aasNames[ i ] );
+					if (fileSystem->ReadFile(aasFilePath, NULL, NULL) > 0) {
+						aasFileExists = true;
+						break;
+					}
+				}
+				Printf("[Harmattan]: AAS file %s.\n", aasFileExists ? "exists" : "not found");
+				if(!aasFileExists)
+				{
+					Printf("[Harmattan]: Generate AAS file %s......\n", mapFileName.c_str());
+					cmdSystem->BufferCommandText( CMD_EXEC_NOW, va("harm_runAAS %s", mapFileName.c_str()) );
+					Printf("[Harmattan]: Generate AAS file %s completed. Try reload AAS.\n", mapFileName.c_str());
+					aasLoadSuc = false;
+					for( i = 0; i < aasNames.Num(); i++ ) {
+						if(aasList[ i ]->Init( idStr( mapFileName ).SetFileExtension( aasNames[ i ] ).c_str(), mapFile->GetGeometryCRC() ))
+							aasLoadSuc = true;
+					}
+					Printf("[Harmattan]: AAS reload %s.\n", aasLoadSuc ? "success" : "fail");
+				}
+			}
+		}
+    }
+#endif
+
 	mpGame.Reset();
 
 	mpGame.Precache();
@@ -2054,19 +2083,10 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 	animationLib->FlushUnusedAnims();
 // RAVEN END
 
-#ifdef _QUAKE4 // bot
-// jmarshall: bot
-	if (CAN_ADD_BOT())
-	{
-		botGoalManager.InitLevelItems();
-	}
-// jmarshall end
-#endif
-
 	gamestate = GAMESTATE_ACTIVE;
 
-#ifdef _QUAKE4 //karin: auto fill bots in MP-game
-	if (CAN_ADD_BOT())
+#ifdef MOD_BOTS //karin: auto fill bots in MP-game
+	if (BOT_ENABLED())
 	{
 		int botCount = harm_si_autoFillBots.GetInteger();
 		if(botCount > 0)
@@ -2369,8 +2389,8 @@ void idGameLocal::MapClear( bool clearClients, int instance ) {
 	for( i = 0; i < MAX_CENTITIES; i++ ) {
 		// on the server we need to keep around client entities bound to entities in our instance2
 		if( gameLocal.isServer && gameLocal.GetLocalPlayer() && instance != -1 &&
-			instance != gameLocal.GetLocalPlayer()->GetInstance() && 
-			clientEntities[ i ] && clientEntities[ i ]->GetBindMaster() && 
+			instance != gameLocal.GetLocalPlayer()->GetInstance() &&
+			clientEntities[ i ] && clientEntities[ i ]->GetBindMaster() &&
 			clientEntities[ i ]->GetBindMaster()->GetInstance() == gameLocal.GetLocalPlayer()->GetInstance() ) {
 			continue;
 		}
@@ -2380,6 +2400,42 @@ void idGameLocal::MapClear( bool clearClients, int instance ) {
 	}
 // RAVEN END
 
+#ifdef MOD_BOTS
+	if(BOT_ENABLED())
+	// TinMan: Keep bots alive
+		for( i = ( clearClients ? 0 : MAX_CLIENTS ); i < MAX_GENTITIES; i++ )
+		{
+			idEntity * ent;
+
+			if ( !clearClients )
+			{
+				ent = entities[ i ];
+				if ( ent )
+				{
+					if ( ent->IsType( botAi::Type ) )
+					{
+						//Printf( "[MapClear][Keep: %s]\n", entities[ i ]->name.c_str() );
+						continue;
+					}
+				}
+
+				delete entities[ i ];
+				// ~idEntity is in charge of setting the pointer to NULL
+				// it will also clear pending events for this entity
+				assert( !entities[ i ] );
+				spawnIds[ i ] = -1;
+			}
+			else
+			{
+				delete entities[ i ];
+				// ~idEntity is in charge of setting the pointer to NULL
+				// it will also clear pending events for this entity
+				assert( !entities[ i ] );
+				spawnIds[ i ] = -1;
+			}
+		}
+    else
+#endif
 	for( i = ( clearClients ? 0 : MAX_CLIENTS ); i < MAX_GENTITIES; i++ ) {
 		if( instance >= 0 && entities[ i ] && entities[ i ]->GetInstance() != instance ) {
 			continue;
@@ -2405,6 +2461,19 @@ void idGameLocal::MapClear( bool clearClients, int instance ) {
 // RAVEN END
 
 	if ( !clearClients ) {
+#ifdef MOD_BOTS
+		if(BOT_ENABLED())
+			// TinMan: add back the hashes of the clients and bots
+			for ( i = 0; i < MAX_GENTITIES; i++ )
+			{
+				if ( !entities[ i ] )
+				{
+					continue;
+				}
+				entityHash.Add( entityHash.GenerateKey( entities[ i ]->name.c_str(), true ), i );
+			}
+		else
+#endif
 		// add back the hashes of the clients/stuff in other instances
 		for ( i = 0; i < MAX_GENTITIES; i++ ) {
 			if ( !entities[ i ] ) {
@@ -3235,7 +3304,6 @@ bool idGameLocal::SetupPortalSkyPVS( idPlayer *player ) {
 		return( false );
 	}
 
-#if 1 //karin: testing
 	// Allocate room for the area flags
 	numAreas = gameRenderWorld->NumAreas();
 	visibleAreas = ( bool * )_alloca( numAreas );
@@ -3266,9 +3334,6 @@ bool idGameLocal::SetupPortalSkyPVS( idPlayer *player ) {
 
 	// .. if any one has a skybox component, then merge in the portal sky
 	return ( i != numAreas );
-#else
-	return true;
-#endif
 }
 // RAVEN END
 
@@ -3544,6 +3609,21 @@ void idGameLocal::SortActiveEntityList( void ) {
 			}
 		}
 	}
+
+#ifdef MOD_BOTS
+	if(BOT_ENABLED()) {
+	// TinMan: Make bots king of the think list, where they shall rule with an iron fist. Basically they should think before thier fakeclient ents
+		for ( ent = activeEntities.Next(); ent != NULL; ent = next_ent )
+		{
+			next_ent = ent->activeNode.Next();
+			if ( ent->IsType( botAi::Type ) )
+			{
+				ent->activeNode.Remove();
+				ent->activeNode.AddToFront( activeEntities );
+			}
+		}
+    }
+#endif
 
 	sortTeamMasters = false;
 	sortPushers = false;
@@ -5714,21 +5794,6 @@ void idGameLocal::AlertAI( idEntity *ent ) {
 // RAVEN BEGIN
 // bdube: merged
 	if ( ent ) {
-#ifdef _QUAKE4 // bot
-// jmarshall: bot
-		// Alert any bots near were we just exploded.
-		if (CAN_ADD_BOT())
-		{
-			idPlayer* player = ent->Cast<idPlayer>();
-			if (player)
-			{
-				AlertBots(player, ent->GetOrigin());
-			}
-
-		}
-// jmarshall end
-#endif
-
 // RAVEN BEGIN
 // jnewquist: Use accessor for static class type 
 		if ( ent->IsType( idActor::GetClassType() ) ) {
@@ -8636,219 +8701,4 @@ void operator delete[]( void *p ) {
 }
 #endif	// #else #ifdef ID_DEBUG_MEMORY
 #endif	// #if defined(ID_REDIRECT_NEWDELETE) || defined(_RV_MEM_SYS_SUPPORT)
-
-#ifdef _QUAKE4 // bot
-/*
-===============
-idGameLocal::GetBotItemEntry
-===============
-*/
-int idGameLocal::GetBotItemEntry( const char* name )
-{
-#if 1 //k: check name
-	if(!botItemTable || !name || !*name)
-		return 9;
-#endif
-
-	const idKeyValue* keyvalue = botItemTable->dict.FindKey( name );
-	if( !keyvalue )
-	{
-		gameLocal.Warning( "GetBotItemModelIndex: Doesn't have key '%s'", name );
-		return 9;
-	}
-
-	return botItemTable->dict.GetInt( name );
-}
-
-/*
-================
-idGameLocal::TravelTimeToGoal
-================
-*/
-int idGameLocal::TravelTimeToGoal( const idVec3& origin, const idVec3& goal )
-{
-	idAAS* aas = GetBotAAS();
-
-	if( aas == NULL )
-	{
-		gameLocal.Error( "idGameLocal::TraveTimeToGoal: No AAS loaded...\n" );
-		return NULL;
-	}
-	//int originArea = aas->PointAreaNum(origin);
-	//idVec3 _goal = goal;
-	//int goalArea = aas->AdjustPositionAndGetArea(_goal);
-	//return aas->TravelTimeToGoalArea(originArea, origin, goalArea, TFL_WALK);
-
-	idVec3 org = origin;
-	int curAreaNum = aas->AdjustPositionAndGetArea( org );
-	int goalArea = aas->PointAreaNum( goal );
-	int travelTime;
-	idReachability* reach;
-	if( !aas->RouteToGoalArea( curAreaNum, org, goalArea, TFL_WALK | TFL_AIR, travelTime, &reach ) )
-	{
-		return NULL;
-	}
-
-	//int goalArea = aas->PointAreaNum(goal);
-	//aas->ShowWalkPath(origin, goalArea, goal);
-
-	return travelTime;
-}
-
-/*
-===============
-idGameLocal::Trace
-===============
-*/
-void idGameLocal::Trace(trace_t& results, const idVec3& start, const idVec3& end, int contentMask, int passEntity)
-{
-	idMat3 axis;
-	axis.Identity();
-
-	if (passEntity == -1)
-	{
-		clip[0]->Translation(results, start, end, NULL, axis, CONTENTS_SOLID, NULL);
-	}
-	else
-	{
-		clip[0]->Translation(results, start, end, NULL, axis, CONTENTS_SOLID, entities[passEntity]);
-	}
-}
-
-/*
-======================
-idGameLocal::AddBot
-======================
-*/
-void idGameLocal::AddBot(const char *botName) {
-	int clientNum;
-
-#if 1
-		if(!GetBotAAS())
-#else
-	if (aasList.Num() == 0) 
-#endif
-	{
-		common->Warning("idGameLocal::AddBot: No AAS file loaded for map\n");
-		return;
-	}
-
-	clientNum = networkSystem->AllocateClientSlotForBot(botName,  MAX_BOT + 1);
-	if (clientNum == -1) {
-		return;
-	}
-
-	//	idPlayer* newPlayer = gameLocal.GetClient(clientNum);
-}
-
-/*
-===================
-idGameLocal::AlertBots
-===================
-*/
-// jmarshall: bot
-void idGameLocal::AlertBots(idPlayer* player, idVec3 alert_position)
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		rvmBot* bot = NULL;
-
-		if (entities[i] == NULL)
-		{
-			continue;
-		}
-
-		bot = entities[i]->Cast<rvmBot>();
-		if (bot == NULL)
-		{
-			continue;
-		}
-
-		trace_t tr;
-		Trace(tr, alert_position, bot->GetRenderEntity()->origin, CONTENTS_SOLID, 0);
-
-		if (tr.fraction == 1.0f)
-		{
-			bot->SetEnemy(player, player->GetOrigin());
-		}
-	}
-}
-
-/*
-===========
-idGameLocal::SpawnPlayer
-============
-*/
-// jmarshall - bot support
-void idGameLocal::SpawnPlayer(int clientNum, bool isBot, const char* botName) {
-// jmarshall end
-
-	TIME_THIS_SCOPE( __FUNCLINE__);
-
-	idEntity	*ent;
-	idDict		args;
-// RAVEN BEGIN
-// jnewquist: Tag scope and callees to track allocations using "new".
-	MEM_SCOPED_TAG(tag,MA_ENTITY);
-// RAVEN END
-
-	// they can connect
-	common->DPrintf( "SpawnPlayer: %i\n", clientNum );
-
-	args.SetInt( "spawn_entnum", clientNum );
-	args.Set( "name", va( "player%d", clientNum + 1 ) );
-// RAVEN BEGIN
-// bdube: changed marine class
-// jmarshall: bot support
-	if (gameLocal.IsMultiplayer())
-	{
-// jmarshall
-		if (isBot)
-		{
-			args.Set("classname", va("%s_bot", idPlayer::GetSpawnClassname()));
-			args.Set("botname", botName);
-		}
-		else
-		{
-			args.Set("classname", idPlayer::GetSpawnClassname());
-		}
-// jmarshall end
-	}
-	else
-	{
-// jmarshall - bot support
-		if (isBot)
-		{
-			gameLocal.Error("Bots not supported in singleplayer games!\n");
-		}
-// jmarshall end
-		else
-			args.Set("classname", idPlayer::GetSpawnClassname());
-	}
-// RAVEN END
-	
-	// This takes a really long time.
-	PACIFIER_UPDATE;
-	if ( !SpawnEntityDef( args, &ent ) || !entities[ clientNum ] ) {
-		Error( "Failed to spawn player as '%s'", args.GetString( "classname" ) );
-	}
-
-	// make sure it's a compatible class
-// RAVEN BEGIN
-// jnewquist: Use accessor for static class type 
-	if ( !ent->IsType( idPlayer::GetClassType() ) ) {
-// RAVEN END
-		Error( "'%s' spawned the player as a '%s'.  Player spawnclass must be a subclass of idPlayer.", args.GetString( "classname" ), ent->GetClassname() );
-	}
-
-	if ( clientNum >= numClients ) {
-		numClients = clientNum + 1;
-	}
-
-	PACIFIER_UPDATE;
-	mpGame.SpawnPlayer( clientNum );
-}
-// jmarshall end
-
-#endif
 // RAVEN END

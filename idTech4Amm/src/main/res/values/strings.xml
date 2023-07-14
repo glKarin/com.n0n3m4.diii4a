@@ -183,7 +183,7 @@
     <string name="language">Language</string>
     <string name="setup_launcher_language">Setup launcher language</string>
     <string name="be_available_on_reboot_the_next_time">Be available on reboot the next time</string>
-    <string name="bot_q3_bot_support_in_mp_game">Quake4 Bot(Q3 bot support in MP game)</string>
+    <string name="bot_q3_bot_support_in_mp_game">Quake4 Bot(SABot-a9 mod)</string>
     <string name="mp_game_map_aas_files">Quake4 MP game map aas files</string>
     <string name="game_patch_resource">Game patch resource</string>
     <string name="extract_all">Extract all</string>

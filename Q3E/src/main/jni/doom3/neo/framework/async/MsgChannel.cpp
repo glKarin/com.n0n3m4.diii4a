@@ -721,13 +721,6 @@ bool idMsgChannel::SendReliableMessage(const idBitMsg &msg)
 {
 	bool result;
 
-#ifdef _RAVEN // bot
-// jmarshall: bot
-	if (remoteAddress.type == NA_BOT)
-		return false;
-// jmarshall end
-#endif
-
 	assert(remoteAddress.type != NA_BAD);
 
 	if (remoteAddress.type == NA_BAD) {

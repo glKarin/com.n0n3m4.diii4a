@@ -43,12 +43,10 @@ public:
 	idEventArg( const class idEntity *data )	{ type = D_EVENT_ENTITY; value = reinterpret_cast<intptr_t>( data ); };
 	idEventArg( const trace_t *data )			{ type = D_EVENT_TRACE; value = reinterpret_cast<intptr_t>( data ); };
 
-#ifdef _QUAKE4 // 64bit
-// jmarshall - this can't be called from doomscript!
+#ifdef _QUAKE4 // 64bit this can't be called from doomscript!
 #ifdef __aarch64__
 	idEventArg(intptr_t data) { type = D_EVENT_INTEGER64bit; value = data; };
 #endif
-// jmarshall end
 #endif
 };
 
@@ -404,23 +402,6 @@ public:
 // bdube: debug info
 	virtual void				GetDebugInfo		( debugInfoProc_t proc, void* userData );
 // RAVEN END
-
-#ifdef _QUAKE4
-// jmarshall
-	template< typename T >
-	T* Cast(void)
-	{
-		return this ? (IsType(T::Type) ? static_cast<T*>(this) : NULL) : NULL;
-	}
-
-	template< typename T >
-	const T* Cast(void) const
-	{
-		return this ? (IsType(T::Type) ? static_cast<const T*>(this) : NULL) : NULL;
-	}
-	virtual void			StateThreadChanged(void) { };
-// jmarshall end
-#endif
 
 private:
 	classSpawnFunc_t			CallSpawnFunc( idTypeInfo *cls );

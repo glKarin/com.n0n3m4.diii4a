@@ -295,12 +295,6 @@ stateResult_t rvStateThread::Execute ( void ) {
 				return SRESULT_ERROR;				
 		}
 
-#ifdef _QUAKE4 // bot
-		if (lastResult == SRESULT_DONE) {
-			owner->StateThreadChanged();
-		}
-#endif
-
 		// Dont remove the node if it was interrupted or cleared in the last process
 		if ( !fl.stateCleared && !fl.stateInterrupted ) {
 			if( lastResult >= SRESULT_SETDELAY ) {

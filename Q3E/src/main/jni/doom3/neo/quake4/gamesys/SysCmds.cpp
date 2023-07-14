@@ -3038,147 +3038,6 @@ void Cmd_ClientOverflowReliable_f( const idCmdArgs& args ) {
 }
 #endif
 
-#ifdef _QUAKE4 // bot
-static int Bot_GetBotNames(idStrList &botNames)
-{
-	idFileList *files;
-	int i, index;
-	int num = 0;
-	int start = botNames.Num();
-
-	files = fileSystem->ListFiles("botfiles/bots", ".c", true, false);
-	for( i = 0; i < files->GetNumFiles(); i++ ) {
-		idStr name = files->GetFile(i);
-		name.StripPath();
-		name.StripFileExtension();
-		index = name.Last('_');
-		if(index != -1)
-			name = name.Left(index);
-		num = botNames.AddUnique(name);
-	}
-	fileSystem->FreeFileList(files);
-	return num - start;
-}
-
-static void ArgCompletion_addbot( const idCmdArgs &args, void(*callback)( const char *s ) ) {
-	idFileList *files;
-	int i;
-	idStrList botNames;
-	int index;
-	int num;
-
-	num = Bot_GetBotNames(botNames);
-	idStr prefix = args.Argv(0);
-	prefix.Append(' ');
-	for(i = 1; i < args.Argc() - 1; i++)
-	{
-		prefix += args.Argv(i);
-		prefix.Append(' ');
-	}
-	if(args.Argc() > 1)
-	{
-		const char *last = args.Argv(args.Argc() - 1);
-		if(botNames.FindIndex(last) != -1)
-		{
-			prefix += last;
-			prefix.Append(' ');
-		}
-	}
-	for( i = 0; i < num; i++ ) {
-		idStr name = botNames[i];
-		callback( prefix + name );
-	}
-}
-
-static int Bot_CheckRestClients(int num)
-{
-	int numClients = gameLocal.numClients;
-	int maxClients = gameLocal.serverInfo.GetInt("si_maxPlayers");
-	return maxClients - num - numClients;
-}
-
-// jmarshall: bot
-void Cmd_AddBot_f(const idCmdArgs& args)
-{
-	if(!CAN_ADD_BOT())
-	{
-		common->Warning("addbot only in Multi-Player game\n");
-		return;
-	}
-	if (args.Argc() < 2)
-	{
-		common->Warning("USAGE: addbot <botfile> <...> e.g. addbot major or addbot dark - see botfiles/bots for more details\n");
-		return;
-	}
-	int num = args.Argc() - 1;
-	if(num > MAX_BOT)
-	{
-		common->Warning("Max bot num is %d\n", MAX_BOT);
-		return;
-	}
-	int rest = Bot_CheckRestClients(num);
-	if(rest < 0)
-	{
-		common->Warning("bots has not enough (%d/%d)\n", rest + num, gameLocal.serverInfo.GetInt("si_maxPlayers"));
-		return;
-	}
-	for(int i = 0; i < num; i++)
-		gameLocal.AddBot(args.Argv(i + 1));
-}
-
-void Cmd_FillBots_f(const idCmdArgs& args)
-{
-	if(!CAN_ADD_BOT())
-	{
-		common->Warning("fillbots only in Multi-Player game\n");
-		return;
-	}
-	int num = Bot_CheckRestClients(0);
-	if(args.Argc() > 1)
-	{
-		int n = atoi(args.Argv(1));
-		if(n)
-			num = n;
-	}
-
-	if(num > MAX_BOT)
-	{
-		common->Warning("Max bot num is %d\n", MAX_BOT);
-		return;
-	}
-
-	int rest = Bot_CheckRestClients(num);
-	if(rest < 0)
-	{
-		common->Warning("bots has not enough (%d/%d)\n", rest + num, gameLocal.serverInfo.GetInt("si_maxPlayers"));
-		return;
-	}
-
-	idStrList botNames;
-	int botNum = Bot_GetBotNames(botNames);
-	idStrList list;
-	for(int i = 0; i < num; i++)
-	{
-		if(list.Num() == 0)
-			list = botNames;
-		int index = gameLocal.random.RandomInt(list.Num());
-		idStr name = list[index];
-		list.RemoveIndex(index);
-		gameLocal.AddBot(name);
-	}
-#if 0
-	gameLocal.AddBot("dark");
-	gameLocal.AddBot("major");
-	gameLocal.AddBot("gargoyle");
-	gameLocal.AddBot("skelebot");
-	gameLocal.AddBot("sly");
-	gameLocal.AddBot("neko");
-	gameLocal.AddBot("sarge");
-#endif
-}
-// jmarshall end
-#endif
-
 /*
 =================
 idGameLocal::InitConsoleCommands
@@ -3194,13 +3053,6 @@ void idGameLocal::InitConsoleCommands( void ) {
 //	cmdSystem->AddCommand( "writeGameState",		WriteGameState_f,			CMD_FL_GAME,				"write game state" );
 //	cmdSystem->AddCommand( "testSaveGame",			TestSaveGame_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"test a save game for a level" );
 // RAVEN END
-
-#ifdef _QUAKE4 // bot
-// jmarshall
-	cmdSystem->AddCommand("addbot", Cmd_AddBot_f, CMD_FL_GAME, "adds a multiplayer bot", ArgCompletion_addbot);
-	cmdSystem->AddCommand("fillbots", Cmd_FillBots_f, CMD_FL_GAME, "fill bots");
-// jmarshall end
-#endif
 
 	cmdSystem->AddCommand( "game_memory",			idClass::DisplayInfo_f,		CMD_FL_GAME,				"displays game class info" );
 	cmdSystem->AddCommand( "listClasses",			idClass::ListClasses_f,		CMD_FL_GAME,				"lists game classes" );
@@ -3382,6 +3234,15 @@ void idGameLocal::InitConsoleCommands( void ) {
 	cmdSystem->AddCommand( "buy",					Cmd_BuyItem_f,				CMD_FL_GAME,				"Buy an item (if in a buy zone and the game type supports it)" );
 // RITUAL END
 
+
+#ifdef MOD_BOTS // TinMan: Bot console commmands
+	cmdSystem->AddCommand( "addBot",				botAi::Addbot_f,			CMD_FL_GAME,				"adds a new bot", botAi::ArgCompletion_addBot );
+    cmdSystem->AddCommand( "removeBot",				botAi::Removebot_f,			CMD_FL_GAME,				"removes bot specified by id (0,15)" /*, idCmdSystem::ArgCompletion_Integer<0,( botAi::BOT_MAX_BOTS - 1 )>*/ );
+
+	cmdSystem->AddCommand("addbots", botAi::Cmd_AddBot_f, CMD_FL_GAME, "adds a multiplayer bot", botAi::ArgCompletion_addBot);
+	cmdSystem->AddCommand("fillbots", botAi::Cmd_FillBots_f, CMD_FL_GAME, "fill bots");
+	cmdSystem->AddCommand("sabot", botAi::Cmd_BotInfo_f, CMD_FL_GAME, "debug SaBot info");
+#endif
 }
 
 /*

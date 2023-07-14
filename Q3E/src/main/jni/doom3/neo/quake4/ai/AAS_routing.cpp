@@ -8,7 +8,27 @@
 #define CACHETYPE_AREA				1
 #define CACHETYPE_PORTAL			2
 
+#ifdef MOD_BOTS // TinMan: MAX_ROUTING_CACHE_MEMORY
+/*
+TinMan: *chatlog*
+custom: the reason it is really expensive to call RouteToGoal many times per frame with alot of different goal areas is because it loads the cache on the fly per goal area
+custom: the cache memory is capped, so when you use alot of different goal areas it has to swap out old cache and create new cache alot
+*/
+#define MAX_ROUTING_CACHE_MEMORY	(4*1024*1024) // TinMan: 4Mb
+/*
+TinMan: *chatlog*
+custom: i think i am going to up that to like 20
+TinMan: right..., you stay away from my computer, it like it's memory just the way it's allocated :p
+custom: well, your bots would perform a hell of a lot better at 20
+custom: you RouteToGoalArea alot
+custom: so it would help
+custom: as long as you have the memory to spare
+custom: how much memory do you have?
+TinMan: $1.50
+*/
+#else
 #define MAX_ROUTING_CACHE_MEMORY	(2*1024*1024)
+#endif
 
 #define LEDGE_TRAVELTIME_PANALTY	250
 
@@ -731,7 +751,7 @@ idReachability *idAASLocal::GetAreaReachability( int areaNum, int reachabilityNu
 idAASLocal::ClusterAreaNum
 ============
 */
-ID_INLINE int idAASLocal::ClusterAreaNum( int clusterNum, int areaNum ) const {
+/*//k ID_INLINE */int idAASLocal::ClusterAreaNum( int clusterNum, int areaNum ) const {
 	int side, areaCluster;
 
 	areaCluster = file->GetArea( areaNum ).cluster;

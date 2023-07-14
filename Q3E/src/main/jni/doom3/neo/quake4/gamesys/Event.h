@@ -21,9 +21,7 @@ Event are used for scheduling tasks and for linking script commands.
 #define MAX_EVENTS					8192		// Upped from 4096
 
 #ifdef _QUAKE4 // 64bit
-// jmarshall - 64bit
 #define D_EVENT_INTEGER64bit		'y'
-// jmarshall end
 // stack size of idVec3, aligned to native pointer size
 #define E_EVENT_SIZEOF_VEC			((sizeof(idVec3) + (sizeof(intptr_t) - 1)) & ~(sizeof(intptr_t) - 1))
 #endif

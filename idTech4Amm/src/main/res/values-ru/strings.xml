@@ -181,7 +181,7 @@
     <string name="language">Язык/Language</string>
     <string name="setup_launcher_language">Выбрать язык лаунчера</string>
     <string name="be_available_on_reboot_the_next_time">Язык будет обновлен после перезагрузки лаунчера</string>
-    <string name="bot_q3_bot_support_in_mp_game">Quake4 bot (поддержка бота Q3 в многопользовательской игре)</string>
+    <string name="bot_q3_bot_support_in_mp_game">Quake4 bot (SABot-a9 mod)</string>
     <string name="mp_game_map_aas_files">Файлы игры Quake4 в формате "aas"</string>
     <string name="game_patch_resource">Ресурсы игрового патча</string>
     <string name="extract_all">Извлечь все</string>

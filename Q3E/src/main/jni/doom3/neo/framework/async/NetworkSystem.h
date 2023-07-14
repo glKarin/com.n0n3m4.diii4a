@@ -128,10 +128,6 @@ class idNetworkSystem
 	virtual	void			AddFriend(int clientNum);
 	virtual void			RemoveFriend(int clientNum);
 #endif
-#ifdef _RAVEN // bot
-	virtual int				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);
-	virtual int				AllocateClientSlotForBot(const char *botName, int maxPlayersOnServer);
-#endif
 
 };
 

@@ -368,10 +368,6 @@ public:
 
 	// Set any additional gui variables needed by the loading screen
 	virtual void				SetupLoadingGui( idUserInterface *gui ) = 0;
-#ifdef _RAVEN // bot
-	virtual void			ServerClientBegin( int clientNum, bool isBot, const char* botName) = 0;
-#endif
-
 };
 
 extern idGame *					game;

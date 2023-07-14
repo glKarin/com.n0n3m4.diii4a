@@ -772,7 +772,7 @@ set(sabot_game_src
 		physics/Force_Grab.cpp
 		bots/BotAASBuild.cpp
 		bots/BotAI.cpp
-		bots/BotSabot.cpp
+		bots/botSabot.cpp
 		)
 list(APPEND src_sabot ${sabot_game_src})
 set_src_dir(src_sabot "sabot" ${src_sabot})
@@ -816,8 +816,6 @@ set(quake4_game_src
 	client/ClientModel.cpp
 	client/ClientMoveable.cpp
 	ai/AAS_Find.cpp
-	ai/AASCallback_FindCoverArea.cpp
-	ai/AASCallback_AvoidLocation.cpp
 	ai/Monster_Berserker.cpp
 	ai/Monster_BossBuddy.cpp
 	ai/Monster_BossMakron.cpp
@@ -856,7 +854,6 @@ set(quake4_game_src
 	ai/AI_Util.cpp
 	ai/VehicleAI.cpp
 	ai/AAS_tactical.cpp
-	ai/ObstacleAvoidance.cpp
 	weapon/WeaponBlaster.cpp
 	weapon/WeaponGrenadeLauncher.cpp
 	weapon/WeaponMachinegun.cpp
@@ -879,22 +876,9 @@ set(quake4_game_src
 	mp/stats/StatWindow.cpp
 	physics/Physics_Particle.cpp
 	physics/Physics_VehicleMonster.cpp
-	bots/Bot.cpp
-	bots/Bot_char.cpp
-	bots/Bot_chat.cpp
-	bots/Bot_goal.cpp
-	bots/Bot_Input.cpp
-	bots/Bot_weapons.cpp
-	bots/Bot_weights.cpp
+	bots/BotAASBuild.cpp
 	bots/BotAI.cpp
-	bots/BotAI_Battle_Attacked.cpp
-	bots/BotAI_Battle_Chase.cpp
-	bots/BotAI_Battle_Fight.cpp
-	bots/BotAI_Battle_NBG.cpp
-	bots/BotAI_Battle_Retreat.cpp
-	bots/BotAI_respawn.cpp
-	bots/BotAI_Seek_NBG.cpp
-	bots/BotAI_SeekLTG.cpp
+	bots/botSabot.cpp
 		)
 list(REMOVE_ITEM src_quake4
 		Fx.cpp
@@ -1548,7 +1532,7 @@ if(QUAKE4)
 	add_library(q4game SHARED ${src_quake4})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set_target_properties(q4game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4")
+	set_target_properties(q4game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;MOD_BOTS")
 	target_include_directories(q4game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/quake4")
 	set_target_properties(q4game PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(q4game PROPERTIES INSTALL_NAME_DIR "@executable_path")

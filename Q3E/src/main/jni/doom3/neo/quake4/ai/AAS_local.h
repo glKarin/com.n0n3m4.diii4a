@@ -5,6 +5,9 @@
 #include "AAS.h"
 #include "../Pvs.h"
 
+#ifdef MOD_BOTS // cusTom3 - aas extensions
+class BotAASBuild;
+#endif
 
 class idRoutingCache {
 	friend class idAASLocal;
@@ -56,6 +59,9 @@ private:
 };
 
 class idAASLocal : public idAAS {
+#ifdef MOD_BOTS // cusTom3 - aas extensions
+	friend class BotAASBuild;
+#endif
 public:
 								idAASLocal( void );
 	virtual						~idAASLocal( void );
@@ -164,10 +170,6 @@ private:	// pathing
 	idVec3						SubSampleFlyPath( int areaNum, const idVec3 &origin, const idVec3 &start, const idVec3 &end, int travelFlags, int &endAreaNum ) const;
 
 private:	// debug
-#ifdef _QUAKE4
-// jmarshall
-	virtual 
-#endif
 	const idBounds &			DefaultSearchBounds( void ) const;
 	void						DrawCone( const idVec3 &origin, const idVec3 &dir, float radius, const idVec4 &color ) const;
 	void						DrawAreaBounds( int areaNum ) const;
@@ -193,11 +195,11 @@ private:	// debug
 	void						ShowProblemArea( const idVec3 &origin ) const;
 // RAVEN END
 
-#ifdef _QUAKE4
-// jmarshall
-	virtual int					AdjustPositionAndGetArea(idVec3& origin);
+#ifdef MOD_BOTS // cusTom3 - aas extensions
 	virtual idAASFile*			GetAASFile(void) { return file; }
-// jmarshall end
+
+	private:
+    BotAASBuild *				botAASBuilder;
 #endif
 
 };

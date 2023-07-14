@@ -5972,6 +5972,28 @@ void rvPusher::Think( void ) {
 	idMover::Think();
 }
 
+#ifdef MOD_BOTS // cusTom3 - aas extensions - need for elevator reachabilities
+/*
+================
+idMover_Binary::GetPosition1
+================
+*/
+idVec3 idMover_Binary::GetPosition1()
+{
+    return pos1;
+}
+
+/*
+================
+idMover_Binary::GetPosition2
+================
+*/
+idVec3 idMover_Binary::GetPosition2()
+{
+    return pos2;
+}
+#endif
+
 
 
 // RAVEN END

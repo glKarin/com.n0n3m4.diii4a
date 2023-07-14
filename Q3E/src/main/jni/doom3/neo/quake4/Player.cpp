@@ -31,6 +31,9 @@
 idCVar net_predictionErrorDecay( "net_predictionErrorDecay", "112", CVAR_FLOAT | CVAR_GAME | CVAR_NOCHEAT, "time in milliseconds it takes to fade away prediction errors", 0.0f, 200.0f );
 idCVar net_showPredictionError( "net_showPredictionError", "-1", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT, "show prediction errors for the given client", -1, MAX_CLIENTS );
 
+#ifdef MOD_BOTS
+#define IS_BOT() ( spawnArgs.GetInt("spawn_entnum") >= botAi::BOT_START_INDEX )
+#endif
 
 /*
 ===============================================================================
@@ -1426,7 +1429,12 @@ void idPlayer::SetupWeaponEntity( void ) {
 	idEntity				*spawn;
 	
 	// don't setup weapons for spectators
-	if ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating ) {
+#ifdef MOD_BOTS
+    if ( !IS_BOT() && ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating )  )
+#else
+	if ( gameLocal.isClient || (weaponViewModel && weaponWorldModel) || spectating ) 
+#endif
+	{
 		return;
 	}
 
@@ -1951,6 +1959,17 @@ void idPlayer::Spawn( void ) {
 			forceRespawn = true;
 			assert( spectating );
 		}
+#ifdef MOD_BOTS
+		else if ( IS_BOT() )
+		{
+			// set yourself ready to spawn. idMultiplayerGame will decide when/if appropriate and call SpawnFromSpawnSpot
+			SetupWeaponEntity( );
+			SpawnFromSpawnSpot( );
+			spectator = entityNumber;
+			forceRespawn = true;
+			assert( spectating );
+		}
+#endif
 	} else {
  		SetupWeaponEntity( );
 		SpawnFromSpawnSpot( );
@@ -2798,9 +2817,8 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 
 	// Force players to use bounding boxes when in multiplayer
 	if ( gameLocal.isMultiplayer ) {
-// jmarshall - breaks multiplayer. #if 0
+// #if 0 jmarshall breaks multiplayer
 		use_combat_bbox = true;
-// jmarshall end
 
 		// Make sure the combat model is unlinked
 		if ( combatModel ) {
@@ -10203,17 +10221,6 @@ void idPlayer::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &di
 
  	// inform the attacker that they hit someone
  	attacker->DamageFeedback( this, inflictor, damage );
-	
-#ifdef _QUAKE4
-// jmarshall
-	if (gameLocal.IsMultiplayer() && gameLocal.isServer) {
-		if (attacker->IsType(rvmBot::GetClassType()) || attacker->IsType(idPlayer::GetClassType()))
-		{
-			InflictedDamageEvent(attacker);
-		}
-	}
-// jmarshall end
-#endif
 
 //RAVEN BEGIN
 //asalmon: Xenon needs stats in singleplayer
@@ -14097,53 +14104,5 @@ int idPlayer::CanSelectWeapon(const char* weaponName)
 
 	return weaponNum;
 }
-
-#ifdef _QUAKE4 // bot
-// jmarshall
-const char* idPlayer::GetNetName(void) {
-	if (!gameLocal.IsMultiplayer()) {
-		gameLocal.Error("Can't get net name in singleplayer!");
-		return NULL;
-	}
-
-	return gameLocal.userInfo[entityNumber].GetString("ui_name");
-}
-
-/*
-===============
-idPlayer::IsShooting
-==============
-*/
-bool idPlayer::IsShooting(void)
-{
-	return pfl.attackHeld;
-}
-
-/*
-===============
-idPlayer::GetViewHeight
-==============
-*/
-float idPlayer::GetViewHeight(void) {
-	float newEyeOffset = 0.0f;
-	if (spectating) {
-		newEyeOffset = 0.0f;
-	}
-	else if (health <= 0) {
-		newEyeOffset = pm_deadviewheight.GetFloat();
-	}
-	else if (physicsObj.IsCrouching()) {
-		newEyeOffset = pm_crouchviewheight.GetFloat();
-	}
-	else if (IsInVehicle()) {
-		newEyeOffset = 0.0f;
-	}
-	else {
-		newEyeOffset = pm_normalviewheight.GetFloat();
-	}
-	return newEyeOffset;
-}
-// jmarshall end
-#endif
 
 // RITUAL END

@@ -2165,33 +2165,3 @@ void idClip::UpdateDynamicContents( idClipModel* clipModel ) {
 	}
 }
 // RAVEN END
-
-#ifdef _QUAKE4
-/*
-============
-idClip::PointContents
-============
-*/
-int idClip::PointContents(const idVec3 p)
-{
-	int contents = -1;
-
-	contents = collisionModelManager->PointContents(p, world);
-	if (contents > 0)
-	{
-		return contents;
-	}
-
-	//for (int i = 0; i < collisionModelManager->GetNumInlinedProcClipModels(); i++)
-	//{
-	//	idCollisionModel* cm = collisionModelManager->GetCollisionModel(i + 1);
-	//	if (cm == NULL)
-	//		continue;
-	//
-	//	contents = collisionModelManager->PointContents(p, cm);
-	//}
-
-	return contents;
-}
-#endif
-
