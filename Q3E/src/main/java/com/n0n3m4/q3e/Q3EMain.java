@@ -324,10 +324,10 @@ public class Q3EMain extends Activity
             Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
 
             String extraCommand = "";
-            if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
-                extraCommand += " +loadGame QuickSave";
             if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
                 extraCommand += " +disconnect";
+            if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
+                extraCommand += " +loadGame QuickSave";
             Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
         }
 

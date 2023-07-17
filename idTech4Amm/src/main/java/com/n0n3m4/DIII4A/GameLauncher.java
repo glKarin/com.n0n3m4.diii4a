@@ -759,14 +759,14 @@ public class GameLauncher extends Activity
         SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
         V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false));
-        boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
-        V.auto_quick_load.setChecked(autoQuickLoad);
-        if (autoQuickLoad)
-            SetParam_temp("loadGame", "QuickSave");
 		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		V.skip_intro.setChecked(skipIntro);
 		if (skipIntro)
 			SetParam_temp("disconnect");
+        boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
+        V.auto_quick_load.setChecked(autoQuickLoad);
+        if (autoQuickLoad)
+            SetParam_temp("loadGame", "QuickSave");
         boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         V.multithreading.setChecked(multithreading);
         V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener()
@@ -1982,12 +1982,12 @@ public class GameLauncher extends Activity
 	{
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
 		String tempCmd = "";
-		boolean quickSave = preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
-		if (quickSave)
-			tempCmd += " +loadGame QuickSave";
 		boolean skipIntro = preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		if (skipIntro)
 			tempCmd += " +disconnect";
+		boolean quickSave = preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
+		if (quickSave)
+			tempCmd += " +loadGame QuickSave";
 		return tempCmd.trim();
 	}
 
