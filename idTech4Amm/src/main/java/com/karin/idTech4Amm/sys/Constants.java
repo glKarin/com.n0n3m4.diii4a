@@ -27,7 +27,8 @@ public final class Constants
 	public static final String[] CONST_CHANGES = {
 	        "Add CVar editor.",
             "Change OpenGL vertex index size to 4 bytes for large model.",
-            "Quake4 remove FakeClient, and add SABot-a9 mod support.",
+            "In Quake4, remove FakeClient, and add SABot-a9 mod support and resource.",
+            "Add skip intro.",
 	};
 
 	// Launcher preference keys

@@ -2405,34 +2405,25 @@ void idGameLocal::MapClear( bool clearClients, int instance ) {
 	// TinMan: Keep bots alive
 		for( i = ( clearClients ? 0 : MAX_CLIENTS ); i < MAX_GENTITIES; i++ )
 		{
-			idEntity * ent;
-
-			if ( !clearClients )
-			{
-				ent = entities[ i ];
-				if ( ent )
-				{
-					if ( ent->IsType( botAi::Type ) )
-					{
-						//Printf( "[MapClear][Keep: %s]\n", entities[ i ]->name.c_str() );
-						continue;
-					}
-				}
-
-				delete entities[ i ];
-				// ~idEntity is in charge of setting the pointer to NULL
-				// it will also clear pending events for this entity
-				assert( !entities[ i ] );
-				spawnIds[ i ] = -1;
+			if( instance >= 0 && entities[ i ] && entities[ i ]->GetInstance() != instance ) {
+				continue;
 			}
-			else
+
+			if ( !clearClients && entities[ i ] && entities[ i ]->IsType( botAi::Type ) )
 			{
-				delete entities[ i ];
-				// ~idEntity is in charge of setting the pointer to NULL
-				// it will also clear pending events for this entity
-				assert( !entities[ i ] );
-				spawnIds[ i ] = -1;
+				//Printf( "[MapClear][Keep: %s]\n", entities[ i ]->name.c_str() );
+				continue;
 			}
+
+			delete entities[ i ];
+			// ~idEntity is in charge of setting the pointer to NULL
+			// it will also clear pending events for this entity
+			assert( !entities[ i ] );
+// RAVEN BEGIN
+// see FIXME in idRestoreGame::Error
+			entities[ i ] = NULL;
+// RAVEN END
+			spawnIds[ i ] = -1;
 		}
     else
 #endif
@@ -2471,6 +2462,12 @@ void idGameLocal::MapClear( bool clearClients, int instance ) {
 					continue;
 				}
 				entityHash.Add( entityHash.GenerateKey( entities[ i ]->name.c_str(), true ), i );
+// RAVEN BEGIN
+// rjohnson: reset spawnedEntities during clear to ensure no left over pieces that get remapped to a new id ( causing bad snapshot reading )
+				if ( instance == -1 ) {
+					entities[ i ]->spawnNode.AddToEnd( spawnedEntities );
+				}
+// RAVEN END
 			}
 		else
 #endif

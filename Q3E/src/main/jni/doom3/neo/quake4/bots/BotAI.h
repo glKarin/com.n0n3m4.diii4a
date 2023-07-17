@@ -429,6 +429,7 @@ private:
     static int				AddBot(const char *name, idDict &dict);
     static int				AddBot(const char *name);
 	static bool             CanAddBot(void);
+    int						lastPreferred;
 };
 
 /*

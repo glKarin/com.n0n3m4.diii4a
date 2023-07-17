@@ -8,6 +8,16 @@
 
 #define MOVE_TO_ATTACK_POSITION MOVE_TO_ATTACK
 
+enum GetAimDirPreferred
+{
+    GET_AIM_DIR_ANY = 0,
+    GET_AIM_DIR_HEAD,
+    GET_AIM_DIR_CHEST,
+    GET_AIM_DIR_FEET,
+    GET_AIM_DIR_TOTAL,
+};
+#define GET_AIM_DIR_DEFAULT GET_AIM_DIR_CHEST
+
 typedef int ammo_t;
 
 static int Bot_GetPlayerModelNames(idStrList &list, int team = TEAM_NONE)
@@ -532,6 +542,7 @@ botAi::botAi()
     ignore_obstacles	= false;
     blockedRadius		= 0.0f;
     blockedMoveTime		= 750;
+    lastPreferred		= GET_AIM_DIR_DEFAULT;
 }
 
 /*
@@ -782,6 +793,7 @@ void botAi::Init( void )
         aimRate = 0.1f;
     }
 
+    lastPreferred = GET_AIM_DIR_DEFAULT;
 }
 
 /*
@@ -825,6 +837,8 @@ void botAi::Spawn( void )
 
     BecomeActive( TH_THINK );
     playerEnt->BecomeActive( TH_THINK ); // TinMan: *test* give your body a prod for good measure
+
+    lastPreferred = GET_AIM_DIR_DEFAULT;
 }
 
 /*
@@ -886,6 +900,8 @@ void botAi::Save( idSaveGame *savefile ) const
 
     savefile->WriteBool( lastHitCheckResult );
     savefile->WriteInt( lastHitCheckTime );
+
+    savefile->WriteInt( lastPreferred );
 }
 
 /*
@@ -942,6 +958,8 @@ void botAi::Restore( idRestoreGame *savefile )
 
     savefile->ReadBool( lastHitCheckResult );
     savefile->ReadInt( lastHitCheckTime );
+
+    savefile->ReadInt( lastPreferred );
 
     SetAAS();
 
@@ -5366,38 +5384,81 @@ void botAi::Event_SetAimRate( float f )
 /*
 =====================
 botAi::Event_GetAimDir
+	TinMan: aim target - used by getaimdir, will test preferred then rest
+	0 = Anywhere
+	1 = Eye
+	2 = Chest
+	3 = Feet
 =====================
 */
 void botAi::Event_GetAimDir( idEntity *aimAtEnt, float prefered )
 {
-    idVec3	headPosition;
-    idVec3	chestPosition;
-    idVec3 aimDir;
     // if no aimAtEnt or projectile set
     if ( !aimAtEnt ) {
-        aimDir = playerEnt->viewAxis[ 0 ] * playerEnt->physicsObj.GetGravityAxis();
-        idThread::ReturnVector( aimDir );
+        lastPreferred = GET_AIM_DIR_CHEST;
+        idThread::ReturnVector( playerEnt->viewAxis[ 0 ] * playerEnt->physicsObj.GetGravityAxis() );
         return;
     }
-    else if ( aimAtEnt == enemy.GetEntity() )
+
+    idVec3	headPosition;
+    idVec3	chestPosition;
+    idVec3	feetPosition;
+    idVec3 aimDir;
+
+    if ( aimAtEnt == enemy.GetEntity() )
     {
         GetAIAimTargets( static_cast<idActor *>( aimAtEnt ), lastVisibleEnemyPos, headPosition, chestPosition );
+        feetPosition = lastVisibleEnemyPos;
     }
     else if ( aimAtEnt->IsType( idActor::Type ) )
     {
-        GetAIAimTargets( static_cast<idActor *>( aimAtEnt ), aimAtEnt->GetPhysics()->GetOrigin(), headPosition, chestPosition );
+        idVec3 entPos = aimAtEnt->GetPhysics()->GetOrigin();
+        GetAIAimTargets( static_cast<idActor *>( aimAtEnt ), entPos, headPosition, chestPosition );
+        feetPosition = entPos;
     }
     else
     {
         headPosition = aimAtEnt->GetPhysics()->GetAbsBounds().GetCenter();
         chestPosition = headPosition;
+        feetPosition = headPosition;
     }
-	if((int)(prefered) % 2)
-		aimDir = headPosition;
-	else
-		aimDir = chestPosition;
+
+    int aimTarget = (int)(prefered) % GET_AIM_DIR_TOTAL;
+    if(GET_AIM_DIR_ANY == aimTarget)
+    {
+        int a = gameLocal.random.RandomInt(8);
+        switch (lastPreferred)
+        {
+            case GET_AIM_DIR_HEAD: // 5/8 head, 3/8 chest
+                aimTarget = a <= 4 ? GET_AIM_DIR_HEAD : GET_AIM_DIR_CHEST;
+                break;
+            case GET_AIM_DIR_FEET: // 3/8 feet, 5/8 chest
+                aimTarget = a <= 2 ? GET_AIM_DIR_FEET : GET_AIM_DIR_CHEST;
+                break;
+            case GET_AIM_DIR_CHEST: // 2/8 head, 5/8 chest, 1/8 feet
+                aimTarget = a <= 1 ? GET_AIM_DIR_HEAD : (a >= 7 ? GET_AIM_DIR_FEET : GET_AIM_DIR_CHEST);
+                break;
+            default: // default chest
+                aimTarget = GET_AIM_DIR_CHEST;
+                break;
+        }
+    }
+	switch(aimTarget)
+    {
+        case GET_AIM_DIR_HEAD:
+            aimDir = headPosition;
+            break;
+        case GET_AIM_DIR_FEET:
+            aimDir = feetPosition;
+            break;
+        //case GET_AIM_DIR_CHEST:
+        default:
+            aimDir = chestPosition;
+            break;
+    }
     aimDir = aimDir - playerEnt->GetEyePosition();
     aimDir.Normalize();
+    lastPreferred = aimTarget;
     idThread::ReturnVector( aimDir );
 }
 
