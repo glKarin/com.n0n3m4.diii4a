@@ -10,6 +10,35 @@
 
 typedef int ammo_t;
 
+static int Bot_GetPlayerModelNames(idStrList &list, int team = TEAM_NONE)
+{
+	int i;
+	int num = 0;
+	int numPlayerModel;
+
+	numPlayerModel = declManager->GetNumDecls(DECL_PLAYER_MODEL);
+	for(i = 0; i < numPlayerModel; i++)
+	{
+		const idDecl *decl = declManager->DeclByIndex(DECL_PLAYER_MODEL, i, false);
+		if(!decl)
+			continue;
+		const rvDeclPlayerModel *playerModel = static_cast<const rvDeclPlayerModel *>(decl);
+		if(team == TEAM_STROGG)
+		{
+			if(idStr::Icmp(playerModel->team , "strogg"))
+				continue;
+		}
+		else if(team == TEAM_MARINE)
+		{
+			if(!idStr::Icmp(playerModel->team , "strogg"))
+				continue;
+		}
+		list.Append(playerModel->GetName());
+		num++;
+	}
+	return num;
+}
+
 ID_INLINE static bool IsGametypeTeamBased(void)
 {
     return gameLocal.IsTeamGame();
@@ -603,23 +632,8 @@ void botAi::Addbot_f( const idCmdArgs &args )
     int			i;
     idDict		dict;
 
-    if ( !gameLocal.isMultiplayer )
-    {
-        gameLocal.Printf( "You may only add a bot to a multiplayer game\n" );
+	if(!CanAddBot())
         return;
-    }
-
-    if ( !gameLocal.isServer )
-    {
-        gameLocal.Printf( "Bots may only be added on server, only it has the powah!\n" );
-        return;
-    }
-
-    if ( !IsAvailable() )
-    {
-        gameLocal.Warning( "SABot(a9) mod file missing!\n" );
-        return;
-    }
 
 	if (args.Argc() < 2)
 	{
@@ -5358,7 +5372,7 @@ void botAi::Event_GetAimDir( idEntity *aimAtEnt, float prefered )
 {
     idVec3	headPosition;
     idVec3	chestPosition;
-    idVec3 aimDir(0, 0, 0);
+    idVec3 aimDir;
     // if no aimAtEnt or projectile set
     if ( !aimAtEnt ) {
         aimDir = playerEnt->viewAxis[ 0 ] * playerEnt->physicsObj.GetGravityAxis();
@@ -5378,7 +5392,11 @@ void botAi::Event_GetAimDir( idEntity *aimAtEnt, float prefered )
         headPosition = aimAtEnt->GetPhysics()->GetAbsBounds().GetCenter();
         chestPosition = headPosition;
     }
-    aimDir = headPosition - playerEnt->GetEyePosition();
+	if((int)(prefered) % 2)
+		aimDir = headPosition;
+	else
+		aimDir = chestPosition;
+    aimDir = aimDir - playerEnt->GetEyePosition();
     aimDir.Normalize();
     idThread::ReturnVector( aimDir );
 }
@@ -5449,28 +5467,15 @@ int botAi::AddBot(const char *defName, idDict &dict)
     int newBotID = 0;
     int newClientID = 0;
 
-    if ( !gameLocal.isMultiplayer )
+    if ( !CanAddBot() )
     {
-        gameLocal.Warning( "You may only add a bot to a multiplayer game\n" );
         return -1;
-    }
-
-    if ( !gameLocal.isServer )
-    {
-        gameLocal.Warning( "Bots may only be added on server, only it has the powah!\n" );
-        return -2;
-    }
-
-    if ( !IsAvailable() )
-    {
-        gameLocal.Warning( "SABot(a9) mod file missing!\n" );
-        return -3;
     }
 
     if (!defName || !defName[0])
     {
         common->Warning("Must set bot entity def name!\n");
-        return -4;
+        return -2;
     }
 
     // Try to find an ID in the bots list
@@ -5497,7 +5502,7 @@ int botAi::AddBot(const char *defName, idDict &dict)
     if ( i >= BOT_MAX_BOTS )
     {
         gameLocal.Warning("The maximum number of bots are already in the game.\n");
-        return -5;
+        return -3;
     }
     else
     {
@@ -5513,7 +5518,7 @@ int botAi::AddBot(const char *defName, idDict &dict)
     if ( !cls || !cls->IsType( botAi::Type ) )
     {
         gameLocal.Warning( "def not of type botAi or no def name given\n" );
-        return -6;
+        return -4;
     }
 
     dict.Set( "classname", value );
@@ -5571,6 +5576,49 @@ int botAi::AddBot(const char *defName, idDict &dict)
 
     gameLocal.SetUserInfo( newClientID, userInfo, false ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
 
+	idStrList playerModelNames;
+	int numMarinePlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_MARINE);
+	if(numMarinePlayerModel > 0)
+	{
+		int index = gameLocal.random.RandomInt(numMarinePlayerModel);
+		const char *modelName = playerModelNames[index];
+		userInfo.Set("model", modelName);
+		userInfo.Set("model_marine", modelName);
+		userInfo.Set("ui_model", modelName);
+		userInfo.Set("ui_model_marine", modelName);
+		userInfo.Set("def_default_model", modelName);
+		userInfo.Set("def_default_model_marine", modelName);
+		botClient->spawnArgs.Set("model", modelName);
+		botClient->spawnArgs.Set("model_marine", modelName);
+		botClient->spawnArgs.Set("ui_model", modelName);
+		botClient->spawnArgs.Set("ui_model_marine", modelName);
+		botClient->spawnArgs.Set("def_default_model", modelName);
+		botClient->spawnArgs.Set("def_default_model_marine", modelName);
+	}
+	int numStroggPlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_STROGG);
+	if(numStroggPlayerModel > 0)
+	{
+		int index = gameLocal.random.RandomInt(numStroggPlayerModel) + numMarinePlayerModel;
+		const char *modelName = playerModelNames[index];
+		userInfo.Set("model_strogg", modelName);
+		userInfo.Set("ui_model_strogg", modelName);
+		userInfo.Set("def_default_model_strogg", modelName);
+		botClient->spawnArgs.Set("model_strogg", modelName);
+		botClient->spawnArgs.Set("ui_model_strogg", modelName);
+		botClient->spawnArgs.Set("def_default_model_strogg", modelName);
+	}
+	if(playerModelNames.Num() > 0)
+	{
+		int index = gameLocal.random.RandomInt(playerModelNames.Num());
+		const char *modelName = playerModelNames[index];
+		userInfo.Set("model", modelName);
+		userInfo.Set("ui_model", modelName);
+		userInfo.Set("def_default_model", modelName);
+		botClient->spawnArgs.Set("model", modelName);
+		botClient->spawnArgs.Set("ui_model", modelName);
+		botClient->spawnArgs.Set("def_default_model", modelName);
+	}
+	botClient->UpdateModelSetup(true);
     botClient->Spectate( false ); // TinMan: Finally done, get outa spectate
 
     cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", newClientID ) );
@@ -5586,11 +5634,9 @@ int botAi::AddBot(const char *name)
 
 void botAi::Cmd_AddBot_f(const idCmdArgs& args)
 {
-    if(!BOT_ENABLED())
-    {
-        common->Warning("addbot only in Multi-Player game\n");
+	if(!CanAddBot())
         return;
-    }
+
     if (args.Argc() < 2)
     {
         common->Warning("USAGE: addbots <botdef> <...> e.g. addbots bot_sabot_tinman bot_sabot_fluffy bot_sabot_blackstar - see def/bot_sabot_characters.def for more details\n");
@@ -5622,11 +5668,9 @@ void botAi::Cmd_AddBot_f(const idCmdArgs& args)
 
 void botAi::Cmd_FillBots_f(const idCmdArgs& args)
 {
-    if(!BOT_ENABLED())
-    {
-        common->Warning("fillbots only in Multi-Player game\n");
+	if(!CanAddBot())
         return;
-    }
+
     int num = CheckRestClients(0);
     if(args.Argc() > 1)
     {
@@ -5741,6 +5785,27 @@ void botAi::Cmd_BotInfo_f(const idCmdArgs& args)
     gameLocal.Printf("botAi::IsAvailable(): %d\n", botAi::IsAvailable());
     gameLocal.Printf("BOT_ENABLED(): %d\n", BOT_ENABLED());
     gameLocal.Printf("Bot slots: total(%d)\n", botAi::BOT_MAX_BOTS);
+
+    int numAAS = gameLocal.GetNumAAS();
+    bool botAasLoaded = false;
+    gameLocal.Printf("Bot AAS: total(%d)\n", numAAS);
+    for(int i = 0; i < numAAS; i++)
+    {
+        idAAS *aas = gameLocal.GetAAS(i);
+        if(!aas)
+            continue;
+        const idAASFile *aasFile = aas->GetFile();
+        if(!aasFile)
+            continue;
+        gameLocal.Printf("\t%d: %s\n", i, aasFile->GetName());
+        if (idStr(aasFile->GetName()).Find( BOT_AAS, false ) > 0)
+        {
+            botAasLoaded = true;
+            break;
+        }
+    }
+    gameLocal.Printf("Bot AAS loaded: %d\n", botAasLoaded);
+
     int numBots = 0;
     idList<int> botIds;
     for ( int i = 0; i < botAi::BOT_MAX_BOTS; i++ )
@@ -5783,4 +5848,49 @@ void botAi::Cmd_BotInfo_f(const idCmdArgs& args)
     }
     gameLocal.Printf("gameLocal.numClients: connected(%d)\n", client);
 }
+
+bool botAi::CanAddBot(void)
+{
+    if ( !gameLocal.isMultiplayer )
+    {
+        gameLocal.Warning( "You may only add a bot to a multiplayer game\n" );
+        return false;
+    }
+
+    if ( !gameLocal.isServer )
+    {
+        gameLocal.Warning( "Bots may only be added on server, only it has the powah!\n" );
+        return false;
+    }
+
+    if ( !IsAvailable() )
+    {
+        gameLocal.Warning( "SABot(a9) mod file missing!\n" );
+        return false;
+    }
+
+    int numAAS = gameLocal.GetNumAAS();
+    bool botAasLoaded = false;
+    for(int i = 0; i < numAAS; i++)
+    {
+        idAAS *aas = gameLocal.GetAAS(i);
+        if(!aas)
+            continue;
+        const idAASFile *aasFile = aas->GetFile();
+        if(!aasFile)
+            continue;
+        if (idStr(aasFile->GetName()).Find( BOT_AAS, false ) > 0)
+        {
+            botAasLoaded = true;
+            break;
+        }
+    }
+    if ( !botAasLoaded )
+    {
+        gameLocal.Warning( "bot aas file not loaded!\n" );
+        return false;
+    }
+	return true;
+}
+
 #endif

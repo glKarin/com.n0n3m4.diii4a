@@ -196,8 +196,6 @@ private:	// debug
 // RAVEN END
 
 #ifdef MOD_BOTS // cusTom3 - aas extensions
-	virtual idAASFile*			GetAASFile(void) { return file; }
-
 	private:
     BotAASBuild *				botAASBuilder;
 #endif

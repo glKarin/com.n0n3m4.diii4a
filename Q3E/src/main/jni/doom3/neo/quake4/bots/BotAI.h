@@ -422,12 +422,13 @@ public:
     static int				CheckRestClients(int num);
     static bool				IsAvailable(void);
 
-    static idVec3				EyeOffset(idActor *actor);
+    static idVec3			EyeOffset(idActor *actor);
     static void				GetAIAimTargets( idActor *actor, const idVec3 &lastSightPos, idVec3 &headPos, idVec3 &chestPos );
 
 private:
     static int				AddBot(const char *name, idDict &dict);
     static int				AddBot(const char *name);
+	static bool             CanAddBot(void);
 };
 
 /*
