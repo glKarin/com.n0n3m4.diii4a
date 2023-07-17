@@ -14,6 +14,8 @@
 extern void (*grab_mouse)(int grab);
 extern void (*pull_input_event)(int execCmd);
 extern FILE * (*itmpfile)(void);
+extern void (*copy_to_clipboard)(const char *text);
+extern char * (*get_clipboard_text)(void);
 
 void Android_GrabMouseCursor(bool grabIt)
 {
@@ -62,6 +64,27 @@ void Sys_SyncState(void)
             prev_state = state;
         }
     }
+}
+
+void Android_SetClipboardData(const char *text)
+{
+    if(copy_to_clipboard)
+        copy_to_clipboard(text);
+}
+
+char * Android_GetClipboardData(void)
+{
+    if(!get_clipboard_text)
+        return NULL;
+    char *text = get_clipboard_text();
+    if(!text)
+        return NULL;
+    size_t len = strlen(text);
+    char *ptr = (char *)Mem_Alloc(len + 1);
+    strncpy(ptr, text, len);
+    ptr[len] = '\0';
+    free(text);
+    return ptr;
 }
 
 #endif

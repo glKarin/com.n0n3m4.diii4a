@@ -20,6 +20,8 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -509,5 +511,29 @@ public class Q3EUtils
             m_uiOptions |= View.SYSTEM_UI_FLAG_FULLSCREEN;
         }
         return m_uiOptions;
+    }
+
+    public static void CopyToClipboard(Context context, String text)
+    {
+        ClipboardManager clipboard = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("idTech4A++", text);
+        clipboard.setPrimaryClip(clip);
+    }
+
+    public static String GetClipboardText(Context context)
+    {
+        ClipboardManager clipboard = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
+
+        String pasteData = null;
+        if (clipboard.hasPrimaryClip())
+        {
+            ClipData primaryClip = clipboard.getPrimaryClip();
+            if(null != primaryClip && primaryClip.getItemCount() > 0)
+            {
+                ClipData.Item item = primaryClip.getItemAt(0);
+                pasteData = item.getText().toString();
+            }
+        }
+        return pasteData;
     }
 }

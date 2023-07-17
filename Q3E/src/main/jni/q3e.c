@@ -54,6 +54,8 @@ void (*qexit)(void);
 static void pull_input_event(int execCmd);
 static void grab_mouse(int grab);
 static FILE * android_tmpfile(void);
+static void copy_to_clipboard(const char *text);
+static char * get_clipboard_text(void);
 
 // data
 static char *game_data_dir = NULL;
@@ -70,6 +72,8 @@ static jobject q3eCallbackObj=0;
 // Java method
 static jmethodID android_PullEvent_method;
 static jmethodID android_GrabMouse_method;
+static jmethodID android_CopyToClipboard_method;
+static jmethodID android_GetClipboardText_method;
 
 jmethodID android_initAudio;
 jmethodID android_writeAudio;
@@ -268,6 +272,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	//k
 	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(Z)V");
 	android_GrabMouse_method = (*env)->GetMethodID(env, q3eCallbackClass, "GrabMouse", "(Z)V");
+	android_CopyToClipboard_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyToClipboard", "(Ljava/lang/String;)V");
+	android_GetClipboardText_method = (*env)->GetMethodID(env, q3eCallbackClass, "GetClipboardText", "()Ljava/lang/String;");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -354,6 +360,8 @@ static void setup_Q3E_callback(void)
 
 	callback.set_state = &setState;
 	callback.Sys_tmpfile = &android_tmpfile;
+	callback.Sys_copyToClipboard = &copy_to_clipboard;
+	callback.Sys_getClipboardText = &get_clipboard_text;
 
 	setCallbacks(&callback);
 }
@@ -527,6 +535,48 @@ void grab_mouse(int grab)
 	}
 
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_GrabMouse_method, (jboolean)grab);
+}
+
+void copy_to_clipboard(const char *text)
+{
+	JNIEnv *env = 0;
+
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+
+	if(!text)
+	{
+		(*env)->CallVoidMethod(env, q3eCallbackObj, android_CopyToClipboard_method, NULL);
+		return;
+	}
+
+	jstring str = (*env)->NewStringUTF(env, text);
+	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_CopyToClipboard_method, nstr);
+}
+
+char * get_clipboard_text(void)
+{
+	JNIEnv *env = 0;
+
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+
+	jstring str = (*env)->CallObjectMethod(env, q3eCallbackObj, android_GetClipboardText_method);
+	if(!str)
+		return NULL;
+
+	const char *nstr = (*env)->GetStringUTFChars(env, str, NULL);
+	char *res = NULL;
+	if(nstr)
+		res = strdup(nstr);
+	(*env)->ReleaseStringUTFChars(env, str, nstr);
+	return res;
 }
 
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"

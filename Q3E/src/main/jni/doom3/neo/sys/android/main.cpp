@@ -609,6 +609,8 @@ FILE * (*itmpfile)(void);
 void (*pull_input_event)(int execCmd);
 void (*grab_mouse)(int grab);
 void (*attach_thread)(void);
+void (*copy_to_clipboard)(const char *text);
+char * (*get_clipboard_text)(void);
 
 int screen_width=640;
 int screen_height=480;
@@ -940,6 +942,8 @@ void Q3E_SetCallbacks(const void *callbacks)
 
 	attach_thread = ptr->Sys_attachThread;
 	itmpfile = ptr->Sys_tmpfile;
+	copy_to_clipboard = ptr->Sys_copyToClipboard;
+	get_clipboard_text = ptr->Sys_getClipboardText;
 
     setState = ptr->set_state;
 }

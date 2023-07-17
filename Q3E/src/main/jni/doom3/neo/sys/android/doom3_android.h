@@ -15,6 +15,8 @@ typedef struct
     // System
     void (*Sys_attachThread)(void); // Attach C/C++ created thread to JNI
     FILE * (*Sys_tmpfile)(void); // for Android tmpfile C function
+    void (*Sys_copyToClipboard)(const char *text); // copy text to clipboard
+    char * (*Sys_getClipboardText)(void); // get text from clipboard
 
     // Other
     void (*set_state)(int st); // Tell Android game current state

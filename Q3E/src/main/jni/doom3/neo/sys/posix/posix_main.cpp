@@ -501,13 +501,16 @@ void Sys_Sleep(int msec)
 
 char *Sys_GetClipboardData(void)
 {
-	Sys_Printf("TODO: Sys_GetClipboardData\n");
-	return NULL;
+	// Sys_Printf("TODO: Sys_GetClipboardData\n");
+	extern char * Android_GetClipboardData(void);
+	return Android_GetClipboardData();
 }
 
 void Sys_SetClipboardData(const char *string)
 {
-	Sys_Printf("TODO: Sys_SetClipboardData\n");
+	// Sys_Printf("TODO: Sys_SetClipboardData\n");
+	extern void Android_SetClipboardData(const char *text);
+	Android_SetClipboardData(string);
 }
 
 
