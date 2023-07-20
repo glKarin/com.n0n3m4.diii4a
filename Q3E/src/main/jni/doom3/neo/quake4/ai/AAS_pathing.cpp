@@ -10,12 +10,30 @@
 #define SUBSAMPLE_WALK_PATH		1
 #define SUBSAMPLE_FLY_PATH		0
 
+#ifdef MOD_BOTS
+extern
+#endif
 const int		maxWalkPathIterations		= 10;
+#ifdef MOD_BOTS
+extern
+#endif
 const float		maxWalkPathDistance			= 500.0f;
+#ifdef MOD_BOTS
+extern
+#endif
 const float		walkPathSampleDistance		= 8.0f;
 
+#ifdef MOD_BOTS
+extern
+#endif
 const int		maxFlyPathIterations		= 10;
+#ifdef MOD_BOTS
+extern
+#endif
 const float		maxFlyPathDistance			= 500.0f;
+#ifdef MOD_BOTS
+extern
+#endif
 const float		flyPathSampleDistance		= 8.0f;
 
 

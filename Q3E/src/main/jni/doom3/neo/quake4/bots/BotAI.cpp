@@ -5992,13 +5992,13 @@ const char * botAi::GetCurrentWeapon(void)
 #define SUBSAMPLE_WALK_PATH		1
 #define SUBSAMPLE_FLY_PATH		0
 
-const int		maxWalkPathIterations		= 10;
-const float		maxWalkPathDistance			= 500.0f;
-const float		walkPathSampleDistance		= 8.0f;
+extern const int		maxWalkPathIterations/*		= 10*/;
+extern const float		maxWalkPathDistance/*			= 500.0f*/;
+extern const float		walkPathSampleDistance/*		= 8.0f*/;
 
-const int		maxFlyPathIterations		= 10;
-const float		maxFlyPathDistance			= 500.0f;
-const float		flyPathSampleDistance		= 8.0f;
+extern const int		maxFlyPathIterations/*		= 10*/;
+extern const float		maxFlyPathDistance/*			= 500.0f*/;
+extern const float		flyPathSampleDistance/*		= 8.0f*/;
 
 bool botAi::RouteToGoalArea( int areaNum, const idVec3 origin, int goalAreaNum, int travelFlags, int &travelTime, idReachability **reach ) const {
 	int clusterNum, goalClusterNum, portalNum, i, clusterAreaNum;
