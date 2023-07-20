@@ -10,6 +10,9 @@ class BotAASBuild;
 #endif
 
 class idRoutingCache {
+#ifdef MOD_BOTS
+	friend class botAi;
+#endif
 	friend class idAASLocal;
 
 public:
@@ -61,6 +64,7 @@ private:
 class idAASLocal : public idAAS {
 #ifdef MOD_BOTS // cusTom3 - aas extensions
 	friend class BotAASBuild;
+	friend class botAi;
 #endif
 public:
 								idAASLocal( void );

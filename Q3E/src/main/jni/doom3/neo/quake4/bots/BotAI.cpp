@@ -5,6 +5,7 @@
 #ifdef MOD_BOTS
 
 #include "../Game_local.h"
+#include "BotAASBuild.h"
 
 #define MOVE_TO_ATTACK_POSITION MOVE_TO_ATTACK
 
@@ -75,6 +76,7 @@ static int Bot_GetBotNames( idStrList &list )
 
     return res;
 }
+
 
 /*
 =====================
@@ -501,7 +503,6 @@ EVENT( BOT_SetAimRate,						botAi::Event_SetAimRate )
 EVENT( BOT_GetAimDir,						botAi::Event_GetAimDir )
 EVENT( BOT_IsMoveDone,						botAi::Event_IsMoveDone )
 EVENT( BOT_IsMoveUnreachable,						botAi::Event_IsMoveUnreachable )
-EVENT( BOT_TestMoveToPosition,						botAi::Event_TestMoveToPosition )
 EVENT( BOT_GetNumSpawnedEntities,						botAi::Event_GetNumSpawnedEntities )
 EVENT( BOT_TestMoveToPosition,						botAi::Event_TestMoveToPosition )
 EVENT( BOT_PowerUpActive,						botAi::Event_PowerUpActive )
@@ -1673,11 +1674,11 @@ bool botAi::PathToGoal( aasPath_t &path, int areaNum, const idVec3 &origin, int 
 
     if ( move.moveType == MOVETYPE_FLY )
     {
-        return aas->FlyPathToGoal( path, areaNum, org, goalAreaNum, goal, travelFlags );
+        return /*aas->*/FlyPathToGoal( path, areaNum, org, goalAreaNum, goal, travelFlags );
     }
     else
     {
-        return aas->WalkPathToGoal( path, areaNum, org, goalAreaNum, goal, travelFlags );
+        return /*aas->*/WalkPathToGoal( path, areaNum, org, goalAreaNum, goal, travelFlags );
     }
 }
 
@@ -1740,7 +1741,7 @@ float botAi::TravelDistance( const idVec3 &start, const idVec3 &end ) const
 
     idReachability *reach;
     int travelTime;
-    if ( !aas->RouteToGoalArea( fromArea, start, toArea, travelFlags, travelTime, &reach ) )
+    if ( !/*aas->*/RouteToGoalArea( fromArea, start, toArea, travelFlags, travelTime, &reach ) )
     {
         return -1;
     }
@@ -5237,95 +5238,6 @@ void botAi::Event_ClearCommand( void )
     commandPosition.Zero();
 }
 
-
-/*
-============
-idAASFindCover::idAASFindCover
-============
-*/
-idAASFindCover::idAASFindCover(const idVec3 &hideFromPos)
-{
-    int			numPVSAreas;
-    idBounds	bounds(hideFromPos - idVec3(16, 16, 0), hideFromPos + idVec3(16, 16, 64));
-
-    // setup PVS
-    numPVSAreas = gameLocal.pvs.GetPVSAreas(bounds, PVSAreas, idEntity::MAX_PVS_AREAS);
-    hidePVS		= gameLocal.pvs.SetupCurrentPVS(PVSAreas, numPVSAreas);
-}
-
-/*
-============
-idAASFindCover::~idAASFindCover
-============
-*/
-idAASFindCover::~idAASFindCover()
-{
-    gameLocal.pvs.FreeCurrentPVS(hidePVS);
-}
-
-/*
-============
-idAASFindCover::TestArea
-============
-*/
-bool idAASFindCover::TestArea(const idAAS *aas, int areaNum)
-{
-    idVec3	areaCenter;
-    int		numPVSAreas;
-    int		PVSAreas[ idEntity::MAX_PVS_AREAS ];
-
-    areaCenter = aas->AreaCenter(areaNum);
-    areaCenter[ 2 ] += 1.0f;
-
-    numPVSAreas = gameLocal.pvs.GetPVSAreas(idBounds(areaCenter).Expand(16.0f), PVSAreas, idEntity::MAX_PVS_AREAS);
-
-    if (!gameLocal.pvs.InCurrentPVS(hidePVS, PVSAreas, numPVSAreas))
-    {
-        return true;
-    }
-
-    return false;
-}
-
-/*
-============
-idAASFindAreaOutOfRange::idAASFindAreaOutOfRange
-============
-*/
-idAASFindAreaOutOfRange::idAASFindAreaOutOfRange(const idVec3 &targetPos, float maxDist)
-{
-    this->targetPos		= targetPos;
-    this->maxDistSqr	= maxDist * maxDist;
-}
-
-/*
-============
-idAASFindAreaOutOfRange::TestArea
-============
-*/
-bool idAASFindAreaOutOfRange::TestArea(const idAAS *aas, int areaNum)
-{
-    const idVec3 &areaCenter = aas->AreaCenter(areaNum);
-    trace_t	trace;
-    float dist;
-
-    dist = (targetPos.ToVec2() - areaCenter.ToVec2()).LengthSqr();
-
-    if ((maxDistSqr > 0.0f) && (dist < maxDistSqr))
-    {
-        return false;
-    }
-
-    gameLocal.TracePoint( NULL, trace, targetPos, areaCenter + idVec3(0.0f, 0.0f, 1.0f), MASK_OPAQUE, NULL);
-
-    if (trace.fraction < 1.0f)
-    {
-        return false;
-    }
-
-    return true;
-}
-
 idVec3 botAi::EyeOffset(idActor *actor)
 {
     return ( actor->GetPhysics()->GetGravityNormal() * -actor->eyeOffset.z );
@@ -5404,39 +5316,39 @@ void botAi::Event_GetAimDir( idEntity *aimAtEnt, float prefered )
     idVec3	chestPosition;
     idVec3	feetPosition;
     idVec3 aimDir;
+    idVec3 aimPosition;
+
+    idVec3 targetOrigin = aimAtEnt->GetPhysics()->GetOrigin();
+    idVec3 origin = playerEnt->GetPhysics()->GetOrigin();
 
     if ( aimAtEnt == enemy.GetEntity() )
     {
         GetAIAimTargets( static_cast<idActor *>( aimAtEnt ), lastVisibleEnemyPos, headPosition, chestPosition );
-        feetPosition = lastVisibleEnemyPos;
     }
     else if ( aimAtEnt->IsType( idActor::Type ) )
     {
-        idVec3 entPos = aimAtEnt->GetPhysics()->GetOrigin();
-        GetAIAimTargets( static_cast<idActor *>( aimAtEnt ), entPos, headPosition, chestPosition );
-        feetPosition = entPos;
+        GetAIAimTargets( static_cast<idActor *>( aimAtEnt ), targetOrigin, headPosition, chestPosition );
     }
     else
     {
         headPosition = aimAtEnt->GetPhysics()->GetAbsBounds().GetCenter();
         chestPosition = headPosition;
-        feetPosition = headPosition;
     }
 
     int aimTarget = (int)(prefered) % GET_AIM_DIR_TOTAL;
     if(GET_AIM_DIR_ANY == aimTarget)
     {
-        int a = gameLocal.random.RandomInt(8);
+        int a = gameLocal.random.RandomInt(100);
         switch (lastPreferred)
         {
-            case GET_AIM_DIR_HEAD: // 5/8 head, 3/8 chest
-                aimTarget = a <= 4 ? GET_AIM_DIR_HEAD : GET_AIM_DIR_CHEST;
+            case GET_AIM_DIR_HEAD: // 95/100 head, 3/100 chest
+                aimTarget = a < 95 ? GET_AIM_DIR_HEAD : GET_AIM_DIR_CHEST;
                 break;
-            case GET_AIM_DIR_FEET: // 3/8 feet, 5/8 chest
-                aimTarget = a <= 2 ? GET_AIM_DIR_FEET : GET_AIM_DIR_CHEST;
+            case GET_AIM_DIR_FEET: // 90/100 feet, 10/100 chest
+                aimTarget = a < 90 ? GET_AIM_DIR_FEET : GET_AIM_DIR_CHEST;
                 break;
-            case GET_AIM_DIR_CHEST: // 2/8 head, 5/8 chest, 1/8 feet
-                aimTarget = a <= 1 ? GET_AIM_DIR_HEAD : (a >= 7 ? GET_AIM_DIR_FEET : GET_AIM_DIR_CHEST);
+            case GET_AIM_DIR_CHEST: // 4/100 head, 95/100 chest, 1/100 feet
+                aimTarget = a < 4 ? GET_AIM_DIR_HEAD : (a >= 99 ? GET_AIM_DIR_FEET : GET_AIM_DIR_CHEST);
                 break;
             default: // default chest
                 aimTarget = GET_AIM_DIR_CHEST;
@@ -5446,17 +5358,36 @@ void botAi::Event_GetAimDir( idEntity *aimAtEnt, float prefered )
 	switch(aimTarget)
     {
         case GET_AIM_DIR_HEAD:
-            aimDir = headPosition;
+            aimPosition = headPosition;
             break;
-        case GET_AIM_DIR_FEET:
-            aimDir = feetPosition;
+        case GET_AIM_DIR_FEET: {
+            if ( targetOrigin.z <= origin.z && DistanceTo( aimAtEnt ) > 96 ) { // TinMan: Only attack his shoes if he's lower
+                //if ( canSeePosition( target.getOrigin(), false ) ) {
+                feetPosition = targetOrigin;
+                feetPosition.z += 8; // TinMan: More chance of checkshot hitting enemy.
+            } else {
+                feetPosition = chestPosition; // TinMan: false chest, true head. Excuse me, can you point to where you want to be shot?
+            }
+        }
+            aimPosition = feetPosition;
             break;
         //case GET_AIM_DIR_CHEST:
         default:
-            aimDir = chestPosition;
+            aimPosition = chestPosition;
             break;
     }
-    aimDir = aimDir - playerEnt->GetEyePosition();
+
+    idVec3 pos;
+    idMat3 axis;
+    playerEnt->GetViewPos( pos, axis );
+
+#if 0
+    float projectileSpeed = GetProjectileSpeed( GetCurrentWeapon() );
+    if ( projectileSpeed >= 0 ) { // TinMan: no predict
+        aimPosition = PredictTargetPosition( aimPosition, pos, aimAtEnt->GetPhysics()->GetLinearVelocity(), projectileSpeed );
+    }
+#endif
+    aimDir = aimPosition - pos;
     aimDir.Normalize();
     lastPreferred = aimTarget;
     idThread::ReturnVector( aimDir );
@@ -5484,12 +5415,57 @@ void botAi::Event_IsMoveUnreachable( void )
 
 /*
 =====================
-botAi::Event_IsMoveUnreachable
+botAi::Event_TestMoveToPosition
 =====================
 */
 void botAi::Event_TestMoveToPosition( const idVec3 &pos )
 {
-    idThread::ReturnFloat( ReachedPos(pos, MOVE_TO_POSITION) );
+    idVec3 goal = pos;
+
+    int toAreaNum = PointReachableAreaNum( goal );
+    aas->PushPointIntoAreaNum( toAreaNum, goal );
+	idThread::ReturnFloat( toAreaNum > 0 );
+	return;
+#if 0
+    idThread::ReturnFloat( !ReachedPos(pos, MOVE_TO_POSITION) );
+	return;
+    if(ReachedPos(pos, MOVE_TO_POSITION))
+    {
+        idThread::ReturnFloat( false );
+        return;
+    }
+    if ( !aas )
+    {
+        idThread::ReturnFloat( false );
+        return;
+    }
+
+    idVec3 org = physicsObject->GetOrigin();
+    idVec3 goal = pos;
+    aasPath_t	path;
+
+    int toAreaNum = PointReachableAreaNum( goal );
+    aas->PushPointIntoAreaNum( toAreaNum, goal );
+    if ( !toAreaNum )
+    {
+        idThread::ReturnFloat( false );
+        return;
+    }
+
+    int areaNum	= PointReachableAreaNum( org );
+    aas->PushPointIntoAreaNum( areaNum, org );
+    if ( !areaNum )
+    {
+        idThread::ReturnFloat( false );
+        return;
+    }
+
+    idVec3 endpos = goal;
+    int endAreaNum = toAreaNum;
+
+    idThread::ReturnFloat( aas->WalkPathValid( areaNum, org, toAreaNum, goal, travelFlags, endpos, endAreaNum ) );
+#endif
+    // idThread::ReturnFloat( ReachedPos(pos, MOVE_TO_POSITION) );
 }
 
 /*
@@ -5951,6 +5927,487 @@ bool botAi::CanAddBot(void)
         gameLocal.Warning( "bot aas file not loaded!\n" );
         return false;
     }
+	return true;
+}
+
+idVec3 botAi::PredictTargetPosition( const idVec3 &targetPosition, const idVec3 &myPosition, const idVec3 &targetVelocity, float projectileSpeed )
+{
+    float travelTime = 0.0; // time for projectile to reach target
+    float timeEstimate; 		// estimated time for projectile arrival
+    float predictError; 		// error in target location
+    int loopCount;
+    idVec3 targetLocation = targetPosition; // = targetVelocity;
+
+    int predictLoopMaximum = 10;
+    float predictErrorTollerance = 0.1;
+
+    predictError = 100;
+
+    // TinMan: *todo* maybe a bug here, gettin div by zeros, I think this is the only place I'm doing division. That would mean projectileSpeed is 0. Sort it out.
+    if ( projectileSpeed == 0 ) {
+        projectileSpeed = 1;
+    }
+
+    for ( loopCount = 0; loopCount < predictLoopMaximum; loopCount++ ) {
+        targetLocation = travelTime * targetVelocity + targetLocation; // TinMan: This will shift each loop as traveTime is changed
+        timeEstimate = ( myPosition - targetLocation ).Length() / projectileSpeed; // TinMan: Estimate of how long it will take projectile to reach targetLocation
+        predictError = timeEstimate - travelTime;
+        travelTime = timeEstimate;
+        if ( predictError < predictErrorTollerance ) {
+            break;
+        }
+    }
+
+    return targetLocation;
+}
+
+float botAi::GetProjectileSpeed(const char *weaponName)
+{
+    float projectileSpeed = 0;
+    int value = 0;
+    spawnArgs.GetInt( idStr("projectile_") + weaponName , "0", value); // TinMan: How speedy are the shooty shooty kill kills?
+    projectileSpeed = value;
+
+    // TinMan: *todo* maybe a bug here, gettin div by zeros, I think this is the only place I'm doing division. That would mean projectileSpeed is 0. Sort it out.
+    if ( projectileSpeed == 0 ) {
+        projectileSpeed = 1;
+    }
+
+    return projectileSpeed;
+}
+
+const char * botAi::GetCurrentWeapon(void)
+{
+    const char *weapon;
+
+    int currentWeapon = playerEnt->GetCurrentWeapon();
+    if ( playerEnt->GetCurrentWeapon() >= 0 ) {
+        weapon = spawnArgs.GetString( va( "def_weapon%d", currentWeapon ) );
+        return weapon;
+    } else {
+        return "";
+    }
+}
+
+#define SUBSAMPLE_WALK_PATH		1
+#define SUBSAMPLE_FLY_PATH		0
+
+const int		maxWalkPathIterations		= 10;
+const float		maxWalkPathDistance			= 500.0f;
+const float		walkPathSampleDistance		= 8.0f;
+
+const int		maxFlyPathIterations		= 10;
+const float		maxFlyPathDistance			= 500.0f;
+const float		flyPathSampleDistance		= 8.0f;
+
+bool botAi::RouteToGoalArea( int areaNum, const idVec3 origin, int goalAreaNum, int travelFlags, int &travelTime, idReachability **reach ) const {
+	int clusterNum, goalClusterNum, portalNum, i, clusterAreaNum;
+	unsigned short int t, bestTime;
+	const aasPortal_t *portal;
+	const aasCluster_t *cluster;
+	idRoutingCache *areaCache, *portalCache, *clusterCache;
+	idReachability *bestReach, *r, *nextr;
+
+	travelTime = 0;
+	*reach = NULL;
+
+	if(!aas)
+		return false;
+	const idAASLocal *aasLocal = (const idAASLocal *)aas;
+	idAASFile *file = aas->GetFile();
+	if ( !file ) {
+		return false;
+	}
+
+	if ( areaNum == goalAreaNum ) {
+		return true;
+	}
+
+	if ( areaNum <= 0 || areaNum >= file->GetNumAreas() ) {
+// RAVEN BEGIN
+// bgeisler:
+//		gameLocal.Printf( "RouteToGoalArea: areaNum %d out of range\n", areaNum );
+// RAVEN END
+		return false;
+	}
+	if ( goalAreaNum <= 0 || goalAreaNum >= file->GetNumAreas() ) {
+// RAVEN BEGIN
+// bgeisler:
+//		gameLocal.Printf( "RouteToGoalArea: goalAreaNum %d out of range\n", goalAreaNum );
+// RAVEN END
+		return false;
+	}
+
+#define MAX_ROUTING_CACHE_MEMORY	(4*1024*1024) // TinMan: 4Mb
+	while( aasLocal->totalCacheMemory > MAX_ROUTING_CACHE_MEMORY ) {
+		aasLocal->DeleteOldestCache();
+	}
+
+	clusterNum = file->GetArea( areaNum ).cluster;
+	goalClusterNum = file->GetArea( goalAreaNum ).cluster;
+
+	// if the source area is a cluster portal, read directly from the portal cache
+	if ( clusterNum < 0 ) {
+		// if the goal area is a portal
+		if ( goalClusterNum < 0 ) {
+			// just assume the goal area is part of the front cluster
+			portal = &file->GetPortal( -goalClusterNum );
+			goalClusterNum = portal->clusters[0];
+		}
+		// get the portal routing cache
+		portalCache = aasLocal->GetPortalRoutingCache( goalClusterNum, goalAreaNum, travelFlags );
+		*reach = aasLocal->GetAreaReachability( areaNum, portalCache->reachabilities[-clusterNum] );
+		if(!*reach)
+			return false;
+		travelTime = portalCache->travelTimes[-clusterNum] + aasLocal->AreaTravelTime( areaNum, origin, (*reach)->start );
+		return true;
+	}
+
+	bestTime = 0;
+	bestReach = NULL;
+
+	// check if the goal area is a portal of the source area cluster
+	if ( goalClusterNum < 0 ) {
+		portal = &file->GetPortal( -goalClusterNum );
+		if ( portal->clusters[0] == clusterNum || portal->clusters[1] == clusterNum) {
+			goalClusterNum = clusterNum;
+		}
+	}
+
+	// if both areas are in the same cluster
+	if ( clusterNum > 0 && goalClusterNum > 0 && clusterNum == goalClusterNum ) {
+		clusterCache = aasLocal->GetAreaRoutingCache( clusterNum, goalAreaNum, travelFlags );
+		clusterAreaNum = aasLocal->ClusterAreaNum( clusterNum, areaNum );
+		if ( clusterCache->travelTimes[clusterAreaNum] ) {
+			bestReach = aasLocal->GetAreaReachability( areaNum, clusterCache->reachabilities[clusterAreaNum] );
+			if(!bestReach)
+				return false;
+			bestTime = clusterCache->travelTimes[clusterAreaNum] + aasLocal->AreaTravelTime( areaNum, origin, bestReach->start );
+		}
+		else {
+			clusterCache = NULL;
+		}
+	}
+	else {
+		clusterCache = NULL;
+	}
+
+	clusterNum = file->GetArea( areaNum ).cluster;
+	goalClusterNum = file->GetArea( goalAreaNum ).cluster;
+
+	// if the goal area is a portal
+	if ( goalClusterNum < 0 ) {
+		// just assume the goal area is part of the front cluster
+		portal = &file->GetPortal( -goalClusterNum );
+		goalClusterNum = portal->clusters[0];
+	}
+	// get the portal routing cache
+	portalCache = aasLocal->GetPortalRoutingCache( goalClusterNum, goalAreaNum, travelFlags );
+
+	// the cluster the area is in
+	cluster = &file->GetCluster( clusterNum );
+	// current area inside the current cluster
+	clusterAreaNum = aasLocal->ClusterAreaNum( clusterNum, areaNum );
+	// if the area is not a reachable area
+	if ( clusterAreaNum >= cluster->numReachableAreas) {
+		return false;
+	}
+
+	// find the portal of the source area cluster leading towards the goal area
+	for ( i = 0; i < cluster->numPortals; i++ ) {
+		portalNum = file->GetPortalIndex( cluster->firstPortal + i );
+
+		// if the goal area isn't reachable from the portal
+		if ( !portalCache->travelTimes[portalNum] ) {
+			continue;
+		}
+
+		portal = &file->GetPortal( portalNum );
+		// get the cache of the portal area
+		areaCache = aasLocal->GetAreaRoutingCache( clusterNum, portal->areaNum, travelFlags );
+		// if the portal is not reachable from this area
+		if ( !areaCache->travelTimes[clusterAreaNum] ) {
+			continue;
+		}
+
+		r = aasLocal->GetAreaReachability( areaNum, areaCache->reachabilities[clusterAreaNum] );
+		if(!r)
+			continue;
+
+		if ( clusterCache ) {
+			// if the next reachability from the portal leads back into the cluster
+			nextr = aasLocal->GetAreaReachability( portal->areaNum, portalCache->reachabilities[portalNum] );
+			if(!nextr)
+				continue;
+			if ( file->GetArea( nextr->toAreaNum ).cluster < 0 || file->GetArea( nextr->toAreaNum ).cluster == clusterNum ) {
+				continue;
+			}
+		}
+
+		// the total travel time is the travel time from the portal area to the goal area
+		// plus the travel time from the source area towards the portal area
+		t = portalCache->travelTimes[portalNum] + areaCache->travelTimes[clusterAreaNum];
+		// NOTE:	Should add the exact travel time through the portal area.
+		//			However we add the largest travel time through the portal area.
+		//			We cannot directly calculate the exact travel time through the portal area
+		//			because the reachability used to travel into the portal area is not known.
+		t += portal->maxAreaTravelTime;
+
+		// if the time is better than the one already found
+		if ( !bestTime || t < bestTime ) {
+			bestReach = r;
+			bestTime = t;
+		}
+	}
+
+	if ( !bestReach ) {
+		return false;
+	}
+
+	*reach = bestReach;
+	travelTime = bestTime;
+
+	return true;
+}
+
+bool botAi::WalkPathToGoal( aasPath_t &path, int areaNum, const idVec3 &origin, int goalAreaNum, const idVec3 &goalOrigin, int travelFlags ) const {
+	int i, travelTime, curAreaNum, lastAreas[4], lastAreaIndex, endAreaNum;
+	idReachability *reach = NULL;
+	idVec3 endPos;
+
+	path.type = PATHTYPE_WALK;
+	path.moveGoal = origin;
+	path.moveAreaNum = areaNum;
+	path.secondaryGoal = origin;
+	path.reachability = NULL;
+
+	if(!aas) {
+		path.moveGoal = goalOrigin;
+		return true;
+	}
+	const idAASLocal *aasLocal = (const idAASLocal *)aas;
+	const idAASFile *file = aas->GetFile();
+
+	if ( file == NULL || areaNum == goalAreaNum ) {
+		path.moveGoal = goalOrigin;
+		return true;
+	}
+
+	lastAreas[0] = lastAreas[1] = lastAreas[2] = lastAreas[3] = areaNum;
+	lastAreaIndex = 0;
+
+	curAreaNum = areaNum;
+
+	for ( i = 0; i < maxWalkPathIterations; i++ ) {
+
+		if ( !botAi::RouteToGoalArea( curAreaNum, path.moveGoal, goalAreaNum, travelFlags, travelTime, &reach ) ) {
+			break;
+		}
+
+		if ( !reach ) {
+			return false;
+		}
+
+ 		// RAVEN BEGIN
+ 		// cdr: Alternate Routes Bug
+ 		path.reachability = reach;
+ 		// RAVEN END
+
+		// no need to check through the first area
+		if ( areaNum != curAreaNum ) {
+			// only optimize a limited distance ahead
+			if ( (reach->start - origin).LengthSqr() > Square( maxWalkPathDistance ) ) {
+#if SUBSAMPLE_WALK_PATH
+				path.moveGoal = aasLocal->SubSampleWalkPath( areaNum, origin, path.moveGoal, reach->start, travelFlags, path.moveAreaNum );
+#endif
+				return true;
+			}
+
+			if ( !aasLocal->WalkPathValid( areaNum, origin, 0, reach->start, travelFlags, endPos, endAreaNum ) ) {
+#if SUBSAMPLE_WALK_PATH
+				path.moveGoal = aasLocal->SubSampleWalkPath( areaNum, origin, path.moveGoal, reach->start, travelFlags, path.moveAreaNum );
+#endif
+				return true;
+			}
+		}
+
+		path.moveGoal = reach->start;
+		path.moveAreaNum = curAreaNum;
+
+		if ( reach->travelType != TFL_WALK ) {
+			break;
+		}
+
+		if ( !aasLocal->WalkPathValid( areaNum, origin, 0, reach->end, travelFlags, endPos, endAreaNum ) ) {
+			return true;
+		}
+
+		path.moveGoal = reach->end;
+		path.moveAreaNum = reach->toAreaNum;
+
+		if ( reach->toAreaNum == goalAreaNum ) {
+			if ( !aasLocal->WalkPathValid( areaNum, origin, 0, goalOrigin, travelFlags, endPos, endAreaNum ) ) {
+#if SUBSAMPLE_WALK_PATH
+				path.moveGoal = aasLocal->SubSampleWalkPath( areaNum, origin, path.moveGoal, goalOrigin, travelFlags, path.moveAreaNum );
+#endif
+				return true;
+			}
+			path.moveGoal = goalOrigin;
+			path.moveAreaNum = goalAreaNum;
+			return true;
+		}
+
+		lastAreas[lastAreaIndex] = curAreaNum;
+		lastAreaIndex = ( lastAreaIndex + 1 ) & 3;
+
+		curAreaNum = reach->toAreaNum;
+
+		if ( curAreaNum == lastAreas[0] || curAreaNum == lastAreas[1] ||
+				curAreaNum == lastAreas[2] || curAreaNum == lastAreas[3] ) {
+			common->Warning( "idAASLocal::WalkPathToGoal: local routing minimum going from area %d to area %d", areaNum, goalAreaNum );
+			break;
+		}
+	}
+
+	if ( !reach ) {
+		return false;
+	}
+
+	switch( reach->travelType ) {
+		case TFL_WALKOFFLEDGE:
+			path.type = PATHTYPE_WALKOFFLEDGE;
+			path.secondaryGoal = reach->end;
+			path.reachability = reach;
+			break;
+		case TFL_BARRIERJUMP:
+			path.type |= PATHTYPE_BARRIERJUMP;
+			path.secondaryGoal = reach->end;
+			path.reachability = reach;
+			break;
+		case TFL_JUMP:
+			path.type |= PATHTYPE_JUMP;
+			path.secondaryGoal = reach->end;
+			path.reachability = reach;
+			break;
+			case TFL_ELEVATOR:
+
+        /* custom3: i took a look at this. it seems many of the plats, especially on ctf1,
+        go through a realm of areaNum=0 on the way up. this is a problem. lol.
+        what i started doing as a hack is something like this.
+        */
+        int time;
+        idReachability *next;
+        path.secondaryGoal = reach->end;
+        this->RouteToGoalArea(reach->toAreaNum, reach->end, goalAreaNum, travelFlags, time, &next);
+        while ( next && next->travelType == TFL_ELEVATOR )
+        {
+            path.secondaryGoal = next->end;
+            this->RouteToGoalArea( next->toAreaNum, next->end, goalAreaNum, travelFlags, time, &next);
+        }
+
+        path.type |= PATHTYPE_ELEVATOR;
+        path.reachability = reach;
+        break;
+		default:
+			break;
+	}
+
+	return true;
+}
+
+bool botAi::FlyPathToGoal( aasPath_t &path, int areaNum, const idVec3 &origin, int goalAreaNum, const idVec3 &goalOrigin, int travelFlags ) const {
+	int i, travelTime, curAreaNum, lastAreas[4], lastAreaIndex, endAreaNum;
+	idReachability *reach = NULL;
+	idVec3 endPos;
+
+	path.type = PATHTYPE_WALK;
+	path.moveGoal = origin;
+	path.moveAreaNum = areaNum;
+	path.secondaryGoal = origin;
+	path.reachability = NULL;
+
+	if(!aas) {
+		path.moveGoal = goalOrigin;
+		return true;
+	}
+	const idAASLocal *aasLocal = (const idAASLocal *)aas;
+	const idAASFile *file = aas->GetFile();
+
+	if ( file == NULL || areaNum == goalAreaNum ) {
+		path.moveGoal = goalOrigin;
+		return true;
+	}
+
+	lastAreas[0] = lastAreas[1] = lastAreas[2] = lastAreas[3] = areaNum;
+	lastAreaIndex = 0;
+
+	curAreaNum = areaNum;
+
+	for ( i = 0; i < maxFlyPathIterations; i++ ) {
+
+		if ( !botAi::RouteToGoalArea( curAreaNum, path.moveGoal, goalAreaNum, travelFlags, travelTime, &reach ) ) {
+			break;
+		}
+
+		if ( !reach ) {
+			return false;
+		}
+
+		// no need to check through the first area
+		if ( areaNum != curAreaNum ) {
+			if ( (reach->start - origin).LengthSqr() > Square( maxFlyPathDistance ) ) {
+#if SUBSAMPLE_FLY_PATH
+				path.moveGoal = aasLocal->SubSampleFlyPath( areaNum, origin, path.moveGoal, reach->start, travelFlags, path.moveAreaNum );
+#endif
+				return true;
+			}
+
+			if ( !aasLocal->FlyPathValid( areaNum, origin, 0, reach->start, travelFlags, endPos, endAreaNum ) ) {
+#if SUBSAMPLE_FLY_PATH
+				path.moveGoal = aasLocal->SubSampleFlyPath( areaNum, origin, path.moveGoal, reach->start, travelFlags, path.moveAreaNum );
+#endif
+				return true;
+			}
+		}
+
+		path.moveGoal = reach->start;
+		path.moveAreaNum = curAreaNum;
+
+		if ( !aasLocal->FlyPathValid( areaNum, origin, 0, reach->end, travelFlags, endPos, endAreaNum ) ) {
+			return true;
+		}
+
+		path.moveGoal = reach->end;
+		path.moveAreaNum = reach->toAreaNum;
+
+		if ( reach->toAreaNum == goalAreaNum ) {
+			if ( !aasLocal->FlyPathValid( areaNum, origin, 0, goalOrigin, travelFlags, endPos, endAreaNum ) ) {
+#if SUBSAMPLE_FLY_PATH
+				path.moveGoal = aasLocal->SubSampleFlyPath( areaNum, origin, path.moveGoal, goalOrigin, travelFlags, path.moveAreaNum );
+#endif
+				return true;
+			}
+			path.moveGoal = goalOrigin;
+			path.moveAreaNum = goalAreaNum;
+			return true;
+		}
+
+		lastAreas[lastAreaIndex] = curAreaNum;
+		lastAreaIndex = ( lastAreaIndex + 1 ) & 3;
+
+		curAreaNum = reach->toAreaNum;
+
+		if ( curAreaNum == lastAreas[0] || curAreaNum == lastAreas[1] ||
+				curAreaNum == lastAreas[2] || curAreaNum == lastAreas[3] ) {
+			common->Warning( "idAASLocal::FlyPathToGoal: local routing minimum going from area %d to area %d", areaNum, goalAreaNum );
+			break;
+		}
+	}
+
+	if ( !reach ) {
+		return false;
+	}
+
 	return true;
 }
 

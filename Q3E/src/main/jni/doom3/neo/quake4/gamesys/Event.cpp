@@ -265,7 +265,7 @@ idEvent *idEvent::Alloc( const idEventDef *evdef, int numargs, va_list args ) {
 	for( i = 0; i < numargs; i++ ) {
 		arg = va_arg( args, idEventArg * );
 		if ( format[ i ] != arg->type ) {
-#if 0 //k jmarshall
+#if !defined(_QUAKE4) //#if 0 //k jmarshall
 // RAVEN BEGIN
 // abahr: type checking change as per Jim D.
 			if ( ( format[ i ] == D_EVENT_ENTITY_NULL ) && ( arg->type == D_EVENT_ENTITY ) ) {
@@ -363,7 +363,7 @@ void idEvent::CopyArgs( const idEventDef *evdef, int numargs, va_list args, intp
 	for( i = 0; i < numargs; i++ ) {
 		arg = va_arg( args, idEventArg * );
 		if ( format[ i ] != arg->type ) {
-#if 0 //k jmarshall
+#if !defined(_QUAKE4) //#if 0 //k jmarshall
 // RAVEN BEGIN
 // abahr: type checking change as per Jim D.
 			if ( ( format[ i ] == D_EVENT_ENTITY_NULL ) && ( arg->type == D_EVENT_ENTITY ) ) {

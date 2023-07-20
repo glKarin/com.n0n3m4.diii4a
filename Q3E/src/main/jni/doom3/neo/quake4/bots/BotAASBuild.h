@@ -55,6 +55,31 @@ private:
     void						CreatePortal( int areaNum, int cluster, int joinCluster );
 };
 
+class idAASFindAreaOutOfRange : public idAASCallback
+{
+public:
+    idAASFindAreaOutOfRange(const idVec3 &targetPos, float maxDist);
+
+    virtual bool		TestArea(const idAAS *aas, int areaNum);
+
+private:
+    idVec3				targetPos;
+    float				maxDistSqr;
+};
+
+class idAASFindCover : public idAASCallback
+{
+public:
+    idAASFindCover(const idVec3 &hideFromPos);
+    ~idAASFindCover();
+
+    virtual bool		TestArea(const idAAS *aas, int areaNum);
+
+private:
+    pvsHandle_t			hidePVS;
+    int					PVSAreas[ idEntity::MAX_PVS_AREAS ];
+};
+
 ID_INLINE BotAASBuild::BotAASBuild( void )
 {
     reachabilities.Resize( 128, 128 );

@@ -1045,4 +1045,95 @@ void AddHardCodedReachabilityToAASPlat()
     //r->rev_next = area->rev_reach;
     //area->rev_reach = r;
 }
+
+
+
+/*
+============
+idAASFindCover::idAASFindCover
+============
+*/
+idAASFindCover::idAASFindCover(const idVec3 &hideFromPos)
+{
+    int			numPVSAreas;
+    idBounds	bounds(hideFromPos - idVec3(16, 16, 0), hideFromPos + idVec3(16, 16, 64));
+
+    // setup PVS
+    numPVSAreas = gameLocal.pvs.GetPVSAreas(bounds, PVSAreas, idEntity::MAX_PVS_AREAS);
+    hidePVS		= gameLocal.pvs.SetupCurrentPVS(PVSAreas, numPVSAreas);
+}
+
+/*
+============
+idAASFindCover::~idAASFindCover
+============
+*/
+idAASFindCover::~idAASFindCover()
+{
+    gameLocal.pvs.FreeCurrentPVS(hidePVS);
+}
+
+/*
+============
+idAASFindCover::TestArea
+============
+*/
+bool idAASFindCover::TestArea(const idAAS *aas, int areaNum)
+{
+    idVec3	areaCenter;
+    int		numPVSAreas;
+    int		PVSAreas[ idEntity::MAX_PVS_AREAS ];
+
+    areaCenter = aas->AreaCenter(areaNum);
+    areaCenter[ 2 ] += 1.0f;
+
+    numPVSAreas = gameLocal.pvs.GetPVSAreas(idBounds(areaCenter).Expand(16.0f), PVSAreas, idEntity::MAX_PVS_AREAS);
+
+    if (!gameLocal.pvs.InCurrentPVS(hidePVS, PVSAreas, numPVSAreas))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+/*
+============
+idAASFindAreaOutOfRange::idAASFindAreaOutOfRange
+============
+*/
+idAASFindAreaOutOfRange::idAASFindAreaOutOfRange(const idVec3 &targetPos, float maxDist)
+{
+    this->targetPos		= targetPos;
+    this->maxDistSqr	= maxDist * maxDist;
+}
+
+/*
+============
+idAASFindAreaOutOfRange::TestArea
+============
+*/
+bool idAASFindAreaOutOfRange::TestArea(const idAAS *aas, int areaNum)
+{
+    const idVec3 &areaCenter = aas->AreaCenter(areaNum);
+    trace_t	trace;
+    float dist;
+
+    dist = (targetPos.ToVec2() - areaCenter.ToVec2()).LengthSqr();
+
+    if ((maxDistSqr > 0.0f) && (dist < maxDistSqr))
+    {
+        return false;
+    }
+
+    gameLocal.TracePoint( NULL, trace, targetPos, areaCenter + idVec3(0.0f, 0.0f, 1.0f), MASK_OPAQUE, NULL);
+
+    if (trace.fraction < 1.0f)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 #endif

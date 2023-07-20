@@ -74,31 +74,6 @@ public:
     int						pathType;
 };
 
-class idAASFindAreaOutOfRange : public idAASCallback
-{
-public:
-    idAASFindAreaOutOfRange(const idVec3 &targetPos, float maxDist);
-
-    virtual bool		TestArea(const idAAS *aas, int areaNum);
-
-private:
-    idVec3				targetPos;
-    float				maxDistSqr;
-};
-
-class idAASFindCover : public idAASCallback
-{
-public:
-    idAASFindCover(const idVec3 &hideFromPos);
-    ~idAASFindCover();
-
-    virtual bool		TestArea(const idAAS *aas, int areaNum);
-
-private:
-    pvsHandle_t			hidePVS;
-    int					PVSAreas[ idEntity::MAX_PVS_AREAS ];
-};
-
 class botAASFindAttackPosition : public idAASCallback
 {
 public:
@@ -430,6 +405,12 @@ private:
     static int				AddBot(const char *name);
 	static bool             CanAddBot(void);
     int						lastPreferred;
+    idVec3                  PredictTargetPosition( const idVec3 &targetPosition, const idVec3 &myPosition, const idVec3 &targetVelocity, float projectileSpeed );
+    float                   GetProjectileSpeed(const char *weaponName);
+    const char *            GetCurrentWeapon(void);
+	bool					WalkPathToGoal( aasPath_t &path, int areaNum, const idVec3 &origin, int goalAreaNum, const idVec3 &goalOrigin, int travelFlags ) const;
+	bool					FlyPathToGoal( aasPath_t &path, int areaNum, const idVec3 &origin, int goalAreaNum, const idVec3 &goalOrigin, int travelFlags ) const;
+	bool					RouteToGoalArea( int areaNum, const idVec3 origin, int goalAreaNum, int travelFlags, int &travelTime, idReachability **reach ) const;
 };
 
 /*

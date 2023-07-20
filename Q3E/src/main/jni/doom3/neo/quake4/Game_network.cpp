@@ -272,26 +272,46 @@ void idGameLocal::ServerClientDisconnect( int clientNum ) {
 	// clear the client PVS
 	memset( clientPVS[ clientNum ], 0, sizeof( clientPVS[ clientNum ] ) );
 #ifdef MOD_BOTS
-	if(BOT_ENABLED()) {
-	// TinMan: remove bot entity
-        if ( clientNum >= botAi::BOT_START_INDEX )
-        {
-            int botID = clientNum - botAi::BOT_START_INDEX;
-            if ( botAi::bots[botID].inUse )
-            {
-                idEntity * ent = entities[ botAi::bots[botID].entityNum ];
-                if ( ent )
-                {
-                    //common->Printf( "[idGameLocal::ServerClientDisconnect][Found bot #%d ent]\n", botID );
-                    delete entities[ botAi::bots[botID].entityNum ];
-                    // TinMan: TODO: memset?
-                    // memset( botAi::bots[botID], 0, sizeof( botInfo_t ) );
-                    botAi::bots[botID].inUse = false;
-                    botAi::bots[botID].clientID = -1;
-                    botAi::bots[botID].entityNum = -1;
-                }
-            }
-        }
+	if(BOT_ENABLED())
+	{
+		if(clientNum == gameLocal.localClientNum)
+		{
+			// TinMan: remove bot entity
+			for ( int botID = 0; botID < botAi::BOT_MAX_BOTS; botID++ )
+			{
+				if ( botAi::bots[botID].inUse )
+				{
+					idEntity * ent = entities[ botAi::bots[botID].entityNum ];
+					if ( ent )
+					{
+						//common->Printf( "[idGameLocal::ServerClientDisconnect][Found bot #%d ent]\n", botID );
+						delete entities[ botAi::bots[botID].entityNum ];
+						entities[ botAi::bots[botID].entityNum ] = NULL;
+					}
+					// TinMan: TODO: memset?
+					// memset( botAi::bots[botID], 0, sizeof( botInfo_t ) );
+					botAi::bots[botID].inUse = false;
+					botAi::bots[botID].clientID = -1;
+					botAi::bots[botID].entityNum = -1;
+				}
+			}
+		}
+		else if(clientNum >= botAi::BOT_START_INDEX)
+		{
+			int botID = clientNum - botAi::BOT_START_INDEX;
+			idEntity * ent = entities[ botAi::bots[botID].entityNum ];
+			if ( ent )
+			{
+				//common->Printf( "[idGameLocal::ServerClientDisconnect][Found bot #%d ent]\n", botID );
+				delete entities[ botAi::bots[botID].entityNum ];
+				entities[ botAi::bots[botID].entityNum ] = NULL;
+			}
+			// TinMan: TODO: memset?
+			// memset( botAi::bots[botID], 0, sizeof( botInfo_t ) );
+			botAi::bots[botID].inUse = false;
+			botAi::bots[botID].clientID = -1;
+			botAi::bots[botID].entityNum = -1;
+		}
     }
 #endif
 
