@@ -279,7 +279,7 @@ set(sys_libs ${sys_libs} dl)
 set(sys_libs ${sys_libs} GLESv2 EGL android z)
 set(local_libs ogg curl)
 if(USING_STB)
-	set(CORE_DEFINES "${CORE_DEFINES};_K_USING_STB")
+	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB")
 	message(STATUS "Using stb jpeg image")
 endif()
 #//k jpeg

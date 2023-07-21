@@ -51,15 +51,14 @@ Tag with `-free` only for F-Droid update.
 ###### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play all levels, but some levels has bugs.  
 > 1. Putting PC Quake 4 game data file to `q4base` folder and START directly.
 > 2. Suggest to extract Quake 4 patch resource to `q4base` game data folder first(in menu `Other` -> `Extract resource`).
-> - Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file> <bot_file> ...` or `fillbots` after enter map in console, or set `harm_si_autoFillBots` to 1 for automatic fill bots).
-> - `SABot` MP game map aas files(for bots in MP game).
+> - `SABot a9 mod` multiplayer-game map aas files and bot scripts(for bots in multiplayer-game).
 
 ###### Problems and resolutions  
 > 1. ~~Door-opening/Collision~~: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, health-station, all doors can be opened.
 > 2. *Main-menu*: Now main menu and MP game menu is work, but without background color. But some GUIs can not interactive.
 > 3. ~~Sound~~: It looks work well now.
 > 4. ~~Loading-UI~~: It looks work well now.
-> 5. ~~Multiplayer-Game~~: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
+> 5. ~~Multiplayer-Game~~: Now is working well with bots(added SABot a7 mod support, but need `SABot a9 mod` file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(aas32)).
 > 6. *Script error*: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
 > 7. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
 > 8. *Entity render*: Some game entities render incorrect.
@@ -91,6 +90,13 @@ Tag with `-free` only for F-Droid update.
 
 ### Portable:
 
+#### Engine for Android
+##### Define macro `__ANDROID__` for Android.
+> 1. _OPENSLES: Add OpenSLES support for sound.
+> 2. _MULTITHREAD: Add multithread support for rendering.
+> 3. _USING_STB: Using stb header for jpeg/png texture image support.
+> 4. _K_CLANG: If compiling by clang not GCC.
+
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
 
@@ -104,7 +110,7 @@ Tag with `-free` only for F-Droid update.
 ##### About `BSE`
 Because `BSE` not open-source, so I default supply a `NULL` implement and a uncompleted but working implement with DOOM3 Particle/Fx system(using macros `_RAVEN_FX` marked).
 ##### About `BOT`
-It has some unnecessary source code for Bot by `jmarshall`.
+Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bot support in multiplayer-game.
 
 #### Prey(2006)
 ##### `_HUMANHEAD`, `_PREY` is patches macros, find them in `DIII4A` source code.

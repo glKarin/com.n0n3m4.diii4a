@@ -51,16 +51,15 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ###### 运行雷神之锤4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). 目前可以运行全部关卡, 部分关卡存在bug.  
 > 1. 将PC端雷神之锤4游戏文件放到`q4base`文件夹, 然后直接启动游戏.
 > 2. 建议先解压雷神之锤4补丁资源到`q4base`资源目录(在菜单`Other` -> `Extract resource`).
-> - 毁灭战士3格式的雷神之锤4字体, [IlDucci](https://github.com/IlDucci)提供.
-> - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbot <bot_file>`或`fillbots`添加bot, 或者设置`harm_si_autoFillBots`为1自动添加bot).
-> - `SABot`多人游戏地图的aas文件(多人游戏的bot寻径).
+> - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbots <bot_file>`或`fillbots`添加bot, 或者设置`harm_si_autoFillBots`为1自动添加bot).
+> - `SABot a9 mod`多人游戏地图的aas文件和脚本文件(多人游戏的bot支持).
 
 ###### 问题和解决方案:    
 > 1. ~~门打不开~~: 碰撞问题已经修复, 例如触发器, 载具, AI, 电梯, 血站, 所有门都可正常打开.
 > 2. *主菜单*: 目前可以正常显示, 包括多人游戏菜单, 去掉背景色. 可能存在部分GUI交互有问题.
 > 3. ~~声音~~: 正常工作.
 > 4. ~~游戏载入界面~~: 正常工作.
-> 5. *多人游戏*: 目前正常工作, 并且可以添加bot(`jmarshall`添加了雷神之锤3的bot支持, 但是需要先添加bot文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹).
+> 5. *多人游戏*: 目前正常工作, 并且可以添加bot(添加SABot a7 mod支持, 但是需要先添加`SABot a9 mod`文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹(aas32)).
 > 6. *脚本错误*: 部分地图存在脚本错误, 虽然不会使程序崩溃, 但是可能会影响游戏进程.
 > 7. *粒子系统*: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, 非开源, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), 但是至今不工作. 现在实现了一个基于毁灭战士3的粒子特效系统的开源BSE, 可以渲染一些, 但是效果不是很理想.
 > 8. *物体渲染*: 存在一些物体错误的渲染结果.
@@ -92,6 +91,13 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 
 ### 移植:
 
+#### 安卓系统上的引擎
+##### 安卓系统编译声明宏`__ANDROID__`.
+> 1. _OPENSLES: OpenSLES声音支持.
+> 2. _MULTITHREAD: 多线程支持.
+> 3. _USING_STB: 使用stb加载jpeg/png纹理图片支持.
+> 4. _K_CLANG: 如果使用clang编译而不是GCC.
+
 #### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
 #### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).
 
@@ -105,7 +111,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ##### 关于`BSE`
 由于`BSE`没开源, 所有我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
 ##### 关于`BOT`
-bot不是必要的, 而是`jmarshall`额外添加的.
+声明宏`MOD_BOTS`将编译SABot a7(来自毁灭战士3) mod源码的多人游戏的bot支持.
 
 #### 掠食(2006)
 ##### `_HUMANHEAD`, `_PREY`是补丁宏, 在`DIII4A`源码中查找.
