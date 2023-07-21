@@ -5208,8 +5208,8 @@ void botAi::Event_GetAimDir( idEntity *aimAtEnt, float prefered )
         int a = gameLocal.random.RandomInt(100);
         switch (lastPreferred)
         {
-            case GET_AIM_DIR_HEAD: // 95/100 head, 3/100 chest
-                aimTarget = a < 95 ? GET_AIM_DIR_HEAD : GET_AIM_DIR_CHEST;
+            case GET_AIM_DIR_HEAD: // 90/100 head, 10/100 chest
+                aimTarget = a < 90 ? GET_AIM_DIR_HEAD : GET_AIM_DIR_CHEST;
                 break;
             case GET_AIM_DIR_FEET: // 90/100 feet, 10/100 chest
                 aimTarget = a < 90 ? GET_AIM_DIR_FEET : GET_AIM_DIR_CHEST;
@@ -5414,7 +5414,7 @@ const char * botAi::GetCurrentWeapon(void)
     }
 }
 
-#include "BotAi_cmd.cpp"
-#include "BotAi_aas.cpp"
+#include "BotAI_cmd.cpp"
+#include "BotAI_aas.cpp"
 
 #endif
