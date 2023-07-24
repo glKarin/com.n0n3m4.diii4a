@@ -27,7 +27,9 @@ public final class KCVarSystem
                         ),
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "4.0", "Specular exponent in interaction light model", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external GLSL shader program directory path", 0),
-                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0: Always heap; Negative: Always stack(original); Positive: Max stack memory limit)", 0)
+                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0: Always heap; Negative: Always stack(original); Positive: Max stack memory limit)", 0),
+                        KCVar.CreateCVar("harm_r_blendShadow", "bool", "0", "Blending shadow", 0),
+                        KCVar.CreateCVar("harm_r_blendShadowOpacity", "float", "0.5", "Blending shadow opacity(0.0 - 1.0)", KCVar.FLAG_POSITIVE)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(
@@ -64,7 +66,7 @@ public final class KCVarSystem
                             "strogg", "fonts/strogg"
                     ),
                     KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0: disable; other number: bot num)", 0),
-                    KCVar.CreateCommand("addbot", "string", "adds a multiplayer bot(support `tab` complete, exam. addbot bot_name1 bot_name2 ...)", 0),
+                    KCVar.CreateCommand("addbots", "string", "adds a multiplayer bot(support `tab` complete, exam. addbots bot_name1 bot_name2 ...)", 0),
                     KCVar.CreateCommand("fillbots", "integer", "fill bots(empty argument to fill max bots num, exam. fillbots 8)", KCVar.FLAG_POSITIVE),
                     KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0)
                 );

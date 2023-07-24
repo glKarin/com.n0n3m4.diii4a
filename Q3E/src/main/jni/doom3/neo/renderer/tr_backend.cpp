@@ -234,6 +234,24 @@ void GL_UniformMatrix4fv(GLint location, const GLfloat *value)
 
 /*
 ====================
+GL_Uniform1f
+====================
+*/
+void GL_Uniform1f(GLint location, GLfloat value)
+{
+	if (!backEnd.glState.currentProgram) {
+		common->Printf("GL_Uniform1f: no current program object\n");
+		__builtin_trap();
+		return;
+	}
+
+	glUniform1f(*(GLint *)((char *)backEnd.glState.currentProgram + location), value);
+
+	GL_CheckErrors();
+}
+
+/*
+====================
 GL_EnableVertexAttribArray
 ====================
 */

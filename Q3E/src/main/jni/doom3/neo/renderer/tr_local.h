@@ -1049,6 +1049,7 @@ void	GL_UseProgram(shaderProgram_s *program);
 void	GL_Uniform1fv(GLint location, const GLfloat *value);
 void	GL_Uniform4fv(GLint location, const GLfloat *value);
 void	GL_UniformMatrix4fv(GLint location, const GLfloat *value);
+void	GL_Uniform1f(GLint location, GLfloat value);
 void	GL_EnableVertexAttribArray(GLuint index);
 void	GL_DisableVertexAttribArray(GLuint index);
 void	GL_VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
@@ -1501,6 +1502,7 @@ typedef struct shaderProgram_s {
 	GLint		texgenT;
 	GLint		texgenQ;
 
+	GLint		alpha;
 #ifdef _HARM_SHADER_NAME //k: restore shader name
 	char name[32];
 #endif
@@ -1528,6 +1530,11 @@ extern shaderProgram_t blendLightShader; //k: blend light shader
 extern shaderProgram_t interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
 extern shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
 extern shaderProgram_t texgenShader; //k: texgen shader
+#define _HARM_BLEND_SHADOW
+#ifdef _HARM_BLEND_SHADOW
+extern shaderProgram_t interactionBlendShadowShader;
+extern shaderProgram_t interactionBlendShadowBlinnPhongShader;
+#endif
 
 
 /*
