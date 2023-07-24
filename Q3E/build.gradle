@@ -45,8 +45,6 @@ android {
             path file('src/main/jni/Android.mk')
         }*/
     }
-
-    ndkVersion '17.2.4988734'
     lintOptions {
         checkReleaseBuilds false
         abortOnError false
