@@ -47,18 +47,22 @@ If you have questions concerning this license or the applicable additional terms
 #define	BUILD_STRING				"android-x86"
 #define BUILD_OS_ID					2
 #define CPUSTRING					"x86"
+#define CPU_EASYARGS				1
 #elif defined(__x86_64__)
 #define	BUILD_STRING				"android-x86_64"
 #define BUILD_OS_ID					2
 #define CPUSTRING					"x86_64"
+#define CPU_EASYARGS				1
 #elif defined(__aarch64__)
 #define	BUILD_STRING				"android-arm64"
 #define CPUSTRING					"arm64"
 #define BUILD_OS_ID					2
+#define CPU_EASYARGS				1
 #elif defined(__arm__)
 #define	BUILD_STRING				"android-arm"
 #define CPUSTRING					"arm"
 #define BUILD_OS_ID					2
+#define CPU_EASYARGS				1
 #endif
 
 #ifdef _MULTITHREAD
@@ -76,17 +80,21 @@ extern bool Sys_InRenderThread(void);
 #define	BUILD_STRING				"linux-x86"
 #define BUILD_OS_ID					2
 #define CPUSTRING					"x86"
+#define CPU_EASYARGS				1
 #elif defined(__x86_64__)
 #define	BUILD_STRING				"linux-x86_64"
 #define BUILD_OS_ID					2
 #define CPUSTRING					"x86_64"
+#define CPU_EASYARGS				1
 #elif defined(__ppc__)
 #define	BUILD_STRING				"linux-ppc"
 #define CPUSTRING					"ppc"
+#define CPU_EASYARGS				1
 #elif defined(__arm__)
 #define	BUILD_STRING				"linux-arm"
 #define BUILD_OS_ID					2
 #define CPUSTRING					"arm"
+#define CPU_EASYARGS				1
 #endif
 
 #endif
@@ -99,7 +107,11 @@ extern bool Sys_InRenderThread(void);
 #define _alloca16( x )					((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
 #endif
 
+#ifdef _SPLASHDAMAGE
+#define ALIGN16( x )					x __attribute__ ((aligned (16)))
+#else
 #define ALIGN16( x )					x
+#endif
 #define PACKED							__attribute__((packed))
 
 #define PATHSEPERATOR_STR				"/"
@@ -133,6 +145,7 @@ typedef enum {
 	CPUID_SSE2							= 0x00080,	// Streaming SIMD Extensions 2
 	CPUID_SSE3							= 0x00100,	// Streaming SIMD Extentions 3 aka Prescott's New Instructions
 	CPUID_ALTIVEC						= 0x00200,	// AltiVec
+	CPUID_XENON							= 0x00400,	// Xenon
 	CPUID_HTT							= 0x01000,	// Hyper-Threading Technology
 	CPUID_CMOV							= 0x02000,	// Conditional Move (CMOV) and fast floating point comparison (FCOMI) instructions
 	CPUID_FTZ							= 0x04000,	// Flush-To-Zero mode (denormal results are flushed to zero)
@@ -627,6 +640,18 @@ extern bool no_handle_signals;
 
 FILE * Sys_tmpfile(void);
 void Sys_SyncState(void);
+#endif
+
+#ifdef _SPLASHDAMAGE
+#define UINT_PTR						unsigned long
+#define PATHSEPARATOR_STR				"/"
+#define PATHSEPARATOR_CHAR				'/'
+
+template< typename T > ID_INLINE void Swap( T& l, T& r ) {
+	T temp = l;
+	l = r;
+	r = temp;
+}
 #endif
 
 #endif /* !__SYS_PUBLIC__ */

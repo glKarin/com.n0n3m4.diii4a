@@ -35,7 +35,6 @@
 	#endif
 #endif
 
-#include "../common/common.h"
 #include <string.h>
 #include <limits.h>
 

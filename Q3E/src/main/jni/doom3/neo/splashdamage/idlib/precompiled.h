@@ -26,8 +26,6 @@
 
 //-----------------------------------------------------
 
-#include "../common/common.h"
-
 // non-portable system services
 #include "../sys/sys_public.h"
 

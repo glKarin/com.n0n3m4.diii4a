@@ -12,7 +12,6 @@
 ===============================================================================
 */
 
-#include "../common/common.h"
 #include "keynum.h"
 
 class sdSysEvent;
