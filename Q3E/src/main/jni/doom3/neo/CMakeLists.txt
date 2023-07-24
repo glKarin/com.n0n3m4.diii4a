@@ -772,7 +772,7 @@ set(sabot_game_src
 		physics/Force_Grab.cpp
 		bots/BotAASBuild.cpp
 		bots/BotAI.cpp
-		bots/botSabot.cpp
+		bots/BotSabot.cpp
 		)
 list(APPEND src_sabot ${sabot_game_src})
 set_src_dir(src_sabot "sabot" ${src_sabot})
@@ -878,7 +878,7 @@ set(quake4_game_src
 	physics/Physics_VehicleMonster.cpp
 	bots/BotAASBuild.cpp
 	bots/BotAI.cpp
-	bots/botSabot.cpp
+	bots/BotSabot.cpp
 		)
 list(REMOVE_ITEM src_quake4
 		Fx.cpp
