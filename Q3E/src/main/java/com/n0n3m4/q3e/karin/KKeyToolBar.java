@@ -103,8 +103,9 @@ public class KKeyToolBar extends LinearLayout {
         int m = resources.getDimensionPixelSize(R.dimen.toolFunctionMargin);
         int w = resources.getDimensionPixelSize(R.dimen.toolButtonWidth);
         int s = resources.getDimensionPixelSize(R.dimen.toolButtonSpacing);
+        Context context = getContext();
 
-        KHorizontalListView m_toolbar = new KHorizontalListView(getContext());
+        KHorizontalListView m_toolbar = new KHorizontalListView(context);
         m_keyListAdapter = new KeyListAdapter(R.layout.tool_button);
         m_keyListAdapter.SetData(list);
         m_toolbar.SetAdapter(m_keyListAdapter);
@@ -114,13 +115,13 @@ public class KKeyToolBar extends LinearLayout {
         LinearLayout.LayoutParams layoutParms = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1);
         addView(m_toolbar, layoutParms);
 
-        ImageView m_movableView = new ImageView(getContext());
+        ImageView m_movableView = new ImageView(context);
         m_movableView.setImageDrawable(resources.getDrawable(R.drawable.icon_m_up_down));
         layoutParms = new LinearLayout.LayoutParams(h, ViewGroup.LayoutParams.MATCH_PARENT);
         layoutParms.setMargins(m, m, m, m);
         addView(m_movableView, layoutParms);
 
-        ImageView m_closeView = new ImageView(getContext());
+        ImageView m_closeView = new ImageView(context);
         m_closeView.setImageDrawable(getResources().getDrawable(R.drawable.icon_m_close));
         layoutParms = new LinearLayout.LayoutParams(h, ViewGroup.LayoutParams.MATCH_PARENT);
         layoutParms.setMargins(m, m, m, m);

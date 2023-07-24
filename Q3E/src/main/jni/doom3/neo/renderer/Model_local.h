@@ -99,6 +99,11 @@ class idRenderModelStatic : public idRenderModel
 
 		struct aseModel_s 			*ConvertLWOToASE(const struct st_lwObject *obj, const char *fileName);
 
+#ifdef _MODEL_OBJ
+	bool						LoadOBJ( const char* fileName );
+	bool						ConvertOBJToModelSurfaces( const struct objModel_t* obj );
+#endif
+
 		bool						DeleteSurfaceWithId(int id);
 		void						DeleteSurfacesWithNegativeId(void);
 		bool						FindSurfaceWithId(int id, int &surfaceNum);

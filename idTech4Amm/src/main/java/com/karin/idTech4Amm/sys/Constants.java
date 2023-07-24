@@ -29,6 +29,8 @@ public final class Constants
             "Change OpenGL vertex index size to 4 bytes for large model.",
             "In Quake4, remove FakeClient, and add SABot-a9 mod support and resource.",
             "Add skip intro.",
+            "Support obj static model, and fix png image load.",
+            "Add blend shadow(maybe has incorrect rendering in some lighting).",
 	};
 
 	// Launcher preference keys

@@ -68,6 +68,7 @@ option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for
 option(OPENSLES			"OpenSLES support" ON)
 option(MULTITHREAD			"Multi-Thread support" ON)
 option(USING_STB			"Using stb" ON)
+option(SUPPORT_OBJ			"Support obj model" ON)
 
 option(D3LE			"Build the d3le game code" ON)
 option(CDOOM			"Build the cdoom game code" ON)
@@ -281,6 +282,10 @@ set(local_libs ogg curl)
 if(USING_STB)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB")
 	message(STATUS "Using stb jpeg image")
+endif()
+if(SUPPORT_OBJ)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_OBJ")
+	message(STATUS "Support obj model")
 endif()
 #//k jpeg
 set(src_jpeg
