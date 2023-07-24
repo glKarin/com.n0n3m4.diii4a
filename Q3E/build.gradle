@@ -16,7 +16,7 @@ android {
         externalNativeBuild {
             cmake {
                 abiFilters "armeabi-v7a", "arm64-v8a" /*, "armeabi", "x86", "x86_64"*/
-                arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_MODE=arm", "-DANDROID_PLATFORM=android-21" /*, "-DANDROID_STL=c++_shared"*/
+                arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21" /*, "-DANDROID_STL=c++_shared"*/
                 cppFlags "-fexceptions", "-frtti"
             }
         }
@@ -45,8 +45,6 @@ android {
             path file('src/main/jni/Android.mk')
         }*/
     }
-
-    ndkVersion '17.2.4988734'
     lintOptions {
         checkReleaseBuilds false
         abortOnError false

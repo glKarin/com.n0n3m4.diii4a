@@ -655,10 +655,10 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->t.z = jointPtr->t.z;
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->t.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.z));
+					assert(!isnan(jointPtr->t.x));
+					assert(!isnan(blendPtr->t.x));
+					assert(!isnan(blendPtr->t.y));
+					assert(!isnan(blendPtr->t.z));
 					//HUMANHEAD END
 
 					jointframe1++;
@@ -671,10 +671,10 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->t.z = jointPtr->t.z;
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->t.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.z));
+					assert(!isnan(jointPtr->t.y));
+					assert(!isnan(blendPtr->t.y));
+					assert(!isnan(blendPtr->t.x));
+					assert(!isnan(blendPtr->t.z));
 					//HUMANHEAD END
 
 					jointframe1++;
@@ -687,10 +687,10 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->t.y = jointPtr->t.y;
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->t.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.y));
+					assert(!isnan(jointPtr->t.z));
+					assert(!isnan(blendPtr->t.z));
+					assert(!isnan(blendPtr->t.x));
+					assert(!isnan(blendPtr->t.y));
 					//HUMANHEAD END
 
 					jointframe1++;
@@ -704,11 +704,11 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->t.z = jointPtr->t.z;
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->t.x));
-					assert(!FLOAT_IS_INVALID(jointPtr->t.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.z));
+					assert(!isnan(jointPtr->t.x));
+					assert(!isnan(jointPtr->t.y));
+					assert(!isnan(blendPtr->t.x));
+					assert(!isnan(blendPtr->t.y));
+					assert(!isnan(blendPtr->t.z));
 					//HUMANHEAD END
 
 					jointframe1 += 2;
@@ -722,11 +722,11 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->t.y = jointPtr->t.y;
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->t.x));
-					assert(!FLOAT_IS_INVALID(jointPtr->t.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.y));
+					assert(!isnan(jointPtr->t.x));
+					assert(!isnan(jointPtr->t.z));
+					assert(!isnan(blendPtr->t.x));
+					assert(!isnan(blendPtr->t.z));
+					assert(!isnan(blendPtr->t.y));
 					//HUMANHEAD END
 
 					jointframe1 += 2;
@@ -740,11 +740,11 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->t.x = jointPtr->t.x;
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->t.y));
-					assert(!FLOAT_IS_INVALID(jointPtr->t.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.x));
+					assert(!isnan(jointPtr->t.y));
+					assert(!isnan(jointPtr->t.z));
+					assert(!isnan(blendPtr->t.y));
+					assert(!isnan(blendPtr->t.z));
+					assert(!isnan(blendPtr->t.x));
 					//HUMANHEAD END
 
 					jointframe1 += 2;
@@ -759,12 +759,12 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->t.z = jointframe2[2];
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->t.x));
-					assert(!FLOAT_IS_INVALID(jointPtr->t.y));
-					assert(!FLOAT_IS_INVALID(jointPtr->t.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->t.z));
+					assert(!isnan(jointPtr->t.x));
+					assert(!isnan(jointPtr->t.y));
+					assert(!isnan(jointPtr->t.z));
+					assert(!isnan(blendPtr->t.x));
+					assert(!isnan(blendPtr->t.y));
+					assert(!isnan(blendPtr->t.z));
 					//HUMANHEAD END
 
 					jointframe1 += 3;
@@ -785,12 +785,12 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->q.w = blendPtr->q.CalcW();
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->q.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.z));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.w));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.w));
+					assert(!isnan(jointPtr->q.x));
+					assert(!isnan(blendPtr->q.x));
+					assert(!isnan(blendPtr->q.y));
+					assert(!isnan(blendPtr->q.z));
+					assert(!isnan(jointPtr->q.w));
+					assert(!isnan(blendPtr->q.w));
 					//HUMANHEAD END
 
 					break;
@@ -803,12 +803,12 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->q.w = blendPtr->q.CalcW();
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->q.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.z));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.w));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.w));
+					assert(!isnan(jointPtr->q.y));
+					assert(!isnan(blendPtr->q.y));
+					assert(!isnan(blendPtr->q.x));
+					assert(!isnan(blendPtr->q.z));
+					assert(!isnan(jointPtr->q.w));
+					assert(!isnan(blendPtr->q.w));
 					//HUMANHEAD END
 
 					break;
@@ -821,12 +821,12 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->q.w = blendPtr->q.CalcW();
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->q.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.y));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.w));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.w));
+					assert(!isnan(jointPtr->q.z));
+					assert(!isnan(blendPtr->q.z));
+					assert(!isnan(blendPtr->q.x));
+					assert(!isnan(blendPtr->q.y));
+					assert(!isnan(jointPtr->q.w));
+					assert(!isnan(blendPtr->q.w));
 					//HUMANHEAD END
 
 					break;
@@ -840,13 +840,13 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->q.w = blendPtr->q.CalcW();
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->q.x));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.z));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.w));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.w));
+					assert(!isnan(jointPtr->q.x));
+					assert(!isnan(jointPtr->q.y));
+					assert(!isnan(blendPtr->q.x));
+					assert(!isnan(blendPtr->q.y));
+					assert(!isnan(blendPtr->q.z));
+					assert(!isnan(jointPtr->q.w));
+					assert(!isnan(blendPtr->q.w));
 					//HUMANHEAD END
 
 					break;
@@ -860,13 +860,13 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->q.w = blendPtr->q.CalcW();
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->q.x));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.y));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.w));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.w));
+					assert(!isnan(jointPtr->q.x));
+					assert(!isnan(jointPtr->q.z));
+					assert(!isnan(blendPtr->q.x));
+					assert(!isnan(blendPtr->q.z));
+					assert(!isnan(blendPtr->q.y));
+					assert(!isnan(jointPtr->q.w));
+					assert(!isnan(blendPtr->q.w));
 					//HUMANHEAD END
 
 					break;
@@ -880,13 +880,13 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->q.w = blendPtr->q.CalcW();
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->q.y));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.x));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.w));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.w));
+					assert(!isnan(jointPtr->q.y));
+					assert(!isnan(jointPtr->q.z));
+					assert(!isnan(blendPtr->q.y));
+					assert(!isnan(blendPtr->q.z));
+					assert(!isnan(blendPtr->q.x));
+					assert(!isnan(jointPtr->q.w));
+					assert(!isnan(blendPtr->q.w));
 					//HUMANHEAD END
 
 					break;
@@ -901,14 +901,14 @@ void idMD5Anim::GetInterpolatedFrame( frameBlend_t &frame, idJointQuat *joints, 
 					blendPtr->q.w = blendPtr->q.CalcW();
 
 					//HUMANHEAD rww - catch nan values
-					assert(!FLOAT_IS_INVALID(jointPtr->q.x));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.y));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.z));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.x));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.y));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.z));
-					assert(!FLOAT_IS_INVALID(jointPtr->q.w));
-					assert(!FLOAT_IS_INVALID(blendPtr->q.w));
+					assert(!isnan(jointPtr->q.x));
+					assert(!isnan(jointPtr->q.y));
+					assert(!isnan(jointPtr->q.z));
+					assert(!isnan(blendPtr->q.x));
+					assert(!isnan(blendPtr->q.y));
+					assert(!isnan(blendPtr->q.z));
+					assert(!isnan(jointPtr->q.w));
+					assert(!isnan(blendPtr->q.w));
 					//HUMANHEAD END
 
 					break;
