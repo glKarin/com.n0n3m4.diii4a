@@ -40,7 +40,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
-    ndkVersion '17.2.4988734'
     lintOptions {
         checkReleaseBuilds false
         abortOnError false
