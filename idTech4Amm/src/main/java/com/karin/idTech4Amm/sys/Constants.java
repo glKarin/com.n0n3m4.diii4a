@@ -30,7 +30,6 @@ public final class Constants
             "In Quake4, remove FakeClient, and add SABot-a9 mod support and resource.",
             "Add skip intro.",
             "Support obj static model, and fix png image load.",
-            "Add blend shadow(maybe has incorrect rendering in some lighting).",
 	};
 
 	// Launcher preference keys
