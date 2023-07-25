@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdk 28
-    buildToolsVersion '28.0.3'
+    buildToolsVersion '30.0.3'
     //compileOptions.encoding "gbk"
 
     defaultConfig {

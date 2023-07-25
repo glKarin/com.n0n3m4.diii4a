@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdk 28
-    buildToolsVersion '28.0.3'
+    buildToolsVersion '30.0.3'
     //compileOptions.encoding "gbk"
 
     /* not AIDE */
@@ -29,7 +29,7 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 11032
+        versionCode 11033
         versionName '1.1.0harmattan33'
         versionNameSuffix 'natasha'
     }
