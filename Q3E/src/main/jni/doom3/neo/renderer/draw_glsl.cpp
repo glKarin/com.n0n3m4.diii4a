@@ -43,10 +43,6 @@ shaderProgram_t	blendLightShader; //k: blend light shader
 shaderProgram_t	interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
 shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
 shaderProgram_t texgenShader; //k: texgen shader
-#ifdef _HARM_BLEND_SHADOW
-shaderProgram_t	interactionBlendShadowShader;
-shaderProgram_t	interactionBlendShadowBlinnPhongShader;
-#endif
 
 static bool r_usePhong = true;
 static float r_specularExponent = 4.0f;
@@ -89,14 +85,6 @@ static idCVar harm_r_specularExponent("harm_r_specularExponent", "4.0", CVAR_FLO
 static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
 
 static bool R_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name);
-
-#ifdef _HARM_BLEND_SHADOW
-static idCVar harm_r_blendShadow("harm_r_blendShadow", "0", CVAR_BOOL|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Blending shadow");
-static idCVar harm_r_blendShadowOpacity("harm_r_blendShadowOpacity", "0.5", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Blending shadow opacity(0.0 - 1.0)");
-
-static void RB_GLSL_CreateDrawInteractions_inverse(const drawSurf_t *surf);
-static float r_blendShadowOpacity = 0.5f;
-#endif
 
 /*
 =========================================================================================
@@ -339,15 +327,9 @@ void RB_GLSL_DrawInteractions(void)
 		}
 
 		RB_StencilShadowPass(vLight->globalShadows);
-#ifdef _HARM_BLEND_SHADOW
-		RB_GLSL_CreateDrawInteractions_inverse(vLight->localInteractions);
-#endif
 		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
 
 		RB_StencilShadowPass(vLight->localShadows);
-#ifdef _HARM_BLEND_SHADOW
-		RB_GLSL_CreateDrawInteractions_inverse(vLight->globalInteractions);
-#endif
 		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
 
 		//k GL_UseProgram(NULL);	// if there weren't any globalInteractions, it would have stayed on
@@ -607,11 +589,6 @@ static bool RB_GLSL_InitShaders(void)
 
 			{ "diffuseCubemap", &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "diffuseCubemap.vert", "diffuseCubemap.frag", 0 },
 			{ "texgen", &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "texgen.vert", "texgen.frag", 0 },
-
-#ifdef _HARM_BLEND_SHADOW
-			{ "interactionBlendShadow", &interactionBlendShadowShader, INTERACTION_BLEND_SHADOW_VERT, INTERACTION_BLEND_SHADOW_FRAG, "interactionBlendShadow.vert", "interactionBlendShadow.frag", 1 },
-			{ "interactionBlendShadow_blinn_phong", &interactionBlendShadowBlinnPhongShader, INTERACTION_BLEND_SHADOW_BLINN_PHONG_VERT, INTERACTION_BLEND_SHADOW_BLINN_PHONG_FRAG, "interactionBlendShadow_blinnphong.vert", "interactionBlendShadow_blinnphong.frag", 1 },
-#endif
 	};
 
 	for(int i = 0; i < sizeof(Props) / sizeof(Props[0]); i++)
@@ -646,15 +623,6 @@ static void R_InitGLSLCvars(void)
 	if(f <= 0.0f)
 		f = 4.0f;
 	r_specularExponent = f;
-
-#ifdef _HARM_BLEND_SHADOW
-	f = harm_r_blendShadowOpacity.GetFloat();
-	if(f <= 0.0f)
-		f = 0.1f;
-	else if(f >= 1.0f)
-		f = 0.9f;
-	r_blendShadowOpacity = f;
-#endif
 }
 
 void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
@@ -879,163 +847,4 @@ void R_CheckGLSLCvars(void)
 		r_specularExponent = f;
 		harm_r_specularExponent.ClearModified();
 	}
-
-#ifdef _HARM_BLEND_SHADOW
-	if(harm_r_blendShadowOpacity.IsModified())
-	{
-		float f = harm_r_blendShadowOpacity.GetFloat();
-		if(f <= 0.0f)
-			f = 0.1f;
-		else if(f >= 1.0f)
-			f = 0.9f;
-		r_blendShadowOpacity = f;
-		harm_r_blendShadowOpacity.ClearModified();
-	}
-#endif
 }
-
-#ifdef _HARM_BLEND_SHADOW
-static void	RB_GLSL_DrawInteraction_inverse(const drawInteraction_t *din)
-{
-	// load all the vertex program parameters
-	GL_UniformMatrix4fv(offsetof(shaderProgram_t, textureMatrix), mat4_identity.ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), din->localLightOrigin.ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, localViewOrigin), din->localViewOrigin.ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, lightProjectionS), din->lightProjection[0].ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, lightProjectionT), din->lightProjection[1].ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, lightProjectionQ), din->lightProjection[2].ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, lightFalloff), din->lightProjection[3].ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, bumpMatrixS), din->bumpMatrix[0].ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, bumpMatrixT), din->bumpMatrix[1].ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, diffuseMatrixS), din->diffuseMatrix[0].ToFloatPtr());
-	GL_Uniform4fv(offsetof(shaderProgram_t, diffuseMatrixT), din->diffuseMatrix[1].ToFloatPtr());
-
-	switch (din->vertexColor) {
-		case SVC_MODULATE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
-			break;
-		case SVC_INVERSE_MODULATE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), negOne);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
-			break;
-		case SVC_IGNORE:
-		default:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
-			break;
-	}
-
-	// set the constant colors
-	GL_Uniform4fv(offsetof(shaderProgram_t, diffuseColor), din->diffuseColor.ToFloatPtr());
-
-	// set the textures
-
-	// texture 0 will be the per-surface bump map
-	GL_SelectTextureNoClient(0);
-	din->bumpImage->Bind();
-
-	// texture 1 will be the light falloff texture
-	GL_SelectTextureNoClient(1);
-	din->lightFalloffImage->Bind();
-
-	// texture 2 will be the light projection texture
-	GL_SelectTextureNoClient(2);
-	din->lightImage->Bind();
-
-	// texture 3 is the per-surface diffuse map
-	GL_SelectTextureNoClient(3);
-	din->diffuseImage->Bind();
-
-	GL_SelectTextureNoClient(0); //k2023
-
-	// draw it
-	RB_DrawElementsWithCounters(din->surf->geo);
-}
-
-void RB_GLSL_CreateDrawInteractions_inverse(const drawSurf_t *surf)
-{
-	if (!surf) {
-		return;
-	}
-
-	if(!r_shadows.GetBool() || !harm_r_blendShadow.GetBool())
-		return;
-
-	glStencilFunc(GL_NOTEQUAL, 128, 255);
-
-	// perform setup here that will be constant for all interactions
-	GL_State(GLS_SRCBLEND_SRC_ALPHA |
-			 GLS_DSTBLEND_ONE |
-			 GLS_DEPTHMASK | GLS_ALPHAMASK |
-			 backEnd.depthFunc);
-
-	// bind the vertex and fragment shader
-	if(r_usePhong)
-		GL_UseProgram(&interactionBlendShadowShader);
-	else
-		GL_UseProgram(&interactionBlendShadowBlinnPhongShader);
-
-	// enable the vertex arrays
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));	// gl_Vertex
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
-
-	GL_Uniform1f(offsetof(shaderProgram_t, alpha), 1.0 - r_blendShadowOpacity);
-
-	backEnd.currentSpace = NULL; //k2023
-
-	for (; surf ; surf=surf->nextOnLight) {
-		// perform setup here that will not change over multiple interaction passes
-
-		// set the modelview matrix for the viewer
-		/*float   mat[16];
-		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
-		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);*/ //k2023
-
-		// set the vertex pointers
-		idDrawVert	*ac = (idDrawVert *)vertexCache.Position(surf->geo->ambientCache);
-
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
-
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), ac->color);
-
-		// this may cause RB_GLSL_DrawInteraction to be exacuted multiple
-		// times with different colors and images if the surface or light have multiple layers
-		RB_CreateSingleDrawInteractions(surf, RB_GLSL_DrawInteraction_inverse);
-	}
-
-	backEnd.currentSpace = NULL; //k2023
-
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));	// gl_Vertex
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
-
-	// disable features
-	GL_SelectTextureNoClient(3);
-	globalImages->BindNull();
-
-	GL_SelectTextureNoClient(2);
-	globalImages->BindNull();
-
-	GL_SelectTextureNoClient(1);
-	globalImages->BindNull();
-
-	backEnd.glState.currenttmu = -1;
-	GL_SelectTexture(0);
-
-	GL_UseProgram(NULL);
-
-	glStencilFunc(GL_EQUAL, 128, 255);
-}
-#endif

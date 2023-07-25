@@ -1530,11 +1530,6 @@ extern shaderProgram_t blendLightShader; //k: blend light shader
 extern shaderProgram_t interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
 extern shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
 extern shaderProgram_t texgenShader; //k: texgen shader
-#define _HARM_BLEND_SHADOW
-#ifdef _HARM_BLEND_SHADOW
-extern shaderProgram_t interactionBlendShadowShader;
-extern shaderProgram_t interactionBlendShadowBlinnPhongShader;
-#endif
 
 
 /*
