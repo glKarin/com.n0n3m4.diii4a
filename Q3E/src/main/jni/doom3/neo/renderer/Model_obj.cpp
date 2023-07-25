@@ -273,7 +273,7 @@ objModel_t* OBJ_Load( const char* fileName )
 	objModel_t* obj;
 
 	int objBufferLen = fileSystem->ReadFile( fileName, ( void** )&objBuffer, &timeStamp );
-	if( objBufferLen <= 0 || objBuffer == nullptr )
+	if( objBufferLen <= 0 || objBuffer == NULL )
 	{
 		return NULL;
 	}
