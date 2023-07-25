@@ -1,0 +1,202 @@
+/***********************************************************************
+Doom3Bots - Open bot framework for Doom 3
+release 1 - "Beware of TinMans horrifying code"
+
+bot_base
+Base for bot scripts
+***********************************************************************/
+
+object bot_base {
+	// TinMan: Movement control - script/bot->gamecode/fakeclient - Reset each frame
+	boolean		AI_FORWARD;
+	boolean		AI_BACKWARD;
+	boolean		AI_STRAFE_LEFT;
+	boolean		AI_STRAFE_RIGHT;
+	boolean		AI_JUMP;
+	boolean		AI_CROUCH;
+	
+	// TinMan: Movement control - script/bot->gamecode/fakeclient
+	boolean		AI_RUN;
+	
+	// TinMan: Fire control - script/bot->gamecode/fakeclient - Reset each frame
+	boolean		AI_WEAPON_FIRE;
+	
+	// TinMan: Body status - gamecode/fakeclient->script/bot
+	boolean		AI_DEAD;
+	boolean		AI_PAIN;
+	boolean		AI_ONGROUND;
+	boolean		AI_TELEPORT;
+
+	// TinMan: Currently unused	
+	boolean		AI_ATTACK_HELD;
+	boolean		AI_WEAPON_FIRED;
+	boolean		AI_ONLADDER;
+	boolean		AI_HARDLANDING;
+	boolean		AI_SOFTLANDING;
+	boolean		AI_RELOAD;
+	boolean		AI_TURN_LEFT;
+	boolean		AI_TURN_RIGHT;
+	
+	// TinMan: Enemy status - gamecode->script
+	boolean		AI_ENEMY_VISIBLE;
+	boolean		AI_ENEMY_IN_FOV;
+	boolean		AI_ENEMY_DEAD;
+	
+	// TinMan: Movement status - gamecode->script
+	boolean		AI_MOVE_DONE;
+	boolean		AI_DEST_UNREACHABLE;
+	boolean		AI_ENEMY_REACHABLE;
+	boolean		AI_BLOCKED;
+	boolean		AI_OBSTACLE_IN_PATH;
+	
+	// TinMan: Currently unused
+	boolean		AI_PUSHED;
+	
+	// TinMan: *todo* shoddy, pull out for q4
+	boolean		BOT_COMMAND;
+	float 		BOT_COMMAND_TYPE;
+	string 		BOT_COMMAND_ENTITY;
+	vector		BOT_COMMAND_VECTOR;
+		
+	
+	// TinMan: Globalistics
+	string		me;
+	string		name;
+	
+	entity		body;
+
+	weapon_base weapon;
+	string		currentWeapon;
+	
+	// TinMan: States
+	void 			state_Begin();
+	void 			state_Killed();
+	
+	// TinMan: Functions
+	void 			moveForward();
+	void 			moveBackward();
+	void 			moveRight();
+	void 			moveLeft();
+};
+
+/*
+=====================
+bot_base::init
+=====================
+*/
+void bot_base::init() {
+	me		= getName();
+	name 	=	getKey( "npc_name" );
+	
+	body 	= getBody(); // TinMan: Grab fakeclient entity.
+}
+
+/*
+=====================
+bot_base::destroy
+TinMan: Clean up stuff for when script is killed.
+=====================
+*/
+void bot_base::destroy() {
+	waitFrame();
+}
+
+/***********************************************************************
+
+	States - Main AI
+
+***********************************************************************/
+
+/*
+=====================
+bot_base::state_Begin
+TinMan: Basic setup. Wakey wakey, rise 'n' shine.
+=====================
+*/
+void bot_base::state_Begin() {
+	waitFrame();
+}
+
+/*
+=====================
+bot_base::state_Idle
+TinMan: Default fallback state
+=====================
+*/
+void bot_base::state_Idle() {
+	//sys.println( "[" + int( sys.getTime() ) + "][state_Idle]" ); // TinMan *debug*
+	waitFrame();
+}
+
+/*
+=====================
+bot_sabot::state_Killed
+TinMan: botAi hijacks script when bots fakeclient is AI_DEAD, sets state to this.
+=====================
+*/
+void bot_base::state_Killed() {
+	//sys.println( "[" + int( sys.getTime() ) + "][" + name + "][Died]" ); // TinMan: *debug*
+	stopMove();
+	
+	while( AI_DEAD ) {
+		//sys.println( "[" + int( sys.getTime() ) + "][" + name + "][state_Killed][waiting]" ); // TinMan: *debug*
+		
+		float nextFire;
+		if ( sys.getTime() > nextFire ) {
+			nextFire = sys.getTime() + 0.1;
+			AI_WEAPON_FIRE = true; // TinMan: Fire so bot respawns
+		}
+		waitFrame();
+	}
+	
+	//sys.println( "[" + int( sys.getTime() ) + "][" + name + "][Restarting]" ); // TinMan: *debug*
+	setState( "state_Begin" );
+}
+
+/***********************************************************************
+
+	Functions
+
+***********************************************************************/
+
+/*
+=====================
+bot_base::moveForward
+=====================
+*/
+void bot_base::moveForward() {
+	AI_FORWARD = true;
+	AI_BACKWARD = false;
+}
+
+/*
+=====================
+bot_base::moveBackward
+=====================
+*/
+void bot_base::moveBackward() {
+	AI_BACKWARD = true;
+	AI_FORWARD = false;
+}
+
+/*
+=====================
+bot_base::moveRight
+=====================
+*/
+void bot_base::moveRight() {
+	AI_STRAFE_RIGHT = true;
+	AI_STRAFE_LEFT = false;
+}
+
+/*
+=====================
+bot_base::moveLeft
+=====================
+*/
+void bot_base::moveLeft() {
+	AI_STRAFE_LEFT = true;
+	AI_STRAFE_RIGHT = false;
+}
+
+// EOF

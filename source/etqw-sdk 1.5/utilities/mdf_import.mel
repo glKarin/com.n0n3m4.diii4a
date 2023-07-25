@@ -1,0 +1,164 @@
+/*
+==============================================================
+
+  MEL script to import mdf files into Maya
+  
+  Version 1.1
+  
+  History:
+  v1.2	- Key frames now can optionally have timestamps
+  v1.1	- Game now exports rotation data in Maya native format
+		- Game now exports camera data
+  v1.0	- Initial implementation
+
+==============================================================
+*/
+
+proc readDemoKeyframeFile( string $fileName ) {
+	int $file = `fopen $fileName "rb"`;
+	if ( $file == 0 ) {
+		error( "Unable to open input file " + $fileName + " for reading" );
+		return;
+	}
+
+	int $numFrames, $maxEntities, $hasTimeStamps;
+
+	$numFrames = `fread $file $numFrames`;
+	$maxEntities = `fread $file $maxEntities`;
+	$hasTimeStamps = `fread $file $hasTimeStamps`;
+
+	playbackOptions -min 0 -max $numFrames -ast 0 -aet $numFrames;
+	
+	camera;
+	rename camera1;
+	
+	camera -e -farClipPlane 999999 camera1;
+	setAttr camera1.scaleX 200;
+	setAttr camera1.scaleY 200;
+	setAttr camera1.scaleZ 200;
+
+	progressWindow -title "Importing demo key frames..." -isInterruptable true -status ( "Imported frames: 0 of " + $numFrames ) -maxValue $numFrames;
+
+	string $entity_objects[];
+
+	int $frame;
+	for ( $frame = 0; $frame < $numFrames; $frame++ ) {
+		if ( `progressWindow -query -isCancelled` ) {
+			break;
+		}
+
+		int $numEntities;
+		int $entityIndex;
+		
+		if ( $hasTimeStamps ) {
+			int $currentTimeStamp;
+
+			$currentTimeStamp = `fread $file $currentTimeStamp`;
+
+			currentTime $currentTimeStamp;
+		} else {
+			currentTime $frame;
+		}
+
+		// camera location
+		vector $cameraOrigin;
+		vector $cameraAngles;
+
+		$cameraOrigin = `fread $file $cameraOrigin`;
+		$cameraAngles = `fread $file $cameraAngles`;
+
+		setKeyframe -value ($cameraOrigin.x) camera1.translateX;
+		setKeyframe -value ($cameraOrigin.y) camera1.translateY;
+		setKeyframe -value ($cameraOrigin.z) camera1.translateZ;
+		setKeyframe -value ($cameraAngles.x) camera1.rotateX;
+		setKeyframe -value ($cameraAngles.y) camera1.rotateY;
+		setKeyframe -value ($cameraAngles.z) camera1.rotateZ;
+
+		// entities to hide
+		$numEntities = `fread $file $numEntities`;
+		for ( $entityIndex = 0; $entityIndex < $numEntities; $entityIndex++ ) {
+			int $entityNum;
+
+			$entityNum = `fread $file $entityNum`;
+
+			setKeyframe -value 0 ($entity_objects[ ($entityNum * 2 + 0) ] + ".visibility");
+		}
+
+		// entities to create
+		$numEntities = `fread $file $numEntities`;
+		for ( $entityIndex = 0; $entityIndex < $numEntities; $entityIndex++ ) {
+			int $entityNum;
+
+			$entityNum = `fread $file $entityNum`;
+
+			string $entityName = "entity_" + $entityNum;
+			string $entity_object[] = `polyCube -w 1 -h 1 -d 1 -n $entityName`;
+			$entity_objects[ ($entityNum * 2 + 0) ] = $entity_object[ 0 ];
+			$entity_objects[ ($entityNum * 2 + 1) ] = $entity_object[ 1 ];
+
+			setKeyframe -time 0 -value 0 ($entity_objects[ ($entityNum * 2 + 0) ] + ".visibility");
+		}
+
+		// entities to make visible
+		$numEntities = `fread $file $numEntities`;
+		for ( $entityIndex = 0; $entityIndex < $numEntities; $entityIndex++ ) {
+			int $entityNum;
+
+			$entityNum = `fread $file $entityNum`;
+
+			setKeyframe -value 1 ($entity_objects[ ($entityNum * 2 + 0) ] + ".visibility");
+		}
+
+		// update entity bounding boxes
+		$numEntities = `fread $file $numEntities`;
+		for ( $entityIndex = 0; $entityIndex < $numEntities; $entityIndex++ ) {
+			int $entityNum;
+			vector $size;
+
+			$entityNum = `fread $file $entityNum`;
+			$size = `fread $file $size`;
+
+			setKeyframe -value ($size.x) ($entity_objects[ ($entityNum * 2 + 1) ] + ".depth");
+			setKeyframe -value ($size.y) ($entity_objects[ ($entityNum * 2 + 1) ] + ".width");
+			setKeyframe -value ($size.z) ($entity_objects[ ($entityNum * 2 + 1) ] + ".height");
+		}
+
+		// update entity origin and angles
+		$numEntities = `fread $file $numEntities`;
+		for ( $entityIndex = 0; $entityIndex < $numEntities; $entityIndex++ ) {
+			int $entityNum;
+			vector $origin;
+			vector $angles;
+
+			$entityNum = `fread $file $entityNum`;
+			$origin = `fread $file $origin`;
+			$angles = `fread $file $angles`;
+
+			setKeyframe -value ($origin.x) ($entity_objects[ ($entityNum * 2 + 0) ] + ".translateX" );
+			setKeyframe -value ($origin.y) ($entity_objects[ ($entityNum * 2 + 0) ] + ".translateY" );
+			setKeyframe -value ($origin.z) ($entity_objects[ ($entityNum * 2 + 0) ] + ".translateZ" );
+			setKeyframe -value ($angles.x) ($entity_objects[ ($entityNum * 2 + 0) ] + ".rotateX" );
+			setKeyframe -value ($angles.y) ($entity_objects[ ($entityNum * 2 + 0) ] + ".rotateY" );
+			setKeyframe -value ($angles.z) ($entity_objects[ ($entityNum * 2 + 0) ] + ".rotateZ" );
+		}
+
+		progressWindow -edit -step 1 -status ( "Imported frames: " + ( $frame + 1 ) + " of " + $numFrames );
+	}
+
+	fclose $file;
+
+	progressWindow -edit -endProgress;
+}
+
+file -f -new;
+setAttr "perspShape.farClipPlane" 999999;
+setAttr "topShape.farClipPlane" 999999;
+setAttr "top.translateY" 20000;
+setAttr "frontShape.farClipPlane" 999999;
+setAttr "front.translateZ" 20000;
+setAttr "sideShape.farClipPlane" 999999;
+setAttr "side.translateX" 20000;
+
+string $fileName = `fileDialog -dm "*.mdf"`;
+
+readDemoKeyframeFile( $fileName );

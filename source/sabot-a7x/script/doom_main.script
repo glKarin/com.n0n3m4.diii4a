@@ -1,0 +1,109 @@
+/***********************************************************************
+
+doom_main.script
+
+This is the main script that is loaded before any level scripts load.
+
+***********************************************************************/
+
+// base defines and util functions
+#include "script/doom_defs.script"
+#include "script/doom_events.script"
+#include "script/doom_util.script"
+#include "script/weapon_base.script"
+#include "script/ai_base.script"
+
+// weapons
+#include "script/weapon_fists.script"
+#include "script/weapon_pistol.script"
+#include "script/weapon_shotgun.script"
+#include "script/weapon_machinegun.script"
+#include "script/weapon_chaingun.script"
+#include "script/weapon_handgrenade.script"
+#include "script/weapon_plasmagun.script"
+#include "script/weapon_rocketlauncher.script"
+#include "script/weapon_bfg.script"
+#include "script/weapon_soulcube.script"
+#include "script/weapon_chainsaw.script"
+#include "script/weapon_flashlight.script"
+#include "script/weapon_pda.script"
+
+// ai
+#include "script/ai_monster_base.script"
+#include "script/ai_monster_zombie_base.script"
+#include "script/ai_monster_demon_archvile.script"
+#include "script/ai_monster_demon_cherub.script"
+#include "script/ai_monster_demon_hellknight.script"
+#include "script/ai_monster_demon_imp.script"
+#include "script/ai_monster_demon_maggot.script"
+#include "script/ai_monster_demon_mancubus.script"
+#include "script/ai_monster_demon_pinky.script"
+#include "script/ai_monster_demon_revenant.script"
+#include "script/ai_monster_demon_trite.script"
+#include "script/ai_monster_demon_wraith.script"
+#include "script/ai_monster_flying_lostsoul.script"
+#include "script/ai_monster_flying_cacodemon.script"
+#include "script/ai_monster_zombie.script"
+#include "script/ai_monster_zombie_morgue.script"
+#include "script/ai_monster_zombie_sawyer.script"
+#include "script/ai_monster_zombie_bernie.script"
+#include "script/ai_monster_zombie_commando_cgun.script"
+#include "script/ai_monster_zombie_commando_tentacle.script"
+#include "script/ai_monster_zombie_security_pistol.script"
+#include "script/ai_monster_turret.script"
+#include "script/ai_monster_boss_vagary.script"
+#include "script/ai_monster_boss_cyberdemon.script"
+#include "script/ai_monster_boss_guardian.script"
+#include "script/ai_monster_boss_guardian_seeker.script"
+#include "script/ai_monster_boss_sabaoth.script"
+#include "script/ai_character.script"
+#include "script/ai_character_prone.script"
+#include "script/ai_character_sentry.script"
+#include "script/ai_player.script"
+
+// map specific character scripts
+#include "script/ai_alphalabs2_scientist1.script"
+
+// map scripts
+#include "script/map_admin1.script" 
+#include "script/map_alphalabs1.script"
+#include "script/map_alphalabs2.script"
+#include "script/map_alphalabs3.script"
+#include "script/map_alphalabs4.script"
+#include "script/map_caves.script"
+#include "script/map_caves2.script"
+#include "script/map_comm1.script"
+#include "script/map_commoutside_lift.script"
+#include "script/map_commoutside.script"
+#include "script/map_cpu.script"
+#include "script/map_cpuboss.script"
+#include "script/map_delta1.script"
+#include "script/map_delta2a.script"
+#include "script/map_delta2b.script"
+#include "script/map_delta3.script"
+#include "script/map_delta5.script"
+#include "script/map_enpro.script"
+#include "script/map_hell1.script"
+#include "script/map_hellhole.script"
+#include "script/map_recycling1.script"
+#include "script/map_recycling2.script"
+#include "script/map_site3.script"
+#include "script/map_marscity1.script"
+#include "script/map_marscity2.script"
+#include "script/map_mc_underground.script"
+#include "script/map_monorail.script"
+
+// test scripts
+#include "script/ai_follower.script"
+
+#include "script/bot_main.script" // TinMan: One script to rule them all, nice and tidy.
+
+void doom_main() {
+	sys.print( "Entering doom_main()\n");
+
+	//
+	// Do any script setup here
+	//
+
+	sys.print( "Exiting doom_main()\n" );
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="SDK"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="SD_SDK_BUILD;SD_PUBLIC_BUILD"
+		RuntimeLibrary="2"
+	/>
+</VisualStudioPropertySheet>

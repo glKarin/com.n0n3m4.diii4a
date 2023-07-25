@@ -1,0 +1,28 @@
+# -*- mode: python -*-
+# ETQW build script
+# TTimo <ttimo@idsoftware.com>
+# http://scons.org
+
+import os.path, scons_utils
+
+Import( 'GLOBALS' )
+Import( GLOBALS )
+
+if ( g_sdk ):
+	idlib_proj = '#idlib_sdk.vcproj'
+else:
+	idlib_proj = '#idlib.vcproj'
+
+idlib_list = scons_utils.ExtractSource( File( idlib_proj ).abspath )
+idlib_list = scons_utils.SplitPattern( idlib_list, 'idlib/sys/threading' )[ 1 ]
+idlib_list.append( 'idlib/sys/threading/SysThread_posix.cpp' )
+idlib_list.append( 'idlib/sys/threading/SysSignal_posix.cpp' )
+idlib_list.append( 'idlib/sys/threading/SysLock_posix.cpp' )
+
+if ( local_idlibpic == 0 ):
+	ret_list = [ g_env.StaticObject( source = os.path.join( '../..', f ) ) for f in idlib_list ]
+else:
+	idlib_list = scons_utils.SplitPattern( idlib_list, 'idlib/typeinfo/' )[ 1 ]
+	ret_list = [ g_env.SharedObject( source = os.path.join( '../..', f ) ) for f in idlib_list ]
+
+Return( 'ret_list' )

@@ -1,0 +1,131 @@
+/***************************************************************************
+	SABot - Stupid Angry Bot - release alpha 8x
+	
+ 	bot_sabot.def
+ 	Main settings for SABot - flamable, handle with care.
+***************************************************************************/
+
+entityDef bot_sabot_a8 {
+	"inherit"								"bot_base"
+	"spawnclass"						"botSabot"
+	"scriptobject"					"bot_sabot_a8"
+	
+	"npc_name" 							"SABota8x"
+	
+	// TinMan: 0-5 - Puke, Red, Blue, Green, Yellow
+	"mp_skin"								"3"
+
+	// TinMan: 0-1, Red, Blue
+	"team"									"0"
+	
+	// TinMan:
+	"fov"										"120" //"90"
+	"aim_accuracy"					"2"		// TinMan: Variation on aiming, more = bigger variation [0-4].	
+	"aim_rate"							"0.5" // TinMan: Size of steps blending aimPos each frame: lower = slower bot aiming/turning, higher = quicker [0.1-1].
+	
+	// TinMan: Priorities
+	"priority_goal_item"			"10"
+	
+	"priority_goal_ammo"			"10"
+	"priority_goal_weapon"		"20"
+	"priority_goal_health"		"30"
+	"priority_goal_armor"			"30"
+	"priority_goal_powerup" 	"30"
+	"priority_goal_enemy"			"40"
+	"priority_goal_team"			"50"
+	
+	// TinMan: Item Priorities - Higher = more desirable.
+	// Priority is 0 if full health/armor, this if less, and more if more hurt.
+	"priority_item_medkit_small"				"1"
+	"priority_item_medkit"							"2"
+	"priority_item_armor_shard"					"1"
+	"priority_item_armor_security"			"2"
+		
+	"priority_item_backpack"						"30"
+	
+	// TinMan: Will be increased in code if bot want's it for weapon
+	"priority_ammo_bullets_small"				"1"
+	"priority_ammo_bullets_large"				"2"
+	"priority_ammo_shells_small"				"1"
+	"priority_ammo_shells_large"				"2"
+	"priority_ammo_clip_small"					"1"
+	"priority_ammo_clip_large"					"2"
+	"priority_ammo_grenade_small"				"1"
+	"priority_ammo_rockets_small"				"1"
+	"priority_ammo_rockets_large"				"2"
+	"priority_ammo_cells_small"					"1"
+	"priority_ammo_cells_large"					"2"
+	"priority_ammo_belt_small"					"1"
+	"priority_ammo_bfg_small"						"1"
+	
+	// TinMan: 
+	"priority_powerup_adrenaline"				"1"
+	"priority_powerup_megahealth"				"2"
+	"priority_powerup_berserk"					"3"
+	"priority_powerup_invisibility"			"4"
+	"powerup_invulnerability"						"5"
+
+	// TinMan: Weapon Priorities - Higher = more desirable. My preciouses!
+	// *todo* split priories, range, pred into it's own defs. Will need game code func to load/grab funcs.
+	"priority_weapon_fists"							"1"
+	"priority_weapon_flashlight"				"2"
+	"priority_weapon_pistol"						"3"
+	"priority_weapon_shotgun"						"4"
+	"priority_weapon_machinegun"				"5"
+	"priority_weapon_shotgun_double"		"6"
+	"priority_weapon_chaingun"					"7"
+	"priority_weapon_plasmagun" 				"8"
+	"priority_weapon_rocketlauncher" 		"9"
+	"priority_weapon_bfg" 							"10"
+	"priority_weapon_handgrenade"				"1"
+	"priority_weapon_chainsaw"					"6"
+	
+	
+	/* 
+	TinMan: Weapon ranges
+	Frikenstein says:
+	_x "sweet spot range" - try to maintain this projectile if possible
+	_y minimum range bot can be to be effective (rl/bfg) (move away)
+	_z maximum range bot can be to be effective (sg, fists) (move in)
+	*/
+	"range_weapon_fists"								"32 0 64"
+	"range_weapon_pistol"								"180 0 99999"
+	"range_weapon_shotgun"							"128 0 2000"
+	"range_weapon_shotgun_double"				"128 0 1500"
+	"range_weapon_machinegun"						"180 0 99999"
+	"range_weapon_chaingun"							"180 0 99999"
+	"range_weapon_plasmagun" 						"180 0 3000"
+	"range_weapon_rocketlauncher" 			"180 64 3000" // TinMan: SP splash radius 175, MP 125
+	"range_weapon_bfg" 									"180 64 3000"	// TinMan: Splash radius 150
+	"range_weapon_handgrenade"					"180 64 2000" // TinMan: SP splash radius 175, MP 150
+	"range_weapon_chainsaw"							"32 0 64"
+	"range_weapon_flashlight"						"32 0 64"
+	
+	/* 
+	TinMan: Prediction Types
+	1 = Explosive - aim at feet
+	*/
+	"predict_weapon_rocketlauncher"			"1"
+	
+	// TinMan: Projectile speeds for prediction 
+	// *todo* write func to grab these off weapon type, dunno some of them are wierd.
+	"projectile_weapon_pistol"								"7200"
+	"projectile_weapon_pistol_mp"							"20000"
+	"projectile_weapon_shotgun"								"2000" // TinMan: What the heck? 60 30 10
+	"projectile_weapon_shotgun_mp"						"20000"
+	"projectile_weapon_shotgun_double"				"7200"	
+	"projectile_weapon_shotgun_double_mp"			"20000"
+	"projectile_weapon_machinegun"						"7200"
+	"projectile_weapon_machinegun_mp"					"20000"
+	"projectile_weapon_chaingun"							"2000"
+	"projectile_weapon_chaingun_mp"						"20000"
+	"projectile_weapon_plasmagun" 						"700"
+	"projectile_weapon_rocketlauncher" 				"900"
+	"projectile_weapon_bfg" 									"350"
+	"projectile_weapon_bfg_mp" 								"250"
+	"projectile_weapon_handgrenade"						"300" // TinMan: ?? 300 0 40
+	
+	"projectile_weapon_fists"									"20000"
+	"projectile_weapon_chainsaw"							"20000"
+	"projectile_weapon_flashlight"						"20000"
+}

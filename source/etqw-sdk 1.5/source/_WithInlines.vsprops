@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="With Inlines"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		InlineFunctionExpansion="1"
+		PreprocessorDefinitions="_INLINEDEBUG"
+	/>
+</VisualStudioPropertySheet>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Library Build Paths"
+	OutputDirectory="$(SolutionDir)/build/$(PlatformName)/$(ConfigurationName)/lib"
+	IntermediateDirectory="$(SolutionDir)/build/$(PlatformName)/intermediate/$(ConfigurationName)/$(ProjectName)"
+	>
+</VisualStudioPropertySheet>

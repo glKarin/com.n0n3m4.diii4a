@@ -1,0 +1,89 @@
+/***********************************************************************
+Bot tastic framework - release numeral uno - I don't know will there ever be an official release?
+
+bot_events.script
+Events for Bot script. Obviously.
+***********************************************************************/
+
+scriptEvent entity		getBody(); // TinMan: Return fake client entity.
+
+scriptEvent float			getGameType();
+
+scriptEvent float 		hasWeapon( string weaponName );
+scriptEvent float 		hasAmmoForWeapon( string weaponName );
+scriptEvent float 		hasAmmo( string ammoName );
+
+scriptEvent	void			setAimPosition( vector aimPosition ); // TinMan: Set where you want bot to aim, viewAngles move to this position over aimRate.
+scriptEvent	vector		getAimPosition(); // TinMan: Get where bot is moving our aim to. If you want where bot is aiming use getViewAngles.
+scriptEvent	void			setAimDirection( vector dir );
+scriptEvent	vector		getMovePosition(); // TinMan: Next point on path set by a setMove.
+scriptEvent	vector		getSecondaryMovePosition(); // TinMan: Position on path to do something, eg jump.
+scriptEvent	float			getPathType(); // TinMan: Type of path, eg PATHTYPE_BARRIERJUMP.
+scriptEvent	void			setMoveDirection( vector dir, float speed ); // TinMan: Set direction and speed for bot to (strafe)move in, 400 being da max. hmm, needs sprucing up with an unfunny and unrelated comment.
+
+scriptEvent	float			canSeeEntity( entity ent, float useFov );
+scriptEvent	float			canSeePosition( vector pos, float useFov );
+
+scriptEvent vector 		getEyePosition();
+scriptEvent vector 		getViewPosition();
+scriptEvent vector 		getAIAimTargets( entity aimAtEnt, float head );
+
+// TinMan: Entity list functions, compiles a list and returns index.
+scriptEvent	float			findEnemies( float onlyInFov ); // TinMan: Returns all clients and actors visible.
+scriptEvent float			findInRadius( vector pos, float radius, string className ); // TinMan: Classname is class type (spawnclass) of entity you want to look for eg idItem.
+scriptEvent float			findItems(); // TinMan: Compile list of all idItems and all idItemPowerups.
+scriptEvent entity		getEntityList( float index ); // TinMan: Used to acess entity list, should only be used imediately after using one of the above functions.
+
+// scriptEvent void		stopMove(); 	// TinMan: ( allready defined in idAI ) Reset move state
+// scriptEvent float	moveStatus(); // TinMan: ( allready defined in idAI )
+// TinMan: Calculate a route, use getMovePosition to get where bot should go.
+scriptEvent	void 			setMoveToCover();
+scriptEvent	void 			setMoveToEnemy();
+scriptEvent	void 			setMoveOutOfRange( entity ent, float range );
+scriptEvent	void 			setMoveToAttackPosition( entity ent );
+scriptEvent	void 			setMoveWander();
+scriptEvent	void 			setMoveToEntity( entity destination );
+scriptEvent	void 			setMoveToPosition( vector position );
+
+// TinMan: Allready defined in doomevents from idAI
+// Note: traveldistance - is approximate becuase it gets travel times between area centers, when the bot is travelling of course it's path is optimised
+//scriptEvent	float	travelDistanceToPoint( vector destination ); // Approximate travel distance to point.
+//scriptEvent	float	travelDistanceToEntity( entity destination ); // Approximate travel distance to entity.
+//scriptEvent	float	travelDistanceBetweenEntities( entity source, entity dest ); // Approximate travel distance between two entities.
+//scriptEvent	float	travelDistanceBetweenPoints( vector source, vector dest ); // Approximate travel distance between two points.
+//scriptEvent entity	getObstacle(); // gets the obstacle in the character's path
+//scriptEvent vector	pushPointIntoAAS( vector pos ); // tries to push the point into a valid AAS area
+
+scriptEvent void			nextBestWeapon();
+
+// TinMan: The old integration vs independence argument, the proper way would be to integrate the following script events into different classes
+scriptEvent float		 	getActorHealth( entity actor ); // TinMan: Could be in actor
+scriptEvent float		 	getArmor( entity player ); // TinMan: Could be in player
+
+scriptEvent float		 	getTeam( entity ent ); // TinMan: Could be in actor
+
+// TinMan: Direct access to entities array
+scriptEvent entity getEntityByNum( float index );
+scriptEvent float getNumEntities();
+
+// TinMan: Could be in entity
+scriptEvent string getClassName( entity ent ); // TinMan: returns classname of entity.
+scriptEvent string getClassType( entity ent ); // TinMan: returns class type of entity.
+
+scriptEvent float			acos( float a ); // TinMan: Could be in script sys
+
+// TinMan: *CTF*
+scriptEvent entity		getFlag( float team );
+scriptEvent float			getFlagStatus( float team );
+scriptEvent entity		getFlagCarrier( float team );
+scriptEvent entity		getCapturePoint( float team );
+
+// TinMan: Plat
+scriptEvent float		isUnderPlat( entity plat );
+scriptEvent vector	getWaitPosition( entity plat );
+
+// TinMan: Command
+scriptEvent float		getCommandType();
+scriptEvent entity	getCommandEntity();
+scriptEvent vector	getCommandPosition();
+scriptEvent void		clearCommand();

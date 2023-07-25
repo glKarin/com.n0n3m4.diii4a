@@ -1,0 +1,23 @@
+/***************************************************************************
+Doom3Bots - Open bot framework for Doom 3
+release ? - "Beware of TinMans horrifying code"
+	
+bot_base.def
+Base settings for bots.
+
+***************************************************************************/
+
+entityDef bot_base {
+	"spawnclass"						"botAi"
+	"scriptobject"					"bot_base"
+	
+	"npc_name" 							"BotBase"
+	
+	// TinMan: 0-5 - Puke, Red, Blue, Green, Yellow *todo* randomise
+	"mp_skin"								"2"
+
+	// TinMan: 0-1, Red, Blue
+	"team"									"0"
+	
+	"aim_rate"							"0.5" // TinMan: Size of steps blending aimPos each frame: lower = slower bot aiming/turning, higher = quicker.
+}

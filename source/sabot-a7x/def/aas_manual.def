@@ -1,0 +1,42 @@
+/***************************************************************************
+
+ 	aas_manual.def
+ 	TinMan: Entities for getting specific aas types to compile without an AI that uses that type in the map.
+***************************************************************************/
+entityDef aas_manual_aas48 {
+	"editor_color"			"1 0 0"
+	"editor_mins"				"-8 -8 0"
+	"editor_maxs"				"8 8 16"
+
+	"editor_usage"			"Makes aas compiler compile an aas of that type even if you don't have an AI in the map that uses that type."
+
+	"spawnclass"				"idTarget"
+	
+	"size"							"48 48 82"
+	"use_aas"						"aas48"
+}
+
+entityDef aas_manual_aas96 {
+	"inherit"						"aas_manual_aas48"
+	"use_aas"						"aas96"
+}
+
+entityDef aas_manual_aas_guardian {
+	"inherit"						"aas_manual_aas48"
+	"use_aas"						"aas_guardian"
+}
+
+entityDef aas_manual_aas_mancubus {
+	"inherit"						"aas_manual_aas48"
+	"use_aas"						"aas_mancubus"
+}
+
+entityDef aas_manual_aas_sabaoth {
+	"inherit"						"aas_manual_aas48"
+	"use_aas"						"aas_sabaoth"
+}
+
+entityDef aas_manual_aas_cyberdemon {
+	"inherit"						"aas_manual_aas48"
+	"use_aas"						"aas_cyberdemon"
+}

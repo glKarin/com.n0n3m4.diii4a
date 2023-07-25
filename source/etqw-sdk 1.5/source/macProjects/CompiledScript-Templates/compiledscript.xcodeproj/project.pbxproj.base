@@ -1,0 +1,315 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		96F06A150CB4529E0010D225 /* CompiledScript_Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96F069BB0CB451880010D225 /* CompiledScript_Base.cpp */; };
+		96F06A160CB4529E0010D225 /* CompiledScript_Class.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96F069BC0CB451880010D225 /* CompiledScript_Class.cpp */; };
+		96F06A170CB4529E0010D225 /* CompiledScript_Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96F069BD0CB451880010D225 /* CompiledScript_Event.cpp */; };
+		96F06A180CB4529E0010D225 /* CompiledScript_TypeInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96F069BF0CB451880010D225 /* CompiledScript_TypeInfo.cpp */; };
+		96F06A190CB4529E0010D225 /* CompiledScripts_Types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96F069C00CB451880010D225 /* CompiledScripts_Types.cpp */; };
+
+$INSERTPBXBUILDFILESHERE$
+
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		96F065D30CB448CE0010D225 /* BuildVersion.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BuildVersion.cpp; sourceTree = "<group>"; };
+
+$INSERTPBXFILEREFERENCESHERE$
+
+		96F069B80CB451700010D225 /* CompiledScript_Class.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = CompiledScript_Class.h; path = game/script/compiledscript/CompiledScript_Class.h; sourceTree = ETQW_Source; };
+		96F069B90CB451700010D225 /* CompiledScript_Event.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = CompiledScript_Event.h; path = game/script/compiledscript/CompiledScript_Event.h; sourceTree = ETQW_Source; };
+		96F069BA0CB451700010D225 /* CompiledScript_TypeInfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = CompiledScript_TypeInfo.h; path = game/script/compiledscript/CompiledScript_TypeInfo.h; sourceTree = ETQW_Source; };
+		96F069BB0CB451880010D225 /* CompiledScript_Base.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CompiledScript_Base.cpp; path = game/script/compiledscript/CompiledScript_Base.cpp; sourceTree = ETQW_Source; };
+		96F069BC0CB451880010D225 /* CompiledScript_Class.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CompiledScript_Class.cpp; path = game/script/compiledscript/CompiledScript_Class.cpp; sourceTree = ETQW_Source; };
+		96F069BD0CB451880010D225 /* CompiledScript_Event.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CompiledScript_Event.cpp; path = game/script/compiledscript/CompiledScript_Event.cpp; sourceTree = ETQW_Source; };
+		96F069BF0CB451880010D225 /* CompiledScript_TypeInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CompiledScript_TypeInfo.cpp; path = game/script/compiledscript/CompiledScript_TypeInfo.cpp; sourceTree = ETQW_Source; };
+		96F069C00CB451880010D225 /* CompiledScripts_Types.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CompiledScripts_Types.cpp; path = game/script/compiledscript/CompiledScripts_Types.cpp; sourceTree = ETQW_Source; };
+		96F06A100CB452900010D225 /* compiledscript.so.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = compiledscript.so.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		96F06A110CB452900010D225 /* compiledscript.so-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "compiledscript.so-Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		96F06A0E0CB452900010D225 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		089C166AFE841209C02AAC07 /* CompiledScript */ = {
+			isa = PBXGroup;
+			children = (
+				96F069B50CB4513A0010D225 /* Source */,
+				08FB77ADFE841716C02AAC07 /* Generated Source */,
+				089C167CFE841241C02AAC07 /* Resources */,
+				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
+				19C28FB4FE9D528D11CA2CBB /* Products */,
+				96F06A110CB452900010D225 /* compiledscript.so-Info.plist */,
+			);
+			name = CompiledScript;
+			sourceTree = "<group>";
+		};
+		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		089C167CFE841241C02AAC07 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		08FB77ADFE841716C02AAC07 /* Generated Source */ = {
+			isa = PBXGroup;
+			children = (
+				96F067EF0CB448DF0010D225 /* Headers */,
+				96F067EE0CB448DA0010D225 /* Source */,
+				96F065D20CB448CE0010D225 /* base */,
+			);
+			name = "Generated Source";
+			sourceTree = "<group>";
+		};
+		19C28FB4FE9D528D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				96F06A100CB452900010D225 /* compiledscript.so.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		96F065D20CB448CE0010D225 /* base */ = {
+			isa = PBXGroup;
+			children = (
+				96F065D30CB448CE0010D225 /* BuildVersion.cpp */,
+			);
+			name = base;
+			path = Script/base;
+			sourceTree = "<group>";
+		};
+		96F067EE0CB448DA0010D225 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+			$INSERTSOURCEREFERENCESHERE$
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		96F067EF0CB448DF0010D225 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+			$INSERTHEADERREFERENCESHERE$
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+		96F069B50CB4513A0010D225 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				96F069B70CB4514F0010D225 /* Headers */,
+				96F069B60CB451440010D225 /* Source */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		96F069B60CB451440010D225 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				96F069BB0CB451880010D225 /* CompiledScript_Base.cpp */,
+				96F069BC0CB451880010D225 /* CompiledScript_Class.cpp */,
+				96F069BD0CB451880010D225 /* CompiledScript_Event.cpp */,
+				96F069BF0CB451880010D225 /* CompiledScript_TypeInfo.cpp */,
+				96F069C00CB451880010D225 /* CompiledScripts_Types.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		96F069B70CB4514F0010D225 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				96F069B80CB451700010D225 /* CompiledScript_Class.h */,
+				96F069B90CB451700010D225 /* CompiledScript_Event.h */,
+				96F069BA0CB451700010D225 /* CompiledScript_TypeInfo.h */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		96F06A0F0CB452900010D225 /* compiledscript.so */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 96F06A120CB452900010D225 /* Build configuration list for PBXNativeTarget "compiledscript.so" */;
+			buildPhases = (
+				96F06A0C0CB452900010D225 /* Resources */,
+				96F06A0D0CB452900010D225 /* Sources */,
+				96F06A0E0CB452900010D225 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = compiledscript.so;
+			productName = compiledscript.so;
+			productReference = 96F06A100CB452900010D225 /* compiledscript.so.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		089C1669FE841209C02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 4FADC23708B4156C00ABE55E /* Build configuration list for PBXProject "CompiledScript" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 089C166AFE841209C02AAC07 /* CompiledScript */;
+			projectDirPath = "";
+			targets = (
+				96F06A0F0CB452900010D225 /* compiledscript.so */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		96F06A0C0CB452900010D225 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		96F06A0D0CB452900010D225 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96F06A150CB4529E0010D225 /* CompiledScript_Base.cpp in Sources */,
+				96F06A160CB4529E0010D225 /* CompiledScript_Class.cpp in Sources */,
+				96F06A170CB4529E0010D225 /* CompiledScript_Event.cpp in Sources */,
+				96F06A180CB4529E0010D225 /* CompiledScript_TypeInfo.cpp in Sources */,
+				96F06A190CB4529E0010D225 /* CompiledScripts_Types.cpp in Sources */,
+$INSERTBUILDPHASEHERE$
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4FADC23808B4156C00ABE55E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = MACOS_X;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(HEADER_SEARCH_PATHS_QUOTED_1)",
+				);
+				HEADER_SEARCH_PATHS_QUOTED_1 = "\"$(ETQW_Source)/game/script/compiledscript\"";
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Debug;
+		};
+		4FADC23908B4156C00ABE55E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = MACOS_X;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(HEADER_SEARCH_PATHS_QUOTED_1)",
+				);
+				HEADER_SEARCH_PATHS_QUOTED_1 = "\"$(ETQW_Source)/game/script/compiledscript\"";
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Release;
+		};
+		96F06A130CB452900010D225 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				INFOPLIST_FILE = "compiledscript.so-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = compiledscript.so;
+				SYMROOT = build/MacOSX;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		96F06A140CB452900010D225 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				INFOPLIST_FILE = "compiledscript.so-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = compiledscript.so;
+				SYMROOT = build/MacOSX;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4FADC23708B4156C00ABE55E /* Build configuration list for PBXProject "CompiledScript" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4FADC23808B4156C00ABE55E /* Debug */,
+				4FADC23908B4156C00ABE55E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		96F06A120CB452900010D225 /* Build configuration list for PBXNativeTarget "compiledscript.so" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96F06A130CB452900010D225 /* Debug */,
+				96F06A140CB452900010D225 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 089C1669FE841209C02AAC07 /* Project object */;
+}

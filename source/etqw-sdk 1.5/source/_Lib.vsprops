@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Lib Properties"
+	CharacterSet="2"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="_LIB"
+		UsePrecompiledHeader="2"
+		PrecompiledHeaderThrough=""
+		WarningLevel="3"
+		Detect64BitPortabilityProblems="true"
+	/>
+</VisualStudioPropertySheet>

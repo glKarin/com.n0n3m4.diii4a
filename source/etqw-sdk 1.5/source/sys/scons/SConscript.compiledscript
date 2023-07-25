@@ -1,0 +1,59 @@
+# -*- mode: python -*-
+# ETQW build script
+# TTimo <ttimo@idsoftware.com>
+# http://scons.org
+
+import sys, os, commands
+import scons_utils
+
+Import( 'GLOBALS' )
+Import( GLOBALS )
+
+# SCRIPT_SOURCE points either to a directory, in which case we'll use that as our source dir
+# or it points to a tarball, which we'll expand and then setup the directory
+if ( os.path.isdir( SCRIPT_SOURCE ) ):
+	generated_source_dir = SCRIPT_SOURCE
+else:
+	assert( SCRIPT_SOURCE[-4:] == '.tar' )
+	tarball = File( SCRIPT_SOURCE ).abspath
+	# could extract under the BuildDir path, but then scons has a problem with the path
+	extract_path = Dir( '#compiledscript' ).abspath
+	print 'extracting compiled script source to: %s' % extract_path
+	ret = os.system( '( mkdir -p %s ; cd %s && tar xvf "%s" )' % ( extract_path, extract_path, tarball ) )
+	assert( ret == 0 )
+	# expand any zips under that tree
+	for root, dirs, files in os.walk( extract_path ):
+		for f in files:
+			if ( f[-4:] == '.zip' ):
+				fp = os.path.join( root, f )
+				fdir = os.path.dirname( fp )
+				print 'expand %s' % fp
+				os.system( '( cd %s && unzip -o %s )' % ( fdir, fp ) )
+	# now point to the source tree
+	generated_source_dir = os.path.join( extract_path, 'compiledscript', SCRIPT_FOLDER, 'src' )
+
+generated_source_list = []
+
+# NOTE: having the script source there means the BuildDir is inoperant and the objects will get compiled in that folder too
+print 'scanning %s' % generated_source_dir
+for root, dirs, files in os.walk( generated_source_dir, topdown = True ):
+	for f in files:
+		if ( f[-4:] == '.cpp' ):
+			# FIXME: have a problem with this, the compile command line emitted then is bogus
+			generated_source_list.append( os.path.join( generated_source_dir, root, f ) )
+			
+
+print '%d files in the generated folder' % len( generated_source_list )
+
+base_source = [ os.path.join( '#game/script/compiledscript', i ) for i in [ 'CompiledScript_Base.cpp', 'CompiledScript_Class.cpp', 'CompiledScript_Event.cpp', 'CompiledScript_TypeInfo.cpp', 'CompiledScripts_Types.cpp' ] ]
+
+g_compiledscript_env = g_env.Clone()
+g_compiledscript_env.Append( CPPPATH = [ '#game/script/compiledscript', generated_source_dir ] )
+
+# f00gly hack so I can use scons to expand the compiled scripts stuff
+if ( sys.platform == 'darwin' ):
+	sys.exit( 0 )
+
+compiledscript = g_compiledscript_env.SharedLibrarySafe( g_compiledscript_env, 'compiledscript', generated_source_list + base_source )
+
+Return( 'compiledscript' )

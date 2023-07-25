@@ -1,0 +1,3287 @@
+/*******************************************************************************
+SABot - Stupid Angry Bot - release alpha 8 - "I'm not a puppet! I'm a real boy!"
+
+bot_sabot
+The brains of SABot. Braaaaaiiinnns!
+********************************************************************************/
+
+#define	SABOT_NEXT_ENEMY_LOOK							0.2
+#define	SABOT_NEXT_GOAL_CHOOSE						1
+#define	SABOT_NEXT_GOAL_LOOK							0.3
+#define	SABOT_NEXT_AIM										0.05
+
+// TinMan: Delays before reacting to events
+#define	SABOT_REACT_TO_ENEMY							0.2 //0.3
+#define	SABOT_REACT_TO_ENEMY_SOUND				0.3 //0.4
+#define	SABOT_REACT_FIRE									0.2
+
+#define	SABOT_ENEMY_LOST_TIME							0.6
+#define SABOT_SUBGOAL_LOST_TIME						3
+
+#define SABOT_CHASE_TIME									12 // TinMan: Time to chase (out of view) enemy before giving up
+#define SABOT_HOLD_TIME										90
+
+#define	SABOT_CHECK_MOVE_DISTANCE					48
+
+// TinMan: time between random strafe changes
+#define	SABOT_STRAFE_MIN									1
+#define	SABOT_STRAFE_MAX									3
+
+// TinMan: Distances for following
+#define SABOT_FOLLOWDIST_MAX							140
+#define SABOT_FOLLOWDIST_MIN							100
+
+#define SABOT_GOAL_NONE											0
+#define SABOT_GOAL_MOVE											1
+#define SABOT_GOAL_HOLD											2
+#define SABOT_GOAL_FOLLOW										3
+#define SABOT_GOAL_ATTACK										4
+
+#define SABOT_ROLE_ROAM											0
+#define SABOT_ROLE_OFFENCE									1
+#define SABOT_ROLE_DEFENCE									2
+
+// TinMan: Basically just used as a workaround the fact that setMoveToEntity doesn't like moving to triggers (what ctf cappoints are).
+#define SABOT_GOALTYPE_ENTITY								0
+#define SABOT_GOALTYPE_POSITION							1
+
+#define	SABOT_ITEMTYPE_NONE									0
+#define	SABOT_ITEMTYPE_HEALTH								1
+#define	SABOT_ITEMTYPE_ARMOR								2
+#define	SABOT_ITEMTYPE_WEAPON								3
+#define	SABOT_ITEMTYPE_AMMO									4
+#define	SABOT_ITEMTYPE_POWERUP							5
+#define	SABOT_ITEMTYPE_ITEM									6
+
+object bot_sabot_a8 : bot_base {
+	vector		weaponRange;
+	
+	entity 		goal;
+	vector		goalPosition;
+	float			goalType;
+	float			goalPriority;
+	
+	entity 		oldGoal;
+	
+	float			moveType;
+	
+	// TinMan: alternate goal for comparing against current, oh yes the crudeness of script
+	entity 		newGoal;
+	vector		newGoalPosition;
+	float			newMoveType;
+	float			newGoalType;
+	float			newGoalPriority;	
+	
+	float			role;
+	float			roleDefault;
+	
+	float 		team;
+	// TinMan: *CTF*
+	entity		ourFlag;
+	entity		theirFlag;
+	entity		ourCap;
+	entity		theirCap;
+	
+	float 		gameType;
+	
+	float			viewHeight;
+	float			jumpHeight;
+	
+	//float			timerAmount;
+	//float			timerStart;
+	float			timerEnd;
+	
+	vector		lastPosition;
+	float			lastPositionTime;
+	
+	float			nextEnemyLookTime;
+	
+	vector		platTop;
+	
+	void 			debugPrint( string func, string message );
+
+	// TinMan: States
+	void 			state_Begin();
+	void 			state_MoveToGoal();
+	void 			state_Combat();
+	void 			state_Chase();
+	void			state_Retreat();
+	void			state_Hold();
+	void			state_Follow();
+	void 			state_Killed();
+
+	// TinMan: Functions
+	void 			setNewGoal();
+	void			clearGoal();
+	void			clearNewGoal();
+	
+	void 			moveForward();
+	void 			moveBackward();
+	void 			moveRight();
+	void 			moveLeft();
+	
+	vector 		moveAction();
+
+	void 			setTimer( float endTime );
+	float 		getTimer();
+	void 			clearTimer();
+	boolean		nextEnemyLook();
+
+	boolean 	checkGoal();
+	boolean		gotFlag();
+	boolean 	checkEnemy( entity thisEnemy );
+	boolean 	checkSelf();
+	boolean 	checkLeader( entity thisLeader );
+	boolean		checkWeapon();
+
+	boolean 	checkStrafeLeft();
+	boolean 	checkStrafeRight();
+	boolean 	checkMoveForward();
+	boolean 	checkMoveBack();
+	float		 	checkMoves();
+	
+	boolean 	checkBlocked();
+
+	boolean 	checkShot( boolean simple );
+	boolean 	checkAimedShot( vector aimPosition, float range );
+	
+	void 			chooseWeapon( float range );
+
+	vector		predictTargetPosition( vector targetPosition, vector myPosition, vector targetVelocity, float projectileSpeed );
+	vector 		addAimVariation( vector aimPosition );
+
+	vector		getAimTarget( entity target );
+
+	float 		getItemPriority( entity item );
+	float 		getPlayerPriority( entity badass );
+	float 		getProjectileSpeed( string weaponName );
+
+	entity 		chooseGoal( entity ignoreGoal );
+	entity 		lookForGoal( float useFov );
+	entity 		lookForEnemies( float useFov );
+	entity		listenForEnemies();
+};
+
+/*
+=====================
+bot_sabot_a8::init
+=====================
+*/
+void bot_sabot_a8::init() {
+	// TinMan: Grab your keys please
+	viewHeight = body.getFloatKey( "pm_normalviewheight" );
+	jumpHeight = body.getFloatKey( "pm_jumpheight" );
+	
+	gameType = getGameType(); // TinMan: *todo* see if gametype change restarts map (and bot), on brief look it does
+	roleDefault = SABOT_ROLE_ROAM;
+	
+	clearTimer();
+	
+	setState( "state_Begin" );
+}
+
+/*
+=====================
+bot_sabot_a8::destroy
+TinMan: Clean up stuff for when script is killed.
+=====================
+*/
+void bot_sabot_a8::destroy() {
+	waitFrame();
+}
+
+/*
+=====================
+bot_sabot_a8::debugPrint
+TinMan: Sommat a leetle cleaner, lets you have more control over what bots are spamming out debug. For great justice!
+=====================
+*/
+void bot_sabot_a8::debugPrint( string func, string message ) {
+	if ( getIntKey( "debug" ) ) {
+		sys.println( "[" + int( sys.getTime() ) + "][" + me + "][" + func + "][" + message + "]" );
+	}
+}
+
+/***********************************************************************
+
+	States - Main AI
+
+***********************************************************************/
+
+/*
+=====================
+bot_sabot_a8::state_Begin
+TinMan: Basic setup. Wakey wakey, rise 'n' shine.
+=====================
+*/
+void bot_sabot_a8::state_Begin() {
+	gameType = getGameType(); // TinMan: *todo* see if gametype change restarts map (and bot), on brief look it does
+	
+	// TinMan: Wait till you get your weapon.
+	while( !weapon ) {
+		weapon = body.getWeaponEntity();
+		waitFrame();
+	}
+	
+	checkWeapon(); // TinMan: Update our weapon vars (currentweapon, weaponrange)
+	
+	AI_RUN = true;
+	
+	clearGoal();
+	
+	clearEnemy();
+	
+	role = roleDefault;
+	
+	gameType = getGameType(); // TinMan: *todo* see if gametype change restarts map (and bot), on brief look it does
+	if ( gameType == GAME_CTF ) {
+		team 				= getTeam( body );  // TinMan: *todo* see if there is any auto ballance during game that could change bots team while it's alive, else this is safe
+		ourFlag 		= getFlag( team );
+		theirFlag 	= getFlag( 1 - team );
+		ourCap 			= getCapturePoint( team );
+		theirCap 		= getCapturePoint( 1 - team );
+	}
+	
+	setState( "state_Idle" );
+}
+
+/*
+=====================
+bot_sabot_a8::state_Idle
+TinMan: Default fallback state
+=====================
+*/
+void bot_sabot_a8::state_Idle() {
+	//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][state_Idle]" ); // TinMan *debug*
+	float nextGoalChoose;
+	float reactToEnemy;
+	entity newEnemy;
+	
+	clearNewGoal();
+	
+	eachFrame {
+		//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][state_Idle]" ); // TinMan *debug*
+		
+		// TinMan: Choose a role, which is used to decide on a goal. Curses rhyming strikes again!
+		if ( checkSelf() ) { // TinMan: Bot too beat up to be thinging abount anything
+			//sys.println( "[" + int( sys.getTime() ) + "][state_Idle][checkSelf: not happy]" ); // TinMan *debug*
+			role = SABOT_ROLE_ROAM;
+		} else {
+			//sys.println( "[" + int( sys.getTime() ) + "][state_Idle][checkSelf: happy]" ); // TinMan *debug*
+			// TinMan: *CTF* Choose a goalType
+			if ( gameType == GAME_CTF ) { // TinMan: *todo* check to see when gametype is set, if map is restarted on gametype change then bot will be restarted, then you can just set a local gameType on state_Begin and save the function lookup
+				if ( role == SABOT_ROLE_ROAM ) {
+					//if ( sys.random( 100 ) < 50 ) {
+						//sys.println( "[" + int( sys.getTime() ) + "][state_Idle][SABOT_ROLE_OFFENCE]" ); // TinMan *debug*
+						role = SABOT_ROLE_OFFENCE;
+					//} else {
+						//sys.println( "[" + int( sys.getTime() ) + "][state_Idle][SABOT_GOAL_DEFENCE]" ); // TinMan *debug*
+					//	role = SABOT_ROLE_DEFENCE;
+					//}
+				}
+			}
+		}
+			
+		if ( !goal && sys.getTime() > nextGoalChoose ) {
+			nextGoalChoose = sys.getTime() + SABOT_NEXT_GOAL_CHOOSE;
+			goal = chooseGoal( oldGoal );
+			if ( !goal ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][state_Idle][" + me + "][Cannot find long range goal]" ); // TinMan *debug*
+				stopMove();
+				waitFrame(); // TinMan: Catch a breather.
+				// TinMan: *todo* set up some kind of wander goal/state?
+			}
+		}
+		
+		waitFrame(); // TinMan: Catch a breather.
+		
+		if ( goal ) {
+			if ( goalType == SABOT_GOAL_MOVE ) {
+				setState( "state_MoveToGoal" );
+			} else if ( goalType == SABOT_GOAL_FOLLOW ) {
+				setState( "state_Follow" );
+			} else if ( goalType == SABOT_GOAL_HOLD ) {
+				setState( "state_Hold" );
+			}	else if ( goalType == SABOT_GOAL_ATTACK ) {
+				setState( "state_Combat" );
+			} else {
+				sys.println( "[" + int( sys.getTime() ) + "][state_Idle][!Unknown goalType!]" ); // TinMan *debug*
+			}
+		} else { // TinMan: no goal, just look for trouble *todo* something else
+			vector bodyOrigin, pushPosition, moveDir;
+			bodyOrigin = body.getOrigin();
+			pushPosition = pushPointIntoAAS( bodyOrigin );
+			if ( pushPosition != bodyOrigin ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][state_Idle][" + me + "][pushpos != bodyOrigin]" ); // TinMan *debug*
+				moveDir = pushPosition - bodyOrigin;
+				moveDir_z = 0; // TinMan: Only horizontal
+				setMoveDirection( moveDir, 400 );
+			}
+			
+			// TinMan: *todo* create a wander state for !goal - flip to idle after certian time to see if new goal
+			if ( !reactToEnemy ) {
+				if ( nextEnemyLook() || AI_PAIN || AI_ENEMY_VISIBLE ) {
+					if ( AI_ENEMY_VISIBLE ) {
+						reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+					} else {
+						newEnemy = lookForEnemies( true );
+						if ( newEnemy ) { // TinMan: We have a new challenger
+							reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+						} else {
+							// TinMan: Shh, I hear something.
+							newEnemy = listenForEnemies();
+							if ( !newEnemy && AI_PAIN ) { // TinMan: *cheaphack* work around due to fack heardsound is being shoehorned into something it's not desiged to handle - multiple players
+								newEnemy = lookForEnemies( false );
+							}
+							if ( newEnemy ) {
+								reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY_SOUND; // TinMan: Set react timer.
+							}
+						}
+					}
+				}
+			} else {
+				if ( reactToEnemy < sys.getTime() ) {
+					setEnemy( newEnemy );
+					setState( "state_Combat" );
+				}
+			}
+		}
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::state_MoveToGoal
+TinMan: Only interested in moving here, ie grabbing item.
+=====================
+*/
+void bot_sabot_a8::state_MoveToGoal() {
+	//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][state_MoveToGoal]" ); // TinMan *debug*
+	vector movePosition, secondaryPosition;
+	vector aimPosition, aimDir;
+	float nextGoalLook;
+	float weaponRangeBuffer;
+	float enemyLostTime;
+	float nextAimTime;
+	float reactToEnemy;
+	float reactFire, fire;
+	float lastVisibleEnemyDist;
+	vector lastVisibleEnemyPos;
+	entity newEnemy;
+	
+	reactToEnemy = 0;
+
+	weaponRangeBuffer = sys.random( 16 ) + 16; // TinMan: *todo* rethink
+
+	//stopMove();
+	
+	if ( goal ) {
+		if ( moveType == SABOT_GOALTYPE_ENTITY ) {
+			setMoveToEntity( goal );
+		} else {
+			setMoveToPosition( goalPosition );
+		}
+	}
+	
+	eachFrame {
+		//sys.println( "[" + int( sys.getTime() ) + "][state_MoveToGoal][goal: " + goal.getName() + "]" ); // TinMan *debug*
+		//debugPrint( "state_MoveToGoal", goalPriority );
+			
+		// TinMan: Look for new goals. The shinier the better.
+		if ( sys.getTime() > nextGoalLook ) {
+			nextGoalLook = sys.getTime() + SABOT_NEXT_GOAL_LOOK;
+			lookForGoal( true ); // TinMan: Will set newGoal. More important than it might seem, here is the ultimate decision whether to discard current goal (via a higher priority), which may be something set by chooseGoal, and something as important as capping flag.
+			// TinMan: If pretty new thing better than current plaything.
+			if ( newGoal ) {
+				if ( newGoal != goal ) {
+					if ( newGoalPriority > goalPriority ) {
+						setNewGoal();
+						break;
+					}
+				}
+			}
+		}
+		
+		// TinMan: Lookin for trouble with a big T.
+		if ( !reactToEnemy ) {
+			if ( nextEnemyLook() || AI_PAIN || AI_ENEMY_VISIBLE ) {
+				if ( AI_ENEMY_VISIBLE ) {
+					reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+				} else {
+					newEnemy = lookForEnemies( true );
+					if ( newEnemy ) { // TinMan: We have a new challenger
+						reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+					} else {
+						// TinMan: Shh, I hear something.
+						newEnemy = listenForEnemies();
+						if ( !newEnemy && AI_PAIN ) { // TinMan: *cheaphack* work around due to fack heardsound is being shoehorned into something it's not desiged to handle - multiple players
+							newEnemy = lookForEnemies( false );
+						}
+						if ( newEnemy ) {
+							reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY_SOUND; // TinMan: Set react timer.
+						}
+					}
+				}
+			}
+		} else {
+			if ( reactToEnemy < sys.getTime() ) {
+				setEnemy( newEnemy );
+				reactToEnemy = 0;
+				newGoalPriority = getPlayerPriority( newEnemy );
+				if ( newGoalPriority > goalPriority ) {
+					newGoal = newEnemy;
+					newGoalType = SABOT_GOAL_ATTACK;
+					setNewGoal();
+					setState( "state_Combat" );	
+				}
+			}
+		}
+		
+		/*
+		// TinMan: *todo* rejigger NGS
+		if ( gameType == GAME_CTF ) {
+			if ( !checkSelf() && gotFlag() ) { // TinMan: *cheaphack* got flag?
+				clearGoal();
+				break; // TinMan: Exit state
+			}
+		}
+		*/
+		
+		// TinMan: Move along given path
+		movePosition = moveAction();
+		
+		checkBlocked();
+		
+		if ( getEnemy() ) { // TinMan: *todo* look through and overhaul looking at enemy/fighting
+			if ( !AI_ENEMY_DEAD ) {
+				lastVisibleEnemyPos = getEnemyPos();
+				lastVisibleEnemyPos_z += viewHeight; // TinMan: cheap hack pos off ground since we'll be aiming at it when enemy dead
+				lastVisibleEnemyDist = enemyRange();
+			}
+			
+			// TinMan: Aim at enemy
+			if ( nextAimTime < sys.getTime() ) { // TinMan: Roughen up aiming a bit
+				nextAimTime = sys.getTime() + SABOT_NEXT_AIM;
+				if ( AI_ENEMY_VISIBLE ) {
+					// TinMan: Get initial aim position  - chest, feets.
+					aimPosition = getAimTarget( getEnemy() );
+					// TinMan: Lead shot
+					entity enemy = getEnemy();
+					aimPosition = predictTargetPosition( aimPosition, getViewPosition(), enemy.getLinearVelocity(), getProjectileSpeed( currentWeapon ) );
+					aimDir = addAimVariation( aimPosition ); // TinMan: Screw up aim cause I'm mean.
+					//aimDir = aimPosition - getViewPosition(); // TinMan: *test* simple
+					setAimDirection( aimDir ); // TinMan: Finally set our target to aim to.
+					//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][aimPosition = " + aimPosition_x + " " + aimPosition_y + " " +aimPosition_z + "]" ); // TinMan: *debug*
+				} else { // TinMan: Aim at teh dedders
+					aimDir = lastVisibleEnemyPos - getViewPosition();
+					setAimDirection( aimDir );
+				}
+			}
+			
+			// TinMan: Check shot is within weapon range. AND SMITE HIM!
+			//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][CurrentWeapon: " + currentWeapon + "][Weaponrange]" ); // TinMan: *debug*
+			if ( ( lastVisibleEnemyDist > weaponRange_y ) && ( lastVisibleEnemyDist < weaponRange_z ) )	{
+				// TinMan: See if any enemies in shot.
+				if ( !reactFire ) { // TinMan: Allready going to fire
+					if ( checkShot( false ) ) { // TinMan: See if enemy in straight bounds trace.
+						reactFire = sys.getTime() + SABOT_REACT_FIRE;
+					} else if ( checkShot( true ) ) { // TinMan: See if enemy in straight point trace.
+						reactFire = sys.getTime() + SABOT_REACT_FIRE;
+					} else if ( checkAimedShot( aimPosition, lastVisibleEnemyDist ) ) { // TinMan: See if we are aimed at position and shot will make it.
+						reactFire = sys.getTime() + SABOT_REACT_FIRE;
+					} else {
+						reactFire = 0;
+						fire = false;
+					}
+				}
+			}	else { // TinMan: Aw, out of weapon range.
+				reactFire = 0;
+				fire = false;
+			}
+	
+			if ( reactFire != 0 ) {
+				if ( reactFire < sys.getTime() ) {
+					fire = true; // TinMan: Ratatat tat, boom, fwoosh!
+				}
+			}
+			
+			if ( fire && ( enemyLostTime < 0.2 || AI_ENEMY_DEAD ) ) { // TinMan: The delayed fire is working out quite nicely at the moment except leads to the bot shooting into walls too much.
+				AI_WEAPON_FIRE = true;
+			}
+		} else {
+			// TinMan: Lookee where we damn be going.
+			if ( AI_ONGROUND && movePosition != body.getOrigin() ) { // TinMan: *cheaphack* stop bot from looking down when movepos = body.org
+				aimDir = movePosition - body.getOrigin();
+				//sys.println( "[" + int( sys.getTime() ) + "][state_MoveToGoal][aimdir: " + aimDir + "]" ); // TinMan: expensive *debug*
+				setAimDirection( aimDir );
+			}
+		}
+		
+		/*
+		if ( checkShot( true ) ) {
+			AI_WEAPON_FIRE = true;
+		}
+		*/
+		
+		// TinMan: Wherizy?
+		if ( !AI_ENEMY_VISIBLE ) {
+			if ( enemyLostTime == 0 ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][state_MoveToGoal][start lost timer]" ); // TinMan: *debug*
+				enemyLostTime = RandomDelay( SABOT_ENEMY_LOST_TIME, SABOT_ENEMY_LOST_TIME + 0.5 );
+			} else if ( enemyLostTime < sys.getTime() ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][state_MoveToGoal][lost]" ); // TinMan: *debug*
+				//setState( "state_Chase" );
+				clearEnemy();
+			}
+		} else if ( AI_ENEMY_VISIBLE ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][state_MoveToGoal][reset lost timer]" ); // TinMan: *debug*
+			enemyLostTime = 0; // TinMan: Can see enemy again, so stop timer
+		}
+		
+		// TinMan: See if we should still go for goal.
+		if ( checkGoal() ) {
+			if ( goalType != SABOT_GOAL_HOLD ) { // TinMan: *cheaphack* need goal stack
+				clearGoal();
+			}
+			break; // TinMan: Exit state
+		}
+		if ( AI_MOVE_DONE || AI_DEST_UNREACHABLE ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][state_MoveToGoal][movedone or cannot reach]" ); // TinMan: *debug*
+			if ( goalType != SABOT_GOAL_HOLD ) { // TinMan: *cheaphack* need goal stack
+				clearGoal();
+			}
+			break; // TinMan: Exit state
+		}
+	
+		checkWeapon(); // TinMan: Make sure your weapon is nice and shiny
+	} // TinMan: End eachFrame/state
+	
+	// TinMan: Exit state
+	setState( "state_Idle" );
+}
+
+/*
+=====================
+bot_sabot_a8::state_Combat
+TinMan: Direct combat with enemy. Strike him down!
+=====================
+*/
+void bot_sabot_a8::state_Combat() {
+	//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][state_Combat]" ); // TinMan: *debug*
+	
+	float weaponRangeBuffer;
+	float nextAimTime;
+	float nextGoalLook;
+	float enemyLostTime;
+	float fire, forwards, back, left, right;
+	float nextStrafeTime;
+	float moveFlags;
+	float reactToEnemy, reactFire;
+	float dist;
+	float lastVisibleEnemyDist;
+	float checkTime;
+	vector lastVisibleEnemyPos;
+	vector aimDir, aimPosition;
+	entity enemy, newEnemy;
+	
+	if ( !getEnemy() ) {
+		clearGoal();
+		setState( "state_Idle" );
+	}
+	
+	reactToEnemy = false;
+	enemyLostTime = 0;
+	
+	enemy = getEnemy();
+
+	setMoveToEnemy();
+	// TinMan: Flip out straight away if you can't do move. *todo* move to attack position instead
+	/*
+	if ( AI_DEST_UNREACHABLE ) {
+		sys.println( "[" + int( sys.getTime() ) + "][state_Combat][Start:Cannot move to enemy!]" ); // TinMan: *debug*
+		setState( "state_Idle" );
+	}
+	*/
+
+	weaponRangeBuffer = sys.random( 16 ) + 16; // TinMan: *todo* rethink
+	eachFrame {
+		//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][state_Combat]" ); // TinMan: *debug*
+		// TinMan: Look for new goals. The shinier the better.
+		if ( sys.getTime() > nextGoalLook ) {
+			nextGoalLook = sys.getTime() + SABOT_NEXT_GOAL_LOOK;
+			lookForGoal( true ); // TinMan: Will set newGoal. More important than it might seem, here is the ultimate decision whether to discard current goal (via a higher priority), which may be something set by choosgoal, and something as important as capping flag.
+			// TinMan: If pretty new thing better than current plaything.
+			if ( newGoal ) {
+				if ( newGoal != goal ) {
+					if ( newGoalPriority > goalPriority ) {
+						setNewGoal();
+						break;
+					}
+				}
+			}
+		}
+		
+		// TinMan: Check to see if enemy died, and set some reaction time
+		if ( AI_ENEMY_DEAD || !getEnemy() ) { // TinMan: idAI checks to see if enemy is alive each think and sets these if not.
+			//sys.println( "[" + int( sys.getTime() ) + "][" + me + "[state_Combat][no enemy]" ); // TinMan *debug*
+			if ( timerEnd == -1 ) {
+				setMoveToPosition( lastVisibleEnemyPos );
+				setTimer( 0.3 );
+			} else if ( getTimer() ) {
+				clearTimer();
+				//sys.println( "[" + int( sys.getTime() ) + "][" + me + "[state_Combat][no enemy]" ); // TinMan *debug*
+				clearGoal();
+				break; // TinMan: Exit state
+			}
+		} else {
+			lastVisibleEnemyPos = getEnemyPos();
+			lastVisibleEnemyPos_z += viewHeight; // TinMan: cheap hack pos off ground since we'll be aiming at it when enemy dead
+			lastVisibleEnemyDist = enemyRange();
+		}
+		
+		// TinMan: The enemy might move to an unreachable spot, wall edge, or be midair, so we need to reset move *todo* Ideally we want to do a movetoattackposition
+		if ( AI_DEST_UNREACHABLE || AI_MOVE_DONE ) {
+			if ( checkTime < sys.getTime() ) {
+				if ( getEnemy() ) {
+					//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][reset move to enemy!]" ); // TinMan: *debug*
+					checkTime = sys.getTime() + 0.3;
+					if ( AI_MOVE_DONE ) { // TinMan: at last reachable enemy pos
+						locateEnemy(); // TinMan: force update
+					}
+					setMoveToEnemy();
+					//setMoveToAttackPosition( getEnemy() );
+				}
+			}
+		}
+		
+		/* TinMan: *todo* NGS rejigger
+		// TinMan: See if we even want to be fighting - if enemy too badass or too beatup
+		if ( checkSelf() ) { // checkEnemy( enemy ) || 
+			//if ( sys.random( 100 ) < 40 ) { // TinMan: *todo* demagic, set a limit/timer
+				//if ( body.distanceTo( getEnemy() ) > 128 ) {
+					waitFrame();
+					setState( "state_CombatRetreat" );
+				//}
+			//}
+		}
+		*/
+
+		// TinMan: Aim at enemy
+		if ( nextAimTime < sys.getTime() ) { // TinMan: Roughen up aiming a bit
+			nextAimTime = sys.getTime() + SABOT_NEXT_AIM;
+			if ( !AI_ENEMY_DEAD ) {
+				// TinMan: Get initial aim position  - chest, feets.
+				aimPosition = getAimTarget( getEnemy() );
+				
+				//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][aimPosition = " + aimPosition_x + " " + aimPosition_y + " " +aimPosition_z + "]" ); // TinMan: *debug*
+				// TinMan: Lead shot
+				aimPosition = predictTargetPosition( aimPosition, getViewPosition(), enemy.getLinearVelocity(), getProjectileSpeed( currentWeapon ) );
+				aimDir = addAimVariation( aimPosition ); // TinMan: Screw up aim cause I'm mean.
+				
+				//aimPosition = enemy.getOrigin(); // TinMan: *test* simple
+				//aimDir = aimPosition - getViewPosition(); // TinMan: *test* simple
+				
+				setAimDirection( aimDir ); // TinMan: Finally set our target to aim to.
+				//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][aimDir = " + aimDir_x + " " + aimDir_y + " " +aimDir_z + "]" ); // TinMan: *debug*
+			} else { // TinMan: Aim at teh dedders
+				aimDir = lastVisibleEnemyPos - getViewPosition();
+				setAimDirection( aimDir );
+			}
+		}
+
+		// TinMan: Check shot is within weapon range. AND SMITE HIM!
+		//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][CurrentWeapon: " + currentWeapon + "][Weaponrange]" ); // TinMan: *debug*
+		if ( ( lastVisibleEnemyDist > weaponRange_y ) && ( lastVisibleEnemyDist < weaponRange_z ) )	{
+			// TinMan: See if any enemies in shot.
+			if ( !reactFire ) { // TinMan: Allready going to fire
+				if ( checkShot( false ) ) { // TinMan: See if enemy in straight bounds trace.
+					reactFire = sys.getTime() + SABOT_REACT_FIRE;
+				} else if ( checkShot( true ) ) { // TinMan: See if enemy in straight point trace.
+					reactFire = sys.getTime() + SABOT_REACT_FIRE;
+				} else if ( checkAimedShot( aimPosition, lastVisibleEnemyDist ) ) { // TinMan: See if we are aimed at position and shot will make it.
+					reactFire = sys.getTime() + SABOT_REACT_FIRE;
+				} else {
+					reactFire = 0;
+					fire = false;
+				}
+			}
+		}	else { // TinMan: Aw, out of weapon range.
+			reactFire = 0;
+			fire = false;
+		}
+
+		if ( reactFire != 0 ) {
+			if ( reactFire < sys.getTime() ) {
+				fire = true; // TinMan: Ratatat tat, boom, fwoosh!
+			}
+		}
+		
+		if ( fire && ( enemyLostTime < 0.2 || AI_ENEMY_DEAD ) ) { // TinMan: The delayed fire is working out quite nicely at the moment except leads to the bot shooting into walls too much. *todo* we should really be stopping firing after a delay like the starting fire does.
+			AI_WEAPON_FIRE = true;
+		}
+		
+		// TinMan: Look out for more imediate threats.
+		if ( !reactToEnemy ) {
+			if ( nextEnemyLook() ) {
+				newEnemy = lookForEnemies( true );
+				if ( newEnemy ) { // TinMan: We have a new challenger
+					dist = body.distanceTo( newEnemy );
+					if ( dist < lastVisibleEnemyDist - 64 ) {
+						//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][Wah! New enemy closy close]" ); // TinMan: *debug*
+						reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+					}
+				} else {
+					// TinMan: Shh, I hear something.
+					newEnemy = listenForEnemies();
+					if ( !newEnemy && AI_PAIN ) { // TinMan: *cheaphack* work around due to fack heardsound is being shoehorned into something it's not desiged to handle - multiple players
+						newEnemy = lookForEnemies( false );
+					}
+					if ( newEnemy ) { // TinMan: We have a new challenger
+						dist = body.distanceTo( newEnemy );
+						if ( dist < lastVisibleEnemyDist - 64 ) {
+							reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY_SOUND; // TinMan: Set react timer.
+						}
+					}
+				}
+			}
+		} else {
+			if ( reactToEnemy < sys.getTime() ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][" + me +"][state_Combat][newenemy!!]" ); // TinMan: *debug*
+				break; // TinMan: Exit state
+			}
+		}
+
+		// TinMan: Move closer/ retreat/ strafe.. to get to weapon sweet spot
+		if ( lastVisibleEnemyDist > weaponRange_x + weaponRangeBuffer ) { // TinMan *todo* rejigger to lastenpos
+			// TinMan: Closer than weaponRange
+			if ( AI_ENEMY_VISIBLE ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][Moving to sweet spot: " + weaponRange_x + "]" ); // TinMan: *debug*
+				if ( travelDistanceToPoint( lastVisibleEnemyPos ) < 600  ) { // TinMan: *todo* remove once better solution implemented
+					// TinMan: -v- still like the careening off any height
+					/*if ( checkMoveForward() ) {
+						moveForward();
+					}*/
+					
+					moveAction();
+				}
+			} else { // !AI_ENEMY_VIS
+				moveAction();
+			}
+		} else if ( lastVisibleEnemyDist < ( weaponRange_x - weaponRangeBuffer ) ) { // TinMan: EnemyRange Further than weaponRange
+			//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][Moving backwards to sweet spot]" ); // TinMan: *debug*
+			AI_FORWARD = false;
+			if ( checkMoveBack() ) {
+				moveBackward();
+			}
+		} /*else {
+			//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][At sweet spot]" ); // TinMan: *debug*
+		} */
+
+		if ( nextStrafeTime < sys.getTime() ) { // TinMan: Randomly change strafe
+			//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][Strafe]" ); // TinMan: *debug*
+			nextStrafeTime = RandomDelay( SABOT_STRAFE_MIN, SABOT_STRAFE_MAX );
+	
+			left = false;
+			right = false;
+			left = checkStrafeLeft();
+			right = checkStrafeRight();
+			 	
+			if ( left && right ) {
+				right == !AI_STRAFE_RIGHT; // TinMan: went right last time
+			 	left == !AI_STRAFE_LEFT;
+			}
+		}
+	
+		if ( right ) {
+			moveRight();
+		} else if ( left ) {
+			moveLeft();
+		}
+
+		// TinMan: *cheaphack* stop bashing into stuff
+		if ( AI_STRAFE_RIGHT && !checkStrafeRight() ) {
+			AI_STRAFE_RIGHT = false;
+			nextStrafeTime = sys.getTime() + 0.05;
+		}
+		if ( AI_STRAFE_LEFT && !checkStrafeLeft() ) {
+			AI_STRAFE_LEFT = false;		
+			nextStrafeTime = sys.getTime() + 0.05;
+		}
+		if ( AI_FORWARD && !checkMoveForward() ) {
+			AI_FORWARD = false;
+		}
+		if ( AI_BACKWARD && !checkMoveBack() ) {
+			AI_BACKWARD = false;
+		}
+
+		// TinMan: Wherizy?
+		if ( !AI_ENEMY_VISIBLE ) {
+			if ( enemyLostTime == 0 ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][start lost timer]" ); // TinMan: *debug*
+				enemyLostTime = RandomDelay( SABOT_ENEMY_LOST_TIME, SABOT_ENEMY_LOST_TIME + 0.5 );
+			} else if ( enemyLostTime < sys.getTime() ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][chase]" ); // TinMan: *debug*
+				setState( "state_Chase" );
+			}
+		} else if ( AI_ENEMY_VISIBLE ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][reset lost timer]" ); // TinMan: *debug*
+			enemyLostTime = 0; // TinMan: Can see enemy again, so stop timer
+		}
+		
+		checkBlocked();
+
+		checkWeapon();
+		
+	} // TinMan: End eachFrame/state
+	
+	//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][Exit state]" ); // TinMan: *debug*
+	
+	// TinMan: Exit state
+	if ( newEnemy ) { // TinMan: *cheaphack* Fix the loosing enemy due to reactiontime and state change *todo* rethink
+		setEnemy( newEnemy );
+	}
+	
+	if ( getEnemy() ) {
+		setState( "state_Combat" );
+	} else {
+		clearGoal();
+		setState( "state_Idle" );
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::state_Chase
+TinMan: Move to restablish combat. Hunt him down!
+=====================
+*/
+void bot_sabot_a8::state_Chase() {
+	//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][state_Chase]" ); // TinMan: *debug*
+	vector movePosition, aimDir, aimPosition;
+	float chaseTime;
+	float nextGoalLook;
+	float reactToEnemy;
+	entity newEnemy;
+	
+	if ( !getEnemy() ) {
+		setState( "state_Idle" );
+	}
+
+	// TinMan: Gentlemen, start your engines.
+	//if ( canReachEntity( getEnemy() ) ) {
+	setMoveToEnemy();
+	//} else {
+		//setMoveToAttackPosition( getEnemy() );
+		//
+		/*
+		if ( AI_DEST_UNREACHABLE ) {
+			// sys.println( "[" + int( sys.getTime() ) + "][state_Chase][Cannot reach enemy or attack position]" ); // TinMan: *debug*
+			clearEnemy();
+			setState( "state_Idle" );
+		}
+		*/
+		// sys.println( "[" + int( sys.getTime() ) + "][state_Chase][Moving to attack position]" ); // TinMan: *debug*
+	//}
+	// TinMan: Flip out straight away if you can't do move.
+	/*if ( AI_MOVE_DONE || AI_DEST_UNREACHABLE ) {
+		setState( "state_Idle" );		
+	}*/
+	
+	reactToEnemy = false;
+
+	setTimer( SABOT_CHASE_TIME ); // TinMan: Start chase timer.
+	//chaseTime = sys.getTime() + SABOT_CHASE_TIME; // TinMan: Start chase timer.
+
+	eachFrame {	
+		//sys.println( "[" + int( sys.getTime() ) + "][state_Chase]" ); // TinMan: *debug*
+		// TinMan: Check to see if enemy died
+		if ( AI_ENEMY_DEAD || !getEnemy() ) { // TinMan: idAI checks to see if enemy is alive each think and sets these if not.
+			setState( "state_Idle" );
+		}
+		
+		// TinMan: Move along given path
+		movePosition = moveAction();
+		
+		// TinMan: Lookee where we damn be going.
+		//movePosition = getMovePosition(); // TinMan: expensive
+		if ( AI_ONGROUND && movePosition != body.getOrigin() ) {
+			aimDir = movePosition - body.getOrigin();
+			setAimDirection( aimDir );
+		}
+				
+		checkBlocked();
+		
+		if ( checkShot( true ) ) {
+			AI_WEAPON_FIRE = true;
+		}
+
+		// TinMan: Look out for new badasses trying to kill you.
+		if ( !reactToEnemy ) {
+			if ( nextEnemyLook() || AI_PAIN || AI_ENEMY_VISIBLE ) {
+				if ( AI_ENEMY_VISIBLE ) {
+					reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+				} else {
+					newEnemy = lookForEnemies( true );
+					if ( newEnemy ) { // TinMan: We have a new challenger
+						if ( body.distanceTo( newEnemy ) < enemyRange() ) { // TinMan: Closer than the chump I'm hunting.
+							reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+						}
+					} else {
+						// TinMan: Shh, I hear something.
+						newEnemy = listenForEnemies();
+						if ( !newEnemy && AI_PAIN ) { // TinMan: *cheaphack* work around due to fack heardsound is being shoehorned into something it's not desiged to handle - multiple players
+							newEnemy = lookForEnemies( false );
+						}
+						if ( newEnemy ) {
+							if (  body.distanceTo( newEnemy ) < enemyRange() ) { // TinMan: Closer than the chump I'm hunting.
+								reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY_SOUND; // TinMan: Set react timer.
+							}
+						}
+					}
+				}
+			}
+		} else {
+			if ( reactToEnemy < sys.getTime() ) {
+				setEnemy( newEnemy );
+				setState( "state_Combat" );
+			}
+		}
+	
+		checkWeapon();
+		
+		// TinMan: Get back into the fightening
+		if ( AI_ENEMY_IN_FOV ) {
+			waitFrame();
+			setState( "state_Combat" );
+		}
+			
+		// TinMan: At last seen enemy pos and can't see enemy *todo* rethink
+		if ( AI_MOVE_DONE || AI_DEST_UNREACHABLE ) {
+			float checkTime;
+			if ( checkTime < sys.getTime() ) {
+				if ( getEnemy() ) {
+					//sys.println( "[" + int( sys.getTime() ) + "][state_Chase][reset move to enemy!]" ); // TinMan: *debug*
+					checkTime = sys.getTime() + 0.3;
+					if ( AI_MOVE_DONE ) { // TinMan: Cheat a bit, move towards current enemy pos
+						locateEnemy(); 
+					}
+					setMoveToEnemy();
+					//setMoveToAttackPosition( getEnemy() );
+				}
+			}
+		}
+		
+		// TinMan: Only chase the enemy for a certain amount of time, if it's up you've lost him.
+		//if ( chaseTime < sys.getTime() ) {
+		if ( getTimer() ) {
+			// sys.println( "[" + int( sys.getTime() ) + "][state_Chase][ChaseTime Up]" ); // TinMan: *debug*
+			clearTimer();
+			clearEnemy();
+			setState( "state_Idle" );
+		}
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::state_Retreat
+TinMan: Trying to escape enemy. Run Forest! Run!
+=====================
+*/
+void bot_sabot_a8::state_Retreat() {
+	// sys.println( "[" + int( sys.getTime() ) + "][state_Retreat]" ); // TinMan: *debug*
+	float nextGoalLook;
+	float reactToEnemy;
+	float enemyLostTime;
+	vector movePosition;
+	vector aimDir;
+	entity newEnemy;
+	
+	if ( !getEnemy() ) {
+		setState( "state_Idle" );
+	} 
+	
+	setMoveToCover();
+	if ( AI_DEST_UNREACHABLE || AI_MOVE_DONE ) {
+		sys.println( "[" + int( sys.getTime() ) + "][state_Retreat][Cannot move to cover]" ); // TinMan: *debug*
+		/*setMoveOutOfRange( getEnemy(), 400 ); // TinMan: *todo* no magic
+		if ( AI_DEST_UNREACHABLE || AI_MOVE_DONE ) {
+			sys.println( "[" + int( sys.getTime() ) + "][state_Retreat][Cannot move out of range]" ); // TinMan: *debug*
+		}	else {
+			sys.println( "[" + int( sys.getTime() ) + "][state_Retreat][Moving out of range]" ); // TinMan: *debug*
+		}
+		*/
+	} /*else {
+		sys.println( "[" + int( sys.getTime() ) + "][state_Retreat][Moving to cover]" ); // TinMan: *debug*
+	} */
+
+	eachFrame {
+		// TinMan: Check to see if enemy died	
+		if ( AI_ENEMY_DEAD || !getEnemy() ) { // TinMan: idAI checks to see if enemy is alive each think and sets these if not.
+			break;
+		}
+		
+		if ( AI_MOVE_DONE || AI_DEST_UNREACHABLE ) {
+			//clearEnemy();
+			break; // TinMan: Exit state
+		}
+		
+		// TinMan: Don't want to be running all our lives
+		if ( !AI_ENEMY_VISIBLE ) {
+			if ( enemyLostTime == 0 ) {
+				enemyLostTime = sys.getTime() + 12; // TinMan: *todo* demagic
+			} else if ( enemyLostTime < sys.getTime() ) {
+				clearEnemy();
+				break; // TinMan: Exit state
+			}
+		} else {
+			if ( AI_PAIN && AI_ENEMY_VISIBLE ) { // TinMan: *todo* set reaction timer
+				setState( "state_CombatRetreat" );
+			}
+		}
+		
+		// TinMan: Move along given path
+		movePosition = moveAction();
+		
+		// TinMan: Lookee where we damn be going.
+		//movePosition = getMovePosition(); // TinMan: expensive
+		if ( AI_ONGROUND && movePosition != body.getOrigin() ) {
+			aimDir = movePosition - body.getOrigin();
+			setAimDirection( aimDir );
+		}
+		
+		checkBlocked();
+		
+		if ( checkShot( true ) ) {
+			AI_WEAPON_FIRE = true;
+		}
+		
+		// TinMan: Look out for new badasses trying to kill you.
+		if ( !reactToEnemy ) {
+			if ( nextEnemyLook() || AI_PAIN ) {
+				newEnemy = lookForEnemies( true );
+				if ( newEnemy ) { // TinMan: We have a new challenger
+					if ( body.distanceTo( newEnemy ) < enemyRange() ) { // TinMan: Closer than the chump I'm hunting.
+						reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+					}
+				} else {
+					// TinMan: Shh, I hear something.
+					newEnemy = listenForEnemies();
+					if ( !newEnemy && AI_PAIN ) { // TinMan: *cheaphack* work around due to fack heardsound is being shoehorned into something it's not desiged to handle - multiple players
+						newEnemy = lookForEnemies( false );
+					}
+					if ( newEnemy ) {
+						if ( body.distanceTo( newEnemy ) < enemyRange() ) { // TinMan: Closer than the chump I'm hunting.
+							reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY_SOUND; // TinMan: Set react timer.
+						}
+					}
+				}
+			}
+		} else {
+			if ( reactToEnemy < sys.getTime() ) {
+				break; // TinMan: Exit state
+			}
+		}
+				
+		checkWeapon();
+	} // TinMan: End eachFrame/state
+	
+	// TinMan: Exit state
+	if ( newEnemy ) { // TinMan: *cheaphack* Fix the loosing enemy due to reactiontime and state change *todo* rethink
+		setEnemy( newEnemy );
+	}
+	
+	if ( getEnemy() ) {
+		setState( "state_Combat" );
+	} else {
+		setState( "state_Idle" );
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::state_Hold
+TinMan: Hold position - Aka camp.
+=====================
+*/
+void bot_sabot_a8::state_Hold() {
+	//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][state_Hold]" ); // TinMan *debug*
+	float nextSubGoalLook;
+	vector movePosition;
+	entity newEnemy;
+	float reactToEnemy;
+
+	reactToEnemy = 0;
+
+	stopMove(); // TinMan: *note* All states should handle movement to that goal, if it doesn't do a move command at start then stopMove previous movement.
+	
+	setTimer( SABOT_HOLD_TIME ); // TinMan: Start timer if we don't want to wait forever
+	
+	eachFrame {
+		//sys.println( "[" + int( sys.getTime() ) + "][" + getName() + "][state_Hold][" + goal.getName() + "]" ); // TinMan *debug*
+		
+		// TinMan: Lookin for trouble with a big T.
+		if ( !reactToEnemy ) {
+			if ( nextEnemyLook() || AI_PAIN || AI_ENEMY_VISIBLE ) {
+				if ( AI_ENEMY_VISIBLE ) {
+					reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+				} else {
+					newEnemy = lookForEnemies( true );
+					if ( newEnemy ) { // TinMan: We have a new challenger
+						reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+					} else {
+						// TinMan: Shh, I hear something.
+						newEnemy = listenForEnemies();
+						if ( !newEnemy && AI_PAIN ) { // TinMan: *cheaphack* work around due to fack heardsound is being shoehorned into something it's not desiged to handle - multiple players
+							newEnemy = lookForEnemies( false );
+						}
+						if ( newEnemy ) {
+							reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY_SOUND; // TinMan: Set react timer.
+						}
+					}
+				}
+			}
+		} else {
+			if ( reactToEnemy < sys.getTime() ) {
+				break; // TinMan: Exit state
+			}
+		}
+	
+		// TinMan: What are we waiting for?		
+		if ( gameType == GAME_CTF ) {
+			/*
+			if ( goal == ourCap ) {
+				if ( getFlagStatus( team ) == FLAGSTATUS_INBASE ) {
+					if ( body.distanceToPoint( goal.getOrigin() ) > 32 ) {
+						goalType = SABOT_GOAL_MOVE;
+						break; // TinMan: Exit state
+					}
+				}
+			} else if ( goal == theirCap ) {
+				if ( getFlagStatus( team ) == FLAGSTATUS_INBASE ) {
+					if ( body.distanceToPoint( goal.getOrigin() ) > 32 ) {
+						goalType = SABOT_GOAL_MOVE;
+						break; // TinMan: Exit state
+					}
+				}				
+			}
+			*/
+			
+			// TinMan: *cheaphack* look somewhere usefull (hopefully), better would be to do a quick predict towards theircap and look there.
+			vector lookDir, capPos;
+			if ( goal == ourCap ) {
+				capPos = theirCap.getOrigin();;
+			} else if ( goal == theirCap ) {
+				capPos = ourCap.getOrigin();
+			}
+			lookDir = capPos - body.getOrigin();
+			lookDir_z = 0;
+			setAimDirection( lookDir );
+			
+			if ( gotFlag() ) { // TinMan: *cheaphack* got flag?
+				//sys.println( "[" + int( sys.getTime() ) + "][" + getName() + "][state_Hold][" + goal.getName() + "]" ); // TinMan *debug*
+				clearGoal();
+				break; // TinMan: Exit state
+			}
+			
+			// TinMan: We only hold for a certain amount of time in ctf
+			if ( getTimer() ) {
+				// sys.println( "[" + int( sys.getTime() ) + "][state_Hold][HoldTime Up]" ); // TinMan: *debug*
+				clearTimer();
+				clearGoal();
+				break; // TinMan: Exit state
+			}
+		}
+		
+		/* TinMan: *todo* rejigger
+		// TinMan: Look for other items to grab
+		if ( sys.getTime() > nextSubGoalLook ) {
+			nextSubGoalLook = sys.getTime() + SABOT_NEXT_SUBGOAL_LOOK;
+			subGoal = lookForGoal( 10, false );
+			if ( subGoal ) {
+				waitFrame();
+				if ( newEnemy ) { // TinMan: *cheaphack*
+					setEnemy( newEnemy );
+				}
+				setState( "state_SubGoal" );
+			}
+		}
+		*/
+	
+		// TinMan: Move to hold position if too far away
+		if ( body.distanceToPoint( goalPosition ) > 128 ) {
+			//goalType = SABOT_GOAL_MOVE; // TinMan: Once the bot reaches the hold goal via movetogoal, the choosegoal will probably set goal back to hold. *todo* really need a stack
+			//break; // TinMan: Exit state
+			setState( "state_MoveToGoal" );
+		}
+		
+		checkWeapon(); // TinMan: Make sure your weapon is nice and shiny
+	} // TinMan: End eachFrame/state
+	
+	// TinMan: Exit state
+	if ( newEnemy ) { // TinMan: *cheaphack* Fix the loosing enemy due to reactiontime and state change *todo* rethink
+		setEnemy( newEnemy );
+	}
+	
+	if ( getEnemy() ) {
+		setState( "state_Combat" );
+	} else {
+		setState( "state_Idle" );
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::state_Follow
+TinMan: Follow teammate.
+=====================
+*/
+void bot_sabot_a8::state_Follow() {
+	//sys.println( "[" + int( sys.getTime() ) + "][state_Follow]" ); // TinMan *debug*
+	vector movePosition;
+	vector aimDir;
+	float nextGoalLook;
+	entity leader;
+	entity newEnemy;
+	float reactToEnemy;
+
+	reactToEnemy = 0;
+	
+	if ( !goal ) {
+		setState( "state_Idle" );
+	}
+	
+	leader = goal;
+	
+	setMoveToPosition( goal.getOrigin() );
+
+	eachFrame {
+		if ( checkLeader( leader ) || !leader ) { // TinMan: See if we should still go for it
+			setState( "state_Idle" );
+		}
+		
+		// TinMan: Lookin for trouble with a big T.
+		if ( !reactToEnemy ) {
+			if ( nextEnemyLook() || AI_PAIN && !getEnemy() ) {
+				newEnemy = lookForEnemies( true );
+				if ( newEnemy ) { // TinMan: We have a new challenger
+					reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY; // TinMan: Set react timer.
+				} else {
+					// TinMan: Shh, I hear something.
+					newEnemy = listenForEnemies();
+					if ( !newEnemy && AI_PAIN ) { // TinMan: *cheaphack* work around due to fack heardsound is being shoehorned into something it's not desiged to handle - multiple players
+						newEnemy = lookForEnemies( false );
+					}
+					if ( newEnemy ) {
+						reactToEnemy = sys.getTime() + SABOT_REACT_TO_ENEMY_SOUND; // TinMan: Set react timer.
+					}
+				}
+			}
+		} else {
+			if ( reactToEnemy < sys.getTime() ) {
+				setEnemy( newEnemy );
+				//setState( "state_Combat" );
+			}
+		}
+		
+		/* *todo* rejigger
+		// TinMan: Look for other items to grab on the way
+		if ( sys.getTime() > nextGoalLook ) {
+			nextGoalLook = sys.getTime() + SABOT_NEXT_GOAL_LOOK;
+			subGoal = lookForGoal( true, false );
+			if ( subGoal ) {
+				// TinMan: Don't want to go after items that are out of the way. Unless the bot needs excersise.
+				//if ( travelDistanceBetweenEntities( goal, subGoal ) < travelDistanceToEntity( goal ) + 192 ) { // TinMan: *todo* tweak buffer *todo* these funcs are expensive, can you grab current travel distance for current route, I seem to remember it being set somewhere
+					waitFrame();
+					setState( "state_SubGoal" );
+				//}
+			}
+		}
+		*/
+		
+		setMoveToPosition( leader.getOrigin() ); // TinMan: Diferent from other states, our goal, the leader is on the move
+		
+		// TinMan: The actual following
+		if  ( body.distanceTo( leader ) < SABOT_FOLLOWDIST_MIN ) {
+			//setAimPosition( getAIAimTargets( leader, true ) );
+			stopMove();
+		} else if ( body.distanceTo( leader ) > SABOT_FOLLOWDIST_MAX ) {
+			// TinMan: Move along given path
+			movePosition = moveAction();
+			
+			// TinMan: Lookee where we damn be going.
+			//movePosition = getMovePosition(); // TinMan: expensive
+			if ( AI_ONGROUND && movePosition != body.getOrigin() ) {
+				aimDir = movePosition - body.getOrigin();
+				setAimDirection( aimDir );
+			}		
+		}
+		
+		checkBlocked();
+		
+		if ( checkShot( true ) ) {
+			AI_WEAPON_FIRE = true;
+		}
+
+		checkWeapon(); // TinMan: Make sure your weapon is nice and shiny
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::state_Killed
+TinMan: botAi hijacks script when bots fakeclient is AI_DEAD, sets state to this.
+=====================
+*/
+void bot_sabot_a8::state_Killed() {
+	//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][Died]" ); // TinMan: *debug*
+
+	stopMove();
+	
+	while( AI_DEAD ) {
+		//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][state_Killed][waiting]" ); // TinMan: *debug*
+		
+		float nextFire;
+		if ( sys.getTime() > nextFire ) {
+			nextFire = sys.getTime() + 0.1;
+			AI_WEAPON_FIRE = true; // TinMan: Fire so bot respawns
+		}
+		waitFrame();
+	}
+	
+	//sys.println( "[" + int( sys.getTime() ) + "][" + me + "][Restarting]" ); // TinMan: *debug*
+	setState( "state_Begin" );
+}
+
+
+/***********************************************************************
+
+	Functions
+
+***********************************************************************/
+
+/*
+=====================
+bot_sabot_a8::setNewGoal
+TinMan: *todo* complete
+=====================
+*/
+void bot_sabot_a8::setNewGoal() {
+	goalType = newGoalType;
+	moveType = newMoveType;
+	goal = newGoal;
+	goalPosition = newGoalPosition;
+	goalPriority = newGoalPriority;
+}
+
+/*
+=====================
+bot_sabot_a8::clearGoal
+=====================
+*/
+void bot_sabot_a8::clearGoal() {
+	if ( goal ) {
+		oldGoal = goal;
+	}
+	
+	goalType = 0;
+	moveType = 0;
+	goal = $null_entity;
+	goalPosition = '0 0 0'; // TinMan: *todo* hmm how do you null a vector?
+	goalPriority = 0;
+}
+
+/*
+=====================
+bot_sabot_a8::clearNewGoal
+TinMan: *todo* complete
+=====================
+*/
+void bot_sabot_a8::clearNewGoal() {
+	newGoalType = 0;
+	newMoveType = 0;
+	newGoal = $null_entity;
+	newGoalPosition = '0 0 0'; // TinMan: *todo* hmm how do you null a vector?
+	newGoalPriority = 0;
+}
+
+/*
+=====================
+bot_sabot_a8::moveForward
+=====================
+*/
+void bot_sabot_a8::moveForward() {
+	AI_FORWARD = true;
+	AI_BACKWARD = false;
+}
+
+/*
+=====================
+bot_sabot_a8::moveBackward
+=====================
+*/
+void bot_sabot_a8::moveBackward() {
+	AI_BACKWARD = true;
+	AI_FORWARD = false;
+}
+
+/*
+=====================
+bot_sabot_a8::moveRight
+=====================
+*/
+void bot_sabot_a8::moveRight() {
+	AI_STRAFE_RIGHT = true;
+	AI_STRAFE_LEFT = false;
+}
+
+/*
+=====================
+bot_sabot_a8::moveLeft
+=====================
+*/
+void bot_sabot_a8::moveLeft() {
+	AI_STRAFE_LEFT = true;
+	AI_STRAFE_RIGHT = false;
+}
+
+/*
+=====================
+bot_sabot_a8::moveAction
+TinMan: Folow path given by routing, check and do more complex navigation actions: Jumps, elevators 
+*todo* Rough as guts, should be moved into botAi and overhauled.
+Note: pathtype is allways ored against pathtype_walk which is enum 0 so doing equality tests is fine.
+=====================
+*/
+vector bot_sabot_a8::moveAction() {
+	float pathType;
+	vector movePosition, secondaryMovePosition, bodyOrigin, moveDir, velocity;
+	float dist, moveSpeed;
+	
+	entity plat;
+	float i, numListedEntities, radius;
+	vector platOrigin, platStart, platBottom;
+	vector waitPos;
+	radius = 256;
+	
+	movePosition = getMovePosition(); // TinMan: expensive
+	
+	if ( AI_MOVE_DONE || AI_DEST_UNREACHABLE ) {
+		return movePosition;
+	}
+	
+	pathType = getPathType();
+	
+	velocity = body.getLinearVelocity();
+	bodyOrigin = body.getOrigin();
+	
+	// TinMan: *test* don't strafe on complicated paths
+	if ( pathType != PATHTYPE_WALK ) {
+		AI_STRAFE_RIGHT = false;
+		AI_STRAFE_LEFT = false;
+	}
+	
+	// reset the topOfPlat reach memory when it has a value and we are no longer using a plat
+	if ( pathType != PATHTYPE_ELEVATOR && platTop != '0 0 0' ) {
+		//sys.println( "re setting topOfPlat" ); // TinMan *debug*
+		platTop = '0 0 0';
+		plat = $null_entity;
+	}
+	
+	//sys.debugBounds( '1 1 0', movePosition + '-1 -1 -1', movePosition + '1 1 1' , 0.01 ); // TinMan: *debug*
+	
+	//sys.println( "[" + int( sys.getTime() ) + "][state_MoveToGoal][PATHTYPE: " + getPathType() + "]" ); // TinMan *debug*
+	if ( pathType == PATHTYPE_WALK ) {
+		//sys.println( "[" + int( sys.getTime() ) + "][state_MoveToGoal][PATHTYPE_WALK]" ); // TinMan *debug*
+			
+		// TinMan: Do actual movement
+		moveDir = movePosition - bodyOrigin;
+		moveDir_z = 0; // TinMan: Only horizontal
+		
+		dist = sys.vecLength( moveDir );
+		//sys.println( "[" + int( sys.getTime() ) + "][moveAction][dist: " + dist + "]" ); // TinMan *debug*
+		// TinMan: This code is a complete nasty mess at the moment. The problem being caused by an area under a platform. A bot chasing a player as he hits the platform will get a walk path to the area under the platform, if the platfor rises the bot could move under the platform. The path doesn't seem to fail or be done despite ai_debugmove showing bot trying to move to top of elevator ( which in a walk path he can't )
+		if ( dist < 128 ) { // TinMan: Getting close
+			//float pong = movePosition_z  - bodyOrigin_z;
+			//sys.println( "[" + int( sys.getTime() ) + "][moveAction][ping][pong: " + pong + "]" ); // TinMan *debug*
+			//if ( movePosition_z - bodyOrigin_z > 16 ) { // TinMan: At moveposition but it's above bots head. stupid *todo* hmm, moveposition still seems to be at ground so this won't work.
+				// TinMan: See if it's the plat weirdness *todo* shift this to checkblocked?
+				numListedEntities = findInRadius( movePosition, radius, "idPlat" );
+				/* if ( numListedEntities > 1 ) {
+					sys.warning( "[" + int( sys.getTime() ) + "][moveAction][More than 1 plat]" ); // TinMan *debug*
+					// TinMan: *todo* get closest
+				} */
+				for ( i = 0; i < numListedEntities; i++ ) {
+					plat = getEntityList( i );
+				}
+				if ( plat ) {
+					//sys.println( "[" + int( sys.getTime() ) + "][moveAction][Found plat]" ); // TinMan *debug*
+					platOrigin = plat.getOrigin();
+					platStart = plat.getVectorKey( "origin" ); // TinMan: Grab spawn origin - the plats starting origin - the top
+					platBottom = platStart;
+					platBottom_z -= plat.getFloatKey( "height" );
+					//sys.println( "[" + int( sys.getTime() ) + "][moveAction][platOrigin z: " + platOrigin_z + "][platOrigin z: " + platStart_z + "]" ); // TinMan *debug* *todo* why isn't origin updated?
+					
+					//sys.debugBounds( '1 0 0', platOrigin + plat.getMins(), platOrigin + plat.getMaxs() , 1 ); // TinMan: *debug* 
+					if ( platOrigin_z > platBottom_z + 32 && isUnderPlat( plat ) ) { // TinMan: Plat above?
+						//sys.println( "[" + int( sys.getTime() ) + "][moveAction][under plat!]" ); // TinMan *debug* *todo* why isn't origin updated?
+						waitPos = getWaitPosition( plat );
+						moveDir = waitPos - bodyOrigin;
+						moveDir_z = 0; // TinMan: Only horizontal
+						dist = sys.vecLength( moveDir );
+						//sys.println( "[" + int( sys.getTime() ) + "][moveAction][dist to waitpos:" + dist + "]" ); // TinMan *debug*
+						if ( dist > 8 ) {
+							//sys.println( "[" + int( sys.getTime() ) + "][moveAction][path_walk: move to waitpos]" ); // TinMan *debug*
+							setMoveDirection( moveDir, 400 );
+						}
+					} else {
+						setMoveDirection( moveDir, 400 );
+					 }
+				} else {
+					setMoveDirection( moveDir, 400 );
+				}
+			//}
+		} else {
+			setMoveDirection( moveDir, 400 );
+		}
+		//moveForward();
+		
+		//checkBlocked();
+	//} else if ( getPathType() & PATHTYPE_WALKOFFLEDGE ) {
+		
+	} else if ( pathType & PATHTYPE_BARRIERJUMP ) {
+		//sys.println( "[" + int( sys.getTime() ) + "][moveAction][PATHTYPE_BARRIERJUMP]" ); // TinMan *debug*
+		//sys.debugBounds( '1 0 0', getSecondaryMovePosition() + '-1 -1 -1', getSecondaryMovePosition() + '1 1 1' , 0.01 ); // TinMan: *debug* show bound secondarypos
+		//sys.println( "[" + int( sys.getTime() ) + "][moveAction][LinearVelocity:" + body.getLinearVelocity() + "][vecLength:" + sys.vecLength( body.getLinearVelocity() ) + "]" ); // TinMan *debug*
+		if ( body.distanceToPoint( movePosition ) < 8 ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][moveAction][close to moveposition]" ); // TinMan *debug*
+				
+			// TinMan: Ping a vector from self through jump end (which will be directly above jump start position)
+			//secondaryMovePosition = getSecondaryMovePosition();
+
+			//moveDir = movePosition - bodyOrigin;
+			//moveDir_z = 0; // TinMan: Only horizontal
+			//movePosition = moveDir * 2048;
+			//movePosition_z = bodyOrigin_z + viewHeight;
+			//sys.debugBounds( '0 1 0', movePosition + '-1 -1 -1', movePosition + '1 1 1' , 0.01 ); // TinMan: *debug* show bound secondarypos
+			//setAimPosition( movePosition );
+				
+			//moveForward();
+			AI_JUMP = true;
+			//AI_JUMP = !AI_JUMP;
+		} else if ( AI_ONGROUND ) { // TinMan: Move to jump position *todo* need propper check to indicate we aren't interested in reach start but reach end.
+			// TinMan: Do actual movement
+			moveDir = movePosition - bodyOrigin;
+			moveDir_z = 0; // TinMan: Only horizontal
+			
+			setMoveDirection( moveDir, 400 );
+			//moveForward();
+		}
+		
+		//sys.println( "[" + int( sys.getTime() ) + "][moveAction][vertical vel: " + velocity_z + "]" ); // TinMan *debug*
+		
+		// TinMan: Going down
+		if ( velocity_z < 250 /*&& !AI_ONGROUND*/ ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][moveAction][falling]" ); // TinMan *debug*
+			//moveForward();
+				
+			// TinMan: While it's more propper to use secondarypos, since in this case the reach end is right above reach start there isn't much of a difference, movepos even seems to be working a little better, haven't looked into why.
+			//secondaryMovePosition = getSecondaryMovePosition();
+			//moveDir = secondaryMovePosition - bodyOrigin;
+			moveDir = movePosition - bodyOrigin;
+			moveDir_z = 0; // TinMan: Only horizontal
+				
+			setMoveDirection( moveDir, 400 );
+		}
+	
+	} else if ( pathType & PATHTYPE_ELEVATOR ) {
+		// set the topOfPlat the first time we hit elevator and it isn't set (this is valid top from WalkPathToGoal)
+		if ( platTop == '0 0 0' ) {
+			platTop = getSecondaryMovePosition();
+		} 
+		//sys.println( "[" + int( sys.getTime() ) + "][moveAction][PATHTYPE_ELEVATOR]" ); // TinMan *debug*
+		
+		//secondaryMovePosition = getSecondaryMovePosition();
+		//sys.debugBounds( '0 0 1', movePosition + '-4 -4 -4', movePosition + '4 4 4' , 10 ); // TinMan: *debug*
+		//sys.debugBounds( '0.5 0 1', secondaryMovePosition + '-4 -4 -4', secondaryMovePosition + '4 4 4' , 10 ); // TinMan: *debug*
+			
+		// TinMan: *todo* so damn crude, better to just go through all plats and find closest to bot?
+		numListedEntities = findInRadius( bodyOrigin, radius, "idPlat" );
+		//numListedEntities = findInRadius( movePosition, radius, "idPlat" );
+		/*if ( !numListedEntities ) {
+			sys.println( "[" + int( sys.getTime() ) + "][moveAction][spang!]" ); // TinMan *debug*
+			numListedEntities = findInRadius( secondaryMovePosition, radius, "idPlat" );
+		}
+		*/
+		/*if ( !numListedEntities ) {
+			numListedEntities = findInRadius( bodyOrigin, radius, "idPlat" );
+			//sys.println( "[" + int( sys.getTime() ) + "][moveAction][why bobo why!]" ); // TinMan *debug*
+		}*/
+		
+		/*
+		if ( numListedEntities > 1 ) {
+			sys.warning( "[" + int( sys.getTime() ) + "][moveAction][More than 1 plat]" ); // TinMan *debug*
+			// TinMan: *todo* get closest
+		}
+		*/
+		for ( i = 0; i < numListedEntities; i++ ) {
+			plat = getEntityList( i );
+		}
+		if ( plat ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][moveAction][Found plat]" ); // TinMan *debug*
+			platOrigin = plat.getOrigin();
+			platStart = plat.getVectorKey( "origin" ); // TinMan: Grab spawn origin - the plats starting origin - the top
+			platBottom = platStart;
+			platBottom_z -= plat.getFloatKey( "height" );
+			//sys.println( "[" + int( sys.getTime() ) + "][moveAction][platOrigin z: " + platOrigin_z + "][platOrigin z: " + platStart_z + "]" ); // TinMan *debug* *todo* why isn't origin updated?
+		}
+		
+		if ( body.touches( plat ) && platOrigin_z <= bodyOrigin_z ) { // TinMan: On plat (not under)
+			//sys.println( "[" + int( sys.getTime() ) + "][moveAction][On plat][platOrigin z: " + platStart_z + "][platOrigin z: " + platStart_z + "]" ); // TinMan *debug*
+			if ( platOrigin_z >= platStart_z - 24 ) { // TinMan: Plat near top. 18 = stepheight
+				// TinMan: Move to end point
+				//sys.println( "[" + int( sys.getTime() ) + "][moveAction][On plat: Move to end]" ); // TinMan *debug*
+				//moveDir = movePosition - bodyOrigin;
+				moveDir = platTop - bodyOrigin;
+				moveDir_z = 0; // TinMan: Only horizontal
+				setMoveDirection( moveDir, 400 );
+				
+				movePosition = platTop;
+			} else {
+				// TinMan: Move to middle of plat
+				//sys.println( "[" + int( sys.getTime() ) + "][moveAction][On plat: Move to center]" ); // TinMan *debug*
+				moveDir = platBottom - bodyOrigin;
+				moveDir_z = 0; // TinMan: Only horizontal
+				dist = sys.vecLength( moveDir );
+				if ( dist > 4 ) { 
+					setMoveDirection( moveDir, 400 );
+				}
+				
+				//movePosition = platBottom;
+			}
+		} else if ( plat ) { // TinMan: Not on plat
+			// TinMan: Move to plat
+			moveDir = movePosition - bodyOrigin;
+			moveDir_z = 0; // TinMan: Only horizontal
+			dist = sys.vecLength( moveDir );
+			if ( platOrigin_z < platBottom_z + 18 ) { // TinMan: plat at bottom 
+				if ( dist > 32 ) { 
+					//sys.println( "[" + int( sys.getTime() ) + "][moveAction][move reach start]" ); // TinMan *debug*
+					setMoveDirection( moveDir, 400 ); // TinMan: Move to reach start
+				} else { // TinMan: else close to reach
+					//sys.println( "[" + int( sys.getTime() ) + "][moveAction][move plat center]" ); // TinMan *debug*
+					// TinMan: Move to middle of plat
+					moveDir = platBottom - bodyOrigin;
+					moveDir_z = 0; // TinMan: Only horizontal
+					setMoveDirection( moveDir, 400 );
+					
+					//movePosition = platBottom;
+				}
+			} else {
+				//sys.println( "[" + int( sys.getTime() ) + "][moveAction][plat not at bottom: move reach start]" ); // TinMan *debug*
+				if ( isUnderPlat( plat ) ) { // TinMan: Plat above?
+					//sys.println( "[" + int( sys.getTime() ) + "][moveAction][under plat!]" ); // TinMan *debug* *todo* why isn't origin updated?
+					waitPos = getWaitPosition( plat );
+					moveDir = waitPos - bodyOrigin;
+					moveDir_z = 0; // TinMan: Only horizontal
+					dist = sys.vecLength( moveDir );
+					//sys.println( "[" + int( sys.getTime() ) + "][moveAction][dist to waitpos:" + dist + "]" ); // TinMan *debug*
+					if ( dist > 8 ) {
+						//sys.println( "[" + int( sys.getTime() ) + "][moveAction][path_elev: move to waitpos]" ); // TinMan *debug*
+						setMoveDirection( moveDir, 400 );
+					}
+					
+					//movePosition = waitPos;
+				} /*else {
+					
+				}*/
+			}
+			
+		} else if ( !plat ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][moveAction][!plat]" ); // TinMan *debug*	
+			//sys.debugBounds( '1 0 0', movePosition + '-4 -4 -4', movePosition + '4 4 4' , 10 ); // TinMan: *debug*
+			moveDir = movePosition - bodyOrigin;
+			moveDir_z = 0; // TinMan: Only horizontal
+			setMoveDirection( moveDir, 400 );
+		}
+		
+		//sys.debugBounds( '1 0 0', platStart + '-1 -1 -1', platStart + '1 1 1' , 1000 ); // TinMan: *debug*
+		//sys.debugBounds( '1 1 0', platBottom + '-1 -1 -1', platBottom + '1 1 1' , 1000 ); // TinMan: *debug*
+		
+	} else { // TinMan: Unknown pathtype
+		// TinMan: Have a bash at it anyway
+		//sys.println( "[" + int( sys.getTime() ) + "][moveAction][Unhandled pathtype: " + getPathType() + "]" ); // TinMan *debug*
+		
+		// TinMan: Do actual movement
+		moveDir = movePosition - bodyOrigin;
+		moveDir_z = 0; // TinMan: Only horizontal
+		setMoveDirection( moveDir, 400 );
+		
+		//checkBlocked();
+	}
+	
+	return movePosition;
+}
+
+/*
+=====================
+bot_sabot_a8::setTimer
+TinMan: I am the very model of a modern major general
+=====================
+*/
+void bot_sabot_a8::setTimer( float endTime ) {
+	//timerAmount = time;
+	//timerStart = sys.getTime();
+	timerEnd = sys.getTime() + endTime;
+}
+
+/*
+=====================
+bot_sabot_a8::getTimer
+TinMan: the bell, the bells
+=====================
+*/
+float bot_sabot_a8::getTimer() {
+	if ( timerEnd == -1 ) { // TinMan: Timer not set
+		//return -1;
+		return false;
+	} else if ( timerEnd < sys.getTime() ) { // TinMan: Timer over
+		// TinMan: *todo* return Elapsed time
+		//clearTimer(); // TinMan: Reset timer now it's over, since sometimes you'll be checking if theres a timer set `*todo* rethink this
+		return true; 
+	} else { // TinMan: Timer still going
+		// TinMan: *todo* return Elapsed time
+		return false; 
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::clearTimer
+TinMan: car button cloth
+=====================
+*/
+void bot_sabot_a8::clearTimer() {
+	timerEnd = -1;
+}
+
+/*
+=====================
+bot_sabot_a8::nextEnemyLook
+TinMan: Timer
+=====================
+*/
+boolean bot_sabot_a8::nextEnemyLook() {
+	if ( sys.getTime() > nextEnemyLookTime ) {
+		nextEnemyLookTime = sys.getTime() + SABOT_NEXT_ENEMY_LOOK;
+		return true;
+	}
+	return false;
+}
+
+/***********************************************************************
+
+	Checks
+
+***********************************************************************/
+/*
+=====================
+bot_sabot_a8::checkGoal
+TinMan: See if we still want this goal, bumps off goal if it's old and mankey, or if we just want to rechoose goal.
+=====================
+*/
+boolean bot_sabot_a8::checkGoal() {
+	vector origin, goalOrigin;
+	float goalDist;
+
+	if ( moveType == SABOT_GOALTYPE_ENTITY ) {
+		if ( !goal ) {
+			return true;
+		}
+		
+		goalDist = body.distanceTo( goal );
+
+		if ( goalDist < 128 ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][checkGoal][close, checking]" ); // TinMan *debug*
+		
+			if ( goal.isHidden() ) {
+				return true;
+			} else if ( body.touches( goal ) ) {
+				//sys.println( "[" + int( sys.getTime() ) + "][checkGoal][touched goal]" ); // TinMan *debug*
+				return true;
+			} else if ( goalDist < 4 ) {
+				return true;
+			}	
+		}
+	} else { // TinMan: SABOT_GOALTYPE_POSITION
+		goalDist = body.distanceToPoint( goalPosition );
+		if ( goalDist < 4 ) {
+			return true;
+		}	
+	}
+
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::gotFlag
+TinMan: *cheaphack* a fix untill single goal/priority is sorted
+*todo* expand into more general flag checking?
+=====================
+*/
+boolean bot_sabot_a8::gotFlag() {
+	if ( getFlagCarrier( team ) == body ) {
+		// TinMan: Did we get flag somehow? If so dump goal and go to idle where chooseGoal will sort it out.
+		if ( goal != ourCap ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][state_hold][!have flag!]" ); // TinMan *debug*
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::checkEnemy
+TinMan: See if we still want to fight this enemy.
+TinMan: *todo* no magic numbers, set em up and tweak em.
+*todo* *rem* outdated
+=====================
+*/
+boolean bot_sabot_a8::checkEnemy( entity thisEnemy ) {
+	float selfPriority, enemyPriority;
+	
+	/*
+	if ( !getEnemy() ) {
+		return true;
+	}
+	*/
+	
+	if ( AI_ENEMY_VISIBLE ) {
+		enemyPriority = getPlayerPriority( thisEnemy );
+		selfPriority = getPlayerPriority( body ) + 30;  // TinMan: *todo* fool! no magic number
+		// TinMan: Enemy too badass for me! I ph34r him!
+		if ( enemyPriority > selfPriority ) {
+			sys.println( "[" + int( sys.getTime() ) + "][checkEnemy][Enemy too badass for me! I ph34r him!]" ); // TinMan *debug* " : " + getClassName( item ) +
+			return true;
+		} /* else if ( selfPriority < 50 ) { // TinMan: *todo* fool! no magic number
+			sys.println( "[" + int( sys.getTime() ) + "][checkEnemy][Self Priority too low]" ); // TinMan *debug* " : " + getClassName( item ) +
+			return true;
+		} */
+	}
+	
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::checkSelf
+TinMan: See if you are happy with your weapon/hp/armor. Returns true if not happy happy joy joy.
+=====================
+*/
+boolean bot_sabot_a8::checkSelf() {
+	float weaponPriority;
+
+	weaponPriority = getFloatKey( "priority_" + currentWeapon ); // TinMan: Grab priority from def
+	
+	if ( weaponPriority <= 3 && getActorHealth( body ) + getArmor( body ) < 40 ) { // TinMan: better weapon than pistol *todo* demagic happystrenght
+		return true;
+	}
+	
+	if ( weaponPriority < 40 && getActorHealth( body ) + getArmor( body ) <= 20 && !AI_PAIN ) { // TinMan: Weapon < chaingun and very beat up, if your allready getting hurt you're probably going to die anyway
+		return true;
+	}
+	
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::checkLeader
+TinMan: 
+=====================
+*/
+boolean bot_sabot_a8::checkLeader( entity thisLeader ) {
+	if ( !thisLeader ) {
+		return true;
+	}
+
+	if ( getActorHealth( thisLeader ) <= 0 ) {
+		return true;
+	}
+
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::checkWeapon
+TinMan: Make sure your weapon is in order
+=====================
+*/
+boolean bot_sabot_a8::checkWeapon() {
+	entity enemy;
+	string weaponName;
+	
+	/*
+	if ( getEnemy() ) {
+		chooseWeapon( enemyRange() );	
+	} else {
+		chooseWeapon( -1 );	
+	}
+	*/
+	
+	//nextBestWeapon();
+	chooseWeapon( 1 );
+	
+	// TinMan: Unless you can be sure weapon only changes in above function (eg no auto switch or empty weapon switch ) you'll have to chack and update weapon stuff here
+	weaponName = body.getCurrentWeapon();
+	if ( weaponName != currentWeapon ) {
+		currentWeapon = weaponName;	
+		weaponRange = getVectorKey( "range_" + currentWeapon ); // TinMan: Grab ranges from def
+		//sys.println( "[" + int( sys.getTime() ) + "][checkweapon][currentWeapon: " + currentWeapon + "][weaponrange: " + weaponRange + "]" ); // TinMan *debug*
+	}
+
+	// TinMan: Autoload only works on next fire after empty (I may be mistaken)
+	if ( weapon.ammoInClip() == 0 ) {
+		weapon.WEAPON_RELOAD = true;
+	}
+
+	if ( !getEnemy() ) {
+		if ( weapon.ammoInClip() <= 20 ) { // TinMan:*todo* demagic
+			weapon.WEAPON_RELOAD = true;
+		}
+	}
+
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::checkStrafeLeft
+TinMan: Crude as hell, but will do for now
+=====================
+*/
+boolean bot_sabot_a8::checkStrafeLeft() {
+	vector	pos, ang, dir, tracePosition;
+	float maxRange, frac, traceDistance;
+	//entity	traceEntity;
+
+	maxRange = SABOT_CHECK_MOVE_DISTANCE; // TinMan: Max a bounds trace can do is 4096.
+
+	pos = getViewPosition();
+	ang = body.getViewAngles();
+
+	ang_x = 0;
+	ang_z = 0;
+	ang_y += 90;
+	dir = sys.angToForward( ang ); // TinMan: Convert angles (pitch yaw roll), to forward vector (x y z).
+
+	frac = sys.tracePoint( pos, pos + ( dir * maxRange ), CONTENTS_OPAQUE | MASK_SHOT_RENDERMODEL, self );
+
+	/*
+	traceDistance = frac * maxRange; // TinMan: Convert the fraction of trace completed to game units
+	tracePosition = sys.getTraceEndPos(); // TinMan: Get where trace hit
+
+	float debugTime = 0.01;
+	sys.debugLine( '0 1 1', pos, pos + ( dir * maxRange ), debugTime ); // TinMan: *debug* full trace
+	sys.debugBounds( '1 0 0', pos + '-1 -1 -1', pos + '1 1 1' , debugTime ); // TinMan: *debug* show bound at eyes
+
+	sys.debugLine( '0 1 0', pos, tracePosition,	debugTime ); // TinMan: *debug* trace
+	sys.debugBounds( '1 1 0', tracePosition + '-2 -2 -2', tracePosition + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+	*/
+
+	if ( frac == 1 ) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::checkStrafeRight
+=====================
+*/
+boolean bot_sabot_a8::checkStrafeRight() {
+	vector	pos, ang, dir, tracePosition;
+	float maxRange, frac, traceDistance;
+	//entity	traceEntity;
+
+	maxRange = SABOT_CHECK_MOVE_DISTANCE; // TinMan: Max a bounds trace can do is 4096.
+
+	pos = getViewPosition();
+	ang = body.getViewAngles();
+
+	ang_x = 0;
+	ang_z = 0;
+	ang_y -= 90;
+	dir = sys.angToForward( ang ); // TinMan: Convert angles (pitch yaw roll), to forward vector (x y z).
+
+	frac = sys.tracePoint( pos, pos + ( dir * maxRange ), CONTENTS_OPAQUE | MASK_SHOT_RENDERMODEL, self );
+
+	/*
+	traceDistance = frac * maxRange; // TinMan: Convert the fraction of trace completed to game units
+	tracePosition = sys.getTraceEndPos(); // TinMan: Get where trace hit
+
+	float debugTime = 0.01;
+	sys.debugLine( '0 1 1', pos, pos + ( dir * maxRange ), debugTime ); // TinMan: *debug* full trace
+	sys.debugBounds( '1 0 0', pos + '-1 -1 -1', pos + '1 1 1' , debugTime ); // TinMan: *debug* show bound at eyes
+
+	sys.debugLine( '0 1 0', pos, tracePosition,	debugTime ); // TinMan: *debug* trace
+	sys.debugBounds( '1 1 0', tracePosition + '-2 -2 -2', tracePosition + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+	*/
+
+	if ( frac == 1 ) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::checkMoveForward
+=====================
+*/
+boolean bot_sabot_a8::checkMoveForward() {
+	vector	pos, ang, dir, tracePosition;
+	float maxRange, frac, traceDistance;
+	entity	traceEntity;
+
+	maxRange = SABOT_CHECK_MOVE_DISTANCE; // TinMan: Max a bounds trace can do is 4096.
+
+	//pos = getViewPosition();
+	pos = body.getOrigin();
+	ang = body.getViewAngles();
+
+	ang_x = 0;
+	ang_z = 0;
+	dir = sys.angToForward( ang ); // TinMan: Convert angles (pitch yaw roll), to forward vector (x y z).
+
+	frac = sys.tracePoint( pos, pos + ( dir * maxRange ), CONTENTS_OPAQUE | MASK_SHOT_RENDERMODEL, self );
+
+	traceDistance = frac * maxRange; // TinMan: Convert the fraction of trace completed to game units
+	tracePosition = sys.getTraceEndPos(); // TinMan: Get where trace hit
+
+	/*
+	float debugTime = 0.01;
+	sys.debugLine( '0 1 1', pos, pos + ( dir * maxRange ), debugTime ); // TinMan: *debug* full trace
+	sys.debugBounds( '1 0 0', pos + '-1 -1 -1', pos + '1 1 1' , debugTime ); // TinMan: *debug* show bound at eyes
+	*/
+
+	/*
+	sys.debugLine( '0 1 0', pos, tracePosition,	debugTime ); // TinMan: *debug* trace
+	sys.debugBounds( '1 1 0', tracePosition + '-2 -2 -2', tracePosition + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+	*/
+
+	if ( frac == 1 ) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::checkMoveBack
+=====================
+*/
+boolean bot_sabot_a8::checkMoveBack() {
+	vector	pos, ang, dir, tracePosition;
+	float maxRange, frac, traceDistance;
+	//entity	traceEntity;
+
+	maxRange = SABOT_CHECK_MOVE_DISTANCE; // TinMan: Max a bounds trace can do is 4096.
+
+	pos = getViewPosition();
+	ang = body.getViewAngles();
+
+	ang_x = 0;
+	ang_z = 0;
+	ang_y += 180;
+	dir = sys.angToForward( ang ); // TinMan: Convert angles (pitch yaw roll), to forward vector (x y z).
+
+	frac = sys.tracePoint( pos, pos + ( dir * maxRange ), CONTENTS_OPAQUE | MASK_SHOT_RENDERMODEL, self );
+
+	/*
+	traceDistance = frac * maxRange; // TinMan: Convert the fraction of trace completed to game units
+	tracePosition = sys.getTraceEndPos(); // TinMan: Get where trace hit
+
+	float debugTime = 0.01;
+	sys.debugLine( '0 1 1', pos, pos + ( dir * maxRange ), debugTime ); // TinMan: *debug* full trace
+	sys.debugBounds( '1 0 0', pos + '-1 -1 -1', pos + '1 1 1' , debugTime ); // TinMan: *debug* show bound at eyes
+
+	sys.debugLine( '0 1 0', pos, tracePosition,	debugTime ); // TinMan: *debug* trace
+	sys.debugBounds( '1 1 0', tracePosition + '-2 -2 -2', tracePosition + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+	*/
+
+	if ( frac == 1 ) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::checkMoves
+TinMan: Do simple trace check in each direction and return results as flags. *todo* can't seem to do a propper negative test, doesn't matter anyway these functions are just hacks untill I delve a bit deeper into pathing.
+=====================
+*/
+float bot_sabot_a8::checkMoves() {
+	vector	pos, ang, dir, tracePosition;
+	float maxRange, frac, traceDistance;
+	float i, moveFlags;
+	//entity	traceEntity;
+
+	moveFlags = 0;
+
+	maxRange = SABOT_CHECK_MOVE_DISTANCE; // TinMan: Max a bounds trace can do is 4096.
+
+	pos = getViewPosition();
+	ang = body.getViewAngles();
+
+	ang_x = 0;
+	ang_z = 0;
+
+	//float debugTime = 0.01;
+	//sys.debugBounds( '1 0 0', pos + '-1 -1 -1', pos + '1 1 1' , debugTime ); // TinMan: *debug* show bound at eyes
+
+	// TinMan: Test fwd,right,back,left.
+	for( i = 1; i < 10; i = i * 2 ) {
+		dir = sys.angToForward( ang ); // TinMan: Convert angles (pitch yaw roll), to forward vector (x y z).
+
+		frac = sys.tracePoint( pos, pos + ( dir * maxRange ), CONTENTS_OPAQUE | MASK_SHOT_RENDERMODEL, self );
+
+		traceDistance = frac * maxRange; // TinMan: Convert the fraction of trace completed to game units
+		tracePosition = sys.getTraceEndPos(); // TinMan: Get where trace hit
+
+		/*
+		sys.debugLine( '0 1 1', pos, pos + ( dir * maxRange ), debugTime ); // TinMan: *debug* full trace
+
+		sys.debugLine( '0 1 0', pos, tracePosition,	debugTime ); // TinMan: *debug* trace
+		sys.debugBounds( '1 1 0', tracePosition + '-2 -2 -2', tracePosition + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+		*/
+
+		if ( frac == 1 ) {
+			moveFlags |= i;
+		}
+
+		ang_y += 90;
+	}
+
+	return moveFlags;
+}
+
+/*
+=====================
+bot_vladimir::checkBlocked
+TinMan: Deals with being blocked while moving to destination. 
+*todo* save obstacle pos and check if it's moved, if it hasn't return true so we can choose new path
+*todo* this is currenly the only func that traps in a loop, rethink if you want this.
+=====================
+*/
+boolean bot_sabot_a8::checkBlocked() {
+	//sys.println( "[" + sys.getTime() + "][checkBlocked()]" ); // TinMan: *debug*
+	entity obstacle;
+	vector obstacle_pos;
+	vector delta;
+	float dist;
+	float endTime;
+	vector movePosition;
+	vector aimDir;
+	
+	float numListedEnemies;
+	entity enemy;
+	
+	/*if ( moveStatus() > MOVE_STATUS_DONE ) {
+		sys.println( "[" + sys.getTime() + "][checkBlocked()][Movestatus:" + moveStatus() + "]" ); // TinMan: *debug*
+	}	*/
+	
+	// TinMan: *cheaphack* see if we're not moving by comparing against previous. !! Interferes with new routing (stopping for elev etc)
+	if ( moveStatus() == MOVE_STATUS_MOVING ) {
+		//sys.println( "[" + sys.getTime() + "][checkBlocked()][Movestatus:" + moveStatus() + "]" ); // TinMan: *debug*
+		vector currentPosition;
+		
+		currentPosition = body.getOrigin();
+		
+		if ( lastPositionTime < sys.getTime() ) {
+			lastPositionTime = sys.getTime() + 0.3;
+			// TinMan: Compare current position with previous to get movement vector.
+			delta = currentPosition  - lastPosition;
+			delta_z = 0;
+			dist = sys.vecLength( delta );
+			
+			lastPosition = currentPosition;
+			
+			// TinMan: Haven't moved enough?
+			if ( dist <= 2 ) {
+				//sys.println( "[" + sys.getTime() + "][checkBlocked][blocked by something]" ); // TinMan: *debug*
+				saveMove();
+				setMoveWander();
+				endTime = RandomDelay( 0.6, 0.7 );
+				while( sys.getTime() < endTime || dist > 16 ) {
+					delta = currentPosition  - lastPosition;
+					delta_z = 0;
+					dist = sys.vecLength( delta ); // TinMan: set dist wandered	
+					
+					// TinMan: Do actual movement
+					movePosition = moveAction();
+					
+					// TinMan: Lookee where we damn be going.
+					//movePosition_z = movePosition_z + viewHeight;
+					//setAimPosition( movePosition );
+					
+					// TinMan: Check for enemies
+					if ( findEnemies( true ) ) {
+						break;
+					}
+					enemy = heardSound( false );
+					if ( canSeeEntity( enemy, false ) ) {
+						break;
+					}
+					waitFrame();
+				}
+				restoreMove();
+			}
+		}
+	}
+	
+	/*
+	// TinMan: *todo* Hmm doesn't seem to really trigger much at all
+	if ( AI_BLOCKED ) {
+		sys.println( "[" + sys.getTime() + "][checkBlocked()][AI_BLOCKED]" ); // TinMan: *debug*
+		saveMove();
+		setMoveWander();
+		endTime = sys.getTime() + 0.8;
+		while( sys.getTime() < endTime ) {
+			// TinMan: Lookee where we damn be going.
+			movePosition = getMovePosition(); // TinMan: expensive
+			movePosition_z = movePosition_z + viewHeight;
+			setAimPosition( movePosition );
+					
+			// TinMan: Do actual movement
+			moveForward();
+				
+			// TinMan: Check for enemies
+			if ( findEnemies( true ) ) {
+				break;
+			}
+			enemy = heardSound( false );
+			if ( canSeeEntity( enemy, false ) ) {
+				break;
+			}
+			waitFrame();
+		}
+		restoreMove();
+	} else*/ if ( moveStatus() == MOVE_STATUS_BLOCKED_BY_MONSTER ) {
+		//sys.println( "[" + sys.getTime() + "][checkblocked][blocked by monster]" ); // TinMan: *debug*
+		obstacle = getObstacle();
+		obstacle_pos = obstacle.getOrigin(); // TinMan: This wil come in handy later.
+	
+		saveMove();
+		setMoveWander();
+		endTime = sys.getTime() + 0.8;
+		while( sys.getTime() < endTime ) {
+			// TinMan: Do actual movement
+			movePosition = moveAction();
+			
+			// TinMan: Lookee where we damn be going.
+			//movePosition = getMovePosition(); // TinMan: expensive
+			if ( AI_ONGROUND && movePosition != body.getOrigin() ) {
+				aimDir = movePosition - body.getOrigin();
+				setAimDirection( aimDir );
+			}
+			
+			// TinMan: Compare current position with previous to get movement vector.
+			delta = obstacle_pos - obstacle.getOrigin();
+			delta_z = 0;
+			
+			// TinMan: Check for enemies
+			if ( findEnemies( true ) ) {
+				break;
+			}
+			enemy = heardSound( false );
+			if ( canSeeEntity( enemy, false ) ) {
+				break;
+			}
+			
+			// TinMan: Yay it moved enough.
+			if ( sys.vecLength( delta ) >= 4 ) {
+				//sys.println( "[" + sys.getTime() + "][" + me + "][checkBlocked][obstacle moved]" ); // TinMan: *debug*
+				break;
+			}
+			waitFrame();
+		}
+		restoreMove();
+	}
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::checkShot
+TinMan: Find what we would hit if we fired. Bounds shot from eyes along viewangles. Itchy itch trigger finger.
+When bounds are used to decide whether to fire gives nice simulation of player pulling trigger when enemy near crosshair.
+*todo* axis align bounding box if possible.
+*todo* false if trace dist < min weapon range? checkaimedshot would intefere. also would have to make sure bot weaponswitches to something that can.
+=====================
+*/
+boolean bot_sabot_a8::checkShot( boolean simple ) {
+	vector	pos, ang, dir, tracePosition;
+	float maxRange, frac, traceDistance;
+	entity	traceEntity;
+	float gameType;
+	float boundSize, halfBound;
+	vector boundMins, boundMaxs;
+
+	maxRange = 2048; // TinMan: Max a bounds trace can do is 4096.
+	
+	/*
+	boundSize = 8;
+	halfBound = boundSize / 2;
+	
+	boundMins_x = -halfBound;
+	boundMins_y = -halfBound;
+	boundMins_z = -halfBound;
+	boundMaxs_x = halfBound;
+	boundMaxs_y = halfBound;
+	boundMaxs_z = halfBound;
+	*/
+	
+	
+
+	pos = getViewPosition();
+	ang = body.getViewAngles();
+	dir = sys.angToForward( ang ); // TinMan: Convert angles (pitch yaw roll), to forward vector (x y z).
+
+	if ( simple ) {
+		frac = sys.tracePoint( pos, pos + ( dir * maxRange ), MASK_SOLID|CONTENTS_BODY, self );  //  CONTENTS_OPAQUE | MASK_SHOT_RENDERMODEL
+	} else { // TinMan: Bounds trace
+		frac = sys.trace( pos, pos + ( dir * maxRange ), '-4 -4 -4', '4 4 4', MASK_SOLID|CONTENTS_BODY, self );
+	}
+	traceEntity = sys.getTraceEntity(); // TinMan: Get what was hit by trace
+
+	traceDistance = frac * maxRange; // TinMan: Convert the fraction of trace completed to game units
+	// TinMan: Hmm, do straight maths, or call function ( which returns value allready calculated when trace func was called. )
+	//tracePosition = pos + ( dir * traceDistance ); // TinMan: Get where trace hit
+	tracePosition = sys.getTraceEndPos(); // TinMan: Get where trace hit
+/*
+	float debugTime = 0.01;
+	//sys.debugLine( '0 1 1', pos, pos + ( dir * maxRange ), debugTime ); // TinMan: *debug* full trace
+	sys.debugBounds( '1 0 0', pos + '-1 -1 -1', pos + '1 1 1' , debugTime ); // TinMan: *debug* show bound at eyes
+
+	sys.debugLine( '0 1 0', pos, tracePosition,	debugTime ); // TinMan: *debug* trace
+
+	sys.debugBounds( '1 1 0', tracePosition + '-4 -4 -4', tracePosition + '4 4 4' , debugTime ); // TinMan: *debug* show bound where trace hit
+	//sys.debugBounds( '0 0.5 1', traceEntity.getOrigin() + traceEntity.getMins(), traceEntity.getOrigin() + traceEntity.getMaxs(), debugTime ); // TinMan: *debug* hilite hit ent
+	//sys.println( "[" + int( sys.getTime() ) + "][Trace Hit: " + traceEntity.getName() + "]" ); // TinMan: *debug*
+
+	sys.debugBounds( '1 0 1', getAimPosition() + '-4 -4 -4', getAimPosition() + '4 4 4', debugTime ); // TinMan: *debug* show bound at aimPos
+	//sys.debugBounds( '1 1 0', body.getOrigin() + getMins() + '-2 -2 -2', body.getOrigin() + getMaxs() + '2 2 2' , debugTime ); // TinMan: *debug* aimPos reset
+
+	//sys.debugLine( '0 1 0', body.getOrigin(), body.getOrigin() + getLinearVelocity(),	debugTime ); // TinMan: *debug* trace velocity
+*/
+
+	// TinMan: Oh my god I think we hit something. Charles, I think we hit something!
+	if ( traceEntity ) {
+		string type = getClassType( traceEntity );
+		if ( type == "idPlayer" || type == "idAI" ) {
+			// TinMan: Friendly fire check. I swear his orange hunting jacket look just like a prize buck officer! *todo* IsGametypeTeamBased?
+			gameType = getGameType();
+			if ( gameType == GAME_SP || gameType == GAME_TDM || gameType == GAME_CTF ) {
+				if ( getTeam( traceEntity ) != getTeam( body ) ) {
+					return true;
+				}
+			} else {
+				return true;
+			}
+		} else if ( traceDistance < 64 && type == "idBrittleFracture"  ) { // TinMan: Breakable glass *todo* this will hurt if the bot got rockets.
+			return true;
+		} /* else if ( traceDistance > 128 && type == "idExplodingBarrel"  ) { // TinMan: *todo* a wider cansee check for barrels to shoot when enemy is near.
+			return true;
+		} */
+	}
+
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::checkAimedShot
+TinMan: See if bot is aimed at given position and if a shot would make it.
+=====================
+*/
+boolean bot_sabot_a8::checkAimedShot( vector aimDir, float range ) {
+	vector viewDir, aimDir, tracePosition, eyePosition;
+	float ang;
+	float frac, maxRange;
+
+	maxRange = 2048; // TinMan: Max a bounds trace can do is 4096.
+
+	eyePosition = getViewPosition();
+	viewDir = sys.angToForward( body.getViewAngles() );	// TinMan: Vector of where bot is looking
+	//aimDir = aimPosition - eyePosition;			// TinMan: Vector of where aimPosition is
+
+	ang = sys.DotProduct( sys.vecNormalize( viewDir ), sys.vecNormalize( aimDir ) );
+	ang = acos( ang ); // TinMan: Angle between viewDir and aimDir
+
+	//sys.println( "[" + int( sys.getTime() ) + "][state_Combat][viewDir<>aimDir Ang:" + ang + "]" ); // TinMan: *debug*
+	if ( ang < 0.1 ) { // TinMan: Minimal angle between the two so must be looking at aimed spot. Frankenstein says: I like nice mice.
+
+		// TinMan: Figure out if bots shot will make it to aimPosition
+		frac = sys.tracePoint( eyePosition, eyePosition + aimDir * maxRange, MASK_SOLID|CONTENTS_BODY, self );  //  CONTENTS_OPAQUE | MASK_SHOT_RENDERMODEL
+
+		//traceDistance = frac * maxRange; // TinMan: Convert the fraction of trace completed to game units
+		tracePosition = sys.getTraceEndPos(); // TinMan: Get where trace hit
+
+		/*
+		float debugTime = 0.01;
+		sys.debugBounds( '1 0 0', pos + '-1 -1 -1', pos + '1 1 1' , debugTime ); // TinMan: *debug* show bound at eyes
+
+		sys.debugLine( '0 1 0', pos, tracePosition,	debugTime ); // TinMan: *debug* trace
+		sys.debugBounds( '1 1 0', tracePosition + '-2 -2 -2', tracePosition + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+
+		sys.debugLine( '1 0 0', pos, pos + aimDir,	debugTime ); // TinMan: *debug* trace
+		sys.debugBounds( '1 0 0', aimPosition + '-2 -2 -2', aimPosition + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+		*/
+
+		// TinMan: Something in the way of shot.
+		if ( body.distanceToPoint( tracePosition ) + 32 < range ) { // TinMan: traceDistance should have buffer since it will be shorter than aimPosition due to the trace hitting the model, of course my buffer is rough and inaccurate.
+			//sys.println( "[" + int( sys.getTime() ) + "][checkAimedShot][aimPosition blocked][tracePosition: " + distanceToPoint( tracePosition ) + "][aimPosition: " + distanceToPoint( aimPosition ) + "]" ); // TinMan: *debug*
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/*
+=====================
+bot_sabot_a8::chooseWeapon
+TinMan: Chose weapon based on range *todo* fix/rethink, and use.
+=====================
+*/
+void bot_sabot_a8::chooseWeapon( float range ) {
+	float w;
+	string weap, bestWeapon;
+	float maxWeapons, weaponPriority, bestPriority;
+	
+	vector weapRange;
+	
+	maxWeapons = 32;	
+
+	for ( w = 0; w < maxWeapons; w++ ) {
+		weap = body.getKey( "def_weapon" + w );
+		if ( !weap ) {
+			break;
+		}
+
+		/*
+		if ( sys.strLeft( weap, 17 ) == "weapon_bloodstone" ) { // TinMan: weapon causes trouble with ctf when !_d3xp
+			continue;
+		}
+		*/
+				
+		//sys.println( "[" + sys.getTime() + "][chooseWeapon][weapon[" + w + "]: " + weap + "]" ); // TinMan: *debug*
+		if ( hasWeapon( weap ) && hasAmmoForWeapon( weap ) ) { // TinMan: *todo* at least a clip?
+			//sys.println( "[" + sys.getTime() + "][chooseWeapon][hasWeapon: " + weap + "]" ); // TinMan: *debug*
+			weaponPriority = getFloatKey( "priority_" + weap ); // TinMan: Grab priority from def *todo* ismultiplayer _mp
+			//sys.println( "[" + sys.getTime() + "][chooseWeapon][weapon: " + weap + "][priority: " + weaponPriority + "]" ); // TinMan: *debug*			
+			
+			if ( weaponPriority > bestPriority ) {
+				bestPriority = weaponPriority;
+				bestWeapon = weap;	
+				//sys.println( "[" + sys.getTime() + "][chooseWeapon][bestWeapon: " + bestWeapon + "]" ); // TinMan: *debug*			
+			}
+			
+			//weapRange = getVectorKey( "range_" + weap ); // TinMan: Grab ranges from def
+			/*if ( range > weapRange_y && range < weapRange_z ) { // TinMan: Weapon out of min max ranges of current enemy dist.
+				break; 
+			} else { // TinMan: weapon not good for range, chose next weapon
+				continue;
+			}*/
+		}	
+	}
+	
+	//sys.println( "[" + sys.getTime() + "][chooseWeapon][bestWeapon: " + bestWeapon + "]" ); // TinMan: *debug*
+	
+	if ( bestWeapon != currentWeapon ) {
+		body.selectWeapon( bestWeapon );
+	}
+}
+
+/*
+=====================
+bot_sabot_a8::predictTargetPosition
+Frankenstein says: I got my eyes from the corpse of the mikeBot.
+TinMan: Lead target
+*todo* sort out loop, it's a mess
+=====================
+*/
+vector bot_sabot_a8::predictTargetPosition( vector targetPosition, vector myPosition, vector targetVelocity, float projectileSpeed ) {
+	//sys.println( "[" + int( sys.getTime() ) + "][predictTargetPosition]" ); // TinMan *debug*
+	float travelTime = 0.0; // time for projectile to reach target
+	float timeEstimate; 		// estimated time for projectile arrival
+	float predictError; 		// error in target location
+	float loopCount;
+	vector targetLocation = targetPosition; // = targetVelocity;
+
+	float debugTime = 0.01;
+
+	float predictLoopMaximum = 10;
+	float predictErrorTollerance = 0.1;
+
+	predictError = 100;
+	
+	// TinMan: *todo* maybe a bug here, gettin div by zeros, I think this is the only place I'm doing division. That would mean projectileSpeed is 0. Sort it out.
+	if ( projectileSpeed == 0 ) {
+		sys.println( "[" + int( sys.getTime() ) + "][predictTargetPosition][!!projectileSpeed == 0]" ); // TinMan *debug*
+		projectileSpeed = 1;
+	}
+
+	for ( loopCount = 0; loopCount < predictLoopMaximum; loopCount++ ) {
+		targetLocation = travelTime * targetVelocity + targetLocation; // TinMan: This will shift each loop as traveTime is changed
+		//sys.debugBounds( '1 0.5 0.5', targetLocation + '-2 -2 -2', targetLocation + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+		//sys.println( "[" + int( sys.getTime() ) + "][predictTargetPosition][" + loopCount + "]" ); // TinMan *debug*
+		timeEstimate = sys.vecLength( myPosition - targetLocation ) / projectileSpeed; // TinMan: Estimate of how long it will take projectile to reach targetLocation
+		predictError = timeEstimate - travelTime;
+		travelTime = timeEstimate;
+		if ( predictError < predictErrorTollerance ) {
+			break;
+		}
+	}
+
+	//sys.debugLine( '0 1 1', pos, pos + ( dir * maxRange ), debugTime ); // TinMan: *debug* full trace
+	/* sys.debugLine( '1 0 0', myPosition, targetLocation,	debugTime ); // TinMan: *debug* trace from self to predicted position
+	sys.debugLine( '0 1 0', targetPosition, targetPosition + targetVelocity,	debugTime ); // TinMan: *debug* trace from  target along predicted direction
+	sys.debugLine( '1 0 1', myPosition, targetPosition,	debugTime );
+	sys.debugBounds( '0.5 1 0.2', targetPosition + '-1 -1 -1', targetPosition + '1 1 1' , debugTime );
+	sys.debugBounds( '1 0.5 0.5', targetLocation + '-2 -2 -2', targetLocation + '2 2 2' , debugTime );
+	*/
+
+	return targetLocation;
+}
+
+/*
+=====================
+bot_sabot_a8::addAimVariation
+TinMan: Add variation to aiming so it's not so damn good. I call this the drunkeness factor.
+*todo* just a cheaphack needs rethinking.
+=====================
+*/
+vector bot_sabot_a8::addAimVariation( vector aimPosition ) {
+	float t, attackAccuracy;
+	vector aimDir, viewAng;
+			
+	attackAccuracy = getFloatKey( "aim_accuracy" );
+	
+	//sys.println( "[" + int( sys.getTime() ) + "][addAimVariation][attackAccuracy: " + attackAccuracy + "]" ); // TinMan *debug*
+	
+	aimDir = aimPosition - getViewPosition();	// TinMan: Vector towards aimPosition
+	
+	if ( attackAccuracy == 0 ) { // TinMan: No aim variation. uberbot.
+		return aimDir;
+	}
+
+	t = sys.getTime() * 50;
+	viewAng = sys.VecToAngles( aimDir );
+	viewAng_x += sys.sin( t * 5.1 ) * attackAccuracy;
+	viewAng_y	+= sys.sin( t * 6.7 ) * attackAccuracy;
+
+	viewAng = sys.angToForward( viewAng );
+	
+	// TinMan: Convert angles back to position
+	//viewAng = eyePosition + viewAng * sys.vecLength( aimDir );
+
+	/*
+	// TinMan: *debug*
+	float maxRange = 2048; // TinMan: Max a bounds trace can do is 4096.
+	vector viewDir = sys.angToForward( body.getViewAngles() ); // TinMan: Convert angles (pitch yaw roll), to forward vector (x y z).
+
+	float frac = sys.tracePoint( eyePosition, eyePosition + viewDir * maxRange, MASK_SOLID|CONTENTS_BODY, self );  //  CONTENTS_OPAQUE | MASK_SHOT_RENDERMODEL
+
+	vector tracePosition = sys.getTraceEndPos(); // TinMan: Get where trace hit
+
+	float debugTime = 0.01;
+	sys.debugBounds( '1 0 0',  eyePosition + '-1 -1 -1',  eyePosition + '1 1 1' , debugTime ); // TinMan: *debug* show bound at eyes
+	sys.debugLine( '0 1 0',  eyePosition, tracePosition,	debugTime ); // TinMan: *debug* trace
+	sys.debugBounds( '1 1 0', tracePosition + '-2 -2 -2', tracePosition + '2 2 2' , debugTime ); // TinMan: *debug* show bound where trace hit
+
+	sys.debugBounds( '1 0 0', aimPosition + '-2 -2 -2', aimPosition + '2 2 2' , debugTime ); // TinMan: *debug*
+	*/
+	
+	//sys.println( "[" + int( sys.getTime() ) + "][addAimVariation][before: " + aimDir + "][after: " + viewAng + "]" ); // TinMan *debug*
+
+	return viewAng;
+}
+
+/*
+=====================
+bot_sabot_a8::getAimTarget
+TinMan: Find out where to aim.
+getAIAimTargets automatically uses lastviablenemypos
+=====================
+*/
+vector bot_sabot_a8::getAimTarget( entity target ) {
+	vector aimPosition;
+	float predictType;
+
+	predictType = getIntKey( "predict_" + currentWeapon );
+	if ( predictType == 1 ) { // TinMan: Explosive|shoot the feet - I said dance boy, dance!
+		vector targetOrigin = target.getOrigin();
+		vector origin = body.getOrigin();
+		if ( targetOrigin_z <= origin_z && body.distanceTo( target ) > 96 ) { // TinMan: Only attack his shoes if he's lower
+		//if ( canSeePosition( target.getOrigin(), false ) ) {
+			aimPosition = target.getOrigin();
+			aimPosition_z += 8; // TinMan: More chance of checkshot hitting enemy.
+		} else {
+			aimPosition = getAIAimTargets( target, false ); // TinMan: false chest, true head. Excuse me, can you point to where you want to be shot?
+		}
+	} else { // TinMan: Default|0|chest
+		aimPosition = getAIAimTargets( target, false );
+	}
+
+	return aimPosition;
+}
+
+/*
+=====================
+bot_sabot_a8::getItemPriority
+TinMan: Find out what the priority of this entity is.
+*todo* implement case switching for scripting from tutorial
+=====================
+*/
+float bot_sabot_a8::getItemPriority( entity item ) {
+	float priority;
+	string itemName, prefix, classType;
+	float	itemType;
+	float len;
+	float health, maxHealth, armor, maxArmor, ammo;
+
+	itemName = getClassName( item ); // TinMan: Get the name of the item
+	// TinMan: Strip mp suffix
+	len = sys.strLength( itemName ) - 3;
+	if ( sys.strSkip( itemName, len ) == "_mp" ) {
+		//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][itemName: " + sys.strLeft( itemName, len ) + "]" ); // TinMan *debug*
+		itemName = sys.strLeft( itemName, len );
+	}
+	//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][itemName: " + itemName + "]" ); // TinMan *debug*
+	
+	classType = getClassType( item );
+	if ( classType == "idMoveableItem" ) {
+		itemName = sys.strSkip( itemName, sys.strLength( "moveable_item_" ) ); // TinMan: Nasty
+		itemName = "weapon_" + itemName; // TinMan: Also cheap *todo* better, this obviously doesn't handle other movables, why did id soft name them moveable_item_machinegun etc instead of moveable_weapon_machinegun. Waaaaaaa!
+	}
+	
+	// TinMan: Grab priority from def *todo* oldski *rem*
+	/*
+	priority = getFloatKey( "priority_" + itemName ); 
+	if ( !priority ) {
+		//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][No Priority for: " + itemName + "]" ); // TinMan *debug*
+		return 0;
+	}
+	*/
+	
+	// TinMan: Lets us diferentiate between items
+	prefix = sys.strLeft( itemName, 4 );
+	if ( prefix == "ammo" ) {
+		itemType = SABOT_ITEMTYPE_AMMO;
+	} else if ( prefix == "weap" ) {
+		itemType = SABOT_ITEMTYPE_WEAPON;
+	} else if ( prefix == "item" ) {
+		prefix = sys.strLeft( itemName, 10 ); // TinMan: item_medkit, item_armor
+		//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][prefix: " + prefix + "]" ); // TinMan *debug*
+		if ( prefix == "item_medki" ) {
+			itemType = SABOT_ITEMTYPE_HEALTH;
+		} else if ( prefix == "item_armor" ) {
+			itemType = SABOT_ITEMTYPE_ARMOR;
+		} else {
+			itemType = SABOT_ITEMTYPE_ITEM;
+		}
+	} else if ( prefix == "powe" ) {
+		itemType = SABOT_ITEMTYPE_POWERUP;
+	} else {
+		itemType = SABOT_ITEMTYPE_NONE;
+	}
+	
+	/* TinMan: reference *todo* *rem*
+		"priority_goal_ammo"			"10"
+	"priority_goal_weapon"		"20"
+	"priority_goal_health"		"35"
+	"priority_goal_armor"			"30"
+	"priority_goal_powerup" 	"30"
+	"priority_goal_enemy"			"40"
+	"priority_goal_team"			"50"
+	*/
+	
+	if ( itemType == SABOT_ITEMTYPE_AMMO ) {
+		//priority = getFloatKey( "priority_goal_ammo" ); // TinMan: Get base priority
+		priority = 10;
+		priority += getFloatKey( "priority_" + itemName ); // TinMan: Add specific priority
+		len = sys.strLength( itemName ) - 6; // TinMan: Strip off suffix ( _small, _large = 6 chars )
+		itemName = sys.strLeft( itemName, len );
+		if ( itemName == "ammo_grenade" ) { // TinMan: pickups are ammo_grenade, while actuall ammo_type is ammo_grenades. Curses.
+			itemName = "ammo_grenades";
+		}
+		ammo = hasAmmo( itemName );
+		if ( ammo >= body.getFloatKey( "max_" + itemName ) ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][bot has full: " + itemName + "]" ); // TinMan *debug*
+			priority = 0;
+		} else if ( !ammo ) {
+			priority += 5;
+		}
+		
+		/* TinMan: *todo*
+		ammo current 20, 25?
+			and low ammo 40 (higher than default enemy
+		backpack + 10
+		*/
+		
+		// TinMan: Priority [10,10(40todo)]+[1,2]
+	} else if ( itemType == SABOT_ITEMTYPE_WEAPON ) {
+		//priority = getFloatKey( "priority_goal_weapon" ); // TinMan: Get base priority
+		priority = 20;
+		priority += getFloatKey( "priority_" + itemName ); // TinMan: Add specific priority
+		if ( !hasWeapon( itemName ) ) {
+			//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][bot doesn't have: " + itemName + "]" ); // TinMan *debug*
+			priority += 5;
+		}
+		if ( itemName == currentWeapon ) { // TinMan: Same type as we're using
+			priority += 5;
+			
+			// TinMan: *todo* and very low ammo + 10
+		} else if ( getFloatKey( "priority_" + itemName ) > getFloatKey( "priority_" + currentWeapon ) ) { // TinMan: It's a better weapon than current
+			priority += 5;
+		}
+		
+		// TinMan: *todo* it's a dropped weapon +5
+		
+		// TinMan: Priority [20,35(45todo)]+[1,10]
+	} else if ( itemType == SABOT_ITEMTYPE_HEALTH ) {
+		//priority = getFloatKey( "priority_goal_health" ); // TinMan: Get base priority
+		priority = 35;
+		priority += getFloatKey( "priority_" + itemName ); // TinMan: Add specific priority	
+		
+		health = getActorHealth( body );
+		maxHealth = body.getFloatKey( "maxhealth" );
+		
+		//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][Health: " + health + "][Maxhealth: " + maxHealth + "]" ); // TinMan *debug*
+		
+		if ( health < maxHealth ) {
+			if ( health < 40 ) {
+				priority += 10;
+				//priority = 45;
+			}
+			if ( health < 20 ) {
+				priority += 10;
+				//priority = 55;
+			}
+		} else {
+			priority = 0;
+		}
+		
+		// TinMan: Priority [35,55]+[1,2]
+	} else if ( itemType == SABOT_ITEMTYPE_ARMOR ) {
+		//priority = getFloatKey( "priority_goal_armor" ); // TinMan: Get base priority
+		priority = 30;
+		priority += getFloatKey( "priority_" + itemName ); // TinMan: Add specific priority	
+		armor = getArmor( body );
+		maxArmor = body.getFloatKey( "maxarmor" );
+		
+		//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][Armor: " + armor + "][Maxarmor: " + maxArmor + "]" ); // TinMan *debug*
+		
+		if ( armor < maxArmor ) {
+			if ( armor < 40 ) {
+				priority += 10;
+				//priority = 40;
+			}
+			if ( armor < 20 ) {
+				priority += 10;
+				//priority = 50;
+			}
+		} else {
+			priority = 0;
+		}
+		
+	} else if ( itemType == SABOT_ITEMTYPE_POWERUP ) {
+		//priority = getFloatKey( "priority_goal_powerup" ); // TinMan: Get base priority
+		priority = 35;
+		priority += getFloatKey( "priority_" + itemName ); // TinMan: Add specific priority	
+	}
+	
+	//sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][" + itemName + " Priority: " + priority + "]" ); // TinMan *debug*
+	/* if ( priority ) {
+		sys.println( "[" + int( sys.getTime() ) + "][getItemPriority][" + itemName + " Priority: " + priority + "]" ); // TinMan *debug*
+	} */
+	
+	return priority;
+}
+
+/*
+=====================
+bot_sabot_a8::getPlayerPriority
+TinMan: How badass is this player?
+Remember: Unlike item where higher priority is better, here lower is better.
+*todo* weapon priority
+*todo* add powerups, + 200, 250, 300, uberbadness.
+*todo* + distance to enemy? ( shorter higher ) + last time seen enemy? ( shorter higher ), if so, don't put in here but where this func is called.
+=====================
+*/
+float bot_sabot_a8::getPlayerPriority( entity badass ) {
+	float priority, weaponPriority;
+	string playerWeapon;
+		
+	playerWeapon = badass.getCurrentWeapon();
+	weaponPriority = getFloatKey( "priority_" + playerWeapon ); // TinMan: Grab priority from def
+	//sys.println( "[" + int( sys.getTime() ) + "][getPlayerPriority][weapon: " + playerWeapon + "][" + weaponPriority + "]" ); // TinMan *debug*
+
+	priority = getFloatKey( "priority_goal_enemy" ); // TinMan: Get base priority
+	//priority -= weaponPriority;
+	
+	//if ( getFloatKey( "priority_" + currentWeapon ) > weaponPriority ) {
+	 //priority += 5;
+	//}
+	//if ( getFloatKey( "priority_" + currentWeapon ) < weaponPriority ) {
+		//priority -= 5;
+	//}
+	
+	if ( gameType == GAME_CTF ) {
+		if ( getFlagCarrier( 1 - team ) == badass ) {
+			priority += 20;
+		}
+	}
+
+	//sys.println( "[" + int( sys.getTime() ) + "][getPlayerPriority][" + badass.getName() + " Priority: " + priority + "]" ); // TinMan *debug*
+	//sys.println( "[" + int( sys.getTime() ) + "][getPlayerPriority][" + badass.getName() + " HP: " + getActorHealth( badass ) + " ARM: " + getArmor( badass ) + " Weap: " + weaponPriority + " Priority: " + priority + "]" ); // TinMan *debug*
+	return priority;
+}
+
+/*
+=====================
+bot_sabot_a8::getProjectileSpeed
+TinMan: How speedy are the shooty shooty kill kills?
+=====================
+*/
+float bot_sabot_a8::getProjectileSpeed( string weaponName ) {
+	float projectileSpeed = 0;
+
+	if ( sys.isMultiplayer() ) {
+		projectileSpeed = getIntKey( "projectile_" + weaponName +  "_mp" );
+	}
+	if ( !sys.isMultiplayer() || !projectileSpeed ) { // TinMan: If mp projspeed isn't defined fall back to regular projspeed
+		projectileSpeed = getIntKey( "projectile_" + weaponName );
+	}
+	//sys.println( "[" + int( sys.getTime() ) + "][predictShot][" + weaponName + "][" + projectileSpeed + "]" ); // TinMan *debug*
+
+	return projectileSpeed;
+}
+
+/*
+=====================
+bot_sabot_a8::chooseGoal
+TinMan: 
+Note: This function is somewhat expensive since nearly all entities found are reachability checked in getItemPriority.
+Note: Debug output is off by one.
+=====================
+*/
+entity bot_sabot_a8::chooseGoal( entity ignoreGoal ) {
+	float i, numListedEntities;
+	float itemPriority, bestPriority;
+	float dist, bestDist;
+	float radius;
+	entity item, bestGoal;
+	
+	clearGoal();
+	
+	// TinMan: Command
+	if ( BOT_COMMAND ) {
+		sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][have command]" ); // TinMan *debug*
+		BOT_COMMAND = false;
+		if ( getCommandType() ) {
+			goalType = getCommandType();
+			bestGoal = getCommandEntity();
+			if ( !bestGoal ) {
+				bestGoal = self;
+			}
+			goalPriority = 200;
+			moveType = SABOT_GOALTYPE_POSITION;
+			goalPosition = getCommandPosition();
+			if ( goalPosition == '0 0 0' ) {
+				goalPosition = bestGoal.getOrigin();
+			}
+			goalPosition = pushPointIntoAAS( goalPosition );
+			sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][commandtype: " + goalType + "][commandEntity:" + bestGoal.getName() + "]" ); // TinMan *debug*
+			clearCommand();
+			return bestGoal; // TinMan: Done
+		} else {
+			sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][no cmdtype]" ); // TinMan *debug*
+		}
+	}
+	
+	// TinMan: *CTF* flag goals	
+	if ( gameType == GAME_CTF ) {
+		if ( getFlagCarrier( team ) == body ) { // TinMan: w00t we gots teh falg!
+			//sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][!have flag!]" ); // TinMan *debug*
+			bestGoal = ourCap;
+			
+			moveType = SABOT_GOALTYPE_POSITION;
+			goalPosition = bestGoal.getOrigin();
+			if ( body.distanceToPoint( goalPosition ) > 32 ) {
+				goalType = SABOT_GOAL_MOVE;
+			} else { // TinMan: Close enough, camp it
+				goalType = SABOT_GOAL_HOLD;
+			}
+			goalPriority = getFloatKey( "priority_goal_team" );
+		} else if ( role == SABOT_ROLE_OFFENCE ) {
+			bestGoal = theirCap;
+			moveType = SABOT_GOALTYPE_POSITION;
+			
+			if ( body.distanceToPoint( goalPosition ) > 128 ) {
+				goalType = SABOT_GOAL_MOVE;
+			} else { // TinMan: Close enough, camp it
+				if ( getFlagStatus( 1 - team ) == FLAGSTATUS_INBASE ) {
+					goal = theirFlag;
+					moveType = SABOT_GOALTYPE_ENTITY;
+					goalPriority = getFloatKey( "priority_goal_team" );
+				} else {
+					goalType = SABOT_GOAL_HOLD;
+				}
+			}
+			
+			goalPosition = bestGoal.getOrigin();
+			//goalPriority = getFloatKey( "priority_goal_team" );
+			goalPriority = 20;
+		} /*else if ( role == SABOT_ROLE_DEFENCE ) {
+				sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][defence][goal: ourFlag]" ); // TinMan *debug*
+				moveType = SABOT_GOALTYPE_POSITION;
+				goalType = SABOT_GOAL_HOLD;
+				bestGoal = ourCap;
+				goalPosition = bestGoal.getOrigin();
+				goalPriority = getFloatKey( "priority_goal_team" );
+		}*/
+			
+		// TinMan: Check if goal can be reached *todo* think about how you are going to handle unreachable goal. *todo* hmm it's ok if enemy is unreachable, he might not be later, or your still might be able to shoot him
+		if ( bestGoal ) {
+			if ( moveType = SABOT_GOALTYPE_POSITION ) {
+				if ( !canReachPosition( bestGoal.getOrigin() ) ) {
+					//sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][can't reach goal position]" ); // TinMan *debug*
+					//sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][GoalPosition: " + goalPosition + "]" ); // TinMan *debug*
+					//clearGoal();
+					bestGoal = $null_entity;
+				}
+			} else {
+				if ( !canReachEntity( bestGoal ) ) {
+					//sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][can't reach goal]" ); // TinMan *debug*
+					clearGoal();
+					bestGoal = $null_entity;
+				}
+			}
+		}
+		
+		if ( !bestGoal ) { // TinMan: Can't CTF so roam
+			//sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][!!No CTF Goal!!]" ); // TinMan *debug*
+			role = roleDefault;
+		}
+	}
+
+	// TinMan: Find an item to hunt. Want l00t!
+	if ( role == SABOT_ROLE_ROAM ) {
+		numListedEntities = findItems();
+		// sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][numListedEntities: " + numListedEntities + "]" ); // TinMan *debug*
+		for ( i = 0; i < numListedEntities; i++ ) {
+			item = getEntityList( i );
+			//sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][listedEntity[" + i + "] : " + item.getName() +  "]" ); // TinMan *debug* " : " + getClassName( item ) +
+			if ( item == ignoreGoal || item.isHidden() ) { // TinMan: *todo* Shouldnt really do a ishidden but at the moment this is stopping ping pong and adding variation
+				continue;
+			}
+			itemPriority = getItemPriority( item );
+			if ( !itemPriority ) {
+				continue;
+			}
+			if ( itemPriority > bestPriority ) {
+				if ( canReachEntity( item ) ) {
+					bestPriority = itemPriority;
+					bestGoal = item;
+				}
+			} else if ( itemPriority == bestPriority ) { // TinMan: If item has same priority get closest, of course staright distance check is cheap and may not be the closest item due to travel time.
+				dist = body.distanceTo( item );
+				bestDist = body.distanceTo( bestGoal );
+				if ( dist < bestDist ) {
+					if ( canReachEntity( item ) ) {
+						bestGoal = item;
+					}
+				}
+			}
+		}
+	
+		goalType = SABOT_GOAL_MOVE;
+		goalPriority = getFloatKey( "priority_goal_item" ); // TinMan: Pretty much anything will override this goal.
+		
+		/*
+		if ( bestGoal ) {
+			sys.println( "[" + int( sys.getTime() ) + "][chooseGoal][goal: " + getClassName( bestGoal ) + " of " + numListedEntities + "][priority: " + goalPriority + "]" ); // TinMan *debug*
+		}
+		*/
+	}
+	
+	return bestGoal; // TinMan: This is the goodest loot
+}
+
+/*
+=====================
+bot_sabot_a8::lookForGoal
+TinMan: Look for nice and shiny baubles to gather.
+*todo* split the seperate looks into funcs that just return best and do a priority compare?
+=====================
+*/
+entity bot_sabot_a8::lookForGoal( float useFov ) {
+	float i, numListedEntities;
+	float itemPriority, bestPriority;
+	float dist, bestDist;
+	float radius;
+	float maxHeight, minHeight;
+	entity item;
+	vector origin, itemOrigin;
+	
+	// TinMan: items, dropped weapons, ctf flags
+	entity bestGoal;
+	entity bestItem, bestDrop, bestFlag;
+	float priorityItem, priorityDrop, priorityFlag;
+	
+	clearNewGoal(); // TinMan: Wipe the slate, and your nose.
+
+	radius = 300; // Todo: *demagic*
+	
+	bestDist = radius;
+	
+	origin = body.getOrigin();
+	
+	maxHeight = 128;
+	minHeight = 64;
+	
+	numListedEntities = findInRadius( origin, radius, "idItem" );
+	//sys.println( "[" + int( sys.getTime() ) + "][lookForGoal][numListedEntities: " + numListedEntities + "]" ); // TinMan *debug*
+	for ( i = 0; i < numListedEntities; i++ ) {
+		item = getEntityList( i );
+		
+		if ( item == goal ) {
+			continue;
+		}
+		
+		// TinMan: *todo* rethink
+		if ( item == oldGoal ) {
+			continue;
+		}
+		
+		itemOrigin = item.getOrigin();
+		if ( itemOrigin_z > origin_z + maxHeight || itemOrigin_z < origin_z - minHeight ) { // TinMan: tunnel vision *todo* rethink.
+			continue;
+		}
+		
+		itemPriority = getItemPriority( item ); // TinMan: Sort out health and armour, stuff that he can't pick up when he's full, the glutton.
+		
+		//sys.println( "[" + int( sys.getTime() ) + "][lookForGoal][listedEntity[" + i + "]:" + item.getName() + "][Prioriy: " + itemPriority + "]" ); // TinMan *debug* " 
+		// TinMan: Find closest l00t
+		if ( itemPriority ) {
+			dist = body.distanceTo( item );
+			
+			//if ( canSeePosition( item.getOrigin(), true ) && item.isHidden() ) { // TinMan: If we can see it's not there. *todo* is this working at all?
+			if ( item.isHidden() ) {
+				continue;
+			}
+			
+			if ( !AI_ENEMY_DEAD && !canSeeEntity( item, true ) ) { // TinMan: *cheaphack, only go for item you can see when fighting
+				continue;
+			}
+
+			
+			if ( dist < bestDist ) {
+				if ( canReachEntity( item ) ) {
+					bestDist = dist;
+					bestItem = item;
+					priorityItem = itemPriority;
+				}
+			}
+		}
+		/* if ( bestItem ) {
+			sys.println( "[" + int( sys.getTime() ) + "][" + i + ": " + getClassName( item ) +  "][dist: " + int( dist ) + "][priority: " + priorityItem +  "]" ); // TinMan *debug* " 
+		} */
+	}
+	
+	// TinMan: Update best goal for comparison later
+	if ( bestItem ) {
+		bestGoal = bestItem;
+		bestPriority = priorityItem;
+	}
+	
+	radius = 400;
+	// TinMan: Check for dropped weapons
+	numListedEntities = findInRadius( origin, radius, "idMoveableItem" );
+	for ( i = 0; i < numListedEntities; i++ ) {
+		item = getEntityList( i );
+		// sys.println( "[" + int( sys.getTime() ) + "][lookForGoal:Movable][listedEntity[" + i + "] : " + item.getName() +  "]" ); // TinMan *debug* "
+		
+		if ( item == goal ) {
+			continue;
+		}
+		
+		if ( item.isHidden() ) { // TinMan: *todo* is idMoveableItem ever hidden or just removed?
+				continue;
+		}
+		
+		itemOrigin = item.getOrigin();
+		if ( itemOrigin_z > origin_z + maxHeight || itemOrigin_z < origin_z - minHeight ) { // TinMan: tunnel vision *todo* rethink.
+			continue;
+		}
+		
+		itemPriority = getItemPriority( item ); // TinMan: Sort out health and armour, stuff that he can't pick up when he's full, the glutton.
+		
+		if ( !itemPriority ) {
+			continue;
+		}
+		// TinMan: Find closest l00t
+		if ( canSeeEntity( item, useFov ) ) {
+			dist = body.distanceTo( item );
+			if ( dist < bestDist ) {
+				if ( canReachEntity( item ) ) {
+					bestDist = dist;
+					bestDrop = item;
+					priorityDrop = itemPriority + 5; // TinMan: Dropped items higher priority *todo* This the right place? Or in getitemprio?
+				}
+			}
+		}
+		//sys.println( "[" + int( sys.getTime() ) + "][listedEntity[" + i + "] : " + item.getName() +  "][dist: " + dist + "]" ); // TinMan *debug* " : " + getClassName( item ) +
+	}
+	
+	// TinMan: Compare against bestgoal (^item)
+	if ( priorityDrop > bestPriority ) {
+		bestGoal = bestDrop;
+		bestPriority = priorityDrop;
+	}
+
+	if ( gameType == GAME_CTF ) {
+		radius = 600;
+		// TinMan: Check for dropped flags
+		numListedEntities = findInRadius( origin, radius, "idItemTeam" );
+	
+		for ( i = 0; i < numListedEntities; i++ ) {
+			item = getEntityList( i );
+			// sys.println( "[" + int( sys.getTime() ) + "][lookForGoal:Movable][listedEntity[" + i + "] : " + item.getName() +  "]" ); // TinMan *debug* "
+			
+			if ( item == goal ) {
+				continue;
+			}
+			
+			if ( item.isHidden() ) { // TinMan: *todo* is flag ever hidden?
+				continue;
+			}
+			
+			itemOrigin = item.getOrigin();
+			if ( itemOrigin_z > origin_z + maxHeight || itemOrigin_z < origin_z - minHeight ) { // TinMan: tunnel vision *todo* rethink.
+				continue;
+			}
+			
+			//itemPriority = getItemPriority( item ); // TinMan: *todo*? do we?
+			// TinMan: Check to see if the flag isn't just at base.
+			if ( item == ourFlag ) {
+				if ( getFlagStatus( team ) != FLAGSTATUS_STRAY ) { // TinMan: Our flag should only be a goal if it needs returning.
+					continue;
+				}
+			} else if ( item == theirFlag ) {
+				if ( getFlagStatus( 1 - team ) == FLAGSTATUS_TAKEN ) { // TinMan: Flag shouldn't be grabbed, cause someone's got it
+					continue;
+				}
+			}
+				
+			if ( canSeeEntity( item, useFov ) ) {
+				dist = body.distanceTo( item );
+				if ( dist < bestDist ) {
+					if ( canReachEntity( item ) ) {
+						bestDist = dist;
+						bestFlag = item;
+						priorityFlag = getFloatKey( "priority_goal_team" );
+					}
+				}
+			}	
+			//sys.println( "[" + int( sys.getTime() ) + "][" + getName() + "][listedEntity[" + i + "] : " + item.getName() +  "][dist: " + dist + "]" ); // TinMan *debug* " : " + getClassName( item ) +
+		}
+	}
+	
+	/*	if ( bestItem ) {
+		sys.println( "[" + int( sys.getTime() ) + "][lookForGoal][bestItem: " + bestItem.getName() + " of [" + numListedEntities + "]]" ); // TinMan *debug*
+	} */
+	
+	if ( priorityFlag > bestPriority ) {
+		bestGoal = bestFlag;
+		bestPriority = priorityFlag;
+	}
+
+	// TinMan: This is the goodest loot
+	if ( bestGoal ) {
+		newGoal = bestGoal;
+		newGoalPriority = bestPriority;
+		newGoalType = SABOT_GOAL_MOVE;
+		newMoveType = SABOT_GOALTYPE_ENTITY;
+	}
+
+	return bestItem; // TinMan: This is the goodest loot
+}
+
+/*
+=====================
+bot_sabot_a8::lookForEnemies
+TinMan: Searches for enemies. You must know where the hurty men are.
+=====================
+*/
+entity bot_sabot_a8::lookForEnemies( float useFov ) {
+	float i, numListedEnemies;
+	entity thisEnemy, bestEnemy;
+	float dist, bestDist;
+	
+	bestDist = 999999;
+	
+	numListedEnemies = findEnemies( useFov );
+	for ( i = 0; i < numListedEnemies; i++ ) {
+		thisEnemy = getEntityList( i );
+		
+		//sys.println( "[" + int( sys.getTime() ) + "][lookForEnemy][listedEnemy[" + i + "] : " + thisEnemy.getName() +  "]" ); // TinMan: *debug*
+		dist = body.distanceTo( thisEnemy );
+		if ( dist < bestDist ) {
+			if ( thisEnemy != getEnemy() ) {
+				bestDist = dist;
+				bestEnemy = thisEnemy;
+			}
+		}
+	}
+
+	/* if ( bestEnemy ) {
+		sys.println( "[" + int( sys.getTime() ) + "][lookForEnemy][bestEnemy: " + bestEnemy.getName() + " of [" + i + "]]" ); // TinMan *debug*
+	} */
+
+	return bestEnemy; // TinMan: He be the badest of the bad
+}
+
+/*
+=====================
+bot_sabot_a8::listenForEnemies
+TinMan: I think I hear something in the basement dear. heardSound is only really geared towards single player ai with one player causing a ruckus.
+=====================
+*/
+entity bot_sabot_a8::listenForEnemies() {
+	entity newEnemy;
+
+	newEnemy = heardSound( false );
+	if ( newEnemy == getEnemy() || !canSeeEntity( newEnemy, false ) ) { // TinMan: Visible but not in fov *todo* hmm
+		newEnemy = $null_entity;
+	}
+
+	return newEnemy;
+}
+
+// EOF

@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "game_sdk.vcproj", "{D790F4F6-F08E-41CE-8DE6-C9222A1621AB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F9A72ED4-E4C8-4205-9432-FB241E56C14D} = {F9A72ED4-E4C8-4205-9432-FB241E56C14D}
+		{A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961} = {A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "idLib", "idlib_sdk.vcproj", "{F9A72ED4-E4C8-4205-9432-FB241E56C14D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libGameDecl", "libGameDecl_sdk.vcproj", "{A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F9A72ED4-E4C8-4205-9432-FB241E56C14D} = {F9A72ED4-E4C8-4205-9432-FB241E56C14D}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug with edit and continue|Win32 = Debug with edit and continue|Win32
+		Debug with inlines|Win32 = Debug with inlines|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D790F4F6-F08E-41CE-8DE6-C9222A1621AB}.Debug with edit and continue|Win32.ActiveCfg = Debug with edit and continue|Win32
+		{D790F4F6-F08E-41CE-8DE6-C9222A1621AB}.Debug with edit and continue|Win32.Build.0 = Debug with edit and continue|Win32
+		{D790F4F6-F08E-41CE-8DE6-C9222A1621AB}.Debug with inlines|Win32.ActiveCfg = Debug with inlines|Win32
+		{D790F4F6-F08E-41CE-8DE6-C9222A1621AB}.Debug with inlines|Win32.Build.0 = Debug with inlines|Win32
+		{D790F4F6-F08E-41CE-8DE6-C9222A1621AB}.Release|Win32.ActiveCfg = Release|Win32
+		{D790F4F6-F08E-41CE-8DE6-C9222A1621AB}.Release|Win32.Build.0 = Release|Win32
+		{F9A72ED4-E4C8-4205-9432-FB241E56C14D}.Debug with edit and continue|Win32.ActiveCfg = Debug with edit and continue|Win32
+		{F9A72ED4-E4C8-4205-9432-FB241E56C14D}.Debug with edit and continue|Win32.Build.0 = Debug with edit and continue|Win32
+		{F9A72ED4-E4C8-4205-9432-FB241E56C14D}.Debug with inlines|Win32.ActiveCfg = Debug with inlines|Win32
+		{F9A72ED4-E4C8-4205-9432-FB241E56C14D}.Debug with inlines|Win32.Build.0 = Debug with inlines|Win32
+		{F9A72ED4-E4C8-4205-9432-FB241E56C14D}.Release|Win32.ActiveCfg = Release|Win32
+		{F9A72ED4-E4C8-4205-9432-FB241E56C14D}.Release|Win32.Build.0 = Release|Win32
+		{A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961}.Debug with edit and continue|Win32.ActiveCfg = Debug with edit and continue|Win32
+		{A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961}.Debug with edit and continue|Win32.Build.0 = Debug with edit and continue|Win32
+		{A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961}.Debug with inlines|Win32.ActiveCfg = Debug with inlines|Win32
+		{A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961}.Debug with inlines|Win32.Build.0 = Debug with inlines|Win32
+		{A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961}.Release|Win32.ActiveCfg = Release|Win32
+		{A2D0B8A0-9F12-4D5D-8D60-E99D3EBEF961}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

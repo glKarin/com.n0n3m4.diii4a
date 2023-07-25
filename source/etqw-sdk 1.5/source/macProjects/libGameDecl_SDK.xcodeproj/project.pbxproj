@@ -1,0 +1,523 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2C2247FB0B6FDD64002B2112 /* precompiled.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2247FA0B6FDD64002B2112 /* precompiled.h */; };
+		2C2247FD0B6FDD71002B2112 /* DeclAmmoType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2247FC0B6FDD71002B2112 /* DeclAmmoType.cpp */; };
+		2C2247FF0B6FDD77002B2112 /* DeclAmmoType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2247FE0B6FDD77002B2112 /* DeclAmmoType.h */; };
+		2C22482F0B6FE250002B2112 /* DeclAOR.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22480F0B6FE250002B2112 /* DeclAOR.h */; };
+		2C2248300B6FE250002B2112 /* DeclCampaign.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248100B6FE250002B2112 /* DeclCampaign.h */; };
+		2C2248310B6FE250002B2112 /* declClimate.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248110B6FE250002B2112 /* declClimate.h */; };
+		2C2248320B6FE250002B2112 /* DeclDamage.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248120B6FE250002B2112 /* DeclDamage.h */; };
+		2C2248330B6FE250002B2112 /* DeclDamageFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248130B6FE250002B2112 /* DeclDamageFilter.h */; };
+		2C2248340B6FE250002B2112 /* DeclDeployableObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248140B6FE250002B2112 /* DeclDeployableObject.h */; };
+		2C2248350B6FE250002B2112 /* DeclDeployableZone.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248150B6FE250002B2112 /* DeclDeployableZone.h */; };
+		2C2248360B6FE250002B2112 /* declForecast.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248160B6FE250002B2112 /* declForecast.h */; };
+		2C2248370B6FE250002B2112 /* DeclGUI.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248170B6FE250002B2112 /* DeclGUI.h */; };
+		2C2248380B6FE250002B2112 /* DeclGUITheme.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248180B6FE250002B2112 /* DeclGUITheme.h */; };
+		2C2248390B6FE250002B2112 /* DeclInvItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248190B6FE250002B2112 /* DeclInvItem.h */; };
+		2C22483A0B6FE250002B2112 /* DeclInvItemType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22481A0B6FE250002B2112 /* DeclInvItemType.h */; };
+		2C22483B0B6FE250002B2112 /* DeclInvSlot.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22481B0B6FE250002B2112 /* DeclInvSlot.h */; };
+		2C22483C0B6FE250002B2112 /* DeclItemPackage.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22481C0B6FE250002B2112 /* DeclItemPackage.h */; };
+		2C22483D0B6FE250002B2112 /* DeclKeyBinding.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22481D0B6FE250002B2112 /* DeclKeyBinding.h */; };
+		2C22483E0B6FE250002B2112 /* DeclMapInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22481E0B6FE250002B2112 /* DeclMapInfo.h */; };
+		2C22483F0B6FE250002B2112 /* DeclPlayerClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22481F0B6FE250002B2112 /* DeclPlayerClass.h */; };
+		2C2248400B6FE250002B2112 /* DeclPlayerTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248200B6FE250002B2112 /* DeclPlayerTask.h */; };
+		2C2248410B6FE250002B2112 /* DeclProficiencyItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248210B6FE250002B2112 /* DeclProficiencyItem.h */; };
+		2C2248420B6FE250002B2112 /* DeclProficiencyType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248220B6FE250002B2112 /* DeclProficiencyType.h */; };
+		2C2248430B6FE250002B2112 /* DeclQuickChat.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248230B6FE250002B2112 /* DeclQuickChat.h */; };
+		2C2248440B6FE250002B2112 /* DeclRadialMenu.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248240B6FE250002B2112 /* DeclRadialMenu.h */; };
+		2C2248450B6FE250002B2112 /* DeclRank.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248250B6FE250002B2112 /* DeclRank.h */; };
+		2C2248460B6FE250002B2112 /* DeclRating.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248260B6FE250002B2112 /* DeclRating.h */; };
+		2C2248470B6FE250002B2112 /* DeclRequirement.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248270B6FE250002B2112 /* DeclRequirement.h */; };
+		2C2248480B6FE250002B2112 /* DeclStringMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248280B6FE250002B2112 /* DeclStringMap.h */; };
+		2C2248490B6FE250002B2112 /* DeclTargetInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2248290B6FE250002B2112 /* DeclTargetInfo.h */; };
+		2C22484A0B6FE250002B2112 /* DeclToolTip.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22482A0B6FE250002B2112 /* DeclToolTip.h */; };
+		2C22484B0B6FE250002B2112 /* DeclVehiclePath.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22482B0B6FE250002B2112 /* DeclVehiclePath.h */; };
+		2C22484C0B6FE250002B2112 /* declVehicleScript.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22482C0B6FE250002B2112 /* declVehicleScript.h */; };
+		2C22484D0B6FE250002B2112 /* GameDeclIdentifiers.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22482D0B6FE250002B2112 /* GameDeclIdentifiers.h */; };
+		2C22484E0B6FE250002B2112 /* GameDeclInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C22482E0B6FE250002B2112 /* GameDeclInfo.h */; };
+		2C22487D0B6FE2BD002B2112 /* DeclAOR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22485C0B6FE2BD002B2112 /* DeclAOR.cpp */; };
+		2C22487E0B6FE2BD002B2112 /* DeclCampaign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22485D0B6FE2BD002B2112 /* DeclCampaign.cpp */; };
+		2C2248800B6FE2BD002B2112 /* DeclDamage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22485F0B6FE2BD002B2112 /* DeclDamage.cpp */; };
+		2C2248810B6FE2BD002B2112 /* DeclDamageFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248600B6FE2BD002B2112 /* DeclDamageFilter.cpp */; };
+		2C2248820B6FE2BD002B2112 /* DeclDeployableObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248610B6FE2BD002B2112 /* DeclDeployableObject.cpp */; };
+		2C2248830B6FE2BD002B2112 /* DeclDeployableZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248620B6FE2BD002B2112 /* DeclDeployableZone.cpp */; };
+		2C2248850B6FE2BD002B2112 /* DeclGUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248640B6FE2BD002B2112 /* DeclGUI.cpp */; };
+		2C2248860B6FE2BD002B2112 /* DeclGUITheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248650B6FE2BD002B2112 /* DeclGUITheme.cpp */; };
+		2C2248870B6FE2BD002B2112 /* DeclInvItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248660B6FE2BD002B2112 /* DeclInvItem.cpp */; };
+		2C2248880B6FE2BD002B2112 /* DeclInvItemType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248670B6FE2BD002B2112 /* DeclInvItemType.cpp */; };
+		2C2248890B6FE2BD002B2112 /* DeclInvSlot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248680B6FE2BD002B2112 /* DeclInvSlot.cpp */; };
+		2C22488A0B6FE2BD002B2112 /* DeclItemPackage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248690B6FE2BD002B2112 /* DeclItemPackage.cpp */; };
+		2C22488B0B6FE2BD002B2112 /* DeclKeyBinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22486A0B6FE2BD002B2112 /* DeclKeyBinding.cpp */; };
+		2C22488C0B6FE2BD002B2112 /* DeclMapInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22486B0B6FE2BD002B2112 /* DeclMapInfo.cpp */; };
+		2C22488D0B6FE2BD002B2112 /* DeclPlayerClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22486C0B6FE2BD002B2112 /* DeclPlayerClass.cpp */; };
+		2C22488E0B6FE2BD002B2112 /* DeclPlayerTask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22486D0B6FE2BD002B2112 /* DeclPlayerTask.cpp */; };
+		2C22488F0B6FE2BD002B2112 /* DeclProficiencyItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22486E0B6FE2BD002B2112 /* DeclProficiencyItem.cpp */; };
+		2C2248900B6FE2BD002B2112 /* DeclProficiencyType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22486F0B6FE2BD002B2112 /* DeclProficiencyType.cpp */; };
+		2C2248910B6FE2BD002B2112 /* DeclQuickChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248700B6FE2BD002B2112 /* DeclQuickChat.cpp */; };
+		2C2248920B6FE2BD002B2112 /* DeclRadialMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248710B6FE2BD002B2112 /* DeclRadialMenu.cpp */; };
+		2C2248930B6FE2BD002B2112 /* DeclRank.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248720B6FE2BD002B2112 /* DeclRank.cpp */; };
+		2C2248940B6FE2BD002B2112 /* DeclRating.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248730B6FE2BD002B2112 /* DeclRating.cpp */; };
+		2C2248950B6FE2BD002B2112 /* DeclRequirement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248740B6FE2BD002B2112 /* DeclRequirement.cpp */; };
+		2C2248960B6FE2BD002B2112 /* DeclStringMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248750B6FE2BD002B2112 /* DeclStringMap.cpp */; };
+		2C2248970B6FE2BD002B2112 /* DeclTargetInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248760B6FE2BD002B2112 /* DeclTargetInfo.cpp */; };
+		2C2248980B6FE2BD002B2112 /* DeclToolTip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248770B6FE2BD002B2112 /* DeclToolTip.cpp */; };
+		2C2248990B6FE2BD002B2112 /* DeclVehiclePath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248780B6FE2BD002B2112 /* DeclVehiclePath.cpp */; };
+		2C22489A0B6FE2BD002B2112 /* declVehicleScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C2248790B6FE2BD002B2112 /* declVehicleScript.cpp */; };
+		2C22489B0B6FE2BD002B2112 /* GameDeclIdentifiers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22487A0B6FE2BD002B2112 /* GameDeclIdentifiers.cpp */; };
+		2C22489C0B6FE2BD002B2112 /* GameDeclInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C22487B0B6FE2BD002B2112 /* GameDeclInfo.cpp */; };
+		2C224D9A0B700808002B2112 /* DeclType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C224D990B700808002B2112 /* DeclType.cpp */; };
+		2CA21A670BD437C100B99FB7 /* DeployMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CA21A660BD437C100B99FB7 /* DeployMask.cpp */; };
+		2CA21A690BD437D000B99FB7 /* DeployMask.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CA21A680BD437D000B99FB7 /* DeployMask.h */; };
+		2CA21A6E0BD4383900B99FB7 /* DeclHeightMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CA21A6D0BD4383900B99FB7 /* DeclHeightMap.h */; };
+		2CA21A700BD4384700B99FB7 /* DeclHeightMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CA21A6F0BD4384700B99FB7 /* DeclHeightMap.cpp */; };
+		2CA21A810BD438F600B99FB7 /* DeclDeployMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CA21A800BD438F600B99FB7 /* DeclDeployMask.cpp */; };
+		2CA21A830BD4390000B99FB7 /* DeclDeployMask.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CA21A820BD4390000B99FB7 /* DeclDeployMask.h */; };
+		2CA21A850BD4392F00B99FB7 /* HeightMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CA21A840BD4392F00B99FB7 /* HeightMap.h */; };
+		2CA21A870BD4393800B99FB7 /* HeightMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CA21A860BD4393800B99FB7 /* HeightMap.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		2C2247FA0B6FDD64002B2112 /* precompiled.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = precompiled.h; path = ../game/decls/precompiled.h; sourceTree = SOURCE_ROOT; };
+		2C2247FC0B6FDD71002B2112 /* DeclAmmoType.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclAmmoType.cpp; path = ../game/decls/DeclAmmoType.cpp; sourceTree = SOURCE_ROOT; };
+		2C2247FE0B6FDD77002B2112 /* DeclAmmoType.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclAmmoType.h; path = ../game/decls/DeclAmmoType.h; sourceTree = SOURCE_ROOT; };
+		2C22480F0B6FE250002B2112 /* DeclAOR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclAOR.h; path = ../game/decls/DeclAOR.h; sourceTree = SOURCE_ROOT; };
+		2C2248100B6FE250002B2112 /* DeclCampaign.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclCampaign.h; path = ../game/decls/DeclCampaign.h; sourceTree = SOURCE_ROOT; };
+		2C2248110B6FE250002B2112 /* declClimate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = declClimate.h; path = ../game/decls/declClimate.h; sourceTree = SOURCE_ROOT; };
+		2C2248120B6FE250002B2112 /* DeclDamage.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclDamage.h; path = ../game/decls/DeclDamage.h; sourceTree = SOURCE_ROOT; };
+		2C2248130B6FE250002B2112 /* DeclDamageFilter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclDamageFilter.h; path = ../game/decls/DeclDamageFilter.h; sourceTree = SOURCE_ROOT; };
+		2C2248140B6FE250002B2112 /* DeclDeployableObject.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclDeployableObject.h; path = ../game/decls/DeclDeployableObject.h; sourceTree = SOURCE_ROOT; };
+		2C2248150B6FE250002B2112 /* DeclDeployableZone.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclDeployableZone.h; path = ../game/decls/DeclDeployableZone.h; sourceTree = SOURCE_ROOT; };
+		2C2248160B6FE250002B2112 /* declForecast.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = declForecast.h; path = ../game/decls/declForecast.h; sourceTree = SOURCE_ROOT; };
+		2C2248170B6FE250002B2112 /* DeclGUI.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclGUI.h; path = ../game/decls/DeclGUI.h; sourceTree = SOURCE_ROOT; };
+		2C2248180B6FE250002B2112 /* DeclGUITheme.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclGUITheme.h; path = ../game/decls/DeclGUITheme.h; sourceTree = SOURCE_ROOT; };
+		2C2248190B6FE250002B2112 /* DeclInvItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclInvItem.h; path = ../game/decls/DeclInvItem.h; sourceTree = SOURCE_ROOT; };
+		2C22481A0B6FE250002B2112 /* DeclInvItemType.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclInvItemType.h; path = ../game/decls/DeclInvItemType.h; sourceTree = SOURCE_ROOT; };
+		2C22481B0B6FE250002B2112 /* DeclInvSlot.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclInvSlot.h; path = ../game/decls/DeclInvSlot.h; sourceTree = SOURCE_ROOT; };
+		2C22481C0B6FE250002B2112 /* DeclItemPackage.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclItemPackage.h; path = ../game/decls/DeclItemPackage.h; sourceTree = SOURCE_ROOT; };
+		2C22481D0B6FE250002B2112 /* DeclKeyBinding.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclKeyBinding.h; path = ../game/decls/DeclKeyBinding.h; sourceTree = SOURCE_ROOT; };
+		2C22481E0B6FE250002B2112 /* DeclMapInfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclMapInfo.h; path = ../game/decls/DeclMapInfo.h; sourceTree = SOURCE_ROOT; };
+		2C22481F0B6FE250002B2112 /* DeclPlayerClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclPlayerClass.h; path = ../game/decls/DeclPlayerClass.h; sourceTree = SOURCE_ROOT; };
+		2C2248200B6FE250002B2112 /* DeclPlayerTask.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclPlayerTask.h; path = ../game/decls/DeclPlayerTask.h; sourceTree = SOURCE_ROOT; };
+		2C2248210B6FE250002B2112 /* DeclProficiencyItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclProficiencyItem.h; path = ../game/decls/DeclProficiencyItem.h; sourceTree = SOURCE_ROOT; };
+		2C2248220B6FE250002B2112 /* DeclProficiencyType.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclProficiencyType.h; path = ../game/decls/DeclProficiencyType.h; sourceTree = SOURCE_ROOT; };
+		2C2248230B6FE250002B2112 /* DeclQuickChat.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclQuickChat.h; path = ../game/decls/DeclQuickChat.h; sourceTree = SOURCE_ROOT; };
+		2C2248240B6FE250002B2112 /* DeclRadialMenu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclRadialMenu.h; path = ../game/decls/DeclRadialMenu.h; sourceTree = SOURCE_ROOT; };
+		2C2248250B6FE250002B2112 /* DeclRank.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclRank.h; path = ../game/decls/DeclRank.h; sourceTree = SOURCE_ROOT; };
+		2C2248260B6FE250002B2112 /* DeclRating.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclRating.h; path = ../game/decls/DeclRating.h; sourceTree = SOURCE_ROOT; };
+		2C2248270B6FE250002B2112 /* DeclRequirement.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclRequirement.h; path = ../game/decls/DeclRequirement.h; sourceTree = SOURCE_ROOT; };
+		2C2248280B6FE250002B2112 /* DeclStringMap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclStringMap.h; path = ../game/decls/DeclStringMap.h; sourceTree = SOURCE_ROOT; };
+		2C2248290B6FE250002B2112 /* DeclTargetInfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclTargetInfo.h; path = ../game/decls/DeclTargetInfo.h; sourceTree = SOURCE_ROOT; };
+		2C22482A0B6FE250002B2112 /* DeclToolTip.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclToolTip.h; path = ../game/decls/DeclToolTip.h; sourceTree = SOURCE_ROOT; };
+		2C22482B0B6FE250002B2112 /* DeclVehiclePath.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclVehiclePath.h; path = ../game/decls/DeclVehiclePath.h; sourceTree = SOURCE_ROOT; };
+		2C22482C0B6FE250002B2112 /* declVehicleScript.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = declVehicleScript.h; path = ../game/decls/declVehicleScript.h; sourceTree = SOURCE_ROOT; };
+		2C22482D0B6FE250002B2112 /* GameDeclIdentifiers.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = GameDeclIdentifiers.h; path = ../game/decls/GameDeclIdentifiers.h; sourceTree = SOURCE_ROOT; };
+		2C22482E0B6FE250002B2112 /* GameDeclInfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = GameDeclInfo.h; path = ../game/decls/GameDeclInfo.h; sourceTree = SOURCE_ROOT; };
+		2C22485C0B6FE2BD002B2112 /* DeclAOR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclAOR.cpp; path = ../game/decls/DeclAOR.cpp; sourceTree = SOURCE_ROOT; };
+		2C22485D0B6FE2BD002B2112 /* DeclCampaign.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclCampaign.cpp; path = ../game/decls/DeclCampaign.cpp; sourceTree = SOURCE_ROOT; };
+		2C22485F0B6FE2BD002B2112 /* DeclDamage.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclDamage.cpp; path = ../game/decls/DeclDamage.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248600B6FE2BD002B2112 /* DeclDamageFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclDamageFilter.cpp; path = ../game/decls/DeclDamageFilter.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248610B6FE2BD002B2112 /* DeclDeployableObject.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclDeployableObject.cpp; path = ../game/decls/DeclDeployableObject.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248620B6FE2BD002B2112 /* DeclDeployableZone.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclDeployableZone.cpp; path = ../game/decls/DeclDeployableZone.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248640B6FE2BD002B2112 /* DeclGUI.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclGUI.cpp; path = ../game/decls/DeclGUI.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248650B6FE2BD002B2112 /* DeclGUITheme.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclGUITheme.cpp; path = ../game/decls/DeclGUITheme.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248660B6FE2BD002B2112 /* DeclInvItem.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclInvItem.cpp; path = ../game/decls/DeclInvItem.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248670B6FE2BD002B2112 /* DeclInvItemType.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclInvItemType.cpp; path = ../game/decls/DeclInvItemType.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248680B6FE2BD002B2112 /* DeclInvSlot.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclInvSlot.cpp; path = ../game/decls/DeclInvSlot.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248690B6FE2BD002B2112 /* DeclItemPackage.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclItemPackage.cpp; path = ../game/decls/DeclItemPackage.cpp; sourceTree = SOURCE_ROOT; };
+		2C22486A0B6FE2BD002B2112 /* DeclKeyBinding.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclKeyBinding.cpp; path = ../game/decls/DeclKeyBinding.cpp; sourceTree = SOURCE_ROOT; };
+		2C22486B0B6FE2BD002B2112 /* DeclMapInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclMapInfo.cpp; path = ../game/decls/DeclMapInfo.cpp; sourceTree = SOURCE_ROOT; };
+		2C22486C0B6FE2BD002B2112 /* DeclPlayerClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclPlayerClass.cpp; path = ../game/decls/DeclPlayerClass.cpp; sourceTree = SOURCE_ROOT; };
+		2C22486D0B6FE2BD002B2112 /* DeclPlayerTask.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclPlayerTask.cpp; path = ../game/decls/DeclPlayerTask.cpp; sourceTree = SOURCE_ROOT; };
+		2C22486E0B6FE2BD002B2112 /* DeclProficiencyItem.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclProficiencyItem.cpp; path = ../game/decls/DeclProficiencyItem.cpp; sourceTree = SOURCE_ROOT; };
+		2C22486F0B6FE2BD002B2112 /* DeclProficiencyType.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclProficiencyType.cpp; path = ../game/decls/DeclProficiencyType.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248700B6FE2BD002B2112 /* DeclQuickChat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclQuickChat.cpp; path = ../game/decls/DeclQuickChat.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248710B6FE2BD002B2112 /* DeclRadialMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclRadialMenu.cpp; path = ../game/decls/DeclRadialMenu.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248720B6FE2BD002B2112 /* DeclRank.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclRank.cpp; path = ../game/decls/DeclRank.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248730B6FE2BD002B2112 /* DeclRating.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclRating.cpp; path = ../game/decls/DeclRating.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248740B6FE2BD002B2112 /* DeclRequirement.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclRequirement.cpp; path = ../game/decls/DeclRequirement.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248750B6FE2BD002B2112 /* DeclStringMap.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclStringMap.cpp; path = ../game/decls/DeclStringMap.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248760B6FE2BD002B2112 /* DeclTargetInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclTargetInfo.cpp; path = ../game/decls/DeclTargetInfo.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248770B6FE2BD002B2112 /* DeclToolTip.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclToolTip.cpp; path = ../game/decls/DeclToolTip.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248780B6FE2BD002B2112 /* DeclVehiclePath.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclVehiclePath.cpp; path = ../game/decls/DeclVehiclePath.cpp; sourceTree = SOURCE_ROOT; };
+		2C2248790B6FE2BD002B2112 /* declVehicleScript.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = declVehicleScript.cpp; path = ../game/decls/declVehicleScript.cpp; sourceTree = SOURCE_ROOT; };
+		2C22487A0B6FE2BD002B2112 /* GameDeclIdentifiers.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GameDeclIdentifiers.cpp; path = ../game/decls/GameDeclIdentifiers.cpp; sourceTree = SOURCE_ROOT; };
+		2C22487B0B6FE2BD002B2112 /* GameDeclInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GameDeclInfo.cpp; path = ../game/decls/GameDeclInfo.cpp; sourceTree = SOURCE_ROOT; };
+		2C224D990B700808002B2112 /* DeclType.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclType.cpp; path = ../decllib/DeclType.cpp; sourceTree = SOURCE_ROOT; };
+		2CA21A660BD437C100B99FB7 /* DeployMask.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeployMask.cpp; path = ../game/decls/DeployMask.cpp; sourceTree = SOURCE_ROOT; };
+		2CA21A680BD437D000B99FB7 /* DeployMask.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeployMask.h; path = ../game/decls/DeployMask.h; sourceTree = SOURCE_ROOT; };
+		2CA21A6D0BD4383900B99FB7 /* DeclHeightMap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclHeightMap.h; path = ../game/decls/DeclHeightMap.h; sourceTree = SOURCE_ROOT; };
+		2CA21A6F0BD4384700B99FB7 /* DeclHeightMap.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclHeightMap.cpp; path = ../game/decls/DeclHeightMap.cpp; sourceTree = SOURCE_ROOT; };
+		2CA21A800BD438F600B99FB7 /* DeclDeployMask.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DeclDeployMask.cpp; path = ../game/decls/DeclDeployMask.cpp; sourceTree = SOURCE_ROOT; };
+		2CA21A820BD4390000B99FB7 /* DeclDeployMask.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DeclDeployMask.h; path = ../game/decls/DeclDeployMask.h; sourceTree = SOURCE_ROOT; };
+		2CA21A840BD4392F00B99FB7 /* HeightMap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = HeightMap.h; path = ../game/decls/HeightMap.h; sourceTree = SOURCE_ROOT; };
+		2CA21A860BD4393800B99FB7 /* HeightMap.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = HeightMap.cpp; path = ../game/decls/HeightMap.cpp; sourceTree = SOURCE_ROOT; };
+		D2AAC046055464E500DB518D /* libGameDecl_SDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libGameDecl_SDK.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D289987405E68DCB004EDB86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* GameDecl */ = {
+			isa = PBXGroup;
+			children = (
+				2C2247F60B6FDD43002B2112 /* Headers */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = GameDecl;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				2C2247FC0B6FDD71002B2112 /* DeclAmmoType.cpp */,
+				2C22485C0B6FE2BD002B2112 /* DeclAOR.cpp */,
+				2C22485D0B6FE2BD002B2112 /* DeclCampaign.cpp */,
+				2C22485F0B6FE2BD002B2112 /* DeclDamage.cpp */,
+				2C2248600B6FE2BD002B2112 /* DeclDamageFilter.cpp */,
+				2C2248610B6FE2BD002B2112 /* DeclDeployableObject.cpp */,
+				2C2248620B6FE2BD002B2112 /* DeclDeployableZone.cpp */,
+				2CA21A800BD438F600B99FB7 /* DeclDeployMask.cpp */,
+				2CA21A6F0BD4384700B99FB7 /* DeclHeightMap.cpp */,
+				2C2248640B6FE2BD002B2112 /* DeclGUI.cpp */,
+				2C2248650B6FE2BD002B2112 /* DeclGUITheme.cpp */,
+				2C2248660B6FE2BD002B2112 /* DeclInvItem.cpp */,
+				2C2248670B6FE2BD002B2112 /* DeclInvItemType.cpp */,
+				2C2248680B6FE2BD002B2112 /* DeclInvSlot.cpp */,
+				2C2248690B6FE2BD002B2112 /* DeclItemPackage.cpp */,
+				2C22486A0B6FE2BD002B2112 /* DeclKeyBinding.cpp */,
+				2C22486B0B6FE2BD002B2112 /* DeclMapInfo.cpp */,
+				2C22486C0B6FE2BD002B2112 /* DeclPlayerClass.cpp */,
+				2C22486D0B6FE2BD002B2112 /* DeclPlayerTask.cpp */,
+				2C22486E0B6FE2BD002B2112 /* DeclProficiencyItem.cpp */,
+				2C22486F0B6FE2BD002B2112 /* DeclProficiencyType.cpp */,
+				2C2248700B6FE2BD002B2112 /* DeclQuickChat.cpp */,
+				2C2248710B6FE2BD002B2112 /* DeclRadialMenu.cpp */,
+				2C2248720B6FE2BD002B2112 /* DeclRank.cpp */,
+				2C2248730B6FE2BD002B2112 /* DeclRating.cpp */,
+				2C2248740B6FE2BD002B2112 /* DeclRequirement.cpp */,
+				2C2248750B6FE2BD002B2112 /* DeclStringMap.cpp */,
+				2C2248760B6FE2BD002B2112 /* DeclTargetInfo.cpp */,
+				2C2248770B6FE2BD002B2112 /* DeclToolTip.cpp */,
+				2C224D990B700808002B2112 /* DeclType.cpp */,
+				2C2248780B6FE2BD002B2112 /* DeclVehiclePath.cpp */,
+				2C2248790B6FE2BD002B2112 /* declVehicleScript.cpp */,
+				2CA21A660BD437C100B99FB7 /* DeployMask.cpp */,
+				2C22487A0B6FE2BD002B2112 /* GameDeclIdentifiers.cpp */,
+				2C22487B0B6FE2BD002B2112 /* GameDeclInfo.cpp */,
+				2CA21A860BD4393800B99FB7 /* HeightMap.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC046055464E500DB518D /* libGameDecl_SDK.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2C2247F60B6FDD43002B2112 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				2C2247FA0B6FDD64002B2112 /* precompiled.h */,
+				2C2247FE0B6FDD77002B2112 /* DeclAmmoType.h */,
+				2C22480F0B6FE250002B2112 /* DeclAOR.h */,
+				2C2248100B6FE250002B2112 /* DeclCampaign.h */,
+				2C2248110B6FE250002B2112 /* declClimate.h */,
+				2C2248120B6FE250002B2112 /* DeclDamage.h */,
+				2C2248130B6FE250002B2112 /* DeclDamageFilter.h */,
+				2C2248140B6FE250002B2112 /* DeclDeployableObject.h */,
+				2C2248150B6FE250002B2112 /* DeclDeployableZone.h */,
+				2CA21A820BD4390000B99FB7 /* DeclDeployMask.h */,
+				2C2248160B6FE250002B2112 /* declForecast.h */,
+				2CA21A6D0BD4383900B99FB7 /* DeclHeightMap.h */,
+				2C2248170B6FE250002B2112 /* DeclGUI.h */,
+				2C2248180B6FE250002B2112 /* DeclGUITheme.h */,
+				2C2248190B6FE250002B2112 /* DeclInvItem.h */,
+				2C22481A0B6FE250002B2112 /* DeclInvItemType.h */,
+				2C22481B0B6FE250002B2112 /* DeclInvSlot.h */,
+				2C22481C0B6FE250002B2112 /* DeclItemPackage.h */,
+				2C22481D0B6FE250002B2112 /* DeclKeyBinding.h */,
+				2C22481E0B6FE250002B2112 /* DeclMapInfo.h */,
+				2C22481F0B6FE250002B2112 /* DeclPlayerClass.h */,
+				2C2248200B6FE250002B2112 /* DeclPlayerTask.h */,
+				2C2248210B6FE250002B2112 /* DeclProficiencyItem.h */,
+				2C2248220B6FE250002B2112 /* DeclProficiencyType.h */,
+				2C2248230B6FE250002B2112 /* DeclQuickChat.h */,
+				2C2248240B6FE250002B2112 /* DeclRadialMenu.h */,
+				2C2248250B6FE250002B2112 /* DeclRank.h */,
+				2C2248260B6FE250002B2112 /* DeclRating.h */,
+				2C2248270B6FE250002B2112 /* DeclRequirement.h */,
+				2C2248280B6FE250002B2112 /* DeclStringMap.h */,
+				2C2248290B6FE250002B2112 /* DeclTargetInfo.h */,
+				2C22482A0B6FE250002B2112 /* DeclToolTip.h */,
+				2C22482B0B6FE250002B2112 /* DeclVehiclePath.h */,
+				2C22482C0B6FE250002B2112 /* declVehicleScript.h */,
+				2CA21A680BD437D000B99FB7 /* DeployMask.h */,
+				2C22482D0B6FE250002B2112 /* GameDeclIdentifiers.h */,
+				2C22482E0B6FE250002B2112 /* GameDeclInfo.h */,
+				2CA21A840BD4392F00B99FB7 /* HeightMap.h */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC043055464E500DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C2247FB0B6FDD64002B2112 /* precompiled.h in Headers */,
+				2C2247FF0B6FDD77002B2112 /* DeclAmmoType.h in Headers */,
+				2C22482F0B6FE250002B2112 /* DeclAOR.h in Headers */,
+				2C2248300B6FE250002B2112 /* DeclCampaign.h in Headers */,
+				2C2248310B6FE250002B2112 /* declClimate.h in Headers */,
+				2C2248320B6FE250002B2112 /* DeclDamage.h in Headers */,
+				2C2248330B6FE250002B2112 /* DeclDamageFilter.h in Headers */,
+				2C2248340B6FE250002B2112 /* DeclDeployableObject.h in Headers */,
+				2C2248350B6FE250002B2112 /* DeclDeployableZone.h in Headers */,
+				2C2248360B6FE250002B2112 /* declForecast.h in Headers */,
+				2C2248370B6FE250002B2112 /* DeclGUI.h in Headers */,
+				2C2248380B6FE250002B2112 /* DeclGUITheme.h in Headers */,
+				2C2248390B6FE250002B2112 /* DeclInvItem.h in Headers */,
+				2C22483A0B6FE250002B2112 /* DeclInvItemType.h in Headers */,
+				2C22483B0B6FE250002B2112 /* DeclInvSlot.h in Headers */,
+				2C22483C0B6FE250002B2112 /* DeclItemPackage.h in Headers */,
+				2C22483D0B6FE250002B2112 /* DeclKeyBinding.h in Headers */,
+				2C22483E0B6FE250002B2112 /* DeclMapInfo.h in Headers */,
+				2C22483F0B6FE250002B2112 /* DeclPlayerClass.h in Headers */,
+				2C2248400B6FE250002B2112 /* DeclPlayerTask.h in Headers */,
+				2C2248410B6FE250002B2112 /* DeclProficiencyItem.h in Headers */,
+				2C2248420B6FE250002B2112 /* DeclProficiencyType.h in Headers */,
+				2C2248430B6FE250002B2112 /* DeclQuickChat.h in Headers */,
+				2C2248440B6FE250002B2112 /* DeclRadialMenu.h in Headers */,
+				2C2248450B6FE250002B2112 /* DeclRank.h in Headers */,
+				2C2248460B6FE250002B2112 /* DeclRating.h in Headers */,
+				2C2248470B6FE250002B2112 /* DeclRequirement.h in Headers */,
+				2C2248480B6FE250002B2112 /* DeclStringMap.h in Headers */,
+				2C2248490B6FE250002B2112 /* DeclTargetInfo.h in Headers */,
+				2C22484A0B6FE250002B2112 /* DeclToolTip.h in Headers */,
+				2C22484B0B6FE250002B2112 /* DeclVehiclePath.h in Headers */,
+				2C22484C0B6FE250002B2112 /* declVehicleScript.h in Headers */,
+				2C22484D0B6FE250002B2112 /* GameDeclIdentifiers.h in Headers */,
+				2C22484E0B6FE250002B2112 /* GameDeclInfo.h in Headers */,
+				2CA21A690BD437D000B99FB7 /* DeployMask.h in Headers */,
+				2CA21A6E0BD4383900B99FB7 /* DeclHeightMap.h in Headers */,
+				2CA21A830BD4390000B99FB7 /* DeclDeployMask.h in Headers */,
+				2CA21A850BD4392F00B99FB7 /* HeightMap.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC045055464E500DB518D /* GameDecl */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "GameDecl" */;
+			buildPhases = (
+				D2AAC043055464E500DB518D /* Headers */,
+				D2AAC044055464E500DB518D /* Sources */,
+				D289987405E68DCB004EDB86 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GameDecl;
+			productName = GameDecl;
+			productReference = D2AAC046055464E500DB518D /* libGameDecl_SDK.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "libGameDecl_SDK" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* GameDecl */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2AAC045055464E500DB518D /* GameDecl */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC044055464E500DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C2247FD0B6FDD71002B2112 /* DeclAmmoType.cpp in Sources */,
+				2C22487D0B6FE2BD002B2112 /* DeclAOR.cpp in Sources */,
+				2C22487E0B6FE2BD002B2112 /* DeclCampaign.cpp in Sources */,
+				2C2248800B6FE2BD002B2112 /* DeclDamage.cpp in Sources */,
+				2C2248810B6FE2BD002B2112 /* DeclDamageFilter.cpp in Sources */,
+				2C2248820B6FE2BD002B2112 /* DeclDeployableObject.cpp in Sources */,
+				2C2248830B6FE2BD002B2112 /* DeclDeployableZone.cpp in Sources */,
+				2C2248850B6FE2BD002B2112 /* DeclGUI.cpp in Sources */,
+				2C2248860B6FE2BD002B2112 /* DeclGUITheme.cpp in Sources */,
+				2C2248870B6FE2BD002B2112 /* DeclInvItem.cpp in Sources */,
+				2C2248880B6FE2BD002B2112 /* DeclInvItemType.cpp in Sources */,
+				2C2248890B6FE2BD002B2112 /* DeclInvSlot.cpp in Sources */,
+				2C22488A0B6FE2BD002B2112 /* DeclItemPackage.cpp in Sources */,
+				2C22488B0B6FE2BD002B2112 /* DeclKeyBinding.cpp in Sources */,
+				2C22488C0B6FE2BD002B2112 /* DeclMapInfo.cpp in Sources */,
+				2C22488D0B6FE2BD002B2112 /* DeclPlayerClass.cpp in Sources */,
+				2C22488E0B6FE2BD002B2112 /* DeclPlayerTask.cpp in Sources */,
+				2C22488F0B6FE2BD002B2112 /* DeclProficiencyItem.cpp in Sources */,
+				2C2248900B6FE2BD002B2112 /* DeclProficiencyType.cpp in Sources */,
+				2C2248910B6FE2BD002B2112 /* DeclQuickChat.cpp in Sources */,
+				2C2248920B6FE2BD002B2112 /* DeclRadialMenu.cpp in Sources */,
+				2C2248930B6FE2BD002B2112 /* DeclRank.cpp in Sources */,
+				2C2248940B6FE2BD002B2112 /* DeclRating.cpp in Sources */,
+				2C2248950B6FE2BD002B2112 /* DeclRequirement.cpp in Sources */,
+				2C2248960B6FE2BD002B2112 /* DeclStringMap.cpp in Sources */,
+				2C2248970B6FE2BD002B2112 /* DeclTargetInfo.cpp in Sources */,
+				2C2248980B6FE2BD002B2112 /* DeclToolTip.cpp in Sources */,
+				2C2248990B6FE2BD002B2112 /* DeclVehiclePath.cpp in Sources */,
+				2C22489A0B6FE2BD002B2112 /* declVehicleScript.cpp in Sources */,
+				2C22489B0B6FE2BD002B2112 /* GameDeclIdentifiers.cpp in Sources */,
+				2C22489C0B6FE2BD002B2112 /* GameDeclInfo.cpp in Sources */,
+				2C224D9A0B700808002B2112 /* DeclType.cpp in Sources */,
+				2CA21A670BD437C100B99FB7 /* DeployMask.cpp in Sources */,
+				2CA21A700BD4384700B99FB7 /* DeclHeightMap.cpp in Sources */,
+				2CA21A810BD438F600B99FB7 /* DeclDeployMask.cpp in Sources */,
+				2CA21A870BD4393800B99FB7 /* HeightMap.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB91EC08733DB70010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = i386;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = GameDecl_SDK;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		1DEB91ED08733DB70010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = i386;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = GameDecl_SDK;
+			};
+			name = Release;
+		};
+		1DEB91F008733DB70010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_ONE_BYTE_BOOL = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ../game/decls/precompiled.h;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					MACOS_X,
+					_DEBUG,
+					__PORTABLE_STRINGS__,
+				);
+				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = NO;
+				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-fpermissive",
+				);
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = ../build/MacOSX;
+			};
+			name = Debug;
+		};
+		1DEB91F108733DB70010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = i386;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_ONE_BYTE_BOOL = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ../game/decls/precompiled.h;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					MACOS_X,
+					NDEBUG,
+					__PORTABLE_STRINGS__,
+				);
+				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = NO;
+				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-fpermissive",
+				);
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = ../build/MacOSX;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "GameDecl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91EC08733DB70010E9CD /* Debug */,
+				1DEB91ED08733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "libGameDecl_SDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91F008733DB70010E9CD /* Debug */,
+				1DEB91F108733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

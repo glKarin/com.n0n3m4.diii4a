@@ -1,0 +1,39 @@
+/***************************************************************************
+	SABot - Stupid Angry Bot - release alpha 7 - "I'm not a puppet! I'm a real boy!"
+	
+ 	bot_sabot_characters.def
+ 	Custom characters.
+ 	TinMan: Note I've done bugger all testing as to attack accuracy and aim rate settings, the functions that use these are pretty much temporary anyway.
+***************************************************************************/
+
+entityDef bot_sabot_tinman { // TinMan: def name, must be unique
+	"inherit"								"bot_sabot"
+	
+	"npc_name" 							"Jarad 'TinMan' Hansen"
+	
+	// TinMan: 0-5 - Puke, Red, Blue, Green, Yellow
+	"mp_skin"								"4"
+
+	// TinMan: 0-1, Red, Blue
+	"team"									"0"
+	
+	"aim_accuracy"				"2"		// TinMan: Variation on aiming, more = bigger variation.	
+	"aim_rate"							"0.5" // TinMan: Size of steps blending aimPos each frame: lower = slower bot aiming/turning, higher = quicker.
+}
+
+entityDef bot_sabot_fluffy {
+	"inherit"								"bot_sabot"
+	"npc_name" 							"Fluffy Bunny"
+	"mp_skin"								"4"
+	"aim_accuracy"				"3"		// TinMan: Variation on aiming, more = bigger variation.	
+	"aim_rate"							"0.7" // TinMan: Size of steps blending aimPos each frame: lower = slower bot aiming/turning, higher = quicker.
+}
+
+entityDef bot_sabot_blackstar {
+	"inherit"								"bot_sabot"
+	"npc_name" 							"BlackStar Ninja"
+	"mp_skin"								"2"
+	
+	"priority_weapon_rocketlauncher" 		"50"
+	"priority_weapon_plasmagun_mp"			"60"
+}

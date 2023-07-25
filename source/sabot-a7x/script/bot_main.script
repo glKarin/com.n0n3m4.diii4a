@@ -1,0 +1,34 @@
+/***********************************************************************
+Doom3Bots - Open bot framework for Doom 3
+release ? - "Beware of TinMans horrifying code"
+
+bot_scripts.script
+List of bots scripts and script used by framework
+***********************************************************************/
+
+// TinMan: Path types, sync with game code
+#define	PATHTYPE_WALK						0
+#define	PATHTYPE_WALKOFFLEDGE		1
+#define	PATHTYPE_BARRIERJUMP		2
+#define	PATHTYPE_JUMP						3
+#define	PATHTYPE_ELEVATOR				4
+
+// TinMan: Game types, sync with game code
+#define	GAME_SP 			0
+#define	GAME_DM 			1
+#define	GAME_TOURNEY	2
+#define	GAME_TDM 			3
+#define	GAME_LASTMAN	4
+#define	GAME_CTF			5
+#define	GAME_COOP			6
+
+// TinMan: *CTF* 
+#define	FLAGSTATUS_INBASE 0
+#define	FLAGSTATUS_TAKEN  1
+#define	FLAGSTATUS_STRAY  2
+#define	FLAGSTATUS_NONE   3
+
+#include "script/bot_events.script"
+#include "script/bot_base.script"
+
+#include "script/bot_sabot.script" // TinMan: My precious

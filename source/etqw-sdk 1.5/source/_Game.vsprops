@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="ETQW Game DLL"
+	CharacterSet="2"
+	>
+	<Tool
+		Name="VCPreBuildEventTool"
+		Description="Generating build version..."
+		CommandLine="makeversion.py"
+	/>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="GAME_DLL"
+		UsePrecompiledHeader="2"
+		PrecompiledHeaderThrough=""
+		WarningLevel="3"
+		Detect64BitPortabilityProblems="true"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		ModuleDefinitionFile=".\game\Game.def"
+		SubSystem="2"
+		StackReserveSize="4194304"
+		StackCommitSize="4194304"
+		LargeAddressAware="2"
+		TargetMachine="1"
+	/>
+</VisualStudioPropertySheet>

@@ -1,0 +1,37 @@
+# -*- mode: python -*-
+# ETQW build script
+# TTimo <ttimo@idsoftware.com>
+# http://scons.org
+
+import sys, os
+import scons_utils
+
+Import( 'GLOBALS' )
+Import( GLOBALS )
+
+if ( g_sdk ):
+	game_proj = '#game_sdk.vcproj'
+	decl_proj = '#libGameDecl_sdk.vcproj'
+else:
+	game_proj = '#game.vcproj'
+	decl_proj = '#libGameDecl.vcproj'
+proj_list = scons_utils.ExtractSource( File( game_proj ).abspath )
+
+# is built globally and passed through GLOBALS in version_file
+proj_list.remove( 'framework/BuildVersion.cpp' )
+
+proj_list = [ os.path.join( '../..', i ) for i in proj_list ]
+
+gamedecl_list = scons_utils.ExtractSource( File( decl_proj ).abspath )
+gamedecl_list = [ os.path.join( '../..', i ) for i in gamedecl_list ]
+
+local_env = g_game_env.Clone()
+
+if ( local_gamedll == 1 ):
+	local_env.Append( CPPDEFINES = 'GAME_DLL' )
+	local_env.Append( LIBS = [ 'pthread' ] )
+	ret = local_env.SharedLibrarySafe( local_env, 'game', version_file[1] + idlib_objects + gamedecl_list + proj_list )
+	Return( 'ret' )
+else:
+	ret_list = [ local_env.StaticObject( source = i ) for i in idlib_objects + gamedecl_list + qgllib_objects + proj_list ]
+	Return( 'ret_list' )
