@@ -559,9 +559,7 @@ public class GameLauncher extends Activity
 
     public void updatehacktings()
     {
-		Log.e("Q3E", "updatehacktings: 1111111111");
     	LockCmdUpdate();
-		Log.e("Q3E", "updatehacktings: 222222222222");
         //k
         V.usedxt.setChecked(getProp("r_useDXT", false));
         V.useetc1.setChecked(getProp("r_useETC1", false));
@@ -986,11 +984,9 @@ public class GameLauncher extends Activity
 
     private void SetProp(String name, Object val)
     {
-		Log.e("Q3E", "SetProp 11111: " + name + " -> " + val);
 		if(!LockCmdUpdate())
 			return;
         SetCmdText(KidTech4Command.SetProp(GetCmdText(), name, val));
-		Log.e("Q3E", "SetProp 22222: " + name + " -> " + val);
         UnlockCmdUpdate();
     }
 
