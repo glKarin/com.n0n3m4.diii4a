@@ -5235,10 +5235,10 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 
 	idVec3 gravity = physicsObj.GetGravityNormal();
 
+	// if the player stepped up recently
 #ifdef _MOD_FULL_BODY_AWARENESS
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) {
 #endif
-	// if the player stepped up recently
 	deltaTime = gameLocal.time - stepUpTime;
 
 	if (deltaTime < STEPUP_TIME) {
