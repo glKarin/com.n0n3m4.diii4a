@@ -252,7 +252,7 @@ extern const char *si_gameTypeArgs[];
 
 extern const char *ui_skinArgs[];
 
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 extern idCVar harm_pm_fullBodyAwareness;
 extern idCVar harm_pm_fullBodyAwarenessOffset;
 #endif

@@ -1593,7 +1593,7 @@ void idPlayer::Spawn(void)
 	playerView.SetPlayerEntity(this);
 
 	// supress model in non-player views, but allow it in mirrors and remote views
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	idVec3 offset(0, 0, 0);
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
@@ -1603,7 +1603,7 @@ void idPlayer::Spawn(void)
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
 	renderEntity.suppressSurfaceInViewID = entityNumber+1;
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	else
 		showWeaponViewModel = false;
 #endif
@@ -2198,7 +2198,7 @@ void idPlayer::Restore(idRestoreGame *savefile)
 
 	// create combat collision hull for exact collision detection
 	SetCombatModel();
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	idVec3 offset(0, 0, 0);
 	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
 		fullBodyAwarenessOffset = offset;
@@ -5212,7 +5212,7 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 	// calculate position for view bobbing
 	viewBob.Zero();
 
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
 	if (physicsObj.HasSteppedUp()) {
@@ -5235,7 +5235,7 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 
 	idVec3 gravity = physicsObj.GetGravityNormal();
 
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) {
 #endif
 	// if the player stepped up recently
@@ -5244,7 +5244,7 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 	if (deltaTime < STEPUP_TIME) {
 		viewBob += gravity * (stepUpDelta * (STEPUP_TIME - deltaTime) / STEPUP_TIME);
 	}
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	}
 #endif
 
@@ -6752,7 +6752,7 @@ Called every tic for each player
 */
 void idPlayer::Think(void)
 {
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 	{
 		renderEntity.suppressSurfaceInViewID = entityNumber + 1;
@@ -7728,7 +7728,7 @@ void idPlayer::CalculateViewWeaponPos(idVec3 &origin, idMat3 &axis)
 	int			delta;
 
 	// CalculateRenderView must have been called first
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	idVec3 viewOrigin = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() ? firstPersonViewOrigin : firstPersonViewOrigin_viewWeaponOrigin;
 #else
 	const idVec3 &viewOrigin = firstPersonViewOrigin;
@@ -7887,7 +7887,7 @@ void idPlayer::GetViewPos(idVec3 &origin, idMat3 &axis) const
 	idAngles angles;
 
 	// if dead, fix the angle and don't add any kick
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	if( (!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) && health <= 0 )
 #else
 	if (health <= 0)
@@ -7917,7 +7917,7 @@ idPlayer::CalculateFirstPersonView
 */
 void idPlayer::CalculateFirstPersonView(void)
 {
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) {
 #endif
 	if ((pm_modelView.GetInteger() == 1) || ((pm_modelView.GetInteger() == 2) && (health <= 0))) {
@@ -7942,7 +7942,7 @@ void idPlayer::CalculateFirstPersonView(void)
 		firstPersonViewAxis = firstPersonViewAxis * playerView.ShakeAxis();
 #endif
 	}
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	} else {
 		idVec3 firstPersonViewOrigin_orig;
 		GetViewPos( firstPersonViewOrigin_orig, firstPersonViewAxis );
@@ -9238,11 +9238,11 @@ idPlayer::CanShowWeaponViewmodel
 */
 bool idPlayer::CanShowWeaponViewmodel(void) const
 {
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
 	return showWeaponViewModel;
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	return false;
 #endif
 }

@@ -55,9 +55,6 @@ If you have questions concerning this license or the applicable additional terms
 #define protected	public
 #endif
 
-#ifdef __ANDROID__
-#define _HARM_FULL_BODY_AWARENESS
-#endif
 extern idRenderWorld 				*gameRenderWorld;
 extern idSoundWorld 				*gameSoundWorld;
 

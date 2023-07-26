@@ -1401,7 +1401,7 @@ if(BASE)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_game})
 	
 	#set_target_properties(game PROPERTIES PREFIX "")
-	set_target_properties(game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
+	set_target_properties(game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_MOD_FULL_BODY_AWARENESS")
 	target_include_directories(game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/game")
 	set_target_properties(game PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(game PROPERTIES INSTALL_NAME_DIR "@executable_path")
