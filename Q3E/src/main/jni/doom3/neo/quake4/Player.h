@@ -427,6 +427,11 @@ public:
 // squirrel: Mode-agnostic buymenus
 	float					buyMenuCash;
 // RITUAL END
+#ifdef _MOD_FULL_BODY_AWARENESS
+	idVec3 firstPersonViewOrigin_playerViewOrigin; // melee
+	idVec3 firstPersonViewOrigin_viewWeaponOrigin; // launch
+	idVec3 fullBodyAwarenessOffset;
+#endif
 
 public:
 	CLASS_PROTOTYPE( idPlayer );

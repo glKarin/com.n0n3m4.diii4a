@@ -66,7 +66,10 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0: disable; other number: bot num)", 0),
                     KCVar.CreateCommand("addbots", "string", "adds a multiplayer bot(support `tab` complete, exam. addbots bot_name1 bot_name2 ...)", 0),
                     KCVar.CreateCommand("fillbots", "integer", "fill bots(empty argument to fill max bots num, exam. fillbots 8)", KCVar.FLAG_POSITIVE),
-                    KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0)
+                    KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint in full-body awareness", 0)
                 );
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)

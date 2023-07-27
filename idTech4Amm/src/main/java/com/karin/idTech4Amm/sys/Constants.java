@@ -31,6 +31,7 @@ public final class Constants
             "Add skip intro.",
             "Support obj static model, and fix png image load.",
             "Support max FPS limit.",
+            "Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).",
 	};
 
 	// Launcher preference keys
