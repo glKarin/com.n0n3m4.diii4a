@@ -277,6 +277,9 @@ void rvWeaponLightningGun::Think ( void ) {
 // RAVEN BEGIN
 // ddynerman: multiple clip worlds
 // jshepard: allow projectile hits
+#ifdef _MOD_FULL_BODY_AWARENESS
+	idVec3 playerViewOrigin = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->IsInVehicle() || owner->IsZoomed() ? rvWeapon::playerViewOrigin : owner->firstPersonViewOrigin_viewWeaponOrigin;
+#endif
 	gameLocal.TracePoint(	owner, tr, 
 							playerViewOrigin, 
 							playerViewOrigin + playerViewAxis[0] * range, 
