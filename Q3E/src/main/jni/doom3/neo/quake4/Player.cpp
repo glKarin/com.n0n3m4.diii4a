@@ -1927,7 +1927,7 @@ void idPlayer::Spawn( void ) {
 	else
 		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
 
-	if(!harm_pm_fullBodyAwareness.GetBool())
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
 	renderEntity.suppressSurfaceInViewID = entityNumber+1;
 #ifdef _MOD_FULL_BODY_AWARENESS
