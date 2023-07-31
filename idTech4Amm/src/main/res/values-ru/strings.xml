@@ -123,7 +123,7 @@
     <string name="redirect_output_to_file">Сохранить логи</string>
     <string name="save_game_runtime_output_log_to_stdout_txt_stderr_txt">Сохранить журнал логов в stdout.txt/stderr.txt</string>
     <string name="function_key_toolbar">Панель функциональных клавиш</string>
-    <string name="show_function_key_toolbar_when_open_input_method">Показать панель функциональных клавиш при открытом методе ввода</string>
+    <string name="show_function_key_toolbar_when_open_input_method">Показать панель функциональных клавиш при открытии клавиатуры</string>
     <string name="function_key_toolbar_offset">Смещение панели функциональной клавиши</string>
     <string name="setup_function_key_toolbar_position_offset">Настройка смещения положения панели инструментов функциональной клавиши</string>
     <string name="general">Прочее</string>
