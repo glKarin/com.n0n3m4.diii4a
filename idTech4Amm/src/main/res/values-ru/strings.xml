@@ -37,10 +37,10 @@
     <string name="specular_exponent_cvar_harm_r_specularexponent">Зеркальность(cvar `harm_r_specularExponent`):</string>
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности в модели взаимодействия света(по умолчанию 4.0)</string>
     <string name="sound_implementation">Качество звука</string>
-    <string name="load_quicksave_when_start_game">Загружать QuickSave при запуске игры</string>
+    <string name="load_quicksave_when_start_game">Загружать автострахование при запуске игры</string>
     <string name="edit_autoexec_cfg">Редактировать autoexec.cfg</string>
     <string name="edit_doomconfig_cfg">Редактировать DoomConfig.cfg</string>
-    <string name="note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here">Примечание. Геймпады/Клавиатуры должны быть настроены в игре (как на ПК), а не здесь.</string>
+    <string name="note_gamepads_keyboards_must_be_configured_in_game_like_on_pc_not_here">Примечание: Геймпады/Клавиатуры должны быть настроены в игре (как на ПК), а не здесь.</string>
     <string name="configure_on_screen_controls">Настройки управления</string>
     <string name="on_screen_button_setting">Настройки кнопок</string>
     <string name="setup_on_screen_button_theme">Настройки темы кнопок</string>
@@ -55,7 +55,7 @@
     <string name="x_axis_sensitivity_of_gyroscope">Чувствительность гироскопа по оси X</string>
     <string name="y_axis_sensitivity_of_gyroscope">Чувствительность гироскопа по оси Y</string>
     <string name="hide_onscreen_buttons">Скрыть экранные кнопки</string>
-    <string name="using_mouse">Использование мыши</string>
+    <string name="using_mouse">Использовать мыши</string>
     <string name="mouse_settings">Настройки мыши:</string>
     <string name="autodetect_mouse">Автоопределение мыши</string>
     <string name="mouse_event_device">Устройство событий мыши:</string>
@@ -238,18 +238,18 @@
     <string name="sorting_by_add_time">сортировка по времени добавления</string>
     <string name="not_supported">Не поддерживается!</string>
     <string name="get_open_source_license">Поиск OPEN-SOURCE ЛИЦЕНЗИЯ......</string>
-    <string name="opengles_shader">OpenGLES shader</string>
-    <string name="extract_file_fail">Extract file fail!</string>
-    <string name="extract_file_success">Extract file success.</string>
-    <string name="extract_file">extract file</string>
-    <string name="extract_source">Extract source</string>
-    <string name="tips">Tips</string>
-    <string name="license">License</string>
-    <string name="maximum_fps_limit_0_unlimited">Maximum FPS limit(0 = unlimited)</string>
-    <string name="limit_maximum_fps_default_is_0">Limit maximum FPS(default is 0)</string>
-    <string name="edit_cvar">Edit CVar</string>
-    <string name="cvar_editor">CVar editor</string>
-    <string name="skip_intro">Skip intro</string>
+    <string name="opengles_shader">OpenGLES шейдер</string>
+    <string name="extract_file_fail">Извлечь файл не удалось</string>
+    <string name="extract_file_success">Извлечение файлов прошло успешно.</string>
+    <string name="extract_file">извлечь файл</string>
+    <string name="extract_source">Извлечь источник</string>
+    <string name="tips">Советы</string>
+    <string name="license">Лицензия</string>
+    <string name="maximum_fps_limit_0_unlimited">Максимальный придел FPS (0 = неограниченный)</string>
+    <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (по умолчанию 0)</string>
+    <string name="edit_cvar">Редактировать CVar</string>
+    <string name="cvar_editor">CVar редактор</string>
+    <string name="skip_intro">Пропустить вступительный ролик</string>
     <string name="overthinked_overthinked">Overthinked(overthinked)</string>
     <string name="sabot_sabot">SABot(sabot)</string>
 
