@@ -242,7 +242,7 @@
     <string name="extract_file_fail">Извлечь файл не удалось</string>
     <string name="extract_file_success">Извлечение файла прошло успешно.</string>
     <string name="extract_file">извлечь файл</string>
-    <string name="extract_source">Извлечь источник</string>
+    <string name="extract_source">Извлечь ресурсы</string>
     <string name="tips">Советы</string>
     <string name="license">Лицензия</string>
     <string name="maximum_fps_limit_0_unlimited">Максимальный придел FPS (0 = неограниченный)</string>
