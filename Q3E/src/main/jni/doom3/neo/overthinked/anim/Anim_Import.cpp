@@ -42,7 +42,6 @@ static idStr				Maya_Error;
 
 static exporterInterface_t	Maya_ConvertModel = NULL;
 static exporterShutdown_t	Maya_Shutdown = NULL;
-//k 64
 static uintptr_t					importDLL = 0;
 
 bool idModelExport::initialized = false;

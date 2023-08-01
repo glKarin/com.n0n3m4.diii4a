@@ -308,7 +308,6 @@ const char 	*Sys_GetCallStackCurAddressStr(int depth);
 void			Sys_ShutdownSymbols(void);
 
 // DLL loading, the path should be a fully qualified OS path to the DLL file to be loaded
-//k 64
 uintptr_t		Sys_DLL_Load(const char *dllName);
 void 			*Sys_DLL_GetProcAddress(uintptr_t dllHandle, const char *procName);
 void			Sys_DLL_Unload(uintptr_t dllHandle);
@@ -572,7 +571,6 @@ class idSys
 		virtual const char 	*GetCallStackCurStr(int depth) = 0;
 		virtual void			ShutdownSymbols(void) = 0;
 
-//k 64
 		virtual uintptr_t		DLL_Load(const char *dllName) = 0;
 		virtual void 			*DLL_GetProcAddress(uintptr_t dllHandle, const char *procName) = 0;
 		virtual void			DLL_Unload(uintptr_t dllHandle) = 0;

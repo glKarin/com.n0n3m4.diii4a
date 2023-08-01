@@ -155,14 +155,11 @@ idInterpreter::PushVector
 */
 ID_INLINE void idInterpreter::PushVector(const idVec3 &vector)
 {
-	//k 64
-	//if (localstackUsed + round_up(sizeof(idVec3), sizeof(intptr_t)) > LOCALSTACK_SIZE) {
 	if (localstackUsed + E_EVENT_SIZEOF_VEC > LOCALSTACK_SIZE) {
 		Error("PushVector: locals stack overflow\n");
 	}
 
 	*(idVec3 *)&localstack[ localstackUsed ]	= vector;
-	//localstackUsed += round_up(sizeof(idVec3), sizeof(intptr_t));
 	localstackUsed += E_EVENT_SIZEOF_VEC;
 }
 

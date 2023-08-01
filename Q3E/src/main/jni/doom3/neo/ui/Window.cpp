@@ -3607,8 +3607,6 @@ wexpOp_t *idWindow::ExpressionOp()
 idWindow::EmitOp
 ================
 */
-
-//k 64
 intptr_t idWindow::EmitOp(intptr_t a, intptr_t b, wexpOpType_t opType, wexpOp_t **opp)
 {
 	wexpOp_t *op;
@@ -3677,7 +3675,6 @@ idWindow::ParseTerm
 Returns a register index
 =================
 */
-//k 64
 intptr_t idWindow::ParseTerm(idParser *src,	idWinVar *var, intptr_t component)
 {
 	idToken token;
@@ -3776,7 +3773,6 @@ Returns a register index
 =================
 */
 #define	TOP_PRIORITY 4
-//k 64
 intptr_t idWindow::ParseExpressionPriority(idParser *src, int priority, idWinVar *var, intptr_t component)
 {
 	idToken token;
@@ -3877,7 +3873,6 @@ idWindow::ParseExpression
 Returns a register index
 ================
 */
-//k 64
 intptr_t idWindow::ParseExpression(idParser *src, idWinVar *var, intptr_t component)
 {
 	return ParseExpressionPriority(src, TOP_PRIORITY, var);

@@ -205,7 +205,6 @@ class idCommonLocal : public idCommon
 		idStrList					warningList;
 		idStrList					errorList;
 
-		//k 64
 		uintptr_t						gameDLL;
 
 		idLangDict					languageDict;
