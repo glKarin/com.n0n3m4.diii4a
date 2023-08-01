@@ -81,6 +81,7 @@ option(RAVEN			"Build the raven core" ON)
 option(HUMANHEAD			"Build the humanhead core" ON)
 option(OVERTHINKED			"Build the overthinked game code" ON)
 option(SABOT			"Build the sabot game code" ON)
+option(HEXENEOC			"Build the hexeneoc game code" ON)
 
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
@@ -783,6 +784,25 @@ list(APPEND src_sabot ${sabot_game_src})
 set_src_dir(src_sabot "sabot" ${src_sabot})
 add_globbed_headers(src_sabot "sabot")
 
+# hexeneoc
+set(src_hexeneoc ${base_game_src})
+set(hexeneoc_game_src
+		PlayerArtifacts.cpp
+		PlayerScriptEvents.cpp
+		ai/AI_Golem.cpp
+		ai/AI_Shadowspawn.cpp
+		ai/AI_Veloxite.cpp
+		objects/Leaf.cpp
+		objects/LeafEmitter.cpp
+		objects/Tree.cpp
+		projectiles/FireStorm.cpp
+		projectiles/Soul.cpp
+		projectiles/Wraithverge.cpp
+		)
+list(APPEND src_hexeneoc ${hexeneoc_game_src})
+set_src_dir(src_hexeneoc "hexeneoc" ${src_hexeneoc})
+add_globbed_headers(src_hexeneoc "hexeneoc")
+
 # quake4
 set(src_quake4 ${base_game_src})
 set(quake4_game_src
@@ -1345,6 +1365,9 @@ endif()
 if(SABOT)
 	message(STATUS "Build sabot")
 endif()
+if(HEXENEOC)
+	message(STATUS "Build hexeneoc")
+endif()
 if(RAVEN)
 	message(STATUS "Build raven core")
 endif()
@@ -1368,6 +1391,23 @@ message(STATUS "-l: ${sys_libs}")
 message(STATUS "-l(static): ${local_libs}")
 
 #message(FATAL_ERROR "stop!!!!!!!!!!!!!!!!!!!!")
+
+if(HEXENEOC)
+	add_library(hexeneoc SHARED ${src_hexeneoc})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hexeneoc})
+	#set_target_properties(hexeneoc PROPERTIES PREFIX "")
+	set_target_properties(hexeneoc PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HEXENEOC")
+	target_include_directories(hexeneoc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/hexeneoc")
+	set_target_properties(hexeneoc PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(hexeneoc PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(hexeneoc idlib)
+
+	install(TARGETS hexeneoc
+			RUNTIME DESTINATION "${bindir}"
+			LIBRARY DESTINATION "${libdir}"
+			ARCHIVE DESTINATION "${libdir}"
+			)
+endif()
 
 if(CORE)
 	add_library(${DOOM3BINARY} SHARED

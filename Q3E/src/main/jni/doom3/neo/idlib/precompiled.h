@@ -129,7 +129,6 @@ public:
 #include <errno.h>
 #include <math.h>
 
-//k 64
 #include <inttypes.h>
 
 #ifdef _HUMANHEAD
@@ -275,6 +274,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
 	#include "../game/Game.h"
 	#elif defined _OVERTHINKED
 	#include "../overthinked/Game.h"
+	#elif defined _HEXENEOC
+	#include "../hexeneoc/Game.h"
 
 	#elif defined _QUAKE4
 	#include "../quake4/Game.h"
@@ -320,6 +321,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
 	#include "../hardcorps/Game_local.h"
 	#elif defined _OVERTHINKED
 	#include "../overthinked/Game_local.h"
+	#elif defined _HEXENEOC
+	#include "../hexeneoc/Game_local.h"
 
 	#elif defined _QUAKE4
 	#include "../quake4/Game_local.h"
