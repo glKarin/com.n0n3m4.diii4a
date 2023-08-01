@@ -113,6 +113,7 @@
     <string name="screen">Экран</string>
     <string name="hide_navigation_bar">Скрыть панель навигации</string>
     <string name="hide_navigation_bar_in_game">Скрыть панель навигации в игре</string>
+    <string name="hide_ad_bar_in_launcher">Hide ad bar in launcher</string>
     <string name="cover_screen_edges">Края экрана</string>
     <string name="cover_screen_edges_in_status_bar">Обложка краев экрана в строке состояния</string>
     <string name="game">Игра</string>

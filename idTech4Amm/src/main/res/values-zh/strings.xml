@@ -112,6 +112,7 @@
     <string name="screen">屏幕</string>
     <string name="hide_navigation_bar">隐藏导航栏</string>
     <string name="hide_navigation_bar_in_game">游戏时隐藏导航栏</string>
+    <string name="hide_ad_bar_in_launcher">隐藏启动器底部广告栏</string>
     <string name="cover_screen_edges">覆盖屏幕刘海</string>
     <string name="game">游戏</string>
     <string name="general">通用</string>

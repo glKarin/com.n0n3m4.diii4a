@@ -115,6 +115,7 @@
     <string name="screen">Screen</string>
     <string name="hide_navigation_bar">Hide navigation bar</string>
     <string name="hide_navigation_bar_in_game">Hide navigation bar in game</string>
+    <string name="hide_ad_bar_in_launcher">Hide ad bar in launcher</string>
     <string name="cover_screen_edges">Cover screen edges</string>
     <string name="cover_screen_edges_in_status_bar">Cover screen edges in status bar</string>
     <string name="game">Game</string>
