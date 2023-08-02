@@ -207,7 +207,7 @@ public class GameLauncher extends Activity
 			{
 				UpdateUserGame(isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putBoolean(Q3EPreference.pref_harm_user_mod, isChecked)
+						.putBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), isChecked)
 						.commit();
 			}
 			else if (id == R.id.launcher_tab2_enable_gyro)
@@ -795,7 +795,7 @@ public class GameLauncher extends Activity
         V.launcher_tab1_edit_doomconfig.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_edit_cvar.setOnClickListener(m_buttonClickListener);
 
-        boolean userMod = mPrefs.getBoolean(Q3EPreference.pref_harm_user_mod, false);
+        boolean userMod = mPrefs.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
         V.fs_game_user.setChecked(userMod);
 		String game = mPrefs.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
 		if (null == game)
@@ -1286,7 +1286,7 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_useetc1, V.useetc1.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_usedxt, V.usedxt.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_nolight, V.nolight.isChecked());
-        mEdtr.putBoolean(Q3EPreference.pref_harm_user_mod, V.fs_game_user.isChecked());
+        mEdtr.putBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), V.fs_game_user.isChecked());
         mEdtr.putString(Q3EPreference.pref_harm_game, Q3EUtils.q3ei.game);
         mEdtr.putBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, V.launcher_tab2_enable_gyro.isChecked());
         mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EUtils.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
@@ -1296,6 +1296,8 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_harm_multithreading, V.multithreading.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
+
+		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
     }
 
@@ -1455,7 +1457,7 @@ public class GameLauncher extends Activity
     private void SetGameDLL(int val)
     {
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean userMod = V.fs_game_user.isChecked(); //preference.getBoolean(Q3EUtils.pref_harm_user_mod, false);
+        boolean userMod = V.fs_game_user.isChecked(); //preference.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
         String game = "";
 		if (val == R.id.fs_game_base)
 		{
@@ -1782,7 +1784,8 @@ public class GameLauncher extends Activity
         if (null == game)
             game = "";
         V.edt_fs_game.setText(game);
-        boolean userMod = preference.getBoolean(Q3EPreference.pref_harm_user_mod, false);
+        boolean userMod = preference.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
+		V.fs_game_user.setChecked(userMod);
 
 		GameProp prop = ChangeGameMod(game, userMod);
 		prop.Handle();

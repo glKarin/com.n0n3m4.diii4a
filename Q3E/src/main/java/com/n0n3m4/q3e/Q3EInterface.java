@@ -401,6 +401,13 @@ public class Q3EInterface
 				: Q3EPreference.pref_harm_fs_game);
 	}
 
+	public String GetEnableModPreferenceKey()
+	{
+		return isPrey ? Q3EPreference.pref_harm_prey_user_mod
+				: (isQ4 ? Q3EPreference.pref_harm_q4_user_mod
+				: Q3EPreference.pref_harm_user_mod);
+	}
+
 	public String GetGameModLibPreferenceKey()
 	{
 		return isPrey ? Q3EPreference.pref_harm_prey_game_lib

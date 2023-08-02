@@ -15,7 +15,11 @@ import com.n0n3m4.q3e.Q3EUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class ChooseGameModFunc extends GameLauncherFunc
 {
@@ -60,6 +64,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         fileBrowser.SetCurrentPath(m_path);
 
         final List<CharSequence> items = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
         final List<String> values = new ArrayList<>();
         for (FileBrowser.FileModel fileModel : fileBrowser.FileList())
         {
@@ -116,8 +121,25 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             if(name.isEmpty())
                 name = fileModel.name;
 
-            items.add(name);
+            map.put(fileModel.name, name);
             values.add(fileModel.name);
+        }
+
+        Collections.sort(values, new Comparator<String>() {
+            @Override
+            public int compare(String a, String b)
+            {
+                if(Q3EGlobals.GAME_BASE_DOOM3.equals(a) || Q3EGlobals.GAME_BASE_QUAKE4.equals(a) || Q3EGlobals.GAME_BASE_PREY.equals(a))
+                    return -1;
+                if(Q3EGlobals.GAME_BASE_DOOM3.equals(b) || Q3EGlobals.GAME_BASE_QUAKE4.equals(b) || Q3EGlobals.GAME_BASE_PREY.equals(b))
+                    return 1;
+                return a.compareTo(b);
+            }
+        });
+
+        for (String value : values)
+        {
+            items.add(map.get(value));
         }
 
         int selected = -1;
