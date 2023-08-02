@@ -276,16 +276,14 @@
 						android:hint="@string/input_your_mod_folder_name"
 						android:imeOptions="flagNoExtractUi"
 						android:inputType="textNoSuggestions">
-
 					</EditText>
 
 					<Button
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:id="@+id/launcher_tab1_game_lib_button"
+						android:id="@+id/launcher_tab1_game_mod_button"
 						android:textAllCaps="false"
-						android:text="@string/gamelib">
-
+						android:text="@string/chooser">
 					</Button>
 
 				</LinearLayout>
@@ -437,12 +435,26 @@
 				android:layout_height="wrap_content"
 				android:text="@string/skip_intro"/>
 
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal">
 			<Button
 				android:id="@+id/launcher_tab1_edit_cvar"
-				android:layout_width="match_parent"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
+				android:layout_weight="0.5"
 				android:textAllCaps="false"
 				android:text="@string/edit_cvar"/>
+			<Button
+				android:id="@+id/launcher_tab1_game_lib_button"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="0.5"
+				android:textAllCaps="false"
+				android:text="@string/gamelib"/>
+		</LinearLayout>
 
 			<LinearLayout
 				android:layout_width="match_parent"

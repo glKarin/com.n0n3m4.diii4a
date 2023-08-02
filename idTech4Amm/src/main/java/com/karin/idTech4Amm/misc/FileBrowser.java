@@ -1,10 +1,12 @@
 package com.karin.idTech4Amm.misc;
 
+import android.util.Log;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,8 +18,11 @@ public class FileBrowser
     public static final int ID_SEQUENCE_ASC = 1;
     public static final int ID_SEQUENCE_DESC = 2;
 
+    public static final int ID_FILTER_FILE = 1;
+    public static final int ID_FILTER_DIRECTORY = 1 << 1;
+
     private String m_currentPath;
-    private final Set<String> m_history = new HashSet<>();
+    private final Set<String> m_history = new LinkedHashSet<>();
     private final List<FileBrowser.FileModel> m_fileList = new ArrayList<>();
     private int m_sequence = ID_SEQUENCE_ASC;
     private int m_filter = 0;
@@ -25,15 +30,15 @@ public class FileBrowser
     private List<String> m_extensions = new ArrayList<>();
     private boolean m_showHidden = true;
     private boolean m_ignoreDotDot = false;
+    private boolean m_dirNameWithSeparator = true;
 
     public FileBrowser()
     {
-        this(System.getProperty("user.home"));
     }
 
     public FileBrowser(String path)
     {
-        if (path == null || path.isEmpty())
+        if (path != null && !path.isEmpty())
             SetCurrentPath(path);
     }
 
@@ -68,7 +73,14 @@ public class FileBrowser
             String name = f.getName();
             if (".".equals(name))
                 continue;
-            if (f.isDirectory())
+            if(m_filter != 0)
+            {
+                if((m_filter & ID_FILTER_FILE) == 0 && !f.isDirectory())
+                    continue;
+                if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
+                    continue;
+            }
+            if (f.isDirectory() && m_dirNameWithSeparator)
                 name += File.separator;
 
             item = new FileBrowser.FileModel();
@@ -151,6 +163,16 @@ public class FileBrowser
         return this;
     }
 
+    public FileBrowser SetDirNameWithSeparator(boolean dirNameWithSeparator)
+    {
+        if (m_dirNameWithSeparator != dirNameWithSeparator)
+        {
+            this.m_dirNameWithSeparator = dirNameWithSeparator;
+            ListFiles(m_currentPath);
+        }
+        return this;
+    }
+
     public FileBrowser SetIgnoreDotDot(boolean b)
     {
         if (m_ignoreDotDot != b)
@@ -166,6 +188,24 @@ public class FileBrowser
         if (m_order != i)
         {
             this.m_order = i;
+            ListFiles(m_currentPath);
+        }
+        return this;
+    }
+
+    public FileBrowser SetFilter(int...filters)
+    {
+        int filter = 0;
+        if(null != filters)
+        {
+            for (int i : filters)
+            {
+                filter |= i;
+            }
+        }
+        if (m_filter != filter)
+        {
+            this.m_filter = filter;
             ListFiles(m_currentPath);
         }
         return this;

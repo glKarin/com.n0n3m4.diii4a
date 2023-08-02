@@ -70,6 +70,7 @@ import com.n0n3m4.DIII4A.launcher.CVarEditorFunc;
 import com.n0n3m4.DIII4A.launcher.CheckForUpdateFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameFolderFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
+import com.n0n3m4.DIII4A.launcher.ChooseGameModFunc;
 import com.n0n3m4.DIII4A.launcher.DebugPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
 import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
@@ -116,6 +117,7 @@ public class GameLauncher extends Activity
     private static final int CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY = 8;
     private static final int CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY = 9;
 	private static final int CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE = 10;
+	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD = 11;
 
     // GameLauncher function
     private ExtractPatchResourceFunc m_extractPatchResourceFunc;
@@ -130,6 +132,7 @@ public class GameLauncher extends Activity
     private EditExternalLibraryFunc m_editExternalLibraryFunc;
 	private OpenSourceLicenseFunc m_openSourceLicenseFunc;
 	private ExtractSourceFunc m_extractSourceFunc;
+	private ChooseGameModFunc m_chooseGameModFunc;
 
     final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -362,6 +365,10 @@ public class GameLauncher extends Activity
 			else if (id == R.id.launcher_tab1_edit_cvar)
 			{
 				EditCVar();
+			}
+			else if (id == R.id.launcher_tab1_game_mod_button)
+			{
+				OpenGameModChooser();
 			}
         }
     };
@@ -818,6 +825,7 @@ public class GameLauncher extends Activity
             }
         });
         V.launcher_tab1_game_lib_button.setOnClickListener(m_buttonClickListener);
+		V.launcher_tab1_game_mod_button.setOnClickListener(m_buttonClickListener);
         V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 4.0f));
 		V.edt_harm_r_maxFps.setText(Q3EPreference.GetStringFromInt(mPrefs, Q3EPreference.pref_harm_r_maxFps, 0));
 
@@ -1625,6 +1633,10 @@ public class GameLauncher extends Activity
 					if (null != m_extractSourceFunc)
 						m_extractSourceFunc.run();
 					break;
+				case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD:
+					if (null != m_chooseGameModFunc)
+						m_chooseGameModFunc.run();
+					break;
                 default:
                     break;
             }
@@ -2007,6 +2019,31 @@ public class GameLauncher extends Activity
 		V.edt_cmdline_temp.setVisibility(Q3EUtils.q3ei.start_temporary_extra_command.length() > 0 ? View.VISIBLE : View.GONE);
 	}
 
+	private void OpenGameModChooser()
+	{
+		SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
+		String preferenceKey = Q3EUtils.q3ei.GetGameModPreferenceKey();
+		if (null == m_chooseGameModFunc)
+		{
+			m_chooseGameModFunc = new ChooseGameModFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD);
+		}
+
+		m_chooseGameModFunc.SetCallback(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				String mod = m_chooseGameModFunc.GetResult();
+				V.edt_fs_game.setText(mod);
+			}
+		});
+		Bundle bundle = new Bundle();
+		bundle.putString("mod", preference.getString(preferenceKey, ""));
+		bundle.putString("path", preference.getString(Q3EPreference.pref_datapath, default_gamedata));
+		m_chooseGameModFunc.Start(bundle);
+	}
+
+
 
     private class ViewHolder
     {
@@ -2067,6 +2104,7 @@ public class GameLauncher extends Activity
 		public Button launcher_tab1_edit_cvar;
 		public TextView edt_cmdline_temp;
 		public CheckBox skip_intro;
+		public Button launcher_tab1_game_mod_button;
 
         public void Setup()
         {
@@ -2126,6 +2164,7 @@ public class GameLauncher extends Activity
 			launcher_tab1_edit_cvar = findViewById(R.id.launcher_tab1_edit_cvar);
 			edt_cmdline_temp = findViewById(R.id.edt_cmdline_temp);
 			skip_intro = findViewById(R.id.skip_intro);
+			launcher_tab1_game_mod_button = findViewById(R.id.launcher_tab1_game_mod_button);
         }
     }
 
@@ -2259,5 +2298,19 @@ public class GameLauncher extends Activity
 		if(null == res)
 			res = new GameProp(0, "", game, "", userMod);
 		return res;
+	}
+
+	public String GetGameOfMod(String game)
+	{
+		for (String key : GameProps.keySet())
+		{
+			List<GameProp> props = GameProps.get(key);
+			for (GameProp prop : props)
+			{
+				if(prop.game.equals(game))
+					return key;
+			}
+		}
+		return null;
 	}
 }
