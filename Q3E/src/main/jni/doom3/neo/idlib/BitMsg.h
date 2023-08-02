@@ -843,16 +843,6 @@ ID_INLINE int idBitMsg::ReadInt(void) const
 	return ReadBits(32);
 }
 
-ID_INLINE void idBitMsgDelta::WriteInt(int c)
-{
-	WriteBits(c, 32);
-}
-
-ID_INLINE int idBitMsgDelta::ReadInt(void) const
-{
-	return ReadBits(32);
-}
-
 ID_INLINE void idBitMsg::WriteDeltaInt(int oldValue, int newValue)
 {
 	WriteDelta(oldValue, newValue, 32);
@@ -861,6 +851,16 @@ ID_INLINE void idBitMsg::WriteDeltaInt(int oldValue, int newValue)
 ID_INLINE int idBitMsg::ReadDeltaInt(int oldValue) const
 {
 	return ReadDelta(oldValue, 32);
+}
+
+ID_INLINE void idBitMsgDelta::WriteInt(int c)
+{
+	WriteBits(c, 32);
+}
+
+ID_INLINE int idBitMsgDelta::ReadInt(void) const
+{
+	return ReadBits(32);
 }
 
 ID_INLINE void idBitMsgDelta::WriteDeltaInt(int oldValue, int newValue)

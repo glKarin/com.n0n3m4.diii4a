@@ -308,7 +308,7 @@ OPTCPPFLAGS = [ ]
 BASECPPFLAGS.append( BASEFLAGS.split() )
 BASECPPFLAGS.append( '-pipe' )
 # warn all
-BASECPPFLAGS.append( '-Wall' )
+BASECPPFLAGS.append( '-Wall' ) # -w
 #BASECPPFLAGS.append( '-Wextra' )
 BASECPPFLAGS.append( '-Wno-sign-compare' )
 BASECPPFLAGS.append( '-Wno-unknown-pragmas' )
@@ -455,7 +455,7 @@ if ( TARGET_ANDROID != '0' ):
 if ( TARGET_ANDROID != '' ):
 	Export( 'GLOBALS ' + GLOBALS )
 
-# Raven Quake4
+# Raven Quake4 / Humanhead Prey
 if ( TARGET_QUAKE4 == '1' ):
 	local_quake4 = 1
 	local_raven = 1
@@ -472,7 +472,7 @@ elif ( TARGET_HUMANHEAD == '1' ):
 	Export( 'GLOBALS ' + GLOBALS )
 
 # build curl if needed
-if ( NOCURL == '0' and ( TARGET_CORE == '1' or TARGET_MONO == '1' ) ):
+if ( NOCURL == '0' and ( TARGET_CORE == '1' or TARGET_MONO == '1' or TARGET_RAVEN == '1' or TARGET_HUMANHEAD == '1' ) ):
 	local_curl = 1
 	Export( 'GLOBALS ' + GLOBALS )
 
@@ -480,6 +480,8 @@ if ( TARGET_CORE == '1' ):
 	local_gamedll = 1
 	local_demo = 0
 	local_idlibpic = 0
+	local_raven = 0
+	local_humanhead = 0
 	if ( DEDICATED == '0' or DEDICATED == '2' ):
 		local_dedicated = 0
 		Export( 'GLOBALS ' + GLOBALS )
@@ -490,12 +492,7 @@ if ( TARGET_CORE == '1' ):
         doom = SConscript( g_build + '/core/sys/scons/SConscript.core' )
 
         InstallAs( '#doom.' + cpu, doom )
-        if ( local_raven == 1 ):
-            InstallAs( g_build + '/package/libdante_raven.so', doom )
-        elif ( local_humanhead == 1 ):
-            InstallAs( g_build + '/package/libdante_humanhead.so', doom )
-        else:
-            InstallAs( g_build + '/package/libdante.so', doom )
+        InstallAs( g_build + '/package/libdante.so', doom )
 		
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1
@@ -507,6 +504,64 @@ if ( TARGET_CORE == '1' ):
 		doomded = SConscript( g_build + '/dedicated/sys/scons/SConscript.core' )
 
 		InstallAs( '#doomded.' + cpu, doomded )
+
+if ( TARGET_RAVEN == '1' ):
+	local_gamedll = 1
+	local_demo = 0
+	local_idlibpic = 0
+	local_raven = 1
+	local_humanhead = 0
+	if ( DEDICATED == '0' or DEDICATED == '2' ):
+		local_dedicated = 0
+		Export( 'GLOBALS ' + GLOBALS )
+	
+        VariantDir( g_build + '/raven', '.', duplicate = 0 )
+        idlib_objects = SConscript( g_build + '/raven/sys/scons/SConscript.idlib' )
+        Export( 'GLOBALS ' + GLOBALS ) # update idlib_objects
+        doom_raven = SConscript( g_build + '/raven/sys/scons/SConscript.core' )
+
+        InstallAs( '#doom_raven.' + cpu, doom_raven )
+        InstallAs( g_build + '/package/libdante_raven.so', doom_raven )
+		
+	if ( DEDICATED == '1' or DEDICATED == '2' ):
+		local_dedicated = 1
+		Export( 'GLOBALS ' + GLOBALS )
+		
+		VariantDir( g_build + '/raven_dedicated', '.', duplicate = 0 )
+		idlib_objects = SConscript( g_build + '/raven_dedicated/sys/scons/SConscript.idlib' )
+		Export( 'GLOBALS ' + GLOBALS )
+		doomded = SConscript( g_build + '/raven_dedicated/sys/scons/SConscript.core' )
+
+		InstallAs( '#doomded_raven.' + cpu, doomded )
+
+if ( TARGET_HUMANHEAD == '1' ):
+	local_gamedll = 1
+	local_demo = 0
+	local_idlibpic = 0
+	local_raven = 0
+	local_humanhead = 1
+	if ( DEDICATED == '0' or DEDICATED == '2' ):
+		local_dedicated = 0
+		Export( 'GLOBALS ' + GLOBALS )
+	
+        VariantDir( g_build + '/humanhead', '.', duplicate = 0 )
+        idlib_objects = SConscript( g_build + '/humanhead/sys/scons/SConscript.idlib' )
+        Export( 'GLOBALS ' + GLOBALS ) # update idlib_objects
+        doom_humanhead = SConscript( g_build + '/humanhead/sys/scons/SConscript.core' )
+
+        InstallAs( '#doom_humanhead.' + cpu, doom_humanhead )
+        InstallAs( g_build + '/package/libdante_humanhead.so', doom_humanhead )
+		
+	if ( DEDICATED == '1' or DEDICATED == '2' ):
+		local_dedicated = 1
+		Export( 'GLOBALS ' + GLOBALS )
+		
+		VariantDir( g_build + '/humanhead_dedicated', '.', duplicate = 0 )
+		idlib_objects = SConscript( g_build + '/raven_dedicated/sys/scons/SConscript.idlib' )
+		Export( 'GLOBALS ' + GLOBALS )
+		doomded = SConscript( g_build + '/humanhead_dedicated/sys/scons/SConscript.core' )
+
+		InstallAs( '#doomded_humanhead.' + cpu, doomded )
 
 
 if ( TARGET_GAME == '1' or TARGET_D3XP == '1' or TARGET_CDOOM == '1' or TARGET_D3LE == '1' or TARGET_RIVENSIN == '1' or TARGET_HARDCORPS == '1' or TARGET_QUAKE4 == '1' or TARGET_PREY == '1' ):
