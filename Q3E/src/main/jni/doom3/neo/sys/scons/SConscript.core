@@ -53,7 +53,7 @@ curl_string = \
     inet_pton.c \
     md5.c \
 	content_encoding.c'
-curl_list = scons_utils.BuildList( '../../../../../../curl/lib/', curl_string )
+curl_list = scons_utils.BuildList( '../../../../../externlibs/curl/lib/', curl_string )
 
 jpeg_string = \
 		'jaricom.c \
@@ -103,7 +103,7 @@ jpeg_string = \
 		jquant2.c \
 		jutils.c'
 
-jpeg_list = scons_utils.BuildList( '../../../../../../jpeg-8d/', jpeg_string )
+jpeg_list = scons_utils.BuildList( '../../../../../externlibs/jpeg-8d/', jpeg_string )
 
 libogg_string = ' \
 				bitwise.c \
@@ -133,7 +133,7 @@ libogg_string = ' \
 				   mdct.c \
 				   synthesis.c'
 
-libogg_list = scons_utils.BuildList( '../../../../../../libogg/', libogg_string )
+libogg_list = scons_utils.BuildList( '../../../../../externlibs/libogg/', libogg_string )
 
 
 renderer_string = ' \
@@ -445,12 +445,12 @@ else:
 #//k curl
 	if g_os == 'Android':
 		curl_env = local_env.Clone()
-		curl_env[ 'CPPFLAGS' ] += [ '-I../curl/include' ]
+		curl_env[ 'CPPFLAGS' ] += [ '-I./externlibs/curl/include' ]
 		curl_env[ 'CPPFLAGS' ] += [ '-DHAVE_CONFIG_H' ]
 
 		curl_lib = curl_env.StaticLibrary( 'curl', curl_list )
 
-		local_env[ 'CPPFLAGS' ] += [ '-I../curl/include' ]
+		local_env[ 'CPPFLAGS' ] += [ '-I./externlibs/curl/include' ]
 		local_env.Append( LIBS = [ 'z' ] )
 	else:
 		local_env.Append( LIBS = [ 'curl' ] )
@@ -480,14 +480,14 @@ if g_os == 'Android':
 	jpeg_env = local_env.Clone()
 	jpeg_lib = jpeg_env.StaticLibrary( 'jpeg', jpeg_list )
 
-	local_env['CPPFLAGS' ] += [ '-I../jpeg-8d/' ]
+	local_env['CPPFLAGS' ] += [ '-I./externlibs/jpeg-8d/' ]
 
 if g_os == 'Android':
 	libogg_env = local_env.Clone()
-	libogg_env['CPPFLAGS' ] += [ '-I../libogg/' ]
+	libogg_env['CPPFLAGS' ] += [ '-I./externlibs/libogg/' ]
 	libogg_lib = libogg_env.StaticLibrary( 'ogg', libogg_list )
 
-	local_env['CPPFLAGS' ] += [ '-I../libogg/' ]
+	local_env['CPPFLAGS' ] += [ '-I./externlibs/libogg/' ]
 
 if g_os == 'Android':
 #local_env.Append( LIBS = [ 'dl', 'vorbisfile','vorbis', 'ogg', 'android' ] )
