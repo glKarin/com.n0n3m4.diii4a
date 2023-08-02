@@ -526,7 +526,7 @@ void idGameLocal::SaveGame(idFile *f)
     savegame.WriteBuildNumber(BUILD_NUMBER);
 
     //k not in original DOOM3
-#ifndef __ANDROID__
+#if !defined(__ANDROID__)
     // DG: add some more information to savegame to make future quirks easier
     savegame.WriteInt( INTERNAL_SAVEGAME_VERSION ); // to be independent of BUILD_NUMBER
     savegame.WriteString( D3_OSTYPE ); // operating system - from CMake

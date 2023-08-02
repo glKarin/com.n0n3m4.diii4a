@@ -842,7 +842,7 @@ idPlayerView::dnPostProcessManager::dnPostProcessManager():
 	this->Initialize();
 
 //k: Only Dhewm3 support idCommon::SetCallback(), but this is original DOOM3
-#ifndef __ANDROID__
+#if !defined(__ANDROID__)
 	if(!common->SetCallback(idCommon::CB_ReloadImages, (idCommon::FunctionPointer)ReloadImagesCallback, this))
 	{
 		gameLocal.Warning("Couldn't set ReloadImages Callback from Ruiner game DLL! This could lead to errors on vid_restart and similar!\n");
@@ -856,7 +856,7 @@ idPlayerView::dnPostProcessManager::~dnPostProcessManager()
 {
 	// remove callback because this object is destroyed (and this was passed as userArg)
 //k: Only Dhewm3 support idCommon::SetCallback(), but this is original DOOM3
-#ifndef __ANDROID__
+#if !defined(__ANDROID__)
 	common->SetCallback(idCommon::CB_ReloadImages, NULL, NULL);
 #else
 #warning "Only Dhewm3 support idCommon::SetCallback(), but this is original DOOM3"

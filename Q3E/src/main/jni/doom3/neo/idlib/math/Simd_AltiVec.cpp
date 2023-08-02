@@ -68,7 +68,6 @@ If you have questions concerning this license or the applicable additional terms
 #define IDVEC4_OFFSET 4
 
 // Alignment tests
-//k 64
 #define IS_16BYTE_ALIGNED( x ) ( ( (unsigned int)&x & 0x0F ) == 0 )
 #define NOT_16BYTE_ALIGNED( x ) ( ( (unsigned int)&x & 0x0F) != 0 )
 

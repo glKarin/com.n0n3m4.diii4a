@@ -659,12 +659,10 @@ void idTrigger_EntityName::Spawn(void)
 	}
 
 	//added for LM
-#ifdef _D3LE
 #ifdef __ANDROID__
 	testPartialName = spawnArgs.GetBool( "testPartialName", testPartialName ? "1" : "0" );
 #else
 	testPartialName = spawnArgs.GetBool( "testPartialName", testPartialName );
-#endif
 #endif
 }
 

@@ -267,7 +267,6 @@ MD5_BlockChecksum
 */
 unsigned int MD5_BlockChecksum(const void *data, int length)
 {
-//k 64
 	unsigned int	digest[4];
 	unsigned int	val;
 	MD5_CTX			ctx;

@@ -69,9 +69,6 @@ class idAudioHardwareAndroid: public idAudioHardware
 		bool Initialize()
 		{
 		common->Printf("------ Android AudioTrack Sound Initialization ------\n");
-#ifdef __ANDROID__
-		common->Printf("[Harmattan]: active write audio.\n");
-#endif
 		m_channels = 2;
 		idSoundSystemLocal::s_numberOfSpeakers.SetInteger(2);
 		m_speed = PRIMARYFREQ;

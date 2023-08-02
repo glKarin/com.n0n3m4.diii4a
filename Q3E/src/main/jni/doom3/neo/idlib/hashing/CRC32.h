@@ -10,7 +10,6 @@
 ===============================================================================
 */
 
-//k 64
 void CRC32_InitChecksum(unsigned int &crcvalue);
 void CRC32_UpdateChecksum(unsigned int &crcvalue, const void *data, int length);
 void CRC32_FinishChecksum(unsigned int &crcvalue);

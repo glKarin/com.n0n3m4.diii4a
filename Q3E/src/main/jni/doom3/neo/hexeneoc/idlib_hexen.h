@@ -1,5 +1,5 @@
-#ifndef _KARIN_IDLIBCOMPAT_H
-#define _KARIN_IDLIBCOMPAT_H
+#ifndef _KARIN_IDLIBHEXEN_H
+#define _KARIN_IDLIBHEXEN_H
 #ifdef __ANDROID__
 
 #define BUTTON_ATTACK2 BUTTON_5
@@ -85,4 +85,4 @@ ID_INLINE float toAngle( const idVec3 &Self, const idVec3 &B)
 }
 
 #endif
-#endif //_KARIN_IDLIBCOMPAT_H
+#endif //_KARIN_IDLIBHEXEN_H

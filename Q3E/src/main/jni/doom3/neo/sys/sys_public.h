@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 // Linux
 #ifdef __linux__
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 
 #if defined(__i386__)
 #define	BUILD_STRING				"android-x86"
@@ -477,7 +477,7 @@ typedef struct {
 	const char 	*name;
 	intptr_t	threadHandle;
 	size_t		threadId;
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	bool		threadCancel;
 #endif
 } xthreadInfo;

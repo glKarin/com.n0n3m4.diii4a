@@ -1031,7 +1031,6 @@ void VPCALL idSIMD_SSE::Dot(float *dst, const idVec3 &constant, const idPlane *s
 ALIGN8_INIT1(unsigned short SIMD_W_zero, 0);
 ALIGN8_INIT1(unsigned short SIMD_W_maxShort, 1<<15);
 
-//k 64
 ALIGN4_INIT1(unsigned int SIMD_DW_mat2quatShuffle0, (3<<0)|(2<<8)|(1<<16)|(0<<24));
 ALIGN4_INIT1(unsigned int SIMD_DW_mat2quatShuffle1, (0<<0)|(1<<8)|(2<<16)|(3<<24));
 ALIGN4_INIT1(unsigned int SIMD_DW_mat2quatShuffle2, (1<<0)|(0<<8)|(3<<16)|(2<<24));
@@ -1983,7 +1982,6 @@ float a, d, s, t;
 if (fabs(y) > fabs(x)) {
 	a = -x / y;
 	d = idMath::HALF_PI;
-//k 64
 	*((unsigned int *)&d) ^= (*((unsigned int *)&x) ^ *((unsigned int *)&y)) & (1<<31);
 } else {
 	a = y / x;
@@ -11909,7 +11907,6 @@ ALIGN16(float omega0[4]);
 ALIGN16(float omega1[4]);
 ALIGN16(float scale0[4]);
 ALIGN16(float scale1[4]);
-//k 64
 ALIGN16(unsigned int signBit[4]);
 
 cosom[0] = jointQuat0[0] * blendQuat0[0];
@@ -11932,7 +11929,6 @@ cosom[1] += jointQuat3[1] * blendQuat3[1];
 cosom[2] += jointQuat3[2] * blendQuat3[2];
 cosom[3] += jointQuat3[3] * blendQuat3[3];
 
-//k 64
 signBit[0] = (*(unsigned int *)&cosom[0]) & (1 << 31);
 signBit[1] = (*(unsigned int *)&cosom[1]) & (1 << 31);
 signBit[2] = (*(unsigned int *)&cosom[2]) & (1 << 31);
@@ -11988,7 +11984,6 @@ scale1[1] = SSE_SinZeroHalfPI(omega1[1]) * sinom[1];
 scale1[2] = SSE_SinZeroHalfPI(omega1[2]) * sinom[2];
 scale1[3] = SSE_SinZeroHalfPI(omega1[3]) * sinom[3];
 
-//k 64
 (*(unsigned int *)&scale1[0]) ^= signBit[0];
 (*(unsigned int *)&scale1[1]) ^= signBit[1];
 (*(unsigned int *)&scale1[2]) ^= signBit[2];
@@ -12048,7 +12043,6 @@ jointQuat3[3] = scale0[3] * jointQuat3[3] + scale1[3] * blendQuat3[3];
 		float omega;
 		float scale0;
 		float scale1;
-//k 64
 		unsigned int signBit;
 
 		cosom = jointQuat.x * blendQuat.x + jointQuat.y * blendQuat.y + jointQuat.z * blendQuat.z + jointQuat.w * blendQuat.w;
@@ -14061,7 +14055,6 @@ void VPCALL idSIMD_SSE::DeriveTangents(idPlane *planes, idDrawVert *verts, const
 
 	for (i = 0; i <= numIndexes - 12; i += 12) {
 		idDrawVert *a, *b, *c;
-//k 64
 		ALIGN16(unsigned int signBit[4]);
 		ALIGN16(float d0[4]);
 		ALIGN16(float d1[4]);
@@ -14365,7 +14358,6 @@ tmp[1] -= d4[1] * d8[1];
 tmp[2] -= d4[2] * d8[2];
 tmp[3] -= d4[3] * d8[3];
 
-//k 64
 signBit[0] = (*(unsigned int *)&tmp[0]) & (1 << 31);
 signBit[1] = (*(unsigned int *)&tmp[1]) & (1 << 31);
 signBit[2] = (*(unsigned int *)&tmp[2]) & (1 << 31);
@@ -14422,7 +14414,6 @@ tmp[1] = idMath::RSqrt(tmp[1]);
 tmp[2] = idMath::RSqrt(tmp[2]);
 tmp[3] = idMath::RSqrt(tmp[3]);
 
-//k 64
 *(unsigned int *)&tmp[0] ^= signBit[0];
 *(unsigned int *)&tmp[1] ^= signBit[1];
 *(unsigned int *)&tmp[2] ^= signBit[2];
@@ -14494,7 +14485,6 @@ tmp[1] = idMath::RSqrt(tmp[1]);
 tmp[2] = idMath::RSqrt(tmp[2]);
 tmp[3] = idMath::RSqrt(tmp[3]);
 
-//k 64
 *(unsigned int *)&tmp[0] ^= signBit[0];
 *(unsigned int *)&tmp[1] ^= signBit[1];
 *(unsigned int *)&tmp[2] ^= signBit[2];
@@ -14621,7 +14611,6 @@ t5[3] *= tmp[3];
 
 	for (; i < numIndexes; i += 3) {
 		idDrawVert *a, *b, *c;
-//k 64
 		ALIGN16(unsigned int signBit[4]);
 		float d0, d1, d2, d3, d4;
 		float d5, d6, d7, d8, d9;
@@ -14848,7 +14837,6 @@ n2 *= tmp;
 
 // area sign bit
 tmp = d3 * d9 - d4 * d8;
-//k 64
 signBit[0] = (*(unsigned int *)&tmp) & (1 << 31);
 
 // first tangent
@@ -14857,7 +14845,6 @@ t1 = d1 * d9 - d4 * d6;
 t2 = d2 * d9 - d4 * d7;
 
 tmp = idMath::RSqrt(t0 * t0 + t1 * t1 + t2 * t2);
-//k 64
 *(unsigned int *)&tmp ^= signBit[0];
 
 t0 *= tmp;
@@ -14870,7 +14857,6 @@ t4 = d3 * d6 - d1 * d8;
 t5 = d3 * d7 - d2 * d8;
 
 tmp = idMath::RSqrt(t3 * t3 + t4 * t4 + t5 * t5);
-//k 64
 *(unsigned int *)&tmp ^= signBit[0];
 
 t3 *= tmp;

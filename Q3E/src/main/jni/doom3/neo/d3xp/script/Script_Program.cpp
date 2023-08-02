@@ -961,11 +961,7 @@ idScriptObject::Save
 */
 void idScriptObject::Save(idSaveGame *savefile) const
 {
-#ifdef __ANDROID__
 	int size;
-#else
-	size_t size;
-#endif
 
 	if (type == &type_object && data == NULL) {
 		// Write empty string for uninitialized object

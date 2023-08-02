@@ -668,14 +668,14 @@ int idSoundSystemLocal::AsyncUpdate(int inTime)
 
 	ulong dwCurrentWritePos;
 	dword dwCurrentBlock;
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	// If not using openal, get actual playback position from sound hardware
 	if (useOpenAL) {
 		// here we do it in samples ( overflows in 27 hours or so )
 		dwCurrentWritePos = idMath::Ftol((float)Sys_Milliseconds() * 44.1f) % (MIXBUFFER_SAMPLES * ROOM_SLICES_IN_BUFFER);
 		dwCurrentBlock = dwCurrentWritePos / MIXBUFFER_SAMPLES;
 	} else 
-	#endif
+#endif
 	{
 		// and here in bytes
 		// get the current byte position in the buffer where the sound hardware is currently reading
@@ -739,12 +739,12 @@ int idSoundSystemLocal::AsyncUpdate(int inTime)
 	if ((newSoundTime - CurrentSoundTime) > (int)MIXBUFFER_SAMPLES) {
 		soundStats.missedWindow++;
 	}
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	if (useOpenAL) {
 		// enable audio hardware caching
 		alcSuspendContext(openalContext);
 	} else 
-	#endif
+#endif
 	{
 		// clear the buffer for all the mixing output
 		SIMDProcessor->Memset(finalMixBuffer, 0, MIXBUFFER_SAMPLES * sizeof(float) * numSpeakers);
@@ -754,13 +754,13 @@ int idSoundSystemLocal::AsyncUpdate(int inTime)
 	if (!muted && currentSoundWorld && !currentSoundWorld->fpa[0]) {
 		currentSoundWorld->MixLoop(newSoundTime, numSpeakers, finalMixBuffer);
 	}
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	if (useOpenAL) {
 		// disable audio hardware caching (this updates ALL settings since last alcSuspendContext)
 		alcProcessContext(openalContext);
 	} 
 	else
-	#endif
+#endif
 	{
 		short *dest = fBlock + nextWriteSamples * numSpeakers;
 
@@ -819,12 +819,12 @@ int idSoundSystemLocal::AsyncUpdateWrite(int inTime)
 
 	int sampleTime = dwCurrentBlock * MIXBUFFER_SAMPLES;
 	int numSpeakers = snd_audio_hw->GetNumberOfSpeakers();
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	if (useOpenAL) {
 		// enable audio hardware caching
 		alcSuspendContext(openalContext);
 	} else
-	#endif
+#endif
 	{
 		// clear the buffer for all the mixing output
 		SIMDProcessor->Memset(finalMixBuffer, 0, MIXBUFFER_SAMPLES * sizeof(float) * numSpeakers);
@@ -834,13 +834,13 @@ int idSoundSystemLocal::AsyncUpdateWrite(int inTime)
 	if (!muted && currentSoundWorld && !currentSoundWorld->fpa[0]) {
 		currentSoundWorld->MixLoop(sampleTime, numSpeakers, finalMixBuffer);
 	}
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	if (useOpenAL) {
 		// disable audio hardware caching (this updates ALL settings since last alcSuspendContext)
 		alcProcessContext(openalContext);
 	} 
 	else
-	#endif
+#endif
 	{
 		short *dest = snd_audio_hw->GetMixBuffer();
 

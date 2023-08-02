@@ -64,7 +64,7 @@ typedef enum {
 static const int	MAX_TEXTURE_LEVELS = 14;
 
 // surface description flags
-//k 64
+//k 64 L
 const unsigned int DDSF_CAPS           = 0x00000001l;
 const unsigned int DDSF_HEIGHT         = 0x00000002l;
 const unsigned int DDSF_WIDTH          = 0x00000004l;
@@ -90,7 +90,6 @@ const unsigned int DDSF_MIPMAP          = 0x00400000l;
 
 #define DDS_MAKEFOURCC(a, b, c, d) ((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
 
-//k 64
 typedef struct {
 	unsigned int dwSize;
 	unsigned int dwFlags;
@@ -102,7 +101,6 @@ typedef struct {
 	unsigned int dwABitMask;
 } ddsFilePixelFormat_t;
 
-//k 64
 typedef struct {
 	unsigned int dwSize;
 	unsigned int dwFlags;

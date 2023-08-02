@@ -68,7 +68,7 @@ const int PMF_ALL_TIMES			= (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK
 int c_pmove = 0;
 
 //k double-jump
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 const int DOUBLE_JUMP_MIN_DELAY		= 500;	// ms
 
 static idCVar	harm_pm_doubleJump("harm_pm_doubleJump", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Enable double-jump.");

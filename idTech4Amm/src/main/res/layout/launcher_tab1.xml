@@ -216,6 +216,11 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="@string/sabot_sabot"/>
+				<RadioButton
+					android:id="@+id/fs_game_hexeneoc"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/hexen_edge_of_chaos_hexeneoc"/>
 			</RadioGroup>
 
             <RadioGroup

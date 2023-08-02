@@ -605,7 +605,6 @@ void *idHeap::SmallAllocate(dword bytes)
 		return (void *)(link);
 	}
 
-	//k 64
 	dword bytesLeft = (size_t)(pageSize) - smallCurPageOffset;
 
 	// if we need to allocate a new page

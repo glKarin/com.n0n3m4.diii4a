@@ -1392,23 +1392,6 @@ message(STATUS "-l(static): ${local_libs}")
 
 #message(FATAL_ERROR "stop!!!!!!!!!!!!!!!!!!!!")
 
-if(HEXENEOC)
-	add_library(hexeneoc SHARED ${src_hexeneoc})
-	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hexeneoc})
-	#set_target_properties(hexeneoc PROPERTIES PREFIX "")
-	set_target_properties(hexeneoc PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HEXENEOC")
-	target_include_directories(hexeneoc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/hexeneoc")
-	set_target_properties(hexeneoc PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(hexeneoc PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(hexeneoc idlib)
-
-	install(TARGETS hexeneoc
-			RUNTIME DESTINATION "${bindir}"
-			LIBRARY DESTINATION "${libdir}"
-			ARCHIVE DESTINATION "${libdir}"
-			)
-endif()
-
 if(CORE)
 	add_library(${DOOM3BINARY} SHARED
 		${src_core}
@@ -1572,6 +1555,25 @@ if(SABOT)
 			ARCHIVE DESTINATION "${libdir}"
 			)
 endif()
+
+if(HEXENEOC)
+	add_library(hexeneoc SHARED ${src_hexeneoc})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hexeneoc})
+	#set_target_properties(hexeneoc PROPERTIES PREFIX "")
+	set_target_properties(hexeneoc PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HEXENEOC")
+	target_include_directories(hexeneoc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/hexeneoc")
+	set_target_properties(hexeneoc PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(hexeneoc PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(hexeneoc idlib)
+
+	install(TARGETS hexeneoc
+			RUNTIME DESTINATION "${bindir}"
+			LIBRARY DESTINATION "${libdir}"
+			ARCHIVE DESTINATION "${libdir}"
+			)
+endif()
+
+
 
 if(QUAKE4)
 	add_library(q4game SHARED ${src_quake4})

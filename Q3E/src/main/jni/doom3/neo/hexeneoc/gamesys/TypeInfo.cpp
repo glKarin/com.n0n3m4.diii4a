@@ -747,6 +747,13 @@ int idTypeInfoTools::WriteVariable_r(const void *varPtr, const char *varName, co
     }
 
     // if this is a pointer
+#ifdef __ANDROID__
+#ifdef __aarch64__
+#define D3_SIZEOFPTR 8
+#else
+#define D3_SIZEOFPTR 4
+#endif
+#endif
 
 #if D3_SIZEOFPTR == 4
     const uintptr_t uninitPtr = (uintptr_t)0xcdcdcdcdUL;

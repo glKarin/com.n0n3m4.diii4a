@@ -3660,7 +3660,6 @@ intptr_t idWindow::EmitOp(intptr_t a, intptr_t b, wexpOpType_t opType, wexpOp_t 
 idWindow::ParseEmitOp
 ================
 */
-//k 64
 intptr_t idWindow::ParseEmitOp(idParser *src, intptr_t a, wexpOpType_t opType, int priority, wexpOp_t **opp)
 {
 	intptr_t b = ParseExpressionPriority(src, priority);

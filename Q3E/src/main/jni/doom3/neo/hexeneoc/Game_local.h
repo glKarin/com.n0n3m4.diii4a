@@ -825,7 +825,7 @@ extern const int	CINEMATIC_SKIP_DELAY;
 #include "script/Script_Thread.h"
 
 #ifdef __ANDROID__
-#include "idlibCompat.h"
+#include "idlib_hexen.h"
 #endif
 
 #endif	/* !__GAME_LOCAL_H__ */

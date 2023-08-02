@@ -1481,6 +1481,10 @@ public class GameLauncher extends Activity
 		{
 			game = "sabot";
 		}
+		else if (val == R.id.fs_game_hexeneoc)
+		{
+			game = "hexeneoc";
+		}
 
 		else if (val == R.id.fs_game_quake4)
 		{
@@ -2198,6 +2202,8 @@ public class GameLauncher extends Activity
 		prop = new GameProp(6, "overthinked", "overthinked", "", false);
 		props.add(prop);
 		prop = new GameProp(7, "sabot", "sabot", "d3xp", false);
+		props.add(prop);
+		prop = new GameProp(8, "hexeneoc", "hexeneoc", "", false);
 		props.add(prop);
 		GameProps.put(Q3EGlobals.GAME_DOOM3, props);
 
