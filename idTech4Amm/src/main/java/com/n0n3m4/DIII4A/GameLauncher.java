@@ -256,9 +256,9 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_skip_intro, isChecked)
 						.commit();
 				if (isChecked)
-					SetParam_temp("disconnect");
+					SetCommand_temp("disconnect");
 				else
-					RemoveParam_temp("disconnect");
+					RemoveCommand_temp("disconnect");
 			}
         }
     };
@@ -760,7 +760,7 @@ public class GameLauncher extends Activity
 		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		V.skip_intro.setChecked(skipIntro);
 		if (skipIntro)
-			SetParam_temp("disconnect");
+			SetCommand_temp("disconnect");
         boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
         V.auto_quick_load.setChecked(autoQuickLoad);
         if (autoQuickLoad)
@@ -1888,9 +1888,19 @@ public class GameLauncher extends Activity
 		UpdateTempCommand();
     }
 
-	private void SetParam_temp(String name)
+	private void SetCommand_temp(String name)
 	{
-		SetParam_temp(name, "");
+		Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetCommand(Q3EUtils.q3ei.start_temporary_extra_command, name));
+		UpdateTempCommand();
+	}
+
+	private void RemoveCommand_temp(String name)
+	{
+		boolean[] res = {false};
+		String str = KidTech4Command.RemoveCommand(Q3EUtils.q3ei.start_temporary_extra_command, name, res);
+		if (res[0])
+			Q3EUtils.q3ei.start_temporary_extra_command = str;
+		UpdateTempCommand();
 	}
 
     private void ShowPreferenceDialog()
