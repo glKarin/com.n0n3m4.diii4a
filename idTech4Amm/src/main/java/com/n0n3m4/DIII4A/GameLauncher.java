@@ -263,6 +263,12 @@ public class GameLauncher extends Activity
 				else
 					RemoveCommand_temp("disconnect");
 			}
+			else if (id == R.id.scale_by_screen_area)
+			{
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, isChecked)
+						.commit();
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -275,6 +281,7 @@ public class GameLauncher extends Activity
 			if (rgId == R.id.rg_scrres)
 			{
 				GameLauncher.this.UpdateCustomerResulotion(id == R.id.res_custom);
+				GameLauncher.this.UpdateResolutionScaleScheme(id);
 				index = GetCheckboxIndex(radioGroup, id);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putInt(Q3EPreference.pref_scrres, index)
@@ -639,7 +646,9 @@ public class GameLauncher extends Activity
         {
             SelectCheckbox(GetGameModRadioGroup(), -1);
         }
-        GameLauncher.this.UpdateCustomerResulotion(V.rg_scrres.getCheckedRadioButtonId() == R.id.res_custom);
+		int checkedRadioButtonId = V.rg_scrres.getCheckedRadioButtonId();
+		GameLauncher.this.UpdateCustomerResulotion(checkedRadioButtonId == R.id.res_custom);
+		GameLauncher.this.UpdateResolutionScaleScheme(checkedRadioButtonId);
 
 		UnlockCmdUpdate();
     }
@@ -939,6 +948,8 @@ public class GameLauncher extends Activity
 		V.skip_intro.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.find_dll.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.scale_by_screen_area.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.scale_by_screen_area.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_scale_by_screen_area, false));
 
         updatehacktings();
 
@@ -1296,6 +1307,7 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_harm_multithreading, V.multithreading.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, V.scale_by_screen_area.isChecked());
 
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -2046,6 +2058,16 @@ public class GameLauncher extends Activity
 		m_chooseGameModFunc.Start(bundle);
 	}
 
+	private void UpdateResolutionScaleScheme(int checkedId)
+	{
+		boolean usingPercent = checkedId == R.id.res_05x
+				|| checkedId == R.id.res_2x
+				|| checkedId == R.id.res_1p3x
+				|| checkedId == R.id.res_1p4x
+				;
+		V.scale_by_screen_area.setEnabled(usingPercent);
+	}
+
 
 
     private class ViewHolder
@@ -2108,6 +2130,7 @@ public class GameLauncher extends Activity
 		public TextView edt_cmdline_temp;
 		public CheckBox skip_intro;
 		public Button launcher_tab1_game_mod_button;
+		public CheckBox scale_by_screen_area;
 
         public void Setup()
         {
@@ -2168,6 +2191,7 @@ public class GameLauncher extends Activity
 			edt_cmdline_temp = findViewById(R.id.edt_cmdline_temp);
 			skip_intro = findViewById(R.id.skip_intro);
 			launcher_tab1_game_mod_button = findViewById(R.id.launcher_tab1_game_mod_button);
+			scale_by_screen_area = findViewById(R.id.scale_by_screen_area);
         }
     }
 

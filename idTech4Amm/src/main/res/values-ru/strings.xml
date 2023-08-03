@@ -257,5 +257,6 @@
     <string name="mod">mod</string>
     <string name="view">View</string>
     <string name="hide_ad_bar_in_launcher">Hide ad bar in launcher</string>
+    <string name="scale_by_screen_area">Scale by screen area</string>
 
 </resources>

@@ -536,4 +536,21 @@ public class Q3EUtils
         }
         return pasteData;
     }
+
+    public static int[] CalcSizeByScaleScreenArea(int width, int height, float scale)
+    {
+        double p = Math.sqrt(scale);
+        int w = (int)Math.floor((double)width * p);
+        int h = (int)Math.floor((double)w * ((double)height / (double)width));
+        return new int[]{w, h};
+    }
+
+    public static int[] CalcSizeByScaleWidthHeight(int width, int height, float scale)
+    {
+        int w = (int)Math.floor((double)width * scale);
+        int h = (int)Math.floor((double)w * ((double)height / (double)width));
+        /*int w = width * scale;
+        int h = width * scale;*/
+        return new int[]{w, h};
+    }
 }

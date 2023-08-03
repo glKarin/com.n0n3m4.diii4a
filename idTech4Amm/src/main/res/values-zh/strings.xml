@@ -256,4 +256,5 @@
     <string name="load_game_mod_list">加载游戏mod列表</string>
     <string name="mod">mod</string>
     <string name="view">查看</string>
+    <string name="scale_by_screen_area">如果使用比例, 则按屏幕面积的比例而不是宽高比例</string>
 </resources>

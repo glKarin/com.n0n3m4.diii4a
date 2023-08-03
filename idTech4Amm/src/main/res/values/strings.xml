@@ -259,5 +259,6 @@
     <string name="load_game_mod_list">load game mod list</string>
     <string name="mod">mod</string>
     <string name="view">View</string>
+    <string name="scale_by_screen_area">Scale by screen area if using ratio</string>
 
 </resources>
