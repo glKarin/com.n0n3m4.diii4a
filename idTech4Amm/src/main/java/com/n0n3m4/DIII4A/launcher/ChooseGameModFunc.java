@@ -3,11 +3,13 @@ package com.n0n3m4.DIII4A.launcher;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.misc.FileBrowser;
+import com.karin.idTech4Amm.misc.Function;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
@@ -120,6 +122,24 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             }
             if(name.isEmpty())
                 name = fileModel.name;
+
+            File dir = new File(fileModel.path);
+            name += "\n " + FileUtility.FormatSize(FileUtility.du(fileModel.path, new Function() {
+                @Override
+                public Object Invoke(Object... args)
+                {
+                    File f = (File)args[0];
+                    String relativePath = FileUtility.RelativePath(dir, f);
+                    if(f.isDirectory())
+                    {
+                        return !"/savegames".equalsIgnoreCase(relativePath);
+                    }
+                    else
+                    {
+                        return !"/.console_history.dat".equalsIgnoreCase(relativePath);
+                    }
+                }
+            }));
 
             map.put(fileModel.name, name);
             values.add(fileModel.name);

@@ -245,8 +245,8 @@
     <string name="extract_source">提取源码</string>
     <string name="tips">提示</string>
     <string name="license">开源许可证</string>
-    <string name="maximum_fps_limit_0_unlimited">最大FPS(0 不限制)</string>
-    <string name="limit_maximum_fps_default_is_0">限制最大FPS(默认0)</string>
+    <string name="maximum_fps_limit_0_unlimited">最大FPS(cvar `harm_r_maxFPS`)</string>
+    <string name="limit_maximum_fps_default_is_0">限制最大FPS(0 不限制)</string>
     <string name="edit_cvar">编辑CVar</string>
     <string name="cvar_editor">CVar编辑器</string>
     <string name="skip_intro">跳过启动介绍</string>
@@ -255,4 +255,5 @@
     <string name="hexen_edge_of_chaos_hexeneoc">Hexen: Edge of Chaos(hexeneoc)</string>
     <string name="load_game_mod_list">加载游戏mod列表</string>
     <string name="mod">mod</string>
+    <string name="view">查看</string>
 </resources>

@@ -80,6 +80,9 @@ public class FileBrowser
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
                     continue;
             }
+            if(!m_showHidden && f.isHidden())
+                continue;
+
             if (f.isDirectory() && m_dirNameWithSeparator)
                 name += File.separator;
 

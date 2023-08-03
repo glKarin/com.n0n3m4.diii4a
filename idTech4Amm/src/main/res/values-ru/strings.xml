@@ -113,7 +113,6 @@
     <string name="screen">Экран</string>
     <string name="hide_navigation_bar">Скрыть панель навигации</string>
     <string name="hide_navigation_bar_in_game">Скрыть панель навигации в игре</string>
-    <string name="hide_ad_bar_in_launcher">Hide ad bar in launcher</string>
     <string name="cover_screen_edges">Края экрана</string>
     <string name="cover_screen_edges_in_status_bar">Обложка краев экрана в строке состояния</string>
     <string name="game">Игра</string>
@@ -246,8 +245,8 @@
     <string name="extract_source">Извлечь ресурсы</string>
     <string name="tips">Советы</string>
     <string name="license">Лицензия</string>
-    <string name="maximum_fps_limit_0_unlimited">Максимальный придел FPS (0 = неограниченный)</string>
-    <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (по умолчанию 0)</string>
+    <string name="maximum_fps_limit_0_unlimited">Максимальный придел FPS (cvar `harm_r_maxFPS`)</string>
+    <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (0 = неограниченный)</string>
     <string name="edit_cvar">Редактировать CVar</string>
     <string name="cvar_editor">CVar редактор</string>
     <string name="skip_intro">Пропустить вступительный ролик</string>
@@ -256,5 +255,7 @@
     <string name="hexen_edge_of_chaos_hexeneoc">Hexen: Edge of Chaos(hexeneoc)</string>
     <string name="load_game_mod_list">load game mod list</string>
     <string name="mod">mod</string>
+    <string name="view">View</string>
+    <string name="hide_ad_bar_in_launcher">Hide ad bar in launcher</string>
 
 </resources>

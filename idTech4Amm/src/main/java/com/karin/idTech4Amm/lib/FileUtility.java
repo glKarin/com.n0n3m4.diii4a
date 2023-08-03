@@ -1,5 +1,7 @@
 package com.karin.idTech4Amm.lib;
 
+import com.karin.idTech4Amm.misc.Function;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -162,6 +164,92 @@ public final class FileUtility
             return file.mkdirs();
         else
             return file.mkdir();
+    }
+
+    public static long du(String path)
+    {
+        return du(new File(path));
+    }
+
+    public static long du(File file)
+    {
+        return du(file, null);
+    }
+
+    public static long du(String path, Function filter)
+    {
+        return du(new File(path), filter);
+    }
+
+    public static long du(File file, Function filter)
+    {
+        if(null != filter && !(boolean)filter.Invoke(file))
+            return -2L;
+        if(!file.exists())
+            return -1L;
+        if(file.isDirectory())
+        {
+            long sum = 0;
+            File[] files = file.listFiles();
+            if(null == files)
+                return 0;
+            for (File f : files)
+            {
+                long l = du(f, filter);
+                if(l > 0)
+                    sum += l;
+            }
+            return sum;
+        }
+        else
+        {
+            return file.length();
+        }
+    }
+
+    public static String FormatSize(long size)
+    {
+        String[] Unit = {"Bytes", "K", "M", "G", "T"};
+        //const Unit = ["byte", "K", "M", "G", "T"];
+        double s;
+        int i;
+        for(s = size, i = 0; s >= 1024.0 && i < Unit.length - 1; s /= 1024.0, i++);
+        s = Math.round(s * 100.0) / 100.0;
+        return s + Unit[i];
+    }
+
+    public static String RelativePath(String a, String b)
+    {
+        return RelativePath(new File(a), new File(b));
+    }
+
+    public static String RelativePath(File a, File b)
+    {
+        if(a == b)
+            return "";
+        String ap = AbsolutePath(a);
+        String bp = AbsolutePath(b);
+        if(ap.equals(bp))
+            return "";
+        if(ap.startsWith(bp))
+            return ap.substring(bp.length());
+        else if(bp.startsWith(ap))
+            return bp.substring(ap.length());
+        else
+            return null;
+    }
+
+    public static String AbsolutePath(File a)
+    {
+        try
+        {
+            return a.getCanonicalPath();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return a.getAbsolutePath();
+        }
     }
     
     private FileUtility() {}

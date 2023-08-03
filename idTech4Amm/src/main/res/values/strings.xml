@@ -248,8 +248,8 @@
     <string name="extract_source">Extract source</string>
     <string name="tips">Tips</string>
     <string name="license">License</string>
-    <string name="maximum_fps_limit_0_unlimited">Maximum FPS limit(0 = unlimited)</string>
-    <string name="limit_maximum_fps_default_is_0">Limit maximum FPS(default is 0)</string>
+    <string name="maximum_fps_limit_0_unlimited">Maximum FPS limit(cvar `harm_r_maxFPS`)</string>
+    <string name="limit_maximum_fps_default_is_0">Limit maximum FPS(0 = unlimited)</string>
     <string name="edit_cvar">Edit CVar</string>
     <string name="cvar_editor">CVar editor</string>
     <string name="skip_intro">Skip intro</string>
@@ -258,5 +258,6 @@
     <string name="hexen_edge_of_chaos_hexeneoc">Hexen: Edge of Chaos(hexeneoc)</string>
     <string name="load_game_mod_list">load game mod list</string>
     <string name="mod">mod</string>
+    <string name="view">View</string>
 
 </resources>
