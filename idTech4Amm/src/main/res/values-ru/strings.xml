@@ -6,7 +6,7 @@
 
     <string name="commandline">Команды:</string>
     <string name="game_working_directory">Путь к игровым файлам:</string>
-    <string name="chooser">Chooser</string>
+    <string name="chooser">Выбрать</string>
     <string name="disable_lighting">Отключить освящение в игре</string>
     <string name="use_dxt_textures_tegra_only_others_no_effect">Использовать DXT текстуры (Работает только на Tegra)</string>
     <string name="use_etc1_or_rgba4444_compression">Использовать ETC1 (или RGBA4444) сжатие</string>
@@ -253,10 +253,10 @@
     <string name="overthinked_overthinked">Overthinked(overthinked)</string>
     <string name="sabot_sabot">SABot(sabot)</string>
     <string name="hexen_edge_of_chaos_hexeneoc">Hexen: Edge of Chaos(hexeneoc)</string>
-    <string name="load_game_mod_list">load game mod list</string>
-    <string name="mod">mod</string>
-    <string name="view">View</string>
-    <string name="hide_ad_bar_in_launcher">Hide ad bar in launcher</string>
-    <string name="scale_by_screen_area">Scale by screen area</string>
+    <string name="load_game_mod_list">загрузить список игровых модов</string>
+    <string name="mod">мод</string>
+    <string name="view">Вид</string>
+    <string name="hide_ad_bar_in_launcher">Скрыть рекламную панель в лаунчере</string>
+    <string name="scale_by_screen_area">Масштабировать по области экрана</string>
 
 </resources>
