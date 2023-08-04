@@ -222,7 +222,7 @@ public class Q3EUtils
         {
             ApplicationInfo ainfo = context.getApplicationContext().getPackageManager().getApplicationInfo
                     (
-                            context.getPackageName(),
+                            context.getApplicationContext().getPackageName(),
                             PackageManager.GET_SHARED_LIBRARY_FILES
                     );
             return ainfo.nativeLibraryDir; //k for arm64-v8a apk install

@@ -23,6 +23,7 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -2066,6 +2067,14 @@ public class GameLauncher extends Activity
 				|| checkedId == R.id.res_1p4x
 				;
 		V.scale_by_screen_area.setEnabled(usingPercent);
+	}
+
+	public String GetDefaultGameDirectory()
+	{
+		if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
+			return Environment.getExternalStorageDirectory() + "/Android/data/" + getApplicationContext().getPackageName();
+		else
+			return default_gamedata;
 	}
 
 

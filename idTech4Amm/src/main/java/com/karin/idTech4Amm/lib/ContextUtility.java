@@ -79,7 +79,7 @@ public final class ContextUtility
     public static void OpenAppSetting(Context context)
     {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+        Uri uri = Uri.fromParts("package", context.getApplicationContext().getPackageName(), null);
         intent.setData(uri);
         context.startActivity(intent);
     }
@@ -90,7 +90,7 @@ public final class ContextUtility
         try
         {
             PackageManager manager = context.getPackageManager();
-            PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
+            PackageInfo info = manager.getPackageInfo(context.getApplicationContext().getPackageName(), 0);
             version = info.versionName;
         }
         catch (Exception e)
@@ -235,7 +235,7 @@ public final class ContextUtility
         {
             ApplicationInfo ainfo = context.getApplicationContext().getPackageManager().getApplicationInfo
             (
-                context.getPackageName(),
+                context.getApplicationContext().getPackageName(),
                 PackageManager.GET_SHARED_LIBRARY_FILES
             );
             return ainfo.nativeLibraryDir;
@@ -256,7 +256,7 @@ public final class ContextUtility
             if(Environment.isExternalStorageManager())
                 return CHECK_PERMISSION_RESULT_GRANTED;
             Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-            intent.setData(Uri.parse("package:" + context.getPackageName()));
+            intent.setData(Uri.parse("package:" + context.getApplicationContext().getPackageName()));
             context.startActivityForResult(intent, resultCode);
             return CHECK_PERMISSION_RESULT_REQUEST;
         }
@@ -343,7 +343,7 @@ public final class ContextUtility
     public static void RestartApp(Activity activity)
     {
         activity.finish();
-        Intent intent = activity.getPackageManager().getLaunchIntentForPackage(activity.getPackageName());
+        Intent intent = activity.getPackageManager().getLaunchIntentForPackage(activity.getApplicationContext().getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activity.startActivity(intent);
     }
