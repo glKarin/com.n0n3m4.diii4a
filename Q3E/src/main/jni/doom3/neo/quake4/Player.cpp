@@ -11105,6 +11105,8 @@ void idPlayer::CalculateFirstPersonView( void ) {
 		float scale = 0.0f;
 		if(p.RayIntersection(firstPersonViewOrigin, forward, scale))
 			firstPersonViewOrigin_viewWeaponOrigin = firstPersonViewOrigin + forward * scale;
+		else
+			firstPersonViewOrigin_viewWeaponOrigin = firstPersonViewOrigin;
 	}
 #endif
 }
