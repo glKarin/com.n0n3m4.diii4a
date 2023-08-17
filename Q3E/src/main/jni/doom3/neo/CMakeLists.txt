@@ -69,6 +69,7 @@ option(OPENSLES			"OpenSLES support" ON)
 option(MULTITHREAD			"Multi-Thread support" ON)
 option(USING_STB			"Using stb" ON)
 option(SUPPORT_OBJ			"Support obj model" ON)
+option(SUPPORT_DAE			"Support dae model" ON)
 
 option(D3LE			"Build the d3le game code" ON)
 option(CDOOM			"Build the cdoom game code" ON)
@@ -287,6 +288,10 @@ endif()
 if(SUPPORT_OBJ)
 	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_OBJ")
 	message(STATUS "Support obj model")
+endif()
+if(SUPPORT_DAE)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_DAE")
+	message(STATUS "Support dae model")
 endif()
 #//k jpeg
 set(src_jpeg
