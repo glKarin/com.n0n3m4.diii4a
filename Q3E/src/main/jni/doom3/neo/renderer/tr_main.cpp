@@ -1257,6 +1257,18 @@ void R_RenderView(viewDef_t *parms)
 	// portal-to-screen scissor box calculations
 	R_SetupProjection();
 
+#ifdef _SHADOW_MAPPING
+	if(r_useShadowMapping.GetBool())
+	{
+		// setup render matrices for faster culling
+		idRenderMatrix		projectionRenderMatrix;	// tech5 version of projectionMatrix
+		idRenderMatrix::Transpose( *( idRenderMatrix* )tr.viewDef->projectionMatrix, /*tr.viewDef->*/projectionRenderMatrix );
+		idRenderMatrix viewRenderMatrix;
+		idRenderMatrix::Transpose( *( idRenderMatrix* )tr.viewDef->worldSpace.modelViewMatrix, viewRenderMatrix );
+		idRenderMatrix::Multiply( /*tr.viewDef->*/projectionRenderMatrix, viewRenderMatrix, *( idRenderMatrix* )tr.viewDef->worldSpace.mvp );
+	}
+#endif
+
 #ifdef _RAVENxxx // particle
     R_AddEffectSurfaces();
 #endif

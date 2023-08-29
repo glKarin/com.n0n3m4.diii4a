@@ -1496,7 +1496,7 @@ public class GameLauncher extends Activity
 		{
 			game = "hardcorps";
 		}
-		else if (val == R.id.fs_game_overthinked)
+		/*else if (val == R.id.fs_game_overthinked)
 		{
 			game = "overthinked";
 		}
@@ -1507,7 +1507,7 @@ public class GameLauncher extends Activity
 		else if (val == R.id.fs_game_hexeneoc)
 		{
 			game = "hexeneoc";
-		}
+		}*/
 
 		else if (val == R.id.fs_game_quake4)
 		{
@@ -2284,12 +2284,14 @@ public class GameLauncher extends Activity
 		props.add(prop);
 		prop = new GameProp(5, "hardcorps", "hardcorps", "", false);
 		props.add(prop);
-		prop = new GameProp(6, "overthinked", "overthinked", "", false);
+
+		/*prop = new GameProp(6, "overthinked", "overthinked", "", false);
 		props.add(prop);
 		prop = new GameProp(7, "sabot", "sabot", "d3xp", false);
 		props.add(prop);
 		prop = new GameProp(8, "hexeneoc", "hexeneoc", "", false);
-		props.add(prop);
+		props.add(prop);*/
+
 		GameProps.put(Q3EGlobals.GAME_DOOM3, props);
 
 		props = new ArrayList<>();

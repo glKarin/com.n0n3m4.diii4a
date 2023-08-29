@@ -404,6 +404,125 @@ viewLight_t *R_SetLightDefViewLight(idRenderLightLocal *light)
 	// link the view light
 	vLight->next = tr.viewDef->viewLights;
 	tr.viewDef->viewLights = vLight;
+#ifdef _SHADOW_MAPPING
+    memcpy(vLight->baseLightProject, light->baseLightProject, sizeof(light->baseLightProject));
+    vLight->pointLight = light->parms.pointLight;
+    vLight->parallel = light->parms.parallel;
+    vLight->lightCenter = light->parms.lightCenter;
+	vLight->shadowLOD = 0;
+
+	if(r_useShadowMapping.GetBool()) {
+		if (harm_r_shadowMapLod.GetInteger() >= 0 && harm_r_shadowMapLod.GetInteger() < 5)
+			vLight->shadowLOD = harm_r_shadowMapLod.GetInteger();
+		else {
+			// Calculate the matrix that projects the zero-to-one cube to exactly cover the
+			// light frustum in clip space.
+			idRenderMatrix invProjectMVPMatrix;
+			idRenderMatrix::Multiply(*(idRenderMatrix *) tr.viewDef->worldSpace.mvp,
+									 *(idRenderMatrix *) light->inverseBaseLightProject,
+									 invProjectMVPMatrix);
+
+			// Calculate the projected bounds, either not clipped at all, near clipped, or fully clipped.
+			idBounds projected;
+			if (r_useLightScissors.GetInteger() == 1) {
+				idRenderMatrix::ProjectedBounds(projected, invProjectMVPMatrix, bounds_zeroOneCube);
+			} else if (r_useLightScissors.GetInteger() == 2) {
+				idRenderMatrix::ProjectedNearClippedBounds(projected, invProjectMVPMatrix,
+														   bounds_zeroOneCube);
+			} else {
+				idRenderMatrix::ProjectedFullyClippedBounds(projected, invProjectMVPMatrix,
+															bounds_zeroOneCube);
+			}
+
+			if (projected[0][2] < projected[1][2]) {
+				float screenWidth =
+						(float) tr.viewDef->viewport.x2 - (float) tr.viewDef->viewport.x1;
+				float screenHeight =
+						(float) tr.viewDef->viewport.y2 - (float) tr.viewDef->viewport.y1;
+
+				idScreenRect lightScissorRect;
+				lightScissorRect.x1 = idMath::Ftoi(projected[0][0] * screenWidth);
+				lightScissorRect.x2 = idMath::Ftoi(projected[1][0] * screenWidth);
+				lightScissorRect.y1 = idMath::Ftoi(projected[0][1] * screenHeight);
+				lightScissorRect.y2 = idMath::Ftoi(projected[1][1] * screenHeight);
+				lightScissorRect.Expand();
+
+				vLight->scissorRect.Intersect(lightScissorRect);
+				vLight->scissorRect.zmin = projected[0][2];
+				vLight->scissorRect.zmax = projected[1][2];
+
+				// RB: calculate shadow LOD similar to Q3A .md3 LOD code
+				vLight->shadowLOD = 0;
+				const bool lightCastsShadows = /*light->parms.forceShadows || */(
+						!light->parms.noShadows && light->lightShader->LightCastsShadows());
+
+				if (r_useShadowMapping.GetBool() && lightCastsShadows) {
+					float flod, lodscale;
+					float projectedRadius;
+					int lod;
+					int numLods;
+
+					numLods = MAX_SHADOWMAP_RESOLUTIONS;
+
+					// compute projected bounding sphere
+					// and use that as a criteria for selecting LOD
+					idVec3 center = projected.GetCenter();
+					projectedRadius = projected.GetRadius(center);
+					if (projectedRadius > 1.0f) {
+						projectedRadius = 1.0f;
+					}
+
+					if (projectedRadius != 0) {
+						lodscale = r_shadowMapLodScale.GetFloat();
+
+						if (lodscale > 20)
+							lodscale = 20;
+
+						flod = 1.0f - projectedRadius * lodscale;
+					} else {
+						// object intersects near view plane, e.g. view weapon
+						flod = 0;
+					}
+
+					flod *= numLods;
+
+					if (flod < 0) {
+						flod = 0;
+					}
+
+					lod = idMath::Ftoi(flod);
+
+					if (lod >= numLods) {
+						//lod = numLods - 1;
+					}
+
+					lod += r_shadowMapLodBias.GetInteger();
+
+					if (lod < 0) {
+						lod = 0;
+					}
+
+					if (lod >= numLods) {
+						// don't draw any shadow
+						//lod = -1;
+
+						lod = numLods - 1;
+					}
+
+					// 2048^2 ultra quality is only for cascaded shadow mapping with sun lights
+					if (lod == 0 && !light->parms.parallel) {
+						lod = 1;
+					}
+
+					vLight->shadowLOD = lod;
+				}
+				// RB end
+			}
+
+			// the light was culled to the view frustum
+		}
+	}
+#endif
 
 	light->viewLight = vLight;
 

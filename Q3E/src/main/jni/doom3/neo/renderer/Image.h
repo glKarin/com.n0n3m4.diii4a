@@ -55,6 +55,11 @@ glDisable( GL_TEXTURE_* )
 ====================================================================
 */
 
+#ifdef _SHADOW_MAPPING
+#ifndef MAX_SHADOWMAP_RESOLUTIONS
+#define MAX_SHADOWMAP_RESOLUTIONS 5
+#endif
+#endif
 typedef enum {
 	IS_UNLOADED,	// no gl texture number
 	IS_PARTIAL,		// has a texture number and the low mip levels loaded
@@ -190,6 +195,12 @@ class idImage
 		int		GenerateImageETC(int width, int height,
 		                              textureFilter_t filter, bool allowDownSize,
 		                              textureRepeat_t repeat, textureDepth_t depth);
+
+#ifdef _SHADOW_MAPPING
+	void		GenerateShadowMapDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
+    void		GenerateShadowMapDepthCubeImage(int size, textureFilter_t filter, bool allowDownSize);
+	void		GenerateDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
+#endif
 #if !defined(GL_ES_VERSION_2_0)
 		void		Generate3DImage(const byte *pic, int width, int height, int depth,
 		                                textureFilter_t filter, bool allowDownSize,
@@ -513,6 +524,13 @@ class idImageManager
 	bool				GetNextAllocImage(ActuallyLoadImage_data_t &ret);
 	idImage *			GetNextPurgeImage();
 	void HandlePendingImage(void);
+#endif
+#ifdef _SHADOW_MAPPING
+	// RB begin
+	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowCubeImage[MAX_SHADOWMAP_RESOLUTIONS];
+    idImage*			shadowDepthImage[MAX_SHADOWMAP_RESOLUTIONS];
+	// RB end
 #endif
 };
 

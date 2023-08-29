@@ -216,6 +216,24 @@ void GL_Uniform4fv(GLint location, const GLfloat *value)
 
 /*
 ====================
+GL_Uniform3fv
+====================
+*/
+void GL_Uniform3fv(GLint location, const GLfloat *value)
+{
+	if (!backEnd.glState.currentProgram) {
+		common->Printf("GL_Uniform4fv: no current program object\n");
+		__builtin_trap();
+		return;
+	}
+
+	glUniform3fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
+
+	GL_CheckErrors();
+}
+
+/*
+====================
 GL_UniformMatrix4fv
 ====================
 */

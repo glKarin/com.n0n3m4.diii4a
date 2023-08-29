@@ -29,9 +29,10 @@ public final class Constants
             "Change OpenGL vertex index size to 4 bytes for large model.",
             "In Quake4, remove FakeClient, and add SABot-a9 mod support and resource.",
             "Add skip intro.",
-            "Support obj static model, and fix png image load.",
+            "Support obj/dae static model, and fix png image load.",
             "Support max FPS limit.",
             "Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).",
+            "Add shadow mapping support(testing, has some incorrect rendering, only support point-lighting), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow volume`.",
 	};
 
 	// Launcher preference keys

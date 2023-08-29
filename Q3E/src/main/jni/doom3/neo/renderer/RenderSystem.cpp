@@ -187,6 +187,7 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 	//Save the potential pixel
 	pixelsCrop = pc;
 	pixels = pix;
+	R_CheckBackEndCvars(); // check backend cvars state
 #ifdef _HUMANHEAD //k: scope view support in multithread
 	backEnd.scopeView = tr.IsScopeView();
 	backEnd.shuttleView = tr.IsShuttleView();
@@ -390,7 +391,6 @@ static void R_CheckCvars(void)
 
 	// check for changes to logging state
 	GLimp_EnableLogging(r_logFile.GetInteger() != 0);
-	R_CheckGLSLCvars();
 
 	if(harm_r_maxFps.IsModified())
 	{
@@ -820,6 +820,7 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	{
 #endif
 	CheckEGLInitialized(); // check/wait EGL context
+	R_CheckBackEndCvars(); // check backend cvars state
 
 	// start the back end up again with the new command list
 	R_IssueRenderCommands();

@@ -2554,3 +2554,209 @@ void idImage::Print() const
 
 	common->Printf(" %s\n", imgName.c_str());
 }
+
+#ifdef _SHADOW_MAPPING
+void		idImage::GenerateDepthImage(int width, int height, textureFilter_t filterParm, bool allowDownSizeParm, textureRepeat_t repeatParm)
+{
+    byte		*scaledBuffer;
+    int			scaled_width, scaled_height;
+
+    PurgeImage();
+
+    filter = filterParm;
+    //filter = TF_NEAREST;
+    allowDownSize = allowDownSizeParm;
+    repeat = repeatParm;
+    depth = TD_HIGH_QUALITY;
+
+    // if we don't have a rendering context, just return after we
+    // have filled in the parms.  We must have the values set, or
+    // an image match from a shader before OpenGL starts would miss
+    // the generated texture
+
+    if (!glConfig.isInitialized) {
+        return;
+    }
+
+    // make sure it is a power of 2
+    scaled_width = MakePowerOfTwo(width);
+    scaled_height = MakePowerOfTwo(height);
+
+    if (scaled_width != width || scaled_height != height) {
+        common->Error("R_CreateImage: not a power of 2 image");
+    }
+
+    // Optionally modify our width/height based on options/hardware
+    GetDownsize(scaled_width, scaled_height);
+
+    scaledBuffer = NULL;
+
+    // generate the texture number
+    glGenTextures(1, &texnum);
+
+    // select proper internal format before we resample
+    internalFormat = GL_DEPTH_COMPONENT24_OES;
+
+    uploadHeight = scaled_height;
+    uploadWidth = scaled_width;
+    type = TT_2D;
+
+    // upload the main image level
+    Bind();
+
+    SetImageFilterAndRepeat();
+
+    //GL_CheckErrors("GenerateDepthImage::start");
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0,
+                 GL_DEPTH_COMPONENT24_OES, GL_UNSIGNED_INT, NULL);
+    //GL_CheckErrors("GenerateDepthImage::end");
+
+    // see if we messed anything up
+    GL_CheckErrors();
+}
+
+void		idImage::GenerateShadowMapDepthImage(int width, int height, textureFilter_t filterParm, bool allowDownSizeParm, textureRepeat_t repeatParm)
+{
+	byte		*scaledBuffer;
+	int			scaled_width, scaled_height;
+
+	PurgeImage();
+
+	filter = filterParm;
+	//filter = TF_NEAREST;
+	allowDownSize = allowDownSizeParm;
+	repeat = repeatParm;
+	depth = TD_HIGH_QUALITY;
+
+	// if we don't have a rendering context, just return after we
+	// have filled in the parms.  We must have the values set, or
+	// an image match from a shader before OpenGL starts would miss
+	// the generated texture
+
+	if (!glConfig.isInitialized) {
+		return;
+	}
+
+	// make sure it is a power of 2
+	scaled_width = MakePowerOfTwo(width);
+	scaled_height = MakePowerOfTwo(height);
+
+	if (scaled_width != width || scaled_height != height) {
+		common->Error("R_CreateImage: not a power of 2 image");
+	}
+
+	// Optionally modify our width/height based on options/hardware
+	GetDownsize(scaled_width, scaled_height);
+
+	scaledBuffer = NULL;
+
+	// generate the texture number
+	glGenTextures(1, &texnum);
+
+	// select proper internal format before we resample
+	internalFormat = GL_RGBA;
+
+	uploadHeight = scaled_height;
+	uploadWidth = scaled_width;
+	type = TT_2D;
+
+	// upload the main image level
+	Bind();
+
+	SetImageFilterAndRepeat();
+
+    //GL_CheckErrors("GenerateShadowMapDepthImage::start");
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    //GL_CheckErrors("GenerateShadowMapDepthImage::end");
+
+	// see if we messed anything up
+	GL_CheckErrors();
+}
+
+void idImage::GenerateShadowMapDepthCubeImage(int size, textureFilter_t filterParm, bool allowDownSizeParm)
+{
+	int			scaled_width, scaled_height;
+	int			width, height;
+	int			i;
+
+	PurgeImage();
+
+	filter = filterParm;
+	//filter = TF_NEAREST;
+	allowDownSize = allowDownSizeParm;
+	depth = TD_HIGH_QUALITY;
+
+	type = TT_CUBIC;
+
+	// if we don't have a rendering context, just return after we
+	// have filled in the parms.  We must have the values set, or
+	// an image match from a shader before OpenGL starts would miss
+	// the generated texture
+	if (!glConfig.isInitialized) {
+		return;
+	}
+
+	// make sure it is a power of 2
+	scaled_width = MakePowerOfTwo(size);
+	scaled_height = MakePowerOfTwo(size);
+
+	if (scaled_width != size || scaled_height != size) {
+		common->Error("GenerateShadowMapDepthCubeImage: not a power of 2 image");
+	}
+
+	// Optionally modify our width/height based on options/hardware
+	GetDownsize(scaled_width, scaled_height);
+
+	width = height = size;
+
+	// generate the texture number
+	glGenTextures(1, &texnum);
+
+	// select proper internal format before we resample
+	internalFormat = GL_RGBA;
+
+	// don't bother with downsample for now
+	scaled_width = width;
+	scaled_height = height;
+
+	uploadHeight = scaled_height;
+	uploadWidth = scaled_width;
+
+	Bind();
+
+	// no other clamp mode makes sense
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R_OES, GL_CLAMP_TO_EDGE);
+
+	// set the minimize / maximize filtering
+	switch (filter) {
+		case TF_DEFAULT:
+			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, globalImages->textureMinFilter);
+			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, globalImages->textureMaxFilter);
+			break;
+		case TF_LINEAR:
+			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			break;
+		case TF_NEAREST:
+			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			break;
+		default:
+			common->FatalError("R_CreateImage: bad texture filter");
+	}
+
+	// upload the base level
+	// FIXME: support GL_COLOR_INDEX8_EXT?
+	//GL_CheckErrors("GenerateShadowMapDepthCubeImage::start");
+	for (i = 0 ; i < 6 ; i++) {
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, internalFormat, scaled_width, scaled_height, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		//GL_CheckErrors(va("GenerateShadowMapDepthCubeImage::part_%d", i));
+	}
+	// see if we messed anything up
+	GL_CheckErrors();
+}
+#endif

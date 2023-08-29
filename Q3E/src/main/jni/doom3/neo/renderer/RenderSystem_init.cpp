@@ -363,6 +363,20 @@ static void R_CheckPortableExtensions(void)
 #endif
 	// GL_ARB_shading_language_100
 	glConfig.GLSLAvailable = R_CheckExtension("GL_ARB_shading_language_100");
+
+	// GL_EXT_framebuffer_object
+	glConfig.framebufferObjectAvailable = true;
+	if( glConfig.framebufferObjectAvailable )
+	{
+		glGetIntegerv( GL_MAX_RENDERBUFFER_SIZE, &glConfig.maxRenderbufferSize );
+		glGetIntegerv( GL_MAX_COLOR_ATTACHMENTS_EXT, &glConfig.maxColorAttachments );
+
+		common->Printf( "...using %s\n", "GL_EXT_framebuffer_object" );
+	}
+	else
+	{
+		common->Printf( "X..%s not found\n", "GL_EXT_framebuffer_object" );
+	}
 }
 
 
@@ -2191,6 +2205,9 @@ void idRenderSystemLocal::InitOpenGL(void)
 
 		globalImages->ReloadAllImages();
 
+#ifdef _SHADOW_MAPPING
+		Framebuffer::Init();
+#endif
 		err = glGetError();
 
 		if (err != GL_NO_ERROR) {
@@ -2255,3 +2272,77 @@ int idRenderSystemLocal::GetScreenHeight(void) const
 {
 	return glConfig.vidHeight;
 }
+
+void GL_CheckErrors(const char *name)
+{
+	int		err;
+	char	s[64];
+	int		i;
+
+	// check for up to 10 errors pending
+	err = glGetError();
+
+	if (err == GL_NO_ERROR) {
+		common->Printf("GL_CheckErrors for %s: NO_ERROR\n", name);
+		return;
+	}
+
+	switch (err) {
+		case GL_INVALID_ENUM:
+			strcpy(s, "GL_INVALID_ENUM");
+			break;
+		case GL_INVALID_VALUE:
+			strcpy(s, "GL_INVALID_VALUE");
+			break;
+		case GL_INVALID_OPERATION:
+			strcpy(s, "GL_INVALID_OPERATION");
+			break;
+#if !defined(GL_ES_VERSION_2_0)
+			case GL_STACK_OVERFLOW:
+            strcpy(s, "GL_STACK_OVERFLOW");
+            break;
+        case GL_STACK_UNDERFLOW:
+            strcpy(s, "GL_STACK_UNDERFLOW");
+            break;
+#endif
+		case GL_OUT_OF_MEMORY:
+			strcpy(s, "GL_OUT_OF_MEMORY");
+			break;
+		default:
+			idStr::snPrintf(s, sizeof(s), "%x", err);
+			break;
+	}
+	common->Printf("GL_CheckErrors for %s: %s\n", name, s);
+}
+
+#ifdef _SHADOW_MAPPING
+// RB: shadow mapping parameters
+idCVar r_useShadowMapping( "r_useShadowMapping", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "use shadow mapping instead of stencil shadows" );
+idCVar r_shadowMapFrustumFOV( "r_shadowMapFrustumFOV", "90", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "oversize FOV for point light side matching" );
+idCVar r_shadowMapSingleSide( "r_shadowMapSingleSide", "-1", CVAR_RENDERER | CVAR_INTEGER, "only draw a single side (0-5) of point lights" );
+idCVar r_shadowMapImageSize( "r_shadowMapImageSize", "1024", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "", 128, 2048 );
+idCVar r_shadowMapJitterScale( "r_shadowMapJitterScale", "3", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter offset" );
+idCVar r_shadowMapBiasScale( "r_shadowMapBiasScale", "0.0001", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter bias" );
+idCVar r_shadowMapRandomizeJitter( "r_shadowMapRandomizeJitter", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "randomly offset jitter texture each draw" );
+idCVar r_shadowMapSamples( "r_shadowMapSamples", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "0, 1, 4, or 16" );
+idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER, "number of splits for cascaded shadow mapping with parallel lights", 0, 4 );
+idCVar r_shadowMapSplitWeight( "r_shadowMapSplitWeight", "0.9", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
+idCVar r_shadowMapLodScale( "r_shadowMapLodScale", "1.4", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
+idCVar r_shadowMapLodBias( "r_shadowMapLodBias", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "" );
+idCVar r_shadowMapPolygonFactor( "r_shadowMapPolygonFactor", "2", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
+idCVar r_shadowMapPolygonOffset( "r_shadowMapPolygonOffset", "3000", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
+idCVar r_shadowMapOccluderFacing( "r_shadowMapOccluderFacing", "2", CVAR_RENDERER | CVAR_INTEGER, "0 = front faces, 1 = back faces, 2 = twosided" );
+// RB end
+
+idCVar harm_r_shadowMapLod( "harm_r_shadowMapLod", "-1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "force using shadow map LOD(0 - 4)" );
+idCVar harm_r_shadowMapBias( "harm_r_shadowMapBias", "0.05", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map bias" );
+idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map alpha" );
+idCVar harm_r_shadowMapSampleSize( "harm_r_shadowMapSampleSize", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map sample size" );
+idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map frustum near" );
+idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "7996.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map frustum far" );
+
+#include "Framebuffer.cpp"
+#include "tr_shadowmapping.cpp"
+#include "RenderMatrix.cpp"
+#include "GLMatrix.cpp"
+#endif
