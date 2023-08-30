@@ -4,6 +4,8 @@
 
 #include "tr_local.h"
 
+static bool r_shadowMapping = true;
+
 static idCVar SaveColorBuffer("SaveColorBuffer", "0", CVAR_BOOL, "");
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: debug light type. 1: parallel, 2: spot, 4: point");
 char RB_ShadowMapPass_T = 'G';
@@ -15,6 +17,47 @@ const int INTERACTION_TEXUNIT_DIFFUSE		= 3;
 const int INTERACTION_TEXUNIT_SPECULAR		= 4;
 const int INTERACTION_TEXUNIT_SHADOWMAPS	= 5;
 const int INTERACTION_TEXUNIT_JITTER		= 6;
+
+ID_INLINE void RB_SetMVP( const idRenderMatrix& mvp )
+{
+	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mvp.m);
+}
+
+void R_SaveColorBuffer(const char *name)
+{
+	Framebuffer *fb = backEnd.glState.currentFramebuffer;
+	int width;
+	int height;
+	if(fb)
+	{
+		width = fb->width;
+		height = fb->height;
+	}
+	else
+	{
+		width = glConfig.vidWidth;
+		height = glConfig.vidHeight;
+	}
+
+	byte *data = (byte *)calloc(width * height * 4, 1);
+/*    float *ddata = (float *)calloc(width * height, sizeof(float));
+    glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, ddata);
+
+    for (int i = 0 ; i < width * height ; i++) {
+        data[i*4] =
+        data[i*4+1] =
+        data[i*4+2] = 255 * ddata[i];
+        data[i*4+3] = 1;
+	}*/
+
+	//GL_CheckErrors("glReadPixels111");
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	//GL_CheckErrors("glReadPixels");
+
+	R_WriteTGA(name, data, width, height, false);
+	free(data);
+	//free(ddata);
+}
 
 static void R_PrintMatrix(int i, const float* arr)
 {

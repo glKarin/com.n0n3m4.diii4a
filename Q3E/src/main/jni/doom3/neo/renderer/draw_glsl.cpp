@@ -35,7 +35,6 @@ If you have questions concerning this license or the applicable additional terms
 
 static bool r_usePhong = true;
 static float r_specularExponent = 4.0f;
-static bool r_shadowMapping = true;
 
 static const float zero[4] = { 0, 0, 0, 0 };
 static const float one[4] = { 1, 1, 1, 1 };
@@ -65,42 +64,6 @@ ID_INLINE static void GL_SelectTextureNoClient(int unit)
 	backEnd.glState.currenttmu = unit;
 	glActiveTexture(GL_TEXTURE0 + unit);
 	RB_LogComment("glActiveTexture( %i )\n", unit);
-}
-
-void R_SaveColorBuffer(const char *name)
-{
-	Framebuffer *fb = backEnd.glState.currentFramebuffer;
-	int width;
-	int height;
-	if(fb)
-	{
-		width = fb->width;
-		height = fb->height;
-	}
-	else
-	{
-		width = glConfig.vidWidth;
-		height = glConfig.vidHeight;
-	}
-
-	byte *data = (byte *)calloc(width * height * 4, 1);
-/*    float *ddata = (float *)calloc(width * height, sizeof(float));
-    glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, ddata);
-
-    for (int i = 0 ; i < width * height ; i++) {
-        data[i*4] =
-        data[i*4+1] =
-        data[i*4+2] = 255 * ddata[i];
-        data[i*4+3] = 1;
-	}*/
-
-	//GL_CheckErrors("glReadPixels111");
-	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	//GL_CheckErrors("glReadPixels");
-
-	R_WriteTGA(name, data, width, height, false);
-	free(data);
-	//free(ddata);
 }
 
 ID_INLINE void			GL_Scissor( int x /* left*/, int y /* bottom */, int w, int h )
@@ -137,11 +100,6 @@ ID_INLINE void	GL_ViewportAndScissor( const idScreenRect& rect )
 RB_SetMVP
 ================
 */
-ID_INLINE void RB_SetMVP( const idRenderMatrix& mvp )
-{
-	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mvp.m);
-}
-
 ID_INLINE void RB_SetMVP( const float mvp[16] )
 {
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mvp);
@@ -576,7 +534,9 @@ static void R_InitGLSLCvars(void)
 		f = 4.0f;
 	r_specularExponent = f;
 
+#ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
+#endif
 }
 
 void R_CheckBackEndCvars(void)
@@ -597,11 +557,13 @@ void R_CheckBackEndCvars(void)
 		harm_r_specularExponent.ClearModified();
 	}
 
+#ifdef _SHADOW_MAPPING
 	if(r_useShadowMapping.IsModified())
 	{
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
 	}
+#endif
 }
 
 void R_GLSL_Init(void)
