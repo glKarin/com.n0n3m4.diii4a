@@ -341,14 +341,16 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 	for (i = 0; i < MAX_FRAGMENT_IMAGES; i++) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentMap%d", i);
 		shader->u_fragmentMap[i] = glGetUniformLocation(shader->program, buffer);
-		glUniform1i(shader->u_fragmentMap[i], i);
+		if(shader->u_fragmentMap[i] != -1)
+			glUniform1i(shader->u_fragmentMap[i], i);
 	}
 
 	//k: add cubemap texture units
 	for ( i = 0; i < MAX_FRAGMENT_IMAGES; i++ ) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentCubeMap%d", i);
 		shader->u_fragmentCubeMap[i] = glGetUniformLocation(shader->program, buffer);
-		glUniform1i(shader->u_fragmentCubeMap[i], i);
+		if(shader->u_fragmentCubeMap[i] != -1)
+			glUniform1i(shader->u_fragmentCubeMap[i], i);
 	}
 
 	shader->alpha = glGetUniformLocation(shader->program, "u_alpha");
