@@ -33,6 +33,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #define LOG_LEN 2048
 
+#define SHADER_ERROR(fmt, _VA_ARGS_...) { \
+	if(shaderRequired) {               \
+		common->Error(fmt, ##_VA_ARGS_); \
+	} else {                           \
+		common->Warning(fmt, ##_VA_ARGS_);   \
+	}                                    \
+}
+
 shaderProgram_t	interactionShader;
 shaderProgram_t	shadowShader;
 shaderProgram_t	defaultShader;
@@ -57,6 +65,8 @@ shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: intera
 shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
 shaderProgram_t	interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
 #endif
+
+static bool shaderRequired = true;
 
 struct GLSLShaderProp
 {
@@ -129,11 +139,11 @@ static idStr R_GLSL_ExpandMacros(const char *source, const char *macros)
 	idStr res(source);
 	int index = res.Find("#version");
 	if(index == -1)
-		common->Error("[Harmattan]: GLSL shader source can not find '#version'.");
+		SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
 
 	index = res.Find('\n', index);
 	if(index == -1 || index + 1 == res.Length())
-		common->Error("[Harmattan]: GLSL shader source '#version' not completed.");
+		SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
 
 	idStr m;
 	m += "\n";
@@ -370,6 +380,7 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 
 static bool RB_GLSL_InitShaders(void)
 {
+	shaderRequired = true;
 	const GLSLShaderProp Props[] = {
 			{ "interaction", &interactionShader, INTERACTION_VERT, INTERACTION_FRAG, "interaction.vert", "interaction.frag", NULL },
 
@@ -388,22 +399,6 @@ static bool RB_GLSL_InitShaders(void)
 
 			{ "diffuseCubemap", &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "diffuseCubemap.vert", "diffuseCubemap.frag", NULL },
 			{ "texgen", &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "texgen.vert", "texgen.frag", NULL },
-
-#ifdef _SHADOW_MAPPING
-			{ "depth_point_light", &depthShader_pointLight, DEPTH_VERT, DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_HARM_POINT_LIGHT" },
-			{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_HARM_POINT_LIGHT" },
-
-			{ "depth", &depthShader_spotLight, DEPTH_VERT, DEPTH_FRAG, "depth.vert", "depth.frag", NULL },
-			{ "interaction_shadow_mapping", &interactionShadowMappingShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", NULL },
-
-			{ "depth_parallel", &depthShader_parallelLight, DEPTH_VERT, DEPTH_FRAG, "depth.vert", "depth.frag", NULL },
-			{ "interaction_parallel_shadow_mapping", &interactionShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", NULL },
-
-            { "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "BLINN_PHONG,_HARM_POINT_LIGHT" },
-            { "interaction_blinnphong_shadow_mapping", &interactionShadowMappingBlinnPhongShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "BLINN_PHONG" },
-
-            { "interaction_blinnphong_parallel_shadow_mapping", &interactionShadowMappingBlinnPhongShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "BLINN_PHONG" },
-#endif
 	};
 
 	for(int i = 0; i < sizeof(Props) / sizeof(Props[0]); i++)
@@ -420,6 +415,49 @@ static bool RB_GLSL_InitShaders(void)
 				) < 0)
 			return false;
 	}
+
+#ifdef _SHADOW_MAPPING
+	shaderRequired = false;
+	const GLSLShaderProp Props_shadowMapping[] = {
+			{ "depth_point_light", &depthShader_pointLight, DEPTH_VERT, DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_HARM_POINT_LIGHT" },
+			{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_HARM_POINT_LIGHT" },
+
+			{ "depth", &depthShader_spotLight, DEPTH_VERT, DEPTH_FRAG, "depth.vert", "depth.frag", NULL },
+			{ "interaction_shadow_mapping", &interactionShadowMappingShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", NULL },
+
+			{ "depth_parallel", &depthShader_parallelLight, DEPTH_VERT, DEPTH_FRAG, "depth.vert", "depth.frag", NULL },
+			{ "interaction_parallel_shadow_mapping", &interactionShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", NULL },
+
+			{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "BLINN_PHONG,_HARM_POINT_LIGHT" },
+			{ "interaction_blinnphong_shadow_mapping", &interactionShadowMappingBlinnPhongShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "BLINN_PHONG" },
+
+			{ "interaction_blinnphong_parallel_shadow_mapping", &interactionShadowMappingBlinnPhongShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "BLINN_PHONG" },
+	};
+
+	for(int i = 0; i < sizeof(Props_shadowMapping) / sizeof(Props_shadowMapping[0]); i++)
+	{
+		const GLSLShaderProp *prop = Props_shadowMapping + i;
+		if(R_LoadGLSLShaderProgram(
+				prop->name,
+				prop->program,
+				prop->default_vertex_shader_source,
+				prop->default_fragment_shader_source,
+				prop->vertex_shader_source_file,
+				prop->fragment_shader_source_file,
+				prop->macros
+		) < 0)
+		{
+			common->Printf("[Harmattan]: not support shadow mapping\n");
+			if(r_useShadowMapping.GetBool())
+			{
+				r_useShadowMapping.SetBool(false);
+			}
+			r_useShadowMapping.SetReadonly();
+			break;
+		}
+	}
+	shaderRequired = true;
+#endif
 
 	return true;
 }
@@ -471,7 +509,7 @@ static GLint R_CreateShader(GLenum type, const char *source)
 	shader = glCreateShader(type);
 	if(shader == 0)
 	{
-		common->Error("[Harmattan]: %s::glCreateShader(%s) error!\n", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER");
+		SHADER_ERROR("[Harmattan]: %s::glCreateShader(%s) error!\n", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER");
 		return 0;
 	}
 
@@ -483,7 +521,7 @@ static GLint R_CreateShader(GLenum type, const char *source)
 	{
 		GLchar log[LOG_LEN];
 		glGetShaderInfoLog(shader, sizeof(GLchar) * LOG_LEN, NULL, log);
-		common->Error("[Harmattan]: %s::glCompileShader(%s) -> %s!\n", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER", log);
+		SHADER_ERROR("[Harmattan]: %s::glCompileShader(%s) -> %s!\n", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER", log);
 		glDeleteShader(shader);
 		shader = 0;
 	}
@@ -499,7 +537,7 @@ static GLint R_CreateProgram(GLint vertShader, GLint fragShader, bool needsAttri
 	program = glCreateProgram();
 	if(program == 0)
 	{
-		common->Error("[Harmattan]: %s::glCreateProgram() error!\n", __func__);
+		SHADER_ERROR("[Harmattan]: %s::glCreateProgram() error!\n", __func__);
 		return 0;
 	}
 
@@ -522,7 +560,7 @@ static GLint R_CreateProgram(GLint vertShader, GLint fragShader, bool needsAttri
 	{
 		GLchar log[LOG_LEN];
 		glGetProgramInfoLog(program, sizeof(GLchar) * LOG_LEN, NULL, log);
-		common->Error("[Harmattan]: %s::glLinkProgram() -> %s!\n", __func__, log);
+		SHADER_ERROR("[Harmattan]: %s::glLinkProgram() -> %s!\n", __func__, log);
 		glDeleteProgram(program);
 		program = 0;
 	}
@@ -533,7 +571,7 @@ static GLint R_CreateProgram(GLint vertShader, GLint fragShader, bool needsAttri
 	{
 		GLchar log[LOG_LEN];
 		glGetProgramInfoLog(program, sizeof(GLchar) * LOG_LEN, NULL, log);
-		common->Error("[Harmattan]: %s::glValidateProgram() -> %s!\n", __func__, log);
+		SHADER_ERROR("[Harmattan]: %s::glValidateProgram() -> %s!\n", __func__, log);
 		glDeleteProgram(program);
 		program = 0;
 	}
@@ -591,16 +629,17 @@ int R_LoadGLSLShaderProgram(
 	R_LoadGLSLShader(fragment_shader_source_file, program, GL_FRAGMENT_SHADER);
 
 	if (!R_LinkGLSLShader(program, true) && !R_ValidateGLSLProgram(program)) {
-		common->Printf("[Harmattan]: 2. Load internal shader source\n\n");
+		common->Printf("[Harmattan]: 2. Load internal shader source\n");
 		idStr vs = R_GLSL_ExpandMacros(default_vertex_shader_source, macros);
 		idStr fs = R_GLSL_ExpandMacros(default_fragment_shader_source, macros);
 		if(!R_CreateShaderProgram(program, vs.c_str(), fs.c_str(), name))
 		{
-			common->Error("[Harmattan]: Load internal shader program fail!");
+			SHADER_ERROR("[Harmattan]: Load internal shader program fail!\n");
 			return -1;
 		}
 		else
 		{
+			common->Printf("[Harmattan]: Load internal shader program success!\n\n");
 			return 2;
 		}
 	} else {
