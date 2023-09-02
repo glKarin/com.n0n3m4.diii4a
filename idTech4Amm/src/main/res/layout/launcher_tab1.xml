@@ -318,7 +318,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/launcher_interaction_shader_lightmodel"
 				android:layout_marginTop="1dp"
 				android:layout_marginBottom="1dp"
                 android:text="@string/light_model_cvar_harm_r_lightmodel"/>
@@ -392,6 +391,34 @@
 					android:imeOptions="flagNoExtractUi"
 					android:text="0" />
 			</LinearLayout>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="1dp"
+				android:layout_marginBottom="1dp"
+				android:text="Shadow(cvar `r_useShadowMapping`)"/>
+			<RadioGroup
+				android:id="@+id/rg_harm_r_shadow"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				>
+
+				<RadioButton
+					android:id="@+id/rg_harm_r_shadow_stencil_volume"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:checked="true"
+					android:text="Shadow volume"/>
+
+				<RadioButton
+					android:id="@+id/rg_harm_r_shadow_mapping"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Shadow mapping"/>
+
+			</RadioGroup>
 
 			<TextView
 				android:layout_width="wrap_content"

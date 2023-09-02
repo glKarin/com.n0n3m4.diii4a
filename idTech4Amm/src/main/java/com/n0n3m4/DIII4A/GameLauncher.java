@@ -338,6 +338,15 @@ public class GameLauncher extends Activity
 						.putString(Q3EPreference.pref_harm_s_driver, value2)
 						.commit();
 			}
+			else if (rgId == R.id.rg_harm_r_shadow)
+			{
+				boolean useShadowMapping = GetCheckboxIndex(radioGroup, id) == 1;
+				String value = useShadowMapping ? "1" : "0";
+				SetProp("r_useShadowMapping", value);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_r_lightModel, useShadowMapping)
+						.commit();
+			}
         }
     };
     private final View.OnClickListener m_buttonClickListener = new View.OnClickListener()
@@ -620,6 +629,16 @@ public class GameLauncher extends Activity
 			V.edt_harm_r_maxFps.setText(str);
 		if (!IsProp("harm_r_maxFps")) SetProp("harm_r_maxFps", "0");
 
+		str = GetProp("r_useShadowMapping");
+		index = 0;
+		if (str != null)
+		{
+			if ("1".equalsIgnoreCase(str))
+				index = 1;
+		}
+		SelectCheckbox(V.rg_harm_r_shadow, index);
+		if (!IsProp("r_useShadowMapping")) SetProp("r_useShadowMapping", "0");
+
         str = GetProp("fs_game");
         if (str != null)
         {
@@ -773,6 +792,8 @@ public class GameLauncher extends Activity
         V.rg_harm_r_lightModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
         V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		SelectCheckbox(V.rg_harm_r_shadow, mPrefs.getBoolean(Q3EPreference.pref_harm_r_useShadowMapping, false) ? 1 : 0);
+		V.rg_harm_r_shadow.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false));
 		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		V.skip_intro.setChecked(skipIntro);
@@ -1284,6 +1305,7 @@ public class GameLauncher extends Activity
         mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 4.0f));
         mEdtr.putString(Q3EPreference.pref_harm_s_driver, GetCheckboxIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
 		mEdtr.putInt(Q3EPreference.pref_harm_r_maxFps, Q3EUtils.parseInt_s(V.edt_harm_r_maxFps.getText().toString(), 0));
+		mEdtr.putBoolean(Q3EPreference.pref_harm_r_useShadowMapping, GetCheckboxIndex(V.rg_harm_r_shadow) == 1);
 
         mEdtr.putBoolean(Q3EPreference.pref_mapvol, V.mapvol.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_analog, V.smoothjoy.isChecked());
@@ -2140,6 +2162,7 @@ public class GameLauncher extends Activity
 		public CheckBox skip_intro;
 		public Button launcher_tab1_game_mod_button;
 		public CheckBox scale_by_screen_area;
+		public RadioGroup rg_harm_r_shadow;
 
         public void Setup()
         {
@@ -2201,6 +2224,7 @@ public class GameLauncher extends Activity
 			skip_intro = findViewById(R.id.skip_intro);
 			launcher_tab1_game_mod_button = findViewById(R.id.launcher_tab1_game_mod_button);
 			scale_by_screen_area = findViewById(R.id.scale_by_screen_area);
+			rg_harm_r_shadow = findViewById(R.id.rg_harm_r_shadow);
         }
     }
 
