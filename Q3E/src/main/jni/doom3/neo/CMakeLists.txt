@@ -1163,12 +1163,17 @@ set(humanhead_renderer_src
 set(humanhead_framework_src
 		humanhead/framework/declPreyBeam.cpp
 		)
+set(humanhead_ui_src
+		humanhead/ui/TabWindow.cpp
+		humanhead/ui/TabContainerWindow.cpp
+		)
 
 set(src_core_humanhead
 		${src_renderer}
 		${humanhead_renderer_src}
 		${src_framework}
 		${humanhead_framework_src}
+		${humanhead_ui_src}
 		${src_cm}
 		${src_aas}
 		${src_roq}
@@ -1584,7 +1589,6 @@ if(HEXENEOC)
 			)
 endif()
 ]]
-
 
 if(RAVEN)
 	set(QUAKE4BINARY "${DOOM3BINARY}_raven")

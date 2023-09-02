@@ -530,6 +530,7 @@ class idWindow
 
 	int translateFontNum;
 	void Translate(int tFontNum = -1);
+	virtual void SetVisible(bool visible);
 #endif
 
 		idList<idWinVar *> definedVars;
