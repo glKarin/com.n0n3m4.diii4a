@@ -49,6 +49,8 @@ enum frustumCull_t
 	FRUSTUM_CULL_CROSS		= 3
 };
 
+extern const float FLT_SMALLEST_NON_DENORMAL;
+
 /*
 ================================================================================================
 
@@ -519,7 +521,7 @@ Clip to normalized device coordinates.
 */
 ID_INLINE void idRenderMatrix::TransformClipToDevice( const idVec4& clip, idVec3& ndc )
 {
-	assert( idMath::Fabs( clip[3] ) > idMath::FLT_SMALLEST_NON_DENORMAL );
+	assert( idMath::Fabs( clip[3] ) > /*idMath::*/FLT_SMALLEST_NON_DENORMAL );
 	float r = 1.0f / clip[3];
 	ndc[0] = clip[0] * r;
 	ndc[1] = clip[1] * r;

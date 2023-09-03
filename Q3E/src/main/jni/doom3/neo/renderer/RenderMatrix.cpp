@@ -44,6 +44,7 @@ typedef int32_t int32;
 //lint -e438	// the non-SSE code isn't lint friendly, either
 //lint -e550
 
+#define IEEE_FLT_MANTISSA_BITS		23
 #define RENDER_MATRIX_INVERSE_EPSILON		1e-16f	// JDC: changed from 1e-14f to allow full wasteland parallel light projections to invert
 #define RENDER_MATRIX_INFINITY				1e30f	// NOTE: cannot initiaize a vec_float4 with idMath::INFINITY on the SPU
 #define RENDER_MATRIX_PROJECTION_EPSILON	0.1f
@@ -1972,7 +1973,7 @@ frustum plane, but only while also being behind another one.
 */
 bool idRenderMatrix::CullExtrudedBoundsToMVPbits( const idRenderMatrix& mvp, const idBounds& bounds, const idVec3& extrudeDirection, const idPlane& clipPlane, byte* outBits, bool zeroToOne )
 {
-	assert( idMath::Fabs( extrudeDirection * clipPlane.Normal() ) >= idMath::FLT_SMALLEST_NON_DENORMAL );
+	assert( idMath::Fabs( extrudeDirection * clipPlane.Normal() ) >= FLT_SMALLEST_NON_DENORMAL );
 	
 #if defined(USE_INTRINSICS)
 	
@@ -3052,7 +3053,7 @@ void idRenderMatrix::ProjectedNearClippedBounds( idBounds& projected, const idRe
 			const float d1 = p1.z + p1.w;
 #endif
 			const float delta = d0 - d1;
-			const float fraction = idMath::Fabs( delta ) > idMath::FLT_SMALLEST_NON_DENORMAL ? ( d0 / delta ) : 1.0f;
+			const float fraction = idMath::Fabs( delta ) > FLT_SMALLEST_NON_DENORMAL ? ( d0 / delta ) : 1.0f;
 			const bool clip = ( fraction > 0.0f && fraction < 1.0f );
 			const idVec4 intersection = p0 + fraction * ( p1 - p0 );
 	
@@ -3071,7 +3072,7 @@ void idRenderMatrix::ProjectedNearClippedBounds( idBounds& projected, const idRe
 	{
 		const idVec4& v = edgeVerts[i];
 	
-		if( v.w <= idMath::FLT_SMALLEST_NON_DENORMAL )
+		if( v.w <= FLT_SMALLEST_NON_DENORMAL )
 		{
 			continue;
 		}
@@ -3644,7 +3645,7 @@ void idRenderMatrix::ProjectedFullyClippedBounds( idBounds& projected, const idR
 	{
 		const idVec4& c = clippedPoints[i];
 	
-		assert( c.w > idMath::FLT_SMALLEST_NON_DENORMAL );
+		assert( c.w > FLT_SMALLEST_NON_DENORMAL );
 	
 		const float rw = 1.0f / c.w;
 	
@@ -3831,7 +3832,7 @@ The extruded bounding box is not clipped to the MVP so the depth bounds may not 
 */
 void idRenderMatrix::DepthBoundsForExtrudedBounds( float& min, float& max, const idRenderMatrix& mvp, const idBounds& bounds, const idVec3& extrudeDirection, const idPlane& clipPlane, bool windowSpace )
 {
-	assert( idMath::Fabs( extrudeDirection * clipPlane.Normal() ) >= idMath::FLT_SMALLEST_NON_DENORMAL );
+	assert( idMath::Fabs( extrudeDirection * clipPlane.Normal() ) >= FLT_SMALLEST_NON_DENORMAL );
 	
 #if defined(USE_INTRINSICS)
 	
@@ -4383,7 +4384,7 @@ void idRenderMatrix::DepthBoundsForShadowBounds( float& min, float& max, const i
 	{
 		const idVec4& c = clippedPoints[i];
 	
-		assert( c.w > idMath::FLT_SMALLEST_NON_DENORMAL );
+		assert( c.w > FLT_SMALLEST_NON_DENORMAL );
 	
 		const float rw = 1.0f / c.w;
 		const float pz = c.z * rw;
@@ -4596,7 +4597,7 @@ void idRenderMatrix::GetFrustumCorners( frustumCorners_t& corners, const idRende
 				float tz = v[0] * frustumTransform[2][0] + v[1] * frustumTransform[2][1] + v[2] * frustumTransform[2][2] + frustumTransform[2][3];
 				float tw = v[0] * frustumTransform[3][0] + v[1] * frustumTransform[3][1] + v[2] * frustumTransform[3][2] + frustumTransform[3][3];
 	
-				assert( tw > idMath::FLT_SMALLEST_NON_DENORMAL );
+				assert( tw > FLT_SMALLEST_NON_DENORMAL );
 	
 				float rw = 1.0f / tw;
 	

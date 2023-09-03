@@ -33,11 +33,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #define LOG_LEN 2048
 
-#define SHADER_ERROR(fmt, _VA_ARGS_...) { \
+#define SHADER_ERROR(fmt, args...) { \
 	if(shaderRequired) {               \
-		common->Error(fmt, ##_VA_ARGS_); \
+		common->Error(fmt, ##args); \
 	} else {                           \
-		common->Warning(fmt, ##_VA_ARGS_);   \
+		common->Warning(fmt, ##args);   \
 	}                                    \
 }
 
