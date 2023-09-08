@@ -462,49 +462,7 @@ void R_DeriveLightData(idRenderLightLocal *light)
 	// six unless the light center is outside the box
 	R_MakeShadowFrustums(light);
 #ifdef _SHADOW_MAPPING
-	if(r_useShadowMapping.GetBool())
-	{
-		idRenderMatrix localProject;
-		float zScale = 1.0f;
-		if( light->parms.parallel )
-		{
-			zScale = R_ComputeParallelLightProjectionMatrix( light, localProject );
-		}
-		else if( light->parms.pointLight )
-		{
-			zScale = R_ComputePointLightProjectionMatrix( light, localProject );
-		}
-		else
-		{
-			zScale = R_ComputeSpotLightProjectionMatrix( light, localProject );
-		}
-
-			// Rotate and translate the light projection by the light matrix.
-		// 99% of lights remain axis aligned in world space.
-		idRenderMatrix lightMatrix;
-		idRenderMatrix::CreateFromOriginAxis( light->parms.origin, light->parms.axis, lightMatrix );
-
-		idRenderMatrix inverseLightMatrix;
-		if( !idRenderMatrix::Inverse( lightMatrix, inverseLightMatrix ) )
-		{
-			idLib::Warning( "lightMatrix invert failed" );
-		}
-		//else inverseLightMatrix.Identity();
-
-		// 'baseLightProject' goes from global space -> light local space -> light projective space
-		idRenderMatrix::Multiply( localProject, inverseLightMatrix, *(idRenderMatrix *)light->baseLightProject );
-
-		// Invert the light projection so we can deform zero-to-one cubes into
-		// the light model and calculate global bounds.
-		if( !idRenderMatrix::Inverse( *(idRenderMatrix *)light->baseLightProject, *(idRenderMatrix *)light->inverseBaseLightProject ) )
-		{
-			idLib::Warning( "baseLightProject invert failed" );
-		}
-		//else (*(idRenderMatrix *)light->inverseBaseLightProject).Identity();
-
-		// calculate the global light bounds by inverse projecting the zero to one cube with the 'inverseBaseLightProject'
-		//idRenderMatrix::ProjectedBounds( light->globalLightBounds, light->inverseBaseLightProject, bounds_zeroOneCube, false );
-	}
+	R_SetupShadowMappingProjectionMatrix(light);
 #endif
 }
 

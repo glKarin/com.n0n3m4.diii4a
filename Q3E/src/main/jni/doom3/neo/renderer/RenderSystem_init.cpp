@@ -2340,6 +2340,7 @@ idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "0.5", CVAR_RENDERER | CV
 idCVar harm_r_shadowMapSampleSize( "harm_r_shadowMapSampleSize", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map sample size" );
 idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map frustum near" );
 idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "7996.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map frustum far" );
+idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 
 #include "Framebuffer.cpp"
 #include "tr_shadowmapping.cpp"

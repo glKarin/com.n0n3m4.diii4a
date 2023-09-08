@@ -383,6 +383,7 @@ typedef struct viewLight_s {
     idVec3					lightCenter;				// offset the lighting direction for shading and
     int						shadowLOD;					// level of detail for shadowmap selection
     float			baseLightProject[16];			// global xyz1 to projected light strq
+	float			inverseBaseLightProject[16];// transforms the zero-to-one cube to exactly cover the light in world space
 #endif
 } viewLight_t;
 
@@ -2040,6 +2041,7 @@ extern idCVar harm_r_shadowMapAlpha;
 extern idCVar harm_r_shadowMapSampleSize;
 extern idCVar harm_r_shadowMapFrustumNear;
 extern idCVar harm_r_shadowMapFrustumFar;
+extern idCVar harm_r_useLightScissors;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;
@@ -2047,6 +2049,9 @@ extern idBounds bounds_unitCube;
 float R_ComputePointLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
 float R_ComputeSpotLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
 float R_ComputeParallelLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
+void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLight);
+void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light);
+void R_SetupFrontEndViewDefMVP(void);
 
 #endif
 

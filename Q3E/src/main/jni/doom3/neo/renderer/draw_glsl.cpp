@@ -235,26 +235,77 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 		idRenderMatrix lightViewRenderMatrix;
 		idRenderMatrix lightProjectionRenderMatrix;
 
-		lightViewRenderMatrix << backEnd.shadowV[0];
-		lightProjectionRenderMatrix << backEnd.shadowP[0];
+        /*
+         * parallel light not use `cascade`, so only 1 matrix
+         * point light has 6 matrix, but unused in shader
+         * spot light only 1 matrix
+         */
+        if( backEnd.vLight->parallel )
+        {
+            //for( int i = 0; i < 1; i++ )
+            {
+				lightViewRenderMatrix << backEnd.shadowV[0];
+				lightProjectionRenderMatrix << backEnd.shadowP[0];
 
-		idRenderMatrix modelRenderMatrix;
-		idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+				idRenderMatrix modelRenderMatrix;
+				idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
 
-		idRenderMatrix modelToLightRenderMatrix;
-		idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+				idRenderMatrix modelToLightRenderMatrix;
+				idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
 
-		idRenderMatrix clipMVP;
-		idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+				idRenderMatrix clipMVP;
+				idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
 
-		GL_UniformMatrix4fv(offsetof(shaderProgram_t, u_shadowMVPMatrix), clipMVP.m);
+                idRenderMatrix MVP;
+                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+                GL_UniformMatrix4fv(offsetof(shaderProgram_t, u_shadowMVPMatrix), MVP.m);
+            }
+        }
+        else if( backEnd.vLight->pointLight )
+        {
+            lightViewRenderMatrix << backEnd.shadowV[0];
+            lightProjectionRenderMatrix << backEnd.shadowP[0];
+
+            idRenderMatrix modelRenderMatrix;
+            idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+
+            idRenderMatrix modelToLightRenderMatrix;
+            idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+            idRenderMatrix clipMVP;
+            idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+            GL_UniformMatrix4fv(offsetof(shaderProgram_t, u_shadowMVPMatrix), clipMVP.m);
+        }
+        else
+        {
+            // spot light
+
+			lightViewRenderMatrix << backEnd.shadowV[0];
+			lightProjectionRenderMatrix << backEnd.shadowP[0];
+
+			idRenderMatrix modelRenderMatrix;
+			idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+
+			idRenderMatrix modelToLightRenderMatrix;
+			idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+			idRenderMatrix clipMVP;
+			idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+			idRenderMatrix MVP;
+			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+			GL_UniformMatrix4fv(offsetof(shaderProgram_t, u_shadowMVPMatrix), MVP.m);
+
+        }
+
 		// texture 6 is the shadow map
 		GL_SelectTextureNoClient(6);
 		float sampleScale = 1.0;
 		if( backEnd.vLight->parallel )
 		{
 			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-			sampleScale = 0.01;
+			sampleScale = 0.0005;
 		}
 		else if( backEnd.vLight->pointLight )
 		{
@@ -386,6 +437,12 @@ void RB_GLSL_DrawInteractions(void)
 
 	//GL_SelectTexture(0); //k2023
 
+#ifdef _SHADOW_MAPPING
+	const bool shadowMapping = r_shadowMapping && r_shadows.GetBool();
+	GLfloat clearColor[4];
+	if(shadowMapping)
+        glGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
+#endif
 	//
 	// for each light, perform adding and shadowing
 	//
@@ -429,14 +486,14 @@ void RB_GLSL_DrawInteractions(void)
 		}
 
 #ifdef _SHADOW_MAPPING
-		if(r_shadowMapping && r_shadows.GetBool())
+		if(shadowMapping)
 		{
             int	side, sideStop;
 
             if( vLight->parallel )
             {
                 side = 0;
-                sideStop = r_shadowMapSplits.GetInteger() + 1;
+                //sideStop = r_shadowMapSplits.GetInteger() + 1;
 				sideStop = 1;
             }
             else if( vLight->pointLight )
@@ -515,6 +572,10 @@ void RB_GLSL_DrawInteractions(void)
 	glStencilFunc(GL_ALWAYS, 128, 255);
 
 	//GL_SelectTexture(0); //k2023
+#ifdef _SHADOW_MAPPING
+	if(shadowMapping)
+        glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+#endif
 }
 
 //===================================================================================
