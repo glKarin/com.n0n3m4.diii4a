@@ -129,6 +129,22 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
 
     GLint start;
     GLsizei numIndexes;
+	if(tri->numIndexes > tri->numShadowIndexesNoFrontCaps) // has front caps
+	{
+		start = tri->numShadowIndexesNoFrontCaps;
+		numIndexes = tri->numIndexes - tri->numShadowIndexesNoFrontCaps;
+	}
+	else if(tri->numShadowIndexesNoFrontCaps > tri->numShadowIndexesNoCaps) // rear cap
+	{
+		start = tri->numShadowIndexesNoCaps;
+		numIndexes = tri->numShadowIndexesNoFrontCaps - tri->numShadowIndexesNoCaps;
+	}
+	else // all
+	{
+        start = 0;
+        numIndexes = tri->numIndexes;
+	}
+	/*
     if(type == SM_REAR_CAP | SM_SIL_EDGE)
     {
         start = 0;
@@ -164,8 +180,9 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
         start = 0;
         numIndexes = tri->numIndexes;
     }
+	*/
 
-    common->Printf("RB_DrawShadowElementsWithCounters_shadowMapping(%d %d %d)\n", tri->numShadowIndexesNoCaps, tri->numShadowIndexesNoFrontCaps, tri->numIndexes);
+    //common->Printf("RB_DrawShadowElementsWithCounters_shadowMapping(%d %d %d)\n", tri->numShadowIndexesNoCaps, tri->numShadowIndexesNoFrontCaps, tri->numIndexes);
 
     backEnd.pc.c_drawElements++;
     backEnd.pc.c_drawIndexes += numIndexes;
@@ -586,8 +603,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         shadowShader = &depthShader_spotLight;
     GL_UseProgram(shadowShader);
 
-    GL_Uniform1f(offsetof(shaderProgram_t, u_near), harm_r_shadowMapFrustumNear.GetFloat());
-    GL_Uniform1f(offsetof(shaderProgram_t, u_far), harm_r_shadowMapFrustumFar.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
 
     GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
@@ -698,7 +715,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                     vLight->globalLightOrigin[2],
                     1.0f,
             };
-            GL_Uniform4fv(offsetof(shaderProgram_t, u_globalLightOrigin), globalLightOrigin);
+            GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
 
             // set the local light position to allow the vertex program to project the shadow volume end cap to infinity
             /*
@@ -817,7 +834,14 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
             GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t),
                                    vertexCache.Position(drawSurf->geo->shadowCache));
 
-            RB_DrawElementsWithCounters( drawSurf->geo );
+            //RB_DrawElementsWithCounters( drawSurf->geo );
+			if(vLight->parallel)
+				GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), 1.0f);
+			else if(vLight->pointLight)
+				GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), 0.0f);
+			else
+				GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), 1.0f);
+            RB_DrawShadowElementsWithCounters_shadowMapping( drawSurf->geo, SM_REAR_CAP );
         }
     }
     backEnd.currentSpace = NULL;
@@ -884,8 +908,8 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     }
     GL_UseProgram(shadowInteractionShader);
 
-    GL_Uniform1f(offsetof(shaderProgram_t, u_near), harm_r_shadowMapFrustumNear.GetFloat());
-    GL_Uniform1f(offsetof(shaderProgram_t, u_far), harm_r_shadowMapFrustumFar.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
 
     // perform setup here that will be constant for all interactions
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE |
@@ -900,8 +924,8 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));	// gl_Vertex
     GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
-    GL_Uniform1f(offsetof(shaderProgram_t, u_bias), harm_r_shadowMapBias.GetFloat());
-    GL_Uniform1f(offsetof(shaderProgram_t, alpha), harm_r_shadowMapAlpha.GetFloat());
+    //GL_Uniform1f(offsetof(shaderProgram_t, bias), harm_r_shadowMapBias.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[3]), harm_r_shadowMapAlpha.GetFloat());
 
     // texture 5 is the specular lookup table
     GL_SelectTextureNoClient(5);
@@ -936,7 +960,7 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
                 backEnd.vLight->globalLightOrigin[2],
                 1.0f,
         };
-        GL_Uniform4fv(offsetof(shaderProgram_t, u_globalLightOrigin), globalLightOrigin);
+        GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
 
         // this may cause RB_GLSL_DrawInteraction to be exacuted multiple
         // times with different colors and images if the surface or light have multiple layers

@@ -41,6 +41,24 @@ If you have questions concerning this license or the applicable additional terms
 	}                                    \
 }
 
+#if 1
+#define GL_GetAttribLocation(program, name) glGetAttribLocation(program, name)
+#define GL_GetUniformLocation(program, name) glGetUniformLocation(program, name)
+#else
+GLint GL_GetAttribLocation(GLint program, const char *name)
+{
+    GLint attribLocation = glGetAttribLocation(program, name);
+	Sys_Printf("GL_GetAttribLocation(%s) -> %d\n", name, attribLocation);
+	return attribLocation;
+}
+GLint GL_GetUniformLocation(GLint program, const char *name)
+{
+	GLint uniformLocation = glGetUniformLocation(program, name);
+	Sys_Printf("GL_GetUniformLocation(%s) -> %d\n", name, uniformLocation);
+	return uniformLocation;
+}
+#endif
+
 shaderProgram_t	interactionShader;
 shaderProgram_t	shadowShader;
 shaderProgram_t	defaultShader;
@@ -294,63 +312,63 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 
 	GL_UseProgram(shader);
 
-	shader->localLightOrigin = glGetUniformLocation(shader->program, "u_lightOrigin");
-	shader->localViewOrigin = glGetUniformLocation(shader->program, "u_viewOrigin");
-	shader->lightProjectionS = glGetUniformLocation(shader->program, "u_lightProjectionS");
-	shader->lightProjectionT = glGetUniformLocation(shader->program, "u_lightProjectionT");
-	shader->lightProjectionQ = glGetUniformLocation(shader->program, "u_lightProjectionQ");
-	shader->lightFalloff = glGetUniformLocation(shader->program, "u_lightFalloff");
-	shader->bumpMatrixS = glGetUniformLocation(shader->program, "u_bumpMatrixS");
-	shader->bumpMatrixT = glGetUniformLocation(shader->program, "u_bumpMatrixT");
-	shader->diffuseMatrixS = glGetUniformLocation(shader->program, "u_diffuseMatrixS");
-	shader->diffuseMatrixT = glGetUniformLocation(shader->program, "u_diffuseMatrixT");
-	shader->specularMatrixS = glGetUniformLocation(shader->program, "u_specularMatrixS");
-	shader->specularMatrixT = glGetUniformLocation(shader->program, "u_specularMatrixT");
-	shader->colorModulate = glGetUniformLocation(shader->program, "u_colorModulate");
-	shader->colorAdd = glGetUniformLocation(shader->program, "u_colorAdd");
-	shader->diffuseColor = glGetUniformLocation(shader->program, "u_diffuseColor");
-	shader->specularColor = glGetUniformLocation(shader->program, "u_specularColor");
-	shader->glColor = glGetUniformLocation(shader->program, "u_glColor");
-	shader->alphaTest = glGetUniformLocation(shader->program, "u_alphaTest");
-	shader->specularExponent = glGetUniformLocation(shader->program, "u_specularExponent");
+	shader->localLightOrigin = GL_GetUniformLocation(shader->program, "u_lightOrigin");
+	shader->localViewOrigin = GL_GetUniformLocation(shader->program, "u_viewOrigin");
+	shader->lightProjectionS = GL_GetUniformLocation(shader->program, "u_lightProjectionS");
+	shader->lightProjectionT = GL_GetUniformLocation(shader->program, "u_lightProjectionT");
+	shader->lightProjectionQ = GL_GetUniformLocation(shader->program, "u_lightProjectionQ");
+	shader->lightFalloff = GL_GetUniformLocation(shader->program, "u_lightFalloff");
+	shader->bumpMatrixS = GL_GetUniformLocation(shader->program, "u_bumpMatrixS");
+	shader->bumpMatrixT = GL_GetUniformLocation(shader->program, "u_bumpMatrixT");
+	shader->diffuseMatrixS = GL_GetUniformLocation(shader->program, "u_diffuseMatrixS");
+	shader->diffuseMatrixT = GL_GetUniformLocation(shader->program, "u_diffuseMatrixT");
+	shader->specularMatrixS = GL_GetUniformLocation(shader->program, "u_specularMatrixS");
+	shader->specularMatrixT = GL_GetUniformLocation(shader->program, "u_specularMatrixT");
+	shader->colorModulate = GL_GetUniformLocation(shader->program, "u_colorModulate");
+	shader->colorAdd = GL_GetUniformLocation(shader->program, "u_colorAdd");
+	shader->diffuseColor = GL_GetUniformLocation(shader->program, "u_diffuseColor");
+	shader->specularColor = GL_GetUniformLocation(shader->program, "u_specularColor");
+	shader->glColor = GL_GetUniformLocation(shader->program, "u_glColor");
+	shader->alphaTest = GL_GetUniformLocation(shader->program, "u_alphaTest");
+	shader->specularExponent = GL_GetUniformLocation(shader->program, "u_specularExponent");
 
-	shader->eyeOrigin = glGetUniformLocation(shader->program, "u_eyeOrigin");
-	shader->localEyeOrigin = glGetUniformLocation(shader->program, "u_localEyeOrigin");
-	shader->nonPowerOfTwo = glGetUniformLocation(shader->program, "u_nonPowerOfTwo");
-	shader->windowCoords = glGetUniformLocation(shader->program, "u_windowCoords");
+	shader->eyeOrigin = GL_GetUniformLocation(shader->program, "u_eyeOrigin");
+	shader->localEyeOrigin = GL_GetUniformLocation(shader->program, "u_localEyeOrigin");
+	shader->nonPowerOfTwo = GL_GetUniformLocation(shader->program, "u_nonPowerOfTwo");
+	shader->windowCoords = GL_GetUniformLocation(shader->program, "u_windowCoords");
 
-	shader->modelViewProjectionMatrix = glGetUniformLocation(shader->program, "u_modelViewProjectionMatrix");
+	shader->modelViewProjectionMatrix = GL_GetUniformLocation(shader->program, "u_modelViewProjectionMatrix");
 
-	shader->modelMatrix = glGetUniformLocation(shader->program, "u_modelMatrix");
-	shader->textureMatrix = glGetUniformLocation(shader->program, "u_textureMatrix");
+	shader->modelMatrix = GL_GetUniformLocation(shader->program, "u_modelMatrix");
+	shader->textureMatrix = GL_GetUniformLocation(shader->program, "u_textureMatrix");
 	//k: add modelView matrix uniform
-	shader->modelViewMatrix = glGetUniformLocation(shader->program, "u_modelViewMatrix");
+	shader->modelViewMatrix = GL_GetUniformLocation(shader->program, "u_modelViewMatrix");
 	//k: add clip plane uniform
-	shader->clipPlane = glGetUniformLocation(shader->program, "u_clipPlane");
+	shader->clipPlane = GL_GetUniformLocation(shader->program, "u_clipPlane");
 	//k: add fog matrix uniform
-	shader->fogMatrix = glGetUniformLocation(shader->program, "u_fogMatrix");
+	shader->fogMatrix = GL_GetUniformLocation(shader->program, "u_fogMatrix");
 	//k: add fog color uniform
-	shader->fogColor = glGetUniformLocation(shader->program, "u_fogColor");
+	shader->fogColor = GL_GetUniformLocation(shader->program, "u_fogColor");
 	//k: add texgen S T Q uniform
-	shader->texgenS = glGetUniformLocation(shader->program, "u_texgenS");
-	shader->texgenT = glGetUniformLocation(shader->program, "u_texgenT");
-	shader->texgenQ = glGetUniformLocation(shader->program, "u_texgenQ");
+	shader->texgenS = GL_GetUniformLocation(shader->program, "u_texgenS");
+	shader->texgenT = GL_GetUniformLocation(shader->program, "u_texgenT");
+	shader->texgenQ = GL_GetUniformLocation(shader->program, "u_texgenQ");
 
-	shader->attr_TexCoord = glGetAttribLocation(shader->program, "attr_TexCoord");
-	shader->attr_Tangent = glGetAttribLocation(shader->program, "attr_Tangent");
-	shader->attr_Bitangent = glGetAttribLocation(shader->program, "attr_Bitangent");
-	shader->attr_Normal = glGetAttribLocation(shader->program, "attr_Normal");
-	shader->attr_Vertex = glGetAttribLocation(shader->program, "attr_Vertex");
-	shader->attr_Color = glGetAttribLocation(shader->program, "attr_Color");
+	shader->attr_TexCoord = GL_GetAttribLocation(shader->program, "attr_TexCoord");
+	shader->attr_Tangent = GL_GetAttribLocation(shader->program, "attr_Tangent");
+	shader->attr_Bitangent = GL_GetAttribLocation(shader->program, "attr_Bitangent");
+	shader->attr_Normal = GL_GetAttribLocation(shader->program, "attr_Normal");
+	shader->attr_Vertex = GL_GetAttribLocation(shader->program, "attr_Vertex");
+	shader->attr_Color = GL_GetAttribLocation(shader->program, "attr_Color");
 
 	for (i = 0; i < MAX_VERTEX_PARMS; i++) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_vertexParm%d", i);
-		shader->u_vertexParm[i] = glGetAttribLocation(shader->program, buffer);
+		shader->u_vertexParm[i] = GL_GetAttribLocation(shader->program, buffer);
 	}
 
 	for (i = 0; i < MAX_FRAGMENT_IMAGES; i++) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentMap%d", i);
-		shader->u_fragmentMap[i] = glGetUniformLocation(shader->program, buffer);
+		shader->u_fragmentMap[i] = GL_GetUniformLocation(shader->program, buffer);
 		if(shader->u_fragmentMap[i] != -1)
 			glUniform1i(shader->u_fragmentMap[i], i);
 	}
@@ -358,19 +376,20 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 	//k: add cubemap texture units
 	for ( i = 0; i < MAX_FRAGMENT_IMAGES; i++ ) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentCubeMap%d", i);
-		shader->u_fragmentCubeMap[i] = glGetUniformLocation(shader->program, buffer);
+		shader->u_fragmentCubeMap[i] = GL_GetUniformLocation(shader->program, buffer);
 		if(shader->u_fragmentCubeMap[i] != -1)
 			glUniform1i(shader->u_fragmentCubeMap[i], i);
 	}
 
-	shader->alpha = glGetUniformLocation(shader->program, "u_alpha");
+	for (i = 0; i < MAX_VERTEX_PARMS; i++) {
+		idStr::snPrintf(buffer, sizeof(buffer), "u_uniformParm%d", i);
+		shader->u_uniformParm[i] = GL_GetUniformLocation(shader->program, buffer);
+	}
+
 #ifdef _SHADOW_MAPPING
-	shader->u_shadowMVPMatrix = glGetUniformLocation(shader->program, "u_shadowMVPMatrix");
-    shader->u_globalLightOrigin = glGetUniformLocation(shader->program, "u_globalLightOrigin");
-    shader->u_bias = glGetUniformLocation(shader->program, "u_bias");
-    shader->u_sampleSize = glGetUniformLocation(shader->program, "u_sampleSize");
-    shader->u_near = glGetUniformLocation(shader->program, "u_near");
-    shader->u_far = glGetUniformLocation(shader->program, "u_far");
+	shader->shadowMVPMatrix = GL_GetUniformLocation(shader->program, "shadowMVPMatrix");
+    shader->globalLightOrigin = GL_GetUniformLocation(shader->program, "globalLightOrigin");
+    shader->bias = GL_GetUniformLocation(shader->program, "bias");
 #endif
 
 	GL_CheckErrors();

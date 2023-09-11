@@ -258,13 +258,16 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 
                 idRenderMatrix MVP;
                 idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-                GL_UniformMatrix4fv(offsetof(shaderProgram_t, u_shadowMVPMatrix), MVP.m);
+                GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
             }
         }
         else if( backEnd.vLight->pointLight )
         {
-            lightViewRenderMatrix << backEnd.shadowV[0];
-            lightProjectionRenderMatrix << backEnd.shadowP[0];
+			float ms[16][6];
+            for( int i = 0; i < 6; i++ )
+            {
+				lightViewRenderMatrix << backEnd.shadowV[i];
+				lightProjectionRenderMatrix << backEnd.shadowP[i];
 
             idRenderMatrix modelRenderMatrix;
             idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
@@ -275,7 +278,12 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
             idRenderMatrix clipMVP;
             idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
 
-            GL_UniformMatrix4fv(offsetof(shaderProgram_t, u_shadowMVPMatrix), clipMVP.m);
+                idRenderMatrix MVP;
+                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
+				MVP >> ms[i];
+            }
+			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), 6, ms[0]);
         }
         else
         {
@@ -295,7 +303,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 
 			idRenderMatrix MVP;
 			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-			GL_UniformMatrix4fv(offsetof(shaderProgram_t, u_shadowMVPMatrix), MVP.m);
+			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
 
         }
 
@@ -322,7 +330,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
             static float SampleSizes[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f, 0.5f, 0.2f, 0.2f, 0.1f};
             sampleSize = SampleSizes[backEnd.vLight->shadowLOD];
         }
-        GL_Uniform1f(offsetof(shaderProgram_t, u_sampleSize), sampleSize * sampleScale);
+        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), sampleSize * sampleScale);
 	};
 #endif
 

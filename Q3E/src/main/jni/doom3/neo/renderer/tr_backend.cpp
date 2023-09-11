@@ -891,3 +891,22 @@ void RB_ComputeMVP( const drawSurf_t * const surf, float mvp[16] ) {
 	// precompute the MVP
 	myGlMultMatrix(surf->space->modelViewMatrix, localProjectionMatrix, mvp);
 }
+
+/*
+====================
+GL_UniformMatrix4fv
+====================
+*/
+void GL_UniformMatrix4fv(GLint location, const GLsizei n, const GLfloat *value)
+{
+	if (!backEnd.glState.currentProgram) {
+		common->Printf("GL_Uniform4fv: no current program object\n");
+		__builtin_trap();
+		return;
+	}
+
+	glUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), n, GL_FALSE, value);
+
+	GL_CheckErrors();
+}
+

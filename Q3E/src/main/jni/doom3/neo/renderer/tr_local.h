@@ -1101,6 +1101,7 @@ void	GL_Uniform1fv(GLint location, const GLfloat *value);
 void	GL_Uniform3fv(GLint location, const GLfloat *value);
 void	GL_Uniform4fv(GLint location, const GLfloat *value);
 void	GL_UniformMatrix4fv(GLint location, const GLfloat *value);
+void 	GL_UniformMatrix4fv(GLint location, const GLsizei n, const GLfloat *value);
 void	GL_Uniform1f(GLint location, GLfloat value);
 void	GL_EnableVertexAttribArray(GLuint index);
 void	GL_DisableVertexAttribArray(GLuint index);
@@ -1556,15 +1557,12 @@ typedef struct shaderProgram_s {
 	GLint		texgenS;
 	GLint		texgenT;
 	GLint		texgenQ;
+	GLint		u_uniformParm[MAX_VERTEX_PARMS];
 
-	GLint		alpha;
 #ifdef _SHADOW_MAPPING
-	GLint		u_shadowMVPMatrix;
-	GLint		u_globalLightOrigin;
-    GLint		u_bias;
-    GLint		u_sampleSize;
-	GLint		u_near;
-	GLint		u_far;
+	GLint		shadowMVPMatrix;
+	GLint		globalLightOrigin;
+    GLint		bias;
 #endif
 #ifdef _HARM_SHADER_NAME //k: restore shader name
 	char name[32];
