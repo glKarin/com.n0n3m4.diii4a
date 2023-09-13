@@ -1050,7 +1050,7 @@ static const char INTERACTION_SHADOW_MAPPING_FRAG[] =
 		"#ifdef _HARM_FLOAT_TEXTURE\n"
 		"	return length(Vec);\n"
 		"#elif defined(_HARM_USING_FAR_PLANE)\n"
-		"	return length(Vec) / u_uniformParm1;\n"
+		"	return length(Vec) / u_uniformParm0;\n"
 		"#else\n"
 		"	vec3 AbsVec = abs(Vec);\n"
 		"	float LocalZcomp = max(AbsVec.x, max(AbsVec.y, AbsVec.z));\n"
