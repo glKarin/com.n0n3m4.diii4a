@@ -344,7 +344,7 @@ public class GameLauncher extends Activity
 				String value = useShadowMapping ? "1" : "0";
 				SetProp("r_useShadowMapping", value);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putBoolean(Q3EPreference.pref_harm_r_lightModel, useShadowMapping)
+						.putBoolean(Q3EPreference.pref_harm_r_useShadowMapping, useShadowMapping)
 						.commit();
 			}
         }
