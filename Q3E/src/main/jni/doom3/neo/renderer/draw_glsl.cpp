@@ -263,7 +263,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
         }
         else if( backEnd.vLight->pointLight )
         {
-			float ms[16][6];
+			float ms[6][16];
             for( int i = 0; i < 6; i++ )
             {
 				lightViewRenderMatrix << backEnd.shadowV[i];
