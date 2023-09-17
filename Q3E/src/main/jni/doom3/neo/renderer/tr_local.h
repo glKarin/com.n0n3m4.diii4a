@@ -727,8 +727,8 @@ typedef struct {
 	bool shuttleView;
 #endif
 #ifdef _SHADOW_MAPPING
-    float		shadowV[16][6];				// shadow depth view matrix
-    float		shadowP[16][6];				// shadow depth projection matrix
+    float		shadowV[6][16];				// shadow depth view matrix
+    float		shadowP[6][16];				// shadow depth projection matrix
 #endif
 } backEndState_t;
 
