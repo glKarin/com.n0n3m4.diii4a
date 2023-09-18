@@ -258,8 +258,8 @@
     <string name="view">Вид</string>
     <string name="hide_ad_bar_in_launcher">Скрыть рекламную панель в лаунчере</string>
     <string name="scale_by_screen_area">Масштабировать по области экрана</string>
-    <string name="shadow_cvar_r_useShadowMapping">Shadow(cvar `r_useShadowMapping`)</string>
-    <string name="shadow_volume">Shadow volume</string>
-    <string name="shadow_mapping">Shadow mapping</string>
+    <string name="shadow_cvar_r_useShadowMapping">Тени(cvar `r_useShadowMapping`)</string>
+    <string name="shadow_volume">Объем теней</string>
+    <string name="shadow_mapping">Наложение теней</string>
 
 </resources>
