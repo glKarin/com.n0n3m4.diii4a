@@ -2344,7 +2344,6 @@ int lwGetPolygons5(idFile *fp, int cksize, lwPolygonList *plist, int ptoffset)
 	lwPolygon *pp;
 	lwPolVert *pv;
 	unsigned char *buf, *bp;
-	//k 64
 	int i, nv, nverts, npols;
 	ptrdiff_t j;
 

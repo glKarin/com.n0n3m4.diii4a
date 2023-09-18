@@ -205,7 +205,6 @@ class idCommonLocal : public idCommon
 		idStrList					warningList;
 		idStrList					errorList;
 
-		//k 64
 		uintptr_t						gameDLL;
 
 		idLangDict					languageDict;
@@ -2869,7 +2868,7 @@ void idCommonLocal::Async(void)
 idCommonLocal::LoadGameDLL
 =================
 */
-#if defined(__ANDROID__) //k
+#ifdef __ANDROID__
 
 #ifdef _RAVEN // quake4 game dll
 #define _HARM_BASE_GAME_DLL "q4game"
@@ -2901,7 +2900,7 @@ void idCommonLocal::LoadGameDLL(void)
 	gameExport_t	gameExport;
 	GetGameAPI_t	GetGameAPI;
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 #define LOAD_RESULT(dll) ((dll) ? "done" : "fail")
 
 #define _K_D3_MOD

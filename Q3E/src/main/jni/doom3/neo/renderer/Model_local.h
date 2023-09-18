@@ -103,6 +103,10 @@ class idRenderModelStatic : public idRenderModel
 	bool						LoadOBJ( const char* fileName );
 	bool						ConvertOBJToModelSurfaces( const struct objModel_t* obj );
 #endif
+#ifdef _MODEL_DAE
+	bool						LoadDAE( const char* fileName );
+	bool						ConvertDAEToModelSurfaces( const struct ColladaParser* obj );
+#endif
 
 		bool						DeleteSurfaceWithId(int id);
 		void						DeleteSurfacesWithNegativeId(void);

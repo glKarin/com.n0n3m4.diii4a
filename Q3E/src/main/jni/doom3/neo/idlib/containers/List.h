@@ -159,6 +159,8 @@ class idList
 
 #ifdef _HUMANHEAD
 	protected:
+#elif defined(_HEXENEOC)
+	public:
 #else
 	private:
 #endif

@@ -46,7 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 static idStr	basepath;
 static idStr	savepath;
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit();
 
@@ -88,7 +88,7 @@ void *Sys_AsyncThread(void *p)
 	int start, end;
 	int ticked, to_ticked;
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	xthreadInfo *threadInfo = static_cast<xthreadInfo *>(p);
 	assert(threadInfo);
 #endif
@@ -113,7 +113,7 @@ void *Sys_AsyncThread(void *p)
 		}
 
 		// thread exit
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 		if (threadInfo->threadCancel) {
 			break;
 		}
@@ -132,7 +132,7 @@ void *Sys_AsyncThread(void *p)
  */
 const char *Sys_DefaultSavePath(void)
 {
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	sprintf(savepath, workdir());
 #else
 #if defined( ID_DEMO_BUILD )
@@ -180,7 +180,7 @@ Try to be intelligent: if there is no BASE_GAMEDIR, try the next path
 
 const char *Sys_DefaultBasePath(void)
 {
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	return workdir();
 #else
 	struct stat st;
@@ -338,7 +338,7 @@ double Sys_ClockTicksPerSecond(void)
 		return ret;
 	}
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	fd = open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", O_RDONLY);
 #else
 	fd = open("/proc/cpuinfo", O_RDONLY);
@@ -355,7 +355,7 @@ double Sys_ClockTicksPerSecond(void)
 	len = read(fd, buf, 4096);
 	close(fd);
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	if (len > 0) {
 		ret = atof(buf);
 		common->Printf("/proc/cpuinfo CPU frequency: %g MHz", ret / 1000.0);
@@ -595,7 +595,7 @@ void abrt_func(mcheck_status status)
 
 #endif
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 
 #include "doom3_android.h"
 

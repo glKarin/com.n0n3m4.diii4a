@@ -38,8 +38,8 @@ Tag with `-free` only for F-Droid update.
 ###### For playing Prey(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). Now can play all levels, but some levels has bugs.
 > 1. Putting PC Prey game data file to `preybase` folder and START directly.
 > 2. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.
-> 3. Exists bugs: e.g. some incorrect collision(using `noclip`), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).
-> 4. Because of tab window UI not support, Settings UI is not work, must edit `preyconfig.cfg` for binding extras key.
+> 3. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).
+> 4. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.
 > > * bind "Your key of spirit walk" "_impulse54"
 > > * bind "Your key of second mode attack of weapons" "_attackAlt"
 > > * bind "Your key of toggle lighter" "_impulse16"

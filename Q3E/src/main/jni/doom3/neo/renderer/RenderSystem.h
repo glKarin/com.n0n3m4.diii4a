@@ -84,6 +84,10 @@ typedef struct glconfig_s {
 	bool				allowGLSLPath;
 
 	bool				isInitialized;
+
+	bool framebufferObjectAvailable;
+	int maxRenderbufferSize;
+	int maxColorAttachments;
 } glconfig_t;
 
 

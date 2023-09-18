@@ -38,7 +38,7 @@
     <string name="blinn_phong">Blinn-Phong</string>
     <string name="specular_exponent_cvar_harm_r_specularexponent">Specular exponent(cvar `harm_r_specularExponent`):</string>
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Specular exponent in interaction light model(default is 4.0)</string>
-    <string name="sound_implementation">Sound implementation</string>
+    <string name="sound">Sound</string>
     <string name="load_quicksave_when_start_game">Load QuickSave when start game</string>
     <string name="edit_autoexec_cfg">Edit autoexec.cfg</string>
     <string name="edit_doomconfig_cfg">Edit DoomConfig.cfg</string>
@@ -115,6 +115,7 @@
     <string name="screen">Screen</string>
     <string name="hide_navigation_bar">Hide navigation bar</string>
     <string name="hide_navigation_bar_in_game">Hide navigation bar in game</string>
+    <string name="hide_ad_bar_in_launcher">Hide ad bar in launcher</string>
     <string name="cover_screen_edges">Cover screen edges</string>
     <string name="cover_screen_edges_in_status_bar">Cover screen edges in status bar</string>
     <string name="game">Game</string>
@@ -247,12 +248,20 @@
     <string name="extract_source">Extract source</string>
     <string name="tips">Tips</string>
     <string name="license">License</string>
-    <string name="maximum_fps_limit_0_unlimited">Maximum FPS limit(0 = unlimited)</string>
-    <string name="limit_maximum_fps_default_is_0">Limit maximum FPS(default is 0)</string>
+    <string name="maximum_fps_limit_0_unlimited">Maximum FPS limit(cvar `harm_r_maxFPS`)</string>
+    <string name="limit_maximum_fps_default_is_0">Limit maximum FPS(0 = unlimited)</string>
     <string name="edit_cvar">Edit CVar</string>
     <string name="cvar_editor">CVar editor</string>
     <string name="skip_intro">Skip intro</string>
     <string name="overthinked_overthinked">Overthinked(overthinked)</string>
     <string name="sabot_sabot">SABot(sabot)</string>
+    <string name="hexen_edge_of_chaos_hexeneoc">Hexen: Edge of Chaos(hexeneoc)</string>
+    <string name="load_game_mod_list">load game mod list</string>
+    <string name="mod">mod</string>
+    <string name="view">View</string>
+    <string name="scale_by_screen_area">Scale by screen area if using ratio</string>
+    <string name="shadow_cvar_r_useShadowMapping">Shadow(cvar `r_useShadowMapping`)</string>
+    <string name="shadow_volume">Shadow volume</string>
+    <string name="shadow_mapping">Shadow mapping</string>
 
 </resources>

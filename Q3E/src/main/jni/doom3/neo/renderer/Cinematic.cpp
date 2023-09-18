@@ -1850,13 +1850,8 @@ redump:
 	roq_id		 = framedata[0] + framedata[1]*256;
 	RoQFrameSize = framedata[2] + framedata[3]*256 + framedata[4]*65536;
 	roq_flags	 = framedata[6] + framedata[7]*256;
-#ifdef __ANDROID__ //k `char` is unsigned on Android
 	roqF0		 = (signed char)framedata[7];
 	roqF1		 = (signed char)framedata[6];
-#else
-	roqF0		 = (char)framedata[7];
-	roqF1		 = (char)framedata[6];
-#endif
 
 	if (RoQFrameSize>65536||roq_id==0x1084) {
 		common->DPrintf("roq_size>65536||roq_id==0x1084\n");

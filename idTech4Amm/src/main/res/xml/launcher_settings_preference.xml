@@ -94,7 +94,7 @@
                 android:key="harm_hide_ad_bar"
                 android:persistent="true"
                 android:defaultValue="true"
-                android:summary="@string/hide_navigation_bar_in_game"
+                android:summary="@string/hide_ad_bar_in_launcher"
             />
             <ListPreference
                 android:title="@string/language"

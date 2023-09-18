@@ -524,7 +524,7 @@ void idSoundSample::Load(void)
 	CheckForDownSample();
 
 	// create hardware audio buffers
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	if (idSoundSystemLocal::useOpenAL) {
 		// PCM loads directly
 		if (objectInfo.wFormatTag == WAVE_FORMAT_TAG_PCM) {

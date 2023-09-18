@@ -31,18 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-shaderProgram_t	interactionShader;
-shaderProgram_t	shadowShader;
-shaderProgram_t	defaultShader;
-shaderProgram_t	depthFillShader;
-shaderProgram_t cubemapShader; //k: skybox shader
-shaderProgram_t reflectionCubemapShader; //k: reflection shader
-shaderProgram_t	depthFillClipShader; //k: z-fill clipped shader
-shaderProgram_t	fogShader; //k: fog shader
-shaderProgram_t	blendLightShader; //k: blend light shader
-shaderProgram_t	interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
-shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
-shaderProgram_t texgenShader; //k: texgen shader
+#include "draw_glsl_shader.cpp"
 
 static bool r_usePhong = true;
 static float r_specularExponent = 4.0f;
@@ -51,40 +40,11 @@ static const float zero[4] = { 0, 0, 0, 0 };
 static const float one[4] = { 1, 1, 1, 1 };
 static const float negOne[4] = { -1, -1, -1, -1 };
 
-struct GLSLShaderProp
-{
-	const char *name;
-	shaderProgram_t * const program;
-	const char *default_vertex_shader_source;
-	const char *default_fragment_shader_source;
-	const char *vertex_shader_source_file;
-	const char *fragment_shader_source_file;
-	int cond;
-};
-static int R_LoadGLSLShaderProgram(
-		const char *name,
-		shaderProgram_t * const program,
-		const char *default_vertex_shader_source,
-		const char *default_fragment_shader_source,
-		const char *vertex_shader_source_file,
-		const char *fragment_shader_source_file,
-		int cond
-);
-
-#include "glsl_shader.h"
 #define HARM_INTERACTION_SHADER_PHONG "phong"
 #define HARM_INTERACTION_SHADER_BLINNPHONG "blinn_phong"
 const char *harm_r_lightModelArgs[]	= { HARM_INTERACTION_SHADER_PHONG, HARM_INTERACTION_SHADER_BLINNPHONG, NULL };
 static idCVar harm_r_lightModel("harm_r_lightModel", harm_r_lightModelArgs[0], CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Light model when draw interactions(`phong` - Phong(default), `blinn_phong` - Blinn-Phong.)", harm_r_lightModelArgs, idCmdSystem::ArgCompletion_String<harm_r_lightModelArgs>);
 static idCVar harm_r_specularExponent("harm_r_specularExponent", "4.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Specular exponent in interaction light model(default is 4.0.)");
-#if 0
-#define _GLPROGS "gl2progs"
-#else
-#define _GLPROGS "glslprogs"
-#endif
-static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
-
-static bool R_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name);
 
 /*
 =========================================================================================
@@ -99,12 +59,108 @@ GENERAL INTERACTION RENDERING
 GL_SelectTextureNoClient
 ====================
 */
-static void GL_SelectTextureNoClient(int unit)
+ID_INLINE static void GL_SelectTextureNoClient(int unit)
 {
 	backEnd.glState.currenttmu = unit;
 	glActiveTexture(GL_TEXTURE0 + unit);
 	RB_LogComment("glActiveTexture( %i )\n", unit);
 }
+
+ID_INLINE void			GL_Scissor( int x /* left*/, int y /* bottom */, int w, int h )
+{
+	glScissor( x, y, w, h );
+}
+
+ID_INLINE void			GL_Viewport( int x /* left */, int y /* bottom */, int w, int h )
+{
+	glViewport( x, y, w, h );
+}
+
+ID_INLINE void	GL_Scissor( const idScreenRect& rect )
+{
+	GL_Scissor( rect.x1, rect.y1, rect.x2 - rect.x1 + 1, rect.y2 - rect.y1 + 1 );
+}
+ID_INLINE void	GL_Viewport( const idScreenRect& rect )
+{
+	GL_Viewport( rect.x1, rect.y1, rect.x2 - rect.x1 + 1, rect.y2 - rect.y1 + 1 );
+}
+ID_INLINE void	GL_ViewportAndScissor( int x, int y, int w, int h )
+{
+	GL_Viewport( x, y, w, h );
+	GL_Scissor( x, y, w, h );
+}
+ID_INLINE void	GL_ViewportAndScissor( const idScreenRect& rect )
+{
+	GL_Viewport( rect );
+	GL_Scissor( rect );
+}
+
+/*
+================
+RB_SetMVP
+================
+*/
+ID_INLINE void RB_SetMVP( const float mvp[16] )
+{
+	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mvp);
+}
+
+/*
+====================
+GL_PolygonOffset
+====================
+*/
+ID_INLINE void GL_PolygonOffset( bool enabled, float scale = 0.0f, float bias = 0.0f )
+{
+	if(enabled)
+	{
+		glPolygonOffset( scale, bias );
+		glEnable(GL_POLYGON_OFFSET_FILL);
+	}
+	else
+		glDisable(GL_POLYGON_OFFSET_FILL);
+}
+
+/*
+====================
+GL_Color
+====================
+*/
+ID_INLINE void GL_Color( float r, float g, float b, float a )
+{
+	float parm[4];
+	parm[0] = idMath::ClampFloat( 0.0f, 1.0f, r );
+	parm[1] = idMath::ClampFloat( 0.0f, 1.0f, g );
+	parm[2] = idMath::ClampFloat( 0.0f, 1.0f, b );
+	parm[3] = idMath::ClampFloat( 0.0f, 1.0f, a );
+	GL_Uniform4fv(offsetof(shaderProgram_t, glColor), parm);
+}
+
+// RB begin
+ID_INLINE void GL_Color( const idVec3& color )
+{
+	GL_Color( color[0], color[1], color[2], 1.0f );
+}
+
+ID_INLINE void GL_Color( const idVec4& color )
+{
+	GL_Color( color[0], color[1], color[2], color[3] );
+}
+// RB end
+
+/*
+====================
+GL_Color
+====================
+*/
+ID_INLINE void GL_Color( float r, float g, float b )
+{
+	GL_Color( r, g, b, 1.0f );
+}
+
+#ifdef _SHADOW_MAPPING
+#include "draw_glsl_shadowmapping.cpp"
+#endif
 
 /*
 ==================
@@ -172,6 +228,111 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	// texture 4 is the per-surface specular map
 	GL_SelectTextureNoClient(4);
 	din->specularImage->Bind();
+
+#ifdef _SHADOW_MAPPING
+	if(r_shadowMapping)
+	{
+		idRenderMatrix lightViewRenderMatrix;
+		idRenderMatrix lightProjectionRenderMatrix;
+
+        /*
+         * parallel light not use `cascade`, so only 1 matrix
+         * point light has 6 matrix, but unused in shader
+         * spot light only 1 matrix
+         */
+        if( backEnd.vLight->parallel )
+        {
+            //for( int i = 0; i < 1; i++ )
+            {
+				lightViewRenderMatrix << backEnd.shadowV[0];
+				lightProjectionRenderMatrix << backEnd.shadowP[0];
+
+				idRenderMatrix modelRenderMatrix;
+				idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+
+				idRenderMatrix modelToLightRenderMatrix;
+				idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+				idRenderMatrix clipMVP;
+				idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+                idRenderMatrix MVP;
+                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+                GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
+            }
+        }
+        else if( backEnd.vLight->pointLight )
+        {
+			float ms[6][16];
+            for( int i = 0; i < 6; i++ )
+            {
+				lightViewRenderMatrix << backEnd.shadowV[i];
+				lightProjectionRenderMatrix << backEnd.shadowP[i];
+
+            idRenderMatrix modelRenderMatrix;
+            idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+
+            idRenderMatrix modelToLightRenderMatrix;
+            idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+            idRenderMatrix clipMVP;
+            idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+                idRenderMatrix MVP;
+                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
+				MVP >> ms[i];
+            }
+			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), 6, ms[0]);
+        }
+        else
+        {
+            // spot light
+
+			lightViewRenderMatrix << backEnd.shadowV[0];
+			lightProjectionRenderMatrix << backEnd.shadowP[0];
+
+			idRenderMatrix modelRenderMatrix;
+			idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
+
+			idRenderMatrix modelToLightRenderMatrix;
+			idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+			idRenderMatrix clipMVP;
+			idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+			idRenderMatrix MVP;
+			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
+
+        }
+
+		// texture 6 is the shadow map
+		GL_SelectTextureNoClient(6);
+		float sampleScale = 1.0;
+		if( backEnd.vLight->parallel )
+		{
+			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
+			sampleScale = 0.0005;
+		}
+		else if( backEnd.vLight->pointLight )
+		{
+			globalImages->shadowCubeImage[backEnd.vLight->shadowLOD]->Bind();
+		}
+		else
+		{
+			sampleScale = 0.01;
+			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
+		}
+        float sampleSize = harm_r_shadowMapSampleSize.GetFloat();
+        if(sampleSize < 0)
+        {
+            static float SampleSizes[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f, 0.5f, 0.2f, 0.2f, 0.1f};
+            sampleSize = SampleSizes[backEnd.vLight->shadowLOD];
+        }
+        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), sampleSize * sampleScale);
+	};
+#endif
 
 	GL_SelectTextureNoClient(0); //k2023
 
@@ -284,6 +445,12 @@ void RB_GLSL_DrawInteractions(void)
 
 	//GL_SelectTexture(0); //k2023
 
+#ifdef _SHADOW_MAPPING
+	const bool shadowMapping = r_shadowMapping && r_shadows.GetBool();
+	GLfloat clearColor[4];
+	if(shadowMapping)
+        glGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
+#endif
 	//
 	// for each light, perform adding and shadowing
 	//
@@ -326,11 +493,73 @@ void RB_GLSL_DrawInteractions(void)
 			glStencilFunc(GL_ALWAYS, 128, 255);
 		}
 
-		RB_StencilShadowPass(vLight->globalShadows);
-		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+#ifdef _SHADOW_MAPPING
+		if(shadowMapping)
+		{
+            int	side, sideStop;
 
-		RB_StencilShadowPass(vLight->localShadows);
-		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+            if( vLight->parallel )
+            {
+                side = 0;
+                //sideStop = r_shadowMapSplits.GetInteger() + 1;
+				sideStop = 1;
+            }
+            else if( vLight->pointLight )
+            {
+                if( r_shadowMapSingleSide.GetInteger() != -1 )
+                {
+                    side = r_shadowMapSingleSide.GetInteger();
+                    sideStop = side + 1;
+                }
+                else
+                {
+                    side = 0;
+                    sideStop = 6;
+                }
+            }
+            else
+            {
+                side = -1;
+                sideStop = 0;
+            }
+
+			if(vLight->globalShadows || vLight->localShadows)
+			{
+                glDisable(GL_STENCIL_TEST);
+				extern char RB_ShadowMapPass_T;
+
+				RB_ShadowMapPass_T = 'G';
+				for( int m = side; m < sideStop ; m++ )
+				{
+					RB_ShadowMapPass( vLight->globalShadows, m, true );
+				}
+
+				RB_ShadowMapPass_T = 'L';
+				for( int m = side; m < sideStop ; m++ )
+				{
+					RB_ShadowMapPass( vLight->localShadows, m, false );
+				}
+
+				RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
+				RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+
+                glEnable(GL_STENCIL_TEST);
+			}
+			else
+			{
+				RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+				RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+			}
+		}
+		else
+#endif
+		{
+            RB_StencilShadowPass(vLight->globalShadows);
+            RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+
+			RB_StencilShadowPass(vLight->localShadows);
+			RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+		}
 
 		//k GL_UseProgram(NULL);	// if there weren't any globalInteractions, it would have stayed on
 		// translucent surfaces never get stencil shadowed
@@ -351,267 +580,17 @@ void RB_GLSL_DrawInteractions(void)
 	glStencilFunc(GL_ALWAYS, 128, 255);
 
 	//GL_SelectTexture(0); //k2023
+#ifdef _SHADOW_MAPPING
+	if(shadowMapping)
+        glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+#endif
 }
 
 //===================================================================================
 
-
-/*
-=================
-R_LoadGLSLShader
-
-loads GLSL vertex or fragment shaders
-=================
-*/
-static void R_LoadGLSLShader(const char *name, shaderProgram_t *shaderProgram, GLenum type)
-{
-#if 0
-	idStr	fullPath = "gl2progs/";
-	fullPath += name;
-#else	
-	idStr	fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramDir");
-	if(fullPath.IsEmpty())
-		fullPath = _GLPROGS;
-	fullPath.AppendPath(name);
-#endif
-	char	*fileBuffer;
-	char	*buffer;
-
-	if (!glConfig.isInitialized) {
-		return;
-	}
-
-	// load the program even if we don't support it, so
-	// fs_copyfiles can generate cross-platform data dumps
-	fileSystem->ReadFile(fullPath.c_str(), (void **)&fileBuffer, NULL);
-
-	common->Printf("Load GLSL shader file: %s -> %s\n", fullPath.c_str(), fileBuffer ? "success" : "fail");
-
-	if (!fileBuffer) {
-		return;
-	}
-
-	// copy to stack memory and free
-	buffer = (char *)_alloca(strlen(fileBuffer) + 1);
-	strcpy(buffer, fileBuffer);
-	fileSystem->FreeFile(fileBuffer);
-
-	switch (type) {
-		case GL_VERTEX_SHADER:
-			// create vertex shader
-			shaderProgram->vertexShader = glCreateShader(GL_VERTEX_SHADER);
-			glShaderSource(shaderProgram->vertexShader, 1, (const GLchar **)&buffer, 0);
-			glCompileShader(shaderProgram->vertexShader);
-			break;
-		case GL_FRAGMENT_SHADER:
-			// create fragment shader
-			shaderProgram->fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-			glShaderSource(shaderProgram->fragmentShader, 1, (const GLchar **)&buffer, 0);
-			glCompileShader(shaderProgram->fragmentShader);
-			break;
-		default:
-			common->Printf("R_LoadGLSLShader: unexpected type\n");
-			return;
-	}
-}
-
-/*
-=================
-R_LinkGLSLShader
-
-links the GLSL vertex and fragment shaders together to form a GLSL program
-=================
-*/
-static bool R_LinkGLSLShader(shaderProgram_t *shaderProgram, bool needsAttributes)
-{
-	char buf[BUFSIZ];
-	int len;
-	GLint status;
-	GLint linked;
-
-	shaderProgram->program = glCreateProgram();
-
-	glAttachShader(shaderProgram->program, shaderProgram->vertexShader);
-	glAttachShader(shaderProgram->program, shaderProgram->fragmentShader);
-
-	if (needsAttributes) {
-		glBindAttribLocation(shaderProgram->program, 8, "attr_TexCoord");
-		glBindAttribLocation(shaderProgram->program, 9, "attr_Tangent");
-		glBindAttribLocation(shaderProgram->program, 10, "attr_Bitangent");
-		glBindAttribLocation(shaderProgram->program, 11, "attr_Normal");
-		glBindAttribLocation(shaderProgram->program, 12, "attr_Vertex");
-		glBindAttribLocation(shaderProgram->program, 13, "attr_Color");
-	}
-
-	glLinkProgram(shaderProgram->program);
-
-	glGetProgramiv(shaderProgram->program, GL_LINK_STATUS, &linked);
-
-	if (com_developer.GetBool()) {
-		glGetShaderInfoLog(shaderProgram->vertexShader, sizeof(buf), &len, buf);
-		common->Printf("VS:\n%.*s\n", len, buf);
-		glGetShaderInfoLog(shaderProgram->fragmentShader, sizeof(buf), &len, buf);
-		common->Printf("FS:\n%.*s\n", len, buf);
-	}
-
-	if (!linked) {
-		common->Printf("R_LinkGLSLShader: program failed to link\n");
-		glGetProgramInfoLog(shaderProgram->program, sizeof(buf), NULL, buf);
-		common->Printf("R_LinkGLSLShader:\n%.*s\n", len, buf);
-		return false;
-	}
-
-	return true;
-}
-
-/*
-=================
-R_ValidateGLSLProgram
-
-makes sure GLSL program is valid
-=================
-*/
-static bool R_ValidateGLSLProgram(shaderProgram_t *shaderProgram)
-{
-	GLint validProgram;
-
-	glValidateProgram(shaderProgram->program);
-
-	glGetProgramiv(shaderProgram->program, GL_VALIDATE_STATUS, &validProgram);
-
-	if (!validProgram) {
-		common->Printf("R_ValidateGLSLProgram: program invalid\n");
-		return false;
-	}
-
-	return true;
-}
-
-
-static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
-{
-	int	i;
-	char	buffer[32];
-
-	GL_UseProgram(shader);
-
-	shader->localLightOrigin = glGetUniformLocation(shader->program, "u_lightOrigin");
-	shader->localViewOrigin = glGetUniformLocation(shader->program, "u_viewOrigin");
-	shader->lightProjectionS = glGetUniformLocation(shader->program, "u_lightProjectionS");
-	shader->lightProjectionT = glGetUniformLocation(shader->program, "u_lightProjectionT");
-	shader->lightProjectionQ = glGetUniformLocation(shader->program, "u_lightProjectionQ");
-	shader->lightFalloff = glGetUniformLocation(shader->program, "u_lightFalloff");
-	shader->bumpMatrixS = glGetUniformLocation(shader->program, "u_bumpMatrixS");
-	shader->bumpMatrixT = glGetUniformLocation(shader->program, "u_bumpMatrixT");
-	shader->diffuseMatrixS = glGetUniformLocation(shader->program, "u_diffuseMatrixS");
-	shader->diffuseMatrixT = glGetUniformLocation(shader->program, "u_diffuseMatrixT");
-	shader->specularMatrixS = glGetUniformLocation(shader->program, "u_specularMatrixS");
-	shader->specularMatrixT = glGetUniformLocation(shader->program, "u_specularMatrixT");
-	shader->colorModulate = glGetUniformLocation(shader->program, "u_colorModulate");
-	shader->colorAdd = glGetUniformLocation(shader->program, "u_colorAdd");
-	shader->diffuseColor = glGetUniformLocation(shader->program, "u_diffuseColor");
-	shader->specularColor = glGetUniformLocation(shader->program, "u_specularColor");
-	shader->glColor = glGetUniformLocation(shader->program, "u_glColor");
-	shader->alphaTest = glGetUniformLocation(shader->program, "u_alphaTest");
-	shader->specularExponent = glGetUniformLocation(shader->program, "u_specularExponent");
-
-	shader->eyeOrigin = glGetUniformLocation(shader->program, "u_eyeOrigin");
-	shader->localEyeOrigin = glGetUniformLocation(shader->program, "u_localEyeOrigin");
-	shader->nonPowerOfTwo = glGetUniformLocation(shader->program, "u_nonPowerOfTwo");
-	shader->windowCoords = glGetUniformLocation(shader->program, "u_windowCoords");
-
-	shader->modelViewProjectionMatrix = glGetUniformLocation(shader->program, "u_modelViewProjectionMatrix");
-
-	shader->modelMatrix = glGetUniformLocation(shader->program, "u_modelMatrix");
-	shader->textureMatrix = glGetUniformLocation(shader->program, "u_textureMatrix");
-	//k: add modelView matrix uniform
-	shader->modelViewMatrix = glGetUniformLocation(shader->program, "u_modelViewMatrix");
-	//k: add clip plane uniform
-	shader->clipPlane = glGetUniformLocation(shader->program, "u_clipPlane");
-	//k: add fog matrix uniform
-	shader->fogMatrix = glGetUniformLocation(shader->program, "u_fogMatrix");
-	//k: add fog color uniform
-	shader->fogColor = glGetUniformLocation(shader->program, "u_fogColor");
-	//k: add texgen S T Q uniform
-	shader->texgenS = glGetUniformLocation(shader->program, "u_texgenS");
-	shader->texgenT = glGetUniformLocation(shader->program, "u_texgenT");
-	shader->texgenQ = glGetUniformLocation(shader->program, "u_texgenQ");
-
-	shader->alpha = glGetUniformLocation(shader->program, "u_alpha");
-
-	shader->attr_TexCoord = glGetAttribLocation(shader->program, "attr_TexCoord");
-	shader->attr_Tangent = glGetAttribLocation(shader->program, "attr_Tangent");
-	shader->attr_Bitangent = glGetAttribLocation(shader->program, "attr_Bitangent");
-	shader->attr_Normal = glGetAttribLocation(shader->program, "attr_Normal");
-	shader->attr_Vertex = glGetAttribLocation(shader->program, "attr_Vertex");
-	shader->attr_Color = glGetAttribLocation(shader->program, "attr_Color");
-
-	for (i = 0; i < MAX_VERTEX_PARMS; i++) {
-		idStr::snPrintf(buffer, sizeof(buffer), "u_vertexParm%d", i);
-		shader->u_vertexParm[i] = glGetAttribLocation(shader->program, buffer);
-	}
-
-	for (i = 0; i < MAX_FRAGMENT_IMAGES; i++) {
-		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentMap%d", i);
-		shader->u_fragmentMap[i] = glGetUniformLocation(shader->program, buffer);
-		glUniform1i(shader->u_fragmentMap[i], i);
-	}
-
-	//k: add cubemap texture units
-	for ( i = 0; i < MAX_FRAGMENT_IMAGES; i++ ) {
-		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentCubeMap%d", i);
-		shader->u_fragmentCubeMap[i] = glGetUniformLocation(shader->program, buffer);
-		glUniform1i(shader->u_fragmentCubeMap[i], i);
-	}
-
-	GL_CheckErrors();
-
-	GL_UseProgram(NULL);
-}
-
-static bool RB_GLSL_InitShaders(void)
-{
-	const GLSLShaderProp Props[] = {
-			{ "interaction", &interactionShader, INTERACTION_VERT, INTERACTION_FRAG, "interaction.vert", "interaction.frag", 1 },
-
-			{ "shadow", &shadowShader, SHADOW_VERT, SHADOW_FRAG, "shadow.vert", "shadow.frag", 0 },
-			{ "default", &defaultShader, DEFAULT_VERT, DEFAULT_FRAG, "default.vert", "default.frag", 0 },
-
-			{ "zfill", &depthFillShader, ZFILL_VERT, ZFILL_FRAG, "zfill.vert", "zfill.frag", 0 },
-			{ "zfillClip", &depthFillClipShader, ZFILLCLIP_VERT, ZFILLCLIP_FRAG, "zfillClip.vert", "zfillClip.frag", 0 },
-
-			{ "cubemap", &cubemapShader, CUBEMAP_VERT, CUBEMAP_FRAG, "cubemap.vert", "cubemap.frag", 0 },
-			{ "reflectionCubemap", &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, CUBEMAP_FRAG, "reflectionCubemap.vert", "reflectionCubemap.frag", 0 },
-			{ "fog", &fogShader, FOG_VERT, FOG_FRAG, "fog.vert", "fog.frag", 0 },
-			{ "blendLight", &blendLightShader, BLENDLIGHT_VERT, FOG_FRAG, "blendLight.vert", "blendLight.frag", 0 },
-
-			{ "interaction_blinn_phong", &interactionBlinnPhongShader, INTERACTION_BLINNPHONG_VERT, INTERACTION_BLINNPHONG_FRAG, "interaction_blinnphong.vert", "interaction_blinnphong.frag", 1 },
-
-			{ "diffuseCubemap", &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "diffuseCubemap.vert", "diffuseCubemap.frag", 0 },
-			{ "texgen", &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "texgen.vert", "texgen.frag", 0 },
-	};
-
-	for(int i = 0; i < sizeof(Props) / sizeof(Props[0]); i++)
-	{
-		const GLSLShaderProp *prop = Props + i;
-		if(R_LoadGLSLShaderProgram(
-				prop->name,
-				prop->program,
-				prop->default_vertex_shader_source,
-				prop->default_fragment_shader_source,
-				prop->vertex_shader_source_file,
-				prop->fragment_shader_source_file,
-				prop->cond
-				) < 0)
-			return false;
-	}
-
-	return true;
-}
-
 /*
 ==================
-R_ReloadGLSLPrograms_f
+R_InitGLSLCvars
 ==================
 */
 static void R_InitGLSLCvars(void)
@@ -623,21 +602,37 @@ static void R_InitGLSLCvars(void)
 	if(f <= 0.0f)
 		f = 4.0f;
 	r_specularExponent = f;
+
+#ifdef _SHADOW_MAPPING
+	r_shadowMapping = r_useShadowMapping.GetBool();
+#endif
 }
 
-void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
+void R_CheckBackEndCvars(void)
 {
-	int		i;
-
-	common->Printf("----- R_ReloadGLSLPrograms -----\n");
-
-	if (!RB_GLSL_InitShaders()) {
-		common->Printf("GLSL shaders failed to init.\n");
+	if(harm_r_lightModel.IsModified())
+	{
+		const char *lightModel = harm_r_lightModel.GetString();
+		r_usePhong = !(lightModel && !idStr::Icmp(HARM_INTERACTION_SHADER_BLINNPHONG, lightModel));
+		harm_r_lightModel.ClearModified();
 	}
 
-	glConfig.allowGLSLPath = true;
+	if(harm_r_specularExponent.IsModified())
+	{
+		float f = harm_r_specularExponent.GetFloat();
+		if(f <= 0.0f)
+			f = 4.0f;
+		r_specularExponent = f;
+		harm_r_specularExponent.ClearModified();
+	}
 
-	common->Printf("-------------------------------\n");
+#ifdef _SHADOW_MAPPING
+	if(r_useShadowMapping.IsModified())
+	{
+		r_shadowMapping = r_useShadowMapping.GetBool();
+		r_useShadowMapping.ClearModified();
+	}
+#endif
 }
 
 void R_GLSL_Init(void)
@@ -655,196 +650,4 @@ void R_GLSL_Init(void)
 
 	R_InitGLSLCvars();
 	common->Printf("---------------------------------\n");
-}
-
-
-
-static void R_DeleteShaderProgram(shaderProgram_t *shaderProgram)
-{
-	if(shaderProgram->program)
-	{
-		if(glIsProgram(shaderProgram->program))
-			glDeleteProgram(shaderProgram->program);
-	}
-
-	if(shaderProgram->vertexShader)
-	{
-		if(glIsShader(shaderProgram->vertexShader))
-			glDeleteShader(shaderProgram->vertexShader);
-	}
-
-	if(shaderProgram->fragmentShader)
-	{
-		if(glIsShader(shaderProgram->fragmentShader))
-			glDeleteShader(shaderProgram->fragmentShader);
-	}
-	memset(shaderProgram, 0, sizeof(shaderProgram_t));
-}
-
-#define LOG_LEN 1024
-static GLint R_CreateShader(GLenum type, const char *source)
-{
-	GLint shader = 0;
-	GLint status;
-	
-	shader = glCreateShader(type);
-	if(shader == 0)
-	{
-		common->Error("[Harmattan]: %s::glCreateShader(%s) error!\n", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER");
-		return 0;
-	}
-
-	glShaderSource(shader, 1, (const GLchar **)&source, 0);
-	glCompileShader(shader);
-
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if(!status)
-	{
-		GLchar log[LOG_LEN];
-		glGetShaderInfoLog(shader, sizeof(GLchar) * LOG_LEN, NULL, log);
-		common->Error("[Harmattan]: %s::glCompileShader(%s) -> %s!\n", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER", log);
-		glDeleteShader(shader);
-		shader = 0;
-	}
-
-	return shader;
-}
-
-static GLint R_CreateProgram(GLint vertShader, GLint fragShader, bool needsAttributes = true)
-{
-	GLint program = 0;
-	GLint result;
-
-	program = glCreateProgram();
-	if(program == 0)
-	{
-		common->Error("[Harmattan]: %s::glCreateProgram() error!\n", __func__);
-		return 0;
-	}
-
-	glAttachShader(program, vertShader);
-	glAttachShader(program, fragShader);
-
-	if(needsAttributes)
-	{
-		glBindAttribLocation(program, 8, "attr_TexCoord");
-		glBindAttribLocation(program, 9, "attr_Tangent");
-		glBindAttribLocation(program, 10, "attr_Bitangent");
-		glBindAttribLocation(program, 11, "attr_Normal");
-		glBindAttribLocation(program, 12, "attr_Vertex");
-		glBindAttribLocation(program, 13, "attr_Color");
-	}
-
-	glLinkProgram(program);
-	glGetProgramiv(program, GL_LINK_STATUS, &result);
-	if(!result)
-	{
-		GLchar log[LOG_LEN];
-		glGetProgramInfoLog(program, sizeof(GLchar) * LOG_LEN, NULL, log);
-		common->Error("[Harmattan]: %s::glLinkProgram() -> %s!\n", __func__, log);
-		glDeleteProgram(program);
-		program = 0;
-	}
-
-	glValidateProgram(program);
-	glGetProgramiv(program, GL_VALIDATE_STATUS, &result);
-	if(!result)
-	{
-		GLchar log[LOG_LEN];
-		glGetProgramInfoLog(program, sizeof(GLchar) * LOG_LEN, NULL, log);
-		common->Error("[Harmattan]: %s::glValidateProgram() -> %s!\n", __func__, log);
-		glDeleteProgram(program);
-		program = 0;
-	}
-
-	return program;
-}
-
-bool R_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name)
-{
-	R_DeleteShaderProgram(shaderProgram);
-	shaderProgram->vertexShader = R_CreateShader(GL_VERTEX_SHADER, vert);
-	if(shaderProgram->vertexShader == 0)
-		return false;
-
-	shaderProgram->fragmentShader = R_CreateShader(GL_FRAGMENT_SHADER, frag);
-	if(shaderProgram->fragmentShader == 0)
-	{
-		R_DeleteShaderProgram(shaderProgram);
-		return false;
-	}
-
-	shaderProgram->program = R_CreateProgram(shaderProgram->vertexShader, shaderProgram->fragmentShader);
-	if(shaderProgram->program == 0)
-	{
-		R_DeleteShaderProgram(shaderProgram);
-		return false;
-	}
-
-	RB_GLSL_GetUniformLocations(shaderProgram);
-#ifdef _HARM_SHADER_NAME
-	strncpy(shaderProgram->name, name, sizeof(shaderProgram->name));
-#else
-	(void)(name);
-#endif
-
-	return true;
-}
-
-int R_LoadGLSLShaderProgram(
-		const char *name,
-		shaderProgram_t * const program,
-		const char *default_vertex_shader_source,
-		const char *default_fragment_shader_source,
-		const char *vertex_shader_source_file,
-		const char *fragment_shader_source_file,
-		int cond
-		)
-{
-	memset(program, 0, sizeof(shaderProgram_t));
-
-	common->Printf("[Harmattan]: Load GLSL shader program: %s\n", name);
-
-	common->Printf("[Harmattan]: 1. Load external shader source: Vertex(%s), Fragment(%s)\n", vertex_shader_source_file, fragment_shader_source_file);
-	R_LoadGLSLShader(vertex_shader_source_file, program, GL_VERTEX_SHADER);
-	R_LoadGLSLShader(fragment_shader_source_file, program, GL_FRAGMENT_SHADER);
-
-	if (!R_LinkGLSLShader(program, true) && !R_ValidateGLSLProgram(program)) {
-		common->Printf("[Harmattan]: 2. Load internal shader source\n\n");
-		if(!R_CreateShaderProgram(program, default_vertex_shader_source, default_fragment_shader_source, name))
-		{
-			common->Error("[Harmattan]: Load internal shader program fail!");
-			return -1;
-		}
-		else
-		{
-			return 2;
-		}
-	} else {
-		RB_GLSL_GetUniformLocations(program);
-		common->Printf("[Harmattan]: Load external shader program success!\n\n");
-#ifdef _HARM_SHADER_NAME
-		strncpy(program->name, name, sizeof(program->name));
-#endif
-		return 1;
-	}
-}
-
-void R_CheckGLSLCvars(void)
-{
-	if(harm_r_lightModel.IsModified())
-	{
-		const char *lightModel = harm_r_lightModel.GetString();
-		r_usePhong = !(lightModel && !idStr::Icmp(HARM_INTERACTION_SHADER_BLINNPHONG, lightModel));
-		harm_r_lightModel.ClearModified();
-	}
-
-	if(harm_r_specularExponent.IsModified())
-	{
-		float f = harm_r_specularExponent.GetFloat();
-		if(f <= 0.0f)
-			f = 4.0f;
-		r_specularExponent = f;
-		harm_r_specularExponent.ClearModified();
-	}
 }

@@ -293,7 +293,6 @@ BMP LOADING
 
 =========================================================
 */
-//k 64
 typedef struct {
 	char id[2];
 	unsigned int fileSize;
@@ -349,7 +348,6 @@ static void LoadBMP(const char *name, byte **pic, int *width, int *height, ID_TI
 
 	bmpHeader.id[0] = *buf_p++;
 	bmpHeader.id[1] = *buf_p++;
-//k 64
 	bmpHeader.fileSize = LittleLong(* (int *) buf_p);
 	buf_p += 4;
 	bmpHeader.reserved0 = LittleLong(* (int *) buf_p);

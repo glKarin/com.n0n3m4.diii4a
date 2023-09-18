@@ -146,8 +146,6 @@ elif ( local_quake4 ):
 	client/ClientModel.cpp \
 	client/ClientMoveable.cpp \
 	ai/AAS_Find.cpp \
-	ai/AASCallback_FindCoverArea.cpp \
-	ai/AASCallback_AvoidLocation.cpp \
 	ai/Monster_Berserker.cpp \
 	ai/Monster_BossBuddy.cpp \
 	ai/Monster_BossMakron.cpp \
@@ -186,7 +184,6 @@ elif ( local_quake4 ):
 	ai/AI_Util.cpp \
 	ai/VehicleAI.cpp \
 	ai/AAS_tactical.cpp \
-	ai/ObstacleAvoidance.cpp \
 	weapon/WeaponBlaster.cpp \
 	weapon/WeaponGrenadeLauncher.cpp \
 	weapon/WeaponMachinegun.cpp \
@@ -209,22 +206,9 @@ elif ( local_quake4 ):
 	mp/stats/StatWindow.cpp \
 	physics/Physics_Particle.cpp \
 	physics/Physics_VehicleMonster.cpp \
-	bots/Bot.cpp \
-	bots/Bot_char.cpp \
-	bots/Bot_chat.cpp \
-	bots/Bot_goal.cpp \
-	bots/Bot_Input.cpp \
-	bots/Bot_weapons.cpp \
-	bots/Bot_weights.cpp \
 	bots/BotAI.cpp \
-	bots/BotAI_Battle_Attacked.cpp \
-	bots/BotAI_Battle_Chase.cpp \
-	bots/BotAI_Battle_Fight.cpp \
-	bots/BotAI_Battle_NBG.cpp \
-	bots/BotAI_Battle_Retreat.cpp \
-	bots/BotAI_respawn.cpp \
-	bots/BotAI_Seek_NBG.cpp \
-	bots/BotAI_SeekLTG.cpp \
+	bots/BotAASBuild.cpp \
+	bots/BotSabot.cpp \
 	'
 # Game_render.cpp
 	game_string = game_string.replace('Fx.cpp ', '')
@@ -412,6 +396,7 @@ for i in range( len( game_list ) ):
 	game_list[ i ] = '../../' + game_list[ i ]
 
 local_env = g_game_env.Clone()
+local_env.Append( CPPDEFINES = [ '_MOD_FULL_BODY_AWARENESS' ] )
 if ( local_d3xp ):
 	local_env.Append( CPPDEFINES = [ '_D3XP', 'CTF' ] )
 
@@ -430,7 +415,7 @@ if ( local_hardcorps ):
 if ( local_raven ):
 	local_env.Append( CPPDEFINES = [ '_RAVEN' ] )
 if ( local_quake4 ):
-	local_env.Append( CPPDEFINES = [ '_QUAKE4' ] )
+	local_env.Append( CPPDEFINES = [ '_QUAKE4', 'MOD_BOTS' ] )
 if ( local_humanhead ):
 	local_env.Append( CPPDEFINES = [ '_HUMANHEAD', 'HUMANHEAD',  ] )
 if ( local_prey ):

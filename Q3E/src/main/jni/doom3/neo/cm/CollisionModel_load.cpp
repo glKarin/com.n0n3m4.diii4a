@@ -3605,6 +3605,9 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
 #ifdef _MODEL_OBJ
 		&& (extension.Icmp("obj") != 0)
 #endif
+#ifdef _MODEL_DAE
+		&& (extension.Icmp("dae") != 0)
+#endif
 #ifdef _RAVEN
 		 && ( extension.Icmp( "mdr" ) != 0 ) && (extension.Icmp("obj") != 0) && (extension.Icmp("dae") != 0)
 #endif

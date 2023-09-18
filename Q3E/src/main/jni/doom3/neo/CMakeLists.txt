@@ -69,6 +69,8 @@ option(OPENSLES			"OpenSLES support" ON)
 option(MULTITHREAD			"Multi-Thread support" ON)
 option(USING_STB			"Using stb" ON)
 option(SUPPORT_OBJ			"Support obj model" ON)
+option(SUPPORT_DAE			"Support dae model" ON)
+option(SHADOW_MAPPING			"Shadow mapping support" ON)
 
 option(D3LE			"Build the d3le game code" ON)
 option(CDOOM			"Build the cdoom game code" ON)
@@ -81,6 +83,7 @@ option(RAVEN			"Build the raven core" ON)
 option(HUMANHEAD			"Build the humanhead core" ON)
 option(OVERTHINKED			"Build the overthinked game code" ON)
 option(SABOT			"Build the sabot game code" ON)
+option(HEXENEOC			"Build the hexeneoc game code" ON)
 
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
@@ -286,6 +289,14 @@ endif()
 if(SUPPORT_OBJ)
 	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_OBJ")
 	message(STATUS "Support obj model")
+endif()
+if(SUPPORT_DAE)
+	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_DAE")
+	message(STATUS "Support dae model")
+endif()
+if(SHADOW_MAPPING)
+	set(CORE_DEFINES "${CORE_DEFINES};_SHADOW_MAPPING")
+	message(STATUS "Add shadow mapping support")
 endif()
 #//k jpeg
 set(src_jpeg
@@ -783,6 +794,25 @@ list(APPEND src_sabot ${sabot_game_src})
 set_src_dir(src_sabot "sabot" ${src_sabot})
 add_globbed_headers(src_sabot "sabot")
 
+# hexeneoc
+set(src_hexeneoc ${base_game_src})
+set(hexeneoc_game_src
+		PlayerArtifacts.cpp
+		PlayerScriptEvents.cpp
+		ai/AI_Golem.cpp
+		ai/AI_Shadowspawn.cpp
+		ai/AI_Veloxite.cpp
+		objects/Leaf.cpp
+		objects/LeafEmitter.cpp
+		objects/Tree.cpp
+		projectiles/FireStorm.cpp
+		projectiles/Soul.cpp
+		projectiles/Wraithverge.cpp
+		)
+list(APPEND src_hexeneoc ${hexeneoc_game_src})
+set_src_dir(src_hexeneoc "hexeneoc" ${src_hexeneoc})
+add_globbed_headers(src_hexeneoc "hexeneoc")
+
 # quake4
 set(src_quake4 ${base_game_src})
 set(quake4_game_src
@@ -1133,12 +1163,17 @@ set(humanhead_renderer_src
 set(humanhead_framework_src
 		humanhead/framework/declPreyBeam.cpp
 		)
+set(humanhead_ui_src
+		humanhead/ui/TabWindow.cpp
+		humanhead/ui/TabContainerWindow.cpp
+		)
 
 set(src_core_humanhead
 		${src_renderer}
 		${humanhead_renderer_src}
 		${src_framework}
 		${humanhead_framework_src}
+		${humanhead_ui_src}
 		${src_cm}
 		${src_aas}
 		${src_roq}
@@ -1345,6 +1380,9 @@ endif()
 if(SABOT)
 	message(STATUS "Build sabot")
 endif()
+if(HEXENEOC)
+	message(STATUS "Build hexeneoc")
+endif()
 if(RAVEN)
 	message(STATUS "Build raven core")
 endif()
@@ -1499,6 +1537,7 @@ if(HARDCORPS)
 			)
 endif()
 
+#[[
 if(OVERTHINKED)
 	add_library(overthinked SHARED ${src_overthinked})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_overthinked})
@@ -1533,39 +1572,23 @@ if(SABOT)
 			)
 endif()
 
-if(QUAKE4)
-	add_library(q4game SHARED ${src_quake4})
-	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
-	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set_target_properties(q4game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;MOD_BOTS;_MOD_FULL_BODY_AWARENESS")
-	target_include_directories(q4game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/quake4")
-	set_target_properties(q4game PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(q4game PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(q4game idlib_raven)
+if(HEXENEOC)
+	add_library(hexeneoc SHARED ${src_hexeneoc})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hexeneoc})
+	#set_target_properties(hexeneoc PROPERTIES PREFIX "")
+	set_target_properties(hexeneoc PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HEXENEOC")
+	target_include_directories(hexeneoc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/hexeneoc")
+	set_target_properties(hexeneoc PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(hexeneoc PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(hexeneoc idlib)
 
-	install(TARGETS q4game
+	install(TARGETS hexeneoc
 			RUNTIME DESTINATION "${bindir}"
 			LIBRARY DESTINATION "${libdir}"
 			ARCHIVE DESTINATION "${libdir}"
 			)
 endif()
-
-if(PREY)
-	add_library(preygame SHARED ${src_prey})
-	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_prey})
-	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set_target_properties(preygame PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HUMANHEAD;HUMANHEAD;_PREY")
-	target_include_directories(preygame PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/prey")
-	set_target_properties(preygame PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(preygame PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(preygame idlib_humanhead)
-
-	install(TARGETS preygame
-			RUNTIME DESTINATION "${bindir}"
-			LIBRARY DESTINATION "${libdir}"
-			ARCHIVE DESTINATION "${libdir}"
-			)
-endif()
+]]
 
 if(RAVEN)
 	set(QUAKE4BINARY "${DOOM3BINARY}_raven")
@@ -1598,6 +1621,25 @@ if(RAVEN)
 			)
 endif()
 
+if(QUAKE4)
+	add_library(q4game SHARED ${src_quake4})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
+	#set_target_properties(quake4 PROPERTIES PREFIX "")
+	set_target_properties(q4game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;MOD_BOTS;_MOD_FULL_BODY_AWARENESS")
+	target_include_directories(q4game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/quake4")
+	set_target_properties(q4game PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(q4game PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(q4game idlib_raven)
+
+	install(TARGETS q4game
+			RUNTIME DESTINATION "${bindir}"
+			LIBRARY DESTINATION "${libdir}"
+			ARCHIVE DESTINATION "${libdir}"
+			)
+endif()
+
+
+
 if(HUMANHEAD)
 	set(PREYBINARY "${DOOM3BINARY}_humanhead")
 	add_library(${PREYBINARY} SHARED
@@ -1619,6 +1661,23 @@ if(HUMANHEAD)
 			)
 
 	install(TARGETS ${PREYBINARY}
+			RUNTIME DESTINATION "${bindir}"
+			LIBRARY DESTINATION "${libdir}"
+			ARCHIVE DESTINATION "${libdir}"
+			)
+endif()
+
+if(PREY)
+	add_library(preygame SHARED ${src_prey})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_prey})
+	#set_target_properties(quake4 PROPERTIES PREFIX "")
+	set_target_properties(preygame PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HUMANHEAD;HUMANHEAD;_PREY")
+	target_include_directories(preygame PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/prey")
+	set_target_properties(preygame PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(preygame PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(preygame idlib_humanhead)
+
+	install(TARGETS preygame
 			RUNTIME DESTINATION "${bindir}"
 			LIBRARY DESTINATION "${libdir}"
 			ARCHIVE DESTINATION "${libdir}"

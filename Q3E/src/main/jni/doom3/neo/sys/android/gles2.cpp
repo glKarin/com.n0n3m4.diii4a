@@ -569,6 +569,12 @@ int GLES_Init(glimpParms_t ap)
 	glstring = (const char *) glGetString(GL_EXTENSIONS);
 	common->Printf("GL_EXTENSIONS: %s\n", glstring);
 
+	glstring = (const char *) glGetString(GL_VERSION);
+	common->Printf("GL_VERSION: %s\n", glstring);
+
+	glstring = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
+	common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glstring);
+
 	glConfig.isFullscreen = true;
 
 	if (glConfig.isFullscreen) {

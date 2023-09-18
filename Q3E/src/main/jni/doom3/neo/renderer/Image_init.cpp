@@ -977,6 +977,99 @@ void R_QuadraticImage(idImage *image)
 	                     TF_DEFAULT, false, TR_CLAMP, TD_HIGH_QUALITY);
 }
 
+#ifdef _SHADOW_MAPPING
+// RB begin
+static void R_CreateShadowMapImage_Res0( idImage* image )
+{
+	int size = shadowMapResolutions[0];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImage_Res1( idImage* image )
+{
+	int size = shadowMapResolutions[1];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImage_Res2( idImage* image )
+{
+	int size = shadowMapResolutions[2];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImage_Res3( idImage* image )
+{
+	int size = shadowMapResolutions[3];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImage_Res4( idImage* image )
+{
+	int size = shadowMapResolutions[4];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+static void R_CreateShadowMapCubeImage_Res0( idImage* image )
+{
+	int size = shadowMapResolutions[0];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapCubeImage_Res1( idImage* image )
+{
+	int size = shadowMapResolutions[1];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapCubeImage_Res2( idImage* image )
+{
+	int size = shadowMapResolutions[2];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapCubeImage_Res3( idImage* image )
+{
+	int size = shadowMapResolutions[3];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapCubeImage_Res4( idImage* image )
+{
+	int size = shadowMapResolutions[4];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapDepthImage_Res0( idImage* image )
+{
+    int size = shadowMapResolutions[0];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapDepthImage_Res1( idImage* image )
+{
+    int size = shadowMapResolutions[1];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapDepthImage_Res2( idImage* image )
+{
+    int size = shadowMapResolutions[2];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapDepthImage_Res3( idImage* image )
+{
+    int size = shadowMapResolutions[3];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapDepthImage_Res4( idImage* image )
+{
+    int size = shadowMapResolutions[4];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+// RB end
+#endif
+
 //=====================================================================
 
 
@@ -2192,6 +2285,26 @@ void idImageManager::Init()
 	cmdSystem->AddCommand("combineCubeImages", R_CombineCubeImages_f, CMD_FL_RENDERER, "combines six images for roq compression");
 
 	// should forceLoadImages be here?
+#ifdef _SHADOW_MAPPING
+	// RB begin
+	shadowImage[0] = ImageFromFunction( va( "_shadowMap0_%i", shadowMapResolutions[0] ), R_CreateShadowMapImage_Res0 );
+	shadowImage[1] = ImageFromFunction( va( "_shadowMap1_%i", shadowMapResolutions[1] ), R_CreateShadowMapImage_Res1 );
+	shadowImage[2] = ImageFromFunction( va( "_shadowMap2_%i", shadowMapResolutions[2] ), R_CreateShadowMapImage_Res2 );
+	shadowImage[3] = ImageFromFunction( va( "_shadowMap3_%i", shadowMapResolutions[3] ), R_CreateShadowMapImage_Res3 );
+	shadowImage[4] = ImageFromFunction( va( "_shadowMap4_%i", shadowMapResolutions[4] ), R_CreateShadowMapImage_Res4 );
+	// RB end
+	shadowCubeImage[0] = ImageFromFunction( va( "_shadowMapCube0_%i", shadowMapResolutions[0] ), R_CreateShadowMapCubeImage_Res0 );
+	shadowCubeImage[1] = ImageFromFunction( va( "_shadowMapCube1_%i", shadowMapResolutions[1] ), R_CreateShadowMapCubeImage_Res1 );
+	shadowCubeImage[2] = ImageFromFunction( va( "_shadowMapCube2_%i", shadowMapResolutions[2] ), R_CreateShadowMapCubeImage_Res2 );
+	shadowCubeImage[3] = ImageFromFunction( va( "_shadowMapCube3_%i", shadowMapResolutions[3] ), R_CreateShadowMapCubeImage_Res3 );
+	shadowCubeImage[4] = ImageFromFunction( va( "_shadowMapCube4_%i", shadowMapResolutions[4] ), R_CreateShadowMapCubeImage_Res4 );
+
+    shadowDepthImage[0] = ImageFromFunction( va( "_shadowMapDepth0_%i", shadowMapResolutions[0] ), R_CreateShadowMapDepthImage_Res0 );
+    shadowDepthImage[1] = ImageFromFunction( va( "_shadowMapDepth1_%i", shadowMapResolutions[1] ), R_CreateShadowMapDepthImage_Res1 );
+    shadowDepthImage[2] = ImageFromFunction( va( "_shadowMapDepth2_%i", shadowMapResolutions[2] ), R_CreateShadowMapDepthImage_Res2 );
+    shadowDepthImage[3] = ImageFromFunction( va( "_shadowMapDepth3_%i", shadowMapResolutions[3] ), R_CreateShadowMapDepthImage_Res3 );
+    shadowDepthImage[4] = ImageFromFunction( va( "_shadowMapDepth4_%i", shadowMapResolutions[4] ), R_CreateShadowMapDepthImage_Res4 );
+#endif
 }
 
 /*

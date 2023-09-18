@@ -206,7 +206,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
 					android:text="@string/hardcorps_hardcorps"/>
-				<RadioButton
+				<!--<RadioButton
 					android:id="@+id/fs_game_overthinked"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -216,6 +216,11 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="@string/sabot_sabot"/>
+				<RadioButton
+					android:id="@+id/fs_game_hexeneoc"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/hexen_edge_of_chaos_hexeneoc"/>-->
 			</RadioGroup>
 
             <RadioGroup
@@ -271,16 +276,14 @@
 						android:hint="@string/input_your_mod_folder_name"
 						android:imeOptions="flagNoExtractUi"
 						android:inputType="textNoSuggestions">
-
 					</EditText>
 
 					<Button
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:id="@+id/launcher_tab1_game_lib_button"
+						android:id="@+id/launcher_tab1_game_mod_button"
 						android:textAllCaps="false"
-						android:text="@string/gamelib">
-
+						android:text="@string/chooser">
 					</Button>
 
 				</LinearLayout>
@@ -315,7 +318,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/launcher_interaction_shader_lightmodel"
 				android:layout_marginTop="1dp"
 				android:layout_marginBottom="1dp"
                 android:text="@string/light_model_cvar_harm_r_lightmodel"/>
@@ -393,10 +395,38 @@
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:layout_marginTop="1dp"
+				android:layout_marginBottom="1dp"
+				android:text="@string/shadow_cvar_r_useShadowMapping"/>
+			<RadioGroup
+				android:id="@+id/rg_harm_r_shadow"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				>
+
+				<RadioButton
+					android:id="@+id/rg_harm_r_shadow_stencil_volume"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:checked="true"
+					android:text="@string/shadow_volume"/>
+
+				<RadioButton
+					android:id="@+id/rg_harm_r_shadow_mapping"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/shadow_mapping"/>
+
+			</RadioGroup>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
 				android:id="@+id/launcher_s_driver"
 				android:layout_marginTop="1dp"
 				android:layout_marginBottom="1dp"
-				android:text="@string/sound_implementation"/>
+				android:text="@string/sound"/>
 
 			<RadioGroup
 				android:id="@+id/rg_s_driver"
@@ -432,12 +462,26 @@
 				android:layout_height="wrap_content"
 				android:text="@string/skip_intro"/>
 
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal">
 			<Button
 				android:id="@+id/launcher_tab1_edit_cvar"
-				android:layout_width="match_parent"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
+				android:layout_weight="0.5"
 				android:textAllCaps="false"
 				android:text="@string/edit_cvar"/>
+			<Button
+				android:id="@+id/launcher_tab1_game_lib_button"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="0.5"
+				android:textAllCaps="false"
+				android:text="@string/gamelib"/>
+		</LinearLayout>
 
 			<LinearLayout
 				android:layout_width="match_parent"

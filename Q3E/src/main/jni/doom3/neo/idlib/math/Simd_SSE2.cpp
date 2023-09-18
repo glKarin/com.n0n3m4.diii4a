@@ -155,7 +155,6 @@ void VPCALL idSIMD_SSE2::CmpLT(byte *dst, const byte bitNum, const float *src0, 
 		}
 	} else {
 		/* aligned memory access */
-//k 64
 		aligned = (float *)((((ptrdiff_t) src0) + 15) & ~15);
 
 		if ((ptrdiff_t)aligned > ((ptrdiff_t)src0) + count) {
@@ -270,7 +269,6 @@ void VPCALL idSIMD_SSE2::CmpLT(byte *dst, const byte bitNum, const float *src0, 
 ALIGN8_INIT1(unsigned short SIMD_W_zero, 0);
 ALIGN8_INIT1(unsigned short SIMD_W_maxShort, 1<<15);
 
-//k 64
 ALIGN4_INIT4(unsigned int SIMD_SP_singleSignBitMask, (unsigned int)(1 << 31), 0, 0, 0);
 ALIGN4_INIT1(unsigned int SIMD_SP_signBitMask, (unsigned int)(1 << 31));
 ALIGN4_INIT1(unsigned int SIMD_SP_absMask, (unsigned int) ~(1 << 31));

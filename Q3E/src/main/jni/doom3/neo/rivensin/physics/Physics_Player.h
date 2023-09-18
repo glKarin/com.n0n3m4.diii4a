@@ -179,7 +179,7 @@ private:
 	//bool					animMoveUseGravity;
 
 	//k double-jump
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 	bool					doubleJumpDone;
 	bool					doubleJumpEnabled; 
 	int						nextDoubleJump;

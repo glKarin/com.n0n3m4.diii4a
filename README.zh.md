@@ -38,8 +38,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ###### 运行掠食(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). 目前可以运行全部关卡, 部分关卡存在bug.
 > 1. 将PC端掠食(2006)游戏文件放到`preybase`文件夹, 然后直接启动游戏.
 > 2. 已知问题的解决方案: 例如. 使用cvar `harm_g_translateAlienFont`自动翻译GUI中的外星人文字.
-> 3. 已知bugs: 例如一些错误的碰撞检测(使用`noclip`), 部分菜单的渲染, 部分GUI不工作(RoadHouse的CD播放器).
-> 4. 由于选项卡窗口UI组件暂不支持, 导致设置页面不工作, 必须通过编辑`preyconfig.cfg`来绑定额外按键.
+> 3. 已知bugs: 例如一些错误的碰撞检测(使用`noclip`), 部分GUI不工作(RoadHouse的CD播放器).
+> 4. 如果设置页面不工作, 可以通过编辑`preyconfig.cfg`来绑定额外按键.
 > > * bind "幽灵行走按键" "_impulse54"
 > > * bind "武器第2攻击键" "_attackAlt"
 > > * bind "打火机开关键" "_impulse16"

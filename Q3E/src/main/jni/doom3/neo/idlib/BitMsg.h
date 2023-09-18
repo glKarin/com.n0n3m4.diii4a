@@ -82,12 +82,12 @@ class idBitMsg
 		void			WriteShort(int c);
 		void			WriteUShort(int c);
 		void			WriteLong(int c);
-#if (defined(_RIVENSIN) || defined(_HARDCORPS))
+// #if (defined(_RIVENSIN) || defined(_HARDCORPS))
 		void			WriteInt(int c);
 		int				ReadInt(void) const;
 		void			WriteDeltaInt(int oldValue, int newValue);
 		int				ReadDeltaInt(int oldValue) const;
-#endif
+// #endif
 		void			WriteFloat(float f);
 		void			WriteFloat(float f, int exponentBits, int mantissaBits);
 		void			WriteAngle8(float f);
@@ -543,12 +543,12 @@ class idBitMsgDelta
 		void			WriteShort(int c);
 		void			WriteUShort(int c);
 		void			WriteLong(int c);
-#if (defined(_RIVENSIN) || defined(_HARDCORPS))
+// #if (defined(_RIVENSIN) || defined(_HARDCORPS))
 		void			WriteInt(int c);
 		int				ReadInt(void) const;
 		void			WriteDeltaInt(int oldValue, int newValue);
 		int				ReadDeltaInt(int oldValue) const;
-#endif
+// #endif
 #ifdef _RAVEN
 // RAVEN BEGIN
 // abahr:
@@ -832,7 +832,7 @@ ID_INLINE float idBitMsgDelta::ReadDeltaFloat(float oldValue, int exponentBits, 
 	return idMath::BitsToFloat(newBits, exponentBits, mantissaBits);
 }
 
-#if (defined(_RIVENSIN) || defined(_HARDCORPS))
+// #if (defined(_RIVENSIN) || defined(_HARDCORPS))
 ID_INLINE void idBitMsg::WriteInt(int c)
 {
 	WriteBits(c, 32);
@@ -873,7 +873,7 @@ ID_INLINE int idBitMsgDelta::ReadDeltaInt(int oldValue) const
 	return ReadDelta(oldValue, 32);
 }
 
-#endif
+// #endif
 
 #ifdef _RAVEN
 

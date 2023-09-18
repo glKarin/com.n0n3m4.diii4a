@@ -213,7 +213,7 @@ void Sys_DestroyThread(xthreadInfo &info)
 	// the target thread must have a cancelation point, otherwise pthread_cancel is useless
 	assert(info.threadHandle);
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	info.threadCancel = true;
 #else
 	if (pthread_cancel((pthread_t)info.threadHandle) != 0) {

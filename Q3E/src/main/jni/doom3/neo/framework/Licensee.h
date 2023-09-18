@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GAME_ICON						"q4icon.bmp"
 
 #include "../raven/sys/AutoVersion.h"
-#define ENGINE_VERSION					"Quake " VERSION_STRING_DOTTED // "DOOM 1.3.1"	// printed in console
+#define ENGINE_VERSION					"Quake4 " VERSION_STRING_DOTTED // "DOOM 1.3.1"	// printed in console
 
 // jnewquist: build type
 #if defined(_DEBUG)

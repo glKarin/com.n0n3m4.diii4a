@@ -825,12 +825,6 @@ int idPlayerView::AddWarp(idVec3 worldOrigin, float centerx, float centery, floa
 
 void idPlayerView::FreeWarp(int id)
 {
-    /*
-    #ifdef __ANDROID__ //k
-    if(harm_g_skipWarpVision.GetBool())
-    	return;
-    #endif
-    */
     FullscreenFX_Warp *fx = (FullscreenFX_Warp *)(fxManager->FindFX("warp"));
 
     if (fx)

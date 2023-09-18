@@ -404,6 +404,15 @@ viewLight_t *R_SetLightDefViewLight(idRenderLightLocal *light)
 	// link the view light
 	vLight->next = tr.viewDef->viewLights;
 	tr.viewDef->viewLights = vLight;
+#ifdef _SHADOW_MAPPING
+    memcpy(vLight->baseLightProject, light->baseLightProject, sizeof(light->baseLightProject));
+	memcpy(vLight->inverseBaseLightProject, light->inverseBaseLightProject, sizeof(light->inverseBaseLightProject));
+    vLight->pointLight = light->parms.pointLight;
+    vLight->parallel = light->parms.parallel;
+    vLight->lightCenter = light->parms.lightCenter;
+	vLight->shadowLOD = 0;
+	R_SetupShadowMappingLOD(light, vLight);
+#endif
 
 	light->viewLight = vLight;
 

@@ -38,7 +38,6 @@ typedef unsigned char *POINTER;
 typedef unsigned short int UINT2;
 
 /* UINT4 defines a four byte word */
-//k 64
 typedef unsigned int UINT4;
 
 /* MD4 context. */
@@ -251,7 +250,6 @@ void MD4_Final(MD4_CTX *context, unsigned char digest[16])
 MD4_BlockChecksum
 ===============
 */
-//k 64
 unsigned int MD4_BlockChecksum(const void *data, int length)
 {
 	unsigned int	digest[4];

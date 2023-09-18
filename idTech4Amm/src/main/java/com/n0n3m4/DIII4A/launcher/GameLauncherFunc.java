@@ -41,6 +41,24 @@ public abstract class GameLauncherFunc implements Runnable
             m_callback.run();
     }
 
+    protected void Callback(String result)
+    {
+        SetResult(result);
+        Callback();
+    }
+
+    protected void Callback(boolean result)
+    {
+        SetResult(result);
+        Callback();
+    }
+
+    protected void Callback(Parcelable result)
+    {
+        SetResult(result);
+        Callback();
+    }
+
     public void Start(Bundle data)
     {
         m_data = data;

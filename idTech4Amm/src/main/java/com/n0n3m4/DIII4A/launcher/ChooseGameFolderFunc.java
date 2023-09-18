@@ -83,6 +83,14 @@ public final class ChooseGameFolderFunc extends GameLauncherFunc
                 Callback();
             }
         });
+        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, Q3ELang.tr(m_gameLauncher, R.string.reset), new AlertDialog.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SetResult(m_gameLauncher.GetDefaultGameDirectory());
+                dialog.dismiss();
+                Callback();
+            }
+        });
 
         dialog.show();
     }

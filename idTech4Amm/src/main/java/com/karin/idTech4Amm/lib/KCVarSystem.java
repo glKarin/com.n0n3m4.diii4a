@@ -94,7 +94,9 @@ public final class KCVarSystem
     public static List<KCVar.Group> Match(String game)
     {
         Map<String, KCVar.Group> _cvars = CVars();
-        if(null == game || game.isEmpty())
+        if(null == game || game.isEmpty()
+                || !_cvars.containsKey(game)
+        )
         {
             if(Q3EUtils.q3ei.isPrey)
                 return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("preybase"));

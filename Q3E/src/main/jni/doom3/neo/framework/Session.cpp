@@ -2976,7 +2976,7 @@ void idSessionLocal::Draw()
 		console->Draw(false);
 	}
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	Sys_SyncState();
 #endif
 }

@@ -35,7 +35,7 @@
     <string name="blinn_phong">Blinn-Phong</string>
     <string name="specular_exponent_cvar_harm_r_specularexponent">镜面反射指数(cvar `harm_r_specularExponent`):</string>
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">光照下镜面反射指数(默认 4.0)</string>
-    <string name="sound_implementation">音频实现</string>
+    <string name="sound">音频</string>
     <string name="load_quicksave_when_start_game">启动游戏时自动加载快速存档</string>
     <string name="edit_autoexec_cfg">编辑 autoexec.cfg</string>
     <string name="edit_doomconfig_cfg">编辑 DoomConfig.cfg</string>
@@ -112,6 +112,7 @@
     <string name="screen">屏幕</string>
     <string name="hide_navigation_bar">隐藏导航栏</string>
     <string name="hide_navigation_bar_in_game">游戏时隐藏导航栏</string>
+    <string name="hide_ad_bar_in_launcher">隐藏启动器底部广告栏</string>
     <string name="cover_screen_edges">覆盖屏幕刘海</string>
     <string name="game">游戏</string>
     <string name="general">通用</string>
@@ -244,11 +245,19 @@
     <string name="extract_source">提取源码</string>
     <string name="tips">提示</string>
     <string name="license">开源许可证</string>
-    <string name="maximum_fps_limit_0_unlimited">最大FPS(0 不限制)</string>
-    <string name="limit_maximum_fps_default_is_0">限制最大FPS(默认0)</string>
+    <string name="maximum_fps_limit_0_unlimited">最大FPS(cvar `harm_r_maxFPS`)</string>
+    <string name="limit_maximum_fps_default_is_0">限制最大FPS(0 不限制)</string>
     <string name="edit_cvar">编辑CVar</string>
     <string name="cvar_editor">CVar编辑器</string>
     <string name="skip_intro">跳过启动介绍</string>
     <string name="overthinked_overthinked">Overthinked(overthinked)</string>
     <string name="sabot_sabot">SABot(sabot)</string>
+    <string name="hexen_edge_of_chaos_hexeneoc">Hexen: Edge of Chaos(hexeneoc)</string>
+    <string name="load_game_mod_list">加载游戏mod列表</string>
+    <string name="mod">mod</string>
+    <string name="view">查看</string>
+    <string name="scale_by_screen_area">如果使用比例, 则按屏幕面积的比例而不是宽高比例</string>
+    <string name="shadow_cvar_r_useShadowMapping">阴影(cvar `r_useShadowMapping`)</string>
+    <string name="shadow_volume">Shadow volume</string>
+    <string name="shadow_mapping">Shadow mapping</string>
 </resources>

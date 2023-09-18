@@ -252,7 +252,6 @@ idDict::Checksum
 */
 int	idDict::Checksum(void) const
 {
-	//k 64
 	unsigned int ret;
 	int i, n;
 

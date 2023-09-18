@@ -98,8 +98,9 @@ public final class Q3EGlobals
             "rivensin",
             "hardcorps",
 
-            "overthinked",
+            /*"overthinked",
             "sabot",
+            "hexeneoc",*/
     };
     public static final String[] Q4_LIBS = {
             "q4game",
