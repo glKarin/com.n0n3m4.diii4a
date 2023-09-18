@@ -7,7 +7,7 @@
     <string name="commandline">Команды:</string>
     <string name="game_working_directory">Путь к игровым файлам:</string>
     <string name="chooser">Выбрать</string>
-    <string name="disable_lighting">Отключить освящение в игре</string>
+    <string name="disable_lighting">Отключить освещение в игре</string>
     <string name="use_dxt_textures_tegra_only_others_no_effect">Использовать DXT текстуры (Работает только на Tegra)</string>
     <string name="use_etc1_or_rgba4444_compression">Использовать ETC1 (или RGBA4444) сжатие</string>
     <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">Очистить буфер вершин(cvar `harm_r_clearVertexBuffer`)</string>
