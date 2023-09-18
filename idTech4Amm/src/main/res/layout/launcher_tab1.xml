@@ -397,7 +397,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginTop="1dp"
 				android:layout_marginBottom="1dp"
-				android:text="Shadow(cvar `r_useShadowMapping`)"/>
+				android:text="@string/shadow_cvar_r_useShadowMapping"/>
 			<RadioGroup
 				android:id="@+id/rg_harm_r_shadow"
 				android:layout_width="wrap_content"
@@ -410,13 +410,13 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:checked="true"
-					android:text="Shadow volume"/>
+					android:text="@string/shadow_volume"/>
 
 				<RadioButton
 					android:id="@+id/rg_harm_r_shadow_mapping"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Shadow mapping"/>
+					android:text="@string/shadow_mapping"/>
 
 			</RadioGroup>
 
@@ -426,7 +426,7 @@
 				android:id="@+id/launcher_s_driver"
 				android:layout_marginTop="1dp"
 				android:layout_marginBottom="1dp"
-				android:text="@string/sound_implementation"/>
+				android:text="@string/sound"/>
 
 			<RadioGroup
 				android:id="@+id/rg_s_driver"
