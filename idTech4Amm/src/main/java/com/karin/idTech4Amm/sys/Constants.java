@@ -32,7 +32,7 @@ public final class Constants
             "Support obj/dae static model, and fix png image load.",
             "Support max FPS limit(cvar `harm_r_maxFPS`).",
             "Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).",
-            "Add shadow mapping support(testing, has some incorrect rendering, only support point-lighting), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow volume`.",
+            "Add GLES2 shadow mapping support(testing, has some incorrect rendering, only support point-lighting), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow volume`.",
             "Fix Setting's tab GUI in Prey2006."
 	};
 

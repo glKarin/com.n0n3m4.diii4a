@@ -39,6 +39,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
+#ifndef EGL_OPENGL_ES3_BIT
+#define EGL_OPENGL_ES3_BIT EGL_OPENGL_ES3_BIT_KHR
+#endif
 idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
                     "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
 
@@ -53,6 +56,7 @@ static EGLContext eglContext = EGL_NO_CONTEXT;
 static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+
 
 static void GLimp_HandleError(const char *func, bool exit = true)
 {
@@ -171,6 +175,48 @@ void GLimp_DeactivateContext()
 	eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 }
 
+#include <dlfcn.h>
+static void *glHandle = NULL;
+#define QGLPROC(name, rettype, args) rettype (GL_APIENTRYP q##name) args;
+#include "../../renderer/qgl_proc.h"
+#undef QGLPROC
+
+static void R_LoadOpenGLFunc()
+{
+#define QGLPROC(name, rettype, args) \
+	q##name = (rettype(GL_APIENTRYP)args)GLimp_ExtensionPointer(#name); \
+	if (!q##name) \
+		common->FatalError("Unable to initialize OpenGL (%s)", #name);
+
+#include "../../renderer/qgl_proc.h"
+}
+
+static bool GLimp_dlopen()
+{
+	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */(
+			gl_version == 0x00030000 ? "libGLESv3.so" : "libGLESv2.so"
+			);
+	common->Printf("dlopen(%s)\n", driverName);
+	if ( !( glHandle = dlopen( driverName, RTLD_NOW | RTLD_GLOBAL ) ) ) {
+		common->Printf("dlopen(%s) failed: %s\n", driverName, dlerror());
+		return false;
+	}
+	R_LoadOpenGLFunc();
+	common->Printf("dlopen(%s) done\n", driverName);
+	return true;
+}
+
+static void GLimp_dlclose()
+{
+	if ( !glHandle ) {
+		common->Printf("dlclose: GL handle is NULL\n");
+	} else {
+		common->Printf("dlclose(%s) done\n", glHandle);
+		dlclose( glHandle );
+		glHandle = NULL;
+	}
+}
+
 /*
 =================
 GLimp_SaveGamma
@@ -225,6 +271,8 @@ void GLimp_Shutdown()
 		eglTerminate(eglDisplay);
 		eglDisplay = EGL_NO_DISPLAY;
 	}
+	GLimp_dlclose();
+
 	Sys_Printf("[Harmattan]: EGL destroyed.\n");
 }
 
@@ -315,7 +363,7 @@ static bool GLES_Init_special(void)
 			EGL_STENCIL_SIZE, stencil_bits,
 			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
 			EGL_SAMPLES, gl_msaa,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+            EGL_RENDERABLE_TYPE, gl_version == 0x00020000 ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_ES3_BIT,
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_NONE,
     };
@@ -479,7 +527,6 @@ int GLES_Init(glimpParms_t ap)
 	unsigned long mask;
 	int actualWidth, actualHeight;
 	int i;
-	const char *glstring;
 	EGLint major, minor;
 	EGLint stencil_bits;
 	EGLint depth_bits;
@@ -563,18 +610,6 @@ int GLES_Init(glimpParms_t ap)
 	glConfig.depthBits = depth_bits;
 	glConfig.stencilBits = stencil_bits;
 
-	glstring = (const char *) glGetString(GL_RENDERER);
-	common->Printf("GL_RENDERER: %s\n", glstring);
-
-	glstring = (const char *) glGetString(GL_EXTENSIONS);
-	common->Printf("GL_EXTENSIONS: %s\n", glstring);
-
-	glstring = (const char *) glGetString(GL_VERSION);
-	common->Printf("GL_VERSION: %s\n", glstring);
-
-	glstring = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
-	common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glstring);
-
 	glConfig.isFullscreen = true;
 
 	if (glConfig.isFullscreen) {
@@ -609,6 +644,22 @@ bool GLimp_Init(glimpParms_t a)
 	if (!GLES_Init(a)) {
 		return false;
 	}
+
+	// load qgl function pointers
+	GLimp_dlopen();
+
+	const char *glstring;
+	glstring = (const char *) qglGetString(GL_RENDERER);
+	common->Printf("GL_RENDERER: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_EXTENSIONS);
+	common->Printf("GL_EXTENSIONS: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_VERSION);
+	common->Printf("GL_VERSION: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_SHADING_LANGUAGE_VERSION);
+	common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glstring);
 
 	//has_gl_context = true;
 	return true;

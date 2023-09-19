@@ -31,14 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-#if !defined(GL_ES_VERSION_2_0)
-#define glBindBuffer	glBindBufferARB
-#define glBufferData	glBufferDataARB
-
-#define GL_ARRAY_BUFFER	GL_ARRAY_BUFFER_ARB
-#define GL_DYNAMIC_DRAW	GL_DYNAMIC_DRAW_ARB
-#endif
-
 #ifdef _MULTITHREAD
 #define _VBO_IS_VALID != -1
 #define _VBO_IS_INVALID == -1
@@ -108,8 +100,8 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 		if (block->vbo _VBO_IS_VALID) {
 #if 0		// this isn't really necessary, it will be reused soon enough
 			// filling with zero length data is the equivalent of freeing
-			glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-			glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
+			qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+			qglBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
 #endif
 			// k
 			int clearVBO = harm_r_clearVertexBuffer.GetInteger();
@@ -117,20 +109,20 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 			{ // clear vertex buffer on graphics memory.
 				if(block->indexBuffer)
 				{
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
-					glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW); // GL_DYNAMIC_DRAW
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+					qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+					qglBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW); // GL_DYNAMIC_DRAW
+					qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 				}
 				else
 				{
-					glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-					glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW); // GL_DYNAMIC_DRAW
-					glBindBuffer(GL_ARRAY_BUFFER, 0);
+					qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+					qglBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW); // GL_DYNAMIC_DRAW
+					qglBindBuffer(GL_ARRAY_BUFFER, 0);
 				}
 #ifdef _MULTITHREAD
 				if(!multithreadActive && clearVBO == 2)
 #endif
-				glDeleteBuffers(1, &block->vbo);
+				qglDeleteBuffers(1, &block->vbo);
 			}
 		} else if (block->virtMem) {
 			Mem_Free(block->virtMem);
@@ -195,7 +187,7 @@ void *idVertexCache::Position(vertCache_t *buffer)
 	// Create VBO if does not exist
 	if(multithreadActive && buffer->vbo _VBO_IS_INVALID)
 	{
-		glGenBuffers(1, &buffer->vbo);
+		qglGenBuffers(1, &buffer->vbo);
     }
 #endif
 	// the vertex object just uses an offset
@@ -209,18 +201,18 @@ void *idVertexCache::Position(vertCache_t *buffer)
 		}
 
 		if (buffer->indexBuffer) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->vbo);
+			qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->vbo);
 		} else {
-			glBindBuffer(GL_ARRAY_BUFFER, buffer->vbo);
+			qglBindBuffer(GL_ARRAY_BUFFER, buffer->vbo);
 		}
 
 #ifdef _MULTITHREAD
 		// Update any new data
 		if (multithreadActive && buffer->virtMemDirty){
 			if (buffer->indexBuffer) {
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer->size, buffer->virtMem, GL_STATIC_DRAW);
+				qglBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer->size, buffer->virtMem, GL_STATIC_DRAW);
 			} else {
-				glBufferData(GL_ARRAY_BUFFER, buffer->size, buffer->virtMem, GL_STATIC_DRAW);
+				qglBufferData(GL_ARRAY_BUFFER, buffer->size, buffer->virtMem, GL_STATIC_DRAW);
 			}
 			buffer->virtMemDirty = false;
 		}
@@ -234,7 +226,7 @@ void *idVertexCache::Position(vertCache_t *buffer)
 
 void idVertexCache::UnbindIndex()
 {
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 
@@ -385,7 +377,7 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 			}
 			else
 #endif
-			glGenBuffers(1, & block->vbo);
+			qglGenBuffers(1, & block->vbo);
 		}
 	}
 
@@ -426,9 +418,9 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 		{
 			block->virtMem = Mem_Alloc(size);
 			block->virtMemDirty = false;
-			glGenBuffers(1, &block->vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-			glBufferData(GL_ARRAY_BUFFER, (GLsizei)size, 0, GL_STREAM_DRAW);
+			qglGenBuffers(1, &block->vbo);
+			qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+			qglBufferData(GL_ARRAY_BUFFER, (GLsizei)size, 0, GL_STREAM_DRAW);
 		}
 		else
 		{
@@ -444,15 +436,15 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 	// copy the data
 	if (block->vbo _VBO_IS_VALID) {
 		if (indexBuffer) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
+			qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+			qglBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
 		} else {
-			glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+			qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
 
 			if (allocatingTempBuffer) {
-				glBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STREAM_DRAW);
+				qglBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STREAM_DRAW);
 			} else {
-				glBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
+				qglBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
 			}
 		}
 	} else {
@@ -603,8 +595,8 @@ vertCache_t	*idVertexCache::AllocFrameTemp(void *data, int size)
 	block->vbo = tempBuffers[listNum]->vbo;
 
 	if (block->vbo _VBO_IS_VALID) {
-		glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, block->offset, (GLsizei)size, data);
+		qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+		qglBufferSubData(GL_ARRAY_BUFFER, block->offset, (GLsizei)size, data);
 	} else {
 		SIMDProcessor->Memcpy((byte *)block->virtMem + block->offset, data, size);
 	}
@@ -656,8 +648,8 @@ void idVertexCache::EndFrame()
 	{
 #endif
 	// unbind vertex buffers
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	qglBindBuffer(GL_ARRAY_BUFFER, 0);
+	qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 #ifdef _MULTITHREAD
 	}
 	//renderFrame = currentFrame;
@@ -753,8 +745,8 @@ void  idVertexCache::BeginBackEnd(int which)
 	// Transfer current frame temp data to GPU
 	if(multithreadActive)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, tempBuffers[which]->vbo);
-		glBufferData(GL_ARRAY_BUFFER, dynamicAllocThisFrames[which], tempBuffers[which]->virtMem, GL_STREAM_DRAW);
+		qglBindBuffer(GL_ARRAY_BUFFER, tempBuffers[which]->vbo);
+		qglBufferData(GL_ARRAY_BUFFER, dynamicAllocThisFrames[which], tempBuffers[which]->virtMem, GL_STREAM_DRAW);
 		//render_frame = which;
 	}
 }
@@ -771,19 +763,19 @@ void idVertexCache::EndBackEnd(int which)
 				if (block->vbo _VBO_IS_VALID) {
 					if(block->indexBuffer)
 					{
-						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
-						glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
-						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+						qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+						qglBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
+						qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 					}
 					else
 					{
-						glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-						glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
-						glBindBuffer(GL_ARRAY_BUFFER, 0);
+						qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+						qglBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
+						qglBindBuffer(GL_ARRAY_BUFFER, 0);
 					}
 					if(clearVBO == 2)
 					{
-						glDeleteBuffers(1, &block->vbo);
+						qglDeleteBuffers(1, &block->vbo);
 						block->vbo = -1;
 					}
 				}
@@ -809,15 +801,15 @@ vertCache_t* idVertexCache::CreateTempVbo(int bytes, bool indexBuffer)
 
 	block->virtMem = Mem_Alloc(bytes);
 
-	glGenBuffers(1, &block->vbo);
+	qglGenBuffers(1, &block->vbo);
 
 	if (indexBuffer) {
-	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
-	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)bytes, 0, GL_STREAM_DRAW);
+	    qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+	    qglBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)bytes, 0, GL_STREAM_DRAW);
 	}
 	else{
-	    glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-	    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)bytes, 0, GL_STREAM_DRAW);
+	    qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+	    qglBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)bytes, 0, GL_STREAM_DRAW);
 	}
 
 	return block;

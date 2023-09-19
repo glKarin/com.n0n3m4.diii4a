@@ -57,49 +57,49 @@ void RB_SetDefaultGLState(void)
 
 	GL_UseProgram(NULL);
 
-	glClearDepthf(1.0f);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	qglClearDepthf(1.0f);
+	qglClear(GL_DEPTH_BUFFER_BIT);
 #if !defined(GL_ES_VERSION_2_0)
 	glColor4f(1,1,1,1);
 #endif
 
-	glColorMask(1, 1, 1, 1);
+	qglColorMask(1, 1, 1, 1);
 
-	glEnable(GL_DEPTH_TEST);
+	qglEnable(GL_DEPTH_TEST);
 
-	glEnable(GL_BLEND);
-	glDisable(GL_DITHER);
-	glEnable(GL_SCISSOR_TEST);
-	glEnable(GL_CULL_FACE);
+	qglEnable(GL_BLEND);
+	qglDisable(GL_DITHER);
+	qglEnable(GL_SCISSOR_TEST);
+	qglEnable(GL_CULL_FACE);
 #if !defined(GL_ES_VERSION_2_0)
-	glDisable(GL_LIGHTING);
+	qglDisable(GL_LIGHTING);
 #endif
-	glDisable(GL_STENCIL_TEST);
+	qglDisable(GL_STENCIL_TEST);
 
-	glDepthMask(GL_TRUE);
-	glDepthFunc(GL_ALWAYS);
+	qglDepthMask(GL_TRUE);
+	qglDepthFunc(GL_ALWAYS);
 
-	glCullFace(GL_FRONT_AND_BACK);
+	qglCullFace(GL_FRONT_AND_BACK);
 #if !defined(GL_ES_VERSION_2_0)
-	glShadeModel(GL_SMOOTH);
+	qglShadeModel(GL_SMOOTH);
 #endif
 
 	if (r_useScissor.GetBool()) {
-		glScissor(0, 0, glConfig.vidWidth, glConfig.vidHeight);
+		qglScissor(0, 0, glConfig.vidWidth, glConfig.vidHeight);
 	}
 
 #if !defined(GL_ES_VERSION_2_0)
 	for (i = glConfig.maxTextureUnits - 1 ; i >= 0 ; i--) {
 		GL_SelectTexture(i);
 
-		glDisable(GL_TEXTURE_2D);
+		qglDisable(GL_TEXTURE_2D);
 
 		if (glConfig.texture3DAvailable) {
-			glDisable(GL_TEXTURE_3D);
+			qglDisable(GL_TEXTURE_3D);
 		}
 
 		if (glConfig.cubeMapAvailable) {
-			glDisable(GL_TEXTURE_CUBE_MAP);
+			qglDisable(GL_TEXTURE_CUBE_MAP);
 		}
 	}
 #endif
@@ -148,11 +148,11 @@ void GL_SelectTexture(int unit)
 	}
 #endif
 
-	glActiveTexture(GL_TEXTURE0 + unit);
+	qglActiveTexture(GL_TEXTURE0 + unit);
 #if !defined(GL_ES_VERSION_2_0)
-	glClientActiveTexture(GL_TEXTURE0 + unit);
+	qglClientActiveTexture(GL_TEXTURE0 + unit);
 #endif
-	RB_LogComment("glActiveTextureARB( %i );\nglClientActiveTextureARB( %i );\n", unit, unit);
+	RB_LogComment("qglActiveTextureARB( %i );\nglClientActiveTextureARB( %i );\n", unit, unit);
 
 	backEnd.glState.currenttmu = unit;
 }
@@ -172,7 +172,7 @@ void GL_UseProgram(shaderProgram_t *program)
 	RB_LogComment("Last shader program: %s, %p\n", backEnd.glState.currentProgram ? backEnd.glState.currentProgram->name : "NULL", backEnd.glState.currentProgram);
 	RB_LogComment("Current shader program: %s, %p\n", program ? program->name : "NULL", program);
 #endif
-	glUseProgram(program ? program->program : 0);
+	qglUseProgram(program ? program->program : 0);
 	backEnd.glState.currentProgram = program;
 
 	GL_CheckErrors();
@@ -191,7 +191,7 @@ void GL_Uniform1fv(GLint location, const GLfloat *value)
 		return;
 	}
 
-	glUniform1fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
+	qglUniform1fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
 	GL_CheckErrors();
 }
@@ -209,7 +209,7 @@ void GL_Uniform4fv(GLint location, const GLfloat *value)
 		return;
 	}
 
-	glUniform4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
+	qglUniform4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
 	GL_CheckErrors();
 }
@@ -227,7 +227,7 @@ void GL_Uniform3fv(GLint location, const GLfloat *value)
 		return;
 	}
 
-	glUniform3fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
+	qglUniform3fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
 	GL_CheckErrors();
 }
@@ -245,7 +245,7 @@ void GL_UniformMatrix4fv(GLint location, const GLfloat *value)
 		return;
 	}
 
-	glUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, GL_FALSE, value);
+	qglUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, GL_FALSE, value);
 
 	GL_CheckErrors();
 }
@@ -263,7 +263,7 @@ void GL_Uniform1f(GLint location, GLfloat value)
 		return;
 	}
 
-	glUniform1f(*(GLint *)((char *)backEnd.glState.currentProgram + location), value);
+	qglUniform1f(*(GLint *)((char *)backEnd.glState.currentProgram + location), value);
 
 	GL_CheckErrors();
 }
@@ -290,8 +290,8 @@ void GL_EnableVertexAttribArray(GLuint index)
 		return;
 	}
 
-	//RB_LogComment("glEnableVertexAttribArray( %i );\n", index);
-	glEnableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
+	//RB_LogComment("qglEnableVertexAttribArray( %i );\n", index);
+	qglEnableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
 
 	GL_CheckErrors();
 }
@@ -318,7 +318,7 @@ void GL_DisableVertexAttribArray(GLuint index)
 		return;
 	}
 
-	glDisableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
+	qglDisableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
 
 	GL_CheckErrors();
 }
@@ -344,8 +344,8 @@ void GL_VertexAttribPointer(GLuint index, GLint size, GLenum type,
 		return;
 	}
 
-	// RB_LogComment("glVertexAttribPointer( %i, %i, %i, %i, %i, %p );\n", index, size, type, normalized, stride, pointer);
-	glVertexAttribPointer(*(GLint *)((char *)backEnd.glState.currentProgram + index),
+	// RB_LogComment("qglVertexAttribPointer( %i, %i, %i, %i, %i, %p );\n", index, size, type, normalized, stride, pointer);
+	qglVertexAttribPointer(*(GLint *)((char *)backEnd.glState.currentProgram + index),
 	                      size, type, normalized, stride, pointer);
 
 	GL_CheckErrors();
@@ -366,23 +366,23 @@ void GL_Cull(int cullType)
 	}
 
 	if (cullType == CT_TWO_SIDED) {
-		glDisable(GL_CULL_FACE);
+		qglDisable(GL_CULL_FACE);
 	} else  {
 		if (backEnd.glState.faceCulling == CT_TWO_SIDED) {
-			glEnable(GL_CULL_FACE);
+			qglEnable(GL_CULL_FACE);
 		}
 
 		if (cullType == CT_BACK_SIDED) {
 			if (backEnd.viewDef->isMirror) {
-				glCullFace(GL_FRONT);
+				qglCullFace(GL_FRONT);
 			} else {
-				glCullFace(GL_BACK);
+				qglCullFace(GL_BACK);
 			}
 		} else {
 			if (backEnd.viewDef->isMirror) {
-				glCullFace(GL_BACK);
+				qglCullFace(GL_BACK);
 			} else {
-				glCullFace(GL_FRONT);
+				qglCullFace(GL_FRONT);
 			}
 		}
 	}
@@ -432,11 +432,11 @@ void GL_State(int stateBits)
 	//
 	if (diff & (GLS_DEPTHFUNC_EQUAL | GLS_DEPTHFUNC_LESS | GLS_DEPTHFUNC_ALWAYS)) {
 		if (stateBits & GLS_DEPTHFUNC_EQUAL) {
-			glDepthFunc(GL_EQUAL);
+			qglDepthFunc(GL_EQUAL);
 		} else if (stateBits & GLS_DEPTHFUNC_ALWAYS) {
-			glDepthFunc(GL_ALWAYS);
+			qglDepthFunc(GL_ALWAYS);
 		} else {
-			glDepthFunc(GL_LEQUAL);
+			qglDepthFunc(GL_LEQUAL);
 		}
 	}
 
@@ -517,7 +517,7 @@ void GL_State(int stateBits)
 				break;
 		}
 
-		glBlendFunc(srcFactor, dstFactor);
+		qglBlendFunc(srcFactor, dstFactor);
 	}
 
 	//
@@ -525,9 +525,9 @@ void GL_State(int stateBits)
 	//
 	if (diff & GLS_DEPTHMASK) {
 		if (stateBits & GLS_DEPTHMASK) {
-			glDepthMask(GL_FALSE);
+			qglDepthMask(GL_FALSE);
 		} else {
-			glDepthMask(GL_TRUE);
+			qglDepthMask(GL_TRUE);
 		}
 	}
 
@@ -540,7 +540,7 @@ void GL_State(int stateBits)
 		g = (stateBits & GLS_GREENMASK) ? 0 : 1;
 		b = (stateBits & GLS_BLUEMASK) ? 0 : 1;
 		a = (stateBits & GLS_ALPHAMASK) ? 0 : 1;
-		glColorMask(r, g, b, a);
+		qglColorMask(r, g, b, a);
 	}
 
 	//
@@ -549,9 +549,9 @@ void GL_State(int stateBits)
 #if !defined(GL_ES_VERSION_2_0)
 	if (diff & GLS_POLYMODE_LINE) {
 		if (stateBits & GLS_POLYMODE_LINE) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 	}
 #endif
@@ -563,18 +563,18 @@ void GL_State(int stateBits)
 	if (diff & GLS_ATEST_BITS) {
 		switch (stateBits & GLS_ATEST_BITS) {
 			case 0:
-				glDisable(GL_ALPHA_TEST);
+				qglDisable(GL_ALPHA_TEST);
 				break;
 			case GLS_ATEST_EQ_255:
-				glEnable(GL_ALPHA_TEST);
+				qglEnable(GL_ALPHA_TEST);
 				glAlphaFunc(GL_EQUAL, 1);
 				break;
 			case GLS_ATEST_LT_128:
-				glEnable(GL_ALPHA_TEST);
+				qglEnable(GL_ALPHA_TEST);
 				glAlphaFunc(GL_LESS, 0.5);
 				break;
 			case GLS_ATEST_GE_128:
-				glEnable(GL_ALPHA_TEST);
+				qglEnable(GL_ALPHA_TEST);
 				glAlphaFunc(GL_GEQUAL, 0.5);
 				break;
 			default:
@@ -608,10 +608,10 @@ This is not used by the normal game paths, just by some tools
 void RB_SetGL2D(void)
 {
 	// set 2D virtual screen size
-	glViewport(0, 0, glConfig.vidWidth, glConfig.vidHeight);
+	qglViewport(0, 0, glConfig.vidWidth, glConfig.vidHeight);
 
 	if (r_useScissor.GetBool()) {
-		glScissor(0, 0, glConfig.vidWidth, glConfig.vidHeight);
+		qglScissor(0, 0, glConfig.vidWidth, glConfig.vidHeight);
 	}
 
 	// always assume 640x480 virtual coordinates
@@ -636,8 +636,8 @@ void RB_SetGL2D(void)
 
 	GL_Cull(CT_TWO_SIDED);
 
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_STENCIL_TEST);
+	qglDisable(GL_DEPTH_TEST);
+	qglDisable(GL_STENCIL_TEST);
 }
 
 
@@ -659,7 +659,7 @@ static void	RB_SetBuffer(const void *data)
 	backEnd.frameCount = cmd->frameCount;
 
 #if !defined(GL_ES_VERSION_2_0)
-	glDrawBuffer(cmd->buffer);
+	qglDrawBuffer(cmd->buffer);
 #endif
 
 	// clear screen for debugging
@@ -669,16 +669,16 @@ static void	RB_SetBuffer(const void *data)
 		float c[3];
 
 		if (sscanf(r_clear.GetString(), "%f %f %f", &c[0], &c[1], &c[2]) == 3) {
-			glClearColor(c[0], c[1], c[2], 1);
+			qglClearColor(c[0], c[1], c[2], 1);
 		} else if (r_clear.GetInteger() == 2) {
-			glClearColor(0.0f, 0.0f,  0.0f, 1.0f);
+			qglClearColor(0.0f, 0.0f,  0.0f, 1.0f);
 		} else if (r_showOverDraw.GetBool()) {
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		} else {
-			glClearColor(0.4f, 0.0f, 0.25f, 1.0f);
+			qglClearColor(0.4f, 0.0f, 0.25f, 1.0f);
 		}
 
-		glClear(GL_COLOR_BUFFER_BIT);
+		qglClear(GL_COLOR_BUFFER_BIT);
 	}
 }
 
@@ -700,10 +700,10 @@ void RB_ShowImages(void)
 
 	RB_SetGL2D();
 
-	//glClearColor( 0.2, 0.2, 0.2, 1 );
-	//glClear( GL_COLOR_BUFFER_BIT );
+	//qglClearColor( 0.2, 0.2, 0.2, 1 );
+	//qglClear( GL_COLOR_BUFFER_BIT );
 
-	glFinish();
+	qglFinish();
 
 	start = Sys_Milliseconds();
 
@@ -738,7 +738,7 @@ void RB_ShowImages(void)
 		glEnd();
 	}
 
-	glFinish();
+	qglFinish();
 
 	end = Sys_Milliseconds();
 	common->Printf("%i msec to draw all images\n", end - start);
@@ -761,7 +761,7 @@ const void	RB_SwapBuffers(const void *data)
 
 	// force a gl sync if requested
 	if (r_finish.GetBool()) {
-		glFinish();
+		qglFinish();
 	}
 
 	RB_LogComment("***************** RB_SwapBuffers *****************\n\n\n");
@@ -855,7 +855,7 @@ void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds)
 	}
 
 	// go back to the default texture so the editor doesn't mess up a bound image
-	glBindTexture(GL_TEXTURE_2D, 0);
+	qglBindTexture(GL_TEXTURE_2D, 0);
 	backEnd.glState.tmu[0].current2DMap = -1;
 
 	// stop rendering on this thread
@@ -905,7 +905,7 @@ void GL_UniformMatrix4fv(GLint location, const GLsizei n, const GLfloat *value)
 		return;
 	}
 
-	glUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), n, GL_FALSE, value);
+	qglUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), n, GL_FALSE, value);
 
 	GL_CheckErrors();
 }

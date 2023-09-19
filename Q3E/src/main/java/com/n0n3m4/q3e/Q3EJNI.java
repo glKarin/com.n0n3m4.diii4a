@@ -31,6 +31,7 @@ public class Q3EJNI {
                                    Surface view,
                                    int format, // 0x8888, 0x4444, 0x5551, 0x565
                                    int msaa, // 0, 4, 16
+                                   int glVersion, // 0x00020000, 0x00030000
                                    boolean redirect_output_to_file,
                                    boolean no_handle_signals,
                                    boolean multithread,

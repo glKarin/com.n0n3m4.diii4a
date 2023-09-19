@@ -34,7 +34,7 @@ void R_SaveColorBuffer(const char *name)
 
 	byte *data = (byte *)calloc(width * height * 4, 1);
 /*    float *ddata = (float *)calloc(width * height, sizeof(float));
-    glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, ddata);
+    qglReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, ddata);
 
     for (int i = 0 ; i < width * height ; i++) {
         data[i*4] =
@@ -44,7 +44,7 @@ void R_SaveColorBuffer(const char *name)
 	}*/
 
 	//GL_CheckErrors("glReadPixels111");
-	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	qglReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	//GL_CheckErrors("glReadPixels");
 
 	R_WriteTGA(name, data, width, height, false);
@@ -106,7 +106,7 @@ static void R_PrintMatrix(int i, const float* arr)
     {
         printf("%f   ", arr[i]);
         if (i % 4 == 3)
-            printf("   |");
+            printf("   |\n");
     }
     printf("\n");
 }
@@ -199,7 +199,7 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
     }
 
     if (tri->indexCache) {
-        glDrawElements(GL_TRIANGLES,
+        qglDrawElements(GL_TRIANGLES,
                        r_singleTriangle.GetBool() ? 3 : numIndexes,
                        GL_INDEX_TYPE,
                        (int *)vertexCache.Position(tri->indexCache) + start);
@@ -207,7 +207,7 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
     } else {
         vertexCache.UnbindIndex();
 
-        glDrawElements(GL_TRIANGLES,
+        qglDrawElements(GL_TRIANGLES,
                        r_singleTriangle.GetBool() ? 3 : numIndexes,
                        GL_INDEX_TYPE,
                        tri->indexes + start);
@@ -243,13 +243,13 @@ static void MatrixOrthogonalProjectionRH( float m[16], float left, float right, 
 static void RB_ResetViewportAndScissorToDefaultCamera( const viewDef_t* viewDef )
 {
     // set the window clipping
-    glViewport(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
+    qglViewport(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
                tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
                backEnd.viewDef->viewport.x2 + 1 - backEnd.viewDef->viewport.x1,
                backEnd.viewDef->viewport.y2 + 1 - backEnd.viewDef->viewport.y1);
 
     // the scissor may be smaller than the viewport for subviews
-    glScissor(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
+    qglScissor(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
               tr.viewportOffset[1] + backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1,
               backEnd.viewDef->scissor.x2 + 1 - backEnd.viewDef->scissor.x1,
               backEnd.viewDef->scissor.y2 + 1 - backEnd.viewDef->scissor.y1);
@@ -529,6 +529,18 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 	if(!harm_r_shadowMapDebug.GetInteger())
 	{
     globalFramebuffers.shadowFBO[vLight->shadowLOD]->Bind();
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+	{
+		globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
+		if( side < 0 )
+			globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepthLayer( globalImages->shadowES3Image[vLight->shadowLOD], 0 );
+		else
+			globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepthLayer( globalImages->shadowES3Image[vLight->shadowLOD], side );
+	}
+	else
+#endif
+	{
     globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepth( globalImages->shadowDepthImage[vLight->shadowLOD]);
 
     if( vLight->parallel && side >= 0 )
@@ -537,6 +549,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2DLayer( globalImages->shadowCubeImage[vLight->shadowLOD], side );
     else
         globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
+	}
 
 #if 0
     globalFramebuffers.shadowFBO[vLight->shadowLOD]->Check();
@@ -547,13 +560,30 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
 	if(clear)
 	{
-		if(vLight->parallel)
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		else if(vLight->pointLight)
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		qglDepthMask(GL_TRUE); // depth buffer lock update yet
+#ifdef GL_ES_VERSION_3_0
+		if(USING_GLES3)
+		{
+			qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			//qglClear( GL_DEPTH_BUFFER_BIT );
+			qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+		}
 		else
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+#endif
+		{
+#ifdef _HARM_ES2_POINT_LIGHT_Z_AS_DEPTH
+            qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+#else
+            if(vLight->parallel)
+                qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            else if(vLight->pointLight)
+                qglClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            else
+                qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+#endif
+		qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+	}
+		qglDepthMask(GL_FALSE);
 	}
 
     if( drawSurfs == NULL )
@@ -605,6 +635,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), vLight->lightRadius.Length());
 
     GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
@@ -658,7 +689,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         backEnd.shadowP[0] << lightProjectionRenderMatrix;
     }
 
-    glDisable(GL_BLEND);
+    qglDisable(GL_BLEND);
 
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO |
              /*GLS_DEPTHMASK | GLS_ALPHAMASK | GLS_GREENMASK | GLS_BLUEMASK |*/
@@ -688,17 +719,17 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
             if (vLight->parallel)
             {
-                idRenderMatrix MVP;
+                /*idRenderMatrix MVP;
                 idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
 
+                RB_SetMVP(MVP);*/
                 RB_SetMVP(clipMVP);
             }
             else if (side < 0)
             {
                 // from OpenGL view space to OpenGL NDC ( -1 : 1 in XYZ )
                 idRenderMatrix MVP;
-                //k idRenderMatrix::Multiply(renderMatrix_windowSpaceToClipSpace, clipMVP, MVP);
-                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+                idRenderMatrix::Multiply(renderMatrix_windowSpaceToClipSpace, clipMVP, MVP);
 
                 RB_SetMVP(MVP);
             }
@@ -835,12 +866,25 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                                    vertexCache.Position(drawSurf->geo->shadowCache));
 
             //RB_DrawElementsWithCounters( drawSurf->geo );
-			if(vLight->parallel)
-				GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), 1.0f);
-			else if(vLight->pointLight)
-				GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), 0.0f);
-			else
-				GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), 1.0f);
+			float w;
+#ifdef _HARM_ES2_POINT_LIGHT_Z_AS_DEPTH
+            w = 1.0;
+#else
+            if(vLight->parallel)
+                w = 1.0;
+            else if(vLight->pointLight)
+            {
+#ifdef GL_ES_VERSION_3_0
+                if(USING_GLES3)
+                    w = 1.0;
+                else
+#endif
+                    w = 0.0;
+            }
+            else
+                w = 1.0;
+#endif
+			GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), w);
             RB_DrawShadowElementsWithCounters_shadowMapping( drawSurf->geo, SM_REAR_CAP );
         }
     }
@@ -857,7 +901,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
     GL_PolygonOffset( false );
     GL_State( glState );
     GL_Cull( faceCulling );
-    glEnable(GL_BLEND);
+    qglEnable(GL_BLEND);
 
     RB_ResetViewportAndScissorToDefaultCamera(backEnd.viewDef);
 }
@@ -910,6 +954,7 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
 
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), backEnd.vLight->lightRadius.Length());
 
     // perform setup here that will be constant for all interactions
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE |

@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __TR_LOCAL_H__
 #define __TR_LOCAL_H__
 
+#include "qgl.h"
+
+extern bool USING_GLES3;
+
 //#define _SHADOW_MAPPING
 #ifdef _SHADOW_MAPPING
 #define MAX_SHADOWMAP_RESOLUTIONS 5
@@ -384,6 +388,7 @@ typedef struct viewLight_s {
     int						shadowLOD;					// level of detail for shadowmap selection
     float			baseLightProject[16];			// global xyz1 to projected light strq
 	float			inverseBaseLightProject[16];// transforms the zero-to-one cube to exactly cover the light in world space
+    idVec3					lightRadius;		// xyz radius for point lights
 #endif
 } viewLight_t;
 
@@ -651,6 +656,9 @@ typedef struct {
 	int		currentCubeMap;
 	int		texEnv;
 	textureType_t	textureType;
+#ifdef GL_ES_VERSION_3_0
+	int		current2DArrayMap;
+#endif
 } tmu_t;
 
 const int MAX_MULTITEXTURE_UNITS =	8;
@@ -1139,7 +1147,7 @@ const int GLS_DSTBLEND_ONE_MINUS_DST_ALPHA		= 0x00000080;
 const int GLS_DSTBLEND_BITS						= 0x000000f0;
 
 
-// these masks are the inverse, meaning when set the glColorMask value will be 0,
+// these masks are the inverse, meaning when set the qglColorMask value will be 0,
 // preventing that channel from being written
 const int GLS_DEPTHMASK							= 0x00000100;
 const int GLS_REDMASK							= 0x00000200;

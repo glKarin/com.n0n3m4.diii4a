@@ -43,8 +43,48 @@ If you have questions concerning this license or the applicable additional terms
 #else
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#ifdef _OPENGLES3
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
+#else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#endif
+#endif
+
+#ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+#endif
+#ifndef GL_MAX_COLOR_ATTACHMENTS
+#define GL_MAX_COLOR_ATTACHMENTS GL_MAX_COLOR_ATTACHMENTS_EXT
+#endif
+#ifndef GL_STENCIL_INDEX8
+#define GL_STENCIL_INDEX8 GL_STENCIL_INDEX8_OES
+#endif
+#ifndef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT   0x83F0
+#endif
+#ifndef GL_ETC1_RGB8_OES
+#define GL_ETC1_RGB8_OES                  0x8D64
+#endif
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT  0x83F1
+#endif
+#ifndef GL_DEPTH_COMPONENT24
+#define GL_DEPTH_COMPONENT24  GL_DEPTH_COMPONENT24_OES
+#endif
+
+#ifndef GL_DEPTH_COMPONENT
+#define GL_DEPTH_COMPONENT GL_DEPTH_COMPONENT24_OES
+#endif
+
+#if defined(GL_ES_VERSION_2_0)
+#define GL_RGB8	GL_RGB
+#define GL_RGBA8	GL_RGBA
+#define GL_ALPHA8 GL_ALPHA
+#define GL_RGB5	GL_RGB5_A1 // GL_RGBA
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83f2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83f3
 #endif
 
 #include "esUtil.h"
@@ -61,20 +101,8 @@ extern "C" {
 }
 #endif
 
-// GL_EXT_stencil_two_side
-extern void (GL_APIENTRY *qglActiveStencilFaceEXT)(GLenum face);
-
-// GL_ATI_separate_stencil
-extern void (GL_APIENTRY *qglStencilOpSeparateATI)(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass);
-extern void (GL_APIENTRY *qglStencilFuncSeparateATI)(GLenum frontfunc, GLenum backfunc, GLint ref, GLuint mask);
-
-#if !defined(GL_ES_VERSION_2_0)
-// GL_ARB_texture_compression + GL_S3_s3tc
-extern void (GL_APIENTRY *qglCompressedTexImage2DARB)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
-extern void (GL_APIENTRY *qglGetCompressedTexImageARB)(GLenum target, GLint level, GLvoid *img);
-
-// GL_EXT_depth_bounds_test
-extern void (GL_APIENTRY *qglDepthBoundsEXT)(GLclampd zmin, GLclampd zmax);
-#endif
+// declare qgl functions
+#define QGLPROC(name, rettype, args) extern rettype (GL_APIENTRYP q##name) args;
+#include "qgl_proc.h"
 
 #endif

@@ -199,6 +199,34 @@
                 android:layout_height="wrap_content"
                 android:text="@string/_16bits_rgba4444" />
         </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:text="OpenGL"/>
+        <RadioGroup
+            android:id="@+id/rg_opengl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+
+            <RadioButton
+                android:id="@+id/rg_opengles2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="OpenGL ES2"/>
+
+            <RadioButton
+                android:id="@+id/rg_opengles3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OpenGL ES3"/>
+
+        </RadioGroup>
         
     </LinearLayout>
 

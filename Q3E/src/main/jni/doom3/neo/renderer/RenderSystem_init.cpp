@@ -212,15 +212,6 @@ idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVA
 
 idCVar harm_r_maxFps( "harm_r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
 
-#if !defined(GL_ES_VERSION_2_0)
-// GL_ARB_texture_compression + GL_S3_s3tc
-void (GL_APIENTRY *qglCompressedTexImage2DARB)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
-void (GL_APIENTRY *qglGetCompressedTexImageARB)(GLenum target, GLint level, GLvoid *img);
-
-// GL_EXT_depth_bounds_test
-void (GL_APIENTRY *qglDepthBoundsEXT)(GLclampd zmin, GLclampd zmax);
-#endif
-
 /*
 =================
 R_CheckExtension
@@ -257,7 +248,7 @@ static void R_CheckPortableExtensions(void)
 
 	if (glConfig.multitextureAvailable)
 	{
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureUnits);
+		qglGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureUnits);
 
 		if (glConfig.maxTextureUnits > MAX_MULTITEXTURE_UNITS) {
 			glConfig.maxTextureUnits = MAX_MULTITEXTURE_UNITS;
@@ -267,8 +258,8 @@ static void R_CheckPortableExtensions(void)
 			glConfig.multitextureAvailable = false;	// shouldn't ever happen
 		}
 
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint *)&glConfig.maxTextureCoords);
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureImageUnits);
+		qglGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint *)&glConfig.maxTextureCoords);
+		qglGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureImageUnits);
 	}
 
 	// GL_ARB_texture_env_combine
@@ -312,7 +303,7 @@ static void R_CheckPortableExtensions(void)
 	glConfig.anisotropicAvailable = R_CheckExtension("GL_EXT_texture_filter_anisotropic");
 
 	if (glConfig.anisotropicAvailable) {
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glConfig.maxTextureAnisotropy);
+		qglGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glConfig.maxTextureAnisotropy);
 		common->Printf("   maxTextureAnisotropy: %f\n", glConfig.maxTextureAnisotropy);
 	} else {
 		glConfig.maxTextureAnisotropy = 1;
@@ -368,8 +359,8 @@ static void R_CheckPortableExtensions(void)
 	glConfig.framebufferObjectAvailable = true;
 	if( glConfig.framebufferObjectAvailable )
 	{
-		glGetIntegerv( GL_MAX_RENDERBUFFER_SIZE, &glConfig.maxRenderbufferSize );
-		glGetIntegerv( GL_MAX_COLOR_ATTACHMENTS_EXT, &glConfig.maxColorAttachments );
+		qglGetIntegerv( GL_MAX_RENDERBUFFER_SIZE, &glConfig.maxRenderbufferSize );
+		qglGetIntegerv( GL_MAX_COLOR_ATTACHMENTS, &glConfig.maxColorAttachments );
 
 		common->Printf( "...using %s\n", "GL_EXT_framebuffer_object" );
 	}
@@ -539,13 +530,13 @@ void R_InitOpenGL(void)
 	soundSystem->InitHW();
 
 	// get our config strings
-	glConfig.vendor_string = (const char *)glGetString(GL_VENDOR);
-	glConfig.renderer_string = (const char *)glGetString(GL_RENDERER);
-	glConfig.version_string = (const char *)glGetString(GL_VERSION);
-	glConfig.extensions_string = (const char *)glGetString(GL_EXTENSIONS);
+	glConfig.vendor_string = (const char *)qglGetString(GL_VENDOR);
+	glConfig.renderer_string = (const char *)qglGetString(GL_RENDERER);
+	glConfig.version_string = (const char *)qglGetString(GL_VERSION);
+	glConfig.extensions_string = (const char *)qglGetString(GL_EXTENSIONS);
 
 	// OpenGL driver constants
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
+	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 	glConfig.maxTextureSize = temp;
 
 	// stubbed or broken drivers may have reported 0...
@@ -609,7 +600,7 @@ void GL_CheckErrors(void)
 
 	// check for up to 10 errors pending
 	for (i = 0 ; i < 10 ; i++) {
-		err = glGetError();
+		err = qglGetError();
 
 		if (err == GL_NO_ERROR) {
 			return;
@@ -968,7 +959,7 @@ R_RenderingFPS
 */
 static float R_RenderingFPS(const renderView_t *renderView)
 {
-	glFinish();
+	qglFinish();
 
 	int		start = Sys_Milliseconds();
 	static const int SAMPLE_MSEC = 1000;
@@ -980,7 +971,7 @@ static float R_RenderingFPS(const renderView_t *renderView)
 		renderSystem->BeginFrame(glConfig.vidWidth, glConfig.vidHeight);
 		tr.primaryWorld->RenderScene(renderView);
 		renderSystem->EndFrame(NULL, NULL);
-		glFinish();
+		qglFinish();
 		count++;
 		end = Sys_Milliseconds();
 
@@ -1057,7 +1048,7 @@ If ref isn't specified, the full session UpdateScreen will be done.
 void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = NULL)
 {
 	// include extra space for OpenGL padding to word boundaries
-	byte	*temp = (byte *)R_StaticAlloc((glConfig.vidWidth+3) * glConfig.vidHeight * 3);
+	byte	*temp = (byte *)R_StaticAlloc((glConfig.vidWidth+4) * glConfig.vidHeight * 4);
 
 	int	oldWidth = glConfig.vidWidth;
 	int oldHeight = glConfig.vidHeight;
@@ -1094,15 +1085,15 @@ void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = 
 			}
 
 #if !defined(GL_ES_VERSION_2_0)
-			glReadBuffer(GL_FRONT);
+			qglReadBuffer(GL_FRONT);
 #endif
-			glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp);
+			qglReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, temp);
 
-			int	row = (w * 3 + 3) & ~3;		// OpenGL pads to dword boundaries
+			int	row = (w * 4 + 4) & ~4;		// OpenGL pads to dword boundaries
 
 			for (int y = 0 ; y < h ; y++) {
-				memcpy(buffer + ((yo + y)* width + xo) * 3,
-				       temp + y * row, w * 3);
+				memcpy(buffer + ((yo + y)* width + xo) * 4,
+				       temp + y * row, w * 4);
 			}
 		}
 	}
@@ -1141,14 +1132,14 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 
 	int	pix = width * height;
 
-	buffer = (byte *)R_StaticAlloc(pix*3 + 18);
+	buffer = (byte *)R_StaticAlloc(pix*4 + 18);
 	memset(buffer, 0, 18);
 
 	if (blends <= 1) {
 		R_ReadTiledPixels(width, height, buffer + 18, ref);
 	} else {
-		unsigned short *shortBuffer = (unsigned short *)R_StaticAlloc(pix*2*3);
-		memset(shortBuffer, 0, pix*2*3);
+		unsigned short *shortBuffer = (unsigned short *)R_StaticAlloc(pix*2*4);
+		memset(shortBuffer, 0, pix*2*4);
 
 		// enable anti-aliasing jitter
 		r_jitter.SetBool(true);
@@ -1156,13 +1147,13 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 		for (i = 0 ; i < blends ; i++) {
 			R_ReadTiledPixels(width, height, buffer + 18, ref);
 
-			for (j = 0 ; j < pix*3 ; j++) {
+			for (j = 0 ; j < pix*4 ; j++) {
 				shortBuffer[j] += buffer[18+j];
 			}
 		}
 
 		// divide back to bytes
-		for (i = 0 ; i < pix*3 ; i++) {
+		for (i = 0 ; i < pix*4 ; i++) {
 			buffer[18+i] = shortBuffer[i] / blends;
 		}
 
@@ -1179,9 +1170,9 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 	buffer[16] = 24;	// pixel size
 
 	// swap rgb to bgr
-	c = 18 + width * height * 3;
+	c = 18 + width * height * 4;
 
-	for (i=18 ; i<c ; i+=3) {
+	for (i=18 ; i<c ; i+=4) {
 		temp = buffer[i];
 		buffer[i] = buffer[i+2];
 		buffer[i+2] = temp;
@@ -1349,10 +1340,10 @@ void R_StencilShot(void)
 #if !defined(GL_ES_VERSION_2_0)
 	GLenum stencilIndex = GL_STENCIL_INDEX;
 #else
-	GLenum stencilIndex = GL_STENCIL_INDEX8_OES; // GL_STENCIL_INDEX4_OES;
+	GLenum stencilIndex = GL_STENCIL_INDEX8; // GL_STENCIL_INDEX4_OES;
 #endif
 
-	glReadPixels(0, 0, width, height, stencilIndex, GL_UNSIGNED_BYTE, byteBuffer);
+	qglReadPixels(0, 0, width, height, stencilIndex, GL_UNSIGNED_BYTE, byteBuffer);
 
 	for (i = 0 ; i < pix ; i++) {
 		buffer[18+i*3] =
@@ -1870,7 +1861,7 @@ void R_VidRestart_f(const idCmdArgs &args)
 	R_RegenerateWorld_f(idCmdArgs());
 
 	// check for problems
-	err = glGetError();
+	err = qglGetError();
 
 	if (err != GL_NO_ERROR) {
 		common->Printf("glGetError() = 0x%x\n", err);
@@ -2208,7 +2199,7 @@ void idRenderSystemLocal::InitOpenGL(void)
 #ifdef _SHADOW_MAPPING
 		Framebuffer::Init();
 #endif
-		err = glGetError();
+		err = qglGetError();
 
 		if (err != GL_NO_ERROR) {
 			common->Printf("glGetError() = 0x%x\n", err);
@@ -2280,7 +2271,7 @@ void GL_CheckErrors(const char *name)
 	int		i;
 
 	// check for up to 10 errors pending
-	err = glGetError();
+	err = qglGetError();
 
 	if (err == GL_NO_ERROR) {
 		common->Printf("GL_CheckErrors for %s: NO_ERROR\n", name);

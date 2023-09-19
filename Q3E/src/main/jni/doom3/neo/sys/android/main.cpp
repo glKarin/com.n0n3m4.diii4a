@@ -635,6 +635,8 @@ static volatile bool window_changed = false;
 // OpenGL attributes
 int gl_format = 0x8888;
 int gl_msaa = 0;
+int gl_version = 0x00020000;
+bool USING_GLES3 = false;
 
 // command line arguments
 static int argc = 0;
@@ -747,6 +749,7 @@ static void Q3E_PrintInitialContext(void)
 	printf("  OpenGL: \n");
 	printf("    Format: 0x%X\n", gl_format);
 	printf("    MSAA: %d\n", gl_msaa);
+	printf("    Version: %x\n", gl_version);
 	printf("  Variables: \n");
 	printf("    Native library directory: %s\n", native_library_dir);
 	printf("    Redirect output to file: %d\n", redirect_output_to_file);
@@ -984,6 +987,8 @@ void Q3E_SetInitialContext(const void *context)
 
 	gl_format = ptr->openGL_format;
 	gl_msaa = ptr->openGL_msaa;
+	gl_version = ptr->openGL_version;
+	USING_GLES3 = gl_version != 0x00020000;
 
 	native_library_dir = strdup(ptr->nativeLibraryDir);
 	redirect_output_to_file = ptr->redirectOutputToFile ? true : false;

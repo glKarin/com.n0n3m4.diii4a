@@ -376,12 +376,13 @@ static void print_initial_context(const Q3E_InitialContext_t *context)
 	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Enable multi-thread: %d", context->multithread);
 	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "OpenGL format: 0x%X", context->openGL_format);
 	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "OpenGL MSAA: %d", context->openGL_msaa);
+	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "OpenGL Version: %x", context->openGL_version);
     __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
 	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "<---------");
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jint width, jint height, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean bContinueNoGLContext)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jint width, jint height, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc=0;
@@ -426,6 +427,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 
 		context.openGL_format = format;
 		context.openGL_msaa = msaa;
+		context.openGL_version = glVersion;
 
 		context.nativeLibraryDir = doom3_path;
 		context.redirectOutputToFile = redirectOutputToFile ? 1 : 0;

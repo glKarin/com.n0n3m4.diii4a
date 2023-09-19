@@ -1066,8 +1066,8 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 	// Android: GL_RGBA && GL_UNSIGNED_BYTE
 	/*
 	   GLint eReadFormat, eReadType;
-	   glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &eReadType); 
-	   glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &eReadFormat); 
+	   qglGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &eReadType); 
+	   qglGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &eReadFormat); 
 	   common->Printf("glReadPixels ava READ_FORMAT: 0x%x, READ_TYPE: %x\n", eReadFormat, eReadType);
 	   */
 	int	c = (rc->width + 4) * rc->height;
@@ -1081,7 +1081,7 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 	}
 	else
 #endif
-	glReadPixels(rc->x, rc->y, rc->width, rc->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	qglReadPixels(rc->x, rc->y, rc->width, rc->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	byte *data2 = (byte *)R_StaticAlloc(c * 4);
 
@@ -1179,7 +1179,7 @@ void BackendThreadTask(void) // BackendThread ->
 	// Take screen shot
 	if(pixels) // if block backend rendering, do not exit backend render function, because it will be swap buffers in GLSurfaceView
 	{
-		glReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
+		qglReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
 		pixels = NULL;
 		pixelsCrop = NULL;
 	}

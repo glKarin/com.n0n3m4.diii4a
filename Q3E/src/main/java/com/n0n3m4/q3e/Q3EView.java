@@ -137,8 +137,9 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
             boolean redirectOutputToFile = preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true);
             boolean noHandleSignals = preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false);
             int runBackground = Q3EUtils.parseInt_s(preferences.getString(Q3EPreference.RUN_BACKGROUND, "0"), 0);
+            int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
 
-            Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa, redirectOutputToFile, noHandleSignals, Q3EUtils.q3ei.multithread, runBackground > 0);
+            Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa, glVersion, redirectOutputToFile, noHandleSignals, Q3EUtils.q3ei.multithread, runBackground > 0);
 
             mInit = true;
 

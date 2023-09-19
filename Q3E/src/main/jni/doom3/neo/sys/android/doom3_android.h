@@ -28,6 +28,7 @@ typedef struct
     // OpenGL
     int openGL_format; // 0x8888 0x565 0x4444
     int openGL_msaa; // 0 1 2 4
+    int openGL_version; // 20 30
 
     // Other
     const char *nativeLibraryDir; // game library directory after apk installed

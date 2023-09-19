@@ -30,8 +30,13 @@
 #else
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#ifdef _OPENGLES3
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
+#else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#endif
 #endif
 
 #ifdef __cplusplus

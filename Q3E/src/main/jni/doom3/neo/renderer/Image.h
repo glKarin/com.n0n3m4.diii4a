@@ -49,8 +49,8 @@ glTexSubImage
 glCopyTexImage
 glCopyTexSubImage
 
-glEnable( GL_TEXTURE_* )
-glDisable( GL_TEXTURE_* )
+qglEnable( GL_TEXTURE_* )
+qglDisable( GL_TEXTURE_* )
 
 ====================================================================
 */
@@ -129,6 +129,11 @@ typedef enum {
 	TD_DEFAULT,				// will use compressed formats when possible
 	TD_BUMP,				// may be compressed with 8 bit lookup
 	TD_HIGH_QUALITY			// either 32 bit or a component format, no loss at all
+#ifdef _SHADOW_MAPPING
+#ifdef GL_ES_VERSION_3_0
+	, TD_SHADOW_ARRAY		// 2D depth buffer array for shadow mapping
+#endif
+#endif
 #ifdef _RAVEN
 		,
 // How is this texture used?  Determines the storage and color format
@@ -149,12 +154,18 @@ typedef enum {
 	TT_3D,
 	TT_CUBIC,
 	TT_RECT
+#ifdef GL_ES_VERSION_3_0
+	, TT_2D_ARRAY
+#endif
 } textureType_t;
 
 typedef enum {
 	CF_2D,			// not a cube map
 	CF_NATIVE,		// _px, _nx, _py, etc, directly sent to GL
 	CF_CAMERA		// _forward, _back, etc, rotated and flipped as needed before sending to GL
+#ifdef GL_ES_VERSION_3_0
+	, CF_2D_ARRAY		// not a cube map but not a single 2d texture either
+#endif
 } cubeFiles_t;
 
 #define	MAX_IMAGE_NAME	256
@@ -200,6 +211,9 @@ class idImage
 	void		GenerateShadowMapDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
     void		GenerateShadowMapDepthCubeImage(int size, textureFilter_t filter, bool allowDownSize);
 	void		GenerateDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
+#ifdef GL_ES_VERSION_3_0
+	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat );
+#endif
 #endif
 #if !defined(GL_ES_VERSION_2_0)
 		void		Generate3DImage(const byte *pic, int width, int height, int depth,
@@ -530,6 +544,9 @@ class idImageManager
 	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
 	idImage*			shadowCubeImage[MAX_SHADOWMAP_RESOLUTIONS];
     idImage*			shadowDepthImage[MAX_SHADOWMAP_RESOLUTIONS];
+#ifdef GL_ES_VERSION_3_0
+	idImage*			shadowES3Image[MAX_SHADOWMAP_RESOLUTIONS];
+#endif
 	// RB end
 #endif
 };
