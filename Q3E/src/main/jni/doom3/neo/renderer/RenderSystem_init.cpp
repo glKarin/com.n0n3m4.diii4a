@@ -237,7 +237,16 @@ R_CheckPortableExtensions
 static void R_CheckPortableExtensions(void)
 {
 	glConfig.glVersion = atof(glConfig.version_string);
-#if !defined(GL_ES_VERSION_2_0)
+	if(glConfig.glVersion == 0.0f)
+	{
+#ifdef GL_ES_VERSION_3_0
+		if(USING_GLES3)
+			glConfig.glVersion = 3.0;
+		else
+#endif
+			glConfig.glVersion = 2.0;
+	}
+#if 0
 	if (!glConfig.glVersion >= 3.0) {
 		common->Error(common->GetLanguageDict()->GetString("#str_06780"));
 	}
@@ -275,13 +284,20 @@ static void R_CheckPortableExtensions(void)
 	glConfig.textureEnvAddAvailable = false; // R_CheckExtension("GL_ARB_texture_env_add");
 
 	// GL_ARB_texture_non_power_of_two
-	glConfig.textureNonPowerOfTwoAvailable = R_CheckExtension(
-#if !defined(GL_ES_VERSION_2_0)
-			"GL_ARB_texture_non_power_of_two"
-#else
-			"GL_OES_texture_npot"
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+		glConfig.textureNonPowerOfTwoAvailable = true;
+	else
 #endif
-			);
+	{
+		glConfig.textureNonPowerOfTwoAvailable = R_CheckExtension(
+#if !defined(GL_ES_VERSION_2_0)
+				"GL_ARB_texture_non_power_of_two"
+#else
+				"GL_OES_texture_npot"
+#endif
+		);
+	}
 
 	// GL_ARB_texture_compression + GL_S3_s3tc
 	// DRI drivers may have GL_ARB_texture_compression but no GL_EXT_texture_compression_s3tc
@@ -324,7 +340,21 @@ static void R_CheckPortableExtensions(void)
 	glConfig.sharedTexturePaletteAvailable = false; // R_CheckExtension("GL_EXT_shared_texture_palette");
 
 	// GL_EXT_texture3D (not currently used for anything)
-	glConfig.texture3DAvailable = false; // R_CheckExtension("GL_EXT_texture3D");
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+		glConfig.texture3DAvailable = true;
+	else
+#endif
+	{
+
+		glConfig.texture3DAvailable = R_CheckExtension(
+#if !defined(GL_ES_VERSION_2_0)
+				"GL_EXT_texture3D"
+#else
+				"GL_OES_texture_3D"
+#endif
+				);
+	}
 
 	// EXT_stencil_wrap
 	tr.stencilIncr = GL_INCR_WRAP;
@@ -333,6 +363,7 @@ static void R_CheckPortableExtensions(void)
 	// ARB_vertex_buffer_object
 	glConfig.ARBVertexBufferObjectAvailable = true; // R_CheckExtension("GL_ARB_vertex_buffer_object");
 
+#if !defined(GL_ES_VERSION_2_0)
 	// ARB_vertex_program
 	glConfig.ARBVertexProgramAvailable = true; // R_CheckExtension("GL_ARB_vertex_program");
 
@@ -342,6 +373,10 @@ static void R_CheckPortableExtensions(void)
 	} else {
 		glConfig.ARBFragmentProgramAvailable = true; // R_CheckExtension("GL_ARB_fragment_program");
 	}
+#else
+	glConfig.ARBVertexProgramAvailable = false;
+	glConfig.ARBFragmentProgramAvailable = false;
+#endif
 
 	glConfig.depthBoundsTestAvailable = false; // R_CheckExtension("EXT_depth_bounds_test");
 
@@ -353,7 +388,7 @@ static void R_CheckPortableExtensions(void)
 	}
 #endif
 	// GL_ARB_shading_language_100
-	glConfig.GLSLAvailable = R_CheckExtension("GL_ARB_shading_language_100");
+	glConfig.GLSLAvailable = true;
 
 	// GL_EXT_framebuffer_object
 	glConfig.framebufferObjectAvailable = true;
@@ -1036,13 +1071,9 @@ void R_OpenGL_f(const idCmdArgs &args)
 	}
 
 	if(USING_GLES3)
-	{
 		common->Printf("OpenGLES 3.0\n");
-	}
 	else
-	{
 		common->Printf("OpenGLES 2.0\n");
-	}
 
 	common->Printf("Renderer: %s\n", glConfig.renderer_string);
 	common->Printf("Version: %s\n", glConfig.version_string);
@@ -1091,6 +1122,11 @@ void R_OpenGL_f(const idCmdArgs &args)
 	common->Printf("framebufferObjectAvailable: %d\n", glConfig.framebufferObjectAvailable);
 	common->Printf("maxRenderbufferSize: %d\n", glConfig.maxRenderbufferSize);
 	common->Printf("maxColorAttachments: %d\n", glConfig.maxColorAttachments);
+
+	if(USING_GLES3)
+		common->Printf("OpenGLES 3.0\n");
+	else
+		common->Printf("OpenGLES 2.0\n");
 }
 #endif
 

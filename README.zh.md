@@ -97,6 +97,10 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 2. _MULTITHREAD: 多线程支持.
 > 3. _USING_STB: 使用stb加载jpeg/png纹理图片支持.
 > 4. _K_CLANG: 如果使用clang编译而不是GCC.
+> 5. _MODEL_OBJ: 添加obj静态模型支持.
+> 6. _MODEL_DAE: 添加dae静态模型支持.
+> 7. _SHADOW_MAPPING: 增加Shadow mapping阴影支持.
+> 8. _OPENGLES3: 增加OpenGL ES3.0支持.
 
 #### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
 #### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).
@@ -109,7 +113,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 3. 构建core引擎: 声明宏`_RAVEN`, `_RAVEN_FX(如果需要OpenBSE, 非必须)`
 > 4. 构建游戏库: 声明宏`_RAVEN`, `_QUAKE4`
 ##### 关于`BSE`
-由于`BSE`没开源, 所有我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
+由于`BSE`没开源, 所以我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
 ##### 关于`BOT`
 声明宏`MOD_BOTS`将编译SABot a7(来自毁灭战士3) mod源码的多人游戏的bot支持.
 
@@ -139,7 +143,6 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > * F-Droid自由版本.
 
 > `package`:
-> * /*.apk: 所有构建
 > * /screenshot: 截图
 > * /source: 引用的源码
 > * /pak: 游戏资源

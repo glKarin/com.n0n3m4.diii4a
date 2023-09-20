@@ -96,6 +96,10 @@ Tag with `-free` only for F-Droid update.
 > 2. _MULTITHREAD: Add multithread support for rendering.
 > 3. _USING_STB: Using stb header for jpeg/png texture image support.
 > 4. _K_CLANG: If compiling by clang not GCC.
+> 5. _MODEL_OBJ: Add obj static model support.
+> 6. _MODEL_DAE: Add dae static model support.
+> 7. _SHADOW_MAPPING: Add `Shadow mapping` support.
+> 8. _OPENGLES3: Add OpenGLES3.0 support.
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
@@ -138,7 +142,6 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 > * For F-Droid pure free version.
 
 > `package`:
-> * /*.apk: all version build
 > * /screenshot: screenshot pictures
 > * /source: Reference source
 > * /pak: Game resource

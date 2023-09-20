@@ -1,31 +1,3 @@
-/*
-===========================================================================
-
-Doom 3 GPL Source Code
-Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
-
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
-
-Doom 3 Source Code is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Doom 3 Source Code is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with Doom 3 Source Code.  If not, see <http://www.gnu.org/licenses/>.
-
-In addition, the Doom 3 Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 Source Code.  If not, please request a copy in writing from id Software at the address below.
-
-If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
-
-===========================================================================
-*/
-
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
@@ -107,7 +79,12 @@ static int R_LoadGLSLShaderProgram(
 );
 
 #define _GLPROGS "glslprogs" // "gl2progs"
-static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
+static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
+
+#ifdef GL_ES_VERSION_3_0
+#define _GL3PROGS "glsl3progs"
+static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
+#endif
 
 static bool R_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name);
 
@@ -184,9 +161,22 @@ loads GLSL vertex or fragment shaders
 */
 static void R_LoadGLSLShader(const char *name, shaderProgram_t *shaderProgram, GLenum type)
 {
-	idStr	fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramDir");
-	if(fullPath.IsEmpty())
-		fullPath = _GLPROGS;
+	idStr	fullPath;
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+	{
+		fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramES3Dir");
+		if(fullPath.IsEmpty())
+			fullPath = _GL3PROGS;
+	}
+	else
+#endif
+	{
+		fullPath = cvarSystem->GetCVarString("harm_r_shaderProgramDir");
+		if(fullPath.IsEmpty())
+			fullPath = _GLPROGS;
+	}
+
 	fullPath.AppendPath(name);
 
 	char	*fileBuffer;
