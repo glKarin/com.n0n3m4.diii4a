@@ -988,7 +988,11 @@ void Q3E_SetInitialContext(const void *context)
 	gl_format = ptr->openGL_format;
 	gl_msaa = ptr->openGL_msaa;
 	gl_version = ptr->openGL_version;
+#ifdef _OPENGLES3
 	USING_GLES3 = gl_version != 0x00020000;
+#else
+	USING_GLES3 = false;
+#endif
 
 	native_library_dir = strdup(ptr->nativeLibraryDir);
 	redirect_output_to_file = ptr->redirectOutputToFile ? true : false;

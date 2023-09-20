@@ -193,9 +193,13 @@ static void R_LoadOpenGLFunc()
 
 static bool GLimp_dlopen()
 {
+#ifdef _OPENGLES3
 	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */(
 			gl_version == 0x00030000 ? "libGLESv3.so" : "libGLESv2.so"
-			);
+	);
+#else
+	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */ "libGLESv2.so";
+#endif
 	common->Printf("dlopen(%s)\n", driverName);
 	if ( !( glHandle = dlopen( driverName, RTLD_NOW | RTLD_GLOBAL ) ) ) {
 		common->Printf("dlopen(%s) failed: %s\n", driverName, dlerror());
@@ -363,7 +367,12 @@ static bool GLES_Init_special(void)
 			EGL_STENCIL_SIZE, stencil_bits,
 			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
 			EGL_SAMPLES, gl_msaa,
-            EGL_RENDERABLE_TYPE, gl_version == 0x00020000 ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_ES3_BIT,
+            EGL_RENDERABLE_TYPE,
+#ifdef _OPENGLES3
+			gl_version == 0x00020000 ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_ES3_BIT,
+#else
+			EGL_OPENGL_ES2_BIT,
+#endif
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_NONE,
     };
