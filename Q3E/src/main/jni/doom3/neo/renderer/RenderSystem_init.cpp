@@ -1026,6 +1026,89 @@ void R_Benchmark_f(const idCmdArgs &args)
 	r_skipRenderContext.SetBool(false);
 }
 
+#ifdef GL_ES_VERSION_3_0
+void R_OpenGL_f(const idCmdArgs &args)
+{
+	if(!glConfig.isInitialized)
+	{
+		common->Printf("OpenGL not initialized!\n");
+		return;
+	}
+
+	if(USING_GLES3)
+	{
+		common->Printf("OpenGLES 3.0\n");
+	}
+	else
+	{
+		common->Printf("OpenGLES 2.0\n");
+	}
+
+	common->Printf("Renderer: %s\n", glConfig.renderer_string);
+	common->Printf("Version: %s\n", glConfig.version_string);
+	common->Printf("Vendor: %s\n", glConfig.version_string);
+	common->Printf("Extensions: %s\n", glConfig.extensions_string);
+
+	common->Printf("glVersion: %f\n", glConfig.glVersion);
+
+	common->Printf("maxTextureSize: %d\n", glConfig.maxTextureSize);
+	common->Printf("maxTextureUnits: %d\n", glConfig.maxTextureUnits);
+	common->Printf("maxTextureCoords: %d\n", glConfig.maxTextureCoords);
+	common->Printf("maxTextureImageUnits: %d\n", glConfig.maxTextureImageUnits);
+	common->Printf("maxTextureAnisotropy: %f\n", glConfig.maxTextureAnisotropy);
+
+	common->Printf("colorBits: %d\n", glConfig.colorBits);
+	common->Printf("depthBits: %d\n", glConfig.depthBits);
+	common->Printf("stencilBits: %d\n", glConfig.stencilBits);
+
+	common->Printf("multitextureAvailable: %d\n", glConfig.multitextureAvailable);
+	common->Printf("textureCompressionAvailable: %d\n", glConfig.textureCompressionAvailable);
+	common->Printf("anisotropicAvailable: %d\n", glConfig.anisotropicAvailable);
+	common->Printf("textureLODBiasAvailable: %d\n", glConfig.textureLODBiasAvailable);
+	common->Printf("textureEnvAddAvailable: %d\n", glConfig.textureEnvAddAvailable);
+	common->Printf("textureEnvCombineAvailable: %d\n", glConfig.textureEnvCombineAvailable);
+	common->Printf("cubeMapAvailable: %d\n", glConfig.cubeMapAvailable);
+	common->Printf("envDot3Available: %d\n", glConfig.envDot3Available);
+	common->Printf("texture3DAvailable: %d\n", glConfig.texture3DAvailable);
+	common->Printf("sharedTexturePaletteAvailable: %d\n", glConfig.sharedTexturePaletteAvailable);
+	common->Printf("ARBVertexBufferObjectAvailable: %d\n", glConfig.ARBVertexBufferObjectAvailable);
+	common->Printf("ARBVertexProgramAvailable: %d\n", glConfig.ARBVertexProgramAvailable);
+	common->Printf("ARBFragmentProgramAvailable: %d\n", glConfig.ARBFragmentProgramAvailable);
+	common->Printf("textureNonPowerOfTwoAvailable: %d\n", glConfig.textureNonPowerOfTwoAvailable);
+	common->Printf("depthBoundsTestAvailable: %d\n", glConfig.depthBoundsTestAvailable);
+	common->Printf("GLSLAvailable: %d\n", glConfig.GLSLAvailable);
+
+	common->Printf("vidWidth: %d\n", glConfig.vidWidth);
+	common->Printf("vidHeight: %d\n", glConfig.vidHeight);
+
+	common->Printf("displayFrequency: %d\n", glConfig.displayFrequency);
+
+	common->Printf("isFullscreen: %d\n", glConfig.isFullscreen);
+
+	common->Printf("allowARB2Path: %d\n", glConfig.allowARB2Path);
+	common->Printf("allowGLSLPath: %d\n", glConfig.allowGLSLPath);
+
+	common->Printf("framebufferObjectAvailable: %d\n", glConfig.framebufferObjectAvailable);
+	common->Printf("maxRenderbufferSize: %d\n", glConfig.maxRenderbufferSize);
+	common->Printf("maxColorAttachments: %d\n", glConfig.maxColorAttachments);
+}
+#endif
+
+#ifdef _MULTITHREAD
+static void R_Multithreading_f(const idCmdArgs &args)
+{
+	extern intptr_t Sys_GetMainThread(void);
+	extern const xthreadInfo * Sys_GetRenderThread(void);
+
+	common->Printf("[Harmattan]: Multi-Thread current is %s.\n", multithreadActive ? "enabled" : "disabled");
+	common->Printf("             - Main thread handle is %lu.\n", Sys_GetMainThread());
+	//if(multithreadActive)
+	{
+		const xthreadInfo *thread = Sys_GetRenderThread();
+		common->Printf("             - Render thread(%s) handle is %lu.\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
+	}
+}
+#endif
 
 /*
 ==============================================================================
@@ -1994,6 +2077,12 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("listRenderLightDefs", R_ListRenderLightDefs_f, CMD_FL_RENDERER, "lists the light defs");
 	cmdSystem->AddCommand("listModes", R_ListModes_f, CMD_FL_RENDERER, "lists all video modes");
 	cmdSystem->AddCommand("reloadSurface", R_ReloadSurface_f, CMD_FL_RENDERER, "reloads the decl and images for selected surface");
+#ifdef GL_ES_VERSION_3_0
+	cmdSystem->AddCommand("glVersion", R_OpenGL_f, CMD_FL_RENDERER, "print OpenGL version");
+#endif
+#ifdef _MULTITHREAD
+	cmdSystem->AddCommand("r_multithread", R_Multithreading_f, CMD_FL_SYSTEM, "print multi-threading state");
+#endif
 }
 
 /*

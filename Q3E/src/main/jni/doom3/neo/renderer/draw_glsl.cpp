@@ -324,10 +324,11 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 			}
 			else if( backEnd.vLight->pointLight )
 			{
+				sampleScale = 0.005;
 			}
 			else
 			{
-				sampleScale = 0.01;
+				sampleScale = 0.005;
 			}
 		}
 		else
@@ -340,10 +341,6 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 		}
 		else if( backEnd.vLight->pointLight )
 		{
-#ifdef GL_ES_VERSION_3_0
-			if(USING_GLES3)
-				sampleScale = 0.005;
-#endif
 			globalImages->shadowCubeImage[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else

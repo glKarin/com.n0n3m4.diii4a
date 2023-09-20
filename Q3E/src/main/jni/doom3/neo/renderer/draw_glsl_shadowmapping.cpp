@@ -633,9 +633,12 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         shadowShader = &depthShader_spotLight;
     GL_UseProgram(shadowShader);
 
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
+#if 0
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
+#else
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), vLight->lightRadius.Length());
+#endif
 
     GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
@@ -696,6 +699,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
              // GLS_REDMASK |
                      GLS_DEPTHFUNC_LESS);
 
+	qglDepthMask(GL_TRUE); // depth buffer lock update yet
     // process the chain of shadows with the current rendering state
     backEnd.currentSpace = NULL;
 
@@ -728,10 +732,11 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
             else if (side < 0)
             {
                 // from OpenGL view space to OpenGL NDC ( -1 : 1 in XYZ )
-                idRenderMatrix MVP;
+                /*idRenderMatrix MVP;
                 idRenderMatrix::Multiply(renderMatrix_windowSpaceToClipSpace, clipMVP, MVP);
+                RB_SetMVP(MVP);*/
 
-                RB_SetMVP(MVP);
+                RB_SetMVP(clipMVP);
             }
             else
             {
@@ -895,13 +900,15 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
     // cleanup the shadow specific rendering state
     GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
+	// restore GL state
     GL_UseProgram(NULL);
     Framebuffer::BindNull();
 
-    GL_PolygonOffset( false );
     GL_State( glState );
+    GL_PolygonOffset( false );
     GL_Cull( faceCulling );
     qglEnable(GL_BLEND);
+	qglDepthMask(GL_FALSE); // lock depth buffer
 
     RB_ResetViewportAndScissorToDefaultCamera(backEnd.viewDef);
 }
@@ -952,9 +959,12 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     }
     GL_UseProgram(shadowInteractionShader);
 
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
+#if 0
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
+#else
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), backEnd.vLight->lightRadius.Length());
+#endif
 
     // perform setup here that will be constant for all interactions
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE |

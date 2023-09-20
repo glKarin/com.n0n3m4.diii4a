@@ -82,9 +82,9 @@ option(QUAKE4			"Build the quake4 game code" ON)
 option(PREY			"Build the prey game code" ON)
 option(RAVEN			"Build the raven core" ON)
 option(HUMANHEAD			"Build the humanhead core" ON)
-option(OVERTHINKED			"Build the overthinked game code" ON)
-option(SABOT			"Build the sabot game code" ON)
-option(HEXENEOC			"Build the hexeneoc game code" ON)
+option(OVERTHINKED			"Build the overthinked game code" OFF)
+option(SABOT			"Build the sabot game code" OFF)
+option(HEXENEOC			"Build the hexeneoc game code" OFF)
 
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
@@ -1543,7 +1543,6 @@ if(HARDCORPS)
 			)
 endif()
 
-#[[
 if(OVERTHINKED)
 	add_library(overthinked SHARED ${src_overthinked})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_overthinked})
@@ -1594,7 +1593,6 @@ if(HEXENEOC)
 			ARCHIVE DESTINATION "${libdir}"
 			)
 endif()
-]]
 
 if(RAVEN)
 	set(QUAKE4BINARY "${DOOM3BINARY}_raven")
