@@ -804,7 +804,7 @@ GLSL_SHADER const char TEXGEN_FRAG[] =
 
 
 #ifdef _SHADOW_MAPPING
-#define PACK_FLOAT_FUNC \
+#define PACK_FLOAT_FUNC() \
 "vec4 pack (float depth)\n" \
 "{\n" \
 "	const vec4 bitSh = vec4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);\n" \
@@ -813,17 +813,17 @@ GLSL_SHADER const char TEXGEN_FRAG[] =
 "	comp -= comp.xxyz * bitMsk;\n" \
 "	return comp;\n" \
 "}\n"
-#define UNPACK_FLOAT_FUNC \
+#define UNPACK_FLOAT_FUNC() \
 "float unpack (vec4 colour)\n" \
 "{\n" \
 "	const vec4 bitShifts = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);\n" \
-"	return dot(colour , bitShifts);\n" \
+"	return /*all(lessThan(colour, vec4(1.0, 1.0, 1.0, 1.0)))*/ colour.r < 1.0 ? dot(colour , bitShifts) : 1.0;\n" \
 "}\n"
 
 #define VECTOR_TO_DEPTH_FUNC(far, near) \
 "float VectorToDepthValue(vec3 Vec)\n" \
 "{\n" \
-"#if defined(_HARM_USING_FAR_PLANE)\n" \
+"#if defined(_HARM_POINT_LIGHT_USING_FAR_PLANE)\n" \
 "	return length(Vec) / " #far ";\n" \
 "#else\n" \
 "	vec3 AbsVec = abs(Vec);\n" \
@@ -849,7 +849,7 @@ GLSL_SHADER const char DEPTH_VERT[] =
 "uniform highp vec4 globalLightOrigin;\n"
 "uniform lowp float u_uniformParm2; // .w 1.0 or 0.0\n"
 "#ifdef _HARM_POINT_LIGHT\n"
-"	#ifdef _HARM_FLOAT_TEXTURE\n"
+"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
 "		varying highp vec4 var_FragCoord;\n"
 "	#else\n"
 "		varying highp vec3 var_LightToVertex;\n"
@@ -865,7 +865,7 @@ GLSL_SHADER const char DEPTH_VERT[] =
 "	vec4 pos = w * u_lightOrigin + vec4(attr_Vertex.xyz, w) - u_lightOrigin;\n"
 "	//pos = attr_Vertex - u_lightOrigin; pos = (pos.wwww * u_lightOrigin) + pos;\n"
 "#ifdef _HARM_POINT_LIGHT\n"
-"	#ifdef _HARM_FLOAT_TEXTURE\n"
+"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
 "		var_FragCoord = pos * u_modelViewProjectionMatrix;\n"
 "	#else\n"
 "		vec4 posWorld = u_modelMatrix * pos;\n"
@@ -888,7 +888,7 @@ GLSL_SHADER const char DEPTH_FRAG[] =
 "uniform highp float u_uniformParm1; // frustum z-near\n"
 "\n"
 "#ifdef _HARM_POINT_LIGHT\n"
-"	#ifdef _HARM_FLOAT_TEXTURE\n"
+"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
 "		varying highp vec4 var_FragCoord;\n"
 "	#else\n"
 "		varying highp vec3 var_LightToVertex;\n"
@@ -897,13 +897,19 @@ GLSL_SHADER const char DEPTH_FRAG[] =
 "	varying highp vec4 var_FragCoord;\n"
 "#endif\n"
 "\n"
+"#ifdef _HARM_POINT_LIGHT\n"
+"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
+PACK_FLOAT_FUNC()
+"	#else\n"
 VECTOR_TO_DEPTH_FUNC(u_uniformParm0, u_uniformParm1)
+"	#endif\n"
+"#endif\n"
 "\n"
 "void main(void)\n"
 "{\n"
 "	float depth;\n"
 "#ifdef _HARM_POINT_LIGHT\n"
-"	#ifdef _HARM_FLOAT_TEXTURE\n"
+"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
 "		float normalizedDistance = var_FragCoord.z / var_FragCoord.w;\n"
 "		depth = (normalizedDistance + 1.0) * 0.5;\n"
 "	#else\n"
@@ -914,8 +920,11 @@ VECTOR_TO_DEPTH_FUNC(u_uniformParm0, u_uniformParm1)
 "#else\n"
 "	depth = var_FragCoord.z / var_FragCoord.w;\n"
 "#endif\n"
-"    //gl_FragColor = pack(depth);\n"
+"#ifdef _HARM_DEPTH_PACK_TO_VEC4\n"
+"    gl_FragColor = depth < 1.0 ? pack(depth) : vec4(1.0, 1.0, 1.0, 1.0);\n"
+"#else\n"
 "    gl_FragColor = vec4(depth, 0.0, 0.0, 1.0);\n"
+"#endif\n"
 "}\n"
 ;
 
@@ -971,7 +980,7 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_VERT[] =
 		"uniform highp vec4 globalLightOrigin;\n"
 		"\n"
 		"#ifdef _HARM_POINT_LIGHT\n"
-		"	#ifdef _HARM_FLOAT_TEXTURE\n"
+		"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
         "		varying highp vec4 var_VertexPosition;\n"
 		"		varying highp vec3 var_LightToVertex;\n"
 		"	#else\n"
@@ -1016,7 +1025,7 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_VERT[] =
         "	var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;\n"
         "\n"
 		"#ifdef _HARM_POINT_LIGHT\n"
-        "   #ifdef _HARM_FLOAT_TEXTURE\n"
+        "   #ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
 		"	    vec4 posInLight = u_modelMatrix * attr_Vertex;\n"
 		"	    var_LightToVertex = posInLight.xyz - globalLightOrigin.xyz;\n"
         "	    var_VertexPosition = attr_Vertex;\n"
@@ -1073,9 +1082,10 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
 		"uniform highp float u_uniformParm1; // frustum z-near\n"
         "uniform lowp float u_uniformParm2; // sample size\n"
 		"uniform lowp float u_uniformParm3; // shadow alpha\n"
+		"uniform lowp float u_uniformParm4; // bias\n"
 		"\n"
 		"#ifdef _HARM_POINT_LIGHT\n"
-		"	#ifdef _HARM_FLOAT_TEXTURE\n"
+		"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
         "		varying highp vec4 var_VertexPosition;\n"
 		"		varying highp vec3 var_LightToVertex;\n"
 		"		uniform highp mat4 shadowMVPMatrix[6];\n"
@@ -1086,7 +1096,13 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "	varying highp vec4 var_ShadowCoord;\n"
 		"#endif\n"
         "\n"
+		"#ifdef _HARM_POINT_LIGHT\n"
+		"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
+		UNPACK_FLOAT_FUNC()
+		"	#else\n"
 		VECTOR_TO_DEPTH_FUNC(u_uniformParm0, u_uniformParm1)
+		"	#endif\n"
+		"#endif\n"
 		"\n"
         "void main(void)\n"
         "{\n"
@@ -1127,15 +1143,15 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
 		"	float shadow = 0.0;\n"
 		" \n"
 		"#ifdef _HARM_POINT_LIGHT\n"
-		"	#define SAMPLES 21\n"
+		"	#define SAMPLES 9 // 21\n"
 		"	vec3 sampleOffsetTable[SAMPLES];\n"
-		"	sampleOffsetTable[0] = vec3( 1.0, 1.0, 1.0); sampleOffsetTable[1] = vec3( 1.0, -1.0, 1.0); sampleOffsetTable[2] = vec3(-1.0, -1.0, 1.0); sampleOffsetTable[3] = vec3(-1.0, 1.0, 1.0);\n"
-		"	sampleOffsetTable[4] = vec3( 1.0, 1.0, -1.0); sampleOffsetTable[5] = vec3( 1.0, -1.0, -1.0); sampleOffsetTable[6] = vec3(-1.0, -1.0, -1.0); sampleOffsetTable[7] = vec3(-1.0, 1.0, -1.0);\n"
-		"	sampleOffsetTable[8] = vec3( 1.0, 1.0, 0.0); sampleOffsetTable[9] = vec3( 1.0, -1.0, 0.0); sampleOffsetTable[10] = vec3(-1.0, -1.0, 0.0); sampleOffsetTable[11] = vec3(-1.0, 1.0, 0.0);\n"
-		"	sampleOffsetTable[12] = vec3( 1.0, 0.0, 1.0); sampleOffsetTable[13] = vec3(-1.0, 0.0, 1.0); sampleOffsetTable[14] = vec3( 1.0, 0.0, -1.0); sampleOffsetTable[15] = vec3(-1.0, 0.0, -1.0);\n"
-		"	sampleOffsetTable[16] = vec3( 0.0, 1.0, 1.0); sampleOffsetTable[17] = vec3( 0.0, -1.0, 1.0); sampleOffsetTable[18] = vec3( 0.0, -1.0, -1.0); sampleOffsetTable[19] = vec3( 0.0, 1.0, -1.0);\n"
-		"	sampleOffsetTable[20] = vec3( 0.0, 0.0, 0.0);\n"
-		"	#ifdef _HARM_FLOAT_TEXTURE\n"
+		"	sampleOffsetTable[0] = vec3( 0.0, 0.0, 0.0);\n"
+		"	sampleOffsetTable[1] = vec3( 1.0, 1.0, 1.0); sampleOffsetTable[2] = vec3( 1.0, 1.0, -1.0); sampleOffsetTable[3] = vec3(1.0, -1.0, -1.0); sampleOffsetTable[4] = vec3(1.0, -1.0, 1.0);\n"
+		"	sampleOffsetTable[5] = vec3( -1.0, 1.0, 1.0); sampleOffsetTable[6] = vec3( -1.0, -1.0, 1.0); sampleOffsetTable[7] = vec3( -1.0, 1.0, -1.0); sampleOffsetTable[8] = vec3( -1.0, -1.0, -1.0);\n"
+		"	//sampleOffsetTable[9] = vec3( 1.0, 1.0, 0.0); sampleOffsetTable[10] = vec3( 1.0, -1.0, 0.0); sampleOffsetTable[11] = vec3(-1.0, -1.0, 0.0); sampleOffsetTable[12] = vec3(-1.0, 1.0, 0.0);\n"
+		"	//sampleOffsetTable[13] = vec3( 1.0, 0.0, 1.0); sampleOffsetTable[14] = vec3( 1.0, 0.0, -1.0); sampleOffsetTable[15] = vec3(-1.0, 0.0, -1.0); sampleOffsetTable[16] = vec3(-1.0, 0.0, 1.0);\n"
+		"	//sampleOffsetTable[17] = vec3( 0.0, 1.0, 1.0); sampleOffsetTable[18] = vec3(0.0, 1.0, -1.0); sampleOffsetTable[19] = vec3( 0.0, -1.0, -1.0); sampleOffsetTable[20] = vec3(0.0, -1.0, 1.0);\n"
+		"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
 		"		#define BIAS 0.001\n"
 		"		vec3 toLightGlobal = normalize( -var_LightToVertex );\n"
 		"		int shadowIndex = 0;"
@@ -1154,7 +1170,11 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
 		"		shadowPosition.xyz /= shadowPosition.w;\n"
 		"		float currentDepth = shadowPosition.z - BIAS;\n"
 		"		for (int i = 0; i < SAMPLES; ++i) {\n"
+		"			#ifdef _HARM_DEPTH_PACK_TO_VEC4\n"
+		"			float shadowDepth = unpack(textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * u_uniformParm2)));\n"
+		"			#else\n"
 		"			float shadowDepth = textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * u_uniformParm2)).r;\n"
+		"			#endif\n"
 		"			float visibility = currentDepth - shadowDepth;\n"
 		"			shadow += 1.0 - step(0.0, visibility) * u_uniformParm3;\n"
 		"			//shadow += visibility < 0.0 ? 1.0 : u_uniformParm3;\n"
@@ -1163,7 +1183,11 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
 		"		#define BIAS 0.05\n"
 		"		float currentDepth = VectorToDepthValue(var_LightToVertex) - BIAS;\n"
 		"		for (int i = 0; i < SAMPLES; ++i) {\n"
+		"			#ifdef _HARM_DEPTH_PACK_TO_VEC4\n"
+		"			float shadowDepth = unpack(textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * u_uniformParm2)));\n"
+		"			#else\n"
 		"			float shadowDepth = textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * u_uniformParm2)).r;\n"
+		"			#endif\n"
 		"			float visibility = currentDepth - shadowDepth;\n"
 		"			shadow += 1.0 - step(visibility, 0.0) * u_uniformParm3;\n"
 		"			//shadow += visibility > 0.0 ? 1.0 : u_uniformParm3;\n"
@@ -1179,7 +1203,11 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
 		"	vec3 shadowCoord = var_ShadowCoord.xyz / var_ShadowCoord.w;\n"
 		"	float currentDepth = shadowCoord.z - BIAS;\n"
 		"	for (int i = 0; i < SAMPLES; ++i) {\n"
+		"		#ifdef _HARM_DEPTH_PACK_TO_VEC4\n"
+		"		float shadowDepth = unpack(texture2D(u_fragmentMap6, shadowCoord.st + sampleOffsetTable[i] * u_uniformParm2));\n"
+		"		#else\n"
 		"		float shadowDepth = texture2D(u_fragmentMap6, shadowCoord.st + sampleOffsetTable[i] * u_uniformParm2).r;\n"
+		"		#endif\n"
 		"		float visibility = currentDepth - shadowDepth;\n"
 		"		shadow += 1.0 - step(0.0, visibility) * u_uniformParm3;\n"
 		"		//shadow += visibility <= 0.0 ? 1.0 : u_uniformParm3;\n"

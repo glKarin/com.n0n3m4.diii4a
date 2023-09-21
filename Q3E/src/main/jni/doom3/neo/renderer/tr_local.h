@@ -1504,6 +1504,7 @@ DRAW_GLSL
 ============================================================
 */
 
+#define MAX_UNIFORM_PARMS 8
 //#define _HARM_SHADER_NAME
 typedef struct shaderProgram_s {
 	GLuint		program;
@@ -1565,7 +1566,7 @@ typedef struct shaderProgram_s {
 	GLint		texgenS;
 	GLint		texgenT;
 	GLint		texgenQ;
-	GLint		u_uniformParm[MAX_VERTEX_PARMS];
+	GLint		u_uniformParm[MAX_UNIFORM_PARMS];
 
 #ifdef _SHADOW_MAPPING
 	GLint		shadowMVPMatrix;
@@ -1602,14 +1603,15 @@ extern shaderProgram_t texgenShader; //k: texgen shader
 #ifdef _SHADOW_MAPPING
 extern shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
 extern shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)
-extern shaderProgram_t depthShader_spotLight; //k: depth shader
-extern shaderProgram_t	interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
+extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: interaction with shadow mapping(point light)
+
 extern shaderProgram_t depthShader_parallelLight; //k: depth shader(parallel)
 extern shaderProgram_t	interactionShadowMappingShader_parallelLight; //k: interaction with shadow(parallel)
-
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: interaction with shadow mapping(point light)
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
 extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
+
+extern shaderProgram_t depthShader_spotLight; //k: depth shader
+extern shaderProgram_t	interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
+extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
 #endif
 
 
