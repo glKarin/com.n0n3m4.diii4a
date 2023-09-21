@@ -633,39 +633,12 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         shadowShader = &depthShader_spotLight;
     GL_UseProgram(shadowShader);
 
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
-#if 0
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
-#else
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), vLight->lightRadius.Length());
-#endif
-
-    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-
     uint64 glState = backEnd.glState.glStateBits;
     int faceCulling = backEnd.glState.faceCulling;
 
     // the actual stencil func will be set in the draw code, but we need to make sure it isn't
     // disabled here, and that the value will get reset for the interactions without looking
     // like a no-change-required
-
-    switch( r_shadowMapOccluderFacing.GetInteger() )
-    {
-        case 0:
-            GL_Cull( CT_FRONT_SIDED );
-            GL_PolygonOffset( true, r_shadowMapPolygonFactor.GetFloat(), r_shadowMapPolygonOffset.GetFloat() );
-            break;
-
-        case 1:
-            GL_Cull( CT_BACK_SIDED );
-            GL_PolygonOffset( true, -r_shadowMapPolygonFactor.GetFloat(), -r_shadowMapPolygonOffset.GetFloat() );
-            break;
-
-        default:
-            GL_Cull( CT_TWO_SIDED );
-            GL_PolygonOffset( true, r_shadowMapPolygonFactor.GetFloat(), r_shadowMapPolygonOffset.GetFloat() );
-            break;
-    }
 
     idRenderMatrix lightProjectionRenderMatrix;
     idRenderMatrix lightViewRenderMatrix;
@@ -692,16 +665,25 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         backEnd.shadowP[0] << lightProjectionRenderMatrix;
     }
 
-    qglDisable(GL_BLEND);
-
+    // setup OpenGL state
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO |
              /*GLS_DEPTHMASK | GLS_ALPHAMASK | GLS_GREENMASK | GLS_BLUEMASK |*/
              // GLS_REDMASK |
                      GLS_DEPTHFUNC_LESS);
-
+    qglDisable(GL_BLEND);
 	qglDepthMask(GL_TRUE); // depth buffer lock update yet
+
     // process the chain of shadows with the current rendering state
     backEnd.currentSpace = NULL;
+    float mvp[16];
+    float modelMatrix[16];
+    idVec4 localLight;
+    float globalLightOrigin[4] = {
+            vLight->globalLightOrigin[0],
+            vLight->globalLightOrigin[1],
+            vLight->globalLightOrigin[2],
+            1.0f,
+    };
 
     for( const drawSurf_t* drawSurf = drawSurfs; drawSurf != NULL; drawSurf = drawSurf->nextOnLight )
     {
@@ -727,7 +709,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                 idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
 
                 RB_SetMVP(MVP);*/
-                RB_SetMVP(clipMVP);
+                clipMVP >> mvp;
             }
             else if (side < 0)
             {
@@ -736,22 +718,14 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                 idRenderMatrix::Multiply(renderMatrix_windowSpaceToClipSpace, clipMVP, MVP);
                 RB_SetMVP(MVP);*/
 
-                RB_SetMVP(clipMVP);
+                clipMVP >> mvp;
             }
             else
             {
-                RB_SetMVP(clipMVP);
+                clipMVP >> mvp;
             }
 
-            GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), drawSurf->space->modelMatrix);
-
-            float globalLightOrigin[4] = {
-                    vLight->globalLightOrigin[0],
-                    vLight->globalLightOrigin[1],
-                    vLight->globalLightOrigin[2],
-                    1.0f,
-            };
-            GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
+            (*(idRenderMatrix *)modelMatrix) << drawSurf->space->modelMatrix;
 
             // set the local light position to allow the vertex program to project the shadow volume end cap to infinity
             /*
@@ -760,11 +734,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
             SetVertexParm( RENDERPARM_LOCALLIGHTORIGIN, localLight.ToFloatPtr() );
             */
 
-			idVec4 localLight;
-
 			R_GlobalPointToLocal(drawSurf->space->modelMatrix, vLight->globalLightOrigin, localLight.ToVec3());
 			localLight.w = 0.0f;
-			GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
 
             backEnd.currentSpace = drawSurf->space;
         }
@@ -778,15 +749,12 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         const float* regs = drawSurf->shaderRegisters;
         idVec4 color( 0, 0, 0, 1 );
 
-        uint64 surfGLState = 0;
-
         // set polygon offset if necessary
         if( shader && shader->TestMaterialFlag( MF_POLYGONOFFSET ) )
         {
             GL_PolygonOffset( true, r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * shader->GetPolygonOffset() );
         }
-        else
-            GL_PolygonOffset( false );
+        // else GL_PolygonOffset( false );
 
         if( shader && shader->Coverage() == MC_PERFORATED )
         {
@@ -796,14 +764,12 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
             {
                 const shaderStage_t* pStage = shader->GetStage( stage );
 
-                if( !pStage->hasAlphaTest )
-                {
+                if( !pStage->hasAlphaTest ) {
                     continue;
                 }
 
                 // check the stage enable condition
-                if( regs[ pStage->conditionRegister ] == 0 )
-                {
+                if( regs[ pStage->conditionRegister ] == 0 ) {
                     continue;
                 }
 
@@ -815,12 +781,9 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                 color[3] = regs[ pStage->color.registers[3] ];
 
                 // skip the entire stage if alpha would be black
-                if( color[3] <= 0.0f )
-                {
+                if( color[3] <= 0.0f ) {
                     continue;
                 }
-
-                uint64 stageGLState = surfGLState;
 
                 // set privatePolygonOffset if necessary
                 if( pStage->privatePolygonOffset )
@@ -828,15 +791,21 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                     GL_PolygonOffset( true, r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * pStage->privatePolygonOffset );
                 }
 
-                GL_Color( color );
-
-                GL_State( stageGLState );
-                GL_Uniform1fv(offsetof(shaderProgram_t, alphaTest), &regs[pStage->alphaTestRegister]);
-
                 // renderProgManager.BindShader_TextureVertexColor();
-                GL_UseProgram(&defaultShader);
+                GL_UseProgram(&depthFillShader);
 
-                GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+                idDrawVert *ac = (idDrawVert *)vertexCache.Position(drawSurf->geo->ambientCache);
+                GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+                GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
+
+                RB_SetMVP(mvp);
+                GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), modelMatrix);
+
+                GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+                GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
+                GL_Color( color );
+                GL_Uniform1fv(offsetof(shaderProgram_t, alphaTest), &regs[pStage->alphaTestRegister]);
 
                 // bind the texture
                 GL_SelectTexture( 0 );
@@ -859,13 +828,49 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                 {
                     GL_PolygonOffset( true, r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * shader->GetPolygonOffset() );
                 }
+
+                GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+                GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
             }
         }
 
         if( !didDraw )
 #endif
         {
+            switch( r_shadowMapOccluderFacing.GetInteger() )
+            {
+                case 0:
+                    GL_Cull( CT_FRONT_SIDED );
+                    GL_PolygonOffset( true, r_shadowMapPolygonFactor.GetFloat(), r_shadowMapPolygonOffset.GetFloat() );
+                    break;
+
+                case 1:
+                    GL_Cull( CT_BACK_SIDED );
+                    GL_PolygonOffset( true, -r_shadowMapPolygonFactor.GetFloat(), -r_shadowMapPolygonOffset.GetFloat() );
+                    break;
+
+                default:
+                    GL_Cull( CT_TWO_SIDED );
+                    GL_PolygonOffset( true, r_shadowMapPolygonFactor.GetFloat(), r_shadowMapPolygonOffset.GetFloat() );
+                    break;
+            }
+
             GL_UseProgram(shadowShader);
+
+            GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+
+            RB_SetMVP(mvp);
+            GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), modelMatrix);
+
+            GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
+            GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
+
+            GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
+#if 0
+            GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
+#else
+            GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), vLight->lightRadius.Length());
+#endif
 
             GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t),
                                    vertexCache.Position(drawSurf->geo->shadowCache));
@@ -891,14 +896,14 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 #endif
 			GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), w);
             RB_DrawShadowElementsWithCounters_shadowMapping( drawSurf->geo, SM_REAR_CAP );
+
+            // cleanup the shadow specific rendering state
+            GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
         }
     }
     backEnd.currentSpace = NULL;
 
     RB_TestColorBuffer(vLight, side);
-
-    // cleanup the shadow specific rendering state
-    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 	// restore GL state
     GL_UseProgram(NULL);

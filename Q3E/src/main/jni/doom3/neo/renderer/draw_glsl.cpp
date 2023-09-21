@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 
 #ifdef _SHADOW_MAPPING
-//#define _HARM_ES2_POINT_LIGHT_Z_AS_DEPTH
+#define _HARM_ES2_POINT_LIGHT_Z_AS_DEPTH
 #endif
 
 #include "draw_glsl_shader.cpp"
