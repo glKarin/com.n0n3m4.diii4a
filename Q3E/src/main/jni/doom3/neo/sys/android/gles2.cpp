@@ -201,17 +201,20 @@ static bool GLimp_dlopen()
 	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */ "libGLESv2.so";
 #endif
 	common->Printf("dlopen(%s)\n", driverName);
+#if 0
 	if ( !( glHandle = dlopen( driverName, RTLD_NOW | RTLD_GLOBAL ) ) ) {
 		common->Printf("dlopen(%s) failed: %s\n", driverName, dlerror());
 		return false;
 	}
-	R_LoadOpenGLFunc();
 	common->Printf("dlopen(%s) done\n", driverName);
+#endif
+	R_LoadOpenGLFunc();
 	return true;
 }
 
 static void GLimp_dlclose()
 {
+#if 0
 	if ( !glHandle ) {
 		common->Printf("dlclose: GL handle is NULL\n");
 	} else {
@@ -219,6 +222,7 @@ static void GLimp_dlclose()
 		dlclose( glHandle );
 		glHandle = NULL;
 	}
+#endif
 }
 
 /*

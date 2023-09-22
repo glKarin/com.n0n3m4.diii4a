@@ -299,6 +299,9 @@ class idRenderSystem
 	// RAVEN END
 	virtual void			DebugGraph( float cur, float min, float max, const idVec4 &color ) = 0;
 #endif
+#ifdef _MULTITHREAD
+		virtual void EndFrame(byte *data, int *frontEndMsec, int *backEndMsec) = 0;
+#endif
 };
 
 extern idRenderSystem 			*renderSystem;

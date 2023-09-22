@@ -1184,6 +1184,20 @@ void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = 
 			tr.viewportOffset[0] = -xo;
 			tr.viewportOffset[1] = -yo;
 
+#ifdef _MULTITHREAD
+			if (multithreadActive)
+			{
+				if (ref) {
+					tr.BeginFrame(oldWidth, oldHeight);
+					tr.primaryWorld->RenderScene(ref);
+					tr.EndFrame(temp, NULL, NULL);
+				} else {
+					session->UpdateScreen(temp, true);
+				}
+			}
+			else
+			{
+#endif
 			if (ref) {
 				tr.BeginFrame(oldWidth, oldHeight);
 				tr.primaryWorld->RenderScene(ref);
@@ -1191,6 +1205,9 @@ void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = 
 			} else {
 				session->UpdateScreen();
 			}
+#ifdef _MULTITHREAD
+			}
+#endif
 
 			int w = oldWidth;
 
@@ -1204,10 +1221,17 @@ void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = 
 				h = height - yo;
 			}
 
+#ifdef _MULTITHREAD
+			if (!multithreadActive)
+			{
+#endif
 #if !defined(GL_ES_VERSION_2_0)
 			qglReadBuffer(GL_FRONT);
 #endif
 			qglReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, temp);
+#ifdef _MULTITHREAD
+			}
+#endif
 
 			//int	row = (w * 4 + 4) & ~4;		// OpenGL pads to dword boundaries
 			int	row = (w * 4); // ES
@@ -2455,10 +2479,11 @@ idCVar r_shadowMapOccluderFacing( "r_shadowMapOccluderFacing", "2", CVAR_RENDERE
 idCVar harm_r_shadowMapLod( "harm_r_shadowMapLod", "-1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "force using shadow map LOD(0 - 4)" );
 idCVar harm_r_shadowMapBias( "harm_r_shadowMapBias", "0.05", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map bias" );
 idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map alpha" );
-idCVar harm_r_shadowMapSampleSize( "harm_r_shadowMapSampleSize", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map sample size" );
+idCVar harm_r_shadowMapSampleFactor( "harm_r_shadowMapSampleFactor", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map sample factor" );
 idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map frustum near" );
-idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "7996.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map frustum far" );
+idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "0.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map frustum far" );
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar harm_r_shadowMapPointLight("harm_r_shadowMapPointLight", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method in OpenGLES2.0: 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = emulate z transform as depth value", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 
 #include "Framebuffer.cpp"
 #include "tr_shadowmapping.cpp"

@@ -4000,3 +4000,50 @@ const char * idSessionLocal::GetDeathwalkMapName(const char *mapName) const
 	return dwMap;
 }
 #endif
+
+#ifdef _MULTITHREAD
+void idSessionLocal::UpdateScreen(byte *data, bool outOfSequence)
+{
+	if(!data)
+	{
+		UpdateScreen(outOfSequence);
+		return;
+	}
+
+#ifdef _WIN32
+
+	if (com_editors) {
+		if (!Sys_IsWindowVisible()) {
+			return;
+		}
+	}
+
+#endif
+
+	if (insideUpdateScreen) {
+		return;
+//		common->FatalError( "idSessionLocal::UpdateScreen: recursively called" );
+	}
+
+	insideUpdateScreen = true;
+
+	// if this is a long-operation update and we are in windowed mode,
+	// release the mouse capture back to the desktop
+	if (outOfSequence) {
+		Sys_GrabMouseCursor(false);
+	}
+
+	renderSystem->BeginFrame(renderSystem->GetScreenWidth(), renderSystem->GetScreenHeight());
+
+	// draw everything
+	Draw();
+
+	if (com_speeds.GetBool()) {
+		renderSystem->EndFrame(&time_frontend, &time_backend);
+	} else {
+		renderSystem->EndFrame(data, NULL, NULL);
+	}
+
+	insideUpdateScreen = false;
+}
+#endif

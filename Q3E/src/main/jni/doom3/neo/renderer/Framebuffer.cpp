@@ -88,8 +88,10 @@ void Framebuffer::Init()
 #ifdef GL_ES_VERSION_3_0
 		if(USING_GLES3)
 		{
-			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA, 0);
 			globalFramebuffers.shadowFBO[i]->AddDepthBuffer(GL_DEPTH_COMPONENT24);
+#ifdef SHADOW_MAPPING_DEBUG
+			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA, 0); // for debug, not need render color buffer with OpenGLES3.0
+#endif
 			//qglDrawBuffers( 0, NULL );
 		}
 		else

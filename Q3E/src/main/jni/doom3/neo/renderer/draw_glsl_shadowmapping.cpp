@@ -1,10 +1,73 @@
+/**
+ * Shadow mapping in DIII4A from RBDOOM3-BFG
+ * maybe has some wrong.
+ *
+ * OpenGLES2.0
+ * FrameBuffer: color buffer, depth buffer(24)
+ * glClearColor: 1.0 as max depth
+ * glClear: color buffer | depth buffer
+ * shadow depth value: color::RED component. So because of color buffer float precision limit, worse than depth texture with OpenGLES3.0,
+ * point light: 2D cubemap color texture, 2D depth texture. shadow map depth stage: clip MVP(-1 - 1) -> fragment shader (z / w + 1.0) * 0.5; interaction stage: window space MVP(0 - 1) x 6.
+ * parallel light: 2D color texture, 2D depth texture. NO CASCADE like RBDOOM3-BFG. shadow map depth stage: clip MVP(-1 - 1) -> fragment shader (z / w + 1.0) * 0.5; interaction stage: window space MVP(0 - 1).
+ * spot light: 2D color texture, 2D depth texture. shadow map depth stage: window space MVP(0 - 1) -> fragment shader (z / w); interaction stage: window space MVP(0 - 1).
+ *
+ * OpenGLES3.0
+ * FrameBuffer: depth buffer(24)
+ * glClear: depth buffer
+ * shadow depth value: depth texture, and setup compare mode, using texture2DShadow to sample
+ * point light: 2D array depth texture, 6 layers: +X, -X, +Y, -Y, +Z, -Z, sequence same as cubemap. shadow map depth stage: clip MVP(-1 - 1); interaction stage: window space MVP(0 - 1) x 6.
+ * parallel light: 2D array depth texture. because NO CASCADE, so only using 0 layer. shadow map depth stage: clip MVP(-1 - 1); interaction stage: window space MVP(0 - 1).
+ * spot light: 2D array depth texture, only using 0 layer. shadow map depth stage: window space MVP(0 - 1); interaction stage: window space MVP(0 - 1).
+ *
+ * PCF:
+ * 9 vec2/vec3 constants
+ * 5 LODs: 2048, 1024, 512, 512, 256
+ * 5 sample base factor: 1.0, 0.5, 0.2, 0.2, 0.1
+ *
+ * BIAS:
+ * 0 - 0.001. I am not sure.
+ *
+ * Point light:
+ * Most light type at scene in Most levels.
+ * In OpenGLES2.0, cvar harm_r_shadowMapPointLight
+ * 0. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5](slowest and bad, but render same as OpenGLES3.0)
+ * 1. glsl macro _HARM_POINT_LIGHT_FRUSTUM_FAR: using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar](fastest and best, but depend frustum far)
+ * 2. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: emulate z transform as depth value(faster and well, more incorrect rendering)
+ *
+ * Parallel light:
+ * Few light type. In out of room big scene, the lights most are point-light, but in lotaa/lotab/lotad of Prey are parallel light.
+ *
+ * Spot light:
+ * Few light type. Most in ceiling lamp, e.g. in DOOM3, vent lights with rotating fan on ceiling; in Quake4 lights on ceiling(building_b start position).
+ *
+ * CVar:
+ * r_useShadowMapping: bool, 0, enable shadow mapping
+ * r_shadowMapFrustumFOV: float, 90, point light view FOV
+ * harm_r_shadowMapLod: int, -1, force using shadow map LOD(0 - 4), -1 is auto
+ * harm_r_shadowMapAlpha: float, 0.5, shadow alpha(0 - 1)
+ * harm_r_shadowMapSampleFactor: float, -1.0, shadow sample size factor, 0 is disable, < 0 is auto, > 0 force using a fixed value
+ * harm_r_shadowMapPointLight: int, 1, point light render method in OpenGLES2.0, 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = emulate z transform as depth value
+ *
+ */
 
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
 #include "tr_local.h"
 
+#define POINT_LIGHT_FRUSTUM_FAR 7996.0f
+
+enum pointLightRenderMethod_e
+{
+    POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH = 0,
+    POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR = 1,
+    POINT_LIGHT_RENDER_METHOD_EMULATE_Z = 2,
+};
+
 static bool r_shadowMapping = false;
+static int r_shadowMapPointLight = 0;
+
+static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f, 0.5f, 0.2f, 0.2f, 0.1f};
 
 static idCVar SaveColorBuffer("SaveColorBuffer", "0", CVAR_BOOL, "");
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug light type mask. 1: parallel, 2: point, 4: spot");
@@ -69,6 +132,135 @@ ID_INLINE bool RB_ShadowMapping_filterLightType(void)
         }
     }
     return false;
+}
+
+ID_INLINE float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
+{
+    float far;
+    if(harm_r_shadowMapFrustumFar.GetFloat() == 0)
+        far = vLight->lightRadius.Length();
+    else if(harm_r_shadowMapFrustumFar.GetFloat() < 0)
+        far = vLight->lightRadius.Length() * -harm_r_shadowMapFrustumFar.GetFloat();
+    else
+    {
+        if(harm_r_shadowMapFrustumFar.GetFloat() <= harm_r_shadowMapFrustumNear.GetFloat())
+            far = vLight->lightRadius.Length() * 2;
+        else
+            far = harm_r_shadowMapFrustumFar.GetFloat();
+    }
+    if(far <= 4)
+        far = POINT_LIGHT_FRUSTUM_FAR;
+    return far;
+}
+
+ID_INLINE shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* vLight, int side)
+{
+    shaderProgram_t *shadowShader;
+    if( vLight->parallel && side >= 0 )
+        shadowShader = &depthShader_parallelLight;
+    else if( vLight->pointLight && side >= 0 )
+    {
+#ifdef GL_ES_VERSION_3_0
+        if(USING_GLES3)
+            shadowShader = &depthShader_pointLight;
+        else
+#endif
+        {
+            switch (r_shadowMapPointLight) {
+                case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+                    shadowShader = &depthShader_pointLight;
+                    break;
+                case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
+                    shadowShader = &depthShader_pointLight_far;
+                    break;
+                case POINT_LIGHT_RENDER_METHOD_EMULATE_Z:
+                    shadowShader = &depthShader_pointLight_z;
+                    break;
+                default:
+                    shadowShader = &depthShader_pointLight;
+                    break;
+            }
+        }
+    }
+    else
+        shadowShader = &depthShader_spotLight;
+    return shadowShader;
+}
+
+ID_INLINE shaderProgram_t * RB_SelectShadowMappingInteractionShader(const viewLight_t* vLight)
+{
+    shaderProgram_t *shadowInteractionShader;
+    if(r_usePhong)
+    {
+        if( vLight->parallel )
+        {
+            shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
+        }
+        else if( vLight->pointLight )
+        {
+#ifdef GL_ES_VERSION_3_0
+            if(USING_GLES3)
+                shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+            else
+#endif
+            {
+                switch (r_shadowMapPointLight) {
+                    case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+                        shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+                        break;
+                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
+                        shadowInteractionShader = &interactionShadowMappingShader_pointLight_far;
+                        break;
+                    case POINT_LIGHT_RENDER_METHOD_EMULATE_Z:
+                        shadowInteractionShader = &interactionShadowMappingShader_pointLight_z;
+                        break;
+                    default:
+                        shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+                        break;
+                }
+            }
+        }
+        else
+        {
+            shadowInteractionShader = &interactionShadowMappingShader_spotLight;
+        }
+    }
+    else
+    {
+        if( vLight->parallel )
+        {
+            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_parallelLight;
+        }
+        else if( vLight->pointLight )
+        {
+#ifdef GL_ES_VERSION_3_0
+            if(USING_GLES3)
+                shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+            else
+#endif
+            {
+                switch (r_shadowMapPointLight) {
+                    case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+                        break;
+                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
+                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_far;
+                        break;
+                    case POINT_LIGHT_RENDER_METHOD_EMULATE_Z:
+                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_z;
+                        break;
+                    default:
+                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+                        break;
+                }
+            }
+        }
+        else
+        {
+            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
+        }
+    }
+    return shadowInteractionShader;
 }
 
 void R_SaveColorBuffer(const char *name)
@@ -587,7 +779,9 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
 	{
-		globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
+#ifdef SHADOW_MAPPING_DEBUG
+		globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]); // for debug, not need render color buffer with OpenGLES3.0
+#endif
 		if( side < 0 )
 			globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepthLayer( globalImages->shadowES3Image[vLight->shadowLOD], 0 );
 		else
@@ -596,14 +790,14 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 	else
 #endif
 	{
-    globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepth( globalImages->shadowDepthImage[vLight->shadowLOD]);
+        globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepth( globalImages->shadowDepthImage[vLight->shadowLOD]);
 
-    if( vLight->parallel && side >= 0 )
-        globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
-    else if( vLight->pointLight && side >= 0 )
-        globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2DLayer( globalImages->shadowCubeImage[vLight->shadowLOD], side );
-    else
-        globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
+        if( vLight->parallel && side >= 0 )
+            globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
+        else if( vLight->pointLight && side >= 0 )
+            globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2DLayer( globalImages->shadowCubeImage[vLight->shadowLOD], side );
+        else
+            globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
 	}
 
 #if 0
@@ -619,23 +813,27 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 #ifdef GL_ES_VERSION_3_0
 		if(USING_GLES3)
 		{
-			qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			//qglClear( GL_DEPTH_BUFFER_BIT );
+#ifdef SHADOW_MAPPING_DEBUG
+            qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 			qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+#else
+            qglClear( GL_DEPTH_BUFFER_BIT );
+#endif
 		}
 		else
 #endif
         {
-#if !defined(_HARM_SHADOW_MAPPING_POINT_LIGHT_USING_DISTANCE)
-            qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-#else
             if(vLight->parallel)
                 qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             else if(vLight->pointLight)
-                qglClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            {
+                if(r_shadowMapPointLight != POINT_LIGHT_RENDER_METHOD_EMULATE_Z)
+                    qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+                else
+                    qglClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            }
             else
                 qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-#endif
 		    qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 	    }
 		qglDepthMask(GL_FALSE);
@@ -649,15 +847,6 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         RB_ResetViewportAndScissorToDefaultCamera(backEnd.viewDef);
         return;
 	}
-
-    // select shadow map shader
-    shaderProgram_t *shadowShader;
-    if( vLight->parallel && side >= 0 )
-        shadowShader = &depthShader_parallelLight;
-    else if( vLight->pointLight && side >= 0 )
-        shadowShader = &depthShader_pointLight;
-    else
-        shadowShader = &depthShader_spotLight;
 
     // the actual stencil func will be set in the draw code, but we need to make sure it isn't
     // disabled here, and that the value will get reset for the interactions without looking
@@ -691,11 +880,14 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
     uint64 glState = backEnd.glState.glStateBits;
     int faceCulling = backEnd.glState.faceCulling;
 
+    // select shadow map shader
+    shaderProgram_t *shadowShader = RB_SelectShadowMapShader(vLight, side);
+
     // setup OpenGL state
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO |
              /*GLS_DEPTHMASK | GLS_ALPHAMASK | GLS_GREENMASK | GLS_BLUEMASK |*/
              // GLS_REDMASK |
-                     GLS_DEPTHFUNC_LESS);
+                     GLS_DEPTHFUNC_LESS); // TODO: in OpenGLES2.0, only write RED color buffer and depth buffer; in OpenGLES3.0, only write depth buffer
     qglDisable(GL_BLEND);
 	qglDepthMask(GL_TRUE); // depth buffer lock update yet
 
@@ -870,32 +1062,30 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
             GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
 
             GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
-            if(harm_r_shadowMapFrustumFar.GetFloat() <= harm_r_shadowMapFrustumNear.GetFloat())
-                GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), vLight->lightRadius.Length());
-            else
-                GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
+            GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), RB_GetPointLightFrustumFar(vLight));
 
             GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t), vertexCache.Position(drawSurf->geo->shadowCache));
 
             //RB_DrawElementsWithCounters( drawSurf->geo );
 			float w;
-#if !defined(_HARM_SHADOW_MAPPING_POINT_LIGHT_USING_DISTANCE)
-                w = 1.0;
-#else
-            if(vLight->parallel)
-                    w = 1.0;
-            else if(vLight->pointLight)
-            {
 #ifdef GL_ES_VERSION_3_0
-                if(USING_GLES3)
-                    w = 1.0;
-                else
-#endif
-                    w = 0.0;
-            }
-            else
+            if(USING_GLES3)
                 w = 1.0;
+            else
 #endif
+            {
+                if(vLight->parallel)
+                    w = 1.0;
+                else if(vLight->pointLight)
+                {
+                    if(r_shadowMapPointLight != POINT_LIGHT_RENDER_METHOD_EMULATE_Z)
+                        w = 1.0;
+                    else
+                        w = 0.0;
+                }
+                else
+                    w = 1.0;
+            }
 			GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), w);
             RB_DrawShadowElementsWithCounters_shadowMapping( drawSurf->geo, SM_REAR_CAP );
 
@@ -934,44 +1124,11 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     }
 
     // bind the vertex and fragment shader
-    shaderProgram_t *shadowInteractionShader;
-    if(r_usePhong)
-    {
-        if( backEnd.vLight->parallel )
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
-        }
-        else if( backEnd.vLight->pointLight )
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-        }
-        else
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_spotLight;
-        }
-    }
-    else
-    {
-        if( backEnd.vLight->parallel )
-        {
-            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_parallelLight;
-        }
-        else if( backEnd.vLight->pointLight )
-        {
-            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
-        }
-        else
-        {
-            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
-        }
-    }
+    shaderProgram_t *shadowInteractionShader = RB_SelectShadowMappingInteractionShader(backEnd.vLight);
     GL_UseProgram(shadowInteractionShader);
 
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
-    if(harm_r_shadowMapFrustumFar.GetFloat() <= harm_r_shadowMapFrustumNear.GetFloat())
-        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), backEnd.vLight->lightRadius.Length());
-    else
-        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), harm_r_shadowMapFrustumFar.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), RB_GetPointLightFrustumFar(backEnd.vLight));
 
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), harm_r_shadowMapBias.GetFloat());
 

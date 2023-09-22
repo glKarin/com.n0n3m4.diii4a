@@ -829,6 +829,9 @@ class idRenderSystemLocal : public idRenderSystem
 	bool scopeView;
 	bool shuttleView;
 #endif
+#ifdef _MULTITHREAD
+	virtual void EndFrame(byte *data, int *frontEndMsec, int *backEndMsec);
+#endif
 
 	public:
 		// internal functions
@@ -1604,6 +1607,15 @@ extern shaderProgram_t texgenShader; //k: texgen shader
 extern shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
 extern shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)
 extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: interaction with shadow mapping(point light)
+// for GLES2.0
+// distance / frustum-far
+extern shaderProgram_t depthShader_pointLight_far; //k: depth shader(point light)
+extern shaderProgram_t	interactionShadowMappingShader_pointLight_far; //k: interaction with shadow mapping(point light)
+extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight_far; //k: interaction with shadow mapping(point light)
+// emulate Z transform
+extern shaderProgram_t depthShader_pointLight_z; //k: depth shader(point light)
+extern shaderProgram_t	interactionShadowMappingShader_pointLight_z; //k: interaction with shadow mapping(point light)
+extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight_z; //k: interaction with shadow mapping(point light)
 
 extern shaderProgram_t depthShader_parallelLight; //k: depth shader(parallel)
 extern shaderProgram_t	interactionShadowMappingShader_parallelLight; //k: interaction with shadow(parallel)
@@ -2019,6 +2031,9 @@ extern unsigned int lastRenderTime;
 extern int r_maxFps;
 
 #ifdef _SHADOW_MAPPING
+
+#define SHADOW_MAPPING_DEBUG
+
 #include "GLMatrix.h"
 #include "RenderMatrix.h"
 
@@ -2046,10 +2061,11 @@ extern idCVar r_shadowMapOccluderFacing;
 extern idCVar harm_r_shadowMapLod;
 extern idCVar harm_r_shadowMapBias;
 extern idCVar harm_r_shadowMapAlpha;
-extern idCVar harm_r_shadowMapSampleSize;
+extern idCVar harm_r_shadowMapSampleFactor;
 extern idCVar harm_r_shadowMapFrustumNear;
 extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
+extern idCVar harm_r_shadowMapPointLight;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;

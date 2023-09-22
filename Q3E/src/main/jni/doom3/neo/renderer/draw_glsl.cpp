@@ -304,7 +304,6 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 			idRenderMatrix MVP;
 			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
 			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
-
         }
 
 		// texture 6 is the shadow map
@@ -345,13 +344,12 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
 		}
 		}
-        float sampleSize = harm_r_shadowMapSampleSize.GetFloat();
-        if(sampleSize < 0)
+        float sampleFactor = harm_r_shadowMapSampleFactor.GetFloat();
+        if(sampleFactor < 0)
         {
-            static float SampleSizes[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f, 0.5f, 0.2f, 0.2f, 0.1f};
-            sampleSize = SampleSizes[backEnd.vLight->shadowLOD];
+            sampleFactor = SampleFactors[backEnd.vLight->shadowLOD];
         }
-        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), sampleSize * sampleScale);
+        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), sampleFactor * sampleScale);
 	};
 #endif
 
@@ -626,6 +624,7 @@ static void R_InitGLSLCvars(void)
 
 #ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
+    r_shadowMapPointLight = harm_r_shadowMapPointLight.GetInteger();
 #endif
 }
 
@@ -653,6 +652,11 @@ void R_CheckBackEndCvars(void)
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
 	}
+    if(harm_r_shadowMapPointLight.IsModified())
+    {
+        r_shadowMapPointLight = harm_r_shadowMapPointLight.GetInteger();
+        harm_r_shadowMapPointLight.ClearModified();
+    }
 #endif
 }
 

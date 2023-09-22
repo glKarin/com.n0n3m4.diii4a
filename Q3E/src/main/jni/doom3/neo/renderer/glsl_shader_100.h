@@ -823,14 +823,10 @@ GLSL_SHADER const char TEXGEN_FRAG[] =
 #define VECTOR_TO_DEPTH_FUNC(far, near) \
 "float VectorToDepthValue(vec3 Vec)\n" \
 "{\n" \
-"#if defined(_HARM_POINT_LIGHT_USING_FAR_PLANE)\n" \
-"	return length(Vec) / " #far ";\n" \
-"#else\n" \
 "	vec3 AbsVec = abs(Vec);\n" \
 "	float LocalZcomp = max(AbsVec.x, max(AbsVec.y, AbsVec.z));\n" \
 "	float NormZComp = (" #far " + " #near ") / (" #far " - " #near ") - (2.0 * " #far " * " #near ") / (" #far " - " #near ") / LocalZcomp;\n" \
 "	return clamp((NormZComp + 1.0) * 0.5, 0.0, 1.0);\n" \
-"#endif\n" \
 "}\n"
 
 // shadow map
@@ -897,12 +893,12 @@ GLSL_SHADER const char DEPTH_FRAG[] =
 "	varying highp vec4 var_FragCoord;\n"
 "#endif\n"
 "\n"
-"#ifdef _HARM_POINT_LIGHT\n"
-"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
+"#ifdef _HARM_DEPTH_PACK_TO_VEC4\n"
 PACK_FLOAT_FUNC()
-"	#else\n"
+"#endif\n"
+"\n"
+"#ifdef _HARM_POINT_LIGHT_EMULATE_Z\n"
 VECTOR_TO_DEPTH_FUNC(u_uniformParm0, u_uniformParm1)
-"	#endif\n"
 "#endif\n"
 "\n"
 "void main(void)\n"
@@ -912,6 +908,8 @@ VECTOR_TO_DEPTH_FUNC(u_uniformParm0, u_uniformParm1)
 "	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
 "		float normalizedDistance = var_FragCoord.z / var_FragCoord.w;\n"
 "		depth = (normalizedDistance + 1.0) * 0.5;\n"
+"	#elif defined(_HARM_POINT_LIGHT_FRUSTUM_FAR)\n"
+"		depth = length(var_LightToVertex) / u_uniformParm0;\n"
 "	#else\n"
 "		depth = VectorToDepthValue(var_LightToVertex);\n"
 "	#endif\n"
@@ -1096,12 +1094,12 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "	varying highp vec4 var_ShadowCoord;\n"
 		"#endif\n"
         "\n"
-		"#ifdef _HARM_POINT_LIGHT\n"
-		"	#ifdef _HARM_POINT_LIGHT_Z_AS_DEPTH\n"
+		"#ifdef _HARM_DEPTH_PACK_TO_VEC4\n"
 		UNPACK_FLOAT_FUNC()
-		"	#else\n"
+		"#endif\n"
+        "\n"
+		"#ifdef _HARM_POINT_LIGHT_EMULATE_Z\n"
 		VECTOR_TO_DEPTH_FUNC(u_uniformParm0, u_uniformParm1)
-		"	#endif\n"
 		"#endif\n"
 		"\n"
         "void main(void)\n"
@@ -1169,6 +1167,19 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
 		"		vec4 shadowPosition = var_VertexPosition * shadowMVPMatrix[shadowIndex];\n"
 		"		shadowPosition.xyz /= shadowPosition.w;\n"
 		"		float currentDepth = shadowPosition.z - BIAS;\n"
+		"		for (int i = 0; i < SAMPLES; ++i) {\n"
+		"			#ifdef _HARM_DEPTH_PACK_TO_VEC4\n"
+		"			float shadowDepth = unpack(textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * u_uniformParm2)));\n"
+		"			#else\n"
+		"			float shadowDepth = textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * u_uniformParm2)).r;\n"
+		"			#endif\n"
+		"			float visibility = currentDepth - shadowDepth;\n"
+		"			shadow += 1.0 - step(0.0, visibility) * u_uniformParm3;\n"
+		"			//shadow += visibility < 0.0 ? 1.0 : u_uniformParm3;\n"
+		"		}\n"
+		"	#elif defined(_HARM_POINT_LIGHT_FRUSTUM_FAR)\n"
+		"		#define BIAS 0.001\n"
+		"		float currentDepth = length(var_LightToVertex) / u_uniformParm0 - BIAS;\n"
 		"		for (int i = 0; i < SAMPLES; ++i) {\n"
 		"			#ifdef _HARM_DEPTH_PACK_TO_VEC4\n"
 		"			float shadowDepth = unpack(textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * u_uniformParm2)));\n"
