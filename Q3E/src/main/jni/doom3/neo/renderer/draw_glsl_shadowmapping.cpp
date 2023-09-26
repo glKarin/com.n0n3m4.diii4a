@@ -366,7 +366,7 @@ RB_DrawElementsWithCounters
 #define SM_SIL_EDGE 1
 #define SM_REAR_CAP 2
 #define SM_FRONT_CAP 4
-static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t *tri, int type = 0)
+static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t *tri/*, int type = 0*/)
 {
     if (!backEnd.glState.currentProgram) {
         common->Printf("RB_DrawShadowElementsWithCounters_shadowMapping: no current program object\n");
@@ -1066,7 +1066,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
             GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t), vertexCache.Position(drawSurf->geo->shadowCache));
 
-            //RB_DrawElementsWithCounters( drawSurf->geo );
+#if 0
 			float w;
 #ifdef GL_ES_VERSION_3_0
             if(USING_GLES3)
@@ -1087,7 +1087,9 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                     w = 1.0;
             }
 			GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), w);
-            RB_DrawShadowElementsWithCounters_shadowMapping( drawSurf->geo, SM_REAR_CAP );
+#endif
+            RB_DrawShadowElementsWithCounters_shadowMapping( drawSurf->geo/*, SM_REAR_CAP*/ );
+            //RB_DrawElementsWithCounters( drawSurf->geo );
 
             // cleanup the shadow specific rendering state
             GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
@@ -1130,7 +1132,9 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), RB_GetPointLightFrustumFar(backEnd.vLight));
 
+#ifdef SHADOW_MAPPING_DEBUG
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), harm_r_shadowMapBias.GetFloat());
+#endif
 
             // perform setup here that will be constant for all interactions
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE |

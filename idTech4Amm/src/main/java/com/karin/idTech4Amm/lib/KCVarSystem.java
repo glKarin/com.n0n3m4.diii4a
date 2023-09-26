@@ -27,7 +27,8 @@ public final class KCVarSystem
                         ),
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "4.0", "Specular exponent in interaction light model", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external GLSL shader program directory path", 0),
-                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0: Always heap; Negative: Always stack(original); Positive: Max stack memory limit)", 0)
+                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0: Always heap; Negative: Always stack(original); Positive: Max stack memory limit)", 0),
+                        KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "0.5", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(

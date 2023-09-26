@@ -38,7 +38,7 @@
     <string name="blinn_phong">Blinn-Phong</string>
     <string name="specular_exponent_cvar_harm_r_specularexponent">Specular exponent(cvar `harm_r_specularExponent`):</string>
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Specular exponent in interaction light model(default is 4.0)</string>
-    <string name="sound">Sound</string>
+    <string name="sound">Sound(cvar `s_driver`)</string>
     <string name="load_quicksave_when_start_game">Load QuickSave when start game</string>
     <string name="edit_autoexec_cfg">Edit autoexec.cfg</string>
     <string name="edit_doomconfig_cfg">Edit DoomConfig.cfg</string>

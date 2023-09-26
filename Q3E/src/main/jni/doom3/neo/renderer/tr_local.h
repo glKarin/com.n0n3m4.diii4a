@@ -35,6 +35,9 @@ extern bool USING_GLES3;
 
 //#define _SHADOW_MAPPING
 #ifdef _SHADOW_MAPPING
+
+//#define SHADOW_MAPPING_DEBUG
+
 #define MAX_SHADOWMAP_RESOLUTIONS 5
 #include "Framebuffer.h"
 
@@ -2031,8 +2034,6 @@ extern unsigned int lastRenderTime;
 extern int r_maxFps;
 
 #ifdef _SHADOW_MAPPING
-
-#define SHADOW_MAPPING_DEBUG
 
 #include "GLMatrix.h"
 #include "RenderMatrix.h"

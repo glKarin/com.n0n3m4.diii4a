@@ -831,9 +831,10 @@ GLSL_SHADER const char ES3_DEPTH_VERT[] =
 "void main(void)\n"
 "{\n"
 "	//vec4 pos = attr_Vertex.w * u_lightOrigin + attr_Vertex - u_lightOrigin;\n"
-"	float w = max(attr_Vertex.w, u_uniformParm2);\n"
-"	vec4 pos = w * u_lightOrigin + vec4(attr_Vertex.xyz, w) - u_lightOrigin;\n"
+"	//float w = max(attr_Vertex.w, u_uniformParm2);\n"
+"	//vec4 pos = w * u_lightOrigin + vec4(attr_Vertex.xyz, w) - u_lightOrigin;\n"
 "	//pos = attr_Vertex - u_lightOrigin; pos = (pos.wwww * u_lightOrigin) + pos;\n"
+"	vec4 pos = vec4(attr_Vertex.xyz, 1.0);\n"
 "	gl_Position = pos * u_modelViewProjectionMatrix;\n"
 "}\n"
 ;
