@@ -167,6 +167,9 @@ class idSessionLocal : public idSession
 	virtual const char * GetDeathwalkMapName(void) const;
 	const char * GetDeathwalkMapName(const char *mapName) const;
 #endif
+#ifdef _MULTITHREAD
+		virtual void UpdateScreen(byte *data, bool outOfSequence);
+#endif
 
 		//=====================================
 

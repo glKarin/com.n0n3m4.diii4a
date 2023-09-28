@@ -31,11 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Session_local.h"
 
-#ifdef _MULTITHREAD
-extern volatile bool backendFinished;
-extern unsigned char multithreadActive;
-#endif
-
 #ifdef _RAVEN //k: for play credits in mainmenu
 #include "../ui/Window.h"
 const char * Com_LocalizeGametype( const char *gameType ) { // from MultiplayerGame.cpp
@@ -960,22 +955,6 @@ static void Session_GuiEvent_f(const idCmdArgs &args)
 static void Session_ExitMenu_f(const idCmdArgs &args)
 {
 	sessLocal.ExitMenu();
-}
-#endif
-
-#ifdef _MULTITHREAD
-static void Session_Multithreading_f(const idCmdArgs &args)
-{
-	extern intptr_t Sys_GetMainThread(void);
-	extern const xthreadInfo * Sys_GetRenderThread(void);
-
-	common->Printf("[Harmattan]: Multi-Thread current is %s.\n", multithreadActive ? "enabled" : "disabled");
-	common->Printf("             - Main thread handle is %lu.\n", Sys_GetMainThread());
-	//if(multithreadActive)
-	{
-		const xthreadInfo *thread = Sys_GetRenderThread();
-		common->Printf("             - Render thread(%s) handle is %lu.\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
-	}
 }
 #endif
 
@@ -2046,7 +2025,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	if (!idAsyncNetwork::IsActive() && !loadingSaveGame) {
 		// spawn players
 		for (i = 0; i < numClients; i++) {
-			game->SpawnPlayer(i); // not bot
+			game->SpawnPlayer(i);
 		}
 	}
 
@@ -2877,9 +2856,6 @@ void idSessionLocal::PacifierUpdate()
 idSessionLocal::Draw
 ===============
 */
-#if defined(__ANDROID__)
-extern void sync_state(void);
-#endif
 void idSessionLocal::Draw()
 {
 	bool fullConsole = false;
@@ -2984,8 +2960,8 @@ void idSessionLocal::Draw()
 		console->Draw(false);
 	}
 
-#if defined(__ANDROID__)
-	sync_state();
+#ifdef __ANDROID__
+	Sys_SyncState();
 #endif
 }
 
@@ -3510,9 +3486,6 @@ void idSessionLocal::Init()
 #ifdef _HUMANHEAD //k: for sound in new game
 	cmdSystem->AddCommand("exitMenu", Session_ExitMenu_f, CMD_FL_SYSTEM, "exit menu");
 #endif
-#ifdef _MULTITHREAD
-	cmdSystem->AddCommand("r_multithead", Session_Multithreading_f, CMD_FL_SYSTEM, "test multi-threading state");
-#endif
 
 	// the same idRenderWorld will be used for all games
 	// and demos, insuring that level specific models
@@ -4025,5 +3998,52 @@ const char * idSessionLocal::GetDeathwalkMapName(const char *mapName) const
 	if(!idStr::Icmp(dwMap, "none"))
 		return "";
 	return dwMap;
+}
+#endif
+
+#ifdef _MULTITHREAD
+void idSessionLocal::UpdateScreen(byte *data, bool outOfSequence)
+{
+	if(!data)
+	{
+		UpdateScreen(outOfSequence);
+		return;
+	}
+
+#ifdef _WIN32
+
+	if (com_editors) {
+		if (!Sys_IsWindowVisible()) {
+			return;
+		}
+	}
+
+#endif
+
+	if (insideUpdateScreen) {
+		return;
+//		common->FatalError( "idSessionLocal::UpdateScreen: recursively called" );
+	}
+
+	insideUpdateScreen = true;
+
+	// if this is a long-operation update and we are in windowed mode,
+	// release the mouse capture back to the desktop
+	if (outOfSequence) {
+		Sys_GrabMouseCursor(false);
+	}
+
+	renderSystem->BeginFrame(renderSystem->GetScreenWidth(), renderSystem->GetScreenHeight());
+
+	// draw everything
+	Draw();
+
+	if (com_speeds.GetBool()) {
+		renderSystem->EndFrame(&time_frontend, &time_backend);
+	} else {
+		renderSystem->EndFrame(data, NULL, NULL);
+	}
+
+	insideUpdateScreen = false;
 }
 #endif

@@ -1257,6 +1257,10 @@ void R_RenderView(viewDef_t *parms)
 	// portal-to-screen scissor box calculations
 	R_SetupProjection();
 
+#ifdef _SHADOW_MAPPING
+	R_SetupFrontEndViewDefMVP();
+#endif
+
 #ifdef _RAVENxxx // particle
     R_AddEffectSurfaces();
 #endif

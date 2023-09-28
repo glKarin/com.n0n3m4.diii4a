@@ -268,6 +268,9 @@ public:
 };
 
 class idPlayer : public idActor {
+#ifdef MOD_BOTS
+	friend class botAi;
+#endif
 public:
 
  	enum {
@@ -424,6 +427,11 @@ public:
 // squirrel: Mode-agnostic buymenus
 	float					buyMenuCash;
 // RITUAL END
+#ifdef _MOD_FULL_BODY_AWARENESS
+	idVec3 firstPersonViewOrigin_playerViewOrigin; // melee
+	idVec3 firstPersonViewOrigin_viewWeaponOrigin; // launch
+	idVec3 fullBodyAwarenessOffset;
+#endif
 
 public:
 	CLASS_PROTOTYPE( idPlayer );
@@ -450,9 +458,6 @@ public:
 	void					SetupWeaponEntity( void );
 	bool					SelectSpawnPoint( idVec3 &origin, idAngles &angles );
 	void					SpawnFromSpawnSpot( void );
-#ifdef _QUAKE4
-	virtual 
-#endif
 	void					SpawnToPoint( const idVec3	&spawn_origin, const idAngles &spawn_angles );
 	void					SetClipModel( bool forceSpectatorBBox = false );	// spectator mode uses a different bbox size
 
@@ -798,18 +803,6 @@ public:
 	void					SetCash( float newCashAmount );
 	void					ResetCash();
 // RITUAL END
-
-#ifdef _QUAKE4 // bot
-// jmarshall
-	const char*				GetNetName(void);
-	virtual bool			IsBot(void) { return false; }
-// jmarshall end
-
-// jmarshall
-	bool					IsShooting(void);
-	float					GetViewHeight(void);
-// jmarshall end
-#endif
 
 protected:
 	void					SetupHead( const char* modelKeyName = "", idVec3 headOffset = idVec3(0, 0, 0) );

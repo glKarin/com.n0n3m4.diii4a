@@ -30,7 +30,7 @@ public final class BackupPreferenceFunc extends GameLauncherFunc
 
     private String GenDefaultBackupFileName()
     {
-        return m_gameLauncher.getPackageName() + "_preferences_backup.xml";
+        return m_gameLauncher.getApplicationContext().getPackageName() + "_preferences_backup.xml";
     }
 
     public void Start(Bundle data)

@@ -529,7 +529,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     protected void onDetachedFromWindow()
     {
         super.onDetachedFromWindow();
-        Q3EGL.usegles20 = true;
+        //Q3EGL.usegles20 = true;
     }
 
     public void Post(Runnable runnable, int... delayed)

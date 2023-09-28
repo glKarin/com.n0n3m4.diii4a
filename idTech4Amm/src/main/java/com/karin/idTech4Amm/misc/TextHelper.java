@@ -6,11 +6,12 @@ import android.content.Context;
 
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
+import com.karin.idTech4Amm.lib.KCVar;
+import com.karin.idTech4Amm.lib.KCVarSystem;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Collection;
 
@@ -166,36 +167,36 @@ public final class TextHelper
                 " 3. Finally START GAME.",
                 null,
                 "Folder name of games/mods:",
-                " DOOM3: base",
-                " DOOM3-Resurrection of Evil: d3xp",
-                " DOOM3-The lost mission: d3le",
-                " Classic DOOM3: cdoom",
-                " Rivensin: rivensin",
-                " Hardcorps: hardcorps",
-                " Quake4: q4base",
+                " " + GenLinkText("https://store.steampowered.com/app/208200/DOOM_3/", "DOOM3: base"),
+                " " + GenLinkText("https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/", "DOOM3-Resurrection of Evil: d3xp"),
+                " " + GenLinkText("https://www.moddb.com/mods/the-lost-mission", "DOOM3-The lost mission: d3le"),
+                " " + GenLinkText("https://www.moddb.com/mods/classic-doom-3", "Classic DOOM3: cdoom"),
+                " " + GenLinkText("https://www.moddb.com/mods/ruiner", "Rivensin: rivensin"),
+                " " + GenLinkText("https://www.moddb.com/mods/hardcorps", "Hardcorps: hardcorps"),
+                /*" " + GenLinkText("https://www.moddb.com/mods/overthinked-doom3", "Overthinked: overthinked"),
+                " " + GenLinkText("https://www.moddb.com/games/doom-3-resurrection-of-evil/downloads/sabot-alpha-7x", "SABot(DOOM3-Resurrection of Evil): sabot"),*/
+                " " + GenLinkText("https://store.steampowered.com/app/2210/Quake_4/", "Quake4: q4base"),
                 " Prey(2006): preybase",
                 null,
             "For playing Prey(2006)(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
             " *. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.",
-            " *. Exists bugs: e.g. some incorrect collision(using `noclip`), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).",
-            " *. Because of tab window UI not support, Settings UI is not work, must edit `preyconfig.cfg` for binding extras key.",
+            " *. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).",
+            " *. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.",
             "  bind \"Your key of spirit walk\" \"_impulse54\"",
             "  bind \"Your key of second mode attack of weapons\" \"_attackAlt\"",
             "  bind \"Your key of toggle lighter\" \"_impulse16\"",
             "  bind \"Your key of drop\" \"_impulse25\"",
-            " *. If not sound when start new game and load `roadhouse` map, try to press `ESC` key back to main menu and then press `ESC` key to back game, then sound can be played.",
             null,
 			"For playing Quake 4(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/Quake4Doom", "Quake4Doom") + "`): ",
 			" 1. Putting PC Quake 4 game data file to `q4base` folder and START directly.",
             " 2. Extract Quake 4 patch resource to `q4base` game data folder if need(in menu `Other` -> `Extract resource`).",
-            "  (a). Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file>` or `fillbots` after enter map in console, or set `harm_si_autoFillBots` to 1 for automatic fill bots).",
-            "  (b). `SABot` MP game map aas files(for bots in MP game).",
+            "  (a). SABot a9 mod files(Bot support, includes scripts, defs and aas files. If you want to add bots in Multiplayer-Game, using command `addbots <bot_file>` or `fillbots` after enter map in console, or set `harm_si_autoFillBots` to 1 for automatic fill bots).",
             " 3. Then start game directly or choose map level, all levels is working.",
             " *. If running crash on arm32 or low-memory device, trying to check `Use ETC1 compression` or `Disable lighting` for decreasing memory usage.",
-            " *. Exists bugs: e.g. some GUIs interface, script error on some levels",
+            " *. Exists bugs: e.g. script error on some levels",
             " *. Effect system: Quake4 using new advanced `BSE` particle system, it not open-source(`jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see `" + GenLinkText("https://github.com/jmarshall23/Quake4BSE", "jmarshall23/Quake4BSE") + "`, but it not work yet.). Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.",
-			" *. Multiplayer-Game: It is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).",
+			" *. Multiplayer-Game: It is working well with bots(added SABot a7 mod support, but need SABot a9 mod file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(aas32)).",
             null,
             "Multi-threading and some GLSL shader using `" + GenLinkText("https://github.com/emileb/d3es-multithread", "emileb/d3es-multithread") + "`.",
             null,
@@ -295,6 +296,7 @@ public final class TextHelper
             "Special thanks: ",
             GenLinkText("https://4pda.ru/forum/index.php?showuser=7653620", "Sir Cat") + "@" + GenLinkText("https://4pda.ru/forum/index.php?showtopic=929753", "4PDA forum"),
             GenLinkText("https://4pda.ru/forum/index.php?showuser=5043340", "ALord7") + "@" + GenLinkText("https://4pda.to/forum/index.php?showtopic=330329", "4PDA forum"),
+            GenLinkText("https://github.com/lvonasek", "Luboš Vonásek") + "@" + GenLinkText("https://github.com/lvonasek/PreyVR", "PreyVR"),
         };
         final String endl = GetDialogMessageEndl();
         for(String str : ABOUTS)
@@ -310,6 +312,15 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+                ChangeLog.Create("2023-06-30", 32,
+                        "Add `Chinese`, `Russian`(by " + TextHelper.GenLinkText("https://4pda.ru/forum/index.php?showuser=5043340", "ALord7") + ") language.",
+                        "Move some on-screen settings to `Configure on-screen controls` page.",
+                        "Add `full-body awareness` mod in DOOM 3. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode).",
+                        "Support add external game library in `GameLib` at tab `General`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project and run it using original idTech4A++).",
+                        "Support load external game library in `Game working directory`/`fs_game` folder instead of default game library of apk if enabled `Find game library in game data directory`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project, and then named `gameaarch64.so`/`libgameaarch64.so`(arm64 device) or named `gamearm.so`/`libgamearm.so`(arm32 device), and then put it on `Game working directory`/`fs_game` folder, and start game directly with original idTech4A++).",
+                        "Support jpg/png image texture file."
+                ),
 
                 ChangeLog.Create("2023-06-10", 31,
                         "Add reset all on-screen buttons scale/opacity in tab `CONTROLS`'s `Reset on-screen controls`.",
@@ -555,212 +566,43 @@ public final class TextHelper
         }
         return GetDialogMessage(sb.toString());
     }
-    
-    private static class Cvar
+
+    private static String GenCVarString(KCVar cvar, String endl)
     {
-        public String name;
-        public String type;
-        public String defaultValue;
-        public String description;
-        public List<Value> values;
-        public static class Value {
-            public String value;
-            public String desc;
-            public Value(String value, String desc)
+        StringBuilder sb = new StringBuilder();
+        if(cvar.category == KCVar.CATEGORY_COMMAND)
+        {
+            sb.append(FormatDialogMessageSpace("  *[Command] ")).append(cvar.name);
+            if(!KCVar.TYPE_NONE.equals(cvar.type))
+                sb.append(" (").append(cvar.type).append(")");
+        }
+        else
+            sb.append(FormatDialogMessageSpace("  *[CVar] ")).append(cvar.name).append(" (").append(cvar.type).append(") default: ").append(cvar.defaultValue);
+        sb.append(FormatDialogMessageSpace("    ")).append(cvar.description);
+        sb.append(endl);
+        if(null != cvar.values)
+        {
+            for(KCVar.Value str : cvar.values)
             {
-                this.value = value;
-                this.desc = desc;
-            }
-
-            public String GenString(String endl)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.append(FormatDialogMessageSpace("    ")).append(value).append(" - ").append(desc);
+                sb.append(FormatDialogMessageSpace("    "));
+                sb.append(str.value).append(" - ").append(str.desc);
                 sb.append(endl);
-                return sb.toString();
-            }
-
-            @Override
-            public String toString()
-            {
-                return GenString(GetDialogMessageEndl());
             }
         }
-
-        public Cvar Name(String name)
-        {
-            this.name = name;
-            return this;
-        }
-
-        public Cvar DefaultValue(String def)
-        {
-            this.defaultValue = def;
-            return this;
-        }
-
-        public Cvar Type(String type)
-        {
-            this.type = type;
-            return this;
-        }
-
-        public Cvar Description(String desc)
-        {
-            this.description = desc;
-            return this;
-        }
-
-        public Cvar Value(String value, String desc)
-        {
-            if(values == null)
-                values = new ArrayList<>();
-            values.add(new Value(value, desc));
-            return this;
-        }
-
-        public Cvar Values(String...args)
-        {
-            for(int i = 0; i < args.length - 1; i += 2)
-                Value(args[i], args[i + 1]);
-            return this;
-        }
-
-        public String GenString(String endl)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.append(FormatDialogMessageSpace("  * ")).append(name).append(" (").append(type).append(") default: ").append(defaultValue);
-            sb.append(FormatDialogMessageSpace("    ")).append(description);
-            sb.append(endl);
-            if(null != values && !values.isEmpty())
-            {
-                for(Value str : values)
-                {
-                    sb.append(FormatDialogMessageSpace("    ")).append(str.GenString(endl));
-                }
-            }
-            return sb.toString();
-        }
-
-        @Override
-        public String toString()
-        {
-            return GenString(GetDialogMessageEndl());
-        }
-
-        public static Cvar Create(String name, String type, String def, String desc, String...args)
-        {
-            Cvar res = new Cvar();
-            res.Name(name)
-                .Type(type)
-                .DefaultValue(def)
-                .Description(desc)
-                ;
-            if(args.length >= 2)
-                res.Values(args);
-            return res;
-        }
+        return sb.toString();
     }
     
     public static CharSequence GetCvarText()
     {
-        final Cvar[] RENDSRER_CVARS = {
-            Cvar.Create("harm_r_clearVertexBuffer", "integer", "2", "Clear vertex buffer on every frame.",
-                        "0", "Not clear(original).",
-						"1", "Force clear.",
-						"2", "Force clear including shutdown."
-                        ),
-            Cvar.Create("harm_r_shadowCarmackInverse", "bool", "0", "Stencil shadow using Carmack-Inverse."),
-            Cvar.Create("harm_r_lightModel", "string", "phong", "Light model when draw interactions.",
-                        "phong", "Phong.",
-						"blinn_phong", "Blinn-Phong."
-                        ),
-            Cvar.Create("harm_r_specularExponent", "float", "4.0", "Specular exponent in interaction light model."),
-            Cvar.Create("harm_r_shaderProgramDir", "string", "glslprogs", "Special external GLSL shader program directory path"),
-            Cvar.Create("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory.",
-                        "0", "Always heap",
-						"Negative", "Always stack(original).",
-						"Positive", "Max stack memory limit."
-                        ),
-        };
-        final Cvar[] COMMON_CVARS = {
-            Cvar.Create("harm_fs_gameLibPath", "string", "", "Special game dynamic library."),
-            Cvar.Create("harm_fs_gameLibDir", "string", "", "Special game dynamic library directory path(default is empty, means using apk install libs directory path."),
-            Cvar.Create("harm_com_consoleHistory", "integer", "1", "Save/load console history.",
-                "0", "disable",
-                "1", "loading in engine initialization, and saving in engine shutdown",
-                "2", "loading in engine initialization, and saving in every e executing"
-            ),
-        };
-        final Cvar[] GAME_CVARS = {
-            Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
-                Cvar.Create("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness."),
-                Cvar.Create("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)."),
-        };
-        final Cvar[] D3XP_CVARS = {
-            Cvar.Create("harm_g_skipWarpVision", "bool", "0", "Skip render warp vision for grabber dragging."),
-            Cvar.Create("harm_g_skipHelltimeVision", "bool", "0", "Skip render helltime vision for powerup."),
-        };
-        final Cvar[] D3LE_CVARS = {
-            Cvar.Create("harm_g_skipWarpVision", "bool", "0", "Skip render warp vision for grabber dragging."),
-            Cvar.Create("harm_g_skipHelltimeVision", "bool", "0", "Skip render helltime vision for powerup."),
-        };
-        final Cvar[] CDOOM_CVARS = {
-            Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
-        };
-        final Cvar[] RIVENSIN_CVARS = {
-            Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
-            Cvar.Create("harm_pm_doubleJump", "bool", "0", "Enable double-jump."),
-            Cvar.Create("harm_pm_autoForceThirdPerson", "bool", "0", "Force set third person view after game level load end."),
-            Cvar.Create("harm_pm_preferCrouchViewHeight", "float", "32", "Set prefer crouch view height in Third-Person(suggest 32 - 39, less or equals 0 to disable)."),
-        };
-        final Cvar[] HARDCORPS_CVARS = {
-            Cvar.Create("harm_g_skipBerserkVision", "bool", "0", "Skip render berserk vision for power up."),
-        };
-        final Cvar[] QUAKE4_CVARS = {
-            Cvar.Create("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic."),
-            Cvar.Create("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movement."),
-            Cvar.Create("harm_gui_defaultFont", "string", "chain", "Default font name.",
-                    "chain", "fonts/chain",
-                    "lowpixel", "fonts/lowpixel",
-                    "marine", "fonts/marine",
-                    "profont", "fonts/profont",
-                    "r_strogg", "fonts/r_strogg",
-                    "strogg", "fonts/strogg"
-            ),
-            Cvar.Create("harm_si_autoFillBots", "bool", "0", "Automatic fill bots after map loaded in multiplayer game(0: disable; other number: bot num)."),
-            Cvar.Create("addbot", "string", "", "adds a multiplayer bot(support `tab` complete, exam. addbot bot_name1 bot_name2 ...)."),
-            Cvar.Create("fillbots", "integer", "", "fill bots(empty argument to fill max bots num, exam. fillbots 8)."),
-            Cvar.Create("harm_g_mutePlayerFootStep", "bool", "1", "Mute player's footstep sound."),
-        };
-        final Cvar[] PREY_CVARS = {
-                Cvar.Create("harm_g_translateAlienFont", "string", "fonts", "Setup font name for automatic translate `alien` font text of GUI(empty to disable).",
-                        "fonts", "fonts",
-                        "fonts/menu", "fonts/menu",
-                        "\"\"", "Disable"
-                ),
-        };
-        
-        Map<String, Cvar[]> cvarMap = new LinkedHashMap<>();
-        cvarMap.put("Renderer", RENDSRER_CVARS);
-        cvarMap.put("Common", COMMON_CVARS);
-        cvarMap.put("Base game", GAME_CVARS);
-        cvarMap.put("DOOM3 RoE", D3XP_CVARS);
-        cvarMap.put("Classic DOOM", CDOOM_CVARS);
-        cvarMap.put("The lost mission", D3LE_CVARS);
-        cvarMap.put("Rivensin mod", RIVENSIN_CVARS);
-        cvarMap.put("Hardcorps mod", HARDCORPS_CVARS);
-        cvarMap.put("Quake 4", QUAKE4_CVARS);
-        cvarMap.put("Prey(2006)", PREY_CVARS);
-
         StringBuilder sb = new StringBuilder();
         final String endl = GetDialogMessageEndl();
-        for(Map.Entry<String, Cvar[]> item : cvarMap.entrySet())
+        for(Map.Entry<String, KCVar.Group> item : KCVarSystem.CVars().entrySet())
         {
-            sb.append("------- ").append(item.getKey()).append(" -------");
+            KCVar.Group value = item.getValue();
+            sb.append("------- ").append(value.name).append(" -------");
             sb.append(endl);
-            for(Cvar cvar : item.getValue())
-                sb.append(cvar.GenString(endl));
+            for(KCVar cvar : value.list)
+                sb.append(GenCVarString(cvar, endl));
             sb.append(endl);
         }
         return GetDialogMessage(sb.toString());

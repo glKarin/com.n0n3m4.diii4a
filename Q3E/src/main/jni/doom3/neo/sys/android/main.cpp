@@ -46,7 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 static idStr	basepath;
 static idStr	savepath;
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit();
 
@@ -88,7 +88,7 @@ void *Sys_AsyncThread(void *p)
 	int start, end;
 	int ticked, to_ticked;
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	xthreadInfo *threadInfo = static_cast<xthreadInfo *>(p);
 	assert(threadInfo);
 #endif
@@ -113,7 +113,7 @@ void *Sys_AsyncThread(void *p)
 		}
 
 		// thread exit
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 		if (threadInfo->threadCancel) {
 			break;
 		}
@@ -132,7 +132,7 @@ void *Sys_AsyncThread(void *p)
  */
 const char *Sys_DefaultSavePath(void)
 {
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	sprintf(savepath, workdir());
 #else
 #if defined( ID_DEMO_BUILD )
@@ -180,7 +180,7 @@ Try to be intelligent: if there is no BASE_GAMEDIR, try the next path
 
 const char *Sys_DefaultBasePath(void)
 {
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	return workdir();
 #else
 	struct stat st;
@@ -338,7 +338,7 @@ double Sys_ClockTicksPerSecond(void)
 		return ret;
 	}
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	fd = open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", O_RDONLY);
 #else
 	fd = open("/proc/cpuinfo", O_RDONLY);
@@ -355,7 +355,7 @@ double Sys_ClockTicksPerSecond(void)
 	len = read(fd, buf, 4096);
 	close(fd);
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	if (len > 0) {
 		ret = atof(buf);
 		common->Printf("/proc/cpuinfo CPU frequency: %g MHz", ret / 1000.0);
@@ -595,20 +595,29 @@ void abrt_func(mcheck_status status)
 
 #endif
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
+
+#include "doom3_android.h"
+
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
-#define ANDROID_CALL_PROTOCOL_TMPFILE 0x10001
-#define ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT 0x10002
-#define ANDROID_CALL_PROTOCOL_ATTACH_THREAD 0x10003
-#define ANDROID_CALL_PROTOCOL_GRAB_MOUSE 0x10005
+void (*initAudio)(void *buffer, int size);
+int (*writeAudio)(int offset, int length);
+void (*setState)(int st);
+FILE * (*itmpfile)(void);
+void (*pull_input_event)(int execCmd);
+void (*grab_mouse)(int grab);
+void (*attach_thread)(void);
+void (*copy_to_clipboard)(const char *text);
+char * (*get_clipboard_text)(void);
 
-#define ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR 0x20001
-#define ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE 0x20002
-#define ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS 0x20003
-#define ANDROID_CALL_PROTOCOL_MULTITHREAD 0x20005
-#define ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT 0x20006
+int screen_width=640;
+int screen_height=480;
+float analogx=0.0f;
+float analogy=0.0f;
+int analogenabled=0;
+FILE *f_stdout = NULL;
 
 // APK's native library path on Android.
 char *native_library_dir = NULL;
@@ -616,9 +625,8 @@ char *native_library_dir = NULL;
 // Do not catch signal
 bool no_handle_signals = false;
 
-// DOOM library call Android JNI
-intptr_t (*Android_Call)(int protocol, int size, ...);
-void (*Android_pull_input_event)(int execCmd);
+// Continue when missing OpenGL context
+volatile bool continue_when_no_gl_context = false;
 
 // Surface window
 volatile ANativeWindow *window = NULL;
@@ -627,34 +635,36 @@ static volatile bool window_changed = false;
 // OpenGL attributes
 int gl_format = 0x8888;
 int gl_msaa = 0;
+int gl_version = 0x00020000;
+bool USING_GLES3 = false;
 
 // command line arguments
 static int argc = 0;
-static char **argv = 0;
+static char **argv = NULL;
 
 // game main thread
 static pthread_t				main_thread;
 
+// multi-thread
+bool multithreadActive = false;
+
 // enable redirect stdout/stderr to file
 static bool redirect_output_to_file = true;
 
-// multi-thread
-bool multithreadActive = false;
-volatile bool backendThreadShutdown = false;
-
 // app paused
-bool paused = false;
+volatile bool paused = false;
 
 // app exit
 static volatile bool running = false;
 
 extern void GLimp_ActivateContext();
 extern void GLimp_DeactivateContext();
-extern void GLimp_WaitEGLInitialized(void);
 
 
 
 #ifdef _MULTITHREAD
+volatile bool backendThreadShutdown = false;
+
 #define RENDER_THREAD_STARTED() (render_thread.threadHandle && !render_thread.threadCancel)
 
 // render thread
@@ -729,7 +739,48 @@ void BackendThreadExecute(void)
 	Sys_CreateThread(BackendThread, common, THREAD_HIGHEST, render_thread, RENDER_THREAD_NAME, g_threads, &g_thread_count);
 	common->Printf("[Harmattan]: Render thread start -> %lu(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
 }
+#endif // end _MULTITHREAD
+
+static void Q3E_PrintInitialContext(void)
+{
+	printf("[Harmattan]: DIII4A start\n\n");
+
+	printf("DOOM3 initial context\n");
+	printf("  OpenGL: \n");
+	printf("    Format: 0x%X\n", gl_format);
+	printf("    MSAA: %d\n", gl_msaa);
+	printf("    Version: %x\n", gl_version);
+	printf("  Variables: \n");
+	printf("    Native library directory: %s\n", native_library_dir);
+	printf("    Redirect output to file: %d\n", redirect_output_to_file);
+	printf("    No handle signals: %d\n", no_handle_signals);
+#ifdef _MULTITHREAD
+	printf("    Multi-thread: %d\n", multithreadActive);
 #endif
+    printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
+	printf("\n");
+
+	printf("DOOM3 callback\n");
+	printf("  AudioTrack: \n");
+	printf("    initAudio: %p\n", initAudio);
+	printf("    writeAudio: %p\n", writeAudio);
+	printf("  Input: \n");
+	printf("    grab_mouse: %p\n", grab_mouse);
+	printf("    pull_input_event: %p\n", pull_input_event);
+	printf("  System: \n");
+	printf("    attach_thread: %p\n", attach_thread);
+	printf("    tmpfile: %p\n", itmpfile);
+	printf("  Other: \n");
+	printf("    setState: %p\n", setState);
+	printf("\n");
+
+	Sys_Printf("DOOM3 command line arguments: %d\n", argc);
+	for(int i = 0; i < argc; i++)
+	{
+		Sys_Printf("  %d: %s\n", i, argv[i]);
+	}
+	printf("\n");
+}
 
 // because SurfaceView may be destroy or create new ANativeWindow in DOOM3 main thread
 void CheckEGLInitialized(void)
@@ -754,6 +805,12 @@ void CheckEGLInitialized(void)
             GLimp_AndroidQuit();
             window_changed = false;
             Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_DESTROYED);
+#if 0
+            if(continue_when_no_gl_context)
+			{
+            	return;
+			}
+#endif
             // wait new ANativeWindow created
             while(!window_changed)
                 Sys_WaitForEvent(TRIGGER_EVENT_WINDOW_CREATED);
@@ -765,7 +822,8 @@ void CheckEGLInitialized(void)
 
 static void * doom3_main(void *data)
 {
-	(void)Android_Call(ANDROID_CALL_PROTOCOL_ATTACH_THREAD, 0);
+	attach_thread(); // attach current to JNI for call Android code
+
 #ifdef ID_MCHECK
 	// must have -lmcheck linkage
 	mcheck(abrt_func);
@@ -841,11 +899,6 @@ static void Q3E_StopGameMainThread(void)
 	Sys_Printf("[Harmattan]: doom3 main thread quit.\n");
 }
 
-FILE *f_stdout = NULL;
-extern "C"
-{
-
-#pragma GCC visibility push(default)
 int main(int argc, const char **argv)
 {
 	::argc = argc;
@@ -863,17 +916,11 @@ int main(int argc, const char **argv)
 		setvbuf(stderr, NULL, _IONBF, 0);
 	}
 
-	Sys_Printf("[Harmattan]: doom3 command line arguments: %d.\n", argc);
-	for(int i = 0; i < argc; i++)
-	{
-		Sys_Printf("    %d: %s\n", i, argv[i]);
-	}
+	Q3E_PrintInitialContext();
+
 	Q3E_StartGameMainThread();
 	return 0;
 }
-
-int screen_width=640;
-int screen_height=480;
 
 void Q3E_SetResolution(int width, int height)
 {
@@ -886,22 +933,22 @@ void Q3E_OGLRestart()
 //	R_VidRestart_f();
 }
 
-void (*initAudio)(void *buffer, int size);
-int (*writeAudio)(int offset, int length);
-void (*setState)(int st);
-void Q3E_SetCallbacks(void *init_audio, void *write_audio, void *set_state)
+void Q3E_SetCallbacks(const void *callbacks)
 {
-    setState = (void(*)(int))set_state;
-    writeAudio = (int(*)(int, int))write_audio;
-    initAudio = (void(*)(void *, int))init_audio;
-}
+	const Q3E_Callback_t *ptr = (const Q3E_Callback_t *)callbacks;
 
-extern int m_buffer_size;
+	initAudio = ptr->AudioTrack_init;
+	writeAudio = ptr->AudioTrack_write;
 
-void Q3E_GetAudio()
-{
-#warning "UNUSED"
-    writeAudio(0,m_buffer_size);
+	pull_input_event = ptr->Input_pullEvent;
+	grab_mouse = ptr->Input_grabMouse;
+
+	attach_thread = ptr->Sys_attachThread;
+	itmpfile = ptr->Sys_tmpfile;
+	copy_to_clipboard = ptr->Sys_copyToClipboard;
+	get_clipboard_text = ptr->Sys_getClipboardText;
+
+    setState = ptr->set_state;
 }
 
 void Q3E_KeyEvent(int state,int key,int character)
@@ -926,9 +973,6 @@ void Q3E_DrawFrame()
 	common->Frame();
 }
 
-float analogx=0.0f;
-float analogy=0.0f;
-int analogenabled=0;
 void Q3E_Analog(int enable,float x,float y)
 {
 	analogenabled=enable;
@@ -936,49 +980,25 @@ void Q3E_Analog(int enable,float x,float y)
 	analogy=y;
 }
 
-intptr_t (*set_Android_Call(intptr_t (*func)(int, int, ...)))(int, int, ...)
+// Setup initial environment variants
+void Q3E_SetInitialContext(const void *context)
 {
-	intptr_t (*cur)(int, int, ...);
-	cur = Android_Call;
-	Android_Call = func;
-	return cur;
-}
+	const Q3E_InitialContext_t *ptr = (const Q3E_InitialContext_t *)context;
 
-// Android JNI call DOOM library
-intptr_t Q3E_Call(int protocol, int size, ...)
-{
-	intptr_t res = 0;
-	va_list va;
+	gl_format = ptr->openGL_format;
+	gl_msaa = ptr->openGL_msaa;
+	gl_version = ptr->openGL_version;
+#ifdef _OPENGLES3
+	USING_GLES3 = gl_version != 0x00020000;
+#else
+	USING_GLES3 = false;
+#endif
 
-	va_start(va, size);
-	switch(protocol)
-	{
-		case ANDROID_CALL_PROTOCOL_NATIVE_LIBRARY_DIR:
-			native_library_dir = strdup(va_arg(va, char *));
-			res = (intptr_t)native_library_dir;
-			break;
-		case ANDROID_CALL_PROTOCOL_REDIRECT_OUTPUT_TO_FILE:
-			redirect_output_to_file = va_arg(va, int) ? true : false;
-			res = redirect_output_to_file;
-			break;
-		case ANDROID_CALL_PROTOCOL_NO_HANDLE_SIGNALS:
-			no_handle_signals = va_arg(va, int) ? true : false;
-			res = no_handle_signals;
-			break;
-		case ANDROID_CALL_PROTOCOL_MULTITHREAD:
-			multithreadActive = va_arg(va, int) ? true : false;
-			res = multithreadActive;
-			break;
-		case ANDROID_CALL_PROTOCOL_SYS_PULL_INPUT_EVENT:
-			Android_pull_input_event = (void (*)(int))va_arg(va, intptr_t);
-			res = (intptr_t)Android_pull_input_event;
-			break;
-		default:
-			break;
-	}
-	va_end(va);
-
-	return res;
+	native_library_dir = strdup(ptr->nativeLibraryDir);
+	redirect_output_to_file = ptr->redirectOutputToFile ? true : false;
+	no_handle_signals = ptr->noHandleSignals ? true : false;
+	multithreadActive = ptr->multithread ? true : false;
+	continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
 }
 
 // Request exit
@@ -1012,17 +1032,8 @@ void Q3E_OnResume(void)
 }
 
 // Setup OpenGL context variables in Android SurfaceView's thread
-void Android_SetGLContext(ANativeWindow *w, int size, ...)
+void Q3E_SetGLContext(ANativeWindow *w)
 {
-	va_list va;
-
-	if(size > 0)
-	{
-		va_start(va, size);
-		gl_format = va_arg(va, int);
-		gl_msaa = va_arg(va, int);
-		va_end(va);
-	}
 	// if engine has started, w is null, means Surfece destroyed, w not null, means Surface has changed.
 	if(common->IsInitialized())
 	{
@@ -1045,69 +1056,39 @@ void Android_SetGLContext(ANativeWindow *w, int size, ...)
 		window = w;
 }
 
+
+extern "C"
+{
+
+#pragma GCC visibility push(default)
+void GetDOOM3API(void *d3interface)
+{
+	Q3E_Interface_t *ptr = (Q3E_Interface_t *)d3interface;
+	memset(ptr, 0, sizeof(*ptr));
+
+	ptr->main = &main;
+	ptr->setCallbacks = &Q3E_SetCallbacks;
+	ptr->setInitialContext = &Q3E_SetInitialContext;
+	ptr->setResolution = &Q3E_SetResolution;
+
+	ptr->pause = &Q3E_OnPause;
+	ptr->resume = &Q3E_OnResume;
+	ptr->exit = &Q3E_exit;
+
+	ptr->setGLContext = &Q3E_SetGLContext;
+
+	ptr->frame = &Q3E_DrawFrame;
+	ptr->vidRestart = &Q3E_OGLRestart;
+
+	ptr->keyEvent = &Q3E_KeyEvent;
+	ptr->analogEvent = &Q3E_Analog;
+	ptr->motionEvent = &Q3E_MotionEvent;
+}
+
 #pragma GCC visibility pop
 }
 
-// For pull input event from Java when GLThread is looping in modal MessageBox of game.
-void pull_input_event(int execCmd)
-{
-	if(!Android_Call)
-		return;
-	(void)Android_Call(ANDROID_CALL_PROTOCOL_PULL_INPUT_EVENT, 1, execCmd);
-}
-
-// tmpfile function symbol for Android.
-FILE * itmpfile(void)
-{
-	if(!Android_Call)
-		return NULL;
-	return (FILE *)Android_Call(ANDROID_CALL_PROTOCOL_TMPFILE, 0);
-}
-
-// grab mouse for Android
-void grab_mouse(int grab)
-{
-	if(!Android_Call)
-		return;
-	(void)Android_Call(ANDROID_CALL_PROTOCOL_GRAB_MOUSE, 1, grab);
-}
-
-#include "../../framework/Session_local.h"
-#define STATE_NONE 0
-#define STATE_ACT 1 // RTCW4A-specific, keep
-#define STATE_GAME (1 << 1) // map spawned
-#define STATE_KICK (1 << 2) // RTCW4A-specific, keep
-#define STATE_LOADING (1 << 3) // current GUI is guiLoading
-#define STATE_CONSOLE (1 << 4) // fullscreen
-#define STATE_MENU (1 << 5) // any menu excludes guiLoading
-#define STATE_DEMO (1 << 6) // demo
-
-void sync_state(void)
-{
-	static int prev_state = -1;
-	static int state = -1;
-	if (setState)
-	{
-		state = STATE_NONE;
-		if(sessLocal.insideExecuteMapChange)
-			state |= STATE_LOADING;
-		else
-		{
-			idUserInterface *gui = sessLocal.GetActiveMenu();
-			if(!gui)
-				state |= STATE_GAME;
-			else
-				state |= STATE_MENU;
-		}
-		if(console->Active())
-			state |= STATE_CONSOLE;
-		if (state != prev_state)
-		{
-			setState(state);
-			prev_state = state;
-		}
-	}
-}
+#include "sys_android.cpp"
 
 #else
 

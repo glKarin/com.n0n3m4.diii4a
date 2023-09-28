@@ -41,10 +41,10 @@ class idRestoreGame;
 #define MAX_STRINGS			1024
 #define MAX_FUNCS			3072
 //k: When include DOOM3 base game map script into doom_main.script, statement count overflow the maximum limit.
-#ifndef __ANDROID__
-#define MAX_STATEMENTS		81920			// statement_t - 18 bytes last I checked
-#else
+#ifdef _RIVENSIN
 #define MAX_STATEMENTS		181920			// +100000, When include DOOM3 base game map script, overflow the maximum limit.
+#else
+#define MAX_STATEMENTS		81920			// statement_t - 18 bytes last I checked
 #endif
 
 typedef enum {

@@ -7,7 +7,6 @@
    Copyright (C) 1995-1998 Mark Adler
 */
 
-//k 64
 #define CRC32_INIT_VALUE	0xffffffff
 #define CRC32_XOR_VALUE		0xffffffff
 
@@ -43,7 +42,6 @@ static unsigned int crctable[256];
 void make_crc_table(void)
 {
 	int i, j;
-	//k 64
 	unsigned int c, poly;
 	/* terms of polynomial defining this crc (except x^32): */
 	static const byte p[] = {0,1,2,4,5,7,8,10,11,12,16,22,23,26};
@@ -71,7 +69,7 @@ void make_crc_table(void)
 /*
   Table of CRC-32's of all single-byte values (made by make_crc_table)
 */
-//k 64
+//k 64 L
 static unsigned int crctable[256] = {
 	0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL,
 	0x076dc419L, 0x706af48fL, 0xe963a535L, 0x9e6495a3L,
@@ -141,19 +139,16 @@ static unsigned int crctable[256] = {
 
 #endif
 
-//k 64
 void CRC32_InitChecksum(unsigned int &crcvalue)
 {
 	crcvalue = CRC32_INIT_VALUE;
 }
 
-//k 64
 void CRC32_Update(unsigned int &crcvalue, const byte data)
 {
 	crcvalue = crctable[(crcvalue ^ data) & 0xff ] ^(crcvalue >> 8);
 }
 
-//k 64
 void CRC32_UpdateChecksum(unsigned int &crcvalue, const void *data, int length)
 {
 	unsigned int crc;
@@ -168,13 +163,11 @@ void CRC32_UpdateChecksum(unsigned int &crcvalue, const void *data, int length)
 	crcvalue = crc;
 }
 
-//k 64
 void CRC32_FinishChecksum(unsigned int &crcvalue)
 {
 	crcvalue ^= CRC32_XOR_VALUE;
 }
 
-//k 64
 unsigned int CRC32_BlockChecksum(const void *data, int length)
 {
 	unsigned int crc;

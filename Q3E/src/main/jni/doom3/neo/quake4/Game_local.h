@@ -9,8 +9,8 @@ inline void operator delete( void *p ) { Memory::Free(p); }
 inline void *operator new[]( size_t s ) { return Memory::Allocate(s); }
 inline void operator delete[]( void *p ) { Memory::Free(p); }
 #endif
+//#define MOD_BOTS
 // RAVEN END
-
 /*
 ===============================================================================
 
@@ -33,7 +33,6 @@ inline void operator delete[]( void *p ) { Memory::Free(p); }
 
 extern idRenderWorld *				gameRenderWorld;
 
-//k
 #include "../raven/sys/AutoVersion.h"
 // the "gameversion" client command will print this plus compile date
 #define	GAME_VERSION		"baseQUAKE4-1"
@@ -63,12 +62,6 @@ class idProgram;
 class idThread;
 class idEditEntities;
 class idLocationEntity;
-
-#ifdef _QUAKE4 // bot
-// jmarshall
-class rvmBot;
-// jmarshall end
-#endif
 
 // RAVEN BEGIN
 // dluetscher: reduced max clients for memory usage
@@ -917,9 +910,7 @@ public:
 	void					ServerSetMinSpawnIndex( void );
 	void					ServerSetEntityIndexWatermark( int instanceID );
 
-#if !defined(_QUAKE4)
 private:
-#endif
 // RAVEN BEGIN
 // ddynerman: multiple instance for MP
 	idList<idClip*>			clip;					// collision detection
@@ -1109,43 +1100,6 @@ public:
 	pvsHandle_t				GetClientPVS( idPlayer *player, pvsType_t type );
 
 	int						GetCurrentDemoProtocol( void ) { return demo_protocol; }
-#ifdef _QUAKE4 // bot
-// jmarshall
-	virtual void			ServerClientBegin( int clientNum, bool isBot, const char* botName);
-	virtual void			SpawnPlayer( int clientNum, bool isBot, const char* botName);
-	virtual int				GetBotItemEntry(const char* name);
-	virtual int				TravelTimeToGoal(const idVec3& origin, const idVec3& goal);
-	void	Trace(trace_t& results, const idVec3& start, const idVec3& end, int contentMask, int passEntity);
-	idAAS* GetBotAAS(void)
-	{
-		if (NumAAS() == 0)
-			return 0;
-
-		return GetAAS(0);
-	}
-	void					RegisterBot(rvmBot* bot)
-	{
-		registeredBots.AddUnique(bot);
-	}
-	void					UnRegisterBot(rvmBot* bot)
-	{
-		registeredBots.Remove(bot);
-	}
-	float					SysScriptTime(void) const
-	{
-		return MS2SEC(realClientTime);
-	}
-	void					AddBot(const char* botName);
-	void					AlertBots(idPlayer* player, idVec3 alert_position);
-	int NumBot(void) const {
-		return registeredBots.Num();
-	}
-// jmarshall end
-
-private:
-	idList<rvmBot*> registeredBots;
-	const idDeclEntityDef* botItemTable;
-#endif
 
 private:
 	char					clientGuids[ MAX_CLIENTS ][ CLIENT_GUID_LENGTH ];
@@ -1455,6 +1409,9 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 
 //k
 #include "../raven/idlib/containers/ListGame.h"
-#include "bots/Bot.h"
 
+#ifdef MOD_BOTS
+// TinMan: BotZ0r
+#include "bots/BotAI.h"
+#endif
 #endif	/* !__GAME_LOCAL_H__ */

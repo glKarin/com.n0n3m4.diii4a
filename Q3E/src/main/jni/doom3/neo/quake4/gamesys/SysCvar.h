@@ -422,4 +422,9 @@ extern idCVar net_clientLagOMeter;
 
 extern idCVar net_warnStale;
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+extern idCVar harm_pm_fullBodyAwareness;
+extern idCVar harm_pm_fullBodyAwarenessOffset;
+extern idCVar harm_pm_fullBodyAwarenessHeadJoint;
+#endif
 #endif /* !__SYS_CVAR_H__ */

@@ -2156,7 +2156,6 @@ ID_INLINE void idVecX::SetData(int length, float *data)
 		Mem_Free16(p);
 	}
 
-	//k 64
 	assert((((uintptr_t) data) & 15) == 0);       // data must be 16 byte aligned
 	p = data;
 	size = length;

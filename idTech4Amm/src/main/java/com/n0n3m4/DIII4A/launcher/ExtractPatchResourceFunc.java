@@ -20,8 +20,7 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
 {
     private final String[] m_patchResources = {
             "glslprogs.pk4",
-            "q4base/botfiles_q3.pk4",
-            "q4base/mp_game_map_aas.pk4",
+            "q4base/sabot_a9.pk4",
             "rivensin/play_original_doom3_level.pk4"
     };
     private String m_path;
@@ -52,7 +51,6 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
         final String[] Names = {
                 Q3ELang.tr(m_gameLauncher, R.string.opengles_shader),
                 Q3ELang.tr(m_gameLauncher, R.string.bot_q3_bot_support_in_mp_game),
-                Q3ELang.tr(m_gameLauncher, R.string.mp_game_map_aas_files),
                 Q3ELang.tr(m_gameLauncher, R.string.rivensin_play_original_doom3_level),
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);

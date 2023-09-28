@@ -145,10 +145,6 @@ public class Q3EMain extends Activity
 
         if (checkGameFiles())
         {
-            Q3EJNI.SetRedirectOutputToFile(preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true));
-            Q3EJNI.SetNoHandleSignals(preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false));
-            Q3EJNI.SetMultiThread(Q3EUtils.q3ei.multithread);
-
             if (!Q3EOuya.Init(this))
                 Q3EUtils.isOuya = false;
 
@@ -328,9 +324,11 @@ public class Q3EMain extends Activity
             Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
 
             String extraCommand = "";
+            if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
+                extraCommand += " +disconnect";
             if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
-                extraCommand += "+loadGame QuickSave";
-            Q3EUtils.q3ei.start_temporary_extra_command = extraCommand;
+                extraCommand += " +loadGame QuickSave";
+            Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
         }
 
         Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);

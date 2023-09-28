@@ -170,5 +170,24 @@ public class Q3ECallbackObj
             e.printStackTrace();
         }
     }
+
+    public void CopyToClipboard(String text)
+    {
+        Runnable runnable = new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Q3EUtils.CopyToClipboard(Q3EMain.mGLSurfaceView.getContext(), text);
+            }
+        };
+        //Q3EMain.mGLSurfaceView.post(runnable);
+        runnable.run();
+    }
+
+    public String GetClipboardText()
+    {
+        return Q3EUtils.GetClipboardText(Q3EMain.mGLSurfaceView.getContext());
+    }
 }
 

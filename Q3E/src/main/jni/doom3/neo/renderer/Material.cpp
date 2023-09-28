@@ -1757,7 +1757,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
 #else
-				//k: unsupported GL asm shader program
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
 #endif
@@ -1771,7 +1770,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
 #else
-			//k: unsupported GL asm shader program
 			newStage.fragmentProgram = -1;
 #endif
 			}
@@ -1784,7 +1782,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
 #else
-			//k: unsupported GL asm shader program
 			newStage.vertexProgram = -1;
 #endif
 			}
@@ -1806,7 +1803,6 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, "megaTexture.vfp");
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, "megaTexture.vfp");
 #else
-				//k: unsupported GL asm shader program
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
 #endif
@@ -1816,18 +1812,12 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 
 		if (!token.Icmp("vertexParm")) {
-			//k: fix some material load fail, unsupported token also must parsed. e.g MC_underground/site3 glass
-//#if !defined(GL_ES_VERSION_2_0)
 			ParseVertexParm(src, &newStage);
-//#endif
 			continue;
 		}
 
 		if (!token.Icmp("fragmentMap")) {
-			//k: fix some material load fail, unsupported token also must parsed. e.g MC_underground/site3 glass
-//#if !defined(GL_ES_VERSION_2_0)
 			ParseFragmentMap(src, &newStage);
-//#endif
 			continue;
 		}
 
@@ -2582,43 +2572,81 @@ void idMaterial::ParseMaterial(idLexer &src)
 
 			// noShadows
 			SetMaterialFlag(MF_NOSHADOWS);
+#ifdef _HUMANHEAD //karin: decal default using alphatest
+			coverage = MC_TRANSLUCENT;
+#endif
 			continue;
 #ifdef _HUMANHEAD
 #define _SURFTYPE(x) ((x) | (surfaceFlags & (~SURF_TYPE_MASK)))
 		} else if (!token.Icmp("matter_metal")) {
 			surfaceFlags = _SURFTYPE(SURFTYPE_METAL);
+			continue;
 		} else if (!token.Icmp("matter_wood")) {
 			surfaceFlags = _SURFTYPE(SURFTYPE_WOOD);
+			continue;
 		} else if (!token.Icmp("matter_cardboard")) {
+			surfaceFlags = _SURFTYPE(SURFTYPE_CARDBOARD);
+			continue;
 		} else if (!token.Icmp("matter_tile")) {
 			surfaceFlags = _SURFTYPE(SURFTYPE_TILE);
+			continue;
 		} else if (!token.Icmp("matter_stone")) {
+			surfaceFlags = _SURFTYPE(SURFTYPE_STONE);
+			continue;
 		} else if (!token.Icmp("matter_flesh")) {
 			surfaceFlags = _SURFTYPE(SURFTYPE_FLESH);
+			continue;
 		} else if (!token.Icmp("matter_glass")) {
 			surfaceFlags = _SURFTYPE(SURFTYPE_GLASS);
+			continue;
 		} else if (!token.Icmp("matter_pipe")) {
 			surfaceFlags = _SURFTYPE(SURFTYPE_PIPE);
+			continue;
 		} else if (!token.Icmp("decal_alphatest_macro")) {
+			// polygonOffset
+			SetMaterialFlag(MF_POLYGONOFFSET);
+			polygonOffset = 1;
+
+			// discrete
+			surfaceFlags |= SURF_DISCRETE;
+			contentFlags &= ~CONTENTS_SOLID;
+
+			// sort decal
+			sort = SS_DECAL;
+
+			// noShadows
+			SetMaterialFlag(MF_NOSHADOWS);
+
+			coverage = MC_TRANSLUCENT;
+			continue;
 		} else if (!token.Icmp("skipClip")) {
 			SetMaterialFlag(MF_SKIPCLIP);
+			continue;
 		} else if (!token.Icmp("noSeeThru")) {
+			continue;
 		} else if (!token.Icmp("seeThru")) {
+			continue;
 		} else if (!token.Icmp("overlay_macro")) {
+			continue;
 		} else if (!token.Icmp("scorch_macro")) {
+			continue;
 		} else if (!token.Icmp("glass_macro")) {
 			surfaceFlags = _SURFTYPE(SURFTYPE_GLASS);
+			continue;
 		} else if (!token.Icmp("skybox_macro")) {
 			surfaceFlags |= SURF_NOFRAGMENT;
 			coverage = MC_OPAQUE;
 			allowOverlays = false;
 			SetMaterialFlag(MF_NOSHADOWS);
+			continue;
 		} else if (!token.Icmp("lightWholeMesh")) {
 			SetMaterialFlag(MF_LIGHT_WHOLE_MESH);
+			continue;
 		} else if (!token.Icmp("skyboxportal")) {
 			src.SkipRestOfLine();
 			sort = SS_SUBVIEW;
 			subviewClass = SC_PORTAL_SKYBOX;
+			continue;
 		} else if (!token.Icmp("directportal")) { // with a parm: e.g. directportal parm5
 			directPortalDistance = ParseExpression(src);
 			sort = SS_SUBVIEW;
@@ -2628,6 +2656,7 @@ void idMaterial::ParseMaterial(idLexer &src)
 			idToken t;
 			t = "discrete";
 			CheckSurfaceParm(&t);
+			continue;
 #undef _SURFTYPE
 #endif
 		} else if (token == "{") {

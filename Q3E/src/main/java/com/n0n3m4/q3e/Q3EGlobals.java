@@ -80,7 +80,7 @@ public final class Q3EGlobals
 
     public static final String GAME_DOOM3 = "doom3";
     public static final String GAME_QUAKE4 = "quake4";
-    public static final String GAME_PREY = "prey(2006)";
+    public static final String GAME_PREY = "prey2006";
 
     public static final String GAME_NAME_DOOM3 = "DOOM 3";
     public static final String GAME_NAME_QUAKE4 = "Quake 4";
@@ -97,6 +97,10 @@ public final class Q3EGlobals
             "d3le",
             "rivensin",
             "hardcorps",
+
+            /*"overthinked",
+            "sabot",
+            "hexeneoc",*/
     };
     public static final String[] Q4_LIBS = {
             "q4game",

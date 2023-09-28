@@ -749,16 +749,8 @@ void idPlayerView::RenderPlayerView(idUserInterface *hud)
 idPlayerView::WarpVision
 ===================
 */
-//k control warp vision for grabber dragging.
-#ifdef __ANDROID__ //k
-static idCVar	harm_g_skipWarpVision("harm_g_skipWarpVision", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Skip render warp vision for grabber dragging.");
-#endif
 int idPlayerView::AddWarp(idVec3 worldOrigin, float centerx, float centery, float initialRadius, float durationMsec)
 {
-#ifdef __ANDROID__ //k
-	if(harm_g_skipWarpVision.GetBool())
-		return 1;
-#endif
 	FullscreenFX_Warp *fx = (FullscreenFX_Warp *)(fxManager->FindFX("warp"));
 
 	if (fx) {
@@ -771,12 +763,6 @@ int idPlayerView::AddWarp(idVec3 worldOrigin, float centerx, float centery, floa
 
 void idPlayerView::FreeWarp(int id)
 {
-	/*
-#ifdef __ANDROID__ //k
-	if(harm_g_skipWarpVision.GetBool())
-		return;
-#endif
-*/
 	FullscreenFX_Warp *fx = (FullscreenFX_Warp *)(fxManager->FindFX("warp"));
 
 	if (fx) {
@@ -991,19 +977,8 @@ bool FullscreenFX_Helltime::Active()
 FullscreenFX_Helltime::AccumPass
 ==================
 */
-#ifdef __ANDROID__ //k
-static idCVar	harm_g_skipHelltimeVision("harm_g_skipHelltimeVision", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Skip render helltime vision for powerup.");
-#endif
 void FullscreenFX_Helltime::AccumPass(const renderView_t *view)
 {
-#ifdef __ANDROID__ //k
-	if(harm_g_skipHelltimeVision.GetBool())
-	{
-		if(clearAccumBuffer)
-			clearAccumBuffer = false;
-		return;
-	}
-#endif
 	idVec2 shiftScale;
 	int level = DetermineLevel();
 
@@ -1034,10 +1009,6 @@ FullscreenFX_Helltime::HighQuality
 */
 void FullscreenFX_Helltime::HighQuality()
 {
-#ifdef __ANDROID__ //k
-	if(harm_g_skipHelltimeVision.GetBool())
-		return;
-#endif
 	idVec2 shiftScale;
 	int level = DetermineLevel();
 

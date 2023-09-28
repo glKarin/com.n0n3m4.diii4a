@@ -2281,6 +2281,11 @@ void idStaticEntity::Spawn( void ) {
 	if ( spawnArgs.GetBool( "inline" ) || gameLocal.world->spawnArgs.GetBool( "inlineAllStatics" ) ) {
 		Hide();
 		if ( solid ) {
+#ifdef MOD_BOTS
+			if(BOT_ENABLED())
+				GetPhysics()->SetContents( CONTENTS_SOLID|CONTENTS_OPAQUE ); // TinMan: *test* set so ai can see it
+			else
+#endif
 			GetPhysics()->SetContents( CONTENTS_SOLID );
 		}
 		return;
@@ -2396,6 +2401,11 @@ idStaticEntity::Show
 void idStaticEntity::Show( void ) {
 	idEntity::Show();
 	if ( spawnArgs.GetBool( "solid" ) ) {
+#ifdef MOD_BOTS
+		if(BOT_ENABLED())
+			GetPhysics()->SetContents( CONTENTS_SOLID|CONTENTS_OPAQUE ); // TinMan: *test* set so ai can see it
+		else
+#endif
 		GetPhysics()->SetContents( CONTENTS_SOLID );
 	}
 }

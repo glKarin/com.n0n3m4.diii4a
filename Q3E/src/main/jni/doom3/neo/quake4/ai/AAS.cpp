@@ -5,6 +5,9 @@
 #include "../Game_local.h"
 // RAVEN END
 #include "AAS_local.h"
+#ifdef MOD_BOTS // cusTom3 - aas extensions - define BotAASBuild for use
+#include "../bots/BotAASBuild.h"
+#endif
 
 /*
 ============
@@ -34,6 +37,9 @@ idAASLocal::idAASLocal
 */
 idAASLocal::idAASLocal( void ) {
 	file = NULL;
+#ifdef MOD_BOTS	// cusTom3 - aas extensions - what a mess, this should probably be in Init - TODO: look at it later
+	botAASBuilder = NULL;
+#endif
 }
 
 /*
@@ -43,6 +49,9 @@ idAASLocal::~idAASLocal
 */
 idAASLocal::~idAASLocal( void ) {
 	Shutdown();
+#ifdef MOD_BOTS	// cusTom3 - aas extensions - what a mess, this should probably be in shut down, TODO: look at it later
+	delete botAASBuilder;
+#endif
 }
 
 /*
@@ -71,6 +80,19 @@ bool idAASLocal::Init( const idStr &mapName, unsigned int mapFileCRC ) {
 			return false;
 		}
 // RAVEN END
+#ifdef MOD_BOTS // cusTom3 - aas extensions
+		if(BOT_ENABLED()) {
+		// TODO: don't need a builder unless it is a 48, but Init's for now, look at later
+        // if class changing is added models could change, would have to handle that here
+			if(!botAASBuilder)
+				botAASBuilder = new BotAASBuild();
+			botAASBuilder->Init( this );
+			if (mapName.Find( BOT_AAS, false ) > 0)
+			{
+				botAASBuilder->AddReachabilities();
+			}
+        }
+#endif // TODO: save the new information out to a file so it doesn't have to be processed each map load
 		SetupRouting();
 	}
 	return true;
@@ -83,6 +105,14 @@ idAASLocal::Shutdown
 */
 void idAASLocal::Shutdown( void ) {
 	if ( file ) {
+#ifdef MOD_BOTS // cusTom3 - aas extensions
+		if(BOT_ENABLED() && botAASBuilder) {
+			if (idStr(file->GetName()).Find( BOT_AAS, false ) > 0)
+			{
+				botAASBuilder->FreeAAS();
+			}
+		}
+#endif // TODO: save the new information out to a file so it doesn't have to be processed each map load
 		ShutdownRouting();
 		RemoveAllObstacles();
 		AASFileManager->FreeAAS( file );
@@ -460,20 +490,3 @@ bool idAASCallback::TestPoint ( class idAAS *aas, const idVec3& pos, const float
 }
 
 // RAVEN END
-
-#ifdef _QUAKE4
-// jmarshall
-/*
-============
-idAASLocal::AdjustPositionAndGetArea
-============
-*/
-int idAASLocal::AdjustPositionAndGetArea(idVec3& origin)
-{
-	int area = PointReachableAreaNum(origin, DefaultSearchBounds(), AREA_REACHABLE_WALK);
-	PushPointIntoAreaNum(area, origin);
-	return area;
-}
-// jmarshall end
-#endif
-

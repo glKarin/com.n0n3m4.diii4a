@@ -148,9 +148,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             else
                 GLES20.glClear(0x8000);
         }
-
-        if (Q3EUtils.q3ei.isD3BFG)
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_STENCIL_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        else
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         //k: not render in game loading
         if (Q3EUtils.q3ei.callbackObj.inLoading)
@@ -159,95 +158,25 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         //Onscreen buttons:
         //save state
 
-        if (!Q3EGL.usegles20)
+        if (Q3EGL.usegles20)
         {
-
-            //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            //XXXXXXXXXXXXXXXXXXXXXXXX  GL 11  XXXXXXXXXXXXXXXXXXXXXXXXXX
-            //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX			
-
-            gl.glGetIntegerv(GL11.GL_MATRIX_MODE, tmpbuf);
-            if (tmpbuf.get(0) == GL11.GL_PROJECTION)
-            {
-                //Do nothing, game is loading.
-                //if (Q3EUtils.q3ei.isQ3||Q3EUtils.q3ei.isRTCW)
-                return;
-            }
-
-            gl.glGetIntegerv(GL11.GL_TEXTURE_BINDING_2D, tmpbuf);
-            int a = tmpbuf.get(0);
-            ((GL11) gl).glGetTexEnviv(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, tmpbuf);
-            int b = tmpbuf.get(0);
-            boolean disabletex = !((GL11) gl).glIsEnabled(gl.GL_TEXTURE_COORD_ARRAY);
-            boolean enableclr = ((GL11) gl).glIsEnabled(gl.GL_COLOR_ARRAY);
-
-            gl.glMatrixMode(gl.GL_PROJECTION);
-
-            gl.glLoadIdentity();
-            gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);
-
-            gl.glDisable(gl.GL_CULL_FACE);
-            gl.glDisable(gl.GL_DEPTH_TEST);
-            if (Q3EUtils.q3ei.isQ2)
-            {
-                //������� <3
-                gl.glDisable(gl.GL_SCISSOR_TEST);
-                gl.glDisable(gl.GL_ALPHA_TEST);
-                gl.glEnable(gl.GL_BLEND);
-            }
-            gl.glDisableClientState(gl.GL_COLOR_ARRAY);
-
-            ((GL11) gl).glTexEnvi(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
-
-            gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-
-            gl.glColor4f(1, 1, 1, 0.3f);
-
-            for (Paintable p : paint_elements)
-                p.Paint((GL11) gl);
-
-            gl.glColor4f(1, 1, 1, 1);
-            gl.glEnable(gl.GL_CULL_FACE);
-            gl.glEnable(gl.GL_DEPTH_TEST);
-            //restore
-            if (disabletex)
-                gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY);
-            if (enableclr)
-                gl.glEnableClientState(gl.GL_COLOR_ARRAY);
-            ((GL11) gl).glTexEnvi(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, b);
-            gl.glBindTexture(GL10.GL_TEXTURE_2D, a);
-        } else
-        {
-
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             //XXXXXXXXXXXXXXXXXXXXXXXX  GL 20  XXXXXXXXXXXXXXXXXXXXXXXXXX
-            //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX				
-
-            GLES20.glDisable(GLES20.GL_CULL_FACE);
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-
-            if (Q3EUtils.q3ei.isD3BFG)
-            {
-                //GLES20.glDisable(GLES20.GL_STENCIL_TEST);		
-                //GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
-
-                GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-                GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-            }
-
-            GLES20.glEnable(GLES20.GL_BLEND);
-
-            GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-
+            //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             for (Paintable p : paint_elements)
                 p.Paint((GL11) gl);
+        }
+        else
+        {
+            //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            //XXXXXXXXXXXXXXXXXXXXXXXX  GL 11  XXXXXXXXXXXXXXXXXXXXXXXXXX
+            //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-            if (Q3EUtils.q3ei.isQ1)
-            {
-                GLES20.glEnable(GLES20.GL_CULL_FACE);
-                GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-            }
-
+            /*gl.glMatrixMode(gl.GL_PROJECTION);
+            gl.glLoadIdentity();
+            gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);*/
+            for (Paintable p : paint_elements)
+                p.Paint((GL11) gl);
         }
 
     }
@@ -315,6 +244,13 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             if(null != m_mouseDevice)
                 m_mouseDevice.Start();
 
+            if(!Q3EGL.usegles20)
+            {
+                gl.glMatrixMode(gl.GL_PROJECTION);
+                gl.glLoadIdentity();
+                gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);
+            }
+
             mInit = true;
             post(new Runnable()
             {
@@ -335,6 +271,24 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         {
             Q3EGL.initGL20();
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+            GLES20.glDepthMask(false);
+            GLES20.glDisable(GLES20.GL_CULL_FACE);
+            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+            GLES20.glEnable(GLES20.GL_BLEND);
+            GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        }
+        else
+        {
+            gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            gl.glDisable(gl.GL_CULL_FACE);
+            gl.glDisable(gl.GL_DEPTH_TEST);
+            gl.glDisable(gl.GL_ALPHA_TEST);
+            gl.glEnable(gl.GL_BLEND);
+
+            ((GL11) gl).glTexEnvi(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
+            gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
+            gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY);
         }
 
         if (mInit)

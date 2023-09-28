@@ -1608,11 +1608,9 @@ void idEntity::Present( void ) {
 	// if there is no handle yet, go ahead and add it, ignoring the last predict frame early out
 	// if not, that causes next render frame to have a bunch of spurious primitive draws ( r_showPrimitives )
 	// ( we suspect this is because TH_UPDATEVISUALS doesn't get cleared? )
-#if 1 //k jmarshall
 	if ( !gameLocal.isLastPredictFrame && modelDefHandle != -1 ) {
 		return;
 	}
-#endif
 
 // RAVEN BEGIN
 // ddynerman: don't render objects not in our instance (only on server)
@@ -6794,62 +6792,4 @@ void idAnimatedEntity::Event_CollapseJoints ( const char* jointnames, const char
 	animator.CollapseJoints ( jointnames, collapseToJoint );	
 }
 // RAVEN END
-
-#ifdef _QUAKE4
-// jmarshall
-/*
-==============
-idEntity::GetKey
-==============
-*/
-const char* idEntity::GetKey(const char* key)
-{
-	const char* value;
-
-	spawnArgs.GetString(key, "", &value);
-
-	return value;
-}
-
-/*
-==============
-idEntity::GetFloat
-==============
-*/
-
-float idEntity::GetFloat(const char* key)
-{
-	return spawnArgs.GetFloat(key, "0");
-}
-
-/*
-==============
-idEntity::GetInt
-==============
-*/
-int idEntity::GetInt(const char* key)
-{
-	return spawnArgs.GetInt(key, "0");
-}
-
-/*
-==============
-idEntity::GetBool
-==============
-*/
-bool idEntity::GetBool(const char* key)
-{
-	return spawnArgs.GetBool(key, "0");
-}
-
-/*
-================
-idEntity::GetOrigin
-================
-*/
-idVec3 idEntity::GetOrigin(void)
-{
-	return GetLocalCoordinates(GetPhysics()->GetOrigin());
-}
-#endif
 

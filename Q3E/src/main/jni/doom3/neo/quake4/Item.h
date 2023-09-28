@@ -70,16 +70,6 @@ public:
 	bool					pickedUp;
 	const idDeclSkin*		pickupSkin;
 	void					Event_DropToFloor	( void );
-	
-#ifdef _QUAKE4
-// jmarshall
-	int						GetModelIndex() const
-	{
-		return modelindex;
-	}
-// jmarshall end
-#endif
-
 protected:
 
 	void					UpdateTrigger( void );
@@ -132,12 +122,6 @@ private: // FIXME: Temp hack while Eric gets back to me about why GameState.cpp 
 // abahr
 	void					Event_SetGravity();
 // RAVEN END
-
-#ifdef _QUAKE4
-// jmarshall
-	int						modelindex;
-// jmarshall end
-#endif
 };
 
 /*

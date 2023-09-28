@@ -10,7 +10,6 @@
 ===============================================================================
 */
 
-//k 64
 unsigned int MD4_BlockChecksum(const void *data, int length);
 
 #endif /* !__MD4_H__ */

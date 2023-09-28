@@ -303,23 +303,3 @@ void idNetworkSystem::AddFriend(int clientNum) { (void)clientNum; }
 void idNetworkSystem::RemoveFriend(int clientNum) { (void)clientNum; }
 #endif
 
-#ifdef _RAVEN // bot
-/*
-==================
-idNetworkSystem::AllocateClientSlotForBot
-==================
-*/
-int idNetworkSystem::AllocateClientSlotForBot(const char* botName, int maxPlayersOnServer) {
-	return idAsyncNetwork::server.AllocOpenClientSlotForAI(botName, maxPlayersOnServer);
-}
-
-/*
-==================
-idNetworkSystem::ServerSetBotUserCommand
-==================
-*/
-int idNetworkSystem::ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd) {
-	return idAsyncNetwork::server.ServerSetBotUserCommand(clientNum, frameNum, cmd);
-}
-#endif
-

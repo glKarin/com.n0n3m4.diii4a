@@ -49,12 +49,17 @@ glTexSubImage
 glCopyTexImage
 glCopyTexSubImage
 
-glEnable( GL_TEXTURE_* )
-glDisable( GL_TEXTURE_* )
+qglEnable( GL_TEXTURE_* )
+qglDisable( GL_TEXTURE_* )
 
 ====================================================================
 */
 
+#ifdef _SHADOW_MAPPING
+#ifndef MAX_SHADOWMAP_RESOLUTIONS
+#define MAX_SHADOWMAP_RESOLUTIONS 5
+#endif
+#endif
 typedef enum {
 	IS_UNLOADED,	// no gl texture number
 	IS_PARTIAL,		// has a texture number and the low mip levels loaded
@@ -64,7 +69,7 @@ typedef enum {
 static const int	MAX_TEXTURE_LEVELS = 14;
 
 // surface description flags
-//k 64
+//k 64 L
 const unsigned int DDSF_CAPS           = 0x00000001l;
 const unsigned int DDSF_HEIGHT         = 0x00000002l;
 const unsigned int DDSF_WIDTH          = 0x00000004l;
@@ -90,7 +95,6 @@ const unsigned int DDSF_MIPMAP          = 0x00400000l;
 
 #define DDS_MAKEFOURCC(a, b, c, d) ((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
 
-//k 64
 typedef struct {
 	unsigned int dwSize;
 	unsigned int dwFlags;
@@ -102,7 +106,6 @@ typedef struct {
 	unsigned int dwABitMask;
 } ddsFilePixelFormat_t;
 
-//k 64
 typedef struct {
 	unsigned int dwSize;
 	unsigned int dwFlags;
@@ -126,6 +129,11 @@ typedef enum {
 	TD_DEFAULT,				// will use compressed formats when possible
 	TD_BUMP,				// may be compressed with 8 bit lookup
 	TD_HIGH_QUALITY			// either 32 bit or a component format, no loss at all
+#ifdef _SHADOW_MAPPING
+#ifdef GL_ES_VERSION_3_0
+	, TD_SHADOW_ARRAY		// 2D depth buffer array for shadow mapping
+#endif
+#endif
 #ifdef _RAVEN
 		,
 // How is this texture used?  Determines the storage and color format
@@ -146,12 +154,18 @@ typedef enum {
 	TT_3D,
 	TT_CUBIC,
 	TT_RECT
+#ifdef GL_ES_VERSION_3_0
+	, TT_2D_ARRAY
+#endif
 } textureType_t;
 
 typedef enum {
 	CF_2D,			// not a cube map
 	CF_NATIVE,		// _px, _nx, _py, etc, directly sent to GL
 	CF_CAMERA		// _forward, _back, etc, rotated and flipped as needed before sending to GL
+#ifdef GL_ES_VERSION_3_0
+	, CF_2D_ARRAY		// not a cube map but not a single 2d texture either
+#endif
 } cubeFiles_t;
 
 #define	MAX_IMAGE_NAME	256
@@ -192,6 +206,15 @@ class idImage
 		int		GenerateImageETC(int width, int height,
 		                              textureFilter_t filter, bool allowDownSize,
 		                              textureRepeat_t repeat, textureDepth_t depth);
+
+#ifdef _SHADOW_MAPPING
+	void		GenerateShadowMapDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
+    void		GenerateShadowMapDepthCubeImage(int size, textureFilter_t filter, bool allowDownSize);
+	void		GenerateDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
+#ifdef GL_ES_VERSION_3_0
+	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat );
+#endif
+#endif
 #if !defined(GL_ES_VERSION_2_0)
 		void		Generate3DImage(const byte *pic, int width, int height, int depth,
 		                                textureFilter_t filter, bool allowDownSize,
@@ -515,6 +538,16 @@ class idImageManager
 	bool				GetNextAllocImage(ActuallyLoadImage_data_t &ret);
 	idImage *			GetNextPurgeImage();
 	void HandlePendingImage(void);
+#endif
+#ifdef _SHADOW_MAPPING
+	// RB begin
+	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowCubeImage[MAX_SHADOWMAP_RESOLUTIONS];
+    idImage*			shadowDepthImage[MAX_SHADOWMAP_RESOLUTIONS];
+#ifdef GL_ES_VERSION_3_0
+	idImage*			shadowES3Image[MAX_SHADOWMAP_RESOLUTIONS];
+#endif
+	// RB end
 #endif
 };
 

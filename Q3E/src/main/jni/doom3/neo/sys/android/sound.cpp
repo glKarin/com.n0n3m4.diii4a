@@ -47,9 +47,6 @@ const char	*s_driverArgs[]	= {
 	// "AAudio"
 	NULL };
 
-extern void (*initAudio)(void *buffer, int size);
-extern int (*writeAudio)(int offset, int length);
-
 int m_buffer_size;
 
 static idCVar s_driver("s_driver", s_driverArgs[0], CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "sound driver. only `AudioTrack`"
@@ -72,9 +69,6 @@ class idAudioHardwareAndroid: public idAudioHardware
 		bool Initialize()
 		{
 		common->Printf("------ Android AudioTrack Sound Initialization ------\n");
-#ifdef __ANDROID__
-		common->Printf("[Harmattan]: active write audio.\n");
-#endif
 		m_channels = 2;
 		idSoundSystemLocal::s_numberOfSpeakers.SetInteger(2);
 		m_speed = PRIMARYFREQ;

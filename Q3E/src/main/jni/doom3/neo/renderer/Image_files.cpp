@@ -47,7 +47,7 @@ void R_LoadImage( const char *name, byte **pic, int *width, int *height, bool ma
  * You may also wish to include "jerror.h".
  */
 
-#ifdef _K_USING_STB
+#ifdef _USING_STB
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR
@@ -183,7 +183,7 @@ void R_WritePalTGA(const char *filename, const byte *data, const byte *palette, 
 static void LoadBMP(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 static void LoadTGA(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 static void LoadJPG(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
-#ifdef _K_USING_STB
+#ifdef _USING_STB
 static void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp)
 {
 
@@ -293,7 +293,6 @@ BMP LOADING
 
 =========================================================
 */
-//k 64
 typedef struct {
 	char id[2];
 	unsigned int fileSize;
@@ -349,7 +348,6 @@ static void LoadBMP(const char *name, byte **pic, int *width, int *height, ID_TI
 
 	bmpHeader.id[0] = *buf_p++;
 	bmpHeader.id[1] = *buf_p++;
-//k 64
 	bmpHeader.fileSize = LittleLong(* (int *) buf_p);
 	buf_p += 4;
 	bmpHeader.reserved0 = LittleLong(* (int *) buf_p);
@@ -890,7 +888,7 @@ LoadJPG
 */
 static void LoadJPG(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp)
 {
-#ifdef _K_USING_STB
+#ifdef _USING_STB
 	byte	*fbuffer;
 	int	len;
 
@@ -1186,7 +1184,7 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 			name.StripFileExtension();
 			name.DefaultFileExtension(".jpg");
 			LoadJPG(name.c_str(), pic, width, height, timestamp);
-#ifdef _K_USING_STB
+#ifdef _USING_STB
 			if ((pic && *pic == 0) || (timestamp && *timestamp == -1)) {
 				name.StripFileExtension();
 				name.DefaultFileExtension(".png");
@@ -1201,6 +1199,11 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 	} else if (ext == "jpg") {
 		LoadJPG(name.c_str(), pic, width, height, timestamp);
 	}
+#ifdef _USING_STB
+	else if (ext == "png") {
+		LoadPNG(name.c_str(), pic, width, height, timestamp);
+	}
+#endif
 
 	if ((width && *width < 1) || (height && *height < 1)) {
 		if (pic && *pic) {

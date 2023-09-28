@@ -82,20 +82,20 @@
                 android:defaultValue="false"
                 android:summary="@string/launcher_orientation_follow_system"
             />
+            <!--<CheckBoxPreference
+                android:title="Reopen launcher"
+                android:key="harm_reopen_launcher"
+                android:persistent="true"
+                android:defaultValue="false"
+                android:summary="Open launcher when game finished"
+                />-->
             <CheckBoxPreference
                 android:title="@string/hide_ad_bar"
                 android:key="harm_hide_ad_bar"
                 android:persistent="true"
                 android:defaultValue="true"
-                android:summary="@string/hide_navigation_bar_in_game"
+                android:summary="@string/hide_ad_bar_in_launcher"
             />
-            <!--<CheckBoxPreference
-                android:title="Open Quake 4 helper dialog"
-                android:key="harm_open_quake4_helper"
-                android:persistent="true"
-                android:defaultValue="true"
-                android:summary="Open helper dialog when start Quake 4"
-                />-->
             <ListPreference
                 android:title="@string/language"
                 android:key="harm_lang"

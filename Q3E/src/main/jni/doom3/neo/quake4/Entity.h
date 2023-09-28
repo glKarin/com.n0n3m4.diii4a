@@ -522,17 +522,6 @@ public:
 	virtual void			GuidedProjectileIncoming( idGuidedProjectile * projectile ) { }
 // RAVEN END
 
-#ifdef _QUAKE4
-// jmarshall
-	idVec3					GetOrigin(void);
-	float					GetFloat(const char* key);
-	const char*				GetKey(const char* key);
-	int						GetInt(const char* key);
-	bool					GetBool(const char* key);
-	virtual void			InflictedDamageEvent(idEntity* target) { }
-// jmarshall end
-#endif
-
 protected:
 	renderEntity_t			renderEntity;						// used to present a model to the renderer
 	int						modelDefHandle;						// handle to static renderer model

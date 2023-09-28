@@ -439,16 +439,16 @@ void idSoundWorldLocal::MixLoop(int current44kHz, int numSpeakers, float *finalM
 
 	// if noclip flying outside the world, leave silence
 	if (listenerArea == -1) {
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 		if (idSoundSystemLocal::useOpenAL)
 			alListenerf(AL_GAIN, 0.0f);
-	#endif
+#endif
 
 		return;
 	}
 
 	// update the listener position and orientation
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	if (idSoundSystemLocal::useOpenAL) {
 		ALfloat listenerPosition[3];
 
@@ -511,7 +511,7 @@ void idSoundWorldLocal::MixLoop(int current44kHz, int numSpeakers, float *finalM
 #endif
 	}
 
-	#endif
+#endif
 
 	// debugging option to mute all but a single soundEmitter
 	if (idSoundSystemLocal::s_singleEmitter.GetInteger() > 0 && idSoundSystemLocal::s_singleEmitter.GetInteger() < emitters.Num()) {
@@ -561,11 +561,11 @@ void idSoundWorldLocal::MixLoop(int current44kHz, int numSpeakers, float *finalM
 		}
 	}
 
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	if (!idSoundSystemLocal::useOpenAL && enviroSuitActive) {
 		soundSystemLocal.DoEnviroSuit(finalMixBuffer, MIXBUFFER_SAMPLES, numSpeakers);
 	}
-	#endif
+#endif
 }
 
 //==============================================================================
@@ -1829,7 +1829,7 @@ void idSoundWorldLocal::AddChannelContribution(idSoundEmitterLocal *sound, idSou
 	//
 	// allocate and initialize hardware source
 	//
-	#if !defined(__ANDROID__)
+#if !defined(__ANDROID__)
 	if (idSoundSystemLocal::useOpenAL && sound->removeStatus < REMOVE_STATUS_SAMPLEFINISHED) {
 		if (!alIsSource(chan->openalSource)) {
 			chan->openalSource = soundSystemLocal.AllocOpenALSource(chan, !chan->leadinSample->hardwareBuffer || !chan->soundShader->entries[0]->hardwareBuffer || looping, chan->leadinSample->objectInfo.nChannels == 2);
@@ -1931,7 +1931,7 @@ void idSoundWorldLocal::AddChannelContribution(idSoundEmitterLocal *sound, idSou
 			}
 		}
 	} else 
-	#endif	
+#endif
 	{
 
 		if (slowmoActive && !chan->disallowSlow) {

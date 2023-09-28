@@ -114,6 +114,9 @@ public:
 };
 
 class idActor : public idAFEntity_Gibbable {
+#ifdef MOD_BOTS
+	friend class botAi;
+#endif
 public:
 	CLASS_PROTOTYPE( idActor );
 
@@ -257,10 +260,6 @@ public:
 
 	int						lightningNextTime;
 	int						lightningEffects;
-#ifdef _QUAKE4
-	bool					PointVisible(const idVec3& point) const;
-#endif
-
 
 protected:
 	friend class			idAnimState;

@@ -585,12 +585,6 @@ idUsercmdGenLocal::KeyMove
 Sets the usercmd_t based on key states
 ================
 */
-//n0n3m4
-
-extern float analogx;
-extern float analogy;
-extern int analogenabled;
-
 void idUsercmdGenLocal::KeyMove(void)
 {
 	int		forward, side, up;

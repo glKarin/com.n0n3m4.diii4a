@@ -1971,6 +1971,25 @@ void hhPlayer::UpdateFocus( void ) {
 #ifdef _PREY //k: auto translate alien text
 	const char *translateAlienFont = harm_g_translateAlienFont.GetString();
 	const bool translateAlien = translateAlienFont && translateAlienFont[0];
+
+#if 0 //lvonasek: Prey - Alien text translation logic fixed
+	if (talon.IsValid() && translateAlienFont && translateAlienFont[0]) {
+		for ( auto e : gameLocal.entities ) {
+			if ( !e || e->IsHidden() ) {
+				continue;
+			}
+
+			renderEntity_t *renderEnt = e->GetRenderEntity();
+			if ( renderEnt ) {
+				for (int ix=0; ix<MAX_RENDERENTITY_GUI; ix++) {
+					if (renderEnt->gui[ix] && ((talon->GetOrigin() - renderEnt->origin).Length() < 200)) {
+						renderEnt->gui[ix]->Translate(translateAlienFont);
+					}
+				}
+			}
+		}
+	}
+#endif
 #endif
 
 	// no pretense at sorting here, just assume that there will only be one active
@@ -1992,9 +2011,11 @@ void hhPlayer::UpdateFocus( void ) {
 					interactiveMask |= (1<<ix);
 				}
 #ifdef _PREY //k: auto translate alien text
+#if 1
 				if ( renderEnt->gui[ix] && translateAlien ) {
 					renderEnt->gui[ix]->Translate(translateAlienFont);
 				}
+#endif
 #endif
 			}
 		}

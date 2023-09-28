@@ -39,16 +39,16 @@ If you have questions concerning this license or the applicable additional terms
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
+#ifndef EGL_OPENGL_ES3_BIT
+#define EGL_OPENGL_ES3_BIT EGL_OPENGL_ES3_BIT_KHR
+#endif
 idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
                     "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
 
 #define MAX_NUM_CONFIGS 4
 static bool window_seted = false;
 static volatile ANativeWindow *win;
-extern int gl_format;
-extern int gl_msaa;
-extern int screen_width;
-extern int screen_height;
+//volatile bool has_gl_context = false;
 
 static EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 static EGLSurface eglSurface = EGL_NO_SURFACE;
@@ -56,6 +56,7 @@ static EGLContext eglContext = EGL_NO_CONTEXT;
 static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+
 
 static void GLimp_HandleError(const char *func, bool exit = true)
 {
@@ -115,11 +116,13 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 		GLimp_HandleError("eglMakeCurrent");
 		return;
 	}
+	//has_gl_context = true;
 	Sys_Printf("[Harmattan]: EGL surface created and using EGL context.\n");
 }
 
 void GLimp_AndroidQuit()
 {
+	//has_gl_context = false;
 	if(!win)
 		return;
 	if(eglDisplay != EGL_NO_DISPLAY)
@@ -141,7 +144,6 @@ void GLimp_WakeBackEnd(void *a)
 
 void GLimp_EnableLogging(bool log)
 {
-	extern FILE *f_stdout;
 	tr.logFile = log ? f_stdout : NULL;
 	//common->DPrintf("GLimp_EnableLogging stub\n");
 }
@@ -171,6 +173,56 @@ void GLimp_ActivateContext()
 void GLimp_DeactivateContext()
 {
 	eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+}
+
+#include <dlfcn.h>
+static void *glHandle = NULL;
+#define QGLPROC(name, rettype, args) rettype (GL_APIENTRYP q##name) args;
+#include "../../renderer/qgl_proc.h"
+#undef QGLPROC
+
+static void R_LoadOpenGLFunc()
+{
+#define QGLPROC(name, rettype, args) \
+	q##name = (rettype(GL_APIENTRYP)args)GLimp_ExtensionPointer(#name); \
+	if (!q##name) \
+		common->FatalError("Unable to initialize OpenGL (%s)", #name);
+
+#include "../../renderer/qgl_proc.h"
+}
+
+static bool GLimp_dlopen()
+{
+#ifdef _OPENGLES3
+	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */(
+			gl_version == 0x00030000 ? "libGLESv3.so" : "libGLESv2.so"
+	);
+#else
+	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */ "libGLESv2.so";
+#endif
+	common->Printf("dlopen(%s)\n", driverName);
+#if 0
+	if ( !( glHandle = dlopen( driverName, RTLD_NOW | RTLD_GLOBAL ) ) ) {
+		common->Printf("dlopen(%s) failed: %s\n", driverName, dlerror());
+		return false;
+	}
+	common->Printf("dlopen(%s) done\n", driverName);
+#endif
+	R_LoadOpenGLFunc();
+	return true;
+}
+
+static void GLimp_dlclose()
+{
+#if 0
+	if ( !glHandle ) {
+		common->Printf("dlclose: GL handle is NULL\n");
+	} else {
+		common->Printf("dlclose(%s) done\n", glHandle);
+		dlclose( glHandle );
+		glHandle = NULL;
+	}
+#endif
 }
 
 /*
@@ -209,6 +261,7 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 
 void GLimp_Shutdown()
 {
+	//has_gl_context = false;
 	GLimp_DeactivateContext();
 	//eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	if(eglContext != EGL_NO_CONTEXT)
@@ -226,6 +279,8 @@ void GLimp_Shutdown()
 		eglTerminate(eglDisplay);
 		eglDisplay = EGL_NO_DISPLAY;
 	}
+	GLimp_dlclose();
+
 	Sys_Printf("[Harmattan]: EGL destroyed.\n");
 }
 
@@ -316,7 +371,12 @@ static bool GLES_Init_special(void)
 			EGL_STENCIL_SIZE, stencil_bits,
 			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
 			EGL_SAMPLES, gl_msaa,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+            EGL_RENDERABLE_TYPE,
+#ifdef _OPENGLES3
+			gl_version == 0x00020000 ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_ES3_BIT,
+#else
+			EGL_OPENGL_ES2_BIT,
+#endif
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_NONE,
     };
@@ -480,7 +540,6 @@ int GLES_Init(glimpParms_t ap)
 	unsigned long mask;
 	int actualWidth, actualHeight;
 	int i;
-	const char *glstring;
 	EGLint major, minor;
 	EGLint stencil_bits;
 	EGLint depth_bits;
@@ -564,12 +623,6 @@ int GLES_Init(glimpParms_t ap)
 	glConfig.depthBits = depth_bits;
 	glConfig.stencilBits = stencil_bits;
 
-	glstring = (const char *) glGetString(GL_RENDERER);
-	common->Printf("GL_RENDERER: %s\n", glstring);
-
-	glstring = (const char *) glGetString(GL_EXTENSIONS);
-	common->Printf("GL_EXTENSIONS: %s\n", glstring);
-
 	glConfig.isFullscreen = true;
 
 	if (glConfig.isFullscreen) {
@@ -605,6 +658,23 @@ bool GLimp_Init(glimpParms_t a)
 		return false;
 	}
 
+	// load qgl function pointers
+	GLimp_dlopen();
+
+	const char *glstring;
+	glstring = (const char *) qglGetString(GL_RENDERER);
+	common->Printf("GL_RENDERER: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_EXTENSIONS);
+	common->Printf("GL_EXTENSIONS: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_VERSION);
+	common->Printf("GL_VERSION: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_SHADING_LANGUAGE_VERSION);
+	common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glstring);
+
+	//has_gl_context = true;
 	return true;
 }
 

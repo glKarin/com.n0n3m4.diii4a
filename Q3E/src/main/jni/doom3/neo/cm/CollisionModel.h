@@ -232,9 +232,6 @@ class idCollisionModelManager
 		virtual void			ListModels(void) = 0;
 		// Writes a collision model file for the given map entity.
 		virtual bool			WriteCollisionModelForMapEntity(const idMapEntity *mapEnt, const char *filename, const bool testTraceModel = true) = 0;
-#ifdef _RAVEN
-	virtual int				PointContents(const idVec3 p, cmHandle_t handle) = 0;
-#endif
 
 };
 

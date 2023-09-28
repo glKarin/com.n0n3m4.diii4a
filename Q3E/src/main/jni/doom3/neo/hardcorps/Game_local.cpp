@@ -454,7 +454,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteBuildNumber( BUILD_NUMBER );
 
 	//k not in original DOOM3
-#ifndef __ANDROID__
+#if !defined(__ANDROID__)
 //rev 2021 dhewm 1.5.1 build updates.  Found this comment in the commits.	
 	// DG: add some more information to savegame to make future quirks easier
 	savegame.WriteInt( INTERNAL_SAVEGAME_VERSION ); // to be independent of BUILD_NUMBER
@@ -1298,7 +1298,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadBuildNumber();
 
 	//k not in original DOOM3
-#ifndef __ANDROID__
+#if !defined(__ANDROID__)
 //rev 2021 dhewm 3 1.5.1 updates.
 	// DG: I enhanced the information in savegames a bit for dhewm3 1.5.1
 	//     for which I bumped th BUILD_NUMBER to 1305

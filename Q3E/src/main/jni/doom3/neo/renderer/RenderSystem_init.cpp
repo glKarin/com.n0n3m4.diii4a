@@ -65,10 +65,10 @@ idCVar r_useInfiniteFarZ("r_useInfiniteFarZ", "1", CVAR_RENDERER | CVAR_BOOL, "u
 
 idCVar r_znear("r_znear", "3", CVAR_RENDERER | CVAR_FLOAT, "near Z clip plane distance", 0.001f, 200.0f);
 
-idCVar r_noLight("r_noLight", "0", CVAR_RENDERER | CVAR_BOOL, "lighting disable hack");
-idCVar r_useETC1("r_useETC1", "1", CVAR_RENDERER | CVAR_BOOL, "use ETC1 compression");
-idCVar r_useETC1Cache("r_useETC1cache", "1", CVAR_RENDERER | CVAR_BOOL, "use ETC1 compression");
-idCVar r_useDXT("r_useDXT", "1", CVAR_RENDERER | CVAR_BOOL, "use DXT compression if possible");
+idCVar r_noLight("r_noLight", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "lighting disable hack");
+idCVar r_useETC1("r_useETC1", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use ETC1 compression");
+idCVar r_useETC1Cache("r_useETC1cache", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use ETC1 compression");
+idCVar r_useDXT("r_useDXT", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use DXT compression if possible");
 
 idCVar r_ignoreGLErrors("r_ignoreGLErrors", "1", CVAR_RENDERER | CVAR_BOOL, "ignore GL errors");
 idCVar r_finish("r_finish", "0", CVAR_RENDERER | CVAR_BOOL, "force a call to glFinish() every frame");
@@ -210,14 +210,7 @@ idCVar r_materialOverride("r_materialOverride", "", CVAR_RENDERER, "overrides al
 
 idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVAR_INTEGER, "");
 
-#if !defined(GL_ES_VERSION_2_0)
-// GL_ARB_texture_compression + GL_S3_s3tc
-void (GL_APIENTRY *qglCompressedTexImage2DARB)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
-void (GL_APIENTRY *qglGetCompressedTexImageARB)(GLenum target, GLint level, GLvoid *img);
-
-// GL_EXT_depth_bounds_test
-void (GL_APIENTRY *qglDepthBoundsEXT)(GLclampd zmin, GLclampd zmax);
-#endif
+idCVar harm_r_maxFps( "harm_r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
 
 /*
 =================
@@ -244,7 +237,16 @@ R_CheckPortableExtensions
 static void R_CheckPortableExtensions(void)
 {
 	glConfig.glVersion = atof(glConfig.version_string);
-#if !defined(GL_ES_VERSION_2_0)
+	if(glConfig.glVersion == 0.0f)
+	{
+#ifdef GL_ES_VERSION_3_0
+		if(USING_GLES3)
+			glConfig.glVersion = 3.0;
+		else
+#endif
+			glConfig.glVersion = 2.0;
+	}
+#if 0
 	if (!glConfig.glVersion >= 3.0) {
 		common->Error(common->GetLanguageDict()->GetString("#str_06780"));
 	}
@@ -255,7 +257,7 @@ static void R_CheckPortableExtensions(void)
 
 	if (glConfig.multitextureAvailable)
 	{
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureUnits);
+		qglGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureUnits);
 
 		if (glConfig.maxTextureUnits > MAX_MULTITEXTURE_UNITS) {
 			glConfig.maxTextureUnits = MAX_MULTITEXTURE_UNITS;
@@ -265,8 +267,8 @@ static void R_CheckPortableExtensions(void)
 			glConfig.multitextureAvailable = false;	// shouldn't ever happen
 		}
 
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint *)&glConfig.maxTextureCoords);
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureImageUnits);
+		qglGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint *)&glConfig.maxTextureCoords);
+		qglGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint *)&glConfig.maxTextureImageUnits);
 	}
 
 	// GL_ARB_texture_env_combine
@@ -282,13 +284,20 @@ static void R_CheckPortableExtensions(void)
 	glConfig.textureEnvAddAvailable = false; // R_CheckExtension("GL_ARB_texture_env_add");
 
 	// GL_ARB_texture_non_power_of_two
-	glConfig.textureNonPowerOfTwoAvailable = R_CheckExtension(
-#if !defined(GL_ES_VERSION_2_0)
-			"GL_ARB_texture_non_power_of_two"
-#else
-			"GL_OES_texture_npot"
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+		glConfig.textureNonPowerOfTwoAvailable = true;
+	else
 #endif
-			);
+	{
+		glConfig.textureNonPowerOfTwoAvailable = R_CheckExtension(
+#if !defined(GL_ES_VERSION_2_0)
+				"GL_ARB_texture_non_power_of_two"
+#else
+				"GL_OES_texture_npot"
+#endif
+		);
+	}
 
 	// GL_ARB_texture_compression + GL_S3_s3tc
 	// DRI drivers may have GL_ARB_texture_compression but no GL_EXT_texture_compression_s3tc
@@ -310,7 +319,7 @@ static void R_CheckPortableExtensions(void)
 	glConfig.anisotropicAvailable = R_CheckExtension("GL_EXT_texture_filter_anisotropic");
 
 	if (glConfig.anisotropicAvailable) {
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glConfig.maxTextureAnisotropy);
+		qglGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &glConfig.maxTextureAnisotropy);
 		common->Printf("   maxTextureAnisotropy: %f\n", glConfig.maxTextureAnisotropy);
 	} else {
 		glConfig.maxTextureAnisotropy = 1;
@@ -331,7 +340,21 @@ static void R_CheckPortableExtensions(void)
 	glConfig.sharedTexturePaletteAvailable = false; // R_CheckExtension("GL_EXT_shared_texture_palette");
 
 	// GL_EXT_texture3D (not currently used for anything)
-	glConfig.texture3DAvailable = false; // R_CheckExtension("GL_EXT_texture3D");
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+		glConfig.texture3DAvailable = true;
+	else
+#endif
+	{
+
+		glConfig.texture3DAvailable = R_CheckExtension(
+#if !defined(GL_ES_VERSION_2_0)
+				"GL_EXT_texture3D"
+#else
+				"GL_OES_texture_3D"
+#endif
+				);
+	}
 
 	// EXT_stencil_wrap
 	tr.stencilIncr = GL_INCR_WRAP;
@@ -340,6 +363,7 @@ static void R_CheckPortableExtensions(void)
 	// ARB_vertex_buffer_object
 	glConfig.ARBVertexBufferObjectAvailable = true; // R_CheckExtension("GL_ARB_vertex_buffer_object");
 
+#if !defined(GL_ES_VERSION_2_0)
 	// ARB_vertex_program
 	glConfig.ARBVertexProgramAvailable = true; // R_CheckExtension("GL_ARB_vertex_program");
 
@@ -349,6 +373,10 @@ static void R_CheckPortableExtensions(void)
 	} else {
 		glConfig.ARBFragmentProgramAvailable = true; // R_CheckExtension("GL_ARB_fragment_program");
 	}
+#else
+	glConfig.ARBVertexProgramAvailable = false;
+	glConfig.ARBFragmentProgramAvailable = false;
+#endif
 
 	glConfig.depthBoundsTestAvailable = false; // R_CheckExtension("EXT_depth_bounds_test");
 
@@ -360,7 +388,21 @@ static void R_CheckPortableExtensions(void)
 	}
 #endif
 	// GL_ARB_shading_language_100
-	glConfig.GLSLAvailable = R_CheckExtension("GL_ARB_shading_language_100");
+	glConfig.GLSLAvailable = true;
+
+	// GL_EXT_framebuffer_object
+	glConfig.framebufferObjectAvailable = true;
+	if( glConfig.framebufferObjectAvailable )
+	{
+		qglGetIntegerv( GL_MAX_RENDERBUFFER_SIZE, &glConfig.maxRenderbufferSize );
+		qglGetIntegerv( GL_MAX_COLOR_ATTACHMENTS, &glConfig.maxColorAttachments );
+
+		common->Printf( "...using %s\n", "GL_EXT_framebuffer_object" );
+	}
+	else
+	{
+		common->Printf( "X..%s not found\n", "GL_EXT_framebuffer_object" );
+	}
 }
 
 
@@ -446,9 +488,6 @@ and model information functions.
 ==================
 */
 #ifdef __ANDROID__
-extern int screen_width;
-extern int screen_height;
-
 static void AndroidSetResolution(int32_t width, int32_t height)
 {
 	cvarSystem->SetCVarBool("r_fullscreen",  true);
@@ -491,9 +530,9 @@ void R_InitOpenGL(void)
 	//
 	// initialize OS specific portions of the renderSystem
 	//
-	#ifdef __ANDROID__
+#ifdef __ANDROID__
 	AndroidSetResolution(screen_width, screen_height);
-	#endif
+#endif
 	for (i = 0 ; i < 2 ; i++) {
 		// set the parameters we are trying
 		R_GetModeInfo(&glConfig.vidWidth, &glConfig.vidHeight, r_mode.GetInteger());
@@ -526,13 +565,13 @@ void R_InitOpenGL(void)
 	soundSystem->InitHW();
 
 	// get our config strings
-	glConfig.vendor_string = (const char *)glGetString(GL_VENDOR);
-	glConfig.renderer_string = (const char *)glGetString(GL_RENDERER);
-	glConfig.version_string = (const char *)glGetString(GL_VERSION);
-	glConfig.extensions_string = (const char *)glGetString(GL_EXTENSIONS);
+	glConfig.vendor_string = (const char *)qglGetString(GL_VENDOR);
+	glConfig.renderer_string = (const char *)qglGetString(GL_RENDERER);
+	glConfig.version_string = (const char *)qglGetString(GL_VERSION);
+	glConfig.extensions_string = (const char *)qglGetString(GL_EXTENSIONS);
 
 	// OpenGL driver constants
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
+	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 	glConfig.maxTextureSize = temp;
 
 	// stubbed or broken drivers may have reported 0...
@@ -596,7 +635,7 @@ void GL_CheckErrors(void)
 
 	// check for up to 10 errors pending
 	for (i = 0 ; i < 10 ; i++) {
-		err = glGetError();
+		err = qglGetError();
 
 		if (err == GL_NO_ERROR) {
 			return;
@@ -955,7 +994,7 @@ R_RenderingFPS
 */
 static float R_RenderingFPS(const renderView_t *renderView)
 {
-	glFinish();
+	qglFinish();
 
 	int		start = Sys_Milliseconds();
 	static const int SAMPLE_MSEC = 1000;
@@ -967,7 +1006,7 @@ static float R_RenderingFPS(const renderView_t *renderView)
 		renderSystem->BeginFrame(glConfig.vidWidth, glConfig.vidHeight);
 		tr.primaryWorld->RenderScene(renderView);
 		renderSystem->EndFrame(NULL, NULL);
-		glFinish();
+		qglFinish();
 		count++;
 		end = Sys_Milliseconds();
 
@@ -1022,6 +1061,90 @@ void R_Benchmark_f(const idCmdArgs &args)
 	r_skipRenderContext.SetBool(false);
 }
 
+#ifdef GL_ES_VERSION_3_0
+void R_OpenGL_f(const idCmdArgs &args)
+{
+	if(!glConfig.isInitialized)
+	{
+		common->Printf("OpenGL not initialized!\n");
+		return;
+	}
+
+	if(USING_GLES3)
+		common->Printf("OpenGLES 3.0\n");
+	else
+		common->Printf("OpenGLES 2.0\n");
+
+	common->Printf("Renderer: %s\n", glConfig.renderer_string);
+	common->Printf("Version: %s\n", glConfig.version_string);
+	common->Printf("Vendor: %s\n", glConfig.version_string);
+	common->Printf("Extensions: %s\n", glConfig.extensions_string);
+
+	common->Printf("glVersion: %f\n", glConfig.glVersion);
+
+	common->Printf("maxTextureSize: %d\n", glConfig.maxTextureSize);
+	common->Printf("maxTextureUnits: %d\n", glConfig.maxTextureUnits);
+	common->Printf("maxTextureCoords: %d\n", glConfig.maxTextureCoords);
+	common->Printf("maxTextureImageUnits: %d\n", glConfig.maxTextureImageUnits);
+	common->Printf("maxTextureAnisotropy: %f\n", glConfig.maxTextureAnisotropy);
+
+	common->Printf("colorBits: %d\n", glConfig.colorBits);
+	common->Printf("depthBits: %d\n", glConfig.depthBits);
+	common->Printf("stencilBits: %d\n", glConfig.stencilBits);
+
+	common->Printf("multitextureAvailable: %d\n", glConfig.multitextureAvailable);
+	common->Printf("textureCompressionAvailable: %d\n", glConfig.textureCompressionAvailable);
+	common->Printf("anisotropicAvailable: %d\n", glConfig.anisotropicAvailable);
+	common->Printf("textureLODBiasAvailable: %d\n", glConfig.textureLODBiasAvailable);
+	common->Printf("textureEnvAddAvailable: %d\n", glConfig.textureEnvAddAvailable);
+	common->Printf("textureEnvCombineAvailable: %d\n", glConfig.textureEnvCombineAvailable);
+	common->Printf("cubeMapAvailable: %d\n", glConfig.cubeMapAvailable);
+	common->Printf("envDot3Available: %d\n", glConfig.envDot3Available);
+	common->Printf("texture3DAvailable: %d\n", glConfig.texture3DAvailable);
+	common->Printf("sharedTexturePaletteAvailable: %d\n", glConfig.sharedTexturePaletteAvailable);
+	common->Printf("ARBVertexBufferObjectAvailable: %d\n", glConfig.ARBVertexBufferObjectAvailable);
+	common->Printf("ARBVertexProgramAvailable: %d\n", glConfig.ARBVertexProgramAvailable);
+	common->Printf("ARBFragmentProgramAvailable: %d\n", glConfig.ARBFragmentProgramAvailable);
+	common->Printf("textureNonPowerOfTwoAvailable: %d\n", glConfig.textureNonPowerOfTwoAvailable);
+	common->Printf("depthBoundsTestAvailable: %d\n", glConfig.depthBoundsTestAvailable);
+	common->Printf("GLSLAvailable: %d\n", glConfig.GLSLAvailable);
+
+	common->Printf("vidWidth: %d\n", glConfig.vidWidth);
+	common->Printf("vidHeight: %d\n", glConfig.vidHeight);
+
+	common->Printf("displayFrequency: %d\n", glConfig.displayFrequency);
+
+	common->Printf("isFullscreen: %d\n", glConfig.isFullscreen);
+
+	common->Printf("allowARB2Path: %d\n", glConfig.allowARB2Path);
+	common->Printf("allowGLSLPath: %d\n", glConfig.allowGLSLPath);
+
+	common->Printf("framebufferObjectAvailable: %d\n", glConfig.framebufferObjectAvailable);
+	common->Printf("maxRenderbufferSize: %d\n", glConfig.maxRenderbufferSize);
+	common->Printf("maxColorAttachments: %d\n", glConfig.maxColorAttachments);
+
+	if(USING_GLES3)
+		common->Printf("OpenGLES 3.0\n");
+	else
+		common->Printf("OpenGLES 2.0\n");
+}
+#endif
+
+#ifdef _MULTITHREAD
+static void R_Multithreading_f(const idCmdArgs &args)
+{
+	extern intptr_t Sys_GetMainThread(void);
+	extern const xthreadInfo * Sys_GetRenderThread(void);
+
+	common->Printf("[Harmattan]: Multi-Thread current is %s.\n", multithreadActive ? "enabled" : "disabled");
+	common->Printf("             - Main thread handle is %lu.\n", Sys_GetMainThread());
+	//if(multithreadActive)
+	{
+		const xthreadInfo *thread = Sys_GetRenderThread();
+		common->Printf("             - Render thread(%s) handle is %lu.\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
+	}
+}
+#endif
 
 /*
 ==============================================================================
@@ -1044,7 +1167,8 @@ If ref isn't specified, the full session UpdateScreen will be done.
 void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = NULL)
 {
 	// include extra space for OpenGL padding to word boundaries
-	byte	*temp = (byte *)R_StaticAlloc((glConfig.vidWidth+3) * glConfig.vidHeight * 3);
+	//byte	*temp = (byte *)R_StaticAlloc((glConfig.vidWidth+4) * glConfig.vidHeight * 4);
+	byte	*temp = (byte *)R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight * 4);
 
 	int	oldWidth = glConfig.vidWidth;
 	int oldHeight = glConfig.vidHeight;
@@ -1060,6 +1184,20 @@ void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = 
 			tr.viewportOffset[0] = -xo;
 			tr.viewportOffset[1] = -yo;
 
+#ifdef _MULTITHREAD
+			if (multithreadActive)
+			{
+				if (ref) {
+					tr.BeginFrame(oldWidth, oldHeight);
+					tr.primaryWorld->RenderScene(ref);
+					tr.EndFrame(temp, NULL, NULL);
+				} else {
+					session->UpdateScreen(temp, true);
+				}
+			}
+			else
+			{
+#endif
 			if (ref) {
 				tr.BeginFrame(oldWidth, oldHeight);
 				tr.primaryWorld->RenderScene(ref);
@@ -1067,6 +1205,9 @@ void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = 
 			} else {
 				session->UpdateScreen();
 			}
+#ifdef _MULTITHREAD
+			}
+#endif
 
 			int w = oldWidth;
 
@@ -1080,16 +1221,24 @@ void R_ReadTiledPixels(int width, int height, byte *buffer, renderView_t *ref = 
 				h = height - yo;
 			}
 
-#if !defined(GL_ES_VERSION_2_0)
-			glReadBuffer(GL_FRONT);
+#ifdef _MULTITHREAD
+			if (!multithreadActive)
+			{
 #endif
-			glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp);
+#if !defined(GL_ES_VERSION_2_0)
+			qglReadBuffer(GL_FRONT);
+#endif
+			qglReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, temp);
+#ifdef _MULTITHREAD
+			}
+#endif
 
-			int	row = (w * 3 + 3) & ~3;		// OpenGL pads to dword boundaries
+			//int	row = (w * 4 + 4) & ~4;		// OpenGL pads to dword boundaries
+			int	row = (w * 4); // ES
 
 			for (int y = 0 ; y < h ; y++) {
-				memcpy(buffer + ((yo + y)* width + xo) * 3,
-				       temp + y * row, w * 3);
+				memcpy(buffer + ((yo + y)* width + xo) * 4,
+				       temp + y * row, w * 4);
 			}
 		}
 	}
@@ -1128,14 +1277,14 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 
 	int	pix = width * height;
 
-	buffer = (byte *)R_StaticAlloc(pix*3 + 18);
+	buffer = (byte *)R_StaticAlloc(pix*4 + 18);
 	memset(buffer, 0, 18);
 
 	if (blends <= 1) {
 		R_ReadTiledPixels(width, height, buffer + 18, ref);
 	} else {
-		unsigned short *shortBuffer = (unsigned short *)R_StaticAlloc(pix*2*3);
-		memset(shortBuffer, 0, pix*2*3);
+		unsigned short *shortBuffer = (unsigned short *)R_StaticAlloc(pix*2*4);
+		memset(shortBuffer, 0, pix*2*4);
 
 		// enable anti-aliasing jitter
 		r_jitter.SetBool(true);
@@ -1143,13 +1292,13 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 		for (i = 0 ; i < blends ; i++) {
 			R_ReadTiledPixels(width, height, buffer + 18, ref);
 
-			for (j = 0 ; j < pix*3 ; j++) {
+			for (j = 0 ; j < pix*4 ; j++) {
 				shortBuffer[j] += buffer[18+j];
 			}
 		}
 
 		// divide back to bytes
-		for (i = 0 ; i < pix*3 ; i++) {
+		for (i = 0 ; i < pix*4 ; i++) {
 			buffer[18+i] = shortBuffer[i] / blends;
 		}
 
@@ -1163,12 +1312,12 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 	buffer[13] = width >> 8;
 	buffer[14] = height & 255;
 	buffer[15] = height >> 8;
-	buffer[16] = 24;	// pixel size
+	buffer[16] = 32;	// pixel size
 
 	// swap rgb to bgr
-	c = 18 + width * height * 3;
+	c = 18 + width * height * 4;
 
-	for (i=18 ; i<c ; i+=3) {
+	for (i=18 ; i<c ; i+=4) {
 		temp = buffer[i];
 		buffer[i] = buffer[i+2];
 		buffer[i+2] = temp;
@@ -1336,10 +1485,10 @@ void R_StencilShot(void)
 #if !defined(GL_ES_VERSION_2_0)
 	GLenum stencilIndex = GL_STENCIL_INDEX;
 #else
-	GLenum stencilIndex = GL_STENCIL_INDEX8_OES; // GL_STENCIL_INDEX4_OES;
+	GLenum stencilIndex = GL_STENCIL_INDEX8; // GL_STENCIL_INDEX4_OES;
 #endif
 
-	glReadPixels(0, 0, width, height, stencilIndex, GL_UNSIGNED_BYTE, byteBuffer);
+	qglReadPixels(0, 0, width, height, stencilIndex, GL_UNSIGNED_BYTE, byteBuffer);
 
 	for (i = 0 ; i < pix ; i++) {
 		buffer[18+i*3] =
@@ -1414,29 +1563,35 @@ void R_EnvShot_f(const idCmdArgs &args)
 	primary = *tr.primaryView;
 
 	memset(&axis, 0, sizeof(axis));
-	axis[0][0][0] = 1;
-	axis[0][1][2] = 1;
-	axis[0][2][1] = 1;
+    // forward = east (positive x-axis in DR)
+    axis[0][0][0] = 1;
+    axis[0][1][1] = 1;
+    axis[0][2][2] = 1;
 
-	axis[1][0][0] = -1;
-	axis[1][1][2] = -1;
-	axis[1][2][1] = 1;
+    // left = north
+    axis[1][0][1] = 1;
+    axis[1][1][0] = -1;
+    axis[1][2][2] = 1;
 
-	axis[2][0][1] = 1;
-	axis[2][1][0] = -1;
-	axis[2][2][2] = -1;
+    // right = south
+    axis[2][0][1] = -1;
+    axis[2][1][0] = 1;
+    axis[2][2][2] = 1;
 
-	axis[3][0][1] = -1;
-	axis[3][1][0] = -1;
-	axis[3][2][2] = 1;
+    // back = west
+    axis[3][0][0] = -1;
+    axis[3][1][1] = -1;
+    axis[3][2][2] = 1;
 
-	axis[4][0][2] = 1;
-	axis[4][1][0] = -1;
-	axis[4][2][1] = 1;
+    // down, while facing forward
+    axis[4][0][2] = -1;
+    axis[4][1][1] = 1;
+    axis[4][2][0] = 1;
 
-	axis[5][0][2] = -1;
-	axis[5][1][0] = 1;
-	axis[5][2][1] = 1;
+    // up, while facing forward
+    axis[5][0][2] = 1;
+    axis[5][1][1] = 1;
+    axis[5][2][0] = -1;
 
 	for (i = 0 ; i < 6 ; i++) {
 		ref = primary.renderView;
@@ -1857,7 +2012,7 @@ void R_VidRestart_f(const idCmdArgs &args)
 	R_RegenerateWorld_f(idCmdArgs());
 
 	// check for problems
-	err = glGetError();
+	err = qglGetError();
 
 	if (err != GL_NO_ERROR) {
 		common->Printf("glGetError() = 0x%x\n", err);
@@ -1952,6 +2107,9 @@ R_InitCvars
 void R_InitCvars(void)
 {
 	// update latched cvars here
+
+	int maxFps = harm_r_maxFps.GetInteger();
+	r_maxFps = maxFps > 0 ? 1000 / maxFps : 0;
 }
 
 /*
@@ -1987,6 +2145,12 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("listRenderLightDefs", R_ListRenderLightDefs_f, CMD_FL_RENDERER, "lists the light defs");
 	cmdSystem->AddCommand("listModes", R_ListModes_f, CMD_FL_RENDERER, "lists all video modes");
 	cmdSystem->AddCommand("reloadSurface", R_ReloadSurface_f, CMD_FL_RENDERER, "reloads the decl and images for selected surface");
+#ifdef GL_ES_VERSION_3_0
+	cmdSystem->AddCommand("glVersion", R_OpenGL_f, CMD_FL_RENDERER, "print OpenGL version");
+#endif
+#ifdef _MULTITHREAD
+	cmdSystem->AddCommand("r_multithread", R_Multithreading_f, CMD_FL_SYSTEM, "print multi-threading state");
+#endif
 }
 
 /*
@@ -2189,7 +2353,10 @@ void idRenderSystemLocal::InitOpenGL(void)
 
 		globalImages->ReloadAllImages();
 
-		err = glGetError();
+#ifdef _SHADOW_MAPPING
+		Framebuffer::Init();
+#endif
+		err = qglGetError();
 
 		if (err != GL_NO_ERROR) {
 			common->Printf("glGetError() = 0x%x\n", err);
@@ -2253,3 +2420,79 @@ int idRenderSystemLocal::GetScreenHeight(void) const
 {
 	return glConfig.vidHeight;
 }
+
+void GL_CheckErrors(const char *name)
+{
+	int		err;
+	char	s[64];
+	int		i;
+
+	// check for up to 10 errors pending
+	err = qglGetError();
+
+	if (err == GL_NO_ERROR) {
+		common->Printf("GL_CheckErrors for %s: NO_ERROR\n", name);
+		return;
+	}
+
+	switch (err) {
+		case GL_INVALID_ENUM:
+			strcpy(s, "GL_INVALID_ENUM");
+			break;
+		case GL_INVALID_VALUE:
+			strcpy(s, "GL_INVALID_VALUE");
+			break;
+		case GL_INVALID_OPERATION:
+			strcpy(s, "GL_INVALID_OPERATION");
+			break;
+#if !defined(GL_ES_VERSION_2_0)
+			case GL_STACK_OVERFLOW:
+            strcpy(s, "GL_STACK_OVERFLOW");
+            break;
+        case GL_STACK_UNDERFLOW:
+            strcpy(s, "GL_STACK_UNDERFLOW");
+            break;
+#endif
+		case GL_OUT_OF_MEMORY:
+			strcpy(s, "GL_OUT_OF_MEMORY");
+			break;
+		default:
+			idStr::snPrintf(s, sizeof(s), "%x", err);
+			break;
+	}
+	common->Printf("GL_CheckErrors for %s: %s\n", name, s);
+}
+
+#ifdef _SHADOW_MAPPING
+// RB: shadow mapping parameters
+idCVar r_useShadowMapping( "r_useShadowMapping", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "use shadow mapping instead of stencil shadows" );
+idCVar r_shadowMapFrustumFOV( "r_shadowMapFrustumFOV", "90", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "oversize FOV for point light side matching" );
+idCVar r_shadowMapSingleSide( "r_shadowMapSingleSide", "-1", CVAR_RENDERER | CVAR_INTEGER, "only draw a single side (0-5) of point lights" );
+idCVar r_shadowMapImageSize( "r_shadowMapImageSize", "1024", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "", 128, 2048 );
+idCVar r_shadowMapJitterScale( "r_shadowMapJitterScale", "3", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter offset" );
+idCVar r_shadowMapBiasScale( "r_shadowMapBiasScale", "0.0001", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter bias" );
+idCVar r_shadowMapRandomizeJitter( "r_shadowMapRandomizeJitter", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "randomly offset jitter texture each draw" );
+idCVar r_shadowMapSamples( "r_shadowMapSamples", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "0, 1, 4, or 16" );
+idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER, "number of splits for cascaded shadow mapping with parallel lights", 0, 4 );
+idCVar r_shadowMapSplitWeight( "r_shadowMapSplitWeight", "0.9", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
+idCVar r_shadowMapLodScale( "r_shadowMapLodScale", "1.4", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
+idCVar r_shadowMapLodBias( "r_shadowMapLodBias", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "" );
+idCVar r_shadowMapPolygonFactor( "r_shadowMapPolygonFactor", "2", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
+idCVar r_shadowMapPolygonOffset( "r_shadowMapPolygonOffset", "3000", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
+idCVar r_shadowMapOccluderFacing( "r_shadowMapOccluderFacing", "2", CVAR_RENDERER | CVAR_INTEGER, "0 = front faces, 1 = back faces, 2 = twosided" );
+// RB end
+
+idCVar harm_r_shadowMapLod( "harm_r_shadowMapLod", "-1", CVAR_RENDERER | CVAR_INTEGER, "force using shadow map LOD(0 - 4, -1: auto)" );
+idCVar harm_r_shadowMapBias( "harm_r_shadowMapBias", "0.001", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's depth compare BIAS in shadow mapping" );
+idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's bias in shadow mapping" );
+idCVar harm_r_shadowMapSampleFactor( "harm_r_shadowMapSampleFactor", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)" );
+idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum near" );
+idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
+idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar harm_r_shadowMapPointLight("harm_r_shadowMapPointLight", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method in OpenGLES2.0: 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+
+#include "Framebuffer.cpp"
+#include "tr_shadowmapping.cpp"
+#include "RenderMatrix.cpp"
+#include "GLMatrix.cpp"
+#endif

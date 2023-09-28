@@ -314,7 +314,6 @@ const char 	*idSysLocal::GetCallStackCurStr(int depth)
 }
 void			idSysLocal::ShutdownSymbols(void) {}
 
-//k 64
 uintptr_t				idSysLocal::DLL_Load(const char *dllName)
 {
 	return 0;

@@ -990,7 +990,22 @@ rvWeapon::Think
 void rvWeapon::Think ( void ) {	
 	
 	// Cache the player origin and axis
+#ifdef _MOD_FULL_BODY_AWARENESS
+	renderEntity_t* worldModelRenderEntity = worldModel.GetEntity()->GetRenderEntity();
+	bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->IsInVehicle() || owner->IsZoomed();
+	if(not_pm_fullBodyAwareness)
+		worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
+	else
+		worldModelRenderEntity->suppressSurfaceInViewID = 0;
+
+	// for melee weapon: always player original firstPersonViewOrigin
+	if(not_pm_fullBodyAwareness)
+#endif
 	playerViewOrigin = owner->firstPersonViewOrigin;
+#ifdef _MOD_FULL_BODY_AWARENESS
+	else
+        playerViewOrigin = owner->firstPersonViewOrigin_playerViewOrigin;
+#endif
 	playerViewAxis   = owner->firstPersonViewAxis;
 
 	// calculate weapon position based on player movement bobbing
@@ -1122,6 +1137,9 @@ void rvWeapon::InitWorldModel( void ) {
 		// supress model in player views, but allow it in mirrors and remote views
 		renderEntity_t *worldModelRenderEntity = ent->GetRenderEntity();
 		if ( worldModelRenderEntity ) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+			if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+#endif
 			worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber+1;
 			worldModelRenderEntity->suppressShadowInViewID = owner->entityNumber+1;
 			worldModelRenderEntity->suppressShadowInLightID = WPLIGHT_MUZZLEFLASH * 100 + owner->entityNumber;
@@ -2551,9 +2569,21 @@ void rvWeapon::Attack( bool altAttack, int num_attacks, float spread, float fuse
 		GetGlobalJointTransform( true, barrelJointView, muzzleOrigin, muzzleAxis );
 	} else {
 		// go straight out of the view
+#ifdef _MOD_FULL_BODY_AWARENESS
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->IsInVehicle() || owner->IsZoomed())
+		{
+#endif
 		muzzleOrigin = playerViewOrigin;
 		muzzleAxis = playerViewAxis;		
 		muzzleOrigin += playerViewAxis[0] * muzzleOffset;
+#ifdef _MOD_FULL_BODY_AWARENESS
+		}
+        else
+        {
+			viewModel->GetPosition(muzzleOrigin, muzzleAxis);
+			muzzleOrigin += muzzleAxis[0] * muzzleOffset;
+		}
+#endif
 	}
 
 	// add some to the kick time, incrementally moving repeat firing weapons back

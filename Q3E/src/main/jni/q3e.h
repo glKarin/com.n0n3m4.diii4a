@@ -11,7 +11,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject
   (JNIEnv *, jclass, jobject);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init
-  (JNIEnv *, jclass, jstring, jint, jint, jstring, jstring, jobject, jint, jint);
+  (JNIEnv *, jclass, jstring, jint, jint, jstring, jstring, jobject, jint, jint, jint, jboolean, jboolean, jboolean, jboolean);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_drawFrame
   (JNIEnv *, jclass);
@@ -21,9 +21,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent
   (JNIEnv *, jclass, jfloat, jfloat);
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_requestAudioData
-  (JNIEnv *, jclass);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_vidRestart
   (JNIEnv *, jclass);    
@@ -35,12 +32,6 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Is64
   (JNIEnv *env, jclass c);
   
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_shutdown(JNIEnv *env, jclass c);
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetRedirectOutputToFile(JNIEnv *env, jclass c, jboolean enabled);
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetNoHandleSignals(JNIEnv *env, jclass c, jboolean enabled);
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_SetMultiThread(JNIEnv *env, jclass c, jboolean enabled);
 
 JNIEXPORT void JNICALL
 Java_com_n0n3m4_q3e_Q3EJNI_OnPause(JNIEnv *env, jclass clazz);

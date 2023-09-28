@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #define _HARM_SKIP_RENDER_SHADER_PASS
 #endif
 #ifdef _HARM_SKIP_RENDER_SHADER_PASS
-static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9000");
+static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9000. All. greater than 0: skip, less than 0: only, 0 disabled.");
 #endif
 
 /*
@@ -89,8 +89,8 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 {
 	// set privatePolygonOffset if necessary
 	if (pStage->privatePolygonOffset) {
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * pStage->privatePolygonOffset);
+		qglEnable(GL_POLYGON_OFFSET_FILL);
+		qglPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * pStage->privatePolygonOffset);
 	}
 
 	// set the texture matrix if needed
@@ -156,7 +156,7 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 {
 	// unset privatePolygonOffset if necessary
 	if (pStage->privatePolygonOffset && !surf->material->TestMaterialFlag(MF_POLYGONOFFSET)) {
-		glDisable(GL_POLYGON_OFFSET_FILL);
+		qglDisable(GL_POLYGON_OFFSET_FILL);
 	}
 
 	if (pStage->texture.texgen == TG_DIFFUSE_CUBE || pStage->texture.texgen == TG_SKYBOX_CUBE
@@ -246,13 +246,13 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 
 	// set polygon offset if necessary
 	if ((shader->TestMaterialFlag(MF_POLYGONOFFSET))&&((r_offsetFactor.GetFloat()!=0)&&(r_offsetUnits.GetFloat()!=0))) {
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * shader->GetPolygonOffset());
+		qglEnable(GL_POLYGON_OFFSET_FILL);
+		qglPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * shader->GetPolygonOffset());
 	}
 
 	// subviews will just down-modulate the color buffer by overbright
 	if (shader->GetSort() == SS_SUBVIEW) {
-		glEnable(GL_BLEND);
+		qglEnable(GL_BLEND);
 		GL_State(GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO | GLS_DEPTHFUNC_LESS);
 		color[0] =
 		        color[1] =
@@ -341,13 +341,13 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 
 	// reset polygon offset
 	if ((shader->TestMaterialFlag(MF_POLYGONOFFSET))&&((r_offsetFactor.GetFloat()!=0)&&(r_offsetUnits.GetFloat()!=0))) {
-		glDisable(GL_POLYGON_OFFSET_FILL);
+		qglDisable(GL_POLYGON_OFFSET_FILL);
 	}
 
 	// reset blending
 	if (shader->GetSort() == SS_SUBVIEW) {
 		GL_State(GLS_DEPTHFUNC_LESS);
-		glDisable(GL_BLEND);
+		qglDisable(GL_BLEND);
 	}
 }
 
@@ -387,7 +387,7 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 	globalImages->whiteImage->Bind(); //k2023
 
 	// decal surfaces may enable polygon offset
-	glPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat());
+	qglPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat());
 
 	GL_State(GLS_DEPTHFUNC_LESS);
 
@@ -396,8 +396,8 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 	// from the ambient pass and the light passes.
 	if (r_shadows.GetBool())
 	{
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_ALWAYS, 1, 255);
+	qglEnable(GL_STENCIL_TEST);
+	qglStencilFunc(GL_ALWAYS, 1, 255);
 	}
 	RB_RenderDrawSurfListWithFunction(drawSurfs, numDrawSurfs, RB_T_FillDepthBuffer);
 
@@ -534,7 +534,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 	// change the scissor if needed
 	if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(surf->scissorRect)) {
 		backEnd.currentScissor = surf->scissorRect;
-		glScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+		qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 		           backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 		           backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 		           backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
@@ -548,8 +548,8 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 
 	// set polygon offset if necessary
 	if (shader->TestMaterialFlag(MF_POLYGONOFFSET)) {
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * shader->GetPolygonOffset());
+		qglEnable(GL_POLYGON_OFFSET_FILL);
+		qglPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat() * shader->GetPolygonOffset());
 	}
 
 	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
@@ -558,7 +558,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		pStage = shader->GetStage(stage);
 
 #ifdef _HUMANHEAD //k: scope view support
-		if(tr.IsScopeView())
+		if(backEnd.scopeView /*tr.IsScopeView()*/)
 		{
 			if(pStage->isNotScopeView)
 				continue;
@@ -568,7 +568,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			if(pStage->isScopeView)
 				continue;
 		}
-		if(!tr.IsShuttleView())
+		if(!backEnd.shuttleView /*!tr.IsShuttleView()*/)
 		{
 			if(pStage->isShuttleView)
 				continue;
@@ -763,7 +763,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 
 	// reset polygon offset
 	if (shader->TestMaterialFlag(MF_POLYGONOFFSET)) {
-		glDisable(GL_POLYGON_OFFSET_FILL);
+		qglDisable(GL_POLYGON_OFFSET_FILL);
 	}
 
 	GL_UseProgram(NULL);
@@ -841,7 +841,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 		// Hack Depth Range if necessary
 		bool bNeedRestoreDepthRange = false;
 		if (drawSurfs[i]->space->weaponDepthHack && drawSurfs[i]->space->modelDepthHack == 0.0f) {
-			glDepthRangef(0.0f, 0.5f);
+			qglDepthRangef(0.0f, 0.5f);
 			bNeedRestoreDepthRange = true;
 		}
 
@@ -850,7 +850,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 		}
 
 		if (bNeedRestoreDepthRange) {
-			glDepthRangef(0.0f, 1.0f);
+			qglDepthRangef(0.0f, 1.0f);
 		}
 
 		backEnd.currentSpace = drawSurfs[i]->space;
@@ -992,13 +992,13 @@ static void RB_T_Shadow(const drawSurf_t *surf)
 		color[3] = 1;
 		GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
 
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-		glDisable(GL_STENCIL_TEST);
+		qglStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		qglDisable(GL_STENCIL_TEST);
 		GL_Cull(CT_TWO_SIDED);
 		RB_DrawShadowElementsWithCounters(tri, numIndexes);
 		GL_Cull(CT_FRONT_SIDED);
 		if (r_shadows.GetBool())
-		glEnable(GL_STENCIL_TEST);
+		qglEnable(GL_STENCIL_TEST);
 
 		return;
 	}
@@ -1009,25 +1009,25 @@ static void RB_T_Shadow(const drawSurf_t *surf)
 		GLenum firstFace = backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK;
 		GLenum secondFace = backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT;
 		if ( !external ) {
-			glStencilOpSeparate( firstFace, GL_KEEP, tr.stencilDecr, tr.stencilDecr );
-			glStencilOpSeparate( secondFace, GL_KEEP, tr.stencilIncr, tr.stencilIncr );
+			qglStencilOpSeparate( firstFace, GL_KEEP, tr.stencilDecr, tr.stencilDecr );
+			qglStencilOpSeparate( secondFace, GL_KEEP, tr.stencilIncr, tr.stencilIncr );
 			RB_DrawShadowElementsWithCounters( tri, numIndexes );
 		}
 
-		glStencilOpSeparate( firstFace, GL_KEEP, GL_KEEP, tr.stencilIncr );
-		glStencilOpSeparate( secondFace, GL_KEEP, GL_KEEP, tr.stencilDecr );
+		qglStencilOpSeparate( firstFace, GL_KEEP, GL_KEEP, tr.stencilIncr );
+		qglStencilOpSeparate( secondFace, GL_KEEP, GL_KEEP, tr.stencilDecr );
 
 		RB_DrawShadowElementsWithCounters( tri, numIndexes );
 	}
 	else
 	{
 		if (!external) {
-			glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, tr.stencilDecr, GL_KEEP);
-			glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, tr.stencilIncr, GL_KEEP);
+			qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, tr.stencilDecr, GL_KEEP);
+			qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, tr.stencilIncr, GL_KEEP);
 		} else {
 			// traditional depth-pass stencil shadows
-			glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, GL_KEEP, tr.stencilIncr);
-			glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, GL_KEEP, tr.stencilDecr);
+			qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, GL_KEEP, tr.stencilIncr);
+			qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, GL_KEEP, tr.stencilDecr);
 		}
 		RB_DrawShadowElementsWithCounters(tri, numIndexes);
 	}
@@ -1079,11 +1079,11 @@ void RB_StencilShadowPass(const drawSurf_t *drawSurfs)
 	}
 
 	if (r_shadowPolygonFactor.GetFloat() || r_shadowPolygonOffset.GetFloat()) {
-		glPolygonOffset(r_shadowPolygonFactor.GetFloat(), -r_shadowPolygonOffset.GetFloat());
-		glEnable(GL_POLYGON_OFFSET_FILL);
+		qglPolygonOffset(r_shadowPolygonFactor.GetFloat(), -r_shadowPolygonOffset.GetFloat());
+		qglEnable(GL_POLYGON_OFFSET_FILL);
 	}
 
-	glStencilFunc(GL_ALWAYS, 1, 255);
+	qglStencilFunc(GL_ALWAYS, 1, 255);
 
 	GL_Cull(CT_TWO_SIDED);
 
@@ -1092,11 +1092,11 @@ void RB_StencilShadowPass(const drawSurf_t *drawSurfs)
 	GL_Cull(CT_FRONT_SIDED);
 
 	if (r_shadowPolygonFactor.GetFloat() || r_shadowPolygonOffset.GetFloat()) {
-		glDisable(GL_POLYGON_OFFSET_FILL);
+		qglDisable(GL_POLYGON_OFFSET_FILL);
 	}
 
-	glStencilFunc(GL_GEQUAL, 128, 255);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	qglStencilFunc(GL_GEQUAL, 128, 255);
+	qglStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
@@ -1414,7 +1414,7 @@ void RB_STD_FogAllLights(void)
 	RB_LogComment("---------- RB_STD_FogAllLights ----------\n");
 
 	// Disable Stencil Test
-	glDisable(GL_STENCIL_TEST);
+	qglDisable(GL_STENCIL_TEST);
 
 	// Disable TexCoord array
 	// Disable Color array
@@ -1446,7 +1446,7 @@ void RB_STD_FogAllLights(void)
 	// GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 	// GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 	// Re-enable Stencil Test
-	glEnable(GL_STENCIL_TEST);
+	qglEnable(GL_STENCIL_TEST);
 }
 
 //=========================================================================================
@@ -1477,7 +1477,7 @@ void RB_STD_LightScale(void)
 
 	// the scissor may be smaller than the viewport for subviews
 	if (r_useScissor.GetBool()) {
-		glScissor(backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
+		qglScissor(backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
 		           backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1,
 		           backEnd.viewDef->scissor.x2 - backEnd.viewDef->scissor.x1 + 1,
 		           backEnd.viewDef->scissor.y2 - backEnd.viewDef->scissor.y1 + 1);
@@ -1494,8 +1494,8 @@ void RB_STD_LightScale(void)
 	GL_State(GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_SRC_COLOR);
 	GL_Cull(CT_TWO_SIDED);	// so mirror views also get it
 	globalImages->BindNull();
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_STENCIL_TEST);
+	qglDisable(GL_DEPTH_TEST);
+	qglDisable(GL_STENCIL_TEST);
 
 	v = 1;
 
@@ -1520,7 +1520,7 @@ void RB_STD_LightScale(void)
 
 
 	glPopMatrix();
-	glEnable(GL_DEPTH_TEST);
+	qglEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_MODELVIEW);
 	GL_Cull(CT_FRONT_SIDED);
 #endif
@@ -1554,16 +1554,16 @@ void	RB_STD_DrawView(void)
 
 	// fill the depth buffer and clear color buffer to black except on
 	// subviews
-	glDisable(GL_BLEND);
+	qglDisable(GL_BLEND);
 	RB_STD_FillDepthBuffer(drawSurfs, numDrawSurfs);
 	// main light renderer
-	glEnable(GL_BLEND);
+	qglEnable(GL_BLEND);
 
 	if (!r_noLight.GetBool())
 		RB_GLSL_DrawInteractions();
 
 	// disable stencil shadow test
-	glStencilFunc(GL_ALWAYS, 128, 255);
+	qglStencilFunc(GL_ALWAYS, 128, 255);
 
 	// uplight the entire screen to crutch up not having better blending range
 	RB_STD_LightScale();

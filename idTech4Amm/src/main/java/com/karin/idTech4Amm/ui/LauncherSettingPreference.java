@@ -30,7 +30,6 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
 
         findPreference(Constants.PreferenceKey.LAUNCHER_ORIENTATION).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.MAP_BACK).setOnPreferenceChangeListener(this);
-        findPreference(Q3EPreference.REDIRECT_OUTPUT_TO_FILE).setOnPreferenceChangeListener(this);
         findPreference(Constants.PreferenceKey.HIDE_AD_BAR).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.LANG).setOnPreferenceChangeListener(this);
@@ -68,9 +67,6 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
                 View view = getActivity().findViewById(R.id.main_ad_layout);
                 if (null != view)
                     view.setVisibility(b ? View.GONE : View.VISIBLE);
-                return true;
-            case Q3EPreference.REDIRECT_OUTPUT_TO_FILE:
-                Q3EJNI.SetRedirectOutputToFile((boolean) newValue);
                 return true;
             case Q3EPreference.pref_harm_function_key_toolbar_y:
             {

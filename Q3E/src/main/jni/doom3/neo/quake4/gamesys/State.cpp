@@ -295,12 +295,6 @@ stateResult_t rvStateThread::Execute ( void ) {
 				return SRESULT_ERROR;				
 		}
 
-#ifdef _QUAKE4 // bot
-		if (lastResult == SRESULT_DONE) {
-			owner->StateThreadChanged();
-		}
-#endif
-
 		// Dont remove the node if it was interrupted or cleared in the last process
 		if ( !fl.stateCleared && !fl.stateInterrupted ) {
 			if( lastResult >= SRESULT_SETDELAY ) {
@@ -325,7 +319,7 @@ stateResult_t rvStateThread::Execute ( void ) {
 	}
 	
 	// Runaway state loop?
-#ifdef _QUAKE4 //k: for map game/convoy1 state error
+#ifdef _QUAKE4xxx //k: for map game/convoy1 state error
 	if(0) //k: now fixed, do not need it no longer
 #endif
 	if ( count >= HISTORY_COUNT ) {

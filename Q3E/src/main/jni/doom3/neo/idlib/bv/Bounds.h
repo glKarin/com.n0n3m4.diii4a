@@ -118,7 +118,11 @@ class idBounds
 	idBounds &		ExpandSelf( const idVec3 &d );					// expand bounds in all directions by the given vector
 #endif
 
+#ifdef _HEXENEOC
+	public:
+#else
 	private:
+#endif
 		idVec3			b[2];
 };
 

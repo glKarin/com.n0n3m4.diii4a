@@ -223,6 +223,20 @@ void idGameLocal::ServerClientBegin( int clientNum ) {
 	Live()->ClientReady(clientNum);
 #endif
 //RAVEN END
+#ifdef MOD_BOTS
+	if(BOT_ENABLED()) {
+	// TinMan: Tell engine to spit out bots userinfo to clients
+        for ( int clientID = botAi::BOT_START_INDEX; clientID < MAX_CLIENTS; clientID++ )
+        {
+            if ( gameLocal.entities[ clientID ] && gameLocal.entities[ clientID ]->IsType( idPlayer::Type ) )
+            {
+                // core is in charge of syncing down userinfo changes
+                // it will also call back game through SetUserInfo with the current info for update
+                cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", clientID ) );
+            }
+        }
+    }
+#endif
 }
 
 /*
@@ -257,6 +271,49 @@ void idGameLocal::ServerClientDisconnect( int clientNum ) {
 
 	// clear the client PVS
 	memset( clientPVS[ clientNum ], 0, sizeof( clientPVS[ clientNum ] ) );
+#ifdef MOD_BOTS
+	if(BOT_ENABLED())
+	{
+		if(clientNum == gameLocal.localClientNum)
+		{
+			// TinMan: remove bot entity
+			for ( int botID = 0; botID < botAi::BOT_MAX_BOTS; botID++ )
+			{
+				if ( botAi::bots[botID].inUse )
+				{
+					idEntity * ent = entities[ botAi::bots[botID].entityNum ];
+					if ( ent )
+					{
+						//common->Printf( "[idGameLocal::ServerClientDisconnect][Found bot #%d ent]\n", botID );
+						delete entities[ botAi::bots[botID].entityNum ];
+						entities[ botAi::bots[botID].entityNum ] = NULL;
+					}
+					// TinMan: TODO: memset?
+					// memset( botAi::bots[botID], 0, sizeof( botInfo_t ) );
+					botAi::bots[botID].inUse = false;
+					botAi::bots[botID].clientID = -1;
+					botAi::bots[botID].entityNum = -1;
+				}
+			}
+		}
+		else if(clientNum >= botAi::BOT_START_INDEX)
+		{
+			int botID = clientNum - botAi::BOT_START_INDEX;
+			idEntity * ent = entities[ botAi::bots[botID].entityNum ];
+			if ( ent )
+			{
+				//common->Printf( "[idGameLocal::ServerClientDisconnect][Found bot #%d ent]\n", botID );
+				delete entities[ botAi::bots[botID].entityNum ];
+				entities[ botAi::bots[botID].entityNum ] = NULL;
+			}
+			// TinMan: TODO: memset?
+			// memset( botAi::bots[botID], 0, sizeof( botInfo_t ) );
+			botAi::bots[botID].inUse = false;
+			botAi::bots[botID].clientID = -1;
+			botAi::bots[botID].entityNum = -1;
+		}
+    }
+#endif
 
 	if ( clientNum == MAX_CLIENTS ) {
 		return;
@@ -465,6 +522,11 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 
 #if ASYNC_WRITE_TAGS
 	msg.WriteLong( tagRandom.RandomInt() );
+#endif
+#ifdef MOD_BOTS
+	if(BOT_ENABLED())
+	// TinMan: Manually shovel the bot usercmds, cause binaryc said so, and I don't want him to get angry
+    botAi::WriteUserCmdsToSnapshot( msg );
 #endif
 
 	// create the snapshot
@@ -1058,6 +1120,11 @@ void idGameLocal::ClientReadSnapshot( int clientNum, int snapshotSequence, const
 #if ASYNC_WRITE_TAGS
 	idRandom tagRandom;
 	tagRandom.SetSeed( msg.ReadLong() );
+#endif
+#ifdef MOD_BOTS
+	if(BOT_ENABLED())
+	// TinMan: Grabby grabby bot usercmds, cause binaryc said so, and I don't want him to get angry
+    botAi::ReadUserCmdsFromSnapshot( msg );
 #endif
 
 	ClientReadUnreliableMessages( msg );
@@ -3513,46 +3580,3 @@ idGameLocal::RandomSpawn
 idPlayerStart *idGameLocal::RandomSpawn( void ) {
 	return spawnSpots[ random.RandomInt( spawnSpots.Num() ) ];
 }
-
-#ifdef _QUAKE4 // bot
-/*
-================
-idGameLocal::ServerClientBegin
-================
-*/
-void idGameLocal::ServerClientBegin( int clientNum, bool isBot, const char* botName) {
-	idBitMsg	outMsg;
-	byte		msgBuf[MAX_GAME_MESSAGE_SIZE];
-
-	// spawn the player
-	SpawnPlayer( clientNum, isBot, botName);
-	if ( clientNum == localClientNum ) {
-		mpGame.EnterGame( clientNum );
-	}
-
-	// ddynerman: connect time
-	((idPlayer*)entities[ clientNum ])->SetConnectTime( time );
-
-	// send message to spawn the player at the clients
-	outMsg.Init( msgBuf, sizeof( msgBuf ) );
-	outMsg.BeginWriting();
-	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_SPAWN_PLAYER );
-	outMsg.WriteByte( clientNum );
-	outMsg.WriteLong( spawnIds[ clientNum ] );
-	networkSystem->ServerSendReliableMessage( -1, outMsg );
-
-	if( gameType != GAME_TOURNEY ) {
-		((idPlayer*)entities[ clientNum ])->JoinInstance( 0 );
-	} else {
-		// instance 0 might be empty in Tourney
-		((idPlayer*)entities[ clientNum ])->JoinInstance( ((rvTourneyGameState*)gameLocal.mpGame.GetGameState())->GetNextActiveArena( 0 ) );
-	}
-//RAVEN BEGIN
-//asalmon: This client has finish loading and will be spawned mark them as ready.
-#ifdef _XENON
-	Live()->ClientReady(clientNum);
-#endif
-//RAVEN END
-}
-#endif
-

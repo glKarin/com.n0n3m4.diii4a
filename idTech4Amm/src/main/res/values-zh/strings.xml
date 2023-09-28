@@ -18,7 +18,7 @@
     <string name="force_delete_vertex_buffer_on_every_end_frame">每帧强制删除顶点缓冲区</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">同第二项, 并且强制删除顶点缓冲区对象, 可能慢, 但内存安全.</string>
     <string name="game_cvar_fs_game">游戏(cvar `fs_game`)</string>
-    <string name="doom_iii">毁灭战士3</string>
+    <string name="doom_iii">毁灭战士3(base)</string>
     <string name="doom3_resurrection_of_evil_d3xp">毁灭战士3:邪恶复苏(d3xp)</string>
     <string name="classic_doom_cdoom">经典毁灭战士(cdoom)</string>
     <string name="doom3_bfg_the_lost_mission_d3le">毁灭战士3-BFG:失落的任务(d3le)</string>
@@ -35,7 +35,7 @@
     <string name="blinn_phong">Blinn-Phong</string>
     <string name="specular_exponent_cvar_harm_r_specularexponent">镜面反射指数(cvar `harm_r_specularExponent`):</string>
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">光照下镜面反射指数(默认 4.0)</string>
-    <string name="sound_implementation">音频实现</string>
+    <string name="sound">音频(cvar `s_driver`)</string>
     <string name="load_quicksave_when_start_game">启动游戏时自动加载快速存档</string>
     <string name="edit_autoexec_cfg">编辑 autoexec.cfg</string>
     <string name="edit_doomconfig_cfg">编辑 DoomConfig.cfg</string>
@@ -112,6 +112,7 @@
     <string name="screen">屏幕</string>
     <string name="hide_navigation_bar">隐藏导航栏</string>
     <string name="hide_navigation_bar_in_game">游戏时隐藏导航栏</string>
+    <string name="hide_ad_bar_in_launcher">隐藏启动器底部广告栏</string>
     <string name="cover_screen_edges">覆盖屏幕刘海</string>
     <string name="game">游戏</string>
     <string name="general">通用</string>
@@ -180,7 +181,7 @@
     <string name="language">语言/Language</string>
     <string name="setup_launcher_language">设置启动器语言</string>
     <string name="be_available_on_reboot_the_next_time">重启或下次启动生效</string>
-    <string name="bot_q3_bot_support_in_mp_game">Bot(多人游戏中雷神之锤3Bot支持)</string>
+    <string name="bot_q3_bot_support_in_mp_game">Bot(SABot-a9 mod)</string>
     <string name="mp_game_map_aas_files">多人游戏地图aas文件</string>
     <string name="game_patch_resource">游戏补丁资源</string>
     <string name="extract_all">全部提取</string>
@@ -244,4 +245,19 @@
     <string name="extract_source">提取源码</string>
     <string name="tips">提示</string>
     <string name="license">开源许可证</string>
+    <string name="maximum_fps_limit_0_unlimited">最大FPS(cvar `harm_r_maxFPS`)</string>
+    <string name="limit_maximum_fps_default_is_0">限制最大FPS(0 不限制)</string>
+    <string name="edit_cvar">编辑CVar</string>
+    <string name="cvar_editor">CVar编辑器</string>
+    <string name="skip_intro">跳过启动介绍</string>
+    <string name="overthinked_overthinked">Overthinked(overthinked)</string>
+    <string name="sabot_sabot">SABot(sabot)</string>
+    <string name="hexen_edge_of_chaos_hexeneoc">Hexen: Edge of Chaos(hexeneoc)</string>
+    <string name="load_game_mod_list">加载游戏mod列表</string>
+    <string name="mod">mod</string>
+    <string name="view">查看</string>
+    <string name="scale_by_screen_area">如果使用比例, 则按屏幕面积的比例而不是宽高比例</string>
+    <string name="shadow_cvar_r_useShadowMapping">阴影(cvar `r_useShadowMapping`)</string>
+    <string name="shadow_volume">Shadow volume</string>
+    <string name="shadow_mapping">Shadow mapping</string>
 </resources>

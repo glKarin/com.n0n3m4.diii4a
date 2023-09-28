@@ -467,8 +467,7 @@ class idFileSystemLocal : public idFileSystem
 
 	private:
 		void					ReplaceSeparators(idStr &path, char sep = PATHSEPERATOR_CHAR);
-//k 64
-		int					HashFileName(const char *fname) const;
+		int						HashFileName(const char *fname) const;
 		int						ListOSFiles(const char *directory, const char *extension, idStrList &list);
 		FILE 					*OpenOSFile(const char *name, const char *mode, idStr *caseSensitiveName = NULL);
 		FILE 					*OpenOSFileCorrectName(idStr &path, const char *mode);
@@ -547,7 +546,6 @@ idFileSystemLocal::HashFileName
 return a hash value for the filename
 ================
 */
-//k 64
 int idFileSystemLocal::HashFileName(const char *fname) const
 {
 	int		i;
@@ -568,7 +566,6 @@ int idFileSystemLocal::HashFileName(const char *fname) const
 			letter = '/';		// damn path names
 		}
 
-//k 64
 		hash += (int)(letter) * (i+119);
 		i++;
 	}
@@ -1100,7 +1097,6 @@ bool idFileSystemLocal::FileIsInPAK(const char *relativePath)
 	searchpath_t	*search;
 	pack_t			*pak;
 	fileInPack_t	*pakFile;
-//k 64
 	int			hash;
 
 	if (!searchPaths) {
@@ -1461,8 +1457,7 @@ pack_t *idFileSystemLocal::LoadZipFile(const char *zipfile)
 	char			filename_inzip[MAX_ZIPPED_FILE_NAME];
 	unz_file_info	file_info;
 	int				i;
-//k 64
-	int			hash;
+	int				hash;
 	int				fs_numHeaderLongs;
 	int 			*fs_headerLongs;
 	FILE			*f;
@@ -3536,8 +3531,7 @@ idFile *idFileSystemLocal::OpenFileReadFlags(const char *relativePath, int searc
 	pack_t 		*pak;
 	fileInPack_t 	*pakFile;
 	directory_t 	*dir;
-//k 64
-	int			hash;
+	int				hash;
 	FILE 			*fp;
 
 	if (!searchPaths) {
@@ -4578,9 +4572,6 @@ bool idFileSystemLocal::RunningD3XP(void)
 idFileSystemLocal::MakeTemporaryFile
 ===============
 */
-#ifdef __ANDROID__
-extern FILE * itmpfile(void);
-#endif
 idFile *idFileSystemLocal::MakeTemporaryFile(void)
 {
 	FILE *f = tmpfile();
@@ -4588,15 +4579,7 @@ idFile *idFileSystemLocal::MakeTemporaryFile(void)
 	if (!f) {
 		common->Warning("idFileSystem::MakeTemporaryFile failed: %s", strerror(errno));
 #ifdef __ANDROID__
-		// if(1)
-		{
-			common->Printf("Call JNI::tmpfile.\n");
-			f = itmpfile();
-			if (!f) {
-				common->Warning("JNI::itmpfile failed: %s", strerror(errno));
-				return NULL;
-			}
-		}
+		f = Sys_tmpfile();
 #else
 		return NULL;
 #endif

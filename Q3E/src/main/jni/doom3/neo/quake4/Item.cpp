@@ -425,12 +425,6 @@ void idItem::Spawn( void ) {
 	RV_PUSH_HEAP_MEM(this);
 // RAVEN END
 
-#ifdef _QUAKE4
-// jmarshall: bot
-	modelindex = gameLocal.GetBotItemEntry(spawnArgs.GetString("modelindex"));
-// jmarshall end
-#endif
-
 	physicsObj.SetClipModel( new idClipModel( GetPhysics()->GetClipModel() ), 1.0f );
 
 // RAVEN BEGIN

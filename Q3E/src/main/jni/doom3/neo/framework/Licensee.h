@@ -40,7 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 #define GAME_NAME						"Quake4"			// appears on window titles and errors
 #define GAME_ICON						"q4icon.bmp"
 
-#define ENGINE_VERSION					"DOOM 1.3.1"	// printed in console
+#include "../raven/sys/AutoVersion.h"
+#define ENGINE_VERSION					"Quake4 " VERSION_STRING_DOTTED // "DOOM 1.3.1"	// printed in console
 
 // jnewquist: build type
 #if defined(_DEBUG)

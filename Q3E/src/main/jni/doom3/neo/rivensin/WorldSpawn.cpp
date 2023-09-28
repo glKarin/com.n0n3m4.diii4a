@@ -49,7 +49,7 @@ END_CLASS
 idWorldspawn::Spawn
 ================
 */
-#ifdef __ANDROID__ //k
+#ifdef _RIVENSIN //k
 static idCVar	harm_pm_autoForceThirdPerson("harm_pm_autoForceThirdPerson", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Force set third person view after game level load end.");
 #endif
 void idWorldspawn::Spawn( void ) {
@@ -95,7 +95,7 @@ void idWorldspawn::Spawn( void ) {
 		kv = spawnArgs.MatchPrefix( "call", kv );
 	}
 
-#ifdef __ANDROID__ //k
+#ifdef _RIVENSIN //k
 	if(harm_pm_autoForceThirdPerson.GetBool())
 	{
 		gameLocal.Printf( "[Harmattan]: Force set third person view.\n" );

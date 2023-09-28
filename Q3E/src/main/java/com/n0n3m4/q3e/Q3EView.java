@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -132,7 +133,13 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
 
             String lib_dir = Q3EUtils.GetGameLibDir(getContext());
             String cmd = Q3EUtils.q3ei.cmd;
-            Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+            boolean redirectOutputToFile = preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true);
+            boolean noHandleSignals = preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false);
+            int runBackground = Q3EUtils.parseInt_s(preferences.getString(Q3EPreference.RUN_BACKGROUND, "0"), 0);
+            int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
+
+            Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa, glVersion, redirectOutputToFile, noHandleSignals, Q3EUtils.q3ei.multithread, runBackground > 0);
 
             mInit = true;
 
@@ -183,6 +190,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
         int width;
         int height;
         SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(this.getContext());
+        boolean scaleByScreenArea = mPrefs.getBoolean(Q3EPreference.pref_harm_scale_by_screen_area, false);
 
         switch (mPrefs.getInt(Q3EPreference.pref_scrres, 0))
         {
@@ -191,12 +199,30 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                 height = h;
                 break;
             case 1:
-                width = w / 2;
-                height = h / 2;
+                if(scaleByScreenArea)
+                {
+                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, 0.5f);
+                    width = size[0];
+                    height = size[1];
+                }
+                else
+                {
+                    width = w / 2;
+                    height = h / 2;
+                }
                 break;
             case 2:
-                width = w * 2;
-                height = h * 2;
+                if(scaleByScreenArea)
+                {
+                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, 2);
+                    width = size[0];
+                    height = size[1];
+                }
+                else
+                {
+                    width = w * 2;
+                    height = h * 2;
+                }
                 break;
             case 3:
                 width = 1920;
@@ -256,12 +282,30 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                 height = 360;
                 break;
             case 8: // 1/3
-                width = w / 3;
-                height = h / 3;
+                if(scaleByScreenArea)
+                {
+                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, 1.0f / 3.0f);
+                    width = size[0];
+                    height = size[1];
+                }
+                else
+                {
+                    width = w / 3;
+                    height = h / 3;
+                }
                 break;
             case 9: // 1/4
-                width = w / 4;
-                height = h / 4;
+                if(scaleByScreenArea)
+                {
+                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, 1.0f / 4.0f);
+                    width = size[0];
+                    height = size[1];
+                }
+                else
+                {
+                    width = w / 4;
+                    height = h / 4;
+                }
                 break;
             //k
             default:
@@ -269,6 +313,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                 height = h;
                 break;
         }
+        Log.i("Q3EView", "FrameSize: (" + width + ", " + height + ")");
         return new int[] { width, height };
     }
 

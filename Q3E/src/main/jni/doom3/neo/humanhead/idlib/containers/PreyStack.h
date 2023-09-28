@@ -31,7 +31,7 @@ hhStack<type>::~hhStack(void) {
 
 template< class type >
 ID_INLINE type hhStack<type>::Top(void) {
-	assert(Num() > 0);
+	assert(this->Num() > 0);
 
 	return this->list[this->Num()-1];
 }
@@ -39,7 +39,7 @@ ID_INLINE type hhStack<type>::Top(void) {
 template< class type >
 ID_INLINE type hhStack<type>::Pop(void) {
 
-	assert(Num() > 0);
+	assert(this->Num() > 0);
 
 	type obj = Top();
 	this->SetNum(this->Num()-1, false);

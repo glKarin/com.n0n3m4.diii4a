@@ -42,6 +42,23 @@ volatile renderCrop_t	*pixelsCrop = NULL;
 volatile byte           *pixels = NULL;
 #endif
 
+// For FPS limiting
+unsigned int lastRenderTime = 0;
+int r_maxFps = 0;
+
+#include <unistd.h>
+#define FPS_LIMIT() \
+{ \
+    if(r_maxFps > 0) \
+    { \
+        unsigned int currentTime = Sys_Milliseconds(); \
+        int timeTook = currentTime - lastRenderTime; \
+        if(timeTook < r_maxFps) \
+            usleep((r_maxFps - timeTook) * 1000); \
+        lastRenderTime = Sys_Milliseconds(); \
+    } \
+}
+
 /*
 =====================
 R_PerformanceCounters
@@ -170,21 +187,33 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 	//Save the potential pixel
 	pixelsCrop = pc;
 	pixels = pix;
+	R_CheckBackEndCvars(); // check backend cvars state
+#ifdef _HUMANHEAD //k: scope view support in multithread
+	backEnd.scopeView = tr.IsScopeView();
+	backEnd.shuttleView = tr.IsShuttleView();
+#endif
 
 	backendFinished = false;
 
 	CheckEGLInitialized(); // check/wait EGL context
 
-	BackendThreadExecute();
+	//if(has_gl_context)
+    {
+        BackendThreadExecute();
 
-	Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
+        Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
 
-	Sys_WaitForEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
+        Sys_WaitForEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
 
-	if(pix)
-	{
-		BackendThreadWait();
-	}
+        if(pix)
+        {
+            BackendThreadWait();
+        }
+    }
+/*	else
+    {
+        backendFinished = true;
+    }*/
 
 	R_ToggleSmpFrame();
 	vertexCache.EndFrame();
@@ -200,6 +229,10 @@ static void R_IssueRenderCommands(void)
 		return;
 	}
 
+#ifdef _HUMANHEAD //k: scope view support in multithread
+	backEnd.scopeView = tr.IsScopeView();
+	backEnd.shuttleView = tr.IsShuttleView();
+#endif
 	// r_skipBackEnd allows the entire time of the back end
 	// to be removed from performance measurements, although
 	// nothing will be drawn to the screen.  If the prints
@@ -208,6 +241,7 @@ static void R_IssueRenderCommands(void)
 
 	// r_skipRender is usually more usefull, because it will still
 	// draw 2D graphics
+	//if(has_gl_context)
 	if (!r_skipBackEnd.GetBool()) {
 		RB_ExecuteBackEndCommands(frameData->cmdHead);
 	}
@@ -357,7 +391,13 @@ static void R_CheckCvars(void)
 
 	// check for changes to logging state
 	GLimp_EnableLogging(r_logFile.GetInteger() != 0);
-	R_CheckGLSLCvars();
+
+	if(harm_r_maxFps.IsModified())
+	{
+		int maxFps = harm_r_maxFps.GetInteger();
+		r_maxFps = maxFps > 0 ? 1000 / maxFps : 0;
+		harm_r_maxFps.ClearModified();
+	}
 }
 
 /*
@@ -769,6 +809,8 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	cmd = (emptyCommand_t *)R_GetCommandBuffer(sizeof(*cmd));
 	cmd->commandId = RC_SWAP_BUFFERS;
 
+	FPS_LIMIT();
+
 #ifdef _MULTITHREAD
 	if(multithreadActive)
 	{
@@ -778,6 +820,7 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	{
 #endif
 	CheckEGLInitialized(); // check/wait EGL context
+	R_CheckBackEndCvars(); // check backend cvars state
 
 	// start the back end up again with the new command list
 	R_IssueRenderCommands();
@@ -1023,8 +1066,8 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 	// Android: GL_RGBA && GL_UNSIGNED_BYTE
 	/*
 	   GLint eReadFormat, eReadType;
-	   glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &eReadType); 
-	   glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &eReadFormat); 
+	   qglGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &eReadType); 
+	   qglGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &eReadFormat); 
 	   common->Printf("glReadPixels ava READ_FORMAT: 0x%x, READ_TYPE: %x\n", eReadFormat, eReadType);
 	   */
 	int	c = (rc->width + 4) * rc->height;
@@ -1038,7 +1081,7 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 	}
 	else
 #endif
-	glReadPixels(rc->x, rc->y, rc->width, rc->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	qglReadPixels(rc->x, rc->y, rc->width, rc->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	byte *data2 = (byte *)R_StaticAlloc(c * 4);
 
@@ -1133,14 +1176,12 @@ void BackendThreadTask(void) // BackendThread ->
 	vertexCache.BeginBackEnd(backendVertexCache);
 	R_IssueRenderCommands(fdToRender);
 
-	bool exit = true;
 	// Take screen shot
 	if(pixels) // if block backend rendering, do not exit backend render function, because it will be swap buffers in GLSurfaceView
 	{
-		glReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
+		qglReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
 		pixels = NULL;
 		pixelsCrop = NULL;
-		exit = false;
 	}
 
 	vertexCache.EndBackEnd(backendVertexCache);
@@ -1157,5 +1198,81 @@ void BackendThreadWait(void)
         Sys_WaitForEvent(TRIGGER_EVENT_BACKEND_FINISHED);
         //usleep(500);
     }
+}
+
+void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMsec)
+{
+	if(!data)
+	{
+		tr.EndFrame(frontEndMsec, backEndMsec);
+		return;
+	}
+	renderCrop_t *rc = &renderCrops[currentRenderCrop];
+
+	emptyCommand_t *cmd;
+
+	if (!glConfig.isInitialized) {
+		return;
+	}
+
+	// close any gui drawing
+	guiModel->EmitFullScreen();
+	guiModel->Clear();
+
+	// save out timing information
+	if (frontEndMsec) {
+		*frontEndMsec = pc.frontEndMsec;
+	}
+
+	if (backEndMsec) {
+		*backEndMsec = backEnd.pc.msec;
+	}
+
+	// print any other statistics and clear all of them
+	R_PerformanceCounters();
+
+	// check for dynamic changes that require some initialization
+	R_CheckCvars();
+
+	// check for errors
+	GL_CheckErrors();
+
+	// add the swapbuffers command
+	cmd = (emptyCommand_t *)R_GetCommandBuffer(sizeof(*cmd));
+	cmd->commandId = RC_SWAP_BUFFERS;
+
+	FPS_LIMIT();
+
+	if(multithreadActive)
+	{
+		RenderCommands(rc, data);
+	}
+	else
+	{
+		CheckEGLInitialized(); // check/wait EGL context
+		R_CheckBackEndCvars(); // check backend cvars state
+
+		// start the back end up again with the new command list
+		R_IssueRenderCommands();
+
+		// use the other buffers next frame, because another CPU
+		// may still be rendering into the current buffers
+		R_ToggleSmpFrame();
+
+		// we can now release the vertexes used this frame
+		vertexCache.EndFrame();
+
+		qglReadPixels(rc->x, rc->y, rc->width, rc->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	}
+
+	if (session->writeDemo) {
+		session->writeDemo->WriteInt(DS_RENDER);
+		session->writeDemo->WriteInt(DC_END_FRAME);
+
+		if (r_showDemo.GetBool()) {
+			common->Printf("write DC_END_FRAME\n");
+		}
+	}
+
 }
 #endif

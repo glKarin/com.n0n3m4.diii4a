@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **最新版本:**
-1.1.0harmattan32(natasha)  
+1.1.0harmattan33(natasha)  
 **最新更新日期:**
-2023-06-30  
+2023-10-01  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -25,12 +25,16 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 添加 `中文`, `俄语`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)).
-* 一些虚拟按键设置移植`Configure on-screen controls`页面.
-* 毁灭战士3新增`full-body awareness` mod. 通过设置cvar`harm_pm_fullBodyAwareness`为1开启, 并且可以使用cvar `harm_pm_fullBodyAwarenessOffset`来设置偏移.
-* 在选项卡`General`下的`GameLib`支持添加外部的游戏动态库(测试. 由于系统安全方案不确定是否对所有设备/安卓版本有效. 允许你通过DIII4A项目编译你自己的游戏mod动态库(armv7/armv8)然后运行在原版的idTech4A++).
-* 如果启用`Find game library in game data directory`, 则支持加载外部的位于`Game working directory`/`fs_game`文件夹下的游戏动态库来代替apk内置的游戏动态库(测试. 由于系统安全方案不确定是否对所有设备/安卓版本有效. 允许你通过DIII4A项目编译你自己的游戏mod动态库(armv7/armv8), 然后命名为`gameaarch64.so`或`libgameaarch64.so`(arm64设备)或命名为`gamearm.so`或`libgamearm.so`(arm32设备), 然后放入`Game working directory`/`fs_game`文件夹下, 将优先加载该mod文件夹下的游戏动态库).
-* 支持jpg/png图像纹理文件.
+* 新增shadow mapping软阴影支持(测试, 存在一些错误渲染), 使用`r_useShadowMapping`切换`shadow mapping`或`stencil shadow`.
+* 雷神之锤4移除多人游戏Bot伪客户端, 使用SABot-a9 mod替换多人游戏的bot(需要先解压资源文件).
+* 修复掠食2006的设置页面选项卡.
+* 雷神之锤4新增`full-body awareness` mod. 设置布尔型cvar `harm_pm_fullBodyAwareness`为1开启, 并且可以使用`harm_pm_fullBodyAwarenessOffset`设置视角偏移(可以调整为第三人称视角), 使用`harm_pm_fullBodyAwarenessHeadJoint`设置自定义头部关节名称(视角位置).
+* 支持限制最大(cvar `harm_r_maxFPS`).
+* 支持obj/dae格式静态模型, 修复png格式图片加载.
+* 新增跳过启动动画支持.
+* 新增简易CVar编辑器.
+* OpenGL顶点索引使用4字节以加载大模型.
+* 新增GLES3.0支持, 在`图形`选项卡切换.
 
 ----------------------------------------------------------------------------------
 
@@ -38,8 +42,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ###### 运行掠食(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). 目前可以运行全部关卡, 部分关卡存在bug.
 > 1. 将PC端掠食(2006)游戏文件放到`preybase`文件夹, 然后直接启动游戏.
 > 2. 已知问题的解决方案: 例如. 使用cvar `harm_g_translateAlienFont`自动翻译GUI中的外星人文字.
-> 3. 已知bugs: 例如一些错误的碰撞检测(使用`noclip`), 部分菜单的渲染, 部分GUI不工作(RoadHouse的CD播放器).
-> 4. 由于选项卡窗口UI组件暂不支持, 导致设置页面不工作, 必须通过编辑`preyconfig.cfg`来绑定额外按键.
+> 3. 已知bugs: 例如一些错误的碰撞检测(使用`noclip`), 部分GUI不工作(RoadHouse的CD播放器).
+> 4. 如果设置页面不工作, 可以通过编辑`preyconfig.cfg`来绑定额外按键.
 > > * bind "幽灵行走按键" "_impulse54"
 > > * bind "武器第2攻击键" "_attackAlt"
 > > * bind "打火机开关键" "_impulse16"
@@ -51,16 +55,15 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ###### 运行雷神之锤4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). 目前可以运行全部关卡, 部分关卡存在bug.  
 > 1. 将PC端雷神之锤4游戏文件放到`q4base`文件夹, 然后直接启动游戏.
 > 2. 建议先解压雷神之锤4补丁资源到`q4base`资源目录(在菜单`Other` -> `Extract resource`).
-> - 毁灭战士3格式的雷神之锤4字体, [IlDucci](https://github.com/IlDucci)提供.
-> - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbot <bot_file>`或`fillbots`添加bot, 或者设置`harm_si_autoFillBots`为1自动添加bot).
-> - `SABot`多人游戏地图的aas文件(多人游戏的bot寻径).
+> - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbots <bot_file>`或`fillbots`添加bot, 或者设置`harm_si_autoFillBots`为1自动添加bot).
+> - `SABot a9 mod`多人游戏地图的aas文件和脚本文件(多人游戏的bot支持).
 
 ###### 问题和解决方案:    
 > 1. ~~门打不开~~: 碰撞问题已经修复, 例如触发器, 载具, AI, 电梯, 血站, 所有门都可正常打开.
 > 2. *主菜单*: 目前可以正常显示, 包括多人游戏菜单, 去掉背景色. 可能存在部分GUI交互有问题.
 > 3. ~~声音~~: 正常工作.
 > 4. ~~游戏载入界面~~: 正常工作.
-> 5. *多人游戏*: 目前正常工作, 并且可以添加bot(`jmarshall`添加了雷神之锤3的bot支持, 但是需要先添加bot文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹).
+> 5. *多人游戏*: 目前正常工作, 并且可以添加bot(添加SABot a7 mod支持, 但是需要先添加`SABot a9 mod`文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹(aas32)).
 > 6. *脚本错误*: 部分地图存在脚本错误, 虽然不会使程序崩溃, 但是可能会影响游戏进程.
 > 7. *粒子系统*: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, 非开源, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), 但是至今不工作. 现在实现了一个基于毁灭战士3的粒子特效系统的开源BSE, 可以渲染一些, 但是效果不是很理想.
 > 8. *物体渲染*: 存在一些物体错误的渲染结果.
@@ -92,6 +95,17 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 
 ### 移植:
 
+#### 安卓系统上的引擎
+##### 安卓系统编译声明宏`__ANDROID__`.
+> 1. _OPENSLES: OpenSLES声音支持.
+> 2. _MULTITHREAD: 多线程支持.
+> 3. _USING_STB: 使用stb加载jpeg/png纹理图片支持.
+> 4. _K_CLANG: 如果使用clang编译而不是GCC.
+> 5. _MODEL_OBJ: 添加obj静态模型支持.
+> 6. _MODEL_DAE: 添加dae静态模型支持.
+> 7. _SHADOW_MAPPING: 增加Shadow mapping软阴影支持.
+> 8. _OPENGLES3: 增加OpenGL ES3.0支持.
+
 #### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
 #### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).
 
@@ -103,9 +117,9 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 3. 构建core引擎: 声明宏`_RAVEN`, `_RAVEN_FX(如果需要OpenBSE, 非必须)`
 > 4. 构建游戏库: 声明宏`_RAVEN`, `_QUAKE4`
 ##### 关于`BSE`
-由于`BSE`没开源, 所有我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
+由于`BSE`没开源, 所以我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
 ##### 关于`BOT`
-bot不是必要的, 而是`jmarshall`额外添加的.
+声明宏`MOD_BOTS`将编译SABot a7(来自毁灭战士3) mod源码的多人游戏的bot支持.
 
 #### 掠食(2006)
 ##### `_HUMANHEAD`, `_PREY`是补丁宏, 在`DIII4A`源码中查找.
@@ -133,7 +147,6 @@ bot不是必要的, 而是`jmarshall`额外添加的.
 > * F-Droid自由版本.
 
 > `package`:
-> * /*.apk: 所有构建
 > * /screenshot: 截图
 > * /source: 引用的源码
 > * /pak: 游戏资源
@@ -145,7 +158,6 @@ bot不是必要的, 而是`jmarshall`额外添加的.
 ----------------------------------------------------------------------------------
 ### 其他下载方式:
 
-* [Google: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb](https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb)
 * [Baidu网盘: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w](https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w) 提取码: `pyyj`
 * [Baidu贴吧: BEYONDK2000](https://tieba.baidu.com/p/6825594793)
 * [F-Droid(不同的签名)](https://f-droid.org/packages/com.karin.idTech4Amm/)

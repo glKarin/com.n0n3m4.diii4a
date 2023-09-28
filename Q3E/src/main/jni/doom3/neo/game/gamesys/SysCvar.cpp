@@ -333,7 +333,7 @@ idCVar mod_validSkins("mod_validSkins",			"skins/characters/player/marine_mp;ski
 idCVar net_serverDownload("net_serverDownload",		"0",			CVAR_GAME | CVAR_INTEGER | CVAR_ARCHIVE, "enable server download redirects. 0: off 1: redirect to si_serverURL 2: use builtin download. see net_serverDl cvars for configuration");
 idCVar net_serverDlBaseURL("net_serverDlBaseURL",		"",				CVAR_GAME | CVAR_ARCHIVE, "base URL for the download redirection");
 idCVar net_serverDlTable("net_serverDlTable",		"",				CVAR_GAME | CVAR_ARCHIVE, "pak names for which download is provided, seperated by ;");
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 idCVar harm_pm_fullBodyAwareness( "harm_pm_fullBodyAwareness", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: enables full-body awareness" );
 idCVar harm_pm_fullBodyAwarenessOffset("harm_pm_fullBodyAwarenessOffset", "0 0 0", CVAR_ARCHIVE | CVAR_GAME | CVAR_NETWORKSYNC, "[Harmattan]: full-body awareness offset(<forward-offset> <side-offset> <up-offset>)");
 #endif

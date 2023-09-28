@@ -129,7 +129,6 @@ public:
 #include <errno.h>
 #include <math.h>
 
-//k 64
 #include <inttypes.h>
 
 #ifdef _HUMANHEAD
@@ -252,36 +251,35 @@ const float MAX_BOUND_SIZE = 65536.0f;
 // game
 #if defined(_D3XP)
 
-#ifdef __ANDROID__ //k: for lost mission
-	#ifdef _D3LE
-	#include "../d3le/Game.h"
-	#else
-	#include "../d3xp/Game.h"
-	#endif
+#ifdef _D3LE
+#include "../d3le/Game.h"
+#elif defined _SABOT
+#include "../sabot/Game.h"
 #else
-	#include "../d3xp/Game.h"
+#include "../d3xp/Game.h"
 #endif
 
 #else
 
-#ifdef __ANDROID__ //k: for classic doom
-	#ifdef _CDOOM
-	#include "../cdoom/Game.h"
-	#elif defined _RIVENSIN
-	#include "../game/Game.h"
-	#elif defined _HARDCORPS
-	#include "../game/Game.h"
-	#elif defined _QUAKE4
-	#include "../quake4/Game.h"
-	#elif defined _RAVEN
-	#include "../quake4/Game.h"
-	#elif defined _HUMANHEAD
-	#include "../prey/Game.h"
-	#else
-	#include "../game/Game.h"
-	#endif
+#ifdef _CDOOM
+#include "../cdoom/Game.h"
+#elif defined _RIVENSIN
+#include "../game/Game.h"
+#elif defined _HARDCORPS
+#include "../game/Game.h"
+#elif defined _OVERTHINKED
+#include "../overthinked/Game.h"
+#elif defined _HEXENEOC
+#include "../hexeneoc/Game.h"
+
+#elif defined _QUAKE4
+#include "../quake4/Game.h"
+#elif defined _RAVEN
+#include "../quake4/Game.h"
+#elif defined _HUMANHEAD
+#include "../prey/Game.h"
 #else
-	#include "../game/Game.h"
+#include "../game/Game.h"
 #endif
 
 #endif
@@ -292,34 +290,33 @@ const float MAX_BOUND_SIZE = 65536.0f;
 
 #if defined(_D3XP)
 
-#ifdef __ANDROID__ //k: for lost mission
-	#ifdef _D3LE
-	#include "../d3le/Game_local.h"
-	#else
-	#include "../d3xp/Game_local.h"
-	#endif
+#ifdef _D3LE
+#include "../d3le/Game_local.h"
+#elif defined _SABOT
+#include "../sabot/Game_local.h"
 #else
 #include "../d3xp/Game_local.h"
 #endif
 
 #else
 
-#ifdef __ANDROID__ //k: for classic doom
-	#ifdef _CDOOM
-	#include "../cdoom/Game_local.h"
-	#elif defined _RIVENSIN
-	#include "../rivensin/Game_local.h"
-	#elif defined _HARDCORPS
-	#include "../hardcorps/Game_local.h"
-	#elif defined _QUAKE4
-	#include "../quake4/Game_local.h"
-	#elif defined _RAVEN
-	#include "../quake4/Game_local.h"
-	#elif defined _HUMANHEAD
-	#include "../prey/Game_local.h"
-	#else
-	#include "../game/Game_local.h"
-	#endif
+#ifdef _CDOOM
+#include "../cdoom/Game_local.h"
+#elif defined _RIVENSIN
+#include "../rivensin/Game_local.h"
+#elif defined _HARDCORPS
+#include "../hardcorps/Game_local.h"
+#elif defined _OVERTHINKED
+#include "../overthinked/Game_local.h"
+#elif defined _HEXENEOC
+#include "../hexeneoc/Game_local.h"
+
+#elif defined _QUAKE4
+#include "../quake4/Game_local.h"
+#elif defined _RAVEN
+#include "../quake4/Game_local.h"
+#elif defined _HUMANHEAD
+#include "../prey/Game_local.h"
 #else
 #include "../game/Game_local.h"
 #endif

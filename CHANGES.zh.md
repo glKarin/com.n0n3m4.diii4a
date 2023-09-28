@@ -1,8 +1,24 @@
 ## 更新日志
-**1.1.0harmattan32(natasha)** - **2023-06-30**
+**1.1.0harmattan33(natasha)** - **2023-10-01**
 
 ----------------------------------------------------------------------------------
-### 更新
+
+> 1.1.0harmattan33 (2023-10-01)
+
+* 新增shadow mapping软阴影支持(测试, 存在一些错误渲染), 使用`r_useShadowMapping`切换`shadow mapping`或`stencil shadow`.
+* 雷神之锤4移除多人游戏Bot伪客户端, 使用SABot-a9 mod替换多人游戏的bot(需要先解压资源文件).
+* 修复掠食2006的设置页面选项卡.
+* 雷神之锤4新增`full-body awareness` mod. 设置布尔型cvar `harm_pm_fullBodyAwareness`为1开启, 并且可以使用`harm_pm_fullBodyAwarenessOffset`设置视角偏移(可以调整为第三人称视角), 使用`harm_pm_fullBodyAwarenessHeadJoint`设置自定义头部关节名称(视角位置).
+* 支持限制最大(cvar `harm_r_maxFPS`).
+* 支持obj/dae格式静态模型, 修复png格式图片加载.
+* 新增跳过启动动画支持.
+* 新增简易CVar编辑器.
+* OpenGL顶点索引使用4字节以加载大模型.
+* 新增GLES3.0支持, 在`图形`选项卡切换.
+
+----------------------------------------------------------------------------------
+
+> 1.1.0harmattan32 (2023-06-30)
 
 * 添加 `中文`, `俄语`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)).
 * 一些虚拟按键设置移植`Configure on-screen controls`页面.
@@ -13,9 +29,7 @@
 
 ----------------------------------------------------------------------------------
 
-### 历史
-
-> 1.1.0harmattan30 (2023-06-10)
+> 1.1.0harmattan31 (2023-06-10)
 
 * 在`CONTROLS`选项卡下的`Reset on-screen controls`, 新增重置所有虚拟按键的缩放和透明度.
 * 在`CONTROLS`选项卡新增统一设置所有虚拟按键大小功能.

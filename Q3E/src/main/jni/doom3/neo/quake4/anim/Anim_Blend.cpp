@@ -2838,7 +2838,7 @@ bool idDeclModelDef::ParseAnim( idLexer &src, int numDefaultAnims ) {
 idDeclModelDef::Parse
 ================
 */
-bool idDeclModelDef::Parse( const char *text, const int textLength/* jmarshall , bool noCaching*/ ) {
+bool idDeclModelDef::Parse( const char *text, const int textLength/* , bool noCaching */ ) {
 	int					i;
 	int					num;
 	idStr				filename;
@@ -3083,7 +3083,6 @@ idDeclModelDef::Validate
 =====================
 */
 bool idDeclModelDef::Validate( const char *psText, int iTextLength, idStr &strReportTo ) const {
-// jmarshall
 #if 0
 	idDeclModelDef *pSelf = (idDeclModelDef*) declManager->AllocateDecl( DECL_MODELDEF );
 	bool bOk = pSelf->Parse( psText, iTextLength, false );
@@ -3095,7 +3094,6 @@ bool idDeclModelDef::Validate( const char *psText, int iTextLength, idStr &strRe
 #else
 	return true;
 #endif
-// jmarshall end
 }
 
 /*

@@ -325,13 +325,6 @@ public:
 	static void				UpdateDynamicContents( idClipModel* clipModel );
 // RAVEN END
 
-#ifdef _QUAKE4
-// jmarshall
-	int						PointContents(const idVec3 p);
-// jmarshall end
-#endif
-
-
 private:
 // RAVEN BEGIN
 // ddynerman: SD's clip sector code

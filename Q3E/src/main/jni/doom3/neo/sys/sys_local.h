@@ -62,7 +62,7 @@ class idSysLocal : public idSys
 		virtual bool			LockMemory(void *ptr, int bytes);
 		virtual bool			UnlockMemory(void *ptr, int bytes);
 
-		virtual uintptr_t		DLL_Load(const char *dllName); //k 64
+		virtual uintptr_t		DLL_Load(const char *dllName);
 		virtual void 			*DLL_GetProcAddress(uintptr_t dllHandle, const char *procName);
 		virtual void			DLL_Unload(uintptr_t dllHandle);
 		virtual void			DLL_GetFileName(const char *baseName, char *dllName, int maxLength);

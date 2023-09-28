@@ -5387,6 +5387,10 @@ void idMultiplayerGame::AddChatLine( const char *fmt, ... ) {
 	va_end( argptr );
 	
 	temp.StripTrailingOnce("\n");
+#ifdef MOD_BOTS // TinMan: process chat
+	if(BOT_ENABLED())
+		botAi::ProcessCommand( temp );
+#endif
 	
 	// this isn't a good way to color informational lines....
 	if( temp.Find( ":" ) > 0 && temp.Find( ":" ) < temp.Length() - 1 ) {
@@ -6310,6 +6314,21 @@ void idMultiplayerGame::ServerStartVote( int clientNum, vote_flags_t voteIndex, 
 	voteValue = value;
 	voteTimeOut = gameLocal.time + 20000;
 	// mark players allowed to vote - only current ingame players, players joining during vote will be ignored
+#ifdef MOD_BOTS
+	if(BOT_ENABLED())
+		for ( i = 0; i < botAi::BOT_START_INDEX; i++ )   // TinMan: customs fix, Modified to leave bots out. No equal rights for bots here.
+		{
+			if ( gameLocal.entities[ i ] && gameLocal.entities[ i ]->IsType( idPlayer::Type ) )
+			{
+				playerState[ i ].vote = ( i == clientNum ) ? PLAYER_VOTE_YES : PLAYER_VOTE_WAIT;
+			}
+			else
+			{
+				playerState[i].vote = PLAYER_VOTE_NONE;
+			}
+		}
+	else
+#endif
 	for ( i = 0; i < gameLocal.numClients; i++ ) {
 // RAVEN BEGIN
 // jnewquist: Use accessor for static class type 
@@ -8971,11 +8990,6 @@ int idMultiplayerGame::VerifyTeamSwitch( int wantTeam, idPlayer *player ) {
 	int teamCount[ TEAM_MAX ];
 	int balanceTeam = -1;
 
-#ifdef _QUAKE4
-	extern int Bot_VerifyTeamSwitch( int wantTeam, idPlayer *player );
-	if(player->IsType(rvmBot::GetClassType()))
-		return Bot_VerifyTeamSwitch(wantTeam, player);
-#endif
 	if( !gameLocal.serverInfo.GetBool( "si_autoBalance" ) ) {
 		return wantTeam;
 	}

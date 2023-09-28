@@ -410,6 +410,10 @@ public:
 	virtual void			ReadFromSnapshot( const idBitMsgDelta &msg );
 
 	void					SetPortalState( bool open );
+#ifdef MOD_BOTS // cusTom3 - aas extensions - need for elevator reachabilities
+	idVec3					GetPosition1();
+    idVec3					GetPosition2();
+#endif
 
 protected:
 	idVec3					pos1;

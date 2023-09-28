@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 // Linux
 #ifdef __linux__
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 
 #if defined(__i386__)
 #define	BUILD_STRING				"android-x86"
@@ -91,9 +91,13 @@ extern bool Sys_InRenderThread(void);
 
 #endif
 
+#if 0 //#ifdef _K_DEV
+#define _alloca( x )							(Sys_Printf("_alloca(%d)\n", x),alloca( x ))
+#define _alloca16( x )					(Sys_Printf("_alloca16(%d)\n", x),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
+#else
 #define _alloca							alloca
-//k 64
 #define _alloca16( x )					((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
+#endif
 
 #define ALIGN16( x )					x
 #define PACKED							__attribute__((packed))
@@ -304,7 +308,6 @@ const char 	*Sys_GetCallStackCurAddressStr(int depth);
 void			Sys_ShutdownSymbols(void);
 
 // DLL loading, the path should be a fully qualified OS path to the DLL file to be loaded
-//k 64
 uintptr_t		Sys_DLL_Load(const char *dllName);
 void 			*Sys_DLL_GetProcAddress(uintptr_t dllHandle, const char *procName);
 void			Sys_DLL_Unload(uintptr_t dllHandle);
@@ -378,13 +381,6 @@ typedef enum {
 	NA_LOOPBACK,
 	NA_BROADCAST,
 	NA_IP
-#ifdef _RAVEN // bot
-		,
-// jmarshall: bot
-	NA_BOT
-// jmarshall end
-#endif
-
 } netadrtype_t;
 
 typedef struct {
@@ -481,7 +477,7 @@ typedef struct {
 	const char 	*name;
 	intptr_t	threadHandle;
 	size_t		threadId;
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 	bool		threadCancel;
 #endif
 } xthreadInfo;
@@ -575,7 +571,6 @@ class idSys
 		virtual const char 	*GetCallStackCurStr(int depth) = 0;
 		virtual void			ShutdownSymbols(void) = 0;
 
-//k 64
 		virtual uintptr_t		DLL_Load(const char *dllName) = 0;
 		virtual void 			*DLL_GetProcAddress(uintptr_t dllHandle, const char *procName) = 0;
 		virtual void			DLL_Unload(uintptr_t dllHandle) = 0;
@@ -611,6 +606,25 @@ void Sys_FreeOpenAL(void);
 #define __LINESTR__ STRINGIZE_INDIRECT(STRINGIZE, __LINE__)
 #define __FILELINEFUNC__ (__FILE__ " " __LINESTR__ " " __FUNCTION__)
 #define __FUNCLINE__ ( __FUNCTION__ " " __LINESTR__ )
+#endif
+
+#ifdef __ANDROID__
+//n0n3m4
+
+extern float analogx;
+extern float analogy;
+extern int analogenabled;
+
+extern int screen_width;
+extern int screen_height;
+
+extern bool multithreadActive;
+
+extern char *native_library_dir;
+extern bool no_handle_signals;
+
+FILE * Sys_tmpfile(void);
+void Sys_SyncState(void);
 #endif
 
 #endif /* !__SYS_PUBLIC__ */

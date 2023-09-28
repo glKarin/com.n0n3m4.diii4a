@@ -354,7 +354,7 @@ idCVar net_serverDlTable(			"net_serverDlTable",		"",				CVAR_GAME | CVAR_ARCHIV
 // HDR related - J.C.Denton
 idCVar r_HDR_enable					( "r_HDR_enable",					"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, " Enables HDR Rendering & post-processing.");
 idCVar r_HDR_enableDebugMode		( "r_HDR_enableDebugMode",			"0",			CVAR_GAME | CVAR_INTEGER, " Shows all the textures generated for HDR postprocess. \n 1: Shows all textures \n 2: Decodes and shows all textures");
-#ifndef __ANDROID__
+#if !defined(__ANDROID__)
 idCVar r_HDR_postProcess			( "r_HDR_postProcess",				"1",			CVAR_GAME | CVAR_INTEGER, " Activates HDR bloom . \n 1: HDR Bloom with automatic eye exposure ");
 #else
 idCVar r_HDR_postProcess			( "r_HDR_postProcess",				"0",			CVAR_GAME | CVAR_INTEGER, " Activates HDR bloom . \n 1: HDR Bloom with automatic eye exposure ");

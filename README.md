@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan32(natasha)  
+1.1.0harmattan33(natasha)  
 **Last update release:**
-2023-06-30  
+2023-10-01  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -25,12 +25,16 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add `Chinese`, `Russian`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)) language.
-* Move some on-screen settings to `Configure on-screen controls` page.
-* Add `full-body awareness` mod in DOOM 3. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode).
-* Support add external game library in `GameLib` at tab `General`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project and run it using original idTech4A++).
-* Support load external game library in `Game working directory`/`fs_game` folder instead of default game library of apk if enabled `Find game library in game data directory`(Testing. Not sure available for all device and Android version because of system security. You can compile own game mod library(armv7/armv8) with DIII4A project, and then named `gameaarch64.so`/`libgameaarch64.so`(arm64 device) or named `gamearm.so`/`libgamearm.so`(arm32 device), and then put it on `Game working directory`/`fs_game` folder, and start game directly with original idTech4A++).
-* Support jpg/png image texture file.
+* Add shadow mapping soft shadow support(testing, has some incorrect rendering), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow`.
+* In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).
+* Fix Setting's tab GUI in Prey2006.
+* Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).
+* Support max FPS limit(cvar `harm_r_maxFPS`).
+* Support obj/dae static model, and fix png image load.
+* Add skip intro support.
+* Add simple CVar editor.
+* Change OpenGL vertex index size to 4 bytes for large model.
+* Add GLES3.0 support, can choose in `Graphics` tab.
 
 ----------------------------------------------------------------------------------
 
@@ -38,8 +42,8 @@ Tag with `-free` only for F-Droid update.
 ###### For playing Prey(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). Now can play all levels, but some levels has bugs.
 > 1. Putting PC Prey game data file to `preybase` folder and START directly.
 > 2. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.
-> 3. Exists bugs: e.g. some incorrect collision(using `noclip`), some menu draw(Tab window), some GUIs not work(Music CD in RoadHouse).
-> 4. Because of tab window UI not support, Settings UI is not work, must edit `preyconfig.cfg` for binding extras key.
+> 3. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).
+> 4. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.
 > > * bind "Your key of spirit walk" "_impulse54"
 > > * bind "Your key of second mode attack of weapons" "_attackAlt"
 > > * bind "Your key of toggle lighter" "_impulse16"
@@ -51,15 +55,14 @@ Tag with `-free` only for F-Droid update.
 ###### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play all levels, but some levels has bugs.  
 > 1. Putting PC Quake 4 game data file to `q4base` folder and START directly.
 > 2. Suggest to extract Quake 4 patch resource to `q4base` game data folder first(in menu `Other` -> `Extract resource`).
-> - Quake 3 bot files(If you want to add bots in Multiplayer-Game, using command `addbot <bot_file> <bot_file> ...` or `fillbots` after enter map in console, or set `harm_si_autoFillBots` to 1 for automatic fill bots).
-> - `SABot` MP game map aas files(for bots in MP game).
+> - `SABot a9 mod` multiplayer-game map aas files and bot scripts(for bots in multiplayer-game).
 
 ###### Problems and resolutions  
 > 1. ~~Door-opening/Collision~~: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, health-station, all doors can be opened.
 > 2. *Main-menu*: Now main menu and MP game menu is work, but without background color. But some GUIs can not interactive.
 > 3. ~~Sound~~: It looks work well now.
 > 4. ~~Loading-UI~~: It looks work well now.
-> 5. ~~Multiplayer-Game~~: Now is working well with bots(`jmarshall` added Q3-bot engine, but need bots decl file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder).
+> 5. ~~Multiplayer-Game~~: Now is working well with bots(added SABot a7 mod support, but need `SABot a9 mod` file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(aas32)).
 > 6. *Script error*: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
 > 7. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
 > 8. *Entity render*: Some game entities render incorrect.
@@ -91,6 +94,17 @@ Tag with `-free` only for F-Droid update.
 
 ### Portable:
 
+#### Engine for Android
+##### Define macro `__ANDROID__` for Android.
+> 1. _OPENSLES: Add OpenSLES support for sound.
+> 2. _MULTITHREAD: Add multithread support for rendering.
+> 3. _USING_STB: Using stb header for jpeg/png texture image support.
+> 4. _K_CLANG: If compiling by clang not GCC.
+> 5. _MODEL_OBJ: Add obj static model support.
+> 6. _MODEL_DAE: Add dae static model support.
+> 7. _SHADOW_MAPPING: Add Shadow mapping support.
+> 8. _OPENGLES3: Add OpenGLES3.0 support.
+
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
 
@@ -104,7 +118,7 @@ Tag with `-free` only for F-Droid update.
 ##### About `BSE`
 Because `BSE` not open-source, so I default supply a `NULL` implement and a uncompleted but working implement with DOOM3 Particle/Fx system(using macros `_RAVEN_FX` marked).
 ##### About `BOT`
-It has some unnecessary source code for Bot by `jmarshall`.
+Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bot support in multiplayer-game.
 
 #### Prey(2006)
 ##### `_HUMANHEAD`, `_PREY` is patches macros, find them in `DIII4A` source code.
@@ -132,7 +146,6 @@ It has some unnecessary source code for Bot by `jmarshall`.
 > * For F-Droid pure free version.
 
 > `package`:
-> * /*.apk: all version build
 > * /screenshot: screenshot pictures
 > * /source: Reference source
 > * /pak: Game resource
@@ -144,7 +157,6 @@ It has some unnecessary source code for Bot by `jmarshall`.
 ----------------------------------------------------------------------------------
 ### Extras download:
 
-* [Google: https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb](https://drive.google.com/drive/folders/1qgFWFGICKjcQ5KfhiNBHn_JYhJN5XoLb)
 * [Baidu网盘: https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w](https://pan.baidu.com/s/1hXvKmrajAACfcCj9_ThZ_w) 提取码: `pyyj`
 * [Baidu贴吧: BEYONDK2000](https://tieba.baidu.com/p/6825594793)
 * [F-Droid(different signature)](https://f-droid.org/packages/com.karin.idTech4Amm/)

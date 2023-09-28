@@ -416,7 +416,6 @@ Sys_DLL_Load
 TODO: OSX - use the native API instead? NSModule
 =================
 */
-//k 64
 uintptr_t Sys_DLL_Load(const char *path)
 {
 	void *handle = dlopen(path, RTLD_NOW);
@@ -433,7 +432,6 @@ uintptr_t Sys_DLL_Load(const char *path)
 Sys_DLL_GetProcAddress
 =================
 */
-//k 64
 void *Sys_DLL_GetProcAddress(uintptr_t handle, const char *sym)
 {
 	const char *error;
@@ -451,7 +449,6 @@ void *Sys_DLL_GetProcAddress(uintptr_t handle, const char *sym)
 Sys_DLL_Unload
 =================
 */
-//k 64
 void Sys_DLL_Unload(uintptr_t handle)
 {
 	dlclose((void *)handle);
@@ -501,13 +498,16 @@ void Sys_Sleep(int msec)
 
 char *Sys_GetClipboardData(void)
 {
-	Sys_Printf("TODO: Sys_GetClipboardData\n");
-	return NULL;
+	// Sys_Printf("TODO: Sys_GetClipboardData\n");
+	extern char * Android_GetClipboardData(void);
+	return Android_GetClipboardData();
 }
 
 void Sys_SetClipboardData(const char *string)
 {
-	Sys_Printf("TODO: Sys_SetClipboardData\n");
+	// Sys_Printf("TODO: Sys_SetClipboardData\n");
+	extern void Android_SetClipboardData(const char *text);
+	Android_SetClipboardData(string);
 }
 
 

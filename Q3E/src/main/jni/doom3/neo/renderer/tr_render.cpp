@@ -66,7 +66,7 @@ void RB_DrawElementsWithCounters(const srfTriangles_t *tri)
 	}
 
 	if (tri->indexCache) {
-		glDrawElements(GL_TRIANGLES,
+		qglDrawElements(GL_TRIANGLES,
 		                r_singleTriangle.GetBool() ? 3 : tri->numIndexes,
 		                GL_INDEX_TYPE,
 		                (int *)vertexCache.Position(tri->indexCache));
@@ -74,7 +74,7 @@ void RB_DrawElementsWithCounters(const srfTriangles_t *tri)
 	} else {
 		vertexCache.UnbindIndex();
 
-		glDrawElements(GL_TRIANGLES,
+		qglDrawElements(GL_TRIANGLES,
 		                r_singleTriangle.GetBool() ? 3 : tri->numIndexes,
 		                GL_INDEX_TYPE,
 		                tri->indexes);
@@ -101,7 +101,7 @@ void RB_DrawShadowElementsWithCounters(const srfTriangles_t *tri, int numIndexes
 	backEnd.pc.c_shadowVertexes += tri->numVerts;
 
 	if (tri->indexCache) {
-		glDrawElements(GL_TRIANGLES,
+		qglDrawElements(GL_TRIANGLES,
 		                r_singleTriangle.GetBool() ? 3 : numIndexes,
 		                GL_INDEX_TYPE,
 		                (int *)vertexCache.Position(tri->indexCache));
@@ -109,7 +109,7 @@ void RB_DrawShadowElementsWithCounters(const srfTriangles_t *tri, int numIndexes
 	} else {
 		vertexCache.UnbindIndex();
 
-		glDrawElements(GL_TRIANGLES,
+		qglDrawElements(GL_TRIANGLES,
 		                r_singleTriangle.GetBool() ? 3 : numIndexes,
 		                GL_INDEX_TYPE,
 		                tri->indexes);
@@ -155,7 +155,7 @@ RB_EnterWeaponDepthHack
 */
 void RB_EnterWeaponDepthHack(const drawSurf_t *surf)
 {
-	glDepthRangef(0, 0.5);
+	qglDepthRangef(0, 0.5);
 
 	float	matrix[16];
 
@@ -175,7 +175,7 @@ RB_EnterModelDepthHack
 */
 void RB_EnterModelDepthHack(const drawSurf_t *surf)
 {
-	glDepthRangef(0.0f, 1.0f);
+	qglDepthRangef(0.0f, 1.0f);
 
 	float	matrix[16];
 
@@ -195,7 +195,7 @@ RB_LeaveDepthHack
 */
 void RB_LeaveDepthHack(const drawSurf_t *surf)
 {
-	glDepthRangef(0, 1);
+	qglDepthRangef(0, 1);
 
 	float	mat[16];
 	myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
@@ -245,7 +245,7 @@ void RB_RenderDrawSurfListWithFunction(drawSurf_t **drawSurfs, int numDrawSurfs,
 		// change the scissor if needed
 		if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
 			backEnd.currentScissor = drawSurf->scissorRect;
-			glScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+			qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 			           backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 			           backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 			           backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
@@ -299,7 +299,7 @@ void RB_RenderDrawSurfChainWithFunction(const drawSurf_t *drawSurfs,
 		// change the scissor if needed
 		if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
 			backEnd.currentScissor = drawSurf->scissorRect;
-			glScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+			qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 			           backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 			           backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 			           backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
@@ -547,13 +547,13 @@ to actually render the visible surfaces for this view
 void RB_BeginDrawingView(void)
 {
 	// set the window clipping
-	glViewport(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
+	qglViewport(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
 	            tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
 	            backEnd.viewDef->viewport.x2 + 1 - backEnd.viewDef->viewport.x1,
 	            backEnd.viewDef->viewport.y2 + 1 - backEnd.viewDef->viewport.y1);
 
 	// the scissor may be smaller than the viewport for subviews
-	glScissor(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
+	qglScissor(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.viewDef->scissor.x1,
 	           tr.viewportOffset[1] + backEnd.viewDef->viewport.y1 + backEnd.viewDef->scissor.y1,
 	           backEnd.viewDef->scissor.x2 + 1 - backEnd.viewDef->scissor.x1,
 	           backEnd.viewDef->scissor.y2 + 1 - backEnd.viewDef->scissor.y1);
@@ -564,15 +564,15 @@ void RB_BeginDrawingView(void)
 
 	// we don't have to clear the depth / stencil buffer for 2D rendering
 	if (backEnd.viewDef->viewEntitys) {
-		glStencilMask(0xff);
+		qglStencilMask(0xff);
 		// some cards may have 7 bit stencil buffers, so don't assume this
 		// should be 128
-		glClearStencil(1<<(glConfig.stencilBits-1));
-		glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
+		qglClearStencil(1<<(glConfig.stencilBits-1));
+		qglClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		qglEnable(GL_DEPTH_TEST);
 	} else {
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_STENCIL_TEST);
+		qglDisable(GL_DEPTH_TEST);
+		qglDisable(GL_STENCIL_TEST);
 	}
 
 	backEnd.glState.faceCulling = -1;		// force face culling to set next time
@@ -713,7 +713,7 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 	// change the scissor if needed
 	if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(surf->scissorRect)) {
 		backEnd.currentScissor = surf->scissorRect;
-		glScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+		qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
 		           backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
 		           backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
 		           backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);

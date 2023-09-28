@@ -187,13 +187,6 @@ class idAsyncServer
 
 		void				PrintLocalServerInfo(void);
 
-#ifdef _RAVEN // bot
-// jmarshall
-	int					AllocOpenClientSlotForAI(const char* botName, int maxPlayersOnServer);
-	int 				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);
-// jmarshall end
-#endif
-
 	private:
 		bool				active;						// true if server is active
 		int					realTime;					// absolute time

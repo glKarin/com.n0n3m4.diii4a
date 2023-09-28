@@ -763,7 +763,7 @@ void idWeapon::InitWorldModel(const idDeclEntityDef *def)
 		renderEntity_t *worldModelRenderEntity = ent->GetRenderEntity();
 
 		if (worldModelRenderEntity) {
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 			if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 #endif
 			worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber+1;
@@ -1987,7 +1987,7 @@ idWeapon::PresentWeapon
 */
 void idWeapon::PresentWeapon(bool showViewModel)
 {
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 	renderEntity_t* worldModelRenderEntity = worldModel.GetEntity()->GetRenderEntity();
 	bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool();
 	if(not_pm_fullBodyAwareness)
@@ -1999,7 +1999,7 @@ void idWeapon::PresentWeapon(bool showViewModel)
 	if(not_pm_fullBodyAwareness)
 #endif
 	playerViewOrigin = owner->firstPersonViewOrigin;
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
     else
         playerViewOrigin = owner->firstPersonViewOrigin_playerViewOrigin;
 #endif
@@ -3102,13 +3102,13 @@ void idWeapon::Event_LaunchProjectiles(int num_projectiles, float spread, float 
 		GetGlobalJointTransform(true, barrelJointView, muzzleOrigin, muzzleAxis);
 	} else {
 		// go straight out of the view
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
 		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
 		{
 #endif
         muzzleOrigin = playerViewOrigin;
         muzzleAxis = playerViewAxis;
-#ifdef _HARM_FULL_BODY_AWARENESS
+#ifdef _MOD_FULL_BODY_AWARENESS
         }
         else
         {

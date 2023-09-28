@@ -1,17 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11032"
-    android:versionName="1.1.0harmattan32"
+    android:versionCode="11033"
+    android:versionName="1.1.0harmattan33"
     android:installLocation="preferExternal"
     >
 
-    <uses-feature android:glEsVersion="0x00020000" />
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+    <uses-feature android:glEsVersion="0x00030000" />
     <uses-sdk
         android:targetSdkVersion="28"
         tools:ignore="GradleOverrides" />
 
-    <!--<uses-permission android:name="android.permission.ACCESS_SUPERUSER" />-->
+    <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!-- Android 9 -->

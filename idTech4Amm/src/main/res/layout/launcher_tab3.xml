@@ -9,11 +9,28 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/tv_scrres"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/screen_resolution" />
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/tv_scrres"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/screen_resolution" />
+
+            <CheckBox
+                android:id="@+id/scale_by_screen_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/scale_by_screen_area"
+                android:checked="false"
+                >
+            </CheckBox>
+        </LinearLayout>
 
         <RadioGroup
             android:id="@+id/rg_scrres"
@@ -181,6 +198,34 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/_16bits_rgba4444" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:text="OpenGL"/>
+        <RadioGroup
+            android:id="@+id/rg_opengl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+
+            <RadioButton
+                android:id="@+id/rg_opengles2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="OpenGL ES2"/>
+
+            <RadioButton
+                android:id="@+id/rg_opengles3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OpenGL ES3"/>
+
         </RadioGroup>
         
     </LinearLayout>

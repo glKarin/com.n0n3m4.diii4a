@@ -386,7 +386,7 @@ static void R_BorderClampImage(idImage *image)
 	// explicit zero border
 	float	color[4];
 	color[0] = color[1] = color[2] = color[3] = 0;
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+	qglTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 #endif
 }
 
@@ -977,6 +977,131 @@ void R_QuadraticImage(idImage *image)
 	                     TF_DEFAULT, false, TR_CLAMP, TD_HIGH_QUALITY);
 }
 
+#ifdef _SHADOW_MAPPING
+// RB begin
+static void R_CreateShadowMapImage_Res0( idImage* image )
+{
+	int size = shadowMapResolutions[0];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImage_Res1( idImage* image )
+{
+	int size = shadowMapResolutions[1];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImage_Res2( idImage* image )
+{
+	int size = shadowMapResolutions[2];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImage_Res3( idImage* image )
+{
+	int size = shadowMapResolutions[3];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImage_Res4( idImage* image )
+{
+	int size = shadowMapResolutions[4];
+	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+static void R_CreateShadowMapCubeImage_Res0( idImage* image )
+{
+	int size = shadowMapResolutions[0];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapCubeImage_Res1( idImage* image )
+{
+	int size = shadowMapResolutions[1];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapCubeImage_Res2( idImage* image )
+{
+	int size = shadowMapResolutions[2];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapCubeImage_Res3( idImage* image )
+{
+	int size = shadowMapResolutions[3];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapCubeImage_Res4( idImage* image )
+{
+	int size = shadowMapResolutions[4];
+	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
+}
+
+static void R_CreateShadowMapDepthImage_Res0( idImage* image )
+{
+    int size = shadowMapResolutions[0];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapDepthImage_Res1( idImage* image )
+{
+    int size = shadowMapResolutions[1];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapDepthImage_Res2( idImage* image )
+{
+    int size = shadowMapResolutions[2];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapDepthImage_Res3( idImage* image )
+{
+    int size = shadowMapResolutions[3];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapDepthImage_Res4( idImage* image )
+{
+    int size = shadowMapResolutions[4];
+    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+#ifdef GL_ES_VERSION_3_0
+static void R_CreateShadowMapImageES3_Res0( idImage* image )
+{
+	int size = shadowMapResolutions[0];
+	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImageES3_Res1( idImage* image )
+{
+	int size = shadowMapResolutions[1];
+	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImageES3_Res2( idImage* image )
+{
+	int size = shadowMapResolutions[2];
+	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImageES3_Res3( idImage* image )
+{
+	int size = shadowMapResolutions[3];
+	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
+}
+
+static void R_CreateShadowMapImageES3_Res4( idImage* image )
+{
+	int size = shadowMapResolutions[4];
+	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
+}
+#endif
+// RB end
+#endif
+
 //=====================================================================
 
 
@@ -1060,6 +1185,11 @@ void idImageManager::ChangeTextureFilter(void)
 			case TT_CUBIC:
 				texEnum = GL_TEXTURE_CUBE_MAP;
 				break;
+#ifdef GL_ES_VERSION_3_0
+				case TT_2D_ARRAY:
+				texEnum = GL_TEXTURE_2D_ARRAY;
+				break;
+#endif
 		}
 
 		// make sure we don't start a background load
@@ -1070,17 +1200,19 @@ void idImageManager::ChangeTextureFilter(void)
 		glt->Bind();
 
 		if (glt->filter == TF_DEFAULT) {
-			glTexParameterf(texEnum, GL_TEXTURE_MIN_FILTER, globalImages->textureMinFilter);
-			glTexParameterf(texEnum, GL_TEXTURE_MAG_FILTER, globalImages->textureMaxFilter);
+			qglTexParameterf(texEnum, GL_TEXTURE_MIN_FILTER, globalImages->textureMinFilter);
+			qglTexParameterf(texEnum, GL_TEXTURE_MAG_FILTER, globalImages->textureMaxFilter);
 		}
 
+#ifndef GL_ES_VERSION_3_0
 		if (glConfig.anisotropicAvailable) {
-			glTexParameterf(texEnum, GL_TEXTURE_MAX_ANISOTROPY_EXT, globalImages->textureAnisotropy);
+			qglTexParameterf(texEnum, GL_TEXTURE_MAX_ANISOTROPY_EXT, globalImages->textureAnisotropy);
 		}
+#endif
 
 #if !defined(GL_ES_VERSION_2_0)
 		if (glConfig.textureLODBiasAvailable) {
-			glTexParameterf(texEnum, GL_TEXTURE_LOD_BIAS_EXT, globalImages->textureLODBias);
+			qglTexParameterf(texEnum, GL_TEXTURE_LOD_BIAS_EXT, globalImages->textureLODBias);
 		}
 #endif
 	}
@@ -1516,7 +1648,7 @@ void idImageManager::SetNormalPalette(void)
 	                 GL_UNSIGNED_BYTE,
 	                 temptable);
 
-	glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
+	qglEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
 #endif
 }
 
@@ -2124,14 +2256,16 @@ void idImageManager::BindNull()
 
 #if !defined(GL_ES_VERSION_2_0)
 	if (tmu->textureType == TT_CUBIC) {
-		glDisable(GL_TEXTURE_CUBE_MAP);
+		qglDisable(GL_TEXTURE_CUBE_MAP);
 	} else if (tmu->textureType == TT_3D) {
-		glDisable(GL_TEXTURE_3D);
+		qglDisable(GL_TEXTURE_3D);
 	} else if (tmu->textureType == TT_2D) {
-		glDisable(GL_TEXTURE_2D);
+		qglDisable(GL_TEXTURE_2D);
+	} else if (tmu->textureType == TT_2D_ARRAY) {
+		qglDisable(GL_TEXTURE_2D_ARRAY);
 	}
 #else
-	//glBindTexture( GL_TEXTURE_2D, 0 ); //k2023
+	//qglBindTexture( GL_TEXTURE_2D, 0 ); //k2023
 #endif
 
 	tmu->textureType = TT_DISABLED;
@@ -2192,6 +2326,36 @@ void idImageManager::Init()
 	cmdSystem->AddCommand("combineCubeImages", R_CombineCubeImages_f, CMD_FL_RENDERER, "combines six images for roq compression");
 
 	// should forceLoadImages be here?
+#ifdef _SHADOW_MAPPING
+	// RB begin
+	shadowImage[0] = ImageFromFunction( va( "_shadowMap0_%i", shadowMapResolutions[0] ), R_CreateShadowMapImage_Res0 );
+	shadowImage[1] = ImageFromFunction( va( "_shadowMap1_%i", shadowMapResolutions[1] ), R_CreateShadowMapImage_Res1 );
+	shadowImage[2] = ImageFromFunction( va( "_shadowMap2_%i", shadowMapResolutions[2] ), R_CreateShadowMapImage_Res2 );
+	shadowImage[3] = ImageFromFunction( va( "_shadowMap3_%i", shadowMapResolutions[3] ), R_CreateShadowMapImage_Res3 );
+	shadowImage[4] = ImageFromFunction( va( "_shadowMap4_%i", shadowMapResolutions[4] ), R_CreateShadowMapImage_Res4 );
+	// RB end
+	shadowCubeImage[0] = ImageFromFunction( va( "_shadowMapCube0_%i", shadowMapResolutions[0] ), R_CreateShadowMapCubeImage_Res0 );
+	shadowCubeImage[1] = ImageFromFunction( va( "_shadowMapCube1_%i", shadowMapResolutions[1] ), R_CreateShadowMapCubeImage_Res1 );
+	shadowCubeImage[2] = ImageFromFunction( va( "_shadowMapCube2_%i", shadowMapResolutions[2] ), R_CreateShadowMapCubeImage_Res2 );
+	shadowCubeImage[3] = ImageFromFunction( va( "_shadowMapCube3_%i", shadowMapResolutions[3] ), R_CreateShadowMapCubeImage_Res3 );
+	shadowCubeImage[4] = ImageFromFunction( va( "_shadowMapCube4_%i", shadowMapResolutions[4] ), R_CreateShadowMapCubeImage_Res4 );
+
+    shadowDepthImage[0] = ImageFromFunction( va( "_shadowMapDepth0_%i", shadowMapResolutions[0] ), R_CreateShadowMapDepthImage_Res0 );
+    shadowDepthImage[1] = ImageFromFunction( va( "_shadowMapDepth1_%i", shadowMapResolutions[1] ), R_CreateShadowMapDepthImage_Res1 );
+    shadowDepthImage[2] = ImageFromFunction( va( "_shadowMapDepth2_%i", shadowMapResolutions[2] ), R_CreateShadowMapDepthImage_Res2 );
+    shadowDepthImage[3] = ImageFromFunction( va( "_shadowMapDepth3_%i", shadowMapResolutions[3] ), R_CreateShadowMapDepthImage_Res3 );
+    shadowDepthImage[4] = ImageFromFunction( va( "_shadowMapDepth4_%i", shadowMapResolutions[4] ), R_CreateShadowMapDepthImage_Res4 );
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+	{
+		shadowES3Image[0] = ImageFromFunction( va( "_shadowMapES3Depth0_%i", shadowMapResolutions[0] ), R_CreateShadowMapImageES3_Res0 );
+		shadowES3Image[1] = ImageFromFunction( va( "_shadowMapES3Depth1_%i", shadowMapResolutions[1] ), R_CreateShadowMapImageES3_Res1 );
+		shadowES3Image[2] = ImageFromFunction( va( "_shadowMapES3Depth2_%i", shadowMapResolutions[2] ), R_CreateShadowMapImageES3_Res2 );
+		shadowES3Image[3] = ImageFromFunction( va( "_shadowMapES3Depth3_%i", shadowMapResolutions[3] ), R_CreateShadowMapImageES3_Res3 );
+		shadowES3Image[4] = ImageFromFunction( va( "_shadowMapES3Depth4_%i", shadowMapResolutions[4] ), R_CreateShadowMapImageES3_Res4 );
+	}
+#endif
+#endif
 }
 
 /*

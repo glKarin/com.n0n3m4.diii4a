@@ -145,7 +145,7 @@ void idAASLocal::CalculateAreaTravelTimes(void) {
 		}
 	}
 
-	assert( ( (unsigned int) bytePtr - (unsigned int) areaTravelTimes ) <= numAreaTravelTimes * sizeof( unsigned short ) );
+	assert( ( (uintptr_t) bytePtr - (uintptr_t) areaTravelTimes ) <= numAreaTravelTimes * sizeof( unsigned short ) );
 }
 
 /*
@@ -731,7 +731,7 @@ idReachability *idAASLocal::GetAreaReachability( int areaNum, int reachabilityNu
 idAASLocal::ClusterAreaNum
 ============
 */
-ID_INLINE int idAASLocal::ClusterAreaNum( int clusterNum, int areaNum ) const {
+/*//k ID_INLINE */int idAASLocal::ClusterAreaNum( int clusterNum, int areaNum ) const {
 	int side, areaCluster;
 
 	areaCluster = file->GetArea( areaNum ).cluster;

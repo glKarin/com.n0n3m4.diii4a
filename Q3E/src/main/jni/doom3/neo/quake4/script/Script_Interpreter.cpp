@@ -1005,7 +1005,6 @@ bool idInterpreter::Execute( void ) {
 		st = &gameLocal.program.GetStatement( instructionPointer );
 
 
-// jmarshall - reval
 // RAVEN BEGIN
 // bdube: if the debugger is running then we need to check to see if any breakpoints have beeng hit
 		if ( gameLocal.editors & EDITOR_DEBUGGER ) {

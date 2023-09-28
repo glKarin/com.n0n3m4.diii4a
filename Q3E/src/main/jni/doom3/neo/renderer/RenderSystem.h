@@ -84,6 +84,10 @@ typedef struct glconfig_s {
 	bool				allowGLSLPath;
 
 	bool				isInitialized;
+
+	bool framebufferObjectAvailable;
+	int maxRenderbufferSize;
+	int maxColorAttachments;
 } glconfig_t;
 
 
@@ -294,6 +298,9 @@ class idRenderSystem
 		virtual void			DrawStretchCopy( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *material ) = 0;
 	// RAVEN END
 	virtual void			DebugGraph( float cur, float min, float max, const idVec4 &color ) = 0;
+#endif
+#ifdef _MULTITHREAD
+		virtual void EndFrame(byte *data, int *frontEndMsec, int *backEndMsec) = 0;
 #endif
 };
 
