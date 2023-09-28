@@ -22,7 +22,7 @@
  * PCF:
  * 9 vec2/vec3 constants
  * 5 LODs: 2048, 1024, 512, 512, 256
- * 5 sample base factor: 1.0, 0.5, 0.2, 0.2, 0.1
+ * 5 sample base factor: 1 / 2048, 1 / 1024, 1 / 512, 1 / 512, 1 / 256
  *
  * BIAS:
  * 0 - 0.001. I am not sure.
@@ -32,7 +32,7 @@
  * In OpenGLES2.0, cvar harm_r_shadowMapPointLight
  * 0. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5](slowest and bad, but render same as OpenGLES3.0)
  * 1. glsl macro _HARM_POINT_LIGHT_FRUSTUM_FAR: using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar](fastest and best, but depend frustum far)
- * 2. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: emulate z transform as depth value(faster and well, more incorrect rendering)
+ * 2. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: calculate z transform as depth value(faster and well)
  *
  * Parallel light:
  * Few light type. In out of room big scene, the lights most are point-light, but in lotaa/lotab/lotad of Prey are parallel light.
@@ -45,8 +45,8 @@
  * r_shadowMapFrustumFOV: float, 90, point light view FOV
  * harm_r_shadowMapLod: int, -1, force using shadow map LOD(0 - 4), -1 is auto
  * harm_r_shadowMapAlpha: float, 0.5, shadow alpha(0 - 1)
- * harm_r_shadowMapSampleFactor: float, -1.0, shadow sample size factor, 0 is disable, < 0 is auto, > 0 force using a fixed value
- * harm_r_shadowMapPointLight: int, 1, point light render method in OpenGLES2.0, 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = emulate z transform as depth value
+ * harm_r_shadowMapSampleFactor: float, -1.0, 0 multiple, 0 is disable, < 0 is auto, > 0 multi with fixed value
+ * harm_r_shadowMapPointLight: int, 1, point light render method in OpenGLES2.0, 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value
  *
  */
 
@@ -67,7 +67,8 @@ enum pointLightRenderMethod_e
 static bool r_shadowMapping = false;
 static int r_shadowMapPointLight = 0;
 
-static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f, 0.5f, 0.2f, 0.2f, 0.1f};
+// see Framebuffer.h::shadowMapResolutions
+static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0};
 
 static idCVar SaveColorBuffer("SaveColorBuffer", "0", CVAR_BOOL, "");
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug light type mask. 1: parallel, 2: point, 4: spot");
@@ -823,6 +824,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 		else
 #endif
         {
+#if 0
             if(vLight->parallel)
                 qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             else if(vLight->pointLight)
@@ -834,6 +836,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
             }
             else
                 qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+#endif
+			qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		    qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 	    }
 		qglDepthMask(GL_FALSE);
@@ -890,6 +894,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
                      GLS_DEPTHFUNC_LESS); // TODO: in OpenGLES2.0, only write RED color buffer and depth buffer; in OpenGLES3.0, only write depth buffer
     qglDisable(GL_BLEND);
 	qglDepthMask(GL_TRUE); // depth buffer lock update yet
+    //qglDepthFunc(GL_LESS);
 
     // process the chain of shadows with the current rendering state
     backEnd.currentSpace = NULL;
@@ -1104,6 +1109,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
     GL_UseProgram(NULL);
     Framebuffer::BindNull();
 
+    //qglDepthFunc(GL_LEQUAL);
     GL_State( glState );
     GL_PolygonOffset( false );
     GL_Cull( faceCulling );

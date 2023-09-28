@@ -1,8 +1,24 @@
 ## Change logs
-**1.1.0harmattan32(natasha)** - **2023-06-31**
+**1.1.0harmattan33(natasha)** - **2023-10-01**
 
 ----------------------------------------------------------------------------------
-### Update
+
+> 1.1.0harmattan33 (2023-10-01)
+
+* Add shadow mapping soft shadow support(testing, has some incorrect rendering), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow`.
+* In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).
+* Fix Setting's tab GUI in Prey2006.
+* Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).
+* Support max FPS limit(cvar `harm_r_maxFPS`).
+* Support obj/dae static model, and fix png image load.
+* Add skip intro support.
+* Add simple CVar editor.
+* Change OpenGL vertex index size to 4 bytes for large model.
+* Add GLES3.0 support, can choose in `Graphics` tab.
+
+----------------------------------------------------------------------------------
+
+> 1.1.0harmattan32 (2023-06-30)
 
 * Add `Chinese`, `Russian`(by [ALord7](https://4pda.ru/forum/index.php?showuser=5043340)) language.
 * Move some on-screen settings to `Configure on-screen controls` page.
@@ -12,8 +28,6 @@
 * Support jpg/png image texture file.
 
 ----------------------------------------------------------------------------------
-
-### History
 
 > 1.1.0harmattan31 (2023-06-10)
 

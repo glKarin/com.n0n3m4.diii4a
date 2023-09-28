@@ -104,4 +104,16 @@ public class CVarSetting_radiogroup extends LinearLayout implements CVarSettingI
     {
         return KidTech4Command.SetProp(cmd, m_cvar.name, m_cvar.defaultValue);
     }
+
+    @Override
+    public void SetEnabled(boolean enabled)
+    {
+        m_radioGroup.setEnabled(enabled);
+
+        for(int i = 0; i < m_radioGroup.getChildCount(); i++)
+        {
+            View child = m_radioGroup.getChildAt(i);
+            child.setEnabled(enabled);
+        }
+    }
 }

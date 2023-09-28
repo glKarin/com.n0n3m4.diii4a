@@ -61,7 +61,7 @@ public class CVarSettingSection extends LinearLayout
             View child = m_contents.getChildAt(i);
             if(!(child instanceof CVarSettingField))
                 continue;
-            ((CVarSettingField)child).CVarSettingUI().RestoreCommand(cmd);
+            ((CVarSettingField)child).RestoreCommand(cmd);
         }
     }
 
@@ -73,7 +73,7 @@ public class CVarSettingSection extends LinearLayout
             View child = m_contents.getChildAt(i);
             if(!(child instanceof CVarSettingField))
                 continue;
-            newCmd = ((CVarSettingField)child).CVarSettingUI().DumpCommand(newCmd);
+            newCmd = ((CVarSettingField)child).DumpCommand(newCmd);
         }
         return newCmd;
     }
@@ -86,7 +86,7 @@ public class CVarSettingSection extends LinearLayout
             View child = m_contents.getChildAt(i);
             if(!(child instanceof CVarSettingField))
                 continue;
-            newCmd = ((CVarSettingField)child).CVarSettingUI().RemoveCommand(newCmd);
+            newCmd = ((CVarSettingField)child).RemoveCommand(newCmd);
         }
         return newCmd;
     }
@@ -99,7 +99,7 @@ public class CVarSettingSection extends LinearLayout
             View child = m_contents.getChildAt(i);
             if(!(child instanceof CVarSettingField))
                 continue;
-            newCmd = ((CVarSettingField)child).CVarSettingUI().ResetCommand(newCmd);
+            newCmd = ((CVarSettingField)child).ResetCommand(newCmd);
         }
         return newCmd;
     }

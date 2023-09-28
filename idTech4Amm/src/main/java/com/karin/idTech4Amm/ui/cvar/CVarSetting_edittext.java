@@ -91,4 +91,10 @@ public class CVarSetting_edittext extends LinearLayout implements CVarSettingInt
     {
         return KidTech4Command.SetProp(cmd, m_cvar.name, m_cvar.defaultValue);
     }
+
+    @Override
+    public void SetEnabled(boolean enabled)
+    {
+        m_editText.setEnabled(enabled);
+    }
 }

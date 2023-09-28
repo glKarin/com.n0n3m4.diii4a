@@ -48,4 +48,10 @@ public class CVarSetting_checkbox extends CheckBox implements CVarSettingInterfa
     {
         return KidTech4Command.SetBoolProp(cmd, m_cvar.name, KidTech4Command.strtob(m_cvar.defaultValue));
     }
+
+    @Override
+    public void SetEnabled(boolean enabled)
+    {
+        setEnabled(enabled);
+    }
 }

@@ -9,4 +9,5 @@ public interface CVarSettingInterface
     public String DumpCommand(String cmd);
     public String RemoveCommand(String cmd);
     public String ResetCommand(String cmd);
+    public void SetEnabled(boolean enabled);
 }

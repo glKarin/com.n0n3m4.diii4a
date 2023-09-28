@@ -10,7 +10,7 @@ import java.util.Arrays;
 public final class Constants
 {
     public static final int CONST_UPDATE_RELEASE = 33;
-    public static final String CONST_RELEASE = "2023-07-29";
+    public static final String CONST_RELEASE = "2023-10-01";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -22,17 +22,17 @@ public final class Constants
     public static final String CONST_DEVELOPER_XDA = "https://forum.xda-developers.com/member.php?u=10584229";
     public static final String CONST_PACKAGE = "com.karin.idTech4Amm";
     public static final String CONST_FDROID = "https://f-droid.org/packages/com.karin.idTech4Amm/";
-	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/package/CHECK_FOR_UPDATE.json";
+	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
 	public static final String[] CONST_CHANGES = {
-            "Add shadow mapping support(testing, has some incorrect rendering), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow`.",
-            "In Quake4, remove FakeClient, and add SABot-a9 mod support and resource.",
+            "Add shadow mapping soft shadow support(testing, has some incorrect rendering), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow`.",
+            "In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).",
             "Fix Setting's tab GUI in Prey2006.",
             "Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).",
             "Support max FPS limit(cvar `harm_r_maxFPS`).",
             "Support obj/dae static model, and fix png image load.",
-            "Add skip intro.",
-	        "Add CVar editor.",
+            "Add skip intro support.",
+	        "Add simple CVar editor.",
             "Change OpenGL vertex index size to 4 bytes for large model.",
             "Add GLES3.0 support, can choose in `Graphics` tab.",
 	};

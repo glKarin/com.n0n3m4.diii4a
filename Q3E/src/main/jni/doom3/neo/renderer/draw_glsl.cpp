@@ -309,21 +309,24 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 		// texture 6 is the shadow map
 		GL_SelectTextureNoClient(6);
 		float sampleScale = 1.0;
+		float sampleFactor = harm_r_shadowMapSampleFactor.GetFloat();
+		float lod = sampleFactor != 0 ? SampleFactors[backEnd.vLight->shadowLOD] : 0.0;
+
 #ifdef GL_ES_VERSION_3_0
 		if(USING_GLES3)
 		{
 			globalImages->shadowES3Image[backEnd.vLight->shadowLOD]->Bind();
 			if( backEnd.vLight->parallel )
 			{
-				sampleScale = 0.0005;
+                sampleScale = 1.0;
 			}
 			else if( backEnd.vLight->pointLight )
 			{
-				sampleScale = 0.005;
+                sampleScale = 5.0;
 			}
 			else
 			{
-				sampleScale = 0.005;
+                sampleScale = 5.0;
 			}
 		}
 		else
@@ -332,24 +335,25 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 		if( backEnd.vLight->parallel )
 		{
 			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-			sampleScale = 0.0005;
+			sampleScale = 1.0;
 		}
 		else if( backEnd.vLight->pointLight )
 		{
 			globalImages->shadowCubeImage[backEnd.vLight->shadowLOD]->Bind();
+			if(sampleFactor != 0)
+				lod = 0.5;
 		}
 		else
 		{
-			sampleScale = 0.01;
+			sampleScale = 5.0;
 			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
 		}
 		}
-        float sampleFactor = harm_r_shadowMapSampleFactor.GetFloat();
-        if(sampleFactor < 0)
-        {
-            sampleFactor = SampleFactors[backEnd.vLight->shadowLOD];
-        }
-        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), sampleFactor * sampleScale);
+
+		if(sampleFactor > 0.0)
+			sampleScale *= sampleFactor;
+
+        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), lod * sampleScale);
 	};
 #endif
 
