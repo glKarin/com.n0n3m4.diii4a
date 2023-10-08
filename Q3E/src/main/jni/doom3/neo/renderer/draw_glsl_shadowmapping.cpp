@@ -1157,6 +1157,56 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
 
     //GL_Uniform1f(offsetof(shaderProgram_t, bias), harm_r_shadowMapBias.GetFloat());
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[3]), harm_r_shadowMapAlpha.GetFloat());
+    float globalLightOrigin[4] = {
+            backEnd.vLight->globalLightOrigin[0],
+            backEnd.vLight->globalLightOrigin[1],
+            backEnd.vLight->globalLightOrigin[2],
+            1.0f,
+    };
+    GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
+
+    float sampleScale = 1.0;
+    float sampleFactor = harm_r_shadowMapSampleFactor.GetFloat();
+    float lod = sampleFactor != 0 ? SampleFactors[backEnd.vLight->shadowLOD] : 0.0;
+
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+    {
+        if( backEnd.vLight->parallel )
+        {
+            sampleScale = 1.0;
+        }
+        else if( backEnd.vLight->pointLight )
+        {
+            sampleScale = 2.0;
+        }
+        else
+        {
+            sampleScale = 2.0;
+        }
+    }
+    else
+#endif
+    {
+    if( backEnd.vLight->parallel )
+    {
+        sampleScale = 1.0;
+    }
+    else if( backEnd.vLight->pointLight )
+    {
+        if(sampleFactor != 0)
+            lod = 0.5;
+    }
+    else
+    {
+        sampleScale = 5.0;
+    }
+    }
+
+    if(sampleFactor > 0.0)
+        sampleScale *= sampleFactor;
+
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), lod * sampleScale);
 
     // texture 5 is the specular lookup table
     GL_SelectTextureNoClient(5);
@@ -1184,14 +1234,6 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
 
 
         GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), surf->space->modelMatrix);
-
-        float globalLightOrigin[4] = {
-                backEnd.vLight->globalLightOrigin[0],
-                backEnd.vLight->globalLightOrigin[1],
-                backEnd.vLight->globalLightOrigin[2],
-                1.0f,
-        };
-        GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
 
         // this may cause RB_GLSL_DrawInteraction to be exacuted multiple
         // times with different colors and images if the surface or light have multiple layers
