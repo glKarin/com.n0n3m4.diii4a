@@ -97,6 +97,10 @@ idCVar	idSessionLocal::com_aviDemoTics("com_aviDemoTics", "2", CVAR_SYSTEM | CVA
 idCVar	idSessionLocal::com_wipeSeconds("com_wipeSeconds", "1", CVAR_SYSTEM, "");
 idCVar	idSessionLocal::com_guid("com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "");
 
+#ifdef _HUMANHEAD //k: play level music when map loading
+static idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "play music during level loads");
+#endif
+
 idSessionLocal		sessLocal;
 idSession			*session = &sessLocal;
 
@@ -1919,15 +1923,18 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 		soundSystem->BeginLevelLoad();
 	}
 #ifdef _HUMANHEAD //k: play level music when map loading
-	soundSystem->SetMute(false);
-	soundSystem->SetPlayingSoundWorld(menuSoundWorld);
-	const idDecl *mapDecl = declManager->FindType(DECL_MAPDEF, mapString.c_str(), false);
-	if(mapDecl)
+	if(g_levelloadmusic.GetBool())
 	{
-		const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
-		const char *loadMusic = mapDef->dict.GetString("snd_loadmusic");
-		if(loadMusic && loadMusic[0])
-			menuSoundWorld->PlayShaderDirectly(loadMusic, 2);
+		soundSystem->SetMute(false);
+		soundSystem->SetPlayingSoundWorld(menuSoundWorld);
+		const idDecl *mapDecl = declManager->FindType(DECL_MAPDEF, mapString.c_str(), false);
+		if(mapDecl)
+		{
+			const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
+			const char *loadMusic = mapDef->dict.GetString("snd_loadmusic");
+			if(loadMusic && loadMusic[0])
+				menuSoundWorld->PlayShaderDirectly(loadMusic, 2);
+		}
 	}
 #endif
 

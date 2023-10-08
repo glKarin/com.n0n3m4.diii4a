@@ -89,7 +89,6 @@ idCVar r_skipGlowOverlay("r_skipGlowOverlay", "0", CVAR_RENDERER | CVAR_ARCHIVE 
 idCVar r_lowParticleDetail("r_lowParticleDetail", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "less detailed particles");
 idCVar r_useFastSkinning("r_useFastSkinning", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = normal, 1 = faster with tangents transformed, 2 = use single weight simple skinning");
 idCVar s_musicvolume_dB("s_musicvolume_dB", "0", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "music volume in dB");
-idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_INTEGER, "play music during level loads");
 idCVar s_deviceName("s_deviceName", "", CVAR_SOUND | CVAR_ARCHIVE | CVAR_INTEGER, "OpenAL device name");
 #endif
 

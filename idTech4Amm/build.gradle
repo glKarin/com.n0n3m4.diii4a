@@ -10,7 +10,7 @@ android {
         debug {
             v1SigningEnabled true
             v2SigningEnabled true
-            storeFile file('F:\\qobj\\droid\\idTech4Amm\\idtech4amm.keystore')
+            storeFile file('F:\\qobj\\droid\\DIII4A\\idtech4amm.keystore')
             storePassword '741953'
             keyAlias 'idtech4amm'
             keyPassword '741953'
@@ -18,7 +18,7 @@ android {
         release {
             v1SigningEnabled true
             v2SigningEnabled true
-            storeFile file('F:\\qobj\\droid\\idTech4Amm\\idtech4amm.keystore')
+            storeFile file('F:\\qobj\\droid\\DIII4A\\idtech4amm.keystore')
             storePassword '741953'
             keyAlias 'idtech4amm'
             keyPassword '741953'
