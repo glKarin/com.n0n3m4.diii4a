@@ -721,6 +721,11 @@ function(set_src_dir DSTLIST PATHPREFIX SRCLIST)
 	set(${DSTLIST} ${list} PARENT_SCOPE)
 endfunction()
 
+set(MOD_DIR "mod")
+set(DOOM3_MOD_DIR "${MOD_DIR}/doom3")
+set(QUAKE4_MOD_DIR "${MOD_DIR}/quake4")
+set(PREY_MOD_DIR "${MOD_DIR}/prey")
+
 # base
 set(src_game ${base_game_src})
 set_src_dir(src_game "game" ${src_game})
@@ -743,13 +748,13 @@ set(d3le_game_src
 		physics/Force_Grab.cpp
 		)
 list(APPEND src_d3le ${d3le_game_src})
-set_src_dir(src_d3le "d3le" ${src_d3le})
-add_globbed_headers(src_d3le "d3le")
+set_src_dir(src_d3le "${DOOM3_MOD_DIR}/d3le" ${src_d3le})
+add_globbed_headers(src_d3le "${DOOM3_MOD_DIR}/d3le")
 
 # cdoom
 set(src_cdoom ${base_game_src})
-set_src_dir(src_cdoom "cdoom" ${src_cdoom})
-add_globbed_headers(src_cdoom "cdoom")
+set_src_dir(src_cdoom "${DOOM3_MOD_DIR}/cdoom" ${src_cdoom})
+add_globbed_headers(src_cdoom "${DOOM3_MOD_DIR}/cdoom")
 
 # rivensin
 set(src_rivensin ${base_game_src})
@@ -762,8 +767,8 @@ set(rivensin_game_src
 		physics/Force_Grab.cpp
 		)
 list(APPEND src_rivensin ${rivensin_game_src})
-set_src_dir(src_rivensin "rivensin" ${src_rivensin})
-add_globbed_headers(src_rivensin "rivensin")
+set_src_dir(src_rivensin "${DOOM3_MOD_DIR}/rivensin" ${src_rivensin})
+add_globbed_headers(src_rivensin "${DOOM3_MOD_DIR}/rivensin")
 
 # hardcorps
 set(src_hardcorps ${base_game_src})
@@ -775,8 +780,8 @@ set(hardcorps_game_src
 		physics/Physics_Liquid.cpp
 		)
 list(APPEND src_hardcorps ${hardcorps_game_src})
-set_src_dir(src_hardcorps "hardcorps" ${src_hardcorps})
-add_globbed_headers(src_hardcorps "hardcorps")
+set_src_dir(src_hardcorps "${DOOM3_MOD_DIR}/hardcorps" ${src_hardcorps})
+add_globbed_headers(src_hardcorps "${DOOM3_MOD_DIR}/hardcorps")
 
 # overthinked
 set(src_overthinked ${base_game_src})
@@ -784,8 +789,8 @@ set(overthinked_game_src
 		tracer.cpp
 		)
 list(APPEND src_overthinked ${overthinked_game_src})
-set_src_dir(src_overthinked "overthinked" ${src_overthinked})
-add_globbed_headers(src_overthinked "overthinked")
+set_src_dir(src_overthinked "${DOOM3_MOD_DIR}/overthinked" ${src_overthinked})
+add_globbed_headers(src_overthinked "${DOOM3_MOD_DIR}/overthinked")
 
 # sabot
 set(src_sabot ${base_game_src})
@@ -797,8 +802,8 @@ set(sabot_game_src
 		bots/BotSabot.cpp
 		)
 list(APPEND src_sabot ${sabot_game_src})
-set_src_dir(src_sabot "sabot" ${src_sabot})
-add_globbed_headers(src_sabot "sabot")
+set_src_dir(src_sabot "${DOOM3_MOD_DIR}/sabot" ${src_sabot})
+add_globbed_headers(src_sabot "${DOOM3_MOD_DIR}/sabot")
 
 # hexeneoc
 set(src_hexeneoc ${base_game_src})
@@ -816,8 +821,8 @@ set(hexeneoc_game_src
 		projectiles/Wraithverge.cpp
 		)
 list(APPEND src_hexeneoc ${hexeneoc_game_src})
-set_src_dir(src_hexeneoc "hexeneoc" ${src_hexeneoc})
-add_globbed_headers(src_hexeneoc "hexeneoc")
+set_src_dir(src_hexeneoc "${DOOM3_MOD_DIR}/hexeneoc" ${src_hexeneoc})
+add_globbed_headers(src_hexeneoc "${DOOM3_MOD_DIR}/hexeneoc")
 
 # quake4
 set(src_quake4 ${base_game_src})

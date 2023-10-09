@@ -29,8 +29,8 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 11033
-        versionName '1.1.0harmattan33'
+        versionCode 11035
+        versionName '1.1.0harmattan35'
         versionNameSuffix 'natasha'
     }
 
