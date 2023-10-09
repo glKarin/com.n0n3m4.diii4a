@@ -776,33 +776,41 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
 	if(!harm_r_shadowMapDebug.GetInteger())
 	{
-    globalFramebuffers.shadowFBO[vLight->shadowLOD]->Bind();
+		Framebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
+    fb->Bind();
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
 	{
 #ifdef SHADOW_MAPPING_DEBUG
-		globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]); // for debug, not need render color buffer with OpenGLES3.0
+		fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]); // for debug, not need render color buffer with OpenGLES3.0
 #endif
 		if( side < 0 )
-			globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepthLayer( globalImages->shadowES3Image[vLight->shadowLOD], 0 );
+			fb->AttachImageDepthLayer( globalImages->shadowImage[vLight->shadowLOD], 0 );
 		else
-			globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepthLayer( globalImages->shadowES3Image[vLight->shadowLOD], side );
+			fb->AttachImageDepthLayer( globalImages->shadowImage[vLight->shadowLOD], side );
 	}
 	else
 #endif
 	{
-        globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImageDepth( globalImages->shadowDepthImage[vLight->shadowLOD]);
-
         if( vLight->parallel && side >= 0 )
-            globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
+		{
+            fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]);
+			fb->AttachImageDepth( globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
+		}
         else if( vLight->pointLight && side >= 0 )
-            globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2DLayer( globalImages->shadowCubeImage[vLight->shadowLOD], side );
+		{
+            fb->AttachImage2DLayer( globalImages->shadowImage_CubeRGBA[vLight->shadowLOD], side );
+			fb->AttachImageDepth( globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
+		}
         else
-            globalFramebuffers.shadowFBO[vLight->shadowLOD]->AttachImage2D( globalImages->shadowImage[vLight->shadowLOD]);
+		{
+            fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]);
+			fb->AttachImageDepth( globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
+		}
 	}
 
 #if 0
-    globalFramebuffers.shadowFBO[vLight->shadowLOD]->Check();
+    fb->Check();
 #endif
 	}
 
@@ -824,19 +832,6 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 		else
 #endif
         {
-#if 0
-            if(vLight->parallel)
-                qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            else if(vLight->pointLight)
-            {
-                if(r_shadowMapPointLight != POINT_LIGHT_RENDER_METHOD_EMULATE_Z)
-                    qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-                else
-                    qglClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            }
-            else
-                qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-#endif
 			qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		    qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 	    }
@@ -1071,28 +1066,6 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
             GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t), vertexCache.Position(drawSurf->geo->shadowCache));
 
-#if 0
-			float w;
-#ifdef GL_ES_VERSION_3_0
-            if(USING_GLES3)
-                w = 1.0;
-            else
-#endif
-            {
-                if(vLight->parallel)
-                    w = 1.0;
-                else if(vLight->pointLight)
-                {
-                    if(r_shadowMapPointLight != POINT_LIGHT_RENDER_METHOD_EMULATE_Z)
-                        w = 1.0;
-                    else
-                        w = 0.0;
-                }
-                else
-                    w = 1.0;
-            }
-			GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), w);
-#endif
             RB_DrawShadowElementsWithCounters_shadowMapping( drawSurf->geo/*, SM_REAR_CAP*/ );
             //RB_DrawElementsWithCounters( drawSurf->geo );
 
@@ -1138,9 +1111,9 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), RB_GetPointLightFrustumFar(backEnd.vLight));
 
-#ifdef SHADOW_MAPPING_DEBUG
+//#ifdef SHADOW_MAPPING_DEBUG
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), harm_r_shadowMapBias.GetFloat());
-#endif
+//#endif
 
             // perform setup here that will be constant for all interactions
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE |

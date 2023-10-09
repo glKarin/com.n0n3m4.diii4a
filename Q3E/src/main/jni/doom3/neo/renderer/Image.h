@@ -208,9 +208,10 @@ class idImage
 		                              textureRepeat_t repeat, textureDepth_t depth);
 
 #ifdef _SHADOW_MAPPING
-	void		GenerateShadowMapDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
-    void		GenerateShadowMapDepthCubeImage(int size, textureFilter_t filter, bool allowDownSize);
-	void		GenerateDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
+	void		GenerateShadow2DRGBAImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
+    void		GenerateShadowCubeRGBAImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
+	void		GenerateShadow2DDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
+	void		GenerateShadowCubeDepthImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
 #ifdef GL_ES_VERSION_3_0
 	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat );
 #endif
@@ -541,11 +542,12 @@ class idImageManager
 #endif
 #ifdef _SHADOW_MAPPING
 	// RB begin
-	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
-	idImage*			shadowCubeImage[MAX_SHADOWMAP_RESOLUTIONS];
-    idImage*			shadowDepthImage[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage_2DRGBA[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage_2DDepth[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage_CubeRGBA[MAX_SHADOWMAP_RESOLUTIONS];
+	// idImage*			shadowImage_CubeDepth[MAX_SHADOWMAP_RESOLUTIONS];
 #ifdef GL_ES_VERSION_3_0
-	idImage*			shadowES3Image[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
 #endif
 	// RB end
 #endif

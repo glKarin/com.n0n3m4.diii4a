@@ -311,22 +311,22 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 #ifdef GL_ES_VERSION_3_0
 		if(USING_GLES3)
 		{
-			globalImages->shadowES3Image[backEnd.vLight->shadowLOD]->Bind();
+			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else
 #endif
 		{
 		if( backEnd.vLight->parallel )
 		{
-			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
+			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else if( backEnd.vLight->pointLight )
 		{
-			globalImages->shadowCubeImage[backEnd.vLight->shadowLOD]->Bind();
+			globalImages->shadowImage_CubeRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else
 		{
-			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
+			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		}
 	}
