@@ -134,7 +134,7 @@ Computes the light shadow map LOD.
 */
 void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLight)
 {
-    int shadowLod = 0;
+    int shadowLod = -1;
     if(r_useShadowMapping.GetBool()) {
         // Calculate the matrix that projects the zero-to-one cube to exactly cover the
         // light frustum in clip space.
@@ -171,21 +171,21 @@ void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLigh
             vLight->scissorRect.zmin = projected[0][2];
             vLight->scissorRect.zmax = projected[1][2];*/
 
-            if (harm_r_shadowMapLod.GetInteger() >= 0 && harm_r_shadowMapLod.GetInteger() < 5)
-                shadowLod = harm_r_shadowMapLod.GetInteger();
-            else
-            {
-                // RB: calculate shadow LOD similar to Q3A .md3 LOD code
-                //k vLight->shadowLOD = 0;
-                const bool lightCastsShadows = /*light->parms.forceShadows || */(
-                        !light->parms.noShadows && light->lightShader->LightCastsShadows());
+            const bool lightCastsShadows = /*light->parms.forceShadows || */(
+                    !light->parms.noShadows && light->lightShader->LightCastsShadows());
+            // RB: calculate shadow LOD similar to Q3A .md3 LOD code
 
-                if (/*r_useShadowMapping.GetBool() && */lightCastsShadows) {
+            if (/*r_useShadowMapping.GetBool() && */lightCastsShadows) {
+                if (harm_r_shadowMapLod.GetInteger() >= 0 && harm_r_shadowMapLod.GetInteger() < MAX_SHADOWMAP_RESOLUTIONS)
+                    shadowLod = harm_r_shadowMapLod.GetInteger();
+                else
+                {
                     float flod, lodscale;
                     float projectedRadius;
-                    int lod;
+                    int lod = 0;
                     int numLods;
 
+                    shadowLod = 0;
                     numLods = MAX_SHADOWMAP_RESOLUTIONS;
 
                     // compute projected bounding sphere
@@ -208,29 +208,24 @@ void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLigh
                         flod = 0;
                     }
 
-                    flod *= numLods;
+                    flod *= ( numLods + 1 );
 
                     if (flod < 0) {
                         flod = 0;
                     }
 
                     lod = idMath::Ftoi(flod);
-
-                    if (lod >= numLods) {
-                        //lod = numLods - 1;
-                    }
-
                     lod += r_shadowMapLodBias.GetInteger();
 
-                    if (lod < 0) {
+                    if( lod < 0 )
+                    {
                         lod = 0;
                     }
 
                     if (lod >= numLods) {
+                        //lod = numLods - 1;
                         // don't draw any shadow
-                        //lod = -1;
-
-                        lod = numLods - 1;
+                        lod = -1;
                     }
 
                     // 2048^2 ultra quality is only for cascaded shadow mapping with sun lights
@@ -239,8 +234,8 @@ void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLigh
                     }
 
                     shadowLod = lod;
+                    // RB end
                 }
-                // RB end
             }
         }
         // the light was culled to the view frustum

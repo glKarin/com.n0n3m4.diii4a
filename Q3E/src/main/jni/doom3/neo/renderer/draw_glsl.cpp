@@ -492,7 +492,7 @@ void RB_GLSL_DrawInteractions(void)
 		}
 
 #ifdef _SHADOW_MAPPING
-		if(shadowMapping)
+		if(shadowMapping && vLight->shadowLOD >= 0)
 		{
             int	side, sideStop;
 
