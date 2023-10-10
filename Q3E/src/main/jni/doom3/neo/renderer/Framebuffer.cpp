@@ -222,6 +222,11 @@ void Framebuffer::AttachImageDepthLayer( const idImage* image, int layer )
     qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, image->texnum, 0 );
 }
 
+void Framebuffer::AttachImageDepthSide( const idImage* image, int side )
+{
+    qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, image->texnum, 0 );
+}
+
 void Framebuffer::AttachImage2D( const idImage* image )
 {
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0 );
@@ -229,7 +234,19 @@ void Framebuffer::AttachImage2D( const idImage* image )
 
 void Framebuffer::AttachImage2DLayer( const idImage* image, int layer )
 {
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+	{
+		qglFramebufferTextureLayer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, image->texnum, 0, layer );
+	}
+	else
+#endif
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, image->texnum, 0 );
+}
+
+void Framebuffer::AttachImage2DSide( const idImage* image, int side )
+{
+	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, image->texnum, 0 );
 }
 
 void Framebuffer::Check()

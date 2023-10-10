@@ -2857,6 +2857,13 @@ void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm,
 					  GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 		//GL_CheckErrors(va("GenerateShadowCubeDepthImage::part_%d", i));
 	}
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+	{
+		qglTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
+		qglTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
+	}
+#endif
 	// see if we messed anything up
 	GL_CheckErrors();
 }

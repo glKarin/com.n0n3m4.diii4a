@@ -58,6 +58,8 @@ public:
 	void					AttachImageDepthLayer( const idImage* image, int layer );
 	void					AttachImage2DLayer( const idImage* image, int layer );
 	void					AttachImage2D( const idImage* image );
+	void					AttachImageDepthSide( const idImage* image, int side );
+	void					AttachImage2DSide( const idImage* image, int side );
 	
 	// check for OpenGL errors
 	void					Check();

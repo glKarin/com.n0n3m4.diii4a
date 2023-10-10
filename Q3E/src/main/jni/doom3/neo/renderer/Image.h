@@ -545,7 +545,7 @@ class idImageManager
 	idImage*			shadowImage_2DRGBA[MAX_SHADOWMAP_RESOLUTIONS];
 	idImage*			shadowImage_2DDepth[MAX_SHADOWMAP_RESOLUTIONS];
 	idImage*			shadowImage_CubeRGBA[MAX_SHADOWMAP_RESOLUTIONS];
-	// idImage*			shadowImage_CubeDepth[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage_CubeDepth[MAX_SHADOWMAP_RESOLUTIONS];
 #ifdef GL_ES_VERSION_3_0
 	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
 #endif

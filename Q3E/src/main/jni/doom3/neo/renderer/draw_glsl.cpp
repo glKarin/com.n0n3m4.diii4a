@@ -232,103 +232,11 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 #ifdef _SHADOW_MAPPING
 	if(r_shadowMapping)
 	{
-		idRenderMatrix lightViewRenderMatrix;
-		idRenderMatrix lightProjectionRenderMatrix;
-
-        /*
-         * parallel light not use `cascade`, so only 1 matrix
-         * point light has 6 matrix, but unused in shader
-         * spot light only 1 matrix
-         */
-        if( backEnd.vLight->parallel )
-        {
-            //for( int i = 0; i < 1; i++ )
-            {
-				lightViewRenderMatrix << backEnd.shadowV[0];
-				lightProjectionRenderMatrix << backEnd.shadowP[0];
-
-				idRenderMatrix modelRenderMatrix;
-				idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
-
-				idRenderMatrix modelToLightRenderMatrix;
-				idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
-
-				idRenderMatrix clipMVP;
-				idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
-
-                idRenderMatrix MVP;
-                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-                GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
-            }
-        }
-        else if( backEnd.vLight->pointLight )
-        {
-			float ms[6 * 16];
-            for( int i = 0; i < 6; i++ )
-            {
-				lightViewRenderMatrix << backEnd.shadowV[i];
-				lightProjectionRenderMatrix << backEnd.shadowP[i];
-
-				idRenderMatrix modelRenderMatrix;
-				idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
-
-				idRenderMatrix modelToLightRenderMatrix;
-				idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
-
-				idRenderMatrix clipMVP;
-				idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
-
-                idRenderMatrix MVP;
-                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-
-                MVP >> &ms[i * 16];
-            }
-			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), 6, ms);
-        }
-        else
-        {
-            // spot light
-
-			lightViewRenderMatrix << backEnd.shadowV[0];
-			lightProjectionRenderMatrix << backEnd.shadowP[0];
-
-			idRenderMatrix modelRenderMatrix;
-			idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
-
-			idRenderMatrix modelToLightRenderMatrix;
-			idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
-
-			idRenderMatrix clipMVP;
-			idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
-
-			idRenderMatrix MVP;
-			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
-        }
+		RB_ShadowMapping_setupMVP(din);
 
 		// texture 6 is the shadow map
 		GL_SelectTextureNoClient(6);
-#ifdef GL_ES_VERSION_3_0
-		if(USING_GLES3)
-		{
-			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-		}
-		else
-#endif
-		{
-		if( backEnd.vLight->parallel )
-		{
-			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
-		}
-		else if( backEnd.vLight->pointLight )
-		{
-			globalImages->shadowImage_CubeRGBA[backEnd.vLight->shadowLOD]->Bind();
-		}
-		else
-		{
-			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
-		}
-		}
+		RB_ShadowMapping_bindTexture();
 	}
 #endif
 
@@ -445,9 +353,9 @@ void RB_GLSL_DrawInteractions(void)
 
 #ifdef _SHADOW_MAPPING
 	const bool shadowMapping = r_shadowMapping && r_shadows.GetBool();
-	GLfloat clearColor[4];
+	float clearColor[4];
 	if(shadowMapping)
-        qglGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
+        RB_ShadowMapping_getClearColor(clearColor);
 #endif
 	//
 	// for each light, perform adding and shadowing
