@@ -622,8 +622,7 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				}
 
 				//lvonasek: Allow max 1 skybox per frame
-				static int lastRenderSkybox = -1;
-				if(tr.frameCount == lastRenderSkybox || tr.viewDef->isSubview)
+				if(tr.SkyboxRenderedInFrame() || tr.viewDef->isSubview)
 					return false;
 
 				// copy the viewport size from the original
@@ -631,7 +630,7 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				if (!parms) {
 					return false;
 				}
-				lastRenderSkybox = tr.frameCount;
+				tr.RenderSkyboxInFrame();
 				*parms = *tr.viewDef;
 
 				parms->isSubview = true;

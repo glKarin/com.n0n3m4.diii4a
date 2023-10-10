@@ -831,6 +831,13 @@ class idRenderSystemLocal : public idRenderSystem
 
 	bool scopeView;
 	bool shuttleView;
+	int lastRenderSkybox;
+	ID_INLINE bool SkyboxRenderedInFrame() const {
+		return frameCount == lastRenderSkybox;
+	}
+	ID_INLINE void RenderSkyboxInFrame() {
+		lastRenderSkybox = frameCount;
+	}
 #endif
 #ifdef _MULTITHREAD
 	virtual void EndFrame(byte *data, int *frontEndMsec, int *backEndMsec);

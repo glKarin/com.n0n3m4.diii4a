@@ -2197,6 +2197,7 @@ void idRenderSystemLocal::Clear(void)
 #ifdef _HUMANHEAD
 	scopeView = false;
 	shuttleView = false;
+	lastRenderSkybox = -1;
 #endif
 }
 
