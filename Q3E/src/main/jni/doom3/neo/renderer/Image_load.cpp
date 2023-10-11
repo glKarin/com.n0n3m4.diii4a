@@ -2570,7 +2570,7 @@ void idImage::Print() const
 }
 
 #ifdef _SHADOW_MAPPING
-void		idImage::GenerateShadow2DDepthImage(int width, int height, textureFilter_t filterParm, bool allowDownSizeParm, textureRepeat_t repeatParm)
+void		idImage::GenerateShadow2DDepthImage(int width, int height, textureFilter_t filterParm, bool allowDownSizeParm, textureRepeat_t repeatParm, int component, bool compare)
 {
     byte		*scaledBuffer;
     int			scaled_width, scaled_height;
@@ -2609,7 +2609,22 @@ void		idImage::GenerateShadow2DDepthImage(int width, int height, textureFilter_t
     qglGenTextures(1, &texnum);
 
     // select proper internal format before we resample
-    internalFormat = GL_DEPTH_COMPONENT24;
+	GLenum dataType;
+	switch (component) {
+		case 16:
+			internalFormat = GL_DEPTH_COMPONENT16;
+			dataType = GL_UNSIGNED_SHORT;
+			break;
+		case 32:
+			internalFormat = GL_DEPTH_COMPONENT32F;
+			dataType = GL_FLOAT;
+			break;
+		case 24:
+		default:
+			internalFormat = GL_DEPTH_COMPONENT24;
+			dataType = GL_UNSIGNED_INT;
+			break;
+	}
 
     uploadHeight = scaled_height;
     uploadWidth = scaled_width;
@@ -2622,9 +2637,16 @@ void		idImage::GenerateShadow2DDepthImage(int width, int height, textureFilter_t
 
     //GL_CheckErrors("GenerateShadow2DDepthImage::start");
     qglTexImage2D(GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0,
-                 GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+                 GL_DEPTH_COMPONENT, dataType, NULL);
     //GL_CheckErrors("GenerateShadow2DDepthImage::end");
 
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3 && compare)
+	{
+		qglTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
+		qglTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
+	}
+#endif
     // see if we messed anything up
     GL_CheckErrors();
 }
@@ -2775,7 +2797,7 @@ void idImage::GenerateShadowCubeRGBAImage(int size, textureFilter_t filterParm, 
 	GL_CheckErrors();
 }
 
-void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm, bool allowDownSizeParm, textureRepeat_t repeatParm)
+void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm, bool allowDownSizeParm, textureRepeat_t repeatParm, int component, bool compare)
 {
 	int			scaled_width, scaled_height;
 	int			width, height;
@@ -2816,7 +2838,22 @@ void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm,
 	qglGenTextures(1, &texnum);
 
 	// select proper internal format before we resample
-	internalFormat = GL_DEPTH_COMPONENT24;
+	GLenum dataType;
+	switch (component) {
+		case 16:
+			internalFormat = GL_DEPTH_COMPONENT16;
+			dataType = GL_UNSIGNED_SHORT;
+			break;
+		case 32:
+			internalFormat = GL_DEPTH_COMPONENT32F;
+			dataType = GL_FLOAT;
+			break;
+		case 24:
+		default:
+			internalFormat = GL_DEPTH_COMPONENT24;
+			dataType = GL_UNSIGNED_INT;
+			break;
+	}
 
 	// don't bother with downsample for now
 	scaled_width = width;
@@ -2854,11 +2891,11 @@ void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm,
 	//GL_CheckErrors("GenerateShadowCubeDepthImage::start");
 	for (i = 0 ; i < 6 ; i++) {
 		qglTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, internalFormat, scaled_width, scaled_height, 0,
-					  GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+					  GL_DEPTH_COMPONENT, dataType, NULL);
 		//GL_CheckErrors(va("GenerateShadowCubeDepthImage::part_%d", i));
 	}
 #ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
+	if(USING_GLES3 && compare)
 	{
 		qglTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
 		qglTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
@@ -2869,7 +2906,7 @@ void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm,
 }
 
 #ifdef GL_ES_VERSION_3_0
-void idImage::GenerateShadowArray( int width, int height, int numSides, textureFilter_t filterParm, textureRepeat_t repeatParm )
+void idImage::GenerateShadowArray( int width, int height, int numSides, textureFilter_t filterParm, textureRepeat_t repeatParm, int component, bool compare )
 {
 	int			scaled_width, scaled_height;
 	int			i;
@@ -2903,7 +2940,22 @@ void idImage::GenerateShadowArray( int width, int height, int numSides, textureF
 	uploadHeight = scaled_height;
 	uploadWidth = scaled_width;
 
-	internalFormat = GL_DEPTH_COMPONENT24;
+	GLenum dataType;
+	switch (component) {
+		case 16:
+			internalFormat = GL_DEPTH_COMPONENT16;
+			dataType = GL_UNSIGNED_SHORT;
+			break;
+		case 32:
+			internalFormat = GL_DEPTH_COMPONENT32F;
+			dataType = GL_FLOAT;
+			break;
+		case 24:
+		default:
+			internalFormat = GL_DEPTH_COMPONENT24;
+			dataType = GL_UNSIGNED_INT;
+			break;
+	}
 
 	qglGenTextures(1, &texnum);
 
@@ -2934,12 +2986,14 @@ void idImage::GenerateShadowArray( int width, int height, int numSides, textureF
 	// upload the base level
 
 	//GL_CheckErrors("GenerateShadowCubeRGBAImage::start");
-	qglTexImage3D( GL_TEXTURE_2D_ARRAY, 0, internalFormat, scaled_width, scaled_height, numSides, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL );
+	qglTexImage3D( GL_TEXTURE_2D_ARRAY, 0, internalFormat, scaled_width, scaled_height, numSides, 0, GL_DEPTH_COMPONENT, dataType, NULL );
 	//GL_CheckErrors("GenerateShadowCubeRGBAImage::end");
 
-	//glTexParameteri( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-	qglTexParameteri( GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
-	qglTexParameteri( GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
+	if(compare)
+	{
+		qglTexParameteri( GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
+		qglTexParameteri( GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
+	}
 	// see if we messed anything up
 
 	GL_CheckErrors();

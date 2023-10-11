@@ -52,6 +52,8 @@ public:
 	
 	void					AddColorBuffer( int format, int index );
 	void					AddDepthBuffer( int format );
+	void					AttachColorBuffer( void );
+	void					AttachDepthBuffer( void );
 	
 	void					AttachImage2D( int target, const idImage* image, int index = 0 );
 	void					AttachImageDepth( const idImage* image );

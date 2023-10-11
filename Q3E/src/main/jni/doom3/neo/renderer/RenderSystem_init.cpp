@@ -403,6 +403,21 @@ static void R_CheckPortableExtensions(void)
 	{
 		common->Printf( "X..%s not found\n", "GL_EXT_framebuffer_object" );
 	}
+
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+	{
+		glConfig.depthTextureAvailable = true;
+		glConfig.depthTextureCubeMapAvailable = true;
+		glConfig.depth24Available = true;
+	}
+	else
+#endif
+	{
+		glConfig.depthTextureAvailable = R_CheckExtension("GL_OES_depth_texture");
+		glConfig.depthTextureCubeMapAvailable = R_CheckExtension("GL_OES_depth_texture_cube_map");
+		glConfig.depth24Available = R_CheckExtension("GL_OES_depth24");
+	}
 }
 
 
@@ -2488,9 +2503,9 @@ idCVar harm_r_shadowMapBias( "harm_r_shadowMapBias", "0.001", CVAR_RENDERER | CV
 idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's bias in shadow mapping" );
 idCVar harm_r_shadowMapSampleFactor( "harm_r_shadowMapSampleFactor", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)" );
 idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum near" );
-idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
+idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapPointLight("harm_r_shadowMapPointLight", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method in OpenGLES2.0: 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+idCVar harm_r_shadowMapPointLight("harm_r_shadowMapPointLight", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method: 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value(OpenGLES2.0 only)", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 
 #include "Framebuffer.cpp"
 #include "tr_shadowmapping.cpp"

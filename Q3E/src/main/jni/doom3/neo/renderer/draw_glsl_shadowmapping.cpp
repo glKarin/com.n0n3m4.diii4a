@@ -3,19 +3,20 @@
  * maybe has some wrong.
  *
  * OpenGLES2.0
- * FrameBuffer: color buffer, depth buffer(24)
- * glClearColor: 1.0 as max depth
- * glClear: color buffer | depth buffer
- * shadow depth value: color::RED component. So because of color buffer float precision limit, worse than depth texture with OpenGLES3.0,
- * point light: 2D cubemap color texture, 2D depth texture. shadow map depth stage: clip MVP(-1 - 1) -> fragment shader (z / w + 1.0) * 0.5; interaction stage: window space MVP(0 - 1) x 6.
- * parallel light: 2D color texture, 2D depth texture. NO CASCADE like RBDOOM3-BFG. shadow map depth stage: clip MVP(-1 - 1) -> fragment shader (z / w + 1.0) * 0.5; interaction stage: window space MVP(0 - 1).
- * spot light: 2D color texture, 2D depth texture. shadow map depth stage: window space MVP(0 - 1) -> fragment shader (z / w); interaction stage: window space MVP(0 - 1).
+ * FrameBuffer: RenderBuffer: color buffer(if debug), depth buffer(24(if support) or 16)
+ * FrameBuffer: RenderTexture: RGBA texture, depth texture(24(if support) or 16)
+ * glClearColor: 1.0 as max depth(if depth texture not support)
+ * glClear: color buffer(if depth texture not support) | depth buffer
+ * shadow depth value: color::RED component(if depth texture not support, So because of color buffer float precision limit, worse than depth texture with OpenGLES3.0) or depth component
+ * point light: 2D cubemap color texture(if depth texture not support) or 2D depth texture(if depth texture support). shadow map depth stage: clip MVP(-1 - 1) -> fragment shader (z / w + 1.0) * 0.5; interaction stage: window space MVP(0 - 1) x 6.
+ * parallel light: 2D color texture(if depth texture not support) or 2D depth texture(if depth texture support). NO CASCADE like RBDOOM3-BFG. shadow map depth stage: clip MVP(-1 - 1) -> fragment shader (z / w + 1.0) * 0.5; interaction stage: window space MVP(0 - 1).
+ * spot light: 2D color texture(if depth texture not support) or 2D depth texture(if depth texture support). shadow map depth stage: window space MVP(0 - 1) -> fragment shader (z / w); interaction stage: window space MVP(0 - 1).
  *
  * OpenGLES3.0
  * FrameBuffer: depth buffer(24)
  * glClear: depth buffer
  * shadow depth value: depth texture, and setup compare mode, using texture2DShadow to sample
- * point light: 2D array depth texture, 6 layers: +X, -X, +Y, -Y, +Z, -Z, sequence same as cubemap. shadow map depth stage: clip MVP(-1 - 1); interaction stage: window space MVP(0 - 1) x 6.
+ * point light: 2D array depth texture, 6 layers: +X, -X, +Y, -Y, +Z, -Z, sequence same as cubemap. shadow map depth stage: clip MVP(-1 - 1); interaction stage: window space MVP(0 - 1) x 6 | 2D depth cubemap texture. shadow map depth stage: distance / frustum far; interaction stage: window space MVP(0 - 1) x 6..
  * parallel light: 2D array depth texture. because NO CASCADE, so only using 0 layer. shadow map depth stage: clip MVP(-1 - 1); interaction stage: window space MVP(0 - 1).
  * spot light: 2D array depth texture, only using 0 layer. shadow map depth stage: window space MVP(0 - 1); interaction stage: window space MVP(0 - 1).
  *
@@ -29,10 +30,10 @@
  *
  * Point light:
  * Most light type at scene in Most levels.
- * In OpenGLES2.0, cvar harm_r_shadowMapPointLight
- * 0. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5](slowest and bad, but render same as OpenGLES3.0)
+ * cvar harm_r_shadowMapPointLight
+ * 0. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5](slowest and bad)
  * 1. glsl macro _HARM_POINT_LIGHT_FRUSTUM_FAR: using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar](fastest and best, but depend frustum far)
- * 2. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: calculate z transform as depth value(faster and well)
+ * 2. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: calculate z transform as depth value(faster and well)( OpenGLES2.0 only)
  *
  * Parallel light:
  * Few light type. In out of room big scene, the lights most are point-light, but in lotaa/lotab/lotad of Prey are parallel light.
@@ -46,7 +47,8 @@
  * harm_r_shadowMapLod: int, -1, force using shadow map LOD(0 - 4), -1 is auto
  * harm_r_shadowMapAlpha: float, 0.5, shadow alpha(0 - 1)
  * harm_r_shadowMapSampleFactor: float, -1.0, 0 multiple, 0 is disable, < 0 is auto, > 0 multi with fixed value
- * harm_r_shadowMapPointLight: int, 1, point light render method in OpenGLES2.0, 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value
+ * harm_r_shadowMapFrustumFar: float, -2.5, shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)
+ * harm_r_shadowMapPointLight: int, 1, point light render method, 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value(OpenGLES2.0 only)
  *
  */
 
@@ -56,6 +58,7 @@
 #include "tr_local.h"
 
 #define POINT_LIGHT_FRUSTUM_FAR 7996.0f
+#define POINT_LIGHT_FRUSTUM_FAR_FACTOR 2.5 // 2
 
 enum pointLightRenderMethod_e
 {
@@ -109,24 +112,71 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 	{
         if( vLight->parallel && side >= 0 )
 		{
+			if(glConfig.depthTextureAvailable)
+			{
+				fb->AttachColorBuffer();
+				fb->AttachImageDepth(globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
+			}
+			else
+			{
             fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]);
-			fb->AttachImageDepth( globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
+				fb->AttachDepthBuffer();
+			}
 		}
         else if( vLight->pointLight && side >= 0 )
 		{
+			if(glConfig.depthTextureCubeMapAvailable)
+			{
+				fb->AttachColorBuffer();
+				fb->AttachImageDepthSide( globalImages->shadowImage_CubeDepth[vLight->shadowLOD], side);
+			}
+			else
+			{
             fb->AttachImage2DSide( globalImages->shadowImage_CubeRGBA[vLight->shadowLOD], side );
-			fb->AttachImageDepth( globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
+				fb->AttachDepthBuffer();
+			}
+		}
+        else
+		{
+			if(glConfig.depthTextureAvailable)
+			{
+				fb->AttachColorBuffer();
+				fb->AttachImageDepth(globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
 		}
         else
 		{
             fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]);
-			fb->AttachImageDepth( globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
+				fb->AttachDepthBuffer();
+			}
 		}
 	}
 
 #if 0
     fb->Check();
 #endif
+}
+
+ID_INLINE static void RB_ShadowMapping_clearBuffer(void)
+{
+    qglDepthMask(GL_TRUE); // depth buffer lock update yet
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+    {
+#ifdef SHADOW_MAPPING_DEBUG
+        qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+#else
+        qglClear( GL_DEPTH_BUFFER_BIT );
+#endif
+    }
+    else
+#endif
+    {
+        //TODO: not need clear color buffer if support depth texture in OpenGLES2.0
+        qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+    }
+    qglDepthMask(GL_FALSE);
 }
 
 ID_INLINE static void RB_ShadowMapping_setupSample(void)
@@ -246,7 +296,7 @@ ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
     else
     {
         if(harm_r_shadowMapFrustumFar.GetFloat() <= harm_r_shadowMapFrustumNear.GetFloat())
-            far = vLight->lightRadius.Length() * 2;
+            far = vLight->lightRadius.Length() * POINT_LIGHT_FRUSTUM_FAR_FACTOR;
         else
             far = harm_r_shadowMapFrustumFar.GetFloat();
     }
@@ -901,24 +951,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
 	if(clear)
 	{
-		qglDepthMask(GL_TRUE); // depth buffer lock update yet
-#ifdef GL_ES_VERSION_3_0
-		if(USING_GLES3)
-		{
-#ifdef SHADOW_MAPPING_DEBUG
-            qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-#else
-            qglClear( GL_DEPTH_BUFFER_BIT );
-#endif
-		}
-		else
-#endif
-        {
-			qglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		    qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-	    }
-		qglDepthMask(GL_FALSE);
+		RB_ShadowMapping_clearBuffer();
 	}
 
     if( drawSurfs == NULL
@@ -969,7 +1002,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO |
              /*GLS_DEPTHMASK | GLS_ALPHAMASK | GLS_GREENMASK | GLS_BLUEMASK |*/
              // GLS_REDMASK |
-                     GLS_DEPTHFUNC_LESS); // TODO: in OpenGLES2.0, only write RED color buffer and depth buffer; in OpenGLES3.0, only write depth buffer
+                     GLS_DEPTHFUNC_LESS); // TODO: in OpenGLES2.0, write RED color buffer(if depth texture not support) and depth buffer; in OpenGLES3.0, only write depth buffer
     qglDisable(GL_BLEND);
 	qglDepthMask(GL_TRUE); // depth buffer lock update yet
     //qglDepthFunc(GL_LESS);
@@ -1392,14 +1425,23 @@ ID_INLINE static void RB_ShadowMapping_bindTexture(void)
 	{
 		if( backEnd.vLight->parallel )
 		{
+			if(glConfig.depthTextureAvailable)
+				globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD]->Bind();
+			else
 			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else if( backEnd.vLight->pointLight )
 		{
+			if(glConfig.depthTextureCubeMapAvailable)
+				globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
+			else
 			globalImages->shadowImage_CubeRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else
 		{
+			if(glConfig.depthTextureAvailable)
+				globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD]->Bind();
+			else
 			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 	}

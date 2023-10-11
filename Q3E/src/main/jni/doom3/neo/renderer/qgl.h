@@ -52,6 +52,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 #endif
 
+// OpenGLES2.0 compat
 #ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 #endif
@@ -74,18 +75,30 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_DEPTH_COMPONENT24  GL_DEPTH_COMPONENT24_OES
 #endif
 
-#ifndef GL_DEPTH_COMPONENT
-#define GL_DEPTH_COMPONENT GL_DEPTH_COMPONENT24_OES
+#ifndef GL_DEPTH_COMPONENT32F
+#define GL_DEPTH_COMPONENT32F GL_DEPTH_COMPONENT24_OES
 #endif
 
-#if defined(GL_ES_VERSION_2_0)
+//#if defined(GL_ES_VERSION_2_0)
+#ifndef GL_RGB8
 #define GL_RGB8	GL_RGB
+#endif
+#ifndef GL_RGBA8
 #define GL_RGBA8	GL_RGBA
+#endif
+#ifndef GL_ALPHA8
 #define GL_ALPHA8 GL_ALPHA
+#endif
+#ifndef GL_RGB5
 #define GL_RGB5	GL_RGB5_A1 // GL_RGBA
+#endif
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83f2
+#endif
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83f3
 #endif
+//#endif
 
 #include "esUtil.h"
 

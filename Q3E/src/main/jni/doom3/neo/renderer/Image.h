@@ -210,10 +210,10 @@ class idImage
 #ifdef _SHADOW_MAPPING
 	void		GenerateShadow2DRGBAImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
     void		GenerateShadowCubeRGBAImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
-	void		GenerateShadow2DDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
-	void		GenerateShadowCubeDepthImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
+	void		GenerateShadow2DDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
+	void		GenerateShadowCubeDepthImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
 #ifdef GL_ES_VERSION_3_0
-	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat );
+	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat, int component = 24, bool compare = true );
 #endif
 #endif
 #if !defined(GL_ES_VERSION_2_0)
