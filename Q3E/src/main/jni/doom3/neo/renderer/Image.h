@@ -605,3 +605,9 @@ IMAGEPROGRAM
 void R_LoadImageProgram(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL);
 const char *R_ParsePastImageProgram(idLexer &src);
 
+#ifdef _USING_STB
+void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, int quality = 100, bool flipVertical = false, const char *basePath = NULL);
+void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, int compression = 0, bool flipVertical = false, const char *basePath = NULL);
+void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
+void R_WriteImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
+#endif

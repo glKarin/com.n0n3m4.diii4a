@@ -881,7 +881,6 @@ RB_T_Shadow
 the shadow volumes face INSIDE
 =====================
 */
-static idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Stencil shadow using Carmack-Inverse.");
 static void RB_T_Shadow(const drawSurf_t *surf)
 {
 	const srfTriangles_t	*tri;

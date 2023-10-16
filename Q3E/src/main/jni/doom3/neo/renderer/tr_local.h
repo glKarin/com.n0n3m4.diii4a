@@ -1107,6 +1107,17 @@ extern idCVar r_materialOverride;		// override all materials
 extern idCVar r_debugRenderToTexture;
 
 extern idCVar harm_r_maxFps;
+extern idCVar harm_r_shadowCarmackInverse;
+
+#ifdef _USING_STB
+extern idCVar r_screenshotFormat;
+extern idCVar r_screenshotJpgQuality;
+extern idCVar r_screenshotPngCompression;
+#endif
+
+#ifdef _RAVEN
+extern idCVar r_skipSky;
+#endif
 
 /*
 ====================================================================
@@ -1532,7 +1543,6 @@ typedef struct shaderProgram_s {
 	GLint		modelViewProjectionMatrix;
 	GLint		modelMatrix;
 	GLint		textureMatrix;
-	//k: add modelView matrix uniform for GLSL vertex shader
 	GLint		modelViewMatrix;
 	GLint		clipPlane;
 	GLint		fogMatrix;
@@ -1943,8 +1953,7 @@ idScreenRect R_CalcIntersectionScissor(const idRenderLightLocal *lightDef,
 #define HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
 
 #ifdef HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
-extern idCVar harm_r_maxAllocStackMemory; // declare in tr_trisurf.cpp
-
+extern idCVar harm_r_maxAllocStackMemory;
 	#define HARM_MAX_STACK_ALLOC_SIZE (harm_r_maxAllocStackMemory.GetInteger())
 #else
 	#define HARM_MAX_STACK_ALLOC_SIZE (1024 * 512)

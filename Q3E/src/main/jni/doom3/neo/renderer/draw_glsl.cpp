@@ -232,11 +232,11 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 #ifdef _SHADOW_MAPPING
 	if(r_shadowMapping)
 	{
-		RB_ShadowMapping_setupMVP(din);
+		RB_ShadowMappingInteraction_setupMVP(din);
 
 		// texture 6 is the shadow map
 		GL_SelectTextureNoClient(6);
-		RB_ShadowMapping_bindTexture();
+		RB_ShadowMappingInteraction_bindTexture();
 	}
 #endif
 
@@ -355,7 +355,7 @@ void RB_GLSL_DrawInteractions(void)
 	const bool shadowMapping = r_shadowMapping && r_shadows.GetBool();
 	float clearColor[4];
 	if(shadowMapping)
-        RB_ShadowMapping_getClearColor(clearColor);
+        RB_getClearColor(clearColor);
 #endif
 	//
 	// for each light, perform adding and shadowing

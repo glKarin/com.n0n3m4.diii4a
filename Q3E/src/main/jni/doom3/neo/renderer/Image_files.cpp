@@ -1363,3 +1363,143 @@ bool R_LoadCubeImages(const char *imgName, cubeFiles_t extensions, byte *pics[6]
 
 	return true;
 }
+
+#ifdef _USING_STB
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../externlibs/stb/stb_image_write.h"
+
+struct StbWriteImageFile_s {
+	const char *fileName;
+	const char *basePath;
+};
+
+static void R_ImageFlipVertical(byte *data, int width, int height, int comp)
+{
+	int		i;
+	byte		*line1, *line2;
+	byte *swapBuffer;
+	int lineSize = width * comp;
+
+	swapBuffer = (byte *)malloc(width * comp);
+    for (i = 0; i < height / 2; ++i) {
+        line1 = &data[i * lineSize];
+        line2 = &data[(height - i - 1) * lineSize];
+        memcpy(swapBuffer, line1, lineSize);
+        memcpy(line1, line2, lineSize);
+        memcpy(line2, swapBuffer, lineSize);
+    }
+	free(swapBuffer);
+}
+
+#ifdef _HARM_IMAGE_RGBA_TO_RGB
+static void R_ImageRGBA8888ToRGB888(const byte *data, int width, int height, byte *to)
+{
+	int		i, j;
+	const byte		*temp;
+	byte *target;
+
+	for (i = 0 ; i < width ; i++) {
+		for (j = 0 ; j < height ; j++) {
+			temp = data + j * 4 * width + i * 4;
+			target = to + j * 3 * width + i * 3;
+			memcpy(target, temp, 3);
+		}
+	}
+}
+#endif
+
+static void R_StbWriteImageFile(void *context, void *data, int size)
+{
+	const StbWriteImageFile_s *f = (const StbWriteImageFile_s *)context;
+	if(f->basePath)
+		fileSystem->WriteFile(f->fileName, data, size, f->basePath);
+	else
+		fileSystem->WriteFile(f->fileName, data, size);
+}
+
+void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, int quality, bool flipVertical, const char *basePath)
+{
+	StbWriteImageFile_s context = {
+			filename, basePath
+	};
+	stbi_write_png_compression_level = idMath::ClampInt(0, 9, quality);
+	byte *ndata = NULL;
+	if(flipVertical)
+	{
+		ndata = (byte *) malloc(width * height * comp);
+		memcpy(ndata, data, width * height * comp);
+		R_ImageFlipVertical(ndata, width, height, comp);
+		data = ndata;
+	}
+	int r = stbi_write_png_to_func(R_StbWriteImageFile, (void *)&context, width, height, comp, data, width * comp);
+	free(ndata);
+	if(!r)
+		common->Warning("R_WritePNG fail: %d", r);
+}
+
+void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, int compression, bool flipVertical, const char *basePath)
+{
+	StbWriteImageFile_s context = {
+			filename, basePath
+	};
+	byte *ndata = NULL;
+	if(flipVertical)
+	{
+		ndata = (byte *) malloc(width * height * comp);
+		memcpy(ndata, data, width * height * comp);
+		R_ImageFlipVertical(ndata, width, height, comp);
+		data = ndata;
+	}
+	int r = stbi_write_jpg_to_func(R_StbWriteImageFile, (void *)&context, width, height, comp, data, idMath::ClampInt(1, 100, compression));
+	free(ndata);
+	if(!r)
+		common->Warning("R_WriteJPG fail: %d", r);
+}
+
+void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
+{
+	StbWriteImageFile_s context = {
+			filename, basePath
+	};
+	byte *ndata = NULL;
+	if(flipVertical)
+	{
+		ndata = (byte *) malloc(width * height * comp);
+		memcpy(ndata, data, width * height * comp);
+		R_ImageFlipVertical(ndata, width, height, comp);
+		data = ndata;
+	}
+	int r = stbi_write_bmp_to_func(R_StbWriteImageFile, (void *)&context, width, height, comp, data);
+	free(ndata);
+	if(!r)
+		common->Warning("R_WriteBMP fail: %d", r);
+}
+
+void R_WriteImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
+{
+	idStr fn(filename);
+	switch(r_screenshotFormat.GetInteger())
+	{
+		case 1: {// bmp
+			fn.SetFileExtension("bmp");
+			R_WriteBMP(fn.c_str(), data, width, height, comp, flipVertical,  basePath);
+		}
+			break;
+		case 2: {// png
+			fn.SetFileExtension("png");
+			R_WritePNG(fn.c_str(), data, width, height, comp, flipVertical, idMath::ClampInt(0, 9, r_screenshotPngCompression.GetInteger()), basePath);
+		}
+			break;
+		case 3: {// jpg
+			fn.SetFileExtension("jpg");
+			R_WriteJPG(fn.c_str(), data, width, height, comp, flipVertical, idMath::ClampInt(1, 100, r_screenshotJpgQuality.GetInteger()), basePath);
+		}
+			break;
+		case 0: // tga
+		default:
+			fn.SetFileExtension("tga");
+			R_WriteTGA(fn.c_str(), data, width, height, flipVertical); //TODO: 4 comp
+			break;
+	}
+}
+#endif

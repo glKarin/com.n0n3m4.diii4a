@@ -31,9 +31,9 @@
  * Point light:
  * Most light type at scene in Most levels.
  * cvar harm_r_shadowMapPointLight
- * 0. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5](slowest and bad)
- * 1. glsl macro _HARM_POINT_LIGHT_FRUSTUM_FAR: using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar](fastest and best, but depend frustum far)
- * 2. glsl macro _HARM_POINT_LIGHT_Z_AS_DEPTH: calculate z transform as depth value(faster and well)( OpenGLES2.0 only)
+ * 0. glsl macro _POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5](slowest and bad)
+ * 1. glsl macro _POINT_LIGHT_USING_DISTANCE: using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar](fastest and best, but depend frustum far)
+ * 2. glsl macro _POINT_LIGHT_Z_AS_DEPTH: calculate z transform as depth value(faster and well)( OpenGLES2.0 only)
  *
  * Parallel light:
  * Few light type. In out of room big scene, the lights most are point-light, but in lotaa/lotab/lotad of Prey are parallel light.
@@ -60,12 +60,10 @@
 #define POINT_LIGHT_FRUSTUM_FAR 7996.0f
 #define POINT_LIGHT_FRUSTUM_FAR_FACTOR 2.5 // 2
 
-enum pointLightRenderMethod_e
-{
-    POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH = 0,
-    POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR = 1,
-    POINT_LIGHT_RENDER_METHOD_EMULATE_Z = 2,
-};
+#define POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH 0
+#define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR 1
+#define POINT_LIGHT_RENDER_METHOD_EMULATE_Z 2
+#define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH 2
 
 static bool r_shadowMapping = false;
 static int r_shadowMapPointLight = 0;
@@ -83,6 +81,7 @@ ID_INLINE void RB_SetMVP( const idRenderMatrix& mvp )
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mvp.m);
 }
 
+// Attach framebuffer render texture or buffer in shadow map pass
 ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const viewLight_t *vLight, int side)
 {
 #ifdef GL_ES_VERSION_3_0
@@ -97,7 +96,7 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 		}
         else if( vLight->pointLight && side >= 0 )
 		{
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR)
+			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR || r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH)
 				fb->AttachImageDepthSide( globalImages->shadowImage_CubeDepth[vLight->shadowLOD], side );
 			else
 				fb->AttachImageDepthLayer( globalImages->shadowImage[vLight->shadowLOD], side );
@@ -156,6 +155,7 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 #endif
 }
 
+// Clear framebuffer buffer in shadow map pass
 ID_INLINE static void RB_ShadowMapping_clearBuffer(void)
 {
     qglDepthMask(GL_TRUE); // depth buffer lock update yet
@@ -179,6 +179,7 @@ ID_INLINE static void RB_ShadowMapping_clearBuffer(void)
     qglDepthMask(GL_FALSE);
 }
 
+// Setup shadow map sample in interaction pass
 ID_INLINE static void RB_ShadowMapping_setupSample(void)
 {
     float sampleScale = 1.0;
@@ -194,7 +195,7 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
         }
         else if( backEnd.vLight->pointLight )
         {
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR)
+			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR || r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH)
 			{
 				if(sampleFactor != 0)
 					lod = 0.5;
@@ -231,6 +232,7 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), lod * sampleScale);
 }
 
+// Setup polygon offset in shadow map pass
 ID_INLINE static void RB_ShadowMapping_polygonOffset(void)
 {
     switch( r_shadowMapOccluderFacing.GetInteger() )
@@ -252,6 +254,7 @@ ID_INLINE static void RB_ShadowMapping_polygonOffset(void)
     }
 }
 
+// Filter light type for debug in shadow map pass
 ID_INLINE static bool RB_ShadowMapping_filterLightType(void)
 {
 #define LIGHT_TYPE_MASK_PARALLEL 1
@@ -286,6 +289,7 @@ ID_INLINE static bool RB_ShadowMapping_filterLightType(void)
     return false;
 }
 
+// Get frustum far value for point light in shadow map/interaction pass
 ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
 {
     float far;
@@ -296,15 +300,14 @@ ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
     else
     {
         if(harm_r_shadowMapFrustumFar.GetFloat() <= harm_r_shadowMapFrustumNear.GetFloat())
-            far = vLight->lightRadius.Length() * POINT_LIGHT_FRUSTUM_FAR_FACTOR;
+            far = POINT_LIGHT_FRUSTUM_FAR;
         else
             far = harm_r_shadowMapFrustumFar.GetFloat();
     }
-    if(far <= 4)
-        far = POINT_LIGHT_FRUSTUM_FAR;
     return far;
 }
 
+// Choose shader by light in shadow map pass
 ID_INLINE static shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* vLight, int side)
 {
     shaderProgram_t *shadowShader;
@@ -315,10 +318,20 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* v
 #ifdef GL_ES_VERSION_3_0
         if(USING_GLES3)
 		{
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR)
-				shadowShader = &depthShader_pointLight_far;
-			else
-            shadowShader = &depthShader_pointLight;
+            switch (r_shadowMapPointLight) {
+                case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+                    shadowShader = &depthShader_pointLight;
+                    break;
+                case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
+                    shadowShader = &depthShader_pointLight_far;
+                    break;
+                case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH:
+                    shadowShader = &depthShader_pointLight_z;
+                    break;
+                default:
+                    shadowShader = &depthShader_pointLight;
+                    break;
+            }
 		}
         else
 #endif
@@ -344,6 +357,7 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* v
     return shadowShader;
 }
 
+// Choose shader by light in interaction pass
 ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const viewLight_t* vLight)
 {
     shaderProgram_t *shadowInteractionShader;
@@ -358,10 +372,20 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
 #ifdef GL_ES_VERSION_3_0
             if(USING_GLES3)
 			{
-				if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR)
-					shadowInteractionShader = &interactionShadowMappingShader_pointLight_far;
-				else
-                shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+                switch (r_shadowMapPointLight) {
+                    case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+                        shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+                        break;
+                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
+                        shadowInteractionShader = &interactionShadowMappingShader_pointLight_far;
+                        break;
+                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH:
+                        shadowInteractionShader = &interactionShadowMappingShader_pointLight_z;
+                        break;
+                    default:
+                        shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+                        break;
+                }
 			}
             else
 #endif
@@ -398,10 +422,20 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
 #ifdef GL_ES_VERSION_3_0
             if(USING_GLES3)
 			{
-				if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR)
-					shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_far;
-				else
-                shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+                switch (r_shadowMapPointLight) {
+                    case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+                        break;
+                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
+                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_far;
+                        break;
+                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH:
+                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_z;
+                        break;
+                    default:
+                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+                        break;
+                }
 			}
             else
 #endif
@@ -430,6 +464,7 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
     return shadowInteractionShader;
 }
 
+// Read framebuffer color buffer to file for debug
 void R_SaveColorBuffer(const char *name)
 {
 	Framebuffer *fb = backEnd.glState.currentFramebuffer;
@@ -461,12 +496,17 @@ void R_SaveColorBuffer(const char *name)
 	qglReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	//GL_CheckErrors("glReadPixels");
 
+#ifdef _USING_STB
+    R_WriteImage(name, data, width, height, 4, true);
+#else
 	R_WriteTGA(name, data, width, height, false);
+#endif
 	free(data);
 	//free(ddata);
 }
 
 #if 1
+// Test framebuffer color buffer to file for debug
 ID_INLINE static void RB_TestColorBuffer(const viewLight_t* vLight, int side)
 {
     if(SaveColorBuffer.GetBool())
@@ -527,7 +567,8 @@ static void R_PrintMatrix(int i, const float* arr)
 
 /*
 ================
-RB_DrawElementsWithCounters
+RB_DrawShadowElementsWithCounters_shadowMapping
+ Render shadow volume's front cap
 ================
 */
 #define SM_SIL_EDGE 1
@@ -671,7 +712,8 @@ static void RB_ResetViewportAndScissorToDefaultCamera( const viewDef_t* viewDef 
 }
 // RB end
 
-static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int side, idRenderMatrix &lightViewRenderMatrix, idRenderMatrix &lightProjectionRenderMatrix)
+// Calculate view-matrix and projection-matrix of parallel light
+ID_INLINE static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int side, idRenderMatrix &lightViewRenderMatrix, idRenderMatrix &lightProjectionRenderMatrix)
 {
     assert( side >= 0 && side < 6 );
     assert( side == 0 ); // not cascade
@@ -802,7 +844,8 @@ static void RB_CalcParallelLightMatrix(const viewLight_t* vLight, int side, idRe
 #endif
 }
 
-static void RB_CalcPointLightMatrix(const viewLight_t* vLight, int side, idRenderMatrix &lightViewRenderMatrix, idRenderMatrix &lightProjectionRenderMatrix)
+// Calculate view-matrix and projection-matrix of point light
+ID_INLINE static void RB_CalcPointLightMatrix(const viewLight_t* vLight, int side, idRenderMatrix &lightViewRenderMatrix, idRenderMatrix &lightProjectionRenderMatrix)
 {
     assert( side >= 0 && side < 6 );
 
@@ -882,7 +925,7 @@ static void RB_CalcPointLightMatrix(const viewLight_t* vLight, int side, idRende
 
 
     // set up 90 degree projection matrix
-    const float zNear = 4;
+    const float zNear = 4; // harm_r_shadowMapFrustumNear.GetFloat();
     const float	fov = r_shadowMapFrustumFOV.GetFloat();
 
     float ymax = zNear * tan( fov * idMath::PI / 360.0f );
@@ -912,8 +955,15 @@ static void RB_CalcPointLightMatrix(const viewLight_t* vLight, int side, idRende
     // rasterize right at the wraparound point
     lightProjectionMatrix[0 * 4 + 2] = 0.0f;
     lightProjectionMatrix[1 * 4 + 2] = 0.0f;
+#if 1
     lightProjectionMatrix[2 * 4 + 2] = -0.999f; // adjust value to prevent imprecision issues
     lightProjectionMatrix[3 * 4 + 2] = -2.0f * zNear;
+#else
+	float zFar = RB_GetPointLightFrustumFar(vLight);
+	float depth = zFar - zNear;
+	lightProjectionMatrix[2 * 4 + 2] =  -( zFar + zNear ) / depth;		// -0.999f; // adjust value to prevent imprecision issues
+	lightProjectionMatrix[3 * 4 + 2] = -2 * zFar * zNear / depth;	// -2.0f * zNear;
+#endif
 
     lightProjectionMatrix[0 * 4 + 3] = 0.0f;
     lightProjectionMatrix[1 * 4 + 3] = 0.0f;
@@ -923,6 +973,7 @@ static void RB_CalcPointLightMatrix(const viewLight_t* vLight, int side, idRende
     idRenderMatrix::Transpose( *( idRenderMatrix* )lightProjectionMatrix, lightProjectionRenderMatrix );
 }
 
+// Calculate view-matrix and projection-matrix of spot light
 ID_INLINE static void RB_CalcSpotLightMatrix(const viewLight_t* vLight, idRenderMatrix &lightViewRenderMatrix, idRenderMatrix &lightProjectionRenderMatrix)
 {
     lightViewRenderMatrix.Identity();
@@ -932,6 +983,7 @@ ID_INLINE static void RB_CalcSpotLightMatrix(const viewLight_t* vLight, idRender
 /*
 =====================
 RB_ShadowMapPass
+ Generate shadow map texture
 =====================
 */
 void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
@@ -1210,8 +1262,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
 /*
 =============
-RB_GLSL_CreateDrawInteractions
-
+RB_GLSL_CreateDrawInteractions_shadowMapping
+Render interaction with shadow map
 =============
 */
 void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
@@ -1322,7 +1374,8 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     GL_UseProgram(NULL);
 }
 
-ID_INLINE static void RB_ShadowMapping_setupMVP(const drawInteraction_t *din)
+// Setup view-matrix-projection-matrix uniform in interaction pass
+ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction_t *din)
 {
 	idRenderMatrix lightViewRenderMatrix;
 	idRenderMatrix lightProjectionRenderMatrix;
@@ -1399,7 +1452,8 @@ ID_INLINE static void RB_ShadowMapping_setupMVP(const drawInteraction_t *din)
 	}
 }
 
-ID_INLINE static void RB_ShadowMapping_bindTexture(void)
+// Bind shadow map texture in interaction pass
+ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
 {
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
@@ -1410,10 +1464,10 @@ ID_INLINE static void RB_ShadowMapping_bindTexture(void)
 		}
 		else if( backEnd.vLight->pointLight )
 		{
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR)
-				globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
+            if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR || r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH)
+                globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
 			else
-				globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
+                globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else
 		{
@@ -1447,7 +1501,8 @@ ID_INLINE static void RB_ShadowMapping_bindTexture(void)
 	}
 }
 
-ID_INLINE static void RB_ShadowMapping_getClearColor(float clearColor[4])
+// Get clear color in interaction pass
+ID_INLINE static void RB_getClearColor(float clearColor[4])
 {
 #if 1
 	if (r_clear.GetFloat() || idStr::Length(r_clear.GetString()) != 1 || r_lockSurfaces.GetBool() || r_singleArea.GetBool() || r_showOverDraw.GetBool()) {

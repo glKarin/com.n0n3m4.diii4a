@@ -441,21 +441,25 @@ static bool RB_GLSL_InitShaders(void)
 #ifdef _SHADOW_MAPPING
 		shaderRequired = false;
 		const GLSLShaderProp Props_shadowMapping[] = {
-				{ "depth_point_light", &depthShader_pointLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_HARM_POINT_LIGHT" },
-				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_HARM_POINT_LIGHT" },
-				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_HARM_POINT_LIGHT,BLINN_PHONG" },
+				{ "depth_point_light", &depthShader_pointLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_POINT_LIGHT" },
+				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_POINT_LIGHT" },
+				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_POINT_LIGHT,BLINN_PHONG" },
 
-				{ "depth_point_light", &depthShader_pointLight_far, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_FRUSTUM_FAR" },
-				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight_far, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_FRUSTUM_FAR" },
-				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight_far, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_HARM_POINT_LIGHT,BLINN_PHONG,_HARM_POINT_LIGHT_FRUSTUM_FAR" },
+				{ "depth_point_light", &depthShader_pointLight_far, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE" },
+				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight_far, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE" },
+				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight_far, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_POINT_LIGHT,BLINN_PHONG,_POINT_LIGHT_USING_DISTANCE" },
 
-				{ "depth_parallel", &depthShader_parallelLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth.vert", "depth.frag", "_HARM_PARALLEL_LIGHT" },
-				{ "interaction_parallel_shadow_mapping", &interactionShadowMappingShader_parallelLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", "_HARM_PARALLEL_LIGHT" },
-				{ "interaction_blinnphong_parallel_shadow_mapping", &interactionShadowMappingBlinnPhongShader_parallelLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "_HARM_PARALLEL_LIGHT,BLINN_PHONG" },
+				{ "depth_point_light", &depthShader_pointLight_z, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE,_USING_FRAG_DEPTH" },
+				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight_z, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE,_USING_FRAG_DEPTH" },
+				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight_z, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_POINT_LIGHT,BLINN_PHONG,_POINT_LIGHT_USING_DISTANCE,_USING_FRAG_DEPTH" },
 
-				{ "depth", &depthShader_spotLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth.vert", "depth.frag", "_HARM_SPOT_LIGHT" },
-				{ "interaction_shadow_mapping", &interactionShadowMappingShader_spotLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", "_HARM_SPOT_LIGHT" },
-				{ "interaction_blinnphong_shadow_mapping", &interactionShadowMappingBlinnPhongShader_spotLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "_HARM_SPOT_LIGHT,BLINN_PHONG" },
+				{ "depth_parallel", &depthShader_parallelLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth.vert", "depth.frag", "_PARALLEL_LIGHT" },
+				{ "interaction_parallel_shadow_mapping", &interactionShadowMappingShader_parallelLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", "_PARALLEL_LIGHT" },
+				{ "interaction_blinnphong_parallel_shadow_mapping", &interactionShadowMappingBlinnPhongShader_parallelLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "_PARALLEL_LIGHT,BLINN_PHONG" },
+
+				{ "depth", &depthShader_spotLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth.vert", "depth.frag", "_SPOT_LIGHT" },
+				{ "interaction_shadow_mapping", &interactionShadowMappingShader_spotLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", "_SPOT_LIGHT" },
+				{ "interaction_blinnphong_shadow_mapping", &interactionShadowMappingBlinnPhongShader_spotLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "_SPOT_LIGHT,BLINN_PHONG" },
 		};
 
 		for(int i = 0; i < sizeof(Props_shadowMapping) / sizeof(Props_shadowMapping[0]); i++)
@@ -528,28 +532,28 @@ static bool RB_GLSL_InitShaders(void)
 #else
 #define POINT_LIGHT_EXTRA_MACROS
 #endif
-		const char *USING_DEPTH_TEXTURE = glConfig.depthTextureAvailable ? ",_HARM_USING_DEPTH_TEXTURE" : "";
-		const char *USING_DEPTH_CUBEMAP_TEXTURE = glConfig.depthTextureCubeMapAvailable ? ",_HARM_USING_DEPTH_TEXTURE" : "";
+		const char *USING_DEPTH_TEXTURE = glConfig.depthTextureAvailable ? ",_USING_DEPTH_TEXTURE" : "";
+		const char *USING_DEPTH_CUBEMAP_TEXTURE = glConfig.depthTextureCubeMapAvailable ? ",_USING_DEPTH_TEXTURE" : "";
 		const idStr macros[] = {
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_Z_AS_DEPTH" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_Z_AS_DEPTH" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_Z_AS_DEPTH,BLINN_PHONG" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_Z_AS_DEPTH" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_Z_AS_DEPTH" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_Z_AS_DEPTH,BLINN_PHONG" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
 
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_FRUSTUM_FAR" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_FRUSTUM_FAR" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_FRUSTUM_FAR,BLINN_PHONG" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE,BLINN_PHONG" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
 
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_CALC_Z" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_CALC_Z" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
-			idStr("_HARM_POINT_LIGHT,_HARM_POINT_LIGHT_CALC_Z,BLINN_PHONG" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_CALC_Z" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_CALC_Z" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
+			idStr("_POINT_LIGHT,_POINT_LIGHT_CALC_Z,BLINN_PHONG" POINT_LIGHT_EXTRA_MACROS) + USING_DEPTH_CUBEMAP_TEXTURE,
 
-			idStr("_HARM_PARALLEL_LIGHT") + USING_DEPTH_TEXTURE,
-			idStr("_HARM_PARALLEL_LIGHT") + USING_DEPTH_TEXTURE,
-			idStr("_HARM_PARALLEL_LIGHT,BLINN_PHONG") + USING_DEPTH_TEXTURE,
+			idStr("_PARALLEL_LIGHT") + USING_DEPTH_TEXTURE,
+			idStr("_PARALLEL_LIGHT") + USING_DEPTH_TEXTURE,
+			idStr("_PARALLEL_LIGHT,BLINN_PHONG") + USING_DEPTH_TEXTURE,
 
-			idStr("_HARM_SPOT_LIGHT") + USING_DEPTH_TEXTURE,
-			idStr("_HARM_SPOT_LIGHT") + USING_DEPTH_TEXTURE,
-			idStr("_HARM_SPOT_LIGHT,BLINN_PHONG") + USING_DEPTH_TEXTURE,
+			idStr("_SPOT_LIGHT") + USING_DEPTH_TEXTURE,
+			idStr("_SPOT_LIGHT") + USING_DEPTH_TEXTURE,
+			idStr("_SPOT_LIGHT,BLINN_PHONG") + USING_DEPTH_TEXTURE,
 		};
 
 		shaderRequired = false;

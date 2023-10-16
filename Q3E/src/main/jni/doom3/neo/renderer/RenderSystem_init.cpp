@@ -211,6 +211,24 @@ idCVar r_materialOverride("r_materialOverride", "", CVAR_RENDERER, "overrides al
 idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVAR_INTEGER, "");
 
 idCVar harm_r_maxFps( "harm_r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
+idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Stencil shadow using Carmack-Inverse.");
+//k: temp memory allocate in stack / heap control on Android
+#ifdef __ANDROID__
+#warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
+#ifdef HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Control allocate temporary memory when load model data on Android, default value is `524288` bytes(Because stack memory is limited on Android, exam `game/le_hell` map's `models/mapobjects/hell/hellintro.lwo` in `DOOM3: The lost mission` mod). If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0 - Always heap, Negative - Always stack, Positive - Max stack memory limit).");
+#endif
+#endif
+
+#ifdef _USING_STB
+idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3>);
+idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)", 0, 100, idCmdSystem::ArgCompletion_Integer<0, 100>);
+idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)", 0, 9, idCmdSystem::ArgCompletion_Integer<0, 9>);
+#endif
+
+#ifdef _RAVEN
+idCVar r_skipSky("r_skipSky", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Dark sky");
+#endif
 
 /*
 =================
@@ -410,13 +428,20 @@ static void R_CheckPortableExtensions(void)
 		glConfig.depthTextureAvailable = true;
 		glConfig.depthTextureCubeMapAvailable = true;
 		glConfig.depth24Available = true;
+		glConfig.gl_FragDepthAvailable = true;
 	}
 	else
 #endif
 	{
-		glConfig.depthTextureAvailable = R_CheckExtension("GL_OES_depth_texture");
-		glConfig.depthTextureCubeMapAvailable = R_CheckExtension("GL_OES_depth_texture_cube_map");
+		//static idCVar harm_r_disableDepthTexture( "harm_r_disableDepthTexture", "0", CVAR_RENDERER | CVAR_INIT | CVAR_BOOL, "Disable depth texture in OpenGLES2.0" );
+		glConfig.depthTextureAvailable =
+				//harm_r_disableDepthTexture.GetBool() ? false :
+				R_CheckExtension("GL_OES_depth_texture");
+		glConfig.depthTextureCubeMapAvailable =
+				//harm_r_disableDepthTexture.GetBool() ? false :
+				R_CheckExtension("GL_OES_depth_texture_cube_map");
 		glConfig.depth24Available = R_CheckExtension("GL_OES_depth24");
+		glConfig.gl_FragDepthAvailable = R_CheckExtension("GL_EXT_frag_depth");
 	}
 }
 
@@ -1076,7 +1101,6 @@ void R_Benchmark_f(const idCmdArgs &args)
 	r_skipRenderContext.SetBool(false);
 }
 
-#ifdef GL_ES_VERSION_3_0
 void R_OpenGL_f(const idCmdArgs &args)
 {
 	if(!glConfig.isInitialized)
@@ -1085,9 +1109,11 @@ void R_OpenGL_f(const idCmdArgs &args)
 		return;
 	}
 
+#ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
 		common->Printf("OpenGLES 3.0\n");
 	else
+#endif
 		common->Printf("OpenGLES 2.0\n");
 
 	common->Printf("Renderer: %s\n", glConfig.renderer_string);
@@ -1138,12 +1164,18 @@ void R_OpenGL_f(const idCmdArgs &args)
 	common->Printf("maxRenderbufferSize: %d\n", glConfig.maxRenderbufferSize);
 	common->Printf("maxColorAttachments: %d\n", glConfig.maxColorAttachments);
 
+	common->Printf("depthTextureAvailable: %d\n", glConfig.depthTextureAvailable);
+	common->Printf("depthTextureCubeMapAvailable: %d\n", glConfig.depthTextureCubeMapAvailable);
+	common->Printf("depth24Available: %d\n", glConfig.depth24Available);
+	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
+
+#ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
 		common->Printf("OpenGLES 3.0\n");
 	else
+#endif
 		common->Printf("OpenGLES 2.0\n");
 }
-#endif
 
 #ifdef _MULTITHREAD
 static void R_Multithreading_f(const idCmdArgs &args)
@@ -1321,6 +1353,34 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 		r_jitter.SetBool(false);
 	}
 
+#ifdef _USING_STB
+	switch(r_screenshotFormat.GetInteger())
+	{
+		case 1: {// bmp
+			idStr fn(fileName);
+			fn.SetFileExtension("bmp");
+			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+			R_WriteBMP(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
+		}
+			break;
+		case 2: {// png
+			idStr fn(fileName);
+			fn.SetFileExtension("png");
+			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+			R_WritePNG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, r_screenshotPngCompression.GetInteger()), basePath);
+		}
+			break;
+		case 3: {// jpg
+			idStr fn(fileName);
+			fn.SetFileExtension("jpg");
+			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+			R_WriteJPG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, idMath::ClampInt(1, 100, r_screenshotJpgQuality.GetInteger())), basePath);
+		}
+			break;
+		case 0: // tga
+		default:
+#endif
+
 	// fill in the header (this is vertically flipped, which glReadPixels emits)
 	buffer[2] = 2;		// uncompressed type
 	buffer[12] = width & 255;
@@ -1344,6 +1404,10 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 	} else {
 		fileSystem->WriteFile(fileName, buffer, c);
 	}
+#ifdef _USING_STB
+			break;
+	}
+#endif
 
 	R_StaticFree(buffer);
 
@@ -2160,9 +2224,7 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("listRenderLightDefs", R_ListRenderLightDefs_f, CMD_FL_RENDERER, "lists the light defs");
 	cmdSystem->AddCommand("listModes", R_ListModes_f, CMD_FL_RENDERER, "lists all video modes");
 	cmdSystem->AddCommand("reloadSurface", R_ReloadSurface_f, CMD_FL_RENDERER, "reloads the decl and images for selected surface");
-#ifdef GL_ES_VERSION_3_0
-	cmdSystem->AddCommand("glVersion", R_OpenGL_f, CMD_FL_RENDERER, "print OpenGL version");
-#endif
+	cmdSystem->AddCommand("glConfig", R_OpenGL_f, CMD_FL_RENDERER, "print OpenGL config");
 #ifdef _MULTITHREAD
 	cmdSystem->AddCommand("r_multithread", R_Multithreading_f, CMD_FL_SYSTEM, "print multi-threading state");
 #endif
@@ -2503,9 +2565,9 @@ idCVar harm_r_shadowMapBias( "harm_r_shadowMapBias", "0.001", CVAR_RENDERER | CV
 idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's bias in shadow mapping" );
 idCVar harm_r_shadowMapSampleFactor( "harm_r_shadowMapSampleFactor", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)" );
 idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum near" );
-idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
+idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2.5 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapPointLight("harm_r_shadowMapPointLight", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method: 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value(OpenGLES2.0 only)", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+idCVar harm_r_shadowMapPointLight("harm_r_shadowMapPointLight", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method: 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value(OpenGLES2.0 only); like 1, but using gl_FragDepth in fragment shader(OpenGLES3.0 only)", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 
 #include "Framebuffer.cpp"
 #include "tr_shadowmapping.cpp"
