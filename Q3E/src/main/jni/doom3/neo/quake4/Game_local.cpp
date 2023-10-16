@@ -484,19 +484,11 @@ void idGameLocal::Init( void ) {
 	// register game specific decl folders
 // RAVEN BEGIN
 #ifndef RV_SINGLE_DECL_FILE
-#if 0 //k
 	declManager->RegisterDeclFolderWrapper( "def",			".def",			DECL_ENTITYDEF );
-#else
-	declManager->RegisterDeclFolder( "def",			".def",			DECL_ENTITYDEF );
-#endif
 // bdube: not used in quake 4
 //	declManager->RegisterDeclFolder( "fx",					".fx",			DECL_FX );
 //	declManager->RegisterDeclFolder( "particles",			".prt",			DECL_PARTICLE );
-#if 0 //k
 	declManager->RegisterDeclFolderWrapper( "af",			".af",			DECL_AF );
-#else
-	declManager->RegisterDeclFolder( "af",			".af",			DECL_AF );
-#endif
 //	declManager->RegisterDeclFolderWrapper( "newpdas",		".pda",			DECL_PDA );
 #else
 	if(!cvarSystem->GetCVarBool("com_SingleDeclFile"))
