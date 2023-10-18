@@ -461,6 +461,32 @@ void idSoundEmitterLocal::OverrideParms(const soundShaderParms_t *base,
 		out->soundClass = base->soundClass;
 	}
 
+#ifdef _HUMANHEAD
+	if (over->subIndex) {
+		out->subIndex = over->subIndex;
+	} else {
+		out->subIndex = base->subIndex;
+	}
+
+	if (over->profanityIndex) {
+		out->profanityIndex = over->profanityIndex;
+	} else {
+		out->profanityIndex = base->profanityIndex;
+	}
+
+	if (over->profanityDelay) {
+		out->profanityDelay = over->profanityDelay;
+	} else {
+		out->profanityDelay = base->profanityDelay;
+	}
+
+	if (over->profanityDuration) {
+		out->profanityDuration = over->profanityDuration;
+	} else {
+		out->profanityDuration = base->profanityDuration;
+	}
+#endif
+
 	out->soundShaderFlags = base->soundShaderFlags | over->soundShaderFlags;
 }
 

@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "snd_local.h"
+#include "sound.h"
 
 #ifdef ID_DEDICATED
 idCVar idSoundSystemLocal::s_noSound("s_noSound", "1", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "");
@@ -310,6 +311,51 @@ void SoundSystemRestart_f(const idCmdArgs &args)
 	soundSystem->SetMute(false);
 }
 
+#ifdef _HUMANHEAD
+
+/*
+===============
+ListSubtitles_f
+
+Optional parameter to only list sounds containing that string
+===============
+*/
+void ListSubtitles_f(const idCmdArgs &args)
+{
+	int i, j;
+	const char	*snd = args.Argv(1);
+
+	if (!soundSystemLocal.soundSubtitleList.Num()) {
+		common->Printf("No subtitle.\n");
+		return;
+	}
+
+	int	totalSounds = 0;
+	int totalSubtitles = 0;
+
+	for (i = 0; i < soundSystemLocal.soundSubtitleList.Num(); i++) {
+		const soundSubtitleList_s &list = soundSystemLocal.soundSubtitleList[i];
+
+		if(snd && snd[0])
+		{
+			if(idStr::Icmp(snd, list.soundName))
+				continue;
+		}
+		common->Printf("%5d: %s\n", i + 1, list.soundName.c_str());
+
+		for (j = 0; j < list.subList.Num(); j++) {
+			const soundSubtitle_s &sub = list.subList[j];
+			common->Printf("\t%3d: %3d %4.3f %s\n", j + 1, sub.subChannel, sub.subTime, sub.subText.c_str());
+			totalSubtitles++;
+		}
+		totalSounds++;
+	}
+
+	common->Printf("%5d total sounds with subtitle\n", totalSounds);
+	common->Printf("%5d total subtitles\n", totalSubtitles);
+}
+#endif
+
 /*
 ===============
 idSoundSystemLocal::Init
@@ -449,6 +495,13 @@ void idSoundSystemLocal::Init()
 	cmdSystem->AddCommand("reloadSounds", SoundReloadSounds_f, CMD_FL_SOUND|CMD_FL_CHEAT, "reloads all sounds");
 	cmdSystem->AddCommand("testSound", TestSound_f, CMD_FL_SOUND | CMD_FL_CHEAT, "tests a sound", idCmdSystem::ArgCompletion_SoundName);
 	cmdSystem->AddCommand("s_restart", SoundSystemRestart_f, CMD_FL_SOUND, "restarts the sound system");
+
+#ifdef _HUMANHEAD
+	sb_subtitleQueue.Clear();
+    sf_subtitleQueue.Clear();
+
+	cmdSystem->AddCommand("listSubtitles", ListSubtitles_f, CMD_FL_SOUND, "lists all subtitles of sounds");
+#endif
 
 	common->Printf("sound system initialized.\n");
 	common->Printf("--------------------------------------\n");
@@ -665,6 +718,9 @@ int idSoundSystemLocal::AsyncUpdate(int inTime)
 	if (!isInitialized || shutdown || !snd_audio_hw) {
 		return 0;
 	}
+#ifdef _HUMANHEAD
+	SB_HideSubtitle();
+#endif
 
 	ulong dwCurrentWritePos;
 	dword dwCurrentBlock;
@@ -781,6 +837,9 @@ int idSoundSystemLocal::AsyncUpdate(int inTime)
 	CurrentSoundTime = newSoundTime;
 
 	soundStats.timeinprocess = Sys_Milliseconds() - inTime;
+#ifdef _HUMANHEAD
+	SB_SetupSubtitle();
+#endif
 
 	return soundStats.timeinprocess;
 }
@@ -798,6 +857,9 @@ int idSoundSystemLocal::AsyncUpdateWrite(int inTime)
 	if (!isInitialized || shutdown || !snd_audio_hw) {
 		return 0;
 	}
+#ifdef _HUMANHEAD
+	SB_HideSubtitle();
+#endif
 
 	if (!useOpenAL) {
 		snd_audio_hw->Flush();
@@ -863,6 +925,9 @@ int idSoundSystemLocal::AsyncUpdateWrite(int inTime)
 	// only move to the next block if the write was successful
 	nextWriteBlock = dwCurrentBlock + 1;
 	CurrentSoundTime = sampleTime;
+#ifdef _HUMANHEAD
+	SB_SetupSubtitle();
+#endif
 
 	return Sys_Milliseconds() - inTime;
 }
@@ -1589,6 +1654,11 @@ int idSoundSystemLocal::IsEAXAvailable(void)
 }
 
 #ifdef _RAVEN
+/*
+===============
+idSoundSystemLocal::GetSoundWorldFromId
+===============
+*/
 idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
 	switch (worldId)
 	{
@@ -1601,5 +1671,392 @@ idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
 	default:
 		return session->sw;
 	}
+}
+#endif
+
+#ifdef _HUMANHEAD
+#if 0
+#define SUBTITLE_DEBUG(fmt, args...) common->Printf(fmt, ##args)
+#else
+#define SUBTITLE_DEBUG(fmt, args...)
+#endif
+
+//HUMANHEAD rww
+/*
+===============
+idSoundSystemLocal::SetSubtitleData
+ Get soundSubtitleList_s index by shader name. Create new if not exists.
+===============
+*/
+int idSoundSystemLocal::GetSubtitleIndex(const char *soundName)
+{
+	int i;
+
+	for(i = 0; i < soundSubtitleList.Num(); i++)
+	{
+		if(!idStr::Icmp(soundName, soundSubtitleList[i].soundName))
+		{
+			SUBTITLE_DEBUG("subtitle %s exists -> %d\n", soundName, i);
+			return i;
+		}
+	}
+	soundSubtitleList_s l;
+	l.soundName = soundName;
+	i = soundSubtitleList.Append(l);
+	SUBTITLE_DEBUG("subtitle %s not exists, create -> %d\n", soundName, i);
+	return i;
+}
+
+/*
+===============
+idSoundSystemLocal::SetSubtitleData
+ Set a soundSub_t data.
+===============
+*/
+void idSoundSystemLocal::SetSubtitleData(int subIndex, int subNum, const char *subText, float subTime, int subChannel)
+{
+	int i;
+	soundSubtitleList_s *list;
+	soundSub_t *sub;
+
+	list = GetSubtitleList(subIndex);
+	assert(NULL != list);
+
+	for(i = 0; i < list->subList.Num(); i++)
+	{
+		sub = &list->subList[i];
+		if(sub->subChannel == subNum)
+		{
+			sub->subTime = subTime;
+			sub->subText = common->GetLanguageDict()->GetString(subText);
+			return;
+		}
+	}
+
+	soundSubtitle_s st;
+	st.subText = common->GetLanguageDict()->GetString(subText);
+	st.subTime = subTime;
+	st.subChannel = subChannel;
+	list->subList.Append(st);
+	SUBTITLE_DEBUG("subtitle data added -> %d, %s, %f\n", subChannel, st.subText.c_str(), subTime);
+}
+
+/*
+===============
+idSoundSystemLocal::GetSubtitleList
+ Get a soundSub_t by index and subChannel.
+===============
+*/
+soundSub_t * idSoundSystemLocal::GetSubtitle(int subIndex, int subNum)
+{
+	int i;
+	soundSub_t *sub;
+	soundSubtitleList_t *list;
+
+	list = GetSubtitleList(subIndex);
+	if(!list)
+		return NULL;
+
+	for(i = 0; i < list->subList.Num(); i++)
+	{
+		sub = &list->subList[i];
+		if(sub->subChannel == subNum)
+			return sub;
+	}
+	return NULL;
+}
+
+/*
+===============
+idSoundSystemLocal::GetSubtitleList
+ Get a soundSubtitleList_s by index.
+===============
+*/
+soundSubtitleList_t * idSoundSystemLocal::GetSubtitleList(int subIndex)
+{
+	if(subIndex < 0 || subIndex >= soundSubtitleList.Num())
+		return NULL;
+
+	return &soundSubtitleList[subIndex];
+}
+//HUMANHEAD END
+
+#include "../framework/Session_local.h"
+extern idCVar g_subtitles;
+
+/*
+===============
+idSoundSystemLocal::SB_SetupSubtitle
+ backend: Setup subtitle queue.
+===============
+*/
+void idSoundSystemLocal::SB_SetupSubtitle(void)
+{
+	int i, j;
+	idSoundEmitterLocal *sound;
+
+	if(!g_subtitles.GetBool() || !currentSoundWorld)
+		return;
+
+	if (idSoundSystemLocal::s_singleEmitter.GetInteger() > 0 && idSoundSystemLocal::s_singleEmitter.GetInteger() < currentSoundWorld->emitters.Num()) {
+		sound = currentSoundWorld->emitters[idSoundSystemLocal::s_singleEmitter.GetInteger()];
+
+		if (sound && sound->playing) {
+			// run through all the channels
+			for (j = 0; j < SOUND_MAX_CHANNELS ; j++) {
+				idSoundChannel	*chan = &sound->channels[j];
+
+				// see if we have a sound triggered on this channel
+				if (!chan->triggerState) {
+					continue;
+				}
+
+                SB_AppendSubtitle(chan);
+			}
+		}
+	}
+	else
+	{
+		for (i = 1; i < currentSoundWorld->emitters.Num(); i++) {
+			sound = currentSoundWorld->emitters[i];
+
+			if (!sound) {
+				continue;
+			}
+
+			// if no channels are active, do nothing
+			if (!sound->playing) {
+				continue;
+			}
+
+			// run through all the channels
+			for (j = 0; j < SOUND_MAX_CHANNELS ; j++) {
+				idSoundChannel	*chan = &sound->channels[j];
+
+				// see if we have a sound triggered on this channel
+				if (!chan->triggerState) {
+					continue;
+				}
+
+                SB_AppendSubtitle(chan);
+			}
+		}
+	}
+}
+
+/*
+===============
+idSoundSystemLocal::SB_ContainsSubtitle
+ backend: Check subtitle exists in backend subtitle queue.
+===============
+*/
+bool idSoundSystemLocal::SB_ContainsSubtitle(const soundSubtitle_s *sub) const
+{
+    int i;
+
+    for(i = 0; i < sb_subtitleQueue.Num(); i++)
+    {
+        if(sb_subtitleQueue[i].subtitle == sub)
+            return true;
+    }
+    return false;
+}
+
+/*
+===============
+idSoundSystemLocal::SB_AppendSubtitle
+ backend: Append subtitle into backend subtitle queue.
+===============
+*/
+bool idSoundSystemLocal::SB_AppendSubtitle(const idSoundChannel *chan)
+{
+	const soundSub_t *sub, *s, *next;
+	const soundSubtitleList_t *list;
+	int i;
+	float timePlayed;
+	int startTime;
+    int curTime;
+	int timeEnd;
+	int length;
+	float addTime;
+	float total;
+
+	if(!chan || !chan->soundShader || chan->parms.subIndex < 0 || chan->trigger44kHzTime < 0/* loop? */)
+		return false;
+
+	list = GetSubtitleList(chan->parms.subIndex);
+	if(!list)
+		return false;
+
+	sub = NULL;
+	startTime = SamplesToMilliseconds(chan->trigger44kHzTime);
+    curTime = SamplesToMilliseconds(GetCurrent44kHzTime());
+	timePlayed = (float)(curTime - startTime) / 1000.0f;
+	addTime = 0.0f;
+	length = chan->leadinSample->LengthIn44kHzSamples();
+	if (chan->leadinSample->objectInfo.nChannels == 2) {
+		length /= 2;	// stereo samples
+	}
+	total = length / (float)PRIMARYFREQ;
+	for(i = 0; i < list->subList.Num(); i++)
+	{
+		s = &list->subList[i];
+		if(i < list->subList.Num() - 1)
+			next = &list->subList[i + 1];
+		else
+			next = NULL;
+		if(s->subTime < timePlayed)
+		{
+			if(next)
+			{
+				if(next->subTime < timePlayed)
+					continue;
+			}
+			else
+			{
+				if(total < timePlayed)
+					return false;
+			}
+		}
+		if(s->subTime > timePlayed)
+			return false;
+		if(SB_ContainsSubtitle(s))
+			continue; // return false;
+		sub = s;
+		if(next)
+		{
+            timeEnd = startTime + next->subTime * 1000.0f;
+		}
+		else
+		{
+			length = total * 1000;
+            timeEnd = startTime + length;
+		}
+		break;
+	}
+
+	if(!sub)
+		return false;
+
+    sb_soundSubtitle_t item;
+    item.subIndex = chan->parms.subIndex;
+    item.subNum = sub->subChannel;
+    item.endTime = timeEnd;
+	item.subtitle = sub;
+	SUBTITLE_DEBUG("backend append: %p %s   %d-%d   %d\n", sub, sub->subText.c_str(), item.subIndex, item.subNum, item.endTime);
+	SFB_HandleSubtitle(true, &item);
+	return true;
+}
+
+/*
+===============
+idSoundSystemLocal::SFB_HandleSubtitle
+ frontend/backend: All modify operations of backend and frontend subtitle queue with lock.
+===============
+*/
+bool idSoundSystemLocal::SFB_HandleSubtitle(bool fromBackEnd, const void *data)
+{
+	bool changed = false;
+
+	Sys_EnterCriticalSection(CRITICAL_SECTION_THREE);
+	{
+		if(fromBackEnd) // backend
+		{
+            if(data) // add
+            {
+				const sb_soundSubtitle_t *inSub = (const sb_soundSubtitle_t *)data;
+                sb_subtitleQueue.Append(*inSub);
+                SUBTITLE_DEBUG("backend swap: %p %d %s\n", inSub->subtitle, changed, inSub->subtitle->subText.c_str());
+                changed = true;
+            }
+            else // remove expired
+            {
+                if(this->sb_subtitleQueue.Num())
+                {
+                    int curTime = SamplesToMilliseconds(GetCurrent44kHzTime());
+                    for(int i = 0; i < sb_subtitleQueue.Num();)
+                    {
+                        if(curTime > sb_subtitleQueue[i].endTime)
+                        {
+                            sb_subtitleQueue.RemoveIndex(i);
+							changed = true;
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                }
+            }
+		}
+		else // frontend: copy backend to frontend
+		{
+            idList<const soundSubtitle_s *> frontend;
+            for(int i = 0; i < sb_subtitleQueue.Num(); i++)
+            {
+                const soundSubtitle_s *sub = sb_subtitleQueue[i].subtitle;
+                frontend.Append(sub);
+                if(!changed && sf_subtitleQueue.FindIndex(sub) < 0)
+                    changed = true;
+            }
+            if(!changed)
+                changed = frontend.Num() != sf_subtitleQueue.Num();
+			if(changed)
+			{
+                SUBTITLE_DEBUG("frontend swap: %d -> %d\n", sf_subtitleQueue.Num(), frontend.Num());
+				sf_subtitleQueue = frontend;
+			}
+		}
+	}
+	Sys_LeaveCriticalSection(CRITICAL_SECTION_THREE);
+	return changed;
+}
+
+/*
+===============
+idSoundSystemLocal::SF_ShowSubtitle
+ frontend: Show subtitle to GUI from frontend subtitle queue.
+===============
+*/
+void idSoundSystemLocal::SF_ShowSubtitle(void)
+{
+	bool changed;
+    int i;
+
+	changed = SFB_HandleSubtitle(false);
+	if(!changed)
+		return;
+
+	if(!this->sf_subtitleQueue.Num())
+	{
+		sessLocal.HideSubtitle();
+		SUBTITLE_DEBUG("frontend hide\n");
+		return;
+	}
+
+	if(!g_subtitles.GetBool())
+		return;
+
+    idStrList text;
+	idStr debugText;
+    for(i = 0; i < sf_subtitleQueue.Num(); i++)
+    {
+        text.Append(sf_subtitleQueue[i]->subText);
+		debugText.Append(sf_subtitleQueue[i]->subText);
+		debugText.Append('\n');
+    }
+	sessLocal.ShowSubtitle(text);
+	SUBTITLE_DEBUG("frontend show: %d %s\n", sf_subtitleQueue.Num(), debugText.c_str());
+}
+
+/*
+===============
+idSoundSystemLocal::SB_HideSubtitle
+ backend: Remove expired subtitle from backend subtitle queue, and update GUI when call SF_ShowSubtitle in main thread.
+===============
+*/
+void idSoundSystemLocal::SB_HideSubtitle(void)
+{
+	SFB_HandleSubtitle(true, NULL);
 }
 #endif

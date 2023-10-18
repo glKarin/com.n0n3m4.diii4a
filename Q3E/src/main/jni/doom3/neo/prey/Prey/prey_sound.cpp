@@ -72,7 +72,7 @@ bool hhSound::StartSoundShader( const idSoundShader *shader, const s_channelType
 			idPlayer *player = gameLocal.GetLocalPlayer();
 			if (
 #ifdef _K_CLANG
-					(length && *length > 0)
+					(length/* && *length > 0*/)
 #else
 					length > 0
 #endif

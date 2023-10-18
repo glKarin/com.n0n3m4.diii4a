@@ -872,6 +872,39 @@ class idSoundSystemLocal : public idSoundSystem
 	virtual void			EndCinematic() { }
 #endif
 
+#ifdef _HUMANHEAD
+	//HUMANHEAD rww
+	virtual int					GetSubtitleIndex(const char *soundName);
+	virtual void				SetSubtitleData(int subIndex, int subNum, const char *subText, float subTime, int subChannel);
+	virtual soundSub_t			*GetSubtitle(int subIndex, int subNum);
+	virtual soundSubtitleList_t *GetSubtitleList(int subIndex);
+	//HUMANHEAD END
+
+	//karin: simple show/hide subtitles: FrontEnd: handle GUI in main thread; BackEnd: update sound in async thread(If com_asyncSound != 0)
+	private:
+    typedef struct sb_soundSubtitle_s
+    {
+		int subIndex; // subtitle sound index in idList<soundSubtitleList_s>
+		int subNum; // subtitle text index - 1 in soundSubtitleList_s::subList
+        const soundSubtitle_s *subtitle; // subtitle data soundSub_t
+		int endTime; // end time(absolute value in ms), subtitle end if idSoundSystemLocal::GetCurrent44kHzTime() greater than this value
+    } sb_soundSubtitle_t; // backend
+
+	bool SB_ContainsSubtitle(const soundSubtitle_s *subtitle) const; // backend
+    bool SB_AppendSubtitle(const idSoundChannel *chan); // backend
+    void SB_SetupSubtitle(void); // backend, call in idSoundSystemLocal::AsyncUpdate/idSoundSystemLocal::AsyncUpdateWrite
+	void SB_HideSubtitle(void); // backend, call in idSoundSystemLocal::AsyncUpdate/idSoundSystemLocal::AsyncUpdateWrite
+
+	bool SFB_HandleSubtitle(bool fromBackEnd, const void *data = NULL); // frontend/backend
+
+	idList<sb_soundSubtitle_t> sb_subtitleQueue; // backend, next or current show, will hide subtitle if NULL
+	idList<const soundSubtitle_s *> sf_subtitleQueue; // frontend, show in player HUD GUI, hide subtitle if NULL
+
+	public:
+	idList<soundSubtitleList_s> soundSubtitleList; // static
+	void SF_ShowSubtitle(void); // frontend, call in idSessionLocal::Frame
+#endif
+
 	//-------------------------
 
 	int						GetCurrent44kHzTime(void) const;

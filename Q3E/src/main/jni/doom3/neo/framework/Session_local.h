@@ -163,9 +163,13 @@ class idSessionLocal : public idSession
 
 		const char			*GetAuthMsg(void);
 #ifdef _HUMANHEAD
-	virtual bool ShouldAppendLevel(void) const;
-	virtual const char * GetDeathwalkMapName(void) const;
-	const char * GetDeathwalkMapName(const char *mapName) const;
+		virtual bool ShouldAppendLevel(void) const;
+		virtual const char * GetDeathwalkMapName(void) const;
+		const char * GetDeathwalkMapName(const char *mapName) const;
+		void ShowSubtitle(const idStrList &strList) const;
+		void HideSubtitle(void) const;
+
+		idUserInterface 	*guiSubtitles;
 #endif
 #ifdef _MULTITHREAD
 		virtual void UpdateScreen(byte *data, bool outOfSequence);

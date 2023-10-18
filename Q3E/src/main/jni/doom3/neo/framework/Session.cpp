@@ -99,6 +99,8 @@ idCVar	idSessionLocal::com_guid("com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVA
 
 #ifdef _HUMANHEAD //k: play level music when map loading
 static idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "play music during level loads");
+
+#include "../sound/snd_local.h"
 #endif
 
 idSessionLocal		sessLocal;
@@ -459,6 +461,9 @@ idSessionLocal::idSessionLocal()
 
 	menuSoundWorld = NULL;
 
+#ifdef _HUMANHEAD
+	guiSubtitles = NULL;
+#endif
 	Clear();
 }
 
@@ -2116,9 +2121,6 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	// restart entity sound playback
 	soundSystem->SetMute(false);
 
-#ifdef _RAVENxxx //karin: TODO: why has noise sound when enable effects???
-	sw->StopAllSounds();
-#endif
 	// we are valid for game draws now
 	mapSpawned = true;
 	Sys_ClearEvents();
@@ -2892,6 +2894,9 @@ void idSessionLocal::Draw()
 		// draw the menus full screen
 		if (guiActive == guiTakeNotes && !com_skipGameDraw.GetBool()) {
 			game->Draw(GetLocalClientNum());
+#ifdef _HUMANHEAD
+			guiSubtitles->Redraw(com_frameTime);
+#endif
 		}
 
 		guiActive->Redraw(com_frameTime);
@@ -2906,6 +2911,9 @@ void idSessionLocal::Draw()
 			// draw the game view
 			int	start = Sys_Milliseconds();
 			gameDraw = game->Draw(GetLocalClientNum());
+#ifdef _HUMANHEAD
+			guiSubtitles->Redraw(com_frameTime);
+#endif
 			int end = Sys_Milliseconds();
 			time_gameDraw += (end - start);	// note time used for com_speeds
 		}
@@ -3267,6 +3275,9 @@ void idSessionLocal::Frame()
 			break;
 		}
 	}
+#ifdef _HUMANHEAD
+	soundSystemLocal.SF_ShowSubtitle();
+#endif
 }
 
 /*
@@ -3514,6 +3525,9 @@ void idSessionLocal::Init()
 	guiRestartMenu = uiManager->FindGui("guis/restart.gui", true, false, true);
 #if !defined(_HUMANHEAD)
 	guiGameOver = uiManager->FindGui("guis/gameover.gui", true, false, true);
+#endif
+#ifdef _HUMANHEAD
+	guiSubtitles = uiManager->FindGui("guis/subtitles.gui", true, false, true);
 #endif
 	guiMsg = uiManager->FindGui("guis/msg.gui", true, false, true);
 	guiTakeNotes = uiManager->FindGui("guis/takeNotes.gui", true, false, true);
@@ -4005,6 +4019,42 @@ const char * idSessionLocal::GetDeathwalkMapName(const char *mapName) const
 	if(!idStr::Icmp(dwMap, "none"))
 		return "";
 	return dwMap;
+}
+
+void idSessionLocal::ShowSubtitle(const idStrList &strList) const
+{
+	int num;
+	int i;
+	int index;
+	char text[16];
+
+	num = strList.Num();
+	for(i = 0; i < 3; i++)
+	{
+		index = num - 1 - i;
+		if(index >= 0)
+		{
+			sprintf(text, /*sizeof(text), */"subtitleText%d", 3 - i);
+			guiSubtitles->SetStateString(text, strList[index].c_str());
+			sprintf(text, /*sizeof(text), */"subtitleAlpha%d", 3 - i);
+			guiSubtitles->SetStateFloat(text, 1);
+		}
+		else
+		{
+			sprintf(text, /*sizeof(text), */"subtitleAlpha%d", 3 - i);
+			guiSubtitles->SetStateFloat(text, 0);
+		}
+	}
+	guiSubtitles->StateChanged(game->GetTimeGroupTime(TIME_GROUP1));
+}
+
+void idSessionLocal::HideSubtitle(void) const
+{
+	guiSubtitles->SetStateFloat("subtitleAlpha1", 0);
+	guiSubtitles->SetStateFloat("subtitleAlpha2", 0);
+	guiSubtitles->SetStateFloat("subtitleAlpha3", 0);
+	/*guiSubtitles->SetStateFloat("subtitleAlpha4", 0);
+	guiSubtitles->SetStateFloat("subtitleAlpha5", 0);*/
 }
 #endif
 
