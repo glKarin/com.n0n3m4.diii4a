@@ -1368,11 +1368,6 @@ bool R_LoadCubeImages(const char *imgName, cubeFiles_t extensions, byte *pics[6]
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../externlibs/stb/stb_image_write.h"
 
-struct StbWriteImageFile_s {
-	const char *fileName;
-	const char *basePath;
-};
-
 static void R_ImageFlipVertical(byte *data, int width, int height, int comp)
 {
 	int		i;
@@ -1410,18 +1405,12 @@ static void R_ImageRGBA8888ToRGB888(const byte *data, int width, int height, byt
 
 static void R_StbWriteImageFile(void *context, void *data, int size)
 {
-	const StbWriteImageFile_s *f = (const StbWriteImageFile_s *)context;
-	if(f->basePath)
-		fileSystem->WriteFile(f->fileName, data, size, f->basePath);
-	else
-		fileSystem->WriteFile(f->fileName, data, size);
+	idFile *f = (idFile *)context;
+	f->Write(data, size);
 }
 
 void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, int quality, bool flipVertical, const char *basePath)
 {
-	StbWriteImageFile_s context = {
-			filename, basePath
-	};
 	stbi_write_png_compression_level = idMath::ClampInt(0, 9, quality);
 	byte *ndata = NULL;
 	if(flipVertical)
@@ -1431,17 +1420,21 @@ void R_WritePNG(const char *filename, const byte *data, int width, int height, i
 		R_ImageFlipVertical(ndata, width, height, comp);
 		data = ndata;
 	}
-	int r = stbi_write_png_to_func(R_StbWriteImageFile, (void *)&context, width, height, comp, data, width * comp);
-	free(ndata);
-	if(!r)
-		common->Warning("R_WritePNG fail: %d", r);
+	if(!basePath)
+		basePath = "fs_savepath";
+	idFile *f = fileSystem->OpenFileWrite(filename, basePath);
+	if(f)
+	{
+		int r = stbi_write_png_to_func(R_StbWriteImageFile, (void *)f, width, height, comp, data, width * comp);
+		free(ndata);
+		if(!r)
+			common->Warning("R_WritePNG fail: %d", r);
+		fileSystem->CloseFile(f);
+	}
 }
 
 void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, int compression, bool flipVertical, const char *basePath)
 {
-	StbWriteImageFile_s context = {
-			filename, basePath
-	};
 	byte *ndata = NULL;
 	if(flipVertical)
 	{
@@ -1450,17 +1443,21 @@ void R_WriteJPG(const char *filename, const byte *data, int width, int height, i
 		R_ImageFlipVertical(ndata, width, height, comp);
 		data = ndata;
 	}
-	int r = stbi_write_jpg_to_func(R_StbWriteImageFile, (void *)&context, width, height, comp, data, idMath::ClampInt(1, 100, compression));
-	free(ndata);
-	if(!r)
-		common->Warning("R_WriteJPG fail: %d", r);
+	if(!basePath)
+		basePath = "fs_savepath";
+	idFile *f = fileSystem->OpenFileWrite(filename, basePath);
+	if(f)
+	{
+		int r = stbi_write_jpg_to_func(R_StbWriteImageFile, (void *)f, width, height, comp, data, idMath::ClampInt(1, 100, compression));
+		free(ndata);
+		if(!r)
+			common->Warning("R_WriteJPG fail: %d", r);
+		fileSystem->CloseFile(f);
+	}
 }
 
 void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
 {
-	StbWriteImageFile_s context = {
-			filename, basePath
-	};
 	byte *ndata = NULL;
 	if(flipVertical)
 	{
@@ -1469,10 +1466,17 @@ void R_WriteBMP(const char *filename, const byte *data, int width, int height, i
 		R_ImageFlipVertical(ndata, width, height, comp);
 		data = ndata;
 	}
-	int r = stbi_write_bmp_to_func(R_StbWriteImageFile, (void *)&context, width, height, comp, data);
-	free(ndata);
-	if(!r)
-		common->Warning("R_WriteBMP fail: %d", r);
+	if(!basePath)
+		basePath = "fs_savepath";
+	idFile *f = fileSystem->OpenFileWrite(filename, basePath);
+	if(f)
+	{
+		int r = stbi_write_bmp_to_func(R_StbWriteImageFile, (void *)f, width, height, comp, data);
+		free(ndata);
+		if(!r)
+			common->Warning("R_WriteBMP fail: %d", r);
+		fileSystem->CloseFile(f);
+	}
 }
 
 void R_WriteImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
