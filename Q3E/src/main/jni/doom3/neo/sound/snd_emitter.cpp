@@ -201,6 +201,9 @@ void idSoundChannel::Clear(void)
 	}
 
 	memset(&parms, 0, sizeof(parms));
+#ifdef _HUMANHEAD
+	parms.subIndex = -1;
+#endif
 
 	triggered = false;
 	openalSource = 0;
@@ -416,6 +419,9 @@ void idSoundEmitterLocal::Clear(void)
 	spatializedOrigin.Zero();
 
 	memset(&parms, 0, sizeof(parms));
+#ifdef _HUMANHEAD
+	parms.subIndex = -1;
+#endif
 }
 
 /*

@@ -126,6 +126,7 @@ class hhSoundShaderParmsModifier {
 public:
 	hhSoundShaderParmsModifier() {
 		memset(&parms, 0, sizeof(soundShaderParms_t));
+        parms.subIndex = -1;
 		minDistanceIsSet = false;
 		maxDistanceIsSet = false;
 		volumeIsSet = false;

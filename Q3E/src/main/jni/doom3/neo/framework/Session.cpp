@@ -3262,6 +3262,9 @@ void idSessionLocal::Frame()
 	int	gameTicsToRun = latchedTicNumber - lastGameTic;
 	int i;
 
+#ifdef _HUMANHEAD
+    soundSystemLocal.SF_ShowSubtitle();
+#endif
 	for (i = 0 ; i < gameTicsToRun ; i++) {
 		RunGameTic();
 
@@ -3275,9 +3278,6 @@ void idSessionLocal::Frame()
 			break;
 		}
 	}
-#ifdef _HUMANHEAD
-	soundSystemLocal.SF_ShowSubtitle();
-#endif
 }
 
 /*
