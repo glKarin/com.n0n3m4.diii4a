@@ -898,6 +898,7 @@ class idSoundSystemLocal : public idSoundSystem
 	bool SFB_HandleSubtitle(bool fromBackEnd, const void *data = NULL); // frontend/backend
 
 	idList<sb_soundSubtitle_t> sb_subtitleQueue; // backend, next or current show, will hide subtitle if NULL
+    bool sfb_subtitleChanged; // frontend/backend, backend tell frontend has changed, and frontend tell backend not changed after sync
 	idList<const soundSubtitle_s *> sf_subtitleQueue; // frontend, show in player HUD GUI, hide subtitle if NULL
 
 	public:

@@ -312,7 +312,6 @@ void SoundSystemRestart_f(const idCmdArgs &args)
 }
 
 #ifdef _HUMANHEAD
-
 /*
 ===============
 ListSubtitles_f
@@ -326,7 +325,7 @@ void ListSubtitles_f(const idCmdArgs &args)
 	const char	*snd = args.Argv(1);
 
 	if (!soundSystemLocal.soundSubtitleList.Num()) {
-		common->Printf("No subtitle.\n");
+		common->Printf("No subtitle yet.\n");
 		return;
 	}
 
@@ -351,8 +350,8 @@ void ListSubtitles_f(const idCmdArgs &args)
 		totalSounds++;
 	}
 
-	common->Printf("%5d total sounds with subtitle\n", totalSounds);
-	common->Printf("%5d total subtitles\n", totalSubtitles);
+	common->Printf("%5d current total sounds with subtitle\n", totalSounds);
+	common->Printf("%5d current total subtitles\n", totalSubtitles);
 }
 #endif
 
@@ -500,6 +499,7 @@ void idSoundSystemLocal::Init()
 	sb_subtitleQueue.Clear();
     sf_subtitleQueue.Clear();
 
+    sfb_subtitleChanged = false;
 	cmdSystem->AddCommand("listSubtitles", ListSubtitles_f, CMD_FL_SOUND, "lists all subtitles of sounds");
 #endif
 
@@ -1675,7 +1675,8 @@ idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
 #endif
 
 #ifdef _HUMANHEAD
-#if 0
+//#define _DEBUG_SUBTITLE
+#ifdef _DEBUG_SUBTITLE
 #define SUBTITLE_DEBUG(fmt, args...) common->Printf(fmt, ##args)
 #else
 #define SUBTITLE_DEBUG(fmt, args...)
@@ -1734,7 +1735,13 @@ void idSoundSystemLocal::SetSubtitleData(int subIndex, int subNum, const char *s
 	}
 
 	soundSubtitle_s st;
-	st.subText = common->GetLanguageDict()->GetString(subText);
+	idStr text = common->GetLanguageDict()->GetString(subText);
+	// remove <PROFANITY>xxx</PROFANITY>
+	{
+		text.Replace("<PROFANITY>", "");
+		text.Replace("</PROFANITY>", "");
+	}
+	st.subText = text;
 	st.subTime = subTime;
 	st.subChannel = subChannel;
 	list->subList.Append(st);
@@ -1956,7 +1963,7 @@ idSoundSystemLocal::SFB_HandleSubtitle
 */
 bool idSoundSystemLocal::SFB_HandleSubtitle(bool fromBackEnd, const void *data)
 {
-	bool changed = false;
+	bool changed;
 
 	Sys_EnterCriticalSection(CRITICAL_SECTION_THREE);
 	{
@@ -1966,8 +1973,8 @@ bool idSoundSystemLocal::SFB_HandleSubtitle(bool fromBackEnd, const void *data)
             {
 				const sb_soundSubtitle_t *inSub = (const sb_soundSubtitle_t *)data;
                 sb_subtitleQueue.Append(*inSub);
-                SUBTITLE_DEBUG("backend swap: %p %d %s\n", inSub->subtitle, changed, inSub->subtitle->subText.c_str());
-                changed = true;
+                sfb_subtitleChanged = true;
+                SUBTITLE_DEBUG("backend swap: %p %d %s\n", inSub->subtitle, sfb_subtitleChanged, inSub->subtitle->subText.c_str());
             }
             else // remove expired
             {
@@ -1976,10 +1983,10 @@ bool idSoundSystemLocal::SFB_HandleSubtitle(bool fromBackEnd, const void *data)
                     int curTime = SamplesToMilliseconds(GetCurrent44kHzTime());
                     for(int i = 0; i < sb_subtitleQueue.Num();)
                     {
-                        if(curTime > sb_subtitleQueue[i].endTime)
+                        if(curTime >= sb_subtitleQueue[i].endTime) // >
                         {
                             sb_subtitleQueue.RemoveIndex(i);
-							changed = true;
+							sfb_subtitleChanged = true;
                         }
                         else
                         {
@@ -1988,23 +1995,21 @@ bool idSoundSystemLocal::SFB_HandleSubtitle(bool fromBackEnd, const void *data)
                     }
                 }
             }
+    		changed = sfb_subtitleChanged;
 		}
 		else // frontend: copy backend to frontend
 		{
-            idList<const soundSubtitle_s *> frontend;
-            for(int i = 0; i < sb_subtitleQueue.Num(); i++)
-            {
-                const soundSubtitle_s *sub = sb_subtitleQueue[i].subtitle;
-                frontend.Append(sub);
-                if(!changed && sf_subtitleQueue.FindIndex(sub) < 0)
-                    changed = true;
-            }
-            if(!changed)
-                changed = frontend.Num() != sf_subtitleQueue.Num();
-			if(changed)
+			if(sfb_subtitleChanged)
 			{
+    			changed = sfb_subtitleChanged;
+				idList<const soundSubtitle_s *> frontend;
+				for(int i = 0; i < sb_subtitleQueue.Num(); i++)
+				{
+					frontend.Append(sb_subtitleQueue[i].subtitle);
+				}
                 SUBTITLE_DEBUG("frontend swap: %d -> %d\n", sf_subtitleQueue.Num(), frontend.Num());
 				sf_subtitleQueue = frontend;
+                sfb_subtitleChanged = false;
 			}
 		}
 	}
@@ -2038,12 +2043,16 @@ void idSoundSystemLocal::SF_ShowSubtitle(void)
 		return;
 
     idStrList text;
+#ifdef _DEBUG_SUBTITLE
 	idStr debugText;
+#endif
     for(i = 0; i < sf_subtitleQueue.Num(); i++)
     {
         text.Append(sf_subtitleQueue[i]->subText);
-		debugText.Append(sf_subtitleQueue[i]->subText);
+#ifdef _DEBUG_SUBTITLE
 		debugText.Append('\n');
+		debugText.Append(sf_subtitleQueue[i]->subText);
+#endif
     }
 	sessLocal.ShowSubtitle(text);
 	SUBTITLE_DEBUG("frontend show: %d %s\n", sf_subtitleQueue.Num(), debugText.c_str());
