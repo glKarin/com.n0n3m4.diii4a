@@ -1999,9 +1999,9 @@ bool idSoundSystemLocal::SFB_HandleSubtitle(bool fromBackEnd, const void *data)
 		}
 		else // frontend: copy backend to frontend
 		{
+    		changed = sfb_subtitleChanged;
 			if(sfb_subtitleChanged)
 			{
-    			changed = sfb_subtitleChanged;
 				idList<const soundSubtitle_s *> frontend;
 				for(int i = 0; i < sb_subtitleQueue.Num(); i++)
 				{
