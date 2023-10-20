@@ -13,6 +13,9 @@
 	}                                    \
 }
 
+//#define _DEBUG_VERT_SHADER_SOURCE
+//#define _DEBUG_FRAG_SHADER_SOURCE
+
 #if 1
 #define GL_GetAttribLocation(program, name) qglGetAttribLocation(program, name)
 #define GL_GetUniformLocation(program, name) qglGetUniformLocation(program, name)
@@ -445,9 +448,9 @@ static bool RB_GLSL_InitShaders(void)
 				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_POINT_LIGHT" },
 				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_POINT_LIGHT,BLINN_PHONG" },
 
-				{ "depth_point_light", &depthShader_pointLight_far, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE" },
-				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight_far, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE" },
-				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight_far, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_POINT_LIGHT,BLINN_PHONG,_POINT_LIGHT_USING_DISTANCE" },
+				{ "depth_point_light", &depthShader_pointLight_far, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE,_USING_FRAG_DEPTH" },
+				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight_far, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE,_USING_FRAG_DEPTH" },
+				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight_far, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_POINT_LIGHT,BLINN_PHONG,_POINT_LIGHT_USING_DISTANCE,_USING_FRAG_DEPTH" },
 
 				{ "depth_point_light", &depthShader_pointLight_z, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE,_USING_FRAG_DEPTH" },
 				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight_z, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_POINT_LIGHT,_POINT_LIGHT_USING_DISTANCE,_USING_FRAG_DEPTH" },
@@ -742,8 +745,16 @@ static GLint R_CreateProgram(GLint vertShader, GLint fragShader, bool needsAttri
 
 bool R_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name)
 {
-	//Sys_Printf(vert);
-	//Sys_Printf(frag);
+#ifdef _DEBUG_VERT_SHADER_SOURCE
+	Sys_Printf("---------- Vertex shader source: ----------\n");
+	Sys_Printf(vert);
+	Sys_Printf("--------------------------------------------------\n");
+#endif
+#ifdef _DEBUG_FRAG_SHADER_SOURCE
+	Sys_Printf("---------- Fragment shader source: ----------\n");
+	Sys_Printf(frag);
+	Sys_Printf("--------------------------------------------------\n");
+#endif
 	R_DeleteShaderProgram(shaderProgram);
 	shaderProgram->vertexShader = R_CreateShader(GL_VERTEX_SHADER, vert);
 	if(shaderProgram->vertexShader == 0)
