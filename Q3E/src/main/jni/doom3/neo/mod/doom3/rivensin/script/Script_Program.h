@@ -481,7 +481,7 @@ public:
 	void										Save( idSaveGame *savefile ) const;
 	bool										Restore( idRestoreGame *savefile );
 	int											CalculateChecksum( bool forOldSavegame
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 			 = false 
 #endif
 			) const;		// Used to insure program code has not

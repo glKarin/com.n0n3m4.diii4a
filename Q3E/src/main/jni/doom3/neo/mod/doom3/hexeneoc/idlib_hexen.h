@@ -1,6 +1,6 @@
 #ifndef _KARIN_IDLIBHEXEN_H
 #define _KARIN_IDLIBHEXEN_H
-#ifdef __ANDROID__
+#ifdef _HEXENEOC
 
 #define BUTTON_ATTACK2 BUTTON_5
 

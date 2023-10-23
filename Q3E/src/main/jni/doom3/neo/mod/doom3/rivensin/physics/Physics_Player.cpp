@@ -626,7 +626,7 @@ void idPhysics_Player::AirMove( void ) {
 	float		scale;
 
 //k double-jump
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 	if( 
 			harm_pm_doubleJump.GetBool() && 
 			//doubleJumpEnabled && 
@@ -1230,7 +1230,7 @@ bool idPhysics_Player::CheckJump( void ) {
 	current.velocity += addVelocity;
 
 //k double-jump
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 	//reset double jump so that we can do it again
 	nextDoubleJump = gameLocal.time + DOUBLE_JUMP_MIN_DELAY;
 	doubleJumpDone = false;
@@ -1280,7 +1280,7 @@ bool idPhysics_Player::CheckWaterJump( void ) {
 	current.movementTime = 2000;
 
 //k double-jump
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 	nextDoubleJump = gameLocal.time + DOUBLE_JUMP_MIN_DELAY;
 	doubleJumpDone = false;
 #endif
@@ -1648,7 +1648,7 @@ idPhysics_Player::idPhysics_Player( void ) {
 	//animMoveUseGravity = true; //ivan
 	
 //k double-jump
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 	doubleJumpDone = false;
 	doubleJumpEnabled = true;
 	nextDoubleJump = 0;
@@ -2368,7 +2368,7 @@ Ivan end
 //ivan start
 
 //k double-jump
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 /*
 =============
 idPhysics_Player::CheckDoubleJump

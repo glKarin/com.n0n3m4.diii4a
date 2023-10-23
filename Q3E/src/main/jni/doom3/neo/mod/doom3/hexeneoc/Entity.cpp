@@ -7153,7 +7153,7 @@ idVec3 idEntity::GetModelDims( void )
     idVec3 a;
     if ( renderEntity.hModel )
     {
-#ifdef __ANDROID__
+#ifdef _HEXENEOC
         a.x = abs( hxBounds::GetMaxs(renderEntity.bounds).x ) + abs( hxBounds::GetMins(renderEntity.bounds).x );
         a.y = abs( hxBounds::GetMaxs(renderEntity.bounds).y ) + abs( hxBounds::GetMins(renderEntity.bounds).y );
         a.z = abs( hxBounds::GetMaxs(renderEntity.bounds).z ) + abs( hxBounds::GetMins(renderEntity.bounds).z );

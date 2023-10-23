@@ -119,7 +119,7 @@ void idProjectile::Spawn(void)
 	SetPhysics(&physicsObj);
 
 	//added for LM
-#ifdef __ANDROID__
+#ifdef _D3LE
 	mNoExplodeDisappear = spawnArgs.GetBool( "no_explode_disappear", mNoExplodeDisappear ? "1" : "0" );
 	mTouchTriggers = spawnArgs.GetBool( "touch_triggers", mTouchTriggers ? "1" : "0" );
 #else

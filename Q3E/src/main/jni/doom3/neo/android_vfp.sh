@@ -13,7 +13,7 @@ export TARGET=${ARCH}
 export API=14 # android 4.0 ice cream
 
 LIB_PATH="${TOOLCHAIN}/arm-linux-androideabi/lib/armv7-a ${TOOLCHAIN}/sysroot/usr/lib"
-DEFINES="-D__ANDROID_API__=${API}"
+DEFINES="-D__ANDROID_API__=${API} -DD3_SIZEOFPTR=4"
 
 	#BASEFLAGS='-march=armv5te -fno-builtin-sin -fno-builtin-sinf -fno-builtin-cosf -fno-builtin-cos -mtune=xscale -mfpu=vfp -mfloat-abi=softfp -Wl,--no-undefined -fexceptions -frtti -I/prog/games/dante-es2/libogg/include -L/prog/games/dante-es2/libogg/lib'\
 scons \

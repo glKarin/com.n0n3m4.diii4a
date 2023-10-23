@@ -248,7 +248,7 @@ idSoundChannel::ALStop
 */
 void idSoundChannel::ALStop(void)
 {
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (idSoundSystemLocal::useOpenAL) {
 
 		if (alIsSource(openalSource)) {
@@ -529,11 +529,11 @@ void idSoundEmitterLocal::CheckForCompletion(int current44kHzTime)
 			// see if this channel has completed
 			if (!(chan->parms.soundShaderFlags & SSF_LOOPING)) {
 				//ALint state = AL_PLAYING;
-				#if !defined(__ANDROID__)
+#ifdef _OPENAL
 				if (idSoundSystemLocal::useOpenAL && alIsSource(chan->openalSource)) {
 					alGetSourcei(chan->openalSource, AL_SOURCE_STATE, &state);
 				}
-				#endif
+#endif
 
 				idSlowChannel slow = GetSlowChannel(chan);
 

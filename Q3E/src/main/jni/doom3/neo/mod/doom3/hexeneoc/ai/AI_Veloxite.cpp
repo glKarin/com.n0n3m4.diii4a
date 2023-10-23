@@ -451,7 +451,7 @@ void idAI_Veloxite::getOnSurface( const idVec3 &newNorm, int numt )
         }
 
         // the more perpendicular the wall is to the ground, the more height. from 0 to 90 degrees, increase height. after 90 degrees, decrease height from max. this works for AI_LEDGING, AI_WALLING, and AI_SLOPING
-#ifdef __ANDROID__
+#ifdef _HEXENEOC
         float ang = hxVec3::toAngle(curNorm(), newNorm);
 #else
         float ang = curNorm().toAngle(newNorm);
@@ -715,7 +715,7 @@ ID_INLINE bool idAI_Veloxite::wallIsWalkable( idEntity *wall )
 
 ID_INLINE bool idAI_Veloxite::onWall()
 {
-#ifdef __ANDROID__
+#ifdef _HEXENEOC
     float ang = hxVec3::toAngle(curNorm(), DEFAULT_GRAVITY_NORMAL);
 #else
     float ang = curNorm().toAngle(DEFAULT_GRAVITY_NORMAL);
@@ -740,7 +740,7 @@ ID_INLINE v_stype idAI_Veloxite::surfaceType( idVec3 normal )
         return t;
     }
 
-#ifdef __ANDROID__
+#ifdef _HEXENEOC
     float ang = hxVec3::toAngle(normal, -curNorm());
 #else
     float ang = normal.toAngle(-curNorm());

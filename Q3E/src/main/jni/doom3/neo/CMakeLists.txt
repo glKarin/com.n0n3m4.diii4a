@@ -1416,7 +1416,7 @@ message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "-l: ${sys_libs}")
 message(STATUS "-l(static): ${local_libs}")
 
-#message(FATAL_ERROR "stop!!!!!!!!!!!!!!!!!!!!")
+#message(FATAL_ERROR "${CMAKE_SIZEOF_VOID_P} stop!!!!!!!!!!!!!!!!!!!!")
 
 if(CORE)
 	add_library(${DOOM3BINARY} SHARED

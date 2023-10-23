@@ -402,7 +402,7 @@ void idSoundSystemLocal::Init()
 	common->StartupVariable("s_useOpenAL", false);
 	common->StartupVariable("s_useEAXReverb", false);
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (idSoundSystemLocal::s_useOpenAL.GetBool() || idSoundSystemLocal::s_useEAXReverb.GetBool()) {
 		if (!Sys_LoadOpenAL()) {
 			idSoundSystemLocal::s_useOpenAL.SetBool(false);
@@ -516,7 +516,7 @@ void idSoundSystemLocal::Shutdown()
 {
 	ShutdownHW();
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	// EAX or not, the list needs to be cleared
 	EFXDatabase.Clear();
 
@@ -551,7 +551,7 @@ void idSoundSystemLocal::Shutdown()
 	delete soundCache;
 	soundCache = NULL;
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	// destroy openal device and context
 	if (useOpenAL) {
 		alcMakeContextCurrent(NULL);
@@ -724,7 +724,7 @@ int idSoundSystemLocal::AsyncUpdate(int inTime)
 
 	ulong dwCurrentWritePos;
 	dword dwCurrentBlock;
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	// If not using openal, get actual playback position from sound hardware
 	if (useOpenAL) {
 		// here we do it in samples ( overflows in 27 hours or so )
@@ -795,7 +795,7 @@ int idSoundSystemLocal::AsyncUpdate(int inTime)
 	if ((newSoundTime - CurrentSoundTime) > (int)MIXBUFFER_SAMPLES) {
 		soundStats.missedWindow++;
 	}
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (useOpenAL) {
 		// enable audio hardware caching
 		alcSuspendContext(openalContext);
@@ -810,7 +810,7 @@ int idSoundSystemLocal::AsyncUpdate(int inTime)
 	if (!muted && currentSoundWorld && !currentSoundWorld->fpa[0]) {
 		currentSoundWorld->MixLoop(newSoundTime, numSpeakers, finalMixBuffer);
 	}
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (useOpenAL) {
 		// disable audio hardware caching (this updates ALL settings since last alcSuspendContext)
 		alcProcessContext(openalContext);
@@ -881,7 +881,7 @@ int idSoundSystemLocal::AsyncUpdateWrite(int inTime)
 
 	int sampleTime = dwCurrentBlock * MIXBUFFER_SAMPLES;
 	int numSpeakers = snd_audio_hw->GetNumberOfSpeakers();
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (useOpenAL) {
 		// enable audio hardware caching
 		alcSuspendContext(openalContext);
@@ -896,7 +896,7 @@ int idSoundSystemLocal::AsyncUpdateWrite(int inTime)
 	if (!muted && currentSoundWorld && !currentSoundWorld->fpa[0]) {
 		currentSoundWorld->MixLoop(sampleTime, numSpeakers, finalMixBuffer);
 	}
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (useOpenAL) {
 		// disable audio hardware caching (this updates ALL settings since last alcSuspendContext)
 		alcProcessContext(openalContext);
@@ -1277,7 +1277,7 @@ void idSoundSystemLocal::BeginLevelLoad()
 
 	soundCache->BeginLevelLoad();
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (efxloaded) {
 		EFXDatabase.UnloadFile();
 		efxloaded = false;
@@ -1298,7 +1298,7 @@ void idSoundSystemLocal::EndLevelLoad(const char *mapstring)
 
 	soundCache->EndLevelLoad();
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 
 	idStr efxname("efxs/");
 	idStr mapname(mapstring);
@@ -1324,7 +1324,7 @@ idSoundSystemLocal::AllocOpenALSource
 */
 ALuint idSoundSystemLocal::AllocOpenALSource(idSoundChannel *chan, bool looping, bool stereo)
 {
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	int timeOldestZeroVolSingleShot = Sys_Milliseconds();
 	int timeOldestZeroVolLooping = Sys_Milliseconds();
 	int timeOldestSingle = Sys_Milliseconds();
@@ -1412,7 +1412,7 @@ idSoundSystemLocal::FreeOpenALSource
 */
 void idSoundSystemLocal::FreeOpenALSource(ALuint handle)
 {
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	ALsizei i;
 
 	for (i = 0; i < openalSourceCount; i++) {

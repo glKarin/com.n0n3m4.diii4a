@@ -438,7 +438,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteBuildNumber( BUILD_NUMBER );
 
 	//k not in original DOOM3
-#if !defined(__ANDROID__)
+#if !defined(_RIVENSIN)
 	// DG: add some more information to savegame to make future quirks easier
 	savegame.WriteInt( INTERNAL_SAVEGAME_VERSION ); // to be independent of BUILD_NUMBER
 	savegame.WriteString( D3_OSTYPE ); // operating system - from CMake
@@ -1261,7 +1261,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	savegame.ReadBuildNumber();
 
 	//k not in original DOOM3
-#if !defined(__ANDROID__)
+#if !defined(_RIVENSIN)
 	// DG: I enhanced the information in savegames a bit for dhewm3 1.5.1
 	//     for which I bumped th BUILD_NUMBER to 1305
 	if( savegame.GetBuildNumber() >= 1305 )

@@ -8826,7 +8826,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis ) {
 idPlayer::OffsetThirdPersonView
 ===============
 */
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 #define HARM_PREFER_CROUCH_VIEW_HEIGHT 32
 #if HARM_PREFER_CROUCH_VIEW_HEIGHT > 0
 static idCVar	harm_pm_preferCrouchViewHeight("harm_pm_preferCrouchViewHeight", "32", CVAR_GAME | CVAR_FLOAT | CVAR_ARCHIVE, "[Harmattan]: Set prefer crouch view height in Third-Person(suggest 32 - 39, less or equals 0 to disable).");
@@ -8866,7 +8866,7 @@ void idPlayer::OffsetThirdPersonView( float angle, float range, float height, bo
 	focusPoint.z += height;
 	view = origin;
 	view.z += 8 + height;
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 #if HARM_PREFER_CROUCH_VIEW_HEIGHT > 0
 	float preferCrouchViewHeight = harm_pm_preferCrouchViewHeight.GetFloat();
 	if ( preferCrouchViewHeight > 0.0f && physicsObj.IsCrouching() ) {

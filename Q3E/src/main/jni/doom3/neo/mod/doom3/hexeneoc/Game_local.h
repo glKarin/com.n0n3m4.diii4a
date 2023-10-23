@@ -824,7 +824,7 @@ extern const int	CINEMATIC_SKIP_DELAY;
 #include "script/Script_Interpreter.h"
 #include "script/Script_Thread.h"
 
-#ifdef __ANDROID__
+#ifdef _HEXENEOC
 #include "idlib_hexen.h"
 #endif
 

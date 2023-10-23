@@ -2033,7 +2033,7 @@ bool idProgram::Restore( idRestoreGame *savefile ) {
 	int saved_checksum, checksum;
 
 	savefile->ReadInt( saved_checksum );
-#if !defined(__ANDROID__)
+#if !defined(_HARDCORPS)
 	bool isOldSavegame = savefile->GetBuildNumber() <= 1304;
 	checksum = CalculateChecksum(isOldSavegame);
 #else

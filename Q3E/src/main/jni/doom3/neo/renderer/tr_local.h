@@ -1949,10 +1949,11 @@ idScreenRect R_CalcIntersectionScissor(const idRenderLightLocal *lightDef,
 #include "GuiModel.h"
 #include "VertexCache.h"
 
-#ifdef __ANDROID__ //k for Android large stack memory allocate limit
-#define HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
+//k for Android large stack memory allocate limit
+#define _DYNAMIC_ALLOC_STACK_OR_HEAP
 
-#ifdef HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+#if 1
 extern idCVar harm_r_maxAllocStackMemory;
 	#define HARM_MAX_STACK_ALLOC_SIZE (harm_r_maxAllocStackMemory.GetInteger())
 #else

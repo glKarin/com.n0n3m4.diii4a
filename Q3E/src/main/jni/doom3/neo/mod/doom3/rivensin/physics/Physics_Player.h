@@ -209,7 +209,7 @@ private:
 	void					DropTimers( void );
 	void					MovePlayer( int msec );
 	//k double-jump
-#ifdef __ANDROID__
+#ifdef _RIVENSIN
 	bool					CheckDoubleJump( void );
 #endif
 

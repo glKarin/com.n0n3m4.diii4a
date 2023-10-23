@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SND_LOCAL_H__
 #define __SND_LOCAL_H__
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 
 // you need the OpenAL headers for build, even if AL is not enabled - http://www.openal.org/
 #ifdef _WIN32
@@ -947,7 +947,7 @@ class idSoundSystemLocal : public idSoundSystem
 
 	idList<SoundFX *>		fxList;
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	ALCdevice				*openalDevice;
 	ALCcontext				*openalContext;
 	ALsizei					openalSourceCount;

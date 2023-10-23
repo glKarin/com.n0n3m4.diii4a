@@ -381,7 +381,7 @@ void idSoundSample::MakeDefault(void)
 		ncd[i*2+1] = sample;
 	}
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (idSoundSystemLocal::useOpenAL) {
 		alGetError();
 		alGenBuffers(1, &openalBuffer);
@@ -524,7 +524,7 @@ void idSoundSample::Load(void)
 	CheckForDownSample();
 
 	// create hardware audio buffers
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (idSoundSystemLocal::useOpenAL) {
 		// PCM loads directly
 		if (objectInfo.wFormatTag == WAVE_FORMAT_TAG_PCM) {
@@ -680,7 +680,7 @@ void idSoundSample::PurgeSoundSample()
 {
 	purged = true;
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (hardwareBuffer && idSoundSystemLocal::useOpenAL) {
 		alGetError();
 		alDeleteBuffers(1, &openalBuffer);
