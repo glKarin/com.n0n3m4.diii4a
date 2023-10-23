@@ -29,10 +29,9 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external GLSL shader program directory path", 0),
                         KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0: Always heap; Negative: Always stack(original); Positive: Max stack memory limit)", 0),
                         KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "0.5", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_shadowMapPointLight", "integer", "1", "Point light shadow mapping", 0,
-                                "0", "using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5]",
-                                "1", "using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar]",
-                                "2", "calculate z transform as depth value(OpenGLES2 only)"
+                        KCVar.CreateCVar("harm_r_shadowMapPointLight2", "integer", "0", "Point light shadow mapping", 0,
+                                "0", "using window space z value as depth value[gl_FragCoord.z]",
+                                "1", "using light position to vertex position distance divide frustum far value as depth value[length(VertexPositionInWorldSpace - LightPositionInWorldSpace) / LightRadiusLengthAsFrustumFar]"
                         ),
                         KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0)
                 );

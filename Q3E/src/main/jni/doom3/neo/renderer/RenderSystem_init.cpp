@@ -433,13 +433,8 @@ static void R_CheckPortableExtensions(void)
 	else
 #endif
 	{
-		//static idCVar harm_r_disableDepthTexture( "harm_r_disableDepthTexture", "0", CVAR_RENDERER | CVAR_INIT | CVAR_BOOL, "Disable depth texture in OpenGLES2.0" );
-		glConfig.depthTextureAvailable =
-				//harm_r_disableDepthTexture.GetBool() ? false :
-				R_CheckExtension("GL_OES_depth_texture");
-		glConfig.depthTextureCubeMapAvailable =
-				//harm_r_disableDepthTexture.GetBool() ? false :
-				R_CheckExtension("GL_OES_depth_texture_cube_map");
+		glConfig.depthTextureAvailable = R_CheckExtension("GL_OES_depth_texture");
+		glConfig.depthTextureCubeMapAvailable = R_CheckExtension("GL_OES_depth_texture_cube_map");
 		glConfig.depth24Available = R_CheckExtension("GL_OES_depth24");
 		glConfig.gl_FragDepthAvailable = R_CheckExtension("GL_EXT_frag_depth");
 	}
@@ -1101,7 +1096,7 @@ void R_Benchmark_f(const idCmdArgs &args)
 	r_skipRenderContext.SetBool(false);
 }
 
-void R_OpenGL_f(const idCmdArgs &args)
+void R_ShowglConfig_f(const idCmdArgs &args)
 {
 	if(!glConfig.isInitialized)
 	{
@@ -1168,6 +1163,12 @@ void R_OpenGL_f(const idCmdArgs &args)
 	common->Printf("depthTextureCubeMapAvailable: %d\n", glConfig.depthTextureCubeMapAvailable);
 	common->Printf("depth24Available: %d\n", glConfig.depth24Available);
 	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
+#ifdef _SHADOW_MAPPING
+	extern bool r_useDepthTexture;
+	extern bool r_useCubeDepthTexture;
+	common->Printf("r_useDepthTexture: %d\n", r_useDepthTexture);
+	common->Printf("r_useCubeDepthTexture: %d\n", r_useCubeDepthTexture);
+#endif
 
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
@@ -2224,9 +2225,13 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("listRenderLightDefs", R_ListRenderLightDefs_f, CMD_FL_RENDERER, "lists the light defs");
 	cmdSystem->AddCommand("listModes", R_ListModes_f, CMD_FL_RENDERER, "lists all video modes");
 	cmdSystem->AddCommand("reloadSurface", R_ReloadSurface_f, CMD_FL_RENDERER, "reloads the decl and images for selected surface");
-	cmdSystem->AddCommand("glConfig", R_OpenGL_f, CMD_FL_RENDERER, "print OpenGL config");
+	cmdSystem->AddCommand("glConfig", R_ShowglConfig_f, CMD_FL_RENDERER, "print OpenGL config");
 #ifdef _MULTITHREAD
 	cmdSystem->AddCommand("r_multithread", R_Multithreading_f, CMD_FL_SYSTEM, "print multi-threading state");
+#endif
+#ifdef _SHADOW_MAPPING
+	extern void R_DumpShadowMap_f(const idCmdArgs &args);
+	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
 #endif
 }
 
@@ -2555,8 +2560,8 @@ idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER
 idCVar r_shadowMapSplitWeight( "r_shadowMapSplitWeight", "0.9", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodScale( "r_shadowMapLodScale", "1.4", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodBias( "r_shadowMapLodBias", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "" );
-idCVar r_shadowMapPolygonFactor( "r_shadowMapPolygonFactor", "2", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
-idCVar r_shadowMapPolygonOffset( "r_shadowMapPolygonOffset", "3000", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
+idCVar r_shadowMapPolygonFactor( "r_shadowMapPolygonFactor", "2", CVAR_RENDERER | CVAR_FLOAT, "polygonOffset factor for drawing shadow buffer" );
+idCVar r_shadowMapPolygonOffset( "r_shadowMapPolygonOffset", "3000", CVAR_RENDERER | CVAR_FLOAT, "polygonOffset units for drawing shadow buffer" );
 idCVar r_shadowMapOccluderFacing( "r_shadowMapOccluderFacing", "2", CVAR_RENDERER | CVAR_INTEGER, "0 = front faces, 1 = back faces, 2 = twosided" );
 // RB end
 
@@ -2567,7 +2572,10 @@ idCVar harm_r_shadowMapSampleFactor( "harm_r_shadowMapSampleFactor", "-1.0", CVA
 idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum near" );
 idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2.5 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapPointLight("harm_r_shadowMapPointLight", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method: 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value(OpenGLES2.0 only); like 1, but using gl_FragDepth in fragment shader(OpenGLES3.0 only)", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+idCVar harm_r_shadowMapPointLight2("harm_r_shadowMapPointLight2", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method: 0 = using window space z value as depth value[gl_FragCoord.z], 1 = using light position to vertex position distance divide frustum far value as depth value[length(VertexPositionInWorldSpace - LightPositionInWorldSpace) / LightRadiusLengthAsFrustumFar]", 0, 1, idCmdSystem::ArgCompletion_Integer<0, 1> );
+idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar harm_r_shadowMapPolygonFactor( "harm_r_shadowMapPolygonFactor", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
+idCVar harm_r_shadowMapPolygonOffset( "harm_r_shadowMapPolygonOffset", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
 
 #include "Framebuffer.cpp"
 #include "tr_shadowmapping.cpp"

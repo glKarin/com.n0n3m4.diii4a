@@ -25,7 +25,7 @@ public final class Constants
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
 	public static final String[] CONST_CHANGES = {
-            "Optimize soft shadow with shadow mapping. Add point light shadow map based frustum-far in OpenGLES3.0. Add shadow map with depth texture in OpenGLES2.0.",
+            "Optimize soft shadow with shadow mapping. Add point light shadow map based frustum-far in OpenGLES3.0. Add shadow map with depth texture in OpenGLES2.0. Change default point light renderer to 0.",
             "Beam rendering optimization in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
 	};
 

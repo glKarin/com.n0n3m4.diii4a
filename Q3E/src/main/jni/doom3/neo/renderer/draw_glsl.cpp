@@ -355,7 +355,14 @@ void RB_GLSL_DrawInteractions(void)
 	const bool shadowMapping = r_shadowMapping && r_shadows.GetBool();
 	float clearColor[4];
 	if(shadowMapping)
-        RB_getClearColor(clearColor);
+	{
+		RB_getClearColor(clearColor);
+		if(r_dumpShadowMapFrontEnd)
+		{
+			r_dumpShadowMap = true;
+			r_dumpShadowMapFrontEnd = false;
+		}
+	}
 #endif
 	//
 	// for each light, perform adding and shadowing
@@ -488,7 +495,10 @@ void RB_GLSL_DrawInteractions(void)
 	//GL_SelectTexture(0); //k2023
 #ifdef _SHADOW_MAPPING
 	if(shadowMapping)
-        qglClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+	{
+		qglClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+	}
+    r_dumpShadowMap = false;
 #endif
 }
 
@@ -511,7 +521,30 @@ static void R_InitGLSLCvars(void)
 
 #ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
-    r_shadowMapPointLight = harm_r_shadowMapPointLight.GetInteger();
+    r_shadowMapPointLight = harm_r_shadowMapPointLight2.GetInteger();
+#ifdef GL_ES_VERSION_3_0
+	if(!USING_GLES3)
+#endif
+	switch(harm_r_shadowMapDepthBuffer.GetInteger())
+	{
+		case 1:
+			r_useDepthTexture = glConfig.depthTextureAvailable;
+			r_useCubeDepthTexture = glConfig.depthTextureCubeMapAvailable;
+			break;
+		case 2:
+			r_useDepthTexture = false;
+			r_useCubeDepthTexture = false;
+			break;
+		case 3:
+			r_useDepthTexture = false;
+			r_useCubeDepthTexture = false;
+			break;
+		case 0:
+		default:
+			r_useDepthTexture = glConfig.depthTextureAvailable;
+			r_useCubeDepthTexture = glConfig.depthTextureCubeMapAvailable;
+			break;
+	}
 #endif
 }
 
@@ -539,10 +572,10 @@ void R_CheckBackEndCvars(void)
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
 	}
-    if(harm_r_shadowMapPointLight.IsModified())
+    if(harm_r_shadowMapPointLight2.IsModified())
     {
-        r_shadowMapPointLight = harm_r_shadowMapPointLight.GetInteger();
-        harm_r_shadowMapPointLight.ClearModified();
+        r_shadowMapPointLight = harm_r_shadowMapPointLight2.GetInteger();
+        harm_r_shadowMapPointLight2.ClearModified();
     }
 #endif
 }

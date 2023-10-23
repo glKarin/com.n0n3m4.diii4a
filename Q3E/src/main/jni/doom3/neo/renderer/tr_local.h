@@ -2082,7 +2082,10 @@ extern idCVar harm_r_shadowMapSampleFactor;
 extern idCVar harm_r_shadowMapFrustumNear;
 extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
-extern idCVar harm_r_shadowMapPointLight;
+extern idCVar harm_r_shadowMapPointLight2;
+extern idCVar harm_r_shadowMapDepthBuffer;
+extern idCVar harm_r_shadowMapPolygonFactor;
+extern idCVar harm_r_shadowMapPolygonOffset;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;

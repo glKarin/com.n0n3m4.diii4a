@@ -31,9 +31,8 @@
  * Point light:
  * Most light type at scene in Most levels.
  * cvar harm_r_shadowMapPointLight
- * 0. glsl macro _POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5](slowest and bad)
- * 1. glsl macro _POINT_LIGHT_USING_DISTANCE: using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar](fastest and best, but depend frustum far)
- * 2. glsl macro _POINT_LIGHT_Z_AS_DEPTH: calculate z transform as depth value(faster and well)( OpenGLES2.0 only)
+ * 0. glsl macro _POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[gl_FragCoord.z](slower but best)
+ * 1. glsl macro _POINT_LIGHT_USING_DISTANCE: using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar](fastest but bad, but depend frustum far)
  *
  * Parallel light:
  * Few light type. In out of room big scene, the lights most are point-light, but in lotaa/lotab/lotad of Prey are parallel light.
@@ -48,7 +47,7 @@
  * harm_r_shadowMapAlpha: float, 0.5, shadow alpha(0 - 1)
  * harm_r_shadowMapSampleFactor: float, -1.0, 0 multiple, 0 is disable, < 0 is auto, > 0 multi with fixed value
  * harm_r_shadowMapFrustumFar: float, -2.5, shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)
- * harm_r_shadowMapPointLight: int, 1, point light render method, 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value(OpenGLES2.0 only)
+ * harm_r_shadowMapPointLight2: int, 0, point light render method, 0 = using window space z value as depth value[gl_FragCoord.z], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInWorldSpace - LightPositionInWorldSpace) / LightRadiusLengthAsFrustumFar]
  *
  */
 
@@ -62,19 +61,25 @@
 
 #define POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH 0
 #define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR 1
-#define POINT_LIGHT_RENDER_METHOD_EMULATE_Z 2
-#define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH 2
 
 static bool r_shadowMapping = false;
 static int r_shadowMapPointLight = 0;
+bool r_useDepthTexture = true;
+bool r_useCubeDepthTexture = true;
+static bool r_dumpShadowMap = false; // backend
+static bool r_dumpShadowMapFrontEnd = false; // frontend
 
 // see Framebuffer.h::shadowMapResolutions
 static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0};
 
-static idCVar SaveColorBuffer("SaveColorBuffer", "0", CVAR_BOOL, "");
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug light type mask. 1: parallel, 2: point, 4: spot");
 static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug shadow map frame buffer.");
 char RB_ShadowMapPass_T = 'G'; // G - global shadow, L - local shadow
+
+void R_DumpShadowMap_f(const idCmdArgs &args)
+{
+    r_dumpShadowMapFrontEnd = true;
+}
 
 ID_INLINE void RB_SetMVP( const idRenderMatrix& mvp )
 {
@@ -96,10 +101,10 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 		}
         else if( vLight->pointLight && side >= 0 )
 		{
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR || r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH)
-				fb->AttachImageDepthSide( globalImages->shadowImage_CubeDepth[vLight->shadowLOD], side );
-			else
+			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
 				fb->AttachImageDepthLayer( globalImages->shadowImage[vLight->shadowLOD], side );
+			else
+				fb->AttachImageDepthSide( globalImages->shadowImage_CubeDepth[vLight->shadowLOD], side );
 		}
         else
 		{
@@ -111,7 +116,7 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 	{
         if( vLight->parallel && side >= 0 )
 		{
-			if(glConfig.depthTextureAvailable)
+			if(r_useDepthTexture)
 			{
 				fb->AttachColorBuffer();
 				fb->AttachImageDepth(globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
@@ -124,7 +129,7 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 		}
         else if( vLight->pointLight && side >= 0 )
 		{
-			if(glConfig.depthTextureCubeMapAvailable)
+			if(r_useCubeDepthTexture)
 			{
 				fb->AttachColorBuffer();
 				fb->AttachImageDepthSide( globalImages->shadowImage_CubeDepth[vLight->shadowLOD], side);
@@ -137,7 +142,7 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 		}
         else
 		{
-			if(glConfig.depthTextureAvailable)
+			if(r_useDepthTexture)
 			{
 				fb->AttachColorBuffer();
 				fb->AttachImageDepth(globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
@@ -195,13 +200,13 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
         }
         else if( backEnd.vLight->pointLight )
         {
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR || r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH)
+			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
+				sampleScale = 2.0;
+			else
 			{
 				if(sampleFactor != 0)
 					lod = 0.5;
 			}
-			else
-				sampleScale = 2.0;
         }
         else
         {
@@ -230,6 +235,7 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
         sampleScale *= sampleFactor;
 
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), lod * sampleScale);
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[5]), SampleFactors[backEnd.vLight->shadowLOD]); // 1.0 / size
 }
 
 // Setup polygon offset in shadow map pass
@@ -239,17 +245,17 @@ ID_INLINE static void RB_ShadowMapping_polygonOffset(void)
     {
         case 0:
             GL_Cull( CT_FRONT_SIDED );
-            GL_PolygonOffset( true, r_shadowMapPolygonFactor.GetFloat(), r_shadowMapPolygonOffset.GetFloat() );
+            GL_PolygonOffset( true, harm_r_shadowMapPolygonFactor.GetFloat(), harm_r_shadowMapPolygonOffset.GetFloat() );
             break;
 
         case 1:
             GL_Cull( CT_BACK_SIDED );
-            GL_PolygonOffset( true, -r_shadowMapPolygonFactor.GetFloat(), -r_shadowMapPolygonOffset.GetFloat() );
+            GL_PolygonOffset( true, -harm_r_shadowMapPolygonFactor.GetFloat(), -harm_r_shadowMapPolygonOffset.GetFloat() );
             break;
 
         default:
             GL_Cull( CT_TWO_SIDED );
-            GL_PolygonOffset( true, r_shadowMapPolygonFactor.GetFloat(), r_shadowMapPolygonOffset.GetFloat() );
+            GL_PolygonOffset( true, harm_r_shadowMapPolygonFactor.GetFloat(), harm_r_shadowMapPolygonOffset.GetFloat() );
             break;
     }
 }
@@ -315,42 +321,10 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* v
         shadowShader = &depthShader_parallelLight;
     else if( vLight->pointLight && side >= 0 )
     {
-#ifdef GL_ES_VERSION_3_0
-        if(USING_GLES3)
-		{
-            switch (r_shadowMapPointLight) {
-                case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+		if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
                     shadowShader = &depthShader_pointLight;
-                    break;
-                case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
-                    shadowShader = &depthShader_pointLight_far;
-                    break;
-                case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH:
-                    shadowShader = &depthShader_pointLight_z;
-                    break;
-                default:
-                    shadowShader = &depthShader_pointLight;
-                    break;
-            }
-		}
         else
-#endif
-        {
-            switch (r_shadowMapPointLight) {
-                case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
-                    shadowShader = &depthShader_pointLight;
-                    break;
-                case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
                     shadowShader = &depthShader_pointLight_far;
-                    break;
-                case POINT_LIGHT_RENDER_METHOD_EMULATE_Z:
-                    shadowShader = &depthShader_pointLight_z;
-                    break;
-                default:
-                    shadowShader = &depthShader_pointLight;
-                    break;
-            }
-        }
     }
     else
         shadowShader = &depthShader_spotLight;
@@ -369,42 +343,10 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
         }
         else if( vLight->pointLight )
         {
-#ifdef GL_ES_VERSION_3_0
-            if(USING_GLES3)
-			{
-                switch (r_shadowMapPointLight) {
-                    case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
                         shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-                        break;
-                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
-                        shadowInteractionShader = &interactionShadowMappingShader_pointLight_far;
-                        break;
-                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH:
-                        shadowInteractionShader = &interactionShadowMappingShader_pointLight_z;
-                        break;
-                    default:
-                        shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-                        break;
-                }
-			}
             else
-#endif
-            {
-                switch (r_shadowMapPointLight) {
-                    case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
-                        shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-                        break;
-                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
                         shadowInteractionShader = &interactionShadowMappingShader_pointLight_far;
-                        break;
-                    case POINT_LIGHT_RENDER_METHOD_EMULATE_Z:
-                        shadowInteractionShader = &interactionShadowMappingShader_pointLight_z;
-                        break;
-                    default:
-                        shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-                        break;
-                }
-            }
         }
         else
         {
@@ -419,42 +361,10 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
         }
         else if( vLight->pointLight )
         {
-#ifdef GL_ES_VERSION_3_0
-            if(USING_GLES3)
-			{
-                switch (r_shadowMapPointLight) {
-                    case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
+			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
                         shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
-                        break;
-                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
-                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_far;
-                        break;
-                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH:
-                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_z;
-                        break;
-                    default:
-                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
-                        break;
-                }
-			}
             else
-#endif
-            {
-                switch (r_shadowMapPointLight) {
-                    case POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH:
-                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
-                        break;
-                    case POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR:
                         shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_far;
-                        break;
-                    case POINT_LIGHT_RENDER_METHOD_EMULATE_Z:
-                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_z;
-                        break;
-                    default:
-                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
-                        break;
-                }
-            }
         }
         else
         {
@@ -509,7 +419,7 @@ void R_SaveColorBuffer(const char *name)
 // Test framebuffer color buffer to file for debug
 ID_INLINE static void RB_TestColorBuffer(const viewLight_t* vLight, int side)
 {
-    if(SaveColorBuffer.GetBool())
+    if(r_dumpShadowMap)
     {
         const char *lightTypeName;
         if( vLight->parallel )
@@ -1464,10 +1374,10 @@ ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
 		}
 		else if( backEnd.vLight->pointLight )
 		{
-            if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR || r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR_WITH_FRAG_DEPTH)
-                globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
-			else
+            if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
                 globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
+			else
+                globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else
 		{
@@ -1479,21 +1389,21 @@ ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
 	{
 		if( backEnd.vLight->parallel )
 		{
-			if(glConfig.depthTextureAvailable)
+			if(r_useDepthTexture)
 				globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD]->Bind();
 			else
 			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else if( backEnd.vLight->pointLight )
 		{
-			if(glConfig.depthTextureCubeMapAvailable)
+			if(r_useCubeDepthTexture)
 				globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
 			else
 			globalImages->shadowImage_CubeRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else
 		{
-			if(glConfig.depthTextureAvailable)
+			if(r_useDepthTexture)
 				globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD]->Bind();
 			else
 			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
