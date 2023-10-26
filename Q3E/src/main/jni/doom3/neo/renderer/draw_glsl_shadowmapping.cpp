@@ -201,11 +201,11 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
         else if( backEnd.vLight->pointLight )
         {
 			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
-				sampleScale = 2.0;
+				sampleScale = 1.0;
 			else
 			{
-				if(sampleFactor != 0)
-					lod = 0.5;
+				//if(sampleFactor != 0) lod = 0.2;
+				sampleScale = 100.0;
 			}
         }
         else
@@ -222,8 +222,8 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
     }
     else if( backEnd.vLight->pointLight )
     {
-        if(sampleFactor != 0)
-            lod = 0.5;
+        // if(sampleFactor != 0) lod = 0.2;
+		sampleScale = 100.0;
     }
     else
     {

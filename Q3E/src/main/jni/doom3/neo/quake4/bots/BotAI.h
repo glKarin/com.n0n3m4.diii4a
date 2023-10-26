@@ -13,7 +13,7 @@
 
 #define BOT_ENABLED() (gameLocal.isMultiplayer && gameLocal.isServer && botAi::IsAvailable())
 
-#define BOT_AAS "aas32" // "aas48"
+#define BOT_AAS "botaas32" // "aas48"
 
 //karin: auto fill bots in MP-game
 extern idCVar harm_si_autoFillBots;
