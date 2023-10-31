@@ -254,6 +254,11 @@ void idSoundChannel::ALStop(void)
 		if (alIsSource(openalSource)) {
 			alSourceStop(openalSource);
 			alSourcei(openalSource, AL_BUFFER, 0);
+#ifdef _OPENAL_EFX
+			// unassociate effect slot from source, so the effect slot can be deleted on shutdown
+			// even though the source itself is deleted later (in idSoundSystemLocal::Shutdown())
+			alSource3i( openalSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL );
+#endif
 			soundSystemLocal.FreeOpenALSource(openalSource);
 		}
 
@@ -528,8 +533,8 @@ void idSoundEmitterLocal::CheckForCompletion(int current44kHzTime)
 
 			// see if this channel has completed
 			if (!(chan->parms.soundShaderFlags & SSF_LOOPING)) {
-				//ALint state = AL_PLAYING;
 #ifdef _OPENAL
+				ALint state = AL_PLAYING;
 				if (idSoundSystemLocal::useOpenAL && alIsSource(chan->openalSource)) {
 					alGetSourcei(chan->openalSource, AL_SOURCE_STATE, &state);
 				}

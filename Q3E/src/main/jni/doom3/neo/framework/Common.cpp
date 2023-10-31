@@ -2878,12 +2878,6 @@ idCommonLocal::LoadGameDLL
 #define _HARM_BASE_GAME_DLL "game"
 #endif
 
-#ifndef _ANDROID_PACKAGE_NAME
-//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
-#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
-#endif
-
-#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
 #endif
 //k
 #define _ANDROID_NATIVE_LIBRARY_DIR "<Android APK native library directory path>/"

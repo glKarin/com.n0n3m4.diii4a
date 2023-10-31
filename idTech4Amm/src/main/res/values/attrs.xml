@@ -7,4 +7,9 @@
         <attr name="suffix" format="string"/>
         <attr name="editable" format="boolean"/>
     </declare-styleable>
+
+    <declare-styleable name="Divider">
+        <attr name="label" format="string"/>
+        <attr name="lineColor" format="color"/>
+    </declare-styleable>
 </resources>

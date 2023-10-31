@@ -84,6 +84,9 @@ idCVar idSoundSystemLocal::s_useEAXReverb("s_useEAXReverb", "0", CVAR_SOUND | CV
 idCVar idSoundSystemLocal::s_muteEAXReverb("s_muteEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "mute eax reverb");
 idCVar idSoundSystemLocal::s_decompressionLimit("s_decompressionLimit", "6", CVAR_SOUND | CVAR_INTEGER | CVAR_ROM, "specifies maximum uncompressed sample length in seconds");
 #endif
+#ifdef _OPENAL_EFX
+idCVar idSoundSystemLocal::s_alReverbGain( "s_alReverbGain", "0.5", CVAR_SOUND | CVAR_FLOAT | CVAR_ARCHIVE, "reduce reverb strength (0.0 to 1.0)", 0.0f, 1.0f );
+#endif
 
 bool idSoundSystemLocal::useOpenAL = false;
 bool idSoundSystemLocal::useEAXReverb = false;
@@ -399,13 +402,19 @@ void idSoundSystemLocal::Init()
 	}
 
 	// set up openal device and context
-	common->StartupVariable("s_useOpenAL", false);
-	common->StartupVariable("s_useEAXReverb", false);
+#if !defined(__ANDROID__)
+	common->StartupVariable("s_useOpenAL", true);
+	common->StartupVariable("s_useEAXReverb", true);
+#endif
 
 #ifdef _OPENAL
 	if (idSoundSystemLocal::s_useOpenAL.GetBool() || idSoundSystemLocal::s_useEAXReverb.GetBool()) {
+		// default all true
+		idSoundSystemLocal::s_useOpenAL.SetBool(true);
+		idSoundSystemLocal::s_useEAXReverb.SetBool( true );
 		if (!Sys_LoadOpenAL()) {
 			idSoundSystemLocal::s_useOpenAL.SetBool(false);
+            idSoundSystemLocal::s_useEAXReverb.SetBool(false);
 		} else {
 			common->Printf("Setup OpenAL device and context... ");
 			openalDevice = alcOpenDevice(NULL);
@@ -413,6 +422,56 @@ void idSoundSystemLocal::Init()
 			alcMakeContextCurrent(openalContext);
 			common->Printf("Done.\n");
 
+			// log openal info
+			common->Printf( "OpenAL vendor: %s\n", alGetString(AL_VENDOR) );
+			common->Printf( "OpenAL renderer: %s\n", alGetString(AL_RENDERER) );
+			common->Printf( "OpenAL version: %s\n", alGetString(AL_VERSION) );
+
+#ifdef _OPENAL_EFX
+			// try to obtain EFX extensions
+			if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
+				common->Printf( "OpenAL: found EFX extension\n" );
+				EAXAvailable = 1;
+
+				alGenEffects = (LPALGENEFFECTS)alGetProcAddress(ID_ALCHAR "alGenEffects");
+				alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress(ID_ALCHAR "alDeleteEffects");
+				alIsEffect = (LPALISEFFECT)alGetProcAddress(ID_ALCHAR "alIsEffect");
+				alEffecti = (LPALEFFECTI)alGetProcAddress(ID_ALCHAR "alEffecti");
+				alEffectf = (LPALEFFECTF)alGetProcAddress(ID_ALCHAR "alEffectf");
+				alEffectfv = (LPALEFFECTFV)alGetProcAddress(ID_ALCHAR "alEffectfv");
+				alGenFilters = (LPALGENFILTERS)alGetProcAddress(ID_ALCHAR "alGenFilters");
+				alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress(ID_ALCHAR "alDeleteFilters");
+				alIsFilter = (LPALISFILTER)alGetProcAddress(ID_ALCHAR "alIsFilter");
+				alFilteri = (LPALFILTERI)alGetProcAddress(ID_ALCHAR "alFilteri");
+				alFilterf = (LPALFILTERF)alGetProcAddress(ID_ALCHAR "alFilterf");
+				alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alGenAuxiliaryEffectSlots");
+				alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alDeleteAuxiliaryEffectSlots");
+				alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress(ID_ALCHAR "alIsAuxiliaryEffectSlot");;
+				alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSloti");
+				alAuxiliaryEffectSlotf = (LPALAUXILIARYEFFECTSLOTF)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSlotf");
+			} else {
+				common->Printf( "OpenAL: EFX extension not found\n" );
+				EAXAvailable = 0;
+				idSoundSystemLocal::s_useEAXReverb.SetBool( false );
+
+				alGenEffects = NULL;
+				alDeleteEffects = NULL;
+				alIsEffect = NULL;
+				alEffecti = NULL;
+				alEffectf = NULL;
+				alEffectfv = NULL;
+				alGenFilters = NULL;
+				alDeleteFilters = NULL;
+				alIsFilter = NULL;
+				alFilteri = NULL;
+				alFilterf = NULL;
+				alGenAuxiliaryEffectSlots = NULL;
+				alDeleteAuxiliaryEffectSlots = NULL;
+				alIsAuxiliaryEffectSlot = NULL;
+				alAuxiliaryEffectSloti = NULL;
+				alAuxiliaryEffectSlotf = NULL;
+			}
+#else
 			// try to obtain EAX extensions
 			if (idSoundSystemLocal::s_useEAXReverb.GetBool() && alIsExtensionPresent(ID_ALCHAR "EAX4.0")) {
 				idSoundSystemLocal::s_useOpenAL.SetBool(true);	// EAX presence causes AL enable
@@ -436,6 +495,7 @@ void idSoundSystemLocal::Init()
 				alEAXGetBufferMode = (EAXGetBufferMode)NULL;
 				common->Printf("OpenAL: no EAX-RAM extension\n");
 			}
+#endif
 
 			if (!idSoundSystemLocal::s_useOpenAL.GetBool()) {
 				common->Printf("OpenAL: disabling ( no EAX ). Using legacy mixer.\n");
@@ -1299,6 +1359,10 @@ void idSoundSystemLocal::EndLevelLoad(const char *mapstring)
 	soundCache->EndLevelLoad();
 
 #ifdef _OPENAL
+#ifdef _OPENAL_EFX
+	if (!useEAXReverb)
+		return;
+#endif
 
 	idStr efxname("efxs/");
 	idStr mapname(mapstring);
@@ -1313,6 +1377,14 @@ void idSoundSystemLocal::EndLevelLoad(const char *mapstring)
 		common->Printf("sound: found %s\n", efxname.c_str());
 	} else {
 		common->Printf("sound: missing %s\n", efxname.c_str());
+#ifdef _RAVEN //karin: Quake4 has efxs/default.efx
+		efxloaded = EFXDatabase.LoadFile("efxs/default.efx");
+		if (efxloaded) {
+			common->Printf("sound: default found %s\n", efxname.c_str());
+		} else {
+			common->Printf("sound: default missing %s\n", efxname.c_str());
+		}
+#endif
 	}
 #endif
 }
@@ -1422,13 +1494,13 @@ void idSoundSystemLocal::FreeOpenALSource(ALuint handle)
 			}
 
 #if ID_OPENAL
-
+#if !defined(_OPENAL_EFX)
 			// Reset source EAX ROOM level when freeing stereo source
 			if (openalSources[i].stereo && alEAXSet) {
 				long Room = EAXSOURCE_DEFAULTROOM;
 				alEAXSet(&EAXPROPERTYID_EAX_Source, EAXSOURCE_ROOM, openalSources[i].handle, &Room, sizeof(Room));
 			}
-
+#endif
 #endif
 			// Initialize structure
 			openalSources[i].startTime = 0;
@@ -1620,6 +1692,9 @@ int idSoundSystemLocal::IsEAXAvailable(void)
 #if !ID_OPENAL
 	return -1;
 #else
+#ifdef _OPENAL_EFX
+	return EAXAvailable;
+#else
 	ALCdevice	*device;
 	ALCcontext	*context;
 
@@ -1650,6 +1725,7 @@ int idSoundSystemLocal::IsEAXAvailable(void)
 	alcCloseDevice(device);
 	EAXAvailable = 0;
 	return 0;
+#endif
 #endif
 }
 

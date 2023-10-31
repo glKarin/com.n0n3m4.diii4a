@@ -42,6 +42,12 @@ If you have questions concerning this license or the applicable additional terms
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #define ID_ALCHAR
+#elif defined(__ANDROID__)
+#include "../externlibs/openal-soft/include/AL/al.h"
+#include "../externlibs/openal-soft/include/AL/alc.h"
+#include "../externlibs/openal-soft/include/AL/efx.h"
+#include "../openal/idal.h"
+#define ID_ALCHAR (ALubyte *)
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -744,7 +750,15 @@ class idSoundWorldLocal : public idSoundWorld
 		idVec3					listenerQU;			// position in "quake units"
 		int						listenerArea;
 		idStr					listenerAreaName;
-		int						listenerEnvironmentID;
+#ifdef _OPENAL_EFX
+	ALuint					listenerEffect;
+	ALuint					listenerSlot;
+	bool					listenerAreFiltersInitialized;
+	ALuint					listenerFilters[2]; // 0 - direct; 1 - send.
+	float					listenerSlotReverbGain;
+#else
+	int						listenerEnvironmentID;
+#endif
 
 		int						gameMsec;
 		int						game44kHz;
@@ -952,18 +966,40 @@ class idSoundSystemLocal : public idSoundSystem
 	ALCcontext				*openalContext;
 	ALsizei					openalSourceCount;
 	openalSource_t			openalSources[256];
+
+#ifdef _OPENAL_EFX
+	LPALGENEFFECTS			alGenEffects;
+	LPALDELETEEFFECTS		alDeleteEffects;
+	LPALISEFFECT			alIsEffect;
+	LPALEFFECTI				alEffecti;
+	LPALEFFECTF				alEffectf;
+	LPALEFFECTFV			alEffectfv;
+	LPALGENFILTERS			alGenFilters;
+	LPALDELETEFILTERS		alDeleteFilters;
+	LPALISFILTER			alIsFilter;
+	LPALFILTERI				alFilteri;
+	LPALFILTERF				alFilterf;
+	LPALGENAUXILIARYEFFECTSLOTS		alGenAuxiliaryEffectSlots;
+	LPALDELETEAUXILIARYEFFECTSLOTS	alDeleteAuxiliaryEffectSlots;
+	LPALISAUXILIARYEFFECTSLOT		alIsAuxiliaryEffectSlot;
+	LPALAUXILIARYEFFECTSLOTI		alAuxiliaryEffectSloti;
+	LPALAUXILIARYEFFECTSLOTF		alAuxiliaryEffectSlotf;
+
+	static idCVar s_alReverbGain;
+#else
 	EAXSet					alEAXSet;
 	EAXGet					alEAXGet;
 	EAXSetBufferMode		alEAXSetBufferMode;
 	EAXGetBufferMode		alEAXGetBufferMode;
+#endif
 	idEFXFile				EFXDatabase;
 #endif
 	bool					efxloaded;
 	// latches
 	static bool				useOpenAL;
-	static bool				useEAXReverb;
+	static bool				useEAXReverb; //k: useEFXReverb if using EFX
 	// mark available during initialization, or through an explicit test
-	static int				EAXAvailable;
+	static int				EAXAvailable; //k: EFXAvailable if using EFX
 
 
 	static idCVar			s_noSound;

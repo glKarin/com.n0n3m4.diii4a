@@ -72,6 +72,7 @@ option(SUPPORT_OBJ			"Support obj model" ON)
 option(SUPPORT_DAE			"Support dae model" ON)
 option(SHADOW_MAPPING			"Shadow mapping support" ON)
 option(OPENGLES3			"OpenGLES3 support" ON)
+option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
 
 option(D3LE			"Build the d3le game code" ON)
 option(CDOOM			"Build the cdoom game code" ON)
@@ -304,6 +305,13 @@ if(SHADOW_MAPPING)
 	set(CORE_DEFINES "${CORE_DEFINES};_SHADOW_MAPPING")
 	message(STATUS "Add shadow mapping support")
 endif()
+
+if(OPENAL)
+	add_subdirectory (externlibs/openal-soft)
+	add_definitions(-D_OPENAL -D_OPENAL_EFX)
+	message(STATUS "Build OpenAL(soft) support")
+endif()
+
 #//k jpeg
 set(src_jpeg
 		externlibs/jpeg-8d/jaricom.c

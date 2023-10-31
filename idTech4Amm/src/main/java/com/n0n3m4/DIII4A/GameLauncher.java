@@ -271,6 +271,25 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_s_useOpenAL)
+			{
+				setProp("s_useOpenAL", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, isChecked)
+						.commit();
+				if(!isChecked)
+				{
+					V.cb_s_useEAXReverb.setChecked(false);
+				}
+				V.cb_s_useEAXReverb.setEnabled(isChecked);
+			}
+			else if (id == R.id.cb_s_useEAXReverb)
+			{
+				setProp("s_useEAXReverb", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, isChecked)
+						.commit();
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -982,6 +1001,10 @@ public class GameLauncher extends Activity
         V.find_dll.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.scale_by_screen_area.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.scale_by_screen_area.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_scale_by_screen_area, false));
+		V.cb_s_useOpenAL.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_s_useOpenAL, true));
+		V.cb_s_useEAXReverb.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_s_useEAXReverb, true));
+		V.cb_s_useOpenAL.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_s_useEAXReverb.setOnCheckedChangeListener(m_checkboxChangeListener);
 
         updatehacktings();
 
@@ -1342,6 +1365,8 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, V.scale_by_screen_area.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, V.cb_s_useEAXReverb.isChecked());
 
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -2175,6 +2200,8 @@ public class GameLauncher extends Activity
 		public CheckBox scale_by_screen_area;
 		public RadioGroup rg_harm_r_shadow;
 		public RadioGroup rg_opengl;
+		public CheckBox cb_s_useOpenAL;
+		public CheckBox cb_s_useEAXReverb;
 
         public void Setup()
         {
@@ -2238,6 +2265,8 @@ public class GameLauncher extends Activity
 			scale_by_screen_area = findViewById(R.id.scale_by_screen_area);
 			rg_harm_r_shadow = findViewById(R.id.rg_harm_r_shadow);
 			rg_opengl = findViewById(R.id.rg_opengl);
+			cb_s_useOpenAL = findViewById(R.id.cb_s_useOpenAL);
+			cb_s_useEAXReverb = findViewById(R.id.cb_s_useEAXReverb);
         }
     }
 

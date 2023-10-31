@@ -63,3 +63,14 @@ extern ALvoid(ALAPIENTRY *idalSourcePlay)(ALuint);
 #define alSourcef idalSourcef
 #define alSourceUnqueueBuffers idalSourceUnqueueBuffers
 #define alSourcePlay idalSourcePlay
+
+
+#ifdef _OPENAL_EFX
+extern ALCboolean(ALAPIENTRY *idalcIsExtensionPresent)(ALCdevice *, const ALCchar *);
+extern const ALchar *(ALAPIENTRY *idalGetString)(ALenum);
+extern ALvoid(ALAPIENTRY *idalSource3i)(ALuint, ALenum, ALint, ALint, ALint);
+
+#define alcIsExtensionPresent idalcIsExtensionPresent
+#define alGetString idalGetString
+#define alSource3i idalSource3i
+#endif
