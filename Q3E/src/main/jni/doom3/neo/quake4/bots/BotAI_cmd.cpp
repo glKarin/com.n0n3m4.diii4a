@@ -257,8 +257,6 @@ int botAi::AddBot(const char *defName, idDict &dict)
 
     userInfo.Set( "ui_ready", "Ready" );
 
-    gameLocal.SetUserInfo( newClientID, userInfo, false ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
-
 	idStrList playerModelNames;
 	int numMarinePlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_MARINE);
 	if(numMarinePlayerModel > 0)
@@ -301,8 +299,10 @@ int botAi::AddBot(const char *defName, idDict &dict)
 		botClient->spawnArgs.Set("ui_model", modelName);
 		botClient->spawnArgs.Set("def_default_model", modelName);
 	}
-	botClient->UpdateModelSetup(true);
+
+    gameLocal.SetUserInfo( newClientID, userInfo, false ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
     botClient->Spectate( false ); // TinMan: Finally done, get outa spectate
+    botClient->UpdateModelSetup(true);
 
     cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", newClientID ) );
 

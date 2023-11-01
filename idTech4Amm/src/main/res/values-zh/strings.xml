@@ -262,6 +262,6 @@
     <string name="shadow_mapping">Shadow mapping</string>
     <string name="renderer">渲染</string>
     <string name="_sound">声音</string>
-    <string name="using_openal">启用OpenAL</string>
-    <string name="using_efx_reverb">启用EFX混响</string>
+    <string name="using_openal">启用OpenAL(soft)(cvar `s_useOpenAL`)</string>
+    <string name="using_efx_reverb">启用EFX混响(cvar `s_useEAXReverb`)</string>
 </resources>
