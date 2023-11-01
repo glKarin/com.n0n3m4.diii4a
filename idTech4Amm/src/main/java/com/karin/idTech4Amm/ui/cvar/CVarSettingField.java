@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.karin.idTech4Amm.lib.KCVar;
@@ -14,7 +15,7 @@ public class CVarSettingField extends LinearLayout implements CompoundButton.OnC
 {
     private static final boolean CONST_DEFAULT_ENABLED = false;
     private CVarSettingInterface m_field;
-    private CheckBox m_checkBox;
+    private Switch m_checkBox; // CheckBox
 
     public CVarSettingField(Context context, String name, View view)
     {
@@ -32,7 +33,7 @@ public class CVarSettingField extends LinearLayout implements CompoundButton.OnC
 
         LinearLayout labelLayout = new LinearLayout(context);
         labelLayout.setOrientation(HORIZONTAL);
-        m_checkBox = new CheckBox(context);
+        m_checkBox = new Switch(context);
         params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         m_checkBox.setChecked(CONST_DEFAULT_ENABLED);
         m_field.SetEnabled(CONST_DEFAULT_ENABLED);

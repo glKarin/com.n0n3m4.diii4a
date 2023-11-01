@@ -86,84 +86,18 @@
 				android:id="@+id/rg_fs_game"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
-
-				<RadioButton
-					android:id="@+id/fs_game_base"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:checked="true"
-					android:text="@string/doom_iii"/>
-
-				<RadioButton
-					android:id="@+id/fs_game_d3xp"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/doom3_resurrection_of_evil_d3xp"/>
-
-				<RadioButton
-					android:id="@+id/fs_game_cdoom"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/classic_doom_cdoom"/>
-
-				<RadioButton
-					android:id="@+id/fs_game_lost_mission"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/doom3_bfg_the_lost_mission_d3le"/>
-
-				<RadioButton
-					android:id="@+id/fs_game_rivensin"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/rivensin_rivensin"/>
-
-                <RadioButton
-                    android:id="@+id/fs_game_hardcorps"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-					android:text="@string/hardcorps_hardcorps"/>
-				<!--<RadioButton
-					android:id="@+id/fs_game_overthinked"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/overthinked_overthinked"/>
-				<RadioButton
-					android:id="@+id/fs_game_sabot"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/sabot_sabot"/>
-				<RadioButton
-					android:id="@+id/fs_game_hexeneoc"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/hexen_edge_of_chaos_hexeneoc"/>-->
 			</RadioGroup>
 
             <RadioGroup
                 android:id="@+id/rg_fs_q4game"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-
-                <RadioButton
-                    android:id="@+id/fs_game_quake4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-					android:text="@string/quake_iv_q4base"/>
-
 			</RadioGroup>
 
 			<RadioGroup
 				android:id="@+id/rg_fs_preygame"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
-
-				<RadioButton
-					android:id="@+id/fs_game_prey"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/prey_preybase"/>
-
 			</RadioGroup>
 
 

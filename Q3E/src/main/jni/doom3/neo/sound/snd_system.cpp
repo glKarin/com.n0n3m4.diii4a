@@ -410,11 +410,15 @@ void idSoundSystemLocal::Init()
 #ifdef _OPENAL
 	if (idSoundSystemLocal::s_useOpenAL.GetBool() || idSoundSystemLocal::s_useEAXReverb.GetBool()) {
 		// default all true
+#ifdef __ANDROID__
 		idSoundSystemLocal::s_useOpenAL.SetBool(true);
-		idSoundSystemLocal::s_useEAXReverb.SetBool( true );
+#endif
 		if (!Sys_LoadOpenAL()) {
 			idSoundSystemLocal::s_useOpenAL.SetBool(false);
             idSoundSystemLocal::s_useEAXReverb.SetBool(false);
+#ifdef __ANDROID__
+			EAXAvailable = 0;
+#endif
 		} else {
 			common->Printf("Setup OpenAL device and context... ");
 			openalDevice = alcOpenDevice(NULL);
@@ -429,47 +433,55 @@ void idSoundSystemLocal::Init()
 
 #ifdef _OPENAL_EFX
 			// try to obtain EFX extensions
-			if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
-				common->Printf( "OpenAL: found EFX extension\n" );
-				EAXAvailable = 1;
+			if(idSoundSystemLocal::s_useEAXReverb.GetBool())
+			{
+				if (alcIsExtensionPresent(openalDevice, "ALC_EXT_EFX")) {
+					common->Printf( "OpenAL: found EFX extension\n" );
+					EAXAvailable = 1;
+					idSoundSystemLocal::s_useEAXReverb.SetBool( true );
 
-				alGenEffects = (LPALGENEFFECTS)alGetProcAddress(ID_ALCHAR "alGenEffects");
-				alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress(ID_ALCHAR "alDeleteEffects");
-				alIsEffect = (LPALISEFFECT)alGetProcAddress(ID_ALCHAR "alIsEffect");
-				alEffecti = (LPALEFFECTI)alGetProcAddress(ID_ALCHAR "alEffecti");
-				alEffectf = (LPALEFFECTF)alGetProcAddress(ID_ALCHAR "alEffectf");
-				alEffectfv = (LPALEFFECTFV)alGetProcAddress(ID_ALCHAR "alEffectfv");
-				alGenFilters = (LPALGENFILTERS)alGetProcAddress(ID_ALCHAR "alGenFilters");
-				alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress(ID_ALCHAR "alDeleteFilters");
-				alIsFilter = (LPALISFILTER)alGetProcAddress(ID_ALCHAR "alIsFilter");
-				alFilteri = (LPALFILTERI)alGetProcAddress(ID_ALCHAR "alFilteri");
-				alFilterf = (LPALFILTERF)alGetProcAddress(ID_ALCHAR "alFilterf");
-				alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alGenAuxiliaryEffectSlots");
-				alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alDeleteAuxiliaryEffectSlots");
-				alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress(ID_ALCHAR "alIsAuxiliaryEffectSlot");;
-				alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSloti");
-				alAuxiliaryEffectSlotf = (LPALAUXILIARYEFFECTSLOTF)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSlotf");
-			} else {
-				common->Printf( "OpenAL: EFX extension not found\n" );
+					alGenEffects = (LPALGENEFFECTS)alGetProcAddress(ID_ALCHAR "alGenEffects");
+					alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress(ID_ALCHAR "alDeleteEffects");
+					alIsEffect = (LPALISEFFECT)alGetProcAddress(ID_ALCHAR "alIsEffect");
+					alEffecti = (LPALEFFECTI)alGetProcAddress(ID_ALCHAR "alEffecti");
+					alEffectf = (LPALEFFECTF)alGetProcAddress(ID_ALCHAR "alEffectf");
+					alEffectfv = (LPALEFFECTFV)alGetProcAddress(ID_ALCHAR "alEffectfv");
+					alGenFilters = (LPALGENFILTERS)alGetProcAddress(ID_ALCHAR "alGenFilters");
+					alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress(ID_ALCHAR "alDeleteFilters");
+					alIsFilter = (LPALISFILTER)alGetProcAddress(ID_ALCHAR "alIsFilter");
+					alFilteri = (LPALFILTERI)alGetProcAddress(ID_ALCHAR "alFilteri");
+					alFilterf = (LPALFILTERF)alGetProcAddress(ID_ALCHAR "alFilterf");
+					alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alGenAuxiliaryEffectSlots");
+					alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress(ID_ALCHAR "alDeleteAuxiliaryEffectSlots");
+					alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress(ID_ALCHAR "alIsAuxiliaryEffectSlot");;
+					alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSloti");
+					alAuxiliaryEffectSlotf = (LPALAUXILIARYEFFECTSLOTF)alGetProcAddress(ID_ALCHAR "alAuxiliaryEffectSlotf");
+				} else {
+					common->Printf( "OpenAL: EFX extension not found\n" );
+					EAXAvailable = 0;
+					idSoundSystemLocal::s_useEAXReverb.SetBool( false );
+
+					alGenEffects = NULL;
+					alDeleteEffects = NULL;
+					alIsEffect = NULL;
+					alEffecti = NULL;
+					alEffectf = NULL;
+					alEffectfv = NULL;
+					alGenFilters = NULL;
+					alDeleteFilters = NULL;
+					alIsFilter = NULL;
+					alFilteri = NULL;
+					alFilterf = NULL;
+					alGenAuxiliaryEffectSlots = NULL;
+					alDeleteAuxiliaryEffectSlots = NULL;
+					alIsAuxiliaryEffectSlot = NULL;
+					alAuxiliaryEffectSloti = NULL;
+					alAuxiliaryEffectSlotf = NULL;
+				}
+			}
+			else
+			{
 				EAXAvailable = 0;
-				idSoundSystemLocal::s_useEAXReverb.SetBool( false );
-
-				alGenEffects = NULL;
-				alDeleteEffects = NULL;
-				alIsEffect = NULL;
-				alEffecti = NULL;
-				alEffectf = NULL;
-				alEffectfv = NULL;
-				alGenFilters = NULL;
-				alDeleteFilters = NULL;
-				alIsFilter = NULL;
-				alFilteri = NULL;
-				alFilterf = NULL;
-				alGenAuxiliaryEffectSlots = NULL;
-				alDeleteAuxiliaryEffectSlots = NULL;
-				alIsAuxiliaryEffectSlot = NULL;
-				alAuxiliaryEffectSloti = NULL;
-				alAuxiliaryEffectSlotf = NULL;
 			}
 #else
 			// try to obtain EAX extensions
@@ -540,6 +552,9 @@ void idSoundSystemLocal::Init()
 				// adjust source count to allow for at least eight stereo sounds to play
 				openalSourceCount -= 8;
 
+#ifdef __ANDROID__
+				if(idSoundSystemLocal::s_useEAXReverb.GetBool())
+#endif
 				EAXAvailable = 1;
 			}
 		}

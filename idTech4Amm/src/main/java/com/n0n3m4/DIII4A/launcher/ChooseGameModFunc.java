@@ -93,7 +93,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                     name = Q3EGlobals.GAME_NAME_DOOM3;
             }
 
-            String guessGame = m_gameLauncher.GetGameOfMod(fileModel.name);
+            String guessGame = m_gameLauncher.GetGameManager().GetGameOfMod(fileModel.name);
             if(null != guessGame)
             {
                 switch (guessGame)
