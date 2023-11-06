@@ -521,7 +521,6 @@ static void R_InitGLSLCvars(void)
 
 #ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
-    r_shadowMapPointLight = harm_r_shadowMapPointLight2.GetInteger();
 #ifdef GL_ES_VERSION_3_0
 	if(!USING_GLES3)
 #endif
@@ -572,11 +571,6 @@ void R_CheckBackEndCvars(void)
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
 	}
-    if(harm_r_shadowMapPointLight2.IsModified())
-    {
-        r_shadowMapPointLight = harm_r_shadowMapPointLight2.GetInteger();
-        harm_r_shadowMapPointLight2.ClearModified();
-    }
 #endif
 }
 

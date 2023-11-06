@@ -29,10 +29,7 @@
  * 0 - 0.001. I am not sure.
  *
  * Point light:
- * Most light type at scene in Most levels.
- * cvar harm_r_shadowMapPointLight
- * 0. glsl macro _POINT_LIGHT_Z_AS_DEPTH: using window space z value as depth value[gl_FragCoord.z](slower but best)
- * 1. glsl macro _POINT_LIGHT_USING_DISTANCE: using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar](fastest but bad, but depend frustum far)
+ * Most light type at scene in Most levels. using window space z value as depth value[gl_FragCoord.z](slower but best)
  *
  * Parallel light:
  * Few light type. In out of room big scene, the lights most are point-light, but in lotaa/lotab/lotad of Prey are parallel light.
@@ -47,7 +44,6 @@
  * harm_r_shadowMapAlpha: float, 0.5, shadow alpha(0 - 1)
  * harm_r_shadowMapSampleFactor: float, -1.0, 0 multiple, 0 is disable, < 0 is auto, > 0 multi with fixed value
  * harm_r_shadowMapFrustumFar: float, -2.5, shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)
- * harm_r_shadowMapPointLight2: int, 0, point light render method, 0 = using window space z value as depth value[gl_FragCoord.z], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInWorldSpace - LightPositionInWorldSpace) / LightRadiusLengthAsFrustumFar]
  *
  */
 
@@ -63,7 +59,6 @@
 #define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR 1
 
 static bool r_shadowMapping = false;
-static int r_shadowMapPointLight = 0;
 bool r_useDepthTexture = true;
 bool r_useCubeDepthTexture = true;
 static bool r_dumpShadowMap = false; // backend
@@ -101,10 +96,7 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 		}
         else if( vLight->pointLight && side >= 0 )
 		{
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
-				fb->AttachImageDepthLayer( globalImages->shadowImage[vLight->shadowLOD], side );
-			else
-				fb->AttachImageDepthSide( globalImages->shadowImage_CubeDepth[vLight->shadowLOD], side );
+            fb->AttachImageDepthLayer( globalImages->shadowImage[vLight->shadowLOD], side );
 		}
         else
 		{
@@ -200,13 +192,7 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
         }
         else if( backEnd.vLight->pointLight )
         {
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
-				sampleScale = 1.0;
-			else
-			{
-				//if(sampleFactor != 0) lod = 0.2;
-				sampleScale = 100.0;
-			}
+            sampleScale = 1.0;
         }
         else
         {
@@ -320,12 +306,7 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* v
     if( vLight->parallel && side >= 0 )
         shadowShader = &depthShader_parallelLight;
     else if( vLight->pointLight && side >= 0 )
-    {
-		if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
-                    shadowShader = &depthShader_pointLight;
-        else
-                    shadowShader = &depthShader_pointLight_far;
-    }
+        shadowShader = &depthShader_pointLight;
     else
         shadowShader = &depthShader_spotLight;
     return shadowShader;
@@ -343,10 +324,7 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
         }
         else if( vLight->pointLight )
         {
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
-                        shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-            else
-                        shadowInteractionShader = &interactionShadowMappingShader_pointLight_far;
+            shadowInteractionShader = &interactionShadowMappingShader_pointLight;
         }
         else
         {
@@ -361,10 +339,7 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
         }
         else if( vLight->pointLight )
         {
-			if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
-                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
-            else
-                        shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight_far;
+            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
         }
         else
         {
@@ -1374,10 +1349,7 @@ ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
 		}
 		else if( backEnd.vLight->pointLight )
 		{
-            if(r_shadowMapPointLight == POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH)
-                globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-			else
-                globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
+            globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else
 		{

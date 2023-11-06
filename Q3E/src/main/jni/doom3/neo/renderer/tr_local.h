@@ -1627,23 +1627,14 @@ extern shaderProgram_t texgenShader; //k: texgen shader
 extern shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
 extern shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)
 extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: interaction with shadow mapping(point light)
-// for GLES2.0
-// distance / frustum-far
-extern shaderProgram_t depthShader_pointLight_far; //k: depth shader(point light)
-extern shaderProgram_t	interactionShadowMappingShader_pointLight_far; //k: interaction with shadow mapping(point light)
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight_far; //k: interaction with shadow mapping(point light)
-// emulate Z transform
-extern shaderProgram_t depthShader_pointLight_z; //k: depth shader(point light)
-extern shaderProgram_t	interactionShadowMappingShader_pointLight_z; //k: interaction with shadow mapping(point light)
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight_z; //k: interaction with shadow mapping(point light)
 
 extern shaderProgram_t depthShader_parallelLight; //k: depth shader(parallel)
-extern shaderProgram_t	interactionShadowMappingShader_parallelLight; //k: interaction with shadow(parallel)
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
+extern shaderProgram_t interactionShadowMappingShader_parallelLight; //k: interaction with shadow(parallel)
+extern shaderProgram_t interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
 
 extern shaderProgram_t depthShader_spotLight; //k: depth shader
-extern shaderProgram_t	interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
+extern shaderProgram_t interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
+extern shaderProgram_t interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
 #endif
 
 
@@ -2083,7 +2074,6 @@ extern idCVar harm_r_shadowMapSampleFactor;
 extern idCVar harm_r_shadowMapFrustumNear;
 extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
-extern idCVar harm_r_shadowMapPointLight2;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapPolygonFactor;
 extern idCVar harm_r_shadowMapPolygonOffset;

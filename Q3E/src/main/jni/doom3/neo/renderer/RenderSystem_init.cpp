@@ -197,7 +197,11 @@ idCVar r_showOverDraw("r_showOverDraw", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = 
 idCVar r_lockSurfaces("r_lockSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "allow moving the view point without changing the composition of the scene, including culling");
 idCVar r_useEntityCallbacks("r_useEntityCallbacks", "1", CVAR_RENDERER | CVAR_BOOL, "if 0, issue the callback immediately at update time, rather than defering");
 
+#ifdef _RAVEN //k: r_showSkel diff with renderer
+idCVar r_showSkel( "r_showSkel", "0", CVAR_RENDERER | CVAR_INTEGER, "draw the skeleton when model animates, 1 = draw model with skeleton, 2 = draw skeleton only, 3 = draw joints only", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
+#else
 idCVar r_showSkel("r_showSkel", "0", CVAR_RENDERER | CVAR_INTEGER, "draw the skeleton when model animates, 1 = draw model with skeleton, 2 = draw skeleton only", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2>);
+#endif
 idCVar r_jointNameScale("r_jointNameScale", "0.02", CVAR_RENDERER | CVAR_FLOAT, "size of joint names when r_showskel is set to 1");
 idCVar r_jointNameOffset("r_jointNameOffset", "0.5", CVAR_RENDERER | CVAR_FLOAT, "offset of joint names when r_showskel is set to 1");
 
@@ -2570,7 +2574,6 @@ idCVar harm_r_shadowMapSampleFactor( "harm_r_shadowMapSampleFactor", "-1.0", CVA
 idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum near" );
 idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2.5 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapPointLight2("harm_r_shadowMapPointLight2", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method: 0 = using window space z value as depth value[gl_FragCoord.z], 1 = using light position to vertex position distance divide frustum far value as depth value[length(VertexPositionInWorldSpace - LightPositionInWorldSpace) / LightRadiusLengthAsFrustumFar]", 0, 1, idCmdSystem::ArgCompletion_Integer<0, 1> );
 idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapPolygonFactor( "harm_r_shadowMapPolygonFactor", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
 idCVar harm_r_shadowMapPolygonOffset( "harm_r_shadowMapPolygonOffset", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );

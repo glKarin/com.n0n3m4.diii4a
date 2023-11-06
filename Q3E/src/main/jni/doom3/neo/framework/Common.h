@@ -268,6 +268,11 @@ class idCommon
 	virtual bool				DoingDeclValidation( void ) = 0;
 
 	virtual void				LoadToolsDLL( void ) = 0;
+
+// mekberg: added
+	virtual int					GetRModeForMachineSpec( int machineSpec ) const = 0;
+	virtual void				SetDesiredMachineSpec( int machineSpec ) = 0;
+// RAVEN END
 #endif
 
 		// Returns key bound to the command

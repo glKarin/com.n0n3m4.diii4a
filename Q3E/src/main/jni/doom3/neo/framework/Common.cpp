@@ -223,6 +223,8 @@ class idCommonLocal : public idCommon
 	virtual void				DebuggerCheckBreakpoint ( idInterpreter* interpreter, idProgram* program, int instructionPointer ) { (void)interpreter; (void)program; (void)instructionPointer; }
 	virtual bool				DoingDeclValidation( void ) { return false; }
 	virtual void				LoadToolsDLL( void ) { }
+	virtual int					GetRModeForMachineSpec( int machineSpec ) const { (void)machineSpec; return 0; };
+	virtual void				SetDesiredMachineSpec( int machineSpec ) { (void)machineSpec; };
 #endif
 #ifdef _HUMANHEAD
 	virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) { (void) src; (void)dst; (void)lengthAllocated; }
