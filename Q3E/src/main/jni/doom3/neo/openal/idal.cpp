@@ -244,3 +244,38 @@ const char *InitializeIDAL(HMODULE h)
 
 	return NULL;
 };
+
+#ifdef _DEBUG_AL_ERROR
+ALenum iddalGetError(ALvoid)
+{
+#define DEBUG_AL_ERROR(x) Sys_Printf("alGetError -> 0x%x: " #x "\n", x);
+	ALenum error;
+
+	error = idalGetError();
+	switch(error)
+	{
+		case AL_NO_ERROR:
+			break;
+		case AL_INVALID_NAME:
+			DEBUG_AL_ERROR(AL_INVALID_NAME);
+			break;
+		case AL_INVALID_ENUM:
+			DEBUG_AL_ERROR(AL_INVALID_ENUM);
+			break;
+		case AL_INVALID_VALUE:
+			DEBUG_AL_ERROR(AL_INVALID_VALUE);
+			break;
+		case AL_INVALID_OPERATION:
+			DEBUG_AL_ERROR(AL_INVALID_OPERATION);
+			break;
+		case AL_OUT_OF_MEMORY:
+			DEBUG_AL_ERROR(AL_OUT_OF_MEMORY);
+			break;
+		default:
+			break;
+	}
+
+	return error;
+#undef DEBUG_AL_ERROR
+}
+#endif

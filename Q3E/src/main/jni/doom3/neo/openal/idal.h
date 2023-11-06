@@ -2,6 +2,9 @@
 // C:\Python23\Lib\idlelib\idle.pyw
 // Mon Mar 28 12:31:26 2005
 
+#if !defined(_K_CLANG)
+#define ALvoid void
+#endif
 extern ALenum(ALAPIENTRY *idalGetError)(ALvoid);
 extern ALvoid(ALAPIENTRY *idalGenBuffers)(ALsizei, ALuint *);
 extern ALboolean(ALAPIENTRY *idalIsSource)(ALuint);
@@ -73,4 +76,11 @@ extern ALvoid(ALAPIENTRY *idalSource3i)(ALuint, ALenum, ALint, ALint, ALint);
 #define alcIsExtensionPresent idalcIsExtensionPresent
 #define alGetString idalGetString
 #define alSource3i idalSource3i
+#endif
+
+//#define _DEBUG_AL_ERROR
+#ifdef _DEBUG_AL_ERROR
+#undef alGetError
+extern ALenum iddalGetError(ALvoid);
+#define alGetError iddalGetError
 #endif

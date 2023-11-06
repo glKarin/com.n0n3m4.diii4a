@@ -25,10 +25,10 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#include "idlib/precompiled.h"
+#include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#include "sound/snd_local.h"
+#include "snd_local.h"
 
 #ifdef _OPENAL
 #ifdef _OPENAL_EFX

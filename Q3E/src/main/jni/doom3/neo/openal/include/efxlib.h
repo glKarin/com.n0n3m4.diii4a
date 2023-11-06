@@ -6,7 +6,7 @@
 
 #ifdef _OPENAL_EFX
 
-#include "../idlib/precompiled.h"
+#include "../../idlib/precompiled.h"
 
 #define EFX_VERBOSE 0
 
