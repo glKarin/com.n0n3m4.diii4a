@@ -11,7 +11,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CORE_DEFINES "__DOOM_DLL__;HAVE_CONFIG_H;NO_ALSA")
 
-# set(CMAKE_BUILD_TYPE "Release")
+# set(CMAKE_BUILD_TYPE "Debug")
 # TODO
 
 # osx: place game .dylib's in the bundle (next to the binary)

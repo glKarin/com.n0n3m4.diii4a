@@ -64,6 +64,7 @@ endif(COMMAND CMAKE_POLICY)
 
 project(OpenAL)
 
+# set(CMAKE_BUILD_TYPE "Debug")
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
         "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."

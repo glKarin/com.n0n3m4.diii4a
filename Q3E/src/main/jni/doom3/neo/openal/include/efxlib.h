@@ -8,7 +8,11 @@
 
 #include "../../idlib/precompiled.h"
 
+#ifdef _DEBUG_AL
+#define EFX_VERBOSE 1
+#else
 #define EFX_VERBOSE 0
+#endif
 
 #if EFX_VERBOSE
 #define EFXprintf(...) do { common->Printf(__VA_ARGS__); } while (false)

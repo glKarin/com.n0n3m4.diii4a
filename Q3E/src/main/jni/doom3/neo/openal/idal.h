@@ -36,6 +36,8 @@ extern ALvoid(ALAPIENTRY *idalSourcef)(ALuint, ALenum, ALfloat);
 extern ALvoid(ALAPIENTRY *idalSourceUnqueueBuffers)(ALuint, ALsizei, ALuint *);
 extern ALvoid(ALAPIENTRY *idalSourcePlay)(ALuint);
 
+extern const ALchar *(ALAPIENTRY *idalGetString)(ALenum);
+
 #define alGetError idalGetError
 #define alGenBuffers idalGenBuffers
 #define alIsSource idalIsSource
@@ -67,19 +69,19 @@ extern ALvoid(ALAPIENTRY *idalSourcePlay)(ALuint);
 #define alSourceUnqueueBuffers idalSourceUnqueueBuffers
 #define alSourcePlay idalSourcePlay
 
+#define alGetString idalGetString
+
 
 #ifdef _OPENAL_EFX
 extern ALCboolean(ALAPIENTRY *idalcIsExtensionPresent)(ALCdevice *, const ALCchar *);
-extern const ALchar *(ALAPIENTRY *idalGetString)(ALenum);
 extern ALvoid(ALAPIENTRY *idalSource3i)(ALuint, ALenum, ALint, ALint, ALint);
 
 #define alcIsExtensionPresent idalcIsExtensionPresent
-#define alGetString idalGetString
 #define alSource3i idalSource3i
 #endif
 
-//#define _DEBUG_AL_ERROR
-#ifdef _DEBUG_AL_ERROR
+//#define _DEBUG_AL
+#ifdef _DEBUG_AL
 #undef alGetError
 extern ALenum iddalGetError(ALvoid);
 #define alGetError iddalGetError

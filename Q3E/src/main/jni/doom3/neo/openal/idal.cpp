@@ -33,9 +33,9 @@ ALvoid(ALAPIENTRY *idalSourcef)(ALuint, ALenum, ALfloat) = NULL;
 ALvoid(ALAPIENTRY *idalSourceUnqueueBuffers)(ALuint, ALsizei, ALuint *) = NULL;
 ALvoid(ALAPIENTRY *idalSourcePlay)(ALuint) = NULL;
 
+const ALchar *(ALAPIENTRY *idalGetString)(ALenum) = NULL;
 #ifdef _OPENAL_EFX
 ALCboolean(ALC_APIENTRY *idalcIsExtensionPresent)(ALCdevice *, const ALCchar *) = NULL;
-const ALchar *(ALAPIENTRY *idalGetString)(ALenum) = NULL;
 ALvoid(ALAPIENTRY *idalSource3i)(ALuint, ALenum, ALint, ALint, ALint);
 #endif
 
@@ -222,17 +222,17 @@ const char *InitializeIDAL(HMODULE h)
 	}
 
 
-#ifdef _OPENAL_EFX
-	idalcIsExtensionPresent = (ALCboolean(ALAPIENTRY *)(ALCdevice *, const ALCchar *))GetProcAddress(h, "alcIsExtensionPresent");
-
-	if (!idalcIsExtensionPresent) {
-		return "alcIsExtensionPresent";
-	}
 
 	idalGetString = (const ALchar *(ALAPIENTRY *)(ALenum))GetProcAddress(h, "alGetString");
 
 	if (!idalGetString) {
 		return "alGetString";
+	}
+#ifdef _OPENAL_EFX
+	idalcIsExtensionPresent = (ALCboolean(ALAPIENTRY *)(ALCdevice *, const ALCchar *))GetProcAddress(h, "alcIsExtensionPresent");
+
+	if (!idalcIsExtensionPresent) {
+		return "alcIsExtensionPresent";
 	}
 
 	idalSource3i = (ALvoid(ALAPIENTRY *)(ALuint, ALenum, ALint, ALint, ALint))GetProcAddress(h, "alSource3i");
@@ -245,7 +245,7 @@ const char *InitializeIDAL(HMODULE h)
 	return NULL;
 };
 
-#ifdef _DEBUG_AL_ERROR
+#ifdef _DEBUG_AL
 ALenum iddalGetError(ALvoid)
 {
 #define DEBUG_AL_ERROR(x) Sys_Printf("alGetError -> 0x%x: " #x "\n", x);
