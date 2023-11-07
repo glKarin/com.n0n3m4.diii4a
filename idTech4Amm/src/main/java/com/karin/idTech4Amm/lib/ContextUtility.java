@@ -26,6 +26,7 @@ import android.text.method.LinkMovementMethod;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.TextHelper;
+import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3ELang;
 
 import java.io.File;
@@ -111,12 +112,12 @@ public final class ContextUtility
         try
         {
             ApplicationInfo info = context.getApplicationInfo();
-            return (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            return (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0 || Constants.IsDebug();
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            return false; // default is release
+            return Constants.IsDebug(); // default is release
         }
     }
 

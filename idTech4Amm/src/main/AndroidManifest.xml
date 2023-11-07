@@ -31,6 +31,7 @@
                       android:xlargeScreens="true"                       
                       android:anyDensity="true"/>
 
+    <!--android:debuggable="true"-->
     <application
         android:icon="@drawable/icon"
         android:largeHeap="true"
@@ -40,7 +41,6 @@
         android:requestLegacyExternalStorage="true"
         android:preserveLegacyExternalStorage="true"
         android:hasFragileUserData="true"
-        android:debuggable="true"
         tools:ignore="HardcodedDebugMode,UnusedAttribute">
         <activity            
             android:name="com.n0n3m4.DIII4A.GameLauncher"

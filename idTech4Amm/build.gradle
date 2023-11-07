@@ -32,6 +32,8 @@ android {
         versionCode 11035
         versionName '1.1.0harmattan35'
         versionNameSuffix 'natasha'
+        buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
+        buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
     }
 
     buildTypes {

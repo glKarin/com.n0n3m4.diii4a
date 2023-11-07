@@ -1,8 +1,11 @@
 package com.karin.idTech4Amm.sys;
 
+import com.karin.idTech4Amm.BuildConfig;
+import com.karin.idTech4Amm.lib.DateTimeUtility;
 import com.karin.idTech4Amm.misc.TextHelper;
 
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Constants define
@@ -30,6 +33,26 @@ public final class Constants
             "Beam rendering optimization in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
             "Add subtitle support in Prey(2006).",
 	};
+
+    public static long GetBuildTimestamp()
+    {
+        return BuildConfig.BUILD_TIMESTAMP;
+    }
+
+    public static int GetBuildSDKVersion()
+    {
+        return BuildConfig.BUILD_SDK_VERSION;
+    }
+
+    public static boolean IsDebug()
+    {
+        return BuildConfig.DEBUG;
+    }
+
+    public static String GetBuildTime(String format)
+    {
+        return DateTimeUtility.Format(GetBuildTimestamp(), format);
+    }
     
 	private Constants() {}
 }
