@@ -259,8 +259,8 @@
     <string name="hide_ad_bar_in_launcher">Скрыть рекламную панель в лаунчере</string>
     <string name="scale_by_screen_area">Масштабировать по области экрана</string>
     <string name="shadow_cvar_r_useShadowMapping">Тени(cvar `r_useShadowMapping`)</string>
-    <string name="shadow_volume">Объем теней</string>
-    <string name="shadow_mapping">Наложение теней</string>
+    <string name="shadow_volume">Объёмные тени</string>
+    <string name="shadow_mapping">Мягкие тени</string>
     <string name="renderer">Рендер</string>
     <string name="_sound">Звук</string>
     <string name="using_openal">Использовать OpenAL(Мягкий)(cvar `s_useOpenAL`)</string>
