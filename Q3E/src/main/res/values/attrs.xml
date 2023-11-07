@@ -6,7 +6,7 @@
         <attr name="columnWidth" format="integer"/>
     </declare-styleable>
 
-    <dimen name="toolbarHeight">36dp</dimen>
+    <dimen name="toolbarHeight">32dp</dimen>
     <dimen name="toolButtonWidth">80dp</dimen>
     <dimen name="toolButtonSpacing">2dp</dimen>
     <dimen name="toolFunctionMargin">4dp</dimen>

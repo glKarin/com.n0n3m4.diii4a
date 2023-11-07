@@ -135,9 +135,9 @@ public final class TextHelper
         final String[] INFOS = {
             Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")",
             Constants.CONST_NAME,
-            "Update: " + ContextUtility.GetAppVersion(context) + ("(API " + Constants.GetBuildSDKVersion() + ")") + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
+            "Update: " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
             "Release: " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
-            "Build: " + Constants.GetBuildTime("yyyy-MM-dd HH:mm:ss.SSS"),
+            "Build: " + Constants.GetBuildTime("yyyy-MM-dd HH:mm:ss.SSS") + ("(API " + Constants.GetBuildSDKVersion() + ")"),
             "Dev: " + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_DEV),
             "Changes: ",
         };
@@ -277,9 +277,9 @@ public final class TextHelper
             Constants.CONST_NAME,
             "Changes by " + GenLinkText(Constants.CONST_DEVELOPER, Constants.CONST_DEV)
             + "&lt;" + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_EMAIL) + "&gt;",
-            "Update: " + ContextUtility.GetAppVersion(context) + ("(API " + Constants.GetBuildSDKVersion() + ")") + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
+            "Update: " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
             "Release: " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
-            "Build: " + Constants.GetBuildTime("yyyy-MM-dd HH:mm:ss.SSS"),
+            "Build: " + Constants.GetBuildTime("yyyy-MM-dd HH:mm:ss.SSS") + ("(API " + Constants.GetBuildSDKVersion() + ")"),
             null,
             "Rename from `DIII4A++`, base on original `n0n3m4`'s `DIII4A`.",
             "idTech4 engine's games support on Android.",

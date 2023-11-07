@@ -32,6 +32,7 @@ public final class Constants
             "Add OpenAL(soft version) and EFX Reverb support.",
             "Beam rendering optimization in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
             "Add subtitle support in Prey(2006).",
+            "Fixed gyroscope in invert-landscape mode.",
 	};
 
     public static long GetBuildTimestamp()
