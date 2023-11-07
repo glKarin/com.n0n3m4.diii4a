@@ -34,7 +34,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -50,6 +52,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,11 +61,13 @@ import com.karin.idTech4Amm.OnScreenButtonConfigActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
+import com.karin.idTech4Amm.lib.UIUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
+import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
@@ -102,6 +107,7 @@ import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -286,9 +292,20 @@ public class GameLauncher extends Activity
 			}
 			else if (id == R.id.cb_s_useEAXReverb)
 			{
+				if(isChecked)
+				{
+					V.cb_s_useOpenAL.setChecked(true);
+				}
 				setProp("s_useEAXReverb", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, isChecked)
+						.commit();
+			}
+			else if (id == R.id.readonly_command)
+			{
+				SetupCommandLine(isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(PreferenceKey.READONLY_COMMAND, isChecked)
 						.commit();
 			}
         }
@@ -757,7 +774,7 @@ public class GameLauncher extends Activity
         KUncaughtExceptionHandler.HandleUnexpectedException(this);
         setTitle(R.string.app_title);
         final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        ContextUtility.SetScreenOrientation(this, mPrefs.getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false) ? 0 : 1);
+        ContextUtility.SetScreenOrientation(this, mPrefs.getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false) ? 0 : 1);
 
         setContentView(R.layout.main);
 
@@ -780,7 +797,7 @@ public class GameLauncher extends Activity
         V.Setup();
 		InitGameList();
 
-        V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
+		V.main_ad_layout.setVisibility(mPrefs.getBoolean(PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
         SetGame(mPrefs.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3));
 
@@ -1003,10 +1020,20 @@ public class GameLauncher extends Activity
         V.find_dll.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.scale_by_screen_area.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.scale_by_screen_area.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_scale_by_screen_area, false));
-		V.cb_s_useOpenAL.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_s_useOpenAL, true));
+		boolean useOpenAL = mPrefs.getBoolean(Q3EPreference.pref_harm_s_useOpenAL, true);
+		V.cb_s_useOpenAL.setChecked(useOpenAL);
 		V.cb_s_useEAXReverb.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_s_useEAXReverb, true));
 		V.cb_s_useOpenAL.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_s_useEAXReverb.setOnCheckedChangeListener(m_checkboxChangeListener);
+		if(!useOpenAL)
+		{
+			V.cb_s_useEAXReverb.setChecked(false);
+			V.cb_s_useEAXReverb.setEnabled(false);
+		}
+		boolean readonlyCommand = mPrefs.getBoolean(PreferenceKey.READONLY_COMMAND, false);
+		V.readonly_command.setChecked(readonlyCommand);
+		SetupCommandLine(readonlyCommand);
+		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
 
         updatehacktings();
 
@@ -1030,7 +1057,7 @@ public class GameLauncher extends Activity
         //k
         WritePreferences();
 		/*
-		if(Q3EUtils.q3ei.isQ4 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.OPEN_QUAKE4_HELPER, true))
+		if(Q3EUtils.q3ei.isQ4 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKey.OPEN_QUAKE4_HELPER, true))
 		{
 			OpenQuake4LevelDialog();
 			return;
@@ -1369,6 +1396,7 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, V.scale_by_screen_area.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, V.cb_s_useEAXReverb.isChecked());
+		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, V.readonly_command.isChecked());
 
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -1564,18 +1592,6 @@ public class GameLauncher extends Activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        // Android SDK > 28
-/*		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11 FS permission
-		{
-			if(requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE
-			|| requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE
-			|| requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE)
-			if (!Environment.isExternalStorageManager()) // reject
-			{
-				List<String> list = Collections.singletonList(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-				HandleGrantPermissionResult(requestCode, list);
-			}
-		}*/
         if (resultCode == RESULT_OK)
         {
             switch (requestCode)
@@ -1614,6 +1630,33 @@ public class GameLauncher extends Activity
 					break;
             }
         }
+		else
+		{
+			// Android SDK > 28: resultCode is RESULT_CANCELED
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11 FS permission
+			{
+				if(requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_START
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTRACT_PATCH_RESOURCE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_LIBRARY
+						|| requestCode == CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD
+				)
+				{
+					List<String> list = null;
+					if (!Environment.isExternalStorageManager()) // reject
+					{
+						list = Collections.singletonList(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+					}
+					HandleGrantPermissionResult(requestCode, list);
+				}
+			}
+		}
     }
 
     private void HandleGrantPermissionResult(int requestCode, List<String> list)
@@ -2143,9 +2186,14 @@ public class GameLauncher extends Activity
 			else if(value.name instanceof String)
 				radio.setText((String)value.name);
 			radio.setTag(value.game);
-			radio.setChecked(!value.is_mod);
 			group.addView(radio, layoutParams);
+			radio.setChecked(!value.is_mod);
 		}
+	}
+
+	private void SetupCommandLine(boolean readonly)
+	{
+		UIUtility.EditText__SetReadOnly(V.edt_cmdline, readonly, InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 	}
 
 
@@ -2215,6 +2263,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_opengl;
 		public CheckBox cb_s_useOpenAL;
 		public CheckBox cb_s_useEAXReverb;
+		public Switch readonly_command;
 
         public void Setup()
         {
@@ -2280,6 +2329,7 @@ public class GameLauncher extends Activity
 			rg_opengl = findViewById(R.id.rg_opengl);
 			cb_s_useOpenAL = findViewById(R.id.cb_s_useOpenAL);
 			cb_s_useEAXReverb = findViewById(R.id.cb_s_useEAXReverb);
+			readonly_command = findViewById(R.id.readonly_command);
         }
     }
 }

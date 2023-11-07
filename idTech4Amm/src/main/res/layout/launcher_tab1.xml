@@ -18,11 +18,26 @@
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
 
-			<TextView
-				android:id="@+id/tv_cmdline"
-				android:layout_width="wrap_content"
+			<LinearLayout
+				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:text="@string/commandline"/>
+				android:orientation="horizontal" >
+				<TextView
+					android:id="@+id/tv_cmdline"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:layout_gravity="center_vertical"
+					android:text="@string/commandline"/>
+				<Switch
+					android:id="@+id/readonly_command"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:checked="false"
+					>
+				</Switch>
+			</LinearLayout>
 
 			<EditText
 				android:id="@+id/edt_cmdline"

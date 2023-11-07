@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 28
+    compileSdk 30
     buildToolsVersion '30.0.3'
     //compileOptions.encoding "gbk"
 
@@ -28,7 +28,7 @@ android {
     defaultConfig {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 11035
         versionName '1.1.0harmattan35'
         versionNameSuffix 'natasha'

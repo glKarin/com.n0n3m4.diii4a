@@ -25,18 +25,11 @@ public final class Constants
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
 	public static final String[] CONST_CHANGES = {
-            "Optimize soft shadow with shadow mapping. Add point light shadow map based frustum-far in OpenGLES3.0. Add shadow map with depth texture in OpenGLES2.0. Change default point light renderer to 0.",
+            "Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.",
+            "Add OpenAL(soft version) and EFX Reverb support.",
             "Beam rendering optimization in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
+            "Add subtitle support in Prey(2006).",
 	};
-
-	// Launcher preference keys
-    public static final class PreferenceKey {
-        public static final String LAUNCHER_ORIENTATION = "harm_launcher_orientation";
-        public static final String HIDE_AD_BAR = "harm_hide_ad_bar";
-		//public static final String OPEN_QUAKE4_HELPER = "harm_open_quake4_helper";
-        
-        private PreferenceKey() {}
-    }
     
 	private Constants() {}
 }
