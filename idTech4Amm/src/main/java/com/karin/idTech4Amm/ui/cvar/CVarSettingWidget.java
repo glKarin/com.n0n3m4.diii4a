@@ -35,7 +35,7 @@ public class CVarSettingWidget extends ScrollView
 
     public void SetGame(String game)
     {
-        //Log.e("Q3E", "SetGame: " + game);
+        //Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "SetGame: " + game);
         SetCVarGroupList(KCVarSystem.Match(game));
     }
 

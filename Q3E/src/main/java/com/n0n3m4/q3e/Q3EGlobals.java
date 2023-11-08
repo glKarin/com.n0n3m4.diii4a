@@ -5,6 +5,8 @@ public final class Q3EGlobals
     public static final String CONST_PACKAGE_NAME = "com.karin.idTech4Amm";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
 
+    public static final String CONST_Q3E_LOG_TAG = "Q3E";
+
     // on-screen buttons index
     public static final int UI_JOYSTICK=0;
     public static final int UI_SHOOT=1;

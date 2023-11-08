@@ -26,17 +26,24 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class Q3EJNI {	
-	public static native void setCallbackObject(Object obj);	
-	public static native void init(String LibPath, int width, int height, String GameDir, String Args,
-                                   Surface view,
-                                   int format, // 0x8888, 0x4444, 0x5551, 0x565
-                                   int msaa, // 0, 4, 16
-                                   int glVersion, // 0x00020000, 0x00030000
-                                   boolean redirect_output_to_file,
-                                   boolean no_handle_signals,
-                                   boolean multithread,
-                                   boolean continueNoGLContext
-                                   );
+	public static native void setCallbackObject(Object obj);
+
+    public static native void init(
+            String LibPath, // engine's library file path
+            String nativeLibPath, // apk's dynamic library directory path
+            int width, // surface width
+            int height, // surface height
+            String GameDir, // game data directory(external)
+            String Args, // doom3 command line arguments
+            Surface view, // render surface
+            int format, // OpenGL color buffer format: 0x8888, 0x4444, 0x5551, 0x565
+            int msaa, // MSAA: 0, 4, 16
+            int glVersion, // OpenGLES verison: 0x00020000, 0x00030000
+            boolean redirect_output_to_file, // save runtime log to file
+            boolean no_handle_signals, // not handle signals
+            boolean multithread, // enable multithread
+            boolean continueNoGLContext
+    );
 	public static native void drawFrame();
 	public static native void sendKeyEvent(int state,int key,int character);
 	public static native void sendAnalog(int enable,float x,float y);
