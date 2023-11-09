@@ -281,9 +281,6 @@ void idWindow::CommonInit()
 	hideCursor = false;
 #ifdef _RAVEN // quake4 gui var
 // jmarshall - gui crash
-    numOps = 0;
-	memset(ops, 0, sizeof(ops));
-
     backColor_r.Bind(backColor, 0);
     backColor_g.Bind(backColor, 1);
     backColor_b.Bind(backColor, 2);
@@ -735,12 +732,7 @@ void idWindow::StateChanged(bool redraw)
 
 	UpdateWinVars();
 
-#ifdef _RAVEN
-	if (expressionRegisters.Num() && numOps)
-#else
-	if (expressionRegisters.Num() && ops.Num())
-#endif
-	{
+	if (expressionRegisters.Num() && ops.Num()) {
 		EvalRegs();
 	}
 
@@ -833,14 +825,7 @@ bool idWindow::RunTimeEvents(int time)
 
 	UpdateWinVars();
 
-#ifdef _RAVEN
-// jmarshall - gui crash.
-    if (expressionRegisters.Num() && numOps)
-// jmarshall end
-#else
-	if (expressionRegisters.Num() && ops.Num())
-#endif
-    {
+	if (expressionRegisters.Num() && ops.Num()) {
 		EvalRegs();
 	}
 
@@ -883,14 +868,7 @@ void idWindow::RunNamedEvent(const char *eventName)
 		UpdateWinVars();
 
 		// Make sure we got all the current values for stuff
-#ifdef _RAVEN
-// jmarshall - gui crash
-        if (expressionRegisters.Num() && numOps)
-// jmarshall end
-#else
-		if (expressionRegisters.Num() && ops.Num())
-#endif
-        {
+		if (expressionRegisters.Num() && ops.Num()) {
 			EvalRegs(-1, true);
 		}
 
@@ -973,12 +951,7 @@ const char *idWindow::HandleEvent(const sysEvent_t *event, bool *updateVisuals)
 		actionDownRun = false;
 		actionUpRun = false;
 
-#ifdef _RAVEN
-        if (expressionRegisters.Num() && numOps)
-#else
-		if (expressionRegisters.Num() && ops.Num())
-#endif
-		{
+		if (expressionRegisters.Num() && ops.Num()) {
 			EvalRegs();
 		}
 
@@ -3606,28 +3579,15 @@ idWindow::ExpressionOp
 */
 wexpOp_t *idWindow::ExpressionOp()
 {
-#ifdef _RAVEN
-// jmarshall - gui crash
-    if (numOps == MAX_EXPRESSION_OPS )
-#else
-	if (ops.Num() == MAX_EXPRESSION_OPS)
-#endif
-	{
+	if (ops.Num() == MAX_EXPRESSION_OPS) {
 		common->Warning("expressionOp: gui %s hit MAX_EXPRESSION_OPS", gui->GetSourceFile());
 		return &ops[0];
 	}
 
-#ifdef _RAVEN
-    wexpOp_t *wop = &ops[numOps++];
-	memset(wop, 0, sizeof(wexpOp_t));
-	return wop;
-// jmarshall end
-#else
 	wexpOp_t wop;
 	memset(&wop, 0, sizeof(wexpOp_t));
 	int i = ops.Append(wop);
 	return &ops[i];
-#endif
 }
 
 /*
@@ -3933,11 +3893,7 @@ void idWindow::EvaluateRegisters(float *registers)
 	idVec4 v;
 
 	int erc = expressionRegisters.Num();
-#ifdef _RAVEN
-    int oc = numOps;
-#else
 	int oc = ops.Num();
-#endif
 
 	// copy the constants
 	for (i = WEXP_REG_NUM_PREDEFINED ; i < erc ; i++) {
@@ -4210,11 +4166,7 @@ void idWindow::ReadFromDemoFile(class idDemoFile *f, bool rebuild)
 			f->ReadInt(w.b);
 			f->ReadInt(w.c);
 			f->ReadInt(w.d);
-#ifdef _RAVEN
-			ops[i] = w;
-#else
 			ops.Append(w);
-#endif
 		}
 
 		f->ReadInt(c);
@@ -4841,11 +4793,7 @@ void idWindow::FixupParms()
 		namedEvents[i]->mEvent->FixupParms(this);
 	}
 
-#ifdef _RAVEN
-    c = numOps;
-#else
 	c = ops.Num();
-#endif
 
 	for (i = 0; i < c; i++) {
 		if (ops[i].b == -2) {
@@ -4883,12 +4831,7 @@ bool idWindow::IsSimple()
 		return false;
 	}
 
-#ifdef _RAVEN
-	if (numOps)
-#else
-	if (ops.Num())
-#endif
-	{
+	if (ops.Num()) {
 		return false;
 	}
 
@@ -5231,11 +5174,7 @@ bool idWindow::UpdateFromDictionary(idDict &dict)
 	// Clear all registers since they will get recreated
 	regList.Reset();
 	expressionRegisters.Clear();
-#ifdef _RAVEN
-    numOps = 0;
-#else
 	ops.Clear();
-#endif
 
 	for (i = 0; i < dict.GetNumKeyVals(); i ++) {
 		kv = dict.GetKeyVal(i);
@@ -5264,6 +5203,17 @@ bool idWindow::UpdateFromDictionary(idDict &dict)
 
 	return true;
 }
+
+#ifdef _RAVEN
+// jmarshall - quake 4 gui
+void idWindow::ClearTransitions(void)
+{
+    transitions.Clear();
+    transitions.SetNum(0, false);
+    flags &= ~WIN_INTRANSITION;
+}
+// jmarshall end
+#endif
 
 #ifdef _HUMANHEAD
 void idWindow::Translate(int tFontNum)
