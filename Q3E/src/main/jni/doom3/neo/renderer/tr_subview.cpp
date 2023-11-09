@@ -549,6 +549,7 @@ bool	R_GenerateSurfaceSubview(drawSurf_t *drawSurf)
 				if (!drawSurf->space->entityDef->parms.remoteRenderView) {
 					return false;
 				}
+				// if(tr.viewDef->isSubview) return false;
 
 				//k: idMaterial::directPortalDistance may be max distance for render, also see `materials/portals.mtr`.
 				int index = shader->GetDirectPortalDistance();

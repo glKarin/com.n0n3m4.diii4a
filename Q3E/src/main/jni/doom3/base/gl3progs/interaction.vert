@@ -14,12 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 /*
 	macros:
 		BLINN_PHONG: using blinn-phong instead phong.
 */
-#version 100
+#version 300 es
 //#pragma optimize(off)
 
 precision mediump float;
@@ -30,23 +29,23 @@ precision mediump float;
  */
 //#define BLINN_PHONG
 
-varying vec2 var_TexDiffuse;
-varying vec2 var_TexNormal;
-varying vec2 var_TexSpecular;
-varying vec4 var_TexLight;
-varying lowp vec4 var_Color;
-varying vec3 var_L;
-varying vec3 var_V;
+out vec2 var_TexDiffuse;
+out vec2 var_TexNormal;
+out vec2 var_TexSpecular;
+out vec4 var_TexLight;
+out lowp vec4 var_Color;
+out vec3 var_L;
+out vec3 var_V;
 #if defined(BLINN_PHONG)
-varying vec3 var_H;
+out vec3 var_H;
 #endif
 
-attribute vec4 attr_TexCoord;
-attribute vec3 attr_Tangent;
-attribute vec3 attr_Bitangent;
-attribute vec3 attr_Normal;
-attribute highp vec4 attr_Vertex;
-attribute lowp vec4 attr_Color;
+in vec4 attr_TexCoord;
+in vec3 attr_Tangent;
+in vec3 attr_Bitangent;
+in vec3 attr_Normal;
+in highp vec4 attr_Vertex;
+in lowp vec4 attr_Color;
 
 uniform vec4 u_lightProjectionS;
 uniform vec4 u_lightProjectionT;

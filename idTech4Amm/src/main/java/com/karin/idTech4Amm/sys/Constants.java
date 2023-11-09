@@ -33,6 +33,7 @@ public final class Constants
             "Beam rendering optimization in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
             "Add subtitle support in Prey(2006).",
             "Fixed gyroscope in invert-landscape mode.",
+            "Fixed bot head in Quake4 MP game.",
 	};
 
     public static long GetBuildTimestamp()
