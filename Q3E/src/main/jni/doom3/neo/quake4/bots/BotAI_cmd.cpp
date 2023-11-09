@@ -4,7 +4,7 @@ idCVar harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GA
 //karin: auto gen aas file for mp game map with bot
 idCVar harm_g_autoGenAASFileInMPGame( "harm_g_autoGenAASFileInMPGame", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic.");
 
-static int Bot_GetPlayerModelNames(idStrList &list, int team = TEAM_NONE)
+static int Bot_GetPlayerModelNames(idStrList &list, int team)
 {
 	int i;
 	int num = 0;
@@ -13,7 +13,7 @@ static int Bot_GetPlayerModelNames(idStrList &list, int team = TEAM_NONE)
 	numPlayerModel = declManager->GetNumDecls(DECL_PLAYER_MODEL);
 	for(i = 0; i < numPlayerModel; i++)
 	{
-		const idDecl *decl = declManager->DeclByIndex(DECL_PLAYER_MODEL, i, false);
+		const idDecl *decl = declManager->DeclByIndex(DECL_PLAYER_MODEL, i, true);
 		if(!decl)
 			continue;
 		const rvDeclPlayerModel *playerModel = static_cast<const rvDeclPlayerModel *>(decl);
@@ -24,7 +24,12 @@ static int Bot_GetPlayerModelNames(idStrList &list, int team = TEAM_NONE)
 		}
 		else if(team == TEAM_MARINE)
 		{
-			if(!idStr::Icmp(playerModel->team , "strogg"))
+			if(idStr::Icmp(playerModel->team , "marine"))
+				continue;
+		}
+		else if(team == TEAM_NONE)
+		{
+			if(idStr::Icmp(playerModel->team , ""))
 				continue;
 		}
 		list.Append(playerModel->GetName());
@@ -288,6 +293,7 @@ int botAi::AddBot(const char *defName, idDict &dict)
 		botClient->spawnArgs.Set("ui_model_strogg", modelName);
 		botClient->spawnArgs.Set("def_default_model_strogg", modelName);
 	}
+	int numPlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_NONE);
 	if(playerModelNames.Num() > 0)
 	{
 		int index = gameLocal.random.RandomInt(playerModelNames.Num());

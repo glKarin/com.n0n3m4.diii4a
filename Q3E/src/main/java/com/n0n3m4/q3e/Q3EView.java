@@ -337,36 +337,23 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
         {
             String localLibPath = Q3EMain.datadir + "/" + Q3EUtils.q3ei.libname;
             File file = new File(localLibPath);
-            if(null == file)
+            if(!file.isFile() || !file.canRead())
             {
-                Log.d(Q3EGlobals.CONST_Q3E_LOG_TAG, "Local engine library not exists: " + localLibPath);
-            }
-            else if(!file.isFile() || !file.canRead())
-            {
-                Log.d(Q3EGlobals.CONST_Q3E_LOG_TAG, "Local engine library not file or unreadable: " + localLibPath);
+                Log.w(Q3EGlobals.CONST_Q3E_LOG_TAG, "Local engine library not file or unreadable: " + localLibPath);
             }
             else
             {
-                Log.d(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found local engine library file: " + localLibPath);
-                FileInputStream is = null;
-                FileOutputStream os = null;
                 String cacheFile = getContext().getCacheDir() + File.separator + Q3EUtils.q3ei.libname;
-                try
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found local engine library file: " + localLibPath);
+                long r = Q3EUtils.cp(localLibPath, cacheFile);
+                if(r > 0)
                 {
-                    is = new FileInputStream(file);
-                    os = new FileOutputStream(cacheFile);
-                    Q3EUtils.Copy(os, is);
                     libPath = cacheFile;
-                    Log.d(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load local engine library: " + cacheFile);
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load local engine library: " + cacheFile);
                 }
-                catch (Exception e)
+                else
                 {
-                    e.printStackTrace();
-                }
-                finally
-                {
-                    Q3EUtils.Close(is);
-                    Q3EUtils.Close(os);
+                    Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local engine library fail: " + cacheFile);
                 }
             }
         }

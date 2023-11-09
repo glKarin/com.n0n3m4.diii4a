@@ -411,28 +411,16 @@ public class Q3EMain extends Activity
             File file = new File(p);
             if(!file.isFile() || !file.canRead())
                 continue;
-            Log.d(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found user game library file: " + p);
-            FileInputStream is = null;
-            FileOutputStream os = null;
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found user game library file: " + p);
             String cacheFile = targetDir + Suffix;
-            try
+            long r = Q3EUtils.cp(p, cacheFile);
+            if(r > 0)
             {
-                is = new FileInputStream(file);
-                os = new FileOutputStream(cacheFile);
-                Q3EUtils.Copy(os, is);
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load user game library: " + cacheFile);
                 res = cacheFile;
-                Log.d(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load user game library: " + cacheFile);
-                break;
             }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            finally
-            {
-                Q3EUtils.Close(is);
-                Q3EUtils.Close(os);
-            }
+            else
+                Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload user game library fail: " + cacheFile);
         }
         return res;
     }

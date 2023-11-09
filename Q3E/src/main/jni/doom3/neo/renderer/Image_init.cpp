@@ -104,7 +104,11 @@ const imageClassificate_t IC_Info[] = {
 	{ "models/mapobjects", "Model Geometry", IC_MODELGEOMETRY, 512, 512 },
 	{ "models/items", "Items", IC_ITEMS, 512, 512 },
 	{ "models", "Other model textures", IC_MODELSOTHER, 512, 512 },
+#ifdef _RAVEN
+	{ "gfx/guis", "Guis", IC_GUIS, 256, 256 },
+#else
 	{ "guis/assets", "Guis", IC_GUIS, 256, 256 },
+#endif
 	{ "textures", "World Geometry", IC_WORLDGEOMETRY, 256, 256 },
 	{ "", "Other", IC_OTHER, 256, 256 }
 };
