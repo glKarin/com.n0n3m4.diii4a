@@ -239,7 +239,7 @@ int botAi::AddBot(const char *defName, idDict &dict)
     bots[newBotID].entityNum = newBot->entityNumber;
 
     // TinMan: Give me your name, licence and occupation.
-    name = newBot->spawnArgs.GetString( "npc_name" );
+    name = newBot->spawnArgs.GetString( "ui_name" );
     userInfo.Set( "ui_name", va( "[BOT%d] %s", newBotID, name) ); // TinMan: *debug* Prefix [BOTn]
 
     // TinMan: I love the skin you're in.

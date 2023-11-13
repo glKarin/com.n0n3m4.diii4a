@@ -13606,10 +13606,11 @@ void idPlayer::SetupHead( const char* headModel, idVec3 headOffset ) {
 
 		rvClientAFAttachment* headEnt = clientHead.GetEntity();
 #ifdef MOD_BOTS //karin: fixed setup head
-		gameLocal.SpawnClientEntityDef( *headDict, (rvClientEntity**)&headEnt, false, IS_BOT() ? "rvClientAFAttachment" : NULL );
-#else
-		gameLocal.SpawnClientEntityDef( *headDict, (rvClientEntity**)&headEnt, false );
+		if(IS_BOT())
+			gameLocal.SpawnClientEntityDef( *headDict, (rvClientEntity**)&headEnt, false, "rvClientAFAttachment" );
+		else
 #endif
+		gameLocal.SpawnClientEntityDef( *headDict, (rvClientEntity**)&headEnt, false );
 		if( headEnt ) {
 			idStr jointName = spawnArgs.GetString( "joint_head" );
 			jointHandle_t joint = animator.GetJointHandle( jointName );

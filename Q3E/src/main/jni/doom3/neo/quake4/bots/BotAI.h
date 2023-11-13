@@ -74,25 +74,6 @@ public:
     int						pathType;
 };
 
-class botAASFindAttackPosition : public idAASCallback
-{
-public:
-    botAASFindAttackPosition( const idPlayer *self, const idMat3 &gravityAxis, idEntity *target, const idVec3 &targetPos, const idVec3 &eyeOffset );
-    ~botAASFindAttackPosition();
-
-    virtual bool			TestArea( const idAAS *aas, int areaNum );
-
-private:
-    const idPlayer			*self;
-    idEntity				*target;
-    idBounds				excludeBounds;
-    idVec3					targetPos;
-    idVec3					eyeOffset;
-    idMat3					gravityAxis;
-    pvsHandle_t				targetPVS;
-    int						PVSAreas[ idEntity::MAX_PVS_AREAS ];
-};
-
 class botAi : public idEntity
 {
 public:
