@@ -104,7 +104,11 @@ const imageClassificate_t IC_Info[] = {
 	{ "models/mapobjects", "Model Geometry", IC_MODELGEOMETRY, 512, 512 },
 	{ "models/items", "Items", IC_ITEMS, 512, 512 },
 	{ "models", "Other model textures", IC_MODELSOTHER, 512, 512 },
+#ifdef _RAVEN
+	{ "gfx/guis", "Guis", IC_GUIS, 256, 256 },
+#else
 	{ "guis/assets", "Guis", IC_GUIS, 256, 256 },
+#endif
 	{ "textures", "World Geometry", IC_WORLDGEOMETRY, 256, 256 },
 	{ "", "Other", IC_OTHER, 256, 256 }
 };
@@ -978,126 +982,45 @@ void R_QuadraticImage(idImage *image)
 }
 
 #ifdef _SHADOW_MAPPING
-// RB begin
-static void R_CreateShadowMapImage_Res0( idImage* image )
-{
-	int size = shadowMapResolutions[0];
-	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
+#define CREATE_SHADOW_MAP_IMAGE_RES_DECL(name, res, func, parms) \
+static void R_CreateShadowMapImage_##name##_Res##res( idImage* image ) \
+{ \
+	int size = shadowMapResolutions[res]; \
+	image->func parms; \
 }
 
-static void R_CreateShadowMapImage_Res1( idImage* image )
-{
-	int size = shadowMapResolutions[1];
-	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
+#define CREATE_SHADOW_MAP_IMAGE_DECL(name, func, parms) \
+CREATE_SHADOW_MAP_IMAGE_RES_DECL(name, 0, func, parms) \
+CREATE_SHADOW_MAP_IMAGE_RES_DECL(name, 1, func, parms) \
+CREATE_SHADOW_MAP_IMAGE_RES_DECL(name, 2, func, parms) \
+CREATE_SHADOW_MAP_IMAGE_RES_DECL(name, 3, func, parms) \
+CREATE_SHADOW_MAP_IMAGE_RES_DECL(name, 4, func, parms)
 
-static void R_CreateShadowMapImage_Res2( idImage* image )
-{
-	int size = shadowMapResolutions[2];
-	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
+#define CREATE_SHADOW_MAP_IMAGE_RES_INVOKE(varname, res, name) \
+varname[res] = ImageFromFunction( va( "_shadowMap_" #name #res "_%i", shadowMapResolutions[0] ), R_CreateShadowMapImage_##name##_Res##res );
 
-static void R_CreateShadowMapImage_Res3( idImage* image )
-{
-	int size = shadowMapResolutions[3];
-	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
-
-static void R_CreateShadowMapImage_Res4( idImage* image )
-{
-	int size = shadowMapResolutions[4];
-	image->GenerateShadowMapDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
-static void R_CreateShadowMapCubeImage_Res0( idImage* image )
-{
-	int size = shadowMapResolutions[0];
-	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
-}
-
-static void R_CreateShadowMapCubeImage_Res1( idImage* image )
-{
-	int size = shadowMapResolutions[1];
-	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
-}
-
-static void R_CreateShadowMapCubeImage_Res2( idImage* image )
-{
-	int size = shadowMapResolutions[2];
-	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
-}
-
-static void R_CreateShadowMapCubeImage_Res3( idImage* image )
-{
-	int size = shadowMapResolutions[3];
-	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
-}
-
-static void R_CreateShadowMapCubeImage_Res4( idImage* image )
-{
-	int size = shadowMapResolutions[4];
-	image->GenerateShadowMapDepthCubeImage( size, TF_LINEAR, true );
-}
-
-static void R_CreateShadowMapDepthImage_Res0( idImage* image )
-{
-    int size = shadowMapResolutions[0];
-    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
-
-static void R_CreateShadowMapDepthImage_Res1( idImage* image )
-{
-    int size = shadowMapResolutions[1];
-    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
-
-static void R_CreateShadowMapDepthImage_Res2( idImage* image )
-{
-    int size = shadowMapResolutions[2];
-    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
-
-static void R_CreateShadowMapDepthImage_Res3( idImage* image )
-{
-    int size = shadowMapResolutions[3];
-    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
-
-static void R_CreateShadowMapDepthImage_Res4( idImage* image )
-{
-    int size = shadowMapResolutions[4];
-    image->GenerateDepthImage( size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA );
-}
+#define CREATE_SHADOW_MAP_IMAGE_INVOKE(varname, name) \
+CREATE_SHADOW_MAP_IMAGE_RES_INVOKE(varname, 0, name) \
+CREATE_SHADOW_MAP_IMAGE_RES_INVOKE(varname, 1, name) \
+CREATE_SHADOW_MAP_IMAGE_RES_INVOKE(varname, 2, name) \
+CREATE_SHADOW_MAP_IMAGE_RES_INVOKE(varname, 3, name) \
+CREATE_SHADOW_MAP_IMAGE_RES_INVOKE(varname, 4, name)
 
 #ifdef GL_ES_VERSION_3_0
-static void R_CreateShadowMapImageES3_Res0( idImage* image )
-{
-	int size = shadowMapResolutions[0];
-	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
-}
+#define DEPTH_FILTER (USING_GLES3 ? TF_LINEAR : TF_NEAREST)
+#define DEPTH_COMPONENT (USING_GLES3 || glConfig.depth24Available ? 24 : 16)
+#else
+#define DEPTH_FILTER TF_NEAREST
+#define DEPTH_COMPONENT (glConfig.depth24Available ? 24 : 16)
+#endif
+// RB begin
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_2D_RGBA, GenerateShadow2DRGBAImage, (size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA))
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_2D_DEPTH, GenerateShadow2DDepthImage, (size, size, DEPTH_FILTER, true, TR_CLAMP_TO_ZERO_ALPHA, DEPTH_COMPONENT, true))
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_CUBE_RGBA, GenerateShadowCubeRGBAImage, (size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA))
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_CUBE_DEPTH, GenerateShadowCubeDepthImage, (size, DEPTH_FILTER, true, TR_CLAMP_TO_ZERO_ALPHA, DEPTH_COMPONENT, true))
 
-static void R_CreateShadowMapImageES3_Res1( idImage* image )
-{
-	int size = shadowMapResolutions[1];
-	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
-}
-
-static void R_CreateShadowMapImageES3_Res2( idImage* image )
-{
-	int size = shadowMapResolutions[2];
-	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
-}
-
-static void R_CreateShadowMapImageES3_Res3( idImage* image )
-{
-	int size = shadowMapResolutions[3];
-	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
-}
-
-static void R_CreateShadowMapImageES3_Res4( idImage* image )
-{
-	int size = shadowMapResolutions[4];
-	image->GenerateShadowArray( size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA );
-}
+#ifdef GL_ES_VERSION_3_0
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES3_2DARRAY_DEPTH, GenerateShadowArray, (size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA, 24, true))
 #endif
 // RB end
 #endif
@@ -2328,33 +2251,17 @@ void idImageManager::Init()
 	// should forceLoadImages be here?
 #ifdef _SHADOW_MAPPING
 	// RB begin
-	shadowImage[0] = ImageFromFunction( va( "_shadowMap0_%i", shadowMapResolutions[0] ), R_CreateShadowMapImage_Res0 );
-	shadowImage[1] = ImageFromFunction( va( "_shadowMap1_%i", shadowMapResolutions[1] ), R_CreateShadowMapImage_Res1 );
-	shadowImage[2] = ImageFromFunction( va( "_shadowMap2_%i", shadowMapResolutions[2] ), R_CreateShadowMapImage_Res2 );
-	shadowImage[3] = ImageFromFunction( va( "_shadowMap3_%i", shadowMapResolutions[3] ), R_CreateShadowMapImage_Res3 );
-	shadowImage[4] = ImageFromFunction( va( "_shadowMap4_%i", shadowMapResolutions[4] ), R_CreateShadowMapImage_Res4 );
-	// RB end
-	shadowCubeImage[0] = ImageFromFunction( va( "_shadowMapCube0_%i", shadowMapResolutions[0] ), R_CreateShadowMapCubeImage_Res0 );
-	shadowCubeImage[1] = ImageFromFunction( va( "_shadowMapCube1_%i", shadowMapResolutions[1] ), R_CreateShadowMapCubeImage_Res1 );
-	shadowCubeImage[2] = ImageFromFunction( va( "_shadowMapCube2_%i", shadowMapResolutions[2] ), R_CreateShadowMapCubeImage_Res2 );
-	shadowCubeImage[3] = ImageFromFunction( va( "_shadowMapCube3_%i", shadowMapResolutions[3] ), R_CreateShadowMapCubeImage_Res3 );
-	shadowCubeImage[4] = ImageFromFunction( va( "_shadowMapCube4_%i", shadowMapResolutions[4] ), R_CreateShadowMapCubeImage_Res4 );
-
-    shadowDepthImage[0] = ImageFromFunction( va( "_shadowMapDepth0_%i", shadowMapResolutions[0] ), R_CreateShadowMapDepthImage_Res0 );
-    shadowDepthImage[1] = ImageFromFunction( va( "_shadowMapDepth1_%i", shadowMapResolutions[1] ), R_CreateShadowMapDepthImage_Res1 );
-    shadowDepthImage[2] = ImageFromFunction( va( "_shadowMapDepth2_%i", shadowMapResolutions[2] ), R_CreateShadowMapDepthImage_Res2 );
-    shadowDepthImage[3] = ImageFromFunction( va( "_shadowMapDepth3_%i", shadowMapResolutions[3] ), R_CreateShadowMapDepthImage_Res3 );
-    shadowDepthImage[4] = ImageFromFunction( va( "_shadowMapDepth4_%i", shadowMapResolutions[4] ), R_CreateShadowMapDepthImage_Res4 );
+	CREATE_SHADOW_MAP_IMAGE_INVOKE(shadowImage_2DRGBA, GLES2_2D_RGBA)
+	CREATE_SHADOW_MAP_IMAGE_INVOKE(shadowImage_2DDepth, GLES2_2D_DEPTH)
+	CREATE_SHADOW_MAP_IMAGE_INVOKE(shadowImage_CubeRGBA, GLES2_CUBE_RGBA)
+	CREATE_SHADOW_MAP_IMAGE_INVOKE(shadowImage_CubeDepth, GLES2_CUBE_DEPTH)
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
 	{
-		shadowES3Image[0] = ImageFromFunction( va( "_shadowMapES3Depth0_%i", shadowMapResolutions[0] ), R_CreateShadowMapImageES3_Res0 );
-		shadowES3Image[1] = ImageFromFunction( va( "_shadowMapES3Depth1_%i", shadowMapResolutions[1] ), R_CreateShadowMapImageES3_Res1 );
-		shadowES3Image[2] = ImageFromFunction( va( "_shadowMapES3Depth2_%i", shadowMapResolutions[2] ), R_CreateShadowMapImageES3_Res2 );
-		shadowES3Image[3] = ImageFromFunction( va( "_shadowMapES3Depth3_%i", shadowMapResolutions[3] ), R_CreateShadowMapImageES3_Res3 );
-		shadowES3Image[4] = ImageFromFunction( va( "_shadowMapES3Depth4_%i", shadowMapResolutions[4] ), R_CreateShadowMapImageES3_Res4 );
+		CREATE_SHADOW_MAP_IMAGE_INVOKE(shadowImage, GLES3_2DARRAY_DEPTH)
 	}
 #endif
+	// RB end
 #endif
 }
 

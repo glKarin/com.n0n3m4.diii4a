@@ -831,6 +831,13 @@ class idRenderSystemLocal : public idRenderSystem
 
 	bool scopeView;
 	bool shuttleView;
+	int lastRenderSkybox;
+	ID_INLINE bool SkyboxRenderedInFrame() const {
+		return frameCount == lastRenderSkybox;
+	}
+	ID_INLINE void RenderSkyboxInFrame() {
+		lastRenderSkybox = frameCount;
+	}
 #endif
 #ifdef _MULTITHREAD
 	virtual void EndFrame(byte *data, int *frontEndMsec, int *backEndMsec);
@@ -1100,6 +1107,17 @@ extern idCVar r_materialOverride;		// override all materials
 extern idCVar r_debugRenderToTexture;
 
 extern idCVar harm_r_maxFps;
+extern idCVar harm_r_shadowCarmackInverse;
+
+#ifdef _USING_STB
+extern idCVar r_screenshotFormat;
+extern idCVar r_screenshotJpgQuality;
+extern idCVar r_screenshotPngCompression;
+#endif
+
+#ifdef _RAVEN
+extern idCVar r_skipSky;
+#endif
 
 /*
 ====================================================================
@@ -1525,7 +1543,6 @@ typedef struct shaderProgram_s {
 	GLint		modelViewProjectionMatrix;
 	GLint		modelMatrix;
 	GLint		textureMatrix;
-	//k: add modelView matrix uniform for GLSL vertex shader
 	GLint		modelViewMatrix;
 	GLint		clipPlane;
 	GLint		fogMatrix;
@@ -1610,23 +1627,14 @@ extern shaderProgram_t texgenShader; //k: texgen shader
 extern shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
 extern shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)
 extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: interaction with shadow mapping(point light)
-// for GLES2.0
-// distance / frustum-far
-extern shaderProgram_t depthShader_pointLight_far; //k: depth shader(point light)
-extern shaderProgram_t	interactionShadowMappingShader_pointLight_far; //k: interaction with shadow mapping(point light)
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight_far; //k: interaction with shadow mapping(point light)
-// emulate Z transform
-extern shaderProgram_t depthShader_pointLight_z; //k: depth shader(point light)
-extern shaderProgram_t	interactionShadowMappingShader_pointLight_z; //k: interaction with shadow mapping(point light)
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight_z; //k: interaction with shadow mapping(point light)
 
 extern shaderProgram_t depthShader_parallelLight; //k: depth shader(parallel)
-extern shaderProgram_t	interactionShadowMappingShader_parallelLight; //k: interaction with shadow(parallel)
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
+extern shaderProgram_t interactionShadowMappingShader_parallelLight; //k: interaction with shadow(parallel)
+extern shaderProgram_t interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
 
 extern shaderProgram_t depthShader_spotLight; //k: depth shader
-extern shaderProgram_t	interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
+extern shaderProgram_t interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
+extern shaderProgram_t interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
 #endif
 
 
@@ -1932,12 +1940,12 @@ idScreenRect R_CalcIntersectionScissor(const idRenderLightLocal *lightDef,
 #include "GuiModel.h"
 #include "VertexCache.h"
 
-#ifdef __ANDROID__ //k for Android large stack memory allocate limit
-#define HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
+//k for Android large stack memory allocate limit
+#define _DYNAMIC_ALLOC_STACK_OR_HEAP
 
-#ifdef HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
-extern idCVar harm_r_maxAllocStackMemory; // declare in tr_trisurf.cpp
-
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+#if 1
+extern idCVar harm_r_maxAllocStackMemory;
 	#define HARM_MAX_STACK_ALLOC_SIZE (harm_r_maxAllocStackMemory.GetInteger())
 #else
 	#define HARM_MAX_STACK_ALLOC_SIZE (1024 * 512)
@@ -2066,7 +2074,9 @@ extern idCVar harm_r_shadowMapSampleFactor;
 extern idCVar harm_r_shadowMapFrustumNear;
 extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
-extern idCVar harm_r_shadowMapPointLight;
+extern idCVar harm_r_shadowMapDepthBuffer;
+extern idCVar harm_r_shadowMapPolygonFactor;
+extern idCVar harm_r_shadowMapPolygonOffset;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;

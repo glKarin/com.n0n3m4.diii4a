@@ -88,17 +88,17 @@ void Framebuffer::Init()
 #ifdef GL_ES_VERSION_3_0
 		if(USING_GLES3)
 		{
-			globalFramebuffers.shadowFBO[i]->AddDepthBuffer(GL_DEPTH_COMPONENT24);
 #ifdef SHADOW_MAPPING_DEBUG
-			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA, 0); // for debug, not need render color buffer with OpenGLES3.0
+			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA8, 0); // for debug, not need render color buffer with OpenGLES3.0
 #endif
+			//globalFramebuffers.shadowFBO[i]->AddDepthBuffer(GL_DEPTH_COMPONENT24);
 			//qglDrawBuffers( 0, NULL );
 		}
 		else
 #endif
 		{
-			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA, 0);
-			globalFramebuffers.shadowFBO[i]->AddDepthBuffer(GL_DEPTH_COMPONENT24);
+			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA8, 0); // GL_RGBA4 TODO: check OpenGLES2.0 support GL_RGBA8
+			globalFramebuffers.shadowFBO[i]->AddDepthBuffer(glConfig.depth24Available ? GL_DEPTH_COMPONENT24 : GL_DEPTH_COMPONENT16);
 		}
 		common->Printf( "--- Framebuffer::Bind( name = '%s', handle = %d ) ---\n", globalFramebuffers.shadowFBO[i]->fboName.c_str(), globalFramebuffers.shadowFBO[i]->frameBuffer );
 	}
@@ -188,6 +188,16 @@ void Framebuffer::AddDepthBuffer( int format )
 	GL_CheckErrors();
 }
 
+void Framebuffer::AttachColorBuffer( void )
+{
+	qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBuffers[0] );
+}
+
+void Framebuffer::AttachDepthBuffer( void )
+{
+	qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer );
+}
+
 void Framebuffer::AttachImage2D( int target, const idImage* image, int index )
 {
 	if( ( target != GL_TEXTURE_2D ) && ( target < GL_TEXTURE_CUBE_MAP_POSITIVE_X || target > GL_TEXTURE_CUBE_MAP_NEGATIVE_Z ) )
@@ -222,6 +232,11 @@ void Framebuffer::AttachImageDepthLayer( const idImage* image, int layer )
     qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, image->texnum, 0 );
 }
 
+void Framebuffer::AttachImageDepthSide( const idImage* image, int side )
+{
+    qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, image->texnum, 0 );
+}
+
 void Framebuffer::AttachImage2D( const idImage* image )
 {
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0 );
@@ -229,7 +244,19 @@ void Framebuffer::AttachImage2D( const idImage* image )
 
 void Framebuffer::AttachImage2DLayer( const idImage* image, int layer )
 {
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+	{
+		qglFramebufferTextureLayer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, image->texnum, 0, layer );
+	}
+	else
+#endif
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, image->texnum, 0 );
+}
+
+void Framebuffer::AttachImage2DSide( const idImage* image, int side )
+{
+	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, image->texnum, 0 );
 }
 
 void Framebuffer::Check()
@@ -242,6 +269,17 @@ void Framebuffer::Check()
 	int status = qglCheckFramebufferStatus( GL_FRAMEBUFFER );
 	if( status == GL_FRAMEBUFFER_COMPLETE )
 	{
+#if 0
+		int type, handle;
+
+		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &handle);
+		Sys_Printf("FrameBuffer[%s]: Color-0 current bind(0x%x %s), object handle(%d)\n", fboName.c_str(), type, (type == GL_RENDERBUFFER ? "RENDERBUFFER" : (type == GL_TEXTURE ? "TEXTURE" : "NONE")), handle);
+
+		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &handle);
+		Sys_Printf("FrameBuffer[%s]: Depth current bind(0x%x %s), object handle(%d)\n", fboName.c_str(), type, (type == GL_RENDERBUFFER ? "RENDERBUFFER" : (type == GL_TEXTURE ? "TEXTURE" : "NONE")), handle);
+#endif
 		qglBindFramebuffer( GL_FRAMEBUFFER, prev );
 		return;
 	}

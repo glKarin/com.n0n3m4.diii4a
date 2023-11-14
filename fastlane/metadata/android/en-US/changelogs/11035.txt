@@ -1,0 +1,6 @@
+* Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.
+* Add OpenAL(soft) and EFX Reverb support.
+* Beam rendering optimization in Prey(2006) by lvonasek/PreyVR.
+* Add subtitle support in Prey(2006).
+* Fixed gyroscope in invert-landscape mode.
+* Fixed bot head and add bot level control(cvar `harm_si_botLevel`, need extract new `sabot_a9.pk4` resource) in Quake4 MP game.

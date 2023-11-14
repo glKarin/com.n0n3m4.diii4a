@@ -32,6 +32,7 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -45,6 +46,7 @@ import com.n0n3m4.q3e.device.Q3EOuya;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -478,6 +480,40 @@ public class Q3EUtils
         }
 
         return size;
+    }
+
+    public static long cp(String src, String dst)
+    {
+        FileInputStream is = null;
+        FileOutputStream os = null;
+        File srcFile = new File(src);
+        if(!srcFile.isFile())
+            return -2;
+        if(!srcFile.canRead())
+            return -3;
+        File dstFile = new File(dst);
+        File dstDir = dstFile.getParentFile();
+        if(null != dstDir && !dstDir.isDirectory())
+        {
+            if(!dstDir.mkdirs())
+                return -4;
+        }
+        try
+        {
+            is = new FileInputStream(srcFile);
+            os = new FileOutputStream(dst);
+            return Q3EUtils.Copy(os, is);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return -1;
+        }
+        finally
+        {
+            Q3EUtils.Close(is);
+            Q3EUtils.Close(os);
+        }
     }
 
     /*

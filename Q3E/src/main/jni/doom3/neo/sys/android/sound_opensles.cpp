@@ -413,11 +413,11 @@ bool idAudioHardwareOpenSLES::CreateSLPlayer()
 	result = (*pcmPlayerObject)->GetInterface(pcmPlayerObject, SL_IID_ANDROIDCONFIGURATION, &inputConfig);
 	HARM_CHECK_RESULT(result, false, "(SLObjectItf)pcmPlayerObject::GetInterface() -> %d", result);
 
-#if __ANDROID_API__ >= 25
-	SLuint32 presetValue =SL_ANDROID_PERFORMANCE_LATENCY;
+//#if __ANDROID_API__ >= 25
+	SLuint32 presetValue = SL_ANDROID_PERFORMANCE_LATENCY;
 	result = (*inputConfig)->SetConfiguration(inputConfig, SL_ANDROID_KEY_PERFORMANCE_MODE, &presetValue, sizeof(SLuint32));
 	//HARM_CHECK_RESULT(result, false, "(SLAndroidConfigurationItf)inputConfig::SetConfiguration() -> %d", result);
-#endif
+//#endif
 
 	//创建播放接口
 	result = (*pcmPlayerObject)->GetInterface(pcmPlayerObject,SL_IID_PLAY,&playItf);

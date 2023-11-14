@@ -120,6 +120,8 @@ class idConsoleLocal : public idConsole
 
 		const idMaterial 	*whiteShader;
 		const idMaterial 	*consoleShader;
+
+		void		DumpHistory(void);
 };
 
 static idConsoleLocal localConsole;
@@ -640,7 +642,7 @@ void idConsoleLocal::KeyDownEvent(int key)
 		historyLine = nextHistoryLine;
 
 		if(harm_com_consoleHistory.GetInteger() == 2)
-			SaveHistory();
+			DumpHistory();
 
 		consoleField.Clear();
 		consoleField.SetWidthInChars(LINE_WIDTH);
@@ -1286,7 +1288,8 @@ void	idConsoleLocal::Draw(bool forceFullScreen)
 
 // command history
 #define CONSOLE_HISTORY_FILE ".console_history.dat"
-void idConsoleLocal::SaveHistory() {
+void idConsoleLocal::DumpHistory(void)
+{
 	idFile *f = fileSystem->OpenFileWrite( CONSOLE_HISTORY_FILE );
 	idStr last;
 	for ( int i=0; i < COMMAND_HISTORY; ++i ) {
@@ -1301,6 +1304,10 @@ void idConsoleLocal::SaveHistory() {
 		}
 	}
 	fileSystem->CloseFile(f);
+}
+
+void idConsoleLocal::SaveHistory() {
+	DumpHistory();
 	common->Printf("[Harmattan]: Console history saved -> %s\n", CONSOLE_HISTORY_FILE);
 }
 

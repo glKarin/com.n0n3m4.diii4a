@@ -26,6 +26,7 @@ ID_INLINE static bool IsGametypeTeamBased(void)
     return gameLocal.IsTeamGame();
 }
 
+#include "BotAI_ctf.cpp"
 
 
 /*
@@ -120,106 +121,6 @@ void botMoveState::Restore( idRestoreGame *savefile )
 
     savefile->ReadVec3( secondaryMovePosition );
     savefile->ReadInt( pathType );
-}
-
-/*
-============
-botAASFindAttackPosition::botAASFindAttackPosition
-TinMan: Tweaked from idAI specific, a lot simpler though.
-============
-*/
-botAASFindAttackPosition::botAASFindAttackPosition( const idPlayer *self, const idMat3 &gravityAxis, idEntity *target, const idVec3 &targetPos, const idVec3 &eyeOffset )
-{
-    int	numPVSAreas;
-
-    this->target		= target;
-    this->targetPos		= targetPos;
-    this->eyeOffset		= eyeOffset;
-    this->self			= self;
-    this->gravityAxis	= gravityAxis;
-
-    excludeBounds		= idBounds( idVec3( -64.0, -64.0f, -8.0f ), idVec3( 64.0, 64.0f, 64.0f ) );
-    excludeBounds.TranslateSelf( self->GetPhysics()->GetOrigin() );
-
-    // setup PVS
-    idBounds bounds( targetPos - idVec3( 16, 16, 0 ), targetPos + idVec3( 16, 16, 64 ) );
-    numPVSAreas = gameLocal.pvs.GetPVSAreas( bounds, PVSAreas, idEntity::MAX_PVS_AREAS );
-    targetPVS	= gameLocal.pvs.SetupCurrentPVS( PVSAreas, numPVSAreas );
-}
-
-/*
-============
-botAASFindAttackPosition::~botAASFindAttackPosition
-============
-*/
-botAASFindAttackPosition::~botAASFindAttackPosition()
-{
-    gameLocal.pvs.FreeCurrentPVS( targetPVS );
-}
-
-/*
-============
-botAASFindAttackPosition::TestArea
-============
-*/
-bool botAASFindAttackPosition::TestArea( const idAAS *aas, int areaNum )
-{
-    idVec3	dir;
-    idVec3	local_dir;
-    idVec3	fromPos;
-    idMat3	axis;
-    idVec3	areaCenter;
-    int		numPVSAreas;
-    int		PVSAreas[ idEntity::MAX_PVS_AREAS ];
-
-    idVec3	targetPos1;
-    idVec3	targetPos2;
-    trace_t		tr;
-    idVec3 toPos;
-
-    areaCenter = aas->AreaCenter( areaNum );
-    areaCenter[ 2 ] += 1.0f;
-
-    if ( excludeBounds.ContainsPoint( areaCenter ) )
-    {
-        // too close to where we already are
-        return false;
-    }
-
-    numPVSAreas = gameLocal.pvs.GetPVSAreas( idBounds( areaCenter ).Expand( 16.0f ), PVSAreas, idEntity::MAX_PVS_AREAS );
-    if ( !gameLocal.pvs.InCurrentPVS( targetPVS, PVSAreas, numPVSAreas ) )
-    {
-        return false;
-    }
-
-
-    // calculate the world transform of the launch position
-    dir = targetPos - areaCenter;
-    gravityAxis.ProjectVector( dir, local_dir );
-    local_dir.z = 0.0f;
-    local_dir.ToVec2().Normalize();
-    axis = local_dir.ToMat3();
-    fromPos = areaCenter + eyeOffset * axis;
-
-    if ( target->IsType( idActor::Type ) )
-    {
-        botAi::GetAIAimTargets( static_cast<idActor *>( target ), target->GetPhysics()->GetOrigin(), targetPos1, targetPos2 );
-    }
-    else
-    {
-        targetPos1 = target->GetPhysics()->GetAbsBounds().GetCenter();
-        targetPos2 = targetPos1;
-    }
-
-    toPos = targetPos1;
-
-    gameLocal.TracePoint( NULL, tr, fromPos, toPos, MASK_SOLID, self );
-    if ( tr.fraction >= 1.0f || ( gameLocal.GetTraceEntity( tr ) == target ) )
-    {
-        return true;
-    }
-
-    return false;
 }
 
 /*
@@ -4860,15 +4761,18 @@ TinMan: *CTF* *todo* still thinking on how to handle ctf specific events, proble
 void botAi::Event_GetFlag( float team )
 {
 #ifdef CTF
-    if ( team > 1 )
+    if(IsCTFGame())
     {
-        team = 1;
+        if ( team > 1 )
+        {
+            team = 1;
+        }
+        idEntity *ent = static_cast<idEntity *>( /*gameLocal.mpGame.*/GetTeamFlag( team ) );
+        idThread::ReturnEntity( ent );
     }
-    idEntity *ent = static_cast<idEntity *>( gameLocal.mpGame.GetTeamFlag( team ) );
-    idThread::ReturnEntity( ent );
-#else
-    idThread::ReturnEntity( NULL );
+    else
 #endif
+    idThread::ReturnEntity( NULL );
 }
 
 /*
@@ -4880,14 +4784,18 @@ TinMan: *CTF*
 void botAi::Event_GetFlagStatus( float team )
 {
 #ifdef CTF
-    if ( team > 1 )
+    if(IsCTFGame())
     {
-        team = 1;
+        if ( team > 1 )
+        {
+            team = 1;
+        }
+        // common->Printf("Event_GetFlagStatus %f | %d\n", team, GetFlagStatus( team ));
+        idThread::ReturnFloat( /*gameLocal.mpGame.*/GetFlagStatus( team ) );
     }
-    idThread::ReturnFloat( gameLocal.mpGame.GetFlagStatus( team ) );
-#else
-    idThread::ReturnFloat( 0 );
+    else
 #endif
+    idThread::ReturnFloat( 0 );
 }
 
 /*
@@ -4899,14 +4807,18 @@ TinMan: *CTF*
 void botAi::Event_GetFlagCarrier( float team )
 {
 #ifdef CTF
-    if ( team > 1 )
+    if(IsCTFGame())
     {
-        team = 1;
+        if ( team > 1 )
+        {
+            team = 1;
+        }
+        int carrier = /*gameLocal.mpGame.*/GetFlagCarrier( team );
+        idThread::ReturnEntity( carrier >= 0 ? gameLocal.entities[ carrier ] : NULL );
     }
-    idThread::ReturnEntity( gameLocal.entities[ gameLocal.mpGame.GetFlagCarrier( team ) ] );
-#else
-    idThread::ReturnEntity( NULL );
+    else
 #endif
+    idThread::ReturnEntity( NULL );
 }
 
 /*
@@ -4917,30 +4829,36 @@ TinMan: *CTF* well capture entity really
 */
 void botAi::Event_GetCapturePoint( float team )
 {
-#ifdef CTF
+#ifdef CTFxxx //karin: unused in script
     idEntity *	ent;
 
-    if ( team > 1 )
+    if(IsCTFGame())
     {
-        team = 1;
-    }
-
-    for ( int i = 0; i < MAX_GENTITIES; i++ )
-    {
-        ent = gameLocal.entities[ i ];
-        if ( ent )
+        if ( team > 1 )
         {
-            if ( ent->IsType( idTrigger_Flag::Type ) )
+            team = 1;
+        }
+
+        for ( int i = 0; i < MAX_GENTITIES; i++ )
+        {
+            ent = gameLocal.entities[ i ];
+            if ( ent )
             {
-                if ( ent->spawnArgs.GetInt( "team" ) == team )
+                if ( ent->IsType( /*idTrigger_Flag*/ rvCTF_AssaultPoint::Type ) )
                 {
-                    //gameLocal.Printf( "[Event_GetCapturePoint][team: %i][capteam: %i]\n", playerEnt->team, ent->spawnArgs.GetInt( "team" ) );
-                    idThread::ReturnEntity( ent );
-                    return;
+                    const rvCTF_AssaultPoint *ap = static_cast<const rvCTF_AssaultPoint *>(ent);
+                    int flagTeam = ap->Team();
+                    if ( /*ent->spawnArgs.GetInt( "team" )*/ flagTeam == team )
+                    {
+                        //gameLocal.Printf( "[Event_GetCapturePoint][team: %i][capteam: %i]\n", playerEnt->team, ent->spawnArgs.GetInt( "team" ) );
+                        idThread::ReturnEntity( ent );
+                        return;
+                    }
                 }
             }
         }
     }
+    else
 #endif
     idThread::ReturnEntity( NULL );
 }
@@ -5352,7 +5270,7 @@ botAi::Event_PowerUpActive
 */
 void botAi::Event_PowerUpActive( void )
 {
-    idThread::ReturnFloat( 0 );
+    idThread::ReturnFloat( playerEnt->inventory.powerups );
 }
 
 idVec3 botAi::PredictTargetPosition( const idVec3 &targetPosition, const idVec3 &myPosition, const idVec3 &targetVelocity, float projectileSpeed )

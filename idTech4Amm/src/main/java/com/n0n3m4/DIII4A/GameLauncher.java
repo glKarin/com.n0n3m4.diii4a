@@ -23,7 +23,6 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,9 +34,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,6 +52,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,9 +61,13 @@ import com.karin.idTech4Amm.OnScreenButtonConfigActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
+import com.karin.idTech4Amm.lib.UIUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
+import com.karin.idTech4Amm.sys.Game;
+import com.karin.idTech4Amm.sys.GameManager;
+import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
@@ -102,7 +107,8 @@ import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -121,6 +127,7 @@ public class GameLauncher extends Activity
 	private static final int CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE = 10;
 	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD = 11;
 
+	private final GameManager m_gameManager = new GameManager();
     // GameLauncher function
     private ExtractPatchResourceFunc m_extractPatchResourceFunc;
     private CheckForUpdateFunc m_checkForUpdateFunc;
@@ -271,6 +278,36 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_s_useOpenAL)
+			{
+				setProp("s_useOpenAL", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, isChecked)
+						.commit();
+				if(!isChecked)
+				{
+					V.cb_s_useEAXReverb.setChecked(false);
+				}
+				V.cb_s_useEAXReverb.setEnabled(isChecked);
+			}
+			else if (id == R.id.cb_s_useEAXReverb)
+			{
+				if(isChecked)
+				{
+					V.cb_s_useOpenAL.setChecked(true);
+				}
+				setProp("s_useEAXReverb", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, isChecked)
+						.commit();
+			}
+			else if (id == R.id.readonly_command)
+			{
+				SetupCommandLine(isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(PreferenceKey.READONLY_COMMAND, isChecked)
+						.commit();
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -307,7 +344,8 @@ public class GameLauncher extends Activity
 			}
 			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame)
 			{
-				SetGameDLL(id);
+				RadioButton checked = radioGroup.findViewById(id);
+				SetGameDLL((String)checked.getTag());
 			}
 			else if (rgId == R.id.rg_msaa)
 			{
@@ -652,7 +690,7 @@ public class GameLauncher extends Activity
         {
             if (!V.fs_game_user.isChecked())
             {
-				GameProp prop = ChangeGameMod(str, false);
+				GameManager.GameProp prop = m_gameManager.ChangeGameMod(str, false);
 				if(prop.IsValid())
 				{
 					SelectCheckbox(GetGameModRadioGroup(), prop.index);
@@ -698,7 +736,7 @@ public class GameLauncher extends Activity
         if (null == game)
             game = "";
 
-		GameProp prop = ChangeGameMod(game, true);
+		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, true);
 		if(prop.IsValid())
 			SelectCheckbox(GetGameModRadioGroup(), prop.index);
 		game = prop.fs_game;
@@ -711,7 +749,7 @@ public class GameLauncher extends Activity
         }
         else
         {
-			if (!prop.is_mod && !game.isEmpty())
+			if (!prop.is_user && !game.isEmpty())
 				SetProp("fs_game", game);
 			else
 				RemoveProp("fs_game");
@@ -731,13 +769,12 @@ public class GameLauncher extends Activity
     {
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
-        InitGameProps();
 
         //k
         KUncaughtExceptionHandler.HandleUnexpectedException(this);
         setTitle(R.string.app_title);
         final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        ContextUtility.SetScreenOrientation(this, mPrefs.getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false) ? 0 : 1);
+        ContextUtility.SetScreenOrientation(this, mPrefs.getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false) ? 0 : 1);
 
         setContentView(R.layout.main);
 
@@ -758,8 +795,9 @@ public class GameLauncher extends Activity
         th.addTab(th.newTabSpec("tab3").setIndicator(Q3ELang.tr(this, R.string.graphics)).setContent(R.id.launcher_tab3));
 
         V.Setup();
+		InitGameList();
 
-        V.main_ad_layout.setVisibility(mPrefs.getBoolean(Constants.PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
+		V.main_ad_layout.setVisibility(mPrefs.getBoolean(PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
         SetGame(mPrefs.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3));
 
@@ -841,7 +879,7 @@ public class GameLauncher extends Activity
 		String game = mPrefs.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
 		if (null == game)
 			game = "";
-		GameProp prop = ChangeGameMod(game, userMod);
+		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, userMod);
 		SelectCheckbox(GetGameModRadioGroup(), prop.index);
         UpdateUserGame(userMod);
         V.fs_game_user.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -982,6 +1020,20 @@ public class GameLauncher extends Activity
         V.find_dll.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.scale_by_screen_area.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.scale_by_screen_area.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_scale_by_screen_area, false));
+		boolean useOpenAL = mPrefs.getBoolean(Q3EPreference.pref_harm_s_useOpenAL, true);
+		V.cb_s_useOpenAL.setChecked(useOpenAL);
+		V.cb_s_useEAXReverb.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_s_useEAXReverb, true));
+		V.cb_s_useOpenAL.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_s_useEAXReverb.setOnCheckedChangeListener(m_checkboxChangeListener);
+		if(!useOpenAL)
+		{
+			V.cb_s_useEAXReverb.setChecked(false);
+			V.cb_s_useEAXReverb.setEnabled(false);
+		}
+		boolean readonlyCommand = mPrefs.getBoolean(PreferenceKey.READONLY_COMMAND, false);
+		V.readonly_command.setChecked(readonlyCommand);
+		SetupCommandLine(readonlyCommand);
+		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
 
         updatehacktings();
 
@@ -1005,7 +1057,7 @@ public class GameLauncher extends Activity
         //k
         WritePreferences();
 		/*
-		if(Q3EUtils.q3ei.isQ4 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.OPEN_QUAKE4_HELPER, true))
+		if(Q3EUtils.q3ei.isQ4 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKey.OPEN_QUAKE4_HELPER, true))
 		{
 			OpenQuake4LevelDialog();
 			return;
@@ -1342,6 +1394,9 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, V.scale_by_screen_area.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, V.cb_s_useEAXReverb.isChecked());
+		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, V.readonly_command.isChecked());
 
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -1500,59 +1555,13 @@ public class GameLauncher extends Activity
         layout.setEnabled(enabled);
     }
 
-    private void SetGameDLL(int val)
+    private void SetGameDLL(String val)
     {
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         boolean userMod = V.fs_game_user.isChecked(); //preference.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
-        String game = "";
-		if (val == R.id.fs_game_base)
-		{
-			game = "base";
-		}
-		else if (val == R.id.fs_game_d3xp)
-		{
-			game = "d3xp";
-		}
-		else if (val == R.id.fs_game_cdoom)
-		{
-			game = "cdoom";
-		}
-		else if (val == R.id.fs_game_lost_mission)
-		{
-			game = "d3le";
-		}
-		else if (val == R.id.fs_game_rivensin)
-		{
-			game = "rivensin";
-		}
-		else if (val == R.id.fs_game_hardcorps)
-		{
-			game = "hardcorps";
-		}
-		/*else if (val == R.id.fs_game_overthinked)
-		{
-			game = "overthinked";
-		}
-		else if (val == R.id.fs_game_sabot)
-		{
-			game = "sabot";
-		}
-		else if (val == R.id.fs_game_hexeneoc)
-		{
-			game = "hexeneoc";
-		}*/
-
-		else if (val == R.id.fs_game_quake4)
-		{
-			game = "q4base";
-		}
-
-		else if (val == R.id.fs_game_prey)
-		{
-			game = "preybase";
-		}
-		GameProp prop = ChangeGameMod(game, userMod);
-		prop.Handle();
+        String game = null != val ? val : "";
+		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, userMod);
+		HandleGameProp(prop);
 
         if (userMod)
         {
@@ -1583,18 +1592,6 @@ public class GameLauncher extends Activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        // Android SDK > 28
-/*		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11 FS permission
-		{
-			if(requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_START_RESULT_CODE
-			|| requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER_RESULT_CODE
-			|| requestCode == CONST_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE_RESULT_CODE)
-			if (!Environment.isExternalStorageManager()) // reject
-			{
-				List<String> list = Collections.singletonList(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-				HandleGrantPermissionResult(requestCode, list);
-			}
-		}*/
         if (resultCode == RESULT_OK)
         {
             switch (requestCode)
@@ -1633,6 +1630,33 @@ public class GameLauncher extends Activity
 					break;
             }
         }
+		else
+		{
+			// Android SDK > 28: resultCode is RESULT_CANCELED
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11 FS permission
+			{
+				if(requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_START
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTRACT_PATCH_RESOURCE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_BACKUP_PREFERENCES_CHOOSE_FILE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_RESTORE_PREFERENCES_CHOOSE_FILE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_LIBRARY
+						|| requestCode == CONST_RESULT_CODE_REQUEST_ADD_EXTERNAL_GAME_LIBRARY
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE
+						|| requestCode == CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD
+				)
+				{
+					List<String> list = null;
+					if (!Environment.isExternalStorageManager()) // reject
+					{
+						list = Collections.singletonList(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+					}
+					HandleGrantPermissionResult(requestCode, list);
+				}
+			}
+		}
     }
 
     private void HandleGrantPermissionResult(int requestCode, List<String> list)
@@ -1833,8 +1857,8 @@ public class GameLauncher extends Activity
         boolean userMod = preference.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
 		V.fs_game_user.setChecked(userMod);
 
-		GameProp prop = ChangeGameMod(game, userMod);
-		prop.Handle();
+		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, userMod);
+		HandleGameProp(prop);
 		SelectCheckbox(GetGameModRadioGroup(), prop.index);
     }
 
@@ -2110,6 +2134,68 @@ public class GameLauncher extends Activity
 			return default_gamedata;
 	}
 
+	private void HandleGameProp(GameManager.GameProp prop)
+	{
+		if(prop.is_user)
+		{
+			if (!prop.fs_game.isEmpty())
+				SetProp("fs_game", prop.fs_game);
+			else
+				RemoveProp("fs_game");
+			RemoveProp("fs_game_base");
+			RemoveProp("harm_fs_gameLibPath");
+		}
+		else
+		{
+			if(null == prop.fs_game || prop.fs_game.isEmpty() || !prop.IsValid())
+				RemoveProp("fs_game");
+			else
+				SetProp("fs_game", prop.fs_game);
+			if(null == prop.fs_game_base || prop.fs_game_base.isEmpty() || !prop.IsValid())
+				RemoveProp("fs_game_base");
+			else
+				SetProp("fs_game_base", prop.fs_game_base);
+			RemoveProp("harm_fs_gameLibPath");
+		}
+	}
+
+	public GameManager GetGameManager()
+	{
+		return m_gameManager;
+	}
+
+	private void InitGameList()
+	{
+		Map<String, RadioGroup> groups = new HashMap<>();
+		RadioButton radio;
+		RadioGroup group;
+		RadioGroup.LayoutParams layoutParams;
+
+		groups.put(Q3EGlobals.GAME_DOOM3, V.rg_fs_game);
+		groups.put(Q3EGlobals.GAME_QUAKE4, V.rg_fs_q4game);
+		groups.put(Q3EGlobals.GAME_PREY, V.rg_fs_preygame);
+		Game[] values = Game.values();
+
+		for (Game value : values)
+		{
+			group = groups.get(value.type);
+			layoutParams = new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
+			radio = new RadioButton(group.getContext());
+			if(value.name instanceof Integer)
+				radio.setText((Integer)value.name);
+			else if(value.name instanceof String)
+				radio.setText((String)value.name);
+			radio.setTag(value.game);
+			group.addView(radio, layoutParams);
+			radio.setChecked(!value.is_mod);
+		}
+	}
+
+	private void SetupCommandLine(boolean readonly)
+	{
+		UIUtility.EditText__SetReadOnly(V.edt_cmdline, readonly, InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+	}
+
 
 
     private class ViewHolder
@@ -2175,6 +2261,9 @@ public class GameLauncher extends Activity
 		public CheckBox scale_by_screen_area;
 		public RadioGroup rg_harm_r_shadow;
 		public RadioGroup rg_opengl;
+		public CheckBox cb_s_useOpenAL;
+		public CheckBox cb_s_useEAXReverb;
+		public Switch readonly_command;
 
         public void Setup()
         {
@@ -2238,154 +2327,9 @@ public class GameLauncher extends Activity
 			scale_by_screen_area = findViewById(R.id.scale_by_screen_area);
 			rg_harm_r_shadow = findViewById(R.id.rg_harm_r_shadow);
 			rg_opengl = findViewById(R.id.rg_opengl);
+			cb_s_useOpenAL = findViewById(R.id.cb_s_useOpenAL);
+			cb_s_useEAXReverb = findViewById(R.id.cb_s_useEAXReverb);
+			readonly_command = findViewById(R.id.readonly_command);
         }
     }
-
-    private class GameProp
-	{
-		public int index = 0;
-		public String game = "";
-		public String fs_game = "";
-		public String fs_game_base = "";
-		//public boolean harm_fs_gameLibPath = true;
-		public boolean is_mod = false;
-
-		public GameProp(int index, String game, String fs_game, String fs_game_base, boolean is_mod)
-		{
-			this.index = index;
-			this.game = game;
-			this.fs_game = fs_game;
-			this.fs_game_base = fs_game_base;
-			this.is_mod = is_mod;
-		}
-
-		public void Handle()
-		{
-			if(is_mod)
-			{
-				if (!fs_game.isEmpty())
-					SetProp("fs_game", fs_game);
-				else
-					RemoveProp("fs_game");
-				RemoveProp("fs_game_base");
-				RemoveProp("harm_fs_gameLibPath");
-			}
-			else
-			{
-				if(null == fs_game || fs_game.isEmpty() || !IsValid())
-					RemoveProp("fs_game");
-				else
-					SetProp("fs_game", fs_game);
-				if(null == fs_game_base || fs_game_base.isEmpty() || !IsValid())
-					RemoveProp("fs_game_base");
-				else
-					SetProp("fs_game_base", fs_game_base);
-				RemoveProp("harm_fs_gameLibPath");
-			}
-		}
-
-		public boolean IsGame(String game)
-		{
-			if (null == game)
-				game = "";
-			if(game.equals(this.game))
-				return true;
-			if(index == 0 && game.isEmpty())
-				return true;
-			return false;
-		}
-
-		public boolean IsValid()
-		{
-			return index >= 0 && !game.isEmpty();
-		}
-	}
-
-	private final Map<String, List<GameProp>> GameProps = new LinkedHashMap<>();
-
-    private void InitGameProps()
-	{
-		List<GameProp> props;
-		GameProp prop;
-
-		props = new ArrayList<>();
-		prop = new GameProp(0, "base", "", "", false);
-		props.add(prop);
-		prop = new GameProp(1, "d3xp", "d3xp", "", false);
-		props.add(prop);
-		prop = new GameProp(2, "cdoom", "cdoom", "", false);
-		props.add(prop);
-		prop = new GameProp(3, "d3le", "d3le", "d3xp", false);
-		props.add(prop);
-		prop = new GameProp(4, "rivensin", "rivensin", "", false);
-		props.add(prop);
-		prop = new GameProp(5, "hardcorps", "hardcorps", "", false);
-		props.add(prop);
-
-		/*prop = new GameProp(6, "overthinked", "overthinked", "", false);
-		props.add(prop);
-		prop = new GameProp(7, "sabot", "sabot", "d3xp", false);
-		props.add(prop);
-		prop = new GameProp(8, "hexeneoc", "hexeneoc", "", false);
-		props.add(prop);*/
-
-		GameProps.put(Q3EGlobals.GAME_DOOM3, props);
-
-		props = new ArrayList<>();
-		prop = new GameProp(0, "q4base", "", "", false);
-		props.add(prop);
-		GameProps.put(Q3EGlobals.GAME_QUAKE4, props);
-
-		props = new ArrayList<>();
-		prop = new GameProp(0, "preybase", "", "", false);
-		props.add(prop);
-		GameProps.put(Q3EGlobals.GAME_PREY, props);
-	}
-
-	private GameProp ChangeGameMod(String game, boolean userMod)
-	{
-		if (null == game)
-			game = "";
-
-		List<GameProp> list;
-		if (Q3EUtils.q3ei.isQ4)
-		{
-			list = GameProps.get(Q3EGlobals.GAME_QUAKE4);
-		}
-		else if (Q3EUtils.q3ei.isPrey)
-		{
-			list = GameProps.get(Q3EGlobals.GAME_PREY);
-		}
-		else
-		{
-			list = GameProps.get(Q3EGlobals.GAME_DOOM3);
-		}
-
-		GameProp res = null;
-		for (GameProp prop : list)
-		{
-			if(prop.IsGame(game))
-			{
-				res = prop;
-				break;
-			}
-		}
-		if(null == res)
-			res = new GameProp(0, "", game, "", userMod);
-		return res;
-	}
-
-	public String GetGameOfMod(String game)
-	{
-		for (String key : GameProps.keySet())
-		{
-			List<GameProp> props = GameProps.get(key);
-			for (GameProp prop : props)
-			{
-				if(prop.game.equals(game))
-					return key;
-			}
-		}
-		return null;
-	}
 }

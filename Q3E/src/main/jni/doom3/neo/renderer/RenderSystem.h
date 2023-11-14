@@ -88,6 +88,11 @@ typedef struct glconfig_s {
 	bool framebufferObjectAvailable;
 	int maxRenderbufferSize;
 	int maxColorAttachments;
+
+	bool depthTextureAvailable;
+	bool depthTextureCubeMapAvailable;
+	bool depth24Available;
+	bool gl_FragDepthAvailable;
 } glconfig_t;
 
 

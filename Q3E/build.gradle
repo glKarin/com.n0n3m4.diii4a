@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk 28
+    compileSdk 30
     buildToolsVersion '30.0.3'
     //compileOptions.encoding "gbk"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 30
 
         ndk {
             moduleName "q3eloader"
@@ -29,6 +29,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+        /*customDebugType {
+            debuggable true
+        }*/
     }
     sourceSets {
         main {
@@ -57,6 +60,6 @@ android {
 
 dependencies {
     //compile 'com.android.support:support-v4:18.+'
-    //implementation files('libs/ouya-sdk.jar')
-    //implementation files('libs/RootTools-2.4.jar')
+    // implementation files('libs/ouya-sdk.jar')
+    // implementation files('libs/RootTools-2.4.jar')
 }

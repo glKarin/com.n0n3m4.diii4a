@@ -247,7 +247,7 @@
     <string name="license">Лицензия</string>
     <string name="maximum_fps_limit_0_unlimited">Максимальный придел FPS (cvar `harm_r_maxFPS`)</string>
     <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (0 = неограниченный)</string>
-    <string name="edit_cvar">Редактировать CVar</string>
+    <string name="edit_cvar">Редактор CVar</string>
     <string name="cvar_editor">CVar редактор</string>
     <string name="skip_intro">Пропустить вступительный ролик</string>
     <string name="overthinked_overthinked">Overthinked(overthinked)</string>
@@ -259,7 +259,11 @@
     <string name="hide_ad_bar_in_launcher">Скрыть рекламную панель в лаунчере</string>
     <string name="scale_by_screen_area">Масштабировать по области экрана</string>
     <string name="shadow_cvar_r_useShadowMapping">Тени(cvar `r_useShadowMapping`)</string>
-    <string name="shadow_volume">Объем теней</string>
-    <string name="shadow_mapping">Наложение теней</string>
+    <string name="shadow_volume">Объёмные тени</string>
+    <string name="shadow_mapping">Мягкие тени</string>
+    <string name="renderer">Рендер</string>
+    <string name="_sound">Звук</string>
+    <string name="using_openal">Использовать OpenAL(Мягкий)(cvar `s_useOpenAL`)</string>
+    <string name="using_efx_reverb">Использовать EFX реверберацию(cvar `s_useEAXReverb`)</string>
 
 </resources>

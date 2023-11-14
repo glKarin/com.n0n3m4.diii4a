@@ -1,6 +1,5 @@
 package com.karin.idTech4Amm.misc;
 
-import android.os.Build;
 import android.text.Html;
 import android.content.Context;
 
@@ -138,6 +137,7 @@ public final class TextHelper
             Constants.CONST_NAME,
             "Update: " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
             "Release: " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
+            "Build: " + Constants.GetBuildTime("yyyy-MM-dd HH:mm:ss.SSS") + ("(API " + Constants.GetBuildSDKVersion() + ")"),
             "Dev: " + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_DEV),
             "Changes: ",
         };
@@ -277,8 +277,9 @@ public final class TextHelper
             Constants.CONST_NAME,
             "Changes by " + GenLinkText(Constants.CONST_DEVELOPER, Constants.CONST_DEV)
             + "&lt;" + GenLinkText("mailto:" + Constants.CONST_EMAIL, Constants.CONST_EMAIL) + "&gt;",
-            "Update: " + ContextUtility.GetAppVersion(context) + ("(API " + Build.VERSION.SDK_INT + ")") + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
+            "Update: " + ContextUtility.GetAppVersion(context) + (ContextUtility.BuildIsDebug(context) ? "(debug)" : ""),
             "Release: " + Constants.CONST_RELEASE + " (R" + Constants.CONST_UPDATE_RELEASE + ")",
+            "Build: " + Constants.GetBuildTime("yyyy-MM-dd HH:mm:ss.SSS") + ("(API " + Constants.GetBuildSDKVersion() + ")"),
             null,
             "Rename from `DIII4A++`, base on original `n0n3m4`'s `DIII4A`.",
             "idTech4 engine's games support on Android.",
@@ -312,6 +313,19 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+
+                ChangeLog.Create("2023-10-01", 33,
+                        "Add shadow mapping soft shadow support(testing, has some incorrect rendering), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow`.",
+                        "In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).",
+                        "Fix Setting's tab GUI in Prey2006.",
+                        "Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).",
+                        "Support max FPS limit(cvar `harm_r_maxFPS`).",
+                        "Support obj/dae static model, and fix png image load.",
+                        "Add skip intro support.",
+                        "Add simple CVar editor.",
+                        "Change OpenGL vertex index size to 4 bytes for large model.",
+                        "Add GLES3.0 support, can choose in `Graphics` tab."
+                        ),
 
                 ChangeLog.Create("2023-06-30", 32,
                         "Add `Chinese`, `Russian`(by " + TextHelper.GenLinkText("https://4pda.ru/forum/index.php?showuser=5043340", "ALord7") + ") language.",
@@ -368,7 +382,7 @@ public final class TextHelper
                         "Using DOOM3's Fx/Particle system implement Quake4's BSE incompletely for effects in Quake 4. The effects are bad now. Using set `bse_enabled` to 0 for disable effects.",
                         "Remove my cvar `harm_g_alwaysRun`, so set original `in_alwaysRun` to 1 for run in Quake 4.",
                         "Add simple beam model render in Prey(2006).",
-                        "Optimize skybox render in Prey(2006) by " + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`."
+                        "Optimize skybox render in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`."
                 ),
 
                 ChangeLog.Create("2023-02-20", 25,

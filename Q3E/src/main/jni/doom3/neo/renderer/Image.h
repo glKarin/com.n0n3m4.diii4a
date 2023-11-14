@@ -208,11 +208,12 @@ class idImage
 		                              textureRepeat_t repeat, textureDepth_t depth);
 
 #ifdef _SHADOW_MAPPING
-	void		GenerateShadowMapDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
-    void		GenerateShadowMapDepthCubeImage(int size, textureFilter_t filter, bool allowDownSize);
-	void		GenerateDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeat);
+	void		GenerateShadow2DRGBAImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
+    void		GenerateShadowCubeRGBAImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
+	void		GenerateShadow2DDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
+	void		GenerateShadowCubeDepthImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
 #ifdef GL_ES_VERSION_3_0
-	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat );
+	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat, int component = 24, bool compare = true );
 #endif
 #endif
 #if !defined(GL_ES_VERSION_2_0)
@@ -541,11 +542,12 @@ class idImageManager
 #endif
 #ifdef _SHADOW_MAPPING
 	// RB begin
-	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
-	idImage*			shadowCubeImage[MAX_SHADOWMAP_RESOLUTIONS];
-    idImage*			shadowDepthImage[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage_2DRGBA[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage_2DDepth[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage_CubeRGBA[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage_CubeDepth[MAX_SHADOWMAP_RESOLUTIONS];
 #ifdef GL_ES_VERSION_3_0
-	idImage*			shadowES3Image[MAX_SHADOWMAP_RESOLUTIONS];
+	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
 #endif
 	// RB end
 #endif
@@ -603,3 +605,9 @@ IMAGEPROGRAM
 void R_LoadImageProgram(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL);
 const char *R_ParsePastImageProgram(idLexer &src);
 
+#ifdef _USING_STB
+void R_WritePNG(const char *filename, const byte *data, int width, int height, int comp, int quality = 100, bool flipVertical = false, const char *basePath = NULL);
+void R_WriteJPG(const char *filename, const byte *data, int width, int height, int comp, int compression = 0, bool flipVertical = false, const char *basePath = NULL);
+void R_WriteBMP(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
+void R_WriteImage(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical = false, const char *basePath = NULL);
+#endif

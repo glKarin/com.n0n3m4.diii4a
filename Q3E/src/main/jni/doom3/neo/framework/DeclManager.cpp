@@ -269,7 +269,7 @@ class idDeclManagerLocal : public idDeclManager
 // RAVEN END
 
 // jmarshall
-    void						RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList);
+    void						RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList, bool norecurse = false);
 // jmarshall end
 
 	virtual bool					GetPlaybackData( const rvDeclPlayback *playback, int control, int now, int last, class rvDeclPlaybackData *pbd ) { (void)playback; (void)control; (void)now; (void)last; (void) pbd; return false; }
@@ -286,6 +286,7 @@ class idDeclManagerLocal : public idDeclManager
 	virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) {
 		return const_cast<idDeclEntityDef *>(GetMapDef(mapName, entityFilter));
 	}
+	virtual void			RegisterDeclFolderWrapper( const char *folder, const char *extension, declType_t defaultType, bool unique = false, bool norecurse = false );
 
 	private:
 	const idDeclEntityDef * GetMapDef(const char *mapName, const char *entityFilter) const;
@@ -1208,16 +1209,13 @@ idDeclManagerLocal::RegisterDeclFolder
 */
 void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *extension, declType_t defaultType)
 {
+#ifdef _RAVEN
+	RegisterDeclFolderWrapper(folder, extension, defaultType, false, false);
+#else
 	int i, j;
 	idStr fileName;
 	idDeclFolder *declFolder;
-#ifdef _RAVEN
-// jmarshall - decls subfolders
-    idList<idStr> fileList;
-// jmarshall end
-#else
 	idFileList *fileList;
-#endif
 	idDeclFile *df;
 
 	// check whether this folder / extension combination already exists
@@ -1238,29 +1236,12 @@ void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *exte
 	}
 
 	// scan for decl files
-#ifdef _RAVEN
-// jmarshall - decls subfolders
-    RegisterDeclSubFolder(declFolder->folder, declFolder->extension, fileList);
-// jmarshall end
-#else
 	fileList = fileSystem->ListFiles(declFolder->folder, declFolder->extension, true);
-#endif
 
 	// load and parse decl files
-#ifdef _RAVEN
-    for ( i = 0; i < fileList.Num(); i++ )
-#else
 	for (i = 0; i < fileList->GetNumFiles(); i++)
-#endif
 	{
-#ifdef _RAVEN
-// jmarshall
-        //fileName = declFolder->folder + "/" + fileList[ i ];
-        fileName = fileList[i];
-// jmarshall end
-#else
 		fileName = declFolder->folder + "/" + fileList->GetFile(i);
-#endif
 
 		// check whether this file has already been loaded
 		for (j = 0; j < loadedFiles.Num(); j++) {
@@ -1279,7 +1260,6 @@ void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *exte
 		df->LoadAndParse();
 	}
 
-#if !defined(_RAVEN)
 	fileSystem->FreeFileList(fileList);
 #endif
 }
@@ -2826,7 +2806,7 @@ RegisterDeclSubFolder
 ===================
 */
 // jmarshall
-void idDeclManagerLocal::RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList)
+void idDeclManagerLocal::RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList, bool norecurse)
 {
     // Find all
     {
@@ -2840,14 +2820,17 @@ void idDeclManagerLocal::RegisterDeclSubFolder(const char* folder, const char* e
         fileSystem->FreeFileList(list);
     }
 
-    idFileList* dirList = fileSystem->ListFiles(folder, "/", true);
-    for (int i = 0; i < dirList->GetNumFiles(); i++)
-    {
-        idStr dir = va("%s/%s", folder, dirList->GetFile(i));
-        RegisterDeclSubFolder(dir, extension, fileList);
-    }
+	if(!norecurse)
+	{
+		idFileList* dirList = fileSystem->ListFiles(folder, "/", true);
+		for (int i = 0; i < dirList->GetNumFiles(); i++)
+		{
+			idStr dir = va("%s/%s", folder, dirList->GetFile(i));
+			RegisterDeclSubFolder(dir, extension, fileList);
+		}
 
-    fileSystem->FreeFileList(dirList);
+		fileSystem->FreeFileList(dirList);
+	}
 }
 // jmarshall end
 
@@ -2949,6 +2932,61 @@ const idDeclEntityDef * idDeclManagerLocal::GetMapDef(const char *mapName, const
 
 	const idDeclEntityDef *mapDef = static_cast<const idDeclEntityDef *>(mapDecl);
 	return mapDef;
+}
+
+void idDeclManagerLocal::RegisterDeclFolderWrapper( const char *folder, const char *extension, declType_t defaultType, bool unique, bool norecurse )
+{
+	(void)unique;
+
+	int i, j;
+	idStr fileName;
+	idDeclFolder *declFolder;
+    idList<idStr> fileList;
+	idDeclFile *df;
+
+	// check whether this folder / extension combination already exists
+	for (i = 0; i < declFolders.Num(); i++) {
+		if (declFolders[i]->folder.Icmp(folder) == 0 && declFolders[i]->extension.Icmp(extension) == 0) {
+			break;
+		}
+	}
+
+	if (i < declFolders.Num()) {
+		declFolder = declFolders[i];
+	} else {
+		declFolder = new idDeclFolder;
+		declFolder->folder = folder;
+		declFolder->extension = extension;
+		declFolder->defaultType = defaultType;
+		declFolders.Append(declFolder);
+	}
+
+	// scan for decl files
+// jmarshall - decls subfolders
+    RegisterDeclSubFolder(declFolder->folder, declFolder->extension, fileList, norecurse);
+// jmarshall end
+
+	// load and parse decl files
+    for ( i = 0; i < fileList.Num(); i++ )
+	{
+        fileName = fileList[i];
+
+		// check whether this file has already been loaded
+		for (j = 0; j < loadedFiles.Num(); j++) {
+			if (fileName.Icmp(loadedFiles[j]->fileName) == 0) {
+				break;
+			}
+		}
+
+		if (j < loadedFiles.Num()) {
+			df = loadedFiles[j];
+		} else {
+			df = new idDeclFile(fileName, defaultType);
+			loadedFiles.Append(df);
+		}
+
+		df->LoadAndParse();
+	}
 }
 
 #endif

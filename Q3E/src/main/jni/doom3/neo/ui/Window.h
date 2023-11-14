@@ -202,7 +202,6 @@ class idWindow
 // jmarshall end
 #endif
 #ifdef _HUMANHEAD
-		//k: TODO tab
 		ON_TABACTIVATE,
 		ON_STARTUP,
 		ON_MAXCHARS,
@@ -284,14 +283,7 @@ class idWindow
 		};
 
 #ifdef _RAVEN // quake4 gui function
-// jmarshall - quake 4 gui
-    void ClearTransitions(void)
-    {
-        transitions.Clear();
-		transitions.SetNum(0, false);
-		flags &= ~WIN_INTRANSITION;
-    }
-// jmarshall end
+    	void ClearTransitions(void);
 #endif
 
 		virtual bool Parse(idParser *src, bool rebuild = true);
@@ -336,13 +328,7 @@ class idWindow
 		void GetScriptString(const char *name, idStr &out);
 		void SetScriptParams();
 		bool HasOps() {
-#ifdef _RAVEN
-// jmarshall - gui crash.
-        return (numOps > 0);
-// jmarshall end
-#else
 			return (ops.Num() > 0);
-#endif
 		};
 		float EvalRegs(int test = -1, bool force = false);
 		void StartTransition();
@@ -521,7 +507,6 @@ class idWindow
 	idWinVec4 seperatorLines;
 	idWinInt seperatorMargin;
 	idWinVec4 hoverBorderColor;
-	//k: TODO tab window
 	idWinInt activeTab;
 	idWinVec4 sepColor;
 	idWinVec2 tabMargins;
@@ -563,13 +548,7 @@ class idWindow
 
 		static bool registerIsTemporary[MAX_EXPRESSION_REGISTERS]; // statics to assist during parsing
 
-#ifdef _RAVEN// jmarshall - gui crash
-    wexpOp_t ops[MAX_EXPRESSION_OPS];			   	// evaluate to make expressionRegisters
-    int numOps;
-// jmarshall end
-#else
 		idList<wexpOp_t> ops;			   	// evaluate to make expressionRegisters
-#endif
 		idList<float> expressionRegisters;
 		idList<wexpOp_t> *saveOps;			   	// evaluate to make expressionRegisters
 		idList<rvNamedEvent *>		namedEvents;		//  added named events

@@ -32,6 +32,10 @@ import android.view.SurfaceView;
 
 import com.n0n3m4.q3e.karin.KOnceRunnable;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+
 class Q3EView extends SurfaceView implements SurfaceHolder.Callback
 {
     public static boolean mInit=false;
@@ -131,7 +135,6 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                     break;
             }
 
-            String lib_dir = Q3EUtils.GetGameLibDir(getContext());
             String cmd = Q3EUtils.q3ei.cmd;
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
             boolean redirectOutputToFile = preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true);
@@ -139,7 +142,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
             int runBackground = Q3EUtils.parseInt_s(preferences.getString(Q3EPreference.RUN_BACKGROUND, "0"), 0);
             int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
 
-            Q3EJNI.init(lib_dir + "/" + Q3EUtils.q3ei.libname, width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa, glVersion, redirectOutputToFile, noHandleSignals, Q3EUtils.q3ei.multithread, runBackground > 0);
+            Q3EJNI.init(GetEngineLib(), Q3EUtils.GetGameLibDir(getContext()), width, height, Q3EMain.datadir, cmd, getHolder().getSurface(), glFormat, msaa, glVersion, redirectOutputToFile, noHandleSignals, Q3EUtils.q3ei.multithread, runBackground > 0);
 
             mInit = true;
 
@@ -324,5 +327,36 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
             Q3EJNI.SetSurface(null);
 		/*Q3EJNI.shutdown();
         super.surfaceDestroyed(holder);*/
+    }
+
+    private String GetEngineLib()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String libPath = Q3EUtils.GetGameLibDir(getContext()) + "/" + Q3EUtils.q3ei.libname;
+        if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
+        {
+            String localLibPath = Q3EMain.datadir + "/" + Q3EUtils.q3ei.libname;
+            File file = new File(localLibPath);
+            if(!file.isFile() || !file.canRead())
+            {
+                Log.w(Q3EGlobals.CONST_Q3E_LOG_TAG, "Local engine library not file or unreadable: " + localLibPath);
+            }
+            else
+            {
+                String cacheFile = getContext().getCacheDir() + File.separator + Q3EUtils.q3ei.libname;
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found local engine library file: " + localLibPath);
+                long r = Q3EUtils.cp(localLibPath, cacheFile);
+                if(r > 0)
+                {
+                    libPath = cacheFile;
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load local engine library: " + cacheFile);
+                }
+                else
+                {
+                    Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local engine library fail: " + cacheFile);
+                }
+            }
+        }
+        return libPath;
     }
 }

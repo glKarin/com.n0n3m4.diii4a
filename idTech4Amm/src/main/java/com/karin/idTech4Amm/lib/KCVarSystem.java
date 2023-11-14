@@ -26,14 +26,10 @@ public final class KCVarSystem
                                 "blinn_phong", "Blinn-Phong"
                         ),
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "4.0", "Specular exponent in interaction light model", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external GLSL shader program directory path", 0),
+                        KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external OpenGLES2.0 GLSL shader program directory path", 0),
+                        KCVar.CreateCVar("harm_r_shaderProgramES3Dir", "string", "glsl3progs", "Special external OpenGLES3.0 GLSL shader program directory path", 0),
                         KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0: Always heap; Negative: Always stack(original); Positive: Max stack memory limit)", 0),
                         KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "0.5", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_shadowMapPointLight", "integer", "1", "OpenGLES2 point light shadow mapping", 0,
-                                "0", "using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5]",
-                                "1", "using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar]",
-                                "2", "calculate z transform as depth value"
-                        ),
                         KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
@@ -76,7 +72,8 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint in full-body awareness", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot level(0 - auto; 1 - 8: difficult level)", KCVar.FLAG_POSITIVE)
                 );
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)

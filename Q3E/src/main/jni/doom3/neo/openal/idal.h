@@ -2,6 +2,9 @@
 // C:\Python23\Lib\idlelib\idle.pyw
 // Mon Mar 28 12:31:26 2005
 
+#if !defined(_K_CLANG)
+#define ALvoid void
+#endif
 extern ALenum(ALAPIENTRY *idalGetError)(ALvoid);
 extern ALvoid(ALAPIENTRY *idalGenBuffers)(ALsizei, ALuint *);
 extern ALboolean(ALAPIENTRY *idalIsSource)(ALuint);
@@ -33,6 +36,8 @@ extern ALvoid(ALAPIENTRY *idalSourcef)(ALuint, ALenum, ALfloat);
 extern ALvoid(ALAPIENTRY *idalSourceUnqueueBuffers)(ALuint, ALsizei, ALuint *);
 extern ALvoid(ALAPIENTRY *idalSourcePlay)(ALuint);
 
+extern const ALchar *(ALAPIENTRY *idalGetString)(ALenum);
+
 #define alGetError idalGetError
 #define alGenBuffers idalGenBuffers
 #define alIsSource idalIsSource
@@ -63,3 +68,21 @@ extern ALvoid(ALAPIENTRY *idalSourcePlay)(ALuint);
 #define alSourcef idalSourcef
 #define alSourceUnqueueBuffers idalSourceUnqueueBuffers
 #define alSourcePlay idalSourcePlay
+
+#define alGetString idalGetString
+
+
+#ifdef _OPENAL_EFX
+extern ALCboolean(ALAPIENTRY *idalcIsExtensionPresent)(ALCdevice *, const ALCchar *);
+extern ALvoid(ALAPIENTRY *idalSource3i)(ALuint, ALenum, ALint, ALint, ALint);
+
+#define alcIsExtensionPresent idalcIsExtensionPresent
+#define alSource3i idalSource3i
+#endif
+
+//#define _DEBUG_AL
+#ifdef _DEBUG_AL
+#undef alGetError
+extern ALenum iddalGetError(ALvoid);
+#define alGetError iddalGetError
+#endif

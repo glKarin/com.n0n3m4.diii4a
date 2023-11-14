@@ -837,7 +837,7 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 {
 	int i;
 
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	int *remap;
 	size_t alloc_size = tri->numVerts * sizeof(remap[0]);
 	_DROID_ALLOC16(int, alloc_size, remap, 0)
@@ -856,7 +856,7 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 	}
 
 	// create duplicate vertex index based on the vertex remap
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	int *tempDupVerts;
 	alloc_size = tri->numVerts * 2 * sizeof(tempDupVerts[0]);
 	_DROID_ALLOC16(int, alloc_size, tempDupVerts, 1)
@@ -875,7 +875,7 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 
 	tri->dupVerts = triDupVertAllocator.Alloc(tri->numDupVerts * 2);
 	memcpy(tri->dupVerts, tempDupVerts, tri->numDupVerts * 2 * sizeof(tri->dupVerts[0]));
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(remap, 0)
 	_DROID_FREE(tempDupVerts, 1)
 #endif
@@ -1367,7 +1367,7 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	int				totalVerts;
 	int				numMirror;
 
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	const size_t alloc_size = tri->numVerts * sizeof(*tverts);
 	_DROID_ALLOC16(tangentVert_t, alloc_size, tverts, 0)
 #else
@@ -1405,7 +1405,7 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	// now create the new list
 	if (totalVerts == tri->numVerts) {
 		tri->mirroredVerts = NULL;
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(tverts, 0)
 #endif
 		return;
@@ -1446,19 +1446,11 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	}
 
 	tri->numVerts = totalVerts;
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(tverts, 0)
 #endif
 }
 
-//k: temp memory allocate in stack / heap control on Android
-#ifdef __ANDROID__
-#warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-
-#ifdef HARM_CVAR_CONTROL_MAX_STACK_ALLOC_SIZE
-/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Control allocate temporary memory when load model data on Android, default value is `524288` bytes(Because stack memory is limited on Android, exam `game/le_hell` map's `models/mapobjects/hell/hellintro.lwo` in `DOOM3: The lost mission` mod). If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0 - Always heap, Negative - Always stack, Positive - Max stack memory limit).");
-#endif
-#endif
 /*
 =================
 R_DeriveTangentsWithoutNormals
@@ -1500,7 +1492,7 @@ void R_DeriveTangentsWithoutNormals(srfTriangles_t *tri)
 	faceTangents_t	*ft;
 	idDrawVert		*vert;
 
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	const size_t alloc_size = sizeof(faceTangents[0]) * tri->numIndexes/3;
 	_DROID_ALLOC16(faceTangents_t, alloc_size, faceTangents, 0)
 #else
@@ -1565,7 +1557,7 @@ void R_DeriveTangentsWithoutNormals(srfTriangles_t *tri)
 
 	tri->tangentsCalculated = true;
 
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(faceTangents, 0)
 #endif
 }
@@ -1818,7 +1810,7 @@ void R_DeriveTangents(srfTriangles_t *tri, bool allocFacePlanes)
 #if 1
 
 	if (!planes) {
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 		const size_t alloc_size = (tri->numIndexes / 3) * sizeof(planes[0]);
 		_DROID_ALLOC16(idPlane, alloc_size, planes, 0)
 #else
@@ -1987,7 +1979,7 @@ void R_DeriveTangents(srfTriangles_t *tri, bool allocFacePlanes)
 
 	tri->tangentsCalculated = true;
 	tri->facePlanesCalculated = true;
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(planes, 0)
 #endif
 }

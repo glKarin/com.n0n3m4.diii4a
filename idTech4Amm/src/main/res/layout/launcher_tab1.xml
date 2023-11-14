@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
 	android:id="@+id/launcher_tab1"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
@@ -17,11 +18,26 @@
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
 
-			<TextView
-				android:id="@+id/tv_cmdline"
-				android:layout_width="wrap_content"
+			<LinearLayout
+				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:text="@string/commandline"/>
+				android:orientation="horizontal" >
+				<TextView
+					android:id="@+id/tv_cmdline"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:layout_gravity="center_vertical"
+					android:text="@string/commandline"/>
+				<Switch
+					android:id="@+id/readonly_command"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:checked="false"
+					>
+				</Switch>
+			</LinearLayout>
 
 			<EditText
 				android:id="@+id/edt_cmdline"
@@ -73,90 +89,6 @@
 
 			</LinearLayout>
 
-			<CheckBox
-				android:id="@+id/nolight"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/disable_lighting"/>
-
-			<CheckBox
-				android:id="@+id/usedxt"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/use_dxt_textures_tegra_only_others_no_effect"/>
-
-			<CheckBox
-				android:id="@+id/useetc1"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/use_etc1_or_rgba4444_compression"/>
-
-			<CheckBox
-				android:id="@+id/useetc1cache"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/use_etc1_or_rgba4444_cache"/>
-
-			<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="1dp"
-				android:layout_marginBottom="1dp"
-				android:text="@string/clear_vertex_buffer_cvar_harm_r_clearvertexbuffer"/>
-
-			<RadioGroup
-				android:id="@+id/r_harmclearvertexbuffer"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content">
-
-				<RadioButton
-					android:id="@+id/r_harmclearvertexbuffer_0"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/don_t_clear_and_do_nothing"/>
-				<TextView
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="32dp"
-					android:layout_marginTop="0dp"
-					android:layout_marginBottom="0dp"
-					android:textSize="12sp"
-					android:text="@string/it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen"
-					android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-				<RadioButton
-					android:id="@+id/r_harmclearvertexbuffer_1"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/force_clear_vertex_buffer_on_every_end_frame"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="32dp"
-					android:layout_marginTop="0dp"
-					android:layout_marginBottom="0dp"
-                    android:textSize="12sp"
-                    android:text="@string/if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer"
-					android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-				<RadioButton
-					android:id="@+id/r_harmclearvertexbuffer_2"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:checked="true"
-					android:text="@string/force_delete_vertex_buffer_on_every_end_frame"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="32dp"
-					android:layout_marginTop="0dp"
-					android:layout_marginBottom="0dp"
-                    android:textSize="12sp"
-                    android:text="@string/also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer"
-					android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-			</RadioGroup>
-
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -169,84 +101,18 @@
 				android:id="@+id/rg_fs_game"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
-
-				<RadioButton
-					android:id="@+id/fs_game_base"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:checked="true"
-					android:text="@string/doom_iii"/>
-
-				<RadioButton
-					android:id="@+id/fs_game_d3xp"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/doom3_resurrection_of_evil_d3xp"/>
-
-				<RadioButton
-					android:id="@+id/fs_game_cdoom"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/classic_doom_cdoom"/>
-
-				<RadioButton
-					android:id="@+id/fs_game_lost_mission"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/doom3_bfg_the_lost_mission_d3le"/>
-
-				<RadioButton
-					android:id="@+id/fs_game_rivensin"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/rivensin_rivensin"/>
-
-                <RadioButton
-                    android:id="@+id/fs_game_hardcorps"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-					android:text="@string/hardcorps_hardcorps"/>
-				<!--<RadioButton
-					android:id="@+id/fs_game_overthinked"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/overthinked_overthinked"/>
-				<RadioButton
-					android:id="@+id/fs_game_sabot"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/sabot_sabot"/>
-				<RadioButton
-					android:id="@+id/fs_game_hexeneoc"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/hexen_edge_of_chaos_hexeneoc"/>-->
 			</RadioGroup>
 
             <RadioGroup
                 android:id="@+id/rg_fs_q4game"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-
-                <RadioButton
-                    android:id="@+id/fs_game_quake4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-					android:text="@string/quake_iv_q4base"/>
-
 			</RadioGroup>
 
 			<RadioGroup
 				android:id="@+id/rg_fs_preygame"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
-
-				<RadioButton
-					android:id="@+id/fs_game_prey"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/prey_preybase"/>
-
 			</RadioGroup>
 
 
@@ -309,11 +175,103 @@
 					android:textAppearance="?android:attr/textAppearanceSmall"/>
 			</LinearLayout>
 
+
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/renderer"
+				myapp:lineColor="@color/launcher_divider_color"
+				/>
+
 			<CheckBox
 				android:id="@+id/multithreading"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/multi_threading"/>
+
+			<CheckBox
+				android:id="@+id/nolight"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/disable_lighting"/>
+
+			<CheckBox
+				android:id="@+id/usedxt"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/use_dxt_textures_tegra_only_others_no_effect"/>
+
+			<CheckBox
+				android:id="@+id/useetc1"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/use_etc1_or_rgba4444_compression"/>
+
+			<CheckBox
+				android:id="@+id/useetc1cache"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/use_etc1_or_rgba4444_cache"/>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="1dp"
+				android:layout_marginBottom="1dp"
+				android:text="@string/clear_vertex_buffer_cvar_harm_r_clearvertexbuffer"/>
+
+			<RadioGroup
+				android:id="@+id/r_harmclearvertexbuffer"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+
+				<RadioButton
+					android:id="@+id/r_harmclearvertexbuffer_0"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/don_t_clear_and_do_nothing"/>
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="32dp"
+					android:layout_marginTop="0dp"
+					android:layout_marginBottom="0dp"
+					android:textSize="12sp"
+					android:text="@string/it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen"
+					android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+				<RadioButton
+					android:id="@+id/r_harmclearvertexbuffer_1"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/force_clear_vertex_buffer_on_every_end_frame"/>
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="32dp"
+					android:layout_marginTop="0dp"
+					android:layout_marginBottom="0dp"
+					android:textSize="12sp"
+					android:text="@string/if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer"
+					android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+				<RadioButton
+					android:id="@+id/r_harmclearvertexbuffer_2"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:checked="true"
+					android:text="@string/force_delete_vertex_buffer_on_every_end_frame"/>
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="32dp"
+					android:layout_marginTop="0dp"
+					android:layout_marginBottom="0dp"
+					android:textSize="12sp"
+					android:text="@string/also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer"
+					android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+			</RadioGroup>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -420,6 +378,13 @@
 
 			</RadioGroup>
 
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/_sound"
+				myapp:lineColor="@color/launcher_divider_color"
+				/>
+
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -449,6 +414,25 @@
 					android:text="OpenSLES"/>
 
 			</RadioGroup>
+
+			<CheckBox
+				android:id="@+id/cb_s_useOpenAL"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/using_openal"/>
+
+			<CheckBox
+				android:id="@+id/cb_s_useEAXReverb"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/using_efx_reverb"/>
+
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/other"
+				myapp:lineColor="@color/launcher_divider_color"
+				/>
 
 			<CheckBox
 				android:id="@+id/auto_quick_load"

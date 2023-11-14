@@ -223,6 +223,8 @@ class idCommonLocal : public idCommon
 	virtual void				DebuggerCheckBreakpoint ( idInterpreter* interpreter, idProgram* program, int instructionPointer ) { (void)interpreter; (void)program; (void)instructionPointer; }
 	virtual bool				DoingDeclValidation( void ) { return false; }
 	virtual void				LoadToolsDLL( void ) { }
+	virtual int					GetRModeForMachineSpec( int machineSpec ) const { (void)machineSpec; return 0; };
+	virtual void				SetDesiredMachineSpec( int machineSpec ) { (void)machineSpec; };
 #endif
 #ifdef _HUMANHEAD
 	virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) { (void) src; (void)dst; (void)lengthAllocated; }
@@ -2878,12 +2880,6 @@ idCommonLocal::LoadGameDLL
 #define _HARM_BASE_GAME_DLL "game"
 #endif
 
-#ifndef _ANDROID_PACKAGE_NAME
-//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
-#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
-#endif
-
-#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
 #endif
 //k
 #define _ANDROID_NATIVE_LIBRARY_DIR "<Android APK native library directory path>/"

@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **最新版本:**
-1.1.0harmattan33(natasha)  
+1.1.0harmattan35(natasha)  
 **最新更新日期:**
-2023-10-01  
+2023-10-29  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -25,16 +25,12 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 新增shadow mapping软阴影支持(测试, 存在一些错误渲染), 使用`r_useShadowMapping`切换`shadow mapping`或`stencil shadow`.
-* 雷神之锤4移除多人游戏Bot伪客户端, 使用SABot-a9 mod替换多人游戏的bot(需要先解压资源文件).
-* 修复掠食2006的设置页面选项卡.
-* 雷神之锤4新增`full-body awareness` mod. 设置布尔型cvar `harm_pm_fullBodyAwareness`为1开启, 并且可以使用`harm_pm_fullBodyAwarenessOffset`设置视角偏移(可以调整为第三人称视角), 使用`harm_pm_fullBodyAwarenessHeadJoint`设置自定义头部关节名称(视角位置).
-* 支持限制最大(cvar `harm_r_maxFPS`).
-* 支持obj/dae格式静态模型, 修复png格式图片加载.
-* 新增跳过启动动画支持.
-* 新增简易CVar编辑器.
-* OpenGL顶点索引使用4字节以加载大模型.
-* 新增GLES3.0支持, 在`图形`选项卡切换.
+* 优化Shadow mapping软阴影. OpenGLES2.0阴影图使用深度纹理.
+* 新增OpenALA(soft)和EFX混响支持.",
+* 掠食2006 Beam模型渲染优化(by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR)).
+* 掠食2006新增字幕支持.
+* 修复反横屏下的陀螺仪.
+* 雷神之锤4多人游戏修复Bot头部模型, 新增Bot等级控制支持(cvar `harm_si_botLevel`, 需要重新解压新的`sabot_a9.pk4`资源).
 
 ----------------------------------------------------------------------------------
 
@@ -105,6 +101,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 6. _MODEL_DAE: 添加dae静态模型支持.
 > 7. _SHADOW_MAPPING: 增加Shadow mapping软阴影支持.
 > 8. _OPENGLES3: 增加OpenGL ES3.0支持.
+> 9. _OPENAL _OPENAL_EFX: 增加OpenAL(soft)和EFX混响支持.
 
 #### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
 #### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).

@@ -611,6 +611,12 @@ void Sys_FreeOpenAL(void);
 #ifdef __ANDROID__
 //n0n3m4
 
+#ifndef _ANDROID_PACKAGE_NAME
+//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
+#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
+#endif
+#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
+
 extern float analogx;
 extern float analogy;
 extern int analogenabled;

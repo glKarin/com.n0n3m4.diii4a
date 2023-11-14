@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 //-----------------------------------------------------
 
 #if defined(_K_DEV)
-#define LOGI(fmt, args...) {common->Printf(fmt, ##args); common->Printf("\n");}
+#define LOGI(fmt, args...) { common->Printf(fmt, ##args); common->Printf("\n"); }
 #define LOGW(fmt, args...) common->Warning(fmt, ##args);
 #define LOGE(fmt, args...) common->Error(fmt, ##args);
 #endif
@@ -251,36 +251,37 @@ const float MAX_BOUND_SIZE = 65536.0f;
 // game
 #if defined(_D3XP)
 
-#ifdef _D3LE
-#include "../d3le/Game.h"
-#elif defined _SABOT
-#include "../sabot/Game.h"
-#else
-#include "../d3xp/Game.h"
-#endif
+    #if defined(_D3LE)
+        #include "../mod/doom3/d3le/Game.h"
+    #elif defined(_SABOT)
+        #include "../mod/doom3/sabot/Game.h"
+    #else
+        #include "../d3xp/Game.h"
+    #endif
+
+#elif defined(_RAVEN)
+
+    #include "../quake4/Game.h"
+
+#elif defined(_HUMANHEAD)
+
+    #include "../prey/Game.h"
 
 #else
 
-#ifdef _CDOOM
-#include "../cdoom/Game.h"
-#elif defined _RIVENSIN
-#include "../game/Game.h"
-#elif defined _HARDCORPS
-#include "../game/Game.h"
-#elif defined _OVERTHINKED
-#include "../overthinked/Game.h"
-#elif defined _HEXENEOC
-#include "../hexeneoc/Game.h"
-
-#elif defined _QUAKE4
-#include "../quake4/Game.h"
-#elif defined _RAVEN
-#include "../quake4/Game.h"
-#elif defined _HUMANHEAD
-#include "../prey/Game.h"
-#else
-#include "../game/Game.h"
-#endif
+    #if defined(_CDOOM)
+        #include "../mod/doom3/cdoom/Game.h"
+    #elif defined(_RIVENSIN)
+        #include "../game/Game.h"
+    #elif defined(_HARDCORPS)
+        #include "../game/Game.h"
+    #elif defined(_OVERTHINKED)
+        #include "../mod/doom3/overthinked/Game.h"
+    #elif defined(_HEXENEOC)
+        #include "../mod/doom3/hexeneoc/Game.h"
+    #else
+        #include "../game/Game.h"
+    #endif
 
 #endif
 
@@ -290,36 +291,37 @@ const float MAX_BOUND_SIZE = 65536.0f;
 
 #if defined(_D3XP)
 
-#ifdef _D3LE
-#include "../d3le/Game_local.h"
-#elif defined _SABOT
-#include "../sabot/Game_local.h"
-#else
-#include "../d3xp/Game_local.h"
-#endif
+    #if defined(_D3LE)
+        #include "../mod/doom3/d3le/Game_local.h"
+    #elif defined(_SABOT)
+        #include "../mod/doom3/sabot/Game_local.h"
+    #else
+        #include "../d3xp/Game_local.h"
+    #endif
+
+#elif defined(_RAVEN)
+
+    #include "../quake4/Game_local.h"
+
+#elif defined(_HUMANHEAD)
+
+    #include "../prey/Game_local.h"
 
 #else
 
-#ifdef _CDOOM
-#include "../cdoom/Game_local.h"
-#elif defined _RIVENSIN
-#include "../rivensin/Game_local.h"
-#elif defined _HARDCORPS
-#include "../hardcorps/Game_local.h"
-#elif defined _OVERTHINKED
-#include "../overthinked/Game_local.h"
-#elif defined _HEXENEOC
-#include "../hexeneoc/Game_local.h"
-
-#elif defined _QUAKE4
-#include "../quake4/Game_local.h"
-#elif defined _RAVEN
-#include "../quake4/Game_local.h"
-#elif defined _HUMANHEAD
-#include "../prey/Game_local.h"
-#else
-#include "../game/Game_local.h"
-#endif
+    #if defined(_CDOOM)
+        #include "../mod/doom3/cdoom/Game_local.h"
+    #elif defined(_RIVENSIN)
+        #include "../mod/doom3/rivensin/Game_local.h"
+    #elif defined(_HARDCORPS)
+        #include "../mod/doom3/hardcorps/Game_local.h"
+    #elif defined(_OVERTHINKED)
+        #include "../mod/doom3/overthinked/Game_local.h"
+    #elif defined(_HEXENEOC)
+        #include "../mod/doom3/hexeneoc/Game_local.h"
+    #else
+        #include "../game/Game_local.h"
+    #endif
 
 #endif
 

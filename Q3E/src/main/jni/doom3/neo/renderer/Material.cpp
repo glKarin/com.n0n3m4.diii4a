@@ -168,6 +168,10 @@ void idMaterial::FreeData()
 		// delete any idCinematic textures
 		for (i = 0; i < numStages; i++) {
 			if (stages[i].texture.cinematic != NULL) {
+#ifdef _MULTITHREAD //karin: set image's cinematic to null
+				if(stages[i].texture.image)
+					stages[i].texture.image->cinematic = NULL;
+#endif
 				delete stages[i].texture.cinematic;
 				stages[i].texture.cinematic = NULL;
 			}
@@ -3230,6 +3234,10 @@ void idMaterial::CloseCinematic(void) const
 	for (int i = 0; i < numStages; i++) {
 		if (stages[i].texture.cinematic) {
 			stages[i].texture.cinematic->Close();
+#ifdef _MULTITHREAD //karin: set image's cinematic to null
+			if(stages[i].texture.image)
+				stages[i].texture.image->cinematic = NULL;
+#endif
 			delete stages[i].texture.cinematic;
 			stages[i].texture.cinematic = NULL;
 		}

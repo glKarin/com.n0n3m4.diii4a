@@ -3956,7 +3956,6 @@ const char* idMultiplayerGame::HandleGuiCommands( const char *_menuCommand ) {
 				cmdSystem->BufferCommandText( CMD_EXEC_NOW,	"setMachineSpec\n" );
 			}
 
-#if 0 //k: ???
 // RAVEN BEGIN
 // mekberg: set the r_mode.
 			cvarSystem->SetCVarInteger( "r_aspectRatio", 0 );
@@ -3967,7 +3966,6 @@ const char* idMultiplayerGame::HandleGuiCommands( const char *_menuCommand ) {
 			cvarSystem->SetCVarInteger( "r_mode", common->GetRModeForMachineSpec ( cvarSystem->GetCVarInteger( "com_machineSpec" ) ) );
 			common->SetDesiredMachineSpec( cvarSystem->GetCVarInteger( "com_machineSpec" ) );
 // RAVEN END
-#endif
 
 			cmdSystem->BufferCommandText( CMD_EXEC_NOW,	"execMachineSpec" );
 			if ( idStr::Icmp( vcmd,	"restart" )	 ==	0) {

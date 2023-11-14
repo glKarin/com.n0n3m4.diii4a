@@ -59,6 +59,8 @@ public final class Q3EPreference
     public static final String pref_harm_scale_by_screen_area = "q3e_harm_scale_by_screen_area";
     public static final String pref_harm_r_useShadowMapping = "q3e_harm_r_useShadowMapping"; //k
     public static final String pref_harm_opengl = "q3e_harm_opengl"; //k
+    public static final String pref_harm_s_useOpenAL = "q3e_harm_s_useOpenAL"; //k
+    public static final String pref_harm_s_useEAXReverb = "q3e_harm_s_useEAXReverb"; //k
 
     public static final String RUN_BACKGROUND = "harm_run_background";
     public static final String RENDER_MEM_STATUS = "harm_render_mem_status";
@@ -75,6 +77,7 @@ public final class Q3EPreference
     public static final String MAP_BACK = "harm_map_back";
     public static final String ONSCREEN_BUTTON = "harm_onscreen_button";
     public static final String REOPEN_LAUNCHER = "harm_reopen_launcher";
+    public static final String LOAD_LOCAL_ENGINE_LIB = "harm_load_local_engine_lib";
 
     public static float GetFloatFromString(Context context, String name, float defVal)
     {

@@ -482,6 +482,11 @@ class idDeclManager
 	//k: find map def
 	virtual const idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) const = 0;
 	virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) = 0;
+// RAVEN BEGIN
+// jscott: for timing
+							// Registers a new folder with decl files.
+	virtual void			RegisterDeclFolderWrapper( const char *folder, const char *extension, declType_t defaultType, bool unique = false, bool norecurse = false ) = 0;
+// RAVEN END
 #endif
 
 		virtual const idMaterial 		*MaterialByIndex(int index, bool forceParse = true) = 0;

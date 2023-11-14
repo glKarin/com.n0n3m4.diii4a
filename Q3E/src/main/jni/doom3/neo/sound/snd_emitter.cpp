@@ -201,6 +201,9 @@ void idSoundChannel::Clear(void)
 	}
 
 	memset(&parms, 0, sizeof(parms));
+#ifdef _HUMANHEAD
+	parms.subIndex = -1;
+#endif
 
 	triggered = false;
 	openalSource = 0;
@@ -245,12 +248,17 @@ idSoundChannel::ALStop
 */
 void idSoundChannel::ALStop(void)
 {
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	if (idSoundSystemLocal::useOpenAL) {
 
 		if (alIsSource(openalSource)) {
 			alSourceStop(openalSource);
 			alSourcei(openalSource, AL_BUFFER, 0);
+#ifdef _OPENAL_EFX
+			// unassociate effect slot from source, so the effect slot can be deleted on shutdown
+			// even though the source itself is deleted later (in idSoundSystemLocal::Shutdown())
+			alSource3i( openalSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL );
+#endif
 			soundSystemLocal.FreeOpenALSource(openalSource);
 		}
 
@@ -416,6 +424,9 @@ void idSoundEmitterLocal::Clear(void)
 	spatializedOrigin.Zero();
 
 	memset(&parms, 0, sizeof(parms));
+#ifdef _HUMANHEAD
+	parms.subIndex = -1;
+#endif
 }
 
 /*
@@ -461,6 +472,32 @@ void idSoundEmitterLocal::OverrideParms(const soundShaderParms_t *base,
 		out->soundClass = base->soundClass;
 	}
 
+#ifdef _HUMANHEAD
+	if (over->subIndex) {
+		out->subIndex = over->subIndex;
+	} else {
+		out->subIndex = base->subIndex;
+	}
+
+	if (over->profanityIndex) {
+		out->profanityIndex = over->profanityIndex;
+	} else {
+		out->profanityIndex = base->profanityIndex;
+	}
+
+	if (over->profanityDelay) {
+		out->profanityDelay = over->profanityDelay;
+	} else {
+		out->profanityDelay = base->profanityDelay;
+	}
+
+	if (over->profanityDuration) {
+		out->profanityDuration = over->profanityDuration;
+	} else {
+		out->profanityDuration = base->profanityDuration;
+	}
+#endif
+
 	out->soundShaderFlags = base->soundShaderFlags | over->soundShaderFlags;
 }
 
@@ -496,12 +533,12 @@ void idSoundEmitterLocal::CheckForCompletion(int current44kHzTime)
 
 			// see if this channel has completed
 			if (!(chan->parms.soundShaderFlags & SSF_LOOPING)) {
-				//ALint state = AL_PLAYING;
-				#if !defined(__ANDROID__)
+#ifdef _OPENAL
+				ALint state = AL_PLAYING;
 				if (idSoundSystemLocal::useOpenAL && alIsSource(chan->openalSource)) {
 					alGetSourcei(chan->openalSource, AL_SOURCE_STATE, &state);
 				}
-				#endif
+#endif
 
 				idSlowChannel slow = GetSlowChannel(chan);
 

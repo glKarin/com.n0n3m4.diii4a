@@ -1,9 +1,7 @@
 package com.karin.idTech4Amm;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.content.Intent;
@@ -21,7 +19,7 @@ import android.view.MenuItem;
 
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
-import com.karin.idTech4Amm.sys.Constants;
+import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.n0n3m4.q3e.Q3ELang;
 
 /**
@@ -56,7 +54,7 @@ public class ConfigEditorActivity extends Activity
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
 
-        boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false);
+        boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false);
         ContextUtility.SetScreenOrientation(this, o ? 0 : 1);
 
         setContentView(R.layout.editor_page);

@@ -52,12 +52,16 @@ public:
 	
 	void					AddColorBuffer( int format, int index );
 	void					AddDepthBuffer( int format );
+	void					AttachColorBuffer( void );
+	void					AttachDepthBuffer( void );
 	
 	void					AttachImage2D( int target, const idImage* image, int index = 0 );
 	void					AttachImageDepth( const idImage* image );
 	void					AttachImageDepthLayer( const idImage* image, int layer );
 	void					AttachImage2DLayer( const idImage* image, int layer );
 	void					AttachImage2D( const idImage* image );
+	void					AttachImageDepthSide( const idImage* image, int side );
+	void					AttachImage2DSide( const idImage* image, int side );
 	
 	// check for OpenGL errors
 	void					Check();

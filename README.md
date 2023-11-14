@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan33(natasha)  
+1.1.0harmattan35(natasha)  
 **Last update release:**
-2023-10-01  
+2023-10-29  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -25,16 +25,12 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add shadow mapping soft shadow support(testing, has some incorrect rendering), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow`.
-* In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).
-* Fix Setting's tab GUI in Prey2006.
-* Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).
-* Support max FPS limit(cvar `harm_r_maxFPS`).
-* Support obj/dae static model, and fix png image load.
-* Add skip intro support.
-* Add simple CVar editor.
-* Change OpenGL vertex index size to 4 bytes for large model.
-* Add GLES3.0 support, can choose in `Graphics` tab.
+* Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.
+* Add OpenAL(soft) and EFX Reverb support.
+* Beam rendering optimization in Prey(2006) by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
+* Add subtitle support in Prey(2006).
+* Fixed gyroscope in invert-landscape mode.
+* Fixed bot head and add bot level control(cvar `harm_si_botLevel`, need extract new `sabot_a9.pk4` resource) in Quake4 MP game.
 
 ----------------------------------------------------------------------------------
 
@@ -104,6 +100,7 @@ Tag with `-free` only for F-Droid update.
 > 6. _MODEL_DAE: Add dae static model support.
 > 7. _SHADOW_MAPPING: Add Shadow mapping support.
 > 8. _OPENGLES3: Add OpenGLES3.0 support.
+> 9. _OPENAL _OPENAL_EFX: Add OpenAL(soft) and EFX Reverb support.
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).

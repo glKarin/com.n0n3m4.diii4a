@@ -5,7 +5,7 @@
     android:versionName="1.0.0harmattan2" >
 
     <uses-sdk
-        android:targetSdkVersion="28"
+        android:targetSdkVersion="30"
         tools:ignore="GradleOverrides" />
 
 </manifest>

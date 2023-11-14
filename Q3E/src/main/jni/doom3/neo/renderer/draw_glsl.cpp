@@ -232,129 +232,12 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 #ifdef _SHADOW_MAPPING
 	if(r_shadowMapping)
 	{
-		idRenderMatrix lightViewRenderMatrix;
-		idRenderMatrix lightProjectionRenderMatrix;
-
-        /*
-         * parallel light not use `cascade`, so only 1 matrix
-         * point light has 6 matrix, but unused in shader
-         * spot light only 1 matrix
-         */
-        if( backEnd.vLight->parallel )
-        {
-            //for( int i = 0; i < 1; i++ )
-            {
-				lightViewRenderMatrix << backEnd.shadowV[0];
-				lightProjectionRenderMatrix << backEnd.shadowP[0];
-
-				idRenderMatrix modelRenderMatrix;
-				idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
-
-				idRenderMatrix modelToLightRenderMatrix;
-				idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
-
-				idRenderMatrix clipMVP;
-				idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
-
-                idRenderMatrix MVP;
-                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-                GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
-            }
-        }
-        else if( backEnd.vLight->pointLight )
-        {
-			float ms[6 * 16];
-            for( int i = 0; i < 6; i++ )
-            {
-				lightViewRenderMatrix << backEnd.shadowV[i];
-				lightProjectionRenderMatrix << backEnd.shadowP[i];
-
-				idRenderMatrix modelRenderMatrix;
-				idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
-
-				idRenderMatrix modelToLightRenderMatrix;
-				idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
-
-				idRenderMatrix clipMVP;
-				idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
-
-                idRenderMatrix MVP;
-                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-
-                MVP >> &ms[i * 16];
-            }
-			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), 6, ms);
-        }
-        else
-        {
-            // spot light
-
-			lightViewRenderMatrix << backEnd.shadowV[0];
-			lightProjectionRenderMatrix << backEnd.shadowP[0];
-
-			idRenderMatrix modelRenderMatrix;
-			idRenderMatrix::Transpose( *( idRenderMatrix* )din->surf->space->modelMatrix, modelRenderMatrix );
-
-			idRenderMatrix modelToLightRenderMatrix;
-			idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
-
-			idRenderMatrix clipMVP;
-			idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
-
-			idRenderMatrix MVP;
-			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
-			GL_UniformMatrix4fv(offsetof(shaderProgram_t, shadowMVPMatrix), MVP.m);
-        }
+		RB_ShadowMappingInteraction_setupMVP(din);
 
 		// texture 6 is the shadow map
 		GL_SelectTextureNoClient(6);
-		float sampleScale = 1.0;
-		float sampleFactor = harm_r_shadowMapSampleFactor.GetFloat();
-		float lod = sampleFactor != 0 ? SampleFactors[backEnd.vLight->shadowLOD] : 0.0;
-
-#ifdef GL_ES_VERSION_3_0
-		if(USING_GLES3)
-		{
-			globalImages->shadowES3Image[backEnd.vLight->shadowLOD]->Bind();
-			if( backEnd.vLight->parallel )
-			{
-                sampleScale = 1.0;
-			}
-			else if( backEnd.vLight->pointLight )
-			{
-                sampleScale = 5.0;
-			}
-			else
-			{
-                sampleScale = 5.0;
-			}
-		}
-		else
-#endif
-		{
-		if( backEnd.vLight->parallel )
-		{
-			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-			sampleScale = 1.0;
-		}
-		else if( backEnd.vLight->pointLight )
-		{
-			globalImages->shadowCubeImage[backEnd.vLight->shadowLOD]->Bind();
-			if(sampleFactor != 0)
-				lod = 0.5;
-		}
-		else
-		{
-			sampleScale = 5.0;
-			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-		}
-		}
-
-		if(sampleFactor > 0.0)
-			sampleScale *= sampleFactor;
-
-        GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), lod * sampleScale);
-	};
+		RB_ShadowMappingInteraction_bindTexture();
+	}
 #endif
 
 	GL_SelectTextureNoClient(0); //k2023
@@ -470,9 +353,16 @@ void RB_GLSL_DrawInteractions(void)
 
 #ifdef _SHADOW_MAPPING
 	const bool shadowMapping = r_shadowMapping && r_shadows.GetBool();
-	GLfloat clearColor[4];
+	float clearColor[4];
 	if(shadowMapping)
-        qglGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
+	{
+		RB_getClearColor(clearColor);
+		if(r_dumpShadowMapFrontEnd)
+		{
+			r_dumpShadowMap = true;
+			r_dumpShadowMapFrontEnd = false;
+		}
+	}
 #endif
 	//
 	// for each light, perform adding and shadowing
@@ -517,7 +407,7 @@ void RB_GLSL_DrawInteractions(void)
 		}
 
 #ifdef _SHADOW_MAPPING
-		if(shadowMapping)
+		if(shadowMapping && vLight->shadowLOD >= 0)
 		{
             int	side, sideStop;
 
@@ -605,7 +495,10 @@ void RB_GLSL_DrawInteractions(void)
 	//GL_SelectTexture(0); //k2023
 #ifdef _SHADOW_MAPPING
 	if(shadowMapping)
-        qglClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+	{
+		qglClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+	}
+    r_dumpShadowMap = false;
 #endif
 }
 
@@ -628,7 +521,29 @@ static void R_InitGLSLCvars(void)
 
 #ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
-    r_shadowMapPointLight = harm_r_shadowMapPointLight.GetInteger();
+#ifdef GL_ES_VERSION_3_0
+	if(!USING_GLES3)
+#endif
+	switch(harm_r_shadowMapDepthBuffer.GetInteger())
+	{
+		case 1:
+			r_useDepthTexture = glConfig.depthTextureAvailable;
+			r_useCubeDepthTexture = glConfig.depthTextureCubeMapAvailable;
+			break;
+		case 2:
+			r_useDepthTexture = false;
+			r_useCubeDepthTexture = false;
+			break;
+		case 3:
+			r_useDepthTexture = false;
+			r_useCubeDepthTexture = false;
+			break;
+		case 0:
+		default:
+			r_useDepthTexture = glConfig.depthTextureAvailable;
+			r_useCubeDepthTexture = glConfig.depthTextureCubeMapAvailable;
+			break;
+	}
 #endif
 }
 
@@ -656,11 +571,6 @@ void R_CheckBackEndCvars(void)
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
 	}
-    if(harm_r_shadowMapPointLight.IsModified())
-    {
-        r_shadowMapPointLight = harm_r_shadowMapPointLight.GetInteger();
-        harm_r_shadowMapPointLight.ClearModified();
-    }
 #endif
 }
 

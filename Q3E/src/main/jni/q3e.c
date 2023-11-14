@@ -34,6 +34,8 @@
 
 #include "doom3/neo/sys/android/doom3_android.h"
 
+#define LOG_TAG "Q3E_JNI"
+
 // call DOOM3
 void (*setResolution)(int width, int height);
 void (*Q3E_SetInitialContext)(const void *context);
@@ -92,34 +94,34 @@ static void Android_AttachThread(void)
 
 static void print_interface(void)
 {
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 interface ---------> ");
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "DOOM3 interface ---------> ");
 
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Main function: %p", qmain);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Setup callbacks: %p", setCallbacks);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Setup initial context: %p", Q3E_SetInitialContext);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Setup resolution: %p", setResolution);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "On pause: %p", on_pause);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "On resume: %p", on_resume);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Exit function: %p", qexit);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Main function: %p", qmain);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Setup callbacks: %p", setCallbacks);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Setup initial context: %p", Q3E_SetInitialContext);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Setup resolution: %p", setResolution);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "On pause: %p", on_pause);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "On resume: %p", on_resume);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Exit function: %p", qexit);
 
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Setup OpenGL context: %p", set_gl_context);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Setup OpenGL context: %p", set_gl_context);
 
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "On frame: %p", onFrame);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Restart OpenGL: %p", vidRestart);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "On frame: %p", onFrame);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Restart OpenGL: %p", vidRestart);
 
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Key event: %p", onKeyEvent);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Analog event: %p", onAnalog);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Motion event: %p", onMotionEvent);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Key event: %p", onKeyEvent);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Analog event: %p", onAnalog);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Motion event: %p", onMotionEvent);
 
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "<---------");
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "<---------");
 }
 
-static void loadLib(char* libpath)
+static void loadLib(const char* libpath)
 {
     libdl = dlopen(libpath, RTLD_NOW | RTLD_GLOBAL);
     if(!libdl)
     {
-        __android_log_print(ANDROID_LOG_ERROR, "Q3E_JNI", "Unable to load library: %s\n", dlerror());
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Unable to load library: %s\n", dlerror());
         return;
     }
 	void (*GetDOOM3API)(void *);
@@ -248,7 +250,7 @@ int JNI_OnLoad(JavaVM* vm, void* reserved)
     jVM = vm;
     if((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK)
     {
-        __android_log_print(ANDROID_LOG_ERROR, "Q3E_JNI", "JNI fatal error");
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "JNI fatal error");
         return -1;
     }
 
@@ -368,62 +370,54 @@ static void setup_Q3E_callback(void)
 
 static void print_initial_context(const Q3E_InitialContext_t *context)
 {
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 initial context ---------> ");
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "DOOM3 initial context ---------> ");
 
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Native library directory: %s", context->nativeLibraryDir);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Redirect output to file: %d", context->redirectOutputToFile);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Don't handle signals: %d", context->noHandleSignals);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Enable multi-thread: %d", context->multithread);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "OpenGL format: 0x%X", context->openGL_format);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "OpenGL MSAA: %d", context->openGL_msaa);
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "OpenGL Version: %x", context->openGL_version);
-    __android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Native library directory: %s", context->nativeLibraryDir);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Redirect output to file: %d", context->redirectOutputToFile);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Don't handle signals: %d", context->noHandleSignals);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Enable multi-thread: %d", context->multithread);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "OpenGL format: 0x%X", context->openGL_format);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "OpenGL MSAA: %d", context->openGL_msaa);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "OpenGL Version: %x", context->openGL_version);
+    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "<---------");
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "<---------");
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jint width, jint height, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean bContinueNoGLContext)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc=0;
 	jboolean iscopy;
-	const char *dir = (*env)->GetStringUTFChars(
-                env, GameDir, &iscopy);
-    const char *arg = (*env)->GetStringUTFChars(
-                env, Cmdline, &iscopy);	
+
+	const char *dir = (*env)->GetStringUTFChars(env, GameDir, &iscopy);
     game_data_dir = strdup(dir);
 	chdir(game_data_dir);
 	(*env)->ReleaseStringUTFChars(env, GameDir, dir);
+
+	const char *arg = (*env)->GetStringUTFChars(env, Cmdline, &iscopy);
 	argv = malloc(sizeof(char*) * 255);
     char *arg_str = strdup(arg);
 	argc = ParseCommandLine(arg_str, argv);	
     //free(arg_str); //TODO: not free
 	(*env)->ReleaseStringUTFChars(env, Cmdline, arg);    
 	
-	const char *libpath = (*env)->GetStringUTFChars(
-                env, LibPath, &iscopy);	
-    char *doom3_path = strdup(libpath);
-	(*env)->ReleaseStringUTFChars(env, LibPath, libpath);
-
-	__android_log_print(ANDROID_LOG_INFO, "Q3E_JNI", "DOOM3 engine native library file: %s", doom3_path);
-	loadLib(doom3_path);
+	const char *engineLibPath = (*env)->GetStringUTFChars(env, LibPath, &iscopy);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "DOOM3 engine native library file: %s", engineLibPath);
+	loadLib(engineLibPath);
+	(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
 
 	setup_Q3E_callback();
 
 	setResolution(width, height);
-
+	char *doom3_path = NULL;
 	if(Q3E_SetInitialContext)
 	{
+		const char *native_lib_path = (*env)->GetStringUTFChars(env, nativeLibPath, &iscopy);
+		doom3_path = strdup(native_lib_path);
+		(*env)->ReleaseStringUTFChars(env, nativeLibPath, native_lib_path);
 		Q3E_InitialContext_t context;
 		memset(&context, 0, sizeof(context));
-
-		char *ptr = strrchr(doom3_path, '/');
-		char ch = '\0';
-		if(ptr)
-		{
-			ch = *ptr;
-			*ptr = '\0';
-		}
 
 		context.openGL_format = format;
 		context.openGL_msaa = msaa;
@@ -438,9 +432,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 		print_initial_context(&context);
 
 		Q3E_SetInitialContext(&context);
-
-		if(ptr)
-			*ptr = ch;
 	}
 
 	window = ANativeWindow_fromSurface(env, view);
@@ -591,7 +582,7 @@ FILE * android_tmpfile(void)
 	int fd = mkstemp(tmp_file);
 	if(fd == -1)
 	{
-		__android_log_print(ANDROID_LOG_ERROR, "Q3E_JNI", "Call mkstemp(%s) error: %s", tmp_file, strerror(errno));
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Call mkstemp(%s) error: %s", tmp_file, strerror(errno));
 		free(tmp_file);
 		return NULL;
 	}
@@ -599,13 +590,13 @@ FILE * android_tmpfile(void)
 	FILE *res = fdopen(fd, "w+b");
 	if(!res)
 	{
-		__android_log_print(ANDROID_LOG_ERROR, "Q3E_JNI", "Call fdopen(%d) error: %s", fd, strerror(errno));
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Call fdopen(%d) error: %s", fd, strerror(errno));
 		close(fd);
 		free(tmp_file);
 		return NULL;
 	}
 	unlink(tmp_file);
-    __android_log_print(ANDROID_LOG_DEBUG, "Q3E_JNI", "android_tmpfile create: %s", tmp_file);
+    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "android_tmpfile create: %s", tmp_file);
 	free(tmp_file);
 	return res;
 }

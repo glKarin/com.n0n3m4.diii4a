@@ -251,7 +251,7 @@ void idMD5Mesh::ParseMesh(idLexer &parser, int numJoints, const idJointMat *join
 	// silhouette edge connectivity and normal / tangent generation information
 	//
 
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	const size_t alloc_size = texCoords.Num() * sizeof(idDrawVert);
 	_DROID_ALLOC16_DEF(idDrawVert, alloc_size, verts, 0)
 #else
@@ -266,7 +266,7 @@ void idMD5Mesh::ParseMesh(idLexer &parser, int numJoints, const idJointMat *join
 	TransformVerts(verts, joints);
 	deformInfo = R_BuildDeformInfo(texCoords.Num(), verts, tris.Num(), tris.Ptr(), shader->UseUnsmoothedTangents());
 
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(verts, 0)
 #endif
 }
@@ -385,7 +385,7 @@ idMD5Mesh::CalcBounds
 idBounds idMD5Mesh::CalcBounds(const idJointMat *entJoints)
 {
 	idBounds	bounds;
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	const int alloc_size = texCoords.Num() * sizeof(idDrawVert);
 	_DROID_ALLOC16_DEF(idDrawVert, alloc_size, verts, 0)
 #else
@@ -396,7 +396,7 @@ idBounds idMD5Mesh::CalcBounds(const idJointMat *entJoints)
 
 	SIMDProcessor->MinMax(bounds[0], bounds[1], verts, texCoords.Num());
 
-#ifdef __ANDROID__
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 	_DROID_FREE(verts, 0)
 #endif
 

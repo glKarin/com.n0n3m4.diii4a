@@ -197,7 +197,11 @@ idCVar r_showOverDraw("r_showOverDraw", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = 
 idCVar r_lockSurfaces("r_lockSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "allow moving the view point without changing the composition of the scene, including culling");
 idCVar r_useEntityCallbacks("r_useEntityCallbacks", "1", CVAR_RENDERER | CVAR_BOOL, "if 0, issue the callback immediately at update time, rather than defering");
 
+#ifdef _RAVEN //k: r_showSkel diff with renderer
+idCVar r_showSkel( "r_showSkel", "0", CVAR_RENDERER | CVAR_INTEGER, "draw the skeleton when model animates, 1 = draw model with skeleton, 2 = draw skeleton only, 3 = draw joints only", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
+#else
 idCVar r_showSkel("r_showSkel", "0", CVAR_RENDERER | CVAR_INTEGER, "draw the skeleton when model animates, 1 = draw model with skeleton, 2 = draw skeleton only", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2>);
+#endif
 idCVar r_jointNameScale("r_jointNameScale", "0.02", CVAR_RENDERER | CVAR_FLOAT, "size of joint names when r_showskel is set to 1");
 idCVar r_jointNameOffset("r_jointNameOffset", "0.5", CVAR_RENDERER | CVAR_FLOAT, "offset of joint names when r_showskel is set to 1");
 
@@ -211,6 +215,22 @@ idCVar r_materialOverride("r_materialOverride", "", CVAR_RENDERER, "overrides al
 idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVAR_INTEGER, "");
 
 idCVar harm_r_maxFps( "harm_r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
+idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Stencil shadow using Carmack-Inverse.");
+//k: temp memory allocate in stack / heap control on Android
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+// #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Control allocate temporary memory when load model data on Android, default value is `524288` bytes(Because stack memory is limited on Android, exam `game/le_hell` map's `models/mapobjects/hell/hellintro.lwo` in `DOOM3: The lost mission` mod). If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0 - Always heap, Negative - Always stack, Positive - Max stack memory limit).");
+#endif
+
+#ifdef _USING_STB
+idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3>);
+idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)", 0, 100, idCmdSystem::ArgCompletion_Integer<0, 100>);
+idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)", 0, 9, idCmdSystem::ArgCompletion_Integer<0, 9>);
+#endif
+
+#ifdef _RAVEN
+idCVar r_skipSky("r_skipSky", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Dark sky");
+#endif
 
 /*
 =================
@@ -402,6 +422,23 @@ static void R_CheckPortableExtensions(void)
 	else
 	{
 		common->Printf( "X..%s not found\n", "GL_EXT_framebuffer_object" );
+	}
+
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+	{
+		glConfig.depthTextureAvailable = true;
+		glConfig.depthTextureCubeMapAvailable = true;
+		glConfig.depth24Available = true;
+		glConfig.gl_FragDepthAvailable = true;
+	}
+	else
+#endif
+	{
+		glConfig.depthTextureAvailable = R_CheckExtension("GL_OES_depth_texture");
+		glConfig.depthTextureCubeMapAvailable = R_CheckExtension("GL_OES_depth_texture_cube_map");
+		glConfig.depth24Available = R_CheckExtension("GL_OES_depth24");
+		glConfig.gl_FragDepthAvailable = R_CheckExtension("GL_EXT_frag_depth");
 	}
 }
 
@@ -1061,8 +1098,7 @@ void R_Benchmark_f(const idCmdArgs &args)
 	r_skipRenderContext.SetBool(false);
 }
 
-#ifdef GL_ES_VERSION_3_0
-void R_OpenGL_f(const idCmdArgs &args)
+void R_ShowglConfig_f(const idCmdArgs &args)
 {
 	if(!glConfig.isInitialized)
 	{
@@ -1070,9 +1106,11 @@ void R_OpenGL_f(const idCmdArgs &args)
 		return;
 	}
 
+#ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
 		common->Printf("OpenGLES 3.0\n");
 	else
+#endif
 		common->Printf("OpenGLES 2.0\n");
 
 	common->Printf("Renderer: %s\n", glConfig.renderer_string);
@@ -1123,12 +1161,24 @@ void R_OpenGL_f(const idCmdArgs &args)
 	common->Printf("maxRenderbufferSize: %d\n", glConfig.maxRenderbufferSize);
 	common->Printf("maxColorAttachments: %d\n", glConfig.maxColorAttachments);
 
+	common->Printf("depthTextureAvailable: %d\n", glConfig.depthTextureAvailable);
+	common->Printf("depthTextureCubeMapAvailable: %d\n", glConfig.depthTextureCubeMapAvailable);
+	common->Printf("depth24Available: %d\n", glConfig.depth24Available);
+	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
+#ifdef _SHADOW_MAPPING
+	extern bool r_useDepthTexture;
+	extern bool r_useCubeDepthTexture;
+	common->Printf("r_useDepthTexture: %d\n", r_useDepthTexture);
+	common->Printf("r_useCubeDepthTexture: %d\n", r_useCubeDepthTexture);
+#endif
+
+#ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
 		common->Printf("OpenGLES 3.0\n");
 	else
+#endif
 		common->Printf("OpenGLES 2.0\n");
 }
-#endif
 
 #ifdef _MULTITHREAD
 static void R_Multithreading_f(const idCmdArgs &args)
@@ -1306,6 +1356,34 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 		r_jitter.SetBool(false);
 	}
 
+#ifdef _USING_STB
+	switch(r_screenshotFormat.GetInteger())
+	{
+		case 1: {// bmp
+			idStr fn(fileName);
+			fn.SetFileExtension("bmp");
+			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+			R_WriteBMP(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
+		}
+			break;
+		case 2: {// png
+			idStr fn(fileName);
+			fn.SetFileExtension("png");
+			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+			R_WritePNG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, r_screenshotPngCompression.GetInteger()), basePath);
+		}
+			break;
+		case 3: {// jpg
+			idStr fn(fileName);
+			fn.SetFileExtension("jpg");
+			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+			R_WriteJPG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, idMath::ClampInt(1, 100, r_screenshotJpgQuality.GetInteger())), basePath);
+		}
+			break;
+		case 0: // tga
+		default:
+#endif
+
 	// fill in the header (this is vertically flipped, which glReadPixels emits)
 	buffer[2] = 2;		// uncompressed type
 	buffer[12] = width & 255;
@@ -1329,6 +1407,10 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 	} else {
 		fileSystem->WriteFile(fileName, buffer, c);
 	}
+#ifdef _USING_STB
+			break;
+	}
+#endif
 
 	R_StaticFree(buffer);
 
@@ -2145,11 +2227,13 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("listRenderLightDefs", R_ListRenderLightDefs_f, CMD_FL_RENDERER, "lists the light defs");
 	cmdSystem->AddCommand("listModes", R_ListModes_f, CMD_FL_RENDERER, "lists all video modes");
 	cmdSystem->AddCommand("reloadSurface", R_ReloadSurface_f, CMD_FL_RENDERER, "reloads the decl and images for selected surface");
-#ifdef GL_ES_VERSION_3_0
-	cmdSystem->AddCommand("glVersion", R_OpenGL_f, CMD_FL_RENDERER, "print OpenGL version");
-#endif
+	cmdSystem->AddCommand("glConfig", R_ShowglConfig_f, CMD_FL_RENDERER, "print OpenGL config");
 #ifdef _MULTITHREAD
 	cmdSystem->AddCommand("r_multithread", R_Multithreading_f, CMD_FL_SYSTEM, "print multi-threading state");
+#endif
+#ifdef _SHADOW_MAPPING
+	extern void R_DumpShadowMap_f(const idCmdArgs &args);
+	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
 #endif
 }
 
@@ -2197,6 +2281,7 @@ void idRenderSystemLocal::Clear(void)
 #ifdef _HUMANHEAD
 	scopeView = false;
 	shuttleView = false;
+	lastRenderSkybox = -1;
 #endif
 }
 
@@ -2477,8 +2562,8 @@ idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER
 idCVar r_shadowMapSplitWeight( "r_shadowMapSplitWeight", "0.9", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodScale( "r_shadowMapLodScale", "1.4", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodBias( "r_shadowMapLodBias", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "" );
-idCVar r_shadowMapPolygonFactor( "r_shadowMapPolygonFactor", "2", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
-idCVar r_shadowMapPolygonOffset( "r_shadowMapPolygonOffset", "3000", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
+idCVar r_shadowMapPolygonFactor( "r_shadowMapPolygonFactor", "2", CVAR_RENDERER | CVAR_FLOAT, "polygonOffset factor for drawing shadow buffer" );
+idCVar r_shadowMapPolygonOffset( "r_shadowMapPolygonOffset", "3000", CVAR_RENDERER | CVAR_FLOAT, "polygonOffset units for drawing shadow buffer" );
 idCVar r_shadowMapOccluderFacing( "r_shadowMapOccluderFacing", "2", CVAR_RENDERER | CVAR_INTEGER, "0 = front faces, 1 = back faces, 2 = twosided" );
 // RB end
 
@@ -2487,9 +2572,11 @@ idCVar harm_r_shadowMapBias( "harm_r_shadowMapBias", "0.001", CVAR_RENDERER | CV
 idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's bias in shadow mapping" );
 idCVar harm_r_shadowMapSampleFactor( "harm_r_shadowMapSampleFactor", "-1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)" );
 idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum near" );
-idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
+idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2.5 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapPointLight("harm_r_shadowMapPointLight", "1", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Point light render method in OpenGLES2.0: 0 = using window space z value as depth value[(gl_Position.z / gl_Position.w + 1.0) * 0.5], 1 = using light position to vertex position distance divide frustum far value as depth value[(VertexPositionInLightSpace - LightGlobalPosition) / LightRadiusLengthAsFrustumFar], 2 = calculate z transform as depth value", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar harm_r_shadowMapPolygonFactor( "harm_r_shadowMapPolygonFactor", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
+idCVar harm_r_shadowMapPolygonOffset( "harm_r_shadowMapPolygonOffset", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
 
 #include "Framebuffer.cpp"
 #include "tr_shadowmapping.cpp"

@@ -34,10 +34,14 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
@@ -69,6 +73,14 @@ import javax.microedition.khronos.opengles.GL11;
 
 public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer, SensorEventListener
 {
+    private static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL = 1000;
+    private static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT = 3;
+    private static final int ENUM_BACK_NONE = 0;
+    private static final int ENUM_BACK_ESCAPE = 1;
+    private static final int ENUM_BACK_EXIT = 2;
+    private static final int ENUM_BACK_ALL = 0xFF;
+    public static final float GYROSCOPE_X_AXIS_SENS = 18;
+    public static final float GYROSCOPE_Y_AXIS_SENS = 18;
     public boolean usesCSAA = false;
     private boolean m_toolbarActive = true;
     private View m_keyToolbar = null;
@@ -81,6 +93,52 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private boolean m_allowGrabMouse = false;
     private float m_lastTouchPadPosX = -1;
     private float m_lastTouchPadPosY = -1;
+
+    public static boolean mInit = false;
+    private IntBuffer tmpbuf;
+
+    public static int orig_width;
+    public static int orig_height;
+
+    public boolean mapvol = false;
+    public boolean analog = false;
+
+
+    //RTCW4A-specific
+    Button actbutton;
+    Button kickbutton;
+
+    //MOUSE
+
+    private boolean hideonscr;
+
+    long oldtime = 0;
+    long delta = 0;
+
+
+    static float last_joystick_x = 0;
+    static float last_joystick_y = 0;
+
+    public static Finger[] fingers = new Finger[10];
+    public static ArrayList<TouchListener> touch_elements = new ArrayList<TouchListener>(0);
+    public static ArrayList<Paintable> paint_elements = new ArrayList<Paintable>(0);
+    public static TouchListener[] handle_elements = new TouchListener[10]; // handled elements in every touch event
+
+    static float last_trackball_x = 0;
+    static float last_trackball_y = 0;
+
+    private int m_mapBack = ENUM_BACK_ALL;
+    private long m_lastPressBackTime = -1;
+    private int m_pressBackCount = 0;
+    private Q3EView m_renderView;
+
+    private boolean m_gyroInited = false;
+    private SensorManager m_sensorManager = null;
+    private Sensor m_gyroSensor = null;
+    private boolean m_enableGyro = false;
+    private float m_xAxisGyroSens = GYROSCOPE_X_AXIS_SENS;
+    private float m_yAxisGyroSens = GYROSCOPE_Y_AXIS_SENS;
+    private Display m_display;
 
     public Q3EControlView(Context context)
     {
@@ -107,27 +165,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 m_usingMouse = true;
         }
     }
-
-    public static boolean mInit = false;
-    private IntBuffer tmpbuf;
-
-    public static int orig_width;
-    public static int orig_height;
-
-    public boolean mapvol = false;
-    public boolean analog = false;
-
-
-    //RTCW4A-specific
-    Button actbutton;
-    Button kickbutton;
-
-    //MOUSE
-
-    private boolean hideonscr;
-
-    long oldtime = 0;
-    long delta = 0;
 
     @Override
     public void onDrawFrame(GL10 gl)
@@ -368,11 +405,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
         return true;
     }
-
-
-    static float last_joystick_x = 0;
-    static float last_joystick_y = 0;
-
     private static float getCenteredAxis(MotionEvent event,
                                          int axis)
     {
@@ -478,12 +510,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         }
         return false;
     }
-
-    public static Finger[] fingers = new Finger[10];
-    public static ArrayList<TouchListener> touch_elements = new ArrayList<TouchListener>(0);
-    public static ArrayList<Paintable> paint_elements = new ArrayList<Paintable>(0);
-    public static TouchListener[] handle_elements = new TouchListener[10]; // handled elements in every touch event
-
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -582,9 +608,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         });
     }
 
-    static float last_trackball_x = 0;
-    static float last_trackball_y = 0;
-
     public void sendMotionEvent(final float deltax, final float deltay)
     {
         queueEvent(new KOnceRunnable()
@@ -621,15 +644,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         Q3EUtils.q3ei.callbackObj.PushEvent(r);
     }
 
-    private int m_mapBack = ENUM_BACK_ALL;
-    private long m_lastPressBackTime = -1;
-    private int m_pressBackCount = 0;
-    private static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL = 1000;
-    private static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT = 3;
-    private static final int ENUM_BACK_NONE = 0;
-    private static final int ENUM_BACK_ESCAPE = 1;
-    private static final int ENUM_BACK_EXIT = 2;
-    private static final int ENUM_BACK_ALL = 0xFF;
 
     private boolean HandleBackPress()
     {
@@ -662,21 +676,11 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         return res;
     }
 
-    private Q3EView m_renderView;
-
     public void RenderView(Q3EView view)
     {
         m_renderView = view;
     }
 
-    private boolean m_gyroInited = false;
-    private SensorManager m_sensorManager = null;
-    private Sensor m_gyroSensor = null;
-    private boolean m_enableGyro = false;
-    public static final float GYROSCOPE_X_AXIS_SENS = 18;
-    public static final float GYROSCOPE_Y_AXIS_SENS = 18;
-    private float m_xAxisGyroSens = GYROSCOPE_X_AXIS_SENS;
-    private float m_yAxisGyroSens = GYROSCOPE_Y_AXIS_SENS;
 
     public boolean EnableGyroscopeControl(boolean... b)
     {
@@ -714,6 +718,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         if (null == m_sensorManager)
             return false;
         m_gyroSensor = m_sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        m_display = ((WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         return null != m_gyroSensor;
     }
 
@@ -733,9 +738,25 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     @Override
     public void onSensorChanged(SensorEvent event)
     {
+        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
+        {
         if (Q3EUtils.q3ei.callbackObj.notinmenu && !Q3EUtils.q3ei.callbackObj.inLoading)
         {
-            sendMotionEvent(-event.values[0] * m_xAxisGyroSens, event.values[1] * m_yAxisGyroSens);
+                float x, y;
+                switch (m_display.getRotation()) {
+                    case Surface.ROTATION_270: // invert
+                        x = -event.values[0];
+                        y = -event.values[1];
+                        break;
+                    case Surface.ROTATION_90:
+                    default:
+                        x = event.values[0];
+                        y = event.values[1];
+                        break;
+                }
+
+                sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
+            }
         }
     }
 

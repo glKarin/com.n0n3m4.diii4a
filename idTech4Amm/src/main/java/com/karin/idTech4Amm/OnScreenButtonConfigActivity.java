@@ -13,7 +13,7 @@ import android.preference.PreferenceManager;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.TextHelper;
-import com.karin.idTech4Amm.sys.Constants;
+import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -63,7 +63,7 @@ public class OnScreenButtonConfigActivity extends Activity
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
 
-        boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Constants.PreferenceKey.LAUNCHER_ORIENTATION, false);
+        boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false);
         ContextUtility.SetScreenOrientation(this, o ? 0 : 1);
         
         m_styleMap = BuildKeyValueMapFromResource(R.array.onscreen_button_style_values, R.array.onscreen_button_style_labels);

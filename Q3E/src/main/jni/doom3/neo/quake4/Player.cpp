@@ -13595,7 +13595,6 @@ void idPlayer::SetupHead( const char* headModel, idVec3 headOffset ) {
 			clientHead = NULL;
 		}
 
-
 		if( spectating || (gameLocal.GetLocalPlayer() && instance != gameLocal.GetLocalPlayer()->GetInstance()) ) {
 			return;
 		}
@@ -13606,6 +13605,11 @@ void idPlayer::SetupHead( const char* headModel, idVec3 headOffset ) {
 		}
 
 		rvClientAFAttachment* headEnt = clientHead.GetEntity();
+#ifdef MOD_BOTS //karin: fixed setup head
+		if(IS_BOT())
+			gameLocal.SpawnClientEntityDef( *headDict, (rvClientEntity**)&headEnt, false, "rvClientAFAttachment" );
+		else
+#endif
 		gameLocal.SpawnClientEntityDef( *headDict, (rvClientEntity**)&headEnt, false );
 		if( headEnt ) {
 			idStr jointName = spawnArgs.GetString( "joint_head" );

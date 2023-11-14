@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Environment;
 import android.provider.Settings;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,6 +16,9 @@ import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.view.Display;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.text.util.Linkify;
@@ -22,12 +26,15 @@ import android.text.method.LinkMovementMethod;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.TextHelper;
+import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3ELang;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
 // import android.widget.Magnifier.Builder;
 
 /**
@@ -105,12 +112,12 @@ public final class ContextUtility
         try
         {
             ApplicationInfo info = context.getApplicationInfo();
-            return (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            return (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0 || Constants.IsDebug();
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            return false; // default is release
+            return Constants.IsDebug(); // default is release
         }
     }
 
@@ -251,7 +258,7 @@ public final class ContextUtility
     {
         String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         // Android SDK > 28
-/*        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) // Android 11
         {
             if(Environment.isExternalStorageManager())
                 return CHECK_PERMISSION_RESULT_GRANTED;
@@ -260,7 +267,7 @@ public final class ContextUtility
             context.startActivityForResult(intent, resultCode);
             return CHECK_PERMISSION_RESULT_REQUEST;
         }
-        else*/ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M - Q
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M - Q
         {
             boolean granted = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
             if(granted)
@@ -427,6 +434,69 @@ public final class ContextUtility
         });
         return dialog;
     }
-    
+
+    public static float SetRefreshRate(Activity context, int modeId)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            Display display = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
+            {
+                display = context.getDisplay();
+            }
+            else
+            {
+                display = context.getWindowManager().getDefaultDisplay();
+            }
+            Display.Mode[] supportedModes = display.getSupportedModes();
+            Display.Mode mode = null;
+            for (Display.Mode supportedMode : supportedModes)
+            {
+                if(supportedMode.getModeId() == modeId)
+                {
+                    mode = supportedMode;
+                    break;
+                }
+            }
+            if(null == mode)
+            {
+                return -1;
+            }
+            Window window = context.getWindow();
+            WindowManager.LayoutParams a = window.getAttributes();
+            a.preferredDisplayModeId = mode.getModeId();
+            a.preferredRefreshRate = mode.getRefreshRate();
+            window.setAttributes(a);
+            return mode.getRefreshRate();
+        }
+        else
+            return 0;
+    }
+
+    public static Map<Integer, Float> GetSupportRefreshRates(Activity context)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            Display display = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
+            {
+                display = context.getDisplay();
+            }
+            else
+            {
+                display = context.getWindowManager().getDefaultDisplay();
+            }
+            Display.Mode[] supportedModes = display.getSupportedModes();
+            Map<Integer, Float> map = new LinkedHashMap<>();
+            for (Display.Mode supportedMode : supportedModes)
+            {
+                map.put(supportedMode.getModeId(), supportedMode.getRefreshRate());
+            }
+            return map;
+        }
+        else
+            return null;
+    }
+
 	private ContextUtility() {}
 }

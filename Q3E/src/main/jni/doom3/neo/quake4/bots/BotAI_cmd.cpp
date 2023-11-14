@@ -4,56 +4,7 @@ idCVar harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GA
 //karin: auto gen aas file for mp game map with bot
 idCVar harm_g_autoGenAASFileInMPGame( "harm_g_autoGenAASFileInMPGame", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic.");
 
-static int Bot_GetPlayerModelNames(idStrList &list, int team = TEAM_NONE)
-{
-	int i;
-	int num = 0;
-	int numPlayerModel;
-
-	numPlayerModel = declManager->GetNumDecls(DECL_PLAYER_MODEL);
-	for(i = 0; i < numPlayerModel; i++)
-	{
-		const idDecl *decl = declManager->DeclByIndex(DECL_PLAYER_MODEL, i, false);
-		if(!decl)
-			continue;
-		const rvDeclPlayerModel *playerModel = static_cast<const rvDeclPlayerModel *>(decl);
-		if(team == TEAM_STROGG)
-		{
-			if(idStr::Icmp(playerModel->team , "strogg"))
-				continue;
-		}
-		else if(team == TEAM_MARINE)
-		{
-			if(!idStr::Icmp(playerModel->team , "strogg"))
-				continue;
-		}
-		list.Append(playerModel->GetName());
-		num++;
-	}
-	return num;
-}
-
-static int Bot_GetBotNames( idStrList &list )
-{
-    int num;
-    int i;
-    int res = 0;
-
-    num = declManager->GetNumDecls(DECL_ENTITYDEF);
-
-    for (i = 0; i < num; i++) {
-        const idDeclEntityDef *decl = (const idDeclEntityDef *)declManager->DeclByIndex(DECL_ENTITYDEF, i , false);
-        if(!decl)
-            continue;
-        if(!idStr(decl->GetName()).IcmpPrefix("bot_sabot"))
-        {
-            list.Append(decl->GetName());
-            res++;
-        }
-    }
-
-    return res;
-}
+#include "BotAI_cfg.cpp"
 
 /*
 ===================
@@ -204,6 +155,26 @@ int botAi::AddBot(const char *defName, idDict &dict)
         return -4;
     }
 
+    idDict botLevelDict;
+    int botLevel = Bot_GetBotLevelData(botLevelDict);
+    if(botLevel > 0)
+    {
+        const char *Bot_Level_Keys[] = {
+                "fov",
+                "aim_rate",
+        };
+        int keysLength = sizeof(Bot_Level_Keys) / sizeof(Bot_Level_Keys[0]);
+        for(int i = 0; i < keysLength; i++)
+        {
+            const char *v = botLevelDict.GetString(Bot_Level_Keys[i], "");
+            if(v && v[0])
+                dict.Set(Bot_Level_Keys[i], v);
+        }
+    }
+    idStr uiName = Bot_GetBotName();
+    if(uiName && uiName[0])
+        dict.Set("ui_name", uiName.c_str());
+
     dict.Set( "classname", value );
 
     dict.Set( "name", va( "bot_%d", newBotID ) ); // TinMan: Set entity name for easier debugging
@@ -234,8 +205,11 @@ int botAi::AddBot(const char *defName, idDict &dict)
     bots[newBotID].entityNum = newBot->entityNumber;
 
     // TinMan: Give me your name, licence and occupation.
-    name = newBot->spawnArgs.GetString( "npc_name" );
-    userInfo.Set( "ui_name", va( "[BOT%d] %s", newBotID, name) ); // TinMan: *debug* Prefix [BOTn]
+    name = newBot->spawnArgs.GetString( "ui_name" );
+    idStr botName(va( "[BOT%d] %s", newBotID, name));
+    if(botLevel > 0)
+        botName.Append(va(" (%d)", botLevel));
+    userInfo.Set( "ui_name", botName ); // TinMan: *debug* Prefix [BOTn]
 
     // TinMan: I love the skin you're in.
     int skinNum = newBot->spawnArgs.GetInt( "mp_skin" );
@@ -256,8 +230,6 @@ int botAi::AddBot(const char *defName, idDict &dict)
     //gameLocal.Printf("Bot has been connected, and client has begun.\n");
 
     userInfo.Set( "ui_ready", "Ready" );
-
-    gameLocal.SetUserInfo( newClientID, userInfo, false ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
 
 	idStrList playerModelNames;
 	int numMarinePlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_MARINE);
@@ -290,6 +262,7 @@ int botAi::AddBot(const char *defName, idDict &dict)
 		botClient->spawnArgs.Set("ui_model_strogg", modelName);
 		botClient->spawnArgs.Set("def_default_model_strogg", modelName);
 	}
+	int numPlayerModel = Bot_GetPlayerModelNames(playerModelNames, TEAM_NONE);
 	if(playerModelNames.Num() > 0)
 	{
 		int index = gameLocal.random.RandomInt(playerModelNames.Num());
@@ -301,8 +274,10 @@ int botAi::AddBot(const char *defName, idDict &dict)
 		botClient->spawnArgs.Set("ui_model", modelName);
 		botClient->spawnArgs.Set("def_default_model", modelName);
 	}
-	botClient->UpdateModelSetup(true);
+
+    gameLocal.SetUserInfo( newClientID, userInfo, false ); // TinMan: apply the userinfo *note* func was changed slightly in 1.3
     botClient->Spectate( false ); // TinMan: Finally done, get outa spectate
+    botClient->UpdateModelSetup(true);
 
     cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "updateUI %d\n", newClientID ) );
 
@@ -312,6 +287,11 @@ int botAi::AddBot(const char *defName, idDict &dict)
 int botAi::AddBot(const char *name)
 {
     idDict dict;
+    const idDeclEntityDef *decl;
+
+    decl = (const idDeclEntityDef *)declManager->FindType(DECL_ENTITYDEF, name , false);
+    if(decl)
+        dict = decl->dict;
     return AddBot(name, dict);
 }
 
@@ -376,7 +356,7 @@ void botAi::Cmd_FillBots_f(const idCmdArgs& args)
     }
 
     idStrList botNames;
-    int botNum = Bot_GetBotNames(botNames);
+    int botNum = Bot_GetBotDefs(botNames);
     idStrList list;
     for(int i = 0; i < num; i++)
     {
@@ -503,7 +483,7 @@ void botAi::Cmd_BotInfo_f(const idCmdArgs& args)
     gameLocal.Printf("Bot slots: used(%d)\n", numBots);
 
     idStrList botNames;
-    int botNum = Bot_GetBotNames(botNames);
+    int botNum = Bot_GetBotDefs(botNames);
     gameLocal.Printf("Bot defs: total(%d)\n", botNum);
     for(int i = 0; i < botNum; i++)
     {

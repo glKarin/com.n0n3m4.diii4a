@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SND_LOCAL_H__
 #define __SND_LOCAL_H__
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 
 // you need the OpenAL headers for build, even if AL is not enabled - http://www.openal.org/
 #ifdef _WIN32
@@ -42,6 +42,12 @@ If you have questions concerning this license or the applicable additional terms
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #define ID_ALCHAR
+#elif defined(__ANDROID__)
+#include "../externlibs/openal-soft/include/AL/al.h"
+#include "../externlibs/openal-soft/include/AL/alc.h"
+#include "../externlibs/openal-soft/include/AL/efx.h"
+#include "../openal/idal.h"
+#define ID_ALCHAR (ALubyte *)
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -744,7 +750,15 @@ class idSoundWorldLocal : public idSoundWorld
 		idVec3					listenerQU;			// position in "quake units"
 		int						listenerArea;
 		idStr					listenerAreaName;
-		int						listenerEnvironmentID;
+#ifdef _OPENAL_EFX
+	ALuint					listenerEffect;
+	ALuint					listenerSlot;
+	bool					listenerAreFiltersInitialized;
+	ALuint					listenerFilters[2]; // 0 - direct; 1 - send.
+	float					listenerSlotReverbGain;
+#else
+	int						listenerEnvironmentID;
+#endif
 
 		int						gameMsec;
 		int						game44kHz;
@@ -872,6 +886,40 @@ class idSoundSystemLocal : public idSoundSystem
 	virtual void			EndCinematic() { }
 #endif
 
+#ifdef _HUMANHEAD
+	//HUMANHEAD rww
+	virtual int					GetSubtitleIndex(const char *soundName);
+	virtual void				SetSubtitleData(int subIndex, int subNum, const char *subText, float subTime, int subChannel);
+	virtual soundSub_t			*GetSubtitle(int subIndex, int subNum);
+	virtual soundSubtitleList_t *GetSubtitleList(int subIndex);
+	//HUMANHEAD END
+
+	//karin: simple show/hide subtitles: FrontEnd: handle GUI in main thread; BackEnd: update sound in async thread(If com_asyncSound != 0)
+	private:
+    typedef struct sb_soundSubtitle_s
+    {
+		int subIndex; // subtitle sound index in idList<soundSubtitleList_s>
+		int subNum; // subtitle text index - 1 in soundSubtitleList_s::subList
+        const soundSubtitle_s *subtitle; // subtitle data soundSub_t
+		int endTime; // end time(absolute value in ms), subtitle end if idSoundSystemLocal::GetCurrent44kHzTime() greater than this value
+    } sb_soundSubtitle_t; // backend
+
+	bool SB_ContainsSubtitle(const soundSubtitle_s *subtitle) const; // backend
+    bool SB_AppendSubtitle(const idSoundChannel *chan); // backend
+    void SB_SetupSubtitle(void); // backend, call in idSoundSystemLocal::AsyncUpdate/idSoundSystemLocal::AsyncUpdateWrite
+	void SB_HideSubtitle(void); // backend, call in idSoundSystemLocal::AsyncUpdate/idSoundSystemLocal::AsyncUpdateWrite
+
+	bool SFB_HandleSubtitle(bool fromBackEnd, const void *data = NULL); // frontend/backend
+
+	idList<sb_soundSubtitle_t> sb_subtitleQueue; // backend, next or current show, will hide subtitle if NULL
+    bool sfb_subtitleChanged; // frontend/backend, backend tell frontend has changed, and frontend tell backend not changed after sync
+	idList<const soundSubtitle_s *> sf_subtitleQueue; // frontend, show in player HUD GUI, hide subtitle if NULL
+
+	public:
+	idList<soundSubtitleList_s> soundSubtitleList; // static
+	void SF_ShowSubtitle(void); // frontend, call in idSessionLocal::Frame
+#endif
+
 	//-------------------------
 
 	int						GetCurrent44kHzTime(void) const;
@@ -913,23 +961,45 @@ class idSoundSystemLocal : public idSoundSystem
 
 	idList<SoundFX *>		fxList;
 
-#if !defined(__ANDROID__)
+#ifdef _OPENAL
 	ALCdevice				*openalDevice;
 	ALCcontext				*openalContext;
 	ALsizei					openalSourceCount;
 	openalSource_t			openalSources[256];
+
+#ifdef _OPENAL_EFX
+	LPALGENEFFECTS			alGenEffects;
+	LPALDELETEEFFECTS		alDeleteEffects;
+	LPALISEFFECT			alIsEffect;
+	LPALEFFECTI				alEffecti;
+	LPALEFFECTF				alEffectf;
+	LPALEFFECTFV			alEffectfv;
+	LPALGENFILTERS			alGenFilters;
+	LPALDELETEFILTERS		alDeleteFilters;
+	LPALISFILTER			alIsFilter;
+	LPALFILTERI				alFilteri;
+	LPALFILTERF				alFilterf;
+	LPALGENAUXILIARYEFFECTSLOTS		alGenAuxiliaryEffectSlots;
+	LPALDELETEAUXILIARYEFFECTSLOTS	alDeleteAuxiliaryEffectSlots;
+	LPALISAUXILIARYEFFECTSLOT		alIsAuxiliaryEffectSlot;
+	LPALAUXILIARYEFFECTSLOTI		alAuxiliaryEffectSloti;
+	LPALAUXILIARYEFFECTSLOTF		alAuxiliaryEffectSlotf;
+
+	static idCVar s_alReverbGain;
+#else
 	EAXSet					alEAXSet;
 	EAXGet					alEAXGet;
 	EAXSetBufferMode		alEAXSetBufferMode;
 	EAXGetBufferMode		alEAXGetBufferMode;
+#endif
 	idEFXFile				EFXDatabase;
 #endif
 	bool					efxloaded;
 	// latches
 	static bool				useOpenAL;
-	static bool				useEAXReverb;
+	static bool				useEAXReverb; //k: useEFXReverb if using EFX
 	// mark available during initialization, or through an explicit test
-	static int				EAXAvailable;
+	static int				EAXAvailable; //k: EFXAvailable if using EFX
 
 
 	static idCVar			s_noSound;

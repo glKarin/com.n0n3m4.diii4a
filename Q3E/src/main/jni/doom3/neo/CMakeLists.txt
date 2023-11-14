@@ -11,7 +11,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CORE_DEFINES "__DOOM_DLL__;HAVE_CONFIG_H;NO_ALSA")
 
-# set(CMAKE_BUILD_TYPE "Release")
+# set(CMAKE_BUILD_TYPE "Debug")
 # TODO
 
 # osx: place game .dylib's in the bundle (next to the binary)
@@ -72,6 +72,7 @@ option(SUPPORT_OBJ			"Support obj model" ON)
 option(SUPPORT_DAE			"Support dae model" ON)
 option(SHADOW_MAPPING			"Shadow mapping support" ON)
 option(OPENGLES3			"OpenGLES3 support" ON)
+option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
 
 option(D3LE			"Build the d3le game code" ON)
 option(CDOOM			"Build the cdoom game code" ON)
@@ -304,6 +305,13 @@ if(SHADOW_MAPPING)
 	set(CORE_DEFINES "${CORE_DEFINES};_SHADOW_MAPPING")
 	message(STATUS "Add shadow mapping support")
 endif()
+
+if(OPENAL)
+	add_subdirectory (externlibs/openal-soft)
+	add_definitions(-D_OPENAL -D_OPENAL_EFX)
+	message(STATUS "Build OpenAL(soft) support")
+endif()
+
 #//k jpeg
 set(src_jpeg
 		externlibs/jpeg-8d/jaricom.c
@@ -721,6 +729,11 @@ function(set_src_dir DSTLIST PATHPREFIX SRCLIST)
 	set(${DSTLIST} ${list} PARENT_SCOPE)
 endfunction()
 
+set(MOD_DIR "mod")
+set(DOOM3_MOD_DIR "${MOD_DIR}/doom3")
+set(QUAKE4_MOD_DIR "${MOD_DIR}/quake4")
+set(PREY_MOD_DIR "${MOD_DIR}/prey")
+
 # base
 set(src_game ${base_game_src})
 set_src_dir(src_game "game" ${src_game})
@@ -743,13 +756,13 @@ set(d3le_game_src
 		physics/Force_Grab.cpp
 		)
 list(APPEND src_d3le ${d3le_game_src})
-set_src_dir(src_d3le "d3le" ${src_d3le})
-add_globbed_headers(src_d3le "d3le")
+set_src_dir(src_d3le "${DOOM3_MOD_DIR}/d3le" ${src_d3le})
+add_globbed_headers(src_d3le "${DOOM3_MOD_DIR}/d3le")
 
 # cdoom
 set(src_cdoom ${base_game_src})
-set_src_dir(src_cdoom "cdoom" ${src_cdoom})
-add_globbed_headers(src_cdoom "cdoom")
+set_src_dir(src_cdoom "${DOOM3_MOD_DIR}/cdoom" ${src_cdoom})
+add_globbed_headers(src_cdoom "${DOOM3_MOD_DIR}/cdoom")
 
 # rivensin
 set(src_rivensin ${base_game_src})
@@ -762,8 +775,8 @@ set(rivensin_game_src
 		physics/Force_Grab.cpp
 		)
 list(APPEND src_rivensin ${rivensin_game_src})
-set_src_dir(src_rivensin "rivensin" ${src_rivensin})
-add_globbed_headers(src_rivensin "rivensin")
+set_src_dir(src_rivensin "${DOOM3_MOD_DIR}/rivensin" ${src_rivensin})
+add_globbed_headers(src_rivensin "${DOOM3_MOD_DIR}/rivensin")
 
 # hardcorps
 set(src_hardcorps ${base_game_src})
@@ -775,8 +788,8 @@ set(hardcorps_game_src
 		physics/Physics_Liquid.cpp
 		)
 list(APPEND src_hardcorps ${hardcorps_game_src})
-set_src_dir(src_hardcorps "hardcorps" ${src_hardcorps})
-add_globbed_headers(src_hardcorps "hardcorps")
+set_src_dir(src_hardcorps "${DOOM3_MOD_DIR}/hardcorps" ${src_hardcorps})
+add_globbed_headers(src_hardcorps "${DOOM3_MOD_DIR}/hardcorps")
 
 # overthinked
 set(src_overthinked ${base_game_src})
@@ -784,8 +797,8 @@ set(overthinked_game_src
 		tracer.cpp
 		)
 list(APPEND src_overthinked ${overthinked_game_src})
-set_src_dir(src_overthinked "overthinked" ${src_overthinked})
-add_globbed_headers(src_overthinked "overthinked")
+set_src_dir(src_overthinked "${DOOM3_MOD_DIR}/overthinked" ${src_overthinked})
+add_globbed_headers(src_overthinked "${DOOM3_MOD_DIR}/overthinked")
 
 # sabot
 set(src_sabot ${base_game_src})
@@ -797,8 +810,8 @@ set(sabot_game_src
 		bots/BotSabot.cpp
 		)
 list(APPEND src_sabot ${sabot_game_src})
-set_src_dir(src_sabot "sabot" ${src_sabot})
-add_globbed_headers(src_sabot "sabot")
+set_src_dir(src_sabot "${DOOM3_MOD_DIR}/sabot" ${src_sabot})
+add_globbed_headers(src_sabot "${DOOM3_MOD_DIR}/sabot")
 
 # hexeneoc
 set(src_hexeneoc ${base_game_src})
@@ -816,8 +829,8 @@ set(hexeneoc_game_src
 		projectiles/Wraithverge.cpp
 		)
 list(APPEND src_hexeneoc ${hexeneoc_game_src})
-set_src_dir(src_hexeneoc "hexeneoc" ${src_hexeneoc})
-add_globbed_headers(src_hexeneoc "hexeneoc")
+set_src_dir(src_hexeneoc "${DOOM3_MOD_DIR}/hexeneoc" ${src_hexeneoc})
+add_globbed_headers(src_hexeneoc "${DOOM3_MOD_DIR}/hexeneoc")
 
 # quake4
 set(src_quake4 ${base_game_src})
@@ -1411,7 +1424,7 @@ message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "-l: ${sys_libs}")
 message(STATUS "-l(static): ${local_libs}")
 
-#message(FATAL_ERROR "stop!!!!!!!!!!!!!!!!!!!!")
+#message(FATAL_ERROR "${CMAKE_SIZEOF_VOID_P} stop!!!!!!!!!!!!!!!!!!!!")
 
 if(CORE)
 	add_library(${DOOM3BINARY} SHARED
@@ -1629,7 +1642,7 @@ if(QUAKE4)
 	add_library(q4game SHARED ${src_quake4})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set_target_properties(q4game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;MOD_BOTS;_MOD_FULL_BODY_AWARENESS")
+	set_target_properties(q4game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;MOD_BOTS;CTF;_MOD_FULL_BODY_AWARENESS")
 	target_include_directories(q4game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/quake4")
 	set_target_properties(q4game PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(q4game PROPERTIES INSTALL_NAME_DIR "@executable_path")

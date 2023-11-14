@@ -210,6 +210,11 @@ public:
 	virtual void			Think( void );
 
 	virtual bool			Collide( const trace_t &collision, const idVec3 &velocity );
+#ifdef MOD_BOTS
+	int Team(void) const { return team; }
+	int Powerup(void) const { return powerup; }
+	bool Dropped(void) const { return dropped; }
+#endif
 
 private:
 	int						team;

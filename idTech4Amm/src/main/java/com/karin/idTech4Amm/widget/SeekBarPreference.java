@@ -21,7 +21,7 @@ import com.karin.idTech4Amm.R;
 public class SeekBarPreference extends DialogPreference
 {
     private Map<String, Object> m_initValues = null;
-    private ViewHolder V = new ViewHolder();
+    private final ViewHolder V = new ViewHolder();
     
     @SuppressLint("NewApi")
     public SeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
