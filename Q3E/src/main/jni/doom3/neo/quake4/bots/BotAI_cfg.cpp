@@ -2,7 +2,7 @@
 
 #define MAX_BOT_LEVEL 8
 
-static idCVar harm_si_botLevel( "harm_si_botLevel", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Bot level(0 - auto; 1 - 8: diffcult level).", 0, MAX_BOT_LEVEL );
+static idCVar harm_si_botLevel( "harm_si_botLevel", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Bot level(0 - auto; 1 - 8: difficult level).", 0, MAX_BOT_LEVEL );
 
 static int Bot_GetPlayerModelNames(idStrList &list, int team)
 {

@@ -29,11 +29,11 @@ public final class Constants
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
 	public static final String[] CONST_CHANGES = {
             "Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.",
-            "Add OpenAL(soft version) and EFX Reverb support.",
+            "Add OpenAL(soft) and EFX Reverb support.",
             "Beam rendering optimization in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
             "Add subtitle support in Prey(2006).",
             "Fixed gyroscope in invert-landscape mode.",
-            "Fixed bot head in Quake4 MP game.",
+            "Fixed bot head and add bot level control(cvar `harm_si_botLevel`, need extract new `sabot_a9.pk4` resource) in Quake4 MP game.",
 	};
 
     public static long GetBuildTimestamp()

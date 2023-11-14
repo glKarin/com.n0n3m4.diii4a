@@ -72,7 +72,8 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint in full-body awareness", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot level(0 - auto; 1 - 8: difficult level)", KCVar.FLAG_POSITIVE)
                 );
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)
