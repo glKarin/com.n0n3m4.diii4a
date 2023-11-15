@@ -4,12 +4,9 @@ project(doom3)
 add_definitions(-D__ANDROID__)
 add_definitions(-D_K_CLANG)
 add_definitions(-DID_ENABLE_CURL=1)
-#add_definitions(-DNO_ALSA)
-#add_definitions(-D__DOOM_DLL__)
-#add_definitions(-DHAVE_CONFIG_H)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(CORE_DEFINES "__DOOM_DLL__;HAVE_CONFIG_H;NO_ALSA")
+set(CORE_DEFINES "__DOOM_DLL__;NO_ALSA")
 
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO
@@ -1260,38 +1257,41 @@ set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 #//k ogg
 set(src_ogg
-	externlibs/libogg/bitwise.c
-	externlibs/libogg/framing.c
-	externlibs/libogg/analysis.c
-	externlibs/libogg/floor1.c
-	externlibs/libogg/psy.c
-	externlibs/libogg/tone.c
-	externlibs/libogg/barkmel.c
-	externlibs/libogg/info.c
-	externlibs/libogg/vorbisenc.c
-	externlibs/libogg/bitrate.c
-	externlibs/libogg/lookup.c
-	externlibs/libogg/registry.c
-	externlibs/libogg/vorbisfile.c
-	externlibs/libogg/block.c
-	externlibs/libogg/lpc.c
-	externlibs/libogg/res0.c
-	externlibs/libogg/window.c
-	externlibs/libogg/codebook.c
-	externlibs/libogg/lsp.c
-	externlibs/libogg/sharedbook.c
-	externlibs/libogg/envelope.c
-	externlibs/libogg/mapping0.c
-	externlibs/libogg/smallft.c
-	externlibs/libogg/floor0.c
-	externlibs/libogg/mdct.c
-	externlibs/libogg/synthesis.c
+	externlibs/libogg/src/bitwise.c
+	externlibs/libogg/src/framing.c
+	externlibs/libvorbis/lib/analysis.c
+	externlibs/libvorbis/lib/floor1.c
+	externlibs/libvorbis/lib/psy.c
+	externlibs/libvorbis/lib/tone.c
+	externlibs/libvorbis/lib/barkmel.c
+	externlibs/libvorbis/lib/info.c
+	externlibs/libvorbis/lib/vorbisenc.c
+	externlibs/libvorbis/lib/bitrate.c
+	externlibs/libvorbis/lib/lookup.c
+	externlibs/libvorbis/lib/registry.c
+	externlibs/libvorbis/lib/vorbisfile.c
+	externlibs/libvorbis/lib/block.c
+	externlibs/libvorbis/lib/lpc.c
+	externlibs/libvorbis/lib/res0.c
+	externlibs/libvorbis/lib/window.c
+	externlibs/libvorbis/lib/codebook.c
+	externlibs/libvorbis/lib/lsp.c
+	externlibs/libvorbis/lib/sharedbook.c
+	externlibs/libvorbis/lib/envelope.c
+	externlibs/libvorbis/lib/mapping0.c
+	externlibs/libvorbis/lib/smallft.c
+	externlibs/libvorbis/lib/floor0.c
+	externlibs/libvorbis/lib/mdct.c
+	externlibs/libvorbis/lib/synthesis.c
 )
 
 add_globbed_headers(src_ogg "externlibs/libogg")
-include_directories("externlibs/libogg")
-include_directories("sys/android/ogg")
-include_directories("sys/android/vorbis")
+add_globbed_headers(src_ogg "externlibs/libvorbis")
+include_directories("externlibs/libogg/include/ogg")
+include_directories("externlibs/libvorbis/include/vorbis")
+include_directories("externlibs/libogg/include")
+include_directories("externlibs/libvorbis/include")
+include_directories("externlibs/libvorbis/lib")
 include_directories("sys/android")
 add_library(ogg STATIC ${src_ogg})
 
