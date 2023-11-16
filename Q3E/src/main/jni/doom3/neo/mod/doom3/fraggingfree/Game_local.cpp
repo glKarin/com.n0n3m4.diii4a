@@ -618,7 +618,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 		f->ForceFlush();
 	}
 
-	savegame.WriteBuildNumber( DHEWM3_BUILD_NUMBER );
+	savegame.WriteBuildNumber( DHEWM3_BUILD_NUMBER ); //karin
 
 	// DG: add some more information to savegame to make future quirks easier
 	savegame.WriteInt( INTERNAL_SAVEGAME_VERSION ); // to be independent of BUILD_NUMBER
@@ -1566,7 +1566,7 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	// DG: I enhanced the information in savegames a bit for dhewm3 1.5.1
 	//     for which I bumped th BUILD_NUMBER to 1305
-	if( savegame.GetBuildNumber() >= DHEWM3_BUILD_NUMBER )
+	if( savegame.GetBuildNumber() >= 1305 )
 	{
 		savegame.ReadInternalSavegameVersion();
 		if( savegame.GetInternalSavegameVersion() > INTERNAL_SAVEGAME_VERSION ) {
