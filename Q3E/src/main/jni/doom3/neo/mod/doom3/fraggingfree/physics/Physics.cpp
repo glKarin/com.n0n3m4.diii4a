@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,13 +25,56 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef __BUILD_VERSION__
-#define __BUILD_VERSION__
-#ifdef _HUMANHEAD
-const int BUILD_NUMBER = 116;
-#elif defined(_RAVEN)
-const int BUILD_NUMBER = 1283;
-#else
-const int BUILD_NUMBER = 1304;
-#endif
-#endif
+
+#include "sys/platform.h"
+#include "Game_local.h"
+
+#include "physics/Physics.h"
+
+ABSTRACT_DECLARATION( idClass, idPhysics )
+END_CLASS
+
+
+/*
+================
+idPhysics::~idPhysics
+================
+*/
+idPhysics::~idPhysics( void ) {
+}
+
+/*
+================
+idPhysics::Save
+================
+*/
+void idPhysics::Save( idSaveGame *savefile ) const {
+}
+
+/*
+================
+idPhysics::Restore
+================
+*/
+void idPhysics::Restore( idRestoreGame *savefile ) {
+}
+
+/*
+================
+idPhysics::SetClipBox
+================
+*/
+void idPhysics::SetClipBox( const idBounds &bounds, float density ) {
+	SetClipModel( new idClipModel( idTraceModel( bounds ) ), density );
+}
+
+/*
+================
+idPhysics::SnapTimeToPhysicsFrame
+================
+*/
+int idPhysics::SnapTimeToPhysicsFrame( int t ) {
+	int s;
+	s = t + USERCMD_MSEC - 1;
+	return ( s - s % USERCMD_MSEC );
+}

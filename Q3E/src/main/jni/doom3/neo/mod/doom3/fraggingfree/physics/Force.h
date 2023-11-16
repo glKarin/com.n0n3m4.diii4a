@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,13 +25,44 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef __BUILD_VERSION__
-#define __BUILD_VERSION__
-#ifdef _HUMANHEAD
-const int BUILD_NUMBER = 116;
-#elif defined(_RAVEN)
-const int BUILD_NUMBER = 1283;
-#else
-const int BUILD_NUMBER = 1304;
-#endif
-#endif
+
+#ifndef __FORCE_H__
+#define __FORCE_H__
+
+#include "gamesys/Class.h"
+
+/*
+===============================================================================
+
+	Force base class
+
+	A force object applies a force to a physics object.
+
+===============================================================================
+*/
+
+class idEntity;
+class idPhysics;
+
+class idForce : public idClass {
+
+public:
+	CLASS_PROTOTYPE( idForce );
+
+						idForce( void );
+	virtual				~idForce( void );
+	static void			DeletePhysics( const idPhysics *phys );
+	static void			ClearForceList( void );
+
+public: // common force interface
+						// evalulate the force up to the given time
+	virtual void		Evaluate( int time );
+						// removes any pointers to the physics object
+	virtual void		RemovePhysics( const idPhysics *phys );
+
+private:
+
+	static idList<idForce*> forceList;
+};
+
+#endif /* !__FORCE_H__ */

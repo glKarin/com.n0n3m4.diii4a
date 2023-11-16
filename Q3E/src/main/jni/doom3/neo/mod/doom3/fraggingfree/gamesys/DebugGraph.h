@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,13 +25,23 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef __BUILD_VERSION__
-#define __BUILD_VERSION__
-#ifdef _HUMANHEAD
-const int BUILD_NUMBER = 116;
-#elif defined(_RAVEN)
-const int BUILD_NUMBER = 1283;
-#else
-const int BUILD_NUMBER = 1304;
-#endif
+
+#ifndef __DEBUGGRAPH_H__
+#define __DEBUGGRAPH_H__
+
+#include "idlib/containers/List.h"
+#include "idlib/math/Vector.h"
+
+class idDebugGraph {
+public:
+					idDebugGraph();
+	void			SetNumSamples( int num );
+	void			AddValue( float value );
+	void			Draw( const idVec4 &color, float scale ) const;
+
+private:
+	idList<float>	samples;
+	int				index;
+};
+
 #endif
