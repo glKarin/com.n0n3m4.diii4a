@@ -1,10 +1,14 @@
 
 #ifdef _WATER_PHYSICS
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
-
+#ifdef _HARDCORPS
+#include "idlib/precompiled.h"
+#endif
 #include "../Game_local.h"
+
+#include "Entity.h"
+
+#include "Physics_Liquid.h"
 
 CLASS_DECLARATION( idPhysics_Static, idPhysics_Liquid )
 END_CLASS

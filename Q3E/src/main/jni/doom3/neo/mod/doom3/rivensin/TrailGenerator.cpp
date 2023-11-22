@@ -1,10 +1,12 @@
 // Created by ivan_the_B
 //
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
+#ifdef _RIVENSIN
+#include "idlib/precompiled.h"
+#endif
+#include "TrailGenerator.h"
 #include "Game_local.h"
+#include "renderer/ModelManager.h"
 
 //uncomment those to enable debug
 //#define _DEBUG_CUSTOM_GEOM

@@ -1,10 +1,15 @@
 // Created by Ivan_the_B
 //
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
-
+#ifdef _HARDCORPS
+#include "idlib/precompiled.h"
+#endif
 #include "../Game_local.h"
+
+#include "AI_bot.h"
+#include "Moveable.h"
+#include "gamesys/SysCvar.h"
+#include "script/Script_Thread.h"
 
 /*
 ===============================================================================

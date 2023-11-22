@@ -26,10 +26,21 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "renderer/ModelManager.h"
 
-#include "Game_local.h"
+#include "gamesys/SysCvar.h"
+#include "script/Script_Thread.h"
+#include "Light.h"
+#include "Player.h"
+#include "Mover.h"
+#include "Misc.h"
+#include "WorldSpawn.h"
+#include "Sound.h"
+#include "Trigger.h"
+
+#include "Target.h"
 
 /*
 ===============================================================================

@@ -3,6 +3,9 @@
 #ifndef __LIQUID_H__
 #define __LIQUID_H__
 
+#include "Entity.h"
+#include "physics/Physics_Liquid.h"
+
 /*
 ===============================================================================
 

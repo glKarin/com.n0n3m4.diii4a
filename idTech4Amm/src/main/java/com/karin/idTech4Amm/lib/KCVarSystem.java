@@ -49,8 +49,8 @@ public final class KCVarSystem
                 );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
-                    KCVar.CreateCVar("harm_pm_doubleJump", "bool", "0", "Enable double-jump", 0),
-                    KCVar.CreateCVar("harm_pm_autoForceThirdPerson", "bool", "0", "Force set third person view after game level load end", 0),
+                    KCVar.CreateCVar("harm_pm_doubleJump", "bool", "1", "Enable double-jump", 0),
+                    KCVar.CreateCVar("harm_pm_autoForceThirdPerson", "bool", "1", "Force set third person view after game level load end", 0),
                     KCVar.CreateCVar("harm_pm_preferCrouchViewHeight", "float", "32", "Set prefer crouch view height in Third-Person(suggest 32 - 39, less or equals 0 to disable)", KCVar.FLAG_POSITIVE)
                 );
 

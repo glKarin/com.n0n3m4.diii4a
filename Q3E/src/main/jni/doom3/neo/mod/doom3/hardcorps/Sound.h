@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_SOUND_H__
 #define __GAME_SOUND_H__
 
+#include "Entity.h"
+
 //ff1.3 start
 extern const idEventDef EV_Music_Start;
 extern const idEventDef EV_Music_Stop;

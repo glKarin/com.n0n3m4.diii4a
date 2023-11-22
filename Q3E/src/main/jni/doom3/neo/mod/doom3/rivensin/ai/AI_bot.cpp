@@ -1,10 +1,18 @@
 // Created by Ivan_the_B
 //
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "../Game_local.h"
+#ifdef _RIVENSIN
+#include "idlib/precompiled.h"
+#endif
+#include "Actor.h"
+#include "Entity.h"
+#include "Projectile.h"
+#include "script/Script_Thread.h"
+#include "gamesys/SysCvar.h"
+#include "Game_local.h"
+#include "Moveable.h"
+#include "AI.h"
+#include "AI_bot.h"
 
 
 /*

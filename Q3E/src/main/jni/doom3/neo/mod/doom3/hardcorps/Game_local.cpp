@@ -26,12 +26,31 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/Stub_SDL_endian.h"	//rev 2021 dhewm 3 1.5.1 updates
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "idlib/Timer.h"
+#include "framework/async/NetworkSystem.h"
+#include "framework/BuildVersion.h"
+#include "framework/DeclEntityDef.h"
+#include "framework/FileSystem.h"
+#include "framework/Licensee.h"	//rev 2021 dhewm 3 1.5.1 updates
+#include "renderer/ModelManager.h"
+
+#include "gamesys/SysCvar.h"
+#include "gamesys/SysCmds.h"
+#include "script/Script_Thread.h"
+#include "ai/AI.h"
+#include "anim/Anim_Testmodel.h"
+#include "Camera.h"
+#include "SmokeParticles.h"
+#include "Player.h"
+#include "WorldSpawn.h"
+#include "Misc.h"
+#include "Trigger.h"
+#include "Sound.h" //ivan
 
 #include "Game_local.h"
-
-#define ID_GAME_API
 
 const int NUM_RENDER_PORTAL_BITS	= idMath::BitsForInteger( PS_BLOCK_ALL );
 
@@ -89,12 +108,6 @@ const char *idGameLocal::sufaceTypeNames[ MAX_SURFACE_TYPES ] = {
 GetGameAPI
 ============
 */
-#if __MWERKS__
-#pragma export on
-#endif
-#if __GNUC__ >= 4
-#pragma GCC visibility push(default)
-#endif
 extern "C" ID_GAME_API gameExport_t *GetGameAPI( gameImport_t *import ) {
 	if ( import->version == GAME_API_VERSION ) {
 
@@ -451,11 +464,13 @@ void idGameLocal::SaveGame( idFile *f ) {
 		f->ForceFlush();
 	}
 
+#ifdef _HARDCORPS
+	savegame.WriteBuildNumber( DHEWM3_BUILD_NUMBER );
+#else
 	savegame.WriteBuildNumber( BUILD_NUMBER );
+#endif
 
-	//k not in original DOOM3
-#if !defined(_HARDCORPS)
-//rev 2021 dhewm 1.5.1 build updates.  Found this comment in the commits.
+//rev 2021 dhewm 1.5.1 build updates.  Found this comment in the commits.	
 	// DG: add some more information to savegame to make future quirks easier
 	savegame.WriteInt( INTERNAL_SAVEGAME_VERSION ); // to be independent of BUILD_NUMBER
 	savegame.WriteString( D3_OSTYPE ); // operating system - from CMake
@@ -465,7 +480,6 @@ void idGameLocal::SaveGame( idFile *f ) {
 	savegame.WriteShort( SDL_BYTEORDER ) ; // SDL_LIL_ENDIAN or SDL_BIG_ENDIAN
 	// DG end
 //rev 2021 dhewm 1.5.1 build updates End
-#endif
 
 	// go through all entities and threads and add them to the object list
 	for( i = 0; i < MAX_GENTITIES; i++ ) {
@@ -1297,8 +1311,6 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	savegame.ReadBuildNumber();
 
-	//k not in original DOOM3
-#if !defined(_HARDCORPS)
 //rev 2021 dhewm 3 1.5.1 updates.
 	// DG: I enhanced the information in savegames a bit for dhewm3 1.5.1
 	//     for which I bumped th BUILD_NUMBER to 1305
@@ -1330,7 +1342,6 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 	}
 	// DG end	
 //rev 2021 dhewm 3 1.5.1 updates END.
-#endif
 
 	// Create the list of all objects in the game
 	savegame.CreateObjects();

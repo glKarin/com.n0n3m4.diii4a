@@ -1,9 +1,14 @@
 #ifdef _DENTONMOD
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
+#ifdef _HARDCORPS
+#include "idlib/precompiled.h"
+#endif
 #include "Game_local.h"
+#include "Entity.h"
+#include "renderer/ModelManager.h"
+#include "SmokeParticles.h"
+
+#include "tracer.h"
 
 /*
 ===============================================================================

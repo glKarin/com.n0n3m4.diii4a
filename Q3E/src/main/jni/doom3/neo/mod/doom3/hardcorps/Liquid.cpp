@@ -1,9 +1,15 @@
 #ifdef _WATER_PHYSICS
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
+#ifdef _HARDCORPS
+#include "idlib/precompiled.h"
+#endif
 #include "Game_local.h"
+
+#include "physics/Physics_Actor.h"
+#include "physics/Physics_AF.h"
+#include "SmokeParticles.h"
+
+#include "Liquid.h"
 
 // We do these splashes if the mass of the colliding object is less than these values.
 // Anything large than MEDIUM_SPLASH does a large splash. (get it?)

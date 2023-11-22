@@ -29,6 +29,17 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_PROJECTILE_H__
 #define __GAME_PROJECTILE_H__
 
+#include "physics/Physics_RigidBody.h"
+#include "physics/Force_Constant.h"
+#include "Entity.h"
+
+#ifdef _DENTONMOD
+#include "tracer.h"
+#ifndef _DENTONMOD_PROJECTILE_CPP
+#define _DENTONMOD_PROJECTILE_CPP
+#endif
+#endif
+
 //ivan start
 //#define PROJECTILE_SIDECOLLISIONS
 //ivan end

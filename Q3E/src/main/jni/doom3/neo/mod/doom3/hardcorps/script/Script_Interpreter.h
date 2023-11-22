@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SCRIPT_INTERPRETER_H__
 #define __SCRIPT_INTERPRETER_H__
 
+#include "script/Script_Program.h"
+#include "Entity.h"
+#include "Game_local.h"
+
 class idThread;
 
 #define MAX_STACK_DEPTH	64

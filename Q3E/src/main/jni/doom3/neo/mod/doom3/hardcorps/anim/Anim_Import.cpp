@@ -26,12 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/Licensee.h"
+#include "MayaImport/maya_main.h"
 
-#include "../Game_local.h"
+#include "gamesys/SysCvar.h"
+#include "Game_local.h"
 
-#include "../../MayaImport/maya_main.h"
+#include "anim/Anim.h"
 
 /***********************************************************************
 
@@ -131,7 +133,7 @@ void idModelExport::LoadMayaDll( void ) {
 	exporterDLLEntry_t	dllEntry;
 	char				dllPath[ MAX_OSPATH ];
 
-	fileSystem->FindDLL( "MayaImport", dllPath, false );
+	fileSystem->FindDLL( "MayaImport", dllPath );
 	if ( !dllPath[ 0 ] ) {
 		return;
 	}
