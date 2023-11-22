@@ -16,7 +16,7 @@ public enum Game
     DOOM3_HARDCORPS(Q3EGlobals.GAME_DOOM3, "hardcorps", "hardcorps", "", true, R.string.hardcorps_hardcorps),
 
     DOOM3_OVERTHINKED(Q3EGlobals.GAME_DOOM3, "overthinked", "overthinked", "", true, "Overthinked(overthinked)"),
-    DOOM3_SABOT(Q3EGlobals.GAME_DOOM3, "sabot", "sabot", "d3xp", true, "SABot(sabot)"),
+    DOOM3_SABOT(Q3EGlobals.GAME_DOOM3, "sabot", "sabot", "d3xp", true, "SABot-a7x(sabot)"),
     DOOM3_HEXENEOC(Q3EGlobals.GAME_DOOM3, "hexeneoc", "hexeneoc", "", true, "HexenEOC(hexeneoc)"),
     DOOM3_FRAGGINGFREE(Q3EGlobals.GAME_DOOM3, "fraggingfree", "fraggingfree", "d3xp", true, "Fragging-Free(fraggingfree)"),
 
