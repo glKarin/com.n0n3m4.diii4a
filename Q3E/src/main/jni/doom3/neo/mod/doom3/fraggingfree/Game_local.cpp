@@ -618,7 +618,11 @@ void idGameLocal::SaveGame( idFile *f ) {
 		f->ForceFlush();
 	}
 
-	savegame.WriteBuildNumber( DHEWM3_BUILD_NUMBER ); //karin
+#ifdef _FRAGGINGFREE
+	savegame.WriteBuildNumber( DHEWM3_BUILD_NUMBER );
+#else
+	savegame.WriteBuildNumber( BUILD_NUMBER );
+#endif
 
 	// DG: add some more information to savegame to make future quirks easier
 	savegame.WriteInt( INTERNAL_SAVEGAME_VERSION ); // to be independent of BUILD_NUMBER

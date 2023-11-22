@@ -48,7 +48,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // if set to 1 the server sends the client PVS with snapshots and the client compares against what it sees
 #ifndef ASYNC_WRITE_PVS
-#define ASYNC_WRITE_PVS 0
+	#define ASYNC_WRITE_PVS 0
 #endif
 
 // the "gameversion" client command will print this plus compile date

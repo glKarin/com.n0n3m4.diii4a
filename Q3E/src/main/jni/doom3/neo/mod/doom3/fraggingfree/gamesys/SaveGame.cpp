@@ -770,7 +770,11 @@ idSaveGame::WriteBuildNumber
 ======================
 */
 void idSaveGame::WriteBuildNumber( const int value ) {
-	file->WriteInt( DHEWM3_BUILD_NUMBER ); //karin
+#ifdef _FRAGGINGFREE
+	file->WriteInt( DHEWM3_BUILD_NUMBER );
+#else
+	file->WriteInt( BUILD_NUMBER );
+#endif
 }
 
 /***********************************************************************

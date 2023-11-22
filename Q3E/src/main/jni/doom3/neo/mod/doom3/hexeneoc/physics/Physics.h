@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,6 +28,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifndef __PHYSICS_H__
 #define __PHYSICS_H__
+
+#include "idlib/BitMsg.h"
+
+#include "gamesys/Class.h"
+#include "physics/Clip.h"
+#include "GameBase.h"
 
 /*
 ===============================================================================
@@ -65,128 +71,126 @@ If you have questions concerning this license or the applicable additional terms
 
 class idEntity;
 
-typedef struct impactInfo_s
-{
-    float						invMass;			// inverse mass
-    idMat3						invInertiaTensor;	// inverse inertia tensor
-    idVec3						position;			// impact position relative to center of mass
-    idVec3						velocity;			// velocity at the impact position
+typedef struct impactInfo_s {
+	float						invMass;			// inverse mass
+	idMat3						invInertiaTensor;	// inverse inertia tensor
+	idVec3						position;			// impact position relative to center of mass
+	idVec3						velocity;			// velocity at the impact position
 } impactInfo_t;
 
 
-class idPhysics : public idClass
-{
+class idPhysics : public idClass {
 
 public:
-    ABSTRACT_PROTOTYPE(idPhysics);
+	ABSTRACT_PROTOTYPE( idPhysics );
 
-    virtual						~idPhysics(void);
-    static int					SnapTimeToPhysicsFrame(int t);
+	virtual						~idPhysics( void );
+	static int					SnapTimeToPhysicsFrame( int t );
 
-    // Must not be virtual
-    void						Save(idSaveGame *savefile) const;
-    void						Restore(idRestoreGame *savefile);
+	// Must not be virtual
+	void						Save( idSaveGame *savefile ) const;
+	void						Restore( idRestoreGame *savefile );
 
 // HEXEN : Zeroth
 public:
-    idVec3					TransitionFromGravity;
-    idVec3					TransitionToGravity;
-    int						curTransition;
-    float					nextTransition;
+	idVec3					TransitionFromGravity;
+	idVec3					TransitionToGravity;
+	int						curTransition;
+	float					nextTransition;
 
 public:	// common physics interface
-    // set pointer to entity using physics
-    virtual void				SetSelf(idEntity *e) = 0;
-    // clip models
-    virtual void				SetClipModel(idClipModel *model, float density, int id = 0, bool freeOld = true) = 0;
-    virtual void				SetClipBox(const idBounds &bounds, float density);
-    virtual idClipModel 		*GetClipModel(int id = 0) const = 0;
-    virtual int					GetNumClipModels(void) const = 0;
-    // get/set the mass of a specific clip model or the whole physics object
-    virtual void				SetMass(float mass, int id = -1) = 0;
-    virtual float				GetMass(int id = -1) const = 0;
-    // get/set the contents of a specific clip model or the whole physics object
-    virtual void				SetContents(int contents, int id = -1) = 0;
-    virtual int					GetContents(int id = -1) const = 0;
-    // get/set the contents a specific clip model or the whole physics object collides with
-    virtual void				SetClipMask(int mask, int id = -1) = 0;
-    virtual int					GetClipMask(int id = -1) const = 0;
-    // get the bounds of a specific clip model or the whole physics object
-    virtual const idBounds 	&GetBounds(int id = -1) const = 0;
-    virtual const idBounds 	&GetAbsBounds(int id = -1) const = 0;
-    // evaluate the physics with the given time step, returns true if the object moved
-    virtual bool				Evaluate(int timeStepMSec, int endTimeMSec) = 0;
-    // update the time without moving
-    virtual void				UpdateTime(int endTimeMSec) = 0;
-    // get the last physics update time
-    virtual int					GetTime(void) const = 0;
-    // collision interaction between different physics objects
-    virtual void				GetImpactInfo(const int id, const idVec3 &point, impactInfo_t *info) const = 0;
-    virtual void				ApplyImpulse(const int id, const idVec3 &point, const idVec3 &impulse) = 0;
-    virtual void				AddForce(const int id, const idVec3 &point, const idVec3 &force) = 0;
-    virtual void				Activate(void) = 0;
-    virtual void				PutToRest(void) = 0;
-    virtual bool				IsAtRest(void) const = 0;
-    virtual int					GetRestStartTime(void) const = 0;
-    virtual bool				IsPushable(void) const = 0;
-    // save and restore the physics state
-    virtual void				SaveState(void) = 0;
-    virtual void				RestoreState(void) = 0;
-    // set the position and orientation in master space or world space if no master set
-    virtual void				SetOrigin(const idVec3 &newOrigin, int id = -1) = 0;
-    virtual void				SetAxis(const idMat3 &newAxis, int id = -1) = 0;
-    // translate or rotate the physics object in world space
-    virtual void				Translate(const idVec3 &translation, int id = -1) = 0;
-    virtual void				Rotate(const idRotation &rotation, int id = -1) = 0;
-    // get the position and orientation in world space
-    virtual const idVec3 		&GetOrigin(int id = 0) const = 0;
-    virtual const idMat3 		&GetAxis(int id = 0) const = 0;
-    // set linear and angular velocity
-    virtual void				SetLinearVelocity(const idVec3 &newLinearVelocity, int id = 0) = 0;
-    virtual void				SetAngularVelocity(const idVec3 &newAngularVelocity, int id = 0) = 0;
-    // get linear and angular velocity
-    virtual const idVec3 		&GetLinearVelocity(int id = 0) const = 0;
-    virtual const idVec3 		&GetAngularVelocity(int id = 0) const = 0;
-    // gravity
-    virtual void				SetGravity(const idVec3 &newGravity) = 0;
-    virtual const idVec3 		&GetGravity(void) const = 0;
-    virtual const idVec3 		&GetGravityNormal(void) const = 0;
-    // get first collision when translating or rotating this physics object
-    virtual void				ClipTranslation(trace_t &results, const idVec3 &translation, const idClipModel *model) const = 0;
-    virtual void				ClipRotation(trace_t &results, const idRotation &rotation, const idClipModel *model) const = 0;
-    virtual int					ClipContents(const idClipModel *model) const = 0;
-    // disable/enable the clip models contained by this physics object
-    virtual void				DisableClip(void) = 0;
-    virtual void				EnableClip(void) = 0;
-    // link/unlink the clip models contained by this physics object
-    virtual void				UnlinkClip(void) = 0;
-    virtual void				LinkClip(void) = 0;
-    // contacts
-    virtual bool				EvaluateContacts(void) = 0;
-    virtual int					GetNumContacts(void) const = 0;
-    virtual const contactInfo_t &GetContact(int num) const = 0;
-    virtual void				ClearContacts(void) = 0;
-    virtual void				AddContactEntity(idEntity *e) = 0;
-    virtual void 				RemoveContactEntity(idEntity *e) = 0;
-    // ground contacts
-    virtual bool				HasGroundContacts(void) const = 0;
-    virtual bool				IsGroundEntity(int entityNum) const = 0;
-    virtual bool				IsGroundClipModel(int entityNum, int id) const = 0;
-    // set the master entity for objects bound to a master
-    virtual void				SetMaster(idEntity *master, const bool orientated = true) = 0;
-    // set pushed state
-    virtual void				SetPushed(int deltaTime) = 0;
-    virtual const idVec3 		&GetPushedLinearVelocity(const int id = 0) const = 0;
-    virtual const idVec3 		&GetPushedAngularVelocity(const int id = 0) const = 0;
-    // get blocking info, returns NULL if the object is not blocked
-    virtual const trace_t 		*GetBlockingInfo(void) const = 0;
-    virtual idEntity 			*GetBlockingEntity(void) const = 0;
-    // movement end times in msec for reached events at the end of predefined motion
-    virtual int					GetLinearEndTime(void) const = 0;
-    virtual int					GetAngularEndTime(void) const = 0;
-    // networking
-    virtual void				WriteToSnapshot(idBitMsgDelta &msg) const = 0;
-    virtual void				ReadFromSnapshot(const idBitMsgDelta &msg) = 0;
+								// set pointer to entity using physics
+	virtual void				SetSelf( idEntity *e ) = 0;
+								// clip models
+	virtual void				SetClipModel( idClipModel *model, float density, int id = 0, bool freeOld = true ) = 0;
+	virtual void				SetClipBox( const idBounds &bounds, float density );
+	virtual idClipModel *		GetClipModel( int id = 0 ) const = 0;
+	virtual int					GetNumClipModels( void ) const = 0;
+								// get/set the mass of a specific clip model or the whole physics object
+	virtual void				SetMass( float mass, int id = -1 ) = 0;
+	virtual float				GetMass( int id = -1 ) const = 0;
+								// get/set the contents of a specific clip model or the whole physics object
+	virtual void				SetContents( int contents, int id = -1 ) = 0;
+	virtual int					GetContents( int id = -1 ) const = 0;
+								// get/set the contents a specific clip model or the whole physics object collides with
+	virtual void				SetClipMask( int mask, int id = -1 ) = 0;
+	virtual int					GetClipMask( int id = -1 ) const = 0;
+								// get the bounds of a specific clip model or the whole physics object
+	virtual const idBounds &	GetBounds( int id = -1 ) const = 0;
+	virtual const idBounds &	GetAbsBounds( int id = -1 ) const = 0;
+								// evaluate the physics with the given time step, returns true if the object moved
+	virtual bool				Evaluate( int timeStepMSec, int endTimeMSec ) = 0;
+								// update the time without moving
+	virtual void				UpdateTime( int endTimeMSec ) = 0;
+								// get the last physics update time
+	virtual int					GetTime( void ) const = 0;
+								// collision interaction between different physics objects
+	virtual void				GetImpactInfo( const int id, const idVec3 &point, impactInfo_t *info ) const = 0;
+	virtual void				ApplyImpulse( const int id, const idVec3 &point, const idVec3 &impulse ) = 0;
+	virtual void				AddForce( const int id, const idVec3 &point, const idVec3 &force ) = 0;
+	virtual void				Activate( void ) = 0;
+	virtual void				PutToRest( void ) = 0;
+	virtual bool				IsAtRest( void ) const = 0;
+	virtual int					GetRestStartTime( void ) const = 0;
+	virtual bool				IsPushable( void ) const = 0;
+								// save and restore the physics state
+	virtual void				SaveState( void ) = 0;
+	virtual void				RestoreState( void ) = 0;
+								// set the position and orientation in master space or world space if no master set
+	virtual void				SetOrigin( const idVec3 &newOrigin, int id = -1 ) = 0;
+	virtual void				SetAxis( const idMat3 &newAxis, int id = -1 ) = 0;
+								// translate or rotate the physics object in world space
+	virtual void				Translate( const idVec3 &translation, int id = -1 ) = 0;
+	virtual void				Rotate( const idRotation &rotation, int id = -1 ) = 0;
+								// get the position and orientation in world space
+	virtual const idVec3 &		GetOrigin( int id = 0 ) const = 0;
+	virtual const idMat3 &		GetAxis( int id = 0 ) const = 0;
+								// set linear and angular velocity
+	virtual void				SetLinearVelocity( const idVec3 &newLinearVelocity, int id = 0 ) = 0;
+	virtual void				SetAngularVelocity( const idVec3 &newAngularVelocity, int id = 0 ) = 0;
+								// get linear and angular velocity
+	virtual const idVec3 &		GetLinearVelocity( int id = 0 ) const = 0;
+	virtual const idVec3 &		GetAngularVelocity( int id = 0 ) const = 0;
+								// gravity
+	virtual void				SetGravity( const idVec3 &newGravity ) = 0;
+	virtual const idVec3 &		GetGravity( void ) const = 0;
+	virtual const idVec3 &		GetGravityNormal( void ) const = 0;
+								// get first collision when translating or rotating this physics object
+	virtual void				ClipTranslation( trace_t &results, const idVec3 &translation, const idClipModel *model ) const = 0;
+	virtual void				ClipRotation( trace_t &results, const idRotation &rotation, const idClipModel *model ) const = 0;
+	virtual int					ClipContents( const idClipModel *model ) const = 0;
+								// disable/enable the clip models contained by this physics object
+	virtual void				DisableClip( void ) = 0;
+	virtual void				EnableClip( void ) = 0;
+								// link/unlink the clip models contained by this physics object
+	virtual void				UnlinkClip( void ) = 0;
+	virtual void				LinkClip( void ) = 0;
+								// contacts
+	virtual bool				EvaluateContacts( void ) = 0;
+	virtual int					GetNumContacts( void ) const = 0;
+	virtual const contactInfo_t &GetContact( int num ) const = 0;
+	virtual void				ClearContacts( void ) = 0;
+	virtual void				AddContactEntity( idEntity *e ) = 0;
+	virtual void				RemoveContactEntity( idEntity *e ) = 0;
+								// ground contacts
+	virtual bool				HasGroundContacts( void ) const = 0;
+	virtual bool				IsGroundEntity( int entityNum ) const = 0;
+	virtual bool				IsGroundClipModel( int entityNum, int id ) const = 0;
+								// set the master entity for objects bound to a master
+	virtual void				SetMaster( idEntity *master, const bool orientated = true ) = 0;
+								// set pushed state
+	virtual void				SetPushed( int deltaTime ) = 0;
+	virtual const idVec3 &		GetPushedLinearVelocity( const int id = 0 ) const = 0;
+	virtual const idVec3 &		GetPushedAngularVelocity( const int id = 0 ) const = 0;
+								// get blocking info, returns NULL if the object is not blocked
+	virtual const trace_t *		GetBlockingInfo( void ) const = 0;
+	virtual idEntity *			GetBlockingEntity( void ) const = 0;
+								// movement end times in msec for reached events at the end of predefined motion
+	virtual int					GetLinearEndTime( void ) const = 0;
+	virtual int					GetAngularEndTime( void ) const = 0;
+								// networking
+	virtual void				WriteToSnapshot( idBitMsgDelta &msg ) const = 0;
+	virtual void				ReadFromSnapshot( const idBitMsgDelta &msg ) = 0;
 };
 
 #endif /* !__PHYSICS_H__ */

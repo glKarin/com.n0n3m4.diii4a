@@ -256,7 +256,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
     #elif defined(_SABOT)
         #include "../mod/doom3/sabot/Game.h"
     #elif defined(_FRAGGINGFREE)
-        #include "../d3xp/Game.h"
+        #include "../framework/Game.h"
     #else
         #include "../d3xp/Game.h"
     #endif
@@ -280,7 +280,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
     #elif defined(_OVERTHINKED)
         #include "../mod/doom3/overthinked/Game.h"
     #elif defined(_HEXENEOC)
-        #include "../mod/doom3/hexeneoc/Game.h"
+        #include "../framework/Game.h"
     #else
         #include "../game/Game.h"
     #endif

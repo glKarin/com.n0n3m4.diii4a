@@ -9,8 +9,9 @@ with the projectile.
 ===============================================================================
 */
 
-#include "../idlib/precompiled.h" //karin
-
+#ifdef _FRAGGINGFREE
+#include "../idlib/precompiled.h"
+#endif
 #include "tracer.h"
 #include "renderer/ModelManager.h"
 #include "SmokeParticles.h"

@@ -826,6 +826,8 @@ extern const float	DEFAULT_GRAVITY;
 extern const idVec3	DEFAULT_GRAVITY_VEC3;
 extern const int	CINEMATIC_SKIP_DELAY;
 
-#include "Sound.h" //karin
+#ifdef _FRAGGINGFREE
+#include "Sound.h"
+#endif
 
 #endif	/* !__GAME_LOCAL_H__ */

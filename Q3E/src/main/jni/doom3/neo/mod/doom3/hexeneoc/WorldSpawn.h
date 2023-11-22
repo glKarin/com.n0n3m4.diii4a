@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_WORLDSPAWN_H__
 #define __GAME_WORLDSPAWN_H__
 
+#include "Entity.h"
+
 /*
 ===============================================================================
 
@@ -37,20 +39,19 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-class idWorldspawn : public idEntity
-{
+class idWorldspawn : public idEntity {
 public:
-    CLASS_PROTOTYPE(idWorldspawn);
+	CLASS_PROTOTYPE( idWorldspawn );
 
-    ~idWorldspawn();
+					~idWorldspawn();
 
-    void			Spawn(void);
+	void			Spawn( void );
 
-    void			Save(idRestoreGame *savefile);
-    void			Restore(idRestoreGame *savefile);
+	void			Save( idRestoreGame *savefile );
+	void			Restore( idRestoreGame *savefile );
 
 private:
-    void			Event_Remove(void);
+	void			Event_Remove( void );
 };
 
 #endif /* !__GAME_WORLDSPAWN_H__ */
