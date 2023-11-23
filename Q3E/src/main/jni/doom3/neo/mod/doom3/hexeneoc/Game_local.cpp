@@ -514,6 +514,7 @@ void idGameLocal::SaveGame( idFile *f ) {
 
 #ifdef _HEXENEOC
 	savegame.WriteBuildNumber( DHEWM3_BUILD_NUMBER );
+
 #else
 	savegame.WriteBuildNumber( BUILD_NUMBER );
 #endif
@@ -1349,10 +1350,12 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 
 	savegame.ReadBuildNumber();
 
+#if !defined(_HEXENEOC) //karin: bug. this int32 not write here
 	// a number to signify which release the save file belons to. this
 	// way we can make save games compatible with newer releases of 
 	int eocnum;
 	savegame.ReadInt( eocnum );
+#endif
 
 	// DG: I enhanced the information in savegames a bit for dhewm3 1.5.1
 	//     for which I bumped th BUILD_NUMBER to 1305
@@ -1383,6 +1386,13 @@ bool idGameLocal::InitFromSaveGame( const char *mapName, idRenderWorld *renderWo
 		// it can be used for quirks for (then-) old savegames
 	}
 	// DG end
+
+#ifdef _HEXENEOC //karin: bug. this int32 write here
+	// a number to signify which release the save file belons to. this
+	// way we can make save games compatible with newer releases of
+	int eocnum;
+	savegame.ReadInt( eocnum );
+#endif
 
 	// Create the list of all objects in the game
 	savegame.CreateObjects();
