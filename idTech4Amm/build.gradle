@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdk 30
     buildToolsVersion '30.0.3'
+    ndkVersion '23.2.8568313'
     //compileOptions.encoding "gbk"
 
     /* not AIDE */
@@ -10,7 +11,7 @@ android {
         debug {
             v1SigningEnabled true
             v2SigningEnabled true
-            storeFile file('F:\\qobj\\droid\\DIII4A\\idtech4amm.keystore')
+            storeFile file('../idtech4amm.keystore')
             storePassword '741953'
             keyAlias 'idtech4amm'
             keyPassword '741953'
@@ -18,7 +19,7 @@ android {
         release {
             v1SigningEnabled true
             v2SigningEnabled true
-            storeFile file('F:\\qobj\\droid\\DIII4A\\idtech4amm.keystore')
+            storeFile file('../idtech4amm.keystore')
             storePassword '741953'
             keyAlias 'idtech4amm'
             keyPassword '741953'
@@ -27,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId "com.karin.idTech4Amm"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 30
         versionCode 11035
         versionName '1.1.0harmattan35'
@@ -40,6 +41,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
         }
     }
     lintOptions {
