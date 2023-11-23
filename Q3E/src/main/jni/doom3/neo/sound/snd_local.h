@@ -798,6 +798,52 @@ typedef struct {
 	bool			stereo;
 } openalSource_t;
 
+#ifdef _RAVEN
+// { 0 Hangar }
+typedef struct rvReverbItem_s
+{
+	int areaNum;
+	idStr efxName;
+} rvReverbItem_t;
+
+//karin: Quake4 no `efx` file for every maps, it only has a `default.efx`, but every maps have `reverb` config file in `maps/<map_name>.reverb`, it has `area` to `efx reverb name`'s map.
+class rvMapReverb
+{
+public:
+	rvMapReverb(void);
+	virtual					~rvMapReverb(void);
+
+	rvReverbItem_t & operator[](int index) {
+		return items[index];
+	}
+
+	int Num() const {
+		return items.Num();
+	}
+
+	const char * GetName() const {
+		return fileName.c_str();
+	}
+
+	int Append(int area, const char *name, bool over = false);
+	bool LoadFile(const char *fileName, bool OSPath = false );
+	bool LoadMap(const char *mapName, const char *filterName = NULL);
+	static idStr GetMapFileName(const char *mapName, const char *filterName = NULL);
+	int GetAreaIndex(int area) const;
+	void UnloadFile(void) { Clear(); }
+	void Clear(void);
+
+private:
+	void Init(void);
+	bool ParseReverb(idLexer &src);
+	bool ParseItem(idLexer &src, rvReverbItem_t &item) const;
+
+private:
+	idList<rvReverbItem_t> items;
+	idStr fileName;
+};
+#endif
+
 class idSoundSystemLocal : public idSoundSystem
 {
 	public:
@@ -883,7 +929,39 @@ class idSoundSystemLocal : public idSoundSystem
 			GetSoundWorldFromId(worldId)->ReadFromSaveGame(savefile);
 		}
 	virtual void			ResetListener( void ) { }
+
+	virtual void			ListActiveSounds( int worldId ) { (void)worldId; }
+
+	virtual size_t			ListSoundSummary( void ) { return 0; }
+
+	virtual bool			HasCache( void ) const { return false; }
+	virtual rvCommonSample	*FindSample( const idStr &filename ) { (void)filename; return NULL; }
+	virtual void *			AllocSoundSample( int size ) { (void)size; return NULL; }
+	virtual void			FreeSoundSample( const byte *address ) { (void)address; }
+
+	virtual bool			GetInsideLevelLoad( void ) const { return false; }
+	virtual	bool			ValidateSoundShader( idSoundShader *shader ) { (void)shader; return false; };
+
+// jscott: voice comm support
+	virtual	bool			EnableRecording( bool enable, bool test, float &micLevel ) { (void)enable; (void)test; (void)micLevel; return false; };
+	virtual int				GetVoiceData( byte *buffer, int maxSize ) { (void)buffer; (void)maxSize; return 0; };
+	virtual void			PlayVoiceData( int clientNum, const byte *buffer, int bytes ) { (void)clientNum; (void)buffer; (void)bytes; };
+	virtual void			BufferVoiceData( void ) { };
+	virtual void			MixVoiceData( float *finalMixBuffer, int numSpeakers, int newTime ) { (void)finalMixBuffer; (void)numSpeakers; (void)newTime; };
+// ddynerman: voice comm utility
+	virtual	int				GetCommClientNum( int channel ) const { (void)channel; return 0; };
+	virtual int				GetNumVoiceChannels( void ) const { return 0; };
+
+// jscott: reverb editor support
+	virtual	const char		*GetReverbName( int reverb );
+	virtual	int				GetNumAreas( void );
+	virtual	int				GetReverb( int area );
+	virtual	bool			SetReverb( int area, const char *reverbName, const char *fileName );
 	virtual void			EndCinematic() { }
+
+private:
+	rvMapReverb reverb;
+public:
 #endif
 
 #ifdef _HUMANHEAD

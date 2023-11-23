@@ -594,6 +594,9 @@ void idSoundSystemLocal::Shutdown()
 #ifdef _OPENAL
 	// EAX or not, the list needs to be cleared
 	EFXDatabase.Clear();
+#ifdef _RAVEN
+	reverb.Clear();
+#endif
 
 	// destroy openal sources
 	if (useOpenAL) {
@@ -1358,6 +1361,9 @@ void idSoundSystemLocal::BeginLevelLoad()
 		efxloaded = false;
 	}
 #endif
+#ifdef _RAVEN
+	reverb.UnloadFile();
+#endif
 }
 
 /*
@@ -1401,6 +1407,15 @@ void idSoundSystemLocal::EndLevelLoad(const char *mapstring)
 		}
 #endif
 	}
+#ifdef _RAVEN //karin: load Quake4 <map>.reverb
+	if(efxloaded)
+	{
+		if(reverb.LoadMap(mapstring))
+			common->Printf("sound: map reverb file load success: %s\n", (const char *)rvMapReverb::GetMapFileName(mapstring));
+		else
+			common->Warning("sound: map reverb file load fail: %s", (const char *)rvMapReverb::GetMapFileName(mapstring));
+	}
+#endif
 #endif
 }
 
@@ -1745,6 +1760,193 @@ int idSoundSystemLocal::IsEAXAvailable(void)
 }
 
 #ifdef _RAVEN
+rvMapReverb::rvMapReverb(void)
+{
+}
+
+rvMapReverb::~rvMapReverb(void)
+{
+}
+
+void rvMapReverb::Init(void)
+{
+	Clear();
+}
+
+// { 0 Hangar }
+bool rvMapReverb::ParseItem(idLexer &src, rvReverbItem_t &item) const
+{
+	if(!src.ExpectTokenString("{"))
+		return false;
+	item.areaNum = src.ParseInt();
+	idToken name;
+	src.ReadToken(&name);
+	item.efxName = name;
+	if(!src.ExpectTokenString("}"))
+		return false;
+	return true;
+}
+
+bool rvMapReverb::LoadFile(const char *filename, bool OSPath )
+{
+	Init();
+	idLexer	src;
+	src.LoadFile( filename, OSPath );
+	if ( !src.IsLoaded() ) {
+		return false;
+	}
+	fileName = filename;
+	src.SetFlags(DECL_LEXER_FLAGS);
+
+	return ParseReverb(src);
+}
+
+bool rvMapReverb::ParseReverb(idLexer &src)
+{
+	idToken token;
+	src.SkipUntilString("{");
+
+	while (!src.EndOfFile()) {
+		if (!src.ReadToken(&token)) {
+			break;
+		}
+
+		if (!token.Icmp("}")) {
+			break;
+		}
+
+		if (token.Icmp("{")) {
+			items.Clear();
+			return false;
+		}
+
+		src.UnreadToken(&token);
+		rvReverbItem_t item;
+		if(!ParseItem(src, item))
+		{
+			items.Clear();
+			return false;
+		}
+		EFXprintf("Quake4 map EFX: read area %d -> %s\n", item.areaNum, item.efxName.c_str());
+		items.Append(item);
+	}
+	EFXprintf("Quake4 map EFX: load areas %d\n", items.Num());
+
+	return true;
+}
+
+int rvMapReverb::Append(int area, const char *name, bool over)
+{
+	int index;
+
+	index = GetAreaIndex(area);
+	if(index >= 0)
+	{
+		rvReverbItem_t &item = items[index];
+		if(!over)
+		{
+			common->Warning("Area %d has exists with efx name %s", area, item.efxName.c_str());
+			return false;
+		}
+		else
+		{
+			item.efxName = name;
+			return true;
+		}
+	}
+	else
+	{
+		rvReverbItem_t item;
+		item.areaNum = area;
+		item.efxName = name;
+		items.Append(item);
+		return true;
+	}
+}
+
+bool rvMapReverb::LoadMap(const char *mapName, const char *filterName)
+{
+	idStr filename = GetMapFileName(mapName, filterName);
+	EFXprintf("Quake4 map EFX: load reverb file %s -> %s\n", mapName, filename.c_str());
+	return LoadFile(filename);
+}
+
+idStr rvMapReverb::GetMapFileName(const char *mapName, const char *filterName)
+{
+	(void)filterName;
+	idStr name;
+
+	// maps/game/air2.reverb
+	name += "maps";
+	name.AppendPath(mapName);
+	name.SetFileExtension(".reverb");
+
+	return name;
+}
+
+int rvMapReverb::GetAreaIndex(int area) const
+{
+	for(int i = 0; i < items.Num(); i++)
+	{
+		if(items[i].areaNum == area)
+			return i;
+	}
+	return -1;
+}
+
+void rvMapReverb::Clear(void)
+{
+	fileName = "";
+	items.Clear();
+}
+
+
+
+/*
+===============
+idSoundSystemLocal::GetReverbName
+ Get reverb efx name by index
+===============
+*/
+const char * idSoundSystemLocal::GetReverbName( int reverb )
+{
+	return reverb >= 0 && reverb < this->reverb.Num() ? this->reverb[reverb].efxName.c_str() : "";
+}
+
+/*
+===============
+idSoundSystemLocal::GetNumAreas
+ Get num of areas
+===============
+*/
+int idSoundSystemLocal::GetNumAreas( void )
+{
+	return this->reverb.Num();
+}
+
+/*
+===============
+idSoundSystemLocal::GetReverb
+ Get index of area
+===============
+*/
+int idSoundSystemLocal::GetReverb( int area )
+{
+	return this->reverb.GetAreaIndex(area);
+}
+
+/*
+===============
+idSoundSystemLocal::SetReverb
+===============
+*/
+bool idSoundSystemLocal::SetReverb( int area, const char *reverbName, const char *fileName )
+{
+	if(idStr::Icmp(this->reverb.GetName(), fileName))
+		return false;
+	return this->reverb.Append(area, reverbName);
+}
+
 /*
 ===============
 idSoundSystemLocal::GetSoundWorldFromId

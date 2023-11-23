@@ -571,6 +571,26 @@ void idSoundWorldLocal::MixLoop(int current44kHz, int numSpeakers, float *finalM
 			s = "default";
 			found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
 		}
+#ifdef _RAVEN
+		//karin: Quake4's reverb area config in `maps/<map>.reverb` file.
+		if (!found) {
+			int reverbIndex = soundSystemLocal.GetReverb(listenerArea);
+			if(reverbIndex >= 0)
+			{
+				s = soundSystemLocal.GetReverbName(reverbIndex);
+				EFXprintf("Quake4 map EFX: area %d -> '%s'\n", reverbIndex, s.c_str());
+				if(s && s[0])
+				{
+					found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
+				}
+			}
+		}
+		//karin: Quake4 has `Generic` reverb
+		if (!found) {
+			s = "Generic";
+			found = soundSystemLocal.EFXDatabase.FindEffect(s, &effect);
+		}
+#endif
 
 		// only update if change in settings
 		if (found && listenerEffect != effect) {
