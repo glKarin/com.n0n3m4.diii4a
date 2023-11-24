@@ -5,7 +5,7 @@
 #include "Game_local.h"
 #include "Item.h"
 #include "Player.h"
-#include "gameSys/SysCvar.h"
+#include "gamesys/SysCvar.h"
 
 int idPlayer::FindArtifact( int art ) {
 	for (int belt=0; belt<Artifact.Num(); belt++) {
