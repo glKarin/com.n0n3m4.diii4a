@@ -1410,10 +1410,11 @@ void idSoundSystemLocal::EndLevelLoad(const char *mapstring)
 #ifdef _RAVEN //karin: load Quake4 <map>.reverb
 	if(efxloaded)
 	{
-		if(reverb.LoadMap(mapstring))
-			common->Printf("sound: map reverb file load success: %s\n", (const char *)rvMapReverb::GetMapFileName(mapstring));
+		int num = reverb.LoadMap(mapstring);
+		if(num >= 0)
+			common->Printf("sound: map reverb file '%s' load success: %d\n", (const char *)rvMapReverb::GetMapFileName(mapstring), num);
 		else
-			common->Warning("sound: map reverb file load fail: %s", (const char *)rvMapReverb::GetMapFileName(mapstring));
+			common->Warning("sound: map reverb file '%s' load fail!", (const char *)rvMapReverb::GetMapFileName(mapstring));
 	}
 #endif
 #endif
@@ -1835,7 +1836,7 @@ bool rvMapReverb::ParseReverb(idLexer &src)
 	return true;
 }
 
-int rvMapReverb::Append(int area, const char *name, bool over)
+bool rvMapReverb::Append(int area, const char *name, bool over)
 {
 	int index;
 
@@ -1864,11 +1865,14 @@ int rvMapReverb::Append(int area, const char *name, bool over)
 	}
 }
 
-bool rvMapReverb::LoadMap(const char *mapName, const char *filterName)
+int rvMapReverb::LoadMap(const char *mapName, const char *filterName)
 {
 	idStr filename = GetMapFileName(mapName, filterName);
 	EFXprintf("Quake4 map EFX: load reverb file %s -> %s\n", mapName, filename.c_str());
-	return LoadFile(filename);
+	if(LoadFile(filename))
+		return items.Num();
+	else
+		return -1;
 }
 
 idStr rvMapReverb::GetMapFileName(const char *mapName, const char *filterName)

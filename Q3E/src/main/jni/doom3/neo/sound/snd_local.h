@@ -825,9 +825,9 @@ public:
 		return fileName.c_str();
 	}
 
-	int Append(int area, const char *name, bool over = false);
+	bool Append(int area, const char *name, bool over = false);
 	bool LoadFile(const char *fileName, bool OSPath = false );
-	bool LoadMap(const char *mapName, const char *filterName = NULL);
+	int LoadMap(const char *mapName, const char *filterName = NULL);
 	static idStr GetMapFileName(const char *mapName, const char *filterName = NULL);
 	int GetAreaIndex(int area) const;
 	void UnloadFile(void) { Clear(); }
