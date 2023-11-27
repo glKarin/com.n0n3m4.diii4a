@@ -245,7 +245,7 @@
     <string name="extract_source">Извлечь ресурсы</string>
     <string name="tips">Советы</string>
     <string name="license">Лицензия</string>
-    <string name="maximum_fps_limit_0_unlimited">Максимальный придел FPS (cvar `harm_r_maxFPS`)</string>
+    <string name="maximum_fps_limit_0_unlimited">Максимальный предел FPS (cvar `harm_r_maxFPS`)</string>
     <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (0 = неограниченный)</string>
     <string name="edit_cvar">Редактор CVar</string>
     <string name="cvar_editor">CVar редактор</string>
