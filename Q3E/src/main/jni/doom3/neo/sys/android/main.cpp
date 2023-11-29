@@ -618,6 +618,7 @@ float analogx=0.0f;
 float analogy=0.0f;
 int analogenabled=0;
 FILE *f_stdout = NULL;
+FILE *f_stderr = NULL;
 
 // APK's native library path on Android.
 char *native_library_dir = NULL;
@@ -899,6 +900,22 @@ static void Q3E_StopGameMainThread(void)
 	Sys_Printf("[Harmattan]: doom3 main thread quit.\n");
 }
 
+static void doom3_exit(void)
+{
+	Sys_Printf("[Harmattan]: doom3 exit.\n");
+
+	if(f_stdout != NULL)
+	{
+		fclose(f_stdout);
+		f_stdout = NULL;
+	}
+	if(f_stderr != NULL)
+	{
+		fclose(f_stderr);
+		f_stderr = NULL;
+	}
+}
+
 int main(int argc, const char **argv)
 {
 	::argc = argc;
@@ -912,13 +929,16 @@ int main(int argc, const char **argv)
 	{
 		f_stdout = freopen("stdout.txt","w",stdout);
 		setvbuf(stdout, NULL, _IONBF, 0);
-		freopen("stderr.txt","w",stderr);
+		f_stderr = freopen("stderr.txt","w",stderr);
 		setvbuf(stderr, NULL, _IONBF, 0);
 	}
 
 	Q3E_PrintInitialContext();
 
 	Q3E_StartGameMainThread();
+
+	atexit(doom3_exit);
+
 	return 0;
 }
 

@@ -28,6 +28,7 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.Q3EUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -496,6 +497,17 @@ public final class ContextUtility
         }
         else
             return null;
+    }
+
+    public static boolean IsInAppPrivateDirectory(Context context, String path)
+    {
+        final String appPath = Q3EUtils.GetAppStoragePath(context, null);
+        if(path.startsWith("/sdcard"))
+        {
+            int i = appPath.indexOf("/Android/data");
+            path = appPath.substring(0, i) + path.substring("/sdcard".length());
+        }
+        return path.startsWith(appPath);
     }
 
 	private ContextUtility() {}

@@ -1260,6 +1260,11 @@ public class GameLauncher extends Activity
 			ChangeGame();
 			return true;
 		}
+		/*else if (itemId == R.id.main_menu_move_game_data)
+		{
+			MoveGameDataToAppPrivateDirectory();
+			return true;
+		}*/
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -2190,10 +2195,41 @@ public class GameLauncher extends Activity
 			radio.setChecked(!value.is_mod);
 		}
 	}
-
 	private void SetupCommandLine(boolean readonly)
 	{
 		UIUtility.EditText__SetReadOnly(V.edt_cmdline, readonly, InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+	}
+
+	private void MoveGameDataToAppPrivateDirectory()
+	{
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String src = preferences.getString(Q3EPreference.pref_datapath, default_gamedata);
+		if(!new File(src).isDirectory())
+		{
+			Toast.makeText(this, "Current game data path is not a directory", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(ContextUtility.IsInAppPrivateDirectory(this, src))
+		{
+			Toast.makeText(this, "Do not need move", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		String target = Q3EUtils.GetAppStoragePath(this, "/diii4a");
+		if(new File(target).exists())
+		{
+			Toast.makeText(this, "Target path exists: " + target, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(FileUtility.mv(src, target))
+		{
+			preferences.edit().putString(Q3EPreference.pref_datapath, target).commit();
+			V.edt_path.setText(target);
+			Toast.makeText(this, "Game data is " + target + " now", Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Toast.makeText(this, "Move game data to app directory fail!", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 

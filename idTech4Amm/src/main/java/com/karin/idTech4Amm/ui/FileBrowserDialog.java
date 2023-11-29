@@ -79,7 +79,7 @@ public class FileBrowserDialog extends AlertDialog {
         m_listener = l;
         return this;
     }
-    
+
     private void SetPath(String path)
     {
         m_path = path;
@@ -102,6 +102,11 @@ public class FileBrowserDialog extends AlertDialog {
     public String File()
     {
         return m_file;
+    }
+
+    public void OpenPath(String path)
+    {
+        m_adapter.SetPath(path);
     }
 
     // internal

@@ -1,5 +1,7 @@
 package com.karin.idTech4Amm.lib;
 
+import android.util.Log;
+
 import com.karin.idTech4Amm.misc.Function;
 
 import java.io.ByteArrayOutputStream;
@@ -10,6 +12,12 @@ import java.io.Closeable;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Local file IO utility
@@ -249,6 +257,62 @@ public final class FileUtility
         {
             e.printStackTrace();
             return a.getAbsolutePath();
+        }
+    }
+
+    public static boolean mv(String src, String target)
+    {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+        {
+            try
+            {
+                Path srcPath = Paths.get(src);
+                Path targetPath = Paths.get(target);
+                if(Files.isDirectory(srcPath))
+                {
+                    Files.walk(srcPath).forEach((x) -> {
+                        File file = x.toFile();
+                        String relativePath = file.getAbsolutePath().substring(src.length());
+                        Path targetP = Paths.get(target + relativePath);
+                        try
+                        {
+                            if(Files.isDirectory(x))
+                            {
+                                Files.createDirectories(targetP);
+                            }
+                            else
+                            {
+                                Files.move(x, targetP/*, StandardCopyOption.REPLACE_EXISTING*/);
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+                else
+                    Files.move(srcPath, targetPath/*, StandardCopyOption.REPLACE_EXISTING*/);
+                return true;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        else
+        {
+            File srcFile = new File(src);
+            try
+            {
+                return srcFile.renameTo(new File(target));
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return false;
+            }
         }
     }
     

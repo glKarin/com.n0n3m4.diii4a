@@ -36,21 +36,23 @@
 
 #define LOG_TAG "Q3E_JNI"
 
-// call DOOM3
-void (*setResolution)(int width, int height);
-void (*Q3E_SetInitialContext)(const void *context);
-void (*setCallbacks)(const void *func);
-void (*set_gl_context)(ANativeWindow *window);
+#define JNI_Version JNI_VERSION_1_4
 
-int  (*qmain)(int argc, char **argv);
-void (*onFrame)();
-void (*onKeyEvent)(int state, int key,int chr);
-void (*onAnalog)(int enable, float x, float y);
-void (*onMotionEvent)(float x, float y);
-void (*vidRestart)();
-void (*on_pause)(void);
-void (*on_resume)(void);
-void (*qexit)(void);
+// call DOOM3
+static void (*setResolution)(int width, int height);
+static void (*Q3E_SetInitialContext)(const void *context);
+static void (*setCallbacks)(const void *func);
+static void (*set_gl_context)(ANativeWindow *window);
+
+static int  (*qmain)(int argc, char **argv);
+static void (*onFrame)();
+static void (*onKeyEvent)(int state, int key,int chr);
+static void (*onAnalog)(int enable, float x, float y);
+static void (*onMotionEvent)(float x, float y);
+static void (*vidRestart)();
+static void (*on_pause)(void);
+static void (*on_resume)(void);
+static void (*qexit)(void);
 
 // Android function
 static void pull_input_event(int execCmd);
@@ -61,7 +63,8 @@ static char * get_clipboard_text(void);
 
 // data
 static char *game_data_dir = NULL;
-static char *audio_track_buffer = NULL;
+static char *arg_str = NULL;
+// static char *audio_track_buffer = NULL;
 
 static void *libdl;
 static ANativeWindow *window = NULL;
@@ -77,10 +80,10 @@ static jmethodID android_GrabMouse_method;
 static jmethodID android_CopyToClipboard_method;
 static jmethodID android_GetClipboardText_method;
 
-jmethodID android_initAudio;
-jmethodID android_writeAudio;
-jmethodID android_setState;
-jmethodID android_writeAudio_direct;
+static jmethodID android_initAudio;
+static jmethodID android_writeAudio;
+static jmethodID android_setState;
+static jmethodID android_writeAudio_direct;
 
 static void Android_AttachThread(void)
 {
@@ -206,6 +209,7 @@ void setState(int state)
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_setState, state);
 }
 
+#if 0
 void initAudio_direct(void *buffer, int size)
 {
 	JNIEnv *env;
@@ -243,6 +247,27 @@ int writeAudio_direct(int offset, int length)
 	int r = (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio_direct, jbuf, offset, length);
 	return r;
 }
+#endif
+
+static void q3e_exit(void)
+{
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Q3E JNI exit");
+	if(game_data_dir)
+	{
+		free(game_data_dir);
+		game_data_dir = NULL;
+	}
+	if(arg_str)
+	{
+		free(arg_str);
+		arg_str = NULL;
+	}
+	if(libdl)
+	{
+		dlclose(libdl);
+		libdl = NULL;
+	}
+}
 
 int JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -254,7 +279,32 @@ int JNI_OnLoad(JavaVM* vm, void* reserved)
         return -1;
     }
 
-    return JNI_VERSION_1_4;
+	atexit(q3e_exit);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "JNI loaded %d", JNI_Version);
+
+    return JNI_Version;
+}
+
+void JNI_OnUnload(JavaVM *vm, void *reserved)
+{
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "JNI unload");
+	JNIEnv *env;
+	if((*vm)->GetEnv(vm, (void**) &env, JNI_Version) != JNI_OK)
+	{
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "JNI unload error");
+		if(q3eCallbackObj)
+		{
+			(*env)->DeleteGlobalRef(env, q3eCallbackObj);
+			q3eCallbackObj = NULL;
+		}
+		if(audioBuffer)
+		{
+			(*env)->DeleteGlobalRef(env, audioBuffer);
+			audioBuffer = NULL;
+		}
+	}
+	jVM = NULL;
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "JNI unload done");
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env, jclass c, jobject obj)
@@ -397,9 +447,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 
 	const char *arg = (*env)->GetStringUTFChars(env, Cmdline, &iscopy);
 	argv = malloc(sizeof(char*) * 255);
-    char *arg_str = strdup(arg);
-	argc = ParseCommandLine(arg_str, argv);	
-    //free(arg_str); //TODO: not free
+    arg_str = strdup(arg);
+	argc = ParseCommandLine(arg_str, argv);
 	(*env)->ReleaseStringUTFChars(env, Cmdline, arg);    
 	
 	const char *engineLibPath = (*env)->GetStringUTFChars(env, LibPath, &iscopy);
