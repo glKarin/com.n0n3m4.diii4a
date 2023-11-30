@@ -2023,7 +2023,7 @@ void hhPlayer::UpdateFocus( void ) {
 			continue;
 		}
 
-		pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), start, end /*, interactiveMask*/ ); // jamrshall
+		pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), start, end , interactiveMask );
 
 		if ( ent->fl.accurateGuiTrace ) {
 			trace_t tr;

@@ -7342,7 +7342,7 @@ void idPlayer::UpdateFocus( void ) {
 				focusBracketsTime = gameLocal.time + 2000;
 			}
 		}
-#ifdef _QUAKE4 //k: focus gui, because calc 2d coord before this, so add harm_2d_calc for mark
+#ifdef _QUAKE4xxx //k: focus gui, because calc 2d coord before this, so add harm_2d_calc for mark // NOT used in game code now, logic move to renderer/tr_guisurf.cpp
 		if(focusBrackets->GetStateBool("harm_2d_calc"))
 		{
 			focusBrackets->SetStateBool ( "harm_2d_calc", false );

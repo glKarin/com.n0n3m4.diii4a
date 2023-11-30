@@ -38,6 +38,61 @@ GUI SHADERS
 ==========================================================================================
 */
 
+#ifdef _RAVEN
+/*
+================
+R_CalcGuiRange
+
+Calculates gui surface range in window coordinates
+================
+*/
+void R_CalcGuiRangeInWindow(idUserInterface *gui, const srfTriangles_t *tri, const float defModelMatrix[16])
+{
+	if (tri->silEdges && tri->verts && tr.primaryView) {
+		idScreenRect	r;
+		idVec3			v;
+		idVec3			ndc;
+		float			windowX, windowY;
+		const int viewportWidth = 640;
+		const int viewportHeight = 480;
+
+		r.Clear();
+		idDrawVert *ac = (idDrawVert *)tri->verts;
+		int danglePlane = tri->numIndexes / 3;
+		for (int j = 0 ; j < tri->numSilEdges ; j++) {
+			const silEdge_t			*edge = tri->silEdges + j;
+			if (edge->p1 != danglePlane && edge->p2 != danglePlane) {
+				continue;
+			}
+
+			float *ptr = ac[ edge->v1 ].xyz.ToFloatPtr();
+			R_LocalPointToGlobal(defModelMatrix, idVec3(ptr[0], ptr[1], ptr[2]), v);
+			R_GlobalToNormalizedDeviceCoordinates(v, ndc);
+
+			windowX = 0.5f * (1.0f + ndc[0]) * viewportWidth;
+			windowY = 0.5f * (1.0f + ndc[1]) * viewportHeight;
+
+			r.AddPoint(windowX, windowY);
+
+			ptr = ac[ edge->v2 ].xyz.ToFloatPtr();
+			R_LocalPointToGlobal(defModelMatrix, idVec3(ptr[0], ptr[1], ptr[2]), v);
+			R_GlobalToNormalizedDeviceCoordinates(v, ndc);
+
+			windowX = 0.5f * (1.0f + ndc[0]) * viewportWidth;
+			windowY = 0.5f * (1.0f + ndc[1]) * viewportHeight;
+
+			r.AddPoint(windowX, windowY);
+		}
+
+		r.Expand();
+
+		gui->SetStateInt("2d_min_x", r.x1);
+		gui->SetStateInt("2d_min_y", viewportHeight - r.y2);
+		gui->SetStateInt("2d_max_x", r.x2);
+		gui->SetStateInt("2d_max_y", viewportHeight - r.y1);
+	}
+}
+#endif
 /*
 ================
 R_SurfaceToTextureAxis
@@ -178,6 +233,24 @@ void R_RenderGuiSurf(idUserInterface *gui, drawSurf_t *drawSurf)
 
 	tr.guiRecursionLevel++;
 
+#ifdef _RAVEN //karin: player focus GUI with brackets
+	if(gui->State().GetBool( "2d_calc" )) // mark in idPlayer::UpdateFocus
+	{
+		if(gui->State().GetBool( "harm_2d_calc" )) // mark in idRenderWorldLocal::GuiTrace
+		{
+			const srfTriangles_t	*tri;
+			const float *defModelMatrix = drawSurf->space->modelMatrix;
+
+			tri = drawSurf->geo; //tri = drawSurf->origGeo;
+
+			R_CalcGuiRangeInWindow(gui, tri, defModelMatrix);
+			// reset mark
+			gui->SetStateBool ( "harm_2d_calc", false );
+			// In game code, setup false for idPlayer::DrawHUD will render focus brackets
+			gui->SetStateBool ( "2d_calc", false );
+		}
+	}
+#endif
 	// call the gui, which will call the 2D drawing functions
 	tr.guiModel->Clear();
 	gui->Redraw(tr.viewDef->renderView.time);

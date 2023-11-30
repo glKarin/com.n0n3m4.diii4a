@@ -297,7 +297,11 @@ class idRenderWorldLocal : public idRenderWorld
 		void					CreateLightDefInteractions(idRenderLightLocal *ldef);
 #ifdef _HUMANHEAD
 #if _HH_RENDERDEMO_HACKS
-	virtual void			DemoSmokeEvent(const idDeclParticle *smoke, const int systemTimeOffset, const float diversity, const idVec3 &origin, const idMat3 &axis) { (void)smoke; (void)systemTimeOffset; (void) diversity; (void)origin; (void)axis; }
+		virtual void			DemoSmokeEvent(const idDeclParticle *smoke, const int systemTimeOffset, const float diversity, const idVec3 &origin, const idMat3 &axis) { (void)smoke; (void)systemTimeOffset; (void) diversity; (void)origin; (void)axis; }
+		virtual guiPoint_t		GuiTrace( qhandle_t entityHandle, const idVec3 start, const idVec3 end, int interactiveMask ) const {
+			(void)interactiveMask;
+			return GuiTrace(entityHandle, start, end);
+		}
 #endif
 
 #if DEATHWALK_AUTOLOAD
