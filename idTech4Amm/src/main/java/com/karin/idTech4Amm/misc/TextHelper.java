@@ -180,7 +180,7 @@ public final class TextHelper
                 null,
             "For playing Prey(2006)(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
-            " *. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.",
+            " *. Some problems solution: e.g. using cvar `harm_ui_translateAlienFont` to translate Alien text on GUI.",
             " *. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).",
             " *. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.",
             "  bind \"Your key of spirit walk\" \"_impulse54\"",

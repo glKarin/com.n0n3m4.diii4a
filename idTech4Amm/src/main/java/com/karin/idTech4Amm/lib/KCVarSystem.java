@@ -78,11 +78,12 @@ public final class KCVarSystem
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)
                 .AddCVar(
-                KCVar.CreateCVar("harm_g_translateAlienFont", "string", "fonts", "Setup font name for automatic translate `alien` font text of GUI(empty to disable)", 0,
+                KCVar.CreateCVar("harm_ui_translateAlienFont", "string", "fonts", "Setup font name for automatic translate `alien` font text of GUI(empty to disable)", 0,
                         "fonts", "fonts",
                         "fonts/menu", "fonts/menu",
                         "\"\"", "Disable"
-                    )
+                    ),
+                    KCVar.CreateCVar("harm_ui_translateAlienFontDistance", "float", "200", "Setup max distance of GUI to view origin for enable translate `alien` font text(0 to disable, -1 to always)", 0)
                 );
 
         _cvars.put("RENDERER", RENDERER_CVARS);

@@ -53,8 +53,8 @@ void R_CalcGuiRangeInWindow(idUserInterface *gui, const srfTriangles_t *tri, con
 		idVec3			v;
 		idVec3			ndc;
 		float			windowX, windowY;
-		const int viewportWidth = 640;
-		const int viewportHeight = 480;
+		const int viewportWidth = SCREEN_WIDTH;
+		const int viewportHeight = SCREEN_HEIGHT;
 
 		r.Clear();
 		idDrawVert *ac = (idDrawVert *)tri->verts;
@@ -186,6 +186,14 @@ Create a texture space on the given surface and
 call the GUI generator to create quads for it.
 =================
 */
+#ifdef _HUMANHEAD //karin: auto translate alien text
+const char	*harm_ui_translateAlienFontArgs[]	= {
+	"fonts",
+	"fonts/menu",
+	NULL };
+static idCVar harm_ui_translateAlienFont( "harm_ui_translateAlienFont", harm_ui_translateAlienFontArgs[0], CVAR_GUI | CVAR_ARCHIVE, "[Harmattan]: Setup font name for automitic translate `alien` font text of GUI(empty to disable).", idCmdSystem::ArgCompletion_String<harm_ui_translateAlienFontArgs> );
+static idCVar harm_ui_translateAlienFontDistance( "harm_ui_translateAlienFontDistance", "200", CVAR_GUI | CVAR_FLOAT | CVAR_ARCHIVE, "[Harmattan]: Setup max distance of GUI to view origin for enable translate `alien` font text(0 to disable, -1 to always)." ); //karin: initial distance see in prey/Prey/game_player.cpp::UpdateFocus is 70(for interactive GUI)
+#endif
 void R_RenderGuiSurf(idUserInterface *gui, drawSurf_t *drawSurf)
 {
 	idVec3	origin, axis[3];
@@ -248,6 +256,22 @@ void R_RenderGuiSurf(idUserInterface *gui, drawSurf_t *drawSurf)
 			gui->SetStateBool ( "harm_2d_calc", false );
 			// In game code, setup false for idPlayer::DrawHUD will render focus brackets
 			gui->SetStateBool ( "2d_calc", false );
+		}
+	}
+#endif
+
+#ifdef _HUMANHEAD //karin: auto translate alien text
+	if(tr.primaryRenderView.viewID)
+	{
+		const char *translateAlienFont = harm_ui_translateAlienFont.GetString();
+		if ( translateAlienFont && translateAlienFont[0] && harm_ui_translateAlienFontDistance.GetFloat() != 0.0f ) {
+			if(harm_ui_translateAlienFontDistance.GetFloat() < 0.0f)
+				gui->Translate(translateAlienFont);
+			else // > 0
+			{
+				if((tr.primaryRenderView.vieworg - idVec3(/*drawSurf->space->*/modelMatrix[12], /*drawSurf->space->*/modelMatrix[13], /*drawSurf->space->*/modelMatrix[14])).LengthFast() <= harm_ui_translateAlienFontDistance.GetFloat())
+					gui->Translate(translateAlienFont);
+			}
 		}
 	}
 #endif

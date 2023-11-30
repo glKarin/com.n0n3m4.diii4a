@@ -1891,13 +1891,6 @@ the focus and sending it a mouse move event
 	PDMMERGE PERSISTENTMERGE: Overridden, Done for 6-03-05 merge
 ================
 */
-#ifdef _PREY //k: auto translate alien text
-const char	*harm_g_translateAlienFontArgs[]	= {
-	"fonts", 
-	"fonts/menu", 
-	NULL };
-static idCVar harm_g_translateAlienFont( "harm_g_translateAlienFont", harm_g_translateAlienFontArgs[0], CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: Setup font name for automitic translate `alien` font text of GUI(empty to disable).", idCmdSystem::ArgCompletion_String<harm_g_translateAlienFontArgs> );
-#endif
 void hhPlayer::UpdateFocus( void ) {
 	idClipModel *clipModelList[ MAX_GENTITIES ];
 	idClipModel *clip;
@@ -1968,30 +1961,6 @@ void hhPlayer::UpdateFocus( void ) {
 
 	listedClipModels = gameLocal.clip.ClipModelsTouchingBounds( bounds, -1, clipModelList, MAX_GENTITIES );
 
-#ifdef _PREY //k: auto translate alien text
-	const char *translateAlienFont = harm_g_translateAlienFont.GetString();
-	const bool translateAlien = translateAlienFont && translateAlienFont[0];
-
-#if 0 //lvonasek: Prey - Alien text translation logic fixed
-	if (talon.IsValid() && translateAlienFont && translateAlienFont[0]) {
-		for ( auto e : gameLocal.entities ) {
-			if ( !e || e->IsHidden() ) {
-				continue;
-			}
-
-			renderEntity_t *renderEnt = e->GetRenderEntity();
-			if ( renderEnt ) {
-				for (int ix=0; ix<MAX_RENDERENTITY_GUI; ix++) {
-					if (renderEnt->gui[ix] && ((talon->GetOrigin() - renderEnt->origin).Length() < 200)) {
-						renderEnt->gui[ix]->Translate(translateAlienFont);
-					}
-				}
-			}
-		}
-	}
-#endif
-#endif
-
 	// no pretense at sorting here, just assume that there will only be one active
 	// gui within range along the trace
 	for ( i = 0; i < listedClipModels; i++ ) {
@@ -2010,13 +1979,6 @@ void hhPlayer::UpdateFocus( void ) {
 				if (renderEnt->gui[ix] && renderEnt->gui[ix]->IsInteractive()) {
 					interactiveMask |= (1<<ix);
 				}
-#ifdef _PREY //k: auto translate alien text
-#if 1
-				if ( renderEnt->gui[ix] && translateAlien ) {
-					renderEnt->gui[ix]->Translate(translateAlienFont);
-				}
-#endif
-#endif
 			}
 		}
 		if (!interactiveMask) {
