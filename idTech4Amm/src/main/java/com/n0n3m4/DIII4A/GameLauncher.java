@@ -38,6 +38,7 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -1040,6 +1041,27 @@ public class GameLauncher extends Activity
         Q3EAd.LoadAds(this);
 
         OpenUpdate();
+
+		try
+		{
+			Intent intent = getIntent();
+			if(null != intent)
+			{
+				Bundle extras = intent.getExtras();
+				if(null != extras)
+				{
+					String intentGame = extras.getString("game");
+					if(null != intentGame && !intentGame.isEmpty())
+					{
+						ChangeGame(intentGame);
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
     }
 
     @Override

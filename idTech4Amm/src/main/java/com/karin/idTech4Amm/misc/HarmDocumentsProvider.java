@@ -1,4 +1,4 @@
-package com.karin.idTech4Amm;
+package com.karin.idTech4Amm.misc;
 
 import android.annotation.TargetApi;
 import android.content.res.AssetFileDescriptor;
@@ -12,6 +12,8 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.webkit.MimeTypeMap;
+
+import com.karin.idTech4Amm.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
