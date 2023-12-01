@@ -265,5 +265,7 @@
     <string name="_sound">Звук</string>
     <string name="using_openal">Использовать OpenAL(Мягкий)(cvar `s_useOpenAL`)</string>
     <string name="using_efx_reverb">Использовать EFX реверберацию(cvar `s_useEAXReverb`)</string>
+    <string name="internal_storage">Internal storage</string>
+    <string name="external_storage">External storage</string>
 
 </resources>

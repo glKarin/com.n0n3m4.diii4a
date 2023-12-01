@@ -7,7 +7,7 @@
 **Arch:**
 arm64 armv7-a  
 **Platform:**
-Android 4.1+  
+Android 4.4+  
 **License:**
 GPLv3
 

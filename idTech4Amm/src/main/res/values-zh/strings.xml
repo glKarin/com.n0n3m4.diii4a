@@ -264,4 +264,6 @@
     <string name="_sound">声音</string>
     <string name="using_openal">启用OpenAL(soft)(cvar `s_useOpenAL`)</string>
     <string name="using_efx_reverb">启用EFX混响(cvar `s_useEAXReverb`)</string>
+    <string name="internal_storage">内部存储</string>
+    <string name="external_storage">外部存储</string>
 </resources>

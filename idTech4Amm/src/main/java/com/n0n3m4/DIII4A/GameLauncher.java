@@ -143,7 +143,7 @@ public class GameLauncher extends Activity
 	private ExtractSourceFunc m_extractSourceFunc;
 	private ChooseGameModFunc m_chooseGameModFunc;
 
-    final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
+    public static final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
     private boolean m_cmdUpdateLock = false;
     private final CompoundButton.OnCheckedChangeListener m_checkboxChangeListener = new CompoundButton.OnCheckedChangeListener()

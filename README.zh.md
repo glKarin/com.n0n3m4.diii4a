@@ -7,7 +7,7 @@
 **架构支持:**
 arm64 armv7-a  
 **平台:**
-Android 4.0+  
+Android 4.4+  
 **许可证:**
 GPLv3
 

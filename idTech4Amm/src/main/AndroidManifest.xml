@@ -82,5 +82,39 @@
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
+
+        <provider
+            android:name="com.karin.idTech4Amm.AndroidDataDocumentsProvider"
+            android:authorities="com.karin.idTech4Amm.android.data.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
+        <provider
+            android:name="com.karin.idTech4Amm.DataUserDocumentsProvider"
+            android:authorities="com.karin.idTech4Amm.data.user.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
+        <provider
+            android:name="com.karin.idTech4Amm.DIII4ADocumentsProvider"
+            android:authorities="com.karin.idTech4Amm.diii4a.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
     </application>    
 </manifest> 

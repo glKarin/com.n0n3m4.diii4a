@@ -1,40 +1,40 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 30
-    buildToolsVersion '30.0.3'
-    ndkVersion '23.2.8568313'
+    compileSdk project.properties.compileSdkVersion.toInteger()
+    buildToolsVersion project.properties.buildToolsVersion
+    ndkVersion project.properties.ndkVersion
     //compileOptions.encoding "gbk"
+
+    defaultConfig {
+        applicationId "com.karin.idTech4Amm"
+        minSdkVersion project.properties.minSdkVersion.toInteger()
+        targetSdkVersion project.properties.targetSdkVersion.toInteger()
+        versionCode 11035
+        versionName '1.1.0harmattan35'
+        versionNameSuffix 'natasha'
+        buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
+        buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
+    }
 
     /* not AIDE */
     signingConfigs {
         debug {
             v1SigningEnabled true
             v2SigningEnabled true
-            storeFile file('../idtech4amm.keystore')
-            storePassword '741953'
-            keyAlias 'idtech4amm'
-            keyPassword '741953'
+            storeFile file(project.properties.storeFile)
+            storePassword project.properties.storePassword
+            keyAlias project.properties.idtech4amm
+            keyPassword project.properties.keyPassword
         }
         release {
             v1SigningEnabled true
             v2SigningEnabled true
-            storeFile file('../idtech4amm.keystore')
-            storePassword '741953'
-            keyAlias 'idtech4amm'
-            keyPassword '741953'
+            storeFile file(project.properties.storeFile)
+            storePassword project.properties.storePassword
+            keyAlias project.properties.idtech4amm
+            keyPassword project.properties.keyPassword
         }
-    }
-
-    defaultConfig {
-        applicationId "com.karin.idTech4Amm"
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 11035
-        versionName '1.1.0harmattan35'
-        versionNameSuffix 'natasha'
-        buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
-        buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
     }
 
     buildTypes {
