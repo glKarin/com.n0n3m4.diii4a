@@ -24,7 +24,7 @@ android {
             v2SigningEnabled true
             storeFile file(project.properties.storeFile)
             storePassword project.properties.storePassword
-            keyAlias project.properties.idtech4amm
+            keyAlias project.properties.keyAlias
             keyPassword project.properties.keyPassword
         }
         release {
@@ -32,7 +32,7 @@ android {
             v2SigningEnabled true
             storeFile file(project.properties.storeFile)
             storePassword project.properties.storePassword
-            keyAlias project.properties.idtech4amm
+            keyAlias project.properties.keyAlias
             keyPassword project.properties.keyPassword
         }
     }
