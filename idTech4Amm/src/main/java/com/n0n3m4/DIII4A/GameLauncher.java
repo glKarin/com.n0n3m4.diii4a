@@ -1038,12 +1038,17 @@ public class GameLauncher extends Activity
 
         updatehacktings();
 
-        Q3EAd.LoadAds(this);
+		AfterCreated();
+    }
 
-        OpenUpdate();
-
+	private void AfterCreated()
+	{
 		try
 		{
+			Q3EAd.LoadAds(this);
+
+			OpenUpdate();
+
 			Intent intent = getIntent();
 			if(null != intent)
 			{
@@ -1062,7 +1067,7 @@ public class GameLauncher extends Activity
 		{
 			e.printStackTrace();
 		}
-    }
+	}
 
     @Override
     protected void onDestroy()
