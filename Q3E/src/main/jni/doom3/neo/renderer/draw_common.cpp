@@ -725,7 +725,8 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		RB_BindVariableStageImage(&pStage->texture, regs);
 
 		// set the state
-		if (r_noLight.GetBool())
+#ifdef _NO_LIGHT
+		if (r_noLight.GetBool() || shader->IsNoLight())
 		{
 			if (pStage->drawStateBits!=9000)
 				GL_State(pStage->drawStateBits);
@@ -738,9 +739,8 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			}
 		}
 		else
-		{
-			GL_State(pStage->drawStateBits);
-		}
+#endif
+		GL_State(pStage->drawStateBits);
 
 		RB_PrepareStageTexturing(pStage, surf, ac);
 
@@ -1558,7 +1558,9 @@ void	RB_STD_DrawView(void)
 	// main light renderer
 	qglEnable(GL_BLEND);
 
+#ifdef _NO_LIGHT
 	if (!r_noLight.GetBool())
+#endif
 		RB_GLSL_DrawInteractions();
 
 	// disable stencil shadow test

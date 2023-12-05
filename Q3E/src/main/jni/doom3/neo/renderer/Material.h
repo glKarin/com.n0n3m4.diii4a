@@ -816,6 +816,9 @@ class idMaterial : public idDecl
 	subviewClass_t		GetSubviewClass( void) const { return subviewClass; }
 	int					GetDirectPortalDistance() const { return directPortalDistance; } // HUMANHEAD CJR:  direct render portal distance cull
 #endif
+#ifdef _NO_LIGHT
+		bool IsNoLight(void) const { return noLight; }
+#endif
 
 	private:
 		// parse the entire material
@@ -937,6 +940,9 @@ class idMaterial : public idDecl
 		bool				suppressInSubview;
 		bool				portalSky;
 		int					refCount;
+#ifdef _NO_LIGHT
+		bool 				noLight;
+#endif
 };
 
 typedef idList<const idMaterial *> idMatList;

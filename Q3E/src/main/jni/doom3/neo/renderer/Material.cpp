@@ -119,6 +119,9 @@ void idMaterial::CommonInit()
 	subviewClass = SC_MIRROR;
 	directPortalDistance = -1;
 #endif
+#ifdef _NO_LIGHT
+	noLight = false;
+#endif
 
 	decalInfo.stayTime = 10000;
 	decalInfo.fadeTime = 4000;
@@ -2663,6 +2666,11 @@ void idMaterial::ParseMaterial(idLexer &src)
 			continue;
 #undef _SURFTYPE
 #endif
+#ifdef _NO_LIGHT
+		} else if (!token.Icmp("noLight")) {
+			noLight = true;
+			continue;
+#endif
 		} else if (token == "{") {
 			// create the new stage
 			ParseStage(src, trpDefault);
@@ -2898,27 +2906,30 @@ bool idMaterial::Parse(const char *text, const int textLength)
 		}
 	}
 
-	if (r_noLight.GetBool())
+#ifdef _NO_LIGHT
+	if (r_noLight.GetBool() || noLight)
 	{
-	int bumpcnt=0;
-	
-	for (i = 0 ; i < numStages ; i++) {
-		if (pd->parseStages[i].lighting == SL_BUMP) {
-			bumpcnt++;
-			break;
-		}
-	}
+		int bumpcnt=0;
 
-	if (bumpcnt!=0)
-	for (i = 0 ; i < numStages ; i++) {
-		if (pd->parseStages[i].lighting == SL_DIFFUSE) {
-			pd->parseStages[i].lighting = SL_AMBIENT;
-			pd->parseStages[i].drawStateBits=9000;
-			numAmbientStages++;
-			break;
+		for (i = 0 ; i < numStages ; i++) {
+			if (pd->parseStages[i].lighting == SL_BUMP) {
+				bumpcnt++;
+				break;
+			}
+		}
+
+		if (bumpcnt!=0) {
+			for (i = 0 ; i < numStages ; i++) {
+				if (pd->parseStages[i].lighting == SL_DIFFUSE) {
+					pd->parseStages[i].lighting = SL_AMBIENT;
+					pd->parseStages[i].drawStateBits=9000;
+					numAmbientStages++;
+					break;
+				}
+			}
 		}
 	}
-	}
+#endif
 
 	// add a tiny offset to the sort orders, so that different materials
 	// that have the same sort value will at least sort consistantly, instead

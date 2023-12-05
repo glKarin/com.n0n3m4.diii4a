@@ -947,7 +947,9 @@ extern idCVar r_multiSamples;			// number of antialiasing samples
 extern idCVar r_ignore;					// used for random debugging without defining new vars
 extern idCVar r_ignore2;				// used for random debugging without defining new vars
 extern idCVar r_znear;					// near Z clip plane
+#ifdef _NO_LIGHT
 extern idCVar r_noLight;				// no lighting
+#endif
 extern idCVar r_useETC1;				// ETC1 compression
 extern idCVar r_useETC1Cache;				// use ETC1 cache
 extern idCVar r_useDXT;					// DXT compression
