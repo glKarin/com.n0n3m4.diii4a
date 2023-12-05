@@ -219,6 +219,11 @@ class idRenderModelMD5 : public idRenderModelStatic
 #ifdef _RAVEN //k: for ShowSurface/HideSurface, md5 model using mesh index as mask: 1 << index, name is shader material name
 		virtual int GetSurfaceMask(const char *name) const;
 #endif
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
+public:
+	idRenderModelStatic * DynamicModelSnapshot(void) { return staticModelInstance; }
+	void ClearDynamicModelSnapshot(void) { staticModelInstance = NULL; }
+#endif
 
 	private:
 		idList<idMD5Joint>			joints;
@@ -234,7 +239,6 @@ class idRenderModelMD5 : public idRenderModelStatic
 		idList<idStr> surfaceShaderList;
 #endif
 #if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-	public:
 		idRenderModelStatic *staticModelInstance;
 #endif
 };

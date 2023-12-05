@@ -553,7 +553,7 @@ void idRenderModelMD5::LoadModel()
 	idJointMat *poseMat3;
 
 #if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-	this->staticModelInstance = 0;
+	this->staticModelInstance = NULL;
 #endif
 
 	if (!purged) {
@@ -803,7 +803,7 @@ idRenderModel *idRenderModelMD5::InstantiateDynamicModel(const struct renderEnti
 	idRenderModelStatic	*staticModel;
 
 #if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-	this->staticModelInstance = 0;
+	this->staticModelInstance = NULL;
 #endif
 
 	if (cachedModel && !r_useCachedDynamicModels.GetBool()) {
@@ -1037,7 +1037,7 @@ void idRenderModelMD5::PurgeModel()
 	defaultPose.Clear();
 	meshes.Clear();
 #if defined(_RAVEN) || defined(_HUMANHEAD) //k: md5 model ref def->dynamicModel, set to 0
-	staticModelInstance = 0;
+	staticModelInstance = NULL;
 #endif
 }
 

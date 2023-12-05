@@ -1105,7 +1105,7 @@ guiPoint_t	idRenderWorldLocal::GuiTrace(qhandle_t entityHandle, const idVec3 sta
 		idRenderModelMD5 *md5_model = dynamic_cast<idRenderModelMD5*>(model);
 		if(!md5_model)
 			return pt;
-		model = md5_model->staticModelInstance;
+		model = md5_model->DynamicModelSnapshot();
 		if(!model)
 			return pt;
 	}
