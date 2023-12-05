@@ -220,7 +220,6 @@ class idRenderModelMD5 : public idRenderModelStatic
 		virtual int GetSurfaceMask(const char *name) const;
 #endif
 #if defined(_RAVEN) || defined(_HUMANHEAD) //k: for GUI view of dynamic model in idRenderWorld::GuiTrace
-public:
 	idRenderModelStatic * DynamicModelSnapshot(void) { return staticModelInstance; }
 	void ClearDynamicModelSnapshot(void) { staticModelInstance = NULL; }
 #endif
