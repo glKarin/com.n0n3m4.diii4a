@@ -340,7 +340,7 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 		model->InitFromFile(modelName);
 #endif
 #endif
-#ifdef _HUMANHEAD //k: TODO beam model
+#ifdef _HUMANHEAD //k: beam model
 	} else if (extension.Icmp("beam") == 0) {
 		model = new hhRenderModelBeam;
 		model->InitFromFile(modelName);

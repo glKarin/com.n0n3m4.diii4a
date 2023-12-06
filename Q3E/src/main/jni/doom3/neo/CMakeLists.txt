@@ -55,13 +55,16 @@ set(DOOM3BINARY "dante")
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 
-option(CORE			"Build the core" ON)
+option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 option(DEDICATED	"Build the dedicated server" OFF)
+
+# DOOM3 cores
+option(CORE			"Build the core" ON)
+option(ONATIVE		"Optimize for the host CPU" OFF)
 option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
-option(ONATIVE		"Optimize for the host CPU" OFF)
-option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 
+# Extras functions
 option(OPENSLES			"OpenSLES support" ON)
 option(MULTITHREAD			"Multi-Thread support" ON)
 option(USING_STB			"Using stb" ON)
@@ -72,19 +75,24 @@ option(OPENGLES3			"OpenGLES3 support" ON)
 option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
 option(NO_LIGHT			"r_noLight support" ON)
 
+# DOOM3 mods
 option(D3LE			"Build the d3le game code" ON)
 option(CDOOM			"Build the cdoom game code" ON)
 option(RIVENSIN			"Build the rivensin game code" ON)
 option(HARDCORPS			"Build the hardcorps game code" ON)
-option(RAVEN_BSE_FX			"OpenBSE with Fx in Raven Quake 4" ON)
-option(QUAKE4			"Build the quake4 game code" ON)
-option(PREY			"Build the prey game code" ON)
-option(RAVEN			"Build the raven core" ON)
-option(HUMANHEAD			"Build the humanhead core" ON)
 option(OVERTHINKED			"Build the overthinked game code" ON)
 option(SABOT			"Build the sabot game code" ON)
 option(HEXENEOC			"Build the hexeneoc game code" ON)
 option(FRAGGINGFREE			"Build the fraggingfree game code" ON)
+
+# Quake4
+option(RAVEN			"Build the raven core" ON)
+option(RAVEN_BSE_FX			"OpenBSE with Fx in Raven Quake 4" ON)
+option(QUAKE4			"Build the quake4 game code" ON)
+
+# Prey 2006
+option(PREY			"Build the prey game code" ON)
+option(HUMANHEAD			"Build the humanhead core" ON)
 
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
