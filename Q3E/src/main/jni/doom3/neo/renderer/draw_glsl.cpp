@@ -161,6 +161,9 @@ ID_INLINE void GL_Color( float r, float g, float b )
 #ifdef _SHADOW_MAPPING
 #include "draw_glsl_shadowmapping.cpp"
 #endif
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#include "draw_glsl_stencilshadow.cpp"
+#endif
 
 /*
 ==================
@@ -364,6 +367,9 @@ void RB_GLSL_DrawInteractions(void)
 		}
 	}
 #endif
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+	const bool translucentStencilShadow = r_translucentStencilShadow && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
+#endif
 	//
 	// for each light, perform adding and shadowing
 	//
@@ -468,9 +474,27 @@ void RB_GLSL_DrawInteractions(void)
 #endif
 		{
             RB_StencilShadowPass(vLight->globalShadows);
-            RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+			if(translucentStencilShadow)
+			{
+				RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
+				if(r_stencilShadowAlpha < 1.0f)
+					RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, false);
+			}
+			else
+#endif
+			RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
 
 			RB_StencilShadowPass(vLight->localShadows);
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+			if(translucentStencilShadow)
+			{
+				RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
+				if(r_stencilShadowAlpha < 1.0f)
+					RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, false);
+			}
+			else
+#endif
 			RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
 		}
 
@@ -511,10 +535,12 @@ R_InitGLSLCvars
 */
 static void R_InitGLSLCvars(void)
 {
+	float f;
+
 	const char *lightModel = harm_r_lightModel.GetString();
 	r_usePhong = !(lightModel && !idStr::Icmp(HARM_INTERACTION_SHADER_BLINNPHONG, lightModel));
 
-	float f = harm_r_specularExponent.GetFloat();
+	f = harm_r_specularExponent.GetFloat();
 	if(f <= 0.0f)
 		f = 4.0f;
 	r_specularExponent = f;
@@ -545,6 +571,16 @@ static void R_InitGLSLCvars(void)
 			break;
 	}
 #endif
+
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+	r_translucentStencilShadow = harm_r_translucentStencilShadow.GetBool();
+	f = harm_r_stencilShadowAlpha.GetFloat();
+	if(f < 0.0f)
+		f = 0.0f;
+	if(f > 1.0f)
+		f = 1.0f;
+	r_stencilShadowAlpha = f;
+#endif
 }
 
 void R_CheckBackEndCvars(void)
@@ -570,6 +606,24 @@ void R_CheckBackEndCvars(void)
 	{
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
+	}
+#endif
+
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+	if(harm_r_translucentStencilShadow.IsModified())
+	{
+		r_translucentStencilShadow = harm_r_translucentStencilShadow.GetBool();
+		harm_r_translucentStencilShadow.ClearModified();
+	}
+	if(harm_r_stencilShadowAlpha.IsModified())
+	{
+		float f = harm_r_stencilShadowAlpha.GetFloat();
+		if(f < 0.0f)
+			f = 0.0f;
+		if(f > 1.0f)
+			f = 1.0f;
+		r_stencilShadowAlpha = f;
+		harm_r_stencilShadowAlpha.ClearModified();
 	}
 #endif
 }

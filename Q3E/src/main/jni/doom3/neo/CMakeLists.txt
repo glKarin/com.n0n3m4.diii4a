@@ -74,6 +74,7 @@ option(SHADOW_MAPPING			"Shadow mapping support" ON)
 option(OPENGLES3			"OpenGLES3 support" ON)
 option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
 option(NO_LIGHT			"r_noLight support" ON)
+option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" ON)
 
 # DOOM3 mods
 option(D3LE			"Build the d3le game code" ON)
@@ -323,6 +324,10 @@ endif()
 if(NO_LIGHT)
 	set(CORE_DEFINES "${CORE_DEFINES};_NO_LIGHT")
 	message(STATUS "Add r_noLight support")
+endif()
+if(TRANSLUCENT_STENCIL_SHADOW)
+	set(CORE_DEFINES "${CORE_DEFINES};_TRANSLUCENT_STENCIL_SHADOW")
+	message(STATUS "Add translucent stencil shadow support")
 endif()
 
 if(OPENAL)
