@@ -9,7 +9,7 @@
     <string name="disable_lighting">禁用光照</string>
     <string name="use_dxt_textures_tegra_only_others_no_effect">使用DXT格式纹理(仅针对tegra, 其他无影响)</string>
     <string name="use_etc1_or_rgba4444_compression">使用ETC1(或RGBA4444)压缩纹理</string>
-    <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">清理顶点缓冲区(cvar `harm_r_clearVertexBuffer`)</string>
+    <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">清理顶点缓冲区(harm_r_clearVertexBuffer)</string>
     <string name="use_etc1_or_rgba4444_cache">缓存生成的ETC1(或RGBA4444)压缩纹理文件</string>
     <string name="don_t_clear_and_do_nothing">不清理任何</string>
     <string name="it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen">原来默认行为, 可能会出现显存溢出从而引起崩溃.</string>
@@ -17,7 +17,7 @@
     <string name="if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer">如果出现显存溢出引起崩溃, 建议强制清空/删除顶点缓冲区.</string>
     <string name="force_delete_vertex_buffer_on_every_end_frame">每帧强制删除顶点缓冲区</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">同第二项, 并且强制删除顶点缓冲区对象, 可能慢, 但内存安全.</string>
-    <string name="game_cvar_fs_game">游戏(cvar `fs_game`)</string>
+    <string name="game_cvar_fs_game">游戏(fs_game)</string>
     <string name="doom_iii">毁灭战士3(base)</string>
     <string name="doom3_resurrection_of_evil_d3xp">毁灭战士3:邪恶复苏(d3xp)</string>
     <string name="classic_doom_cdoom">经典毁灭战士(cdoom)</string>
@@ -30,12 +30,12 @@
     <string name="input_your_mod_folder_name">游戏mod文件夹名称</string>
     <string name="gamelib">游戏运行库</string>
     <string name="multi_threading">多线程(渲染线程独立于游戏线程)</string>
-    <string name="light_model_cvar_harm_r_lightmodel">光照模型(cvar `harm_r_lightModel`)</string>
+    <string name="light_model_cvar_harm_r_lightmodel">光照模型(harm_r_lightModel)</string>
     <string name="phong">Phong</string>
     <string name="blinn_phong">Blinn-Phong</string>
-    <string name="specular_exponent_cvar_harm_r_specularexponent">镜面反射指数(cvar `harm_r_specularExponent`):</string>
+    <string name="specular_exponent_cvar_harm_r_specularexponent">镜面反射指数(harm_r_specularExponent):</string>
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">光照下镜面反射指数(默认 4.0)</string>
-    <string name="sound">音频实现(cvar `s_driver`)</string>
+    <string name="sound">音频实现(s_driver)</string>
     <string name="load_quicksave_when_start_game">启动游戏时自动加载快速存档</string>
     <string name="edit_autoexec_cfg">编辑 autoexec.cfg</string>
     <string name="edit_doomconfig_cfg">编辑 DoomConfig.cfg</string>
@@ -245,7 +245,7 @@
     <string name="extract_source">提取源码</string>
     <string name="tips">提示</string>
     <string name="license">开源许可证</string>
-    <string name="maximum_fps_limit_0_unlimited">最大FPS(cvar `harm_r_maxFPS`)</string>
+    <string name="maximum_fps_limit_0_unlimited">最大FPS(harm_r_maxFPS)</string>
     <string name="limit_maximum_fps_default_is_0">限制最大FPS(0 不限制)</string>
     <string name="edit_cvar">编辑CVar</string>
     <string name="cvar_editor">CVar编辑器</string>
@@ -257,13 +257,13 @@
     <string name="mod">mod</string>
     <string name="view">查看</string>
     <string name="scale_by_screen_area">如果使用比例, 则按屏幕面积的比例而不是宽高比例</string>
-    <string name="shadow_cvar_r_useShadowMapping">阴影(cvar `r_useShadowMapping`)</string>
+    <string name="shadow_cvar_r_useShadowMapping">阴影(r_useShadowMapping)</string>
     <string name="shadow_volume">Shadow volume</string>
     <string name="shadow_mapping">Shadow mapping</string>
     <string name="renderer">渲染</string>
     <string name="_sound">声音</string>
-    <string name="using_openal">启用OpenAL(soft)(cvar `s_useOpenAL`)</string>
-    <string name="using_efx_reverb">启用EFX混响(cvar `s_useEAXReverb`)</string>
+    <string name="using_openal">启用OpenAL(soft)(s_useOpenAL)</string>
+    <string name="using_efx_reverb">启用EFX混响(s_useEAXReverb)</string>
     <string name="internal_storage">内部存储</string>
     <string name="external_storage">外部存储</string>
 </resources>
