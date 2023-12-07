@@ -44,7 +44,7 @@ public:
 	idEventArg( const trace_t *data )			{ type = D_EVENT_TRACE; value = reinterpret_cast<intptr_t>( data ); };
 
 #ifdef _QUAKE4 // 64bit this can't be called from doomscript!
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(__x86_64__)
 	idEventArg(intptr_t data) { type = D_EVENT_INTEGER64bit; value = data; };
 #endif
 #endif
