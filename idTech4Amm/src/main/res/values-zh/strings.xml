@@ -245,7 +245,7 @@
     <string name="extract_source">提取源码</string>
     <string name="tips">提示</string>
     <string name="license">开源许可证</string>
-    <string name="maximum_fps_limit_0_unlimited">最大FPS(harm_r_maxFPS)</string>
+    <string name="maximum_fps_limit_0_unlimited">最大FPS(harm_r_maxFps)</string>
     <string name="limit_maximum_fps_default_is_0">限制最大FPS(0 不限制)</string>
     <string name="edit_cvar">编辑CVar</string>
     <string name="cvar_editor">CVar编辑器</string>
@@ -266,4 +266,5 @@
     <string name="using_efx_reverb">启用EFX混响(s_useEAXReverb)</string>
     <string name="internal_storage">内部存储</string>
     <string name="external_storage">外部存储</string>
+    <string name="translucent_stencil_shadow">半透明模板阴影(harm_r_translucentStencilShadow)</string>
 </resources>

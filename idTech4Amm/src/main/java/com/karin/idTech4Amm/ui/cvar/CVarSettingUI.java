@@ -25,8 +25,9 @@ public final class CVarSettingUI
                 "harm_r_lightModel",
                 "harm_r_specularExponent",
                 "harm_fs_gameLibPath",
-
-                "harm_r_shaderProgramDir",
+                "harm_r_maxFps",
+                "r_useShadowMapping",
+                "harm_r_translucentStencilShadow",
                 "harm_fs_gameLibDir",
         };
         if(Utility.ArrayContains(IgnoreCVars, cvar.name))

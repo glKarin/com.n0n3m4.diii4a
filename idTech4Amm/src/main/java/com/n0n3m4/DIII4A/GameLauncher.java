@@ -309,6 +309,13 @@ public class GameLauncher extends Activity
 						.putBoolean(PreferenceKey.READONLY_COMMAND, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_translucentStencilShadow)
+			{
+				setProp("harm_r_translucentStencilShadow", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, isChecked)
+						.commit();
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -1035,6 +1042,8 @@ public class GameLauncher extends Activity
 		V.readonly_command.setChecked(readonlyCommand);
 		SetupCommandLine(readonlyCommand);
 		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_translucentStencilShadow.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_translucentStencilShadow, false));
+		V.cb_translucentStencilShadow.setOnCheckedChangeListener(m_checkboxChangeListener);
 
         updatehacktings();
 
@@ -1429,6 +1438,7 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, V.cb_s_useEAXReverb.isChecked());
 		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, V.readonly_command.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_r_translucentStencilShadow, V.cb_translucentStencilShadow.isChecked());
 
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -2327,6 +2337,7 @@ public class GameLauncher extends Activity
 		public CheckBox cb_s_useOpenAL;
 		public CheckBox cb_s_useEAXReverb;
 		public Switch readonly_command;
+		public CheckBox cb_translucentStencilShadow;
 
         public void Setup()
         {
@@ -2393,6 +2404,7 @@ public class GameLauncher extends Activity
 			cb_s_useOpenAL = findViewById(R.id.cb_s_useOpenAL);
 			cb_s_useEAXReverb = findViewById(R.id.cb_s_useEAXReverb);
 			readonly_command = findViewById(R.id.readonly_command);
+			cb_translucentStencilShadow = findViewById(R.id.cb_translucentStencilShadow);
         }
     }
 }

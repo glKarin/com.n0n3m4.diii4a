@@ -248,7 +248,7 @@
     <string name="extract_source">Extract source</string>
     <string name="tips">Tips</string>
     <string name="license">License</string>
-    <string name="maximum_fps_limit_0_unlimited">Maximum FPS limit(harm_r_maxFPS)</string>
+    <string name="maximum_fps_limit_0_unlimited">Maximum FPS limit(harm_r_maxFps)</string>
     <string name="limit_maximum_fps_default_is_0">Limit maximum FPS(0 = unlimited)</string>
     <string name="edit_cvar">Edit CVar</string>
     <string name="cvar_editor">CVar editor</string>
@@ -269,5 +269,6 @@
     <string name="using_efx_reverb">Enable EFX Reverb(s_useEAXReverb)</string>
     <string name="internal_storage">Internal storage</string>
     <string name="external_storage">External storage</string>
+    <string name="translucent_stencil_shadow">Translucent stencil shadow(harm_r_translucentStencilShadow)</string>
 
 </resources>

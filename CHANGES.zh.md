@@ -16,7 +16,7 @@
 * 雷神之锤4移除多人游戏Bot伪客户端, 使用SABot-a9 mod替换多人游戏的bot(需要先解压资源文件).
 * 修复掠食2006的设置页面选项卡.
 * 雷神之锤4新增`full-body awareness` mod. 设置布尔型cvar `harm_pm_fullBodyAwareness`为1开启, 并且可以使用`harm_pm_fullBodyAwarenessOffset`设置视角偏移(可以调整为第三人称视角), 使用`harm_pm_fullBodyAwarenessHeadJoint`设置自定义头部关节名称(视角位置).
-* 支持限制最大(cvar `harm_r_maxFPS`).
+* 支持限制最大(cvar `harm_r_maxFps`).
 * 支持obj/dae格式静态模型, 修复png格式图片加载.
 * 新增跳过启动动画支持.
 * 新增简易CVar编辑器.

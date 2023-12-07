@@ -319,7 +319,7 @@ public final class TextHelper
                         "In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).",
                         "Fix Setting's tab GUI in Prey2006.",
                         "Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).",
-                        "Support max FPS limit(cvar `harm_r_maxFPS`).",
+                        "Support max FPS limit(cvar `harm_r_maxFps`).",
                         "Support obj/dae static model, and fix png image load.",
                         "Add skip intro support.",
                         "Add simple CVar editor.",

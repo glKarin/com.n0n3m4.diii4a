@@ -360,9 +360,7 @@
 				android:id="@+id/rg_harm_r_shadow"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:orientation="horizontal"
-				>
-
+				android:orientation="horizontal">
 				<RadioButton
 					android:id="@+id/rg_harm_r_shadow_stencil_volume"
 					android:layout_width="wrap_content"
@@ -375,8 +373,13 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="@string/shadow_mapping"/>
-
 			</RadioGroup>
+
+			<CheckBox
+				android:id="@+id/cb_translucentStencilShadow"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/translucent_stencil_shadow"/>
 
 			<com.karin.idTech4Amm.widget.Divider
 				android:layout_width="match_parent"

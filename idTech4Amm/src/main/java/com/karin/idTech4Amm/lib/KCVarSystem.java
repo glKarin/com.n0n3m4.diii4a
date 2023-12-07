@@ -20,17 +20,31 @@ public final class KCVarSystem
                                 "1", "Force clear",
                                 "2", "Force clear including shutdown"
                         ),
+                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0: Always heap; Negative: Always stack(original); Positive: Max stack memory limit)", 0),
+                        KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external OpenGLES2.0 GLSL shader program directory path", 0),
+                        KCVar.CreateCVar("harm_r_shaderProgramES3Dir", "string", "glsl3progs", "Special external OpenGLES3.0 GLSL shader program directory path", 0),
+
                         KCVar.CreateCVar("harm_r_shadowCarmackInverse", "bool", "0", "Stencil shadow using Carmack-Inverse", 0),
                         KCVar.CreateCVar("harm_r_lightModel", "string", "phong", "Light model when draw interactions", 0,
                                 "phong", "Phong",
                                 "blinn_phong", "Blinn-Phong"
                         ),
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "4.0", "Specular exponent in interaction light model", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external OpenGLES2.0 GLSL shader program directory path", 0),
-                        KCVar.CreateCVar("harm_r_shaderProgramES3Dir", "string", "glsl3progs", "Special external OpenGLES3.0 GLSL shader program directory path", 0),
-                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "524288", "Control allocate temporary memory when load model data on Android, if less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0: Always heap; Negative: Always stack(original); Positive: Max stack memory limit)", 0),
+                        KCVar.CreateCVar("harm_r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE),
+
+                        KCVar.CreateCVar("r_screenshotFormat", "integer", "0", "Screenshot format", 0,
+                        "0", "TGA (default)",
+                                "1", "BMP",
+                                "2", "PNG",
+                                "3", "JPG"
+                                ),
+                        KCVar.CreateCVar("r_screenshotJpgQuality", "integer", "75", "Screenshot quality for JPG images (0-100)", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
+
+                        KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", 0),
                         KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "0.5", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
+
                         KCVar.CreateCVar("harm_r_translucentStencilShadow", "bool", "0", "enable translucent shadow in stencil shadow", 0),
                         KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "0.5", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE)
                 );
@@ -38,7 +52,7 @@ public final class KCVarSystem
                 .AddCVar(
                     KCVar.CreateCVar("harm_fs_gameLibPath", "string", "", "Special game dynamic library", 0),
                     KCVar.CreateCVar("harm_fs_gameLibDir", "string", "", "Special game dynamic library directory path(default is empty, means using apk install libs directory path", 0),
-                    KCVar.CreateCVar("harm_com_consoleHistory", "integer", "1", "Save/load console history", 0,
+                    KCVar.CreateCVar("harm_com_consoleHistory", "integer", "2", "Save/load console history", 0,
                             "0", "disable",
                             "1", "loading in engine initialization, and saving in engine shutdown",
                             "2", "loading in engine initialization, and saving in every e executing"

@@ -245,7 +245,7 @@
     <string name="extract_source">Извлечь ресурсы</string>
     <string name="tips">Советы</string>
     <string name="license">Лицензия</string>
-    <string name="maximum_fps_limit_0_unlimited">Максимальный предел FPS (harm_r_maxFPS)</string>
+    <string name="maximum_fps_limit_0_unlimited">Максимальный предел FPS (harm_r_maxFps)</string>
     <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (0 = неограниченный)</string>
     <string name="edit_cvar">Редактор CVar</string>
     <string name="cvar_editor">CVar редактор</string>
@@ -267,5 +267,6 @@
     <string name="using_efx_reverb">Использовать EFX реверберацию(s_useEAXReverb)</string>
     <string name="internal_storage">Internal storage</string>
     <string name="external_storage">External storage</string>
+    <string name="translucent_stencil_shadow">Translucent stencil shadow(harm_r_translucentStencilShadow)</string>
 
 </resources>
