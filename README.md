@@ -11,6 +11,22 @@ Android 4.4+
 **License:**
 GPLv3
 
+----------------------------------------------------------------------------------
+### Feature
+* multi-threading renderer
+* png/dds texture image
+* jpeg/png/bmp format of screenshot
+* obj format static model
+* dae format static model
+* shadow with shadow-mapping
+* OpenGLES2.0/OpenGLES3.0
+* OpenAL(soft) and EFX Reverb
+* no-lighting rendering and no-lighting material
+* translucent stencil shadow
+* DOOM3 mods: The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
+* Quake4 and Raven's idTech4 engine
+* Prey(2006) and HumanHead's idTech4 engine
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
@@ -94,13 +110,15 @@ Tag with `-free` only for F-Droid update.
 ##### Define macro `__ANDROID__` for Android.
 > 1. _OPENSLES: Add OpenSLES support for sound.
 > 2. _MULTITHREAD: Add multithread support for rendering.
-> 3. _USING_STB: Using stb header for jpeg/png texture image support.
+> 3. _USING_STB: Using stb header for jpeg/png/dds texture image and jpeg/png/bmp screenshot support.
 > 4. _K_CLANG: If compiling by clang not GCC.
 > 5. _MODEL_OBJ: Add obj static model support.
 > 6. _MODEL_DAE: Add dae static model support.
 > 7. _SHADOW_MAPPING: Add Shadow mapping support.
 > 8. _OPENGLES3: Add OpenGLES3.0 support.
 > 9. _OPENAL _OPENAL_EFX: Add OpenAL(soft) and EFX Reverb support.
+> 10. TRANSLUCENT_STENCIL_SHADOW: Add no lighting support.
+> 11. TRANSLUCENT_STENCIL_SHADOW: Add translucent stencil shadow support.
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).

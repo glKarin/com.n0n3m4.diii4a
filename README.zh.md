@@ -11,6 +11,22 @@ Android 4.4+
 **许可证:**
 GPLv3
 
+----------------------------------------------------------------------------------
+### 支持
+* 多线程渲染
+* png/dds纹理图片加载
+* jpeg/png/bmp格式截屏
+* obj格式静态模型
+* dae格式静态模型
+* 阴影图映射阴影
+* OpenGLES2.0/OpenGLES3.0
+* OpenAL(soft)和EFX混响
+* no-lighting rendering and no-lighting material
+* 半透明模板阴影
+* 毁灭战士3 mods: The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
+* 雷神之锤4和Raven idTech4引擎
+* 掠食(2006)和HumanHead idTech4引擎
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
 height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
