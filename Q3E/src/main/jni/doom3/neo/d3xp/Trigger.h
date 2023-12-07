@@ -142,6 +142,11 @@ class idTrigger_EntityName : public idTrigger
 		int					nextTriggerTime;
 		bool				triggerFirst;
 		idStr				entityName;
+		
+	//added for LM
+#ifdef _D3LE
+	bool				testPartialName;
+#endif
 
 		void				TriggerAction(idEntity *activator);
 		void				Event_TriggerAction(idEntity *activator);

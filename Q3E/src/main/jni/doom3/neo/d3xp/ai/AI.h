@@ -356,6 +356,12 @@ class idAI : public idActor
 		idEntityPtr<idProjectile> projectile;
 		idStr					attack;
 
+	//Added for the LM
+#ifdef _D3LE
+	idVec3					homingMissileGoal;
+#endif
+
+
 		// chatter/talking
 		const idSoundShader		*chat_snd;
 		int						chat_min;
@@ -582,6 +588,11 @@ class idAI : public idActor
 		void					Event_FireMissileAtTarget(const char *jointname, const char *targetname);
 		void					Event_LaunchMissile(const idVec3 &muzzle, const idAngles &ang);
 #ifdef _D3XP
+	//Added for the LM
+#ifdef _D3LE
+	void					Event_LaunchHomingMissile();
+	void					Event_SetHomingMissileGoal();
+#endif
 		void					Event_LaunchProjectile(const char *entityDefName);
 #endif
 		void					Event_AttackMelee(const char *meleeDefName);

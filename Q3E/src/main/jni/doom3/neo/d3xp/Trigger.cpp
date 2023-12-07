@@ -575,6 +575,11 @@ idTrigger_EntityName::idTrigger_EntityName(void)
 	random_delay = 0.0f;
 	nextTriggerTime = 0;
 	triggerFirst = false;
+	
+	//added for LM
+#ifdef _D3LE
+	testPartialName = false;
+#endif
 }
 
 /*
@@ -591,6 +596,10 @@ void idTrigger_EntityName::Save(idSaveGame *savefile) const
 	savefile->WriteInt(nextTriggerTime);
 	savefile->WriteBool(triggerFirst);
 	savefile->WriteString(entityName);
+	//added For LM
+#ifdef _D3LE
+	savefile->WriteBool( testPartialName );
+#endif
 }
 
 /*
@@ -607,6 +616,10 @@ void idTrigger_EntityName::Restore(idRestoreGame *savefile)
 	savefile->ReadInt(nextTriggerTime);
 	savefile->ReadBool(triggerFirst);
 	savefile->ReadString(entityName);
+	//added for LM
+#ifdef _D3LE
+	savefile->ReadBool( testPartialName );
+#endif
 }
 
 /*
@@ -644,6 +657,13 @@ void idTrigger_EntityName::Spawn(void)
 	if (!spawnArgs.GetBool("noTouch")) {
 		GetPhysics()->SetContents(CONTENTS_TRIGGER);
 	}
+
+	//added for LM
+#ifdef _D3LE
+	testPartialName = spawnArgs.GetBool( "testPartialName", testPartialName ? "1" : "0" );
+#else
+	testPartialName = spawnArgs.GetBool( "testPartialName", testPartialName );
+#endif
 }
 
 /*
@@ -693,9 +713,24 @@ void idTrigger_EntityName::Event_Trigger(idEntity *activator)
 		return;
 	}
 
+	//added for LM
+#ifdef _D3LE
+	bool validEntity = false;
+	if ( activator ) {
+		if ( testPartialName ) {
+			if ( activator->name.Find( entityName, false ) >= 0 ) {
+				validEntity = true;
+			}
+		}
+		if ( activator->name == entityName ) {
+			validEntity = true;
+		}
+	}
+#else
 	if (!activator || (activator->name != entityName)) {
 		return;
 	}
+#endif
 
 	if (triggerFirst) {
 		triggerFirst = false;
@@ -730,9 +765,28 @@ void idTrigger_EntityName::Event_Touch(idEntity *other, trace_t *trace)
 		return;
 	}
 
+	//added for LM
+#ifdef _D3LE
+	bool validEntity = false;
+	if ( other ) {
+		if ( testPartialName ) {
+			if ( other->name.Find( entityName, false ) >= 0 ) {
+				validEntity = true;
+			}
+		}
+		if ( other->name == entityName ) {
+			validEntity = true;
+		}
+	}
+
+	if ( !validEntity ) {
+		return;
+	}
+#else
 	if (!other || (other->name != entityName)) {
 		return;
 	}
+#endif
 
 	nextTriggerTime = gameLocal.time + 1;
 

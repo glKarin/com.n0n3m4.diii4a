@@ -231,6 +231,14 @@ class idEntityPtr
 
 		idEntityPtr<type> &		operator=(type *ent);
 
+	//added for LM
+#ifdef _D3LE
+	idEntityPtr &			operator=( const idEntityPtr & ep );
+	bool					operator==( const idEntityPtr & ep ) { return spawnId == ep.spawnId; }
+	type *					operator->() const { return GetEntity(); }
+							operator type * () const { return GetEntity(); }
+#endif
+
 		// synchronize entity pointers over the network
 		int						GetSpawnId(void) const {
 			return spawnId;
@@ -725,6 +733,15 @@ ID_INLINE idEntityPtr<type> &idEntityPtr<type>::operator=(type *ent)
 
 	return *this;
 }
+
+//added for LM
+#ifdef _D3LE
+template< class type >
+ID_INLINE idEntityPtr< type > &idEntityPtr<type>::operator=( const idEntityPtr & ep ) {
+	spawnId = ep.spawnId;
+	return *this;
+}
+#endif
 
 template< class type >
 ID_INLINE bool idEntityPtr<type>::SetSpawnId(int id)

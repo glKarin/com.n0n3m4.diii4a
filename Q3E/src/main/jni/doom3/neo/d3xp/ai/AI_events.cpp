@@ -50,6 +50,11 @@ const idEventDef AI_AttackMissile("attackMissile", "s", 'e');
 const idEventDef AI_FireMissileAtTarget("fireMissileAtTarget", "ss", 'e');
 const idEventDef AI_LaunchMissile("launchMissile", "vv", 'e');
 #ifdef _D3XP
+//Added for the LM
+#ifdef _D3LE
+const idEventDef AI_LaunchHomingMissile( "launchHomingMissile" );
+const idEventDef AI_SetHomingMissileGoal( "setHomingMissileGoal" );
+#endif
 const idEventDef AI_LaunchProjectile("launchProjectile", "s");
 #endif
 const idEventDef AI_AttackMelee("attackMelee", "s", 'd');
@@ -190,6 +195,11 @@ EVENT(AI_AttackMissile,					idAI::Event_AttackMissile)
 EVENT(AI_FireMissileAtTarget,				idAI::Event_FireMissileAtTarget)
 EVENT(AI_LaunchMissile,					idAI::Event_LaunchMissile)
 #ifdef _D3XP
+	//Added for the LM
+#ifdef _D3LE
+	EVENT( AI_LaunchHomingMissile,				idAI::Event_LaunchHomingMissile )
+	EVENT( AI_SetHomingMissileGoal,				idAI::Event_SetHomingMissileGoal )
+#endif
 EVENT(AI_LaunchProjectile,					idAI::Event_LaunchProjectile)
 #endif
 EVENT(AI_AttackMelee,						idAI::Event_AttackMelee)
@@ -3145,6 +3155,97 @@ void idAI::Event_StopEmitter(const char *name)
 {
 	StopEmitter(name);
 }
+
+//Added for LM (Lost mission)
+#ifdef _D3LE
+/*
+=====================
+idAI::Event_LaunchHomingMissile
+=====================
+*/
+void idAI::Event_LaunchHomingMissile() {
+	idVec3		start;
+	trace_t		tr;
+	idBounds	projBounds;
+	const idClipModel *projClip;
+	idMat3		axis;
+	float		distance;
+
+	if ( !projectileDef ) {
+		gameLocal.Warning( "%s (%s) doesn't have a projectile specified", name.c_str(), GetEntityDefName() );
+		idThread::ReturnEntity( NULL );
+		return;
+	}
+
+	idActor *enemy = GetEnemy();
+	if ( enemy == NULL ) {
+		idThread::ReturnEntity( NULL );
+		return;
+	}
+
+	idVec3 org = GetPhysics()->GetOrigin() + idVec3( 0.0f, 0.0f, 250.0f );
+	idVec3 goal = enemy->GetPhysics()->GetOrigin();
+	homingMissileGoal = goal;
+
+//	axis = ( goal - org ).ToMat3();
+//	axis.Identity();
+	if ( !projectile.GetEntity() ) {
+		idHomingProjectile *homing = ( idHomingProjectile * ) CreateProjectile( org, idVec3( 0.0f, 0.0f, 1.0f ) );
+		if ( homing != NULL ) {
+			homing->SetEnemy( enemy );
+			homing->SetSeekPos( homingMissileGoal );
+		}
+	}
+
+	// make sure the projectile starts inside the monster bounding box
+	const idBounds &ownerBounds = physicsObj.GetAbsBounds();
+	projClip = projectile.GetEntity()->GetPhysics()->GetClipModel();
+	projBounds = projClip->GetBounds().Rotate( projClip->GetAxis() );
+
+	// check if the owner bounds is bigger than the projectile bounds
+	if ( ( ( ownerBounds[1][0] - ownerBounds[0][0] ) > ( projBounds[1][0] - projBounds[0][0] ) ) &&
+		( ( ownerBounds[1][1] - ownerBounds[0][1] ) > ( projBounds[1][1] - projBounds[0][1] ) ) &&
+		( ( ownerBounds[1][2] - ownerBounds[0][2] ) > ( projBounds[1][2] - projBounds[0][2] ) ) ) {
+			if ( (ownerBounds - projBounds).RayIntersection( org, viewAxis[ 0 ], distance ) ) {
+				start = org + distance * viewAxis[ 0 ];
+			} else {
+				start = ownerBounds.GetCenter();
+			}
+	} else {
+		// projectile bounds bigger than the owner bounds, so just start it from the center
+		start = ownerBounds.GetCenter();
+	}
+
+	gameLocal.clip.Translation( tr, start, org, projClip, projClip->GetAxis(), MASK_SHOT_RENDERMODEL, this );
+
+	// launch the projectile
+	idThread::ReturnEntity( projectile.GetEntity() );
+	idVec3 dir = homingMissileGoal - org;
+	idAngles ang = dir.ToAngles();
+	ang.pitch = -45.0f;
+	projectile.GetEntity()->Launch( org, ang.ToForward(), vec3_origin );
+	projectile = NULL;
+
+	TriggerWeaponEffects( tr.endpos );
+
+	lastAttackTime = gameLocal.time;
+}
+
+/*
+=====================
+idAI::Event_SetHomingMissileGoal
+=====================
+*/
+void idAI::Event_SetHomingMissileGoal() {
+	idActor *enemy = GetEnemy();
+	if ( enemy == NULL ) {
+		idThread::ReturnEntity( NULL );
+		return;
+	}
+
+	homingMissileGoal = enemy->GetPhysics()->GetOrigin();
+}
+#endif
 
 #endif
 

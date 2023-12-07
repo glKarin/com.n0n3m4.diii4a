@@ -79,6 +79,12 @@ class idProjectile : public idEntity
 			EVENT_MAXEVENTS
 		};
 
+	//Added for LM
+#ifdef _D3LE
+	void					SetLaunchedFromGrabber( bool bl ) { launchedFromGrabber = bl; }
+	bool					GetLaunchedFromGrabber() { return launchedFromGrabber; }
+#endif
+
 		static void				DefaultDamageEffect(idEntity *soundEnt, const idDict &projectileDef, const trace_t &collision, const idVec3 &velocity);
 		static bool				ClientPredictionCollide(idEntity *soundEnt, const idDict &projectileDef, const trace_t &collision, const idVec3 &velocity, bool addDamageEffect);
 		virtual void			ClientPredictionThink(void);
@@ -97,6 +103,11 @@ class idProjectile : public idEntity
 			bool				noSplashDamage				: 1;
 		} projectileFlags;
 
+	//Added for LM
+#ifdef _D3LE
+	bool					launchedFromGrabber;
+#endif
+
 		float					thrust;
 		int						thrust_end;
 		float					damagePower;
@@ -113,6 +124,12 @@ class idProjectile : public idEntity
 
 		const idDeclParticle 	*smokeFly;
 		int						smokeFlyTime;
+
+	//Code for LM
+#ifdef _D3LE
+	bool					mNoExplodeDisappear;
+	bool					mTouchTriggers;
+#endif
 
 #ifdef _D3XP
 		int						originalTimeGroup;
@@ -242,6 +259,43 @@ class idBFGProjectile : public idProjectile
 		void					Event_RemoveBeams();
 		void					ApplyDamage();
 };
+
+//Added for LM (Lost mission)
+#ifdef _D3LE
+class idHomingProjectile : public idProjectile {
+public :
+	CLASS_PROTOTYPE( idHomingProjectile );
+
+	idHomingProjectile();
+	~idHomingProjectile();
+
+	void					Save( idSaveGame *savefile ) const;
+	void					Restore( idRestoreGame *savefile );
+
+	void					Spawn();
+	virtual void			Think();
+	virtual void			Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f );
+	void					SetEnemy( idEntity *ent );
+	void					SetSeekPos( idVec3 pos );
+	void					Event_SetEnemy(idEntity *ent);
+
+protected:
+	float					speed;
+	idEntityPtr<idEntity>	enemy;
+	idVec3					seekPos;
+
+private:
+	idAngles				rndScale;
+	idAngles				rndAng;
+	idAngles				angles;
+	float					turn_max;
+	float					clamp_dist;
+	bool					burstMode;
+	bool					unGuided;
+	float					burstDist;
+	float					burstVelocity;
+};
+#endif
 
 /*
 ===============================================================================

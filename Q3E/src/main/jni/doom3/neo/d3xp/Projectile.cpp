@@ -91,6 +91,13 @@ idProjectile::idProjectile(void)
 	memset(&projectileFlags, 0, sizeof(projectileFlags));
 	memset(&renderLight, 0, sizeof(renderLight));
 
+	//added for LM
+#ifdef _D3LE
+	launchedFromGrabber = false;
+	mTouchTriggers		= false;
+	mNoExplodeDisappear = false;
+#endif
+
 	// note: for net_instanthit projectiles, we will force this back to false at spawn time
 	fl.networkSync		= true;
 
@@ -110,6 +117,15 @@ void idProjectile::Spawn(void)
 	physicsObj.SetClipMask(0);
 	physicsObj.PutToRest();
 	SetPhysics(&physicsObj);
+
+	//added for LM
+#ifdef _D3LE
+	mNoExplodeDisappear = spawnArgs.GetBool( "no_explode_disappear", mNoExplodeDisappear ? "1" : "0" );
+	mTouchTriggers = spawnArgs.GetBool( "touch_triggers", mTouchTriggers ? "1" : "0" );
+#else
+	mNoExplodeDisappear = spawnArgs.GetBool( "no_explode_disappear", mNoExplodeDisappear );
+	mTouchTriggers = spawnArgs.GetBool( "touch_triggers", mTouchTriggers );
+#endif
 }
 
 /*
@@ -508,6 +524,13 @@ void idProjectile::Think(void)
 			thruster.Evaluate(gameLocal.time);
 		}
 	}
+
+	//Added for LM
+#ifdef _D3LE
+	if ( mTouchTriggers ) {
+		TouchTriggers();
+	}
+#endif
 
 	// run physics
 	RunPhysics();
@@ -2853,3 +2876,213 @@ void idDebris::Event_Fizzle(void)
 {
 	Fizzle();
 }
+
+#ifdef _D3LE
+/*
+===============================================================================
+	idHomingProjectile
+===============================================================================
+*/
+
+CLASS_DECLARATION( idProjectile, idHomingProjectile )
+	EVENT( EV_SetEnemy,		idHomingProjectile::Event_SetEnemy )
+END_CLASS
+
+/*
+================
+idHomingProjectile::idHomingProjectile
+================
+*/
+idHomingProjectile::idHomingProjectile() {
+	enemy			= NULL;
+	speed			= 0.0f;
+	turn_max		= 0.0f;
+	clamp_dist		= 0.0f;
+	rndScale		= ang_zero;
+	rndAng			= ang_zero;
+	angles			= ang_zero;
+	burstMode		= false;
+	burstDist		= 0;
+	burstVelocity	= 0.0f;
+	unGuided		= false;
+	seekPos			= vec3_origin;
+}
+
+/*
+=================
+idHomingProjectile::~idHomingProjectile
+=================
+*/
+idHomingProjectile::~idHomingProjectile() {
+}
+
+/*
+================
+idHomingProjectile::Spawn
+================
+*/
+void idHomingProjectile::Spawn() {
+}
+
+/*
+================
+idHomingProjectile::Save
+================
+*/
+void idHomingProjectile::Save( idSaveGame *savefile ) const {
+	enemy.Save( savefile );
+	savefile->WriteFloat( speed );
+	savefile->WriteAngles( rndScale );
+	savefile->WriteAngles( rndAng );
+	savefile->WriteFloat( turn_max );
+	savefile->WriteFloat( clamp_dist );
+	savefile->WriteAngles( angles );
+	savefile->WriteBool( burstMode );
+	savefile->WriteBool( unGuided );
+	savefile->WriteFloat( burstDist );
+	savefile->WriteFloat( burstVelocity );
+	savefile->WriteVec3( seekPos );
+}
+
+/*
+================
+idHomingProjectile::Restore
+================
+*/
+void idHomingProjectile::Restore( idRestoreGame *savefile ) {
+	enemy.Restore( savefile );
+	savefile->ReadFloat( speed );
+	savefile->ReadAngles( rndScale );
+	savefile->ReadAngles( rndAng );
+	savefile->ReadFloat( turn_max );
+	savefile->ReadFloat( clamp_dist );
+	savefile->ReadAngles( angles );
+	savefile->ReadBool( burstMode );
+	savefile->ReadBool( unGuided );
+	savefile->ReadFloat( burstDist );
+	savefile->ReadFloat( burstVelocity );
+	savefile->ReadVec3( seekPos );
+}
+
+
+/*
+================
+idHomingProjectile::Think
+================
+*/
+void idHomingProjectile::Think() {
+	if ( seekPos == vec3_zero ) {
+		// ai def uses a single def_projectile .. guardian has two projectile types so when seekPos is zero, just run regular projectile
+		idProjectile::Think();
+		return;
+	}
+
+	idVec3		dir;
+	idVec3		velocity;
+	idVec3		nose;
+	idVec3		tmp;
+	idMat3		axis;
+	idAngles	dirAng;
+	idAngles	diff;
+	float		dist;
+	float		frac;
+	int			i;
+
+		
+	nose = physicsObj.GetOrigin() + 10.0f * physicsObj.GetAxis()[0];
+
+	dir = seekPos - nose;
+	dist = dir.Normalize();
+	dirAng = dir.ToAngles();
+
+	// make it more accurate as it gets closer
+	frac = ( dist * 2.0f ) / clamp_dist;
+	if ( frac > 1.0f ) {
+		frac = 1.0f;
+	}
+
+	diff = dirAng - angles * frac;
+
+	// clamp the to the max turn rate
+	diff.Normalize180();
+	for( i = 0; i < 3; i++ ) {
+		if ( diff[ i ] > turn_max ) {
+			diff[ i ] = turn_max;
+		} else if ( diff[ i ] < -turn_max ) {
+			diff[ i ] = -turn_max;
+		}
+	}
+	angles += diff;
+
+	// make the visual model always points the dir we're traveling
+	dir = angles.ToForward();
+	velocity = dir * speed;
+
+	if ( burstMode && dist < burstDist ) {
+		unGuided = true;
+		velocity *= burstVelocity;
+	}
+
+	physicsObj.SetLinearVelocity( velocity );
+
+	// align z-axis of model with the direction
+	axis = dir.ToMat3();
+	tmp = axis[2];
+	axis[2] = axis[0];
+	axis[0] = -tmp;
+
+	GetPhysics()->SetAxis( axis );
+
+	idProjectile::Think();
+}
+
+/*
+=================
+idHomingProjectile::Launch
+=================
+*/
+void idHomingProjectile::Launch( const idVec3 &start, const idVec3 &dir, const idVec3 &pushVelocity, const float timeSinceFire, const float launchPower, float dmgPower ) {
+	idProjectile::Launch( start, dir, pushVelocity, timeSinceFire, launchPower, dmgPower );
+	if ( owner.GetEntity() ) {
+		if ( owner.GetEntity()->IsType( idAI::Type ) ) {
+			enemy = static_cast<idAI *>( owner.GetEntity() )->GetEnemy();
+		} else if ( owner.GetEntity()->IsType( idPlayer::Type ) ) {
+			trace_t tr;
+			idPlayer *player = static_cast<idPlayer*>( owner.GetEntity() );
+			idVec3 start = player->GetEyePosition();
+			idVec3 end = start + player->viewAxis[0] * 1000.0f;
+			gameLocal.clip.TracePoint( tr, start, end, MASK_SHOT_RENDERMODEL | CONTENTS_BODY, owner.GetEntity() );
+			if ( tr.fraction < 1.0f ) {
+				enemy = gameLocal.GetTraceEntity( tr );
+			} 
+			// ignore actors on the player's team
+			if ( enemy.GetEntity() == NULL || !enemy.GetEntity()->IsType( idActor::Type ) || ( static_cast<idActor *>( enemy.GetEntity() )->team == player->team ) ) {
+				enemy = player->EnemyWithMostHealth();
+			}
+		}
+	}
+	const idVec3 &vel = physicsObj.GetLinearVelocity();
+	float com_engineHz_latched = 60.0f;
+
+	angles = vel.ToAngles();
+	speed = vel.Length();
+	rndScale = spawnArgs.GetAngles( "random", "15 15 0" );
+	turn_max = spawnArgs.GetFloat( "turn_max", "180" ) / com_engineHz_latched;
+	clamp_dist = spawnArgs.GetFloat( "clamp_dist", "256" );
+	burstMode = spawnArgs.GetBool( "burstMode" );
+	unGuided = false;
+	burstDist = spawnArgs.GetFloat( "burstDist", "64" );
+	burstVelocity = spawnArgs.GetFloat( "burstVelocity", "1.25" );
+	UpdateVisuals();
+}
+
+void idHomingProjectile::SetEnemy( idEntity *ent ) {
+	enemy = ent;
+}
+void idHomingProjectile::SetSeekPos( idVec3 pos ) {
+	seekPos = pos;
+}
+void idHomingProjectile::Event_SetEnemy(idEntity *ent) {
+	SetEnemy(ent);
+}
+#endif

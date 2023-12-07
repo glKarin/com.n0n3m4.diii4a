@@ -1876,6 +1876,161 @@ void idFuncEmitter::ReadFromSnapshot(const idBitMsgDelta &msg)
 	}
 }
 
+//added for LM
+#ifdef _D3LE
+/*
+===============================================================================
+idFuncShootProjectile
+===============================================================================
+*/
+
+
+CLASS_DECLARATION( idStaticEntity, idFuncShootProjectile )
+	EVENT( EV_Activate,				idFuncShootProjectile::Event_Activate )
+	END_CLASS
+
+	/*
+	===============
+	idFuncShootProjectile::idFuncShootProjectile
+	===============
+	*/
+	idFuncShootProjectile::idFuncShootProjectile() {
+		mRespawnDelay = 1000;
+		mRespawnTime = 0;
+		mShootSpeed = 1000;
+		mShootDir = idVec3( 0.0f, 0.0f, 1.0f );
+}
+
+/*
+===============
+idFuncShootProjectile::Spawn
+===============
+*/
+void idFuncShootProjectile::Spawn() {
+}
+
+/*
+===============
+idFuncShootProjectile::Think
+===============
+*/
+void idFuncShootProjectile::Think() {
+	if ( thinkFlags & TH_THINK ) {
+		// time to spawn a new projectile?
+		if ( mRespawnTime > 0 && mRespawnTime <= gameLocal.GetTime() ) {
+			const idDict *dict = gameLocal.FindEntityDefDict( mEntityDefName );
+			idEntity *ent = NULL;
+			gameLocal.SpawnEntityDef( *dict, &ent );
+			if ( ent != NULL ) {
+				idProjectile *proj = static_cast<idProjectile *>(ent);
+
+				idVec3 pushVel = mShootDir * mShootSpeed;
+				proj->Create( this, GetPhysics()->GetOrigin(), mShootDir );
+				proj->Launch( GetPhysics()->GetOrigin(), mShootDir, pushVel );
+				if ( mShootSpeed == 0.0f ) {
+					proj->GetPhysics()->SetLinearVelocity( vec3_zero );
+				} else {
+					proj->GetPhysics()->SetLinearVelocity( pushVel );
+				}
+
+				mLastProjectile = proj;
+			}
+			if ( mShootSpeed == 0.0f ) {
+				mRespawnTime = 0;	// stationary, respawn when triggered
+			} else {
+				mRespawnTime = gameLocal.GetTime() + mRespawnDelay;		// moving, respawn after delay
+			}
+		}
+	}
+}
+
+/*
+===============
+idFuncShootProjectile::Save
+===============
+*/
+void idFuncShootProjectile::Save( idSaveGame *savefile ) const {
+	savefile->WriteInt( mRespawnDelay );
+	savefile->WriteInt( mRespawnTime );
+	savefile->WriteFloat( mShootSpeed );
+	savefile->WriteVec3( mShootDir );
+	savefile->WriteString( mEntityDefName );
+}
+
+/*
+===============
+idFuncShootProjectile::Restore
+===============
+*/
+void idFuncShootProjectile::Restore( idRestoreGame *savefile ) {
+	savefile->ReadInt( mRespawnDelay );
+	savefile->ReadInt( mRespawnTime );
+	savefile->ReadFloat( mShootSpeed );
+	savefile->ReadVec3( mShootDir );
+	savefile->ReadString( mEntityDefName );
+}
+
+/*
+================
+idFuncShootProjectile::Event_Activate
+================
+*/
+void idFuncShootProjectile::Event_Activate( idEntity *activator ) {
+	if ( ( thinkFlags & TH_THINK ) != 0 ) {
+		if ( mShootSpeed == 0.0f && mRespawnTime == 0 ) {
+			mRespawnTime = gameLocal.GetTime();
+			return;
+		}
+	}
+
+	mRespawnDelay = spawnArgs.GetInt( "spawn_delay_ms" );
+	mShootSpeed = spawnArgs.GetFloat( "speed" );
+	mEntityDefName = spawnArgs.GetString( "def_projectile" );
+	if ( targets.Num() > 0 && targets[0].IsValid() ) {
+		mShootDir = targets[0]->GetPhysics()->GetOrigin() - GetPhysics()->GetOrigin();
+		//mShootDir = targets[0].GetPhysics()->GetOrigin() - GetPhysics()->GetOrigin();
+		mShootDir.Normalize();
+	} else {
+		// stationary projectile, doesn't move and only respawns when triggered
+		mShootSpeed = 0.0f;
+		mRespawnTime = 0;
+	}
+
+	if ( ( thinkFlags & TH_THINK ) != 0 ) {
+		// currently active, deactivate
+		BecomeInactive( TH_THINK );
+	} else {
+		// currently inactive, activate
+		BecomeActive( TH_THINK );
+		mRespawnTime = gameLocal.GetTime();
+	}
+}
+
+/*
+================
+idFuncShootProjectile::WriteToSnapshot
+================
+*/
+void idFuncShootProjectile::WriteToSnapshot( idBitMsg &msg ) const {
+	// 	msg.WriteBits( hidden ? 1 : 0, 1 );
+	// 	msg.WriteFloat( renderEntity.shaderParms[ SHADERPARM_PARTICLE_STOPTIME ] );
+	// 	msg.WriteFloat( renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] );
+}
+
+/*
+================
+idFuncShootProjectile::ReadFromSnapshot
+================
+*/
+void idFuncShootProjectile::ReadFromSnapshot( const idBitMsg &msg ) {
+	// 	hidden = msg.ReadBits( 1 ) != 0;
+	// 	renderEntity.shaderParms[ SHADERPARM_PARTICLE_STOPTIME ] = msg.ReadFloat();
+	// 	renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = msg.ReadFloat();
+	// 	if ( msg.HasChanged() ) {
+	// 		UpdateVisuals();
+	// 	}
+}
+#endif
 
 /*
 ===============================================================================
