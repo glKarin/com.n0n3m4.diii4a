@@ -251,14 +251,12 @@ const float MAX_BOUND_SIZE = 65536.0f;
 // game
 #if defined(_D3XP)
 
-    #if defined(_D3LE)
-        #include "../mod/doom3/d3le/Game.h"
-    #elif defined(_SABOT)
+    #if defined(_SABOT)
         #include "../mod/doom3/sabot/Game.h"
     #elif defined(_FRAGGINGFREE)
         #include "../framework/Game.h"
     #else
-        #include "../d3xp/Game.h"
+        #include "../mod/doom3/d3le/Game.h"
     #endif
 
 #elif defined(_RAVEN)
@@ -293,14 +291,12 @@ const float MAX_BOUND_SIZE = 65536.0f;
 
 #if defined(_D3XP)
 
-    #if defined(_D3LE)
-        #include "../mod/doom3/d3le/Game_local.h"
-    #elif defined(_SABOT)
+    #if defined(_SABOT)
         #include "../mod/doom3/sabot/Game_local.h"
     #elif defined(_FRAGGINGFREE)
         #include "../mod/doom3/fraggingfree/Game_local.h"
     #else
-        #include "../d3xp/Game_local.h"
+        #include "../mod/doom3/d3le/Game_local.h"
     #endif
 
 #elif defined(_RAVEN)

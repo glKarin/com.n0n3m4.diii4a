@@ -763,16 +763,6 @@ set(src_game ${base_game_src})
 set_src_dir(src_game "game" ${src_game})
 add_globbed_headers(src_game "game")
 
-# d3xp
-set(src_d3xp ${base_game_src})
-set(d3xp_game_src
-		Grabber.cpp
-		physics/Force_Grab.cpp
-		)
-list(APPEND src_d3xp ${d3xp_game_src})
-set_src_dir(src_d3xp "d3xp" ${src_d3xp})
-add_globbed_headers(src_d3xp "d3xp")
-
 # d3le
 set(src_d3le ${base_game_src})
 set(d3le_game_src
@@ -1513,11 +1503,11 @@ if(BASE)
 endif()
 
 if(D3XP)
-	add_library(d3xp SHARED ${src_d3xp})
-	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_d3xp})
+	add_library(d3xp SHARED ${src_d3le})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_d3le})
 	#set_target_properties(d3xp PROPERTIES PREFIX "")
 	set_target_properties(d3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
-	target_include_directories(d3xp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/d3xp")
+	target_include_directories(d3xp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/d3le")
 	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(d3xp idlib)

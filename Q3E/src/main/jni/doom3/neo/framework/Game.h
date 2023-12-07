@@ -8,7 +8,7 @@
 #define DHEWM3_BUILD_NUMBER 1305
 
 #if defined(_D3XP)
-    #include "../d3xp/Game.h"
+    #include "../mod/doom3/d3le/Game.h"
 #else
     #include "../game/Game.h"
 #endif
