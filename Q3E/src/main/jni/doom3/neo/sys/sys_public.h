@@ -608,6 +608,13 @@ void Sys_FreeOpenAL(void);
 #define __FUNCLINE__ ( __FUNCTION__ " " __LINESTR__ )
 #endif
 
+extern float analogx;
+extern float analogy;
+extern int analogenabled;
+
+extern int screen_width;
+extern int screen_height;
+
 #ifdef __ANDROID__
 //n0n3m4
 
@@ -616,13 +623,6 @@ void Sys_FreeOpenAL(void);
 #define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
 #endif
 #define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
-
-extern float analogx;
-extern float analogy;
-extern int analogenabled;
-
-extern int screen_width;
-extern int screen_height;
 
 extern bool multithreadActive;
 

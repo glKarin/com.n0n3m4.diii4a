@@ -57,6 +57,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #else
 
+#define EFXprintf(...) do { } while (false)
+
 /** 8-bit boolean */
 typedef char ALboolean;
 /** character */

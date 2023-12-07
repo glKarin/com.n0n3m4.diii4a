@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(doom3)
 
-add_definitions(-D__ANDROID__)
 add_definitions(-D_K_CLANG)
 add_definitions(-DID_ENABLE_CURL=1)
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -65,14 +64,16 @@ option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
 
 # Extras functions
-option(OPENSLES			"OpenSLES support" ON)
-option(MULTITHREAD			"Multi-Thread support" ON)
+if(ANDROID)
+	option(OPENSLES			"OpenSLES support" ON)
+	option(MULTITHREAD			"Multi-Thread support" ON)
+	option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
+endif()
 option(USING_STB			"Using stb" ON)
 option(SUPPORT_OBJ			"Support obj model" ON)
 option(SUPPORT_DAE			"Support dae model" ON)
 option(SHADOW_MAPPING			"Shadow mapping support" ON)
 option(OPENGLES3			"OpenGLES3 support" ON)
-option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
 option(NO_LIGHT			"r_noLight support" ON)
 option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" ON)
 
@@ -302,8 +303,10 @@ function(add_globbed_headers SRCLIST PATHPREFIX)
 	set(${SRCLIST} ${tmp_hdrs} ${${SRCLIST}})
 endfunction()
 
-set(sys_libs ${sys_libs} dl)
-set(sys_libs ${sys_libs} EGL android z)
+if(ANDROID)
+	set(sys_libs ${sys_libs} android)
+endif()
+set(sys_libs ${sys_libs} dl EGL z)
 set(local_libs ogg curl)
 if(USING_STB)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB")
@@ -1367,15 +1370,20 @@ set(src_sys_base
 	sys/posix/posix_threads.cpp
 	sys/posix/posix_signal.cpp
 	sys/posix/posix_input.cpp
-	sys/android/main.cpp
-	sys/android/sound.cpp
 	sys/linux/gl_extensions.cpp
-	sys/android/input.cpp
 )
 
-set(src_sys_core
-	sys/android/gles2.cpp
-)
+if(ANDROID)
+	set(src_sys_base
+		${src_sys_base}
+		sys/android/main.cpp
+		sys/android/sound.cpp
+		sys/android/input.cpp
+	)
+	set(src_sys_core
+		sys/android/gles2.cpp
+	)
+endif()
 
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

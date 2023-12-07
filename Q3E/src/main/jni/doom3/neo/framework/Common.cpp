@@ -2870,8 +2870,6 @@ void idCommonLocal::Async(void)
 idCommonLocal::LoadGameDLL
 =================
 */
-#ifdef __ANDROID__
-
 #ifdef _RAVEN // quake4 game dll
 #define _HARM_BASE_GAME_DLL "q4game"
 #elif defined(_HUMANHEAD) // prey game dll
@@ -2880,7 +2878,6 @@ idCommonLocal::LoadGameDLL
 #define _HARM_BASE_GAME_DLL "game"
 #endif
 
-#endif
 //k
 #define _ANDROID_NATIVE_LIBRARY_DIR "<Android APK native library directory path>/"
 static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. e.g. "
