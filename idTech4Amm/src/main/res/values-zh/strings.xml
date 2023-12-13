@@ -18,14 +18,14 @@
     <string name="force_delete_vertex_buffer_on_every_end_frame">每帧强制删除顶点缓冲区</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">同第二项, 并且强制删除顶点缓冲区对象, 可能慢, 但内存安全.</string>
     <string name="game_cvar_fs_game">游戏(fs_game)</string>
-    <string name="doom_iii">毁灭战士3(base)</string>
-    <string name="doom3_resurrection_of_evil_d3xp">毁灭战士3:邪恶复苏(d3xp)</string>
-    <string name="classic_doom_cdoom">经典毁灭战士(cdoom)</string>
-    <string name="doom3_bfg_the_lost_mission_d3le">毁灭战士3-BFG:失落的任务(d3le)</string>
-    <string name="rivensin_rivensin">Rivensin(rivensin)</string>
-    <string name="hardcorps_hardcorps">Hardcorps(hardcorps)</string>
-    <string name="quake_iv_q4base">雷神之锤4(q4base)</string>
-    <string name="prey_preybase">掠食(preybase)</string>
+    <string name="doom_iii">毁灭战士3</string>
+    <string name="doom3_resurrection_of_evil_d3xp">毁灭战士3:邪恶复苏</string>
+    <string name="classic_doom_cdoom">经典毁灭战士</string>
+    <string name="doom3_bfg_the_lost_mission_d3le">毁灭战士3-BFG:失落的任务</string>
+    <string name="rivensin_rivensin">Rivensin</string>
+    <string name="hardcorps_hardcorps">Hardcorps</string>
+    <string name="quake_iv_q4base">雷神之锤4</string>
+    <string name="prey_preybase">掠食</string>
     <string name="user_mod">游戏mod</string>
     <string name="input_your_mod_folder_name">游戏mod文件夹名称</string>
     <string name="gamelib">游戏运行库</string>
@@ -267,4 +267,8 @@
     <string name="internal_storage">内部存储</string>
     <string name="external_storage">外部存储</string>
     <string name="translucent_stencil_shadow">半透明模板阴影(harm_r_translucentStencilShadow)</string>
+    <string name="overthinked_doom_3">Overthinked DooM^3</string>
+    <string name="stupid_angry_bot_a7x">Stupid Angry Bot(a7x)</string>
+    <string name="hexen_edge_of_chaos">HeXen:Edge of Chaos</string>
+    <string name="fragging_free">Fragging Free</string>
 </resources>

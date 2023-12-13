@@ -19,14 +19,14 @@
     <string name="force_delete_vertex_buffer_on_every_end_frame">Принудительное удаление буфера вершин в каждом конечном кадре</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">Удаляет буфер вершин, может быть медленнее, но безопаснее для памяти.</string>
     <string name="game_cvar_fs_game">Выбор игры(fs_game)</string>
-    <string name="doom_iii">DOOM III(base)</string>
-    <string name="doom3_resurrection_of_evil_d3xp">DOOM3:Resurrection of Evil(d3xp)</string>
-    <string name="classic_doom_cdoom">Classic DOOM(cdoom)</string>
-    <string name="doom3_bfg_the_lost_mission_d3le">DOOM3-BFG:The Lost Mission(d3le)</string>
-    <string name="rivensin_rivensin">Rivensin(rivensin)</string>
-    <string name="hardcorps_hardcorps">Hardcorps(hardcorps)</string>
-    <string name="quake_iv_q4base">Quake IV(q4base)</string>
-    <string name="prey_preybase">Prey(preybase)</string>
+    <string name="doom_iii">DOOM III</string>
+    <string name="doom3_resurrection_of_evil_d3xp">DOOM3:Resurrection of Evil</string>
+    <string name="classic_doom_cdoom">Classic DOOM</string>
+    <string name="doom3_bfg_the_lost_mission_d3le">DOOM3-BFG:The Lost Mission</string>
+    <string name="rivensin_rivensin">Rivensin</string>
+    <string name="hardcorps_hardcorps">Hardcorps</string>
+    <string name="quake_iv_q4base">Quake IV</string>
+    <string name="prey_preybase">Prey</string>
     <string name="user_mod">Пользовательский мод</string>
     <string name="input_your_mod_folder_name">Имя папки вашего мода</string>
     <string name="gamelib">GameLib</string>
@@ -268,5 +268,9 @@
     <string name="internal_storage">Internal storage</string>
     <string name="external_storage">External storage</string>
     <string name="translucent_stencil_shadow">Translucent stencil shadow(harm_r_translucentStencilShadow)</string>
+    <string name="overthinked_doom_3">Overthinked DooM^3</string>
+    <string name="stupid_angry_bot_a7x">Stupid Angry Bot(a7x)</string>
+    <string name="hexen_edge_of_chaos">HeXen:Edge of Chaos</string>
+    <string name="fragging_free">Fragging Free</string>
 
 </resources>

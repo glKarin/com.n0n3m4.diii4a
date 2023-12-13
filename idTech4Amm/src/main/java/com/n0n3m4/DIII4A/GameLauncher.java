@@ -2223,10 +2223,15 @@ public class GameLauncher extends Activity
 			group = groups.get(value.type);
 			layoutParams = new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
 			radio = new RadioButton(group.getContext());
+			String name;
 			if(value.name instanceof Integer)
-				radio.setText((Integer)value.name);
+				name = Q3ELang.tr(this, (Integer)value.name);
 			else if(value.name instanceof String)
-				radio.setText((String)value.name);
+				name = (String)value.name;
+			else
+				name = "";
+			name += "(" + value.game + ")";
+			radio.setText(name);
 			radio.setTag(value.game);
 			group.addView(radio, layoutParams);
 			radio.setChecked(!value.is_mod);
