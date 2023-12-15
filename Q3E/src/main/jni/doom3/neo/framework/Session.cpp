@@ -34,6 +34,9 @@ If you have questions concerning this license or the applicable additional terms
 #if defined(_RAVEN) || defined(_HUMANHEAD)
 #include "../ui/Window.h"
 #endif
+#ifdef _HUMANHEAD
+#include "../ui/UserInterfaceLocal.h"
+#endif
 
 #ifdef _RAVEN
 const char * Com_LocalizeGametype( const char *gameType ) { // from MultiplayerGame.cpp
@@ -3539,7 +3542,7 @@ void idSessionLocal::Init()
 	guiSubtitles = uiManager->FindGui("guis/subtitles.gui", true, false, true);
 	if(guiSubtitles)
 	{
-		idWindow *desktop = guiSubtitles->GetDesktop();
+		idWindow *desktop = ((idUserInterfaceLocal *)guiSubtitles)->GetDesktop();
 		if(desktop)
 		{
 #define SUBTITLE_GET_TEXT_SCALE(name, index) \
@@ -4057,7 +4060,7 @@ void idSessionLocal::ShowSubtitle(const idStrList &strList)
 	int num;
 	int i;
 	int index;
-	char text[16];
+	char text[32];
 
 	if(!guiSubtitles)
 		return;
@@ -4065,10 +4068,10 @@ void idSessionLocal::ShowSubtitle(const idStrList &strList)
 	// setup subtitles's text scale
 	if(!subtitleTextScaleInited || harm_ui_subtitlesTextScale.IsModified())
 	{
-		idWindow *desktop = guiSubtitles->GetDesktop();
+		idWindow *desktop = ((idUserInterfaceLocal *)guiSubtitles)->GetDesktop();
 		if(desktop)
 		{
-			float textScale = harm_ui_subtitlesTextScale.GetFloat();
+			float textScale = harm_ui_subtitlesTextScale.GetFloat(); // !!less than 32 characters!!
 #define SUBTITLE_SET_TEXT_SCALE(name, index) \
             {                              \
 				float f = textScale > 0.0f ? textScale : subtitlesTextScale[index]; \

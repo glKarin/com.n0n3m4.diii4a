@@ -152,7 +152,6 @@ class idUserInterface
     virtual void				Translate(const char *fontname) = 0;
     virtual void				CallStartup() = 0;
     // HUMANHEAD END
-	virtual class idWindow *	GetDesktop( void ) const = 0;
 #endif
 };
 
