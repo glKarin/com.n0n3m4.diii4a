@@ -31,8 +31,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Session_local.h"
 
-#ifdef _RAVEN //k: for play credits in mainmenu
+#if defined(_RAVEN) || defined(_HUMANHEAD)
 #include "../ui/Window.h"
+#endif
+
+#ifdef _RAVEN
 const char * Com_LocalizeGametype( const char *gameType ) { // from MultiplayerGame.cpp
 	const char *localisedGametype = gameType;
 
@@ -463,6 +466,9 @@ idSessionLocal::idSessionLocal()
 
 #ifdef _HUMANHEAD
 	guiSubtitles = NULL;
+	subtitleTextScaleInited = false;
+	for(int m = 0; m < sizeof(subtitlesTextScale) / sizeof(subtitlesTextScale[0]); m++)
+		subtitlesTextScale[m] = 0.0f;
 #endif
 	Clear();
 }
@@ -1941,6 +1947,7 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 				menuSoundWorld->PlayShaderDirectly(loadMusic, 2);
 		}
 	}
+	subtitleTextScaleInited = false; // reload subtitles's text scale
 #endif
 
 	uiManager->BeginLevelLoad();
@@ -2895,7 +2902,8 @@ void idSessionLocal::Draw()
 		if (guiActive == guiTakeNotes && !com_skipGameDraw.GetBool()) {
 			game->Draw(GetLocalClientNum());
 #ifdef _HUMANHEAD
-			guiSubtitles->Redraw(com_frameTime);
+			if(guiSubtitles)
+				guiSubtitles->Redraw(com_frameTime);
 #endif
 		}
 
@@ -2912,7 +2920,8 @@ void idSessionLocal::Draw()
 			int	start = Sys_Milliseconds();
 			gameDraw = game->Draw(GetLocalClientNum());
 #ifdef _HUMANHEAD
-			guiSubtitles->Redraw(com_frameTime);
+			if(guiSubtitles)
+				guiSubtitles->Redraw(com_frameTime);
 #endif
 			int end = Sys_Milliseconds();
 			time_gameDraw += (end - start);	// note time used for com_speeds
@@ -3528,6 +3537,27 @@ void idSessionLocal::Init()
 #endif
 #ifdef _HUMANHEAD
 	guiSubtitles = uiManager->FindGui("guis/subtitles.gui", true, false, true);
+	if(guiSubtitles)
+	{
+		idWindow *desktop = guiSubtitles->GetDesktop();
+		if(desktop)
+		{
+#define SUBTITLE_GET_TEXT_SCALE(name, index) \
+            {                              \
+				drawWin_t *dw = desktop->FindChildByName(name); \
+				if(dw && dw->win) \
+				{ \
+					idWinVar *winvar = dw->win->GetWinVarByName("textScale"); \
+					if(winvar) \
+						subtitlesTextScale[index] = winvar->x(); \
+				} \
+			}
+			SUBTITLE_GET_TEXT_SCALE("subtitles1", 0)
+			SUBTITLE_GET_TEXT_SCALE("subtitles2", 1)
+			SUBTITLE_GET_TEXT_SCALE("subtitles3", 2)
+#undef SUBTITLE_GET_TEXT_SCALE
+		}
+	}
 #endif
 	guiMsg = uiManager->FindGui("guis/msg.gui", true, false, true);
 	guiTakeNotes = uiManager->FindGui("guis/takeNotes.gui", true, false, true);
@@ -4021,12 +4051,41 @@ const char * idSessionLocal::GetDeathwalkMapName(const char *mapName) const
 	return dwMap;
 }
 
-void idSessionLocal::ShowSubtitle(const idStrList &strList) const
+static idCVar harm_ui_subtitlesTextScale( "harm_ui_subtitlesTextScale", "0.32", CVAR_GUI | CVAR_FLOAT | CVAR_ARCHIVE, "[Harmattan]: Subtitles's text scale(<= 0: unset)." ); //karin: setup subtitles's text scale
+void idSessionLocal::ShowSubtitle(const idStrList &strList)
 {
 	int num;
 	int i;
 	int index;
 	char text[16];
+
+	if(!guiSubtitles)
+		return;
+
+	// setup subtitles's text scale
+	if(!subtitleTextScaleInited || harm_ui_subtitlesTextScale.IsModified())
+	{
+		idWindow *desktop = guiSubtitles->GetDesktop();
+		if(desktop)
+		{
+			float textScale = harm_ui_subtitlesTextScale.GetFloat();
+#define SUBTITLE_SET_TEXT_SCALE(name, index) \
+            {                              \
+				float f = textScale > 0.0f ? textScale : subtitlesTextScale[index]; \
+				if(f > 0.0f) \
+				{ \
+					sprintf(text, /*sizeof(text), */"%f", f); \
+					desktop->SetChildWinVarVal(name, "textScale", text); \
+				} \
+			}
+			SUBTITLE_SET_TEXT_SCALE("subtitles1", 0)
+			SUBTITLE_SET_TEXT_SCALE("subtitles2", 1)
+			SUBTITLE_SET_TEXT_SCALE("subtitles3", 2)
+#undef SUBTITLE_SET_TEXT_SCALE
+		}
+		subtitleTextScaleInited = true;
+		harm_ui_subtitlesTextScale.ClearModified();
+	}
 
 	num = strList.Num();
 	for(i = 0; i < 3; i++)
@@ -4050,6 +4109,8 @@ void idSessionLocal::ShowSubtitle(const idStrList &strList) const
 
 void idSessionLocal::HideSubtitle(void) const
 {
+	if(!guiSubtitles)
+		return;
 	guiSubtitles->SetStateFloat("subtitleAlpha1", 0);
 	guiSubtitles->SetStateFloat("subtitleAlpha2", 0);
 	guiSubtitles->SetStateFloat("subtitleAlpha3", 0);

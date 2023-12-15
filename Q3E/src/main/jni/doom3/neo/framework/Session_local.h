@@ -166,10 +166,12 @@ class idSessionLocal : public idSession
 		virtual bool ShouldAppendLevel(void) const;
 		virtual const char * GetDeathwalkMapName(void) const;
 		const char * GetDeathwalkMapName(const char *mapName) const;
-		void ShowSubtitle(const idStrList &strList) const;
+		void ShowSubtitle(const idStrList &strList);
 		void HideSubtitle(void) const;
 
 		idUserInterface 	*guiSubtitles;
+		bool				subtitleTextScaleInited;
+		float 				subtitlesTextScale[3];
 #endif
 #ifdef _MULTITHREAD
 		virtual void UpdateScreen(byte *data, bool outOfSequence);

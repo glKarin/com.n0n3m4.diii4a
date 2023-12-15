@@ -99,7 +99,8 @@ public final class KCVarSystem
                         "fonts/menu", "fonts/menu",
                         "\"\"", "Disable"
                     ),
-                    KCVar.CreateCVar("harm_ui_translateAlienFontDistance", "float", "200", "Setup max distance of GUI to view origin for enable translate `alien` font text(0 to disable, -1 to always)", 0)
+                    KCVar.CreateCVar("harm_ui_translateAlienFontDistance", "float", "200", "Setup max distance of GUI to view origin for enable translate `alien` font text(0 to disable, -1 to always)", 0),
+                    KCVar.CreateCVar("harm_ui_subtitlesTextScale", "float", "0.32", "Subtitles's text scale(<= 0: unset)", 0)
                 );
 
         _cvars.put("RENDERER", RENDERER_CVARS);

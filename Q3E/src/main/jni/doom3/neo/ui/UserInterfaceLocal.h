@@ -92,7 +92,7 @@ class idUserInterfaceLocal : public idUserInterface
 			return timeStamp;
 		}
 
-#ifdef _RAVEN //k: Quake4 idWindow is using externally
+#if defined(_RAVEN) || defined(_HUMANHEAD) //k: Quake4 idWindow is using externally
 		virtual 
 #endif
 		idWindow 					*GetDesktop() const {
