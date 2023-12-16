@@ -103,7 +103,7 @@
     <string name="weapon_panel">Панель оружия</string>
     <string name="reset">Сбросить</string>
     <string name="theme">Тема</string>
-    <string name="start_game">Начать игру</string>
+    <string name="start_game">Для запуска игры</string>
     <string name="toggle_key">Клавиша переключения</string>
     <string name="touch_type">Сенсорный тип</string>
     <string name="slider_type">Тип ползунка</string>
@@ -207,7 +207,7 @@
     <string name="startgame">старт игры</string>
     <string name="file_can_not_access">Файл не может получить доступ:</string>
     <string name="game_library">библиотека игры</string>
-    <string name="request_necessary_permissions">запросить необходимые разрешения</string>
+    <string name="request_necessary_permissions">необходимо предоставить разрешения</string>
     <string name="grant">предоставить</string>
     <string name="extract_path_resource_">Извлечь ресурс пути: </string>
     <string name="rivensin_play_original_doom3_level">Rivensin на оригинальном уровне DOOM3</string>
