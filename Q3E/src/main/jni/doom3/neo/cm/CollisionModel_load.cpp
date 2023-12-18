@@ -4078,9 +4078,12 @@ void idCollisionModelManagerLocal::BuildModels(const idMapFile *mapFile)
             }
         }
         WriteCollisionModelsToFile( mapFile->GetName(), firstModel, numModels, mapFile->GetGeometryCRC() );
-#endif
-#endif
+#else
 		WriteCollisionModelsToFile(mapFile->GetName(), 0, numModels, mapFile->GetGeometryCRC());
+#endif
+#else
+		WriteCollisionModelsToFile(mapFile->GetName(), 0, numModels, mapFile->GetGeometryCRC());
+#endif
 	}
 
 	timer.Stop();

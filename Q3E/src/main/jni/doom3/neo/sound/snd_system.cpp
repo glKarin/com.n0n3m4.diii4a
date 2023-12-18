@@ -2116,6 +2116,9 @@ void idSoundSystemLocal::SB_SetupSubtitle(void)
 					continue;
 				}
 
+				if(chan->lastVolume < SND_EPSILON)
+					continue;
+
                 SB_AppendSubtitle(chan);
 			}
 		}
@@ -2142,6 +2145,9 @@ void idSoundSystemLocal::SB_SetupSubtitle(void)
 				if (!chan->triggerState) {
 					continue;
 				}
+
+				if(chan->lastVolume < SND_EPSILON)
+					continue;
 
                 SB_AppendSubtitle(chan);
 			}
