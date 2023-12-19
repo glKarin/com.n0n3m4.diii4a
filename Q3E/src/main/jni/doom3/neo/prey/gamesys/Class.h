@@ -44,8 +44,9 @@ public:
 	idEventArg( const class idEntity *data )	{ type = D_EVENT_ENTITY; value = reinterpret_cast<intptr_t>( data ); };
 	idEventArg( const struct trace_s *data )	{ type = D_EVENT_TRACE; value = reinterpret_cast<intptr_t>( data ); };
 #ifdef _PREY //k: placeholder for NULL
+	// only call in C++: game_anim.cpp::hhAnim::CallFrameCommandsExtra -> entity->ProcessEvent( &idEventDef, time, (intptr_t)ptr )
 #if defined(__aarch64__) || defined(__x86_64__)
-	idEventArg(intptr_t data) { type = 'y'; value = data; };
+	idEventArg(intptr_t data) { type = D_EVENT_INTPTR; value = data; };
 #endif
 #endif
 };

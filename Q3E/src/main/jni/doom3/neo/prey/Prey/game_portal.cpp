@@ -1051,7 +1051,7 @@ void hhPortal::Event_Opened( void ) {
 	
 	// If we are open, and should close automatically, post an event to trigger us closed - nla
 	if ( closeDelay > 0.0f ) {
-		PostEventSec( &EV_Activate, closeDelay, NULL );
+		PostEventSec( &EV_Activate, closeDelay, (const class idEntity *)NULL ); //k
 
 		// Remove the portal now that it has done it's job
 		if (monsterportal) {

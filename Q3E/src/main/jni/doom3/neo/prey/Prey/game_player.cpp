@@ -4131,7 +4131,7 @@ void hhPlayer::DisableEthereal( void ) {
 		if ( hhMonsterAI::allSimpleMonsters[i]->GetEnemy() == spiritProxy.GetEntity() ) {
 			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, spiritProxy.GetEntity() );
 		} else if ( hhMonsterAI::allSimpleMonsters[i]->GetEnemy() == this ) { // Targetting spirit that is going away
-			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, NULL );
+			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, (const class idEntity *)NULL ); //k
 		}
 	}
 
