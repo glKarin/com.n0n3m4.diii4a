@@ -127,7 +127,7 @@ void rvVehicleWalker::Restore ( idRestoreGame *savefile ) {
 rvVehicleWalker::UpdateState
 ================
 */
-#ifdef __ANDROID__ //k: renormalize walker movment
+#ifdef __ANDROID__ //k: renormalize walker movment. only for DIII4A smooth onscreen joystick control
 idCVar harm_g_vehicleWalkerMoveNormalize( "harm_g_vehicleWalkerMoveNormalize", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: Re-normalize vehicle walker movment." );
 #endif
 void rvVehicleWalker::UpdateState ( void ) {
