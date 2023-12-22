@@ -2101,4 +2101,8 @@ extern idCVar harm_r_translucentStencilShadow;
 extern idCVar harm_r_stencilShadowAlpha;
 #endif
 
+#ifdef __ANDROID__
+extern float RB_overbright;
+#endif
+
 #endif /* !__TR_LOCAL_H__ */
