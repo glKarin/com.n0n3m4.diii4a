@@ -55,7 +55,14 @@ idVec4	g_color_table[16] = {
 	idVec4(1.0f, 1.0f, 1.0f, 1.0f), // S_COLOR_WHITE
 	idVec4(0.5f, 0.5f, 0.5f, 1.0f), // S_COLOR_GRAY
 	idVec4(0.0f, 0.0f, 0.0f, 1.0f), // S_COLOR_BLACK
+#ifdef _RAVEN
+// RAVEN BEGIN
+// bdube: console color
+	idVec4(0.94f, 0.62f, 0.05f, 1.0f),	// S_COLOR_CONSOLE
+// RAVEN END
+#else
 	idVec4(0.0f, 0.0f, 0.0f, 1.0f),
+#endif
 	idVec4(0.0f, 0.0f, 0.0f, 1.0f),
 	idVec4(0.0f, 0.0f, 0.0f, 1.0f),
 	idVec4(0.0f, 0.0f, 0.0f, 1.0f),
