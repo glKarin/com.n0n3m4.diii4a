@@ -289,7 +289,7 @@ If you have questions concerning this license or the applicable additional terms
 #define NVIDIA_DRIVER_LOCATOR			"www.nvidia.com"
 #define ATI_DRIVER_LOCATOR				"www.ati.com"
 #define _HH_RENDERDEMO_HACKS			1		//rww - if 1 enables hacks to make renderdemos work through whatever nefarious means necessary
-#define _HH_CLIP_FASTSECTORS			0		//rww - much faster method for clip sector checking
+#define _HH_CLIP_FASTSECTORS			1		//rww - much faster method for clip sector checking
 #define NEW_MESH_TRANSFORM				0		//bjk - SSE new vert transform
 #define SIMD_SHADOW						0		//bjk - simd shadow calculations
 #define MULTICORE						0		// Multicore optimizations
