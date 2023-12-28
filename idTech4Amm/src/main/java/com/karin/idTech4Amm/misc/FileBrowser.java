@@ -1,6 +1,9 @@
 package com.karin.idTech4Amm.misc;
 
+import android.support.v4.provider.DocumentFile;
 import android.util.Log;
+
+import com.karin.idTech4Amm.lib.FileUtility;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,7 +64,7 @@ public class FileBrowser
             if (!path.equals(m_currentPath))
             {
                 m_currentPath = path;
-                m_fileList.clear();
+                SetupEmptyList(path);
             }
             return false;
         }
@@ -99,7 +102,7 @@ public class FileBrowser
         //m_fileList.sort(m_fileComparator);
 
         // add parent directory
-        if (!m_ignoreDotDot)
+        if (!m_ignoreDotDot && !"/".equals(path))
         {
             item = new FileBrowser.FileModel();
             item.name = "../";
@@ -224,6 +227,235 @@ public class FileBrowser
         return this;
     }
 
+    public boolean ListVirtualFiles(String path, String[] files)
+    {
+        FileBrowser.FileModel item;
+
+        if (path == null || path.isEmpty())
+            return false;
+
+        if (files == null)
+        {
+            if (!path.equals(m_currentPath))
+            {
+                m_currentPath = path;
+                SetupEmptyList(path);
+            }
+            return false;
+        }
+
+        m_fileList.clear();
+
+        for (String name : files)
+        {
+            if (".".equals(name))
+                continue;
+            boolean isDirectory = name.endsWith("/") || "..".equals(name);
+            String p = name.endsWith("/") ? name.substring(0, name.length() - 1) : name;
+            if(m_filter != 0)
+            {
+                if((m_filter & ID_FILTER_FILE) == 0 && !isDirectory)
+                    continue;
+                if((m_filter & ID_FILTER_DIRECTORY) == 0 && isDirectory)
+                    continue;
+            }
+
+            if (isDirectory && !m_dirNameWithSeparator)
+                name = p;
+
+            item = new FileBrowser.FileModel();
+            item.name = name;
+            item.path = path + "/" + p;
+            item.size = 0;
+            item.time = -1;
+            item.type = isDirectory ? FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY : FileBrowser.FileModel.ID_FILE_TYPE_FILE;
+            m_fileList.add(item);
+        }
+
+        Collections.sort(m_fileList, m_fileComparator);
+        //m_fileList.sort(m_fileComparator);
+
+        // add parent directory
+        if (!m_ignoreDotDot && !"/".equals(path))
+        {
+            item = new FileBrowser.FileModel();
+            item.name = "../";
+            item.path = FileUtility.ParentPath(path);
+            item.size = 0;
+            item.time = -1;
+            item.type = FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY;
+            m_fileList.add(0, item);
+        }
+
+        m_currentPath = path;
+        return true;
+    }
+
+    public boolean ListGivenFiles(String path, String[] files)
+    {
+        File dir;
+        FileBrowser.FileModel item;
+
+        if (path == null || path.isEmpty())
+            return false;
+
+        dir = new File(path);
+        if (!dir.isDirectory())
+            return false;
+
+        if (files == null)
+        {
+            if (!path.equals(m_currentPath))
+            {
+                m_currentPath = path;
+                SetupEmptyList(path);
+            }
+            return false;
+        }
+
+        m_fileList.clear();
+
+        for (String name : files)
+        {
+            if (".".equals(name))
+                continue;
+
+            String p = name.endsWith("/") ? name.substring(0, name.length() - 1) : name;
+            File f = new File(path + "/" + p);
+            if(!f.exists())
+                continue;
+
+            name = f.getName();
+            boolean isDirectory = f.isDirectory();
+            if(m_filter != 0)
+            {
+                if((m_filter & ID_FILTER_FILE) == 0 && !isDirectory)
+                    continue;
+                if((m_filter & ID_FILTER_DIRECTORY) == 0 && isDirectory)
+                    continue;
+            }
+            if(!m_showHidden && f.isHidden())
+                continue;
+
+            if (isDirectory && !m_dirNameWithSeparator)
+                name += File.separator;
+
+            item = new FileBrowser.FileModel();
+            item.name = name;
+            item.path = f.getAbsolutePath();
+            item.size = f.length();
+            item.time = f.lastModified();
+            item.type = isDirectory ? FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY : FileBrowser.FileModel.ID_FILE_TYPE_FILE;
+            m_fileList.add(item);
+        }
+
+        Collections.sort(m_fileList, m_fileComparator);
+        //m_fileList.sort(m_fileComparator);
+
+        // add parent directory
+        if (!m_ignoreDotDot && !"/".equals(path))
+        {
+            item = new FileBrowser.FileModel();
+            item.name = "../";
+            item.path = dir.getParent();
+            item.size = dir.length();
+            item.time = dir.lastModified();
+            item.type = dir.isDirectory() ? FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY : FileBrowser.FileModel.ID_FILE_TYPE_FILE;
+            m_fileList.add(0, item);
+        }
+
+        m_currentPath = path;
+        return true;
+    }
+
+    public boolean ListDocumentFiles(String path, DocumentFile dir)
+    {
+        DocumentFile[] files;
+        FileBrowser.FileModel item;
+
+        if (path == null || path.isEmpty())
+            return false;
+
+        if (dir == null)
+        {
+            if (!path.equals(m_currentPath))
+            {
+                m_currentPath = path;
+                SetupEmptyList(path);
+            }
+            return false;
+        }
+
+        if (!dir.isDirectory())
+            return false;
+
+        files = dir.listFiles();
+
+        m_fileList.clear();
+
+        for (DocumentFile f : files)
+        {
+            String name = f.getName();
+            if (".".equals(name))
+                continue;
+            if(m_filter != 0)
+            {
+                if((m_filter & ID_FILTER_FILE) == 0 && !f.isDirectory())
+                    continue;
+                if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
+                    continue;
+            }
+            if(!m_showHidden && name.startsWith("."))
+                continue;
+
+            if (f.isDirectory() && m_dirNameWithSeparator)
+                name += File.separator;
+
+            item = new FileBrowser.FileModel();
+            item.name = name;
+            item.path = path + "/" + f.getName();
+            item.size = f.length();
+            item.time = f.lastModified();
+            item.type = f.isDirectory() ? FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY : FileBrowser.FileModel.ID_FILE_TYPE_FILE;
+            m_fileList.add(item);
+        }
+
+        Collections.sort(m_fileList, m_fileComparator);
+        //m_fileList.sort(m_fileComparator);
+
+        // add parent directory
+        if (!m_ignoreDotDot && !"/".equals(path))
+        {
+            item = new FileBrowser.FileModel();
+            item.name = "../";
+            item.path = FileUtility.ParentPath(path);
+            item.size = dir.length();
+            item.time = dir.lastModified();
+            item.type = dir.isDirectory() ? FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY : FileBrowser.FileModel.ID_FILE_TYPE_FILE;
+            m_fileList.add(0, item);
+        }
+        m_currentPath = path;
+
+        return true;
+    }
+
+    private void SetupEmptyList(String path)
+    {
+        FileBrowser.FileModel item;
+
+        m_fileList.clear();
+        if (!m_ignoreDotDot && !"/".equals(path))
+        {
+            item = new FileBrowser.FileModel();
+            item.name = "../";
+            item.path = FileUtility.ParentPath(path);
+            item.size = 0;
+            item.time = -1;
+            item.type = FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY;
+            m_fileList.add(0, item);
+        }
+    }
+
     public static class FileModel
     {
         public static final int ID_FILE_TYPE_FILE = 0;
@@ -243,7 +475,7 @@ public class FileBrowser
         }
     }
 
-    private Comparator<FileBrowser.FileModel> m_fileComparator = new Comparator<FileBrowser.FileModel>()
+    private final Comparator<FileBrowser.FileModel> m_fileComparator = new Comparator<FileBrowser.FileModel>()
     {
         @Override
         public int compare(FileBrowser.FileModel a, FileBrowser.FileModel b)

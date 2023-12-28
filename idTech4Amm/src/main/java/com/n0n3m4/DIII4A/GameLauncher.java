@@ -128,6 +128,8 @@ public class GameLauncher extends Activity
 	private static final int CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE = 10;
 	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD = 11;
 
+	private static final int CONST_RESULT_CODE_ACCESS_ANDROID_DATA = 12;
+
 	private final GameManager m_gameManager = new GameManager();
     // GameLauncher function
     private ExtractPatchResourceFunc m_extractPatchResourceFunc;
@@ -1378,7 +1380,7 @@ public class GameLauncher extends Activity
     private void OpenFolderChooser()
     {
         if (null == m_chooseGameFolderFunc)
-            m_chooseGameFolderFunc = new ChooseGameFolderFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER, new Runnable()
+            m_chooseGameFolderFunc = new ChooseGameFolderFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER, CONST_RESULT_CODE_ACCESS_ANDROID_DATA, new Runnable()
             {
                 @Override
                 public void run()
@@ -1669,6 +1671,9 @@ public class GameLauncher extends Activity
 						bundle.putParcelable("uri", data.getData());
 						m_extractSourceFunc.Start(bundle);
 					}
+					break;
+				case CONST_RESULT_CODE_ACCESS_ANDROID_DATA:
+					ContextUtility.PersistableUriPermission(this, data.getData());
 					break;
             }
         }

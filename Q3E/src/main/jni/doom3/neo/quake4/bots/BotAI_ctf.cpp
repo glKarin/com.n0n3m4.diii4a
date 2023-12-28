@@ -1,4 +1,4 @@
-#ifdef MOD_BOTS
+// #ifdef MOD_BOTS
 
 // #define _CTF_BOT_CODE_D3
 
@@ -126,4 +126,4 @@ static int GetFlagCarrier(int team)
 #endif
 }
 
-#endif
+// #endif

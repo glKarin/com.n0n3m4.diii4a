@@ -56,4 +56,5 @@ android {
 
 dependencies {
     implementation project(':Q3E')
+    implementation 'com.android.support:documentfile:28.0.0'
 }

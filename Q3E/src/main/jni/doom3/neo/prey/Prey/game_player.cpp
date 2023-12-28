@@ -3878,7 +3878,11 @@ void hhPlayer::StartSpiritWalk( const bool bThrust, bool force ) {
 		GetViewPos( origin, axis );
 		fxInfo.SetEntity( this );
 		fxInfo.RemoveWhenDone( true );
+#ifdef _PREY
+		fxInfo.SetBindBone( spawnArgs.GetString("bone_fx_spiritWalkFlash", "origin") );
+#else
 		fxInfo.SetBindBone( "origin" );
+#endif
 		BroadcastFxInfoPrefixed( "fx_spiritWalkFlash", origin, axis, &fxInfo );
 
 		// Thrust the player backwards out of the body
@@ -3949,7 +3953,11 @@ void hhPlayer::StopSpiritWalk(bool forceAllowance) {
 		GetViewPos( origin, axis );
 		fxInfo.SetEntity( this );
 		fxInfo.RemoveWhenDone( true );
+#ifdef _PREY
+		fxInfo.SetBindBone( spawnArgs.GetString("bone_fx_spiritWalkFlash", "origin") );
+#else
 		fxInfo.SetBindBone( "origin" );
+#endif
 		BroadcastFxInfoPrefixed( "fx_spiritWalkFlash", origin, axis, &fxInfo );
 	}
 }
