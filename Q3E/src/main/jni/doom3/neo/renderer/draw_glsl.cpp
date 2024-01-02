@@ -445,24 +445,33 @@ void RB_GLSL_DrawInteractions(void)
 			if(vLight->globalShadows || vLight->localShadows)
 			{
                 qglDisable(GL_STENCIL_TEST);
-				extern char RB_ShadowMapPass_T;
 
-				RB_ShadowMapPass_T = 'G';
 				for( int m = side; m < sideStop ; m++ )
 				{
 					RB_ShadowMapPass( vLight->globalShadows, m, true );
 				}
 
-				RB_ShadowMapPass_T = 'L';
 				for( int m = side; m < sideStop ; m++ )
 				{
 					RB_ShadowMapPass( vLight->localShadows, m, false );
 				}
 
-				RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
-				RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+				if(r_prelightStencilShadow)
+				{
+					qglEnable(GL_STENCIL_TEST);
 
-                qglEnable(GL_STENCIL_TEST);
+					RB_StencilShadowPass_shadowMapping(vLight->globalShadows);
+					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
+					RB_StencilShadowPass_shadowMapping(vLight->localShadows);
+					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+				}
+				else
+				{
+					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
+					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+
+					qglEnable(GL_STENCIL_TEST);
+				}
 			}
 			else
 			{
@@ -547,6 +556,7 @@ static void R_InitGLSLCvars(void)
 
 #ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
+	r_prelightStencilShadow = harm_r_prelightStencilShadow.GetBool();
 #ifdef GL_ES_VERSION_3_0
 	if(!USING_GLES3)
 #endif
@@ -606,6 +616,11 @@ void R_CheckBackEndCvars(void)
 	{
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
+	}
+	if(harm_r_prelightStencilShadow.IsModified())
+	{
+		r_prelightStencilShadow = harm_r_prelightStencilShadow.GetBool();
+		harm_r_prelightStencilShadow.ClearModified();
 	}
 #endif
 
