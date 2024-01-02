@@ -1,9 +1,10 @@
 #define glDepthRange(a, b) qglDepthRangef(a, b)
 
-#define GL_COLOR_ARRAY				0x8076
+// #define GL_COLOR_ARRAY				0x8076
 #define GL_TEXTURE_COORD_ARRAY			0x8078
 
-#define GL_POLYGON GL_LINE_LOOP // GL_TRIANGLE_FAN
+#define GL_POLYGON GL_TRIANGLE_FAN // GL_LINE_LOOP
+#define GL_QUADS GL_TRIANGLE_FAN
 // #define GL_POLYGON				0x0009
 #define GL_ALL_ATTRIB_BITS			0xFFFFFFFF
 
@@ -19,9 +20,14 @@
 #define BACKEND_MODELVIEW_MATRIX (backEnd.viewDef->worldSpace.modelViewMatrix)
 #define BACKEND_PROJECTION_MATRIX (backEnd.viewDef->projectionMatrix)
 
+#define CLIENT_STATE_VERTEX 1
+#define CLIENT_STATE_TEXCOORD (1 << 1)
+#define CLIENT_STATE_COLOR (1 << 2)
+
 static GLenum gl_RenderType;
+static GLfloat gl_TexCoord[2];
 static GLfloat gl_Color[4] = {0, 0, 0, 1};
-static idList<idVec3> gl_VertexList;
+static idList<idDrawVert> gl_VertexList;
 static GLenum gl_MatrixMode = GL_MODELVIEW;
 static GLuint gl_ClientState = 1 | 0 | 4;
 static const float	GL_IDENTITY_MATRIX[16] = {
@@ -253,38 +259,64 @@ static void glLoadIdentity(void)
 	}
 }
 
-static void glVertex3f(const GLfloat x, GLfloat y, GLfloat z)
+// must call glPushMatrix first
+static void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat nearZ, GLfloat farZ)
 {
-	gl_VertexList.Append(idVec3(x, y, z));
+	if(gl_MatrixMode == GL_PROJECTION)
+	{
+		if(gl_ProjectionMatrixStack.Empty())
+		{
+			Sys_Printf("[GLCompat]: must call glPushMatrix() first for ortho matrix!\n");
+			return;
+		}
+		GLfloat m[16];
+		esOrtho((ESMatrix *)m, left, right, bottom, top, nearZ, farZ);
+		gl_ProjectionMatrixStack.Set(m);
+	}
+	else
+	{
+		if(gl_ModelviewMatrixStack.Empty())
+		{
+			Sys_Printf("[GLCompat]: must call glPushMatrix() first for ortho matrix!\n");
+			return;
+		}
+		GLfloat m[16];
+		esOrtho((ESMatrix *)m, left, right, bottom, top, nearZ, farZ);
+		gl_ModelviewMatrixStack.Set(m);
+	}
 }
 
-static void glVertex3fv(const GLfloat *v)
+static void glrbFillVertex(idDrawVert &drawVert)
 {
-	gl_VertexList.Append(idVec3(v[0], v[1], v[2]));
+	drawVert.color[0] = (byte)(gl_Color[0] * 255.0f);
+	drawVert.color[1] = (byte)(gl_Color[1] * 255.0f);
+	drawVert.color[2] = (byte)(gl_Color[2] * 255.0f);
+	drawVert.color[3] = (byte)(gl_Color[3] * 255.0f);
+	drawVert.st.Set(gl_TexCoord[0], gl_TexCoord[1]);
 }
 
-static void glColor3f(GLfloat r, GLfloat g, GLfloat b)
+static void glVertex3f(GLfloat x, GLfloat y, GLfloat z)
 {
-	gl_Color[0] = r;
-	gl_Color[1] = g;
-	gl_Color[2] = b;
-	gl_Color[3] = 1;
+	idDrawVert drawVert;
+	drawVert.xyz.Set(x, y, z);
+	glrbFillVertex(drawVert);
+	gl_VertexList.Append(drawVert);
 }
 
-static void glColor3fv(const GLfloat *v)
+static void glVertex2f(GLfloat x, GLfloat y)
 {
-	gl_Color[0] = v[0];
-	gl_Color[1] = v[1];
-	gl_Color[2] = v[2];
-	gl_Color[3] = 1;
+	glVertex3f(x, y, 0.0f);
 }
 
-static void glColor4fv(const GLfloat *v)
+static void glVertex3fv(const GLfloat v[3])
 {
-	gl_Color[0] = v[0];
-	gl_Color[1] = v[1];
-	gl_Color[2] = v[2];
-	gl_Color[3] = v[3];
+	glVertex3f(v[0], v[1], v[2]);
+}
+
+static void glTexCoord2f(GLfloat s, GLfloat t)
+{
+	gl_TexCoord[0] = s;
+	gl_TexCoord[1] = t;
 }
 
 static void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
@@ -295,17 +327,47 @@ static void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 	gl_Color[3] = a;
 }
 
-static void glColor4ubv(const GLubyte *v)
+static void glColor3f(GLfloat r, GLfloat g, GLfloat b)
 {
-	gl_Color[0] = (float)v[0] / 255.0f;
-	gl_Color[1] = (float)v[1] / 255.0f;
-	gl_Color[2] = (float)v[2] / 255.0f;
-	gl_Color[3] = (float)v[3] / 255.0f;
+	glColor4f(r, g, b, 1.0f);
 }
 
-static void qglDisableClientState(int i)
+static void glColor3fv(const GLfloat v[3])
 {
-	//gl_ClientState &= ~(1 << i); // `default` glsl shader must attr_Color is all [255, 255, 255, 255]
+	glColor3f(v[0], v[1], v[2]);
+}
+
+static void glColor4fv(const GLfloat v[4])
+{
+	glColor4f(v[0], v[1], v[2], v[3]);
+}
+
+static void glColor4ubv(const GLubyte v[4])
+{
+	glColor4f((float)v[0] / 255.0f, (float)v[1] / 255.0f, (float)v[2] / 255.0f, (float)v[3] / 255.0f);
+}
+
+static void glDisableClientState(GLenum e)
+{
+	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
+	if(e == GL_TEXTURE_COORD_ARRAY)
+		gl_ClientState &= ~CLIENT_STATE_TEXCOORD;
+}
+
+static void glEnableClientState(GLenum e)
+{
+	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
+	if(e == GL_TEXTURE_COORD_ARRAY)
+		gl_ClientState |= CLIENT_STATE_TEXCOORD;
+}
+
+static GLboolean glrbClientStateIsEnabled(GLenum e)
+{
+	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
+	if(e == GL_TEXTURE_COORD_ARRAY)
+		return gl_ClientState & CLIENT_STATE_TEXCOORD ? GL_TRUE : GL_FALSE;
+	else
+		return GL_TRUE;
 }
 
 // must call glPushMatrix first
@@ -376,28 +438,53 @@ static void glEnd()
 	{
 		glrbStartRender();
 
+		GLboolean usingTexCoord = glrbClientStateIsEnabled(GL_TEXTURE_COORD_ARRAY);
+
 		qglBindBuffer(GL_ARRAY_BUFFER, 0);
 		GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+		if(usingTexCoord)
+			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
-		globalImages->whiteImage->Bind();
+		GL_SelectTexture(0);
+		if(!usingTexCoord)
+			globalImages->whiteImage->Bind();
 
 		GLfloat *vertex = (GLfloat *)malloc(sizeof(GLfloat) * num * 3);
 		GLubyte *color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
-		memset(color, 0xFF, sizeof(GLubyte) * num * 4);
+		//memset(color, 0xFF, sizeof(GLubyte) * num * 4);
+		GLfloat *texcoord = NULL;
+		if(usingTexCoord)
+			texcoord = (GLfloat *)malloc(sizeof(GLfloat) * num * 2);
 		for(int i = 0; i < num; i++)
 		{
-			const idVec3 &v3 = gl_VertexList[i];
-			vertex[i * 3] = v3[0];
-			vertex[i * 3 + 1] = v3[1];
-			vertex[i * 3 + 2] = v3[2];
+			const idDrawVert &drawVert = gl_VertexList[i];
+			vertex[i * 3] = drawVert.xyz[0];
+			vertex[i * 3 + 1] = drawVert.xyz[1];
+			vertex[i * 3 + 2] = drawVert.xyz[2];
+			color[i * 4] = drawVert.color[0];
+			color[i * 4 + 1] = drawVert.color[1];
+			color[i * 4 + 2] = drawVert.color[2];
+			color[i * 4 + 3] = drawVert.color[3];
+			if(usingTexCoord)
+			{
+				texcoord[i * 2] = drawVert.st[0];
+				texcoord[i * 2 + 1] = drawVert.st[1];
+			}
 		}
 		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, 0, vertex);
 		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, 0, color);
+		if(usingTexCoord)
+			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, 0, texcoord);
+
 		qglDrawArrays(gl_RenderType, 0, num);
-		free(vertex);
-		free(color);
 
 		GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+		if(usingTexCoord)
+			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
+		free(vertex);
+		free(color);
+		free(texcoord);
 		glrbEndRender();
 	}
 

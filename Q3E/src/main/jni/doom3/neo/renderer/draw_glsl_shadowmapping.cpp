@@ -469,17 +469,17 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
 
     GLint start;
     GLsizei numIndexes;
-	if(tri->numIndexes > tri->numShadowIndexesNoFrontCaps) // has front caps
+	if(tri->numIndexes > tri->numShadowIndexesNoFrontCaps) // has front caps: prelight shadow model
 	{
 		start = tri->numShadowIndexesNoFrontCaps;
 		numIndexes = tri->numIndexes - tri->numShadowIndexesNoFrontCaps;
 	}
-	else if(tri->numShadowIndexesNoFrontCaps > tri->numShadowIndexesNoCaps) // rear cap
+	else if(tri->numShadowIndexesNoFrontCaps > tri->numShadowIndexesNoCaps) // rear cap: r_useTurboShadows = 1
 	{
 		start = tri->numShadowIndexesNoCaps;
 		numIndexes = tri->numShadowIndexesNoFrontCaps - tri->numShadowIndexesNoCaps;
 	}
-	else // all
+	else // all: player model
 	{
         start = 0;
         numIndexes = tri->numIndexes;
