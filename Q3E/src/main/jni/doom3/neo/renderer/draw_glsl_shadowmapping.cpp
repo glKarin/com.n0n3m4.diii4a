@@ -58,8 +58,8 @@
 #define POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH 0
 #define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR 1
 
-static bool r_shadowMapping = false; // using shadow mapping(current only for dynamic shadow)
-static bool r_prelightStencilShadow = true; // prelight shadow using stencil shadow
+static bool r_shadowMapping = false; // using shadow mapping(include prelight shadow)
+static bool r_prelightStencilShadow = false; // prelight shadow using stencil shadow
 bool r_useDepthTexture = true;
 bool r_useCubeDepthTexture = true;
 static bool r_dumpShadowMap = false; // backend
@@ -444,9 +444,9 @@ ID_INLINE static void RB_TestColorBuffer(const viewLight_t* vLight, int side)
 #define RB_TestColorBuffer(vLight, side)
 #endif
 
-static void R_PrintMatrix(int i, const float* arr)
+static void R_PrintMatrix(int w, const float* arr)
 {
-    printf("%d ------>\n", i);
+    printf("%d ------>\n", w);
     for (int i = 0; i < 16; i++)
     {
         printf("%f   ", arr[i]);
@@ -966,19 +966,29 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 
     for( const drawSurf_t* drawSurf = drawSurfs; drawSurf != NULL; drawSurf = drawSurf->nextOnLight )
     {
-        if( r_prelightStencilShadow && RB_ShadowMapping_isPrelightShadow(drawSurf) )
-        {
-            continue;	// prelight shadow using stencil shadow
-        }
         if( drawSurf->geo->numIndexes == 0 )
         {
             continue;	// a job may have created an empty shadow geometry
+        }
+        /* //karin:
+         * prelight shadow's model matrix is using worldSpace->modelMatrix, also see in tr_light::R_AddLightSurfaces and tr_light::R_LinkLightSurf.
+         * although the world model matrix's is 4x4 matrix, but only has 3x3 identity matrix. 4th column and 4th row is 0 and not 1, so it's not 4x4 identity matrix, but it not effect to calc local light position.
+         * so we force using 4x4 identity matrix.
+         * current using cdrawSurf_t::geo->shadowIsPrelight for checking the shadow model is prelight.
+         */
+        const bool IsPrelightShadow = RB_ShadowMapping_isPrelightShadow(drawSurf);
+        if( r_prelightStencilShadow && IsPrelightShadow )
+        {
+            continue;	// if prelight shadow using stencil shadow
         }
 
         if( drawSurf->space != backEnd.currentSpace )
         {
             idRenderMatrix modelRenderMatrix;
-            idRenderMatrix::Transpose( *( idRenderMatrix* )drawSurf->space->modelMatrix, modelRenderMatrix );
+            if(IsPrelightShadow)
+                modelRenderMatrix.Identity();
+            else
+                idRenderMatrix::Transpose( *( idRenderMatrix* )drawSurf->space->modelMatrix, modelRenderMatrix );
 
             idRenderMatrix modelToLightRenderMatrix;
             idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );

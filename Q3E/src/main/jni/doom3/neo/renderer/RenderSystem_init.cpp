@@ -2585,8 +2585,7 @@ idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | C
 idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapPolygonFactor( "harm_r_shadowMapPolygonFactor", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
 idCVar harm_r_shadowMapPolygonOffset( "harm_r_shadowMapPolygonOffset", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
-
-idCVar harm_r_prelightStencilShadow( "harm_r_prelightStencilShadow", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "use stencil shadows if prelight shadow(shadow mapping not support on prelight shadow current)" );
+idCVar harm_r_prelightStencilShadow( "harm_r_prelightStencilShadow", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "use stencil shadows if prelight shadow in shadow mapping" );
 
 #include "Framebuffer.cpp"
 #include "tr_shadowmapping.cpp"
