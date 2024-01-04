@@ -2636,6 +2636,22 @@ void idMaterial::ParseMaterial(idLexer &src)
 		} else if (!token.Icmp("overlay_macro")) {
 			continue;
 		} else if (!token.Icmp("scorch_macro")) {
+			//karin: same as `DECAL_MACRO` for weapon projectile scorches
+			// polygonOffset
+			SetMaterialFlag(MF_POLYGONOFFSET);
+			polygonOffset = 1;
+
+			// discrete
+			surfaceFlags |= SURF_DISCRETE;
+			contentFlags &= ~CONTENTS_SOLID;
+
+			// sort decal
+			sort = SS_DECAL;
+
+			// noShadows
+			SetMaterialFlag(MF_NOSHADOWS);
+
+			coverage = MC_TRANSLUCENT;
 			continue;
 		} else if (!token.Icmp("glass_macro")) {
 			surfaceFlags = _SURFTYPE(SURFTYPE_GLASS);
