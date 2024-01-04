@@ -2083,7 +2083,6 @@ extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapPolygonFactor;
 extern idCVar harm_r_shadowMapPolygonOffset;
-extern idCVar harm_r_prelightStencilShadow;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;

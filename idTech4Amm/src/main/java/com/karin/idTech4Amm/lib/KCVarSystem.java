@@ -42,9 +42,13 @@ public final class KCVarSystem
                         KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
 
                         KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", 0),
-                        KCVar.CreateCVar("harm_r_prelightStencilShadow", "bool", "0", "use stencil shadows if prelight shadow in shadow mapping", 0),
                         KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "0.5", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
+                        /*KCVar.CreateCVar("harm_r_shadowMappingScheme", "integer", "0", "shadow mapping rendering scheme", 0,
+                                "0", "always using shadow mapping",
+                                "1", "prelight shadow using shadow mapping, others using stencil shadow",
+                                "2", "non-prelight shadow using shadow mapping, others using stencil shadow"
+                        ),*/
 
                         KCVar.CreateCVar("harm_r_translucentStencilShadow", "bool", "0", "enable translucent shadow in stencil shadow", 0),
                         KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "0.5", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE)

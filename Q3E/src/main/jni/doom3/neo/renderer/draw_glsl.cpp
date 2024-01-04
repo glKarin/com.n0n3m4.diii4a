@@ -40,6 +40,14 @@ static const float zero[4] = { 0, 0, 0, 0 };
 static const float one[4] = { 1, 1, 1, 1 };
 static const float negOne[4] = { -1, -1, -1, -1 };
 
+#if 1
+#define ENABLE_STENCIL_TEST() qglEnable(GL_STENCIL_TEST);
+#define DISABLE_STENCIL_TEST() qglDisable(GL_STENCIL_TEST);
+#else
+#define ENABLE_STENCIL_TEST() // qglStencilFunc(GL_GEQUAL, 128, 255);
+#define DISABLE_STENCIL_TEST() qglStencilFunc(GL_ALWAYS, 128, 255);
+#endif
+
 #define HARM_INTERACTION_SHADER_PHONG "phong"
 #define HARM_INTERACTION_SHADER_BLINNPHONG "blinn_phong"
 const char *harm_r_lightModelArgs[]	= { HARM_INTERACTION_SHADER_PHONG, HARM_INTERACTION_SHADER_BLINNPHONG, NULL };
@@ -353,11 +361,15 @@ void RB_GLSL_DrawInteractions(void)
 	const idMaterial	*lightShader;
 
 	//GL_SelectTexture(0); //k2023
+	/* current
+     * GL_STENCIL_TEST enabled
+     * GL_BLEND enabled
+     */
 
 #ifdef _SHADOW_MAPPING
-	const bool shadowMapping = r_shadowMapping && r_shadows.GetBool();
+	const bool ShadowMapping = r_shadowMapping && r_shadows.GetBool();
 	float clearColor[4];
-	if(shadowMapping)
+	if(ShadowMapping)
 	{
 		RB_getClearColor(clearColor);
 		if(r_dumpShadowMapFrontEnd)
@@ -366,9 +378,13 @@ void RB_GLSL_DrawInteractions(void)
 			r_dumpShadowMapFrontEnd = false;
 		}
 	}
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+	const bool PureShadowMapping = ShadowMapping && r_shadowMappingScheme == SHADOW_MAPPING_PURE;
 #endif
+#endif
+
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-	const bool translucentStencilShadow = r_translucentStencilShadow && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
+	const bool TranslucentStencilShadow = r_translucentStencilShadow && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
 #endif
 	//
 	// for each light, perform adding and shadowing
@@ -413,7 +429,7 @@ void RB_GLSL_DrawInteractions(void)
 		}
 
 #ifdef _SHADOW_MAPPING
-		if(shadowMapping && vLight->shadowLOD >= 0)
+		if(ShadowMapping && vLight->shadowLOD >= 0)
 		{
             int	side, sideStop;
 
@@ -456,7 +472,17 @@ void RB_GLSL_DrawInteractions(void)
 					RB_ShadowMapPass( vLight->localShadows, m, false );
 				}
 
-				if(r_prelightStencilShadow)
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+				if(PureShadowMapping)
+				{
+#endif
+					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
+					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+
+					qglEnable(GL_STENCIL_TEST);
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+				}
+				else
 				{
 					qglEnable(GL_STENCIL_TEST);
 
@@ -465,13 +491,7 @@ void RB_GLSL_DrawInteractions(void)
 					RB_StencilShadowPass_shadowMapping(vLight->localShadows);
 					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
 				}
-				else
-				{
-					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
-					RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
-
-					qglEnable(GL_STENCIL_TEST);
-				}
+#endif
 			}
 			else
 			{
@@ -484,7 +504,7 @@ void RB_GLSL_DrawInteractions(void)
 		{
             RB_StencilShadowPass(vLight->globalShadows);
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-			if(translucentStencilShadow)
+			if(TranslucentStencilShadow)
 			{
 				RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
 				if(r_stencilShadowAlpha < 1.0f)
@@ -496,7 +516,7 @@ void RB_GLSL_DrawInteractions(void)
 
 			RB_StencilShadowPass(vLight->localShadows);
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-			if(translucentStencilShadow)
+			if(TranslucentStencilShadow)
 			{
 				RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
 				if(r_stencilShadowAlpha < 1.0f)
@@ -527,7 +547,7 @@ void RB_GLSL_DrawInteractions(void)
 
 	//GL_SelectTexture(0); //k2023
 #ifdef _SHADOW_MAPPING
-	if(shadowMapping)
+	if(ShadowMapping)
 	{
 		qglClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
 	}
@@ -556,7 +576,12 @@ static void R_InitGLSLCvars(void)
 
 #ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
-	r_prelightStencilShadow = harm_r_prelightStencilShadow.GetBool();
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+	int i = harm_r_shadowMappingScheme.GetInteger();
+    if(i < 0 || i > SHADOW_MAPPING_NON_PRELIGHT)
+        i = SHADOW_MAPPING_PURE;
+    r_shadowMappingScheme = i;
+#endif
 #ifdef GL_ES_VERSION_3_0
 	if(!USING_GLES3)
 #endif
@@ -617,11 +642,16 @@ void R_CheckBackEndCvars(void)
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
 	}
-	if(harm_r_prelightStencilShadow.IsModified())
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+	if(harm_r_shadowMappingScheme.IsModified())
 	{
-		r_prelightStencilShadow = harm_r_prelightStencilShadow.GetBool();
-		harm_r_prelightStencilShadow.ClearModified();
+        int i = harm_r_shadowMappingScheme.GetInteger();
+        if(i < 0 || i > SHADOW_MAPPING_NON_PRELIGHT)
+            i = SHADOW_MAPPING_PURE;
+        r_shadowMappingScheme = i;
+		harm_r_shadowMappingScheme.ClearModified();
 	}
+#endif
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW

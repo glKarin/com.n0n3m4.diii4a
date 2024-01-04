@@ -18,13 +18,13 @@ GPLv3
 * jpeg/png/bmp format of screenshot
 * obj format static model
 * dae format static model
-* soft shadow with shadow-mapping
+* pure soft shadow with shadow-mapping
 * OpenGLES2.0/OpenGLES3.0
 * OpenAL(soft) and EFX Reverb
 * no-lighting rendering and no-lighting material
 * translucent stencil shadow
 * DOOM3 mods: DOOM3(with full body awareness mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
-* Quake4(with Bot mod, full body awareness mod) and Raven's idTech4 engine
+* Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"

@@ -59,7 +59,6 @@
 #define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR 1
 
 static bool r_shadowMapping = false; // using shadow mapping(include prelight shadow)
-static bool r_prelightStencilShadow = false; // prelight shadow using stencil shadow
 bool r_useDepthTexture = true;
 bool r_useCubeDepthTexture = true;
 static bool r_dumpShadowMap = false; // backend
@@ -67,6 +66,16 @@ static bool r_dumpShadowMapFrontEnd = false; // frontend
 
 // see Framebuffer.h::shadowMapResolutions
 static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0};
+
+// #define _CONTROL_SHADOW_MAPPING_RENDERING // prelight shadow using stencil shadow or shadow mapping
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+#define SHADOW_MAPPING_PURE 0 // always using shadow mapping
+#define SHADOW_MAPPING_PRELIGHT 1 // only prelight shadow using shadow mapping, others using stencil shadow
+#define SHADOW_MAPPING_NON_PRELIGHT 2 // only prelight shadow using stencil shadow, others using shadow mapping
+
+static int r_shadowMappingScheme = SHADOW_MAPPING_PURE;
+static idCVar harm_r_shadowMappingScheme( "harm_r_shadowMappingScheme", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "shadow mapping rendering scheme. 0 = always using shadow mapping; 1 = prelight shadow using shadow mapping, others using stencil shadow; 2 = non-prelight shadow using shadow mapping, others using stencil shadow", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+#endif
 
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug light type mask. 1: parallel, 2: point, 4: spot");
 static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug shadow map frame buffer.");
@@ -977,10 +986,18 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
          * current using cdrawSurf_t::geo->shadowIsPrelight for checking the shadow model is prelight.
          */
         const bool IsPrelightShadow = RB_ShadowMapping_isPrelightShadow(drawSurf);
-        if( r_prelightStencilShadow && IsPrelightShadow )
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+        if( IsPrelightShadow )
         {
-            continue;	// if prelight shadow using stencil shadow
+            if(r_shadowMappingScheme == SHADOW_MAPPING_NON_PRELIGHT)
+                continue;	// if prelight shadow using stencil shadow
         }
+        else
+        {
+            if(r_shadowMappingScheme == SHADOW_MAPPING_PRELIGHT)
+                continue;	// if prelight shadow using stencil shadow
+        }
+#endif
 
         if( drawSurf->space != backEnd.currentSpace )
         {
@@ -1443,6 +1460,7 @@ ID_INLINE static void RB_getClearColor(float clearColor[4])
 #endif
 }
 
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
 /*
 ======================
 RB_RenderDrawSurfChainWithFunction
@@ -1660,6 +1678,12 @@ static void RB_T_Shadow_shadowMapping(const drawSurf_t *surf)
     }
 }
 
+static ID_INLINE bool RB_StencilShadowPass_shadowMappingFilter(const drawSurf_t *surf)
+{
+    const bool IsPrelightShadow = RB_ShadowMapping_isPrelightShadow(surf);
+    return (r_shadowMappingScheme == SHADOW_MAPPING_PRELIGHT && !IsPrelightShadow) || (r_shadowMappingScheme == SHADOW_MAPPING_NON_PRELIGHT && IsPrelightShadow);
+}
+
 /*
 =====================
 RB_StencilShadowPass
@@ -1671,7 +1695,7 @@ been set to 128 on any surfaces that might receive shadows
 */
 static void RB_StencilShadowPass_shadowMapping(const drawSurf_t *drawSurfs)
 {
-    if (!r_shadows.GetBool() || !r_prelightStencilShadow) {
+    if (!r_shadows.GetBool()) {
         return;
     }
 
@@ -1715,7 +1739,7 @@ static void RB_StencilShadowPass_shadowMapping(const drawSurf_t *drawSurfs)
 
     GL_Cull(CT_TWO_SIDED);
 
-    RB_RenderDrawSurfChainWithFunction_filter(drawSurfs, RB_T_Shadow_shadowMapping, RB_ShadowMapping_isPrelightShadow);
+    RB_RenderDrawSurfChainWithFunction_filter(drawSurfs, RB_T_Shadow_shadowMapping, RB_StencilShadowPass_shadowMappingFilter);
 
     GL_Cull(CT_FRONT_SIDED);
 
@@ -1730,3 +1754,4 @@ static void RB_StencilShadowPass_shadowMapping(const drawSurf_t *drawSurfs)
 
     GL_UseProgram(NULL);
 }
+#endif
