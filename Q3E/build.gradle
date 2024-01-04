@@ -23,8 +23,8 @@ android {
                 cppFlags "-fexceptions", "-frtti"
             }
         }
-        versionCode 1
-        versionName '1.0.0harmattan2'
+        versionCode 131130403
+        versionName '1.3.1.1304.3' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
     }
 
     buildTypes {

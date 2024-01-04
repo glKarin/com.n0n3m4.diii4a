@@ -109,6 +109,14 @@ idEventDef::idEventDef( const char *command, const char *formatspec, char return
 			argsize += sizeof(trace_t) + MAX_STRING_LEN + sizeof(bool);
 			break;
 
+#ifdef _PREY
+#if defined(__aarch64__) || defined(__x86_64__)
+		case D_EVENT_INTPTR:
+			argsize += sizeof(intptr_t);
+			break;
+#endif
+#endif
+
 		default :
 			eventError = true;
 			sprintf( eventErrorMsg, "idEventDef::idEventDef : Invalid arg format '%s' string for '%s' event.", formatspec, name );
@@ -324,6 +332,14 @@ idEvent *idEvent::Alloc( const idEventDef *evdef, int numargs, va_list args ) {
 			}
 			break;
 
+#ifdef _PREY
+#if defined(__aarch64__) || defined(__x86_64__)
+		case D_EVENT_INTPTR:
+			*reinterpret_cast<intptr_t *>( dataPtr ) = arg->value;
+			break;
+#endif
+#endif
+
 		default :
 			gameLocal.Error( "idEvent::Alloc : Invalid arg format '%s' string for '%s' event.", format, evdef->GetName() );
 			break;
@@ -528,6 +544,13 @@ void idEvent::ServiceEvents( void ) {
 					*tracePtr = NULL;
 				}
 				break;
+#ifdef _PREY
+#if defined(__aarch64__) || defined(__x86_64__)
+			case D_EVENT_INTPTR:
+				args[ i ] = *reinterpret_cast<intptr_t *>( &data[ offset ] );
+				break;
+#endif
+#endif
 
 			default:
 				gameLocal.Error( "idEvent::ServiceEvents : Invalid arg format '%s' string for '%s' event.", formatspec, ev->GetName() );

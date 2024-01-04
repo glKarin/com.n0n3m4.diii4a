@@ -5,11 +5,12 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import android.support.v4.provider.DocumentFile;
 import android.view.View;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
+import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.ui.FileBrowserDialog;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
@@ -19,12 +20,14 @@ import java.io.File;
 public final class ChooseGameFolderFunc extends GameLauncherFunc
 {
     private final int m_code;
+    private final int m_uriCode;
     private String m_path;
 
-    public ChooseGameFolderFunc(GameLauncher gameLauncher, int code, Runnable runnable)
+    public ChooseGameFolderFunc(GameLauncher gameLauncher, int code, int uriCode, Runnable runnable)
     {
         super(gameLauncher, runnable);
         m_code = code;
+        m_uriCode = uriCode;
     }
 
     public void Reset()
@@ -53,23 +56,60 @@ public final class ChooseGameFolderFunc extends GameLauncherFunc
         String defaultPath = Environment.getExternalStorageDirectory().getAbsolutePath(); //System.getProperty("user.home");
         if(null == gamePath || gamePath.isEmpty())
             gamePath = defaultPath;
-        File f = new File(gamePath);
-        if(!f.exists())
+
+        boolean checked = false;
+        if(ContextUtility.NeedUsingDocumentFile(m_gameLauncher, gamePath))
         {
-            gamePath = defaultPath;
-            f = new File(gamePath);
-        }
-        if(!f.isDirectory())
-        {
-            gamePath = f.getParent();
-            f = f.getParentFile();
-        }
-        if(!f.canRead())
-        {
-            gamePath = defaultPath;
+            DocumentFile documentFile = ContextUtility.DirectoryDocument(m_gameLauncher, gamePath);
+            if(null == documentFile || !documentFile.exists())
+            {
+                gamePath = defaultPath;
+            }
+            else
+            {
+                if(!documentFile.isDirectory())
+                {
+                    gamePath = FileUtility.ParentPath(gamePath);
+                }
+                checked = true;
+            }
         }
 
+        if(!checked)
+        {
+            File f = new File(gamePath);
+            if(!f.exists())
+            {
+                gamePath = defaultPath;
+                f = new File(gamePath);
+            }
+            if(!f.isDirectory())
+            {
+                gamePath = f.getParent();
+                // f = f.getParentFile();
+            }
+            /*if(!f.canRead())
+            {
+                gamePath = defaultPath;
+            }*/
+        }
+
+        FileBrowserDialog.FileBrowserCallback callback = new FileBrowserDialog.FileBrowserCallback()
+        {
+            @Override
+            public boolean Check(String path)
+            {
+                if(!ContextUtility.NeedGrantUriPermission(m_gameLauncher, path))
+                    return true;
+                if(ContextUtility.IsUriPermissionGrant(m_gameLauncher, path))
+                    return true;
+                ContextUtility.GrantUriPermission(m_gameLauncher, path, m_uriCode);
+                return false;
+            }
+        };
+
         FileBrowserDialog dialog = new FileBrowserDialog(m_gameLauncher);
+        dialog.SetCallback(callback);
         dialog.SetupUI(Q3ELang.tr(m_gameLauncher, R.string.choose_data_folder), gamePath);
         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, Q3ELang.tr(m_gameLauncher, R.string.cancel), new AlertDialog.OnClickListener() {
             @Override
@@ -94,7 +134,7 @@ public final class ChooseGameFolderFunc extends GameLauncherFunc
             dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    dialog.OpenPath(m_gameLauncher.GetDefaultGameDirectory());
+                    dialog.SetPath(m_gameLauncher.GetDefaultGameDirectory());
                 }
             });
         }

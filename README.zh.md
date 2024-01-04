@@ -18,14 +18,14 @@ GPLv3
 * jpeg/png/bmp格式截屏
 * obj格式静态模型
 * dae格式静态模型
-* 阴影图映射阴影
+* 阴影图映射软阴影
 * OpenGLES2.0/OpenGLES3.0
 * OpenAL(soft)和EFX混响
-* no-lighting rendering and no-lighting material
+* 无光照渲染和无光照材质
 * 半透明模板阴影
-* 毁灭战士3 mods: The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
-* 雷神之锤4和Raven idTech4引擎
-* 掠食(2006)和HumanHead idTech4引擎
+* 毁灭战士3 mods: 毁灭战士3(支持全身mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
+* 雷神之锤4(支持Bot mod; 全身mod)和Raven idTech4引擎
+* 掠食(2006)(支持全身mod)和HumanHead idTech4引擎
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"

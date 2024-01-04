@@ -648,5 +648,5 @@ static	idCVarHelp	help_g_ai_useRVMasterMove( "ai_useRVMasterMove", "Use new mast
 #ifdef _MOD_FULL_BODY_AWARENESS
 idCVar harm_pm_fullBodyAwareness( "harm_pm_fullBodyAwareness", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: enables full-body awareness" );
 idCVar harm_pm_fullBodyAwarenessOffset("harm_pm_fullBodyAwarenessOffset", "0 0 0", CVAR_ARCHIVE | CVAR_GAME | CVAR_NETWORKSYNC, "[Harmattan]: full-body awareness offset(<forward-offset> <side-offset> <up-offset>)");
-idCVar harm_pm_fullBodyAwarenessHeadJoint( "harm_pm_fullBodyAwarenessHeadJoint", "head_channel", CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: head joint in full-body awareness" );
+idCVar harm_pm_fullBodyAwarenessHeadJoint( "harm_pm_fullBodyAwarenessHeadJoint", "head_channel", CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: head joint when without head model in full-body awareness" );
 #endif

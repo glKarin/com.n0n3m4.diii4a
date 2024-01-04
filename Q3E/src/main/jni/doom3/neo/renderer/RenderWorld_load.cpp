@@ -308,6 +308,9 @@ idRenderModel *idRenderWorldLocal::ParseShadowModel(idLexer *src)
 
 	// we do NOT do a model->FinishSurfaceces, because we don't need sil edges, planes, tangents, etc.
 //	model->FinishSurfaces();
+#ifdef _SHADOW_MAPPING
+	tri->shadowIsPrelight = true;
+#endif
 
 	return model;
 }

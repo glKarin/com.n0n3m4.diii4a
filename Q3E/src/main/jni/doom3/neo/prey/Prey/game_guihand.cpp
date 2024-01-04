@@ -48,5 +48,28 @@ void hhGuiHand::SetAction(const char* str) {
 }
 
 bool hhGuiHand::IsValidFor( hhPlayer *who ) { 
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || who->InVehicle() || who->IsZoomed())
+#endif
 	return( who->InGUIMode() ); 
+#ifdef _MOD_FULL_BODY_AWARENESS
+	else
+		return false;
+#endif
 }
+#ifdef _MOD_FULL_BODY_AWARENESS
+void hhGuiHand::Show( void )
+{
+	if ( owner.IsValid()) 
+	{
+		idActor *actor = owner.GetEntity();
+		if(actor && owner->IsType( hhPlayer::Type ) )
+		{
+			hhPlayer *who = (hhPlayer *)actor;
+			if(harm_pm_fullBodyAwareness.GetBool() && !pm_thirdPerson.GetBool() && !who->InVehicle() && !who->IsZoomed())
+				return;
+		}
+	}
+	hhAnimatedEntity::Show();
+}
+#endif

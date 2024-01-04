@@ -36,6 +36,10 @@ If you have questions concerning this license or the applicable additional terms
   back end scene + lights rendering functions
 
 */
+#ifdef __ANDROID__
+// Hack brightness slider to increase lighting in the game
+float RB_overbright = 1;
+#endif
 
 
 /*
@@ -669,6 +673,14 @@ static void RB_SubmittInteraction(drawInteraction_t *din, void (*DrawInteraction
 	        || ((din->specularColor[0] > 0 ||
 	             din->specularColor[1] > 0 ||
 	             din->specularColor[2] > 0) && din->specularImage != globalImages->blackImage)) {
+#ifdef __ANDROID__
+		if(RB_overbright > 1.0f)
+		{
+			din->diffuseColor[0] *= RB_overbright;
+			din->diffuseColor[1] *= RB_overbright;
+			din->diffuseColor[2] *= RB_overbright;
+		}
+#endif
 		DrawInteraction(din);
 	}
 }

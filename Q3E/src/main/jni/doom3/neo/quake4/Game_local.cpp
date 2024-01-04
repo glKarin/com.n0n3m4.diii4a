@@ -14,7 +14,6 @@
 
 //#define UI_DEBUG	1
 
-
 #ifdef GAME_DLL
 
 idSys *						sys = NULL;
@@ -1597,8 +1596,7 @@ void idGameLocal::LocalMapRestart( int instance ) {
 	for (i = 0; i < MAX_CLIENTS; i++) {
 // RAVEN BEGIN
 // jnewquist: Use accessor for static class type 
-		if (entities[i] && entities[i]->IsType(idPlayer::GetClassType()) &&
-			(isClient || instance == -1 || entities[i]->GetInstance() == instance)) {
+		if (entities[i] && entities[i]->IsType(idPlayer::GetClassType()) && (isClient || instance == -1 || entities[i]->GetInstance() == instance)) {
 // RAVEN END
 			static_cast< idPlayer * >( entities[i] )->Restart();
 		}

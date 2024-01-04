@@ -513,6 +513,10 @@ protected:
 	void				Event_IgnoreDamage(); // mdl
 
 	void				Event_RespawnCleanup(void); //HUMANHEAD rww
+#ifdef _MOD_FULL_BODY_AWARENESS
+public:
+	virtual bool IsZoomed(void) const;
+#endif
 };
 
 /*

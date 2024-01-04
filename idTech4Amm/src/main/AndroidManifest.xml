@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11035"
-    android:versionName="1.1.0harmattan35"
+    android:versionCode="11036"
+    android:versionName="1.1.0harmattan36"
     android:installLocation="preferExternal"
     >
 
@@ -22,6 +22,9 @@
         tools:ignore="ScopedStorage" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
 
     <!--<uses-feature android:name="android.hardware.type.pc" android:required="false" />-->
 

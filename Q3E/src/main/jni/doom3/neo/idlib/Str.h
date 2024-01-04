@@ -104,6 +104,13 @@ const int C_COLOR_BLACK				= '9';
 #define S_COLOR_BLACK				"^9"
 
 #ifdef _RAVEN
+// RAVEN BEGIN
+// bdube: added
+const int C_COLOR_CONSOLE			= ':';
+// RAVEN END
+
+// bdube: added
+#define S_COLOR_CONSOLE				"^:"
 // ddynerman: team colors
 #define S_COLOR_MARINE				"^c683"
 #define S_COLOR_STROGG				"^c950"

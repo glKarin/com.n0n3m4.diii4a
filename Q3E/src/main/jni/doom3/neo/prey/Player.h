@@ -671,6 +671,14 @@ protected:				// HUMANHEAD nla - need to be protected for access by hhPlayer
 	void					Event_HideTip( void );
 	void					Event_LevelTrigger( void );
 	void					Event_Gibbed( void );
+#ifdef _MOD_FULL_BODY_AWARENESS
+protected:
+	idVec3 fullBodyAwarenessOffset;
+public:
+	virtual bool IsZoomed(void) const { return false; }
+	idVec3 firstPersonViewOrigin_playerViewOrigin; // melee
+	idVec3 firstPersonViewOrigin_viewWeaponOrigin; // launch
+#endif
 };
 
 ID_INLINE bool idPlayer::IsReady( void ) {

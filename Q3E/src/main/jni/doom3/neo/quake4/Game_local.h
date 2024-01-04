@@ -9,7 +9,6 @@ inline void operator delete( void *p ) { Memory::Free(p); }
 inline void *operator new[]( size_t s ) { return Memory::Allocate(s); }
 inline void operator delete[]( void *p ) { Memory::Free(p); }
 #endif
-//#define MOD_BOTS
 // RAVEN END
 /*
 ===============================================================================

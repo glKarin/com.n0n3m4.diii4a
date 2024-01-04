@@ -77,7 +77,7 @@ idCVar r_finish("r_finish", "0", CVAR_RENDERER | CVAR_BOOL, "force a call to glF
 idCVar r_swapInterval("r_swapInterval", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "changes swap interval");
 
 idCVar r_gamma("r_gamma", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 3.0f);
-idCVar r_brightness("r_brightness", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 2.0f);
+idCVar r_brightness("r_brightness", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 3.0f/*2.0f*/);
 
 idCVar r_renderer("r_renderer", "glsl", CVAR_RENDERER | CVAR_ARCHIVE, "hardware specific renderer path to use");
 
@@ -1916,6 +1916,7 @@ R_SetColorMappings
 */
 void R_SetColorMappings(void)
 {
+#if !defined(__ANDROID__)
 	int		i, j;
 	float	g, b;
 	int		inf;
@@ -1948,6 +1949,11 @@ void R_SetColorMappings(void)
 	}
 
 	GLimp_SetGamma(tr.gammaTable, tr.gammaTable, tr.gammaTable);
+#else
+	RB_overbright = (r_brightness.GetFloat() * 2) - 1;
+	if( RB_overbright < 1 )
+		RB_overbright = 1;
+#endif
 }
 
 

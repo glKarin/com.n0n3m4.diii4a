@@ -58,7 +58,7 @@
 #define POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH 0
 #define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR 1
 
-static bool r_shadowMapping = false;
+static bool r_shadowMapping = false; // using shadow mapping(include prelight shadow)
 bool r_useDepthTexture = true;
 bool r_useCubeDepthTexture = true;
 static bool r_dumpShadowMap = false; // backend
@@ -67,6 +67,16 @@ static bool r_dumpShadowMapFrontEnd = false; // frontend
 // see Framebuffer.h::shadowMapResolutions
 static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0};
 
+// #define _CONTROL_SHADOW_MAPPING_RENDERING // prelight shadow using stencil shadow or shadow mapping
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+#define SHADOW_MAPPING_PURE 0 // always using shadow mapping
+#define SHADOW_MAPPING_PRELIGHT 1 // only prelight shadow using shadow mapping, others using stencil shadow
+#define SHADOW_MAPPING_NON_PRELIGHT 2 // only prelight shadow using stencil shadow, others using shadow mapping
+
+static int r_shadowMappingScheme = SHADOW_MAPPING_PURE;
+static idCVar harm_r_shadowMappingScheme( "harm_r_shadowMappingScheme", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "shadow mapping rendering scheme. 0 = always using shadow mapping; 1 = prelight shadow using shadow mapping, others using stencil shadow; 2 = non-prelight shadow using shadow mapping, others using stencil shadow", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
+#endif
+
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug light type mask. 1: parallel, 2: point, 4: spot");
 static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug shadow map frame buffer.");
 char RB_ShadowMapPass_T = 'G'; // G - global shadow, L - local shadow
@@ -74,6 +84,11 @@ char RB_ShadowMapPass_T = 'G'; // G - global shadow, L - local shadow
 void R_DumpShadowMap_f(const idCmdArgs &args)
 {
     r_dumpShadowMapFrontEnd = true;
+}
+
+static ID_INLINE bool RB_ShadowMapping_isPrelightShadow(const drawSurf_t *surf)
+{
+    return surf->geo && surf->geo->shadowIsPrelight;
 }
 
 ID_INLINE void RB_SetMVP( const idRenderMatrix& mvp )
@@ -438,9 +453,9 @@ ID_INLINE static void RB_TestColorBuffer(const viewLight_t* vLight, int side)
 #define RB_TestColorBuffer(vLight, side)
 #endif
 
-static void R_PrintMatrix(int i, const float* arr)
+static void R_PrintMatrix(int w, const float* arr)
 {
-    printf("%d ------>\n", i);
+    printf("%d ------>\n", w);
     for (int i = 0; i < 16; i++)
     {
         printf("%f   ", arr[i]);
@@ -469,17 +484,17 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
 
     GLint start;
     GLsizei numIndexes;
-	if(tri->numIndexes > tri->numShadowIndexesNoFrontCaps) // has front caps
+	if(tri->numIndexes > tri->numShadowIndexesNoFrontCaps) // has front caps: prelight shadow model
 	{
 		start = tri->numShadowIndexesNoFrontCaps;
 		numIndexes = tri->numIndexes - tri->numShadowIndexesNoFrontCaps;
 	}
-	else if(tri->numShadowIndexesNoFrontCaps > tri->numShadowIndexesNoCaps) // rear cap
+	else if(tri->numShadowIndexesNoFrontCaps > tri->numShadowIndexesNoCaps) // rear cap: r_useTurboShadows = 1
 	{
 		start = tri->numShadowIndexesNoCaps;
 		numIndexes = tri->numShadowIndexesNoFrontCaps - tri->numShadowIndexesNoCaps;
 	}
-	else // all
+	else // all: player model
 	{
         start = 0;
         numIndexes = tri->numIndexes;
@@ -875,6 +890,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
 {
     const viewLight_t* vLight = backEnd.vLight;
 
+    RB_ShadowMapPass_T = clear ? 'G' : 'L';
+
     RB_LogComment( "---------- RB_ShadowMapPass( side = %i ) ----------\n", side );
 
 	if(!harm_r_shadowMapDebug.GetInteger())
@@ -962,11 +979,33 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, bool clear )
         {
             continue;	// a job may have created an empty shadow geometry
         }
+        /* //karin:
+         * prelight shadow's model matrix is using worldSpace->modelMatrix, also see in tr_light::R_AddLightSurfaces and tr_light::R_LinkLightSurf.
+         * although the world model matrix's is 4x4 matrix, but only has 3x3 identity matrix. 4th column and 4th row is 0 and not 1, so it's not 4x4 identity matrix, but it not effect to calc local light position.
+         * so we force using 4x4 identity matrix.
+         * current using cdrawSurf_t::geo->shadowIsPrelight for checking the shadow model is prelight.
+         */
+        const bool IsPrelightShadow = RB_ShadowMapping_isPrelightShadow(drawSurf);
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+        if( IsPrelightShadow )
+        {
+            if(r_shadowMappingScheme == SHADOW_MAPPING_NON_PRELIGHT)
+                continue;	// if prelight shadow using stencil shadow
+        }
+        else
+        {
+            if(r_shadowMappingScheme == SHADOW_MAPPING_PRELIGHT)
+                continue;	// if prelight shadow using stencil shadow
+        }
+#endif
 
         if( drawSurf->space != backEnd.currentSpace )
         {
             idRenderMatrix modelRenderMatrix;
-            idRenderMatrix::Transpose( *( idRenderMatrix* )drawSurf->space->modelMatrix, modelRenderMatrix );
+            if(IsPrelightShadow)
+                modelRenderMatrix.Identity();
+            else
+                idRenderMatrix::Transpose( *( idRenderMatrix* )drawSurf->space->modelMatrix, modelRenderMatrix );
 
             idRenderMatrix modelToLightRenderMatrix;
             idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
@@ -1420,3 +1459,299 @@ ID_INLINE static void RB_getClearColor(float clearColor[4])
 	qglGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
 #endif
 }
+
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+/*
+======================
+RB_RenderDrawSurfChainWithFunction
+======================
+*/
+static void RB_RenderDrawSurfChainWithFunction_filter(const drawSurf_t *drawSurfs,
+                                        void (*triFunc_)(const drawSurf_t *), bool (*filter)(const drawSurf_t *))
+{
+    const drawSurf_t		*drawSurf;
+
+    backEnd.currentSpace = NULL;
+
+    for (drawSurf = drawSurfs ; drawSurf ; drawSurf = drawSurf->nextOnLight) {
+
+        if(filter && !filter(drawSurf))
+            continue;
+
+        // change the matrix if needed
+        if (drawSurf->space != backEnd.currentSpace) {
+            float	mat[16];
+            myGlMultMatrix(drawSurf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
+            GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+
+            // we need the model matrix without it being combined with the view matrix
+            // so we can transform local vectors to global coordinates
+            GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), drawSurf->space->modelMatrix);
+        }
+
+        if (drawSurf->space->weaponDepthHack) {
+            RB_EnterWeaponDepthHack(drawSurf);
+        }
+
+        if (drawSurf->space->modelDepthHack) {
+            RB_EnterModelDepthHack(drawSurf);
+        }
+
+        // change the scissor if needed
+        if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
+            backEnd.currentScissor = drawSurf->scissorRect;
+            qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+                       backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
+                       backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
+                       backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
+        }
+
+        // render it
+        triFunc_(drawSurf);
+
+        if (drawSurf->space->weaponDepthHack || drawSurf->space->modelDepthHack != 0.0f) {
+            RB_LeaveDepthHack(drawSurf);
+        }
+
+        backEnd.currentSpace = drawSurf->space;
+    }
+
+    backEnd.currentSpace = NULL; //k2023
+}
+
+
+/*
+=====================
+RB_T_Shadow
+
+the shadow volumes face INSIDE
+=====================
+*/
+static void RB_T_Shadow_shadowMapping(const drawSurf_t *surf)
+{
+    const srfTriangles_t	*tri;
+
+    tri = surf->geo;
+
+    if (!tri->shadowCache) {
+        return;
+    }
+
+    // set the light position for the vertex program to project the rear surfaces
+    if (surf->space != backEnd.currentSpace) {
+        idVec4 localLight;
+
+        R_GlobalPointToLocal(surf->space->modelMatrix, backEnd.vLight->globalLightOrigin, localLight.ToVec3());
+        localLight.w = 0.0f;
+        GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
+/* //k2023
+		// set the modelview matrix for the viewer
+		float	mat[16];
+
+		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
+		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);*/
+    }
+
+    tri = surf->geo;
+
+    GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t),
+                           vertexCache.Position(tri->shadowCache));
+
+    // we always draw the sil planes, but we may not need to draw the front or rear caps
+    int	numIndexes;
+    bool external = false;
+
+    if (!r_useExternalShadows.GetInteger()) {
+        numIndexes = tri->numIndexes;
+    } else if (r_useExternalShadows.GetInteger() == 2) {   // force to no caps for testing
+        numIndexes = tri->numShadowIndexesNoCaps;
+    } else if (!(surf->dsFlags & DSF_VIEW_INSIDE_SHADOW)) {
+        // if we aren't inside the shadow projection, no caps are ever needed needed
+        numIndexes = tri->numShadowIndexesNoCaps;
+        external = true;
+    } else if (!backEnd.vLight->viewInsideLight && !(surf->geo->shadowCapPlaneBits & SHADOW_CAP_INFINITE)) {
+        // if we are inside the shadow projection, but outside the light, and drawing
+        // a non-infinite shadow, we can skip some caps
+        if (backEnd.vLight->viewSeesShadowPlaneBits & surf->geo->shadowCapPlaneBits) {
+            // we can see through a rear cap, so we need to draw it, but we can skip the
+            // caps on the actual surface
+            numIndexes = tri->numShadowIndexesNoFrontCaps;
+        } else {
+            // we don't need to draw any caps
+            numIndexes = tri->numShadowIndexesNoCaps;
+        }
+
+        external = true;
+    } else {
+        // must draw everything
+        numIndexes = tri->numIndexes;
+    }
+
+    // debug visualization
+    if (r_showShadows.GetInteger()) {
+        float color[4];
+
+        if (r_showShadows.GetInteger() == 3) {
+            if (external) {
+                color[0] = 0.1;
+                color[1] = 1;
+                color[2] = 0.1;
+            } else {
+                // these are the surfaces that require the reverse
+                color[0] = 1;
+                color[1] = 0.1;
+                color[2] = 0.1;
+            }
+        } else {
+            // draw different color for turboshadows
+            if (surf->geo->shadowCapPlaneBits & SHADOW_CAP_INFINITE) {
+                if (numIndexes == tri->numIndexes) {
+                    color[0] = 1;
+                    color[1] = 0.1;
+                    color[2] = 0.1;
+                } else {
+                    color[0] = 1;
+                    color[1] = 0.4;
+                    color[2] = 0.1;
+                }
+            } else {
+                if (numIndexes == tri->numIndexes) {
+                    color[0] = 0.1;
+                    color[1] = 1;
+                    color[2] = 0.1;
+                } else if (numIndexes == tri->numShadowIndexesNoFrontCaps) {
+                    color[0] = 0.1;
+                    color[1] = 1;
+                    color[2] = 0.6;
+                } else {
+                    color[0] = 0.6;
+                    color[1] = 1;
+                    color[2] = 0.1;
+                }
+            }
+        }
+
+        color[0] /= backEnd.overBright;
+        color[1] /= backEnd.overBright;
+        color[2] /= backEnd.overBright;
+        color[3] = 1;
+        GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
+
+        qglStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        qglDisable(GL_STENCIL_TEST);
+        GL_Cull(CT_TWO_SIDED);
+        RB_DrawShadowElementsWithCounters(tri, numIndexes);
+        GL_Cull(CT_FRONT_SIDED);
+        if (r_shadows.GetBool())
+            qglEnable(GL_STENCIL_TEST);
+
+        return;
+    }
+
+    // depth-fail stencil shadows
+    if(!harm_r_shadowCarmackInverse.GetBool())
+    {
+        GLenum firstFace = backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK;
+        GLenum secondFace = backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT;
+        if ( !external ) {
+            qglStencilOpSeparate( firstFace, GL_KEEP, tr.stencilDecr, tr.stencilDecr );
+            qglStencilOpSeparate( secondFace, GL_KEEP, tr.stencilIncr, tr.stencilIncr );
+            RB_DrawShadowElementsWithCounters( tri, numIndexes );
+        }
+
+        qglStencilOpSeparate( firstFace, GL_KEEP, GL_KEEP, tr.stencilIncr );
+        qglStencilOpSeparate( secondFace, GL_KEEP, GL_KEEP, tr.stencilDecr );
+
+        RB_DrawShadowElementsWithCounters( tri, numIndexes );
+    }
+    else
+    {
+        if (!external) {
+            qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, tr.stencilDecr, GL_KEEP);
+            qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, tr.stencilIncr, GL_KEEP);
+        } else {
+            // traditional depth-pass stencil shadows
+            qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, GL_KEEP, tr.stencilIncr);
+            qglStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, GL_KEEP, tr.stencilDecr);
+        }
+        RB_DrawShadowElementsWithCounters(tri, numIndexes);
+    }
+}
+
+static ID_INLINE bool RB_StencilShadowPass_shadowMappingFilter(const drawSurf_t *surf)
+{
+    const bool IsPrelightShadow = RB_ShadowMapping_isPrelightShadow(surf);
+    return (r_shadowMappingScheme == SHADOW_MAPPING_PRELIGHT && !IsPrelightShadow) || (r_shadowMappingScheme == SHADOW_MAPPING_NON_PRELIGHT && IsPrelightShadow);
+}
+
+/*
+=====================
+RB_StencilShadowPass
+ only prelight shadow
+
+Stencil test should already be enabled, and the stencil buffer should have
+been set to 128 on any surfaces that might receive shadows
+=====================
+*/
+static void RB_StencilShadowPass_shadowMapping(const drawSurf_t *drawSurfs)
+{
+    if (!r_shadows.GetBool()) {
+        return;
+    }
+
+    if (!drawSurfs) {
+        return;
+    }
+
+    RB_LogComment("---------- RB_StencilShadowPass_shadowMapping ----------\n");
+
+    // Use the stencil shadow shader
+    GL_UseProgram(&shadowShader);
+
+    // Setup attributes arrays
+    // Vertex attribute is always enabled
+    // Disable Color attribute (as it is enabled by default)
+    // Disable TexCoord attribute (as it is enabled by default)
+    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+
+    globalImages->BindNull();
+
+    // for visualizing the shadows
+    if (r_showShadows.GetInteger()) {
+        if (r_showShadows.GetInteger() == 2) {
+            // draw filled in
+            GL_State(GLS_DEPTHMASK | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHFUNC_LESS);
+        } else {
+            // draw as lines, filling the depth buffer
+            GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_POLYMODE_LINE | GLS_DEPTHFUNC_ALWAYS);
+        }
+    } else {
+        // don't write to the color buffer, just the stencil buffer
+        GL_State(GLS_DEPTHMASK | GLS_COLORMASK | GLS_ALPHAMASK | GLS_DEPTHFUNC_LESS);
+    }
+
+    if (r_shadowPolygonFactor.GetFloat() || r_shadowPolygonOffset.GetFloat()) {
+        qglPolygonOffset(r_shadowPolygonFactor.GetFloat(), -r_shadowPolygonOffset.GetFloat());
+        qglEnable(GL_POLYGON_OFFSET_FILL);
+    }
+
+    qglStencilFunc(GL_ALWAYS, 1, 255);
+
+    GL_Cull(CT_TWO_SIDED);
+
+    RB_RenderDrawSurfChainWithFunction_filter(drawSurfs, RB_T_Shadow_shadowMapping, RB_StencilShadowPass_shadowMappingFilter);
+
+    GL_Cull(CT_FRONT_SIDED);
+
+    if (r_shadowPolygonFactor.GetFloat() || r_shadowPolygonOffset.GetFloat()) {
+        qglDisable(GL_POLYGON_OFFSET_FILL);
+    }
+
+    qglStencilFunc(GL_GEQUAL, 128, 255);
+    qglStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+
+    GL_UseProgram(NULL);
+}
+#endif

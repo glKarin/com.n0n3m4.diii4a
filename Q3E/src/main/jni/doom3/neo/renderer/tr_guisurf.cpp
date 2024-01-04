@@ -261,7 +261,7 @@ void R_RenderGuiSurf(idUserInterface *gui, drawSurf_t *drawSurf)
 #endif
 
 #ifdef _HUMANHEAD //karin: auto translate alien text
-	if(tr.primaryRenderView.viewID)
+	//if(tr.primaryRenderView.viewID) // it's 0 when pm_thirdPersion = 1
 	{
 		const char *translateAlienFont = harm_ui_translateAlienFont.GetString();
 		if ( translateAlienFont && translateAlienFont[0] && harm_ui_translateAlienFontDistance.GetFloat() != 0.0f ) {

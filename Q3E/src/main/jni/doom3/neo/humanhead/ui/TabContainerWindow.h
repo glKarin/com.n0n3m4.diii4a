@@ -25,19 +25,21 @@ class hhTabContainerWindow : public idWindow
 		virtual void		StateChanged(bool redraw = false);
 
 		void				UpdateTab();
-
-        void SetOffsets(float x, float y);
+        void 				SetOffsets(float x, float y);
 
 	private:
 		virtual bool		ParseInternalVar(const char *name, idParser *src);
 		void				CommonInit();
-        void SetActiveTab(int index);
+        void 				SetActiveTab(int index);
+		float				GetTabHeight();
+        float				GetTabWidth();
 
-		idList<hhTabRect> tabs;
-	    bool				horizontal;
-        float tabHeight;
-        int currentTab;
-        idVec2 offsets;
+		idList<hhTabRect> 	tabs;
+	    // bool				horizontal;
+		bool				vertical;
+        float 				tabHeight;
+        int 				currentTab;
+        idVec2 				offsets;
 };
 
 #endif // _KARIN_TABCONTAINERWINDOW_H

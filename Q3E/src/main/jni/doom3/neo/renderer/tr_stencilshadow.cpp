@@ -1457,6 +1457,9 @@ srfTriangles_t *R_CreateShadowVolume(const idRenderEntityLocal *ent,
 	if (optimize == SG_OFFLINE) {
 		CleanupOptimizedShadowTris(newTri);
 	}
+#ifdef _SHADOW_MAPPING
+	newTri->shadowIsPrelight = false;
+#endif
 
 	return newTri;
 }

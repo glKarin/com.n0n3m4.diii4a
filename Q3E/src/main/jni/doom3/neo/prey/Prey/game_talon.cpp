@@ -790,10 +790,18 @@ void hhTalon::EnterTommyState(void) {
 	UpdateVisuals();
 
 	// Bind the bird to Tommy's shoulder
+#ifdef _PREY
+	const char *bone_fx_bird = spawnArgs.GetString("bone_fx_bird", "fx_bird");
+	owner->GetJointWorldTransform( bone_fx_bird, bindOrigin, bindAxis );
+	SetOrigin( bindOrigin );
+	SetAxis( owner->viewAxis );
+	BindToJoint( owner.GetEntity(), bone_fx_bird, true );
+#else
 	owner->GetJointWorldTransform( "fx_bird", bindOrigin, bindAxis );
 	SetOrigin( bindOrigin );
 	SetAxis( owner->viewAxis );
 	BindToJoint( owner.GetEntity(), "fx_bird", true );
+#endif
 
 	// Start checking for enemies
 	PostEventSec( &EV_CheckForEnemy, spawnArgs.GetFloat("checkEnemyTime", "4.0" ) );

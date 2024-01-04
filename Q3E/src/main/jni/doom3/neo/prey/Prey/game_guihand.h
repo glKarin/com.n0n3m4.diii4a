@@ -22,6 +22,9 @@ public:
 	virtual void	Action(void);			// Player clicked
 	virtual void	SetAction(const char* str);	//HUMANHEAD bjk
 	virtual bool	IsValidFor( hhPlayer *who );
+#ifdef _MOD_FULL_BODY_AWARENESS
+	virtual void			Show( void );
+#endif
 
 protected:
 	int				actionAnimDoneTime;

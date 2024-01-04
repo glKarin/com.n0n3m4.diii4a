@@ -91,6 +91,13 @@ idEventDef::idEventDef( const char *command, const char *formatspec, char return
 		case D_EVENT_TRACE :
 			argsize += sizeof( trace_t ) + MAX_STRING_LEN + sizeof( bool );
 			break;
+#ifdef _QUAKE4
+#if defined(__aarch64__) || defined(__x86_64__)
+		case D_EVENT_INTEGER64bit:
+			argsize += sizeof( intptr_t );
+			break;
+#endif
+#endif
 
 		default :
 			eventError = true;
@@ -335,6 +342,13 @@ idEvent *idEvent::Alloc( const idEventDef *evdef, int numargs, va_list args ) {
 				*reinterpret_cast<bool *>( dataPtr ) = false;
 			}
 			break;
+#ifdef _QUAKE4
+#if defined(__aarch64__) || defined(__x86_64__)
+		case D_EVENT_INTEGER64bit:
+			*reinterpret_cast<intptr_t *>( dataPtr ) = arg->value;
+			break;
+#endif
+#endif
 
 		default :
 			gameLocal.Error( "idEvent::Alloc : Invalid arg format '%s' string for '%s' event.", format, evdef->GetName() );
@@ -588,6 +602,13 @@ void idEvent::ServiceEvents( void ) {
 					*tracePtr = NULL;
 				}
 				break;
+#ifdef _QUAKE4
+#if defined(__aarch64__) || defined(__x86_64__)
+		case D_EVENT_INTEGER64bit:
+			args[ i ] = *reinterpret_cast<intptr_t *>( &data[ offset ] );
+			break;
+#endif
+#endif
 
 			default:
 				gameLocal.Error( "idEvent::ServiceEvents : Invalid arg format '%s' string for '%s' event.", formatspec, ev->GetName() );

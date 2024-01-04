@@ -1397,14 +1397,15 @@ void idSoundSystemLocal::EndLevelLoad(const char *mapstring)
 	if (efxloaded) {
 		common->Printf("sound: found %s\n", efxname.c_str());
 	} else {
-		common->Printf("sound: missing %s\n", efxname.c_str());
 #ifdef _RAVEN //karin: Quake4 has efxs/default.efx
 		efxloaded = EFXDatabase.LoadFile("efxs/default.efx");
 		if (efxloaded) {
-			common->Printf("sound: default found %s\n", efxname.c_str());
+			common->Printf("sound: found %s\n", efxname.c_str());
 		} else {
-			common->Printf("sound: default missing %s\n", efxname.c_str());
+			common->Printf("sound: missing %s\n", efxname.c_str());
 		}
+#else
+		common->Printf("sound: missing %s\n", efxname.c_str());
 #endif
 	}
 #ifdef _RAVEN //karin: load Quake4 <map>.reverb
@@ -1412,9 +1413,9 @@ void idSoundSystemLocal::EndLevelLoad(const char *mapstring)
 	{
 		int num = reverb.LoadMap(mapstring);
 		if(num >= 0)
-			common->Printf("sound: map reverb file '%s' load success: %d\n", (const char *)rvMapReverb::GetMapFileName(mapstring), num);
+			common->Printf("Loaded reverb file '%s'\n", (const char *)rvMapReverb::GetMapFileName(mapstring), num);
 		else
-			common->Warning("sound: map reverb file '%s' load fail!", (const char *)rvMapReverb::GetMapFileName(mapstring));
+			common->Warning("Unable load reverb file '%s'!", (const char *)rvMapReverb::GetMapFileName(mapstring));
 	}
 #endif
 #endif
@@ -2115,6 +2116,9 @@ void idSoundSystemLocal::SB_SetupSubtitle(void)
 					continue;
 				}
 
+				if(chan->lastVolume < SND_EPSILON)
+					continue;
+
                 SB_AppendSubtitle(chan);
 			}
 		}
@@ -2141,6 +2145,9 @@ void idSoundSystemLocal::SB_SetupSubtitle(void)
 				if (!chan->triggerState) {
 					continue;
 				}
+
+				if(chan->lastVolume < SND_EPSILON)
+					continue;
 
                 SB_AppendSubtitle(chan);
 			}

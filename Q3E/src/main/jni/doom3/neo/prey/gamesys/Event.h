@@ -22,6 +22,11 @@ Event are used for scheduling tasks and for linking script commands.
 
 #define MAX_EVENTS					4096
 
+#ifdef _PREY
+#if defined(__aarch64__) || defined(__x86_64__)
+#define D_EVENT_INTPTR		'y'
+#endif
+#endif
 // stack size of idVec3, aligned to native pointer size
 #define E_EVENT_SIZEOF_VEC			((sizeof(idVec3) + (sizeof(intptr_t) - 1)) & ~(sizeof(intptr_t) - 1))
 

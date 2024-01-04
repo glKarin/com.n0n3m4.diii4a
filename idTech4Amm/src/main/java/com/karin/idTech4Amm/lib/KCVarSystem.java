@@ -44,6 +44,11 @@ public final class KCVarSystem
                         KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", 0),
                         KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "0.5", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
+                        /*KCVar.CreateCVar("harm_r_shadowMappingScheme", "integer", "0", "shadow mapping rendering scheme", 0,
+                                "0", "always using shadow mapping",
+                                "1", "prelight shadow using shadow mapping, others using stencil shadow",
+                                "2", "non-prelight shadow using shadow mapping, others using stencil shadow"
+                        ),*/
 
                         KCVar.CreateCVar("harm_r_translucentStencilShadow", "bool", "0", "enable translucent shadow in stencil shadow", 0),
                         KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "0.5", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE)
@@ -88,7 +93,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_g_mutePlayerFootStep", "bool", "0", "Mute player's footstep sound", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot level(0 - auto; 1 - 8: difficult level)", KCVar.FLAG_POSITIVE)
                 );
 
@@ -99,7 +104,12 @@ public final class KCVarSystem
                         "fonts/menu", "fonts/menu",
                         "\"\"", "Disable"
                     ),
-                    KCVar.CreateCVar("harm_ui_translateAlienFontDistance", "float", "200", "Setup max distance of GUI to view origin for enable translate `alien` font text(0 to disable, -1 to always)", 0)
+                    KCVar.CreateCVar("harm_ui_translateAlienFontDistance", "float", "200", "Setup max distance of GUI to view origin for enable translate `alien` font text(0 to disable, -1 to always)", 0),
+                    KCVar.CreateCVar("harm_ui_subtitlesTextScale", "float", "0.32", "Subtitles's text scale(<= 0: unset)", 0),
+
+                    KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "neck", "Set head joint when without head model in full-body awareness", 0)
                 );
 
         _cvars.put("RENDERER", RENDERER_CVARS);

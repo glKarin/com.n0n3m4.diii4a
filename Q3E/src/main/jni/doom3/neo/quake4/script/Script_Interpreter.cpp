@@ -995,9 +995,6 @@ bool idInterpreter::Execute( void ) {
 		instructionPointer++;
 
 		if ( !--runaway ) {
-#if 0 //k: for map game/waste, not need now
-			break;
-#endif
 			Error( "runaway loop error" );
 		}
 

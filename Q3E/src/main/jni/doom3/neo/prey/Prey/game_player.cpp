@@ -250,6 +250,18 @@ void hhPlayer::Spawn( void ) {
 	bDeathWalkStage2 = false;
 
 	physicsObj.SetInwardGravity(-1); //rww
+#ifdef _MOD_FULL_BODY_AWARENESS
+	idVec3 offset(0, 0, 0);
+	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+		fullBodyAwarenessOffset = offset;
+	else
+		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+		renderEntity.suppressSurfaceInViewID = entityNumber+1;
+	else
+		showWeaponViewModel = false;
+#endif
 }
 
 void hhPlayer::RestorePersistantInfo( void ) {
@@ -2396,6 +2408,9 @@ void hhPlayer::BobCycle( const idVec3 &pushVelocity ) {
 	// calculate position for view bobbing
 	viewBob.Zero();
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed())
+#endif
 	if ( physicsObj.HasSteppedUp() ) {
 
 		// check for stepping up before a previous step is completed
@@ -2414,10 +2429,16 @@ void hhPlayer::BobCycle( const idVec3 &pushVelocity ) {
 	idVec3 gravity = physicsObj.GetGravityNormal();
 
 	// if the player stepped up recently
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed()) {
+#endif
 	deltaTime = gameLocal.time - stepUpTime;
 	if ( deltaTime < STEPUP_TIME ) {
 		viewBob += gravity * ( stepUpDelta * ( STEPUP_TIME - deltaTime ) / STEPUP_TIME );
 	}
+#ifdef _MOD_FULL_BODY_AWARENESS
+	}
+#endif
 
 	// add bob height after any movement smoothing
 	bob = bobfracsin * xyspeed * pm_bobup.GetFloat();
@@ -3692,7 +3713,12 @@ void hhPlayer::GetViewPos( idVec3 &origin, idMat3 &axis ) {
 
 	// if dead, fix the angle and don't add any kick
 	// HUMANHEAD cjr:  Replaced health <= 0 with IsDead() call for deathwalk override
-	if ( IsDead() && !gameLocal.isMultiplayer ) { //rww - don't want this in mp.
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if( (!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed()) && (IsDead() && !gameLocal.isMultiplayer) )
+#else
+	if ( IsDead() && !gameLocal.isMultiplayer ) 
+#endif
+	{ //rww - don't want this in mp.
 	// HUMANHEAD END
 		angles.yaw = viewAngles.yaw;
 		angles.roll = 40;
@@ -3878,7 +3904,11 @@ void hhPlayer::StartSpiritWalk( const bool bThrust, bool force ) {
 		GetViewPos( origin, axis );
 		fxInfo.SetEntity( this );
 		fxInfo.RemoveWhenDone( true );
+#ifdef _PREY
+		fxInfo.SetBindBone( spawnArgs.GetString("bone_fx_spiritWalkFlash", "origin") );
+#else
 		fxInfo.SetBindBone( "origin" );
+#endif
 		BroadcastFxInfoPrefixed( "fx_spiritWalkFlash", origin, axis, &fxInfo );
 
 		// Thrust the player backwards out of the body
@@ -3949,7 +3979,11 @@ void hhPlayer::StopSpiritWalk(bool forceAllowance) {
 		GetViewPos( origin, axis );
 		fxInfo.SetEntity( this );
 		fxInfo.RemoveWhenDone( true );
+#ifdef _PREY
+		fxInfo.SetBindBone( spawnArgs.GetString("bone_fx_spiritWalkFlash", "origin") );
+#else
 		fxInfo.SetBindBone( "origin" );
+#endif
 		BroadcastFxInfoPrefixed( "fx_spiritWalkFlash", origin, axis, &fxInfo );
 	}
 }
@@ -4131,7 +4165,7 @@ void hhPlayer::DisableEthereal( void ) {
 		if ( hhMonsterAI::allSimpleMonsters[i]->GetEnemy() == spiritProxy.GetEntity() ) {
 			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, spiritProxy.GetEntity() );
 		} else if ( hhMonsterAI::allSimpleMonsters[i]->GetEnemy() == this ) { // Targetting spirit that is going away
-			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, NULL );
+			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, (const class idEntity *)NULL ); //k
 		}
 	}
 
@@ -4826,6 +4860,28 @@ hhPlayer::Think
 ==============
 */
 void hhPlayer::Think( void ) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed())
+	{
+		renderEntity.suppressSurfaceInViewID = entityNumber + 1;
+		showWeaponViewModel		= GetUserInfo()->GetBool("ui_showGun");
+	}
+	else
+	{
+		renderEntity.suppressSurfaceInViewID = 0;
+		showWeaponViewModel = false;
+
+		if(harm_pm_fullBodyAwarenessOffset.IsModified())
+		{
+			idVec3 offset(0, 0, 0);
+			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+				fullBodyAwarenessOffset = offset;
+			else
+				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
+			harm_pm_fullBodyAwarenessOffset.ClearModified();
+		}
+	}
+#endif
 	renderEntity_t *headRenderEnt;
 
 	UpdatePossession();
@@ -7182,6 +7238,13 @@ void hhPlayer::Restore( idRestoreGame *savefile ) {
 	if ( bLighter ) {
 		lighterHandle = gameRenderWorld->AddLightDef( &lighter );
 	}
+#ifdef _MOD_FULL_BODY_AWARENESS
+	idVec3 offset(0, 0, 0);
+	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+		fullBodyAwarenessOffset = offset;
+	else
+		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+#endif
 }
 
 int hhPlayer::GetSpiritPower() {
@@ -7823,3 +7886,16 @@ void hhPlayer::Show(void) {
 		}
 	}
 }
+#ifdef _MOD_FULL_BODY_AWARENESS
+bool hhPlayer::IsZoomed(void) const
+{
+	if( weapon.IsValid() && weapon->IsType( hhWeaponZoomable::Type ) )
+	{
+		const hhWeaponZoomable *weap = static_cast<const hhWeaponZoomable*>(weapon.GetEntity());
+		if ( weap )
+			return weap->IsZoomed();
+	}
+	return false;
+}
+#endif
+
