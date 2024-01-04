@@ -178,7 +178,12 @@ const char *Sys_DefaultBasePath(void) {
 		}
 	}
 	common->Printf( "WARNING: using hardcoded default base path\n" );
+#ifndef LINUX_DEFAULT_PATH
+	#warning undefined data path
+	return BASE_GAMEDIR;
+#else
 	return LINUX_DEFAULT_PATH;
+#endif
 }
 
 /*
@@ -257,7 +262,8 @@ double Sys_GetClockTicks( void ) {
 						  : "=r" (lo), "=r" (hi) );
 	return (double) lo + (double) 0xFFFFFFFF * hi;
 #else
-#error unsupported CPU
+#warning unsupported CPU
+	return 0;
 #endif
 }
 

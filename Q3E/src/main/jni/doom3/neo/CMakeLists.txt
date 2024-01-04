@@ -1387,6 +1387,12 @@ if(ANDROID)
 	set(src_sys_core
 		sys/android/gles2.cpp
 	)
+else()
+	set(src_sys_base
+		${src_sys_base}
+		sys/linux/main.cpp
+		sys/linux/input.cpp
+	)
 endif()
 
 include_directories(${CMAKE_BINARY_DIR})

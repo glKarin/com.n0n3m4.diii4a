@@ -37,7 +37,9 @@ extern glconfig_t glConfig;
 #if defined( ID_ENABLE_DGA )
 #include <X11/extensions/xf86dga.h>
 #endif
-#include <X11/extensions/xf86vmode.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xos.h>
 #include <X11/XKBlib.h>
 
 extern Display *dpy;
