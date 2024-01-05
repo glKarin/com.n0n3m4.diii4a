@@ -614,9 +614,6 @@ char * (*get_clipboard_text)(void);
 
 int screen_width=640;
 int screen_height=480;
-float analogx=0.0f;
-float analogy=0.0f;
-int analogenabled=0;
 FILE *f_stdout = NULL;
 FILE *f_stderr = NULL;
 

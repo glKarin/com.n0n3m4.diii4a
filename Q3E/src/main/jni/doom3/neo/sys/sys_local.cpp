@@ -40,6 +40,10 @@ idCVar sys_lang("sys_lang", "english", CVAR_SYSTEM | CVAR_ARCHIVE,  "", sysLangu
 idSysLocal			sysLocal;
 idSys 				*sys = &sysLocal;
 
+float analogx=0.0f;
+float analogy=0.0f;
+int analogenabled=0;
+
 void idSysLocal::DebugPrintf(const char *fmt, ...)
 {
 	va_list argptr;

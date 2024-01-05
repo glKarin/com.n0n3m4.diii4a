@@ -309,6 +309,8 @@ endfunction()
 
 if(ANDROID)
 	set(sys_libs ${sys_libs} android)
+else()
+	set(sys_libs ${sys_libs} X11)
 endif()
 set(sys_libs ${sys_libs} dl EGL z)
 set(local_libs ogg curl)
