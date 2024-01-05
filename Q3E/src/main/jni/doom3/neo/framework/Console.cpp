@@ -639,9 +639,28 @@ void idConsoleLocal::KeyDownEvent(int key)
 		cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "\n");
 
 		// copy line to history buffer
-		historyEditLines[nextHistoryLine % COMMAND_HISTORY] = consoleField;
-		nextHistoryLine++;
-		historyLine = nextHistoryLine;
+		bool record = harm_com_consoleHistory.GetInteger() != 2;
+		if(!record)
+		{
+			const char *cmdbuf = consoleField.GetBuffer();
+			if(cmdbuf[0]) // empty command with single ENTER -> ignore
+			{
+				if(nextHistoryLine > 0)
+				{
+					const char *lastCmdBuf = historyEditLines[(nextHistoryLine - 1) % COMMAND_HISTORY].GetBuffer();
+					if(!lastCmdBuf[0] || idStr::Cmp(cmdbuf, lastCmdBuf) != 0) // dup -> ignore
+						record = true;
+				}
+				else
+					record = true;
+			}
+		}
+		if(record)
+		{
+			historyEditLines[nextHistoryLine % COMMAND_HISTORY] = consoleField;
+			nextHistoryLine++;
+			historyLine = nextHistoryLine;
+		}
 
 		if(harm_com_consoleHistory.GetInteger() == 2)
 			DumpHistory();
@@ -1323,7 +1342,7 @@ void idConsoleLocal::DumpHistory(void)
 		int line = (nextHistoryLine + i) % COMMAND_HISTORY;
 		const char *s = historyEditLines[line].GetBuffer();
 		if ( s && s[0] ) {
-			if(!idStr::Icmp(last, s))
+			if(!idStr::Cmp(last, s))
 				continue;
 			f->WriteString(s);
 			last = s;

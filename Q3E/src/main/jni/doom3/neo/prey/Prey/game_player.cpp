@@ -3904,7 +3904,7 @@ void hhPlayer::StartSpiritWalk( const bool bThrust, bool force ) {
 		GetViewPos( origin, axis );
 		fxInfo.SetEntity( this );
 		fxInfo.RemoveWhenDone( true );
-#ifdef _PREY
+#ifdef _PREY //k: unnecessary, only for mod: if player's model mesh has not this bone(origin)
 		fxInfo.SetBindBone( spawnArgs.GetString("bone_fx_spiritWalkFlash", "origin") );
 #else
 		fxInfo.SetBindBone( "origin" );
@@ -3979,7 +3979,7 @@ void hhPlayer::StopSpiritWalk(bool forceAllowance) {
 		GetViewPos( origin, axis );
 		fxInfo.SetEntity( this );
 		fxInfo.RemoveWhenDone( true );
-#ifdef _PREY
+#ifdef _PREY //k: unnecessary, only for mod: if player's model mesh has not this bone(origin)
 		fxInfo.SetBindBone( spawnArgs.GetString("bone_fx_spiritWalkFlash", "origin") );
 #else
 		fxInfo.SetBindBone( "origin" );
