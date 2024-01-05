@@ -84,87 +84,37 @@ public final class Q3EControls
         return GetDefaultLayout(context, CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, landscape);
     }
 
+    private static String ButtonLayoutStr(Number x, Number y, Number r_or_w, Number a)
+    {
+        return x.intValue() + " " + y.intValue() + " " + r_or_w.intValue() + " " + a.intValue();
+    }
+
+    private static class ButtonLayout
+    {
+        public final int x, y, width_or_radius, alpha;
+        public ButtonLayout(Number x, Number y, Number r_or_w, Number a)
+        {
+            this.x = x.intValue();
+            this.y = y.intValue();
+            this.width_or_radius = r_or_w.intValue();
+            this.alpha = a.intValue();
+        }
+
+        @Override
+        public String toString()
+        {
+            return x + " " + y + " " + width_or_radius + " " + alpha;
+        }
+    }
+
+    private static int Dip2px(Activity context, int i, float scale)
+    {
+        return Math.round((float)Q3EUtils.dip2px(context, i) * scale);
+    }
+
     public static String[] GetDefaultLayout(Activity context, boolean friendly, float scale, int opacity, boolean landscape)
     {
-        if (scale <= 0.0f)
-            scale = 1.0f;
-
-        int safeInsetTop = Q3EUtils.GetEdgeHeight(context, landscape);
-        int safeInsetBottom = Q3EUtils.GetEndEdgeHeight(context, landscape);
-        int[] fullSize = Q3EUtils.GetFullScreenSize(context);
-        int[] size = Q3EUtils.GetNormalScreenSize(context);
-        if(landscape)
-        {
-            int tmp = fullSize[0];
-            fullSize[0] = fullSize[1];
-            fullSize[1] = tmp;
-
-            tmp = size[0];
-            size[0] = size[1];
-            size[1] = tmp;
-        }
-        int navBarHeight = fullSize[1] - size[1] - safeInsetTop - safeInsetBottom;
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
-        boolean coverEdges = preferences.getBoolean(Q3EPreference.COVER_EDGES, true);
-        int w, h;
-        int start = 0;
-        if (friendly)
-        {
-            w = fullSize[0];
-            h = fullSize[1];
-            h -= navBarHeight;
-            if (coverEdges)
-                start = safeInsetTop;
-            else
-                h -= (safeInsetTop + safeInsetBottom);
-        }
-        else
-        {
-            w = fullSize[0];
-            h = fullSize[1];
-            if (!hideNav)
-                h -= navBarHeight;
-            if (!coverEdges)
-                h -= (safeInsetTop + safeInsetBottom);
-        }
-        int width = Math.max(w, h);
-        int height = Math.min(w, h);
-
-        final boolean needScale = scale > 0.0f && scale != 1.0f;
-        int r = Q3EUtils.dip2px(context, 75);
-        if (needScale)
-            r = Math.round((float) r * scale);
-        int rightoffset = r * 3 / 4;
-        int sliders_width = Q3EUtils.dip2px(context, 125);
-        if (needScale)
-            sliders_width = Math.round((float) sliders_width * scale);
-        final int alpha = opacity;
-
-        String[] defaults_table = new String[Q3EGlobals.UI_SIZE];
-        defaults_table[Q3EGlobals.UI_JOYSTICK] = (start + r * 4 / 3) + " " + (height - r * 4 / 3) + " " + r + " " + alpha;
-        defaults_table[Q3EGlobals.UI_SHOOT] = (width - r / 2 - rightoffset) + " " + (height - r / 2 - rightoffset) + " " + r * 3 / 2 + " " + alpha;
-        defaults_table[Q3EGlobals.UI_JUMP] = (width - r / 2) + " " + (height - r - 2 * rightoffset) + " " + r + " " + alpha;
-        defaults_table[Q3EGlobals.UI_CROUCH] = (width - r / 2) + " " + (height - r / 2) + " " + r + " " + alpha;
-        defaults_table[Q3EGlobals.UI_RELOADBAR] = (width - sliders_width / 2 - rightoffset / 3) + " " + (sliders_width * 3 / 8) + " " + sliders_width + " " + alpha;
-        defaults_table[Q3EGlobals.UI_PDA] = (width - r - 2 * rightoffset) + " " + (height - r / 2) + " " + r + " " + alpha;
-        defaults_table[Q3EGlobals.UI_FLASHLIGHT] = (width - r / 2 - 4 * rightoffset) + " " + (height - r / 2) + " " + r + " " + alpha;
-        defaults_table[Q3EGlobals.UI_SAVE] = (start + sliders_width / 2) + " " + sliders_width / 2 + " " + sliders_width + " " + alpha;
-
-        for (int i = Q3EGlobals.UI_SAVE + 1; i < Q3EGlobals.UI_SIZE; i++)
-            defaults_table[i] = (r / 2 + r * (i - Q3EGlobals.UI_SAVE - 1)) + " " + (height + r / 2) + " " + r + " " + alpha;
-
-        defaults_table[Q3EGlobals.UI_WEAPON_PANEL] = (width - sliders_width - r - rightoffset) + " " + (r) + " " + (r / 3) + " " + alpha;
-
-        //k
-        final int sr = r / 6 * 5;
-        defaults_table[Q3EGlobals.UI_1] = String.format("%d %d %d %d", width - sr / 2 - sr * 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-        defaults_table[Q3EGlobals.UI_2] = String.format("%d %d %d %d", width - sr / 2 - sr, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-        defaults_table[Q3EGlobals.UI_3] = String.format("%d %d %d %d", width - sr / 2, (sliders_width * 5 / 8 + sr / 2), sr, alpha);
-        defaults_table[Q3EGlobals.UI_KBD] = String.format("%d %d %d %d", start + sliders_width + sr / 2, sr / 2, sr, alpha);
-        defaults_table[Q3EGlobals.UI_CONSOLE] = String.format("%d %d %d %d", start + sliders_width / 2 + sr / 2, sliders_width / 2 + sr / 2, sr, alpha);
-
-        return defaults_table;
+        return Q3EButtonLayoutManager.GetDefaultLayout(context, friendly, scale, opacity, landscape);
     }
 
     public static int[] GetDefaultSize(Activity context, boolean landscape)
