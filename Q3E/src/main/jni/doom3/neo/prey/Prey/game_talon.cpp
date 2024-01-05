@@ -790,7 +790,7 @@ void hhTalon::EnterTommyState(void) {
 	UpdateVisuals();
 
 	// Bind the bird to Tommy's shoulder
-#ifdef _PREY
+#ifdef _PREY //k: unnecessary, only for mod: if player's model mesh has not this bone(fx_bird)
 	const char *bone_fx_bird = spawnArgs.GetString("bone_fx_bird", "fx_bird");
 	owner->GetJointWorldTransform( bone_fx_bird, bindOrigin, bindAxis );
 	SetOrigin( bindOrigin );
