@@ -1393,6 +1393,7 @@ else()
 	set(src_sys_base
 		${src_sys_base}
 		sys/linux/main.cpp
+		sys/linux/gles2.cpp
 		sys/linux/input.cpp
 	)
 endif()
