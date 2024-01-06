@@ -1,0 +1,6 @@
+* 优化Shadow mapping软阴影. OpenGLES2.0阴影图使用深度纹理.
+* 新增OpenALA(soft)和EFX混响支持.",
+* 掠食2006 Beam模型渲染优化(by lvonasek/PreyVR).
+* 掠食2006新增字幕支持.
+* 修复反横屏下的陀螺仪.
+* 雷神之锤4多人游戏修复Bot头部模型, 新增Bot等级控制支持(cvar `harm_si_botLevel`, 需要重新解压新的`sabot_a9.pk4`资源).

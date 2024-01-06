@@ -1,0 +1,31 @@
+安卓手机上的毁灭战士3/雷神之锤4/掠食(2006)运行环境
+
+  1. 把你的PC上的游戏数据(包括外部的文件夹)放到启动器中`Game working directory`所设置的目录下(默认为`/sdcard/diii4a`).
+  2. 点击顶部栏的左边图标或右边的游戏名称选择游戏, 然后在选项卡`GENERAL`下的`Game`选择游戏mod.
+  3. 点击`START GAME`开始游戏.
+
+支持
+  多线程渲染
+  png/dds纹理图片加载, jpeg/png/bmp格式截屏
+  obj/dae格式静态模型
+  纯阴影图映射软阴影
+  OpenGLES2.0/OpenGLES3.0
+  OpenAL(soft)和EFX混响
+  无光照渲染
+  半透明模板阴影
+
+游戏/mod文件夹名称:
+  毁灭战士3: base (支持全身mod)
+  毁灭战士3 - 邪恶复苏: d3xp
+  毁灭战士3 - 失落的任务: d3le
+  经典毁灭战士3: cdoom
+  Rivensin: rivensin
+  Hardcorps: hardcorps
+  Stupid Angry Bot(a7x): sabot
+  Overthinked DooM^3: overthinked
+  Fragging Free: fraggingfree
+  HeXen:Edge of Chaos: hexeneoc
+
+  雷神之锤4: q4base (支持bot mod和全身mod)
+
+  掠食(2006): preybase (支持全身mod)
