@@ -21,6 +21,8 @@
     <string-array name="onscreen_slider_style_labels">
         <item>Лево-право</item>
         <item>Вниз-право</item>
+        <item>Лево-право(click)</item>
+        <item>Вниз-право(click)</item>
     </string-array>
 
     <string-array name="onscreen_type_labels">
