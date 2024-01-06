@@ -43,29 +43,26 @@ public class UiLoader
 
     private Object LoadUiElement(int id, int cx, int cy, int size, int alpha, boolean editMode)
     {
-        int bh = size;
-        if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == 0)
-            bh = size;
-        if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == 1)
-            bh = size;
-        if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == 2)
-            bh = size / 2;
-
-        int sh = size;
-        if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == 0)
-            sh = size / 2;
-        if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == 1)
-            sh = size;
-
-
         switch (Q3EUtils.q3ei.type_table[id])
         {
             case Q3EGlobals.TYPE_BUTTON:
+                int bh = size;
+                if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL)
+                    bh = size;
+                else if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM)
+                    bh = size;
+                else if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_CENTER)
+                    bh = size / 2;
                 return new Button(ctx, gl, cx, cy, size, bh, Q3EUtils.q3ei.texture_table[id], Q3EUtils.q3ei.arg_table[id * 4], Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 1] == 1, (float) alpha / 100);
             case Q3EGlobals.TYPE_JOYSTICK: {
                 return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone, Q3EUtils.q3ei.joystick_unfixed, editMode, Q3EUtils.q3ei.texture_table[id]);
             }
             case Q3EGlobals.TYPE_SLIDER:
+                int sh = size;
+                if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
+                    sh = size / 2;
+                /*else if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT)
+                    sh = size;*/
                 return new Slider(ctx, gl, cx, cy, size, sh, Q3EUtils.q3ei.texture_table[id], Q3EUtils.q3ei.arg_table[id * 4], Q3EUtils.q3ei.arg_table[id * 4 + 1], Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 3], (float) alpha / 100);
             case Q3EGlobals.TYPE_DISC:
             {

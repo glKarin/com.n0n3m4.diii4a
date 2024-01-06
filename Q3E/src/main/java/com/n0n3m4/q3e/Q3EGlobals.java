@@ -55,6 +55,8 @@ public final class Q3EGlobals
     // on-screen slider type
     public static final int ONSCRREN_SLIDER_STYLE_LEFT_RIGHT = 0;
     public static final int ONSCRREN_SLIDER_STYLE_DOWN_RIGHT = 1;
+    public static final int ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK = 2;
+    public static final int ONSCRREN_SLIDER_STYLE_DOWN_RIGHT_SPLIT_CLICK = 3;
 
     // game state
     public static final int STATE_NONE = 0;

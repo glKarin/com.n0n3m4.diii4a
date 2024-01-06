@@ -1,8 +1,10 @@
 package com.n0n3m4.q3e.onscreen;
 
+import android.util.Log;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3EControlView;
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 
@@ -31,6 +33,7 @@ public class Slider extends Paintable implements TouchListener
     int startx, starty;
     int SLIDE_DIST;
     public int style;
+    private int m_lastKey;
 
     public Slider(View vw, GL10 gl, int center_x, int center_y, int w, int h, String texid,
                   int leftkey, int centerkey, int rightkey, int stl, float a)
@@ -88,50 +91,70 @@ public class Slider extends Paintable implements TouchListener
         {
             startx = x;
             starty = y;
-        }
-        if (act == -1)
-        {
-            if (style == 0)
+            if(style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK || style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT_SPLIT_CLICK)
             {
-                if (x - startx < -SLIDE_DIST)
+                int key = KeyInPosition(x, y);
+                if(key > 0)
                 {
-                    controlView.sendKeyEvent(true, lkey, 0);
-                    controlView.sendKeyEvent(false, lkey, 0);
-                }
-                else if (x - startx > SLIDE_DIST)
-                {
-                    controlView.sendKeyEvent(true, rkey, 0);
-                    controlView.sendKeyEvent(false, rkey, 0);
-                }
-                else
-                {
-                    controlView.sendKeyEvent(true, ckey, 0);
-                    controlView.sendKeyEvent(false, ckey, 0);
+                    controlView.sendKeyEvent(true, key, 0);
+                    m_lastKey = key;
                 }
             }
-
-            //k
-            else if (style == 1)
+        }
+        else if (act == -1)
+        {
+            switch (style)
             {
-                if ((y - starty > SLIDE_DIST) || (x - startx > SLIDE_DIST))
-                {
-                    double ang = Math.abs(Math.atan2(y - starty, x - startx));
-                    if (ang > Math.PI / 4 && ang < Math.PI * 3 / 4)
+                case Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT: {
+                    if (x - startx < -SLIDE_DIST)
                     {
                         controlView.sendKeyEvent(true, lkey, 0);
                         controlView.sendKeyEvent(false, lkey, 0);
                     }
-                    else
-                    { //k
+                    else if (x - startx > SLIDE_DIST)
+                    {
                         controlView.sendKeyEvent(true, rkey, 0);
                         controlView.sendKeyEvent(false, rkey, 0);
-                    } //k
+                    }
+                    else
+                    {
+                        controlView.sendKeyEvent(true, ckey, 0);
+                        controlView.sendKeyEvent(false, ckey, 0);
+                    }
                 }
-                else
-                {
-                    controlView.sendKeyEvent(true, ckey, 0);
-                    controlView.sendKeyEvent(false, ckey, 0);
+                break;
+                case Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT: {
+                    if ((y - starty > SLIDE_DIST) || (x - startx > SLIDE_DIST))
+                    {
+                        double ang = Math.abs(Math.atan2(y - starty, x - startx));
+                        if (ang > Math.PI / 4 && ang < Math.PI * 3 / 4)
+                        {
+                            controlView.sendKeyEvent(true, lkey, 0);
+                            controlView.sendKeyEvent(false, lkey, 0);
+                        }
+                        else
+                        { //k
+                            controlView.sendKeyEvent(true, rkey, 0);
+                            controlView.sendKeyEvent(false, rkey, 0);
+                        } //k
+                    }
+                    else
+                    {
+                        controlView.sendKeyEvent(true, ckey, 0);
+                        controlView.sendKeyEvent(false, ckey, 0);
+                    }
                 }
+                break;
+                case Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK:
+                case Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT_SPLIT_CLICK:
+                default: {
+                    if(m_lastKey > 0)
+                    {
+                        controlView.sendKeyEvent(false, m_lastKey, 0);
+                        m_lastKey = 0;
+                    }
+                }
+                break;
             }
         }
         return true;
@@ -140,10 +163,38 @@ public class Slider extends Paintable implements TouchListener
     @Override
     public boolean isInside(int x, int y)
     {
-        if (style == 0)
+        if (style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
             return ((2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height));
         else
             return ((2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height)) && (!((y > cy) && (x > cx)));
+    }
+
+    private int KeyInPosition(int x, int y)
+    {
+        if (style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
+        {
+            int deltaX = x - cx;
+            int slide_dist_2 = SLIDE_DIST / 2;
+            if (deltaX < -slide_dist_2)
+                return lkey;
+            else if (deltaX > slide_dist_2)
+                return rkey;
+            else
+                return ckey;
+        }
+        else
+        {
+            int deltaX = x - cx;
+            int deltaY = y - cy;
+            if (deltaX > 0 && deltaY < 0)
+                return rkey;
+            else if (deltaX < 0 && deltaY > 0)
+                return lkey;
+            else if (deltaX <= 0 && deltaY <= 0)
+                return ckey;
+            else
+                return 0;
+        }
     }
 
     public static Slider Move(Slider tmp, GL10 gl)

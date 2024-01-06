@@ -314,6 +314,21 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2023-12-31", 36,
+                        "Fixed prelight shadow's shadow mapping.",
+                        "Fixed EFX Reverb in Quake4.",
+                        "Add translucent stencil shadow support in stencil shadow(bool cvar `harm_r_translucentStencilShadow`(default 0); float cvar `harm_r_stencilShadowAlpha` for setting transparency).",
+                        "Add float cvar `harm_ui_subtitlesTextScale` control subtitles's text scale in Prey.",
+                        "Support cvar `r_brightness`.",
+                        "Fixed weapon projectile's scorches decals rendering in Prey(2006).",
+                        "Data directory chooser support Android SAF.",
+                        "New default on-screen buttons layout.",
+                        "Add `Stupid Angry Bot`(a7x) mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `sabot`. More view in`" + TextHelper.GenLinkText("https://www.moddb.com/downloads/sabot-alpha-7x", "SABot(a7x)") + "`.",
+                        "Add `Overthinked DooM^3` mod of DOOM3 support, game data directory named `overthinked`. More view in`" + TextHelper.GenLinkText("https://www.moddb.com/mods/overthinked-doom3", "Overthinked DooM^3") + "`.",
+                        "Add `Fragging Free` mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `fraggingfree`. More view in`" + TextHelper.GenLinkText("https://www.moddb.com/mods/fragging-free", "Fragging Free") + "`.",
+                        "Add `HeXen:Edge of Chaos` mod of DOOM3 support, game data directory named `hexeneoc`. More view in`" + TextHelper.GenLinkText("https://www.moddb.com/mods/hexen-edge-of-chaos", "HexenEOC") + "`."
+                ),
+
                 ChangeLog.Create("2023-10-29", 35,
                         "Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.",
                         "Add OpenAL(soft) and EFX Reverb support.",

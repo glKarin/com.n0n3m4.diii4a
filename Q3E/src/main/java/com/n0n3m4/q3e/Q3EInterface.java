@@ -40,7 +40,7 @@ public class Q3EInterface
 	public String[] defaults_table;
 	public String[] texture_table;
 	public int[] type_table;
-	public int[] arg_table; //key,key,key,style or key,canbeheld,style,null	
+	public int[] arg_table; // slider: key,key,key,style | button: key,canbeheld,style,null
 
 	public boolean isRTCW=false;
 	public boolean isQ1=false;
@@ -316,79 +316,79 @@ public class Q3EInterface
 		int[] arg_table = new int[Q3EGlobals.UI_SIZE * 4];
 
 		arg_table[Q3EGlobals.UI_SHOOT * 4] = Q3EKeyCodes.KeyCodes.K_MOUSE1;
-		arg_table[Q3EGlobals.UI_SHOOT * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_SHOOT * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_SHOOT * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_SHOOT * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_SHOOT * 4 + 3] = 0;
 
 
 		arg_table[Q3EGlobals.UI_JUMP * 4] = Q3EKeyCodes.KeyCodes.K_SPACE;
-		arg_table[Q3EGlobals.UI_JUMP * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_JUMP * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_JUMP * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_JUMP * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_JUMP * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_CROUCH * 4] = Q3EKeyCodes.KeyCodesD3.K_C; // BFG
-		arg_table[Q3EGlobals.UI_CROUCH * 4 + 1] = 1;
-		arg_table[Q3EGlobals.UI_CROUCH * 4 + 2] = 1;
+		arg_table[Q3EGlobals.UI_CROUCH * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
+		arg_table[Q3EGlobals.UI_CROUCH * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM;
 		arg_table[Q3EGlobals.UI_CROUCH * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_RELOADBAR * 4] = Q3EKeyCodes.KeyCodesD3.K_BRACKET_RIGHT; // 93
 		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 1] = Q3EKeyCodes.KeyCodesD3.K_R; // 114
 		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 2] = Q3EKeyCodes.KeyCodesD3.K_BRACKET_LEFT; // 91
-		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 3] = 0;
+		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 3] = Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT;
 
 		arg_table[Q3EGlobals.UI_PDA * 4] = Q3EKeyCodes.KeyCodes.K_TAB;
-		arg_table[Q3EGlobals.UI_PDA * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_PDA * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_PDA * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_PDA * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_PDA * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4] = Q3EKeyCodes.KeyCodesD3.K_F; // BFG
-		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_SAVE * 4] = Q3EKeyCodes.KeyCodes.K_F5;
 		arg_table[Q3EGlobals.UI_SAVE * 4 + 1] = Q3EKeyCodes.KeyCodes.K_ESCAPE;
 		arg_table[Q3EGlobals.UI_SAVE * 4 + 2] = Q3EKeyCodes.KeyCodes.K_F9;
-		arg_table[Q3EGlobals.UI_SAVE * 4 + 3] = 1;
+		arg_table[Q3EGlobals.UI_SAVE * 4 + 3] = Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT;
 
 		arg_table[Q3EGlobals.UI_1 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_1;
-		arg_table[Q3EGlobals.UI_1 * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_1 * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_1 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_1 * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_1 * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_2 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_2;
-		arg_table[Q3EGlobals.UI_2 * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_2 * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_2 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_2 * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_2 * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_3 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_3;
-		arg_table[Q3EGlobals.UI_3 * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_3 * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_3 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_3 * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_3 * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_KBD * 4] = Q3EKeyCodes.K_VKBD;
-		arg_table[Q3EGlobals.UI_KBD * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_KBD * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_KBD * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_KBD * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_KBD * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_CONSOLE * 4] = Q3EKeyCodes.KeyCodesD3.K_CONSOLE;
-		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_RUN * 4] = Q3EKeyCodes.KeyCodesD3.K_SHIFT;
-		arg_table[Q3EGlobals.UI_RUN * 4 + 1] = 1;
-		arg_table[Q3EGlobals.UI_RUN * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_RUN * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
+		arg_table[Q3EGlobals.UI_RUN * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_RUN * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_ZOOM * 4] = Q3EKeyCodes.KeyCodesD3.K_Z;
-		arg_table[Q3EGlobals.UI_ZOOM * 4 + 1] = 1;
-		arg_table[Q3EGlobals.UI_ZOOM * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_ZOOM * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
+		arg_table[Q3EGlobals.UI_ZOOM * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_ZOOM * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_INTERACT * 4] = Q3EKeyCodes.KeyCodesD3.K_MOUSE2;
-		arg_table[Q3EGlobals.UI_INTERACT * 4 + 1] = 0;
-		arg_table[Q3EGlobals.UI_INTERACT * 4 + 2] = 0;
+		arg_table[Q3EGlobals.UI_INTERACT * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_INTERACT * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_INTERACT * 4 + 3] = 0;
 
 		_defaultArgs = Arrays.copyOf(arg_table, arg_table.length);
