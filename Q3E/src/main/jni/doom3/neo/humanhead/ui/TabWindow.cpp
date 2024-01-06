@@ -42,7 +42,6 @@ bool hhTabWindow::ParseInternalVar(const char *_name, idParser *src)
 void hhTabWindow::PostParse()
 {
 	idWindow::PostParse();
-
 }
 
 void hhTabWindow::Draw(int time, float x, float y)

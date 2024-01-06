@@ -1,45 +1,47 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 30
-    buildToolsVersion '30.0.3'
+    compileSdk project.properties.compileSdkVersion.toInteger()
+    buildToolsVersion project.properties.buildToolsVersion
+    ndkVersion project.properties.ndkVersion
     //compileOptions.encoding "gbk"
+
+    defaultConfig {
+        applicationId "com.karin.idTech4Amm"
+        minSdkVersion project.properties.minSdkVersion.toInteger()
+        targetSdkVersion project.properties.targetSdkVersion.toInteger()
+        versionCode 11036
+        versionName '1.1.0harmattan36'
+        versionNameSuffix 'natasha'
+        buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
+        buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
+    }
 
     /* not AIDE */
     signingConfigs {
         debug {
             v1SigningEnabled true
             v2SigningEnabled true
-            storeFile file('F:\\qobj\\droid\\DIII4A\\idtech4amm.keystore')
-            storePassword '741953'
-            keyAlias 'idtech4amm'
-            keyPassword '741953'
+            storeFile file(project.properties.storeFile)
+            storePassword project.properties.storePassword
+            keyAlias project.properties.keyAlias
+            keyPassword project.properties.keyPassword
         }
         release {
             v1SigningEnabled true
             v2SigningEnabled true
-            storeFile file('F:\\qobj\\droid\\DIII4A\\idtech4amm.keystore')
-            storePassword '741953'
-            keyAlias 'idtech4amm'
-            keyPassword '741953'
+            storeFile file(project.properties.storeFile)
+            storePassword project.properties.storePassword
+            keyAlias project.properties.keyAlias
+            keyPassword project.properties.keyPassword
         }
-    }
-
-    defaultConfig {
-        applicationId "com.karin.idTech4Amm"
-        minSdkVersion 14
-        targetSdkVersion 30
-        versionCode 11035
-        versionName '1.1.0harmattan35'
-        versionNameSuffix 'natasha'
-        buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
-        buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
         }
     }
     lintOptions {
@@ -54,4 +56,5 @@ android {
 
 dependencies {
     implementation project(':Q3E')
+    implementation 'com.android.support:documentfile:28.0.0'
 }

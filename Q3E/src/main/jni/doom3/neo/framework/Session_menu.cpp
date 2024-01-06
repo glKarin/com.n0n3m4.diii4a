@@ -351,6 +351,9 @@ void idSessionLocal::SetMainMenuGuiVars(void)
 #else
 	guiMainMenu->SetStateString("driver_prompt", "0");
 #endif
+#ifdef _HUMANHEAD
+	guiMainMenu->SetStateInt("roadhouseCompleted", cvarSystem->GetCVarInteger("g_roadhouseCompleted"));
+#endif
 
 	SetPbMenuGuiVars();
 }

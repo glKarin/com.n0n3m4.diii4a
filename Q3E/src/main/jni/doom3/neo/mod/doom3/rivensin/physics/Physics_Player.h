@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __PHYSICS_PLAYER_H__
 #define __PHYSICS_PLAYER_H__
 
+#include "physics/Physics_Actor.h"
+#include "physics/Physics_Monster.h"
+
 /*
 ===================================================================================
 
@@ -177,11 +180,9 @@ private:
 	idVec3					delta;				//ivan - delta for next move
 	//float					animMoveGravityMultiplier;
 	//bool					animMoveUseGravity;
-
-	//k double-jump
-#ifdef _RIVENSIN
+#ifdef _RIVENSIN //karin: double-jump from hardcorps
 	bool					doubleJumpDone;
-	bool					doubleJumpEnabled; 
+	bool					doubleJumpEnabled;
 	int						nextDoubleJump;
 #endif
 
@@ -208,8 +209,7 @@ private:
 	void					SetWaterLevel( void );
 	void					DropTimers( void );
 	void					MovePlayer( int msec );
-	//k double-jump
-#ifdef _RIVENSIN
+#ifdef _RIVENSIN //karin: double-jump from hardcorps
 	bool					CheckDoubleJump( void );
 #endif
 

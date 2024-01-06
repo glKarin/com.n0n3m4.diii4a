@@ -106,34 +106,34 @@ jpeg_string = \
 jpeg_list = scons_utils.BuildList( '../../../../../externlibs/jpeg-8d/', jpeg_string )
 
 libogg_string = ' \
-				bitwise.c \
-				framing.c \
-				   analysis.c \
-				   floor1.c \
-				   psy.c \
-				   tone.c \
-				   barkmel.c \
-				   info.c \
-				   vorbisenc.c \
-				   bitrate.c \
-				   lookup.c \
-				   registry.c \
-				   vorbisfile.c \
-				   block.c \
-				   lpc.c \
-				   res0.c \
-				   window.c \
-				   codebook.c \
-				   lsp.c \
-				   sharedbook.c \
-				   envelope.c \
-				   mapping0.c \
-				   smallft.c \
-				   floor0.c \
-				   mdct.c \
-				   synthesis.c'
+				libogg/src/bitwise.c \
+				libogg/src/framing.c \
+				   libvorbis/lib/analysis.c \
+				   libvorbis/lib/floor1.c \
+				   libvorbis/lib/psy.c \
+				   libvorbis/lib/tone.c \
+				   libvorbis/lib/barkmel.c \
+				   libvorbis/lib/info.c \
+				   libvorbis/lib/vorbisenc.c \
+				   libvorbis/lib/bitrate.c \
+				   libvorbis/lib/lookup.c \
+				   libvorbis/lib/registry.c \
+				   libvorbis/lib/vorbisfile.c \
+				   libvorbis/lib/block.c \
+				   libvorbis/lib/lpc.c \
+				   libvorbis/lib/res0.c \
+				   libvorbis/lib/window.c \
+				   libvorbis/lib/codebook.c \
+				   libvorbis/lib/lsp.c \
+				   libvorbis/lib/sharedbook.c \
+				   libvorbis/lib/envelope.c \
+				   libvorbis/lib/mapping0.c \
+				   libvorbis/lib/smallft.c \
+				   libvorbis/lib/floor0.c \
+				   libvorbis/lib/mdct.c \
+				   libvorbis/lib/synthesis.c'
 
-libogg_list = scons_utils.BuildList( '../../../../../externlibs/libogg/', libogg_string )
+libogg_list = scons_utils.BuildList( '../../../../../externlibs/', libogg_string )
 
 
 renderer_string = ' \
@@ -202,6 +202,8 @@ if ( local_raven ):
 if ( local_humanhead ):
 	renderer_string += ' \
 		../humanhead/renderer/Model_hhBeam.cpp \
+		../humanhead/ui/TabContainerWindow.cpp \
+		../humanhead/ui/TabWindow.cpp \
 		'
 
 renderer_list = scons_utils.BuildList( 'renderer', renderer_string )
@@ -408,7 +410,7 @@ for i in range( len( core_list ) ):
 
 local_env = g_env.Clone()
 
-local_env.Append( CPPDEFINES = [ '_USING_STB', '_MODEL_OBJ', '_MODEL_DAE', '_SHADOW_MAPPING', '_OPENGLES3' ] )
+local_env.Append( CPPDEFINES = [ '_USING_STB', '_MODEL_OBJ', '_MODEL_DAE', '_SHADOW_MAPPING', '_OPENGLES3', '_TRANSLUCENT_STENCIL_SHADOW' ] )
 # RAVEN QUAKE4
 if ( local_raven ):
 	local_env.Append( CPPDEFINES = [ '_RAVEN' ] )

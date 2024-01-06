@@ -7342,17 +7342,7 @@ void idPlayer::UpdateFocus( void ) {
 				focusBracketsTime = gameLocal.time + 2000;
 			}
 		}
-#ifdef _QUAKE4 //k: focus gui, because calc 2d coord before this, so add harm_2d_calc for mark
-		if(focusBrackets->GetStateBool("harm_2d_calc"))
-		{
-			focusBrackets->SetStateBool ( "harm_2d_calc", false );
-			focusBrackets->SetStateBool ( "2d_calc", false );
-		}
-		else
-			focusBrackets->SetStateBool ( "2d_calc", true );
-#else
 		focusBrackets->SetStateBool ( "2d_calc", true );
-#endif
 	}	
 
  	if ( cursor && ( oldTalkCursor != talkCursor ) ) {
@@ -11038,12 +11028,12 @@ void idPlayer::CalculateFirstPersonView( void ) {
 			idMat3 axis;
 			idVec3 origin;
 			const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
-			jointHandle_t headJoint = INVALID_JOINT;
+			jointHandle_t head_joint = INVALID_JOINT;
 			if(headJointName && headJointName[0])
 			{
-				headJoint = head->GetAnimator()->GetJointHandle( headJointName );
+				head_joint = head->GetAnimator()->GetJointHandle( headJointName );
 			}
-			if(headJoint >= 0 && head->GetJointWorldTransform( headJoint, gameLocal.time, origin, axis ) )
+			if(head_joint >= 0 && head->GetJointWorldTransform( head_joint, gameLocal.time, origin, axis ) )
 				firstPersonViewOrigin = origin;
 			else
 			{
@@ -11056,24 +11046,24 @@ void idPlayer::CalculateFirstPersonView( void ) {
 			idMat3 axis;
 			idVec3 origin;
 			const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
-			jointHandle_t headJoint = INVALID_JOINT;
+			jointHandle_t head_joint = INVALID_JOINT;
 			if(headJointName && headJointName[0])
 			{
-				headJoint = animator.GetJointHandle( headJointName );
+				head_joint = animator.GetJointHandle( headJointName );
 #if 0
-				if(headJoint < 0 && idStr::Icmp(_HARM_Q4_PLAYERMODEL_HEAD_JOINT, headJointName))
-					headJoint = animator.GetJointHandle( _HARM_Q4_PLAYERMODEL_HEAD_JOINT );
+				if(head_joint < 0 && idStr::Icmp(_HARM_Q4_PLAYERMODEL_HEAD_JOINT, headJointName))
+					head_joint = animator.GetJointHandle( _HARM_Q4_PLAYERMODEL_HEAD_JOINT );
 #endif
 			}
 			else
 			{
-				headJoint = animator.GetJointHandle( _HARM_Q4_PLAYERMODEL_HEAD_JOINT ); // quake4 playermodel head joint name, quake4 playermodel head is can attached
+				head_joint = animator.GetJointHandle( _HARM_Q4_PLAYERMODEL_HEAD_JOINT ); // quake4 playermodel head joint name, quake4 playermodel head is can attached
 			}
 #if 0
-			if(headJoint < 0) // doom3 playermodel head joint name
-				headJoint = animator.GetJointHandle( "Head" );
+			if(head_joint < 0) // doom3 playermodel head joint name
+				head_joint = animator.GetJointHandle( "Head" );
 #endif
-			if(headJoint >= 0 && animator.GetJointTransform( headJoint, gameLocal.time, origin, axis ) )
+			if(head_joint >= 0 && animator.GetJointTransform( head_joint, gameLocal.time, origin, axis ) )
 				firstPersonViewOrigin = ( origin + modelOffset) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
 									+ viewBob
 					;

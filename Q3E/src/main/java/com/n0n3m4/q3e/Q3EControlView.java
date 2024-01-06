@@ -130,6 +130,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private int m_mapBack = ENUM_BACK_ALL;
     private long m_lastPressBackTime = -1;
     private int m_pressBackCount = 0;
+
+
     private Q3EView m_renderView;
 
     private boolean m_gyroInited = false;
@@ -165,7 +167,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 m_usingMouse = true;
         }
     }
-
     @Override
     public void onDrawFrame(GL10 gl)
     {
@@ -644,7 +645,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         Q3EUtils.q3ei.callbackObj.PushEvent(r);
     }
 
-
     private boolean HandleBackPress()
     {
         if ((m_mapBack & ENUM_BACK_EXIT) == 0)
@@ -680,7 +680,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         m_renderView = view;
     }
-
 
     public boolean EnableGyroscopeControl(boolean... b)
     {
@@ -740,8 +739,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
         {
-        if (Q3EUtils.q3ei.callbackObj.notinmenu && !Q3EUtils.q3ei.callbackObj.inLoading)
-        {
+            if (Q3EUtils.q3ei.callbackObj.notinmenu && !Q3EUtils.q3ei.callbackObj.inLoading)
+            {
                 float x, y;
                 switch (m_display.getRotation()) {
                     case Surface.ROTATION_270: // invert

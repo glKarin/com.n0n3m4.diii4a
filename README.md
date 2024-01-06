@@ -1,15 +1,31 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan35(natasha)  
+1.1.0harmattan36(natasha)  
 **Last update release:**
-2023-10-29  
+2023-12-31  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
-Android 4.0+  
+Android 4.4+  
 **License:**
 GPLv3
+
+----------------------------------------------------------------------------------
+### Feature
+* multi-threading renderer
+* png/dds texture image
+* jpeg/png/bmp format of screenshot
+* obj format static model
+* dae format static model
+* pure soft shadow with shadow-mapping
+* OpenGLES2.0/OpenGLES3.0
+* OpenAL(soft) and EFX Reverb
+* no-lighting rendering and no-lighting material
+* translucent stencil shadow
+* DOOM3 mods: DOOM3(with full body awareness mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
+* Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
+* Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -25,19 +41,25 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.
-* Add OpenAL(soft) and EFX Reverb support.
-* Beam rendering optimization in Prey(2006) by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
-* Add subtitle support in Prey(2006).
-* Fixed gyroscope in invert-landscape mode.
-* Fixed bot head and add bot level control(cvar `harm_si_botLevel`, need extract new `sabot_a9.pk4` resource) in Quake4 MP game.
+* Fixed prelight shadow's shadow mapping.
+* Fixed EFX Reverb in Quake4.
+* Add translucent stencil shadow support in stencil shadow(bool cvar `harm_r_translucentStencilShadow`(default 0); float cvar `harm_r_stencilShadowAlpha` for setting transparency).
+* Add float cvar `harm_ui_subtitlesTextScale` control subtitles's text scale in Prey.
+* Support cvar `r_brightness`.
+* Fixed weapon projectile's scorches decals rendering in Prey(2006).
+* Data directory chooser support Android SAF.
+* New default on-screen buttons layout.
+* Add `Stupid Angry Bot`(a7x) mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `sabot`. More view in [SABot(a7x)](https://www.moddb.com/downloads/sabot-alpha-7x).
+* Add `Overthinked DooM^3` mod of DOOM3 support, game data directory named `overthinked`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/overthinked-doom3).
+* Add `Fragging Free` mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `fraggingfree`. More view in [Fragging Free](https://www.moddb.com/mods/fragging-free).
+* Add `HeXen:Edge of Chaos` mod of DOOM3 support, game data directory named `hexeneoc`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/hexen-edge-of-chaos).
 
 ----------------------------------------------------------------------------------
 
 #### About Prey(2006)
 ###### For playing Prey(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). Now can play all levels, but some levels has bugs.
 > 1. Putting PC Prey game data file to `preybase` folder and START directly.
-> 2. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.
+> 2. Some problems solution: e.g. using cvar `harm_ui_translateAlienFont` to translate Alien text on GUI.
 > 3. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).
 > 4. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.
 > > * bind "Your key of spirit walk" "_impulse54"
@@ -94,13 +116,15 @@ Tag with `-free` only for F-Droid update.
 ##### Define macro `__ANDROID__` for Android.
 > 1. _OPENSLES: Add OpenSLES support for sound.
 > 2. _MULTITHREAD: Add multithread support for rendering.
-> 3. _USING_STB: Using stb header for jpeg/png texture image support.
+> 3. _USING_STB: Using stb header for jpeg/png/dds texture image and jpeg/png/bmp screenshot support.
 > 4. _K_CLANG: If compiling by clang not GCC.
 > 5. _MODEL_OBJ: Add obj static model support.
 > 6. _MODEL_DAE: Add dae static model support.
 > 7. _SHADOW_MAPPING: Add Shadow mapping support.
 > 8. _OPENGLES3: Add OpenGLES3.0 support.
 > 9. _OPENAL _OPENAL_EFX: Add OpenAL(soft) and EFX Reverb support.
+> 10. _NO_LIGHT: Add no lighting support.
+> 11. _TRANSLUCENT_STENCIL_SHADOW: Add translucent stencil shadow support.
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
@@ -136,8 +160,8 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 ### Branch:
 
 > `master`:
-> * /DIII4A: frontend source
-> * /doom3: game source
+> * /idTech4Amm: frontend source
+> * /Q3E /Q3E/src/main/jni/doom3: game source
 
 > `free`:
 > * For F-Droid pure free version.

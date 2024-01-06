@@ -26,7 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class Q3EJNI {	
-	public static native void setCallbackObject(Object obj);	
+	public static native void setCallbackObject(Object obj);
 
     public static native void init(
             String LibPath, // engine's library file path

@@ -1,5 +1,22 @@
 ## 更新日志
-**1.1.0harmattan35(natasha)** - **2023-10-29**
+**1.1.0harmattan36(natasha)** - **2023-12-31**
+
+* 修复预烘培阴影图软阴影渲染.
+* 雷神之锤4修复EFX混响.
+* 添加半透明模板阴影支持(bool型cvar `harm_r_translucentStencilShadow`(默认 0); 浮点型cvar `harm_r_stencilShadowAlpha`设置透明度).
+* 掠食(2006)添加浮点型cvar `harm_ui_subtitlesTextScale`控制字幕字体大小.
+* 支持cvar `r_brightness`.
+* 掠食(2006)修复武器发射爆炸贴花渲染Z-Fighting.
+* 数据文件目录选择器支持安卓SAF框架.
+* 新的默认屏幕按键布局.
+* 添加毁灭战士3 mod `Stupid Angry Bot`(a7x)(需要邪恶复苏数据包), 游戏数据文件夹名为`sabot`. 详情 [SABot(a7x)](https://www.moddb.com/downloads/sabot-alpha-7x).
+* 添加毁灭战士3 mod `Overthinked DooM^3`, 游戏数据文件夹名为`overthinked`. 详情 [Overthinked DooM^3](https://www.moddb.com/mods/overthinked-doom3).
+* 添加毁灭战士3 mod `Fragging Free`(需要邪恶复苏数据包), 游戏数据文件夹名为`fraggingfree`. 详情 [Fragging Free](https://www.moddb.com/mods/fragging-free).
+* 添加毁灭战士3 mod `HeXen:Edge of Chaos`, 游戏数据文件夹名为`hexeneoc`. 详情 [Overthinked DooM^3](https://www.moddb.com/mods/hexen-edge-of-chaos).
+
+----------------------------------------------------------------------------------
+
+> 1.1.0harmattan33 (2023-10-29)
 
 * 优化Shadow mapping软阴影. OpenGLES2.0阴影图使用深度纹理.
 * 新增OpenALA(soft)和EFX混响支持.",
@@ -16,7 +33,7 @@
 * 雷神之锤4移除多人游戏Bot伪客户端, 使用SABot-a9 mod替换多人游戏的bot(需要先解压资源文件).
 * 修复掠食2006的设置页面选项卡.
 * 雷神之锤4新增`full-body awareness` mod. 设置布尔型cvar `harm_pm_fullBodyAwareness`为1开启, 并且可以使用`harm_pm_fullBodyAwarenessOffset`设置视角偏移(可以调整为第三人称视角), 使用`harm_pm_fullBodyAwarenessHeadJoint`设置自定义头部关节名称(视角位置).
-* 支持限制最大(cvar `harm_r_maxFPS`).
+* 支持限制最大(cvar `harm_r_maxFps`).
 * 支持obj/dae格式静态模型, 修复png格式图片加载.
 * 新增跳过启动动画支持.
 * 新增简易CVar编辑器.

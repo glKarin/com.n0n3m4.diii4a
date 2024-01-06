@@ -4,14 +4,28 @@ idTech4A++ is DOOM III/Quake 4/Prey(2006) idTech4 game runtime environment for A
   2. Click left icon or right game name text of launcher status bar for choosing game, and select game mod in tab `GENERAL`'s `Game`.
   3. Finally `START GAME`.
 
+Feature
+  multi-threading renderer
+  png/dds texture image, jpeg/png/bmp format of screenshot
+  obj/dae format static model
+  pure soft shadow with shadow-mapping
+  OpenGLES2.0/OpenGLES3.0
+  OpenAL(soft) and EFX Reverb
+  no-lighting rendering
+  translucent stencil shadow
+
 Folder name of games/mods:
-  DOOM3: base
+  DOOM3: base (with full body awareness mod)
   DOOM3 - Resurrection of Evil: d3xp
   DOOM3 - The lost mission: d3le
   Classic DOOM3: cdoom
   Rivensin: rivensin
   Hardcorps: hardcorps
+  Stupid Angry Bot(a7x): sabot
+  Overthinked DooM^3: overthinked
+  Fragging Free: fraggingfree
+  HeXen:Edge of Chaos: hexeneoc
 
-  Quake4: q4base
+  Quake4: q4base (with bot mod, full body awareness mod)
 
-  Prey(2006): preybase
+  Prey(2006): preybase (with full body awareness mod)

@@ -112,6 +112,7 @@ objModel_t* OBJ_Parse( const char* fileName, const char* objFileBuffer, int leng
 			idVec2 st;
 			st.x = src.ParseFloat();
 			st.y = 1.0f - src.ParseFloat();
+            src.SkipRestOfLine(); //k: for 3 components
 			texCoords.Append( st );
 		}
 		else if( token == "#" )
@@ -215,7 +216,7 @@ objModel_t* OBJ_Parse( const char* fileName, const char* objFileBuffer, int leng
 			int matches = sscanf( line.c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2] );
 			if( matches != 9 )
 			{
-				common->FatalError( "Failed to parse face line" );
+				common->FatalError( "Failed to parse face line in line %d", src.GetLineNum() );
 			}
 
 			for( int i = 0; i < 3; i++ )
@@ -240,7 +241,7 @@ objModel_t* OBJ_Parse( const char* fileName, const char* objFileBuffer, int leng
 		}
 		else
 		{
-			common->FatalError( "idRenderModelStatic::ParseOBJ: Unknown or unexpected token %s", token.c_str() );
+			common->FatalError( "idRenderModelStatic::ParseOBJ: Unknown or unexpected token %s in line %d", token.c_str(), src.GetLineNum() );
 		}
 	}
 

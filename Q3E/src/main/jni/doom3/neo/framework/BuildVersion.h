@@ -25,10 +25,13 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+#ifndef __BUILD_VERSION__
+#define __BUILD_VERSION__
 #ifdef _HUMANHEAD
 const int BUILD_NUMBER = 116;
 #elif defined(_RAVEN)
 const int BUILD_NUMBER = 1283;
 #else
 const int BUILD_NUMBER = 1304;
+#endif
 #endif

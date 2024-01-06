@@ -1,15 +1,31 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **最新版本:**
-1.1.0harmattan35(natasha)  
+1.1.0harmattan36(natasha)  
 **最新更新日期:**
-2023-10-29  
+2023-12-31  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
-Android 4.0+  
+Android 4.4+  
 **许可证:**
 GPLv3
+
+----------------------------------------------------------------------------------
+### 支持
+* 多线程渲染
+* png/dds纹理图片加载
+* jpeg/png/bmp格式截屏
+* obj格式静态模型
+* dae格式静态模型
+* 纯阴影图映射软阴影
+* OpenGLES2.0/OpenGLES3.0
+* OpenAL(soft)和EFX混响
+* 无光照渲染和无光照材质
+* 半透明模板阴影
+* 毁灭战士3 mods: 毁灭战士3(支持全身mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
+* 雷神之锤4(支持Bot mod; 全身mod)和Raven idTech4引擎
+* 掠食(2006)(支持全身mod)和HumanHead idTech4引擎
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
@@ -25,19 +41,25 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 优化Shadow mapping软阴影. OpenGLES2.0阴影图使用深度纹理.
-* 新增OpenALA(soft)和EFX混响支持.",
-* 掠食2006 Beam模型渲染优化(by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR)).
-* 掠食2006新增字幕支持.
-* 修复反横屏下的陀螺仪.
-* 雷神之锤4多人游戏修复Bot头部模型, 新增Bot等级控制支持(cvar `harm_si_botLevel`, 需要重新解压新的`sabot_a9.pk4`资源).
+* 修复预烘培阴影图软阴影渲染.
+* 雷神之锤4修复EFX混响.
+* 添加半透明模板阴影支持(bool型cvar `harm_r_translucentStencilShadow`(默认 0); 浮点型cvar `harm_r_stencilShadowAlpha`设置透明度).
+* 掠食(2006)添加浮点型cvar `harm_ui_subtitlesTextScale`控制字幕字体大小.
+* 支持cvar `r_brightness`.
+* 掠食(2006)修复武器发射爆炸贴花渲染Z-Fighting.
+* 数据文件目录选择器支持安卓SAF框架.
+* 新的默认屏幕按键布局.
+* 添加毁灭战士3 mod `Stupid Angry Bot`(a7x)(需要邪恶复苏数据包), 游戏数据文件夹名为`sabot`. 详情 [SABot(a7x)](https://www.moddb.com/downloads/sabot-alpha-7x).
+* 添加毁灭战士3 mod `Overthinked DooM^3`, 游戏数据文件夹名为`overthinked`. 详情 [Overthinked DooM^3](https://www.moddb.com/mods/overthinked-doom3).
+* 添加毁灭战士3 mod `Fragging Free`(需要邪恶复苏数据包), 游戏数据文件夹名为`fraggingfree`. 详情 [Fragging Free](https://www.moddb.com/mods/fragging-free).
+* 添加毁灭战士3 mod `HeXen:Edge of Chaos`, 游戏数据文件夹名为`hexeneoc`. 详情 [Overthinked DooM^3](https://www.moddb.com/mods/hexen-edge-of-chaos).
 
 ----------------------------------------------------------------------------------
 
 #### 关于掠食(2006)
 ###### 运行掠食(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). 目前可以运行全部关卡, 部分关卡存在bug.
 > 1. 将PC端掠食(2006)游戏文件放到`preybase`文件夹, 然后直接启动游戏.
-> 2. 已知问题的解决方案: 例如. 使用cvar `harm_g_translateAlienFont`自动翻译GUI中的外星人文字.
+> 2. 已知问题的解决方案: 例如. 使用cvar `harm_ui_translateAlienFont`自动翻译GUI中的外星人文字.
 > 3. 已知bugs: 例如一些错误的碰撞检测(使用`noclip`), 部分GUI不工作(RoadHouse的CD播放器).
 > 4. 如果设置页面不工作, 可以通过编辑`preyconfig.cfg`来绑定额外按键.
 > > * bind "幽灵行走按键" "_impulse54"
@@ -102,6 +124,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 7. _SHADOW_MAPPING: 增加Shadow mapping软阴影支持.
 > 8. _OPENGLES3: 增加OpenGL ES3.0支持.
 > 9. _OPENAL _OPENAL_EFX: 增加OpenAL(soft)和EFX混响支持.
+> 10. _NO_LIGHT: 添加无光照渲染支持.
+> 11. _TRANSLUCENT_STENCIL_SHADOW: 添加半透明模板阴影支持.
 
 #### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
 #### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).
@@ -137,8 +161,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ### 分支:
 
 > `master`:
-> * /DIII4A: 前端启动器源码
-> * /doom3: 游戏源码
+> * /idTech4Amm: 前端启动器源码
+> * /Q3E /Q3E/src/main/jni/doom3: 游戏源码
 
 > `free`:
 > * F-Droid自由版本.

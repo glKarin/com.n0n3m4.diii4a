@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,6 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SMOKEPARTICLES_H__
 #define __SMOKEPARTICLES_H__
 
+#include "idlib/math/Random.h"
+#include "idlib/math/Vector.h"
+#include "idlib/math/Matrix.h"
+#include "framework/DeclParticle.h"
+#include "renderer/RenderWorld.h"
+
 /*
 ===============================================================================
 
@@ -51,55 +57,52 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-typedef struct singleSmoke_s
-{
-    struct singleSmoke_s	 	*next;
-    int							privateStartTime;	// start time for this particular particle
-    int							index;				// particle index in system, 0 <= index < stage->totalParticles
-    idRandom					random;
-    idVec3						origin;
-    idMat3						axis;
+typedef struct singleSmoke_s {
+	struct singleSmoke_s	 *	next;
+	int							privateStartTime;	// start time for this particular particle
+	int							index;				// particle index in system, 0 <= index < stage->totalParticles
+	idRandom					random;
+	idVec3						origin;
+	idMat3						axis;
 } singleSmoke_t;
 
-typedef struct
-{
-    const idParticleStage 		*stage;
-    singleSmoke_t 				*smokes;
+typedef struct {
+	const idParticleStage *		stage;
+	singleSmoke_t *				smokes;
 } activeSmokeStage_t;
 
 
-class idSmokeParticles
-{
+class idSmokeParticles {
 public:
-    idSmokeParticles(void);
+								idSmokeParticles( void );
 
-    // creats an entity covering the entire world that will call back each rendering
-    void						Init(void);
-    void						Shutdown(void);
+	// creats an entity covering the entire world that will call back each rendering
+	void						Init( void );
+	void						Shutdown( void );
 
-    // spits out a particle, returning false if the system will not emit any more particles in the future
-    bool						EmitSmoke(const idDeclParticle *smoke, const int startTime, const float diversity,
-                                          const idVec3 &origin, const idMat3 &axis);
+	// spits out a particle, returning false if the system will not emit any more particles in the future
+	bool						EmitSmoke( const idDeclParticle *smoke, const int startTime, const float diversity,
+											const idVec3 &origin, const idMat3 &axis );
 
-    // free old smokes
-    void						FreeSmokes(void);
+	// free old smokes
+	void						FreeSmokes( void );
 
 private:
-    bool						initialized;
+	bool						initialized;
 
-    renderEntity_t				renderEntity;			// used to present a model to the renderer
-    int							renderEntityHandle;		// handle to static renderer model
+	renderEntity_t				renderEntity;			// used to present a model to the renderer
+	int							renderEntityHandle;		// handle to static renderer model
 
-    static const int			MAX_SMOKE_PARTICLES = 10000;
-    singleSmoke_t				smokes[MAX_SMOKE_PARTICLES];
+	static const int			MAX_SMOKE_PARTICLES = 10000;
+	singleSmoke_t				smokes[MAX_SMOKE_PARTICLES];
 
-    idList<activeSmokeStage_t>	activeStages;
-    singleSmoke_t 				*freeSmokes;
-    int							numActiveSmokes;
-    int							currentParticleTime;	// don't need to recalculate if == view time
+	idList<activeSmokeStage_t>	activeStages;
+	singleSmoke_t *				freeSmokes;
+	int							numActiveSmokes;
+	int							currentParticleTime;	// don't need to recalculate if == view time
 
-    bool						UpdateRenderEntity(renderEntity_s *renderEntity, const renderView_t *renderView);
-    static bool					ModelCallback(renderEntity_s *renderEntity, const renderView_t *renderView);
+	bool						UpdateRenderEntity( renderEntity_s *renderEntity, const renderView_t *renderView );
+	static bool					ModelCallback( renderEntity_s *renderEntity, const renderView_t *renderView );
 };
 
 #endif /* !__SMOKEPARTICLES_H__ */

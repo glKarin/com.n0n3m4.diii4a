@@ -731,7 +731,7 @@ void R_FreeEntityDefDerivedData(idRenderEntityLocal *def, bool keepDecals, bool 
 	{
 		idRenderModelMD5 *md5_model = dynamic_cast<idRenderModelMD5*>(def->parms.hModel);
 		if(md5_model)
-			md5_model->staticModelInstance = 0;
+			md5_model->ClearDynamicModelSnapshot();
 	}
 #endif
 

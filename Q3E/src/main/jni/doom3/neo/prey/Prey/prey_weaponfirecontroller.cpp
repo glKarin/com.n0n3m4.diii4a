@@ -198,7 +198,15 @@ idMat3 hhWeaponFireController::DetermineAimAxis( const idVec3& muzzlePos, const 
 	
 	//HUMANHEAD bjk
 	if( aimTrace.fraction < 1.0f ) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+		idVec3 eyePos;
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->InVehicle() || owner->IsZoomed())
+			eyePos = owner->GetEyePosition();
+		else
+			eyePos = owner->firstPersonViewOrigin_viewWeaponOrigin;
+#else
 		idVec3 eyePos = owner->GetEyePosition();
+#endif
 
 		// Perform eye trace
 		gameLocal.clip.TracePoint( aimTrace, eyePos, eyePos + weaponAxis[0] * traceDist * 4.0f, 

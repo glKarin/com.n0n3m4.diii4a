@@ -72,6 +72,10 @@
                 android:id="@+id/main_menu_extract_resource"
                 android:title="@string/extract_resource"
                 android:showAsAction="never"/>
+            <!--<item
+                android:id="@+id/main_menu_move_game_data"
+                android:title="Move game data to app private directory"
+                android:showAsAction="never"/>-->
             <item
                 android:id="@+id/main_menu_cvar_list"
                 android:title="@string/special_cvar_list"

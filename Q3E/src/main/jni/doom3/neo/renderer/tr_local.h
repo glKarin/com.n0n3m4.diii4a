@@ -947,7 +947,9 @@ extern idCVar r_multiSamples;			// number of antialiasing samples
 extern idCVar r_ignore;					// used for random debugging without defining new vars
 extern idCVar r_ignore2;				// used for random debugging without defining new vars
 extern idCVar r_znear;					// near Z clip plane
+#ifdef _NO_LIGHT
 extern idCVar r_noLight;				// no lighting
+#endif
 extern idCVar r_useETC1;				// ETC1 compression
 extern idCVar r_useETC1Cache;				// use ETC1 cache
 extern idCVar r_useDXT;					// DXT compression
@@ -1636,6 +1638,10 @@ extern shaderProgram_t depthShader_spotLight; //k: depth shader
 extern shaderProgram_t interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
 extern shaderProgram_t interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
 #endif
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+extern shaderProgram_t interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
+extern shaderProgram_t interactionTranslucentBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader(translucent stencil shadow)
+#endif
 
 
 /*
@@ -2088,6 +2094,15 @@ void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLigh
 void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light);
 void R_SetupFrontEndViewDefMVP(void);
 
+#endif
+
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+extern idCVar harm_r_translucentStencilShadow;
+extern idCVar harm_r_stencilShadowAlpha;
+#endif
+
+#ifdef __ANDROID__
+extern float RB_overbright;
 #endif
 
 #endif /* !__TR_LOCAL_H__ */

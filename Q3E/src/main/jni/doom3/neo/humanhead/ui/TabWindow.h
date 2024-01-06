@@ -17,11 +17,11 @@ public:
 	virtual void		StateChanged(bool redraw = false);
 
 	void				UpdateTab();
-	void SetActive(bool active);
-    void SetOffsets(float x, float y);
+	void 				SetActive(bool active);
+    void 				SetOffsets(float x, float y);
 
 protected:
-    virtual void SetVisible(bool visible);
+    virtual void 		SetVisible(bool visible);
 
 private:
 	virtual bool		ParseInternalVar(const char *name, idParser *src);

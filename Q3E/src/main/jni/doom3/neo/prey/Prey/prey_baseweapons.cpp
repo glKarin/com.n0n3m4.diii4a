@@ -430,6 +430,9 @@ void hhWeapon::InitWorldModel( const idDict *dict ) {
 		// supress model in player views, but allow it in mirrors and remote views
 		renderEntity_t *worldModelRenderEntity = ent->GetRenderEntity();
 		if ( worldModelRenderEntity ) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+			if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+#endif
 			worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber+1;
 			worldModelRenderEntity->suppressShadowInViewID = owner->entityNumber+1;
 			worldModelRenderEntity->suppressShadowInLightID = LIGHTID_VIEW_MUZZLE_FLASH + owner->entityNumber;
@@ -1778,6 +1781,17 @@ hhWeapon::Think
 ================
 */
 void hhWeapon::Think() {
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(worldModel.IsValid())
+	{
+		renderEntity_t* worldModelRenderEntity = worldModel.GetEntity()->GetRenderEntity();
+		bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->InVehicle() || owner->IsZoomed();
+		if(not_pm_fullBodyAwareness)
+			worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
+		else
+			worldModelRenderEntity->suppressSurfaceInViewID = 0;
+	}
+#endif
 	if( thinkFlags & TH_TICKER ) {
 		if (owner.IsValid()) {
 			Ticker();

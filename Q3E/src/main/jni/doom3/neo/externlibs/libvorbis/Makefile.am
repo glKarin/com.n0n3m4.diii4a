@@ -1,60 +1,44 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = modes books
+AUTOMAKE_OPTIONS = foreign 1.11 dist-zip dist-xz
 
-AM_CPPFLAGS = -I$(top_srcdir)/include @OGG_CFLAGS@
+ACLOCAL_AMFLAGS = -I m4
 
-lib_LTLIBRARIES = libvorbis.la libvorbisfile.la libvorbisenc.la
+SUBDIRS = m4 include vq lib test doc
 
-libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c \
-			lpc.c analysis.c synthesis.c psy.c info.c \
-			floor1.c floor0.c\
-			res0.c mapping0.c registry.c codebook.c sharedbook.c\
-			lookup.c bitrate.c\
-			envelope.h lpc.h lsp.h codebook.h misc.h psy.h\
-			masking.h os.h mdct.h smallft.h highlevel.h\
-			registry.h scales.h window.h lookup.h lookup_data.h\
-			codec_internal.h backends.h bitrate.h 
-libvorbis_la_LDFLAGS = -no-undefined -version-info @V_LIB_CURRENT@:@V_LIB_REVISION@:@V_LIB_AGE@
-libvorbis_la_LIBADD = @VORBIS_LIBS@ @OGG_LIBS@
+if BUILD_EXAMPLES 
+SUBDIRS += examples 
+endif 
 
-libvorbisfile_la_SOURCES = vorbisfile.c
-libvorbisfile_la_LDFLAGS = -no-undefined -version-info @VF_LIB_CURRENT@:@VF_LIB_REVISION@:@VF_LIB_AGE@
-libvorbisfile_la_LIBADD = libvorbis.la @OGG_LIBS@
+m4datadir = $(datadir)/aclocal
+m4data_DATA = vorbis.m4
 
-libvorbisenc_la_SOURCES = vorbisenc.c 
-libvorbisenc_la_LDFLAGS = -no-undefined -version-info @VE_LIB_CURRENT@:@VE_LIB_REVISION@:@VE_LIB_AGE@
-libvorbisenc_la_LIBADD = libvorbis.la @OGG_LIBS@
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = vorbis.pc vorbisenc.pc vorbisfile.pc
 
-EXTRA_PROGRAMS = barkmel tone psytune
-CLEANFILES = $(EXTRA_PROGRAMS)
+EXTRA_DIST = \
+	CHANGES COPYING \
+	autogen.sh \
+	libvorbis.spec libvorbis.spec.in \
+	vorbis.m4 \
+	vorbis.pc.in vorbisenc.pc.in vorbisfile.pc.in \
+	vorbis-uninstalled.pc.in \
+	vorbisenc-uninstalled.pc.in \
+	vorbisfile-uninstalled.pc.in \
+	symbian \
+	macosx win32
 
-barkmel_SOURCES = barkmel.c
-tone_SOURCES = tone.c
-psytune_SOURCES = psytune.c
-psytune_LDFLAGS = -static
-psytune_LDADD = libvorbis.la
 
-EXTRA_DIST = lookups.pl 
+DISTCHECK_CONFIGURE_FLAGS = --enable-docs
 
-# build and run the self tests on 'make check'
-
-#vorbis_selftests = test_codebook test_sharedbook
-vorbis_selftests = test_sharedbook
-
-noinst_PROGRAMS = $(vorbis_selftests)
-
-check: $(noinst_PROGRAMS)
-	./test_sharedbook$(EXEEXT)
-
-#test_codebook_SOURCES = codebook.c
-#test_codebook_CFLAGS = -D_V_SELFTEST
-
-test_sharedbook_SOURCES = sharedbook.c
-test_sharedbook_CFLAGS = -D_V_SELFTEST
-test_sharedbook_LDADD = @VORBIS_LIBS@
-
-# recurse for alternate targets
+dist-hook:
+	for item in $(EXTRA_DIST); do \
+	  if test -d $$item; then \
+	    echo -n "cleaning $$item dir for distribution..."; \
+	    rm -rf `find $(distdir)/$$item -name .svn`; \
+	    echo "OK"; \
+	  fi; \
+	done
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"

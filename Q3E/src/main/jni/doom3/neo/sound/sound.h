@@ -36,6 +36,42 @@ If you have questions concerning this license or the applicable additional terms
 #define SOUNDWORLD_MENU		2
 #define SOUNDWORLD_EDITOR	3
 #define SOUNDWORLD_MAX		4
+
+// RAVEN BEGIN
+class rvCommonSample
+{
+public:
+							rvCommonSample( void );
+	virtual					~rvCommonSample( void ) {}
+
+	virtual const byte		*GetSampleData( void ) const { return( NULL ); }
+	virtual int				GetNumChannels( void ) const { return( 0 ); }
+	virtual int				GetNumSamples( void ) const { return( 0 ); }
+	virtual int				GetSampleRate( void ) const { return( 0 ); }
+	virtual int				GetMemoryUsed( void ) const { return( 0 ); }
+	virtual	int				GetDurationMS( void ) const { return( 0 ); }
+	virtual	float			GetDuration( void ) const { return( 0.0f ); }
+	virtual	void			Load( int langIndex = -1 ) {}
+	virtual void			PurgeSoundSample( void ) {}
+	virtual	bool			IsOgg( void ) const { return false; }		// is false for an expanded ogg
+	virtual	void			Expand( bool force ) {}						// expand oggs to pcm
+
+			void			SetReferencedThisLevel( void ) { levelLoadReferenced = true; }
+
+	idStr					name;								// name of the sample file
+	unsigned int 			timestamp;							// the most recent of all images used in creation, for reloadImages command
+
+	bool					defaultSound;						// error during loading, now a beep
+	bool					purged;
+	bool					levelLoadReferenced;				// so we can tell which samples aren't needed any more
+// RAVEN BEGIN
+// mwhitlock: Dynamic memory consolidation
+#if defined(_RV_MEM_SYS_SUPPORT)
+	bool					referencedOutsideLevelLoad;
+#endif
+// RAVEN END
+};
+// RAVEN END
 #endif
 /*
 ===============================================================================
@@ -569,7 +605,44 @@ class idSoundSystem
 	// reset the listener portal to invalid during level transitions
 	virtual void			ResetListener( void ) = 0;
 
+// RAVEN BEGIN
+// rjohnson: added list active sounds
+	virtual void			ListActiveSounds( int worldId ) = 0;
+// RAVEN END
+	// End SoundWorld stuff
+
+// RAVEN BEGIN
+// jscott: added
+	virtual size_t			ListSoundSummary( void ) = 0;
+
+	virtual bool			HasCache( void ) const = 0;
+	virtual rvCommonSample	*FindSample( const idStr &filename ) = 0;
+	virtual	int				SamplesToMilliseconds( int samples ) const = 0;
+	virtual void *			AllocSoundSample( int size ) = 0;
+	virtual void			FreeSoundSample( const byte *address ) = 0;
+
+	virtual bool			GetInsideLevelLoad( void ) const = 0;
+	virtual	bool			ValidateSoundShader( idSoundShader *shader ) = 0;
+
+// jscott: voice comm support
+	virtual	bool			EnableRecording( bool enable, bool test, float &micLevel ) = 0;
+	virtual int				GetVoiceData( byte *buffer, int maxSize ) = 0;
+	virtual void			PlayVoiceData( int clientNum, const byte *buffer, int bytes ) = 0;
+	virtual void			BufferVoiceData( void ) = 0;
+	virtual void			MixVoiceData( float *finalMixBuffer, int numSpeakers, int newTime ) = 0;
+// ddynerman: voice comm utility
+	virtual	int				GetCommClientNum( int channel ) const = 0;
+	virtual int				GetNumVoiceChannels( void ) const = 0;
+
+// jscott: reverb editor support
+	virtual	const char		*GetReverbName( int reverb ) = 0;
+	virtual	int				GetNumAreas( void ) = 0;
+	virtual	int				GetReverb( int area ) = 0;
+	virtual	bool			SetReverb( int area, const char *reverbName, const char *fileName ) = 0;
+
 	virtual void			EndCinematic() = 0;
+
+// RAVEN END
 #endif
 
 #ifdef _HUMANHEAD

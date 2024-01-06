@@ -1,8 +1,11 @@
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
-
-#include "Game_local.h"
+#ifdef _RIVENSIN
+#include "idlib/precompiled.h"
+#endif
+#include "Game_local.h" 
+#include "Player.h"
+#include "PlayerCursor.h"
+#include "renderer/ModelManager.h"
 
 /* 
 =============== 
@@ -96,7 +99,7 @@ void idPlayerCursor::Draw( const idVec3 &origin, const idMat3 &axis,const char *
 	gameLocal.Printf("destLookAng: %s\n", destLookAng.ToString() );
 	gameLocal.Printf("cameraLookAng: %s\n", cameraLookAng.ToString() );
 	gameLocal.Printf("delta: %s\n", deltaLookAng.ToString() );
-	//x: lungo su/gi? retta. 0 = centro, pos = mirino sotto, neg = mirino sopra
+	//x: lungo su/gi� retta. 0 = centro, pos = mirino sotto, neg = mirino sopra
 	//y: pos = quanto sx
 	//z: 0
 

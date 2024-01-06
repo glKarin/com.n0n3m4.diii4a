@@ -180,7 +180,7 @@ public final class TextHelper
                 null,
             "For playing Prey(2006)(Thanks for `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
-            " *. Some problems solution: e.g. using cvar `harm_g_translateAlienFont` to translate Alien text on GUI.",
+            " *. Some problems solution: e.g. using cvar `harm_ui_translateAlienFont` to translate Alien text on GUI.",
             " *. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).",
             " *. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.",
             "  bind \"Your key of spirit walk\" \"_impulse54\"",
@@ -314,12 +314,21 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2023-10-29", 35,
+                        "Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.",
+                        "Add OpenAL(soft) and EFX Reverb support.",
+                        "Beam rendering optimization in Prey(2006) by `" + TextHelper.GenLinkText("https://github.com/lvonasek/PreyVR", "lvonasek/PreyVR") + "`.",
+                        "Add subtitle support in Prey(2006).",
+                        "Fixed gyroscope in invert-landscape mode.",
+                        "Fixed bot head and add bot level control(cvar `harm_si_botLevel`, need extract new `sabot_a9.pk4` resource) in Quake4 MP game."
+                ),
+
                 ChangeLog.Create("2023-10-01", 33,
                         "Add shadow mapping soft shadow support(testing, has some incorrect rendering), using `r_useShadowMapping` to change from `shadow mapping` or `stencil shadow`.",
                         "In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).",
                         "Fix Setting's tab GUI in Prey2006.",
                         "Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).",
-                        "Support max FPS limit(cvar `harm_r_maxFPS`).",
+                        "Support max FPS limit(cvar `harm_r_maxFps`).",
                         "Support obj/dae static model, and fix png image load.",
                         "Add skip intro support.",
                         "Add simple CVar editor.",

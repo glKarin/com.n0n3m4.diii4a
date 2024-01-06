@@ -1793,12 +1793,10 @@ void idGameLocal::DumpOggSounds( void ) {
 
 				// don't OGG sounds that cause a shake because that would
 				// cause continuous seeking on the OGG file which is expensive
-#if 1 // jmarshall
 				if ( parms->shakes != 0.0f || (parms->soundShaderFlags & SSF_VOICEAMPLITUDE)) {
 					shakeSounds.AddUnique( soundName );
 					continue;
 				}
-#endif
 
 #if HUMANHEAD	// HUMANHEAD mdc - our version of skip logic (to account for our naming conventions)
 

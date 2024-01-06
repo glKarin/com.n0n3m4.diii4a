@@ -29,6 +29,16 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GAME_PLAYER_H__
 #define __GAME_PLAYER_H__
 
+#include "idlib/math/Interpolate.h"
+
+#include "physics/Physics_Player.h"
+#include "Item.h"
+#include "Actor.h"
+#include "Weapon.h"
+#include "Projectile.h"
+#include "PlayerIcon.h"
+#include "GameEdit.h"
+
 #ifndef _DENTONMOD_PLAYER_CPP
 #define _DENTONMOD_PLAYER_CPP
 #endif

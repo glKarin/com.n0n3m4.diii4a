@@ -1105,7 +1105,7 @@ guiPoint_t	idRenderWorldLocal::GuiTrace(qhandle_t entityHandle, const idVec3 sta
 		idRenderModelMD5 *md5_model = dynamic_cast<idRenderModelMD5*>(model);
 		if(!md5_model)
 			return pt;
-		model = md5_model->staticModelInstance;
+		model = md5_model->DynamicModelSnapshot();
 		if(!model)
 			return pt;
 	}
@@ -1164,61 +1164,21 @@ guiPoint_t	idRenderWorldLocal::GuiTrace(qhandle_t entityHandle, const idVec3 sta
 			pt.y = (cursor * axis[1]) / (axisLen[1] * axisLen[1]);
 			pt.guiId = shader->GetEntityGui();
 
-#ifdef _RAVEN //k: player focus gui
-			if (tri->silEdges && tri->verts && tr.primaryView) {
-				idScreenRect	r;
-				idVec3			v;
-				idVec3			ndc;
-				float			windowX, windowY;
-				//int viewportWidth = (backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1);
-				//int viewportHeight = (backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1);
-				const int viewportWidth = 640;
-				const int viewportHeight = 480;
-
-				r.Clear();
-				idDrawVert *ac = (idDrawVert *)tri->verts;
-				int danglePlane = tri->numIndexes / 3;
-				for (int j = 0 ; j < tri->numSilEdges ; j++) {
-					const silEdge_t			*edge = tri->silEdges + j;
-					if (edge->p1 != danglePlane && edge->p2 != danglePlane) {
-						continue;
-					}
-
-					float *ptr = ac[ edge->v1 ].xyz.ToFloatPtr();
-					R_LocalPointToGlobal(def->modelMatrix, idVec3(ptr[0], ptr[1], ptr[2]), v);
-					R_GlobalToNormalizedDeviceCoordinates(v, ndc);
-
-					windowX = 0.5f * (1.0f + ndc[0]) * viewportWidth;
-					windowY = 0.5f * (1.0f + ndc[1]) * viewportHeight;
-
-					r.AddPoint(windowX, windowY);
-
-					ptr = ac[ edge->v2 ].xyz.ToFloatPtr();
-					R_LocalPointToGlobal(def->modelMatrix, idVec3(ptr[0], ptr[1], ptr[2]), v);
-					R_GlobalToNormalizedDeviceCoordinates(v, ndc);
-
-					windowX = 0.5f * (1.0f + ndc[0]) * viewportWidth;
-					windowY = 0.5f * (1.0f + ndc[1]) * viewportHeight;
-
-					r.AddPoint(windowX, windowY);
-				}
-
-				r.Expand();
-
-				idUserInterface	*gui = 0;
-				int guiNum = shader->GetEntityGui() - 1;
-				if (guiNum >= 0 && guiNum < MAX_RENDERENTITY_GUI)
-					gui = def->parms.gui[ guiNum ];
-				if (!gui)
-					gui = shader->GlobalGui();
-				if (gui) 
-				{
-					gui->SetStateInt("2d_min_x", r.x1);
-					gui->SetStateInt("2d_min_y", viewportHeight - r.y2);
-					gui->SetStateInt("2d_max_x", r.x2);
-					gui->SetStateInt("2d_max_y", viewportHeight - r.y1);
-					gui->SetStateBool("harm_2d_calc", true);
-				}
+#ifdef _RAVEN //karin: player focus GUI with brackets
+			idUserInterface	*gui = NULL;
+			int guiNum = shader->GetEntityGui() - 1;
+			if (guiNum >= 0 && guiNum < MAX_RENDERENTITY_GUI)
+				gui = def->parms.gui[ guiNum ];
+			if (!gui)
+				gui = shader->GlobalGui();
+			if (gui)
+			{
+#if 0 //karin: now calc in tr_guisurf::R_RenderGuiSurf
+				extern void R_CalcGuiRangeInWindow(idUserInterface *gui, const srfTriangles_t *tri, const float defModelMatrix[16]);
+				R_CalcGuiRangeInWindow(gui, tri, def->modelMatrix);
+#else //karin: now only mark `harm_2d_calc` to true
+				gui->SetStateBool("harm_2d_calc", true);
+#endif
 			}
 #endif
 			return pt;

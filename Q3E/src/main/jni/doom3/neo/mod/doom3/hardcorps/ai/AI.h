@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __AI_H__
 #define __AI_H__
 
+#include "physics/Physics_Monster.h"
+#include "Entity.h"
+#include "Actor.h"
+#include "Projectile.h"
+
 /*
 ===============================================================================
 

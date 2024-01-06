@@ -4,6 +4,9 @@
 #ifndef __GAME_TRACER_H__
 #define __GAME_TRACER_H__
 
+#include "Entity.h"
+#include "idlib/math/Vector.h"
+
 
 // TypeInfo flags
 enum {

@@ -26,10 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/Licensee.h"
+#include "framework/BuildVersion.h"
 
-#include "../Game_local.h"
+#include "GameBase.h"
+#include "MultiplayerGame.h"
+
+#include "SysCvar.h"
 
 #if defined( _DEBUG )
 	#define	BUILD_DEBUG	"-debug"
@@ -51,7 +55,7 @@ const char *ui_skinArgs[]			= { "skins/characters/player/marine_mp", "skins/char
 const char *ui_teamArgs[]			= { "Red", "Blue", NULL };
 
 struct gameVersion_s {
-	gameVersion_s( void ) { sprintf( string, "%s.%d%s %s %s", ENGINE_VERSION, BUILD_NUMBER, BUILD_DEBUG, BUILD_STRING, __DATE__ ); }
+	gameVersion_s( void ) { sprintf( string, "%s.%d%s %s-%s %s %s", ENGINE_VERSION, BUILD_NUMBER, BUILD_DEBUG, BUILD_OS, BUILD_CPU, __DATE__, __TIME__ ); }
 	char	string[256];
 } gameVersion;
 
@@ -354,13 +358,16 @@ idCVar g_grabberDamping(			"g_grabberDamping",			"0.5",			CVAR_GAME | CVAR_FLOAT
 
 
 // HDR related - J.C.Denton
-idCVar r_HDR_enable					( "r_HDR_enable",					"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, " Enables HDR Rendering & post-processing.");
-idCVar r_HDR_enableDebugMode		( "r_HDR_enableDebugMode",			"0",			CVAR_GAME | CVAR_INTEGER, " Shows all the textures generated for HDR postprocess. \n 1: Shows all textures \n 2: Decodes and shows all textures");
-//k: Only work on Dhewm3 engine.
-#if !defined(_RIVENSIN)
-idCVar r_HDR_postProcess			( "r_HDR_postProcess",				"1",			CVAR_GAME | CVAR_INTEGER, " Activates HDR bloom . \n 1: HDR Bloom with automatic eye exposure ");
+#ifdef _RIVENSIN
+idCVar r_HDR_enable					( "r_HDR_enable",					"0",			CVAR_GAME | CVAR_ROM | CVAR_INIT | CVAR_BOOL, " Enables HDR Rendering & post-processing.");
 #else
-idCVar r_HDR_postProcess			( "r_HDR_postProcess",				"0",			CVAR_GAME | CVAR_INTEGER, " Activates HDR bloom . \n 1: HDR Bloom with automatic eye exposure (Only work on Dhewm3 engine)");
+idCVar r_HDR_enable					( "r_HDR_enable",					"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, " Enables HDR Rendering & post-processing.");
+#endif
+idCVar r_HDR_enableDebugMode		( "r_HDR_enableDebugMode",			"0",			CVAR_GAME | CVAR_INTEGER, " Shows all the textures generated for HDR postprocess. \n 1: Shows all textures \n 2: Decodes and shows all textures");
+#ifdef _RIVENSIN
+idCVar r_HDR_postProcess			( "r_HDR_postProcess",				"0",			CVAR_GAME | CVAR_ROM | CVAR_INIT | CVAR_INTEGER, " Activates HDR bloom . \n 1: HDR Bloom with automatic eye exposure ");
+#else
+idCVar r_HDR_postProcess			( "r_HDR_postProcess",				"1",			CVAR_GAME | CVAR_INTEGER, " Activates HDR bloom . \n 1: HDR Bloom with automatic eye exposure ");
 #endif
 idCVar r_HDR_middleGray				( "r_HDR_middleGray",				"0.1",			CVAR_GAME | CVAR_FLOAT,	" Middle gray value for overall scene . Range 0 - 1. (Works only when automatic exposure is on) ");
 idCVar r_HDR_brightPassThreshold	( "r_HDR_brightPassThreshold",		"1.7",			CVAR_GAME | CVAR_FLOAT, " brightness threshold for Bright-pass (Works only when automatic exposure is on)");

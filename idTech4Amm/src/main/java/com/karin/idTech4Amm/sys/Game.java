@@ -15,9 +15,10 @@ public enum Game
     DOOM3_RIVENSIN(Q3EGlobals.GAME_DOOM3, "rivensin", "rivensin", "", true, R.string.rivensin_rivensin),
     DOOM3_HARDCORPS(Q3EGlobals.GAME_DOOM3, "hardcorps", "hardcorps", "", true, R.string.hardcorps_hardcorps),
 
-        /*DOOM3_OVERTHINKED(Q3EGlobals.GAME_DOOM3, "overthinked", "overthinked", "", true, "Overthinked"),
-        DOOM3_SABOT(Q3EGlobals.GAME_DOOM3, "sabot", "sabot", "", true, "SABot"),
-        DOOM3_HEXENEOC(Q3EGlobals.GAME_DOOM3, "hexeneoc", "hexeneoc", "", true, "HexenEOC"),*/
+    DOOM3_OVERTHINKED(Q3EGlobals.GAME_DOOM3, "overthinked", "overthinked", "", true, R.string.overthinked_doom_3),
+    DOOM3_SABOT(Q3EGlobals.GAME_DOOM3, "sabot", "sabot", "d3xp", true, R.string.stupid_angry_bot_a7x),
+    DOOM3_HEXENEOC(Q3EGlobals.GAME_DOOM3, "hexeneoc", "hexeneoc", "", true, R.string.hexen_edge_of_chaos),
+    DOOM3_FRAGGINGFREE(Q3EGlobals.GAME_DOOM3, "fraggingfree", "fraggingfree", "d3xp", true, R.string.fragging_free),
 
     // Quake 4
     QUAKE4_BASE(Q3EGlobals.GAME_QUAKE4, "q4base", "", "", false, R.string.quake_iv_q4base),

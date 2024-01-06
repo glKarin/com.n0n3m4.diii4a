@@ -1,5 +1,22 @@
 ## Change logs
-**1.1.0harmattan35(natasha)** - **2023-10-29**
+**1.1.0harmattan36(natasha)** - **2023-12-31**
+
+* Fixed prelight shadow's shadow mapping.
+* Fixed EFX Reverb in Quake4.
+* Add translucent stencil shadow support in stencil shadow(bool cvar `harm_r_translucentStencilShadow`(default 0); float cvar `harm_r_stencilShadowAlpha` for setting transparency).
+* Add float cvar `harm_ui_subtitlesTextScale` control subtitles's text scale in Prey.
+* Support cvar `r_brightness`.
+* Fixed weapon projectile's scorches decals rendering in Prey(2006).
+* Data directory chooser support Android SAF.
+* New default on-screen buttons layout.
+* Add `Stupid Angry Bot`(a7x) mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `sabot`. More view in [SABot(a7x)](https://www.moddb.com/downloads/sabot-alpha-7x).
+* Add `Overthinked DooM^3` mod of DOOM3 support, game data directory named `overthinked`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/overthinked-doom3).
+* Add `Fragging Free` mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `fraggingfree`. More view in [Fragging Free](https://www.moddb.com/mods/fragging-free).
+* Add `HeXen:Edge of Chaos` mod of DOOM3 support, game data directory named `hexeneoc`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/hexen-edge-of-chaos).
+
+----------------------------------------------------------------------------------
+
+> 1.1.0harmattan33 (2023-10-29)
 
 * Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.
 * Add OpenAL(soft) and EFX Reverb support.
@@ -16,7 +33,7 @@
 * In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).
 * Fix Setting's tab GUI in Prey2006.
 * Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).
-* Support max FPS limit(cvar `harm_r_maxFPS`).
+* Support max FPS limit(cvar `harm_r_maxFps`).
 * Support obj/dae static model, and fix png image load.
 * Add skip intro support.
 * Add simple CVar editor.

@@ -253,7 +253,7 @@ Setup the light base projection matrix and inverse base projection matrix.
 */
 void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light)
 {
-    if(r_useShadowMapping.GetBool())
+    // if(r_useShadowMapping.GetBool()) //k: always calc when a light spawned
     {
         idRenderMatrix localProject;
         float zScale = 1.0f;

@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11035"
-    android:versionName="1.1.0harmattan35"
+    android:versionCode="11036"
+    android:versionName="1.1.0harmattan36"
     android:installLocation="preferExternal"
     >
 
@@ -22,6 +22,9 @@
         tools:ignore="ScopedStorage" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
 
     <!--<uses-feature android:name="android.hardware.type.pc" android:required="false" />-->
 
@@ -52,6 +55,8 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
         <activity android:label="@string/app_name"
             android:screenOrientation="landscape"
@@ -82,5 +87,39 @@
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
+
+        <provider
+            android:name="com.karin.idTech4Amm.AndroidDataDocumentsProvider"
+            android:authorities="com.karin.idTech4Amm.android.data.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
+        <provider
+            android:name="com.karin.idTech4Amm.DataUserDocumentsProvider"
+            android:authorities="com.karin.idTech4Amm.data.user.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
+        <provider
+            android:name="com.karin.idTech4Amm.DIII4ADocumentsProvider"
+            android:authorities="com.karin.idTech4Amm.diii4a.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
     </application>    
 </manifest> 

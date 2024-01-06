@@ -1,5 +1,10 @@
 package com.karin.idTech4Amm.lib;
 
+import android.net.Uri;
+import android.os.Environment;
+import android.support.v4.provider.DocumentFile;
+import android.util.Log;
+
 import com.karin.idTech4Amm.misc.Function;
 
 import java.io.ByteArrayOutputStream;
@@ -10,6 +15,9 @@ import java.io.Closeable;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Local file IO utility
@@ -250,6 +258,133 @@ public final class FileUtility
             e.printStackTrace();
             return a.getAbsolutePath();
         }
+    }
+
+    public static boolean mv(String src, String target)
+    {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+        {
+            try
+            {
+                Path srcPath = Paths.get(src);
+                Path targetPath = Paths.get(target);
+                if(Files.isDirectory(srcPath))
+                {
+                    Files.walk(srcPath).forEach((x) -> {
+                        File file = x.toFile();
+                        String relativePath = file.getAbsolutePath().substring(src.length());
+                        Path targetP = Paths.get(target + relativePath);
+                        try
+                        {
+                            if(Files.isDirectory(x))
+                            {
+                                Files.createDirectories(targetP);
+                            }
+                            else
+                            {
+                                Files.move(x, targetP/*, StandardCopyOption.REPLACE_EXISTING*/);
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+                else
+                    Files.move(srcPath, targetPath/*, StandardCopyOption.REPLACE_EXISTING*/);
+                return true;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        else
+        {
+            File srcFile = new File(src);
+            try
+            {
+                return srcFile.renameTo(new File(target));
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+    public static boolean IsSDCardPath(String path)
+    {
+        if (path.startsWith("/sdcard"))
+            return true;
+        else
+        {
+            final String emuPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+            if (path.startsWith(emuPath))
+                return true;
+        }
+        return false;
+    }
+
+    public static String GetSDCardRelativePath(String path)
+    {
+        if (path.startsWith("/sdcard"))
+            path = path.substring("/sdcard".length());
+        else
+        {
+            final String emuPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+            if (path.startsWith(emuPath))
+                path = path.substring(emuPath.length());
+        }
+        return path;
+    }
+
+    public static Uri PathGrantUri(String dir)
+    {
+        dir = GetSDCardRelativePath(dir);
+        String d;
+        if(dir.startsWith("/Android/data"))
+            d = "Android/data";
+        else if(dir.startsWith("/Android/obb"))
+            d = "Android/obb";
+        else
+            d = "";
+        d = d.replaceAll("/", "%2F");
+        if(dir.startsWith("/"))
+            dir = dir.substring(1);
+        String str = "content://com.android.externalstorage.documents"
+                + "/tree/primary%3A" // :
+                + d
+                + "/document/primary%3A"
+                + dir.replaceAll("/", "%2F")
+                ;
+        return Uri.parse(str);
+    }
+
+    // content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata/document/primary%3AAndroid%2Fdata%2Fcom.android.fileexplorer
+    // content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata%2Fcom.android.fileexplorer
+    public static Uri PathUri(String dir)
+    {
+        dir = GetSDCardRelativePath(dir);
+        if(dir.startsWith("/"))
+            dir = dir.substring(1);
+        String str = "content://com.android.externalstorage.documents"
+                + "/tree/primary%3A" // :
+                + dir.replaceAll("/", "%2F")
+                ;
+        return Uri.parse(str);
+    }
+
+    public static String ParentPath(String path)
+    {
+        if(path.endsWith("/"))
+            path = path.substring(0, path.length() - 1);
+        int i = path.lastIndexOf('/');
+        path = i > 0 ? path.substring(0, i) : "/";
+        return path;
     }
     
     private FileUtility() {}

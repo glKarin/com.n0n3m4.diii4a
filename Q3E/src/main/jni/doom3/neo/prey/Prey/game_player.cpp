@@ -250,6 +250,18 @@ void hhPlayer::Spawn( void ) {
 	bDeathWalkStage2 = false;
 
 	physicsObj.SetInwardGravity(-1); //rww
+#ifdef _MOD_FULL_BODY_AWARENESS
+	idVec3 offset(0, 0, 0);
+	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+		fullBodyAwarenessOffset = offset;
+	else
+		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+		renderEntity.suppressSurfaceInViewID = entityNumber+1;
+	else
+		showWeaponViewModel = false;
+#endif
 }
 
 void hhPlayer::RestorePersistantInfo( void ) {
@@ -1891,13 +1903,6 @@ the focus and sending it a mouse move event
 	PDMMERGE PERSISTENTMERGE: Overridden, Done for 6-03-05 merge
 ================
 */
-#ifdef _PREY //k: auto translate alien text
-const char	*harm_g_translateAlienFontArgs[]	= {
-	"fonts", 
-	"fonts/menu", 
-	NULL };
-static idCVar harm_g_translateAlienFont( "harm_g_translateAlienFont", harm_g_translateAlienFontArgs[0], CVAR_GAME | CVAR_ARCHIVE, "[Harmattan]: Setup font name for automitic translate `alien` font text of GUI(empty to disable).", idCmdSystem::ArgCompletion_String<harm_g_translateAlienFontArgs> );
-#endif
 void hhPlayer::UpdateFocus( void ) {
 	idClipModel *clipModelList[ MAX_GENTITIES ];
 	idClipModel *clip;
@@ -1968,30 +1973,6 @@ void hhPlayer::UpdateFocus( void ) {
 
 	listedClipModels = gameLocal.clip.ClipModelsTouchingBounds( bounds, -1, clipModelList, MAX_GENTITIES );
 
-#ifdef _PREY //k: auto translate alien text
-	const char *translateAlienFont = harm_g_translateAlienFont.GetString();
-	const bool translateAlien = translateAlienFont && translateAlienFont[0];
-
-#if 0 //lvonasek: Prey - Alien text translation logic fixed
-	if (talon.IsValid() && translateAlienFont && translateAlienFont[0]) {
-		for ( auto e : gameLocal.entities ) {
-			if ( !e || e->IsHidden() ) {
-				continue;
-			}
-
-			renderEntity_t *renderEnt = e->GetRenderEntity();
-			if ( renderEnt ) {
-				for (int ix=0; ix<MAX_RENDERENTITY_GUI; ix++) {
-					if (renderEnt->gui[ix] && ((talon->GetOrigin() - renderEnt->origin).Length() < 200)) {
-						renderEnt->gui[ix]->Translate(translateAlienFont);
-					}
-				}
-			}
-		}
-	}
-#endif
-#endif
-
 	// no pretense at sorting here, just assume that there will only be one active
 	// gui within range along the trace
 	for ( i = 0; i < listedClipModels; i++ ) {
@@ -2010,20 +1991,13 @@ void hhPlayer::UpdateFocus( void ) {
 				if (renderEnt->gui[ix] && renderEnt->gui[ix]->IsInteractive()) {
 					interactiveMask |= (1<<ix);
 				}
-#ifdef _PREY //k: auto translate alien text
-#if 1
-				if ( renderEnt->gui[ix] && translateAlien ) {
-					renderEnt->gui[ix]->Translate(translateAlienFont);
-				}
-#endif
-#endif
 			}
 		}
 		if (!interactiveMask) {
 			continue;
 		}
 
-		pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), start, end /*, interactiveMask*/ ); // jamrshall
+		pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), start, end , interactiveMask );
 
 		if ( ent->fl.accurateGuiTrace ) {
 			trace_t tr;
@@ -2434,6 +2408,9 @@ void hhPlayer::BobCycle( const idVec3 &pushVelocity ) {
 	// calculate position for view bobbing
 	viewBob.Zero();
 
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed())
+#endif
 	if ( physicsObj.HasSteppedUp() ) {
 
 		// check for stepping up before a previous step is completed
@@ -2452,10 +2429,16 @@ void hhPlayer::BobCycle( const idVec3 &pushVelocity ) {
 	idVec3 gravity = physicsObj.GetGravityNormal();
 
 	// if the player stepped up recently
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed()) {
+#endif
 	deltaTime = gameLocal.time - stepUpTime;
 	if ( deltaTime < STEPUP_TIME ) {
 		viewBob += gravity * ( stepUpDelta * ( STEPUP_TIME - deltaTime ) / STEPUP_TIME );
 	}
+#ifdef _MOD_FULL_BODY_AWARENESS
+	}
+#endif
 
 	// add bob height after any movement smoothing
 	bob = bobfracsin * xyspeed * pm_bobup.GetFloat();
@@ -3730,7 +3713,12 @@ void hhPlayer::GetViewPos( idVec3 &origin, idMat3 &axis ) {
 
 	// if dead, fix the angle and don't add any kick
 	// HUMANHEAD cjr:  Replaced health <= 0 with IsDead() call for deathwalk override
-	if ( IsDead() && !gameLocal.isMultiplayer ) { //rww - don't want this in mp.
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if( (!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed()) && (IsDead() && !gameLocal.isMultiplayer) )
+#else
+	if ( IsDead() && !gameLocal.isMultiplayer ) 
+#endif
+	{ //rww - don't want this in mp.
 	// HUMANHEAD END
 		angles.yaw = viewAngles.yaw;
 		angles.roll = 40;
@@ -3916,7 +3904,11 @@ void hhPlayer::StartSpiritWalk( const bool bThrust, bool force ) {
 		GetViewPos( origin, axis );
 		fxInfo.SetEntity( this );
 		fxInfo.RemoveWhenDone( true );
+#ifdef _PREY //k: unnecessary, only for mod: if player's model mesh has not this bone(origin)
+		fxInfo.SetBindBone( spawnArgs.GetString("bone_fx_spiritWalkFlash", "origin") );
+#else
 		fxInfo.SetBindBone( "origin" );
+#endif
 		BroadcastFxInfoPrefixed( "fx_spiritWalkFlash", origin, axis, &fxInfo );
 
 		// Thrust the player backwards out of the body
@@ -3987,7 +3979,11 @@ void hhPlayer::StopSpiritWalk(bool forceAllowance) {
 		GetViewPos( origin, axis );
 		fxInfo.SetEntity( this );
 		fxInfo.RemoveWhenDone( true );
+#ifdef _PREY //k: unnecessary, only for mod: if player's model mesh has not this bone(origin)
+		fxInfo.SetBindBone( spawnArgs.GetString("bone_fx_spiritWalkFlash", "origin") );
+#else
 		fxInfo.SetBindBone( "origin" );
+#endif
 		BroadcastFxInfoPrefixed( "fx_spiritWalkFlash", origin, axis, &fxInfo );
 	}
 }
@@ -4169,7 +4165,7 @@ void hhPlayer::DisableEthereal( void ) {
 		if ( hhMonsterAI::allSimpleMonsters[i]->GetEnemy() == spiritProxy.GetEntity() ) {
 			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, spiritProxy.GetEntity() );
 		} else if ( hhMonsterAI::allSimpleMonsters[i]->GetEnemy() == this ) { // Targetting spirit that is going away
-			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, NULL );
+			hhMonsterAI::allSimpleMonsters[i]->ProcessEvent( &MA_EnemyIsPhysical, this, (const class idEntity *)NULL ); //k
 		}
 	}
 
@@ -4864,6 +4860,28 @@ hhPlayer::Think
 ==============
 */
 void hhPlayer::Think( void ) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed())
+	{
+		renderEntity.suppressSurfaceInViewID = entityNumber + 1;
+		showWeaponViewModel		= GetUserInfo()->GetBool("ui_showGun");
+	}
+	else
+	{
+		renderEntity.suppressSurfaceInViewID = 0;
+		showWeaponViewModel = false;
+
+		if(harm_pm_fullBodyAwarenessOffset.IsModified())
+		{
+			idVec3 offset(0, 0, 0);
+			if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+				fullBodyAwarenessOffset = offset;
+			else
+				gameLocal.Warning("[Harmattan]: unable read harm_pm_fullBodyAwarenessOffset.\n");
+			harm_pm_fullBodyAwarenessOffset.ClearModified();
+		}
+	}
+#endif
 	renderEntity_t *headRenderEnt;
 
 	UpdatePossession();
@@ -7220,6 +7238,13 @@ void hhPlayer::Restore( idRestoreGame *savefile ) {
 	if ( bLighter ) {
 		lighterHandle = gameRenderWorld->AddLightDef( &lighter );
 	}
+#ifdef _MOD_FULL_BODY_AWARENESS
+	idVec3 offset(0, 0, 0);
+	if(sscanf(harm_pm_fullBodyAwarenessOffset.GetString(), "%f %f %f", &offset.x, &offset.y, &offset.z) == 3)
+		fullBodyAwarenessOffset = offset;
+	else
+		gameLocal.Warning("[Harmattan]: unable read pm_fullBodyAwarenessOffset.\n");
+#endif
 }
 
 int hhPlayer::GetSpiritPower() {
@@ -7861,3 +7886,16 @@ void hhPlayer::Show(void) {
 		}
 	}
 }
+#ifdef _MOD_FULL_BODY_AWARENESS
+bool hhPlayer::IsZoomed(void) const
+{
+	if( weapon.IsValid() && weapon->IsType( hhWeaponZoomable::Type ) )
+	{
+		const hhWeaponZoomable *weap = static_cast<const hhWeaponZoomable*>(weapon.GetEntity());
+		if ( weap )
+			return weap->IsZoomed();
+	}
+	return false;
+}
+#endif
+

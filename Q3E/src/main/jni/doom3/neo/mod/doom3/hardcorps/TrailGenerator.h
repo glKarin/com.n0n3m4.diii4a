@@ -4,6 +4,9 @@
 #ifndef __GAME_TRAILGENERATOR_H__
 #define __GAME_TRAILGENERATOR_H__
 
+#include "gamesys/SaveGame.h"
+#include "idlib/math/Vector.h"
+
 #define	MAX_TRAILS			32
 
 /*

@@ -59,6 +59,10 @@ shaderProgram_t depthShader_spotLight; //k: depth shader
 shaderProgram_t	interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
 shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
 #endif
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+shaderProgram_t	interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
+shaderProgram_t	interactionTranslucentBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader(translucent stencil shadow)
+#endif
 
 static bool shaderRequired = true;
 
@@ -398,23 +402,95 @@ static bool RB_GLSL_InitShaders(void)
 	{
 		shaderRequired = true;
 		const GLSLShaderProp Props[] = {
-				{ "interaction", &interactionShader, ES3_INTERACTION_VERT, ES3_INTERACTION_FRAG, "interaction.vert", "interaction.frag", NULL },
+				{
+					"interaction",
+					&interactionShader,
+					ES3_INTERACTION_VERT, ES3_INTERACTION_FRAG,
+					"interaction.vert", "interaction.frag",
+					NULL
+					},
 
-				{ "shadow", &shadowShader, ES3_SHADOW_VERT, ES3_SHADOW_FRAG, "shadow.vert", "shadow.frag", NULL },
-				{ "default", &defaultShader, ES3_DEFAULT_VERT, ES3_DEFAULT_FRAG, "default.vert", "default.frag", NULL },
+				{
+					"shadow",
+				  &shadowShader,
+				  ES3_SHADOW_VERT, ES3_SHADOW_FRAG,
+				  "shadow.vert", "shadow.frag",
+				  NULL
+				  },
+				{
+					"default",
+					&defaultShader,
+					ES3_DEFAULT_VERT, ES3_DEFAULT_FRAG,
+					"default.vert", "default.frag",
+					NULL
+					},
 
-				{ "zfill", &depthFillShader, ES3_ZFILL_VERT, ES3_ZFILL_FRAG, "zfill.vert", "zfill.frag", NULL },
-				{ "zfillClip", &depthFillClipShader, ES3_ZFILLCLIP_VERT, ES3_ZFILLCLIP_FRAG, "zfillClip.vert", "zfillClip.frag", NULL },
+				{
+					"zfill",
+					&depthFillShader,
+					ES3_ZFILL_VERT, ES3_ZFILL_FRAG,
+					"zfill.vert", "zfill.frag",
+                    NULL
+					},
+				{
+					"zfillClip",
+					&depthFillClipShader,
+					ES3_ZFILLCLIP_VERT, ES3_ZFILLCLIP_FRAG,
+					"zfillClip.vert", "zfillClip.frag",
+					NULL
+					},
 
-				{ "cubemap", &cubemapShader, ES3_CUBEMAP_VERT, ES3_CUBEMAP_FRAG, "cubemap.vert", "cubemap.frag", NULL },
-				{ "reflectionCubemap", &reflectionCubemapShader, ES3_REFLECTION_CUBEMAP_VERT, ES3_CUBEMAP_FRAG, "reflectionCubemap.vert", "reflectionCubemap.frag", NULL },
-				{ "fog", &fogShader, ES3_FOG_VERT, ES3_FOG_FRAG, "fog.vert", "fog.frag", NULL },
-				{ "blendLight", &blendLightShader, ES3_BLENDLIGHT_VERT, ES3_FOG_FRAG, "blendLight.vert", "blendLight.frag", NULL },
+				{
+					"cubemap",
+					&cubemapShader,
+					ES3_CUBEMAP_VERT, ES3_CUBEMAP_FRAG,
+					"cubemap.vert", "cubemap.frag",
+					NULL
+				},
+				{
+					"reflectionCubemap",
+					&reflectionCubemapShader,
+					ES3_REFLECTION_CUBEMAP_VERT, ES3_CUBEMAP_FRAG,
+					"reflectionCubemap.vert", "reflectionCubemap.frag",
+					NULL
+					},
+				{
+					"fog",
+					&fogShader,
+					ES3_FOG_VERT, ES3_FOG_FRAG,
+					"fog.vert", "fog.frag",
+					NULL
+					},
+				{
+					"blendLight",
+					&blendLightShader,
+					ES3_BLENDLIGHT_VERT, ES3_FOG_FRAG,
+					"blendLight.vert", "blendLight.frag",
+					NULL
+					},
 
-				{ "interaction_blinn_phong", &interactionBlinnPhongShader, ES3_INTERACTION_BLINNPHONG_VERT, ES3_INTERACTION_BLINNPHONG_FRAG, "interaction_blinnphong.vert", "interaction_blinnphong.frag", NULL },
+				{
+					"interaction_blinn_phong",
+					&interactionBlinnPhongShader,
+					ES3_INTERACTION_VERT, ES3_INTERACTION_FRAG,
+					"interaction_blinnphong.vert", "interaction_blinnphong.frag",
+					"BLINN_PHONG"
+					},
 
-				{ "diffuseCubemap", &diffuseCubemapShader, ES3_DIFFUSE_CUBEMAP_VERT, ES3_CUBEMAP_FRAG, "diffuseCubemap.vert", "diffuseCubemap.frag", NULL },
-				{ "texgen", &texgenShader, ES3_TEXGEN_VERT, ES3_TEXGEN_FRAG, "texgen.vert", "texgen.frag", NULL },
+				{
+					"diffuseCubemap",
+					&diffuseCubemapShader,
+					ES3_DIFFUSE_CUBEMAP_VERT, ES3_CUBEMAP_FRAG,
+					"diffuseCubemap.vert", "diffuseCubemap.frag",
+					NULL
+					},
+				{
+					"texgen",
+					&texgenShader,
+					ES3_TEXGEN_VERT, ES3_TEXGEN_FRAG,
+					"texgen.vert", "texgen.frag",
+					NULL
+				},
 		};
 
 		for(int i = 0; i < sizeof(Props) / sizeof(Props[0]); i++)
@@ -435,17 +511,71 @@ static bool RB_GLSL_InitShaders(void)
 #ifdef _SHADOW_MAPPING
 		shaderRequired = false;
 		const GLSLShaderProp Props_shadowMapping[] = {
-				{ "depth_point_light", &depthShader_pointLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", "_POINT_LIGHT" },
-				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", "_POINT_LIGHT" },
-				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", "_POINT_LIGHT,BLINN_PHONG" },
+				{
+					"depth_point_light",
+					&depthShader_pointLight,
+					ES3_DEPTH_VERT, ES3_DEPTH_FRAG,
+					"depth_point_light.vert", "depth_point_light.frag",
+					"_POINT_LIGHT"
+					},
+				{
+					"interaction_point_light_shadow_mapping",
+				  &interactionShadowMappingShader_pointLight,
+				  ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG,
+				  "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag",
+				  "_POINT_LIGHT"
+				  },
+				{
+					"interaction_blinnphong_point_light_shadow_mapping",
+				  &interactionShadowMappingBlinnPhongShader_pointLight,
+				  ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG,
+				  "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag",
+				  "_POINT_LIGHT,BLINN_PHONG"
+				  },
 
-				{ "depth_parallel_light", &depthShader_parallelLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth.vert", "depth.frag", "_PARALLEL_LIGHT" },
-				{ "interaction_parallel_light_shadow_mapping", &interactionShadowMappingShader_parallelLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", "_PARALLEL_LIGHT" },
-				{ "interaction_blinnphong_parallel_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_parallelLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "_PARALLEL_LIGHT,BLINN_PHONG" },
+				{
+					"depth_parallel_light",
+				  &depthShader_parallelLight,
+				  ES3_DEPTH_VERT, ES3_DEPTH_FRAG,
+				  "depth.vert", "depth.frag",
+				  "_PARALLEL_LIGHT"
+				  },
+				{
+					"interaction_parallel_light_shadow_mapping",
+					&interactionShadowMappingShader_parallelLight,
+					ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG,
+					"interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag",
+					"_PARALLEL_LIGHT"
+					},
+				{
+					"interaction_blinnphong_parallel_light_shadow_mapping",
+				  &interactionShadowMappingBlinnPhongShader_parallelLight,
+				  ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG,
+				  "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag",
+				  "_PARALLEL_LIGHT,BLINN_PHONG"
+				  },
 
-				{ "depth_spot_light", &depthShader_spotLight, ES3_DEPTH_VERT, ES3_DEPTH_FRAG, "depth.vert", "depth.frag", "_SPOT_LIGHT" },
-				{ "interaction_spot_light_shadow_mapping", &interactionShadowMappingShader_spotLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", "_SPOT_LIGHT" },
-				{ "interaction_blinnphong_spot_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_spotLight, ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_spot_light_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", "_SPOT_LIGHT,BLINN_PHONG" },
+				{
+					"depth_spot_light",
+					&depthShader_spotLight,
+					ES3_DEPTH_VERT, ES3_DEPTH_FRAG,
+					"depth.vert", "depth.frag",
+					"_SPOT_LIGHT"
+					},
+				{
+					"interaction_spot_light_shadow_mapping",
+					&interactionShadowMappingShader_spotLight,
+					ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG,
+					"interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag",
+					"_SPOT_LIGHT"
+					},
+				{
+					"interaction_blinnphong_spot_light_shadow_mapping",
+					&interactionShadowMappingBlinnPhongShader_spotLight,
+					ES3_INTERACTION_SHADOW_MAPPING_VERT, ES3_INTERACTION_SHADOW_MAPPING_FRAG,
+					"interaction_blinnphong_spot_light_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag",
+					"_SPOT_LIGHT,BLINN_PHONG"
+					},
 		};
 
 		for(int i = 0; i < sizeof(Props_shadowMapping) / sizeof(Props_shadowMapping[0]); i++)
@@ -461,12 +591,56 @@ static bool RB_GLSL_InitShaders(void)
 					prop->macros
 			) < 0)
 			{
-				common->Printf("[Harmattan]: not support shadow mapping\n");
+				common->Printf("[Harmattan]: not support shadow mapping!\n");
 				if(r_useShadowMapping.GetBool())
 				{
 					r_useShadowMapping.SetBool(false);
 				}
 				r_useShadowMapping.SetReadonly();
+				break;
+			}
+		}
+		shaderRequired = true;
+#endif
+
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+		shaderRequired = false;
+		const GLSLShaderProp Props_translucentStencilShadow[] = {
+				{
+					"interaction_translucent",
+					&interactionTranslucentShader,
+					ES3_INTERACTION_TRANSLUCENT_VERT, ES3_INTERACTION_TRANSLUCENT_FRAG,
+					"interaction_translucent.vert", "interaction_translucent.frag",
+					NULL
+					},
+				{
+					"interaction_translucent_blinn_phong",
+					&interactionTranslucentBlinnPhongShader,
+					ES3_INTERACTION_TRANSLUCENT_VERT, ES3_INTERACTION_TRANSLUCENT_FRAG,
+					"interaction_translucent_blinnphong.vert", "interaction_translucent_blinnphong.frag",
+					"BLINN_PHONG"
+					},
+		};
+
+		for(int i = 0; i < sizeof(Props_translucentStencilShadow) / sizeof(Props_translucentStencilShadow[0]); i++)
+		{
+			const GLSLShaderProp *prop = Props_translucentStencilShadow + i;
+			if(R_LoadGLSLShaderProgram(
+					prop->name,
+					prop->program,
+					prop->default_vertex_shader_source,
+					prop->default_fragment_shader_source,
+					prop->vertex_shader_source_file,
+					prop->fragment_shader_source_file,
+					prop->macros
+			) < 0)
+			{
+				common->Printf("[Harmattan]: translucent stencil shadow shader error!\n");
+				if(harm_r_translucentStencilShadow.GetBool())
+				{
+					harm_r_translucentStencilShadow.SetBool(false);
+				}
+				harm_r_translucentStencilShadow.SetReadonly();
 				break;
 			}
 		}
@@ -478,23 +652,95 @@ static bool RB_GLSL_InitShaders(void)
 	{
 		shaderRequired = true;
 		const GLSLShaderProp Props[] = {
-				{ "interaction", &interactionShader, INTERACTION_VERT, INTERACTION_FRAG, "interaction.vert", "interaction.frag", NULL },
+				{
+					"interaction",
+					&interactionShader,
+					INTERACTION_VERT, INTERACTION_FRAG,
+					"interaction.vert", "interaction.frag",
+					NULL
+					},
 
-				{ "shadow", &shadowShader, SHADOW_VERT, SHADOW_FRAG, "shadow.vert", "shadow.frag", NULL },
-				{ "default", &defaultShader, DEFAULT_VERT, DEFAULT_FRAG, "default.vert", "default.frag", NULL },
+				{
+					"shadow",
+					&shadowShader,
+					SHADOW_VERT, SHADOW_FRAG,
+					"shadow.vert", "shadow.frag",
+					NULL
+					},
+				{
+					"default",
+					&defaultShader,
+					DEFAULT_VERT, DEFAULT_FRAG,
+					"default.vert", "default.frag",
+					NULL
+					},
 
-				{ "zfill", &depthFillShader, ZFILL_VERT, ZFILL_FRAG, "zfill.vert", "zfill.frag", NULL },
-				{ "zfillClip", &depthFillClipShader, ZFILLCLIP_VERT, ZFILLCLIP_FRAG, "zfillClip.vert", "zfillClip.frag", NULL },
+				{
+					"zfill",
+					&depthFillShader,
+					ZFILL_VERT, ZFILL_FRAG,
+					"zfill.vert", "zfill.frag",
+					NULL
+					},
+				{
+					"zfillClip",
+					&depthFillClipShader,
+					ZFILLCLIP_VERT, ZFILLCLIP_FRAG,
+					"zfillClip.vert", "zfillClip.frag",
+					NULL
+					},
 
-				{ "cubemap", &cubemapShader, CUBEMAP_VERT, CUBEMAP_FRAG, "cubemap.vert", "cubemap.frag", NULL },
-				{ "reflectionCubemap", &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, CUBEMAP_FRAG, "reflectionCubemap.vert", "reflectionCubemap.frag", NULL },
-				{ "fog", &fogShader, FOG_VERT, FOG_FRAG, "fog.vert", "fog.frag", NULL },
-				{ "blendLight", &blendLightShader, BLENDLIGHT_VERT, FOG_FRAG, "blendLight.vert", "blendLight.frag", NULL },
+				{
+					"cubemap",
+					&cubemapShader,
+					CUBEMAP_VERT, CUBEMAP_FRAG,
+					"cubemap.vert", "cubemap.frag",
+					NULL
+					},
+				{
+					"reflectionCubemap",
+					&reflectionCubemapShader,
+					REFLECTION_CUBEMAP_VERT, CUBEMAP_FRAG,
+					"reflectionCubemap.vert", "reflectionCubemap.frag",
+					NULL
+					},
+				{
+					"fog",
+					&fogShader,
+					FOG_VERT, FOG_FRAG,
+					"fog.vert", "fog.frag",
+					NULL
+					},
+				{
+					"blendLight",
+					&blendLightShader,
+					BLENDLIGHT_VERT, FOG_FRAG,
+					"blendLight.vert", "blendLight.frag",
+					NULL
+					},
 
-				{ "interaction_blinn_phong", &interactionBlinnPhongShader, INTERACTION_BLINNPHONG_VERT, INTERACTION_BLINNPHONG_FRAG, "interaction_blinnphong.vert", "interaction_blinnphong.frag", NULL },
+				{
+					"interaction_blinn_phong",
+					&interactionBlinnPhongShader,
+					INTERACTION_VERT, INTERACTION_FRAG,
+					"interaction_blinnphong.vert", "interaction_blinnphong.frag",
+					"BLINN_PHONG"
+					},
 
-				{ "diffuseCubemap", &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "diffuseCubemap.vert", "diffuseCubemap.frag", NULL },
-				{ "texgen", &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "texgen.vert", "texgen.frag", NULL },
+				{
+					"diffuseCubemap",
+					&diffuseCubemapShader,
+					DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG,
+					"diffuseCubemap.vert", "diffuseCubemap.frag",
+					NULL
+					},
+				{
+					"texgen",
+					&texgenShader,
+					TEXGEN_VERT, TEXGEN_FRAG,
+					"texgen.vert", "texgen.frag",
+					NULL
+					},
 		};
 
 		for(int i = 0; i < sizeof(Props) / sizeof(Props[0]); i++)
@@ -538,25 +784,70 @@ static bool RB_GLSL_InitShaders(void)
 
 		shaderRequired = false;
 		const GLSLShaderProp Props_shadowMapping[] = {
-				{ "depth_point_light", &depthShader_pointLight, DEPTH_VERT, DEPTH_FRAG, "depth_point_light.vert", "depth_point_light.frag", macros[0]
+				{
+					"depth_point_light",
+					&depthShader_pointLight,
+					DEPTH_VERT, DEPTH_FRAG,
+					"depth_point_light.vert", "depth_point_light.frag",
+					macros[0]
 				},
-				{ "interaction_point_light_shadow_mapping", &interactionShadowMappingShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag", macros[1]
+				{
+					"interaction_point_light_shadow_mapping",
+				  &interactionShadowMappingShader_pointLight,
+				  INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
+				  "interaction_point_light_shadow_mapping.vert", "interaction_point_light_shadow_mapping.frag",
+				  macros[1]
 				},
-				{ "interaction_blinnphong_point_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag", macros[2]
+				{
+					"interaction_blinnphong_point_light_shadow_mapping",
+				  &interactionShadowMappingBlinnPhongShader_pointLight,
+				  INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
+				  "interaction_blinnphong_point_light_shadow_mapping.vert", "interaction_blinnphong_point_light_shadow_mapping.frag",
+				  macros[2]
 				},
 
-				{ "depth_parallel_light", &depthShader_parallelLight, DEPTH_VERT, DEPTH_FRAG, "depth.vert", "depth.frag", macros[6]
+				{
+					"depth_parallel_light",
+					&depthShader_parallelLight,
+					DEPTH_VERT, DEPTH_FRAG,
+					"depth.vert", "depth.frag",
+					macros[6]
 				},
-				{ "interaction_parallel_light_shadow_mapping", &interactionShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", macros[7]
+				{
+					"interaction_parallel_light_shadow_mapping",
+					&interactionShadowMappingShader_parallelLight,
+					INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
+					"interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag",
+					macros[7]
 				},
-				{ "interaction_blinnphong_parallel_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", macros[8]
+				{
+					"interaction_blinnphong_parallel_light_shadow_mapping",
+					&interactionShadowMappingBlinnPhongShader_parallelLight,
+					INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
+					"interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag",
+					macros[8]
 				},
 
-				{ "depth_spot_light", &depthShader_spotLight, DEPTH_VERT, DEPTH_FRAG, "depth.vert", "depth.frag", macros[9]
+				{
+					"depth_spot_light",
+					&depthShader_spotLight,
+					DEPTH_VERT, DEPTH_FRAG,
+					"depth.vert", "depth.frag",
+					macros[9]
 				},
-				{ "interaction_spot_light_shadow_mapping", &interactionShadowMappingShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag", macros[10]
+				{
+					"interaction_spot_light_shadow_mapping",
+					&interactionShadowMappingShader_spotLight,
+					INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
+					"interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag",
+					macros[10]
 				},
-				{ "interaction_blinnphong_spot_light_shadow_mapping", &interactionShadowMappingBlinnPhongShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, "interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag", macros[11]
+				{
+					"interaction_blinnphong_spot_light_shadow_mapping",
+					&interactionShadowMappingBlinnPhongShader_spotLight,
+					INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
+					"interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag",
+					macros[11]
 				},
 		};
 
@@ -573,12 +864,58 @@ static bool RB_GLSL_InitShaders(void)
 					prop->macros
 			) < 0)
 			{
-				common->Printf("[Harmattan]: not support shadow mapping\n");
+				common->Printf("[Harmattan]: not support shadow mapping!\n");
 				if(r_useShadowMapping.GetBool())
 				{
 					r_useShadowMapping.SetBool(false);
 				}
 				r_useShadowMapping.SetReadonly();
+				break;
+			}
+		}
+		shaderRequired = true;
+#endif
+
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+		shaderRequired = false;
+		const GLSLShaderProp Props_translucentStencilShadow[] = {
+				{
+					"interaction_translucent",
+					&interactionTranslucentShader,
+					INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG,
+					"interaction_translucent.vert", "interaction_translucent.frag",
+					NULL
+					},
+				{
+					"interaction_translucent_blinn_phong",
+					&interactionTranslucentBlinnPhongShader,
+					INTERACTION_TRANSLUCENT_VERT,
+					INTERACTION_TRANSLUCENT_FRAG,
+					"interaction_translucent_blinnphong.vert",
+					"interaction_translucent_blinnphong.frag",
+					"BLINN_PHONG"
+					},
+		};
+
+		for(int i = 0; i < sizeof(Props_translucentStencilShadow) / sizeof(Props_translucentStencilShadow[0]); i++)
+		{
+			const GLSLShaderProp *prop = Props_translucentStencilShadow + i;
+			if(R_LoadGLSLShaderProgram(
+					prop->name,
+					prop->program,
+					prop->default_vertex_shader_source,
+					prop->default_fragment_shader_source,
+					prop->vertex_shader_source_file,
+					prop->fragment_shader_source_file,
+					prop->macros
+			) < 0)
+			{
+				common->Printf("[Harmattan]: translucent stencil shadow shader error!\n");
+				if(harm_r_translucentStencilShadow.GetBool())
+				{
+					harm_r_translucentStencilShadow.SetBool(false);
+				}
+				harm_r_translucentStencilShadow.SetReadonly();
 				break;
 			}
 		}

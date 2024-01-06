@@ -21,7 +21,7 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
     private final String[] m_patchResources = {
             "glslprogs.pk4",
             "q4base/sabot_a9.pk4",
-            "rivensin/play_original_doom3_level.pk4"
+            "rivensin/play_original_doom3_level.pk4",
     };
     private String m_path;
     private List<String> m_files;

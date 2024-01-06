@@ -26,10 +26,13 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/FileSystem.h"
 
-#include "Game_local.h"
+#include "gamesys/SysCvar.h"
+#include "script/Script_Thread.h"
+
+#include "WorldSpawn.h"
 
 /*
 ================
@@ -49,8 +52,8 @@ END_CLASS
 idWorldspawn::Spawn
 ================
 */
-#ifdef _RIVENSIN //k
-static idCVar	harm_pm_autoForceThirdPerson("harm_pm_autoForceThirdPerson", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Force set third person view after game level load end.");
+#ifdef _RIVENSIN //karin: auto change to third-person in original DOOM3 game
+static idCVar	harm_pm_autoForceThirdPerson("harm_pm_autoForceThirdPerson", "1", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Force set third person view after game level load end.");
 #endif
 void idWorldspawn::Spawn( void ) {
 	idStr				scriptname;
@@ -94,8 +97,7 @@ void idWorldspawn::Spawn( void ) {
 		thread->DelayedStart( 0 );
 		kv = spawnArgs.MatchPrefix( "call", kv );
 	}
-
-#ifdef _RIVENSIN //k
+#ifdef _RIVENSIN //karin: auto change to third-person in original DOOM3 game
 	if(harm_pm_autoForceThirdPerson.GetBool())
 	{
 		gameLocal.Printf( "[Harmattan]: Force set third person view.\n" );

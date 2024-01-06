@@ -29,6 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SCRIPT_PROGRAM_H__
 #define __SCRIPT_PROGRAM_H__
 
+#include "idlib/containers/StrList.h"
+#include "idlib/containers/StaticList.h"
+#include "idlib/containers/HashIndex.h"
+#include "idlib/math/Vector.h"
+
+#include "GameBase.h"
+
 class idEventDef;
 class idVarDef;
 class idTypeDef;
@@ -478,11 +485,7 @@ public:
 	// save games
 	void										Save( idSaveGame *savefile ) const;
 	bool										Restore( idRestoreGame *savefile );
-	int											CalculateChecksum( bool forOldSavegame 
-#ifdef _HARDCORPS
-			 = false 
-#endif
-			) const;		// Used to insure program code has not
+	int											CalculateChecksum( bool forOldSavegame ) const;		// Used to insure program code has not
 																						//    changed between savegames
 
 	void										Startup( const char *defaultScript );

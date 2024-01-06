@@ -26,10 +26,15 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "renderer/RenderWorld.h"
 
-#include "Game_local.h"
+#include "gamesys/SysCvar.h"
+#include "gamesys/SaveGame.h"
+#include "GameBase.h"
+#include "Player.h"
+
+#include "PlayerView.h"
 
 static int MakePowerOfTwo( int num ) {
 	int		pot;
@@ -841,25 +846,19 @@ idPlayerView::dnPostProcessManager::dnPostProcessManager():
 	// Initialize once this object is created.	
 	this->Initialize();
 
-//k: Only Dhewm3 support idCommon::SetCallback(), but this is original DOOM3
 #if !defined(_RIVENSIN)
 	if(!common->SetCallback(idCommon::CB_ReloadImages, (idCommon::FunctionPointer)ReloadImagesCallback, this))
 	{
 		gameLocal.Warning("Couldn't set ReloadImages Callback from Ruiner game DLL! This could lead to errors on vid_restart and similar!\n");
 	}
-#else
-#warning "Only Dhewm3 support idCommon::SetCallback(), but this is original DOOM3"
 #endif
 }
 
 idPlayerView::dnPostProcessManager::~dnPostProcessManager()
 {
-	// remove callback because this object is destroyed (and this was passed as userArg)
-//k: Only Dhewm3 support idCommon::SetCallback(), but this is original DOOM3
 #if !defined(_RIVENSIN)
+	// remove callback because this object is destroyed (and this was passed as userArg)
 	common->SetCallback(idCommon::CB_ReloadImages, NULL, NULL);
-#else
-#warning "Only Dhewm3 support idCommon::SetCallback(), but this is original DOOM3"
 #endif
 }
 
@@ -1165,14 +1164,6 @@ void idPlayerView::dnPostProcessManager::RenderDebugTextures()
 
 void idPlayerView::dnPostProcessManager::UpdateInteractionShader()
 {
-	//k: If set r_HDR_postProcess is false, uncheck it no longer.
-#ifdef _RIVENSIN
-	if(!r_HDR_postProcess.GetBool())
-	{
-		gameLocal.Printf("[Harmattan]: UpdateInteractionShader: r_HDR_postProcess already set false, uncheck r_HDR_enable state no longer.\n");
-		return;
-	}
-#endif
 	// Check the CVARs.
 	if (r_HDR_enable.GetBool())
 	{

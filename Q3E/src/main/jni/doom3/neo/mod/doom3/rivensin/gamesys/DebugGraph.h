@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __DEBUGGRAPH_H__
 #define __DEBUGGRAPH_H__
 
+#include "idlib/containers/List.h"
+#include "idlib/math/Vector.h"
+
 class idDebugGraph {
 public:
 					idDebugGraph();

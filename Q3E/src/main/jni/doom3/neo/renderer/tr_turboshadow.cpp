@@ -182,6 +182,9 @@ srfTriangles_t *R_CreateVertexProgramTurboShadowVolume(const idRenderEntityLocal
 		shadowIndexes += 6;
 	}
 
+#ifdef _SHADOW_MAPPING
+	newTri->shadowIsPrelight = false;
+#endif
 	return newTri;
 }
 

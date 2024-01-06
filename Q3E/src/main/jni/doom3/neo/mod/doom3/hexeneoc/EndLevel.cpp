@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,10 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+// NOTE: even though this file is part of the Doom3 GPL source (but not the original SDK in game/),
+//       it has never been part of the build (=> not compiled into base.dll)
 
-#include "Game_local.h"
+#include "sys/platform.h"
+
+#include "EndLevel.h"
 
 /*
 
@@ -41,8 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-CLASS_DECLARATION(idEntity, idTarget_EndLevel)
-EVENT(EV_Activate,		idTarget_EndLevel::Event_Trigger)
+CLASS_DECLARATION( idEntity, idTarget_EndLevel )
+	EVENT( EV_Activate,		idTarget_EndLevel::Event_Trigger )
 END_CLASS
 
 /*
@@ -50,27 +52,23 @@ END_CLASS
 idTarget_EndLevel::Spawn
 ================
 */
-void idTarget_EndLevel::Spawn(void)
-{
-    idStr		guiName;
+void idTarget_EndLevel::Spawn( void ) {
+	idStr		guiName;
 
-    gui = NULL;
-    noGui = spawnArgs.GetBool("noGui");
+	gui = NULL;
+	noGui = spawnArgs.GetBool("noGui");
+	if (!noGui) {
+		spawnArgs.GetString( "guiName", "guis/EndLevel.gui", guiName );
 
-    if (!noGui)
-    {
-        spawnArgs.GetString("guiName", "guis/EndLevel.gui", guiName);
+		if (guiName.Length()) {
+			gui = idUserInterface::FindGui( guiName, true, false, true );
+		}
+	}
 
-        if (guiName.Length())
-        {
-            gui = idUserInterface::FindGui(guiName, true, false, true);
-        }
-    }
+	buttonsReleased = false;
+	readyToExit = false;
 
-    buttonsReleased = false;
-    readyToExit = false;
-
-    exitCommand = "";
+	exitCommand = "";
 }
 
 /*
@@ -78,10 +76,9 @@ void idTarget_EndLevel::Spawn(void)
 idTarget_EndLevel::~idTarget_EndLevel()
 ================
 */
-idTarget_EndLevel::~idTarget_EndLevel()
-{
-    //FIXME: need to go to smart ptrs for gui allocs or the unique method
-    //delete gui;
+idTarget_EndLevel::~idTarget_EndLevel() {
+	//FIXME: need to go to smart ptrs for gui allocs or the unique method
+	//delete gui;
 }
 
 /*
@@ -89,30 +86,27 @@ idTarget_EndLevel::~idTarget_EndLevel()
 idTarget_EndLevel::Event_Trigger
 ================
 */
-void idTarget_EndLevel::Event_Trigger(idEntity *activator)
-{
-    if (gameLocal.endLevel)
-    {
-        return;
-    }
+void idTarget_EndLevel::Event_Trigger( idEntity *activator ) {
+	if ( gameLocal.endLevel ) {
+		return;
+	}
 
-    // mark the endLevel, which will modify some game actions
-    // and pass control to us for drawing the stats and camera position
-    gameLocal.endLevel = this;
+	// mark the endLevel, which will modify some game actions
+	// and pass control to us for drawing the stats and camera position
+	gameLocal.endLevel = this;
 
-    // grab the activating player view position
-    idPlayer *player = (idPlayer *)(activator);
+	// grab the activating player view position
+	idPlayer *player = (idPlayer *)(activator);
 
-    initialViewOrg = player->GetEyePosition();
-    initialViewAngles = idVec3(player->viewAngles[0], player->viewAngles[1], player->viewAngles[2]);
+	initialViewOrg = player->GetEyePosition();
+	initialViewAngles = idVec3( player->viewAngles[0], player->viewAngles[1], player->viewAngles[2] );
 
-    // kill all the sounds
-    gameSoundWorld->StopAllSounds();
+	// kill all the sounds
+	gameSoundWorld->StopAllSounds();
 
-    if (noGui)
-    {
-        readyToExit = true;
-    }
+	if ( noGui ) {
+		readyToExit = true;
+	}
 }
 
 /*
@@ -120,39 +114,37 @@ void idTarget_EndLevel::Event_Trigger(idEntity *activator)
 idTarget_EndLevel::Draw
 ================
 */
-void idTarget_EndLevel::Draw()
-{
+void idTarget_EndLevel::Draw() {
 
-    if (noGui)
-    {
-        return;
-    }
+	if (noGui) {
+		return;
+	}
 
-    renderView_t			renderView;
+	renderView_t			renderView;
 
-    memset(&renderView, 0, sizeof(renderView));
+	memset( &renderView, 0, sizeof( renderView ) );
 
-    renderView.width = SCREEN_WIDTH;
-    renderView.height = SCREEN_HEIGHT;
-    renderView.x = 0;
-    renderView.y = 0;
+	renderView.width = SCREEN_WIDTH;
+	renderView.height = SCREEN_HEIGHT;
+	renderView.x = 0;
+	renderView.y = 0;
 
-    renderView.fov_x = 90;
-    renderView.fov_y = gameLocal.CalcFovY(renderView.fov_x);
-    renderView.time = gameLocal.time;
+	renderView.fov_x = 90;
+	renderView.fov_y = gameLocal.CalcFovY( renderView.fov_x );
+	renderView.time = gameLocal.time;
 
 #if 0
-    renderView.vieworg = initialViewOrg;
-    renderView.viewaxis = idAngles(initialViewAngles).toMat3();
+	renderView.vieworg = initialViewOrg;
+	renderView.viewaxis = idAngles(initialViewAngles).toMat3();
 #else
-    renderView.vieworg = renderEntity.origin;
-    renderView.viewaxis = renderEntity.axis;
+	renderView.vieworg = renderEntity.origin;
+	renderView.viewaxis = renderEntity.axis;
 #endif
 
-    gameRenderWorld->RenderScene(&renderView);
+	gameRenderWorld->RenderScene( &renderView );
 
-    // draw the gui on top of the 3D view
-    gui->Redraw(gameLocal.time);
+	// draw the gui on top of the 3D view
+	gui->Redraw(gameLocal.time);
 }
 
 /*
@@ -160,21 +152,17 @@ void idTarget_EndLevel::Draw()
 idTarget_EndLevel::PlayerCommand
 ================
 */
-void idTarget_EndLevel::PlayerCommand(int buttons)
-{
-    if (!(buttons & BUTTON_ATTACK))
-    {
-        buttonsReleased = true;
-        return;
-    }
+void idTarget_EndLevel::PlayerCommand( int buttons ) {
+	if ( !( buttons & BUTTON_ATTACK ) ) {
+		buttonsReleased = true;
+		return;
+	}
+	if ( !buttonsReleased ) {
+		return;
+	}
 
-    if (!buttonsReleased)
-    {
-        return;
-    }
-
-    // we will exit at the end of the next game frame
-    readyToExit = true;
+	// we will exit at the end of the next game frame
+	readyToExit = true;
 }
 
 /*
@@ -182,23 +170,18 @@ void idTarget_EndLevel::PlayerCommand(int buttons)
 idTarget_EndLevel::ExitCommand
 ================
 */
-const char *idTarget_EndLevel::ExitCommand()
-{
-    if (!readyToExit)
-    {
-        return NULL;
-    }
+const char *idTarget_EndLevel::ExitCommand() {
+	if ( !readyToExit ) {
+		return NULL;
+	}
 
-    idStr nextMap;
+	idStr nextMap;
 
-    if (spawnArgs.GetString("nextMap", "", nextMap))
-    {
-        sprintf(exitCommand, "map %s", nextMap.c_str());
-    }
-    else
-    {
-        exitCommand = "";
-    }
+	if (spawnArgs.GetString( "nextMap", "", nextMap )) {
+		sprintf( exitCommand, "map %s", nextMap.c_str() );
+	} else {
+		exitCommand = "";
+	}
 
-    return exitCommand;
+	return exitCommand;
 }

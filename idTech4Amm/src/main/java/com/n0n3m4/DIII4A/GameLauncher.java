@@ -38,6 +38,7 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -127,6 +128,8 @@ public class GameLauncher extends Activity
 	private static final int CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE = 10;
 	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD = 11;
 
+	private static final int CONST_RESULT_CODE_ACCESS_ANDROID_DATA = 12;
+
 	private final GameManager m_gameManager = new GameManager();
     // GameLauncher function
     private ExtractPatchResourceFunc m_extractPatchResourceFunc;
@@ -143,7 +146,7 @@ public class GameLauncher extends Activity
 	private ExtractSourceFunc m_extractSourceFunc;
 	private ChooseGameModFunc m_chooseGameModFunc;
 
-    final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
+    public static final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
     private boolean m_cmdUpdateLock = false;
     private final CompoundButton.OnCheckedChangeListener m_checkboxChangeListener = new CompoundButton.OnCheckedChangeListener()
@@ -306,6 +309,13 @@ public class GameLauncher extends Activity
 				SetupCommandLine(isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(PreferenceKey.READONLY_COMMAND, isChecked)
+						.commit();
+			}
+			else if (id == R.id.cb_translucentStencilShadow)
+			{
+				setProp("harm_r_translucentStencilShadow", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, isChecked)
 						.commit();
 			}
         }
@@ -1034,13 +1044,41 @@ public class GameLauncher extends Activity
 		V.readonly_command.setChecked(readonlyCommand);
 		SetupCommandLine(readonlyCommand);
 		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_translucentStencilShadow.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_translucentStencilShadow, false));
+		V.cb_translucentStencilShadow.setOnCheckedChangeListener(m_checkboxChangeListener);
 
         updatehacktings();
 
-        Q3EAd.LoadAds(this);
-
-        OpenUpdate();
+		AfterCreated();
     }
+
+	private void AfterCreated()
+	{
+		try
+		{
+			Q3EAd.LoadAds(this);
+
+			OpenUpdate();
+
+			Intent intent = getIntent();
+			if(null != intent)
+			{
+				Bundle extras = intent.getExtras();
+				if(null != extras)
+				{
+					String intentGame = extras.getString("game");
+					if(null != intentGame && !intentGame.isEmpty())
+					{
+						ChangeGame(intentGame);
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 
     @Override
     protected void onDestroy()
@@ -1260,6 +1298,11 @@ public class GameLauncher extends Activity
 			ChangeGame();
 			return true;
 		}
+		/*else if (itemId == R.id.main_menu_move_game_data)
+		{
+			MoveGameDataToAppPrivateDirectory();
+			return true;
+		}*/
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -1337,7 +1380,7 @@ public class GameLauncher extends Activity
     private void OpenFolderChooser()
     {
         if (null == m_chooseGameFolderFunc)
-            m_chooseGameFolderFunc = new ChooseGameFolderFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER, new Runnable()
+            m_chooseGameFolderFunc = new ChooseGameFolderFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_FOLDER, CONST_RESULT_CODE_ACCESS_ANDROID_DATA, new Runnable()
             {
                 @Override
                 public void run()
@@ -1397,6 +1440,7 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, V.cb_s_useEAXReverb.isChecked());
 		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, V.readonly_command.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_r_translucentStencilShadow, V.cb_translucentStencilShadow.isChecked());
 
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -1627,6 +1671,9 @@ public class GameLauncher extends Activity
 						bundle.putParcelable("uri", data.getData());
 						m_extractSourceFunc.Start(bundle);
 					}
+					break;
+				case CONST_RESULT_CODE_ACCESS_ANDROID_DATA:
+					ContextUtility.PersistableUriPermission(this, data.getData());
 					break;
             }
         }
@@ -2181,19 +2228,55 @@ public class GameLauncher extends Activity
 			group = groups.get(value.type);
 			layoutParams = new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
 			radio = new RadioButton(group.getContext());
+			String name;
 			if(value.name instanceof Integer)
-				radio.setText((Integer)value.name);
+				name = Q3ELang.tr(this, (Integer)value.name);
 			else if(value.name instanceof String)
-				radio.setText((String)value.name);
+				name = (String)value.name;
+			else
+				name = "";
+			name += "(" + value.game + ")";
+			radio.setText(name);
 			radio.setTag(value.game);
 			group.addView(radio, layoutParams);
 			radio.setChecked(!value.is_mod);
 		}
 	}
-
 	private void SetupCommandLine(boolean readonly)
 	{
 		UIUtility.EditText__SetReadOnly(V.edt_cmdline, readonly, InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+	}
+
+	private void MoveGameDataToAppPrivateDirectory()
+	{
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String src = preferences.getString(Q3EPreference.pref_datapath, default_gamedata);
+		if(!new File(src).isDirectory())
+		{
+			Toast.makeText(this, "Current game data path is not a directory", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(ContextUtility.IsInAppPrivateDirectory(this, src))
+		{
+			Toast.makeText(this, "Do not need move", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		String target = Q3EUtils.GetAppStoragePath(this, "/diii4a");
+		if(new File(target).exists())
+		{
+			Toast.makeText(this, "Target path exists: " + target, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(FileUtility.mv(src, target))
+		{
+			preferences.edit().putString(Q3EPreference.pref_datapath, target).commit();
+			V.edt_path.setText(target);
+			Toast.makeText(this, "Game data is " + target + " now", Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Toast.makeText(this, "Move game data to app directory fail!", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 
@@ -2264,6 +2347,7 @@ public class GameLauncher extends Activity
 		public CheckBox cb_s_useOpenAL;
 		public CheckBox cb_s_useEAXReverb;
 		public Switch readonly_command;
+		public CheckBox cb_translucentStencilShadow;
 
         public void Setup()
         {
@@ -2330,6 +2414,7 @@ public class GameLauncher extends Activity
 			cb_s_useOpenAL = findViewById(R.id.cb_s_useOpenAL);
 			cb_s_useEAXReverb = findViewById(R.id.cb_s_useEAXReverb);
 			readonly_command = findViewById(R.id.readonly_command);
+			cb_translucentStencilShadow = findViewById(R.id.cb_translucentStencilShadow);
         }
     }
 }

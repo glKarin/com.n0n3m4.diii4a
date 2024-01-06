@@ -4,12 +4,9 @@ project(doom3)
 add_definitions(-D__ANDROID__)
 add_definitions(-D_K_CLANG)
 add_definitions(-DID_ENABLE_CURL=1)
-#add_definitions(-DNO_ALSA)
-#add_definitions(-D__DOOM_DLL__)
-#add_definitions(-DHAVE_CONFIG_H)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(CORE_DEFINES "__DOOM_DLL__;HAVE_CONFIG_H;NO_ALSA")
+set(CORE_DEFINES "__DOOM_DLL__;NO_ALSA")
 
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO
@@ -58,13 +55,16 @@ set(DOOM3BINARY "dante")
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 
-option(CORE			"Build the core" ON)
+option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 option(DEDICATED	"Build the dedicated server" OFF)
+
+# DOOM3 cores
+option(CORE			"Build the core" ON)
+option(ONATIVE		"Optimize for the host CPU" OFF)
 option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
-option(ONATIVE		"Optimize for the host CPU" OFF)
-option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 
+# Extras functions
 option(OPENSLES			"OpenSLES support" ON)
 option(MULTITHREAD			"Multi-Thread support" ON)
 option(USING_STB			"Using stb" ON)
@@ -73,19 +73,31 @@ option(SUPPORT_DAE			"Support dae model" ON)
 option(SHADOW_MAPPING			"Shadow mapping support" ON)
 option(OPENGLES3			"OpenGLES3 support" ON)
 option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
+option(NO_LIGHT			"r_noLight support" ON)
+option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" ON)
 
+# DOOM3 mods
+option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" ON)
 option(D3LE			"Build the d3le game code" ON)
 option(CDOOM			"Build the cdoom game code" ON)
 option(RIVENSIN			"Build the rivensin game code" ON)
 option(HARDCORPS			"Build the hardcorps game code" ON)
+option(OVERTHINKED			"Build the overthinked game code" ON)
+option(SABOT			"Build the sabot game code" ON)
+option(HEXENEOC			"Build the hexeneoc game code" ON)
+option(FRAGGINGFREE			"Build the fraggingfree game code" ON)
+
+# Quake4
+option(RAVEN			"Build the raven core" ON)
 option(RAVEN_BSE_FX			"OpenBSE with Fx in Raven Quake 4" ON)
 option(QUAKE4			"Build the quake4 game code" ON)
+option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod support" ON)
+option(Q4_MOD_BOTS			"Build quake4 bots mod support" ON)
+
+# Prey 2006
 option(PREY			"Build the prey game code" ON)
-option(RAVEN			"Build the raven core" ON)
 option(HUMANHEAD			"Build the humanhead core" ON)
-option(OVERTHINKED			"Build the overthinked game code" OFF)
-option(SABOT			"Build the sabot game code" OFF)
-option(HEXENEOC			"Build the hexeneoc game code" OFF)
+option(PREY_MOD_FULL_BODY_AWARENESS			"Build prey full body awareness mod support" ON)
 
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
@@ -164,6 +176,14 @@ elseif(cpu MATCHES "[aA][rR][mM].*") # some kind of arm..
 endif()
 
 add_definitions(-DD3_ARCH="${cpu}" -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
+# Stores in variable <var> either 1 or 0 indicating whether the target architecture is big or little endian.
+# test_big_endian(big_endian)
+if(CMAKE_CXX_BYTE_ORDER EQUAL BIG_ENDIAN)
+	set(big_endian, "1")
+else()
+	set(big_endian, "0")
+endif()
+add_definitions(-BUILD_IS_BIG_ENDIAN="${big_endian}")
 
 # target os
 if(APPLE)
@@ -304,6 +324,14 @@ endif()
 if(SHADOW_MAPPING)
 	set(CORE_DEFINES "${CORE_DEFINES};_SHADOW_MAPPING")
 	message(STATUS "Add shadow mapping support")
+endif()
+if(NO_LIGHT)
+	set(CORE_DEFINES "${CORE_DEFINES};_NO_LIGHT")
+	message(STATUS "Add r_noLight support")
+endif()
+if(TRANSLUCENT_STENCIL_SHADOW)
+	set(CORE_DEFINES "${CORE_DEFINES};_TRANSLUCENT_STENCIL_SHADOW")
+	message(STATUS "Add translucent stencil shadow support")
 endif()
 
 if(OPENAL)
@@ -832,6 +860,17 @@ list(APPEND src_hexeneoc ${hexeneoc_game_src})
 set_src_dir(src_hexeneoc "${DOOM3_MOD_DIR}/hexeneoc" ${src_hexeneoc})
 add_globbed_headers(src_hexeneoc "${DOOM3_MOD_DIR}/hexeneoc")
 
+# fraggingfree
+set(src_fraggingfree ${base_game_src})
+set(fraggingfree_game_src
+		Grabber.cpp
+		physics/Force_Grab.cpp
+		tracer.cpp
+		)
+list(APPEND src_fraggingfree ${fraggingfree_game_src})
+set_src_dir(src_fraggingfree "${DOOM3_MOD_DIR}/fraggingfree" ${src_fraggingfree})
+add_globbed_headers(src_fraggingfree "${DOOM3_MOD_DIR}/fraggingfree")
+
 # quake4
 set(src_quake4 ${base_game_src})
 set(quake4_game_src
@@ -1260,38 +1299,41 @@ set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 #//k ogg
 set(src_ogg
-	externlibs/libogg/bitwise.c
-	externlibs/libogg/framing.c
-	externlibs/libogg/analysis.c
-	externlibs/libogg/floor1.c
-	externlibs/libogg/psy.c
-	externlibs/libogg/tone.c
-	externlibs/libogg/barkmel.c
-	externlibs/libogg/info.c
-	externlibs/libogg/vorbisenc.c
-	externlibs/libogg/bitrate.c
-	externlibs/libogg/lookup.c
-	externlibs/libogg/registry.c
-	externlibs/libogg/vorbisfile.c
-	externlibs/libogg/block.c
-	externlibs/libogg/lpc.c
-	externlibs/libogg/res0.c
-	externlibs/libogg/window.c
-	externlibs/libogg/codebook.c
-	externlibs/libogg/lsp.c
-	externlibs/libogg/sharedbook.c
-	externlibs/libogg/envelope.c
-	externlibs/libogg/mapping0.c
-	externlibs/libogg/smallft.c
-	externlibs/libogg/floor0.c
-	externlibs/libogg/mdct.c
-	externlibs/libogg/synthesis.c
+	externlibs/libogg/src/bitwise.c
+	externlibs/libogg/src/framing.c
+	externlibs/libvorbis/lib/analysis.c
+	externlibs/libvorbis/lib/floor1.c
+	externlibs/libvorbis/lib/psy.c
+	externlibs/libvorbis/lib/tone.c
+	externlibs/libvorbis/lib/barkmel.c
+	externlibs/libvorbis/lib/info.c
+	externlibs/libvorbis/lib/vorbisenc.c
+	externlibs/libvorbis/lib/bitrate.c
+	externlibs/libvorbis/lib/lookup.c
+	externlibs/libvorbis/lib/registry.c
+	externlibs/libvorbis/lib/vorbisfile.c
+	externlibs/libvorbis/lib/block.c
+	externlibs/libvorbis/lib/lpc.c
+	externlibs/libvorbis/lib/res0.c
+	externlibs/libvorbis/lib/window.c
+	externlibs/libvorbis/lib/codebook.c
+	externlibs/libvorbis/lib/lsp.c
+	externlibs/libvorbis/lib/sharedbook.c
+	externlibs/libvorbis/lib/envelope.c
+	externlibs/libvorbis/lib/mapping0.c
+	externlibs/libvorbis/lib/smallft.c
+	externlibs/libvorbis/lib/floor0.c
+	externlibs/libvorbis/lib/mdct.c
+	externlibs/libvorbis/lib/synthesis.c
 )
 
 add_globbed_headers(src_ogg "externlibs/libogg")
-include_directories("externlibs/libogg")
-include_directories("sys/android/ogg")
-include_directories("sys/android/vorbis")
+add_globbed_headers(src_ogg "externlibs/libvorbis")
+include_directories("externlibs/libogg/include/ogg")
+include_directories("externlibs/libvorbis/include/vorbis")
+include_directories("externlibs/libogg/include")
+include_directories("externlibs/libvorbis/include")
+include_directories("externlibs/libvorbis/lib")
 include_directories("sys/android")
 add_library(ogg STATIC ${src_ogg})
 
@@ -1402,6 +1444,9 @@ endif()
 if(HEXENEOC)
 	message(STATUS "Build hexeneoc")
 endif()
+if(FRAGGINGFREE)
+	message(STATUS "Build fraggingfree")
+endif()
 if(RAVEN)
 	message(STATUS "Build raven core")
 endif()
@@ -1458,7 +1503,12 @@ if(BASE)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_game})
 	
 	#set_target_properties(game PROPERTIES PREFIX "")
-	set_target_properties(game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_MOD_FULL_BODY_AWARENESS")
+	set(d3_compile_definitions "GAME_DLL")
+	if(D3_MOD_FULL_BODY_AWARENESS)
+		set(d3_compile_definitions "${d3_compile_definitions};_MOD_FULL_BODY_AWARENESS")
+		message(STATUS "Build doom3 full body awareness mod support")
+	endif()
+	set_target_properties(game PROPERTIES COMPILE_DEFINITIONS "${d3_compile_definitions}")
 	target_include_directories(game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/game")
 	set_target_properties(game PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(game PROPERTIES INSTALL_NAME_DIR "@executable_path")
@@ -1493,7 +1543,7 @@ if(D3LE)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_d3le})
 	#set_target_properties(d3le PROPERTIES PREFIX "")
 	set_target_properties(d3le PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_D3LE")
-	target_include_directories(d3le PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/d3le")
+	target_include_directories(d3le PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/d3le")
 	set_target_properties(d3le PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3le PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(d3le idlib)
@@ -1510,7 +1560,7 @@ if(CDOOM)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_cdoom})
 	#set_target_properties(cdoom PROPERTIES PREFIX "")
 	set_target_properties(cdoom PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_CDOOM")
-	target_include_directories(cdoom PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/cdoom")
+	target_include_directories(cdoom PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/cdoom")
 	set_target_properties(cdoom PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(cdoom PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(cdoom idlib)
@@ -1527,7 +1577,7 @@ if(RIVENSIN)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_rivensin})
 	#set_target_properties(rivensin PROPERTIES PREFIX "")
 	set_target_properties(rivensin PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RIVENSIN;_DENTONMOD;_PORTALSKY;_HDR")
-	target_include_directories(rivensin PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/rivensin")
+	target_include_directories(rivensin PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/rivensin")
 	set_target_properties(rivensin PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(rivensin PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(rivensin idlib)
@@ -1544,7 +1594,7 @@ if(HARDCORPS)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hardcorps})
 	#set_target_properties(hardcorps PROPERTIES PREFIX "")
 	set_target_properties(hardcorps PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HARDCORPS;_DENTONMOD;_PORTALSKY;_WATER_PHYSICS")
-	target_include_directories(hardcorps PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/hardcorps")
+	target_include_directories(hardcorps PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/hardcorps")
 	set_target_properties(hardcorps PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(hardcorps PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(hardcorps idlib)
@@ -1561,7 +1611,7 @@ if(OVERTHINKED)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_overthinked})
 	#set_target_properties(overthinked PROPERTIES PREFIX "")
 	set_target_properties(overthinked PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_OVERTHINKED;_DENTONMOD;_PORTALSKY")
-	target_include_directories(overthinked PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/overthinked")
+	target_include_directories(overthinked PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/overthinked")
 	set_target_properties(overthinked PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(overthinked PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(overthinked idlib)
@@ -1578,7 +1628,7 @@ if(SABOT)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_sabot})
 	#set_target_properties(sabot PROPERTIES PREFIX "")
 	set_target_properties(sabot PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_SABOT;MOD_BOTS;_PORTALSKY;_D3XP;CTF")
-	target_include_directories(sabot PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/sabot")
+	target_include_directories(sabot PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/sabot")
 	set_target_properties(sabot PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(sabot PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(sabot idlib)
@@ -1595,12 +1645,29 @@ if(HEXENEOC)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hexeneoc})
 	#set_target_properties(hexeneoc PROPERTIES PREFIX "")
 	set_target_properties(hexeneoc PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HEXENEOC")
-	target_include_directories(hexeneoc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/hexeneoc")
+	target_include_directories(hexeneoc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/hexeneoc")
 	set_target_properties(hexeneoc PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(hexeneoc PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(hexeneoc idlib)
 
 	install(TARGETS hexeneoc
+			RUNTIME DESTINATION "${bindir}"
+			LIBRARY DESTINATION "${libdir}"
+			ARCHIVE DESTINATION "${libdir}"
+			)
+endif()
+
+if(FRAGGINGFREE)
+	add_library(fraggingfree SHARED ${src_fraggingfree})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_fraggingfree})
+	#set_target_properties(fraggingfree PROPERTIES PREFIX "")
+	set_target_properties(fraggingfree PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_FRAGGINGFREE;_DENTONMOD;_PORTALSKY")
+	target_include_directories(fraggingfree PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/fraggingfree")
+	set_target_properties(fraggingfree PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(fraggingfree PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(fraggingfree idlib)
+
+	install(TARGETS fraggingfree
 			RUNTIME DESTINATION "${bindir}"
 			LIBRARY DESTINATION "${libdir}"
 			ARCHIVE DESTINATION "${libdir}"
@@ -1618,11 +1685,11 @@ if(RAVEN)
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
+	set(raven_compile_definitions "_RAVEN")
 	if(RAVEN_BSE_FX)
-		set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "_RAVEN;_RAVEN_FX;${CORE_DEFINES}")
-	else()
-		set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${CORE_DEFINES}")
+		set(raven_compile_definitions "${raven_compile_definitions};_RAVEN_FX")
 	endif()
+	set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "${raven_compile_definitions};${CORE_DEFINES}")
 	set_target_properties(${QUAKE4BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 
 	target_link_libraries(${QUAKE4BINARY}
@@ -1642,7 +1709,16 @@ if(QUAKE4)
 	add_library(q4game SHARED ${src_quake4})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set_target_properties(q4game PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;MOD_BOTS;CTF;_MOD_FULL_BODY_AWARENESS")
+	set(q4_compile_definitions "GAME_DLL;_RAVEN;_QUAKE4")
+	if(Q4_MOD_FULL_BODY_AWARENESS)
+		set(q4_compile_definitions "${q4_compile_definitions};_MOD_FULL_BODY_AWARENESS")
+		message(STATUS "Build quake4 full body awareness mod support")
+	endif()
+	if(Q4_MOD_BOTS)
+		set(q4_compile_definitions "${q4_compile_definitions};MOD_BOTS")
+		message(STATUS "Build quake4 bots mod support")
+	endif()
+	set_target_properties(q4game PROPERTIES COMPILE_DEFINITIONS "${q4_compile_definitions}")
 	target_include_directories(q4game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/quake4")
 	set_target_properties(q4game PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(q4game PROPERTIES INSTALL_NAME_DIR "@executable_path")
@@ -1688,7 +1764,12 @@ if(PREY)
 	add_library(preygame SHARED ${src_prey})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_prey})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set_target_properties(preygame PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HUMANHEAD;HUMANHEAD;_PREY")
+	set(prey_compile_definitions "GAME_DLL;_HUMANHEAD;HUMANHEAD;_PREY")
+	if(PREY_MOD_FULL_BODY_AWARENESS)
+		set(prey_compile_definitions "${prey_compile_definitions};_MOD_FULL_BODY_AWARENESS")
+		message(STATUS "Build prey full body awareness mod support")
+	endif()
+	set_target_properties(preygame PROPERTIES COMPILE_DEFINITIONS "${prey_compile_definitions}")
 	target_include_directories(preygame PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/prey")
 	set_target_properties(preygame PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(preygame PROPERTIES INSTALL_NAME_DIR "@executable_path")

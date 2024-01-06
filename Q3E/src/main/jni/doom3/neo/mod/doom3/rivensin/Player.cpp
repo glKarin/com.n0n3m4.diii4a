@@ -27,10 +27,23 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "idlib/LangDict.h"
+#include "framework/async/NetworkSystem.h"
+#include "framework/DeclEntityDef.h"
+#include "renderer/RenderSystem.h"
 
-#include "Game_local.h"
+#include "gamesys/SysCvar.h"
+#include "script/Script_Thread.h"
+#include "ai/AI.h"
+#include "WorldSpawn.h"
+#include "Player.h"
+#include "Camera.h"
+#include "Fx.h"
+#include "Misc.h"
+
+#include "Moveable.h"
+#include "BrittleFracture.h"
 
 const int ASYNC_PLAYER_INV_AMMO_BITS = idMath::BitsForInteger( 999 );	// 9 bits to cover the range [0, 999]
 const int ASYNC_PLAYER_INV_CLIP_BITS = -7;								// -7 bits to cover the range [-1, 60]
@@ -8826,7 +8839,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis ) {
 idPlayer::OffsetThirdPersonView
 ===============
 */
-#ifdef _RIVENSIN
+#ifdef _RIVENSIN //karin: third-person camera
 #define HARM_PREFER_CROUCH_VIEW_HEIGHT 32
 #if HARM_PREFER_CROUCH_VIEW_HEIGHT > 0
 static idCVar	harm_pm_preferCrouchViewHeight("harm_pm_preferCrouchViewHeight", "32", CVAR_GAME | CVAR_FLOAT | CVAR_ARCHIVE, "[Harmattan]: Set prefer crouch view height in Third-Person(suggest 32 - 39, less or equals 0 to disable).");
@@ -8866,7 +8879,7 @@ void idPlayer::OffsetThirdPersonView( float angle, float range, float height, bo
 	focusPoint.z += height;
 	view = origin;
 	view.z += 8 + height;
-#ifdef _RIVENSIN
+#ifdef _RIVENSIN //karin: third-person camera
 #if HARM_PREFER_CROUCH_VIEW_HEIGHT > 0
 	float preferCrouchViewHeight = harm_pm_preferCrouchViewHeight.GetFloat();
 	if ( preferCrouchViewHeight > 0.0f && physicsObj.IsCrouching() ) {

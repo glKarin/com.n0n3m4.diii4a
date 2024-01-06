@@ -1675,8 +1675,10 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 	idImage	*image;
 	int hash;
 
-	if ((r_noLight.GetBool())&&((depth == TD_BUMP)||(depth == TD_SPECULAR)))
+#ifdef _NO_LIGHT
+	if ( r_noLight.GetBool() && ( depth == TD_BUMP || depth == TD_SPECULAR ) )
 		return globalImages->defaultImage;
+#endif
 
 	if (!_name || !_name[0] || idStr::Icmp(_name, "default") == 0 || idStr::Icmp(_name, "_default") == 0) {
 		declManager->MediaPrint("DEFAULTED\n");

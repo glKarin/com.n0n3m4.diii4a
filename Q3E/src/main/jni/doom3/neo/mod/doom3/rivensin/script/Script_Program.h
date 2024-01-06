@@ -29,6 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SCRIPT_PROGRAM_H__
 #define __SCRIPT_PROGRAM_H__
 
+#include "idlib/containers/StrList.h"
+#include "idlib/containers/StaticList.h"
+#include "idlib/containers/HashIndex.h"
+#include "idlib/math/Vector.h"
+
+#include "GameBase.h"
+
 class idEventDef;
 class idVarDef;
 class idTypeDef;
@@ -40,8 +47,7 @@ class idRestoreGame;
 #define MAX_GLOBALS			296608 			// in bytes vanilla d3 is 196608 rev 2018
 #define MAX_STRINGS			1024
 #define MAX_FUNCS			3072
-//k: When include DOOM3 base game map script into doom_main.script, statement count overflow the maximum limit.
-#ifdef _RIVENSIN
+#ifdef _RIVENSIN //karin: When include DOOM3 base game map script into doom_main.script, statement count overflow the maximum limit.
 #define MAX_STATEMENTS		181920			// +100000, When include DOOM3 base game map script, overflow the maximum limit.
 #else
 #define MAX_STATEMENTS		81920			// statement_t - 18 bytes last I checked
@@ -480,11 +486,7 @@ public:
 	// save games
 	void										Save( idSaveGame *savefile ) const;
 	bool										Restore( idRestoreGame *savefile );
-	int											CalculateChecksum( bool forOldSavegame
-#ifdef _RIVENSIN
-			 = false 
-#endif
-			) const;		// Used to insure program code has not
+	int											CalculateChecksum( bool forOldSavegame ) const;		// Used to insure program code has not
 																						//    changed between savegames
 
 	void										Startup( const char *defaultScript );

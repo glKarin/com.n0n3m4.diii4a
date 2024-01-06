@@ -4,7 +4,7 @@
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
+This file is part of the Doom 3 GPL Source Code ("Doom 3 Source Code").
 
 Doom 3 Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,16 +26,16 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "renderer/ModelManager.h"
 
-#include "Game_local.h"
+#include "Player.h"
+
 #include "PlayerIcon.h"
 
-static const char *iconKeys[ ICON_NONE ] =
-{
-    "mtr_icon_lag",
-    "mtr_icon_chat"
+static const char * iconKeys[ ICON_NONE ] = {
+	"mtr_icon_lag",
+	"mtr_icon_chat"
 };
 
 /*
@@ -43,10 +43,9 @@ static const char *iconKeys[ ICON_NONE ] =
 idPlayerIcon::idPlayerIcon
 ===============
 */
-idPlayerIcon::idPlayerIcon()
-{
-    iconHandle	= -1;
-    iconType	= ICON_NONE;
+idPlayerIcon::idPlayerIcon() {
+	iconHandle	= -1;
+	iconType	= ICON_NONE;
 }
 
 /*
@@ -54,9 +53,8 @@ idPlayerIcon::idPlayerIcon()
 idPlayerIcon::~idPlayerIcon
 ===============
 */
-idPlayerIcon::~idPlayerIcon()
-{
-    FreeIcon();
+idPlayerIcon::~idPlayerIcon() {
+	FreeIcon();
 }
 
 /*
@@ -64,21 +62,19 @@ idPlayerIcon::~idPlayerIcon()
 idPlayerIcon::Draw
 ===============
 */
-void idPlayerIcon::Draw(idPlayer *player, jointHandle_t joint)
-{
-    idVec3 origin;
-    idMat3 axis;
+void idPlayerIcon::Draw( idPlayer *player, jointHandle_t joint ) {
+	idVec3 origin;
+	idMat3 axis;
 
-    if (joint == INVALID_JOINT)
-    {
-        FreeIcon();
-        return;
-    }
+	if ( joint == INVALID_JOINT ) {
+		FreeIcon();
+		return;
+	}
 
-    player->GetJointWorldTransform(joint, gameLocal.time, origin, axis);
-    origin.z += 16.0f;
+	player->GetJointWorldTransform( joint, gameLocal.time, origin, axis );
+	origin.z += 16.0f;
 
-    Draw(player, origin);
+	Draw( player, origin );
 }
 
 /*
@@ -86,37 +82,27 @@ void idPlayerIcon::Draw(idPlayer *player, jointHandle_t joint)
 idPlayerIcon::Draw
 ===============
 */
-void idPlayerIcon::Draw(idPlayer *player, const idVec3 &origin)
-{
-    idPlayer *localPlayer = gameLocal.GetLocalPlayer();
+void idPlayerIcon::Draw( idPlayer *player, const idVec3 &origin ) {
+	idPlayer *localPlayer = gameLocal.GetLocalPlayer();
+	if ( !localPlayer || !localPlayer->GetRenderView() ) {
+		FreeIcon();
+		return;
+	}
 
-    if (!localPlayer || !localPlayer->GetRenderView())
-    {
-        FreeIcon();
-        return;
-    }
+	idMat3 axis = localPlayer->GetRenderView()->viewaxis;
 
-    idMat3 axis = localPlayer->GetRenderView()->viewaxis;
-
-    if (player->isLagged)
-    {
-        // create the icon if necessary, or update if already created
-        if (!CreateIcon(player, ICON_LAG, origin, axis))
-        {
-            UpdateIcon(player, origin, axis);
-        }
-    }
-    else if (player->isChatting)
-    {
-        if (!CreateIcon(player, ICON_CHAT, origin, axis))
-        {
-            UpdateIcon(player, origin, axis);
-        }
-    }
-    else
-    {
-        FreeIcon();
-    }
+	if ( player->isLagged ) {
+		// create the icon if necessary, or update if already created
+		if ( !CreateIcon( player, ICON_LAG, origin, axis ) ) {
+			UpdateIcon( player, origin, axis );
+		}
+	} else if ( player->isChatting ) {
+		if ( !CreateIcon( player, ICON_CHAT, origin, axis ) ) {
+			UpdateIcon( player, origin, axis );
+		}
+	} else {
+		FreeIcon();
+	}
 }
 
 /*
@@ -124,15 +110,12 @@ void idPlayerIcon::Draw(idPlayer *player, const idVec3 &origin)
 idPlayerIcon::FreeIcon
 ===============
 */
-void idPlayerIcon::FreeIcon(void)
-{
-    if (iconHandle != - 1)
-    {
-        gameRenderWorld->FreeEntityDef(iconHandle);
-        iconHandle = -1;
-    }
-
-    iconType = ICON_NONE;
+void idPlayerIcon::FreeIcon( void ) {
+	if ( iconHandle != - 1 ) {
+		gameRenderWorld->FreeEntityDef( iconHandle );
+		iconHandle = -1;
+	}
+	iconType = ICON_NONE;
 }
 
 /*
@@ -140,11 +123,10 @@ void idPlayerIcon::FreeIcon(void)
 idPlayerIcon::CreateIcon
 ===============
 */
-bool idPlayerIcon::CreateIcon(idPlayer *player, playerIconType_t type, const idVec3 &origin, const idMat3 &axis)
-{
-    assert(type != ICON_NONE);
-    const char *mtr = player->spawnArgs.GetString(iconKeys[ type ], "_default");
-    return CreateIcon(player, type, mtr, origin, axis);
+bool idPlayerIcon::CreateIcon( idPlayer *player, playerIconType_t type, const idVec3 &origin, const idMat3 &axis ) {
+	assert( type != ICON_NONE );
+	const char *mtr = player->spawnArgs.GetString( iconKeys[ type ], "_default" );
+	return CreateIcon( player, type, mtr, origin, axis );
 }
 
 /*
@@ -152,41 +134,39 @@ bool idPlayerIcon::CreateIcon(idPlayer *player, playerIconType_t type, const idV
 idPlayerIcon::CreateIcon
 ===============
 */
-bool idPlayerIcon::CreateIcon(idPlayer *player, playerIconType_t type, const char *mtr, const idVec3 &origin, const idMat3 &axis)
-{
-    assert(type != ICON_NONE);
+bool idPlayerIcon::CreateIcon( idPlayer *player, playerIconType_t type, const char *mtr, const idVec3 &origin, const idMat3 &axis ) {
+	assert( type != ICON_NONE );
 
-    if (type == iconType)
-    {
-        return false;
-    }
+	if ( type == iconType ) {
+		return false;
+	}
 
-    FreeIcon();
+	FreeIcon();
 
-    memset(&renderEnt, 0, sizeof(renderEnt));
-    renderEnt.origin	= origin;
-    renderEnt.axis		= axis;
-    renderEnt.shaderParms[ SHADERPARM_RED ]				= 1.0f;
-    renderEnt.shaderParms[ SHADERPARM_GREEN ]			= 1.0f;
-    renderEnt.shaderParms[ SHADERPARM_BLUE ]			= 1.0f;
-    renderEnt.shaderParms[ SHADERPARM_ALPHA ]			= 1.0f;
-    renderEnt.shaderParms[ SHADERPARM_SPRITE_WIDTH ]	= 16.0f;
-    renderEnt.shaderParms[ SHADERPARM_SPRITE_HEIGHT ]	= 16.0f;
-    renderEnt.hModel = renderModelManager->FindModel("_sprite");
-    renderEnt.callback = NULL;
-    renderEnt.numJoints = 0;
-    renderEnt.joints = NULL;
-    renderEnt.customSkin = 0;
-    renderEnt.noShadow = true;
-    renderEnt.noSelfShadow = true;
-    renderEnt.customShader = declManager->FindMaterial(mtr);
-    renderEnt.referenceShader = 0;
-    renderEnt.bounds = renderEnt.hModel->Bounds(&renderEnt);
+	memset( &renderEnt, 0, sizeof( renderEnt ) );
+	renderEnt.origin	= origin;
+	renderEnt.axis		= axis;
+	renderEnt.shaderParms[ SHADERPARM_RED ]				= 1.0f;
+	renderEnt.shaderParms[ SHADERPARM_GREEN ]			= 1.0f;
+	renderEnt.shaderParms[ SHADERPARM_BLUE ]			= 1.0f;
+	renderEnt.shaderParms[ SHADERPARM_ALPHA ]			= 1.0f;
+	renderEnt.shaderParms[ SHADERPARM_SPRITE_WIDTH ]	= 16.0f;
+	renderEnt.shaderParms[ SHADERPARM_SPRITE_HEIGHT ]	= 16.0f;
+	renderEnt.hModel = renderModelManager->FindModel( "_sprite" );
+	renderEnt.callback = NULL;
+	renderEnt.numJoints = 0;
+	renderEnt.joints = NULL;
+	renderEnt.customSkin = 0;
+	renderEnt.noShadow = true;
+	renderEnt.noSelfShadow = true;
+	renderEnt.customShader = declManager->FindMaterial( mtr );
+	renderEnt.referenceShader = 0;
+	renderEnt.bounds = renderEnt.hModel->Bounds( &renderEnt );
 
-    iconHandle = gameRenderWorld->AddEntityDef(&renderEnt);
-    iconType = type;
+	iconHandle = gameRenderWorld->AddEntityDef( &renderEnt );
+	iconType = type;
 
-    return true;
+	return true;
 }
 
 /*
@@ -194,12 +174,10 @@ bool idPlayerIcon::CreateIcon(idPlayer *player, playerIconType_t type, const cha
 idPlayerIcon::UpdateIcon
 ===============
 */
-void idPlayerIcon::UpdateIcon(idPlayer *player, const idVec3 &origin, const idMat3 &axis)
-{
-    assert(iconHandle >= 0);
+void idPlayerIcon::UpdateIcon( idPlayer *player, const idVec3 &origin, const idMat3 &axis ) {
+	assert( iconHandle >= 0 );
 
-    renderEnt.origin = origin;
-    renderEnt.axis	= axis;
-    gameRenderWorld->UpdateEntityDef(iconHandle, &renderEnt);
+	renderEnt.origin = origin;
+	renderEnt.axis	= axis;
+	gameRenderWorld->UpdateEntityDef( iconHandle, &renderEnt );
 }
-

@@ -29,10 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 // NOTE: even though this file is part of the Doom3 GPL source (but not the original SDK in game/),
 //       it has never been part of the build (=> not compiled into base.dll)
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
 
-#include "Game_local.h"
+#include "EndLevel.h"
 
 /*
 

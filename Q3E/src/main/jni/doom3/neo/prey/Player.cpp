@@ -6060,7 +6060,11 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis ) {
 	int			delta;
 
 	// CalculateRenderView must have been called first
+#ifdef _MOD_FULL_BODY_AWARENESS
+	idVec3 viewOrigin = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed() ? firstPersonViewOrigin : firstPersonViewOrigin_viewWeaponOrigin;
+#else
 	const idVec3 &viewOrigin = firstPersonViewOrigin;
+#endif
 	const idMat3 &viewAxis = firstPersonViewAxis;
 
 	// these cvars are just for hand tweaking before moving a value to the weapon def
@@ -6236,6 +6240,9 @@ idPlayer::CalculateFirstPersonView
 ===============
 */
 void idPlayer::CalculateFirstPersonView( void ) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed()) {
+#endif
 	if ( ( pm_modelView.GetInteger() == 1 ) || ( ( pm_modelView.GetInteger() == 2 ) && IsDead() ) ) { // HUMANHEAD cjr:  Replaced health <= 0 with IsDead() call for deathwalk override
 		//	Displays the view from the point of view of the "camera" joint in the player model
 
@@ -6258,6 +6265,94 @@ void idPlayer::CalculateFirstPersonView( void ) {
 		firstPersonViewAxis = firstPersonViewAxis * playerView.ShakeAxis();
 #endif
 	}
+#ifdef _MOD_FULL_BODY_AWARENESS
+	} else {
+		idVec3 firstPersonViewOrigin_orig;
+		GetViewPos( firstPersonViewOrigin_orig, firstPersonViewAxis );
+
+		if( af.IsActive() )
+		{
+			idAFBody* head = af.GetPhysics()->GetBody( "head" );
+			if( head )
+			{
+				firstPersonViewOrigin = head->GetWorldOrigin();
+				firstPersonViewAxis = head->GetWorldAxis();
+			}
+		}
+		else if(head.GetEntity())
+		{
+#define _HARM_PREY_PLAYERMODEL_HEAD_JOINT "neck"
+			idMat3 axis;
+			idVec3 origin;
+			const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
+			jointHandle_t head_joint = INVALID_JOINT;
+			if(headJointName && headJointName[0])
+			{
+				head_joint = head->GetAnimator()->GetJointHandle( headJointName );
+			}
+			if(head_joint >= 0 && head->GetJointWorldTransform( head_joint, gameLocal.time, origin, axis ) )
+				firstPersonViewOrigin = origin;
+			else
+			{
+				firstPersonViewOrigin = head->GetPhysics()->GetOrigin();
+			}
+		}
+		else
+		{
+			// position camera at head
+			idMat3 axis;
+			idVec3 origin;
+			const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
+			jointHandle_t head_joint = INVALID_JOINT;
+			if(headJointName && headJointName[0])
+			{
+				head_joint = animator.GetJointHandle( headJointName );
+#if 0
+				if(head_joint < 0 && idStr::Icmp(_HARM_PREY_PLAYERMODEL_HEAD_JOINT, headJointName))
+					head_joint = animator.GetJointHandle( _HARM_PREY_PLAYERMODEL_HEAD_JOINT );
+#endif
+			}
+			else
+			{
+				head_joint = animator.GetJointHandle( _HARM_PREY_PLAYERMODEL_HEAD_JOINT ); // quake4 playermodel head joint name, quake4 playermodel head is can attached
+			}
+
+			if(head_joint >= 0 && animator.GetJointTransform( head_joint, gameLocal.time, origin, axis ) )
+				firstPersonViewOrigin = ( origin + modelOffset) * ( viewAxis /* * physicsObj.GetGravityAxis() */) + physicsObj.GetOrigin()
+									+ viewBob
+					;
+			else
+				firstPersonViewOrigin = GetEyePosition() + viewBob
+									;
+#undef _HARM_PREY_PLAYERMODEL_HEAD_JOINT
+		}
+
+		firstPersonViewOrigin_playerViewOrigin = firstPersonViewOrigin;
+		firstPersonViewOrigin_viewWeaponOrigin = firstPersonViewOrigin;
+
+		// custom offset: when no focus GUI
+		if(!focusUI && (fullBodyAwarenessOffset.x != 0 || fullBodyAwarenessOffset.y != 0 || fullBodyAwarenessOffset.z != 0 ))
+			firstPersonViewOrigin += fullBodyAwarenessOffset * firstPersonViewAxis;
+
+		// clip
+		idBounds bounds(idVec3(-4, -4, -4), idVec3(4, 4, 4));
+		trace_t trace;
+		gameLocal.clip.TraceBounds(trace, firstPersonViewOrigin_orig, firstPersonViewOrigin, bounds, MASK_SOLID, this);
+
+		if (trace.fraction != 1.0f) {
+			firstPersonViewOrigin = trace.endpos;
+		}
+
+		// for weapon
+		const idVec3 &forward = firstPersonViewAxis[0];
+		const idPlane p(-forward, -forward * firstPersonViewOrigin_viewWeaponOrigin);
+		float scale = 0.0f;
+		if(p.RayIntersection(firstPersonViewOrigin, forward, scale))
+			firstPersonViewOrigin_viewWeaponOrigin = firstPersonViewOrigin + forward * scale;
+		else
+			firstPersonViewOrigin_viewWeaponOrigin = firstPersonViewOrigin;
+	}
+#endif
 }
 
 /*
@@ -7368,7 +7463,13 @@ idPlayer::CanShowWeaponViewmodel
 ===============
 */
 bool idPlayer::CanShowWeaponViewmodel( void ) const {
+#ifdef _MOD_FULL_BODY_AWARENESS
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed())
+#endif
 	return showWeaponViewModel;
+#ifdef _MOD_FULL_BODY_AWARENESS
+	return false;
+#endif
 }
 
 /*

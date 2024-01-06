@@ -31,22 +31,17 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "GameBase.h"
 
-#include "gamesys/Event.h"
-#include "gamesys/Class.h"
-#include "gamesys/SysCvar.h"
-#include "gamesys/SysCmds.h"
+#include "idlib/containers/StrList.h"
+#include "idlib/containers/LinkList.h"
+#include "idlib/BitMsg.h"
+#include "framework/Game.h"
+
 #include "gamesys/SaveGame.h"
-#include "gamesys/DebugGraph.h"
-
-#include "script/Script_Program.h"
-
-#include "anim/Anim.h"
-
-#include "ai/AAS.h"
-
 #include "physics/Clip.h"
 #include "physics/Push.h"
-
+#include "script/Script_Program.h"
+#include "ai/AAS.h"
+#include "anim/Anim.h"
 #include "Pvs.h"
 #include "MultiplayerGame.h"
 
@@ -724,65 +719,5 @@ extern const int	CINEMATIC_SKIP_DELAY;
 
 #include "ai/AI_bot.h" //ivan
 */
-
-#include "physics/Force.h"
-#include "physics/Force_Constant.h"
-#include "physics/Force_Drag.h"
-#include "physics/Force_Field.h"
-#include "physics/Force_Spring.h"
-#include "physics/Physics.h"
-#include "physics/Physics_Static.h"
-#include "physics/Physics_StaticMulti.h"
-#include "physics/Physics_Base.h"
-#include "physics/Physics_Actor.h"
-#include "physics/Physics_Monster.h"
-#include "physics/Physics_Player.h"
-#include "physics/Physics_Parametric.h"
-#include "physics/Physics_RigidBody.h"
-#include "physics/Physics_AF.h"
-#include "physics/Physics_Liquid.h"
-
-#include "SmokeParticles.h"
-
-#include "Entity.h"
-#include "GameEdit.h"
-#include "AF.h"
-#include "IK.h"
-#include "AFEntity.h"
-#include "TrailGenerator.h"
-#include "Misc.h"
-#include "Actor.h"
-#ifdef _DENTONMOD
-#include "tracer.h"
-#ifndef _DENTONMOD_PROJECTILE_CPP
-#define _DENTONMOD_PROJECTILE_CPP
-#endif
-#endif
-#include "Projectile.h"
-#include "Weapon.h"
-#include "Light.h"
-#include "WorldSpawn.h"
-#include "Item.h"
-#include "PlayerView.h"
-#include "PlayerIcon.h"
-#include "Player.h"
-#include "Mover.h"
-#include "Camera.h"
-#include "Moveable.h"
-#include "Target.h"
-#include "Trigger.h"
-#include "Sound.h"
-#include "Fx.h"
-#include "SecurityCamera.h"
-#include "BrittleFracture.h"
-#include "Liquid.h"
-
-#include "ai/AI.h"
-#include "ai/AI_bot.h"
-#include "anim/Anim_Testmodel.h"
-
-#include "script/Script_Compiler.h"
-#include "script/Script_Interpreter.h"
-#include "script/Script_Thread.h"
 
 #endif	/* !__GAME_LOCAL_H__ */

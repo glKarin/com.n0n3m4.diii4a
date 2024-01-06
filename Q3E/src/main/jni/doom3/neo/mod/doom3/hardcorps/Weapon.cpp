@@ -26,10 +26,22 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
-#pragma hdrstop
+#include "sys/platform.h"
+#include "framework/DeclEntityDef.h"
+#include "framework/DeclSkin.h"
 
-#include "Game_local.h"
+#include "gamesys/SysCvar.h"
+#include "ai/AI.h"
+#include "Player.h"
+#include "Trigger.h"
+#include "SmokeParticles.h"
+#include "WorldSpawn.h"
+
+#include "Moveable.h"  //rev 2019
+#include "BrittleFracture.h" //rev 2019
+#include "renderer/ModelManager.h"
+
+#include "Weapon.h"
 
 /***********************************************************************
 
