@@ -34,6 +34,8 @@ public final class Constants
             "Add float cvar `harm_ui_subtitlesTextScale` control subtitles's text scale in Prey.",
             "Support cvar `r_brightness`.",
             "Fixed weapon projectile's scorches decals rendering in Prey(2006).",
+            "Data directory chooser support Android SAF.",
+            "New default on-screen buttons layout.",
             "Add `Stupid Angry Bot`(a7x) mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `sabot`. More view in`" + TextHelper.GenLinkText("https://www.moddb.com/downloads/sabot-alpha-7x", "SABot(a7x)") + "`.",
             "Add `Overthinked DooM^3` mod of DOOM3 support, game data directory named `overthinked`. More view in`" + TextHelper.GenLinkText("https://www.moddb.com/mods/overthinked-doom3", "Overthinked DooM^3") + "`.",
             "Add `Fragging Free` mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `fraggingfree`. More view in`" + TextHelper.GenLinkText("https://www.moddb.com/mods/fragging-free", "Fragging Free") + "`.",

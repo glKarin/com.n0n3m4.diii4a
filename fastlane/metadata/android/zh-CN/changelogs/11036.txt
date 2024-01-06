@@ -1,0 +1,12 @@
+* 修复预烘培阴影图软阴影渲染.
+* 雷神之锤4修复EFX混响.
+* 添加半透明模板阴影支持.
+* 掠食(2006)添加浮点型cvar `harm_ui_subtitlesTextScale`控制字幕字体大小.
+* 支持cvar `r_brightness`.
+* 掠食(2006)修复武器发射爆炸贴花渲染Z-Fighting.
+* 数据文件目录选择器支持安卓SAF框架.
+* 新的默认屏幕按键布局.
+* 添加毁灭战士3 mod `Stupid Angry Bot`(a7x).
+* 添加毁灭战士3 mod `Overthinked DooM^3`.
+* 添加毁灭战士3 mod `Fragging Free`.
+* 添加毁灭战士3 mod `HeXen:Edge of Chaos`.

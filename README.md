@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan35(natasha)  
+1.1.0harmattan36(natasha)  
 **Last update release:**
-2023-10-29  
+2023-12-31  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -41,12 +41,18 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.
-* Add OpenAL(soft) and EFX Reverb support.
-* Beam rendering optimization in Prey(2006) by [lvonasek/PreyVR](https://github.com/lvonasek/PreyVR).
-* Add subtitle support in Prey(2006).
-* Fixed gyroscope in invert-landscape mode.
-* Fixed bot head and add bot level control(cvar `harm_si_botLevel`, need extract new `sabot_a9.pk4` resource) in Quake4 MP game.
+* Fixed prelight shadow's shadow mapping.
+* Fixed EFX Reverb in Quake4.
+* Add translucent stencil shadow support in stencil shadow(bool cvar `harm_r_translucentStencilShadow`(default 0); float cvar `harm_r_stencilShadowAlpha` for setting transparency).
+* Add float cvar `harm_ui_subtitlesTextScale` control subtitles's text scale in Prey.
+* Support cvar `r_brightness`.
+* Fixed weapon projectile's scorches decals rendering in Prey(2006).
+* Data directory chooser support Android SAF.
+* New default on-screen buttons layout.
+* Add `Stupid Angry Bot`(a7x) mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `sabot`. More view in [SABot(a7x)](https://www.moddb.com/downloads/sabot-alpha-7x).
+* Add `Overthinked DooM^3` mod of DOOM3 support, game data directory named `overthinked`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/overthinked-doom3).
+* Add `Fragging Free` mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `fraggingfree`. More view in [Fragging Free](https://www.moddb.com/mods/fragging-free).
+* Add `HeXen:Edge of Chaos` mod of DOOM3 support, game data directory named `hexeneoc`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/hexen-edge-of-chaos).
 
 ----------------------------------------------------------------------------------
 
@@ -117,8 +123,8 @@ Tag with `-free` only for F-Droid update.
 > 7. _SHADOW_MAPPING: Add Shadow mapping support.
 > 8. _OPENGLES3: Add OpenGLES3.0 support.
 > 9. _OPENAL _OPENAL_EFX: Add OpenAL(soft) and EFX Reverb support.
-> 10. TRANSLUCENT_STENCIL_SHADOW: Add no lighting support.
-> 11. TRANSLUCENT_STENCIL_SHADOW: Add translucent stencil shadow support.
+> 10. _NO_LIGHT: Add no lighting support.
+> 11. _TRANSLUCENT_STENCIL_SHADOW: Add translucent stencil shadow support.
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
@@ -154,8 +160,8 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 ### Branch:
 
 > `master`:
-> * /DIII4A: frontend source
-> * /doom3: game source
+> * /idTech4Amm: frontend source
+> * /Q3E /Q3E/src/main/jni/doom3: game source
 
 > `free`:
 > * For F-Droid pure free version.

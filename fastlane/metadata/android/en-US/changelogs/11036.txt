@@ -1,0 +1,12 @@
+* Fixed prelight shadow's shadow mapping.
+* Fixed EFX Reverb in Quake4.
+* Add translucent stencil shadow support in stencil shadow.
+* Add float cvar `harm_ui_subtitlesTextScale` control subtitles's text scale in Prey.
+* Support cvar `r_brightness`.
+* Fixed weapon projectile's scorches decals rendering in Prey(2006).
+* Data directory chooser support Android SAF.
+* New default on-screen buttons layout.
+* Add `Stupid Angry Bot`(a7x) mod of DOOM3 support.
+* Add `Overthinked DooM^3` mod of DOOM3 support.
+* Add `Fragging Free` mod of DOOM3 support.
+* Add `HeXen:Edge of Chaos` mod of DOOM3 support.
