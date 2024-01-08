@@ -397,7 +397,7 @@ void R_SaveColorBuffer(const char *name)
 	//GL_CheckErrors("glReadPixels");
 
 #ifdef _USING_STB
-    R_WriteImage(name, data, width, height, 4, true);
+    R_WriteScreenshotImage(name, data, width, height, 4, true);
 #else
 	R_WriteTGA(name, data, width, height, false);
 #endif
