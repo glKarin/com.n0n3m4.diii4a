@@ -225,7 +225,7 @@ idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTE
 #endif
 
 #ifdef _USING_STB
-idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3>);
+idCVar r_screenshotFormat("r_screenshotFormat", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot format. 0 = TGA (default), 1 = BMP, 2 = PNG, 3 = JPG, 4 = DDS", 0, 4, idCmdSystem::ArgCompletion_Integer<0, 4>);
 idCVar r_screenshotJpgQuality("r_screenshotJpgQuality", "75", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Screenshot quality for JPG images (0-100)", 0, 100, idCmdSystem::ArgCompletion_Integer<0, 100>);
 idCVar r_screenshotPngCompression("r_screenshotPngCompression", "3", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "Compression level when using PNG screenshots (0-9)", 0, 9, idCmdSystem::ArgCompletion_Integer<0, 9>);
 #endif
@@ -1382,6 +1382,13 @@ void idRenderSystemLocal::TakeScreenshot(int width, int height, const char *file
 			R_WriteJPG(fn.c_str(), buffer + 18, width, height, 4, true, idMath::ClampInt(0, 9, idMath::ClampInt(1, 100, r_screenshotJpgQuality.GetInteger())), basePath);
 		}
 			break;
+		case 4: {// dds
+			idStr fn(fileName);
+			fn.SetFileExtension("dds");
+			const char *basePath = strstr(fileName, "viewnote") ? "fs_cdpath" : NULL;
+			R_WriteDDS(fn.c_str(), buffer + 18, width, height, 4, true, basePath);
+		}
+			break;
 		case 0: // tga
 		default:
 #endif
@@ -2242,6 +2249,10 @@ void R_InitCommands(void)
 #ifdef _SHADOW_MAPPING
 	extern void R_DumpShadowMap_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("harm_dumpShadowMap", R_DumpShadowMap_f, CMD_FL_RENDERER, "dump shadow map to file in next frame");
+#endif
+#ifdef _USING_STB
+	extern void R_ConvertImage_f(const idCmdArgs &args);
+	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
 #endif
 }
 

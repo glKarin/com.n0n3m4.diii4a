@@ -89,29 +89,6 @@ public final class Q3EControls
         return x.intValue() + " " + y.intValue() + " " + r_or_w.intValue() + " " + a.intValue();
     }
 
-    private static class ButtonLayout
-    {
-        public final int x, y, width_or_radius, alpha;
-        public ButtonLayout(Number x, Number y, Number r_or_w, Number a)
-        {
-            this.x = x.intValue();
-            this.y = y.intValue();
-            this.width_or_radius = r_or_w.intValue();
-            this.alpha = a.intValue();
-        }
-
-        @Override
-        public String toString()
-        {
-            return x + " " + y + " " + width_or_radius + " " + alpha;
-        }
-    }
-
-    private static int Dip2px(Activity context, int i, float scale)
-    {
-        return Math.round((float)Q3EUtils.dip2px(context, i) * scale);
-    }
-
     public static String[] GetDefaultLayout(Activity context, boolean friendly, float scale, int opacity, boolean landscape)
     {
         return Q3EButtonLayoutManager.GetDefaultLayout(context, friendly, scale, opacity, landscape);
