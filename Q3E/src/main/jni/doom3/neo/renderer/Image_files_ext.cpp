@@ -389,7 +389,7 @@ bool R_ConvertImage(const char *filename, const char *toFormat, idStr &ret, int 
     {
         LoadTGA(filename, &pic, &width, &height, &timestamp);
     }
-    else if(!idStr::Icmp(srcExt, "jpg") || !idStr::Icmp(srcExt, "jpg") )
+    else if(!idStr::Icmp(srcExt, "jpg") || !idStr::Icmp(srcExt, "jpeg") )
     {
         LoadJPG(filename, &pic, &width, &height, &timestamp);
     }
@@ -485,7 +485,7 @@ bool R_ConvertImage(const char *filename, const char *toFormat, idStr &ret, int 
         R_WriteTGA(targetPath.c_str(), pic, width, height, flipVertical);
         res = true;
     }
-    else if(!idStr::Icmp(toFormat, "jpg") || !idStr::Icmp(toFormat, "jpg") )
+    else if(!idStr::Icmp(toFormat, "jpg") || !idStr::Icmp(toFormat, "jpeg") )
     {
         if(compression < 0 || compression > 100)
             compression = 100;
