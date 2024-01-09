@@ -22,6 +22,7 @@ package com.n0n3m4.q3e;
 import android.content.Context;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.File;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ public class Q3EInterface
 	private static int[] _defaultArgs;
 	private static int[] _defaultType;
 	static {
+		Q3EKeyCodes.InitD3Keycodes();
 		InitDefaultTypeTable();
 		InitDefaultArgTable();
 	}

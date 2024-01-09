@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **最新版本:**
-1.1.0harmattan36(natasha)  
+1.1.0harmattan37(natasha)  
 **最新更新日期:**
-2023-12-31  
+2024-01-06  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -15,7 +15,7 @@ GPLv3
 ### 支持
 * 多线程渲染
 * png/dds纹理图片加载
-* jpeg/png/bmp格式截屏
+* jpeg/png/bmp/dds格式截屏
 * obj格式静态模型
 * dae格式静态模型
 * 纯阴影图映射软阴影
@@ -41,18 +41,10 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 修复预烘培阴影图软阴影渲染.
-* 雷神之锤4修复EFX混响.
-* 添加半透明模板阴影支持(bool型cvar `harm_r_translucentStencilShadow`(默认 0); 浮点型cvar `harm_r_stencilShadowAlpha`设置透明度).
-* 掠食(2006)添加浮点型cvar `harm_ui_subtitlesTextScale`控制字幕字体大小.
-* 支持cvar `r_brightness`.
-* 掠食(2006)修复武器发射爆炸贴花渲染Z-Fighting.
-* 数据文件目录选择器支持安卓SAF框架.
-* 新的默认屏幕按键布局.
-* 添加毁灭战士3 mod `Stupid Angry Bot`(a7x)(需要邪恶复苏数据包), 游戏数据文件夹名为`sabot`. 详情 [SABot(a7x)](https://www.moddb.com/downloads/sabot-alpha-7x).
-* 添加毁灭战士3 mod `Overthinked DooM^3`, 游戏数据文件夹名为`overthinked`. 详情 [Overthinked DooM^3](https://www.moddb.com/mods/overthinked-doom3).
-* 添加毁灭战士3 mod `Fragging Free`(需要邪恶复苏数据包), 游戏数据文件夹名为`fraggingfree`. 详情 [Fragging Free](https://www.moddb.com/mods/fragging-free).
-* 添加毁灭战士3 mod `HeXen:Edge of Chaos`, 游戏数据文件夹名为`hexeneoc`. 详情 [Overthinked DooM^3](https://www.moddb.com/mods/hexen-edge-of-chaos).
+* 修复屏幕按键初始键码配置.
+* 滑动按键支持设置为点击触发.
+* 新增dds格式屏幕截图.
+* 新增cvar `r_scaleMenusTo43`启用4:3比例菜单.
 
 ----------------------------------------------------------------------------------
 

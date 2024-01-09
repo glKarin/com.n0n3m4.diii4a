@@ -28,7 +28,10 @@ public final class Constants
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
 	public static final String[] CONST_CHANGES = {
+            "Fixed on-screen buttons initial keycodes.",
             "On-screen slider button can setup clickable.",
+            "Add dds screenshot support.",
+            "Add cvar `r_scaleMenusTo43` for 4:3 menu.",
 	};
 
     public static long GetBuildTimestamp()

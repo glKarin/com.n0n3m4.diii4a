@@ -6,7 +6,4 @@
 * 掠食(2006)修复武器发射爆炸贴花渲染Z-Fighting.
 * 数据文件目录选择器支持安卓SAF框架.
 * 新的默认屏幕按键布局.
-* 添加毁灭战士3 mod `Stupid Angry Bot`(a7x).
-* 添加毁灭战士3 mod `Overthinked DooM^3`.
-* 添加毁灭战士3 mod `Fragging Free`.
-* 添加毁灭战士3 mod `HeXen:Edge of Chaos`.
+* 添加毁灭战士3 mod `Stupid Angry Bot`(a7x), `Overthinked DooM^3`, `Fragging Free`, `HeXen:Edge of Chaos`.
