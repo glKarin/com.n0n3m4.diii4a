@@ -155,6 +155,7 @@ static unsigned char *convert_format(unsigned char *data, int img_n, int req_com
 }
 
 #include "stbi_dds_aug.h"
+#include "image_dxt.h"
 #include "stbi_dds_aug_c.h"
 
 #ifdef __cplusplus

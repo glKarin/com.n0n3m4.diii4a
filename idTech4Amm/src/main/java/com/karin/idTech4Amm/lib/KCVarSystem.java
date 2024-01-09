@@ -36,7 +36,8 @@ public final class KCVarSystem
                         "0", "TGA (default)",
                                 "1", "BMP",
                                 "2", "PNG",
-                                "3", "JPG"
+                                "3", "JPG",
+                                "4", "DDS"
                                 ),
                         KCVar.CreateCVar("r_screenshotJpgQuality", "integer", "75", "Screenshot quality for JPG images (0-100)", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
@@ -61,7 +62,8 @@ public final class KCVarSystem
                             "0", "disable",
                             "1", "loading in engine initialization, and saving in engine shutdown",
                             "2", "loading in engine initialization, and saving in every e executing"
-                    )
+                    ),
+                    KCVar.CreateCVar("r_scaleMenusTo43", "bool", "0", "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio", 0)
                 );
         KCVar.Group GAME_CVARS = new KCVar.Group("DOOM3", false)
                 .AddCVar(

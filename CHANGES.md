@@ -1,5 +1,15 @@
 ## Change logs
-**1.1.0harmattan36(natasha)** - **2023-12-31**
+
+> 1.1.0harmattan37 (2024-01-06)
+
+* Fixed on-screen buttons initial keycodes.
+* On-screen slider button can setup clickable.
+* Add dds screenshot support.
+* Add cvar `r_scaleMenusTo43` for 4:3 menu.
+
+----------------------------------------------------------------------------------
+
+> 1.1.0harmattan36 (2023-12-31)
 
 * Fixed prelight shadow's shadow mapping.
 * Fixed EFX Reverb in Quake4.
@@ -12,11 +22,11 @@
 * Add `Stupid Angry Bot`(a7x) mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `sabot`. More view in [SABot(a7x)](https://www.moddb.com/downloads/sabot-alpha-7x).
 * Add `Overthinked DooM^3` mod of DOOM3 support, game data directory named `overthinked`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/overthinked-doom3).
 * Add `Fragging Free` mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `fraggingfree`. More view in [Fragging Free](https://www.moddb.com/mods/fragging-free).
-* Add `HeXen:Edge of Chaos` mod of DOOM3 support, game data directory named `hexeneoc`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/hexen-edge-of-chaos).
+* Add `HeXen:Edge of Chaos` mod of DOOM3 support, game data directory named `hexeneoc`. More view in [HeXen:Edge of Chaos](https://www.moddb.com/mods/hexen-edge-of-chaos).
 
 ----------------------------------------------------------------------------------
 
-> 1.1.0harmattan33 (2023-10-29)
+> 1.1.0harmattan35 (2023-10-29)
 
 * Optimize soft shadow with shadow mapping. Add shadow map with depth texture in OpenGLES2.0.
 * Add OpenAL(soft) and EFX Reverb support.

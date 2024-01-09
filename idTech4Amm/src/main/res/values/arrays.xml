@@ -39,11 +39,15 @@
     <string-array name="onscreen_slider_style_labels">
         <item>Left-right</item>
         <item>Down-right</item>
+        <item>Left-right(click)</item>
+        <item>Down-right(click)</item>
     </string-array>
 
     <integer-array name="onscreen_slider_style_values">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
+        <item>3</item>
 	</integer-array>
 
     <string-array name="onscreen_type_labels">

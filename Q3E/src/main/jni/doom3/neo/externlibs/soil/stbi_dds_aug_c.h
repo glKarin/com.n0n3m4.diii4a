@@ -2,40 +2,6 @@
 ///	DDS file support, does decoding, _not_ direct uploading
 ///	(use SOIL for that ;-)
 
-///	A bunch of DirectDraw Surface structures and flags
-typedef struct {
-    unsigned int    dwMagic;
-    unsigned int    dwSize;
-    unsigned int    dwFlags;
-    unsigned int    dwHeight;
-    unsigned int    dwWidth;
-    unsigned int    dwPitchOrLinearSize;
-    unsigned int    dwDepth;
-    unsigned int    dwMipMapCount;
-    unsigned int    dwReserved1[ 11 ];
-
-    //  DDPIXELFORMAT
-    struct {
-      unsigned int    dwSize;
-      unsigned int    dwFlags;
-      unsigned int    dwFourCC;
-      unsigned int    dwRGBBitCount;
-      unsigned int    dwRBitMask;
-      unsigned int    dwGBitMask;
-      unsigned int    dwBBitMask;
-      unsigned int    dwAlphaBitMask;
-    }               sPixelFormat;
-
-    //  DDCAPS2
-    struct {
-      unsigned int    dwCaps1;
-      unsigned int    dwCaps2;
-      unsigned int    dwDDSX;
-      unsigned int    dwReserved;
-    }               sCaps;
-    unsigned int    dwReserved2;
-} DDS_header ;
-
 //	the following constants were copied directly off the MSDN website
 
 //	The dwFlags member of the original DDSURFACEDESC2 structure

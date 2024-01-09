@@ -60,6 +60,7 @@ bool idWindow::registerIsTemporary[MAX_EXPRESSION_REGISTERS];		// statics to ass
 
 idCVar idWindow::gui_debug("gui_debug", "0", CVAR_GUI | CVAR_BOOL, "");
 idCVar idWindow::gui_edit("gui_edit", "0", CVAR_GUI | CVAR_BOOL, "");
+extern idCVar r_scaleMenusTo43;
 
 #ifdef _RAVEN //k: for main menu gui
 idCVar net_menulanserver("net_menuLANServer", "0", CVAR_SYSTEM | CVAR_ARCHIVE, "menu cvar for config of lan servers");
@@ -1529,6 +1530,19 @@ void idWindow::Redraw(float x, float y)
 		return;
 	}
 
+	// DG: allow scaling menus to 4:3
+	bool fixupFor43 = false;
+	if ( flags & WIN_DESKTOP ) {
+		// only scale desktop windows (will automatically scale its sub-windows)
+		// that EITHER have the scaleto43 flag set OR are fullscreen menus and r_scaleMenusTo43 is 1
+		if( /*(flags & WIN_SCALETO43) ||*/
+			((flags & WIN_MENUGUI) && r_scaleMenusTo43.GetBool()) )
+		{
+			fixupFor43 = true;
+			dc->SetMenuScaleFix(true);
+		}
+	}
+
 	if (flags & WIN_SHOWTIME) {
 		dc->DrawText(va(" %0.1f seconds\n%s", (float)(time - timeLine) / 1000, gui->State().GetString("name")), 0.35f, 0, dc->colorWhite, idRectangle(100, 0, 80, 80), false);
 	}
@@ -1541,6 +1555,9 @@ void idWindow::Redraw(float x, float y)
 	}
 
 	if (!visible) {
+		if (fixupFor43) { // DG: gotta reset that before returning this function
+			dc->SetMenuScaleFix(false);
+		}
 		return;
 	}
 
@@ -1616,6 +1633,9 @@ void idWindow::Redraw(float x, float y)
 		dc->EnableClipping(true);
 	}
 
+	if (fixupFor43) { // DG: gotta reset that before returning this function
+		dc->SetMenuScaleFix(false);
+	}
 	drawRect.Offset(-x, -y);
 	clientRect.Offset(-x, -y);
 	textRect.Offset(-x, -y);

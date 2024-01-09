@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 
 #include "Rectangle.h"
+extern idCVar r_scaleMenusTo43;
 
 const int VIRTUAL_WIDTH = 640;
 const int VIRTUAL_HEIGHT = 480;
@@ -105,6 +106,11 @@ class idDeviceContext
 
 		void				DrawEditCursor(float x, float y, float scale);
 
+		void 				SetMenuScaleFix(bool enable);
+	bool				IsMenuScaleFixActive() const {
+		return r_scaleMenusTo43.GetBool() && (fixOffsetForMenu.x != 0.0f || fixOffsetForMenu.y != 0.0f);
+	}
+
 		enum {
 			CURSOR_ARROW,
 			CURSOR_HAND,
@@ -143,6 +149,7 @@ class idDeviceContext
 		void				PaintChar(float x,float y,float width,float height,float scale,float	s,float	t,float	s2,float t2,const idMaterial *hShader);
 		void				SetFontByScale(float scale);
 		void				Clear(void);
+	void				AdjustCursorCoords(float *x, float *y, float *w, float *h); // DG: added for "render menus as 4:3" hack
 
 		const idMaterial	*cursorImages[CURSOR_COUNT];
 		const idMaterial	*scrollBarImages[SCROLLBAR_COUNT];
@@ -172,6 +179,10 @@ class idDeviceContext
 		bool				initialized;
 
 		bool				mbcs;
+
+	// DG: this is used for the "make sure menus are rendered as 4:3" hack
+	idVec2				fixScaleForMenu;
+	idVec2				fixOffsetForMenu;
 };
 
 #endif /* !__DEVICECONTEXT_H__ */

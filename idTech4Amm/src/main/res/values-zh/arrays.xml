@@ -21,6 +21,8 @@
     <string-array name="onscreen_slider_style_labels">
         <item>左-右方向</item>
         <item>下-右方向</item>
+        <item>左-右方向(点击)</item>
+        <item>下-右方向(点击)</item>
     </string-array>
 
     <string-array name="onscreen_type_labels">
