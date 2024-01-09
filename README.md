@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
 #### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
 **Latest version:**
-1.1.0harmattan36(natasha)  
+1.1.0harmattan37(natasha)  
 **Last update release:**
-2023-12-31  
+2024-01-06  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -15,7 +15,7 @@ GPLv3
 ### Feature
 * multi-threading renderer
 * png/dds texture image
-* jpeg/png/bmp format of screenshot
+* jpeg/png/bmp/dds format of screenshot
 * obj format static model
 * dae format static model
 * pure soft shadow with shadow-mapping
@@ -41,18 +41,10 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Fixed prelight shadow's shadow mapping.
-* Fixed EFX Reverb in Quake4.
-* Add translucent stencil shadow support in stencil shadow(bool cvar `harm_r_translucentStencilShadow`(default 0); float cvar `harm_r_stencilShadowAlpha` for setting transparency).
-* Add float cvar `harm_ui_subtitlesTextScale` control subtitles's text scale in Prey.
-* Support cvar `r_brightness`.
-* Fixed weapon projectile's scorches decals rendering in Prey(2006).
-* Data directory chooser support Android SAF.
-* New default on-screen buttons layout.
-* Add `Stupid Angry Bot`(a7x) mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `sabot`. More view in [SABot(a7x)](https://www.moddb.com/downloads/sabot-alpha-7x).
-* Add `Overthinked DooM^3` mod of DOOM3 support, game data directory named `overthinked`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/overthinked-doom3).
-* Add `Fragging Free` mod of DOOM3 support(need DOOM3: RoE game data), game data directory named `fraggingfree`. More view in [Fragging Free](https://www.moddb.com/mods/fragging-free).
-* Add `HeXen:Edge of Chaos` mod of DOOM3 support, game data directory named `hexeneoc`. More view in [Overthinked DooM^3](https://www.moddb.com/mods/hexen-edge-of-chaos).
+* Fixed on-screen buttons initial keycodes.
+* On-screen slider button can setup clickable.
+* Add dds screenshot support.
+* Add cvar `r_scaleMenusTo43` for 4:3 menu.
 
 ----------------------------------------------------------------------------------
 

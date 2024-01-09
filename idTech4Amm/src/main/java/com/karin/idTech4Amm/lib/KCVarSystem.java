@@ -62,7 +62,8 @@ public final class KCVarSystem
                             "0", "disable",
                             "1", "loading in engine initialization, and saving in engine shutdown",
                             "2", "loading in engine initialization, and saving in every e executing"
-                    )
+                    ),
+                    KCVar.CreateCVar("r_scaleMenusTo43", "bool", "0", "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio", 0)
                 );
         KCVar.Group GAME_CVARS = new KCVar.Group("DOOM3", false)
                 .AddCVar(

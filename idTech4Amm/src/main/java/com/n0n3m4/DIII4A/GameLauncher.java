@@ -515,7 +515,7 @@ public class GameLauncher extends Activity
 
     public void InitQ3E()
     {
-        Q3EKeyCodes.InitD3Keycodes();
+        // Q3EKeyCodes.InitD3Keycodes();
         Q3EInterface q3ei = new Q3EInterface();
 
         q3ei.InitD3();

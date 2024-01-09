@@ -6,7 +6,4 @@
 * Fixed weapon projectile's scorches decals rendering in Prey(2006).
 * Data directory chooser support Android SAF.
 * New default on-screen buttons layout.
-* Add `Stupid Angry Bot`(a7x) mod of DOOM3 support.
-* Add `Overthinked DooM^3` mod of DOOM3 support.
-* Add `Fragging Free` mod of DOOM3 support.
-* Add `HeXen:Edge of Chaos` mod of DOOM3 support.
+* Add `Stupid Angry Bot`(a7x), `Overthinked DooM^3`, `Fragging Free`, `HeXen:Edge of Chaos` mod of DOOM3 support.
