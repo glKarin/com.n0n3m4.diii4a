@@ -2255,9 +2255,8 @@ void R_InitCommands(void)
 	extern void R_ConvertImage_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
 #endif
-	extern void R_CutAnim_f(const idCmdArgs &args);
-	extern void ArgCompletion_AnimName(const idCmdArgs &args, void(*callback)(const char *s));
-	cmdSystem->AddCommand("cutAnim", R_CutAnim_f, CMD_FL_RENDERER, "cut md5 anim", ArgCompletion_AnimName);
+    extern void MD5Anim_AddCommand(void);
+	MD5Anim_AddCommand();
 }
 
 /*

@@ -27,13 +27,13 @@ namespace md5anim
 
     typedef struct bounds_s
     {
-        idList<idStr> bounds;
+        idList<idStr> frames;
 
         idStr ToString(void) const;
         bool Parse(idLexer &parser, int numFrames);
     } bounds_t;
 
-    class file
+    class idMD5AnimFile
     {
     private:
         int						numFrames;
@@ -47,18 +47,21 @@ namespace md5anim
         idStr					name;
     
     public:
-        file();
+        idMD5AnimFile();
     
         bool					LoadAnim(const char *filename);
-        bool AppendAnim(const file &other, int startFrame = 0, int endFrame = -1);
+        bool AppendAnim(const idMD5AnimFile &other, int startFrame = 0, int endFrame = -1);
         bool CutAnim(int startFrame = 0, int endFrame = -1);
+        bool ReverseAnim(int startFrame = 0, int endFrame = -1);
         idStr ToString(void) const;
+        int NumFrames() const {
+            return numFrames;
+        }
     
     private:
         bool Check(void) const;
-        bool Compat(const file &other) const;
-
-        friend void R_CutAnim_f(const idCmdArgs &args);
+        bool Compat(const idMD5AnimFile &other) const;
+        void NormalizedFrame(int &frame) const;
     };
 
     idStr ReadLine(idLexer &parser)
@@ -82,7 +85,7 @@ namespace md5anim
         return file->Write(text.c_str(), text.Length());
     }
 
-    file::file()
+    idMD5AnimFile::idMD5AnimFile()
     : numFrames(0),
     numJoints(0),
     frameRate(0),
@@ -90,7 +93,17 @@ namespace md5anim
     {
     }
 
-    bool file::LoadAnim(const char *filename)
+    void idMD5AnimFile::NormalizedFrame(int &frame) const
+    {
+        if(frame < 0)
+            frame = numFrames + frame;
+        if(frame < 0)
+            frame = 0;
+        else if(frame >= numFrames)
+            frame = numFrames - 1;
+    }
+
+    bool idMD5AnimFile::LoadAnim(const char *filename)
     {
         int		version;
         idLexer	parser(LEXFL_ALLOWPATHNAMES | LEXFL_NOSTRINGESCAPECHARS | LEXFL_NOSTRINGCONCAT
@@ -181,7 +194,7 @@ namespace md5anim
         return Check();
     }
 
-    bool file::Check(void) const
+    bool idMD5AnimFile::Check(void) const
     {
         if(numFrames <= 0)
         {
@@ -209,9 +222,9 @@ namespace md5anim
             return false;
         }
 
-        if(bounds.bounds.Num() != numFrames)
+        if(bounds.frames.Num() != numFrames)
         {
-            common->Warning("bounds.Num() != numFrames: %d != %d", bounds.bounds.Num(), numFrames);
+            common->Warning("bounds.Num() != numFrames: %d != %d", bounds.frames.Num(), numFrames);
             return false;
         }
         if(hierarchy.joints.Num() != numJoints)
@@ -247,32 +260,35 @@ namespace md5anim
         return true;
     }
 
-    bool file::Compat(const file &other) const
+    bool idMD5AnimFile::Compat(const idMD5AnimFile &other) const
     {
         if(!other.Check())
             return false;
 
         if(numJoints != other.numJoints)
+        {
+            common->Warning("numJoints != numJoints: %d != %d", numJoints, other.numJoints);
             return false;
+        }
 
         return true;
     }
 
-    bool file::AppendAnim(const file &other, int startFrame, int endFrame)
+    bool idMD5AnimFile::AppendAnim(const idMD5AnimFile &other, int startFrame, int endFrame)
     {
         if(numJoints == 0)
         {
             numJoints = other.numJoints;
             frameRate = other.frameRate;
             numAnimatedComponents = other.numAnimatedComponents;
+            hierarchy = other.hierarchy;
+            baseframe = other.baseframe;
         }
-        if(Compat(other))
+        if(!Compat(other))
             return false;
 
-        if(startFrame < 0)
-            startFrame = 0;
-        if(endFrame >= other.numFrames || endFrame < 0)
-            endFrame = other.numFrames - 1;
+        other.NormalizedFrame(startFrame);
+        other.NormalizedFrame(endFrame);
 
         if(startFrame > endFrame)
             return false;
@@ -283,8 +299,8 @@ namespace md5anim
             frame.index = this->numFrames;
             frames.Append(frame);
 
-            idStr b = other.bounds.bounds[i];
-            bounds.bounds.Append(b);
+            idStr b = other.bounds.frames[i];
+            bounds.frames.Append(b);
 
             this->numFrames++;
         }
@@ -292,12 +308,10 @@ namespace md5anim
         return true;
     }
 
-    bool file::CutAnim(int startFrame, int endFrame)
+    bool idMD5AnimFile::CutAnim(int startFrame, int endFrame)
     {
-        if(startFrame < 0)
-            startFrame = 0;
-        if(endFrame >= numFrames || endFrame < 0)
-            endFrame = numFrames - 1;
+        NormalizedFrame(startFrame);
+        NormalizedFrame(endFrame);
 
         if(startFrame == 0 && endFrame == numFrames - 1)
             return true;
@@ -310,14 +324,14 @@ namespace md5anim
         bounds_t b;
         target.SetGranularity(1);
         target.SetNum(diff);
-        b.bounds.SetGranularity(1);
-        b.bounds.SetNum(diff);
+        b.frames.SetGranularity(1);
+        b.frames.SetNum(diff);
         for(int i = startFrame; i <= endFrame; i++)
         {
             int index = i - startFrame;
             target[index] = frames[i];
             target[index].index = index;
-            b.bounds[i - startFrame] = bounds.bounds[i];
+            b.frames[i - startFrame] = bounds.frames[i];
         }
 
         this->frames = target;
@@ -327,7 +341,37 @@ namespace md5anim
         return Check();
     }
 
-    idStr file::ToString(void) const
+    bool idMD5AnimFile::ReverseAnim(int startFrame, int endFrame)
+    {
+        NormalizedFrame(startFrame);
+        NormalizedFrame(endFrame);
+
+        if(startFrame >= endFrame)
+            return false;
+
+        int diff = endFrame - startFrame + 1;
+        diff /= 2;
+
+        for(int i = 0; i < diff; i++)
+        {
+            int a = startFrame + i;
+            int b = endFrame - i;
+            int indexA = frames[a].index;
+            int indexB = frames[b].index;
+            frame_t f = frames[a];
+            frames[a] = frames[b];
+            frames[b] = f;
+            frames[a].index = indexA;
+            frames[b].index = indexB;
+            idStr bo = bounds.frames[a];
+            bounds.frames[a] = bounds.frames[b];
+            bounds.frames[b] = bo;
+        }
+
+        return Check();
+    }
+
+    idStr idMD5AnimFile::ToString(void) const
     {
         idStr str;
 
@@ -475,14 +519,14 @@ namespace md5anim
 
         parser.ExpectTokenString("bounds");
         parser.ExpectTokenString("{");
-        bounds.SetGranularity(1);
-        bounds.SetNum(numFrames);
+        frames.SetGranularity(1);
+        frames.SetNum(numFrames);
 
         for (int i = 0; i < numFrames; i++) {
             idStr text = ReadLine(parser);
             if(text.IsEmpty())
                 return false;
-            bounds[i] = text;
+            frames[i] = text;
         }
 
         parser.ExpectTokenString("}");
@@ -495,71 +539,322 @@ namespace md5anim
         idStr str;
 
         str.Append("bounds {\n");
-        for(int i = 0; i < bounds.Num(); i++)
+        for(int i = 0; i < frames.Num(); i++)
         {
             str.Append("  ");
-            str.Append(bounds[i]);
+            str.Append(frames[i]);
             str.Append("\n");
         }
         str.Append("}\n");
 
         return str;
     }
+}
 
-    void R_CutAnim_f(const idCmdArgs &args)
+static void R_CutAnim_f(const idCmdArgs &args)
+{
+    if (args.Argc() < 4)
     {
-        if (args.Argc() < 4)
+        common->Printf("Usage: cutAnim <anim_file> <start_frame> <end_frame>");
+        return;
+    }
+
+    md5anim::idMD5AnimFile file;
+    const char *filename = args.Argv(1);
+    if(!file.LoadAnim(filename))
+    {
+        common->Warning("Load md5anim file error: %s", filename);
+        return;
+    }
+
+    const char *start = args.Argv(2);
+    const char *end = args.Argv(3);
+    if(!file.CutAnim(atoi(start), atoi(end)))
+    {
+        common->Warning("Cut md5anim error: %s(%s - %s)", filename, start, end);
+        return;
+    }
+
+    idStr text = file.ToString();
+    idStr basePath;
+
+    idStr targetPath;
+    if(!basePath.IsEmpty())
+    {
+        targetPath = basePath;
+        targetPath.AppendPath(filename);
+    }
+    else
+    {
+        targetPath = filename;
+        targetPath.StripFileExtension();
+        targetPath.Append(va("_cut_%s_%s", start, end));
+        targetPath.Append(".md5anim");
+    }
+    idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
+    md5anim::WriteText(text, f);
+    fileSystem->CloseFile(f);
+
+    common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
+}
+
+static void R_ReverseAnim_f(const idCmdArgs &args)
+{
+    if (args.Argc() < 2)
+    {
+        common->Printf("Usage: reverseAnim <anim_file> [<start_frame> <end_frame>]");
+        return;
+    }
+
+    md5anim::idMD5AnimFile file;
+    const char *filename = args.Argv(1);
+    if(!file.LoadAnim(filename))
+    {
+        common->Warning("Load md5anim file error: %s", filename);
+        return;
+    }
+
+    int startFrame = 0;
+    int endFrame = -1;
+    if(args.Argc() > 2)
+        startFrame = atoi(args.Argv(2));
+    if(args.Argc() > 3)
+        endFrame = atoi(args.Argv(3));
+    if(!file.ReverseAnim(startFrame, endFrame))
+    {
+        common->Warning("Reverse md5anim error: %s(%d - %d)", filename, startFrame, endFrame);
+        return;
+    }
+
+    idStr text = file.ToString();
+    idStr basePath;
+
+    idStr targetPath;
+    if(!basePath.IsEmpty())
+    {
+        targetPath = basePath;
+        targetPath.AppendPath(filename);
+    }
+    else
+    {
+        targetPath = filename;
+        targetPath.StripFileExtension();
+        targetPath.Append(va("_reverse_%d_%d", startFrame, endFrame));
+        targetPath.Append(".md5anim");
+    }
+    idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
+    md5anim::WriteText(text, f);
+    fileSystem->CloseFile(f);
+
+    common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
+}
+
+static void R_LinkAnim_f(const idCmdArgs &args)
+{
+    if (args.Argc() < 5)
+    {
+        common->Printf("Usage: cutAnim <new_anim_file> [-a <anim_file> [-f] <start_frame> <end_frame> ......]");
+        return;
+    }
+
+#define PARSE_SHORT_ARG(what) \
+		if(argType != 1) \
+		{ \
+			common->Warning("Required short argument"); \
+            continue; \
+		} \
+		i++; \
+		if(i >= args.Argc()) \
+		{                           \
+            readNum = -1; \
+            common->Warning("Missing short argument `" what "` value"); \
+			break; \
+		} \
+		arg = args.Argv(i);
+
+    struct animPart_s
+    {
+        idStr file_name;
+        int start;
+        int end;
+    };
+    struct animLoad_s
+    {
+        idStr file_name;
+        md5anim::idMD5AnimFile anim;
+    };
+
+    idList<animPart_s> parts;
+    idList<animLoad_s> loadeds;
+
+    animPart_s part;
+    bool partSeted = false;
+    int readNum = -1;
+    for(int i = 2; i < args.Argc(); i++)
+    {
+        idStr arg = args.Argv(i);
+        int argType = 0;
+        if(!arg.Cmp("-"))
         {
-            common->Printf("Usage: cutAnim <anim_file> <start_frame> <end_frame>");
-            return;
+            i++;
+            if(i >= args.Argc())
+            {
+                common->Warning("Missing short argument");
+                break;
+            }
+            arg = args.Argv(i);
+            argType = 1;
         }
 
-        md5anim::file file;
-        const char *filename = args.Argv(1);
-        if(!file.LoadAnim(filename))
+        if(argType == 1)
         {
-            common->Warning("Load md5anim file error: %s", filename);
-            return;
-        }
+            if(partSeted)
+            {
+                parts.Append(part);
+                part.start = 0;
+                part.end = -1;
+                readNum = 0;
+            }
 
-        const char *start = args.Argv(2);
-        const char *end = args.Argv(3);
-        if(!file.CutAnim(atoi(start), atoi(end)))
-        {
-            common->Warning("Cut md5anim error: %s(%s - %s)", filename, start, end);
-            return;
-        }
-
-        idStr text = file.ToString();
-        idStr basePath;
-
-        idStr targetPath;
-        if(!basePath.IsEmpty())
-        {
-            targetPath = basePath;
-            targetPath.AppendPath(filename);
+            if(arg == "a")
+            {
+                PARSE_SHORT_ARG("a");
+                part.file_name = arg;
+                part.start = 0;
+                part.end = -1;
+                partSeted = true;
+                readNum = 0;
+            }
+            else if(arg == "f")
+            {
+                PARSE_SHORT_ARG("f");
+                if(!partSeted)
+                {
+                    common->Warning("Missing animation file");
+                    continue;
+                }
+                part.start = part.end = atoi(arg.c_str());
+                readNum = 1;
+            }
+            else
+            {
+                readNum = -1;
+                partSeted = false;
+                common->Warning("Missing short argument");
+                continue;
+            }
         }
         else
         {
-            targetPath = filename;
-            targetPath.StripFileExtension();
-            targetPath.Append(va("_cut_%s_%s", start, end));
-            targetPath.Append(".md5anim");
+            if(!partSeted)
+            {
+                common->Warning("Missing animation file");
+                continue;
+            }
+            if(readNum == 0)
+            {
+                part.start = part.end = atoi(arg.c_str());
+                readNum++;
+            }
+            else if(readNum == 1)
+            {
+                part.end = atoi(arg.c_str());
+                readNum++;
+            }
+            else
+            {
+                readNum = -1;
+                partSeted = false;
+                common->Warning("More frame index: %s", arg.c_str());
+                continue;
+            }
         }
-        idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
-        md5anim::WriteText(text, f);
-        fileSystem->CloseFile(f);
-
-        common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.numFrames);
     }
+    if(readNum >= 0)
+        parts.Append(part);
+
+    for(int i = 0; i < parts.Num(); i++)
+    {
+        const animPart_s &part = parts[i];
+        common->Printf("Link %d: %s(%d - %d)\n", i, part.file_name.c_str(), part.start, part.end);
+
+        // check need cache
+        bool exists = false;
+        for(int m = 0; m < loadeds.Num(); m++)
+        {
+            if(loadeds[i].file_name == part.file_name)
+            {
+                exists = true;
+                break;
+            }
+        }
+        // cache
+        if(!exists)
+        {
+            animLoad_s loaded;
+            if(!loaded.anim.LoadAnim(part.file_name))
+            {
+                common->Warning("Load md5anim file error: %s", part.file_name.c_str());
+                return;
+            }
+            loaded.file_name = part.file_name;
+            loadeds.Append(loaded);
+        }
+    }
+
+    md5anim::idMD5AnimFile file;
+    for(int i = 0; i < parts.Num(); i++)
+    {
+        const animPart_s &part = parts[i];
+        const md5anim::idMD5AnimFile *f = NULL;
+        for(int m = 0; m < loadeds.Num(); m++)
+        {
+            if(loadeds[i].file_name == part.file_name)
+            {
+                f = &loadeds[i].anim;
+                break;
+            }
+        }
+        if(!file.AppendAnim(*f, part.start, part.end))
+        {
+            common->Warning("Append md5anim error: %d - %s(%d - %d)", i, part.file_name.c_str(), part.start, part.end);
+            return;
+        }
+    }
+
+    idStr text = file.ToString();
+    idStr basePath;
+    idStr filename = args.Argv(1);
+    if(filename.Length() < strlen(".md5anim") || idStr::Icmp(filename.Right(strlen(".md5anim")), ".md5anim"))
+        filename.Append(".md5anim");
+
+    idStr targetPath;
+    if(!basePath.IsEmpty())
+    {
+        targetPath = basePath;
+        targetPath.AppendPath(filename);
+    }
+    else
+    {
+        targetPath = filename;
+    }
+    idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
+    md5anim::WriteText(text, f);
+    fileSystem->CloseFile(f);
+
+    common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
+
+#undef PARSE_SHORT_ARG
 }
 
-void R_CutAnim_f(const idCmdArgs &args)
-{
-    md5anim::R_CutAnim_f(args);
-}
-
-void ArgCompletion_AnimName(const idCmdArgs &args, void(*callback)(const char *s))
+static void ArgCompletion_AnimName(const idCmdArgs &args, void(*callback)(const char *s))
 {
     cmdSystem->ArgCompletion_FolderExtension(args, callback, "models/", false, ".md5anim", NULL);
+}
+
+void MD5Anim_AddCommand(void)
+{
+    cmdSystem->AddCommand("cutAnim", R_CutAnim_f, CMD_FL_RENDERER, "cut md5 anim", ArgCompletion_AnimName);
+    cmdSystem->AddCommand("reverseAnim", R_ReverseAnim_f, CMD_FL_RENDERER, "reverse md5 anim", ArgCompletion_AnimName);
+    cmdSystem->AddCommand("linkAnim", R_LinkAnim_f, CMD_FL_RENDERER, "link md5 anim", ArgCompletion_AnimName);
 }
