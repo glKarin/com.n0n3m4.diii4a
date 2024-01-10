@@ -1377,6 +1377,10 @@ void idSessionLocal::DispatchCommand(idUserInterface *gui, const char *menuComma
 		HandleNoteCommands(menuCommand);
 	} else if (gui == guiRestartMenu) {
 		HandleRestartMenuCommands(menuCommand);
+#ifdef _RAVEN
+	} else if (gui == guiLoading) {
+		HandleLoadingCommands(menuCommand);
+#endif
 	} else if (game && guiActive && guiActive->State().GetBool("gameDraw")) {
 		const char *cmd = game->HandleGuiCommands(menuCommand);
 
@@ -1990,3 +1994,82 @@ void idSessionLocal::SetCDKeyGuiVars(void)
 	guiMainMenu->SetStateString("str_d3key_state", common->GetLanguageDict()->GetString(va("#str_071%d", 86 + cdkey_state)));
 	guiMainMenu->SetStateString("str_xpkey_state", common->GetLanguageDict()->GetString(va("#str_071%d", 86 + xpkey_state)));
 }
+
+#ifdef _RAVEN
+/*
+==============
+idSessionLocal::HandleLoadingCommands
+
+Executes any commands returned by the gui
+==============
+*/
+void idSessionLocal::HandleLoadingCommands(const char *menuCommand)
+{
+	// execute the command from the menu
+	int icmd;
+	idCmdArgs args;
+
+	args.TokenizeString(menuCommand, false);
+
+	for (icmd = 0; icmd < args.Argc();) {
+		const char *cmd = args.Argv(icmd++);
+
+		if (!idStr::Icmp(cmd, "unmute")) {
+			//k: TODO all code move to `close` command
+			continue;
+		}
+
+		if (!idStr::Icmp(cmd, "close")) {
+			finishedLoading = false;
+
+			//k: from idSessionLocal::ExecuteMapChange
+			usercmdGen->Clear();
+
+			// start saving commands for possible writeCmdDemo usage
+			logIndex = 0;
+			statIndex = 0;
+			lastSaveIndex = 0;
+
+			// don't bother spinning over all the tics we spent loading
+			lastGameTic = latchedTicNumber = com_ticNumber;
+
+			// remove any prints from the notify lines
+			console->ClearNotifyLines();
+
+			// stop drawing the laoding screen
+			insideExecuteMapChange = false;
+
+			Sys_SetPhysicalWorkMemory(-1, -1);
+
+			// set the game sound world for playback
+			soundSystem->SetPlayingSoundWorld(sw);
+
+			// when loading a save game the sound is paused
+			if (sw->IsPaused()) {
+				// unpause the game sound world
+				sw->UnPause();
+			}
+
+			// restart entity sound playback
+			soundSystem->SetMute(false);
+
+			// we are valid for game draws now
+			mapSpawned = true;
+			Sys_ClearEvents();
+
+			SetGUI(NULL, NULL);
+			continue;
+		}
+
+		if (!idStr::Icmp(cmd, "play")) {
+			if (args.Argc() - icmd >= 1) {
+				idStr snd = args.Argv(icmd++);
+				sw->PlayShaderDirectly(snd);
+			}
+
+			continue;
+		}
+	}
+}
+
+#endif

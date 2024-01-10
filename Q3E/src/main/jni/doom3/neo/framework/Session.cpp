@@ -39,6 +39,9 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #ifdef _RAVEN
+//karin: pause when finished loading
+idCVar com_skipLevelLoadPause("com_skipLevelLoadPause", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "");
+
 const char * Com_LocalizeGametype( const char *gameType ) { // from MultiplayerGame.cpp
 	const char *localisedGametype = gameType;
 
@@ -452,6 +455,9 @@ void idSessionLocal::Clear()
 	authWaitBox = false;
 
 	authMsg.Clear();
+#ifdef _RAVEN
+	finishedLoading = false;
+#endif
 }
 
 /*
@@ -511,6 +517,9 @@ void idSessionLocal::Stop()
 
 	insideUpdateScreen = false;
 	insideExecuteMapChange = false;
+#ifdef _RAVEN
+	finishedLoading = false;
+#endif
 
 	// drop all guis
 	SetGUI(NULL, NULL);
@@ -1495,6 +1504,11 @@ void idSessionLocal::MoveToNewMap(const char *mapName)
 		SaveGame(GetAutoSaveName(mapName), true);
 	}
 
+#ifdef _RAVEN //karin: pause when finished loading
+	if(!com_skipLevelLoadPause.GetBool())
+		SetGUI(guiLoading, NULL);
+	else
+#endif
 	SetGUI(NULL, NULL);
 }
 
@@ -1962,6 +1976,9 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	// cause prints to force screen updates as a pacifier,
 	// and draw the loading gui instead of game draws
 	insideExecuteMapChange = true;
+#ifdef _RAVEN
+	finishedLoading = false;
+#endif
 
 	// if this works out we will probably want all the sizes in a def file although this solution will
 	// work for new maps etc. after the first load. we can also drop the sizes into the default.cfg
@@ -2101,6 +2118,15 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	// capture the current screen and start a wipe
 	StartWipe("wipe2Material");
 
+#ifdef _RAVEN //karin: pause when finished loading
+	if(!com_skipLevelLoadPause.GetBool() && !(loadingSaveGame && savegameFile) && !IsMultiplayer())
+	{
+		guiLoading->HandleNamedEvent("FinishedLoading");
+		finishedLoading = true;
+		return;
+	}
+	finishedLoading = true;
+#endif
 	usercmdGen->Clear();
 
 	// start saving commands for possible writeCmdDemo usage
@@ -2613,6 +2639,13 @@ bool idSessionLocal::LoadGame(const char *saveName)
 
 		ExecuteMapChange();
 
+#if 0 //karin: when load game, goto game directly
+#ifdef _RAVEN
+		if(!com_skipLevelLoadPause.GetBool())
+			SetGUI(guiLoading, NULL);
+		else
+#endif
+#endif
 		SetGUI(NULL, NULL);
 	}
 

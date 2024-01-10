@@ -46,7 +46,11 @@ void Sys_SyncState(void)
     if (setState)
     {
         state = STATE_NONE;
-        if(sessLocal.insideExecuteMapChange)
+        if(sessLocal.insideExecuteMapChange
+#ifdef _RAVEN
+				&& !sessLocal.FinishedLoading()
+#endif
+				)
             state |= STATE_LOADING;
         else
         {

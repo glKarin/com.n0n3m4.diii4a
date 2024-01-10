@@ -53,6 +53,9 @@ else
 
 */
 
+#ifdef _RAVEN //karin: pause when finished loading
+extern idCVar com_skipLevelLoadPause;
+#endif
 typedef struct {
 	usercmd_t	cmd;
 	int			consistencyHash;
@@ -278,6 +281,12 @@ class idSessionLocal : public idSession
 		int					wipeStartTic;
 		int					wipeStopTic;
 		bool				wipeHold;
+#ifdef _RAVEN //karin: pause when finished loading
+		bool				finishedLoading;
+		bool				FinishedLoading(void) const {
+			return !com_skipLevelLoadPause.GetBool() && finishedLoading;
+		}
+#endif
 
 #if ID_CONSOLE_LOCK
 		int					emptyDrawCount;				// watchdog to force the main menu to restart
@@ -352,6 +361,9 @@ class idSessionLocal : public idSession
 		void				SetModsMenuGuiVars(void);
 		void				SetMainMenuSkin(void);
 		void				SetPbMenuGuiVars(void);
+#ifdef _RAVEN
+		void				HandleLoadingCommands(const char *menuCommand);
+#endif
 
 	private:
 		bool				BoxDialogSanityCheck(void);
