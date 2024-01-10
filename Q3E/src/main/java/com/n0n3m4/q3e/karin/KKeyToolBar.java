@@ -73,7 +73,7 @@ public class KKeyToolBar extends LinearLayout {
                     return false;
             }
             post(m_updateToolBar);
-            Q3EUtils.q3ei.callbackObj.vw.sendKeyEvent(down, key.keyCode, 0);
+            Q3EUtils.q3ei.callbackObj.sendKeyEvent(down, key.keyCode, 0);
             return true;
         }
     };

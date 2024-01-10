@@ -86,7 +86,6 @@ public class Slider extends Paintable implements TouchListener
     @Override
     public boolean onTouchEvent(int x, int y, int act)
     {
-        Q3EControlView controlView = (Q3EControlView) (this.view);
         if (act == 1)
         {
             startx = x;
@@ -96,7 +95,7 @@ public class Slider extends Paintable implements TouchListener
                 int key = KeyInPosition(x, y);
                 if(key > 0)
                 {
-                    controlView.sendKeyEvent(true, key, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, key, 0);
                     m_lastKey = key;
                 }
             }
@@ -108,18 +107,18 @@ public class Slider extends Paintable implements TouchListener
                 case Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT: {
                     if (x - startx < -SLIDE_DIST)
                     {
-                        controlView.sendKeyEvent(true, lkey, 0);
-                        controlView.sendKeyEvent(false, lkey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, lkey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, lkey, 0);
                     }
                     else if (x - startx > SLIDE_DIST)
                     {
-                        controlView.sendKeyEvent(true, rkey, 0);
-                        controlView.sendKeyEvent(false, rkey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, rkey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, rkey, 0);
                     }
                     else
                     {
-                        controlView.sendKeyEvent(true, ckey, 0);
-                        controlView.sendKeyEvent(false, ckey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, ckey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, ckey, 0);
                     }
                 }
                 break;
@@ -129,19 +128,19 @@ public class Slider extends Paintable implements TouchListener
                         double ang = Math.abs(Math.atan2(y - starty, x - startx));
                         if (ang > Math.PI / 4 && ang < Math.PI * 3 / 4)
                         {
-                            controlView.sendKeyEvent(true, lkey, 0);
-                            controlView.sendKeyEvent(false, lkey, 0);
+                            Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, lkey, 0);
+                            Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, lkey, 0);
                         }
                         else
                         { //k
-                            controlView.sendKeyEvent(true, rkey, 0);
-                            controlView.sendKeyEvent(false, rkey, 0);
+                            Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, rkey, 0);
+                            Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, rkey, 0);
                         } //k
                     }
                     else
                     {
-                        controlView.sendKeyEvent(true, ckey, 0);
-                        controlView.sendKeyEvent(false, ckey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, ckey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, ckey, 0);
                     }
                 }
                 break;
@@ -150,7 +149,7 @@ public class Slider extends Paintable implements TouchListener
                 default: {
                     if(m_lastKey > 0)
                     {
-                        controlView.sendKeyEvent(false, m_lastKey, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, m_lastKey, 0);
                         m_lastKey = 0;
                     }
                 }

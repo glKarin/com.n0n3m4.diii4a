@@ -2,6 +2,7 @@ package com.n0n3m4.q3e.onscreen;
 
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EKeyCodes;
+import com.n0n3m4.q3e.Q3EUtils;
 
 public class MouseControl implements TouchListener
 {
@@ -24,12 +25,12 @@ public class MouseControl implements TouchListener
         if (act == 1)
         {
             if (isleftbutton)
-                view.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
+                Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
             alreadydown = true;
         }
         else
         {
-            view.sendMotionEvent(x - lx, y - ly);
+            Q3EUtils.q3ei.callbackObj.sendMotionEvent(x - lx, y - ly);
         }
         lx = x;
         ly = y;
@@ -37,7 +38,7 @@ public class MouseControl implements TouchListener
         if (act == -1)
         {
             if (isleftbutton)
-                view.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
+                Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
             alreadydown = false;
         }
         return true;

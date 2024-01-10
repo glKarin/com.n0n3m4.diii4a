@@ -260,9 +260,8 @@ public class Disc extends Paintable implements TouchListener
                                 if (p.pressed)
                                 {
                                     has = true;
-                                    Q3EControlView controlView = (Q3EControlView) (this.view);
-                                    controlView.sendKeyEvent(true, p.key, 0);
-                                    controlView.sendKeyEvent(false, p.key, 0);
+                                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, p.key, 0);
+                                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, p.key, 0);
                                 }
                             }
                             p.pressed = false;
