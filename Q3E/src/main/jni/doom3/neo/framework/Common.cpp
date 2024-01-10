@@ -2870,6 +2870,7 @@ void idCommonLocal::Async(void)
 idCommonLocal::LoadGameDLL
 =================
 */
+#ifdef __ANDROID__ //karin: select game dll on Android
 #ifdef _RAVEN // quake4 game dll
 #define _HARM_BASE_GAME_DLL "q4game"
 #elif defined(_HUMANHEAD) // prey game dll
@@ -2878,12 +2879,12 @@ idCommonLocal::LoadGameDLL
 #define _HARM_BASE_GAME_DLL "game"
 #endif
 
-//k
 #define _ANDROID_NATIVE_LIBRARY_DIR "<Android APK native library directory path>/"
 static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. e.g. "
 		"`" _ANDROID_NATIVE_LIBRARY_DIR "lib" _HARM_BASE_GAME_DLL ".so`, "
 		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
 static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library directory path(default is empty, means using `" _ANDROID_NATIVE_LIBRARY_DIR "`).");
+#endif
 void idCommonLocal::LoadGameDLL(void)
 {
 #ifdef __DOOM_DLL__
@@ -2893,11 +2894,9 @@ void idCommonLocal::LoadGameDLL(void)
 	gameExport_t	gameExport;
 	GetGameAPI_t	GetGameAPI;
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: select game dll on Android
 #define LOAD_RESULT(dll) ((dll) ? "done" : "fail")
 
-#define _K_D3_MOD
-#ifdef _K_D3_MOD
 	common->Printf("[Harmattan]: fpu = "
 #ifdef __aarch64__
 			"hard"
@@ -2990,23 +2989,17 @@ void idCommonLocal::LoadGameDLL(void)
 				}
 			}
 		}
-#if 0
-		else
-#else
-			// last load base game library if all failed.
-			if(!gameDLL)
-#endif
-#endif
-			{
-				common->Printf("[Harmattan]: Load BASE game......\n");
-				idStr dllFile(dir);
-				dllFile.AppendPath("lib" _HARM_BASE_GAME_DLL ".so");
-				gameDLL = sys->DLL_Load(dllFile);
-				common->Printf("[Harmattan]: Load BASE dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
-			}
+		// last load base game library if all failed.
+		if(!gameDLL)
+		{
+			common->Printf("[Harmattan]: Load BASE game......\n");
+			idStr dllFile(dir);
+			dllFile.AppendPath("lib" _HARM_BASE_GAME_DLL ".so");
+			gameDLL = sys->DLL_Load(dllFile);
+			common->Printf("[Harmattan]: Load BASE dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+		}
 	}
-	//k
-#else
+#else //karin: other platform load game{arch}.dll/game{arch}.so
 	fileSystem->FindDLL("game", dllPath, true);
 
 	if (!dllPath[ 0 ]) {

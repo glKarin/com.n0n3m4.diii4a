@@ -109,7 +109,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ##### 安卓系统编译声明宏`__ANDROID__`.
 > 1. _OPENSLES: OpenSLES声音支持.
 > 2. _MULTITHREAD: 多线程支持.
-> 3. _USING_STB: 使用stb加载jpeg/png纹理图片支持.
+> 3. _USING_STB: 使用stb加载jpeg/png/dds纹理图片支持和jpeg/png/bmp/dds格式截图支持.
 > 4. _K_CLANG: 如果使用clang编译而不是GCC.
 > 5. _MODEL_OBJ: 添加obj静态模型支持.
 > 6. _MODEL_DAE: 添加dae静态模型支持.

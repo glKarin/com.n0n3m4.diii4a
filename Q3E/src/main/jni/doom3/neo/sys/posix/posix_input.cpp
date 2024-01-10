@@ -38,7 +38,7 @@ typedef struct poll_mouse_event_s {
 	int value;
 } poll_mouse_event_t;
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: from original DIII4A ???
 #define MAX_POLL_EVENTS		(50 * 1000)
 #else
 #define MAX_POLL_EVENTS		(50)

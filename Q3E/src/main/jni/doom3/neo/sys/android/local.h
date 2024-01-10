@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 extern glconfig_t glConfig;
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: sys::local expose on Android
 extern FILE *f_stdout;
 extern int gl_format;
 extern int gl_msaa;

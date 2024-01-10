@@ -108,7 +108,7 @@ Tag with `-free` only for F-Droid update.
 ##### Define macro `__ANDROID__` for Android.
 > 1. _OPENSLES: Add OpenSLES support for sound.
 > 2. _MULTITHREAD: Add multithread support for rendering.
-> 3. _USING_STB: Using stb header for jpeg/png/dds texture image and jpeg/png/bmp screenshot support.
+> 3. _USING_STB: Using stb header for jpeg/png/dds texture image and jpeg/png/bmp/dds screenshot support.
 > 4. _K_CLANG: If compiling by clang not GCC.
 > 5. _MODEL_OBJ: Add obj static model support.
 > 6. _MODEL_DAE: Add dae static model support.

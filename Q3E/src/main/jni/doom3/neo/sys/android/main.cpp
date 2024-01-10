@@ -46,16 +46,13 @@ If you have questions concerning this license or the applicable additional terms
 static idStr	basepath;
 static idStr	savepath;
 
-#ifdef __ANDROID__
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit();
 
 extern void Posix_EarlyInit();
 extern void Posix_LateInit();
 extern bool Posix_AddMousePollEvent(int action, int value);
-extern void Posix_QueEvent(sysEventType_t type, int value, int value2,
-                           int ptrLength, void *ptr);
-#endif
+extern void Posix_QueEvent(sysEventType_t type, int value, int value2, int ptrLength, void *ptr);
 
 /*
 ===========
@@ -88,7 +85,7 @@ void *Sys_AsyncThread(void *p)
 	int start, end;
 	int ticked, to_ticked;
 
-#ifdef __ANDROID__
+#if 1 // Android
 	xthreadInfo *threadInfo = static_cast<xthreadInfo *>(p);
 	assert(threadInfo);
 #endif
@@ -113,7 +110,7 @@ void *Sys_AsyncThread(void *p)
 		}
 
 		// thread exit
-#ifdef __ANDROID__
+#ifdef _NO_PTHREAD_CANCEL
 		if (threadInfo->threadCancel) {
 			break;
 		}
@@ -132,7 +129,7 @@ void *Sys_AsyncThread(void *p)
  */
 const char *Sys_DefaultSavePath(void)
 {
-#ifdef __ANDROID__
+#if 1 // Android
 	sprintf(savepath, workdir());
 #else
 #if defined( ID_DEMO_BUILD )
@@ -180,7 +177,7 @@ Try to be intelligent: if there is no BASE_GAMEDIR, try the next path
 
 const char *Sys_DefaultBasePath(void)
 {
-#ifdef __ANDROID__
+#if 1 // Android
 	return workdir();
 #else
 	struct stat st;
@@ -338,7 +335,7 @@ double Sys_ClockTicksPerSecond(void)
 		return ret;
 	}
 
-#ifdef __ANDROID__
+#if 1 // Android
 	fd = open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", O_RDONLY);
 #else
 	fd = open("/proc/cpuinfo", O_RDONLY);
@@ -355,7 +352,7 @@ double Sys_ClockTicksPerSecond(void)
 	len = read(fd, buf, 4096);
 	close(fd);
 
-#ifdef __ANDROID__
+#if 1 // Android
 	if (len > 0) {
 		ret = atof(buf);
 		common->Printf("/proc/cpuinfo CPU frequency: %g MHz", ret / 1000.0);
@@ -595,7 +592,7 @@ void abrt_func(mcheck_status status)
 
 #endif
 
-#ifdef __ANDROID__
+/* Android */
 
 #include "doom3_android.h"
 
@@ -663,7 +660,11 @@ extern void GLimp_DeactivateContext();
 #ifdef _MULTITHREAD
 volatile bool backendThreadShutdown = false;
 
+#ifdef _NO_PTHREAD_CANCEL
 #define RENDER_THREAD_STARTED() (render_thread.threadHandle && !render_thread.threadCancel)
+#else
+#define RENDER_THREAD_STARTED() (render_thread.threadHandle)
+#endif
 
 // render thread
 static xthreadInfo				render_thread = {0};
@@ -716,7 +717,11 @@ static void * BackendThread(void *data)
 	while(true)
 	{
 		BackendThreadTask();
-		if(render_thread.threadCancel || backendThreadShutdown)
+		if(
+#ifdef _NO_PTHREAD_CANCEL
+				render_thread.threadCancel ||
+#endif
+				backendThreadShutdown)
 			break;
 	}
 	GLimp_DeactivateContext();
@@ -1107,6 +1112,3 @@ void GetDOOM3API(void *d3interface)
 
 #include "sys_android.cpp"
 
-#else
-
-#endif

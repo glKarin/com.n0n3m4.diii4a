@@ -197,7 +197,7 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadPriority priority,
 		common->DPrintf("WARNING: MAX_THREADS reached\n");
 	}
 
-#if defined(__ANDROID__)
+#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
 	info.threadCancel = false;
 #endif
 	Sys_LeaveCriticalSection();
@@ -213,7 +213,7 @@ void Sys_DestroyThread(xthreadInfo &info)
 	// the target thread must have a cancelation point, otherwise pthread_cancel is useless
 	assert(info.threadHandle);
 
-#ifdef __ANDROID__
+#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
 	info.threadCancel = true;
 #else
 	if (pthread_cancel((pthread_t)info.threadHandle) != 0) {

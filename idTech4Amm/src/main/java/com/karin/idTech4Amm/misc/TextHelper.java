@@ -314,6 +314,13 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2024-01-06", 37,
+                        "Fixed on-screen buttons initial keycodes.",
+                        "On-screen slider button can setup clickable.",
+                        "Add dds screenshot support.",
+                        "Add cvar `r_scaleMenusTo43` for 4:3 menu."
+                ),
+
                 ChangeLog.Create("2023-12-31", 36,
                         "Fixed prelight shadow's shadow mapping.",
                         "Fixed EFX Reverb in Quake4.",

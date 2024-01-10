@@ -131,9 +131,9 @@ Posix_InitSigs
 */
 void Posix_InitSigs()
 {
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: not handle signals for debug
 	if(no_handle_signals)
-		return; //k signals
+		return;
 #endif
 	struct sigaction action;
 	int i;

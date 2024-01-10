@@ -97,16 +97,12 @@ class idAudioHardwareAndroid: public idAudioHardware
 		// try to write as many sound samples to the device as possible without blocking and prepare for a possible new mixing call
 		// returns wether there is *some* space for writing available
 		bool Flush(void){
-#ifdef __ANDROID__
 			writeAudio(-1, 0);
 			//Write(true);
-#endif
 			return true;
 		};
 		void Write(bool flushing){
-#ifdef __ANDROID__
 			writeAudio(0, flushing ? -m_buffer_size : m_buffer_size);
-#endif
 		};
 
 		int GetNumberOfSpeakers(void)

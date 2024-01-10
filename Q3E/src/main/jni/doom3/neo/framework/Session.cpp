@@ -3020,7 +3020,7 @@ void idSessionLocal::Draw()
 		console->Draw(false);
 	}
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: sync session state to Q3E
 	Sys_SyncState();
 #endif
 }

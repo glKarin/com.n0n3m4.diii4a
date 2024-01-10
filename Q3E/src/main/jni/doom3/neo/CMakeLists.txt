@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(doom3)
 
-add_definitions(-D_K_CLANG)
+option(ANDROID "Android build" ON)
+
+if(ANDROID)
+	add_definitions(-D__ANDROID__)
+	add_definitions(-D_NO_PTHREAD_CANCEL)
+endif()
+
+add_definitions(-D_K_CLANG) # TODO
+
 add_definitions(-DID_ENABLE_CURL=1)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -1515,13 +1523,7 @@ if(CORE)
 endif()
 
 if(BASE)
-	if(ANDROID)
-		add_library(game SHARED ${src_game})
-		target_link_libraries(game idlib)
-	else()
-		add_executable(game ${src_game})
-		target_link_libraries(game ${DOOM3BINARY})
-	endif()
+	add_library(game SHARED ${src_game})
 	
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_game})
 	
@@ -1535,6 +1537,7 @@ if(BASE)
 	target_include_directories(game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/game")
 	set_target_properties(game PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(game PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(game idlib)
 
 	install(TARGETS game
 			RUNTIME DESTINATION "${bindir}"
@@ -1544,20 +1547,14 @@ if(BASE)
 endif()
 
 if(D3XP)
-	if(ANDROID)
-		add_library(d3xp SHARED ${src_d3xp})
-		target_link_libraries(d3xp idlib)
-	else()
-		add_executable(d3xp ${src_d3xp})
-		target_link_libraries(d3xp ${DOOM3BINARY})
-	endif()
-
+	add_library(d3xp SHARED ${src_d3xp})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_d3xp})
 	#set_target_properties(d3xp PROPERTIES PREFIX "")
 	set_target_properties(d3xp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF")
 	target_include_directories(d3xp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/d3xp")
 	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(d3xp idlib)
 
 	install(TARGETS d3xp
 			RUNTIME DESTINATION "${bindir}"
@@ -1567,20 +1564,14 @@ if(D3XP)
 endif()
 
 if(D3LE)
-	if(ANDROID)
-		add_library(d3le SHARED ${src_d3le})
-		target_link_libraries(d3le idlib)
-	else()
-		add_executable(d3le ${src_d3le})
-		target_link_libraries(d3le ${DOOM3BINARY})
-	endif()
-
+	add_library(d3le SHARED ${src_d3le})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_d3le})
 	#set_target_properties(d3le PROPERTIES PREFIX "")
 	set_target_properties(d3le PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_D3LE")
 	target_include_directories(d3le PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/d3le")
 	set_target_properties(d3le PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3le PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(d3le idlib)
 
 	install(TARGETS d3le
 			RUNTIME DESTINATION "${bindir}"
@@ -1590,20 +1581,14 @@ if(D3LE)
 endif()
 
 if(CDOOM)
-	if(ANDROID)
-		add_library(cdoom SHARED ${src_cdoom})
-		target_link_libraries(cdoom idlib)
-	else()
-		add_executable(cdoom ${src_cdoom})
-		target_link_libraries(cdoom ${DOOM3BINARY})
-	endif()
-
+	add_library(cdoom SHARED ${src_cdoom})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_cdoom})
 	#set_target_properties(cdoom PROPERTIES PREFIX "")
 	set_target_properties(cdoom PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_CDOOM")
 	target_include_directories(cdoom PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/cdoom")
 	set_target_properties(cdoom PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(cdoom PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(cdoom idlib)
 
 	install(TARGETS cdoom
 			RUNTIME DESTINATION "${bindir}"
@@ -1613,20 +1598,14 @@ if(CDOOM)
 endif()
 
 if(RIVENSIN)
-	if(ANDROID)
-		add_library(rivensin SHARED ${src_rivensin})
-		target_link_libraries(rivensin idlib)
-	else()
-		add_executable(rivensin ${src_rivensin})
-		target_link_libraries(rivensin ${DOOM3BINARY})
-	endif()
-
+	add_library(rivensin SHARED ${src_rivensin})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_rivensin})
 	#set_target_properties(rivensin PROPERTIES PREFIX "")
 	set_target_properties(rivensin PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RIVENSIN;_DENTONMOD;_PORTALSKY;_HDR")
 	target_include_directories(rivensin PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/rivensin")
 	set_target_properties(rivensin PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(rivensin PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(rivensin idlib)
 
 	install(TARGETS rivensin
 			RUNTIME DESTINATION "${bindir}"
@@ -1636,20 +1615,14 @@ if(RIVENSIN)
 endif()
 
 if(HARDCORPS)
-	if(ANDROID)
-		add_library(hardcorps SHARED ${src_hardcorps})
-		target_link_libraries(hardcorps idlib)
-	else()
-		add_executable(hardcorps ${src_hardcorps})
-		target_link_libraries(hardcorps ${DOOM3BINARY})
-	endif()
-
+	add_library(hardcorps SHARED ${src_hardcorps})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hardcorps})
 	#set_target_properties(hardcorps PROPERTIES PREFIX "")
 	set_target_properties(hardcorps PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HARDCORPS;_DENTONMOD;_PORTALSKY;_WATER_PHYSICS")
 	target_include_directories(hardcorps PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/hardcorps")
 	set_target_properties(hardcorps PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(hardcorps PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(hardcorps idlib)
 
 	install(TARGETS hardcorps
 			RUNTIME DESTINATION "${bindir}"
@@ -1659,20 +1632,14 @@ if(HARDCORPS)
 endif()
 
 if(OVERTHINKED)
-	if(ANDROID)
-		add_library(overthinked SHARED ${src_overthinked})
-		target_link_libraries(overthinked idlib)
-	else()
-		add_executable(overthinked ${src_overthinked})
-		target_link_libraries(overthinked ${DOOM3BINARY})
-	endif()
-
+	add_library(overthinked SHARED ${src_overthinked})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_overthinked})
 	#set_target_properties(overthinked PROPERTIES PREFIX "")
 	set_target_properties(overthinked PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_OVERTHINKED;_DENTONMOD;_PORTALSKY")
 	target_include_directories(overthinked PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/overthinked")
 	set_target_properties(overthinked PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(overthinked PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(overthinked idlib)
 
 	install(TARGETS overthinked
 			RUNTIME DESTINATION "${bindir}"
@@ -1682,20 +1649,14 @@ if(OVERTHINKED)
 endif()
 
 if(SABOT)
-	if(ANDROID)
-		add_library(sabot SHARED ${src_sabot})
-		target_link_libraries(sabot idlib)
-	else()
-		add_executable(sabot ${src_sabot})
-		target_link_libraries(sabot ${DOOM3BINARY})
-	endif()
-
+	add_library(sabot SHARED ${src_sabot})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_sabot})
 	#set_target_properties(sabot PROPERTIES PREFIX "")
 	set_target_properties(sabot PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_SABOT;MOD_BOTS;_PORTALSKY;_D3XP;CTF")
 	target_include_directories(sabot PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/sabot")
 	set_target_properties(sabot PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(sabot PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(sabot idlib)
 
 	install(TARGETS sabot
 			RUNTIME DESTINATION "${bindir}"
@@ -1705,20 +1666,14 @@ if(SABOT)
 endif()
 
 if(HEXENEOC)
-	if(ANDROID)
-		add_library(hexeneoc SHARED ${src_hexeneoc})
-		target_link_libraries(hexeneoc idlib)
-	else()
-		add_executable(hexeneoc ${src_hexeneoc})
-		target_link_libraries(hexeneoc ${DOOM3BINARY})
-	endif()
-
+	add_library(hexeneoc SHARED ${src_hexeneoc})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hexeneoc})
 	#set_target_properties(hexeneoc PROPERTIES PREFIX "")
 	set_target_properties(hexeneoc PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_HEXENEOC")
 	target_include_directories(hexeneoc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/hexeneoc")
 	set_target_properties(hexeneoc PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(hexeneoc PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(hexeneoc idlib)
 
 	install(TARGETS hexeneoc
 			RUNTIME DESTINATION "${bindir}"
@@ -1728,20 +1683,14 @@ if(HEXENEOC)
 endif()
 
 if(FRAGGINGFREE)
-	if(ANDROID)
-		add_library(fraggingfree SHARED ${src_fraggingfree})
-		target_link_libraries(fraggingfree idlib)
-	else()
-		add_executable(fraggingfree ${src_fraggingfree})
-		target_link_libraries(fraggingfree ${DOOM3BINARY})
-	endif()
-
+	add_library(fraggingfree SHARED ${src_fraggingfree})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_fraggingfree})
 	#set_target_properties(fraggingfree PROPERTIES PREFIX "")
 	set_target_properties(fraggingfree PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_FRAGGINGFREE;_DENTONMOD;_PORTALSKY")
 	target_include_directories(fraggingfree PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/fraggingfree")
 	set_target_properties(fraggingfree PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(fraggingfree PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(fraggingfree idlib)
 
 	install(TARGETS fraggingfree
 			RUNTIME DESTINATION "${bindir}"
@@ -1782,14 +1731,7 @@ if(RAVEN)
 endif()
 
 if(QUAKE4)
-	if(ANDROID)
-		add_library(q4game SHARED ${src_quake4})
-		target_link_libraries(q4game idlib_raven)
-	else()
-		add_executable(q4game ${src_quake4})
-		target_link_libraries(q4game ${QUAKE4BINARY})
-	endif()
-
+	add_library(q4game SHARED ${src_quake4})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
 	set(q4_compile_definitions "GAME_DLL;_RAVEN;_QUAKE4")
@@ -1805,6 +1747,7 @@ if(QUAKE4)
 	target_include_directories(q4game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/quake4")
 	set_target_properties(q4game PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(q4game PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(q4game idlib_raven)
 
 	install(TARGETS q4game
 			RUNTIME DESTINATION "${bindir}"
@@ -1843,14 +1786,7 @@ if(HUMANHEAD)
 endif()
 
 if(PREY)
-	if(ANDROID)
-		add_library(preygame SHARED ${src_prey})
-		target_link_libraries(preygame idlib_humanhead)
-	else()
-		add_executable(preygame ${src_prey})
-		target_link_libraries(preygame ${PREYBINARY})
-	endif()
-
+	add_library(preygame SHARED ${src_prey})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_prey})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
 	set(prey_compile_definitions "GAME_DLL;_HUMANHEAD;HUMANHEAD;_PREY")
@@ -1862,6 +1798,7 @@ if(PREY)
 	target_include_directories(preygame PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/prey")
 	set_target_properties(preygame PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(preygame PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(preygame idlib_humanhead)
 
 	install(TARGETS preygame
 			RUNTIME DESTINATION "${bindir}"

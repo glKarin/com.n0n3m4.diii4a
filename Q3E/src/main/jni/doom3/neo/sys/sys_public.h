@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 // Linux
 #ifdef __linux__
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: Android arch defines
 
 #if defined(__i386__)
 #define	BUILD_STRING				"android-x86"
@@ -61,15 +61,6 @@ If you have questions concerning this license or the applicable additional terms
 #define BUILD_OS_ID					2
 #endif
 
-#ifdef _MULTITHREAD
-#define RENDER_THREAD_NAME "render_thread"
-#if 0
-#define IN_RENDER_THREAD() (!idStr::Icmp(RENDER_THREAD_NAME, Sys_GetThreadName()))
-#else
-extern bool Sys_InRenderThread(void);
-#define IN_RENDER_THREAD() Sys_InRenderThread()
-#endif
-#endif
 #else
 
 #if defined(__i386__)
@@ -89,6 +80,16 @@ extern bool Sys_InRenderThread(void);
 #define CPUSTRING					"arm"
 #endif
 
+#endif
+
+#ifdef _MULTITHREAD
+#define RENDER_THREAD_NAME "render_thread"
+#if 0
+#define IN_RENDER_THREAD() (!idStr::Icmp(RENDER_THREAD_NAME, Sys_GetThreadName()))
+#else
+extern bool Sys_InRenderThread(void);
+#define IN_RENDER_THREAD() Sys_InRenderThread()
+#endif
 #endif
 
 #if 0 //#ifdef _K_DEV
@@ -477,7 +478,7 @@ typedef struct {
 	const char 	*name;
 	intptr_t	threadHandle;
 	size_t		threadId;
-#ifdef __ANDROID__
+#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
 	bool		threadCancel;
 #endif
 } xthreadInfo;
@@ -608,14 +609,7 @@ void Sys_FreeOpenAL(void);
 #define __FUNCLINE__ ( __FUNCTION__ " " __LINESTR__ )
 #endif
 
-extern float analogx;
-extern float analogy;
-extern int analogenabled;
-
-extern int screen_width;
-extern int screen_height;
-
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: sys::public expose on Android
 //n0n3m4
 
 #ifndef _ANDROID_PACKAGE_NAME
@@ -624,6 +618,13 @@ extern int screen_height;
 #endif
 #define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
 
+extern float analogx;
+extern float analogy;
+extern int analogenabled;
+
+extern int screen_width;
+extern int screen_height;
+
 extern bool multithreadActive;
 
 extern char *native_library_dir;
@@ -631,6 +632,7 @@ extern bool no_handle_signals;
 
 FILE * Sys_tmpfile(void);
 void Sys_SyncState(void);
+void AndroidSetResolution(int32_t width, int32_t height);
 #endif
 
 #endif /* !__SYS_PUBLIC__ */

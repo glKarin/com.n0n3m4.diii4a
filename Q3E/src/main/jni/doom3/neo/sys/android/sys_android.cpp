@@ -1,5 +1,5 @@
-#ifdef __ANDROID__
-// Android functions
+/* Android functions */
+
 #include "../../framework/Session_local.h"
 
 #define STATE_NONE 0
@@ -91,4 +91,24 @@ char * Android_GetClipboardData(void)
     return ptr;
 }
 
-#endif
+void AndroidSetResolution(int32_t width, int32_t height)
+{
+    cvarSystem->SetCVarBool("r_fullscreen",  true);
+    cvarSystem->SetCVarInteger("r_mode", -1);
+
+    cvarSystem->SetCVarInteger("r_customWidth", width);
+    cvarSystem->SetCVarInteger("r_customHeight", height);
+
+    float r = (float) width / (float) height;
+
+    if (r > 1.7f) {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
+    } else if (r > 1.55f) {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
+    } else {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
+    }
+
+    Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
+               -1, width, height);
+}

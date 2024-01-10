@@ -12,8 +12,8 @@ import java.util.Date;
  */
 public final class Constants
 {
-    public static final int CONST_UPDATE_RELEASE = 37;
-    public static final String CONST_RELEASE = "2024-01-06";
+    public static final int CONST_UPDATE_RELEASE = 38;
+    public static final String CONST_RELEASE = "2024-01-10";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -28,10 +28,7 @@ public final class Constants
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
 	public static final String[] CONST_CHANGES = {
-            "Fixed on-screen buttons initial keycodes.",
-            "On-screen slider button can setup clickable.",
-            "Add dds screenshot support.",
-            "Add cvar `r_scaleMenusTo43` for 4:3 menu.",
+            "Support level loading finished pause(cvar `com_skipLevelLoadPause`) in Quake4.",
 	};
 
     public static long GetBuildTimestamp()

@@ -872,7 +872,7 @@ const char *idFileSystemLocal::BuildOSPath(const char *base, const char *game, c
 
 		if (testPath.HasUpper()) {
 
-#if defined(__ANDROID__) && !defined(_K_DEV)
+#if !defined(__ANDROID__) //karin: do not print on Android
 			common->Warning("Non-portable: path contains uppercase characters: %s", testPath.c_str());
 #endif
 
@@ -4578,7 +4578,7 @@ idFile *idFileSystemLocal::MakeTemporaryFile(void)
 
 	if (!f) {
 		common->Warning("idFileSystem::MakeTemporaryFile failed: %s", strerror(errno));
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: tmpfile always return NULL on Android
 		f = Sys_tmpfile();
 #else
 		return NULL;

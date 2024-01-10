@@ -527,30 +527,6 @@ all renderSystem functions will still operate properly, notably the material
 and model information functions.
 ==================
 */
-#ifdef __ANDROID__
-static void AndroidSetResolution(int32_t width, int32_t height)
-{
-	cvarSystem->SetCVarBool("r_fullscreen",  true);
-	cvarSystem->SetCVarInteger("r_mode", -1);
-
-	cvarSystem->SetCVarInteger("r_customWidth", width);
-	cvarSystem->SetCVarInteger("r_customHeight", height);
-
-	float r = (float) width / (float) height;
-
-	if (r > 1.7f) {
-		cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
-	} else if (r > 1.55f) {
-		cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
-	} else {
-		cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
-	}
-
-	Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
-	           -1, width, height);
-}
-#endif
-
 void R_InitOpenGL(void)
 {
 	GLint			temp;
@@ -570,7 +546,7 @@ void R_InitOpenGL(void)
 	//
 	// initialize OS specific portions of the renderSystem
 	//
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: force setup resolution on Android
 	AndroidSetResolution(screen_width, screen_height);
 #endif
 	for (i = 0 ; i < 2 ; i++) {
@@ -1924,7 +1900,7 @@ R_SetColorMappings
 */
 void R_SetColorMappings(void)
 {
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) //karin: r_brightness on Android
 	int		i, j;
 	float	g, b;
 	int		inf;

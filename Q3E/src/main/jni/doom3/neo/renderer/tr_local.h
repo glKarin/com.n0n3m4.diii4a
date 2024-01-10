@@ -2101,7 +2101,7 @@ extern idCVar harm_r_translucentStencilShadow;
 extern idCVar harm_r_stencilShadowAlpha;
 #endif
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: r_brightness on Android
 extern float RB_overbright;
 #endif
 
