@@ -13,6 +13,7 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 ### Feature
+* Linux build(testing)
 * multi-threading renderer
 * png/dds texture image
 * jpeg/png/bmp/dds format of screenshot
@@ -94,6 +95,9 @@ Tag with `-free` only for F-Droid update.
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" width="50%" alt="Quake IV">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" width="50%" alt="Prey(2006)">
 
+> Quake 4 on Debian
+
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/Quake4_on_Debian.png" alt="Quake 4 on Debian">
 ----------------------------------------------------------------------------------
 
 ### Changes:
