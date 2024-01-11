@@ -558,10 +558,13 @@ int GLES_Init(glimpParms_t ap)
 	Window root;
 
 	root = RootWindow( dpy, scrnum );
+	
+	actualWidth = glConfig.vidWidth;
+	actualHeight = glConfig.vidHeight;
 
 	// window attributes
 	int blackColour = BlackPixel(dpy, scrnum);
-	win = XCreateSimpleWindow(dpy, /* root */DefaultRootWindow(dpy), 0, 0, 1, 1, 0, blackColour, blackColour);
+	win = XCreateSimpleWindow(dpy, /* root */DefaultRootWindow(dpy), 0, 0, actualWidth, actualHeight, 0, blackColour, blackColour);
 
 	XWindowAttributes WinAttr;
 	int XResult = BadImplementation;
@@ -602,8 +605,6 @@ int GLES_Init(glimpParms_t ap)
 		}
 	}
 
-	actualWidth = glConfig.vidWidth;
-	actualHeight = glConfig.vidHeight;
 	eglConfig = configs[0];
 
 	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_NATIVE_VISUAL_ID, &format);
