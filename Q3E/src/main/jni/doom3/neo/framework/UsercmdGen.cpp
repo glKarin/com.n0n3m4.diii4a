@@ -607,6 +607,7 @@ void idUsercmdGenLocal::KeyMove(void)
 	forward += KEY_MOVESPEED * ButtonState(UB_FORWARD);
 	forward -= KEY_MOVESPEED * ButtonState(UB_BACK);
 
+#ifdef __ANDROID__ //karin: joystick smooth movement on Android
 	//ANALOG
 	if (analogenabled)
 	{
@@ -614,6 +615,7 @@ void idUsercmdGenLocal::KeyMove(void)
 	forward = (int)(KEY_MOVESPEED * analogy);
 	}
 	//END
+#endif
 
 	cmd.forwardmove = idMath::ClampChar(forward);
 	cmd.rightmove = idMath::ClampChar(side);

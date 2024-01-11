@@ -44,6 +44,12 @@ idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEG
 
 #define MAX_NUM_CONFIGS 4
 
+Display *dpy = NULL;
+static int scrnum = 0;
+Window win = 0;
+
+bool dga_found = false;
+
 static EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 static EGLSurface eglSurface = EGL_NO_SURFACE;
 static EGLContext eglContext = EGL_NO_CONTEXT;
@@ -81,6 +87,11 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 
 	if(exit)
 		common->Error("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+}
+
+void CheckEGLInitialized(void)
+{
+	// TODO
 }
 
 void GLimp_WakeBackEnd(void *a)
@@ -207,6 +218,8 @@ void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned
 
 void GLimp_Shutdown()
 {
+	assert( dpy );
+
 	//has_gl_context = false;
 	GLimp_DeactivateContext();
 	//eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -227,6 +240,13 @@ void GLimp_Shutdown()
 	}
 	GLimp_dlclose();
 
+	XDestroyWindow( dpy, win );
+
+	XFlush( dpy );
+
+	dpy = NULL;
+	win = 0;
+
 	Sys_Printf("[Harmattan]: EGL destroyed.\n");
 }
 
@@ -235,8 +255,30 @@ void GLimp_SwapBuffers()
 	eglSwapBuffers(eglDisplay, eglSurface);
 }
 
+/*
+** XErrorHandler
+**   the default X error handler exits the application
+**   I found out that on some hosts some operations would raise X errors (GLXUnsupportedPrivateRequest)
+**   but those don't seem to be fatal .. so the default would be to just ignore them
+**   our implementation mimics the default handler behaviour (not completely cause I'm lazy)
+*/
+int idXErrorHandler(Display * l_dpy, XErrorEvent * ev) {
+	char buf[1024];
+	common->Printf( "Fatal X Error:\n" );
+	common->Printf( "  Major opcode of failed request: %d\n", ev->request_code );
+	common->Printf( "  Minor opcode of failed request: %d\n", ev->minor_code );
+	common->Printf( "  Serial number of failed request: %lu\n", ev->serial );
+	XGetErrorText( l_dpy, ev->error_code, buf, 1024 );
+	common->Printf( "%s\n", buf );
+	return 0;
+}
+
 bool GLimp_OpenDisplay(void)
 {
+	if ( dpy ) {
+		return true;
+	}
+
 	if(eglDisplay) {
 		return true;
 	}
@@ -246,12 +288,21 @@ bool GLimp_OpenDisplay(void)
 		return false;
 	}
 
-	common->Printf( "Setup EGL display connection\n" );
- 
-	if ( !( eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY) ) ) {
-		common->Printf( "Couldn't open the EGL display\n" );
+	// that should be the first call into X
+	if ( !XInitThreads() ) {
+		common->Printf("XInitThreads failed\n");
 		return false;
 	}
+
+	// set up our custom error handler for X failures
+	XSetErrorHandler( &idXErrorHandler );
+
+	if ( !( dpy = XOpenDisplay(NULL) ) ) {
+		common->Printf( "Couldn't open the X display\n" );
+		return false;
+	}
+	scrnum = DefaultScreen( dpy );
+
 	return true;
 }
 
@@ -500,6 +551,40 @@ int GLES_Init(glimpParms_t ap)
 	if (!GLimp_OpenDisplay()) {
 		return false;
 	}
+
+	XSetWindowAttributes attr;
+	XSizeHints sizehints;
+	XVisualInfo *visinfo;
+	Window root;
+
+	root = RootWindow( dpy, scrnum );
+
+	// window attributes
+	int blackColour = BlackPixel(dpy, scrnum);
+	win = XCreateSimpleWindow(dpy, /* root */DefaultRootWindow(dpy), 0, 0, 1, 1, 0, blackColour, blackColour);
+
+	XWindowAttributes WinAttr;
+	int XResult = BadImplementation;
+
+	if (!(XResult = XGetWindowAttributes(dpy, win, &WinAttr)))
+		;
+
+	XSelectInput(dpy, win, X_MASK);
+
+	XStoreName(dpy, win, GAME_NAME);
+
+	XMapWindow( dpy, win );
+
+	XFlush(dpy);
+	XSync(dpy, False);
+
+	common->Printf( "Setup EGL display connection\n" );
+
+	if ( !( eglDisplay = eglGetDisplay(dpy) ) ) {
+		common->Printf( "Couldn't open the EGL display\n" );
+		return false;
+	}
+
 	if (!eglInitialize(eglDisplay, &major, &minor))
 	{
 		GLimp_HandleError("eglInitialize");

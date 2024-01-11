@@ -4,11 +4,11 @@ project(doom3)
 if(ANDROID)
 	add_definitions(-D__ANDROID__)
 	add_definitions(-D_NO_PTHREAD_CANCEL)
+	add_definitions(-DID_ENABLE_CURL=1)
 endif()
 
 add_definitions(-D_K_CLANG) # TODO
 
-add_definitions(-DID_ENABLE_CURL=1)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CORE_DEFINES "__DOOM_DLL__;NO_ALSA")
@@ -1399,8 +1399,11 @@ else()
 	set(src_sys_base
 		${src_sys_base}
 		sys/linux/main.cpp
-		sys/linux/gles2.cpp
 		sys/linux/input.cpp
+		sys/linux/sound.cpp
+	)
+	set(src_sys_core
+		sys/linux/gles2.cpp
 	)
 endif()
 
@@ -1495,12 +1498,22 @@ message(STATUS "-l(static): ${local_libs}")
 #message(FATAL_ERROR "${CMAKE_SIZEOF_VOID_P} stop!!!!!!!!!!!!!!!!!!!!")
 
 if(CORE)
-	add_library(${DOOM3BINARY} SHARED
-		${src_core}
-		${src_sys_base}
-		${src_sys_core}
-		${src_editor_tools}
-	)
+	if(ANDROID)
+		add_library(${DOOM3BINARY} SHARED
+				${src_core}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	else()
+		set(DOOM3BINARY "Doom3")
+		add_executable(${DOOM3BINARY}
+				${src_core_humanhead}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
@@ -1698,13 +1711,23 @@ if(FRAGGINGFREE)
 endif()
 
 if(RAVEN)
-	set(QUAKE4BINARY "${DOOM3BINARY}_raven")
-	add_library(${QUAKE4BINARY} SHARED
-			${src_core_raven}
-			${src_sys_base}
-			${src_sys_core}
-			${src_editor_tools}
-			)
+	if(ANDROID)
+		set(QUAKE4BINARY "${DOOM3BINARY}_raven")
+		add_library(${QUAKE4BINARY} SHARED
+				${src_core_raven}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	else()
+		set(QUAKE4BINARY "Quake4")
+		add_executable(${QUAKE4BINARY}
+				${src_core_raven}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+		)
+	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
@@ -1757,13 +1780,23 @@ endif()
 
 
 if(HUMANHEAD)
-	set(PREYBINARY "${DOOM3BINARY}_humanhead")
-	add_library(${PREYBINARY} SHARED
-			${src_core_humanhead}
-			${src_sys_base}
-			${src_sys_core}
-			${src_editor_tools}
-			)
+	if(ANDROID)
+		set(PREYBINARY "${DOOM3BINARY}_humanhead")
+		add_library(${PREYBINARY} SHARED
+				${src_core_humanhead}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	else()
+		set(PREYBINARY "Prey")
+		add_executable(${PREYBINARY}
+				${src_core_humanhead}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_humanhead} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 

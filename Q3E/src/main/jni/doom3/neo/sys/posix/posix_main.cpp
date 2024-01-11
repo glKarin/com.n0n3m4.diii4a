@@ -499,15 +499,19 @@ void Sys_Sleep(int msec)
 char *Sys_GetClipboardData(void)
 {
 	// Sys_Printf("TODO: Sys_GetClipboardData\n");
+#ifdef __ANDROID__ //karin: from JNI
 	extern char * Android_GetClipboardData(void);
 	return Android_GetClipboardData();
+#endif
 }
 
 void Sys_SetClipboardData(const char *string)
 {
 	// Sys_Printf("TODO: Sys_SetClipboardData\n");
+#ifdef __ANDROID__ //karin: from JNI
 	extern void Android_SetClipboardData(const char *text);
 	Android_SetClipboardData(string);
+#endif
 }
 
 

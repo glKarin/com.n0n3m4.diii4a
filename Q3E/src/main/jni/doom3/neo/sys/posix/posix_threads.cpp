@@ -292,7 +292,12 @@ Posix_StartAsyncThread
 void Posix_StartAsyncThread()
 {
 	if (asyncThread.threadHandle == 0) {
+#if !defined(__ANDROID__)
+		extern void Sys_AsyncThread( void );
+		Sys_CreateThread((xthread_t) Sys_AsyncThread, &asyncThread, THREAD_NORMAL, asyncThread, "Async", g_threads, &g_thread_count);
+#else
 		Sys_CreateThread(Sys_AsyncThread, &asyncThread, THREAD_NORMAL, asyncThread, "Async", g_threads, &g_thread_count);
+#endif
 	} else {
 		common->Printf("Async thread already running\n");
 	}

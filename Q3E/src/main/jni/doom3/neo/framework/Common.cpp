@@ -3000,15 +3000,28 @@ void idCommonLocal::LoadGameDLL(void)
 		}
 	}
 #else //karin: other platform load game{arch}.dll/game{arch}.so
-	fileSystem->FindDLL("game", dllPath, true);
+    idStr dllFile("./");
+    const char *fs_game = cvarSystem->GetCVarString("fs_game");
+    if(!fs_game || !fs_game[0])
+        fs_game = BASE_GAMEDIR;
+    common->Printf("[Harmattan]: Load game from %s......\n", fs_game);
+    dllFile.AppendPath(fs_game);
+    dllFile.AppendPath("libgame.so");
+    gameDLL = sys->DLL_Load(dllFile);
+    common->Printf("[Harmattan]: Load game dynamic library `%s` %p!\n", dllFile.c_str(), gameDLL);
 
-	if (!dllPath[ 0 ]) {
-		common->FatalError("couldn't find game dynamic library");
-		return;
-	}
+    if(!gameDLL)
+    {
+        fileSystem->FindDLL("game", dllPath, true);
 
-	common->DPrintf("Loading game DLL: '%s'\n", dllPath);
-	gameDLL = sys->DLL_Load(dllPath);
+        if (!dllPath[ 0 ]) {
+            common->FatalError("couldn't find game dynamic library");
+            return;
+        }
+
+        common->DPrintf("Loading game DLL: '%s'\n", dllPath);
+        gameDLL = sys->DLL_Load(dllPath);
+    }
 #endif
 
 	if (!gameDLL) {

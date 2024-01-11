@@ -34,7 +34,11 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/mman.h>
 // OSS sound interface
 // http://www.opensound.com/
+#if 1 // TODO
+#include "oss/include/sys/soundcard.h"
+#else
 #include <sys/soundcard.h>
+#endif
 
 #include "../../idlib/precompiled.h"
 #include "../../sound/snd_local.h"
@@ -279,7 +283,7 @@ bool idAudioHardwareOSS::Initialize( ) {
 	}
 	// instead of an exact match, do a very close to
 	// there is some horrible Ensonic ES1371 which replies 44101 for a 44100 request
-	if ( abs( m_speed - PRIMARYFREQ ) > 5 ) {
+	if ( abs( (int)m_speed - PRIMARYFREQ ) > 5 ) {
 		common->Warning( "ioctl SNDCTL_DSP_SPEED failed to get the requested frequency %d, got %d", PRIMARYFREQ, m_speed );
 		InitFailed();
 		return false;
@@ -374,7 +378,7 @@ void idAudioHardwareOSS::Write( bool flushing ) {
 		return;
 	}
 	// what to write and how much
-	int pos = (int)m_buffer + ( MIXBUFFER_CHUNKS - m_writeChunks ) * m_channels * 2 * MIXBUFFER_SAMPLES / MIXBUFFER_CHUNKS;
+	intptr_t pos = (intptr_t)m_buffer + ( MIXBUFFER_CHUNKS - m_writeChunks ) * m_channels * 2 * MIXBUFFER_SAMPLES / MIXBUFFER_CHUNKS;
 	int len = Min( m_writeChunks, m_freeWriteChunks ) * m_channels * 2 * MIXBUFFER_SAMPLES / MIXBUFFER_CHUNKS;
 	assert( len > 0 );
 	if ( ( ret = write( m_audio_fd, (void*)pos, len ) ) == -1 ) {
