@@ -109,8 +109,10 @@ punctuation_t default_punctuations[] = {
 	{"$",P_DOLLAR},
 #ifdef _RAVEN
 	// RAVEN BEGIN
+#if defined(__arm__) || defined(__aarch64__) //karin: not ascii, only in char is unsigned, else seg fault. TODO precheck
  {"¡",P_INVERTED_PLING},
  {"¿",P_INVERTED_QUERY},
+#endif
  // RAVEN END
 #endif
 	{NULL, 0}
