@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(doom3)
 
-option(ANDROID "Android build" ON)
-
 if(ANDROID)
 	add_definitions(-D__ANDROID__)
 	add_definitions(-D_NO_PTHREAD_CANCEL)

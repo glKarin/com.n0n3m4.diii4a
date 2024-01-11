@@ -2057,6 +2057,11 @@ void idSessionLocal::HandleLoadingCommands(const char *menuCommand)
 			mapSpawned = true;
 			Sys_ClearEvents();
 
+			const char *mapName = mapSpawnData.serverInfo.GetString("si_map", mapName);
+			if (!mapSpawnData.serverInfo.GetBool("devmap")) {
+				// Autosave at the beginning of the level
+				SaveGame(GetAutoSaveName(mapName), true);
+			}
 			SetGUI(NULL, NULL);
 			continue;
 		}

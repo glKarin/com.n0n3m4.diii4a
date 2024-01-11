@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.4.1)
 project(doom3)
 
 add_definitions(-D__ANDROID__)
-set(ANDROID ON)
+option(ANDROID "Android build" ON)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.

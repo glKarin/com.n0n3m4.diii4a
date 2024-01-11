@@ -1499,17 +1499,21 @@ void idSessionLocal::MoveToNewMap(const char *mapName)
 
 	ExecuteMapChange();
 
-	if (!mapSpawnData.serverInfo.GetBool("devmap")) {
-		// Autosave at the beginning of the level
-		SaveGame(GetAutoSaveName(mapName), true);
-	}
-
 #ifdef _RAVEN //karin: pause when finished loading
-	if(!com_skipLevelLoadPause.GetBool())
+    if(!com_skipLevelLoadPause.GetBool())
 		SetGUI(guiLoading, NULL);
 	else
+    {
 #endif
-	SetGUI(NULL, NULL);
+    if (!mapSpawnData.serverInfo.GetBool("devmap")) {
+        // Autosave at the beginning of the level
+        SaveGame(GetAutoSaveName(mapName), true);
+    }
+
+    SetGUI(NULL, NULL);
+#ifdef _RAVEN
+    }
+#endif
 }
 
 /*
@@ -2639,13 +2643,6 @@ bool idSessionLocal::LoadGame(const char *saveName)
 
 		ExecuteMapChange();
 
-#if 0 //karin: when load game, goto game directly
-#ifdef _RAVEN
-		if(!com_skipLevelLoadPause.GetBool())
-			SetGUI(guiLoading, NULL);
-		else
-#endif
-#endif
 		SetGUI(NULL, NULL);
 	}
 
