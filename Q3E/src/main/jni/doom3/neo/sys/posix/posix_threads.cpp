@@ -336,3 +336,27 @@ void Posix_InitPThreads()
 	}
 }
 
+#ifdef _MULTITHREAD
+bool Sys_InThread(const xthreadInfo *thread)
+{
+#if 0
+	return (!idStr::Icmp(thread->name, Sys_GetThreadName()));
+#else
+	return thread->threadHandle && pthread_equal(thread->threadHandle, pthread_self()) != 0;
+#endif
+}
+
+intptr_t Sys_GetMainThread(void)
+{
+	return pthread_self();
+}
+
+bool Sys_ThreadIsRunning(const xthreadInfo *thread)
+{
+#ifdef _NO_PTHREAD_CANCEL
+	return (thread->threadHandle && !thread->threadCancel);
+#else
+	return (thread->threadHandle);
+#endif
+}
+#endif

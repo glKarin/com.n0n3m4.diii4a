@@ -82,16 +82,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif
 
-#ifdef _MULTITHREAD
-#define RENDER_THREAD_NAME "render_thread"
-#if 0
-#define IN_RENDER_THREAD() (!idStr::Icmp(RENDER_THREAD_NAME, Sys_GetThreadName()))
-#else
-extern bool Sys_InRenderThread(void);
-#define IN_RENDER_THREAD() Sys_InRenderThread()
-#endif
-#endif
-
 #if 0 //#ifdef _K_DEV
 #define _alloca( x )							(Sys_Printf("_alloca(%d)\n", x),alloca( x ))
 #define _alloca16( x )					(Sys_Printf("_alloca16(%d)\n", x),((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15)))
@@ -625,14 +615,22 @@ extern int analogenabled;
 extern int screen_width;
 extern int screen_height;
 
-extern bool multithreadActive;
-
 extern char *native_library_dir;
 extern bool no_handle_signals;
 
 FILE * Sys_tmpfile(void);
 void Sys_SyncState(void);
 void AndroidSetResolution(int32_t width, int32_t height);
+#endif
+
+#ifdef _MULTITHREAD
+bool Sys_InThread(const xthreadInfo *thread);
+bool Sys_ThreadIsRunning(const xthreadInfo *thread);
+#ifdef _NO_PTHREAD_CANCEL
+#define THREAD_CANCELED(x) (x).threadCancel
+#else
+#define THREAD_CANCELED(x) false
+#endif
 #endif
 
 #endif /* !__SYS_PUBLIC__ */

@@ -640,9 +640,6 @@ static char **argv = NULL;
 // game main thread
 static pthread_t				main_thread;
 
-// multi-thread
-bool multithreadActive = false;
-
 // enable redirect stdout/stderr to file
 static bool redirect_output_to_file = true;
 
@@ -658,91 +655,9 @@ extern void GLimp_DeactivateContext();
 
 
 #ifdef _MULTITHREAD
-volatile bool backendThreadShutdown = false;
-
-#ifdef _NO_PTHREAD_CANCEL
-#define RENDER_THREAD_STARTED() (render_thread.threadHandle && !render_thread.threadCancel)
-#else
-#define RENDER_THREAD_STARTED() (render_thread.threadHandle)
+extern bool multithreadActive;
+extern bool Sys_ShutdownRenderThread(void);
 #endif
-
-// render thread
-static xthreadInfo				render_thread = {0};
-static volatile bool render_thread_finished = false;
-
-extern void BackendThreadWait();
-extern void BackendThreadTask();
-
-const xthreadInfo * Sys_GetRenderThread(void)
-{
-	return &render_thread;
-}
-
-intptr_t Sys_GetMainThread(void)
-{
-	return main_thread;
-}
-
-bool Sys_InRenderThread(void)
-{
-	return render_thread.threadHandle && pthread_equal(render_thread.threadHandle, pthread_self()) != 0;
-}
-
-bool Sys_InMainThread(void)
-{
-	return main_thread && pthread_equal(main_thread, pthread_self()) != 0;
-}
-
-void BackendThreadShutdown(void)
-{
-	if(!multithreadActive)
-		return;
-	if (!RENDER_THREAD_STARTED())
-		return;
-	BackendThreadWait();
-	backendThreadShutdown = true;
-	Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
-	Sys_DestroyThread(render_thread);
-	while(!render_thread_finished)
-		Sys_WaitForEvent(TRIGGER_EVENT_RENDER_THREAD_FINISHED);
-	GLimp_ActivateContext();
-	common->Printf("[Harmattan]: Render thread shutdown -> %s\n", RENDER_THREAD_NAME);
-}
-
-static void * BackendThread(void *data)
-{
-	render_thread_finished = false;
-	Sys_Printf("[Harmattan]: Enter doom3 render thread -> %s\n", Sys_GetThreadName());
-	GLimp_ActivateContext();
-	while(true)
-	{
-		BackendThreadTask();
-		if(
-#ifdef _NO_PTHREAD_CANCEL
-				render_thread.threadCancel ||
-#endif
-				backendThreadShutdown)
-			break;
-	}
-	GLimp_DeactivateContext();
-	Sys_Printf("[Harmattan]: Leave doom3 render thread -> %s\n", RENDER_THREAD_NAME);
-	render_thread_finished = true;
-	Sys_TriggerEvent(TRIGGER_EVENT_RENDER_THREAD_FINISHED);
-	return 0;
-}
-
-void BackendThreadExecute(void)
-{
-	if(!multithreadActive)
-		return;
-	if (RENDER_THREAD_STARTED())
-		return;
-	GLimp_DeactivateContext();
-	backendThreadShutdown = false;
-	Sys_CreateThread(BackendThread, common, THREAD_HIGHEST, render_thread, RENDER_THREAD_NAME, g_threads, &g_thread_count);
-	common->Printf("[Harmattan]: Render thread start -> %lu(%s)\n", render_thread.threadHandle, RENDER_THREAD_NAME);
-}
-#endif // end _MULTITHREAD
 
 static void Q3E_PrintInitialContext(void)
 {
@@ -792,11 +707,7 @@ void CheckEGLInitialized(void)
     {
 #ifdef _MULTITHREAD
         // shutdown render thread
-        if(multithreadActive)
-        {
-            Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
-            BackendThreadShutdown();
-        }
+		Sys_ShutdownRenderThread();
 #endif
         if(window) // if set new window, create EGLSurface
         {
@@ -1019,7 +930,9 @@ void Q3E_SetInitialContext(const void *context)
 	native_library_dir = strdup(ptr->nativeLibraryDir);
 	redirect_output_to_file = ptr->redirectOutputToFile ? true : false;
 	no_handle_signals = ptr->noHandleSignals ? true : false;
+#ifdef _MULTITHREAD
 	multithreadActive = ptr->multithread ? true : false;
+#endif
 	continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
 }
 

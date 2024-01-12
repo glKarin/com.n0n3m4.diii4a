@@ -35,10 +35,11 @@ If you have questions concerning this license or the applicable additional terms
 #define MAX_WARNING_LIST	256
 
 #ifdef _MULTITHREAD
+extern bool multithreadActive;
+extern bool Sys_InRenderThread(void);
 #ifdef _K_DEV
 #define _HARM_DEBUG_MULTITHREAD
 #endif
-#include <pthread.h>
 #endif
 
 typedef enum {
@@ -483,7 +484,7 @@ void idCommonLocal::VPrintf(const char *fmt, va_list args)
 		// update the console if we are in a long-running command, like dmap
 		if (com_refreshOnPrint) {
 #ifdef _MULTITHREAD
-			if(!multithreadActive/* || !IN_RENDER_THREAD()*/)
+			if(!multithreadActive/* || !Sys_InRenderThread()*/)
 #endif
 			session->UpdateScreen();
 		}
@@ -3204,6 +3205,15 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 
 		// override cvars from command line
 		StartupVariable(NULL, false);
+#ifdef _MULTITHREAD
+#if !defined(__ANDROID__)
+		multithreadActive = cvarSystem->GetCVarBool("harm_r_multithread");
+		if(multithreadActive)
+			Sys_Printf("[Harmattan]: Enable multi-threading rendering\n");
+		else
+			Sys_Printf("[Harmattan]: Disable multi-threading rendering\n");
+#endif
+#endif
 
 		if (!idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning()) {
 			Sys_Quit();

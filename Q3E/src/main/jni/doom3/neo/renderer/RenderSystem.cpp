@@ -33,15 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 idRenderSystemLocal	tr;
 idRenderSystem	*renderSystem = &tr;
 
-#ifdef _MULTITHREAD
-volatile bool backendFinished = true;
-volatile frameData_t	*fdToRender = NULL;
-volatile int			vertListToRender = 0;
-// These are set if the backend should save pixels
-volatile renderCrop_t	*pixelsCrop = NULL;
-volatile byte           *pixels = NULL;
-#endif
-
 // For FPS limiting
 unsigned int lastRenderTime = 0;
 int r_maxFps = 0;
@@ -180,26 +171,26 @@ static void R_IssueRenderCommands(volatile frameData_t *fd)
 
 static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 {
-	BackendThreadWait();
-	vertListToRender = vertexCache.GetListNum();
-	fdToRender = frameData;
+	renderThread->BackendThreadWait();
+	renderThread->vertListToRender = vertexCache.GetListNum();
+	renderThread->fdToRender = frameData;
 
 	//Save the potential pixel
-	pixelsCrop = pc;
-	pixels = pix;
+	renderThread->pixelsCrop = pc;
+	renderThread->pixels = pix;
 	R_CheckBackEndCvars(); // check backend cvars state
 #ifdef _HUMANHEAD //k: scope view support in multithread
 	backEnd.scopeView = tr.IsScopeView();
 	backEnd.shuttleView = tr.IsShuttleView();
 #endif
 
-	backendFinished = false;
+	renderThread->backendFinished = false;
 
 	CheckEGLInitialized(); // check/wait EGL context
 
 	//if(has_gl_context)
     {
-        BackendThreadExecute();
+        renderThread->BackendThreadExecute();
 
         Sys_TriggerEvent(TRIGGER_EVENT_RUN_BACKEND);
 
@@ -207,7 +198,7 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 
         if(pix)
         {
-            BackendThreadWait();
+            renderThread->BackendThreadWait();
         }
     }
 /*	else
@@ -1163,43 +1154,6 @@ bool idRenderSystemLocal::UploadImage(const char *imageName, const byte *data, i
 }
 
 #ifdef _MULTITHREAD
-void BackendThreadTask(void) // BackendThread -> 
-{
-	// waiting start
-	Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
-	// Purge all images,  Load all images
-	globalImages->HandlePendingImage();
-	// image process finished
-	Sys_TriggerEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
-
-	int backendVertexCache = vertListToRender;
-	vertexCache.BeginBackEnd(backendVertexCache);
-	R_IssueRenderCommands(fdToRender);
-
-	// Take screen shot
-	if(pixels) // if block backend rendering, do not exit backend render function, because it will be swap buffers in GLSurfaceView
-	{
-		qglReadPixels( pixelsCrop->x, pixelsCrop->y, pixelsCrop->width, pixelsCrop->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels );
-		pixels = NULL;
-		pixelsCrop = NULL;
-	}
-
-	vertexCache.EndBackEnd(backendVertexCache);
-	backendFinished = true;
-	Sys_TriggerEvent(TRIGGER_EVENT_BACKEND_FINISHED);
-}
-
-// waiting backend render finished
-void BackendThreadWait(void)
-{
-	while(/*multithreadActive &&*/ !backendFinished)
-    {
-        //usleep(1000 * 3);
-        Sys_WaitForEvent(TRIGGER_EVENT_BACKEND_FINISHED);
-        //usleep(500);
-    }
-}
-
 void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMsec)
 {
 	if(!data)
@@ -1275,4 +1229,6 @@ void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMs
 	}
 
 }
+
+#include "RenderThread.cpp"
 #endif

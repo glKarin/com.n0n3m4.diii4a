@@ -757,6 +757,10 @@ typedef struct {
 } renderCrop_t;
 static const int	MAX_RENDER_CROPS = 8;
 
+#ifdef _MULTITHREAD
+#include "RenderThread.h"
+#endif
+
 /*
 ** Most renderer globals are defined here.
 ** backend functions should never modify any of these fields,
@@ -1997,12 +2001,12 @@ struct idAllocAutoHeap {
 				data = NULL;
 			}
 		}
-		void * operator new(size_t size);
-		void * operator new[](size_t size);
-		void operator delete(void *ptr);
-		void operator delete[](void *ptr);
-		idAllocAutoHeap(const idAllocAutoHeap &other);
-		idAllocAutoHeap & operator=(const idAllocAutoHeap &other);
+		void * operator new(size_t);
+		void * operator new[](size_t);
+		void operator delete(void *);
+		void operator delete[](void *);
+		idAllocAutoHeap(const idAllocAutoHeap &);
+		idAllocAutoHeap & operator=(const idAllocAutoHeap &);
 };
 
 // alloc in heap memory
@@ -2034,14 +2038,6 @@ struct idAllocAutoHeap {
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
 #endif
 
-#ifdef _MULTITHREAD
-#define NUM_FRAME_DATA 2
-
-extern void BackendThreadWait(void); // renderer/RenderSystem
-extern void BackendThreadTask(void); // renderer/RenderSystem
-extern void BackendThreadExecute(void); // sys/android/main
-extern void BackendThreadShutdown(void); // sys/android/main
-#endif
 extern void CheckEGLInitialized(void); // sys/android/main
 //extern volatile bool has_gl_context;
 extern unsigned int lastRenderTime;

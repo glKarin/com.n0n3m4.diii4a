@@ -8,7 +8,7 @@ if(ANDROID)
 	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA")
 else()
 	# apt-get install libasound2-dev # sound alsa support
-	# apt-get install libgles2-mesa-dev # GLES2/EGL headers
+	# apt-get install libgles-dev # GLES2/GLES3/EGL headers
 endif()
 
 add_definitions(-D_K_CLANG) # TODO
@@ -77,10 +77,10 @@ option(D3XP			"Build the d3xp game code" ON)
 # Extras functions
 if(ANDROID)
 	option(OPENSLES			"OpenSLES support" ON)
-	option(MULTITHREAD			"Multi-Thread support" ON)
 	option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
-	option(OPENGLES3			"OpenGLES3 support" ON)
 endif()
+option(MULTITHREAD			"Multi-Thread support" ON)
+option(OPENGLES3			"OpenGLES3 support" ON)
 option(USING_STB			"Using stb" ON)
 option(SUPPORT_OBJ			"Support obj model" ON)
 option(SUPPORT_DAE			"Support dae model" ON)

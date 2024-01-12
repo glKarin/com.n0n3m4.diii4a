@@ -31,6 +31,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Session_local.h"
 
+#ifdef _MULTITHREAD
+extern bool multithreadActive;
+extern bool Sys_InRenderThread(void);
+#endif
+
 #if defined(_RAVEN) || defined(_HUMANHEAD)
 #include "../ui/Window.h"
 #endif
@@ -2873,7 +2878,7 @@ void idSessionLocal::PacifierUpdate()
 	}
 
 #ifdef _MULTITHREAD
-	if(multithreadActive && IN_RENDER_THREAD()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
+	if(multithreadActive && Sys_InRenderThread()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
 		return;
 #endif
 	int	time = eventLoop->Milliseconds();

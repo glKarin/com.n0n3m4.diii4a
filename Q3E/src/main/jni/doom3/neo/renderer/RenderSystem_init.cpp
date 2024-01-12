@@ -1163,13 +1163,12 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 static void R_Multithreading_f(const idCmdArgs &args)
 {
 	extern intptr_t Sys_GetMainThread(void);
-	extern const xthreadInfo * Sys_GetRenderThread(void);
 
 	common->Printf("[Harmattan]: Multi-Thread current is %s.\n", multithreadActive ? "enabled" : "disabled");
 	common->Printf("             - Main thread handle is %lu.\n", Sys_GetMainThread());
 	//if(multithreadActive)
 	{
-		const xthreadInfo *thread = Sys_GetRenderThread();
+		const xthreadInfo *thread = &renderThread->render_thread;
 		common->Printf("             - Render thread(%s) handle is %lu.\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
 	}
 }
@@ -2026,7 +2025,7 @@ void R_VidRestart_f(const idCmdArgs &args)
 #ifdef _MULTITHREAD
 	if(multithreadActive)
 	{
-		BackendThreadShutdown();
+		renderThread->BackendThreadShutdown();
 		common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
 	}
 #endif
@@ -2353,7 +2352,7 @@ void idRenderSystemLocal::Shutdown(void)
 #ifdef _MULTITHREAD
 	if(multithreadActive)
 	{
-		BackendThreadShutdown();
+		renderThread->BackendThreadShutdown();
 		common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
 	}
 #endif
