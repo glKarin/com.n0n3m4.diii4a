@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #define ID_ALCHAR
-#elif defined(__ANDROID__)
+#elif defined(_OPENAL_SOFT)
 #include "../externlibs/openal-soft/include/AL/al.h"
 #include "../externlibs/openal-soft/include/AL/alc.h"
 #include "../externlibs/openal-soft/include/AL/efx.h"

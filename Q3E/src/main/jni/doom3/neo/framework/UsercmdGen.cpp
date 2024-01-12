@@ -611,8 +611,8 @@ void idUsercmdGenLocal::KeyMove(void)
 	//ANALOG
 	if (analogenabled)
 	{
-	side = (int)(KEY_MOVESPEED * analogx);
-	forward = (int)(KEY_MOVESPEED * analogy);
+		side = (int)(KEY_MOVESPEED * analogx);
+		forward = (int)(KEY_MOVESPEED * analogy);
 	}
 	//END
 #endif

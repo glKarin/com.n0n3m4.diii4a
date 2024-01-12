@@ -3206,7 +3206,7 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 		// override cvars from command line
 		StartupVariable(NULL, false);
 #ifdef _MULTITHREAD
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) //karin: enable multithreading-rendering from command cvar
 		multithreadActive = cvarSystem->GetCVarBool("harm_r_multithread");
 		if(multithreadActive)
 			Sys_Printf("[Harmattan]: Enable multi-threading rendering\n");

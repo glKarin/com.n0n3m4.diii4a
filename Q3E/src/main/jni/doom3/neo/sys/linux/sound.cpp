@@ -392,12 +392,60 @@ void idAudioHardwareOSS::Write( bool flushing ) {
 	m_writeChunks -= Min( m_writeChunks, m_freeWriteChunks );
 }
 
+#ifdef _OPENAL
+#include <dlfcn.h>
+typedef void * HMODULE;
+static HMODULE hOpenAL = NULL;
+#define GetProcAddress( x, a ) Sys_DLL_GetProcAddress((uintptr_t)x, a)
+#include "../../openal/idal.cpp"
+#endif
+
 /*
  ===============
  Sys_LoadOpenAL
  -===============
  */
-bool Sys_LoadOpenAL( void ) {
+bool Sys_LoadOpenAL(void)
+{
+#ifdef _OPENAL
+	const char *sym;
+
+	if ( hOpenAL ) {
+		return true;
+	}
+
+	idStr path("./");
+	path.AppendPath("libopenal.so");
+
+	hOpenAL = dlopen( path.c_str(), RTLD_NOW | RTLD_GLOBAL );
+	if ( !hOpenAL ) {
+		common->Warning( "LoadLibrary %s failed.", path.c_str() );
+		return false;
+	}
+	if ( ( sym = InitializeIDAL( hOpenAL ) ) ) {
+		common->Warning( "GetProcAddress %s failed.", sym );
+		dlclose( hOpenAL );
+		hOpenAL = NULL;
+		return false;
+	}
+	return true;
+#else
 	return false;
+#endif
 }
 
+/*
+===============
+Sys_FreeOpenAL
+===============
+*/
+void Sys_FreeOpenAL(void) {
+#ifdef _OPENAL
+	if ( hOpenAL ) {
+		dlclose( hOpenAL );
+		hOpenAL = NULL;
+	}
+#endif
+}
+
+#undef GetProcAddress

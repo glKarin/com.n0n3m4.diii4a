@@ -352,7 +352,7 @@ endif()
 
 if(OPENAL)
 	add_subdirectory (externlibs/openal-soft)
-	add_definitions(-D_OPENAL -D_OPENAL_EFX)
+	add_definitions(-D_OPENAL -D_OPENAL_EFX -D_OPENAL_SOFT)
 	message(STATUS "Build OpenAL(soft) support")
 endif()
 

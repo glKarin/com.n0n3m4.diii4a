@@ -402,7 +402,7 @@ void idSoundSystemLocal::Init()
 	}
 
 	// set up openal device and context
-#if !defined(__ANDROID__)
+#if !defined(_OPENAL_SOFT)
 	common->StartupVariable("s_useOpenAL", true);
 	common->StartupVariable("s_useEAXReverb", true);
 #endif
@@ -410,13 +410,13 @@ void idSoundSystemLocal::Init()
 #ifdef _OPENAL
 	if (idSoundSystemLocal::s_useOpenAL.GetBool() || idSoundSystemLocal::s_useEAXReverb.GetBool()) {
 		// default all true
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 		idSoundSystemLocal::s_useOpenAL.SetBool(true);
 #endif
 		if (!Sys_LoadOpenAL()) {
 			idSoundSystemLocal::s_useOpenAL.SetBool(false);
             idSoundSystemLocal::s_useEAXReverb.SetBool(false);
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 			EAXAvailable = 0;
 #endif
 		} else {
@@ -552,7 +552,7 @@ void idSoundSystemLocal::Init()
 				// adjust source count to allow for at least eight stereo sounds to play
 				openalSourceCount -= 8;
 
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 				if(idSoundSystemLocal::s_useEAXReverb.GetBool())
 #endif
 				EAXAvailable = 1;
