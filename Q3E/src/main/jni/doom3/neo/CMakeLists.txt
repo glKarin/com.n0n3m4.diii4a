@@ -1,14 +1,18 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(doom3)
 
+set(CORE_DEFINES "__DOOM_DLL__")
 if(ANDROID)
 	add_definitions(-D__ANDROID__)
 	add_definitions(-D_NO_PTHREAD_CANCEL)
-	add_definitions(-DID_ENABLE_CURL=1)
-	message(STATUS "Android build")
+	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA")
+else()
+	# apt-get install libasound2-dev # sound alsa support
+	# apt-get install libgles2-mesa-dev # GLES2/EGL headers
 endif()
 
 add_definitions(-D_K_CLANG) # TODO
+add_definitions(-DID_ENABLE_CURL=1)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -1307,7 +1311,16 @@ add_globbed_headers(src_curl "externlibs/curl/lib")
 include_directories("externlibs/curl/lib")
 include_directories("externlibs/curl/include")
 add_library(curl STATIC ${src_curl})
-set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "HAVE_CONFIG_H")
+set(CURL_DEFINES "HAVE_CONFIG_H") # without autoconf
+INCLUDE(CheckFunctionExists)
+check_function_exists(strlcat HAVE_STRLCAT)
+if(NOT HAVE_STRLCAT)
+	set(CURL_DEFINES "${CURL_DEFINES};_NOT_HAVE_STRLCAT")
+	message(STATUS "No strlcat for cURL")
+else()
+	message(STATUS "Have strlcat for cURL")
+endif()
+set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
 
 #//k ogg
 set(src_ogg
