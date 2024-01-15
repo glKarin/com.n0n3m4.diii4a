@@ -16,8 +16,6 @@ add_definitions(-DID_ENABLE_CURL=1)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(CORE_DEFINES "__DOOM_DLL__;NO_ALSA")
-
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO
 
