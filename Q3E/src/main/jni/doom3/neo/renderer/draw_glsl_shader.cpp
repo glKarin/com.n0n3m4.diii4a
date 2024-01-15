@@ -811,21 +811,21 @@ static bool RB_GLSL_InitShaders(void)
 					&depthShader_parallelLight,
 					DEPTH_VERT, DEPTH_FRAG,
 					"depth.vert", "depth.frag",
-					macros[6]
+					macros[3]
 				},
 				{
 					"interaction_parallel_light_shadow_mapping",
 					&interactionShadowMappingShader_parallelLight,
 					INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
 					"interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag",
-					macros[7]
+					macros[4]
 				},
 				{
 					"interaction_blinnphong_parallel_light_shadow_mapping",
 					&interactionShadowMappingBlinnPhongShader_parallelLight,
 					INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
 					"interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag",
-					macros[8]
+					macros[5]
 				},
 
 				{
@@ -833,21 +833,21 @@ static bool RB_GLSL_InitShaders(void)
 					&depthShader_spotLight,
 					DEPTH_VERT, DEPTH_FRAG,
 					"depth.vert", "depth.frag",
-					macros[9]
+					macros[6]
 				},
 				{
 					"interaction_spot_light_shadow_mapping",
 					&interactionShadowMappingShader_spotLight,
 					INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
 					"interaction_shadow_mapping.vert", "interaction_shadow_mapping.frag",
-					macros[10]
+					macros[7]
 				},
 				{
 					"interaction_blinnphong_spot_light_shadow_mapping",
 					&interactionShadowMappingBlinnPhongShader_spotLight,
 					INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG,
 					"interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag",
-					macros[11]
+					macros[8]
 				},
 		};
 
