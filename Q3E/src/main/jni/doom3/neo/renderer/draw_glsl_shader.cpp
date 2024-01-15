@@ -1036,8 +1036,10 @@ static GLint R_CreateProgram(GLint vertShader, GLint fragShader, bool needsAttri
 		GLchar log[LOG_LEN];
 		qglGetProgramInfoLog(program, sizeof(GLchar) * LOG_LEN, NULL, log);
 		SHADER_ERROR("[Harmattan]: %s::glValidateProgram() -> %s!\n", __func__, log);
+#if 0
 		qglDeleteProgram(program);
 		program = 0;
+#endif
 	}
 
 	return program;
@@ -1102,7 +1104,7 @@ int R_LoadGLSLShaderProgram(
 	R_LoadGLSLShader(vertex_shader_source_file, program, GL_VERTEX_SHADER);
 	R_LoadGLSLShader(fragment_shader_source_file, program, GL_FRAGMENT_SHADER);
 
-	if (!R_LinkGLSLShader(program, true) && !R_ValidateGLSLProgram(program)) {
+	if (!R_LinkGLSLShader(program, true)/* && !R_ValidateGLSLProgram(program)*/) {
 		common->Printf("[Harmattan]: 2. Load internal shader source\n");
 		idStr vs = R_GLSL_ExpandMacros(default_vertex_shader_source, macros);
 		idStr fs = R_GLSL_ExpandMacros(default_fragment_shader_source, macros);
@@ -1117,6 +1119,7 @@ int R_LoadGLSLShaderProgram(
 			return 2;
 		}
 	} else {
+		R_ValidateGLSLProgram(program);
 		RB_GLSL_GetUniformLocations(program);
 		common->Printf("[Harmattan]: Load external shader program success!\n\n");
 #ifdef _HARM_SHADER_NAME
