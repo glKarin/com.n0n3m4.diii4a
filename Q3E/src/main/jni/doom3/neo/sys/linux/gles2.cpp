@@ -39,8 +39,30 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef EGL_OPENGL_ES3_BIT
 #define EGL_OPENGL_ES3_BIT EGL_OPENGL_ES3_BIT_KHR
 #endif
+
+const char	*s_openglesArgs[]	= {
+		"GLES2",
+#ifdef _OPENGLES3
+		"GLES3.0",
+#endif
+		// "AAudio"
+		NULL };
 idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
                     "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
+idCVar harm_sys_openglVersion("harm_sys_openglVersion",
+#ifdef _OPENGLES3
+        s_openglesArgs[1]
+#else
+                              s_openglesArgs[0]
+#endif
+                              , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
+					"Texture memory on the video card (in megabytes) - 0: autodetect", s_openglesArgs, idCmdSystem::ArgCompletion_String<s_openglesArgs>);
+
+#ifdef _OPENGLES3
+#define DEFAULT_GLES_VERSION 0x00030000
+#else
+#define DEFAULT_GLES_VERSION 0x00020000
+#endif
 
 #define MAX_NUM_CONFIGS 4
 
@@ -59,7 +81,7 @@ static EGLint format = 1;
 
 int gl_format = 0x8888;
 int gl_msaa = 1;
-int gl_version = 0x00030000;
+int gl_version = DEFAULT_GLES_VERSION;
 bool USING_GLES3 = gl_version != 0x00020000;
 
 static void GLimp_HandleError(const char *func, bool exit = true)

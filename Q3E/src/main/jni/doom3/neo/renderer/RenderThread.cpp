@@ -12,7 +12,7 @@ idRenderThread *renderThread = &renderThreadInstance;
 extern void GLimp_ActivateContext();
 extern void GLimp_DeactivateContext();
 
-static idCVar harm_r_multithread("harm_r_multithread", "0", CVAR_ARCHIVE | CVAR_INIT | CVAR_BOOL, "Multithread backend");
+static idCVar harm_r_multithread("harm_r_multithread", "0", CVAR_ARCHIVE | CVAR_INIT | CVAR_BOOL | CVAR_RENDERER, "Multithread backend");
 
 static void * BackendThread(void *data)
 {

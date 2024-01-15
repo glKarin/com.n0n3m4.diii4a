@@ -414,12 +414,13 @@ bool Sys_LoadOpenAL(void)
 		return true;
 	}
 
-	idStr path("./");
-	path.AppendPath("libopenal.so");
+	const char *path = cvarSystem->GetCVarString("s_libOpenAL");
+	if(!path || !path[0])
+		return false;
 
-	hOpenAL = dlopen( path.c_str(), RTLD_NOW | RTLD_GLOBAL );
+	hOpenAL = dlopen( path, RTLD_NOW | RTLD_GLOBAL );
 	if ( !hOpenAL ) {
-		common->Warning( "LoadLibrary %s failed.", path.c_str() );
+		common->Warning( "LoadLibrary %s failed.", path );
 		return false;
 	}
 	if ( ( sym = InitializeIDAL( hOpenAL ) ) ) {

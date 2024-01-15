@@ -3214,6 +3214,28 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 			Sys_Printf("[Harmattan]: Disable multi-threading rendering\n");
 #endif
 #endif
+#ifdef _OPENGLES3
+#if !defined(__ANDROID__) //karin: check OpenGL version from command cvar
+		const char *openglVersion = cvarSystem->GetCVarString("harm_sys_openglVersion");
+		if(openglVersion && openglVersion[0])
+		{
+			extern int gl_version;
+		    extern bool USING_GLES3;
+			Sys_Printf("[Harmattan]: harm_sys_openglVersion = %s\n", openglVersion);
+			if(!idStr::Icmp("GLES2", openglVersion))
+			{
+				gl_version = 0x00020000;
+				Sys_Printf("[Harmattan]: Using OpenGLES2\n");
+			}
+			else
+			{
+				gl_version = 0x00030000;
+				Sys_Printf("[Harmattan]: Using OpenGLES3\n");
+			}
+			USING_GLES3 = gl_version != 0x00020000;
+		}
+#endif
+#endif
 
 		if (!idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning()) {
 			Sys_Quit();
