@@ -1403,7 +1403,6 @@ if(ANDROID)
 		sys/android/main.cpp
 		sys/android/sound.cpp
 		sys/android/input.cpp
-		sys/android/sound_alsa.cpp
 	)
 	set(src_sys_core
 		sys/android/gles2.cpp
@@ -1414,6 +1413,7 @@ else()
 		sys/linux/main.cpp
 		sys/linux/input.cpp
 		sys/linux/sound.cpp
+		sys/android/sound_alsa.cpp
 	)
 	set(src_sys_core
 		sys/linux/gles2.cpp
