@@ -1413,7 +1413,7 @@ else()
 		sys/linux/main.cpp
 		sys/linux/input.cpp
 		sys/linux/sound.cpp
-		sys/android/sound_alsa.cpp
+		sys/linux/sound_alsa.cpp
 	)
 	set(src_sys_core
 		sys/linux/gles2.cpp
