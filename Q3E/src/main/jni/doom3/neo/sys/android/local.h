@@ -35,6 +35,7 @@ extern FILE *f_stdout;
 extern int gl_format;
 extern int gl_msaa;
 extern int gl_version;
+extern bool USING_GLES3;
 
 void Android_GrabMouseCursor(bool grabIt);
 void Android_PollInput(void);

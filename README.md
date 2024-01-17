@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
-#### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
+#### DOOM III/Quake 4/Prey(2006) for Android/Linux, 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版. Original named DIII4A++, based on com.n0n3m4.diii4a
 **Latest version:**
-1.1.0harmattan37(natasha)  
-**Last update release:**
-2024-01-06  
+1.1.0harmattan38(natasha)  
+**最新更新日期:**
+2024-01-15  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -42,10 +42,8 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Fixed on-screen buttons initial keycodes.
-* On-screen slider button can setup clickable.
-* Add dds screenshot support.
-* Add cvar `r_scaleMenusTo43` for 4:3 menu.
+* Fixed shadow mapping on non-Adreno GPU.
+* Support level loading finished pause(cvar `com_skipLevelLoadPause`) in Quake4.
 
 ----------------------------------------------------------------------------------
 

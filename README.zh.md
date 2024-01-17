@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
-#### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
+#### DOOM III/Quake 4/Prey(2006) for Android/Linux, 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版. Original named DIII4A++, based on com.n0n3m4.diii4a
 **最新版本:**
-1.1.0harmattan37(natasha)  
+1.1.0harmattan38(natasha)  
 **最新更新日期:**
-2024-01-06  
+2024-01-15  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -13,6 +13,7 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 ### 支持
+* Linux构建(测试)
 * 多线程渲染
 * png/dds纹理图片加载
 * jpeg/png/bmp/dds格式截屏
@@ -41,10 +42,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 修复屏幕按键初始键码配置.
-* 滑动按键支持设置为点击触发.
-* 新增dds格式屏幕截图.
-* 新增cvar `r_scaleMenusTo43`启用4:3比例菜单.
+* 修复非Adreno GPU的阴影映射阴影.
+* 支持雷神之锤4关卡加载完成暂停等待(cvar `com_skipLevelLoadPause`).
 
 ----------------------------------------------------------------------------------
 

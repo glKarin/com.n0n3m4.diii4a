@@ -1,5 +1,14 @@
 ## Change logs
 
+----------------------------------------------------------------------------------
+
+> 1.1.0harmattan38 (2024-01-15)
+
+* Fixed shadow mapping on non-Adreno GPU.
+* Support level loading finished pause(cvar `com_skipLevelLoadPause`) in Quake4.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan37 (2024-01-06)
 
 * Fixed on-screen buttons initial keycodes.

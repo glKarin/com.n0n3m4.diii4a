@@ -1,0 +1,2 @@
+* 修复非Adreno GPU的阴影映射阴影.
+* 支持雷神之锤4关卡加载完成暂停等待(cvar `com_skipLevelLoadPause`).

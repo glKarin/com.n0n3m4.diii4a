@@ -638,7 +638,11 @@ namespace md5anim
         {
             targetPath = filename;
             targetPath.StripFileExtension();
-            targetPath.Append(va("_reverse_%d_%d", startFrame, endFrame));
+            targetPath.Append("_reverse");
+            if(args.Argc() > 2)
+                targetPath.Append(va("_%d", startFrame));
+            if(args.Argc() > 3)
+                targetPath.Append(va("_%d", endFrame));
             targetPath.Append(".md5anim");
         }
         idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
