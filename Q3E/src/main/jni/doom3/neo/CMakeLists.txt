@@ -1525,7 +1525,7 @@ if(CORE)
 	else()
 		set(DOOM3BINARY "Doom3")
 		add_executable(${DOOM3BINARY}
-				${src_core_humanhead}
+				${src_core}
 				${src_sys_base}
 				${src_sys_core}
 				${src_editor_tools}
