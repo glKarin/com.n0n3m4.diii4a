@@ -220,13 +220,17 @@ public final class KidTech4Command
         return PostCmd(str);
     }
 
-    public static String SetCommand(String str, String name)
+    public static String SetCommand(String str, String name, boolean...prepend)
     {
         str = PreCmd(str);
         String nname = " +" + name;
+        boolean pp = null != prepend && prepend.length > 0 && prepend[0];
         if (!str.contains(nname))
         {
-            str += nname;
+            if(pp)
+                str = nname + str;
+            else
+                str += nname;
         }
         return PostCmd(str);
     }
@@ -349,9 +353,9 @@ public final class KidTech4Command
         return this;
     }
 
-    public KidTech4Command SetCommand(String name)
+    public KidTech4Command SetCommand(String name, boolean...prepend)
     {
-        m_cmd = KidTech4Command.SetCommand(m_cmd, name);
+        m_cmd = KidTech4Command.SetCommand(m_cmd, name, prepend);
         return this;
     }
 

@@ -271,7 +271,7 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_skip_intro, isChecked)
 						.commit();
 				if (isChecked)
-					SetCommand_temp("disconnect");
+					SetCommand_temp("disconnect", true);
 				else
 					RemoveCommand_temp("disconnect");
 			}
@@ -310,6 +310,10 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(PreferenceKey.READONLY_COMMAND, isChecked)
 						.commit();
+			}
+			else if (id == R.id.editable_temp_command)
+			{
+				SetupTempCommandLine(isChecked);
 			}
 			else if (id == R.id.cb_translucentStencilShadow)
 			{
@@ -856,7 +860,7 @@ public class GameLauncher extends Activity
 		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		V.skip_intro.setChecked(skipIntro);
 		if (skipIntro)
-			SetCommand_temp("disconnect");
+			SetCommand_temp("disconnect", true);
         boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
         V.auto_quick_load.setChecked(autoQuickLoad);
         if (autoQuickLoad)
@@ -960,9 +964,7 @@ public class GameLauncher extends Activity
 				SetProp("harm_r_maxFps", s);
 			}
 
-			public void beforeTextChanged(CharSequence s, int start, int count, int after)
-			{
-			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
 			public void afterTextChanged(Editable s)
 			{
@@ -1046,6 +1048,23 @@ public class GameLauncher extends Activity
 		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_translucentStencilShadow.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_translucentStencilShadow, false));
 		V.cb_translucentStencilShadow.setOnCheckedChangeListener(m_checkboxChangeListener);
+		SetupTempCommandLine(false);
+		V.editable_temp_command.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.edt_cmdline_temp.addTextChangedListener(new TextWatcher()
+		{
+			public void onTextChanged(CharSequence s, int start, int before, int count)
+			{
+				if (V.edt_cmdline_temp.isInputMethodTarget())
+				{
+					Q3EUtils.q3ei.start_temporary_extra_command = GetTempCmdText();
+					UpdateTempCommand();
+				}
+			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+			public void afterTextChanged(Editable s) { }
+		});
 
         updatehacktings();
 
@@ -2005,10 +2024,15 @@ public class GameLauncher extends Activity
         return KidTech4Command.GetParam(GetCmdText(), name);
     }
 
+	private String GetTempCmdText()
+	{
+		return V.edt_cmdline_temp.getText().toString();
+	}
+
     private void RemoveParam_temp(String name)
     {
         boolean[] res = {false};
-        String str = KidTech4Command.RemoveParam(Q3EUtils.q3ei.start_temporary_extra_command, name, res);
+        String str = KidTech4Command.RemoveParam(GetTempCmdText(), name, res);
         if (res[0])
             Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
@@ -2016,20 +2040,20 @@ public class GameLauncher extends Activity
 
     private void SetParam_temp(String name, Object val)
     {
-        Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetParam(Q3EUtils.q3ei.start_temporary_extra_command, name, val));
+        Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetParam(GetTempCmdText(), name, val));
 		UpdateTempCommand();
     }
 
-	private void SetCommand_temp(String name)
+	private void SetCommand_temp(String name, boolean prepend)
 	{
-		Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetCommand(Q3EUtils.q3ei.start_temporary_extra_command, name));
+		Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetCommand(GetTempCmdText(), name, prepend));
 		UpdateTempCommand();
 	}
 
 	private void RemoveCommand_temp(String name)
 	{
 		boolean[] res = {false};
-		String str = KidTech4Command.RemoveCommand(Q3EUtils.q3ei.start_temporary_extra_command, name, res);
+		String str = KidTech4Command.RemoveCommand(GetTempCmdText(), name, res);
 		if (res[0])
 			Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
@@ -2135,8 +2159,11 @@ public class GameLauncher extends Activity
 
 	private void UpdateTempCommand()
 	{
+		if(Q3EUtils.q3ei.start_temporary_extra_command.equals(GetTempCmdText()))
+			return;
+
 		V.edt_cmdline_temp.setText(Q3EUtils.q3ei.start_temporary_extra_command);
-		V.edt_cmdline_temp.setVisibility(Q3EUtils.q3ei.start_temporary_extra_command.length() > 0 ? View.VISIBLE : View.GONE);
+		V.temp_cmdline.setVisibility(Q3EUtils.q3ei.start_temporary_extra_command.length() > 0 ? View.VISIBLE : View.GONE);
 	}
 
 	private void OpenGameModChooser()
@@ -2247,6 +2274,11 @@ public class GameLauncher extends Activity
 		UIUtility.EditText__SetReadOnly(V.edt_cmdline, readonly, InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 	}
 
+	private void SetupTempCommandLine(boolean editable)
+	{
+		UIUtility.EditText__SetReadOnly(V.edt_cmdline_temp, !editable, InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+	}
+
 
 
     private class ViewHolder
@@ -2306,7 +2338,7 @@ public class GameLauncher extends Activity
         public CheckBox find_dll;
 		public EditText edt_harm_r_maxFps;
 		public Button launcher_tab1_edit_cvar;
-		public TextView edt_cmdline_temp;
+		public EditText edt_cmdline_temp;
 		public CheckBox skip_intro;
 		public Button launcher_tab1_game_mod_button;
 		public CheckBox scale_by_screen_area;
@@ -2316,6 +2348,8 @@ public class GameLauncher extends Activity
 		public CheckBox cb_s_useEAXReverb;
 		public Switch readonly_command;
 		public CheckBox cb_translucentStencilShadow;
+		public Switch editable_temp_command;
+		public LinearLayout temp_cmdline;
 
         public void Setup()
         {
@@ -2383,6 +2417,8 @@ public class GameLauncher extends Activity
 			cb_s_useEAXReverb = findViewById(R.id.cb_s_useEAXReverb);
 			readonly_command = findViewById(R.id.readonly_command);
 			cb_translucentStencilShadow = findViewById(R.id.cb_translucentStencilShadow);
+			editable_temp_command = findViewById(R.id.editable_temp_command);
+			temp_cmdline = findViewById(R.id.temp_cmdline);
         }
     }
 }
