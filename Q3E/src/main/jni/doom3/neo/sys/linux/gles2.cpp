@@ -603,6 +603,25 @@ int GLES_Init(glimpParms_t ap)
 	XFlush(dpy);
 	XSync(dpy, False);
 
+    bool r_fullscreen = cvarSystem->GetCVarBool("r_fullscreen");
+    if (r_fullscreen) {
+        XEvent xev;
+        Atom wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
+        Atom fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+        memset(&xev, 0, sizeof(xev));
+        xev.type = ClientMessage;
+        xev.xclient.window = win;
+        xev.xclient.message_type = wm_state;
+        xev.xclient.format = 32;
+        xev.xclient.data.l[0] = 1; // _NET_WM_STATE_ADD
+        xev.xclient.data.l[1] = fullscreen;
+        xev.xclient.data.l[2] = 0;
+        XSendEvent(dpy, DefaultRootWindow(dpy), False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
+        Screen *screen = ScreenOfDisplay(dpy, 0);
+        glConfig.vidWidth = actualWidth = screen->width;
+        glConfig.vidHeight = actualHeight = screen->height;
+    }
+
 	common->Printf( "Setup EGL display connection\n" );
 
 	if ( !( eglDisplay = eglGetDisplay(dpy) ) ) {
@@ -676,7 +695,7 @@ int GLES_Init(glimpParms_t ap)
 	glConfig.depthBits = depth_bits;
 	glConfig.stencilBits = stencil_bits;
 
-	glConfig.isFullscreen = true;
+	glConfig.isFullscreen = r_fullscreen;
 
 	if (glConfig.isFullscreen) {
 		Sys_GrabMouseCursor(true);
