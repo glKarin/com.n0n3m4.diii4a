@@ -1327,8 +1327,8 @@ set(src_ogg
 	externlibs/libvorbis/lib/analysis.c
 	externlibs/libvorbis/lib/floor1.c
 	externlibs/libvorbis/lib/psy.c
-	externlibs/libvorbis/lib/tone.c
-	externlibs/libvorbis/lib/barkmel.c
+	# externlibs/libvorbis/lib/tone.c
+	# externlibs/libvorbis/lib/barkmel.c
 	externlibs/libvorbis/lib/info.c
 	externlibs/libvorbis/lib/vorbisenc.c
 	externlibs/libvorbis/lib/bitrate.c
