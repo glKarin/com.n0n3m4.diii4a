@@ -472,16 +472,16 @@
 				/>
 
 			<CheckBox
-				android:id="@+id/auto_quick_load"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/load_quicksave_when_start_game"/>
-
-			<CheckBox
 				android:id="@+id/skip_intro"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/skip_intro"/>
+
+			<CheckBox
+				android:id="@+id/auto_quick_load"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/load_quicksave_when_start_game"/>
 
 
 		<LinearLayout

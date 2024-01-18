@@ -2871,7 +2871,6 @@ void idCommonLocal::Async(void)
 idCommonLocal::LoadGameDLL
 =================
 */
-#ifdef __ANDROID__ //karin: select game dll on Android
 #ifdef _RAVEN // quake4 game dll
 #define _HARM_BASE_GAME_DLL "q4game"
 #elif defined(_HUMANHEAD) // prey game dll
@@ -2880,12 +2879,26 @@ idCommonLocal::LoadGameDLL
 #define _HARM_BASE_GAME_DLL "game"
 #endif
 
-#define _ANDROID_NATIVE_LIBRARY_DIR "<Android APK native library directory path>/"
-static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. e.g. "
-		"`" _ANDROID_NATIVE_LIBRARY_DIR "lib" _HARM_BASE_GAME_DLL ".so`, "
-		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
-static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library directory path(default is empty, means using `" _ANDROID_NATIVE_LIBRARY_DIR "`).");
+#ifdef _WIN32
+#define DLL_SUFFIX ".dll"
+#define DLL_PREFIX "lib"
+#else
+#define DLL_SUFFIX ".so"
+#define DLL_PREFIX "lib"
 #endif
+
+#define DLL_NAME(x) DLL_PREFIX x DLL_SUFFIX
+
+#ifdef __ANDROID__
+#define _DEFAULT_LIBRARY_DIR "<apk native libraries path>"
+#else
+#define _DEFAULT_LIBRARY_DIR "<executable application path>"
+#endif
+
+static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. e.g. "
+		"`<harm_fs_gameLibPath>/lib" _HARM_BASE_GAME_DLL DLL_SUFFIX "`, "
+		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
+static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library directory path(default is empty, means using `" _DEFAULT_LIBRARY_DIR "`).");
 void idCommonLocal::LoadGameDLL(void)
 {
 #ifdef __DOOM_DLL__
@@ -2895,7 +2908,7 @@ void idCommonLocal::LoadGameDLL(void)
 	gameExport_t	gameExport;
 	GetGameAPI_t	GetGameAPI;
 
-#ifdef __ANDROID__ //karin: select game dll on Android
+#if 1 //karin: select game dll on Android
 #define LOAD_RESULT(dll) ((dll) ? "done" : "fail")
 
 	common->Printf("[Harmattan]: fpu = "
@@ -2931,13 +2944,15 @@ void idCommonLocal::LoadGameDLL(void)
 			common->Printf("[Harmattan]: Find game dynamic library directory in `%s` from cvar `harm_fs_gameLibDir`.\n", dir.c_str());
 		else
 		{
+#ifdef __ANDROID__
 			const char *dir_str = native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
+#else
+            const char *dir_str = "./";
+#endif
 			common->Printf("[Harmattan]: cvar `harm_fs_gameLibDir` is unset. Find game dynamic library directory in default path `%s`.\n", dir_str);
 			dir = dir_str;
 		}
 
-		if(fsgame.Length())
-		{
 			common->Printf("[Harmattan]: Load game `%s` from cvar `fs_game`.\n", fsgame.c_str());
 
 #ifdef _RAVEN // quake4 base game dll
@@ -2945,7 +2960,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load Quake4 game......\n");
 				idStr dllFile(dir);
-				dllFile.AppendPath("libq4game.so");
+            dllFile.AppendPath(DLL_NAME("q4game"));
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -2954,7 +2969,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load Prey2006 game......\n");
 				idStr dllFile(dir);
-				dllFile.AppendPath("libpreygame.so");
+				dllFile.AppendPath(DLL_NAME("preygame"));
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -2963,7 +2978,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load DOOM3 game......\n");
 				idStr dllFile(dir);
-				dllFile.AppendPath("libgame.so");
+				dllFile.AppendPath(DLL_NAME("game"));
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -2972,7 +2987,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load `%s` game......\n", fsgame.c_str());
 				idStr dllFile(dir);
-				dllFile.AppendPath(va("lib%s.so", fsgame.c_str()));
+            dllFile.AppendPath(va(DLL_NAME("%s"), fsgame.c_str()));
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -2989,28 +3004,31 @@ void idCommonLocal::LoadGameDLL(void)
 					common->Printf("[Harmattan]: Load found dynamic library %s!\n", LOAD_RESULT(gameDLL));
 				}
 			}
+#if !defined(__ANDROID__)
+        if(!gameDLL) // load <fs_game>/libgame.so
+        {
+            idStr dllFile("./");
+            const char *fs_game = cvarSystem->GetCVarString("fs_game");
+            if(!fs_game || !fs_game[0])
+                fs_game = BASE_GAMEDIR;
+            common->Printf("[Harmattan]: Load game from %s......\n", fs_game);
+            dllFile.AppendPath(fs_game);
+            dllFile.AppendPath(DLL_NAME("game"));
+            gameDLL = sys->DLL_Load(dllFile);
+            common->Printf("[Harmattan]: Load game dynamic library `%s` %p!\n", dllFile.c_str(), gameDLL);
 		}
+#endif
 		// last load base game library if all failed.
 		if(!gameDLL)
 		{
 			common->Printf("[Harmattan]: Load BASE game......\n");
 			idStr dllFile(dir);
-			dllFile.AppendPath("lib" _HARM_BASE_GAME_DLL ".so");
+			dllFile.AppendPath(DLL_NAME(_HARM_BASE_GAME_DLL));
 			gameDLL = sys->DLL_Load(dllFile);
 			common->Printf("[Harmattan]: Load BASE dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 		}
 	}
-#else //karin: other platform load game{arch}.dll/game{arch}.so
-    idStr dllFile("./");
-    const char *fs_game = cvarSystem->GetCVarString("fs_game");
-    if(!fs_game || !fs_game[0])
-        fs_game = BASE_GAMEDIR;
-    common->Printf("[Harmattan]: Load game from %s......\n", fs_game);
-    dllFile.AppendPath(fs_game);
-    dllFile.AppendPath("libgame.so");
-    gameDLL = sys->DLL_Load(dllFile);
-    common->Printf("[Harmattan]: Load game dynamic library `%s` %p!\n", dllFile.c_str(), gameDLL);
-
+#else
     if(!gameDLL)
     {
         fileSystem->FindDLL("game", dllPath, true);

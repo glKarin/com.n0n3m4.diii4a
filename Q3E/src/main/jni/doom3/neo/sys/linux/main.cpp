@@ -543,6 +543,8 @@ void abrt_func( mcheck_status status ) {
 
 #endif
 
+#include <pthread.h>
+static intptr_t main_thread = 0;
 /*
 ===============
 main
@@ -557,6 +559,8 @@ int main(int argc, const char **argv) {
 	
 	Posix_EarlyInit( );
 
+	main_thread = pthread_self();
+
 	if ( argc > 1 ) {
 		common->Init( argc-1, &argv[1], NULL );
 	} else {
@@ -568,4 +572,9 @@ int main(int argc, const char **argv) {
 	while (1) {
 		common->Frame();
 	}
+}
+
+intptr_t Sys_GetMainThread(void)
+{
+	return main_thread;
 }

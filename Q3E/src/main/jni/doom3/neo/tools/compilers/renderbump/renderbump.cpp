@@ -125,7 +125,7 @@ ResizeWindow
 */
 static void ResizeWindow(int width, int height)
 {
-#ifdef WIN32
+#if defined(WIN32) && defined(ID_ALLOW_TOOLS)
 	int	winWidth, winHeight;
 
 	if (glConfig.isFullscreen) {
@@ -159,7 +159,7 @@ RestoreWindow
 */
 static void RestoreWindow(void)
 {
-#ifdef WIN32
+#if defined(WIN32) && defined(ID_ALLOW_TOOLS)
 	int	winWidth, winHeight;
 
 	if (glConfig.isFullscreen) {

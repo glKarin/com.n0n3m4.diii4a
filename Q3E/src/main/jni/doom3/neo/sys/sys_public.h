@@ -37,6 +37,79 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+// Win32
+#if defined(WIN32) || defined(_WIN32)
+
+#define	BUILD_STRING					"win-x86"
+#define BUILD_OS_ID						0
+#define	CPUSTRING						"x86"
+#define CPU_EASYARGS					1
+
+#define ALIGN16( x )					__declspec(align(16)) x
+#define PACKED
+
+#define _alloca16( x )					((void *)((((intptr_t)_alloca( (x)+15 )) + 15) & ~15))
+
+#define PATHSEPERATOR_STR				"\\"
+#define PATHSEPERATOR_CHAR				'\\'
+
+#ifdef _MSC_VER
+#define ID_STATIC_TEMPLATE				static
+#define ID_INLINE						__forceinline
+#else
+#define ID_STATIC_TEMPLATE
+#define ID_INLINE						inline
+#endif
+
+#define assertmem( x, y )				assert( _CrtIsValidPointer( x, y, true ) )
+
+bool Sys_IsMainThread();
+
+enum sysPath_t {
+    PATH_BASE,
+    PATH_CONFIG,
+    PATH_SAVE,
+    PATH_EXE
+};
+#endif
+
+// Mac OSX
+#if defined(MACOS_X) || defined(__APPLE__)
+
+#define BUILD_STRING				"MacOSX-universal"
+#define BUILD_OS_ID					1
+#ifdef __ppc__
+	#define	CPUSTRING					"ppc"
+	#define CPU_EASYARGS				0
+#elif defined(__i386__)
+	#define	CPUSTRING					"x86"
+	#define CPU_EASYARGS				1
+#endif
+
+#define ALIGN16( x )					x __attribute__ ((aligned (16)))
+
+#ifdef __MWERKS__
+#define PACKED
+#include <alloca.h>
+#else
+#define PACKED							__attribute__((packed))
+#endif
+
+#define _alloca							alloca
+#define _alloca16( x )					((void *)((((int)alloca( (x)+15 )) + 15) & ~15))
+
+#define PATHSEPERATOR_STR				"/"
+#define PATHSEPERATOR_CHAR				'/'
+
+#define __cdecl
+#define ASSERT							assert
+
+#define ID_INLINE						inline
+#define ID_STATIC_TEMPLATE
+
+#define assertmem( x, y )
+
+#endif
 
 // Linux
 #ifdef __linux__
@@ -484,13 +557,20 @@ void				Sys_DestroyThread(xthreadInfo &info);   // sets threadHandle back to 0
 // if index != NULL, set the index in g_threads array (use -1 for "main" thread)
 const char 		*Sys_GetThreadName(int *index = 0);
 
+#ifdef _SDL
+const int MAX_CRITICAL_SECTIONS		= 5;
+#else
 const int MAX_CRITICAL_SECTIONS		= 4;
+#endif
 
 enum {
 	CRITICAL_SECTION_ZERO = 0,
 	CRITICAL_SECTION_ONE,
 	CRITICAL_SECTION_TWO,
 	CRITICAL_SECTION_THREE
+#ifdef _SDL
+    , CRITICAL_SECTION_SYS
+#endif
 };
 
 void				Sys_EnterCriticalSection(int index = CRITICAL_SECTION_ZERO);

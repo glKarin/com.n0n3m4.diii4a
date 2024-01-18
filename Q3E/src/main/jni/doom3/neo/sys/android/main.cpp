@@ -744,4 +744,9 @@ int main(int argc, const char **argv)
 	return 0;
 }
 
+intptr_t Sys_GetMainThread(void)
+{
+	return main_thread;
+}
+
 #include "sys_android.cpp"

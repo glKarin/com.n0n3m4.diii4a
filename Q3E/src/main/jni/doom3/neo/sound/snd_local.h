@@ -33,11 +33,19 @@ If you have questions concerning this license or the applicable additional terms
 
 // you need the OpenAL headers for build, even if AL is not enabled - http://www.openal.org/
 #ifdef _WIN32
+#ifdef _OPENAL_SOFT
+#include "../externlibs/openal-soft/include/AL/al.h"
+#include "../externlibs/openal-soft/include/AL/alc.h"
+#include "../externlibs/openal-soft/include/AL/efx.h"
+#include "../openal/idal.h"
+#define ID_ALCHAR (ALubyte *)
+#else
 #include "../openal/include/al.h"
 #include "../openal/include/alc.h"
 #include "../openal/idal.h"
 // broken OpenAL SDK ?
 #define ID_ALCHAR (ALubyte *)
+#endif
 #elif defined( MACOS_X )
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>

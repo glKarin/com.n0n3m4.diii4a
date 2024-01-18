@@ -82,7 +82,10 @@ public:
 
 #else
 
+
+#ifdef ID_ALLOW_TOOLS
 #include "../tools/comafx/StdAfx.h"
+#endif
 
 #endif
 

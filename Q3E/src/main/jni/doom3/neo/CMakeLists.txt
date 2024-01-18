@@ -1,18 +1,22 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(doom3)
 
+set(COMPILE_CURL "1")
 set(CORE_DEFINES "__DOOM_DLL__")
 if(ANDROID)
 	add_definitions(-D__ANDROID__)
 	add_definitions(-D_NO_PTHREAD_CANCEL)
 	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA")
+elseif(WIN32)
+	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA")
+	set(COMPILE_CURL "0")
 else()
 	# apt-get install libasound2-dev # sound alsa support
 	# apt-get install libgles-dev # GLES2/GLES3/EGL headers
 endif()
 
 add_definitions(-D_K_CLANG) # TODO
-add_definitions(-DID_ENABLE_CURL=1)
+add_definitions(-DID_ENABLE_CURL=${COMPILE_CURL})
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -76,9 +80,11 @@ option(D3XP			"Build the d3xp game code" ON)
 if(ANDROID)
 	option(OPENSLES			"OpenSLES support" ON)
 endif()
-option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
-option(MULTITHREAD			"Multi-Thread support" ON)
+if(NOT WIN32)
 option(OPENGLES3			"OpenGLES3 support" ON)
+option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
+endif()
+option(MULTITHREAD			"Multi-Thread support" ON)
 option(USING_STB			"Using stb" ON)
 option(SUPPORT_OBJ			"Support obj model" ON)
 option(SUPPORT_DAE			"Support dae model" ON)
@@ -318,11 +324,27 @@ endfunction()
 
 if(ANDROID)
 	set(sys_libs ${sys_libs} android)
-else()
+	set(sys_libs ${sys_libs} dl EGL z)
+elseif(LINUX)
 	set(sys_libs ${sys_libs} X11)
+	set(sys_libs ${sys_libs} dl EGL z)
+else()
+	if(APPLE OR WIN32)
+		set(SDL2_BUILDING_LIBRARY TRUE)
+	endif()
+	find_package(SDL2 REQUIRED)
+	include_directories(${SDL2_INCLUDE_DIR})
+	set(SDLx_LIBRARY ${SDL2_LIBRARIES})
+	set(sys_libs ${sys_libs} ${SDLx_LIBRARY} wsock32 Iphlpapi winmm dsound ksuser)
+	add_definitions(-D_SDL)
 endif()
-set(sys_libs ${sys_libs} dl EGL z)
-set(local_libs ogg curl)
+
+set(local_libs ogg)
+if(COMPILE_CURL STREQUAL "1")
+	set(local_libs ${local_libs} curl)
+	message(STATUS "Build cURL")
+endif()
+
 if(USING_STB)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB")
 	message(STATUS "Using stb jpeg image")
@@ -1259,6 +1281,7 @@ add_globbed_headers(humanhead_renderer_src "humanhead")
 add_globbed_headers(humanhead_framework_src "humanhead")
 
 include_directories("externlibs")
+if(COMPILE_CURL STREQUAL "1")
 #//k curl
 set(src_curl
 	externlibs/curl/lib/base64.c
@@ -1319,6 +1342,7 @@ else()
 	message(STATUS "Have strlcat for cURL")
 endif()
 set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
+endif()
 
 #//k ogg
 set(src_ogg
@@ -1407,6 +1431,29 @@ if(ANDROID)
 	set(src_sys_core
 		sys/android/gles2.cpp
 	)
+elseif(WIN32)
+	set(src_sys_base
+			sys/sys_local.cpp
+			sys/sdl/threads.cpp
+			sys/sdl/events.cpp
+			sys/sdl/cpu.cpp
+			sys/sdl/sdl.cpp
+			)
+	set(src_sys_base
+			${src_sys_base}
+			sys/win32/win_input.cpp
+			sys/win32/win_main.cpp
+			sys/win32/win_net.cpp
+			sys/win32/win_shared.cpp
+			sys/win32/win_syscon.cpp
+			sys/win32/SDL_win32_main.c
+			sys/win32/win_aros.cpp
+			sys/win32/win_cpu.cpp
+			sys/win32/win_snd.cpp
+			)
+	set(src_sys_core
+			sys/sdl/glimp.cpp
+			)
 else()
 	set(src_sys_base
 		${src_sys_base}

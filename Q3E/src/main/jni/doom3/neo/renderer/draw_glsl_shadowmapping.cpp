@@ -299,19 +299,19 @@ ID_INLINE static bool RB_ShadowMapping_filterLightType(void)
 // Get frustum far value for point light in shadow map/interaction pass
 ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
 {
-    float far;
+    float _far;
     if(harm_r_shadowMapFrustumFar.GetFloat() == 0)
-        far = vLight->lightRadius.Length();
+        _far = vLight->lightRadius.Length();
     else if(harm_r_shadowMapFrustumFar.GetFloat() < 0)
-        far = vLight->lightRadius.Length() * -harm_r_shadowMapFrustumFar.GetFloat();
+        _far = vLight->lightRadius.Length() * -harm_r_shadowMapFrustumFar.GetFloat();
     else
     {
         if(harm_r_shadowMapFrustumFar.GetFloat() <= harm_r_shadowMapFrustumNear.GetFloat())
-            far = POINT_LIGHT_FRUSTUM_FAR;
+            _far = POINT_LIGHT_FRUSTUM_FAR;
         else
-            far = harm_r_shadowMapFrustumFar.GetFloat();
+            _far = harm_r_shadowMapFrustumFar.GetFloat();
     }
-    return far;
+    return _far;
 }
 
 // Choose shader by light in shadow map pass

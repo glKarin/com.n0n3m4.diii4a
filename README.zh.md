@@ -13,7 +13,7 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 ### 支持
-* Linux构建(测试)
+* Linux/Windows(MinGW)构建(测试)
 * 多线程渲染
 * png/dds纹理图片加载
 * jpeg/png/bmp/dds格式截屏
@@ -102,21 +102,19 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 
 ----------------------------------------------------------------------------------
 
-### 移植:
+### 编译构建:
 
-#### 安卓系统上的引擎
-##### 安卓系统编译声明宏`__ANDROID__`.
-> 1. _OPENSLES: OpenSLES声音支持.
-> 2. _MULTITHREAD: 多线程支持.
-> 3. _USING_STB: 使用stb加载jpeg/png/dds纹理图片支持和jpeg/png/bmp/dds格式截图支持.
-> 4. _K_CLANG: 如果使用clang编译而不是GCC.
-> 5. _MODEL_OBJ: 添加obj静态模型支持.
-> 6. _MODEL_DAE: 添加dae静态模型支持.
-> 7. _SHADOW_MAPPING: 增加Shadow mapping软阴影支持.
-> 8. _OPENGLES3: 增加OpenGL ES3.0支持.
-> 9. _OPENAL _OPENAL_EFX: 增加OpenAL(soft)和EFX混响支持.
-> 10. _NO_LIGHT: 添加无光照渲染支持.
-> 11. _TRANSLUCENT_STENCIL_SHADOW: 添加半透明模板阴影支持.
+#### 引擎
+> 1. _MULTITHREAD: 多线程支持.
+> 2. _USING_STB: 使用stb加载jpeg/png/dds纹理图片支持和jpeg/png/bmp/dds格式截图支持.
+> 3. _K_CLANG: 如果使用clang编译而不是GCC.
+> 4. _MODEL_OBJ: 添加obj静态模型支持.
+> 5. _MODEL_DAE: 添加dae静态模型支持.
+> 6. _SHADOW_MAPPING: 增加Shadow mapping软阴影支持.
+> 7. _OPENGLES3: 增加OpenGL ES3.0支持.
+> 8. _OPENAL _OPENAL_EFX _OPENAL_SOFT: 增加OpenAL(soft)和EFX混响支持.
+> 9. _NO_LIGHT: 添加无光照渲染支持.
+> 10. _TRANSLUCENT_STENCIL_SHADOW: 添加半透明模板阴影支持.
 
 #### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
 #### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).
@@ -140,6 +138,19 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 2. _PREY: 编译`游戏 (掠食(2006)的SDK源码)`库.
 > 3. 构建core引擎: 声明宏`_HUMANHEAD`
 > 4. 构建游戏库: 声明宏`_HUMANHEAD`, `_PREY`, 和原来SDK的宏`HUMANHEAD`
+
+#### 安卓
+##### 声明宏`__ANDROID__`.
+> 1. _OPENSLES: OpenSLES声音支持.
+
+#### Linux
+##### 声明宏`__linux__`.
+> 1. 支持ALSA.
+
+#### Windows(MinGW)
+##### 声明宏`_WIN32`和`WIN32`.
+> 1. 请求 SDL2, zlib
+> 2. 不支持 OpenGLES3, OpenAL, cURL
 
 ----------------------------------------------------------------------------------
 

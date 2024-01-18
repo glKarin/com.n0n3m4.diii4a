@@ -85,7 +85,11 @@ typedef enum {
 
 typedef enum {
 	FILE_EXEC,
+#ifdef _WIN32
+    DL_FILE_OPEN
+#else
 	FILE_OPEN
+#endif
 } dlMime_t;
 
 typedef enum {
