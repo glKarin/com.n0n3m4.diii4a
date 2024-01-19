@@ -1342,6 +1342,7 @@ else()
 	message(STATUS "Have strlcat for cURL")
 endif()
 set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
+target_link_libraries(curl z)
 endif()
 
 #//k ogg
