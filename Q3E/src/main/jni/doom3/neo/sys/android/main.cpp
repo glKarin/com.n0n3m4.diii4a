@@ -611,7 +611,7 @@ extern void Q3E_RedirectOutput(void);
 extern void Q3E_Start(void);
 extern void Q3E_End(void);
 
-void CheckEGLInitialized(void)
+void GLimp_CheckGLInitialized(void)
 {
 	Q3E_CheckNativeWindowChanged();
 }

@@ -11059,10 +11059,6 @@ void idPlayer::CalculateFirstPersonView( void ) {
 			{
 				head_joint = animator.GetJointHandle( _HARM_Q4_PLAYERMODEL_HEAD_JOINT ); // quake4 playermodel head joint name, quake4 playermodel head is can attached
 			}
-#if 0
-			if(head_joint < 0) // doom3 playermodel head joint name
-				head_joint = animator.GetJointHandle( "Head" );
-#endif
 			if(head_joint >= 0 && animator.GetJointTransform( head_joint, gameLocal.time, origin, axis ) )
 				firstPersonViewOrigin = ( origin + modelOffset) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
 									+ viewBob

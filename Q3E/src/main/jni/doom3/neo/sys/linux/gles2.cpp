@@ -111,9 +111,9 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 		common->Error("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 }
 
-void CheckEGLInitialized(void)
+void GLimp_CheckGLInitialized(void)
 {
-	// TODO
+	// Not need do anything
 }
 
 void GLimp_WakeBackEnd(void *a)

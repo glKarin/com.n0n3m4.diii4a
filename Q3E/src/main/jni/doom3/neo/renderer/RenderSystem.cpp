@@ -186,7 +186,7 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 
 	renderThread->backendFinished = false;
 
-	CheckEGLInitialized(); // check/wait EGL context
+	GLimp_CheckGLInitialized(); // check/wait EGL context
 
 	//if(has_gl_context)
     {
@@ -810,7 +810,8 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	else
 	{
 #endif
-	CheckEGLInitialized(); // check/wait EGL context
+	GLimp_CheckGLInitialized(); // check/wait EGL context
+
 	R_CheckBackEndCvars(); // check backend cvars state
 
 	// start the back end up again with the new command list
@@ -1203,7 +1204,7 @@ void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMs
 	}
 	else
 	{
-		CheckEGLInitialized(); // check/wait EGL context
+		GLimp_CheckGLInitialized(); // check/wait EGL context
 		R_CheckBackEndCvars(); // check backend cvars state
 
 		// start the back end up again with the new command list

@@ -2038,7 +2038,7 @@ struct idAllocAutoHeap {
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
 #endif
 
-extern void CheckEGLInitialized(void); // sys/android/main
+extern void GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
 //extern volatile bool has_gl_context;
 extern unsigned int lastRenderTime;
 extern int r_maxFps;
