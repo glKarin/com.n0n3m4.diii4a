@@ -526,7 +526,6 @@ void Sys_InitInput() {
 	kbd_polls.SetGranularity(64);
 	mouse_polls.SetGranularity(64);
 
-    Sys_Printf("%d %d\n", sizeof(scancodemappings)/sizeof(scancodemappings[0]), K_NUM_SCANCODES);
 	assert(sizeof(scancodemappings)/sizeof(scancodemappings[0]) == K_NUM_SCANCODES && "scancodemappings incomplete?");
 
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
@@ -901,20 +900,22 @@ sysEvent_t Sys_GetEvent() {
 #endif
 
 		case SDL_MOUSEMOTION:
+#if 0 //k
 			if ( in_relativeMouseMode ) {
+#endif
 				res.evType = SE_MOUSE;
 				res.evValue = ev.motion.xrel;
 				res.evValue2 = ev.motion.yrel;
 
 				mouse_polls.Append(mouse_poll_t(M_DELTAX, ev.motion.xrel));
 				mouse_polls.Append(mouse_poll_t(M_DELTAY, ev.motion.yrel));
-			} else {
 #if 0 //k
+			} else {
 				res.evType = SE_MOUSE_ABS;
 				res.evValue = ev.motion.x;
 				res.evValue2 = ev.motion.y;
-#endif
 			}
+#endif
 
 			return res;
 
@@ -1042,7 +1043,11 @@ static void handleMouseGrab() {
 
 		if ( menuActive ) {
 			showCursor = false;
+#if 1 //k
+			relativeMouse = !console->Active();
+#else
 			relativeMouse = false;
+#endif
 			grabMouse = false; // TODO: or still grab to window? (maybe only if in exclusive fullscreen mode?)
 		} else if ( console->Active() ) {
 			showCursor = true;

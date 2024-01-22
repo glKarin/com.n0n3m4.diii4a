@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "codec.h"
 
-#ifndef __ANDROID__
+#if! defined(__ANDROID__)
 #include <limits.h>
 #define HUGE INT_MAX
 #endif
