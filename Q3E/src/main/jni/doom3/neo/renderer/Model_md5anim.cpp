@@ -53,6 +53,7 @@ namespace md5anim
         bool AppendAnim(const idMD5AnimFile &other, int startFrame = 0, int endFrame = -1);
         bool CutAnim(int startFrame = 0, int endFrame = -1);
         bool ReverseAnim(int startFrame = 0, int endFrame = -1);
+        bool LoopAnim(int startFrame = 0, int endFrame = -1);
         idStr ToString(void) const;
         int NumFrames() const {
             return numFrames;
@@ -371,6 +372,47 @@ namespace md5anim
         return Check();
     }
 
+    bool idMD5AnimFile::LoopAnim(int startFrame, int endFrame)
+    {
+        NormalizedFrame(startFrame);
+        NormalizedFrame(endFrame);
+
+        if(startFrame >= endFrame)
+            return false;
+
+        int num = (endFrame - startFrame + 1) * 2 - 1;
+
+        idList<frame_t> target;
+        bounds_t b;
+        target.SetGranularity(1);
+        target.SetNum(num);
+        b.frames.SetGranularity(1);
+        b.frames.SetNum(num);
+        int index = 0;
+        // [ startFrame -> endFrame ]
+        for(int i = startFrame; i <= endFrame; i++)
+        {
+            target[index] = frames[i];
+            target[index].index = index;
+            b.frames[index] = bounds.frames[i];
+            index++;
+        }
+        // ( endFrame -> startFrame ]
+        for(int i = endFrame - 1; i >= startFrame; i--)
+        {
+            target[index] = frames[i];
+            target[index].index = index;
+            b.frames[index] = bounds.frames[i];
+            index++;
+        }
+
+        this->frames = target;
+        this->bounds = b;
+        this->numFrames = num;
+
+        return Check();
+    }
+
     idStr idMD5AnimFile::ToString(void) const
     {
         idStr str;
@@ -652,6 +694,61 @@ namespace md5anim
         common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
     }
 
+    static void R_LoopAnim_f(const idCmdArgs &args)
+    {
+        if (args.Argc() < 2)
+        {
+            common->Printf("Usage: loopAnim <anim_file> [<start_frame> <end_frame>]");
+            return;
+        }
+
+        md5anim::idMD5AnimFile file;
+        const char *filename = args.Argv(1);
+        if(!file.LoadAnim(filename))
+        {
+            common->Warning("Load md5anim file error: %s", filename);
+            return;
+        }
+
+        int startFrame = 0;
+        int endFrame = -1;
+        if(args.Argc() > 2)
+            startFrame = atoi(args.Argv(2));
+        if(args.Argc() > 3)
+            endFrame = atoi(args.Argv(3));
+        if(!file.LoopAnim(startFrame, endFrame))
+        {
+            common->Warning("Loop md5anim error: %s(%d - %d)", filename, startFrame, endFrame);
+            return;
+        }
+
+        idStr text = file.ToString();
+        idStr basePath;
+
+        idStr targetPath;
+        if(!basePath.IsEmpty())
+        {
+            targetPath = basePath;
+            targetPath.AppendPath(filename);
+        }
+        else
+        {
+            targetPath = filename;
+            targetPath.StripFileExtension();
+            targetPath.Append("_loop");
+            if(args.Argc() > 2)
+                targetPath.Append(va("_%d", startFrame));
+            if(args.Argc() > 3)
+                targetPath.Append(va("_%d", endFrame));
+            targetPath.Append(".md5anim");
+        }
+        idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
+        md5anim::WriteText(text, f);
+        fileSystem->CloseFile(f);
+
+        common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
+    }
+
     struct animPart_s
     {
         idStr file_name;
@@ -862,4 +959,5 @@ void MD5Anim_AddCommand(void)
     cmdSystem->AddCommand("cutAnim", R_CutAnim_f, CMD_FL_RENDERER, "cut md5 anim", ArgCompletion_AnimName);
     cmdSystem->AddCommand("reverseAnim", R_ReverseAnim_f, CMD_FL_RENDERER, "reverse md5 anim", ArgCompletion_AnimName);
     cmdSystem->AddCommand("linkAnim", R_LinkAnim_f, CMD_FL_RENDERER, "link md5 anim", ArgCompletion_AnimName);
+    cmdSystem->AddCommand("loopAnim", R_LoopAnim_f, CMD_FL_RENDERER, "loop md5 anim", ArgCompletion_AnimName);
 }
