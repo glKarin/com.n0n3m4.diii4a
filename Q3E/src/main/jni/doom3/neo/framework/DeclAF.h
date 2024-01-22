@@ -154,7 +154,11 @@ class idDeclAF : public idDecl
 
 		virtual size_t			Size(void) const;
 		virtual const char 	*DefaultDefinition(void) const;
+#ifdef _RAVEN
+		virtual bool			Parse(const char *text, const int textLength, bool noCaching = false);
+#else
 		virtual bool			Parse(const char *text, const int textLength);
+#endif
 		virtual void			FreeData(void);
 
 		virtual void			Finish(const getJointTransform_t GetJointTransform, const idJointMat *frame, void *model) const;

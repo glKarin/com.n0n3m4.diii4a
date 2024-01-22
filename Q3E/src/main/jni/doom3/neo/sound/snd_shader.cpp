@@ -149,7 +149,11 @@ idSoundShader::Parse
   this is called by the declManager
 ===============
 */
+#ifdef _RAVEN
+bool idSoundShader::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idSoundShader::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer	src;
 

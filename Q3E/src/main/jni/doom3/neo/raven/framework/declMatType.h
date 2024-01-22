@@ -30,7 +30,7 @@ public:
 	float				GetBlue( void ) const { return( mTint[2] / 255.0f ); }
 
 	virtual const char	*DefaultDefinition( void ) const;
-	virtual bool		Parse( const char *text, const int textLength );
+	virtual bool		Parse( const char *text, const int textLength, bool noCaching = false );
 	virtual void		FreeData( void );
 	virtual size_t		Size( void ) const;
 

@@ -55,7 +55,11 @@ void idDeclSkin::FreeData(void)
 idDeclSkin::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclSkin::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclSkin::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken	token, token2;

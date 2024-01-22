@@ -227,7 +227,8 @@ size_t rvDeclPlayback::Size(void) const {
 rvDeclPlayback::Parse
 =====================
 */
-bool rvDeclPlayback::Parse(const char* text, const int textLength) {
+bool rvDeclPlayback::Parse(const char* text, const int textLength, bool noCaching)
+{
 	idLexer src;
 	idToken	token, token2;
 

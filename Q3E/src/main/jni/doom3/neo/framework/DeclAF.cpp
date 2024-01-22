@@ -1545,7 +1545,11 @@ bool idDeclAF::ParseSettings(idLexer &src)
 idDeclAF::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclAF::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclAF::Parse(const char *text, const int textLength)
+#endif
 {
 	int i, j;
 	idLexer src;

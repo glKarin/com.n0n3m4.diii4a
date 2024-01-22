@@ -513,7 +513,11 @@ idParticleStage *idDeclParticle::ParseParticleStage(idLexer &src)
 idDeclParticle::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclParticle::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclParticle::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken	token;

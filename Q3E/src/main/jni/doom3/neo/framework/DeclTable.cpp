@@ -115,7 +115,11 @@ const char *idDeclTable::DefaultDefinition(void) const
 idDeclTable::Parse
 =================
 */
+#ifdef _RAVEN
+bool idDeclTable::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclTable::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken token;

@@ -430,7 +430,11 @@ void idDeclFX::ParseSingleFXAction(idLexer &src, idFXSingleAction &FXAction)
 idDeclFX::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclFX::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclFX::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken token;

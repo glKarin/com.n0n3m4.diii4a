@@ -498,7 +498,7 @@ rvBSEParticleStage *rvBSEParticle::ParseParticleStage(idLexer &src)
 rvBSEParticle::Parse
 ================
 */
-bool rvBSEParticle::Parse(const char *text, const int textLength)
+bool rvBSEParticle::Parse(const char *text, const int textLength, bool noCaching)
 {
 	idLexer src;
 	idToken	token;

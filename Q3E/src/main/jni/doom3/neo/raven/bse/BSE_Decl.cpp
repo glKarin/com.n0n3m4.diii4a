@@ -83,7 +83,7 @@ void rvDeclEffect::List(void) const
 rvDeclEffect::Parse
 ================
 */
-bool rvDeclEffect::Parse(const char *text, const int textLength)
+bool rvDeclEffect::Parse(const char *text, const int textLength, bool noCaching)
 {
 	idLexer src;
 	idToken token;

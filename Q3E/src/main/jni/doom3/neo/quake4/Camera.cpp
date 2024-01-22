@@ -1451,7 +1451,7 @@ bool idDeclCameraDef::ParseAnim( idLexer &src, int numDefaultAnims ) {
 idDeclCameraDef::Parse
 ================
 */
-bool idDeclCameraDef::Parse( const char *text, const int textLength/* , bool noCaching */ ) {
+bool idDeclCameraDef::Parse( const char *text, const int textLength, bool noCaching ) {
 	idStr				filename;
 	idStr				extension;
 	idLexer				src;

@@ -2759,7 +2759,11 @@ idMaterial::Parse
 Parses the current material definition and finds all necessary images.
 =========================
 */
+#ifdef _RAVEN
+bool idMaterial::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idMaterial::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer	src;
 	idToken	token;

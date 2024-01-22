@@ -44,7 +44,11 @@ class idDeclEntityDef : public idDecl
 
 		virtual size_t			Size(void) const;
 		virtual const char 	*DefaultDefinition() const;
+#ifdef _RAVEN
+		virtual bool			Parse(const char *text, const int textLength, bool noCaching = false);
+#else
 		virtual bool			Parse(const char *text, const int textLength);
+#endif
 		virtual void			FreeData(void);
 		virtual void			Print(void);
 };

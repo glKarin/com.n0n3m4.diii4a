@@ -151,7 +151,7 @@ class idDeclBase
 		virtual bool			SetDefaultText(void) = 0;
 		virtual const char 	*DefaultDefinition(void) const = 0;
 #ifdef _RAVEN
-		virtual bool			Parse(const char *text, const int textLength, bool noCaching) = 0;
+		virtual bool			Parse(const char *text, const int textLength, bool noCaching = false) = 0;
 #else
 		virtual bool			Parse(const char *text, const int textLength) = 0;
 #endif
@@ -325,8 +325,8 @@ class idDecl
 		// The subclass can call MakeDefault() internally at any point if
 		// there are parse errors.
 #ifdef _RAVEN
-		virtual bool			Parse(const char *text, const int textLength/*jmarshall , bool noCaching*/) {
-			return base->Parse(text, textLength, false/* jmarshall noCaching*/);
+		virtual bool			Parse(const char *text, const int textLength , bool noCaching = false) {
+			return base->Parse(text, textLength, noCaching/*false*/);
 		}
 #else
 		virtual bool			Parse(const char *text, const int textLength) {

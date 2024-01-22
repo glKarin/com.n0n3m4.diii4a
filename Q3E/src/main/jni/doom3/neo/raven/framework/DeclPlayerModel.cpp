@@ -32,7 +32,8 @@ const char* rvDeclPlayerModel::DefaultDefinition() const {
 rvDeclPlayerModel::FreeData
 ===================
 */
-bool rvDeclPlayerModel::Parse(const char* text, const int textLength) {
+bool rvDeclPlayerModel::Parse(const char* text, const int textLength, bool noCaching)
+{
 	idLexer src;
 	idToken	token, token2;
 
