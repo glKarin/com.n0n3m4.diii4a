@@ -42,23 +42,15 @@ If you have questions concerning this license or the applicable additional terms
 idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
 					"Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
 
-const char	*s_openglesArgs[]	= {
-		"GLES2",
 #ifdef _OPENGLES3
+const char	*r_openglesArgs[]	= {
+		"GLES2",
 		"GLES3.0",
-#endif
-		// "AAudio"
 		NULL };
 idCVar harm_sys_openglVersion("harm_sys_openglVersion",
-#ifdef _OPENGLES3
-        s_openglesArgs[1]
-#else
-                              s_openglesArgs[0]
-#endif
+                              r_openglesArgs[1]
                               , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
-					"OpenGL version", s_openglesArgs, idCmdSystem::ArgCompletion_String<s_openglesArgs>);
-
-#ifdef _OPENGLES3
+					"OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
 #define DEFAULT_GLES_VERSION 0x00030000
 #else
 #define DEFAULT_GLES_VERSION 0x00020000

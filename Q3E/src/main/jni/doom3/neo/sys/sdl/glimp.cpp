@@ -107,6 +107,22 @@ static SDL_Surface *window = NULL;
 #define SDL_WINDOW_FULLSCREEN SDL_FULLSCREEN
 #endif
 
+#ifdef _OPENGLES3
+const char	*r_openglesArgs[]	= {
+        "GLES2",
+        "GLES3.0",
+        NULL };
+idCVar harm_sys_openglVersion("harm_sys_openglVersion",
+                              r_openglesArgs[1]
+        , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
+                              "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
+#define DEFAULT_GLES_VERSION 0x00030000
+#else
+#define DEFAULT_GLES_VERSION 0x00020000
+#endif
+bool USING_GLES3 = false;
+int gl_version = DEFAULT_GLES_VERSION;
+
 static idCVar r_fullscreenDesktop( "r_fullscreenDesktop", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0: 'real' fullscreen mode 1: keep resolution 'desktop' fullscreen mode" );
 
 const int GRAB_GRABMOUSE	= (1 << 0);
@@ -290,8 +306,17 @@ bool GLimp_Init(glimpParms_t parms) {
 
         // Get GLES2 context
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        int glMajorVersion = 2;
+        int glMinorVersion = 0;
+#ifdef _OPENGLES3
+        if(USING_GLES3)
+        {
+            glMajorVersion = 3;
+            glMinorVersion = 0;
+        }
+#endif
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glMajorVersion);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glMinorVersion);
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
