@@ -2097,7 +2097,7 @@ extern idCVar harm_r_translucentStencilShadow;
 extern idCVar harm_r_stencilShadowAlpha;
 #endif
 
-#ifdef __ANDROID__ //karin: r_brightness on Android
+#ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma
 extern float RB_overbright;
 #endif
 
