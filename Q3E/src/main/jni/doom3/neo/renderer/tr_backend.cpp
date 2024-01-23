@@ -175,7 +175,7 @@ void GL_UseProgram(shaderProgram_t *program)
 	qglUseProgram(program ? program->program : 0);
 	backEnd.glState.currentProgram = program;
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -189,7 +189,7 @@ void GL_Uniform1fv(GLint location, const GLfloat *value)
 
 	qglUniform1fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -203,7 +203,7 @@ void GL_Uniform4fv(GLint location, const GLfloat *value)
 
 	qglUniform4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -217,7 +217,7 @@ void GL_Uniform3fv(GLint location, const GLfloat *value)
 
 	qglUniform3fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -231,7 +231,7 @@ void GL_UniformMatrix4fv(GLint location, const GLfloat *value)
 
 	qglUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, GL_FALSE, value);
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -245,7 +245,7 @@ void GL_Uniform1f(GLint location, GLfloat value)
 
 	qglUniform1f(*(GLint *)((char *)backEnd.glState.currentProgram + location), value);
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -262,7 +262,7 @@ void GL_EnableVertexAttribArray(GLuint index)
 	//RB_LogComment("qglEnableVertexAttribArray( %i );\n", index);
 	qglEnableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -278,7 +278,7 @@ void GL_DisableVertexAttribArray(GLuint index)
 
 	qglDisableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -298,7 +298,7 @@ void GL_VertexAttribPointer(GLuint index, GLint size, GLenum type,
 	qglVertexAttribPointer(*(GLint *)((char *)backEnd.glState.currentProgram + index),
 	                      size, type, normalized, stride, pointer);
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 
 /*
@@ -853,6 +853,6 @@ void GL_UniformMatrix4fv(GLint location, const GLsizei n, const GLfloat *value)
 
 	qglUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), n, GL_FALSE, value);
 
-	GL_CheckErrors();
+	HARM_CHECK_SHADER_ERROR();
 }
 

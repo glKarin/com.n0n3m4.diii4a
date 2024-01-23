@@ -2108,6 +2108,7 @@ extern float RB_overbright;
         Sys_Trap(); \
 		return; \
 	}
+
 #ifdef _HARM_SHADER_NAME
 #define HARM_CHECK_SHADER_ATTR(x, index) \
 	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) { \
@@ -2124,9 +2125,13 @@ extern float RB_overbright;
 		return; \
 	}
 #endif
+
+#define HARM_CHECK_SHADER_ERROR() GL_CheckErrors();
+
 #else
 #define HARM_CHECK_SHADER(x)
 #define HARM_CHECK_SHADER_ATTR(x, index)
+#define HARM_CHECK_SHADER_ERROR(x)
 #endif
 
 #endif /* !__TR_LOCAL_H__ */
