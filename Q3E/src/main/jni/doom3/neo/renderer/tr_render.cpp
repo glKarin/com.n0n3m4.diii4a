@@ -49,11 +49,7 @@ RB_DrawElementsWithCounters
 */
 void RB_DrawElementsWithCounters(const srfTriangles_t *tri)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("RB_DrawElementsWithCounters: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("RB_DrawElementsWithCounters");
 
 	backEnd.pc.c_drawElements++;
 	backEnd.pc.c_drawIndexes += tri->numIndexes;
@@ -94,11 +90,7 @@ May not use all the indexes in the surface if caps are skipped
 */
 void RB_DrawShadowElementsWithCounters(const srfTriangles_t *tri, int numIndexes)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("RB_DrawShadowElementsWithCounters: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("RB_DrawShadowElementsWithCounters");
 
 	backEnd.pc.c_shadowElements++;
 	backEnd.pc.c_shadowIndexes += numIndexes;

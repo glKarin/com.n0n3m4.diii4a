@@ -1182,13 +1182,17 @@ void Sys_Error(const char *error, ...)
 
 void Sys_Trap(void)
 {
-#if defined(__unix__)
+#ifdef __ANDROID__
+	__builtin_trap();
+#elif defined(__unix__)
     // __builtin_trap() causes an illegal instruction which is kinda ugly.
     // especially if you'd like to be able to continue after the assertion during debugging
     raise(SIGTRAP); // this will break into the debugger.
 #elif defined( __GNUC__ )
     __builtin_trap();
     _exit(1);
+#else
+	abort();
 #endif
 }
 

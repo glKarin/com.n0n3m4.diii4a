@@ -476,11 +476,7 @@ RB_DrawShadowElementsWithCounters_shadowMapping
 #define SM_FRONT_CAP 4
 static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t *tri/*, int type = 0*/)
 {
-    if (!backEnd.glState.currentProgram) {
-        common->Printf("RB_DrawShadowElementsWithCounters_shadowMapping: no current program object\n");
-        Sys_Trap();
-        return;
-    }
+    HARM_CHECK_SHADER("RB_DrawShadowElementsWithCounters_shadowMapping");
 
     GLint start;
     GLsizei numIndexes;

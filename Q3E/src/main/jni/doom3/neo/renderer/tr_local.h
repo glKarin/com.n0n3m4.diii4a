@@ -2101,4 +2101,32 @@ extern idCVar harm_r_stencilShadowAlpha;
 extern float RB_overbright;
 #endif
 
+#ifdef _K_DEV
+#define HARM_CHECK_SHADER(x) \
+	if (!backEnd.glState.currentProgram) { \
+		common->Printf(x ": no current program object\n"); \
+        Sys_Trap(); \
+		return; \
+	}
+#ifdef _HARM_SHADER_NAME
+#define HARM_CHECK_SHADER_ATTR(x, index) \
+	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) { \
+		common->Printf(x ": unbound attribute index\n"); \
+		RB_LogComment("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index); \
+        Sys_Trap(); \
+		return; \
+	}
+#else
+#define HARM_CHECK_SHADER_ATTR(x, index) \
+	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) { \
+		common->Printf(x ": unbound attribute index\n"); \
+        Sys_Trap(); \
+		return; \
+	}
+#endif
+#else
+#define HARM_CHECK_SHADER(x)
+#define HARM_CHECK_SHADER_ATTR(x, index)
+#endif
+
 #endif /* !__TR_LOCAL_H__ */

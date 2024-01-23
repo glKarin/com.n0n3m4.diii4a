@@ -185,11 +185,7 @@ GL_Uniform1fv
 */
 void GL_Uniform1fv(GLint location, const GLfloat *value)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_Uniform1fv: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_Uniform1fv");
 
 	qglUniform1fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
@@ -203,11 +199,7 @@ GL_Uniform4fv
 */
 void GL_Uniform4fv(GLint location, const GLfloat *value)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_Uniform4fv: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_Uniform4fv");
 
 	qglUniform4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
@@ -221,11 +213,7 @@ GL_Uniform3fv
 */
 void GL_Uniform3fv(GLint location, const GLfloat *value)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_Uniform4fv: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_Uniform3fv");
 
 	qglUniform3fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
 
@@ -239,11 +227,7 @@ GL_UniformMatrix4fv
 */
 void GL_UniformMatrix4fv(GLint location, const GLfloat *value)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_Uniform4fv: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_UniformMatrix4fv");
 
 	qglUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, GL_FALSE, value);
 
@@ -257,11 +241,7 @@ GL_Uniform1f
 */
 void GL_Uniform1f(GLint location, GLfloat value)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_Uniform1f: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_Uniform1f");
 
 	qglUniform1f(*(GLint *)((char *)backEnd.glState.currentProgram + location), value);
 
@@ -275,20 +255,9 @@ GL_EnableVertexAttribArray
 */
 void GL_EnableVertexAttribArray(GLuint index)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_EnableVertexAttribArray: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_EnableVertexAttribArray");
 
-	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) {
-		common->Printf("GL_EnableVertexAttribArray: unbound attribute index\n");
-#ifdef _HARM_SHADER_NAME
-		RB_LogComment("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
-#endif
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER_ATTR("GL_EnableVertexAttribArray", index);
 
 	//RB_LogComment("qglEnableVertexAttribArray( %i );\n", index);
 	qglEnableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
@@ -303,20 +272,9 @@ GL_DisableVertexAttribArray
 */
 void GL_DisableVertexAttribArray(GLuint index)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_DisableVertexAttribArray: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_DisableVertexAttribArray");
 
-	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) {
-		common->Printf("GL_DisableVertexAttribArray: unbound attribute index\n");
-#ifdef _HARM_SHADER_NAME
-		RB_LogComment("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
-#endif
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER_ATTR("GL_DisableVertexAttribArray", index);
 
 	qglDisableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
 
@@ -332,17 +290,9 @@ void GL_VertexAttribPointer(GLuint index, GLint size, GLenum type,
 			    GLboolean normalized, GLsizei stride,
 			    const GLvoid *pointer)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_VertexAttribPointer: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_VertexAttribPointer");
 
-	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) {
-		common->Printf("GL_VertexAttribPointer: unbound attribute index\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER_ATTR("GL_VertexAttribPointer", index);
 
 	// RB_LogComment("qglVertexAttribPointer( %i, %i, %i, %i, %i, %p );\n", index, size, type, normalized, stride, pointer);
 	qglVertexAttribPointer(*(GLint *)((char *)backEnd.glState.currentProgram + index),
@@ -899,11 +849,7 @@ GL_UniformMatrix4fv
 */
 void GL_UniformMatrix4fv(GLint location, const GLsizei n, const GLfloat *value)
 {
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_Uniform4fv: no current program object\n");
-        Sys_Trap();
-		return;
-	}
+	HARM_CHECK_SHADER("GL_UniformMatrix4fv");
 
 	qglUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), n, GL_FALSE, value);
 
