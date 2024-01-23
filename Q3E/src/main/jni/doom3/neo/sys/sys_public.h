@@ -713,4 +713,8 @@ bool Sys_ThreadIsRunning(const xthreadInfo *thread);
 #endif
 #endif
 
+void			Sys_Trap(void);
+void			Sys_Usleep(int usec);
+void			Sys_Msleep(int msec);
+
 #endif /* !__SYS_PUBLIC__ */

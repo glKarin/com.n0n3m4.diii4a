@@ -146,8 +146,10 @@ public:
 #endif
 
 typedef intptr_t INT_PTR;
+#if !defined(_MSC_VER)
 typedef unsigned int DWORD;
 typedef bool BOOL;
+#endif
 #endif
 
 #define round_up(x, y)	(((x) + ((y)-1)) & ~((y)-1))

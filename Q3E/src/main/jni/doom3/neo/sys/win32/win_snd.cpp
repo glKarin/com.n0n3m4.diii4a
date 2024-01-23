@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 // DirectX SDK
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 #include <DxErr.h>
 #else
 static int dxtrace_err(const char *text, intptr_t p) {

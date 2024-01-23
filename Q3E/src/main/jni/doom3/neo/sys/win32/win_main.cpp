@@ -694,7 +694,7 @@ void *Sys_DLL_GetProcAddress( uintptr_t dllHandle, const char *procName ) {
 		idStr errorStr = va("[%i (0x%X)]\t%s", e, e, msgBuf);
 
 		if (errorStr.Length())
-			common->Warning("GetProcAddress( %i %s) Failed ! %s", dllHandle, procName, errorStr.c_str());
+			common->Warning("GetProcAddress( %p %s) Failed ! %s", dllHandle, procName, errorStr.c_str());
 
 		::LocalFree(msgBuf);
 	}
@@ -1285,4 +1285,32 @@ void idSysLocal::StartProcess( const char *exePath, bool doexit ) {
 	if ( doexit ) {
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
 	}
+}
+
+void Sys_Trap(void)
+{
+#ifdef _MSC_VER
+    __debugbreak();
+    _exit(1);
+#elif defined( __GNUC__ )
+	__builtin_trap();
+	_exit(1);
+#endif
+}
+
+void Sys_Usleep(int usec)
+{
+    HANDLE timer;
+    LARGE_INTEGER interval;
+    interval.QuadPart = -(10 * usec);
+
+    timer = CreateWaitableTimer(NULL, TRUE, NULL);
+    SetWaitableTimer(timer, &interval, 0, NULL, NULL, 0);
+    WaitForSingleObject(timer, INFINITE);
+    CloseHandle(timer);
+}
+
+void Sys_Msleep(int msec)
+{
+    Sleep(msec);
 }

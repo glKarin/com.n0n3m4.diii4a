@@ -1179,3 +1179,25 @@ void Sys_Error(const char *error, ...)
 
 	Posix_Exit(EXIT_FAILURE);
 }
+
+void Sys_Trap(void)
+{
+#if defined(__unix__)
+    // __builtin_trap() causes an illegal instruction which is kinda ugly.
+    // especially if you'd like to be able to continue after the assertion during debugging
+    raise(SIGTRAP); // this will break into the debugger.
+#elif defined( __GNUC__ )
+    __builtin_trap();
+    _exit(1);
+#endif
+}
+
+void Sys_Usleep(int usec)
+{
+    usleep(usec);
+}
+
+void Sys_Msleep(int msec)
+{
+    usleep(msec * 1000);
+}

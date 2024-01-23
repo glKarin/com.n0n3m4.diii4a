@@ -153,17 +153,35 @@ extern idCVar bse_render;
 extern idCVar bse_singleEffect;
 extern idCVar bse_debug;
 #ifdef _K_DEV // my debug macros
+#if !defined(_MSC_VER)
 #define BSE_VERBOSE(fmt, args...) { if(bse_debug.GetInteger() >= 1) { common->Printf(fmt, ##args); } }
 #define BSE_DEBUG(fmt, args...) { if(bse_debug.GetInteger() >= 2) { common->Printf(fmt, ##args); } }
 #define BSE_INFO(fmt, args...) { if(bse_debug.GetInteger() >= 3) { common->Printf(fmt, ##args); } }
 #define BSE_WARNING(fmt, args...) { if(bse_debug.GetInteger() >= 4) { common->Printf(fmt, ##args); } }
 #define BSE_ERROR(fmt, args...) { if(bse_debug.GetInteger() >= 5) { common->Printf(fmt, ##args); } }
 #else
+#define BSE_VERBOSE(fmt, ...) { if(bse_debug.GetInteger() >= 1) { common->Printf(fmt, __VA_ARGS__); } }
+#define BSE_DEBUG(fmt, ...) { if(bse_debug.GetInteger() >= 2) { common->Printf(fmt, __VA_ARGS__); } }
+#define BSE_INFO(fmt, ...) { if(bse_debug.GetInteger() >= 3) { common->Printf(fmt, __VA_ARGS__); } }
+#define BSE_WARNING(fmt, ...) { if(bse_debug.GetInteger() >= 4) { common->Printf(fmt, __VA_ARGS__); } }
+#define BSE_ERROR(fmt, ...) { if(bse_debug.GetInteger() >= 5) { common->Printf(fmt, __VA_ARGS__); } }
+#endif
+
+#else
+
+#if !defined(_MSC_VER)
 #define BSE_VERBOSE(fmt, args...)
 #define BSE_DEBUG(fmt, args...)
 #define BSE_INFO(fmt, args...)
 #define BSE_WARNING(fmt, args...)
 #define BSE_ERROR(fmt, args...)
+#else
+#define BSE_VERBOSE(fmt, ...)
+#define BSE_DEBUG(fmt, ...)
+#define BSE_INFO(fmt, ...)
+#define BSE_WARNING(fmt, ...)
+#define BSE_ERROR(fmt, ...)
+#endif
 #endif
 
 typedef struct {

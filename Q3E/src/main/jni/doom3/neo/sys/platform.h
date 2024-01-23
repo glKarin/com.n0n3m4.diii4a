@@ -5,12 +5,6 @@
 #include "../framework/BuildDefines.h"
 #include "../idlib/precompiled.h"
 
-#ifdef GAME_DLL
-#define ID_GAME_API					__attribute__((visibility ("default")))
-#else
-#define ID_GAME_API
-#endif
-
 #ifdef D3_OSTYPE
 #define BUILD_OS D3_OSTYPE
 #else // Android

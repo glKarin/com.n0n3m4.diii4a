@@ -1979,9 +1979,17 @@ idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
 #ifdef _HUMANHEAD
 //#define _DEBUG_SUBTITLE
 #ifdef _DEBUG_SUBTITLE
+#if !defined(_MSC_VER)
 #define SUBTITLE_DEBUG(fmt, args...) common->Printf(fmt, ##args)
 #else
+#define SUBTITLE_DEBUG(fmt, s...) common->Printf(fmt,__VA_ARGS__)
+#endif
+#else
+#if !defined(_MSC_VER)
 #define SUBTITLE_DEBUG(fmt, args...)
+#else
+#define SUBTITLE_DEBUG(fmt, ...)
+#endif
 #endif
 
 //HUMANHEAD rww

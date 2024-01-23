@@ -478,7 +478,7 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
 {
     if (!backEnd.glState.currentProgram) {
         common->Printf("RB_DrawShadowElementsWithCounters_shadowMapping: no current program object\n");
-        __builtin_trap();
+        Sys_Trap();
         return;
     }
 

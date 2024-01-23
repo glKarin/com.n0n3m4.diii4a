@@ -5,6 +5,7 @@
 
 #define LOG_LEN 2048
 
+#if !defined(_MSC_VER)
 #define SHADER_ERROR(fmt, args...) { \
 	if(shaderRequired) {               \
 		common->Error(fmt, ##args); \
@@ -12,6 +13,15 @@
 		common->Warning(fmt, ##args);   \
 	}                                    \
 }
+#else
+#define SHADER_ERROR(fmt, ...) { \
+	if(shaderRequired) {               \
+		common->Error(fmt, __VA_ARGS__); \
+	} else {                           \
+		common->Warning(fmt, __VA_ARGS__);   \
+	}                                    \
+}
+#endif
 
 //#define _DEBUG_VERT_SHADER_SOURCE
 //#define _DEBUG_FRAG_SHADER_SOURCE

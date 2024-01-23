@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(doom3)
 
+# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
 set(COMPILE_CURL "1")
 set(CORE_DEFINES "__DOOM_DLL__")
 if(ANDROID)
@@ -8,8 +9,17 @@ if(ANDROID)
 	add_definitions(-D_NO_PTHREAD_CANCEL)
 	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA")
 elseif(WIN32)
+	find_package(CURL QUIET)
+	if(CURL_FOUND)
+		set(COMPILE_CURL "1")
+		include_directories(${CURL_INCLUDE_DIR})
+		message(STATUS "libcurl found and enabled")
+	else()
+		message(WARNING "libcurl not found, server downloads won't be available (apart from that dhewm3 will work)")
+		set(CURL_LIBRARY "")
+		set(COMPILE_CURL "0")
+	endif()
 	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA")
-	set(COMPILE_CURL "0")
 else()
 	# apt-get install libasound2-dev # sound alsa support
 	# apt-get install libgles-dev # GLES2/GLES3/EGL headers
@@ -257,16 +267,17 @@ check_c_source_compiles( "#include <backtrace.h>
 	int main() { backtrace_create_state(NULL, 0, NULL, NULL); return 0; }" HAVE_LIBBACKTRACE )
 unset(CMAKE_REQUIRED_LIBRARIES)
 
-# compiler specific flags
-add_compile_options(-pipe)
-#add_compile_options(-Wall)
-add_compile_options(-w)
-
 if(NOT CMAKE_CROSSCOMPILING AND ONATIVE)
 	add_compile_options(-march=native)
 elseif(NOT APPLE AND cpu STREQUAL "x86")
 	add_compile_options(-march=pentium3)
 endif()
+
+if(NOT MSVC)
+	# compiler specific flags
+	add_compile_options(-pipe)
+	#add_compile_options(-Wall)
+	add_compile_options(-w)
 
 set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0 -fPIC")
 set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG -fPIC")
@@ -283,13 +294,11 @@ add_compile_options(-fno-strict-aliasing)
 # (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
 add_compile_options(-ffp-contract=off)
 
-if(NOT AROS)
 	CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
 	if(NOT cxx_has_fvisibility)
 		message(FATAL_ERROR "Compiler does not support -fvisibility")
 	endif()
 	add_compile_options(-fvisibility=hidden)
-endif()
 
 # TODO fix these warnings
 add_compile_options(-Wno-sign-compare)
@@ -299,6 +308,10 @@ add_compile_options(-Wno-format-security)
 add_compile_options(-Wno-unknown-pragmas)
 add_compile_options(-Wno-unused-private-field)
 add_compile_options(-Wno-unused-variable)
+
+else()
+	add_definitions(-D_ALLOW_KEYWORD_MACROS) # because of the "#define private public" and "#define protected public" in TypeInfo.cpp
+endif()
 
 CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 if(cxx_has_Woverload_virtual)
@@ -339,7 +352,11 @@ endif()
 
 set(local_libs ogg)
 if(COMPILE_CURL STREQUAL "1")
+	if(NOT WIN32)
 	set(local_libs ${local_libs} curl)
+	else()
+		set(sys_libs ${sys_libs} ${CURL_LIBRARY})
+	endif()
 	message(STATUS "Build cURL")
 endif()
 
@@ -1014,7 +1031,7 @@ list(REMOVE_ITEM src_quake4
 		PlayerIcon.cpp
 		SmokeParticles.cpp
 		ai/AI_Vagary.cpp
-		gamesys/TypeInfo.cpp
+		#gamesys/TypeInfo.cpp
 		)
 list(APPEND src_quake4 ${quake4_game_src})
 set_src_dir(src_quake4 "quake4" ${src_quake4})
@@ -1281,6 +1298,8 @@ add_globbed_headers(humanhead_renderer_src "humanhead")
 add_globbed_headers(humanhead_framework_src "humanhead")
 
 include_directories("externlibs")
+
+if(NOT WIN32)
 if(COMPILE_CURL STREQUAL "1")
 #//k curl
 set(src_curl
@@ -1343,6 +1362,7 @@ else()
 endif()
 set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
 target_link_libraries(curl z)
+endif()
 endif()
 
 #//k ogg
@@ -1472,7 +1492,9 @@ include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(idlib STATIC ${src_idlib})
+if(NOT MSVC)
 set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib})
 
@@ -1483,7 +1505,9 @@ set(src_idlib_raven
 		${raven_idlib_src}
 		)
 add_library(idlib_raven STATIC ${src_idlib_raven})
+if(NOT MSVC)
 set_target_properties(idlib_raven PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
 set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_raven})
@@ -1495,7 +1519,9 @@ set(src_idlib_humanhead
 		${humanhead_idlib_src}
 		)
 add_library(idlib_humanhead STATIC ${src_idlib_humanhead})
+if(NOT MSVC)
 set_target_properties(idlib_humanhead PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
 set_target_properties(idlib_humanhead PROPERTIES COMPILE_DEFINITIONS "_HUMANHEAD;HUMANHEAD")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_humanhead})

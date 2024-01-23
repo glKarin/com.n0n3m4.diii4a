@@ -187,7 +187,7 @@ void GL_Uniform1fv(GLint location, const GLfloat *value)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_Uniform1fv: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -205,7 +205,7 @@ void GL_Uniform4fv(GLint location, const GLfloat *value)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_Uniform4fv: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -223,7 +223,7 @@ void GL_Uniform3fv(GLint location, const GLfloat *value)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_Uniform4fv: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -241,7 +241,7 @@ void GL_UniformMatrix4fv(GLint location, const GLfloat *value)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_Uniform4fv: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -259,7 +259,7 @@ void GL_Uniform1f(GLint location, GLfloat value)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_Uniform1f: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -277,7 +277,7 @@ void GL_EnableVertexAttribArray(GLuint index)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_EnableVertexAttribArray: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -286,7 +286,7 @@ void GL_EnableVertexAttribArray(GLuint index)
 #ifdef _HARM_SHADER_NAME
 		RB_LogComment("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
 #endif
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -305,7 +305,7 @@ void GL_DisableVertexAttribArray(GLuint index)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_DisableVertexAttribArray: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -314,7 +314,7 @@ void GL_DisableVertexAttribArray(GLuint index)
 #ifdef _HARM_SHADER_NAME
 		RB_LogComment("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index);
 #endif
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -334,13 +334,13 @@ void GL_VertexAttribPointer(GLuint index, GLint size, GLenum type,
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_VertexAttribPointer: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
 	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) {
 		common->Printf("GL_VertexAttribPointer: unbound attribute index\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -901,7 +901,7 @@ void GL_UniformMatrix4fv(GLint location, const GLsizei n, const GLfloat *value)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("GL_Uniform4fv: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 

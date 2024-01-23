@@ -37,7 +37,6 @@ idRenderSystem	*renderSystem = &tr;
 unsigned int lastRenderTime = 0;
 int r_maxFps = 0;
 
-#include <unistd.h>
 #define FPS_LIMIT() \
 { \
     if(r_maxFps > 0) \
@@ -45,7 +44,7 @@ int r_maxFps = 0;
         unsigned int currentTime = Sys_Milliseconds(); \
         int timeTook = currentTime - lastRenderTime; \
         if(timeTook < r_maxFps) \
-            usleep((r_maxFps - timeTook) * 1000); \
+            Sys_Msleep(r_maxFps - timeTook); \
         lastRenderTime = Sys_Milliseconds(); \
     } \
 }

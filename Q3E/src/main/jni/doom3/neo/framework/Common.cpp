@@ -2881,7 +2881,13 @@ idCommonLocal::LoadGameDLL
 
 #ifdef _WIN32
 #define DLL_SUFFIX ".dll"
+
+#ifdef _MSC_VER
+#define DLL_PREFIX ""
+#else
 #define DLL_PREFIX "lib"
+#endif
+
 #else
 #define DLL_SUFFIX ".so"
 #define DLL_PREFIX "lib"
@@ -2911,6 +2917,7 @@ void idCommonLocal::LoadGameDLL(void)
 #if 1 //karin: select game dll on Android
 #define LOAD_RESULT(dll) ((dll) ? "done" : "fail")
 
+#ifdef __ANDROID__
 	common->Printf("[Harmattan]: fpu = "
 #ifdef __aarch64__
 			"hard"
@@ -2922,6 +2929,7 @@ void idCommonLocal::LoadGameDLL(void)
 	#endif
 #endif
 			"\n");
+#endif
 	// First try to load user special game library.
 	// For other apk.
 	idStr fsgame = cvarSystem->GetCVarString("harm_fs_gameLibPath");

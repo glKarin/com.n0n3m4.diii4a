@@ -1460,7 +1460,7 @@ a floating point value
 */
 void RB_STD_LightScale(void)
 {
-#warning RB_STD_LightScale
+//#warning RB_STD_LightScale
 #if 0	//!defined(GL_ES_VERSION_2_0)
 	float	v, f;
 

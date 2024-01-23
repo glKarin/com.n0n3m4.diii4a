@@ -51,7 +51,7 @@ void RB_DrawElementsWithCounters(const srfTriangles_t *tri)
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("RB_DrawElementsWithCounters: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 
@@ -96,7 +96,7 @@ void RB_DrawShadowElementsWithCounters(const srfTriangles_t *tri, int numIndexes
 {
 	if (!backEnd.glState.currentProgram) {
 		common->Printf("RB_DrawShadowElementsWithCounters: no current program object\n");
-		__builtin_trap();
+        Sys_Trap();
 		return;
 	}
 

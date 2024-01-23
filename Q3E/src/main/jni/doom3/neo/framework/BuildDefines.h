@@ -137,3 +137,19 @@ If you have questions concerning this license or the applicable additional terms
 #	endif
 #endif
 
+#ifdef _WIN64
+#ifndef __x86_64__
+#define __x86_64__ 1
+#endif
+#endif
+
+#ifdef GAME_DLL
+#ifdef _MSC_VER
+#define ID_GAME_API					__declspec(dllexport)
+#else
+#define ID_GAME_API
+//#define ID_GAME_API					__attribute__((visibility ("default")))
+#endif
+#else
+#define ID_GAME_API
+#endif

@@ -73,10 +73,16 @@ GetGameAPI
 ============
 */
 
+#if __MWERKS__
+#pragma export on
+#endif
 #if __GNUC__ >= 4
 #pragma GCC visibility push(default)
 #endif
-extern "C" gameExport_t *GetGameAPI( gameImport_t *import ) {
+extern "C" ID_GAME_API gameExport_t *GetGameAPI( gameImport_t *import ) {
+#if __MWERKS__
+#pragma export off
+#endif
 
 	if ( import->version == GAME_API_VERSION ) {
 

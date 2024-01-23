@@ -46,7 +46,7 @@ Sys_GetClockTicks
 ================
 */
 double Sys_GetClockTicks( void ) {
-#if !defined(_MSC_VER)
+#if !defined(_MSC_VER) || defined(_WIN64)
 
 	LARGE_INTEGER li;
 
@@ -78,7 +78,7 @@ Sys_ClockTicksPerSecond
 */
 double Sys_ClockTicksPerSecond( void ) {
 	static double ticks = 0;
-#if !defined(_MSC_VER)
+#if !defined(_MSC_VER) || defined(_WIN64)
 
 	if ( !ticks ) {
 		LARGE_INTEGER li;
@@ -124,7 +124,7 @@ double Sys_ClockTicksPerSecond( void ) {
 ==============================================================
 */
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 /*
 ================
 HasCPUID
@@ -534,7 +534,7 @@ Sys_GetCPUId
 ================
 */
 cpuid_t Sys_GetCPUId( void ) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 	int flags;
 
 	// verify we're at least a Pentium or 486 with CPUID support
@@ -687,7 +687,7 @@ Sys_FPU_StackIsEmpty
 ===============
 */
 bool Sys_FPU_StackIsEmpty( void ) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 	__asm {
 		mov			eax, statePtr
 		fnstenv		[eax]
@@ -710,7 +710,7 @@ Sys_FPU_ClearStack
 ===============
 */
 void Sys_FPU_ClearStack( void ) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 	__asm {
 		mov			eax, statePtr
 		fnstenv		[eax]
@@ -737,7 +737,7 @@ Sys_FPU_GetState
 ===============
 */
 const char *Sys_FPU_GetState( void ) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 	double fpuStack[8] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	double *fpuStackPtr = fpuStack;
 	int i, numValues;
@@ -845,7 +845,7 @@ Sys_FPU_EnableExceptions
 ===============
 */
 void Sys_FPU_EnableExceptions( int exceptions ) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 	__asm {
 		mov			eax, statePtr
 		mov			ecx, exceptions
@@ -867,7 +867,7 @@ Sys_FPU_SetPrecision
 ===============
 */
 void Sys_FPU_SetPrecision( int precision ) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 	short precisionBitTable[4] = { 0, 1, 3, 0 };
 	short precisionBits = precisionBitTable[precision & 3] << 8;
 	short precisionMask = ~( ( 1 << 9 ) | ( 1 << 8 ) );
@@ -891,7 +891,7 @@ Sys_FPU_SetRounding
 ================
 */
 void Sys_FPU_SetRounding( int rounding ) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 	short roundingBitTable[4] = { 0, 1, 2, 3 };
 	short roundingBits = roundingBitTable[rounding & 3] << 10;
 	short roundingMask = ~( ( 1 << 11 ) | ( 1 << 10 ) );
