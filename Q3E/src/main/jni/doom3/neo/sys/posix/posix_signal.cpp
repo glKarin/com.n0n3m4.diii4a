@@ -132,6 +132,7 @@ Posix_InitSigs
 void Posix_InitSigs()
 {
 #ifdef __ANDROID__ //karin: not handle signals for debug
+	extern bool no_handle_signals;
 	if(no_handle_signals)
 		return;
 #endif

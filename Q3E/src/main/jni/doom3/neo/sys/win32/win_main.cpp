@@ -1314,3 +1314,8 @@ void Sys_Msleep(int msec)
 {
     Sleep(msec);
 }
+
+const char * Sys_DLLDefaultPath(void)
+{
+	return "./";
+}

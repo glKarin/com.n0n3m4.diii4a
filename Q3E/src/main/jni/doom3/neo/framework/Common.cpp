@@ -2626,6 +2626,9 @@ void idCommonLocal::InitRenderSystem(void)
 		return;
 	}
 
+#ifdef __ANDROID__ //karin: force setup resolution on Android
+	Sys_ForceResolution();
+#endif
 	renderSystem->InitOpenGL();
 	PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04343"));
 }
@@ -2952,11 +2955,7 @@ void idCommonLocal::LoadGameDLL(void)
 			common->Printf("[Harmattan]: Find game dynamic library directory in `%s` from cvar `harm_fs_gameLibDir`.\n", dir.c_str());
 		else
 		{
-#ifdef __ANDROID__
-			const char *dir_str = native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
-#else
-            const char *dir_str = "./";
-#endif
+			const char *dir_str = Sys_DLLDefaultPath();
 			common->Printf("[Harmattan]: cvar `harm_fs_gameLibDir` is unset. Find game dynamic library directory in default path `%s`.\n", dir_str);
 			dir = dir_str;
 		}

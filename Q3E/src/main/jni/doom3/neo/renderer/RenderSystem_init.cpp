@@ -552,9 +552,6 @@ void R_InitOpenGL(void)
 	//
 	// initialize OS specific portions of the renderSystem
 	//
-#ifdef __ANDROID__ //karin: force setup resolution on Android
-	AndroidSetResolution(screen_width, screen_height);
-#endif
 	for (i = 0 ; i < 2 ; i++) {
 		// set the parameters we are trying
 		R_GetModeInfo(&glConfig.vidWidth, &glConfig.vidHeight, r_mode.GetInteger());

@@ -578,3 +578,8 @@ intptr_t Sys_GetMainThread(void)
 {
 	return main_thread;
 }
+
+const char * Sys_DLLDefaultPath(void)
+{
+	return "./";
+}

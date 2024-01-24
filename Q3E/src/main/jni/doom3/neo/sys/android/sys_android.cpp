@@ -142,15 +142,15 @@ char * Android_GetClipboardData(void)
     return ptr;
 }
 
-void AndroidSetResolution(int32_t width, int32_t height)
+void Sys_ForceResolution(void)
 {
     cvarSystem->SetCVarBool("r_fullscreen",  true);
     cvarSystem->SetCVarInteger("r_mode", -1);
 
-    cvarSystem->SetCVarInteger("r_customWidth", width);
-    cvarSystem->SetCVarInteger("r_customHeight", height);
+    cvarSystem->SetCVarInteger("r_customWidth", screen_width);
+    cvarSystem->SetCVarInteger("r_customHeight", screen_height);
 
-    float r = (float) width / (float) height;
+    float r = (float) screen_width / (float) screen_height;
 
     if (r > 1.7f) {
         cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
@@ -161,7 +161,7 @@ void AndroidSetResolution(int32_t width, int32_t height)
     }
 
     Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
-               -1, width, height);
+               -1, screen_width, screen_height);
 }
 
 void Q3E_PrintInitialContext(int argc, const char **argv)

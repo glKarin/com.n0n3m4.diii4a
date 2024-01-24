@@ -680,27 +680,10 @@ void Sys_FreeOpenAL(void);
 #endif
 
 #ifdef __ANDROID__ //karin: sys::public expose on Android
-//n0n3m4
-
-#ifndef _ANDROID_PACKAGE_NAME
-//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
-#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
-#endif
-#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
-
-extern float analogx;
-extern float analogy;
-extern int analogenabled;
-
-extern int screen_width;
-extern int screen_height;
-
-extern char *native_library_dir;
-extern bool no_handle_signals;
-
 FILE * Sys_tmpfile(void);
 void Sys_SyncState(void);
-void AndroidSetResolution(int32_t width, int32_t height);
+void Sys_ForceResolution(void);
+void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED);
 #endif
 
 #ifdef _MULTITHREAD
@@ -716,5 +699,6 @@ bool Sys_ThreadIsRunning(const xthreadInfo *thread);
 void			Sys_Trap(void);
 void			Sys_Usleep(int usec);
 void			Sys_Msleep(int msec);
+const char *	Sys_DLLDefaultPath(void);
 
 #endif /* !__SYS_PUBLIC__ */

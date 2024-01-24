@@ -603,14 +603,6 @@ static pthread_t				main_thread;
 // app exit
 volatile bool q3e_running = false;
 
-extern void (*attach_thread)(void);
-extern void Q3E_CheckNativeWindowChanged(void);
-extern void Q3E_CloseRedirectOutput(void);
-extern void Q3E_PrintInitialContext(int argc, const char **argv);
-extern void Q3E_RedirectOutput(void);
-extern void Q3E_Start(void);
-extern void Q3E_End(void);
-
 void GLimp_CheckGLInitialized(void)
 {
 	Q3E_CheckNativeWindowChanged();
@@ -747,6 +739,20 @@ int main(int argc, const char **argv)
 intptr_t Sys_GetMainThread(void)
 {
 	return main_thread;
+}
+
+const char * Sys_DLLDefaultPath(void)
+{
+	return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
+}
+
+void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
+{
+	if (analogenabled)
+	{
+		side = (int)(KEY_MOVESPEED * analogx);
+		forward = (int)(KEY_MOVESPEED * analogy);
+	}
 }
 
 #include "sys_android.cpp"

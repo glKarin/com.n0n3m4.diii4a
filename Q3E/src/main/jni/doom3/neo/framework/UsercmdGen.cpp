@@ -609,11 +609,7 @@ void idUsercmdGenLocal::KeyMove(void)
 
 #ifdef __ANDROID__ //karin: joystick smooth movement on Android
 	//ANALOG
-	if (analogenabled)
-	{
-		side = (int)(KEY_MOVESPEED * analogx);
-		forward = (int)(KEY_MOVESPEED * analogy);
-	}
+	Sys_Analog(side, forward, KEY_MOVESPEED);
 	//END
 #endif
 

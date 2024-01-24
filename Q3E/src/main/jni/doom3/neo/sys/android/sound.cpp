@@ -156,8 +156,7 @@ bool Sys_LoadOpenAL(void)
 		return true;
 	}
 
-	const char *dir_str = native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
-	idStr path(dir_str);
+	idStr path(Sys_DLLDefaultPath());
 	path.AppendPath("libopenal.so");
 
 	hOpenAL = dlopen( path.c_str(), RTLD_NOW | RTLD_GLOBAL );
