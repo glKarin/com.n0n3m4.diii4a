@@ -1251,5 +1251,5 @@ bool R_LoadCubeImages(const char *imgName, cubeFiles_t extensions, byte *pics[6]
 }
 
 #ifdef _USING_STB
-#include "Image_files_ext.cpp"
+#include "image/Image_files_ext.cpp"
 #endif

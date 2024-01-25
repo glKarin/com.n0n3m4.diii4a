@@ -102,7 +102,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 //#endif
 
-#include "esUtil.h"
+#include "matrix/esUtil.h"
 
 typedef void (*GLExtension_t)(void);
 

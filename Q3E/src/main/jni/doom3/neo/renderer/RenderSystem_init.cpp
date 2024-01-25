@@ -2578,10 +2578,10 @@ idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_REN
 idCVar harm_r_shadowMapPolygonFactor( "harm_r_shadowMapPolygonFactor", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
 idCVar harm_r_shadowMapPolygonOffset( "harm_r_shadowMapPolygonOffset", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
 
-#include "Framebuffer.cpp"
-#include "tr_shadowmapping.cpp"
-#include "RenderMatrix.cpp"
-#include "GLMatrix.cpp"
+#include "rb/Framebuffer.cpp"
+#include "tr/tr_shadowmapping.cpp"
+#include "matrix/RenderMatrix.cpp"
+#include "matrix/GLMatrix.cpp"
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW

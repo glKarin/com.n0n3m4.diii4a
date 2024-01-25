@@ -1,7 +1,7 @@
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#include "tr_local.h"
+#include "../tr_local.h"
 
 #define LOG_LEN 2048
 

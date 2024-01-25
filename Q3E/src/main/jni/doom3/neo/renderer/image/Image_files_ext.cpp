@@ -6,10 +6,10 @@
 #define STBI_NO_STDIO  // images are passed as buffers
 #define STBI_ONLY_PNG
 
-#include "../externlibs/stb/stb_image.h"
+#include "../../externlibs/stb/stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "../externlibs/stb/stb_image_write.h"
+#include "../../externlibs/stb/stb_image_write.h"
 
 // Load functions
 void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp)
@@ -127,7 +127,7 @@ void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_
     stbi_image_free( decodedImageData );
 }
 
-#include "../externlibs/soil/soil_dds_image.h"
+#include "../../externlibs/soil/soil_dds_image.h"
 void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp)
 {
 
@@ -299,7 +299,7 @@ void R_WriteBMP(const char *filename, const byte *data, int width, int height, i
     }
 }
 
-#include "../externlibs/soil/image_dxt.h"
+#include "../../externlibs/soil/image_dxt.h"
 void R_WriteDDS(const char *filename, const byte *data, int width, int height, int comp, bool flipVertical, const char *basePath)
 {
     byte *ndata = NULL;

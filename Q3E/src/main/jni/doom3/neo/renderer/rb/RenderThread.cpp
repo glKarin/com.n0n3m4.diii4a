@@ -1,6 +1,6 @@
 #include "RenderThread.h"
 
-#include "../sys/sys_public.h"
+#include "../../sys/sys_public.h"
 
 #define RENDER_THREAD_STARTED() (Sys_ThreadIsRunning(&render_thread))
 

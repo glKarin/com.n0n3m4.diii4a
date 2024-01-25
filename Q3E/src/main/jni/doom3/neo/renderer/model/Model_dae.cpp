@@ -44,12 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Collada parser helper
  */
 
-#include "../idlib/precompiled.h"
+#include "../../idlib/precompiled.h"
 #pragma hdrstop
 
 #ifndef ASSIMP_BUILD_NO_DAE_IMPORTER
 
-#include "../externlibs/irrxml/src/irrXML.cpp"
+#include "../../externlibs/irrxml/src/irrXML.cpp"
 
 #include "Model_dae.h"
 //#include "../libs/irrxml/src/fast_atof.h"

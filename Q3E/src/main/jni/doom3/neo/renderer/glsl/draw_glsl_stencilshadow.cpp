@@ -2,7 +2,7 @@
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#include "tr_local.h"
+#include "../tr_local.h"
 
 static bool r_translucentStencilShadow = false;
 static float r_stencilShadowAlpha = 0.5f;

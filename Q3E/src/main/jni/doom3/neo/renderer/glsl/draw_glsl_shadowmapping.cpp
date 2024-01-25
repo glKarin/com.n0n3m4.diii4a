@@ -50,7 +50,7 @@
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#include "tr_local.h"
+#include "../tr_local.h"
 
 #define POINT_LIGHT_FRUSTUM_FAR 7996.0f
 #define POINT_LIGHT_FRUSTUM_FAR_FACTOR 2.5 // 2

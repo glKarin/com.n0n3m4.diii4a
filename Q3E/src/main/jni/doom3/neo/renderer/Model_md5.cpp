@@ -1095,4 +1095,4 @@ int idRenderModelMD5::GetSurfaceMask(const char *name) const
 }
 #endif
 
-#include "Model_md5anim.cpp"
+#include "model/Model_md5anim.cpp"

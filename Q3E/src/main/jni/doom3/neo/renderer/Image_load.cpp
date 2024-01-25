@@ -389,7 +389,7 @@ void rgba4444_convert_tex_image(
 #ifdef USE_RG_ETC1
 #include "etc_rg_etc1.h"
 #else
-#include "etc1_android.h"
+#include "etc/etc1_android.h"
 #endif
 
 unsigned int etc1_data_size(unsigned int width, unsigned int height) {

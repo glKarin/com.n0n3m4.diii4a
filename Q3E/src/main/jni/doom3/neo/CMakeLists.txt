@@ -537,10 +537,10 @@ set(src_renderer
 	renderer/tr_trace.cpp
 	renderer/tr_trisurf.cpp
 	renderer/tr_turboshadow.cpp
-	renderer/etc_android.cpp
-	renderer/etc_rg_etc1.cpp
+	renderer/etc/etc_android.cpp
+	renderer/etc/etc_rg_etc1.cpp
 	renderer/tr_rendertools.cpp
-	renderer/esTransform.c
+    renderer/matrix/esTransform.c
 )
 
 add_globbed_headers(src_renderer "renderer")

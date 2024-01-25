@@ -39,7 +39,7 @@ extern bool USING_GLES3;
 //#define SHADOW_MAPPING_DEBUG
 
 #define MAX_SHADOWMAP_RESOLUTIONS 5
-#include "Framebuffer.h"
+#include "rb/Framebuffer.h"
 
 // RB: added multiple subfrustums for cascaded shadow mapping
 enum frustumPlanes_t
@@ -758,7 +758,7 @@ typedef struct {
 static const int	MAX_RENDER_CROPS = 8;
 
 #ifdef _MULTITHREAD
-#include "RenderThread.h"
+#include "rb/RenderThread.h"
 #endif
 
 /*
@@ -2045,8 +2045,8 @@ extern int r_maxFps;
 
 #ifdef _SHADOW_MAPPING
 
-#include "GLMatrix.h"
-#include "RenderMatrix.h"
+#include "matrix/GLMatrix.h"
+#include "matrix/RenderMatrix.h"
 
 extern idCVar r_useShadowMapping;			// use shadow mapping instead of stencil shadows
 extern idCVar r_useHalfLambertLighting;		// use Half-Lambert lighting instead of classic Lambert

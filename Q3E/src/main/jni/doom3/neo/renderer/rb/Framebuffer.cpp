@@ -26,10 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../idlib/precompiled.h"
+#include "../../idlib/precompiled.h"
 #pragma hdrstop
 
-#include "tr_local.h"
+#include "../tr_local.h"
 #include "Framebuffer.h"
 
 idList<Framebuffer*>	Framebuffer::framebuffers;

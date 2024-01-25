@@ -1230,5 +1230,5 @@ void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMs
 
 }
 
-#include "RenderThread.cpp"
+#include "rb/RenderThread.cpp"
 #endif

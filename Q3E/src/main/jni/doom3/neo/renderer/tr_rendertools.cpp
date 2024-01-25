@@ -79,7 +79,7 @@ int				rb_debugPolygonTime = 0;
 static void RB_DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align);
 
 #ifdef GL_ES_VERSION_2_0
-#include "tr_gl_compat.cpp"
+#include "glsl/gles2_compat.cpp"
 #endif
 
 /*

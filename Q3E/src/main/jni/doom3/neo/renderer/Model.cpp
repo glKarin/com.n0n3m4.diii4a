@@ -2542,8 +2542,8 @@ int idRenderModelStatic::GetSurfaceMask(const char *name) const
 #endif
 
 #ifdef _MODEL_OBJ
-#include "Model_obj.h"
-#include "Model_obj.cpp"
+#include "model/Model_obj.h"
+#include "model/Model_obj.cpp"
 
 
 /*
@@ -2927,8 +2927,8 @@ bool idRenderModelStatic::ConvertOBJToModelSurfaces( const objModel_t* model )
 #endif
 
 #ifdef _MODEL_DAE
-#include "Model_dae.h"
-#include "Model_dae.cpp"
+#include "model/Model_dae.h"
+#include "model/Model_dae.cpp"
 
 // RB: added COLLADA support
 bool idRenderModelStatic::LoadDAE( const char* fileName )
