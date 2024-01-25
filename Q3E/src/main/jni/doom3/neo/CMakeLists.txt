@@ -1299,6 +1299,7 @@ add_globbed_headers(humanhead_renderer_src "humanhead")
 add_globbed_headers(humanhead_framework_src "humanhead")
 
 include_directories("externlibs")
+include_directories("externlibs/include")
 
 if(NOT WIN32)
 if(COMPILE_CURL STREQUAL "1")
