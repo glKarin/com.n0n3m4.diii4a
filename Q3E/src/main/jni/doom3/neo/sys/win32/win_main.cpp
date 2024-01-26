@@ -1295,6 +1295,8 @@ void Sys_Trap(void)
 #elif defined( __GNUC__ )
 	__builtin_trap();
 	_exit(1);
+#else
+	_exit(1);
 #endif
 }
 

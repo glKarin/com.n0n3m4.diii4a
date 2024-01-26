@@ -33,6 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+#elif defined(__unix__)
+#include <signal.h>
+#include <sys/types.h>
 #endif
 
 /*
@@ -651,5 +654,7 @@ void AssertFailed(const char *file, int line, const char *expression)
 #elif defined( __GNUC__ )
 	__builtin_trap();
 	_exit(1);
+#else
+	abort();
 #endif
 }
