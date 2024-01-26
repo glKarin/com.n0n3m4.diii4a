@@ -40,9 +40,15 @@ If you have questions concerning this license or the applicable additional terms
 // Win32
 #if defined(WIN32) || defined(_WIN32)
 
+#ifdef _WIN64
+#define	BUILD_STRING					"win-x64"
+#define BUILD_OS_ID						0
+#define	CPUSTRING						"x64"
+#else
 #define	BUILD_STRING					"win-x86"
 #define BUILD_OS_ID						0
 #define	CPUSTRING						"x86"
+#endif
 #define CPU_EASYARGS					1
 
 #define ALIGN16( x )					__declspec(align(16)) x
@@ -151,6 +157,10 @@ enum sysPath_t {
 #define	BUILD_STRING				"linux-arm"
 #define BUILD_OS_ID					2
 #define CPUSTRING					"arm"
+#elif defined(__aarch64__)
+#define	BUILD_STRING				"linux-arm64"
+#define CPUSTRING					"arm64"
+#define BUILD_OS_ID					2
 #endif
 
 #endif
