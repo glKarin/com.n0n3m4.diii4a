@@ -100,6 +100,7 @@ option(SUPPORT_DAE			"Support dae model" ON)
 option(SHADOW_MAPPING			"Shadow mapping support" ON)
 option(NO_LIGHT			"r_noLight support" ON)
 option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" ON)
+option(EXTRAS_TOOLS			"Add extras commands" OFF)
 
 # DOOM3 mods
 option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" ON)
@@ -138,6 +139,11 @@ endif()
 if(OPENGLES3)
 	add_definitions(-D_OPENGLES3)
 	message(STATUS "Build OpenGLES3 support")
+endif()
+
+if(EXTRAS_TOOLS)
+	add_definitions(-D_EXTRAS_TOOLS)
+	message(STATUS "Build extras tools support")
 endif()
 
 set(CMAKE_CXX_STANDARD "98")

@@ -2134,4 +2134,10 @@ extern float RB_overbright;
 #define HARM_CHECK_SHADER_ERROR(x)
 #endif
 
+#ifdef _EXTRAS_TOOLS
+void ModelTest_TestModel(int time);
+void MD5Anim_AddCommand(void);
+void ModelTest_AddCommand(void);
+#endif
+
 #endif /* !__TR_LOCAL_H__ */

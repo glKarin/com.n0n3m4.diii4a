@@ -2233,8 +2233,10 @@ void R_InitCommands(void)
 	extern void R_ConvertImage_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
 #endif
-    extern void MD5Anim_AddCommand(void);
+#ifdef _EXTRAS_TOOLS
 	MD5Anim_AddCommand();
+	ModelTest_AddCommand();
+#endif
 }
 
 /*
