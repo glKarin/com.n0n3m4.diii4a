@@ -593,7 +593,7 @@ public:
 
 	// New------------------
 #ifdef _DENTONMOD_PLAYER_CPP
-	void					SetWeaponZoom( bool Status );
+	void					SetWeaponZoom( bool status );
 	void					SetProjectileType( int type );
 	int						GetProjectileType( void );
 #endif// _DENTONMOD_PLAYER_CPP
