@@ -746,6 +746,9 @@ void idRenderWorldLocal::RenderScene(const renderView_t *renderView)
 	if (!glConfig.isInitialized) {
 		return;
 	}
+#ifdef _EXTRAS_TOOLS
+	ModelTest_TestModel(renderView->time);
+#endif
 
 	copy = *renderView;
 

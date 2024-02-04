@@ -64,7 +64,11 @@ void idDeclPDA::List(void) const
 idDeclPDA::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclPDA::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclPDA::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken token;
@@ -384,7 +388,11 @@ void idDeclEmail::List(void) const
 idDeclEmail::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclEmail::Parse(const char *_text, const int textLength, bool noCaching)
+#else
 bool idDeclEmail::Parse(const char *_text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken token;
@@ -521,7 +529,11 @@ void idDeclVideo::List(void) const
 idDeclVideo::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclVideo::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclVideo::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken token;
@@ -642,7 +654,11 @@ void idDeclAudio::List(void) const
 idDeclAudio::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclAudio::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclAudio::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken token;

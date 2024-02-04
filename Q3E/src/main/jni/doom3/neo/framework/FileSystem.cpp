@@ -872,7 +872,7 @@ const char *idFileSystemLocal::BuildOSPath(const char *base, const char *game, c
 
 		if (testPath.HasUpper()) {
 
-#if defined(__ANDROID__) && !defined(_K_DEV)
+#if !defined(__ANDROID__) //karin: do not print on Android
 			common->Warning("Non-portable: path contains uppercase characters: %s", testPath.c_str());
 #endif
 
@@ -4029,7 +4029,7 @@ size_t idFileSystemLocal::CurlWriteFunction(void *ptr, size_t size, size_t nmemb
 	}
 
 #ifdef _WIN32
-	return _write(static_cast<idFile_Permanent *>(bgl->f)->GetFilePtr()->_file, ptr, size * nmemb);
+	return _write(_fileno(static_cast<idFile_Permanent *>(bgl->f)->GetFilePtr()/*->_file*/), ptr, size * nmemb);
 #else
 	return fwrite(ptr, size, nmemb, static_cast<idFile_Permanent *>(bgl->f)->GetFilePtr());
 #endif
@@ -4081,7 +4081,7 @@ void *BackgroundDownloadThread(void *parms)
 		if (bgl->opcode == DLTYPE_FILE) {
 			// use the low level read function, because fread may allocate memory
 #if defined(WIN32)
-			_read(static_cast<idFile_Permanent *>(bgl->f)->GetFilePtr()->_file, bgl->file.buffer, bgl->file.length);
+			_read(_fileno(static_cast<idFile_Permanent *>(bgl->f)->GetFilePtr()/*->_file*/), bgl->file.buffer, bgl->file.length);
 #else
 			fread(bgl->file.buffer, bgl->file.length, 1, static_cast<idFile_Permanent *>(bgl->f)->GetFilePtr());
 #endif
@@ -4578,7 +4578,7 @@ idFile *idFileSystemLocal::MakeTemporaryFile(void)
 
 	if (!f) {
 		common->Warning("idFileSystem::MakeTemporaryFile failed: %s", strerror(errno));
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: tmpfile always return NULL on Android
 		f = Sys_tmpfile();
 #else
 		return NULL;

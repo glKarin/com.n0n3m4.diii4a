@@ -8,6 +8,7 @@ import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EPreference;
+import com.n0n3m4.q3e.Q3EUtils;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -140,7 +141,7 @@ public class Q3EMouseDevice
                         if (qevnt_available)
                         {
                             qevnt_available = false;
-                            view.queueEvent(qevnt_runnable);
+                            Q3EUtils.q3ei.callbackObj.PushEvent(qevnt_runnable);
                         }
                         fout.write(narr);
                     }
@@ -160,7 +161,7 @@ public class Q3EMouseDevice
 
                         readmouse_keystate = arr[sizeofstruct - 4];
                         if (readmouse_keycode != 0)
-                            view.queueEvent(qkeyevnt_runnable);
+                            Q3EUtils.q3ei.callbackObj.PushEvent(qkeyevnt_runnable);
                     }
 
                     if (arr[sizeofstruct - 8] == 2)
@@ -174,10 +175,10 @@ public class Q3EMouseDevice
                             else
                                 readmouse_keycode = Q3EKeyCodes.KeyCodes.K_MWHEELDOWN;
                             readmouse_keystate = 1;
-                            view.queueEvent(qkeyevnt_runnable);
+                            Q3EUtils.q3ei.callbackObj.PushEvent(qkeyevnt_runnable);
                             Thread.sleep(25);
                             readmouse_keystate = 0;
-                            view.queueEvent(qkeyevnt_runnable);
+                            Q3EUtils.q3ei.callbackObj.PushEvent(qkeyevnt_runnable);
                         }
                     }
                 }

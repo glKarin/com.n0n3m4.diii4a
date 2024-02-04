@@ -42,7 +42,8 @@ const char* rvDeclLipSync::DefaultDefinition() const {
 rvDeclPlayerModel::FreeData
 ===================
 */
-bool rvDeclLipSync::Parse(const char* text, const int textLength) {
+bool rvDeclLipSync::Parse(const char* text, const int textLength, bool noCaching)
+{
 	idLexer src;
 	idToken	token, token2;
 

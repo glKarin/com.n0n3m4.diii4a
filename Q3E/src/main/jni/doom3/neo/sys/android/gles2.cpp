@@ -45,6 +45,26 @@ If you have questions concerning this license or the applicable additional terms
 idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
                     "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
 
+#ifdef _OPENGLES3
+const char	*r_openglesArgs[]	= {
+		"GLES2",
+		"GLES3.0",
+		NULL };
+idCVar harm_sys_openglVersion("harm_sys_openglVersion",
+                              r_openglesArgs[0]
+		, CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
+                              "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
+#define DEFAULT_GLES_VERSION 0x00020000
+#else
+#define DEFAULT_GLES_VERSION 0x00020000
+#endif
+
+// OpenGL attributes
+int gl_format = 0x8888;
+int gl_msaa = 0;
+int gl_version = DEFAULT_GLES_VERSION;
+bool USING_GLES3 = gl_version != 0x00020000;
+
 #define MAX_NUM_CONFIGS 4
 static bool window_seted = false;
 static volatile ANativeWindow *win;
@@ -120,7 +140,7 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 	Sys_Printf("[Harmattan]: EGL surface created and using EGL context.\n");
 }
 
-void GLimp_AndroidQuit()
+void GLimp_AndroidQuit(void)
 {
 	//has_gl_context = false;
 	if(!win)

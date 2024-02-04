@@ -410,7 +410,7 @@ public:
 
 	virtual size_t				Size( void ) const;
 	virtual const char *		DefaultDefinition( void ) const;
-	virtual bool				Parse( const char *text, const int textLength/* jmarshall , bool noCaching*/ );
+	virtual bool				Parse( const char *text, const int textLength, bool noCaching );
 	virtual void				FreeData( void );
 
 // RAVEN BEGIN

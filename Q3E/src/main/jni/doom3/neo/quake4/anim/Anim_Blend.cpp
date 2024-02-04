@@ -2838,7 +2838,7 @@ bool idDeclModelDef::ParseAnim( idLexer &src, int numDefaultAnims ) {
 idDeclModelDef::Parse
 ================
 */
-bool idDeclModelDef::Parse( const char *text, const int textLength/* , bool noCaching */ ) {
+bool idDeclModelDef::Parse( const char *text, const int textLength, bool noCaching  ) {
 	int					i;
 	int					num;
 	idStr				filename;

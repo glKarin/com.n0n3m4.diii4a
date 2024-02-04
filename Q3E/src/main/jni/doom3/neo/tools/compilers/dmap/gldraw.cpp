@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "dmap.h"
 
-#ifdef WIN32
+#if defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>

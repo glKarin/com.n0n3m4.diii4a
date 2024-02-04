@@ -178,7 +178,12 @@ const char *Sys_DefaultBasePath(void) {
 		}
 	}
 	common->Printf( "WARNING: using hardcoded default base path\n" );
+#ifndef LINUX_DEFAULT_PATH
+	#warning undefined data path
+	return BASE_GAMEDIR;
+#else
 	return LINUX_DEFAULT_PATH;
+#endif
 }
 
 /*
@@ -257,7 +262,8 @@ double Sys_GetClockTicks( void ) {
 						  : "=r" (lo), "=r" (hi) );
 	return (double) lo + (double) 0xFFFFFFFF * hi;
 #else
-#error unsupported CPU
+#warning unsupported CPU
+	return 0;
 #endif
 }
 
@@ -537,6 +543,8 @@ void abrt_func( mcheck_status status ) {
 
 #endif
 
+#include <pthread.h>
+static intptr_t main_thread = 0;
 /*
 ===============
 main
@@ -551,6 +559,8 @@ int main(int argc, const char **argv) {
 	
 	Posix_EarlyInit( );
 
+	main_thread = pthread_self();
+
 	if ( argc > 1 ) {
 		common->Init( argc-1, &argv[1], NULL );
 	} else {
@@ -562,4 +572,14 @@ int main(int argc, const char **argv) {
 	while (1) {
 		common->Frame();
 	}
+}
+
+intptr_t Sys_GetMainThread(void)
+{
+	return main_thread;
+}
+
+const char * Sys_DLLDefaultPath(void)
+{
+	return "./";
 }

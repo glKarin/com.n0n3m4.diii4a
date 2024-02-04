@@ -41,8 +41,10 @@ If you have questions concerning this license or the applicable additional terms
 #include <GL/glx.h>
 #define GL_APIENTRY	GLAPIENTRY
 #else
+#if !defined(_SDL)
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#endif
 #ifdef _OPENGLES3
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
@@ -100,7 +102,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 //#endif
 
-#include "esUtil.h"
+#include "matrix/esUtil.h"
 
 typedef void (*GLExtension_t)(void);
 

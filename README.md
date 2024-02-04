@@ -1,9 +1,9 @@
 ## idTech4A++ (Harmattan Edition)
-#### DIII4A++, com.n0n3m4.diii4a, DOOM III/Quake 4/Prey(2006) for Android, 毁灭战士3/雷神之锤4/掠食(2006)安卓移植版
+#### DOOM III/Quake 4/Prey(2006) for Android/Linux, 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版. Original named DIII4A++, based on com.n0n3m4.diii4a
 **Latest version:**
-1.1.0harmattan37(natasha)  
-**Last update release:**
-2024-01-06  
+1.1.0harmattan38(natasha)  
+**最新更新日期:**
+2024-02-05  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -13,6 +13,7 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 ### Feature
+* Linux/Windows(MinGW) build(testing)
 * multi-threading renderer
 * png/dds texture image
 * jpeg/png/bmp/dds format of screenshot
@@ -41,10 +42,8 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Fixed on-screen buttons initial keycodes.
-* On-screen slider button can setup clickable.
-* Add dds screenshot support.
-* Add cvar `r_scaleMenusTo43` for 4:3 menu.
+* Fixed shadow mapping on non-Adreno GPU.
+* Support level loading finished pause(cvar `com_skipLevelLoadPause`) in Quake4.
 
 ----------------------------------------------------------------------------------
 
@@ -102,21 +101,19 @@ Tag with `-free` only for F-Droid update.
 
 ----------------------------------------------------------------------------------
 
-### Portable:
+### Build:
 
-#### Engine for Android
-##### Define macro `__ANDROID__` for Android.
-> 1. _OPENSLES: Add OpenSLES support for sound.
-> 2. _MULTITHREAD: Add multithread support for rendering.
-> 3. _USING_STB: Using stb header for jpeg/png/dds texture image and jpeg/png/bmp screenshot support.
-> 4. _K_CLANG: If compiling by clang not GCC.
-> 5. _MODEL_OBJ: Add obj static model support.
-> 6. _MODEL_DAE: Add dae static model support.
-> 7. _SHADOW_MAPPING: Add Shadow mapping support.
-> 8. _OPENGLES3: Add OpenGLES3.0 support.
-> 9. _OPENAL _OPENAL_EFX: Add OpenAL(soft) and EFX Reverb support.
-> 10. _NO_LIGHT: Add no lighting support.
-> 11. _TRANSLUCENT_STENCIL_SHADOW: Add translucent stencil shadow support.
+#### Engine
+> 1. _MULTITHREAD: Add multithread support for rendering.
+> 2. _USING_STB: Using stb header for jpeg/png/dds texture image and jpeg/png/bmp/dds screenshot support.
+> 3. _K_CLANG: If compiling by clang not GCC.
+> 4. _MODEL_OBJ: Add obj static model support.
+> 5. _MODEL_DAE: Add dae static model support.
+> 6. _SHADOW_MAPPING: Add Shadow mapping support.
+> 7. _OPENGLES3: Add OpenGLES3.0 support.
+> 8. _OPENAL _OPENAL_EFX _OPENAL_SOFT: Add OpenAL(soft) and EFX Reverb support.
+> 9. _NO_LIGHT: Add no lighting support.
+> 10. _TRANSLUCENT_STENCIL_SHADOW: Add translucent stencil shadow support.
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
@@ -140,6 +137,19 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 > 2. _PREY: for compile `game (PreySDK source code)` library.
 > 3. Build core engine: define macro `_HUMANHEAD`
 > 4. Build game library: define macro `_HUMANHEAD`, `_PREY`, and original SDK macros `HUMANHEAD`
+
+#### Android
+##### Define macro `__ANDROID__`.
+> 1. _OPENSLES: Add OpenSLES support for sound.
+
+#### Linux
+##### Define macro `__linux__`.
+> 1. Support ALSA.
+
+#### Windows(MinGW)
+##### Define macro `_WIN32` and `WIN32`.
+> 1. REQUIRE SDL2, zlib
+> 2. NOT SUPPORT OpenGLES3, OpenAL, cURL
 
 ----------------------------------------------------------------------------------
 

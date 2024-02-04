@@ -35,10 +35,11 @@ If you have questions concerning this license or the applicable additional terms
 #define MAX_WARNING_LIST	256
 
 #ifdef _MULTITHREAD
+extern bool multithreadActive;
+extern bool Sys_InRenderThread(void);
 #ifdef _K_DEV
 #define _HARM_DEBUG_MULTITHREAD
 #endif
-#include <pthread.h>
 #endif
 
 typedef enum {
@@ -483,7 +484,7 @@ void idCommonLocal::VPrintf(const char *fmt, va_list args)
 		// update the console if we are in a long-running command, like dmap
 		if (com_refreshOnPrint) {
 #ifdef _MULTITHREAD
-			if(!multithreadActive/* || !IN_RENDER_THREAD()*/)
+			if(!multithreadActive/* || !Sys_InRenderThread()*/)
 #endif
 			session->UpdateScreen();
 		}
@@ -2625,6 +2626,9 @@ void idCommonLocal::InitRenderSystem(void)
 		return;
 	}
 
+#ifdef __ANDROID__ //karin: force setup resolution on Android
+	Sys_ForceResolution();
+#endif
 	renderSystem->InitOpenGL();
 	PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04343"));
 }
@@ -2870,8 +2874,6 @@ void idCommonLocal::Async(void)
 idCommonLocal::LoadGameDLL
 =================
 */
-#ifdef __ANDROID__
-
 #ifdef _RAVEN // quake4 game dll
 #define _HARM_BASE_GAME_DLL "q4game"
 #elif defined(_HUMANHEAD) // prey game dll
@@ -2880,13 +2882,32 @@ idCommonLocal::LoadGameDLL
 #define _HARM_BASE_GAME_DLL "game"
 #endif
 
+#ifdef _WIN32
+#define DLL_SUFFIX ".dll"
+
+#ifdef _MSC_VER
+#define DLL_PREFIX ""
+#else
+#define DLL_PREFIX "lib"
 #endif
-//k
-#define _ANDROID_NATIVE_LIBRARY_DIR "<Android APK native library directory path>/"
+
+#else
+#define DLL_SUFFIX ".so"
+#define DLL_PREFIX "lib"
+#endif
+
+#define DLL_NAME(x) DLL_PREFIX x DLL_SUFFIX
+
+#ifdef __ANDROID__
+#define _DEFAULT_LIBRARY_DIR "<apk native libraries path>"
+#else
+#define _DEFAULT_LIBRARY_DIR "<executable application path>"
+#endif
+
 static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. e.g. "
-		"`" _ANDROID_NATIVE_LIBRARY_DIR "lib" _HARM_BASE_GAME_DLL ".so`, "
+		"`<harm_fs_gameLibPath>/lib" _HARM_BASE_GAME_DLL DLL_SUFFIX "`, "
 		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
-static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library directory path(default is empty, means using `" _ANDROID_NATIVE_LIBRARY_DIR "`).");
+static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library directory path(default is empty, means using `" _DEFAULT_LIBRARY_DIR "`).");
 void idCommonLocal::LoadGameDLL(void)
 {
 #ifdef __DOOM_DLL__
@@ -2896,11 +2917,10 @@ void idCommonLocal::LoadGameDLL(void)
 	gameExport_t	gameExport;
 	GetGameAPI_t	GetGameAPI;
 
-#ifdef __ANDROID__
+#if 1 //karin: select game dll on Android
 #define LOAD_RESULT(dll) ((dll) ? "done" : "fail")
 
-#define _K_D3_MOD
-#ifdef _K_D3_MOD
+#ifdef __ANDROID__
 	common->Printf("[Harmattan]: fpu = "
 #ifdef __aarch64__
 			"hard"
@@ -2912,6 +2932,7 @@ void idCommonLocal::LoadGameDLL(void)
 	#endif
 #endif
 			"\n");
+#endif
 	// First try to load user special game library.
 	// For other apk.
 	idStr fsgame = cvarSystem->GetCVarString("harm_fs_gameLibPath");
@@ -2934,13 +2955,11 @@ void idCommonLocal::LoadGameDLL(void)
 			common->Printf("[Harmattan]: Find game dynamic library directory in `%s` from cvar `harm_fs_gameLibDir`.\n", dir.c_str());
 		else
 		{
-			const char *dir_str = native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
+			const char *dir_str = Sys_DLLDefaultPath();
 			common->Printf("[Harmattan]: cvar `harm_fs_gameLibDir` is unset. Find game dynamic library directory in default path `%s`.\n", dir_str);
 			dir = dir_str;
 		}
 
-		if(fsgame.Length())
-		{
 			common->Printf("[Harmattan]: Load game `%s` from cvar `fs_game`.\n", fsgame.c_str());
 
 #ifdef _RAVEN // quake4 base game dll
@@ -2948,7 +2967,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load Quake4 game......\n");
 				idStr dllFile(dir);
-				dllFile.AppendPath("libq4game.so");
+            dllFile.AppendPath(DLL_NAME("q4game"));
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -2957,7 +2976,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load Prey2006 game......\n");
 				idStr dllFile(dir);
-				dllFile.AppendPath("libpreygame.so");
+				dllFile.AppendPath(DLL_NAME("preygame"));
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -2966,7 +2985,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load DOOM3 game......\n");
 				idStr dllFile(dir);
-				dllFile.AppendPath("libgame.so");
+				dllFile.AppendPath(DLL_NAME("game"));
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -2975,7 +2994,7 @@ void idCommonLocal::LoadGameDLL(void)
 			{
 				common->Printf("[Harmattan]: Load `%s` game......\n", fsgame.c_str());
 				idStr dllFile(dir);
-				dllFile.AppendPath(va("lib%s.so", fsgame.c_str()));
+            dllFile.AppendPath(va(DLL_NAME("%s"), fsgame.c_str()));
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
@@ -2992,33 +3011,43 @@ void idCommonLocal::LoadGameDLL(void)
 					common->Printf("[Harmattan]: Load found dynamic library %s!\n", LOAD_RESULT(gameDLL));
 				}
 			}
+#if !defined(__ANDROID__)
+        if(!gameDLL) // load <fs_game>/libgame.so
+        {
+            idStr dllFile("./");
+            const char *fs_game = cvarSystem->GetCVarString("fs_game");
+            if(!fs_game || !fs_game[0])
+                fs_game = BASE_GAMEDIR;
+            common->Printf("[Harmattan]: Load game from %s......\n", fs_game);
+            dllFile.AppendPath(fs_game);
+            dllFile.AppendPath(DLL_NAME("game"));
+            gameDLL = sys->DLL_Load(dllFile);
+            common->Printf("[Harmattan]: Load game dynamic library `%s` %p!\n", dllFile.c_str(), gameDLL);
 		}
-#if 0
-		else
-#else
-			// last load base game library if all failed.
-			if(!gameDLL)
 #endif
-#endif
-			{
-				common->Printf("[Harmattan]: Load BASE game......\n");
-				idStr dllFile(dir);
-				dllFile.AppendPath("lib" _HARM_BASE_GAME_DLL ".so");
-				gameDLL = sys->DLL_Load(dllFile);
-				common->Printf("[Harmattan]: Load BASE dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
-			}
+		// last load base game library if all failed.
+		if(!gameDLL)
+		{
+			common->Printf("[Harmattan]: Load BASE game......\n");
+			idStr dllFile(dir);
+			dllFile.AppendPath(DLL_NAME(_HARM_BASE_GAME_DLL));
+			gameDLL = sys->DLL_Load(dllFile);
+			common->Printf("[Harmattan]: Load BASE dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+		}
 	}
-	//k
 #else
-	fileSystem->FindDLL("game", dllPath, true);
+    if(!gameDLL)
+    {
+        fileSystem->FindDLL("game", dllPath, true);
 
-	if (!dllPath[ 0 ]) {
-		common->FatalError("couldn't find game dynamic library");
-		return;
-	}
+        if (!dllPath[ 0 ]) {
+            common->FatalError("couldn't find game dynamic library");
+            return;
+        }
 
-	common->DPrintf("Loading game DLL: '%s'\n", dllPath);
-	gameDLL = sys->DLL_Load(dllPath);
+        common->DPrintf("Loading game DLL: '%s'\n", dllPath);
+        gameDLL = sys->DLL_Load(dllPath);
+    }
 #endif
 
 	if (!gameDLL) {
@@ -3201,6 +3230,37 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 
 		// override cvars from command line
 		StartupVariable(NULL, false);
+#ifdef _MULTITHREAD
+#if !defined(__ANDROID__) //karin: enable multithreading-rendering from command cvar
+		multithreadActive = cvarSystem->GetCVarBool("harm_r_multithread");
+		if(multithreadActive)
+			Sys_Printf("[Harmattan]: Enable multi-threading rendering\n");
+		else
+			Sys_Printf("[Harmattan]: Disable multi-threading rendering\n");
+#endif
+#endif
+#ifdef _OPENGLES3
+#if !defined(__ANDROID__) //karin: check OpenGL version from command cvar
+		const char *openglVersion = cvarSystem->GetCVarString("harm_sys_openglVersion");
+		if(openglVersion && openglVersion[0])
+		{
+			extern int gl_version;
+		    extern bool USING_GLES3;
+			Sys_Printf("[Harmattan]: harm_sys_openglVersion = %s\n", openglVersion);
+			if(!idStr::Icmp("GLES2", openglVersion))
+			{
+				gl_version = 0x00020000;
+				Sys_Printf("[Harmattan]: Using OpenGLES2\n");
+			}
+			else
+			{
+				gl_version = 0x00030000;
+				Sys_Printf("[Harmattan]: Using OpenGLES3\n");
+			}
+			USING_GLES3 = gl_version != 0x00020000;
+		}
+#endif
+#endif
 
 		if (!idAsyncNetwork::serverDedicated.GetInteger() && Sys_AlreadyRunning()) {
 			Sys_Quit();

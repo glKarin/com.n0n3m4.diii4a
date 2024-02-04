@@ -64,6 +64,6 @@ android {
 dependencies {
     //compile 'com.android.support:support-v4:18.+'
     // F-Droid free version comment 2 lines
-    /*implementation files('libs/ouya-sdk.jar')
-    implementation files('libs/RootTools-2.4.jar')*/
+    //implementation files('libs/ouya-sdk.jar')
+    //implementation files('libs/RootTools-2.4.jar')
 }

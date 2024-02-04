@@ -81,9 +81,19 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private static final int ENUM_BACK_ALL = 0xFF;
     public static final float GYROSCOPE_X_AXIS_SENS = 18;
     public static final float GYROSCOPE_Y_AXIS_SENS = 18;
+
+    // render
+    public static boolean mInit = false;
     public boolean usesCSAA = false;
+    public static int orig_width;
+    public static int orig_height;
+    private boolean hideonscr;
+
+    // toolbar function
     private boolean m_toolbarActive = true;
     private View m_keyToolbar = null;
+
+    // mouse function
     private boolean m_usingMouse = false;
     private float m_lastMousePosX = -1;
     private float m_lastMousePosY = -1;
@@ -94,28 +104,28 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private float m_lastTouchPadPosX = -1;
     private float m_lastTouchPadPosY = -1;
 
-    public static boolean mInit = false;
     private IntBuffer tmpbuf;
 
-    public static int orig_width;
-    public static int orig_height;
-
+    // map volume key function
     public boolean mapvol = false;
-    public boolean analog = false;
+
+    // map back key function
+    private int m_mapBack = ENUM_BACK_ALL;
+    private long m_lastPressBackTime = -1;
+    private int m_pressBackCount = 0;
 
 
     //RTCW4A-specific
     Button actbutton;
     Button kickbutton;
+    private Q3EView m_renderView;
 
     //MOUSE
-
-    private boolean hideonscr;
-
     long oldtime = 0;
     long delta = 0;
 
 
+    // other controls function
     static float last_joystick_x = 0;
     static float last_joystick_y = 0;
 
@@ -127,13 +137,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     static float last_trackball_x = 0;
     static float last_trackball_y = 0;
 
-    private int m_mapBack = ENUM_BACK_ALL;
-    private long m_lastPressBackTime = -1;
-    private int m_pressBackCount = 0;
-
-
-    private Q3EView m_renderView;
-
+    /// gyroscope function
     private boolean m_gyroInited = false;
     private SensorManager m_sensorManager = null;
     private Sensor m_gyroSensor = null;
@@ -177,7 +181,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             delta = 1000;
 
         if ((last_joystick_x != 0) || (last_joystick_y != 0))
-            sendMotionEvent(delta * last_joystick_x, delta * last_joystick_y);
+            Q3EUtils.q3ei.callbackObj.sendMotionEvent(delta * last_joystick_x, delta * last_joystick_y);
 
         if (usesCSAA)
         {
@@ -232,7 +236,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
             mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
             m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, ENUM_BACK_ALL); //k
-            analog = Q3EUtils.q3ei.joystick_smooth;
 
             if(m_usingMouseDevice)
                 m_mouseDevice = new Q3EMouseDevice(this);
@@ -373,7 +376,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 break;
         }
         int t = getCharacter(keyCode, event);
-        sendKeyEvent(true, qKeyCode, t);
+        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, qKeyCode, t);
         return true;
     }
 
@@ -403,7 +406,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event);
                 break;
         }
-        sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
+        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
         return true;
     }
     private static float getCenteredAxis(MotionEvent event,
@@ -431,7 +434,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         {
             float x = getCenteredAxis(event, MotionEvent.AXIS_X);
             float y = -getCenteredAxis(event, MotionEvent.AXIS_Y);
-            sendAnalog(((Math.abs(x) > 0.01) || (Math.abs(y) > 0.01)), x, y);
+            Q3EUtils.q3ei.callbackObj.sendAnalog(((Math.abs(x) > 0.01) || (Math.abs(y) > 0.01)), x, y);
             x = getCenteredAxis(event, MotionEvent.AXIS_Z);
             y = getCenteredAxis(event, MotionEvent.AXIS_RZ);
             last_joystick_x = x;
@@ -457,7 +460,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     int gameMouseButton = ConvMouseButton(event);
                     if(gameMouseButton >= 0)
                     {
-                        sendKeyEvent(true, gameMouseButton, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, gameMouseButton, 0);
                     }
                 }
                     break;
@@ -465,7 +468,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     int gameMouseButton = ConvMouseButton(event);
                     if(gameMouseButton >= 0)
                     {
-                        sendKeyEvent(false, gameMouseButton, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, gameMouseButton, 0);
                     }
                     m_lastMousePosX = -1;
                     m_lastMousePosY = -1;
@@ -474,20 +477,19 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 //                case MotionEvent.ACTION_HOVER_ENTER: break;
 //                case MotionEvent.ACTION_HOVER_EXIT: break;
                 case MotionEvent.ACTION_HOVER_MOVE:
-                    sendMotionEvent(deltaX, deltaY);
+                    Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
                     break;
                 case MotionEvent.ACTION_SCROLL:
                     float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
                     if(scrollY > 0)
                     {
-                        sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
-                        sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
                     }
                     else if(scrollY < 0)
                     {
-
-                        sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
-                        sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
                     }
                     break;
             }
@@ -581,63 +583,19 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     @Override
     public boolean onTrackballEvent(MotionEvent event)
     {
-        sendTrackballEvent(event.getAction() == MotionEvent.ACTION_DOWN, event.getX(), event.getY());
+        float x = event.getX();
+        float y = event.getY();
+        if (event.getAction() == MotionEvent.ACTION_DOWN)
+        {
+            last_trackball_x = x;
+            last_trackball_y = y;
+        }
+        final float deltaX = x - last_trackball_x;
+        final float deltaY = y - last_trackball_y;
+        Q3EJNI.sendMotionEvent(deltaX, deltaY);
+        last_trackball_x = x;
+        last_trackball_y = y;
         return true;
-    }
-
-    public void sendAnalog(final boolean down, final float x, final float y)
-    {
-        queueEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendAnalog(down ? 1 : 0, x, y);
-            }
-        });
-    }
-
-    public void sendKeyEvent(final boolean down, final int keycode, final int charcode)
-    {
-        queueEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendKeyEvent(down ? 1 : 0, keycode, charcode);
-            }
-        });
-    }
-
-    public void sendMotionEvent(final float deltax, final float deltay)
-    {
-        queueEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendMotionEvent(deltax, deltay);
-            }
-        });
-    }
-
-    private void sendTrackballEvent(final boolean down, final float x, final float y)
-    {
-        queueEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                if (down)
-                {
-                    last_trackball_x = x;
-                    last_trackball_y = y;
-                }
-                Q3EJNI.sendMotionEvent(x - last_trackball_x, y - last_trackball_y);
-                last_trackball_x = x;
-                last_trackball_y = y;
-            }
-        });
     }
 
     public void queueEvent(Runnable r)
@@ -754,7 +712,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                         break;
                 }
 
-                sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
+                Q3EUtils.q3ei.callbackObj.sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
             }
         }
     }
@@ -993,7 +951,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 int gameMouseButton = ConvMouseButton(event);
                 if(gameMouseButton >= 0)
                 {
-                    sendKeyEvent(true, gameMouseButton, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, gameMouseButton, 0);
                 }
                 m_lastTouchPadPosX = event.getAxisValue(MotionEvent.AXIS_X, actionIndex);
                 m_lastTouchPadPosY = event.getAxisValue(MotionEvent.AXIS_Y, actionIndex);
@@ -1003,7 +961,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 int gameMouseButton = ConvMouseButton(event);
                 if(gameMouseButton >= 0)
                 {
-                    sendKeyEvent(false, gameMouseButton, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, gameMouseButton, 0);
                 }
                 m_lastTouchPadPosX = -1;
                 m_lastTouchPadPosY = -1;
@@ -1034,21 +992,20 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                         m_lastTouchPadPosY = y;
                     }
                 }
-                sendMotionEvent(deltaX, deltaY);
+                Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
                 break;
             case MotionEvent.ACTION_SCROLL:
                 // float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
                 float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
                 if(scrollY > 0)
                 {
-                    sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
-                    sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
                 }
                 else if(scrollY < 0)
                 {
-
-                    sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
-                    sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
                 }
                 break;
         }

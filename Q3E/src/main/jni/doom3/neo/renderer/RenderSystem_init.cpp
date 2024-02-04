@@ -77,7 +77,13 @@ idCVar r_finish("r_finish", "0", CVAR_RENDERER | CVAR_BOOL, "force a call to glF
 idCVar r_swapInterval("r_swapInterval", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "changes swap interval");
 
 idCVar r_gamma("r_gamma", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 3.0f);
-idCVar r_brightness("r_brightness", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 3.0f/*2.0f*/);
+idCVar r_brightness("r_brightness", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f,
+#ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma
+		3.0f
+#else
+		2.0f
+#endif
+);
 
 idCVar r_renderer("r_renderer", "glsl", CVAR_RENDERER | CVAR_ARCHIVE, "hardware specific renderer path to use");
 
@@ -527,30 +533,6 @@ all renderSystem functions will still operate properly, notably the material
 and model information functions.
 ==================
 */
-#ifdef __ANDROID__
-static void AndroidSetResolution(int32_t width, int32_t height)
-{
-	cvarSystem->SetCVarBool("r_fullscreen",  true);
-	cvarSystem->SetCVarInteger("r_mode", -1);
-
-	cvarSystem->SetCVarInteger("r_customWidth", width);
-	cvarSystem->SetCVarInteger("r_customHeight", height);
-
-	float r = (float) width / (float) height;
-
-	if (r > 1.7f) {
-		cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
-	} else if (r > 1.55f) {
-		cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
-	} else {
-		cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
-	}
-
-	Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
-	           -1, width, height);
-}
-#endif
-
 void R_InitOpenGL(void)
 {
 	GLint			temp;
@@ -570,9 +552,6 @@ void R_InitOpenGL(void)
 	//
 	// initialize OS specific portions of the renderSystem
 	//
-#ifdef __ANDROID__
-	AndroidSetResolution(screen_width, screen_height);
-#endif
 	for (i = 0 ; i < 2 ; i++) {
 		// set the parameters we are trying
 		R_GetModeInfo(&glConfig.vidWidth, &glConfig.vidHeight, r_mode.GetInteger());
@@ -1187,13 +1166,12 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 static void R_Multithreading_f(const idCmdArgs &args)
 {
 	extern intptr_t Sys_GetMainThread(void);
-	extern const xthreadInfo * Sys_GetRenderThread(void);
 
 	common->Printf("[Harmattan]: Multi-Thread current is %s.\n", multithreadActive ? "enabled" : "disabled");
 	common->Printf("             - Main thread handle is %lu.\n", Sys_GetMainThread());
 	//if(multithreadActive)
 	{
-		const xthreadInfo *thread = Sys_GetRenderThread();
+		const xthreadInfo *thread = &renderThread->render_thread;
 		common->Printf("             - Render thread(%s) handle is %lu.\n", thread ? thread->name : "<NULL>", thread ? thread->threadHandle : 0);
 	}
 }
@@ -1924,7 +1902,7 @@ R_SetColorMappings
 */
 void R_SetColorMappings(void)
 {
-#if !defined(__ANDROID__)
+#if !defined(_NO_GAMMA) //karin: r_brightness when unsupport gamma
 	int		i, j;
 	float	g, b;
 	int		inf;
@@ -2050,7 +2028,7 @@ void R_VidRestart_f(const idCmdArgs &args)
 #ifdef _MULTITHREAD
 	if(multithreadActive)
 	{
-		BackendThreadShutdown();
+		renderThread->BackendThreadShutdown();
 		common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
 	}
 #endif
@@ -2255,8 +2233,10 @@ void R_InitCommands(void)
 	extern void R_ConvertImage_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
 #endif
-    extern void MD5Anim_AddCommand(void);
+#ifdef _EXTRAS_TOOLS
 	MD5Anim_AddCommand();
+	ModelTest_AddCommand();
+#endif
 }
 
 /*
@@ -2377,7 +2357,7 @@ void idRenderSystemLocal::Shutdown(void)
 #ifdef _MULTITHREAD
 	if(multithreadActive)
 	{
-		BackendThreadShutdown();
+		renderThread->BackendThreadShutdown();
 		common->SetRefreshOnPrint( false ); // without a renderer there's nothing to refresh
 	}
 #endif
@@ -2600,10 +2580,10 @@ idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_REN
 idCVar harm_r_shadowMapPolygonFactor( "harm_r_shadowMapPolygonFactor", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
 idCVar harm_r_shadowMapPolygonOffset( "harm_r_shadowMapPolygonOffset", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
 
-#include "Framebuffer.cpp"
-#include "tr_shadowmapping.cpp"
-#include "RenderMatrix.cpp"
-#include "GLMatrix.cpp"
+#include "rb/Framebuffer.cpp"
+#include "tr/tr_shadowmapping.cpp"
+#include "matrix/RenderMatrix.cpp"
+#include "matrix/GLMatrix.cpp"
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW

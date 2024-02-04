@@ -30,6 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "codec.h"
 
+#if !defined(HUGE)
+#include <limits.h>
+#define HUGE INT_MAX
+#endif
+
 float glimit(const float val)
 {
 	if (val<0) return 0;

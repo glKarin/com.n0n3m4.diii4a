@@ -1983,7 +1983,7 @@ void idSoundWorldLocal::AddChannelContribution(idSoundEmitterLocal *sound, idSou
 			}
 
 			alSourcei(chan->openalSource, AL_LOOPING, (looping && chan->soundShader->entries[0]->hardwareBuffer) ? AL_TRUE : AL_FALSE);
-#if defined(__ANDROID__)
+#if defined(_OPENAL_SOFT)
 			alSourcef(chan->openalSource, AL_REFERENCE_DISTANCE, mind);
 			alSourcef(chan->openalSource, AL_MAX_DISTANCE, maxd);
 #endif

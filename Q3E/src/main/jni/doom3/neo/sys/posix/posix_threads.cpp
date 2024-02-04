@@ -197,7 +197,7 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadPriority priority,
 		common->DPrintf("WARNING: MAX_THREADS reached\n");
 	}
 
-#if defined(__ANDROID__)
+#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
 	info.threadCancel = false;
 #endif
 	Sys_LeaveCriticalSection();
@@ -213,7 +213,7 @@ void Sys_DestroyThread(xthreadInfo &info)
 	// the target thread must have a cancelation point, otherwise pthread_cancel is useless
 	assert(info.threadHandle);
 
-#ifdef __ANDROID__
+#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
 	info.threadCancel = true;
 #else
 	if (pthread_cancel((pthread_t)info.threadHandle) != 0) {
@@ -292,7 +292,12 @@ Posix_StartAsyncThread
 void Posix_StartAsyncThread()
 {
 	if (asyncThread.threadHandle == 0) {
+#if !defined(__ANDROID__)
+		extern void Sys_AsyncThread( void );
+		Sys_CreateThread((xthread_t) Sys_AsyncThread, &asyncThread, THREAD_NORMAL, asyncThread, "Async", g_threads, &g_thread_count);
+#else
 		Sys_CreateThread(Sys_AsyncThread, &asyncThread, THREAD_NORMAL, asyncThread, "Async", g_threads, &g_thread_count);
+#endif
 	} else {
 		common->Printf("Async thread already running\n");
 	}
@@ -331,3 +336,22 @@ void Posix_InitPThreads()
 	}
 }
 
+#ifdef _MULTITHREAD
+bool Sys_InThread(const xthreadInfo *thread)
+{
+#if 0
+	return (!idStr::Icmp(thread->name, Sys_GetThreadName()));
+#else
+	return thread->threadHandle && pthread_equal(thread->threadHandle, pthread_self()) != 0;
+#endif
+}
+
+bool Sys_ThreadIsRunning(const xthreadInfo *thread)
+{
+#ifdef _NO_PTHREAD_CANCEL
+	return (thread->threadHandle && !thread->threadCancel);
+#else
+	return (thread->threadHandle);
+#endif
+}
+#endif

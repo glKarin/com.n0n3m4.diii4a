@@ -128,7 +128,7 @@ class idDeclLocal : public idDeclBase
 		virtual bool				SetDefaultText(void);
 		virtual const char 		*DefaultDefinition(void) const;
 #ifdef _RAVEN
-		virtual bool			Parse(const char *text, const int textLength, bool precache);
+		virtual bool			Parse(const char *text, const int textLength, bool precache = false);
 #else
 		virtual bool				Parse(const char *text, const int textLength);
 #endif

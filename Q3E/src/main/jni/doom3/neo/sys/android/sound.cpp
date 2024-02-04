@@ -97,16 +97,12 @@ class idAudioHardwareAndroid: public idAudioHardware
 		// try to write as many sound samples to the device as possible without blocking and prepare for a possible new mixing call
 		// returns wether there is *some* space for writing available
 		bool Flush(void){
-#ifdef __ANDROID__
 			writeAudio(-1, 0);
 			//Write(true);
-#endif
 			return true;
 		};
 		void Write(bool flushing){
-#ifdef __ANDROID__
 			writeAudio(0, flushing ? -m_buffer_size : m_buffer_size);
-#endif
 		};
 
 		int GetNumberOfSpeakers(void)
@@ -160,8 +156,7 @@ bool Sys_LoadOpenAL(void)
 		return true;
 	}
 
-	const char *dir_str = native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
-	idStr path(dir_str);
+	idStr path(Sys_DLLDefaultPath());
 	path.AppendPath("libopenal.so");
 
 	hOpenAL = dlopen( path.c_str(), RTLD_NOW | RTLD_GLOBAL );

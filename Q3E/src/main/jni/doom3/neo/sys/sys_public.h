@@ -37,11 +37,90 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+// Win32
+#if defined(WIN32) || defined(_WIN32)
+
+#ifdef _WIN64
+#define	BUILD_STRING					"win-x64"
+#define BUILD_OS_ID						0
+#define	CPUSTRING						"x64"
+#else
+#define	BUILD_STRING					"win-x86"
+#define BUILD_OS_ID						0
+#define	CPUSTRING						"x86"
+#endif
+#define CPU_EASYARGS					1
+
+#define ALIGN16( x )					__declspec(align(16)) x
+#define PACKED
+
+#define _alloca16( x )					((void *)((((intptr_t)_alloca( (x)+15 )) + 15) & ~15))
+
+#define PATHSEPERATOR_STR				"\\"
+#define PATHSEPERATOR_CHAR				'\\'
+
+#ifdef _MSC_VER
+#define ID_STATIC_TEMPLATE				static
+#define ID_INLINE						__forceinline
+#else
+#define ID_STATIC_TEMPLATE
+#define ID_INLINE						inline
+#endif
+
+#define assertmem( x, y )				assert( _CrtIsValidPointer( x, y, true ) )
+
+bool Sys_IsMainThread();
+
+enum sysPath_t {
+    PATH_BASE,
+    PATH_CONFIG,
+    PATH_SAVE,
+    PATH_EXE
+};
+#endif
+
+// Mac OSX
+#if defined(MACOS_X) || defined(__APPLE__)
+
+#define BUILD_STRING				"MacOSX-universal"
+#define BUILD_OS_ID					1
+#ifdef __ppc__
+	#define	CPUSTRING					"ppc"
+	#define CPU_EASYARGS				0
+#elif defined(__i386__)
+	#define	CPUSTRING					"x86"
+	#define CPU_EASYARGS				1
+#endif
+
+#define ALIGN16( x )					x __attribute__ ((aligned (16)))
+
+#ifdef __MWERKS__
+#define PACKED
+#include <alloca.h>
+#else
+#define PACKED							__attribute__((packed))
+#endif
+
+#define _alloca							alloca
+#define _alloca16( x )					((void *)((((int)alloca( (x)+15 )) + 15) & ~15))
+
+#define PATHSEPERATOR_STR				"/"
+#define PATHSEPERATOR_CHAR				'/'
+
+#define __cdecl
+#define ASSERT							assert
+
+#define ID_INLINE						inline
+#define ID_STATIC_TEMPLATE
+
+#define assertmem( x, y )
+
+#endif
 
 // Linux
 #ifdef __linux__
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: Android arch defines
 
 #if defined(__i386__)
 #define	BUILD_STRING				"android-x86"
@@ -61,15 +140,6 @@ If you have questions concerning this license or the applicable additional terms
 #define BUILD_OS_ID					2
 #endif
 
-#ifdef _MULTITHREAD
-#define RENDER_THREAD_NAME "render_thread"
-#if 0
-#define IN_RENDER_THREAD() (!idStr::Icmp(RENDER_THREAD_NAME, Sys_GetThreadName()))
-#else
-extern bool Sys_InRenderThread(void);
-#define IN_RENDER_THREAD() Sys_InRenderThread()
-#endif
-#endif
 #else
 
 #if defined(__i386__)
@@ -87,6 +157,10 @@ extern bool Sys_InRenderThread(void);
 #define	BUILD_STRING				"linux-arm"
 #define BUILD_OS_ID					2
 #define CPUSTRING					"arm"
+#elif defined(__aarch64__)
+#define	BUILD_STRING				"linux-arm64"
+#define CPUSTRING					"arm64"
+#define BUILD_OS_ID					2
 #endif
 
 #endif
@@ -477,7 +551,7 @@ typedef struct {
 	const char 	*name;
 	intptr_t	threadHandle;
 	size_t		threadId;
-#ifdef __ANDROID__
+#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
 	bool		threadCancel;
 #endif
 } xthreadInfo;
@@ -493,13 +567,20 @@ void				Sys_DestroyThread(xthreadInfo &info);   // sets threadHandle back to 0
 // if index != NULL, set the index in g_threads array (use -1 for "main" thread)
 const char 		*Sys_GetThreadName(int *index = 0);
 
+#ifdef _SDL
+const int MAX_CRITICAL_SECTIONS		= 5;
+#else
 const int MAX_CRITICAL_SECTIONS		= 4;
+#endif
 
 enum {
 	CRITICAL_SECTION_ZERO = 0,
 	CRITICAL_SECTION_ONE,
 	CRITICAL_SECTION_TWO,
 	CRITICAL_SECTION_THREE
+#ifdef _SDL
+    , CRITICAL_SECTION_SYS
+#endif
 };
 
 void				Sys_EnterCriticalSection(int index = CRITICAL_SECTION_ZERO);
@@ -608,29 +689,26 @@ void Sys_FreeOpenAL(void);
 #define __FUNCLINE__ ( __FUNCTION__ " " __LINESTR__ )
 #endif
 
-#ifdef __ANDROID__
-//n0n3m4
-
-#ifndef _ANDROID_PACKAGE_NAME
-//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
-#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
-#endif
-#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
-
-extern float analogx;
-extern float analogy;
-extern int analogenabled;
-
-extern int screen_width;
-extern int screen_height;
-
-extern bool multithreadActive;
-
-extern char *native_library_dir;
-extern bool no_handle_signals;
-
+#ifdef __ANDROID__ //karin: sys::public expose on Android
 FILE * Sys_tmpfile(void);
 void Sys_SyncState(void);
+void Sys_ForceResolution(void);
+void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED);
 #endif
+
+#ifdef _MULTITHREAD
+bool Sys_InThread(const xthreadInfo *thread);
+bool Sys_ThreadIsRunning(const xthreadInfo *thread);
+#ifdef _NO_PTHREAD_CANCEL
+#define THREAD_CANCELED(x) (x).threadCancel
+#else
+#define THREAD_CANCELED(x) false
+#endif
+#endif
+
+void			Sys_Trap(void);
+void			Sys_Usleep(int usec);
+void			Sys_Msleep(int msec);
+const char *	Sys_DLLDefaultPath(void);
 
 #endif /* !__SYS_PUBLIC__ */

@@ -9,6 +9,7 @@
 
 #include "StatEvent.h"
 #include "StatWindow.h"
+#include <limits.h>
 
 #ifndef ID_TRAFFICSTATS
 	#define ID_TRAFFICSTATS 0

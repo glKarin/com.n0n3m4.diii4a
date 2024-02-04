@@ -31,6 +31,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Session_local.h"
 
+#ifdef _MULTITHREAD
+extern bool multithreadActive;
+extern bool Sys_InRenderThread(void);
+#endif
+
 #if defined(_RAVEN) || defined(_HUMANHEAD)
 #include "../ui/Window.h"
 #endif
@@ -39,6 +44,9 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #ifdef _RAVEN
+//karin: pause when finished loading
+idCVar com_skipLevelLoadPause("com_skipLevelLoadPause", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "");
+
 const char * Com_LocalizeGametype( const char *gameType ) { // from MultiplayerGame.cpp
 	const char *localisedGametype = gameType;
 
@@ -452,6 +460,9 @@ void idSessionLocal::Clear()
 	authWaitBox = false;
 
 	authMsg.Clear();
+#ifdef _RAVEN
+	finishedLoading = false;
+#endif
 }
 
 /*
@@ -511,6 +522,9 @@ void idSessionLocal::Stop()
 
 	insideUpdateScreen = false;
 	insideExecuteMapChange = false;
+#ifdef _RAVEN
+	finishedLoading = false;
+#endif
 
 	// drop all guis
 	SetGUI(NULL, NULL);
@@ -1490,12 +1504,21 @@ void idSessionLocal::MoveToNewMap(const char *mapName)
 
 	ExecuteMapChange();
 
-	if (!mapSpawnData.serverInfo.GetBool("devmap")) {
-		// Autosave at the beginning of the level
-		SaveGame(GetAutoSaveName(mapName), true);
-	}
+#ifdef _RAVEN //karin: pause when finished loading
+    if(!com_skipLevelLoadPause.GetBool())
+		SetGUI(guiLoading, NULL);
+	else
+    {
+#endif
+    if (!mapSpawnData.serverInfo.GetBool("devmap")) {
+        // Autosave at the beginning of the level
+        SaveGame(GetAutoSaveName(mapName), true);
+    }
 
-	SetGUI(NULL, NULL);
+    SetGUI(NULL, NULL);
+#ifdef _RAVEN
+    }
+#endif
 }
 
 /*
@@ -1962,6 +1985,9 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	// cause prints to force screen updates as a pacifier,
 	// and draw the loading gui instead of game draws
 	insideExecuteMapChange = true;
+#ifdef _RAVEN
+	finishedLoading = false;
+#endif
 
 	// if this works out we will probably want all the sizes in a def file although this solution will
 	// work for new maps etc. after the first load. we can also drop the sizes into the default.cfg
@@ -2101,6 +2127,15 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	// capture the current screen and start a wipe
 	StartWipe("wipe2Material");
 
+#ifdef _RAVEN //karin: pause when finished loading
+	if(!com_skipLevelLoadPause.GetBool() && !(loadingSaveGame && savegameFile) && !IsMultiplayer())
+	{
+		guiLoading->HandleNamedEvent("FinishedLoading");
+		finishedLoading = true;
+		return;
+	}
+	finishedLoading = true;
+#endif
 	usercmdGen->Clear();
 
 	// start saving commands for possible writeCmdDemo usage
@@ -2843,7 +2878,7 @@ void idSessionLocal::PacifierUpdate()
 	}
 
 #ifdef _MULTITHREAD
-	if(multithreadActive && IN_RENDER_THREAD()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
+	if(multithreadActive && Sys_InRenderThread()) // render thread do not continue in multithreading, e.g. call this from idCommon::Printf
 		return;
 #endif
 	int	time = eventLoop->Milliseconds();
@@ -2987,7 +3022,7 @@ void idSessionLocal::Draw()
 		console->Draw(false);
 	}
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: sync session state to Q3E
 	Sys_SyncState();
 #endif
 }

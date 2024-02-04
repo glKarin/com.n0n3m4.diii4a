@@ -659,8 +659,8 @@ void idConsoleLocal::KeyDownEvent(int key)
 		{
 			historyEditLines[nextHistoryLine % COMMAND_HISTORY] = consoleField;
 			nextHistoryLine++;
-			historyLine = nextHistoryLine;
 		}
+		historyLine = nextHistoryLine;
 
 		if(harm_com_consoleHistory.GetInteger() == 2)
 			DumpHistory();

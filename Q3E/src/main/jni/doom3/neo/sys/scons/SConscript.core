@@ -410,7 +410,7 @@ for i in range( len( core_list ) ):
 
 local_env = g_env.Clone()
 
-local_env.Append( CPPDEFINES = [ '_USING_STB', '_MODEL_OBJ', '_MODEL_DAE', '_SHADOW_MAPPING', '_OPENGLES3', '_TRANSLUCENT_STENCIL_SHADOW' ] )
+local_env.Append( CPPDEFINES = [ '_USING_STB', '_MODEL_OBJ', '_MODEL_DAE', '_SHADOW_MAPPING', '_OPENGLES3', '_NO_LIGHT', '_TRANSLUCENT_STENCIL_SHADOW' ] )
 # RAVEN QUAKE4
 if ( local_raven ):
 	local_env.Append( CPPDEFINES = [ '_RAVEN' ] )
@@ -486,10 +486,15 @@ if g_os == 'Android':
 
 if g_os == 'Android':
 	libogg_env = local_env.Clone()
-	libogg_env['CPPFLAGS' ] += [ '-I./externlibs/libogg/' ]
+	libogg_env['CPPFLAGS' ] += [ '-I./externlibs/libogg/include/' ]
+	libogg_env['CPPFLAGS' ] += [ '-I./externlibs/libogg/include/ogg/' ]
+	libogg_env['CPPFLAGS' ] += [ '-I./externlibs/libvorbis/include/' ]
+	libogg_env['CPPFLAGS' ] += [ '-I./externlibs/libvorbis/lib/' ]
 	libogg_lib = libogg_env.StaticLibrary( 'ogg', libogg_list )
 
-	local_env['CPPFLAGS' ] += [ '-I./externlibs/libogg/' ]
+	local_env['CPPFLAGS' ] += [ '-I./externlibs/libogg/include/' ]
+	local_env['CPPFLAGS' ] += [ '-I./externlibs/libogg/include/ogg/' ]
+	local_env['CPPFLAGS' ] += [ '-I./externlibs/libvorbis/include/' ]
 
 if g_os == 'Android':
 #local_env.Append( LIBS = [ 'dl', 'vorbisfile','vorbis', 'ogg', 'android' ] )

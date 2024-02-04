@@ -49,9 +49,6 @@ END_CLASS
 idCamera::Spawn
 =====================
 */
-
-void * __attribute__((weak)) __dso_handle=0;
-
 void idCamera::Spawn(void)
 {
 }

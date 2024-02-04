@@ -273,5 +273,6 @@
     <string name="hexen_edge_of_chaos">HeXen:Edge of Chaos</string>
     <string name="fragging_free">Fragging Free</string>
     <string name="normal_font_size_subtitle_prey_2006">Обычный размер шрифта(Prey 2006)</string>
+    <string name="_mod">Mod</string>
 
 </resources>

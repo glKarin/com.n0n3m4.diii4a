@@ -7946,6 +7946,7 @@ void idPlayer::CalculateFirstPersonView(void)
 	} else {
 		idVec3 firstPersonViewOrigin_orig;
 		GetViewPos( firstPersonViewOrigin_orig, firstPersonViewAxis );
+		idAFAttachment *headAF = head.GetEntity();
 
 		if( af.IsActive() )
 		{
@@ -7956,15 +7957,47 @@ void idPlayer::CalculateFirstPersonView(void)
 				firstPersonViewAxis = head->GetWorldAxis();
 			}
 		}
+		else if(headAF)
+		{
+#define _HARM_D3_PLAYERMODEL_HEAD_JOINT "Head"
+			idMat3 axis;
+			idVec3 origin;
+			const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
+			jointHandle_t head_joint = INVALID_JOINT;
+			if(headJointName && headJointName[0])
+			{
+				head_joint = headAF->GetAnimator()->GetJointHandle( headJointName );
+			}
+			if(head_joint >= 0 && headAF->GetJointWorldTransform( head_joint, gameLocal.time, origin, axis ) )
+				firstPersonViewOrigin = origin;
+			else
+			{
+				firstPersonViewOrigin = headAF->GetPhysics()->GetOrigin();
+			}
+		}
 		else
 		{
 			// position camera at head
 			idMat3 axis;
 			idVec3 origin;
-			animator.GetJointTransform( animator.GetJointHandle( "Head" ), gameLocal.time, origin, axis );
-			firstPersonViewOrigin = ( origin + modelOffset) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
-				+ viewBob
-				;
+			const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
+			jointHandle_t head_joint = INVALID_JOINT;
+			if(headJointName && headJointName[0])
+			{
+				head_joint = animator.GetJointHandle( headJointName );
+			}
+			else
+			{
+				head_joint = animator.GetJointHandle( _HARM_D3_PLAYERMODEL_HEAD_JOINT );
+			}
+			if(head_joint >= 0 && animator.GetJointTransform( head_joint, gameLocal.time, origin, axis ) )
+				firstPersonViewOrigin = ( origin + modelOffset) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
+										+ viewBob
+						;
+			else
+				firstPersonViewOrigin = GetEyePosition() + viewBob
+						;
+#undef _HARM_D3_PLAYERMODEL_HEAD_JOINT
 		}
 
 		firstPersonViewOrigin_playerViewOrigin = firstPersonViewOrigin;

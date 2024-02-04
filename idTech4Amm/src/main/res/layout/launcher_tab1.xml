@@ -47,14 +47,41 @@
 				android:imeOptions="flagNoExtractUi"
 				android:inputType="textNoSuggestions|textMultiLine">
 			</EditText>
-			<TextView
+
+			<LinearLayout
+				android:id="@+id/temp_cmdline"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				android:visibility="gone"
+				>
+				<EditText
+					android:id="@+id/edt_cmdline_temp"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:textColor="#FF000000"
+					android:ems="10"
+					android:imeOptions="flagNoExtractUi"
+					android:inputType="textNoSuggestions|textMultiLine"
+					/>
+				<Switch
+					android:id="@+id/editable_temp_command"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:checked="false"
+					>
+				</Switch>
+			</LinearLayout>
+			<!--<TextView
 				android:id="@+id/edt_cmdline_temp"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:textColor="#FF000000"
 				android:textSize="14sp"
 				android:visibility="gone"
-				/>
+				/>-->
 
 			<TextView
 				android:id="@+id/tv_path"
@@ -88,6 +115,13 @@
 				</Button>
 
 			</LinearLayout>
+
+			<com.karin.idTech4Amm.widget.Divider
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				myapp:label="@string/_mod"
+				myapp:lineColor="@color/launcher_divider_color"
+				/>
 
 			<TextView
 				android:layout_width="wrap_content"
@@ -438,16 +472,16 @@
 				/>
 
 			<CheckBox
-				android:id="@+id/auto_quick_load"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/load_quicksave_when_start_game"/>
-
-			<CheckBox
 				android:id="@+id/skip_intro"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/skip_intro"/>
+
+			<CheckBox
+				android:id="@+id/auto_quick_load"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/load_quicksave_when_start_game"/>
 
 
 		<LinearLayout

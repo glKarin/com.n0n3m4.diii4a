@@ -394,7 +394,7 @@ void idSoundSample::MakeDefault(void)
 		alBufferData(openalBuffer, objectInfo.nChannels==1?AL_FORMAT_MONO16:AL_FORMAT_STEREO16, nonCacheData, objectMemSize, objectInfo.nSamplesPerSec);
 
 		if (alGetError() != AL_NO_ERROR) {
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 			common->Warning( "idSoundCache: error loading data into OpenAL hardware buffer" );
 			hardwareBuffer = false;
 #else
@@ -544,7 +544,7 @@ void idSoundSample::Load(void)
 				alBufferData(openalBuffer, objectInfo.nChannels==1?AL_FORMAT_MONO16:AL_FORMAT_STEREO16, nonCacheData, objectMemSize, objectInfo.nSamplesPerSec);
 
 				if (alGetError() != AL_NO_ERROR) {
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 					common->Warning( "idSoundCache: error loading data into OpenAL hardware buffer" );
 					hardwareBuffer = false;
 #else
@@ -582,7 +582,7 @@ void idSoundSample::Load(void)
 
 		// OGG decompressed at load time (when smaller than s_decompressionLimit seconds, 6 seconds by default)
 		if (objectInfo.wFormatTag == WAVE_FORMAT_TAG_OGG) {
-#if defined(__ANDROID__)
+#if defined(_OPENAL_SOFT)
 
 			if ((objectSize < ((int) objectInfo.nSamplesPerSec * idSoundSystemLocal::s_decompressionLimit.GetInteger()))) {
 #else
@@ -636,7 +636,7 @@ void idSoundSample::Load(void)
 					alBufferData(openalBuffer, objectInfo.nChannels==1?AL_FORMAT_MONO16:AL_FORMAT_STEREO16, destData, objectSize * sizeof(short), objectInfo.nSamplesPerSec);
 
 					if (alGetError() != AL_NO_ERROR)
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 					{
 						common->Warning( "idSoundCache: error loading data into OpenAL hardware buffer" );
 						hardwareBuffer = false;
@@ -703,7 +703,7 @@ void idSoundSample::PurgeSoundSample()
 		alDeleteBuffers(1, &openalBuffer);
 
 		if (alGetError() != AL_NO_ERROR) {
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 			common->Warning( "idSoundCache: error unloading data from OpenAL hardware buffer" );
 			openalBuffer = 0;
 			hardwareBuffer = false;

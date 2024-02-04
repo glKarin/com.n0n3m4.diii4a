@@ -499,15 +499,19 @@ void Sys_Sleep(int msec)
 char *Sys_GetClipboardData(void)
 {
 	// Sys_Printf("TODO: Sys_GetClipboardData\n");
+#ifdef __ANDROID__ //karin: from JNI
 	extern char * Android_GetClipboardData(void);
 	return Android_GetClipboardData();
+#endif
 }
 
 void Sys_SetClipboardData(const char *string)
 {
 	// Sys_Printf("TODO: Sys_SetClipboardData\n");
+#ifdef __ANDROID__ //karin: from JNI
 	extern void Android_SetClipboardData(const char *text);
 	Android_SetClipboardData(string);
+#endif
 }
 
 
@@ -1174,4 +1178,30 @@ void Sys_Error(const char *error, ...)
 	Sys_Printf("\n");
 
 	Posix_Exit(EXIT_FAILURE);
+}
+
+void Sys_Trap(void)
+{
+#ifdef __ANDROID__
+	__builtin_trap();
+#elif defined(__unix__)
+    // __builtin_trap() causes an illegal instruction which is kinda ugly.
+    // especially if you'd like to be able to continue after the assertion during debugging
+    raise(SIGTRAP); // this will break into the debugger.
+#elif defined( __GNUC__ )
+    __builtin_trap();
+    _exit(1);
+#else
+	abort();
+#endif
+}
+
+void Sys_Usleep(int usec)
+{
+    usleep(usec);
+}
+
+void Sys_Msleep(int msec)
+{
+    usleep(msec * 1000);
 }

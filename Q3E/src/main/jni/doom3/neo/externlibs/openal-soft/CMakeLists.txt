@@ -1136,7 +1136,11 @@ endif()
 
 # Check for OpenSL (Android) backend
 option(ALSOFT_BACKEND_OPENSL "Enable OpenSL backend" ON)
+if(ANDROID)
 option(ALSOFT_REQUIRE_OPENSL "Require OpenSL backend" ON) #k: OFF
+else()
+option(ALSOFT_REQUIRE_OPENSL "Require OpenSL backend" OFF)
+endif()
 if(ALSOFT_BACKEND_OPENSL)
     find_package(OpenSL)
     if(OPENSL_FOUND)

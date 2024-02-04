@@ -1,12 +1,35 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(doom3)
 
-add_definitions(-D__ANDROID__)
-add_definitions(-D_K_CLANG)
-add_definitions(-DID_ENABLE_CURL=1)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# -DCMAKE_TOOLCHAIN_FILE=D:/project/c/vcpkg/scripts/buildsystems/vcpkg.cmake
+set(COMPILE_CURL "1")
+set(CORE_DEFINES "__DOOM_DLL__")
+if(ANDROID)
+	add_definitions(-D__ANDROID__)
+	add_definitions(-D_NO_PTHREAD_CANCEL)
+	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA;_NO_GAMMA")
+elseif(WIN32)
+	find_package(CURL QUIET)
+	if(CURL_FOUND)
+		set(COMPILE_CURL "1")
+		include_directories(${CURL_INCLUDE_DIR})
+		message(STATUS "libcurl found and enabled")
+	else()
+		message(WARNING "libcurl not found, server downloads won't be available (apart from that dhewm3 will work)")
+		set(CURL_LIBRARY "")
+		set(COMPILE_CURL "0")
+	endif()
+	set(CORE_DEFINES "${CORE_DEFINES};NO_ALSA")
+else()
+	set(CORE_DEFINES "${CORE_DEFINES};_NO_GAMMA")
+	# apt-get install libasound2-dev # sound alsa support
+	# apt-get install libgles-dev # GLES2/GLES3/EGL headers
+endif()
 
-set(CORE_DEFINES "__DOOM_DLL__;NO_ALSA")
+add_definitions(-D_K_CLANG) # TODO
+add_definitions(-DID_ENABLE_CURL=${COMPILE_CURL})
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # set(CMAKE_BUILD_TYPE "Debug")
 # TODO
@@ -65,16 +88,19 @@ option(BASE			"Build the base game code" ON)
 option(D3XP			"Build the d3xp game code" ON)
 
 # Extras functions
-option(OPENSLES			"OpenSLES support" ON)
+if(ANDROID)
+	option(OPENSLES			"OpenSLES support" ON)
+endif()
+option(OPENGLES3			"OpenGLES3 support" ON)
+option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
 option(MULTITHREAD			"Multi-Thread support" ON)
 option(USING_STB			"Using stb" ON)
 option(SUPPORT_OBJ			"Support obj model" ON)
 option(SUPPORT_DAE			"Support dae model" ON)
 option(SHADOW_MAPPING			"Shadow mapping support" ON)
-option(OPENGLES3			"OpenGLES3 support" ON)
-option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
 option(NO_LIGHT			"r_noLight support" ON)
 option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" ON)
+option(EXTRAS_TOOLS			"Add extras commands" OFF)
 
 # DOOM3 mods
 option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" ON)
@@ -113,6 +139,11 @@ endif()
 if(OPENGLES3)
 	add_definitions(-D_OPENGLES3)
 	message(STATUS "Build OpenGLES3 support")
+endif()
+
+if(EXTRAS_TOOLS)
+	add_definitions(-D_EXTRAS_TOOLS)
+	message(STATUS "Build extras tools support")
 endif()
 
 set(CMAKE_CXX_STANDARD "98")
@@ -243,23 +274,24 @@ check_c_source_compiles( "#include <backtrace.h>
 	int main() { backtrace_create_state(NULL, 0, NULL, NULL); return 0; }" HAVE_LIBBACKTRACE )
 unset(CMAKE_REQUIRED_LIBRARIES)
 
-# compiler specific flags
-add_compile_options(-pipe)
-#add_compile_options(-Wall)
-add_compile_options(-w)
-
 if(NOT CMAKE_CROSSCOMPILING AND ONATIVE)
 	add_compile_options(-march=native)
 elseif(NOT APPLE AND cpu STREQUAL "x86")
 	add_compile_options(-march=pentium3)
 endif()
 
-set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0")
-set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG")
-set(CMAKE_C_FLAGS_PROFILE "-g -ggdb -D_DEBUG -O1 -fno-omit-frame-pointer")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -fno-math-errno -fno-trapping-math -fomit-frame-pointer")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -ggdb -O2 -fno-math-errno -fno-trapping-math -fno-omit-frame-pointer")
-set(CMAKE_C_FLAGS_MINSIZEREL "-Os -fno-math-errno -fno-trapping-math -fomit-frame-pointer")
+if(NOT MSVC)
+	# compiler specific flags
+	add_compile_options(-pipe)
+	#add_compile_options(-Wall)
+	add_compile_options(-w)
+
+set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0 -fPIC")
+set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG -fPIC")
+set(CMAKE_C_FLAGS_PROFILE "-g -ggdb -D_DEBUG -O1 -fno-omit-frame-pointer -fPIC")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -fno-math-errno -fno-trapping-math -fomit-frame-pointer -fPIC")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -ggdb -O2 -fno-math-errno -fno-trapping-math -fno-omit-frame-pointer -fPIC")
+set(CMAKE_C_FLAGS_MINSIZEREL "-Os -fno-math-errno -fno-trapping-math -fomit-frame-pointer -fPIC")
 
 set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
 set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
@@ -269,13 +301,11 @@ add_compile_options(-fno-strict-aliasing)
 # (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
 add_compile_options(-ffp-contract=off)
 
-if(NOT AROS)
 	CHECK_CXX_COMPILER_FLAG("-fvisibility=hidden" cxx_has_fvisibility)
 	if(NOT cxx_has_fvisibility)
 		message(FATAL_ERROR "Compiler does not support -fvisibility")
 	endif()
 	add_compile_options(-fvisibility=hidden)
-endif()
 
 # TODO fix these warnings
 add_compile_options(-Wno-sign-compare)
@@ -285,6 +315,10 @@ add_compile_options(-Wno-format-security)
 add_compile_options(-Wno-unknown-pragmas)
 add_compile_options(-Wno-unused-private-field)
 add_compile_options(-Wno-unused-variable)
+
+else()
+	add_definitions(-D_ALLOW_KEYWORD_MACROS) # because of the "#define private public" and "#define protected public" in TypeInfo.cpp
+endif()
 
 CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 if(cxx_has_Woverload_virtual)
@@ -306,9 +340,31 @@ function(add_globbed_headers SRCLIST PATHPREFIX)
 	set(${SRCLIST} ${tmp_hdrs} ${${SRCLIST}})
 endfunction()
 
-set(sys_libs ${sys_libs} dl)
-set(sys_libs ${sys_libs} EGL android z)
-set(local_libs ogg curl)
+if(ANDROID)
+	set(sys_libs ${sys_libs} android)
+	set(sys_libs ${sys_libs} dl EGL z)
+elseif(WIN32)
+	find_package(SDL2 REQUIRED)
+	include_directories(${SDL2_INCLUDE_DIR})
+	set(SDLx_LIBRARY ${SDL2_LIBRARIES})
+	set(sys_libs ${sys_libs} ${SDLx_LIBRARY} wsock32 Iphlpapi winmm dsound ksuser)
+	add_definitions(-D_SDL)
+	include_directories("externlibs/include")
+else()
+	set(sys_libs ${sys_libs} X11)
+	set(sys_libs ${sys_libs} dl EGL z)
+endif()
+
+set(local_libs ogg)
+if(COMPILE_CURL STREQUAL "1")
+	if(NOT WIN32)
+	set(local_libs ${local_libs} curl)
+	else()
+		set(sys_libs ${sys_libs} ${CURL_LIBRARY})
+	endif()
+	message(STATUS "Build cURL")
+endif()
+
 if(USING_STB)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB")
 	message(STATUS "Using stb jpeg image")
@@ -335,8 +391,10 @@ if(TRANSLUCENT_STENCIL_SHADOW)
 endif()
 
 if(OPENAL)
+	if(ANDROID)
 	add_subdirectory (externlibs/openal-soft)
-	add_definitions(-D_OPENAL -D_OPENAL_EFX)
+	endif()
+	add_definitions(-D_OPENAL -D_OPENAL_EFX -D_OPENAL_SOFT)
 	message(STATUS "Build OpenAL(soft) support")
 endif()
 
@@ -483,10 +541,10 @@ set(src_renderer
 	renderer/tr_trace.cpp
 	renderer/tr_trisurf.cpp
 	renderer/tr_turboshadow.cpp
-	renderer/etc_android.cpp
-	renderer/etc_rg_etc1.cpp
+	renderer/etc/etc_android.cpp
+	renderer/etc/etc_rg_etc1.cpp
 	renderer/tr_rendertools.cpp
-	renderer/esTransform.c
+    renderer/matrix/esTransform.c
 )
 
 add_globbed_headers(src_renderer "renderer")
@@ -978,7 +1036,7 @@ list(REMOVE_ITEM src_quake4
 		PlayerIcon.cpp
 		SmokeParticles.cpp
 		ai/AI_Vagary.cpp
-		gamesys/TypeInfo.cpp
+		#gamesys/TypeInfo.cpp
 		)
 list(APPEND src_quake4 ${quake4_game_src})
 set_src_dir(src_quake4 "quake4" ${src_quake4})
@@ -1245,6 +1303,9 @@ add_globbed_headers(humanhead_renderer_src "humanhead")
 add_globbed_headers(humanhead_framework_src "humanhead")
 
 include_directories("externlibs")
+
+if(NOT WIN32)
+if(COMPILE_CURL STREQUAL "1")
 #//k curl
 set(src_curl
 	externlibs/curl/lib/base64.c
@@ -1295,7 +1356,19 @@ add_globbed_headers(src_curl "externlibs/curl/lib")
 include_directories("externlibs/curl/lib")
 include_directories("externlibs/curl/include")
 add_library(curl STATIC ${src_curl})
-set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "HAVE_CONFIG_H")
+set(CURL_DEFINES "HAVE_CONFIG_H") # without autoconf
+INCLUDE(CheckFunctionExists)
+check_function_exists(strlcat HAVE_STRLCAT)
+if(NOT HAVE_STRLCAT)
+	set(CURL_DEFINES "${CURL_DEFINES};_NOT_HAVE_STRLCAT")
+	message(STATUS "No strlcat for cURL")
+else()
+	message(STATUS "Have strlcat for cURL")
+endif()
+set_target_properties(curl PROPERTIES COMPILE_DEFINITIONS "${CURL_DEFINES}")
+target_link_libraries(curl z)
+endif()
+endif()
 
 #//k ogg
 set(src_ogg
@@ -1304,8 +1377,8 @@ set(src_ogg
 	externlibs/libvorbis/lib/analysis.c
 	externlibs/libvorbis/lib/floor1.c
 	externlibs/libvorbis/lib/psy.c
-	externlibs/libvorbis/lib/tone.c
-	externlibs/libvorbis/lib/barkmel.c
+	# externlibs/libvorbis/lib/tone.c
+	# externlibs/libvorbis/lib/barkmel.c
 	externlibs/libvorbis/lib/info.c
 	externlibs/libvorbis/lib/vorbisenc.c
 	externlibs/libvorbis/lib/bitrate.c
@@ -1371,21 +1444,62 @@ set(src_sys_base
 	sys/posix/posix_threads.cpp
 	sys/posix/posix_signal.cpp
 	sys/posix/posix_input.cpp
-	sys/android/main.cpp
-	sys/android/sound.cpp
 	sys/linux/gl_extensions.cpp
-	sys/android/input.cpp
 )
 
-set(src_sys_core
-	sys/android/gles2.cpp
-)
+if(ANDROID)
+	set(src_sys_base
+		${src_sys_base}
+		sys/android/main.cpp
+		sys/android/sound.cpp
+		sys/android/input.cpp
+	)
+	set(src_sys_core
+		sys/android/gles2.cpp
+	)
+elseif(WIN32)
+	set(src_sys_base
+			sys/sys_local.cpp
+			sys/sdl/threads.cpp
+			sys/sdl/events.cpp
+			sys/sdl/cpu.cpp
+			sys/sdl/sdl.cpp
+			)
+	set(src_sys_base
+			${src_sys_base}
+			sys/win32/win_input.cpp
+			sys/win32/win_main.cpp
+			sys/win32/win_net.cpp
+			sys/win32/win_shared.cpp
+			sys/win32/win_syscon.cpp
+			sys/win32/SDL_win32_main.c
+			sys/win32/win_aros.cpp
+			sys/win32/win_cpu.cpp
+			sys/win32/win_snd.cpp
+			)
+	set(src_sys_core
+			sys/sdl/glimp.cpp
+			)
+else()
+	set(src_sys_base
+		${src_sys_base}
+		sys/linux/main.cpp
+		sys/linux/input.cpp
+		sys/linux/sound.cpp
+		sys/linux/sound_alsa.cpp
+	)
+	set(src_sys_core
+		sys/linux/gles2.cpp
+	)
+endif()
 
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(idlib STATIC ${src_idlib})
+if(NOT MSVC)
 set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib})
 
@@ -1396,7 +1510,9 @@ set(src_idlib_raven
 		${raven_idlib_src}
 		)
 add_library(idlib_raven STATIC ${src_idlib_raven})
+if(NOT MSVC)
 set_target_properties(idlib_raven PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
 set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_raven})
@@ -1408,7 +1524,9 @@ set(src_idlib_humanhead
 		${humanhead_idlib_src}
 		)
 add_library(idlib_humanhead STATIC ${src_idlib_humanhead})
+if(NOT MSVC)
 set_target_properties(idlib_humanhead PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
 set_target_properties(idlib_humanhead PROPERTIES COMPILE_DEFINITIONS "_HUMANHEAD;HUMANHEAD")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_humanhead})
@@ -1469,15 +1587,29 @@ message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "-l: ${sys_libs}")
 message(STATUS "-l(static): ${local_libs}")
 
-#message(FATAL_ERROR "${CMAKE_SIZEOF_VOID_P} stop!!!!!!!!!!!!!!!!!!!!")
+message(STATUS "pointer size: ${CMAKE_SIZEOF_VOID_P}")
+message(STATUS "CORE_DEFINES: ${CORE_DEFINES}")
+message(STATUS "ldflags: ${ldflags}")
+
+#message(FATAL_ERROR "STOP")
 
 if(CORE)
-	add_library(${DOOM3BINARY} SHARED
-		${src_core}
-		${src_sys_base}
-		${src_sys_core}
-		${src_editor_tools}
-	)
+	if(ANDROID)
+		add_library(${DOOM3BINARY} SHARED
+				${src_core}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	else()
+		set(DOOM3BINARY "Doom3")
+		add_executable(${DOOM3BINARY}
+				${src_core}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
@@ -1675,13 +1807,23 @@ if(FRAGGINGFREE)
 endif()
 
 if(RAVEN)
-	set(QUAKE4BINARY "${DOOM3BINARY}_raven")
-	add_library(${QUAKE4BINARY} SHARED
-			${src_core_raven}
-			${src_sys_base}
-			${src_sys_core}
-			${src_editor_tools}
-			)
+	if(ANDROID)
+		set(QUAKE4BINARY "${DOOM3BINARY}_raven")
+		add_library(${QUAKE4BINARY} SHARED
+				${src_core_raven}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	else()
+		set(QUAKE4BINARY "Quake4")
+		add_executable(${QUAKE4BINARY}
+				${src_core_raven}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+		)
+	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 
@@ -1734,13 +1876,23 @@ endif()
 
 
 if(HUMANHEAD)
-	set(PREYBINARY "${DOOM3BINARY}_humanhead")
-	add_library(${PREYBINARY} SHARED
-			${src_core_humanhead}
-			${src_sys_base}
-			${src_sys_core}
-			${src_editor_tools}
-			)
+	if(ANDROID)
+		set(PREYBINARY "${DOOM3BINARY}_humanhead")
+		add_library(${PREYBINARY} SHARED
+				${src_core_humanhead}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	else()
+		set(PREYBINARY "Prey")
+		add_executable(${PREYBINARY}
+				${src_core_humanhead}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+				)
+	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_humanhead} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
 

@@ -55,7 +55,11 @@ void idDeclEntityDef::FreeData(void)
 idDeclEntityDef::Parse
 ================
 */
+#ifdef _RAVEN
+bool idDeclEntityDef::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idDeclEntityDef::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer src;
 	idToken	token, token2;

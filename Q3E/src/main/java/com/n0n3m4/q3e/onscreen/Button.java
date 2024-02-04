@@ -91,20 +91,19 @@ public class Button extends Paintable implements TouchListener
     @Override
     public boolean onTouchEvent(int x, int y, int act)
     {
-        Q3EControlView controlView = (Q3EControlView) (this.view);
         if (canbeheld)
         {
             if (act == 1)
             {
                 if (!heldarr.contains(keycode))
                 {
-                    controlView.sendKeyEvent(true, keycode, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, keycode, 0);
                     heldarr.add(keycode);
                     alpha = Math.min(initalpha * 2, 1f);
                 }
                 else
                 {
-                    controlView.sendKeyEvent(false, keycode, 0);
+                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keycode, 0);
                     heldarr.remove(Integer.valueOf(keycode));
                     alpha = initalpha;
                 }
@@ -123,22 +122,22 @@ public class Button extends Paintable implements TouchListener
         {
             lx = x;
             ly = y;
-            controlView.sendKeyEvent(true, keycode, 0);
+            Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, keycode, 0);
         }
         else if (act == -1)
-            controlView.sendKeyEvent(false, keycode, 0);
+            Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keycode, 0);
 
         if (keycode == Q3EKeyCodes.KeyCodes.K_MOUSE1)
         {
             if (Q3EUtils.q3ei.callbackObj.notinmenu)
             {
-                controlView.sendMotionEvent(x - lx, y - ly);
+                Q3EUtils.q3ei.callbackObj.sendMotionEvent(x - lx, y - ly);
                 lx = x;
                 ly = y;
             }
             else
             {
-                controlView.sendMotionEvent(0, 0);//???
+                Q3EUtils.q3ei.callbackObj.sendMotionEvent(0, 0);//???
             }
         }
         return true;

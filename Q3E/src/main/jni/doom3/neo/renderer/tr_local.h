@@ -39,7 +39,7 @@ extern bool USING_GLES3;
 //#define SHADOW_MAPPING_DEBUG
 
 #define MAX_SHADOWMAP_RESOLUTIONS 5
-#include "Framebuffer.h"
+#include "rb/Framebuffer.h"
 
 // RB: added multiple subfrustums for cascaded shadow mapping
 enum frustumPlanes_t
@@ -756,6 +756,10 @@ typedef struct {
 	int		x, y, width, height;	// these are in physical, OpenGL Y-at-bottom pixels
 } renderCrop_t;
 static const int	MAX_RENDER_CROPS = 8;
+
+#ifdef _MULTITHREAD
+#include "rb/RenderThread.h"
+#endif
 
 /*
 ** Most renderer globals are defined here.
@@ -1997,12 +2001,12 @@ struct idAllocAutoHeap {
 				data = NULL;
 			}
 		}
-		void * operator new(size_t size);
-		void * operator new[](size_t size);
-		void operator delete(void *ptr);
-		void operator delete[](void *ptr);
-		idAllocAutoHeap(const idAllocAutoHeap &other);
-		idAllocAutoHeap & operator=(const idAllocAutoHeap &other);
+		void * operator new(size_t);
+		void * operator new[](size_t);
+		void operator delete(void *);
+		void operator delete[](void *);
+		idAllocAutoHeap(const idAllocAutoHeap &);
+		idAllocAutoHeap & operator=(const idAllocAutoHeap &);
 };
 
 // alloc in heap memory
@@ -2034,23 +2038,15 @@ struct idAllocAutoHeap {
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
 #endif
 
-#ifdef _MULTITHREAD
-#define NUM_FRAME_DATA 2
-
-extern void BackendThreadWait(void); // renderer/RenderSystem
-extern void BackendThreadTask(void); // renderer/RenderSystem
-extern void BackendThreadExecute(void); // sys/android/main
-extern void BackendThreadShutdown(void); // sys/android/main
-#endif
-extern void CheckEGLInitialized(void); // sys/android/main
+extern void GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
 //extern volatile bool has_gl_context;
 extern unsigned int lastRenderTime;
 extern int r_maxFps;
 
 #ifdef _SHADOW_MAPPING
 
-#include "GLMatrix.h"
-#include "RenderMatrix.h"
+#include "matrix/GLMatrix.h"
+#include "matrix/RenderMatrix.h"
 
 extern idCVar r_useShadowMapping;			// use shadow mapping instead of stencil shadows
 extern idCVar r_useHalfLambertLighting;		// use Half-Lambert lighting instead of classic Lambert
@@ -2101,8 +2097,47 @@ extern idCVar harm_r_translucentStencilShadow;
 extern idCVar harm_r_stencilShadowAlpha;
 #endif
 
-#ifdef __ANDROID__
+#ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma
 extern float RB_overbright;
+#endif
+
+#ifdef _K_DEV
+#define HARM_CHECK_SHADER(x) \
+	if (!backEnd.glState.currentProgram) { \
+		common->Printf(x ": no current program object\n"); \
+        Sys_Trap(); \
+		return; \
+	}
+
+#ifdef _HARM_SHADER_NAME
+#define HARM_CHECK_SHADER_ATTR(x, index) \
+	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) { \
+		common->Printf(x ": unbound attribute index\n"); \
+		RB_LogComment("Current shader program: %s, index: %d\n", backEnd.glState.currentProgram->name, index); \
+        Sys_Trap(); \
+		return; \
+	}
+#else
+#define HARM_CHECK_SHADER_ATTR(x, index) \
+	if ((*(GLint *)((char *)backEnd.glState.currentProgram + index)) == -1) { \
+		common->Printf(x ": unbound attribute index\n"); \
+        Sys_Trap(); \
+		return; \
+	}
+#endif
+
+#define HARM_CHECK_SHADER_ERROR() GL_CheckErrors();
+
+#else
+#define HARM_CHECK_SHADER(x)
+#define HARM_CHECK_SHADER_ATTR(x, index)
+#define HARM_CHECK_SHADER_ERROR(x)
+#endif
+
+#ifdef _EXTRAS_TOOLS
+void ModelTest_TestModel(int time);
+void MD5Anim_AddCommand(void);
+void ModelTest_AddCommand(void);
 #endif
 
 #endif /* !__TR_LOCAL_H__ */

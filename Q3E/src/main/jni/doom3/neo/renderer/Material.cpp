@@ -172,8 +172,11 @@ void idMaterial::FreeData()
 		for (i = 0; i < numStages; i++) {
 			if (stages[i].texture.cinematic != NULL) {
 #ifdef _MULTITHREAD //karin: set image's cinematic to null
-				if(stages[i].texture.image)
-					stages[i].texture.image->cinematic = NULL;
+				if(multithreadActive)
+				{
+					if(stages[i].texture.image)
+						stages[i].texture.image->cinematic = NULL;
+				}
 #endif
 				delete stages[i].texture.cinematic;
 				stages[i].texture.cinematic = NULL;
@@ -2756,7 +2759,11 @@ idMaterial::Parse
 Parses the current material definition and finds all necessary images.
 =========================
 */
+#ifdef _RAVEN
+bool idMaterial::Parse(const char *text, const int textLength, bool noCaching)
+#else
 bool idMaterial::Parse(const char *text, const int textLength)
+#endif
 {
 	idLexer	src;
 	idToken	token;
@@ -3262,8 +3269,11 @@ void idMaterial::CloseCinematic(void) const
 		if (stages[i].texture.cinematic) {
 			stages[i].texture.cinematic->Close();
 #ifdef _MULTITHREAD //karin: set image's cinematic to null
-			if(stages[i].texture.image)
-				stages[i].texture.image->cinematic = NULL;
+			if(multithreadActive)
+			{
+				if(stages[i].texture.image)
+					stages[i].texture.image->cinematic = NULL;
+			}
 #endif
 			delete stages[i].texture.cinematic;
 			stages[i].texture.cinematic = NULL;

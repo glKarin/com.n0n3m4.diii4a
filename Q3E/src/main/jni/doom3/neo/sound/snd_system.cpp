@@ -72,7 +72,11 @@ idCVar idSoundSystemLocal::s_skipHelltimeFX("s_skipHelltimeFX", "0", CVAR_SOUND 
 
 #if ID_OPENAL
 // off by default. OpenAL DLL gets loaded on-demand
+#ifdef _WIN32
 idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
+#else
+idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "./libopenal.so", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
+#endif
 idCVar idSoundSystemLocal::s_useOpenAL("s_useOpenAL", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use OpenAL");
 idCVar idSoundSystemLocal::s_useEAXReverb("s_useEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use EAX reverb");
 idCVar idSoundSystemLocal::s_muteEAXReverb("s_muteEAXReverb", "0", CVAR_SOUND | CVAR_BOOL, "mute eax reverb");
@@ -402,7 +406,7 @@ void idSoundSystemLocal::Init()
 	}
 
 	// set up openal device and context
-#if !defined(__ANDROID__)
+#if !defined(_OPENAL_SOFT)
 	common->StartupVariable("s_useOpenAL", true);
 	common->StartupVariable("s_useEAXReverb", true);
 #endif
@@ -410,13 +414,13 @@ void idSoundSystemLocal::Init()
 #ifdef _OPENAL
 	if (idSoundSystemLocal::s_useOpenAL.GetBool() || idSoundSystemLocal::s_useEAXReverb.GetBool()) {
 		// default all true
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 		idSoundSystemLocal::s_useOpenAL.SetBool(true);
 #endif
 		if (!Sys_LoadOpenAL()) {
 			idSoundSystemLocal::s_useOpenAL.SetBool(false);
             idSoundSystemLocal::s_useEAXReverb.SetBool(false);
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 			EAXAvailable = 0;
 #endif
 		} else {
@@ -552,7 +556,7 @@ void idSoundSystemLocal::Init()
 				// adjust source count to allow for at least eight stereo sounds to play
 				openalSourceCount -= 8;
 
-#ifdef __ANDROID__
+#ifdef _OPENAL_SOFT
 				if(idSoundSystemLocal::s_useEAXReverb.GetBool())
 #endif
 				EAXAvailable = 1;
@@ -1975,9 +1979,17 @@ idSoundWorld* idSoundSystemLocal::GetSoundWorldFromId(int worldId) {
 #ifdef _HUMANHEAD
 //#define _DEBUG_SUBTITLE
 #ifdef _DEBUG_SUBTITLE
+#if !defined(_MSC_VER)
 #define SUBTITLE_DEBUG(fmt, args...) common->Printf(fmt, ##args)
 #else
+#define SUBTITLE_DEBUG(fmt, s...) common->Printf(fmt,__VA_ARGS__)
+#endif
+#else
+#if !defined(_MSC_VER)
 #define SUBTITLE_DEBUG(fmt, args...)
+#else
+#define SUBTITLE_DEBUG(fmt, ...)
+#endif
 #endif
 
 //HUMANHEAD rww
