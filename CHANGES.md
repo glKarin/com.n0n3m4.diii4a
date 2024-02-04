@@ -2,7 +2,7 @@
 
 ----------------------------------------------------------------------------------
 
-> 1.1.0harmattan38 (2024-01-15)
+> 1.1.0harmattan38 (2024-02-05)
 
 * Fixed shadow mapping on non-Adreno GPU.
 * Support level loading finished pause(cvar `com_skipLevelLoadPause`) in Quake4.

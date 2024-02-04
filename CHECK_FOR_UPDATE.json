@@ -1,6 +1,6 @@
 {
     "release":38,
-    "update":"2024-01-15",
+    "update":"2024-02-05",
     "version":"1.1.0harmattan38",
     "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan38/idTech4A++_1.1.0harmattan38.apk",
     "changes":"  * Fixed shadow mapping on non-Adreno GPU.\n  * Support level loading finished pause(cvar `com_skipLevelLoadPause`) in Quake4."

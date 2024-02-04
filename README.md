@@ -3,7 +3,7 @@
 **Latest version:**
 1.1.0harmattan38(natasha)  
 **最新更新日期:**
-2024-01-15  
+2024-02-05  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -93,9 +93,6 @@ Tag with `-free` only for F-Droid update.
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" width="50%" alt="Quake IV">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" width="50%" alt="Prey(2006)">
 
-> Quake 4 on Debian
-
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/master/Quake4_on_Debian.png" alt="Quake 4 on Debian">
 ----------------------------------------------------------------------------------
 
 ### Changes:
