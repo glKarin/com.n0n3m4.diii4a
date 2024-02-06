@@ -1620,6 +1620,7 @@ if(CORE)
 		idlib
 		${sys_libs}
 		${local_libs}
+		pthread
 	)
 
 	install(TARGETS ${DOOM3BINARY}
@@ -1838,6 +1839,7 @@ if(RAVEN)
 			idlib_raven
 			${sys_libs}
 			${local_libs}
+			pthread
 			)
 
 	install(TARGETS ${QUAKE4BINARY}
@@ -1903,6 +1905,7 @@ if(HUMANHEAD)
 			idlib_humanhead
 			${sys_libs}
 			${local_libs}
+			pthread
 			)
 
 	install(TARGETS ${PREYBINARY}
