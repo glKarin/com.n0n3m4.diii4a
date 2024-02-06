@@ -110,7 +110,7 @@ idEventDef::idEventDef( const char *command, const char *formatspec, char return
 			break;
 
 #ifdef _PREY
-#if defined(__aarch64__) || defined(__x86_64__)
+#if defined(__aarch64__) || defined(__x86_64__) || defined(__e2k__)
 		case D_EVENT_INTPTR:
 			argsize += sizeof(intptr_t);
 			break;

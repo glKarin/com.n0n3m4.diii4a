@@ -92,7 +92,7 @@ idEventDef::idEventDef( const char *command, const char *formatspec, char return
 			argsize += sizeof( trace_t ) + MAX_STRING_LEN + sizeof( bool );
 			break;
 #ifdef _QUAKE4
-#if defined(__aarch64__) || defined(__x86_64__)
+#if defined(__aarch64__) || defined(__x86_64__) || defined(__e2k__)
 		case D_EVENT_INTEGER64bit:
 			argsize += sizeof( intptr_t );
 			break;
@@ -343,7 +343,7 @@ idEvent *idEvent::Alloc( const idEventDef *evdef, int numargs, va_list args ) {
 			}
 			break;
 #ifdef _QUAKE4
-#if defined(__aarch64__) || defined(__x86_64__)
+#if defined(__aarch64__) || defined(__x86_64__) || defined(__e2k__)
 		case D_EVENT_INTEGER64bit:
 			*reinterpret_cast<intptr_t *>( dataPtr ) = arg->value;
 			break;
