@@ -270,6 +270,7 @@ static void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GL
 			return;
 		}
 		GLfloat m[16];
+		memcpy(m, gl_ProjectionMatrix, sizeof(GLfloat) * 16);
 		esOrtho((ESMatrix *)m, left, right, bottom, top, nearZ, farZ);
 		gl_ProjectionMatrixStack.Set(m);
 	}
@@ -281,6 +282,7 @@ static void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GL
 			return;
 		}
 		GLfloat m[16];
+		memcpy(m, gl_ModelviewMatrix, sizeof(GLfloat) * 16);
 		esOrtho((ESMatrix *)m, left, right, bottom, top, nearZ, farZ);
 		gl_ModelviewMatrixStack.Set(m);
 	}
