@@ -267,12 +267,12 @@
     <string name="using_efx_reverb">Использовать EFX реверберацию(s_useEAXReverb)</string>
     <string name="internal_storage">Внутреннее хранилище</string>
     <string name="external_storage">Внешнее хранилище</string>
-    <string name="translucent_stencil_shadow">Полупрозрачная трафаретная тень(harm_r_translucentStencilShadow)</string>
+    <string name="translucent_stencil_shadow">Полупрозрачная тень(harm_r_translucentStencilShadow)</string>
     <string name="overthinked_doom_3">Overthinked DooM^3</string>
     <string name="stupid_angry_bot_a7x">Stupid Angry Bot(a7x)</string>
     <string name="hexen_edge_of_chaos">HeXen:Edge of Chaos</string>
     <string name="fragging_free">Fragging Free</string>
     <string name="normal_font_size_subtitle_prey_2006">Обычный размер шрифта(Prey 2006)</string>
-    <string name="_mod">Mod</string>
+    <string name="_mod">Мод</string>
 
 </resources>
