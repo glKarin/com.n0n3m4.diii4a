@@ -1,6 +1,6 @@
 #define glDepthRange(a, b) qglDepthRangef(a, b)
 
-// #define GL_COLOR_ARRAY				0x8076
+#define GL_COLOR_ARRAY				0x8076
 #define GL_TEXTURE_COORD_ARRAY			0x8078
 
 #define GL_POLYGON GL_TRIANGLE_FAN // GL_LINE_LOOP
@@ -28,6 +28,7 @@ static GLenum gl_RenderType;
 static GLfloat gl_TexCoord[2];
 static GLfloat gl_Color[4] = {0, 0, 0, 1};
 static idList<idDrawVert> gl_VertexList;
+static idList<glIndex_t> gl_IndexList;
 static GLenum gl_MatrixMode = GL_MODELVIEW;
 static GLuint gl_ClientState = 1 | 0 | 4;
 static const float	GL_IDENTITY_MATRIX[16] = {
@@ -349,11 +350,18 @@ static void glColor4ubv(const GLubyte v[4])
 	glColor4f((float)v[0] / 255.0f, (float)v[1] / 255.0f, (float)v[2] / 255.0f, (float)v[3] / 255.0f);
 }
 
+static void glArrayElement(glIndex_t index)
+{
+	gl_IndexList.Append(index);
+}
+
 static void glDisableClientState(GLenum e)
 {
 	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
 	if(e == GL_TEXTURE_COORD_ARRAY)
 		gl_ClientState &= ~CLIENT_STATE_TEXCOORD;
+	else if(e == GL_COLOR_ARRAY)
+		gl_ClientState &= ~CLIENT_STATE_COLOR;
 }
 
 static void glEnableClientState(GLenum e)
@@ -361,6 +369,8 @@ static void glEnableClientState(GLenum e)
 	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
 	if(e == GL_TEXTURE_COORD_ARRAY)
 		gl_ClientState |= CLIENT_STATE_TEXCOORD;
+	else if(e == GL_COLOR_ARRAY)
+		gl_ClientState |= CLIENT_STATE_COLOR;
 }
 
 static GLboolean glrbClientStateIsEnabled(GLenum e)
@@ -368,6 +378,8 @@ static GLboolean glrbClientStateIsEnabled(GLenum e)
 	// `default` glsl shader must attr_Color is all [255, 255, 255, 255]
 	if(e == GL_TEXTURE_COORD_ARRAY)
 		return gl_ClientState & CLIENT_STATE_TEXCOORD ? GL_TRUE : GL_FALSE;
+	else if(e == GL_COLOR_ARRAY)
+		return gl_ClientState & CLIENT_STATE_COLOR ? GL_TRUE : GL_FALSE;
 	else
 		return GL_TRUE;
 }
@@ -435,62 +447,112 @@ static void glrbEndRender(void)
 // draw func
 static void glEnd()
 {
-	int num = gl_VertexList.Num();
-	if(gl_RenderType && num)
+	if(gl_RenderType)
 	{
-		glrbStartRender();
-
 		GLboolean usingTexCoord = glrbClientStateIsEnabled(GL_TEXTURE_COORD_ARRAY);
+		int num = gl_VertexList.Num();
+		int numIndex = gl_IndexList.Num();
 
-		qglBindBuffer(GL_ARRAY_BUFFER, 0);
-		GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
-		if(usingTexCoord)
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-
-		GL_SelectTexture(0);
-		if(!usingTexCoord)
-			globalImages->whiteImage->Bind();
-
-		GLfloat *vertex = (GLfloat *)malloc(sizeof(GLfloat) * num * 3);
-		GLubyte *color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
-		//memset(color, 0xFF, sizeof(GLubyte) * num * 4);
-		GLfloat *texcoord = NULL;
-		if(usingTexCoord)
-			texcoord = (GLfloat *)malloc(sizeof(GLfloat) * num * 2);
-		for(int i = 0; i < num; i++)
+		if(num > 0)
 		{
-			const idDrawVert &drawVert = gl_VertexList[i];
-			vertex[i * 3] = drawVert.xyz[0];
-			vertex[i * 3 + 1] = drawVert.xyz[1];
-			vertex[i * 3 + 2] = drawVert.xyz[2];
-			color[i * 4] = drawVert.color[0];
-			color[i * 4 + 1] = drawVert.color[1];
-			color[i * 4 + 2] = drawVert.color[2];
-			color[i * 4 + 3] = drawVert.color[3];
+			glrbStartRender();
+
+			qglBindBuffer(GL_ARRAY_BUFFER, 0);
+			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 			if(usingTexCoord)
+				GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
+			GL_SelectTexture(0);
+			if(!usingTexCoord)
+				globalImages->whiteImage->Bind();
+
+			GLfloat *vertex = (GLfloat *)malloc(sizeof(GLfloat) * num * 3);
+			GLubyte *color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
+			//memset(color, 0xFF, sizeof(GLubyte) * num * 4);
+			GLfloat *texcoord = NULL;
+			if(usingTexCoord)
+				texcoord = (GLfloat *)malloc(sizeof(GLfloat) * num * 2);
+			for(int i = 0; i < num; i++)
 			{
-				texcoord[i * 2] = drawVert.st[0];
-				texcoord[i * 2 + 1] = drawVert.st[1];
+				const idDrawVert &drawVert = gl_VertexList[i];
+				vertex[i * 3] = drawVert.xyz[0];
+				vertex[i * 3 + 1] = drawVert.xyz[1];
+				vertex[i * 3 + 2] = drawVert.xyz[2];
+				color[i * 4] = drawVert.color[0];
+				color[i * 4 + 1] = drawVert.color[1];
+				color[i * 4 + 2] = drawVert.color[2];
+				color[i * 4 + 3] = drawVert.color[3];
+				if(usingTexCoord)
+				{
+					texcoord[i * 2] = drawVert.st[0];
+					texcoord[i * 2 + 1] = drawVert.st[1];
+				}
 			}
+			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, 0, vertex);
+			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, 0, color);
+			if(usingTexCoord)
+				GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, 0, texcoord);
+
+			qglDrawArrays(gl_RenderType, 0, num);
+
+			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+			if(usingTexCoord)
+				GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
+			free(vertex);
+			free(color);
+			free(texcoord);
+
+			glrbEndRender();
 		}
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, 0, vertex);
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, 0, color);
-		if(usingTexCoord)
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, 0, texcoord);
+		else if(numIndex > 0)
+		{
+			GLboolean usingColor = glrbClientStateIsEnabled(GL_COLOR_ARRAY);
 
-		qglDrawArrays(gl_RenderType, 0, num);
+			qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			GL_SelectTexture(0);
+			if(!usingTexCoord)
+				globalImages->whiteImage->Bind();
 
-		GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
-		if(usingTexCoord)
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+			glIndex_t *index = (glIndex_t *)malloc(sizeof(glIndex_t) * numIndex);
+			for(int i = 0; i < numIndex; i++)
+			{
+				index[i] = gl_IndexList[i];
+			}
 
-		free(vertex);
-		free(color);
-		free(texcoord);
-		glrbEndRender();
+			GLubyte *color = NULL;
+			if(!usingColor)
+			{
+				GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+				color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
+				GLubyte glColor[] = {
+					gl_Color[0] * 255,
+					gl_Color[1] * 255,
+					gl_Color[2] * 255,
+					gl_Color[3] * 255,
+				};
+				for(int i = 0; i < numIndex; i++)
+				{
+					index[i] = gl_IndexList[i];
+					color[i * 4] = glColor[0];
+					color[i * 4 + 1] = glColor[1];
+					color[i * 4 + 2] = glColor[2];
+					color[i * 4 + 3] = glColor[3];
+				}
+				GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, 0, color);
+			}
+
+			qglDrawElements(gl_RenderType, numIndex, GL_INDEX_TYPE, index);
+
+			free(index);
+			free(color);
+			if(!usingColor)
+				GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+		}
 	}
 
 	gl_VertexList.Clear();
+	gl_IndexList.Clear();
 	gl_RenderType = 0;
 }
 
