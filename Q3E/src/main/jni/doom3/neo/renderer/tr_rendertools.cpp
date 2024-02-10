@@ -80,6 +80,79 @@ static void RB_DrawText(const char *text, const idVec3 &origin, float scale, con
 
 #ifdef GL_ES_VERSION_2_0
 #include "glsl/gles2_compat.cpp"
+
+static void RB_DrawElementsWithCounters_polygon(const srfTriangles_t *tri)
+{
+	HARM_CHECK_SHADER("RB_DrawElementsWithCounters_polygon");
+
+	backEnd.pc.c_drawElements++;
+	backEnd.pc.c_drawIndexes += tri->numIndexes;
+	backEnd.pc.c_drawVertexes += tri->numVerts;
+
+	if (tri->ambientSurface != NULL) {
+		if (tri->indexes == tri->ambientSurface->indexes) {
+			backEnd.pc.c_drawRefIndexes += tri->numIndexes;
+		}
+
+		if (tri->verts == tri->ambientSurface->verts) {
+			backEnd.pc.c_drawRefVertexes += tri->numVerts;
+		}
+	}
+
+	const int numIndexes = r_singleTriangle.GetBool() ? 3 : tri->numIndexes;
+	if(backEnd.glState.glStateBits & GLS_POLYMODE_LINE)
+	{
+		for(int i = 0; i < numIndexes; i += 3)
+		{
+			if (tri->indexCache) {
+				qglDrawElements(GL_LINES,
+						3,
+						GL_INDEX_TYPE,
+						(glIndex_t *)vertexCache.Position(tri->indexCache) + i);
+				backEnd.pc.c_vboIndexes += 3;
+			} else {
+				vertexCache.UnbindIndex();
+
+				qglDrawElements(GL_LINES,
+						3,
+						GL_INDEX_TYPE,
+						tri->indexes + i);
+			}
+		}
+	}
+	else
+	{
+		if (tri->indexCache) {
+			qglDrawElements(GL_TRIANGLES,
+					numIndexes,
+					GL_INDEX_TYPE,
+					(int *)vertexCache.Position(tri->indexCache));
+			backEnd.pc.c_vboIndexes += tri->numIndexes;
+		} else {
+			vertexCache.UnbindIndex();
+
+			qglDrawElements(GL_TRIANGLES,
+					numIndexes,
+					GL_INDEX_TYPE,
+					tri->indexes);
+		}
+	}
+}
+
+static void RB_T_RenderTriangleSurface_polygon(const drawSurf_t *surf)
+{
+	const srfTriangles_t *tri = surf->geo;
+
+	if (!tri->ambientCache) {
+		return;
+	}
+
+	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
+	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
+
+	RB_DrawElementsWithCounters_polygon(tri);
+}
 #endif
 
 /*
@@ -615,7 +688,7 @@ plane extends from, allowing you to see doubled edges
 */
 void RB_ShowSilhouette(void)
 {
-#if !defined(GL_ES_VERSION_2_0)
+//#if !defined(GL_ES_VERSION_2_0)
 	int		i;
 	const drawSurf_t	*surf;
 	const viewLight_t	*vLight;
@@ -639,13 +712,22 @@ void RB_ShowSilhouette(void)
 	GL_Cull(CT_TWO_SIDED);
 	qglDisable(GL_DEPTH_TEST);
 
+#ifdef GL_ES_VERSION_2_0
+	glrbStartRender();
+#endif
 	RB_RenderDrawSurfListWithFunction(backEnd.viewDef->drawSurfs, backEnd.viewDef->numDrawSurfs,
-	                                  RB_T_RenderTriangleSurface);
+	                                  RB_T_RenderTriangleSurface_polygon);
+#ifdef GL_ES_VERSION_2_0
+	glrbEndRender();
+#endif
 
 
 	//
 	// now blend in edges that cast silhouettes
 	//
+#ifdef GL_ES_VERSION_2_0
+	glPushMatrix();
+#endif
 	RB_SimpleWorldSetup();
 	glColor3f(0.5, 0, 0);
 	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE);
@@ -658,6 +740,9 @@ void RB_ShowSilhouette(void)
 
 				const srfTriangles_t	*tri = surf->geo;
 
+#ifdef GL_ES_VERSION_2_0
+				glrbStartRender();
+#endif
 				glVertexPointer(3, GL_FLOAT, sizeof(shadowCache_t), vertexCache.Position(tri->shadowCache));
 				glBegin(GL_LINES);
 
@@ -679,16 +764,22 @@ void RB_ShowSilhouette(void)
 
 				glEnd();
 
+#ifdef GL_ES_VERSION_2_0
+				glrbEndRender();
+#endif
 			}
 		}
 	}
+#ifdef GL_ES_VERSION_2_0
+	glPopMatrix();
+#endif
 
 	qglEnable(GL_DEPTH_TEST);
 
 	GL_State(GLS_DEFAULT);
 	glColor3f(1,1,1);
 	GL_Cull(CT_FRONT_SIDED);
-#endif
+//#endif
 }
 
 
@@ -870,7 +961,7 @@ static void RB_ShowTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 #ifdef GL_ES_VERSION_2_0
 	glrbStartRender();
 #endif
-	RB_RenderDrawSurfListWithFunction(drawSurfs, numDrawSurfs, RB_T_RenderTriangleSurface);
+	RB_RenderDrawSurfListWithFunction(drawSurfs, numDrawSurfs, RB_T_RenderTriangleSurface_polygon);
 #ifdef GL_ES_VERSION_2_0
 	glrbEndRender();
 #endif
