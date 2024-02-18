@@ -39,6 +39,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #ifndef EGL_OPENGL_ES3_BIT
 #define EGL_OPENGL_ES3_BIT EGL_OPENGL_ES3_BIT_KHR
 #endif
@@ -54,9 +57,13 @@ idCVar harm_sys_openglVersion("harm_sys_openglVersion",
                               r_openglesArgs[0]
 		, CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
                               "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
-#define DEFAULT_GLES_VERSION 0x00020000
+#define DEFAULT_GLES_VERSION 0x00020000 // still es2.0
+#define HARM_EGL_OPENGL_ES_BIT (gl_version != 0x00020000 ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT)
+#define HARM_EGL_CONTEXT_CLIENT_VERSION (gl_version != 0x00020000 ? 3 : 2)
 #else
 #define DEFAULT_GLES_VERSION 0x00020000
+#define HARM_EGL_OPENGL_ES_BIT EGL_OPENGL_ES2_BIT
+#define HARM_EGL_CONTEXT_CLIENT_VERSION 2
 #endif
 
 // OpenGL attributes
@@ -103,6 +110,8 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 
 	if(exit)
 		common->Error("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+	else
+		common->Printf("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 }
 
 void GLimp_AndroidInit(volatile ANativeWindow *w)
@@ -215,7 +224,7 @@ static bool GLimp_dlopen()
 {
 #ifdef _OPENGLES3
 	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */(
-			gl_version == 0x00030000 ? "libGLESv3.so" : "libGLESv2.so"
+			gl_version != 0x00020000 ? "libGLESv3.so" : "libGLESv2.so"
 	);
 #else
 	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */ "libGLESv2.so";
@@ -391,12 +400,7 @@ static bool GLES_Init_special(void)
 			EGL_STENCIL_SIZE, stencil_bits,
 			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
 			EGL_SAMPLES, gl_msaa,
-            EGL_RENDERABLE_TYPE,
-#ifdef _OPENGLES3
-			gl_version == 0x00020000 ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_ES3_BIT,
-#else
-			EGL_OPENGL_ES2_BIT,
-#endif
+            EGL_RENDERABLE_TYPE, HARM_EGL_OPENGL_ES_BIT,
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_NONE,
     };
@@ -514,7 +518,7 @@ static bool GLES_Init_prefer(void)
 			EGL_STENCIL_SIZE, tstencilbits,
 			EGL_SAMPLE_BUFFERS, multisamples > 1 ? 1 : 0,
 			EGL_SAMPLES, multisamples,
-			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+			EGL_RENDERABLE_TYPE, HARM_EGL_OPENGL_ES_BIT,
 			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 			EGL_NONE,
 		};
@@ -605,7 +609,7 @@ int GLES_Init(glimpParms_t ap)
 	}
 
 	EGLint ctxAttrib[] = {
-		EGL_CONTEXT_CLIENT_VERSION, 2,
+		EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
 		EGL_NONE
 	};
 	if ((eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib)) == EGL_NO_CONTEXT)

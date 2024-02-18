@@ -1,6 +1,8 @@
 #ifndef _KARIN_DOOM3_ANDROID_H
 #define _KARIN_DOOM3_ANDROID_H
 
+#include <android/native_window.h>
+
 // DOOM3 call Android::JNI, all in DOOM3 main thread
 typedef struct
 {

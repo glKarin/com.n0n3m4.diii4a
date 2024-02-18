@@ -112,6 +112,7 @@ option(OVERTHINKED			"Build the overthinked game code" ON)
 option(SABOT			"Build the sabot game code" ON)
 option(HEXENEOC			"Build the hexeneoc game code" ON)
 option(FRAGGINGFREE			"Build the fraggingfree game code" ON)
+option(LIBRECOOP			"Build the librecoop game code" ON)
 
 # Quake4
 option(RAVEN			"Build the raven core" ON)
@@ -929,6 +930,11 @@ list(APPEND src_fraggingfree ${fraggingfree_game_src})
 set_src_dir(src_fraggingfree "${DOOM3_MOD_DIR}/fraggingfree" ${src_fraggingfree})
 add_globbed_headers(src_fraggingfree "${DOOM3_MOD_DIR}/fraggingfree")
 
+# librecoop
+set(src_librecoop ${base_game_src})
+set_src_dir(src_librecoop "${DOOM3_MOD_DIR}/librecoop" ${src_librecoop})
+add_globbed_headers(src_librecoop "${DOOM3_MOD_DIR}/librecoop")
+
 # quake4
 set(src_quake4 ${base_game_src})
 set(quake4_game_src
@@ -1402,13 +1408,13 @@ set(src_ogg
 
 add_globbed_headers(src_ogg "externlibs/libogg")
 add_globbed_headers(src_ogg "externlibs/libvorbis")
-include_directories("externlibs/libogg/include/ogg")
-include_directories("externlibs/libvorbis/include/vorbis")
 include_directories("externlibs/libogg/include")
 include_directories("externlibs/libvorbis/include")
-include_directories("externlibs/libvorbis/lib")
 include_directories("sys/android")
 add_library(ogg STATIC ${src_ogg})
+target_include_directories(ogg PRIVATE "externlibs/libogg/include/ogg")
+target_include_directories(ogg PRIVATE "externlibs/libvorbis/include/vorbis")
+target_include_directories(ogg PRIVATE "externlibs/libvorbis/lib")
 
 set(src_core
 	${src_renderer}
@@ -1564,6 +1570,9 @@ if(HEXENEOC)
 endif()
 if(FRAGGINGFREE)
 	message(STATUS "Build fraggingfree")
+endif()
+if(LIBRECOOP)
+	message(STATUS "Build librecoop")
 endif()
 if(RAVEN)
 	message(STATUS "Build raven core")
@@ -1800,6 +1809,23 @@ if(FRAGGINGFREE)
 	target_link_libraries(fraggingfree idlib)
 
 	install(TARGETS fraggingfree
+			RUNTIME DESTINATION "${bindir}"
+			LIBRARY DESTINATION "${libdir}"
+			ARCHIVE DESTINATION "${libdir}"
+			)
+endif()
+
+if(LIBRECOOP)
+	add_library(librecoop SHARED ${src_librecoop})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_librecoop})
+	#set_target_properties(librecoop PROPERTIES PREFIX "")
+	set_target_properties(librecoop PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_LIBRECOOP")
+	target_include_directories(librecoop PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/librecoop")
+	set_target_properties(librecoop PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(librecoop PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(librecoop idlib)
+
+	install(TARGETS librecoop
 			RUNTIME DESTINATION "${bindir}"
 			LIBRARY DESTINATION "${libdir}"
 			ARCHIVE DESTINATION "${libdir}"

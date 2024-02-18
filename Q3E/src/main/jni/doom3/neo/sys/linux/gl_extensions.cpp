@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../idlib/precompiled.h"
 #pragma hdrstop
 
+#include <EGL/egl.h>
+
 typedef struct {
 	const char *ext_name;
 } glExtName_t;
