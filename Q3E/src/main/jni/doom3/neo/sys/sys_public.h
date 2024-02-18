@@ -161,6 +161,10 @@ enum sysPath_t {
 #define	BUILD_STRING				"linux-arm64"
 #define CPUSTRING					"arm64"
 #define BUILD_OS_ID					2
+#elif defined(__e2k__)
+#define	BUILD_STRING				"linux-e2k"
+#define CPUSTRING					"e2k"
+#define BUILD_OS_ID					2
 #endif
 
 #endif

@@ -146,7 +146,7 @@ bool rvDeclEffect::SetDefaultText()
 {
 	char generated[1024]; // [esp+4h] [ebp-404h]
 
-	idStr::snPrintf(generated, sizeof(generated), "effect %s // IMPLICITLY GENERATED\n");
+	idStr::snPrintf(generated, sizeof(generated), "effect %s // IMPLICITLY GENERATED\n" , GetName());
 	SetText(generated);
 	return false;
 }
