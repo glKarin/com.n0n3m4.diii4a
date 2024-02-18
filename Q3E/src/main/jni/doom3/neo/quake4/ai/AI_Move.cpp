@@ -3889,10 +3889,10 @@ public:
 
 	/*
 	=====================
-	success
+	Success
 	=====================
 	*/
-	bool	success(visitNode* node) {
+	bool	Success(visitNode* node) {
 		static idVec3		edgeA;
 		static idVec3		edgeB;
 		static idVec3		intersect;
@@ -4384,13 +4384,13 @@ public:
 			// Test For Any Obstacles In The Way
 			//-----------------------------------
 			if (!obstacleFinder.RayTrace(0.0f, myArea, myMove->myPos, myMove->goalPos, 0/*CDR_TODO: Get myAASNum*/, myIgnoreEntity, myIgnoreEntity2)) {
-				return success(NULL);
+				return Success(NULL);
 			}
 
 			// If There Is An Obstacle But We Think We Can Steer Around It, Then We've Still Succeeded
 			//-----------------------------------------------------------------------------------------
 			if (obstacleFinder.contact.v1Valid || obstacleFinder.contact.v2Valid) {
-				return success(NULL);
+				return Success(NULL);
 			}
 		}
 
@@ -4420,13 +4420,13 @@ public:
 				// Test For Any Obstacles In The Way
 				//-----------------------------------
 				if (!obstacleFinder.RayTrace(0.0f, goalArea, GetSeekPosition(next), myMove->goalPos, 0/*CDR_TODO: Get myAASNum*/, myIgnoreEntity, myIgnoreEntity2)) {
-					return success(next);
+					return Success(next);
 				}
 
 				// Or If There Is An Obstacle, But One Of The Verts Is Valid, Then This Is Still A Safe Course
 				//---------------------------------------------------------------------------------------------
 				if (obstacleFinder.contact.v1Valid || obstacleFinder.contact.v2Valid) {
-					return success(next);
+					return Success(next);
 				}
 
 			// Visit All Reaches In The Next Area
