@@ -691,7 +691,7 @@ int GLES_Init(glimpParms_t ap)
 	glConfig.depthBits = depth_bits;
 	glConfig.stencilBits = stencil_bits;
 
-	glConfig.isFullscreen = r_fullscreen;
+	glConfig.isFullscreen = fullscreen;
 
 	if (glConfig.isFullscreen) {
 		Sys_GrabMouseCursor(true);
