@@ -599,8 +599,8 @@ int GLES_Init(glimpParms_t ap)
 	XFlush(dpy);
 	XSync(dpy, False);
 
-    bool fullscreen = cvarSystem->GetCVarBool("r_fullscreen");
-    if (fullscreen) {
+    bool fs = cvarSystem->GetCVarBool("r_fullscreen");
+    if (fs) {
         XEvent xev;
         Atom wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
         Atom fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
@@ -691,7 +691,7 @@ int GLES_Init(glimpParms_t ap)
 	glConfig.depthBits = depth_bits;
 	glConfig.stencilBits = stencil_bits;
 
-	glConfig.isFullscreen = fullscreen;
+	glConfig.isFullscreen = fs;
 
 	if (glConfig.isFullscreen) {
 		Sys_GrabMouseCursor(true);
