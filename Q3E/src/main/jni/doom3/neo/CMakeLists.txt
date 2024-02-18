@@ -352,7 +352,7 @@ elseif(WIN32)
 	include_directories("externlibs/include")
 else()
 	set(sys_libs ${sys_libs} X11)
-	set(sys_libs ${sys_libs} dl EGL z)
+	set(sys_libs ${sys_libs} dl EGL z pthread)
 endif()
 
 set(local_libs ogg)
@@ -1620,7 +1620,6 @@ if(CORE)
 		idlib
 		${sys_libs}
 		${local_libs}
-		pthread
 	)
 
 	install(TARGETS ${DOOM3BINARY}
@@ -1839,7 +1838,6 @@ if(RAVEN)
 			idlib_raven
 			${sys_libs}
 			${local_libs}
-			pthread
 			)
 
 	install(TARGETS ${QUAKE4BINARY}
@@ -1905,7 +1903,6 @@ if(HUMANHEAD)
 			idlib_humanhead
 			${sys_libs}
 			${local_libs}
-			pthread
 			)
 
 	install(TARGETS ${PREYBINARY}
