@@ -314,6 +314,11 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
 
+                ChangeLog.Create("2024-02-05", 38,
+                        "Fixed shadow mapping on non-Adreno GPU.",
+                        "Support level loading finished pause(cvar `com_skipLevelLoadPause`) in Quake4."
+                ),
+
                 ChangeLog.Create("2024-01-06", 37,
                         "Fixed on-screen buttons initial keycodes.",
                         "On-screen slider button can setup clickable.",

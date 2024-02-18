@@ -19,6 +19,7 @@ public enum Game
     DOOM3_SABOT(Q3EGlobals.GAME_DOOM3, "sabot", "sabot", "d3xp", true, R.string.stupid_angry_bot_a7x),
     DOOM3_HEXENEOC(Q3EGlobals.GAME_DOOM3, "hexeneoc", "hexeneoc", "", true, R.string.hexen_edge_of_chaos),
     DOOM3_FRAGGINGFREE(Q3EGlobals.GAME_DOOM3, "fraggingfree", "fraggingfree", "d3xp", true, R.string.fragging_free),
+    DOOM3_LIBRECOOP(Q3EGlobals.GAME_DOOM3, "librecoop", "librecoop", "", true, R.string.librecoop),
 
     // Quake 4
     QUAKE4_BASE(Q3EGlobals.GAME_QUAKE4, "q4base", "", "", false, R.string.quake_iv_q4base),
