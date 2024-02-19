@@ -201,5 +201,11 @@ public final class Q3EGlobals
             "Weapon"
     };
 
+    public static final int GLFORMAT_RGB565 = 0x0565;
+    public static final int GLFORMAT_RGBA4444 = 0x4444;
+    public static final int GLFORMAT_RGBA5551 = 0x5551;
+    public static final int GLFORMAT_RGBA8888 = 0x8888;
+    public static final int GLFORMAT_RGBA1010102 = 0xaaa2;
+
     private Q3EGlobals() {}
 }

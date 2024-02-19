@@ -66,13 +66,19 @@ idCVar harm_sys_openglVersion("harm_sys_openglVersion",
 #define HARM_EGL_CONTEXT_CLIENT_VERSION 2
 #endif
 
+#define GLFORMAT_RGB565 0x0565
+#define GLFORMAT_RGBA4444 0x4444
+#define GLFORMAT_RGBA5551 0x5551
+#define GLFORMAT_RGBA8888 0x8888
+#define GLFORMAT_RGBA1010102 0xaaa2
+
 // OpenGL attributes
-int gl_format = 0x8888;
+int gl_format = GLFORMAT_RGBA8888;
 int gl_msaa = 0;
 int gl_version = DEFAULT_GLES_VERSION;
 bool USING_GLES3 = gl_version != 0x00020000;
 
-#define MAX_NUM_CONFIGS 4
+#define MAX_NUM_CONFIGS 1000
 static bool window_seted = false;
 static volatile ANativeWindow *win;
 //volatile bool has_gl_context = false;
@@ -112,6 +118,139 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 		common->Error("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 	else
 		common->Printf("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+}
+
+typedef struct EGLConfigInfo_s
+{
+	EGLint red;
+	EGLint green;
+	EGLint blue;
+	EGLint alpha;
+	EGLint buffer;
+	EGLint depth;
+	EGLint stencil;
+	EGLint samples;
+	EGLint sample_buffers;
+} EGLConfigInfo_t;
+
+static EGLConfigInfo_t GLimp_FormatInfo(int format)
+{
+	int red_bits = 8;
+	int green_bits = 8;
+	int blue_bits = 8;
+	int alpha_bits = 8;
+	int buffer_bits = 32;
+	int depth_bits = 24;
+	int stencil_bits = 8;
+
+	switch(gl_format)
+	{
+		case GLFORMAT_RGB565:
+			red_bits = 5;
+			green_bits = 6;
+			blue_bits = 5;
+			alpha_bits = 0;
+			depth_bits = 16;
+			buffer_bits = 16;
+			break;
+		case GLFORMAT_RGBA4444:
+			red_bits = 4;
+			green_bits = 4;
+			blue_bits = 4;
+			alpha_bits = 4;
+			depth_bits = 16;
+			buffer_bits = 16;
+			break;
+		case GLFORMAT_RGBA5551:
+			red_bits = 5;
+			green_bits = 5;
+			blue_bits = 5;
+			alpha_bits = 1;
+			depth_bits = 16;
+			buffer_bits = 16;
+			break;
+		case GLFORMAT_RGBA1010102:
+			red_bits = 10;
+			green_bits = 10;
+			blue_bits = 10;
+			alpha_bits = 2;
+			depth_bits = 24;
+			buffer_bits = 32;
+			break;
+		case GLFORMAT_RGBA8888:
+		default:
+			red_bits = 8;
+			green_bits = 8;
+			blue_bits = 8;
+			alpha_bits = 8;
+			depth_bits = 24;
+			buffer_bits = 32;
+			break;
+	}
+	EGLConfigInfo_t info;
+	info.red = red_bits;
+	info.green = green_bits;
+	info.blue = blue_bits;
+	info.alpha = alpha_bits;
+	info.buffer = buffer_bits;
+	info.depth = depth_bits;
+	info.stencil = stencil_bits;
+	return info;
+}
+
+static int GLimp_EGLConfigCompare(const void *left, const void *right)
+{
+	const EGLConfig lhs = *(EGLConfig *)left;
+	const EGLConfig rhs = *(EGLConfig *)right;
+	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format);
+	int r = info.red;
+	int g = info.green;
+	int b = info.blue;
+	int a = info.alpha;
+	int d = info.depth;
+	int s = info.stencil;
+
+	int lr, lg, lb, la, ld, ls;
+	int rr, rg, rb, ra, rd, rs;
+	int rat1, rat2;
+	eglGetConfigAttrib(eglDisplay, lhs, EGL_RED_SIZE, &lr);
+	eglGetConfigAttrib(eglDisplay, lhs, EGL_GREEN_SIZE, &lg);
+	eglGetConfigAttrib(eglDisplay, lhs, EGL_BLUE_SIZE, &lb);
+	eglGetConfigAttrib(eglDisplay, lhs, EGL_ALPHA_SIZE, &la);
+	//eglGetConfigAttrib(eglDisplay, lhs, EGL_DEPTH_SIZE, &ld);
+	//eglGetConfigAttrib(eglDisplay, lhs, EGL_STENCIL_SIZE, &ls);
+	eglGetConfigAttrib(eglDisplay, rhs, EGL_RED_SIZE, &rr);
+	eglGetConfigAttrib(eglDisplay, rhs, EGL_GREEN_SIZE, &rg);
+	eglGetConfigAttrib(eglDisplay, rhs, EGL_BLUE_SIZE, &rb);
+	eglGetConfigAttrib(eglDisplay, rhs, EGL_ALPHA_SIZE, &ra);
+	//eglGetConfigAttrib(eglDisplay, rhs, EGL_DEPTH_SIZE, &rd);
+	//eglGetConfigAttrib(eglDisplay, rhs, EGL_STENCIL_SIZE, &rs);
+	rat1 = (abs(lr - r) + abs(lg - g) + abs(lb - b));//*1000000-(ld*10000+la*100+ls);
+	rat2 = (abs(rr - r) + abs(rg - g) + abs(rb - b));//*1000000-(rd*10000+ra*100+rs);
+	return rat1 - rat2;
+}
+
+static EGLConfig GLimp_ChooseConfig(EGLConfig configs[], int size)
+{
+	qsort(configs, size, sizeof(EGLConfig), GLimp_EGLConfigCompare);
+	return configs[0];
+}
+
+static EGLConfigInfo_t GLimp_GetConfigInfo(const EGLConfig eglConfig)
+{
+	EGLConfigInfo_t info;
+
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_RED_SIZE, &info.red);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_GREEN_SIZE, &info.green);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_BLUE_SIZE, &info.blue);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_ALPHA_SIZE, &info.alpha);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_DEPTH_SIZE, &info.depth);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_STENCIL_SIZE, &info.stencil);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_BUFFER_SIZE, &info.buffer);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_SAMPLES, &info.samples);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_SAMPLE_BUFFERS, &info.sample_buffers);
+
+	return info;
 }
 
 void GLimp_AndroidInit(volatile ANativeWindow *w)
@@ -346,50 +485,15 @@ GLES_Init
 static bool GLES_Init_special(void)
 {
 	EGLint config_count = 0;
-	int stencil_bits = 8;
-	int depth_bits = 24;
-	int red_bits = 8;
-	int green_bits = 8;
-	int blue_bits = 8;
-	int alpha_bits = 8;
-	int buffer_bits = 32;
+	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format);
+	int stencil_bits = info.stencil;
+	int depth_bits = info.depth;
+	int red_bits = info.red;
+	int green_bits = info.green;
+	int blue_bits = info.blue;
+	int alpha_bits = info.alpha;
+	int buffer_bits = info.buffer;
 
-	switch(gl_format)
-	{
-		case 0x565:
-			red_bits = 5;
-			green_bits = 6;
-			blue_bits = 5;
-			alpha_bits = 0;
-			depth_bits = 16;
-			buffer_bits = 16;
-			break;
-		case 0x4444:
-			red_bits = 4;
-			green_bits = 4;
-			blue_bits = 4;
-			alpha_bits = 4;
-			depth_bits = 16;
-			buffer_bits = 16;
-			break;
-		case 0x5551:
-			red_bits = 5;
-			green_bits = 5;
-			blue_bits = 5;
-			alpha_bits = 1;
-			depth_bits = 16;
-			buffer_bits = 16;
-			break;
-		case 0x8888:
-		default:
-			red_bits = 8;
-			green_bits = 8;
-			blue_bits = 8;
-			alpha_bits = 8;
-			depth_bits = 24;
-			buffer_bits = 32;
-			break;
-	}
     EGLint attrib[] = {
             EGL_BUFFER_SIZE, buffer_bits,
             EGL_ALPHA_SIZE, alpha_bits,
@@ -414,9 +518,10 @@ static bool GLES_Init_special(void)
 			);
 
 	int multisamples = gl_msaa;
+	EGLConfig eglConfigs[MAX_NUM_CONFIGS];
 	while(1)
 	{
-		if (!eglChooseConfig (eglDisplay, attrib, configs, 1, &config_count))
+		if (!eglChooseConfig (eglDisplay, attrib, eglConfigs, MAX_NUM_CONFIGS, &config_count))
 		{
 			GLimp_HandleError("eglChooseConfig", false);
 
@@ -432,8 +537,25 @@ static bool GLES_Init_special(void)
 				return false;
 			}
 		}
+		else
+		{
+			common->Printf( "[Harmattan]: Get EGL context num -> %d.\n", config_count);
+			for(int i = 0; i < config_count; i++)
+			{
+				EGLConfigInfo_t info = GLimp_GetConfigInfo(eglConfigs[i]);
+				common->Printf( "\t%d EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
+								i + 1,
+								info.red, info.green,
+								info.blue, info.alpha,
+								info.depth,
+								info.stencil
+						, info.samples, info.sample_buffers
+				);
+			}
+		}
 		break;
 	}
+	configs[0] = GLimp_ChooseConfig(eglConfigs, config_count);
 	return true;
 }
 
@@ -624,23 +746,17 @@ int GLES_Init(glimpParms_t ap)
 		return false;
 	}
 
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_STENCIL_SIZE, &stencil_bits);
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_DEPTH_SIZE, &depth_bits);
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_RED_SIZE, &red_bits);
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_GREEN_SIZE, &green_bits);
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_BLUE_SIZE, &blue_bits);
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_ALPHA_SIZE, &alpha_bits);
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_BUFFER_SIZE, &buffer_bits);
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_SAMPLES, &samples);
-	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_SAMPLE_BUFFERS, &sample_buffers);
-	int tcolorbits = red_bits + green_bits + blue_bits;
+	EGLConfigInfo_t info = GLimp_GetConfigInfo(eglConfig);
+	int tcolorbits = info.red + info.green + info.blue;
+	depth_bits = info.depth;
+	stencil_bits = info.stencil;
 
 	common->Printf( "[Harmattan]: EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
-			red_bits, green_bits,
-			blue_bits, alpha_bits,
-			depth_bits,
-			stencil_bits
-			, samples, sample_buffers
+					info.red, info.green,
+					info.blue, info.alpha,
+					info.depth,
+					info.stencil
+			, info.samples, info.sample_buffers
 			);
 
 	glConfig.colorBits = tcolorbits;

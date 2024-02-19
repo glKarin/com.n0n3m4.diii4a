@@ -198,6 +198,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/_16bits_rgba4444" />
+
+            <RadioButton
+                android:id="@+id/color_bits_16_rgba5551"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_16bits_rgba5551" />
+
+            <RadioButton
+                android:id="@+id/color_bits_32_rgba1010102"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_32bits_rgba1010102" />
         </RadioGroup>
 
         <TextView

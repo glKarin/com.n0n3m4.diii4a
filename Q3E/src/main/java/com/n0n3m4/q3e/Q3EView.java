@@ -25,6 +25,7 @@ package com.n0n3m4.q3e;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -122,16 +123,22 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
             int glFormat = 0x8888;
             switch (pixelFormat) {
                 case PixelFormat.RGBA_4444:
-                    glFormat = 0x4444;
+                    glFormat = Q3EGlobals.GLFORMAT_RGBA4444;
                     break;
                 case PixelFormat.RGBA_5551:
-                    glFormat = 0x5551;
+                    glFormat = Q3EGlobals.GLFORMAT_RGBA5551;
                     break;
                 case PixelFormat.RGB_565:
-                    glFormat = 0x565;
+                    glFormat = Q3EGlobals.GLFORMAT_RGB565;
+                    break;
+                case PixelFormat.RGBA_1010102:
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        glFormat = Q3EGlobals.GLFORMAT_RGBA1010102;
+                    else
+                        glFormat = Q3EGlobals.GLFORMAT_RGBA8888;
                     break;
                 case PixelFormat.RGBA_8888:
-                    glFormat = 0x8888;
+                    glFormat = Q3EGlobals.GLFORMAT_RGBA8888;
                     break;
             }
 
@@ -169,6 +176,11 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
                     return PixelFormat.RGBA_4444;
                 case 2: // RGBA5551
                     return PixelFormat.RGBA_5551;
+                case 3: // RGBA10101002
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        return PixelFormat.RGBA_1010102;
+                    else
+                        return PixelFormat.RGBA_8888;
                 case 0: // RGB565
                 default:
                     return PixelFormat.RGB_565;
