@@ -104,7 +104,7 @@ public class Q3ECallbackObj
     }
 
     //k NEW:
-// Now call directly by native of libdante.so, and don't need call requestAudioData in Java.
+// Now call directly by native of libidtech4*.so, and don't need call requestAudioData in Java.
 // if offset >= 0 and length > 0, only write.
 // if offset >= 0 and length < 0, length = -length, then write and flush.
 // If length == 0 and offset < 0, only flush.

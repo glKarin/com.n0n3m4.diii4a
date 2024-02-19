@@ -74,9 +74,9 @@ public final class Q3EGlobals
     public static final int VIEW_MOTION_CONTROL_ALL = VIEW_MOTION_CONTROL_TOUCH | VIEW_MOTION_CONTROL_GYROSCOPE;
 
     // game
-    public static final String LIB_ENGINE_ID = "libdante.so"; // DOOM3
-    public static final String LIB_ENGINE_RAVEN = "libdante_raven.so"; // Quake 4
-    public static final String LIB_ENGINE_HUMANHEAD = "libdante_humanhead.so"; // Prey 2006
+    public static final String LIB_ENGINE_ID = "libidtech4.so"; // DOOM3
+    public static final String LIB_ENGINE_RAVEN = "libidtech4_raven.so"; // Quake 4
+    public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
 
     public static final String CONFIG_FILE_DOOM3 = "DoomConfig.cfg"; // DOOM3
     public static final String CONFIG_FILE_QUAKE4 = "Quake4Config.cfg"; // Quake 4

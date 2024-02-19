@@ -73,7 +73,7 @@ else()
 	set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
 endif()
 
-set(DOOM3BINARY "dante")
+set(IDTECH4LIBRARY "idtech4")
 
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
@@ -1604,7 +1604,8 @@ message(STATUS "ldflags: ${ldflags}")
 
 if(CORE)
 	if(ANDROID)
-		add_library(${DOOM3BINARY} SHARED
+		set(DOOM3BINARY ${IDTECH4LIBRARY})
+		add_library(${IDTECH4LIBRARY} SHARED
 				${src_core}
 				${src_sys_base}
 				${src_sys_core}
@@ -1834,7 +1835,7 @@ endif()
 
 if(RAVEN)
 	if(ANDROID)
-		set(QUAKE4BINARY "${DOOM3BINARY}_raven")
+		set(QUAKE4BINARY "${IDTECH4LIBRARY}_raven")
 		add_library(${QUAKE4BINARY} SHARED
 				${src_core_raven}
 				${src_sys_base}
@@ -1903,7 +1904,7 @@ endif()
 
 if(HUMANHEAD)
 	if(ANDROID)
-		set(PREYBINARY "${DOOM3BINARY}_humanhead")
+		set(PREYBINARY "${IDTECH4LIBRARY}_humanhead")
 		add_library(${PREYBINARY} SHARED
 				${src_core_humanhead}
 				${src_sys_base}
