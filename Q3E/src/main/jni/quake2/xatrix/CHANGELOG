@@ -1,0 +1,46 @@
+The Reckoning 2.00RC to 2.00:
+- Updates to the opened inventory screen
+  were fixed. (By svdijk, merged from
+  baseq2)
+
+The Reckoning 1.09 to 2.00RC:
+- Cleanup of the whole source, nearly every line
+  was audited and touched.
+- Add sanity checks to all function.
+- Fix all known bugs.
+- Merge all missing changes from baseq2.
+
+The Reckoning 1.08 to 1.09
+- Port 'The Reckoning' to Mac OS X.
+
+The Reckoning 1.07 to 1.08
+- Port 'The Reckoning' to Windows.
+- Use randk() instead of rand(), a better PNRG.
+- Fix some potential problems found by scan-build.
+
+The Reckoning 1.06 to 1.07
+- Port the new savegame system from baseq2
+- Reorder the files to reflect the new structure of baseq2
+
+The Reckoning 1.05 to 1.06:
+- Reformat the console output
+
+The Reckoning 1.04 to 1.05:
+- Fix "weapprev" cmd, weapon change via mousewheel should now
+  work without running into loops
+- Fix animation of strogg infantry
+
+The Reckoning 1.04RC2 to 1.04:
+- Just version number change
+
+The Reckoning 1.04RC to 1.04RC2:
+- Saner CFLAGS
+- Do not show the gun symbol when fov is bigger than 91 and
+  cl_gun is set to 2
+
+The Reckoning 1.03 to 1.04RC:
+- Slightly better performance (~10 FPS)
+
+The Reckoning 1.02 to 1.03:
+- Added License
+- Added Readme

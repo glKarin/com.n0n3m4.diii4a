@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: libjpeg
+Description: Reads and writes JPEG files
+Version: @JPEG_LIB_VERSION_MAJOR@.@JPEG_LIB_VERSION_MINOR@.0
+Libs: -L${libdir} -ljpeg
+Cflags: -I${includedir}

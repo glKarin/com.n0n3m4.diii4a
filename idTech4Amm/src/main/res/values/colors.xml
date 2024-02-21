@@ -3,5 +3,6 @@
     <color name="theme_doom3_main_color">#FF212121</color>
     <color name="theme_quake4_main_color">#FF16492A</color>
     <color name="theme_prey_main_color">#FF04ACFF</color>
+    <color name="theme_quake2_main_color">#FF16492A</color>
     <color name="launcher_divider_color">#FFCCCCCC</color>
 </resources>

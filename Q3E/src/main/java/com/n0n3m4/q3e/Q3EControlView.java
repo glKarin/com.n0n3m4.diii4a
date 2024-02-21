@@ -326,6 +326,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             gl.glDisable(gl.GL_DEPTH_TEST);
             gl.glDisable(gl.GL_ALPHA_TEST);
             gl.glEnable(gl.GL_BLEND);
+            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
             ((GL11) gl).glTexEnvi(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
             gl.glEnableClientState(gl.GL_VERTEX_ARRAY);

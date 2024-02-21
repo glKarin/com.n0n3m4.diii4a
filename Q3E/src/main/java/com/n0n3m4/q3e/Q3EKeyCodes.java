@@ -19,11 +19,14 @@
 
 package com.n0n3m4.q3e;
 
+import android.util.Log;
 import android.view.KeyEvent;
 
 import com.n0n3m4.q3e.device.Q3EOuya;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Q3EKeyCodes
 {
@@ -243,15 +246,6 @@ public class Q3EKeyCodes
         public static final int K_MOUSE5 = 191;
         public static final int K_MWHEELDOWN = 195;
         public static final int K_MWHEELUP = 196;
-
-        //k
-        public static final int K_CONSOLE = '~';
-        public static final int K_C = 'c';
-        public static final int K_F = 'f';
-        public static final int K_R = 'r';
-        public static final int K_BRACKET_LEFT = '[';
-        public static final int K_BRACKET_RIGHT = ']';
-        public static final int K_Z = 'z';
 
         public static final int J_LEFT = 'a';
         public static final int J_RIGHT = 'd';
@@ -510,47 +504,71 @@ public class Q3EKeyCodes
 
     public static void InitRTCWKeycodes()
     {
-        try
-        {
-            for (Field f : KeyCodes.class.getFields())
-                f.set(null, KeyCodesRTCW.class.getField(f.getName()).get(null));
-		} catch (Exception ignored) {}
+        InitKeycodes(KeyCodesRTCW.class);
     }
 
     public static void InitQ3Keycodes()
     {
-        try
-        {
-            for (Field f : KeyCodes.class.getFields())
-                f.set(null, KeyCodesQ3.class.getField(f.getName()).get(null));
-		} catch (Exception ignored) {}
+        InitKeycodes(KeyCodesQ3.class);
     }
 
     public static void InitD3Keycodes()
     {
-        try
-        {
-            for (Field f : KeyCodes.class.getFields())
-                f.set(null, KeyCodesD3.class.getField(f.getName()).get(null));
-		} catch (Exception ignored) {}
+        InitKeycodes(KeyCodesD3.class);
     }
 
     public static void InitD3BFGKeycodes()
     {
-        try
-        {
-            for (Field f : KeyCodes.class.getFields())
-                f.set(null, KeyCodesD3BFG.class.getField(f.getName()).get(null));
-		} catch (Exception ignored) {}
+        InitKeycodes(KeyCodesD3BFG.class);
     }
 
     public static void InitQ1Keycodes()
     {
+        InitKeycodes(KeyCodesQ1.class);
+    }
+
+    public static void InitKeycodes(Class<?> clazz)
+    {
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "InitKeycodes: " + clazz.getName());
         try
         {
             for (Field f : KeyCodes.class.getFields())
-                f.set(null, KeyCodesQ1.class.getField(f.getName()).get(null));
+                f.set(null, clazz.getField(f.getName()).get(null));
         } catch (Exception ignored) {}
+    }
+
+    public static int GetRealKeyCode(int keycodeGeneric)
+    {
+        try
+        {
+            Field[] fields = KeyCodesGeneric.class.getFields();
+            for (Field field : fields)
+            {
+                int key = (Integer) field.get(null);
+                if(key == keycodeGeneric)
+                {
+                    String name = field.getName();
+                    Field f = KeyCodes.class.getField(name);
+                    //Log.e("TAG", "GetRealKeyCode: " + name + " : " + keycodeGeneric + " -> " + f.get(null));
+                    return (Integer) f.get(null);
+                }
+            }
+        } catch (Exception ignored) {}
+        return keycodeGeneric;
+    }
+
+    public static int[] GetRealKeyCodes(int[] keycodeGeneric)
+    {
+        int[] codes = new int[keycodeGeneric.length];
+        for (int i = 0; i < keycodeGeneric.length; i++)
+            codes[i] = Q3EKeyCodes.GetRealKeyCode(keycodeGeneric[i]);
+        return codes;
+    }
+
+    public static void ConvertRealKeyCodes(int[] codes)
+    {
+        for (int i = 0; i < codes.length; i++)
+            codes[i] = Q3EKeyCodes.GetRealKeyCode(codes[i]);
     }
 
 
@@ -674,4 +692,104 @@ public class Q3EKeyCodes
         return keyCode % 95 + 32;//Magic
     }
 
+    public static class KeyCodesGeneric
+    {
+        public static final int K_MOUSE1 = 187;
+        public static final int K_MOUSE2 = 188;
+        public static final int K_MOUSE3 = 189;
+        public static final int K_MOUSE4 = 190;
+        public static final int K_MOUSE5 = 191;
+        public static final int K_MWHEELUP = 195;
+        public static final int K_MWHEELDOWN = 196;
+
+        public static final int K_A = 97;
+        public static final int K_B = 98;
+        public static final int K_C = 99;
+        public static final int K_D = 100;
+        public static final int K_E = 101;
+        public static final int K_F = 102;
+        public static final int K_G = 103;
+        public static final int K_H = 104;
+        public static final int K_I = 105;
+        public static final int K_J = 106;
+        public static final int K_K = 107;
+        public static final int K_L = 108;
+        public static final int K_M = 109;
+        public static final int K_N = 110;
+        public static final int K_O = 111;
+        public static final int K_P = 112;
+        public static final int K_Q = 113;
+        public static final int K_R = 114;
+        public static final int K_S = 115;
+        public static final int K_T = 116;
+        public static final int K_U = 117;
+        public static final int K_V = 118;
+        public static final int K_W = 119;
+        public static final int K_X = 120;
+        public static final int K_Y = 121;
+        public static final int K_Z = 122;
+
+        public static final int K_0 = 48;
+        public static final int K_1 = 49;
+        public static final int K_2 = 50;
+        public static final int K_3 = 51;
+        public static final int K_4 = 52;
+        public static final int K_5 = 53;
+        public static final int K_6 = 54;
+        public static final int K_7 = 55;
+        public static final int K_8 = 56;
+        public static final int K_9 = 57;
+
+        public static final int K_F1 = 149;
+        public static final int K_F2 = 150;
+        public static final int K_F3 = 151;
+        public static final int K_F4 = 152;
+        public static final int K_F5 = 153;
+        public static final int K_F6 = 154;
+        public static final int K_F7 = 155;
+        public static final int K_F8 = 156;
+        public static final int K_F9 = 157;
+        public static final int K_F10 = 158;
+        public static final int K_F11 = 159;
+        public static final int K_F12 = 160;
+
+        public static final int K_BACKSPACE = 127;
+        public static final int K_TAB = 9;
+        public static final int K_ENTER = 13;
+        public static final int K_SHIFT = 142;
+        public static final int K_CTRL = 141;
+        public static final int K_ALT = 140;
+        public static final int K_CAPSLOCK = 129;
+        public static final int K_ESCAPE = 27;
+        public static final int K_SPACE = 32;
+        public static final int K_PGUP = 146;
+        public static final int K_PGDN = 145;
+        public static final int K_END = 148;
+        public static final int K_HOME = 147;
+        public static final int K_LEFTARROW = 135;
+        public static final int K_UPARROW = 133;
+        public static final int K_RIGHTARROW = 136;
+        public static final int K_DOWNARROW = 134;
+        public static final int K_INS = 143;
+        public static final int K_DEL = 144;
+
+        public static final int K_SEMICOLON = 59;
+        public static final int K_EQUALS = 61;
+        public static final int K_COMMA = 44;
+        public static final int K_MINUS = 45;
+        public static final int K_PERIOD = 46;
+        public static final int K_SLASH = 47;
+        public static final int K_GRAVE = 96;
+        public static final int K_LBRACKET = 91;
+        public static final int K_BACKSLASH = 92;
+        public static final int K_RBRACKET = 93;
+        public static final int K_APOSTROPHE = 39;
+
+        public static final int J_LEFT = 'a';
+        public static final int J_RIGHT = 'd';
+        public static final int J_UP = K_UPARROW;
+        public static final int J_DOWN = K_DOWNARROW;
+    }
+
+    public static final String K_WEAPONS_STR = "1,2,3,4,5,6,7,8,9,q,0";
 }

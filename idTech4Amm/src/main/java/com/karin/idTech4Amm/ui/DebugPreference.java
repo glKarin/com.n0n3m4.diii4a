@@ -1,5 +1,4 @@
 package com.karin.idTech4Amm.ui;
-import android.os.Process;
 import android.preference.PreferenceFragment;
 import android.os.Bundle;
 import android.preference.PreferenceScreen;
@@ -9,19 +8,12 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.util.Log;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
-import com.n0n3m4.q3e.Q3EJNI;
-import com.n0n3m4.q3e.Q3EMain;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3ELang;
-import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Debug preference fragment
@@ -47,30 +39,6 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
-
-    /*private void gdbserver()
-    {
-        Context context = ContextUtility.GetContext(this);
-        String datadir = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_datapath, Q3EUtils.q3ei.default_path);
-        String localPath = datadir + "/" + "gdbserver";
-        String cacheFile =  "/data/local/tmp/gdbserver";
-        long r = Q3EUtils.cp(localPath, cacheFile);
-        Log.e("TAG", "aaa: " + r);
-        File file = new File(cacheFile);
-        file.setExecutable(true, false);
-        new Thread(() -> {
-            int pid = Process.myPid();
-            try
-            {
-                Runtime.getRuntime().exec(String.format("%s :1234 --attach %d", cacheFile, pid));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        }).start();
-    }*/
 
     private void OpenCrashInfo()
     {

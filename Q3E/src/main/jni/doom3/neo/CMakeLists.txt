@@ -356,7 +356,7 @@ else()
 	set(sys_libs ${sys_libs} dl EGL z pthread)
 endif()
 
-set(local_libs ogg)
+set(local_libs static_ogg)
 if(COMPILE_CURL STREQUAL "1")
 	if(NOT WIN32)
 	set(local_libs ${local_libs} curl)
@@ -451,9 +451,9 @@ set(src_jpeg
 
 add_globbed_headers(src_jpeg "externlibs/jpeg-8d")
 include_directories("externlibs/jpeg-8d")
-add_library(jpeg STATIC ${src_jpeg})
+add_library(static_jpeg STATIC ${src_jpeg})
 
-set(local_libs ${local_libs} jpeg)
+set(local_libs ${local_libs} static_jpeg)
 
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -1411,10 +1411,10 @@ add_globbed_headers(src_ogg "externlibs/libvorbis")
 include_directories("externlibs/libogg/include")
 include_directories("externlibs/libvorbis/include")
 include_directories("sys/android")
-add_library(ogg STATIC ${src_ogg})
-target_include_directories(ogg PRIVATE "externlibs/libogg/include/ogg")
-target_include_directories(ogg PRIVATE "externlibs/libvorbis/include/vorbis")
-target_include_directories(ogg PRIVATE "externlibs/libvorbis/lib")
+add_library(static_ogg STATIC ${src_ogg})
+target_include_directories(static_ogg PRIVATE "externlibs/libogg/include/ogg")
+target_include_directories(static_ogg PRIVATE "externlibs/libvorbis/include/vorbis")
+target_include_directories(static_ogg PRIVATE "externlibs/libvorbis/lib")
 
 set(src_core
 	${src_renderer}

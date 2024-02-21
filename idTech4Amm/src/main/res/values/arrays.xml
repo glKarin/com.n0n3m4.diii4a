@@ -160,11 +160,11 @@
         <item>\\</item>
         <item>]</item>
         <item>\'</item>
-        <item>0x2</item>
+<!--        <item>0x2</item>
         <item>0x3</item>
         <item>0x4</item>
         <item>0x5</item>
-        <item>0x6</item>
+        <item>0x6</item>-->
     </string-array>
 
     <integer-array name="key_map_codes">
@@ -253,10 +253,10 @@
         <item>92</item>
         <item>93</item>
         <item>39</item> <!--'-->
-        <item>2</item>
+<!--        <item>2</item>
         <item>3</item>
         <item>4</item>
         <item>5</item>
-        <item>6</item>
+        <item>6</item>-->
     </integer-array>
 </resources>

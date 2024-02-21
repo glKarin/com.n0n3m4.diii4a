@@ -1,0 +1,58 @@
+name: Build and Test
+
+on: [push, workflow_dispatch]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+          os: [macos-11, macos-12, ubuntu-20.04, ubuntu-22.04]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Ubuntu
+      if: startsWith(matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake
+
+    - name: Setup macOS
+      if: startsWith(matrix.os, 'macos')
+      run: |
+        sudo xcode-select -s /Library/Developer/CommandLineTools/
+        sudo rm -rf /Library/Frameworks/Mono.framework
+        brew install cmake
+
+    - name: Configure CMake
+      shell: bash
+      run: |
+        cmake -S $GITHUB_WORKSPACE -B ${{runner.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+          -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/install
+
+    - name: Build
+      shell: bash
+      # Execute the build.  You can specify a specific target with "--target <NAME>"
+      run: cmake --build ${{runner.workspace}}/build --config $BUILD_TYPE
+
+    - name: Test libjpeg
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ctest -V -C $BUILD_TYPE
+
+    - name: Test install
+      shell: bash
+      run: |
+        cmake --install ${{runner.workspace}}/build --config $BUILD_TYPE
+        RESULT=$(cmake --find-package -DNAME=JPEG \
+          -DCOMPILER_ID=GNU -DLANGUAGE=C -DMODE=COMPILE \
+          -DCMAKE_PREFIX_PATH=${{runner.workspace}}/install | awk '{$1=$1};1')
+        [[ "$RESULT" != "-I${{runner.workspace}}/install/include" ]] && { echo "libjpeg not found or found at unexpected location: ${RESULT}" ; exit 1; }
+        exit 0
+        

@@ -542,14 +542,14 @@ static bool GLES_Init_special(void)
 			common->Printf( "[Harmattan]: Get EGL context num -> %d.\n", config_count);
 			for(int i = 0; i < config_count; i++)
 			{
-				EGLConfigInfo_t info = GLimp_GetConfigInfo(eglConfigs[i]);
-				common->Printf( "\t%d EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
+				EGLConfigInfo_t cinfo = GLimp_GetConfigInfo(eglConfigs[i]);
+				common->Printf("\t%d EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
 								i + 1,
-								info.red, info.green,
-								info.blue, info.alpha,
-								info.depth,
-								info.stencil
-						, info.samples, info.sample_buffers
+							   cinfo.red, cinfo.green,
+							   cinfo.blue, cinfo.alpha,
+							   cinfo.depth,
+							   cinfo.stencil
+						, cinfo.samples, cinfo.sample_buffers
 				);
 			}
 		}

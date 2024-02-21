@@ -41,8 +41,8 @@ public class Joystick extends Paintable implements TouchListener
     boolean dotjoyenabled = false;
     public View view;
 
-    private final static int[] codes = {Q3EKeyCodes.KeyCodes.J_UP, Q3EKeyCodes.KeyCodes.J_RIGHT, Q3EKeyCodes.KeyCodes.J_DOWN, Q3EKeyCodes.KeyCodes.J_LEFT};
-    private final static int[] Menu_Codes = {Q3EKeyCodes.KeyCodes.K_UPARROW, Q3EKeyCodes.KeyCodes.K_RIGHTARROW, Q3EKeyCodes.KeyCodes.K_DOWNARROW, Q3EKeyCodes.KeyCodes.K_LEFTARROW};
+    private final int[] codes = {Q3EKeyCodes.KeyCodesGeneric.J_UP, Q3EKeyCodes.KeyCodesGeneric.J_RIGHT, Q3EKeyCodes.KeyCodesGeneric.J_DOWN, Q3EKeyCodes.KeyCodesGeneric.J_LEFT};
+    private final int[] Menu_Codes = {Q3EKeyCodes.KeyCodesGeneric.K_UPARROW, Q3EKeyCodes.KeyCodesGeneric.K_RIGHTARROW, Q3EKeyCodes.KeyCodesGeneric.K_DOWNARROW, Q3EKeyCodes.KeyCodesGeneric.K_LEFTARROW};
     private final boolean[] keys = {false, false, false, false};
     private final boolean[] enarr = new boolean[4];
 
@@ -69,6 +69,9 @@ public class Joystick extends Paintable implements TouchListener
     {
         int fullZoneRadius = fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0;
         int deadZoneRadius = deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0;
+
+        Q3EKeyCodes.ConvertRealKeyCodes(codes);
+        Q3EKeyCodes.ConvertRealKeyCodes(Menu_Codes);
 
         view = vw;
         size = r * 2;
@@ -288,11 +291,10 @@ public class Joystick extends Paintable implements TouchListener
     {
         final int deltax = x - cx;
         final int deltay = y - cy;
-        Q3EControlView controlView = (Q3EControlView) (this.view);
         boolean res = true;
         if (NotInFullZone(deltax, deltay))
         {
-                res = false;
+            res = false;
         }
         if (res && act != ACT_RELEASE)
         {

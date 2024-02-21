@@ -32,7 +32,7 @@
 #include <android/native_window_jni.h>
 #include "q3e.h"
 
-#include "doom3/neo/sys/android/doom3_android.h"
+#include "doom3/neo/sys/android/sys_android.h"
 
 #define LOG_TAG "Q3E_JNI"
 
@@ -127,11 +127,11 @@ static void loadLib(const char* libpath)
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Unable to load library: %s\n", dlerror());
         return;
     }
-	void (*GetDOOM3API)(void *);
+	void (*GetIDTechAPI)(void *);
 
-	GetDOOM3API = dlsym(libdl, "GetDOOM3API");
+	GetIDTechAPI = dlsym(libdl, "GetIDTechAPI");
 	Q3E_Interface_t d3interface;
-	GetDOOM3API(&d3interface);
+	GetIDTechAPI(&d3interface);
 
 	qmain = (int (*)(int, char **)) d3interface.main;
 	setCallbacks = d3interface.setCallbacks;
@@ -179,6 +179,7 @@ void initAudio(void *buffer, int size)
     {
         (*jVM)->AttachCurrentThread(jVM,&env, NULL);
     }
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Q3E AudioTrack init");
     tmp = (*env)->NewDirectByteBuffer(env, buffer, size);
     audioBuffer = (jobject)(*env)->NewGlobalRef(env, tmp);
     return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
@@ -197,6 +198,21 @@ int writeAudio(int offset, int length)
     	(*jVM)->AttachCurrentThread(jVM,&env, NULL);
     }
     return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio, audioBuffer, offset, length);
+}
+
+void closeAudio()
+{
+	if (!audioBuffer)
+		return;
+	JNIEnv *env;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Q3E AudioTrack shutdown");
+	jobject ab = audioBuffer;
+	audioBuffer = 0;
+	(*env)->DeleteGlobalRef(env, ab);
 }
 
 void setState(int state)
@@ -404,6 +420,7 @@ static void setup_Q3E_callback(void)
 
 	callback.AudioTrack_init = &initAudio; // initAudio_direct
 	callback.AudioTrack_write = &writeAudio; // writeAudio_direct
+	callback.AudioTrack_shutdown = &closeAudio;
 
 	callback.Input_grabMouse = &grab_mouse;
 	callback.Input_pullEvent = &pull_input_event;

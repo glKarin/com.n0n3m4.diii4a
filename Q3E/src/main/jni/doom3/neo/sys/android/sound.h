@@ -32,5 +32,6 @@ extern bool paused;
 
 extern void (*initAudio)(void *buffer, int size);
 extern int (*writeAudio)(int offset, int length);
+extern void (*shutdownAudio)(void);
 
 #endif

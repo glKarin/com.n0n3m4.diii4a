@@ -66,7 +66,7 @@ public class Q3EInterface
     
     public boolean view_motion_control_gyro = false;
     public String start_temporary_extra_command = "";
-	public String cmd = "game.arm";
+	public String cmd = Q3EGlobals.GAME_EXECUABLE;
 	public boolean multithread = false;
 	public boolean function_key_toolbar = false;
 	public float joystick_release_range = 0.0f;
@@ -81,8 +81,8 @@ public class Q3EInterface
 	public final int RTCW4A_UI_KICK=7;
 
 	//k volume key map
-	public int VOLUME_UP_KEY_CODE = Q3EKeyCodes.KeyCodes.K_F3;
-	public int VOLUME_DOWN_KEY_CODE = Q3EKeyCodes.KeyCodes.K_F2;
+	public int VOLUME_UP_KEY_CODE = Q3EKeyCodes.KeyCodesGeneric.K_F3;
+	public int VOLUME_DOWN_KEY_CODE = Q3EKeyCodes.KeyCodesGeneric.K_F2;
 
 	public String EngineLibName()
 	{
@@ -90,6 +90,8 @@ public class Q3EInterface
 			return Q3EGlobals.LIB_ENGINE_HUMANHEAD;
 		else if(isQ4)
 			return Q3EGlobals.LIB_ENGINE_RAVEN;
+		else if(isQ2)
+			return Q3EGlobals.LIB_ENGINE2_ID;
 		else
 			return Q3EGlobals.LIB_ENGINE_ID;
 	}
@@ -100,6 +102,8 @@ public class Q3EInterface
 			return Q3EGlobals.CONFIG_FILE_PREY;
 		else if(isQ4)
 			return Q3EGlobals.CONFIG_FILE_QUAKE4;
+		else if(isQ2)
+			return Q3EGlobals.CONFIG_FILE_QUAKE2;
 		else
 			return Q3EGlobals.CONFIG_FILE_DOOM3;
 	}
@@ -110,6 +114,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_NAME_PREY;
 		else if(isQ4)
 			return Q3EGlobals.GAME_NAME_QUAKE4;
+		else if(isQ2)
+			return Q3EGlobals.GAME_NAME_QUAKE2;
 		else
 			return Q3EGlobals.GAME_NAME_DOOM3;
 	}
@@ -120,6 +126,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_PREY;
 		else if(isQ4)
 			return Q3EGlobals.GAME_QUAKE4;
+		else if(isQ2)
+			return Q3EGlobals.GAME_QUAKE2;
 		else
 			return Q3EGlobals.GAME_DOOM3;
 	}
@@ -130,6 +138,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_BASE_PREY;
 		else if(isQ4)
 			return Q3EGlobals.GAME_BASE_QUAKE4;
+		else if(isQ2)
+			return Q3EGlobals.GAME_BASE_QUAKE2;
 		else
 			return Q3EGlobals.GAME_BASE_DOOM3;
 	}
@@ -140,6 +150,8 @@ public class Q3EInterface
 			return Q3EGlobals.PREY_LIBS;
 		else if(isQ4)
 			return Q3EGlobals.Q4_LIBS;
+		else if(isQ2)
+			return Q3EGlobals.Q2_LIBS;
 		else
 			return Q3EGlobals.LIBS;
 	}
@@ -147,6 +159,18 @@ public class Q3EInterface
 	public void SetupEngineLib()
 	{
 		libname = EngineLibName();
+	}
+
+	public void SetupKeycodes()
+	{
+		if(isPrey)
+			Q3EKeyCodes.InitD3Keycodes();
+		else if(isQ4)
+			Q3EKeyCodes.InitD3Keycodes();
+		else if(isQ2)
+			Q3EKeyCodes.InitQ3Keycodes();
+		else
+			Q3EKeyCodes.InitD3Keycodes();
 	}
 
 	private void SetupConfigFile()
@@ -168,12 +192,24 @@ public class Q3EInterface
 
 	public void SetupGame(String name)
 	{
+		Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "SetupGame: " + name);
 		if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
 			SetupPrey();
 		else if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
 			SetupQuake4();
+		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+			SetupQuake2();
 		else
 			SetupDOOM3();
+	}
+
+	public void SetupGameConfig()
+	{
+		SetupGameTypeAndName();
+		SetupEngineLib();
+		SetupGameLibs();
+		SetupConfigFile();
+		SetupKeycodes();
 	}
 
 	public void SetupDOOM3()
@@ -181,10 +217,8 @@ public class Q3EInterface
 		isD3 = true;
 		isPrey = false;
 		isQ4 = false;
-		SetupGameTypeAndName();
-		SetupEngineLib();
-		SetupGameLibs();
-		SetupConfigFile();
+		isQ2 = false;
+		SetupGameConfig();
 	}
 
 	public void SetupPrey()
@@ -192,10 +226,8 @@ public class Q3EInterface
 		isD3 = true;
 		isQ4 = false;
 		isPrey = true;
-		SetupGameTypeAndName();
-		SetupEngineLib();
-		SetupGameLibs();
-		SetupConfigFile();
+		isQ2 = false;
+		SetupGameConfig();
 	}
 
 	public void SetupQuake4()
@@ -203,11 +235,18 @@ public class Q3EInterface
 		isD3 = true;
 		isPrey = false;
 		isQ4 = true;
-		SetupGameTypeAndName();
-		SetupEngineLib();
-		SetupGameLibs();
-		SetupConfigFile();
+		isQ2 = false;
+		SetupGameConfig();
     }
+
+	public void SetupQuake2()
+	{
+		isD3 = false;
+		isPrey = false;
+		isQ4 = false;
+		isQ2 = true;
+		SetupGameConfig();
+	}
 
     public void InitTextureTable()
     {
@@ -317,53 +356,53 @@ public class Q3EInterface
 	{
 		int[] arg_table = new int[Q3EGlobals.UI_SIZE * 4];
 
-		arg_table[Q3EGlobals.UI_SHOOT * 4] = Q3EKeyCodes.KeyCodes.K_MOUSE1;
+		arg_table[Q3EGlobals.UI_SHOOT * 4] = Q3EKeyCodes.KeyCodesGeneric.K_MOUSE1;
 		arg_table[Q3EGlobals.UI_SHOOT * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_SHOOT * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_SHOOT * 4 + 3] = 0;
 
 
-		arg_table[Q3EGlobals.UI_JUMP * 4] = Q3EKeyCodes.KeyCodes.K_SPACE;
+		arg_table[Q3EGlobals.UI_JUMP * 4] = Q3EKeyCodes.KeyCodesGeneric.K_SPACE;
 		arg_table[Q3EGlobals.UI_JUMP * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_JUMP * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_JUMP * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_CROUCH * 4] = Q3EKeyCodes.KeyCodesD3.K_C; // BFG
+		arg_table[Q3EGlobals.UI_CROUCH * 4] = Q3EKeyCodes.KeyCodesGeneric.K_C; // BFG
 		arg_table[Q3EGlobals.UI_CROUCH * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
 		arg_table[Q3EGlobals.UI_CROUCH * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM;
 		arg_table[Q3EGlobals.UI_CROUCH * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_RELOADBAR * 4] = Q3EKeyCodes.KeyCodesD3.K_BRACKET_RIGHT; // 93
-		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 1] = Q3EKeyCodes.KeyCodesD3.K_R; // 114
-		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 2] = Q3EKeyCodes.KeyCodesD3.K_BRACKET_LEFT; // 91
+		arg_table[Q3EGlobals.UI_RELOADBAR * 4] = Q3EKeyCodes.KeyCodesGeneric.K_RBRACKET; // 93
+		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 1] = Q3EKeyCodes.KeyCodesGeneric.K_R; // 114
+		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 2] = Q3EKeyCodes.KeyCodesGeneric.K_LBRACKET; // 91
 		arg_table[Q3EGlobals.UI_RELOADBAR * 4 + 3] = Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT;
 
-		arg_table[Q3EGlobals.UI_PDA * 4] = Q3EKeyCodes.KeyCodes.K_TAB;
+		arg_table[Q3EGlobals.UI_PDA * 4] = Q3EKeyCodes.KeyCodesGeneric.K_TAB;
 		arg_table[Q3EGlobals.UI_PDA * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_PDA * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_PDA * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4] = Q3EKeyCodes.KeyCodesD3.K_F; // BFG
+		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4] = Q3EKeyCodes.KeyCodesGeneric.K_F; // BFG
 		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_FLASHLIGHT * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_SAVE * 4] = Q3EKeyCodes.KeyCodes.K_F5;
-		arg_table[Q3EGlobals.UI_SAVE * 4 + 1] = Q3EKeyCodes.KeyCodes.K_ESCAPE;
-		arg_table[Q3EGlobals.UI_SAVE * 4 + 2] = Q3EKeyCodes.KeyCodes.K_F9;
+		arg_table[Q3EGlobals.UI_SAVE * 4] = Q3EKeyCodes.KeyCodesGeneric.K_F5;
+		arg_table[Q3EGlobals.UI_SAVE * 4 + 1] = Q3EKeyCodes.KeyCodesGeneric.K_ESCAPE;
+		arg_table[Q3EGlobals.UI_SAVE * 4 + 2] = Q3EKeyCodes.KeyCodesGeneric.K_F9;
 		arg_table[Q3EGlobals.UI_SAVE * 4 + 3] = Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT;
 
-		arg_table[Q3EGlobals.UI_1 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_1;
+		arg_table[Q3EGlobals.UI_1 * 4] = Q3EKeyCodes.KeyCodesGeneric.K_F1;
 		arg_table[Q3EGlobals.UI_1 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_1 * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_1 * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_2 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_2;
+		arg_table[Q3EGlobals.UI_2 * 4] = Q3EKeyCodes.KeyCodesGeneric.K_F2;
 		arg_table[Q3EGlobals.UI_2 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_2 * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_2 * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_3 * 4] = Q3EKeyCodes.KeyCodesD3BFG.K_3;
+		arg_table[Q3EGlobals.UI_3 * 4] = Q3EKeyCodes.KeyCodesGeneric.K_F3;
 		arg_table[Q3EGlobals.UI_3 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_3 * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_3 * 4 + 3] = 0;
@@ -373,22 +412,22 @@ public class Q3EInterface
 		arg_table[Q3EGlobals.UI_KBD * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_KBD * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_CONSOLE * 4] = Q3EKeyCodes.KeyCodesD3.K_CONSOLE;
+		arg_table[Q3EGlobals.UI_CONSOLE * 4] = Q3EKeyCodes.KeyCodesGeneric.K_GRAVE;
 		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_CONSOLE * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_RUN * 4] = Q3EKeyCodes.KeyCodesD3.K_SHIFT;
+		arg_table[Q3EGlobals.UI_RUN * 4] = Q3EKeyCodes.KeyCodesGeneric.K_SHIFT;
 		arg_table[Q3EGlobals.UI_RUN * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
 		arg_table[Q3EGlobals.UI_RUN * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_RUN * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_ZOOM * 4] = Q3EKeyCodes.KeyCodesD3.K_Z;
+		arg_table[Q3EGlobals.UI_ZOOM * 4] = Q3EKeyCodes.KeyCodesGeneric.K_Z;
 		arg_table[Q3EGlobals.UI_ZOOM * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
 		arg_table[Q3EGlobals.UI_ZOOM * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_ZOOM * 4 + 3] = 0;
 
-		arg_table[Q3EGlobals.UI_INTERACT * 4] = Q3EKeyCodes.KeyCodesD3.K_MOUSE2;
+		arg_table[Q3EGlobals.UI_INTERACT * 4] = Q3EKeyCodes.KeyCodesGeneric.K_MOUSE2;
 		arg_table[Q3EGlobals.UI_INTERACT * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_INTERACT * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_INTERACT * 4 + 3] = 0;
@@ -398,23 +437,50 @@ public class Q3EInterface
 
 	public String GetGameModPreferenceKey()
 	{
-		return isPrey ? Q3EPreference.pref_harm_prey_fs_game
-				: (isQ4 ? Q3EPreference.pref_harm_q4_fs_game
-				: Q3EPreference.pref_harm_fs_game);
+		if(Q3EUtils.q3ei.isQ4)
+			return Q3EPreference.pref_harm_q4_fs_game;
+		else if(Q3EUtils.q3ei.isPrey)
+			return Q3EPreference.pref_harm_prey_fs_game;
+		else if(Q3EUtils.q3ei.isQ2)
+			return Q3EPreference.pref_harm_q2_fs_game;
+		else
+			return Q3EPreference.pref_harm_fs_game;
 	}
 
 	public String GetEnableModPreferenceKey()
 	{
-		return isPrey ? Q3EPreference.pref_harm_prey_user_mod
-				: (isQ4 ? Q3EPreference.pref_harm_q4_user_mod
-				: Q3EPreference.pref_harm_user_mod);
+		if(Q3EUtils.q3ei.isQ4)
+			return Q3EPreference.pref_harm_q4_user_mod;
+		else if(Q3EUtils.q3ei.isPrey)
+			return Q3EPreference.pref_harm_prey_user_mod;
+		else if(Q3EUtils.q3ei.isQ2)
+			return Q3EPreference.pref_harm_q2_user_mod;
+		else
+			return Q3EPreference.pref_harm_user_mod;
 	}
 
 	public String GetGameModLibPreferenceKey()
 	{
-		return isPrey ? Q3EPreference.pref_harm_prey_game_lib
-				: (isQ4 ? Q3EPreference.pref_harm_q4_game_lib
-				: Q3EPreference.pref_harm_game_lib);
+		if(Q3EUtils.q3ei.isQ4)
+			return Q3EPreference.pref_harm_q4_game_lib;
+		else if(Q3EUtils.q3ei.isPrey)
+			return Q3EPreference.pref_harm_prey_game_lib;
+		else if(Q3EUtils.q3ei.isQ2)
+			return Q3EPreference.pref_harm_q2_game_lib;
+		else
+			return Q3EPreference.pref_harm_game_lib;
+	}
+
+	public String GetGameCommandPreferenceKey()
+	{
+		if(Q3EUtils.q3ei.isQ4)
+			return Q3EPreference.pref_params;
+		else if(Q3EUtils.q3ei.isPrey)
+			return Q3EPreference.pref_params;
+		else if(Q3EUtils.q3ei.isQ2)
+			return Q3EPreference.pref_params_q2;
+		else
+			return Q3EPreference.pref_params;
 	}
 
 	public void LoadTypeAndArgTablePreference(Context context)

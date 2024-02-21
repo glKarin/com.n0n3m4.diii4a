@@ -89,7 +89,7 @@ public class Q3EMain extends Activity
         InitGlobalEnv();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        Q3EGL.usegles20 = Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
+        Q3EGL.usegles20 = false; // Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
         m_coverEdges = preferences.getBoolean(Q3EPreference.COVER_EDGES, true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && m_coverEdges)
         {
@@ -323,24 +323,28 @@ public class Q3EMain extends Activity
 
             Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
 
-            String extraCommand = "";
-            if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
-                extraCommand += " +disconnect";
-            if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
-                extraCommand += " +loadGame QuickSave";
-            Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
+            if(Q3EUtils.q3ei.isD3)
+            {
+                String extraCommand = "";
+                if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
+                    extraCommand += " +disconnect";
+                if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
+                    extraCommand += " +loadGame QuickSave";
+                Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
+            }
         }
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Run " + Q3EUtils.q3ei.game_name);
 
         Q3EUtils.q3ei.joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
         Q3EUtils.q3ei.joystick_inner_dead_zone = preferences.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
-        Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = preferences.getInt(Q3EPreference.VOLUME_UP_KEY, Q3EKeyCodes.KeyCodes.K_F3);
-        Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = preferences.getInt(Q3EPreference.VOLUME_DOWN_KEY, Q3EKeyCodes.KeyCodes.K_F2);
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false);
         Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EPreference.pref_harm_function_key_toolbar, true);
         Q3EUtils.q3ei.joystick_unfixed = preferences.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
         Q3EUtils.q3ei.joystick_smooth = preferences.getBoolean(Q3EPreference.pref_analog, true);
+        Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_UP_KEY, Q3EKeyCodes.KeyCodesGeneric.K_F3));
+        Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_DOWN_KEY, Q3EKeyCodes.KeyCodesGeneric.K_F2));
         // DOOM 3: hardscorps mod template disable smooth joystick
         /*if(Q3EUtils.q3ei.joystick_smooth)
         {
@@ -365,7 +369,7 @@ public class Q3EMain extends Activity
 
         String cmd = preferences.getString(Q3EPreference.pref_params, Q3EUtils.q3ei.libname);
         if(null == cmd)
-            cmd = "game.arm";
+            cmd = Q3EGlobals.GAME_EXECUABLE;
         if(preferences.getBoolean(Q3EPreference.pref_harm_find_dll, false))
         {
             KidTech4Command command = new KidTech4Command(cmd);
@@ -379,6 +383,9 @@ public class Q3EMain extends Activity
                         break;
                     case Q3EGlobals.GAME_QUAKE4:
                         fs_game = "q4base";
+                        break;
+                    case Q3EGlobals.GAME_QUAKE2:
+                        fs_game = "baseq2";
                         break;
                     case Q3EGlobals.GAME_DOOM3:
                     default:

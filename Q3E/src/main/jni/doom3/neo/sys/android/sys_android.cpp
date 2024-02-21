@@ -33,6 +33,7 @@ extern void ShutdownGame(void);
 
 void (*initAudio)(void *buffer, int size);
 int (*writeAudio)(int offset, int length);
+void (*shutdownAudio)(void);
 void (*setState)(int st);
 FILE * (*itmpfile)(void);
 void (*pull_input_event)(int execCmd);
@@ -187,6 +188,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("  AudioTrack: \n");
     printf("    initAudio: %p\n", initAudio);
     printf("    writeAudio: %p\n", writeAudio);
+    printf("    shutdownAudio: %p\n", shutdownAudio);
     printf("  Input: \n");
     printf("    grab_mouse: %p\n", grab_mouse);
     printf("    pull_input_event: %p\n", pull_input_event);
@@ -222,6 +224,7 @@ void Q3E_SetCallbacks(const void *callbacks)
 
     initAudio = ptr->AudioTrack_init;
     writeAudio = ptr->AudioTrack_write;
+    shutdownAudio = ptr->AudioTrack_shutdown;
 
     pull_input_event = ptr->Input_pullEvent;
     grab_mouse = ptr->Input_grabMouse;
@@ -410,7 +413,7 @@ extern "C"
 {
 
 #pragma GCC visibility push(default)
-void GetDOOM3API(void *d3interface)
+void GetIDTechAPI(void *d3interface)
 {
     Q3E_Interface_t *ptr = (Q3E_Interface_t *)d3interface;
     memset(ptr, 0, sizeof(*ptr));

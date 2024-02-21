@@ -26,6 +26,14 @@ public enum Game
 
     // Prey(2006)
     PREY_BASE(Q3EGlobals.GAME_PREY, "preybase", "", "", false, R.string.prey_preybase),
+
+    // Quake 2
+    QUAKE2_BASE(Q3EGlobals.GAME_QUAKE2, "baseq2", "", "", false, R.string.quake_2_base),
+    QUAKE2_CTF(Q3EGlobals.GAME_QUAKE2, "ctf", "ctf", "", true, R.string.quake_2_ctf),
+    QUAKE2_ROGUE(Q3EGlobals.GAME_QUAKE2, "rogue", "rogue", "", true, R.string.quake_2_rogue),
+    QUAKE2_XATRIX(Q3EGlobals.GAME_QUAKE2, "xatrix", "xatrix", "", true, R.string.quake_2_xatrix),
+    QUAKE2_ZAERO(Q3EGlobals.GAME_QUAKE2, "zaero", "zaero", "", true, R.string.quake_2_zaero),
+
     ;
 
     public final String type; // game type: doom3/quake4/prey2006

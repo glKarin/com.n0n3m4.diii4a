@@ -1,0 +1,41 @@
+# libjpeg.la - a libtool library file
+# Configured from libjpeg.la.in using CMake
+#
+# Please DO NOT delete this file!
+# It is necessary for linking the library.
+
+# The name that we can dlopen(3).
+dlname='@DYN_LIB_FILE_VERSIONED@'
+
+# Names of this library.
+library_names='@DYN_LIB_FILES@'
+
+# The name of the static archive.
+old_library='@STATIC_LIB_FILE@'
+
+# Linker flags that cannot go in dependency_libs.
+inherited_linker_flags=' '
+
+# Libraries that this one depends upon.
+dependency_libs=''
+
+# Names of additional weak libraries provided by this library
+weak_library_names=''
+
+# Version information for libjpeg.
+current=@JPEG_CONF_VER_MAJOR@
+age=@PROJECT_VERSION_MINOR@
+revision=@PROJECT_VERSION_PATCH@
+
+# Is this an already installed library?
+installed=yes
+
+# Should we warn about portability when linking against -modules?
+shouldnotlink=no
+
+# Files to dlopen/dlpreopen
+dlopen=''
+dlpreopen=''
+
+# Directory that this library needs to be installed in:
+libdir='@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@'
