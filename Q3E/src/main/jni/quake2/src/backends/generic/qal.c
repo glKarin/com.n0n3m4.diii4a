@@ -462,7 +462,7 @@ QAL_Init()
 #endif
 
 	/* Open the OpenAL device */
-    Com_Printf("...opening OpenAL device:");
+    Com_Printf("...opening OpenAL device: %s", DEFAULT_OPENAL_DRIVER);
 
 	device = qalcOpenDevice(al_device->string[0] ? al_device->string : NULL);
 

@@ -13,7 +13,7 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 ### Feature
-* Linux/Windows(MinGW) build(testing)
+* Linux/Windows(MinGW/MSVC(without editor)) build(testing)
 * multi-threading renderer
 * png/dds texture image
 * jpeg/png/bmp/dds format of screenshot
@@ -24,9 +24,10 @@ GPLv3
 * OpenAL(soft) and EFX Reverb
 * no-lighting rendering and no-lighting material
 * translucent stencil shadow
-* DOOM3 mods: DOOM3(with full body awareness mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
+* DOOM3 mods: DOOM3(with full body awareness mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free; LibreCoop
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
+* Quake2(Yamagi Quake II) and mods: ctf; rogue; xatrix; zaero
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -144,7 +145,6 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 
 #### Linux
 ##### Define macro `__linux__`.
-> 1. Support ALSA.
 
 #### Windows(MinGW)
 ##### Define macro `_WIN32` and `WIN32`.

@@ -367,7 +367,7 @@ public class Q3EMain extends Activity
             preferences.edit().putString(Q3EPreference.pref_datapath, datadir).commit();
         }
 
-        String cmd = preferences.getString(Q3EPreference.pref_params, Q3EUtils.q3ei.libname);
+        String cmd = preferences.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EUtils.q3ei.libname);
         if(null == cmd)
             cmd = Q3EGlobals.GAME_EXECUABLE;
         if(preferences.getBoolean(Q3EPreference.pref_harm_find_dll, false))
