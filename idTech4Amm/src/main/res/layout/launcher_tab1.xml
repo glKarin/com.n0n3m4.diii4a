@@ -473,12 +473,6 @@
                     android:text="@string/using_efx_reverb" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/other_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
                 <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -491,6 +485,11 @@
                     android:layout_height="wrap_content"
                     android:text="@string/skip_intro" />
 
+            <LinearLayout
+                android:id="@+id/other_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
                 <CheckBox
                     android:id="@+id/auto_quick_load"
                     android:layout_width="wrap_content"

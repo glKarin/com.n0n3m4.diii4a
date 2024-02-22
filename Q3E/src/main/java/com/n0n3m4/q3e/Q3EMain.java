@@ -323,15 +323,15 @@ public class Q3EMain extends Activity
 
             Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
 
-            if(Q3EUtils.q3ei.isD3)
+            String extraCommand = "";
+            if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
+                extraCommand += " +disconnect";
+            if(Q3EUtils.q3ei.IsIdTech4())
             {
-                String extraCommand = "";
-                if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
-                    extraCommand += " +disconnect";
                 if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
                     extraCommand += " +loadGame QuickSave";
-                Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
             }
+            Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
         }
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Run " + Q3EUtils.q3ei.game_name);
 
@@ -348,7 +348,7 @@ public class Q3EMain extends Activity
         // DOOM 3: hardscorps mod template disable smooth joystick
         /*if(Q3EUtils.q3ei.joystick_smooth)
         {
-            if(!Q3EUtils.q3ei.isQ4 && !Q3EUtils.q3ei.isPrey)
+            if(!Q3EUtils.q3ei.isQ4 && !Q3EUtils.q3ei.isPrey && !Q3EUtils.q3ei.isQ2)
             {
                 String game = preferences.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
                 if("hardscorps".equals(game))

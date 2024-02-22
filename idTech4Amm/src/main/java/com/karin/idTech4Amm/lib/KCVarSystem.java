@@ -2,6 +2,7 @@ package com.karin.idTech4Amm.lib;
 
 import com.n0n3m4.q3e.Q3EUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -136,6 +137,8 @@ public final class KCVarSystem
                 return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("preybase"));
             else if(Q3EUtils.q3ei.isQ4)
                 return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("q4base"));
+            else if(Q3EUtils.q3ei.isQ2)
+                return new ArrayList<>();
             else
                 return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("base"));
         }
@@ -144,7 +147,12 @@ public final class KCVarSystem
             if(_cvars.containsKey(game))
                 return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get(game));
             else
-                return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"));
+            {
+                if(Q3EUtils.q3ei.IsIdTech4())
+                    return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"));
+                else
+                    return new ArrayList<>();
+            }
         }
     }
 }

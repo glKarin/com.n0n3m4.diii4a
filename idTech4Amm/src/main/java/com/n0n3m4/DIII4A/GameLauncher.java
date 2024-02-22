@@ -234,7 +234,7 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_auto_quick_load, isChecked)
 						.commit();
-				if (isChecked)
+				if (isChecked && (Q3EUtils.q3ei.IsIdTech4()))
 					SetParam_temp("loadGame", "QuickSave");
 				else
 					RemoveParam_temp("loadGame");
@@ -678,9 +678,6 @@ public class GameLauncher extends Activity
 
     public void updatehacktings()
     {
-		if(!m_commandTextWatcher.IsEnabled())
-			return;
-
     	LockCmdUpdate();
         //k
         V.usedxt.setChecked(getProp("r_useDXT", false));
@@ -737,7 +734,7 @@ public class GameLauncher extends Activity
 		SelectCheckbox(V.rg_harm_r_shadow, index);
 		if (!IsProp("r_useShadowMapping")) SetProp("r_useShadowMapping", "0");
 
-        str = GetProp("fs_game");
+        str = GetProp(Q3EUtils.q3ei.GetGameCommandParm());
         if (str != null)
         {
             if (!V.fs_game_user.isChecked())
@@ -749,7 +746,7 @@ public class GameLauncher extends Activity
 				}
 /*				else
 				{
-					RemoveProp("fs_game");
+					RemoveProp(Q3EUtils.q3ei.GetGameCommandParm());
 					RemoveProp("fs_game_base");
 				}*/
             }
@@ -796,15 +793,15 @@ public class GameLauncher extends Activity
         preference.edit().putString(Q3EPreference.pref_harm_game_lib, "").commit();
         if (on)
         {
-            SetProp("fs_game", game);
+            SetProp(Q3EUtils.q3ei.GetGameCommandParm(), game);
             //RemoveProp("fs_game_base");
         }
         else
         {
 			if (!prop.is_user && !game.isEmpty())
-				SetProp("fs_game", game);
+				SetProp(Q3EUtils.q3ei.GetGameCommandParm(), game);
 			else
-				RemoveProp("fs_game");
+				RemoveProp(Q3EUtils.q3ei.GetGameCommandParm());
             //RemoveProp("fs_game_base");
         }
         V.edt_fs_game.setText(game);
@@ -902,7 +899,7 @@ public class GameLauncher extends Activity
 			SetCommand_temp("disconnect", true);
         boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
         V.auto_quick_load.setChecked(autoQuickLoad);
-        if (autoQuickLoad)
+        if (autoQuickLoad || Q3EUtils.q3ei.IsIdTech4())
             SetParam_temp("loadGame", "QuickSave");
         boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         V.multithreading.setChecked(multithreading);
@@ -937,12 +934,15 @@ public class GameLauncher extends Activity
         UpdateUserGame(userMod);
         V.fs_game_user.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.rg_fs_game.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		V.rg_fs_q4game.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		V.rg_fs_preygame.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		V.rg_fs_q2game.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.edt_fs_game.addTextChangedListener(new TextWatcher()
         {
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
                 if (V.fs_game_user.isChecked())
-                    SetProp("fs_game", s);
+                    SetProp(Q3EUtils.q3ei.GetGameCommandParm(), s);
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after)
@@ -1208,7 +1208,7 @@ public class GameLauncher extends Activity
             m_editConfigFileFunc = new EditConfigFileFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE);
 
         Bundle bundle = new Bundle();
-        String game = GetProp("fs_game");
+        String game = GetProp(Q3EUtils.q3ei.GetGameCommandParm());
         if (game == null || game.isEmpty())
             game = Q3EUtils.q3ei.game_base;
         bundle.putString("game", game);
@@ -1525,9 +1525,6 @@ public class GameLauncher extends Activity
 
 	private void SetCmdText(String text)
     {
-		if(!m_commandTextWatcher.IsEnabled())
-			return;
-
 		if(null == text || text.isEmpty())
 			text = Q3EGlobals.GAME_EXECUABLE;
         EditText edit = V.edt_cmdline;
@@ -1953,6 +1950,7 @@ public class GameLauncher extends Activity
 
     private void ChangeGame(String... games)
     {
+		LockCmdUpdate();
 		SetupCommandTextWatcher(false);
         String newGame = games.length > 0 ? games[0] : null;
         if (null == newGame || newGame.isEmpty())
@@ -1992,6 +1990,7 @@ public class GameLauncher extends Activity
 		String cmd = preference.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGlobals.GAME_EXECUABLE);
 		V.edt_cmdline.setText(cmd);
 		SetupCommandTextWatcher(true);
+		UnlockCmdUpdate();
     }
 
 	private void SetupCommandTextWatcher(boolean b)
@@ -1999,7 +1998,7 @@ public class GameLauncher extends Activity
 		if(b)
 		{
 			V.edt_cmdline.addTextChangedListener(m_commandTextWatcher);
-			m_commandTextWatcher.Install(Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ4 || Q3EUtils.q3ei.isPrey);
+			m_commandTextWatcher.Install(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isQ2);
 		}
 		else
 		{
@@ -2214,7 +2213,7 @@ public class GameLauncher extends Activity
 	private void EditCVar()
 	{
 		Bundle bundle = new Bundle();
-		bundle.putString("game", GetProp("fs_game"));
+		bundle.putString("game", GetProp(Q3EUtils.q3ei.GetGameCommandParm()));
 		bundle.putString("command", Q3EUtils.q3ei.start_temporary_extra_command);
 		bundle.putString("baseCommand", GetTempBaseCommand());
 		CVarEditorFunc cVarEditorFunc = new CVarEditorFunc(this, new Runnable()
@@ -2237,7 +2236,7 @@ public class GameLauncher extends Activity
 		if (skipIntro)
 			tempCmd += " +disconnect";
 		boolean quickSave = preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
-		if (quickSave)
+		if (quickSave || Q3EUtils.q3ei.IsIdTech4())
 			tempCmd += " +loadGame QuickSave";
 		return tempCmd.trim();
 	}
@@ -2298,18 +2297,18 @@ public class GameLauncher extends Activity
 		if(prop.is_user)
 		{
 			if (!prop.fs_game.isEmpty())
-				SetProp("fs_game", prop.fs_game);
+				SetProp(Q3EUtils.q3ei.GetGameCommandParm(), prop.fs_game);
 			else
-				RemoveProp("fs_game");
+				RemoveProp(Q3EUtils.q3ei.GetGameCommandParm());
 			RemoveProp("fs_game_base");
 			RemoveProp("harm_fs_gameLibPath");
 		}
 		else
 		{
 			if(null == prop.fs_game || prop.fs_game.isEmpty() || !prop.IsValid())
-				RemoveProp("fs_game");
+				RemoveProp(Q3EUtils.q3ei.GetGameCommandParm());
 			else
-				SetProp("fs_game", prop.fs_game);
+				SetProp(Q3EUtils.q3ei.GetGameCommandParm(), prop.fs_game);
 			if(null == prop.fs_game_base || prop.fs_game_base.isEmpty() || !prop.IsValid())
 				RemoveProp("fs_game_base");
 			else

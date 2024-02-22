@@ -248,6 +248,23 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public boolean IsIdTech4()
+	{
+		return isD3 || isQ4 || isPrey;
+	}
+
+	public String GetGameCommandParm()
+	{
+		if(isPrey)
+			return "fs_game";
+		else if(isQ4)
+			return "fs_game";
+		else if(isQ2)
+			return "game";
+		else
+			return "fs_game";
+	}
+
     public void InitTextureTable()
     {
         texture_table = new String[Q3EGlobals.UI_SIZE];
