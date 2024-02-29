@@ -92,6 +92,8 @@ public class Q3EInterface
 			return Q3EGlobals.LIB_ENGINE_RAVEN;
 		else if(isQ2)
 			return Q3EGlobals.LIB_ENGINE2_ID;
+		else if(isRTCW)
+			return Q3EGlobals.LIB_ENGINE3_RTCW;
 		else
 			return Q3EGlobals.LIB_ENGINE_ID;
 	}
@@ -104,6 +106,8 @@ public class Q3EInterface
 			return Q3EGlobals.CONFIG_FILE_QUAKE4;
 		else if(isQ2)
 			return Q3EGlobals.CONFIG_FILE_QUAKE2;
+		else if(isRTCW)
+			return Q3EGlobals.CONFIG_FILE_RTCW;
 		else
 			return Q3EGlobals.CONFIG_FILE_DOOM3;
 	}
@@ -116,6 +120,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_NAME_QUAKE4;
 		else if(isQ2)
 			return Q3EGlobals.GAME_NAME_QUAKE2;
+		else if(isRTCW)
+			return Q3EGlobals.GAME_NAME_RTCW;
 		else
 			return Q3EGlobals.GAME_NAME_DOOM3;
 	}
@@ -128,6 +134,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_QUAKE4;
 		else if(isQ2)
 			return Q3EGlobals.GAME_QUAKE2;
+		else if(isRTCW)
+			return Q3EGlobals.GAME_RTCW;
 		else
 			return Q3EGlobals.GAME_DOOM3;
 	}
@@ -140,6 +148,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_BASE_QUAKE4;
 		else if(isQ2)
 			return Q3EGlobals.GAME_BASE_QUAKE2;
+		else if(isRTCW)
+			return Q3EGlobals.GAME_BASE_RTCW;
 		else
 			return Q3EGlobals.GAME_BASE_DOOM3;
 	}
@@ -152,6 +162,8 @@ public class Q3EInterface
 			return Q3EGlobals.Q4_LIBS;
 		else if(isQ2)
 			return Q3EGlobals.Q2_LIBS;
+		else if(isRTCW)
+			return Q3EGlobals.RTCW_LIBS;
 		else
 			return Q3EGlobals.LIBS;
 	}
@@ -169,6 +181,8 @@ public class Q3EInterface
 			Q3EKeyCodes.InitD3Keycodes();
 		else if(isQ2)
 			Q3EKeyCodes.InitQ3Keycodes();
+		else if(isRTCW)
+			Q3EKeyCodes.InitRTCWKeycodes();
 		else
 			Q3EKeyCodes.InitD3Keycodes();
 	}
@@ -199,6 +213,8 @@ public class Q3EInterface
 			SetupQuake4();
 		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
 			SetupQuake2();
+		else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+			SetupRTCW();
 		else
 			SetupDOOM3();
 	}
@@ -218,6 +234,7 @@ public class Q3EInterface
 		isPrey = false;
 		isQ4 = false;
 		isQ2 = false;
+		isRTCW = false;
 		SetupGameConfig();
 	}
 
@@ -227,6 +244,7 @@ public class Q3EInterface
 		isQ4 = false;
 		isPrey = true;
 		isQ2 = false;
+		isRTCW = false;
 		SetupGameConfig();
 	}
 
@@ -236,6 +254,7 @@ public class Q3EInterface
 		isPrey = false;
 		isQ4 = true;
 		isQ2 = false;
+		isRTCW = false;
 		SetupGameConfig();
     }
 
@@ -245,12 +264,38 @@ public class Q3EInterface
 		isPrey = false;
 		isQ4 = false;
 		isQ2 = true;
+		isRTCW = false;
+		SetupGameConfig();
+	}
+
+	public void SetupRTCW()
+	{
+		isD3 = false;
+		isPrey = false;
+		isQ4 = false;
+		isQ2 = false;
+		isRTCW = true;
 		SetupGameConfig();
 	}
 
 	public boolean IsIdTech4()
 	{
 		return isD3 || isQ4 || isPrey;
+	}
+
+	public boolean IsIdTech3()
+	{
+		return isQ3 || isRTCW;
+	}
+
+	public boolean IsIdTech2()
+	{
+		return isQ2;
+	}
+
+	public boolean IsIdTech1()
+	{
+		return isQ1;
 	}
 
 	public String GetGameCommandParm()
@@ -261,6 +306,8 @@ public class Q3EInterface
 			return "fs_game";
 		else if(isQ2)
 			return "game";
+		else if(isRTCW)
+			return "fs_game";
 		else
 			return "fs_game";
 	}
@@ -460,6 +507,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_prey_fs_game;
 		else if(Q3EUtils.q3ei.isQ2)
 			return Q3EPreference.pref_harm_q2_fs_game;
+		else if(Q3EUtils.q3ei.isRTCW)
+			return Q3EPreference.pref_harm_rtqw_fs_game;
 		else
 			return Q3EPreference.pref_harm_fs_game;
 	}
@@ -472,6 +521,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_prey_user_mod;
 		else if(Q3EUtils.q3ei.isQ2)
 			return Q3EPreference.pref_harm_q2_user_mod;
+		else if(Q3EUtils.q3ei.isRTCW)
+			return Q3EPreference.pref_harm_rtqw_user_mod;
 		else
 			return Q3EPreference.pref_harm_user_mod;
 	}
@@ -484,6 +535,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_prey_game_lib;
 		else if(Q3EUtils.q3ei.isQ2)
 			return Q3EPreference.pref_harm_q2_game_lib;
+		else if(Q3EUtils.q3ei.isRTCW)
+			return Q3EPreference.pref_harm_rtqw_game_lib;
 		else
 			return Q3EPreference.pref_harm_game_lib;
 	}
@@ -496,6 +549,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_params;
 		else if(Q3EUtils.q3ei.isQ2)
 			return Q3EPreference.pref_params_q2;
+		else if(Q3EUtils.q3ei.isRTCW)
+			return Q3EPreference.pref_params_rtqw;
 		else
 			return Q3EPreference.pref_params;
 	}

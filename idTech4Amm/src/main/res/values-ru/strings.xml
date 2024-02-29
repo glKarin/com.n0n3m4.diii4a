@@ -85,6 +85,7 @@
     <string name="doom_3">DOOM 3</string>
     <string name="quake_4">Quake 4</string>
     <string name="quake_2">Quake 2</string>
+    <string name="rtcw">RTCW</string>
     <string name="prey_2006">Prey(2006)</string>
     <string name="settings">Настройки</string>
     <string name="changes">Последние изменения</string>
@@ -279,9 +280,10 @@
     <string name="_mod">Мод</string>
     <string name="librecoop">LibreCoop</string>
     <string name="quake_2_base">Quake II</string>
-    <string name="quake_2_ctf">Quake II(ctf)</string>
-    <string name="quake_2_rogue">Quake II(rogue)</string>
-    <string name="quake_2_xatrix">Quake II(xatrix)</string>
-    <string name="quake_2_zaero">Quake II(zaero)</string>
+    <string name="quake_2_ctf">Quake II:ctf</string>
+    <string name="quake_2_rogue">Quake II:rogue</string>
+    <string name="quake_2_xatrix">Quake II:xatrix</string>
+    <string name="quake_2_zaero">Quake II:zaero</string>
+    <string name="rtcw_base">Return to Castle Wolfenstein</string>
 
 </resources>

@@ -56,3 +56,5 @@ add_subdirectory (doom3/neo)
 add_subdirectory (deplibs)
 
 add_subdirectory (quake2)
+
+add_subdirectory (rtcw)

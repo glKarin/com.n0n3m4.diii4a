@@ -62,6 +62,7 @@ public final class GameManager
         GameProps.put(Q3EGlobals.GAME_QUAKE4, new ArrayList<>());
         GameProps.put(Q3EGlobals.GAME_PREY, new ArrayList<>());
         GameProps.put(Q3EGlobals.GAME_QUAKE2, new ArrayList<>());
+        GameProps.put(Q3EGlobals.GAME_RTCW, new ArrayList<>());
         Game[] values = Game.values();
 
         for (Game value : values)
@@ -89,6 +90,10 @@ public final class GameManager
         else if (Q3EUtils.q3ei.isQ2)
         {
             list = GameProps.get(Q3EGlobals.GAME_QUAKE2);
+        }
+        else if (Q3EUtils.q3ei.isRTCW)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_RTCW);
         }
         else
         {

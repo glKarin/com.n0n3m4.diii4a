@@ -102,8 +102,8 @@ void Sys_LeaveCriticalSection(int index)
 
 #define MAX_TRIGGER_EVENTS 2
 enum {
-    TRIGGER_EVENT_WINDOW_CREATED, // Android SurfaceView thread -> doom3/renderer thread: notify native window is set
-    TRIGGER_EVENT_WINDOW_DESTROYED, // doom3 thread/render thread -> Android SurfaceView thread: notify released OpenGL context
+    TRIGGER_EVENT_WINDOW_CREATED, // Android SurfaceView thread -> game/renderer thread: notify native window is set
+    TRIGGER_EVENT_WINDOW_DESTROYED, // game thread/render thread -> Android SurfaceView thread: notify released OpenGL context
 };
 
 static pthread_cond_t	event_cond[ MAX_TRIGGER_EVENTS ];
@@ -153,6 +153,31 @@ void Sys_TriggerEvent(int index)
     Sys_LeaveCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
 }
 
+/*
+==================
+Posix_InitPThreads
+==================
+*/
+void Sys_InitThreads()
+{
+    int i;
+    pthread_mutexattr_t attr;
+
+    // init critical sections
+    for (i = 0; i < MAX_LOCAL_CRITICAL_SECTIONS; i++) {
+        pthread_mutexattr_init(&attr);
+        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
+        pthread_mutex_init(&global_lock[i], &attr);
+        pthread_mutexattr_destroy(&attr);
+    }
+
+    // init event sleep/triggers
+    for (i = 0; i < MAX_TRIGGER_EVENTS; i++) {
+        pthread_cond_init(&event_cond[ i ], NULL);
+        signaled[i] = false;
+        waiting[i] = false;
+    }
+}
 
 void Android_GrabMouseCursor(qboolean grabIt)
 {
@@ -403,7 +428,7 @@ void Q3E_exit(void)
     if(window)
         window = NULL;
     GLimp_AndroidQuit();
-    Com_Printf("[Harmattan]: doom3 exit.\n");
+    Com_Printf("[Harmattan]: quake2 exit.\n");
 }
 
 // Setup OpenGL context variables in Android SurfaceView's thread
@@ -413,14 +438,14 @@ void Q3E_SetGLContext(ANativeWindow *w)
     if(IsInitialized)
     {
         Com_Printf("[Harmattan]: ANativeWindow changed: %p\n", w);
-        if(!w) // set window is null, and wait doom3 main thread deactive OpenGL render context.
+        if(!w) // set window is null, and wait game main thread deactive OpenGL render context.
         {
             window = NULL;
             window_changed = true;
             while(window_changed)
                 Sys_WaitForEvent(TRIGGER_EVENT_WINDOW_DESTROYED);
         }
-        else // set new window, notify doom3 main thread active OpenGL render context
+        else // set new window, notify game main thread active OpenGL render context
         {
             window = w;
             window_changed = true;

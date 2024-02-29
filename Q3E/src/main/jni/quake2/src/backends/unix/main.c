@@ -210,7 +210,7 @@ void ShutdownGame(void)
 	}
 }
 
-static void doom3_exit(void)
+static void game_exit(void)
 {
 	Com_Printf("[Harmattan]: quake2 exit.\n");
 
@@ -227,9 +227,11 @@ main(int argc, char **argv)
 
 	Q3E_PrintInitialContext(argc, (const char **)argv);
 
+	Sys_InitThreads();
+
 	Q3E_StartGameMainThread();
 
-	atexit(doom3_exit);
+	atexit(game_exit);
 
 	IsInitialized = true;
 

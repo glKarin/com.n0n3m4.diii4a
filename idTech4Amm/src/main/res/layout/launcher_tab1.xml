@@ -146,6 +146,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"></RadioGroup>
 
+            <RadioGroup
+                android:id="@+id/rg_fs_rtcwgame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></RadioGroup>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -484,17 +489,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/skip_intro" />
+                <CheckBox
+                    android:id="@+id/auto_quick_load"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/load_quicksave_when_start_game" />
 
             <LinearLayout
                 android:id="@+id/other_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-                <CheckBox
-                    android:id="@+id/auto_quick_load"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/load_quicksave_when_start_game" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -517,8 +522,9 @@
                         android:text="@string/gamelib"
                         android:textAllCaps="false" />
                 </LinearLayout>
+            </LinearLayout>
 
-                <LinearLayout
+            <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -540,7 +546,6 @@
                         android:textAllCaps="false" />
 
                 </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
 
     </RelativeLayout>

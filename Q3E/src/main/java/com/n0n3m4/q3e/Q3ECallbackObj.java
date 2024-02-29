@@ -115,7 +115,7 @@ public class Q3ECallbackObj
         return mAudioTrack.writeAudio(audioData, offset, len);
     }
 
-    public int writeAudio_direct(byte[] audioData, int offset, int len)
+    public int writeAudio_array(byte[] audioData, int offset, int len)
     {
         if (null == mAudioTrack || !reqThreadrunning)
             return 0;

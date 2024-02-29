@@ -26,6 +26,10 @@
                 android:id="@+id/main_menu_game_quake2"
                 android:title="@string/quake_2"
                 android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_game_rtcw"
+                android:title="@string/rtcw"
+                android:showAsAction="never"/>
         </menu>
     </item>
     

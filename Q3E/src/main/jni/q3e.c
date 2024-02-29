@@ -38,6 +38,8 @@
 
 #define JNI_Version JNI_VERSION_1_4
 
+//#define AUDIOTRACK_BYTEBUFFER 1
+
 // call DOOM3
 static void (*setResolution)(int width, int height);
 static void (*Q3E_SetInitialContext)(const void *context);
@@ -64,7 +66,6 @@ static char * get_clipboard_text(void);
 // data
 static char *game_data_dir = NULL;
 static char *arg_str = NULL;
-// static char *audio_track_buffer = NULL;
 
 static void *libdl;
 static ANativeWindow *window = NULL;
@@ -73,6 +74,7 @@ static ANativeWindow *window = NULL;
 static JavaVM *jVM;
 static jobject audioBuffer=0;
 static jobject q3eCallbackObj=0;
+static const jbyte *audio_track_buffer = NULL;
 
 // Java method
 static jmethodID android_PullEvent_method;
@@ -83,7 +85,7 @@ static jmethodID android_GetClipboardText_method;
 static jmethodID android_initAudio;
 static jmethodID android_writeAudio;
 static jmethodID android_setState;
-static jmethodID android_writeAudio_direct;
+static jmethodID android_writeAudio_array;
 
 static void Android_AttachThread(void)
 {
@@ -151,38 +153,26 @@ static void loadLib(const char* libpath)
 	onAnalog = d3interface.analogEvent;
 	onMotionEvent = d3interface.motionEvent;
 
-#if 0
-    qmain = dlsym(libdl, "main");
-    onFrame = dlsym(libdl, "Q3E_DrawFrame");
-    onKeyEvent = dlsym(libdl, "Q3E_KeyEvent");
-    onAnalog = dlsym(libdl, "Q3E_Analog");
-    onMotionEvent = dlsym(libdl, "Q3E_MotionEvent");
-    setCallbacks = dlsym(libdl, "Q3E_SetCallbacks");
-    setResolution = dlsym(libdl, "Q3E_SetResolution");
-	vidRestart = dlsym(libdl, "Q3E_OGLRestart");
-
-    on_pause = dlsym(libdl, "Q3E_OnPause");
-    on_resume = dlsym(libdl, "Q3E_OnResume");
-	Q3E_SetInitialContext = dlsym(libdl, "Q3E_SetInitialContext");
-    qexit = dlsym(libdl, "Q3E_exit");
-	set_gl_context = dlsym(libdl, "Q3E_SetGLContext");
-#endif
-
 	print_interface();
 }
 
 void initAudio(void *buffer, int size)
 {
-    JNIEnv *env;
-    jobject tmp;
-    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-    {
-        (*jVM)->AttachCurrentThread(jVM,&env, NULL);
-    }
+	JNIEnv *env;
+	jobject tmp;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Q3E AudioTrack init");
+#ifdef AUDIOTRACK_BYTEBUFFER
     tmp = (*env)->NewDirectByteBuffer(env, buffer, size);
-    audioBuffer = (jobject)(*env)->NewGlobalRef(env, tmp);
-    return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
+#else
+	audio_track_buffer = buffer;
+	tmp = (*env)->NewByteArray(env, size);
+#endif
+	audioBuffer = (jobject)(*env)->NewGlobalRef(env, tmp);
+	return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
 }
 
 //k NEW: 
@@ -191,13 +181,33 @@ void initAudio(void *buffer, int size)
 // If offset < 0 and length == 0, only flush.
 int writeAudio(int offset, int length)
 {
+#ifdef AUDIOTRACK_BYTEBUFFER
 	if (audioBuffer==0) return 0;
-    JNIEnv *env;
-    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-    {
-    	(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-    }
+#else
+	if (!audio_track_buffer || !audioBuffer)
+		return 0;
+#endif
+	JNIEnv *env;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+#ifdef AUDIOTRACK_BYTEBUFFER
     return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio, audioBuffer, offset, length);
+#else
+	if(offset >= 0 && length != 0)
+	{
+		int len = abs(length);
+#if 0
+		jbyte *buf_mem = (*env)->GetByteArrayElements(env, audioBuffer, NULL);
+		memcpy(buf_mem, audio_track_buffer, len);
+		(*env)->ReleaseByteArrayElements(env, audioBuffer, buf_mem, 0);
+#else
+		(*env)->SetByteArrayRegion(env, audioBuffer, 0, len, audio_track_buffer);
+#endif
+	}
+	return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio_array, audioBuffer, offset, length);
+#endif
 }
 
 void closeAudio()
@@ -224,46 +234,6 @@ void setState(int state)
     }
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_setState, state);
 }
-
-#if 0
-void initAudio_direct(void *buffer, int size)
-{
-	JNIEnv *env;
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
-	audio_track_buffer = buffer;
-	return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
-}
-
-int writeAudio_direct(int offset, int length)
-{
-	if (!audio_track_buffer)
-		return 0;
-	JNIEnv *env;
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
-	jbyteArray buf = NULL;
-	if(offset >= 0)
-	{
-		int len = abs(length);
-		if(len > 0)
-		{
-			buf = (*env)->NewByteArray(env, len);
-			jbyte *buf_mem = (*env)->GetByteArrayElements(env, buf, NULL);
-			memcpy(buf_mem, audio_track_buffer + offset, len);
-			(*env)->ReleaseByteArrayElements(env, buf, buf_mem, JNI_ABORT);
-		}
-	}
-	jobject jbuf = (*env)->NewWeakGlobalRef(env, buf); // weak ref for auto release
-	(*env)->DeleteLocalRef(env, buf);
-	int r = (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio_direct, jbuf, offset, length);
-	return r;
-}
-#endif
 
 static void q3e_exit(void)
 {
@@ -335,7 +305,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
     android_initAudio = (*env)->GetMethodID(env,q3eCallbackClass,"init","(I)V");
     android_writeAudio = (*env)->GetMethodID(env,q3eCallbackClass,"writeAudio","(Ljava/nio/ByteBuffer;II)I");
 	android_setState = (*env)->GetMethodID(env,q3eCallbackClass,"setState","(I)V");
-	android_writeAudio_direct = (*env)->GetMethodID(env,q3eCallbackClass, "writeAudio_direct", "([BII)I");
+	android_writeAudio_array = (*env)->GetMethodID(env,q3eCallbackClass, "writeAudio_array", "([BII)I");
 	
 	//k
 	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(Z)V");
@@ -418,8 +388,8 @@ static void setup_Q3E_callback(void)
 	Q3E_Callback_t callback;
 	memset(&callback, 0, sizeof(callback));
 
-	callback.AudioTrack_init = &initAudio; // initAudio_direct
-	callback.AudioTrack_write = &writeAudio; // writeAudio_direct
+	callback.AudioTrack_init = &initAudio;
+	callback.AudioTrack_write = &writeAudio;
 	callback.AudioTrack_shutdown = &closeAudio;
 
 	callback.Input_grabMouse = &grab_mouse;

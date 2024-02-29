@@ -28,6 +28,7 @@ GPLv3
 * 雷神之锤4(支持Bot mod; 全身mod)和Raven idTech4引擎
 * 掠食(2006)(支持全身mod)和HumanHead idTech4引擎
 * 雷神之锤2(Yamagi Quake II) 和mods: ctf; rogue; xatrix; zaero
+* 重返德军总部(iortcw)
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"

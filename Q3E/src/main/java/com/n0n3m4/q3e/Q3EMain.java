@@ -326,7 +326,7 @@ public class Q3EMain extends Activity
             String extraCommand = "";
             if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
                 extraCommand += " +disconnect";
-            if(Q3EUtils.q3ei.IsIdTech4())
+            if(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3())
             {
                 if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
                     extraCommand += " +loadGame QuickSave";
@@ -373,7 +373,7 @@ public class Q3EMain extends Activity
         if(preferences.getBoolean(Q3EPreference.pref_harm_find_dll, false))
         {
             KidTech4Command command = new KidTech4Command(cmd);
-            String fs_game = command.Prop("fs_game");
+            String fs_game = command.Prop(Q3EUtils.q3ei.GetGameCommandParm());
             if(null == fs_game || fs_game.isEmpty())
             {
                 switch (Q3EUtils.q3ei.game)
@@ -386,6 +386,9 @@ public class Q3EMain extends Activity
                         break;
                     case Q3EGlobals.GAME_QUAKE2:
                         fs_game = "baseq2";
+                        break;
+                    case Q3EGlobals.GAME_RTCW:
+                        fs_game = "main";
                         break;
                     case Q3EGlobals.GAME_DOOM3:
                     default:

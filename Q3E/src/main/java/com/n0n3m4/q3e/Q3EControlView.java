@@ -30,6 +30,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.opengl.GLES11;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
@@ -150,11 +151,11 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         super(context);
 
-        setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, Q3EGL.usegles20));
+        setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, /*Q3EGL.usegles20*/false));
         getHolder().setFormat(PixelFormat.RGBA_8888);
 
-        if (Q3EGL.usegles20)
-            setEGLContextClientVersion(2);
+/*        if (Q3EGL.usegles20)
+            setEGLContextClientVersion(2);*/
 
         setRenderer(this);
 
@@ -183,7 +184,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         if ((last_joystick_x != 0) || (last_joystick_y != 0))
             Q3EUtils.q3ei.callbackObj.sendMotionEvent(delta * last_joystick_x, delta * last_joystick_y);
 
-        if (usesCSAA)
+/*        if (usesCSAA)
         {
             if (!Q3EGL.usegles20)
                 gl.glClear(0x8000); //Yeah, I know, it doesn't work in 1.1
@@ -191,7 +192,11 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 GLES20.glClear(0x8000);
         }
         else
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);*/
+        if (usesCSAA)
+            gl.glClear(0x8000); //Yeah, I know, it doesn't work in 1.1
+        else
+            gl.glClear(GLES11.GL_COLOR_BUFFER_BIT);
 
         //k: not render in game loading
         if (Q3EUtils.q3ei.callbackObj.inLoading)
@@ -200,7 +205,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         //Onscreen buttons:
         //save state
 
-        if (Q3EGL.usegles20)
+/*        if (Q3EGL.usegles20)
         {
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             //XXXXXXXXXXXXXXXXXXXXXXXX  GL 20  XXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -209,7 +214,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 p.Paint((GL11) gl);
         }
         else
-        {
+        {*/
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             //XXXXXXXXXXXXXXXXXXXXXXXX  GL 11  XXXXXXXXXXXXXXXXXXXXXXXXXX
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -219,7 +224,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);*/
             for (Paintable p : paint_elements)
                 p.Paint((GL11) gl);
-        }
+/*        }*/
 
     }
 
@@ -252,7 +257,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 paint_elements.add((Paintable) o);
             }
 
-            if (Q3EUtils.q3ei.isRTCW)
+/*            if (Q3EUtils.q3ei.isRTCW)
             {
                 actbutton = (Button) touch_elements.get(Q3EUtils.q3ei.RTCW4A_UI_ACTION);
                 kickbutton = (Button) touch_elements.get(Q3EUtils.q3ei.RTCW4A_UI_KICK);
@@ -260,7 +265,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             {
                 actbutton = null;
                 kickbutton = null;
-            }
+            }*/
 
             if (hideonscr)
             {
@@ -285,12 +290,12 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             if(null != m_mouseDevice)
                 m_mouseDevice.Start();
 
-            if(!Q3EGL.usegles20)
-            {
+/*            if(!Q3EGL.usegles20)
+            {*/
                 gl.glMatrixMode(gl.GL_PROJECTION);
                 gl.glLoadIdentity();
                 gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);
-            }
+/*            }*/
 
             mInit = true;
             post(new Runnable()
@@ -308,7 +313,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public void onSurfaceCreated(GL10 gl, EGLConfig config)
     {
 
-        if (Q3EGL.usegles20)
+/*        if (Q3EGL.usegles20)
         {
             Q3EGL.initGL20();
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -320,7 +325,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         }
         else
-        {
+        {*/
             gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             gl.glDisable(gl.GL_CULL_FACE);
             gl.glDisable(gl.GL_DEPTH_TEST);
@@ -331,7 +336,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             ((GL11) gl).glTexEnvi(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
             gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
             gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY);
-        }
+/*        }*/
 
         if (mInit)
         {

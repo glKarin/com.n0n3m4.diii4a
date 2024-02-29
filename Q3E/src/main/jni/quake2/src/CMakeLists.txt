@@ -8,12 +8,12 @@ OPTION(WITH_OPENAL "Enables the optional OpenAL sound system." ON)
 OPTION(WITH_ZIP "Enables opening of ZIP files (also known as .pk3 paks)." ON)
 OPTION(WITH_RETEXTURING "Enables retexturing support. Adds a dependency to libjpeg." ON)
 
-set(client_libs android)
-set(opengl_libs EGL GLESv1_CM android)
+set(q2client_libs android)
+set(q2opengl_libs EGL GLESv1_CM android)
 if(WITH_ZIP)
     message(STATUS "quake2 libz")
     add_definitions(-DZIP -DNOUNCRYPT)
-    set(client_libs ${client_libs} z)
+    set(q2client_libs ${q2client_libs} z)
 endif()
 if(WITH_OPENAL)
     message(STATUS "quake2 OpenAL")
@@ -23,13 +23,13 @@ endif()
 if(WITH_OGG)
     message(STATUS "quake2 ogg/vorbis")
     add_definitions(-DOGG)
-    set(client_libs ${client_libs} vorbisfile vorbis ogg)
+    set(q2client_libs ${q2client_libs} vorbisfile vorbis ogg)
 endif()
 if(WITH_RETEXTURING)
     message(STATUS "quake2 jpeg")
     add_definitions(-DRETEXTURE)
     include_directories("../../deplibs/libjpeg/libjpeg")
-    set(opengl_libs ${opengl_libs} jpeg)
+    set(q2opengl_libs ${q2opengl_libs} jpeg)
 endif()
 #message(FATAL_ERROR "STOP")
 
@@ -67,7 +67,7 @@ endif()
 set(ARCH "${cpu}")
 add_definitions(-DYQ2ARCH="${ARCH}")
 
-set(game_src
+set(q2game_src
         common/shared/flash.c
         common/shared/rand.c
         common/shared/shared.c
@@ -118,7 +118,7 @@ set(game_src
         game/savegame/savegame.c
         )
 
-set(client_src
+set(q2client_src
         backends/generic/qal.c
         backends/generic/vid.c
         backends/sdl/cd.c
@@ -182,24 +182,24 @@ set(client_src
         )
 
 if(WIN32)
-    set(win_client_src
+    set(q2win_client_src
             backends/windows/shared/mem.c
             backends/windows/network.c
             backends/windows/system.c
             )
-    list(APPEND client_src ${win_client_src})
+    list(APPEND q2client_src ${q2win_client_src})
 else()
-    set(unix_client_src
+    set(q2unix_client_src
             backends/unix/main.c
             backends/unix/network.c
             backends/unix/signalhandler.c
             backends/unix/system.c
             backends/unix/shared/hunk.c
             )
-    list(APPEND client_src ${unix_client_src})
+    list(APPEND q2client_src ${q2unix_client_src})
 endif()
 
-set(server_src
+set(q2server_src
         common/argproc.c
         common/clientserver.c
         common/cmdparser.c
@@ -232,24 +232,24 @@ set(server_src
         )
 
 if(WIN32)
-    set(win_server_src
+    set(q2win_server_src
             backends/windows/shared/mem.c
             backends/windows/network.c
             backends/windows/system.c
             )
-    list(APPEND server_src ${win_server_src})
+    list(APPEND q2server_src ${q2win_server_src})
 else()
-    set(unix_server_src
+    set(q2unix_server_src
             backends/unix/main.c
             backends/unix/network.c
             backends/unix/signalhandler.c
             backends/unix/system.c
             backends/unix/shared/hunk.c
             )
-    list(APPEND server_src ${unix_server_src})
+    list(APPEND q2server_src ${q2unix_server_src})
 endif()
 
-set(opengl_src
+set(q2opengl_src
         backends/generic/qgl.c
         backends/sdl/input.c
         backends/sdl/refresh.c
@@ -274,34 +274,34 @@ set(opengl_src
         )
 
 if(WIN32)
-    set(win_opengl_src
+    set(q2win_opengl_src
             backends/windows/shared/mem.c
             )
-    list(APPEND opengl_src ${win_opengl_src})
+    list(APPEND q2opengl_src ${q2win_opengl_src})
 else()
-    set(unix_opengl_src
+    set(q2unix_opengl_src
             backends/unix/shared/hunk.c
             )
-    list(APPEND opengl_src ${unix_opengl_src})
+    list(APPEND q2opengl_src ${q2unix_opengl_src})
 endif()
 
 set(QUAKE2LIBRARY idtech2)
 add_library(${QUAKE2LIBRARY} SHARED
-        ${client_src}
+        ${q2client_src}
         )
 target_link_libraries(${QUAKE2LIBRARY}
-        ${client_libs}
+        ${q2client_libs}
         )
 
 #add_library(idtech2_ded SHARED ${server_src})
 
 add_library(ref_gl SHARED
-        ${opengl_src}
+        ${q2opengl_src}
         )
 target_link_libraries(ref_gl
-        ${opengl_libs}
+        ${q2opengl_libs}
         )
 
 add_library(q2game SHARED
-        ${game_src}
+        ${q2game_src}
         )

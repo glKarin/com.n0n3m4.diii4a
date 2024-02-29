@@ -2,7 +2,7 @@
 #### DOOM III/Quake 4/Prey(2006) for Android/Linux, 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版. Original named DIII4A++, based on com.n0n3m4.diii4a
 **Latest version:**
 1.1.0harmattan38(natasha)  
-**最新更新日期:**
+**Latest update:**
 2024-02-05  
 **Arch:**
 arm64 armv7-a  
@@ -28,6 +28,7 @@ GPLv3
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
 * Quake2(Yamagi Quake II) and mods: ctf; rogue; xatrix; zaero
+* Return to Castle Wolfenstein(iortcw)
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"

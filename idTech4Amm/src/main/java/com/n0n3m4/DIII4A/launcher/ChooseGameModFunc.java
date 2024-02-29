@@ -73,28 +73,35 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             String name = "";
             if (Q3EUtils.q3ei.isQ4)
             {
-                if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name) || Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name))
+                if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name) || Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name) || Q3EGlobals.GAME_BASE_RTCW.equals(fileModel.name))
                     continue;
                 if(Q3EGlobals.GAME_BASE_QUAKE4.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_QUAKE4;
             }
             else if(Q3EUtils.q3ei.isPrey)
             {
-                if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE4.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name))
+                if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE4.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name) || Q3EGlobals.GAME_BASE_RTCW.equals(fileModel.name))
                     continue;
                 if(Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_PREY;
             }
             else if(Q3EUtils.q3ei.isQ2)
             {
-                if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE4.equals(fileModel.name) || Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name))
+                if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE4.equals(fileModel.name) || Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name) || Q3EGlobals.GAME_BASE_RTCW.equals(fileModel.name))
                     continue;
                 if(Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_QUAKE2;
             }
+            else if(Q3EUtils.q3ei.isRTCW)
+            {
+                if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE4.equals(fileModel.name) || Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name))
+                    continue;
+                if(Q3EGlobals.GAME_BASE_RTCW.equals(fileModel.name))
+                    name = Q3EGlobals.GAME_NAME_RTCW;
+            }
             else
             {
-                if(Q3EGlobals.GAME_BASE_QUAKE4.equals(fileModel.name) || Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name))
+                if(Q3EGlobals.GAME_BASE_QUAKE4.equals(fileModel.name) || Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name) || Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name) || Q3EGlobals.GAME_BASE_RTCW.equals(fileModel.name))
                     continue;
                 if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_DOOM3;
@@ -115,6 +122,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_QUAKE2:
                         if(!Q3EUtils.q3ei.isQ2)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_RTCW:
+                        if(!Q3EUtils.q3ei.isRTCW)
                             continue;
                         break;
                     case Q3EGlobals.GAME_DOOM3:
@@ -160,9 +171,9 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             @Override
             public int compare(String a, String b)
             {
-                if(Q3EGlobals.GAME_BASE_DOOM3.equals(a) || Q3EGlobals.GAME_BASE_QUAKE4.equals(a) || Q3EGlobals.GAME_BASE_PREY.equals(a) || Q3EGlobals.GAME_BASE_QUAKE2.equals(a))
+                if(Q3EGlobals.GAME_BASE_DOOM3.equals(a) || Q3EGlobals.GAME_BASE_QUAKE4.equals(a) || Q3EGlobals.GAME_BASE_PREY.equals(a) || Q3EGlobals.GAME_BASE_QUAKE2.equals(a) || Q3EGlobals.GAME_BASE_RTCW.equals(a))
                     return -1;
-                if(Q3EGlobals.GAME_BASE_DOOM3.equals(b) || Q3EGlobals.GAME_BASE_QUAKE4.equals(b) || Q3EGlobals.GAME_BASE_PREY.equals(b) || Q3EGlobals.GAME_BASE_QUAKE2.equals(b))
+                if(Q3EGlobals.GAME_BASE_DOOM3.equals(b) || Q3EGlobals.GAME_BASE_QUAKE4.equals(b) || Q3EGlobals.GAME_BASE_PREY.equals(b) || Q3EGlobals.GAME_BASE_QUAKE2.equals(b) || Q3EGlobals.GAME_BASE_RTCW.equals(b))
                     return 1;
                 return a.compareTo(b);
             }

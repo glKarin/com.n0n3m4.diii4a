@@ -234,7 +234,7 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_auto_quick_load, isChecked)
 						.commit();
-				if (isChecked && (Q3EUtils.q3ei.IsIdTech4()))
+				if (isChecked && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
 					SetParam_temp("loadGame", "QuickSave");
 				else
 					RemoveParam_temp("loadGame");
@@ -356,7 +356,7 @@ public class GameLauncher extends Activity
 						.putString(Q3EPreference.pref_harm_r_lightModel, value)
 						.commit();
 			}
-			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game)
+			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_rtcwgame)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
 				SetGameDLL((String)checked.getTag());
@@ -809,6 +809,7 @@ public class GameLauncher extends Activity
         V.rg_fs_q4game.setEnabled(!on);
         V.rg_fs_preygame.setEnabled(!on);
 		V.rg_fs_q2game.setEnabled(!on);
+		V.rg_fs_rtcwgame.setEnabled(!on);
         V.fs_game_user.setText(on ? R.string.mod_ : R.string.user_mod);
         //V.launcher_tab1_game_lib_button.setEnabled(on);
         V.edt_fs_game.setEnabled(on);
@@ -899,7 +900,7 @@ public class GameLauncher extends Activity
 			SetCommand_temp("disconnect", true);
         boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
         V.auto_quick_load.setChecked(autoQuickLoad);
-        if (autoQuickLoad || Q3EUtils.q3ei.IsIdTech4())
+        if (autoQuickLoad && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
             SetParam_temp("loadGame", "QuickSave");
         boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         V.multithreading.setChecked(multithreading);
@@ -937,6 +938,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_q4game.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_preygame.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_q2game.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		V.rg_fs_rtcwgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.edt_fs_game.addTextChangedListener(new TextWatcher()
         {
             public void onTextChanged(CharSequence s, int start, int before, int count)
@@ -1346,6 +1348,11 @@ public class GameLauncher extends Activity
 		else if (itemId == R.id.main_menu_game_quake2)
 		{
 			ChangeGame(Q3EGlobals.GAME_QUAKE2);
+			return true;
+		}
+		else if (itemId == R.id.main_menu_game_rtcw)
+		{
+			ChangeGame(Q3EGlobals.GAME_RTCW);
 			return true;
 		}
 		else if (itemId == android.R.id.home)
@@ -1897,6 +1904,7 @@ public class GameLauncher extends Activity
         boolean q4Visible = false;
         boolean preyVisible = false;
 		boolean q2Visible = false;
+		boolean rtcwVisible = false;
 		boolean rendererVisible = true;
 		boolean soundVisible = true;
 		boolean otherVisible = true;
@@ -1923,6 +1931,16 @@ public class GameLauncher extends Activity
 			otherVisible = false;
 			openglVisible = false;
 		}
+		else if (Q3EUtils.q3ei.isRTCW)
+		{
+			colorId = R.color.theme_rtcw_main_color;
+			iconId = R.drawable.rtcw_icon;
+			rtcwVisible = true;
+			rendererVisible = false;
+			soundVisible = false;
+			otherVisible = false;
+			openglVisible = false;
+		}
         else
         {
             colorId = R.color.theme_doom3_main_color;
@@ -1941,11 +1959,13 @@ public class GameLauncher extends Activity
         V.rg_fs_q4game.setVisibility(q4Visible ? View.VISIBLE : View.GONE);
         V.rg_fs_preygame.setVisibility(preyVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_q2game.setVisibility(q2Visible ? View.VISIBLE : View.GONE);
+		V.rg_fs_rtcwgame.setVisibility(rtcwVisible ? View.VISIBLE : View.GONE);
 
 		V.renderer_section.setVisibility(rendererVisible ? View.VISIBLE : View.GONE);
 		V.sound_section.setVisibility(soundVisible ? View.VISIBLE : View.GONE);
 		V.other_section.setVisibility(otherVisible ? View.VISIBLE : View.GONE);
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
+		V.auto_quick_load.setVisibility(q2Visible ? View.GONE : View.VISIBLE);
     }
 
     private void ChangeGame(String... games)
@@ -1960,6 +1980,7 @@ public class GameLauncher extends Activity
                     Q3EGlobals.GAME_QUAKE4,
                     Q3EGlobals.GAME_PREY,
 					Q3EGlobals.GAME_QUAKE2,
+					Q3EGlobals.GAME_RTCW,
             };
             int i;
             for (i = 0; i < Games.length; i++)
@@ -1998,7 +2019,7 @@ public class GameLauncher extends Activity
 		if(b)
 		{
 			V.edt_cmdline.addTextChangedListener(m_commandTextWatcher);
-			m_commandTextWatcher.Install(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isQ2);
+			m_commandTextWatcher.Install(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isQ2 || Q3EUtils.q3ei.isRTCW);
 		}
 		else
 		{
@@ -2177,6 +2198,8 @@ public class GameLauncher extends Activity
 			return V.rg_fs_preygame;
 		else if(Q3EUtils.q3ei.isQ2)
 			return V.rg_fs_q2game;
+		else if(Q3EUtils.q3ei.isRTCW)
+			return V.rg_fs_rtcwgame;
 		else
         	return V.rg_fs_game;
     }
@@ -2236,7 +2259,7 @@ public class GameLauncher extends Activity
 		if (skipIntro)
 			tempCmd += " +disconnect";
 		boolean quickSave = preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
-		if (quickSave || Q3EUtils.q3ei.IsIdTech4())
+		if (quickSave && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
 			tempCmd += " +loadGame QuickSave";
 		return tempCmd.trim();
 	}
@@ -2333,6 +2356,7 @@ public class GameLauncher extends Activity
 		groups.put(Q3EGlobals.GAME_QUAKE4, V.rg_fs_q4game);
 		groups.put(Q3EGlobals.GAME_PREY, V.rg_fs_preygame);
 		groups.put(Q3EGlobals.GAME_QUAKE2, V.rg_fs_q2game);
+		groups.put(Q3EGlobals.GAME_RTCW, V.rg_fs_rtcwgame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -2440,6 +2464,7 @@ public class GameLauncher extends Activity
 		public LinearLayout other_section;
 		public LinearLayout opengl_section;
 		public RadioGroup rg_fs_q2game;
+		public RadioGroup rg_fs_rtcwgame;
 
         public void Setup()
         {
@@ -2514,6 +2539,7 @@ public class GameLauncher extends Activity
 			other_section = findViewById(R.id.other_section);
 			opengl_section = findViewById(R.id.opengl_section);
 			rg_fs_q2game = findViewById(R.id.rg_fs_q2game);
+			rg_fs_rtcwgame = findViewById(R.id.rg_fs_rtcwgame);
         }
     }
 }

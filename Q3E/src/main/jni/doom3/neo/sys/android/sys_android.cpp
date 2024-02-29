@@ -139,7 +139,7 @@ char * Android_GetClipboardData(void)
     char *ptr = (char *)Mem_Alloc(len + 1);
     strncpy(ptr, text, len);
     ptr[len] = '\0';
-    free(text);
+    Mem_Free(text);
     return ptr;
 }
 

@@ -34,6 +34,9 @@ public enum Game
     QUAKE2_XATRIX(Q3EGlobals.GAME_QUAKE2, "xatrix", "xatrix", "", true, R.string.quake_2_xatrix),
     QUAKE2_ZAERO(Q3EGlobals.GAME_QUAKE2, "zaero", "zaero", "", true, R.string.quake_2_zaero),
 
+    // Return to Castle Wolfenstein
+    RTCW_BASE(Q3EGlobals.GAME_RTCW, "main", "", "", false, R.string.rtcw_base),
+
     ;
 
     public final String type; // game type: doom3/quake4/prey2006
