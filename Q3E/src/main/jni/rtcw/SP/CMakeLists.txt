@@ -9,9 +9,11 @@ add_definitions(-DUSE_OPENAL -DUSE_OPENAL_DLOPEN) # OpenAL dlopen
 add_definitions(-DUSE_INTERNAL_JPEG) # jpeg
 add_definitions(-DUSE_OPENGLES) # OpenGLES 1.1
 add_definitions(-DUSE_CODEC_VORBIS) # ogg
+add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl
 
 set(rtcwclient_libs android log GLESv1_CM EGL z)
 set(rtcwclient_libs ${rtcwclient_libs} vorbisfile vorbis ogg)
+#set(rtcwclient_libs ${rtcwclient_libs} curl)
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
 
@@ -380,6 +382,7 @@ set_target_properties(${RTCWLIBRARY} PROPERTIES COMPILE_DEFINITIONS "BOTLIB")
 target_link_libraries(${RTCWLIBRARY}
         ${rtcwclient_libs}
         )
+target_include_directories(${RTCWLIBRARY} PRIVATE "code/curl-7.60.0/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/libogg-1.3.3/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/libvorbis-1.3.6/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/jpeg-8c")
