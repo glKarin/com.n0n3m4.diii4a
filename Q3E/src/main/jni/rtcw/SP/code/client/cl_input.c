@@ -155,7 +155,7 @@ CL_KeyState
 Returns the fraction of the frame that the key was down
 ===============
 */
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: analog move on Android
 extern void IN_Analog(const kbutton_t kb[], const kbutton_t *key, float *val);
 #endif
 float CL_KeyState( kbutton_t *key ) {
@@ -188,7 +188,7 @@ float CL_KeyState( kbutton_t *key ) {
 	if ( val > 1 ) {
 		val = 1;
 	}
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: analog move on Android
 	IN_Analog(kb, key, &val);
 #endif
 

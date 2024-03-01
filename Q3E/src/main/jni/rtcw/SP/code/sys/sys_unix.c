@@ -1013,7 +1013,7 @@ Sys_GetDLLName
 ==============
 */
 char* Sys_GetDLLName( const char *name ) {
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: libxxx.so on Android
     return va("%s" DLL_EXT, name);
 #else
 	return va("%s.sp." ARCH_STRING DLL_EXT, name);

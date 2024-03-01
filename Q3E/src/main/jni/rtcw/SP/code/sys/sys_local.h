@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) //karin: without SDL on Android
 #ifndef DEDICATED
 #ifdef USE_LOCAL_HEADERS
 #	include "SDL_version.h"
@@ -40,7 +40,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MINSDL_PATCH 0
 #endif
 #endif
-#endif // __ANDROID__
+#endif
 
 // Console
 void CON_Shutdown( void );

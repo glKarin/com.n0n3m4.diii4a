@@ -479,7 +479,7 @@ Sys_GetGameAPI(void *parms)
 	return GetGameAPI(parms);
 }
 
-extern void (*setState)(int shown);
+extern void Sys_SyncState(void);
 
 #include "../../client/header/client.h"
 #include "../../client/header/input.h"
@@ -490,16 +490,7 @@ Sys_SendKeyEvents(void)
 #ifndef DEDICATED_ONLY
 	if (IN_Update_fp)
 	{
-	static int prev_state = -1;
-    	static int state = -1;
-    	state = (cls.key_dest == key_game) << 1;
-
-    	if (state != prev_state)
-    	{
-       		(*setState)(state);
-        	prev_state = state;
-    	}
-
+		Sys_SyncState();
 		IN_Update_fp();
 	}
 #endif

@@ -2370,7 +2370,7 @@ static cvar_t *s_alCapture;
 #define ALDRIVER_DEFAULT "libopenal.dylib"
 #elif defined(__OpenBSD__)
 #define ALDRIVER_DEFAULT "libopenal.so"
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) //karin: openal on Q3E
 #define ALDRIVER_DEFAULT "libopenal.so"
 #else
 #define ALDRIVER_DEFAULT "libopenal.so.1"

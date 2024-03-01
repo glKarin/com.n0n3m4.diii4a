@@ -979,7 +979,11 @@ void SV_InitGameProgs( void ) {
 	}
 
 	// load the dll or bytecode
+#ifdef __ANDROID__ //karin: qagame rename on Android
 	gvm = VM_Create( "rtcwqagame", SV_GameSystemCalls, Cvar_VariableValue( "vm_game" ) );
+#else
+	gvm = VM_Create( "qagame", SV_GameSystemCalls, Cvar_VariableValue( "vm_game" ) );
+#endif
 	if ( !gvm ) {
 		Com_Error( ERR_FATAL, "VM_Create on game failed" );
 	}

@@ -49,13 +49,6 @@ static qboolean trackball_event = qfalse;
 static float trackball_dx = 0;
 static float trackball_dy = 0;
 
-extern void (*setState)(int shown);
-
-void setInputCallbacks(void *set_state)
-{
-	setState = set_state;
-}
-
 #if 0
 void Com_PushEvent( sysEvent_t *event );
 
@@ -83,11 +76,11 @@ void Q3E_KeyEvent(int state,int key,int character)
 	if (key!=0)
 	{
 		Com_QueueEvent(t, SE_KEY, key, state, 0, NULL);
-		Com_DPrintf("SE_KEY key=%d state=%d\n", key, state);
+		//Com_DPrintf("SE_KEY key=%d state=%d\n", key, state);
 	}
 	if ((state==1)&&(character!=0))
 	{
-		Com_DPrintf("SE_CHAR key=%d state=%d\n", character, state);
+		//Com_DPrintf("SE_CHAR key=%d state=%d\n", character, state);
 		Com_QueueEvent(t, SE_CHAR, character, 0, 0, NULL);
 	}
 }
@@ -196,28 +189,15 @@ static void processTrackballEvents(void)
 }
 
 extern void (*pull_input_event)(int execCmd);
+extern void Sys_SyncState(void);
 void IN_Frame(void)
 {
-	static int prev_state = -1;
-	int state = -1;
 	pull_input_event(1);
+
 	processMotionEvents();
 	processTrackballEvents();
 
-	/* We are in game and neither console/ui is active */
-	//if (cls.state == CA_ACTIVE && Key_GetCatcher() == 0)
-
-	state = (((cl.snap.ps.serverCursorHint==HINT_DOOR_ROTATING)||(cl.snap.ps.serverCursorHint==HINT_DOOR)
-			  ||(cl.snap.ps.serverCursorHint==HINT_BUTTON)||(cl.snap.ps.serverCursorHint==HINT_ACTIVATE)) << 0) | ((clc.state == CA_ACTIVE && Key_GetCatcher() == 0) << 1) | ((cl.snap.ps.serverCursorHint==HINT_BREAKABLE) << 2);
-//cl.snap.ps.pm_flags & PMF_DUCKED;
-//    else
-//        state = 0;
-
-	if (state != prev_state)
-	{
-		setState(state);
-		prev_state = state;
-	}
+	Sys_SyncState();
 }
 
 /*

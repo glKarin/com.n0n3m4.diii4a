@@ -1157,7 +1157,11 @@ void CL_InitUI( void ) {
 	int v;
 
 	// load the dll or bytecode
+#ifdef __ANDROID__ //karin: ui rename on Android
 	uivm = VM_Create( "rtcwui", CL_UISystemCalls, Cvar_VariableValue("vm_ui") );
+#else
+	uivm = VM_Create( "ui", CL_UISystemCalls, Cvar_VariableValue("vm_ui") );
+#endif
 	if ( !uivm ) {
 		Com_Error( ERR_FATAL, "VM_Create on UI failed" );
 	}

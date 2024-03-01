@@ -977,7 +977,11 @@ void CL_InitCGame( void ) {
 			interpret = VMI_COMPILED;
 	}
 
+#ifdef __ANDROID__ //karin: cgame rename on Android
 	cgvm = VM_Create( "rtcwcgame", CL_CgameSystemCalls, interpret );
+#else
+	cgvm = VM_Create( "cgame", CL_CgameSystemCalls, interpret );
+#endif
 	if ( !cgvm ) {
 		Com_Error( ERR_DROP, "VM_Create on cgame failed" );
 	}

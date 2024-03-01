@@ -217,6 +217,21 @@ static void game_exit(void)
 	Q3E_CloseRedirectOutput();
 }
 
+void Sys_SyncState(void)
+{
+	if (setState)
+	{
+		static int prev_state = -1;
+		static int state = -1;
+		state = (cls.key_dest == key_game) << 1;
+
+		if (state != prev_state)
+		{
+			(*setState)(state);
+			prev_state = state;
+		}
+	}
+}
 
 int
 main(int argc, char **argv)

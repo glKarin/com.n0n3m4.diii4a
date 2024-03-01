@@ -70,7 +70,7 @@
   #define fseeko64 fseek
  #endif
 #endif
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: using stdio on Android
 #define fopen64 fopen
 #define ftello64 ftell
 #define fseeko64 fseek

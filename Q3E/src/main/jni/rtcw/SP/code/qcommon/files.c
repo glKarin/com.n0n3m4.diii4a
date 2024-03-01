@@ -1685,7 +1685,7 @@ int FS_FindVM(void **startSearch, char *found, int foundlen, const char *name, i
 		Q_strncpyz(dllName, Sys_GetDLLName(name), sizeof(dllName));
 
 	Com_sprintf(qvmName, sizeof(qvmName), "vm/%s.sp.qvm", name);
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: load *.so on Android
 	if(enableDll)
 	{
 		const char * Sys_DLLDefaultPath(void);
@@ -3841,7 +3841,7 @@ static void FS_CheckSPPaks( void )
 				"Please re-install the 1.41 point release.\n\n", missingPaks ) );
 		}
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: not require sp_pak4.pk3
         Com_Printf("%s", errorText);
 #else
 		Com_Error(ERR_FATAL, "%s", errorText);

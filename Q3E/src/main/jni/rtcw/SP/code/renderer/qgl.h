@@ -34,13 +34,13 @@ If you have questions concerning this license or the applicable additional terms
 #define __QGL_H__
 
 #ifdef USE_OPENGLES
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: Android GLES1.1 headers
 #	include <EGL/egl.h>
 #	include <GLES/gl.h>
 #ifndef APIENTRY
 #define APIENTRY
 #endif
-#else // __ANDROID__
+#else
 #ifdef USE_LOCAL_HEADERS
 #	include "SDL_opengles.h"
 #	include "EGL/egl.h"
@@ -48,7 +48,7 @@ If you have questions concerning this license or the applicable additional terms
 #	include <SDL_opengles.h>
 #	include <EGL/egl.h>
 #endif
-#endif // __ANDROID__
+#endif
 #ifndef APIENTRYP
 #define APIENTRYP APIENTRY *
 #endif
