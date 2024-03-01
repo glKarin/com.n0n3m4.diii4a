@@ -41,6 +41,7 @@
 qboolean IsInitialized = false;
 
 extern void Android_PollInput(void);
+extern void Q3E_CheckNativeWindowChanged(void);
 int main_time, main_oldtime, main_newtime;
 void main_frame()
 {
@@ -51,6 +52,7 @@ void main_frame()
 	}
 	while (main_time < 1);
 	Android_PollInput();
+	Q3E_CheckNativeWindowChanged();
 	Qcommon_Frame(main_time);
 	main_oldtime = main_newtime;
 }

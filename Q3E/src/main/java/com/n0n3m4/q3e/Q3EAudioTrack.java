@@ -137,9 +137,7 @@ public class Q3EAudioTrack extends AudioTrack
                 }
                 audioData.position(offset);
                 m_data = new byte[len];
-                //audioData.get(m_data, 0, len);
-                System.arraycopy(audioData.array(), 0, m_data, 0, len);
-                //Arrays.copyOf(audioData.array(), len);
+                audioData.get(m_data, 0, len);
                 m_length = len;
             }
         }

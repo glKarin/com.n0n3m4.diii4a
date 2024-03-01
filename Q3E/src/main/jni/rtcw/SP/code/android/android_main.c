@@ -726,6 +726,7 @@ static void * game_main(void *data)
 	while (1) {
 		if(!q3e_running) // exit
 			break;
+		Q3E_CheckNativeWindowChanged();
 		Com_Frame( );
 	}
 
