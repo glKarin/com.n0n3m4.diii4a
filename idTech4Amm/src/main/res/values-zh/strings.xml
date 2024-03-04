@@ -177,7 +177,7 @@
     <string name="last_dalvik_crash_info">最后启动器崩溃信息</string>
     <string name="preferences_settings_saved">偏好设置已保存!</string>
     <string name="choose_data_folder">选择游戏数据目录</string>
-    <string name="choose_current_directory">选择当前目录</string>
+    <string name="choose_current_directory">选择</string>
     <string name="unset">不设置</string>
     <string name="edit_config_file">编辑配置文件</string>
     <string name="operation">操作</string>

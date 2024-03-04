@@ -62,6 +62,7 @@ static void grab_mouse(int grab);
 static FILE * android_tmpfile(void);
 static void copy_to_clipboard(const char *text);
 static char * get_clipboard_text(void);
+static void show_toast(const char *text);
 
 // data
 static char *game_data_dir = NULL;
@@ -86,6 +87,8 @@ static jmethodID android_initAudio;
 static jmethodID android_writeAudio;
 static jmethodID android_setState;
 static jmethodID android_writeAudio_array;
+
+static jmethodID android_ShowToast_method;
 
 static void Android_AttachThread(void)
 {
@@ -312,6 +315,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_GrabMouse_method = (*env)->GetMethodID(env, q3eCallbackClass, "GrabMouse", "(Z)V");
 	android_CopyToClipboard_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyToClipboard", "(Ljava/lang/String;)V");
 	android_GetClipboardText_method = (*env)->GetMethodID(env, q3eCallbackClass, "GetClipboardText", "()Ljava/lang/String;");
+	android_ShowToast_method = (*env)->GetMethodID(env, q3eCallbackClass, "ShowToast", "(Ljava/lang/String;)V");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -401,6 +405,8 @@ static void setup_Q3E_callback(void)
 	callback.Sys_tmpfile = &android_tmpfile;
 	callback.Sys_copyToClipboard = &copy_to_clipboard;
 	callback.Sys_getClipboardText = &get_clipboard_text;
+
+	callback.Gui_ShowToast = &show_toast;
 
 	setCallbacks(&callback);
 }
@@ -606,6 +612,26 @@ char * get_clipboard_text(void)
 		res = strdup(nstr);
 	(*env)->ReleaseStringUTFChars(env, str, nstr);
 	return res;
+}
+
+void show_toast(const char *text)
+{
+	JNIEnv *env = 0;
+
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+
+	if(!text)
+	{
+		return;
+	}
+
+	jstring str = (*env)->NewStringUTF(env, text);
+	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_ShowToast_method, nstr);
 }
 
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"

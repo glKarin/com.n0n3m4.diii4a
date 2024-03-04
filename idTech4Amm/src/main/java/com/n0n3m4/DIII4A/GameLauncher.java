@@ -1410,7 +1410,7 @@ public class GameLauncher extends Activity
     private void OpenRuntimeLog()
     {
         String path = V.edt_path.getText().toString() + File.separatorChar + "stdout.txt";
-        String text = FileUtility.file_get_contents(path);
+        String text = Q3EUtils.file_get_contents(path);
         if (text != null)
         {
             ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.last_runtime_log), text);
@@ -1634,7 +1634,7 @@ public class GameLauncher extends Activity
 
     private void Test()
     {
-        //((Object)null).toString();
+		// test function
     }
 
     private void OpenSettings()

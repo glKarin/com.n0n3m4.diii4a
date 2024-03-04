@@ -293,6 +293,11 @@ Sys_Error(char *error, ...)
 	vsnprintf(string, 1024, error, argptr);
 	va_end(argptr);
 	fprintf(stderr, "Error: %s\n", string);
+#ifdef __ANDROID__
+	extern void (*show_toast)(const char *text);
+	if(show_toast)
+		show_toast(string);
+#endif
 
 	exit(1);
 }

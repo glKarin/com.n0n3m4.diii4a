@@ -151,6 +151,7 @@ public class Q3EMain extends Activity
             if (mAudio == null)
             {
                 mAudio = new Q3ECallbackObj();
+                mAudio.InitGUIInterface(this);
             }
             Q3EUtils.q3ei.callbackObj = mAudio;
             Q3EJNI.setCallbackObject(mAudio);

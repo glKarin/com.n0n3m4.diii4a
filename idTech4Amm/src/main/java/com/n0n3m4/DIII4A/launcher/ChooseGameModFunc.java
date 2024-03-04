@@ -135,7 +135,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 }
             }
 
-            String desc = FileUtility.file_get_contents(fileModel.path + File.separator + "description.txt");
+            String desc = Q3EUtils.file_get_contents(fileModel.path + File.separator + "description.txt");
             if(null != desc)
             {
                 desc = desc.trim();

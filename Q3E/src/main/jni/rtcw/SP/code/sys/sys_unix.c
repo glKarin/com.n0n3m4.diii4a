@@ -794,6 +794,12 @@ Display a *nix dialog box
 */
 dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *title )
 {
+#ifdef __ANDROID__
+    extern void (*show_toast)(const char *text);
+	if(show_toast)
+		(*show_toast)(message);
+	return DR_OK;
+#else
 	typedef enum
 	{
 		NONE = 0,
@@ -855,6 +861,7 @@ dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *t
 
 	Com_DPrintf( S_COLOR_YELLOW "WARNING: failed to show a dialog\n" );
 	return DR_OK;
+#endif
 }
 #endif
 

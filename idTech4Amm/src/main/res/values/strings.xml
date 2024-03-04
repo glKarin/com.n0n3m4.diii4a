@@ -30,7 +30,7 @@
     <string name="quake_iv_q4base">Quake IV</string>
     <string name="prey_preybase">Prey</string>
     <string name="user_mod">User mod</string>
-    <string name="input_your_mod_folder_name">Your mod folder name</string>
+    <string name="input_your_mod_folder_name">Mod folder name</string>
     <string name="gamelib">GameLib</string>
     <string name="multi_threading">Multi-threading</string>
     <string name="light_model_cvar_harm_r_lightmodel">Light model(harm_r_lightModel)</string>
@@ -180,7 +180,7 @@
     <string name="last_dalvik_crash_info">Last dalvik crash info</string>
     <string name="preferences_settings_saved">Preferences settings saved!</string>
     <string name="choose_data_folder">Choose data folder</string>
-    <string name="choose_current_directory">Choose current directory</string>
+    <string name="choose_current_directory">Choose</string>
     <string name="unset">Unset</string>
     <string name="edit_config_file">Edit config file</string>
     <string name="operation">Operation</string>

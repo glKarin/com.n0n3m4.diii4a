@@ -1176,6 +1176,17 @@ void Sys_Error(const char *error, ...)
 	Sys_DebugVPrintf(error, argptr);
 	va_end(argptr);
 	Sys_Printf("\n");
+#ifdef __ANDROID__
+	extern void (*show_toast)(const char *text);
+	if(show_toast)
+	{
+		va_start(argptr, error);
+		char text[1024];
+		idStr::vsnPrintf(text, sizeof(text), error, argptr);
+		va_end(argptr);
+		show_toast(text);
+	}
+#endif
 
 	Posix_Exit(EXIT_FAILURE);
 }

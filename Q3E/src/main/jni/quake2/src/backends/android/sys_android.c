@@ -23,6 +23,7 @@ extern void (*pull_input_event)(int execCmd);
 extern FILE * (*itmpfile)(void);
 extern void (*copy_to_clipboard)(const char *text);
 extern char * (*get_clipboard_text)(void);
+extern void (*show_toast)(const char *text);
 
 void (* GLimp_AndroidInit)(volatile ANativeWindow *win);
 void (* GLimp_AndroidQuit)(void);
@@ -38,6 +39,7 @@ void (*grab_mouse)(int grab);
 void (*attach_thread)(void);
 void (*copy_to_clipboard)(const char *text);
 char * (*get_clipboard_text)(void);
+void (*show_toast)(const char *text);
 
 int screen_width=640;
 int screen_height=480;
@@ -270,6 +272,10 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("  System: \n");
     printf("    attach_thread: %p\n", attach_thread);
     printf("    tmpfile: %p\n", itmpfile);
+    printf("    copy_to_clipboard: %p\n", copy_to_clipboard);
+    printf("    get_clipboard_text: %p\n", get_clipboard_text);
+    printf("  GUI: \n");
+    printf("    show_toast: %p\n", show_toast);
     printf("  Other: \n");
     printf("    setState: %p\n", setState);
     printf("\n");
@@ -309,6 +315,8 @@ void Q3E_SetCallbacks(const void *callbacks)
     itmpfile = ptr->Sys_tmpfile;
     copy_to_clipboard = ptr->Sys_copyToClipboard;
     get_clipboard_text = ptr->Sys_getClipboardText;
+
+    show_toast = ptr->Gui_ShowToast;
 
     setState = ptr->set_state;
 }

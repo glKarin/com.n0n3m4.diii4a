@@ -19,7 +19,11 @@
 
 package com.n0n3m4.q3e;
 
+import android.app.Activity;
+import android.content.Context;
+
 import com.n0n3m4.q3e.karin.KOnceRunnable;
+import com.n0n3m4.q3e.onscreen.Q3EGUI;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -31,6 +35,8 @@ public class Q3ECallbackObj
     public int state = Q3EGlobals.STATE_NONE;
     private final Object m_audioLock = new Object();
     public static boolean reqThreadrunning = false;
+
+    private Q3EGUI gui;
 
     private final LinkedList<Runnable> m_eventQueue = new LinkedList<>();
     public boolean notinmenu = true;
@@ -226,6 +232,17 @@ public class Q3ECallbackObj
                 Q3EJNI.sendMotionEvent(deltax, deltay);
             }
         });
+    }
+
+    public void InitGUIInterface(Activity context)
+    {
+        gui = new Q3EGUI(context);
+    }
+
+    public void ShowToast(String text)
+    {
+        if(null != gui)
+            gui.Toast(text);
     }
 }
 

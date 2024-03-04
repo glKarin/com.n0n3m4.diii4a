@@ -21,6 +21,9 @@ typedef struct
     void (*Sys_copyToClipboard)(const char *text); // copy text to clipboard
     char * (*Sys_getClipboardText)(void); // get text from clipboard
 
+    // GUI
+    void (*Gui_ShowToast)(const char *text); // get text from clipboard
+
     // Other
     void (*set_state)(int st); // Tell Android game current state
 } Q3E_Callback_t;

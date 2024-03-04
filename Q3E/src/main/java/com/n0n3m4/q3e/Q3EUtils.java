@@ -47,6 +47,8 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -588,5 +590,94 @@ public class Q3EUtils
         /*int w = width * scale;
         int h = width * scale;*/
         return new int[]{w, h};
+    }
+
+    public static boolean file_put_contents(String path, String content)
+    {
+        if(null == path)
+            return false;
+        return file_put_contents(new File(path), content);
+    }
+
+    public static boolean file_put_contents(File file, String content)
+    {
+        if(null == file)
+            return false;
+
+        FileWriter writer = null;
+        try
+        {
+            writer = new FileWriter(file);
+            writer.append(content);
+            writer.flush();
+            return true;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            Close(writer);
+        }
+    }
+
+    public static String file_get_contents(String path)
+    {
+        if(null == path)
+            return null;
+        return file_get_contents(new File(path));
+    }
+
+    public static String file_get_contents(File file)
+    {
+        if(null == file || !file.isFile() || !file.canRead())
+            return null;
+
+        FileReader reader = null;
+        try
+        {
+            reader = new FileReader(file);
+            int BUF_SIZE = 1024;
+            char[] chars = new char[BUF_SIZE];
+            int len;
+            StringBuilder sb = new StringBuilder();
+            while ((len = reader.read(chars)) > 0)
+                sb.append(chars, 0, len);
+            return sb.toString();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        finally
+        {
+            Close(reader);
+        }
+    }
+
+    public static boolean rm(String path)
+    {
+        if(null == path)
+            return false;
+        return rm(new File(path));
+    }
+
+    public static boolean rm(File file)
+    {
+        if(null == file || !file.isFile())
+            return false;
+
+        try
+        {
+            return file.delete();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
