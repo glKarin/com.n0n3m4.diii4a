@@ -1,0 +1,20 @@
+--- Alc/helpers.c	2018-10-12 01:05:31.000000000 +0300
++++ Alc/helpers_new.c	2020-05-15 12:51:45.210000000 +0300
+@@ -278,7 +278,7 @@
+ 
+ void SetMixerFPUMode(FPUCtl *ctl)
+ {
+-#if defined(__GNUC__) && defined(HAVE_SSE)
++#if defined(__GNUC__) && defined(HAVE_SSE) && (defined(__i386__) || defined(__x86_64__))
+     if((CPUCapFlags&CPU_CAP_SSE))
+     {
+         __asm__ __volatile__("stmxcsr %0" : "=m" (*&ctl->sse_state));
+@@ -303,7 +303,7 @@
+ 
+ void RestoreFPUMode(const FPUCtl *ctl)
+ {
+-#if defined(__GNUC__) && defined(HAVE_SSE)
++#if defined(__GNUC__) && defined(HAVE_SSE) && (defined(__i386__) || defined(__x86_64__))
+     if((CPUCapFlags&CPU_CAP_SSE))
+         __asm__ __volatile__("ldmxcsr %0" : : "m" (*&ctl->sse_state));
+ 

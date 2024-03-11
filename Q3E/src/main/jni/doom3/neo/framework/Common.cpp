@@ -79,7 +79,13 @@ idCVar com_asyncSound("com_asyncSound", "1", CVAR_INTEGER|CVAR_SYSTEM, ASYNCSOUN
 #endif
 idCVar com_forceGenericSIMD("com_forceGenericSIMD", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "force generic platform independent SIMD");
 idCVar com_developer("developer", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "developer mode");
-idCVar com_allowConsole("com_allowConsole", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "allow toggling console with the tilde key");
+idCVar com_allowConsole("com_allowConsole",
+#ifdef __ANDROID__
+		"1"
+#else
+						"0"
+#endif
+						, CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "allow toggling console with the tilde key");
 idCVar com_speeds("com_speeds", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "show engine timings");
 idCVar com_showFPS("com_showFPS", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_ARCHIVE|CVAR_NOCHEAT, "show frames rendered per second");
 idCVar com_showMemoryUsage("com_showMemoryUsage", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "show total and per frame memory usage");

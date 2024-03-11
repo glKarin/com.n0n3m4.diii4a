@@ -298,10 +298,10 @@ public final class ContextUtility
         {
             is = context.getAssets().open(path);
             File out = new File(outPath);
-            FileUtility.mkdir(out.getParent(), true);
+            Q3EUtils.mkdir(out.getParent(), true);
             os = new FileOutputStream(out);
 
-            long res = FileUtility.Copy(os, is);
+            long res = Q3EUtils.Copy(os, is);
 
             return res > 0;
         }
@@ -325,12 +325,12 @@ public final class ContextUtility
 
         try
         {
-            FileUtility.mkdir(outPath, true);
+            Q3EUtils.mkdir(outPath, true);
             is = context.getAssets().open(path);
             File out = new File(outPath + File.separator + name);
             os = new FileOutputStream(out);
 
-            long res = FileUtility.Copy(os, is);
+            long res = Q3EUtils.Copy(os, is);
 
             return res > 0;
         }

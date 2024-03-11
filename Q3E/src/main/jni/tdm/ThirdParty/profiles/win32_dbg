@@ -1,0 +1,7 @@
+[settings]
+os=Windows
+arch=x86
+compiler=Visual Studio
+compiler.version=17
+build_type=Release
+compiler.runtime=MTd

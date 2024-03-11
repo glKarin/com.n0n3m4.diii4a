@@ -37,6 +37,8 @@ public enum Game
     // Return to Castle Wolfenstein
     RTCW_BASE(Q3EGlobals.GAME_RTCW, "main", "", "", false, R.string.rtcw_base),
 
+    // The dark mod
+    TDM_BASE(Q3EGlobals.GAME_TDM, "darkmod", "", "", false, R.string.tdm_base),
     ;
 
     public final String type; // game type: doom3/quake4/prey2006

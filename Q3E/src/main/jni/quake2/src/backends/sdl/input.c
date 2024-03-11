@@ -69,6 +69,9 @@ static cvar_t *in_mouse;
 
 //cvar_t *vid_fullscreen;
 
+
+extern void GLimp_GrabInput(qboolean grab);
+
 /*
  * Input event processing
  */
@@ -109,6 +112,26 @@ IN_Update(void)
 	if (IN_Update_Flag == 1)
 	{
 		return;
+	}
+
+	if(in_grab && windowed_mouse)
+	{
+		qboolean want_grab;
+		/* Grab and ungrab the mouse if the console or the menu is opened */
+		if (in_grab->value == 3)
+		{
+			want_grab = windowed_mouse->value;
+		}
+		else
+		{
+			want_grab = (in_grab->value == 1 ||
+						 (in_grab->value == 2 && windowed_mouse->value));
+		}
+
+		// calling GLimp_GrabInput() each frame is a bit ugly but simple and should work.
+		// The called SDL functions return after a cheap check, if there's nothing to do.
+		GLimp_GrabInput(want_grab);
+		mouse_grabbed = want_grab;
 	}
 
 	IN_Update_Flag = 1;

@@ -63,6 +63,9 @@ volatile bool paused = false;
 // Continue when missing OpenGL context
 volatile bool continue_when_no_gl_context = false;
 
+// using mouse
+bool mouse_available = false;
+
 // Surface window
 volatile ANativeWindow *window = NULL;
 static volatile bool window_changed = false;
@@ -72,7 +75,7 @@ extern volatile bool q3e_running;
 
 void Android_GrabMouseCursor(bool grabIt)
 {
-    if(grab_mouse)
+    if(mouse_available && grab_mouse)
         grab_mouse(grabIt);
 }
 
@@ -174,7 +177,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("  OpenGL: \n");
     printf("    Format: 0x%X\n", gl_format);
     printf("    MSAA: %d\n", gl_msaa);
-    printf("    Version: %x\n", gl_version);
+    printf("    Version: %08x\n", gl_version);
     printf("  Variables: \n");
     printf("    Native library directory: %s\n", native_library_dir);
     printf("    Redirect output to file: %d\n", redirect_output_to_file);
@@ -182,6 +185,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
 #ifdef _MULTITHREAD
     printf("    Multi-thread: %d\n", multithreadActive);
 #endif
+    printf("    Using mouse: %d\n", mouse_available);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
@@ -319,6 +323,7 @@ void Q3E_SetInitialContext(const void *context)
     multithreadActive = ptr->multithread ? true : false;
 #endif
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
+    mouse_available = ptr->mouseAvailable ? true : false;
 }
 
 // View paused

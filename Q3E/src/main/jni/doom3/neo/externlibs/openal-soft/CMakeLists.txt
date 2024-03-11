@@ -1426,6 +1426,11 @@ else()
             PUBLIC_HEADER "${TARGET_PUBLIC_HEADERS}"
             MACOSX_RPATH TRUE)
     endif()
+
+    if(ANDROID)
+        add_library(openal INTERFACE)
+        target_link_libraries(openal INTERFACE ${IMPL_TARGET})
+    endif()
 endif()
 
 target_include_directories(${IMPL_TARGET}

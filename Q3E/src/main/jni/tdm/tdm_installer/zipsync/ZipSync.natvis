@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="ZipSync::HashDigest">
+    <DisplayString ExcludeView="simple">{((uint64_t*)_data)[0],x} - {((uint64_t*)_data)[1],x} - {((uint64_t*)_data)[2],x} - {((uint64_t*)_data)[3],x}</DisplayString>
+    <DisplayString IncludeView="simple">{((uint64_t*)_data)[0],x}...</DisplayString>
+  </Type>
+  
+  <Type Name="ZipSync::FileMetainfo">
+    <DisplayString IncludeView="provided">{zipPath.rel} || {filename} in {location}</DisplayString>
+    <DisplayString IncludeView="target">{zipPath.rel} || {filename}</DisplayString>
+    <DisplayString>{zipPath.rel} || {filename} in {location}: {contentsHash,view(simple)}</DisplayString>
+  </Type>
+  
+  <Type Name="ZipSync::Manifest">
+    <DisplayString>Manifest {_comment}: {_files}</DisplayString>
+    <Expand>
+      <ExpandedItem>_files</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="ZipSync::ManifestIter">
+    <DisplayString IncludeView="target">{_manifest->_files._Mypair._Myval2._Myfirst[_index],view(target)}</DisplayString>
+    <DisplayString IncludeView="provided">{_manifest->_files._Mypair._Myval2._Myfirst[_index],view(provided)}</DisplayString>
+    <DisplayString>{_manifest->_files._Mypair._Myval2._Myfirst[_index]}</DisplayString>
+    <Expand>
+      <ExpandedItem>_manifest->_files._Mypair._Myval2._Myfirst + _index</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="ZipSync::UpdateProcess::Match">
+    <DisplayString>{target,view(target)} &lt;= {provided,view(provided)}</DisplayString>
+  </Type>
+
+</AutoVisualizer>

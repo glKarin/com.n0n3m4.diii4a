@@ -1,0 +1,11 @@
+sources:
+  1.21.0:
+    sha256: cd3650530866f3906058225f4bfbe0052be19e0a29dcc6df185a460f9948feec
+    url: https://github.com/kcat/openal-soft/archive/1.21.0.tar.gz
+  1.21.1:
+    sha256: 8ac17e4e3b32c1af3d5508acfffb838640669b4274606b7892aa796ca9d7467f
+    url: https://github.com/kcat/openal-soft/archive/1.21.1.tar.gz
+patches:
+  1.21.1:
+    - patch_file: patches/1.21.1/mxcsr.patch      # stgatilov: for Elbrus2k
+      base_path: source_subfolder

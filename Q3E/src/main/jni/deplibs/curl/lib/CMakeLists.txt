@@ -210,6 +210,11 @@ if(BUILD_SHARED_LIBS)
   target_include_directories(${LIB_SHARED} INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+
+  if(ANDROID)
+    add_library(curl INTERFACE)
+    target_link_libraries(curl INTERFACE ${LIB_SHARED})
+  endif()
 endif()
 
 add_library(${LIB_NAME} ALIAS ${LIB_SELECTED})

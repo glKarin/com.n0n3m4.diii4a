@@ -356,7 +356,7 @@ public class GameLauncher extends Activity
 						.putString(Q3EPreference.pref_harm_r_lightModel, value)
 						.commit();
 			}
-			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_rtcwgame)
+			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
 				SetGameDLL((String)checked.getTag());
@@ -810,6 +810,7 @@ public class GameLauncher extends Activity
         V.rg_fs_preygame.setEnabled(!on);
 		V.rg_fs_q2game.setEnabled(!on);
 		V.rg_fs_rtcwgame.setEnabled(!on);
+		V.rg_fs_tdmgame.setEnabled(!on);
         V.fs_game_user.setText(on ? R.string.mod_ : R.string.user_mod);
         //V.launcher_tab1_game_lib_button.setEnabled(on);
         V.edt_fs_game.setEnabled(on);
@@ -939,6 +940,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_preygame.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_q2game.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_rtcwgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		V.rg_fs_tdmgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.edt_fs_game.addTextChangedListener(new TextWatcher()
         {
             public void onTextChanged(CharSequence s, int start, int before, int count)
@@ -1353,6 +1355,11 @@ public class GameLauncher extends Activity
 		else if (itemId == R.id.main_menu_game_rtcw)
 		{
 			ChangeGame(Q3EGlobals.GAME_RTCW);
+			return true;
+		}
+		else if (itemId == R.id.main_menu_game_tdm)
+		{
+			ChangeGame(Q3EGlobals.GAME_TDM);
 			return true;
 		}
 		else if (itemId == android.R.id.home)
@@ -1898,53 +1905,58 @@ public class GameLauncher extends Activity
             V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
         ActionBar actionBar = getActionBar();
         Resources res = getResources();
-        int colorId;
-        int iconId;
+        int colorId = GameManager.GetGameThemeColor();
+        int iconId = GameManager.GetGameIcon();
         boolean d3Visible = false;
         boolean q4Visible = false;
         boolean preyVisible = false;
 		boolean q2Visible = false;
 		boolean rtcwVisible = false;
+		boolean tdmVisible = false;
 		boolean rendererVisible = true;
 		boolean soundVisible = true;
 		boolean otherVisible = true;
 		boolean openglVisible = true;
+		boolean modVisible = true;
+		boolean dllVisible = true;
         if (Q3EUtils.q3ei.isPrey)
         {
-            colorId = R.color.theme_prey_main_color;
-            iconId = R.drawable.prey_icon;
             preyVisible = true;
         }
         else if (Q3EUtils.q3ei.isQ4)
         {
-            colorId = R.color.theme_quake4_main_color;
-            iconId = R.drawable.q4_icon;
             q4Visible = true;
         }
 		else if (Q3EUtils.q3ei.isQ2)
 		{
-			colorId = R.color.theme_quake2_main_color;
-			iconId = R.drawable.q2_icon;
 			q2Visible = true;
 			rendererVisible = false;
 			soundVisible = false;
 			otherVisible = false;
 			openglVisible = false;
+			dllVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isRTCW)
 		{
-			colorId = R.color.theme_rtcw_main_color;
-			iconId = R.drawable.rtcw_icon;
 			rtcwVisible = true;
 			rendererVisible = false;
 			soundVisible = false;
 			otherVisible = false;
 			openglVisible = false;
+			dllVisible = false;
+		}
+		else if (Q3EUtils.q3ei.isTDM)
+		{
+			tdmVisible = true;
+			rendererVisible = false;
+			soundVisible = false;
+			otherVisible = false;
+			openglVisible = false;
+			modVisible = false;
+			dllVisible = false;
 		}
         else
         {
-            colorId = R.color.theme_doom3_main_color;
-            iconId = R.drawable.d3_icon;
             d3Visible = true;
         }
         if (null != actionBar)
@@ -1960,11 +1972,14 @@ public class GameLauncher extends Activity
         V.rg_fs_preygame.setVisibility(preyVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_q2game.setVisibility(q2Visible ? View.VISIBLE : View.GONE);
 		V.rg_fs_rtcwgame.setVisibility(rtcwVisible ? View.VISIBLE : View.GONE);
+		V.rg_fs_tdmgame.setVisibility(tdmVisible ? View.VISIBLE : View.GONE);
 
 		V.renderer_section.setVisibility(rendererVisible ? View.VISIBLE : View.GONE);
 		V.sound_section.setVisibility(soundVisible ? View.VISIBLE : View.GONE);
 		V.other_section.setVisibility(otherVisible ? View.VISIBLE : View.GONE);
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
+		V.mod_section.setVisibility(modVisible ? View.VISIBLE : View.GONE);
+		V.dll_section.setVisibility(dllVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(q2Visible ? View.GONE : View.VISIBLE);
     }
 
@@ -1975,22 +1990,15 @@ public class GameLauncher extends Activity
         String newGame = games.length > 0 ? games[0] : null;
         if (null == newGame || newGame.isEmpty())
         {
-            final String[] Games = {
-                    Q3EGlobals.GAME_DOOM3,
-                    Q3EGlobals.GAME_QUAKE4,
-                    Q3EGlobals.GAME_PREY,
-					Q3EGlobals.GAME_QUAKE2,
-					Q3EGlobals.GAME_RTCW,
-            };
             int i;
-            for (i = 0; i < Games.length; i++)
+            for (i = 0; i < GameManager.Games.length; i++)
             {
-                if (Games[i].equalsIgnoreCase(Q3EUtils.q3ei.game))
+                if (GameManager.Games[i].equalsIgnoreCase(Q3EUtils.q3ei.game))
                     break;
             }
-            if (i >= Games.length)
-                i = Games.length - 1;
-            newGame = Games[(i + 1) % Games.length];
+            if (i >= GameManager.Games.length)
+                i = GameManager.Games.length - 1;
+            newGame = GameManager.Games[(i + 1) % GameManager.Games.length];
         }
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         preference.edit().putString(Q3EPreference.pref_harm_game, newGame).commit();
@@ -2019,7 +2027,7 @@ public class GameLauncher extends Activity
 		if(b)
 		{
 			V.edt_cmdline.addTextChangedListener(m_commandTextWatcher);
-			m_commandTextWatcher.Install(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isQ2 || Q3EUtils.q3ei.isRTCW);
+			m_commandTextWatcher.Install(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isQ2 || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isTDM);
 		}
 		else
 		{
@@ -2200,6 +2208,8 @@ public class GameLauncher extends Activity
 			return V.rg_fs_q2game;
 		else if(Q3EUtils.q3ei.isRTCW)
 			return V.rg_fs_rtcwgame;
+		else if(Q3EUtils.q3ei.isTDM)
+			return V.rg_fs_tdmgame;
 		else
         	return V.rg_fs_game;
     }
@@ -2357,6 +2367,7 @@ public class GameLauncher extends Activity
 		groups.put(Q3EGlobals.GAME_PREY, V.rg_fs_preygame);
 		groups.put(Q3EGlobals.GAME_QUAKE2, V.rg_fs_q2game);
 		groups.put(Q3EGlobals.GAME_RTCW, V.rg_fs_rtcwgame);
+		groups.put(Q3EGlobals.GAME_TDM, V.rg_fs_tdmgame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -2463,8 +2474,11 @@ public class GameLauncher extends Activity
 		public LinearLayout sound_section;
 		public LinearLayout other_section;
 		public LinearLayout opengl_section;
+		public LinearLayout mod_section;
+		public LinearLayout dll_section;
 		public RadioGroup rg_fs_q2game;
 		public RadioGroup rg_fs_rtcwgame;
+		public RadioGroup rg_fs_tdmgame;
 
         public void Setup()
         {
@@ -2538,8 +2552,11 @@ public class GameLauncher extends Activity
 			sound_section = findViewById(R.id.sound_section);
 			other_section = findViewById(R.id.other_section);
 			opengl_section = findViewById(R.id.opengl_section);
+			dll_section = findViewById(R.id.dll_section);
+			mod_section = findViewById(R.id.mod_section);
 			rg_fs_q2game = findViewById(R.id.rg_fs_q2game);
 			rg_fs_rtcwgame = findViewById(R.id.rg_fs_rtcwgame);
+			rg_fs_tdmgame = findViewById(R.id.rg_fs_tdmgame);
         }
     }
 }

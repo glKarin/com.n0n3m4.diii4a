@@ -79,30 +79,36 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
     public static final String LIB_ENGINE2_ID = "libidtech2.so"; // Quake 2
     public static final String LIB_ENGINE3_RTCW = "libidtech3_rtcw.so"; // RTCW
+    public static final String LIB_ENGINE4_TDM = "libthedarkmod.so"; // TDM
 
     public static final String CONFIG_FILE_DOOM3 = "DoomConfig.cfg"; // DOOM3
     public static final String CONFIG_FILE_QUAKE4 = "Quake4Config.cfg"; // Quake 4
     public static final String CONFIG_FILE_PREY = "preyconfig.cfg"; // Prey 2006
     public static final String CONFIG_FILE_QUAKE2 = "yq2.cfg"; // Quake 2
     public static final String CONFIG_FILE_RTCW = "wolfconfig.cfg"; // RTCW
+    public static final String CONFIG_FILE_TDM = "Darkmod.cfg"; // TDM
 
     public static final String GAME_DOOM3 = "doom3";
     public static final String GAME_QUAKE4 = "quake4";
     public static final String GAME_PREY = "prey2006";
     public static final String GAME_QUAKE2 = "quake2";
     public static final String GAME_RTCW = "rtcw";
+    public static final String GAME_TDM = "tdm";
 
     public static final String GAME_NAME_DOOM3 = "DOOM 3";
     public static final String GAME_NAME_QUAKE4 = "Quake 4";
     public static final String GAME_NAME_PREY = "Prey(2006)";
     public static final String GAME_NAME_QUAKE2 = "Quake 2";
     public static final String GAME_NAME_RTCW = "RTCW"; // "Return to Castle Wolfenstein";
+    public static final String GAME_NAME_TDM = "Dark mod"; // The Dark Mod
 
     public static final String GAME_BASE_DOOM3 = "base";
+    public static final String GAME_BASE_D3XP = "d3xp";
     public static final String GAME_BASE_QUAKE4 = "q4base";
     public static final String GAME_BASE_PREY = "preybase"; // Other platform is `base`
     public static final String GAME_BASE_QUAKE2 = "baseq2";
     public static final String GAME_BASE_RTCW = "main";
+    public static final String GAME_BASE_TDM = "darkmod";
 
     public static final String[] LIBS = {
             "game",
@@ -133,6 +139,9 @@ public final class Q3EGlobals
     };
     public static final String[] RTCW_LIBS = {
             "rtcwgame",
+    };
+    public static final String[] TDM_LIBS = {
+            "thedarkmod",
     };
 
     public static final String[] QUAKE4_MAPS = {
@@ -230,6 +239,8 @@ public final class Q3EGlobals
     public static final int GLFORMAT_RGBA1010102 = 0xaaa2;
 
     public static final String GAME_EXECUABLE = "game.arm";
+
+    public static final String TDM_GLSL_SHADER_VERSION = "2.11.1";
 
     private Q3EGlobals() {}
 }

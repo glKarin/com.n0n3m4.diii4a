@@ -519,6 +519,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         }
         return false;
     }
+
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -908,8 +909,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            Runnable runnable = new Runnable()
-            {
+            Runnable runnable = new Runnable() {
                 @Override
                 public void run()
                 {

@@ -315,8 +315,12 @@ VID_LoadRefresh(char *name)
 
 	extern void (* GLimp_AndroidInit)(volatile ANativeWindow *win);
 	extern void (* GLimp_AndroidQuit)(void);
+	extern void Android_GrabMouseCursor(qboolean grabIt);
 	GLimp_AndroidInit = Sys_GetProcAddress(reflib_library, "GLimp_AndroidInit");
 	GLimp_AndroidQuit = Sys_GetProcAddress(reflib_library, "GLimp_AndroidQuit");
+	void (* Android_SetMouseGrabFunction)(void (* f)(qboolean grabIt));
+	Android_SetMouseGrabFunction = Sys_GetProcAddress(reflib_library, "Android_SetMouseGrabFunction");
+	Android_SetMouseGrabFunction(Android_GrabMouseCursor);
     extern void Q3E_Start(void);
     Q3E_Start();
 

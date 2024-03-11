@@ -6,6 +6,7 @@ import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
 import com.karin.idTech4Amm.misc.Function;
+import com.n0n3m4.q3e.Q3EUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -42,43 +43,10 @@ public final class FileUtility
         }
     }
 
-    public static long Copy(OutputStream out, InputStream in, int...bufferSizeArg) throws RuntimeException
-    {
-        if(null == out)
-            return -1;
-        if(null == in)
-            return -1;
-
-        int bufferSize = bufferSizeArg.length > 0 ? bufferSizeArg[0] : 0;
-        if (bufferSize <= 0)
-            bufferSize = DEFAULT_BUFFER_SIZE;
-
-        byte[] buffer = new byte[bufferSize];
-
-        long size = 0L;
-
-        int readSize;
-        try
-        {
-            while((readSize = in.read(buffer)) != -1)
-            {
-                out.write(buffer, 0, readSize);
-                size += readSize;
-                out.flush();
-            }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-
-        return size;
-    }
-
     public static byte[] ReadStream(InputStream in, int...bufferSizeArg)
     {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        long size = Copy(os, in, bufferSizeArg);
+        long size = Q3EUtils.Copy(os, in, bufferSizeArg);
         byte[] res = null;
         if(size >= 0)
             res = os.toByteArray();
@@ -104,15 +72,6 @@ public final class FileUtility
         if(index <= 0 || index == fileName.length() - 1)
             return fileName;
         return fileName.substring(0, index);
-    }
-
-    public static boolean mkdir(String path, boolean p)
-    {
-        File file = new File(path);
-        if(p)
-            return file.mkdirs();
-        else
-            return file.mkdir();
     }
 
     public static long du(String path)

@@ -49,6 +49,10 @@ static qboolean trackball_event = qfalse;
 static float trackball_dx = 0;
 static float trackball_dy = 0;
 
+static qboolean mouseActive = qfalse;
+static cvar_t *in_nograb;
+extern void Android_GrabMouseCursor(qboolean grabIt);
+
 #if 0
 void Com_PushEvent( sysEvent_t *event );
 
@@ -188,10 +192,55 @@ static void processTrackballEvents(void)
 	}
 }
 
+/*
+===============
+IN_ActivateMouse
+===============
+*/
+static void IN_ActivateMouse( void )
+{
+	if(!in_nograb)
+	{
+		Android_GrabMouseCursor( qtrue );
+	}
+	else if( in_nograb->modified || !mouseActive )
+	{
+		if( in_nograb->integer ) {
+			Android_GrabMouseCursor( qfalse );
+		} else {
+			Android_GrabMouseCursor( qtrue );
+		}
+
+		in_nograb->modified = qfalse;
+	}
+
+	mouseActive = qtrue;
+}
+
+/*
+===============
+IN_DeactivateMouse
+===============
+*/
+static void IN_DeactivateMouse( void )
+{
+	if( mouseActive )
+	{
+		Android_GrabMouseCursor( qfalse );
+
+		mouseActive = qfalse;
+	}
+}
+
 extern void (*pull_input_event)(int execCmd);
 extern void Sys_SyncState(void);
 void IN_Frame(void)
 {
+	if( ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) )
+		IN_DeactivateMouse();
+	else
+		IN_ActivateMouse();
+
 	pull_input_event(1);
 
 	processMotionEvents();
@@ -210,6 +259,7 @@ void IN_Init( void *windowData )
 	Com_DPrintf( "\n------- Input Initialization -------\n" );
 	scale_ratio = (float)SCREEN_HEIGHT/glConfig.vidHeight;
 	offset_x = (glConfig.vidWidth - ((float)SCREEN_WIDTH/scale_ratio))/2;
+	in_nograb = Cvar_Get( "in_nograb", "0", CVAR_ARCHIVE );
 	Com_DPrintf( "------------------------------------\n" );
 }
 

@@ -1,0 +1,10 @@
+include(${CMAKE_CURRENT_LIST_DIR}/tdm_find_package.cmake)
+
+set(ogg_FOUND 1)
+set(ogg_INCLUDE_DIRS "${ARTEFACTS_DIR}/ogg/include")
+set(ogg_LIBRARY_DIR "${ARTEFACTS_DIR}/ogg/lib/${PACKAGE_PLATFORM}")
+if(MSVC)
+	set(ogg_LIBRARIES "${ogg_LIBRARY_DIR}/ogg.lib")
+else()
+	set(ogg_LIBRARIES "${ogg_LIBRARY_DIR}/libogg.a")
+endif()

@@ -151,7 +151,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"></RadioGroup>
 
+            <RadioGroup
+                android:id="@+id/rg_fs_tdmgame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></RadioGroup>
 
+
+
+        <LinearLayout
+            android:id="@+id/mod_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -190,6 +201,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/dll_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -210,6 +222,7 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textSize="12sp" />
             </LinearLayout>
+        </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/renderer_section"

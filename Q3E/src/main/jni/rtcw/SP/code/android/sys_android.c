@@ -68,6 +68,9 @@ volatile qboolean paused = false;
 // Continue when missing OpenGL context
 volatile qboolean continue_when_no_gl_context = false;
 
+// using mouse
+qboolean mouse_available = false;
+
 // Surface window
 volatile ANativeWindow *window = NULL;
 static volatile qboolean window_changed = false;
@@ -181,10 +184,9 @@ void Sys_InitThreads()
     }
 }
 
-
 void Android_GrabMouseCursor(qboolean grabIt)
 {
-    if(grab_mouse)
+    if(mouse_available && grab_mouse)
         grab_mouse(grabIt);
 }
 
@@ -259,6 +261,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("    Native library directory: %s\n", native_library_dir);
     printf("    Redirect output to file: %d\n", redirect_output_to_file);
     printf("    No handle signals: %d\n", no_handle_signals);
+    printf("    Using mouse: %d\n", mouse_available);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
@@ -384,6 +387,7 @@ void Q3E_SetInitialContext(const void *context)
     redirect_output_to_file = ptr->redirectOutputToFile ? true : false;
     no_handle_signals = ptr->noHandleSignals ? true : false;
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
+    mouse_available = ptr->mouseAvailable ? true : false;
 }
 
 // View paused

@@ -10,6 +10,7 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.Q3EUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -101,10 +102,10 @@ public final class AddExternalLibraryFunc extends GameLauncherFunc
         {
             InputStream is = m_gameLauncher.getContentResolver().openInputStream(uri);
             String path = m_path;
-            FileUtility.mkdir(path, true);
+            Q3EUtils.mkdir(path, true);
             File file = new File(path + File.separator + fileName);
             os = new FileOutputStream(file);
-            FileUtility.Copy(os, is);
+            Q3EUtils.Copy(os, is);
             Toast_long(R.string.add_game_library_file_success);
             Callback();
         }

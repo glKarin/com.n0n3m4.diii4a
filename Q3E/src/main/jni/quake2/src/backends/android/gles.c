@@ -588,6 +588,17 @@ qboolean GLimp_InitGL(qboolean fullscreen)
 	return true;
 }
 
+/*
+ * (Un)grab Input
+ */
+void (* Android_GrabMouseCursor)(qboolean grabIt);
+void
+GLimp_GrabInput(qboolean grab)
+{
+	if(Android_GrabMouseCursor)
+		(*Android_GrabMouseCursor)(grab);
+}
+
 #pragma GCC visibility push(default)
 void AndroidSetResolution(int aw,int ah)
 {
@@ -599,5 +610,10 @@ void R_SetGLParms(int f, int msaa)
 {
 	gl_format = f;
 	gl_msaa = msaa;
+}
+
+void Android_SetMouseGrabFunction(void (* f)(qboolean grabIt))
+{
+	Android_GrabMouseCursor = f;
 }
 #pragma GCC visibility pop

@@ -680,4 +680,21 @@ public class Q3EUtils
             return false;
         }
     }
+
+    public static boolean mkdir(String path, boolean p)
+    {
+        File file = new File(path);
+        try
+        {
+            if(p)
+                return file.mkdirs();
+            else
+                return file.mkdir();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

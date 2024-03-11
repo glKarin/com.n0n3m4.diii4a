@@ -1,0 +1,10 @@
+include(${CMAKE_CURRENT_LIST_DIR}/tdm_find_package.cmake)
+
+set(libjpeg_FOUND 1)
+set(libjpeg_INCLUDE_DIRS "${ARTEFACTS_DIR}/libjpeg/include")
+set(libjpeg_LIBRARY_DIR "${ARTEFACTS_DIR}/libjpeg/lib/${PACKAGE_PLATFORM}")
+if(MSVC)
+	set(libjpeg_LIBRARIES "${libjpeg_LIBRARY_DIR}/libjpeg.lib")
+else()
+	set(libjpeg_LIBRARIES "${libjpeg_LIBRARY_DIR}/libjpeg.a")
+endif()
