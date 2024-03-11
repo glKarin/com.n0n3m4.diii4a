@@ -6,7 +6,13 @@ if(NOT is_multi_config AND NOT CMAKE_BUILD_TYPE)
 	message(FATAL_ERROR "Set CMAKE_BUILD_TYPE to either Release or Debug")
 endif()
 
-if (UNIX)
+if (ANDROID)
+    # we want debug symbols even with Release builds
+    string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math")
+    string(APPEND CMAKE_C_FLAGS_RELEASE_INIT "-ffast-math")
+#[[    string(REPLACE "-O2" "-O1" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+    string(REPLACE "-O2" "-O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")]]
+elseif (UNIX)
 	# we want debug symbols even with Release builds
 	string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT "-g -ffast-math")
 	string(APPEND CMAKE_C_FLAGS_RELEASE_INIT "-g -ffast-math")
@@ -34,11 +40,13 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 cmake_dependent_option(WITH_TOOLS "Compile with Tools" ON "MSVC" OFF)
 set(GAME_DIR "${PROJECT_SOURCE_DIR}/../darkmod" CACHE STRING "The directory where the game assets are stored")
 option(COPY_EXE "Copy executable to GAME_DIR after build" OFF)
 set(THIRDPARTY_PLATFORM_OVERRIDE "" CACHE STRING "If you build conan dependencies yourself with custom platform_name, pass platform_name string here")
-option(ENABLE_TRACY "Enable tracy profiling support. Needs to be activated ingame by enabling the cvar com_enableTracing." ON)
+option(ENABLE_TRACY "Enable tracy profiling support. Needs to be activated ingame by enabling the cvar com_enableTracing." OFF) #k ON
 
 if (UNIX)
     # configure sensible warnings
@@ -250,7 +258,7 @@ elseif (MSVC)
 	endif ()
 endif ()
 # ffmpeg dep was compiled without -fPIC, so need to disable PIE on 64bit builds
-set_target_properties(TheDarkMod PROPERTIES POSITION_INDEPENDENT_CODE OFF)	# see also CMP0083
+set_target_properties(TheDarkMod PROPERTIES POSITION_INDEPENDENT_CODE ON)	# see also CMP0083
 ucm_set_runtime(STATIC)
 
 #[[find_package(zlib REQUIRED)
@@ -287,7 +295,6 @@ include_directories(
 target_link_libraries(TheDarkMod
 		z
 		minizip
-        jpeg
 		vorbis
 		ogg
 		mbedtls
@@ -296,6 +303,7 @@ target_link_libraries(TheDarkMod
         curl
         openal
         vorbisfile
+        jpeg
 )
 #k target_link_libraries(TheDarkMod debug ${pugixml_LIBRARIES_D} optimized ${pugixml_LIBRARIES})
 
@@ -304,6 +312,7 @@ if (WIN32)
 	set_target_properties(TheDarkMod PROPERTIES WIN32_EXECUTABLE TRUE)
 elseif (ANDROID)
     target_link_libraries(TheDarkMod z dl android EGL)
+    #set_target_properties(TheDarkMod PROPERTIES LINK_FLAGS "-static-libstdc++")
 elseif (UNIX)
 	target_link_libraries(TheDarkMod pthread dl stdc++fs X11 Xext Xxf86vm)
 	# strip debug symbols from executable and put them into a separate symbols file

@@ -197,7 +197,9 @@ void RenderBackend::DrawView( const viewDef_t *viewDef, bool colorIsBackground )
 		RB_STD_FogAllLights( true ); // 2.08: second fog pass, translucent only
 	}
 
+#if !defined(__ANDROID__) //karin: TODO: crash when build release
 	RB_RenderDebugTools( drawSurfs, numDrawSurfs );
+#endif
 
 	// restore the context for 2D drawing if we were stubbing it out
 	if ( r_skipRenderContext.GetBool() && viewDef->viewEntitys ) {
