@@ -19,7 +19,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 // stgatilov: if you update Tracy and this header is missing in new artefacts
 // then you need to implement proper way of querying the version of Tracy
 // see this issue: https://github.com/wolfpld/tracy/issues/449
+#if !defined(_NO_TRACY) // __ANDROID__
 #include <common/TracyVersion.hpp>
+#endif
 
 idCVar r_useDebugGroups(
 	// note: we cannot enable these for players, because they are slow as shit in AMD driver:

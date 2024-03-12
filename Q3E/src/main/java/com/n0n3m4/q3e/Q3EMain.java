@@ -102,7 +102,7 @@ public class Q3EMain extends Activity
         if (gameHelper.checkGameFiles())
         {
             // if game is TDM, extract glsl shader
-            if(Q3EUtils.q3ei.IsIdTech4_TDM())
+            if(Q3EUtils.q3ei.IsTDMTech())
                 gameHelper.ExtractTDMGLSLShaderSource();
 
             // init GUI component

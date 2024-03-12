@@ -147,6 +147,21 @@ ucm_add_files(
 	"ThirdParty/artefacts/tracy/src/TracyClient.cpp"
 TO TDM_SOURCE_FILES)
 
+if(ANDROID)
+    ucm_remove_files(
+            "ThirdParty/artefacts/tracy/src/TracyClient.cpp"
+            FROM TDM_SOURCE_FILES
+    )
+    add_definitions(-D_NO_TRACY)
+else()
+    include_directories(
+            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include"
+            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/common"
+            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/client"
+            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/libbacktrace"
+    )
+endif()
+
 if (WITH_TOOLS)
 	ucm_add_dirs("tools" TO TDM_SOURCE_FILES RECURSIVE)
 	ucm_remove_files(
@@ -274,24 +289,31 @@ find_package(libpng REQUIRED)
 find_package(mbedtls REQUIRED)
 find_package(glfw REQUIRED)]]
 
+
+
+set(DEPLIBS_PATH "${PROJECT_SOURCE_DIR}/../deplibs")
+set(DEPINCS_PATH "${PROJECT_SOURCE_DIR}/ThirdParty/include")
+set(D3_DEPLIBS_PATH "${PROJECT_SOURCE_DIR}/../doom3/neo/externlibs")
+# ogg headers
+set(OGG_CONFIG_TYPES_HEADER_PATH ${DEPINCS_PATH})
+include(${DEPLIBS_PATH}/libogg/cmake/GenerateConfigTypesHeader.cmake)
+# png headers
+configure_file(${DEPLIBS_PATH}/libpng/scripts/pnglibconf.h.prebuilt ${DEPINCS_PATH}/pnglibconf.h)
 include_directories(
 		"${PROJECT_SOURCE_DIR}"
 		"${PROJECT_SOURCE_DIR}/idlib"
-		"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/doctest/include"
-		"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include"
-		"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/common"
-		"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/client"
-		"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/libbacktrace"
-        "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/minizip/include"
-        "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/openal/include"
-        "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/libcurl/include"
-        "${PROJECT_SOURCE_DIR}/../deplibs/libjpeg/libjpeg"
-        "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/libpng/include"
-		"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/pugixml/include"
-		"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/vorbis/include"
-		"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/ogg/include"
+        "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/doctest/include"
+        "${D3_DEPLIBS_PATH}/openal-soft"
+        "${DEPLIBS_PATH}"
+        "${DEPLIBS_PATH}/minizip"
+        "${DEPLIBS_PATH}/curl/include"
+        "${DEPLIBS_PATH}/libjpeg/libjpeg"
+        "${DEPLIBS_PATH}/libpng"
+        "${DEPLIBS_PATH}/pugixml/src"
+        "${DEPLIBS_PATH}/libogg/include"
+        "${DEPLIBS_PATH}/libvorbis/include"
+        "${DEPINCS_PATH}"
 )
-#"${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/libjpeg/include"
 target_link_libraries(TheDarkMod
 		z
 		minizip

@@ -24,7 +24,6 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -312,7 +311,7 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
-	public boolean IsIdTech4_TDM()
+	public boolean IsTDMTech()
 	{
 		return isTDM;
 	}

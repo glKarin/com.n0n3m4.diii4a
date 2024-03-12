@@ -26,7 +26,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #undef min
 #undef max
+#if !defined(_NO_TRACY) // __ANDROID__
 #include <Tracy.hpp>
+#endif
 
 #define ID_TIME_T time_t
 
