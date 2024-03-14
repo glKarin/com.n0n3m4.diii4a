@@ -356,7 +356,7 @@ public class GameLauncher extends Activity
 						.putString(Q3EPreference.pref_harm_r_lightModel, value)
 						.commit();
 			}
-			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame)
+			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_q3game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
 				SetGameDLL((String)checked.getTag());
@@ -809,6 +809,7 @@ public class GameLauncher extends Activity
         V.rg_fs_q4game.setEnabled(!on);
         V.rg_fs_preygame.setEnabled(!on);
 		V.rg_fs_q2game.setEnabled(!on);
+		V.rg_fs_q3game.setEnabled(!on);
 		V.rg_fs_rtcwgame.setEnabled(!on);
 		V.rg_fs_tdmgame.setEnabled(!on);
         V.fs_game_user.setText(on ? R.string.mod_ : R.string.user_mod);
@@ -939,6 +940,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_q4game.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_preygame.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_q2game.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		V.rg_fs_q3game.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_rtcwgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_tdmgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.edt_fs_game.addTextChangedListener(new TextWatcher()
@@ -1350,6 +1352,11 @@ public class GameLauncher extends Activity
 		else if (itemId == R.id.main_menu_game_quake2)
 		{
 			ChangeGame(Q3EGlobals.GAME_QUAKE2);
+			return true;
+		}
+		else if (itemId == R.id.main_menu_game_quake3)
+		{
+			ChangeGame(Q3EGlobals.GAME_QUAKE3);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_game_rtcw)
@@ -1911,6 +1918,7 @@ public class GameLauncher extends Activity
         boolean q4Visible = false;
         boolean preyVisible = false;
 		boolean q2Visible = false;
+		boolean q3Visible = false;
 		boolean rtcwVisible = false;
 		boolean tdmVisible = false;
 		boolean rendererVisible = true;
@@ -1930,6 +1938,15 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isQ2)
 		{
 			q2Visible = true;
+			rendererVisible = false;
+			soundVisible = false;
+			otherVisible = false;
+			openglVisible = false;
+			dllVisible = false;
+		}
+		else if (Q3EUtils.q3ei.isQ3)
+		{
+			q3Visible = true;
 			rendererVisible = false;
 			soundVisible = false;
 			otherVisible = false;
@@ -1971,6 +1988,7 @@ public class GameLauncher extends Activity
         V.rg_fs_q4game.setVisibility(q4Visible ? View.VISIBLE : View.GONE);
         V.rg_fs_preygame.setVisibility(preyVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_q2game.setVisibility(q2Visible ? View.VISIBLE : View.GONE);
+		V.rg_fs_q3game.setVisibility(q3Visible ? View.VISIBLE : View.GONE);
 		V.rg_fs_rtcwgame.setVisibility(rtcwVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_tdmgame.setVisibility(tdmVisible ? View.VISIBLE : View.GONE);
 
@@ -2027,7 +2045,7 @@ public class GameLauncher extends Activity
 		if(b)
 		{
 			V.edt_cmdline.addTextChangedListener(m_commandTextWatcher);
-			m_commandTextWatcher.Install(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isQ2 || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isTDM);
+			m_commandTextWatcher.Install(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech2() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech());
 		}
 		else
 		{
@@ -2206,6 +2224,8 @@ public class GameLauncher extends Activity
 			return V.rg_fs_preygame;
 		else if(Q3EUtils.q3ei.isQ2)
 			return V.rg_fs_q2game;
+		else if(Q3EUtils.q3ei.isQ3)
+			return V.rg_fs_q3game;
 		else if(Q3EUtils.q3ei.isRTCW)
 			return V.rg_fs_rtcwgame;
 		else if(Q3EUtils.q3ei.isTDM)
@@ -2366,6 +2386,7 @@ public class GameLauncher extends Activity
 		groups.put(Q3EGlobals.GAME_QUAKE4, V.rg_fs_q4game);
 		groups.put(Q3EGlobals.GAME_PREY, V.rg_fs_preygame);
 		groups.put(Q3EGlobals.GAME_QUAKE2, V.rg_fs_q2game);
+		groups.put(Q3EGlobals.GAME_QUAKE3, V.rg_fs_q3game);
 		groups.put(Q3EGlobals.GAME_RTCW, V.rg_fs_rtcwgame);
 		groups.put(Q3EGlobals.GAME_TDM, V.rg_fs_tdmgame);
 		Game[] values = Game.values();
@@ -2477,6 +2498,7 @@ public class GameLauncher extends Activity
 		public LinearLayout mod_section;
 		public LinearLayout dll_section;
 		public RadioGroup rg_fs_q2game;
+		public RadioGroup rg_fs_q3game;
 		public RadioGroup rg_fs_rtcwgame;
 		public RadioGroup rg_fs_tdmgame;
 
@@ -2555,6 +2577,7 @@ public class GameLauncher extends Activity
 			dll_section = findViewById(R.id.dll_section);
 			mod_section = findViewById(R.id.mod_section);
 			rg_fs_q2game = findViewById(R.id.rg_fs_q2game);
+			rg_fs_q3game = findViewById(R.id.rg_fs_q3game);
 			rg_fs_rtcwgame = findViewById(R.id.rg_fs_rtcwgame);
 			rg_fs_tdmgame = findViewById(R.id.rg_fs_tdmgame);
         }

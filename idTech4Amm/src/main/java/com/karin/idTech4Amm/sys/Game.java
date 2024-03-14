@@ -39,6 +39,9 @@ public enum Game
 
     // The dark mod
     TDM_BASE(Q3EGlobals.GAME_TDM, "darkmod", "", "", false, R.string.tdm_base),
+
+    // Quake 3
+    QUAKE3_BASE(Q3EGlobals.GAME_QUAKE3, "baseq3", "", "", false, R.string.quake_3_base),
     ;
 
     public final String type; // game type: doom3/quake4/prey2006

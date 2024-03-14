@@ -84,6 +84,7 @@
     <string name="doom_3">毁灭战士3</string>
     <string name="quake_4">雷神之锤4</string>
     <string name="quake_2">雷神之锤2</string>
+    <string name="quake_3">雷神之锤3</string>
     <string name="rtcw">重返德军总部</string>
     <string name="tdm">Dark mod</string>
     <string name="prey_2006">掠食(2006)</string>
@@ -286,4 +287,5 @@
     <string name="quake_2_zaero">雷神之锤2:zaero</string>
     <string name="rtcw_base">重返德军总部</string>
     <string name="tdm_base">The Dark Mod</string>
+    <string name="quake_3_base">雷神之锤3</string>
 </resources>

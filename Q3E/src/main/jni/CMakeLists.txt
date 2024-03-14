@@ -59,6 +59,8 @@ add_subdirectory (deplibs)
 
 add_subdirectory (quake2)
 
+add_subdirectory (quake3)
+
 add_subdirectory (rtcw)
 
 add_subdirectory (tdm)

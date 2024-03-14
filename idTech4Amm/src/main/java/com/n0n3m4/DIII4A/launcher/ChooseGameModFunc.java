@@ -90,6 +90,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         {
             blackList.remove(Q3EGlobals.GAME_BASE_QUAKE2);
         }
+        else if(Q3EUtils.q3ei.isQ3)
+        {
+            blackList.remove(Q3EGlobals.GAME_BASE_QUAKE3);
+        }
         else if(Q3EUtils.q3ei.isRTCW)
         {
             blackList.remove(Q3EGlobals.GAME_BASE_RTCW);
@@ -123,6 +127,11 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 if(Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_QUAKE2;
             }
+            else if(Q3EUtils.q3ei.isQ3)
+            {
+                if(Q3EGlobals.GAME_BASE_QUAKE3.equals(fileModel.name))
+                    name = Q3EGlobals.GAME_NAME_QUAKE3;
+            }
             else if(Q3EUtils.q3ei.isRTCW)
             {
                 if(Q3EGlobals.GAME_BASE_RTCW.equals(fileModel.name))
@@ -154,6 +163,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_QUAKE2:
                         if(!Q3EUtils.q3ei.isQ2)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_QUAKE3:
+                        if(!Q3EUtils.q3ei.isQ3)
                             continue;
                         break;
                     case Q3EGlobals.GAME_RTCW:

@@ -139,6 +139,8 @@ public final class KCVarSystem
                 return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("q4base"));
             else if(Q3EUtils.q3ei.isQ2)
                 return new ArrayList<>();
+            else if(Q3EUtils.q3ei.isQ3)
+                return new ArrayList<>();
             else if(Q3EUtils.q3ei.isRTCW)
                 return new ArrayList<>();
             else if(Q3EUtils.q3ei.isTDM)

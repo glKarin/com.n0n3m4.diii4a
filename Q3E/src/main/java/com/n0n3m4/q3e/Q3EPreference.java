@@ -43,6 +43,10 @@ public final class Q3EPreference
     public static final String pref_harm_q2_game_lib = "q3e_harm_q2_game_lib"; //k
     public static final String pref_harm_q2_user_mod = "q3e_harm_q2_user_mod"; //k
     public static final String pref_params_q2 = "q3e_params_q2"; //k
+    public static final String pref_harm_q3_fs_game = "q3e_harm_q3_fs_game"; //k
+    public static final String pref_harm_q3_game_lib = "q3e_harm_q3_game_lib"; //k
+    public static final String pref_harm_q3_user_mod = "q3e_harm_q3_user_mod"; //k
+    public static final String pref_params_q3 = "q3e_params_q3"; //k
     public static final String pref_harm_rtqw_fs_game = "q3e_harm_rtqw_fs_game"; //k
     public static final String pref_harm_rtqw_game_lib = "q3e_harm_rtqw_game_lib"; //k
     public static final String pref_harm_rtqw_user_mod = "q3e_harm_rtqw_user_mod"; //k

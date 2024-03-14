@@ -160,6 +160,9 @@ public class Q3EGameHelper
                     case Q3EGlobals.GAME_QUAKE2:
                         fs_game = "baseq2";
                         break;
+                    case Q3EGlobals.GAME_QUAKE3:
+                        fs_game = "baseq3";
+                        break;
                     case Q3EGlobals.GAME_RTCW:
                         fs_game = "main";
                         break;

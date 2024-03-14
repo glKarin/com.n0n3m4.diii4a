@@ -19,6 +19,7 @@ public final class GameManager
             Q3EGlobals.GAME_QUAKE4,
             Q3EGlobals.GAME_PREY,
             Q3EGlobals.GAME_QUAKE2,
+            Q3EGlobals.GAME_QUAKE3,
             Q3EGlobals.GAME_RTCW,
             Q3EGlobals.GAME_TDM,
     };
@@ -98,6 +99,10 @@ public final class GameManager
         {
             list = GameProps.get(Q3EGlobals.GAME_QUAKE2);
         }
+        else if (Q3EUtils.q3ei.isQ3)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_QUAKE3);
+        }
         else if (Q3EUtils.q3ei.isRTCW)
         {
             list = GameProps.get(Q3EGlobals.GAME_RTCW);
@@ -147,6 +152,8 @@ public final class GameManager
             return R.drawable.q4_icon;
         else if (Q3EUtils.q3ei.isQ2)
             return R.drawable.q2_icon;
+        else if (Q3EUtils.q3ei.isQ3)
+            return R.drawable.q3_icon;
         else if (Q3EUtils.q3ei.isRTCW)
             return R.drawable.rtcw_icon;
         else if (Q3EUtils.q3ei.isTDM)
@@ -163,6 +170,8 @@ public final class GameManager
             return R.color.theme_quake4_main_color;
         else if (Q3EUtils.q3ei.isQ2)
             return R.color.theme_quake2_main_color;
+        else if (Q3EUtils.q3ei.isQ3)
+            return R.color.theme_quake3_main_color;
         else if (Q3EUtils.q3ei.isRTCW)
             return R.color.theme_rtcw_main_color;
         else if (Q3EUtils.q3ei.isTDM)

@@ -78,6 +78,7 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE_RAVEN = "libidtech4_raven.so"; // Quake 4
     public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
     public static final String LIB_ENGINE2_ID = "libidtech2.so"; // Quake 2
+    public static final String LIB_ENGINE3_ID = "libidtech3.so"; // Quake 3
     public static final String LIB_ENGINE3_RTCW = "libidtech3_rtcw.so"; // RTCW
     public static final String LIB_ENGINE4_TDM = "libthedarkmod.so"; // TDM
 
@@ -85,6 +86,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_QUAKE4 = "Quake4Config.cfg"; // Quake 4
     public static final String CONFIG_FILE_PREY = "preyconfig.cfg"; // Prey 2006
     public static final String CONFIG_FILE_QUAKE2 = "yq2.cfg"; // Quake 2
+    public static final String CONFIG_FILE_QUAKE3 = "q3config.cfg"; // Quake 3
     public static final String CONFIG_FILE_RTCW = "wolfconfig.cfg"; // RTCW
     public static final String CONFIG_FILE_TDM = "Darkmod.cfg"; // TDM
 
@@ -92,6 +94,7 @@ public final class Q3EGlobals
     public static final String GAME_QUAKE4 = "quake4";
     public static final String GAME_PREY = "prey2006";
     public static final String GAME_QUAKE2 = "quake2";
+    public static final String GAME_QUAKE3 = "quake3";
     public static final String GAME_RTCW = "rtcw";
     public static final String GAME_TDM = "tdm";
 
@@ -99,6 +102,7 @@ public final class Q3EGlobals
     public static final String GAME_NAME_QUAKE4 = "Quake 4";
     public static final String GAME_NAME_PREY = "Prey(2006)";
     public static final String GAME_NAME_QUAKE2 = "Quake 2";
+    public static final String GAME_NAME_QUAKE3 = "Quake 3";
     public static final String GAME_NAME_RTCW = "RTCW"; // "Return to Castle Wolfenstein";
     public static final String GAME_NAME_TDM = "Dark mod"; // The Dark Mod
 
@@ -107,6 +111,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_QUAKE4 = "q4base";
     public static final String GAME_BASE_PREY = "preybase"; // Other platform is `base`
     public static final String GAME_BASE_QUAKE2 = "baseq2";
+    public static final String GAME_BASE_QUAKE3 = "baseq3";
     public static final String GAME_BASE_RTCW = "main";
     public static final String GAME_BASE_TDM = "darkmod";
 
@@ -136,6 +141,9 @@ public final class Q3EGlobals
             "q2rogue",
             "q2xatrix",
             "q2zaero",
+    };
+    public static final String[] Q3_LIBS = {
+            "qagame",
     };
     public static final String[] RTCW_LIBS = {
             "rtcwgame",

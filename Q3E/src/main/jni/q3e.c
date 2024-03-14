@@ -654,6 +654,7 @@ void show_toast(const char *text)
 		return;
 	}
 
+	LOGI("Toast: %s", text);
 	jstring str = (*env)->NewStringUTF(env, text);
 	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
 	(*env)->DeleteLocalRef(env, str);
