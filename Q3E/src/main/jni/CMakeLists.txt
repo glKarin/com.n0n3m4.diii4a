@@ -51,9 +51,9 @@ target_link_libraries( # Specifies the target library.
         android
         )
 
-add_subdirectory (doom3/neo)
-
 #add_subdirectory(doom3/neo/externlibs/openal-soft)
+
+add_subdirectory (doom3/neo)
 
 add_subdirectory (deplibs)
 

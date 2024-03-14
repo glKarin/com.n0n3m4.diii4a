@@ -74,6 +74,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 Q3EGlobals.GAME_BASE_QUAKE4,
                 Q3EGlobals.GAME_BASE_PREY,
                 Q3EGlobals.GAME_BASE_QUAKE2,
+                Q3EGlobals.GAME_BASE_QUAKE3,
                 Q3EGlobals.GAME_BASE_RTCW,
                 Q3EGlobals.GAME_BASE_TDM
         );

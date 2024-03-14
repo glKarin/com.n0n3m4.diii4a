@@ -28,6 +28,7 @@ GPLv3
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
 * Quake2(Yamagi Quake II) and mods: ctf; rogue; xatrix; zaero
+* Quake3(ioquake3)
 * Return to Castle Wolfenstein(iortcw)
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
@@ -150,7 +151,7 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 #### Windows(MinGW)
 ##### Define macro `_WIN32` and `WIN32`.
 > 1. REQUIRE SDL2, zlib
-> 2. NOT SUPPORT OpenGLES3, OpenAL, cURL
+> 2. NOT SUPPORT cURL
 
 ----------------------------------------------------------------------------------
 

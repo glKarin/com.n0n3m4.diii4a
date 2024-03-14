@@ -429,15 +429,22 @@ code/sys/con_passive.c
 code/sys/sys_unix.c
         )
 
+add_library(q3renderer1 STATIC
+        ${q3renderer_src}
+)
+set_target_properties(q3renderer1 PROPERTIES COMPILE_FLAGS "-fPIC")
+target_include_directories(q3renderer1 PRIVATE "code/jpeg-8c")
+target_include_directories(q3renderer1 PRIVATE "code/curl-7.54.0/include")
+
 set(Q3LIBRARY idtech3)
 add_library(${Q3LIBRARY} SHARED
-        ${q3renderer_src}
         ${q3client_src}
         ${q3jpeglib_src}
         )
 set_target_properties(${Q3LIBRARY} PROPERTIES COMPILE_DEFINITIONS "BOTLIB")
 target_link_libraries(${Q3LIBRARY}
         ${q3client_libs}
+		q3renderer1
         )
 target_include_directories(${Q3LIBRARY} PRIVATE "code/curl-7.54.0/include")
 target_include_directories(${Q3LIBRARY} PRIVATE "code/libogg-1.3.3/include")
