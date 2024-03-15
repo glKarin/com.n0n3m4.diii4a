@@ -80,36 +80,36 @@ code/qcommon/q_shared.c
 code/cgame/cg_syscalls.c
         )
 
-#[[set(q3mpcgame_src
-        $(B)/$(MISSIONPACK)/cgame/cg_main.c
-$(B)/$(MISSIONPACK)/cgame/bg_misc.c
-$(B)/$(MISSIONPACK)/cgame/bg_pmove.c
-$(B)/$(MISSIONPACK)/cgame/bg_slidemove.c
-$(B)/$(MISSIONPACK)/cgame/bg_lib.c
-$(B)/$(MISSIONPACK)/cgame/cg_consolecmds.c
-$(B)/$(MISSIONPACK)/cgame/cg_newdraw.c
-$(B)/$(MISSIONPACK)/cgame/cg_draw.c
-$(B)/$(MISSIONPACK)/cgame/cg_drawtools.c
-$(B)/$(MISSIONPACK)/cgame/cg_effects.c
-$(B)/$(MISSIONPACK)/cgame/cg_ents.c
-$(B)/$(MISSIONPACK)/cgame/cg_event.c
-$(B)/$(MISSIONPACK)/cgame/cg_info.c
-$(B)/$(MISSIONPACK)/cgame/cg_localents.c
-$(B)/$(MISSIONPACK)/cgame/cg_marks.c
-$(B)/$(MISSIONPACK)/cgame/cg_particles.c
-$(B)/$(MISSIONPACK)/cgame/cg_players.c
-$(B)/$(MISSIONPACK)/cgame/cg_playerstate.c
-$(B)/$(MISSIONPACK)/cgame/cg_predict.c
-$(B)/$(MISSIONPACK)/cgame/cg_scoreboard.c
-$(B)/$(MISSIONPACK)/cgame/cg_servercmds.c
-$(B)/$(MISSIONPACK)/cgame/cg_snapshot.c
-$(B)/$(MISSIONPACK)/cgame/cg_view.c
-$(B)/$(MISSIONPACK)/cgame/cg_weapons.c
-$(B)/$(MISSIONPACK)/ui/ui_shared.c
-$(B)/$(MISSIONPACK)/qcommon/q_math.c
-$(B)/$(MISSIONPACK)/qcommon/q_shared.c
-$(B)/$(MISSIONPACK)/cgame/cg_syscalls.c
-)]]
+set(q3mpcgame_src
+        code/cgame/cg_main.c
+code/game/bg_misc.c
+code/game/bg_pmove.c
+code/game/bg_slidemove.c
+code/game/bg_lib.c
+code/cgame/cg_consolecmds.c
+code/cgame/cg_newdraw.c
+code/cgame/cg_draw.c
+code/cgame/cg_drawtools.c
+code/cgame/cg_effects.c
+code/cgame/cg_ents.c
+code/cgame/cg_event.c
+code/cgame/cg_info.c
+code/cgame/cg_localents.c
+code/cgame/cg_marks.c
+code/cgame/cg_particles.c
+code/cgame/cg_players.c
+code/cgame/cg_playerstate.c
+code/cgame/cg_predict.c
+code/cgame/cg_scoreboard.c
+code/cgame/cg_servercmds.c
+code/cgame/cg_snapshot.c
+code/cgame/cg_view.c
+code/cgame/cg_weapons.c
+code/ui/ui_shared.c
+code/qcommon/q_math.c
+code/qcommon/q_shared.c
+code/cgame/cg_syscalls.c
+)
 
 set(q3game_src
         code/game/g_main.c
@@ -147,45 +147,43 @@ code/qcommon/q_math.c
 code/qcommon/q_shared.c
 code/game/g_syscalls.c
         )
-#[[
 
 set(q3mpgame_src
-        $(B)/$(MISSIONPACK)/game/g_main.c
-$(B)/$(MISSIONPACK)/game/ai_chat.c
-$(B)/$(MISSIONPACK)/game/ai_cmd.c
-$(B)/$(MISSIONPACK)/game/ai_dmnet.c
-$(B)/$(MISSIONPACK)/game/ai_dmq3.c
-$(B)/$(MISSIONPACK)/game/ai_main.c
-$(B)/$(MISSIONPACK)/game/ai_team.c
-$(B)/$(MISSIONPACK)/game/ai_vcmd.c
-$(B)/$(MISSIONPACK)/game/bg_misc.c
-$(B)/$(MISSIONPACK)/game/bg_pmove.c
-$(B)/$(MISSIONPACK)/game/bg_slidemove.c
-$(B)/$(MISSIONPACK)/game/bg_lib.c
-$(B)/$(MISSIONPACK)/game/g_active.c
-$(B)/$(MISSIONPACK)/game/g_arenas.c
-$(B)/$(MISSIONPACK)/game/g_bot.c
-$(B)/$(MISSIONPACK)/game/g_client.c
-$(B)/$(MISSIONPACK)/game/g_cmds.c
-$(B)/$(MISSIONPACK)/game/g_combat.c
-$(B)/$(MISSIONPACK)/game/g_items.c
-$(B)/$(MISSIONPACK)/game/g_mem.c
-$(B)/$(MISSIONPACK)/game/g_misc.c
-$(B)/$(MISSIONPACK)/game/g_missile.c
-$(B)/$(MISSIONPACK)/game/g_mover.c
-$(B)/$(MISSIONPACK)/game/g_session.c
-$(B)/$(MISSIONPACK)/game/g_spawn.c
-$(B)/$(MISSIONPACK)/game/g_svcmds.c
-$(B)/$(MISSIONPACK)/game/g_target.c
-$(B)/$(MISSIONPACK)/game/g_team.c
-$(B)/$(MISSIONPACK)/game/g_trigger.c
-$(B)/$(MISSIONPACK)/game/g_utils.c
-$(B)/$(MISSIONPACK)/game/g_weapon.c
-$(B)/$(MISSIONPACK)/qcommon/q_math.c
-$(B)/$(MISSIONPACK)/qcommon/q_shared.c
-$(B)/$(MISSIONPACK)/game/g_syscalls.c
+        code/game/g_main.c
+code/game/ai_chat.c
+code/game/ai_cmd.c
+code/game/ai_dmnet.c
+code/game/ai_dmq3.c
+code/game/ai_main.c
+code/game/ai_team.c
+code/game/ai_vcmd.c
+code/game/bg_misc.c
+code/game/bg_pmove.c
+code/game/bg_slidemove.c
+code/game/bg_lib.c
+code/game/g_active.c
+code/game/g_arenas.c
+code/game/g_bot.c
+code/game/g_client.c
+code/game/g_cmds.c
+code/game/g_combat.c
+code/game/g_items.c
+code/game/g_mem.c
+code/game/g_misc.c
+code/game/g_missile.c
+code/game/g_mover.c
+code/game/g_session.c
+code/game/g_spawn.c
+code/game/g_svcmds.c
+code/game/g_target.c
+code/game/g_team.c
+code/game/g_trigger.c
+code/game/g_utils.c
+code/game/g_weapon.c
+code/qcommon/q_math.c
+code/qcommon/q_shared.c
+code/game/g_syscalls.c
         )
-]]
 
 set(q3ui_src
         code/q3_ui/ui_main.c
@@ -234,18 +232,18 @@ code/qcommon/q_shared.c
 code/ui/ui_syscalls.c
         )
 
-#[[set(q3mpui_src
-        $(B)/$(MISSIONPACK)/ui/ui_main.c
-$(B)/$(MISSIONPACK)/ui/ui_atoms.c
-$(B)/$(MISSIONPACK)/ui/ui_gameinfo.c
-$(B)/$(MISSIONPACK)/ui/ui_players.c
-$(B)/$(MISSIONPACK)/ui/ui_shared.c
-$(B)/$(MISSIONPACK)/ui/bg_misc.c
-$(B)/$(MISSIONPACK)/ui/bg_lib.c
-$(B)/$(MISSIONPACK)/qcommon/q_math.c
-$(B)/$(MISSIONPACK)/qcommon/q_shared.c
-$(B)/$(MISSIONPACK)/ui/ui_syscalls.c
-        )]]
+set(q3mpui_src
+        code/ui/ui_main.c
+code/ui/ui_atoms.c
+code/ui/ui_gameinfo.c
+code/ui/ui_players.c
+code/ui/ui_shared.c
+code/game/bg_misc.c
+code/game/bg_lib.c
+code/qcommon/q_math.c
+code/qcommon/q_shared.c
+code/ui/ui_syscalls.c
+        )
 
 set(q3jpeglib_src
         code/jpeg-8c/jaricom.c
@@ -452,6 +450,7 @@ target_include_directories(${Q3LIBRARY} PRIVATE "code/libvorbis-1.3.6/include")
 target_include_directories(${Q3LIBRARY} PRIVATE "code/jpeg-8c")
 target_include_directories(${Q3LIBRARY} PRIVATE "code")
 
+# Quake III Arena
 add_library(q3ui SHARED
         ${q3ui_src}
         )
@@ -472,3 +471,25 @@ add_library(q3qagame SHARED
 set_target_properties(q3qagame PROPERTIES COMPILE_DEFINITIONS "GAMEDLL;QAGAME")
 set_target_properties(q3qagame PROPERTIES COMPILE_FLAGS "-fPIC")
 set_target_properties(q3qagame PROPERTIES OUTPUT_NAME "qagame")
+
+# MissionPack
+add_library(q3mpui SHARED
+        ${q3mpui_src}
+        )
+set_target_properties(q3mpui PROPERTIES COMPILE_DEFINITIONS "UI;MISSIONPACK")
+set_target_properties(q3mpui PROPERTIES COMPILE_FLAGS "-fPIC")
+set_target_properties(q3mpui PROPERTIES OUTPUT_NAME "ui_mp")
+
+add_library(q3mpcgame SHARED
+        ${q3mpcgame_src}
+        )
+set_target_properties(q3mpcgame PROPERTIES COMPILE_DEFINITIONS "CGAMEDLL;CGAME;MISSIONPACK")
+set_target_properties(q3mpcgame PROPERTIES COMPILE_FLAGS "-fPIC")
+set_target_properties(q3mpcgame PROPERTIES OUTPUT_NAME "cgame_mp")
+
+add_library(q3mpqagame SHARED
+        ${q3mpgame_src}
+        )
+set_target_properties(q3mpqagame PROPERTIES COMPILE_DEFINITIONS "GAMEDLL;QAGAME;MISSIONPACK")
+set_target_properties(q3mpqagame PROPERTIES COMPILE_FLAGS "-fPIC")
+set_target_properties(q3mpqagame PROPERTIES OUTPUT_NAME "qagame_mp")

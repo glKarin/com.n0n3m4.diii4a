@@ -234,7 +234,7 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_auto_quick_load, isChecked)
 						.commit();
-				if (isChecked && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
+				if (isChecked && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech()))
 					SetParam_temp("loadGame", "QuickSave");
 				else
 					RemoveParam_temp("loadGame");
@@ -902,7 +902,7 @@ public class GameLauncher extends Activity
 			SetCommand_temp("disconnect", true);
         boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
         V.auto_quick_load.setChecked(autoQuickLoad);
-        if (autoQuickLoad && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
+        if (autoQuickLoad && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech()))
             SetParam_temp("loadGame", "QuickSave");
         boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         V.multithreading.setChecked(multithreading);
@@ -2289,7 +2289,7 @@ public class GameLauncher extends Activity
 		if (skipIntro)
 			tempCmd += " +disconnect";
 		boolean quickSave = preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
-		if (quickSave && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
+		if (quickSave && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech()))
 			tempCmd += " +loadGame QuickSave";
 		return tempCmd.trim();
 	}

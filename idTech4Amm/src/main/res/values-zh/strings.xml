@@ -287,5 +287,6 @@
     <string name="quake_2_zaero">雷神之锤2:zaero</string>
     <string name="rtcw_base">重返德军总部</string>
     <string name="tdm_base">The Dark Mod</string>
-    <string name="quake_3_base">雷神之锤3</string>
+    <string name="quake_3_base">雷神之锤3:竞技场</string>
+    <string name="quake_3_teamarena">雷神之锤3:团队竞技场</string>
 </resources>

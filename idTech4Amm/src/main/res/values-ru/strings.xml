@@ -288,6 +288,7 @@
     <string name="quake_2_zaero">Quake II:zaero</string>
     <string name="rtcw_base">Return to Castle Wolfenstein</string>
     <string name="tdm_base">The Dark Mod</string>
-    <string name="quake_3_base">Quake III</string>
+    <string name="quake_3_base">Quake III:Arena</string>
+    <string name="quake_3_teamarena">Quake III:Team Arena</string>
 
 </resources>

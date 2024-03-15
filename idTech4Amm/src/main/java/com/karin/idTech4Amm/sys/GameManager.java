@@ -18,9 +18,9 @@ public final class GameManager
             Q3EGlobals.GAME_DOOM3,
             Q3EGlobals.GAME_QUAKE4,
             Q3EGlobals.GAME_PREY,
-            Q3EGlobals.GAME_QUAKE2,
             Q3EGlobals.GAME_QUAKE3,
             Q3EGlobals.GAME_RTCW,
+            Q3EGlobals.GAME_QUAKE2,
             Q3EGlobals.GAME_TDM,
     };
 

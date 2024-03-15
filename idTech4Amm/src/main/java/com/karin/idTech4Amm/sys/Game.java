@@ -42,6 +42,7 @@ public enum Game
 
     // Quake 3
     QUAKE3_BASE(Q3EGlobals.GAME_QUAKE3, "baseq3", "", "", false, R.string.quake_3_base),
+    QUAKE3_TEAMARENA(Q3EGlobals.GAME_QUAKE3, "missionpack", "missionpack", "", true, R.string.quake_3_teamarena),
     ;
 
     public final String type; // game type: doom3/quake4/prey2006

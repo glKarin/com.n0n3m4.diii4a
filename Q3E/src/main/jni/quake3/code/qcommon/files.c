@@ -1462,10 +1462,17 @@ int FS_FindVM(void **startSearch, char *found, int foundlen, const char *name, i
 #ifdef __ANDROID__ //karin: load *.so on Android
 	if(enableDll)
 	{
+		const char *_fs_game = Cvar_VariableString( "fs_game" );
+		const char *lib_suffix = "";
+		if(_fs_game && _fs_game[0])
+		{
+			if(!strcmp(_fs_game, "missionpack")) // Team Arena
+				lib_suffix = "_mp";
+		}
 		const char * Sys_DLLDefaultPath(void);
 		char path[MAX_OSPATH];
 		memset(path, 0, MAX_OSPATH);
-		Com_sprintf(dllName, sizeof(dllName), "%s" DLL_EXT, name);
+		Com_sprintf(dllName, sizeof(dllName), "%s%s" DLL_EXT, name, lib_suffix);
 		snprintf(path, MAX_OSPATH - 1, "%s/lib%s", Sys_DLLDefaultPath(), dllName);
 		netpath = path;
 		Com_Printf("[Harmattan]: FS_FindVM: %s\n", netpath);
