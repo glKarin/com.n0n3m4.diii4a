@@ -9,6 +9,12 @@
 
 precision mediump float;
 
+uniform sampler2D u_fragmentMap0;
+uniform lowp float u_alphaTest;
+uniform lowp vec4 u_glColor;
+
+varying vec2 var_TexDiffuse;
+
 #ifdef _PACK_FLOAT
 vec4 pack (highp float depth)
 {
@@ -22,6 +28,10 @@ vec4 pack (highp float depth)
 
 void main(void)
 {
+	if (u_alphaTest > texture2D(u_fragmentMap0, var_TexDiffuse).a) {
+		discard;
+	}
+
 #ifdef _USING_DEPTH_TEXTURE
    #ifdef _DEBUG
        gl_FragColor = vec4((gl_FragCoord.z + 1.0) * 0.5, 0.0, 0.0, 1.0); // DEBUG

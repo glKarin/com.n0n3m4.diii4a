@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <pthread.h>
 
+// toggled by grab calls - decides if we ignore MotionNotify events
+static bool mouse_active = false;
+
 idCVar in_mouse("in_mouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "");
 idCVar in_dgamouse("in_dgamouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "");
 idCVar in_nograb("in_nograb", "0", CVAR_SYSTEM | CVAR_NOCHEAT, "");
@@ -44,17 +47,15 @@ void Sys_InitInput(void)
 {
 }
 
-static void Sys_XInstallGrabs(void)
-{
-}
-
-void Sys_XUninstallGrabs(void)
-{
-}
-
 void Sys_GrabMouseCursor(bool grabIt)
 {
-	Android_GrabMouseCursor(grabIt);
+	if ( grabIt && !mouse_active ) {
+		Android_GrabMouseCursor(true);
+		mouse_active = true;
+	} else if ( !grabIt && mouse_active ) {
+		Android_GrabMouseCursor(false);
+		mouse_active = false;
+	}
 }
 
 void Posix_PollInput()

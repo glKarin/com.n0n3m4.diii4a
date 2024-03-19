@@ -80,6 +80,7 @@ static void R_InitGLSLCvars(void)
 
 #ifdef _SHADOW_MAPPING
 	r_shadowMapping = r_useShadowMapping.GetBool();
+	r_shadowMapPerforated = harm_r_shadowMapPerforated.GetBool();
 #ifdef _CONTROL_SHADOW_MAPPING_RENDERING
 	int i = harm_r_shadowMappingScheme.GetInteger();
     if(i < 0 || i > SHADOW_MAPPING_NON_PRELIGHT)
@@ -112,7 +113,7 @@ static void R_InitGLSLCvars(void)
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-	r_translucentStencilShadow = harm_r_translucentStencilShadow.GetBool();
+	r_stencilShadowTranslucent = harm_r_stencilShadowTranslucent.GetBool();
 	f = harm_r_stencilShadowAlpha.GetFloat();
 	if(f < 0.0f)
 		f = 0.0f;
@@ -120,6 +121,7 @@ static void R_InitGLSLCvars(void)
 		f = 1.0f;
 	r_stencilShadowAlpha = f;
 #endif
+	r_stencilShadowCombine = harm_r_stencilShadowCombine.GetBool();
 }
 
 void R_CheckBackEndCvars(void)
@@ -146,6 +148,11 @@ void R_CheckBackEndCvars(void)
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
 	}
+	if(harm_r_shadowMapPerforated.IsModified())
+	{
+		r_shadowMapPerforated = harm_r_shadowMapPerforated.GetBool();
+		harm_r_shadowMapPerforated.ClearModified();
+	}
 #ifdef _CONTROL_SHADOW_MAPPING_RENDERING
 	if(harm_r_shadowMappingScheme.IsModified())
 	{
@@ -159,10 +166,10 @@ void R_CheckBackEndCvars(void)
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-	if(harm_r_translucentStencilShadow.IsModified())
+	if(harm_r_stencilShadowTranslucent.IsModified())
 	{
-		r_translucentStencilShadow = harm_r_translucentStencilShadow.GetBool();
-		harm_r_translucentStencilShadow.ClearModified();
+		r_stencilShadowTranslucent = harm_r_stencilShadowTranslucent.GetBool();
+		harm_r_stencilShadowTranslucent.ClearModified();
 	}
 	if(harm_r_stencilShadowAlpha.IsModified())
 	{
@@ -175,6 +182,11 @@ void R_CheckBackEndCvars(void)
 		harm_r_stencilShadowAlpha.ClearModified();
 	}
 #endif
+	if(harm_r_stencilShadowCombine.IsModified())
+	{
+		r_stencilShadowCombine = harm_r_stencilShadowCombine.GetBool();
+		harm_r_stencilShadowCombine.ClearModified();
+	}
 }
 
 void R_GLSL_Init(void)

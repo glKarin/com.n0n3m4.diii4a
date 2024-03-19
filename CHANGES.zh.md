@@ -22,7 +22,7 @@
 
 * 修复预烘培阴影图软阴影渲染.
 * 雷神之锤4修复EFX混响.
-* 添加半透明模板阴影支持(bool型cvar `harm_r_translucentStencilShadow`(默认 0); 浮点型cvar `harm_r_stencilShadowAlpha`设置透明度).
+* 添加半透明模板阴影支持(bool型cvar `harm_r_stencilShadowTranslucent`(默认 0); 浮点型cvar `harm_r_stencilShadowAlpha`设置透明度).
 * 掠食(2006)添加浮点型cvar `harm_ui_subtitlesTextScale`控制字幕字体大小.
 * 支持cvar `r_brightness`.
 * 掠食(2006)修复武器发射爆炸贴花渲染Z-Fighting.

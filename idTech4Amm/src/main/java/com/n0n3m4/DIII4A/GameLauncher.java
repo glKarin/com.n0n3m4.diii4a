@@ -317,7 +317,7 @@ public class GameLauncher extends Activity
 			}
 			else if (id == R.id.cb_translucentStencilShadow)
 			{
-				setProp("harm_r_translucentStencilShadow", isChecked);
+				setProp("harm_r_stencilShadowTranslucent", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, isChecked)
 						.commit();
@@ -2021,23 +2021,24 @@ public class GameLauncher extends Activity
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         preference.edit().putString(Q3EPreference.pref_harm_game, newGame).commit();
         SetGame(newGame);
-        preference.edit().putString(Q3EPreference.pref_harm_game_lib, "");
-
-        String game = preference.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
-        if (null == game)
-            game = "";
-        V.edt_fs_game.setText(game);
-        boolean userMod = preference.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
-		V.fs_game_user.setChecked(userMod);
-
-		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, userMod);
-		HandleGameProp(prop);
-		SelectCheckbox(GetGameModRadioGroup(), prop.index);
+        preference.edit().putString(Q3EPreference.pref_harm_game_lib, "").commit();
 
 		String cmd = preference.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGlobals.GAME_EXECUABLE);
 		V.edt_cmdline.setText(cmd);
 		SetupCommandTextWatcher(true);
 		UnlockCmdUpdate();
+
+		// put last
+		String game = preference.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
+		if (null == game)
+			game = "";
+		V.edt_fs_game.setText(game);
+		boolean userMod = preference.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
+		V.fs_game_user.setChecked(userMod);
+
+		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, userMod);
+		HandleGameProp(prop);
+		SelectCheckbox(GetGameModRadioGroup(), prop.index);
     }
 
 	private void SetupCommandTextWatcher(boolean b)

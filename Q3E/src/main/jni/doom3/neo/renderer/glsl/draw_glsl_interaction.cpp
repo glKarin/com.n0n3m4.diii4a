@@ -2,6 +2,9 @@ static const float zero[4] = { 0, 0, 0, 0 };
 static const float one[4] = { 1, 1, 1, 1 };
 static const float negOne[4] = { -1, -1, -1, -1 };
 
+static idCVar harm_r_stencilShadowCombine( "harm_r_stencilShadowCombine", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "combine local and global stencil shadow" );
+static bool r_stencilShadowCombine = false;
+
 /*
 =========================================================================================
 
@@ -187,11 +190,291 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_UseProgram(NULL);
 }
 
+typedef void (* RB_GLSL_DrawInteraction_f)(viewLight_t *vLight);
+
+static ID_INLINE void RB_GLSL_DrawInteraction_noShadow(viewLight_t *vLight)
+{
+	RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
+	RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+}
+
+static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow(viewLight_t *vLight)
+{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+
+	RB_StencilShadowPass(vLight->localShadows);
+	RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+}
+static RB_GLSL_DrawInteraction_f RB_GLSL_DrawInteraction_ptr = RB_GLSL_DrawInteraction_stencilShadow;
+
+static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_combine(viewLight_t *vLight)
+{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_StencilShadowPass(vLight->localShadows);
+
+	RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+	RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+}
+
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_translucent(viewLight_t *vLight)
+{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
+	if(r_stencilShadowAlpha < 1.0f)
+		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, false);
+
+	RB_StencilShadowPass(vLight->localShadows);
+	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
+	if(r_stencilShadowAlpha < 1.0f)
+		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, false);
+}
+
+static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_translucent_combine(viewLight_t *vLight)
+{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_StencilShadowPass(vLight->localShadows);
+
+	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
+	if(r_stencilShadowAlpha < 1.0f)
+		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, false);
+
+	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
+	if(r_stencilShadowAlpha < 1.0f)
+		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, false);
+}
+#endif
+
+#ifdef _SHADOW_MAPPING
+static ID_INLINE void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLight)
+{
+	if(vLight->shadowLOD >= 0)
+	{
+		int	side, sideStop;
+
+		if( vLight->parallel )
+		{
+			side = 0;
+			//sideStop = r_shadowMapSplits.GetInteger() + 1;
+			sideStop = 1;
+		}
+		else if( vLight->pointLight )
+		{
+			if( r_shadowMapSingleSide.GetInteger() != -1 )
+			{
+				side = r_shadowMapSingleSide.GetInteger();
+				sideStop = side + 1;
+			}
+			else
+			{
+				side = 0;
+				sideStop = 6;
+			}
+		}
+		else
+		{
+			side = -1;
+			sideStop = 0;
+		}
+
+		if(vLight->globalShadows || vLight->localShadows)
+		{
+			qglDisable(GL_STENCIL_TEST);
+
+			for( int m = side; m < sideStop ; m++ )
+			{
+				const drawSurf_t *shadowDrawSurfs[2] = {
+						vLight->globalShadows,
+						vLight->localShadows,
+				};
+				const drawSurf_t *ambientDrawSurfs[2] = {
+						NULL,
+						NULL,
+				};
+
+				if(r_shadowMapPerforated)
+				{
+					ambientDrawSurfs[0] = vLight->localInteractions;
+					ambientDrawSurfs[1] = vLight->globalInteractions;
+				}
+				RB_ShadowMapPasses( shadowDrawSurfs, ambientDrawSurfs, m );
+			}
+
+			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
+			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+
+			qglEnable(GL_STENCIL_TEST);
+		}
+		else
+		{
+			RB_GLSL_DrawInteraction_noShadow(vLight);
+		}
+	}
+	else
+	{
+		RB_GLSL_DrawInteraction_noShadow(vLight);
+	}
+}
+
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+static ID_INLINE void RB_GLSL_DrawInteraction_shadowMapping_control(viewLight_t *vLight)
+{
+	if(vLight->shadowLOD >= 0)
+	{
+		int	side, sideStop;
+
+		if( vLight->parallel )
+		{
+			side = 0;
+			//sideStop = r_shadowMapSplits.GetInteger() + 1;
+			sideStop = 1;
+		}
+		else if( vLight->pointLight )
+		{
+			if( r_shadowMapSingleSide.GetInteger() != -1 )
+			{
+				side = r_shadowMapSingleSide.GetInteger();
+				sideStop = side + 1;
+			}
+			else
+			{
+				side = 0;
+				sideStop = 6;
+			}
+		}
+		else
+		{
+			side = -1;
+			sideStop = 0;
+		}
+
+		if(vLight->globalShadows || vLight->localShadows)
+		{
+			qglDisable(GL_STENCIL_TEST);
+
+			for( int m = side; m < sideStop ; m++ )
+			{
+				const drawSurf_t *shadowDrawSurfs[2] = {
+						vLight->globalShadows,
+						vLight->localShadows,
+				};
+				const drawSurf_t *ambientDrawSurfs[2] = {
+						NULL,
+						NULL,
+				};
+
+				if(r_shadowMapPerforated)
+				{
+					ambientDrawSurfs[0] = vLight->localInteractions;
+					ambientDrawSurfs[1] = vLight->globalInteractions;
+				}
+				RB_ShadowMapPasses( shadowDrawSurfs, ambientDrawSurfs, m );
+			}
+
+			qglEnable(GL_STENCIL_TEST);
+
+			RB_StencilShadowPass_shadowMapping(vLight->globalShadows);
+			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
+			RB_StencilShadowPass_shadowMapping(vLight->localShadows);
+			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+		}
+		else
+		{
+			RB_GLSL_DrawInteraction_ptr(vLight);
+		}
+	}
+	else
+	{
+		RB_GLSL_DrawInteraction_ptr(vLight);
+	}
+}
+#endif
+
+#endif
+
+static ID_INLINE void RB_GLSL_DrawInteractionsFunction(RB_GLSL_DrawInteraction_f func)
+{
+	viewLight_t		*vLight;
+	const idMaterial	*lightShader;
+
+	//GL_SelectTexture(0); //k2023
+	/* current
+     * GL_STENCIL_TEST enabled
+     * GL_BLEND enabled
+     */
+
+	//
+	// for each light, perform adding and shadowing
+	//
+	for (vLight = backEnd.viewDef->viewLights ; vLight ; vLight = vLight->next)
+	{
+		backEnd.vLight = vLight;
+
+		// do fogging later
+		if (vLight->lightShader->IsFogLight()) {
+			continue;
+		}
+
+		if (vLight->lightShader->IsBlendLight()) {
+			continue;
+		}
+
+		if (!vLight->localInteractions && !vLight->globalInteractions
+			&& !vLight->translucentInteractions) {
+			continue;
+		}
+
+		lightShader = vLight->lightShader;
+
+		// clear the stencil buffer if needed
+		if ((vLight->globalShadows || vLight->localShadows)&&(r_shadows.GetBool())) {
+			backEnd.currentScissor = vLight->scissorRect;
+
+			if (r_useScissor.GetBool()) {
+				qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+						   backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
+						   backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
+						   backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
+			}
+			qglClear(GL_STENCIL_BUFFER_BIT);
+		} else {
+			// no shadows, so no need to read or write the stencil buffer
+			// we might in theory want to use GL_ALWAYS instead of disabling
+			// completely, to satisfy the invarience rules
+			if (r_shadows.GetBool())
+				qglStencilFunc(GL_ALWAYS, 128, 255);
+		}
+
+		func(vLight);
+
+		//k GL_UseProgram(NULL);	// if there weren't any globalInteractions, it would have stayed on
+		// translucent surfaces never get stencil shadowed
+		if (r_skipTranslucent.GetBool()) {
+			continue;
+		}
+		if (r_shadows.GetBool())
+			qglStencilFunc(GL_ALWAYS, 128, 255);
+
+		backEnd.depthFunc = GLS_DEPTHFUNC_LESS;
+		RB_GLSL_CreateDrawInteractions(vLight->translucentInteractions);
+
+		backEnd.depthFunc = GLS_DEPTHFUNC_EQUAL;
+	}
+
+	// disable stencil shadow test
+	if (r_shadows.GetBool())
+		qglStencilFunc(GL_ALWAYS, 128, 255);
+
+	//GL_SelectTexture(0); //k2023
+}
+
 /*
 ==================
 RB_GLSL_DrawInteractions
 ==================
 */
+#if 0
 void RB_GLSL_DrawInteractions(void)
 {
 	viewLight_t		*vLight;
@@ -221,7 +504,7 @@ void RB_GLSL_DrawInteractions(void)
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-	const bool TranslucentStencilShadow = r_translucentStencilShadow && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
+	const bool TranslucentStencilShadow = r_stencilShadowTranslucent && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
 #endif
 	//
 	// for each light, perform adding and shadowing
@@ -301,12 +584,21 @@ void RB_GLSL_DrawInteractions(void)
 
 				for( int m = side; m < sideStop ; m++ )
 				{
-					RB_ShadowMapPass( vLight->globalShadows, m, true );
+					RB_ShadowMapPass( vLight->globalShadows, m, SHADOW_MAPPING_VOLUME, true );
 				}
 
 				for( int m = side; m < sideStop ; m++ )
 				{
-					RB_ShadowMapPass( vLight->localShadows, m, false );
+					RB_ShadowMapPass( vLight->localShadows, m, SHADOW_MAPPING_VOLUME, false );
+				}
+
+				if(r_shadowMapPerforated)
+				{
+					for( int m = side; m < sideStop ; m++ )
+					{
+						RB_ShadowMapPass( vLight->localInteractions, m, SHADOW_MAPPING_SURFACE, false );
+						RB_ShadowMapPass( vLight->globalInteractions, m, SHADOW_MAPPING_SURFACE, false );
+					}
 				}
 
 #ifdef _CONTROL_SHADOW_MAPPING_RENDERING
@@ -391,6 +683,56 @@ void RB_GLSL_DrawInteractions(void)
     r_dumpShadowMap = false;
 #endif
 }
+#else
+void RB_GLSL_DrawInteractions(void)
+{
+	RB_GLSL_DrawInteraction_f func;
+
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+	const bool TranslucentStencilShadow = r_stencilShadowTranslucent && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
+	if(TranslucentStencilShadow)
+	{
+		func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_translucent_combine : RB_GLSL_DrawInteraction_stencilShadow_translucent;
+	}
+	else
+#endif
+	{
+		func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_combine : RB_GLSL_DrawInteraction_stencilShadow;
+	}
+	RB_GLSL_DrawInteraction_ptr = func;
+
+#ifdef _SHADOW_MAPPING
+	const bool ShadowMapping = r_shadowMapping && r_shadows.GetBool();
+	float clearColor[4];
+	if(ShadowMapping)
+	{
+		RB_getClearColor(clearColor);
+		if(r_dumpShadowMapFrontEnd)
+		{
+			r_dumpShadowMap = true;
+			r_dumpShadowMapFrontEnd = false;
+		}
+#ifdef _CONTROL_SHADOW_MAPPING_RENDERING
+		const bool PureShadowMapping = ShadowMapping && r_shadowMappingScheme == SHADOW_MAPPING_PURE;
+		if(PureShadowMapping)
+			func = RB_GLSL_DrawInteraction_shadowMapping_control;
+		else
+#endif
+		func = RB_GLSL_DrawInteraction_shadowMapping;
+	}
+#endif
+
+	RB_GLSL_DrawInteractionsFunction(func);
+
+#ifdef _SHADOW_MAPPING
+	if(ShadowMapping)
+	{
+		qglClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+	}
+    r_dumpShadowMap = false;
+#endif
+}
+#endif
 
 //===================================================================================
 

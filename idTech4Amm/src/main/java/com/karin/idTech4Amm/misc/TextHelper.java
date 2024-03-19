@@ -329,7 +329,7 @@ public final class TextHelper
                 ChangeLog.Create("2023-12-31", 36,
                         "Fixed prelight shadow's shadow mapping.",
                         "Fixed EFX Reverb in Quake4.",
-                        "Add translucent stencil shadow support in stencil shadow(bool cvar `harm_r_translucentStencilShadow`(default 0); float cvar `harm_r_stencilShadowAlpha` for setting transparency).",
+                        "Add translucent stencil shadow support in stencil shadow(bool cvar `harm_r_stencilShadowTranslucent`(default 0); float cvar `harm_r_stencilShadowAlpha` for setting transparency).",
                         "Add float cvar `harm_ui_subtitlesTextScale` control subtitles's text scale in Prey.",
                         "Support cvar `r_brightness`.",
                         "Fixed weapon projectile's scorches decals rendering in Prey(2006).",

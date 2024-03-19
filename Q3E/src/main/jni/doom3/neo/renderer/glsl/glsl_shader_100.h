@@ -699,8 +699,6 @@ GLSL_SHADER const char DEPTH_FRAG[] =
 "\n"
 "precision mediump float;\n"
 "\n"
-"uniform highp vec4 globalLightOrigin;\n"
-"\n"
 "#ifdef _PACK_FLOAT\n"
 PACK_FLOAT_FUNC()
 "#endif\n"
@@ -987,6 +985,69 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "	gl_FragColor = vec4(color, 1.0) * var_Color;\n"
         "}\n"
 ;
+
+// z-fill perforated depth
+GLSL_SHADER const char DEPTH_PERFORATED_VERT[] =
+"#version 100\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision mediump float;\n"
+"\n"
+"attribute vec4 attr_TexCoord;\n"
+"attribute highp vec4 attr_Vertex;\n"
+"\n"
+"uniform mat4 u_textureMatrix;\n"
+"uniform highp mat4 u_modelViewProjectionMatrix;\n"
+"\n"
+"varying vec2 var_TexDiffuse;\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"	var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;\n"
+"\n"
+"	gl_Position = attr_Vertex * u_modelViewProjectionMatrix;\n"
+"}\n"
+;
+GLSL_SHADER const char DEPTH_PERFORATED_FRAG[] =
+"#version 100\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision mediump float;\n"
+"\n"
+"uniform sampler2D u_fragmentMap0;\n"
+"uniform lowp float u_alphaTest;\n"
+"uniform lowp vec4 u_glColor;\n"
+"\n"
+"varying vec2 var_TexDiffuse;\n"
+"\n"
+"#ifdef _PACK_FLOAT\n"
+PACK_FLOAT_FUNC()
+"#endif\n"
+"\n"
+"void main(void)\n"
+"{\n"
+	"if (u_alphaTest > texture2D(u_fragmentMap0, var_TexDiffuse).a) {\n"
+		"discard;\n"
+	"}\n"
+"\n"
+"#ifdef _USING_DEPTH_TEXTURE\n"
+"   #ifdef _DEBUG\n"
+"       gl_FragColor = vec4((gl_FragCoord.z + 1.0) * 0.5, 0.0, 0.0, 1.0); // DEBUG\n"
+"   #else\n"
+"       gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+"   #endif\n"
+"#else\n"
+"	highp float depth;\n"
+"	depth = gl_FragCoord.z;\n"
+"   #ifdef _PACK_FLOAT\n"
+"		gl_FragColor = gl_FragColor = pack(depth);\n"
+"   #else\n"
+"		gl_FragColor = vec4(depth, 0.0, 0.0, 1.0);\n"
+"   #endif\n"
+"#endif\n"
+"}\n"
+;
+
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW

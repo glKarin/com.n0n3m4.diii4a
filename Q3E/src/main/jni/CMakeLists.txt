@@ -53,14 +53,14 @@ target_link_libraries( # Specifies the target library.
 
 #add_subdirectory(doom3/neo/externlibs/openal-soft)
 
-add_subdirectory (doom3/neo)
+add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
 
-add_subdirectory (deplibs)
+add_subdirectory (deplibs) # common depend libraries
 
-add_subdirectory (quake2)
+add_subdirectory (quake2) # Quake 2
 
-add_subdirectory (quake3)
+add_subdirectory (quake3) # Quake 3 Arena | Team Arena
 
-add_subdirectory (rtcw)
+add_subdirectory (rtcw) # RTCW
 
-add_subdirectory (tdm)
+add_subdirectory (tdm) # The Dark Mod

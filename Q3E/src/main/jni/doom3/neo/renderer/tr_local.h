@@ -1641,6 +1641,8 @@ extern shaderProgram_t interactionShadowMappingBlinnPhongShader_parallelLight; /
 extern shaderProgram_t depthShader_spotLight; //k: depth shader
 extern shaderProgram_t interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
 extern shaderProgram_t interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
+
+extern shaderProgram_t depthPerforatedShader; //k: depth perforated shader
 #endif
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
 extern shaderProgram_t interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
@@ -2093,7 +2095,7 @@ void R_SetupFrontEndViewDefMVP(void);
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-extern idCVar harm_r_translucentStencilShadow;
+extern idCVar harm_r_stencilShadowTranslucent;
 extern idCVar harm_r_stencilShadowAlpha;
 #endif
 

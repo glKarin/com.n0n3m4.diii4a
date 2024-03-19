@@ -2587,6 +2587,6 @@ idCVar harm_r_shadowMapPolygonOffset( "harm_r_shadowMapPolygonOffset", "0", CVAR
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-idCVar harm_r_translucentStencilShadow( "harm_r_translucentStencilShadow", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "enable translucent shadow in stencil shadow" );
+idCVar harm_r_stencilShadowTranslucent( "harm_r_stencilShadowTranslucent", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "enable translucent shadow in stencil shadow" );
 idCVar harm_r_stencilShadowAlpha( "harm_r_stencilShadowAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "translucent shadow's alpha in stencil shadow" );
 #endif
