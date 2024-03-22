@@ -83,7 +83,6 @@ static idCVar harm_r_shadowMappingScheme( "harm_r_shadowMappingScheme", "0", CVA
 
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug light type mask. 1: parallel, 2: point, 4: spot");
 static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug shadow map frame buffer.");
-static idCVar harm_r_shadowMapPerforated( "harm_r_shadowMapPerforated", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "render perforated item to shadow map" );
 
 char RB_ShadowMapPass_T = 'G'; // G - global shadow, L - local shadow
 

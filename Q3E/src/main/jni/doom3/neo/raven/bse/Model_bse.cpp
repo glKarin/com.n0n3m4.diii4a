@@ -258,6 +258,9 @@ idRenderModel *rvRenderModelBSE::InstantiateDynamicModel(const struct renderEnti
 		surf->geometry->numVerts = numVerts;
 		surf->geometry->numIndexes = numIndexes;
 		surf->geometry->bounds = stage->bounds;		// just always draw the particles
+
+    	R_BoundTriSurf(surf->geometry);
+		bounds = surf->geometry->bounds;
 	}
 
 	return staticModel;
@@ -280,7 +283,7 @@ rvRenderModelBSE::Bounds
 */
 idBounds rvRenderModelBSE::Bounds(const struct renderEntity_s *ent) const
 {
-	return particleSystem->bounds;
+	return particleSystem->bounds + bounds;
 }
 
 /*

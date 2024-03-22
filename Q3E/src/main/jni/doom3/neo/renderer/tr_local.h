@@ -2070,6 +2070,7 @@ extern idCVar r_shadowMapLodBias;
 extern idCVar r_shadowMapPolygonFactor;
 extern idCVar r_shadowMapPolygonOffset;
 extern idCVar r_shadowMapOccluderFacing;
+extern idCVar r_forceShadowMapsOnAlphaTestedSurfaces;
 
 extern idCVar harm_r_shadowMapLod;
 extern idCVar harm_r_shadowMapBias;
