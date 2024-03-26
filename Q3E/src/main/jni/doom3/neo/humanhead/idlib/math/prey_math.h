@@ -7,7 +7,7 @@ class idBounds;
 //HUMANHEAD rww
 #define	FLOAT_IS_INVALID(x)		(FLOAT_IS_NAN(x) || FLOAT_IS_DENORMAL(x))
 
-#define FLOAT_SET_NAN( x )		(*(unsigned long *)&x) |= 0x7f800000
+#define FLOAT_SET_NAN( x )		(*(unsigned long *)&x) |= 0x7f800000 //k 64long?
 
 //HUMANHEAD END
 

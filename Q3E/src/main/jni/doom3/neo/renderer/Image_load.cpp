@@ -1473,7 +1473,7 @@ bool idImage::CheckPrecompressedImage(bool fullLoad)
 
 	fileSystem->CloseFile(f);
 
-	unsigned long magic = LittleLong(*(unsigned long *)data); //k: 64long???
+	unsigned int magic = LittleLong(*(unsigned int *)data); //k: 64long???
 	ddsFileHeader_t	*_header = (ddsFileHeader_t *)(data + 4);
 	int ddspf_dwFlags = LittleLong(_header->ddspf.dwFlags);
 
