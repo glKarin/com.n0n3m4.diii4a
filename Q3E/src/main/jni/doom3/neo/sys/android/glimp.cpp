@@ -3,6 +3,8 @@
 
 Doom 3 GPL Source Code
 Copyright (C) 1999-2011 id Software LLC, a ZeniMax Media company.
+Copyright (C) 2012 Krzysztof Klinikowski <kkszysiu@gmail.com>
+Copyright (C) 2012 Havlena Petr <havlenapetr@gmail.com>
 
 This file is part of the Doom 3 GPL Source Code (?Doom 3 Source Code?).
 
@@ -29,34 +31,279 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../renderer/tr_local.h"
 #include "local.h"
 
-#include <X11/extensions/xf86vmode.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 
-Display *dpy = NULL;
-static int scrnum = 0;
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 
-Window win = 0;
+#ifndef EGL_OPENGL_ES3_BIT
+#define EGL_OPENGL_ES3_BIT EGL_OPENGL_ES3_BIT_KHR
+#endif
+idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
+					"Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
 
-bool dga_found = false;
+#ifdef _OPENGLES3
+const char	*r_openglesArgs[]	= {
+		"GLES2",
+		"GLES3.0",
+		NULL };
+idCVar harm_sys_openglVersion("harm_sys_openglVersion",
+                              r_openglesArgs[0]
+		, CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
+                              "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
+#define DEFAULT_GLES_VERSION 0x00020000 // still es2.0
+#define HARM_EGL_OPENGL_ES_BIT (gl_version != 0x00020000 ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT)
+#define HARM_EGL_CONTEXT_CLIENT_VERSION (gl_version != 0x00020000 ? 3 : 2)
+#else
+#define DEFAULT_GLES_VERSION 0x00020000
+#define HARM_EGL_OPENGL_ES_BIT EGL_OPENGL_ES2_BIT
+#define HARM_EGL_CONTEXT_CLIENT_VERSION 2
+#endif
 
-static GLXContext ctx = NULL;
+#define GLFORMAT_RGB565 0x0565
+#define GLFORMAT_RGBA4444 0x4444
+#define GLFORMAT_RGBA5551 0x5551
+#define GLFORMAT_RGBA8888 0x8888
+#define GLFORMAT_RGBA1010102 0xaaa2
 
-static bool vidmode_ext = false;
-static int vidmode_MajorVersion = 0, vidmode_MinorVersion = 0;	// major and minor of XF86VidExtensions
+// OpenGL attributes
+int gl_format = GLFORMAT_RGBA8888;
+int gl_msaa = 0;
+int gl_version = DEFAULT_GLES_VERSION;
+bool USING_GLES3 = gl_version != 0x00020000;
 
-static XF86VidModeModeInfo **vidmodes;
-static int num_vidmodes;
-static bool vidmode_active = false;
+#define MAX_NUM_CONFIGS 1000
+static bool window_seted = false;
+static volatile ANativeWindow *win;
+//volatile bool has_gl_context = false;
 
-// backup gamma ramp
-static int save_rampsize = 0;
-static unsigned short *save_red, *save_green, *save_blue;
+static EGLDisplay eglDisplay = EGL_NO_DISPLAY;
+static EGLSurface eglSurface = EGL_NO_SURFACE;
+static EGLContext eglContext = EGL_NO_CONTEXT;
+static EGLConfig configs[1];
+static EGLConfig eglConfig = 0;
+static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+
+
+static void GLimp_HandleError(const char *func, bool exit = true)
+{
+	static const char *GLimp_StringErrors[] = {
+			"EGL_SUCCESS",
+			"EGL_NOT_INITIALIZED",
+			"EGL_BAD_ACCESS",
+			"EGL_BAD_ALLOC",
+			"EGL_BAD_ATTRIBUTE",
+			"EGL_BAD_CONFIG",
+			"EGL_BAD_CONTEXT",
+			"EGL_BAD_CURRENT_SURFACE",
+			"EGL_BAD_DISPLAY",
+			"EGL_BAD_MATCH",
+			"EGL_BAD_NATIVE_PIXMAP",
+			"EGL_BAD_NATIVE_WINDOW",
+			"EGL_BAD_PARAMETER",
+			"EGL_BAD_SURFACE",
+			"EGL_CONTEXT_LOST",
+	};
+	GLint err = eglGetError();
+	if(err == EGL_SUCCESS)
+		return;
+
+	if(exit)
+		common->Error("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+	else
+		common->Printf("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+}
+
+typedef struct EGLConfigInfo_s
+{
+	EGLint red;
+	EGLint green;
+	EGLint blue;
+	EGLint alpha;
+	EGLint buffer;
+	EGLint depth;
+	EGLint stencil;
+	EGLint samples;
+	EGLint sample_buffers;
+} EGLConfigInfo_t;
+
+static EGLConfigInfo_t GLimp_FormatInfo(int format)
+{
+	int red_bits = 8;
+	int green_bits = 8;
+	int blue_bits = 8;
+	int alpha_bits = 8;
+	int buffer_bits = 32;
+	int depth_bits = 24;
+	int stencil_bits = 8;
+
+	switch(gl_format)
+	{
+		case GLFORMAT_RGB565:
+			red_bits = 5;
+			green_bits = 6;
+			blue_bits = 5;
+			alpha_bits = 0;
+			depth_bits = 16;
+			buffer_bits = 16;
+			break;
+		case GLFORMAT_RGBA4444:
+			red_bits = 4;
+			green_bits = 4;
+			blue_bits = 4;
+			alpha_bits = 4;
+			depth_bits = 16;
+			buffer_bits = 16;
+			break;
+		case GLFORMAT_RGBA5551:
+			red_bits = 5;
+			green_bits = 5;
+			blue_bits = 5;
+			alpha_bits = 1;
+			depth_bits = 16;
+			buffer_bits = 16;
+			break;
+		case GLFORMAT_RGBA1010102:
+			red_bits = 10;
+			green_bits = 10;
+			blue_bits = 10;
+			alpha_bits = 2;
+			depth_bits = 24;
+			buffer_bits = 32;
+			break;
+		case GLFORMAT_RGBA8888:
+		default:
+			red_bits = 8;
+			green_bits = 8;
+			blue_bits = 8;
+			alpha_bits = 8;
+			depth_bits = 24;
+			buffer_bits = 32;
+			break;
+	}
+	EGLConfigInfo_t info;
+	info.red = red_bits;
+	info.green = green_bits;
+	info.blue = blue_bits;
+	info.alpha = alpha_bits;
+	info.buffer = buffer_bits;
+	info.depth = depth_bits;
+	info.stencil = stencil_bits;
+	return info;
+}
+
+static int GLimp_EGLConfigCompare(const void *left, const void *right)
+{
+	const EGLConfig lhs = *(EGLConfig *)left;
+	const EGLConfig rhs = *(EGLConfig *)right;
+	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format);
+	int r = info.red;
+	int g = info.green;
+	int b = info.blue;
+	int a = info.alpha;
+	int d = info.depth;
+	int s = info.stencil;
+
+	int lr, lg, lb, la, ld, ls;
+	int rr, rg, rb, ra, rd, rs;
+	int rat1, rat2;
+	eglGetConfigAttrib(eglDisplay, lhs, EGL_RED_SIZE, &lr);
+	eglGetConfigAttrib(eglDisplay, lhs, EGL_GREEN_SIZE, &lg);
+	eglGetConfigAttrib(eglDisplay, lhs, EGL_BLUE_SIZE, &lb);
+	eglGetConfigAttrib(eglDisplay, lhs, EGL_ALPHA_SIZE, &la);
+	//eglGetConfigAttrib(eglDisplay, lhs, EGL_DEPTH_SIZE, &ld);
+	//eglGetConfigAttrib(eglDisplay, lhs, EGL_STENCIL_SIZE, &ls);
+	eglGetConfigAttrib(eglDisplay, rhs, EGL_RED_SIZE, &rr);
+	eglGetConfigAttrib(eglDisplay, rhs, EGL_GREEN_SIZE, &rg);
+	eglGetConfigAttrib(eglDisplay, rhs, EGL_BLUE_SIZE, &rb);
+	eglGetConfigAttrib(eglDisplay, rhs, EGL_ALPHA_SIZE, &ra);
+	//eglGetConfigAttrib(eglDisplay, rhs, EGL_DEPTH_SIZE, &rd);
+	//eglGetConfigAttrib(eglDisplay, rhs, EGL_STENCIL_SIZE, &rs);
+	rat1 = (abs(lr - r) + abs(lg - g) + abs(lb - b));//*1000000-(ld*10000+la*100+ls);
+	rat2 = (abs(rr - r) + abs(rg - g) + abs(rb - b));//*1000000-(rd*10000+ra*100+rs);
+	return rat1 - rat2;
+}
+
+static EGLConfig GLimp_ChooseConfig(EGLConfig configs[], int size)
+{
+	qsort(configs, size, sizeof(EGLConfig), GLimp_EGLConfigCompare);
+	return configs[0];
+}
+
+static EGLConfigInfo_t GLimp_GetConfigInfo(const EGLConfig eglConfig)
+{
+	EGLConfigInfo_t info;
+
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_RED_SIZE, &info.red);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_GREEN_SIZE, &info.green);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_BLUE_SIZE, &info.blue);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_ALPHA_SIZE, &info.alpha);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_DEPTH_SIZE, &info.depth);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_STENCIL_SIZE, &info.stencil);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_BUFFER_SIZE, &info.buffer);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_SAMPLES, &info.samples);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_SAMPLE_BUFFERS, &info.sample_buffers);
+
+	return info;
+}
+
+void GLimp_AndroidInit(volatile ANativeWindow *w)
+{
+	if(!w)
+		return;
+	if(!window_seted)
+	{
+		win = w;
+		ANativeWindow_acquire((ANativeWindow *)win);
+		window_seted = true;
+		return;
+	}
+
+	if(eglDisplay == EGL_NO_DISPLAY)
+		return;
+
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_NATIVE_VISUAL_ID, &format);
+	win = w;
+	ANativeWindow_acquire((ANativeWindow *)win);
+	ANativeWindow_setBuffersGeometry((ANativeWindow *)win, screen_width, screen_height, format);
+
+	if ((eglSurface = eglCreateWindowSurface(eglDisplay, eglConfig, (NativeWindowType) win, NULL)) == EGL_NO_SURFACE)
+	{
+		GLimp_HandleError("eglCreateWindowSurface");
+		return;
+	}
+
+	if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext))
+	{
+		GLimp_HandleError("eglMakeCurrent");
+		return;
+	}
+	//has_gl_context = true;
+	Sys_Printf("[Harmattan]: EGL surface created and using EGL context.\n");
+}
+
+void GLimp_AndroidQuit(void)
+{
+	//has_gl_context = false;
+	if(!win)
+		return;
+	if(eglDisplay != EGL_NO_DISPLAY)
+		GLimp_DeactivateContext();
+	if(eglSurface != EGL_NO_SURFACE)
+	{
+		eglDestroySurface(eglDisplay, eglSurface);
+		eglSurface = EGL_NO_SURFACE;
+	}
+	ANativeWindow_release((ANativeWindow *)win);
+	win = NULL;
+	Sys_Printf("[Harmattan]: EGL surface destroyed and no EGL context.\n");
+}
 
 void GLimp_WakeBackEnd(void *a)
 {
@@ -65,6 +312,7 @@ void GLimp_WakeBackEnd(void *a)
 
 void GLimp_EnableLogging(bool log)
 {
+	tr.logFile = log ? f_stdout : NULL;
 	//common->DPrintf("GLimp_EnableLogging stub\n");
 }
 
@@ -87,15 +335,62 @@ bool GLimp_SpawnRenderThread(void (*a)())
 
 void GLimp_ActivateContext()
 {
-	assert(dpy);
-	assert(ctx);
-	glXMakeCurrent(dpy, win, ctx);
+	eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext);
 }
 
 void GLimp_DeactivateContext()
 {
-	assert(dpy);
-	glXMakeCurrent(dpy, None, NULL);
+	eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+}
+
+#include <dlfcn.h>
+static void *glHandle = NULL;
+#define QGLPROC(name, rettype, args) rettype (GL_APIENTRYP q##name) args;
+#include "../../renderer/qgl_proc.h"
+#undef QGLPROC
+
+static void R_LoadOpenGLFunc()
+{
+#define QGLPROC(name, rettype, args) \
+	q##name = (rettype(GL_APIENTRYP)args)GLimp_ExtensionPointer(#name); \
+	if (!q##name) \
+		common->FatalError("Unable to initialize OpenGL (%s)", #name);
+
+#include "../../renderer/qgl_proc.h"
+}
+
+static bool GLimp_dlopen()
+{
+#ifdef _OPENGLES3
+	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */(
+			gl_version != 0x00020000 ? "libGLESv3.so" : "libGLESv2.so"
+	);
+#else
+	const char *driverName = /*r_glDriver.GetString()[0] ? r_glDriver.GetString() : */ "libGLESv2.so";
+#endif
+	common->Printf("dlopen(%s)\n", driverName);
+#if 0
+	if ( !( glHandle = dlopen( driverName, RTLD_NOW | RTLD_GLOBAL ) ) ) {
+		common->Printf("dlopen(%s) failed: %s\n", driverName, dlerror());
+		return false;
+	}
+	common->Printf("dlopen(%s) done\n", driverName);
+#endif
+	R_LoadOpenGLFunc();
+	return true;
+}
+
+static void GLimp_dlclose()
+{
+#if 0
+	if ( !glHandle ) {
+		common->Printf("dlclose: GL handle is NULL\n");
+	} else {
+		common->Printf("dlclose(%s) done\n", glHandle);
+		dlclose( glHandle );
+		glHandle = NULL;
+	}
+#endif
 }
 
 /*
@@ -107,17 +402,6 @@ save and restore the original gamma of the system
 */
 void GLimp_SaveGamma()
 {
-	if (save_rampsize) {
-		return;
-	}
-
-	assert(dpy);
-
-	XF86VidModeGetGammaRampSize(dpy, scrnum, &save_rampsize);
-	save_red = (unsigned short *)malloc(save_rampsize*sizeof(unsigned short));
-	save_green = (unsigned short *)malloc(save_rampsize*sizeof(unsigned short));
-	save_blue = (unsigned short *)malloc(save_rampsize*sizeof(unsigned short));
-	XF86VidModeGetGammaRamp(dpy, scrnum, save_rampsize, save_red, save_green, save_blue);
 }
 
 /*
@@ -129,15 +413,6 @@ save and restore the original gamma of the system
 */
 void GLimp_RestoreGamma()
 {
-	if (!save_rampsize)
-		return;
-
-	XF86VidModeSetGammaRamp(dpy, scrnum, save_rampsize, save_red, save_green, save_blue);
-
-	free(save_red);
-	free(save_green);
-	free(save_blue);
-	save_rampsize = 0;
 }
 
 /*
@@ -150,129 +425,41 @@ the size of the gamma ramp can not be changed on X (I need to confirm this)
 */
 void GLimp_SetGamma(unsigned short red[256], unsigned short green[256], unsigned short blue[256])
 {
-	if (dpy) {
-		int size;
-
-		GLimp_SaveGamma();
-		XF86VidModeGetGammaRampSize(dpy, scrnum, &size);
-		common->DPrintf("XF86VidModeGetGammaRampSize: %d\n", size);
-
-		if (size > 256) {
-			// silly generic resample
-			int i;
-			unsigned short *l_red, *l_green, *l_blue;
-			l_red = (unsigned short *)malloc(size*sizeof(unsigned short));
-			l_green = (unsigned short *)malloc(size*sizeof(unsigned short));
-			l_blue = (unsigned short *)malloc(size*sizeof(unsigned short));
-			//int r_size = 256;
-			int r_i;
-			float r_f;
-
-			for (i=0; i<size-1; i++) {
-				r_f = (float)i*255.0f/(float)(size-1);
-				r_i = (int)floor(r_f);
-				r_f -= (float)r_i;
-				l_red[i] = (int)round((1.0f-r_f)*(float)red[r_i]+r_f*(float)red[r_i+1]);
-				l_green[i] = (int)round((1.0f-r_f)*(float)green[r_i]+r_f*(float)green[r_i+1]);
-				l_blue[i] = (int)round((1.0f-r_f)*(float)blue[r_i]+r_f*(float)blue[r_i+1]);
-			}
-
-			l_red[size-1] = red[255];
-			l_green[size-1] = green[255];
-			l_blue[size-1] = blue[255];
-			XF86VidModeSetGammaRamp(dpy, scrnum, size, l_red, l_green, l_blue);
-			free(l_red);
-			free(l_green);
-			free(l_blue);
-		} else {
-			XF86VidModeSetGammaRamp(dpy, scrnum, size, red, green, blue);
-		}
-	}
 }
 
 void GLimp_Shutdown()
 {
-	if (dpy) {
-
-		Sys_XUninstallGrabs();
-
-		GLimp_RestoreGamma();
-
-		glXDestroyContext(dpy, ctx);
-
-		XDestroyWindow(dpy, win);
-
-		if (vidmode_active) {
-			XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
-		}
-
-		// FIXME: that's going to crash
-		//XFlush(dpy);
-		//XCloseDisplay( dpy );
-
-		vidmode_active = false;
-		dpy = NULL;
-		win = 0;
-		ctx = NULL;
+	//has_gl_context = false;
+	GLimp_DeactivateContext();
+	//eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+	if(eglContext != EGL_NO_CONTEXT)
+	{
+		eglDestroyContext(eglDisplay, eglContext);
+		eglContext = EGL_NO_CONTEXT;
 	}
+	if(eglSurface != EGL_NO_SURFACE)
+	{
+		eglDestroySurface(eglDisplay, eglSurface);
+		eglSurface = EGL_NO_SURFACE;
+	}
+	if(eglDisplay != EGL_NO_DISPLAY)
+	{
+		eglTerminate(eglDisplay);
+		eglDisplay = EGL_NO_DISPLAY;
+	}
+	GLimp_dlclose();
+
+	Sys_Printf("[Harmattan]: EGL destroyed.\n");
 }
 
 void GLimp_SwapBuffers()
 {
-	assert(dpy);
-	glXSwapBuffers(dpy, win);
-}
-
-/*
-GLX_TestDGA
-Check for DGA	- update in_dgamouse if needed
-*/
-void GLX_TestDGA()
-{
-	int dga_MajorVersion = 0, dga_MinorVersion = 0;
-
-	assert(dpy);
-
-#if defined( ID_ENABLE_DGA )
-
-	if (!XF86DGAQueryVersion(dpy, &dga_MajorVersion, &dga_MinorVersion)) {
-		// unable to query, probalby not supported
-		common->Printf("Failed to detect DGA DirectVideo Mouse\n");
-		cvarSystem->SetCVarBool("in_dgamouse", false);
-		dga_found = false;
-	} else {
-		common->Printf("DGA DirectVideo Mouse (Version %d.%d) initialized\n",
-		               dga_MajorVersion, dga_MinorVersion);
-		dga_found = true;
-	}
-
-#else
-	dga_found = false;
-#endif
-}
-
-/*
-** XErrorHandler
-**   the default X error handler exits the application
-**   I found out that on some hosts some operations would raise X errors (GLXUnsupportedPrivateRequest)
-**   but those don't seem to be fatal .. so the default would be to just ignore them
-**   our implementation mimics the default handler behaviour (not completely cause I'm lazy)
-*/
-int idXErrorHandler(Display *l_dpy, XErrorEvent *ev)
-{
-	char buf[1024];
-	common->Printf("Fatal X Error:\n");
-	common->Printf("  Major opcode of failed request: %d\n", ev->request_code);
-	common->Printf("  Minor opcode of failed request: %d\n", ev->minor_code);
-	common->Printf("  Serial number of failed request: %lu\n", ev->serial);
-	XGetErrorText(l_dpy, ev->error_code, buf, 1024);
-	common->Printf("%s\n", buf);
-	return 0;
+	eglSwapBuffers(eglDisplay, eglSurface);
 }
 
 bool GLimp_OpenDisplay(void)
 {
-	if (dpy) {
+	if(eglDisplay) {
 		return true;
 	}
 
@@ -281,139 +468,110 @@ bool GLimp_OpenDisplay(void)
 		return false;
 	}
 
-	common->Printf("Setup X display connection\n");
+	common->Printf( "Setup EGL display connection\n" );
 
-	// that should be the first call into X
-	if (!XInitThreads()) {
-		common->Printf("XInitThreads failed\n");
+	if ( !( eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY) ) ) {
+		common->Printf( "Couldn't open the EGL display\n" );
 		return false;
 	}
-
-	// set up our custom error handler for X failures
-	XSetErrorHandler(&idXErrorHandler);
-
-	if (!(dpy = XOpenDisplay(NULL))) {
-		common->Printf("Couldn't open the X display\n");
-		return false;
-	}
-
-	scrnum = DefaultScreen(dpy);
 	return true;
 }
 
 /*
 ===============
-GLX_Init
+GLES_Init
 ===============
 */
-int GLX_Init(glimpParms_t a)
+static bool GLES_Init_special(void)
 {
-	int attrib[] = {
-		GLX_RGBA,				// 0
-		GLX_RED_SIZE, 8,		// 1, 2
-		GLX_GREEN_SIZE, 8,		// 3, 4
-		GLX_BLUE_SIZE, 8,		// 5, 6
-		GLX_DOUBLEBUFFER,		// 7
-		GLX_DEPTH_SIZE, 24,		// 8, 9
-		GLX_STENCIL_SIZE, 8,	// 10, 11
-		GLX_ALPHA_SIZE, 8, // 12, 13
-		None
+	EGLint config_count = 0;
+	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format);
+	int stencil_bits = info.stencil;
+	int depth_bits = info.depth;
+	int red_bits = info.red;
+	int green_bits = info.green;
+	int blue_bits = info.blue;
+	int alpha_bits = info.alpha;
+	int buffer_bits = info.buffer;
+
+	EGLint attrib[] = {
+			EGL_BUFFER_SIZE, buffer_bits,
+			EGL_ALPHA_SIZE, alpha_bits,
+			EGL_RED_SIZE, red_bits,
+			EGL_BLUE_SIZE, green_bits,
+			EGL_GREEN_SIZE, blue_bits,
+			EGL_DEPTH_SIZE, depth_bits,
+			EGL_STENCIL_SIZE, stencil_bits,
+			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
+			EGL_SAMPLES, gl_msaa,
+			EGL_RENDERABLE_TYPE, HARM_EGL_OPENGL_ES_BIT,
+			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+			EGL_NONE,
 	};
-	// these match in the array
-#define ATTR_RED_IDX 2
-#define ATTR_GREEN_IDX 4
-#define ATTR_BLUE_IDX 6
-#define ATTR_DEPTH_IDX 9
-#define ATTR_STENCIL_IDX 11
-#define ATTR_ALPHA_IDX 13
-	Window root;
-	XVisualInfo *visinfo;
-	XSetWindowAttributes attr;
-	XSizeHints sizehints;
-	unsigned long mask;
-	int colorbits, depthbits, stencilbits;
-	int tcolorbits, tdepthbits, tstencilbits;
-	int actualWidth, actualHeight;
-	int i;
-	const char *glstring;
 
-	if (!GLimp_OpenDisplay()) {
-		return false;
-	}
+	common->Printf( "[Harmattan]: Request special EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
+					red_bits, green_bits,
+					blue_bits, alpha_bits,
+					depth_bits,
+					stencil_bits
+			, attrib[15], attrib[17]
+	);
 
-	common->Printf("Initializing OpenGL display\n");
+	int multisamples = gl_msaa;
+	EGLConfig eglConfigs[MAX_NUM_CONFIGS];
+	while(1)
+	{
+		if (!eglChooseConfig (eglDisplay, attrib, eglConfigs, MAX_NUM_CONFIGS, &config_count))
+		{
+			GLimp_HandleError("eglChooseConfig", false);
 
-	root = RootWindow(dpy, scrnum);
+			if(multisamples > 1) {
+				multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
 
-	actualWidth = glConfig.vidWidth;
-	actualHeight = glConfig.vidHeight;
-
-	// Get video mode list
-	if (!XF86VidModeQueryVersion(dpy, &vidmode_MajorVersion, &vidmode_MinorVersion)) {
-		vidmode_ext = false;
-		common->Printf("XFree86-VidModeExtension not available\n");
-	} else {
-		vidmode_ext = true;
-		common->Printf("Using XFree86-VidModeExtension Version %d.%d\n",
-		               vidmode_MajorVersion, vidmode_MinorVersion);
-	}
-
-	GLX_TestDGA();
-
-	if (vidmode_ext) {
-		int best_fit, best_dist, dist, x, y;
-
-		XF86VidModeGetAllModeLines(dpy, scrnum, &num_vidmodes, &vidmodes);
-
-		// Are we going fullscreen?  If so, let's change video mode
-		if (a.fullScreen) {
-			best_dist = 9999999;
-			best_fit = -1;
-
-			for (i = 0; i < num_vidmodes; i++) {
-				if (a.width > vidmodes[i]->hdisplay ||
-				    a.height > vidmodes[i]->vdisplay)
-					continue;
-
-				x = a.width - vidmodes[i]->hdisplay;
-				y = a.height - vidmodes[i]->vdisplay;
-				dist = (x * x) + (y * y);
-
-				if (dist < best_dist) {
-					best_dist = dist;
-					best_fit = i;
-				}
+				attrib[7 + 1] = multisamples > 1 ? 1 : 0;
+				attrib[8 + 1] = multisamples;
+				continue;
 			}
-
-			if (best_fit != -1) {
-				actualWidth = vidmodes[best_fit]->hdisplay;
-				actualHeight = vidmodes[best_fit]->vdisplay;
-
-				// change to the mode
-				XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[best_fit]);
-				vidmode_active = true;
-
-				// Move the viewport to top left
-				// FIXME: center?
-				XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
-
-				common->Printf("Free86-VidModeExtension Activated at %dx%d\n", actualWidth, actualHeight);
-
-			} else {
-				a.fullScreen = false;
-				common->Printf("Free86-VidModeExtension: No acceptable modes found\n");
+			else
+			{
+				return false;
 			}
-		} else {
-			common->Printf("XFree86-VidModeExtension: not fullscreen, ignored\n");
 		}
+		else
+		{
+			common->Printf( "[Harmattan]: Get EGL context num -> %d.\n", config_count);
+			for(int i = 0; i < config_count; i++)
+			{
+				EGLConfigInfo_t cinfo = GLimp_GetConfigInfo(eglConfigs[i]);
+				common->Printf("\t%d EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
+							   i + 1,
+							   cinfo.red, cinfo.green,
+							   cinfo.blue, cinfo.alpha,
+							   cinfo.depth,
+							   cinfo.stencil
+						, cinfo.samples, cinfo.sample_buffers
+				);
+			}
+		}
+		break;
 	}
+	configs[0] = GLimp_ChooseConfig(eglConfigs, config_count);
+	return true;
+}
 
-	// color, depth and stencil
-	colorbits = 24;
-	depthbits = 24;
-	stencilbits = 8;
+static bool GLES_Init_prefer(void)
+{
+	EGLint config_count = 0;
+	int colorbits = 24;
+	int depthbits = 24;
+	int stencilbits = 8;
+	bool suc;
 
-	for (i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
+
+		int multisamples = gl_msaa;
+		suc = false;
+
 		// 0 - default
 		// 1 - minus colorbits
 		// 2 - minus depthbits
@@ -421,21 +579,16 @@ int GLX_Init(glimpParms_t a)
 		if ((i % 4) == 0 && i) {
 			// one pass, reduce
 			switch (i / 4) {
-				case 2:
-
+				case 2 :
 					if (colorbits == 24)
 						colorbits = 16;
-
 					break;
-				case 1:
-
+				case 1 :
 					if (depthbits == 24)
 						depthbits = 16;
 					else if (depthbits == 16)
 						depthbits = 8;
-
-				case 3:
-
+				case 3 :
 					if (stencilbits == 24)
 						stencilbits = 16;
 					else if (stencilbits == 16)
@@ -443,23 +596,26 @@ int GLX_Init(glimpParms_t a)
 			}
 		}
 
-		tcolorbits = colorbits;
-		tdepthbits = depthbits;
-		tstencilbits = stencilbits;
+		int tcolorbits = colorbits;
+		int tdepthbits = depthbits;
+		int tstencilbits = stencilbits;
 
-		if ((i % 4) == 3) {		// reduce colorbits
+		if ((i % 4) == 3) {
+			// reduce colorbits
 			if (tcolorbits == 24)
 				tcolorbits = 16;
 		}
 
-		if ((i % 4) == 2) {		// reduce depthbits
+		if ((i % 4) == 2) {
+			// reduce depthbits
 			if (tdepthbits == 24)
 				tdepthbits = 16;
 			else if (tdepthbits == 16)
 				tdepthbits = 8;
 		}
 
-		if ((i % 4) == 1) {		// reduce stencilbits
+		if ((i % 4) == 1) {
+			// reduce stencilbits
 			if (tstencilbits == 24)
 				tstencilbits = 16;
 			else if (tstencilbits == 16)
@@ -468,99 +624,146 @@ int GLX_Init(glimpParms_t a)
 				tstencilbits = 0;
 		}
 
-		if (tcolorbits == 24) {
-			attrib[ATTR_RED_IDX] = 8;
-			attrib[ATTR_GREEN_IDX] = 8;
-			attrib[ATTR_BLUE_IDX] = 8;
-		} else {
-			// must be 16 bit
-			attrib[ATTR_RED_IDX] = 4;
-			attrib[ATTR_GREEN_IDX] = 4;
-			attrib[ATTR_BLUE_IDX] = 4;
+		int channelcolorbits = 4;
+		if (tcolorbits == 24)
+			channelcolorbits = 8;
+
+		int talphabits = channelcolorbits;
+
+		EGLint attrib[] = {
+				EGL_BUFFER_SIZE, channelcolorbits * 4,
+				EGL_ALPHA_SIZE, talphabits,
+				EGL_RED_SIZE, channelcolorbits,
+				EGL_BLUE_SIZE, channelcolorbits,
+				EGL_GREEN_SIZE, channelcolorbits,
+				EGL_DEPTH_SIZE, tdepthbits,
+				EGL_STENCIL_SIZE, tstencilbits,
+				EGL_SAMPLE_BUFFERS, multisamples > 1 ? 1 : 0,
+				EGL_SAMPLES, multisamples,
+				EGL_RENDERABLE_TYPE, HARM_EGL_OPENGL_ES_BIT,
+				EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+				EGL_NONE,
+		};
+
+		common->Printf( "[Harmattan]: Request EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
+						channelcolorbits, channelcolorbits,
+						channelcolorbits, talphabits,
+						tdepthbits,
+						tstencilbits
+				, attrib[15], attrib[17]
+		);
+
+		while(1)
+		{
+			if (!eglChooseConfig (eglDisplay, attrib, configs, 1, &config_count))
+			{
+				GLimp_HandleError("eglChooseConfig", false);
+
+				if(multisamples > 1) {
+					multisamples = (multisamples <= 2) ? 0 : (multisamples/2);
+
+					attrib[7 + 1] = multisamples > 1 ? 1 : 0;
+					attrib[8 + 1] = multisamples;
+					continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+			suc = true;
+			break;
 		}
 
-		attrib[ATTR_DEPTH_IDX] = tdepthbits;	// default to 24 depth
-		attrib[ATTR_STENCIL_IDX] = tstencilbits;
-
-		visinfo = glXChooseVisual(dpy, scrnum, attrib);
-
-		if (!visinfo) {
-			continue;
-		}
-
-		common->Printf("Using %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display.\n",
-		               attrib[ATTR_RED_IDX], attrib[ATTR_GREEN_IDX],
-		               attrib[ATTR_BLUE_IDX], attrib[ATTR_ALPHA_IDX],
-		               attrib[ATTR_DEPTH_IDX],
-		               attrib[ATTR_STENCIL_IDX]);
-
-		glConfig.colorBits = tcolorbits;
-		glConfig.depthBits = tdepthbits;
-		glConfig.stencilBits = tstencilbits;
-		break;
+		if(suc)
+			break;
 	}
+	return suc;
+}
 
-	if (!visinfo) {
-		common->Printf("Couldn't get a visual\n");
+int GLES_Init(glimpParms_t ap)
+{
+	unsigned long mask;
+	int actualWidth, actualHeight;
+	int i;
+	EGLint major, minor;
+	EGLint stencil_bits;
+	EGLint depth_bits;
+	EGLint red_bits;
+	EGLint green_bits;
+	EGLint blue_bits;
+	EGLint alpha_bits;
+	EGLint buffer_bits;
+	EGLint samples;
+	EGLint sample_buffers;
+
+	if (!GLimp_OpenDisplay()) {
+		return false;
+	}
+	if (!eglInitialize(eglDisplay, &major, &minor))
+	{
+		GLimp_HandleError("eglInitialize");
 		return false;
 	}
 
-	// window attributes
-	attr.background_pixel = BlackPixel(dpy, scrnum);
-	attr.border_pixel = 0;
-	attr.colormap = XCreateColormap(dpy, root, visinfo->visual, AllocNone);
-	attr.event_mask = X_MASK;
+	common->Printf("Initializing OpenGL display\n");
 
-	if (vidmode_active) {
-		mask = CWBackPixel | CWColormap | CWSaveUnder | CWBackingStore |
-		       CWEventMask | CWOverrideRedirect;
-		attr.override_redirect = True;
-		attr.backing_store = NotUseful;
-		attr.save_under = False;
-	} else {
-		mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
+	if(!GLES_Init_special())
+	{
+		if(!GLES_Init_prefer())
+		{
+			common->Error("Initializing EGL error");
+			return false;
+		}
 	}
 
-	win = XCreateWindow(dpy, root, 0, 0,
-	                    actualWidth, actualHeight,
-	                    0, visinfo->depth, InputOutput,
-	                    visinfo->visual, mask, &attr);
+	actualWidth = glConfig.vidWidth;
+	actualHeight = glConfig.vidHeight;
+	eglConfig = configs[0];
 
-	XStoreName(dpy, win, GAME_NAME);
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_NATIVE_VISUAL_ID, &format);
+	ANativeWindow_setBuffersGeometry((ANativeWindow *)win, screen_width, screen_height, format);
 
-	// don't let the window be resized
-	// FIXME: allow resize (win32 does)
-	sizehints.flags = PMinSize | PMaxSize;
-	sizehints.min_width = sizehints.max_width = actualWidth;
-	sizehints.min_height = sizehints.max_height = actualHeight;
-
-	XSetWMNormalHints(dpy, win, &sizehints);
-
-	XMapWindow(dpy, win);
-
-	if (vidmode_active) {
-		XMoveWindow(dpy, win, 0, 0);
+	if ((eglSurface = eglCreateWindowSurface(eglDisplay, eglConfig, (NativeWindowType) win, NULL)) == EGL_NO_SURFACE)
+	{
+		GLimp_HandleError("eglCreateWindowSurface");
+		return false;
 	}
 
-	XFlush(dpy);
-	XSync(dpy, False);
-	ctx = glXCreateContext(dpy, visinfo, NULL, True);
-	XSync(dpy, False);
+	EGLint ctxAttrib[] = {
+			EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
+			EGL_NONE
+	};
+	if ((eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib)) == EGL_NO_CONTEXT)
+	{
+		GLimp_HandleError("eglCreateContext");
+		return false;
+	}
 
-	// Free the visinfo after we're done with it
-	XFree(visinfo);
+	if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext))
+	{
+		GLimp_HandleError("eglMakeCurrent");
+		return false;
+	}
 
-	glXMakeCurrent(dpy, win, ctx);
+	EGLConfigInfo_t info = GLimp_GetConfigInfo(eglConfig);
+	int tcolorbits = info.red + info.green + info.blue;
+	depth_bits = info.depth;
+	stencil_bits = info.stencil;
 
-	glstring = (const char *) glGetString(GL_RENDERER);
-	common->Printf("GL_RENDERER: %s\n", glstring);
+	common->Printf( "[Harmattan]: EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
+					info.red, info.green,
+					info.blue, info.alpha,
+					info.depth,
+					info.stencil
+			, info.samples, info.sample_buffers
+	);
 
-	glstring = (const char *) glGetString(GL_EXTENSIONS);
-	common->Printf("GL_EXTENSIONS: %s\n", glstring);
+	glConfig.colorBits = tcolorbits;
+	glConfig.depthBits = depth_bits;
+	glConfig.stencilBits = stencil_bits;
 
-	// FIXME: here, software GL test
-
-	glConfig.isFullscreen = a.fullScreen;
+	glConfig.isFullscreen = true;
 
 	if (glConfig.isFullscreen) {
 		Sys_GrabMouseCursor(true);
@@ -591,10 +794,27 @@ bool GLimp_Init(glimpParms_t a)
 		return false;
 	}
 
-	if (!GLX_Init(a)) {
+	if (!GLES_Init(a)) {
 		return false;
 	}
 
+	// load qgl function pointers
+	GLimp_dlopen();
+
+	const char *glstring;
+	glstring = (const char *) qglGetString(GL_RENDERER);
+	common->Printf("GL_RENDERER: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_EXTENSIONS);
+	common->Printf("GL_EXTENSIONS: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_VERSION);
+	common->Printf("GL_VERSION: %s\n", glstring);
+
+	glstring = (const char *) qglGetString(GL_SHADING_LANGUAGE_VERSION);
+	common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glstring);
+
+	//has_gl_context = true;
 	return true;
 }
 
@@ -620,8 +840,6 @@ int Sys_GetVideoRam(void)
 {
 	static int run_once = 0;
 	int major, minor, value;
-	Display *l_dpy;
-	int l_scrnum;
 
 	if (run_once) {
 		return run_once;
@@ -635,52 +853,6 @@ int Sys_GetVideoRam(void)
 	// try a few strategies to guess the amount of video ram
 	common->Printf("guessing video ram ( use +set sys_videoRam to force ) ..\n");
 
-	if (!GLimp_OpenDisplay()) {
-		run_once = 64;
-		return run_once;
-	}
-
-	l_dpy = dpy;
-	l_scrnum = scrnum;
-
-	// try ATI /proc read ( for the lack of a better option )
-	int fd;
-
-	if ((fd = open("/proc/dri/0/umm", O_RDONLY)) != -1) {
-		int len;
-		char umm_buf[ 1024 ];
-		char *line;
-
-		if ((len = read(fd, umm_buf, 1024)) != -1) {
-			// should be way enough to get the full file
-			// grab "free  LFB = " line and "free  Inv = " lines
-			umm_buf[ len-1 ] = '\0';
-			line = umm_buf;
-			line = strtok(umm_buf, "\n");
-			int total = 0;
-
-			while (line) {
-				if (strlen(line) >= 13 && strstr(line, "max   LFB =") == line) {
-					total += atoi(line + 12);
-				} else if (strlen(line) >= 13 && strstr(line, "max   Inv =") == line) {
-					total += atoi(line + 12);
-				}
-
-				line = strtok(NULL, "\n");
-			}
-
-			if (total) {
-				run_once = total / 1048576;
-				// round to the lower 16Mb
-				run_once &= ~15;
-				return run_once;
-			}
-		} else {
-			common->Printf("read /proc/dri/0/umm failed: %s\n", strerror(errno));
-		}
-	}
-
-	common->Printf("guess failed, return default low-end VRAM setting ( 64MB VRAM )\n");
 	run_once = 64;
 	return run_once;
 }

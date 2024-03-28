@@ -194,8 +194,8 @@ typedef void (* RB_GLSL_DrawInteraction_f)(viewLight_t *vLight);
 
 static ID_INLINE void RB_GLSL_DrawInteraction_noShadow(viewLight_t *vLight)
 {
-	RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
-	RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->globalInteractions);
+	RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+	RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
 }
 
 static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow(viewLight_t *vLight)
