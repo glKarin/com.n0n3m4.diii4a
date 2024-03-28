@@ -403,8 +403,8 @@ public:
 
 	virtual void				Think();
 
-	virtual void				WriteToSnapshot( idBitMsg &msg ) const;
-	virtual void				ReadFromSnapshot( const idBitMsg &msg );
+	virtual void				WriteToSnapshot( idBitMsgDelta &msg ) const;
+	virtual void				ReadFromSnapshot( const idBitMsgDelta &msg );
 
 private:
 	int							mRespawnDelay;

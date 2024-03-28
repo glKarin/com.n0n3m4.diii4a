@@ -1495,7 +1495,11 @@ static void Com_Crash_f(const idCmdArgs &args)
 		return;
 	}
 
-	*(int *) 0 = 0x12345678;
+#ifdef __GNUC__
+	__builtin_trap();
+#else
+	* ( int * ) 0 = 0x12345678;
+#endif
 }
 
 /*

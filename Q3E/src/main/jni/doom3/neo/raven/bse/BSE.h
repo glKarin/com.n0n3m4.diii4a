@@ -56,7 +56,7 @@ const float BSE_PARTICLE_TEXCOORDSCALE = (0.01f);
 const unsigned int MEMORY_BLOCK_SIZE = (0x100000);
 const unsigned int BSE_ELEC_MAX_BOLTS = (200);
 
-typedef enum eBSEPerfCounter
+/*typedef*/ enum eBSEPerfCounter
 {
 	PERF_NUM_BSE,
 	PERF_NUM_TRACES,
@@ -66,7 +66,7 @@ typedef enum eBSEPerfCounter
 	NUM_PERF_COUNTERS
 };
 
-typedef enum eBSESegment
+/*typedef*/ enum eBSESegment
 {
 	SEG_NONE = 0,
 	SEG_EFFECT,						// Spawns another effect inheriting data from owner
@@ -97,7 +97,7 @@ enum eBSEParticleType
 	PTYPE_COUNT
 };
 
-typedef enum eBSETrail
+/*typedef*/ enum eBSETrail
 {
 	TRAIL_NONE = 0,
 	TRAIL_BURN,

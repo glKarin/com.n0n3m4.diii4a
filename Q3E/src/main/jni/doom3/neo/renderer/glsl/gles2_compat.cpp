@@ -205,7 +205,7 @@ static void glPopAttrib(void)
 	_SETBS(DEPTH_TEST);
 	_SETBS(CULL_FACE);
 	_SETBS(SCISSOR_TEST);
-#undef _SETBS;
+#undef _SETBS
 }
 
 static void glPushMatrix(void)

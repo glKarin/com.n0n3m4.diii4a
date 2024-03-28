@@ -16,7 +16,7 @@ void rvDeclLipSync::SetLipSyncData(const char* lsd, const char* lang) {
 		return;
 	}
 
-	common->Warning("SetLipSyncData: language %s for lipsync '%s' has invalid character %% in it", lsd, base->GetType());
+	common->Warning("SetLipSyncData: language %s for lipsync '%d' has invalid character %% in it", lsd, base->GetType()); //k %s
 }
 
 /*

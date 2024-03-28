@@ -2011,7 +2011,7 @@ void idFuncShootProjectile::Event_Activate( idEntity *activator ) {
 idFuncShootProjectile::WriteToSnapshot
 ================
 */
-void idFuncShootProjectile::WriteToSnapshot( idBitMsg &msg ) const {
+void idFuncShootProjectile::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	// 	msg.WriteBits( hidden ? 1 : 0, 1 );
 	// 	msg.WriteFloat( renderEntity.shaderParms[ SHADERPARM_PARTICLE_STOPTIME ] );
 	// 	msg.WriteFloat( renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] );
@@ -2022,7 +2022,7 @@ void idFuncShootProjectile::WriteToSnapshot( idBitMsg &msg ) const {
 idFuncShootProjectile::ReadFromSnapshot
 ================
 */
-void idFuncShootProjectile::ReadFromSnapshot( const idBitMsg &msg ) {
+void idFuncShootProjectile::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 	// 	hidden = msg.ReadBits( 1 ) != 0;
 	// 	renderEntity.shaderParms[ SHADERPARM_PARTICLE_STOPTIME ] = msg.ReadFloat();
 	// 	renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = msg.ReadFloat();

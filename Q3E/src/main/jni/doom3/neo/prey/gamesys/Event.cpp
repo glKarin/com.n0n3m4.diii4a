@@ -810,7 +810,7 @@ void idEvent::Restore(idRestoreGame* savefile) {
 		if (argsize != (int)event->eventdef->GetArgSize())
 		{
 			// RB: fixed wrong formatting
-			savefile->Error("idEvent::Restore: arg size (%zd) doesn't match saved arg size(%zd) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName());
+			savefile->Error("idEvent::Restore: arg size (%zd) doesn't match saved arg size(%d) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName());
 			// RB end
 		}
 		if (argsize)

@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "gamesys/SysCvar.h"
 #include "Player.h"
 #include "Camera.h"
-#include "Sound.h"
+#include "../Sound.h"
 
 #include "script/Script_Thread.h"
 

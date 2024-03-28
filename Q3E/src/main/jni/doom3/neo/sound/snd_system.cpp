@@ -1417,7 +1417,7 @@ void idSoundSystemLocal::EndLevelLoad(const char *mapstring)
 	{
 		int num = reverb.LoadMap(mapstring);
 		if(num >= 0)
-			common->Printf("Loaded reverb file '%s'\n", (const char *)rvMapReverb::GetMapFileName(mapstring), num);
+			common->Printf("Loaded reverb file '%s', total %d\n", (const char *)rvMapReverb::GetMapFileName(mapstring), num);
 		else
 			common->Warning("Unable load reverb file '%s'!", (const char *)rvMapReverb::GetMapFileName(mapstring));
 	}

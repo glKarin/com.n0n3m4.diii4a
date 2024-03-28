@@ -11,11 +11,11 @@
 ===============================================================================
 */
 
-typedef enum {
+/*typedef*/ enum {
 	PDIST_POINT = 3, // PDIST_SPHERE + 1
 };
 
-typedef enum {
+/*typedef*/ enum {
 	POR_DIR = 5, // POR_Z + 1
 };
 

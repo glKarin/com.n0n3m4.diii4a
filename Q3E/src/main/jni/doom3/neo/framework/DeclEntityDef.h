@@ -50,7 +50,7 @@ class idDeclEntityDef : public idDecl
 		virtual bool			Parse(const char *text, const int textLength);
 #endif
 		virtual void			FreeData(void);
-		virtual void			Print(void);
+		virtual void			Print(void) const;
 };
 
 #endif /* !__DECLENTITYDEF_H__ */
