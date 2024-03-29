@@ -39,7 +39,7 @@ import java.io.FileOutputStream;
 
 class Q3EView extends SurfaceView implements SurfaceHolder.Callback
 {
-    public static boolean mInit=false;
+    private boolean mInit=false;
 
 	public Q3EView(Context context)
     {

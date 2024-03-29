@@ -54,7 +54,6 @@ import javax.microedition.khronos.opengles.GL11;
 
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
-
     private int m_unit = 0;
     public final int step = Q3EUtils.dip2px(getContext(), 5);
     private FloatBuffer m_gridBuffer = null;

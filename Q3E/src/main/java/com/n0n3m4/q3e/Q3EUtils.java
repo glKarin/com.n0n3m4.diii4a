@@ -42,6 +42,8 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
+import com.n0n3m4.q3e.karin.KFDManager;
+import com.n0n3m4.q3e.karin.KFileDescriptor;
 
 import java.io.Closeable;
 import java.io.File;
@@ -53,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Q3EUtils
 {
@@ -263,32 +266,10 @@ public class Q3EUtils
         return deg;
     }
 
-    // 1. try find in /sdcard/Android/data/<package>/files/assets
-    // 2. try find in /<apk>/assets
     public static InputStream OpenResource(Context cnt, String assetname)
     {
         InputStream is;
-        if((is = OpenResource_external(cnt, assetname)) == null)
-            is = OpenResource_assets(cnt, assetname);
-        return is;
-    }
-
-    public static InputStream OpenResource_external(Context cnt, String assetname)
-    {
-        InputStream is = null;
-        try
-        {
-            final String filePath = GetAppStoragePath(cnt, "/assets/" + assetname);
-            File file = new File(filePath);
-            if(file.exists() && file.isFile() && file.canRead())
-            {
-                is = new FileInputStream(file);
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        is = KFDManager.Instance(cnt).OpenRead(assetname);
         return is;
     }
 
@@ -319,6 +300,18 @@ public class Q3EUtils
         return path;
     }
 
+    public static String GetAppInternalPath(Context context, String filename)
+    {
+        String path;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            path = context.getDataDir().getAbsolutePath();
+        else
+            path = context.getCacheDir().getAbsolutePath();
+        if(null != filename && !filename.isEmpty())
+            path += filename;
+        return path;
+    }
+
     public static void Close(Closeable closeable)
     {
         try
@@ -337,16 +330,10 @@ public class Q3EUtils
         LinkedHashMap<String, String> list = new LinkedHashMap<>();
         list.put("/android_asset", "Default");
         list.put("", "External");
-        String filePath = GetAppStoragePath(context, "/assets/controls_theme");
-        File dir = new File(filePath);
-        if(dir.exists() && dir.isDirectory())
+        List<String> controls_theme = KFDManager.Instance(context).ListDir("controls_theme");
+        for (String file : controls_theme)
         {
-            File[] files = dir.listFiles();
-            for (File file : files)
-            {
-                if(file.isDirectory())
-                    list.put("controls_theme/" + file.getName(), file.getName());
-            }
+            list.put("controls_theme/" + file, file);
         }
         return list;
     }

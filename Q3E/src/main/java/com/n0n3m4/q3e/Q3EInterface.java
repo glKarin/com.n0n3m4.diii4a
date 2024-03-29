@@ -78,8 +78,10 @@ public class Q3EInterface
 	public String app_storage_path;
 	
 	//RTCW4A:
+	/*
 	public final int RTCW4A_UI_ACTION=6;
 	public final int RTCW4A_UI_KICK=7;
+	 */
 
 	//k volume key map
 	public int VOLUME_UP_KEY_CODE = Q3EKeyCodes.KeyCodesGeneric.K_F3;

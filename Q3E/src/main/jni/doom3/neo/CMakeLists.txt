@@ -81,50 +81,50 @@ include(GNUInstallDirs OPTIONAL RESULT_VARIABLE GNUINSTALLDIRS)
 option(REPRODUCIBLE_BUILD "Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 option(DEDICATED	"Build the dedicated server" OFF)
 
-# DOOM3 cores
-option(CORE			"Build the core" ON)
-option(ONATIVE		"Optimize for the host CPU" OFF)
-option(BASE			"Build the base game code" ON)
-option(D3XP			"Build the d3xp game code" ON)
-
 # Extras functions
 if(ANDROID)
-	option(OPENSLES			"OpenSLES support" ON)
+	option(OPENSLES							"OpenSLES support"								ON)
 endif()
-option(OPENGLES3			"OpenGLES3 support" ON)
-option(OPENAL			"OpenAL(soft, OpenSL as backend) support" ON)
-option(MULTITHREAD			"Multi-Thread support" ON)
-option(USING_STB			"Using stb" ON)
-option(SUPPORT_OBJ			"Support obj model" ON)
-option(SUPPORT_DAE			"Support dae model" ON)
-option(SHADOW_MAPPING			"Shadow mapping support" ON)
-option(NO_LIGHT			"r_noLight support" ON)
-option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" ON)
-option(EXTRAS_TOOLS			"Add extras commands" ON)
+option(OPENGLES3							"OpenGLES3 support"								ON)
+option(OPENAL								"OpenAL(soft, OpenSL as backend) support"		ON)
+option(MULTITHREAD							"Multi-Thread support"							ON)
+option(USING_STB							"Using stb"										ON)
+option(SUPPORT_OBJ							"Support obj model"								ON)
+option(SUPPORT_DAE							"Support dae model" 							ON)
+option(SHADOW_MAPPING						"Shadow mapping support" 						ON)
+option(NO_LIGHT								"r_noLight support" 							ON)
+option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" 			ON)
+option(EXTRAS_TOOLS							"Add extras commands" 							ON)
+
+# DOOM3 cores
+option(CORE									"Build the core" 								ON)
+option(ONATIVE								"Optimize for the host CPU" 					OFF)
+option(BASE									"Build the base game code" 						ON)
+option(D3XP									"Build the d3xp game code" 						ON)
 
 # DOOM3 mods
-option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" ON)
-option(D3LE			"Build the d3le game code" ON)
-option(CDOOM			"Build the cdoom game code" ON)
-option(RIVENSIN			"Build the rivensin game code" ON)
-option(HARDCORPS			"Build the hardcorps game code" ON)
-option(OVERTHINKED			"Build the overthinked game code" ON)
-option(SABOT			"Build the sabot game code" ON)
-option(HEXENEOC			"Build the hexeneoc game code" ON)
-option(FRAGGINGFREE			"Build the fraggingfree game code" ON)
-option(LIBRECOOP			"Build the librecoop game code" ON)
+option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" 	ON)
+option(D3LE									"Build the d3le game code" 						ON)
+option(CDOOM								"Build the cdoom game code" 					ON)
+option(RIVENSIN								"Build the rivensin game code" 					ON)
+option(HARDCORPS							"Build the hardcorps game code" 				ON)
+option(OVERTHINKED							"Build the overthinked game code" 				ON)
+option(SABOT								"Build the sabot game code" 					ON)
+option(HEXENEOC								"Build the hexeneoc game code" 					ON)
+option(FRAGGINGFREE							"Build the fraggingfree game code" 				ON)
+option(LIBRECOOP							"Build the librecoop game code" 				ON)
 
 # Quake4
-option(RAVEN			"Build the raven core" ON)
-option(RAVEN_BSE_FX			"OpenBSE with Fx in Raven Quake 4" ON)
-option(QUAKE4			"Build the quake4 game code" ON)
-option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod support" ON)
-option(Q4_MOD_BOTS			"Build quake4 bots mod support" ON)
+option(RAVEN								"Build the raven core" 							ON)
+option(RAVEN_BSE_FX							"OpenBSE with Fx in Raven Quake 4" 				ON)
+option(QUAKE4								"Build the quake4 game code" 					ON)
+option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod support" 	ON)
+option(Q4_MOD_BOTS							"Build quake4 bots mod support" 				ON)
 
 # Prey 2006
-option(PREY			"Build the prey game code" ON)
-option(HUMANHEAD			"Build the humanhead core" ON)
-option(PREY_MOD_FULL_BODY_AWARENESS			"Build prey full body awareness mod support" ON)
+option(HUMANHEAD							"Build the humanhead core" 						ON)
+option(PREY									"Build the prey game code" 						ON)
+option(PREY_MOD_FULL_BODY_AWARENESS			"Build prey full body awareness mod support" 	ON)
 
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
@@ -284,8 +284,6 @@ endif()
 if(NOT MSVC)
 	# compiler specific flags
 	add_compile_options(-pipe)
-	#add_compile_options(-Wall)
-	add_compile_options(-w)
 
 set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0 -fPIC")
 set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG -fPIC")
@@ -317,13 +315,21 @@ add_compile_options(-Wno-unknown-pragmas)
 add_compile_options(-Wno-unused-private-field)
 add_compile_options(-Wno-unused-variable)
 
+	#add_compile_options(-Wall)
+	#add_compile_options(-w)
+	add_compile_options(-Wno-local-type-template-args -Wno-parentheses-equality -Wno-unused-value)
+	add_compile_options(-Wno-self-assign-field -Wno-logical-not-parentheses -Wno-overloaded-virtual -Wno-c++11-compat-deprecated-writable-strings)
+	add_compile_options(-Wno-undefined-inline -Wno-null-conversion -Wno-extra-tokens -Wno-c++11-extensions)
+
 else()
 	add_definitions(-D_ALLOW_KEYWORD_MACROS) # because of the "#define private public" and "#define protected public" in TypeInfo.cpp
 endif()
 
+if(NOT ANDROID)
 CHECK_CXX_COMPILER_FLAG("-Woverloaded-virtual" cxx_has_Woverload_virtual)
 if(cxx_has_Woverload_virtual)
 	add_compile_options(-Woverloaded-virtual)
+endif()
 endif()
 
 # shut up about using memcpy() on classes, in the cases doom3 uses it it seems to be fine
@@ -1461,7 +1467,7 @@ if(ANDROID)
 		sys/android/input.cpp
 	)
 	set(src_sys_core
-		sys/android/gles2.cpp
+		sys/android/glimp.cpp
 	)
 elseif(WIN32)
 	set(src_sys_base

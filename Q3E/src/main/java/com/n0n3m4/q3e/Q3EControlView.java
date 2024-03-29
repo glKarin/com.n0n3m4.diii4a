@@ -84,8 +84,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public static final float GYROSCOPE_Y_AXIS_SENS = 18;
 
     // render
-    public static boolean mInit = false;
-    public boolean usesCSAA = false;
+    private boolean mInit = false;
+    private boolean usesCSAA = false;
     public static int orig_width;
     public static int orig_height;
     private boolean hideonscr;
@@ -105,10 +105,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private float m_lastTouchPadPosX = -1;
     private float m_lastTouchPadPosY = -1;
 
-    private IntBuffer tmpbuf;
-
     // map volume key function
-    public boolean mapvol = false;
+    private boolean mapvol = false;
 
     // map back key function
     private int m_mapBack = ENUM_BACK_ALL;
@@ -117,26 +115,28 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
 
     //RTCW4A-specific
-    Button actbutton;
-    Button kickbutton;
+    /*
+    private Button actbutton;
+    private Button kickbutton;
+    */
     private Q3EView m_renderView;
 
     //MOUSE
-    long oldtime = 0;
-    long delta = 0;
+    private long oldtime = 0;
+    private long delta = 0;
 
 
     // other controls function
-    static float last_joystick_x = 0;
-    static float last_joystick_y = 0;
+    private float last_joystick_x = 0;
+    private float last_joystick_y = 0;
 
-    public static Finger[] fingers = new Finger[10];
-    public static ArrayList<TouchListener> touch_elements = new ArrayList<TouchListener>(0);
-    public static ArrayList<Paintable> paint_elements = new ArrayList<Paintable>(0);
-    public static TouchListener[] handle_elements = new TouchListener[10]; // handled elements in every touch event
+    private final Finger[] fingers = new Finger[10];
+    private final ArrayList<TouchListener> touch_elements = new ArrayList<TouchListener>(0);
+    private final ArrayList<Paintable> paint_elements = new ArrayList<Paintable>(0);
+    private final TouchListener[] handle_elements = new TouchListener[10]; // handled elements in every touch event
 
-    static float last_trackball_x = 0;
-    static float last_trackball_y = 0;
+    private float last_trackball_x = 0;
+    private float last_trackball_y = 0;
 
     /// gyroscope function
     private boolean m_gyroInited = false;
@@ -233,9 +233,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         if (!mInit)
         {
-
-            tmpbuf = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
-
             SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
             hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
@@ -347,10 +344,12 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     public void setState(int st)
     {
+        /*
         if (actbutton != null)
             actbutton.alpha = ((st & 1) == 1) ? Math.min(actbutton.initalpha * 2, 1f) : actbutton.initalpha;
         if (kickbutton != null)
             kickbutton.alpha = ((st & 4) == 4) ? Math.min(kickbutton.initalpha * 2, 1f) : kickbutton.initalpha;
+            */
     }
 
     public int getCharacter(int keyCode, KeyEvent event)

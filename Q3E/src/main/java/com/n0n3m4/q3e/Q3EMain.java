@@ -40,13 +40,13 @@ import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 
 public class Q3EMain extends Activity
 {
-    public static Q3ECallbackObj mAudio;
-    public static Q3EView mGLSurfaceView;
+    private Q3ECallbackObj mAudio;
+    private Q3EView mGLSurfaceView;
     // k
     private boolean m_hideNav = true;
     private int m_runBackground = 1;
     private int m_renderMemStatus = 0;
-    public Q3EControlView mControlGLSurfaceView;
+    private Q3EControlView mControlGLSurfaceView;
     private KDebugTextView memoryUsageText;
     private boolean m_coverEdges = true;
     @SuppressLint("StaticFieldLeak")

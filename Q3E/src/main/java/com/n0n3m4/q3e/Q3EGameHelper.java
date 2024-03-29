@@ -561,4 +561,9 @@ public class Q3EGameHelper
                 runBackground > 0
         );
     }
+
+    public Context GetContext()
+    {
+        return m_context;
+    }
 }

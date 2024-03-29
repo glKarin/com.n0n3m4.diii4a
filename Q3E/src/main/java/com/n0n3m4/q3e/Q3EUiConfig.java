@@ -56,7 +56,7 @@ public class Q3EUiConfig extends Activity
     private static float m_onScreenButtonGlobalSizeScale = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE;
     private static boolean m_onScreenButtonFriendlyEdge = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE;
 
-    Q3EUiView vw;
+    private Q3EUiView vw;
     //k
     private boolean m_hideNav = true;
 

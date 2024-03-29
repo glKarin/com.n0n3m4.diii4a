@@ -186,7 +186,7 @@ public class Q3ECallbackObj
             @Override
             public void run()
             {
-                Q3EUtils.CopyToClipboard(Q3EMain.mGLSurfaceView.getContext(), text);
+                Q3EUtils.CopyToClipboard(Q3EMain.gameHelper.GetContext(), text);
             }
         };
         //Q3EMain.mGLSurfaceView.post(runnable);
@@ -195,7 +195,7 @@ public class Q3ECallbackObj
 
     public String GetClipboardText()
     {
-        return Q3EUtils.GetClipboardText(Q3EMain.mGLSurfaceView.getContext());
+        return Q3EUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
     }
 
     public void sendAnalog(final boolean down, final float x, final float y)
