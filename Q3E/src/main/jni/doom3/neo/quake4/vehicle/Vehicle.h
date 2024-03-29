@@ -354,7 +354,7 @@ rvVehicle inlines
 ID_INLINE bool rvVehicle::IsFlipped( void ) const {
 	return (( !vfl.flipEject ) ? false :
 			idMath::Fabs( idMath::AngleNormalize180( renderEntity.axis.ToAngles().roll ) ) > 60.f ||
-			idMath::Fabs( idMath::AngleNormalize180( renderEntity.axis.ToAngles().pitch ) > 60.0f ));
+			idMath::Fabs( idMath::AngleNormalize180( renderEntity.axis.ToAngles().pitch ) ) > 60.0f ); //k -Wimplicit-conversion-floating-point-to-bool
 }
 
 ID_INLINE bool rvVehicle::IsFrozen( void ) const {
