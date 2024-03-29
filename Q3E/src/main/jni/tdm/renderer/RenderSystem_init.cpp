@@ -970,12 +970,26 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 	takingScreenshot = true;
 
 	int	pix = width * height;
-	byte *buffer = ( byte * )R_StaticAlloc( pix * 3 );
+#ifdef __ANDROID__
+	byte *buffer = ( byte * )R_StaticAlloc( pix * 4 );
+#else
+    byte *buffer = ( byte * )R_StaticAlloc( pix * 3 );
+#endif
 
 	if ( blends <= 1 ) {
 		R_ReadTiledPixels( width, height, buffer, ref );
+#ifdef __ANDROID__
+        byte *buffer3 = ( byte * )R_StaticAlloc( pix * 3 );
+        for ( int i = 0 ; i < pix ; i++ ) {
+            buffer3[i * 3] = buffer[i * 4];
+            buffer3[i * 3 + 1] = buffer[i * 4 + 1];
+            buffer3[i * 3 + 2] = buffer[i * 4 + 2];
+        }
+	    R_StaticFree( buffer );
+        buffer = buffer3;
+#endif
 	} else {
-		unsigned short *shortBuffer = ( unsigned short * )R_StaticAlloc( pix * 2 * 3 );
+        unsigned short *shortBuffer = ( unsigned short * )R_StaticAlloc( pix * 2 * 3 );
 		memset( shortBuffer, 0, pix * 2 * 3 );
 
 		// enable anti-aliasing jitter
@@ -984,15 +998,32 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 		for ( int i = 0 ; i < blends ; i++ ) {
 			R_ReadTiledPixels( width, height, buffer, ref );
 
-			for ( int j = 0 ; j < pix * 3 ; j++ ) {
-				shortBuffer[j] += buffer[j];
+#ifdef __ANDROID__
+			for ( int j = 0 ; j < pix ; j++ ) {
+				shortBuffer[j * 3] += buffer[j * 4];
+				shortBuffer[j * 3 + 1] += buffer[j * 4 + 1];
+				shortBuffer[j * 3 + 2] += buffer[j * 4 + 2];
 			}
+#else
+            for ( int j = 0 ; j < pix * 3 ; j++ ) {
+                shortBuffer[j] += buffer[j];
+            }
+#endif
 		}
 
 		// divide back to bytes
+#ifdef __ANDROID__
+        byte *buffer3 = ( byte * )R_StaticAlloc( pix * 3 );
 		for ( int i = 0 ; i < pix * 3 ; i++ ) {
-			buffer[i] = shortBuffer[i] / blends;
+			buffer3[i] = shortBuffer[i] / blends;
 		}
+	    R_StaticFree( buffer );
+        buffer = buffer3;
+#else
+        for ( int i = 0 ; i < pix * 3 ; i++ ) {
+            buffer[i] = shortBuffer[i] / blends;
+        }
+#endif
 		R_StaticFree( shortBuffer );
 		r_jitter.SetBool( false );
 	}

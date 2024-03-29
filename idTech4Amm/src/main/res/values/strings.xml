@@ -97,6 +97,7 @@
     <string name="help">Help</string>
     <string name="preference">Preference</string>
     <string name="other">Other</string>
+    <string name="option">Option</string>
     <string name="save_launcher_settings">Save launcher settings</string>
     <string name="backup_settings">Backup settings</string>
     <string name="restore_settings">Restore settings</string>

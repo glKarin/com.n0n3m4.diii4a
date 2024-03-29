@@ -290,5 +290,6 @@
     <string name="tdm_base">The Dark Mod</string>
     <string name="quake_3_base">Quake III:Arena</string>
     <string name="quake_3_teamarena">Quake III:Team Arena</string>
+    <string name="option">Option</string>
 
 </resources>

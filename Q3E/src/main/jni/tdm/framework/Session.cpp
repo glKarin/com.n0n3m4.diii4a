@@ -2006,6 +2006,7 @@ bool idSessionLocal::SaveGame( const char *saveName, bool autosave, bool skipChe
 		renderSystem->GetCurrentRenderCropSize(width, height);
 #ifdef __ANDROID__ //karin: RGBA
 		byte *imgData = (byte*)Mem_Alloc(height * width * 4);
+		renderSystem->CaptureRenderToBuffer(imgData);
 #else
         byte *imgData = (byte*)Mem_Alloc(height * width * 3);
 		renderSystem->CaptureRenderToBuffer(imgData);
