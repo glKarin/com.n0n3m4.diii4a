@@ -2,7 +2,6 @@ package com.n0n3m4.q3e.onscreen;
 
 import android.view.View;
 
-import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
@@ -83,7 +82,7 @@ public class Button extends Paintable implements TouchListener
     public void Paint(GL11 gl)
     {
         super.Paint(gl);
-        Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
     }
 
     private int lx;

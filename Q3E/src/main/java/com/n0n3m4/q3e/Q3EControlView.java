@@ -414,8 +414,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
         return true;
     }
-    private static float getCenteredAxis(MotionEvent event,
-                                         int axis)
+    private static float getCenteredAxis(MotionEvent event, int axis)
     {
         final InputDevice.MotionRange range = event.getDevice().getMotionRange(axis, event.getSource());
         if (range != null)

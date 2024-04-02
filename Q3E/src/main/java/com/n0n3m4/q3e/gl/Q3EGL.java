@@ -72,8 +72,7 @@ public final class Q3EGL
 
     //End GL20
 
-    public static void DrawVerts(GL11 gl, int texid, int cnt, FloatBuffer texcoord, FloatBuffer vertcoord, ByteBuffer inds, float trax, float tray
-            , float r, float g, float b, float a)
+    public static void DrawVerts(GL11 gl, int texid, int cnt, FloatBuffer texcoord, FloatBuffer vertcoord, ByteBuffer inds, float trax, float tray, float r, float g, float b, float a)
     {
         if (usegles20)
         {
@@ -108,6 +107,17 @@ public final class Q3EGL
             gl.glDrawElements(GL10.GL_TRIANGLES, cnt, GL10.GL_UNSIGNED_BYTE, inds);
             gl.glTranslatef(-trax, -tray, 0);
         }
+    }
+
+    public static void DrawVerts_GL1(GL11 gl, int texid, int cnt, FloatBuffer texcoord, FloatBuffer vertcoord, ByteBuffer inds, float trax, float tray, float r, float g, float b, float a)
+    {
+        gl.glColor4f(r, g, b, a);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, texid);
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, texcoord);
+        gl.glVertexPointer(2, GL10.GL_FLOAT, 0, vertcoord);
+        gl.glTranslatef(trax, tray, 0);
+        gl.glDrawElements(GL10.GL_TRIANGLES, cnt, GL10.GL_UNSIGNED_BYTE, inds);
+        gl.glTranslatef(-trax, -tray, 0);
     }
 
     public static int loadGLTexture(GL10 gl, Bitmap bmp)

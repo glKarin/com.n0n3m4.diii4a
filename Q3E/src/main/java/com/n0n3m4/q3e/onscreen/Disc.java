@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.View;
 
-import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
@@ -190,7 +189,7 @@ public class Disc extends Paintable implements TouchListener
     {
         //main paint
         super.Paint(gl);
-        Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
         if (null == m_parts || m_parts.length == 0)
             return;
 
@@ -200,9 +199,9 @@ public class Disc extends Paintable implements TouchListener
             {
                 //DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red,green,blue,p.pressed ? (float)Math.max(alpha, 0.9) : (float)(Math.min(alpha, 0.1)));
                 if (p.pressed)
-                    Q3EGL.DrawVerts(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
                 else
-                    Q3EGL.DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
+                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
             }
         }
     }
