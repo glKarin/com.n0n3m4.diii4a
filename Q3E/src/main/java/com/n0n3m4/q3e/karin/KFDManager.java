@@ -82,7 +82,7 @@ public final class KFDManager
     {
         List<String> list = new ArrayList<>();
         File dir = new File(path);
-        File[] files = dir.listFiles(new SuffixFileFilter(Q3EGlobals.IDTPAK_SUFFIX));
+        File[] files = dir.listFiles(new SuffixFileFilter(Q3EGlobals.IDTECH4AMM_PAK_SUFFIX));
         if(null != files)
         {
             for (File file : files)
@@ -103,8 +103,8 @@ public final class KFDManager
             {
                 for (String file : files)
                 {
-                    if(file.toLowerCase().endsWith(Q3EGlobals.IDTPAK_SUFFIX))
-                        list.add(file);
+                    if(file.toLowerCase().endsWith(Q3EGlobals.IDTECH4AMM_PAK_SUFFIX))
+                        list.add("/android_asset/" + file);
                 }
             }
         }

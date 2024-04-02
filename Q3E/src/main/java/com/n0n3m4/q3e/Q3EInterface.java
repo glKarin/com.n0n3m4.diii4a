@@ -398,10 +398,10 @@ public class Q3EInterface
         texture_table[Q3EGlobals.UI_SHOOT] = "btn_sht.png";
         texture_table[Q3EGlobals.UI_JUMP] = "btn_jump.png";
         texture_table[Q3EGlobals.UI_CROUCH] = "btn_crouch.png";
-        texture_table[Q3EGlobals.UI_RELOADBAR] = "btn_reload.png"; // btn_prevweapon.png;btn_nextweapon.png";
+        texture_table[Q3EGlobals.UI_RELOADBAR] = "btn_reload.png;btn_prevweapon.png;btn_ammo.png;btn_nextweapon.png";
         texture_table[Q3EGlobals.UI_PDA] = "btn_pda.png";
         texture_table[Q3EGlobals.UI_FLASHLIGHT] = "btn_flashlight.png";
-        texture_table[Q3EGlobals.UI_SAVE] = "btn_pause.png"; // btn_loadgame.png;btn_savegame.png";
+        texture_table[Q3EGlobals.UI_SAVE] = "btn_pause.png;btn_savegame.png;btn_escape.png;btn_loadgame.png";
         texture_table[Q3EGlobals.UI_1] = "btn_1.png";
         texture_table[Q3EGlobals.UI_2] = "btn_2.png";
         texture_table[Q3EGlobals.UI_3] = "btn_3.png";

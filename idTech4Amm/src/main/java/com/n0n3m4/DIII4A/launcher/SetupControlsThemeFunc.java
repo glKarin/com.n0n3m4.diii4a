@@ -111,9 +111,9 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
     private void ShowTips()
     {
         final String endl = TextHelper.GetDialogMessageEndl();
-        final String Tips = "If choosing `External`, put button image files to `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files/assets` as same file name, will instead of apk internal image files."
+        final String Tips = "If choosing `External`, put button image files to `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files` as same file name, will instead of apk internal image files."
                 + endl
-                + "Or putting button image files as a folder with your custom name in `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files/assets/controls_theme/`, the Theme chooser will show the folder name, and select the folder name instead of apk internal image files.";
+                + "Or putting button image files as a folder with your custom name in `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files/controls_theme/`, the Theme chooser will show the folder name, and select the folder name instead of apk internal image files.";
         ContextUtility.OpenMessageDialog(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.tips), TextHelper.GetDialogMessage(Tips));
     }
 
@@ -149,23 +149,48 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
                 if(type == Q3EGlobals.TYPE_JOYSTICK || type == Q3EGlobals.TYPE_DISC)
                     continue;
                 String name = Q3EUtils.q3ei.texture_table[i];
-                ControlsTheme theme = new ControlsTheme();
-                theme.name = Q3EGlobals.CONTROLS_NAMES[i];
-                theme.path = name;
-                m_list.add(theme);
+                if(type == Q3EGlobals.TYPE_SLIDER)
+                {
+                    ControlsTheme theme = new ControlsTheme();
+                    theme.name = Q3EGlobals.CONTROLS_NAMES[i];
+                    if(null != name && !name.isEmpty())
+                    {
+                        String[] split = name.split(";");
+                        theme.path = split[0];
+                        m_list.add(theme);
+                        if(split.length >= 4)
+                        {
+                            for(int m = 1; m <= 3; m++)
+                            {
+                                theme = new ControlsTheme();
+                                theme.name = Q3EGlobals.CONTROLS_NAMES[i] + " " + m;
+                                theme.path = split[m];
+                                m_list.add(theme);
+                            }
+                        }
+                    }
+                    else
+                        m_list.add(theme);
+                }
+                else
+                {
+                    ControlsTheme theme = new ControlsTheme();
+                    theme.name = Q3EGlobals.CONTROLS_NAMES[i];
+                    theme.path = name;
+                    m_list.add(theme);
+                }
             }
 
             // weapon panel
             str = Q3EUtils.q3ei.texture_table[Q3EGlobals.UI_WEAPON_PANEL];
+            ControlsTheme theme = new ControlsTheme();
+            theme.name = Q3ELang.tr(getContext(), R.string.weapon_panel);
             if(null != str && !str.isEmpty())
             {
                 String[] split = str.split(";");
-                String name = split[0];
-                ControlsTheme theme = new ControlsTheme();
-                theme.name = Q3ELang.tr(getContext(), R.string.weapon_panel);
-                theme.path = name;
-                m_list.add(theme);
+                theme.path = split[0];
             }
+            m_list.add(theme);
             SetData(m_list);
         }
 

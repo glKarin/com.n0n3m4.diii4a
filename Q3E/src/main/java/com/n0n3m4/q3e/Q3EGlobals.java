@@ -250,7 +250,7 @@ public final class Q3EGlobals
 
     public static final String TDM_GLSL_SHADER_VERSION = "2.11.1";
 
-    public static final String IDTPAK_SUFFIX = ".idtpak";
+    public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
     private Q3EGlobals() {}
 }

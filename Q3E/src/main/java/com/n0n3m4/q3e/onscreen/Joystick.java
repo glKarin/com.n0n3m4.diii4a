@@ -21,25 +21,26 @@ public class Joystick extends Paintable implements TouchListener
     private static final int CONST_INVALID_DIRECTION = -1;
     private static final int CONST_HELPER_BORDER_WIDTH = 8;
 
-    private FloatBuffer verts_p; // ring vertex buffer
-    private FloatBuffer vertsd_p; // dot vertex buffer
-    private FloatBuffer tex_p; // rect texture coord buffer
-    private ByteBuffer inds_p; // rect index buffer
-    public int tex_ind; // ring texture
+    public View view;
+    public int cx;
+    public int cy;
+
+    private final FloatBuffer verts_p; // ring vertex buffer
+    private final FloatBuffer vertsd_p; // dot vertex buffer
+    private final FloatBuffer tex_p; // rect texture coord buffer
+    private final ByteBuffer inds_p; // rect index buffer
+    private int tex_ind; // ring texture
     private int texd_ind; // dot texture
 
     private final float[] posx = new float[8];
     private final float[] posy = new float[8];
     public int size;
-    private int dot_size;
-    private float internalsize;
-    public int cx = -1;
-    public int cy = -1;
+    private final int dot_size;
+    private final float internalsize;
 
     private int dot_pos = CONST_INVALID_DIRECTION;
     private int dotx, doty;
-    boolean dotjoyenabled = false;
-    public View view;
+    private boolean dotjoyenabled = false;
 
     private final int[] codes = {Q3EKeyCodes.KeyCodesGeneric.J_UP, Q3EKeyCodes.KeyCodesGeneric.J_RIGHT, Q3EKeyCodes.KeyCodesGeneric.J_DOWN, Q3EKeyCodes.KeyCodesGeneric.J_LEFT};
     private final int[] Menu_Codes = {Q3EKeyCodes.KeyCodesGeneric.K_UPARROW, Q3EKeyCodes.KeyCodesGeneric.K_RIGHTARROW, Q3EKeyCodes.KeyCodesGeneric.K_DOWNARROW, Q3EKeyCodes.KeyCodesGeneric.K_LEFTARROW};
@@ -47,9 +48,9 @@ public class Joystick extends Paintable implements TouchListener
     private final boolean[] enarr = new boolean[4];
 
     private int m_joystickReleaseRange_2 = 0;
-    private int m_size_2 = 0;
-    private int m_posX = 0;
-    private int m_posY = 0;
+    private final int m_size_2;
+    private int m_posX;
+    private int m_posY;
     private int m_fullZoneRadius = 0;
     private final Rect m_range = new Rect();
     private boolean m_pressed = false;

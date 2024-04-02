@@ -9,9 +9,7 @@ import com.n0n3m4.q3e.Q3EUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +53,7 @@ public final class KFileDescriptor
                         break;
                     }
                 }
-                else if(searchPath.endsWith(Q3EGlobals.IDTPAK_SUFFIX))
+                else if(searchPath.endsWith(Q3EGlobals.IDTECH4AMM_PAK_SUFFIX))
                 {
                     if(searchPath.startsWith("/android_asset/"))
                         is = OpenRead_androidasset_zip(searchPath.substring("/android_asset/".length()), m_path);
@@ -101,13 +99,13 @@ public final class KFileDescriptor
                             list.add(file);
                     }
                 }
-                else if(searchPath.endsWith(Q3EGlobals.IDTPAK_SUFFIX))
+                else if(searchPath.endsWith(Q3EGlobals.IDTECH4AMM_PAK_SUFFIX))
                 {
                     List<String> strings;
                     if(searchPath.startsWith("/android_asset/"))
                         strings = ListDir_androidasset_zip(searchPath.substring("/android_asset/".length()), m_path);
                     else
-                       strings = ListDir_filesystem_zip(searchPath, m_path);
+                        strings = ListDir_filesystem_zip(searchPath, m_path);
                     for (String file : strings)
                     {
                         if(!list.contains(file))
