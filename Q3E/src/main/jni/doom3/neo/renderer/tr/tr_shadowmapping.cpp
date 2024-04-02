@@ -230,6 +230,7 @@ void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLigh
 
                     // 2048^2 ultra quality is only for cascaded shadow mapping with sun lights
                     if (lod == 0 && !light->parms.parallel) {
+                        if(!harm_r_shadowMapNonParallelLightUltra.GetBool()) //k non parallel light allow using ultra quality shadow map texture
                         lod = 1;
                     }
 

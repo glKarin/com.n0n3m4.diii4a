@@ -34,11 +34,16 @@
             android:defaultValue="false"
             android:summary="Load local engine library"
             />
-    <Preference
-        android:key="last_dalvik_crash_info"
-        android:title="@string/last_dalvik_crash_info"
-        android:summary="@string/last_dalvik_crash_info"
-        android:persistent="false"/>
+        <Preference
+            android:key="last_dalvik_crash_info"
+            android:title="@string/last_dalvik_crash_info"
+            android:summary="@string/last_dalvik_crash_info"
+            android:persistent="false"/>
+        <Preference
+            android:key="get_pid"
+            android:title="PID"
+            android:summary="Get application PID"
+            android:persistent="false"/>
     </PreferenceCategory>
     
 </PreferenceScreen>

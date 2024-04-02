@@ -1,4 +1,5 @@
 package com.karin.idTech4Amm.ui;
+import android.os.Process;
 import android.preference.PreferenceFragment;
 import android.os.Bundle;
 import android.preference.PreferenceScreen;
@@ -8,12 +9,15 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.widget.Toast;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
+import com.n0n3m4.q3e.Q3EMain;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 
 /**
@@ -37,6 +41,10 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         {
             OpenCrashInfo();
         }
+        else if("get_pid".equals(key))
+        {
+            GetPID();
+        }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
@@ -48,13 +56,13 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         if(text != null)
         {
             builder.setNeutralButton(R.string.clear, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id)
-                    {
-                        KUncaughtExceptionHandler.ClearDumpExceptionContent();
-                        dialog.dismiss();
-                    }
-                });
+                @Override
+                public void onClick(DialogInterface dialog, int id)
+                {
+                    KUncaughtExceptionHandler.ClearDumpExceptionContent();
+                    dialog.dismiss();
+                }
+            });
             if(Constants.IsDebug())
             {
                 builder.setNegativeButton("Trigger", new DialogInterface.OnClickListener() {
@@ -67,6 +75,14 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
             }
         }
         builder.create().show();
+    }
+
+    private void GetPID()
+    {
+        Context activity = ContextUtility.GetContext(this);
+        final String PID = "" + Process.myPid();
+        Toast.makeText(activity, "Application PID: " + PID, Toast.LENGTH_LONG).show();
+        Q3EUtils.CopyToClipboard(activity, PID);
     }
 
     @Override

@@ -222,19 +222,19 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
     else
 #endif
     {
-    if( backEnd.vLight->parallel )
-    {
-        sampleScale = 1.0;
-    }
-    else if( backEnd.vLight->pointLight )
-    {
-        // if(sampleFactor != 0) lod = 0.2;
-		sampleScale = 100.0;
-    }
-    else
-    {
-        sampleScale = 4.0;
-    }
+		if( backEnd.vLight->parallel )
+		{
+			sampleScale = 1.0;
+		}
+		else if( backEnd.vLight->pointLight )
+		{
+			// if(sampleFactor != 0) lod = 0.2;
+			sampleScale = 100.0;
+		}
+		else
+		{
+			sampleScale = 4.0;
+		}
     }
 
     if(sampleFactor > 0.0)
@@ -242,6 +242,7 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
 
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), lod * sampleScale);
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[5]), SampleFactors[backEnd.vLight->shadowLOD]); // 1.0 / size
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[6]), shadowMapResolutions[backEnd.vLight->shadowLOD]); // textureSize()
 }
 
 // Setup polygon offset in shadow map pass

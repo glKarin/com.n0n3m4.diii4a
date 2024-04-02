@@ -38,9 +38,9 @@ uniform sampler2D u_fragmentMap4;	/* u_specularTexture */
 uniform sampler2D u_fragmentMap5;	/* u_specularFalloffTexture */
 
 uniform highp vec4 globalLightOrigin;
-uniform lowp float u_uniformParm2; // sample size
-uniform lowp float u_uniformParm3; // shadow alpha
-uniform lowp float u_uniformParm4; // shadow bias
+uniform highp float u_uniformParm2; // sample size
+uniform mediump float u_uniformParm3; // shadow alpha
+uniform highp float u_uniformParm4; // shadow bias
 uniform highp float u_uniformParm5; // 1.0 / textureSize()
 uniform highp sampler2DArrayShadow u_fragmentMap6;	/* u_shadowMapTexture */
 #ifdef _POINT_LIGHT
@@ -111,8 +111,8 @@ vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
 );
 #ifdef _POINT_LIGHT
 	int shadowIndex = 0;
-	vec3 toLightGlobal = normalize( var_VertexToLight );
-	float axis[6] = float[6](
+	highp vec3 toLightGlobal = normalize( var_VertexToLight );
+	highp float axis[6] = float[6](
 		-toLightGlobal.x,
 		toLightGlobal.x,
 		-toLightGlobal.y,
@@ -131,7 +131,7 @@ vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
 	highp float distance = u_uniformParm2 + length(var_VertexToLight) / (100000000000.0 * u_uniformParm5); // more far more large
 #else
 	highp vec4 shadowPosition = vec4(var_ShadowCoord.xyz / var_ShadowCoord.w, 0.0);
-	float distance = u_uniformParm2;
+	highp float distance = u_uniformParm2;
 #endif
    // end light type
 	shadowPosition.z = BIAS(shadowPosition.z);
@@ -140,7 +140,7 @@ vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
 		shadow += 1.0 - (1.0 - shadowDepth) * u_uniformParm3;
 		//shadow += shadowDepth > 0.0 ? 1.0 : u_uniformParm3;
 	}
-	const float sampleAvg = 1.0 / float(SAMPLES);
+	const highp float sampleAvg = 1.0 / float(SAMPLES);
 	shadow *= sampleAvg;
 
 	vec3 color;

@@ -55,7 +55,7 @@ public final class KFDManager
                 preferences.getString(Q3EPreference.pref_datapath, DefPath),
                 Q3EUtils.GetAppStoragePath(m_context, null),
                 Q3EUtils.GetAppInternalPath(m_context, null),
-                DefPath,
+                //DefPath,
                 "/android_asset"
         };
 
