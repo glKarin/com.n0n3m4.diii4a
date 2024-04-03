@@ -70,7 +70,7 @@ public final class KLogcat
             BufferedReader mReader = null;
             try
             {
-                final String cmd = "logcat --pid=" + android.os.Process.myPid();
+                final String[] cmd = {"/bin/sh", "-c", "logcat | grep com.karin.idTech4Amm"};
                 logcatProc = Runtime.getRuntime().exec(cmd);
                 mReader = new BufferedReader(new InputStreamReader(logcatProc.getInputStream(), StandardCharsets.UTF_8), 1024);
                 String line;
