@@ -118,7 +118,7 @@ public class LogcatActivity extends Activity
         }
         else if (itemId == R.id.logcat_menu_dump)
         {
-            String path = Q3EUtils.GetAppStoragePath(this, "logcat");
+            String path = Q3EUtils.GetAppStoragePath(this, "/logcat");
             if(Q3EUtils.mkdir(path, true))
             {
                 String filePath = path + "/" + Constants.CONST_APP_NAME + "_logcat.log";
