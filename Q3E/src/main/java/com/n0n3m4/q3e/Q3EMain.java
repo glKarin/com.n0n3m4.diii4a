@@ -95,6 +95,8 @@ public class Q3EMain extends Activity
         // create
         super.onCreate(savedInstanceState);
 
+        Q3EUtils.DumpPID(this);
+
         // setup language environment
         Q3ELang.Locale(this);
 

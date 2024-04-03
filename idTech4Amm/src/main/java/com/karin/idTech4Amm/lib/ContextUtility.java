@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.UriPermission;
@@ -645,6 +646,14 @@ public final class ContextUtility
     {
         DocumentFile documentFile = DocumentFile.fromTreeUri(context, FileUtility.PathUri(path));
         return documentFile;
+    }
+
+    public static void OpenDocumentsUI(Context context)
+    {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        ComponentName name = new ComponentName("com.google.android.documentsui", "com.android.documentsui.files.FilesActivity");
+        intent.setComponent(name);
+        context.startActivity(intent);
     }
 
 	private ContextUtility() {}

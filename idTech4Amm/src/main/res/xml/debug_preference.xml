@@ -44,6 +44,16 @@
             android:title="PID"
             android:summary="Get application PID"
             android:persistent="false"/>
+        <Preference
+            android:key="open_logcat"
+            android:title="Open Logcat"
+            android:summary="Open Logcat"
+            android:persistent="false"/>
+        <Preference
+            android:key="open_documentsui"
+            android:title="Open documents"
+            android:summary="Open system file browser"
+            android:persistent="false"/>
     </PreferenceCategory>
     
 </PreferenceScreen>

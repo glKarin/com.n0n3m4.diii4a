@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -31,6 +32,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Process;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -59,6 +61,7 @@ import java.util.List;
 
 public class Q3EUtils
 {
+    private static final String TAG = "Q3EUtils";
     public static Q3EInterface q3ei = new Q3EInterface(); //k: new
     public static boolean isOuya = false;
     public static int UI_FULLSCREEN_HIDE_NAV_OPTIONS = 0;
@@ -671,6 +674,10 @@ public class Q3EUtils
     public static boolean mkdir(String path, boolean p)
     {
         File file = new File(path);
+        if(file.exists())
+        {
+            return file.isDirectory();
+        }
         try
         {
             if(p)
@@ -682,6 +689,34 @@ public class Q3EUtils
         {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private static boolean _dumpPID = false;
+    public static void DumpPID(Context context)
+    {
+        if(_dumpPID || !BuildConfig.DEBUG )
+            return;
+        try
+        {
+            String text = "" + Process.myPid();
+            final String[] Paths = {
+                    PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_datapath, ""),
+                    context.getDataDir().getAbsolutePath()
+            };
+            for (String dir : Paths)
+            {
+                if(null == dir || dir.isEmpty())
+                    continue;
+                String path = dir + "/.idtech4amm.pid";
+                file_put_contents(path, text);
+                Log.i(TAG, "DumpPID " + text + " to " + path);
+                _dumpPID = true;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 }

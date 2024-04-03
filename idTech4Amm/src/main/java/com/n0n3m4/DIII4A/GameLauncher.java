@@ -38,7 +38,6 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,7 +60,6 @@ import android.widget.Toast;
 import com.karin.idTech4Amm.OnScreenButtonConfigActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
-import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.lib.UIUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.TextHelper;
@@ -127,7 +125,6 @@ public class GameLauncher extends Activity
     private static final int CONST_RESULT_CODE_REQUEST_EDIT_EXTERNAL_GAME_LIBRARY = 9;
 	private static final int CONST_RESULT_CODE_REQUEST_EXTRACT_SOURCE = 10;
 	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD = 11;
-
 	private static final int CONST_RESULT_CODE_ACCESS_ANDROID_DATA = 12;
 
 	private final GameManager m_gameManager = new GameManager();
@@ -821,6 +818,7 @@ public class GameLauncher extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+		Q3EUtils.DumpPID(this);
         Q3ELang.Locale(this);
 
         //k

@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions" />
 
     <!--<uses-feature android:name="android.hardware.type.pc" android:required="false" />-->
 
@@ -86,6 +87,13 @@
             android:launchMode="singleTask"
             android:exported="true"
             android:name="com.karin.idTech4Amm.OnScreenButtonConfigActivity"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+        </activity>
+        <activity android:label="Logcat"
+            android:launchMode="singleTask"
+            android:exported="true"
+            android:name="com.karin.idTech4Amm.LogcatActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>

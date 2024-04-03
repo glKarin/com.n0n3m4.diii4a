@@ -290,4 +290,9 @@
     <string name="tdm_base">The Dark Mod</string>
     <string name="quake_3_base">雷神之锤3:竞技场</string>
     <string name="quake_3_teamarena">雷神之锤3:团队竞技场</string>
+    <string name="stop">停止</string>
+    <string name="scroll_to_top">顶部</string>
+    <string name="scroll_to_bottom">底部</string>
+    <string name="scroll">滚动</string>
+    <string name="pause">暂停</string>
 </resources>
