@@ -2136,7 +2136,7 @@ extern float RB_overbright;
 #else
 #define HARM_CHECK_SHADER(x)
 #define HARM_CHECK_SHADER_ATTR(x, index)
-#define HARM_CHECK_SHADER_ERROR(x)
+#define HARM_CHECK_SHADER_ERROR()
 #endif
 
 #ifdef _EXTRAS_TOOLS

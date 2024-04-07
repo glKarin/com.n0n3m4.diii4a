@@ -426,5 +426,6 @@ extern idCVar net_warnStale;
 extern idCVar harm_pm_fullBodyAwareness;
 extern idCVar harm_pm_fullBodyAwarenessOffset;
 extern idCVar harm_pm_fullBodyAwarenessHeadJoint;
+extern idCVar harm_pm_fullBodyAwarenessFixed;
 #endif
 #endif /* !__SYS_CVAR_H__ */

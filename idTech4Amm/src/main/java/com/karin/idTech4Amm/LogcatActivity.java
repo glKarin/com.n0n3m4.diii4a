@@ -53,6 +53,7 @@ public class LogcatActivity extends Activity
         setContentView(R.layout.logcat_page);
 
         m_logcat = new KLogcat();
+        m_logcat.SetCommand("logcat | grep idTech4Amm");
 
         V.SetupUI();
 

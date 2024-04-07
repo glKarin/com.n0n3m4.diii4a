@@ -66,7 +66,9 @@ public:
 
 #ifndef GAME_DLL
 
+#ifndef WINVER
 #define WINVER				0x501
+#endif
 
 #if 0
 // Dedicated server hits unresolved when trying to link this way now. Likely because of the 2010/Win7 transition? - TTimo

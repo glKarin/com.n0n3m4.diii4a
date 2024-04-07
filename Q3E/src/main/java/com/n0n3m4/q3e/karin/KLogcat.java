@@ -9,13 +9,19 @@ import java.nio.charset.StandardCharsets;
 public final class KLogcat
 {
     private KLogcatThread m_thread;
+    private String m_command = "logcat";
+
+    public void SetCommand(String str)
+    {
+        m_command = str;
+    }
 
     public void Start(KLogcatCallback callback)
     {
         Stop();
         m_thread = new KLogcatThread();
         m_thread.SetCallback(callback);
-        m_thread.start();
+        m_thread.Start(m_command);
     }
 
     public void Stop()
@@ -41,6 +47,7 @@ public final class KLogcat
     {
         private boolean m_running = false;
         private KLogcatCallback m_callback;
+        private String m_command = "logcat";
 
         @Override
         public void start()
@@ -49,6 +56,15 @@ public final class KLogcat
                 return;
             m_running = true;
             super.start();
+        }
+
+        public void Start(String cmd)
+        {
+            if(m_running)
+                Stop();
+            if(null != cmd && !cmd.isEmpty())
+                m_command = cmd;
+            this.start();
         }
 
         public void Stop()
@@ -70,7 +86,7 @@ public final class KLogcat
             BufferedReader mReader = null;
             try
             {
-                final String[] cmd = {"/bin/sh", "-c", "logcat | grep com.karin.idTech4Amm"};
+                final String[] cmd = {"/bin/sh", "-c", m_command};
                 logcatProc = Runtime.getRuntime().exec(cmd);
                 mReader = new BufferedReader(new InputStreamReader(logcatProc.getInputStream(), StandardCharsets.UTF_8), 1024);
                 String line;
