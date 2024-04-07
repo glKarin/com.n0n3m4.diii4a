@@ -568,6 +568,12 @@ void idInteraction::FreeSurfaces(void)
 					sint->shadowTris = NULL;
 				}
 			}
+#ifdef _SHADOW_MAPPING
+			if (sint->perforatedTris) {
+				R_FreeStaticTriSurf(sint->perforatedTris);
+				sint->perforatedTris = NULL;
+			}
+#endif
 
 			R_FreeInteractionCullInfo(sint->cullInfo);
 		}
@@ -994,6 +1000,35 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 			}
 		}
 
+#ifdef _SHADOW_MAPPING //karin: perforated surface for shadow mapping
+		if(HasShadows() && r_shadows.GetBool() && r_useShadowMapping.GetBool() && r_forceShadowMapsOnAlphaTestedSurfaces.GetBool() && shader->Coverage() == MC_PERFORATED && tri->numIndexes)
+		{
+#if 0 //karin: don't need precheck
+			bool handle = false;
+			for( int stage = 0; stage < shader->GetNumStages(); stage++ )
+			{
+				const shaderStage_t* pStage = shader->GetStage( stage );
+				if( !pStage->hasAlphaTest )
+					continue;
+				handle = true;
+				break;
+			}
+			if(handle)
+#endif
+			{
+				srfTriangles_t *newTri = R_AllocStaticTriSurf();
+				newTri->ambientSurface = const_cast<srfTriangles_t *>(tri);
+				R_ReferenceStaticTriSurfVerts(newTri, tri);
+				newTri->numVerts = tri->numVerts;
+				R_ReferenceStaticTriSurfIndexes(newTri, tri);
+				newTri->numIndexes = tri->numIndexes;
+				newTri->bounds = tri->bounds;
+				sint->perforatedTris = newTri;
+				interactionGenerated = true;
+			}
+		}
+#endif
+		
 		// free the cull information when it's no longer needed
 		if (sint->lightTris != LIGHT_TRIS_DEFERRED) {
 			R_FreeInteractionCullInfo(sint->cullInfo);
@@ -1322,6 +1357,25 @@ void idInteraction::AddActiveInteraction(void)
 				                shadowTris, vEntity, lightDef, NULL, shadowScissor, inside);
 			}
 		}
+#ifdef _SHADOW_MAPPING //karin: perforated surface for shadow mapping
+		if(sint->perforatedTris)
+		{
+			srfTriangles_t *tri = sint->ambientTris;
+			srfTriangles_t *perforatedTris = sint->perforatedTris;
+			if (!tri->ambientCache) {
+				if (!R_CreateAmbientCache(tri, sint->shader->ReceivesLighting())) {
+					continue;
+				}
+			}
+			perforatedTris->ambientCache = tri->ambientCache;
+			vertexCache.Touch(perforatedTris->ambientCache);
+			if (!perforatedTris->indexCache) {
+				vertexCache.Alloc(perforatedTris->indexes, perforatedTris->numIndexes * sizeof(perforatedTris->indexes[0]), &perforatedTris->indexCache, true);
+				vertexCache.Touch(perforatedTris->indexCache);
+			}
+			R_LinkLightSurf(&vLight->perforatedShadows, perforatedTris, vEntity, lightDef, sint->shader, lightScissor, false);
+		}
+#endif
 	}
 }
 
@@ -1343,6 +1397,11 @@ void R_ShowInteractionMemory_f(const idCmdArgs &args)
 	int shadowTris = 0;
 	int shadowTriVerts = 0;
 	int shadowTriIndexes = 0;
+#ifdef _SHADOW_MAPPING
+	int perforatedTris = 0;
+	int perforatedTriVerts = 0;
+	int perforatedTriIndexes = 0;
+#endif
 
 	for (int i = 0; i < tr.primaryWorld->entityDefs.Num(); i++) {
 		idRenderEntityLocal	*def = tr.primaryWorld->entityDefs[i];
@@ -1385,6 +1444,13 @@ void R_ShowInteractionMemory_f(const idCmdArgs &args)
 					shadowTriVerts += srf->shadowTris->numVerts;
 					shadowTriIndexes += srf->shadowTris->numIndexes;
 				}
+#ifdef _SHADOW_MAPPING
+				if (srf->shadowTris) {
+					perforatedTris++;
+					perforatedTriVerts += srf->perforatedTris->numVerts;
+					perforatedTriIndexes += srf->perforatedTris->numIndexes;
+				}
+#endif
 			}
 		}
 	}
@@ -1393,4 +1459,7 @@ void R_ShowInteractionMemory_f(const idCmdArgs &args)
 	common->Printf("%i deferred interactions, %i empty interactions\n", deferredInteractions, emptyInteractions);
 	common->Printf("%5i indexes %5i verts in %5i light tris\n", lightTriIndexes, lightTriVerts, lightTris);
 	common->Printf("%5i indexes %5i verts in %5i shadow tris\n", shadowTriIndexes, shadowTriVerts, shadowTris);
+#ifdef _SHADOW_MAPPING
+	common->Printf("%5i indexes %5i verts in %5i perforated tris\n", perforatedTriIndexes, perforatedTriVerts, perforatedTris);
+#endif
 }

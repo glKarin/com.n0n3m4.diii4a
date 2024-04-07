@@ -392,6 +392,7 @@ typedef struct viewLight_s {
     float			baseLightProject[16];			// global xyz1 to projected light strq
 	float			inverseBaseLightProject[16];// transforms the zero-to-one cube to exactly cover the light in world space
     idVec3					lightRadius;		// xyz radius for point lights
+	const struct drawSurf_s	*perforatedShadows;	//karin: perforated surface for shadow mapping
 #endif
 } viewLight_t;
 

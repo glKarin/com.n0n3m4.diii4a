@@ -278,27 +278,13 @@ static ID_INLINE void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLight)
 			sideStop = 0;
 		}
 
-		if(vLight->globalShadows || vLight->localShadows)
+		if(vLight->globalShadows || vLight->localShadows || (r_shadowMapPerforated && vLight->perforatedShadows))
 		{
 			qglDisable(GL_STENCIL_TEST);
 
 			for( int m = side; m < sideStop ; m++ )
 			{
-				const drawSurf_t *shadowDrawSurfs[2] = {
-						vLight->globalShadows,
-						vLight->localShadows,
-				};
-				const drawSurf_t *ambientDrawSurfs[2] = {
-						NULL,
-						NULL,
-				};
-
-				if(r_shadowMapPerforated)
-				{
-					ambientDrawSurfs[0] = vLight->localInteractions;
-					ambientDrawSurfs[1] = vLight->globalInteractions;
-				}
-				RB_ShadowMapPasses( shadowDrawSurfs, ambientDrawSurfs, m );
+				RB_ShadowMapPasses( vLight->globalShadows, vLight->localShadows, r_shadowMapPerforated ? vLight->perforatedShadows : NULL, m );
 			}
 
 			RB_GLSL_CreateDrawInteractions_shadowMapping(vLight->localInteractions);
@@ -349,27 +335,13 @@ static ID_INLINE void RB_GLSL_DrawInteraction_shadowMapping_control(viewLight_t 
 			sideStop = 0;
 		}
 
-		if(vLight->globalShadows || vLight->localShadows)
+		if(vLight->globalShadows || vLight->localShadows || (r_shadowMapPerforated && vLight->perforatedShadows))
 		{
 			qglDisable(GL_STENCIL_TEST);
 
 			for( int m = side; m < sideStop ; m++ )
 			{
-				const drawSurf_t *shadowDrawSurfs[2] = {
-						vLight->globalShadows,
-						vLight->localShadows,
-				};
-				const drawSurf_t *ambientDrawSurfs[2] = {
-						NULL,
-						NULL,
-				};
-
-				if(r_shadowMapPerforated)
-				{
-					ambientDrawSurfs[0] = vLight->localInteractions;
-					ambientDrawSurfs[1] = vLight->globalInteractions;
-				}
-				RB_ShadowMapPasses( shadowDrawSurfs, ambientDrawSurfs, m );
+				RB_ShadowMapPasses( vLight->globalShadows, vLight->localShadows, r_shadowMapPerforated ? vLight->perforatedShadows : NULL, m );
 			}
 
 			qglEnable(GL_STENCIL_TEST);

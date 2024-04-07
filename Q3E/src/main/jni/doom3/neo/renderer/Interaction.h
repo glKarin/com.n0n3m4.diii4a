@@ -78,6 +78,9 @@ typedef struct {
 	int						expCulled;			// only for the experimental shadow buffer renderer
 
 	srfCullInfo_t			cullInfo;
+#ifdef _SHADOW_MAPPING //karin: perforated surface for shadow mapping
+	srfTriangles_t 		*perforatedTris;
+#endif
 } surfaceInteraction_t;
 
 
