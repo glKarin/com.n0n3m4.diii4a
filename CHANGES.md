@@ -2,6 +2,18 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan39 (2024-04-10)
+
+* Support perforated surface shadow in shadow mapping.
+* Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`. More view in [LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
+* Add `Quake II` support, game data directory named `baseq2`. More view in [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
+* Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
+* Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
+* Add `The dark mod` 2.11 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
+* Add a on-screen button theme.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan38 (2024-02-05)
 
 * Fixed shadow mapping on non-Adreno GPU.

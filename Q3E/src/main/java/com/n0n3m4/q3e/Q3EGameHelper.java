@@ -252,10 +252,10 @@ public class Q3EGameHelper
         try
         {
             final String destname = Q3EUtils.q3ei.datadir + "/darkmod";
-            File versionFile = new File(destname + "/" + "glprogs/version");
+            File versionFile = new File(destname + "/glprogs/idtech4amm.version");
             if(!versionFile.isFile())
             {
-                Log.i("Q3E", "The Dark Mod GLSL shader source file version not exists.");
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "The Dark Mod GLSL shader source file version not exists.");
                 overwrite = true;
             }
             else
@@ -265,14 +265,14 @@ public class Q3EGameHelper
                     version = version.trim();
                 if(!Q3EGlobals.TDM_GLSL_SHADER_VERSION.equalsIgnoreCase(version))
                 {
-                    Log.i("Q3E", String.format("The Dark Mod GLSL shader source file version is mismatch: %s != %s.", version, Q3EGlobals.TDM_GLSL_SHADER_VERSION));
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format("The Dark Mod GLSL shader source file version is mismatch: %s != %s.", version, Q3EGlobals.TDM_GLSL_SHADER_VERSION));
                     overwrite = true;
                 }
             }
             if(overwrite)
-                Log.i("Q3E", "The Dark Mod GLSL shader source file will be overwrite.");
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "The Dark Mod GLSL shader source file will be overwrite.");
             else
-                Log.i("Q3E", "The Dark Mod GLSL shader source file will keep exists version.");
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "The Dark Mod GLSL shader source file will keep exists version.");
 
             bis = m_context.getAssets().open("pak/darkmod/glprogs.pk4");
             zipinputstream = new ZipInputStream(bis);
@@ -298,6 +298,7 @@ public class Q3EGameHelper
                     continue;
 
                 fileoutputstream = new FileOutputStream(entryName);
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying " + tmpname + " to " + destname);
                 Q3EUtils.Copy(fileoutputstream, zipinputstream, 4096);
                 fileoutputstream.close();
                 fileoutputstream = null;
@@ -307,7 +308,7 @@ public class Q3EGameHelper
             if(overwrite)
             {
                 Q3EUtils.file_put_contents(versionFile, Q3EGlobals.TDM_GLSL_SHADER_VERSION);
-                Log.i("Q3E", "Write The Dark Mod GLSL shader source file version is " + Q3EGlobals.TDM_GLSL_SHADER_VERSION);
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Write The Dark Mod GLSL shader source file version is " + Q3EGlobals.TDM_GLSL_SHADER_VERSION);
             }
         }
         catch (Exception e)

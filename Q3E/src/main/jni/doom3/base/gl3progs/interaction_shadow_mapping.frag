@@ -42,6 +42,7 @@ uniform highp float u_uniformParm2; // sample size
 uniform mediump float u_uniformParm3; // shadow alpha
 uniform highp float u_uniformParm4; // shadow bias
 uniform highp float u_uniformParm5; // 1.0 / textureSize()
+uniform highp float u_uniformParm6; // textureSize()
 uniform highp sampler2DArrayShadow u_fragmentMap6;	/* u_shadowMapTexture */
 #ifdef _POINT_LIGHT
    in highp vec4 var_VertexPosition;
@@ -128,7 +129,7 @@ vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
 	//vec3 c; if(shadowIndex == 0) c = vec3(1.0, 0.0, 0.0); else if(shadowIndex == 1) c = vec3(1.0, 1.0, 0.0); else if(shadowIndex == 2) c = vec3(0.0, 1.0, 0.0); else if(shadowIndex == 3) c = vec3(0.0, 1.0, 1.0); else if(shadowIndex == 4) c = vec3(0.0, 0.0, 1.0); else c = vec3(1.0, 0.0, 1.0);
 	shadowPosition.xyz /= shadowPosition.w;
 	shadowPosition.w = float(shadowIndex);
-	highp float distance = u_uniformParm2 + length(var_VertexToLight) / (100000000000.0 * u_uniformParm5); // more far more large
+	highp float distance = u_uniformParm2 + length(var_VertexToLight) * (0.00000000001 * u_uniformParm6); // more far more large
 #else
 	highp vec4 shadowPosition = vec4(var_ShadowCoord.xyz / var_ShadowCoord.w, 0.0);
 	highp float distance = u_uniformParm2;

@@ -137,7 +137,7 @@ void main(void)
 	highp vec4 shadowPosition = var_VertexPosition * shadowMVPMatrix[shadowIndex];
 	shadowPosition.xyz /= shadowPosition.w;
 	highp float currentDepth = BIAS(shadowPosition.z);
-	float distance = u_uniformParm2 + length(var_LightToVertex) / (2000000.0 * u_uniformParm5); // more far more large
+	float distance = u_uniformParm2 + length(var_LightToVertex) * (0.0000002 * u_uniformParm6); // more far more large
 	for (int i = 0; i < SAMPLES; ++i) {
 		highp float shadowDepth = DC(textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * distance)));
 		highp float visibility = currentDepth - shadowDepth;

@@ -700,9 +700,10 @@ public class Q3EUtils
         try
         {
             String text = "" + Process.myPid();
-            final String[] Paths = {
+            final String[] Paths;
+            Paths = new String[]{
                     PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_datapath, ""),
-                    context.getDataDir().getAbsolutePath()
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? context.getDataDir().getAbsolutePath() : context.getCacheDir().getAbsolutePath()
             };
             for (String dir : Paths)
             {

@@ -4,6 +4,11 @@ project(quake3 C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 98)
 
+# build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 add_definitions(-DNO_VM_COMPILED) # base
 add_definitions(-DUSE_OPENAL -DUSE_OPENAL_DLOPEN) # OpenAL dlopen
 add_definitions(-DUSE_INTERNAL_JPEG) # jpeg

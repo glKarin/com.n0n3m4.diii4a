@@ -920,7 +920,7 @@ GLSL_SHADER const char ES3_INTERACTION_SHADOW_MAPPING_FRAG[] =
 		"	//vec3 c; if(shadowIndex == 0) c = vec3(1.0, 0.0, 0.0); else if(shadowIndex == 1) c = vec3(1.0, 1.0, 0.0); else if(shadowIndex == 2) c = vec3(0.0, 1.0, 0.0); else if(shadowIndex == 3) c = vec3(0.0, 1.0, 1.0); else if(shadowIndex == 4) c = vec3(0.0, 0.0, 1.0); else c = vec3(1.0, 0.0, 1.0);\n"
 		"	shadowPosition.xyz /= shadowPosition.w;\n"
 		"	shadowPosition.w = float(shadowIndex);\n"
-        "	highp float distance = u_uniformParm2 + length(var_VertexToLight) / (100000000000.0 * u_uniformParm5); // more far more large\n"
+        "	highp float distance = u_uniformParm2 + length(var_VertexToLight) * (0.00000000001 * u_uniformParm6); // more far more large // length(var_VertexToLight) / (100000000000.0 * u_uniformParm5)\n"
 		"#else\n"
 		"	highp vec4 shadowPosition = vec4(var_ShadowCoord.xyz / var_ShadowCoord.w, 0.0);\n"
         "	highp float distance = u_uniformParm2;\n"

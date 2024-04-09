@@ -2,6 +2,18 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan39 (2024-04-10)
+
+* 阴影映射支持镂空图层阴影.
+* 新增毁灭战士3 mod `LibreCoop`支持, 游戏数据文件夹命名为`librecoop`. 详情[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
+* 新增`雷神之锤2`支持, 游戏数据文件夹命名为`baseq2`. 详情[Quake II](https://store.steampowered.com/app/2320/Quake_II/).
+* 新增`雷神之锤3竞技场`支持, 游戏数据文件夹命名为`baseq3`; 新增`雷神之锤3团队竞技场`支持, 游戏数据文件夹命名为`missionpack`. 详情[Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
+* 新增`重返德军总部`支持, 游戏数据文件夹命名为`main`. 详情[Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
+* 新增`The dark mod`v2.11支持, 游戏数据文件夹命名为`darkmod`. 详情[The Dark Mod](https://www.thedarkmod.com).
+* 新增一个虚拟按键主题.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan38 (2024-02-05)
 
 * 修复非Adreno GPU的阴影映射阴影.
