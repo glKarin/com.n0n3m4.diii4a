@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.UriPermission;
@@ -298,10 +299,10 @@ public final class ContextUtility
         {
             is = context.getAssets().open(path);
             File out = new File(outPath);
-            FileUtility.mkdir(out.getParent(), true);
+            Q3EUtils.mkdir(out.getParent(), true);
             os = new FileOutputStream(out);
 
-            long res = FileUtility.Copy(os, is);
+            long res = Q3EUtils.Copy(os, is);
 
             return res > 0;
         }
@@ -325,12 +326,12 @@ public final class ContextUtility
 
         try
         {
-            FileUtility.mkdir(outPath, true);
+            Q3EUtils.mkdir(outPath, true);
             is = context.getAssets().open(path);
             File out = new File(outPath + File.separator + name);
             os = new FileOutputStream(out);
 
-            long res = FileUtility.Copy(os, is);
+            long res = Q3EUtils.Copy(os, is);
 
             return res > 0;
         }
@@ -645,6 +646,14 @@ public final class ContextUtility
     {
         DocumentFile documentFile = DocumentFile.fromTreeUri(context, FileUtility.PathUri(path));
         return documentFile;
+    }
+
+    public static void OpenDocumentsUI(Context context)
+    {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        ComponentName name = new ComponentName("com.google.android.documentsui", "com.android.documentsui.files.FilesActivity");
+        intent.setComponent(name);
+        context.startActivity(intent);
     }
 
 	private ContextUtility() {}

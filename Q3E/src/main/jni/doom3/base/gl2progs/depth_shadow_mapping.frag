@@ -9,8 +9,6 @@
 
 precision mediump float;
 
-uniform highp vec4 globalLightOrigin;
-
 #ifdef _PACK_FLOAT
 vec4 pack (highp float depth)
 {

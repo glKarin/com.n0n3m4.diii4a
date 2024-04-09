@@ -40,8 +40,8 @@ FS_WriteFloatString
 */
 int FS_WriteFloatString(char *buf, const char *fmt, va_list argPtr)
 {
-	long i;
-	unsigned long u;
+	int i; // 64long
+	unsigned int u; // 64long
 	double f;
 	char *str;
 	int index;
@@ -83,27 +83,27 @@ int FS_WriteFloatString(char *buf, const char *fmt, va_list argPtr)
 						break;
 					case 'd':
 					case 'i':
-						i = va_arg(argPtr, long);
+						i = va_arg(argPtr, int); // 64long
 						index += sprintf(buf+index, format.c_str(), i);
 						break;
 					case 'u':
-						u = va_arg(argPtr, unsigned long);
+						u = va_arg(argPtr, unsigned int); // 64long
 						index += sprintf(buf+index, format.c_str(), u);
 						break;
 					case 'o':
-						u = va_arg(argPtr, unsigned long);
+						u = va_arg(argPtr, unsigned int); // 64long
 						index += sprintf(buf+index, format.c_str(), u);
 						break;
 					case 'x':
-						u = va_arg(argPtr, unsigned long);
+						u = va_arg(argPtr, unsigned int); // 64long
 						index += sprintf(buf+index, format.c_str(), u);
 						break;
 					case 'X':
-						u = va_arg(argPtr, unsigned long);
+						u = va_arg(argPtr, unsigned int); // 64long
 						index += sprintf(buf+index, format.c_str(), u);
 						break;
 					case 'c':
-						i = va_arg(argPtr, long);
+						i = va_arg(argPtr, int); // 64long
 						index += sprintf(buf+index, format.c_str(), (char) i);
 						break;
 					case 's':

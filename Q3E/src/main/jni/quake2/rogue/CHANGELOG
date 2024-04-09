@@ -1,0 +1,38 @@
+Ground Zero 1.06 to 1.07
+- Port 'Ground Zero' to Mac OS X.
+
+Ground Zero 1.05 to 1.06
+- Port 'Ground Zero' to Windows.
+- Use randk() instead of rand(), a better PNRG.
+- Fix some potential problems found by scan-build.
+
+Ground Zero 1.04 to 1.05
+- Port new savegame system from baseq2
+- Reorder files to reflect the new structure of baseq2
+
+Ground Zero 1.03 to 1.04:
+- Fix a crash when a proxy mine is attached to a flying enemy
+- Fix a crash in coop when multible rockets are in flight
+  (by caedes)
+- Reformat the console output 
+
+Ground Zero 1.03RC3 to 1.03:
+- Just version number change
+
+Ground Zero 1.03RC2 to 1.03RC3:
+- Saner CFLAGS
+- Do not show the gun symbol when fov is bigger than 91 and
+  cl_gun is set to 2
+
+Ground Zero 1.03RC to 1.03RC2:
+- Slightly better performance (~10 FPS)
+
+Ground Zero 1.02 to 1.03RC:
+- Fix a rare crash with the Proxy Mine Launcher (reported by
+  E. Müller)
+- Tesla Coils explode when touching lava or slime (reported
+  by ogrish_freak [at] gmail [dot] com)
+
+Ground Zero 1.01 to 1.02:
+- Added License
+- Added Readme

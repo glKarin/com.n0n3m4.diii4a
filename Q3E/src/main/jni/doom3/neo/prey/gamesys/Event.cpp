@@ -110,7 +110,7 @@ idEventDef::idEventDef( const char *command, const char *formatspec, char return
 			break;
 
 #ifdef _PREY
-#if defined(__aarch64__) || defined(__x86_64__)
+#if defined(__aarch64__) || defined(__x86_64__) || defined(__e2k__)
 		case D_EVENT_INTPTR:
 			argsize += sizeof(intptr_t);
 			break;
@@ -810,7 +810,7 @@ void idEvent::Restore(idRestoreGame* savefile) {
 		if (argsize != (int)event->eventdef->GetArgSize())
 		{
 			// RB: fixed wrong formatting
-			savefile->Error("idEvent::Restore: arg size (%zd) doesn't match saved arg size(%zd) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName());
+			savefile->Error("idEvent::Restore: arg size (%zd) doesn't match saved arg size(%d) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName());
 			// RB end
 		}
 		if (argsize)

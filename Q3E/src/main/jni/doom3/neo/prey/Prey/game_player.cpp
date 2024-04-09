@@ -933,8 +933,8 @@ void hhPlayer::UpdateHudAmmo(idUserInterface *_hud) {
 
 		_hud->SetStateFloat( "player_ammopercent", ammoPct );
 		_hud->SetStateFloat( "player_altammopercent", altPct );
-		_hud->SetStateString( "player_ammoamounttext", ammo<0 ? "" : va("%d", ammo) );
-		_hud->SetStateString( "player_altammoamounttext", altAmmo<0 ? "" : va("%d", altAmmo) );
+		_hud->SetStateString( "player_ammoamounttext", ammo<0 ? "" : va("%d", /*//k */(int)ammo) );
+		_hud->SetStateString( "player_altammoamounttext", altAmmo<0 ? "" : va("%d", /*//k */(int)altAmmo) );
 		_hud->SetStateBool( "player_ammolow", ammoLow );
 		_hud->SetStateBool( "player_altammolow", altAmmoLow );
 	}
@@ -6498,7 +6498,7 @@ void hhPlayer::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 				AI_PAIN = Pain( NULL, NULL, oldHealth - health, lastDamageDir, lastDamageLocation );
 				lastDmgTime = gameLocal.time;
 			} else {
-				common->Warning( "NET: no damage def for damage feedback '%s'\n", lastDamageDef );
+				common->Warning( "NET: no damage def for damage feedback '%d'\n", lastDamageDef );
 			}
 		}
 	}

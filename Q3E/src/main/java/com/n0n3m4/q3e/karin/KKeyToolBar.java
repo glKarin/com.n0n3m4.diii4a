@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.R;
@@ -95,7 +96,7 @@ public class KKeyToolBar extends LinearLayout {
         for (int i = 0; i < values.length; i++) {
             key = new Key();
             key.name = values[i];
-            key.keyCode = keys[i];
+            key.keyCode = Q3EKeyCodes.GetRealKeyCode(keys[i]);
             list.add(key);
         }
 

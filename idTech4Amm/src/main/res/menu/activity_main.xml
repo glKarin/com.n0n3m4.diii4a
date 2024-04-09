@@ -22,6 +22,22 @@
                 android:id="@+id/main_menu_game_prey"
                 android:title="@string/prey_2006"
                 android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_game_quake3"
+                android:title="@string/quake_3"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_game_rtcw"
+                android:title="@string/rtcw"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_game_quake2"
+                android:title="@string/quake_2"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_game_tdm"
+                android:title="@string/tdm"
+                android:showAsAction="never"/>
         </menu>
     </item>
     
@@ -62,27 +78,23 @@
                 android:showAsAction="never"/>
         </menu>
     </item>
-    
+
     <item
-        android:id="@+id/main_menu_other_menu"
-        android:title="@string/other"
+        android:id="@+id/main_menu_option_menu"
+        android:title="@string/option"
         android:showAsAction="never">
         <menu>
             <item
                 android:id="@+id/main_menu_extract_resource"
                 android:title="@string/extract_resource"
                 android:showAsAction="never"/>
-            <!--<item
-                android:id="@+id/main_menu_move_game_data"
-                android:title="Move game data to app private directory"
-                android:showAsAction="never"/>-->
             <item
-                android:id="@+id/main_menu_cvar_list"
-                android:title="@string/special_cvar_list"
+                android:id="@+id/main_menu_support_developer"
+                android:title="@string/support_the_developer"
                 android:showAsAction="never"/>
             <item
-                android:id="@+id/main_menu_runtime_log"
-                android:title="@string/last_runtime_log"
+                android:id="@+id/main_menu_check_for_update"
+                android:title="@string/check_for_update"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_debug"
@@ -92,19 +104,24 @@
     </item>
     
     <item
-        android:id="@+id/main_menu_support_developer"
-        android:title="@string/support_the_developer"
-        android:showAsAction="never"/>
-
-    <item
-        android:id="@+id/main_menu_check_for_update"
-        android:title="@string/check_for_update"
-        android:showAsAction="never"/>
-
-    <item
-        android:id="@+id/main_menu_translators"
-        android:title="@string/translators"
-        android:showAsAction="never"/>
+        android:id="@+id/main_menu_other_menu"
+        android:title="@string/other"
+        android:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/main_menu_cvar_list"
+                android:title="@string/special_cvar_list"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_runtime_log"
+                android:title="@string/last_runtime_log"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_translators"
+                android:title="@string/translators"
+                android:showAsAction="never"/>
+        </menu>
+    </item>
     
     <item
         android:id="@+id/main_menu_dev_menu"

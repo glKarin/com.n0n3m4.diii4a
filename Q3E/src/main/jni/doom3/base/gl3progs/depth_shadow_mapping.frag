@@ -7,8 +7,6 @@
 
 precision mediump float;
 
-uniform highp vec4 globalLightOrigin;
-
 out vec4 _gl_FragColor;
 
 void main(void)

@@ -1,9 +1,11 @@
 ## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006) for Android/Linux, 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版. Original named DIII4A++, based on com.n0n3m4.diii4a
+#### DOOM III/Quake 4/Prey(2006) for Android/Linux
+#### 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版.
+##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan38(natasha)  
-**最新更新日期:**
-2024-02-05  
+1.1.0harmattan39(natasha)  
+**Latest update:**
+2024-04-10  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -13,7 +15,7 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 ### Feature
-* Linux/Windows(MinGW) build(testing)
+* Linux/Windows(MinGW/MSVC(without editor)) build
 * multi-threading renderer
 * png/dds texture image
 * jpeg/png/bmp/dds format of screenshot
@@ -24,9 +26,13 @@ GPLv3
 * OpenAL(soft) and EFX Reverb
 * no-lighting rendering and no-lighting material
 * translucent stencil shadow
-* DOOM3 mods: DOOM3(with full body awareness mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
+* DOOM3 mods: DOOM3(with full body awareness mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free; LibreCoop
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
+* Quake2(Yamagi Quake II) and mods: ctf; rogue; xatrix; zaero
+* Quake III Arena/Quake III Team Arena(ioquake3)
+* Return to Castle Wolfenstein(iortcw)
+* The Dark Mod
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -42,8 +48,13 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Fixed shadow mapping on non-Adreno GPU.
-* Support level loading finished pause(cvar `com_skipLevelLoadPause`) in Quake4.
+* Support perforated surface shadow in shadow mapping.
+* Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`. More view in [LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
+* Add `Quake II` support, game data directory named `baseq2`. More view in [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
+* Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
+* Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
+* Add `The Dark Mod` 2.11 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
+* Add a on-screen button theme.
 
 ----------------------------------------------------------------------------------
 
@@ -67,15 +78,16 @@ Tag with `-free` only for F-Droid update.
 > - `SABot a9 mod` multiplayer-game map aas files and bot scripts(for bots in multiplayer-game).
 
 ###### Problems and resolutions  
-> 1. ~~Door-opening/Collision~~: Now collision bug has fixed, e.g. trigger, vehicle, AI, elevator, health-station, all doors can be opened.
-> 2. *Main-menu*: Now main menu and MP game menu is work, but without background color. But some GUIs can not interactive.
-> 3. ~~Sound~~: It looks work well now.
-> 4. ~~Loading-UI~~: It looks work well now.
-> 5. ~~Multiplayer-Game~~: Now is working well with bots(added SABot a7 mod support, but need `SABot a9 mod` file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(aas32)).
-> 6. *Script error*: Some maps have any script errors, it can not cause game crash, but maybe have impact on the game process.
-> 7. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
-> 8. *Entity render*: Some game entities render incorrect.
-> 9. ~~Font~~: Support Q4 format fonts now. [IlDucci](https://github.com/IlDucci)'s DOOM3-format fonts of Quake 4 is not need on longer.
+> 1. *Particle system*: Now is not work(Quake4 using new advanced `BSE` particle system, it not open-source, `jmarshall` has realized and added by decompiling `ETQW`'s BSE binary file, also see [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), but it not work yet. Now implementing a OpenBSE with DOOM3 original FX/Particle system, some effects can played, but has incorrect render.
+> 2. *Entity render*: Some game entities render incorrect.
+
+###### Bot mod
+> 1. Added SABot a7 mod support.
+> 2. Extract `q4base/sabot_a9.pk4` file in apk to Quake4 game data folder, it includes some defs, scripts and MP game map AAS file.
+> 3. Set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(botaas32).
+> 4. Set `harm_si_autoFillBots` to 1 for automatic fill bots when start MP game.
+> 5. Execute `addbots` for add multiplayer bot.
+> 6. Execute `fillbots` for auto fill multiplayer bots.
 
 ----------------------------------------------------------------------------------
 ### Screenshot
@@ -115,7 +127,7 @@ Tag with `-free` only for F-Droid update.
 > 9. _NO_LIGHT: Add no lighting support.
 > 10. _TRANSLUCENT_STENCIL_SHADOW: Add translucent stencil shadow support.
 
-#### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGL ES2.0, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
+#### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGLES, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
 
 #### Quake 4
@@ -143,13 +155,10 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 > 1. _OPENSLES: Add OpenSLES support for sound.
 
 #### Linux
-##### Define macro `__linux__`.
-> 1. Support ALSA.
+> 1. REQUIRE ALSA, zlib, X11, EGL
 
-#### Windows(MinGW)
-##### Define macro `_WIN32` and `WIN32`.
-> 1. REQUIRE SDL2, zlib
-> 2. NOT SUPPORT OpenGLES3, OpenAL, cURL
+#### Windows(MinGW/MSVC)
+> 1. REQUIRE SDL2, zlib, cURL
 
 ----------------------------------------------------------------------------------
 
@@ -164,6 +173,7 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 > `master`:
 > * /idTech4Amm: frontend source
 > * /Q3E /Q3E/src/main/jni/doom3: game source
+> * /CHECK_FOR_UPDATE.json: Check for update config JSON
 
 > `free`:
 > * For F-Droid pure free version.
@@ -172,7 +182,6 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 > * /screenshot: screenshot pictures
 > * /source: Reference source
 > * /pak: Game resource
-> * /CHECK_FOR_UPDATE.json: Check for update config JSON
 
 > `n0n3m4_original_old_version`:
 > * Original old `n0n3m4` version source.

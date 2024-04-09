@@ -21,35 +21,36 @@ public class Joystick extends Paintable implements TouchListener
     private static final int CONST_INVALID_DIRECTION = -1;
     private static final int CONST_HELPER_BORDER_WIDTH = 8;
 
-    private FloatBuffer verts_p; // ring vertex buffer
-    private FloatBuffer vertsd_p; // dot vertex buffer
-    private FloatBuffer tex_p; // rect texture coord buffer
-    private ByteBuffer inds_p; // rect index buffer
-    public int tex_ind; // ring texture
+    public View view;
+    public int cx;
+    public int cy;
+
+    private final FloatBuffer verts_p; // ring vertex buffer
+    private final FloatBuffer vertsd_p; // dot vertex buffer
+    private final FloatBuffer tex_p; // rect texture coord buffer
+    private final ByteBuffer inds_p; // rect index buffer
+    private int tex_ind; // ring texture
     private int texd_ind; // dot texture
 
     private final float[] posx = new float[8];
     private final float[] posy = new float[8];
     public int size;
-    private int dot_size;
-    private float internalsize;
-    public int cx = -1;
-    public int cy = -1;
+    private final int dot_size;
+    private final float internalsize;
 
     private int dot_pos = CONST_INVALID_DIRECTION;
     private int dotx, doty;
-    boolean dotjoyenabled = false;
-    public View view;
+    private boolean dotjoyenabled = false;
 
-    private final static int[] codes = {Q3EKeyCodes.KeyCodes.J_UP, Q3EKeyCodes.KeyCodes.J_RIGHT, Q3EKeyCodes.KeyCodes.J_DOWN, Q3EKeyCodes.KeyCodes.J_LEFT};
-    private final static int[] Menu_Codes = {Q3EKeyCodes.KeyCodes.K_UPARROW, Q3EKeyCodes.KeyCodes.K_RIGHTARROW, Q3EKeyCodes.KeyCodes.K_DOWNARROW, Q3EKeyCodes.KeyCodes.K_LEFTARROW};
+    private final int[] codes = {Q3EKeyCodes.KeyCodesGeneric.J_UP, Q3EKeyCodes.KeyCodesGeneric.J_RIGHT, Q3EKeyCodes.KeyCodesGeneric.J_DOWN, Q3EKeyCodes.KeyCodesGeneric.J_LEFT};
+    private final int[] Menu_Codes = {Q3EKeyCodes.KeyCodesGeneric.K_UPARROW, Q3EKeyCodes.KeyCodesGeneric.K_RIGHTARROW, Q3EKeyCodes.KeyCodesGeneric.K_DOWNARROW, Q3EKeyCodes.KeyCodesGeneric.K_LEFTARROW};
     private final boolean[] keys = {false, false, false, false};
     private final boolean[] enarr = new boolean[4];
 
     private int m_joystickReleaseRange_2 = 0;
-    private int m_size_2 = 0;
-    private int m_posX = 0;
-    private int m_posY = 0;
+    private final int m_size_2;
+    private int m_posX;
+    private int m_posY;
     private int m_fullZoneRadius = 0;
     private final Rect m_range = new Rect();
     private boolean m_pressed = false;
@@ -69,6 +70,9 @@ public class Joystick extends Paintable implements TouchListener
     {
         int fullZoneRadius = fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0;
         int deadZoneRadius = deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0;
+
+        Q3EKeyCodes.ConvertRealKeyCodes(codes);
+        Q3EKeyCodes.ConvertRealKeyCodes(Menu_Codes);
 
         view = vw;
         size = r * 2;
@@ -178,13 +182,13 @@ public class Joystick extends Paintable implements TouchListener
         {
             if(!m_unfixed)
             {
-                Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
 
                 // int dp = dot_pos;//Multithreading.
                 if (dotjoyenabled)
-                    Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+                    Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
                 else if (dot_pos != CONST_INVALID_DIRECTION)
-                    Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+                    Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
             }
             else
             {
@@ -192,27 +196,27 @@ public class Joystick extends Paintable implements TouchListener
                 {
                     // GL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
                     if (dotjoyenabled)
-                        Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
+                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + dotx, cy + doty, red, green, blue, alpha);
                     else if (dot_pos != CONST_INVALID_DIRECTION)
-                        Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
+                        Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, cx + posx[dot_pos], cy + posy[dot_pos], red, green, blue, alpha);
                 }
                 else
-                    Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                    Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
             }
         }
         else
         {
             if(!m_unfixed)
-                Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
             else
-                Q3EGL.DrawVerts(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, texd_ind, 6, tex_p, vertsd_p, inds_p, m_posX, m_posY, red, green, blue, alpha);
 
             if(null != m_outerVertexBuffer)
-                Q3EGL.DrawVerts(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
+                Q3EGL.DrawVerts_GL1(gl, m_outerTexture, 6, tex_p, m_outerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
             else if(null != m_borderVertexBuffer)
-                Q3EGL.DrawVerts(gl, m_borderTexture, 6, tex_p, m_borderVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
+                Q3EGL.DrawVerts_GL1(gl, m_borderTexture, 6, tex_p, m_borderVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */0, 1, 0, alpha);
             if(null != m_innerVertexBuffer)
-                Q3EGL.DrawVerts(gl, m_innerTexture, 6, tex_p, m_innerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */1, 0, 0, alpha);
+                Q3EGL.DrawVerts_GL1(gl, m_innerTexture, 6, tex_p, m_innerVertexBuffer, inds_p, m_posX, m_posY, /*red, green, blue, */1, 0, 0, alpha);
         }
     }
 
@@ -288,11 +292,10 @@ public class Joystick extends Paintable implements TouchListener
     {
         final int deltax = x - cx;
         final int deltay = y - cy;
-        Q3EControlView controlView = (Q3EControlView) (this.view);
         boolean res = true;
         if (NotInFullZone(deltax, deltay))
         {
-                res = false;
+            res = false;
         }
         if (res && act != ACT_RELEASE)
         {

@@ -300,7 +300,7 @@ idClass::FindUninitializedMemory
 void idClass::FindUninitializedMemory(void)
 {
 #ifdef ID_DEBUG_UNINITIALIZED_MEMORY
-	unsigned long *ptr = ((unsigned long *)this) - 1;
+	unsigned int *ptr = ((unsigned int *)this) - 1; // 64long
 	int size = *ptr;
 	assert((size & 3) == 0);
 	size >>= 2;
@@ -483,7 +483,7 @@ void *idClass::operator new(size_t s)
 	numobjects++;
 
 #ifdef ID_DEBUG_UNINITIALIZED_MEMORY
-	unsigned long *ptr = (unsigned long *)p;
+	unsigned int *ptr = (unsigned int *)p; // 64long
 	int size = s;
 	assert((size & 3) == 0);
 	size >>= 3;
@@ -508,7 +508,7 @@ void *idClass::operator new(size_t s, int, int, char *, int)
 	numobjects++;
 
 #ifdef ID_DEBUG_UNINITIALIZED_MEMORY
-	unsigned long *ptr = (unsigned long *)p;
+	unsigned int *ptr = (unsigned int *)p; // 64long
 	int size = s;
 	assert((size & 3) == 0);
 	size >>= 3;

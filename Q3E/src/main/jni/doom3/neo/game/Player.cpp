@@ -7948,56 +7948,65 @@ void idPlayer::CalculateFirstPersonView(void)
 		GetViewPos( firstPersonViewOrigin_orig, firstPersonViewAxis );
 		idAFAttachment *headAF = head.GetEntity();
 
-		if( af.IsActive() )
+		if(harm_pm_fullBodyAwarenessFixed.GetBool())
 		{
-			idAFBody* head = af.GetPhysics()->GetBody( "head" );
-			if( head )
-			{
-				firstPersonViewOrigin = head->GetWorldOrigin();
-				firstPersonViewAxis = head->GetWorldAxis();
-			}
-		}
-		else if(headAF)
-		{
-#define _HARM_D3_PLAYERMODEL_HEAD_JOINT "Head"
-			idMat3 axis;
-			idVec3 origin;
-			const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
-			jointHandle_t head_joint = INVALID_JOINT;
-			if(headJointName && headJointName[0])
-			{
-				head_joint = headAF->GetAnimator()->GetJointHandle( headJointName );
-			}
-			if(head_joint >= 0 && headAF->GetJointWorldTransform( head_joint, gameLocal.time, origin, axis ) )
-				firstPersonViewOrigin = origin;
-			else
-			{
-				firstPersonViewOrigin = headAF->GetPhysics()->GetOrigin();
-			}
+			firstPersonViewOrigin = GetEyePosition() + viewBob;
 		}
 		else
 		{
-			// position camera at head
-			idMat3 axis;
-			idVec3 origin;
-			const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
-			jointHandle_t head_joint = INVALID_JOINT;
-			if(headJointName && headJointName[0])
+			if( af.IsActive() )
 			{
-				head_joint = animator.GetJointHandle( headJointName );
+				idAFBody* head = af.GetPhysics()->GetBody( "head" );
+				if( head )
+				{
+					firstPersonViewOrigin = head->GetWorldOrigin();
+					firstPersonViewAxis = head->GetWorldAxis();
+				}
+				else
+					firstPersonViewOrigin = GetEyePosition();
+			}
+			else if(headAF)
+			{
+	#define _HARM_D3_PLAYERMODEL_HEAD_JOINT "Head"
+				idMat3 axis;
+				idVec3 origin;
+				const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
+				jointHandle_t head_joint = INVALID_JOINT;
+				if(headJointName && headJointName[0])
+				{
+					head_joint = headAF->GetAnimator()->GetJointHandle( headJointName );
+				}
+				if(head_joint >= 0 && headAF->GetJointWorldTransform( head_joint, gameLocal.time, origin, axis ) )
+					firstPersonViewOrigin = origin;
+				else
+				{
+					firstPersonViewOrigin = headAF->GetPhysics()->GetOrigin();
+				}
 			}
 			else
 			{
-				head_joint = animator.GetJointHandle( _HARM_D3_PLAYERMODEL_HEAD_JOINT );
+				// position camera at head
+				idMat3 axis;
+				idVec3 origin;
+				const char *headJointName = harm_pm_fullBodyAwarenessHeadJoint.GetString();
+				jointHandle_t head_joint = INVALID_JOINT;
+				if(headJointName && headJointName[0])
+				{
+					head_joint = animator.GetJointHandle( headJointName );
+				}
+				else
+				{
+					head_joint = animator.GetJointHandle( _HARM_D3_PLAYERMODEL_HEAD_JOINT );
+				}
+				if(head_joint >= 0 && animator.GetJointTransform( head_joint, gameLocal.time, origin, axis ) )
+					firstPersonViewOrigin = ( origin + modelOffset) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
+											+ viewBob
+							;
+				else
+					firstPersonViewOrigin = GetEyePosition() + viewBob
+							;
+	#undef _HARM_D3_PLAYERMODEL_HEAD_JOINT
 			}
-			if(head_joint >= 0 && animator.GetJointTransform( head_joint, gameLocal.time, origin, axis ) )
-				firstPersonViewOrigin = ( origin + modelOffset) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin()
-										+ viewBob
-						;
-			else
-				firstPersonViewOrigin = GetEyePosition() + viewBob
-						;
-#undef _HARM_D3_PLAYERMODEL_HEAD_JOINT
 		}
 
 		firstPersonViewOrigin_playerViewOrigin = firstPersonViewOrigin;

@@ -1,0 +1,14 @@
+sources:
+  0.7.8:
+    sha256: 4021940a2620570ac767eee84e58d572a3faf1570edfaf5309c609752146e950
+    url: https://github.com/wolfpld/tracy/archive/refs/tags/v0.7.8.tar.gz
+  0.8.1:
+    sha256: 004992012b2dc879a9f6d143cbf94d7ea30e88135db3ef08951605d214892891
+    url: https://github.com/wolfpld/tracy/archive/refs/tags/v0.8.1.tar.gz
+patches:
+  0.7.8:
+    - patch_file: patches/0.7.8/RecreateQueries.patch
+      base_path: fullsource
+  0.8.1:
+    - patch_file: patches/0.8.1/RecreateQueries.patch
+      base_path: fullsource

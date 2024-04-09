@@ -621,7 +621,7 @@ void hhHarvesterSimple::ClearSmoke(void) {
 	}
 
 	for(int i = 0; i < MAX_HARVESTER_LEGS; i++) {
-		SAFE_REMOVE(fxSmoke[MAX_HARVESTER_LEGS]);
+		SAFE_REMOVE(fxSmoke[i/*//k MAX_HARVESTER_LEGS*/]);
 	}
 }
 

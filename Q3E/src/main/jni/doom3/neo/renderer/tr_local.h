@@ -392,6 +392,7 @@ typedef struct viewLight_s {
     float			baseLightProject[16];			// global xyz1 to projected light strq
 	float			inverseBaseLightProject[16];// transforms the zero-to-one cube to exactly cover the light in world space
     idVec3					lightRadius;		// xyz radius for point lights
+	const struct drawSurf_s	*perforatedShadows;	//karin: perforated surface for shadow mapping
 #endif
 } viewLight_t;
 
@@ -1641,6 +1642,8 @@ extern shaderProgram_t interactionShadowMappingBlinnPhongShader_parallelLight; /
 extern shaderProgram_t depthShader_spotLight; //k: depth shader
 extern shaderProgram_t interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
 extern shaderProgram_t interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
+
+extern shaderProgram_t depthPerforatedShader; //k: depth perforated shader
 #endif
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
 extern shaderProgram_t interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
@@ -1975,7 +1978,7 @@ struct idAllocAutoHeap {
 		void * Alloc(size_t size) {
 			Free();
 			data = calloc(size, 1);
-			common->Printf("[Harmattan]: %p alloca on heap memory %p(%d bytes)\n", this, data, size);
+			common->Printf("[Harmattan]: %p alloca on heap memory %p(%zu bytes)\n", this, data, size);
 			return data;
 		}
 
@@ -1983,7 +1986,7 @@ struct idAllocAutoHeap {
 			Free();
 			data = calloc(size + 15, 1);
 			void *ptr = ((void *)(((intptr_t)data + 15) & ~15));
-			common->Printf("[Harmattan]: %p alloca16 on heap memory %p(%d bytes) <- %p(%d bytes)\n", this, ptr, size, data, size + 15);
+			common->Printf("[Harmattan]: %p alloca16 on heap memory %p(%zu bytes) <- %p(%zu bytes)\n", this, ptr, size, data, size + 15);
 			return ptr;
 		}
 
@@ -2017,13 +2020,13 @@ struct idAllocAutoHeap {
 	idAllocAutoHeap _allocAutoHeap##x; \
 	T *varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
 	if(_allocAutoHeap##x.IsAlloc()) \
-		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%d bytes)\n", #varname, varname, alloc_size);
+		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size);
 
 #define _DROID_ALLOC16(T, alloc_size, varname, x) \
 	idAllocAutoHeap _allocAutoHeap##x; \
 	varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
 	if(_allocAutoHeap##x.IsAlloc()) \
-		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%d bytes)\n", #varname, varname, alloc_size);
+		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size);
 
 	// free memory when not call alloca()
 #define _DROID_FREE(varname, x)/* \
@@ -2068,6 +2071,7 @@ extern idCVar r_shadowMapLodBias;
 extern idCVar r_shadowMapPolygonFactor;
 extern idCVar r_shadowMapPolygonOffset;
 extern idCVar r_shadowMapOccluderFacing;
+extern idCVar r_forceShadowMapsOnAlphaTestedSurfaces;
 
 extern idCVar harm_r_shadowMapLod;
 extern idCVar harm_r_shadowMapBias;
@@ -2079,6 +2083,7 @@ extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapPolygonFactor;
 extern idCVar harm_r_shadowMapPolygonOffset;
+extern idCVar harm_r_shadowMapNonParallelLightUltra;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;
@@ -2093,7 +2098,7 @@ void R_SetupFrontEndViewDefMVP(void);
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-extern idCVar harm_r_translucentStencilShadow;
+extern idCVar harm_r_stencilShadowTranslucent;
 extern idCVar harm_r_stencilShadowAlpha;
 #endif
 
@@ -2131,7 +2136,7 @@ extern float RB_overbright;
 #else
 #define HARM_CHECK_SHADER(x)
 #define HARM_CHECK_SHADER_ATTR(x, index)
-#define HARM_CHECK_SHADER_ERROR(x)
+#define HARM_CHECK_SHADER_ERROR()
 #endif
 
 #ifdef _EXTRAS_TOOLS

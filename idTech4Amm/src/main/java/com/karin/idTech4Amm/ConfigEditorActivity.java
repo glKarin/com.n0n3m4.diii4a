@@ -21,6 +21,7 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.Q3EUtils;
 
 /**
  * cfg file editor
@@ -96,7 +97,7 @@ public class ConfigEditorActivity extends Activity
         Reset();
 
         File file = new File(path);
-        String text = FileUtility.file_get_contents(file);
+        String text = Q3EUtils.file_get_contents(file);
         if (text != null)
         {
             V.editText.setText(text);
@@ -120,7 +121,7 @@ public class ConfigEditorActivity extends Activity
     {
         if (m_file == null)
             return false;
-        return FileUtility.file_put_contents(m_file, V.editText.getText().toString());
+        return Q3EUtils.file_put_contents(m_file, V.editText.getText().toString());
     }
 
     private boolean IsValid()

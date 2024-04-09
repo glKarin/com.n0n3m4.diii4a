@@ -492,7 +492,7 @@ if ( TARGET_CORE == '1' ):
         doom = SConscript( g_build + '/core/sys/scons/SConscript.core' )
 
         InstallAs( '#doom.' + cpu, doom )
-        InstallAs( g_build + '/package/libdante.so', doom )
+        InstallAs( g_build + '/package/libidtech4.so', doom )
 		
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1
@@ -521,7 +521,7 @@ if ( TARGET_RAVEN == '1' ):
         doom_raven = SConscript( g_build + '/raven/sys/scons/SConscript.core' )
 
         InstallAs( '#doom_raven.' + cpu, doom_raven )
-        InstallAs( g_build + '/package/libdante_raven.so', doom_raven )
+        InstallAs( g_build + '/package/libidtech4_raven.so', doom_raven )
 		
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1
@@ -550,7 +550,7 @@ if ( TARGET_HUMANHEAD == '1' ):
         doom_humanhead = SConscript( g_build + '/humanhead/sys/scons/SConscript.core' )
 
         InstallAs( '#doom_humanhead.' + cpu, doom_humanhead )
-        InstallAs( g_build + '/package/libdante_humanhead.so', doom_humanhead )
+        InstallAs( g_build + '/package/libidtech4_humanhead.so', doom_humanhead )
 		
 	if ( DEDICATED == '1' or DEDICATED == '2' ):
 		local_dedicated = 1

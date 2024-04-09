@@ -10,6 +10,7 @@ import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.misc.PreferenceBackup;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.Q3EUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -75,7 +76,7 @@ public final class ExtractSourceFunc extends GameLauncherFunc
         {
             os = m_gameLauncher.getContentResolver().openOutputStream(uri);
             is = m_gameLauncher.getAssets().open("source/DIII4A.source.tgz");
-            FileUtility.Copy(os, is);
+            Q3EUtils.Copy(os, is);
             Toast_long(R.string.extract_file_success);
         }
         catch (Exception e)

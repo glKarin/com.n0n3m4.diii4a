@@ -1,4 +1,4 @@
-#include "../idlib/precompiled.h"
+#include "../../idlib/precompiled.h"
 #pragma hdrstop
 
 #include "../tr_local.h"
@@ -68,6 +68,8 @@ shaderProgram_t	interactionShadowMappingBlinnPhongShader_parallelLight; //k: int
 shaderProgram_t depthShader_spotLight; //k: depth shader
 shaderProgram_t	interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
 shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
+
+shaderProgram_t depthPerforatedShader; //k: depth perforated shader
 #endif
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
 shaderProgram_t	interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
@@ -115,6 +117,7 @@ static int R_GLSL_ParseMacros(const char *macros, idStrList &ret)
 	int index;
 	int counter = 0;
 	idStr str(macros);
+	str.Strip(',');
 	while((index = str.Find(',', start)) != -1)
 	{
 		if(index - start > 0)
@@ -586,6 +589,13 @@ static bool RB_GLSL_InitShaders(void)
 					"interaction_blinnphong_spot_light_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag",
 					"_SPOT_LIGHT,BLINN_PHONG"
 					},
+				{
+					"depth_perforated",
+					&depthPerforatedShader,
+					ES3_DEPTH_PERFORATED_VERT, ES3_DEPTH_PERFORATED_FRAG,
+					"depth_perforated.vert", "depth_perforated.frag",
+					NULL
+					},
 		};
 
 		for(int i = 0; i < sizeof(Props_shadowMapping) / sizeof(Props_shadowMapping[0]); i++)
@@ -646,11 +656,11 @@ static bool RB_GLSL_InitShaders(void)
 			) < 0)
 			{
 				common->Printf("[Harmattan]: translucent stencil shadow shader error!\n");
-				if(harm_r_translucentStencilShadow.GetBool())
+				if(harm_r_stencilShadowTranslucent.GetBool())
 				{
-					harm_r_translucentStencilShadow.SetBool(false);
+					harm_r_stencilShadowTranslucent.SetBool(false);
 				}
-				harm_r_translucentStencilShadow.SetReadonly();
+				harm_r_stencilShadowTranslucent.SetReadonly();
 				break;
 			}
 		}
@@ -859,6 +869,13 @@ static bool RB_GLSL_InitShaders(void)
 					"interaction_blinnphong_shadow_mapping.vert", "interaction_blinnphong_shadow_mapping.frag",
 					macros[8]
 				},
+				{
+					"depth_perforated",
+					&depthPerforatedShader,
+					DEPTH_PERFORATED_VERT, DEPTH_PERFORATED_FRAG,
+					"depth_perforated.vert", "depth_perforated.frag",
+					USING_DEPTH_TEXTURE
+					},
 		};
 
 		for(int i = 0; i < sizeof(Props_shadowMapping) / sizeof(Props_shadowMapping[0]); i++)
@@ -921,11 +938,11 @@ static bool RB_GLSL_InitShaders(void)
 			) < 0)
 			{
 				common->Printf("[Harmattan]: translucent stencil shadow shader error!\n");
-				if(harm_r_translucentStencilShadow.GetBool())
+				if(harm_r_stencilShadowTranslucent.GetBool())
 				{
-					harm_r_translucentStencilShadow.SetBool(false);
+					harm_r_stencilShadowTranslucent.SetBool(false);
 				}
-				harm_r_translucentStencilShadow.SetReadonly();
+				harm_r_stencilShadowTranslucent.SetReadonly();
 				break;
 			}
 		}

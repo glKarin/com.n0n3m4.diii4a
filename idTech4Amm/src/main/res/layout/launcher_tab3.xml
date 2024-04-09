@@ -2,17 +2,17 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/launcher_tab3"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tv_scrres"
@@ -26,16 +26,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="@string/scale_by_screen_area"
                 android:checked="false"
-                >
-            </CheckBox>
+                android:text="@string/scale_by_screen_area"></CheckBox>
         </LinearLayout>
 
         <RadioGroup
             android:id="@+id/rg_scrres"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <RadioButton
                 android:id="@+id/res_1x"
@@ -67,7 +65,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/custom" />
-            
+
             <RadioButton
                 android:id="@+id/res_720"
                 android:layout_width="wrap_content"
@@ -103,14 +101,14 @@
             android:id="@+id/res_customlayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-            
+            android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginRight="5dp"
-                android:text="@string/custom2"/>
+                android:text="@string/custom2" />
 
             <EditText
                 android:id="@+id/res_x"
@@ -130,23 +128,24 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:text="480" />
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="5dp"
-                android:text="@string/_0_auto_using_screen_aspect_ratio"/>
+                android:text="@string/_0_auto_using_screen_aspect_ratio" />
         </LinearLayout>
-        
+
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/msaa_warning_tegra_doesn_t_support_it" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/msaa_warning_tegra_doesn_t_support_it" />
+
         <RadioGroup
             android:id="@+id/rg_msaa"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <RadioButton
                 android:id="@+id/msaa_1x"
@@ -168,17 +167,17 @@
                 android:text="@string/_16x" />
         </RadioGroup>
 
-        
 
         <TextView
+            android:id="@+id/launcher_16bit_setting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/launcher_16bit_setting"
             android:text="@string/color_bits" />
+
         <RadioGroup
             android:id="@+id/rg_color_bits"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <RadioButton
                 android:id="@+id/color_bits_32"
@@ -198,36 +197,56 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/_16bits_rgba4444" />
-        </RadioGroup>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="1dp"
-            android:text="OpenGL"/>
-        <RadioGroup
-            android:id="@+id/rg_opengl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
 
             <RadioButton
-                android:id="@+id/rg_opengles2"
+                android:id="@+id/color_bits_16_rgba5551"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="OpenGL ES2"/>
+                android:text="@string/_16bits_rgba5551" />
 
             <RadioButton
-                android:id="@+id/rg_opengles3"
+                android:id="@+id/color_bits_32_rgba1010102"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="OpenGL ES3"/>
-
+                android:text="@string/_32bits_rgba1010102" />
         </RadioGroup>
-        
+
+
+        <LinearLayout
+            android:id="@+id/opengl_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:text="OpenGL" />
+
+            <RadioGroup
+                android:id="@+id/rg_opengl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rg_opengles2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="OpenGL ES2" />
+
+                <RadioButton
+                    android:id="@+id/rg_opengles3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="OpenGL ES3" />
+
+            </RadioGroup>
+        </LinearLayout>
+
     </LinearLayout>
 
 </ScrollView>

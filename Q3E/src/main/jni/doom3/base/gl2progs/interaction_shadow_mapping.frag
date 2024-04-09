@@ -44,9 +44,11 @@ uniform highp sampler2D u_fragmentMap6;	/* u_shadowMapTexture */
 #endif
 
 uniform highp vec4 globalLightOrigin;
-uniform lowp float u_uniformParm2; // sample size
-uniform lowp float u_uniformParm3; // shadow alpha
-uniform lowp float u_uniformParm4; // bias
+uniform highp float u_uniformParm2; // sample size
+uniform mediump float u_uniformParm3; // shadow alpha
+uniform highp float u_uniformParm4; // bias
+uniform highp float u_uniformParm5; // 1.0 / textureSize()
+uniform highp float u_uniformParm6; // textureSize()
 
 #ifdef _POINT_LIGHT
 	varying highp vec3 var_LightToVertex;
@@ -111,7 +113,7 @@ void main(void)
 	float specularFalloff = pow(RdotV, u_specularExponent);
 #endif
 
-	float shadow = 0.0;
+	highp float shadow = 0.0;
 	#define SAMPLES 9
 
 #ifdef _POINT_LIGHT
@@ -119,9 +121,9 @@ void main(void)
 	sampleOffsetTable[0] = vec3(0.0, 0.0, 0.0);
 	sampleOffsetTable[1] = vec3(1.0, 1.0, 1.0); sampleOffsetTable[2] = vec3(1.0, 1.0, -1.0); sampleOffsetTable[3] = vec3(1.0, -1.0, -1.0); sampleOffsetTable[4] = vec3(1.0, -1.0, 1.0);
 	sampleOffsetTable[5] = vec3(-1.0, 1.0, 1.0); sampleOffsetTable[6] = vec3(-1.0, -1.0, 1.0); sampleOffsetTable[7] = vec3(-1.0, 1.0, -1.0); sampleOffsetTable[8] = vec3(-1.0, -1.0, -1.0);
-	vec3 toLightGlobal = normalize( -var_LightToVertex );
+	highp vec3 toLightGlobal = normalize( -var_LightToVertex );
 	int shadowIndex = 0;
-	float axis[6];
+	highp float axis[6];
 	axis[0] = -toLightGlobal.x;
 	axis[1] =  toLightGlobal.x;
 	axis[2] = -toLightGlobal.y;
@@ -135,7 +137,7 @@ void main(void)
 	highp vec4 shadowPosition = var_VertexPosition * shadowMVPMatrix[shadowIndex];
 	shadowPosition.xyz /= shadowPosition.w;
 	highp float currentDepth = BIAS(shadowPosition.z);
-	float distance = u_uniformParm2 + (length(var_LightToVertex) / 1000.0); // more far more large
+	float distance = u_uniformParm2 + length(var_LightToVertex) * (0.0000002 * u_uniformParm6); // more far more large
 	for (int i = 0; i < SAMPLES; ++i) {
 		highp float shadowDepth = DC(textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + sampleOffsetTable[i] * distance)));
 		highp float visibility = currentDepth - shadowDepth;
@@ -156,7 +158,7 @@ void main(void)
 		//shadow += visibility < 0.0 ? 1.0 : u_uniformParm3;
 	}
 #endif
-	const float sampleAvg = 1.0 / float(SAMPLES);
+	const highp float sampleAvg = 1.0 / float(SAMPLES);
 	shadow *= sampleAvg;
 
 	vec3 color;

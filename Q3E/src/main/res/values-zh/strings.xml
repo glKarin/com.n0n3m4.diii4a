@@ -40,4 +40,5 @@
     <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">虚拟按键位置单位必须是5的倍数或0</string>
     <string name="setup_joystick_done">摇杆设置完成.</string>
     <string name="back">返回</string>
+    <string name="extract_the_dark_mod_glsl_shader_source_files_fail">提取The Dark Mod GLSL着色器源码文件失败!</string>
 </resources>

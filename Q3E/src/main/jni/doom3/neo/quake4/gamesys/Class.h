@@ -45,7 +45,7 @@ public:
 
 #ifdef _QUAKE4 // 64bit this can't be called from doomscript!
 	// only call in C++: Anim_Blend.cpp::idAnim::CallFrameCommands, Camera.cpp::rvCameraAnimation::CallFrameCommands -> entity->ProcessEvent( &idEventDef, time, (intptr_t)ptr )
-#if defined(__aarch64__) || defined(__x86_64__)
+#if defined(__aarch64__) || defined(__x86_64__) || defined(__e2k__)
 	idEventArg(intptr_t data) { type = D_EVENT_INTEGER64bit; value = data; };
 #endif
 #endif

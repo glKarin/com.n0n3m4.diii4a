@@ -1,0 +1,14 @@
+.idea
+cmake-build-*
+idlib/svnversion.h
+CMakeSettings.json
+
+.svn/
+.vs/
+build/
+ipch/
+Darkmod.log
+
+ThirdParty/artefacts/*/lib
+ThirdParty/artefacts/*/bin
+#ThirdParty/include

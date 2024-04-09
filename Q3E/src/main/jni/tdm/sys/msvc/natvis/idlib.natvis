@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="idVec2">
+    <DisplayString>({x}, {y})</DisplayString>
+  </Type>
+  <Type Name="idVec3">
+    <DisplayString>({x}, {y}, {z})</DisplayString>
+  </Type>
+  <Type Name="idVec4">
+    <DisplayString>({x}, {y}, {z}, {w})</DisplayString>
+  </Type>
+  <Type Name="idVecX">
+    <Expand>
+      <ArrayItems>
+        <Size>size</Size>
+        <ValuePointer>p</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="idMat2">
+    <DisplayString>2 x 2 matrix</DisplayString>
+    <Expand>
+      <ExpandedItem>mat</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="idMat3">
+    <DisplayString>3 x 3 matrix</DisplayString>
+    <Expand>
+      <ExpandedItem>mat</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="idMat4">
+    <DisplayString>4 x 4 matrix</DisplayString>
+    <Expand>
+      <ExpandedItem>mat</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="idMatX">
+    <DisplayString>mat [{numRows} x {numColumns}]</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Rank>2</Rank>
+        <Size>$i==0 ? numRows : numColumns</Size>
+        <ValuePointer>mat</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="idRenderMatrix">
+    <DisplayString>render matrix</DisplayString>
+    <Expand>
+      <ExpandedItem>((idVec4*)m),4na</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="idPlane">
+    <DisplayString>(a={a}, b={b}, c={c}, d={d})</DisplayString>
+  </Type>
+
+  <Type Name="idBounds">
+    <Expand>
+      <Item Name="min">b[0]</Item>
+      <Item Name="max">b[1]</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="idWinding">
+    <Expand>
+      <Item Name="num">numPoints</Item>
+      <ArrayItems>
+        <Size>numPoints</Size>
+        <ValuePointer>p</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idRaw&lt;*&gt;">
+    <DisplayString>{*($T1*)bytes}</DisplayString>
+    <Expand HideRawView="1">
+      <ExpandedItem>*($T1*)bytes</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="idStr">
+    <DisplayString>{data,s}</DisplayString>
+    <StringView>data,s</StringView>
+  </Type>
+
+  <Type Name="idPoolStr">
+    <DisplayString>[x{numUsers}] {*(idStr*)this}</DisplayString>
+    <StringView>*(idStr*)this</StringView>
+  </Type>
+
+  <Type Name="idKeyValue">
+    <DisplayString>{*(idStr*)key}: {*(idStr*)value}</DisplayString>
+  </Type>
+
+  <Type Name="idList&lt;*&gt;">
+    <DisplayString>[{num}] {list,[num]na}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>num</Size>
+        <ValuePointer>list</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idStaticList&lt;*,*&gt;">
+    <DisplayString>[{num}] {list,[num]na}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>num</Size>
+        <ValuePointer>list</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idFlexList&lt;*,*&gt;">
+    <DisplayString>[{num}] {list,[num]na}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>num</Size>
+        <ValuePointer>list</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idBitArray&lt;*&gt;">
+    <DisplayString>[{num}] bitset{list,[(num - 1) / (sizeof($T1)*8) + 1]na}</DisplayString>
+    <Expand>
+      <IndexListItems>
+        <Size>num</Size>
+        <ValueNode>( list[$i / (8 * sizeof($T1))] &amp; ( 1 &lt;&lt; ($i % (8 * sizeof($T1))) ) ) != 0</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+
+  <Type Name="idDict">
+    <DisplayString>{args}</DisplayString>
+    <Expand>
+      <ExpandedItem>args</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="idHashIndex">
+    <DisplayString Condition="lookupMask == 0">HashIndex: size = {hashSize}/{indexSize} EMPTY</DisplayString>
+    <DisplayString Condition="lookupMask != 0">HashIndex: size = {hashSize}/{indexSize}</DisplayString>
+    <Expand>
+      <Synthetic Name="[index]">
+        <DisplayString>[{indexSize}]</DisplayString>
+        <Expand>
+          <ArrayItems>
+            <Size>indexSize</Size>
+            <ValuePointer>indexChain</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[hash]">
+        <DisplayString>[{hashSize}]</DisplayString>
+        <Expand>
+          <ArrayItems>
+            <Size>hashSize</Size>
+            <ValuePointer>hash</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <!--Unfortunately, idHashIndex is implemented as an array of linked lists.
+          It is not possible to correctly present all key:value pairs
+          without CustomListItems, which is only available in MSVC2015.-->
+      <!--
+      <Synthetic Name="[lists]">
+        <DisplayString>key:value pairs</DisplayString>
+        ????
+      </Synthetic>
+      -->
+    </Expand>
+  </Type>
+
+  <Type Name="idHashMap&lt;*,*,*,*&gt;">
+    <DisplayString>HashMap: size = {count}/{size}</DisplayString>
+    <Expand>
+      <CustomListItems Optional="true">
+        <Variable Name="i" InitialValue="0"/>
+        <Loop Condition="i &lt; size">
+          <!-- Unfortunately, we cannot use equality comparator here -->
+          <Item Condition="!(table[i].key == empty)" Name="{table[i].key}">table[i].value</Item>
+          <Exec>i++</Exec>
+        </Loop>
+      </CustomListItems>
+      <Synthetic Name="[cells]">
+        <DisplayString>{table,[size]na}</DisplayString>
+        <Expand>
+          <ArrayItems>
+            <Size>size</Size>
+            <ValuePointer>table</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[props]">
+        <DisplayString>maxLoad={maxLoad/256.0f} empty={empty}</DisplayString>
+      </Synthetic>
+      <Item Condition="sizeof(hashFunc) &gt; 1" Name="[hashFunc]">hashFunc</Item>
+      <Item Condition="sizeof(equalFunc) &gt; 1" Name="[equalFunc]">equalFunc</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="idDenseHash&lt;*,*,*&gt;">
+    <DisplayString>DenseHash: size = {count}/{size1 + 1}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>size1 + 1</Size>
+        <ValuePointer>table</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  
+  <Type Name="idLinkList&lt;*&gt;">
+    <Expand>
+      <!--fields head and owner are usually omitted in the head node-->
+      <Item Name="prev">prev,view(simple)</Item>
+      <Item Name="head" Condition="head != this">head</Item>
+      <Item Name="owner" Condition="owner != 0">owner</Item>
+      <Item Name="next">next,view(simple)</Item>
+      <!--special node which shows all elements (works only in the head node)-->
+      <Synthetic Name="[Enum All]" Condition="head == this" ExcludeView="simple">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>next</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>owner</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[Enum Close]" ExcludeView="simple">
+        <Expand>
+          <Item Name="before">*(__idList_backward_helper&lt;$T1&gt;*)prev->prev->prev->prev->prev</Item>
+          <Item Name="[-4]">prev->prev->prev->prev->owner</Item>
+          <Item Name="[-3]">prev->prev->prev->owner</Item>
+          <Item Name="[-2]">prev->prev->owner</Item>
+          <Item Name="[-1]">prev->owner</Item>
+          <Item Name="[0]">owner</Item>
+          <Item Name="[1]">next->owner</Item>
+          <Item Name="[2]">next->next->owner</Item>
+          <Item Name="[3]">next->next->next->owner</Item>
+          <Item Name="[4]">next->next->next->next->owner</Item>
+          <Item Name="after">*(__idList_forward_helper&lt;$T1&gt;*)next->next->next->next->next</Item>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  <!--Note: these two types are added only for [Enum Close] mode to work in idList-->
+  <Type Name="__idList_forward_helper&lt;*&gt;">
+    <DisplayString>[more]</DisplayString>
+    <Expand>
+      <Item Name="[0]">owner</Item>
+      <Item Name="[1]">next->owner</Item>
+      <Item Name="[2]">next->next->owner</Item>
+      <Item Name="[3]">next->next->next->owner</Item>
+      <Item Name="[4]">next->next->next->next->owner</Item>
+      <Item Name="[5]">next->next->next->next->next->owner</Item>
+      <Item Name="[6]">next->next->next->next->next->next->owner</Item>
+      <Item Name="[7]">next->next->next->next->next->next->next->owner</Item>
+      <Item Name="[8]">next->next->next->next->next->next->next->next->owner</Item>
+      <Item Name="[9]">next->next->next->next->next->next->next->next->next->owner</Item>
+      <Item Name="after">*(__idList_forward_helper&lt;$T1&gt;*)next->next->next->next->next->next->next->next->next->next</Item>
+    </Expand>
+  </Type>
+  <Type Name="__idList_backward_helper&lt;*&gt;">
+    <DisplayString>[more]</DisplayString>
+    <Expand>
+      <Item Name="before">*(__idList_backward_helper&lt;$T1&gt;*)prev->prev->prev->prev->prev->prev->prev->prev->prev->prev</Item>
+      <Item Name="[-9]">prev->prev->prev->prev->prev->prev->prev->prev->prev->owner</Item>
+      <Item Name="[-8]">prev->prev->prev->prev->prev->prev->prev->prev->owner</Item>
+      <Item Name="[-7]">prev->prev->prev->prev->prev->prev->prev->owner</Item>
+      <Item Name="[-6]">prev->prev->prev->prev->prev->prev->owner</Item>
+      <Item Name="[-5]">prev->prev->prev->prev->prev->owner</Item>
+      <Item Name="[-4]">prev->prev->prev->prev->owner</Item>
+      <Item Name="[-3]">prev->prev->prev->owner</Item>
+      <Item Name="[-2]">prev->prev->owner</Item>
+      <Item Name="[-1]">prev->owner</Item>
+      <Item Name="[0]">owner</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="stdext::path">
+    <DisplayString>{d._Myptr->_Mystr}</DisplayString>
+    <StringView>d._Myptr->_Mystr</StringView>
+  </Type>
+
+  <Type Name="idBvhCreator::Node">
+    <DisplayString>elems=[{begElem}..{endElem}) sons={{{sons[0]},{sons[1]}}} bounds={bounds}</DisplayString>
+  </Type>
+
+</AutoVisualizer>

@@ -1874,7 +1874,7 @@ static int add_clip(char *s, lwClip **clist, int *nclips)
 	clip->saturation.val = 1.0f;
 	clip->gamma.val = 1.0f;
 
-	if (p = strstr(s, "(sequence)")) {
+	if ( (p = strstr(s, "(sequence)")) ) {
 		p[ -1 ] = 0;
 		clip->type = ID_ISEQ;
 		clip->source.seq.prefix = s;
@@ -3157,7 +3157,8 @@ Read polygon tags from a PTAG chunk in an LWO2 file.
 int lwGetPolygonTags(idFile *fp, int cksize, lwTagList *tlist, lwPolygonList *plist)
 {
 	unsigned int type;
-	int rlen = 0, i, j;
+	int rlen = 0, i;
+	ptrdiff_t j;
 
 	set_flen(0);
 	type = getU4(fp);

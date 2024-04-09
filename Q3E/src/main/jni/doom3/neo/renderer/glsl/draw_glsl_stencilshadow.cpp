@@ -1,11 +1,12 @@
 
-#include "../idlib/precompiled.h"
+#include "../../idlib/precompiled.h"
 #pragma hdrstop
 
 #include "../tr_local.h"
 
-static bool r_translucentStencilShadow = false;
+static bool r_stencilShadowTranslucent = false;
 static float r_stencilShadowAlpha = 0.5f;
+
 static void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest);
 
 void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest)

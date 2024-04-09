@@ -62,36 +62,45 @@ class idAudioHardwareAndroid: public idAudioHardware
 		unsigned int m_speed;
 		void *m_buffer;
 		
-		idAudioHardwareAndroid(){m_buffer=0;};
+		idAudioHardwareAndroid()
+		: m_buffer(NULL)
+		{}
 
-		~idAudioHardwareAndroid(){};
+		~idAudioHardwareAndroid(){
+			if(m_buffer)
+			{
+				shutdownAudio();
+				free(m_buffer);
+				m_buffer = NULL;
+			}
+		}
 
 		bool Initialize()
 		{
-		common->Printf("------ Android AudioTrack Sound Initialization ------\n");
-		m_channels = 2;
-		idSoundSystemLocal::s_numberOfSpeakers.SetInteger(2);
-		m_speed = PRIMARYFREQ;
-		m_buffer_size = MIXBUFFER_SAMPLES * m_channels * 2;
-		m_buffer = malloc(m_buffer_size);
-		memset(m_buffer,0,m_buffer_size);
-		initAudio(m_buffer,m_buffer_size);
-		return true;
+			common->Printf("------ Android AudioTrack Sound Initialization ------\n");
+			m_channels = 2;
+			idSoundSystemLocal::s_numberOfSpeakers.SetInteger(2);
+			m_speed = PRIMARYFREQ;
+			m_buffer_size = MIXBUFFER_SAMPLES * m_channels * 2;
+			m_buffer = malloc(m_buffer_size);
+			memset(m_buffer,0,m_buffer_size);
+			initAudio(m_buffer,m_buffer_size);
+			return true;
 		}
 
 		bool Lock(void **pDSLockedBuffer, ulong *dwDSLockedBufferSize)
 		{
-		return false;
+			return false;
 		}
 
 		bool Unlock(void *pDSLockedBuffer, dword dwDSLockedBufferSize)
 		{
-		return false;
+			return false;
 		}
 
 		bool GetCurrentPosition(ulong *pdwCurrentWriteCursor)
 		{
-		return false;
+			return false;
 		}
 
 		// try to write as many sound samples to the device as possible without blocking and prepare for a possible new mixing call
@@ -107,15 +116,15 @@ class idAudioHardwareAndroid: public idAudioHardware
 
 		int GetNumberOfSpeakers(void)
 		{
-		return m_channels;
+			return m_channels;
 		}
 		int GetMixBufferSize(void)
 		{
-		return m_buffer_size;
+			return m_buffer_size;
 		}
 		short *GetMixBuffer(void)
 		{
-		return (short *)m_buffer;
+			return (short *)m_buffer;
 		}
 };
 

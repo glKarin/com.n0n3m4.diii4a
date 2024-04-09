@@ -1,9 +1,11 @@
 ## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006) for Android/Linux, 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版. Original named DIII4A++, based on com.n0n3m4.diii4a
+#### DOOM III/Quake 4/Prey(2006) for Android/Linux
+#### 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版. 
+#### 原名DIII4A++, 基于n0n3m4的diii4a的OpenGLES版本.
 **最新版本:**
-1.1.0harmattan38(natasha)  
+1.1.0harmattan39(natasha)  
 **最新更新日期:**
-2024-02-05  
+2024-04-10  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -13,7 +15,7 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 ### 支持
-* Linux/Windows(MinGW)构建(测试)
+* Linux/Windows(MinGW/MSVC(不支持编辑器))构建
 * 多线程渲染
 * png/dds纹理图片加载
 * jpeg/png/bmp/dds格式截屏
@@ -24,9 +26,13 @@ GPLv3
 * OpenAL(soft)和EFX混响
 * 无光照渲染和无光照材质
 * 半透明模板阴影
-* 毁灭战士3 mods: 毁灭战士3(支持全身mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free
+* 毁灭战士3 mods: 毁灭战士3(支持全身mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free; LibreCoop
 * 雷神之锤4(支持Bot mod; 全身mod)和Raven idTech4引擎
 * 掠食(2006)(支持全身mod)和HumanHead idTech4引擎
+* 雷神之锤2(Yamagi Quake II) 和mods: ctf; rogue; xatrix; zaero
+* 雷神之锤3竞技场/雷神之锤3团队竞技场(ioquake3)
+* 重返德军总部(iortcw)
+* The Dark Mod
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
@@ -42,8 +48,13 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 修复非Adreno GPU的阴影映射阴影.
-* 支持雷神之锤4关卡加载完成暂停等待(cvar `com_skipLevelLoadPause`).
+* 阴影映射支持镂空图层阴影.
+* 新增毁灭战士3 mod `LibreCoop`支持, 游戏数据文件夹命名为`librecoop`. 详情[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
+* 新增`雷神之锤2`支持, 游戏数据文件夹命名为`baseq2`. 详情[Quake II](https://store.steampowered.com/app/2320/Quake_II/).
+* 新增`雷神之锤3竞技场`支持, 游戏数据文件夹命名为`baseq3`; 新增`雷神之锤3团队竞技场`支持, 游戏数据文件夹命名为`missionpack`. 详情[Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
+* 新增`重返德军总部`支持, 游戏数据文件夹命名为`main`. 详情[Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
+* 新增`The Dark Mod`v2.11支持, 游戏数据文件夹命名为`darkmod`. 详情[The Dark Mod](https://www.thedarkmod.com).
+* 新增一个虚拟按键主题.
 
 ----------------------------------------------------------------------------------
 
@@ -67,16 +78,17 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > - 雷神之锤3bot文件(在多人游戏中, 进入游戏后在控制台使用命令`addbots <bot_file>`或`fillbots`添加bot, 或者设置`harm_si_autoFillBots`为1自动添加bot).
 > - `SABot a9 mod`多人游戏地图的aas文件和脚本文件(多人游戏的bot支持).
 
-###### 问题和解决方案:    
-> 1. ~~门打不开~~: 碰撞问题已经修复, 例如触发器, 载具, AI, 电梯, 血站, 所有门都可正常打开.
-> 2. *主菜单*: 目前可以正常显示, 包括多人游戏菜单, 去掉背景色. 可能存在部分GUI交互有问题.
-> 3. ~~声音~~: 正常工作.
-> 4. ~~游戏载入界面~~: 正常工作.
-> 5. *多人游戏*: 目前正常工作, 并且可以添加bot(添加SABot a7 mod支持, 但是需要先添加`SABot a9 mod`文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹(aas32)).
-> 6. *脚本错误*: 部分地图存在脚本错误, 虽然不会使程序崩溃, 但是可能会影响游戏进程.
-> 7. *粒子系统*: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, 非开源, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), 但是至今不工作. 现在实现了一个基于毁灭战士3的粒子特效系统的开源BSE, 可以渲染一些, 但是效果不是很理想.
-> 8. *物体渲染*: 存在一些物体错误的渲染结果.
-> 9. ~~碰撞~~: 碰撞问题已经修复.
+###### 问题和解决方案:
+> 1. *粒子系统*: 目前工作的不完整(雷神之锤4使用了新的更高级的粒子系统`BSE`, 非开源, `jmarshall`通过反编译`深入敌后: 雷神战争`的BSE二进制实现了, 更多详情 [jmarshall23/Quake4BSE](https://github.com/jmarshall23/Quake4BSE)), 但是至今不工作. 现在实现了一个基于毁灭战士3的粒子特效系统的开源BSE, 可以渲染一些, 但是效果不是很理想.
+> 2. *物体渲染*: 存在一些物体错误的渲染结果.
+
+###### Bot mod:
+> 1. 添加SABot a7 mod支持. 
+> 2. 解压apk中的`q4base/sabot_a9.pk4`文件到雷神之锤4游戏文件目录, 其中包含一些配置文件, 脚本文件和多人游戏地图的AAS文件.
+> 3. 设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹(botaas32)).
+> 4. 设置`harm_si_autoFillBots`自动添加bot当开始多人游戏.
+> 5. 执行`addbots`添加bot.
+> 6. 执行`fillbots`自动填满bot.
 
 ----------------------------------------------------------------------------------
 ### 截图
@@ -116,7 +128,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 9. _NO_LIGHT: 添加无光照渲染支持.
 > 10. _TRANSLUCENT_STENCIL_SHADOW: 添加半透明模板阴影支持.
 
-#### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGL ES2.0, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
+#### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGLES, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
 #### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).
 
 #### 雷神之锤4
@@ -144,13 +156,10 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 1. _OPENSLES: OpenSLES声音支持.
 
 #### Linux
-##### 声明宏`__linux__`.
-> 1. 支持ALSA.
+> 1. 需要 ALSA, zlib, X11, EGL
 
-#### Windows(MinGW)
-##### 声明宏`_WIN32`和`WIN32`.
-> 1. 请求 SDL2, zlib
-> 2. 不支持 OpenGLES3, OpenAL, cURL
+#### Windows(MinGW/MSVC)
+> 1. 需要 SDL2, zlib, cURL
 
 ----------------------------------------------------------------------------------
 
@@ -165,6 +174,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > `master`:
 > * /idTech4Amm: 前端启动器源码
 > * /Q3E /Q3E/src/main/jni/doom3: 游戏源码
+> * /CHECK_FOR_UPDATE.json: 检查更新的配置JSON
 
 > `free`:
 > * F-Droid自由版本.
@@ -173,7 +183,6 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > * /screenshot: 截图
 > * /source: 引用的源码
 > * /pak: 游戏资源
-> * /CHECK_FOR_UPDATE.json: 检查更新的配置JSON
 
 > `n0n3m4_original_old_version`:
 > * 原来旧的`n0n3m4`的版本.

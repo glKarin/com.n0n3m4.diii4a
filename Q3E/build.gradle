@@ -23,8 +23,8 @@ android {
                 cppFlags "-fexceptions", "-frtti"
             }
         }
-        versionCode 131130403
-        versionName '1.3.1.1304.3' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
+        versionCode 131130405
+        versionName '1.3.1.1304.5' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
     }
 
     buildTypes {
@@ -64,6 +64,6 @@ android {
 dependencies {
     //compile 'com.android.support:support-v4:18.+'
     // F-Droid free version comment 2 lines
-    //implementation files('libs/ouya-sdk.jar')
-    //implementation files('libs/RootTools-2.4.jar')
+//    implementation files('libs/ouya-sdk.jar')
+//    implementation files('libs/RootTools-2.4.jar')
 }

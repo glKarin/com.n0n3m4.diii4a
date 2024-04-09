@@ -33,6 +33,7 @@ public class Q3EJNI {
             String nativeLibPath, // apk's dynamic library directory path
             int width, // surface width
             int height, // surface height
+            String game, // game type
             String GameDir, // game data directory(external)
             String Args, // doom3 command line arguments
             Surface view, // render surface
@@ -42,6 +43,7 @@ public class Q3EJNI {
             boolean redirect_output_to_file, // save runtime log to file
             boolean no_handle_signals, // not handle signals
             boolean multithread, // enable multithread
+            boolean usingMouse, // using mouse
             boolean continueNoGLContext
     );
 	public static native void drawFrame();

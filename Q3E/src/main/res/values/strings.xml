@@ -41,4 +41,5 @@
     <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">On-screen buttons position unit must is multiple of 5 or 0</string>
     <string name="setup_joystick_done">Setup joystick done.</string>
     <string name="back">Back</string>
+    <string name="extract_the_dark_mod_glsl_shader_source_files_fail">Extract The dark mod GLSL shader source files fail!</string>
 </resources>

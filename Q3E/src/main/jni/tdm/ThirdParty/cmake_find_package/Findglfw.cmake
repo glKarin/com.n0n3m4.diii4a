@@ -1,0 +1,10 @@
+include(${CMAKE_CURRENT_LIST_DIR}/tdm_find_package.cmake)
+
+set(glfw_FOUND 1)
+set(glfw_INCLUDE_DIRS "${ARTEFACTS_DIR}/glfw/include")
+set(glfw_LIBRARY_DIR "${ARTEFACTS_DIR}/glfw/lib/${PACKAGE_PLATFORM}")
+if(MSVC)
+	set(glfw_LIBRARIES "${glfw_LIBRARY_DIR}/glfw3.lib")
+else()
+	set(glfw_LIBRARIES "${glfw_LIBRARY_DIR}/libglfw3.a")
+endif()

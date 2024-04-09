@@ -122,6 +122,6 @@ void rvDeclPlayerModel::FreeData(void) {
 rvDeclPlayerModel::DefaultDefinition
 ===================
 */
-void rvDeclPlayerModel::Print(void) {
+void rvDeclPlayerModel::Print(void) const {
 
 }

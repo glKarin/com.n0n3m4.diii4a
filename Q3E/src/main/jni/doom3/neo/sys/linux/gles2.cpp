@@ -36,6 +36,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #ifndef EGL_OPENGL_ES3_BIT
 #define EGL_OPENGL_ES3_BIT EGL_OPENGL_ES3_BIT_KHR
 #endif
@@ -52,8 +55,12 @@ idCVar harm_sys_openglVersion("harm_sys_openglVersion",
                               , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
 					"OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
 #define DEFAULT_GLES_VERSION 0x00030000
+#define HARM_EGL_OPENGL_ES_BIT (gl_version != 0x00020000 ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT)
+#define HARM_EGL_CONTEXT_CLIENT_VERSION (gl_version != 0x00020000 ? 3 : 2)
 #else
 #define DEFAULT_GLES_VERSION 0x00020000
+#define HARM_EGL_OPENGL_ES_BIT EGL_OPENGL_ES2_BIT
+#define HARM_EGL_CONTEXT_CLIENT_VERSION 2
 #endif
 
 #define MAX_NUM_CONFIGS 4
@@ -101,6 +108,8 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 
 	if(exit)
 		common->Error("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
+	else
+		common->Printf("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 }
 
 void GLimp_CheckGLInitialized(void)
@@ -382,12 +391,7 @@ static bool GLES_Init_special(void)
 			EGL_STENCIL_SIZE, stencil_bits,
 			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
 			EGL_SAMPLES, gl_msaa,
-            EGL_RENDERABLE_TYPE,
-#ifdef _OPENGLES3
-			gl_version == 0x00020000 ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_ES3_BIT,
-#else
-			EGL_OPENGL_ES2_BIT,
-#endif
+            EGL_RENDERABLE_TYPE, HARM_EGL_OPENGL_ES_BIT,
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_NONE,
     };
@@ -505,7 +509,7 @@ static bool GLES_Init_prefer(void)
 			EGL_STENCIL_SIZE, tstencilbits,
 			EGL_SAMPLE_BUFFERS, multisamples > 1 ? 1 : 0,
 			EGL_SAMPLES, multisamples,
-			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+			EGL_RENDERABLE_TYPE, HARM_EGL_OPENGL_ES_BIT,
 			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 			EGL_NONE,
 		};
@@ -595,8 +599,8 @@ int GLES_Init(glimpParms_t ap)
 	XFlush(dpy);
 	XSync(dpy, False);
 
-    bool r_fullscreen = cvarSystem->GetCVarBool("r_fullscreen");
-    if (r_fullscreen) {
+    bool fs = cvarSystem->GetCVarBool("r_fullscreen");
+    if (fs) {
         XEvent xev;
         Atom wm_state = XInternAtom(dpy, "_NET_WM_STATE", False);
         Atom fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
@@ -649,7 +653,7 @@ int GLES_Init(glimpParms_t ap)
 	}
 
 	EGLint ctxAttrib[] = {
-		EGL_CONTEXT_CLIENT_VERSION, 2,
+		EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
 		EGL_NONE
 	};
 	if ((eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib)) == EGL_NO_CONTEXT)
@@ -687,7 +691,7 @@ int GLES_Init(glimpParms_t ap)
 	glConfig.depthBits = depth_bits;
 	glConfig.stencilBits = stencil_bits;
 
-	glConfig.isFullscreen = r_fullscreen;
+	glConfig.isFullscreen = fs;
 
 	if (glConfig.isFullscreen) {
 		Sys_GrabMouseCursor(true);

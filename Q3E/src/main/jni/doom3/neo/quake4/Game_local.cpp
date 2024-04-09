@@ -2048,7 +2048,7 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 				if(!aasFileExists)
 				{
 					Printf("[Harmattan]: Generate AAS file %s......\n", mapFileName.c_str());
-					cmdSystem->BufferCommandText( CMD_EXEC_NOW, va("harm_runAAS %s", mapFileName.c_str()) );
+					cmdSystem->BufferCommandText( CMD_EXEC_NOW, va("botRunAAS %s", mapFileName.c_str()) );
 					Printf("[Harmattan]: Generate AAS file %s completed. Try reload AAS.\n", mapFileName.c_str());
 					aasLoadSuc = false;
 					for( i = 0; i < aasNames.Num(); i++ ) {

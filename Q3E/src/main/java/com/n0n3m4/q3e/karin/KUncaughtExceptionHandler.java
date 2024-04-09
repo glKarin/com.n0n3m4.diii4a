@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.n0n3m4.q3e.Q3EGlobals;
@@ -123,15 +124,74 @@ public class KUncaughtExceptionHandler implements Thread.UncaughtExceptionHandle
         }
     }
 
+    private String GetDumpPath()
+    {
+        if(null == m_context)
+            return null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            return m_context.getDataDir().getAbsolutePath();
+        else
+            return m_context.getCacheDir().getAbsolutePath();
+    }
+
+    private String GetExceptionDumpFile()
+    {
+        String dir = GetDumpPath();
+        if(null == dir)
+            return null;
+        return dir + "/" + CONST_PREFERENCE_APP_CRASH_INFO;
+    }
+
+    public static KUncaughtExceptionHandler Instance()
+    {
+        return _instance;
+    }
+
+    public static String GetDumpExceptionContent()
+    {
+        if(null == _instance)
+            return "";
+        try
+        {
+            String str;
+
+            str = Q3EUtils.file_get_contents(_instance.GetExceptionDumpFile());
+            // str = PreferenceManager.getDefaultSharedPreferences(_instance.m_context).getString(KUncaughtExceptionHandler.CONST_PREFERENCE_APP_CRASH_INFO, null);
+            return null != str ? str : "";
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static boolean ClearDumpExceptionContent()
+    {
+        if(null == _instance)
+            return false;
+        try
+        {
+            return Q3EUtils.rm(_instance.GetExceptionDumpFile());
+            //return PreferenceManager.getDefaultSharedPreferences(_instance.m_context).edit().remove(KUncaughtExceptionHandler.CONST_PREFERENCE_APP_CRASH_INFO).commit();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private boolean WriteToPreference(String str)
     {
         if(null == m_context)
             return false;
         try
         {
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(m_context).edit();
+            Q3EUtils.file_put_contents(GetExceptionDumpFile(), str);
+/*            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(m_context).edit();
             editor.putString(CONST_PREFERENCE_APP_CRASH_INFO, str);
-            editor.commit();
+            editor.commit();*/
             return true;
         }
         catch (Exception e)

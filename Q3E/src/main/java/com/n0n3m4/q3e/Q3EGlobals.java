@@ -74,25 +74,46 @@ public final class Q3EGlobals
     public static final int VIEW_MOTION_CONTROL_ALL = VIEW_MOTION_CONTROL_TOUCH | VIEW_MOTION_CONTROL_GYROSCOPE;
 
     // game
-    public static final String LIB_ENGINE_ID = "libdante.so"; // DOOM3
-    public static final String LIB_ENGINE_RAVEN = "libdante_raven.so"; // Quake 4
-    public static final String LIB_ENGINE_HUMANHEAD = "libdante_humanhead.so"; // Prey 2006
+    public static final String LIB_ENGINE_ID = "libidtech4.so"; // DOOM3
+    public static final String LIB_ENGINE_RAVEN = "libidtech4_raven.so"; // Quake 4
+    public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
+    public static final String LIB_ENGINE2_ID = "libidtech2.so"; // Quake 2
+    public static final String LIB_ENGINE3_ID = "libidtech3.so"; // Quake 3
+    public static final String LIB_ENGINE3_RTCW = "libidtech3_rtcw.so"; // RTCW
+    public static final String LIB_ENGINE4_TDM = "libthedarkmod.so"; // TDM
 
     public static final String CONFIG_FILE_DOOM3 = "DoomConfig.cfg"; // DOOM3
     public static final String CONFIG_FILE_QUAKE4 = "Quake4Config.cfg"; // Quake 4
     public static final String CONFIG_FILE_PREY = "preyconfig.cfg"; // Prey 2006
+    public static final String CONFIG_FILE_QUAKE2 = "yq2.cfg"; // Quake 2
+    public static final String CONFIG_FILE_QUAKE3 = "q3config.cfg"; // Quake 3
+    public static final String CONFIG_FILE_RTCW = "wolfconfig.cfg"; // RTCW
+    public static final String CONFIG_FILE_TDM = "Darkmod.cfg"; // TDM
 
     public static final String GAME_DOOM3 = "doom3";
     public static final String GAME_QUAKE4 = "quake4";
     public static final String GAME_PREY = "prey2006";
+    public static final String GAME_QUAKE2 = "quake2";
+    public static final String GAME_QUAKE3 = "quake3";
+    public static final String GAME_RTCW = "rtcw";
+    public static final String GAME_TDM = "tdm";
 
     public static final String GAME_NAME_DOOM3 = "DOOM 3";
     public static final String GAME_NAME_QUAKE4 = "Quake 4";
     public static final String GAME_NAME_PREY = "Prey(2006)";
+    public static final String GAME_NAME_QUAKE2 = "Quake 2";
+    public static final String GAME_NAME_QUAKE3 = "Quake 3";
+    public static final String GAME_NAME_RTCW = "RTCW"; // "Return to Castle Wolfenstein";
+    public static final String GAME_NAME_TDM = "Dark mod"; // The Dark Mod
 
     public static final String GAME_BASE_DOOM3 = "base";
+    public static final String GAME_BASE_D3XP = "d3xp";
     public static final String GAME_BASE_QUAKE4 = "q4base";
     public static final String GAME_BASE_PREY = "preybase"; // Other platform is `base`
+    public static final String GAME_BASE_QUAKE2 = "baseq2";
+    public static final String GAME_BASE_QUAKE3 = "baseq3";
+    public static final String GAME_BASE_RTCW = "main";
+    public static final String GAME_BASE_TDM = "darkmod";
 
     public static final String[] LIBS = {
             "game",
@@ -102,15 +123,33 @@ public final class Q3EGlobals
             "rivensin",
             "hardcorps",
 
-            /*"overthinked",
+            "overthinked",
             "sabot",
-            "hexeneoc",*/
+            "hexeneoc",
+            "fraggingfree",
+            "librecoop",
     };
     public static final String[] Q4_LIBS = {
             "q4game",
     };
     public static final String[] PREY_LIBS = {
             "preygame",
+    };
+    public static final String[] Q2_LIBS = {
+            "q2game",
+            "q2ctf",
+            "q2rogue",
+            "q2xatrix",
+            "q2zaero",
+    };
+    public static final String[] Q3_LIBS = {
+            "qagame",
+    };
+    public static final String[] RTCW_LIBS = {
+            "rtcwgame",
+    };
+    public static final String[] TDM_LIBS = {
+            "thedarkmod",
     };
 
     public static final String[] QUAKE4_MAPS = {
@@ -200,6 +239,18 @@ public final class Q3EGlobals
             "Interact",
             "Weapon"
     };
+
+    public static final int GLFORMAT_RGB565 = 0x0565;
+    public static final int GLFORMAT_RGBA4444 = 0x4444;
+    public static final int GLFORMAT_RGBA5551 = 0x5551;
+    public static final int GLFORMAT_RGBA8888 = 0x8888;
+    public static final int GLFORMAT_RGBA1010102 = 0xaaa2;
+
+    public static final String GAME_EXECUABLE = "game.arm";
+
+    public static final String TDM_GLSL_SHADER_VERSION = "2.11.1";
+
+    public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
     private Q3EGlobals() {}
 }

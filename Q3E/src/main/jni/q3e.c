@@ -32,11 +32,17 @@
 #include <android/native_window_jni.h>
 #include "q3e.h"
 
-#include "doom3/neo/sys/android/doom3_android.h"
+#include "doom3/neo/sys/android/sys_android.h"
 
 #define LOG_TAG "Q3E_JNI"
 
 #define JNI_Version JNI_VERSION_1_4
+
+#define LOGD(fmt, args...) { printf("[" LOG_TAG " debug]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##args); }
+#define LOGI(fmt, args...) { printf("[" LOG_TAG " info]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_INFO, LOG_TAG, fmt, ##args); }
+#define LOGE(fmt, args...) { printf("[" LOG_TAG " error]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##args); }
+
+//#define AUDIOTRACK_BYTEBUFFER 1
 
 // call DOOM3
 static void (*setResolution)(int width, int height);
@@ -60,11 +66,11 @@ static void grab_mouse(int grab);
 static FILE * android_tmpfile(void);
 static void copy_to_clipboard(const char *text);
 static char * get_clipboard_text(void);
+static void show_toast(const char *text);
 
 // data
 static char *game_data_dir = NULL;
 static char *arg_str = NULL;
-// static char *audio_track_buffer = NULL;
 
 static void *libdl;
 static ANativeWindow *window = NULL;
@@ -73,6 +79,7 @@ static ANativeWindow *window = NULL;
 static JavaVM *jVM;
 static jobject audioBuffer=0;
 static jobject q3eCallbackObj=0;
+static const jbyte *audio_track_buffer = NULL;
 
 // Java method
 static jmethodID android_PullEvent_method;
@@ -83,7 +90,9 @@ static jmethodID android_GetClipboardText_method;
 static jmethodID android_initAudio;
 static jmethodID android_writeAudio;
 static jmethodID android_setState;
-static jmethodID android_writeAudio_direct;
+static jmethodID android_writeAudio_array;
+
+static jmethodID android_ShowToast_method;
 
 static void Android_AttachThread(void)
 {
@@ -97,26 +106,26 @@ static void Android_AttachThread(void)
 
 static void print_interface(void)
 {
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "DOOM3 interface ---------> ");
+	LOGI("idTech4A++ interface ---------> ");
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Main function: %p", qmain);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Setup callbacks: %p", setCallbacks);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Setup initial context: %p", Q3E_SetInitialContext);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Setup resolution: %p", setResolution);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "On pause: %p", on_pause);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "On resume: %p", on_resume);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Exit function: %p", qexit);
+	LOGI("Main function: %p", qmain);
+	LOGI("Setup callbacks: %p", setCallbacks);
+	LOGI("Setup initial context: %p", Q3E_SetInitialContext);
+	LOGI("Setup resolution: %p", setResolution);
+	LOGI("On pause: %p", on_pause);
+	LOGI("On resume: %p", on_resume);
+	LOGI("Exit function: %p", qexit);
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Setup OpenGL context: %p", set_gl_context);
+	LOGI("Setup OpenGL context: %p", set_gl_context);
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "On frame: %p", onFrame);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Restart OpenGL: %p", vidRestart);
+	LOGI("On frame: %p", onFrame);
+	LOGI("Restart OpenGL: %p", vidRestart);
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Key event: %p", onKeyEvent);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Analog event: %p", onAnalog);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Motion event: %p", onMotionEvent);
+	LOGI("Key event: %p", onKeyEvent);
+	LOGI("Analog event: %p", onAnalog);
+	LOGI("Motion event: %p", onMotionEvent);
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "<---------");
+	LOGI("<---------");
 }
 
 static void loadLib(const char* libpath)
@@ -124,14 +133,14 @@ static void loadLib(const char* libpath)
     libdl = dlopen(libpath, RTLD_NOW | RTLD_GLOBAL);
     if(!libdl)
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Unable to load library: %s\n", dlerror());
+        LOGE("Unable to load library: %s\n", dlerror());
         return;
     }
-	void (*GetDOOM3API)(void *);
+	void (*GetIDTechAPI)(void *);
 
-	GetDOOM3API = dlsym(libdl, "GetDOOM3API");
+	GetIDTechAPI = dlsym(libdl, "GetIDTechAPI");
 	Q3E_Interface_t d3interface;
-	GetDOOM3API(&d3interface);
+	GetIDTechAPI(&d3interface);
 
 	qmain = (int (*)(int, char **)) d3interface.main;
 	setCallbacks = d3interface.setCallbacks;
@@ -151,37 +160,26 @@ static void loadLib(const char* libpath)
 	onAnalog = d3interface.analogEvent;
 	onMotionEvent = d3interface.motionEvent;
 
-#if 0
-    qmain = dlsym(libdl, "main");
-    onFrame = dlsym(libdl, "Q3E_DrawFrame");
-    onKeyEvent = dlsym(libdl, "Q3E_KeyEvent");
-    onAnalog = dlsym(libdl, "Q3E_Analog");
-    onMotionEvent = dlsym(libdl, "Q3E_MotionEvent");
-    setCallbacks = dlsym(libdl, "Q3E_SetCallbacks");
-    setResolution = dlsym(libdl, "Q3E_SetResolution");
-	vidRestart = dlsym(libdl, "Q3E_OGLRestart");
-
-    on_pause = dlsym(libdl, "Q3E_OnPause");
-    on_resume = dlsym(libdl, "Q3E_OnResume");
-	Q3E_SetInitialContext = dlsym(libdl, "Q3E_SetInitialContext");
-    qexit = dlsym(libdl, "Q3E_exit");
-	set_gl_context = dlsym(libdl, "Q3E_SetGLContext");
-#endif
-
 	print_interface();
 }
 
 void initAudio(void *buffer, int size)
 {
-    JNIEnv *env;
-    jobject tmp;
-    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-    {
-        (*jVM)->AttachCurrentThread(jVM,&env, NULL);
-    }
+	JNIEnv *env;
+	jobject tmp;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+	LOGI("Q3E AudioTrack init");
+#ifdef AUDIOTRACK_BYTEBUFFER
     tmp = (*env)->NewDirectByteBuffer(env, buffer, size);
-    audioBuffer = (jobject)(*env)->NewGlobalRef(env, tmp);
-    return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
+#else
+	audio_track_buffer = buffer;
+	tmp = (*env)->NewByteArray(env, size);
+#endif
+	audioBuffer = (jobject)(*env)->NewGlobalRef(env, tmp);
+	return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
 }
 
 //k NEW: 
@@ -190,13 +188,48 @@ void initAudio(void *buffer, int size)
 // If offset < 0 and length == 0, only flush.
 int writeAudio(int offset, int length)
 {
+#ifdef AUDIOTRACK_BYTEBUFFER
 	if (audioBuffer==0) return 0;
-    JNIEnv *env;
-    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-    {
-    	(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-    }
+#else
+	if (!audio_track_buffer || !audioBuffer)
+		return 0;
+#endif
+	JNIEnv *env;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+#ifdef AUDIOTRACK_BYTEBUFFER
     return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio, audioBuffer, offset, length);
+#else
+	if(offset >= 0 && length != 0)
+	{
+		int len = abs(length);
+#if 0
+		jbyte *buf_mem = (*env)->GetByteArrayElements(env, audioBuffer, NULL);
+		memcpy(buf_mem, audio_track_buffer, len);
+		(*env)->ReleaseByteArrayElements(env, audioBuffer, buf_mem, 0);
+#else
+		(*env)->SetByteArrayRegion(env, audioBuffer, 0, len, audio_track_buffer);
+#endif
+	}
+	return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio_array, audioBuffer, offset, length);
+#endif
+}
+
+void closeAudio()
+{
+	if (!audioBuffer)
+		return;
+	JNIEnv *env;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+	LOGI("Q3E AudioTrack shutdown");
+	jobject ab = audioBuffer;
+	audioBuffer = 0;
+	(*env)->DeleteGlobalRef(env, ab);
 }
 
 void setState(int state)
@@ -209,49 +242,9 @@ void setState(int state)
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_setState, state);
 }
 
-#if 0
-void initAudio_direct(void *buffer, int size)
-{
-	JNIEnv *env;
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
-	audio_track_buffer = buffer;
-	return (*env)->CallVoidMethod(env, q3eCallbackObj, android_initAudio, size);
-}
-
-int writeAudio_direct(int offset, int length)
-{
-	if (!audio_track_buffer)
-		return 0;
-	JNIEnv *env;
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
-	jbyteArray buf = NULL;
-	if(offset >= 0)
-	{
-		int len = abs(length);
-		if(len > 0)
-		{
-			buf = (*env)->NewByteArray(env, len);
-			jbyte *buf_mem = (*env)->GetByteArrayElements(env, buf, NULL);
-			memcpy(buf_mem, audio_track_buffer + offset, len);
-			(*env)->ReleaseByteArrayElements(env, buf, buf_mem, JNI_ABORT);
-		}
-	}
-	jobject jbuf = (*env)->NewWeakGlobalRef(env, buf); // weak ref for auto release
-	(*env)->DeleteLocalRef(env, buf);
-	int r = (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio_direct, jbuf, offset, length);
-	return r;
-}
-#endif
-
 static void q3e_exit(void)
 {
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Q3E JNI exit");
+	LOGI("Q3E JNI exit");
 	if(game_data_dir)
 	{
 		free(game_data_dir);
@@ -275,23 +268,26 @@ int JNI_OnLoad(JavaVM* vm, void* reserved)
     jVM = vm;
     if((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK)
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "JNI fatal error");
+        LOGE("JNI fatal error");
         return -1;
     }
 
 	atexit(q3e_exit);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "JNI loaded %d", JNI_Version);
+	LOGI("JNI loaded %d", JNI_Version);
 
     return JNI_Version;
 }
 
 void JNI_OnUnload(JavaVM *vm, void *reserved)
 {
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "JNI unload");
+	LOGI("JNI unload");
 	JNIEnv *env;
 	if((*vm)->GetEnv(vm, (void**) &env, JNI_Version) != JNI_OK)
 	{
-		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "JNI unload error");
+		LOGI("JNI unload error");
+	}
+	else
+	{
 		if(q3eCallbackObj)
 		{
 			(*env)->DeleteGlobalRef(env, q3eCallbackObj);
@@ -302,9 +298,9 @@ void JNI_OnUnload(JavaVM *vm, void *reserved)
 			(*env)->DeleteGlobalRef(env, audioBuffer);
 			audioBuffer = NULL;
 		}
+		LOGI("JNI unload done");
 	}
 	jVM = NULL;
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "JNI unload done");
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env, jclass c, jobject obj)
@@ -319,13 +315,14 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
     android_initAudio = (*env)->GetMethodID(env,q3eCallbackClass,"init","(I)V");
     android_writeAudio = (*env)->GetMethodID(env,q3eCallbackClass,"writeAudio","(Ljava/nio/ByteBuffer;II)I");
 	android_setState = (*env)->GetMethodID(env,q3eCallbackClass,"setState","(I)V");
-	android_writeAudio_direct = (*env)->GetMethodID(env,q3eCallbackClass, "writeAudio_direct", "([BII)I");
+	android_writeAudio_array = (*env)->GetMethodID(env,q3eCallbackClass, "writeAudio_array", "([BII)I");
 	
 	//k
 	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(Z)V");
 	android_GrabMouse_method = (*env)->GetMethodID(env, q3eCallbackClass, "GrabMouse", "(Z)V");
 	android_CopyToClipboard_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyToClipboard", "(Ljava/lang/String;)V");
 	android_GetClipboardText_method = (*env)->GetMethodID(env, q3eCallbackClass, "GetClipboardText", "()Ljava/lang/String;");
+	android_ShowToast_method = (*env)->GetMethodID(env, q3eCallbackClass, "ShowToast", "(Ljava/lang/String;)V");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -402,8 +399,9 @@ static void setup_Q3E_callback(void)
 	Q3E_Callback_t callback;
 	memset(&callback, 0, sizeof(callback));
 
-	callback.AudioTrack_init = &initAudio; // initAudio_direct
-	callback.AudioTrack_write = &writeAudio; // writeAudio_direct
+	callback.AudioTrack_init = &initAudio;
+	callback.AudioTrack_write = &writeAudio;
+	callback.AudioTrack_shutdown = &closeAudio;
 
 	callback.Input_grabMouse = &grab_mouse;
 	callback.Input_pullEvent = &pull_input_event;
@@ -415,26 +413,29 @@ static void setup_Q3E_callback(void)
 	callback.Sys_copyToClipboard = &copy_to_clipboard;
 	callback.Sys_getClipboardText = &get_clipboard_text;
 
+	callback.Gui_ShowToast = &show_toast;
+
 	setCallbacks(&callback);
 }
 
 static void print_initial_context(const Q3E_InitialContext_t *context)
 {
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "DOOM3 initial context ---------> ");
+	LOGI("idTech4A++ initial context ---------> ");
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Native library directory: %s", context->nativeLibraryDir);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Redirect output to file: %d", context->redirectOutputToFile);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Don't handle signals: %d", context->noHandleSignals);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Enable multi-thread: %d", context->multithread);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "OpenGL format: 0x%X", context->openGL_format);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "OpenGL MSAA: %d", context->openGL_msaa);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "OpenGL Version: %x", context->openGL_version);
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
+	LOGI("Native library directory: %s", context->nativeLibraryDir);
+	LOGI("Redirect output to file: %d", context->redirectOutputToFile);
+	LOGI("Don't handle signals: %d", context->noHandleSignals);
+	LOGI("Enable multi-thread: %d", context->multithread);
+	LOGI("OpenGL format: 0x%X", context->openGL_format);
+	LOGI("OpenGL MSAA: %d", context->openGL_msaa);
+	LOGI("OpenGL Version: %x", context->openGL_version);
+	LOGI("Using mouse: %x", context->mouseAvailable);
+    LOGI("Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "<---------");
+	LOGI("<---------");
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean bContinueNoGLContext)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring game, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc=0;
@@ -442,17 +443,31 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 
 	const char *dir = (*env)->GetStringUTFChars(env, GameDir, &iscopy);
     game_data_dir = strdup(dir);
-	chdir(game_data_dir);
 	(*env)->ReleaseStringUTFChars(env, GameDir, dir);
 
+	const char *game_type = (*env)->GetStringUTFChars(env, game, &iscopy);
+	if(!strcasecmp(game_type, "tdm"))
+	{
+		const char Tdm[] = "darkmod";
+		const int Len = strlen(game_data_dir) + 1 + strlen(Tdm);
+		char *game_path = malloc(Len + 1);
+		sprintf(game_path, "%s/%s", game_data_dir, Tdm);
+		game_path[Len] = '\0';
+		free(game_data_dir);
+		game_data_dir = game_path;
+	}
+	chdir(game_data_dir);
+	(*env)->ReleaseStringUTFChars(env, game, game_type);
+
 	const char *arg = (*env)->GetStringUTFChars(env, Cmdline, &iscopy);
+	LOGI("idTech4A++ game command: %s\n", arg);
 	argv = malloc(sizeof(char*) * 255);
     arg_str = strdup(arg);
 	argc = ParseCommandLine(arg_str, argv);
 	(*env)->ReleaseStringUTFChars(env, Cmdline, arg);    
 	
 	const char *engineLibPath = (*env)->GetStringUTFChars(env, LibPath, &iscopy);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "DOOM3 engine native library file: %s", engineLibPath);
+	LOGI("idTech4a++ engine native library file: %s", engineLibPath);
 	loadLib(engineLibPath);
 	(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
 
@@ -476,6 +491,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 		context.redirectOutputToFile = redirectOutputToFile ? 1 : 0;
 		context.noHandleSignals = noHandleSignals ? 1 : 0;
 		context.multithread = bMultithread ? 1 : 0;
+		context.mouseAvailable = mouseAvailable ? 1 : 0;
         context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;
 
 		print_initial_context(&context);
@@ -487,6 +503,9 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 	set_gl_context(window);
     
     qmain(argc, argv);
+
+	LOGI("idTech4A++ game data directory: %s\n", game_data_dir);
+
 	free(argv);
     free(doom3_path);
 }
@@ -621,6 +640,27 @@ char * get_clipboard_text(void)
 	return res;
 }
 
+void show_toast(const char *text)
+{
+	JNIEnv *env = 0;
+
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
+	}
+
+	if(!text)
+	{
+		return;
+	}
+
+	LOGI("Toast: %s", text);
+	jstring str = (*env)->NewStringUTF(env, text);
+	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_ShowToast_method, nstr);
+}
+
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"
 FILE * android_tmpfile(void)
 {
@@ -631,7 +671,7 @@ FILE * android_tmpfile(void)
 	int fd = mkstemp(tmp_file);
 	if(fd == -1)
 	{
-		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Call mkstemp(%s) error: %s", tmp_file, strerror(errno));
+		LOGE("Call mkstemp(%s) error: %s", tmp_file, strerror(errno));
 		free(tmp_file);
 		return NULL;
 	}
@@ -639,13 +679,13 @@ FILE * android_tmpfile(void)
 	FILE *res = fdopen(fd, "w+b");
 	if(!res)
 	{
-		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Call fdopen(%d) error: %s", fd, strerror(errno));
+		LOGE("Call fdopen(%d) error: %s", fd, strerror(errno));
 		close(fd);
 		free(tmp_file);
 		return NULL;
 	}
 	unlink(tmp_file);
-    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "android_tmpfile create: %s", tmp_file);
+	LOGD("android_tmpfile create: %s", tmp_file);
 	free(tmp_file);
 	return res;
 }

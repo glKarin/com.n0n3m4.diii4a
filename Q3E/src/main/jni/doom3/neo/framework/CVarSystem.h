@@ -428,7 +428,7 @@ ID_INLINE void idCVar::Init(const char *name, const char *value, int flags, cons
 	this->floatValue = 0.0f;
 	this->internalVar = this;
 
-	if (staticVars != (idCVar *)0xFFFFFFFF) {
+	if (staticVars != (idCVar *)(uintptr_t)0xFFFFFFFF) {
 		this->next = staticVars;
 		staticVars = this;
 	} else {
@@ -438,12 +438,12 @@ ID_INLINE void idCVar::Init(const char *name, const char *value, int flags, cons
 
 ID_INLINE void idCVar::RegisterStaticVars(void)
 {
-	if (staticVars != (idCVar *)0xFFFFFFFF) {
+	if (staticVars != (idCVar *)(uintptr_t)0xFFFFFFFF) {
 		for (idCVar *cvar = staticVars; cvar; cvar = cvar->next) {
 			cvarSystem->Register(cvar);
 		}
 
-		staticVars = (idCVar *)0xFFFFFFFF;
+		staticVars = (idCVar *)(uintptr_t)0xFFFFFFFF;
 	}
 }
 
@@ -462,7 +462,7 @@ ID_INLINE idCVarHelp::idCVarHelp( const char *cvarName, const char *friendlyName
 	this->category = category;
 	this->next = NULL;
 
-	if ( staticCVarHelps != (idCVarHelp *)0xFFFFFFFF ) {
+	if ( staticCVarHelps != (idCVarHelp *)(uintptr_t)0xFFFFFFFF ) {
 		if ( !staticCVarHelpsTail ) {
 			staticCVarHelps = this;
 		} else {
@@ -480,11 +480,11 @@ ID_INLINE void idCVarHelp::RegisterStatics( void ) {
 // jnewquist: Tag scope and callees to track allocations using "new".
 	MEM_SCOPED_TAG(tag,MA_CVAR);
 // RAVEN END
-	if ( staticCVarHelps != (idCVarHelp *)0xFFFFFFFF ) {
+	if ( staticCVarHelps != (idCVarHelp *)(uintptr_t)0xFFFFFFFF ) {
 		for ( const idCVarHelp *cvarHelp = staticCVarHelps; cvarHelp; cvarHelp = cvarHelp->next ) {
 			cvarSystem->Register( cvarHelp );
 		}
-		staticCVarHelps = (idCVarHelp *)0xFFFFFFFF;
+		staticCVarHelps = (idCVarHelp *)(uintptr_t)0xFFFFFFFF;
 	}
 }
 // RAVEN END

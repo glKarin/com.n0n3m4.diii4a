@@ -1615,7 +1615,7 @@ idCompressor_Arithmetic::GetCurrentCount
 */
 int idCompressor_Arithmetic::GetCurrentCount(void)
 {
-	return (unsigned int)(((((long) code - low) + 1) * scale - 1) / (((long) high - low) + 1));
+	return (unsigned int)(((((int/* 64long */) code - low) + 1) * scale - 1) / (((int/* 64long */) high - low) + 1));
 }
 
 /*
@@ -1689,9 +1689,9 @@ idCompressor_Arithmetic::RemoveSymbolFromStream
 */
 void idCompressor_Arithmetic::RemoveSymbolFromStream(acSymbol_t *symbol)
 {
-	long range;
+	int range;
 
-	range	= (long)(high - low) + 1;
+	range	= (int)(high - low) + 1;
 	high	= low + (unsigned short)((range * symbol->high) / scale - 1);
 	low		= low + (unsigned short)((range * symbol->low) / scale);
 

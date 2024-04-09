@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
-project(doom3)
+project(idtech)
 
 add_definitions(-D__ANDROID__)
 option(ANDROID "Android build" ON)
@@ -51,4 +51,18 @@ target_link_libraries( # Specifies the target library.
         android
         )
 
-add_subdirectory (doom3/neo)
+#add_subdirectory(doom3/neo/externlibs/openal-soft)
+
+add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
+
+add_subdirectory (deplibs) # common depend libraries
+
+add_subdirectory (quake2) # Quake 2
+
+add_subdirectory (quake3) # Quake 3 Arena | Team Arena
+
+add_subdirectory (rtcw) # RTCW
+
+add_subdirectory (tdm) # The Dark Mod
+
+#add_subdirectory (duke4) # DNF

@@ -591,7 +591,7 @@ void abrt_func(mcheck_status status)
 
 /* Android */
 
-#include "doom3_android.h"
+#include "sys_android.h"
 
 // command line arguments
 static int q3e_argc = 0;

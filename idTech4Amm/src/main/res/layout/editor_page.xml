@@ -11,8 +11,8 @@
 		android:layout_height="wrap_content"
 		android:gravity="left|center_vertical"
 		android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="5dp"
+		android:textSize="16sp"
 		android:textStyle="bold"/>
     
     <View
@@ -35,6 +35,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
             android:typeface="monospace"
+			android:textSize="16sp"
 			android:hint=""
             />
 

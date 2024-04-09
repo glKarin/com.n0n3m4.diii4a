@@ -19,12 +19,30 @@ public enum Game
     DOOM3_SABOT(Q3EGlobals.GAME_DOOM3, "sabot", "sabot", "d3xp", true, R.string.stupid_angry_bot_a7x),
     DOOM3_HEXENEOC(Q3EGlobals.GAME_DOOM3, "hexeneoc", "hexeneoc", "", true, R.string.hexen_edge_of_chaos),
     DOOM3_FRAGGINGFREE(Q3EGlobals.GAME_DOOM3, "fraggingfree", "fraggingfree", "d3xp", true, R.string.fragging_free),
+    DOOM3_LIBRECOOP(Q3EGlobals.GAME_DOOM3, "librecoop", "librecoop", "", true, R.string.librecoop),
 
     // Quake 4
     QUAKE4_BASE(Q3EGlobals.GAME_QUAKE4, "q4base", "", "", false, R.string.quake_iv_q4base),
 
     // Prey(2006)
     PREY_BASE(Q3EGlobals.GAME_PREY, "preybase", "", "", false, R.string.prey_preybase),
+
+    // Quake 2
+    QUAKE2_BASE(Q3EGlobals.GAME_QUAKE2, "baseq2", "", "", false, R.string.quake_2_base),
+    QUAKE2_CTF(Q3EGlobals.GAME_QUAKE2, "ctf", "ctf", "", true, R.string.quake_2_ctf),
+    QUAKE2_ROGUE(Q3EGlobals.GAME_QUAKE2, "rogue", "rogue", "", true, R.string.quake_2_rogue),
+    QUAKE2_XATRIX(Q3EGlobals.GAME_QUAKE2, "xatrix", "xatrix", "", true, R.string.quake_2_xatrix),
+    QUAKE2_ZAERO(Q3EGlobals.GAME_QUAKE2, "zaero", "zaero", "", true, R.string.quake_2_zaero),
+
+    // Return to Castle Wolfenstein
+    RTCW_BASE(Q3EGlobals.GAME_RTCW, "main", "", "", false, R.string.rtcw_base),
+
+    // The dark mod
+    TDM_BASE(Q3EGlobals.GAME_TDM, "darkmod", "", "", false, R.string.tdm_base),
+
+    // Quake 3
+    QUAKE3_BASE(Q3EGlobals.GAME_QUAKE3, "baseq3", "", "", false, R.string.quake_3_base),
+    QUAKE3_TEAMARENA(Q3EGlobals.GAME_QUAKE3, "missionpack", "missionpack", "", true, R.string.quake_3_teamarena),
     ;
 
     public final String type; // game type: doom3/quake4/prey2006

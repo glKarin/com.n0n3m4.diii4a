@@ -295,5 +295,6 @@ extern const char *si_gameTypeArgs[];
 extern idCVar harm_pm_fullBodyAwareness;
 extern idCVar harm_pm_fullBodyAwarenessOffset;
 extern idCVar harm_pm_fullBodyAwarenessHeadJoint;
+extern idCVar harm_pm_fullBodyAwarenessFixed;
 #endif
 #endif /* !__SYS_CVAR_H__ */

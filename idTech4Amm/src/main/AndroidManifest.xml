@@ -1,13 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11038"
-    android:versionName="1.1.0harmattan38"
+    android:versionCode="11039"
+    android:versionName="1.1.0harmattan39"
     android:installLocation="preferExternal"
     >
 
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
     <uses-feature android:glEsVersion="0x00030000" />
+    <uses-feature android:glEsVersion="0x00030002" />
     <uses-sdk
         android:targetSdkVersion="30"
         tools:ignore="GradleOverrides" />
@@ -26,6 +27,7 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions" />
 
     <!--<uses-feature android:name="android.hardware.type.pc" android:required="false" />-->
 
@@ -85,6 +87,13 @@
             android:launchMode="singleTask"
             android:exported="true"
             android:name="com.karin.idTech4Amm.OnScreenButtonConfigActivity"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+        </activity>
+        <activity android:label="Logcat"
+            android:launchMode="singleTask"
+            android:exported="true"
+            android:name="com.karin.idTech4Amm.LogcatActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>

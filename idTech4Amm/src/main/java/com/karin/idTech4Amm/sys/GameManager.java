@@ -1,5 +1,6 @@
 package com.karin.idTech4Amm.sys;
 
+import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 
@@ -12,6 +13,16 @@ import java.util.Map;
 public final class GameManager
 {
     private final Map<String, List<GameProp>> GameProps = new LinkedHashMap<>();
+
+    public final static String[] Games = {
+            Q3EGlobals.GAME_DOOM3,
+            Q3EGlobals.GAME_QUAKE4,
+            Q3EGlobals.GAME_PREY,
+            Q3EGlobals.GAME_QUAKE3,
+            Q3EGlobals.GAME_RTCW,
+            Q3EGlobals.GAME_QUAKE2,
+            Q3EGlobals.GAME_TDM,
+    };
 
     public GameManager()
     {
@@ -58,9 +69,8 @@ public final class GameManager
         List<GameProp> props;
         GameProp prop;
 
-        GameProps.put(Q3EGlobals.GAME_DOOM3, new ArrayList<>());
-        GameProps.put(Q3EGlobals.GAME_QUAKE4, new ArrayList<>());
-        GameProps.put(Q3EGlobals.GAME_PREY, new ArrayList<>());
+        for(String game : Games)
+            GameProps.put(game, new ArrayList<>());
         Game[] values = Game.values();
 
         for (Game value : values)
@@ -84,6 +94,22 @@ public final class GameManager
         else if (Q3EUtils.q3ei.isPrey)
         {
             list = GameProps.get(Q3EGlobals.GAME_PREY);
+        }
+        else if (Q3EUtils.q3ei.isQ2)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_QUAKE2);
+        }
+        else if (Q3EUtils.q3ei.isQ3)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_QUAKE3);
+        }
+        else if (Q3EUtils.q3ei.isRTCW)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_RTCW);
+        }
+        else if (Q3EUtils.q3ei.isTDM)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_TDM);
         }
         else
         {
@@ -116,5 +142,41 @@ public final class GameManager
             }
         }
         return null;
+    }
+
+    public static int GetGameIcon()
+    {
+        if (Q3EUtils.q3ei.isPrey)
+            return R.drawable.prey_icon;
+        else if (Q3EUtils.q3ei.isQ4)
+            return R.drawable.q4_icon;
+        else if (Q3EUtils.q3ei.isQ2)
+            return R.drawable.q2_icon;
+        else if (Q3EUtils.q3ei.isQ3)
+            return R.drawable.q3_icon;
+        else if (Q3EUtils.q3ei.isRTCW)
+            return R.drawable.rtcw_icon;
+        else if (Q3EUtils.q3ei.isTDM)
+            return R.drawable.tdm_icon;
+        else
+            return R.drawable.d3_icon;
+    }
+
+    public static int GetGameThemeColor()
+    {
+        if (Q3EUtils.q3ei.isPrey)
+            return R.color.theme_prey_main_color;
+        else if (Q3EUtils.q3ei.isQ4)
+            return R.color.theme_quake4_main_color;
+        else if (Q3EUtils.q3ei.isQ2)
+            return R.color.theme_quake2_main_color;
+        else if (Q3EUtils.q3ei.isQ3)
+            return R.color.theme_quake3_main_color;
+        else if (Q3EUtils.q3ei.isRTCW)
+            return R.color.theme_rtcw_main_color;
+        else if (Q3EUtils.q3ei.isTDM)
+            return R.color.theme_tdm_main_color;
+        else
+            return R.color.theme_doom3_main_color;
     }
 }

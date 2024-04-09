@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class Q3EAudioTrack extends AudioTrack
 {
@@ -152,7 +153,8 @@ public class Q3EAudioTrack extends AudioTrack
                     m_flush = true;
                     len = -len;
                 }
-                m_data = audioData;
+                m_data = new byte[len];
+                System.arraycopy(audioData, 0, m_data, 0, len);
                 m_length = len;
             }
         }

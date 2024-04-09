@@ -11,7 +11,7 @@ extern "C" {
 
 #define __forceinline ID_INLINE
 
-#define epuc(x,y)  ((unsigned char *) (e(x,y)?NULL:NULL))
+#define epuc(x,y)  ((unsigned char *) (e(x,y)?(void *)0:(void *)0))
 
 static int e(char *str)
 {

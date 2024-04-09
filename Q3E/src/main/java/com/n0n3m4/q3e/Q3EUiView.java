@@ -54,7 +54,6 @@ import javax.microedition.khronos.opengles.GL11;
 
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
-
     private int m_unit = 0;
     public final int step = Q3EUtils.dip2px(getContext(), 5);
     private FloatBuffer m_gridBuffer = null;
@@ -173,8 +172,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             touch_elements.set(touch_elements.indexOf(tmp), newb);
             paint_elements.set(paint_elements.indexOf(tmp), newb);
         }
-
-        if (fn.target instanceof Joystick)
+        else if (fn.target instanceof Joystick)
         {
             final Joystick tmp = (Joystick) fn.target;
             final Joystick newj = Joystick.Move(tmp, uildr.gl, Q3EUtils.q3ei.joystick_release_range, Q3EUtils.q3ei.joystick_inner_dead_zone);
@@ -182,8 +180,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             touch_elements.set(touch_elements.indexOf(tmp), newj);
             paint_elements.set(paint_elements.indexOf(tmp), newj);
         }
-
-        if (fn.target instanceof Slider)
+        else if (fn.target instanceof Slider)
         {
             final Slider tmp = (Slider) fn.target;
             final Slider news = Slider.Move(tmp, uildr.gl);
@@ -191,9 +188,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             touch_elements.set(touch_elements.indexOf(tmp), news);
             paint_elements.set(paint_elements.indexOf(tmp), news);
         }
-
         //k
-        if (fn.target instanceof Disc)
+        else if (fn.target instanceof Disc)
         {
             final Disc tmp = (Disc) fn.target;
             final Disc newd = Disc.Move(tmp, uildr.gl);

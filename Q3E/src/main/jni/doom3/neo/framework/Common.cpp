@@ -79,7 +79,13 @@ idCVar com_asyncSound("com_asyncSound", "1", CVAR_INTEGER|CVAR_SYSTEM, ASYNCSOUN
 #endif
 idCVar com_forceGenericSIMD("com_forceGenericSIMD", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "force generic platform independent SIMD");
 idCVar com_developer("developer", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "developer mode");
-idCVar com_allowConsole("com_allowConsole", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "allow toggling console with the tilde key");
+idCVar com_allowConsole("com_allowConsole",
+#ifdef __ANDROID__
+		"1"
+#else
+						"0"
+#endif
+						, CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "allow toggling console with the tilde key");
 idCVar com_speeds("com_speeds", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "show engine timings");
 idCVar com_showFPS("com_showFPS", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_ARCHIVE|CVAR_NOCHEAT, "show frames rendered per second");
 idCVar com_showMemoryUsage("com_showMemoryUsage", "0", CVAR_BOOL|CVAR_SYSTEM|CVAR_NOCHEAT, "show total and per frame memory usage");
@@ -1489,7 +1495,11 @@ static void Com_Crash_f(const idCmdArgs &args)
 		return;
 	}
 
-	*(int *) 0 = 0x12345678;
+#ifdef __GNUC__
+	__builtin_trap();
+#else
+	* ( int * ) 0 = 0x12345678;
+#endif
 }
 
 /*
@@ -2561,7 +2571,7 @@ void idCommonLocal::InitCommands(void)
 	cmdSystem->AddCommand("renderbump", RenderBump_f, CMD_FL_TOOL, "renders a bump map", idCmdSystem::ArgCompletion_ModelName);
 	cmdSystem->AddCommand("renderbumpFlat", RenderBumpFlat_f, CMD_FL_TOOL, "renders a flat bump map", idCmdSystem::ArgCompletion_ModelName);
 #ifdef _RAVEN //k: for generate AAS file of mp game map and bot.
-	cmdSystem->AddCommand("harm_runAAS", RunAAS_f, CMD_FL_GAME, "compiles an AAS file for a map for Quake 4 multiplayer-game", idCmdSystem::ArgCompletion_MapName);
+	cmdSystem->AddCommand("botRunAAS", RunAAS_f, CMD_FL_GAME, "compiles an AAS file for a map for Quake 4 multiplayer-game", idCmdSystem::ArgCompletion_MapName);
 #endif
 	cmdSystem->AddCommand("runAAS", RunAAS_f, CMD_FL_TOOL, "compiles an AAS file for a map", idCmdSystem::ArgCompletion_MapName);
 	cmdSystem->AddCommand("runAASDir", RunAASDir_f, CMD_FL_TOOL, "compiles AAS files for all maps in a folder", idCmdSystem::ArgCompletion_MapName);

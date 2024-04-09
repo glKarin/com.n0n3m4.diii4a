@@ -1,0 +1,113 @@
+## CMake ##
+build/
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+## jpeg-cmake ##
+libjpeg/CMakeLists.txt
+libjpeg/ConfigureJConfig.cmake
+libjpeg/jconfig.h.in
+libjpeg/jconfig.h
+libjpeg/libjpeg.pc.cmakein
+libjpeg/libjpeg.pc
+libjpeg/libjpeg.la.in
+libjpeg/libjpeg.la
+libjpeg/test-libjpeg.sh
+
+## libjpeg ##
+.deps/
+.libs/
+cjpeg
+djpeg
+jpegtran
+rdjpgcom
+wrjpgcom
+testout*
+
+## Autoconf ##
+# http://www.gnu.org/software/automake
+mdate-sh
+py-compile
+test-driver
+ylwrap
+
+# http://www.gnu.org/software/autoconf
+autom4te.cache
+autoscan.log
+autoscan-*.log
+config.h.in
+config.log
+config.status
+configure.scan
+stamp-h1
+
+# http://www.gnu.org/software/m4/
+libtool.m4
+ltoptions.m4
+ltsugar.m4
+ltversion.m4
+lt~obsolete.m4
+libtool
+
+## C ##
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf

@@ -541,8 +541,8 @@ if ( local_gamedll == 0 ):
 	source_list += game_objects
 
 if g_os == 'Android':
-	d3wm = local_env.SharedLibrary( target = 'dante', source = source_list )
+	d3wm = local_env.SharedLibrary( target = 'idtech4', source = source_list )
 else:
-	d3wm = local_env.Program( target = 'dante', source = source_list )
+	d3wm = local_env.Program( target = 'idtech4', source = source_list )
 
 Return( 'd3wm' )

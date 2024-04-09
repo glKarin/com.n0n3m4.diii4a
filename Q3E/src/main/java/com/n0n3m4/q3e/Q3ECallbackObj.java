@@ -19,7 +19,11 @@
 
 package com.n0n3m4.q3e;
 
+import android.app.Activity;
+import android.content.Context;
+
 import com.n0n3m4.q3e.karin.KOnceRunnable;
+import com.n0n3m4.q3e.onscreen.Q3EGUI;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -31,6 +35,8 @@ public class Q3ECallbackObj
     public int state = Q3EGlobals.STATE_NONE;
     private final Object m_audioLock = new Object();
     public static boolean reqThreadrunning = false;
+
+    private Q3EGUI gui;
 
     private final LinkedList<Runnable> m_eventQueue = new LinkedList<>();
     public boolean notinmenu = true;
@@ -104,7 +110,7 @@ public class Q3ECallbackObj
     }
 
     //k NEW:
-// Now call directly by native of libdante.so, and don't need call requestAudioData in Java.
+// Now call directly by native of libidtech4*.so, and don't need call requestAudioData in Java.
 // if offset >= 0 and length > 0, only write.
 // if offset >= 0 and length < 0, length = -length, then write and flush.
 // If length == 0 and offset < 0, only flush.
@@ -115,7 +121,7 @@ public class Q3ECallbackObj
         return mAudioTrack.writeAudio(audioData, offset, len);
     }
 
-    public int writeAudio_direct(byte[] audioData, int offset, int len)
+    public int writeAudio_array(byte[] audioData, int offset, int len)
     {
         if (null == mAudioTrack || !reqThreadrunning)
             return 0;
@@ -180,7 +186,7 @@ public class Q3ECallbackObj
             @Override
             public void run()
             {
-                Q3EUtils.CopyToClipboard(Q3EMain.mGLSurfaceView.getContext(), text);
+                Q3EUtils.CopyToClipboard(Q3EMain.gameHelper.GetContext(), text);
             }
         };
         //Q3EMain.mGLSurfaceView.post(runnable);
@@ -189,7 +195,7 @@ public class Q3ECallbackObj
 
     public String GetClipboardText()
     {
-        return Q3EUtils.GetClipboardText(Q3EMain.mGLSurfaceView.getContext());
+        return Q3EUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
     }
 
     public void sendAnalog(final boolean down, final float x, final float y)
@@ -226,6 +232,17 @@ public class Q3ECallbackObj
                 Q3EJNI.sendMotionEvent(deltax, deltay);
             }
         });
+    }
+
+    public void InitGUIInterface(Activity context)
+    {
+        gui = new Q3EGUI(context);
+    }
+
+    public void ShowToast(String text)
+    {
+        if(null != gui)
+            gui.Toast(text);
     }
 }
 

@@ -30,7 +30,7 @@
     <string name="quake_iv_q4base">Quake IV</string>
     <string name="prey_preybase">Prey</string>
     <string name="user_mod">User mod</string>
-    <string name="input_your_mod_folder_name">Your mod folder name</string>
+    <string name="input_your_mod_folder_name">Mod folder name</string>
     <string name="gamelib">GameLib</string>
     <string name="multi_threading">Multi-threading</string>
     <string name="light_model_cvar_harm_r_lightmodel">Light model(harm_r_lightModel)</string>
@@ -82,8 +82,14 @@
     <string name="_32bits">32Bits</string>
     <string name="_16bits_rgb565">16Bits(RGB565)</string>
     <string name="_16bits_rgba4444">16Bits(RGBA4444)</string>
+    <string name="_16bits_rgba5551">16Bits(RGBA5551)</string>
+    <string name="_32bits_rgba1010102">32Bits(RGBA1010102)</string>
     <string name="doom_3">DOOM 3</string>
     <string name="quake_4">Quake 4</string>
+    <string name="quake_2">Quake 2</string>
+    <string name="quake_3">Quake 3</string>
+    <string name="rtcw">RTCW</string>
+    <string name="tdm">Dark mod</string>
     <string name="prey_2006">Prey(2006)</string>
     <string name="settings">Settings</string>
     <string name="changes">Changes</string>
@@ -91,6 +97,7 @@
     <string name="help">Help</string>
     <string name="preference">Preference</string>
     <string name="other">Other</string>
+    <string name="option">Option</string>
     <string name="save_launcher_settings">Save launcher settings</string>
     <string name="backup_settings">Backup settings</string>
     <string name="restore_settings">Restore settings</string>
@@ -176,7 +183,7 @@
     <string name="last_dalvik_crash_info">Last dalvik crash info</string>
     <string name="preferences_settings_saved">Preferences settings saved!</string>
     <string name="choose_data_folder">Choose data folder</string>
-    <string name="choose_current_directory">Choose current directory</string>
+    <string name="choose_current_directory">Choose</string>
     <string name="unset">Unset</string>
     <string name="edit_config_file">Edit config file</string>
     <string name="operation">Operation</string>
@@ -269,12 +276,27 @@
     <string name="using_efx_reverb">Enable EFX Reverb(s_useEAXReverb)</string>
     <string name="internal_storage">Internal storage</string>
     <string name="external_storage">External storage</string>
-    <string name="translucent_stencil_shadow">Translucent stencil shadow(harm_r_translucentStencilShadow)</string>
+    <string name="translucent_stencil_shadow">Translucent stencil shadow(harm_r_stencilShadowTranslucent)</string>
     <string name="overthinked_doom_3">Overthinked DooM^3</string>
     <string name="stupid_angry_bot_a7x">Stupid Angry Bot(a7x)</string>
     <string name="hexen_edge_of_chaos">HeXen:Edge of Chaos</string>
     <string name="fragging_free">Fragging Free</string>
     <string name="normal_font_size_subtitle_prey_2006">Normal font size subtitle(Prey 2006)</string>
     <string name="_mod">Mod</string>
+    <string name="librecoop">LibreCoop</string>
+    <string name="quake_2_base">Quake II</string>
+    <string name="quake_2_ctf">Quake II:ctf</string>
+    <string name="quake_2_rogue">Quake II:rogue</string>
+    <string name="quake_2_xatrix">Quake II:xatrix</string>
+    <string name="quake_2_zaero">Quake II:zaero</string>
+    <string name="rtcw_base">Return to Castle Wolfenstein</string>
+    <string name="tdm_base">The Dark Mod</string>
+    <string name="quake_3_base">Quake III:Arena</string>
+    <string name="quake_3_teamarena">Quake III:Team Arena</string>
+    <string name="stop">Stop</string>
+    <string name="scroll_to_top">Top</string>
+    <string name="scroll_to_bottom">Bottom</string>
+    <string name="scroll">Scroll</string>
+    <string name="pause">Pause</string>
 
 </resources>

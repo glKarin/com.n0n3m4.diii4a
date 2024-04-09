@@ -29,10 +29,11 @@
             android:title="@string/game"
         >
             <ListPreference
+                android:enabled="false"
                 android:title="@string/run_background"
                 android:key="harm_run_background"
                 android:persistent="true"
-                android:defaultValue="1"
+                android:defaultValue="2"
                 android:summary="@string/control_game_state_when_application_in_background"
                 android:entryValues="@array/run_background_values"
                 android:entries="@array/run_background_labels"

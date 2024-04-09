@@ -249,7 +249,7 @@ idGameEdit::ClassSummary
 */
 size_t idGameEdit::ClassSummary( const idCmdArgs &args ) const {
 
-	common->Printf( "Classes         - %dK\n", idClass::GetUsedMemory() / 1024 );
+	common->Printf( "Classes         - %zdK\n", idClass::GetUsedMemory() / 1024 );
 
 	return( idClass::GetUsedMemory() / 1024 );
 }
@@ -262,7 +262,7 @@ idGameEdit::EntitySummary
 
 size_t idGameEdit::EntitySummary( const idCmdArgs &args ) const {
 
-	common->Printf( "CL & SV ents    - %dK\n", gameLocal.GetEntityMemoryUsage () / 1024);
+	common->Printf( "CL & SV ents    - %zdK\n", gameLocal.GetEntityMemoryUsage () / 1024);
 
 	return gameLocal.GetEntityMemoryUsage() / 1024;
 }

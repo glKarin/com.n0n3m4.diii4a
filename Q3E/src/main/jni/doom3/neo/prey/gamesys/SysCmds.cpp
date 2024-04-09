@@ -50,7 +50,7 @@ void Cmd_EntityList(const idStr &match) {
 		size += check->spawnArgs.Allocated();
 	}
 
-	gameLocal.Printf( "...%d entities\n...%d bytes of spawnargs\n", count, size );
+	gameLocal.Printf( "...%d entities\n...%zd bytes of spawnargs\n", count, size );
 }
 //HUMANHEAD END
 
@@ -1682,7 +1682,7 @@ static void Cmd_ListAnims_f( const idCmdArgs &args ) {
 			}
 		}
 
-		gameLocal.Printf( "%d memory used in %d entity animators\n", size, num );
+		gameLocal.Printf( "%zd memory used in %d entity animators\n", size, num );
 	}
 }
 

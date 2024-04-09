@@ -489,7 +489,7 @@ public:
 	virtual void			ServerClientBegin( int clientNum );
 	virtual void			ServerClientDisconnect( int clientNum );
 	virtual void			ServerWriteInitialReliableMessages( int clientNum );
-	virtual allowReply_t	RepeaterAllowClient( int clientId, int numClients, const char *IP, const char *guid, bool repeater, const char *password, const char *privatePassword, char reason[MAX_STRING_CHARS] ) { idStr::Copynz( reason, "#str_107239" /* zinx - FIXME - not banned... */, sizeof(reason) ); return ALLOW_NO; };
+	virtual allowReply_t	RepeaterAllowClient( int clientId, int numClients, const char *IP, const char *guid, bool repeater, const char *password, const char *privatePassword, char reason[MAX_STRING_CHARS] ) { idStr::Copynz( reason, "#str_107239" /* zinx - FIXME - not banned... */, /*//k sizeof(reason)*/sizeof(char) * MAX_STRING_CHARS ); return ALLOW_NO; };
 	virtual void			RepeaterClientConnect( int clientNum ) {assert(false);};
 	virtual void			RepeaterClientBegin( int clientNum ) {assert(false);};
 	virtual void			RepeaterClientDisconnect( int clientNum ) {assert(false);};

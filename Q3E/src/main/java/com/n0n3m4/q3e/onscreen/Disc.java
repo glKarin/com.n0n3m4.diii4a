@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.View;
 
-import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
@@ -20,7 +19,7 @@ import javax.microedition.khronos.opengles.GL11;
 
 public class Disc extends Paintable implements TouchListener
 {
-    public static class Part
+    private static class Part
     {
         public float start;
         public float end;
@@ -31,25 +30,23 @@ public class Disc extends Paintable implements TouchListener
         public boolean disabled;
     }
 
+    public View view;
+    public int cx, cy;
+
     private final FloatBuffer m_fanVertexArray;
-    float[] verts_back = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
-    FloatBuffer verts_p;
-    float[] texcoords = {0, 0, 0, 1, 1, 1, 1, 0};
-    FloatBuffer tex_p;
-    byte[] indices = {0, 1, 2, 0, 2, 3};
-    ByteBuffer inds_p;
+    private final FloatBuffer verts_p;
+    private final FloatBuffer tex_p;
+    private final ByteBuffer inds_p;
     private Part[] m_parts = null;
     public int size;
-    int dot_size;
-    public int cx, cy;
-    int tex_ind;
+    private final int dot_size;
+    private int tex_ind;
     private int m_circleWidth;
     private final char[] m_keys;
     private final int m_size_2;
 
-    int dotx, doty;
-    boolean dotjoyenabled = false;
-    public View view;
+    private int dotx, doty;
+    private boolean dotjoyenabled = false;
 
     public Disc(View vw, GL10 gl, int center_x, int center_y, int r, float a, char[] keys, String texid)
     {
@@ -60,6 +57,9 @@ public class Disc extends Paintable implements TouchListener
         dot_size = size * 3;
         alpha = a;
         m_size_2 = size * size;
+        float[] verts_back = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
+        float[] texcoords = {0, 0, 0, 1, 1, 1, 1, 0};
+        byte[] indices = {0, 1, 2, 0, 2, 3};
 
         float[] tmp = new float[verts_back.length];
         for (int i = 0; i < verts_back.length; i += 2)
@@ -189,7 +189,7 @@ public class Disc extends Paintable implements TouchListener
     {
         //main paint
         super.Paint(gl);
-        Q3EGL.DrawVerts(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
         if (null == m_parts || m_parts.length == 0)
             return;
 
@@ -199,9 +199,9 @@ public class Disc extends Paintable implements TouchListener
             {
                 //DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red,green,blue,p.pressed ? (float)Math.max(alpha, 0.9) : (float)(Math.min(alpha, 0.1)));
                 if (p.pressed)
-                    Q3EGL.DrawVerts(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
                 else
-                    Q3EGL.DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
+                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
             }
         }
     }

@@ -30,6 +30,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.opengl.GLES11;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
@@ -83,8 +84,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public static final float GYROSCOPE_Y_AXIS_SENS = 18;
 
     // render
-    public static boolean mInit = false;
-    public boolean usesCSAA = false;
+    private boolean mInit = false;
+    private boolean usesCSAA = false;
     public static int orig_width;
     public static int orig_height;
     private boolean hideonscr;
@@ -104,10 +105,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private float m_lastTouchPadPosX = -1;
     private float m_lastTouchPadPosY = -1;
 
-    private IntBuffer tmpbuf;
-
     // map volume key function
-    public boolean mapvol = false;
+    private boolean mapvol = false;
 
     // map back key function
     private int m_mapBack = ENUM_BACK_ALL;
@@ -116,26 +115,28 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
 
     //RTCW4A-specific
-    Button actbutton;
-    Button kickbutton;
+    /*
+    private Button actbutton;
+    private Button kickbutton;
+    */
     private Q3EView m_renderView;
 
     //MOUSE
-    long oldtime = 0;
-    long delta = 0;
+    private long oldtime = 0;
+    private long delta = 0;
 
 
     // other controls function
-    static float last_joystick_x = 0;
-    static float last_joystick_y = 0;
+    private float last_joystick_x = 0;
+    private float last_joystick_y = 0;
 
-    public static Finger[] fingers = new Finger[10];
-    public static ArrayList<TouchListener> touch_elements = new ArrayList<TouchListener>(0);
-    public static ArrayList<Paintable> paint_elements = new ArrayList<Paintable>(0);
-    public static TouchListener[] handle_elements = new TouchListener[10]; // handled elements in every touch event
+    private final Finger[] fingers = new Finger[10];
+    private final ArrayList<TouchListener> touch_elements = new ArrayList<TouchListener>(0);
+    private final ArrayList<Paintable> paint_elements = new ArrayList<Paintable>(0);
+    private final TouchListener[] handle_elements = new TouchListener[10]; // handled elements in every touch event
 
-    static float last_trackball_x = 0;
-    static float last_trackball_y = 0;
+    private float last_trackball_x = 0;
+    private float last_trackball_y = 0;
 
     /// gyroscope function
     private boolean m_gyroInited = false;
@@ -150,11 +151,11 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         super(context);
 
-        setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, Q3EGL.usegles20));
+        setEGLConfigChooser(new Q3EConfigChooser(8, 8, 8, 8, 0, /*Q3EGL.usegles20*/false));
         getHolder().setFormat(PixelFormat.RGBA_8888);
 
-        if (Q3EGL.usegles20)
-            setEGLContextClientVersion(2);
+/*        if (Q3EGL.usegles20)
+            setEGLContextClientVersion(2);*/
 
         setRenderer(this);
 
@@ -183,7 +184,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         if ((last_joystick_x != 0) || (last_joystick_y != 0))
             Q3EUtils.q3ei.callbackObj.sendMotionEvent(delta * last_joystick_x, delta * last_joystick_y);
 
-        if (usesCSAA)
+/*        if (usesCSAA)
         {
             if (!Q3EGL.usegles20)
                 gl.glClear(0x8000); //Yeah, I know, it doesn't work in 1.1
@@ -191,7 +192,11 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 GLES20.glClear(0x8000);
         }
         else
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);*/
+        if (usesCSAA)
+            gl.glClear(0x8000); //Yeah, I know, it doesn't work in 1.1
+        else
+            gl.glClear(GLES11.GL_COLOR_BUFFER_BIT);
 
         //k: not render in game loading
         if (Q3EUtils.q3ei.callbackObj.inLoading)
@@ -200,7 +205,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         //Onscreen buttons:
         //save state
 
-        if (Q3EGL.usegles20)
+/*        if (Q3EGL.usegles20)
         {
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             //XXXXXXXXXXXXXXXXXXXXXXXX  GL 20  XXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -209,7 +214,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 p.Paint((GL11) gl);
         }
         else
-        {
+        {*/
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             //XXXXXXXXXXXXXXXXXXXXXXXX  GL 11  XXXXXXXXXXXXXXXXXXXXXXXXXX
             //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -219,7 +224,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);*/
             for (Paintable p : paint_elements)
                 p.Paint((GL11) gl);
-        }
+/*        }*/
 
     }
 
@@ -228,9 +233,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         if (!mInit)
         {
-
-            tmpbuf = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
-
             SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
             hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
@@ -252,7 +254,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 paint_elements.add((Paintable) o);
             }
 
-            if (Q3EUtils.q3ei.isRTCW)
+/*            if (Q3EUtils.q3ei.isRTCW)
             {
                 actbutton = (Button) touch_elements.get(Q3EUtils.q3ei.RTCW4A_UI_ACTION);
                 kickbutton = (Button) touch_elements.get(Q3EUtils.q3ei.RTCW4A_UI_KICK);
@@ -260,7 +262,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             {
                 actbutton = null;
                 kickbutton = null;
-            }
+            }*/
 
             if (hideonscr)
             {
@@ -285,12 +287,12 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             if(null != m_mouseDevice)
                 m_mouseDevice.Start();
 
-            if(!Q3EGL.usegles20)
-            {
+/*            if(!Q3EGL.usegles20)
+            {*/
                 gl.glMatrixMode(gl.GL_PROJECTION);
                 gl.glLoadIdentity();
                 gl.glOrthof(0, orig_width, orig_height, 0, -1, 1);
-            }
+/*            }*/
 
             mInit = true;
             post(new Runnable()
@@ -308,7 +310,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public void onSurfaceCreated(GL10 gl, EGLConfig config)
     {
 
-        if (Q3EGL.usegles20)
+/*        if (Q3EGL.usegles20)
         {
             Q3EGL.initGL20();
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -320,17 +322,18 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         }
         else
-        {
+        {*/
             gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             gl.glDisable(gl.GL_CULL_FACE);
             gl.glDisable(gl.GL_DEPTH_TEST);
             gl.glDisable(gl.GL_ALPHA_TEST);
             gl.glEnable(gl.GL_BLEND);
+            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
             ((GL11) gl).glTexEnvi(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_MODULATE);
             gl.glEnableClientState(gl.GL_VERTEX_ARRAY);
             gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY);
-        }
+/*        }*/
 
         if (mInit)
         {
@@ -341,10 +344,12 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     public void setState(int st)
     {
+        /*
         if (actbutton != null)
             actbutton.alpha = ((st & 1) == 1) ? Math.min(actbutton.initalpha * 2, 1f) : actbutton.initalpha;
         if (kickbutton != null)
             kickbutton.alpha = ((st & 4) == 4) ? Math.min(kickbutton.initalpha * 2, 1f) : kickbutton.initalpha;
+            */
     }
 
     public int getCharacter(int keyCode, KeyEvent event)
@@ -409,8 +414,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
         return true;
     }
-    private static float getCenteredAxis(MotionEvent event,
-                                         int axis)
+    private static float getCenteredAxis(MotionEvent event, int axis)
     {
         final InputDevice.MotionRange range = event.getDevice().getMotionRange(axis, event.getSource());
         if (range != null)
@@ -513,6 +517,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         }
         return false;
     }
+
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -902,8 +907,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            Runnable runnable = new Runnable()
-            {
+            Runnable runnable = new Runnable() {
                 @Override
                 public void run()
                 {

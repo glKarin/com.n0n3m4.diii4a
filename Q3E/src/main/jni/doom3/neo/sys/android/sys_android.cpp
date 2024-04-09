@@ -33,6 +33,7 @@ extern void ShutdownGame(void);
 
 void (*initAudio)(void *buffer, int size);
 int (*writeAudio)(int offset, int length);
+void (*shutdownAudio)(void);
 void (*setState)(int st);
 FILE * (*itmpfile)(void);
 void (*pull_input_event)(int execCmd);
@@ -40,6 +41,7 @@ void (*grab_mouse)(int grab);
 void (*attach_thread)(void);
 void (*copy_to_clipboard)(const char *text);
 char * (*get_clipboard_text)(void);
+void (*show_toast)(const char *text);
 
 int screen_width=640;
 int screen_height=480;
@@ -61,6 +63,9 @@ volatile bool paused = false;
 // Continue when missing OpenGL context
 volatile bool continue_when_no_gl_context = false;
 
+// using mouse
+bool mouse_available = false;
+
 // Surface window
 volatile ANativeWindow *window = NULL;
 static volatile bool window_changed = false;
@@ -70,7 +75,7 @@ extern volatile bool q3e_running;
 
 void Android_GrabMouseCursor(bool grabIt)
 {
-    if(grab_mouse)
+    if(mouse_available && grab_mouse)
         grab_mouse(grabIt);
 }
 
@@ -138,7 +143,7 @@ char * Android_GetClipboardData(void)
     char *ptr = (char *)Mem_Alloc(len + 1);
     strncpy(ptr, text, len);
     ptr[len] = '\0';
-    free(text);
+    Mem_Free(text);
     return ptr;
 }
 
@@ -172,7 +177,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("  OpenGL: \n");
     printf("    Format: 0x%X\n", gl_format);
     printf("    MSAA: %d\n", gl_msaa);
-    printf("    Version: %x\n", gl_version);
+    printf("    Version: %08x\n", gl_version);
     printf("  Variables: \n");
     printf("    Native library directory: %s\n", native_library_dir);
     printf("    Redirect output to file: %d\n", redirect_output_to_file);
@@ -180,6 +185,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
 #ifdef _MULTITHREAD
     printf("    Multi-thread: %d\n", multithreadActive);
 #endif
+    printf("    Using mouse: %d\n", mouse_available);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
@@ -187,12 +193,17 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("  AudioTrack: \n");
     printf("    initAudio: %p\n", initAudio);
     printf("    writeAudio: %p\n", writeAudio);
+    printf("    shutdownAudio: %p\n", shutdownAudio);
     printf("  Input: \n");
     printf("    grab_mouse: %p\n", grab_mouse);
     printf("    pull_input_event: %p\n", pull_input_event);
     printf("  System: \n");
     printf("    attach_thread: %p\n", attach_thread);
     printf("    tmpfile: %p\n", itmpfile);
+    printf("    copy_to_clipboard: %p\n", copy_to_clipboard);
+    printf("    get_clipboard_text: %p\n", get_clipboard_text);
+    printf("  GUI: \n");
+    printf("    show_toast: %p\n", show_toast);
     printf("  Other: \n");
     printf("    setState: %p\n", setState);
     printf("\n");
@@ -222,6 +233,7 @@ void Q3E_SetCallbacks(const void *callbacks)
 
     initAudio = ptr->AudioTrack_init;
     writeAudio = ptr->AudioTrack_write;
+    shutdownAudio = ptr->AudioTrack_shutdown;
 
     pull_input_event = ptr->Input_pullEvent;
     grab_mouse = ptr->Input_grabMouse;
@@ -230,6 +242,8 @@ void Q3E_SetCallbacks(const void *callbacks)
     itmpfile = ptr->Sys_tmpfile;
     copy_to_clipboard = ptr->Sys_copyToClipboard;
     get_clipboard_text = ptr->Sys_getClipboardText;
+
+    show_toast = ptr->Gui_ShowToast;
 
     setState = ptr->set_state;
 }
@@ -309,6 +323,7 @@ void Q3E_SetInitialContext(const void *context)
     multithreadActive = ptr->multithread ? true : false;
 #endif
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
+    mouse_available = ptr->mouseAvailable ? true : false;
 }
 
 // View paused
@@ -410,7 +425,7 @@ extern "C"
 {
 
 #pragma GCC visibility push(default)
-void GetDOOM3API(void *d3interface)
+void GetIDTechAPI(void *d3interface)
 {
     Q3E_Interface_t *ptr = (Q3E_Interface_t *)d3interface;
     memset(ptr, 0, sizeof(*ptr));

@@ -1,5 +1,7 @@
 package com.n0n3m4.q3e.karin;
 
+import com.n0n3m4.q3e.Q3EGlobals;
+
 /**
  * idTech4 command line utility
  */
@@ -296,7 +298,7 @@ public final class KidTech4Command
 
 
 
-    private String m_cmd = "game.arm";
+    private String m_cmd = Q3EGlobals.GAME_EXECUABLE;
 
     public KidTech4Command(String str)
     {
