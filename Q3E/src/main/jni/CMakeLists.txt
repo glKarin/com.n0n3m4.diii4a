@@ -64,3 +64,5 @@ add_subdirectory (quake3) # Quake 3 Arena | Team Arena
 add_subdirectory (rtcw) # RTCW
 
 add_subdirectory (tdm) # The Dark Mod
+
+#add_subdirectory (duke4) # DNF

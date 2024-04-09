@@ -11,4 +11,4 @@ Darkmod.log
 
 ThirdParty/artefacts/*/lib
 ThirdParty/artefacts/*/bin
-ThirdParty/include
+#ThirdParty/include
