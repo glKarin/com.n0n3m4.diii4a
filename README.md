@@ -32,6 +32,7 @@ GPLv3
 * Quake2(Yamagi Quake II) and mods: ctf; rogue; xatrix; zaero
 * Quake III Arena/Quake III Team Arena(ioquake3)
 * Return to Castle Wolfenstein(iortcw)
+* The Dark Mod
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -52,7 +53,7 @@ Tag with `-free` only for F-Droid update.
 * Add `Quake II` support, game data directory named `baseq2`. More view in [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
 * Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
 * Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
-* Add `The dark mod` 2.11 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
+* Add `The Dark Mod` 2.11 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
 * Add a on-screen button theme.
 
 ----------------------------------------------------------------------------------
@@ -81,7 +82,12 @@ Tag with `-free` only for F-Droid update.
 > 2. *Entity render*: Some game entities render incorrect.
 
 ###### Bot mod
-> 1. added SABot a7 mod support, but need `SABot a9 mod` file and Multiplayer-Game map AAS file, now set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(aas32).
+> 1. Added SABot a7 mod support.
+> 2. Extract `q4base/sabot_a9.pk4` file in apk to Quake4 game data folder, it includes some defs, scripts and MP game map AAS file.
+> 3. Set cvar `harm_g_autoGenAASFileInMPGame` to 1 for generating a bad AAS file when loading map in Multiplayer-Game and not valid AAS file in current map, you can also put your MP map's AAS file to `maps/mp` folder(botaas32).
+> 4. Set `harm_si_autoFillBots` to 1 for automatic fill bots when start MP game.
+> 5. Execute `addbots` for add multiplayer bot.
+> 6. Execute `fillbots` for auto fill multiplayer bots.
 
 ----------------------------------------------------------------------------------
 ### Screenshot

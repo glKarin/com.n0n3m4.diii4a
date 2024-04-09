@@ -1978,7 +1978,7 @@ struct idAllocAutoHeap {
 		void * Alloc(size_t size) {
 			Free();
 			data = calloc(size, 1);
-			common->Printf("[Harmattan]: %p alloca on heap memory %p(%lu bytes)\n", this, data, size);
+			common->Printf("[Harmattan]: %p alloca on heap memory %p(%zu bytes)\n", this, data, size);
 			return data;
 		}
 
@@ -1986,7 +1986,7 @@ struct idAllocAutoHeap {
 			Free();
 			data = calloc(size + 15, 1);
 			void *ptr = ((void *)(((intptr_t)data + 15) & ~15));
-			common->Printf("[Harmattan]: %p alloca16 on heap memory %p(%lu bytes) <- %p(%lu bytes)\n", this, ptr, size, data, size + 15);
+			common->Printf("[Harmattan]: %p alloca16 on heap memory %p(%zu bytes) <- %p(%zu bytes)\n", this, ptr, size, data, size + 15);
 			return ptr;
 		}
 
@@ -2020,13 +2020,13 @@ struct idAllocAutoHeap {
 	idAllocAutoHeap _allocAutoHeap##x; \
 	T *varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
 	if(_allocAutoHeap##x.IsAlloc()) \
-		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%lu bytes)\n", #varname, varname, (size_t)alloc_size);
+		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size);
 
 #define _DROID_ALLOC16(T, alloc_size, varname, x) \
 	idAllocAutoHeap _allocAutoHeap##x; \
 	varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
 	if(_allocAutoHeap##x.IsAlloc()) \
-		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%lu bytes)\n", #varname, varname, (size_t)alloc_size);
+		common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size);
 
 	// free memory when not call alloca()
 #define _DROID_FREE(varname, x)/* \

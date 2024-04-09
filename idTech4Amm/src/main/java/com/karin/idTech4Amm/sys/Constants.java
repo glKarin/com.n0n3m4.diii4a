@@ -33,7 +33,7 @@ public final class Constants
             "Add `Quake II` support, game data directory named `baseq2`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2320/Quake_II/", "Quake II") + "`.",
             "Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2200/Quake_III_Arena/", "Quake III Arena") + "`.",
             "Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/games/return-to-castle-wolfenstein", "Return to Castle Wolfenstein") + "`.",
-            "Add `The dark mod` support, game data directory named `darkmod`. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com", "The Dark Mod") + "`.",
+            "Add `The Dark Mod` support, game data directory named `darkmod`. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com", "The Dark Mod") + "`.",
             "Add a on-screen button theme.",
 	};
 

@@ -32,6 +32,7 @@ GPLv3
 * 雷神之锤2(Yamagi Quake II) 和mods: ctf; rogue; xatrix; zaero
 * 雷神之锤3竞技场/雷神之锤3团队竞技场(ioquake3)
 * 重返德军总部(iortcw)
+* The Dark Mod
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
@@ -52,7 +53,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 * 新增`雷神之锤2`支持, 游戏数据文件夹命名为`baseq2`. 详情[Quake II](https://store.steampowered.com/app/2320/Quake_II/).
 * 新增`雷神之锤3竞技场`支持, 游戏数据文件夹命名为`baseq3`; 新增`雷神之锤3团队竞技场`支持, 游戏数据文件夹命名为`missionpack`. 详情[Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
 * 新增`重返德军总部`支持, 游戏数据文件夹命名为`main`. 详情[Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
-* 新增`The dark mod`v2.11支持, 游戏数据文件夹命名为`darkmod`. 详情[The Dark Mod](https://www.thedarkmod.com).
+* 新增`The Dark Mod`v2.11支持, 游戏数据文件夹命名为`darkmod`. 详情[The Dark Mod](https://www.thedarkmod.com).
 * 新增一个虚拟按键主题.
 
 ----------------------------------------------------------------------------------
@@ -82,7 +83,12 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 2. *物体渲染*: 存在一些物体错误的渲染结果.
 
 ###### Bot mod:
-> 1. 并且可以添加bot(添加SABot a7 mod支持, 但是需要先添加`SABot a9 mod`文件和多人游戏地图的AAS文件, 目前可以设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹(aas32)).
+> 1. 添加SABot a7 mod支持. 
+> 2. 解压apk中的`q4base/sabot_a9.pk4`文件到雷神之锤4游戏文件目录, 其中包含一些配置文件, 脚本文件和多人游戏地图的AAS文件.
+> 3. 设置`harm_g_autoGenAASFileInMPGame`为1自动在多人游戏地图载入(如果没有一个有效的该地图的AAS文件)后生成一个不怎么好的AAS文件, 也可以把你自己用其他方式生成的AAS文件放到游戏数据目录的`maps/mp`文件夹(botaas32)).
+> 4. 设置`harm_si_autoFillBots`自动添加bot当开始多人游戏.
+> 5. 执行`addbots`添加bot.
+> 6. 执行`fillbots`自动填满bot.
 
 ----------------------------------------------------------------------------------
 ### 截图

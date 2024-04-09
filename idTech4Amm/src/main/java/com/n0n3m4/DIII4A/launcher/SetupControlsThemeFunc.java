@@ -29,6 +29,7 @@ import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KFDManager;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -111,9 +112,22 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
     private void ShowTips()
     {
         final String endl = TextHelper.GetDialogMessageEndl();
-        final String Tips = "If choosing `External`, put button image files to `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files` as same file name, will instead of apk internal image files."
+        KFDManager manager = KFDManager.Instance(m_gameLauncher);
+        StringBuilder sb = new StringBuilder();
+        String[] sps = manager.GetSearchPathFolders();
+        int i = 0;
+        for (String sp : sps)
+        {
+            sb.append(" ").append(++i).append(". ").append(sp).append(endl);
+            sb.append(" ").append(++i).append(". ").append(sp).append("/*.zipak").append(endl);
+        }
+        final String Tips = "If choosing `External`, put button image files to `&lt;EXTERNAL SEARCH PATH&gt;` as same file name, will instead of apk internal image files."
                 + endl
-                + "Or putting button image files as a folder with your custom name in `/sdcard/Android/data/" + Constants.CONST_PACKAGE + "/files/controls_theme/`, the Theme chooser will show the folder name, and select the folder name instead of apk internal image files.";
+                + "Or putting button image files as a folder with your custom name in `&lt;EXTERNAL SEARCH PATH&gt;/controls_theme/`, the Theme chooser will show the folder name, and select the folder name instead of apk internal image files."
+                + endl + endl
+                + "&lt;CURRENT ALL SEARCH PATH&gt; (.zipak is zip archive file): " + endl
+                + sb
+                ;
         ContextUtility.OpenMessageDialog(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.tips), TextHelper.GetDialogMessage(Tips));
     }
 

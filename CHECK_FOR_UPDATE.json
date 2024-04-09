@@ -3,5 +3,5 @@
     "update":"2024-04-10",
     "version":"1.1.0harmattan39",
     "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan39/idTech4A++_1.1.0harmattan39.apk",
-    "changes":"  * Support perforated surface shadow in shadow mapping.\n  * Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`.\n  * Add `Quake II` support, game data directory named `baseq2`.\n  * Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`.\n  * Add `Return to Castle Wolfenstein` support, game data directory named `main`.\n  * Add `The dark mod` 2.11 support, game data directory named `darkmod`.\n  * Add a on-screen button theme."
+    "changes":"  * Support perforated surface shadow in shadow mapping.\n  * Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`.\n  * Add `Quake II` support, game data directory named `baseq2`.\n  * Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`.\n  * Add `Return to Castle Wolfenstein` support, game data directory named `main`.\n  * Add `The Dark Mod` 2.11 support, game data directory named `darkmod`.\n  * Add a on-screen button theme."
 }

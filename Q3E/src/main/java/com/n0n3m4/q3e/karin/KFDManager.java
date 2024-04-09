@@ -30,6 +30,22 @@ public final class KFDManager
         SetContext(context);
     }
 
+    public String[] GetSearchPaths()
+    {
+        return m_searchPaths.toArray(new String[0]);
+    }
+
+    public String[] GetSearchPathFolders()
+    {
+        List<String> list = new ArrayList<>();
+        for (String sp : m_searchPaths)
+        {
+            if(!sp.endsWith(Q3EGlobals.IDTECH4AMM_PAK_SUFFIX))
+                list.add(sp);
+        }
+        return list.toArray(new String[0]);
+    }
+
     public static KFDManager Instance(Context context)
     {
         if(null == _instance)

@@ -9,7 +9,7 @@
 * Add `Quake II` support, game data directory named `baseq2`. More view in [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
 * Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
 * Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
-* Add `The dark mod` 2.11 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
+* Add `The Dark Mod` 2.11 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
 * Add a on-screen button theme.
 
 ----------------------------------------------------------------------------------
