@@ -4,7 +4,7 @@
 
 > 1.1.0harmattan39 (2024-04-10)
 
-* 阴影映射支持镂空图层阴影.
+* 阴影映射支持镂空图层阴影(cvar `r_forceShadowMapsOnAlphaTestedSurfaces`, 默认0).
 * 新增毁灭战士3 mod `LibreCoop`支持, 游戏数据文件夹命名为`librecoop`. 详情[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
 * 新增`雷神之锤2`支持, 游戏数据文件夹命名为`baseq2`. 详情[Quake II](https://store.steampowered.com/app/2320/Quake_II/).
 * 新增`雷神之锤3竞技场`支持, 游戏数据文件夹命名为`baseq3`; 新增`雷神之锤3团队竞技场`支持, 游戏数据文件夹命名为`missionpack`. 详情[Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
