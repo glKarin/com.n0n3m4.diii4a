@@ -26,7 +26,7 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
 	if(r_usePhong)
 		GL_UseProgram(&interactionTranslucentShader);
 	else
-		GL_UseProgram(&interactionTranslucentBlinnPhongShader);
+		GL_UseProgram(&interactionBlinnPhongTranslucentShader);
 
 	// enable the vertex arrays
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));

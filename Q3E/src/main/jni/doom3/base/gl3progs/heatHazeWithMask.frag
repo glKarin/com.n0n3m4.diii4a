@@ -7,23 +7,32 @@ precision mediump float;
 
 uniform sampler2D u_fragmentMap0;
 uniform sampler2D u_fragmentMap1;
+uniform sampler2D u_fragmentMap2;
 uniform highp vec4 u_uniformParm0; // u_scalePotToWindow
 uniform highp vec4 u_uniformParm1; // u_scaleWindowToUnit
+in highp vec4 var_TexCoord0;
 in highp vec4 var_TexCoord1;
 in highp vec4 var_TexCoord2;
 out vec4 _gl_FragColor;
 
 // # texture 0 is _currentRender
 // # texture 1 is a normal map that we will use to deform texture 0
+// # texture 2 is a mask texture
 // #
 // # env[0] is the 1.0 to _currentRender conversion
 // # env[1] is the fragment.position to 0.0 - 1.0 conversion
 void main(void)
 {
 #if HEATHAZE_BFG // BFG
+    // load the distortion map
+    vec4 mask = texture( u_fragmentMap2, var_TexCoord0.xy );
+    // kill the pixel if the distortion wound up being very small
+    mask.xy -= 0.01f;
+     if ( any( lessThan( mask, vec4( 0.0 ) ) ) ) { discard; }
     // load the filtered normal map and convert to -1 to 1 range
     vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;
     vec2 localNormal = bumpMap.wy;
+    localNormal *= mask.xy;
     // calculate the screen texcoord in the 0.0 to 1.0 range
     vec2 screenTexCoord = (gl_FragCoord.xy ) * u_uniformParm1.xy;
     screenTexCoord += ( localNormal * var_TexCoord2.xy );
@@ -33,16 +42,24 @@ void main(void)
 
 #else // 2004
 
-    vec4 localNormal, R0; // TEMP localNormal, R0;
+    vec4 localNormal, mask, R0; // TEMP localNormal, mask, R0;
 
     vec4 subOne = vec4(-1.0, -1.0, -1.0, -1.0); // PARAM subOne = { -1, -1, -1, -1 };
     vec4 scaleTwo = vec4(2.0, 2.0, 2.0, 2.0); // PARAM scaleTwo = { 2, 2, 2, 2 };
+
+    // # load the distortion map
+    mask = texture(u_fragmentMap2, var_TexCoord0.xy); // TEX  mask, fragment.texcoord[0], texture[2], 2D;
+
+    // # kill the pixel if the distortion wound up being very small
+    mask.xy = (mask.xy) - (vec2(0.01)); // SUB  mask.xy, mask, 0.01;
+    if (any(lessThan(mask, vec4(0.0)))) discard; // KIL  mask;
 
     //# load the filtered normal map and convert to -1 to 1 range
     localNormal = texture(u_fragmentMap1, var_TexCoord1.xy); // TEX  localNormal, fragment.texcoord[1], texture[1], 2D;
     localNormal.x = localNormal.a; // MOV  localNormal.x, localNormal.a;
     localNormal = (localNormal) * (scaleTwo) + (subOne); // MAD  localNormal, localNormal, scaleTwo, subOne;
     //localNormal.z = sqrt(max(0.0, 1.0-localNormal.x*localNormal.x-localNormal.y*localNormal.y));
+    localNormal = (localNormal) * (mask); // MUL  localNormal, localNormal, mask;
 
     // # calculate the screen texcoord in the 0.0 to 1.0 range
     R0 = (gl_FragCoord) * (u_uniformParm1); // MUL  R0, fragment.position, program.env[1];

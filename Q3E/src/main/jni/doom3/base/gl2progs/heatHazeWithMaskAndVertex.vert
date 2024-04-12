@@ -1,12 +1,13 @@
-#version 300 es
+#version 100
 //#pragma optimize(off)
 
 #define HEATHAZE_BFG 1
 
 precision mediump float;
 
-in vec4 attr_TexCoord;
-in highp vec4 attr_Vertex;
+attribute vec4 attr_TexCoord;
+attribute highp vec4 attr_Vertex;
+attribute highp vec4 attr_Color;
 
 uniform highp mat4 u_modelViewProjectionMatrix;
 uniform highp mat4 u_modelViewMatrix;
@@ -15,12 +16,15 @@ uniform highp mat4 u_projectionMatrix;
 uniform highp vec4 u_vertexParm0; // texture scrolling
 uniform highp vec4 u_vertexParm1; // magnitude of the distortion
 
-out highp vec4 var_TexCoord1;
-out highp vec4 var_TexCoord2;
+varying highp vec4 var_TexCoord0;
+varying highp vec4 var_TexCoord1;
+varying highp vec4 var_TexCoord2;
+varying lowp vec4 var_Color;
 
 // # input:
 // #
 // # texcoord[0] TEX0 texcoords
+// # color    vertex color for particle fading, will be multiplied by the mask texture
 // #
 // # local[0] scroll
 // # local[1] deform magnitude (1.0 is reasonable, 2.0 is twice as wavy, 0.5 is half as wavy, etc)
@@ -29,20 +33,25 @@ out highp vec4 var_TexCoord2;
 // #
 // # texture 0 is _currentRender
 // # texture 1 is a normal map that we will use to deform texture 0
+// # texture 2 is a mask texture
 // #
+// # texCoord[0] is the model surface texture coords unmodified for the mask
 // # texCoord[1] is the model surface texture coords with a scroll
 // # texCoord[2] is the copied deform magnitude
+// # color is the copied vertex color
 void main(void)
 {
-    #if HEATHAZE_BFG // BFG
-    // texture 0 takes the texture coordinates and adds a scroll
+#if HEATHAZE_BFG // BFG
+    // texture 0 takes the texture coordinates unmodified
+    var_TexCoord0 = vec4( attr_TexCoord.xy, 0.0, 0.0 );
+    // texture 1 takes the texture coordinates and adds a scroll
     vec4 textureScroll = u_vertexParm0;
     var_TexCoord1 = vec4( attr_TexCoord.xy, 0.0, 0.0 ) + textureScroll;
-    // texture 1 takes the deform magnitude and scales it by the projection distance
+    // texture 2 takes the deform magnitude and scales it by the projection distance
     vec4 vec = vec4( 0.0, 1.0, 0.0, 1.0 );
     vec.z  = dot( attr_Vertex, u_modelViewMatrix[2] );
     // magicProjectionAdjust is a magic scalar that scales the projection since we changed from
-    // using the X axis to the Y axis to calculate R1.  It is an approximation to closely match
+    // using the X axis to the Y axis to calculate x.  It is an approximation to closely match
     // what the original game did
     const float magicProjectionAdjust = 0.43f;
     float x = dot ( vec, u_projectionMatrix[1] ) * magicProjectionAdjust;
@@ -54,11 +63,15 @@ void main(void)
     x = min( x, 0.02 );
     vec4 deformMagnitude = u_vertexParm1;
     var_TexCoord2 = vec4(x) * deformMagnitude;
+    var_Color = attr_Color / 255.0;
     gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 
 #else // 2004
 
     vec4 R0, R1, R2; // TEMP R0, R1, R2;
+
+    // # texture 0 takes the texture coordinates unmodified
+    var_TexCoord0 = attr_TexCoord; // MOV  result.texcoord[0], vertex.texcoord[0];
 
     // # texture 1 takes the texture coordinates and adds a scroll
     var_TexCoord1 = (attr_TexCoord) + (u_vertexParm0); // ADD  result.texcoord[1], vertex.texcoord[0], program.local[0];
@@ -82,6 +95,8 @@ void main(void)
     R1 = min(R1, vec4(0.02)); // MIN  R1, R1, 0.02;
 
     var_TexCoord2 = (R1) * (u_vertexParm1); // MUL  result.texcoord[2], R1, program.local[1];
+
+    var_Color = attr_Color / 255.0; // MOV  result.color, vertex.color;
 
     gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 #endif

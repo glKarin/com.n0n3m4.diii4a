@@ -148,7 +148,7 @@ public final class TextHelper
                 sb.append(str);
             sb.append(endl);
         }
-        for(String str : Constants.CONST_CHANGES)
+        for(String str : Constants.CONST_CHANGES())
         {
             if(null != str)
                 sb.append(FormatDialogMessageSpace("  * ")).append(str);
@@ -321,7 +321,17 @@ public final class TextHelper
     public static CharSequence GetChangesText()
     {
         final ChangeLog[] CHANGES = {
-            ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES),
+            ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
+
+                ChangeLog.Create("2024-04-10", 39,
+                        "Support perforated surface shadow in shadow mapping(cvar `r_forceShadowMapsOnAlphaTestedSurfaces`, default 0).",
+                        "Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop") + "`.",
+                        "Add `Quake II` support, game data directory named `baseq2`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2320/Quake_II/", "Quake II") + "`.",
+                        "Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2200/Quake_III_Arena/", "Quake III Arena") + "`.",
+                        "Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/games/return-to-castle-wolfenstein", "Return to Castle Wolfenstein") + "`.",
+                        "Add `The Dark Mod` support, game data directory named `darkmod`. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com", "The Dark Mod") + "`.",
+                        "Add a on-screen button theme."
+                ),
 
                 ChangeLog.Create("2024-02-05", 38,
                         "Fixed shadow mapping on non-Adreno GPU.",

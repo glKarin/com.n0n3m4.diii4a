@@ -1,32 +1,61 @@
-/*
- * Copyright (C) 2012  Oliver McFadden <omcfadde@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #version 100
-#pragma optimize(off)
+//#pragma optimize(off)
+
+#define HEATHAZE_BFG 1
 
 precision mediump float;
 
 uniform sampler2D u_fragmentMap0;
 uniform sampler2D u_fragmentMap1;
-uniform sampler2D u_fragmentMap2;
-uniform sampler2D u_fragmentMap3;
+uniform highp vec4 u_uniformParm0; // u_scalePotToWindow
+uniform highp vec4 u_uniformParm1; // u_scaleWindowToUnit
+varying highp vec4 var_TexCoord1;
+varying highp vec4 var_TexCoord2;
 
+// # texture 0 is _currentRender
+// # texture 1 is a normal map that we will use to deform texture 0
+// #
+// # env[0] is the 1.0 to _currentRender conversion
+// # env[1] is the fragment.position to 0.0 - 1.0 conversion
 void main(void)
 {
-	//gl_FragColor = texture2D(u_fragmentMap0, vec2(0.5, 0.5));
-	gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+#if HEATHAZE_BFG // BFG
+    // load the filtered normal map and convert to -1 to 1 range
+    vec4 bumpMap = ( texture2D( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;
+    vec2 localNormal = bumpMap.wy;
+    // calculate the screen texcoord in the 0.0 to 1.0 range
+    vec2 screenTexCoord = (gl_FragCoord.xy ) * u_uniformParm1.xy;
+    screenTexCoord += ( localNormal * var_TexCoord2.xy );
+    screenTexCoord = clamp( screenTexCoord, vec2(0.0), vec2(1.0) );
+    screenTexCoord = screenTexCoord * u_uniformParm0.xy;
+    gl_FragColor = texture2D( u_fragmentMap0, screenTexCoord );
+
+#else // 2004
+
+    vec4 localNormal, R0; // TEMP localNormal, R0;
+
+    vec4 subOne = vec4(-1.0, -1.0, -1.0, -1.0); // PARAM subOne = { -1, -1, -1, -1 };
+    vec4 scaleTwo = vec4(2.0, 2.0, 2.0, 2.0); // PARAM scaleTwo = { 2, 2, 2, 2 };
+
+    //# load the filtered normal map and convert to -1 to 1 range
+    localNormal = texture2D(u_fragmentMap1, var_TexCoord1.xy); // TEX  localNormal, fragment.texcoord[1], texture[1], 2D;
+    localNormal.x = localNormal.a; // MOV  localNormal.x, localNormal.a;
+    localNormal = (localNormal) * (scaleTwo) + (subOne); // MAD  localNormal, localNormal, scaleTwo, subOne;
+    //localNormal.z = sqrt(max(0.0, 1.0-localNormal.x*localNormal.x-localNormal.y*localNormal.y));
+
+    // # calculate the screen texcoord in the 0.0 to 1.0 range
+    R0 = (gl_FragCoord) * (u_uniformParm1); // MUL  R0, fragment.position, program.env[1];
+
+    //localNormal.x /= localNormal.z;
+    //localNormal.y /= localNormal.z;
+
+    // # offset by the scaled localNormal and clamp it to 0.0 - 1.0
+    R0 = clamp((localNormal) * (var_TexCoord2) + (R0), 0.0, 1.0); // MAD_SAT R0, localNormal, fragment.texcoord[2], R0;
+
+    // # scale by the screen non-power-of-two-adjust
+    R0 = (R0) * (u_uniformParm0); // MUL  R0, R0, program.env[0];
+
+    // # load the screen render
+    gl_FragColor = texture2D(u_fragmentMap0, R0.xy); // TEX  result.color.xyz, R0, texture[0], 2D;
+#endif
 }

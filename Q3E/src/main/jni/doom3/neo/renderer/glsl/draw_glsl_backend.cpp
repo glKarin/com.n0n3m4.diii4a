@@ -50,6 +50,34 @@ void GL_Uniform4fv(GLint location, const GLfloat *value)
 
 /*
 ====================
+GL_Uniform4f
+====================
+*/
+void GL_Uniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
+{
+    HARM_CHECK_SHADER("GL_Uniform4f");
+
+    qglUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + location), x, y, z, w);
+
+    HARM_CHECK_SHADER_ERROR();
+}
+
+/*
+====================
+GL_Uniform4f
+====================
+*/
+void GL_Uniform1i(GLint location, GLint w)
+{
+    HARM_CHECK_SHADER("GL_Uniform1i");
+
+    qglUniform1i(*(GLint *)((char *)backEnd.glState.currentProgram + location), w);
+
+    HARM_CHECK_SHADER_ERROR();
+}
+
+/*
+====================
 GL_Uniform3fv
 ====================
 */
@@ -286,4 +314,10 @@ GL_Color
 ID_INLINE void GL_Color( float r, float g, float b )
 {
     GL_Color( r, g, b, 1.0f );
+}
+
+void GL_SelectTextureForce(int unit)
+{
+    backEnd.glState.currenttmu = -1;
+    GL_SelectTexture(unit);
 }

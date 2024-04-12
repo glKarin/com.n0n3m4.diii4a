@@ -223,6 +223,7 @@ typedef struct {
 	idImage 			*fragmentProgramImages[MAX_FRAGMENT_IMAGES];
 
 	idMegaTexture		*megaTexture;		// handles all the binding and parameter setting
+	int 				glslProgram;
 } newShaderStage_t;
 
 #ifdef _HUMANHEAD

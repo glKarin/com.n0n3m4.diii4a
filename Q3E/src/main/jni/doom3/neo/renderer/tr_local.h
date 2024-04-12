@@ -1139,6 +1139,8 @@ void	GL_UseProgram(shaderProgram_s *program);
 void	GL_Uniform1fv(GLint location, const GLfloat *value);
 void	GL_Uniform3fv(GLint location, const GLfloat *value);
 void	GL_Uniform4fv(GLint location, const GLfloat *value);
+void 	GL_Uniform1i(GLint location, GLint w);
+void	GL_Uniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 void	GL_UniformMatrix4fv(GLint location, const GLfloat *value);
 void 	GL_UniformMatrix4fv(GLint location, const GLsizei n, const GLfloat *value);
 void	GL_Uniform1f(GLint location, GLfloat value);
@@ -1150,7 +1152,8 @@ void	GL_ClearStateDelta(void);
 void	GL_State(int stateVector);
 void	GL_TexEnv(int env);
 void	GL_Cull(int cullType);
-void GL_CheckErrors(const char *name);
+void    GL_CheckErrors(const char *name);
+void	GL_SelectTextureForce(int unit);
 
 const int GLS_SRCBLEND_ZERO						= 0x00000001;
 const int GLS_SRCBLEND_ONE						= 0x0;
@@ -1536,6 +1539,7 @@ DRAW_GLSL
 */
 
 #define MAX_UNIFORM_PARMS 8
+#define HARM_SHADER_NAME_LENGTH 64
 //#define _HARM_SHADER_NAME
 typedef struct shaderProgram_s {
 	GLuint		program;
@@ -1551,6 +1555,7 @@ typedef struct shaderProgram_s {
 	GLint		modelMatrix;
 	GLint		textureMatrix;
 	GLint		modelViewMatrix;
+	GLint		projectionMatrix;
 	GLint		clipPlane;
 	GLint		fogMatrix;
 	GLint		fogColor;
@@ -1603,10 +1608,28 @@ typedef struct shaderProgram_s {
 	GLint		globalLightOrigin;
     GLint		bias;
 #endif
-#ifdef _HARM_SHADER_NAME //k: restore shader name
-	char name[32];
-#endif
+	char 		name[HARM_SHADER_NAME_LENGTH];
 } shaderProgram_t;
+#define SHADER_PARM_ADDR(prop) offsetof(shaderProgram_t, prop)
+#define SHADER_PARM_LOCATION(location) (*(GLint *)((char *)backEnd.glState.currentProgram + location))
+#define SHADER_PARMS_ADDR(prop, i) ((GLint)(offsetof(shaderProgram_t, prop)) + i * (GLint)sizeof(GLuint))
+
+class idGLSLShaderManager
+{
+public:
+	int Add(const shaderProgram_t *shader);
+	void Clear(void);
+	const shaderProgram_t * Find(const char *name) const;
+	const shaderProgram_t * Find(GLuint handle) const;
+	static idGLSLShaderManager _shaderManager;
+
+private:
+	idList<const shaderProgram_t *> shaders;
+
+private:
+	idGLSLShaderManager() {}
+};
+extern idGLSLShaderManager *shaderManager;
 
 
 /* This file was automatically generated.  Do not edit! */
@@ -1647,7 +1670,7 @@ extern shaderProgram_t depthPerforatedShader; //k: depth perforated shader
 #endif
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
 extern shaderProgram_t interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
-extern shaderProgram_t interactionTranslucentBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader(translucent stencil shadow)
+extern shaderProgram_t interactionBlinnPhongTranslucentShader; //k: BLINN-PHONG lighting model interaction shader(translucent stencil shadow)
 #endif
 
 
@@ -2081,8 +2104,6 @@ extern idCVar harm_r_shadowMapFrustumNear;
 extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
-extern idCVar harm_r_shadowMapPolygonFactor;
-extern idCVar harm_r_shadowMapPolygonOffset;
 extern idCVar harm_r_shadowMapNonParallelLightUltra;
 
 extern idBounds bounds_zeroOneCube;

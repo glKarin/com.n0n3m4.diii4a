@@ -15,6 +15,7 @@ uniform highp mat4 u_projectionMatrix;
 uniform highp vec4 u_vertexParm0; // texture scrolling
 uniform highp vec4 u_vertexParm1; // magnitude of the distortion
 
+out highp vec4 var_TexCoord0;
 out highp vec4 var_TexCoord1;
 out highp vec4 var_TexCoord2;
 
@@ -29,16 +30,20 @@ out highp vec4 var_TexCoord2;
 // #
 // # texture 0 is _currentRender
 // # texture 1 is a normal map that we will use to deform texture 0
+// # texture 2 is a mask texture
 // #
+// # texCoord[0] is the model surface texture coords unmodified for the mask
 // # texCoord[1] is the model surface texture coords with a scroll
 // # texCoord[2] is the copied deform magnitude
 void main(void)
 {
-    #if HEATHAZE_BFG // BFG
-    // texture 0 takes the texture coordinates and adds a scroll
+#if HEATHAZE_BFG // BFG
+    // texture 0 takes the texture coordinates unmodified
+    var_TexCoord0 = vec4( attr_TexCoord.xy, 0.0, 0.0 );
+    // texture 1 takes the texture coordinates and adds a scroll
     vec4 textureScroll = u_vertexParm0;
     var_TexCoord1 = vec4( attr_TexCoord.xy, 0.0, 0.0 ) + textureScroll;
-    // texture 1 takes the deform magnitude and scales it by the projection distance
+    // texture 2 takes the deform magnitude and scales it by the projection distance
     vec4 vec = vec4( 0.0, 1.0, 0.0, 1.0 );
     vec.z  = dot( attr_Vertex, u_modelViewMatrix[2] );
     // magicProjectionAdjust is a magic scalar that scales the projection since we changed from
@@ -59,6 +64,9 @@ void main(void)
 #else // 2004
 
     vec4 R0, R1, R2; // TEMP R0, R1, R2;
+
+    // # texture 0 takes the texture coordinates unmodified
+    var_TexCoord0 = attr_TexCoord; // MOV  result.texcoord[0], vertex.texcoord[0];
 
     // # texture 1 takes the texture coordinates and adds a scroll
     var_TexCoord1 = (attr_TexCoord) + (u_vertexParm0); // ADD  result.texcoord[1], vertex.texcoord[0], program.local[0];

@@ -1219,6 +1219,8 @@ void idMaterial::ParseFragmentMap(idLexer &src, newShaderStage_t *newStage)
 	newStage->fragmentProgramImages[unit] =
 	        globalImages->ImageFromFile(str, tf, allowPicmip, trp, td, cubeMap);
 
+    //common->Printf("AAA %d %s\n", unit, newStage->fragmentProgramImages[unit]?newStage->fragmentProgramImages[unit]->imgName.c_str():"NULL");
+
 	if (!newStage->fragmentProgramImages[unit]) {
 		newStage->fragmentProgramImages[unit] = globalImages->defaultImage;
 	}
@@ -1769,6 +1771,16 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #else
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
+                //if(newStage.glslProgram <= 0)
+                {
+                    token.StripFileExtension();
+                    const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
+                    //common->Printf("QQQ program %s %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL");
+                    if(shaderProgram && shaderProgram->program > 0)
+                        newStage.glslProgram = shaderProgram->program;
+                    else
+                        newStage.glslProgram = -1;
+                }
 #endif
 			}
 
@@ -1780,7 +1792,17 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
 #else
-			newStage.fragmentProgram = -1;
+				newStage.fragmentProgram = -1;
+                //if(newStage.glslProgram <= 0)
+                {
+                    token.StripFileExtension();
+                    const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
+                    //common->Printf("QQQ fragmentProgram %s %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL");
+                    if(shaderProgram && shaderProgram->program > 0)
+                        newStage.glslProgram = shaderProgram->program;
+                    else
+                        newStage.glslProgram = -1;
+                }
 #endif
 			}
 
@@ -1792,7 +1814,17 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
 #else
-			newStage.vertexProgram = -1;
+				newStage.vertexProgram = -1;
+                //if(newStage.glslProgram <= 0)
+                {
+                    token.StripFileExtension();
+                    const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
+                    //common->Printf("QQQ vertexProgram %s %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL");
+                    if(shaderProgram && shaderProgram->program > 0)
+                        newStage.glslProgram = shaderProgram->program;
+                    else
+                        newStage.glslProgram = -1;
+                }
 #endif
 			}
 
@@ -1945,8 +1977,12 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 
 	// if we are using newStage, allocate a copy of it
-	//k: unsupported GL asm shader program
-	if (newStage.fragmentProgram || newStage.vertexProgram) {
+#if !defined(GL_ES_VERSION_2_0)
+	if (newStage.fragmentProgram || newStage.vertexProgram)
+#else
+	if (newStage.glslProgram)
+#endif
+	{
 		ss->newStage = (newShaderStage_t *)Mem_Alloc(sizeof(newStage));
 		*(ss->newStage) = newStage;
 	}

@@ -252,17 +252,17 @@ ID_INLINE static void RB_ShadowMapping_polygonOffset(void)
     {
         case 0:
             GL_Cull( CT_FRONT_SIDED );
-            GL_PolygonOffset( true, harm_r_shadowMapPolygonFactor.GetFloat(), harm_r_shadowMapPolygonOffset.GetFloat() );
+            GL_PolygonOffset( true, r_shadowMapPolygonFactor.GetFloat(), r_shadowMapPolygonOffset.GetFloat() );
             break;
 
         case 1:
             GL_Cull( CT_BACK_SIDED );
-            GL_PolygonOffset( true, -harm_r_shadowMapPolygonFactor.GetFloat(), -harm_r_shadowMapPolygonOffset.GetFloat() );
+            GL_PolygonOffset( true, -r_shadowMapPolygonFactor.GetFloat(), -r_shadowMapPolygonOffset.GetFloat() );
             break;
 
         default:
             GL_Cull( CT_TWO_SIDED );
-            GL_PolygonOffset( true, harm_r_shadowMapPolygonFactor.GetFloat(), harm_r_shadowMapPolygonOffset.GetFloat() );
+            GL_PolygonOffset( true, r_shadowMapPolygonFactor.GetFloat(), r_shadowMapPolygonOffset.GetFloat() );
             break;
     }
 }
