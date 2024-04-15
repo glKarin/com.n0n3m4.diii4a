@@ -23,7 +23,7 @@ vec3 fetchSurfaceNormal(vec2 texCoord, bool hasNormalsTexture, in sampler2D norm
 		if (RGTC) {
 			// RGTC compression: add positive Z value
 			float xyNormSqr = dot(bumpTexel.xy, bumpTexel.xy);
-			return vec3(bumpTexel.x, bumpTexel.y, sqrt(max(1.0 - xyNormSqr, 0.0)));
+			return vec3(bumpTexel.x, bumpTexel.y, sqrt(max(1.0 - xyNormSqr, 0)));
 		}
 		else {
 			// full RGB texture
@@ -32,6 +32,6 @@ vec3 fetchSurfaceNormal(vec2 texCoord, bool hasNormalsTexture, in sampler2D norm
 	}
 	else {
 		// flat surface
-		return vec3(0.0, 0.0, 1.0);
+		return vec3(0, 0, 1);
 	}
 }

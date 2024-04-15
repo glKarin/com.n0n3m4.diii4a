@@ -36,12 +36,12 @@ vec4 projFalloffOfNormalLight(in sampler2D lightProjectionTexture, in sampler2D 
 	// not because it is better, but because of AMD driver's stupidity
 	// moving this "if" before texture fetches results in bright lines on light volume boundary
 	if (
-		projCoords.w <= 0.0 ||                                            //anything with inversed W
-		projCoords.x < 0.0 || projCoords.x > projCoords.w ||              //proj U outside [0..1]
-		projCoords.y < 0.0 || projCoords.y > projCoords.w ||              //proj V outside [0..1]
-		falloffCoord < 0.0 || falloffCoord > 1.0                          //falloff outside [0..1]
+		projCoords.w <= 0 ||                                            //anything with inversed W
+		projCoords.x < 0 || projCoords.x > projCoords.w ||              //proj U outside [0..1]
+		projCoords.y < 0 || projCoords.y > projCoords.w ||              //proj V outside [0..1]
+		falloffCoord < 0 || falloffCoord > 1.0                          //falloff outside [0..1]
 	) {
-		return vec4(0.0);
+		return vec4(0);
 	}
 
 	return lightProjection * lightFalloff;

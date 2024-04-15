@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "tdm_transform.glsl"
 
@@ -37,9 +35,9 @@ void main() {
 	var_toEyeWorld = mat3(u_modelMatrix) * vec3(u_viewOriginLocal - attr_Position);
 
 	mat3 matTangentToLocal = mat3(
-		clamp(attr_Tangent, vec3(-1.0), vec3(1.0)),
-		clamp(attr_Bitangent, vec3(-1.0), vec3(1.0)),
-		clamp(attr_Normal, vec3(-1.0), vec3(1.0))
+		clamp(attr_Tangent, -1, 1),
+		clamp(attr_Bitangent, -1, 1),
+		clamp(attr_Normal, -1, 1)
 	);
 	var_TangentToWorldMatrix = mat3(u_modelMatrix) * matTangentToLocal;
 

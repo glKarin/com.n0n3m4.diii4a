@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 in vec2 var_TexCoord;
 out vec4 draw_Color;
@@ -93,7 +91,7 @@ vec3 sharpen(vec2 texcoord) {
 
 	// Smooth minimum distance to signal limit divided by smooth max.
 	vec3 rcpMRGB = vec3(1) / mxRGB;
-	vec3 ampRGB = clamp(min(mnRGB, 2.0 - mxRGB) * rcpMRGB, vec3(0.0), vec3(1.0));
+	vec3 ampRGB = clamp(min(mnRGB, 2.0 - mxRGB) * rcpMRGB, 0, 1);
 
 	// Shaping amount of sharpening.
 	ampRGB = inversesqrt(ampRGB);
@@ -107,7 +105,7 @@ vec3 sharpen(vec2 texcoord) {
 	//  Filter shape:           w 1 w
 	//                          0 w 0
 	vec3 window = (b + d) + (f + h);
-	vec3 outColor = clamp((window * wRGB + e) * rcpWeightRGB, vec3(0.0), vec3(1.0));
+	vec3 outColor = clamp((window * wRGB + e) * rcpWeightRGB, 0, 1);
 
 	return outColor;
 }
@@ -137,8 +135,8 @@ float mapColorComponent(float value) {
 }
 
 vec3 ditherColor(vec3 value, float strength) {
-	vec2 tc = gl_FragCoord.xy / vec2(textureSize(u_noiseImage, 0));
-	vec3 noiseColor = textureLod(u_noiseImage, tc, 0.0).rgb;
+	vec2 tc = gl_FragCoord.xy / textureSize(u_noiseImage, 0);
+	vec3 noiseColor = textureLod(u_noiseImage, tc, 0).rgb;
 	value += (noiseColor - vec3(0.5)) * strength;
 	return value;
 }
@@ -151,7 +149,7 @@ void main() {
 		color = texture(u_texture, var_TexCoord).rgb;
 	}
 
-	if (u_ditherInput > 0.0)
+	if (u_ditherInput > 0)
 		color = ditherColor(color, -u_ditherInput);
 
 	color.r = mapColorComponent(color.r);
@@ -163,7 +161,7 @@ void main() {
 		color = mix(color, vec3(luma), u_desaturation);
 	}
 
-	if (u_ditherOutput > 0.0)
+	if (u_ditherOutput > 0)
 		color = ditherColor(color, u_ditherOutput);
 
 	draw_Color = vec4(color, 1);

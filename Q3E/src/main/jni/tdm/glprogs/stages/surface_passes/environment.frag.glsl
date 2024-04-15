@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "tdm_compression.glsl"
 
@@ -38,13 +36,13 @@ void main() {
 	// calculate reflection vector
 	vec3 eyeWorld = normalize(var_ToEyeWorld);
 	float dotEN = dot(eyeWorld, normalWorld);
-	vec3 reflectWorld = 2.0 * dotEN * normalWorld - eyeWorld;
+	vec3 reflectWorld = 2 * dotEN * normalWorld - eyeWorld;
 
 	// read the environment map with the reflection vector
 	vec4 reflectedColor = texture(u_environmentMap, reflectWorld);
 
 	// calculate fresnel reflectance
-	float q = 1.0 - dotEN;
+	float q = 1 - dotEN;
 	reflectedColor *= u_fresnel * (q * q * q * q) + u_constant;
 
 	if (u_tonemapOutputColor) {

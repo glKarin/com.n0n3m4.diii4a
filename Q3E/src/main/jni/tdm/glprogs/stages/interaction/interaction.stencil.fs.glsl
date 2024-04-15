@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 out vec4 FragColor;
 
@@ -22,7 +20,7 @@ out vec4 FragColor;
 #pragma tdm_include "stages/interaction/interaction.common.fs.glsl"
 #pragma tdm_include "tdm_shadowstencilsoft.glsl"
 
-uniform highp usampler2D u_stencilTexture;
+uniform usampler2D u_stencilTexture;
 uniform sampler2D u_depthTexture;
 
 uniform sampler2D u_stencilMipmapsTexture;

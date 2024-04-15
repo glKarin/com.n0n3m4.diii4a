@@ -54,10 +54,10 @@ float sampleZWithDerivs(sampler2D depthTexture, mat4 projectionMatrix, vec2 tcPo
 	float valueMoreY = depthToZ(projectionMatrix, texture(depthTexture, tcMoreY).r);
 	float valueLessY = depthToZ(projectionMatrix, texture(depthTexture, tcLessY).r);
 	// set infinite values for texcoords outside [0..1]
-	if (tcMoreX.x > 1.0) valueMoreX = 1e+20;
-	if (tcLessX.x < 0.0) valueLessX = 1e+20;
-	if (tcMoreY.x > 1.0) valueMoreY = 1e+20;
-	if (tcLessY.x < 0.0) valueLessY = 1e+20;
+	if (tcMoreX.x > 1) valueMoreX = 1e+20;
+	if (tcLessX.x < 0) valueLessX = 1e+20;
+	if (tcMoreY.x > 1) valueMoreY = 1e+20;
+	if (tcLessY.x < 0) valueLessY = 1e+20;
 	// compute all finite differences
 	float derivMoreX = valueMoreX - valueCenter;
 	float derivLessX = -(valueLessX - valueCenter);
@@ -68,4 +68,3 @@ float sampleZWithDerivs(sampler2D depthTexture, mat4 projectionMatrix, vec2 tcPo
 	Zderivs.y = (abs(derivLessY) < abs(derivMoreY) ? derivLessY : derivMoreY);
 	return valueCenter;
 }
-

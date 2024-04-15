@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 in float clipPlaneDist; 
 in vec4 var_TexCoord0;
@@ -28,7 +26,7 @@ out vec4 FragColor;
 void main() {
 	if (clipPlaneDist < 0.0)
 		discard;
-	if (u_alphaTest < 0.0) {
+	if (u_alphaTest < 0) {
 		FragColor = u_color;
 	}
 	else {

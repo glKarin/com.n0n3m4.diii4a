@@ -12,16 +12,14 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "tdm_transform.glsl"
 
 uniform mat4 u_textureMatrix;
 uniform vec4 u_colorMul;
 uniform vec4 u_colorAdd;
-uniform highp float u_screenTex;
+uniform float u_screenTex;
 
 in vec4 attr_Position;
 in vec2 attr_TexCoord;

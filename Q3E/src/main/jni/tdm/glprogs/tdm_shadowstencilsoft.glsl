@@ -37,12 +37,12 @@ float computeStencilSoftShadow(
 
 	//check stencil mipmaps if there is constant value in vicinity
 	if (stencilMipmapsLevel.x >= 0) {
-		vec2 pixelCoords = clamp(vec2(gl_FragCoord.xy), stencilMipmapsScissor.xy, stencilMipmapsScissor.zw);
-		vec2 mipmapsFullSize = vec2(textureSize(stencilMipmapsTexture, 0) * (1 << stencilMipmapsLevel.y));
+		vec2 pixelCoords = clamp(gl_FragCoord.xy, stencilMipmapsScissor.xy, stencilMipmapsScissor.zw);
+		vec2 mipmapsFullSize = textureSize(stencilMipmapsTexture, 0) * (1 << stencilMipmapsLevel.y);
 		float mipmapValue = textureLod(
 			stencilMipmapsTexture,
 			pixelCoords / mipmapsFullSize,
-			float(stencilMipmapsLevel.x - stencilMipmapsLevel.y)
+			stencilMipmapsLevel.x - stencilMipmapsLevel.y
 		).r;
 		if (mipmapValue == 0.0)
 			return 0.0;
@@ -83,12 +83,12 @@ float computeStencilSoftShadow(
 	float ortho_w = dot(mvpRow3, orthoDirW);
 	//this is perspective correction: it is necessary because W component in clip space also varies
 	//if you remove it and look horizontally parallel to a wall, then vertical shadow boundaries on this wall won't be blurred
-	vec2 thisNdc = (2.0 * baseTexCoord - vec2(1.0));
+	vec2 thisNdc = (2 * baseTexCoord - vec2(1));
 	alongDir -= thisNdc * along_w;
 	orthoDir -= thisNdc * ortho_w;
 	//divide by clip W to get NDC coords (screen coords are half of them)
-	alongDir *= gl_FragCoord.w / 2.0;
-	orthoDir *= gl_FragCoord.w / 2.0;
+	alongDir *= gl_FragCoord.w / 2;
+	orthoDir *= gl_FragCoord.w / 2;
 	//Note: if you want to check the math just above, consider how screen position changes when a point moves in specified direction:
 	//  F(t) = divideByW(gl_ModelViewProjectionMatrix * (var_Position + dir_world * t)).xy
 	//the converted vector must be equal to the derivative by parameter:
@@ -99,9 +99,9 @@ float computeStencilSoftShadow(
 	float lenX = length(alongDir * texSize);
 	float lenY = length(orthoDir * texSize);
 	//make sure vectors are sufficiently sampled
-	float maxBlurAxisLength = computeMaxBlurAxisLength(texSize.y, float(softQuality));
+	float maxBlurAxisLength = computeMaxBlurAxisLength(texSize.y, softQuality);
 	float oversize = max(lenX, lenY) / maxBlurAxisLength;
-	if (oversize > 1.0) {
+	if (oversize > 1) {
 		alongDir /= oversize;
 		orthoDir /= oversize;
 	}

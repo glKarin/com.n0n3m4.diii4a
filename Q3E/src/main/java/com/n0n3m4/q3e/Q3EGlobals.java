@@ -1,5 +1,9 @@
 package com.n0n3m4.q3e;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 public final class Q3EGlobals
 {
     public static final String CONST_PACKAGE_NAME = "com.karin.idTech4Amm";
@@ -251,6 +255,60 @@ public final class Q3EGlobals
     public static final String TDM_GLSL_SHADER_VERSION = "2.11.1";
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
+
+
+    public static boolean IS_NEON = false; // only armv7-a 32. arm64 always support, but using hard
+    public static boolean IS_64 = false;
+    public static boolean SYSTEM_64 = false;
+    public static String ARCH = "";
+    private static boolean _is_detected = false;
+
+    private static boolean GetCpuInfo()
+    {
+        if (_is_detected)
+            return true;
+        IS_64 = Q3EJNI.Is64();
+        ARCH = IS_64 ? "aarch64" : "arm";
+        BufferedReader br = null;
+        try
+        {
+            br = new BufferedReader(new FileReader("/proc/cpuinfo"));
+            String l;
+            while ((l = br.readLine()) != null)
+            {
+                if ((l.contains("Features")) && (l.contains("neon")))
+                {
+                    IS_NEON = true;
+                }
+                if (l.contains("Processor") && (l.contains("AArch64")))
+                {
+                    SYSTEM_64 = true;
+                    IS_NEON = true;
+                }
+
+            }
+            _is_detected = true;
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            _is_detected = false;
+        } finally
+        {
+            try
+            {
+                if (br != null)
+                    br.close();
+            } catch (IOException ioe)
+            {
+                ioe.printStackTrace();
+            }
+        }
+        return _is_detected;
+    }
+
+    static {
+        GetCpuInfo();
+    }
 
     private Q3EGlobals() {}
 }

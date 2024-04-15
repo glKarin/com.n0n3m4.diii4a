@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 18) out;
@@ -51,7 +49,7 @@ void emitEdge(int i, int j, int k) {
     vec2 aout = -normalize(ab + ac);
 
     float strength = 1.0;
-    if (u_alphaTest >= 0.0) {
+    if (u_alphaTest >= 0) {
         //if middle of edge fails alpha test
         //then don't render its outline
         vec4 tex = texture(u_diffuse, mix(var_TexCoord[i], var_TexCoord[j], 0.4137));

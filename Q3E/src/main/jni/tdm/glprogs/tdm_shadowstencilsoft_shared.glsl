@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ******************************************************************************/
 
 float computeMaxBlurAxisLength(float resolutionY, float softQuality) {
-	float avgSampleDistInPixels = 2.0 * max(1e-3 * resolutionY, 1.0);
+	float avgSampleDistInPixels = 2 * max(1e-3 * resolutionY, 1.0);
 	float maxBlurAxisLength = avgSampleDistInPixels * sqrt(0.0 + softQuality);
 	return maxBlurAxisLength;
 }

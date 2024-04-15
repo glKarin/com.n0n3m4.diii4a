@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 uniform sampler2D u_normalTexture;
 uniform samplerCube u_texture0;
@@ -33,8 +31,8 @@ void main() {
 
 	// load the filtered normal map, then normalize to full scale,
 	vec3 localNormal = texture(u_normalTexture, var_texCoord).rgb;
-	localNormal = localNormal * vec3(2) - vec3(1);
-	localNormal.z = sqrt(max(0.0, 1.0 - localNormal.x * localNormal.x - localNormal.y * localNormal.y));
+	localNormal = localNormal * 2 - vec3(1);
+	localNormal.z = sqrt(max(0, 1 - localNormal.x * localNormal.x - localNormal.y * localNormal.y));
 	localNormal = normalize(localNormal);
 
 	// transform the surface normal by the local tangent space
@@ -43,13 +41,13 @@ void main() {
 	// calculate reflection vector
 	vec3 globalEye = normalize(var_toEyeWorld);
 	float dotEN = dot(globalEye, globalNormal);
-	vec3 globalReflect = 2.0 * (dotEN * globalNormal) - globalEye;
+	vec3 globalReflect = 2 * (dotEN * globalNormal) - globalEye;
 
 	// read the environment map with the reflection vector
 	vec3 reflectedColor = texture(u_texture0, globalReflect).rgb;
 
 	// calculate fresnel reflectance.
-	float q = 1.0 - dotEN;
+	float q = 1 - dotEN;
 	float fresnel = 3.0 * q * q * q * q;
 	reflectedColor *= (fresnel + 0.4);
 

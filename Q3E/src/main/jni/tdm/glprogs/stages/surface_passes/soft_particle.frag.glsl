@@ -12,15 +12,13 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "tdm_utils.glsl"
 
 uniform sampler2D u_particleColorTexture;
 uniform sampler2D u_depthTexture;
-uniform highp mat4 u_projectionMatrix;
+uniform mat4 u_projectionMatrix;
 uniform float u_invParticleRadius;
 uniform float u_invSceneFadeCoeff;
 uniform vec2 u_invDepthTextureSize;

@@ -24,8 +24,19 @@ Folder name of games/mods:
   Stupid Angry Bot(a7x): sabot
   Overthinked DooM^3: overthinked
   Fragging Free: fraggingfree
-  HeXen:Edge of Chaos: hexeneoc
+  HeXen - Edge of Chaos: hexeneoc
+  LibreCoop: librecoop
 
   Quake4: q4base (with bot mod, full body awareness mod)
 
   Prey(2006): preybase (with full body awareness mod)
+
+  Quake2: baseq2
+
+  Quake III Arena: baseq3
+
+  Quake III Team Arena: missionpack
+
+  Return to Castle Wolfenstein: main
+
+  The Dark Mod: darkmod

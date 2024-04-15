@@ -12,11 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-#extension GL_EXT_clip_cull_distance : enable
-
-precision mediump float;
+#version 300 es
 
 uniform mat4 u_modelMatrix;
 uniform vec4 u_lightOrigin;
@@ -28,56 +24,56 @@ in vec4 attr_TexCoord;
 in int attr_DrawId;
 
 out vec2 texCoord;
-// out float gl_ClipDistance[5];
+out float gl_ClipDistance[5];
 
 const mat3 cubicTransformations[6] = mat3[6] (
     mat3(
-        0.0, 0.0, -1.0,
-        0.0, -1.0, 0.0,
-        -1.0, 0.0, 0.0
+        0, 0, -1,
+        0, -1, 0,
+        -1, 0, 0
     ),
     mat3(
-        0.0, 0.0, 1.0,
-        0.0, -1.0, 0.0,
-        1.0, 0.0, 0.0
+        0, 0, 1,
+        0, -1, 0,
+        1, 0, 0
     ),
     mat3(
-        1.0, 0.0, 0.0,
-        0.0, 0.0, -1.0,
-        0.0, 1.0, 0.0
+        1, 0, 0,
+        0, 0, -1,
+        0, 1, 0
     ),
     mat3(
-        1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0,
-        0.0, -1.0, 0.0
+        1, 0, 0,
+        0, 0, 1,
+        0, -1, 0
     ),
     mat3(
-        1.0, 0.0, 0.0,
-        0.0, -1.0, 0.0,
-        0.0, 0.0, -1.0
+        1, 0, 0,
+        0, -1, 0,
+        0, 0, -1
     ),
     mat3(
-        -1.0, 0.0, 0.0,
-        0.0, -1.0, 0.0,
-        0.0, 0.0, 1.0
+        -1, 0, 0,
+        0, -1, 0,
+        0, 0, 1
     )
 );
 
 const float clipEps = 0e-2;
 const vec4 ClipPlanes[4] = vec4[4] (
-    vec4(1.0, 0.0, -1.0, clipEps),
-    vec4(-1.0, 0.0, -1.0, clipEps),
-    vec4(0.0, 1.0, -1.0, clipEps),
-    vec4(0.0, -1.0, -1.0, clipEps)
+    vec4(1, 0, -1, clipEps),
+    vec4(-1, 0, -1, clipEps),
+    vec4(0, 1, -1, clipEps),
+    vec4(0, -1, -1, clipEps)
 );
 
 void main() {
     texCoord = (u_textureMatrix * attr_TexCoord).xy;
     vec4 lightSpacePos = u_modelMatrix * attr_Position - u_lightOrigin;
-    vec4 fragPos = vec4(cubicTransformations[gl_InstanceID] * lightSpacePos.xyz, 1.0);
-    gl_Position.x = fragPos.x / 6.0 + fragPos.z * 5.0/6.0 - fragPos.z / 3.0 * float(gl_InstanceID);
+    vec4 fragPos = vec4(cubicTransformations[gl_InstanceID] * lightSpacePos.xyz, 1);
+    gl_Position.x = fragPos.x / 6 + fragPos.z * 5/6 - fragPos.z / 3 * gl_InstanceID;
     gl_Position.y = fragPos.y;
-    gl_Position.z = -fragPos.z - 2.0;
+    gl_Position.z = -fragPos.z - 2;
     gl_Position.w = -fragPos.z;
     gl_ClipDistance[0] = dot(fragPos, ClipPlanes[0]);
     gl_ClipDistance[1] = dot(fragPos, ClipPlanes[1]);

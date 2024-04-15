@@ -12,16 +12,14 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 uniform sampler2D u_opaqueTexture;
 uniform float u_alphaTest;
 in vec2 texCoord;
 
 void main() {   
-	if (u_alphaTest >= 0.0) {
+	if (u_alphaTest >= 0) {
 		vec4 tex = texture(u_opaqueTexture, texCoord);
 		if (tex.a <= u_alphaTest)
 			discard;

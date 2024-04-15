@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 /**
  * This is a 9-tap Gaussian blur accelerated by making use of the GPU filtering hardware
@@ -31,11 +29,10 @@ const float weight[3] = float[](0.227027027, 0.3162162162, 0.0702702703);
 // (1, 0) or (0, 1)
 uniform vec2 u_axis;
 
+vec2 invImageSize = vec2(1) / vec2(textureSize(u_source, 0));
 
 
 void main() {
-	vec2 invImageSize = vec2(1) / vec2(textureSize(u_source, 0));
-
     vec2 fragCoord = gl_FragCoord.xy;
     FragColor = texture(u_source, fragCoord * invImageSize) * weight[0];
     
