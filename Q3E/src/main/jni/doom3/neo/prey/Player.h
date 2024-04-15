@@ -563,7 +563,13 @@ protected:				// HUMANHEAD nla - need to be protected for access by hhPlayer
 
 	// if there is a focusGUIent, the attack button will be changed into mouse clicks
 	idEntity *				focusGUIent;
+#ifdef _MOD_FULL_BODY_AWARENESS
+public:
+#endif
 	idUserInterface *		focusUI;				// focusGUIent->renderEntity.gui, gui2, or gui3
+#ifdef _MOD_FULL_BODY_AWARENESS
+protected:
+#endif
 	int						focusTime;
 	idUserInterface *		cursor;
 	

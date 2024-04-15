@@ -200,7 +200,7 @@ idMat3 hhWeaponFireController::DetermineAimAxis( const idVec3& muzzlePos, const 
 	if( aimTrace.fraction < 1.0f ) {
 #ifdef _MOD_FULL_BODY_AWARENESS
 		idVec3 eyePos;
-		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->InVehicle() || owner->IsZoomed())
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->InVehicle() || owner->IsZoomed() || owner->focusUI)
 			eyePos = owner->GetEyePosition();
 		else
 			eyePos = owner->firstPersonViewOrigin_viewWeaponOrigin;

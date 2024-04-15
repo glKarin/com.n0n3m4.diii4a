@@ -5213,7 +5213,7 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 	viewBob.Zero();
 
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI)
 #endif
 	if (physicsObj.HasSteppedUp()) {
 
@@ -5237,7 +5237,7 @@ void idPlayer::BobCycle(const idVec3 &pushVelocity)
 
 	// if the player stepped up recently
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) {
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI) {
 #endif
 	deltaTime = gameLocal.time - stepUpTime;
 
@@ -6753,7 +6753,7 @@ Called every tic for each player
 void idPlayer::Think(void)
 {
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI)
 	{
 		renderEntity.suppressSurfaceInViewID = entityNumber + 1;
 		showWeaponViewModel		= GetUserInfo()->GetBool("ui_showGun");
@@ -7729,7 +7729,7 @@ void idPlayer::CalculateViewWeaponPos(idVec3 &origin, idMat3 &axis)
 
 	// CalculateRenderView must have been called first
 #ifdef _MOD_FULL_BODY_AWARENESS
-	idVec3 viewOrigin = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() ? firstPersonViewOrigin : firstPersonViewOrigin_viewWeaponOrigin;
+	idVec3 viewOrigin = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI ? firstPersonViewOrigin : firstPersonViewOrigin_viewWeaponOrigin;
 #else
 	const idVec3 &viewOrigin = firstPersonViewOrigin;
 #endif
@@ -7888,7 +7888,7 @@ void idPlayer::GetViewPos(idVec3 &origin, idMat3 &axis) const
 
 	// if dead, fix the angle and don't add any kick
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if( (!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) && health <= 0 )
+	if( (!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI) && health <= 0 )
 #else
 	if (health <= 0)
 #endif
@@ -7918,7 +7918,7 @@ idPlayer::CalculateFirstPersonView
 void idPlayer::CalculateFirstPersonView(void)
 {
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool()) {
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI) {
 #endif
 	if ((pm_modelView.GetInteger() == 1) || ((pm_modelView.GetInteger() == 2) && (health <= 0))) {
 		//	Displays the view from the point of view of the "camera" joint in the player model
@@ -9283,7 +9283,7 @@ idPlayer::CanShowWeaponViewmodel
 bool idPlayer::CanShowWeaponViewmodel(void) const
 {
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI)
 #endif
 	return showWeaponViewModel;
 #ifdef _MOD_FULL_BODY_AWARENESS
