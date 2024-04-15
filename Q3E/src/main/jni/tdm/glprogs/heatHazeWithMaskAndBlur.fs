@@ -41,8 +41,8 @@ void main() {
 	vec4 coord0, coord1, coord2, coord3, coord4;                                                        //TEMP	coord0, coord1, coord2, coord3, coord4;
 	vec4 input0, input1, input2, input3, input4;                                                        //TEMP	input0, input1, input2, input3, input4;
 	
-	vec4 subOne = vec4(-1, -1, -1, -1);                                                                 //PARAM	subOne = { -1, -1, -1, -1 };
-	vec4 scaleTwo = vec4(2, 2, 2, 2);                                                                   //PARAM	scaleTwo = { 2, 2, 2, 2 };
+	vec4 subOne = vec4(-1.0, -1.0, -1.0, -1.0);                                                                 //PARAM	subOne = { -1, -1, -1, -1 };
+	vec4 scaleTwo = vec4(2.0, 2.0, 2.0, 2.0);                                                                   //PARAM	scaleTwo = { 2, 2, 2, 2 };
 	
 	// load the distortion map
 	mask = texture(u_texture2, var_tc0.xy);                                                             //TEX		mask, fragment.texcoord[0], texture[2], 2D;

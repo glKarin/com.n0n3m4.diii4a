@@ -54,7 +54,7 @@ void main() {
 	var_tc1 = (attr_TexCoord) + (u_localParam0);                                                        //ADD		result.texcoord[1], vertex.attrib[8], program.local[0];
 	
 	// texture 2 takes the deform magnitude and scales it by the projection distance
-	vec4 vec = vec4(1, 0, 0, 1);                                                                        //PARAM	vec = { 1, 0, 0, 1 };
+	vec4 vec = vec4(1.0, 0.0, 0.0, 1.0);                                                                        //PARAM	vec = { 1, 0, 0, 1 };
 	
 	R0 = vec;                                                                                           //MOV		R0, vec;
 	R0.z = dot(attr_Position, transpose(u_modelViewMatrix)[2]);                                         //DP4		R0.z, vertex.position, state.matrix.modelview.row[2];
@@ -63,7 +63,7 @@ void main() {
 	R2 = vec4(dot(R0, transpose(u_projectionMatrix)[3]));                                               //DP4		R2, R0, state.matrix.projection.row[3];
 	
 	// don't let the recip get near zero for polygons that cross the view plane
-	R2 = max(R2, vec4(1));                                                                              //MAX		R2, R2, 1;
+	R2 = max(R2, vec4(1.0));                                                                              //MAX		R2, R2, 1;
 	
 	R2 = vec4(1.0 / R2.w);                                                                              //RCP		R2, R2.w;
 	R1 = (R1) * (R2);                                                                                   //MUL		R1, R1, R2;

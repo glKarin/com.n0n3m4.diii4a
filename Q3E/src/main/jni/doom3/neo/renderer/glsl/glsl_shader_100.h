@@ -583,6 +583,58 @@ GLSL_SHADER const char HEATHAZEWITHMASKANDVERTEX_FRAG[] =
 		"}\n"
 ;
 
+// colorProcess
+GLSL_SHADER const char COLORPROCESS_VERT[] =
+		"#version 100\n"
+		"//#pragma optimize(off)\n"
+		"\n"
+		"precision mediump float;\n"
+		"\n"
+		"attribute highp vec4 attr_Vertex;\n"
+		"attribute highp vec4 attr_TexCoord;\n"
+		"\n"
+		"uniform highp mat4 u_modelViewProjectionMatrix;\n"
+		"uniform highp vec4 u_vertexParm0; // fraction\n"
+		"uniform highp vec4 u_vertexParm1; // target hue\n"
+		"\n"
+		"varying highp vec4 var_TexCoord;\n"
+		"varying lowp vec4 var_Color;\n"
+		"\n"
+		"// # parameter 0 is the fraction from the current hue to the target hue to map\n"
+		"// # parameter 1.rgb is the target hue\n"
+		"// # texture 0 is _currentRender\n"
+		"\n"
+		"// # nothing to do but pass the parameters along\n"
+		"void main(void)\n"
+		"{\n"
+		"gl_Position = u_modelViewProjectionMatrix * attr_Vertex;\n"
+		"\n"
+		"var_Color = u_vertexParm1;\n"
+		"var_TexCoord.x = attr_TexCoord.x;\n"
+		"var_TexCoord.y = 1.0f - attr_TexCoord.y;\n"
+		"var_TexCoord.z = u_vertexParm0.x;\n"
+		"}\n"
+;
+GLSL_SHADER const char COLORPROCESS_FRAG[] =
+		"#version 100\n"
+		"//#pragma optimize(off)\n"
+		"\n"
+		"precision mediump float;\n"
+		"\n"
+		"uniform sampler2D u_fragmentMap0;\n"
+		"uniform highp vec4 u_uniformParm0; // u_scalePotToWindow\n"
+		"\n"
+		"varying highp vec4 var_TexCoord;\n"
+		"varying lowp vec4 var_Color;\n"
+		"\n"
+		"void main(void)\n"
+		"{\n"
+		"vec4 src = texture2D( u_fragmentMap0, var_TexCoord.xy * u_uniformParm0.xy /* scale by the screen non-power-of-two-adjust */ );\n"
+		"vec4 target = var_Color * dot( vec3( 0.333, 0.333, 0.333 ), src.xyz );\n"
+		"gl_FragColor = mix( src, target, var_TexCoord.z );\n"
+		"}\n"
+;
+
 // interaction
 GLSL_SHADER const char INTERACTION_VERT[] = 
 "#version 100\n"

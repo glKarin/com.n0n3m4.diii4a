@@ -1480,6 +1480,62 @@ typedef enum {
 	PROG_USER
 } program_t;
 
+typedef enum {
+	// base
+	SHADER_INTERACTION = 0,
+	SHADER_SHADOW,
+	SHADER_DEFAULT,
+	SHADER_ZFILL,
+	SHADER_ZFILLCLIP,
+	SHADER_CUBEMAP,
+	SHADER_REFLECTIONCUBEMAP,
+	SHADER_FOG,
+	SHADER_BLENDLIGHT,
+	SHADER_INTERACTIONBLINNPHONG,
+	SHADER_DIFFUSECUBEMAP,
+	SHADER_TEXGEN,
+	// new stage
+	SHADER_HEATHAZE,
+	SHADER_HEATHAZEWITHMASK,
+	SHADER_HEATHAZEWITHMASKANDVERTEX,
+	SHADER_COLORPROCESS,
+	// shadow mapping
+#ifdef _SHADOW_MAPPING
+	SHADER_DEPTHPOINTLIGHT,
+	SHADER_INTERACTIONPOINTLIGHT,
+	SHADER_INTERACTIONBLINNPHONGPOINTLIGHT,
+	SHADER_DEPTHPARALLELLIGHT,
+	SHADER_INTERACTIONPARALLELLIGHT,
+	SHADER_INTERACTIONBLINNPHONGPARALLELLIGHT,
+	SHADER_DEPTHSPOTLIGHT,
+	SHADER_INTERACTIONSPOTLIGHT,
+	SHADER_INTERACTIONBLINNPHONGSPOTLIGHT,
+	SHADER_DEPTHPERFORATED,
+#endif
+	// translucent stencil shadow
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+	SHADER_INTERACTIONTRANSLUCENT,
+	SHADER_INTERACTIONBLINNPHONGTRANSLUCENT,
+#endif
+	SHADER_TOTAL,
+} glsl_program_t;
+
+#define SHADER_BASE_BEGIN SHADER_INTERACTION
+#define SHADER_BASE_END SHADER_TEXGEN
+
+#define SHADER_NEW_STAGE_BEGIN SHADER_HEATHAZE
+#define SHADER_NEW_STAGE_END SHADER_COLORPROCESS
+
+#ifdef _SHADOW_MAPPING
+#define SHADER_SHADOW_MAPPING_BEGIN SHADER_DEPTHPOINTLIGHT
+#define SHADER_SHADOW_MAPPING_END SHADER_DEPTHPERFORATED
+#endif
+
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#define SHADER_STENCIL_SHADOW_BEGIN SHADER_INTERACTIONTRANSLUCENT
+#define SHADER_STENCIL_SHADOW_END SHADER_INTERACTIONBLINNPHONGTRANSLUCENT
+#endif
+
 /*
 
   All vertex programs use the same constant register layout:
@@ -1653,6 +1709,11 @@ extern shaderProgram_t blendLightShader; //k: blend light shader
 extern shaderProgram_t interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
 extern shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
 extern shaderProgram_t texgenShader; //k: texgen shader
+// new stage
+extern shaderProgram_t heatHazeShader; //k: heatHaze shader
+extern shaderProgram_t heatHazeWithMaskShader; //k: heatHaze with mask shader
+extern shaderProgram_t heatHazeWithMaskAndVertexShader; //k: heatHaze with mask and vertex shader
+extern shaderProgram_t colorProcessShader; //k: color process shader
 #ifdef _SHADOW_MAPPING
 extern shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
 extern shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)

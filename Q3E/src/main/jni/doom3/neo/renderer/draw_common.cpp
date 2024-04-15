@@ -492,127 +492,6 @@ void RB_SetProgramEnvironmentSpace(void)
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
 }
 
-/**
- * Render newStage
- * @param drawSurf
- * @param pStage
- */
-void R_DrawCustomShader( const drawSurf_t *drawSurf, const shaderStage_t *pStage, const float mvp[16] ) {
-	newShaderStage_t *newStage = pStage->newStage;
-	if(newStage->glslProgram <= 0)
-		return;
-
-	const shaderProgram_t *shaderProgram = shaderManager->Find(newStage->glslProgram);
-	if(!shaderProgram)
-		return;
-	GL_UseProgram((shaderProgram_t *)shaderProgram);
-
-	GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
-	GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
-    GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
-
-	const srfTriangles_t	*tri;
-	tri = drawSurf->geo;
-	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
-
-	GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-	GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
-    GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), &ac->color);
-
-	// set standard transformations
-	GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mvp);
-    float projectionMatrix[16];
-    R_TransposeGLMatrix(backEnd.viewDef->projectionMatrix, projectionMatrix);
-	GL_UniformMatrix4fv(SHADER_PARM_ADDR(projectionMatrix), /*backEnd.viewDef->*/projectionMatrix);
-
-    float modelViewMatrix[16];
-    R_TransposeGLMatrix(drawSurf->space->modelViewMatrix, modelViewMatrix);
-	GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewMatrix), /*drawSurf->space->*/modelViewMatrix);
-
-	// we need the model matrix without it being combined with the view matrix
-	// so we can transform local vectors to global coordinates
-	idMat4 modelMatrix;
-	memcpy( &modelMatrix, drawSurf->space->modelMatrix, sizeof(modelMatrix) );
-	modelMatrix.TransposeSelf();
-	GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelMatrix), modelMatrix.ToFloatPtr());
-
-	// obsolete: screen power of two correction factor, assuming the copy to _currentRender
-	// also copied an extra row and column for the bilerp
-    int	w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
-    int	h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
-	int ow = MakePowerOfTwo(w);
-	int oh = MakePowerOfTwo(h);
-    // if is pot, glUniform4f(1, 1, 0, 1);
-	GL_Uniform4f(SHADER_PARM_ADDR(u_uniformParm[0]), (float)w / (float)ow, (float)h / (float)oh, 0, 1); // scalePotToWindow
-	// window coord to 0.0 to 1.0 conversion
-	GL_Uniform4f(SHADER_PARM_ADDR(u_uniformParm[1]),
-				 1.0f / (float)w,
-				 1.0f / (float)h,
-				 0, 1); // scaleWindowToUnit
-	// #3877: Allow shaders to access depth buffer.
-	// Two useful ratios are packed into this parm: [0] and [1] hold the x,y multipliers you need to map a screen
-	// coordinate (fragment position) to the depth image: those are simply the reciprocal of the depth
-	// image size, which has been rounded up to a power of two. Slots [2] and [3] hold the ratio of the depth image
-	// size to the current render image size. These sizes can differ if the game crops the render viewport temporarily
-	// during post-processing effects. The depth render is smaller during the effect too, but the depth image doesn't
-	// need to be downsized, whereas the current render image does get downsized when it's captured by the game after
-	// the skybox render pass. The ratio is needed to map between the two render images.
-/*	GL_Uniform4f(offsetof(shaderProgram_t, u_uniformParm[7]),
-			1.0f / ow,
-			1.0f / oh,
-			1,
-			1
-	);
-
-	// set eye position in global space
-	idVec3 viewOriginGlobal = backEnd.viewDef->renderView.vieworg;
-	GL_Uniform4f(SHADER_PARM_ADDR(eyeOrigin), viewOriginGlobal.x, viewOriginGlobal.y, viewOriginGlobal.z, 1.0f);
-	// set eye position in model space
-	idVec3 viewOriginLocal;
-	R_GlobalPointToLocal( drawSurf->space->modelMatrix, viewOriginGlobal, viewOriginLocal );
-	GL_Uniform4f(SHADER_PARM_ADDR(localViewOrigin), viewOriginLocal.x, viewOriginLocal.y, viewOriginLocal.z, 1.0f);
-	*/
-
-	//============================================================================
-
-	// setting local parameters (specified in material definition)
-	const float *regs = drawSurf->shaderRegisters;
-	for ( int i = 0; i < newStage->numVertexParms; i++ ) {
-		idVec4 parm;
-		for (int d = 0; d < 4; d++)
-			parm[d] = regs[ newStage->vertexParms[i][d] ];
-		GL_Uniform4fv(SHADER_PARMS_ADDR(u_vertexParm, i), parm.ToFloatPtr());
-	}
-
-	// setting textures
-	// note: the textures are also bound to TUs at this moment
-	for ( int i = 0; i < newStage->numFragmentProgramImages; i++ ) {
-		if ( newStage->fragmentProgramImages[i] ) {
-			GL_SelectTexture( i );
-			newStage->fragmentProgramImages[i]->Bind();
-			//GL_Uniform1i(SHADER_PARMS_ADDR(u_fragmentMap, i), i);
-		}
-	}
-
-	GL_State( pStage->drawStateBits );
-
-	RB_DrawElementsWithCounters( tri );
-
-	for ( int i = 0; i < newStage->numFragmentProgramImages; i++ ) {
-		if ( newStage->fragmentProgramImages[i] ) {
-			GL_SelectTexture( i );
-			globalImages->BindNull();
-			//GL_Uniform1i(SHADER_PARMS_ADDR(u_fragmentMap, i), i);
-		}
-	}
-	GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
-	GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
-    GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
-
-	GL_SelectTextureForce(0);
-	GL_UseProgram(NULL);
-}
-
 /*
 ==================
 RB_STD_T_RenderShaderPasses
@@ -630,6 +509,8 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 	const srfTriangles_t	*tri;
 	bool attrIsSet[TG_GLASSWARP - TG_EXPLICIT] = { false };
 	bool uniformIsSet[TG_GLASSWARP - TG_EXPLICIT] = { false };
+	bool newStageAttrIsSet[SHADER_NEW_STAGE_END - SHADER_NEW_STAGE_BEGIN + 1] = { false };
+	bool newStageUniformIsSet[SHADER_NEW_STAGE_END - SHADER_NEW_STAGE_BEGIN + 1] = { false };
 
 	tri = surf->geo;
 	shader = surf->material;
@@ -733,7 +614,141 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			if ( r_skipNewAmbient.GetBool() ) {
 				continue;
 			}
-			R_DrawCustomShader(surf, pStage, mat);
+
+			if(newStage->glslProgram <= 0)
+				continue;
+
+			const shaderProgram_t *shaderProgram = shaderManager->Find(newStage->glslProgram);
+			if(!shaderProgram)
+				continue;
+			GL_UseProgram((shaderProgram_t *)shaderProgram);
+			int type;
+			if(shaderProgram == &heatHazeShader)
+				type = SHADER_HEATHAZE;
+			else if(shaderProgram == &heatHazeWithMaskShader)
+				type = SHADER_HEATHAZEWITHMASK;
+			else if(shaderProgram == &heatHazeWithMaskAndVertexShader)
+				type = SHADER_HEATHAZEWITHMASKANDVERTEX;
+			else if(shaderProgram == &colorProcessShader)
+				type = SHADER_COLORPROCESS;
+			else
+			{
+				common->Warning("Unexpected newStage shader: %s", shaderProgram->name);
+				continue; // Error
+			}
+			int index = type - SHADER_NEW_STAGE_BEGIN;
+
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+
+			if(!newStageAttrIsSet[index])
+			{
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), &ac->color);
+				newStageAttrIsSet[index] = true;
+			}
+
+			if(!newStageUniformIsSet[index])
+			{
+				// set standard transformations
+				GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mat);
+				float projectionMatrix[16];
+				R_TransposeGLMatrix(backEnd.viewDef->projectionMatrix, projectionMatrix);
+				GL_UniformMatrix4fv(SHADER_PARM_ADDR(projectionMatrix), /*backEnd.viewDef->*/
+									projectionMatrix);
+
+				float modelViewMatrix[16];
+				R_TransposeGLMatrix(surf->space->modelViewMatrix, modelViewMatrix);
+				GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewMatrix), /*drawSurf->space->*/
+									modelViewMatrix);
+
+				// we need the model matrix without it being combined with the view matrix
+				// so we can transform local vectors to global coordinates
+				idMat4 modelMatrix;
+				memcpy(&modelMatrix, surf->space->modelMatrix, sizeof(modelMatrix));
+				modelMatrix.TransposeSelf();
+				GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelMatrix), modelMatrix.ToFloatPtr());
+
+				// obsolete: screen power of two correction factor, assuming the copy to _currentRender
+				// also copied an extra row and column for the bilerp
+				int w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
+				int h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
+				int ow = MakePowerOfTwo(w);
+				int oh = MakePowerOfTwo(h);
+				// if is pot, glUniform4f(1, 1, 0, 1);
+				GL_Uniform4f(SHADER_PARM_ADDR(u_uniformParm[0]), (float) w / (float) ow,
+							 (float) h / (float) oh, 0, 1); // scalePotToWindow
+				// window coord to 0.0 to 1.0 conversion
+				GL_Uniform4f(SHADER_PARM_ADDR(u_uniformParm[1]),
+							 1.0f / (float) w,
+							 1.0f / (float) h,
+							 0, 1); // scaleWindowToUnit
+				// #3877: Allow shaders to access depth buffer.
+				// Two useful ratios are packed into this parm: [0] and [1] hold the x,y multipliers you need to map a screen
+				// coordinate (fragment position) to the depth image: those are simply the reciprocal of the depth
+				// image size, which has been rounded up to a power of two. Slots [2] and [3] hold the ratio of the depth image
+				// size to the current render image size. These sizes can differ if the game crops the render viewport temporarily
+				// during post-processing effects. The depth render is smaller during the effect too, but the depth image doesn't
+				// need to be downsized, whereas the current render image does get downsized when it's captured by the game after
+				// the skybox render pass. The ratio is needed to map between the two render images.
+				/*	GL_Uniform4f(offsetof(shaderProgram_t, u_uniformParm[7]),
+							1.0f / ow,
+							1.0f / oh,
+							1,
+							1
+					);
+
+					// set eye position in global space
+					idVec3 viewOriginGlobal = backEnd.viewDef->renderView.vieworg;
+					GL_Uniform4f(SHADER_PARM_ADDR(eyeOrigin), viewOriginGlobal.x, viewOriginGlobal.y, viewOriginGlobal.z, 1.0f);
+					// set eye position in model space
+					idVec3 viewOriginLocal;
+					R_GlobalPointToLocal( drawSurf->space->modelMatrix, viewOriginGlobal, viewOriginLocal );
+					GL_Uniform4f(SHADER_PARM_ADDR(localViewOrigin), viewOriginLocal.x, viewOriginLocal.y, viewOriginLocal.z, 1.0f);
+					*/
+				newStageUniformIsSet[index] = true;
+			}
+
+			//============================================================================
+
+			// setting local parameters (specified in material definition)
+			for ( int i = 0; i < newStage->numVertexParms; i++ ) {
+				idVec4 vparm;
+				for (int d = 0; d < 4; d++)
+					vparm[d] = regs[ newStage->vertexParms[i][d] ];
+				GL_Uniform4fv(SHADER_PARMS_ADDR(u_vertexParm, i), vparm.ToFloatPtr());
+			}
+
+			// setting textures
+			// note: the textures are also bound to TUs at this moment
+			for ( int i = 0; i < newStage->numFragmentProgramImages; i++ ) {
+				if ( newStage->fragmentProgramImages[i] ) {
+					GL_SelectTexture( i );
+					newStage->fragmentProgramImages[i]->Bind();
+					//GL_Uniform1i(SHADER_PARMS_ADDR(u_fragmentMap, i), i);
+				}
+			}
+
+			GL_State( pStage->drawStateBits );
+
+			RB_DrawElementsWithCounters( tri );
+
+			for ( int i = 0; i < newStage->numFragmentProgramImages; i++ ) {
+				if ( newStage->fragmentProgramImages[i] ) {
+					GL_SelectTexture( i );
+					globalImages->BindNull();
+					//GL_Uniform1i(SHADER_PARMS_ADDR(u_fragmentMap, i), i);
+				}
+			}
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+
+			GL_SelectTextureForce(0);
+			GL_UseProgram(NULL);
+
 			continue;
 		}
 

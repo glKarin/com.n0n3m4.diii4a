@@ -36,8 +36,8 @@ void main() {
 	
 	vec4 localNormal, R0;                                                                               //TEMP	localNormal, R0;
 	
-	vec4 subOne = vec4(-1, -1, -1, -1);                                                                 //PARAM	subOne = { -1, -1, -1, -1 };
-	vec4 scaleTwo = vec4(2, 2, 2, 2);                                                                   //PARAM	scaleTwo = { 2, 2, 2, 2 };
+	vec4 subOne = vec4(-1.0, -1.0, -1.0, -1.0);                                                                 //PARAM	subOne = { -1, -1, -1, -1 };
+	vec4 scaleTwo = vec4(2.0, 2.0, 2.0, 2.0);                                                                   //PARAM	scaleTwo = { 2, 2, 2, 2 };
 	
 	// load the filtered normal map and convert to -1 to 1 range
 	localNormal = texture(u_texture1, var_tc1.xy);                                                      //TEX		localNormal, fragment.texcoord[1], texture[1], 2D;

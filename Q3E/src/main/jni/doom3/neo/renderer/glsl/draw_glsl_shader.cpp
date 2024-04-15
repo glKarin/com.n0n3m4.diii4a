@@ -60,6 +60,7 @@ shaderProgram_t texgenShader; //k: texgen shader
 shaderProgram_t heatHazeShader; //k: heatHaze shader
 shaderProgram_t heatHazeWithMaskShader; //k: heatHaze with mask shader
 shaderProgram_t heatHazeWithMaskAndVertexShader; //k: heatHaze with mask and vertex shader
+shaderProgram_t colorProcessShader; //k: color process shader
 #ifdef _SHADOW_MAPPING
 shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
 shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)
@@ -190,43 +191,6 @@ static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM
 static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
 #endif
 
-enum {
-	SHADER_INTERACTION = 0,
-	SHADER_SHADOW,
-	SHADER_DEFAULT,
-	SHADER_ZFILL,
-	SHADER_ZFILLCLIP,
-	SHADER_CUBEMAP,
-	SHADER_REFLECTIONCUBEMAP,
-	SHADER_FOG,
-	SHADER_BLENDLIGHT,
-	SHADER_INTERACTIONBLINNPHONG,
-	SHADER_DIFFUSECUBEMAP,
-	SHADER_TEXGEN,
-	SHADER_HEATHAZE,
-	SHADER_HEATHAZEWITHMASK,
-	SHADER_HEATHAZEWITHMASKANDVERTEX,
-	// shadow mapping
-#ifdef _SHADOW_MAPPING
-	SHADER_DEPTHPOINTLIGHT,
-	SHADER_INTERACTIONPOINTLIGHT,
-	SHADER_INTERACTIONBLINNPHONGPOINTLIGHT,
-	SHADER_DEPTHPARALLELLIGHT,
-	SHADER_INTERACTIONPARALLELLIGHT,
-	SHADER_INTERACTIONBLINNPHONGPARALLELLIGHT,
-	SHADER_DEPTHSPOTLIGHT,
-	SHADER_INTERACTIONSPOTLIGHT,
-	SHADER_INTERACTIONBLINNPHONGSPOTLIGHT,
-	SHADER_DEPTHPERFORATED,
-#endif
-	// translucent stencil shadow
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
-	SHADER_INTERACTIONTRANSLUCENT,
-	SHADER_INTERACTIONBLINNPHONGTRANSLUCENT,
-#endif
-	SHADER_TOTAL,
-};
-
 static void R_GetShaderSources(idList<GLSLShaderProp> &ret)
 {
 #include "glsl_shader.h"
@@ -261,6 +225,7 @@ static void R_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("heatHaze", &heatHazeShader, HEATHAZE_VERT, HEATHAZE_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("colorProcess", &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
 	// point light
@@ -652,16 +617,29 @@ static bool RB_GLSL_InitShaders(void)
 
 	shaderRequired = true;
 
-	for(int i = 0; i <= SHADER_HEATHAZEWITHMASKANDVERTEX; i++)
+	// base shader
+	for(int i = SHADER_BASE_BEGIN; i <= SHADER_BASE_END; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
 		if(!RB_GLSL_LoadShaderProgram(&prop))
 			return false;
 	}
 
+	// newStage shader
+	shaderRequired = false;
+	for(int i = SHADER_NEW_STAGE_BEGIN; i <= SHADER_NEW_STAGE_END; i++)
+	{
+		const GLSLShaderProp &prop = Props[i];
+		if(!RB_GLSL_LoadShaderProgram(&prop))
+		{
+			common->Printf("[Harmattan]: newStage %d not support!\n", i);
+		}
+	}
+
+
 #ifdef _SHADOW_MAPPING
 	shaderRequired = false;
-	for(int i = SHADER_DEPTHPOINTLIGHT; i <= SHADER_DEPTHPERFORATED; i++)
+	for(int i = SHADER_SHADOW_MAPPING_BEGIN; i <= SHADER_SHADOW_MAPPING_END; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
 		if(!RB_GLSL_LoadShaderProgram(&prop))
@@ -680,7 +658,7 @@ static bool RB_GLSL_InitShaders(void)
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
 	shaderRequired = false;
-	for(int i = SHADER_INTERACTIONTRANSLUCENT; i <= SHADER_INTERACTIONBLINNPHONGTRANSLUCENT; i++)
+	for(int i = SHADER_STENCIL_SHADOW_BEGIN; i <= SHADER_STENCIL_SHADOW_END; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
 		if(!RB_GLSL_LoadShaderProgram(&prop))
