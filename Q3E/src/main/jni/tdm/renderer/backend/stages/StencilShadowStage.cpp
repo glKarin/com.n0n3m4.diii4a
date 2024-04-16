@@ -133,7 +133,11 @@ void StencilShadowStage::DrawSurfs( const viewDef_t *viewDef, const viewLight_t 
 }
 
 #define max(x, y) idMath::Fmax(x, y)
+#ifdef __ANDROID__
+#include "glslprogs/tdm_shadowstencilsoft_shared.glsl"
+#else
 #include "glprogs/tdm_shadowstencilsoft_shared.glsl"
+#endif
 #undef max
 
 idScreenRect StencilShadowStage::ExpandScissorRectForSoftShadows( const viewDef_t *viewDef, const idScreenRect &scissor ) const {

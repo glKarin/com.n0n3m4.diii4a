@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "tdm_lightproject.glsl"
 #pragma tdm_include "tdm_interaction.glsl"
@@ -45,7 +43,7 @@ uniform vec4 u_specularMatrix[2];
 uniform mat4 u_lightProjectionFalloff;
 uniform vec4 u_colorModulate;
 uniform vec4 u_colorAdd;
-uniform highp mat4 u_modelMatrix;
+uniform mat4 u_modelMatrix;
 
 void main( void ) {
 	// transform vertex position into homogenous clip-space

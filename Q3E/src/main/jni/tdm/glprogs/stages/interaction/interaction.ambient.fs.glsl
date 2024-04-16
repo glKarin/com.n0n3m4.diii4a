@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "tdm_lightproject.glsl"
 #pragma tdm_include "tdm_interaction.glsl"
@@ -53,7 +51,7 @@ uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;
 uniform vec4 u_hasTextureDNS;
 uniform float u_RGTC;
-uniform highp mat4 u_modelMatrix;
+uniform mat4 u_modelMatrix;
 
 void main() {
 	vec3 lightColor;
@@ -74,7 +72,7 @@ void main() {
 		u_minLevel, u_gamma
 	);
 
-	float ssao = 1.0;
+	float ssao = 1;
 	if (u_ssaoEnabled == 1) {
 		ssao = texture(u_ssaoTexture, gl_FragCoord.xy / u_renderResolution).r;
 	}

@@ -184,7 +184,7 @@ public class Q3EGameHelper
     private String FindDLL(String fs_game)
     {
         String DLLPath = Q3EUtils.q3ei.datadir + File.separator + fs_game + File.separator; // /sdcard/diii4a/<fs_game>
-        String Suffix = "game" + Q3EJNI.ARCH + ".so"; // gameaarch64.so(64) / gamearm.so(32)
+        String Suffix = "game" + Q3EGlobals.ARCH + ".so"; // gameaarch64.so(64) / gamearm.so(32)
         String[] guess = {
                 Suffix,
                 "lib" + Suffix,
@@ -252,8 +252,8 @@ public class Q3EGameHelper
         try
         {
             final String destname = Q3EUtils.q3ei.datadir + "/darkmod";
-            File versionFile = new File(destname + "/glprogs/idtech4amm.version");
-            if(!versionFile.isFile())
+            File versionFile = new File(destname + "/glslprogs/idtech4amm.version");
+            if(!versionFile.isFile() || !versionFile.canRead())
             {
                 Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "The Dark Mod GLSL shader source file version not exists.");
                 overwrite = true;

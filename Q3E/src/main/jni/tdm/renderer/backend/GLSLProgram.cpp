@@ -188,7 +188,13 @@ namespace {
 
 	std::string ReadFile( const char *sourceFile ) {
 		void *buf = nullptr;
-		int len = fileSystem->ReadFile( idStr("glprogs/") + sourceFile, &buf );
+		int len = fileSystem->ReadFile( idStr(
+#ifdef __ANDROID__
+                "glslprogs/"
+#else
+                "glprogs/"
+#endif
+        ) + sourceFile, &buf );
 		if( buf == nullptr ) {
 			common->Warning( "Could not open shader file %s", sourceFile );
 			return "";
@@ -398,7 +404,11 @@ void GLSLProgram::SetDefaultUniformBlockBindings() {
 
 namespace {
 	const std::string BASIC_SHADER =
+#ifdef __ANDROID__
+        "#version 320 es\n"
+#else
 		"#version 150\n"
+#endif
 		"void main() {}";
 	const std::string SHARED_COMMON =
 		"uniform vec4 someParam;\n"
@@ -407,7 +417,11 @@ namespace {
 		"  return someParam * 2;\n"
 		"}\n";
 	const std::string INCLUDE_SHADER =
+#ifdef __ANDROID__
+        "#version 320 es\n"
+#else
 		"#version 140\n"
+#endif
 		"#pragma tdm_include \"tests/shared_common.glsl\"\r\n"
 		"void main() {}\n";
 
@@ -418,7 +432,11 @@ namespace {
 		"}";
 
 	const std::string ADVANCED_INCLUDES =
+#ifdef __ANDROID__
+        "#version 320 es\n"
+#else
 		"#version 330\n"
+#endif
 		"\n"
 		" #pragma tdm_include \"tests/nested_include.glsl\"\n"
 		"#pragma  tdm_include \"tests/shared_common.glsl\"  // ignore this comment\n"
@@ -429,7 +447,11 @@ namespace {
 		"#pragma tdm_include \"tests/basic_shader.glsl\"\n";
 
 	const std::string EXPANDED_INCLUDE_SHADER =
+#ifdef __ANDROID__
+        "#version 320 es\n"
+#else
 		"#version 140\n"
+#endif
 		"#line 0 1\n"
 		"uniform vec4 someParam;\n"
 		"\n"
@@ -439,7 +461,11 @@ namespace {
 		"\n#line 2 0\n"
 		"void main() {}\n";
 	const std::string EXPANDED_ADVANCED_INCLUDES =
+#ifdef __ANDROID__
+		"#version 320 es\n"
+#else
 		"#version 330\n"
+#endif
 		"\n"
 		"#line 0 1\n"
 		"#line 0 2\n"
@@ -459,7 +485,11 @@ namespace {
 		"  float myVar = myFunc();\n"
 		"}\n"
 		"#line 0 3\n"
+#ifdef __ANDROID__
+        "#version 320 es\n"
+#else
 		"#version 150\n"
+#endif
 		"void main() {}"
 		"\n#line 9 0\n";
 
@@ -472,11 +502,16 @@ namespace {
 
 	TEST_CASE("Shader include handling") {
 		INFO( "Preparing test shaders" );
-		fileSystem->WriteFile( "glprogs/tests/basic_shader.glsl", BASIC_SHADER.c_str(), BASIC_SHADER.size(), "fs_savepath", "" );
-		fileSystem->WriteFile( "glprogs/tests/shared_common.glsl", SHARED_COMMON.c_str(), SHARED_COMMON.size(), "fs_savepath", "" );
-		fileSystem->WriteFile( "glprogs/tests/include_shader.glsl", INCLUDE_SHADER.c_str(), INCLUDE_SHADER.size(), "fs_savepath", "" );
-		fileSystem->WriteFile( "glprogs/tests/nested_include.glsl", NESTED_INCLUDE.c_str(), NESTED_INCLUDE.size(), "fs_savepath", "" );
-		fileSystem->WriteFile( "glprogs/tests/advanced_includes.glsl", ADVANCED_INCLUDES.c_str(), ADVANCED_INCLUDES.size(), "fs_savepath", "" );
+#ifdef __ANDROID__
+#define TEST_GLPROGS_DIR "glslprogs"
+#else
+#define TEST_GLPROGS_DIR "glprogs"
+#endif
+		fileSystem->WriteFile( TEST_GLPROGS_DIR "/tests/basic_shader.glsl", BASIC_SHADER.c_str(), BASIC_SHADER.size(), "fs_savepath", "" );
+		fileSystem->WriteFile( TEST_GLPROGS_DIR "/tests/shared_common.glsl", SHARED_COMMON.c_str(), SHARED_COMMON.size(), "fs_savepath", "" );
+		fileSystem->WriteFile( TEST_GLPROGS_DIR "/tests/include_shader.glsl", INCLUDE_SHADER.c_str(), INCLUDE_SHADER.size(), "fs_savepath", "" );
+		fileSystem->WriteFile( TEST_GLPROGS_DIR "/tests/nested_include.glsl", NESTED_INCLUDE.c_str(), NESTED_INCLUDE.size(), "fs_savepath", "" );
+		fileSystem->WriteFile( TEST_GLPROGS_DIR "/tests/advanced_includes.glsl", ADVANCED_INCLUDES.c_str(), ADVANCED_INCLUDES.size(), "fs_savepath", "" );
 
 		SUBCASE( "Basic shader without includes remains unaltered" ) {
 			REQUIRE( LoadSource( "tests/basic_shader.glsl" ) == BASIC_SHADER );
@@ -500,7 +535,11 @@ namespace {
 
 	TEST_CASE("Shader defines handling") {
 		const std::string shaderWithDynamicDefines =
+#ifdef __ANDROID__
+			"#version 320 es\n"
+#else
 			"#version 140\n"
+#endif
 			"#pragma tdm_define \"FIRST_DEFINE\"\n"
 			"\n"
 			"  #pragma   tdm_define   \"SECOND_DEFINE\"\n"
@@ -511,7 +550,11 @@ namespace {
 			"}\n" ;
 
 		const std::string expectedResult =
+#ifdef __ANDROID__
+			"#version 320 es\n"
+#else
 			"#version 140\n"
+#endif
 			"#define FIRST_DEFINE 1\n"
 			"\n"
 			"// #undef SECOND_DEFINE\n"

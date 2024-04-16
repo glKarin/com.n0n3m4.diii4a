@@ -42,9 +42,9 @@ uniform bool u_shadows;
 uniform int u_softShadowsQuality;
 uniform float u_softShadowsRadius;
 
-uniform highp mat4 u_modelViewMatrix;
-uniform highp mat4 u_modelMatrix;
-uniform highp mat4 u_projectionMatrix;
+uniform mat4 u_modelViewMatrix;
+uniform mat4 u_modelMatrix;
+uniform mat4 u_projectionMatrix;
 uniform vec4 u_lightTextureMatrix[2];
 uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;

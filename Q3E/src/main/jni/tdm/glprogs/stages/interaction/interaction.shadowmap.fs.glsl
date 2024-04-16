@@ -12,13 +12,10 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
+#version 300 es
 #extension GL_ARB_texture_gather: enable
 
 #define STGATILOV_USEGATHER 1
-
-precision mediump float;
 
 out vec4 FragColor;
 

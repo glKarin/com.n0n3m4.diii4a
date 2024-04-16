@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 // same as TiledCustomMipmapStage::MipmapMode
 #pragma tdm_define "MIPMAP_MODE"
@@ -35,23 +33,22 @@ ivec2 clampPixelCoords(ivec2 pixelCoords) {
 }
 
 // "sample" function returns contents of texture by given pixel coords
-#define MODE MIPMAP_MODE //k
 #if MIPMAP_FIRST
 	#if MODE == 0   // MM_STENCIL_SHADOW
-		uniform highp usampler2D u_sourceTexture;
+		uniform usampler2D u_sourceTexture;
 	#else
 		//TODO
-		uniform highp sampler2D u_sourceTexture;
+		uniform sampler2D u_sourceTexture;
 	#endif
 
-	vec4 _sample(ivec2 pixelCoords) {
+	vec4 sample(ivec2 pixelCoords) {
 		// fetch from base LOD level
 		return vec4(texelFetch(u_sourceTexture, clampPixelCoords(pixelCoords), 0));
 	}
 #else
-	uniform highp sampler2D u_mipmapTexture;
+	uniform sampler2D u_mipmapTexture;
 
-	vec4 _sample(ivec2 pixelCoords) {
+	vec4 sample(ivec2 pixelCoords) {
 		// fetch from previous LOD level
 		return texelFetch(u_mipmapTexture, clampPixelCoords(pixelCoords), u_level - 1 - MIPMAP_SKIP);
 	}
@@ -87,42 +84,42 @@ void main() {
 	#if MIPMAP_FIRST
 		#if MIPMAP_SKIP == 0
 			// take raw pixel from source
-			FragColor = convertInitial(_sample(pixelCoords));
+			FragColor = convertInitial(sample(pixelCoords));
 		#elif MIPMAP_SKIP == 1
 			// don't rely on filtering (especially for stencil texture)
 			// just fetch 4 raw pixels individually, and combine their values
 			FragColor = combine(
-				convertInitial(_sample(2 * pixelCoords + ivec2(0, 0))),
-				convertInitial(_sample(2 * pixelCoords + ivec2(1, 0))),
-				convertInitial(_sample(2 * pixelCoords + ivec2(0, 1))),
-				convertInitial(_sample(2 * pixelCoords + ivec2(1, 1)))
+				convertInitial(sample(2 * pixelCoords + ivec2(0, 0))),
+				convertInitial(sample(2 * pixelCoords + ivec2(1, 0))),
+				convertInitial(sample(2 * pixelCoords + ivec2(0, 1))),
+				convertInitial(sample(2 * pixelCoords + ivec2(1, 1)))
 			);
 		#elif MIPMAP_SKIP == 2
 			// don't rely on filtering (especially for stencil texture)
 			// just fetch 16 raw pixels individually, and combine their values
 			vec4 p0 = combine(
-				convertInitial(_sample(4 * pixelCoords + ivec2(0, 0))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(1, 0))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(0, 1))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(1, 1)))
+				convertInitial(sample(4 * pixelCoords + ivec2(0, 0))),
+				convertInitial(sample(4 * pixelCoords + ivec2(1, 0))),
+				convertInitial(sample(4 * pixelCoords + ivec2(0, 1))),
+				convertInitial(sample(4 * pixelCoords + ivec2(1, 1)))
 			);
 			vec4 p1 = combine(
-				convertInitial(_sample(4 * pixelCoords + ivec2(2, 0))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(3, 0))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(2, 1))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(3, 1)))
+				convertInitial(sample(4 * pixelCoords + ivec2(2, 0))),
+				convertInitial(sample(4 * pixelCoords + ivec2(3, 0))),
+				convertInitial(sample(4 * pixelCoords + ivec2(2, 1))),
+				convertInitial(sample(4 * pixelCoords + ivec2(3, 1)))
 			);
 			vec4 p2 = combine(
-				convertInitial(_sample(4 * pixelCoords + ivec2(0, 2))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(1, 2))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(0, 3))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(1, 3)))
+				convertInitial(sample(4 * pixelCoords + ivec2(0, 2))),
+				convertInitial(sample(4 * pixelCoords + ivec2(1, 2))),
+				convertInitial(sample(4 * pixelCoords + ivec2(0, 3))),
+				convertInitial(sample(4 * pixelCoords + ivec2(1, 3)))
 			);
 			vec4 p3 = combine(
-				convertInitial(_sample(4 * pixelCoords + ivec2(2, 2))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(3, 2))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(2, 3))),
-				convertInitial(_sample(4 * pixelCoords + ivec2(3, 3)))
+				convertInitial(sample(4 * pixelCoords + ivec2(2, 2))),
+				convertInitial(sample(4 * pixelCoords + ivec2(3, 2))),
+				convertInitial(sample(4 * pixelCoords + ivec2(2, 3))),
+				convertInitial(sample(4 * pixelCoords + ivec2(3, 3)))
 			);
 			FragColor = combine(p0, p1, p2, p3);
 		#else
@@ -131,10 +128,10 @@ void main() {
 	#else
 		// fetch 4 cooked pixels individually, and combine their values
 		FragColor = combine(
-			_sample(2 * pixelCoords + ivec2(0, 0)),
-			_sample(2 * pixelCoords + ivec2(1, 0)),
-			_sample(2 * pixelCoords + ivec2(0, 1)),
-			_sample(2 * pixelCoords + ivec2(1, 1))
+			sample(2 * pixelCoords + ivec2(0, 0)),
+			sample(2 * pixelCoords + ivec2(1, 0)),
+			sample(2 * pixelCoords + ivec2(0, 1)),
+			sample(2 * pixelCoords + ivec2(1, 1))
 		);
 	#endif
 }

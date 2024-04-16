@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "tdm_transform.glsl"
 

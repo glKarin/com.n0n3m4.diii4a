@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 in vec2 var_TexCoord;
 out vec4 draw_Color;
@@ -27,7 +25,7 @@ uniform float u_alphaTest;
 
 void main() {
 	vec4 diffuse = texture(u_diffuse, var_TexCoord);
-	if (u_alphaTest >= 0.0) {
+	if (u_alphaTest >= 0) {
 		if (diffuse.a <= u_alphaTest)
 			discard;
 	}

@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 // !!ARBfp1.0 
 
 in vec4 var_tc0;
@@ -99,7 +97,7 @@ void main() {
 	//-----------------------------------------
 	//		Calculate fresnel reflectance.
 	//-----------------------------------------
-	fresnelFactor.x = clamp((1.0) - (R0.x), 0.0, 1.0);                                                    //SUB_SAT	fresnelFactor.x, 1, R0.x;
+	fresnelFactor.x = clamp((1) - (R0.x), 0.0, 1.0);                                                    //SUB_SAT	fresnelFactor.x, 1, R0.x;
 	fresnelFactor.x = (fresnelFactor.x) * (fresnelFactor.x);                                            //MUL		fresnelFactor.x, fresnelFactor.x, fresnelFactor.x;
 	fresnelFactor.x = (fresnelFactor.x) * (fresnelFactor.x);                                            //MUL		fresnelFactor.x, fresnelFactor.x, fresnelFactor.x;
 	//-----------------------------------------

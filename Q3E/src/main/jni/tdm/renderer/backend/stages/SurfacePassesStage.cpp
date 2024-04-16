@@ -22,7 +22,11 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/backend/GLSLProgramManager.h"
 #include "renderer/backend/FrameBuffer.h"
 #include "renderer/backend/FrameBufferManager.h"
+#ifdef __ANDROID__
+#include "glslprogs/stages/surface_passes/texgen_shared.glsl"
+#else
 #include "glprogs/stages/surface_passes/texgen_shared.glsl"
+#endif
 
 struct SimpleTextureUniforms : GLSLUniformGroup {
 	UNIFORM_GROUP_DEF( SimpleTextureUniforms )

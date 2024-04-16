@@ -12,13 +12,11 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "stages/surface_passes/texgen_shared.glsl"
 
-uniform highp int u_texgen;
+uniform int u_texgen;
 uniform sampler2D u_texture;
 uniform samplerCube u_cubemap;
 

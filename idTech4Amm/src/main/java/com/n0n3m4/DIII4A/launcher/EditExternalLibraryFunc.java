@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -71,10 +72,10 @@ public final class EditExternalLibraryFunc extends GameLauncherFunc
 
         String[] result = new String[items.size()];
         StringBuilder sb = new StringBuilder();
-        if(Q3EJNI.IS_64)
-            sb.append("armv8-a 64");
+        if(Q3EGlobals.IS_64)
+            sb.append("armv8");
         else
-            sb.append("armv7-a neon");
+            sb.append("armv7-a");
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.edit_external_game_library);
         builder.setMultiChoiceItems(items.toArray(new CharSequence[0]), new boolean[items.size()], new DialogInterface.OnMultiChoiceClickListener(){

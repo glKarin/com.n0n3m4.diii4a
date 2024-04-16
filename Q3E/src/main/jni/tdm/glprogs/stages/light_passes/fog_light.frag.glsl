@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 uniform vec3 u_fogColor;
 uniform float u_fogAlpha;
@@ -30,13 +28,13 @@ out vec4 FragColor;
 float falloffRatio(float depthRatio) {
 	float remains = pow(0.009737, max(depthRatio, 1e-10));
 	// note: original code worked with finalizer == 0, having a jump from 0.991 to 1.0 on far end
-	float finalizer = clamp(depthRatio - 0.9, 0.0, 1.0) / 0.1;
+	float finalizer = clamp(depthRatio - 0.9, 0, 1) / 0.1;
 	return 1.0 - mix(remains, 0.0, finalizer);
 }
 
 // restored from R_FogEnterImage + FogFraction C++ mess
 float fogEnterRatio(float eyeHeight, float fragHeight, float enterDistance, float deepDistance) {
-	if (eyeHeight > 0.0 && fragHeight > 0.0)
+	if (eyeHeight > 0 && fragHeight > 0)
 		return 0.0;
 	if (eyeHeight < -enterDistance && fragHeight < -enterDistance)
 		return 1.0;
@@ -55,7 +53,7 @@ void main() {
 	float falloffFactor = falloffRatio(var_eyeDistance / u_eyeDistanceCap);
 	// enterDistance = 1000 * RAMP_RANGE / FOG_ENTER
 	// deepDistance = 1000 * DEEP_RANGE / FOG_ENTER
-	float enterFactor = fogEnterRatio(var_eyeHeight, var_fragHeight, 1000.0 * 8.0 / 64.0, 1000.0 * 30.0 / 64.0);
+	float enterFactor = fogEnterRatio(var_eyeHeight, var_fragHeight, 1000 * 8 / 64, 1000 * 30 / 64);
 
 	vec4 result = vec4(u_fogColor, falloffFactor * enterFactor * u_fogAlpha);
 	FragColor = result;

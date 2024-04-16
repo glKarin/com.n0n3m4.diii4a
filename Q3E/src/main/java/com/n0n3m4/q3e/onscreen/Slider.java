@@ -2,6 +2,7 @@ package com.n0n3m4.q3e.onscreen;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3EGlobals;
@@ -188,7 +189,7 @@ public class Slider extends Paintable implements TouchListener
         {
             startx = x;
             starty = y;
-            if(IsClickable())
+            if(style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK || style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT_SPLIT_CLICK)
             {
                 int key = KeyInPosition(x, y);
                 if(key > 0)
@@ -260,7 +261,7 @@ public class Slider extends Paintable implements TouchListener
     @Override
     public boolean isInside(int x, int y)
     {
-        if (IsClickable())
+        if (style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
             return ((2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height));
         else
             return ((2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height)) && (!((y > cy) && (x > cx)));
@@ -268,7 +269,7 @@ public class Slider extends Paintable implements TouchListener
 
     private int KeyInPosition(int x, int y)
     {
-        if (IsClickable())
+        if (style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
         {
             int deltaX = x - cx;
             int slide_dist_2 = SLIDE_DIST / 2;
@@ -316,10 +317,5 @@ public class Slider extends Paintable implements TouchListener
     {
         cx = x;
         cy = y;
-    }
-
-    public boolean IsClickable()
-    {
-        return style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK || style == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT_SPLIT_CLICK;
     }
 }

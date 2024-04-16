@@ -39,9 +39,9 @@ void generateSurfaceProperties(
 
 	// tangent space matrix (mainly for bumpmapping)
 	matTangentToLocal = mat3(
-		clamp(attrTangent, vec3(-1.0), vec3(1.0)),
-		clamp(attrBitangent, -vec3(1.0), vec3(1.0)),
-		clamp(attrNormal, -vec3(1.0), vec3(1.0))
+		clamp(attrTangent, -1, 1),
+		clamp(attrBitangent, -1, 1),
+		clamp(attrNormal, -1, 1)
 	);
 }
 
@@ -75,7 +75,7 @@ InteractionGeometry computeInteractionGeometry(vec3 localToLight, vec3 localToVi
 float applyBumpmapTogglingFix(InteractionGeometry props, bool enabled) {
 	if (enabled) {
 		// stgatilov: hacky coefficient to make lighting smooth when L is almost in surface tangent plane
-		float MNdotL = max(props.localL.z, 0.0);       	// dot(mesh_normal, light_dir) in tangent space
+		float MNdotL = max(props.localL.z, 0);       	// dot(mesh_normal, light_dir) in tangent space
 		if (MNdotL < min(0.25, props.NdotL))
 			return mix(MNdotL, props.NdotL, MNdotL / 0.25);
 	}
@@ -140,7 +140,7 @@ AmbientGeometry computeAmbientGeometry(vec3 globalToView, vec3 localNormal, mat3
 	props.worldV = normalize(globalToView);
 	props.worldN = normalize(modelMatrix * (matTangentToObject * localNormal));
 	props.NdotV = clamp(dot(props.worldN, props.worldV), 0.0, 1.0);
-	props.worldR = 2.0 * props.worldN * props.NdotV - props.worldV;
+	props.worldR = 2 * props.worldN * props.NdotV - props.worldV;
 	return props;
 }
 
@@ -161,17 +161,17 @@ vec4 computeAmbientInteraction(
 	vec3 specularTexColor = texture(specularTexture, specularTexCoord).rgb;
 
 	// diffuse term
-	vec3 diffuseTerm = vec3(1.0);
+	vec3 diffuseTerm = vec3(1);
 	if (useNormalIndexedDiffuse)
 		diffuseTerm = texture(normalIndexedDiffuse, props.worldN).rgb;
 	diffuseTerm *= diffuseParamColor;
 
 	// tweaking brightness by messing with ambient
-	if (ambientMinLevel != 0.0)
-		diffuseTerm = mix(diffuseTerm, vec3(1.0), ambientMinLevel);
+	if (ambientMinLevel != 0)
+		diffuseTerm = mix(diffuseTerm, vec3(1), ambientMinLevel);
 
 	// specular term
-	vec3 specularTerm = vec3(0.0);
+	vec3 specularTerm = vec3(0);
 	if (useNormalIndexedSpecular)
 		specularTerm = texture(normalIndexedSpecular, props.worldR).rgb;
 	specularTerm *= specularParamColor;
@@ -180,9 +180,9 @@ vec4 computeAmbientInteraction(
 	vec4 result = vec4(surfaceTerm, diffuseTexColor.a);
 
 	// avoid negative values, which with floating point render buffers can lead to NaN artefacts
-	result = max(result, vec4(0.0));
+	result = max(result, vec4(0));
 	// tweaking brightness by messing with ambient
-	if (ambientGamma != 1.0)
+	if (ambientGamma != 1)
 		result.rgb = pow(result.rgb, vec3(1.0 / ambientGamma));
 
 	return result;

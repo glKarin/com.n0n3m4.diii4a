@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 // !!ARBfp1.0 
 
 in vec4 var_tc0;
@@ -55,7 +53,7 @@ void main() {
 	localNormal = texture(u_texture1, var_tc1.xy);                                                      //TEX		localNormal, fragment.texcoord[1], texture[1], 2D;
 //	localNormal.x = localNormal.a;                                                                      //MOV		localNormal.x, localNormal.a;
 	localNormal = (localNormal) * (scaleTwo) + (subOne);                                                //MAD		localNormal, localNormal, scaleTwo, subOne;
-	localNormal.z = sqrt(max(0.0, 1.0-localNormal.x*localNormal.x-localNormal.y*localNormal.y));
+	localNormal.z = sqrt(max(0, 1-localNormal.x*localNormal.x-localNormal.y*localNormal.y));
 	localNormal = (localNormal) * (mask);                                                               //MUL		localNormal, localNormal, mask;
 	
 	// calculate the screen texcoord in the 0.0 to 1.0 range
@@ -68,10 +66,10 @@ void main() {
 	pos4 = pos0;                                                                                        //MOV pos4, pos0;
 	
 	// greebo: Offset the positions by a certain amount to the left/right/top/bottom
-	pos1.y = (pos1.y) + (-3.0);                                                                           //ADD pos1.y, pos1.y, -3;
-	pos2.x = (pos2.x) + (3.0);                                                                            //ADD pos2.x, pos2.x, 3;
-	pos3.y = (pos3.y) + (4.0);                                                                            //ADD pos3.y, pos3.y, 4;
-	pos4.x = (pos4.x) + (-5.0);                                                                           //ADD pos4.x, pos4.x, -5;
+	pos1.y = (pos1.y) + (-3);                                                                           //ADD pos1.y, pos1.y, -3;
+	pos2.x = (pos2.x) + (3);                                                                            //ADD pos2.x, pos2.x, 3;
+	pos3.y = (pos3.y) + (4);                                                                            //ADD pos3.y, pos3.y, 4;
+	pos4.x = (pos4.x) + (-5);                                                                           //ADD pos4.x, pos4.x, -5;
 	
 	// convert pixel's screen position to a fraction of the screen width & height
 	// fraction will be between 0.0 and 1.0.

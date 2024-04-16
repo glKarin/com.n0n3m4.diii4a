@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -114,10 +115,10 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
 
         boolean hasExternal = items.size() > Libs.length;
         StringBuilder sb = new StringBuilder();
-        if(Q3EJNI.IS_64)
-            sb.append("armv8-a 64");
+        if(Q3EGlobals.IS_64)
+            sb.append("armv8");
         else
-            sb.append("armv7-a neon");
+            sb.append("armv7-a");
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(m_gameLauncher, R.string.game_library) + "(" + sb.toString() + ")");
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){

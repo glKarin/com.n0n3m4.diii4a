@@ -1,6 +1,4 @@
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 /**
  Based on the SAO algorithm by Morgan McGuire and Michael Mara, NVIDIA Research

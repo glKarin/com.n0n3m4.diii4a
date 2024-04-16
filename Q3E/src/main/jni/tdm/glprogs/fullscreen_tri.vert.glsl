@@ -12,15 +12,13 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 out vec2 var_TexCoord;
 
 void main() {
-    var_TexCoord.x = gl_VertexID == 1 ? 2.0 : 0.0;
-    var_TexCoord.y = gl_VertexID == 2 ? 2.0 : 0.0;
+    var_TexCoord.x = gl_VertexID == 1 ? 2 : 0;
+    var_TexCoord.y = gl_VertexID == 2 ? 2 : 0;
     
-    gl_Position = vec4(var_TexCoord * 2.0 - 1.0, 1.0, 1.0);
+    gl_Position = vec4(var_TexCoord * 2 - 1, 1, 1);
 }

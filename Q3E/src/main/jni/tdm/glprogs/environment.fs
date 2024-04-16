@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 uniform samplerCube u_texture0;
 
@@ -30,7 +28,7 @@ void main() {
 
 	// calculate reflection vector
 	float dotEN = dot(toEye, normal);
-	vec3 reflectionVector = vec3(2.0) * normal * vec3(dotEN) - toEye;
+	vec3 reflectionVector = 2 * normal * dotEN - toEye;
 
 	draw_Color = texture(u_texture0, reflectionVector) * var_color;
 }

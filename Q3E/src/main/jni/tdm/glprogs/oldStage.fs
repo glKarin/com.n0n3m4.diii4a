@@ -12,11 +12,9 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
+#version 300 es
 
-precision mediump float;
-
-uniform highp float u_screenTex;
+uniform float u_screenTex;
 uniform sampler2D u_tex0;
 
 in vec4 var_TexCoord0;

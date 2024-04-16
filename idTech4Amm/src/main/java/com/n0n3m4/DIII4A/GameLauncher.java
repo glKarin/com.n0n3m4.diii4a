@@ -731,6 +731,22 @@ public class GameLauncher extends Activity
 		SelectCheckbox(V.rg_harm_r_shadow, index);
 		if (!IsProp("r_useShadowMapping")) SetProp("r_useShadowMapping", "0");
 
+		V.cb_translucentStencilShadow.setChecked(getProp("harm_r_stencilShadowTranslucent", false));
+		if (!IsProp("harm_r_stencilShadowTranslucent")) setProp("r_useDXT", false);
+
+		V.cb_s_useOpenAL.setChecked(getProp("s_useOpenAL", false));
+		if (!IsProp("s_useOpenAL"))
+		{
+			setProp("s_useOpenAL", false);
+			V.cb_s_useEAXReverb.setChecked(false);
+			setProp("s_useEAXReverb", false);
+		}
+		else
+		{
+			V.cb_s_useEAXReverb.setChecked(getProp("s_useEAXReverb", false));
+			if (!IsProp("s_useEAXReverb")) setProp("s_useEAXReverb", false);
+		}
+
         str = GetProp(Q3EUtils.q3ei.GetGameCommandParm());
         if (str != null)
         {
@@ -2254,7 +2270,7 @@ public class GameLauncher extends Activity
 
     private String GetExternalGameLibraryPath()
     {
-        return getFilesDir() + File.separator + Q3EUtils.q3ei.game + File.separator + Q3EJNI.ARCH;
+        return getFilesDir() + File.separator + Q3EUtils.q3ei.game + File.separator + Q3EGlobals.ARCH;
     }
 
     private void OpenTranslatorsDialog()

@@ -67,7 +67,13 @@ void GLSLProgramManager::Shutdown() {
 
 GLSLProgram * GLSLProgramManager::Load( const idStr &name, const idHashMapDict &defines ) {
 	Generator generator = [=]( GLSLProgram *program ) {
-		if( fileSystem->FindFile( idStr("glprogs/") + name + ".gs" ) != FIND_NO ) {
+		if( fileSystem->FindFile( idStr(
+#ifdef __ANDROID__
+                "glslprogs/"
+#else
+                "glprogs/"
+#endif
+        ) + name + ".gs" ) != FIND_NO ) {
 			DefaultProgramInit( program, defines, name + ".vs", name + ".fs", name + ".gs" );
 		} else {
 			DefaultProgramInit( program, defines, name + ".vs", name + ".fs", nullptr );
@@ -193,7 +199,13 @@ namespace {
 	GLSLProgram *LoadFromBaseNameWithCustomizer( const idStr &baseName, const std::function<void(GLSLProgram*)> customizer) {
 		return programManager->LoadFromGenerator( baseName, [=]( GLSLProgram *program ) {
 			idStr geometrySource = baseName + ".gs";
-			if( fileSystem->FindFile( idStr( "glprogs/" ) + baseName + ".gs" ) != FIND_NO ) {
+			if( fileSystem->FindFile( idStr(
+#ifdef __ANDROID__
+                    "glslprogs/"
+#else
+                    "glprogs/"
+#endif
+            ) + baseName + ".gs" ) != FIND_NO ) {
 				DefaultProgramInit( program, {}, baseName + ".vs", baseName + ".fs", baseName + ".gs" );
 			} else {
 				DefaultProgramInit( program, {}, baseName + ".vs", baseName + ".fs", nullptr );

@@ -12,9 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
-
-precision mediump float;
+#version 300 es
 
 #pragma tdm_include "tdm_utils.glsl"
 #pragma tdm_include "stages/surface_passes/texgen_shared.glsl"
@@ -25,7 +23,7 @@ uniform mat4 u_projectionMatrix;
 uniform vec4 u_colorMul;
 uniform vec4 u_colorAdd;
 
-uniform highp int u_texgen;
+uniform int u_texgen;
 uniform mat4 u_textureMatrix;
 uniform vec3 u_viewOrigin;
 
@@ -42,12 +40,12 @@ void main() {
 	var_Color = attr_Color * u_colorMul + u_colorAdd;
 
 	if (u_texgen == TEXGEN_EXPLICIT) {
-		var_TexCoord = u_textureMatrix * vec4(attr_TexCoord, 0.0, 1.0);
+		var_TexCoord = u_textureMatrix * vec4(attr_TexCoord, 0, 1);
 	}
 	else if (u_texgen == TEXGEN_SCREEN) {
 		var_TexCoord = gl_Position;
 	}
 	else if (u_texgen == TEXGEN_CUBEMAP) {
-		var_TexCoord = vec4(vec3(attr_Position) - u_viewOrigin, 0.0);
+		var_TexCoord = vec4(vec3(attr_Position) - u_viewOrigin, 0);
 	}
 }

@@ -54,28 +54,28 @@ vec3 CubeMapDirectionToUv(vec3 v, out int faceIdx) {
 float ShadowAtlasForVector(in sampler2D shadowMapTexture, vec4 shadowRect, vec3 lightVec) {
 	int faceIdx;
 	vec3 v1 = CubeMapDirectionToUv(lightVec, faceIdx);
-	ivec2 texSize = textureSize(shadowMapTexture, 0);
+	vec2 texSize = textureSize(shadowMapTexture, 0);
 	vec2 shadow2d = (v1.xy * .5 + vec2(.5) ) * shadowRect.ww + shadowRect.xy;
-	shadow2d.x += (shadowRect.w + 1./float(texSize.x)) * float(faceIdx);
-	float d = textureLod(shadowMapTexture, shadow2d, 0.0).r;
-	return 1.0 / (1.0 - d);
+	shadow2d.x += (shadowRect.w + 1./texSize.x) * faceIdx;
+	float d = textureLod(shadowMapTexture, shadow2d, 0).r;
+	return 1 / (1 - d);
 }
 #if TDM_allow_ARB_texture_gather
 vec4 ShadowAtlasForVector4(in sampler2D shadowMapTexture, vec4 shadowRect, vec3 lightVec, out vec4 sampleWeights) {
 	int faceIdx;
 	vec3 v1 = CubeMapDirectionToUv(lightVec, faceIdx);
-	ivec2 texSize = textureSize(shadowMapTexture, 0);
+	vec2 texSize = textureSize(shadowMapTexture, 0);
 	vec2 shadow2d = (v1.xy * .5 + vec2(.5) ) * shadowRect.ww + shadowRect.xy;
-	shadow2d.x += (shadowRect.w + 1./float(texSize.x)) * float(faceIdx);
-#if 0 // GL_ARB_texture_gather
+	shadow2d.x += (shadowRect.w + 1./texSize.x) * faceIdx;
+#if GL_ARB_texture_gather
 	vec4 d = textureGather(shadowMapTexture, shadow2d);
 #else
-	vec4 d = textureLod(shadowMapTexture, shadow2d, 0.0).rrrr;
+	vec4 d = textureLod(shadowMapTexture, shadow2d, 0).rrrr;
 #endif
-	vec2 wgt = fract(shadow2d * float(texSize) - 0.5);
-	vec2 mwgt = vec2(1.0) - wgt;
+	vec2 wgt = fract(shadow2d * texSize - 0.5);
+	vec2 mwgt = vec2(1) - wgt;
 	sampleWeights = vec4(mwgt.x, wgt.x, wgt.x, mwgt.x) * vec4(wgt.y, wgt.y, mwgt.y, mwgt.y);
-	return vec4(1.0) / (vec4(1.0) - d);
+	return vec4(1) / (vec4(1) - d);
 }
 #endif
 
@@ -85,7 +85,7 @@ float computeShadowMapCoefficient(
 	sampler2D shadowMap, vec4 shadowRect,
 	int softQuality, float softRadius, bool shadowMapCullFrontHack
 ) {
-	float shadowMapResolution = (float(textureSize(shadowMap, 0).x) * shadowRect.w);
+	float shadowMapResolution = (textureSize(shadowMap, 0).x * shadowRect.w);
 
 	//get unit direction from light to current fragment
 	vec3 L = normalize(worldFromLight);
@@ -129,7 +129,7 @@ float computeShadowMapCoefficient(
 
 	//search for blockers in a cone with rather large angle
 	float searchAngle = 0.03 * softRadius;    //TODO: this option is probably very important
-	float avgBlockerZ = 0.0;
+	float avgBlockerZ = 0;
 	int blockerCnt = 0;
 	for (int i = 0; i < softQuality; i++) {
 		//note: copy/paste from sampling code below
@@ -156,7 +156,7 @@ float computeShadowMapCoefficient(
 		return 0.0;
 	}
 	*/
-	avgBlockerZ /= float(blockerCnt);
+	avgBlockerZ /= blockerCnt;
 
 	//radius of light source
 	float lightRadius = softRadius;
@@ -192,7 +192,7 @@ float computeShadowMapCoefficient(
 		float blockerZ = ShadowAtlasForVector(shadowMap, shadowRect, perturbedLightDir);
 		lit += float(blockerZ >= fragZ - errorMargin);
 	}
-	lit /= float(softQuality + 1);
+	lit /= softQuality + 1;
 
 	return lit * fallAngleLimiter;
 }
