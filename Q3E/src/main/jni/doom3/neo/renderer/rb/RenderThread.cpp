@@ -78,6 +78,8 @@ void idRenderThread::BackendThreadTask(void) // BackendThread ->
     Sys_WaitForEvent(TRIGGER_EVENT_RUN_BACKEND);
     // Purge all images,  Load all images
     globalImages->HandlePendingImage();
+    // Load custom GLSL shader
+    shaderManager->LoadFromQueue();
     // image process finished
     Sys_TriggerEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
 

@@ -1754,6 +1754,9 @@ void idWindow::SetupBackground()
 		background->SetImageClassifications(1);	// just for resource tracking
 
 		if (background && !background->TestMaterialFlag(MF_DEFAULTED)) {
+#ifdef _RAVEN //karin: don't SetSort to SS_GUI for post-process stage
+			if(!background->TestMaterialFlag(MF_NEED_CURRENT_RENDER))
+#endif
 			background->SetSort(SS_GUI);
 		}
 	}

@@ -160,7 +160,7 @@ typedef struct drawSurf_s {
 	struct vertCache_s		*dynamicTexCoords;	// float * in vertex cache memory
 	// specular directions for non vertex program cards, skybox texcoords, etc
 #ifdef _MULTITHREAD //k: only for frontend in multithread, like memory address ==
-	const srfTriangles_t *origGeo;
+	const srfTriangles_t 	*geoOrig;
 #endif
 } drawSurf_t;
 
@@ -1517,7 +1517,8 @@ typedef enum {
 	SHADER_INTERACTIONTRANSLUCENT,
 	SHADER_INTERACTIONBLINNPHONGTRANSLUCENT,
 #endif
-	SHADER_TOTAL,
+    // costum
+	SHADER_CUSTOM,
 } glsl_program_t;
 
 #define SHADER_BASE_BEGIN SHADER_INTERACTION
@@ -1665,10 +1666,53 @@ typedef struct shaderProgram_s {
     GLint		bias;
 #endif
 	char 		name[HARM_SHADER_NAME_LENGTH];
+    int         type; // glsl_program_t
 } shaderProgram_t;
 #define SHADER_PARM_ADDR(prop) offsetof(shaderProgram_t, prop)
 #define SHADER_PARM_LOCATION(location) (*(GLint *)((char *)backEnd.glState.currentProgram + location))
 #define SHADER_PARMS_ADDR(prop, i) ((GLint)(offsetof(shaderProgram_t, prop)) + i * (GLint)sizeof(GLuint))
+
+struct GLSLShaderProp
+{
+	idStr name;
+	shaderProgram_t *program;
+	idStr default_vertex_shader_source;
+	idStr default_fragment_shader_source;
+	idStr macros;
+	idStr vertex_shader_source_file;
+	idStr fragment_shader_source_file;
+    int type; // glsl_program_t
+
+	GLSLShaderProp()
+			: program(NULL),
+            type(SHADER_CUSTOM)
+	{}
+
+	GLSLShaderProp(const char *name)
+			: name(name),
+			  program(NULL),
+              type(SHADER_CUSTOM)
+	{
+		vertex_shader_source_file = name;
+		vertex_shader_source_file += ".vert";
+		fragment_shader_source_file = name;
+		fragment_shader_source_file += ".frag";
+	}
+
+	GLSLShaderProp(const char *name, int type, shaderProgram_t *program, const idStr &vs, const idStr &fs, const idStr &macros)
+			: name(name),
+              type(type),
+			  program(program),
+			  default_vertex_shader_source(vs),
+			  default_fragment_shader_source(fs),
+			  macros(macros)
+	{
+		vertex_shader_source_file = name;
+		vertex_shader_source_file += ".vert";
+		fragment_shader_source_file = name;
+		fragment_shader_source_file += ".frag";
+	}
+};
 
 class idGLSLShaderManager
 {
@@ -1678,9 +1722,12 @@ public:
 	const shaderProgram_t * Find(const char *name) const;
 	const shaderProgram_t * Find(GLuint handle) const;
 	static idGLSLShaderManager _shaderManager;
+	const shaderProgram_t * AddLoadQueue(const GLSLShaderProp &prop); // frontend
+	void LoadFromQueue(void); // backend
 
 private:
 	idList<const shaderProgram_t *> shaders;
+	idList<GLSLShaderProp> queue;
 
 private:
 	idGLSLShaderManager() {}
@@ -1697,43 +1744,9 @@ void RB_GLSL_DrawInteraction(const drawInteraction_t *din);
 
 void R_CheckBackEndCvars(void);
 
-extern shaderProgram_t shadowShader;
-extern shaderProgram_t interactionShader;
-extern shaderProgram_t defaultShader;
-extern shaderProgram_t depthFillShader;
-extern shaderProgram_t cubemapShader; //k: skybox shader
-extern shaderProgram_t reflectionCubemapShader; //k: reflection shader
-extern shaderProgram_t depthFillClipShader; //k: z-fill clipped shader
-extern shaderProgram_t fogShader; //k: fog shader
-extern shaderProgram_t blendLightShader; //k: blend light shader
-extern shaderProgram_t interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
-extern shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
-extern shaderProgram_t texgenShader; //k: texgen shader
-// new stage
-extern shaderProgram_t heatHazeShader; //k: heatHaze shader
-extern shaderProgram_t heatHazeWithMaskShader; //k: heatHaze with mask shader
-extern shaderProgram_t heatHazeWithMaskAndVertexShader; //k: heatHaze with mask and vertex shader
-extern shaderProgram_t colorProcessShader; //k: color process shader
-#ifdef _SHADOW_MAPPING
-extern shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
-extern shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)
-extern shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: interaction with shadow mapping(point light)
-
-extern shaderProgram_t depthShader_parallelLight; //k: depth shader(parallel)
-extern shaderProgram_t interactionShadowMappingShader_parallelLight; //k: interaction with shadow(parallel)
-extern shaderProgram_t interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
-
-extern shaderProgram_t depthShader_spotLight; //k: depth shader
-extern shaderProgram_t interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
-extern shaderProgram_t interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
-
-extern shaderProgram_t depthPerforatedShader; //k: depth perforated shader
-#endif
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
-extern shaderProgram_t interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
-extern shaderProgram_t interactionBlinnPhongTranslucentShader; //k: BLINN-PHONG lighting model interaction shader(translucent stencil shadow)
-#endif
-
+#define GLSL_PROGRAM_PROC extern
+#include "glsl/glsl_program.h"
+#undef GLSL_PROGRAM_PROC
 
 /*
 ============================================================
@@ -2123,6 +2136,7 @@ struct idAllocAutoHeap {
 #ifdef _RAVEN //k: macros for renderEffect_s::suppressSurfaceMask
 #define SUPPRESS_SURFACE_MASK(x) (1 << (x))
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
+#include "../raven/renderer/NewShaderStage.h"
 #endif
 
 extern void GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android

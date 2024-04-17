@@ -31,6 +31,7 @@ public final class Constants
     {
         return new String[]{
                 "Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion).",
+                "Support new stage rendering of GLSL shaders in Quake 4(e.g. sniper scope).",
         };
 	};
 

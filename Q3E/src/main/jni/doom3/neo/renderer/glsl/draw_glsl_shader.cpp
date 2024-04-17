@@ -44,44 +44,28 @@ GLint GL_GetUniformLocation(GLint program, const char *name)
 }
 #endif
 
-shaderProgram_t	interactionShader;
-shaderProgram_t	shadowShader;
-shaderProgram_t	defaultShader;
-shaderProgram_t	depthFillShader;
-shaderProgram_t	depthFillClipShader; //k: z-fill clipped shader
-shaderProgram_t cubemapShader; //k: skybox shader
-shaderProgram_t reflectionCubemapShader; //k: reflection shader
-shaderProgram_t	fogShader; //k: fog shader
-shaderProgram_t	blendLightShader; //k: blend light shader
-shaderProgram_t	interactionBlinnPhongShader; //k: BLINN-PHONG lighting model interaction shader
-shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap shader
-shaderProgram_t texgenShader; //k: texgen shader
-// new stage
-shaderProgram_t heatHazeShader; //k: heatHaze shader
-shaderProgram_t heatHazeWithMaskShader; //k: heatHaze with mask shader
-shaderProgram_t heatHazeWithMaskAndVertexShader; //k: heatHaze with mask and vertex shader
-shaderProgram_t colorProcessShader; //k: color process shader
-#ifdef _SHADOW_MAPPING
-shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
-shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)
-shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: interaction with shadow mapping(point light)
+static bool shaderRequired = true;
+#define REQUIRE_SHADER shaderRequired = true;
+#define UNNECESSARY_SHADER shaderRequired = false;
 
-shaderProgram_t depthShader_parallelLight; //k: depth shader(parallel)
-shaderProgram_t	interactionShadowMappingShader_parallelLight; //k: interaction with shadow mapping(parallel)
-shaderProgram_t	interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
+static int RB_GLSL_LoadShaderProgram(
+		const char *name,
+        int type,
+		shaderProgram_t * const program,
+		const char *default_vertex_shader_source,
+		const char *default_fragment_shader_source,
+		const char *vertex_shader_source_file,
+		const char *fragment_shader_source_file,
+		const char *macros
+);
+static bool RB_GLSL_LoadShaderProgram(const GLSLShaderProp *prop);
 
-shaderProgram_t depthShader_spotLight; //k: depth shader
-shaderProgram_t	interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
-shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
+#define GLSL_PROGRAM_PROC
+#include "glsl_program.h"
+#undef GLSL_PROGRAM_PROC
 
-shaderProgram_t depthPerforatedShader; //k: depth perforated shader
-#endif
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
-shaderProgram_t	interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
-shaderProgram_t	interactionBlinnPhongTranslucentShader; //k: BLINN-PHONG lighting model interaction shader(translucent stencil shadow)
-#endif
-
-int idGLSLShaderManager::Add(const shaderProgram_t *shader) {
+int idGLSLShaderManager::Add(const shaderProgram_t *shader)
+{
 	if(!shader)
 		return -1;
 	if(!shader->program)
@@ -99,11 +83,13 @@ int idGLSLShaderManager::Add(const shaderProgram_t *shader) {
 	return shaders.Append(shader);
 }
 
-void idGLSLShaderManager::Clear(void) {
+void idGLSLShaderManager::Clear(void)
+{
 	shaders.Clear();
 }
 
-const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const {
+const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
+{
 	for (int i = 0; i < shaders.Num(); i++)
 	{
 		const shaderProgram_t *shader = shaders[i];
@@ -126,62 +112,65 @@ const shaderProgram_t * idGLSLShaderManager::Find(GLuint handle) const
 	return NULL;
 }
 
+const shaderProgram_t * idGLSLShaderManager::AddLoadQueue(const GLSLShaderProp &inProp)
+{
+	const shaderProgram_t *c;
+
+	c = Find(inProp.name.c_str());
+	if(c)
+		return c;
+
+	// TODO: free it
+	shaderProgram_t *shader = (shaderProgram_t *)malloc(sizeof(*shader));
+	memset(shader, 0, sizeof(*shader));
+	shader->program = -1;
+	GLSLShaderProp prop;
+	prop = inProp;
+	prop.program = shader;
+	queue.Append(prop);
+	c = shader;
+
+#ifdef _MULTITHREAD // in multi-threading, push on queue and load on backend
+	if(!multithreadActive)
+		LoadFromQueue();
+#else
+	LoadFromQueue();
+#endif
+
+	return c;
+}
+
+void idGLSLShaderManager::LoadFromQueue(void)
+{
+	const shaderProgram_t *c;
+
+	if(!queue.Num())
+		return;
+
+	const bool B = shaderRequired;
+	UNNECESSARY_SHADER;
+
+	while(queue.Num())
+	{
+		GLSLShaderProp &prop = queue[0];
+		c = Find(prop.name);
+		if(c && c->program > 0)
+		{
+			queue.RemoveIndex(0);
+			continue;
+		}
+
+		if(RB_GLSL_LoadShaderProgram(&prop))
+			Add(c);
+
+		queue.RemoveIndex(0);
+	}
+	shaderRequired = B;
+}
+
 idGLSLShaderManager idGLSLShaderManager::_shaderManager;
 
 idGLSLShaderManager *shaderManager = &idGLSLShaderManager::_shaderManager;
-
-static bool shaderRequired = true;
-
-struct GLSLShaderProp
-{
-	idStr name;
-	shaderProgram_t *program;
-	idStr default_vertex_shader_source;
-	idStr default_fragment_shader_source;
-	idStr macros;
-#ifdef GL_ES_VERSION_3_0
-	idStr es3_default_vertex_shader_source;
-	idStr es3_default_fragment_shader_source;
-	idStr es3_macros;
-#endif
-	idStr vertex_shader_source_file;
-	idStr fragment_shader_source_file;
-
-	GLSLShaderProp()
-			  : program(NULL)
-	{}
-
-	GLSLShaderProp(const char *name, shaderProgram_t *program, const idStr &vs, const idStr &fs, const idStr &macros
-#ifdef GL_ES_VERSION_3_0
-				   , const idStr &vs3, const idStr &fs3, const idStr &macros3
-#endif
-				   )
-	: name(name),
-	  program(program),
-	  default_vertex_shader_source(vs),
-	  default_fragment_shader_source(fs),
-	  macros(macros)
-#ifdef GL_ES_VERSION_3_0
-	  , es3_default_vertex_shader_source(vs3),
-	  es3_default_fragment_shader_source(fs3),
-	  es3_macros(macros3)
-#endif
-	{
-		vertex_shader_source_file = name;
-		vertex_shader_source_file += ".vert";
-		fragment_shader_source_file = name;
-		fragment_shader_source_file += ".frag";
-	}
-};
-static int RB_GLSL_LoadShaderProgram(
-		const char *name,
-		shaderProgram_t * const program,
-		const char *default_vertex_shader_source,
-		const char *default_fragment_shader_source,
-		const char *vertex_shader_source_file,
-		const char *fragment_shader_source_file,
-		const char *macros
-);
 
 #define _GLPROGS "glslprogs" // "gl2progs"
 static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
@@ -195,9 +184,9 @@ static void R_GetShaderSources(idList<GLSLShaderProp> &ret)
 {
 #include "glsl_shader.h"
 #ifdef GL_ES_VERSION_3_0
-#define GLSL_SHADER_SOURCE(name, program, vs, fs, macros, macros3) GLSLShaderProp(name, program, vs, fs, macros, ES3_##vs, ES3_##fs, macros3)
+#define GLSL_SHADER_SOURCE(name, type, program, vs, fs, macros, macros3) GLSLShaderProp(name, type, program, USING_GLES3 ? ES3_##vs : vs, USING_GLES3 ? ES3_##fs : fs, USING_GLES3 ? macros3 : macros)
 #else
-#define GLSL_SHADER_SOURCE(name, program, vs, fs, macros, unused) GLSLShaderProp(name, program, vs, fs, macros)
+#define GLSL_SHADER_SOURCE(name, type, program, vs, fs, macros, unused) GLSLShaderProp(name, type, program, vs, fs, macros)
 #endif
 #define GLSL2_SHADOW_MAPPING_2D_MACROS(type) r_useDepthTexture ? type ",_USING_DEPTH_TEXTURE" : (packFloat ? type ",_PACK_FLOAT" : type)
 #define GLSL2_SHADOW_MAPPING_CUBE_MACROS(type) r_useCubeDepthTexture ? type ",_USING_DEPTH_TEXTURE" : (packFloat ? type ",_PACK_FLOAT" : type)
@@ -210,69 +199,63 @@ static void R_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Clear();
 
 	// base
-	ret.Append(GLSL_SHADER_SOURCE("interaction", &interactionShader, INTERACTION_VERT, INTERACTION_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("shadow", &shadowShader, SHADOW_VERT, SHADOW_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("default", &defaultShader, DEFAULT_VERT, DEFAULT_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("zfill", &depthFillShader, ZFILL_VERT, ZFILL_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("zfillClip", &depthFillClipShader, ZFILLCLIP_VERT, ZFILLCLIP_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("cubemap", &cubemapShader, CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("reflectionCubemap", &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("fog", &fogShader, FOG_VERT, FOG_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("blendLight", &blendLightShader, BLENDLIGHT_VERT, FOG_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphong", &interactionBlinnPhongShader, INTERACTION_VERT, INTERACTION_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
-	ret.Append(GLSL_SHADER_SOURCE("diffuseCubemap", &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("texgen", &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("heatHaze", &heatHazeShader, HEATHAZE_VERT, HEATHAZE_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("colorProcess", &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("interaction", SHADER_INTERACTION, &interactionShader, INTERACTION_VERT, INTERACTION_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("shadow", SHADER_SHADOW, &shadowShader, SHADOW_VERT, SHADOW_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("default", SHADER_DEFAULT, &defaultShader, DEFAULT_VERT, DEFAULT_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("zfill", SHADER_ZFILL, &depthFillShader, ZFILL_VERT, ZFILL_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("zfillClip", SHADER_ZFILLCLIP, &depthFillClipShader, ZFILLCLIP_VERT, ZFILLCLIP_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("cubemap", SHADER_CUBEMAP, &cubemapShader, CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("reflectionCubemap", SHADER_REFLECTIONCUBEMAP, &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("fog", SHADER_FOG, &fogShader, FOG_VERT, FOG_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("blendLight", SHADER_BLENDLIGHT, &blendLightShader, BLENDLIGHT_VERT, FOG_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphong", SHADER_INTERACTIONBLINNPHONG, &interactionBlinnPhongShader, INTERACTION_VERT, INTERACTION_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
+	ret.Append(GLSL_SHADER_SOURCE("diffuseCubemap", SHADER_DIFFUSECUBEMAP, &diffuseCubemapShader, DIFFUSE_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("texgen", SHADER_TEXGEN, &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "", ""));
+
+    // newStage
+	ret.Append(GLSL_SHADER_SOURCE("heatHaze", SHADER_HEATHAZE, &heatHazeShader, HEATHAZE_VERT, HEATHAZE_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", SHADER_HEATHAZEWITHMASK, &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZEWITHMASKANDVERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
+
 	// shadow mapping
 #ifdef _SHADOW_MAPPING
 	// point light
-	ret.Append(GLSL_SHADER_SOURCE("depthPointLight", &depthShader_pointLight, DEPTH_VERT, DEPTH_FRAG, GLSL2_SHADOW_MAPPING_CUBE_MACROS("_POINT_LIGHT"), "_POINT_LIGHT"));
-	ret.Append(GLSL_SHADER_SOURCE("interactionPointLightShadowMapping", &interactionShadowMappingShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_CUBE_MACROS("_POINT_LIGHT"), "_POINT_LIGHT"));
-	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongPointLightShadowMapping", &interactionShadowMappingBlinnPhongShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_CUBE_MACROS("_POINT_LIGHT,BLINN_PHONG"), "_POINT_LIGHT,BLINN_PHONG"));
+	ret.Append(GLSL_SHADER_SOURCE("depthPointLight", SHADER_DEPTHPOINTLIGHT, &depthShader_pointLight, DEPTH_VERT, DEPTH_FRAG, GLSL2_SHADOW_MAPPING_CUBE_MACROS("_POINT_LIGHT"), "_POINT_LIGHT"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionPointLightShadowMapping", SHADER_INTERACTIONPOINTLIGHT, &interactionShadowMappingShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_CUBE_MACROS("_POINT_LIGHT"), "_POINT_LIGHT"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongPointLightShadowMapping", SHADER_INTERACTIONBLINNPHONGPOINTLIGHT, &interactionShadowMappingBlinnPhongShader_pointLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_CUBE_MACROS("_POINT_LIGHT,BLINN_PHONG"), "_POINT_LIGHT,BLINN_PHONG"));
 	// parallel light
-	ret.Append(GLSL_SHADER_SOURCE("depthParallelLight", &depthShader_parallelLight, DEPTH_VERT, DEPTH_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT"), "_PARALLEL_LIGHT"));
-	ret.Append(GLSL_SHADER_SOURCE("interactionParallelLightShadowMapping", &interactionShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT"), "_PARALLEL_LIGHT"));
-	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongParallelLightShadowMapping", &interactionShadowMappingBlinnPhongShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,BLINN_PHONG"), "_PARALLEL_LIGHT,BLINN_PHONG"));
+	ret.Append(GLSL_SHADER_SOURCE("depthParallelLight", SHADER_DEPTHPARALLELLIGHT, &depthShader_parallelLight, DEPTH_VERT, DEPTH_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT"), "_PARALLEL_LIGHT"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionParallelLightShadowMapping", SHADER_INTERACTIONPARALLELLIGHT, &interactionShadowMappingShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT"), "_PARALLEL_LIGHT"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongParallelLightShadowMapping", SHADER_INTERACTIONBLINNPHONGPARALLELLIGHT, &interactionShadowMappingBlinnPhongShader_parallelLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_PARALLEL_LIGHT,BLINN_PHONG"), "_PARALLEL_LIGHT,BLINN_PHONG"));
 	// spot light
-	ret.Append(GLSL_SHADER_SOURCE("depthSpotLight", &depthShader_spotLight, DEPTH_VERT, DEPTH_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_SPOT_LIGHT"), "_SPOT_LIGHT"));
-	ret.Append(GLSL_SHADER_SOURCE("interactionSpotLightShadowMapping", &interactionShadowMappingShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_SPOT_LIGHT"), "_SPOT_LIGHT"));
-	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongSpotLightShadowMapping", &interactionShadowMappingBlinnPhongShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_SPOT_LIGHT,BLINN_PHONG"), "_SPOT_LIGHT,BLINN_PHONG"));
+	ret.Append(GLSL_SHADER_SOURCE("depthSpotLight", SHADER_DEPTHSPOTLIGHT, &depthShader_spotLight, DEPTH_VERT, DEPTH_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_SPOT_LIGHT"), "_SPOT_LIGHT"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionSpotLightShadowMapping", SHADER_INTERACTIONSPOTLIGHT, &interactionShadowMappingShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_SPOT_LIGHT"), "_SPOT_LIGHT"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongSpotLightShadowMapping", SHADER_INTERACTIONBLINNPHONGSPOTLIGHT, &interactionShadowMappingBlinnPhongShader_spotLight, INTERACTION_SHADOW_MAPPING_VERT, INTERACTION_SHADOW_MAPPING_FRAG, GLSL2_SHADOW_MAPPING_2D_MACROS("_SPOT_LIGHT,BLINN_PHONG"), "_SPOT_LIGHT,BLINN_PHONG"));
 	// perforated surface
-	ret.Append(GLSL_SHADER_SOURCE("depthPerforated", &depthPerforatedShader, DEPTH_PERFORATED_VERT, DEPTH_PERFORATED_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("depthPerforated", SHADER_DEPTHPERFORATED, &depthPerforatedShader, DEPTH_PERFORATED_VERT, DEPTH_PERFORATED_FRAG, "", ""));
 #endif
+
 	// translucent stencil shadow
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-	ret.Append(GLSL_SHADER_SOURCE("interactionTranslucent", &interactionTranslucentShader, INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongTranslucent", &interactionBlinnPhongTranslucentShader, INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
+	ret.Append(GLSL_SHADER_SOURCE("interactionTranslucent", SHADER_INTERACTIONTRANSLUCENT, &interactionTranslucentShader, INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongTranslucent", SHADER_INTERACTIONBLINNPHONGTRANSLUCENT, &interactionBlinnPhongTranslucentShader, INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
 #endif
 }
 
-static bool RB_GLSL_LoadShaderProgram(const GLSLShaderProp *prop)
+bool RB_GLSL_LoadShaderProgram(const GLSLShaderProp *prop)
 {
 	const char *vs;
 	const char *fs;
 	const char *macros;
-#ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-	{
-		vs = prop->es3_default_vertex_shader_source.c_str();
-		fs = prop->es3_default_fragment_shader_source.c_str();
-		macros = prop->es3_macros.c_str();
-	}
-	else
-	{
-#endif
-		vs = prop->default_vertex_shader_source.c_str();
-		fs = prop->default_fragment_shader_source.c_str();
-		macros = prop->macros.c_str();
-#ifdef GL_ES_VERSION_3_0
-	}
-#endif
+
+	vs = prop->default_vertex_shader_source.c_str();
+	fs = prop->default_fragment_shader_source.c_str();
+	macros = prop->macros.c_str();
+
 	if(RB_GLSL_LoadShaderProgram(
 			prop->name.c_str(),
+            prop->type,
 			prop->program,
 			vs,
 			fs,
@@ -462,6 +445,9 @@ static bool RB_GLSL_LinkShader(shaderProgram_t *shaderProgram, bool needsAttribu
 	GLint status;
 	GLint linked;
 
+	if(!shaderProgram->vertexShader || !shaderProgram->fragmentShader)
+		return false;
+
 	shaderProgram->program = qglCreateProgram();
 
 	qglAttachShader(shaderProgram->program, shaderProgram->vertexShader);
@@ -615,9 +601,8 @@ static bool RB_GLSL_InitShaders(void)
 	idList<GLSLShaderProp> Props;
 	R_GetShaderSources(Props);
 
-	shaderRequired = true;
-
 	// base shader
+	REQUIRE_SHADER;
 	for(int i = SHADER_BASE_BEGIN; i <= SHADER_BASE_END; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
@@ -626,7 +611,7 @@ static bool RB_GLSL_InitShaders(void)
 	}
 
 	// newStage shader
-	shaderRequired = false;
+	UNNECESSARY_SHADER;
 	for(int i = SHADER_NEW_STAGE_BEGIN; i <= SHADER_NEW_STAGE_END; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
@@ -635,10 +620,10 @@ static bool RB_GLSL_InitShaders(void)
 			common->Printf("[Harmattan]: newStage %d not support!\n", i);
 		}
 	}
-
+	REQUIRE_SHADER;
 
 #ifdef _SHADOW_MAPPING
-	shaderRequired = false;
+	UNNECESSARY_SHADER;
 	for(int i = SHADER_SHADOW_MAPPING_BEGIN; i <= SHADER_SHADOW_MAPPING_END; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
@@ -653,11 +638,11 @@ static bool RB_GLSL_InitShaders(void)
 			break;
 		}
 	}
-	shaderRequired = true;
+	REQUIRE_SHADER;
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-	shaderRequired = false;
+	UNNECESSARY_SHADER;
 	for(int i = SHADER_STENCIL_SHADOW_BEGIN; i <= SHADER_STENCIL_SHADOW_END; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
@@ -672,7 +657,7 @@ static bool RB_GLSL_InitShaders(void)
 			break;
 		}
 	}
-	shaderRequired = true;
+	REQUIRE_SHADER;
 #endif
 
 	return true;
@@ -792,7 +777,7 @@ static GLint RB_GLSL_CreateProgram(GLint vertShader, GLint fragShader, bool need
 	return program;
 }
 
-bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name)
+bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name, int type)
 {
 #ifdef _DEBUG_VERT_SHADER_SOURCE
 	Sys_Printf("---------- Vertex shader source: ----------\n");
@@ -825,6 +810,7 @@ bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *ver
 
 	RB_GLSL_GetUniformLocations(shaderProgram);
 	strncpy(shaderProgram->name, name, sizeof(shaderProgram->name));
+    shaderProgram->type = type;
 
 	shaderManager->Add(shaderProgram);
 
@@ -833,6 +819,7 @@ bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *ver
 
 int RB_GLSL_LoadShaderProgram(
 		const char *name,
+        int type,
 		shaderProgram_t * const program,
 		const char *default_vertex_shader_source,
 		const char *default_fragment_shader_source,
@@ -853,7 +840,7 @@ int RB_GLSL_LoadShaderProgram(
 		common->Printf("[Harmattan]: 2. Load internal shader source\n");
 		idStr vs = RB_GLSL_ExpandMacros(default_vertex_shader_source, macros);
 		idStr fs = RB_GLSL_ExpandMacros(default_fragment_shader_source, macros);
-		if(!RB_GLSL_CreateShaderProgram(program, vs.c_str(), fs.c_str(), name))
+		if(!RB_GLSL_CreateShaderProgram(program, vs.c_str(), fs.c_str(), name, type))
 		{
 			SHADER_ERROR("[Harmattan]: Load internal shader program fail!\n");
 			return -1;
@@ -868,12 +855,13 @@ int RB_GLSL_LoadShaderProgram(
 		RB_GLSL_GetUniformLocations(program);
 		common->Printf("[Harmattan]: Load external shader program success!\n\n");
 		strncpy(program->name, name, sizeof(program->name));
+        program->type = type;
 		shaderManager->Add(program);
 		return 1;
 	}
 }
 
-void R_SaveGLSLShaderSource_f(const idCmdArgs &args)
+void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
 {
 	const char *vs;
 	const char *fs;
@@ -899,28 +887,15 @@ void R_SaveGLSLShaderSource_f(const idCmdArgs &args)
 
 	common->Printf("[Harmattan]: Save GLSL shader source to '%s'\n", path.c_str());
 
-	for(int i = 0; i < SHADER_TOTAL; i++)
+	for(int i = 0; i < SHADER_CUSTOM; i++)
 	{
 		const GLSLShaderProp &prop = Props[i];
 		if(target.Num() > 0 && target.FindIndex(prop.name) < 0)
 			continue;
 
-#ifdef GL_ES_VERSION_3_0
-		if(USING_GLES3)
-		{
-			vs = prop.es3_default_vertex_shader_source.c_str();
-			fs = prop.es3_default_fragment_shader_source.c_str();
-			macros = prop.es3_macros.c_str();
-		}
-		else
-		{
-#endif
-			vs = prop.default_vertex_shader_source.c_str();
-			fs = prop.default_fragment_shader_source.c_str();
-			macros = prop.macros.c_str();
-#ifdef GL_ES_VERSION_3_0
-		}
-#endif
+		vs = prop.default_vertex_shader_source.c_str();
+		fs = prop.default_fragment_shader_source.c_str();
+		macros = prop.macros.c_str();
 
 		idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros);
 		idStr p(path);
@@ -934,4 +909,129 @@ void R_SaveGLSLShaderSource_f(const idCmdArgs &args)
 		fileSystem->WriteFile(p.c_str(), fsSrc.c_str(), fsSrc.Length(), "fs_basepath");
 		common->Printf("GLSL fragment shader: '%s'\n", p.c_str());
 	}
+}
+
+// Convert OpenGL2.0(GLSL 120) shader to GLES2.0(GLSL 100es) or GLES3.x(GLSL 3xx es) for Quake 4 GLSL progs
+/**
+ * Vertex shader
+ * ES2.0
+ * 	+ #version 100
+ * 	+ precision mediump float;
+ * 	+ attribute highp vec4 attr_Vertex;
+ * 	+ attribute highp vec4 attr_TexCoord;
+ * 	+ attribute lowp vec4 attr_Color;
+ *
+ * ES3.0
+ * 	+ #version <version> es
+ * 	+ precision mediump float;
+ * 	+ in highp vec4 attr_Vertex;
+ * 	+ in highp vec4 attr_TexCoord;
+ * 	+ in lowp vec4 attr_Color;
+ *	attribute -> in
+ *	varying -> out
+ * 	ftransform() -> u_modelViewProjectionMatrix * attr_Vertex
+ * 	gl_Vertex -> attr_Vertex
+ * 	gl_MultiTexCoord0 -> attr_TexCoord
+ * 	gl_Color -> (attr_Color / 255.0)
+ */
+idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
+{
+	idStr source = text;
+
+	idStr ver;
+	idStr attribute;
+	if(version == 100)
+	{
+		ver = "100";
+		attribute = "attribute";
+	}
+	else
+	{
+		ver += version;
+		ver += " es";
+		attribute = "in";
+		source.Replace("varying", "out");
+	}
+
+	source.Replace("ftransform()", "u_modelViewProjectionMatrix * attr_Vertex");
+	source.Replace("gl_Vertex", "attr_Vertex");
+	source.Replace("gl_MultiTexCoord0", "attr_TexCoord");
+	source.Replace("gl_Color", "(attr_Color / 255.0)");
+
+	idStr ret;
+	ret += "#version ";
+	ret += ver;
+	ret += "\n";
+	ret += "//#pragma optimize(off)\n";
+	ret += "\n";
+	ret += "precision mediump float;\n";
+	ret += "\n";
+
+	ret += attribute + " highp vec4 attr_Vertex;\n";
+	ret += attribute + " highp vec4 attr_TexCoord;\n";
+	ret += attribute + " lowp vec4 attr_Color;\n";
+	ret += "\n";
+
+	ret += "uniform highp mat4 u_modelViewProjectionMatrix;\n";
+	ret += "\n";
+
+	ret += source;
+
+	return ret;
+}
+
+/**
+ * Fragment shader
+ * ES2.0
+ * 	+ #version 100
+ * 	+ precision mediump float;
+ *
+ * ES3.0
+ * 	+ #version <version> es
+ * 	+ precision mediump float;
+ *	varying -> in
+ * 	+ out vec4 _gl_FragColor;
+ * 	gl_FragColor -> _gl_FragColor
+ * 	texture2D -> texture
+ * 	textureCube -> texture
+ * 	texture2DProj -> textureProj
+ * 	textureCubeProj -> textureProj
+ */
+idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
+{
+	idStr source = text;
+
+	idStr ver;
+	idStr out;
+	if(version == 100)
+	{
+		ver = "100";
+	}
+	else
+	{
+		ver += version;
+		ver += " es";
+		source.Replace("varying", "in");
+		out = "out vec4 _gl_FragColor;\n";
+		source.Replace("gl_FragColor", "_gl_FragColor");
+		source.Replace("texture2D", "texture");
+		source.Replace("texture2DProj", "textureProj");
+		source.Replace("textureCubeProj", "textureProj");
+	}
+
+
+	idStr ret;
+	ret += "#version ";
+	ret += ver;
+	ret += "\n";
+	ret += "//#pragma optimize(off)\n";
+	ret += "\n";
+	ret += "precision mediump float;\n";
+	ret += "\n";
+
+	ret += out;
+
+	ret += source;
+
+	return ret;
 }

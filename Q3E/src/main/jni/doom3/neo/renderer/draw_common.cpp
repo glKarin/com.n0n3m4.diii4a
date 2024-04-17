@@ -601,6 +601,53 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		if ((pStage->drawStateBits & (GLS_SRCBLEND_BITS|GLS_DSTBLEND_BITS)) == (GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE)) {
 			continue;
 		}
+#ifdef _RAVEN //karin: GLSL newShaderStage
+		// see if we are a new-style stage
+		rvNewShaderStage *newShaderStage = pStage->newShaderStage;
+
+		if (newShaderStage) {
+			//--------------------------
+			//
+			// new style stages GLSL
+			//
+			//--------------------------
+			if ( r_skipNewAmbient.GetBool() ) {
+				continue;
+			}
+
+			if(!newShaderStage->Bind())
+				continue;
+
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), &ac->color);
+
+				// set standard transformations
+				GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mat);
+			//============================================================================
+
+			newShaderStage->BindUniform(regs);
+
+			GL_State( pStage->drawStateBits );
+
+			RB_DrawElementsWithCounters( tri );
+
+			newShaderStage->UnbindUniform();
+
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+
+			GL_SelectTextureForce(0);
+			newShaderStage->Unbind();
+
+			continue;
+		}
+#endif
 
 		// see if we are a new-style stage
 		newShaderStage_t *newStage = pStage->newStage;
@@ -622,20 +669,8 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			if(!shaderProgram)
 				continue;
 			GL_UseProgram((shaderProgram_t *)shaderProgram);
-			int type;
-			if(shaderProgram == &heatHazeShader)
-				type = SHADER_HEATHAZE;
-			else if(shaderProgram == &heatHazeWithMaskShader)
-				type = SHADER_HEATHAZEWITHMASK;
-			else if(shaderProgram == &heatHazeWithMaskAndVertexShader)
-				type = SHADER_HEATHAZEWITHMASKANDVERTEX;
-			else if(shaderProgram == &colorProcessShader)
-				type = SHADER_COLORPROCESS;
-			else
-			{
-				common->Warning("Unexpected newStage shader: %s", shaderProgram->name);
-				continue; // Error
-			}
+			int type = shaderProgram->type;
+			assert(type >= SHADER_NEW_STAGE_BEGIN && type <= SHADER_NEW_STAGE_END);
 			int index = type - SHADER_NEW_STAGE_BEGIN;
 
 			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
@@ -673,41 +708,9 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 
 				// obsolete: screen power of two correction factor, assuming the copy to _currentRender
 				// also copied an extra row and column for the bilerp
-				int w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
-				int h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
-				int ow = MakePowerOfTwo(w);
-				int oh = MakePowerOfTwo(h);
 				// if is pot, glUniform4f(1, 1, 0, 1);
-				GL_Uniform4f(SHADER_PARM_ADDR(u_uniformParm[0]), (float) w / (float) ow,
-							 (float) h / (float) oh, 0, 1); // scalePotToWindow
 				// window coord to 0.0 to 1.0 conversion
-				GL_Uniform4f(SHADER_PARM_ADDR(u_uniformParm[1]),
-							 1.0f / (float) w,
-							 1.0f / (float) h,
-							 0, 1); // scaleWindowToUnit
-				// #3877: Allow shaders to access depth buffer.
-				// Two useful ratios are packed into this parm: [0] and [1] hold the x,y multipliers you need to map a screen
-				// coordinate (fragment position) to the depth image: those are simply the reciprocal of the depth
-				// image size, which has been rounded up to a power of two. Slots [2] and [3] hold the ratio of the depth image
-				// size to the current render image size. These sizes can differ if the game crops the render viewport temporarily
-				// during post-processing effects. The depth render is smaller during the effect too, but the depth image doesn't
-				// need to be downsized, whereas the current render image does get downsized when it's captured by the game after
-				// the skybox render pass. The ratio is needed to map between the two render images.
-				/*	GL_Uniform4f(offsetof(shaderProgram_t, u_uniformParm[7]),
-							1.0f / ow,
-							1.0f / oh,
-							1,
-							1
-					);
-
-					// set eye position in global space
-					idVec3 viewOriginGlobal = backEnd.viewDef->renderView.vieworg;
-					GL_Uniform4f(SHADER_PARM_ADDR(eyeOrigin), viewOriginGlobal.x, viewOriginGlobal.y, viewOriginGlobal.z, 1.0f);
-					// set eye position in model space
-					idVec3 viewOriginLocal;
-					R_GlobalPointToLocal( drawSurf->space->modelMatrix, viewOriginGlobal, viewOriginLocal );
-					GL_Uniform4f(SHADER_PARM_ADDR(localViewOrigin), viewOriginLocal.x, viewOriginLocal.y, viewOriginLocal.z, 1.0f);
-					*/
+				RB_SetProgramEnvironment();
 				newStageUniformIsSet[index] = true;
 			}
 
@@ -934,13 +937,20 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	// if we are about to draw the first surface that needs
 	// the rendering in a texture, copy it over
-	if (drawSurfs[0]->material->GetSort() >= SS_POST_PROCESS) {
+	if (drawSurfs[0]->material->GetSort() >= SS_POST_PROCESS
+#ifdef _RAVEN //karin: sniper's blur is 2D and has flag `MF_NEED_CURRENT_RENDER`
+		|| drawSurfs[0]->material->TestMaterialFlag(MF_NEED_CURRENT_RENDER)
+#endif
+	) {
 		if (r_skipPostProcess.GetBool()) {
 			return 0;
 		}
 
 		// only dump if in a 3d view
-		if (backEnd.viewDef->viewEntitys) {
+#if !defined(_RAVEN) //karin: sniper's blur is 2D //TODO: check it for avoid unused operation
+		if (backEnd.viewDef->viewEntitys)
+#endif
+		{
 			globalImages->currentRenderImage->CopyFramebuffer(backEnd.viewDef->viewport.x1,
 			                backEnd.viewDef->viewport.y1,  backEnd.viewDef->viewport.x2 -  backEnd.viewDef->viewport.x1 + 1,
 			                backEnd.viewDef->viewport.y2 -  backEnd.viewDef->viewport.y1 + 1, true);

@@ -7,8 +7,8 @@ precision mediump float;
 
 uniform sampler2D u_fragmentMap0;
 uniform sampler2D u_fragmentMap1;
-uniform highp vec4 u_uniformParm0; // u_scalePotToWindow
-uniform highp vec4 u_uniformParm1; // u_scaleWindowToUnit
+uniform highp vec4 u_nonPowerOfTwo;
+uniform highp vec4 u_windowCoords;
 in highp vec4 var_TexCoord1;
 in highp vec4 var_TexCoord2;
 out vec4 _gl_FragColor;
@@ -25,10 +25,10 @@ void main(void)
     vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;
     vec2 localNormal = bumpMap.wy;
     // calculate the screen texcoord in the 0.0 to 1.0 range
-    vec2 screenTexCoord = (gl_FragCoord.xy ) * u_uniformParm1.xy;
+    vec2 screenTexCoord = (gl_FragCoord.xy ) * u_windowCoords.xy;
     screenTexCoord += ( localNormal * var_TexCoord2.xy );
     screenTexCoord = clamp( screenTexCoord, vec2(0.0), vec2(1.0) );
-    screenTexCoord = screenTexCoord * u_uniformParm0.xy;
+    screenTexCoord = screenTexCoord * u_nonPowerOfTwo.xy;
     _gl_FragColor = texture( u_fragmentMap0, screenTexCoord );
 
 #else // 2004
@@ -45,7 +45,7 @@ void main(void)
     //localNormal.z = sqrt(max(0.0, 1.0-localNormal.x*localNormal.x-localNormal.y*localNormal.y));
 
     // # calculate the screen texcoord in the 0.0 to 1.0 range
-    R0 = (gl_FragCoord) * (u_uniformParm1); // MUL  R0, fragment.position, program.env[1];
+    R0 = (gl_FragCoord) * (u_windowCoords); // MUL  R0, fragment.position, program.env[1];
 
     //localNormal.x /= localNormal.z;
     //localNormal.y /= localNormal.z;
@@ -54,7 +54,7 @@ void main(void)
     R0 = clamp((localNormal) * (var_TexCoord2) + (R0), 0.0, 1.0); // MAD_SAT R0, localNormal, fragment.texcoord[2], R0;
 
     // # scale by the screen non-power-of-two-adjust
-    R0 = (R0) * (u_uniformParm0); // MUL  R0, R0, program.env[0];
+    R0 = (R0) * (u_nonPowerOfTwo); // MUL  R0, R0, program.env[0];
 
     // # load the screen render
     _gl_FragColor = texture(u_fragmentMap0, R0.xy); // TEX  result.color.xyz, R0, texture[0], 2D;

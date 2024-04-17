@@ -249,7 +249,7 @@ void R_RenderGuiSurf(idUserInterface *gui, drawSurf_t *drawSurf)
 			const srfTriangles_t	*tri;
 			const float *defModelMatrix = drawSurf->space->modelMatrix;
 
-			tri = drawSurf->geo; //tri = drawSurf->origGeo;
+			tri = drawSurf->geo; //tri = drawSurf->geoOrig;
 
 			R_CalcGuiRangeInWindow(gui, tri, defModelMatrix);
 			// reset mark

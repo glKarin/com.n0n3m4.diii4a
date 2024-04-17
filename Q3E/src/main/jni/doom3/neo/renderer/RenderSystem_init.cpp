@@ -2233,8 +2233,8 @@ void R_InitCommands(void)
 	extern void R_ConvertImage_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
 #endif
-	extern void R_SaveGLSLShaderSource_f(const idCmdArgs &args);
-	cmdSystem->AddCommand("saveGLSLShaderSource", R_SaveGLSLShaderSource_f, CMD_FL_RENDERER, "save GLSL shader source to game data directory");
+	extern void R_ExportGLSLShaderSource_f(const idCmdArgs &args);
+	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory");
 #ifdef _EXTRAS_TOOLS
 	MD5Anim_AddCommand();
 	ModelTest_AddCommand();
