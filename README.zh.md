@@ -1,6 +1,6 @@
 ## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006) for Android/Linux
-#### 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版. 
+#### DOOM III/Quake 4/Prey(2006) for Android/Windows/Linux OpenGLES
+#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版. 
 #### 原名DIII4A++, 基于n0n3m4的diii4a的OpenGLES版本.
 **最新版本:**
 1.1.0harmattan39(natasha)  
@@ -33,6 +33,17 @@ GPLv3
 * 雷神之锤3竞技场/雷神之锤3团队竞技场(ioquake3)
 * 重返德军总部(iortcw)
 * The Dark Mod
+
+###### 和其他OpenGLES移植版本比较
+
+| 功能支持                                                                             |       idTech4A++        |                 其他                  |
+|:---------------------------------------------------------------------------------|:-----------------------:|:-----------------------------------:|
+| 多线程渲染                                                                            |   支持<br/>(但是不支持游戏中切换)   | d3es-multithread 支持<br/>(并且支持游戏中切换) |
+| 新渲染着色器<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess) |           支持            |                  -                  |
+| 纹理坐标生成着色器                                                                        |           支持            |                  -                  |
+| 基于阴影图的纯软阴影                                                                       |           支持            |                  -                  |
+| 半透明模板阴影                                                                          |           支持            |                  -                  |
+| OpenGL ES版本                                                                      | 2.0和3.0+<br/>(阴影映射着色器有各自的版本) |            2.0(3.0+下兼容)             |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"

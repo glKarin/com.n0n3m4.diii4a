@@ -1,6 +1,6 @@
 ## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006) for Android/Linux
-#### 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版.
+#### DOOM III/Quake 4/Prey(2006) for Android/Windows/Linux OpenGLES
+#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版.
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
 1.1.0harmattan39(natasha)  
@@ -34,6 +34,17 @@ GPLv3
 * Return to Castle Wolfenstein(iortcw)
 * The Dark Mod
 
+###### Compare with other OpenGLES rendering version
+
+| Feature                                                                                    |                         idTech4A++                         |                            Other                            |
+|:-------------------------------------------------------------------------------------------|:----------------------------------------------------------:|:-----------------------------------------------------------:|
+| Multi-threading                                                                            |          Support<br/>(but can't switch in gaming)          | d3es-multithread support<br/>(and support switch in gaming) |
+| New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess) |                            Yes                             |                              -                              |
+| TexGen shader                                                                              |                            Yes                             |                              -                              |
+| Shadow mapping for pure soft shadow                                                        |                            Yes                             |                              -                              |
+| Translucent stencil shadow                                                                 |                            Yes                             |                              -                              |
+| OpenGL ES version                                                                          | 2.0 and 3.0+<br/>(shadow mapping shaders has different version) |                      2.0(3.0+ compat)                       |
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
@@ -41,9 +52,9 @@ GPLv3
 Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
 Tag with `-free` only for F-Droid update.
 
-| Feature | Github | F-Droid |
-|:-|:-:|:-:|
-| Ouya TV | Yes | No |
+| Feature | Github | F-Droid  |
+|:--------|:------:|:--------:|
+| Ouya TV |   Yes  |    No    |
 
 ----------------------------------------------------------------------------------
 ### Update
