@@ -734,10 +734,6 @@ typedef struct {
 	glstate_t			glState;
 
 	int					c_copyFrameBuffer;
-#ifdef _HUMANHEAD //k: scope view support: in multithread
-	bool scopeView;
-	bool shuttleView;
-#endif
 #ifdef _SHADOW_MAPPING
     float		shadowV[6][16];				// shadow depth view matrix
     float		shadowP[6][16];				// shadow depth projection matrix

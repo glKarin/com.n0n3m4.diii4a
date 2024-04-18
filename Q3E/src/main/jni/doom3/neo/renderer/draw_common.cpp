@@ -560,7 +560,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		pStage = shader->GetStage(stage);
 
 #ifdef _HUMANHEAD //k: scope view support
-		if(backEnd.scopeView /*tr.IsScopeView()*/)
+		if(tr.IsScopeView())
 		{
 			if(pStage->isNotScopeView)
 				continue;
@@ -570,7 +570,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			if(pStage->isScopeView)
 				continue;
 		}
-		if(!backEnd.shuttleView /*!tr.IsShuttleView()*/)
+		if(!tr.IsShuttleView())
 		{
 			if(pStage->isShuttleView)
 				continue;
