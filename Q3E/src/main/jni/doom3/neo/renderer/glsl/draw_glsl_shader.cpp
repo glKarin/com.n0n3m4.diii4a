@@ -64,27 +64,37 @@ static bool RB_GLSL_LoadShaderProgram(const GLSLShaderProp *prop);
 #include "glsl_program.h"
 #undef GLSL_PROGRAM_PROC
 
-int idGLSLShaderManager::Add(const shaderProgram_t *shader)
+int idGLSLShaderManager::Add(shaderProgram_t *shader)
 {
 	if(!shader)
 		return -1;
 	if(!shader->program)
 	{
-		common->Warning("idGLSLShaderManager::Add shader's program handle is 0");
+		common->Warning("idGLSLShaderManager::Add shader's program handle is 0!");
 		return -1;
 	}
 	const shaderProgram_t *c = Find(shader->name);
 	if(c && c != shader)
 	{
-		common->Warning("idGLSLShaderManager::Add shader's name is dup '%s'", shader->name);
+		common->Warning("idGLSLShaderManager::Add shader's name is dup '%s'!", shader->name);
 		return -1;
 	}
-	common->Printf("idGLSLShaderManager::Add shader program '%s'\n", shader->name);
+	common->Printf("idGLSLShaderManager::Add shader program '%s'.\n", shader->name);
 	return shaders.Append(shader);
 }
 
 void idGLSLShaderManager::Clear(void)
 {
+	for(int i = 0; i < shaders.Num(); i++)
+	{
+		shaderProgram_t *shader = shaders[i];
+		// free all custom shaders
+		if(shader->type == SHADER_CUSTOM) // TOOD: tell rvNewShaderStage
+		{
+			printf("[Harmattan]: GLSL shader manager::free loaded custom shader '%s'.\n", shader->name);
+			free(shader);
+		}
+	}
 	shaders.Clear();
 }
 
@@ -112,35 +122,49 @@ const shaderProgram_t * idGLSLShaderManager::Find(GLuint handle) const
 	return NULL;
 }
 
-const shaderProgram_t * idGLSLShaderManager::AddLoadQueue(const GLSLShaderProp &inProp)
+const shaderProgram_t * idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 {
 	const shaderProgram_t *c;
 
 	c = Find(inProp.name.c_str());
 	if(c)
+	{
+		common->Printf("[Harmattan]: GLSL shader manager::Load shader '%s' has loaded.\n", inProp.name.c_str());
 		return c;
+	}
 
-	// TODO: free it
+	for(int i = 0; i < queue.Num(); i++)
+	{
+		GLSLShaderProp &prop = queue[i];
+		if(!idStr::Icmp(inProp.name.c_str(), prop.name.c_str()))
+		{
+			common->Printf("[Harmattan]: GLSL shader manager::Load shader '%s' has already.\n", inProp.name.c_str());
+			return prop.program;
+		}
+	}
+
 	shaderProgram_t *shader = (shaderProgram_t *)malloc(sizeof(*shader));
 	memset(shader, 0, sizeof(*shader));
 	shader->program = -1;
+	strncpy(shader->name, inProp.name.c_str(), sizeof(shader->name));
 	GLSLShaderProp prop;
 	prop = inProp;
 	prop.program = shader;
 	queue.Append(prop);
 	c = shader;
+	common->Printf("[Harmattan]: GLSL shader manager::Load shader push '%s' into queue.\n", prop.name.c_str());
 
 #ifdef _MULTITHREAD // in multi-threading, push on queue and load on backend
 	if(!multithreadActive)
-		LoadFromQueue();
+		ActuallyLoad();
 #else
-	LoadFromQueue();
+	ActuallyLoad();
 #endif
 
 	return c;
 }
 
-void idGLSLShaderManager::LoadFromQueue(void)
+void idGLSLShaderManager::ActuallyLoad(void)
 {
 	const shaderProgram_t *c;
 
@@ -160,12 +184,26 @@ void idGLSLShaderManager::LoadFromQueue(void)
 			continue;
 		}
 
+		common->Printf("[Harmattan]: GLSL shader manager::ActuallyLoad shader '%s'.\n", prop.name.c_str());
 		if(RB_GLSL_LoadShaderProgram(&prop))
-			Add(c);
+			Add(prop.program);
 
 		queue.RemoveIndex(0);
 	}
 	shaderRequired = B;
+}
+
+idGLSLShaderManager::~idGLSLShaderManager()
+{
+	printf("[Harmattan]: GLSL shader manager destroying......\n");
+	while(queue.Num())
+	{
+		GLSLShaderProp &prop = queue[0];
+		printf("[Harmattan]: GLSL shader manager::free unloaded custom shader '%s'.\n", prop.name.c_str());
+		delete prop.program;
+		queue.RemoveIndex(0);
+	}
+	Clear();
 }
 
 idGLSLShaderManager idGLSLShaderManager::_shaderManager;

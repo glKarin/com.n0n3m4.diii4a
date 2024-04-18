@@ -3,6 +3,19 @@
 
 #include "../../renderer/tr_local.h"
 
+#if 0
+#define NSS_DEBUG(x) x
+#else
+#define NSS_DEBUG(x)
+#endif
+
+template<class T>
+void rvNewShaderStageParm__Init(rvNewShaderStage::rvNewShaderStageParm<T> *p) {
+    p->index = -1;
+    p->location = -1;
+    p->numValue = 0;
+}
+
 extern idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version);
 extern idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version);
 
@@ -183,7 +196,7 @@ bool rvNewShaderStage::ParseShaderTexture(idLexer &src, idMaterial *material)
 
     p->value = globalImages->ImageFromFile(str, tf, allowPicmip, trp, td, cubeMap);
 
-    //common->Printf("BBB %d %s\n", numShaderTextures+1, p->value?p->value->imgName.c_str():"NULL");
+    NSS_DEBUG(common->Printf("NSS shaderTexture: %d %s\n", numShaderTextures+1, p->value?p->value->imgName.c_str():"NULL"));
     if (!p->value) {
         p->value = globalImages->defaultImage;
     }
@@ -202,7 +215,7 @@ bool rvNewShaderStage::ParseGLSLProgram(idLexer &src, idMaterial *material)
             token.StripFileExtension();
             if(!LoadGLSLProgram(token.c_str()))
                 shaderProgram = NULL;
-            //common->Printf("PPP glslProgram %s %p\n", material->GetName(), shaderProgram);
+            NSS_DEBUG(common->Printf("NSS glslProgram: %s -> %s\n", material->GetName(), shaderProgram ? shaderProgram->name : "NULL"));
             return shaderProgram != NULL;
         }
     }
@@ -254,7 +267,7 @@ void rvNewShaderStage::BindUniform(const float *regs)
 
 bool rvNewShaderStage::Bind(void)
 {
-    if(!shaderProgram || shaderProgram->program <= 0)
+    if(!IsValid())
         return false;
 
     GL_UseProgram((shaderProgram_t *)shaderProgram);
@@ -306,13 +319,13 @@ bool rvNewShaderStage::LoadGLSLProgram(const char *name)
     idStr vertexSource;
     if(!LoadSource(name, "glslvp", vertexSource))
     {
-        common->Warning("Load GLSL vertex shader source fail: %s", name);
+        common->Warning("Load GLSL vertex shader source fail: %s.", name);
         return false;
     }
     idStr fragmentSource;
     if(!LoadSource(name, "glslfp", fragmentSource))
     {
-        common->Warning("Load GLSL fragment shader source fail: %s", name);
+        common->Warning("Load GLSL fragment shader source fail: %s.", name);
         return false;
     }
 
@@ -325,10 +338,10 @@ bool rvNewShaderStage::LoadGLSLProgram(const char *name)
     prop.default_fragment_shader_source = fragmentSource;
     common->Printf("Vertex shader:\n%s\n\n", vertexSource.c_str());
     common->Printf("Fragment shader:\n%s\n\n", fragmentSource.c_str());
-    shader = shaderManager->AddLoadQueue(prop);
+    shader = shaderManager->Load(prop);
     if(!shader)
     {
-        common->Warning("Load GLSL shader program fail: %s", name);
+        common->Warning("Load GLSL shader program fail: %s.", name);
         return false;
     }
     shaderProgram = shader;

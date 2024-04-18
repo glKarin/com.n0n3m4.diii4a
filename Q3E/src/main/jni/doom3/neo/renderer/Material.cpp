@@ -31,6 +31,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#if 0
+#define NS_DEBUG(x) x
+#else
+#define NS_DEBUG(x)
+#endif
+
 /*
 
 Any errors during parsing just set MF_DEFAULTED and return, rather than throwing
@@ -1241,7 +1247,7 @@ void idMaterial::ParseFragmentMap(idLexer &src, newShaderStage_t *newStage)
 	newStage->fragmentProgramImages[unit] =
 	        globalImages->ImageFromFile(str, tf, allowPicmip, trp, td, cubeMap);
 
-    //common->Printf("AAA %d %s\n", unit, newStage->fragmentProgramImages[unit]?newStage->fragmentProgramImages[unit]->imgName.c_str():"NULL");
+	NS_DEBUG(common->Printf("NS fragmentImage: %d %s\n", unit, newStage->fragmentProgramImages[unit]?newStage->fragmentProgramImages[unit]->imgName.c_str():"NULL"));
 
 	if (!newStage->fragmentProgramImages[unit]) {
 		newStage->fragmentProgramImages[unit] = globalImages->defaultImage;
@@ -1800,7 +1806,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
                 {
                     token.StripFileExtension();
                     const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
-                    //common->Printf("QQQ program %s %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL");
+					NS_DEBUG(common->Printf("NS program: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
                     if(shaderProgram && shaderProgram->program > 0)
                         newStage.glslProgram = shaderProgram->program;
                     else
@@ -1822,7 +1828,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
                 {
                     token.StripFileExtension();
                     const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
-                    //common->Printf("QQQ fragmentProgram %s %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL");
+					NS_DEBUG(common->Printf("NS fragmentProgram: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
                     if(shaderProgram && shaderProgram->program > 0)
                         newStage.glslProgram = shaderProgram->program;
                     else
@@ -1844,7 +1850,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
                 {
                     token.StripFileExtension();
                     const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
-                    //common->Printf("QQQ vertexProgram %s %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL");
+					NS_DEBUG(common->Printf("NS vertexProgram: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
                     if(shaderProgram && shaderProgram->program > 0)
                         newStage.glslProgram = shaderProgram->program;
                     else
@@ -3304,7 +3310,7 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 					float f = 0.0;
 					if (stages && !r_skipNewAmbient.GetBool()) {
 						for (int m = 0; m < numStages; m++) {
-							if (stages[ m ].newShaderStage) {
+							if (stages[ m ].newShaderStage && stages[ m ].newShaderStage->IsValid()) {
 								f = 1.0;
 								break;
 							}

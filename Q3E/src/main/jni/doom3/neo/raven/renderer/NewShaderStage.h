@@ -26,6 +26,11 @@ public:
     void UnbindUniform(void);
     void Unbind(void);
 
+    // state
+    bool IsValid(void) const {
+        return shaderProgram && shaderProgram->program > 0;
+    }
+
     template<class T>
     struct rvNewShaderStageParm {
         int index; // order, start with 0
@@ -50,13 +55,6 @@ private:
             return p->location;
         p->location = qglGetUniformLocation(shaderProgram->program, p->name.c_str());
         return p->location;
-    }
-
-    template<class T>
-    friend void rvNewShaderStageParm__Init(rvNewShaderStageParm<T> *p) {
-        p->index = -1;
-        p->location = -1;
-        p->numValue = 0;
     }
 };
 

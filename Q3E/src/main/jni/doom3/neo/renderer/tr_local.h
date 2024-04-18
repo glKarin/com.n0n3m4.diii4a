@@ -1717,16 +1717,18 @@ struct GLSLShaderProp
 class idGLSLShaderManager
 {
 public:
-	int Add(const shaderProgram_t *shader);
+	~idGLSLShaderManager();
+	int Add(shaderProgram_t *shader); // return num of shaders
 	void Clear(void);
 	const shaderProgram_t * Find(const char *name) const;
-	const shaderProgram_t * Find(GLuint handle) const;
+	const shaderProgram_t * Find(GLuint handle) const; // handle is OpenGL shader program's handle
+	const shaderProgram_t * Load(const GLSLShaderProp &prop); // frontend: if in multi-threading, only add on queue, because current thread has not OpenGL context; else if not in multi-threading, actual load directly. however always return a shader program handle, if not load, shaderProgram_t::program = -1.
+	void ActuallyLoad(void); // backend: if in multi-threading, load actually from queue with OpenGL context
+
 	static idGLSLShaderManager _shaderManager;
-	const shaderProgram_t * AddLoadQueue(const GLSLShaderProp &prop); // frontend
-	void LoadFromQueue(void); // backend
 
 private:
-	idList<const shaderProgram_t *> shaders;
+	idList<shaderProgram_t *> shaders;
 	idList<GLSLShaderProp> queue;
 
 private:
