@@ -339,6 +339,28 @@ static int RB_GLSL_ParseMacros(const char *macros, idStrList &ret)
 	return counter;
 }
 
+static idStr RB_GLSL_SetupPrecision(const char *source, const char *precision)
+{
+    if(!precision || !precision[0])
+        return idStr(source);
+
+    idStr res(source);
+    res.Replace("precision", "// precision");
+
+    int index = res.Find("#version");
+    if(index == -1)
+    SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
+
+    index = res.Find('\n', index);
+    if(index == -1 || index + 1 == res.Length())
+    SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
+
+    res.Insert(idStr("precision ") + precision + " float;\n", index + 1);
+
+    //printf("%d|%s|\n%s\n", n, macros, res.c_str());
+    return res;
+}
+
 static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros)
 {
 	if(!macros || !macros[0])

@@ -22,7 +22,7 @@
 #version 300 es
 //#pragma optimize(off)
 
-precision mediump float;
+precision highp float;
 
 /*
  * Pixel values between vertices are interpolated by Gouraud shading by default,
