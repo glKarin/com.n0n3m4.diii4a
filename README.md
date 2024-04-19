@@ -171,9 +171,11 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 
 #### Linux
 > 1. REQUIRE ALSA, zlib, X11, EGL
+> 2. ./cmake_linux_build.sh
 
 #### Windows(MinGW/MSVC)
 > 1. REQUIRE SDL2, zlib, cURL
+> 2. cmake_msvc_build.bat
 
 ----------------------------------------------------------------------------------
 

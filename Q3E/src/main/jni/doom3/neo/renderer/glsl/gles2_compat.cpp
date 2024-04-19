@@ -526,10 +526,10 @@ static void glEnd()
 				GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 				color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
 				GLubyte glColor[] = {
-					gl_Color[0] * 255,
-					gl_Color[1] * 255,
-					gl_Color[2] * 255,
-					gl_Color[3] * 255,
+					(GLubyte)(gl_Color[0] * 255),
+					(GLubyte)(gl_Color[1] * 255),
+					(GLubyte)(gl_Color[2] * 255),
+					(GLubyte)(gl_Color[3] * 255),
 				};
 				for(int i = 0; i < numIndex; i++)
 				{

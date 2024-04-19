@@ -172,9 +172,11 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 
 #### Linux
 > 1. 需要 ALSA, zlib, X11, EGL
+> 2. ./cmake_linux_build.sh
 
 #### Windows(MinGW/MSVC)
 > 1. 需要 SDL2, zlib, cURL
+> 2. cmake_msvc_build.bat
 
 ----------------------------------------------------------------------------------
 
