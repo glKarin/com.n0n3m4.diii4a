@@ -1,7 +1,7 @@
 #version 100
 //#pragma optimize(off)
 
-precision mediump float;
+precision highp float;
 
 attribute highp vec4 attr_Vertex;
 

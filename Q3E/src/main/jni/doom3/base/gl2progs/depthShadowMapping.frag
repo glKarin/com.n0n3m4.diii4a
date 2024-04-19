@@ -7,7 +7,7 @@
 #version 100
 //#pragma optimize(off)
 
-precision mediump float;
+precision highp float;
 
 #ifdef _PACK_FLOAT
 vec4 pack (highp float depth)

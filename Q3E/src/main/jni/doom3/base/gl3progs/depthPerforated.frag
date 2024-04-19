@@ -5,7 +5,7 @@
 #version 300 es
 //#pragma optimize(off)
 
-precision mediump float;
+precision highp float;
 
 uniform sampler2D u_fragmentMap0;
 uniform lowp float u_alphaTest;

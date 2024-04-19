@@ -5,7 +5,7 @@
 #version 300 es
 //#pragma optimize(off)
 
-precision mediump float;
+precision highp float;
 
 out vec4 _gl_FragColor;
 
