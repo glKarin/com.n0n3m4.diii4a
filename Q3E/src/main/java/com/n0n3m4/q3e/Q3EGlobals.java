@@ -62,6 +62,11 @@ public final class Q3EGlobals
     public static final int ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK = 2;
     public static final int ONSCRREN_SLIDER_STYLE_DOWN_RIGHT_SPLIT_CLICK = 3;
 
+    // on-screen joystick visible
+    public static final int ONSCRREN_JOYSTICK_VISIBLE_ALWAYS = 0;
+    public static final int ONSCRREN_JOYSTICK_VISIBLE_HIDDEN = 1;
+    public static final int ONSCRREN_JOYSTICK_VISIBLE_ONLY_PRESSED = 2;
+
     // game state
     public static final int STATE_NONE = 0;
     public static final int STATE_ACT = 1; // RTCW4A-specific, keep

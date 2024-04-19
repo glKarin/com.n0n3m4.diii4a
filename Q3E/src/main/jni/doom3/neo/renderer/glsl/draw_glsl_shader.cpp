@@ -104,14 +104,17 @@ const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
 	{
 		const shaderProgram_t *shader = shaders[i];
 		if(!idStr::Icmp(name, shader->name))
-			return shader;
+        {
+            common->Printf("[Harmattan]: GLSL shader manager::Find '%s' -> %d %s.\n", shader->name, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "internal");
+            return shader;
+        }
 	}
 	return NULL;
 }
 
 const shaderProgram_t * idGLSLShaderManager::Find(GLuint handle) const
 {
-	if(handle <= 0)
+	if(handle == 0)
 		return NULL;
 	for (int i = 0; i < shaders.Num(); i++)
 	{

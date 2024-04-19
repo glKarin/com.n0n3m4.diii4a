@@ -74,6 +74,18 @@
         <item>ru</item>
     </string-array>
 
+    <integer-array name="joystick_visible_mode_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </integer-array>
+
+    <string-array name="joystick_visible_mode_names">
+        <item>Always</item>
+        <item>Hidden</item>
+        <item>Only pressed</item>
+    </string-array>
+
     <string-array name="key_map_names">
         <item>Mouse 1</item>
         <item>Mouse 2</item>

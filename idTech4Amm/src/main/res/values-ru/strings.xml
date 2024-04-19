@@ -296,5 +296,6 @@
     <string name="scroll_to_bottom">Bottom</string>
     <string name="scroll">Scroll</string>
     <string name="pause">Pause</string>
+    <string name="joystick_visible">Joystick visible:</string>
 
 </resources>
