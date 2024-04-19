@@ -12,7 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 300 es
+#version 140
 
 uniform sampler2D u_normalTexture;
 uniform samplerCube u_texture0;

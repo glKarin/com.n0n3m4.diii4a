@@ -54,6 +54,6 @@ void main() {
 	
 	// load the screen render
 	//draw_Color.xyz = texture(u_texture0, R0.xy).xyz;                                                    //TEX		result.color.xyz, R0, texture[0], 2D;
-	draw_Color = texture(u_texture0, R0.xy);                                                    //TEX		result.color.xyz, R0, texture[0], 2D;
+	draw_Color = min( (texture(u_texture0, R0.xy)), vec4(0.2, 0.2, 0.2, 1.0));                      //TEX		result.color.xyz, R0, texture[0], 2D;
 	
 }

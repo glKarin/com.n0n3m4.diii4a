@@ -12,7 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 300 es
+#version 330 core
 
 #pragma tdm_include "tdm_utils.glsl"
 #pragma tdm_include "stages/surface_passes/texgen_shared.glsl"

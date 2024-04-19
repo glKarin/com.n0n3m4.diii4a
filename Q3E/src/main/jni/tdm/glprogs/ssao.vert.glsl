@@ -1,4 +1,4 @@
-#version 300 es
+#version 330
 
 out vec2 var_TexCoord;
 out vec2 var_ViewRayXY;
