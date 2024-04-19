@@ -621,10 +621,12 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
 			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Normal));
 
 				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
 				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
 				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), &ac->color);
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
 
 				// set standard transformations
 				GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mat);
@@ -641,6 +643,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
 			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Normal));
 
 			GL_SelectTextureForce(0);
 			newShaderStage->Unbind();

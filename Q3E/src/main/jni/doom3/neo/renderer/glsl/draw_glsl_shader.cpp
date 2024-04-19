@@ -187,6 +187,8 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		common->Printf("[Harmattan]: GLSL shader manager::ActuallyLoad shader '%s'.\n", prop.name.c_str());
 		if(RB_GLSL_LoadShaderProgram(&prop))
 			Add(prop.program);
+		else
+			common->Warning("[Harmattan]: GLSL shader manager::ActuallyLoad shader '%s' error!", prop.name.c_str());
 
 		queue.RemoveIndex(0);
 	}
@@ -980,6 +982,12 @@ void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
  * 	+ attribute highp vec4 attr_Vertex;
  * 	+ attribute highp vec4 attr_TexCoord;
  * 	+ attribute lowp vec4 attr_Color;
+ * 	+ attribute vec3 attr_Normal;
+ * 	ftransform() -> u_modelViewProjectionMatrix * attr_Vertex
+ * 	gl_Vertex -> attr_Vertex
+ * 	gl_MultiTexCoord0 -> attr_TexCoord
+ * 	gl_Color -> (attr_Color / 255.0)
+ * 	gl_Normal -> attr_Normal
  *
  * ES3.0
  * 	+ #version <version> es
@@ -987,12 +995,14 @@ void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
  * 	+ in highp vec4 attr_Vertex;
  * 	+ in highp vec4 attr_TexCoord;
  * 	+ in lowp vec4 attr_Color;
+ * 	+ in vec3 attr_Normal;
  *	attribute -> in
  *	varying -> out
  * 	ftransform() -> u_modelViewProjectionMatrix * attr_Vertex
  * 	gl_Vertex -> attr_Vertex
  * 	gl_MultiTexCoord0 -> attr_TexCoord
  * 	gl_Color -> (attr_Color / 255.0)
+ * 	gl_Normal -> attr_Normal
  */
 idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
 {
@@ -1017,6 +1027,7 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
 	source.Replace("gl_Vertex", "attr_Vertex");
 	source.Replace("gl_MultiTexCoord0", "attr_TexCoord");
 	source.Replace("gl_Color", "(attr_Color / 255.0)");
+	source.Replace("gl_Normal", "attr_Normal");
 
 	idStr ret;
 	ret += "#version ";
@@ -1030,6 +1041,7 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
 	ret += attribute + " highp vec4 attr_Vertex;\n";
 	ret += attribute + " highp vec4 attr_TexCoord;\n";
 	ret += attribute + " lowp vec4 attr_Color;\n";
+	ret += attribute + " vec3 attr_Normal;\n";
 	ret += "\n";
 
 	ret += "uniform highp mat4 u_modelViewProjectionMatrix;\n";
@@ -1076,6 +1088,7 @@ idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
 		source.Replace("gl_FragColor", "_gl_FragColor");
 		source.Replace("texture2D", "texture");
 		source.Replace("texture2DProj", "textureProj");
+		source.Replace("textureCube", "texture");
 		source.Replace("textureCubeProj", "textureProj");
 	}
 
