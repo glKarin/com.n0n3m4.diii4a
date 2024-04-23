@@ -29,10 +29,12 @@ public final class Constants
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
 	public static String[] CONST_CHANGES()
     {
-        return new String[]{
-                "Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion).",
-                "Support new stage rendering of GLSL shaders in Quake 4(e.g. sniper scope).",
-                "Add control on-screen joystick visible mode in `Control` tab(always show, hidden, only show when pressed).",
+        return new String[] {
+            "Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).",
+            "Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).",
+            "Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).",
+            "Improving Phong/Blinn-Phong light model interaction shader with high-precision.",
+            "Force disable using compression texture in The Dark Mod.",
         };
 	};
 

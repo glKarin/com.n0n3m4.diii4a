@@ -1,7 +1,7 @@
 #version 300 es
 //#pragma optimize(off)
 
-precision highp float;
+precision mediump float;
 
 in highp vec4 attr_Vertex;
 

@@ -58,7 +58,7 @@ uniform highp float u_uniformParm6; // textureSize()
 	varying highp vec4 var_ShadowCoord;
 #endif
 
-#ifdef _PACK_FLOAT
+#if !defined(_USING_DEPTH_TEXTURE) && defined(_PACK_FLOAT)
 highp float unpack (vec4 colour)
 {
 	const highp vec4 bitShifts = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);

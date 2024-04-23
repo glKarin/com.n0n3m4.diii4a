@@ -295,7 +295,7 @@ public final class TextHelper
             "e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, `Prey(2006)`, and some mods(e.g. `The Dark Mod`).",
             null,
             "Source in `assets/source` folder in APK file.",
-            " `DIII4A.source.tgz`: launcher frontend source and game source, game source and OpenGLES2.0 shader source in `/Q3E/src/main/jni/doom3` of archive package.",
+            " `DIII4A.source.tgz`: launcher frontend source and game source, game source and OpenGLES2.0/3.0 shader source in `/Q3E/src/main/jni/doom3` of archive package.",
             null,
             "Homepage: ",
             "Github: " + GenLinkText(Constants.CONST_MAIN_PAGE, null),

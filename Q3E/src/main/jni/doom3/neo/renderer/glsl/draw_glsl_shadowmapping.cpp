@@ -64,9 +64,15 @@
 static bool r_shadowMapping = false; // using shadow mapping(include prelight shadow)
 bool r_useDepthTexture = true;
 bool r_useCubeDepthTexture = true;
+bool r_usePackColorAsDepth = false; // Only OpenGLES2.0 and depth texture not supported
 static bool r_dumpShadowMap = false; // backend
 static bool r_dumpShadowMapFrontEnd = false; // frontend
 static bool r_shadowMapPerforated = true;
+
+static shaderProgram_t *depthShader_2d = &depthShader;
+static shaderProgram_t *depthShader_cube = &depthShader;
+static shaderProgram_t *depthPerforatedShader_2d = &depthPerforatedShader;
+static shaderProgram_t *depthPerforatedShader_cube = &depthPerforatedShader;
 
 // see Framebuffer.h::shadowMapResolutions
 static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = {1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0};
@@ -130,12 +136,14 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 		{
 			if(r_useDepthTexture)
 			{
+#ifdef SHADOW_MAPPING_DEBUG
 				fb->AttachColorBuffer();
+#endif
 				fb->AttachImageDepth(globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
 			}
 			else
 			{
-            fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]);
+                fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]);
 				fb->AttachDepthBuffer();
 			}
 		}
@@ -143,12 +151,14 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 		{
 			if(r_useCubeDepthTexture)
 			{
+#ifdef SHADOW_MAPPING_DEBUG
 				fb->AttachColorBuffer();
+#endif
 				fb->AttachImageDepthSide( globalImages->shadowImage_CubeDepth[vLight->shadowLOD], side);
 			}
 			else
 			{
-            fb->AttachImage2DSide( globalImages->shadowImage_CubeRGBA[vLight->shadowLOD], side );
+                fb->AttachImage2DSide( globalImages->shadowImage_CubeRGBA[vLight->shadowLOD], side );
 				fb->AttachDepthBuffer();
 			}
 		}
@@ -156,13 +166,15 @@ ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const view
 		{
 			if(r_useDepthTexture)
 			{
+#ifdef SHADOW_MAPPING_DEBUG
 				fb->AttachColorBuffer();
+#endif
 				fb->AttachImageDepth(globalImages->shadowImage_2DDepth[vLight->shadowLOD]);
-		}
-        else
-		{
-            fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]);
-				fb->AttachDepthBuffer();
+            }
+            else
+            {
+                fb->AttachImage2D( globalImages->shadowImage_2DRGBA[vLight->shadowLOD]);
+                fb->AttachDepthBuffer();
 			}
 		}
 	}
@@ -323,14 +335,49 @@ ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
 // Choose shader by light in shadow map pass
 ID_INLINE static shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* vLight, int side)
 {
-    shaderProgram_t *shadowShader;
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+        return &depthShader;
+#endif
+#if 1
     if( vLight->parallel && side >= 0 )
-        shadowShader = &depthShader_parallelLight;
+        return depthShader_2d;
     else if( vLight->pointLight && side >= 0 )
-        shadowShader = &depthShader_pointLight;
+        return depthShader_2d;
     else
-        shadowShader = &depthShader_spotLight;
-    return shadowShader;
+        return depthShader_cube;
+#else
+    if( vLight->parallel && side >= 0 )
+        return r_useDepthTexture ? &depthShader : &depthShader_color;
+    else if( vLight->pointLight && side >= 0 )
+        return r_useDepthTexture ? &depthShader : &depthShader_color;
+    else
+        return r_useCubeDepthTexture ? &depthShader : &depthShader_color;
+#endif
+}
+
+// Choose shader by light in shadow map pass
+ID_INLINE static shaderProgram_t * RB_SelectPerforatedShadowMapShader(const viewLight_t* vLight, int side)
+{
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+        return &depthPerforatedShader;
+#endif
+#if 1
+    if( vLight->parallel && side >= 0 )
+        return depthPerforatedShader_2d;
+    else if( vLight->pointLight && side >= 0 )
+        return depthPerforatedShader_2d;
+    else
+        return depthPerforatedShader_cube;
+#else
+    if( vLight->parallel && side >= 0 )
+        return r_useDepthTexture ? &depthPerforatedShader : &depthPerforatedShader_color;
+    else if( vLight->pointLight && side >= 0 )
+        return r_useDepthTexture ? &depthPerforatedShader : &depthPerforatedShader_color;
+    else
+        return r_useCubeDepthTexture ? &depthPerforatedShader : &depthPerforatedShader_color;
+#endif
 }
 
 // Choose shader by light in interaction pass
@@ -952,7 +999,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
     int faceCulling = backEnd.glState.faceCulling;
 
     // select shadow map shader
-    shaderProgram_t *shadowShader = RB_SelectShadowMapShader(vLight, side);
+    shaderProgram_t *shadowMapShader = RB_SelectShadowMapShader(vLight, side);
+    shaderProgram_t *shadowMapPerforatedShader = RB_SelectPerforatedShadowMapShader(vLight, side);
 
     // setup OpenGL state
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO |
@@ -1051,7 +1099,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
         {
             RB_ShadowMapping_polygonOffset();
 
-            GL_UseProgram(shadowShader);
+            GL_UseProgram(shadowMapShader);
 
             GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
@@ -1125,7 +1173,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
                     }
 
                     // renderProgManager.BindShader_TextureVertexColor();
-                    GL_UseProgram(&depthPerforatedShader);
+                    GL_UseProgram(shadowMapPerforatedShader);
 
                     idDrawVert *ac = (idDrawVert *)vertexCache.Position(drawSurf->geo->ambientCache);
                     GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
@@ -1247,7 +1295,8 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
     int faceCulling = backEnd.glState.faceCulling;
 
     // select shadow map shader
-    shaderProgram_t *shadowShader = RB_SelectShadowMapShader(vLight, side);
+    shaderProgram_t *shadowMapShader = RB_SelectShadowMapShader(vLight, side);
+    shaderProgram_t *shadowMapPerforatedShader = RB_SelectPerforatedShadowMapShader(vLight, side);
 
     // setup OpenGL state
     GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO |
@@ -1359,7 +1408,7 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
             {
                 RB_ShadowMapping_polygonOffset();
 
-                GL_UseProgram(shadowShader);
+                GL_UseProgram(shadowMapShader);
 
                 GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
@@ -1433,7 +1482,7 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
                         }
 
                         // renderProgManager.BindShader_TextureVertexColor();
-                        GL_UseProgram(&depthPerforatedShader);
+                        GL_UseProgram(shadowMapPerforatedShader);
 
                         idDrawVert *ac = (idDrawVert *)vertexCache.Position(drawSurf->geo->ambientCache);
                         GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
@@ -1696,18 +1745,13 @@ ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
 	{
-		if( backEnd.vLight->parallel )
-		{
+        globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
+/*		if( backEnd.vLight->parallel )
 			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-		}
 		else if( backEnd.vLight->pointLight )
-		{
             globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-		}
 		else
-		{
-			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-		}
+			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();*/
 	}
 	else
 #endif
@@ -1717,21 +1761,21 @@ ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
 			if(r_useDepthTexture)
 				globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD]->Bind();
 			else
-			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
+			    globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else if( backEnd.vLight->pointLight )
 		{
 			if(r_useCubeDepthTexture)
 				globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
 			else
-			globalImages->shadowImage_CubeRGBA[backEnd.vLight->shadowLOD]->Bind();
+			    globalImages->shadowImage_CubeRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 		else
 		{
 			if(r_useDepthTexture)
 				globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD]->Bind();
 			else
-			globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
+			    globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 	}
 }

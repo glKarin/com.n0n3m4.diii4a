@@ -7,7 +7,7 @@
 #version 100
 //#pragma optimize(off)
 
-precision highp float;
+precision mediump float;
 
 uniform sampler2D u_fragmentMap0;
 uniform lowp float u_alphaTest;
@@ -35,8 +35,6 @@ void main(void)
 #ifdef _USING_DEPTH_TEXTURE
    #ifdef _DEBUG
        gl_FragColor = vec4((gl_FragCoord.z + 1.0) * 0.5, 0.0, 0.0, 1.0); // DEBUG
-   #else
-       gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
    #endif
 #else
 	highp float depth;

@@ -23,19 +23,20 @@ GLSL_PROGRAM_PROC shaderProgram_t heatHazeWithMaskAndVertexShader; //k: heatHaze
 GLSL_PROGRAM_PROC shaderProgram_t colorProcessShader; //k: color process shader
 
 #ifdef _SHADOW_MAPPING
-GLSL_PROGRAM_PROC shaderProgram_t depthShader_pointLight; //k: depth shader(point light)
+GLSL_PROGRAM_PROC shaderProgram_t   depthShader; //k: depth shader
+GLSL_PROGRAM_PROC shaderProgram_t   depthShader_color; //k: depth shader(if not support depth texture(2D / cubemap), only ES2.0)
+
 GLSL_PROGRAM_PROC shaderProgram_t	interactionShadowMappingShader_pointLight; //k: interaction with shadow mapping(point light)
 GLSL_PROGRAM_PROC shaderProgram_t	interactionShadowMappingBlinnPhongShader_pointLight; //k: interaction with shadow mapping(point light)
 
-GLSL_PROGRAM_PROC shaderProgram_t depthShader_parallelLight; //k: depth shader(parallel)
 GLSL_PROGRAM_PROC shaderProgram_t	interactionShadowMappingShader_parallelLight; //k: interaction with shadow mapping(parallel)
 GLSL_PROGRAM_PROC shaderProgram_t	interactionShadowMappingBlinnPhongShader_parallelLight; //k: interaction with shadow mapping(parallel)
 
-GLSL_PROGRAM_PROC shaderProgram_t depthShader_spotLight; //k: depth shader
 GLSL_PROGRAM_PROC shaderProgram_t	interactionShadowMappingShader_spotLight; //k: interaction with shadow mapping
 GLSL_PROGRAM_PROC shaderProgram_t	interactionShadowMappingBlinnPhongShader_spotLight; //k: interaction with shadow mapping
 
 GLSL_PROGRAM_PROC shaderProgram_t depthPerforatedShader; //k: depth perforated shader
+GLSL_PROGRAM_PROC shaderProgram_t depthPerforatedShader_color; //k: depth perforated shader(if not support depth texture(2D / cubemap), only ES2.0)
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW

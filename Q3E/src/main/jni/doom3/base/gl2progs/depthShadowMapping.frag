@@ -25,8 +25,6 @@ void main(void)
 #ifdef _USING_DEPTH_TEXTURE
    #ifdef _DEBUG
        gl_FragColor = vec4((gl_FragCoord.z + 1.0) * 0.5, 0.0, 0.0, 1.0); // DEBUG
-   #else
-       gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
    #endif
 #else
 	highp float depth;
