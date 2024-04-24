@@ -157,15 +157,6 @@ public class Q3EGameHelper
                     case Q3EGlobals.GAME_QUAKE4:
                         fs_game = "q4base";
                         break;
-                    case Q3EGlobals.GAME_QUAKE2:
-                        fs_game = "baseq2";
-                        break;
-                    case Q3EGlobals.GAME_QUAKE3:
-                        fs_game = "baseq3";
-                        break;
-                    case Q3EGlobals.GAME_RTCW:
-                        fs_game = "main";
-                        break;
                     case Q3EGlobals.GAME_DOOM3:
                     default:
                         fs_game = "base";
@@ -545,12 +536,12 @@ public class Q3EGameHelper
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
 
         Q3EJNI.init(
-                Q3EMain.gameHelper.GetEngineLib(),
+                GetEngineLib(),
                 Q3EUtils.GetGameLibDir(m_context),
                 width,
                 height,
-                Q3EUtils.q3ei.game,
                 Q3EUtils.q3ei.datadir,
+                Q3EUtils.q3ei.GameSubDirectory(),
                 cmd,
                 surface,
                 glFormat,

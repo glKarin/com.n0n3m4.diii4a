@@ -196,6 +196,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 name = fileModel.name;
 
             File dir = new File(fileModel.path);
+            /*
             name += "\n " + FileUtility.FormatSize(FileUtility.du(fileModel.path, new Function() {
                 @Override
                 public Object Invoke(Object... args)
@@ -212,7 +213,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                     }
                 }
             }));
-
+*/
             map.put(fileModel.name, name);
             values.add(fileModel.name);
         }

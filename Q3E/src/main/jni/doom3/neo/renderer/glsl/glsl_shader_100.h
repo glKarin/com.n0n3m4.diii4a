@@ -1165,7 +1165,8 @@ GLSL_SHADER const char TEXGEN_FRAG[] =
 "highp float unpack (vec4 colour)\n" \
 "{\n" \
 "	const highp vec4 bitShifts = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);\n" \
-"	return /*all(lessThan(colour, vec4(1.0, 1.0, 1.0, 1.0)))*/ colour.r < 1.0 ? dot(colour , bitShifts) : 1.0;\n" \
+"	highp float dotc = dot(colour , bitShifts);\n" \
+"	return /*all(lessThan(colour, vec4(1.0, 1.0, 1.0, 1.0)))*/ colour.r < 1.0 ? dotc : 1.0;\n" \
 "}\n"
 
 #define VECTOR_TO_DEPTH_FUNC(far, near) \

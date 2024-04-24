@@ -86,6 +86,7 @@
     <string name="_32bits_rgba1010102">32Bits(RGBA1010102)</string>
     <string name="doom_3">DOOM 3</string>
     <string name="quake_4">Quake 4</string>
+    <string name="quake_1">Quake 1</string>
     <string name="quake_2">Quake 2</string>
     <string name="quake_3">Quake 3</string>
     <string name="rtcw">RTCW</string>
@@ -284,6 +285,7 @@
     <string name="normal_font_size_subtitle_prey_2006">Normal font size subtitle(Prey 2006)</string>
     <string name="_mod">Mod</string>
     <string name="librecoop">LibreCoop</string>
+    <string name="quake_1_base">Quake I</string>
     <string name="quake_2_base">Quake II</string>
     <string name="quake_2_ctf">Quake II:ctf</string>
     <string name="quake_2_rogue">Quake II:rogue</string>
@@ -299,5 +301,6 @@
     <string name="scroll">Scroll</string>
     <string name="pause">Pause</string>
     <string name="joystick_visible">Joystick visible:</string>
+    <string name="suggest_game_woring_directory_tips">Suggest create folder in `%s` as game working directory for loading faster on Android 11/11+!</string>
 
 </resources>

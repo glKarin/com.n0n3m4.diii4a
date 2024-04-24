@@ -21,6 +21,8 @@ package com.n0n3m4.q3e;
 
 import android.app.Activity;
 import android.content.Context;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.n0n3m4.q3e.karin.KOnceRunnable;
 import com.n0n3m4.q3e.onscreen.Q3EGUI;
@@ -243,6 +245,40 @@ public class Q3ECallbackObj
     {
         if(null != gui)
             gui.Toast(text);
+    }
+
+    public void CloseVKB()
+    {
+        if (null != vw)
+        {
+            vw.post(new Runnable() {
+                @Override
+                public void run() {
+                    Q3EUtils.CloseVKB(vw);
+                }
+            });
+        }
+    }
+
+    public void OpenVKB()
+    {
+        if (null != vw)
+        {
+            vw.post(new Runnable() {
+                @Override
+                public void run() {
+                    Q3EUtils.OpenVKB(vw);
+                }
+            });
+        }
+    }
+
+    public void ToggleToolbar(boolean on)
+    {
+        if (null != vw)
+        {
+            vw.ToggleToolbar(on);
+        }
     }
 }
 

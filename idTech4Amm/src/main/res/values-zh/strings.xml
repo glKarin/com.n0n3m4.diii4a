@@ -82,6 +82,7 @@
     <string name="_16bits_rgba5551">16位(RGBA5551)</string>
     <string name="_32bits_rgba1010102">32位(RGBA1010102)</string>
     <string name="doom_3">毁灭战士3</string>
+    <string name="quake_1">雷神之锤1</string>
     <string name="quake_4">雷神之锤4</string>
     <string name="quake_2">雷神之锤2</string>
     <string name="quake_3">雷神之锤3</string>
@@ -281,6 +282,7 @@
     <string name="normal_font_size_subtitle_prey_2006">正常字体字幕(Prey 2006)</string>
     <string name="_mod">Mod</string>
     <string name="librecoop">LibreCoop</string>
+    <string name="quake_1_base">雷神之锤1</string>
     <string name="quake_2_base">雷神之锤2</string>
     <string name="quake_2_ctf">雷神之锤2:ctf</string>
     <string name="quake_2_rogue">雷神之锤2:rogue</string>
@@ -296,4 +298,5 @@
     <string name="scroll">滚动</string>
     <string name="pause">暂停</string>
     <string name="joystick_visible">摇杆显示:</string>
+    <string name="suggest_game_woring_directory_tips">Android11/11+建议在`%s`下创建文件夹作为游戏数据文件夹以加快加载速度!</string>
 </resources>

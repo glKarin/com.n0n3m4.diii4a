@@ -1,0 +1,223 @@
+* -crlf
+
+*.0 -diff -crlf
+*.1 crlf=input
+*.3 crlf=input
+*.7z -diff -crlf
+*.ac crlf=input
+*.a -diff -crlf
+*.afm crlf=input
+*.aft crlf=input
+*.ai -diff -crlf
+*.aliases crlf=input
+all crlf=input
+*.am crlf=input
+*.animinfo crlf=input
+*.aps -diff -crlf
+*.asc -diff -crlf
+*.ase -crlf
+*.bat -crlf
+*.bgs crlf=input
+*.blend1 -diff -crlf
+*.blend -diff -crlf
+blind_id -diff -crlf
+*.bmp -diff -crlf
+branch-manager crlf=input
+*.brand crlf=input
+BSDmakefile crlf=input
+bsp2ent crlf=input
+*.bsp -diff -crlf
+*.cache -diff -crlf
+*.cbp -crlf
+*.cbp -diff -crlf
+*.c crlf=input
+*.cfg crlf=input
+*.cg crlf=input
+ChangeLog crlf=input
+CHANGES crlf=input
+cjpeg -diff -crlf
+COMPILING crlf=input
+compress-texture crlf=input
+*.conf crlf=input
+CONTRIBUTORS crlf=input
+COPYING crlf=input
+*.cpp crlf=input
+create crlf=input
+*.cron crlf=input
+*.css crlf=input
+*.cvswrappers crlf=input
+*.d0pk -diff -crlf
+*.db -diff -crlf
+*.default crlf=input
+*.def crlf=input
+*.dem -diff -crlf
+*.dev -crlf
+dir -diff -crlf
+djpeg -diff -crlf
+*.dll -diff -crlf
+DOCS -diff -crlf
+*.dot crlf=input
+DoxyConfig crlf=input
+doxyfile crlf=input
+Doxyfile crlf=input
+*.doxygen crlf=input
+*.dpk -diff -crlf
+*.dpm -diff -crlf
+*.dsp -crlf
+*.dsw -crlf
+*.dtd crlf=input
+*.dylib -diff -crlf
+empty -diff -crlf
+*.EncoderPlugin crlf=input
+*.flac -diff -crlf
+*.form crlf=input
+*.framegroups crlf=input
+*.game crlf=input
+*.gdb crlf=input
+gendox crlf=input
+gendoxfunctions crlf=input
+genDoxyfile crlf=input
+*.gif -diff -crlf
+*.gitattributes crlf=input
+git-branch-manager crlf=input
+git-filter-index crlf=input
+git-filter-repository crlf=input
+*.gitignore crlf=input
+git-pk3-import crlf=input
+git-pk3-merge crlf=input
+git-pullall crlf=input
+git-recurse crlf=input
+git-split-repository crlf=input
+git-svn-checkout crlf=input
+git-svn-update crlf=input
+git-update-octopus crlf=input
+*.glp crlf=input
+*.glsl crlf=input
+GPL crlf=input
+*.hardwired crlf=input
+*.h crlf=input
+*.hs crlf=input
+*.html crlf=input
+*.html-part crlf=input
+*.icns -diff -crlf
+*.ico -diff -crlf
+*.idl crlf=input
+*.idsoftware crlf=input
+*.inc crlf=input
+*.in crlf=input
+*.info-1 -diff -crlf
+*.info-2 -diff -crlf
+*.info -diff -crlf
+*.inl crlf=input
+*.instantaction crlf=input
+*.iqm -diff -crlf
+*.java crlf=input
+*.jhm crlf=input
+*.jnlp crlf=input
+jpegtran -diff -crlf
+*.jpg -diff -crlf
+*.jsmooth crlf=input
+*.la crlf=input
+LGPL crlf=input
+LICENSE crlf=input
+*.lmp -diff -crlf
+*.loaders crlf=input
+*.lso -diff -crlf
+*.m4 crlf=input
+makefile crlf=input
+Makefile crlf=input
+makespr32 crlf=input
+*.map -crlf filter=mapclean
+*.mapinfo crlf=input
+*.m crlf=input
+*.md3 -diff -crlf
+*.md5anim -crlf
+*.md5mesh -crlf
+*.mdl -diff -crlf
+*.med crlf=input
+*.mf crlf=input
+*.mid -diff -crlf
+*.mk crlf=input
+*.mkdir -diff -crlf
+*.mmpz -diff -crlf
+*.modules crlf=input
+*.nib -crlf
+*.obj -crlf
+OFFSETS -diff -crlf
+*.ogg -diff -crlf
+*.options crlf=input
+pangorc crlf=input
+*.patch crlf=input
+*.patchsets crlf=input
+*.pc crlf=input
+*.pcx -diff -crlf
+*.pfb -diff -crlf
+*.pfm -diff -crlf
+*.pk3 -diff -crlf
+PkgInfo crlf=input
+*.pl crlf=input
+*.plist crlf=input
+*.pm crlf=input
+*.png -diff -crlf
+POSITIONS -diff -crlf
+*.proj -crlf
+*.properties crlf=input
+*.psd -diff -crlf
+*.py crlf=input
+*.q3map1 crlf=input
+*.qc crlf=input linguist-language=C
+*.qdt crlf=input
+*.qh crlf=input linguist-language=C
+*.rb crlf=input
+*.rc2 crlf=input
+*.rc -crlf
+rdjpgcom -diff -crlf
+*.readme crlf=input
+README crlf=input
+*.rtlights -diff -crlf
+SCHEMA crlf=input
+*.scm crlf=input
+sdl-config crlf=input
+SDL -diff -crlf
+*.shader crlf=input
+*.sh crlf=input
+*.skin crlf=input
+*.sln -crlf
+*.sounds crlf=input
+*.sp2 -diff -crlf
+*.spr32 -diff -crlf
+*.spr -diff -crlf
+*.src crlf=input
+*.strings crlf=input
+strip crlf=input
+*.svg -diff -crlf
+*.TAB -diff -crlf
+*.tga -diff -crlf
+TMAP -diff -crlf
+todo crlf=input
+TODO crlf=input
+*.ttf -diff -crlf
+*.TTF -diff -crlf
+*.txt crlf=input
+update-shaderlists crlf=input
+*.vbs -crlf
+*.vcproj -crlf
+versionbuilder crlf=input
+*.wav -diff -crlf
+*.waypoints -diff -crlf
+w crlf=input
+*.width crlf=input
+*.workspace -crlf
+wrjpgcom -diff -crlf
+*.xcf -diff -crlf
+*.xlink crlf=input
+*.xml crlf=input
+xonotic-map-compiler-autobuild crlf=input
+xonotic-map-compiler crlf=input
+xonotic-map-screenshot crlf=input
+xonotic-osx-agl crlf=input
+xonotic-osx-sdl crlf=input
+*.xpm crlf=input
+*.zip -diff -crlf
+zipdiff crlf=input
+*.zym -diff -crlf

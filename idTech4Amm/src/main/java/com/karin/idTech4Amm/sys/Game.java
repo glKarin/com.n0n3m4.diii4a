@@ -27,6 +27,9 @@ public enum Game
     // Prey(2006)
     PREY_BASE(Q3EGlobals.GAME_PREY, "preybase", "", "", false, R.string.prey_preybase),
 
+    // Quake 1
+    QUAKE1_BASE(Q3EGlobals.GAME_QUAKE1, "darkplaces", "", "", false, R.string.quake_2_base),
+
     // Quake 2
     QUAKE2_BASE(Q3EGlobals.GAME_QUAKE2, "baseq2", "", "", false, R.string.quake_2_base),
     QUAKE2_CTF(Q3EGlobals.GAME_QUAKE2, "ctf", "ctf", "", true, R.string.quake_2_ctf),

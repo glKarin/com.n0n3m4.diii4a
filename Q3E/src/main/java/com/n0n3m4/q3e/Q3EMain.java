@@ -175,7 +175,7 @@ public class Q3EMain extends Activity
         {
             mControlGLSurfaceView.Pause();
         }
-        Q3EUtils.CloseVKB();
+        Q3EUtils.CloseVKB(mGLSurfaceView);
     }
 
     @Override

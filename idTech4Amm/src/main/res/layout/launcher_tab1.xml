@@ -142,6 +142,11 @@
                 android:layout_height="wrap_content"></RadioGroup>
 
             <RadioGroup
+                android:id="@+id/rg_fs_q1game"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></RadioGroup>
+
+            <RadioGroup
                 android:id="@+id/rg_fs_q2game"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"></RadioGroup>

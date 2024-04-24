@@ -29,8 +29,8 @@ public class Q3EJNI {
             String nativeLibPath, // apk's dynamic library directory path
             int width, // surface width
             int height, // surface height
-            String game, // game type
             String GameDir, // game data directory(external)
+			String gameSubDir, // game data sub directory(external)
             String Args, // doom3 command line arguments
             Surface view, // render surface
             int format, // OpenGL color buffer format: 0x8888, 0x4444, 0x5551, 0x565

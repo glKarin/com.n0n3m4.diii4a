@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  # Run on pushes to tags, the "master" branch, and PR's
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    container:
+      image: debian:latest
+    steps:
+      # Must install git before checking out the repo otherwise github doesn't fetch the .git directory.
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install --yes build-essential git libjpeg-dev libsdl2-dev libcurl4-openssl-dev libpng-dev libfreetype-dev libvorbis-dev
+
+      - name: Fetch repository
+        uses: actions/checkout@v4.1.1
+        with:
+          # make `git describe` show the correct commit hash
+          fetch-depth: '0'
+
+      - name: Compile DP
+        run: |
+          # prevent git complaining about dubious ownership of the repo
+          chown -R root:root .
+          # fail if `git describe` doesn't work (required for the buildstring)
+          git describe --always
+          # fail if there's any warnings
+          export CC="cc -Werror"
+          make sdl-release
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux
+          path: |
+            darkplaces-sdl
+

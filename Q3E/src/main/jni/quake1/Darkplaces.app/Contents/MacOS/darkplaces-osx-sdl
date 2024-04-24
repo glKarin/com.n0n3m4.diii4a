@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Get dylib files from the same dir as the executable
+export DYLD_LIBRARY_PATH="${0%/*}"
+
+set -- "$0"-bin "$@"
+
+exec "$@"

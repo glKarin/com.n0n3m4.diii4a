@@ -61,6 +61,9 @@ volatile bool continue_when_no_gl_context = false;
 // using mouse
 bool mouse_available = false;
 
+// Game data directory.
+char *game_data_dir = NULL;
+
 // Surface window
 volatile ANativeWindow *window = NULL;
 static volatile bool window_changed = false;
@@ -177,6 +180,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("    Redirect output to file: %d\n", redirect_output_to_file);
     printf("    No handle signals: %d\n", no_handle_signals);
     printf("    Using mouse: %d\n", mouse_available);
+    printf("    Game data directory: %s\n", game_data_dir);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
@@ -199,10 +203,10 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("    setState: %p\n", setState);
     printf("\n");
 
-    Sys_Printf("DOOM3 command line arguments: %d\n", argc);
+    printf("DOOM3 command line arguments: %d\n", argc);
     for(int i = 0; i < argc; i++)
     {
-        Sys_Printf("  %d: %s\n", i, argv[i]);
+        printf("  %d: %s\n", i, argv[i]);
     }
     printf("\n");
 }
@@ -308,6 +312,7 @@ void Q3E_SetInitialContext(const void *context)
 #endif*/
 
     native_library_dir = strdup(ptr->nativeLibraryDir);
+    game_data_dir = strdup(ptr->gameDataDir);
     redirect_output_to_file = ptr->redirectOutputToFile ? true : false;
     no_handle_signals = ptr->noHandleSignals ? true : false;
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
