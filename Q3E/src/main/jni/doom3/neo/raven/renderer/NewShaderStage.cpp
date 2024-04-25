@@ -20,7 +20,7 @@ extern idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version);
 extern idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version);
 
 rvNewShaderStage::rvNewShaderStage()
-        : shaderProgram(NULL),
+        : shaderProgram(idGLSLShaderManager::INVALID_SHADER_HANDLE),
         numShaderParms(0),
         numShaderTextures(0)
 {
@@ -209,29 +209,29 @@ bool rvNewShaderStage::ParseGLSLProgram(idLexer &src, idMaterial *material)
 {
     idToken token;
     if (src.ReadTokenOnLine(&token)) {
-        shaderProgram = NULL;
-        //if(!shaderProgram)
+        shaderProgram = idGLSLShaderManager::INVALID_SHADER_HANDLE;
+        //if(shaderProgram == idGLSLShaderManager::INVALID_SHADER_HANDLE)
         {
             token.StripFileExtension();
             if(!LoadGLSLProgram(token.c_str()))
-                shaderProgram = NULL;
-            NSS_DEBUG(common->Printf("NSS glslProgram: %s -> %s\n", material->GetName(), shaderProgram ? shaderProgram->name : "NULL"));
-            return shaderProgram != NULL;
+                shaderProgram = idGLSLShaderManager::INVALID_SHADER_HANDLE;
+            NSS_DEBUG(common->Printf("NSS glslProgram: %s -> %d\n", material->GetName(), shaderProgram));
+            return SHADER_HANDLE_IS_VALID(shaderProgram);
         }
     }
     return false;
 }
 
-void rvNewShaderStage::BindUniform(const float *regs)
+void rvNewShaderStage::BindUniform(const shaderProgram_t *shader, const float *regs)
 {
-    //common->Printf("BBB %d\n", shaderProgram->program);
+    //common->Printf("BBB %d\n", shaderProgram);
     // setting local parameters (specified in material definition)
     for ( int i = 0; i < numShaderParms; i++ ) {
         rvNewShaderStageParm<int[4]> *p = shaderParms + i;
         idVec4 vparm;
         for (int d = 0; d < 4; d++)
             vparm[d] = regs[ p->value[d] ];
-        GLint location = GetLocation(p);
+        GLint location = GetLocation(shader, p);
         switch(p->numValue)
         {
             case 1:
@@ -256,7 +256,7 @@ void rvNewShaderStage::BindUniform(const float *regs)
     for ( int i = 0; i < numShaderTextures; i++ ) {
         if ( shaderTextures[i].value ) {
             rvNewShaderStageParm<idImage *> *p = shaderTextures + i;
-            GLint location = GetLocation(p);
+            GLint location = GetLocation(shader, p);
             GL_SelectTexture( i );
             p->value->Bind();
             qglUniform1i(location, i);
@@ -265,12 +265,18 @@ void rvNewShaderStage::BindUniform(const float *regs)
     }
 }
 
-bool rvNewShaderStage::Bind(void)
+bool rvNewShaderStage::Bind(const float *regs)
 {
     if(!IsValid())
         return false;
 
-    GL_UseProgram((shaderProgram_t *)shaderProgram);
+    const shaderProgram_t *shader = shaderManager->Get(shaderProgram);
+    if(!shader)
+        return false;
+    GL_UseProgram((shaderProgram_t *)shader);
+
+    BindUniform(shader, regs);
+
     return true;
 }
 
@@ -286,6 +292,8 @@ void rvNewShaderStage::UnbindUniform(void)
 
 void rvNewShaderStage::Unbind(void)
 {
+    UnbindUniform();
+    GL_SelectTextureForce(0);
     GL_UseProgram(NULL);
 }
 
@@ -308,11 +316,12 @@ bool rvNewShaderStage::LoadSource(const char *name, const char *extension, idStr
 bool rvNewShaderStage::LoadGLSLProgram(const char *name)
 {
     const shaderProgram_t *shader;
+    shaderHandle_t handle;
 
-    shader = shaderManager->Find(name);
-    if(shader)
+    handle = shaderManager->GetHandle(name);
+    if(SHADER_HANDLE_IS_VALID(handle))
     {
-        shaderProgram = shader;
+        shaderProgram = handle;
         return true;
     }
 
@@ -338,13 +347,13 @@ bool rvNewShaderStage::LoadGLSLProgram(const char *name)
     prop.default_fragment_shader_source = fragmentSource;
     common->Printf("Vertex shader:\n%s\n\n", vertexSource.c_str());
     common->Printf("Fragment shader:\n%s\n\n", fragmentSource.c_str());
-    shader = shaderManager->Load(prop);
-    if(!shader)
+    handle = shaderManager->Load(prop);
+    if(SHADER_HANDLE_IS_INVALID(handle))
     {
         common->Warning("Load GLSL shader program fail: %s.", name);
         return false;
     }
-    shaderProgram = shader;
+    shaderProgram = handle;
     return true;
 }
 

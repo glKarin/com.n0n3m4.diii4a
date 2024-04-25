@@ -1710,22 +1710,35 @@ struct GLSLShaderProp
 	}
 };
 
+typedef int shaderHandle_t; // > 0 is internal shader(index = handle - 1), < 0 is custom shader(index = -handle - 1), = 0 is invalid
+#define SHADER_HANDLE_IS_VALID(x) ( (x) != idGLSLShaderManager::INVALID_SHADER_HANDLE )
+#define SHADER_HANDLE_IS_INVALID(x) ( (x) == idGLSLShaderManager::INVALID_SHADER_HANDLE )
 class idGLSLShaderManager
 {
 public:
 	~idGLSLShaderManager();
-	int Add(shaderProgram_t *shader); // return num of shaders
+	int Add(shaderProgram_t *shader); // return added shader's index
 	void Clear(void);
 	const shaderProgram_t * Find(const char *name) const;
 	const shaderProgram_t * Find(GLuint handle) const; // handle is OpenGL shader program's handle
-	const shaderProgram_t * Load(const GLSLShaderProp &prop); // frontend: if in multi-threading, only add on queue, because current thread has not OpenGL context; else if not in multi-threading, actual load directly. however always return a shader program handle, if not load, shaderProgram_t::program = -1.
+	shaderHandle_t Load(const GLSLShaderProp &prop); // frontend: if in multi-threading, only add on queue, because current thread has not OpenGL context; else if not in multi-threading, actual load directly. however always return a shader program handle, if has loaded, return OpenGL program handle(> 0), else return -(customShaders::index + 1), error return 0.
 	void ActuallyLoad(void); // backend: if in multi-threading, load actually from queue with OpenGL context
+	const shaderProgram_t * Get(shaderHandle_t handle) const;
+	shaderHandle_t GetHandle(const char *name) const;
 
 	static idGLSLShaderManager _shaderManager;
+	static shaderHandle_t INVALID_SHADER_HANDLE;
 
 private:
-	idList<shaderProgram_t *> shaders;
-	idList<GLSLShaderProp> queue;
+	int FindIndex(const char *name) const; // return raw index
+	int FindIndex(GLuint handle) const; // return raw index
+    int FindCustomIndex(const char *name) const; // return raw index
+    GLSLShaderProp * FindCustom(const char *name);
+
+private:
+	idList<shaderProgram_t *> shaders; // available shaders
+	idList<GLSLShaderProp> queue; // custom shaders load queue
+	idList<GLSLShaderProp> customShaders; // custom shaders load success list
 
 private:
 	idGLSLShaderManager() {}

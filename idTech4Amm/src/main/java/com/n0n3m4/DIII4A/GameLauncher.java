@@ -901,7 +901,8 @@ public class GameLauncher extends Activity
 
         V.edt_cmdline.setText(mPrefs.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGlobals.GAME_EXECUABLE));
         V.edt_mouse.setText(mPrefs.getString(Q3EPreference.pref_eventdev, "/dev/input/event???"));
-        V.edt_path.setText(mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata));
+		V.edt_path.setText(mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata));
+		m_edtPathFocused = V.edt_path.getText().toString();
 		if(ContextUtility.InScopedStorage())
 		{
 			V.edt_path.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -913,7 +914,6 @@ public class GameLauncher extends Activity
 					if(!hasFocus)
 					{
 						OpenSuggestGameWorkingDirectory(curPath);
-						m_edtPathFocused = curPath;
 					}
 				}
 			});
@@ -2437,13 +2437,14 @@ public class GameLauncher extends Activity
 		UIUtility.EditText__SetReadOnly(V.edt_cmdline_temp, !editable, InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 	}
 
-	public void OpenSuggestGameWorkingDirectory(String s)
+	public void OpenSuggestGameWorkingDirectory(String curPath)
 	{
-		if(ContextUtility.InScopedStorage() && !ContextUtility.IsInAppPrivateDirectory(GameLauncher.this, s))
+		if(ContextUtility.InScopedStorage() && !ContextUtility.IsInAppPrivateDirectory(GameLauncher.this, curPath))
 		{
 			String path = Q3EUtils.GetAppStoragePath(GameLauncher.this);
 			Toast.makeText(GameLauncher.this, Q3ELang.tr(this, R.string.suggest_game_woring_directory_tips, path), Toast.LENGTH_LONG).show();
 		}
+		m_edtPathFocused = curPath;
 	}
 
 

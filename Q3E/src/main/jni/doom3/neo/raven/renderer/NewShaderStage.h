@@ -21,14 +21,12 @@ public:
 	void ReloadImages(bool force);
 
     // bind
-    void BindUniform(const float *regs);
-    bool Bind(void);
-    void UnbindUniform(void);
+    bool Bind(const float *regs);
     void Unbind(void);
 
     // state
     bool IsValid(void) const {
-        return shaderProgram && shaderProgram->program > 0;
+        return SHADER_HANDLE_IS_VALID(shaderProgram);
     }
 
     template<class T>
@@ -39,7 +37,7 @@ public:
         int numValue; // data value count; uniform variant maybe not vec4 in GLSL shader
         GLint location; // uniform variant location
     };
-    const shaderProgram_t 				            *shaderProgram;
+    shaderHandle_t 				                    shaderProgram;
     rvNewShaderStageParm<int[4]>					shaderParms[MAX_SHADER_PARMS];
     int					                            numShaderParms;
     rvNewShaderStageParm<idImage *> 			    shaderTextures[MAX_SHADER_TEXTURES];
@@ -48,12 +46,14 @@ public:
 private:
     bool LoadSource(const char *name, const char *extension, idStr &ret);
     bool LoadGLSLProgram(const char *name);
+    void BindUniform(const shaderProgram_t *shader, const float *regs);
+    void UnbindUniform(void);
 
     template<class T>
-    GLint GetLocation(rvNewShaderStageParm<T> *p) {
+    GLint GetLocation(const shaderProgram_t *shader, rvNewShaderStageParm<T> *p) {
         if(p->location >= 0)
             return p->location;
-        p->location = qglGetUniformLocation(shaderProgram->program, p->name.c_str());
+        p->location = qglGetUniformLocation(shader->program, p->name.c_str());
         return p->location;
     }
 };
