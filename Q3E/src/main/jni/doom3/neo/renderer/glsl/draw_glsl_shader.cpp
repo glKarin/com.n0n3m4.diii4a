@@ -271,8 +271,8 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 	GLSLShaderProp p = inProp;
 	p.type = SHADER_CUSTOM;
 	p.program = NULL;
-	queue.Append(p);
 	index = customShaders.Append(p);
+	queue.Append(index);
 	common->Printf("[Harmattan]: GLSL shader manager::Load shader push '%s' into queue.\n", p.name.c_str());
 
 #ifdef _MULTITHREAD // in multi-threading, push on queue and load on backend
@@ -288,7 +288,7 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 
 void idGLSLShaderManager::ActuallyLoad(void)
 {
-	int index;
+	unsigned int index;
 
 	if(!queue.Num())
 		return;
@@ -298,40 +298,46 @@ void idGLSLShaderManager::ActuallyLoad(void)
 
 	while(queue.Num())
 	{
-		GLSLShaderProp &prop = queue[0];
-		index = FindIndex(prop.name.c_str());
-		if(index >= 0)
+		index = queue[0];
+		queue.RemoveIndex(0); // always remove it
+
+		// it's not happened, using assert
+		if(index >= customShaders.Num())
 		{
-			queue.RemoveIndex(0);
+			common->Warning("[Harmattan]: GLSL shader manager::ActuallyLoad custom shader index '%d' over( >= %d ).", index, customShaders.Num());
 			continue;
 		}
-		GLSLShaderProp *p = FindCustom(prop.name.c_str());
-		if(!p)
+
+		GLSLShaderProp &prop = customShaders[index];
+
+		if(FindIndex(prop.name.c_str()) >= 0)
 		{
-			common->Warning("[Harmattan]: GLSL shader manager::ActuallyLoad custom shader '%s' missing.", prop.name.c_str());
-			queue.RemoveIndex(0);
+			common->Warning("[Harmattan]: GLSL shader manager::ActuallyLoad custom shader '%s' has loaded.", prop.name.c_str());
+			continue;
+		}
+		if(prop.program)
+		{
+			common->Warning("[Harmattan]: GLSL shader manager::ActuallyLoad custom shader '%s' has handle.", prop.name.c_str());
 			continue;
 		}
 
 		// create shader on heap
 		shaderProgram_t *shader = (shaderProgram_t *)malloc(sizeof(*shader));
 		memset(shader, 0, sizeof(*shader));
-		strncpy(shader->name, p->name.c_str(), sizeof(shader->name));
+		strncpy(shader->name, prop.name.c_str(), sizeof(shader->name));
 		shader->type = SHADER_CUSTOM;
-		p->program = shader;
+		prop.program = shader;
 
-		common->Printf("[Harmattan]: GLSL shader manager::ActuallyLoad shader '%s'.\n", p->name.c_str());
-		if(RB_GLSL_LoadShaderProgramFromProp(p))
+		common->Printf("[Harmattan]: GLSL shader manager::ActuallyLoad shader '%s'.\n", prop.name.c_str());
+		if(RB_GLSL_LoadShaderProgramFromProp(&prop))
 		{
 			Add(shader);
 		}
 		else
 		{
-			memset(p->program, 0, sizeof(*p->program));
-			common->Warning("[Harmattan]: GLSL shader manager::ActuallyLoad shader '%s' error!", p->name.c_str());
+			memset(prop.program, 0, sizeof(*prop.program));
+			common->Warning("[Harmattan]: GLSL shader manager::ActuallyLoad shader '%s' error!", prop.name.c_str());
 		}
-
-		queue.RemoveIndex(0);
 	}
 	shaderRequired = B;
 }

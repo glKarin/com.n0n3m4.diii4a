@@ -1736,9 +1736,9 @@ private:
     GLSLShaderProp * FindCustom(const char *name);
 
 private:
-	idList<shaderProgram_t *> shaders; // available shaders
-	idList<GLSLShaderProp> queue; // custom shaders load queue
-	idList<GLSLShaderProp> customShaders; // custom shaders load success list
+	idList<shaderProgram_t *> shaders; // available shaders, include internal shaders and loaded custom shaders
+	idList<GLSLShaderProp> customShaders; // custom shaders load list. GLSLShaderProp::program == NULL: loading not start; GLSLShaderProp::program->program > 0: load success; GLSLShaderProp::program->program == 0: load failed
+	idList<unsigned int> queue; // custom shaders load queue: index to customShaders
 
 private:
 	idGLSLShaderManager() {}
