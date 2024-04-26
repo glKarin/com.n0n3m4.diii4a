@@ -100,6 +100,7 @@ import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUiConfig;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGLConstants;
+import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
@@ -110,6 +111,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @SuppressLint({"ApplySharedPref", "CommitPrefEdits"})
 public class GameLauncher extends Activity
@@ -579,10 +581,11 @@ public class GameLauncher extends Activity
 		q3ei.defaults_table = Q3EControls.GetDefaultLayout(this, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY, false);
     }
 
-    public void InitQ3E()
+    public void InitQ3E(String game)
     {
         // Q3EKeyCodes.InitD3Keycodes();
         Q3EInterface q3ei = new Q3EInterface();
+		q3ei.standalone = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
 
         q3ei.InitD3();
 
@@ -595,6 +598,9 @@ public class GameLauncher extends Activity
         // Q3EInterface.DumpDefaultOnScreenConfig(q3ei.arg_table, q3ei.type_table);
 
 		q3ei.LoadTypeAndArgTablePreference(this);
+
+		if(null != game && !game.isEmpty())
+			q3ei.SetupGame(game);
 
         Q3EUtils.q3ei = q3ei;
     }
@@ -880,7 +886,8 @@ public class GameLauncher extends Activity
         if (null != actionBar)
             actionBar.setDisplayHomeAsUpEnabled(true);
 
-        InitQ3E();
+		String gameType = mPrefs.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3);
+        InitQ3E(null); // gameType
         Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
         Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
         Q3EUtils.q3ei.joystick_inner_dead_zone = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
@@ -897,7 +904,7 @@ public class GameLauncher extends Activity
 
 		V.main_ad_layout.setVisibility(mPrefs.getBoolean(PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
-        SetGame(mPrefs.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3));
+        SetGame(gameType);
 
         V.edt_cmdline.setText(mPrefs.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGlobals.GAME_EXECUABLE));
         V.edt_mouse.setText(mPrefs.getString(Q3EPreference.pref_eventdev, "/dev/input/event???"));
@@ -1275,7 +1282,7 @@ public class GameLauncher extends Activity
         if (game == null || game.isEmpty())
             game = Q3EUtils.q3ei.game_base;
         bundle.putString("game", game);
-        bundle.putString("path", V.edt_path.getText().toString());
+		bundle.putString("path", KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir));
         bundle.putString("file", file);
         m_editConfigFileFunc.Start(bundle);
     }
@@ -1970,7 +1977,7 @@ public class GameLauncher extends Activity
 
     private void SetGame(String game)
     {
-        Q3EUtils.q3ei.SetupGame(game); //k armv7-a only support neon now
+        Q3EUtils.q3ei.SetupGame(game);
         V.launcher_tab1_edit_doomconfig.setText(getString(R.string.edit_) + Q3EUtils.q3ei.config_name);
         if (null != V.main_menu_game)
             V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
@@ -2074,6 +2081,14 @@ public class GameLauncher extends Activity
 		V.mod_section.setVisibility(modVisible ? View.VISIBLE : View.GONE);
 		V.dll_section.setVisibility(dllVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(q2Visible ? View.GONE : View.VISIBLE);
+
+		String subdir = Q3EUtils.q3ei.subdatadir;
+		if(null == subdir)
+			subdir = "";
+		else
+			subdir += "/";
+		V.launcher_fs_game_subdir.setText(Q3ELang.tr(this, R.string.sub_directory) + subdir);
+		V.launcher_fs_game_subdir.setVisibility(subdir.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     private void ChangeGame(String... games)
@@ -2339,7 +2354,7 @@ public class GameLauncher extends Activity
 		});
 		Bundle bundle = new Bundle();
 		bundle.putString("mod", preference.getString(preferenceKey, ""));
-		bundle.putString("path", preference.getString(Q3EPreference.pref_datapath, default_gamedata));
+		bundle.putString("path", KStr.AppendPath(preference.getString(Q3EPreference.pref_datapath, default_gamedata), Q3EUtils.q3ei.subdatadir));
 		m_chooseGameModFunc.Start(bundle);
 	}
 
@@ -2410,6 +2425,15 @@ public class GameLauncher extends Activity
 
 		for (Game value : values)
 		{
+			String subdir = "";
+
+			if(Q3EUtils.q3ei.standalone)
+			{
+				subdir = Q3EInterface.GetGameStandaloneDirectory(value.type);
+				if(!subdir.isEmpty())
+					subdir += "/";
+			}
+
 			group = groups.get(value.type);
 			layoutParams = new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
 			radio = new RadioButton(group.getContext());
@@ -2420,7 +2444,7 @@ public class GameLauncher extends Activity
 				name = (String)value.name;
 			else
 				name = "";
-			name += "(" + value.game + ")";
+			name += "(" + subdir + value.game + ")";
 			radio.setText(name);
 			radio.setTag(value.game);
 			group.addView(radio, layoutParams);
@@ -2530,6 +2554,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_rtcwgame;
 		public RadioGroup rg_fs_tdmgame;
 		public Spinner launcher_tab2_joystick_visible;
+		public TextView launcher_fs_game_subdir;
 
         public void Setup()
         {
@@ -2611,6 +2636,7 @@ public class GameLauncher extends Activity
 			rg_fs_rtcwgame = findViewById(R.id.rg_fs_rtcwgame);
 			rg_fs_tdmgame = findViewById(R.id.rg_fs_tdmgame);
 			launcher_tab2_joystick_visible = findViewById(R.id.launcher_tab2_joystick_visible);
+			launcher_fs_game_subdir = findViewById(R.id.launcher_fs_game_subdir);
         }
     }
 }

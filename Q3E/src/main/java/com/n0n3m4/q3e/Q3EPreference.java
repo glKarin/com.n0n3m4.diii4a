@@ -98,7 +98,7 @@ public final class Q3EPreference
     public static final String LANG = "harm_lang";
     public static final String MAP_BACK = "harm_map_back";
     public static final String ONSCREEN_BUTTON = "harm_onscreen_key"; // old = "harm_onscreen_button"
-    public static final String REOPEN_LAUNCHER = "harm_reopen_launcher";
+    public static final String GAME_STANDALONE_DIRECTORY = "harm_game_standalone_directory";
     public static final String LOAD_LOCAL_ENGINE_LIB = "harm_load_local_engine_lib";
 
     public static float GetFloatFromString(Context context, String name, float defVal)

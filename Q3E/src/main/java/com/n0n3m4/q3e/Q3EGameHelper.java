@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 
 import java.io.File;
@@ -67,9 +68,10 @@ public class Q3EGameHelper
 
     public boolean checkGameFiles()
     {
-        if (!new File(Q3EUtils.q3ei.datadir).exists())
+        String dataDir = Q3EUtils.q3ei.GetGameDataDirectoryPath(null);
+        if (!new File(dataDir).exists())
         {
-            ShowMessage(Q3ELang.tr(m_context, R.string.game_files_weren_t_found_put_game_files_to) + Q3EUtils.q3ei.datadir);
+            ShowMessage(Q3ELang.tr(m_context, R.string.game_files_weren_t_found_put_game_files_to) + dataDir);
             return false;
         }
 
@@ -82,6 +84,8 @@ public class Q3EGameHelper
 
         if (!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
         {
+            Q3EUtils.q3ei.standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
+
             Q3EKeyCodes.InitD3Keycodes();
 
             Q3EUtils.q3ei.InitD3();
@@ -168,13 +172,13 @@ public class Q3EGameHelper
                 command.SetProp("harm_fs_gameLibPath", dll);
             cmd = command.toString();
         }
-        cmd = Q3EUtils.q3ei.datadir + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
+        cmd = Q3EUtils.q3ei.GetGameDataDirectoryPath(null) + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
         Q3EUtils.q3ei.cmd = cmd;
     }
 
     private String FindDLL(String fs_game)
     {
-        String DLLPath = Q3EUtils.q3ei.datadir + File.separator + fs_game + File.separator; // /sdcard/diii4a/<fs_game>
+        String DLLPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(fs_game); // /sdcard/diii4a/<fs_game>
         String Suffix = "game" + Q3EGlobals.ARCH + ".so"; // gameaarch64.so(64) / gamearm.so(32)
         String[] guess = {
                 Suffix,
@@ -184,7 +188,7 @@ public class Q3EGameHelper
         String targetDir = m_context.getCacheDir() + File.separator; // /data/user/<package_name>/cache/
         for (String f : guess)
         {
-            String p = DLLPath + f;
+            String p = KStr.AppendPath(DLLPath, f);
             File file = new File(p);
             if(!file.isFile() || !file.canRead())
                 continue;
@@ -208,7 +212,7 @@ public class Q3EGameHelper
         String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + Q3EUtils.q3ei.libname;
         if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
         {
-            String localLibPath = Q3EUtils.q3ei.datadir + "/" + Q3EUtils.q3ei.libname;
+            String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(Q3EUtils.q3ei.libname);
             File file = new File(localLibPath);
             if(!file.isFile() || !file.canRead())
             {
@@ -534,6 +538,9 @@ public class Q3EGameHelper
         int runBackground = Q3EUtils.parseInt_s(preferences.getString(Q3EPreference.RUN_BACKGROUND, "0"), 0);
         int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
+        String subdatadir = Q3EUtils.q3ei.subdatadir;
+        if(null != subdatadir &&subdatadir.isEmpty())
+            subdatadir = null;
 
         Q3EJNI.init(
                 GetEngineLib(),
@@ -541,7 +548,7 @@ public class Q3EGameHelper
                 width,
                 height,
                 Q3EUtils.q3ei.datadir,
-                Q3EUtils.q3ei.GameSubDirectory(),
+                subdatadir,
                 cmd,
                 surface,
                 glFormat,

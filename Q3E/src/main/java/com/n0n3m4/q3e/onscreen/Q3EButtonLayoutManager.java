@@ -142,6 +142,8 @@ public class Q3EButtonLayoutManager
 
         int bottomLineRight = layouts[Q3EGlobals.UI_SHOOT].x - Dip2px_s(20) + Horizontal_Space;
         layouts[Q3EGlobals.UI_PDA].Set(start + Sliders_Width + SmallButton_Width / 2 + SmallButton_Width + Horizontal_Space * 2, SmallButton_Width / 2 + Vertical_Space, SmallButton_Width, Alpha);
+        layouts[Q3EGlobals.UI_SCORE].Set(start + Sliders_Width + SmallButton_Width / 2 + SmallButton_Width * 2 + Horizontal_Space * 3, SmallButton_Width / 2 + Vertical_Space, SmallButton_Width, Alpha);
+
         layouts[Q3EGlobals.UI_ZOOM].Set(bottomLineRight - MediumButton_Width - Horizontal_Space, Height - MediumButton_Width / 2, MediumButton_Width, Alpha);
         layouts[Q3EGlobals.UI_FLASHLIGHT].Set(bottomLineRight - MediumButton_Width * 2 - Horizontal_Space * 2, Height - MediumButton_Width / 2, MediumButton_Width, Alpha);
         layouts[Q3EGlobals.UI_RUN].Set(bottomLineRight - MediumButton_Width * 3 - Horizontal_Space * 3, Height - MediumButton_Width / 2, MediumButton_Width, Alpha);
@@ -234,7 +236,7 @@ public class Q3EButtonLayoutManager
         defaults_table[Q3EGlobals.UI_FLASHLIGHT] = (width - r / 2 - 4 * rightoffset) + " " + (height - r / 2) + " " + r + " " + alpha;
         defaults_table[Q3EGlobals.UI_SAVE] = (start + sliders_width / 2) + " " + sliders_width / 2 + " " + sliders_width + " " + alpha;
 
-        for (int i = Q3EGlobals.UI_SAVE + 1; i < Q3EGlobals.UI_SIZE; i++)
+        for (int i = Q3EGlobals.UI_SCORE; i < Q3EGlobals.UI_SIZE; i++)
             defaults_table[i] = (r / 2 + r * (i - Q3EGlobals.UI_SAVE - 1)) + " " + (height + r / 2) + " " + r + " " + alpha;
 
         defaults_table[Q3EGlobals.UI_WEAPON_PANEL] = (width - sliders_width - r - rightoffset) + " " + (r) + " " + (r / 3) + " " + alpha;

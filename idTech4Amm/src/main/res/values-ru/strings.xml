@@ -300,5 +300,9 @@
     <string name="pause">Pause</string>
     <string name="joystick_visible">Joystick visible:</string>
     <string name="suggest_game_woring_directory_tips">Suggest create folder in `%s` as game working directory for loading faster on Android 11/11+!</string>
+    <string name="sub_directory">Sub directory: </string>
+    <string name="app_is_rebooting">App is rebooting......</string>
+    <string name="standalone_game_data_directory">Standalone game data directory</string>
+    <string name="game_data_directories_are_standalone"><![CDATA[Game data directories are standalone: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake2 -> quake2; Quake3 -> quake3; RTCW -> rtcw; The Dark Mod -> darkmod/(always); Quake1 -> darkplaces/(always)]]></string>
 
 </resources>

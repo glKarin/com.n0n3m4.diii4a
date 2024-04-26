@@ -3,6 +3,7 @@ package com.n0n3m4.DIII4A.launcher;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.karin.idTech4Amm.R;
@@ -13,6 +14,7 @@ import com.karin.idTech4Amm.misc.Function;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 
 import java.io.File;
@@ -69,43 +71,78 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         final List<CharSequence> items = new ArrayList<>();
         Map<String, String> map = new HashMap<>();
         final List<String> values = new ArrayList<>();
-        final List<String> TotalList = Arrays.asList(
+        final List<String> TotalList = new ArrayList<>(Arrays.asList(
                 Q3EGlobals.GAME_BASE_DOOM3,
                 Q3EGlobals.GAME_BASE_QUAKE4,
                 Q3EGlobals.GAME_BASE_PREY,
+                Q3EGlobals.GAME_BASE_QUAKE1,
                 Q3EGlobals.GAME_BASE_QUAKE2,
                 Q3EGlobals.GAME_BASE_QUAKE3,
-                Q3EGlobals.GAME_BASE_RTCW,
-                Q3EGlobals.GAME_BASE_TDM
-        );
-        List<String> blackList = new ArrayList<>(TotalList);
+                Q3EGlobals.GAME_BASE_RTCW
+        ));
+        List<String> blackList = new ArrayList<>();
+        boolean standalone = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
+        if(!standalone)
+        {
+            blackList.addAll(TotalList);
+            blackList.addAll(Arrays.asList(
+                    Q3EGlobals.GAME_SUBDIR_DOOM3,
+                    Q3EGlobals.GAME_SUBDIR_QUAKE4,
+                    Q3EGlobals.GAME_SUBDIR_PREY,
+                    Q3EGlobals.GAME_SUBDIR_QUAKE1,
+                    Q3EGlobals.GAME_SUBDIR_QUAKE1,
+                    Q3EGlobals.GAME_SUBDIR_QUAKE2,
+                    Q3EGlobals.GAME_SUBDIR_QUAKE3,
+                    Q3EGlobals.GAME_SUBDIR_RTCW,
+                    Q3EGlobals.GAME_SUBDIR_TDM
+            ));
+        }
+
         if (Q3EUtils.q3ei.isQ4)
         {
-            blackList.remove(Q3EGlobals.GAME_BASE_QUAKE4);
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_QUAKE4);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_QUAKE4);
         }
         else if(Q3EUtils.q3ei.isPrey)
         {
-            blackList.remove(Q3EGlobals.GAME_BASE_PREY);
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_PREY);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_PREY);
         }
         else if(Q3EUtils.q3ei.isQ2)
         {
-            blackList.remove(Q3EGlobals.GAME_BASE_QUAKE2);
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_QUAKE2);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_QUAKE2);
         }
         else if(Q3EUtils.q3ei.isQ3)
         {
-            blackList.remove(Q3EGlobals.GAME_BASE_QUAKE3);
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_QUAKE3);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_QUAKE3);
         }
         else if(Q3EUtils.q3ei.isRTCW)
         {
-            blackList.remove(Q3EGlobals.GAME_BASE_RTCW);
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_RTCW);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_RTCW);
         }
-        else if(Q3EUtils.q3ei.isTDM)
+/*        else if(Q3EUtils.q3ei.isTDM)
         {
             blackList.remove(Q3EGlobals.GAME_BASE_TDM);
-        }
+        }*/
         else
         {
-            blackList.remove(Q3EGlobals.GAME_BASE_DOOM3);
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_DOOM3);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_DOOM3);
         }
 
         for (FileBrowser.FileModel fileModel : fileBrowser.FileList())
@@ -123,6 +160,11 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 if(Q3EGlobals.GAME_BASE_PREY.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_PREY;
             }
+            else if(Q3EUtils.q3ei.isQ1)
+            {
+                if(Q3EGlobals.GAME_BASE_QUAKE1.equals(fileModel.name))
+                    name = Q3EGlobals.GAME_NAME_QUAKE1;
+            }
             else if(Q3EUtils.q3ei.isQ2)
             {
                 if(Q3EGlobals.GAME_BASE_QUAKE2.equals(fileModel.name))
@@ -138,11 +180,11 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 if(Q3EGlobals.GAME_BASE_RTCW.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_RTCW;
             }
-            else if(Q3EUtils.q3ei.isTDM)
+/*            else if(Q3EUtils.q3ei.isTDM)
             {
                 if(Q3EGlobals.GAME_BASE_TDM.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_TDM;
-            }
+            }*/
             else
             {
                 if(Q3EGlobals.GAME_BASE_DOOM3.equals(fileModel.name))
@@ -160,6 +202,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_PREY:
                         if(!Q3EUtils.q3ei.isPrey)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_QUAKE1:
+                        if(!Q3EUtils.q3ei.isQ1)
                             continue;
                         break;
                     case Q3EGlobals.GAME_QUAKE2:

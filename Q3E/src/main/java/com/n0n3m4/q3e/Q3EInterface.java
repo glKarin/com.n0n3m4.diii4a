@@ -24,6 +24,8 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.n0n3m4.q3e.karin.KStr;
+
 import java.util.Arrays;
 import java.util.Set;
 
@@ -62,6 +64,8 @@ public class Q3EInterface
 	public String game_base;
 	public String[] libs;
 	public String datadir;
+	public boolean standalone = false;
+	public String subdatadir;
 
 	public Q3ECallbackObj callbackObj;
     
@@ -209,12 +213,22 @@ public class Q3EInterface
 
 	public String GameSubDirectory()
 	{
-		if(isTDM)
-			return Q3EGlobals.GAME_BASE_TDM;
+		if(isQ4)
+			return Q3EGlobals.GAME_SUBDIR_QUAKE4;
+		else if(isPrey)
+			return Q3EGlobals.GAME_SUBDIR_PREY;
+		else if(isRTCW)
+			return Q3EGlobals.GAME_SUBDIR_RTCW;
+		else if(isQ3)
+			return Q3EGlobals.GAME_SUBDIR_QUAKE3;
+		else if(isQ2)
+			return Q3EGlobals.GAME_SUBDIR_QUAKE2;
 		else if(isQ1)
-			return Q3EGlobals.GAME_BASE_QUAKE1;
+			return Q3EGlobals.GAME_SUBDIR_QUAKE1;
+		else if(isTDM)
+			return Q3EGlobals.GAME_SUBDIR_TDM;
 		else
-			return null;
+			return Q3EGlobals.GAME_SUBDIR_DOOM3;
 	}
 
 	public void SetupEngineLib()
@@ -245,6 +259,18 @@ public class Q3EInterface
 	private void SetupConfigFile()
 	{
 		config_name = ConfigFileName();
+	}
+
+	private void SetupSubDir()
+	{
+		String subdir = GameSubDirectory();
+		if(standalone)
+			subdatadir = subdir;
+		else if(isTDM || isQ1)
+			subdatadir = subdir;
+			// else if(IS_D3()) return null;
+		else
+			subdatadir = null;
 	}
 
 	private void SetupGameTypeAndName()
@@ -287,6 +313,7 @@ public class Q3EInterface
 		SetupGameLibs();
 		SetupConfigFile();
 		SetupKeycodes();
+		SetupSubDir();
 	}
 
 	public void SetupDOOM3()
@@ -460,6 +487,8 @@ public class Q3EInterface
         texture_table[Q3EGlobals.UI_RUN] = "btn_kick.png";
 
         texture_table[Q3EGlobals.UI_WEAPON_PANEL] = "disc_weapon.png";
+
+		texture_table[Q3EGlobals.UI_SCORE] = "btn_score.png";
     }
 
     public void InitTypeTable()
@@ -538,6 +567,8 @@ public class Q3EInterface
 		type_table[Q3EGlobals.UI_INTERACT] = Q3EGlobals.TYPE_BUTTON;
 
 		type_table[Q3EGlobals.UI_WEAPON_PANEL] = Q3EGlobals.TYPE_DISC;
+
+		type_table[Q3EGlobals.UI_SCORE] = Q3EGlobals.TYPE_BUTTON;
 
 		_defaultType = Arrays.copyOf(type_table, type_table.length);
 	}
@@ -621,6 +652,11 @@ public class Q3EInterface
 		arg_table[Q3EGlobals.UI_INTERACT * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_INTERACT * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_INTERACT * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_SCORE * 4] = Q3EKeyCodes.KeyCodesGeneric.K_M;
+		arg_table[Q3EGlobals.UI_SCORE * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_SCORE * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_SCORE * 4 + 3] = 0;
 
 		_defaultArgs = Arrays.copyOf(arg_table, arg_table.length);
 	}
@@ -733,5 +769,35 @@ public class Q3EInterface
 			e.printStackTrace();
 			RestoreDefaultOnScreenConfig(arg_table, type_table);
 		}
+	}
+
+	public static String GetGameStandaloneDirectory(String name)
+	{
+		if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_PREY;
+		else if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_QUAKE4;
+		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_QUAKE2;
+		else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_QUAKE3;
+		else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_RTCW;
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_TDM;
+		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_QUAKE1;
+		else
+			return Q3EGlobals.GAME_SUBDIR_DOOM3;
+	}
+
+	public boolean IS_D3()
+	{
+		return isD3 && (!isQ4 || !isPrey);
+	}
+
+	public String GetGameDataDirectoryPath(String file)
+	{
+		return KStr.AppendPath(datadir, subdatadir, file);
 	}
 }

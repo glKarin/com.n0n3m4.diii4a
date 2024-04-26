@@ -1,4 +1,5 @@
 package com.karin.idTech4Amm.ui;
+import android.os.Handler;
 import android.preference.PreferenceFragment;
 import android.os.Bundle;
 import android.preference.PreferenceScreen;
@@ -31,6 +32,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         findPreference(PreferenceKey.HIDE_AD_BAR).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.LANG).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.GAME_STANDALONE_DIRECTORY).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -84,6 +86,17 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             case Q3EPreference.LANG:
             {
                 Toast.makeText(ContextUtility.GetContext(this), R.string.be_available_on_reboot_the_next_time, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            case Q3EPreference.GAME_STANDALONE_DIRECTORY:
+            {
+                Toast.makeText(ContextUtility.GetContext(this), R.string.app_is_rebooting, Toast.LENGTH_SHORT).show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        ContextUtility.RestartApp(LauncherSettingPreference.this.getActivity());
+                    }
+                }, 1000);
                 return true;
             }
             default:

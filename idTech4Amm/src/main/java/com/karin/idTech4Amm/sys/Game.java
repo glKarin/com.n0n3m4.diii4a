@@ -28,7 +28,7 @@ public enum Game
     PREY_BASE(Q3EGlobals.GAME_PREY, "preybase", "", "", false, R.string.prey_preybase),
 
     // Quake 1
-    QUAKE1_BASE(Q3EGlobals.GAME_QUAKE1, "darkplaces", "", "", false, R.string.quake_2_base),
+    QUAKE1_BASE(Q3EGlobals.GAME_QUAKE1, "id1", "", "", false, R.string.quake_1_base),
 
     // Quake 2
     QUAKE2_BASE(Q3EGlobals.GAME_QUAKE2, "baseq2", "", "", false, R.string.quake_2_base),
@@ -41,7 +41,7 @@ public enum Game
     RTCW_BASE(Q3EGlobals.GAME_RTCW, "main", "", "", false, R.string.rtcw_base),
 
     // The dark mod
-    TDM_BASE(Q3EGlobals.GAME_TDM, "darkmod", "", "", false, R.string.tdm_base),
+    TDM_BASE(Q3EGlobals.GAME_TDM, "", "", "", false, R.string.tdm_base),
 
     // Quake 3
     QUAKE3_BASE(Q3EGlobals.GAME_QUAKE3, "baseq3", "", "", false, R.string.quake_3_base),

@@ -299,4 +299,8 @@
     <string name="pause">暂停</string>
     <string name="joystick_visible">摇杆显示:</string>
     <string name="suggest_game_woring_directory_tips">Android11/11+建议在`%s`下创建文件夹作为游戏数据文件夹以加快加载速度!</string>
+    <string name="sub_directory">独立目录: </string>
+    <string name="app_is_rebooting">应用重启中......</string>
+    <string name="standalone_game_data_directory">游戏数据独立文件夹</string>
+    <string name="game_data_directories_are_standalone"><![CDATA[每个游戏的数据文件夹独立放置: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake2 -> quake2; Quake3 -> quake3; RTCW -> rtcw; The Dark Mod -> darkmod/(总是独立); Quake1 -> darkplaces/(总是独立)]]></string>
 </resources>

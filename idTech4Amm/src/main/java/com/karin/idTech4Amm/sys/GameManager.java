@@ -156,7 +156,7 @@ public final class GameManager
         else if (Q3EUtils.q3ei.isQ4)
             return R.drawable.q4_icon;
         else if (Q3EUtils.q3ei.isQ1)
-            return R.drawable.q2_icon;
+            return R.drawable.q1_icon;
         else if (Q3EUtils.q3ei.isQ2)
             return R.drawable.q2_icon;
         else if (Q3EUtils.q3ei.isQ3)
