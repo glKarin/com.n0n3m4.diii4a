@@ -98,7 +98,7 @@ static bool RB_GLSL_LoadShaderProgramFromProp(const GLSLShaderProp *prop)
 #define GLSL_INTERNAL_SHADER_HANDLE_TO_INDEX(x) ( (x) - 1 )
 #define GLSL_CUSTOM_SHADER_HANDLE_TO_INDEX(x) ( -(x) - 1 )
 
-shaderHandle_t idGLSLShaderManager::INVALID_SHADER_HANDLE = 0;
+const shaderHandle_t idGLSLShaderManager::INVALID_SHADER_HANDLE = 0;
 
 int idGLSLShaderManager::Add(shaderProgram_t *shader)
 {
@@ -272,7 +272,7 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 	p.type = SHADER_CUSTOM;
 	p.program = NULL;
 	index = customShaders.Append(p);
-	queue.Append(index);
+	// queue.Append(index);
 	common->Printf("[Harmattan]: GLSL shader manager::Load shader push '%s' into queue.\n", p.name.c_str());
 
 #ifdef _MULTITHREAD // in multi-threading, push on queue and load on backend
@@ -288,16 +288,24 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 
 void idGLSLShaderManager::ActuallyLoad(void)
 {
-	unsigned int index;
+	unsigned int index = queueCurrentIndex;
+	const int num = customShaders.Num();
 
-	if(!queue.Num())
+	if(
+			// !queue.Num()
+			index >= num
+			)
 		return;
 
 	const bool B = shaderRequired;
 	UNNECESSARY_SHADER;
 
-	while(queue.Num())
+	while(
+			index < num
+			// queue.Num()
+			)
 	{
+		/*
 		index = queue[0];
 		queue.RemoveIndex(0); // always remove it
 
@@ -306,9 +314,10 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		{
 			common->Warning("[Harmattan]: GLSL shader manager::ActuallyLoad custom shader index '%d' over( >= %d ).", index, customShaders.Num());
 			continue;
-		}
+		}*/
 
 		GLSLShaderProp &prop = customShaders[index];
+		index++;
 
 		if(FindIndex(prop.name.c_str()) >= 0)
 		{
@@ -340,12 +349,14 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		}
 	}
 	shaderRequired = B;
+	queueCurrentIndex = index;
 }
 
 idGLSLShaderManager::~idGLSLShaderManager()
 {
 	printf("[Harmattan]: GLSL shader manager destroying......\n");
-	queue.Clear();
+	//queue.Clear();
+	queueCurrentIndex = customShaders.Num();
 	for(int i = 0; i < customShaders.Num(); i++)
 	{
 		GLSLShaderProp &prop = customShaders[i];

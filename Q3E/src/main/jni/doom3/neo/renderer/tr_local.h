@@ -1727,7 +1727,7 @@ public:
 	shaderHandle_t GetHandle(const char *name) const;
 
 	static idGLSLShaderManager _shaderManager;
-	static shaderHandle_t INVALID_SHADER_HANDLE;
+	static const shaderHandle_t INVALID_SHADER_HANDLE;
 
 private:
 	int FindIndex(const char *name) const; // return raw index
@@ -1738,10 +1738,11 @@ private:
 private:
 	idList<shaderProgram_t *> shaders; // available shaders, include internal shaders and loaded custom shaders
 	idList<GLSLShaderProp> customShaders; // custom shaders load list. GLSLShaderProp::program == NULL: loading not start; GLSLShaderProp::program->program > 0: load success; GLSLShaderProp::program->program == 0: load failed
-	idList<unsigned int> queue; // custom shaders load queue: index to customShaders
+	// idList<unsigned int> queue; // custom shaders load queue: index to customShaders
+	unsigned int queueCurrentIndex; // current loaded index in customShaders
 
 private:
-	idGLSLShaderManager() {}
+	idGLSLShaderManager() : queueCurrentIndex(0) {}
 };
 extern idGLSLShaderManager *shaderManager;
 
