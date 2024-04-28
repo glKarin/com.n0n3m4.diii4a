@@ -548,6 +548,9 @@ void RB_ShowImages(void)
 
 	end = Sys_Milliseconds();
 	common->Printf("%i msec to draw all images\n", end - start);
+#else
+	extern void RB_ShowImages_compat(void);
+	RB_ShowImages_compat();
 #endif
 }
 
