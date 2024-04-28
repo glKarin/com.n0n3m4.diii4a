@@ -213,7 +213,7 @@ int writeAudio(int offset, int length)
 		memcpy(buf_mem, audio_track_buffer, len);
 		(*env)->ReleaseByteArrayElements(env, audioBuffer, buf_mem, 0);
 #else
-		(*env)->SetByteArrayRegion(env, audioBuffer, 0, len, audio_track_buffer);
+		(*env)->SetByteArrayRegion(env, audioBuffer, offset, len, audio_track_buffer);
 #endif
 	}
 	return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio_array, audioBuffer, offset, length);

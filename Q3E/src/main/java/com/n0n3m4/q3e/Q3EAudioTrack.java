@@ -154,7 +154,7 @@ public class Q3EAudioTrack extends AudioTrack
                     len = -len;
                 }
                 m_data = new byte[len];
-                System.arraycopy(audioData, 0, m_data, 0, len);
+                System.arraycopy(audioData, offset, m_data, 0, len);
                 m_length = len;
             }
         }
