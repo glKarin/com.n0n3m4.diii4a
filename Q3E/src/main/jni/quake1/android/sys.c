@@ -9,17 +9,6 @@
 
 #include <unistd.h>
 
-#define host_initialized (host.state = host_active)
-
-extern void Android_PollInput(void);
-extern void Q3E_CheckNativeWindowChanged(void);
-int main_time, main_oldtime, main_newtime;
-void main_frame()
-{
-	Android_PollInput();
-	Q3E_CheckNativeWindowChanged();
-}
-
 /* Android */
 
 #include "sys_android.c"

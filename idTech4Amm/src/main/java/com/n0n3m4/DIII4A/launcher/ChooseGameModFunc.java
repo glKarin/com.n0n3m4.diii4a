@@ -78,7 +78,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 Q3EGlobals.GAME_BASE_QUAKE1,
                 Q3EGlobals.GAME_BASE_QUAKE2,
                 Q3EGlobals.GAME_BASE_QUAKE3,
-                Q3EGlobals.GAME_BASE_RTCW
+                Q3EGlobals.GAME_BASE_RTCW,
+                Q3EGlobals.GAME_BASE_TDM
         ));
         List<String> blackList = new ArrayList<>();
         boolean standalone = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);

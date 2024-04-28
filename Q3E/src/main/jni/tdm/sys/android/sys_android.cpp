@@ -169,9 +169,9 @@ void Sys_ForceResolution(void)
 
 void Q3E_PrintInitialContext(int argc, const char **argv)
 {
-    printf("[Harmattan]: DIII4A start\n\n");
+    printf("[Harmattan]: TheDarkMod start\n\n");
 
-    printf("DOOM3 initial context\n");
+    printf("Q3E initial context\n");
     printf("  OpenGL: \n");
     printf("    Format: 0x%X\n", gl_format);
     printf("    MSAA: %d\n", gl_msaa);
@@ -184,7 +184,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
-    printf("DOOM3 callback\n");
+    printf("Q3E callback\n");
     printf("  AudioTrack: \n");
     printf("    initAudio: %p\n", initAudio);
     printf("    writeAudio: %p\n", writeAudio);
@@ -203,7 +203,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("    setState: %p\n", setState);
     printf("\n");
 
-    printf("DOOM3 command line arguments: %d\n", argc);
+    printf("Q3E command line arguments: %d\n", argc);
     for(int i = 0; i < argc; i++)
     {
         printf("  %d: %s\n", i, argv[i]);

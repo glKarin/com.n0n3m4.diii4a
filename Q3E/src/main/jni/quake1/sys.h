@@ -34,20 +34,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # define DP_OS_NAME		"Android"
 # define DP_OS_STR		"android"
 # define USE_GLES2		1
-#if !defined(_NOSDL)
-# define USE_RWOPS		1
-#else
+#ifdef _DIII4A
 # define USE_RWOPS		0
+#else
+# define USE_RWOPS		1
 #endif
 # define LINK_TO_ZLIB	1
 # define LINK_TO_LIBVORBIS 1
 #ifdef USEXMP
 # define LINK_TO_LIBXMP 1 // nyov: if someone can test with the android NDK compiled libxmp?
 #endif
-#if !defined(_NOSDL)
-# define DP_MOBILETOUCH	1
-#else
+#ifdef _DIII4A
 # define DP_MOBILETOUCH	0
+#else
+# define DP_MOBILETOUCH	1
 #endif
 # define DP_FREETYPE_STATIC 1
 #elif defined(__linux__)

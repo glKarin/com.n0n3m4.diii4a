@@ -266,7 +266,7 @@ public class Q3EInterface
 		String subdir = GameSubDirectory();
 		if(standalone)
 			subdatadir = subdir;
-		else if(isTDM || isQ1)
+		else if(isTDM)
 			subdatadir = subdir;
 			// else if(IS_D3()) return null;
 		else

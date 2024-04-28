@@ -77,21 +77,21 @@
         </activity> 
 
         <activity android:label="@string/config_editor_name"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:exported="true"
             android:name="com.karin.idTech4Amm.ConfigEditorActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity android:label="@string/key_config_page_name"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:exported="true"
             android:name="com.karin.idTech4Amm.OnScreenButtonConfigActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity android:label="Logcat"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:exported="true"
             android:name="com.karin.idTech4Amm.LogcatActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"

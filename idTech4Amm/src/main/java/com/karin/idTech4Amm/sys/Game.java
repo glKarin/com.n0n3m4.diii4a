@@ -28,7 +28,7 @@ public enum Game
     PREY_BASE(Q3EGlobals.GAME_PREY, "preybase", "", "", false, R.string.prey_preybase),
 
     // Quake 1
-    QUAKE1_BASE(Q3EGlobals.GAME_QUAKE1, "id1", "", "", false, R.string.quake_1_base),
+    QUAKE1_BASE(Q3EGlobals.GAME_QUAKE1, "darkplaces/id1", "", "", false, R.string.quake_1_base),
 
     // Quake 2
     QUAKE2_BASE(Q3EGlobals.GAME_QUAKE2, "baseq2", "", "", false, R.string.quake_2_base),

@@ -2014,6 +2014,7 @@ public class GameLauncher extends Activity
 			soundVisible = false;
 			otherVisible = false;
 			openglVisible = false;
+			modVisible = false;
 			dllVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isQ2)

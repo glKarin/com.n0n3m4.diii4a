@@ -2133,11 +2133,11 @@ static void FS_Init_Dir (void)
 #ifdef DP_FS_BASEDIR
 		dp_strlcpy(fs_basedir, DP_FS_BASEDIR, sizeof(fs_basedir));
 #elif defined(__ANDROID__)
-#if !defined(_NOSDL)
-		dpsnprintf(fs_basedir, sizeof(fs_basedir), "/sdcard/%s/", gameuserdirname);
-#else
+#ifdef _DIII4A
 		extern const char * Sys_GameDataDefaultPath(void);
 		dpsnprintf(fs_basedir, sizeof(fs_basedir), "%s/%s/", Sys_GameDataDefaultPath(), gameuserdirname);
+#else
+		dpsnprintf(fs_basedir, sizeof(fs_basedir), "/sdcard/%s/", gameuserdirname);
 #endif
 #elif defined(MACOSX)
 		// FIXME: is there a better way to find the directory outside the .app, without using Objective-C?

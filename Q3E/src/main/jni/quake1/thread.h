@@ -9,7 +9,12 @@
 // use recursive mutex (non-posix) extensions in thread_pthread
 #define THREADRECURSIVE
 
+#ifdef _NOSDL
+#include <stdatomic.h>
+typedef atomic_flag Thread_SpinLock;
+#else
 typedef int Thread_SpinLock;
+#endif
 typedef struct {int value;} Thread_Atomic;
 
 #define Thread_CreateMutex()              (_Thread_CreateMutex(__FILE__, __LINE__))

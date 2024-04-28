@@ -172,7 +172,8 @@ public class Q3EGameHelper
                 command.SetProp("harm_fs_gameLibPath", dll);
             cmd = command.toString();
         }
-        cmd = Q3EUtils.q3ei.GetGameDataDirectoryPath(null) + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
+        String binDir = Q3EUtils.q3ei.GetGameDataDirectoryPath(null);
+        cmd = binDir + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
         Q3EUtils.q3ei.cmd = cmd;
     }
 
@@ -538,9 +539,6 @@ public class Q3EGameHelper
         int runBackground = Q3EUtils.parseInt_s(preferences.getString(Q3EPreference.RUN_BACKGROUND, "0"), 0);
         int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
-        String subdatadir = Q3EUtils.q3ei.subdatadir;
-        if(null != subdatadir &&subdatadir.isEmpty())
-            subdatadir = null;
 
         Q3EJNI.init(
                 GetEngineLib(),
@@ -548,7 +546,7 @@ public class Q3EGameHelper
                 width,
                 height,
                 Q3EUtils.q3ei.datadir,
-                subdatadir,
+                Q3EUtils.q3ei.subdatadir,
                 cmd,
                 surface,
                 glFormat,

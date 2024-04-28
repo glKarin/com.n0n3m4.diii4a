@@ -356,6 +356,8 @@ public final class ContextUtility
 
     public static void RestartApp(Activity activity)
     {
+        if(null == activity)
+            return;
         activity.finish();
         Intent intent = activity.getPackageManager().getLaunchIntentForPackage(activity.getApplicationContext().getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -1428,7 +1428,7 @@ static int VID_Mode(viddef_mode_t *mode)
 		mode->bitsperpixel      = vid_bitsperpixel.integer;
 		mode->refreshrate       = max(0, vid_refreshrate.integer);
 		mode->stereobuffer      = vid_stereobuffer.integer != 0;
-#ifdef _NOSDL
+#ifdef _DIII4A
 		extern int screen_width;
 		extern int screen_height;
 		mode->display           = 0;

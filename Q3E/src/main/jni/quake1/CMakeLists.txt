@@ -186,7 +186,7 @@ configure_file(
 )
 
 add_definitions(-DCONFIG_MENU -D_FILE_OFFSET_BITS=64 -D__KERNEL_STRICT_NAMES)
-add_definitions(-D_NOSDL -D_NOKTX -D_GLDL -DLINK_TO_LIBJPEG=1)
+add_definitions(-D_DIII4A -D_NOSDL -D_NOKTX -D_GLDL -DLINK_TO_LIBJPEG=1)
 set(Q1LIBRARY idtech_quake)
 add_library(${Q1LIBRARY} SHARED
         ${q1common_src}

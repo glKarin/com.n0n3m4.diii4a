@@ -671,8 +671,9 @@ static inline double Host_UpdateTime (double newtime, double oldtime)
 	return time;
 }
 
-#ifdef _NOSDL
+#ifdef _DIII4A
 extern volatile qbool q3e_running;
+extern void Q3E_CheckNativeWindowChanged(void);
 #endif
 void Host_Main(void)
 {
@@ -686,9 +687,10 @@ void Host_Main(void)
 	// Main event loop
 	while(host.state < host_shutdown) // see Sys_HandleCrash() comments
 	{
-#ifdef _NOSDL
+#ifdef _DIII4A
 		if(!q3e_running) // exit
 			break;
+		Q3E_CheckNativeWindowChanged();
 #endif
 		// Something bad happened, or the server disconnected
 		if (setjmp(host.abortframe))

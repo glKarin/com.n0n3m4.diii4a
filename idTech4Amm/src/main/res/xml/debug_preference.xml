@@ -33,26 +33,26 @@
             android:summary="@string/last_dalvik_crash_info"
             android:persistent="false"/>
         <CheckBoxPreference
-            android:title="Load local engine library"
+            android:title="@string/load_local_engine_library"
             android:key="harm_load_local_engine_lib"
             android:persistent="true"
             android:defaultValue="false"
-            android:summary="Load local engine library"
+            android:summary="@string/load_local_engine_library"
             />
         <Preference
             android:key="get_pid"
-            android:title="PID"
-            android:summary="Get application PID"
+            android:title="@string/pid"
+            android:summary="@string/get_application_pid"
             android:persistent="false"/>
         <Preference
             android:key="open_logcat"
-            android:title="Open Logcat"
-            android:summary="Open Logcat"
+            android:title="@string/open_logcat"
+            android:summary="@string/view_logcat"
             android:persistent="false"/>
         <Preference
             android:key="open_documentsui"
-            android:title="Open documents"
-            android:summary="Open system file browser"
+            android:title="@string/open_documents"
+            android:summary="@string/open_system_file_browser"
             android:persistent="false"/>
     </PreferenceCategory>
     

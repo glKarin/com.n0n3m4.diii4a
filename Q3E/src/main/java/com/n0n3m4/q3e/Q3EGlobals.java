@@ -100,7 +100,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_QUAKE3 = "q3config.cfg"; // Quake 3
     public static final String CONFIG_FILE_RTCW = "wolfconfig.cfg"; // RTCW
     public static final String CONFIG_FILE_TDM = "Darkmod.cfg"; // TDM
-    public static final String CONFIG_FILE_QUAKE1 = "q1config.cfg"; // Quake 1
+    public static final String CONFIG_FILE_QUAKE1 = "config.cfg"; // Quake 1
 
     public static final String GAME_DOOM3 = "doom3";
     public static final String GAME_QUAKE4 = "quake4";
@@ -109,7 +109,7 @@ public final class Q3EGlobals
     public static final String GAME_QUAKE3 = "quake3";
     public static final String GAME_RTCW = "rtcw";
     public static final String GAME_TDM = "tdm";
-    public static final String GAME_QUAKE1 = "id1";
+    public static final String GAME_QUAKE1 = "quake1";
 
     public static final String GAME_NAME_DOOM3 = "DOOM 3";
     public static final String GAME_NAME_QUAKE4 = "Quake 4";
@@ -128,7 +128,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_QUAKE3 = "baseq3";
     public static final String GAME_BASE_RTCW = "main";
     public static final String GAME_BASE_TDM = ""; // the dark mod is standalone
-    public static final String GAME_BASE_QUAKE1 = "id1"; // "darkplaces";
+    public static final String GAME_BASE_QUAKE1 = "darkplaces/id1"; // "darkplaces";
 
     public static final String GAME_SUBDIR_DOOM3 = "doom3";
     public static final String GAME_SUBDIR_QUAKE4 = "quake4";
@@ -137,7 +137,7 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_QUAKE3 = "quake3";
     public static final String GAME_SUBDIR_RTCW = "rtcw";
     public static final String GAME_SUBDIR_TDM = "darkmod";
-    public static final String GAME_SUBDIR_QUAKE1 = "darkplaces";
+    public static final String GAME_SUBDIR_QUAKE1 = "quake1";
 
     public static final String[] LIBS = {
             "game",

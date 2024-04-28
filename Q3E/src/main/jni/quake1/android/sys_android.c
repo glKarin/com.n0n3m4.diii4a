@@ -84,7 +84,7 @@ static volatile qbool window_changed = false;
 // app exit
 extern volatile qbool q3e_running;
 
-#define com_fullyInitialized (host.state = host_active)
+#define host_initialized (host.state == host_active)
 
 // we use an extra lock for the local stuff
 const int MAX_CRITICAL_SECTIONS		= 4;
@@ -96,7 +96,7 @@ static pthread_mutex_t global_lock[ MAX_LOCAL_CRITICAL_SECTIONS ];
 Sys_EnterCriticalSection2
 ==================
 */
-void Sys_EnterCriticalSection2(int index)
+void Sys_EnterCriticalSection(int index)
 {
     assert(index >= 0 && index < MAX_LOCAL_CRITICAL_SECTIONS);
     pthread_mutex_lock(&global_lock[index]);
@@ -107,7 +107,7 @@ void Sys_EnterCriticalSection2(int index)
 Sys_LeaveCriticalSection2
 ==================
 */
-void Sys_LeaveCriticalSection2(int index)
+void Sys_LeaveCriticalSection(int index)
 {
     assert(index >= 0 && index < MAX_LOCAL_CRITICAL_SECTIONS);
     pthread_mutex_unlock(&global_lock[index]);
@@ -131,7 +131,7 @@ Sys_WaitForEvent
 void Sys_WaitForEvent(int index)
 {
     assert(index >= 0 && index < MAX_TRIGGER_EVENTS);
-    Sys_EnterCriticalSection2(MAX_LOCAL_CRITICAL_SECTIONS - 1);
+    Sys_EnterCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
     assert(!waiting[ index ]);	// WaitForEvent from multiple threads? that wouldn't be good
 
     if (signaled[ index ]) {
@@ -143,7 +143,7 @@ void Sys_WaitForEvent(int index)
         waiting[ index ] = false;
     }
 
-    Sys_LeaveCriticalSection2(MAX_LOCAL_CRITICAL_SECTIONS - 1);
+    Sys_LeaveCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
 }
 
 /*
@@ -154,7 +154,7 @@ Sys_TriggerEvent
 void Sys_TriggerEvent(int index)
 {
     assert(index >= 0 && index < MAX_TRIGGER_EVENTS);
-    Sys_EnterCriticalSection2(MAX_LOCAL_CRITICAL_SECTIONS - 1);
+    Sys_EnterCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
 
     if (waiting[ index ]) {
         pthread_cond_signal(&event_cond[ index ]);
@@ -163,7 +163,7 @@ void Sys_TriggerEvent(int index)
         signaled[ index ] = true;
     }
 
-    Sys_LeaveCriticalSection2(MAX_LOCAL_CRITICAL_SECTIONS - 1);
+    Sys_LeaveCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
 }
 
 /*
@@ -259,9 +259,9 @@ void Sys_ForceResolution(void)
 
 void Q3E_PrintInitialContext(int argc, const char **argv)
 {
-    printf("[Harmattan]: DIII4A start\n\n");
+    printf("[Harmattan]: Quake1 start\n\n");
 
-    printf("DOOM3 initial context\n");
+    printf("Q3E initial context\n");
     printf("  OpenGL: \n");
     printf("    Format: 0x%X\n", gl_format);
     printf("    MSAA: %d\n", gl_msaa);
@@ -274,7 +274,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
-    printf("DOOM3 callback\n");
+    printf("Q3E callback\n");
     printf("  AudioTrack: \n");
     printf("    initAudio: %p\n", initAudio);
     printf("    writeAudio: %p\n", writeAudio);
@@ -295,7 +295,7 @@ void Q3E_PrintInitialContext(int argc, const char **argv)
     printf("    setState: %p\n", setState);
     printf("\n");
 
-    printf("Quake1 command line arguments: %d\n", argc);
+    printf("Q3E command line arguments: %d\n", argc);
     for(int i = 0; i < argc; i++)
     {
         printf("  %d: %s\n", i, argv[i]);
@@ -393,14 +393,14 @@ void Q3E_SetInitialContext(const void *context)
 // View paused
 void Q3E_OnPause(void)
 {
-    if(com_fullyInitialized)
+    if(host_initialized)
         paused = true;
 }
 
 // View resume
 void Q3E_OnResume(void)
 {
-    if(com_fullyInitialized)
+    if(host_initialized)
         paused = false;
 }
 
@@ -449,7 +449,7 @@ void Q3E_exit(void)
 void Q3E_SetGLContext(ANativeWindow *w)
 {
     // if engine has started, w is null, means Surfece destroyed, w not null, means Surface has changed.
-    if(com_fullyInitialized)
+    if(host_initialized)
     {
         Con_Printf("[Harmattan]: ANativeWindow changed: %p\n", w);
         if(!w) // set window is null, and wait game main thread deactive OpenGL render context.

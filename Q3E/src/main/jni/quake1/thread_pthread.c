@@ -231,6 +231,7 @@ void _Thread_AtomicLock(Thread_SpinLock *lock, const char *filename, int filelin
 	Sys_Printf("%p atomic lock %s:%i\n", lock, filename, fileline);
 #endif
 	//SDL_AtomicLock(lock);
+	atomic_flag_test_and_set(lock);
 }
 
 void _Thread_AtomicUnlock(Thread_SpinLock *lock, const char *filename, int fileline)
@@ -239,4 +240,5 @@ void _Thread_AtomicUnlock(Thread_SpinLock *lock, const char *filename, int filel
 	Sys_Printf("%p atomic unlock %s:%i\n", lock, filename, fileline);
 #endif
 	//SDL_AtomicUnlock(lock);
+	atomic_flag_clear(lock);
 }

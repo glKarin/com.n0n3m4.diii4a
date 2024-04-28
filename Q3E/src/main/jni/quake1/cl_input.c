@@ -312,7 +312,7 @@ Returns 0.25 if a key was pressed and released during the frame,
 1.0 if held for the entire time
 ===============
 */
-#ifdef _NOSDL
+#ifdef _DIII4A
 extern void CL_Analog(const kbutton_t *key, float *val);
 #endif
 float CL_KeyState (kbutton_t *key)
@@ -356,7 +356,7 @@ float CL_KeyState (kbutton_t *key)
 
 	key->state &= 1;		// clear impulses
 
-#ifdef _NOSDL
+#ifdef _DIII4A
 	//ANALOG
 	CL_Analog(key, &val);
 	//END

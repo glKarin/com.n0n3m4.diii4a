@@ -302,5 +302,12 @@
     <string name="sub_directory">独立目录: </string>
     <string name="app_is_rebooting">应用重启中......</string>
     <string name="standalone_game_data_directory">游戏数据独立文件夹</string>
-    <string name="game_data_directories_are_standalone"><![CDATA[每个游戏的数据文件夹独立放置: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake2 -> quake2; Quake3 -> quake3; RTCW -> rtcw; The Dark Mod -> darkmod/(总是独立); Quake1 -> darkplaces/(总是独立)]]></string>
+    <string name="game_data_directories_are_standalone"><![CDATA[每个游戏的数据文件夹独立放置: 毁灭战士3 -> doom3/; 雷神之锤4 -> quake4/; 掠食(2006) -> prey/; 雷神之锤1 -> quake1/; 雷神之锤2 -> quake2/; 雷神之锤3 -> quake3/; 重返德军总部 -> rtcw/; The Dark Mod -> darkmod/ (总是独立)]]></string>
+    <string name="load_local_engine_library">加载本地引擎库</string>
+    <string name="pid">进程PID</string>
+    <string name="get_application_pid">获取进程PID</string>
+    <string name="open_logcat">打开Logcat</string>
+    <string name="view_logcat">查看Logcat</string>
+    <string name="open_documents">安卓存储访问框架</string>
+    <string name="open_system_file_browser">打开安卓存储访问框架</string>
 </resources>

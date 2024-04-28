@@ -1072,7 +1072,7 @@ static void Sys_HandleSignal(int sig)
 /// SDL2 only handles SIGINT and SIGTERM by default and doesn't log anything
 static void Sys_InitSignals(void)
 {
-#ifdef _NOSDL //karin: not handle signals for debug
+#ifdef _DIII4A //karin: not handle signals for debug
 	extern bool no_handle_signals;
 	if(no_handle_signals)
 		return;

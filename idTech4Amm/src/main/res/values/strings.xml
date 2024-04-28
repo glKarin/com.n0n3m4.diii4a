@@ -305,6 +305,13 @@
     <string name="sub_directory">Sub directory: </string>
     <string name="app_is_rebooting">App is rebooting......</string>
     <string name="standalone_game_data_directory">Standalone game data directory</string>
-    <string name="game_data_directories_are_standalone"><![CDATA[Game data directories are standalone: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake2 -> quake2; Quake3 -> quake3; RTCW -> rtcw; The Dark Mod -> darkmod/(always); Quake1 -> darkplaces/(always)]]></string>
+    <string name="game_data_directories_are_standalone"><![CDATA[Game data directories are standalone: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always)]]></string>
+    <string name="load_local_engine_library">Load local engine library</string>
+    <string name="pid">PID</string>
+    <string name="get_application_pid">Get application PID</string>
+    <string name="open_logcat">Open logcat</string>
+    <string name="view_logcat">View logcat</string>
+    <string name="open_documents">Android Storage Access Framework</string>
+    <string name="open_system_file_browser">Open Android Storage Access Framework</string>
 
 </resources>
