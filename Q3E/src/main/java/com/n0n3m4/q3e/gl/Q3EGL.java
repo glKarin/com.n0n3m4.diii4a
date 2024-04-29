@@ -91,7 +91,7 @@ public final class Q3EGL
             GLES20.glUniform4f(gl20tr, -Q3EControlView.orig_width / 2.0f + trax, -Q3EControlView.orig_height / 2.0f + tray, 0.0f, 0.0f);
             GLES20.glUniform4f(gl20cl, r, g, b, a);
             GLES20.glDrawElements(GLES20.GL_TRIANGLES, cnt, GLES20.GL_UNSIGNED_BYTE, inds);
-            if ((!Q3EUtils.q3ei.isQ1) && (!Q3EUtils.q3ei.isD3BFG))
+            /*if ((!Q3EUtils.q3ei.isQ1) && (!Q3EUtils.q3ei.isD3BFG))*/
             {
                 GLES20.glDisableVertexAttribArray(mPositionHandle);
                 GLES20.glDisableVertexAttribArray(mTexHandle);
