@@ -319,6 +319,9 @@ static void M_Demo_Key (cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		S_LocalSound ("sound/misc/menu2.wav");
 		m_state = m_none;
 		key_dest = key_game;
@@ -514,6 +517,9 @@ static void M_Main_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		m_entersound = true;
 
 		if (m_missingdata)
@@ -775,7 +781,11 @@ static void M_SinglePlayer_Key(cmd_state_t *cmd, int key, int ascii)
 {
 	if (gamemode == GAME_GOODVSBAD2 || gamemode == GAME_BATTLEMECH)
 	{
-		if (key == K_ESCAPE || key == K_ENTER)
+		if (key == K_ESCAPE || key == K_ENTER
+#ifdef _DIII4A
+			|| key == K_MOUSE1
+#endif
+				)
 			m_state = m_main;
 		return;
 	}
@@ -799,6 +809,9 @@ static void M_SinglePlayer_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		m_entersound = true;
 
 		switch (m_singleplayer_cursor)
@@ -956,6 +969,9 @@ static void M_Load_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		S_LocalSound ("sound/misc/menu2.wav");
 		if (!loadable[load_cursor])
 			return;
@@ -998,6 +1014,9 @@ static void M_Save_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		m_state = m_none;
 		key_dest = key_game;
 		Cbuf_AddText(cmd, va(vabuf, sizeof(vabuf), "save s%i\n", load_cursor));
@@ -1073,6 +1092,9 @@ static void M_Transfusion_Episode_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		Cbuf_AddText(cmd, "deathmatch 0\n");
 		m_entersound = true;
 		M_Menu_Transfusion_Skill_f(cmd);
@@ -1132,6 +1154,9 @@ static void M_Transfusion_Skill_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		m_entersound = true;
 		switch (m_skill_cursor)
 		{
@@ -1245,6 +1270,9 @@ static void M_MultiPlayer_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		m_entersound = true;
 		switch (m_multiplayer_cursor)
 		{
@@ -1481,6 +1509,9 @@ forward:
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		if (setup_cursor == 0)
 			return;
 
@@ -1717,6 +1748,9 @@ static void M_Options_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		m_entersound = true;
 		switch (options_cursor)
 		{
@@ -1932,6 +1966,9 @@ static void M_Options_Effects_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		M_Menu_Options_Effects_AdjustSliders (1);
 		break;
 
@@ -2062,6 +2099,9 @@ static void M_Options_Graphics_Key (cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		M_Menu_Options_Graphics_AdjustSliders (cmd, 1);
 		break;
 
@@ -2290,6 +2330,9 @@ static void M_Options_ColorControl_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		m_entersound = true;
 		switch (options_colorcontrol_cursor)
 		{
@@ -2711,6 +2754,9 @@ static void M_Keys_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:		// go into bind mode
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		Key_FindKeysForCommand (bindnames[keys_cursor][0], keys, NUMKEYS, 0);
 		S_LocalSound ("sound/misc/menu2.wav");
 		if (keys[NUMKEYS - 1] != -1)
@@ -3045,6 +3091,9 @@ static void M_Video_Key(cmd_state_t *cmd, int key, int ascii)
 			break;
 
 		case K_ENTER:
+#ifdef _DIII4A
+		case K_MOUSE1:
+#endif
 			m_entersound = true;
 			switch (video_cursor)
 			{
@@ -3434,6 +3483,9 @@ static void M_LanConfig_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		if (lanConfig_cursor == 0)
 			break;
 
@@ -4337,6 +4389,9 @@ static void M_GameOptions_Key(cmd_state_t *cmd, int key, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		S_LocalSound ("sound/misc/menu2.wav");
 		if (gameoptions_cursor == 0)
 		{
@@ -4501,6 +4556,9 @@ static void M_ServerList_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		S_LocalSound ("sound/misc/menu2.wav");
 		if (serverlist_viewcount)
 			Cbuf_AddText(cmd, va(vabuf, sizeof(vabuf), "connect \"%s\"\n", ServerList_GetViewEntry(slist_cursor)->info.cname));
@@ -4739,6 +4797,9 @@ static void M_ModList_Key(cmd_state_t *cmd, int k, int ascii)
 		break;
 
 	case K_ENTER:
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		S_LocalSound ("sound/misc/menu2.wav");
 		ModList_Enable ();
 		break;
