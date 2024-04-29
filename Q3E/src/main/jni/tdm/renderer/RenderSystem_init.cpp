@@ -892,7 +892,7 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 				tr.EndFrame( NULL, NULL );
 			} else {
 				session->UpdateScreen( false );
-#if !defined(__ANDROID__)
+#ifdef _OPENGLES3 //karin: OpenGLES3.0
 				qglReadBuffer( GL_FRONT );
 #endif
 				qglPixelStorei( GL_PACK_ALIGNMENT, 1 );	// otherwise small rows get padded to 32 bits

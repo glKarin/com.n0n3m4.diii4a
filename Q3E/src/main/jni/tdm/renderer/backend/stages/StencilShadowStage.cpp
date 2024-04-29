@@ -133,7 +133,7 @@ void StencilShadowStage::DrawSurfs( const viewDef_t *viewDef, const viewLight_t 
 }
 
 #define max(x, y) idMath::Fmax(x, y)
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: using glslprops/ for avoid override
 #include "glslprogs/tdm_shadowstencilsoft_shared.glsl"
 #else
 #include "glprogs/tdm_shadowstencilsoft_shared.glsl"

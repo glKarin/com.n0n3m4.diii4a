@@ -558,9 +558,11 @@ static void	RB_SetBuffer( const void *data ) {
 
 	backEnd.frameCount = cmd->frameCount;
 
-	qglDrawBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
 #if !defined(__ANDROID__)
-	qglReadBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
+	qglDrawBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
+#endif
+#ifdef _OPENGLES3
+	qglReadBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK ); //karin: OpenGLES3.0
 #endif
 
 	// note: clear was moved to RB_BeginDrawingView

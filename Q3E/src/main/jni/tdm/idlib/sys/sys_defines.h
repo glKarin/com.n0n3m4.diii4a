@@ -101,7 +101,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #define CPUSTRING						"x86_64"
 #elif defined(__e2k__)
 #define CPUSTRING						"e2k"
-#elif defined(__ANDROID__) //k Android arch
+#elif defined(__ANDROID__) //karin: Android arch
     #ifdef __aarch64__
     #define CPUSTRING						"arm64"
     #else
