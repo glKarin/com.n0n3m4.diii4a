@@ -1,7 +1,7 @@
 {
-    "release":39,
-    "update":"2024-04-10",
-    "version":"1.1.0harmattan39",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan39/idTech4A++_1.1.0harmattan39.apk",
-    "changes":"  * Support perforated surface shadow in shadow mapping.\n  * Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`.\n  * Add `Quake II` support, game data directory named `baseq2`.\n  * Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`.\n  * Add `Return to Castle Wolfenstein` support, game data directory named `main`.\n  * Add `The Dark Mod` 2.12 support, game data directory named `darkmod`.\n  * Add a on-screen button theme."
+    "release":50,
+    "update":"2024-04-30",
+    "version":"1.1.0harmattan50",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan50/idTech4A++_1.1.0harmattan50.apk",
+    "changes":"  * Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).\n  * Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).\n   * Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).\n   * Improving Phong/Blinn-Phong light model interaction shader with high-precision.\n   * Force disable using compression texture in The Dark Mod.\n   * Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always)."
 }
