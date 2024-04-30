@@ -8,3 +8,4 @@ tdm/ThirdParty/artefacts/*/bin/*
 tdm/ThirdParty/artefacts/*/lib/*
 
 duke4
+deplibs/oboe

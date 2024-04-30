@@ -1977,6 +1977,8 @@ public class GameLauncher extends Activity
 
     private void SetGame(String game)
     {
+		if(Q3EGlobals.GAME_QUAKE1.equals(game))
+			game = Q3EGlobals.GAME_DOOM3;
         Q3EUtils.q3ei.SetupGame(game);
         V.launcher_tab1_edit_doomconfig.setText(getString(R.string.edit_) + Q3EUtils.q3ei.config_name);
         if (null != V.main_menu_game)
@@ -2097,6 +2099,8 @@ public class GameLauncher extends Activity
 		LockCmdUpdate();
 		SetupCommandTextWatcher(false);
         String newGame = games.length > 0 ? games[0] : null;
+		if(Q3EGlobals.GAME_QUAKE1.equals(newGame))
+			newGame = null;
         if (null == newGame || newGame.isEmpty())
         {
             int i;
@@ -2108,6 +2112,8 @@ public class GameLauncher extends Activity
             if (i >= GameManager.Games.length)
                 i = GameManager.Games.length - 1;
             newGame = GameManager.Games[(i + 1) % GameManager.Games.length];
+			if(Q3EGlobals.GAME_QUAKE1.equals(newGame))
+				newGame = GameManager.Games[(i + 2) % GameManager.Games.length];
         }
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         preference.edit().putString(Q3EPreference.pref_harm_game, newGame).commit();

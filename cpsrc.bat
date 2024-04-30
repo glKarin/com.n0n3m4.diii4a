@@ -16,7 +16,7 @@ mkdir %DST_PATH%
 mkdir %DST_PATH%\idTech4amm
 mkdir %DST_PATH%\Q3E
 
-echo Copying %DST_PATH% to %SRC_PATH%
+echo Copying %SRC_PATH% to %DST_PATH%
 xcopy /E/I/Y/Q %SRC_PATH%\idTech4amm\src %DST_PATH%\idTech4amm\src
 xcopy /Y/Q %SRC_PATH%\idTech4amm\build.gradle %DST_PATH%\idTech4amm\
 xcopy /Y/Q %SRC_PATH%\idTech4amm\lint.xml %DST_PATH%\idTech4amm\

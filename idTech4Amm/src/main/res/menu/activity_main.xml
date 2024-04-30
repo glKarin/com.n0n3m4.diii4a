@@ -23,12 +23,12 @@
                 android:title="@string/prey_2006"
                 android:showAsAction="never"/>
             <item
-                android:id="@+id/main_menu_game_quake3"
-                android:title="@string/quake_3"
-                android:showAsAction="never"/>
-            <item
                 android:id="@+id/main_menu_game_rtcw"
                 android:title="@string/rtcw"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_game_quake3"
+                android:title="@string/quake_3"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_game_quake2"
@@ -37,6 +37,7 @@
             <item
                 android:id="@+id/main_menu_game_quake1"
                 android:title="@string/quake_1"
+                android:visible="false"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_game_tdm"

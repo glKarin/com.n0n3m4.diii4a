@@ -35,6 +35,7 @@ public final class Constants
             "Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).",
             "Improving Phong/Blinn-Phong light model interaction shader with high-precision.",
             "Force disable using compression texture in The Dark Mod.",
+            "Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always).",
         };
 	};
 

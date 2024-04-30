@@ -5,9 +5,10 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Q3EAudioTrack extends AudioTrack
 {
@@ -17,16 +18,21 @@ public class Q3EAudioTrack extends AudioTrack
     private boolean m_inited = false;
     //k byte[] mAudioData;
 
-    private Q3EAudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int bufferSizeInBytes, int mode) throws IllegalStateException
+    public Q3EAudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int bufferSizeInBytes, int mode) throws IllegalStateException
     {
         super(streamType, sampleRateInHz, channelConfig, audioFormat,
                 bufferSizeInBytes, mode);
     }
 
-    private void Init(int size)
+    protected void Init(int size)
     {
         if (m_inited)
             return;
+
+        if (getState() != AudioTrack.STATE_INITIALIZED) {
+            Log.e(TAG, "Failed during initialization of Audio Track");
+            return;
+        }
 
         m_thread = new HandlerThread(TAG);
         m_thread.start();
@@ -118,7 +124,7 @@ public class Q3EAudioTrack extends AudioTrack
         release();
     }
 
-    private class AudioOptRunnable implements Runnable
+    protected class AudioOptRunnable implements Runnable
     {
         private byte[] m_data = null;
         public int m_length = 0;
@@ -162,12 +168,29 @@ public class Q3EAudioTrack extends AudioTrack
         @Override
         public void run()
         {
-            if (m_inited)
+            if (Q3EAudioTrack.this.m_inited)
             {
                 if (m_length > 0)
-                    write(m_data, 0, m_length);
+                {
+                    int i = 0;
+                    while ( i < m_data.length ) {
+                        int result = Q3EAudioTrack.this.write(m_data, i, m_length - i/*, AudioTrack.WRITE_BLOCKING*/);
+                        if (result > 0) {
+                            i += result;
+                        } else if (result == 0) {
+                            try {
+                                Thread.sleep(1);
+                            } catch(InterruptedException ignored) {
+                                // Nom nom
+                            }
+                        } else {
+                            Log.w(TAG, "Audio: error return from write(byte)");
+                        }
+                    }
+                    // Q3EAudioTrack.this.write(m_data, 0, m_length);
+                }
                 if (m_flush)
-                    flush();
+                    Q3EAudioTrack.this.flush();
             }
             m_data = null;
         }

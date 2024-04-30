@@ -20,9 +20,6 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
-import android.content.Context;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 
 import com.n0n3m4.q3e.karin.KOnceRunnable;
 import com.n0n3m4.q3e.onscreen.Q3EGUI;
@@ -107,8 +104,13 @@ public class Q3ECallbackObj
                                            "' */
 
         if (mAudioTrack != null) return;
-        mAudioTrack = Q3EAudioTrack.Instance(size);
+        mAudioTrack = Instance(size);
         reqThreadrunning = true;
+    }
+
+    public static Q3EAudioTrack Instance(int size)
+    {
+        return Q3EAudioTrack.Instance(size);
     }
 
     //k NEW:

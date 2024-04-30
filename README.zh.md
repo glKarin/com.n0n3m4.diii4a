@@ -3,9 +3,9 @@
 #### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版. 
 #### 原名DIII4A++, 基于n0n3m4的diii4a的OpenGLES版本.
 **最新版本:**
-1.1.0harmattan39(natasha)  
+1.1.0harmattan50(natasha)  
 **最新更新日期:**
-2024-04-10  
+2024-04-30  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -59,13 +59,12 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 阴影映射支持镂空图层阴影(cvar `r_forceShadowMapsOnAlphaTestedSurfaces`, 默认0).
-* 新增毁灭战士3 mod `LibreCoop`支持, 游戏数据文件夹命名为`librecoop`. 详情[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
-* 新增`雷神之锤2`支持, 游戏数据文件夹命名为`baseq2`. 详情[Quake II](https://store.steampowered.com/app/2320/Quake_II/).
-* 新增`雷神之锤3竞技场`支持, 游戏数据文件夹命名为`baseq3`; 新增`雷神之锤3团队竞技场`支持, 游戏数据文件夹命名为`missionpack`. 详情[Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
-* 新增`重返德军总部`支持, 游戏数据文件夹命名为`main`. 详情[Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
-* 新增`The Dark Mod`v2.12支持, 游戏数据文件夹命名为`darkmod`. 详情[The Dark Mod](https://www.thedarkmod.com).
-* 新增一个虚拟按键主题.
+* 支持新渲染通道: 热浪(例如 BFG9000飞行物的扭曲, 火箭炮的爆炸), colorProcess(例如 marscity2镜子前的血色影片).
+* 雷神之锤4支持新GLSL渲染通道(例如 机枪的瞄准镜特效和弹孔).
+* `Control`选项卡新增控制虚拟摇杆的显示模式(总是显示; 隐藏; 仅按下显示).
+* 改进Phong/Blinn-Phong光照模型着色器使用高精度.
+* The Dark Mod中强制禁用压缩纹理.
+* 设置中可以启用每个游戏的数据文件夹独立放置: 毁灭战士3 -> doom3/; 雷神之锤4 -> quake4/; 掠食(2006) -> prey/; 雷神之锤1 -> quake1/; 雷神之锤2 -> quake2/; 雷神之锤3 -> quake3/; 重返德军总部 -> rtcw/; The Dark Mod -> darkmod/ (总是独立).
 
 ----------------------------------------------------------------------------------
 

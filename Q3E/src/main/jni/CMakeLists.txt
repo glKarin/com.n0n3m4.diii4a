@@ -32,6 +32,14 @@ option(ANDROID "Android build" ON)
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
+set(q3e_src
+        q3e.c
+        )
+set(q3e_lib
+        log
+        android
+        )
+
 add_library( # Sets the name of the library.
         q3eloader
 
@@ -39,7 +47,8 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        q3e.c )
+        ${q3e_src}
+        )
 
 target_link_libraries( # Specifies the target library.
         q3eloader
@@ -47,8 +56,7 @@ target_link_libraries( # Specifies the target library.
         # Links the target library to the log library
         # included in the NDK.
         #${log-lib}
-        log
-        android
+        ${q3e_lib}
         )
 
 #add_subdirectory(doom3/neo/externlibs/openal-soft)
@@ -65,6 +73,6 @@ add_subdirectory (rtcw) # RTCW
 
 add_subdirectory (tdm) # The Dark Mod
 
-add_subdirectory (quake1) # Quake 1
+#add_subdirectory (quake1) # Quake 1
 
 #add_subdirectory (duke4) # DNF

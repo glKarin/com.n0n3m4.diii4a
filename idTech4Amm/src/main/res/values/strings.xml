@@ -273,7 +273,7 @@
     <string name="shadow_mapping">Shadow mapping</string>
     <string name="renderer">Renderer</string>
     <string name="_sound">Sound</string>
-    <string name="using_openal">Using OpenAL(soft)(s_useOpenAL)</string>
+    <string name="using_openal">Using OpenAL(s_useOpenAL)</string>
     <string name="using_efx_reverb">Enable EFX Reverb(s_useEAXReverb)</string>
     <string name="internal_storage">Internal storage</string>
     <string name="external_storage">External storage</string>

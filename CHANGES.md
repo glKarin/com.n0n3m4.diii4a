@@ -2,6 +2,17 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan50 (2024-04-30)
+
+* Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).
+* Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).
+* Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).
+* Improving Phong/Blinn-Phong light model interaction shader with high-precision.
+* Force disable using compression texture in The Dark Mod.
+* Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always).
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan39 (2024-04-10)
 
 * Support perforated surface shadow in shadow mapping(cvar `r_forceShadowMapsOnAlphaTestedSurfaces`, default 0).

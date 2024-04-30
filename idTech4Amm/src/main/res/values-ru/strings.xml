@@ -270,7 +270,7 @@
     <string name="shadow_mapping">Мягкие тени</string>
     <string name="renderer">Рендер</string>
     <string name="_sound">Звук</string>
-    <string name="using_openal">Использовать OpenAL(Мягкий)(s_useOpenAL)</string>
+    <string name="using_openal">Использовать OpenAL(s_useOpenAL)</string>
     <string name="using_efx_reverb">Использовать EFX реверберацию(s_useEAXReverb)</string>
     <string name="internal_storage">Внутреннее хранилище</string>
     <string name="external_storage">Внешнее хранилище</string>
