@@ -37,7 +37,6 @@
             <item
                 android:id="@+id/main_menu_game_quake1"
                 android:title="@string/quake_1"
-                android:visible="false"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_game_tdm"

@@ -1,23 +1,16 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
-project(quake1 C)
+project(quake1)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-add_definitions(-DNO_VM_COMPILED) # base
-add_definitions(-DUSE_OPENAL -DUSE_OPENAL_DLOPEN) # OpenAL dlopen
-add_definitions(-DUSE_INTERNAL_JPEG) # jpeg
-add_definitions(-DUSE_OPENGLES) # OpenGLES 1.1
-add_definitions(-DUSE_CODEC_VORBIS) # ogg
-add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl
-
 set(q1libs android log EGL z)
-set(q1libs ${q1libs} vorbisfile vorbisenc vorbis png jpeg ogg freetype)
+set(q1libs ${q1libs} vorbisfile vorbisenc vorbis png jpeg ogg freetype oboe)
 #set(q1libs ${q1libs} curl)
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
@@ -173,16 +166,14 @@ set(q1sound_src
 		snd_main.c snd_mem.c snd_mix.c snd_ogg.c snd_wav.c
 )
 
+include_directories("../deplibs/oboe/include")
 set(q1sys_src
 	builddate.c
 		android/snd_android.c
 		android/vid_android.c
 		android/sys.c
+		android/snd_oboe.cpp
 		thread_pthread.c
-)
-configure_file(
-		"../deplibs/libogg/include/ogg/config_types.h.in"
-		"./include/ogg/config_types.h"
 )
 
 add_definitions(-DCONFIG_MENU -D_FILE_OFFSET_BITS=64 -D__KERNEL_STRICT_NAMES)

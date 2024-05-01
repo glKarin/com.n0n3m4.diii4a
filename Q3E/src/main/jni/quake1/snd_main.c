@@ -246,7 +246,7 @@ static cvar_t snd_show = {CF_CLIENT, "snd_show", "0", "shows some statistics abo
 // Default sound format is 48KHz, 32bit float, stereo
 // (48KHz because a lot of onboard sound cards sucks at any other speed)
 static cvar_t snd_speed = {CF_CLIENT | CF_ARCHIVE, "snd_speed", "48000", "sound output frequency, in hertz"};
-static cvar_t snd_width = {CF_CLIENT | CF_ARCHIVE, "snd_width", "4", "sound output precision, in bytes - 1 = 8bit, 2 = 16bit, 4 = 32bit float"};
+static cvar_t snd_width = {CF_CLIENT | CF_ARCHIVE, "snd_width", "2", "sound output precision, in bytes - 1 = 8bit, 2 = 16bit, 4 = 32bit float"};
 static cvar_t snd_channels = {CF_CLIENT | CF_ARCHIVE, "snd_channels", "2", "number of channels for the sound output (2 for stereo; up to 8 supported for 3D sound)"};
 
 static cvar_t snd_startloopingsounds = {CF_CLIENT, "snd_startloopingsounds", "1", "whether to start sounds that would loop (you want this to be 1); existing sounds are not affected"};
