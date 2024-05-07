@@ -38,7 +38,7 @@ ivec2 clampPixelCoords(ivec2 pixelCoords) {
 #define MODE MIPMAP_MODE //k
 #if MIPMAP_FIRST
 	#if MODE == 0   // MM_STENCIL_SHADOW
-		uniform highp usampler2D u_sourceTexture;
+		uniform mediump usampler2D u_sourceTexture;
 	#else
 		//TODO
 		uniform highp sampler2D u_sourceTexture;

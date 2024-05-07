@@ -276,7 +276,7 @@ public final class Q3EGlobals
 
     public static final String GAME_EXECUABLE = "game.arm";
 
-    public static final String TDM_GLSL_SHADER_VERSION = "2.12.0";
+    public static final String TDM_GLSL_SHADER_VERSION = "2.12.1";
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

@@ -17,7 +17,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #pragma tdm_include "tdm_shadowstencilsoft_shared.glsl"
 #pragma tdm_include "tdm_poissondisk.glsl"  // note: adds uniform
 
-float fetchStencilShadowTexture(usampler2D stencilTexture, vec2 texCoord) {
+float fetchStencilShadowTexture(mediump usampler2D stencilTexture, vec2 texCoord) {
 	float stTex = float(texture(stencilTexture, texCoord).r);
 	return clamp(129.0 - stTex, 0.0, 1.0);
 }
@@ -25,7 +25,7 @@ float fetchStencilShadowTexture(usampler2D stencilTexture, vec2 texCoord) {
 // note: this function must be run while rendering the shadowed surface
 // it uses gl_FragCoord and dfdx/dfdy (including depth/W components)
 float computeStencilSoftShadow(
-	usampler2D stencilTexture, sampler2D depthTexture,
+        mediump usampler2D stencilTexture, sampler2D depthTexture,
 	vec3 objectToLight, vec3 objectNormal,
 	mat4 modelViewMatrix, mat4 projectionMatrix,
 	int softQuality, float softRadius,

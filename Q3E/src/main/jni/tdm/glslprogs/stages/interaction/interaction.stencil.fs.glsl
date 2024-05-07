@@ -22,7 +22,7 @@ out vec4 FragColor;
 #pragma tdm_include "stages/interaction/interaction.common.fs.glsl"
 #pragma tdm_include "tdm_shadowstencilsoft.glsl"
 
-uniform highp usampler2D u_stencilTexture;
+uniform mediump usampler2D u_stencilTexture;
 uniform sampler2D u_depthTexture;
 
 uniform sampler2D u_stencilMipmapsTexture;
