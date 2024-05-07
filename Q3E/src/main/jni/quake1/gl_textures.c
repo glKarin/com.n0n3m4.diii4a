@@ -1561,11 +1561,10 @@ int R_SaveTextureDDSFile(rtexture_t *rt, const char *filename, qbool skipuncompr
 #endif
 }
 
-#ifdef __ANDROID__
 #if !defined(_NOKTX)
+#ifdef __ANDROID__
 // ELUAN: FIXME: separate this code
 #include "ktx10/include/ktx.h"
-#endif
 #endif
 
 rtexture_t *R_LoadTextureDDSFile(rtexturepool_t *rtexturepool, const char *filename, qbool srgb, int flags, qbool *hasalphaflag, float *avgcolor, int miplevel, qbool optionaltexture) // DDS textures are opaque, so miplevel isn't a pointer but just seen as a hint
@@ -1589,20 +1588,17 @@ rtexture_t *R_LoadTextureDDSFile(rtexturepool_t *rtexturepool, const char *filen
 	unsigned int ddssize;
 	qbool force_swdecode;
 #ifdef __ANDROID__
-	#if !defined(_NOKTX)
 	// ELUAN: FIXME: separate this code
 	char vabuf[1024];
 	char vabuf2[1024];
 	int strsize;
 	KTX_dimensions sizes;
     #endif
-#endif
 
 	if (cls.state == ca_dedicated)
 		return NULL;
 
 #ifdef __ANDROID__
-	#if !defined(_NOKTX)
 	// ELUAN: FIXME: separate this code
 	if (vid.renderpath != RENDERPATH_GLES2)
 	{
@@ -1737,7 +1733,6 @@ rtexture_t *R_LoadTextureDDSFile(rtexturepool_t *rtexturepool, const char *filen
 			return NULL;
 		}
 	}
-    #endif
 #endif // __ANDROID__
 
 	dds = FS_LoadFile(filename, tempmempool, true, &ddsfilesize);
@@ -2272,6 +2267,587 @@ rtexture_t *R_LoadTextureDDSFile(rtexturepool_t *rtexturepool, const char *filen
 		Mem_Free((unsigned char *) mippixels_start);
 	return (rtexture_t *)glt;
 }
+#else
+rtexture_t *R_LoadTextureDDSFile(rtexturepool_t *rtexturepool, const char *filename, qbool srgb, int flags, qbool *hasalphaflag, float *avgcolor, int miplevel, qbool optionaltexture) // DDS textures are opaque, so miplevel isn't a pointer but just seen as a hint
+{
+	int i, size, dds_format_flags, dds_miplevels, dds_width, dds_height;
+	//int dds_flags;
+	textype_t textype;
+	int bytesperblock, bytesperpixel;
+	int mipcomplete;
+	gltexture_t *glt;
+	gltexturepool_t *pool = (gltexturepool_t *)rtexturepool;
+	textypeinfo_t *texinfo;
+	int mip, mipwidth, mipheight, mipsize, mipsize_total;
+	unsigned int c, r, g, b;
+	GLint oldbindtexnum = 0;
+	unsigned char *mippixels;
+	unsigned char *mippixels_start;
+	unsigned char *ddspixels;
+	unsigned char *dds;
+	fs_offset_t ddsfilesize;
+	unsigned int ddssize;
+	qbool force_swdecode, npothack;
+
+	if (cls.state == ca_dedicated)
+		return NULL;
+
+	dds = FS_LoadFile(filename, tempmempool, true, &ddsfilesize);
+	ddssize = ddsfilesize;
+
+	if (!dds)
+	{
+		if (r_texture_dds_load_logfailure.integer && (r_texture_dds_load_logfailure.integer >= 2 || !optionaltexture))
+			Log_Printf("ddstexturefailures.log", "%s\n", filename);
+		return NULL; // not found
+	}
+
+	if (ddsfilesize <= 128 || memcmp(dds, "DDS ", 4) || ddssize < (unsigned int)BuffLittleLong(dds+4) || BuffLittleLong(dds+76) != 32)
+	{
+		Mem_Free(dds);
+		Con_Printf("^1%s: not a DDS image\n", filename);
+		return NULL;
+	}
+
+	//dds_flags = BuffLittleLong(dds+8);
+	dds_format_flags = BuffLittleLong(dds+80);
+	dds_miplevels = (BuffLittleLong(dds+108) & 0x400000) ? BuffLittleLong(dds+28) : 1;
+	dds_width = BuffLittleLong(dds+16);
+	dds_height = BuffLittleLong(dds+12);
+	ddspixels = dds + 128;
+
+	if(r_texture_dds_load_alphamode.integer == 0)
+		if(!(dds_format_flags & 0x1)) // DDPF_ALPHAPIXELS
+			flags &= ~TEXF_ALPHA;
+
+	//flags &= ~TEXF_ALPHA; // disabled, as we DISABLE TEXF_ALPHA in the alpha detection, not enable it!
+	if ((dds_format_flags & 0x40) && BuffLittleLong(dds+88) == 32)
+	{
+		// very sloppy BGRA 32bit identification
+		textype = TEXTYPE_BGRA;
+		flags &= ~TEXF_COMPRESS; // don't let the textype be wrong
+		bytesperblock = 0;
+		bytesperpixel = 4;
+		size = INTOVERFLOW_MUL(INTOVERFLOW_MUL(dds_width, dds_height), bytesperpixel);
+		if(INTOVERFLOW_ADD(128, size) > INTOVERFLOW_NORMALIZE(ddsfilesize))
+		{
+			Mem_Free(dds);
+			Con_Printf("^1%s: invalid BGRA DDS image\n", filename);
+			return NULL;
+		}
+		if((r_texture_dds_load_alphamode.integer == 1) && (flags & TEXF_ALPHA))
+		{
+			// check alpha
+			for (i = 3;i < size;i += 4)
+				if (ddspixels[i] < 255)
+					break;
+			if (i >= size)
+				flags &= ~TEXF_ALPHA;
+		}
+	}
+	else if (!memcmp(dds+84, "DXT1", 4))
+	{
+		// we need to find out if this is DXT1 (opaque) or DXT1A (transparent)
+		// LordHavoc: it is my belief that this does not infringe on the
+		// patent because it is not decoding pixels...
+		textype = TEXTYPE_DXT1;
+		bytesperblock = 8;
+		bytesperpixel = 0;
+		//size = ((dds_width+3)/4)*((dds_height+3)/4)*bytesperblock;
+		size = INTOVERFLOW_MUL(INTOVERFLOW_MUL(INTOVERFLOW_DIV(INTOVERFLOW_ADD(dds_width, 3), 4), INTOVERFLOW_DIV(INTOVERFLOW_ADD(dds_height, 3), 4)), bytesperblock);
+		if(INTOVERFLOW_ADD(128, size) > INTOVERFLOW_NORMALIZE(ddsfilesize))
+		{
+			Mem_Free(dds);
+			Con_Printf("^1%s: invalid DXT1 DDS image\n", filename);
+			return NULL;
+		}
+		if (flags & TEXF_ALPHA)
+		{
+			if (r_texture_dds_load_alphamode.integer == 1)
+			{
+				// check alpha
+				for (i = 0;i < size;i += bytesperblock)
+					if (ddspixels[i+0] + ddspixels[i+1] * 256 <= ddspixels[i+2] + ddspixels[i+3] * 256)
+					{
+						// NOTE: this assumes sizeof(unsigned int) == 4
+						unsigned int data = * (unsigned int *) &(ddspixels[i+4]);
+						// check if data, in base 4, contains a digit 3 (DXT1: transparent pixel)
+						if(data & (data<<1) & 0xAAAAAAAA)//rgh
+							break;
+					}
+				if (i < size)
+					textype = TEXTYPE_DXT1A;
+				else
+					flags &= ~TEXF_ALPHA;
+			}
+			else if (r_texture_dds_load_alphamode.integer == 0)
+				textype = TEXTYPE_DXT1A;
+			else
+			{
+				flags &= ~TEXF_ALPHA;
+			}
+		}
+	}
+	else if (!memcmp(dds+84, "DXT3", 4) || !memcmp(dds+84, "DXT2", 4))
+	{
+		if(!memcmp(dds+84, "DXT2", 4))
+		{
+			if(!(flags & TEXF_RGBMULTIPLYBYALPHA))
+			{
+				Con_Printf("^1%s: expecting DXT3 image without premultiplied alpha, got DXT2 image with premultiplied alpha\n", filename);
+			}
+		}
+		else
+		{
+			if(flags & TEXF_RGBMULTIPLYBYALPHA)
+			{
+				Con_Printf("^1%s: expecting DXT2 image without premultiplied alpha, got DXT3 image without premultiplied alpha\n", filename);
+			}
+		}
+		textype = TEXTYPE_DXT3;
+		bytesperblock = 16;
+		bytesperpixel = 0;
+		size = INTOVERFLOW_MUL(INTOVERFLOW_MUL(INTOVERFLOW_DIV(INTOVERFLOW_ADD(dds_width, 3), 4), INTOVERFLOW_DIV(INTOVERFLOW_ADD(dds_height, 3), 4)), bytesperblock);
+		if(INTOVERFLOW_ADD(128, size) > INTOVERFLOW_NORMALIZE(ddsfilesize))
+		{
+			Mem_Free(dds);
+			Con_Printf("^1%s: invalid DXT3 DDS image\n", filename);
+			return NULL;
+		}
+		// we currently always assume alpha
+	}
+	else if (!memcmp(dds+84, "DXT5", 4) || !memcmp(dds+84, "DXT4", 4))
+	{
+		if(!memcmp(dds+84, "DXT4", 4))
+		{
+			if(!(flags & TEXF_RGBMULTIPLYBYALPHA))
+			{
+				Con_Printf("^1%s: expecting DXT5 image without premultiplied alpha, got DXT4 image with premultiplied alpha\n", filename);
+			}
+		}
+		else
+		{
+			if(flags & TEXF_RGBMULTIPLYBYALPHA)
+			{
+				Con_Printf("^1%s: expecting DXT4 image without premultiplied alpha, got DXT5 image without premultiplied alpha\n", filename);
+			}
+		}
+		textype = TEXTYPE_DXT5;
+		bytesperblock = 16;
+		bytesperpixel = 0;
+		size = INTOVERFLOW_MUL(INTOVERFLOW_MUL(INTOVERFLOW_DIV(INTOVERFLOW_ADD(dds_width, 3), 4), INTOVERFLOW_DIV(INTOVERFLOW_ADD(dds_height, 3), 4)), bytesperblock);
+		if(INTOVERFLOW_ADD(128, size) > INTOVERFLOW_NORMALIZE(ddsfilesize))
+		{
+			Mem_Free(dds);
+			Con_Printf("^1%s: invalid DXT5 DDS image\n", filename);
+			return NULL;
+		}
+		// we currently always assume alpha
+	}
+	else
+	{
+		Mem_Free(dds);
+		Con_Printf("^1%s: unrecognized/unsupported DDS format\n", filename);
+		return NULL;
+	}
+
+	// when requesting a non-alpha texture and we have DXT3/5, convert to DXT1
+	if(!(flags & TEXF_ALPHA) && (textype == TEXTYPE_DXT3 || textype == TEXTYPE_DXT5))
+	{
+		textype = TEXTYPE_DXT1;
+		bytesperblock = 8;
+		ddssize -= 128;
+		ddssize /= 2;
+		for (i = 0;i < (int)ddssize;i += bytesperblock)
+			memcpy(&ddspixels[i], &ddspixels[(i<<1)+8], 8);
+		ddssize += 128;
+	}
+
+	force_swdecode = false;
+	npothack = 
+		(!true/*vid.support.arb_texture_non_power_of_two*/ &&
+			(
+				(dds_width & (dds_width - 1))
+				||
+				(dds_height & (dds_height - 1))
+			)
+		);
+	if(bytesperblock)
+	{
+		if(true/*vid.support.arb_texture_compression*/ && vid.support.ext_texture_compression_s3tc && !npothack)
+		{
+			if(r_texture_dds_swdecode.integer > 1)
+				force_swdecode = true;
+		}
+		else
+		{
+			if(r_texture_dds_swdecode.integer < 1)
+			{
+				// unsupported
+				Mem_Free(dds);
+				return NULL;
+			}
+			force_swdecode = true;
+		}
+	}
+
+	// return whether this texture is transparent
+	if (hasalphaflag)
+		*hasalphaflag = (flags & TEXF_ALPHA) != 0;
+
+	// if we SW decode, choose 2 sizes bigger
+	if(force_swdecode)
+	{
+		// this is quarter res, so do not scale down more than we have to
+		miplevel -= 2;
+
+		if(miplevel < 0)
+			Con_DPrintf("WARNING: fake software decoding of compressed texture %s degraded quality\n", filename);
+	}
+
+	// this is where we apply gl_picmip
+	mippixels_start = ddspixels;
+	mipwidth = dds_width;
+	mipheight = dds_height;
+	while(miplevel >= 1 && dds_miplevels >= 1)
+	{
+		if (mipwidth <= 1 && mipheight <= 1)
+			break;
+		mipsize = bytesperblock ? ((mipwidth+3)/4)*((mipheight+3)/4)*bytesperblock : mipwidth*mipheight*bytesperpixel;
+		mippixels_start += mipsize; // just skip
+		--dds_miplevels;
+		--miplevel;
+		if (mipwidth > 1)
+			mipwidth >>= 1;
+		if (mipheight > 1)
+			mipheight >>= 1;
+	}
+	mipsize_total = ddssize - 128 - (mippixels_start - ddspixels);
+	mipsize = bytesperblock ? ((mipwidth+3)/4)*((mipheight+3)/4)*bytesperblock : mipwidth*mipheight*bytesperpixel;
+
+	// from here on, we do not need the ddspixels and ddssize any more (apart from the statistics entry in glt)
+
+	// fake decode S3TC if needed
+	if(force_swdecode)
+	{
+		int mipsize_new = mipsize_total / bytesperblock * 4;
+		unsigned char *mipnewpixels = (unsigned char *) Mem_Alloc(tempmempool, mipsize_new);
+		unsigned char *p = mipnewpixels;
+		for (i = bytesperblock == 16 ? 8 : 0;i < (int)mipsize_total;i += bytesperblock, p += 4)
+		{
+			c = mippixels_start[i] + 256*mippixels_start[i+1] + 65536*mippixels_start[i+2] + 16777216*mippixels_start[i+3];
+			p[2] = (((c >> 11) & 0x1F) + ((c >> 27) & 0x1F)) * (0.5f / 31.0f * 255.0f);
+			p[1] = (((c >>  5) & 0x3F) + ((c >> 21) & 0x3F)) * (0.5f / 63.0f * 255.0f);
+			p[0] = (((c      ) & 0x1F) + ((c >> 16) & 0x1F)) * (0.5f / 31.0f * 255.0f);
+			if(textype == TEXTYPE_DXT5)
+				p[3] = (0.5 * mippixels_start[i-8] + 0.5 * mippixels_start[i-7]);
+			else if(textype == TEXTYPE_DXT3)
+				p[3] = (
+					  (mippixels_start[i-8] & 0x0F)
+					+ (mippixels_start[i-8] >> 4)
+					+ (mippixels_start[i-7] & 0x0F)
+					+ (mippixels_start[i-7] >> 4)
+					+ (mippixels_start[i-6] & 0x0F)
+					+ (mippixels_start[i-6] >> 4)
+					+ (mippixels_start[i-5] & 0x0F)
+					+ (mippixels_start[i-5] >> 4)
+				       ) * (0.125f / 15.0f * 255.0f);
+			else
+				p[3] = 255;
+		}
+
+		textype = TEXTYPE_BGRA;
+		bytesperblock = 0;
+		bytesperpixel = 4;
+
+		// as each block becomes a pixel, we must use pixel count for this
+		mipwidth = (mipwidth + 3) / 4;
+		mipheight = (mipheight + 3) / 4;
+		mipsize = bytesperpixel * mipwidth * mipheight;
+		mippixels_start = mipnewpixels;
+		mipsize_total = mipsize_new;
+	}
+
+	// start mip counting
+	mippixels = mippixels_start;
+
+	// calculate average color if requested
+	if (avgcolor)
+	{
+		float f;
+		Vector4Clear(avgcolor);
+		if (bytesperblock)
+		{
+			for (i = bytesperblock == 16 ? 8 : 0;i < mipsize;i += bytesperblock)
+			{
+				c = mippixels[i] + 256*mippixels[i+1] + 65536*mippixels[i+2] + 16777216*mippixels[i+3];
+				avgcolor[0] += ((c >> 11) & 0x1F) + ((c >> 27) & 0x1F);
+				avgcolor[1] += ((c >>  5) & 0x3F) + ((c >> 21) & 0x3F);
+				avgcolor[2] += ((c      ) & 0x1F) + ((c >> 16) & 0x1F);
+				if(textype == TEXTYPE_DXT5)
+					avgcolor[3] += (mippixels[i-8] + (int) mippixels[i-7]) * (0.5f / 255.0f);
+				else if(textype == TEXTYPE_DXT3)
+					avgcolor[3] += (
+						  (mippixels_start[i-8] & 0x0F)
+						+ (mippixels_start[i-8] >> 4)
+						+ (mippixels_start[i-7] & 0x0F)
+						+ (mippixels_start[i-7] >> 4)
+						+ (mippixels_start[i-6] & 0x0F)
+						+ (mippixels_start[i-6] >> 4)
+						+ (mippixels_start[i-5] & 0x0F)
+						+ (mippixels_start[i-5] >> 4)
+					       ) * (0.125f / 15.0f);
+				else
+					avgcolor[3] += 1.0f;
+			}
+			f = (float)bytesperblock / mipsize;
+			avgcolor[0] *= (0.5f / 31.0f) * f;
+			avgcolor[1] *= (0.5f / 63.0f) * f;
+			avgcolor[2] *= (0.5f / 31.0f) * f;
+			avgcolor[3] *= f;
+		}
+		else
+		{
+			for (i = 0;i < mipsize;i += 4)
+			{
+				avgcolor[0] += mippixels[i+2];
+				avgcolor[1] += mippixels[i+1];
+				avgcolor[2] += mippixels[i];
+				avgcolor[3] += mippixels[i+3];
+			}
+			f = (1.0f / 255.0f) * bytesperpixel / mipsize;
+			avgcolor[0] *= f;
+			avgcolor[1] *= f;
+			avgcolor[2] *= f;
+			avgcolor[3] *= f;
+		}
+	}
+
+	// if we want sRGB, convert now
+	if(srgb)
+	{
+		if (vid.support.ext_texture_srgb)
+		{
+			switch(textype)
+			{
+			case TEXTYPE_DXT1:    textype = TEXTYPE_SRGB_DXT1   ;break;
+			case TEXTYPE_DXT1A:   textype = TEXTYPE_SRGB_DXT1A  ;break;
+			case TEXTYPE_DXT3:    textype = TEXTYPE_SRGB_DXT3   ;break;
+			case TEXTYPE_DXT5:    textype = TEXTYPE_SRGB_DXT5   ;break;
+			case TEXTYPE_RGBA:    textype = TEXTYPE_SRGB_RGBA   ;break;
+			default:
+				break;
+			}
+		}
+		else
+		{
+			switch(textype)
+			{
+			case TEXTYPE_DXT1:
+			case TEXTYPE_DXT1A:
+			case TEXTYPE_DXT3:
+			case TEXTYPE_DXT5:
+				{
+					for (i = bytesperblock == 16 ? 8 : 0;i < mipsize_total;i += bytesperblock)
+					{
+						int c0, c1, c0new, c1new;
+						c0 = mippixels_start[i] + 256*mippixels_start[i+1];
+						r = ((c0 >> 11) & 0x1F);
+						g = ((c0 >>  5) & 0x3F);
+						b = ((c0      ) & 0x1F);
+						r = floor(Image_LinearFloatFromsRGB(r * (255.0f / 31.0f)) * 31.0f + 0.5f); // these multiplications here get combined with multiplications in Image_LinearFloatFromsRGB
+						g = floor(Image_LinearFloatFromsRGB(g * (255.0f / 63.0f)) * 63.0f + 0.5f); // these multiplications here get combined with multiplications in Image_LinearFloatFromsRGB
+						b = floor(Image_LinearFloatFromsRGB(b * (255.0f / 31.0f)) * 31.0f + 0.5f); // these multiplications here get combined with multiplications in Image_LinearFloatFromsRGB
+						c0new = (r << 11) | (g << 5) | b;
+						c1 = mippixels_start[i+2] + 256*mippixels_start[i+3];
+						r = ((c1 >> 11) & 0x1F);
+						g = ((c1 >>  5) & 0x3F);
+						b = ((c1      ) & 0x1F);
+						r = floor(Image_LinearFloatFromsRGB(r * (255.0f / 31.0f)) * 31.0f + 0.5f); // these multiplications here get combined with multiplications in Image_LinearFloatFromsRGB
+						g = floor(Image_LinearFloatFromsRGB(g * (255.0f / 63.0f)) * 63.0f + 0.5f); // these multiplications here get combined with multiplications in Image_LinearFloatFromsRGB
+						b = floor(Image_LinearFloatFromsRGB(b * (255.0f / 31.0f)) * 31.0f + 0.5f); // these multiplications here get combined with multiplications in Image_LinearFloatFromsRGB
+						c1new = (r << 11) | (g << 5) | b;
+						// swap the colors if needed to fix order
+						if(c0 > c1) // thirds
+						{
+							if(c0new < c1new)
+							{
+								c = c0new;
+								c0new = c1new;
+								c1new = c;
+								if(c0new == c1new)
+								mippixels_start[i+4] ^= 0x55;
+								mippixels_start[i+5] ^= 0x55;
+								mippixels_start[i+6] ^= 0x55;
+								mippixels_start[i+7] ^= 0x55;
+							}
+							else if(c0new == c1new)
+							{
+								mippixels_start[i+4] = 0x00;
+								mippixels_start[i+5] = 0x00;
+								mippixels_start[i+6] = 0x00;
+								mippixels_start[i+7] = 0x00;
+							}
+						}
+						else // half + transparent
+						{
+							if(c0new > c1new)
+							{
+								c = c0new;
+								c0new = c1new;
+								c1new = c;
+								mippixels_start[i+4] ^= (~mippixels_start[i+4] >> 1) & 0x55;
+								mippixels_start[i+5] ^= (~mippixels_start[i+5] >> 1) & 0x55;
+								mippixels_start[i+6] ^= (~mippixels_start[i+6] >> 1) & 0x55;
+								mippixels_start[i+7] ^= (~mippixels_start[i+7] >> 1) & 0x55;
+							}
+						}
+						mippixels_start[i] = c0new & 255;
+						mippixels_start[i+1] = c0new >> 8;
+						mippixels_start[i+2] = c1new & 255;
+						mippixels_start[i+3] = c1new >> 8;
+					}
+				}
+				break;
+			case TEXTYPE_RGBA:
+				Image_MakeLinearColorsFromsRGB(mippixels, mippixels, mipsize_total / bytesperblock);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	// when not requesting mipmaps, do not load them
+	if(!(flags & TEXF_MIPMAP))
+		dds_miplevels = 0;
+
+	if (dds_miplevels >= 1)
+		flags |= TEXF_MIPMAP;
+	else
+		flags &= ~TEXF_MIPMAP;
+
+	texinfo = R_GetTexTypeInfo(textype, flags);
+
+	glt = (gltexture_t *)Mem_ExpandableArray_AllocRecord(&texturearray);
+	dp_strlcpy (glt->identifier, filename, sizeof(glt->identifier));
+	glt->pool = pool;
+	glt->chain = pool->gltchain;
+	pool->gltchain = glt;
+	glt->inputwidth = mipwidth;
+	glt->inputheight = mipheight;
+	glt->inputdepth = 1;
+	glt->flags = flags;
+	glt->textype = texinfo;
+	glt->texturetype = GLTEXTURETYPE_2D;
+	glt->inputdatasize = ddssize;
+	glt->glinternalformat = texinfo->glinternalformat;
+	glt->glformat = texinfo->glformat;
+	glt->gltype = texinfo->gltype;
+	glt->bytesperpixel = texinfo->internalbytesperpixel;
+	glt->sides = 1;
+	glt->gltexturetypeenum = gltexturetypeenums[glt->texturetype];
+	glt->tilewidth = mipwidth;
+	glt->tileheight = mipheight;
+	glt->tiledepth = 1;
+	glt->miplevels = dds_miplevels;
+
+	if(npothack)
+	{
+		for (glt->tilewidth = 1;glt->tilewidth < mipwidth;glt->tilewidth <<= 1);
+		for (glt->tileheight = 1;glt->tileheight < mipheight;glt->tileheight <<= 1);
+	}
+
+	// texture uploading can take a while, so make sure we're sending keepalives
+	CL_KeepaliveMessage(false);
+
+	// create the texture object
+	switch(vid.renderpath)
+	{
+	case RENDERPATH_GLES2:
+		CHECKGLERROR
+		GL_ActiveTexture(0);
+		oldbindtexnum = R_Mesh_TexBound(0, gltexturetypeenums[glt->texturetype]);
+		qglGenTextures(1, (GLuint *)&glt->texnum);CHECKGLERROR
+		qglBindTexture(gltexturetypeenums[glt->texturetype], glt->texnum);CHECKGLERROR
+		break;
+	}
+
+	// upload the texture
+	// we need to restore the texture binding after finishing the upload
+	mipcomplete = false;
+
+	for (mip = 0;mip <= dds_miplevels;mip++) // <= to include the not-counted "largest" miplevel
+	{
+		unsigned char *upload_mippixels = mippixels;
+		int upload_mipwidth = mipwidth;
+		int upload_mipheight = mipheight;
+		mipsize = bytesperblock ? ((mipwidth+3)/4)*((mipheight+3)/4)*bytesperblock : mipwidth*mipheight*bytesperpixel;
+		if (mippixels + mipsize > mippixels_start + mipsize_total)
+			break;
+		if(npothack)
+		{
+			upload_mipwidth = (glt->tilewidth >> mip);
+			upload_mipheight = (glt->tileheight >> mip);
+			if(upload_mipwidth != mipwidth || upload_mipheight != mipheight)
+			// I _think_ they always mismatch, but I was too lazy
+			// to properly check, and this test here is really
+			// harmless
+			{
+				upload_mippixels = (unsigned char *) Mem_Alloc(tempmempool, 4 * upload_mipwidth * upload_mipheight);
+				Image_Resample32(mippixels, mipwidth, mipheight, 1, upload_mippixels, upload_mipwidth, upload_mipheight, 1, r_lerpimages.integer);
+			}
+		}
+		switch(vid.renderpath)
+		{
+		case RENDERPATH_GLES2:
+			if (bytesperblock)
+			{
+				qglCompressedTexImage2D(GL_TEXTURE_2D, mip, glt->glinternalformat, upload_mipwidth, upload_mipheight, 0, mipsize, upload_mippixels);CHECKGLERROR
+			}
+			else
+			{
+				qglTexImage2D(GL_TEXTURE_2D, mip, glt->glinternalformat, upload_mipwidth, upload_mipheight, 0, glt->glformat, glt->gltype, upload_mippixels);CHECKGLERROR
+			}
+			break;
+		}
+		if(upload_mippixels != mippixels)
+			Mem_Free(upload_mippixels);
+		mippixels += mipsize;
+		if (mipwidth <= 1 && mipheight <= 1)
+		{
+			mipcomplete = true;
+			break;
+		}
+		if (mipwidth > 1)
+			mipwidth >>= 1;
+		if (mipheight > 1)
+			mipheight >>= 1;
+	}
+
+	// after upload we have to set some parameters...
+	switch(vid.renderpath)
+	{
+	case RENDERPATH_GLES2:
+#ifdef GL_TEXTURE_MAX_LEVEL
+		if (dds_miplevels >= 1 && !mipcomplete)
+		{
+			// need to set GL_TEXTURE_MAX_LEVEL
+			qglTexParameteri(gltexturetypeenums[glt->texturetype], GL_TEXTURE_MAX_LEVEL, dds_miplevels - 1);CHECKGLERROR
+		}
+#endif
+		GL_SetupTextureParameters(glt->flags, glt->textype->textype, glt->texturetype);
+		qglBindTexture(gltexturetypeenums[glt->texturetype], oldbindtexnum);CHECKGLERROR
+		break;
+	}
+
+	Mem_Free(dds);
+	if(force_swdecode)
+		Mem_Free((unsigned char *) mippixels_start);
+	return (rtexture_t *)glt;
+}
+
+#endif
 
 int R_TextureWidth(rtexture_t *rt)
 {
