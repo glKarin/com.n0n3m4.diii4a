@@ -8,7 +8,7 @@
 #version 100
 //#pragma optimize(off)
 
-precision mediump float;
+precision highp float;
 
 //#define BLINN_PHONG
 

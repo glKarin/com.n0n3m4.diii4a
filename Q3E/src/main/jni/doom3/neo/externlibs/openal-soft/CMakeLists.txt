@@ -1104,7 +1104,7 @@ endif()
 
 # Check for Oboe (Android) backend
 option(ALSOFT_BACKEND_OBOE "Enable Oboe backend" OFF) #k: ON
-option(ALSOFT_REQUIRE_OBOE "Require Oboe backend" OFF)
+option(ALSOFT_REQUIRE_OBOE "Require Oboe backend" OFF) #k: OFF
 if(ALSOFT_BACKEND_OBOE)
     set(OBOE_TARGET )
     if(ANDROID)
@@ -1120,6 +1120,10 @@ if(ALSOFT_BACKEND_OBOE)
             if(TARGET oboe::oboe)
                 set(OBOE_TARGET "oboe::oboe")
             endif()
+
+#[[            if(NOT TARGET OBOE_TARGET)
+                set(OBOE_TARGET "oboe")
+            endif()]]
         endif()
     endif()
 

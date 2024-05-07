@@ -40,6 +40,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #define	LL(x) x=LittleLong(x)
 
+// DG: added constructor to make sure all members are initialized
+idRenderModelMD3::idRenderModelMD3() : index(-1), dataSize(0), md3(NULL), numLods(0)
+{}
+
 /*
 =================
 idRenderModelMD3::InitFromFile
@@ -65,7 +69,9 @@ void idRenderModelMD3::InitFromFile(const char *fileName)
 
 	size = fileSystem->ReadFile(fileName, &buffer, NULL);
 
-	if (!size || size<0) {
+	//64 if (!size || size<0)
+	if ( size <= sizeof(md3Header_t) )
+	{
 		return;
 	}
 
@@ -176,10 +182,14 @@ void idRenderModelMD3::InitFromFile(const char *fileName)
 		shader = (md3Shader_t *)((byte *)surf + surf->ofsShaders);
 
 		for (j = 0 ; j < surf->numShaders ; j++, shader++) {
-			const idMaterial *sh;
+/*64			const idMaterial *sh;
 
 			sh = declManager->FindMaterial(shader->name);
-			shader->shader = sh;
+			shader->shader = sh;*/
+            const idMaterial *sh = declManager->FindMaterial( shader->name );
+            // DG: md3Shadder_t must use an index to the material instead of a pointer,
+            //     otherwise the sizes are wrong on 64bit and we get data corruption
+            shader->shaderIndex = (sh != NULL) ? shaders.AddUnique( sh ) : -1;
 		}
 
 		// swap all the triangles
@@ -326,7 +336,11 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel(const struct renderEnti
 		surf.geometry = tri;
 
 		md3Shader_t *shaders = (md3Shader_t *)((byte *)surface + surface->ofsShaders);
-		surf.shader = shaders->shader;
+		//64 surf.shader = shaders->shader;
+        // FIXME: theoretically there can be multiple shaders?
+        // DG: turned md3Shader_t::shader (pointer) into an int (index)
+        int shaderIdx = shaders->shaderIndex;
+        surf.shader = (shaderIdx >= 0) ? this->shaders[shaderIdx] : NULL;
 
 		LerpMeshVertexes(tri, surface, backlerp, frame, oldframe);
 
@@ -350,6 +364,8 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel(const struct renderEnti
 		}
 
 		R_BoundTriSurf(tri);
+
+		surf.id = staticModel->NumSurfaces(); // DG: make sure to initialize id; FIXME: or just set id to 0?
 
 		staticModel->AddSurface(surf);
 		staticModel->bounds.AddPoint(surf.geometry->bounds[0]);
@@ -382,6 +398,8 @@ idBounds idRenderModelMD3::Bounds(const struct renderEntity_s *ent) const
 	}
 
 	md3Frame_t	*frame = (md3Frame_t *)((byte *)md3 + md3->ofsFrames);
+
+	frame += (int)ent->shaderParms[SHADERPARM_MD3_FRAME]; // DG: use bounds of current frame
 
 	ret.AddPoint(frame->bounds[0]);
 	ret.AddPoint(frame->bounds[1]);

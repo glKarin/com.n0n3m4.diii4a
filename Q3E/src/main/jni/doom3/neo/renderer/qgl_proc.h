@@ -172,8 +172,12 @@ QGLPROC(glMapBufferRange, void*, (GLenum target, GLintptr offset, GLsizeiptr len
 QGLPROC(glUnmapBuffer, GLboolean,(GLenum target))
 #endif
 
+// GLES3.0
+#ifdef _OPENGLES3
 QGLPROC(glTexImage3D, void, (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels))
+QGLPROC(glReadBuffer, void, (GLenum src));
 QGLPROC(glDrawBuffers, void, (GLsizei n, const GLenum *bufs));
 QGLPROC(glFramebufferTextureLayer, void, (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer));
+#endif
 
 #undef QGLPROC

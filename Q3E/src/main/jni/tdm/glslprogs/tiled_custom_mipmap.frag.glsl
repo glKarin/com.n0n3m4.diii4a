@@ -1,3 +1,4 @@
+#version 320 es
 /*****************************************************************************
 The Dark Mod GPL Source Code
 
@@ -12,7 +13,6 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
 
 precision mediump float;
 
@@ -38,7 +38,7 @@ ivec2 clampPixelCoords(ivec2 pixelCoords) {
 #define MODE MIPMAP_MODE //k
 #if MIPMAP_FIRST
 	#if MODE == 0   // MM_STENCIL_SHADOW
-		uniform highp usampler2D u_sourceTexture;
+		uniform mediump usampler2D u_sourceTexture;
 	#else
 		//TODO
 		uniform highp sampler2D u_sourceTexture;

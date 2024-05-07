@@ -48,6 +48,13 @@
                 android:defaultValue="@array/map_back_values"
             />
             <CheckBoxPreference
+                android:title="@string/standalone_game_data_directory"
+                android:key="harm_game_standalone_directory"
+                android:persistent="true"
+                android:defaultValue="false"
+                android:summary="@string/game_data_directories_are_standalone"
+                />
+            <CheckBoxPreference
                 android:title="@string/redirect_output_to_file"
                 android:key="harm_redirect_output_to_file"
                 android:persistent="true"

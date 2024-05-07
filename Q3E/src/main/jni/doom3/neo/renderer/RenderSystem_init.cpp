@@ -1150,8 +1150,10 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 #ifdef _SHADOW_MAPPING
 	extern bool r_useDepthTexture;
 	extern bool r_useCubeDepthTexture;
+	extern bool r_usePackColorAsDepth;
 	common->Printf("r_useDepthTexture: %d\n", r_useDepthTexture);
 	common->Printf("r_useCubeDepthTexture: %d\n", r_useCubeDepthTexture);
+	common->Printf("r_usePackColorAsDepth: %d\n", r_usePackColorAsDepth);
 #endif
 
 #ifdef GL_ES_VERSION_3_0
@@ -2233,6 +2235,10 @@ void R_InitCommands(void)
 	extern void R_ConvertImage_f(const idCmdArgs &args);
 	cmdSystem->AddCommand("convertImage", R_ConvertImage_f, CMD_FL_RENDERER, "convert image format", idCmdSystem::ArgCompletion_ImageName);
 #endif
+	extern void R_ExportGLSLShaderSource_f(const idCmdArgs &args);
+	extern void R_PrintGLSLShaderSource_f(const idCmdArgs &args);
+	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
+	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
 #ifdef _EXTRAS_TOOLS
 	MD5Anim_AddCommand();
 	ModelTest_AddCommand();
@@ -2564,10 +2570,10 @@ idCVar r_shadowMapSplits( "r_shadowMapSplits", "3", CVAR_RENDERER | CVAR_INTEGER
 idCVar r_shadowMapSplitWeight( "r_shadowMapSplitWeight", "0.9", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodScale( "r_shadowMapLodScale", "1.4", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar r_shadowMapLodBias( "r_shadowMapLodBias", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "" );
-idCVar r_shadowMapPolygonFactor( "r_shadowMapPolygonFactor", "2", CVAR_RENDERER | CVAR_FLOAT, "polygonOffset factor for drawing shadow buffer" );
-idCVar r_shadowMapPolygonOffset( "r_shadowMapPolygonOffset", "3000", CVAR_RENDERER | CVAR_FLOAT, "polygonOffset units for drawing shadow buffer" );
+idCVar r_shadowMapPolygonFactor( "r_shadowMapPolygonFactor", "0" /*"2"*/, CVAR_RENDERER | CVAR_FLOAT, "polygonOffset factor for drawing shadow buffer" );
+idCVar r_shadowMapPolygonOffset( "r_shadowMapPolygonOffset", "0" /*"3000"*/, CVAR_RENDERER | CVAR_FLOAT, "polygonOffset units for drawing shadow buffer" );
 idCVar r_shadowMapOccluderFacing( "r_shadowMapOccluderFacing", "2", CVAR_RENDERER | CVAR_INTEGER, "0 = front faces, 1 = back faces, 2 = twosided" );
-idCVar r_forceShadowMapsOnAlphaTestedSurfaces( "r_forceShadowMapsOnAlphaTestedSurfaces", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "0 = same shadowing as with stencil shadows, 1 = ignore noshadows for alpha tested materials" );
+idCVar r_forceShadowMapsOnAlphaTestedSurfaces( "r_forceShadowMapsOnAlphaTestedSurfaces", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "0 = same shadowing as with stencil shadows, 1 = ignore noshadows for alpha tested materials" );
 // RB end
 
 idCVar harm_r_shadowMapLod( "harm_r_shadowMapLod", "-1", CVAR_RENDERER | CVAR_INTEGER, "force using shadow map LOD(0 - 4, -1: auto)" );
@@ -2578,9 +2584,7 @@ idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_R
 idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2.5 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapPolygonFactor( "harm_r_shadowMapPolygonFactor", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset factor for drawing shadow buffer" );
-idCVar harm_r_shadowMapPolygonOffset( "harm_r_shadowMapPolygonOffset", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "polygonOffset units for drawing shadow buffer" );
-idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "non parallel light allow ultra quality shadow map texture" );
+idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "0", CVAR_RENDERER | CVAR_BOOL/*//k next version open: | CVAR_ARCHIVE*/, "non parallel light allow ultra quality shadow map texture" );
 
 #include "rb/Framebuffer.cpp"
 #include "tr/tr_shadowmapping.cpp"

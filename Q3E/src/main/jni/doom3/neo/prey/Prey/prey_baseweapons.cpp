@@ -1785,7 +1785,7 @@ void hhWeapon::Think() {
 	if(worldModel.IsValid())
 	{
 		renderEntity_t* worldModelRenderEntity = worldModel.GetEntity()->GetRenderEntity();
-		bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->InVehicle() || owner->IsZoomed();
+		bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->InVehicle() || owner->IsZoomed() || owner->focusUI;
 		if(not_pm_fullBodyAwareness)
 			worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
 		else

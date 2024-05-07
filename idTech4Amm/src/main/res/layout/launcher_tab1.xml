@@ -118,13 +118,25 @@
                 myapp:label="@string/_mod"
                 myapp:lineColor="@color/launcher_divider_color" />
 
-            <TextView
-                android:id="@+id/launcher_fs_game"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:layout_marginBottom="1dp"
-                android:text="@string/game_cvar_fs_game" />
+                android:layout_marginBottom="1dp">
+                <TextView
+                    android:id="@+id/launcher_fs_game"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/game_cvar_fs_game" />
+                <TextView
+                    android:id="@+id/launcher_fs_game_subdir"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:layout_gravity="center_vertical"
+                    android:text="" />
+            </LinearLayout>
 
             <RadioGroup
                 android:id="@+id/rg_fs_game"
@@ -138,6 +150,11 @@
 
             <RadioGroup
                 android:id="@+id/rg_fs_preygame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></RadioGroup>
+
+            <RadioGroup
+                android:id="@+id/rg_fs_q1game"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"></RadioGroup>
 

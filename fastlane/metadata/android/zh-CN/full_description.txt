@@ -24,8 +24,19 @@
   Stupid Angry Bot(a7x): sabot
   Overthinked DooM^3: overthinked
   Fragging Free: fraggingfree
-  HeXen:Edge of Chaos: hexeneoc
+  HeXen - Edge of Chaos: hexeneoc
+  LibreCoop: librecoop
 
   雷神之锤4: q4base (支持bot mod和全身mod)
 
   掠食(2006): preybase (支持全身mod)
+
+  雷神之锤2: baseq2
+
+  雷神之锤3竞技场: baseq3
+
+  雷神之锤3团队竞技场: missionpack
+
+  重返德军总部: main
+
+  The Dark Mod: darkmod

@@ -6,45 +6,57 @@ import android.os.Looper;
 
 public final class ThreadUtility
 {
-    public static void Post(String name, Runnable runnable, Runnable andThen)
+    public static Object Post(String name, Runnable runnable/* run on new thread */, Runnable andThen/* run on origin thread */)
     {
         HandlerThread handlerThread = new HandlerThread(name);
-        handlerThread.start();
-        Handler handler = new Handler(handlerThread.getLooper());
-        Looper looper = Looper.myLooper();
-        handler.post(new Runnable()
+        handlerThread.start(); // start new thread
+        final Handler newThreadHandler = new Handler(handlerThread.getLooper()); // new thread
+        final Looper originThreadLooper = Looper.myLooper(); // current thread
+        newThreadHandler.post(new Runnable()
         {
             @Override
             public void run()
             {
-                runnable.run();
-                new Handler(looper).post(new Runnable()
+                runnable.run(); // runnable run on new thread
+                Handler originThreadHandler = new Handler(originThreadLooper);
+                originThreadHandler.post(new Runnable()
                 {
                     @Override
                     public void run()
                     {
-                        handlerThread.quit();
+                        handlerThread.quit(); // quit new thread
                         if(null != andThen)
-                            andThen.run();
+                            andThen.run(); // andThen run on origin thread
                     }
                 });
             }
         });
+        return handlerThread;
     }
 
-    public static void Post(Runnable runnable, Runnable andThen)
+    public static Object Post(Runnable runnable, Runnable andThen)
     {
-        Post("ThreadUtility", runnable, andThen);
+        return Post("ThreadUtility", runnable, andThen);
     }
 
-    public static void Post(String name, Runnable runnable)
+    public static Object Post(String name, Runnable runnable)
     {
-        Post("ThreadUtility", runnable, null);
+        return Post("ThreadUtility", runnable, null);
     }
 
-    public static void Post(Runnable runnable)
+    public static Object Post(Runnable runnable)
     {
-        Post(runnable, null);
+        return Post(runnable, null);
+    }
+
+    public static void Quit(Object handler)
+    {
+        if(null == handler)
+            return;
+        HandlerThread handlerThread = (HandlerThread)handler;
+        if(handlerThread.isAlive())
+            handlerThread.quit();
+        handlerThread.interrupt();
     }
 
     private ThreadUtility() {}

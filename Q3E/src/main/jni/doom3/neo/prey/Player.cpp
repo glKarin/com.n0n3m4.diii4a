@@ -6061,7 +6061,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis ) {
 
 	// CalculateRenderView must have been called first
 #ifdef _MOD_FULL_BODY_AWARENESS
-	idVec3 viewOrigin = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed() ? firstPersonViewOrigin : firstPersonViewOrigin_viewWeaponOrigin;
+	idVec3 viewOrigin = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed() || focusUI ? firstPersonViewOrigin : firstPersonViewOrigin_viewWeaponOrigin;
 #else
 	const idVec3 &viewOrigin = firstPersonViewOrigin;
 #endif
@@ -6241,7 +6241,7 @@ idPlayer::CalculateFirstPersonView
 */
 void idPlayer::CalculateFirstPersonView( void ) {
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed()) {
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed() || focusUI) {
 #endif
 	if ( ( pm_modelView.GetInteger() == 1 ) || ( ( pm_modelView.GetInteger() == 2 ) && IsDead() ) ) { // HUMANHEAD cjr:  Replaced health <= 0 with IsDead() call for deathwalk override
 		//	Displays the view from the point of view of the "camera" joint in the player model
@@ -7473,7 +7473,7 @@ idPlayer::CanShowWeaponViewmodel
 */
 bool idPlayer::CanShowWeaponViewmodel( void ) const {
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed())
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || InVehicle() || IsZoomed() || focusUI)
 #endif
 	return showWeaponViewModel;
 #ifdef _MOD_FULL_BODY_AWARENESS

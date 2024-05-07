@@ -98,7 +98,7 @@ option(SUPPORT_DAE							"Support dae model" 							ON)
 option(SHADOW_MAPPING						"Shadow mapping support" 						ON)
 option(NO_LIGHT								"r_noLight support" 							ON)
 option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" 			ON)
-option(EXTRAS_TOOLS							"Add extras commands" 							ON)
+option(EXTRAS_TOOLS							"Add extras commands" 							OFF)
 
 # DOOM3 cores
 option(CORE									"Build the core" 								ON)
@@ -1646,6 +1646,7 @@ if(RAVEN)
 	# raven engine source
 	set(raven_renderer_src
 			raven/bse/Model_bse.cpp
+			raven/renderer/NewShaderStage.cpp
 			)
 	set(raven_framework_src
 			raven/framework/DeclLipSync.cpp

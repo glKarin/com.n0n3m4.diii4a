@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 
 import java.io.File;
@@ -67,9 +68,10 @@ public class Q3EGameHelper
 
     public boolean checkGameFiles()
     {
-        if (!new File(Q3EUtils.q3ei.datadir).exists())
+        String dataDir = Q3EUtils.q3ei.GetGameDataDirectoryPath(null);
+        if (!new File(dataDir).exists())
         {
-            ShowMessage(Q3ELang.tr(m_context, R.string.game_files_weren_t_found_put_game_files_to) + Q3EUtils.q3ei.datadir);
+            ShowMessage(Q3ELang.tr(m_context, R.string.game_files_weren_t_found_put_game_files_to) + dataDir);
             return false;
         }
 
@@ -82,6 +84,8 @@ public class Q3EGameHelper
 
         if (!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
         {
+            Q3EUtils.q3ei.standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
+
             Q3EKeyCodes.InitD3Keycodes();
 
             Q3EUtils.q3ei.InitD3();
@@ -157,15 +161,6 @@ public class Q3EGameHelper
                     case Q3EGlobals.GAME_QUAKE4:
                         fs_game = "q4base";
                         break;
-                    case Q3EGlobals.GAME_QUAKE2:
-                        fs_game = "baseq2";
-                        break;
-                    case Q3EGlobals.GAME_QUAKE3:
-                        fs_game = "baseq3";
-                        break;
-                    case Q3EGlobals.GAME_RTCW:
-                        fs_game = "main";
-                        break;
                     case Q3EGlobals.GAME_DOOM3:
                     default:
                         fs_game = "base";
@@ -177,13 +172,14 @@ public class Q3EGameHelper
                 command.SetProp("harm_fs_gameLibPath", dll);
             cmd = command.toString();
         }
-        cmd = Q3EUtils.q3ei.datadir + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
+        String binDir = Q3EUtils.q3ei.GetGameDataDirectoryPath(null);
+        cmd = binDir + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
         Q3EUtils.q3ei.cmd = cmd;
     }
 
     private String FindDLL(String fs_game)
     {
-        String DLLPath = Q3EUtils.q3ei.datadir + File.separator + fs_game + File.separator; // /sdcard/diii4a/<fs_game>
+        String DLLPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(fs_game); // /sdcard/diii4a/<fs_game>
         String Suffix = "game" + Q3EGlobals.ARCH + ".so"; // gameaarch64.so(64) / gamearm.so(32)
         String[] guess = {
                 Suffix,
@@ -193,7 +189,7 @@ public class Q3EGameHelper
         String targetDir = m_context.getCacheDir() + File.separator; // /data/user/<package_name>/cache/
         for (String f : guess)
         {
-            String p = DLLPath + f;
+            String p = KStr.AppendPath(DLLPath, f);
             File file = new File(p);
             if(!file.isFile() || !file.canRead())
                 continue;
@@ -217,7 +213,7 @@ public class Q3EGameHelper
         String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + Q3EUtils.q3ei.libname;
         if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
         {
-            String localLibPath = Q3EUtils.q3ei.datadir + "/" + Q3EUtils.q3ei.libname;
+            String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(Q3EUtils.q3ei.libname);
             File file = new File(localLibPath);
             if(!file.isFile() || !file.canRead())
             {
@@ -545,12 +541,12 @@ public class Q3EGameHelper
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
 
         Q3EJNI.init(
-                Q3EMain.gameHelper.GetEngineLib(),
+                GetEngineLib(),
                 Q3EUtils.GetGameLibDir(m_context),
                 width,
                 height,
-                Q3EUtils.q3ei.game,
                 Q3EUtils.q3ei.datadir,
+                Q3EUtils.q3ei.subdatadir,
                 cmd,
                 surface,
                 glFormat,

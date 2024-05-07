@@ -158,6 +158,7 @@ if(ANDROID)
             FROM TDM_SOURCE_FILES
     )
     add_definitions(-D_NO_TRACY)
+    add_definitions(-D_OPENGLES3)
 else()
     include_directories(
             "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include"

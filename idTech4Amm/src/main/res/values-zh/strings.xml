@@ -82,6 +82,7 @@
     <string name="_16bits_rgba5551">16位(RGBA5551)</string>
     <string name="_32bits_rgba1010102">32位(RGBA1010102)</string>
     <string name="doom_3">毁灭战士3</string>
+    <string name="quake_1">雷神之锤1</string>
     <string name="quake_4">雷神之锤4</string>
     <string name="quake_2">雷神之锤2</string>
     <string name="quake_3">雷神之锤3</string>
@@ -269,7 +270,7 @@
     <string name="shadow_mapping">Shadow mapping</string>
     <string name="renderer">渲染</string>
     <string name="_sound">声音</string>
-    <string name="using_openal">启用OpenAL(soft)(s_useOpenAL)</string>
+    <string name="using_openal">启用OpenAL(s_useOpenAL)</string>
     <string name="using_efx_reverb">启用EFX混响(s_useEAXReverb)</string>
     <string name="internal_storage">内部存储</string>
     <string name="external_storage">外部存储</string>
@@ -281,6 +282,7 @@
     <string name="normal_font_size_subtitle_prey_2006">正常字体字幕(Prey 2006)</string>
     <string name="_mod">Mod</string>
     <string name="librecoop">LibreCoop</string>
+    <string name="quake_1_base">雷神之锤1</string>
     <string name="quake_2_base">雷神之锤2</string>
     <string name="quake_2_ctf">雷神之锤2:ctf</string>
     <string name="quake_2_rogue">雷神之锤2:rogue</string>
@@ -295,4 +297,17 @@
     <string name="scroll_to_bottom">底部</string>
     <string name="scroll">滚动</string>
     <string name="pause">暂停</string>
+    <string name="joystick_visible">摇杆显示:</string>
+    <string name="suggest_game_woring_directory_tips">Android11/11+建议在`%s`下创建文件夹作为游戏数据文件夹以加快加载速度!</string>
+    <string name="sub_directory">独立目录: </string>
+    <string name="app_is_rebooting">应用重启中......</string>
+    <string name="standalone_game_data_directory">游戏数据独立文件夹</string>
+    <string name="game_data_directories_are_standalone"><![CDATA[每个游戏的数据文件夹独立放置: 毁灭战士3 -> doom3/; 雷神之锤4 -> quake4/; 掠食(2006) -> prey/; 雷神之锤1 -> quake1/; 雷神之锤2 -> quake2/; 雷神之锤3 -> quake3/; 重返德军总部 -> rtcw/; The Dark Mod -> darkmod/ (总是独立)]]></string>
+    <string name="load_local_engine_library">加载本地引擎库</string>
+    <string name="pid">进程PID</string>
+    <string name="get_application_pid">获取进程PID</string>
+    <string name="open_logcat">打开Logcat</string>
+    <string name="view_logcat">查看Logcat</string>
+    <string name="open_documents">安卓存储访问框架</string>
+    <string name="open_system_file_browser">打开安卓存储访问框架</string>
 </resources>

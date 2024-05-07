@@ -1,3 +1,4 @@
+#version 320 es
 /*****************************************************************************
 The Dark Mod GPL Source Code
 
@@ -12,7 +13,6 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
 
 precision mediump float;
 
@@ -22,7 +22,7 @@ out vec4 FragColor;
 #pragma tdm_include "stages/interaction/interaction.common.fs.glsl"
 #pragma tdm_include "tdm_shadowstencilsoft.glsl"
 
-uniform highp usampler2D u_stencilTexture;
+uniform mediump usampler2D u_stencilTexture;
 uniform sampler2D u_depthTexture;
 
 uniform sampler2D u_stencilMipmapsTexture;

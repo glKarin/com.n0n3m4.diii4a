@@ -1,3 +1,4 @@
+#version 320 es
 /*****************************************************************************
 The Dark Mod GPL Source Code
 
@@ -12,7 +13,6 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 320 es
 
 #extension GL_EXT_clip_cull_distance : enable
 
@@ -79,9 +79,11 @@ void main() {
     gl_Position.y = fragPos.y;
     gl_Position.z = -fragPos.z - 2.0;
     gl_Position.w = -fragPos.z;
+#ifdef GL_EXT_clip_cull_distance
     gl_ClipDistance[0] = dot(fragPos, ClipPlanes[0]);
     gl_ClipDistance[1] = dot(fragPos, ClipPlanes[1]);
     gl_ClipDistance[2] = dot(fragPos, ClipPlanes[2]);
     gl_ClipDistance[3] = dot(fragPos, ClipPlanes[3]);
     gl_ClipDistance[4] = u_maxLightDistance - (-fragPos.z);
+#endif
 }

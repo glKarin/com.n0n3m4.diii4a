@@ -356,6 +356,8 @@ public final class ContextUtility
 
     public static void RestartApp(Activity activity)
     {
+        if(null == activity)
+            return;
         activity.finish();
         Intent intent = activity.getPackageManager().getLaunchIntentForPackage(activity.getApplicationContext().getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -507,7 +509,7 @@ public final class ContextUtility
 
     public static boolean IsInAppPrivateDirectory(Context context, String path)
     {
-        final String appPath = Q3EUtils.GetAppStoragePath(context, null);
+        final String appPath = Q3EUtils.GetAppStoragePath(context);
         if(path.startsWith("/sdcard"))
         {
             int i = appPath.indexOf("/Android/data");
@@ -654,6 +656,11 @@ public final class ContextUtility
         ComponentName name = new ComponentName("com.google.android.documentsui", "com.android.documentsui.files.FilesActivity");
         intent.setComponent(name);
         context.startActivity(intent);
+    }
+
+    public static boolean InScopedStorage()
+    {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R); // >= 11
     }
 
 	private ContextUtility() {}

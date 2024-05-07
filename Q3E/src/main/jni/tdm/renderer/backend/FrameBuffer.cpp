@@ -107,7 +107,9 @@ void FrameBuffer::Validate() {
 	Bind();
 	GLenum result = qglCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (result == GL_FRAMEBUFFER_COMPLETE) {
-        common->Printf( "Framebuffer (%s) is completed\n", name.c_str() ); // debug
+#ifdef __ANDROID__ //karin: debug framebuffer
+        common->Printf( "Framebuffer (%s) is completed\n", name.c_str() );
+#endif
 		return;
 	}
 

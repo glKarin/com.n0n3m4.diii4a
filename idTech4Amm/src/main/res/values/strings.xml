@@ -86,6 +86,7 @@
     <string name="_32bits_rgba1010102">32Bits(RGBA1010102)</string>
     <string name="doom_3">DOOM 3</string>
     <string name="quake_4">Quake 4</string>
+    <string name="quake_1">Quake 1</string>
     <string name="quake_2">Quake 2</string>
     <string name="quake_3">Quake 3</string>
     <string name="rtcw">RTCW</string>
@@ -272,7 +273,7 @@
     <string name="shadow_mapping">Shadow mapping</string>
     <string name="renderer">Renderer</string>
     <string name="_sound">Sound</string>
-    <string name="using_openal">Using OpenAL(soft)(s_useOpenAL)</string>
+    <string name="using_openal">Using OpenAL(s_useOpenAL)</string>
     <string name="using_efx_reverb">Enable EFX Reverb(s_useEAXReverb)</string>
     <string name="internal_storage">Internal storage</string>
     <string name="external_storage">External storage</string>
@@ -284,6 +285,7 @@
     <string name="normal_font_size_subtitle_prey_2006">Normal font size subtitle(Prey 2006)</string>
     <string name="_mod">Mod</string>
     <string name="librecoop">LibreCoop</string>
+    <string name="quake_1_base">Quake I</string>
     <string name="quake_2_base">Quake II</string>
     <string name="quake_2_ctf">Quake II:ctf</string>
     <string name="quake_2_rogue">Quake II:rogue</string>
@@ -298,5 +300,18 @@
     <string name="scroll_to_bottom">Bottom</string>
     <string name="scroll">Scroll</string>
     <string name="pause">Pause</string>
+    <string name="joystick_visible">Joystick visible:</string>
+    <string name="suggest_game_woring_directory_tips">Suggest create folder in `%s` as game working directory for loading faster on Android 11/11+!</string>
+    <string name="sub_directory">Sub directory: </string>
+    <string name="app_is_rebooting">App is rebooting......</string>
+    <string name="standalone_game_data_directory">Standalone game data directory</string>
+    <string name="game_data_directories_are_standalone"><![CDATA[Game data directories are standalone: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always)]]></string>
+    <string name="load_local_engine_library">Load local engine library</string>
+    <string name="pid">PID</string>
+    <string name="get_application_pid">Get application PID</string>
+    <string name="open_logcat">Open logcat</string>
+    <string name="view_logcat">View logcat</string>
+    <string name="open_documents">Android Storage Access Framework</string>
+    <string name="open_system_file_browser">Open Android Storage Access Framework</string>
 
 </resources>

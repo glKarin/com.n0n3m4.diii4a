@@ -1,4 +1,4 @@
-#version 300 es
+#version 140
 #extension GL_ARB_gpu_shader5 : enable
 
 /**

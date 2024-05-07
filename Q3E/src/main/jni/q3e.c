@@ -67,6 +67,8 @@ static FILE * android_tmpfile(void);
 static void copy_to_clipboard(const char *text);
 static char * get_clipboard_text(void);
 static void show_toast(const char *text);
+static void open_keyboard(void);
+static void close_keyboard(void);
 
 // data
 static char *game_data_dir = NULL;
@@ -93,15 +95,19 @@ static jmethodID android_setState;
 static jmethodID android_writeAudio_array;
 
 static jmethodID android_ShowToast_method;
+static jmethodID android_OpenVKB_method;
+static jmethodID android_CloseVKB_method;
+
+#define ATTACH_JNI(env) \
+	JNIEnv *env = 0; \
+	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0 ) \
+	{ \
+		(*jVM)->AttachCurrentThread(jVM, &env, NULL); \
+	}
 
 static void Android_AttachThread(void)
 {
-	JNIEnv *env = 0;
-
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0)
-	{
-		(*jVM)->AttachCurrentThread(jVM, &env, NULL);
-	}
+	ATTACH_JNI(env)
 }
 
 static void print_interface(void)
@@ -130,6 +136,7 @@ static void print_interface(void)
 
 static void loadLib(const char* libpath)
 {
+	LOGI("Load library: %s......\n", libpath);
     libdl = dlopen(libpath, RTLD_NOW | RTLD_GLOBAL);
     if(!libdl)
     {
@@ -165,12 +172,10 @@ static void loadLib(const char* libpath)
 
 void initAudio(void *buffer, int size)
 {
-	JNIEnv *env;
 	jobject tmp;
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
+
+	ATTACH_JNI(env)
+
 	LOGI("Q3E AudioTrack init");
 #ifdef AUDIOTRACK_BYTEBUFFER
     tmp = (*env)->NewDirectByteBuffer(env, buffer, size);
@@ -194,11 +199,9 @@ int writeAudio(int offset, int length)
 	if (!audio_track_buffer || !audioBuffer)
 		return 0;
 #endif
-	JNIEnv *env;
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
+
+	ATTACH_JNI(env)
+
 #ifdef AUDIOTRACK_BYTEBUFFER
     return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio, audioBuffer, offset, length);
 #else
@@ -210,7 +213,7 @@ int writeAudio(int offset, int length)
 		memcpy(buf_mem, audio_track_buffer, len);
 		(*env)->ReleaseByteArrayElements(env, audioBuffer, buf_mem, 0);
 #else
-		(*env)->SetByteArrayRegion(env, audioBuffer, 0, len, audio_track_buffer);
+		(*env)->SetByteArrayRegion(env, audioBuffer, offset, len, audio_track_buffer);
 #endif
 	}
 	return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio_array, audioBuffer, offset, length);
@@ -221,11 +224,9 @@ void closeAudio()
 {
 	if (!audioBuffer)
 		return;
-	JNIEnv *env;
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
+
+	ATTACH_JNI(env)
+
 	LOGI("Q3E AudioTrack shutdown");
 	jobject ab = audioBuffer;
 	audioBuffer = 0;
@@ -234,11 +235,8 @@ void closeAudio()
 
 void setState(int state)
 {
-    JNIEnv *env;
-    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-    {
-        (*jVM)->AttachCurrentThread(jVM,&env, NULL);
-    }
+	ATTACH_JNI(env)
+
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_setState, state);
 }
 
@@ -323,6 +321,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_CopyToClipboard_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyToClipboard", "(Ljava/lang/String;)V");
 	android_GetClipboardText_method = (*env)->GetMethodID(env, q3eCallbackClass, "GetClipboardText", "()Ljava/lang/String;");
 	android_ShowToast_method = (*env)->GetMethodID(env, q3eCallbackClass, "ShowToast", "(Ljava/lang/String;)V");
+	android_OpenVKB_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenVKB", "()V");
+	android_CloseVKB_method = (*env)->GetMethodID(env, q3eCallbackClass, "CloseVKB", "()V");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -412,6 +412,8 @@ static void setup_Q3E_callback(void)
 	callback.Sys_tmpfile = &android_tmpfile;
 	callback.Sys_copyToClipboard = &copy_to_clipboard;
 	callback.Sys_getClipboardText = &get_clipboard_text;
+	callback.Sys_openKeyboard = &open_keyboard;
+	callback.Sys_closeKeyboard = &close_keyboard;
 
 	callback.Gui_ShowToast = &show_toast;
 
@@ -430,12 +432,13 @@ static void print_initial_context(const Q3E_InitialContext_t *context)
 	LOGI("OpenGL MSAA: %d", context->openGL_msaa);
 	LOGI("OpenGL Version: %x", context->openGL_version);
 	LOGI("Using mouse: %x", context->mouseAvailable);
+	LOGI("Game data directory: %s", context->gameDataDir);
     LOGI("Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
 	LOGI("<---------");
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring game, jstring GameDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jboolean bContinueNoGLContext)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc=0;
@@ -445,19 +448,19 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
     game_data_dir = strdup(dir);
 	(*env)->ReleaseStringUTFChars(env, GameDir, dir);
 
-	const char *game_type = (*env)->GetStringUTFChars(env, game, &iscopy);
-	if(!strcasecmp(game_type, "tdm"))
+	if(gameSubDir)
 	{
-		const char Tdm[] = "darkmod";
-		const int Len = strlen(game_data_dir) + 1 + strlen(Tdm);
+		const char *game_type = (*env)->GetStringUTFChars(env, gameSubDir, &iscopy);
+		const int Len = strlen(game_data_dir) + 1 + strlen(game_type);
 		char *game_path = malloc(Len + 1);
-		sprintf(game_path, "%s/%s", game_data_dir, Tdm);
+		sprintf(game_path, "%s/%s", game_data_dir, game_type);
 		game_path[Len] = '\0';
 		free(game_data_dir);
 		game_data_dir = game_path;
+		(*env)->ReleaseStringUTFChars(env, gameSubDir, game_type);
 	}
+	LOGI("idTech4A++ game data directory: %s\n", game_data_dir);
 	chdir(game_data_dir);
-	(*env)->ReleaseStringUTFChars(env, game, game_type);
 
 	const char *arg = (*env)->GetStringUTFChars(env, Cmdline, &iscopy);
 	LOGI("idTech4A++ game command: %s\n", arg);
@@ -493,6 +496,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 		context.multithread = bMultithread ? 1 : 0;
 		context.mouseAvailable = mouseAvailable ? 1 : 0;
         context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;
+		context.gameDataDir = game_data_dir;
 
 		print_initial_context(&context);
 
@@ -576,36 +580,21 @@ Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
 
 void pull_input_event(int execCmd)
 {
-    JNIEnv *env = 0;
-
-    if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-    {
-        (*jVM)->AttachCurrentThread(jVM,&env, NULL);
-    }
+	ATTACH_JNI(env)
 
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_PullEvent_method, (jboolean)execCmd);
 }
 
 void grab_mouse(int grab)
 {
-	JNIEnv *env = 0;
-
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
+	ATTACH_JNI(env)
 
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_GrabMouse_method, (jboolean)grab);
 }
 
 void copy_to_clipboard(const char *text)
 {
-	JNIEnv *env = 0;
-
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
+	ATTACH_JNI(env)
 
 	if(!text)
 	{
@@ -621,12 +610,7 @@ void copy_to_clipboard(const char *text)
 
 char * get_clipboard_text(void)
 {
-	JNIEnv *env = 0;
-
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
+	ATTACH_JNI(env)
 
 	jstring str = (*env)->CallObjectMethod(env, q3eCallbackObj, android_GetClipboardText_method);
 	if(!str)
@@ -642,23 +626,32 @@ char * get_clipboard_text(void)
 
 void show_toast(const char *text)
 {
-	JNIEnv *env = 0;
-
-	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
-	{
-		(*jVM)->AttachCurrentThread(jVM,&env, NULL);
-	}
-
 	if(!text)
-	{
 		return;
-	}
+
+	ATTACH_JNI(env)
 
 	LOGI("Toast: %s", text);
 	jstring str = (*env)->NewStringUTF(env, text);
 	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
 	(*env)->DeleteLocalRef(env, str);
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_ShowToast_method, nstr);
+}
+
+void open_keyboard(void)
+{
+	ATTACH_JNI(env)
+
+	LOGI("Open keyboard");
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_OpenVKB_method);
+}
+
+void close_keyboard(void)
+{
+	ATTACH_JNI(env)
+
+	LOGI("Close keyboard");
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_CloseVKB_method);
 }
 
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"

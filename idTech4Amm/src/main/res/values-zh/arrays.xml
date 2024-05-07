@@ -36,4 +36,10 @@
         <item>中文</item>
         <item>Русский</item>
     </string-array>
+
+    <string-array name="joystick_visible_mode_names">
+        <item>总是</item>
+        <item>隐藏</item>
+        <item>仅按下</item>
+    </string-array>
 </resources>

@@ -25,6 +25,7 @@ public:
 
 	private:
 		const rvBSEParticle 		*particleSystem;
+		idBounds					bounds;
 #else
 	virtual void				InitFromFile(const char* fileName);
 	virtual void				FinishSurfaces(bool useMikktspace);

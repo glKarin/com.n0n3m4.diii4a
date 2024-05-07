@@ -31,6 +31,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#if 0
+#define NS_DEBUG(x) x
+#else
+#define NS_DEBUG(x)
+#endif
+
 /*
 
 Any errors during parsing just set MF_DEFAULTED and return, rather than throwing
@@ -186,6 +192,12 @@ void idMaterial::FreeData()
 				Mem_Free(stages[i].newStage);
 				stages[i].newStage = NULL;
 			}
+#ifdef _RAVEN //karin: GLSL newShaderStage
+			if (stages[i].newShaderStage != NULL) {
+				delete stages[i].newShaderStage;
+				stages[i].newShaderStage = NULL;
+			}
+#endif
 		}
 
 		R_StaticFree(stages);
@@ -420,6 +432,10 @@ void idMaterial::ParseSort(idLexer &src)
 		sort = SS_POST_PROCESS;
 	} else if (!token.Icmp("portalSky")) {
 		sort = SS_PORTAL_SKY;
+#ifdef _RAVEN
+	} else if (!token.Icmp("gui")) {
+		sort = SS_GUI;
+#endif
 	} else {
 		sort = atof(token);
 	}
@@ -703,7 +719,19 @@ int idMaterial::ParseTerm(idLexer &src)
 
 #ifdef _RAVEN //k: quake4 material property
 	if (!token.Icmp("glslPrograms")) {
-		return GetExpressionConstant(0.0f);
+		pd->registersAreConstant = false;
+		return EmitOp(0, 0, OP_TYPE_GLSL_ENABLED);
+		// return GetExpressionConstant(0.0f);
+	}
+	if (!token.Icmp("POTCorrectionX")) {
+		pd->registersAreConstant = false;
+		return EmitOp(0, 0, OP_TYPE_POT_X);
+		// return GetExpressionConstant(1.0f);
+	}
+	if (!token.Icmp("POTCorrectionY")) {
+		pd->registersAreConstant = false;
+		return EmitOp(0, 0, OP_TYPE_POT_Y);
+		// return GetExpressionConstant(1.0f);
 	}
 	if (!token.Icmp("DecalLife")) {
 		return GetExpressionConstant(0.0f);
@@ -1219,6 +1247,8 @@ void idMaterial::ParseFragmentMap(idLexer &src, newShaderStage_t *newStage)
 	newStage->fragmentProgramImages[unit] =
 	        globalImages->ImageFromFile(str, tf, allowPicmip, trp, td, cubeMap);
 
+	NS_DEBUG(common->Printf("NS fragmentImage: %d %s\n", unit, newStage->fragmentProgramImages[unit]?newStage->fragmentProgramImages[unit]->imgName.c_str():"NULL"));
+
 	if (!newStage->fragmentProgramImages[unit]) {
 		newStage->fragmentProgramImages[unit] = globalImages->defaultImage;
 	}
@@ -1299,6 +1329,9 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 	int					a, b;
 	int					matrix[2][3];
 	newShaderStage_t	newStage;
+#ifdef _RAVEN //karin: GLSL newShaderStage
+	rvNewShaderStage	newShaderStage;
+#endif
 
 	if (numStages >= MAX_SHADER_STAGES) {
 		SetMaterialFlag(MF_DEFAULTED);
@@ -1769,6 +1802,16 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #else
 				newStage.vertexProgram = -1;
 				newStage.fragmentProgram = -1;
+                //if(newStage.glslProgram <= 0)
+                {
+                    token.StripFileExtension();
+                    const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
+					NS_DEBUG(common->Printf("NS program: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
+                    if(shaderProgram && shaderProgram->program > 0)
+                        newStage.glslProgram = shaderProgram->program;
+                    else
+                        newStage.glslProgram = -1;
+                }
 #endif
 			}
 
@@ -1780,7 +1823,17 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.fragmentProgram = R_FindARBProgram(GL_FRAGMENT_PROGRAM_ARB, token.c_str());
 #else
-			newStage.fragmentProgram = -1;
+				newStage.fragmentProgram = -1;
+                //if(newStage.glslProgram <= 0)
+                {
+                    token.StripFileExtension();
+                    const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
+					NS_DEBUG(common->Printf("NS fragmentProgram: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
+                    if(shaderProgram && shaderProgram->program > 0)
+                        newStage.glslProgram = shaderProgram->program;
+                    else
+                        newStage.glslProgram = -1;
+                }
 #endif
 			}
 
@@ -1792,7 +1845,17 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 				newStage.vertexProgram = R_FindARBProgram(GL_VERTEX_PROGRAM_ARB, token.c_str());
 #else
-			newStage.vertexProgram = -1;
+				newStage.vertexProgram = -1;
+                //if(newStage.glslProgram <= 0)
+                {
+                    token.StripFileExtension();
+                    const shaderProgram_t *shaderProgram = shaderManager->Find(token.c_str());
+					NS_DEBUG(common->Printf("NS vertexProgram: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
+                    if(shaderProgram && shaderProgram->program > 0)
+                        newStage.glslProgram = shaderProgram->program;
+                    else
+                        newStage.glslProgram = -1;
+                }
 #endif
 			}
 
@@ -1831,8 +1894,10 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			continue;
 		}
 
-#ifdef _RAVEN //k: unsupported GLSL shader program in material
+#ifdef _RAVEN //karin: GLSL newShaderStage
 		if (!token.Icmp("glslProgram")) {
+			newShaderStage.ParseGLSLProgram(src, this);
+#if 0
 			src.SkipRestOfLine();
 			//SetMaterialFlag(MF_DEFAULTED); // as default
 			/*
@@ -1847,19 +1912,32 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 			ss->color.registers[3] = EXP_REG_PARM3;
 			pd->registersAreConstant = false;
 			*/
+#endif
 			continue;
 		}
 		if (!token.Icmp("shaderParm")) {
+			if(newShaderStage.shaderProgram)
+				newShaderStage.ParseShaderParm(src, this);
+			else
+				src.SkipRestOfLine();
+#if 0
 			src.SkipRestOfLine();
+#endif
 			continue;
 		}
 		if (!token.Icmp("shaderTexture")) {
+			if(newShaderStage.shaderProgram)
+				newShaderStage.ParseShaderTexture(src, this);
+			else
+				src.SkipRestOfLine();
+#if 0
 			src.SkipRestOfLine();
 			/*
 			idToken t;
 			while(src.ReadTokenOnLine(&t))
 				idStr::Copynz(imageName, t.c_str(), sizeof(imageName));
 				*/
+#endif
 			continue;
 		}
 #endif
@@ -1945,11 +2023,22 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 
 	// if we are using newStage, allocate a copy of it
-	//k: unsupported GL asm shader program
-	if (newStage.fragmentProgram || newStage.vertexProgram) {
+#if !defined(GL_ES_VERSION_2_0)
+	if (newStage.fragmentProgram || newStage.vertexProgram)
+#else
+	if (newStage.glslProgram)
+#endif
+	{
 		ss->newStage = (newShaderStage_t *)Mem_Alloc(sizeof(newStage));
 		*(ss->newStage) = newStage;
 	}
+#ifdef _RAVEN //karin: GLSL newShaderStage
+	if (newShaderStage.shaderProgram)
+	{
+		ss->newShaderStage = new rvNewShaderStage;
+		*ss->newShaderStage = newShaderStage;
+	}
+#endif
 
 	// successfully parsed a stage
 	numStages++;
@@ -1978,7 +2067,11 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 		if (!ts->image) {
 			ts->image = globalImages->defaultImage;
 		}
-	} else if (!ts->cinematic && !ts->dynamic && !ss->newStage) {
+	} else if (!ts->cinematic && !ts->dynamic && !ss->newStage
+#ifdef _RAVEN //karin: GLSL newShaderStage
+			&& !ss->newShaderStage
+#endif
+			) {
 		common->Warning("material '%s' had stage with no image", GetName());
 		ts->image = globalImages->defaultImage;
 	}
@@ -2323,12 +2416,13 @@ void idMaterial::ParseMaterial(idLexer &src)
 				*/
         else if (!token.Icmp("sky"))
         {
+            SetMaterialFlag(MF_SKY);
             // Unknown what this is used for.
             continue;
         }
-        else if (!token.Icmp("needCurrentRender"))
+        else if (!token.Icmp("needCurrentRender")) //karin: only for sniper scope GUI render in GLSL newShaderStage, require copy framebuffer to _currentRenderImage before render 2D GUI.
         {
-            // Unknown what this is used for.
+            SetMaterialFlag(MF_NEED_CURRENT_RENDER);
             continue;
         }
         else if (!token.Icmp("materialType"))
@@ -2890,6 +2984,29 @@ bool idMaterial::Parse(const char *text, const int textLength)
 				}
 			}
 		}
+#ifdef _RAVEN //karin: GLSL newShaderStage
+		if (pStage->newShaderStage) {
+			bool postProcess = false;
+			for (int j = 0 ; j < pStage->newShaderStage->numShaderTextures ; j++) {
+				if (pStage->newShaderStage->shaderTextures[j].value == globalImages->currentRenderImage) {
+					if (sort != SS_PORTAL_SKY && sort != SS_GUI) {
+                        //karin: setup MF_NEED_CURRENT_RENDER flag, so don't SetSort to SS_GUI for post-process stage in GUI window
+/*                        if(sort == SS_GUI)
+                            SetMaterialFlag(MF_NEED_CURRENT_RENDER);*/
+						sort = SS_POST_PROCESS;
+						coverage = MC_TRANSLUCENT;
+					}
+					postProcess = true;
+
+					i = numStages;
+					break;
+				}
+			}
+			//karin: don't render 2D GUIs to currentRenderImage when start render 2D
+			if(postProcess && TestMaterialFlag(MF_NEED_CURRENT_RENDER) && sort == SS_GUI)
+				sort = SS_PREGUI;
+		}
+#endif
 	}
 
 	// set the drawStateBits depth flags
@@ -3020,6 +3137,18 @@ const char *opNames[] = {
 	"OP_TYPE_NE",
 	"OP_TYPE_AND",
 	"OP_TYPE_OR"
+#ifdef _RAVEN //karin: GLSL newShaderStage
+	// RAVEN BEGIN
+// rjohnson: new shader stage system
+	,
+	"OP_TYPE_GLSL_ENABLED",
+	"OP_TYPE_POT_X",
+	"OP_TYPE_POT_Y",
+// RAVEN END
+#endif
+#ifdef _HUMANHEAD
+	, "OP_TYPE_FRAGMENTPROGRAMS" // HUMANHEAD CJR:  Added so fragment programs support can be toggled
+#endif
 };
 
 void idMaterial::Print() const
@@ -3176,6 +3305,33 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 			case OP_TYPE_OR:
 				registers[op->c] = registers[ op->a ] || registers[op->b];
 				break;
+#ifdef _RAVEN //karin: calc dynamic variants on material stage
+			case OP_TYPE_GLSL_ENABLED: { //karin: GLSL shader stage is enabled current
+					float f = 0.0;
+					if (stages && !r_skipNewAmbient.GetBool()) {
+						for (int m = 0; m < numStages; m++) {
+							if (stages[ m ].newShaderStage && stages[ m ].newShaderStage->IsValid()) {
+								f = 1.0;
+								break;
+							}
+						}
+					}
+					registers[op->c] = f;
+				}
+				break;
+			case OP_TYPE_POT_X: { //karin: screen width and power of two width
+					int w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
+					int potw = globalImages->currentRenderImage->uploadWidth;
+					registers[op->c] = (float) w / (float) potw;
+				}
+				break;
+			case OP_TYPE_POT_Y: { //karin: screen height and power of two height
+					int h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
+					int poth = globalImages->currentRenderImage->uploadHeight;
+					registers[op->c] = (float) h / (float) poth;
+				}
+				break;
+#endif
 			default:
 				common->FatalError("R_EvaluateExpression: bad opcode");
 		}
@@ -3458,6 +3614,10 @@ void idMaterial::ReloadImages(bool force) const
 					stages[i].newStage->fragmentProgramImages[j]->Reload(false, force);
 				}
 			}
+#ifdef _RAVEN //karin: GLSL newShaderStage
+		} else if (stages[i].newShaderStage) {
+			stages[i].newShaderStage->ReloadImages(force);
+#endif
 		} else if (stages[i].texture.image) {
 			stages[i].texture.image->Reload(false, force);
 		}

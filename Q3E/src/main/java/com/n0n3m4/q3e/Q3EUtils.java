@@ -129,16 +129,27 @@ public class Q3EUtils
 
     public static void ToggleToolbar(boolean on)
     {
-        if (null != q3ei.callbackObj.vw)
-            q3ei.callbackObj.vw.ToggleToolbar(on);
+        q3ei.callbackObj.ToggleToolbar(on);
     }
 
-    public static void CloseVKB()
+    public static void OpenVKB(View vw)
     {
-        if (null != q3ei.callbackObj.vw)
+        if (null != vw)
         {
-            InputMethodManager imm = (InputMethodManager) q3ei.callbackObj.vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(q3ei.callbackObj.vw.getWindowToken(), 0);
+            InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            if (Q3EUtils.q3ei.function_key_toolbar)
+                Q3EUtils.ToggleToolbar(true);
+        }
+    }
+
+    public static void CloseVKB(View vw)
+    {
+        if (null != vw)
+        {
+            InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
         }
     }
 
@@ -288,6 +299,13 @@ public class Q3EUtils
             e.printStackTrace();
         }
         return is;
+    }
+
+    public static String GetAppStoragePath(Context context)
+    {
+        String path = Q3EUtils.GetAppStoragePath(context, null);
+        File dir = new File(path);
+        return dir.getParent();
     }
 
     public static String GetAppStoragePath(Context context, String filename)

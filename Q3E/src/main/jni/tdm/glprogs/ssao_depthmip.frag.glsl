@@ -1,4 +1,4 @@
-#version 300 es
+#version 140
 
 /**
  Based on the SAO algorithm by Morgan McGuire and Michael Mara, NVIDIA Research

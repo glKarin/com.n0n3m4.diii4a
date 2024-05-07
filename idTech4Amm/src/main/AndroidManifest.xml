@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11039"
-    android:versionName="1.1.0harmattan39"
+    android:versionCode="11050"
+    android:versionName="1.1.0harmattan50"
     android:installLocation="preferExternal"
     >
 
@@ -77,21 +77,21 @@
         </activity> 
 
         <activity android:label="@string/config_editor_name"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:exported="true"
             android:name="com.karin.idTech4Amm.ConfigEditorActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity android:label="@string/key_config_page_name"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:exported="true"
             android:name="com.karin.idTech4Amm.OnScreenButtonConfigActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity android:label="Logcat"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:exported="true"
             android:name="com.karin.idTech4Amm.LogcatActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"

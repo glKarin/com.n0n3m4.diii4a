@@ -12,7 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 300 es
+#version 140
 
 /**
  * This is the upsampling portion of the "dual filtering" blur as suggested in the Siggraph 2015 talk

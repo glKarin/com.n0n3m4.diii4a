@@ -8,6 +8,8 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.File;
 
@@ -47,9 +49,7 @@ public final class EditConfigFileFunc extends GameLauncherFunc
 
     public void run()
     {
-        String gamePath = m_path;
-        String game = m_game;
-        String basePath = gamePath + File.separator + game + File.separator + m_file;
+        String basePath = KStr.AppendPath(m_path, m_game, m_file);
         File f = new File(basePath);
         if(!f.isFile() || !f.canWrite() || !f.canRead())
         {

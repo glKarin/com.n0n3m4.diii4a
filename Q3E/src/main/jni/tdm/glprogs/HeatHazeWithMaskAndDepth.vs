@@ -12,7 +12,7 @@ or (at your option) any later version. For details, see LICENSE.TXT.
 Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
-#version 300 es
+#version 140
 // !!ARBvp1.0 
 
 #pragma tdm_include "tdm_transform.glsl"

@@ -124,6 +124,15 @@ typedef enum {
 	OP_TYPE_AND,
 	OP_TYPE_OR,
 	OP_TYPE_SOUND
+#ifdef _RAVEN
+	// RAVEN BEGIN
+// rjohnson: new shader stage system
+	,
+	OP_TYPE_GLSL_ENABLED,
+	OP_TYPE_POT_X,
+	OP_TYPE_POT_Y,
+// RAVEN END
+#endif
 #ifdef _HUMANHEAD
 	, OP_TYPE_FRAGMENTPROGRAMS // HUMANHEAD CJR:  Added so fragment programs support can be toggled
 #endif
@@ -212,6 +221,9 @@ typedef enum {
 
 static const int	MAX_FRAGMENT_IMAGES = 8;
 static const int	MAX_VERTEX_PARMS = 4;
+#ifdef _RAVEN
+class rvNewShaderStage;
+#endif
 
 typedef struct {
 	int					vertexProgram;
@@ -223,6 +235,7 @@ typedef struct {
 	idImage 			*fragmentProgramImages[MAX_FRAGMENT_IMAGES];
 
 	idMegaTexture		*megaTexture;		// handles all the binding and parameter setting
+	int 				glslProgram;
 } newShaderStage_t;
 
 #ifdef _HUMANHEAD
@@ -248,6 +261,12 @@ typedef struct {
 	float				privatePolygonOffset;	// a per-stage polygon offset
 
 	newShaderStage_t	*newStage;			// vertex / fragment program based stage
+
+#ifdef _RAVEN
+	// RAVEN BEGIN
+// rjohnson: new shader stage system
+	rvNewShaderStage	*newShaderStage;
+#endif
 
 #ifdef _HUMANHEAD
     bool				isGlow; // HUMANHEAD CJR:  Glow overlay
@@ -323,6 +342,14 @@ typedef enum {
 	MF_NOSELFSHADOW				= BIT(4),
 	MF_NOPORTALFOG				= BIT(5),	// this fog volume won't ever consider a portal fogged out
 	MF_EDITOR_VISIBLE			= BIT(6)	// in use (visible) per editor
+#ifdef _RAVEN
+// RAVEN BEGIN
+// jscott: for portal skies
+	,
+	MF_SKY						= BIT(7),
+	MF_NEED_CURRENT_RENDER		= BIT(8)	// for hud guis that need sort order preseved but need back end too
+// RAVEN END
+#endif
 #ifdef _HUMANHEAD
 	, MF_USESDISTANCE				= BIT(7),	// HUMANHEAD pdm: distance optimization
 	MF_LIGHT_WHOLE_MESH			= BIT(8),	// HUMANHEAD bjk: dont cull tris with light bounds
@@ -370,10 +397,10 @@ typedef enum {
 	CONTENTS_ITEMCLIP			= BIT(23),	// so items can collide
 	CONTENTS_PROJECTILECLIP		= BIT(24),  // unlike contents_projectile, projectiles only NOT hitscans
 // RAVEN END
-
+/* // jmarshall23's botAI, not q4 sdk
 	CONTENTS_FOG				= BIT(25),
 	CONTENTS_LAVA				= BIT(26),
-	CONTENTS_SLIME				= BIT(27),
+	CONTENTS_SLIME				= BIT(27),*/
 #endif
 	
 #ifdef _HUMANHEAD
@@ -449,6 +476,10 @@ typedef enum {
 	SURF_NULLNORMAL				= BIT(12)	// renderbump will draw this surface as 0x80 0x80 0x80, which
 #ifdef _RAVEN
 		, SURF_BOUNCE = BIT(13),  // projectiles should bounce off this surface
+
+// dluetscher: added no T fix
+	SURF_NO_T_FIX				= BIT(14),	// merge surfaces (like decals), but does not try to T-fix them
+
 #endif
 	// won't collect light from any angle
 } surfaceFlags_t;
@@ -457,6 +488,11 @@ class idSoundEmitter;
 
 class idMaterial : public idDecl
 {
+#ifdef _RAVEN
+// rjohnson: new shader stage system
+	friend class rvNewShaderStage;
+// RAVEN END
+#endif
 	public:
 		idMaterial();
 		virtual				~idMaterial();
@@ -807,6 +843,11 @@ class idMaterial : public idDecl
 		};
 		void				AddReference();
 #ifdef _RAVEN // quake4 material
+// RAVEN BEGIN
+// dluetscher: added SURF_NO_T_FIX to merge surfaces (like decals), but skipping any T-junction fixing
+	bool				NoTFix( void ) const { return ( surfaceFlags & SURF_NO_T_FIX ) != 0; }
+// RAVEN END
+
 	const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
 // RAVEN BEGIN
 // rjohnson: added vertex randomizing

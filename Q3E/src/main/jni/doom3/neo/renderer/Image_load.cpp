@@ -2218,7 +2218,8 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 #endif
 
 #if !defined(GL_ES_VERSION_2_0)
-	qglReadBuffer(GL_BACK);
+	if(USING_GLES3)
+		qglReadBuffer(GL_BACK);
 #endif
 
 	// only resize if the current dimensions can't hold it at all,

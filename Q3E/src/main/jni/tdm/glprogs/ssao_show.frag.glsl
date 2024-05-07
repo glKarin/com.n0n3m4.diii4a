@@ -1,4 +1,4 @@
-#version 300 es
+#version 140
 
 // display the occlusion channel from the SSAO texture for debug purposes
 

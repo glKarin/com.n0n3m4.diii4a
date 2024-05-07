@@ -20,6 +20,8 @@ typedef struct
     FILE * (*Sys_tmpfile)(void); // for Android tmpfile C function
     void (*Sys_copyToClipboard)(const char *text); // copy text to clipboard
     char * (*Sys_getClipboardText)(void); // get text from clipboard
+    void (*Sys_openKeyboard)(void); // open virtual keyboard
+    void (*Sys_closeKeyboard)(void); // close virtual keyboard
 
     // GUI
     void (*Gui_ShowToast)(const char *text); // get text from clipboard
@@ -43,6 +45,7 @@ typedef struct
     int multithread; // enable multi-threading rendering
     int mouseAvailable; // using mouse
     int continueWhenNoGLContext; // Continue when missing OpenGL context
+    const char *gameDataDir; // game data directory
 } Q3E_InitialContext_t;
 
 // Android::JNI call DOOM3 after main()

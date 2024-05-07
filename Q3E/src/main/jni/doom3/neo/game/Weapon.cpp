@@ -1989,7 +1989,7 @@ void idWeapon::PresentWeapon(bool showViewModel)
 {
 #ifdef _MOD_FULL_BODY_AWARENESS
 	renderEntity_t* worldModelRenderEntity = worldModel.GetEntity()->GetRenderEntity();
-	bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool();
+	bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->focusUI;
 	if(not_pm_fullBodyAwareness)
 		worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
 	else
@@ -3103,7 +3103,7 @@ void idWeapon::Event_LaunchProjectiles(int num_projectiles, float spread, float 
 	} else {
 		// go straight out of the view
 #ifdef _MOD_FULL_BODY_AWARENESS
-		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool())
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->focusUI)
 		{
 #endif
         muzzleOrigin = playerViewOrigin;

@@ -48,7 +48,7 @@ static float r_specularExponent = 4.0f;
 #define HARM_INTERACTION_SHADER_BLINNPHONG "blinn_phong"
 const char *harm_r_lightModelArgs[]	= { HARM_INTERACTION_SHADER_PHONG, HARM_INTERACTION_SHADER_BLINNPHONG, NULL };
 static idCVar harm_r_lightModel("harm_r_lightModel", harm_r_lightModelArgs[0], CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Light model when draw interactions(`phong` - Phong(default), `blinn_phong` - Blinn-Phong.)", harm_r_lightModelArgs, idCmdSystem::ArgCompletion_String<harm_r_lightModelArgs>);
-static idCVar harm_r_specularExponent("harm_r_specularExponent", "4.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Specular exponent in interaction light model(default is 4.0.)");
+static idCVar harm_r_specularExponent("harm_r_specularExponent", "4.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Specular exponent in interaction light model(Phong default is 4, Blinn-Phong default is 12.)");
 
 #include "glsl/draw_glsl_backend.cpp"
 
@@ -88,28 +88,65 @@ static void R_InitGLSLCvars(void)
     r_shadowMappingScheme = i;
 #endif
 #ifdef GL_ES_VERSION_3_0
-	if(!USING_GLES3)
+	if(!USING_GLES3) {
 #endif
-	switch(harm_r_shadowMapDepthBuffer.GetInteger())
-	{
-		case 1:
-			r_useDepthTexture = glConfig.depthTextureAvailable;
-			r_useCubeDepthTexture = glConfig.depthTextureCubeMapAvailable;
-			break;
-		case 2:
-			r_useDepthTexture = false;
-			r_useCubeDepthTexture = false;
-			break;
-		case 3:
-			r_useDepthTexture = false;
-			r_useCubeDepthTexture = false;
-			break;
-		case 0:
-		default:
-			r_useDepthTexture = glConfig.depthTextureAvailable;
-			r_useCubeDepthTexture = glConfig.depthTextureCubeMapAvailable;
-			break;
+		switch (harm_r_shadowMapDepthBuffer.GetInteger())
+		{
+			case 1:
+				r_useDepthTexture = glConfig.depthTextureAvailable;
+				r_useCubeDepthTexture = glConfig.depthTextureCubeMapAvailable;
+				r_usePackColorAsDepth = false;
+				break;
+			case 2:
+				r_useDepthTexture = false;
+				r_useCubeDepthTexture = false;
+				r_usePackColorAsDepth = false;
+				break;
+			case 3:
+				r_useDepthTexture = false;
+				r_useCubeDepthTexture = false;
+				r_usePackColorAsDepth = true;
+				break;
+			case 0:
+			default:
+				r_useDepthTexture = glConfig.depthTextureAvailable;
+				r_useCubeDepthTexture = glConfig.depthTextureCubeMapAvailable;
+				if (!r_useDepthTexture || !r_useCubeDepthTexture)
+					r_usePackColorAsDepth = true;
+				break;
+		}
+#ifdef GL_ES_VERSION_3_0
+		common->Printf("[Harmattan]: Shadow mapping in OpenGLES2.0: \n");
+		if(r_useCubeDepthTexture)
+        {
+            common->Printf("[Harmattan]: Using depth cubemap texture on point light.\n");
+            depthShader_cube = &depthShader;
+            depthPerforatedShader_cube = &depthPerforatedShader;
+        }
+		else
+        {
+            common->Printf("[Harmattan]: Using color cubemap texture on point light.\n");
+            depthShader_cube = &depthShader_color;
+            depthPerforatedShader_cube = &depthPerforatedShader_color;
+        }
+		if(r_useDepthTexture)
+        {
+            common->Printf("[Harmattan]: Using depth texture on non-point light.\n");
+            depthShader_2d = &depthShader;
+            depthPerforatedShader_2d = &depthPerforatedShader;
+        }
+		else
+        {
+            common->Printf("[Harmattan]: Using color texture on non-point light.\n");
+            depthShader_2d = &depthShader_color;
+            depthPerforatedShader_2d = &depthPerforatedShader_color;
+        }
+		if(r_usePackColorAsDepth)
+			common->Printf("[Harmattan]: Store depth value with pack to RGBA if not using depth texture.\n");
+		else
+			common->Printf("[Harmattan]: Store depth value with RED component if not using depth texture.\n");
 	}
+#endif
 #endif
 
 #ifdef _TRANSLUCENT_STENCIL_SHADOW

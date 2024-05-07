@@ -1,11 +1,11 @@
 ## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006) for Android/Linux
-#### 毁灭战士3/雷神之锤4/掠食(2006)安卓/Linux移植版.
+#### DOOM III/Quake 4/Prey(2006) for Android/Windows/Linux OpenGLES
+#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版.
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan39(natasha)  
+1.1.0harmattan50(natasha)  
 **Latest update:**
-2024-04-10  
+2024-04-30  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -34,6 +34,17 @@ GPLv3
 * Return to Castle Wolfenstein(iortcw)
 * The Dark Mod
 
+###### Compare with other OpenGLES rendering version
+
+| Feature                                                                                    |                         idTech4A++                         |                            Other                            |
+|:-------------------------------------------------------------------------------------------|:----------------------------------------------------------:|:-----------------------------------------------------------:|
+| Multi-threading                                                                            |          Support<br/>(but can't switch in gaming)          | d3es-multithread support<br/>(and support switch in gaming) |
+| New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess) |                            Yes                             |                              -                              |
+| TexGen shader                                                                              |                            Yes                             |                              -                              |
+| Shadow mapping for pure soft shadow                                                        |                            Yes                             |                              -                              |
+| Translucent stencil shadow                                                                 |                            Yes                             |                              -                              |
+| OpenGL ES version                                                                          | 2.0 and 3.0+<br/>(shadow mapping shaders has different version) |                      2.0(3.0+ compat)                       |
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
@@ -42,19 +53,18 @@ Or download the latest APK from the [Releases Section](https://github.com/glKari
 Tag with `-free` only for F-Droid update.
 
 | Feature | Github | F-Droid |
-|:-|:-:|:-:|
+|:--------|:------:|:--------:|
 | Ouya TV | Yes | No |
 
 ----------------------------------------------------------------------------------
 ### Update
 
-* Support perforated surface shadow in shadow mapping.
-* Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`. More view in [LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
-* Add `Quake II` support, game data directory named `baseq2`. More view in [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
-* Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
-* Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
-* Add `The Dark Mod` 2.11 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
-* Add a on-screen button theme.
+* Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).
+* Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).
+* Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).
+* Improving Phong/Blinn-Phong light model interaction shader with high-precision.
+* Force disable using compression texture in The Dark Mod.
+* Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always).
 
 ----------------------------------------------------------------------------------
 
@@ -95,15 +105,19 @@ Tag with `-free` only for F-Droid update.
 
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_bathroom.png" alt="Classic bathroom">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4_game_2.png" alt="Quake IV on DOOM3">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey_girlfriend.png" alt="Prey(2006) on DOOM3">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" alt="Quake IV on DOOM3">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" alt="Prey(2006) on DOOM3">
 
 > Mod
 
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_roe.png" width="50%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_the_lost_mission.png" width="50%" alt="The lost mission">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_classic_doom3.png" width="50%" alt="Classic DOOM"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_hardcorps.png" width="50%" alt="Hardcorps">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_rivensin.png" width="50%" alt="Rivensin"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" width="50%" alt="Quake IV">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" width="50%" alt="Prey(2006)">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_classic_doom3.png" width="50%" alt="Classic DOOM">
+
+> Other
+
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_arena.jpg" width="50%" alt="Quake III : Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_team_arena.jpg" width="50%" alt="Quake III : Team Arena">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_return_to_castle_wolfenstein.jpg" width="50%" alt="Return to Castle Wolfenstein"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_the_dark_mod.jpg" width="50%" alt="The Dark Mod">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake2.jpg" width="50%" alt="Quake II">
 
 ----------------------------------------------------------------------------------
 
@@ -156,9 +170,11 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 
 #### Linux
 > 1. REQUIRE ALSA, zlib, X11, EGL
+> 2. ./cmake_linux_build.sh
 
 #### Windows(MinGW/MSVC)
 > 1. REQUIRE SDL2, zlib, cURL
+> 2. cmake_msvc_build.bat
 
 ----------------------------------------------------------------------------------
 

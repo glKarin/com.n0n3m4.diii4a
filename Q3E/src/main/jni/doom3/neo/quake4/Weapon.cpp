@@ -992,7 +992,7 @@ void rvWeapon::Think ( void ) {
 	// Cache the player origin and axis
 #ifdef _MOD_FULL_BODY_AWARENESS
 	renderEntity_t* worldModelRenderEntity = worldModel.GetEntity()->GetRenderEntity();
-	bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->IsInVehicle() || owner->IsZoomed();
+	bool not_pm_fullBodyAwareness = !harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->IsInVehicle() || owner->IsZoomed() || owner->focusUI;
 	if(not_pm_fullBodyAwareness)
 		worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
 	else
@@ -2570,7 +2570,7 @@ void rvWeapon::Attack( bool altAttack, int num_attacks, float spread, float fuse
 	} else {
 		// go straight out of the view
 #ifdef _MOD_FULL_BODY_AWARENESS
-		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->IsInVehicle() || owner->IsZoomed())
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || owner->IsInVehicle() || owner->IsZoomed() || owner->focusUI)
 		{
 #endif
 		muzzleOrigin = playerViewOrigin;

@@ -258,6 +258,8 @@ idRenderModel *rvRenderModelBSE::InstantiateDynamicModel(const struct renderEnti
 		surf->geometry->numVerts = numVerts;
 		surf->geometry->numIndexes = numIndexes;
 		surf->geometry->bounds = stage->bounds;		// just always draw the particles
+
+    	R_BoundTriSurf(surf->geometry);
 	}
 
 	return staticModel;

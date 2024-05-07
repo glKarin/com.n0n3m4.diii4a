@@ -49,7 +49,7 @@ void hhGuiHand::SetAction(const char* str) {
 
 bool hhGuiHand::IsValidFor( hhPlayer *who ) { 
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || who->InVehicle() || who->IsZoomed())
+	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || who->InVehicle() || who->IsZoomed() || who->focusUI)
 #endif
 	return( who->InGUIMode() ); 
 #ifdef _MOD_FULL_BODY_AWARENESS
@@ -66,7 +66,7 @@ void hhGuiHand::Show( void )
 		if(actor && owner->IsType( hhPlayer::Type ) )
 		{
 			hhPlayer *who = (hhPlayer *)actor;
-			if(harm_pm_fullBodyAwareness.GetBool() && !pm_thirdPerson.GetBool() && !who->InVehicle() && !who->IsZoomed())
+			if(harm_pm_fullBodyAwareness.GetBool() && !pm_thirdPerson.GetBool() && !who->InVehicle() && !who->IsZoomed() && !who->focusUI)
 				return;
 		}
 	}

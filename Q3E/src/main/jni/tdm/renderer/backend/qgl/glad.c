@@ -743,13 +743,11 @@ void close_gl(void) {
 #ifdef _HARM_DEBUG_GET_PROC
 static void * droidGetProcAddress(const char *name)
 {
-    printf("eglGetProcAddress: %s -> ", name);
     void *result = (void*)eglGetProcAddress(name);
-    printf("%p\n", result);
-    if(!result)
-    {
-        fprintf(stderr, "eglGetProcAddress not found: %s\n", name);
-    }
+    if(result)
+        printf("eglGetProcAddress: %s ...... found\n", name);
+    else
+        fprintf(stderr, "eglGetProcAddress: %s ...... missing\n", name);
     return result;
 }
 #else

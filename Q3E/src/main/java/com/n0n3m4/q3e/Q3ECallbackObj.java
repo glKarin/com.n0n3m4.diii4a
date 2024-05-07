@@ -20,7 +20,6 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
-import android.content.Context;
 
 import com.n0n3m4.q3e.karin.KOnceRunnable;
 import com.n0n3m4.q3e.onscreen.Q3EGUI;
@@ -105,8 +104,13 @@ public class Q3ECallbackObj
                                            "' */
 
         if (mAudioTrack != null) return;
-        mAudioTrack = Q3EAudioTrack.Instance(size);
+        mAudioTrack = Instance(size);
         reqThreadrunning = true;
+    }
+
+    public static Q3EAudioTrack Instance(int size)
+    {
+        return Q3EAudioTrack.Instance(size);
     }
 
     //k NEW:
@@ -243,6 +247,40 @@ public class Q3ECallbackObj
     {
         if(null != gui)
             gui.Toast(text);
+    }
+
+    public void CloseVKB()
+    {
+        if (null != vw)
+        {
+            vw.post(new Runnable() {
+                @Override
+                public void run() {
+                    Q3EUtils.CloseVKB(vw);
+                }
+            });
+        }
+    }
+
+    public void OpenVKB()
+    {
+        if (null != vw)
+        {
+            vw.post(new Runnable() {
+                @Override
+                public void run() {
+                    Q3EUtils.OpenVKB(vw);
+                }
+            });
+        }
+    }
+
+    public void ToggleToolbar(boolean on)
+    {
+        if (null != vw)
+        {
+            vw.ToggleToolbar(on);
+        }
     }
 }
 

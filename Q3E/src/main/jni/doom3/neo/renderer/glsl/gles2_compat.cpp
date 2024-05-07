@@ -30,7 +30,7 @@ static GLfloat gl_Color[4] = {0, 0, 0, 1};
 static idList<idDrawVert> gl_VertexList;
 static idList<glIndex_t> gl_IndexList;
 static GLenum gl_MatrixMode = GL_MODELVIEW;
-static GLuint gl_ClientState = 1 | 0 | 4;
+static GLuint gl_ClientState = CLIENT_STATE_VERTEX | 0 | CLIENT_STATE_COLOR;
 static const float	GL_IDENTITY_MATRIX[16] = {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -526,10 +526,10 @@ static void glEnd()
 				GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 				color = (GLubyte *)malloc(sizeof(GLubyte) * num * 4);
 				GLubyte glColor[] = {
-					gl_Color[0] * 255,
-					gl_Color[1] * 255,
-					gl_Color[2] * 255,
-					gl_Color[3] * 255,
+					(GLubyte)(gl_Color[0] * 255),
+					(GLubyte)(gl_Color[1] * 255),
+					(GLubyte)(gl_Color[2] * 255),
+					(GLubyte)(gl_Color[3] * 255),
 				};
 				for(int i = 0; i < numIndex; i++)
 				{
@@ -569,3 +569,93 @@ static void glrbDebugRenderCompat(void)
 
 #define DEBUG_RENDER_COMPAT
 // #define DEBUG_RENDER_COMPAT glrbDebugRenderCompat();
+
+static void RB_SetGL2D_compat(void)
+{
+	// set 2D virtual screen size
+	qglViewport(0, 0, glConfig.vidWidth, glConfig.vidHeight);
+
+	if (r_useScissor.GetBool()) {
+		qglScissor(0, 0, glConfig.vidWidth, glConfig.vidHeight);
+	}
+
+	// always assume 640x480 virtual coordinates
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0, 640, 480, 0, 0, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	GL_State(GLS_DEPTHFUNC_ALWAYS |
+			 GLS_SRCBLEND_SRC_ALPHA |
+			 GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA);
+
+	GL_Cull(CT_TWO_SIDED);
+
+	qglDisable(GL_DEPTH_TEST);
+	qglDisable(GL_STENCIL_TEST);
+}
+
+void RB_ShowImages_compat(void)
+{
+	int		i;
+	idImage	*image;
+	float	x, y, w, h;
+	int		start, end;
+
+	RB_SetGL2D_compat();
+
+	//qglClearColor( 0.2, 0.2, 0.2, 1 );
+	//qglClear( GL_COLOR_BUFFER_BIT );
+
+	qglFinish();
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glColor4f(1.0, 1.0, 1.0, 1.0);
+
+	start = Sys_Milliseconds();
+
+	for (i = 0 ; i < globalImages->images.Num() ; i++) {
+		image = globalImages->images[i];
+
+		if (image->texnum == idImage::TEXTURE_NOT_LOADED && image->partialImage == NULL) {
+			continue;
+		}
+
+		w = glConfig.vidWidth / 20;
+		h = glConfig.vidHeight / 15;
+		x = i % 20 * w;
+		y = i / 20 * h;
+
+		// show in proportional size in mode 2
+		if (r_showImages.GetInteger() == 2) {
+			w *= image->uploadWidth / 512.0f;
+			h *= image->uploadHeight / 512.0f;
+		}
+
+		image->Bind();
+		glBegin(GL_QUADS);
+		glTexCoord2f(0, 0);
+		glVertex2f(x, y);
+		glTexCoord2f(1, 0);
+		glVertex2f(x + w, y);
+		glTexCoord2f(1, 1);
+		glVertex2f(x + w, y + h);
+		glTexCoord2f(0, 1);
+		glVertex2f(x, y + h);
+		glEnd();
+	}
+
+	qglFinish();
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+
+	end = Sys_Milliseconds();
+	common->Printf("%i msec to draw all images\n", end - start);
+}

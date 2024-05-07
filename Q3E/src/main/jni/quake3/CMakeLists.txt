@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
-project(quake3 C)
+project(quake3)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 98)

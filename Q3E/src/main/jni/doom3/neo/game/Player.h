@@ -605,7 +605,13 @@ class idPlayer : public idActor
 
 		// if there is a focusGUIent, the attack button will be changed into mouse clicks
 		idEntity 				*focusGUIent;
+#ifdef _MOD_FULL_BODY_AWARENESS
+public:
+#endif
 		idUserInterface 		*focusUI;				// focusGUIent->renderEntity.gui, gui2, or gui3
+#ifdef _MOD_FULL_BODY_AWARENESS
+private:
+#endif
 		idAI 					*focusCharacter;
 		int						talkCursor;				// show the state of the focusCharacter (0 == can't talk/dead, 1 == ready to talk, 2 == busy talking)
 		int						focusTime;

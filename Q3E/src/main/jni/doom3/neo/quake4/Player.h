@@ -916,7 +916,13 @@ private:
 	idAngles				demoViewAngles;
 
 	// if there is a focusGUIent, the attack button will be changed into mouse clicks
+#ifdef _MOD_FULL_BODY_AWARENESS
+public:
+#endif
 	idUserInterface *		focusUI;
+#ifdef _MOD_FULL_BODY_AWARENESS
+private:
+#endif
 	int						focusTime;
 	playerFocus_t			focusType;
 	idEntityPtr<idEntity>	focusEnt;

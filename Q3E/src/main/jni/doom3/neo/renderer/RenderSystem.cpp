@@ -178,10 +178,6 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 	renderThread->pixelsCrop = pc;
 	renderThread->pixels = pix;
 	R_CheckBackEndCvars(); // check backend cvars state
-#ifdef _HUMANHEAD //k: scope view support in multithread
-	backEnd.scopeView = tr.IsScopeView();
-	backEnd.shuttleView = tr.IsShuttleView();
-#endif
 
 	renderThread->backendFinished = false;
 
@@ -219,10 +215,6 @@ static void R_IssueRenderCommands(void)
 		return;
 	}
 
-#ifdef _HUMANHEAD //k: scope view support in multithread
-	backEnd.scopeView = tr.IsScopeView();
-	backEnd.shuttleView = tr.IsShuttleView();
-#endif
 	// r_skipBackEnd allows the entire time of the back end
 	// to be removed from performance measurements, although
 	// nothing will be drawn to the screen.  If the prints
