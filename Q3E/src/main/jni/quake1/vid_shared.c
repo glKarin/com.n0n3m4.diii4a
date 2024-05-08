@@ -403,8 +403,14 @@ void (GLAPIENTRY *qglVertexAttribPointer)(GLuint index, GLint size, GLenum type,
 void (GLAPIENTRY *qglViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
 #endif
 #ifdef _GLDL
+#if !defined(_GLDBG)
 #define QGLPROC(name, rettype, args) rettype (GL_APIENTRYP q##name) args;
 #include "android/qgl_proc.h"
+#else
+#define QGLPROC(name, rettype, args) rettype (GL_APIENTRYP __##name) args;
+#include "android/qgl_proc.h"
+#include "android/qgl_debug.inc"
+#endif
 #endif
 
 #if _MSC_VER >= 1400
@@ -634,7 +640,11 @@ static glfunction_t openglfuncs[] =
 };
 #endif
 #ifdef _GLDL
+#if !defined(_GLDBG)
 #define QGLPROC(name, rettype, args) { "core", #name, (void **)&q##name },
+#else
+#define QGLPROC(name, rettype, args) { "core", #name, (void **)&__##name },
+#endif
 // functions we look for - both core and extensions - it's okay if some of these are NULL for unsupported extensions.
 static glfunction_t openglfuncs[] =
 {

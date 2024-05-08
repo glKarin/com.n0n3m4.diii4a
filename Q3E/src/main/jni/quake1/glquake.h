@@ -801,7 +801,11 @@ extern void (GLAPIENTRY *qglVertexAttrib4usv)(GLuint index, const GLushort *v);
 extern void (GLAPIENTRY *qglVertexAttribPointer)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
 extern void (GLAPIENTRY *qglViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
 #elif defined(_GLDL)
+#if !defined(_GLDBG)
 #define QGLPROC(name, rettype, args) extern rettype (GL_APIENTRYP q##name) args;
+#else
+#define QGLPROC(name, rettype, args) extern rettype q##name args;
+#endif
 #include "android/qgl_proc.h"
 #else
 #define qglActiveTexture glActiveTexture
