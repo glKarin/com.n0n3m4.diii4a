@@ -35,6 +35,9 @@ option(ANDROID "Android build" ON)
 set(q3e_src
         q3e.c
         )
+
+add_subdirectory (deplibs/oboe) # 1.8.1
+
 set(q3e_lib
         log
         android
@@ -64,6 +67,8 @@ target_link_libraries( # Specifies the target library.
 add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
 
 add_subdirectory (deplibs) # common depend libraries
+
+add_subdirectory (common)
 
 add_subdirectory (quake2) # Quake 2
 

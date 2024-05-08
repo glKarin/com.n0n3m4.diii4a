@@ -10,7 +10,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(q1libs android log EGL z)
-set(q1libs ${q1libs} vorbisfile vorbisenc vorbis png jpeg ogg freetype oboe)
+set(q1libs ${q1libs} vorbisfile vorbisenc vorbis png jpeg ogg freetype oboeaudio)
 #set(q1libs ${q1libs} curl)
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
@@ -176,7 +176,7 @@ set(q1sys_src
 )
 
 add_definitions(-DCONFIG_MENU -D_FILE_OFFSET_BITS=64 -D__KERNEL_STRICT_NAMES)
-add_definitions(-D_DIII4A -D_NOSDL -D_GLDL -D_NOKTX -DLINK_TO_LIBJPEG=1)
+add_definitions(-D_DIII4A -D_NOSDL -D_GLDL -D_NOKTX -DLINK_TO_LIBJPEG=1) # _GLDBG
 set(Q1LIBRARY idtech_quake)
 add_library(${Q1LIBRARY} SHARED
         ${q1common_src}
@@ -190,5 +190,6 @@ target_link_libraries(${Q1LIBRARY}
 target_include_directories(${Q1LIBRARY} PRIVATE "./android/include")
 target_include_directories(${Q1LIBRARY} PRIVATE "../deplibs/libvorbis/include")
 target_include_directories(${Q1LIBRARY} PRIVATE "../deplibs/libjpeg/libjpeg")
+target_include_directories(${Q1LIBRARY} PRIVATE "../common")
 
 

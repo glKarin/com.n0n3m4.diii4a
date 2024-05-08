@@ -23,6 +23,6 @@ add_subdirectory (minizip) # -ng-1.2
 
 add_subdirectory (freetype) #
 
-add_subdirectory (oboe) # 1.8.1
+#add_subdirectory (ktx) # KTX-Software-3.0.1
 
 #add_subdirectory (sdl2) # 2.30.2

@@ -19,13 +19,6 @@
 #define STATE_MENU (1 << 5) // any menu excludes guiLoading
 #define STATE_DEMO (1 << 6) // demo
 
-extern void (*grab_mouse)(int grab);
-extern void (*pull_input_event)(int execCmd);
-extern FILE * (*itmpfile)(void);
-extern void (*copy_to_clipboard)(const char *text);
-extern char * (*get_clipboard_text)(void);
-extern void (*show_toast)(const char *text);
-
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
 extern void ShutdownGame(void);

@@ -30,6 +30,7 @@
 #include <stdarg.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+
 #include "q3e.h"
 
 #include "doom3/neo/sys/android/sys_android.h"
