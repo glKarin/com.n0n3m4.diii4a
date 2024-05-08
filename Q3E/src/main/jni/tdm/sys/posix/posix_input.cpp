@@ -28,7 +28,7 @@ typedef struct poll_mouse_event_s
 } poll_mouse_event_t;
 
 #ifdef __ANDROID__ //karin: from original DIII4A ???
-#define MAX_POLL_EVENTS		(50 * 1000)
+#define MAX_POLL_EVENTS		(50000) // 50 * 1000
 #else
 #define MAX_POLL_EVENTS 50
 #endif
@@ -45,7 +45,12 @@ Posix_AddKeyboardPollEvent
 */
 bool Posix_AddKeyboardPollEvent(int key, bool state) {
 	if (poll_keyboard_event_count >= MAX_POLL_EVENTS + POLL_EVENTS_HEADROOM) {
+#ifdef __ANDROID__
+        common->Warning("poll_keyboard_event_count exceeded MAX_POLL_EVENT + POLL_EVENTS_HEADROOM\n");
+        return false;
+#else
 		common->FatalError("poll_keyboard_event_count exceeded MAX_POLL_EVENT + POLL_EVENTS_HEADROOM\n");
+#endif
 	}
 	poll_events_keyboard[poll_keyboard_event_count].key = key;
 	poll_events_keyboard[poll_keyboard_event_count++].state = state;
@@ -67,7 +72,12 @@ Posix_AddMousePollEvent
 */
 bool Posix_AddMousePollEvent(int action, int value) {
 	if (poll_mouse_event_count >= MAX_POLL_EVENTS + POLL_EVENTS_HEADROOM) {
+#ifdef __ANDROID__
+        common->Warning("poll_mouse_event_count exceeded MAX_POLL_EVENT + POLL_EVENTS_HEADROOM\n");
+        return false;
+#else
 		common->FatalError("poll_mouse_event_count exceeded MAX_POLL_EVENT + POLL_EVENTS_HEADROOM\n");
+#endif
 	}
 	poll_events_mouse[poll_mouse_event_count].action = action;
 	poll_events_mouse[poll_mouse_event_count++].value = value;
