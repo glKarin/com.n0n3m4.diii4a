@@ -102,11 +102,11 @@ static int				mt_rb_debugPolygonTime = 0;
 #define __numDebugPolygons (multithreadActive ? mt_rb_numDebugPolygons : ::rb_numDebugPolygons)
 #define __debugPolygonTime (multithreadActive ? mt_rb_debugPolygonTime : ::rb_debugPolygonTime)
 
-static idCVar harm_r_renderToolsMutithread("harm_r_renderToolsMutithread", "0", CVAR_BOOL | CVAR_RENDERER/* | CVAR_ARCHIVE*/, "Enable render tools debug in multi-threading.");
+static idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER/* | CVAR_ARCHIVE*/, "Enable render tools debug in multi-threading.");
 
 void RB_SetupRenderTools(void)
 {
-	if(multithreadActive && harm_r_renderToolsMutithread.GetBool())
+	if(multithreadActive && harm_r_renderToolsMultithread.GetBool())
 	{
 		mt_rb_debugLineTime = rb_debugLineTime;
 		mt_rb_numDebugLines = rb_numDebugLines;
@@ -2996,7 +2996,7 @@ RB_RenderDebugTools
 void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
 #ifdef _MULTITHREAD
-	if(multithreadActive && !harm_r_renderToolsMutithread.GetBool())
+	if(multithreadActive && !harm_r_renderToolsMultithread.GetBool())
 		return;
 #endif
 	// don't do anything if this was a 2D rendering
