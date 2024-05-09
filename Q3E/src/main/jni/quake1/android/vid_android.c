@@ -45,42 +45,20 @@ extern void Sys_SyncState(void);
 
 // Input handling
 
-qbool VID_HasScreenKeyboardSupport(void)
-{
-	return true;
-}
-
-static qbool showing = false;
-void VID_ShowKeyboard(qbool show)
-{
-	if(show)
-		Android_OpenKeyboard();
-	else
-		Android_CloseKeyboard();
-	showing = show;
-}
-
-qbool VID_ShowingKeyboard(void)
-{
-	return showing;
-}
-
 static void VID_SetMouse(qbool relative, qbool hidecursor)
 {
-#ifndef DP_MOBILETOUCH
 	if (vid_usingmouse != relative)
 	{
 		vid_usingmouse = relative;
 		cl_ignoremousemoves = 2;
-		vid_usingmouse_relativeworks = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
-//		Con_Printf("VID_SetMouse(%i, %i) relativeworks = %i\n", (int)relative, (int)hidecursor, (int)vid_usingmouse_relativeworks);
+/*		vid_usingmouse_relativeworks = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
+//		Con_Printf("VID_SetMouse(%i, %i) relativeworks = %i\n", (int)relative, (int)hidecursor, (int)vid_usingmouse_relativeworks);*/
 	}
 	if (vid_usinghidecursor != hidecursor)
 	{
 		vid_usinghidecursor = hidecursor;
-		SDL_ShowCursor( hidecursor ? SDL_DISABLE : SDL_ENABLE);
+		Android_GrabMouseCursor(hidecursor);
 	}
-#endif
 }
 
 void VID_BuildJoyState(vid_joystate_t *joystate)
