@@ -76,6 +76,56 @@ debugPolygon_t	rb_debugPolygons[ MAX_DEBUG_POLYGONS ];
 int				rb_numDebugPolygons = 0;
 int				rb_debugPolygonTime = 0;
 
+#ifdef _MULTITHREAD
+//karin: always using original variants in RB_ShowDebug[Text|Lines|Polygons] without multi-threading
+static debugLine_t		mt_rb_debugLines[ MAX_DEBUG_LINES ];
+static int				mt_rb_numDebugLines = 0;
+static int				mt_rb_debugLineTime = 0;
+
+static debugText_t		mt_rb_debugText[ MAX_DEBUG_TEXT ];
+static int				mt_rb_numDebugText = 0;
+static int				mt_rb_debugTextTime = {0};
+
+static debugPolygon_t	mt_rb_debugPolygons[ MAX_DEBUG_POLYGONS ];
+static int				mt_rb_numDebugPolygons = 0;
+static int				mt_rb_debugPolygonTime = 0;
+
+#define __debugLines (multithreadActive ? mt_rb_debugLines : ::rb_debugLines)
+#define __numDebugLines (multithreadActive ? mt_rb_numDebugLines : ::rb_numDebugLines)
+#define __debugLineTime (multithreadActive ? mt_rb_debugLineTime : ::rb_debugLineTime)
+
+#define __debugText (multithreadActive ? mt_rb_debugText : ::rb_debugText)
+#define __numDebugText (multithreadActive ? mt_rb_numDebugText : ::rb_numDebugText)
+#define __debugTextTime (multithreadActive ? mt_rb_debugTextTime : ::rb_debugTextTime)
+
+#define __debugPolygons (multithreadActive ? mt_rb_debugPolygons : ::rb_debugPolygons)
+#define __numDebugPolygons (multithreadActive ? mt_rb_numDebugPolygons : ::rb_numDebugPolygons)
+#define __debugPolygonTime (multithreadActive ? mt_rb_debugPolygonTime : ::rb_debugPolygonTime)
+
+static idCVar harm_r_renderToolsMutithread("harm_r_renderToolsMutithread", "0", CVAR_BOOL | CVAR_RENDERER/* | CVAR_ARCHIVE*/, "Enable render tools debug in multi-threading.");
+
+void RB_SetupRenderTools(void)
+{
+	if(multithreadActive && harm_r_renderToolsMutithread.GetBool())
+	{
+		mt_rb_debugLineTime = rb_debugLineTime;
+		mt_rb_numDebugLines = rb_numDebugLines;
+		if(mt_rb_numDebugLines > 0)
+			memcpy(mt_rb_debugLines, rb_debugLines, sizeof(rb_debugLines[0]) * mt_rb_numDebugLines);
+
+		mt_rb_debugTextTime = rb_debugTextTime;
+		mt_rb_numDebugText = rb_numDebugText;
+		if(mt_rb_numDebugText > 0)
+			memcpy(mt_rb_debugText, rb_debugText, sizeof(rb_debugText[0]) * mt_rb_numDebugText);
+
+		mt_rb_debugPolygonTime = rb_debugPolygonTime;
+		mt_rb_numDebugPolygons = rb_numDebugPolygons;
+		if(mt_rb_numDebugPolygons > 0)
+			memcpy(mt_rb_debugPolygons, rb_debugPolygons, sizeof(rb_debugPolygons[0]) * mt_rb_numDebugPolygons);
+	}
+}
+#endif
+
 static void RB_DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align);
 
 #ifdef GL_ES_VERSION_2_0
@@ -987,6 +1037,10 @@ Debugging tool
 */
 static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
+#ifdef _MULTITHREAD //karin: RB_ShowSurfaceInfo using frontend functions, don't support call in backend in multi-threading
+	if(multithreadActive)
+		return;
+#endif
 	modelTrace_t mt;
 	idVec3 start, end;
 
@@ -2328,6 +2382,11 @@ RB_ShowDebugText
 */
 void RB_ShowDebugText(void)
 {
+#ifdef _MULTITHREAD
+	debugText_t *rb_debugText = __debugText;
+	const int rb_numDebugText = __numDebugText;
+	const int rb_debugTextTime = __debugTextTime;
+#endif
 //#if !defined(GL_ES_VERSION_2_0)
 	int			i;
 	int			width;
@@ -2454,6 +2513,11 @@ RB_ShowDebugLines
 */
 void RB_ShowDebugLines(void)
 {
+#ifdef _MULTITHREAD
+	debugLine_t *rb_debugLines = __debugLines;
+	const int rb_numDebugLines = __numDebugLines;
+	const int rb_debugLineTime = __debugLineTime;
+#endif
 //#if !defined(GL_ES_VERSION_2_0)
 	int			i;
 	int			width;
@@ -2592,6 +2656,11 @@ RB_ShowDebugPolygons
 */
 void RB_ShowDebugPolygons(void)
 {
+#ifdef _MULTITHREAD
+	debugPolygon_t *rb_debugPolygons = __debugPolygons;
+	const int rb_numDebugPolygons = __numDebugPolygons;
+	const int rb_debugPolygonTime = __debugPolygonTime;
+#endif
 //#if !defined(GL_ES_VERSION_2_0)
 	int				i, j;
 	debugPolygon_t	*poly;
@@ -2927,8 +2996,8 @@ RB_RenderDebugTools
 void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
 #ifdef _MULTITHREAD
-	if(multithreadActive)
-		return; // not implement frontend and backend at present
+	if(multithreadActive && !harm_r_renderToolsMutithread.GetBool())
+		return;
 #endif
 	// don't do anything if this was a 2D rendering
 	if (!backEnd.viewDef->viewEntitys) {
@@ -2994,3 +3063,4 @@ void RB_ShutdownDebugTools(void)
 	}
 //#endif
 }
+

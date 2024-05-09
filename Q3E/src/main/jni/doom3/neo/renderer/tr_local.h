@@ -756,6 +756,7 @@ static const int	MAX_RENDER_CROPS = 8;
 
 #ifdef _MULTITHREAD
 #include "rb/RenderThread.h"
+void RB_SetupRenderTools(void);
 #endif
 
 /*
