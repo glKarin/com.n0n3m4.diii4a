@@ -115,6 +115,23 @@ volatile int	com_ticNumber;			// 60 hz tics
 int				com_editors;			// currently opened editor(s)
 bool			com_editorActive;		//  true if an editor has focus
 
+#ifdef _BREAK_60FPS_CAP
+#include "Session_local.h"
+int				com_frameDelta;			// time elapsed since previous frame in milliseconds
+extern idCVar	com_maxFPS;
+extern idCVar harm_g_minorTic;
+extern idCVar harm_g_timestepMs;
+
+#define USERCMD_HZ 60		// 60 frames per second
+#define USERCMD_MSEC (1000 / USERCMD_HZ)
+
+#define DEFAULT_60_TIC() \
+            { \
+				harm_g_timestepMs.SetInteger(USERCMD_MSEC); \
+				harm_g_minorTic.SetBool(false);             \
+			}
+#endif
+
 #ifdef _WIN32
 HWND			com_hwndMsg = NULL;
 bool			com_outputMsg = false;
@@ -2702,7 +2719,44 @@ void idCommonLocal::Frame(void)
 
 		eventLoop->RunEventLoop();
 
+#ifdef _BREAK_60FPS_CAP
+		static int64_t com_frameTimeMicro = 0;		//same as com_frameTime, but in microseconds
+		static int64_t lastFrameAstroTime = Sys_Microseconds();
+		if (sessLocal.com_fixedTic.GetBool()) {
+		    DEFAULT_60_TIC();
+
+			//stgatilov #4865: impose artificial FPS limit
+			int64_t minDeltaTime = 1000000 / com_maxFPS.GetInteger();
+			int64_t currFrameAstroTime;
+			while (1) {
+				currFrameAstroTime = Sys_Microseconds();
+				if (currFrameAstroTime - lastFrameAstroTime > minDeltaTime)
+					break;
+				//note: this is busy-wait loop
+				currFrameAstroTime = currFrameAstroTime;	//NOP
+			}
+			//see how much passed in microseconds
+			int deltaTime = currFrameAstroTime - lastFrameAstroTime;
+			lastFrameAstroTime = currFrameAstroTime;
+
+			//update precise time in microseconds, then round it to milliseconds
+			com_frameTimeMicro += deltaTime * com_timescale.GetFloat();
+			int newFrameTime = com_frameTimeMicro / 1000;
+			com_frameDelta = newFrameTime - com_frameTime;
+			com_frameTime = newFrameTime;
+		}
+		else {
+			//synchronize common time to async tic number
+			//(which is synced to astronomical time in idCommonLocal::SingleAsyncTic)
+			com_frameTime = com_ticNumber * USERCMD_MSEC;	//com_frameTime += USERCMD_MSEC;
+			com_frameDelta = USERCMD_MSEC;
+			//these variables are not used now, but they will be needed if we switch to uncapped FPS mode
+			com_frameTimeMicro = com_frameTime * 1000;
+			lastFrameAstroTime = Sys_Microseconds();
+		}
+#else
 		com_frameTime = com_ticNumber * USERCMD_MSEC;
+#endif
 
 		idAsyncNetwork::RunFrame();
 

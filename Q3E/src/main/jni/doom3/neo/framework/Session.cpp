@@ -117,6 +117,45 @@ static idCVar g_levelloadmusic("g_levelloadmusic", "1", CVAR_GAME | CVAR_ARCHIVE
 #include "../sound/snd_local.h"
 #endif
 
+#ifdef _BREAK_60FPS_CAP
+
+#define USERCMD_HZ 60		// 60 frames per second
+#define USERCMD_MSEC (1000 / USERCMD_HZ)
+
+#define DEFAULT_60_TIC() \
+            { \
+				harm_g_timestepMs.SetInteger(USERCMD_MSEC); \
+				harm_g_minorTic.SetBool(false);             \
+			}
+#define SETUP_TIC(timestepMs, minorTic) \
+            { \
+				harm_g_timestepMs.SetInteger(timestepMs); \
+				harm_g_minorTic.SetBool(minorTic);             \
+			}
+
+//Karin: These 2 cvar using transfer variants for keeping game code compation.
+idCVar harm_g_minorTic("harm_g_minorTic", "0", CVAR_BOOL | CVAR_SYSTEM, "bool minorTic;");
+idCVar harm_g_timestepMs("harm_g_timestepMs", va("%d", USERCMD_MSEC), CVAR_INTEGER | CVAR_SYSTEM, "int timestepMs;");
+
+idCVar g_timeModifier(				"g_timeModifier",			"1",			CVAR_GAME | CVAR_FLOAT, "Use this to stretch the hardcoded 16 msec each frame takes. This can be used to let the game run ultra-slow." );
+idCVar	com_useMinorTics("com_useMinorTics", "1", CVAR_SYSTEM | CVAR_BOOL,
+						   "If several game tics are modelled in one frame, all tics except the first one are declared \"minor\". "
+						   "Minor tics can enable various optimizations, f.i. alive AIs don't think in minor tics.",
+						   1, 1000);
+idCVar	com_maxFPS( "com_maxFPS", "300", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER, "define the maximum FPS cap", 2, 1000 );
+idCVar	com_maxTicTimestep("com_maxTicTimestep", "17", CVAR_SYSTEM | CVAR_INTEGER,
+							 "Timestep of a game tic must not exceed this number of milliseconds. "
+							 "If frame takes more time, then its duration is split into several game tics.\n"
+							 "Note: takes effect only when FPS is uncapped.",
+							 1, 1000);
+idCVar	com_maxTicsPerFrame("com_maxTicsPerFrame", "10", CVAR_SYSTEM | CVAR_INTEGER,
+							  "Never do more than this number of game tics per one frame. "
+							  "When frames take too much time, allow game time to run slower than astronomical time.",
+							  1, 1000);
+
+extern int				com_frameDelta;			// time elapsed since previous frame in milliseconds
+#endif
+
 idSessionLocal		sessLocal;
 idSession			*session = &sessLocal;
 
@@ -1662,6 +1701,9 @@ void idSessionLocal::StartPlayingCmdDemo(const char *demoName)
 	LoadCmdDemoFromFile(cmdDemoFile);
 
 	// run one frame to get the view angles correct
+#ifdef _BREAK_60FPS_CAP
+	DEFAULT_60_TIC();
+#endif
 	RunGameTic();
 }
 
@@ -1685,6 +1727,9 @@ void idSessionLocal::TimeCmdDemo(const char *demoName)
 	minuteStart = startTime;
 
 	while (cmdDemoFile) {
+#ifdef _BREAK_60FPS_CAP
+		DEFAULT_60_TIC();
+#endif
 		RunGameTic();
 		count++;
 
@@ -2090,6 +2135,9 @@ void idSessionLocal::ExecuteMapChange(bool noFadeWipe)
 	if (!idAsyncNetwork::IsActive() && !loadingSaveGame) {
 		// run a few frames to allow everything to settle
 		for (i = 0; i < 10; i++) {
+#ifdef _BREAK_60FPS_CAP
+			DEFAULT_60_TIC();
+#endif
 #ifdef _RAVEN
 			game->RunFrame(mapSpawnData.mapSpawnUsercmd, 0, false, 0); // serverGameFrame isn't used
 #else
@@ -3131,7 +3179,20 @@ void idSessionLocal::Frame()
 	}
 
 	// se how many tics we should have before continuing
+#ifdef _BREAK_60FPS_CAP
+	int	minTic;
+	if ( com_fixedTic.GetInteger() ) {
+		// stgatilov: don't wait for async tics, just model & render as fast as we can
+		minTic = latchedTicNumber;
+	}
+	else {
+		// stgatilov: don't do anything until at least one async tic has passed
+		// that's because we tie game ticks to async tics
+		minTic = latchedTicNumber + 1;
+	}
+#else
 	int	minTic = latchedTicNumber + 1;
+#endif
 
 	if (com_minTics.GetInteger() > 1) {
 		minTic = lastGameTic + com_minTics.GetInteger();
@@ -3152,6 +3213,12 @@ void idSessionLocal::Frame()
 	// fixedTic lets us run a forced number of usercmd each frame without timing
 	if (com_fixedTic.GetInteger()) {
 		minTic = latchedTicNumber;
+#ifdef _BREAK_60FPS_CAP
+		if (com_minTics.GetInteger() > 1) {
+			// stgatilov: looks like some rarely used debug setting
+			minTic = lastGameTic + com_minTics.GetInteger();
+		}
+#endif
 	}
 
 	// FIXME: deserves a cleanup and abstraction
@@ -3300,19 +3367,61 @@ void idSessionLocal::Frame()
 		syncNextGameFrame = false;
 	}
 
+#ifdef _BREAK_60FPS_CAP
+	int					gameTicsToRun;			// how many game ticks to run this frame
+	int					gameTimestepTotal;		// total timestep for all game tics to be run this frame (in milliseconds)
+
+    if (com_fixedTic.GetInteger() > 0) {
+        gameTimestepTotal = com_frameDelta;
+        //stgatilov #4924: if too much time passed since last frame,
+        //then split this game tic into many short tics
+        //long tics easily make physics unstable, so game tic duration should be under control
+        gameTicsToRun = (gameTimestepTotal - 1) / com_maxTicTimestep.GetInteger() + 1;	//divide by 17 ms, rounding up
+        if (gameTicsToRun > com_maxTicsPerFrame.GetInteger()) {
+            //if everything is too bad, slow game down instead of modeling insane number of ticks per frame
+			gameTicsToRun = com_maxTicsPerFrame.GetInteger();
+            gameTimestepTotal = USERCMD_MSEC * gameTicsToRun;
+        }
+        lastGameTic = latchedTicNumber - gameTicsToRun;
+    }
+    else {
+		gameTicsToRun = latchedTicNumber - lastGameTic;
+        gameTimestepTotal = USERCMD_MSEC * gameTicsToRun;
+    }
+#endif
+
 	// create client commands, which will be sent directly
 	// to the game
 	if (com_showTics.GetBool()) {
 		common->Printf("%i ", latchedTicNumber - lastGameTic);
 	}
 
+#if !defined( _BREAK_60FPS_CAP)
 	int	gameTicsToRun = latchedTicNumber - lastGameTic;
+#endif
 	int i;
 
 #ifdef _HUMANHEAD
     soundSystemLocal.SF_ShowSubtitle();
 #endif
 	for (i = 0 ; i < gameTicsToRun ; i++) {
+#ifdef _BREAK_60FPS_CAP
+		bool minorTic;
+		int deltaMs;
+		if (com_fixedTic.GetBool())
+		{
+			deltaMs = gameTimestepTotal * (i+1) / gameTicsToRun - gameTimestepTotal * i / gameTicsToRun;
+
+			// stgatilov #5992: optimize all tics except for the first one
+			minorTic = com_useMinorTics.GetBool() && (i > 0);
+		}
+		else
+		{
+			deltaMs = USERCMD_MSEC;
+			minorTic = false;
+		}
+		SETUP_TIC(deltaMs, minorTic);
+#endif
 		RunGameTic();
 
 		if (!mapSpawned) {

@@ -1096,8 +1096,15 @@ void idAI::DormantEnd(void)
 idAI::Think
 =====================
 */
+#ifdef _BREAK_60FPS_CAP
+extern bool minorTic;
+#endif
 void idAI::Think(void)
 {
+#ifdef _BREAK_60FPS_CAP
+	if(minorTic)
+		return;
+#endif
 	// if we are completely closed off from the player, don't do anything at all
 	if (CheckDormant()) {
 		return;
