@@ -3336,7 +3336,7 @@ void idSessionLocal::Frame()
 
 	// don't get too far behind after a hitch
 #ifdef _BREAK_60FPS_CAP
-	if(sessLocal.com_fixedTic.GetInteger())
+	if(com_fixedTic.GetInteger())
 	{
 		if (numCmdsToRun > com_maxTicsPerFrame.GetInteger()) {
 			lastGameTic = latchedTicNumber - com_maxTicsPerFrame.GetInteger();
