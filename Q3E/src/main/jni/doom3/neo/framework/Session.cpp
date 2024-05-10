@@ -3335,9 +3335,15 @@ void idSessionLocal::Frame()
 	}
 
 	// don't get too far behind after a hitch
+#ifdef _BREAK_60FPS_CAP
+	if (numCmdsToRun > com_maxTicsPerFrame.GetInteger()) {
+		lastGameTic = latchedTicNumber - com_maxTicsPerFrame.GetInteger();
+	}
+#else
 	if (numCmdsToRun > 10) {
 		lastGameTic = latchedTicNumber - 10;
 	}
+#endif
 
 	// never use more than USERCMD_PER_DEMO_FRAME,
 	// which makes it go into slow motion when recording
