@@ -99,7 +99,7 @@ option(SHADOW_MAPPING						"Shadow mapping support" 						ON)
 option(NO_LIGHT								"r_noLight support" 							ON)
 option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" 			ON)
 option(EXTRAS_TOOLS							"Add extras commands" 							OFF)
-option(BREAK_60FPS_CAP						"Break 60 fps cap" 								ON)
+option(BREAK_60FPS_CAP						"Break 60 fps cap" 								OFF)
 
 # DOOM3 cores
 option(CORE									"Build the core" 								ON)
