@@ -45,6 +45,9 @@ cvar_t  *gamedir;
 
 cvar_t	*sv_cheats;
 
+cvar_t *aimfix;
+cvar_t *g_machinegun_norecoil;
+cvar_t *g_swap_speed;
 
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
@@ -282,6 +285,8 @@ void ExitLevel (void)
 	level.fadeFrames = 0;
 	level.exitintermission = 0;
 	level.intermissiontime = 0;
+	gibsthisframe = 0;
+	lastgibframe = 0;
 }
 
 /*
@@ -356,4 +361,3 @@ void G_RunFrame (void)
 	// build the playerstate_t structures for all players
 	ClientEndServerFrames ();
 }
-

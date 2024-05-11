@@ -200,7 +200,11 @@ ai_charge(edict_t *self, float dist)
 		return;
 	}
 
-	VectorSubtract(self->enemy->s.origin, self->s.origin, v);
+	if(self->enemy)
+	{
+		VectorSubtract(self->enemy->s.origin, self->s.origin, v);
+	}
+
 	self->ideal_yaw = vectoyaw(v);
 	M_ChangeYaw(self);
 
@@ -382,7 +386,11 @@ HuntTarget(edict_t *self)
 		self->monsterinfo.run(self);
 	}
 
-	VectorSubtract(self->enemy->s.origin, self->s.origin, vec);
+	if(visible(self, self->enemy))
+	{
+		VectorSubtract(self->enemy->s.origin, self->s.origin, vec);
+	}
+
 	self->ideal_yaw = vectoyaw(vec);
 
 	/* wait a while before first attack */
@@ -395,7 +403,7 @@ HuntTarget(edict_t *self)
 void
 FoundTarget(edict_t *self)
 {
-	if (!self)
+	if (!self|| !self->enemy || !self->enemy->inuse)
 	{
 		return;
 	}
@@ -508,15 +516,11 @@ FindTarget(edict_t *self)
 	else
 	{
 		client = level.sight_client;
-
-		if (!client)
-		{
-			return false; /* no clients to get mad at */
-		}
 	}
 
 	/* if the entity went away, forget it */
-	if (!client->inuse)
+	if (!client || !client->inuse ||
+		(client->client && level.intermissiontime))
 	{
 		return false;
 	}
@@ -697,7 +701,7 @@ M_CheckAttack(edict_t *self)
 	float chance;
 	trace_t tr;
 
-	if (!self)
+	if (!self || !self->enemy || !self->enemy->inuse)
 	{
 		return false;
 	}
@@ -725,7 +729,7 @@ M_CheckAttack(edict_t *self)
 	if (enemy_range == RANGE_MELEE)
 	{
 		/* don't always melee in easy mode */
-		if ((skill->value == 0) && (rand() & 3))
+		if ((skill->value == SKILL_EASY) && (rand() & 3))
 		{
 			return false;
 		}
@@ -762,10 +766,6 @@ M_CheckAttack(edict_t *self)
 	{
 		chance = 0.4;
 	}
-	else if (enemy_range == RANGE_MELEE)
-	{
-		chance = 0.2;
-	}
 	else if (enemy_range == RANGE_NEAR)
 	{
 		chance = 0.1;
@@ -779,11 +779,11 @@ M_CheckAttack(edict_t *self)
 		return false;
 	}
 
-	if (skill->value == 0)
+	if (skill->value == SKILL_EASY)
 	{
 		chance *= 0.5;
 	}
-	else if (skill->value >= 2)
+	else if (skill->value >= SKILL_HARD)
 	{
 		chance *= 2;
 	}
@@ -827,8 +827,11 @@ ai_run_melee(edict_t *self)
 
 	if (FacingIdeal(self))
 	{
-		self->monsterinfo.melee(self);
-		self->monsterinfo.attack_state = AS_STRAIGHT;
+		if (self->monsterinfo.melee)
+		{
+			self->monsterinfo.melee(self);
+			self->monsterinfo.attack_state = AS_STRAIGHT;
+		}
 	}
 }
 
@@ -849,8 +852,10 @@ ai_run_missile(edict_t *self)
 
 	if (FacingIdeal(self))
 	{
-		self->monsterinfo.attack(self);
-		self->monsterinfo.attack_state = AS_STRAIGHT;
+		if (self->monsterinfo.attack) {
+			self->monsterinfo.attack(self);
+			self->monsterinfo.attack_state = AS_STRAIGHT;
+		}
 	}
 }
 
@@ -893,14 +898,43 @@ ai_run_slide(edict_t *self, float distance)
  * Decides if we're going to
  * attack or do something else
  */
+static qboolean
+hesDeadJim(const edict_t *self)
+{
+	const edict_t *enemy = self->enemy;
+
+	if (!enemy || !enemy->inuse)
+	{
+		return true;
+	}
+
+	if (self->monsterinfo.aiflags & AI_MEDIC)
+	{
+		return (enemy->health > 0);
+	}
+
+	if (enemy->client && level.intermissiontime)
+	{
+		return true;
+	}
+
+	if (self->monsterinfo.aiflags & AI_BRUTAL)
+	{
+		return (enemy->health <= -80);
+	}
+
+	return (enemy->health <= 0);
+}
+
 qboolean
 ai_checkattack(edict_t *self, float dist)
 {
 	vec3_t temp;
-	qboolean hesDeadJim;
 
 	if (!self)
 	{
+		enemy_vis = false;
+
 		return false;
 	}
 
@@ -913,9 +947,9 @@ ai_checkattack(edict_t *self, float dist)
 			return false;
 		}
 
-		if (self->monsterinfo.aiflags & AI_SOUND_TARGET)
+		if ((self->monsterinfo.aiflags & AI_SOUND_TARGET) && !visible(self, self->goalentity))
 		{
-			if ((level.time - self->enemy->teleport_time) > 5.0)
+			if ((level.time - self->enemy->last_sound_time) > 5.0)
 			{
 				if (self->goalentity == self->enemy)
 				{
@@ -947,41 +981,10 @@ ai_checkattack(edict_t *self, float dist)
 	enemy_vis = false;
 
 	/* see if the enemy is dead */
-	hesDeadJim = false;
-
-	if ((!self->enemy) || (!self->enemy->inuse))
-	{
-		hesDeadJim = true;
-	}
-	else if (self->monsterinfo.aiflags & AI_MEDIC)
-	{
-		if (self->enemy->health > 0)
-		{
-			hesDeadJim = true;
-			self->monsterinfo.aiflags &= ~AI_MEDIC;
-		}
-	}
-	else
-	{
-		if (self->monsterinfo.aiflags & AI_BRUTAL)
-		{
-			if (self->enemy->health <= -80)
-			{
-				hesDeadJim = true;
-			}
-		}
-		else
-		{
-			if (self->enemy->health <= 0)
-			{
-				hesDeadJim = true;
-			}
-		}
-	}
-
-	if (hesDeadJim)
+	if (hesDeadJim(self))
 	{
 		self->enemy = NULL;
+		self->monsterinfo.aiflags &= ~AI_MEDIC;
 
 		if (self->oldenemy && (self->oldenemy->health > 0))
 		{
@@ -1021,7 +1024,7 @@ ai_checkattack(edict_t *self, float dist)
 		VectorCopy(self->enemy->s.origin, self->monsterinfo.last_sighting);
 	}
 
-	if (coop && (self->monsterinfo.search_time < level.time))
+	if (coop && coop->value && (self->monsterinfo.search_time < level.time))
 	{
 		if (FindTarget(self))
 		{
@@ -1029,10 +1032,13 @@ ai_checkattack(edict_t *self, float dist)
 		}
 	}
 
-	enemy_infront = infront(self, self->enemy);
-	enemy_range = range(self, self->enemy);
-	VectorSubtract(self->enemy->s.origin, self->s.origin, temp);
-	enemy_yaw = vectoyaw(temp);
+	if (self->enemy)
+	{
+		enemy_infront = infront(self, self->enemy);
+		enemy_range = range(self, self->enemy);
+		VectorSubtract(self->enemy->s.origin, self->s.origin, temp);
+		enemy_yaw = vectoyaw(temp);
+	}
 
 	if (self->monsterinfo.attack_state == AS_MISSILE)
 	{
@@ -1087,13 +1093,23 @@ ai_run(edict_t *self, float dist)
 
 	if (self->monsterinfo.aiflags & AI_SOUND_TARGET)
 	{
-		VectorSubtract(self->s.origin, self->enemy->s.origin, v);
-
-		if (VectorLength(v) < 64)
+		/* Special case: Some projectiles like grenades or rockets are
+		   classified as an enemy. When they explode they generate a
+		   sound entity, triggering this code path. Since they're gone
+		   after the explosion their entity pointer is NULL. Therefor
+		   self->enemy is also NULL and we're crashing. Work around
+		   this by predending that the enemy is still there, and move
+		   to it. */
+		if (self->enemy)
 		{
-			self->monsterinfo.aiflags |= (AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
-			self->monsterinfo.stand(self);
-			return;
+			VectorSubtract(self->s.origin, self->enemy->s.origin, v);
+
+			if (VectorLength(v) < 64)
+			{
+				self->monsterinfo.aiflags |= (AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
+				self->monsterinfo.stand(self);
+				return;
+			}
 		}
 
 		M_MoveToGoal(self, dist);
@@ -1132,8 +1148,15 @@ ai_run(edict_t *self, float dist)
 		return;
 	}
 
+    tempgoal = G_SpawnOptional();
+
+	if (!tempgoal)
+	{
+		M_MoveToGoal(self, dist);
+		return;
+	}
+
 	save = self->goalentity;
-	tempgoal = G_Spawn();
 	self->goalentity = tempgoal;
 
 	new = false;
@@ -1259,9 +1282,5 @@ ai_run(edict_t *self, float dist)
 
 	G_FreeEdict(tempgoal);
 
-	if (self)
-	{
-		self->goalentity = save;
-	}
+	self->goalentity = save;
 }
-

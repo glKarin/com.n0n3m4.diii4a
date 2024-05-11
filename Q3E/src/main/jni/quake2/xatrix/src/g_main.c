@@ -22,6 +22,8 @@ edict_t *g_edicts;
 
 cvar_t *deathmatch;
 cvar_t *coop;
+cvar_t *coop_elevator_delay;
+cvar_t *coop_pickup_weapons;
 cvar_t *dmflags;
 cvar_t *skill;
 cvar_t *fraglimit;
@@ -34,6 +36,8 @@ cvar_t *maxspectators;
 cvar_t *maxentities;
 cvar_t *g_select_empty;
 cvar_t *dedicated;
+cvar_t *g_footsteps;
+cvar_t *g_fix_triggered;
 
 cvar_t *filterban;
 
@@ -61,6 +65,11 @@ cvar_t *flood_waitdelay;
 cvar_t *sv_maplist;
 
 cvar_t *gib_on;
+
+cvar_t *aimfix;
+cvar_t *g_machinegun_norecoil;
+cvar_t *g_quick_weap;
+cvar_t *g_swap_speed;
 
 void SpawnEntities(char *mapname, char *entities, char *spawnpoint);
 void ClientThink(edict_t *ent, usercmd_t *cmd);
@@ -138,7 +147,7 @@ Sys_Error(char *error, ...)
 	vsprintf(text, error, argptr);
 	va_end(argptr);
 
-	gi.error(ERR_FATAL, "%s", text);
+	gi.error("%s", text);
 }
 
 void
@@ -377,11 +386,14 @@ ExitLevel(void)
 			continue;
 		}
 
-		if (ent->health > ent->client->pers.max_health)
+		if (ent->health > ent->max_health)
 		{
-			ent->health = ent->client->pers.max_health;
+			ent->health = ent->max_health;
 		}
 	}
+
+	debristhisframe = 0;
+	gibsthisframe = 0;
 }
 
 /*
@@ -395,6 +407,9 @@ G_RunFrame(void)
 
 	level.framenum++;
 	level.time = level.framenum * FRAMETIME;
+
+	debristhisframe = 0;
+	gibsthisframe = 0;
 
 	/* choose a client for monsters to target this frame */
 	AI_SetSightClient();

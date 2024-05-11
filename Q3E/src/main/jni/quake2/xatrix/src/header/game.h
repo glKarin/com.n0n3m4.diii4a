@@ -77,7 +77,7 @@ struct edict_s
 	int clipmask;
 	edict_t *owner;
 
-	/* the game dll can add anything it wants 
+	/* the game dll can add anything it wants
 	   after this point in the structure */
 };
 
@@ -106,7 +106,7 @@ typedef struct
 
 	void (*error)(char *fmt, ...);
 
-	/* the *index functions create configstrings 
+	/* the *index functions create configstrings
 	   and some internal server state */
 	int (*modelindex)(char *name);
 	int (*soundindex)(char *name);
@@ -219,8 +219,6 @@ typedef struct
 	int num_edicts; /* current number, <= max_edicts */
 	int max_edicts;
 } game_export_t;
-
-game_export_t *GetGameAPI(game_import_t *import);
 
 #endif /* XATRIX_GAME_H */
 

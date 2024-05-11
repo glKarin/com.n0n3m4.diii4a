@@ -121,7 +121,7 @@ SP_target_speaker(edict_t *ent)
 	}
 	else
 	{
-		strncpy(buffer, st.noise, sizeof(buffer));
+		Q_strlcpy(buffer, st.noise, sizeof(buffer));
 	}
 
 	ent->noise_index = gi.soundindex(buffer);

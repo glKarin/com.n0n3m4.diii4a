@@ -18,6 +18,7 @@ add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl
 
 set(q3client_libs android log GLESv1_CM EGL z)
 set(q3client_libs ${q3client_libs} vorbisfile vorbis ogg)
+set(q3client_libs ${q3client_libs} oboeaudio)
 #set(q3client_libs ${q3client_libs} curl)
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
@@ -454,6 +455,7 @@ target_include_directories(${Q3LIBRARY} PRIVATE "code/libogg-1.3.3/include")
 target_include_directories(${Q3LIBRARY} PRIVATE "code/libvorbis-1.3.6/include")
 target_include_directories(${Q3LIBRARY} PRIVATE "code/jpeg-8c")
 target_include_directories(${Q3LIBRARY} PRIVATE "code")
+target_include_directories(${Q3LIBRARY} PRIVATE "../common")
 
 # Quake III Arena
 add_library(q3ui SHARED

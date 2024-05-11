@@ -45,18 +45,33 @@ void zboss_attack (edict_t *self);
 
 void zboss_walksound (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_BODY, sound_walk, 1, ATTN_NORM, 0);
 }
 
 
 void zboss_sight (edict_t *self, edict_t *other)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 
 void possibleBossTaunt(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	float r = random();
 
 	if(random() < 0.10)
@@ -155,6 +170,11 @@ mmove_t zboss_stand2 = {FRAME_stand2start, FRAME_stand2end, zboss_frames_stand2,
 
 void zboss_standidle (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if (random() < 0.8)
   {
 		gi.sound (self, CHAN_VOICE, sound_idle1, 1, ATTN_NORM, 0);
@@ -167,7 +187,7 @@ void zboss_standidle (edict_t *self)
   }
 }
 
-// 
+//
 // Post WALK/RUN leading into ilde.
 //
 
@@ -187,6 +207,11 @@ mmove_t zboss_move_postwalk = {FRAME_postWalkStart, FRAME_postWalkEnd, zboss_fra
 
 void zboss_postWalkRun (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &zboss_move_postwalk;
 }
 
@@ -220,7 +245,7 @@ mframe_t zboss_frames_walk [] =
 	{ai_walk,  4, NULL},	// 170
 	{ai_walk,  4, NULL},
 	{ai_walk,  4, NULL},
-	{ai_walk,  3, NULL},	
+	{ai_walk,  3, NULL},
 	{ai_walk,  2, NULL},
 	{ai_walk,  2, NULL},
 	{ai_walk,  3, zboss_walksound},						// 176
@@ -229,11 +254,21 @@ mmove_t zboss_move_walk = {FRAME_walkStart, FRAME_walkEnd, zboss_frames_walk, zb
 
 void zboss_walk (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &zboss_move_prewalk;
 }
 
 void zboss_walk2(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &zboss_move_walk;
 }
 
@@ -267,7 +302,7 @@ mframe_t zboss_frames_run [] =
 	{ai_run,  4, NULL},	// 170
 	{ai_run,  4, NULL},
 	{ai_run,  4, NULL},
-	{ai_run,  3, NULL},	
+	{ai_run,  3, NULL},
 	{ai_run,  2, NULL},
 	{ai_run,  2, NULL},
 	{ai_run,  3, zboss_walksound},						// 176
@@ -276,6 +311,11 @@ mmove_t zboss_move_run = {FRAME_walkStart, FRAME_walkEnd, zboss_frames_run, NULL
 
 void zboss_run (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
     zboss_stand(self);
 	else
@@ -284,6 +324,11 @@ void zboss_run (edict_t *self)
 
 void zboss_run2 (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
     zboss_stand(self);
 	else
@@ -295,9 +340,14 @@ void zboss_run2 (edict_t *self)
 //
 void zboss_stand (edict_t *self)
 {
-	if(self->monsterinfo.currentmove == &zboss_move_prewalk || 
-				self->monsterinfo.currentmove == &zboss_move_walk || 
-				self->monsterinfo.currentmove == &zboss_move_prerun || 
+	if (!self)
+	{
+		return;
+	}
+
+	if(self->monsterinfo.currentmove == &zboss_move_prewalk ||
+				self->monsterinfo.currentmove == &zboss_move_walk ||
+				self->monsterinfo.currentmove == &zboss_move_prerun ||
 				self->monsterinfo.currentmove == &zboss_move_run)
 	{
 		zboss_postWalkRun(self);
@@ -365,7 +415,14 @@ mmove_t zboss_move_pain3 = {FRAME_pain3Start, FRAME_pain3End, zboss_frames_pain3
 void zboss_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 	float r;
-	float hbreak = (self->max_health / 3.0);
+	float hbreak;
+
+	if (!self)
+	{
+		return;
+	}
+
+	hbreak = (self->max_health / 3.0);
 
 	// set the skin
 	if (self->health < hbreak)
@@ -441,7 +498,7 @@ void zboss_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 5;
 
-	if (skill->value == 3)
+	if (skill->value == SKILL_HARDPLUS)
 		return;		// no pain anims in nightmare
 
 	if(self->laser)
@@ -469,6 +526,11 @@ void zboss_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void zboss_swing (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	static	vec3_t	aim = {MELEE_DISTANCE, 0, -24};
 	fire_hit (self, aim, (15 + (rand() % 6)), 800);
 }
@@ -489,6 +551,11 @@ mmove_t zboss_move_attack2c = {FRAME_attack2cStart, FRAME_attack2cEnd, zboss_fra
 
 void zboss_melee2 (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &zboss_move_attack2c;
 	gi.sound (self, CHAN_WEAPON, sound_swing, 1, ATTN_NORM, 0);
 }
@@ -510,6 +577,11 @@ mmove_t zboss_move_premelee = {FRAME_preHookStart, FRAME_preHookEnd, zboss_frame
 
 void zboss_melee (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_BODY, sound_raisegun, 1, ATTN_NORM, 0);
 	self->monsterinfo.currentmove = &zboss_move_premelee;
 }
@@ -524,7 +596,7 @@ void zboss_melee (edict_t *self)
 mframe_t zboss_frames_attack1b [] =
 {
 	{ai_charge, 0,	NULL},	// 92
-	{ai_charge, 0,	NULL},		 
+	{ai_charge, 0,	NULL},
 	{ai_charge, 0,	NULL},
 	{ai_charge, 0,	NULL},
 	{ai_charge, 0,	NULL},
@@ -536,12 +608,17 @@ mmove_t zboss_move_attack1b = {FRAME_attack1bStart, FRAME_attack1bEnd, zboss_fra
 
 void zboss_reloadRockets(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.aiflags &= ~AI_ONESHOTTARGET;
 	self->monsterinfo.currentmove = &zboss_move_attack1b;
 }
 
 
-static vec3_t	rocketoffset[]	= 
+static vec3_t	rocketoffset[]	=
 {
 	{-5, -50, 33},
 	{-5, -39, 27},
@@ -558,6 +635,11 @@ void FireFlare(edict_t *self)
 	vec3_t	start;
 	vec3_t	dir;
 	vec3_t	vec;
+
+	if (!self)
+	{
+		return;
+	}
 
 	int offset = (self->s.frame - 71) / 3;
 
@@ -577,7 +659,7 @@ void FireFlare(edict_t *self)
 
 	VectorSubtract (vec, start, dir);
 	VectorNormalize (dir);
-	
+
 	if(!(self->monsterinfo.aiflags & AI_ONESHOTTARGET))
 	{
 		ANIM_AIM(self, dir);
@@ -594,6 +676,11 @@ void FireRocket(edict_t *self)
 	vec3_t	start;
 	vec3_t	dir;
 	vec3_t	vec;
+
+	if (!self)
+	{
+		return;
+	}
 
 	int offset = (self->s.frame - 71) / 3;
 
@@ -657,9 +744,16 @@ void zboss_reelInGraaple2(edict_t *self)
 {
 	vec3_t	vec, dir;
 	float length;
-	edict_t *enemy = self->laser->enemy;
-	vec3_t	hookoffset	= {-5, -24, 34};
-	vec3_t	forward, right;
+	edict_t *enemy;
+	vec3_t hookoffset = {-5, -24, 34};
+	vec3_t forward, right;
+
+	if (!self)
+	{
+		return;
+	}
+
+	enemy = self->laser->enemy;
 
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource(self->s.origin, hookoffset, forward, right, vec);
@@ -700,9 +794,14 @@ mmove_t zboss_move_attack2b = {FRAME_attack2bStart, FRAME_attack2bEnd, zboss_fra
 void HookDragThink (edict_t *self)
 {
 	vec3_t	dir, vec;
-	float length, speed;
+	float	speed;
 	vec3_t	hookoffset	= {-5, -24, 34};
 	vec3_t	forward, right;
+
+	if (!self)
+	{
+		return;
+	}
 
 	if(self->enemy && self->enemy->health > 0)
 	{
@@ -710,7 +809,6 @@ void HookDragThink (edict_t *self)
 	}
 
 	VectorSubtract (self->owner->s.origin, self->s.origin, dir);
-	length = VectorLength (dir);
 
 	AngleVectors (self->owner->s.angles, forward, right, NULL);
 	G_ProjectSource(self->owner->s.origin, hookoffset, forward, right, vec);
@@ -769,6 +867,11 @@ void HookThink(edict_t *self)
 	vec3_t	hookoffset	= {-3, -24, 34};
 	vec3_t	forward, right;
 
+	if (!self)
+	{
+		return;
+	}
+
 	if(self->powerarmor_time < level.time)
 	{
 		self->powerarmor_time = level.time + 15;
@@ -802,6 +905,11 @@ void FireHook(edict_t *self)
 	edict_t	*hook;
 	float speed;
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 
 	G_ProjectSource (self->s.origin, hookoffset, forward, right, start);
@@ -809,11 +917,11 @@ void FireHook(edict_t *self)
 	vec[2] += self->enemy->viewheight;
 	VectorSubtract (vec, start, dir);
 	VectorNormalize (dir);
-	
+
   ANIM_AIM(self, dir);
 
 	self->s.modelindex3 = 0;
-	
+
 	speed = 1000;
 
 	gi.sound (self, CHAN_WEAPON, sound_hooklaunch, 1, ATTN_NORM, 0);
@@ -843,6 +951,11 @@ void FireHook(edict_t *self)
 
 void zboss_reelInGraaple(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &zboss_move_attack2b;
 }
 
@@ -872,11 +985,21 @@ mmove_t zboss_move_posthook = {FRAME_postHookStart, FRAME_postHookEnd, zboss_fra
 
 void zboss_posthook(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &zboss_move_posthook;
 }
 
 void zboss_chooseHookRocket(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if(random() < 0.2 && !(self->monsterinfo.aiflags & AI_ONESHOTTARGET))
 	{
 		self->monsterinfo.currentmove = &zboss_move_attack2a;
@@ -904,24 +1027,34 @@ mmove_t zboss_move_prehook = {FRAME_preHookStart, FRAME_preHookEnd, zboss_frames
 
 // Plasma Cannon
 
-void PlasmaballBlastAnim(edict_t	*ent)
+void PlasmaballBlastAnim(edict_t *ent)
 {
-  ent->s.frame++;
-  ent->s.skinnum++;
+	if (!ent)
+	{
+		return;
+	}
 
-  if(ent->s.frame > 1)
-  {
+	ent->s.frame++;
+	ent->s.skinnum++;
+
+	if(ent->s.frame > 1)
+	{
 		G_FreeEdict(ent);
 		return;
-  }
-  else
-  {
-    ent->nextthink = level.time + FRAMETIME;
-  }
+	}
+	else
+	{
+		ent->nextthink = level.time + FRAMETIME;
+	}
 }
 
 void Plasmaball_Explode (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	//FIXME: if we are onground then raise our Z just a bit since we are a point?
 	if (ent->enemy)
 	{
@@ -956,6 +1089,11 @@ void Plasmaball_Explode (edict_t *ent)
 
 void Plasmaball_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+	if (!ent || !other)
+	{
+		return;
+	}
+
 	if (other == ent->owner)
 		return;
 
@@ -974,6 +1112,11 @@ void fire_plasmaCannon (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	edict_t	*plasmaball;
 	vec3_t	dir;
 	vec3_t	forward, right, up;
+
+	if (!self)
+	{
+		return;
+	}
 
 	vectoangles (aimdir, dir);
 	AngleVectors (dir, forward, right, up);
@@ -1005,7 +1148,7 @@ void fire_plasmaCannon (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 }
 
 
-static vec3_t cannonoffset[]	= 
+static vec3_t cannonoffset[]	=
 {
 	{-19, -44, 30},
 	{-14, -33, 32},
@@ -1023,6 +1166,11 @@ void FireCannon(edict_t *self)
 	vec3_t	dir;
 	vec3_t	vec;
 	float distance;
+
+	if (!self)
+	{
+		return;
+	}
 
 	int offset = (self->s.frame - 119) / 2;
 
@@ -1060,12 +1208,12 @@ void FireCannon(edict_t *self)
 	{
 		distance = 700;
 	}
-	
-	if(skill->value < 2)
+
+	if(skill->value < SKILL_HARD)
 	{
 		fire_plasmaCannon (self, start, dir, 90, 700, 2.5, 90+40, distance);
 	}
-	else if(skill->value < 3)
+	else if(skill->value < SKILL_HARDPLUS)
 	{
 		fire_plasmaCannon (self, start, dir, 90, (int)(distance * 1.2), 2.5, 90+40, distance);
 	}
@@ -1097,6 +1245,11 @@ mmove_t zboss_move_attack3 = {FRAME_attack3Start, FRAME_attack3End, zboss_frames
 
 void zboss_fireCannons(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &zboss_move_attack3;
 
 	self->seq = 0;
@@ -1123,6 +1276,11 @@ mmove_t zboss_move_postcannon = {FRAME_postCannonStart, FRAME_postCannonEnd, zbo
 
 void zboss_postcannon(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &zboss_move_postcannon;
 }
 
@@ -1153,6 +1311,11 @@ mmove_t zboss_move_c2h = {FRAME_attackC2HStart, FRAME_attackC2HEnd, zboss_frames
 
 void zboss_chooseNextAttack(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if (self->enemy == NULL)
 		return;
 
@@ -1203,6 +1366,11 @@ void zboss_chooseNextAttack(edict_t *self)
 
 void zboss_attack (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if (self->enemy == NULL)
 		return;
 
@@ -1226,6 +1394,11 @@ Death Stuff Starts
 
 void zboss_dead (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	VectorSet (self->mins, -32, -74, -30);
 	VectorSet (self->maxs, 32, 40, 12);
 	self->movetype = MOVETYPE_TOSS;
@@ -1265,10 +1438,15 @@ void FireDeadRocket1(edict_t *self)
 	vec3_t	start;
 	vec3_t	rocketoffset	= {-26, -26, 25};
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 
 	G_ProjectSource (self->s.origin, rocketoffset, forward, right, start);
-	
+
 	fire_rocket (self, start, forward, 70, 500, 70+20, 70);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -1283,10 +1461,15 @@ void FireDeadRocket2(edict_t *self)
 	vec3_t	start;
 	vec3_t	rocketoffset	= {-16, -21, 20};
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 
 	G_ProjectSource (self->s.origin, rocketoffset, forward, right, start);
-	
+
 	forward[1] += 10;
 	fire_rocket (self, start, forward, 70, 500, 70+20, 70);
 
@@ -1302,10 +1485,15 @@ void FireDeadRocket3(edict_t *self)
 	vec3_t	start;
 	vec3_t	rocketoffset	= {-17, -20, 30};
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, up);
 
 	G_ProjectSource (self->s.origin, rocketoffset, forward, right, start);
-	
+
 	fire_rocket (self, start, up, 70, 500, 70+20, 70);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -1316,14 +1504,19 @@ void FireDeadRocket3(edict_t *self)
 
 void FireDeadRocket4(edict_t *self)
 {
+
 	vec3_t	forward, right, up;
 	vec3_t	start;
 	vec3_t	rocketoffset	= {-8, -16, 17};
 
+	if (!self)
+	{
+		return;
+	}
 	AngleVectors (self->s.angles, forward, right, up);
 
 	G_ProjectSource (self->s.origin, rocketoffset, forward, right, start);
-	
+
 	fire_rocket (self, start, up, 70, 500, 70+20, 70);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -1337,6 +1530,11 @@ void FireDeadRocket5(edict_t *self)
 	vec3_t	forward, right, up;
 	vec3_t	start;
 	vec3_t	rocketoffset	= {-10, -16, 30};
+
+	if (!self)
+	{
+		return;
+	}
 
 	AngleVectors (self->s.angles, forward, right, up);
 
@@ -1356,6 +1554,11 @@ void FireDeadRocket6(edict_t *self)
 	vec3_t	forward, right, up;
 	vec3_t	start;
 	vec3_t	rocketoffset	= {0, -18, 25};
+
+	if (!self)
+	{
+		return;
+	}
 
 	AngleVectors (self->s.angles, forward, right, up);
 
@@ -1377,6 +1580,11 @@ void FireDeadRocket7(edict_t *self)
 	vec3_t	start;
 	vec3_t	rocketoffset	= {17, -27, 30};
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, up);
 
 	G_ProjectSource (self->s.origin, rocketoffset, forward, right, start);
@@ -1397,10 +1605,15 @@ void FireDeadCannon1(edict_t *self)
 	vec3_t	start;
 	vec3_t	cannonoffset	= {9, -46, 33};
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 
 	G_ProjectSource (self->s.origin, cannonoffset, forward, right, start);
-	
+
 	fire_plasmaCannon (self, start, forward, 90, 700, 2.5, 90+40, 700);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -1415,10 +1628,15 @@ void FireDeadCannon2(edict_t *self)
 	vec3_t	start;
 	vec3_t	cannonoffset	= {3, -31, 37};
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 
 	G_ProjectSource (self->s.origin, cannonoffset, forward, right, start);
-	
+
 	fire_plasmaCannon (self, start, forward, 90, 700, 2.5, 90+40, 700);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -1433,10 +1651,15 @@ void FireDeadCannon3(edict_t *self)
 	vec3_t	start;
 	vec3_t	cannonoffset	= {-21, -19, 24};
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 
 	G_ProjectSource (self->s.origin, cannonoffset, forward, right, start);
-	
+
 	fire_plasmaCannon (self, start, forward, 90, 700, 2.5, 90+40, 700);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -1447,6 +1670,11 @@ void FireDeadCannon3(edict_t *self)
 
 void DeadHookTouch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+	if (!ent || !other)
+	{
+		return;
+	}
+
 	if (other == ent->owner)
 		return;
 
@@ -1467,15 +1695,20 @@ void FireDeadGrapple(edict_t *self)
 	edict_t	*hook;
 	float speed;
 
+	if (!self)
+	{
+		return;
+	}
+
 	if(self->s.modelindex3 == 0)  // hook already out...
 		return;
 
 	AngleVectors (self->s.angles, forward, right, up);
 
 	G_ProjectSource (self->s.origin, hookoffset, forward, right, start);
-	
+
 	self->s.modelindex3 = 0;
-	
+
 	speed = 500;
 
 	gi.sound (self, CHAN_WEAPON, sound_hooklaunch, 1, ATTN_NORM, 0);
@@ -1528,9 +1761,9 @@ mframe_t zboss_frames_death2 [] =
 
 	{ai_move, 0,	FireDeadCannon1},  // 257
 	{ai_move, 0,	FireDeadCannon2},	// 258
-	{ai_move, 0,	NULL},	
 	{ai_move, 0,	NULL},
-	{ai_move, 0,	NULL},	
+	{ai_move, 0,	NULL},
+	{ai_move, 0,	NULL},
 	{ai_move, 0,	NULL},
 	{ai_move, 0,	NULL},
 	{ai_move, 0,	FireDeadCannon3},	// 264
@@ -1559,6 +1792,11 @@ mmove_t zboss_move_death2 = {FRAME_die2Start, FRAME_die2End, zboss_frames_death2
 void zboss_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
+
+	if (!self)
+	{
+		return;
+	}
 
 	if(self->laser)
 	{
@@ -1589,15 +1827,15 @@ void zboss_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 	// todo
 	if (random() < 0.5)
-  {
+	{
 		gi.sound (self, CHAN_VOICE, sound_die1, 1, ATTN_NORM, 0);
-  	self->monsterinfo.currentmove = &zboss_move_death1;
-  }
-  else
-  {
+		self->monsterinfo.currentmove = &zboss_move_death1;
+	}
+	else
+	{
 		gi.sound (self, CHAN_VOICE, sound_die2, 1, ATTN_NORM, 0);
-  	self->monsterinfo.currentmove = &zboss_move_death2;
-  }
+		self->monsterinfo.currentmove = &zboss_move_death2;
+	}
 }
 
 
@@ -1608,11 +1846,11 @@ End Death Stuff
 */
 void SP_monster_zboss_precache(void)
 {
-	sound_pain1 = gi.soundindex ("monsters/bossz/bpain1.wav");	
-	sound_pain2 = gi.soundindex ("monsters/bossz/bpain2.wav");	
-	sound_pain3 = gi.soundindex ("monsters/bossz/bpain3.wav");	
-	sound_die1 = gi.soundindex ("monsters/bossz/bdeth1.wav");	
-	sound_die2 = gi.soundindex ("monsters/bossz/bdeth2.wav");	
+	sound_pain1 = gi.soundindex ("monsters/bossz/bpain1.wav");
+	sound_pain2 = gi.soundindex ("monsters/bossz/bpain2.wav");
+	sound_pain3 = gi.soundindex ("monsters/bossz/bpain3.wav");
+	sound_die1 = gi.soundindex ("monsters/bossz/bdeth1.wav");
+	sound_die2 = gi.soundindex ("monsters/bossz/bdeth2.wav");
 	sound_hooklaunch = gi.soundindex("monsters/bossz/bhlaunch.wav");
 	sound_hookimpact = gi.soundindex("monsters/bossz/bhimpact.wav");
 	sound_hookfly	= gi.soundindex("monsters/bossz/bhfly.wav");
@@ -1636,6 +1874,11 @@ void SP_monster_zboss_precache(void)
 */
 void SP_monster_zboss (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if (deathmatch->value)
 	{
 		G_FreeEdict (self);
@@ -1659,15 +1902,15 @@ void SP_monster_zboss (edict_t *self)
 	self->monsterinfo.aiflags = AI_MONREDUCEDDAMAGE;
 	self->monsterinfo.reducedDamageAmount = 0.25;
 
-	if(skill->value == 0)
+	if(skill->value == SKILL_EASY)
 	{
 		self->health = 3000;
 	}
-	else if(skill->value == 1)
+	else if(skill->value == SKILL_MEDIUM)
 	{
 		self->health = 4500;
 	}
-	else if(skill->value == 2)
+	else if(skill->value == SKILL_HARD)
 	{
 		self->health = 6000;
 	}
@@ -1692,17 +1935,22 @@ void SP_monster_zboss (edict_t *self)
 
 	gi.linkentity (self);
 
-	self->monsterinfo.currentmove = &zboss_stand1;	
+	self->monsterinfo.currentmove = &zboss_stand1;
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);
 }
 
-/*QUAKED target_zboss_target 
+/*QUAKED target_zboss_target
 */
 
 void trigger_zboss (edict_t *self, edict_t *other, edict_t *activator)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	edict_t	*boss = NULL;
 
 	while ((boss = G_Find (boss, FOFS(targetname), self->target)) != NULL)
@@ -1718,6 +1966,11 @@ void trigger_zboss (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_zboss_target(edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if(!self->target)
 	{
 		gi.dprintf("target_zboss_target does not have a target");

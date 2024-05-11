@@ -275,13 +275,19 @@ gladiator_attack(edict_t *self)
 		return;
 	}
 
-	/* a small safe zone */
-	VectorSubtract(self->s.origin, self->enemy->s.origin, v);
-	range = VectorLength(v);
-
-	if (range <= (MELEE_DISTANCE + 32))
+	/* a small safe zone
+	   but not for stand-ground ones since players can
+	   abuse it by standing still inside this range
+	*/
+	if (!(self->monsterinfo.aiflags & AI_STAND_GROUND))
 	{
-		return;
+		VectorSubtract(self->s.origin, self->enemy->s.origin, v);
+		range = VectorLength(v);
+
+		if (range <= (MELEE_DISTANCE + 32))
+		{
+			return;
+		}
 	}
 
 	/* charge up the railgun */
@@ -360,7 +366,7 @@ gladiator_pain(edict_t *self, edict_t *other /* unused */,
 		gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 	}
 
-	if (skill->value == 3)
+	if (skill->value == SKILL_HARDPLUS)
 	{
 		return; /* no pain anims in nightmare */
 	}

@@ -266,9 +266,10 @@ SP_trigger_once(edict_t *ent)
  * it can only be fired by other events.
  */
 void
-trigger_relay_use(edict_t *self, edict_t *other /* unused */, edict_t *activator)
+trigger_relay_use(edict_t *self, edict_t *other /* unused */, 
+		edict_t *activator /* may be NULL */)
 {
-	if (!self || !activator)
+	if (!self)
 	{
 		return;
 	}
@@ -641,14 +642,14 @@ trigger_push_active(edict_t *self)
 void
 SP_trigger_push(edict_t *self)
 {
-	InitTrigger(self);
-	windsound = gi.soundindex("misc/windfly.wav");
-	self->touch = trigger_push_touch;
-
   	if (!self)
 	{
 		return;
 	}
+
+	InitTrigger(self);
+	windsound = gi.soundindex("misc/windfly.wav");
+	self->touch = trigger_push_touch;
 
 	if (self->spawnflags & 2)
 	{
@@ -821,14 +822,13 @@ SP_trigger_gravity(edict_t *self)
 
 	if (st.gravity == 0)
 	{
-		gi.dprintf("trigger_gravity without gravity set at %s\n",
-				vtos(self->s.origin));
+		gi.dprintf("trigger_gravity without gravity set at %s\n", vtos(self->s.origin));
 		G_FreeEdict(self);
 		return;
 	}
 
 	InitTrigger(self);
-	self->gravity = atoi(st.gravity);
+	self->gravity = (int)strtol(st.gravity, (char **)NULL, 10);
 	self->touch = trigger_gravity_touch;
 }
 

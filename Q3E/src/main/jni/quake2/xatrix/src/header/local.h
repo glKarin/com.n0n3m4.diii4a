@@ -53,6 +53,7 @@
 #define FL_TEAMSLAVE 0x00000400 /* not the first on the team */
 #define FL_NO_KNOCKBACK 0x00000800
 #define FL_POWER_ARMOR 0x00001000 /* power armor (if any) is active */
+#define FL_COOP_TAKEN 0x00002000 /* Another client has already taken it */
 #define FL_RESPAWN 0x80000000 /* used for item respawning */
 
 #define FRAMETIME 0.1
@@ -92,6 +93,10 @@ typedef enum
 	AMMO_TRAP
 } ammo_t;
 
+/* Maximum debris / gibs per frame */
+#define MAX_GIBS 20
+#define MAX_DEBRIS 20
+
 /* deadflag */
 #define DEAD_NO 0
 #define DEAD_DYING 1
@@ -124,6 +129,7 @@ typedef enum
 #define AI_COMBAT_POINT 0x00001000
 #define AI_MEDIC 0x00002000
 #define AI_RESURRECTING 0x00004000
+#define AI_IGNORE_PAIN 0x00008000
 
 /* monster attack state */
 #define AS_STRAIGHT 1
@@ -197,6 +203,7 @@ typedef struct
 #define IT_STAY_COOP 8
 #define IT_KEY 16
 #define IT_POWERUP 32
+#define IT_INSTANT_USE 64 /* item is insta-used on pickup if dmflag is set */
 
 /* gitem_t->weapmodel for weapons indicates model index */
 #define WEAP_BLASTER 1
@@ -249,12 +256,12 @@ typedef struct
 {
 	char helpmessage1[512];
 	char helpmessage2[512];
-	int helpchanged; /* flash F1 icon if non 0, play sound 
+	int helpchanged; /* flash F1 icon if non 0, play sound
 					    and increment only if 1, 2, or 3 */
 
 	gclient_t *clients; /* [maxclients] */
 
-	/* can't store spawnpoint in level, because 
+	/* can't store spawnpoint in level, because
 	   it would get overwritten by the savegame restore */
 	char spawnpoint[512]; /* needed for coop respawns */
 
@@ -428,6 +435,9 @@ extern spawn_temp_t st;
 extern int sm_meat_index;
 extern int snd_fry;
 
+extern int debristhisframe;
+extern int gibsthisframe;
+
 /* means of death */
 #define MOD_UNKNOWN 0
 #define MOD_BLASTER 1
@@ -471,6 +481,12 @@ extern int snd_fry;
 #define MOD_TRAP 39
 #define MOD_FRIENDLY_FIRE 0x8000000
 
+/* Easier handling of AI skill levels */
+#define SKILL_EASY 0
+#define SKILL_MEDIUM 1
+#define SKILL_HARD 2
+#define SKILL_HARDPLUS 3
+
 extern int meansOfDeath;
 extern edict_t *g_edicts;
 
@@ -485,6 +501,8 @@ extern edict_t *g_edicts;
 extern cvar_t *maxentities;
 extern cvar_t *deathmatch;
 extern cvar_t *coop;
+extern cvar_t *coop_elevator_delay;
+extern cvar_t *coop_pickup_weapons;
 extern cvar_t *dmflags;
 extern cvar_t *skill;
 extern cvar_t *fraglimit;
@@ -494,6 +512,8 @@ extern cvar_t *spectator_password;
 extern cvar_t *needpass;
 extern cvar_t *g_select_empty;
 extern cvar_t *dedicated;
+extern cvar_t *g_footsteps;
+extern cvar_t *g_fix_triggered;
 
 extern cvar_t *filterban;
 
@@ -520,19 +540,24 @@ extern cvar_t *flood_waitdelay;
 
 extern cvar_t *sv_maplist;
 
+extern cvar_t *aimfix;
+extern cvar_t *g_machinegun_norecoil;
+extern cvar_t *g_quick_weap;
+extern cvar_t *g_swap_speed;
+
 #define world (&g_edicts[0])
 
  /* item spawnflags */
 #define ITEM_TRIGGER_SPAWN 0x00000001
 #define ITEM_NO_TOUCH 0x00000002
- /* 6 bits reserved for editor flags 
+ /* 6 bits reserved for editor flags
     8 bits used as power cube id bits
     for coop games */
 #define DROPPED_ITEM 0x00010000
 #define DROPPED_PLAYER_ITEM 0x00020000
 #define ITEM_TARGETS_USED 0x00040000
 
- /* fields are needed for spawning from the 
+ /* fields are needed for spawning from the
     entity string  and saving / loading games */
 #define FFL_SPAWNTEMP 1
 #define FFL_NOSPAWN 2
@@ -559,6 +584,7 @@ typedef struct
 	int ofs;
 	fieldtype_t type;
 	int flags;
+	short save_ver;
 } field_t;
 
 extern field_t fields[];
@@ -597,6 +623,7 @@ void G_UseTargets(edict_t *ent, edict_t *activator);
 void G_SetMovedir(vec3_t angles, vec3_t movedir);
 
 void G_InitEdict(edict_t *e);
+edict_t *G_SpawnOptional(void);
 edict_t *G_Spawn(void);
 void G_FreeEdict(edict_t *e);
 
@@ -607,6 +634,7 @@ char *G_CopyString(char *in);
 
 float *tv(float x, float y, float z);
 char *vtos(vec3_t v);
+void get_normal_vector(const cplane_t *p, vec3_t normal);
 
 float vectoyaw(vec3_t vec);
 void vectoangles(vec3_t vec, vec3_t angles);
@@ -632,7 +660,6 @@ void T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage,
 #define DEFAULT_BULLET_VSPREAD 500
 #define DEFAULT_SHOTGUN_HSPREAD 1000
 #define DEFAULT_SHOTGUN_VSPREAD 500
-#define DEFAULT_DEATHMATCH_SHOTGUN_COUNT 12
 #define DEFAULT_SHOTGUN_COUNT 12
 #define DEFAULT_SSHOTGUN_COUNT 20
 
@@ -806,7 +833,7 @@ typedef struct
 	qboolean connected; /* a loadgame will leave valid entities that
 						   just don't have a connection yet */
 
-	/* values saved and restored from 
+	/* values saved and restored from
 	   edicts when changing levels */
 	int health;
 	int max_health;
@@ -848,8 +875,8 @@ typedef struct
 	qboolean spectator; /* client is a spectator */
 } client_respawn_t;
 
-/* this structure is cleared on each 
-   PutClientInServer(), except for 
+/* this structure is cleared on each
+   PutClientInServer(), except for
    'client->pers' */
 struct gclient_s
 {
@@ -877,7 +904,7 @@ struct gclient_s
 
 	gitem_t *newweapon;
 
-	/* sum up damage over an entire frame, so 
+	/* sum up damage over an entire frame, so
 	   shotgun blasts give a single big kick */
 	int damage_armor; /* damage absorbed by armor */
 	int damage_parmor; /* damage absorbed by power armor */
@@ -943,9 +970,9 @@ struct edict_s
 {
 	entity_state_t s;
 	struct gclient_s *client; /* NULL if not a player */
-							    
+
     /* the server expects the first part
-	   of gclient_s to be a player_state_t 
+	   of gclient_s to be a player_state_t
 	   but the rest of it is opaque */
 
 	qboolean inuse;
@@ -1003,7 +1030,7 @@ struct edict_s
 	vec3_t avelocity;
 	int mass;
 	float air_finished;
-	float gravity; /* per entity gravity multiplier (1.0 is 
+	float gravity; /* per entity gravity multiplier (1.0 is
 					  normal) use for lowgrav artifact, flares */
 
 	edict_t *goalentity;
@@ -1022,18 +1049,19 @@ struct edict_s
 	void (*die)(edict_t *self, edict_t *inflictor, edict_t *attacker,
 			int damage, vec3_t point);
 
-	float touch_debounce_time; /* are all these legit?  do we need more/less of them? */
+	float touch_debounce_time;		/* now also used by fixbots for timeouts when getting stuck */
 	float pain_debounce_time;
 	float damage_debounce_time;
-	float fly_sound_debounce_time; /* move to clientinfo */
+	float fly_sound_debounce_time;	/* now also used by insane marines to store pain sound timeout */
+									/* and by fixbots for storing object_repair timeout when getting stuck */
 	float last_move_time;
 
 	int health;
 	int max_health;
 	int gib_health;
 	int deadflag;
-	qboolean show_hostile;
 
+	float show_hostile;
 	float powerarmor_time;
 
 	char *map; /* target_changelevel */
@@ -1043,7 +1071,7 @@ struct edict_s
 	int dmg;
 	int radius_dmg;
 	float dmg_radius;
-	int sounds; /* make this a spawntemp var? */
+	int sounds; /* now also used for player death sound aggregation */
 	int count;
 
 	edict_t *chain;
@@ -1068,7 +1096,7 @@ struct edict_s
 	float delay; /* before firing targets */
 	float random;
 
-	float teleport_time;
+	float last_sound_time;
 
 	int watertype;
 	int waterlevel;

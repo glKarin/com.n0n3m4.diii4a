@@ -22,7 +22,7 @@
  * Interface between client <-> game and client calculations.
  *
  * =======================================================================
- */ 
+ */
 
 #include "../header/local.h"
 #include "../monster/player.h"
@@ -76,11 +76,11 @@ SP_info_player_coop(edict_t *self)
 /*
  * QUAKED info_player_intermission (1 0 1) (-16 -16 -24) (16 16 32)
  * The deathmatch intermission point will be at one of these
- * Use 'angles' instead of 'angle', so you can set pitch or 
+ * Use 'angles' instead of 'angle', so you can set pitch or
  * roll as well as yaw.  'pitch yaw roll'
  */
 void
-SP_info_player_intermission(void)
+SP_info_player_intermission(edict_t *ent)
 {
 }
 
@@ -89,7 +89,7 @@ SP_info_player_intermission(void)
 void
 player_pain(edict_t *self, edict_t *other, float kick, int damage)
 {
-	/* player pain is handled at the 
+	/* player pain is handled at the
 	   end of the frame in P_DamageFeedback */
 }
 
@@ -521,7 +521,7 @@ player_die(edict_t *self, edict_t *inflictor, edict_t *attacker,
 	memset(self->client->pers.inventory, 0, sizeof(self->client->pers.inventory));
 
 	if (self->health < -40)
-	{   
+	{
 		/* gib */
 		gi.sound(self, CHAN_BODY, gi.soundindex(
 						"misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -586,7 +586,7 @@ player_die(edict_t *self, edict_t *inflictor, edict_t *attacker,
 /* ======================================================================= */
 
 /*
- * This is only called when the game 
+ * This is only called when the game
  * first initializes in single player,
  * but is called after each death and
  * level change in deathmatch
@@ -731,7 +731,7 @@ PlayersRangeFromSpot(edict_t *spot)
 }
 
 /*
- * go to a random point, but NOT the two 
+ * go to a random point, but NOT the two
  * points closest to other players
  */
 edict_t *
@@ -824,7 +824,7 @@ SelectFarthestDeathmatchSpawnPoint(void)
 		return bestspot;
 	}
 
-	/* if there is a player just spawned on 
+	/* if there is a player just spawned on
 	   each and every start spot we have no
 	   choice to turn one into a telefrag meltdown */
 	spot = G_Find(NULL, FOFS(classname), "info_player_deathmatch");
@@ -880,7 +880,7 @@ SelectCoopSpawnPoint(edict_t *ent)
 		}
 
 		if (Q_stricmp(game.spawnpoint, target) == 0)
-		{   
+		{
 			/* this is a coop spawn point for one of the clients here */
 			index--;
 
@@ -942,7 +942,7 @@ SelectSpawnPoint(edict_t *ent, vec3_t origin, vec3_t angles)
 		if (!spot)
 		{
 			if (!game.spawnpoint[0])
-			{   
+			{
 				/* there wasn't a spawnpoint without a target, so use any */
 				spot = G_Find(spot, FOFS(classname), "info_player_start");
 			}
@@ -1062,7 +1062,7 @@ respawn(edict_t *self)
 /* ============================================================== */
 
 /*
- * Called when a player connects 
+ * Called when a player connects
  * to a server or respawns in
  * a deathmatch.
  */
@@ -1225,7 +1225,7 @@ PutClientInServer(edict_t *ent)
 	}
 
 	if (!KillBox(ent))
-	{   
+	{
 		/* could't spawn in? */
 	}
 
@@ -1237,7 +1237,7 @@ PutClientInServer(edict_t *ent)
 }
 
 /*
- * A client has just connected to 
+ * A client has just connected to
  * the server in deathmatch mode,
  * so clear everything out before
  * starting them.
@@ -1288,13 +1288,13 @@ ClientBegin(edict_t *ent)
 		return;
 	}
 
-	/* if there is already a body waiting for 
+	/* if there is already a body waiting for
 	   us (a loadgame), just take it, otherwise
 	   spawn one from scratch */
 	if (ent->inuse == true)
 	{
-		/* the client has cleared the client side viewangles upon 
-		   connecting to the server, which is different than the 
+		/* the client has cleared the client side viewangles upon
+		   connecting to the server, which is different than the
 		   state when the game is saved, so we need to compensate
 		   with deltaangles */
 		for (i = 0; i < 3; i++)
@@ -1305,7 +1305,7 @@ ClientBegin(edict_t *ent)
 	}
 	else
 	{
-		/* a spawn point will completely reinitialize the entity 
+		/* a spawn point will completely reinitialize the entity
 		   except for the persistant data that was initialized at
 		   ClientConnect() time */
 		G_InitEdict(ent);
@@ -1513,9 +1513,9 @@ ClientDisconnect(edict_t *ent)
 
 edict_t *pm_passent;
 
-/* 
+/*
  * pmove doesn't need to know about
- * passent and contentmask 
+ * passent and contentmask
  */
 trace_t
 PM_trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
@@ -1620,7 +1620,10 @@ ClientThink(edict_t *ent, usercmd_t *ucmd)
 	for (i = 0; i < 3; i++)
 	{
 		pm.s.origin[i] = ent->s.origin[i] * 8;
-		pm.s.velocity[i] = ent->velocity[i] * 8;
+		/* save to an int first, in case the short overflows
+		 * so we get defined behavior (at least with -fwrapv) */
+		int tmpVel = ent->velocity[i] * 8;
+		pm.s.velocity[i] = tmpVel;
 	}
 
 	if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
@@ -1724,7 +1727,7 @@ ClientThink(edict_t *ent, usercmd_t *ucmd)
 	client->buttons = ucmd->buttons;
 	client->latched_buttons |= client->buttons & ~client->oldbuttons;
 
-	/* save light level the player is 
+	/* save light level the player is
 	   standing on for monster sighting AI */
 	ent->light_level = ucmd->lightlevel;
 

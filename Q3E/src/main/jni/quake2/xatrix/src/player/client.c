@@ -18,7 +18,7 @@ SP_FixCoopSpots(edict_t *self)
 	/* Entity number 292 is an unnamed info_player_start
 	   next to a named info_player_start. Delete it, if
 	   we're in coop since it screws up the spawnpoint
-	   selection heuristic in SelectCoopSpawnPoint(). 
+	   selection heuristic in SelectCoopSpawnPoint().
 	   This unnamed info_player_start is selected as
 	   spawnpoint for player 0, therefor none of the
 	   named info_coop_start() matches... */
@@ -112,7 +112,7 @@ SP_info_player_coop(edict_t *self)
  * roll as well as yaw.  'pitch yaw roll'
  */
 void
-SP_info_player_intermission(void)
+SP_info_player_intermission(edict_t *ent)
 {
 	/* This function cannot be removed
 	 * since the info_player_intermission
@@ -554,7 +554,7 @@ LookAtKiller(edict_t *self, edict_t *inflictor, edict_t *attacker)
 {
 	vec3_t dir;
 
-	if (!self || !inflictor || !attacker)
+	if (!self)
 	{
 		return;
 	}
@@ -663,9 +663,8 @@ player_die(edict_t *self, edict_t *inflictor, edict_t *attacker,
 
 	if (self->health < -40)
 	{
-		/* gib */
-		gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"),
-			   	1, ATTN_NORM, 0);
+		/* gib (sound played at end of server frame) */
+		self->sounds = gi.soundindex("misc/udeath.wav");
 
 		for (n = 0; n < 4; n++)
 		{
@@ -713,8 +712,12 @@ player_die(edict_t *self, edict_t *inflictor, edict_t *attacker,
 				}
 			}
 
-			gi.sound(self, CHAN_VOICE, gi.soundindex(va("*death%i.wav",
-									(rand() % 4) + 1)), 1, ATTN_NORM, 0);
+			/* sound played at end of server frame */
+			if (!self->sounds)
+			{
+				self->sounds = gi.soundindex(va("*death%i.wav",
+									(rand() % 4) + 1));
+			}
 		}
 	}
 
@@ -2025,7 +2028,10 @@ ClientThink(edict_t *ent, usercmd_t *ucmd)
 		for (i = 0; i < 3; i++)
 		{
 			pm.s.origin[i] = ent->s.origin[i] * 8;
-			pm.s.velocity[i] = ent->velocity[i] * 8;
+			/* save to an int first, in case the short overflows
+			 * so we get defined behavior (at least with -fwrapv) */
+			int tmpVel = ent->velocity[i] * 8;
+			pm.s.velocity[i] = tmpVel;
 		}
 
 		if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))

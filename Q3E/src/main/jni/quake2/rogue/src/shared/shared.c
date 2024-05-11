@@ -57,7 +57,7 @@ RotatePointAroundVector(vec3_t dst, const vec3_t dir,
 	im[2][1] = m[1][2];
 
 	memset(zrot, 0, sizeof(zrot));
-	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
+	zrot[1][1] = zrot[2][2] = 1.0F;
 
 	zrot[0][0] = (float)cos(DEG2RAD(degrees));
 	zrot[0][1] = (float)sin(DEG2RAD(degrees));
@@ -303,9 +303,6 @@ anglemod(float a)
 	return a;
 }
 
-int i;
-vec3_t corners[2];
-
 /*
  * This is the slow, general version
  */
@@ -506,20 +503,9 @@ VectorNormalize(vec3_t v)
 vec_t
 VectorNormalize2(vec3_t v, vec3_t out)
 {
-	float length, ilength;
+	VectorCopy(v, out);
 
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = (float)sqrt(length);
-
-	if (length)
-	{
-		ilength = 1 / length;
-		out[0] = v[0] * ilength;
-		out[1] = v[1] * ilength;
-		out[2] = v[2] * ilength;
-	}
-
-	return length;
+	return VectorNormalize(out);
 }
 
 void
@@ -650,31 +636,17 @@ COM_StripExtension(char *in, char *out)
 	*out = 0;
 }
 
-char *
-COM_FileExtension(char *in)
+const char *
+COM_FileExtension(const char *in)
 {
-	static char exten[8];
-	int i;
+	const char *ext = strrchr(in, '.');
 
-	while (*in && *in != '.')
-	{
-		in++;
-	}
-
-	if (!*in)
+	if (!ext || ext == in)
 	{
 		return "";
 	}
 
-	in++;
-
-	for (i = 0; i < 7 && *in; i++, in++)
-	{
-		exten[i] = *in;
-	}
-
-	exten[i] = 0;
-	return exten;
+	return ext + 1;
 }
 
 void
@@ -868,6 +840,7 @@ Swap_Init(void)
 	byte swaptest[2] = {1, 0};
 
 	/* set the byte swapping variables in a portable manner */
+	/* PVS NOTE: maybe use memcpy instead? */
 	if (*(short *)swaptest == 1)
 	{
 		bigendien = false;
@@ -900,7 +873,7 @@ Swap_Init(void)
  * need to have varargs versions of all text functions.
  */
 char *
-va(char *format, ...)
+va(const char *format, ...)
 {
 	va_list argptr;
 	static char string[1024];
@@ -1089,7 +1062,7 @@ Com_sprintf(char *dest, int size, char *fmt, ...)
 	len = vsnprintf(bigbuffer, 0x10000, fmt, argptr);
 	va_end(argptr);
 
-	if ((len >= size) || (len == size))
+	if (len >= size)
 	{
 		Com_Printf("Com_sprintf: overflow\n");
 
@@ -1113,6 +1086,42 @@ strlwr ( char *s )
 	}
 
 	return ( p );
+}
+
+int
+Q_strlcpy(char *dst, const char *src, int size)
+{
+	const char *s = src;
+
+	while (*s)
+	{
+		if (size > 1)
+		{
+			*dst++ = *s;
+			size--;
+		}
+		s++;
+	}
+	if (size > 0)
+	{
+		*dst = '\0';
+	}
+
+	return s - src;
+}
+
+int
+Q_strlcat(char *dst, const char *src, int size)
+{
+	char *d = dst;
+
+	while (size > 0 && *d)
+	{
+		size--;
+		d++;
+	}
+
+	return (d - dst) + Q_strlcpy(d, src, size);
 }
 
 /*
@@ -1242,7 +1251,7 @@ Info_RemoveKey(char *s, char *key)
 
 		if (!strcmp(key, pkey))
 		{
-			strcpy(start, s); /* remove this part */
+			memmove(start, s, strlen(s) + 1); /* remove this part */
 			return;
 		}
 
@@ -1306,14 +1315,14 @@ Info_SetValueForKey(char *s, char *key, char *value)
 
 	Info_RemoveKey(s, key);
 
-	if (!value || !strlen(value))
+	if (*value == '\0')
 	{
 		return;
 	}
 
 	Com_sprintf(newi, sizeof(newi), "\\%s\\%s", key, value);
 
-	if (strlen(newi) + strlen(s) > maxsize)
+	if (strlen(newi) + strlen(s) >= maxsize)
 	{
 		Com_Printf("Info string length exceeded\n");
 		return;

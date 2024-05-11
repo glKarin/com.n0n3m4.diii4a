@@ -503,6 +503,9 @@ extern	spawn_temp_t	st;
 extern	int	sm_meat_index;
 extern	int	snd_fry;
 
+extern int gibsthisframe;
+extern int lastgibframe;
+
 extern	int	jacket_armor_index;
 extern	int	combat_armor_index;
 extern	int	body_armor_index;
@@ -552,6 +555,13 @@ extern	int	body_armor_index;
 #define MOD_GL_POLYBLEND   	  40
 #define MOD_FRIENDLY_FIRE	  0x8000000
 
+/* Easier handling of AI skill levels */
+#define SKILL_EASY 0
+#define SKILL_MEDIUM 1
+#define SKILL_HARD 2
+#define SKILL_HARDPLUS 3
+
+
 extern	int	meansOfDeath;
 
 
@@ -599,6 +609,10 @@ extern	cvar_t	*grenadeammotype;
 extern	cvar_t	*grenadeammo;
 extern	cvar_t	*bettyammo;
 
+extern cvar_t *aimfix;
+extern cvar_t *g_machinegun_norecoil;
+extern cvar_t *g_swap_speed;
+
 #define world	(&g_edicts[0])
 
 // item spawnflags
@@ -615,6 +629,7 @@ extern	cvar_t	*bettyammo;
 // and saving / loading games
 //
 #define FFL_SPAWNTEMP		1
+#define FFL_NOSPAWN			2
 
 typedef enum {
 	F_INT, 
@@ -637,12 +652,11 @@ typedef struct
 	int		ofs;
 	fieldtype_t	type;
 	int		flags;
+	short   save_ver;
 } field_t;
-
 
 extern	field_t fields[];
 extern	gitem_t	itemlist[];
-
 
 //
 // g_cmds.c
@@ -838,6 +852,7 @@ void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
 // g_pweapon.c
 //
 void PlayerNoise(edict_t *who, vec3_t where, int type);
+int get_ammo_usage(gitem_t *weap);
 
 //
 // m_move.c
@@ -893,7 +908,7 @@ void ai_schoolSideStepLeft (edict_t *self, float dist);
 #define	ANIM_PAIN		3
 #define	ANIM_ATTACK		4
 #define	ANIM_DEATH		5
-
+#define	ANIM_REVERSE	6
 
 // client data that stays across multiple level loads
 typedef struct
@@ -1152,7 +1167,7 @@ struct edict_s
 	int			dmg;
 	int			radius_dmg;
 	float		dmg_radius;
-	int			sounds;			//make this a spawntemp var?
+	int			sounds;			// now also used for player death sound aggregation
 	int			count;
 
 	edict_t		*chain;

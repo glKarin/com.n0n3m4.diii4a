@@ -10,8 +10,7 @@ void Weapon_Generic (edict_t *ent,
 					 int *pause_frames, 
 					 int *fire_frames, 
 					 void (*fire)(edict_t *ent));
-void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
-
+void P_ProjectSource (edict_t *ent, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 
 static char testItem_className[256];
 static char testItem_gModel[256];
@@ -21,15 +20,11 @@ static char testItem_aminationFramesStr[4096];
 static int	testItem_aminationFrames[100];
 static vec3_t testItem_Size[2];
 
-
 gitem_t *testItem;
 edict_t *testItemDroped = NULL;
 int animUpto;
 qboolean testitemOriginMove = false;
 float animSpeed = 1.0;
-
-
-
 
 float lineSize = 100.0f;
 
@@ -37,70 +32,80 @@ void Weapon_LineDraw_Fire (edict_t *ent);
 
 void Weapon_LineDraw_Think (edict_t *ent)
 {
-  Weapon_LineDraw_Fire (ent->owner);
+	if (!ent)
+	{
+		return;
+	}
+
+	Weapon_LineDraw_Fire (ent->owner);
 	ent->owner->client->ps.gunframe--;
 }
 
-
 void Weapon_LineDraw_Fire (edict_t *ent)
 {
-  edict_t *beam;
+	edict_t *beam;
 	vec3_t	start;
 	vec3_t	forward, right;
 	vec3_t	offset;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorSet(offset, 0, 7,  ent->viewheight - 8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, offset, forward, right, start);
 
-  if(!ent->client->lineDraw)
-  {
-    beam = ent->client->lineDraw = G_Spawn();
+	if(!ent->client->lineDraw)
+	{
+		beam = ent->client->lineDraw = G_Spawn();
 
-    beam->classname = "DrawLine";
+		beam->classname = "DrawLine";
 
-    beam->flags |= FL_DONTSETOLDORIGIN;
+		beam->flags |= FL_DONTSETOLDORIGIN;
 
-    beam->owner = ent;
+		beam->owner = ent;
 
-    beam->movetype = MOVETYPE_NONE;
-    beam->solid = SOLID_NOT;
-    beam->s.renderfx |= RF_BEAM|RF_TRANSLUCENT;
-    beam->s.modelindex = 1;			// must be non-zero
+		beam->movetype = MOVETYPE_NONE;
+		beam->solid = SOLID_NOT;
+		beam->s.renderfx |= RF_BEAM|RF_TRANSLUCENT;
+		beam->s.modelindex = 1;			// must be non-zero
 
-    VectorSet (beam->mins, -8, -8, -8);
-    VectorSet (beam->maxs, 8, 8, 8);
+		VectorSet (beam->mins, -8, -8, -8);
+		VectorSet (beam->maxs, 8, 8, 8);
 
-    beam->s.frame = 2;
-	  beam->s.skinnum = 0xf3f3f1f1;
+		beam->s.frame = 2;
+		beam->s.skinnum = 0xf3f3f1f1;
 
-    beam->think = Weapon_LineDraw_Think;
-    beam->nextthink = level.time + (FRAMETIME * 2);
-  }
-  else
-  {
-    beam = ent->client->lineDraw;
-  }
+		beam->think = Weapon_LineDraw_Think;
+		beam->nextthink = level.time + (FRAMETIME * 2);
+	}
+	else
+	{
+		beam = ent->client->lineDraw;
+	}
 
-  VectorCopy (start, beam->s.origin);
+	VectorCopy (start, beam->s.origin);
 	VectorMA (start, lineSize, forward, beam->s.old_origin);
 
-  gi.linkentity (beam);
+	gi.linkentity (beam);
 	ent->client->ps.gunframe++;
 }
 
-
-
 void Weapon_LineDraw (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	static int	pause_frames[]	= {19, 32, 0};
 	static int	fire_frames[]	= {5, 0};
 
 	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_LineDraw_Fire);
 }
-
-
 
 static char testWeap_className[256];
 static char testWeap_gModel[256];
@@ -117,9 +122,7 @@ static int  testWeap_FRAME_DEACTIVATE_LAST;
 static int	testWeap_pause_frames[20];
 static int	testWeap_fire_frames[20];
 
-
 gitem_t *testWeapon;
-
 
 void convertToNumbers(char *frames, int *arrayFrames)
 {
@@ -156,9 +159,6 @@ void convertToNumbers(char *frames, int *arrayFrames)
 
   arrayFrames[num] = 0;
 }
-
-
-
 
 void convertToVector(char *vecStr, vec3_t *size)
 {
@@ -198,8 +198,6 @@ void convertToVector(char *vecStr, vec3_t *size)
     bp = sp;
   }
 }
-
-
 
 void InitTestWeapon(void)
 {
@@ -294,120 +292,134 @@ void InitTestWeapon(void)
   testWeapon->pickup_name = testWeap_name;
 }
 
-
 void Weapon_Test_Fire (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/blastf1a.wav"), 1, ATTN_NORM, 0);
 	ent->client->ps.gunframe++;
 }
 
-
-
 void Weapon_Test (edict_t *ent)
 {
-	Weapon_Generic (ent, testWeap_FRAME_ACTIVATE_LAST, 
-        testWeap_FRAME_FIRE_LAST, testWeap_FRAME_IDLE_LAST, 
-        testWeap_FRAME_DEACTIVATE_LAST, 
-        testWeap_pause_frames, testWeap_fire_frames, Weapon_Test_Fire);
-}
+	if (!ent)
+	{
+		return;
+	}
 
+	Weapon_Generic (ent, testWeap_FRAME_ACTIVATE_LAST,
+		testWeap_FRAME_FIRE_LAST, testWeap_FRAME_IDLE_LAST,
+		testWeap_FRAME_DEACTIVATE_LAST,
+		testWeap_pause_frames, testWeap_fire_frames, Weapon_Test_Fire);
+}
 
 void testitem_think (edict_t *ent)
 {
-  if(testItem_aminationFrames[animUpto])
-  {
-    ent->s.frame++;
-    if(ent->s.frame >= testItem_aminationFrames[animUpto])
-    {
-      if(animUpto)
-      {
-        ent->s.frame = testItem_aminationFrames[animUpto - 1];
-      }
-      else
-      {
-        ent->s.frame = 0;
-      }
-    }
-  }
+	if (!ent)
+	{
+		return;
+	}
+
+	if(testItem_aminationFrames[animUpto])
+	{
+		ent->s.frame++;
+		if(ent->s.frame >= testItem_aminationFrames[animUpto])
+		{
+			if(animUpto)
+			{
+				ent->s.frame = testItem_aminationFrames[animUpto - 1];
+			}
+			else
+			{
+				ent->s.frame = 0;
+			}
+		}
+	}
 
 	ent->nextthink = level.time + (FRAMETIME * animSpeed);
 }
 
-
 void Cmd_TestItem (edict_t *ent)
 {
-  char *cmd;
+	char *cmd;
 
-  cmd = gi.argv(1);
+	if (!ent)
+	{
+		return;
+	}
+
+	cmd = gi.argv(1);
 
 	if (Q_stricmp (cmd, "animnext") == 0)
-  {
-    if(testItem_aminationFrames[animUpto] && testItem_aminationFrames[animUpto + 1])
-    {
-      animUpto++;
+	{
+		if(testItem_aminationFrames[animUpto] && testItem_aminationFrames[animUpto + 1])
+		{
+			animUpto++;
 
-      gi.cprintf (ent, PRINT_HIGH, "Animation %d set\n", animUpto);
-    }
-  }
+			gi.cprintf (ent, PRINT_HIGH, "Animation %d set\n", animUpto);
+		}
+	}
 	else if (Q_stricmp (cmd, "animprev") == 0)
-  {
-    if(animUpto && testItem_aminationFrames[animUpto - 1])
-    {
-      animUpto--;
+	{
+		if(animUpto && testItem_aminationFrames[animUpto - 1])
+		{
+			animUpto--;
 
-      gi.cprintf (ent, PRINT_HIGH, "Animation %d set\n", animUpto);
-    }
-  }
+			gi.cprintf (ent, PRINT_HIGH, "Animation %d set\n", animUpto);
+		}
+	}
 	else if (Q_stricmp (cmd, "animspeed") == 0)
-  {
-    float as = atof(gi.argv(2));
+	{
+		float as = atof(gi.argv(2));
 
-    if(as < 1.0)
-    {
-      gi.cprintf (ent, PRINT_HIGH, "AnimSpeed must be greater than or equal to 1\n");
-      return;
-    }
+		if(as < 1.0)
+		{
+			gi.cprintf (ent, PRINT_HIGH, "AnimSpeed must be greater than or equal to 1\n");
+			return;
+		}
 
-    animSpeed = as;
-  }
+		animSpeed = as;
+	}
 	else if (Q_stricmp (cmd, "movestart") == 0)
-  {
-    if(testItemDroped)
-    {
-      testitemOriginMove = true;
-      gi.cprintf (ent, PRINT_HIGH, "testitem move start\n");
-    }
-  }
+	{
+		if(testItemDroped)
+		{
+			testitemOriginMove = true;
+			gi.cprintf (ent, PRINT_HIGH, "testitem move start\n");
+		}
+	}
 	else if (Q_stricmp (cmd, "moveend") == 0)
-  {
-    if(testItemDroped)
-    {
-      testitemOriginMove = false;
-      gi.cprintf (ent, PRINT_HIGH, "testitem move end\n");
-    }
-  }
+	{
+		if(testItemDroped)
+		{
+			testitemOriginMove = false;
+			gi.cprintf (ent, PRINT_HIGH, "testitem move end\n");
+		}
+	}
 	else if (Q_stricmp (cmd, "rotatestart") == 0)
-  {
-    if(testItemDroped)
-    {
-      testItemDroped->s.effects = EF_ROTATE;
-      gi.cprintf (ent, PRINT_HIGH, "Rotate On\n");
-    }
-  }
+	{
+		if(testItemDroped)
+		{
+			testItemDroped->s.effects = EF_ROTATE;
+			gi.cprintf (ent, PRINT_HIGH, "Rotate On\n");
+		}
+	}
 	else if (Q_stricmp (cmd, "rotateend") == 0)
-  {
-    if(testItemDroped)
-    {
-      testItemDroped->s.effects = 0;
-      gi.cprintf (ent, PRINT_HIGH, "Rotate Off\n");
-    }
-  }
-	else 
-  {
-    gi.cprintf (ent, PRINT_HIGH, "Bad testitem command\n");
-  }
+	{
+		if(testItemDroped)
+		{
+			testItemDroped->s.effects = 0;
+			gi.cprintf (ent, PRINT_HIGH, "Rotate Off\n");
+		}
+	}
+	else
+	{
+		gi.cprintf (ent, PRINT_HIGH, "Bad testitem command\n");
+	}
 }
-
 
 void InitTestItem(void)
 {
@@ -493,11 +505,13 @@ void InitTestItem(void)
   testItem->pickup_name = testItem_name;
 }
 
-
-
-
 qboolean Pickup_TestItem (edict_t *ent, edict_t *other)
 {
+	if (!ent)
+	{
+		return false;
+	}
+
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 
 	return true;
@@ -510,19 +524,24 @@ void Drop_TestItem (edict_t *ent, gitem_t *item)
 	vec3_t	forward, right;
 	vec3_t	offset;
 
-  testitemOriginMove = false;
+	if (!ent || !item)
+	{
+		return;
+	}
 
-  testItemDroped = G_Spawn();
+	testitemOriginMove = false;
+
+	testItemDroped = G_Spawn();
 
 	testItemDroped->classname = item->classname;
 	testItemDroped->item = item;
 	testItemDroped->spawnflags = DROPPED_ITEM;
 	testItemDroped->s.effects = item->world_model_flags;
 	testItemDroped->s.renderfx = RF_GLOW;
-  VectorCopy(testItem_Size[0], testItemDroped->mins);
-  VectorCopy(testItem_Size[1], testItemDroped->maxs);
+	VectorCopy(testItem_Size[0], testItemDroped->mins);
+	VectorCopy(testItem_Size[1], testItemDroped->maxs);
 	gi.setmodel (testItemDroped, testItemDroped->item->world_model);
-  testItemDroped->s.skinnum = 0;
+	testItemDroped->s.skinnum = 0;
 	testItemDroped->solid = SOLID_TRIGGER;
 	testItemDroped->movetype = MOVETYPE_TOSS;  
 	testItemDroped->touch = drop_temp_touch;
@@ -536,7 +555,7 @@ void Drop_TestItem (edict_t *ent, gitem_t *item)
 		VectorSet(offset, 24, 0, -16);
 		G_ProjectSource (ent->s.origin, offset, forward, right, testItemDroped->s.origin);
 		trace = gi.trace (ent->s.origin, testItemDroped->mins, testItemDroped->maxs,
-			testItemDroped->s.origin, ent, CONTENTS_SOLID);
+		testItemDroped->s.origin, ent, CONTENTS_SOLID);
 		VectorCopy (trace.endpos, testItemDroped->s.origin);
 	}
 	else

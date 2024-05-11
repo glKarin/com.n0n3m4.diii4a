@@ -120,6 +120,7 @@ void SP_monster_mutant(edict_t *self);
 void SP_monster_supertank(edict_t *self);
 void SP_monster_boss2(edict_t *self);
 void SP_monster_jorg(edict_t *self);
+void SP_monster_makron(edict_t *self);
 void SP_monster_boss3_stand(edict_t *self);
 
 void SP_monster_commander_body(edict_t *self);
@@ -265,6 +266,7 @@ spawn_t spawns[] = {
 	{"monster_supertank", SP_monster_supertank},
 	{"monster_boss2", SP_monster_boss2},
 	{"monster_boss3_stand", SP_monster_boss3_stand},
+	{"monster_makron", SP_monster_makron},
 	{"monster_jorg", SP_monster_jorg},
 	{"monster_commander_body", SP_monster_commander_body},
 	{"monster_soldier_hypergun", SP_monster_soldier_hypergun},
@@ -282,6 +284,35 @@ spawn_t spawns[] = {
 
 	{NULL, NULL}
 };
+
+qboolean Spawn_CheckCoop_MapHacks (edict_t *ent)
+{
+	if(!coop->value || !ent)
+	{
+		return false;
+	}
+
+	if(!Q_stricmp(level.mapname, "xsewer1"))
+	{
+		if(ent->classname && !Q_stricmp(ent->classname, "trigger_relay") && ent->target && !Q_stricmp(ent->target, "t3") && ent->targetname && !Q_stricmp(ent->targetname, "t2"))
+		{
+			return true;
+		}
+		if(ent->classname && !Q_stricmp(ent->classname, "func_button") && ent->target && !Q_stricmp(ent->target, "t16") && ent->model && !Q_stricmp(ent->model, "*71"))
+		{
+			ent->message = "Overflow valve maintenance\nhatch A opened.";
+			return false;
+		}
+
+		if(ent->classname && !Q_stricmp(ent->classname, "trigger_once") && ent->model && !Q_stricmp(ent->model, "*3"))
+		{
+			ent->message = "Overflow valve maintenance\nhatch B opened.";
+			return false;
+		}
+	}
+
+	return false;
+}
 
 /*
  * Finds the spawn function for
@@ -341,6 +372,11 @@ ED_NewString(const char *string)
 	char *newb, *new_p;
 	int i, l;
 
+	if (!string)
+	{
+		return NULL;
+	}
+
 	l = strlen(string) + 1;
 
 	newb = gi.TagMalloc(l, TAG_LEVEL);
@@ -390,7 +426,7 @@ ED_ParseField(const char *key, const char *value, edict_t *ent)
 
 	for (f = fields; f->name; f++)
 	{
-		if (!(f->flags & FFL_NOSPAWN) && !Q_stricmp(f->name, key))
+		if (!(f->flags & FFL_NOSPAWN) && !Q_strcasecmp(f->name, (char *)key))
 		{
 			/* found it */
 			if (f->flags & FFL_SPAWNTEMP)
@@ -414,13 +450,13 @@ ED_ParseField(const char *key, const char *value, edict_t *ent)
 					((float *)(b + f->ofs))[2] = vec[2];
 					break;
 				case F_INT:
-					*(int *)(b + f->ofs) = atoi(value);
+					*(int *)(b + f->ofs) = (int)strtol(value, (char **)NULL, 10);
 					break;
 				case F_FLOAT:
-					*(float *)(b + f->ofs) = atof(value);
+					*(float *)(b + f->ofs) = (float)strtod(value, (char **)NULL);
 					break;
 				case F_ANGLEHACK:
-					v = atof(value);
+					v = (float)strtod(value, (char **)NULL);
 					((float *)(b + f->ofs))[0] = 0;
 					((float *)(b + f->ofs))[1] = v;
 					((float *)(b + f->ofs))[2] = 0;
@@ -449,6 +485,11 @@ ED_ParseEdict(char *data, edict_t *ent)
 	qboolean init;
 	char keyname[256];
 	const char *com_token;
+
+	if (!ent)
+	{
+		return NULL;
+	}
 
 	init = false;
 	memset(&st, 0, sizeof(st));
@@ -678,14 +719,14 @@ SpawnEntities(const char *mapname, char *entities, const char *spawnpoint)
 			}
 			else
 			{
-				if (
-					((skill->value == 0) &&
+				if (Spawn_CheckCoop_MapHacks(ent) || (
+					((skill->value == SKILL_EASY) &&
 					 (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
-					((skill->value == 1) &&
+					((skill->value == SKILL_MEDIUM) &&
 					 (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
-					(((skill->value == 2) ||
-					  (skill->value == 3)) &&
-					 (ent->spawnflags & SPAWNFLAG_NOT_HARD))
+					(((skill->value == SKILL_HARD) ||
+					  (skill->value == SKILL_HARDPLUS)) &&
+					 (ent->spawnflags & SPAWNFLAG_NOT_HARD)))
 					)
 				{
 					G_FreeEdict(ent);
@@ -888,11 +929,11 @@ SP_worldspawn(edict_t *ent)
 	if (ent->message && ent->message[0])
 	{
 		gi.configstring(CS_NAME, ent->message);
-		strncpy(level.level_name, ent->message, sizeof(level.level_name));
+		Q_strlcpy(level.level_name, ent->message, sizeof(level.level_name));
 	}
 	else
 	{
-		strncpy(level.level_name, level.mapname, sizeof(level.level_name));
+		Q_strlcpy(level.level_name, level.mapname, sizeof(level.level_name));
 	}
 
 	if (st.sky && st.sky[0])

@@ -12,6 +12,11 @@ INTERMISSION
 
 void MoveClientToIntermission (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	if (deathmatch->value || coop->value)
 		ent->client->showscores = true;
 	VectorCopy (level.intermission_origin, ent->s.origin);
@@ -56,6 +61,11 @@ void BeginIntermission (edict_t *targ)
 	int		i, n;
 	edict_t	*ent, *client;
 
+	if (!targ)
+	{
+		return;
+	}
+
 	if (level.intermissiontime)
 		return;		// already activated
 
@@ -90,7 +100,7 @@ void BeginIntermission (edict_t *targ)
 				for (n = 0; n < MAX_ITEMS; n++)
 				{
 					if (itemlist[n].flags & IT_KEY)
-						client->client->pers.inventory[n] = 0;
+					client->client->pers.inventory[n] = 0;
 				}
 			}
 		}
@@ -154,11 +164,15 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 	int		sorted[MAX_CLIENTS];
 	int		sortedscores[MAX_CLIENTS];
 	int		score, total;
-	int		picnum;
 	int		x, y;
 	gclient_t	*cl;
 	edict_t		*cl_ent;
 	char	*tag;
+
+	if (!ent || !killer)
+	{
+		return;
+	}
 
 	// sort the clients by score
 	total = 0;
@@ -197,7 +211,6 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		cl = &game.clients[sorted[i]];
 		cl_ent = g_edicts + 1 + sorted[i];
 
-		picnum = gi.imageindex ("i_fixme");
 		x = (i>=6) ? 160 : 0;
 		y = 32 + 32 * (i%6);
 
@@ -245,6 +258,11 @@ Note that it isn't that hard to overflow the 1400 byte message limit!
 */
 void DeathmatchScoreboard (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	DeathmatchScoreboardMessage (ent, ent->enemy);
 	gi.unicast (ent, true);
 }
@@ -259,6 +277,11 @@ Display the scoreboard
 */
 void Cmd_Score_f (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	ent->client->showinventory = false;
 	ent->client->showhelp = false;
 
@@ -288,11 +311,16 @@ void HelpComputer (edict_t *ent)
 	char	string[1024];
 	char	*sk;
 
-	if (skill->value == 0)
+	if (!ent)
+	{
+		return;
+	}
+
+	if (skill->value == SKILL_EASY)
 		sk = "easy";
-	else if (skill->value == 1)
+	else if (skill->value == SKILL_MEDIUM)
 		sk = "medium";
-	else if (skill->value == 2)
+	else if (skill->value == SKILL_HARD)
 		sk = "hard";
 	else
 		sk = "hard+";
@@ -305,12 +333,12 @@ void HelpComputer (edict_t *ent)
 		"xv 0 yv 54 cstring2 \"%s\" "		// help 1
 		"xv 0 yv 110 cstring2 \"%s\" "		// help 2
 		"xv 50 yv 164 string2 \" kills     goals    secrets\" "
-		"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ", 
+		"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ",
 		sk,
 		level.level_name,
 		game.helpmessage1,
 		game.helpmessage2,
-		level.killed_monsters, level.total_monsters, 
+		level.killed_monsters, level.total_monsters,
 		level.found_goals, level.total_goals,
 		level.found_secrets, level.total_secrets);
 
@@ -329,6 +357,11 @@ Display the current help message
 */
 void Cmd_Help_f (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	// this is for backwards compatability
 	if (deathmatch->value)
 	{
@@ -364,13 +397,18 @@ void G_SetStats (edict_t *ent)
 	int			index, cells;
 	int			power_armor_type;
 
-        cells = 0;
+	if (!ent)
+	{
+		return;
+	}
+
+	cells = 0;
 
 	//
 	// health
 	//
 	ent->client->ps.stats[STAT_HEALTH_ICON] = level.pic_health;
-	ent->client->ps.stats[STAT_HEALTH] = ent->health;
+	ent->client->ps.stats[STAT_HEALTH] = (ent->health < -99) ? -99 : ent->health;
 
 	//
 	// ammo
@@ -386,9 +424,9 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
 		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 	}
-	
+
 	cells = 0;
-	
+
 	//
 	// armor
 	//

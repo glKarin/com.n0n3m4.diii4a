@@ -1,0 +1,590 @@
+Quake II 8.20 to 8.30:
+- Use the same image loading code in all renderers. (by 0lvin)
+- Use the same model loading code in all renderers. (by 0lvin)
+- Remove the unused `msg` cvar and the corresponding server side
+  infrastructure. The cvar was never implemented in Quake II, but
+  existing bits could be used for attacks against the client.
+- Add `cl_audiopaused`. When set to `1` the audio stops when the
+  game is paused. (by David Carlier)
+- Add `ogg_pausewithgame`. When set to `1` the background music stops
+  when the game is paused. (by apartfromtime)
+- New logo files, matching the original Quake II logo. (by SirYodaJedi)
+- Support for RISCV64 (by David Carlier)
+- Fix resetting Mods back to baseq2 when running with `-portable`.
+- Alternative playback modes for OGG/Vorbis background music: once,
+  sequential, random. (by apartfromtime)
+- Support gyro aiming for Switch controllers with SDL < 2.0.14. (by
+  protocultor)
+- Fixed stand-ground gladiators not attacking within a certain range.
+  (by BjossiAlfreds)
+- Fixed monsters seeing players during intermissions. (by BjossiAlfreds)
+- Several fixes to Makron. (by BjossiAlfreds)
+- Optional high dpi awareness when running under Wayland. Requires a
+  Wayland compositor supporting fractional-scale-v1 and at least SDL
+  2.26. Set `vid_highdpiawareness 1` to enable.
+- Fix lava surfaces not glowing.
+- Add a cheat protected cvar `g_swap_speed`. Allows to skip frames of
+  "putting down weapon" and "raising weapon" animations, speeding them
+  up. (by protocultor)
+- Support of RGBA png/jpg image with r_retexturing as cinematic. (by
+  0lvin)
+
+Quake II 8.10 to 8.20:
+- This release marks Quake IIs 25th anniversary. Happy Birthday!
+- Various improvements to the menu. This includes updates to the menu
+  framework itself, to the game controller menu, the savegame menu and
+  the video menus. (by apartfromtime, protocultor, David Carlier and
+  0lvin)
+- A lot of fixes and improvements to the controller support. Support for
+  gyro aiming, more precise stick handling and rumble improvements. (by
+  protocultor)
+- Implement faster weapon switching with the new 'cycleweap' command.
+  (by protocultor).
+- Fixes pusher delta yaw manipulation. This fixes the infamous bug were
+  a player standing on a blocked elevator gets turned around (by
+  skuller).
+- Add a command 'spawnentity' to spawn entities at the given
+  coordinates. Can be used for debugging. (by 0lvin)
+- Ported monster footstep sounds from SkacikPLs Q2RTX fork. Needs a pak
+  file with assets to work, see the documentation for details. (by
+  0lvin)
+- Ported reverb effects from SkacikPLs Q2RTX fork. (by 0lvin)
+- Fix several coop related bugs with the powercubes. (by BjossiAlfreds)
+- A way better fix for dead bodies obstructing elevators or falling
+  through the worldmodel. (by BjossiAlfreds)
+- Fix items already in water playing a splash sound at level start. (by
+  BjossiAlfreds)
+- Pause the game when getting minimized or hidden. (by David Carlier)
+- Fix Bugs related to 'ogg_ignoretrack0'. (by BjossiAlfreds)
+- Share model loading code between renderers. (by 0lvin)
+- Restore stair step smoothing for step sizes other than 16.
+- Fix playback of long audio samples (>10 seconds) through OpenAL.
+
+Quake II 8.01 to 8.10:
+- The OpenGL 3.2 renderer now supports the classic underwater effect.
+  Until now it was only available in the Software renderer.
+- Add 'ref_gles3', an OpenGL ES 3.0 renderer lib. This is an variant
+  of the OpenGL 3.2 renderer, using OpenGL ES instead of desktop OpenGL.
+  It greatly enhances support for embedded GPUs like the RaspberryPI 4.
+- The Software renderer now supports colored lighting. It can be
+  enabled through `sw_colorlight`. (by 0lvin)
+- Another round of timing fixes. Implement `cl_maxfps -1` (the new
+  default, existing configs are not altered) to automatically select
+  a known to be good packet framerate depending on the current renderer
+  framerate. This solves some subtile problems with stuttering entities.
+- Greatly improved support for joysticks and controllers. Devices can
+  now be hotplugged at runtime, binding should be portable between
+  different controllers and there's a new menu for controller bindings.
+  (by protocultor)
+- Add the `r_2D_unfiltered` and `r_videos_unfiltered` cvars. When
+  enabled 2D elements like the HUD and videos are not filtered, they
+  appear pixeled.
+- Add 'prefweap' command to select weapon by priority. (by protocultor)
+- Support building with Microsoft Visual Studio 2015 and newer.
+- Several game code fixes, mostly for stuck mechanics in fact2. (by
+  BjossiAlfreds and maraakate)
+- Fix two stuck monsters in hangar1 and jail5. (by Dremor8484 and
+  BjossiAlfreds)
+- Fix the `viewsize` cvar.
+
+Quake II 8.00 to 8.01:
+- Fix the game not starting when nonexistent dirs in the search path.
+- Sync haptic joystick effects to the sound. (by 0lvin)
+- Move several map bug fixes to entity files, add some more map bug
+  fixes. Without entity files the maps are the same as in Vanilla Quake
+  II. (by BjossiAlfreds)
+- Play the correct demo loop after changing the current mod.
+- Fix numbered paks with upper case letters added twice to the search
+  path. Only Windows was affected.
+- `g_footsteps 2` now only generate footstep sound when the player is on
+  the ground entity and no longer when in water or air.
+- Add a cvar `g_machinegun_norecoil' which disables the machinegun
+  recoil effect. This is cheat protected. (by De-Deppe)
+- Scale 8 bit textures when `r_scale8bittextures` is set. (by 0lvin)
+- The game is no longer limited to 1000 FPS when running in timedemo
+  mode. (by 0lvin)
+- Optimise command line parser and fix several subtle bugs. (by
+  BjossiAlfreds)
+- Add `r_2D_unfiltered`, when set to `1` 2D elements aren't filtered.
+- Fix soldiers never showing their pain skin as long as they're alive.
+- Fix relative paths in ZIP files not being found.
+- Add `gamemode` command for changing between singleplayer, deathmatch
+  and coop. (by BjossiAlfreds)
+- Show a download progress bar when `cl_http_show_dw_progress` is set to
+  `1`. (by David Carlier)
+
+Quake II 7.45 to 8.00:
+- Client side support for the optional Vulkan renderer library.
+- Non existent renderer libraries are now skipped over by the menu.
+- Fix several bugs when loading autosaves.
+- Bump the maximal number of OGG/Vorbis files to 128.
+- Several fixes to the Barracuda Shark. (by BjossiAlfreds)
+- 'vid_fullscreen' and 'r_mode' are no longer special, they require an
+  explicit 'vid_restart' like every other cvar.
+- Remove hardcoded map fixes and replace them by optional entity files.
+  Add several newly discovered map fixes. (by BjossiAlfreds)
+- Send the network protocol version to the server. This can be used by
+  the server to support clients with different network protocol version.
+  (by Knightmare)
+- Force SDL to minimize the window when its focus is lost. This fixes
+  several problem under Windows with SDL 2.0.14 and newer.
+- Switch the semantics of the 'vid_fullscreen' cvar. '1' is now native
+  fullscreen, like it was in Vanilla Quake II. '2' is desktop
+  fullscreen. When desktop fullscreen is selected through the menu,
+  'r_mode' is forced to '-2'.
+- Add 'g_footsteps' to control the generation of footstep sound. This
+  cvar is cheat protected. '1' is Vanilla Quake II behavior and the
+  default. '0' never generates footstep sound, '2' always generates
+  them.
+- Support stereo wave files. (by 0lvin)
+- Add 'cl_r1q2_lighstyle'. When set to '1' Yamagi Quake II uses the
+  Vanilla Quake II light styles (for example yellow light for the
+  Hyperblaster) instead of the default r1q2 light styles.
+- Add a submenu to configure gamepad and joystick sensitivities. (by
+  Larry Davis)
+- Ensure that the config file is written before changing the active mod.
+  This prevents config changes from getting lost.
+- Overhaul the search path logic. Make sure that each directory is added
+  only once.
+
+Quake II 7.44 to 7.45:
+- Fix a crash under windows when opening the games menu with mods
+  installed.
+
+Quake II 7.43 to 7.44:
+- Fix some input option not getting saved.
+- Limit busywaits to the full client. This lowers the cpu consumption
+  of q2ded considerably.
+- Rework the build system to be more distribution friendly. The base
+  CFLAGS and LDFLAGS can now be overridden by the environment and by
+  options passed to make. (by Simon McVittie)
+- Fix some corner cases of broken IPv6 connectivity.
+- Fix qport colliding between several Yamagi Quake II clients.
+- Keyboard keys unknown to Yamagi Quake II can now be bound.
+- Adaptive vsync is now supported by setting 'r_vsync' to '1'.
+- Implement 'coop_pickup_weapons'. When set to '1', a weapon may be
+  picked up by coop players if the player doesn't have the weapon in
+  their inventory or no other player has already picked it up.
+- In coop elevators wait for 'coop_elevator_delay' seconds.
+- If 'cl_anglekick' is set '1' angle kicks are ignored. This breaks
+  the gameplay a little bit, but helps against motion sickness. This
+  cvar is cheat protected.
+- Add 'listmaps' command and autocompletion for maps. (by JBerg)
+- Make 'wait' in scripts wait for 17 ms. This fixes some movement
+  makros.
+- Support for Haiku. (by David Carlier)
+- Add a 'mods' submenu. (by earth-metal)
+- Add the 'vstr' command and 'nextdemo' cvar. Ported from ioquake3.
+  (by Denis Pauk)
+
+Quake II 7.42 to 7.43:
+- Recover from a lost sound device, do not crash of no sound device is
+  available. This fixes several problem with DisplayPort and HDMI audio,
+  especially with the Intel Windows GPU drivers.
+- Several small game logic fixes. This includes a fix for a potential
+  progress blocker in 'The Torture Chambers' introduced in the last
+  release. (by BjossiAlfreds)
+- Add the 'gl1_particle_square' cvar, it forces square particles in
+  the GL1 renderer. (by Mason UnixBeard)
+- The software renderer is no longer experimental.
+- Add an option to configure the gun Z offset in the software renderer.
+
+Quake II 7.41 to 7.42:
+- The console can now be scrolled with the mouse wheel. (by maxcrofts)
+- Fix entities on non-horizontal surfaces rendered in full black.
+- Add an option to choose the display Quake II runs on. (by Spirrwell)
+- Add an option to specify the display refresh rate used in fullscreen.
+- Allow mouse 'sensitivity' to be set to non-integral values.
+- Port cvar operations from q2pro. These allow the manipulation of cvar
+  values, supported are: dec, inc, reset, resetall and toggle
+- Put the client into pause mode during savegame load. This prevents the
+  world getting forwarded about 100 frames during load, time in which
+  the player might be hurt by monsters or the environment.
+- New commands: 'listentities' allows listing of entities. 'teleport'
+  teleports the player to the given coordinates.
+- Fix loading of config files not ending in newlines.
+- A lot of fixes for subtle, long standing AI and game play bugs. (by
+  BjossiAlfreds)
+- Quicksaves can now be loaded and saved throught the savegame menus.
+- The software renderer now skips frames with no changes. This improves
+  performance quite a bit, especially on slow CPUs. (by Denis Pauk)
+
+Quake II 7.40 to 7.41:
+- Some bugfixes to HTTP downloads introduced in 7.40.
+- Fix several crashes when loading savegames in coop.
+- Fix some out of memory aborts when loading maps with a lot surfaces.
+- Allow autodetection of the desktop resolution. Set 'r_mode' to '-2' to
+  enable that. (by Denis Pauk)
+- Several fixes to the OpenGL 3.2 renderer. Some dynamic lights were
+  missing, for example for most explosions. Stencil shadows were broken
+  under some conditions. Performance was bad with the AMD driver under
+  Windows. Intel Ivy Bridge didn't work. Under some conditions lights
+  were too bright.
+- Add an optional fix for lighting problems in maps that misuse sky
+  surfaces for interior lighting. Set 'gl_fixsurfsky' to '1' to enable
+  it.
+- Another bunch of timing fixes. The game should now hold the framerate
+  under all conditions, even with crappy Windows GPU drivers.
+- The quake2.exe wrapper forces the Quake II window into focus. This
+  prevents Quake II starting in background.
+
+Quake II 7.30 to 7.40:
+- Add support for HTTP downloads. Both the r1q2 and q2pro URL schemes
+  are supported, if a file is unavailable over HTTP the download code
+  falls back to UDP.
+- Savegames can be removed through the menu by pressing 'del' on the
+  selected savegame. (by Jonathan Bergeron)
+- Support external entity files. This was submitted by @NeonKnightOA.
+- Some fixes to OGG/Vorbis music playback. The music keeps playing after
+  s_restart and ogg_shuffle is handled correctly by the menu.
+- Another round of timing fixes. Average frame times are now taken into
+  account when taking an educated guess on the next frames render time.
+  And the display refresh rate detection no longer cripple working GPU
+  drivers in an efford to work around bugs in older version of AMDs.
+- A lot of fixes to the internal memory management. The game is now
+  much more memory efficient, this allows playing of extremely big maps
+  without crashes. This is largely based upon work done by Denis Pauk.
+- New and much more detailed documentation.
+- Enhancements to the software renderer. Retexturing packs are now
+  supported, general cleanup and bugfixes. (by Denis Pauk)
+
+Quake II 7.21 to 7.30:
+- Removed support for SDL 1.2.
+- Removed static dependencies to libogg, libvorbis and libz.
+- Fixed several bugs regarding render- and fullscreen switch.
+- A lot of fixes and improvements to the software renderer. It's now
+  able to render the whole game without artifacts and much faster than
+  before. (by Denis Pauk)
+
+Quake II 7.20 to 7.21:
+- Fix some render glitches in the software renderer. (by Denis Pauk)
+- Render the weapon independent of the current field of view, otherwise
+  the weapon distorts with very high FOV settings. The weapons FOV can
+  be set through r_gunfov, it defaults to 90.
+- Rework the OGG/Vorbis backend. This fixes several annoying bugs, and
+  adds support for alternative track <=> file mappings. Use this to
+  implement support for the audio tracks supplied by the GOG.com version
+  of Quake II.
+
+Quake II 7.10 to 7.20:
+- Add the soft renderer back. This feature is considered experimental.
+  The porting of the old soft renderer code to SDL and it's cleanup
+  were done by Denis Pauk.
+- Rename several cvars to be consistent across different renderers.
+  The configuration file will be converted at the first start, when an
+  old cvar name is used a message is printed.
+- Make the client unicode compatible. Yamagi Quake II can now be 
+  installed into paths with unicode characters in it. On Windows the
+  user name of the current account may contain unicode characters.
+  As a side effect the game can run on ReFS volumes. While '+set
+  basedir' is still supported, the unicode compatible '-datadir'
+  should be used.
+- Another round of timing fixes. The game is now capable of holding
+  the requestes or vsync framerate even on slow machines and with
+  problematic GL drivers.
+- Fix server side mod handling, their configs are now saved to the
+  correct directories and the configs are reexeced at mod startup.
+
+Quake II 7.02 to 7.10:
+- Joystick support including haptic feedback. This fantastic work was
+  done by Denis Pauk. The dirty work is done by SDL, how good or bad
+  a joystick or gamepad is supported depends on SDLs support for it.
+- Fix the old SDL sound backend, s_openal set to 0 is working again.
+- Fix possible Vorbis buffer underruns if too many sound samples are
+  in flight. This occured only in large multi player games with at
+  least 6 custom models.
+- Fix a possible crash on Windows if MSAA was set to a value not
+  supported by the driver.
+- It's now possible to play through the whole game on a Raspberry PI
+  and other ARM boards. Please note that the RPIs hardware is really
+  limited. Only the OpenGL 1.4 renderer is supported and the framerate
+  is highly dependend on the screen resolution.
+
+Quake II 7.01 to 7.02:
+- Fix several corner cases regarding render library loading. The game
+  should now always fall back to the OpenGL 1.4 renderer if the new
+  OpenGL 3.2 renderer can't be initialized. Also the game aborts if no
+  useable OpenGL implementation exists.
+- Refactor the search path code. This should fix several bugs with
+  Quake II writing to the wrong directories or being unable to find
+  some / all assets.
+- Reimplement portable binaries. If called with the -portable command
+  line option Quake II saves all data (configs, savegames, screenshorts
+  etc.) into it's systemwide installation directory and not users home
+  directory. In contrast to the old implementation on Windows stdout.txt
+  contains all output, the first lines are no longer missing.
+- vid_fullscreen set to 1 now keeps the desktops resolution. Set it to 2
+  to change the resolution.
+- Instead of a list with precalculated FOV values the video menu now
+  shows a slider with possible values from 60 to 120. Horplus is now
+  always enabled, set the horplus cvar to 0 to disable it.
+- The game is now able to hold the requested framerate (either by the
+  vsync or the gl_maxfps cvar) with an accuracy of about +/- 1% as long
+  as the hardware is fast enough.  The framecounter was reimplemented
+  to be much more precise.
+- Fix mispredictions if an original client running on Win32 connects
+  to a Yamagi Quake II server running on Linux/i386.
+
+Quake II 7.00 to 7.01:
+- Fix build of GL3 for platforms without SSE.
+- Fix Jennel Jaquays name in credits and quit screen.
+- Make Quake II high DPI aware on Window Vista and above.
+- Fix some problems with loading dependend librarys on Windows.
+
+Quake II 6.00 to 7.00:
+- Remove the broken multitexturing render path from the OpenGL 1.4
+  renderer. It was switched off by default in 6.00.
+- Reimplement the support for shared renderer libraries. Please note
+  the this is an incompatible implementation with an custom API. The
+  original renderer libraries will not work!
+- Implement an OpenGL 3.2 renderer. This renderer has the same look
+  and feel as the old OpenGL 1.4 renderer but makes heavy use of
+  modern OpenGL and GPU features. An OpenGL 3.2 capable GPU (Intel
+  starting with Ivy Bridge on Windows or Sandy Bridge on Linux, Nvidia
+  staring with G80 and AMD starting with R600 / HD2000) is required.
+- Fix OpenAL compatibility with modern openal-soft versions.
+- Several fixes and optimizations to OpenAL, implement support for
+  doppler effects. (by xorw)
+
+Quake II 5.34 to 6.00:
+- Make the client asynchronous. The old behaviour can be forced by
+  setting cl_async to 0. Please note that asynchronicity can lead to
+  problems if the old SDL 1.2 backend is used and vsync is enabled.
+- Implement gl_overbrightbits in the non multitexturing case.  A value
+  of 1 just fixes lighting on water surfaces, higher values increase
+  the brightness of everything.
+- General renderer overhaul for better compatibility with modern GPUs.
+  OpenGL 1.4 is now required, older versions are no longer supported.
+  Multitexturing was deprecated and will be removed in a future release.
+- Fix some longstanding AI problems.
+- Several general gameplay fixes.
+
+Quake II 5.33 to 5.34:
+- Add support for stereo 3D (by Valery Guskov)
+- Make gibs solid so they move with conveyor belts.
+- Disable gl_ext_multitexturing by default.
+- Switch from an arch whitelist to an "all archs are supported"
+  approach.
+- Add a new README.
+
+Quake II 5.32 to 5.33:
+- Add OGG volume slider in settings menu
+- Fixed some bugs in volume settings
+- Replaced HUD scale option in video menu with generic UI scale
+- General UI upscaling improvements
+- Better support for keyboards with AZERTY layout
+
+Quake II 5.31 to 5.32:
+- Fix problems with newer openal-soft versions.
+- Fix overbright bits not applied to regular meshes. (by David Reid)
+- Several improvements to GUI / HUD scaling. (by David Reid)
+- Don't stop generating gibs after map change.
+- A new high resolution application / windows icon. (by Ryan)
+- Don't display baseq2 savegames in mods / addons.
+- Some smaller bugfixes.
+
+Quake II 5.30 to 5.31:
+- Enabled hud scaling by default and added an option to the video menu
+  to switch scaling off.
+- Fixed animated textures on transparent surfaces.
+- Added CMake as an optional build system.
+- Implemented a persistent console history. (by caedes)
+- Fix bug with high velocities in vents in 32bit builds.
+- A lot of small fixes and changes. (by Ozkan Sezer)
+
+Quake II 5.24 to 5.30:
+- Support for Mac OS X was overhauled. (by Jarvik7)
+- Overhauled retexturing support, replacing libjpeg with stb_image,
+  adding png support because it was so easy (by caedes).
+- Fix gamma (was broken in last release)
+- Fix mouse grabbing (again!)
+- Add binary directory to game data path
+
+Quake II 5.23 to 5.24:
+- Fix keyboard layouts in the console.
+- Use GL_ARB_texture_non_power_of_two if it's supported by the GPU.
+- Provide gl_consolescale and gl_menuscale cvars to change the scale
+  of the console and the menu.
+- Several bugfixes and improvements to the sound system.  Some bugs
+  were fixed and the underwater effect is now supported in the SDL
+backend. (by bibendovsky)
+
+Quake II 5.22 to 5.23:
+- Provide gl_hudscale cvar that can be changed to scale the HUD, for
+  high resolutions etc. (by caedes)
+- Several menu improvements.
+- A better work around for the "the mouse cursor hits the window
+  border" SDL2 problem.
+
+Quake II 5.21 to 5.22:
+- Provide a fallback if SDL2s relative mouse mode cannot be activated.
+- Add support for MSAA through the gl_msaa_samples cvar.
+
+Quake II 5.20 to 5.21:
+- Fix a bug regarding mouse key handling (reported by phenixia2003)
+- Correct MS Windows builds. Add official support for Win64. This
+  still needs some testing.
+- Allow to shutdown the client by pressing ctrl-c or sending SIGTERM.
+  Unix / Linux only.
+
+Quake II 5.11 to 5.20
+- Integrate the refresher into the client and remove QGL. This means
+  that ref_gl.so is gone and libGL is now linked like every other lib.
+  (by Alejandro Ricoveri)
+- Port the client to SDL 2.0. The newer SDL version solves some long
+  standing problems, like broken keyboard layouts and non working SDL
+  sound on Windows. While SDL 2.0 is enabled by default, one can switch
+  back to SDL 1.2 by editing the Makefile.
+- OS X support was put to hold. While OS X support is nice to have,
+  non of the deveolpers has interest in maintaining it. Until someone
+  steps up and takes responsibility, no OS X versions will be released.
+
+Quake II 5.10 to 5.11
+- A lot of bugfixes.
+- Videos are scaled to 4:3 to prevent distortions.
+- Another sound system cleanup.
+
+Quake II 5.00 to 5.10
+- Support for OS X. (by W. Beser)
+- Correct field of view handling (by Ricardo Garci)
+- Many improvements to the mouse release code (by svdijk)
+- Scrolling save / load menus (by svdijk)
+
+Quake II 4.21 to 5.00
+- Backport to Microsoft Windows.
+- Support for OpenBSD. (by Jonathan Gray)
+- Aspect ration can be set via the video menu.
+- A better random number generator.
+- The SDL sound driver is now selectable by "s_sdldriver".
+
+Quake II 4.20 to 4.21
+- Fix several segfaults with OpenAL. (reported by Joran and
+  mxmvasilyev0)
+- Add a file CONTRIBUTE.
+- Some minor changes to the Makefile.
+
+Quake II 4.10 to 4.20
+- Add an options framework to allow disabling most option features
+  (OGG/Vorbis, ZIP file loading, OpenAL, etc) at compile time.
+- Integrate OpenAL support, enabling surround sound and better stereo
+  sound calculations.
+- Enforce the "C" locale to prevent libraries like broken LADSPA
+  plugins to override it and break printf, scanf, etc.
+
+Quake II 4.03 to 4.10
+- Change the behavior of hotkey menus to fix some strange bugs and
+  memory leaks in the menu system.
+- Add the "gl_farsee" cvar. When set to "1" Quake II renders maps up
+  to 4096x4096 units instead of being limited to 2300x2300. The
+  default is "0". (by Richard Allen)
+- Add support for the high resolution retexturing pack.
+- Reenable support for gamma via SDL, since the upstream bug was fixed
+  with SDL 1.2.15. Gamma via X11 can be forced by defining X11GAMMA at
+  compile time.
+- Add support for big endian architectures and enable the build on
+  SPARC64 CPUs. (by Kieron Gillespie)
+
+Quake II 4.02 to 4.03
+- Fix wrong function call in the Quake II file system.
+- Fix gl_ext_multitexture set to 1. (reported by Richard Allen and
+  Lukas Sabota)
+- Print the version number in the window title.
+
+Quake II 4.01 to 4.02
+- Fix a linker problem manifesting only on Ubuntu.
+
+Quake II 4.00 to 4.01
+- Fix a linker problem.
+- Fix a problem with displaying the version number.
+
+Quake II 3.00 to 4.00
+- A major rewrite of the savegame system.
+- Add a crash handler, printing a backtrace on Linux platforms.
+- Add support for system wide installations.
+- ctf was moved into a separate download.
+- All open bugs were fixed.
+- Fix spawnpoint selection if single player maps are loaded via
+  console.
+- Rename ~/.quake2 to ~/.yq2 to ease parallel installation with other
+  Quake II clients.
+- The client does no longer crash if the menu is opened while
+  connecting to remote server.
+- The game code received a code audit and major rework.
+
+Quake II 3.00RC2 to 3.00
+- Improve compatiblity with pulseaudio (by Ozkan Sezer)
+
+Quake II 3.00RC1 to 3.00RC2
+- Many improvements to the OGG/Vorbis support. (by Ozkan Sezer)
+- The map command now works even when a server is running.
+
+Quake II 2.11 to 3.00RC1
+- Complete refactoring and code audit of the client, leading to much
+  cleaner and more maintainable code and improved stability.
+- Fixed a wrong cast under linux. This could result in sudden crashes.
+- Reworked the input system.
+- Much improved console tab completion.
+- Better TTY output of the startup and shutdown.
+- More reliable shutdown of the client.
+- Plugged a memory leak in the quake file system.
+- Major rework of the sound system:
+  - A lot of bugfixes for the upper layer.
+  - Simplified code and removed crap from the 90ies.
+  - Rewrote the low level backend from scratch.
+- Major rework of the refresher:
+  - Added multitexturing and paletted textures back (this was
+    requested by many, many people).
+  - Rewrote the SDL backend.
+  - Reimplemented the gamma control using native X11 calls.  This
+    should fix the gamma for all setups.
+  - Support for overbright bits.
+- Changed the window title to "Yamagi Quake II".
+
+Quake II 2.10 to 2.11
+- Fix a bug in the client. This fixes the strange crashes under
+  Ubuntu. (Reported by many, special thanks to jhansonxi for his help)
+- Add a null pointer check in cl_view.c. This fixes a rare case crash
+  in Ground Zero when files are missing. (by Sascha K.)
+- Add a script as possible work around for Ubuntu bug 32452 (by
+  caedes)
+
+Quake II 2.10RC3 to 2.10:
+- Fix blending
+
+Quake II 2.10RC2 to 2.10RC3:
+- The refresher uses OpenGL 1.4 not 1.0
+- Saner standard configuration
+- Fix a bug when a video follows a video (like in Ground Zero)
+- Fix a crash when enabling OGG/Vorbis in the menu
+- Fix a crash when changing level after deactivating OGG/Vorbis
+  playback
+- Do not show the gun symbol when fov is bigger than 91 and cl_gun is
+  set to 2
+
+Quake II 2.10RC to 2.10RC2:
+- Fix a problem with machine gun soldiers deadlocking
+- Change CFLAGS to a saner default
+- Quake II now creates ~/.quake2 if it doesn't exist (reported by N.
+  Tsakiris)
+- Slightly better game performance (~10 FPS)
+
+Quake II 2.00 to 2.10RC:
+- Automagically releases the mouse when the console is opened
+- Increased the maximal amount of file descriptores from 64 to 256.
+  This should fix some very rare crashes with 'The Reckoning' and
+  possible similar problems with mods.  (reported by E. Müller)
+- Support for custom resolutions (by caedes and Yamagi)
+
+Quake II 1.05 to 2.00:
+- Ogg/Vorbis Support as an optional replacement for the CD playback
+- Support for hardware gamma via SDL
+- Support for grabbing the mouse
+- Some bugfixes
+
+Quake II 1.04 to 1.05:
+- Fix slowdown with CD music under Linux (by caedes)
+
+Quake II 1.03 to 1.04:
+- Added icon (by caedes)
+- Added README
+- Removed duplicated file

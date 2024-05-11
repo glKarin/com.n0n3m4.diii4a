@@ -7,8 +7,8 @@
 
 #include "header/local.h"
 
-int gibsthisframe = 0;
-int lastgibframe = 0;
+int debristhisframe;
+int gibsthisframe;
 
 /*
  * QUAKED func_group (0 0 0) ?
@@ -124,12 +124,12 @@ gib_think(edict_t *self)
 void
 gib_touch(edict_t *self, edict_t *other /* unused */, cplane_t *plane, csurface_t *surf /* unused */)
 {
-	if (!self || !plane)
+	vec3_t normal_angles, right;
+
+	if (!self)
 	{
 		return;
 	}
-
-	vec3_t normal_angles, right;
 
 	if (!self->groundentity)
 	{
@@ -181,20 +181,19 @@ ThrowGib(edict_t *self, char *gibname, int damage, int type)
 		return;
 	}
 
-	if (level.framenum > lastgibframe)
-	{
-		gibsthisframe = 0;
-		lastgibframe = level.framenum;
-	}
-
-	gibsthisframe++;
-
-	if (gibsthisframe > 20)
+	if (gibsthisframe > MAX_GIBS)
 	{
 		return;
 	}
 
-	gib = G_Spawn();
+	gib = G_SpawnOptional();
+
+	if (!gib)
+	{
+		return;
+	}
+
+	gibsthisframe++;
 
 	VectorScale(self->size, 0.5, size);
 	VectorAdd(self->absmin, size, origin);
@@ -203,11 +202,13 @@ ThrowGib(edict_t *self, char *gibname, int damage, int type)
 	gib->s.origin[2] = origin[2] + crandom() * size[2];
 
 	gi.setmodel(gib, gibname);
-	gib->solid = SOLID_NOT;
+	gib->solid = SOLID_BBOX;
+	gib->svflags = SVF_DEADMONSTER;
 	gib->s.effects |= EF_GIB;
 	gib->flags |= FL_NO_KNOCKBACK;
 	gib->takedamage = DAMAGE_YES;
 	gib->die = gib_die;
+	gib->health = 250;
 
 	if (type == GIB_ORGANIC)
 	{
@@ -244,7 +245,7 @@ ThrowHead(edict_t *self, char *gibname, int damage, int type)
 	{
 		return;
 	}
-	
+
 	self->s.skinnum = 0;
 	self->s.frame = 0;
 	VectorClear(self->mins);
@@ -252,7 +253,7 @@ ThrowHead(edict_t *self, char *gibname, int damage, int type)
 
 	self->s.modelindex2 = 0;
 	gi.setmodel(self, gibname);
-	self->solid = SOLID_NOT;
+	self->solid = SOLID_BBOX;
 	self->s.effects |= EF_GIB;
 	self->s.effects &= ~EF_FLIES;
 	self->s.sound = 0;
@@ -260,6 +261,10 @@ ThrowHead(edict_t *self, char *gibname, int damage, int type)
 	self->svflags &= ~SVF_MONSTER;
 	self->takedamage = DAMAGE_YES;
 	self->die = gib_die;
+
+	// The entity still has the monsters clipmaks.
+	// Reset it to MASK_SHOT to be on the save side.
+	self->clipmask = MASK_SHOT;
 
 	if (type == GIB_ORGANIC)
 	{
@@ -299,15 +304,9 @@ ThrowGibACID(edict_t *self, char *gibname, int damage, int type)
 		return;
 	}
 
-	if (level.framenum > lastgibframe)
-	{
-		gibsthisframe = 0;
-		lastgibframe = level.framenum;
-	}
-
 	gibsthisframe++;
 
-	if (gibsthisframe > 20)
+	if (gibsthisframe > MAX_GIBS)
 	{
 		return;
 	}
@@ -333,6 +332,7 @@ ThrowGibACID(edict_t *self, char *gibname, int damage, int type)
 	gib->takedamage = DAMAGE_YES;
 	gib->die = gib_die;
 	gib->dmg = 2;
+	gib->health = 250;
 
 	if (type == GIB_ORGANIC)
 	{
@@ -368,7 +368,7 @@ ThrowHeadACID(edict_t *self, char *gibname, int damage, int type)
 	{
 		return;
 	}
-	
+
 	self->s.skinnum = 0;
 	self->s.frame = 0;
 	VectorClear(self->mins);
@@ -442,10 +442,14 @@ ThrowClientHead(edict_t *self, int damage)
 	VectorSet(self->maxs, 16, 16, 16);
 
 	self->takedamage = DAMAGE_NO;
-	self->solid = SOLID_NOT;
+	self->solid = SOLID_BBOX;
 	self->s.effects = EF_GIB;
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
+
+	// The entity still has the monsters clipmaks.
+	// Reset it to MASK_SHOT to be on the save side.
+	self->clipmask = MASK_SHOT;
 
 	self->movetype = MOVETYPE_BOUNCE;
 	VelocityForDamage(damage, vd);
@@ -488,20 +492,20 @@ ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
 		return;
 	}
 
-	if (level.framenum > lastgibframe)
-	{
-		gibsthisframe = 0;
-		lastgibframe = level.framenum;
-	}
-
-	gibsthisframe++;
-
-	if (gibsthisframe > 20)
+	if (debristhisframe > MAX_DEBRIS)
 	{
 		return;
 	}
 
-	chunk = G_Spawn();
+	chunk = G_SpawnOptional();
+
+	if (!chunk)
+	{
+		return;
+	}
+
+	debristhisframe++;
+
 	VectorCopy(origin, chunk->s.origin);
 	gi.setmodel(chunk, modelname);
 	v[0] = 100 * crandom();
@@ -520,6 +524,7 @@ ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
 	chunk->classname = "debris";
 	chunk->takedamage = DAMAGE_YES;
 	chunk->die = debris_die;
+	chunk->health = 250;
 	gi.linkentity(chunk);
 }
 
@@ -823,7 +828,7 @@ SP_info_null(edict_t *self)
 
 /*
  * QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
- * Used as a positional target for lightning.
+ * Used as a positional target for lighting.
  */
 void
 SP_info_notnull(edict_t *self)
@@ -1013,12 +1018,6 @@ func_object_touch(edict_t *self, edict_t *other, cplane_t *plane,
 		csurface_t *surf /* unused */)
 {
 	if (!self || !other || !plane)
-	{
-		return;
-	}
-
-	/* only squash thing we fall on top of */
-	if (!plane)
 	{
 		return;
 	}
@@ -1372,7 +1371,7 @@ barrel_explode(edict_t *self)
 	ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
 
 	/* a bunch of little chunks */
-	spd = 2 * self->dmg / 200;
+	spd = (float)(2 * self->dmg / 200);
 	org[0] = self->s.origin[0] + crandom() * self->size[0];
 	org[1] = self->s.origin[1] + crandom() * self->size[1];
 	org[2] = self->s.origin[2] + crandom() * self->size[2];
@@ -2377,7 +2376,7 @@ SP_misc_gib_arm(edict_t *ent)
 	}
 
 	gi.setmodel(ent, "models/objects/gibs/arm/tris.md2");
-	ent->solid = SOLID_NOT;
+	ent->solid = SOLID_BBOX;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
 	ent->die = gib_die;
@@ -2405,7 +2404,7 @@ SP_misc_gib_leg(edict_t *ent)
 	}
 
 	gi.setmodel(ent, "models/objects/gibs/leg/tris.md2");
-	ent->solid = SOLID_NOT;
+	ent->solid = SOLID_BBOX;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
 	ent->die = gib_die;
@@ -2433,7 +2432,7 @@ SP_misc_gib_head(edict_t *ent)
 	}
 
 	gi.setmodel(ent, "models/objects/gibs/head/tris.md2");
-	ent->solid = SOLID_NOT;
+	ent->solid = SOLID_BBOX;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
 	ent->die = gib_die;
@@ -2918,7 +2917,7 @@ amb4_think(edict_t *ent)
 		return;
 	}
 
-	ent->nextthink = level.time + 2.7;
+	ent->nextthink = level.time + 2.0;
 	gi.sound(ent, CHAN_VOICE, amb4sound, 1, ATTN_NONE, 0);
 }
 

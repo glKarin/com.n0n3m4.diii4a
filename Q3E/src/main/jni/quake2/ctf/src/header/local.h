@@ -29,7 +29,7 @@
 
 #include "shared.h"
 
-/* define GAME_INCLUDE so that game.h does not define the 
+/* define GAME_INCLUDE so that game.h does not define the
    short, server-visible gclient_t and edict_t structures,
    because we define the full size ones in this file */
 #define GAME_INCLUDE
@@ -109,6 +109,10 @@ typedef enum
 	AMMO_CELLS,
 	AMMO_SLUGS
 } ammo_t;
+
+/* Maximum debris / gibs per frame */
+#define MAX_GIBS 20
+#define MAX_DEBRIS 20
 
 /* deadflag */
 #define DEAD_NO 0
@@ -259,8 +263,8 @@ typedef struct gitem_s
 	char *precaches;            /* string of all models, sounds, and images this item will use */
 } gitem_t;
 
-/* this structure is left intact through an entire game 
-   it should be initialized at dll load time, and read/written to 
+/* this structure is left intact through an entire game
+   it should be initialized at dll load time, and read/written to
    the server.ssv file for savegames */
 typedef struct
 {
@@ -271,7 +275,7 @@ typedef struct
 
 	gclient_t *clients;         /* [maxclients] */
 
-	/* can't store spawnpoint in level, because 
+	/* can't store spawnpoint in level, because
 	   it would get overwritten by the savegame restore */
 	char spawnpoint[512];       /* needed for coop respawns */
 
@@ -288,7 +292,7 @@ typedef struct
 	qboolean autosaved;
 } game_locals_t;
 
-/* this structure is cleared as each map is entered 
+/* this structure is cleared as each map is entered
    it is read/written to the level.sav file for savegames */
 typedef struct
 {
@@ -333,8 +337,8 @@ typedef struct
 	int power_cubes;                /* ugly necessity for coop */
 } level_locals_t;
 
-/* spawn_temp_t is only used to hold entity field values that 
-   can be set from the editor, but aren't actualy present 
+/* spawn_temp_t is only used to hold entity field values that
+   can be set from the editor, but aren't actualy present
    in edict_t during gameplay */
 typedef struct
 {
@@ -446,6 +450,10 @@ extern spawn_temp_t st;
 extern int sm_meat_index;
 extern int snd_fry;
 
+extern int debristhisframe;
+extern int gibsthisframe;
+
+
 /* means of death */
 #define MOD_UNKNOWN 0
 #define MOD_BLASTER 1
@@ -533,6 +541,8 @@ extern cvar_t *flood_waitdelay;
 
 extern cvar_t *sv_maplist;
 
+extern cvar_t *aimfix;
+
 #define world (&g_edicts[0])
 
 /* item spawnflags */
@@ -543,7 +553,7 @@ extern cvar_t *sv_maplist;
 #define DROPPED_PLAYER_ITEM 0x00020000
 #define ITEM_TARGETS_USED 0x00040000
 
-/* fields are needed for spawning from the entity string 
+/* fields are needed for spawning from the entity string
    and saving / loading games */
 #define FFL_SPAWNTEMP 1
 
@@ -752,7 +762,7 @@ void DeathmatchScoreboardMessage(edict_t *client, edict_t *killer);
 
 /* g_pweapon.c */
 void PlayerNoise(edict_t *who, vec3_t where, int type);
-void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance,
+void P_ProjectSource(edict_t *ent, vec3_t distance,
 		vec3_t forward, vec3_t right, vec3_t result);
 void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames,
@@ -793,7 +803,7 @@ typedef struct
 	char netname[16];
 	int hand;
 
-	qboolean connected;             /* a loadgame will leave valid entities that 
+	qboolean connected;             /* a loadgame will leave valid entities that
 									   just don't have a connection yet */
 
 	/* values saved and restored from edicts when changing levels */
@@ -842,7 +852,7 @@ typedef struct
 	int helpchanged;
 } client_respawn_t;
 
-/* this structure is cleared on each PutClientInServer(), 
+/* this structure is cleared on each PutClientInServer(),
    except for 'client->pers' */
 struct gclient_s
 {
@@ -872,7 +882,7 @@ struct gclient_s
 
 	gitem_t *newweapon;
 
-	/* sum up damage over an entire frame, so 
+	/* sum up damage over an entire frame, so
 	   shotgun blasts give a single big kick */
 	int damage_armor;               /* damage absorbed by armor */
 	int damage_parmor;              /* damage absorbed by power armor */
@@ -941,9 +951,9 @@ struct gclient_s
 struct edict_s
 {
 	entity_state_t s;
-	struct gclient_s *client;       /* NULL if not a player 
-									   the server expects the first part 
-									   of gclient_s to be a player_state_t 
+	struct gclient_s *client;       /* NULL if not a player
+									   the server expects the first part
+									   of gclient_s to be a player_state_t
 									   but the rest of it is opaque */
 
 	qboolean inuse;
@@ -1000,7 +1010,7 @@ struct edict_s
 	vec3_t avelocity;
 	int mass;
 	float air_finished;
-	float gravity;              /* per entity gravity multiplier (1.0 is normal) 
+	float gravity;              /* per entity gravity multiplier (1.0 is normal)
 								   use for lowgrav artifact, flares */
 
 	edict_t *goalentity;
@@ -1029,7 +1039,7 @@ struct edict_s
 	int max_health;
 	int gib_health;
 	int deadflag;
-	qboolean show_hostile;
+	int show_hostile;
 
 	float powerarmor_time;
 
@@ -1065,7 +1075,7 @@ struct edict_s
 	float delay;                /* before firing targets */
 	float random;
 
-	float teleport_time;
+	float last_sound_time;
 
 	int watertype;
 	int waterlevel;

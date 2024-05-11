@@ -202,6 +202,8 @@ void Com_PageInMemory(byte *buffer, int size);
 int Q_stricmp(const char *s1, const char *s2);
 int Q_strcasecmp(char *s1, char *s2);
 int Q_strncasecmp(char *s1, char *s2, int n);
+int Q_strlcpy(char *dst, const char *src, int size);
+int Q_strlcat(char *dst, const char *src, int size);
 
 /* ============================================= */
 
@@ -213,7 +215,7 @@ float BigFloat(float l);
 float LittleFloat(float l);
 
 void Swap_Init(void);
-char *va(const char *format, ...); //k const
+char *va(char *format, ...);
 
 /* ============================================= */
 

@@ -310,10 +310,10 @@ vec3_t corners[2];
 int
 BoxOnPlaneSide2(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {
-	int i;
+	//int i; // DG: I think it's supposed to write to the global!
 	float dist1, dist2;
 	int sides;
-	vec3_t corners[2];
+	//vec3_t corners[2]; // DG: ditto
 
 	for (i = 0; i < 3; i++)
 	{
@@ -504,20 +504,9 @@ VectorNormalize(vec3_t v)
 vec_t
 VectorNormalize2(vec3_t v, vec3_t out)
 {
-	float length, ilength;
+	VectorCopy(v, out);
 
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = (float)sqrt(length);
-
-	if (length)
-	{
-		ilength = 1 / length;
-		out[0] = v[0] * ilength;
-		out[1] = v[1] * ilength;
-		out[2] = v[2] * ilength;
-	}
-
-	return length;
+	return VectorNormalize(out);
 }
 
 void
@@ -680,6 +669,12 @@ COM_FileBase(char *in, char *out)
 {
 	char *s, *s2;
 
+	if(!in[0])
+	{
+		out[0] = '\0';
+		return;
+	}
+
 	s = in + strlen(in) - 1;
 
 	while (s != in && *s != '.')
@@ -711,6 +706,12 @@ COM_FilePath(const char *in, char *out)
 {
 	const char *s;
 
+	if(!in[0])
+	{
+		out[0] = '\0';
+		return;
+	}
+
 	s = in + strlen(in) - 1;
 
 	while (s != in && *s != '/')
@@ -726,6 +727,11 @@ void
 COM_DefaultExtension(char *path, const char *extension)
 {
 	char *src;
+
+	if(!path[0])
+	{
+		return;
+	}
 
 	/* */
 	/* if path doesn't have a .EXT, append extension */
@@ -1092,6 +1098,42 @@ Com_sprintf(char *dest, int size, char *fmt, ...)
 	strcpy(dest, bigbuffer);
 }
 
+int
+Q_strlcpy(char *dst, const char *src, int size)
+{
+	const char *s = src;
+
+	while (*s)
+	{
+		if (size > 1)
+		{
+			*dst++ = *s;
+			size--;
+		}
+		s++;
+	}
+	if (size > 0)
+	{
+		*dst = '\0';
+	}
+
+	return s - src;
+}
+
+int
+Q_strlcat(char *dst, const char *src, int size)
+{
+	char *d = dst;
+
+	while (size > 0 && *d)
+	{
+		size--;
+		d++;
+	}
+
+	return (d - dst) + Q_strlcpy(d, src, size);
+}
+
 /*
  * =====================================================================
  *
@@ -1140,7 +1182,7 @@ Info_ValueForKey(char *s, char *key)
 
 		o = value[valueindex];
 
-		while (*s != '\\' && *s)
+		while (*s != '\\')
 		{
 			if (!*s)
 			{
@@ -1205,7 +1247,7 @@ Info_RemoveKey(char *s, char *key)
 
 		o = value;
 
-		while (*s != '\\' && *s)
+		while (*s != '\\')
 		{
 			if (!*s)
 			{
@@ -1219,7 +1261,7 @@ Info_RemoveKey(char *s, char *key)
 
 		if (!strcmp(key, pkey))
 		{
-			strcpy(start, s); /* remove this part */
+			memmove(start, s, strlen(s) + 1); /* remove this part */
 			return;
 		}
 
@@ -1257,6 +1299,11 @@ Info_SetValueForKey(char *s, char *key, char *value)
 	int c;
 	int maxsize = MAX_INFO_STRING;
 
+	if (!value || !strlen(value))
+	{
+		return;
+	}
+
 	if (strstr(key, "\\") || strstr(value, "\\"))
 	{
 		Com_Printf("Can't use keys or values with a \\\n");
@@ -1282,11 +1329,6 @@ Info_SetValueForKey(char *s, char *key, char *value)
 	}
 
 	Info_RemoveKey(s, key);
-
-	if (!value || !strlen(value))
-	{
-		return;
-	}
 
 	Com_sprintf(newi, sizeof(newi), "\\%s\\%s", key, value);
 

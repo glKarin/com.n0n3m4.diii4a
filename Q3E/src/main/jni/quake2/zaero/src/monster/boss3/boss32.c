@@ -38,6 +38,11 @@ void makron_taunt (edict_t *self)
 {
 	float r;
 
+	if (!self)
+	{
+		return;
+	}
+
 	r=random();
 	if (r <= 0.3)
 		gi.sound (self, CHAN_AUTO, sound_taunt1, 1, ATTN_NONE, 0);
@@ -115,9 +120,14 @@ mframe_t makron_frames_stand []=
 	{ai_stand, 0, NULL}		// 60
 };
 mmove_t	makron_move_stand = {FRAME_stand201, FRAME_stand260, makron_frames_stand, NULL};
-	
+
 void makron_stand (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	self->monsterinfo.currentmove = &makron_move_stand;
 }
 
@@ -138,31 +148,61 @@ mmove_t	makron_move_run = {FRAME_walk204, FRAME_walk213, makron_frames_run, NULL
 
 void makron_hit (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_AUTO, sound_hit, 1, ATTN_NONE,0);
 }
 
 void makron_popup (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_BODY, sound_popup, 1, ATTN_NONE,0);
 }
 
 void makron_step_left (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_BODY, sound_step_left, 1, ATTN_NORM,0);
 }
 
 void makron_step_right (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_BODY, sound_step_right, 1, ATTN_NORM,0);
 }
 
 void makron_brainsplorch (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_VOICE, sound_brainsplorch, 1, ATTN_NORM,0);
 }
 
 void makron_prerailgun (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	gi.sound (self, CHAN_WEAPON, sound_prerailgun, 1, ATTN_NORM,0);
 }
 
@@ -184,11 +224,21 @@ mmove_t	makron_move_walk = {FRAME_walk204, FRAME_walk213, makron_frames_run, NUL
 
 void makron_walk (edict_t *self)
 {
-		self->monsterinfo.currentmove = &makron_move_walk;
+	if (!self)
+	{
+		return;
+	}
+
+	self->monsterinfo.currentmove = &makron_move_walk;
 }
 
 void makron_run (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		self->monsterinfo.currentmove = &makron_move_stand;
 	else
@@ -273,7 +323,7 @@ mframe_t makron_frames_death2 [] =
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
-	{ai_move,	0,	NULL},			
+	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},			// 30
@@ -287,7 +337,6 @@ mframe_t makron_frames_death2 [] =
 	{ai_move,	0,	NULL},
 	{ai_move,	-1,	NULL},
 	{ai_move,	2,	NULL},			// 40
-	{ai_move,	0,	NULL},			
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
@@ -295,9 +344,10 @@ mframe_t makron_frames_death2 [] =
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
-	{ai_move,	0,	NULL},			
+	{ai_move,	0,	NULL},
+	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},			// 50
-	{ai_move,	0,	NULL},			
+	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	-6,	NULL},
@@ -307,7 +357,7 @@ mframe_t makron_frames_death2 [] =
 	{ai_move,	-4,	makron_step_left},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},			// 60
-	{ai_move,	0,	NULL},			
+	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	-2,	NULL},
 	{ai_move,	-5,	NULL},
@@ -317,7 +367,7 @@ mframe_t makron_frames_death2 [] =
 	{ai_move,	-7,	NULL},
 	{ai_move,	-4,	NULL},
 	{ai_move,	-4,	makron_step_right},			// 70
-	{ai_move,	-6,	NULL},			
+	{ai_move,	-6,	NULL},
 	{ai_move,	-7,	NULL},
 	{ai_move,	0,	makron_step_left},
 	{ai_move,	0,	NULL},
@@ -327,7 +377,7 @@ mframe_t makron_frames_death2 [] =
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},			// 80
-	{ai_move,	0,	NULL},			
+	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
 	{ai_move,	0,	NULL},
@@ -337,7 +387,7 @@ mframe_t makron_frames_death2 [] =
 	{ai_move,	0,	NULL},
 	{ai_move,	2,	NULL},
 	{ai_move,	0,	NULL},			// 90
-	{ai_move,	27,	makron_hit},			
+	{ai_move,	27,	makron_hit},
 	{ai_move,	26,	NULL},
 	{ai_move,	0,	makron_brainsplorch},
 	{ai_move,	0,	NULL},
@@ -395,6 +445,11 @@ void makronBFG (edict_t *self)
 	vec3_t	dir;
 	vec3_t	vec;
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_MAKRON_BFG], forward, right, start);
 
@@ -410,7 +465,7 @@ void makronBFG (edict_t *self)
 	VectorNormalize (dir);
 	gi.sound (self, CHAN_VOICE, sound_attack_bfg, 1, ATTN_NORM, 0);
 	monster_fire_bfg (self, start, dir, 50, 300, 100, 300, MZ2_MAKRON_BFG);
-}	
+}
 
 
 mframe_t makron_frames_attack3 []=
@@ -480,6 +535,11 @@ mmove_t makron_move_attack5 = {FRAME_attak501, FRAME_attak516, makron_frames_att
 
 void MakronSaveloc (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	VectorCopy (self->enemy->s.origin, self->pos1);	//save for aiming the shot
 	self->pos1[2] += self->enemy->viewheight;
 }
@@ -491,9 +551,14 @@ void MakronRailgun (edict_t *self)
 	vec3_t	dir;
 	vec3_t	forward, right;
 
+	if (!self)
+	{
+		return;
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_MAKRON_RAILGUN_1], forward, right, start);
-	
+
 	// calc direction to where we targted
 	VectorSubtract (self->pos1, start, dir);
 	VectorNormalize (dir);
@@ -509,6 +574,11 @@ void MakronHyperblaster (edict_t *self)
 	vec3_t	start;
 	vec3_t	forward, right;
 	int		flash_number;
+
+	if (!self)
+	{
+		return;
+	}
 
 	flash_number = MZ2_MAKRON_BLASTER_1 + (self->s.frame - FRAME_attak405);
 
@@ -536,11 +606,16 @@ void MakronHyperblaster (edict_t *self)
 	AngleVectors (dir, forward, NULL, NULL);
 
 	monster_fire_blaster (self, start, forward, 15, 1000, MZ2_MAKRON_BLASTER_1, EF_BLASTER);
-}	
+}
 
 
 void makron_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
+	if (!self)
+	{
+		return;
+	}
+
 
 	if (self->health < (self->max_health / 2))
 			self->s.skinnum = 1;
@@ -554,7 +629,7 @@ void makron_pain (edict_t *self, edict_t *other, float kick, int damage)
 			return;
 
 	self->pain_debounce_time = level.time + 3;
-	if (skill->value == 3)
+	if (skill->value == SKILL_HARDPLUS)
 		return;		// no pain anims in nightmare
 
 
@@ -589,20 +664,18 @@ void makron_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void makron_sight(edict_t *self, edict_t *other)
 {
-	self->monsterinfo.currentmove = &makron_move_sight;
 }
 
 void makron_attack(edict_t *self)
 {
-	vec3_t	vec;
-	float	range;
 	float	r;
 
+	if (!self)
+	{
+		return;
+	}
+
 	r = random();
-
-	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
-	range = VectorLength (vec);
-
 
 	if (r <= 0.3)
 		self->monsterinfo.currentmove = &makron_move_attack3;
@@ -617,32 +690,104 @@ void makron_attack(edict_t *self)
 Makron Torso. This needs to be spawned in
 ---
 */
-
 void makron_torso_think (edict_t *self)
 {
-	if (++self->s.frame < 365)
-		self->nextthink = level.time + FRAMETIME;
-	else
-	{		
-		self->s.frame = 346;
-		self->nextthink = level.time + FRAMETIME;
+	if (!self)
+	{
+		return;
 	}
+
+	/* detach from the makron if the legs are gone completely */
+	if (self->owner && (!self->owner->inuse || (self->owner->health <= self->owner->gib_health)))
+	{
+		self->owner = NULL;
+	}
+
+	/* if the makron is revived the torso was put back on him */
+	if (self->owner && self->owner->deadflag != DEAD_DEAD)
+	{
+		G_FreeEdict(self);
+		return;
+	}
+
+	if (++self->s.frame >= FRAME_death320)
+	{
+		self->s.frame = FRAME_death301;
+	}
+
+	self->nextthink = level.time + FRAMETIME;
 }
 
-void makron_torso (edict_t *ent)
+static void makron_torso_origin (edict_t *self, edict_t *torso)
 {
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_NOT;
-	VectorSet (ent->mins, -8, -8, 0);
-	VectorSet (ent->maxs, 8, 8, 8);
-	ent->s.frame = 346;
-	ent->s.modelindex = gi.modelindex ("models/monsters/boss3/rider/tris.md2");
-	ent->think = makron_torso_think;
-	ent->nextthink = level.time + 2 * FRAMETIME;
-	ent->s.sound = gi.soundindex ("makron/spine.wav");
-	gi.linkentity (ent);
+	vec3_t v;
+	trace_t tr;
+
+	AngleVectors(self->s.angles, v, NULL, NULL);
+	VectorMA(self->s.origin, -84.0f, v, v);
+
+	tr = gi.trace(self->s.origin, torso->mins, torso->maxs, v, self, MASK_SOLID);
+
+	VectorCopy (tr.endpos, torso->s.origin);
 }
 
+void makron_torso_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	int n;
+
+	if (self->health > self->gib_health)
+	{
+		return;
+	}
+
+	gi.sound(self, CHAN_VOICE, gi.soundindex( "misc/udeath.wav"), 1, ATTN_NORM, 0);
+
+	ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2",
+			damage, GIB_ORGANIC);
+
+	for (n = 0; n < 4; n++)
+	{
+		ThrowGib(self, "models/objects/gibs/sm_metal/tris.md2",
+				damage, GIB_METALLIC);
+	}
+
+	G_FreeEdict(self);
+}
+
+void makron_torso (edict_t *self)
+{
+	edict_t *torso;
+
+	if (!self)
+	{
+		return;
+	}
+
+	torso = G_Spawn();
+
+	VectorCopy(self->s.angles, torso->s.angles);
+	VectorSet(torso->mins, -24, -24, 0);
+	VectorSet(torso->maxs, 24, 24, 16);
+	makron_torso_origin(self, torso);
+
+	torso->gib_health = -800;
+	torso->takedamage = DAMAGE_YES;
+	torso->die = makron_torso_die;
+	torso->deadflag = DEAD_DEAD;
+
+	torso->owner = self;
+	torso->movetype = MOVETYPE_TOSS;
+	torso->solid = SOLID_BBOX;
+	torso->svflags = SVF_MONSTER|SVF_DEADMONSTER;
+	torso->clipmask = MASK_MONSTERSOLID;
+	torso->s.frame = FRAME_death301;
+	torso->s.modelindex = gi.modelindex("models/monsters/boss3/rider/tris.md2");
+	torso->think = makron_torso_think;
+	torso->nextthink = level.time + 2 * FRAMETIME;
+	torso->s.sound = gi.soundindex("makron/spine.wav");
+
+	gi.linkentity(torso);
+}
 
 //
 // death
@@ -650,8 +795,13 @@ void makron_torso (edict_t *ent)
 
 void makron_dead (edict_t *self)
 {
-	VectorSet (self->mins, -60, -60, 0);
-	VectorSet (self->maxs, 60, 60, 72);
+	if (!self)
+	{
+		return;
+	}
+
+	VectorSet (self->mins, -48, -48, 0);
+	VectorSet (self->maxs, 48, 48, 24);
 	self->movetype = MOVETYPE_TOSS;
 	self->svflags |= SVF_DEADMONSTER;
 	self->nextthink = 0;
@@ -661,9 +811,12 @@ void makron_dead (edict_t *self)
 
 void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	edict_t *tempent;
-
 	int		n;
+
+	if (!self)
+	{
+		return;
+	}
 
 	self->s.sound = 0;
 	// check for gib
@@ -687,14 +840,13 @@ void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	tempent = G_Spawn();
-	VectorCopy (self->s.origin, tempent->s.origin);
-	VectorCopy (self->s.angles, tempent->s.angles);
-	tempent->s.origin[1] -= 84;
-	makron_torso (tempent);
+	makron_torso (self);
+
+	/* lower bbox since the torso is gone */
+	self->maxs[2] = 64;
+	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &makron_move_death2;
-	
 }
 
 qboolean Makron_CheckAttack (edict_t *self)
@@ -703,9 +855,13 @@ qboolean Makron_CheckAttack (edict_t *self)
 	vec3_t	temp;
 	float	chance;
 	trace_t	tr;
-	qboolean	enemy_infront;
 	int			enemy_range;
 	float		enemy_yaw;
+
+	if (!self)
+	{
+		return false;
+	}
 
 	if (self->enemy->health > 0)
 	{
@@ -721,8 +877,7 @@ qboolean Makron_CheckAttack (edict_t *self)
 		if (tr.ent != self->enemy)
 			return false;
 	}
-	
-	enemy_infront = infront(self, self->enemy);
+
 	enemy_range = range(self, self->enemy);
 	VectorSubtract (self->enemy->s.origin, self->s.origin, temp);
 	enemy_yaw = vectoyaw(temp);
@@ -739,14 +894,14 @@ qboolean Makron_CheckAttack (edict_t *self)
 			self->monsterinfo.attack_state = AS_MISSILE;
 		return true;
 	}
-	
+
 	// missile attack
 	if (!self->monsterinfo.attack)
 		return false;
-		
+
 	if (level.time < self->monsterinfo.attack_finished)
 		return false;
-		
+
 	if (enemy_range == RANGE_FAR)
 		return false;
 
@@ -818,6 +973,11 @@ void MakronPrecache (void)
 */
 void SP_monster_makron (edict_t *self)
 {
+	if (!self)
+	{
+		return;
+	}
+
 	if (deathmatch->value)
 	{
 		G_FreeEdict (self);
@@ -848,7 +1008,7 @@ void SP_monster_makron (edict_t *self)
 	self->monsterinfo.checkattack = Makron_CheckAttack;
 
 	gi.linkentity (self);
-	
+
 	self->monsterinfo.currentmove = &makron_move_sight;
 	self->monsterinfo.scale = MODEL_SCALE;
 
@@ -864,39 +1024,99 @@ MakronSpawn
 */
 void MakronSpawn (edict_t *self)
 {
-	vec3_t		vec;
-	edict_t		*player;
+	vec3_t vec;
+	edict_t *enemy;
+	edict_t *oldenemy;
 
-	SP_monster_makron (self);
-
-	// jump at player
-	player = level.sight_client;
-	if (!player)
+	if (!self)
+	{
 		return;
+	}
 
-	VectorSubtract (player->s.origin, self->s.origin, vec);
-	self->s.angles[YAW] = vectoyaw(vec);
-	VectorNormalize (vec);
-	VectorMA (vec3_origin, 400, vec, self->velocity);
-	self->velocity[2] = 200;
+	/* spawning can mess with enemy state so clear it temporarily */
+	enemy = self->enemy;
+	self->enemy = NULL;
+
+	oldenemy = self->oldenemy;
+	self->oldenemy = NULL;
+
+	SP_monster_makron(self);
+	if (self->think)
+	{
+		self->think(self);
+	}
+
+	/* and re-link enemy state now that he's spawned */
+	if (enemy && enemy->inuse && enemy->deadflag != DEAD_DEAD)
+	{
+		self->enemy = enemy;
+	}
+
+	if (oldenemy && oldenemy->inuse && oldenemy->deadflag != DEAD_DEAD)
+	{
+		self->oldenemy = oldenemy;
+	}
+
+	if (!self->enemy)
+	{
+		self->enemy = self->oldenemy;
+		self->oldenemy = NULL;
+	}
+
+	enemy = self->enemy;
+
+	if (enemy)
+	{
+		FoundTarget(self);
+		VectorCopy(self->pos1, self->monsterinfo.last_sighting);
+	}
+
+	if (enemy && visible(self, enemy))
+	{
+		VectorSubtract(enemy->s.origin, self->s.origin, vec);
+		self->s.angles[YAW] = vectoyaw(vec);
+		VectorNormalize(vec);
+	}
+	else
+	{
+		AngleVectors(self->s.angles, vec, NULL, NULL);
+	}
+
+	VectorScale(vec, 400, self->velocity);
+	/* the jump frames are fixed length so best to normalize the up speed */
+	self->velocity[2] = 200.0f * (sv_gravity->value / 800.0f);
+
 	self->groundentity = NULL;
+	self->s.origin[2] += 1;
+	gi.linkentity(self);
+
+	self->pain_debounce_time = level.time + 1;
+
+	self->monsterinfo.currentmove = &makron_move_sight;
 }
 
 /*
-=================
-MakronToss
-
-Jorg is just about dead, so set up to launch Makron out
-=================
-*/
-void MakronToss (edict_t *self)
+ * Jorg is just about dead, so set up to launch Makron out
+ */
+void
+MakronToss(edict_t *self)
 {
-	edict_t	*ent;
+	edict_t *ent;
 
-	ent = G_Spawn ();
+	if (!self)
+	{
+		return;
+	}
+
+	ent = G_Spawn();
+	ent->classname = "monster_makron";
 	ent->nextthink = level.time + 0.8;
 	ent->think = MakronSpawn;
 	ent->target = self->target;
-	VectorCopy (self->s.origin, ent->s.origin);
-}
+	VectorCopy(self->s.origin, ent->s.origin);
+	VectorCopy(self->s.angles, ent->s.angles);
+	VectorCopy(self->monsterinfo.last_sighting, ent->pos1);
 
+	ent->enemy = self->enemy;
+	ent->oldenemy = self->oldenemy;
+}
