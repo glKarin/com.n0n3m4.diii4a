@@ -92,7 +92,11 @@ static YQ2_ATTR_INLINE void Sys_CpuPause(void)
 #if (__i386 || __x86_64__)
 	asm volatile("pause");
 #elif defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 7) || defined(__ARM_ARCH_6K__)
+//#ifdef __ANDROID__
+	//sched_yield();
+//#else
 	asm volatile("yield");
+//#endif
 #elif defined(__powerpc__) || defined(__powerpc64__)
 	asm volatile("or 27,27,27");
 #elif defined(__riscv) && __riscv_xlen == 64

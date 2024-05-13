@@ -150,7 +150,7 @@ static void loadLib(const char* libpath)
 	Q3E_Interface_t d3interface;
 	GetIDTechAPI(&d3interface);
 
-	qmain = (int (*)(int, char **)) d3interface.main;
+	qmain = d3interface.main;
 	setCallbacks = d3interface.setCallbacks;
 	Q3E_SetInitialContext = d3interface.setInitialContext;
 	setResolution = d3interface.setResolution;

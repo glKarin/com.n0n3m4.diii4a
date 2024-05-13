@@ -11,103 +11,37 @@
 
 /* Android */
 
+static void * game_main(void *data);
+
 #include "sys_android.c"
-
-// command line arguments
-static int q3e_argc = 0;
-static char **q3e_argv = NULL;
-
-// game main thread
-static pthread_t				main_thread;
-
-// app exit
-volatile qbool q3e_running = false;
 
 void GLimp_CheckGLInitialized(void)
 {
 	Q3E_CheckNativeWindowChanged();
 }
 
-static void Q3E_DumpArgs(int argc, const char **argv)
-{
-	q3e_argc = argc;
-	q3e_argv = (char **) malloc(sizeof(char *) * argc);
-	for (int i = 0; i < argc; i++)
-	{
-		q3e_argv[i] = strdup(argv[i]);
-	}
-}
-
-static void Q3E_FreeArgs(void)
-{
-	for(int i = 0; i < q3e_argc; i++)
-	{
-		free(q3e_argv[i]);
-	}
-	free(q3e_argv);
-}
-
 // quake1 game main thread loop
-static void * quake1_main(void *data)
+void * game_main(void *data)
 {
 	attach_thread(); // attach current to JNI for call Android code
 
 	Q3E_Start();
 
-	Con_Printf("[Harmattan]: Enter quake1 main thread -> %s\n", "main");
+	Con_Printf("[Harmattan]: Enter " Q3E_GAME_NAME " main thread -> %s\n", "main");
 
 	Sys_Main(q3e_argc, q3e_argv);
 
 	Q3E_End();
 	main_thread = 0;
-	Con_Printf("[Harmattan]: Leave quake1 main thread.\n");
+	Con_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
 	return 0;
-}
-
-// start game main thread from Android Surface thread
-static void Q3E_StartGameMainThread(void)
-{
-	if(main_thread)
-		return;
-
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-
-	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) != 0) {
-		Con_Printf("[Harmattan]: ERROR: pthread_attr_setdetachstate quake1 main thread failed\n");
-		exit(1);
-	}
-
-	if (pthread_create((pthread_t *)&main_thread, &attr, quake1_main, NULL) != 0) {
-		Con_Printf("[Harmattan]: ERROR: pthread_create quake1 main thread failed\n");
-		exit(1);
-	}
-
-	pthread_attr_destroy(&attr);
-
-	q3e_running = true;
-	Con_Printf("[Harmattan]: quake1 main thread start.\n");
-}
-
-// shutdown game main thread
-static void Q3E_ShutdownGameMainThread(void)
-{
-	if(!main_thread)
-		return;
-
-	q3e_running = false;
-	if (pthread_join(main_thread, NULL) != 0) {
-		Con_Printf("[Harmattan]: ERROR: pthread_join quake1 main thread failed\n");
-	}
-	main_thread = 0;
-	Con_Printf("[Harmattan]: quake1 main thread quit.\n");
 }
 
 void ShutdownGame(void)
 {
-	if(host_initialized)
+	if(Q3E_IS_INITIALIZED)
 	{
-		Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_CREATED); // if quake1 main thread is waiting new window
+		TRIGGER_WINDOW_CREATED; // if quake1 main thread is waiting new window
 		Q3E_ShutdownGameMainThread();
 		//common->Quit();
 	}
@@ -126,7 +60,7 @@ static void game_exit(void)
 
 void Sys_SyncState(void)
 {
-	if (setState)
+	//if (setState)
 	{
 		//keydest_t keydest = (key_consoleactive & KEY_CONSOLEACTIVE_USER) ? key_console : key_dest;
 		static int prev_state = -1;
@@ -143,13 +77,13 @@ void Sys_SyncState(void)
 int
 main(int argc, char **argv)
 {
-	Q3E_DumpArgs(argc, (const char **)argv);
+	Q3E_DumpArgs(argc, argv);
 
 	Q3E_RedirectOutput();
 
-	Q3E_PrintInitialContext(argc, (const char **)argv);
+	Q3E_PrintInitialContext(argc, argv);
 
-	Sys_InitThreads();
+	INIT_Q3E_THREADS;
 
 	Q3E_StartGameMainThread();
 

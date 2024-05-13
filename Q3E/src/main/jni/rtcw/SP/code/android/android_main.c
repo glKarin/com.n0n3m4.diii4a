@@ -633,40 +633,13 @@ extern clientStatic_t cls;
 
 extern qboolean com_fullyInitialized;
 
+static void * game_main(void *data);
+
 #include "sys_android.c"
-
-// command line arguments
-static int q3e_argc = 0;
-static char **q3e_argv = NULL;
-
-// game main thread
-static pthread_t				main_thread;
-
-// app exit
-volatile qboolean q3e_running = false;
 
 void GLimp_CheckGLInitialized(void)
 {
 	Q3E_CheckNativeWindowChanged();
-}
-
-static void Q3E_DumpArgs(int argc, const char **argv)
-{
-	q3e_argc = argc;
-	q3e_argv = (char **) malloc(sizeof(char *) * argc);
-	for (int i = 0; i < argc; i++)
-	{
-		q3e_argv[i] = strdup(argv[i]);
-	}
-}
-
-static void Q3E_FreeArgs(void)
-{
-	for(int i = 0; i < q3e_argc; i++)
-	{
-		free(q3e_argv[i]);
-	}
-	free(q3e_argv);
 }
 
 // RTCW game main thread loop
@@ -737,50 +710,11 @@ static void * game_main(void *data)
 	return 0;
 }
 
-// start game main thread from Android Surface thread
-static void Q3E_StartGameMainThread(void)
-{
-	if(main_thread)
-		return;
-
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-
-	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) != 0) {
-		Com_Printf("[Harmattan]: ERROR: pthread_attr_setdetachstate RTCW main thread failed\n");
-		exit(1);
-	}
-
-	if (pthread_create((pthread_t *)&main_thread, &attr, game_main, NULL) != 0) {
-		Com_Printf("[Harmattan]: ERROR: pthread_create RTCW main thread failed\n");
-		exit(1);
-	}
-
-	pthread_attr_destroy(&attr);
-
-	q3e_running = true;
-	Com_Printf("[Harmattan]: RTCW main thread start.\n");
-}
-
-// shutdown game main thread
-static void Q3E_ShutdownGameMainThread(void)
-{
-	if(!main_thread)
-		return;
-
-	q3e_running = false;
-	if (pthread_join(main_thread, NULL) != 0) {
-		Com_Printf("[Harmattan]: ERROR: pthread_join RTCW main thread failed\n");
-	}
-	main_thread = 0;
-	Com_Printf("[Harmattan]: RTCW main thread quit.\n");
-}
-
 void ShutdownGame(void)
 {
 	if(com_fullyInitialized)
 	{
-		Sys_TriggerEvent(TRIGGER_EVENT_WINDOW_CREATED); // if RTCW main thread is waiting new window
+		TRIGGER_WINDOW_CREATED; // if RTCW main thread is waiting new window
 		Q3E_ShutdownGameMainThread();
 		//common->Quit();
 	}
@@ -803,23 +737,13 @@ char *Sys_GetClipboardData(void)
 #ifdef DEDICATED
     return NULL;
 #else
-    if(!get_clipboard_text)
-        return NULL;
-    char *text = get_clipboard_text();
-    if(!text)
-        return NULL;
-    size_t len = strlen(text);
-    char *ptr = (char *)malloc(len + 1);
-    strncpy(ptr, text, len);
-    ptr[len] = '\0';
-    free(text);
-    return ptr;
+	return Android_GetClipboardData();
 #endif
 }
 
 void Sys_SyncState(void)
 {
-	if (setState)
+	//if (setState)
 	{
 		static int prev_state = -1;
 		/* We are in game and neither console/ui is active */
@@ -845,13 +769,13 @@ main
 =================
 */
 int main( int argc, char* argv[] ) {
-	Q3E_DumpArgs(argc, (const char **)argv);
+	Q3E_DumpArgs(argc, argv);
 
 	Q3E_RedirectOutput();
 
-	Q3E_PrintInitialContext(argc, (const char **)argv);
+	Q3E_PrintInitialContext(argc, argv);
 
-	Sys_InitThreads();
+	INIT_Q3E_THREADS;
 
 	Q3E_StartGameMainThread();
 

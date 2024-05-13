@@ -14,16 +14,15 @@
 #define STATE_MENU (1 << 5) // any menu excludes guiLoading
 #define STATE_DEMO (1 << 6) // demo
 
+//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
+#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
+#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
+#define _ANDROID_GAME_DATA_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME
+
 #ifdef _MULTITHREAD
 extern bool multithreadActive;
 extern bool Sys_ShutdownRenderThread(void);
 #endif
-
-extern void (*grab_mouse)(int grab);
-extern void (*pull_input_event)(int execCmd);
-extern FILE * (*itmpfile)(void);
-extern void (*copy_to_clipboard)(const char *text);
-extern char * (*get_clipboard_text)(void);
 
 extern void GLimp_ActivateContext();
 extern void GLimp_DeactivateContext();
@@ -78,20 +77,20 @@ extern volatile bool q3e_running;
 
 void Android_GrabMouseCursor(bool grabIt)
 {
-    if(mouse_available && grab_mouse)
+    if(mouse_available/* && grab_mouse*/)
         grab_mouse(grabIt);
 }
 
 void Android_PollInput(void)
 {
-    if(pull_input_event)
+    //if(pull_input_event)
         pull_input_event(1);
 }
 
 FILE * Sys_tmpfile(void)
 {
     common->Printf("Call JNI::tmpfile.\n");
-    FILE *f = itmpfile ? itmpfile() : NULL;
+    FILE *f = /*itmpfile ? */itmpfile()/* : NULL*/;
     if (!f) {
         common->Warning("JNI::tmpfile failed: %s", strerror(errno));
     }
@@ -102,7 +101,7 @@ void Sys_SyncState(void)
 {
     static int prev_state = -1;
     static int state = -1;
-    if (setState)
+    // if (setState)
     {
         state = STATE_NONE;
         if(sessLocal.insideExecuteMapChange
@@ -131,14 +130,14 @@ void Sys_SyncState(void)
 
 void Android_SetClipboardData(const char *text)
 {
-    if(copy_to_clipboard)
+    // if(copy_to_clipboard)
         copy_to_clipboard(text);
 }
 
 char * Android_GetClipboardData(void)
 {
-    if(!get_clipboard_text)
-        return NULL;
+/*    if(!get_clipboard_text)
+        return NULL;*/
     char *text = get_clipboard_text();
     if(!text)
         return NULL;
@@ -150,29 +149,7 @@ char * Android_GetClipboardData(void)
     return ptr;
 }
 
-void Sys_ForceResolution(void)
-{
-    cvarSystem->SetCVarBool("r_fullscreen",  true);
-    cvarSystem->SetCVarInteger("r_mode", -1);
-
-    cvarSystem->SetCVarInteger("r_customWidth", screen_width);
-    cvarSystem->SetCVarInteger("r_customHeight", screen_height);
-
-    float r = (float) screen_width / (float) screen_height;
-
-    if (r > 1.7f) {
-        cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
-    } else if (r > 1.55f) {
-        cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
-    } else {
-        cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
-    }
-
-    Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
-               -1, screen_width, screen_height);
-}
-
-void Q3E_PrintInitialContext(int argc, const char **argv)
+void Q3E_PrintInitialContext(int argc, char **argv)
 {
     printf("[Harmattan]: DOOM3 start\n\n");
 
@@ -255,7 +232,7 @@ void Q3E_SetCallbacks(const void *callbacks)
 void Q3E_KeyEvent(int state,int key,int character)
 {
     Posix_QueEvent(SE_KEY, key, state, 0, NULL);
-    if ((character!=0)&&(state==1))
+    if ((character != 0) && (state == 1))
     {
         Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
     }
@@ -276,9 +253,9 @@ void Q3E_DrawFrame()
 
 void Q3E_Analog(int enable,float x,float y)
 {
-    analogenabled=enable;
-    analogx=x;
-    analogy=y;
+    analogenabled = enable;
+    analogx = x;
+    analogy = y;
 }
 
 void Q3E_RedirectOutput(void)
@@ -424,6 +401,16 @@ void Q3E_End(void)
 {
     GLimp_AndroidQuit();
     window = NULL;
+}
+
+const char * Sys_DLLDefaultPath(void)
+{
+    return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
+}
+
+const char * Sys_GameDataDefaultPath(void)
+{
+    return game_data_dir ? game_data_dir : _ANDROID_GAME_DATA_PATH;
 }
 
 extern "C"

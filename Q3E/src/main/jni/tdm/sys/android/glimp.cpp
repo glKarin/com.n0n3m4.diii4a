@@ -32,8 +32,8 @@ extern int screen_width;
 extern int screen_height;
 
 // OpenGL attributes
-int gl_format = GLFORMAT_RGBA8888;
-int gl_msaa = 0;
+extern int gl_format;
+extern int gl_msaa;
 
 #define MAX_NUM_CONFIGS 1000
 static bool window_seted = false;

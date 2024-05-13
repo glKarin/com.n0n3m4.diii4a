@@ -52,7 +52,7 @@ typedef struct
 typedef struct
 {
     // any thread(Java): before idCommon Initialized
-    int  (*main)(int argc, const char **argv); // call main(int, const char **)
+    int  (*main)(int argc, char **argv); // call main(int, const char **)
     void (*setCallbacks)(const void *func);
     void (*setInitialContext)(const void *context);
     void (*setResolution)(int width, int height);

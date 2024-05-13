@@ -70,14 +70,14 @@ add_subdirectory (deplibs) # common depend libraries
 
 add_subdirectory (common)
 
-add_subdirectory (quake2) # Quake 2
+add_subdirectory (rtcw) # RTCW
 
 add_subdirectory (quake3) # Quake 3 Arena | Team Arena
 
-add_subdirectory (rtcw) # RTCW
-
-add_subdirectory (tdm) # The Dark Mod
+add_subdirectory (quake2) # Quake 2
 
 add_subdirectory (quake1) # Quake 1
+
+add_subdirectory (tdm) # The Dark Mod
 
 #add_subdirectory (duke4) # DNF

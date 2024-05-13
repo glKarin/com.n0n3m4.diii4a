@@ -608,7 +608,7 @@ void GLimp_CheckGLInitialized(void)
 	Q3E_CheckNativeWindowChanged();
 }
 
-static void Q3E_DumpArgs(int argc, const char **argv)
+static void Q3E_DumpArgs(int argc, char **argv)
 {
 	::q3e_argc = argc;
 	::q3e_argv = (char **) malloc(sizeof(char *) * argc);
@@ -721,7 +721,7 @@ static void doom3_exit(void)
 	Q3E_CloseRedirectOutput();
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
 	Q3E_DumpArgs(argc, argv);
 
@@ -741,11 +741,6 @@ intptr_t Sys_GetMainThread(void)
 	return main_thread;
 }
 
-const char * Sys_DLLDefaultPath(void)
-{
-	return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
-}
-
 void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
 {
 	if (analogenabled)
@@ -753,6 +748,28 @@ void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
 		side = (int)(KEY_MOVESPEED * analogx);
 		forward = (int)(KEY_MOVESPEED * analogy);
 	}
+}
+
+void Sys_ForceResolution(void)
+{
+    cvarSystem->SetCVarBool("r_fullscreen",  true);
+    cvarSystem->SetCVarInteger("r_mode", -1);
+
+    cvarSystem->SetCVarInteger("r_customWidth", screen_width);
+    cvarSystem->SetCVarInteger("r_customHeight", screen_height);
+
+    float r = (float) screen_width / (float) screen_height;
+
+    if (r > 1.7f) {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
+    } else if (r > 1.55f) {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
+    } else {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
+    }
+
+    Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
+               -1, screen_width, screen_height);
 }
 
 #include "sys_android.cpp"
