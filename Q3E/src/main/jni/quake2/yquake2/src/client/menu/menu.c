@@ -3492,7 +3492,11 @@ ExecDeleteSaveFunc(menuframework_s *m, int menu_key)
 	menucommon_s *item = Menu_ItemAtCursor(m);
 	menukeyitem_delete = false;
 
-	if (menu_key == K_ENTER || menu_key == 'y' || menu_key == 'Y')
+	if (menu_key == K_ENTER || menu_key == 'y' || menu_key == 'Y'
+#ifdef __ANDROID__
+        || menu_key == K_MOUSE1
+#endif
+    )
 	{
 		char name[MAX_OSPATH] = {0};
 		if (item->localdata[0] == -1)	// quicksave
@@ -6038,6 +6042,9 @@ M_Quit_Key(int key)
     case K_ENTER:
     case 'Y':
     case 'y':
+#ifdef __ANDROID__
+     case K_MOUSE1:
+#endif
         cls.key_dest = key_console;
         CL_Quit_f();
         break;

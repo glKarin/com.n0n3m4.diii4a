@@ -38,13 +38,13 @@ void Q3E_MotionEvent(float dx, float dy)
     in_windowmouse_x += dx;
     if (in_windowmouse_x < 0)
         in_windowmouse_x = 0;
-    if (in_windowmouse_x > screen_width - 1)
+    else if (in_windowmouse_x > screen_width - 1)
         in_windowmouse_x = screen_width - 1;
 
     in_windowmouse_y += dy;
     if (in_windowmouse_y < 0)
         in_windowmouse_y = 0;
-    if (in_windowmouse_y > screen_height - 1)
+    else if (in_windowmouse_y > screen_height - 1)
         in_windowmouse_y = screen_height - 1;
 }
 

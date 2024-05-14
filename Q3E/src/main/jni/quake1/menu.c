@@ -2786,6 +2786,9 @@ static void M_Reset_Key(cmd_state_t *cmd, int key, int ascii)
 	{
 	case 'Y':
 	case 'y':
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		Cbuf_AddText(cmd, "cvar_resettodefaults_all;exec default.cfg\n");
 		// no break here since we also exit the menu
 
@@ -3336,6 +3339,9 @@ static void M_Quit_Key(cmd_state_t *cmd, int key, int ascii)
 
 	case 'Y':
 	case 'y':
+#ifdef _DIII4A
+	case K_MOUSE1:
+#endif
 		host.state = host_shutdown;
 		break;
 
