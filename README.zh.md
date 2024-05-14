@@ -156,6 +156,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 由于`BSE`没开源, 所以我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
 ##### 关于`BOT`
 声明宏`MOD_BOTS`将编译SABot a7(来自毁灭战士3) mod源码的多人游戏的bot支持.
+##### About `全身模式(第三人称)支持`
+声明宏`_MOD_FULL_BODY_AWARENESS`将编译全身模式(第三人称)支持.
 
 #### 掠食(2006)
 ##### `_HUMANHEAD`, `_PREY`是补丁宏, 在`DIII4A`源码中查找.
@@ -164,6 +166,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 2. _PREY: 编译`游戏 (掠食(2006)的SDK源码)`库.
 > 3. 构建core引擎: 声明宏`_HUMANHEAD`
 > 4. 构建游戏库: 声明宏`_HUMANHEAD`, `_PREY`, 和原来SDK的宏`HUMANHEAD`
+##### About `全身模式(第三人称)支持`
+声明宏`_MOD_FULL_BODY_AWARENESS`将编译全身模式(第三人称)支持.
 
 #### 安卓
 ##### 声明宏`__ANDROID__`.

@@ -106,23 +106,38 @@ static idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0"
 
 void RB_SetupRenderTools(void)
 {
+#define U_NORMALIZE_CLAMP(x, max) { \
+		if(x < 0 || x > max) \
+			x = 0; \
+	}
+/*#define U_NORMALIZE_CLAMP(x, max) { \
+		if(x < 0) \
+			x = 0; \
+		else if(x > max) \
+			x = max; \
+	}*/
+
 	if(multithreadActive && harm_r_renderToolsMultithread.GetBool())
 	{
 		mt_rb_debugLineTime = rb_debugLineTime;
 		mt_rb_numDebugLines = rb_numDebugLines;
+		U_NORMALIZE_CLAMP(mt_rb_numDebugLines, MAX_DEBUG_LINES)
 		if(mt_rb_numDebugLines > 0)
 			memcpy(mt_rb_debugLines, rb_debugLines, sizeof(rb_debugLines[0]) * mt_rb_numDebugLines);
 
 		mt_rb_debugTextTime = rb_debugTextTime;
 		mt_rb_numDebugText = rb_numDebugText;
+		U_NORMALIZE_CLAMP(mt_rb_numDebugText, MAX_DEBUG_TEXT)
 		if(mt_rb_numDebugText > 0)
 			memcpy(mt_rb_debugText, rb_debugText, sizeof(rb_debugText[0]) * mt_rb_numDebugText);
 
 		mt_rb_debugPolygonTime = rb_debugPolygonTime;
 		mt_rb_numDebugPolygons = rb_numDebugPolygons;
+		U_NORMALIZE_CLAMP(mt_rb_numDebugPolygons, MAX_DEBUG_POLYGONS)
 		if(mt_rb_numDebugPolygons > 0)
 			memcpy(mt_rb_debugPolygons, rb_debugPolygons, sizeof(rb_debugPolygons[0]) * mt_rb_numDebugPolygons);
 	}
+#undef U_NORMALIZE_CLAMP
 }
 #endif
 

@@ -155,6 +155,8 @@ Tag with `-free` only for F-Droid update.
 Because `BSE` not open-source, so I default supply a `NULL` implement and a uncompleted but working implement with DOOM3 Particle/Fx system(using macros `_RAVEN_FX` marked).
 ##### About `BOT`
 Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bot support in multiplayer-game.
+##### About `Full body awareness support`
+Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support.
 
 #### Prey(2006)
 ##### `_HUMANHEAD`, `_PREY` is patches macros, find them in `DIII4A` source code.
@@ -163,6 +165,8 @@ Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bo
 > 2. _PREY: for compile `game (PreySDK source code)` library.
 > 3. Build core engine: define macro `_HUMANHEAD`
 > 4. Build game library: define macro `_HUMANHEAD`, `_PREY`, and original SDK macros `HUMANHEAD`
+##### About `Full body awareness support`
+Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support.
 
 #### Android
 ##### Define macro `__ANDROID__`.

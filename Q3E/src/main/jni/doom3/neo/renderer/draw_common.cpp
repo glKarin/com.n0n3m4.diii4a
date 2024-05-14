@@ -515,9 +515,22 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 	tri = surf->geo;
 	shader = surf->material;
 
+#ifdef _NO_LIGHT
+	if(r_noLight.GetInteger() > 1)
+	{
+		if(!shader->HasAmbient() && !shader->ReceivesLighting())
+			return;
+	}
+	else
+	{
+		if(!shader->HasAmbient())
+			return;
+	}
+#else
 	if (!shader->HasAmbient()) {
 		return;
 	}
+#endif
 
 	if (shader->IsPortalSky()) {
 		return;
@@ -593,9 +606,22 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		}
 
 		// skip the stages involved in lighting
+#ifdef _NO_LIGHT
+		if(r_noLight.GetInteger() > 1)
+		{
+			if(pStage->lighting != SL_AMBIENT && pStage->lighting != SL_DIFFUSE)
+				continue;
+		}
+		else
+		{
+			if(pStage->lighting != SL_AMBIENT)
+				continue;
+		}
+#else
 		if (pStage->lighting != SL_AMBIENT) {
 			continue;
 		}
+#endif
 
 		// skip if the stage is ( GL_ZERO, GL_ONE ), which is used for some alpha masks
 		if ((pStage->drawStateBits & (GLS_SRCBLEND_BITS|GLS_DSTBLEND_BITS)) == (GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE)) {
@@ -872,17 +898,33 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		// set the state
 #ifdef _NO_LIGHT
 		if (r_noLight.GetBool() || shader->IsNoLight())
-		{
-			if (pStage->drawStateBits!=9000)
-				GL_State(pStage->drawStateBits);
-			else
-			{
-				if (shader->TestMaterialFlag(MF_POLYGONOFFSET))
-				GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|GLS_DEPTHFUNC_LESS);
-				else
-				GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
-			}
-		}
+        {
+            if (r_noLight.GetInteger() > 1 && !shader->IsNoLight())
+            {
+                if (pStage->lighting == SL_AMBIENT)
+                    GL_State(pStage->drawStateBits);
+                else
+                {
+                    if (shader->TestMaterialFlag(MF_POLYGONOFFSET))
+                        GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|GLS_DEPTHFUNC_LESS);
+                    else
+                        GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
+                }
+            }
+            else/* if (shader->IsNoLight())*/
+            {
+                if (pStage->drawStateBits!=9000)
+                    GL_State(pStage->drawStateBits);
+                else
+                {
+                    if (shader->TestMaterialFlag(MF_POLYGONOFFSET))
+                        GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|GLS_DEPTHFUNC_LESS);
+                    else
+                        GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
+                }
+            }
+            // else GL_State(pStage->drawStateBits);
+        }
 		else
 #endif
 		GL_State(pStage->drawStateBits);
