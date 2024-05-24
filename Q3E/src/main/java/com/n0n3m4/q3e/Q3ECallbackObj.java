@@ -143,19 +143,39 @@ public class Q3ECallbackObj
         }
     }
 
-    // thread event
-    // It is will run on GLThread. Call by DOOM from JNI, for some MessageBox in game.
-    public void PullEvent(boolean execCmd)
+    /**
+     * thread event
+     * @param num < 0: all; > 0: max; = 0: clear
+     * @return event num
+     */
+    public int PullEvent(int num)
     {
         synchronized (m_eventQueue)
         {
-            if (execCmd)
+            if (num < 0)
             {
+                int i = m_eventQueue.size();
                 while (!m_eventQueue.isEmpty())
                     m_eventQueue.removeFirst().run();
+                return i; // 0
+            }
+            else if (num > 0)
+            {
+                int i = 0;
+                while (!m_eventQueue.isEmpty())
+                {
+                    m_eventQueue.removeFirst().run();
+                    i++;
+                    if(i >= num)
+                        break;
+                }
+                return i; // m_eventQueue.size();
             }
             else
+            {
                 m_eventQueue.clear();
+                return 0;
+            }
         }
     }
 

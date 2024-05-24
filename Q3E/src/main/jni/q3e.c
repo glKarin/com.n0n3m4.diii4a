@@ -62,7 +62,7 @@ static void (*on_resume)(void);
 static void (*qexit)(void);
 
 // Android function
-static void pull_input_event(int execCmd);
+static int pull_input_event(int num);
 static void grab_mouse(int grab);
 static FILE * android_tmpfile(void);
 static void copy_to_clipboard(const char *text);
@@ -317,7 +317,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_writeAudio_array = (*env)->GetMethodID(env,q3eCallbackClass, "writeAudio_array", "([BII)I");
 	
 	//k
-	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(Z)V");
+	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(I)I");
 	android_GrabMouse_method = (*env)->GetMethodID(env, q3eCallbackClass, "GrabMouse", "(Z)V");
 	android_CopyToClipboard_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyToClipboard", "(Ljava/lang/String;)V");
 	android_GetClipboardText_method = (*env)->GetMethodID(env, q3eCallbackClass, "GetClipboardText", "()Ljava/lang/String;");
@@ -579,11 +579,11 @@ Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
 	set_gl_context(window);
 }
 
-void pull_input_event(int execCmd)
+int pull_input_event(int num)
 {
 	ATTACH_JNI(env)
 
-    (*env)->CallVoidMethod(env, q3eCallbackObj, android_PullEvent_method, (jboolean)execCmd);
+    return (*env)->CallIntMethod(env, q3eCallbackObj, android_PullEvent_method, (jint)num);
 }
 
 void grab_mouse(int grab)

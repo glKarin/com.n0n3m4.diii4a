@@ -2320,14 +2320,6 @@ void idGameLocal::SortActiveEntityList(void)
 idGameLocal::RunFrame
 ================
 */
-#ifdef _BREAK_60FPS_CAP
-static idCVar g_timeModifier("g_timeModifier", "1", CVAR_GAME | CVAR_FLOAT, "Use this to stretch the hardcoded 16 msec each frame takes. This can be used to let the game run ultra-slow." );
-static idCVar harm_g_timestepMs("harm_g_timestepMs", "1", CVAR_INTEGER | CVAR_SYSTEM, "");
-static idCVar com_fixedTic("com_fixedTic", "0", CVAR_SYSTEM | CVAR_INTEGER, "", 0, 10);
-static idCVar harm_g_minorTic("harm_g_minorTic", "0", CVAR_BOOL | CVAR_SYSTEM, "");
-bool minorTic = false;
-#define Imax(a, b) ((a) > (b) ? (a) : (b))
-#endif
 gameReturn_t idGameLocal::RunFrame(const usercmd_t *clientCmds)
 {
 	idEntity 	*ent;
@@ -2362,20 +2354,7 @@ gameReturn_t idGameLocal::RunFrame(const usercmd_t *clientCmds)
 			// update the game time
 			framenum++;
 			previousTime = time;
-#ifdef _BREAK_60FPS_CAP
-			if(com_fixedTic.GetInteger())
-			{
-				minorTic = harm_g_minorTic.GetBool();
-				time += Imax(int(harm_g_timestepMs.GetInteger() * g_timeModifier.GetFloat()), 1);
-			}
-			else
-			{
-				minorTic = false;
-				time += msec;
-			}
-#else
 			time += msec;
-#endif
 			realClientTime = time;
 
 #ifdef GAME_DLL
