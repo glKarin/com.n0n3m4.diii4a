@@ -1,12 +1,12 @@
 #ifdef Q3E_REQUIRE_THREAD
 
-#define ENTER_CRITICAL_SECTION (Sys_EnterCriticalSectionQ3E(MAX_LOCAL_CRITICAL_SECTIONS - 1));
-#define LEAVE_CRITICAL_SECTION (Sys_LeaveCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1));
+#define ENTER_CRITICAL_SECTION (Sys_EnterCriticalSectionQ3E(Q3E_MAX_LOCAL_CRITICAL_SECTIONS - 1));
+#define LEAVE_CRITICAL_SECTION (Sys_LeaveCriticalSection(Q3E_MAX_LOCAL_CRITICAL_SECTIONS - 1));
 
 // we use an extra lock for the local stuff
-const int MAX_CRITICAL_SECTIONS		= 4;
-#define MAX_LOCAL_CRITICAL_SECTIONS 5
-static pthread_mutex_t global_lock[ MAX_LOCAL_CRITICAL_SECTIONS ];
+const int Q3E_MAX_CRITICAL_SECTIONS		= 4;
+#define Q3E_MAX_LOCAL_CRITICAL_SECTIONS 5
+static pthread_mutex_t global_lock[ Q3E_MAX_LOCAL_CRITICAL_SECTIONS ];
 
 #define MAX_TRIGGER_EVENTS 2
 enum {
@@ -21,7 +21,7 @@ Q3E_Sys_EnterCriticalSection
 */
 void Q3E_Sys_EnterCriticalSection(int index)
 {
-    assert(index >= 0 && index < MAX_LOCAL_CRITICAL_SECTIONS);
+    assert(index >= 0 && index < Q3E_MAX_LOCAL_CRITICAL_SECTIONS);
     pthread_mutex_lock(&global_lock[index]);
 }
 
@@ -32,7 +32,7 @@ Q3E_Sys_LeaveCriticalSection
 */
 void Q3E_Sys_LeaveCriticalSection(int index)
 {
-    assert(index >= 0 && index < MAX_LOCAL_CRITICAL_SECTIONS);
+    assert(index >= 0 && index < Q3E_MAX_LOCAL_CRITICAL_SECTIONS);
     pthread_mutex_unlock(&global_lock[index]);
 }
 
@@ -48,7 +48,7 @@ Q3E_Sys_WaitForEvent
 void Q3E_Sys_WaitForEvent(int index)
 {
     assert(index >= 0 && index < MAX_TRIGGER_EVENTS);
-    Q3E_Sys_EnterCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
+    Q3E_Sys_EnterCriticalSection(Q3E_MAX_LOCAL_CRITICAL_SECTIONS - 1);
     assert(!waiting[ index ]);	// WaitForEvent from multiple threads? that wouldn't be good
 
     if (signaled[ index ]) {
@@ -56,11 +56,11 @@ void Q3E_Sys_WaitForEvent(int index)
         signaled[ index ] = Q3E_FALSE;
     } else {
         waiting[ index ] = Q3E_TRUE;
-        pthread_cond_wait(&event_cond[ index ], &global_lock[ MAX_LOCAL_CRITICAL_SECTIONS - 1 ]);
+        pthread_cond_wait(&event_cond[ index ], &global_lock[ Q3E_MAX_LOCAL_CRITICAL_SECTIONS - 1 ]);
         waiting[ index ] = Q3E_FALSE;
     }
 
-    Q3E_Sys_LeaveCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
+    Q3E_Sys_LeaveCriticalSection(Q3E_MAX_LOCAL_CRITICAL_SECTIONS - 1);
 }
 
 /*
@@ -71,7 +71,7 @@ Q3E_Sys_TriggerEvent
 void Q3E_Sys_TriggerEvent(int index)
 {
     assert(index >= 0 && index < MAX_TRIGGER_EVENTS);
-    Q3E_Sys_EnterCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
+    Q3E_Sys_EnterCriticalSection(Q3E_MAX_LOCAL_CRITICAL_SECTIONS - 1);
 
     if (waiting[ index ]) {
         pthread_cond_signal(&event_cond[ index ]);
@@ -80,7 +80,7 @@ void Q3E_Sys_TriggerEvent(int index)
         signaled[ index ] = Q3E_TRUE;
     }
 
-    Q3E_Sys_LeaveCriticalSection(MAX_LOCAL_CRITICAL_SECTIONS - 1);
+    Q3E_Sys_LeaveCriticalSection(Q3E_MAX_LOCAL_CRITICAL_SECTIONS - 1);
 }
 
 /*
@@ -94,7 +94,7 @@ void Q3E_Sys_InitThreads()
     pthread_mutexattr_t attr;
 
     // init critical sections
-    for (i = 0; i < MAX_LOCAL_CRITICAL_SECTIONS; i++) {
+    for (i = 0; i < Q3E_MAX_LOCAL_CRITICAL_SECTIONS; i++) {
         pthread_mutexattr_init(&attr);
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
         pthread_mutex_init(&global_lock[i], &attr);

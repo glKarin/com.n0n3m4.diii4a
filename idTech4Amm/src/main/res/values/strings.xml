@@ -313,5 +313,6 @@
     <string name="view_logcat">View logcat</string>
     <string name="open_documents">Android Storage Access Framework</string>
     <string name="open_system_file_browser">Open Android Storage Access Framework</string>
+    <string name="application_pid">"Application PID: "</string>
 
 </resources>

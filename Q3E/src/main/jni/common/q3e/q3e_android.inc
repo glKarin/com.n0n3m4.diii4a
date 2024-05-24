@@ -263,6 +263,12 @@ void Android_PollInput(void)
         pull_input_event(1);
 }
 
+void Android_ClearEvents(void)
+{
+    //if(pull_input_event)
+    pull_input_event(0);
+}
+
 FILE * Sys_tmpfile(void)
 {
     Q3E_PRINTF("Call JNI::tmpfile.\n");

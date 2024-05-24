@@ -310,4 +310,5 @@
     <string name="view_logcat">查看Logcat</string>
     <string name="open_documents">安卓存储访问框架</string>
     <string name="open_system_file_browser">打开安卓存储访问框架</string>
+    <string name="application_pid">"程序PID: "</string>
 </resources>

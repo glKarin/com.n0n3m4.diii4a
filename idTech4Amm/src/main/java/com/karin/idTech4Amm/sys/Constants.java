@@ -12,7 +12,7 @@ import java.util.Date;
  */
 public final class Constants
 {
-    public static final int CONST_UPDATE_RELEASE = 50;
+    public static final int CONST_UPDATE_RELEASE = 51;
     public static final String CONST_RELEASE = "2024-04-30";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
@@ -30,12 +30,11 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).",
-            "Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).",
-            "Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).",
-            "Improving Phong/Blinn-Phong light model interaction shader with high-precision.",
-            "Force disable using compression texture in The Dark Mod.",
-            "Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always).",
+            "Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2310/Quake/", "Quake I") + "`.",
+            "Fix some shaders error in TheDarkMod(2.12)",
+            "Upgrade Quake2(yquake2) version.",
+            "Enable debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey.",
+            "Allow switch lighting disabled in game with r_noLight 0 and 2.",
         };
 	};
 

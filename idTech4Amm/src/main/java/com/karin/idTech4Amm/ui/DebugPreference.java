@@ -92,7 +92,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
     {
         Context activity = ContextUtility.GetContext(this);
         final String PID = "" + Process.myPid();
-        Toast.makeText(activity, "Application PID: " + PID, Toast.LENGTH_LONG).show();
+        Toast.makeText(activity, getString(R.string.application_pid) + PID, Toast.LENGTH_LONG).show();
         Q3EUtils.CopyToClipboard(activity, PID);
     }
 
