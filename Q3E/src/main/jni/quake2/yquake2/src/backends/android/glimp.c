@@ -57,6 +57,8 @@ extern int screen_height;
 extern int gl_format;
 extern int gl_msaa;
 
+extern volatile ANativeWindow * Android_GetWindow(void);
+
 void (* GLref_AndroidInit)(volatile ANativeWindow *w);
 void (* GLref_AndroidQuit)(void);
 typedef void (*RI_SetGLParms)(int f, int msaa);
@@ -131,8 +133,10 @@ ClearDisplayIndices(void)
 }
 
 static qboolean
-CreateSDLWindow(int flags, int w, int h)
+CreateAndroidWindow(int flags, int w, int h)
 {
+	if(!win)
+		win = Android_GetWindow();
 	if (win)
 	{
 		/* save current display as default */
@@ -238,7 +242,7 @@ GLimp_Init(void)
 	num_displays = 1;
 	InitDisplayIndices();
 	ClampDisplayIndexCvar();
-	Com_Printf("SDL display modes:\n");
+	Com_Printf("Android display modes:\n");
 
 	PrintDisplayModes();
 	Com_Printf("------------------------------------\n\n");
@@ -311,7 +315,7 @@ GLimp_InitGraphics(int fullscreen, int *pwidth, int *pheight)
 	/* Mkay, now the hard work. Let's create the window. */
 	cvar_t *gl_msaa_samples = Cvar_Get("r_msaa_samples", "0", CVAR_ARCHIVE);
 
-	CreateSDLWindow(flags, width, height);
+	CreateAndroidWindow(flags, width, height);
 
 	last_flags = flags;
 

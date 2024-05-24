@@ -550,6 +550,11 @@ void Android_CloseKeyboard(void)
     close_keyboard();
 }
 
+volatile ANativeWindow * Android_GetWindow(void)
+{
+    return window;
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
