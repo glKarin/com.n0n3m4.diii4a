@@ -415,6 +415,8 @@ void idImage::ActuallyLoadImage( bool fromBackEnd )
 #if defined(__APPLE__) && defined(USE_VULKAN)
 			// SRS - Handle case when image read is cached and RGB565 format conversion is already done
 			&& ( header.format == opts.format || ( header.format == FMT_RGB565 && opts.format == FMT_RGBA8 ) )
+#elif defined(_GLES) //karin: force convert light texture format from RGB565 to RGBA8888
+			&& ( header.format == opts.format || ( header.format == FMT_RGB565 && opts.format == FMT_RGBA8 ) )
 #else
 			&& ( header.format == opts.format )
 #endif
@@ -427,6 +429,12 @@ void idImage::ActuallyLoadImage( bool fromBackEnd )
 		opts.colorFormat = ( textureColor_t )header.colorFormat;
 #if defined(__APPLE__) && defined(USE_VULKAN)
 		// SRS - Set in-memory format to FMT_RGBA8 for converted FMT_RGB565 image
+		if( header.format == FMT_RGB565 )
+		{
+			opts.format = FMT_RGBA8;
+		}
+		else
+#elif defined(_GLES) //karin: force convert light texture format from RGB565 to RGBA8888
 		if( header.format == FMT_RGB565 )
 		{
 			opts.format = FMT_RGBA8;

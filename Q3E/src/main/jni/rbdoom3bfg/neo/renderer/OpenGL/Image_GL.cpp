@@ -39,6 +39,8 @@ Contains the Image implementation for OpenGL.
 
 #ifdef _GLES //karin: decompress texture to RGBA instead of glCompressedXXX on OpenGLES
 #include "../DXT/DXTCodec.h"
+#endif
+#if 0
 #define TID(x) {\
 	while(glGetError() != GL_NO_ERROR); \
 	x; \
@@ -263,7 +265,7 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 		else
 #endif
 		{
-#ifdef _GLES //karin: framebuffer using GL_RGBA8 instead of GL_RGBA16F
+#ifdef _GLESxxx //karin: framebuffer using GL_RGBA8 instead of GL_RGBA16F
 			TID(glCopyTexImage2D( target, 0, GL_RGBA8, x, y, imageWidth, imageHeight, 0 ));
 #else
 			glCopyTexImage2D( target, 0, GL_RGBA16F, x, y, imageWidth, imageHeight, 0 );
@@ -386,7 +388,14 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 		if(opts.format == FMT_DXT1)
 			decoder.DecompressImageDXT1((const byte *)pic, dpic, width, height);
 		else
+		{
+			if( opts.colorFormat == CFM_YCOCG_DXT5 )
+				decoder.DecompressYCoCgDXT5((const byte *)pic, dpic, width, height);
+			else if( opts.colorFormat == CFM_NORMAL_DXT5 )
+				decoder.DecompressNormalMapDXT5Renormalize((const byte *)pic, dpic, width, height);
+			else
 			decoder.DecompressImageDXT5((const byte *)pic, dpic, width, height);
+		}
 
 #if 0
         idStr ff = "ttt/";
@@ -429,10 +438,12 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 	GL_CheckErrors();
 #endif
 
+#if !defined(_GLES) //karin: not support in OpenGLES
 	if( opts.format == FMT_RGB565 )
 	{
 		glPixelStorei( GL_UNPACK_SWAP_BYTES, GL_FALSE );
 	}
+#endif
 	if( pixelPitch != 0 )
 	{
 		glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
@@ -674,7 +685,11 @@ void idImage::AllocImage()
 			break;
 
 		case FMT_RGB565:
+#ifdef _GLESxxx
+			internalFormat = GL_RGB565;
+#else
 			internalFormat = GL_RGB;
+#endif
 			dataFormat = GL_RGB;
 			dataType = GL_UNSIGNED_SHORT_5_6_5;
 			break;

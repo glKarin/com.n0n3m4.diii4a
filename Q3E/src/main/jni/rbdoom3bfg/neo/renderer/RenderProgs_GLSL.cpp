@@ -859,11 +859,23 @@ const char* fragmentInsert_GLSL_ES_3_00 =
 	"#define PC\n"
 	"precision mediump float;\n"
 	"precision lowp sampler2D;\n"
+#ifdef _GLES //karin: depth trxture using highp precision
+	"precision highp sampler2DShadow;\n"
+#else
 	"precision lowp sampler2DShadow;\n"
+#endif
 	"precision lowp sampler2DArray;\n"
+#ifdef _GLES //karin: depth trxture using highp precision
+	"precision highp sampler2DArrayShadow;\n"
+#else
 	"precision lowp sampler2DArrayShadow;\n"
+#endif
 	"precision lowp samplerCube;\n"
+#ifdef _GLES //karin: depth trxture using highp precision
+	"precision highp samplerCubeShadow;\n"
+#else
 	"precision lowp samplerCubeShadow;\n"
+#endif
 	"precision lowp sampler3D;\n"
 	"\n"
 	"void clip( float v ) { if ( v < 0.0 ) { discard; } }\n"
@@ -1511,6 +1523,11 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 	// RB: tell shader debuggers what shader we look at
 	idStr filenameHint = "// filename " + idStr( name ) + "\n";
 
+#ifdef _GLES //karin: interaction shader using high precision float
+	idStr nameStr(name);
+	nameStr.StripPath();
+	const bool IsInteractionShader = nameStr.Find("interaction", false) == 0;
+#endif
 	// RB: changed to allow multiple versions of GLSL
 	if( stage == SHADER_STAGE_VERTEX )
 	{
@@ -1520,6 +1537,15 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 			{
 				out.ReAllocate( idStr::Length( vertexInsert_GLSL_ES_3_00 ) + in.Length() * 2, false );
 				out += filenameHint;
+#ifdef _GLES //karin: interaction shader using high precision float
+				if(IsInteractionShader)
+				{
+					idStr p(vertexInsert_GLSL_ES_3_00);
+					p.Replace("precision mediump float;", "precision highp float;");
+					out.Append(p);
+				}
+				else
+#endif
 				out += vertexInsert_GLSL_ES_3_00;
 				break;
 			}
@@ -1541,6 +1567,15 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 			{
 				out.ReAllocate( idStr::Length( fragmentInsert_GLSL_ES_3_00 ) + in.Length() * 2, false );
 				out += filenameHint;
+#ifdef _GLES //karin: interaction shader using high precision float
+				if(IsInteractionShader)
+				{
+					idStr p(fragmentInsert_GLSL_ES_3_00);
+					p.Replace("precision mediump float;", "precision highp float;");
+					out.Append(p);
+				}
+				else
+#endif
 				out += fragmentInsert_GLSL_ES_3_00;
 				break;
 			}

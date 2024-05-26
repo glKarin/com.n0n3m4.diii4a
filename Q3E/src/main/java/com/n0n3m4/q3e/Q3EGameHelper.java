@@ -210,10 +210,14 @@ public class Q3EGameHelper
     public String GetEngineLib()
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
-        String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + Q3EUtils.q3ei.libname;
+        String libname = Q3EUtils.q3ei.libname;
+        // if(Q3EUtils.q3ei.isTDM) libname = Q3EGlobals.LIB_ENGINE4_D3BFG; // Test a new game using TDM
+        String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + libname; // Q3EUtils.q3ei.libname;
         if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
         {
-            String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(Q3EUtils.q3ei.libname);
+            // if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = Q3EGlobals.GAME_SUBDIR_DOOMBFG; // Test a new game using TDM
+            String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(libname);
+            // if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = Q3EGlobals.GAME_SUBDIR_TDM; // Test a new game using TDM
             File file = new File(localLibPath);
             if(!file.isFile() || !file.canRead())
             {
@@ -221,7 +225,7 @@ public class Q3EGameHelper
             }
             else
             {
-                String cacheFile = m_context.getCacheDir() + File.separator + Q3EUtils.q3ei.libname;
+                String cacheFile = m_context.getCacheDir() + File.separator + /*Q3EUtils.q3ei.*/libname;
                 Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found local engine library file: " + localLibPath);
                 long r = Q3EUtils.cp(localLibPath, cacheFile);
                 if(r > 0)
@@ -540,13 +544,16 @@ public class Q3EGameHelper
         int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
 
+        String subdatadir = Q3EUtils.q3ei.subdatadir;
+        // if(Q3EUtils.q3ei.isTDM) subdatadir = Q3EGlobals.GAME_SUBDIR_DOOMBFG; // Test a new game using TDM
+
         Q3EJNI.init(
                 GetEngineLib(),
                 Q3EUtils.GetGameLibDir(m_context),
                 width,
                 height,
                 Q3EUtils.q3ei.datadir,
-                Q3EUtils.q3ei.subdatadir,
+                subdatadir, // Q3EUtils.q3ei.subdatadir,
                 cmd,
                 surface,
                 glFormat,

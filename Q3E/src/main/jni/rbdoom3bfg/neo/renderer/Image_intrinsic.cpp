@@ -242,7 +242,7 @@ static void R_HDR_RGBA16FImage_ResNative( idImage* image )
 #else
 	int msaaSamples = 0;
 #endif
-#ifdef _GLES //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
+#ifdef _GLESxxx //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
 	image->GenerateImage( NULL, renderSystem->GetWidth(), renderSystem->GetHeight(), TF_NEAREST, TR_CLAMP, TD_LOOKUP_TABLE_RGBA );//, msaaSamples );
 #else
 	image->GenerateImage( NULL, renderSystem->GetWidth(), renderSystem->GetHeight(), TF_NEAREST, TR_CLAMP, TD_RGBA16F );//, msaaSamples );
@@ -251,7 +251,7 @@ static void R_HDR_RGBA16FImage_ResNative( idImage* image )
 
 static void R_HDR_RGBA16FImage_ResNative_NoMSAA( idImage* image )
 {
-#ifdef _GLES //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
+#ifdef _GLESxxx //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
 	image->GenerateImage( NULL, renderSystem->GetWidth(), renderSystem->GetHeight(), TF_NEAREST, TR_CLAMP, TD_LOOKUP_TABLE_RGBA );
 #else
 	image->GenerateImage( NULL, renderSystem->GetWidth(), renderSystem->GetHeight(), TF_NEAREST, TR_CLAMP, TD_RGBA16F );
@@ -260,7 +260,7 @@ static void R_HDR_RGBA16FImage_ResNative_NoMSAA( idImage* image )
 
 static void R_HDR_RGBA16FImage_ResQuarter( idImage* image )
 {
-#ifdef _GLES //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
+#ifdef _GLESxxx //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
 	image->GenerateImage( NULL, renderSystem->GetWidth() / 4, renderSystem->GetHeight() / 4, TF_NEAREST, TR_CLAMP, TD_LOOKUP_TABLE_RGBA );
 #else
 	image->GenerateImage( NULL, renderSystem->GetWidth() / 4, renderSystem->GetHeight() / 4, TF_NEAREST, TR_CLAMP, TD_RGBA16F );
@@ -274,7 +274,7 @@ static void R_HDR_RGBA16FImage_ResQuarter_Linear( idImage* image )
 
 static void R_HDR_RGBA16FImage_Res64( idImage* image )
 {
-#ifdef _GLES //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
+#ifdef _GLESxxx //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
 	image->GenerateImage( NULL, 64, 64, TF_NEAREST, TR_CLAMP, TD_LOOKUP_TABLE_RGBA );
 #else
 	image->GenerateImage( NULL, 64, 64, TF_NEAREST, TR_CLAMP, TD_RGBA16F );
@@ -283,7 +283,7 @@ static void R_HDR_RGBA16FImage_Res64( idImage* image )
 
 static void R_EnvprobeImage_HDR( idImage* image )
 {
-#ifdef _GLES //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
+#ifdef _GLESxxx //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
 	image->GenerateImage( NULL, ENVPROBE_CAPTURE_SIZE, ENVPROBE_CAPTURE_SIZE, TF_NEAREST, TR_CLAMP, TD_LOOKUP_TABLE_RGBA );
 #else
 	image->GenerateImage( NULL, ENVPROBE_CAPTURE_SIZE, ENVPROBE_CAPTURE_SIZE, TF_NEAREST, TR_CLAMP, TD_RGBA16F );
@@ -302,7 +302,7 @@ static void R_SMAAImage_ResNative( idImage* image )
 
 static void R_GeometryBufferImage_ResNative( idImage* image )
 {
-#ifdef _GLES //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
+#ifdef _GLESxxx //karin: framebuffer texture using GL_RGBA8 instead of GL_RGBA16F
 	image->GenerateImage( NULL, renderSystem->GetWidth(), renderSystem->GetHeight(), TF_LINEAR, TR_CLAMP, TD_LOOKUP_TABLE_RGBA );
 #else
 	image->GenerateImage( NULL, renderSystem->GetWidth(), renderSystem->GetHeight(), TF_LINEAR, TR_CLAMP, TD_RGBA16F );

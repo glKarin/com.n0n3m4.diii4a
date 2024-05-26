@@ -69,7 +69,7 @@ enum renderLogIndentLabel_t
 };
 
 // using this macro avoids printf parameter overhead if the renderlog isn't active
-#define RENDERLOG_PRINTF( ... ) printf(__VA_ARGS__); // if ( renderLog.activeLevel ) renderLog.Printf( __VA_ARGS__ );
+#define RENDERLOG_PRINTF( ... ) //printf(__VA_ARGS__); // if ( renderLog.activeLevel ) renderLog.Printf( __VA_ARGS__ );
 
 
 

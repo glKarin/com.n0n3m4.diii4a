@@ -54,6 +54,9 @@ extern void Android_SetClipboardData(const char *text);
 extern void Android_ClearEvents(void);
 extern void Android_PollInput(void);
 extern int Android_PollEvents(int num);
+extern float analogx;
+extern float analogy;
+extern int analogenabled;
 
 const char* kbdNames[] =
 {
@@ -249,6 +252,12 @@ void Sys_GrabMouseCursor( bool grabIt )
 Sys_GetEvent
 ================
 */
+enum
+{
+	Q3E_EVENT_NONE = 0,
+	Q3E_EVENT_KEY = 1,
+	Q3E_EVENT_MOUSE = 2,
+};
 struct Q3E_Event_s
 {
 	int type; // 1 key; 2 mouse
@@ -259,32 +268,48 @@ struct Q3E_Event_s
 	float dy;
 };
 static Q3E_Event_s q3e_event;
-#define Q3E_KEY_EVENT(state, key, character) { q3e_event.type = 1; q3e_event.state = state; q3e_event.key = key; q3e_event.character = character; }
-#define Q3E_MOUSE_EVENT(dx, dy) { q3e_event.type = 2; q3e_event.dx = dx; q3e_event.dy = dy; }
-#define Q3E_NONE_EVENT() { q3e_event.type = 0; }
-#define Q3E_HAS_EVENT() (q3e_event.type != 0)
+#define Q3E_KEY_EVENT(state, key, character) { q3e_event.type = Q3E_EVENT_KEY; q3e_event.state = state; q3e_event.key = key; q3e_event.character = character; }
+#define Q3E_MOUSE_EVENT(dx, dy) { q3e_event.type = Q3E_EVENT_MOUSE; q3e_event.dx = dx; q3e_event.dy = dy; }
+#define Q3E_NONE_EVENT() { q3e_event.type = Q3E_EVENT_NONE; }
+#define Q3E_HAS_EVENT() (q3e_event.type != Q3E_EVENT_NONE)
 sysEvent_t Sys_GetEvent()
 {
 	sysEvent_t res = { };
 
 	// when this is returned, it's assumed that there are no more events!
 	static const sysEvent_t no_more_events = { SE_NONE, 0, 0, 0, NULL };
+	//static int32 uniChar = 0;
+
+	/*
+	if( uniChar )
+	{
+		res.evType = SE_CHAR;
+		res.evValue = uniChar;
+
+		uniChar = 0;
+
+		return res;
+	}
+	*/
 
 	Q3E_NONE_EVENT();
 	while(Android_PollEvents(1) > 0)
 	{
 		switch(q3e_event.type)
 		{
-			case 1:
+			case Q3E_EVENT_KEY:
+				/*
 				if(q3e_event.character)
 				{
-					res.evType = SE_CHAR;
-					res.evValue = q3e_event.character;
-					kbd_polls.Append( kbd_poll_t( q3e_event.key, q3e_event.state ) );
-					return res;
+					if(q3e_event.state)
+					{
+						uniChar = q3e_event.character;
+					}
 				}
-				else
+				*/
 				{
+					if( q3e_event.character == Sys_GetConsoleKey( false ) || q3e_event.character == Sys_GetConsoleKey( true ) )
+						q3e_event.key = K_GRAVE;
 					res.evType = SE_KEY;
 					res.evValue = q3e_event.key;
 					res.evValue2 = q3e_event.state ? 1 : 0;
@@ -292,7 +317,8 @@ sysEvent_t Sys_GetEvent()
 					return res;
 				}
 				break;
-			case 2:
+
+			case Q3E_EVENT_MOUSE:
 				res.evType = SE_MOUSE;
 				res.evValue = q3e_event.dx;
 				res.evValue2 = q3e_event.dy;
@@ -489,3 +515,13 @@ void Q3E_MotionEvent(float dx, float dy)
     Posix_AddMousePollEvent(M_DELTAY, dy);*/
 	Q3E_MOUSE_EVENT(dx, dy);
 }
+
+void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
+{
+	if (analogenabled)
+	{
+		side = (int)(KEY_MOVESPEED * analogx);
+		forward = (int)(KEY_MOVESPEED * analogy);
+	}
+}
+

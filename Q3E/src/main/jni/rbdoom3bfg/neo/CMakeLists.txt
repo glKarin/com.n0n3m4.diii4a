@@ -16,7 +16,7 @@ option(STANDALONE
 		"Skip DOOM-3-BFG base/ folder and use assets/ instead" OFF)
 
 option(DOOM_CLASSIC
-		"Build with Doom 1 & 2" OFF) #k ON
+		"Build with Doom 1 & 2" ON)
 
 option(FORCE_COLOR_OUTPUT
 		"Always produce ANSI-colored output (GNU/Clang only)." OFF)

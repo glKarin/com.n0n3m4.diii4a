@@ -22,6 +22,7 @@ public final class GameManager
             Q3EGlobals.GAME_QUAKE3,
             Q3EGlobals.GAME_QUAKE2,
             Q3EGlobals.GAME_QUAKE1,
+            Q3EGlobals.GAME_DOOM3BFG,
             Q3EGlobals.GAME_TDM,
     };
 
@@ -116,6 +117,10 @@ public final class GameManager
         {
             list = GameProps.get(Q3EGlobals.GAME_TDM);
         }
+        else if (Q3EUtils.q3ei.isD3BFG)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_DOOM3BFG);
+        }
         else
         {
             list = GameProps.get(Q3EGlobals.GAME_DOOM3);
@@ -165,6 +170,8 @@ public final class GameManager
             return R.drawable.rtcw_icon;
         else if (Q3EUtils.q3ei.isTDM)
             return R.drawable.tdm_icon;
+        else if (Q3EUtils.q3ei.isD3BFG)
+            return R.drawable.d3bfg_icon;
         else
             return R.drawable.d3_icon;
     }
@@ -185,6 +192,8 @@ public final class GameManager
             return R.color.theme_rtcw_main_color;
         else if (Q3EUtils.q3ei.isTDM)
             return R.color.theme_tdm_main_color;
+        else if (Q3EUtils.q3ei.isD3BFG)
+            return R.color.theme_d3bfg_main_color;
         else
             return R.color.theme_doom3_main_color;
     }

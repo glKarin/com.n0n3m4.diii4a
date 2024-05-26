@@ -112,7 +112,7 @@ public final class Q3EGlobals
     public static final String GAME_RTCW = "rtcw";
     public static final String GAME_TDM = "tdm";
     public static final String GAME_QUAKE1 = "quake1";
-    public static final String GAME_DOOM3BFG = "doom3";
+    public static final String GAME_DOOM3BFG = "doom3bfg";
 
     public static final String GAME_NAME_DOOM3 = "DOOM 3";
     public static final String GAME_NAME_QUAKE4 = "Quake 4";

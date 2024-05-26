@@ -8,5 +8,6 @@
     <color name="theme_quake3_main_color">#FF614D44</color>
     <color name="theme_rtcw_main_color">#FF330000</color>
     <color name="theme_tdm_main_color">#FF763F20</color>
+    <color name="theme_d3bfg_main_color">#FFFF0000</color>
     <color name="launcher_divider_color">#FFCCCCCC</color>
 </resources>

@@ -54,15 +54,6 @@ void Sys_SyncState(void)
     }
 }
 
-void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
-{
-    if (analogenabled)
-    {
-        side = (int)(KEY_MOVESPEED * analogx);
-        forward = (int)(KEY_MOVESPEED * analogy);
-    }
-}
-
 void Sys_ForceResolution(void)
 {
     cvarSystem->SetCVarBool("r_fullscreen",  true);

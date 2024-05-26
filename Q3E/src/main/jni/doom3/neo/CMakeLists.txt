@@ -98,24 +98,24 @@ option(SUPPORT_DAE							"Support dae model" 							ON)
 option(SHADOW_MAPPING						"Shadow mapping support" 						ON)
 option(NO_LIGHT								"r_noLight support" 							ON)
 option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" 			ON)
-option(EXTRAS_TOOLS							"Add extras commands" 							ON)
+option(EXTRAS_TOOLS							"Add extras commands" 							OFF)
 
 # DOOM3 cores
 option(CORE									"Build the core" 								ON)
 option(BASE									"Build the base game code" 						ON)
-option(D3XP									"Build the d3xp game code" 						OFF)
+option(D3XP									"Build the d3xp game code" 						ON)
 
 # DOOM3 mods
 option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" 	ON)
-option(D3LE									"Build the d3le game code" 						OFF)
-option(CDOOM								"Build the cdoom game code" 					OFF)
-option(RIVENSIN								"Build the rivensin game code" 					OFF)
-option(HARDCORPS							"Build the hardcorps game code" 				OFF)
-option(OVERTHINKED							"Build the overthinked game code" 				OFF)
-option(SABOT								"Build the sabot game code" 					OFF)
-option(HEXENEOC								"Build the hexeneoc game code" 					OFF)
-option(FRAGGINGFREE							"Build the fraggingfree game code" 				OFF)
-option(LIBRECOOP							"Build the librecoop game code" 				OFF)
+option(D3LE									"Build the d3le game code" 						ON)
+option(CDOOM								"Build the cdoom game code" 					ON)
+option(RIVENSIN								"Build the rivensin game code" 					ON)
+option(HARDCORPS							"Build the hardcorps game code" 				ON)
+option(OVERTHINKED							"Build the overthinked game code" 				ON)
+option(SABOT								"Build the sabot game code" 					ON)
+option(HEXENEOC								"Build the hexeneoc game code" 					ON)
+option(FRAGGINGFREE							"Build the fraggingfree game code" 				ON)
+option(LIBRECOOP							"Build the librecoop game code" 				ON)
 
 # Quake4
 option(RAVEN								"Build the raven core" 							ON)
@@ -125,8 +125,8 @@ option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod suppor
 option(Q4_MOD_BOTS							"Build quake4 bots mod support" 				ON)
 
 # Prey 2006
-option(HUMANHEAD							"Build the humanhead core" 						OFF)
-option(PREY									"Build the prey game code" 						OFF)
+option(HUMANHEAD							"Build the humanhead core" 						ON)
+option(PREY									"Build the prey game code" 						ON)
 option(PREY_MOD_FULL_BODY_AWARENESS			"Build prey full body awareness mod support" 	ON)
 
 # Print env

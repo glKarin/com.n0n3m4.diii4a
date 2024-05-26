@@ -290,6 +290,7 @@
     <string name="quake_2_zaero">雷神之锤2:zaero</string>
     <string name="rtcw_base">重返德军总部</string>
     <string name="tdm_base">The Dark Mod</string>
+    <string name="d3bfg_base">毁灭战士3 BFG</string>
     <string name="quake_3_base">雷神之锤3:竞技场</string>
     <string name="quake_3_teamarena">雷神之锤3:团队竞技场</string>
     <string name="stop">停止</string>
@@ -311,4 +312,5 @@
     <string name="open_documents">安卓存储访问框架</string>
     <string name="open_system_file_browser">打开安卓存储访问框架</string>
     <string name="application_pid">"程序PID: "</string>
+    <string name="doom_3_bfg">毁灭战士3 BFG</string>
 </resources>

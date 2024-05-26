@@ -352,7 +352,7 @@ static void R_CheckPortableExtensions()
 	// RB: make GPU skinning optional for weak OpenGL drivers
 	glConfig.gpuSkinningAvailable = glConfig.uniformBufferAvailable && ( glConfig.driverType == GLDRV_OPENGL3X || glConfig.driverType == GLDRV_OPENGL32_CORE_PROFILE || glConfig.driverType == GLDRV_OPENGL32_COMPATIBILITY_PROFILE );
 #ifdef _GLES //karin: force setup glConfig's extension support
-    //glConfig.gpuSkinningAvailable = true;
+    glConfig.gpuSkinningAvailable = true;
 #endif
 
 	// ATI_separate_stencil / OpenGL 2.0 separate stencil

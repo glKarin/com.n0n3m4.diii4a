@@ -563,7 +563,7 @@ void Framebuffer::Check()
 
 	glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
 
-#ifdef _GLES //karin: print framebuffer info
+#ifdef _GLESxxx //karin: print framebuffer info
 	GLint value[4] = {0};
 	for(int i = 0; i < 6; i++)
 	{
@@ -601,7 +601,7 @@ void Framebuffer::Check()
 	if( status == GL_FRAMEBUFFER_COMPLETE )
 	{
 		glBindFramebuffer( GL_FRAMEBUFFER, prev );
-#ifdef _GLES //karin: debug
+#ifdef _GLESxxx //karin: debug
 		common->Printf( "Framebuffer::Check( %s ): Framebuffer complete\n", fboName.c_str() );
 #endif
 		return;

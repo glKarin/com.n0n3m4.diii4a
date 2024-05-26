@@ -284,6 +284,8 @@ public class Q3EInterface
 			subdatadir = subdir;
 		else if(isTDM)
 			subdatadir = subdir;
+		else if(isD3BFG)
+			subdatadir = subdir;
 			// else if(IS_D3()) return null;
 		else
 			subdatadir = null;
@@ -318,6 +320,8 @@ public class Q3EInterface
 			SetupTDM();
 		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
 			SetupQuake1();
+		else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+			SetupDoom3BFG();
 		else
 			SetupDOOM3();
 	}
@@ -439,8 +443,8 @@ public class Q3EInterface
 		isQ2 = false;
 		isRTCW = false;
 		isQ3 = false;
-		isD3BFG = false;
 		isQ1 = true;
+		isD3BFG = false;
 		SetupGameConfig();
 	}
 
@@ -722,6 +726,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_tdm_fs_game;
 		else if(Q3EUtils.q3ei.isQ1)
 			return Q3EPreference.pref_harm_q1_fs_game;
+		else if(Q3EUtils.q3ei.isD3BFG)
+			return Q3EPreference.pref_harm_d3bfg_fs_game;
 		else
 			return Q3EPreference.pref_harm_fs_game;
 	}
@@ -742,6 +748,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_tdm_user_mod;
 		else if(Q3EUtils.q3ei.isQ1)
 			return Q3EPreference.pref_harm_q1_user_mod;
+		else if(Q3EUtils.q3ei.isD3BFG)
+			return Q3EPreference.pref_harm_d3bfg_user_mod;
 		else
 			return Q3EPreference.pref_harm_user_mod;
 	}
@@ -762,6 +770,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_harm_tdm_game_lib;
 		else if(Q3EUtils.q3ei.isQ1)
 			return Q3EPreference.pref_harm_q1_game_lib;
+		else if(Q3EUtils.q3ei.isD3BFG)
+			return Q3EPreference.pref_harm_d3bfg_game_lib;
 		else
 			return Q3EPreference.pref_harm_game_lib;
 	}
@@ -782,6 +792,8 @@ public class Q3EInterface
 			return Q3EPreference.pref_params_tdm;
 		else if(Q3EUtils.q3ei.isQ1)
 			return Q3EPreference.pref_params_q1;
+		else if(Q3EUtils.q3ei.isD3BFG)
+			return Q3EPreference.pref_params_d3bfg;
 		else
 			return Q3EPreference.pref_params;
 	}
@@ -832,6 +844,8 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_SUBDIR_TDM;
 		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
 			return Q3EGlobals.GAME_SUBDIR_QUAKE1;
+		else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_SUBDIR_DOOMBFG;
 		else
 			return Q3EGlobals.GAME_SUBDIR_DOOM3;
 	}
