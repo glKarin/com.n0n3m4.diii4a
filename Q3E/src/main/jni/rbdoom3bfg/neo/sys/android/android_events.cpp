@@ -278,9 +278,8 @@ sysEvent_t Sys_GetEvent()
 
 	// when this is returned, it's assumed that there are no more events!
 	static const sysEvent_t no_more_events = { SE_NONE, 0, 0, 0, NULL };
-	//static int32 uniChar = 0;
+	static int32 uniChar = 0;
 
-	/*
 	if( uniChar )
 	{
 		res.evType = SE_CHAR;
@@ -290,7 +289,6 @@ sysEvent_t Sys_GetEvent()
 
 		return res;
 	}
-	*/
 
 	Q3E_NONE_EVENT();
 	while(Android_PollEvents(1) > 0)
@@ -298,7 +296,6 @@ sysEvent_t Sys_GetEvent()
 		switch(q3e_event.type)
 		{
 			case Q3E_EVENT_KEY:
-				/*
 				if(q3e_event.character)
 				{
 					if(q3e_event.state)
@@ -306,7 +303,6 @@ sysEvent_t Sys_GetEvent()
 						uniChar = q3e_event.character;
 					}
 				}
-				*/
 				{
 					if( q3e_event.character == Sys_GetConsoleKey( false ) || q3e_event.character == Sys_GetConsoleKey( true ) )
 						q3e_event.key = K_GRAVE;

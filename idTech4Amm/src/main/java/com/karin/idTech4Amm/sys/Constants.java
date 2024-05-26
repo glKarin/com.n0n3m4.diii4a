@@ -30,6 +30,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`. More view in `" + TextHelper.GenLinkText("https://github.com/RobertBeckebans/RBDOOM-3-BFG", "RBDOOM-3-BFG") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/agecheck/app/208200/", "DOOM-3-BFG") + "`.",
             "Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2310/Quake/", "Quake I") + "`.",
             "Fix some shaders error in TheDarkMod(2.12)",
             "Upgrade Quake2(yquake2) version.",
