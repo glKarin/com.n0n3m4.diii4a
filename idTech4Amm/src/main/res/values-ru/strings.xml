@@ -299,7 +299,7 @@
     <string name="scroll">Прокрутка</string>
     <string name="pause">Пауза</string>
     <string name="joystick_visible">Джойстик виден:</string>
-    <string name="suggest_game_woring_directory_tips">Предложить создать папку в `%s` как рабочий каталог игры для быстрой загрузки на Android 11/11+!</string>
+    <string name="suggest_game_woring_directory_tips">Рекомендуется создать папку в `%s` для быстрой загрузки игры на Android 11/11+!</string>
     <string name="sub_directory">Подкаталог: </string>
     <string name="app_is_rebooting">Приложение перезагружается......</string>
     <string name="standalone_game_data_directory">Автономный каталог данных игры</string>
