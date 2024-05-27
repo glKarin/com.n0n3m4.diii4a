@@ -1863,7 +1863,7 @@ else()
 	endif()
 
 	if(ANDROID)
-		add_library(RBDoom3BFG ${RBDOOM3_SOURCES})
+		add_library(RBDoom3BFG SHARED ${RBDOOM3_SOURCES})
 	else()
 	add_executable(RBDoom3BFG WIN32 ${RBDOOM3_SOURCES})
 	endif()

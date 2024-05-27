@@ -500,9 +500,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, idUserCmdMgr * userCmdMgr, int newTics )
 	if (side > MAXPLMOVE) 
 		side = MAXPLMOVE; 
 	else if (side < -MAXPLMOVE) 
-		side = -MAXPLMOVE; 
+		side = -MAXPLMOVE;
 
-	cmd->forwardmove += forward; 
+	cmd->forwardmove += forward;
 	cmd->sidemove += side;
 
 	// special buttons

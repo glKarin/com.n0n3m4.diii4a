@@ -1477,6 +1477,9 @@ qboolean M_Responder (event_t* ev)
 		return true;
 
 	case KEY_ENTER:
+#ifdef _DIII4A //karin: Mouse1 as enter on menu
+	case K_MOUSE1:
+#endif
 		if (::g->currentMenu->menuitems[::g->itemOn].routine &&
 			::g->currentMenu->menuitems[::g->itemOn].status)
 		{

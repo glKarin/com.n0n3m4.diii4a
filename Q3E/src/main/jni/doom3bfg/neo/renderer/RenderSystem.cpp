@@ -1154,10 +1154,25 @@ void idRenderSystemLocal::CaptureRenderToFile( const char* fileName, bool fixAlp
 #if !defined(USE_VULKAN)
 	glReadBuffer( GL_BACK );
 
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
+	// include extra space for OpenGL padding to word boundaries
+	int	c = ( rc.GetWidth() + 4 ) * rc.GetHeight();
+	byte* data = ( byte* )R_StaticAlloc( c * 4 );
+	glReadPixels( rc.x1, rc.y1, rc.GetWidth(), rc.GetHeight(), GL_RGBA, GL_UNSIGNED_BYTE, data );
+
+	byte* data2 = ( byte* )R_StaticAlloc( c * 4 );
+
+	for( int i = 0 ; i < c ; i++ )
+	{
+		data2[ i * 4 ] = data[ i * 4 ];
+		data2[ i * 4 + 1 ] = data[ i * 4 + 1 ];
+		data2[ i * 4 + 2 ] = data[ i * 4 + 2 ];
+		data2[ i * 4 + 3 ] = 0xff;
+	}
+#else
 	// include extra space for OpenGL padding to word boundaries
 	int	c = ( rc.GetWidth() + 3 ) * rc.GetHeight();
 	byte* data = ( byte* )R_StaticAlloc( c * 3 );
-
 	glReadPixels( rc.x1, rc.y1, rc.GetWidth(), rc.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, data );
 
 	byte* data2 = ( byte* )R_StaticAlloc( c * 4 );
@@ -1169,6 +1184,7 @@ void idRenderSystemLocal::CaptureRenderToFile( const char* fileName, bool fixAlp
 		data2[ i * 4 + 2 ] = data[ i * 3 + 2 ];
 		data2[ i * 4 + 3 ] = 0xff;
 	}
+#endif
 
 	R_WriteTGA( fileName, data2, rc.GetWidth(), rc.GetHeight(), true );
 

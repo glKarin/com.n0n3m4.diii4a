@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer/RenderCommon.h"
 #include "android_local.h"
 #include "../posix/posix_public.h"
+#include "../../framework/Common_local.h"
 
 // DG: those are needed for moving/resizing windows
 extern idCVar r_windowX;
@@ -303,9 +304,15 @@ sysEvent_t Sys_GetEvent()
 						uniChar = q3e_event.character;
 					}
 				}
+
 				{
-					if( q3e_event.character == Sys_GetConsoleKey( false ) || q3e_event.character == Sys_GetConsoleKey( true ) )
+					const char a = Sys_GetConsoleKey( false );
+					const char b = Sys_GetConsoleKey( true );
+					if( q3e_event.character == a || q3e_event.character == b
+						|| q3e_event.key == a || q3e_event.key == b
+					)
 						q3e_event.key = K_GRAVE;
+
 					res.evType = SE_KEY;
 					res.evValue = q3e_event.key;
 					res.evValue2 = q3e_event.state ? 1 : 0;
@@ -482,33 +489,11 @@ void Sys_EndJoystickInputEvents()
 
 void Q3E_KeyEvent(int state,int key,int character)
 {
-/*    sysEvent_t res = { };
-
-    res.evType = SE_KEY;
-    res.evValue = key;
-    res.evValue2 = state;*/
-
-    // kbd_polls.Append( kbd_poll_t( key, state ) );
-/*    Posix_QueEvent(SE_KEY, key, state, 0, NULL);
-    if ((character != 0) && (state == 1)) {
-        Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
-    }
-    Posix_AddKeyboardPollEvent(key, state);*/
 	Q3E_KEY_EVENT(state, key, character);
 }
 
 void Q3E_MotionEvent(float dx, float dy)
 {
-/*    sysEvent_t res = { };
-    res.evType = SE_MOUSE;
-    res.evValue = dx;
-    res.evValue2 = dy;*/
-
-//    mouse_polls.Append( mouse_poll_t( M_DELTAX, dx ) );
-//    mouse_polls.Append( mouse_poll_t( M_DELTAY, dy ) );
-    /*Posix_QueEvent(SE_MOUSE, dx, dy, 0, NULL);
-    Posix_AddMousePollEvent(M_DELTAX, dx);
-    Posix_AddMousePollEvent(M_DELTAY, dy);*/
 	Q3E_MOUSE_EVENT(dx, dy);
 }
 

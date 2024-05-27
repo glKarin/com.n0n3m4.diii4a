@@ -686,7 +686,8 @@ bool GLimp_SetScreenParms( glimpParms_t parms )
 	glConfig.nativeScreenWidth = screen_width;
 	glConfig.nativeScreenHeight = screen_height;
 	glConfig.displayFrequency = 60;
-	glConfig.multisamples = 0;
+	glConfig.multisamples = gl_msaa > 1 ? gl_msaa / 2 : 0;
+	glConfig.pixelAspect = 1.0f;	// FIXME: some monitor modes may be distorted
 
 	return true;
 }

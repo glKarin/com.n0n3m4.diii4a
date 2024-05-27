@@ -20,6 +20,14 @@
 #include "precompiled.h"
 #include "../../framework/Common_local.h"
 extern idCommonLocal commonLocal;
+#if defined(USE_DOOMCLASSIC)
+#include "../../../doomclassic/doom/globaldata.h"
+static int classicdoom_gamestate = -1;
+extern void Sys_SetClassicDOOMGameState(int state)
+{
+    classicdoom_gamestate = state;
+}
+#endif
 
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
@@ -34,18 +42,40 @@ void Sys_SyncState(void)
     //if (setState)
     {
         state = STATE_NONE;
-        if(commonLocal.insideExecuteMapChange)
-            state |= STATE_LOADING;
-        else
-        {
-            idGame *game = commonLocal.Game();
-            if(game && game->Shell_IsActive())
-                state |= STATE_MENU;
+#if defined(USE_DOOMCLASSIC)
+		currentGame_t game = commonLocal.GetCurrentGame();
+		switch(game)
+		{
+			case DOOM3_BFG:
+			default:
+#endif
+            if(commonLocal.insideExecuteMapChange)
+                state |= STATE_LOADING;
             else
-                state |= STATE_GAME;
+            {
+                idGame *game = commonLocal.Game();
+                if(game && game->Shell_IsActive())
+                    state |= STATE_MENU;
+                else
+                    state |= STATE_GAME;
+            }
+            if(console->Active())
+                state |= STATE_CONSOLE;
+
+#if defined(USE_DOOMCLASSIC)
+            break;
+
+			case DOOM_CLASSIC:
+			case DOOM2_CLASSIC:
+                if(classicdoom_gamestate == GS_DEMOSCREEN)
+                    state |= STATE_MENU;
+                else if(classicdoom_gamestate == GS_LEVEL)
+                    state |= STATE_GAME;
+                if(console->Active())
+                    state |= STATE_CONSOLE;
+            break;
         }
-        if(console->Active())
-            state |= STATE_CONSOLE;
+#endif
         if (state != prev_state)
         {
             setState(state);

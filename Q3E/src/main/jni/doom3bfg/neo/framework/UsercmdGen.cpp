@@ -450,7 +450,7 @@ idUsercmdGenLocal::KeyMove
 Sets the usercmd_t based on key states
 ================
 */
-#ifdef __ANDROID__ //karin: joystick smooth movement on Android
+#ifdef _DIII4A //karin: joystick smooth movement on Android
 extern void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED);
 #endif
 void idUsercmdGenLocal::KeyMove()
@@ -464,7 +464,7 @@ void idUsercmdGenLocal::KeyMove()
 	forward += KEY_MOVESPEED * ButtonState( UB_MOVEFORWARD );
 	forward -= KEY_MOVESPEED * ButtonState( UB_MOVEBACK );
 
-#ifdef __ANDROID__ //karin: joystick smooth movement on Android
+#ifdef _DIII4A //karin: joystick smooth movement on Android
 	//ANALOG
 	Sys_Analog(side, forward, KEY_MOVESPEED);
 	//END

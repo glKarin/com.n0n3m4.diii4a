@@ -391,8 +391,12 @@ public class Q3EKeyCodes
         public static final int K_MOUSE8 = 293;
         public static final int K_MWHEELDOWN = 294;
         public static final int K_MWHEELUP = 295;
-        public static final int J_LEFT = K_LEFTARROW;
-        public static final int J_RIGHT = K_RIGHTARROW;
+
+        //karin: change to a/d
+//        public static final int J_LEFT = K_LEFTARROW;
+//        public static final int J_RIGHT = K_RIGHTARROW;
+        public static final int J_LEFT = K_A;
+        public static final int J_RIGHT = K_D;
         public static final int J_UP = K_UPARROW;
         public static final int J_DOWN = K_DOWNARROW;
     }

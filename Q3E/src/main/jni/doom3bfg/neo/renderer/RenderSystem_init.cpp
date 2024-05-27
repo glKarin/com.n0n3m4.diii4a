@@ -401,7 +401,7 @@ void R_SetNewMode( const bool fullInit )
 				// try forcing a specific mode, even if it isn't on the list
 				parms.width = r_customWidth.GetInteger();
 				parms.height = r_customHeight.GetInteger();
-				parms.displayHz = r_displayRefresh.GetInteger();
+				parms.displayHz = 60;
 			}
 			else
 			{
@@ -862,7 +862,23 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 				globalFramebuffers.envprobeFBO->Bind();
 
 				glPixelStorei( GL_PACK_ROW_LENGTH, ENVPROBE_CAPTURE_SIZE );
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
+				int tmpsize = width * height;
+				byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 * 2 );
+				glReadPixels( 0, 0, w, h, GL_RGBA, GL_HALF_FLOAT, tmpbuf );
+				for(int i = 0; i < tmpsize; i++)
+				{
+					buffer[i * 3 * 2] = tmpbuf[i * 4 * 2];
+					buffer[i * 3 * 2 + 1] = tmpbuf[i * 4 * 2 + 1];
+					buffer[i * 3 * 2 + 2] = tmpbuf[i * 4 * 2 + 2];
+					buffer[i * 3 * 2 + 3] = tmpbuf[i * 4 * 2 + 4];
+					buffer[i * 3 * 2 + 4] = tmpbuf[i * 4 * 2 + 5];
+					buffer[i * 3 * 2 + 5] = tmpbuf[i * 4 * 2 + 6];
+				}
+				R_StaticFree(tmpbuf);
+#else
 				glReadPixels( 0, 0, w, h, GL_RGB, GL_HALF_FLOAT, buffer );
+#endif
 
 				R_VerticalFlipRGB16F( buffer, w, h );
 
@@ -871,7 +887,20 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 			else
 			{
 				glReadBuffer( GL_FRONT );
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
+				int tmpsize = width * height;
+				byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 );
+				GLDBG(glReadPixels( 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, tmpbuf ));
+				for(int i = 0; i < tmpsize; i++)
+				{
+					buffer[i * 3] = tmpbuf[i * 4];
+					buffer[i * 3 + 1] = tmpbuf[i * 4 + 1];
+					buffer[i * 3 + 2] = tmpbuf[i * 4 + 2];
+				}
+				R_StaticFree(tmpbuf);
+#else
 				glReadPixels( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp );
+#endif
 
 				int	row = ( w * 3 + 3 ) & ~3;		// OpenGL pads to dword boundaries
 

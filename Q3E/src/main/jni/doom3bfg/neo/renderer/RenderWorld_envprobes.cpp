@@ -1067,7 +1067,23 @@ CONSOLE_COMMAND( bakeEnvironmentProbes, "Bake environment probes", NULL )
 			globalFramebuffers.envprobeFBO->Bind();
 
 			glPixelStorei( GL_PACK_ROW_LENGTH, ENVPROBE_CAPTURE_SIZE );
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
+			int tmpsize = captureSize * captureSize;
+			byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 * 2 );
+			glReadPixels( 0, 0, captureSize, captureSize, GL_RGBA, GL_HALF_FLOAT, tmpbuf );
+			for(int i = 0; i < tmpsize; i++)
+			{
+				float16FRGB[i * 3 * 2] = tmpbuf[i * 4 * 2];
+				float16FRGB[i * 3 * 2 + 1] = tmpbuf[i * 4 * 2 + 1];
+				float16FRGB[i * 3 * 2 + 2] = tmpbuf[i * 4 * 2 + 2];
+				float16FRGB[i * 3 * 2 + 3] = tmpbuf[i * 4 * 2 + 4];
+				float16FRGB[i * 3 * 2 + 4] = tmpbuf[i * 4 * 2 + 5];
+				float16FRGB[i * 3 * 2 + 5] = tmpbuf[i * 4 * 2 + 6];
+			}
+			R_StaticFree(tmpbuf);
+#else
 			glReadPixels( 0, 0, captureSize, captureSize, GL_RGB, GL_HALF_FLOAT, float16FRGB );
+#endif
 
 			R_VerticalFlipRGB16F( float16FRGB, captureSize, captureSize );
 

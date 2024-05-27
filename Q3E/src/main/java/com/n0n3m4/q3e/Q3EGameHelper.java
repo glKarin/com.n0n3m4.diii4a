@@ -324,6 +324,88 @@ public class Q3EGameHelper
         }
     }
 
+    public void ExtractDOOM3BFGHLSLShaderSource()
+    {
+        InputStream bis = null;
+        ZipInputStream zipinputstream = null;
+        FileOutputStream fileoutputstream = null;
+        boolean overwrite = false;
+
+        try
+        {
+            final String destname = Q3EUtils.q3ei.datadir + "/doom3bfg/base";
+            File versionFile = new File(destname + "/renderprogs/idtech4amm.version");
+            if(!versionFile.isFile() || !versionFile.canRead())
+            {
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "RBDOOM 3 BFG HLSL shader source file version not exists.");
+                overwrite = true;
+            }
+            else
+            {
+                String version = Q3EUtils.file_get_contents(versionFile);
+                if(null != version)
+                    version = version.trim();
+                if(!Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION.equalsIgnoreCase(version))
+                {
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format("RBDOOM 3 BFG HLSL shader source file version is mismatch: %s != %s.", version, Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION));
+                    overwrite = true;
+                }
+            }
+            if(overwrite)
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "RBDOOM 3 BFG HLSL shader source file will be overwrite.");
+            else
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "RBDOOM 3 BFG HLSL shader source file will keep exists version.");
+
+            bis = m_context.getAssets().open("pak/doom3bfg/renderprogs.pk4");
+            zipinputstream = new ZipInputStream(bis);
+
+            ZipEntry zipentry;
+            Q3EUtils.mkdir(destname, true);
+            while ((zipentry = zipinputstream.getNextEntry()) != null)
+            {
+                String tmpname = zipentry.getName();
+
+                String entryName = destname + "/" + tmpname;
+                entryName = entryName.replace('/', File.separatorChar);
+                entryName = entryName.replace('\\', File.separatorChar);
+                File file = new File(entryName);
+
+                if (zipentry.isDirectory())
+                {
+                    if(!file.exists())
+                        Q3EUtils.mkdir(entryName, true);
+                    continue;
+                }
+                if(!overwrite && file.exists())
+                    continue;
+
+                fileoutputstream = new FileOutputStream(entryName);
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying " + tmpname + " to " + destname);
+                Q3EUtils.Copy(fileoutputstream, zipinputstream, 4096);
+                fileoutputstream.close();
+                fileoutputstream = null;
+                zipinputstream.closeEntry();
+            }
+
+            if(overwrite)
+            {
+                Q3EUtils.file_put_contents(versionFile, Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION);
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Write RBDOOM 3 BFG HLSL shader source file version is " + Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            ShowMessage(R.string.extract_rbdoom3bfg_hlsl_shader_source_files_fail);
+        }
+        finally
+        {
+            Q3EUtils.Close(fileoutputstream);
+            Q3EUtils.Close(zipinputstream);
+            Q3EUtils.Close(bis);
+        }
+    }
+
     private int GetMSAA()
     {
         int msaa = PreferenceManager.getDefaultSharedPreferences(m_context).getInt(Q3EPreference.pref_msaa, 0);
