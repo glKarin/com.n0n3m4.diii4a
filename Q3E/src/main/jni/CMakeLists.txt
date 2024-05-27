@@ -80,4 +80,6 @@ add_subdirectory (quake1) # Quake 1
 
 add_subdirectory (tdm) # The Dark Mod
 
+add_subdirectory (rbdoom3bfg/neo) # RBDOOM3-BFG
+
 #add_subdirectory (duke4) # DNF

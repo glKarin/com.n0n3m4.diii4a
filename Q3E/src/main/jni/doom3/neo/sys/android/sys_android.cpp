@@ -35,7 +35,7 @@ int (*writeAudio)(int offset, int length);
 void (*shutdownAudio)(void);
 void (*setState)(int st);
 FILE * (*itmpfile)(void);
-void (*pull_input_event)(int execCmd);
+int (*pull_input_event)(int execCmd);
 void (*grab_mouse)(int grab);
 void (*attach_thread)(void);
 void (*copy_to_clipboard)(const char *text);
@@ -84,7 +84,7 @@ void Android_GrabMouseCursor(bool grabIt)
 void Android_PollInput(void)
 {
     //if(pull_input_event)
-        pull_input_event(1);
+        pull_input_event(-1);
 }
 
 FILE * Sys_tmpfile(void)

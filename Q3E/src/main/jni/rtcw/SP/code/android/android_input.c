@@ -232,7 +232,7 @@ static void IN_DeactivateMouse( void )
 	}
 }
 
-extern void (*pull_input_event)(int execCmd);
+extern void Android_PollInput(void);
 extern void Sys_SyncState(void);
 void IN_Frame(void)
 {
@@ -241,7 +241,7 @@ void IN_Frame(void)
 	else
 		IN_ActivateMouse();
 
-	pull_input_event(1);
+	Android_PollInput();
 
 	processMotionEvents();
 	processTrackballEvents();

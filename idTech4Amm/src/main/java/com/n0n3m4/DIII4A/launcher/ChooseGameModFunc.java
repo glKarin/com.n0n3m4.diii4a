@@ -79,6 +79,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 Q3EGlobals.GAME_BASE_QUAKE2,
                 Q3EGlobals.GAME_BASE_QUAKE3,
                 Q3EGlobals.GAME_BASE_RTCW,
+                Q3EGlobals.GAME_BASE_DOOM3BFG,
                 Q3EGlobals.GAME_BASE_TDM
         ));
         List<String> blackList = new ArrayList<>();
@@ -223,6 +224,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_TDM:
                         if(!Q3EUtils.q3ei.isTDM)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_DOOM3BFG:
+                        if(!Q3EUtils.q3ei.isD3BFG)
                             continue;
                         break;
                     case Q3EGlobals.GAME_DOOM3:

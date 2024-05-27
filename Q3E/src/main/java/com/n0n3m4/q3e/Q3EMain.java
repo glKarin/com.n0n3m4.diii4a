@@ -27,6 +27,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -306,5 +307,17 @@ public class Q3EMain extends Activity
         setContentView(mainLayout);
 
         mControlGLSurfaceView.requestFocus();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        return mControlGLSurfaceView.OnKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event)
+    {
+        return mControlGLSurfaceView.OnKeyUp(keyCode, event);
     }
 }

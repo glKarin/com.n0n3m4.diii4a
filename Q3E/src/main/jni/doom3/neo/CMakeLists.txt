@@ -99,7 +99,6 @@ option(SHADOW_MAPPING						"Shadow mapping support" 						ON)
 option(NO_LIGHT								"r_noLight support" 							ON)
 option(TRANSLUCENT_STENCIL_SHADOW			"Translucent stencil shadow support" 			ON)
 option(EXTRAS_TOOLS							"Add extras commands" 							OFF)
-option(BREAK_60FPS_CAP						"Break 60 fps cap" 								OFF)
 
 # DOOM3 cores
 option(CORE									"Build the core" 								ON)
@@ -150,11 +149,6 @@ endif()
 if(EXTRAS_TOOLS)
 	add_definitions(-D_EXTRAS_TOOLS)
 	message(STATUS "Build extras tools support")
-endif()
-
-if(BREAK_60FPS_CAP)
-	add_definitions(-D_BREAK_60FPS_CAP)
-	message(STATUS "Build break 60 fps cap support")
 endif()
 
 # Using traditional C++98

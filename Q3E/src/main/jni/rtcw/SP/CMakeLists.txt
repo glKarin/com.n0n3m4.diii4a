@@ -51,6 +51,7 @@ elseif(cpu MATCHES "[aA][rR][mM].*") # some kind of arm..
 endif()
 set(ARCH "${cpu}")
 add_definitions(-DARCH_STRING="${ARCH}")
+add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 
 set(rtcwcgame_src
         code/cgame/cg_main.c

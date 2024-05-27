@@ -74,12 +74,6 @@ import javax.microedition.khronos.opengles.GL11;
 
 public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Renderer, SensorEventListener
 {
-    private static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL = 1000;
-    private static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT = 3;
-    private static final int ENUM_BACK_NONE = 0;
-    private static final int ENUM_BACK_ESCAPE = 1;
-    private static final int ENUM_BACK_EXIT = 2;
-    private static final int ENUM_BACK_ALL = 0xFF;
     public static final float GYROSCOPE_X_AXIS_SENS = 18;
     public static final float GYROSCOPE_Y_AXIS_SENS = 18;
 
@@ -109,7 +103,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private boolean mapvol = false;
 
     // map back key function
-    private int m_mapBack = ENUM_BACK_ALL;
+    private int m_mapBack = Q3EGlobals.ENUM_BACK_ALL;
     private long m_lastPressBackTime = -1;
     private int m_pressBackCount = 0;
 
@@ -237,7 +231,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
             hideonscr = mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false);
             mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
-            m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, ENUM_BACK_ALL); //k
+            m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, Q3EGlobals.ENUM_BACK_ALL); //k
 
             if(m_usingMouseDevice)
                 m_mouseDevice = new Q3EMouseDevice(this);
@@ -358,12 +352,12 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         return event.getUnicodeChar();
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
+    //@Override
+    public boolean OnKeyDown(int keyCode, KeyEvent event)
     {
         if ((!mapvol) && ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) || (keyCode == KeyEvent.KEYCODE_VOLUME_UP)))
             return false;
-        if (keyCode == KeyEvent.KEYCODE_BACK && (m_mapBack & ENUM_BACK_ESCAPE) == 0)
+        if (keyCode == KeyEvent.KEYCODE_BACK && (m_mapBack & Q3EGlobals.ENUM_BACK_ESCAPE) == 0)
         {
             return true;
         }
@@ -385,16 +379,16 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         return true;
     }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event)
+    //@Override
+    public boolean OnKeyUp(int keyCode, KeyEvent event)
     {
         if ((!mapvol) && ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) || (keyCode == KeyEvent.KEYCODE_VOLUME_UP)))
             return false;
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
-            if (m_mapBack == ENUM_BACK_NONE)
+            if (m_mapBack == Q3EGlobals.ENUM_BACK_NONE)
                 return true;
-            if ((m_mapBack & ENUM_BACK_EXIT) != 0 && HandleBackPress())
+            if ((m_mapBack & Q3EGlobals.ENUM_BACK_EXIT) != 0 && HandleBackPress())
                 return true;
             Q3EUtils.ToggleToolbar(false);
         }
@@ -414,6 +408,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
         return true;
     }
+
     private static float getCenteredAxis(MotionEvent event, int axis)
     {
         final InputDevice.MotionRange range = event.getDevice().getMotionRange(axis, event.getSource());
@@ -610,23 +605,23 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     private boolean HandleBackPress()
     {
-        if ((m_mapBack & ENUM_BACK_EXIT) == 0)
+        if ((m_mapBack & Q3EGlobals.ENUM_BACK_EXIT) == 0)
             return false;
-        boolean res = false;
+        boolean res;
         long now = System.currentTimeMillis();
-        if (m_lastPressBackTime > 0 && now - m_lastPressBackTime <= CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL)
+        if (m_lastPressBackTime > 0 && now - m_lastPressBackTime <= Q3EGlobals.CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL)
         {
             m_pressBackCount++;
             res = true;
         } else
         {
             m_pressBackCount = 1;
-            res = (m_mapBack & ENUM_BACK_ESCAPE) == 0;
+            res = (m_mapBack & Q3EGlobals.ENUM_BACK_ESCAPE) == 0;
         }
         m_lastPressBackTime = now;
-        if (m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT - 1)
+        if (m_pressBackCount == Q3EGlobals.CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT - 1)
             Toast.makeText(getContext(), R.string.click_back_again_to_exit, Toast.LENGTH_LONG).show();
-        else if (m_pressBackCount == CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
+        else if (m_pressBackCount == Q3EGlobals.CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
         {
             m_renderView.Shutdown();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)

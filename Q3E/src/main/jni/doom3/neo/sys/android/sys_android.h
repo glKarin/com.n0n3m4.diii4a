@@ -13,7 +13,7 @@ typedef struct
 
     // Input
     void (*Input_grabMouse)(int grab); // Android grab mouse
-    void (*Input_pullEvent)(int execCmd); // Android pull input event
+    int (*Input_pullEvent)(int execCmd); // Android pull input event
 
     // System
     void (*Sys_attachThread)(void); // Attach C/C++ created thread to JNI

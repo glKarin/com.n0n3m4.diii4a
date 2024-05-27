@@ -113,7 +113,7 @@ int (*writeAudio)(int offset, int length);
 void (*shutdownAudio)(void);
 void (*setState)(int st);
 FILE * (*itmpfile)(void);
-void (*pull_input_event)(int execCmd);
+int (*pull_input_event)(int num);
 void (*grab_mouse)(int grab);
 void (*attach_thread)(void);
 void (*copy_to_clipboard)(const char *text);
@@ -260,7 +260,19 @@ void Android_GrabMouseCursor(Q3Ebool grabIt)
 void Android_PollInput(void)
 {
     //if(pull_input_event)
-        pull_input_event(1);
+        pull_input_event(-1);
+}
+
+void Android_ClearEvents(void)
+{
+    //if(pull_input_event)
+    pull_input_event(0);
+}
+
+int Android_PollEvents(int num)
+{
+    //if(pull_input_event)
+    return pull_input_event(num);
 }
 
 FILE * Sys_tmpfile(void)
@@ -542,6 +554,11 @@ void Android_CloseKeyboard(void)
 {
     //if(close_keyboard)
     close_keyboard();
+}
+
+volatile ANativeWindow * Android_GetWindow(void)
+{
+    return window;
 }
 
 #ifdef __cplusplus
