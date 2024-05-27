@@ -2483,7 +2483,7 @@ idRenderSystemLocal::IsStereoScopicRenderingSupported
 */
 bool idRenderSystemLocal::IsStereoScopicRenderingSupported() const
 {
-#ifdef _GLES
+#ifdef _GLES //karin: not support glDrawBuffer(GL_LEFT*, GL_RIGHT*)
 	return false;
 #else
 	return true;
