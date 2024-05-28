@@ -304,7 +304,7 @@
     <string name="sub_directory">Подкаталог: </string>
     <string name="app_is_rebooting">Приложение перезагружается......</string>
     <string name="standalone_game_data_directory">Автономный каталог данных игры</string>
-    <string name="game_data_directories_are_standalone"><![CDATA[Каталоги игровых данных являются автономными: DOOM3 -> doom3/; Quake4 -> quake4/; Prey(2006) -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (всегда)]]></string>
+    <string name="game_data_directories_are_standalone"><![CDATA[DOOM3: doom3\nQuake4: quake4\nPrey(2006): prey\nQuake1: quake1\nQuake2: quake2\nQuake3: quake3\nRTCW: rtcw\nThe Dark Mod: darkmod/ (всегда)\nDOOM3 BFG: doom3bfg/ (всегда)]]></string>
     <string name="load_local_engine_library">Загрузить локальную библиотеку движка</string>
     <string name="pid">PID</string>
     <string name="get_application_pid">Получить PID приложения</string>

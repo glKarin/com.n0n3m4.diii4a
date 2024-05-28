@@ -1283,8 +1283,9 @@ public class GameLauncher extends Activity
         String game = GetProp(Q3EUtils.q3ei.GetGameCommandParm());
         if (game == null || game.isEmpty())
             game = Q3EUtils.q3ei.game_base;
+		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir, Q3EUtils.q3ei.GetGameHomeDirectoryPath());
         bundle.putString("game", game);
-		bundle.putString("path", KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir));
+		bundle.putString("path", path);
         bundle.putString("file", file);
         m_editConfigFileFunc.Start(bundle);
     }
@@ -2069,7 +2070,6 @@ public class GameLauncher extends Activity
 			soundVisible = false;
 			otherVisible = false;
 			openglVisible = false;
-			modVisible = false;
 			dllVisible = false;
 		}
         else

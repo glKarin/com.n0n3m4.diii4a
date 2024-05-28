@@ -97,12 +97,12 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_DOOM3 = "DoomConfig.cfg"; // DOOM3
     public static final String CONFIG_FILE_QUAKE4 = "Quake4Config.cfg"; // Quake 4
     public static final String CONFIG_FILE_PREY = "preyconfig.cfg"; // Prey 2006
-    public static final String CONFIG_FILE_QUAKE2 = "yq2.cfg"; // Quake 2
+    public static final String CONFIG_FILE_QUAKE2 = "config.cfg"; // Quake 2
     public static final String CONFIG_FILE_QUAKE3 = "q3config.cfg"; // Quake 3
     public static final String CONFIG_FILE_RTCW = "wolfconfig.cfg"; // RTCW
     public static final String CONFIG_FILE_TDM = "Darkmod.cfg"; // TDM
     public static final String CONFIG_FILE_QUAKE1 = "config.cfg"; // Quake 1
-    public static final String CONFIG_FILE_DOOM3BFG = "DoomConfig.cfg"; // DOOM3-BFG
+    public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg"; // DOOM3-BFG
 
     public static final String GAME_DOOM3 = "doom3";
     public static final String GAME_QUAKE4 = "quake4";
@@ -133,7 +133,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_RTCW = "main";
     public static final String GAME_BASE_TDM = ""; // the dark mod is standalone
     public static final String GAME_BASE_QUAKE1 = "darkplaces/id1"; // "darkplaces";
-    public static final String GAME_BASE_DOOM3BFG = "doom3bfg/base";
+    public static final String GAME_BASE_DOOM3BFG = "base"; // RBDoom3BFG always in doom3bfg folder
 
     public static final String GAME_SUBDIR_DOOM3 = "doom3";
     public static final String GAME_SUBDIR_QUAKE4 = "quake4";

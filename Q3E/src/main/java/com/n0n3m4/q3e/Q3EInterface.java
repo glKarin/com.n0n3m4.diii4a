@@ -798,6 +798,16 @@ public class Q3EInterface
 			return Q3EPreference.pref_params;
 	}
 
+	public String GetGameHomeDirectoryPath()
+	{
+		if(Q3EUtils.q3ei.isD3BFG)
+			return ".local/share/rbdoom3bfg";
+		else if(Q3EUtils.q3ei.isQ2)
+			return ".yq2";
+		else
+			return null;
+	}
+
 	public void LoadTypeAndArgTablePreference(Context context)
 	{
 		// index:type;23,1,2,0|......

@@ -306,7 +306,7 @@
     <string name="sub_directory">Sub directory: </string>
     <string name="app_is_rebooting">App is rebooting......</string>
     <string name="standalone_game_data_directory">Standalone game data directory</string>
-    <string name="game_data_directories_are_standalone"><![CDATA[Game data directories are standalone: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always)]]></string>
+    <string name="game_data_directories_are_standalone"><![CDATA[DOOM3: doom3\nQuake4: quake4\nPrey(2006): prey\nQuake1: quake1\nQuake2: quake2\nQuake3: quake3\nRTCW: rtcw\nThe Dark Mod: darkmod/ (always)\nDOOM3 BFG: doom3bfg/ (always)]]></string>
     <string name="load_local_engine_library">Load local engine library</string>
     <string name="pid">PID</string>
     <string name="get_application_pid">Get application PID</string>

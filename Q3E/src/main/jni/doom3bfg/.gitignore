@@ -45,3 +45,8 @@ neo/.kdev4
 neo/neo.kdev4
 neo/.idea/
 neo/cmake-build-*/
+
+neo/premake4.exe
+neo/astyle.exe
+neo/astyle.x86
+neo/astyle.x86_64
