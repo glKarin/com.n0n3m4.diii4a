@@ -1669,6 +1669,7 @@ void RB_SetVertexColorParms( stageVertexColor_t svc );
 #include "VertexCache.h"
 
 #ifdef _GLES //karin: debug
+#if 0
 #define GLDBG(x) { \
 		while(glGetError() != GL_NO_ERROR); \
 		x; \
@@ -1685,6 +1686,11 @@ while(glGetError() != GL_NO_ERROR); \
 			printf("  %2d -> %x\n", _glErrIdx++, _glErr); \
         }           \
 	}
+#else
+#define GLDBG(x) x
+#define CLERR
+#define CHKRR(x)
+#endif
 #endif
 
 #endif /* !__TR_LOCAL_H__ */

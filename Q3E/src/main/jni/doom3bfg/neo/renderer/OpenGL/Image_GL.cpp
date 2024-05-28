@@ -384,7 +384,7 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 	{
 #ifdef _GLES //karin: decompress texture to RGBA instead of glCompressedXXX on OpenGLES
 		idDxtDecoder decoder;
-		// Alloc more memory
+		// Alloc more memory???
 		const int dxtWidth = Max(( width + 4 ) & ~4, ( width + 3 ) & ~3);
 		const int dxtHeight = Max(( height + 4 ) & ~4, ( height + 3 ) & ~3);
 		byte *dpic = ( byte* )Mem_Alloc(dxtWidth * dxtHeight * 4, TAG_TEMP );

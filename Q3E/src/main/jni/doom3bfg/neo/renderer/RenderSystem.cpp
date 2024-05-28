@@ -1157,18 +1157,9 @@ void idRenderSystemLocal::CaptureRenderToFile( const char* fileName, bool fixAlp
 #ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
 	// include extra space for OpenGL padding to word boundaries
 	int	c = ( rc.GetWidth() + 4 ) * rc.GetHeight();
-	byte* data = ( byte* )R_StaticAlloc( c * 4 );
-	glReadPixels( rc.x1, rc.y1, rc.GetWidth(), rc.GetHeight(), GL_RGBA, GL_UNSIGNED_BYTE, data );
-
-	byte* data2 = ( byte* )R_StaticAlloc( c * 4 );
-
-	for( int i = 0 ; i < c ; i++ )
-	{
-		data2[ i * 4 ] = data[ i * 4 ];
-		data2[ i * 4 + 1 ] = data[ i * 4 + 1 ];
-		data2[ i * 4 + 2 ] = data[ i * 4 + 2 ];
-		data2[ i * 4 + 3 ] = 0xff;
-	}
+	byte* data = NULL;
+    byte* data2 = ( byte* )R_StaticAlloc( c * 4 );
+	glReadPixels( rc.x1, rc.y1, rc.GetWidth(), rc.GetHeight(), GL_RGBA, GL_UNSIGNED_BYTE, data2 );
 #else
 	// include extra space for OpenGL padding to word boundaries
 	int	c = ( rc.GetWidth() + 3 ) * rc.GetHeight();

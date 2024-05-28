@@ -863,7 +863,7 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 
 				glPixelStorei( GL_PACK_ROW_LENGTH, ENVPROBE_CAPTURE_SIZE );
 #ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
-				int tmpsize = width * height;
+				const int tmpsize = w * h;
 				byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 * 2 );
 				glReadPixels( 0, 0, w, h, GL_RGBA, GL_HALF_FLOAT, tmpbuf );
 				for(int i = 0; i < tmpsize; i++)
@@ -888,19 +888,25 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 			{
 				glReadBuffer( GL_FRONT );
 #ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
-				int tmpsize = width * height;
-				byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 );
-				GLDBG(glReadPixels( 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, tmpbuf ));
-				for(int i = 0; i < tmpsize; i++)
+				byte *tmpbuf = ( byte* )R_StaticAlloc( w * h * 4 ); //TODO: allca
+				glReadPixels( 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, tmpbuf );
+				const int tmpsize = sysWidth * sysHeight;
+
+				int	rowtmp = w * 4;
+
+				for( int _y = 0 ; _y < h ; _y++ )
 				{
-					buffer[i * 3] = tmpbuf[i * 4];
-					buffer[i * 3 + 1] = tmpbuf[i * 4 + 1];
-					buffer[i * 3 + 2] = tmpbuf[i * 4 + 2];
+					byte *from = tmpbuf + _y * rowtmp;
+					byte *to = buffer + ( ( yo + _y )* width + xo ) * 3;
+
+					for( int _x = 0 ; _x < w ; _x++ )
+					{
+						memcpy( to + _x * 3, from + _x * 4, 3 );
+					}
 				}
 				R_StaticFree(tmpbuf);
 #else
 				glReadPixels( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp );
-#endif
 
 				int	row = ( w * 3 + 3 ) & ~3;		// OpenGL pads to dword boundaries
 
@@ -909,6 +915,7 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 					memcpy( buffer + ( ( yo + y )* width + xo ) * 3,
 							temp + y * row, w * 3 );
 				}
+#endif
 			}
 		}
 	}

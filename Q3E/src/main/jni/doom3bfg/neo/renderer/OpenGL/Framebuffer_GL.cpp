@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../Framebuffer.h"
 
 #if !defined(USE_VULKAN)
+#ifdef _GLES
 #if 0
 #define FBD(x) {\
 	while(glGetError() != GL_NO_ERROR); \
@@ -41,6 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 	}
 #else
 #define FBD(x) x
+#endif
 #endif
 
 static void R_ListFramebuffers_f( const idCmdArgs& args )

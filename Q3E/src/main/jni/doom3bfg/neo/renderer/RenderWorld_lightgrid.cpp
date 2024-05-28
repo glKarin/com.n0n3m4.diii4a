@@ -1287,17 +1287,17 @@ CONSOLE_COMMAND( bakeLightGrids, "Bake irradiance/vis light grid data", NULL )
 
 							glPixelStorei( GL_PACK_ROW_LENGTH, ENVPROBE_CAPTURE_SIZE );
 #ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
-							int tmpsize = captureSize * captureSize;
+							const int tmpsize = captureSize * captureSize;
 							byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 * 2 );
 							glReadPixels( 0, 0, captureSize, captureSize, GL_RGBA, GL_HALF_FLOAT, tmpbuf );
-							for(int i = 0; i < tmpsize; i++)
+							for(int m = 0; m < tmpsize; m++)
 							{
-								float16FRGB[i * 3 * 2] = tmpbuf[i * 4 * 2];
-								float16FRGB[i * 3 * 2 + 1] = tmpbuf[i * 4 * 2 + 1];
-								float16FRGB[i * 3 * 2 + 2] = tmpbuf[i * 4 * 2 + 2];
-								float16FRGB[i * 3 * 2 + 3] = tmpbuf[i * 4 * 2 + 4];
-								float16FRGB[i * 3 * 2 + 4] = tmpbuf[i * 4 * 2 + 5];
-								float16FRGB[i * 3 * 2 + 5] = tmpbuf[i * 4 * 2 + 6];
+								float16FRGB[m * 3 * 2] = tmpbuf[m * 4 * 2];
+								float16FRGB[m * 3 * 2 + 1] = tmpbuf[m * 4 * 2 + 1];
+								float16FRGB[m * 3 * 2 + 2] = tmpbuf[m * 4 * 2 + 2];
+								float16FRGB[m * 3 * 2 + 3] = tmpbuf[m * 4 * 2 + 4];
+								float16FRGB[m * 3 * 2 + 4] = tmpbuf[m * 4 * 2 + 5];
+								float16FRGB[m * 3 * 2 + 5] = tmpbuf[m * 4 * 2 + 6];
 							}
 							R_StaticFree(tmpbuf);
 #else
