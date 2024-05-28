@@ -127,6 +127,8 @@ If you have questions concerning this license or the applicable additional terms
 			#define CPUSTRING						"sparc"
 		#elif defined(__loongarch64)
 			#define CPUSTRING						"loongarch64"
+		#elif defined(__arm__) //karin: arm32
+			#define CPUSTRING						"arm"
 		#else
 			#error unknown CPU
 		#endif
@@ -134,6 +136,8 @@ If you have questions concerning this license or the applicable additional terms
 
 	#if defined(__FreeBSD__)
 		#define	BUILD_STRING					"freebsd-" CPUSTRING
+	#elif defined(__ANDROID__) //karin: android os
+		#define	BUILD_STRING					"android-" CPUSTRING
 	#elif defined(__linux__)
 		#define	BUILD_STRING					"linux-" CPUSTRING
 	#elif defined(__APPLE__)
