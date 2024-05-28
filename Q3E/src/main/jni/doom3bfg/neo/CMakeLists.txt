@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.2)
 
 project(RBDoom3BFG)
 
+# build type
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 add_definitions(-D_DIII4A -D_GLES -DGLEW_EGL) #  -DUSE_GLES3
 add_compile_options(-Wno-non-c-typedef-for-linkage)
 

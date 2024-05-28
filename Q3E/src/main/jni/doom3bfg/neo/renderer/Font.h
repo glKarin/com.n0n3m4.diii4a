@@ -68,7 +68,13 @@ private:
 	{
 		byte	width;	// width of glyph in pixels
 		byte	height;	// height of glyph in pixels
+#ifdef __ANDROID__ //karin: char is unsigned on Android arm with GCC/clang
+		signed
+#endif
 		char	top;	// distance in pixels from the base line to the top of the glyph
+#ifdef __ANDROID__ //karin: char is unsigned on Android arm with GCC/clang
+		signed
+#endif
 		char	left;	// distance in pixels from the pen to the left edge of the glyph
 		byte	xSkip;	// x adjustment after rendering this glyph
 		uint16	s;		// x offset in image where glyph starts (in pixels)
@@ -93,6 +99,9 @@ private:
 		uint32* 	charIndex;
 
 		// As an optimization, provide a direct mapping for the ascii character set
+#ifdef __ANDROID__ //karin: char is unsigned on Android arm with GCC/clang
+		signed
+#endif
 		char		ascii[128];
 
 		const idMaterial* 	material;

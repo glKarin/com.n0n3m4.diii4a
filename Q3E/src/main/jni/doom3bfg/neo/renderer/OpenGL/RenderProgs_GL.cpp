@@ -292,7 +292,7 @@ void idRenderProgManager::LoadShader( shader_t& shader )
 
 		glShaderSource( shader.progId, 1, source, NULL );
 		glCompileShader( shader.progId );
-#ifdef _GLES //karin: TEST dump GLSL shader
+#ifdef _GLESxxx //karin: TEST dump GLSL shader
 		idStr dumpPath = "glprogs/" + inFile;
 		dumpPath.SetFileExtension("glsl");
 		fileSystem->WriteFile(dumpPath.c_str(), programGLSL.c_str(), programGLSL.Length() + 1);

@@ -45,7 +45,7 @@ typedef struct
     signed
 #endif
 	char	forwardmove;	// *2048 for move
-#ifdef __ANDROID__ //karin: char is unsigned on Android
+#ifdef __ANDROID__ //karin: char is unsigned on Android arm with GCC/clang
 	signed
 #endif
 	char	sidemove;	// *2048 for move
