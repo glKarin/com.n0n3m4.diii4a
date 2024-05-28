@@ -103,8 +103,14 @@ void idRenderSystemLocal::PrintPerformanceCounters()
 RenderCommandBuffers
 ====================
 */
+#ifdef __ANDROID__ //karin: Check surface on Android
+extern void GLimp_CheckGLInitialized(void);
+#endif
 void idRenderSystemLocal::RenderCommandBuffers( const emptyCommand_t* const cmdHead )
 {
+#ifdef __ANDROID__ //karin: check/wait EGL context
+	GLimp_CheckGLInitialized();
+#endif
 	// if there isn't a draw view command, do nothing to avoid swapping a bad frame
 	bool	hasView = false;
 	for( const emptyCommand_t* cmd = cmdHead ; cmd ; cmd = ( const emptyCommand_t* )cmd->next )

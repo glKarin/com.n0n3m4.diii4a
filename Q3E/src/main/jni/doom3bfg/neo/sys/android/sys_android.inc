@@ -43,8 +43,8 @@ void Sys_SyncState(void)
     {
         state = STATE_NONE;
 #if defined(USE_DOOMCLASSIC)
-		currentGame_t game = commonLocal.GetCurrentGame();
-		switch(game)
+		currentGame_t gameType = commonLocal.GetCurrentGame();
+		switch(gameType)
 		{
 			case DOOM3_BFG:
 			default:
@@ -53,8 +53,8 @@ void Sys_SyncState(void)
                 state |= STATE_LOADING;
             else
             {
-                idGame *game = commonLocal.Game();
-                if(game && game->Shell_IsActive())
+                idGame *gameLocal = commonLocal.Game();
+                if(gameLocal && gameLocal->Shell_IsActive())
                     state |= STATE_MENU;
                 else
                     state |= STATE_GAME;
@@ -92,6 +92,7 @@ void Sys_ForceResolution(void)
     cvarSystem->SetCVarInteger("r_customWidth", screen_width);
     cvarSystem->SetCVarInteger("r_customHeight", screen_height);
 
+#if 0
     float r = (float) screen_width / (float) screen_height;
 
     if (r > 1.7f) {
@@ -101,6 +102,7 @@ void Sys_ForceResolution(void)
     } else {
         cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
     }
+#endif
     cvarSystem->SetCVarInteger("r_displayRefresh", 60);
     cvarSystem->SetCVarInteger("r_antiAliasing", 0);
 
