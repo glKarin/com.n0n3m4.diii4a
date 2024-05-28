@@ -61,6 +61,7 @@ idCVar r_useOpenGL32( "r_useOpenGL32", "2", CVAR_INTEGER, "0 = OpenGL 3.x, 1 = O
 
 extern int screen_width;
 extern int screen_height;
+extern int refresh_rate;
 
 // OpenGL attributes
 extern int gl_format;
@@ -597,7 +598,7 @@ int GLES_Init() {
 	glConfig.isStereoPixelFormat = false;
 	glConfig.nativeScreenWidth = screen_width;
 	glConfig.nativeScreenHeight = screen_height;
-	glConfig.displayFrequency = 60;
+	glConfig.displayFrequency = refresh_rate;
 	glConfig.multisamples = gl_msaa > 1 ? gl_msaa / 2 : 0;
 	glConfig.pixelAspect = 1.0f;	// FIXME: some monitor modes may be distorted
 
@@ -685,7 +686,7 @@ bool GLimp_SetScreenParms( glimpParms_t parms )
 	glConfig.isStereoPixelFormat = false;
 	glConfig.nativeScreenWidth = screen_width;
 	glConfig.nativeScreenHeight = screen_height;
-	glConfig.displayFrequency = 60;
+	glConfig.displayFrequency = refresh_rate;
 	glConfig.multisamples = gl_msaa > 1 ? gl_msaa / 2 : 0;
 	glConfig.pixelAspect = 1.0f;	// FIXME: some monitor modes may be distorted
 
@@ -811,26 +812,26 @@ public:
 // RB: resolutions supported by XreaL
 static void FillStaticVidModes( idList<vidMode_t>& modeList )
 {
-	modeList.AddUnique( vidMode_t( 320,   240, 60 ) );
-	modeList.AddUnique( vidMode_t( 400,   300, 60 ) );
-	modeList.AddUnique( vidMode_t( 512,   384, 60 ) );
-	modeList.AddUnique( vidMode_t( 640,   480, 60 ) );
-	modeList.AddUnique( vidMode_t( 800,   600, 60 ) );
-	modeList.AddUnique( vidMode_t( 960,   720, 60 ) );
-	modeList.AddUnique( vidMode_t( 1024,  768, 60 ) );
-	modeList.AddUnique( vidMode_t( 1152,  864, 60 ) );
-	modeList.AddUnique( vidMode_t( 1280,  720, 60 ) );
-	modeList.AddUnique( vidMode_t( 1280,  768, 60 ) );
-	modeList.AddUnique( vidMode_t( 1280,  800, 60 ) );
-	modeList.AddUnique( vidMode_t( 1280, 1024, 60 ) );
-	modeList.AddUnique( vidMode_t( 1360,  768, 60 ) );
-	modeList.AddUnique( vidMode_t( 1440,  900, 60 ) );
-	modeList.AddUnique( vidMode_t( 1680, 1050, 60 ) );
-	modeList.AddUnique( vidMode_t( 1600, 1200, 60 ) );
-	modeList.AddUnique( vidMode_t( 1920, 1080, 60 ) );
-	modeList.AddUnique( vidMode_t( 1920, 1200, 60 ) );
-	modeList.AddUnique( vidMode_t( 2048, 1536, 60 ) );
-	modeList.AddUnique( vidMode_t( 2560, 1600, 60 ) );
+	modeList.AddUnique( vidMode_t( 320,   240, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 400,   300, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 512,   384, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 640,   480, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 800,   600, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 960,   720, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1024,  768, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1152,  864, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1280,  720, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1280,  768, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1280,  800, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1280, 1024, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1360,  768, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1440,  900, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1680, 1050, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1600, 1200, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1920, 1080, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 1920, 1200, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 2048, 1536, refresh_rate ) );
+	modeList.AddUnique( vidMode_t( 2560, 1600, refresh_rate ) );
 
 	modeList.SortWithTemplate( idSort_VidMode() );
 }

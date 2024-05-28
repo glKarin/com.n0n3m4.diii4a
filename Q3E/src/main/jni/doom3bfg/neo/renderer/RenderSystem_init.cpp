@@ -401,7 +401,7 @@ void R_SetNewMode( const bool fullInit )
 				// try forcing a specific mode, even if it isn't on the list
 				parms.width = r_customWidth.GetInteger();
 				parms.height = r_customHeight.GetInteger();
-				parms.displayHz = 60;
+				parms.displayHz = r_displayRefresh.GetInteger();
 			}
 			else
 			{

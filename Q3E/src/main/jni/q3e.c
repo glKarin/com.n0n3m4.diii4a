@@ -434,12 +434,13 @@ static void print_initial_context(const Q3E_InitialContext_t *context)
 	LOGI("OpenGL Version: %x", context->openGL_version);
 	LOGI("Using mouse: %x", context->mouseAvailable);
 	LOGI("Game data directory: %s", context->gameDataDir);
+	LOGI("Refresh rate: %d", context->refreshRate);
     LOGI("Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
 	LOGI("<---------");
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jboolean bContinueNoGLContext)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc=0;
@@ -498,6 +499,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 		context.mouseAvailable = mouseAvailable ? 1 : 0;
         context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;
 		context.gameDataDir = game_data_dir;
+		context.refreshRate = refreshRate;
 
 		print_initial_context(&context);
 

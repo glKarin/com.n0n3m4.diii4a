@@ -103,7 +103,7 @@ void Sys_ForceResolution(void)
         cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
     }
 #endif
-    cvarSystem->SetCVarInteger("r_displayRefresh", 60);
+    cvarSystem->SetCVarInteger("r_displayRefresh", refresh_rate);
     cvarSystem->SetCVarInteger("r_antiAliasing", 0);
 
     Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",

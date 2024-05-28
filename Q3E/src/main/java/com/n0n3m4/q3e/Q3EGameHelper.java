@@ -629,13 +629,15 @@ public class Q3EGameHelper
         String subdatadir = Q3EUtils.q3ei.subdatadir;
         // if(Q3EUtils.q3ei.isTDM) subdatadir = Q3EGlobals.GAME_SUBDIR_DOOMBFG; // Test a new game using TDM
 
+        int refreshRate = (int)Q3EUtils.GetRefreshRate(m_context);
+
         Q3EJNI.init(
                 GetEngineLib(),
                 Q3EUtils.GetGameLibDir(m_context),
                 width,
                 height,
                 Q3EUtils.q3ei.datadir,
-                subdatadir, // Q3EUtils.q3ei.subdatadir,
+                subdatadir,
                 cmd,
                 surface,
                 glFormat,
@@ -644,6 +646,7 @@ public class Q3EGameHelper
                 noHandleSignals,
                 Q3EUtils.q3ei.multithread,
                 usingMouse,
+                refreshRate,
                 runBackground > 0
         );
     }

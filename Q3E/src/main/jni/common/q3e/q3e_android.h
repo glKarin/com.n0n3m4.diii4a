@@ -46,6 +46,7 @@ typedef struct
     int mouseAvailable; // using mouse
     int continueWhenNoGLContext; // Continue when missing OpenGL context
     const char *gameDataDir; // game data directory
+    int refreshRate; // screen refresh rate
 } Q3E_InitialContext_t;
 
 // Android::JNI call DOOM3 after main()

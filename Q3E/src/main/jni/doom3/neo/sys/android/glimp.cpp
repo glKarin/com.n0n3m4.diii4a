@@ -74,9 +74,13 @@ idCVar harm_sys_openglVersion("harm_sys_openglVersion",
 #define GLFORMAT_RGBA1010102 0xaaa2
 
 // OpenGL attributes
+// OpenGL color format
 int gl_format = GLFORMAT_RGBA8888;
+// OpenGL multisamples
 int gl_msaa = 0;
+// OpenGL version
 int gl_version = DEFAULT_GLES_VERSION;
+
 bool USING_GLES3 = gl_version != 0x00020000;
 
 #define MAX_NUM_CONFIGS 1000

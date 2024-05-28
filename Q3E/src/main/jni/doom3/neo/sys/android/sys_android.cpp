@@ -30,22 +30,45 @@ extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
 extern void ShutdownGame(void);
 
+// Android AudioTrack
 void (*initAudio)(void *buffer, int size);
 int (*writeAudio)(int offset, int length);
 void (*shutdownAudio)(void);
+
+// Sync game state
 void (*setState)(int st);
+
+// Android tmpfile
 FILE * (*itmpfile)(void);
+
+// Pull input event
+// num = 0: only clear; > 0: max num; -1: all.
+// return pull event num
 int (*pull_input_event)(int execCmd);
+
+// Grab mouse
 void (*grab_mouse)(int grab);
+
+// Attach current thread to JNI
 void (*attach_thread)(void);
+
+// Access Android clipboard
 void (*copy_to_clipboard)(const char *text);
 char * (*get_clipboard_text)(void);
+
+// Show a Android toast as dialog
 void (*show_toast)(const char *text);
 
-int screen_width=640;
-int screen_height=480;
+// Surface window size
+int screen_width = 640;
+int screen_height = 480;
+
+// Redirect stdout/stderr file
 FILE *f_stdout = NULL;
 FILE *f_stderr = NULL;
+
+// Screen refresh rate
+int refresh_rate = 60;
 
 // APK's native library path on Android.
 char *native_library_dir = NULL;
@@ -53,16 +76,10 @@ char *native_library_dir = NULL;
 // Do not catch signal
 bool no_handle_signals = false;
 
-// enable redirect stdout/stderr to file
+// Enable redirect stdout/stderr to file
 static bool redirect_output_to_file = true;
 
-// app paused
-volatile bool paused = false;
-
-// Continue when missing OpenGL context
-volatile bool continue_when_no_gl_context = false;
-
-// using mouse
+// Using mouse
 bool mouse_available = false;
 
 // Game data directory.
@@ -72,7 +89,13 @@ char *game_data_dir = NULL;
 volatile ANativeWindow *window = NULL;
 static volatile bool window_changed = false;
 
-// app exit
+// App paused
+volatile bool paused = false;
+
+// Continue when missing OpenGL context
+volatile bool continue_when_no_gl_context = false;
+
+// App exit
 extern volatile bool q3e_running;
 
 void Android_GrabMouseCursor(bool grabIt)
@@ -167,6 +190,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
 #endif
     printf("    Using mouse: %d\n", mouse_available);
     printf("    Game data directory: %s\n", game_data_dir);
+    printf("    Refresh rate: %d\n", refresh_rate);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
@@ -306,6 +330,7 @@ void Q3E_SetInitialContext(const void *context)
 #endif
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
     mouse_available = ptr->mouseAvailable ? true : false;
+    refresh_rate = ptr->refreshRate <= 0 ? 60 : ptr->refreshRate;
 }
 
 // View paused

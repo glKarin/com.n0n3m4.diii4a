@@ -108,38 +108,59 @@ extern void Q3E_MotionEvent(float dx, float dy);
 #define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib"
 #define _ANDROID_GAME_DATA_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME
 
+// Android AudioTrack
 void (*initAudio)(void *buffer, int size);
 int (*writeAudio)(int offset, int length);
 void (*shutdownAudio)(void);
+
+// Sync game state
 void (*setState)(int st);
+
+// Android tmpfile
 FILE * (*itmpfile)(void);
+
+// Pull input event
+// num = 0: only clear; > 0: max num; -1: all.
+// return pull event num
 int (*pull_input_event)(int num);
+
+// Grab mouse
 void (*grab_mouse)(int grab);
+
+// Attach current thread to JNI
 void (*attach_thread)(void);
+
+// Access Android clipboard
 void (*copy_to_clipboard)(const char *text);
 char * (*get_clipboard_text)(void);
+
+// Show a Android toast as dialog
 void (*show_toast)(const char *text);
+
+// Access Android keyboard
 void (*open_keyboard)(void);
 void (*close_keyboard)(void);
 
+// Surface window size
 int screen_width = 640;
 int screen_height = 480;
+
+// Redirect stdout/stderr file
 FILE *f_stdout = NULL;
 FILE *f_stderr = NULL;
 
+// Analog
 float analogx = 0.0f;
 float analogy = 0.0f;
 int analogenabled = 0;
 
+// OpenGL color format
 int gl_format = 0x8888;
+// OpenGL multisamples
 int gl_msaa = 0;
 
-// command line arguments
-static int q3e_argc = 0;
-static char **q3e_argv = NULL;
-
-// game main thread
-static pthread_t main_thread;
+// Screen refresh rate
+int refresh_rate = 60;
 
 // APK's native library path on Android.
 char *native_library_dir = NULL;
@@ -147,26 +168,33 @@ char *native_library_dir = NULL;
 // Do not catch signal
 Q3Ebool no_handle_signals = Q3E_FALSE;
 
-// enable redirect stdout/stderr to file
+// Enable redirect stdout/stderr to file
 static Q3Ebool redirect_output_to_file = Q3E_TRUE;
-
-// app paused
-volatile Q3Ebool paused = Q3E_FALSE;
 
 // Continue when missing OpenGL context
 volatile Q3Ebool continue_when_no_gl_context = Q3E_FALSE;
 
-// using mouse
+// Using mouse
 Q3Ebool mouse_available = Q3E_FALSE;
 
 // Game data directory.
 char *game_data_dir = NULL;
 
+// Command line arguments
+static int q3e_argc = 0;
+static char **q3e_argv = NULL;
+
+// Game main thread
+static pthread_t main_thread;
+
+// App paused
+volatile Q3Ebool paused = Q3E_FALSE;
+
 // Surface window
 volatile ANativeWindow *window = NULL;
 static volatile Q3Ebool window_changed = Q3E_FALSE;
 
-// app exit
+// App exit
 volatile Q3Ebool q3e_running = false;
 
 #include "q3e_thread.inc"
@@ -320,6 +348,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("    No handle signals: %d\n", no_handle_signals);
     printf("    Using mouse: %d\n", mouse_available);
     printf("    Game data directory: %s\n", game_data_dir);
+    printf("    Refresh rate: %d\n", refresh_rate);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
@@ -437,6 +466,7 @@ void Q3E_SetInitialContext(const void *context)
     no_handle_signals = ptr->noHandleSignals ? Q3E_TRUE : Q3E_FALSE;
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? Q3E_TRUE : Q3E_FALSE;
     mouse_available = ptr->mouseAvailable ? Q3E_TRUE : Q3E_FALSE;
+    refresh_rate = ptr->refreshRate <= 0 ? 60 : ptr->refreshRate;
 }
 
 // View paused
