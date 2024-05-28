@@ -10,7 +10,7 @@ extern "C" {
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject
   (JNIEnv *, jclass, jobject);
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init
   (JNIEnv *, jclass, jstring, jstring, jint, jint, jstring, jstring, jstring, jobject, jint, jint, jint, jboolean, jboolean, jboolean, jboolean, jint, jboolean);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_drawFrame

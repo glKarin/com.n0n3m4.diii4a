@@ -117,6 +117,7 @@ public class Q3EMain extends Activity
         else
         {
             finish();
+            Q3EUtils.RunLauncher(this);
         }
     }
 

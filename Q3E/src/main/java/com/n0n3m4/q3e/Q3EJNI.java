@@ -24,7 +24,7 @@ import android.view.Surface;
 public class Q3EJNI {	
 	public static native void setCallbackObject(Object obj);
 
-    public static native void init(
+    public static native boolean init(
             String LibPath, // engine's library file path
             String nativeLibPath, // apk's dynamic library directory path
             int width, // surface width

@@ -19,6 +19,7 @@
 
 package com.n0n3m4.q3e;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
@@ -608,7 +609,7 @@ public class Q3EGameHelper
         return new int[] { width, height };
     }
 
-    public void Start(Surface surface, int surfaceWidth, int surfaceHeight)
+    public boolean Start(Surface surface, int surfaceWidth, int surfaceHeight)
     {
         // GL
         int msaa = GetMSAA();
@@ -631,7 +632,7 @@ public class Q3EGameHelper
 
         int refreshRate = (int)Q3EUtils.GetRefreshRate(m_context);
 
-        Q3EJNI.init(
+        boolean res = Q3EJNI.init(
                 GetEngineLib(),
                 Q3EUtils.GetGameLibDir(m_context),
                 width,
@@ -649,6 +650,22 @@ public class Q3EGameHelper
                 refreshRate,
                 runBackground > 0
         );
+        if(!res)
+        {
+            if(m_context instanceof Activity)
+            {
+                Activity activity = (Activity)m_context;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        activity.finish();
+                        // Q3EUtils.RunLauncher(activity);
+                    }
+                });
+            }
+        }
+        return res;
     }
 
     public Context GetContext()
