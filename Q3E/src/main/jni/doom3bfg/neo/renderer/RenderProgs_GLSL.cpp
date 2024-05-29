@@ -1536,17 +1536,18 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 			case GLDRV_OPENGL_MESA:
 			{
 				out.ReAllocate( idStr::Length( vertexInsert_GLSL_ES_3_00 ) + in.Length() * 2, false );
-				out += filenameHint;
 #ifdef _GLES //karin: interaction shader using high precision float
+				idStr p(vertexInsert_GLSL_ES_3_00);
+				p.Insert(filenameHint, p.Find('\n') + 1); //karin: #version must on first line on mali GPU
 				if(IsInteractionShader)
 				{
-					idStr p(vertexInsert_GLSL_ES_3_00);
 					p.Replace("precision mediump float;", "precision highp float;");
-					out.Append(p);
 				}
-				else
-#endif
+				out.Append(p);
+#else
+				out += filenameHint;
 				out += vertexInsert_GLSL_ES_3_00;
+#endif
 				break;
 			}
 
@@ -1566,17 +1567,18 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 			case GLDRV_OPENGL_MESA:
 			{
 				out.ReAllocate( idStr::Length( fragmentInsert_GLSL_ES_3_00 ) + in.Length() * 2, false );
-				out += filenameHint;
 #ifdef _GLES //karin: interaction shader using high precision float
+				idStr p(fragmentInsert_GLSL_ES_3_00);
+				p.Insert(filenameHint, p.Find('\n') + 1); //karin: #version must on first line on mali GPU
 				if(IsInteractionShader)
 				{
-					idStr p(fragmentInsert_GLSL_ES_3_00);
 					p.Replace("precision mediump float;", "precision highp float;");
-					out.Append(p);
 				}
-				else
-#endif
+				out.Append(p);
+#else
+				out += filenameHint;
 				out += fragmentInsert_GLSL_ES_3_00;
+#endif
 				break;
 			}
 

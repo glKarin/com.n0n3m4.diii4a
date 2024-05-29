@@ -493,7 +493,7 @@ void idRenderProgManager::LoadGLSLProgram( const int programIndex, const int ver
 	}
 	// RB end
 #ifdef _GLES //karin: debug
-	idLib::Printf( "Load Shader '%s' -> %d\n", prog.name.c_str(), prog.progId );
+	idLib::Printf( "Load Shader '%s': %d\n", prog.name.c_str(), prog.progId );
 #endif
 }
 
