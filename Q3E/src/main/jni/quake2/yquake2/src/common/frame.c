@@ -93,9 +93,14 @@ static YQ2_ATTR_INLINE void Sys_CpuPause(void)
 	asm volatile("pause");
 #elif defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 7) || defined(__ARM_ARCH_6K__)
 #ifdef __ANDROID__
-	sched_yield();
+	#ifdef __arm__
+		sched_yield();
+        #warning "Processor yield not supported on armv7."
+    #else
+	    asm volatile("yield");
+    #endif
 #else
-	asm volatile("yield");
+    asm volatile("yield");
 #endif
 #elif defined(__powerpc__) || defined(__powerpc64__)
 	asm volatile("or 27,27,27");
