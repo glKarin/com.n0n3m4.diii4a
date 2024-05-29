@@ -1993,6 +1993,7 @@ public class GameLauncher extends Activity
         Resources res = getResources();
         int colorId = GameManager.GetGameThemeColor();
         int iconId = GameManager.GetGameIcon();
+
         boolean d3Visible = false;
         boolean q4Visible = false;
         boolean preyVisible = false;
@@ -2002,12 +2003,16 @@ public class GameLauncher extends Activity
 		boolean rtcwVisible = false;
 		boolean tdmVisible = false;
 		boolean d3bfgVisible = false;
+
 		boolean rendererVisible = true;
 		boolean soundVisible = true;
 		boolean otherVisible = true;
 		boolean openglVisible = true;
 		boolean modVisible = true;
 		boolean dllVisible = true;
+		boolean quickloadVisible = true;
+		boolean skipintroVisible = true;
+
         if (Q3EUtils.q3ei.isPrey)
         {
             preyVisible = true;
@@ -2025,6 +2030,8 @@ public class GameLauncher extends Activity
 			openglVisible = false;
 			modVisible = false;
 			dllVisible = false;
+			quickloadVisible = false;
+			skipintroVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isQ2)
 		{
@@ -2034,6 +2041,8 @@ public class GameLauncher extends Activity
 			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
+			quickloadVisible = false;
+			skipintroVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isQ3)
 		{
@@ -2043,6 +2052,7 @@ public class GameLauncher extends Activity
 			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
+			quickloadVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isRTCW)
 		{
@@ -2062,6 +2072,8 @@ public class GameLauncher extends Activity
 			openglVisible = false;
 			modVisible = false;
 			dllVisible = false;
+			quickloadVisible = false;
+			skipintroVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isD3BFG)
 		{
@@ -2071,6 +2083,8 @@ public class GameLauncher extends Activity
 			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
+			quickloadVisible = false;
+			skipintroVisible = false;
 		}
         else
         {
@@ -2100,7 +2114,8 @@ public class GameLauncher extends Activity
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.mod_section.setVisibility(modVisible ? View.VISIBLE : View.GONE);
 		V.dll_section.setVisibility(dllVisible ? View.VISIBLE : View.GONE);
-		V.auto_quick_load.setVisibility(q2Visible ? View.GONE : View.VISIBLE);
+		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
+		V.skip_intro.setVisibility(skipintroVisible ? View.VISIBLE : View.GONE);
 
 		String subdir = Q3EUtils.q3ei.subdatadir;
 		if(null == subdir)

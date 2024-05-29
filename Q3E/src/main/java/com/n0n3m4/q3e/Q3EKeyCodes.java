@@ -572,19 +572,21 @@ public class Q3EKeyCodes
     public static void InitKeycodes(Class<?> clazz)
     {
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "InitKeycodes: " + clazz.getName());
-        try
+        for (Field f : KeyCodes.class.getFields())
         {
-            for (Field f : KeyCodes.class.getFields())
+            try
+            {
                 f.set(null, clazz.getField(f.getName()).get(null));
-        } catch (Exception ignored) {}
+            } catch (Exception ignored) {}
+        }
     }
 
     public static int GetRealKeyCode(int keycodeGeneric)
     {
-        try
+        Field[] fields = KeyCodesGeneric.class.getFields();
+        for (Field field : fields)
         {
-            Field[] fields = KeyCodesGeneric.class.getFields();
-            for (Field field : fields)
+            try
             {
                 int key = (Integer) field.get(null);
                 if(key == keycodeGeneric)
@@ -594,8 +596,8 @@ public class Q3EKeyCodes
                     //Log.e("TAG", "GetRealKeyCode: " + name + " : " + keycodeGeneric + " -> " + f.get(null));
                     return (Integer) f.get(null);
                 }
-            }
-        } catch (Exception ignored) {}
+            } catch (Exception ignored) {}
+        }
         return keycodeGeneric;
     }
 
