@@ -312,7 +312,7 @@
     <string name="view_logcat">Показать лог-код</string>
     <string name="open_documents">Платформа доступа к хранилищу Android</string>
     <string name="open_system_file_browser">Открыть платформу доступа к хранилищу Android</string>
-    <string name="application_pid">"Application PID: "</string>
+    <string name="application_pid">"Приложение PID: "</string>
     <string name="doom_3_bfg">DOOM 3 BFG</string>
 
 </resources>
