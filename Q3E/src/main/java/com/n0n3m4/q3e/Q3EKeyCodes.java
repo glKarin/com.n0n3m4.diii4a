@@ -577,7 +577,12 @@ public class Q3EKeyCodes
             try
             {
                 f.set(null, clazz.getField(f.getName()).get(null));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                try // else setup generic key codes
+                {
+                    f.set(null, KeyCodesGeneric.class.getField(f.getName()).get(null));
+                } catch (Exception ignored2) { }
+            }
         }
     }
 
