@@ -72,6 +72,10 @@ extern "C"
 #include <libavutil/imgutils.h>
 }
 #define NUM_LAG_FRAMES 15	// SRS - Lag audio by 15 frames (~1/2 sec at 30 fps) for ffmpeg bik decoder AV sync
+
+#ifdef __ANDROID__ //karin: Using dl on Android
+#include "../sys/android/android_ffmpeg.h"
+#endif
 #endif
 
 #ifdef USE_BINKDEC
@@ -434,6 +438,9 @@ idCinematicLocal::idCinematicLocal()
 
 	isRoQ = false;      // SRS - Initialize isRoQ for all cases, not just FFMPEG
 #if defined(USE_FFMPEG)
+#ifdef __ANDROID__ //karin: Using dl on Android
+	if(FFMPEG_AVAILABLE()) {
+#endif
 	// Carl: ffmpeg stuff, for bink and normal video files:
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55,28,1)
 	frame = av_frame_alloc();
@@ -444,6 +451,9 @@ idCinematicLocal::idCinematicLocal()
 	frame2 = avcodec_alloc_frame();
 	frame3 = avcodec_alloc_frame();
 #endif // LIBAVCODEC_VERSION_INT
+#ifdef __ANDROID__ //karin: Using dl on Android
+	}
+#endif
 	dec_ctx = NULL;
 	dec_ctx2 = NULL;
 	fmt_ctx = NULL;
@@ -540,6 +550,9 @@ idCinematicLocal::~idCinematicLocal()
 	// RB: TODO double check this. It seems we have different versions of ffmpeg on Kubuntu 13.10 and the win32 development files
 //#if defined(_WIN32) || defined(_WIN64)
 	// SRS - Should use the same version criteria as when the frames are allocated in idCinematicLocal() above
+#ifdef __ANDROID__ //karin: Using dl on Android
+	if(FFMPEG_AVAILABLE()) {
+#endif
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55,28,1)
 	av_frame_free( &frame );
 	av_frame_free( &frame2 );
@@ -548,6 +561,9 @@ idCinematicLocal::~idCinematicLocal()
 	av_freep( &frame );
 	av_freep( &frame2 );
 	av_freep( &frame3 );
+#endif
+#ifdef __ANDROID__ //karin: Using dl on Android
+	}
 #endif
 #endif
 
@@ -616,6 +632,10 @@ idCinematicLocal::InitFromFFMPEGFile
 */
 bool idCinematicLocal::InitFromFFMPEGFile( const char* qpath, bool amilooping )
 {
+#ifdef __ANDROID__ //karin: Using dl on Android
+	if(!FFMPEG_AVAILABLE())
+		return false;
+#endif
 	int ret;
 	int ret2;
 	int file_size;
@@ -813,6 +833,10 @@ idCinematicLocal::FFMPEGReset
 #if defined(USE_FFMPEG)
 void idCinematicLocal::FFMPEGReset()
 {
+#ifdef __ANDROID__ //karin: Using dl on Android
+	if(!FFMPEG_AVAILABLE())
+		return;
+#endif
 	// RB: don't reset startTime here because that breaks video replays in the PDAs
 	//startTime = 0;
 
@@ -986,6 +1010,10 @@ bool idCinematicLocal::InitFromFile( const char* qpath, bool amilooping )
 	{
 		//idLib::Warning( "Original Doom 3 RoQ Cinematic not found: '%s'\n", temp.c_str() );
 #if defined(USE_FFMPEG)
+#ifdef __ANDROID__ //karin: Using dl on Android
+		if(!FFMPEG_AVAILABLE())
+			return false;
+#endif
 		temp = fileName.StripFileExtension() + ".bik";
 		skipLag = false;				// SRS - Enable lag buffer for ffmpeg bik decoder AV sync
 
@@ -1074,6 +1102,10 @@ void idCinematicLocal::Close()
 #if defined(USE_FFMPEG)
 	else //if( !isRoQ )
 	{
+#ifdef __ANDROID__ //karin: Using dl on Android
+		if(!FFMPEG_AVAILABLE())
+			return;
+#endif
 		if( img_convert_ctx )
 		{
 			sws_freeContext( img_convert_ctx );
@@ -1312,6 +1344,13 @@ cinData_t idCinematicLocal::ImageForTimeFFMPEG( int thisTime )
 	cinData_t	cinData;
 	uint8_t*	audioBuffer = NULL;
 	int			num_bytes = 0;
+#ifdef __ANDROID__ //karin: Using dl on Android
+	if(!FFMPEG_AVAILABLE())
+	{
+		memset( &cinData, 0, sizeof( cinData ) );
+		return cinData;
+	}
+#endif
 
 	if( thisTime <= 0 )
 	{

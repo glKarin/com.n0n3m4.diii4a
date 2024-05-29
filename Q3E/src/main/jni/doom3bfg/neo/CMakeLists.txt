@@ -2,13 +2,18 @@ cmake_minimum_required(VERSION 3.2)
 
 project(RBDoom3BFG)
 
-# build type
-if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Release")
-endif()
+if(ANDROID)
+	# build type
+	if(NOT CMAKE_BUILD_TYPE)
+		set(CMAKE_BUILD_TYPE "Release")
+	endif()
 
-add_definitions(-D_DIII4A -D_GLES -DGLEW_EGL) #  -DUSE_GLES3
-add_compile_options(-Wno-non-c-typedef-for-linkage)
+	add_definitions(-D_DIII4A) # for DIII4A touchscreen
+	add_definitions(-D_GLES -DGLEW_EGL) # Using OpenGLES3.2
+	#add_definitions(-DDUSE_GLES3)
+	#add_definitions(-DUSE_ID_CINEMATIC) # Using id cinematic
+	add_compile_options(-Wno-non-c-typedef-for-linkage)
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -42,7 +47,7 @@ option(OPENAL
 		"Use OpenAL soft instead of XAudio2" ON) #k OFF
 
 option(FFMPEG
-		"Use FMPEG to render Bink videos" OFF) #k OFF
+		"Use FMPEG to render Bink videos" ON) #k OFF
 
 option(BINKDEC
 		"Use included libbinkdec to render Bink videos" OFF)
@@ -1709,11 +1714,27 @@ else()
 	
 	if(UNIX)
 		if(FFMPEG)
+			if(ANDROID)
+				add_definitions(-DUSE_FFMPEG)
+				include_directories(libs/ffmpeg/include)
+#[[				include_directories(libs/ffmpeg/include/libswscale)
+				include_directories(libs/ffmpeg/include/libavformat)
+				include_directories(libs/ffmpeg/include/libavutil)
+				include_directories(libs/ffmpeg/include/libavcodec)
+				include_directories(libs/ffmpeg/include/libswresample)]]
+				#[[set(FFmpeg_LIBRARIES
+						avcodec
+						avformat
+						avutil
+						swscale
+						swresample)]]
+			else()
 			find_package(FFMPEG REQUIRED)
 			add_definitions(-DUSE_FFMPEG)
 			
 			include_directories(${FFMPEG_INCLUDE_DIR})
 			link_directories(${FFMPEG_LIBRARIES_DIRS})
+			endif()
 		endif()
 
 		if(NOT ANDROID)
@@ -1886,7 +1907,7 @@ else()
 		if(ANDROID)
 			target_include_directories(RBDoom3BFG PRIVATE ../../common)
 			set(OPENGL_LIBRARIES GLESv3 EGL)
-			set(RBDoom3BFG_sys_libs openal android z log)
+			set(RBDoom3BFG_sys_libs openal android z log) # ${FFmpeg_LIBRARIES}
 		else()
 			if(NOT "${CMAKE_SYSTEM}" MATCHES "Darwin")
 				set(RT_LIBRARY rt)

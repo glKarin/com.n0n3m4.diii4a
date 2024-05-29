@@ -7,6 +7,9 @@ extern void		Posix_EarlyInit( );
 // called after common has been initialized
 extern void		Posix_LateInit( );
 
+extern bool FFmpeg_Init(void);
+extern void FFmpeg_Shutdown(void);
+
 #include "sys_android.inc"
 
 extern void Sys_SetArgs(int argc, const char** argv);
@@ -30,6 +33,11 @@ void * game_main(void *data)
 	Sys_Printf( "memory consistency checking enabled\n" );
 #endif
     Q3E_Start();
+
+    if(FFmpeg_Init())
+        Sys_Printf("[Harmattan]: Using FFmpeg for playing bink cinematic.\n");
+    else
+        Sys_Printf("[Harmattan]: FFmpeg is disabled for playing bink cinematic!\n");
 
     Posix_EarlyInit();
     Sys_Printf("[Harmattan]: Enter doom3 main thread -> %s\n", "main");
@@ -73,6 +81,8 @@ static void doom3_exit(void)
     Sys_Printf("[Harmattan]: doom3 exit.\n");
 
     Q3E_FreeArgs();
+
+    FFmpeg_Shutdown();
 
     Q3E_CloseRedirectOutput();
 }
