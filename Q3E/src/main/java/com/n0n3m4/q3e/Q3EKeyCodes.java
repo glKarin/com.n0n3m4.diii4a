@@ -502,6 +502,44 @@ public class Q3EKeyCodes
         public static int J_RIGHT;
         public static int J_UP;
         public static int J_DOWN;
+
+        public static int K_A;
+        public static int K_B;
+        public static int K_C;
+        public static int K_D;
+        public static int K_E;
+        public static int K_F;
+        public static int K_G;
+        public static int K_H;
+        public static int K_I;
+        public static int K_J;
+        public static int K_K;
+        public static int K_L;
+        public static int K_M;
+        public static int K_N;
+        public static int K_O;
+        public static int K_P;
+        public static int K_Q;
+        public static int K_R;
+        public static int K_S;
+        public static int K_T;
+        public static int K_U;
+        public static int K_V;
+        public static int K_W;
+        public static int K_X;
+        public static int K_Y;
+        public static int K_Z;
+
+        public static int K_0;
+        public static int K_1;
+        public static int K_2;
+        public static int K_3;
+        public static int K_4;
+        public static int K_5;
+        public static int K_6;
+        public static int K_7;
+        public static int K_8;
+        public static int K_9;
     }
 
     ;
