@@ -2,6 +2,17 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan51 (2024-05-31)
+
+* Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`. More view in [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) and [DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
+* Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`. More view in [DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces) and [Quake I](https://store.steampowered.com/app/2310/Quake/).
+* Fix some shaders error on Mali GPU in The Dark Mod(v2.12).
+* Upgrade Quake2(Yamagi Quake II) version.
+* Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).
+* Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006).
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan50 (2024-04-30)
 
 * Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).

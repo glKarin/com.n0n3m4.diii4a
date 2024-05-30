@@ -2,6 +2,17 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan50 (2024-05-31)
+
+* 新增`毁灭战士 3 BFG`(RBDOOM-3-BFG ver1.4.0)支持, 游戏数据文件夹名为`doom3bfg/base`. More view in [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) and [DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
+* 新增`雷神之锤 I`(Darkplaces)支持, 游戏数据文件夹名为`darkplaces/id1`. More view in [DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces) and [Quake I](https://store.steampowered.com/app/2310/Quake/).
+* 修复The Dark Mod(v2.12)在Mali GPU的着色器错误.
+* 更新雷神之锤2(Yamagi Quake II)版本.
+* 毁灭战士3/雷神之锤4/掠食(2006)支持在多线程下启用调试渲染工具(除r_showSurfaceInfo).
+* 毁灭战士3/雷神之锤4/掠食(2006)支持使用cvar r_noLight 0和2, 允许在游戏中切换是否禁用光照渲染.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan50 (2024-04-30)
 
 * 支持新渲染通道: 热浪(例如 BFG9000飞行物的扭曲, 火箭炮的爆炸), colorProcess(例如 marscity2镜子前的血色影片).

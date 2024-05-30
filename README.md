@@ -1,11 +1,11 @@
 ## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006) for Android/Windows/Linux OpenGLES
-#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版.
+#### DOOM III/Quake 4/Prey(2006)/DOOM 3 BFG/The Dark Mod for Android/Windows/Linux OpenGLES
+#### 毁灭战士3/雷神之锤4/掠食(2006)/毁灭战士3 BFG/The Dark Mod 安卓/Windows/Linux OpenGLES移植版.
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan50(natasha)  
+1.1.0harmattan51(natasha)  
 **Latest update:**
-2024-04-30  
+2024-05-31  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -14,7 +14,7 @@ Android 4.4+
 GPLv3
 
 ----------------------------------------------------------------------------------
-### Feature
+### idTech4's feature
 * Linux/Windows(MinGW/MSVC(without editor)) build
 * multi-threading renderer
 * png/dds texture image
@@ -26,24 +26,35 @@ GPLv3
 * OpenAL(soft) and EFX Reverb
 * no-lighting rendering and no-lighting material
 * translucent stencil shadow
-* DOOM3 mods: DOOM3(with full body awareness mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free; LibreCoop
+* DOOM3(with full body awareness mod)
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
-* Quake2(Yamagi Quake II) and mods: ctf; rogue; xatrix; zaero
-* Quake III Arena/Quake III Team Arena(ioquake3)
-* Return to Castle Wolfenstein(iortcw)
-* The Dark Mod
 
-###### Compare with other OpenGLES rendering version
+###### Compare with other OpenGLES rendering version of DOOM3
 
-| Feature                                                                                    |                         idTech4A++                         |                            Other                            |
-|:-------------------------------------------------------------------------------------------|:----------------------------------------------------------:|:-----------------------------------------------------------:|
-| Multi-threading                                                                            |          Support<br/>(but can't switch in gaming)          | d3es-multithread support<br/>(and support switch in gaming) |
-| New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess) |                            Yes                             |                              -                              |
-| TexGen shader                                                                              |                            Yes                             |                              -                              |
-| Shadow mapping for pure soft shadow                                                        |                            Yes                             |                              -                              |
-| Translucent stencil shadow                                                                 |                            Yes                             |                              -                              |
+| Feature                                                                                    |                           idTech4A++                            |                            Other                            |
+|:-------------------------------------------------------------------------------------------|:---------------------------------------------------------------:|:-----------------------------------------------------------:|
+| Multi-threading                                                                            |            Support<br/>(but can't switch in gaming)             | d3es-multithread support<br/>(and support switch in gaming) |
+| New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess) |                               Yes                               |                              -                              |
+| TexGen shader                                                                              |                               Yes                               |                              -                              |
+| Shadow mapping for pure soft shadow                                                        |                               Yes                               |                              -                              |
+| Translucent stencil shadow                                                                 |                               Yes                               |                              -                              |
 | OpenGL ES version                                                                          | 2.0 and 3.0+<br/>(shadow mapping shaders has different version) |                      2.0(3.0+ compat)                       |
+| No lighting                                                                                |               Yes<br/>(And support switch in gaming)                |                             Yes                             |
+
+###### Support games
+
+| Game                         |                             Engine                              |                 Version                 |             OpenGL ES version             |                                                                                         Mods                                                                                         |
+|:-----------------------------|:---------------------------------------------------------------:|:---------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
+| DOOM III       |                                -                                |                    -                    |                  2.0/3.0                  | Resurrection of Evil<br/>The Lost Mission<br/>Classic DOOM3<br/>Rivensin<br/>HardCorps<br/>Overthinked Doom^3<br/>Sabot(a7x)<br/>HeXen:Edge of Chaos<br/>Fragging Free<br/>LibreCoop |
+| Quake IV                     |                                -                                |                    -                    |                  2.0/3.0                  |                                                                                                                                                                                      |
+| Prey(2006)                   |                                -                                |                    -                    |                  2.0/3.0                  |                                                                                                                                                                                      |
+| DOOM 3 BFG(Classic DOOM 1&2)                   | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) |                    3.2                    |                                                                                                                                                                                      |
+| The Dark Mod                 |             [Dark Mod](https://www.thedarkmod.com)              |                  2.12                   | 3.2<br/>(require geometry shader support) |                                                                                                                                                                                      |
+| Return to Castle Wolfenstein |           [iortcw](https://github.com/iortcw/iortcw)            |                    -                    |                    1.1                    |                                           |
+| Quake III Arena   |           [ioquake3](https://github.com/ioquake/ioq3)           |                    -                    |                    1.1                    |                                                                                 Quake III Team Arena                                                                                 |
+| Quake II                     |      [Yamagi Quake II](https://github.com/yquake2/yquake2)      |                    -                    |                    1.1                    |                                                                          ctf<br/>rogue<br/>xatrix<br/>zaero                                                                          |
+| Quake I                     |  [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces)   |                    -                    |                    2.0                    |                                                                                                                                                                                      |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -59,12 +70,12 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).
-* Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).
-* Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).
-* Improving Phong/Blinn-Phong light model interaction shader with high-precision.
-* Force disable using compression texture in The Dark Mod.
-* Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always).
+* Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`. More view in [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) and [DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
+* Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`. More view in [DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces) and [Quake I](https://store.steampowered.com/app/2310/Quake/).
+* Fix some shaders error on Mali GPU in The Dark Mod(v2.12).
+* Upgrade Quake2(Yamagi Quake II) version.
+* Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).
+* Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006).
 
 ----------------------------------------------------------------------------------
 
