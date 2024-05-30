@@ -10,8 +10,6 @@ if(ANDROID)
 
 	add_definitions(-D_DIII4A) # for DIII4A touchscreen
 	add_definitions(-D_GLES -DGLEW_EGL) # Using OpenGLES3.2
-	#add_definitions(-DDUSE_GLES3)
-	#add_definitions(-DUSE_ID_CINEMATIC) # Using id cinematic
 	add_compile_options(-Wno-non-c-typedef-for-linkage)
 endif()
 
