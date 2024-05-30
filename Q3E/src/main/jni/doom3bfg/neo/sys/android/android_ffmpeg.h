@@ -2,6 +2,8 @@
 #define _ANDROID_FFMPEG_H
 
 #if defined(USE_FFMPEG)
+#ifdef _DL_FFMPEG
+
 #define av_frame_alloc qav_frame_alloc
 #define av_frame_free qav_frame_free
 #define avformat_open_input qavformat_open_input
@@ -35,6 +37,16 @@
 
 extern bool ffmpeg_available;
 #define FFMPEG_AVAILABLE() (ffmpeg_available)
+#define FFMPEG_IF_AVAILABLE if(FFMPEG_AVAILABLE())
+#define FFMPEG_IF_NOT_AVAILABLE(x) if(!FFMPEG_AVAILABLE()) { x }
+
+#else
+
+#define FFMPEG_AVAILABLE() (true)
+#define FFMPEG_IF_AVAILABLE
+#define FFMPEG_IF_NOT_AVAILABLE(x)
+
+#endif
 
 #endif
 

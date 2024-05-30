@@ -1715,19 +1715,23 @@ else()
 	if(UNIX)
 		if(FFMPEG)
 			if(ANDROID)
-				add_definitions(-DUSE_FFMPEG)
 				include_directories(libs/ffmpeg/include)
+				add_definitions(-DUSE_FFMPEG)
+				if(1)
+					add_definitions(-D_DL_FFMPEG) # using dlopen ffmpeg
+				else()
+					#[[set(FFmpeg_LIBRARIES
+                            avcodec
+                            avformat
+                            avutil
+                            swscale
+                            swresample)]]
+				endif()
 #[[				include_directories(libs/ffmpeg/include/libswscale)
 				include_directories(libs/ffmpeg/include/libavformat)
 				include_directories(libs/ffmpeg/include/libavutil)
 				include_directories(libs/ffmpeg/include/libavcodec)
 				include_directories(libs/ffmpeg/include/libswresample)]]
-				#[[set(FFmpeg_LIBRARIES
-						avcodec
-						avformat
-						avutil
-						swscale
-						swresample)]]
 			else()
 			find_package(FFMPEG REQUIRED)
 			add_definitions(-DUSE_FFMPEG)

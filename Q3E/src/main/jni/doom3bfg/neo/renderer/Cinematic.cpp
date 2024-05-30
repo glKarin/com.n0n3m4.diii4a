@@ -439,7 +439,8 @@ idCinematicLocal::idCinematicLocal()
 	isRoQ = false;      // SRS - Initialize isRoQ for all cases, not just FFMPEG
 #if defined(USE_FFMPEG)
 #ifdef __ANDROID__ //karin: Using dl on Android
-	if(FFMPEG_AVAILABLE()) {
+	FFMPEG_IF_AVAILABLE
+	{
 #endif
 	// Carl: ffmpeg stuff, for bink and normal video files:
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55,28,1)
@@ -551,7 +552,8 @@ idCinematicLocal::~idCinematicLocal()
 //#if defined(_WIN32) || defined(_WIN64)
 	// SRS - Should use the same version criteria as when the frames are allocated in idCinematicLocal() above
 #ifdef __ANDROID__ //karin: Using dl on Android
-	if(FFMPEG_AVAILABLE()) {
+	FFMPEG_IF_AVAILABLE
+	{
 #endif
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55,28,1)
 	av_frame_free( &frame );
@@ -633,8 +635,7 @@ idCinematicLocal::InitFromFFMPEGFile
 bool idCinematicLocal::InitFromFFMPEGFile( const char* qpath, bool amilooping )
 {
 #ifdef __ANDROID__ //karin: Using dl on Android
-	if(!FFMPEG_AVAILABLE())
-		return false;
+	FFMPEG_IF_NOT_AVAILABLE(return false;)
 #endif
 	int ret;
 	int ret2;
@@ -834,8 +835,7 @@ idCinematicLocal::FFMPEGReset
 void idCinematicLocal::FFMPEGReset()
 {
 #ifdef __ANDROID__ //karin: Using dl on Android
-	if(!FFMPEG_AVAILABLE())
-		return;
+	FFMPEG_IF_NOT_AVAILABLE(return;)
 #endif
 	// RB: don't reset startTime here because that breaks video replays in the PDAs
 	//startTime = 0;
@@ -1011,8 +1011,7 @@ bool idCinematicLocal::InitFromFile( const char* qpath, bool amilooping )
 		//idLib::Warning( "Original Doom 3 RoQ Cinematic not found: '%s'\n", temp.c_str() );
 #if defined(USE_FFMPEG)
 #ifdef __ANDROID__ //karin: Using dl on Android
-		if(!FFMPEG_AVAILABLE())
-			return false;
+		FFMPEG_IF_NOT_AVAILABLE(return false;)
 #endif
 		temp = fileName.StripFileExtension() + ".bik";
 		skipLag = false;				// SRS - Enable lag buffer for ffmpeg bik decoder AV sync
@@ -1103,8 +1102,7 @@ void idCinematicLocal::Close()
 	else //if( !isRoQ )
 	{
 #ifdef __ANDROID__ //karin: Using dl on Android
-		if(!FFMPEG_AVAILABLE())
-			return;
+		FFMPEG_IF_NOT_AVAILABLE(return;)
 #endif
 		if( img_convert_ctx )
 		{
@@ -1345,11 +1343,12 @@ cinData_t idCinematicLocal::ImageForTimeFFMPEG( int thisTime )
 	uint8_t*	audioBuffer = NULL;
 	int			num_bytes = 0;
 #ifdef __ANDROID__ //karin: Using dl on Android
-	if(!FFMPEG_AVAILABLE())
-	{
-		memset( &cinData, 0, sizeof( cinData ) );
-		return cinData;
-	}
+	FFMPEG_IF_NOT_AVAILABLE(
+		{
+			memset( &cinData, 0, sizeof( cinData ) );
+			return cinData;
+		}
+	)
 #endif
 
 	if( thisTime <= 0 )

@@ -1,4 +1,5 @@
 #if defined(USE_FFMPEG)
+#ifdef _DL_FFMPEG
 
 #include "precompiled.h"
 
@@ -150,4 +151,6 @@ bool FFmpeg_Init(void)
     ffmpeg_available = true;
     return true;
 }
+
+#endif
 #endif
