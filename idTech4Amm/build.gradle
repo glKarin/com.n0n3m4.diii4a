@@ -52,6 +52,19 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    packagingOptions {
+        // remove unused ffmpeg libraries
+        // remove all x86/x86-64 libraries
+        exclude "lib/x86/**"
+        exclude "lib/x86_64/**"
+        // remove all mobileffmpeg libraries
+        exclude "lib/*/libmobileffmpeg*.so"
+        // remove all armv7 neon libraries
+        exclude "lib/armeabi-v7a/*_neon.so"
+        
+        // remove arm64 libraries if testing arm32
+        // exclude "lib/arm64-v8a/**"
+    }
 }
 
 dependencies {
