@@ -468,11 +468,11 @@ private:
 	bool				menuActive;
 	idSoundWorld* 		menuSoundWorld;			// so the game soundWorld can be muted
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: make public using sync game state to on-screen buttons
 public:
 #endif
 	bool				insideExecuteMapChange;	// Enable Pacifier Updates
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: make public using sync game state to on-screen buttons
 	private:
 #endif
 

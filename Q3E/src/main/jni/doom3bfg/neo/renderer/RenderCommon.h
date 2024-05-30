@@ -1668,7 +1668,7 @@ void RB_SetVertexColorParms( stageVertexColor_t svc );
 #include "GuiModel.h"
 #include "VertexCache.h"
 
-#ifdef _GLES //karin: debug
+#ifdef _GLES //karin: only for debug
 #if 0
 #define GLDBG(x) { \
 		while(glGetError() != GL_NO_ERROR); \

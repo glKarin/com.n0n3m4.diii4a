@@ -1562,7 +1562,7 @@ void Sys_DebugPrintf( const char* fmt, ... )
 	va_end( argptr );
 	msg[sizeof( msg ) - 1] = '\0';
 
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: print log to stdout
 	printf( "[RBDoom3_Debug] %s", msg );
 #else
 	__android_log_print( ANDROID_LOG_DEBUG, "RBDoom3_Debug", msg );
@@ -1581,7 +1581,7 @@ void Sys_DebugPrintf( const char* fmt, ... )
 void Sys_DebugVPrintf( const char* fmt, va_list arg )
 {
 #if defined(__ANDROID__)
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: print log to stdout
 	vprintf( fmt, arg );
 #else
 	__android_log_vprint( ANDROID_LOG_DEBUG, "RBDoom3_Debug", fmt, arg );
@@ -1604,7 +1604,7 @@ void Sys_Printf( const char* fmt, ... )
 	va_end( argptr );
 	msg[sizeof( msg ) - 1] = '\0';
 
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: print log to stdout
 	printf( "[RBDoom3] %s", msg );
 #else
 	__android_log_print( ANDROID_LOG_DEBUG, "RBDoom3", "%s", msg );
@@ -1623,7 +1623,7 @@ void Sys_Printf( const char* fmt, ... )
 void Sys_VPrintf( const char* fmt, va_list arg )
 {
 #if defined(__ANDROID__)
-	#ifdef _DIII4A
+	#ifdef _DIII4A //karin: print log to stdout
 	vprintf( fmt, arg );
 #else
 	__android_log_vprint( ANDROID_LOG_DEBUG, "RBDoom3", fmt, arg );

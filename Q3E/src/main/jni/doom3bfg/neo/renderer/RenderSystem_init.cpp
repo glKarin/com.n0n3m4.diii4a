@@ -862,7 +862,7 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 				globalFramebuffers.envprobeFBO->Bind();
 
 				glPixelStorei( GL_PACK_ROW_LENGTH, ENVPROBE_CAPTURE_SIZE );
-#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on OpenGLES
 				const int tmpsize = w * h;
 				byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 * 2 );
 				glReadPixels( 0, 0, w, h, GL_RGBA, GL_HALF_FLOAT, tmpbuf );
@@ -887,8 +887,8 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 			else
 			{
 				glReadBuffer( GL_FRONT );
-#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
-				byte *tmpbuf = ( byte* )R_StaticAlloc( w * h * 4 ); //TODO: allca
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on OpenGLES
+				byte *tmpbuf = ( byte* )R_StaticAlloc( w * h * 4 );
 				glReadPixels( 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, tmpbuf );
 				const int tmpsize = sysWidth * sysHeight;
 
@@ -2519,7 +2519,7 @@ idRenderSystemLocal::IsStereoScopicRenderingSupported
 */
 bool idRenderSystemLocal::IsStereoScopicRenderingSupported() const
 {
-#ifdef _GLES //karin: not support glDrawBuffer(GL_LEFT*, GL_RIGHT*)
+#ifdef _GLES //karin: not support stereo glDrawBuffer(GL_LEFT*, GL_RIGHT*)
 	return false;
 #else
 	return true;

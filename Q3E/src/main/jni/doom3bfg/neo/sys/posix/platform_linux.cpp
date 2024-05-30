@@ -507,7 +507,7 @@ void Sys_ReLaunch()
 main
 ===============
 */
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) //karin: main function in sys/android/android_main.cpp
 int main( int argc, const char** argv )
 {
 	// DG: needed for Sys_ReLaunch()

@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../Framebuffer.h"
 
 #if !defined(USE_VULKAN)
-#ifdef _GLES
+#ifdef _GLES //karin: only for debug
 #if 0
 #define FBD(x) {\
 	while(glGetError() != GL_NO_ERROR); \

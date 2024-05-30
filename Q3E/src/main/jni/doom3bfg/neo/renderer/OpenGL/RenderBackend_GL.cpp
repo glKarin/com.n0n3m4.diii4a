@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 	//#undef strcasecmp
 	//#undef vsnprintf
 	// DG end
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) //karin: unuse SDL
 	#include <SDL.h>
 #endif
 #endif
@@ -112,7 +112,7 @@ bool GL_CheckErrors_( const char* filename, int line )
 			case GL_INVALID_OPERATION:
 				strcpy( s, "GL_INVALID_OPERATION" );
 				break;
-#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES)
+#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES) //karin: not support on OpenGLES
 			case GL_STACK_OVERFLOW:
 				strcpy( s, "GL_STACK_OVERFLOW" );
 				break;
@@ -1564,7 +1564,7 @@ void idRenderBackend::CheckCVars()
 
 
 	// SRS - Enable SDL-driven vync changes without restart for UNIX-like OSs
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) //karin: unuse SDL
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)
 	extern idCVar r_swapInterval;
 	if( r_swapInterval.IsModified() )
@@ -2461,7 +2461,7 @@ void idRenderBackend::ImGui_RenderDrawLists( ImDrawData* draw_data )
 	glEnable( GL_SCISSOR_TEST );
 	glActiveTexture( GL_TEXTURE0 );
 
-#if !defined(_GLES)
+#if !defined(_GLES) //karin: not support on OpenGLES
 	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 #endif
 

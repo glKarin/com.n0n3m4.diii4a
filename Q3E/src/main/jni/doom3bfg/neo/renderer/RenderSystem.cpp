@@ -1160,7 +1160,7 @@ void idRenderSystemLocal::CaptureRenderToFile( const char* fileName, bool fixAlp
 #if !defined(USE_VULKAN)
 	glReadBuffer( GL_BACK );
 
-#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on OpenGLES
 	// include extra space for OpenGL padding to word boundaries
 	int	c = ( rc.GetWidth() + 4 ) * rc.GetHeight();
 	byte* data = NULL;

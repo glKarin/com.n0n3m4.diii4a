@@ -1286,7 +1286,7 @@ CONSOLE_COMMAND( bakeLightGrids, "Bake irradiance/vis light grid data", NULL )
 							globalFramebuffers.envprobeFBO->Bind();
 
 							glPixelStorei( GL_PACK_ROW_LENGTH, ENVPROBE_CAPTURE_SIZE );
-#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on OpenGLES
 							const int tmpsize = captureSize * captureSize;
 							byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 * 2 );
 							glReadPixels( 0, 0, captureSize, captureSize, GL_RGBA, GL_HALF_FLOAT, tmpbuf );

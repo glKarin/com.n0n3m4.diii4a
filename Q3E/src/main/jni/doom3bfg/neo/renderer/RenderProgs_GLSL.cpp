@@ -859,19 +859,19 @@ const char* fragmentInsert_GLSL_ES_3_00 =
 	"#define PC\n"
 	"precision mediump float;\n"
 	"precision lowp sampler2D;\n"
-#ifdef _GLES //karin: depth trxture using highp precision
+#ifdef _GLES //karin: depth texture using highp precision
 	"precision highp sampler2DShadow;\n"
 #else
 	"precision lowp sampler2DShadow;\n"
 #endif
 	"precision lowp sampler2DArray;\n"
-#ifdef _GLES //karin: depth trxture using highp precision
+#ifdef _GLES //karin: depth texture using highp precision
 	"precision highp sampler2DArrayShadow;\n"
 #else
 	"precision lowp sampler2DArrayShadow;\n"
 #endif
 	"precision lowp samplerCube;\n"
-#ifdef _GLES //karin: depth trxture using highp precision
+#ifdef _GLES //karin: depth texture using highp precision
 	"precision highp samplerCubeShadow;\n"
 #else
 	"precision lowp samplerCubeShadow;\n"

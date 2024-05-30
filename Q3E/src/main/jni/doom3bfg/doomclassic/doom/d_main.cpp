@@ -176,7 +176,7 @@ void D_Wipe()
 }
 
 
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: setup classic DOOM game state for sync state
 extern void Sys_SetClassicDOOMGameState(int state);
 #endif
 void D_Display (void)
@@ -184,12 +184,12 @@ void D_Display (void)
 	qboolean			redrawsbar;
 
 	if (::g->nodrawers)
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: setup classic DOOM game state for sync state
 	{
 		Sys_SetClassicDOOMGameState(-1);
 #endif
 		return;                    // for comparative timing / profiling
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: setup classic DOOM game state for sync state
 	}
 #endif
 
@@ -299,7 +299,7 @@ void D_Display (void)
 	// menus go directly to the screen
 	M_Drawer ();          // menu is drawn even on top of everything
 	NetUpdate ( NULL );         // send out any new accumulation
-#ifdef _DIII4A
+#ifdef _DIII4A //karin: setup classic DOOM game state for sync state
 	if(::g->menuactivestate)
 		Sys_SetClassicDOOMGameState(GS_DEMOSCREEN);
 	else if (::g->gamestate == GS_LEVEL && !::g->automapactive && ::g->gametic)
