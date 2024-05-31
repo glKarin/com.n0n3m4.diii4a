@@ -1,0 +1,25 @@
+#include <windows.h> // include for version info constants
+
+A ICON MOVEABLE PURE LOADONCALL DISCARDABLE "nexuiz.ico"
+
+1 VERSIONINFO
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILETYPE VFT_APP
+{
+  BLOCK "StringFileInfo"
+	 {
+		 BLOCK "040904E4"
+		 {
+			 VALUE "CompanyName", "Forest Hale Digital Services"
+			 VALUE "FileVersion", "1.0"
+			 VALUE "FileDescription", "Nexuiz"
+			 VALUE "InternalName", "nexuiz.exe"
+			 VALUE "LegalCopyright", "id Software, Forest Hale, and contributors"
+			 VALUE "LegalTrademarks", ""
+			 VALUE "OriginalFilename", "nexuiz.exe"
+			 VALUE "ProductName", "Nexuiz"
+			 VALUE "ProductVersion", "1.0"
+		 }
+	 }
+}

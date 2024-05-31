@@ -1216,3 +1216,18 @@ void Sys_Msleep(int msec)
 {
     usleep(msec * 1000);
 }
+
+/*
+================
+Sys_Microseconds
+================
+*/
+uint64_t Sys_Microseconds( void )
+{
+	struct timeval tp;
+	//returns time since the Epoch (1970-01-01)
+	gettimeofday(&tp, NULL);
+
+	uint64_t curtime = (tp.tv_sec) * 1000000LL + tp.tv_usec;
+	return curtime;
+}

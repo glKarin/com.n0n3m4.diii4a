@@ -27,7 +27,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/snd_local.h"
 #include "../client/client.h"
 
+#include "oboeaudio/snd_oboe.h"
+
 qboolean snd_inited = qfalse;
+
+/* The audio callback. All the magic happens here. */
+static int dmapos = 0;
+static int dmasize = 0;
+
 
 /* The audio callback. All the magic happens here. */
 #define BUFFER_SIZE 4096
@@ -35,13 +42,48 @@ qboolean snd_inited = qfalse;
 static int buf_size=0;
 static int bytes_per_sample=0;
 static int chunkSizeBytes=0;
-static int dmapos=0;
-
-extern void (*initAudio)(void *buffer, int size);
-extern void (*writeAudio)(int offset, int length);
-extern void (*shutdownAudio)(void);
 
 
+/*
+===============
+SNDDMA_AudioCallback
+===============
+*/
+static void SNDDMA_AudioCallback(unsigned char*stream, int len)
+{
+	int pos = (dmapos * (dma.samplebits/8));
+	if (pos >= dmasize)
+		dmapos = pos = 0;
+
+	if (!snd_inited)  /* shouldn't happen, but just in case... */
+	{
+		memset(stream, '\0', len);
+		return;
+	}
+	else
+	{
+		int tobufend = dmasize - pos;  /* bytes to buffer's end. */
+		int len1 = len;
+		int len2 = 0;
+
+		if (len1 > tobufend)
+		{
+			len1 = tobufend;
+			len2 = len - len1;
+		}
+		memcpy(stream, dma.buffer + pos, len1);
+		if (len2 <= 0)
+			dmapos += (len1 / (dma.samplebits/8));
+		else  /* wraparound? */
+		{
+			memcpy(stream+len1, dma.buffer, len2);
+			dmapos = (len2 / (dma.samplebits/8));
+		}
+	}
+
+	if (dmapos >= dmasize)
+		dmapos = 0;
+}
 
 /*
 ===============
@@ -50,6 +92,9 @@ SNDDMA_Init
 */
 qboolean SNDDMA_Init(void)
 {
+	if (snd_inited)
+		return qtrue;
+
 	Com_Printf("Initializing Android Sound subsystem\n");
 
 	/* For now hardcode this all :) */
@@ -74,10 +119,18 @@ qboolean SNDDMA_Init(void)
 	dma.buffer = calloc(1, buf_size);
 #endif
 
+	dmasize = (dma.samples * (dma.samplebits/8));
 	chunkSizeBytes = dma.submission_chunk * bytes_per_sample;
+	dmapos = 0;
+	dma.fullsamples = dma.samples / dma.channels;
+	dma.isfloat = 0;
 
-	initAudio(dma.buffer, buf_size);
+	Com_Printf("Q3E Oboe audio initialized.\n");
+	Q3E_Oboe_Init(dma.speed, dma.channels, -1, SNDDMA_AudioCallback);
+	Q3E_Oboe_Start();
+	snd_inited = qtrue;
 
+	Com_Printf("Starting Q3E Oboe audio callback...\n");
 	return qtrue;
 }
 
@@ -98,13 +151,12 @@ SNDDMA_Shutdown
 */
 void SNDDMA_Shutdown(void)
 {
-	Com_Printf("SNDDMA_ShutDown\n");
-	if(dma.buffer)
-	{
-		shutdownAudio();
-		free(dma.buffer);
-		dma.buffer = NULL;
-	}
+	Q3E_Oboe_Shutdown();
+	free(dma.buffer);
+	dma.buffer = NULL;
+	dmapos = dmasize = 0;
+	snd_inited = qfalse;
+	Com_Printf("Q3E Oboe audio shut down.\n");
 }
 
 /*
@@ -116,14 +168,7 @@ Send sound to device if buffer isn't really the dma buffer
 */
 void SNDDMA_Submit(void)
 {
-#if 0
-	int offset = (dmapos * bytes_per_sample) & (buf_size - 1);
-    writeAudio(offset, chunkSizeBytes);
-    dmapos+=dma.submission_chunk;
-#else
-	writeAudio(0, BUFFER_SIZE);
-	/*dma.samplepos*/dmapos += BUFFER_SIZE/bytes_per_sample;
-#endif
+	Q3E_Oboe_Unlock();
 }
 
 /*
@@ -133,30 +178,6 @@ SNDDMA_BeginPainting
 */
 void SNDDMA_BeginPainting (void)
 {
+	Q3E_Oboe_Lock();
 }
-
-
-#ifdef USE_VOIP
-void SNDDMA_StartCapture(void)
-{
-}
-
-int SNDDMA_AvailableCaptureSamples(void)
-{
-	return 0;
-}
-
-void SNDDMA_Capture(int samples, byte *data)
-{
-	SDL_memset(data, '\0', samples * 2);
-}
-
-void SNDDMA_StopCapture(void)
-{
-}
-
-void SNDDMA_MasterGain( float val )
-{
-}
-#endif
 

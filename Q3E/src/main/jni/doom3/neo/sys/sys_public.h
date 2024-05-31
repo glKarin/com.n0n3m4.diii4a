@@ -714,5 +714,6 @@ void			Sys_Trap(void);
 void			Sys_Usleep(int usec);
 void			Sys_Msleep(int msec);
 const char *	Sys_DLLDefaultPath(void);
+uint64_t		Sys_Microseconds(void);
 
 #endif /* !__SYS_PUBLIC__ */

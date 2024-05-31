@@ -45,8 +45,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef EGL_OPENGL_ES3_BIT
 #define EGL_OPENGL_ES3_BIT EGL_OPENGL_ES3_BIT_KHR
 #endif
+#define DEFAULT_SYS_VIDEO_MEMORY 512 // 64
 idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
-					"Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
+					"Texture memory on the video card (in megabytes) - 0: autodetect", 0, 1024);
 
 #ifdef _OPENGLES3
 const char	*r_openglesArgs[]	= {
@@ -73,9 +74,13 @@ idCVar harm_sys_openglVersion("harm_sys_openglVersion",
 #define GLFORMAT_RGBA1010102 0xaaa2
 
 // OpenGL attributes
+// OpenGL color format
 int gl_format = GLFORMAT_RGBA8888;
+// OpenGL multisamples
 int gl_msaa = 0;
+// OpenGL version
 int gl_version = DEFAULT_GLES_VERSION;
+
 bool USING_GLES3 = gl_version != 0x00020000;
 
 #define MAX_NUM_CONFIGS 1000
@@ -839,7 +844,6 @@ using the one shared with GLimp_Init is not stable
 int Sys_GetVideoRam(void)
 {
 	static int run_once = 0;
-	int major, minor, value;
 
 	if (run_once) {
 		return run_once;
@@ -853,6 +857,6 @@ int Sys_GetVideoRam(void)
 	// try a few strategies to guess the amount of video ram
 	common->Printf("guessing video ram ( use +set sys_videoRam to force ) ..\n");
 
-	run_once = 64;
+	run_once = DEFAULT_SYS_VIDEO_MEMORY;
 	return run_once;
 }

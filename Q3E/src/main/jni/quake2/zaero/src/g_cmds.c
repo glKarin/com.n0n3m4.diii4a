@@ -1,10 +1,15 @@
 #include "header/local.h"
 #include "monster/misc/player.h"
 
-char *ClientTeam (edict_t *ent)
+static char*
+ClientTeam (edict_t *ent, char* value)
 {
 	char		*p;
-	static char	value[512];
+
+	if (!ent)
+	{
+		return value;
+	}
 
 	value[0] = 0;
 
@@ -30,14 +35,20 @@ qboolean OnSameTeam (edict_t *ent1, edict_t *ent2)
 	char	ent1Team [512];
 	char	ent2Team [512];
 
+	if (!ent1 || !ent2)
+	{
+		return false;
+	}
+
 	if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
 		return false;
 
-	strcpy (ent1Team, ClientTeam (ent1));
-	strcpy (ent2Team, ClientTeam (ent2));
+	ClientTeam (ent1, ent1Team);
+	ClientTeam (ent2, ent2Team);
 
-	if (strcmp(ent1Team, ent2Team) == 0)
+	if (ent1Team[0] != '\0' && strcmp(ent1Team, ent2Team) == 0)
 		return true;
+	
 	return false;
 }
 
@@ -47,6 +58,11 @@ void SelectNextItem (edict_t *ent, int itflags)
 	gclient_t	*cl;
 	int			i, index;
 	gitem_t		*it;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	cl = ent->client;
 
@@ -77,6 +93,11 @@ void SelectPrevItem (edict_t *ent, int itflags)
 	int			i, index;
 	gitem_t		*it;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	cl = ent->client;
 
 	// scan  for the next valid one
@@ -103,6 +124,11 @@ void SelectPrevItem (edict_t *ent, int itflags)
 void ValidateSelectedItem (edict_t *ent)
 {
 	gclient_t	*cl;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	cl = ent->client;
 
@@ -132,6 +158,11 @@ void Cmd_Give_f (edict_t *ent)
 	edict_t		*it_ent;
 	int     numargs;
 	char tryname[256];
+
+	if (!ent)
+	{
+		return;
+	}
 
 	if (deathmatch->value && !sv_cheats->value)
 	{
@@ -313,6 +344,11 @@ void Cmd_God_f (edict_t *ent)
 {
 	char	*msg;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	if ((deathmatch->value || coop->value) && !sv_cheats->value)
 	{
 		gi.cprintf (ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
@@ -342,6 +378,11 @@ void Cmd_Notarget_f (edict_t *ent)
 {
 	char	*msg;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	if ((deathmatch->value || coop->value) && !sv_cheats->value)
 	{
 		gi.cprintf (ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
@@ -368,6 +409,11 @@ argv(0) noclip
 void Cmd_Noclip_f (edict_t *ent)
 {
 	char	*msg;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	if ((deathmatch->value || coop->value) && !sv_cheats->value)
 	{
@@ -413,6 +459,12 @@ qboolean tryUse(edict_t *ent, char *s)
 {
 	int index = 0;
 	gitem_t *it = FindItem(s);
+
+	if (!ent)
+	{
+		return false;
+	}
+
 	if (!it)
 	{
 		gi.cprintf (ent, PRINT_HIGH, "unknown item: %s\n", s);
@@ -437,6 +489,11 @@ void findNext(edict_t *ent, struct altsel_s *ptr, int offset)
 {
 	int start = offset;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	while (1)
 	{
 		if (tryUse(ent, ptr->weapon[offset]))
@@ -458,7 +515,12 @@ void altSelect(edict_t *ent, int num)
 	int i = 0;
 	struct altsel_s *ptr = NULL;
 	gitem_t *it = NULL;
-	
+
+	if (!ent)
+	{
+		return;
+	}
+
 	// within range?
 	if (num < 1 || num > 10)
 	{
@@ -502,6 +564,11 @@ void Cmd_Use_f (edict_t *ent)
 	int			index;
 	gitem_t		*it;
 	char		*s;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	// are we using a multiselect item?
 	if (Q_stricmp(gi.argv(1), "weapon") == 0)
@@ -550,6 +617,11 @@ void Cmd_Drop_f (edict_t *ent)
 	gitem_t		*it;
 	char		*s;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	s = gi.args();
 	it = FindItem (s);
 	if (!it)
@@ -582,6 +654,11 @@ void Cmd_Inven_f (edict_t *ent)
 {
 	int			i;
 	gclient_t	*cl;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	cl = ent->client;
 
@@ -620,6 +697,11 @@ void Cmd_InvUse_f (edict_t *ent)
 {
 	gitem_t		*it;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	ValidateSelectedItem (ent);
 
 	if (ent->client->pers.selected_item == -1)
@@ -648,6 +730,11 @@ void Cmd_WeapPrev_f (edict_t *ent)
 	int			i, index;
 	gitem_t		*it;
 	int			selected_weapon;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	cl = ent->client;
 
@@ -687,6 +774,11 @@ void Cmd_WeapNext_f (edict_t *ent)
 	gitem_t		*it;
 	int			selected_weapon;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	cl = ent->client;
 
 	if (!cl->pers.weapon)
@@ -724,6 +816,11 @@ void Cmd_WeapLast_f (edict_t *ent)
 	int			index;
 	gitem_t		*it;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	cl = ent->client;
 
 	if (!cl->pers.weapon || !cl->pers.lastweapon)
@@ -749,6 +846,11 @@ void Cmd_InvDrop_f (edict_t *ent)
 {
 	gitem_t		*it;
 
+	if (!ent)
+	{
+		return;
+	}
+
 	ValidateSelectedItem (ent);
 
 	if (ent->client->pers.selected_item == -1)
@@ -773,6 +875,11 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	if((level.time - ent->client->respawn_time) < 5)
 		return;
 	ent->flags &= ~FL_GODMODE;
@@ -792,6 +899,11 @@ Cmd_PutAway_f
 */
 void Cmd_PutAway_f (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	ent->client->showscores = false;
 	ent->client->showhelp = false;
 	ent->client->showinventory = false;
@@ -831,6 +943,11 @@ void Cmd_Players_f (edict_t *ent)
 	char	large[1280];
 	int		index[256];
 
+	if (!ent)
+	{
+		return;
+	}
+
 	count = 0;
 	for (i = 0 ; i < maxclients->value ; i++)
 		if (game.clients[i].pers.connected)
@@ -869,6 +986,11 @@ Cmd_Wave_f
 void Cmd_Wave_f (edict_t *ent)
 {
 	int		i;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	i = atoi (gi.argv(1));
 
@@ -924,6 +1046,11 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	char	*p;
 	char	text[2048];
 
+	if (!ent)
+	{
+		return;
+	}
+
 	if (gi.argc () < 2 && !arg0)
 		return;
 
@@ -978,6 +1105,264 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	}
 }
 
+/* Yamagi's cycleweap / prefweap */
+
+static gitem_t *
+cycle_weapon(edict_t *ent)
+{
+	gclient_t *cl;
+	gitem_t *noammo_fallback;
+	gitem_t *noweap_fallback;
+	gitem_t *weap;
+	gitem_t *ammo;
+	int i;
+	int start;
+	int num_weaps;
+	const char *weapname = NULL;
+
+	if (!ent)
+	{
+		return NULL;
+	}
+
+	cl = ent->client;
+
+	if (!cl)
+	{
+		return NULL;
+	}
+
+	num_weaps = gi.argc();
+
+	/* find where we want to start the search for the next eligible weapon */
+	if (cl->newweapon)
+	{
+		weapname = cl->newweapon->classname;
+	}
+	else if (cl->pers.weapon)
+	{
+		weapname = cl->pers.weapon->classname;
+	}
+
+	if (weapname)
+	{
+		for (i = 1; i < num_weaps; i++)
+		{
+			if (Q_stricmp(weapname, gi.argv(i)) == 0)
+			{
+				break;
+			}
+		}
+
+		i++;
+
+		if (i >= num_weaps)
+		{
+			i = 1;
+		}
+	}
+	else
+	{
+		i = 1;
+	}
+
+	start = i;
+	noammo_fallback = NULL;
+	noweap_fallback = NULL;
+
+	/* find the first eligible weapon in the list we can switch to */
+	do
+	{
+		weap = FindItemByClassname(gi.argv(i));
+
+		if (weap && weap != cl->pers.weapon && (weap->flags & IT_WEAPON) && weap->use)
+		{
+			if (cl->pers.inventory[ITEM_INDEX(weap)] > 0)
+			{
+				if (weap->ammo)
+				{
+					ammo = FindItem(weap->ammo);
+					if (ammo)
+					{
+						if (cl->pers.inventory[ITEM_INDEX(ammo)] >= get_ammo_usage(weap))
+						{
+							return weap;
+						}
+
+						if (!noammo_fallback)
+						{
+							noammo_fallback = weap;
+						}
+					}
+				}
+				else
+				{
+					return weap;
+				}
+			}
+			else if (!noweap_fallback)
+			{
+				noweap_fallback = weap;
+			}
+		}
+
+		i++;
+
+		if (i >= num_weaps)
+		{
+			i = 1;
+		}
+	} while (i != start);
+
+	/* if no weapon was found, the fallbacks will be used for
+	   printing the appropriate error message to the console
+	*/
+
+	if (noammo_fallback)
+	{
+		return noammo_fallback;
+	}
+
+	return noweap_fallback;
+}
+
+static void
+Cmd_CycleWeap_f(edict_t *ent)
+{
+	gitem_t *weap;
+
+	if (!ent)
+	{
+		return;
+	}
+
+	if (gi.argc() <= 1)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Usage: cycleweap classname1 classname2 .. classnameN\n");
+		return;
+	}
+
+	weap = cycle_weapon(ent);
+	if (weap)
+	{
+		if (ent->client->pers.inventory[ITEM_INDEX(weap)] <= 0)
+		{
+			gi.cprintf(ent, PRINT_HIGH, "Out of item: %s\n", weap->pickup_name);
+		}
+		else
+		{
+			weap->use(ent, weap);
+		}
+	}
+}
+
+static gitem_t *
+preferred_weapon(edict_t *ent)
+{
+	gclient_t *cl;
+	gitem_t *noammo_fallback;
+	gitem_t *noweap_fallback;
+	gitem_t *weap;
+	gitem_t *ammo;
+	int i;
+	int num_weaps;
+
+	if (!ent)
+	{
+		return NULL;
+	}
+
+	cl = ent->client;
+
+	if (!cl)
+	{
+		return NULL;
+	}
+
+	num_weaps = gi.argc();
+	noammo_fallback = NULL;
+	noweap_fallback = NULL;
+
+	/* find the first eligible weapon in the list we can switch to */
+	for (i = 1; i < num_weaps; i++)
+	{
+		weap = FindItemByClassname(gi.argv(i));
+
+		if (weap && (weap->flags & IT_WEAPON) && weap->use)
+		{
+			if (cl->pers.inventory[ITEM_INDEX(weap)] > 0)
+			{
+				if (weap->ammo)
+				{
+					ammo = FindItem(weap->ammo);
+					if (ammo)
+					{
+						if (cl->pers.inventory[ITEM_INDEX(ammo)] >= get_ammo_usage(weap))
+						{
+							return weap;
+						}
+
+						if (!noammo_fallback)
+						{
+							noammo_fallback = weap;
+						}
+					}
+				}
+				else
+				{
+					return weap;
+				}
+			}
+			else if (!noweap_fallback)
+			{
+				noweap_fallback = weap;
+			}
+		}
+	}
+
+	/* if no weapon was found, the fallbacks will be used for
+	   printing the appropriate error message to the console
+	*/
+
+	if (noammo_fallback)
+	{
+		return noammo_fallback;
+	}
+
+	return noweap_fallback;
+}
+
+static void
+Cmd_PrefWeap_f(edict_t *ent)
+{
+	gitem_t *weap;
+
+	if (!ent)
+	{
+		return;
+	}
+
+	if (gi.argc() <= 1)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Usage: prefweap classname1 classname2 .. classnameN\n");
+		return;
+	}
+
+	weap = preferred_weapon(ent);
+	if (weap)
+	{
+		if (ent->client->pers.inventory[ITEM_INDEX(weap)] <= 0)
+		{
+			gi.cprintf(ent, PRINT_HIGH, "Out of item: %s\n", weap->pickup_name);
+		}
+		else
+		{
+			weap->use(ent, weap);
+		}
+	}
+}
+
+
 /*
 =================
 ClientCommand
@@ -986,6 +1371,11 @@ ClientCommand
 void ClientCommand (edict_t *ent)
 {
 	char	*cmd;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	if (!ent->client)
 		return;		// not fully in game yet
@@ -1116,7 +1506,14 @@ void ClientCommand (edict_t *ent)
    else if(Q_stricmp (cmd, "anim") == 0)
       anim_player_cmd(ent);
 #endif
+	else if (Q_stricmp(cmd, "cycleweap") == 0)
+	{
+		Cmd_CycleWeap_f(ent);
+	}
+	else if (Q_stricmp(cmd, "prefweap") == 0)
+	{
+		Cmd_PrefWeap_f(ent);
+	}
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }
-

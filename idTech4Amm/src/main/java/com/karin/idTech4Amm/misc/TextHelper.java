@@ -185,6 +185,7 @@ public final class TextHelper
                 " " + GenLinkText("https://store.steampowered.com/app/2200/Quake_III_Arena/", "Quake III Team Arena: missionpack"),
                 " " + GenLinkText("https://www.moddb.com/games/return-to-castle-wolfenstein", "Return to Castle Wolfenstein: main"),
                 " " + GenLinkText("https://www.thedarkmod.com", "The Dark Mod: darkmod"),
+                " " + GenLinkText("https://store.steampowered.com/agecheck/app/208200/", "DOOM3 BFG: doom3bfg/base"),
                 null,
             "For playing Prey(2006)(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
@@ -292,7 +293,7 @@ public final class TextHelper
             null,
             "Rename from `DIII4A++`, base on original `n0n3m4`'s `DIII4A`.",
             "idTech4 engine's games support on Android.",
-            "e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, `Prey(2006)`, and some mods(e.g. `The Dark Mod`).",
+            "e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, `Prey(2006)`, and some mods(e.g. `The Dark Mod`, `DOOM3 BFG`).",
             null,
             "Source in `assets/source` folder in APK file.",
             " `DIII4A.source.tgz`: launcher frontend source and game source, game source and OpenGLES2.0/3.0 shader source in `/Q3E/src/main/jni/doom3` of archive package.",
@@ -323,12 +324,21 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2024-04-30", 50,
+                        "Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).",
+                        "Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).",
+                        "Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).",
+                        "Improving Phong/Blinn-Phong light model interaction shader with high-precision.",
+                        "Force disable using compression texture in The Dark Mod.",
+                        "Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always); DOOM3 BFG -> doom3bfg/ (always)."
+                ),
+
                 ChangeLog.Create("2024-04-10", 39,
                         "Support perforated surface shadow in shadow mapping(cvar `r_forceShadowMapsOnAlphaTestedSurfaces`, default 0).",
                         "Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop") + "`.",
-                        "Add `Quake II` support, game data directory named `baseq2`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2320/Quake_II/", "Quake II") + "`.",
-                        "Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2200/Quake_III_Arena/", "Quake III Arena") + "`.",
-                        "Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/games/return-to-castle-wolfenstein", "Return to Castle Wolfenstein") + "`.",
+                        "Add `Quake II` support, game data directory named `baseq2`. More view in `" + TextHelper.GenLinkText("https://github.com/yquake2/yquake2", "Yamagi Quake II") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2320/Quake_II/", "Quake II") + "`.",
+                        "Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in `" + TextHelper.GenLinkText("https://github.com/ioquake/ioq3", "ioquake3") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2200/Quake_III_Arena/", "Quake III Arena") + "`.",
+                        "Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/iortcw/iortcw", "iortcw") + "` and `" + TextHelper.GenLinkText("https://www.moddb.com/games/return-to-castle-wolfenstein", "Return to Castle Wolfenstein") + "`.",
                         "Add `The Dark Mod` support, game data directory named `darkmod`. More view in `" + TextHelper.GenLinkText("https://www.thedarkmod.com", "The Dark Mod") + "`.",
                         "Add a on-screen button theme."
                 ),

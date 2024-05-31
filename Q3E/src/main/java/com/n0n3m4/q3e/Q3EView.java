@@ -112,9 +112,7 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         if(!mInit)
         {
-            Q3EMain.gameHelper.Start(holder.getSurface(), w, h);
-
-            mInit = true;
+            mInit = Q3EMain.gameHelper.Start(holder.getSurface(), w, h);
 
             getHolder().setFixedSize(w, h);
         }

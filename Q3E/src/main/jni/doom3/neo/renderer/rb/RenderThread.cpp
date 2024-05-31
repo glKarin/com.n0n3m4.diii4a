@@ -80,6 +80,8 @@ void idRenderThread::BackendThreadTask(void) // BackendThread ->
     globalImages->HandlePendingImage();
     // Load custom GLSL shader
     shaderManager->ActuallyLoad();
+    // debug tools
+    RB_SetupRenderTools();
     // image process finished
     Sys_TriggerEvent(TRIGGER_EVENT_IMAGES_PROCESSES);
 

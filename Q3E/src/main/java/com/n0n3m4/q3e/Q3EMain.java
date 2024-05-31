@@ -27,6 +27,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -106,6 +107,9 @@ public class Q3EMain extends Activity
             // if game is TDM, extract glsl shader
             if(Q3EUtils.q3ei.IsTDMTech())
                 gameHelper.ExtractTDMGLSLShaderSource();
+            // if game is D3BFG, extract hlsl shader
+            else if(Q3EUtils.q3ei.IsIdTech4BFG())
+                gameHelper.ExtractDOOM3BFGHLSLShaderSource();
 
             // init GUI component
             InitGUI();
@@ -113,6 +117,7 @@ public class Q3EMain extends Activity
         else
         {
             finish();
+            Q3EUtils.RunLauncher(this);
         }
     }
 
@@ -306,5 +311,17 @@ public class Q3EMain extends Activity
         setContentView(mainLayout);
 
         mControlGLSurfaceView.requestFocus();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        return mControlGLSurfaceView.OnKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event)
+    {
+        return mControlGLSurfaceView.OnKeyUp(keyCode, event);
     }
 }

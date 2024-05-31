@@ -19,6 +19,7 @@
 
 package com.n0n3m4.q3e;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
@@ -99,12 +100,15 @@ public class Q3EGameHelper
             Q3EUtils.q3ei.LoadTypeAndArgTablePreference(m_context);
 
             String extraCommand = "";
-            if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
-                extraCommand += " +disconnect";
-            if(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech())
+            if(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()/* || Q3EUtils.q3ei.IsTDMTech()*/)
             {
-                if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
-                    extraCommand += " +loadGame QuickSave";
+                if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
+                    extraCommand += " +disconnect";
+                if(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech())
+                {
+                    if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
+                        extraCommand += " +loadGame QuickSave";
+                }
             }
             Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
         }
@@ -210,10 +214,14 @@ public class Q3EGameHelper
     public String GetEngineLib()
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
-        String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + Q3EUtils.q3ei.libname;
+        String libname = Q3EUtils.q3ei.libname;
+        // if(Q3EUtils.q3ei.isTDM) libname = Q3EGlobals.LIB_ENGINE4_D3BFG; // Test a new game using TDM
+        String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + libname; // Q3EUtils.q3ei.libname;
         if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
         {
-            String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(Q3EUtils.q3ei.libname);
+            // if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = Q3EGlobals.GAME_SUBDIR_DOOMBFG; // Test a new game using TDM
+            String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(libname);
+            // if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = Q3EGlobals.GAME_SUBDIR_TDM; // Test a new game using TDM
             File file = new File(localLibPath);
             if(!file.isFile() || !file.canRead())
             {
@@ -221,7 +229,7 @@ public class Q3EGameHelper
             }
             else
             {
-                String cacheFile = m_context.getCacheDir() + File.separator + Q3EUtils.q3ei.libname;
+                String cacheFile = m_context.getCacheDir() + File.separator + /*Q3EUtils.q3ei.*/libname;
                 Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found local engine library file: " + localLibPath);
                 long r = Q3EUtils.cp(localLibPath, cacheFile);
                 if(r > 0)
@@ -311,6 +319,88 @@ public class Q3EGameHelper
         {
             e.printStackTrace();
             ShowMessage(R.string.extract_the_dark_mod_glsl_shader_source_files_fail);
+        }
+        finally
+        {
+            Q3EUtils.Close(fileoutputstream);
+            Q3EUtils.Close(zipinputstream);
+            Q3EUtils.Close(bis);
+        }
+    }
+
+    public void ExtractDOOM3BFGHLSLShaderSource()
+    {
+        InputStream bis = null;
+        ZipInputStream zipinputstream = null;
+        FileOutputStream fileoutputstream = null;
+        boolean overwrite = false;
+
+        try
+        {
+            final String destname = Q3EUtils.q3ei.datadir + "/doom3bfg/base";
+            File versionFile = new File(destname + "/renderprogs/idtech4amm.version");
+            if(!versionFile.isFile() || !versionFile.canRead())
+            {
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "RBDOOM 3 BFG HLSL shader source file version not exists.");
+                overwrite = true;
+            }
+            else
+            {
+                String version = Q3EUtils.file_get_contents(versionFile);
+                if(null != version)
+                    version = version.trim();
+                if(!Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION.equalsIgnoreCase(version))
+                {
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format("RBDOOM 3 BFG HLSL shader source file version is mismatch: %s != %s.", version, Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION));
+                    overwrite = true;
+                }
+            }
+            if(overwrite)
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "RBDOOM 3 BFG HLSL shader source file will be overwrite.");
+            else
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "RBDOOM 3 BFG HLSL shader source file will keep exists version.");
+
+            bis = m_context.getAssets().open("pak/doom3bfg/renderprogs.pk4");
+            zipinputstream = new ZipInputStream(bis);
+
+            ZipEntry zipentry;
+            Q3EUtils.mkdir(destname, true);
+            while ((zipentry = zipinputstream.getNextEntry()) != null)
+            {
+                String tmpname = zipentry.getName();
+
+                String entryName = destname + "/" + tmpname;
+                entryName = entryName.replace('/', File.separatorChar);
+                entryName = entryName.replace('\\', File.separatorChar);
+                File file = new File(entryName);
+
+                if (zipentry.isDirectory())
+                {
+                    if(!file.exists())
+                        Q3EUtils.mkdir(entryName, true);
+                    continue;
+                }
+                if(!overwrite && file.exists())
+                    continue;
+
+                fileoutputstream = new FileOutputStream(entryName);
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying " + tmpname + " to " + destname);
+                Q3EUtils.Copy(fileoutputstream, zipinputstream, 4096);
+                fileoutputstream.close();
+                fileoutputstream = null;
+                zipinputstream.closeEntry();
+            }
+
+            if(overwrite)
+            {
+                Q3EUtils.file_put_contents(versionFile, Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION);
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Write RBDOOM 3 BFG HLSL shader source file version is " + Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            ShowMessage(R.string.extract_rbdoom3bfg_hlsl_shader_source_files_fail);
         }
         finally
         {
@@ -522,7 +612,7 @@ public class Q3EGameHelper
         return new int[] { width, height };
     }
 
-    public void Start(Surface surface, int surfaceWidth, int surfaceHeight)
+    public boolean Start(Surface surface, int surfaceWidth, int surfaceHeight)
     {
         // GL
         int msaa = GetMSAA();
@@ -540,13 +630,18 @@ public class Q3EGameHelper
         int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
 
-        Q3EJNI.init(
+        String subdatadir = Q3EUtils.q3ei.subdatadir;
+        // if(Q3EUtils.q3ei.isTDM) subdatadir = Q3EGlobals.GAME_SUBDIR_DOOMBFG; // Test a new game using TDM
+
+        int refreshRate = (int)Q3EUtils.GetRefreshRate(m_context);
+
+        boolean res = Q3EJNI.init(
                 GetEngineLib(),
                 Q3EUtils.GetGameLibDir(m_context),
                 width,
                 height,
                 Q3EUtils.q3ei.datadir,
-                Q3EUtils.q3ei.subdatadir,
+                subdatadir,
                 cmd,
                 surface,
                 glFormat,
@@ -555,8 +650,25 @@ public class Q3EGameHelper
                 noHandleSignals,
                 Q3EUtils.q3ei.multithread,
                 usingMouse,
+                refreshRate,
                 runBackground > 0
         );
+        if(!res)
+        {
+            if(m_context instanceof Activity)
+            {
+                Activity activity = (Activity)m_context;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        activity.finish();
+                        // Q3EUtils.RunLauncher(activity);
+                    }
+                });
+            }
+        }
+        return res;
     }
 
     public Context GetContext()

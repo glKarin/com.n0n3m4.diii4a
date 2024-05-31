@@ -104,8 +104,12 @@ class idVertexCache
 		// listVertexCache calls this
 		void			List();
 #ifdef _MULTITHREAD
-	int GetListNum(void) const { return listNum; }
-	int GetNextListNum(void) const;
+	int GetListNum(void) const {
+		return listNum;
+	}
+	int GetNextListNum(void) const {
+		return (listNum + 1) % NUM_VERTEX_FRAMES;
+	}
 	void BeginBackEnd(int which);
 	void EndBackEnd(int which); // clear VBO
 	private:

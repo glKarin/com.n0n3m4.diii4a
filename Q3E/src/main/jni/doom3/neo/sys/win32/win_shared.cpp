@@ -101,3 +101,22 @@ Sys_SetPhysicalWorkMemory
 void Sys_SetPhysicalWorkMemory( int minBytes, int maxBytes ) {
 	::SetProcessWorkingSetSize( GetCurrentProcess(), minBytes, maxBytes );
 }
+
+/*
+================
+Sys_Microseconds
+================
+*/
+uint64_t Sys_Microseconds( void ) {
+	FILETIME ft = {0};
+	//note: returns number of 100-nanosec intervals since January 1, 1601 (UTC)
+	GetSystemTimeAsFileTime(&ft);
+	ULARGE_INTEGER num;
+	num.HighPart = ft.dwHighDateTime;
+	num.LowPart = ft.dwLowDateTime;
+
+	//difference between 1970-Jan-01 & 1601-Jan-01 in 100-nanosecond intervals
+	const uint64_t shift = 116444736000000000ULL; // (27111902 << 32) + 3577643008
+	uint64_t res = (num.QuadPart - shift) / 10;
+	return res;	//in microsecs now
+}

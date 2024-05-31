@@ -1,7 +1,7 @@
 #include "header/local.h"
 
-int gibsthisframe = 0;
-int lastgibframe = 0;
+int debristhisframe;
+int gibsthisframe;
 
 /*
  * QUAKED func_group (0 0 0) ?
@@ -139,15 +139,9 @@ ThrowGib(edict_t *self, char *gibname, int damage, int type)
 	vec3_t size;
 	float vscale;
 
-	if (level.framenum > lastgibframe)
-	{
-		gibsthisframe = 0;
-		lastgibframe = level.framenum;
-	}
-
 	gibsthisframe++;
 
-	if (gibsthisframe > 20)
+	if (gibsthisframe > MAX_GIBS)
 	{
 		return;
 	}
@@ -161,11 +155,12 @@ ThrowGib(edict_t *self, char *gibname, int damage, int type)
 	gib->s.origin[2] = origin[2] + crandom() * size[2];
 
 	gi.setmodel(gib, gibname);
-	gib->solid = SOLID_NOT;
+	gib->solid = SOLID_BBOX;
 	gib->s.effects |= EF_GIB;
 	gib->flags |= FL_NO_KNOCKBACK;
 	gib->takedamage = DAMAGE_YES;
 	gib->die = gib_die;
+	gib->health = 250;
 
 	if (type == GIB_ORGANIC)
 	{
@@ -205,7 +200,7 @@ ThrowHead(edict_t *self, char *gibname, int damage, int type)
 
 	self->s.modelindex2 = 0;
 	gi.setmodel(self, gibname);
-	self->solid = SOLID_NOT;
+	self->solid = SOLID_BBOX;
 	self->s.effects |= EF_GIB;
 	self->s.effects &= ~EF_FLIES;
 	self->s.sound = 0;
@@ -262,7 +257,7 @@ ThrowClientHead(edict_t *self, int damage)
 	VectorSet(self->maxs, 16, 16, 16);
 
 	self->takedamage = DAMAGE_NO;
-	self->solid = SOLID_NOT;
+	self->solid = SOLID_BBOX;
 	self->s.effects = EF_GIB;
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
@@ -293,15 +288,9 @@ ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
 	edict_t *chunk;
 	vec3_t v;
 
-	if (level.framenum > lastgibframe)
-	{
-		gibsthisframe = 0;
-		lastgibframe = level.framenum;
-	}
+	debristhisframe++;
 
-	gibsthisframe++;
-
-	if (gibsthisframe > 20)
+	if (debristhisframe > MAX_DEBRIS)
 	{
 		return;
 	}
@@ -314,7 +303,7 @@ ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
 	v[2] = 100 + 100 * crandom();
 	VectorMA(self->velocity, speed, v, chunk->velocity);
 	chunk->movetype = MOVETYPE_BOUNCE;
-	chunk->solid = SOLID_NOT;
+	chunk->solid = SOLID_BBOX;
 	chunk->avelocity[0] = random() * 600;
 	chunk->avelocity[1] = random() * 600;
 	chunk->avelocity[2] = random() * 600;
@@ -325,6 +314,7 @@ ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
 	chunk->classname = "debris";
 	chunk->takedamage = DAMAGE_YES;
 	chunk->die = debris_die;
+	chunk->health = 250;
 	gi.linkentity(chunk);
 }
 
@@ -344,7 +334,7 @@ BecomeExplosion1(edict_t *self)
 	{
 		CTFResetFlag(CTF_TEAM2); /* this will free self! */
 		gi.bprintf(PRINT_HIGH, "The %s flag has returned!\n",
-				CTFTeamName(CTF_TEAM1));
+				CTFTeamName(CTF_TEAM2));
 		return;
 	}
 
@@ -972,7 +962,7 @@ void
 SP_func_explosive(edict_t *self)
 {
 	if (deathmatch->value)
-	{   
+	{
 		/* auto-remove for deathmatch */
 		G_FreeEdict(self);
 		return;
@@ -1147,7 +1137,7 @@ void
 SP_misc_explobox(edict_t *self)
 {
 	if (deathmatch->value)
-	{   
+	{
 		/* auto-remove for deathmatch */
 		G_FreeEdict(self);
 		return;
@@ -1438,7 +1428,7 @@ void
 SP_misc_deadsoldier(edict_t *ent)
 {
 	if (deathmatch->value)
-	{   
+	{
 		/* auto-remove for deathmatch */
 		G_FreeEdict(ent);
 		return;
@@ -1744,7 +1734,7 @@ void
 SP_misc_gib_arm(edict_t *ent)
 {
 	gi.setmodel(ent, "models/objects/gibs/arm/tris.md2");
-	ent->solid = SOLID_NOT;
+	ent->solid = SOLID_BBOX;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
 	ent->die = gib_die;
@@ -1767,7 +1757,7 @@ void
 SP_misc_gib_leg(edict_t *ent)
 {
 	gi.setmodel(ent, "models/objects/gibs/leg/tris.md2");
-	ent->solid = SOLID_NOT;
+	ent->solid = SOLID_BBOX;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
 	ent->die = gib_die;
@@ -1790,7 +1780,7 @@ void
 SP_misc_gib_head(edict_t *ent)
 {
 	gi.setmodel(ent, "models/objects/gibs/head/tris.md2");
-	ent->solid = SOLID_NOT;
+	ent->solid = SOLID_BBOX;
 	ent->s.effects |= EF_GIB;
 	ent->takedamage = DAMAGE_YES;
 	ent->die = gib_die;
@@ -2136,7 +2126,7 @@ teleporter_touch(edict_t *self, edict_t *other, cplane_t *plane,
 	/* set angles */
 	for (i = 0; i < 3; i++)
 	{
-		other->client->ps.pmove.delta_angles[i] = 
+		other->client->ps.pmove.delta_angles[i] =
 			ANGLE2SHORT(dest->s.angles[i] - other->client->resp.cmd_angles[i]);
 	}
 

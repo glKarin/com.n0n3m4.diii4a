@@ -27,6 +27,13 @@ xcopy /Y/Q %SRC_PATH%\Q3E\build.gradle %DST_PATH%\Q3E\
 del /S/Q %DST_PATH%\Q3E\src\main\assets
 del /S/Q %DST_PATH%\Q3E\src\main\jni\duke4
 rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\duke4
+del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\def
+del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\materials
+del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\textures
+del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\maps
+del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\*.cfg
+del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\astyle.*
+del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\premake4.exe
 
 xcopy /Y/Q %SRC_PATH%\.gitignore %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\build.gradle %DST_PATH%\
@@ -43,8 +50,10 @@ xcopy /Y/Q %SRC_PATH%\local.properties %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\README.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\settings.gradle %DST_PATH%\
+xcopy /Y/Q %SRC_PATH%\cmake_linux_build.sh %DST_PATH%\
+xcopy /Y/Q %SRC_PATH%\cmake_msvc_build.bat %DST_PATH%\
 
-echo done!
+echo Done!
 start "" %DST_PATH%
 
 pause

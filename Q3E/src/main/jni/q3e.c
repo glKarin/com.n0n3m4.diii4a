@@ -30,6 +30,7 @@
 #include <stdarg.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+
 #include "q3e.h"
 
 #include "doom3/neo/sys/android/sys_android.h"
@@ -61,7 +62,7 @@ static void (*on_resume)(void);
 static void (*qexit)(void);
 
 // Android function
-static void pull_input_event(int execCmd);
+static int pull_input_event(int num);
 static void grab_mouse(int grab);
 static FILE * android_tmpfile(void);
 static void copy_to_clipboard(const char *text);
@@ -134,14 +135,20 @@ static void print_interface(void)
 	LOGI("<---------");
 }
 
-static void loadLib(const char* libpath)
+static int loadLib(const char* libpath)
 {
 	LOGI("Load library: %s......\n", libpath);
     libdl = dlopen(libpath, RTLD_NOW | RTLD_GLOBAL);
     if(!libdl)
     {
-        LOGE("Unable to load library: %s\n", dlerror());
-        return;
+        LOGE("Unable to load library '%s': %s\n", libpath, dlerror());
+
+		char text[1024];
+		snprintf(text, sizeof(text), "Unable to load library '%s': %s", libpath, dlerror());
+		copy_to_clipboard(text);
+		show_toast(text);
+
+        return 1;
     }
 	void (*GetIDTechAPI)(void *);
 
@@ -149,7 +156,7 @@ static void loadLib(const char* libpath)
 	Q3E_Interface_t d3interface;
 	GetIDTechAPI(&d3interface);
 
-	qmain = (int (*)(int, char **)) d3interface.main;
+	qmain = d3interface.main;
 	setCallbacks = d3interface.setCallbacks;
 	Q3E_SetInitialContext = d3interface.setInitialContext;
 	setResolution = d3interface.setResolution;
@@ -168,6 +175,8 @@ static void loadLib(const char* libpath)
 	onMotionEvent = d3interface.motionEvent;
 
 	print_interface();
+
+	return 0;
 }
 
 void initAudio(void *buffer, int size)
@@ -316,7 +325,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_writeAudio_array = (*env)->GetMethodID(env,q3eCallbackClass, "writeAudio_array", "([BII)I");
 	
 	//k
-	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(Z)V");
+	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(I)I");
 	android_GrabMouse_method = (*env)->GetMethodID(env, q3eCallbackClass, "GrabMouse", "(Z)V");
 	android_CopyToClipboard_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyToClipboard", "(Ljava/lang/String;)V");
 	android_GetClipboardText_method = (*env)->GetMethodID(env, q3eCallbackClass, "GetClipboardText", "()Ljava/lang/String;");
@@ -433,16 +442,26 @@ static void print_initial_context(const Q3E_InitialContext_t *context)
 	LOGI("OpenGL Version: %x", context->openGL_version);
 	LOGI("Using mouse: %x", context->mouseAvailable);
 	LOGI("Game data directory: %s", context->gameDataDir);
+	LOGI("Refresh rate: %d", context->refreshRate);
     LOGI("Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
 	LOGI("<---------");
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jboolean bContinueNoGLContext)
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jboolean bContinueNoGLContext)
 {
     char **argv;
-    int argc=0;
+    int argc;
 	jboolean iscopy;
+
+	const char *engineLibPath = (*env)->GetStringUTFChars(env, LibPath, &iscopy);
+	LOGI("idTech4a++ engine native library file: %s", engineLibPath);
+	int res = loadLib(engineLibPath);
+	(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
+	if(res != 0)
+	{
+		return JNI_FALSE; // init fail
+	}
 
 	const char *dir = (*env)->GetStringUTFChars(env, GameDir, &iscopy);
     game_data_dir = strdup(dir);
@@ -467,41 +486,35 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 	argv = malloc(sizeof(char*) * 255);
     arg_str = strdup(arg);
 	argc = ParseCommandLine(arg_str, argv);
-	(*env)->ReleaseStringUTFChars(env, Cmdline, arg);    
-	
-	const char *engineLibPath = (*env)->GetStringUTFChars(env, LibPath, &iscopy);
-	LOGI("idTech4a++ engine native library file: %s", engineLibPath);
-	loadLib(engineLibPath);
-	(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
+	(*env)->ReleaseStringUTFChars(env, Cmdline, arg);
 
 	setup_Q3E_callback();
 
 	setResolution(width, height);
 	char *doom3_path = NULL;
-	if(Q3E_SetInitialContext)
-	{
-		const char *native_lib_path = (*env)->GetStringUTFChars(env, nativeLibPath, &iscopy);
-		doom3_path = strdup(native_lib_path);
-		(*env)->ReleaseStringUTFChars(env, nativeLibPath, native_lib_path);
-		Q3E_InitialContext_t context;
-		memset(&context, 0, sizeof(context));
 
-		context.openGL_format = format;
-		context.openGL_msaa = msaa;
-		context.openGL_version = glVersion;
+	const char *native_lib_path = (*env)->GetStringUTFChars(env, nativeLibPath, &iscopy);
+	doom3_path = strdup(native_lib_path);
+	(*env)->ReleaseStringUTFChars(env, nativeLibPath, native_lib_path);
+	Q3E_InitialContext_t context;
+	memset(&context, 0, sizeof(context));
 
-		context.nativeLibraryDir = doom3_path;
-		context.redirectOutputToFile = redirectOutputToFile ? 1 : 0;
-		context.noHandleSignals = noHandleSignals ? 1 : 0;
-		context.multithread = bMultithread ? 1 : 0;
-		context.mouseAvailable = mouseAvailable ? 1 : 0;
-        context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;
-		context.gameDataDir = game_data_dir;
+	context.openGL_format = format;
+	context.openGL_msaa = msaa;
+	context.openGL_version = glVersion;
 
-		print_initial_context(&context);
+	context.nativeLibraryDir = doom3_path;
+	context.redirectOutputToFile = redirectOutputToFile ? 1 : 0;
+	context.noHandleSignals = noHandleSignals ? 1 : 0;
+	context.multithread = bMultithread ? 1 : 0;
+	context.mouseAvailable = mouseAvailable ? 1 : 0;
+	context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;
+	context.gameDataDir = game_data_dir;
+	context.refreshRate = refreshRate;
 
-		Q3E_SetInitialContext(&context);
-	}
+	print_initial_context(&context);
+
+	Q3E_SetInitialContext(&context);
 
 	window = ANativeWindow_fromSurface(env, view);
 	set_gl_context(window);
@@ -512,6 +525,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, js
 
 	free(argv);
     free(doom3_path);
+
+	return JNI_TRUE;
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_drawFrame(JNIEnv *env, jclass c)
@@ -578,11 +593,11 @@ Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
 	set_gl_context(window);
 }
 
-void pull_input_event(int execCmd)
+int pull_input_event(int num)
 {
 	ATTACH_JNI(env)
 
-    (*env)->CallVoidMethod(env, q3eCallbackObj, android_PullEvent_method, (jboolean)execCmd);
+    return (*env)->CallIntMethod(env, q3eCallbackObj, android_PullEvent_method, (jint)num);
 }
 
 void grab_mouse(int grab)

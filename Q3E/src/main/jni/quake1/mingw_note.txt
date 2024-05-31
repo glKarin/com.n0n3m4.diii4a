@@ -1,0 +1,16 @@
+For compiling Darkplaces with MinGW, you need the following files which do not
+come in the standard MinGW installation:
+	- include/ddraw.h
+	- include/dinput.h
+	- include/dsound.h
+They are part of the DirectX SDK but can also be found in the original release
+of Quake 1 source code (ftp://ftp.idsoftware.com/idstuff/source/q1source.zip).
+
+Assuming the MinGW binaries are in your PATH, you compile Darkplaces by typing
+"make release". Note that "make" may be named "mingw32-make", so you may want
+to try "mingw32-make release" if the first command fails to run.
+
+For cross-compiling Win32 binaries on Linux using MinGW, you need to force the
+makefile to use the MinGW compilation parameters, otherwise it will autodetect
+the operating system it runs on and will use the corresponding parameters. You
+can force it by appending "DP_MAKE_TARGET=mingw" at the end of the command line.

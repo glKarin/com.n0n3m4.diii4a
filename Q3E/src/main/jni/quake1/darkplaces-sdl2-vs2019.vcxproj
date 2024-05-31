@@ -1,0 +1,448 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{72D93E63-FDBB-4AA3-B42B-FAADA6D7F5B2}</ProjectGuid>
+    <RootNamespace>darkplacessdl2</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>darkplaces-sdl2-vs2019</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)\</OutDir>
+    <IntDir>$(Configuration)-$(ProjectName)-$(Platform)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)\</OutDir>
+    <IntDir>$(Configuration)-$(ProjectName)-$(Platform)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)\</OutDir>
+    <IntDir>$(Configuration)-$(ProjectName)-$(Platform)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\</OutDir>
+    <IntDir>$(Configuration)-$(ProjectName)-$(Platform)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>CONFIG_MENU;CONFIG_VIDEO_CAPTURE;WIN32;_DEBUG;_WINDOWS;_FILE_OFFSET_BITS=64;__KERNEL_STRICT_NAMES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4706;4127;4100;4055;4054;4244;4305;4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd"4201" %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>CONFIG_MENU;CONFIG_VIDEO_CAPTURE;WIN32;WIN64;_DEBUG;_WINDOWS;_FILE_OFFSET_BITS=64;__KERNEL_STRICT_NAMES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4706;4127;4100;4055;4054;4244;4305;4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd"4201" %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>CONFIG_MENU;CONFIG_VIDEO_CAPTURE;WIN32;NDEBUG;_WINDOWS;_FILE_OFFSET_BITS=64;__KERNEL_STRICT_NAMES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4706;4127;4100;4055;4054;4244;4305;4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd"4201" %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>CONFIG_MENU;CONFIG_VIDEO_CAPTURE;WIN32;WIN64;NDEBUG;_WINDOWS;_FILE_OFFSET_BITS=64;__KERNEL_STRICT_NAMES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4706;4127;4100;4055;4054;4244;4305;4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd"4201" %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="bih.c" />
+    <ClCompile Include="builddate.c" />
+    <ClCompile Include="cap_avi.c" />
+    <ClCompile Include="cap_ogg.c" />
+    <ClCompile Include="cd_shared.c" />
+    <ClCompile Include="cl_cmd.c" />
+    <ClCompile Include="cl_collision.c" />
+    <ClCompile Include="cl_demo.c" />
+    <ClCompile Include="cl_ents.c" />
+    <ClCompile Include="cl_ents4.c" />
+    <ClCompile Include="cl_ents5.c" />
+    <ClCompile Include="cl_ents_nq.c" />
+    <ClCompile Include="cl_ents_qw.c" />
+    <ClCompile Include="cl_input.c" />
+    <ClCompile Include="cl_main.c" />
+    <ClCompile Include="cl_parse.c" />
+    <ClCompile Include="cl_particles.c" />
+    <ClCompile Include="cl_screen.c" />
+    <ClCompile Include="cl_video.c" />
+    <ClCompile Include="cl_video_libavw.c" />
+    <ClCompile Include="clvm_cmds.c" />
+    <ClCompile Include="cmd.c" />
+    <ClCompile Include="collision.c" />
+    <ClCompile Include="com_crc16.c" />
+    <ClCompile Include="com_ents.c" />
+    <ClCompile Include="com_ents4.c" />
+    <ClCompile Include="com_game.c" />
+    <ClCompile Include="com_infostring.c" />
+    <ClCompile Include="com_msg.c" />
+    <ClCompile Include="common.c" />
+    <ClCompile Include="console.c" />
+    <ClCompile Include="convex.c" />
+    <ClCompile Include="crypto.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd"4800" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd"4800" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/wd"4800" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/wd"4800" %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="csprogs.c" />
+    <ClCompile Include="curves.c" />
+    <ClCompile Include="cvar.c" />
+    <ClCompile Include="dpvsimpledecode.c" />
+    <ClCompile Include="filematch.c" />
+    <ClCompile Include="fractalnoise.c" />
+    <ClCompile Include="fs.c" />
+    <ClCompile Include="ft2.c" />
+    <ClCompile Include="gl_backend.c" />
+    <ClCompile Include="gl_draw.c" />
+    <ClCompile Include="gl_rmain.c" />
+    <ClCompile Include="gl_rsurf.c" />
+    <ClCompile Include="gl_textures.c" />
+    <ClCompile Include="hmac.c" />
+    <ClCompile Include="host.c" />
+    <ClCompile Include="image.c" />
+    <ClCompile Include="image_png.c" />
+    <ClCompile Include="jpeg.c" />
+    <ClCompile Include="keys.c" />
+    <ClCompile Include="lhnet.c" />
+    <ClCompile Include="libcurl.c" />
+    <ClCompile Include="mathlib.c" />
+    <ClCompile Include="matrixlib.c" />
+    <ClCompile Include="mdfour.c" />
+    <ClCompile Include="menu.c" />
+    <ClCompile Include="meshqueue.c" />
+    <ClCompile Include="mod_skeletal_animatevertices_generic.c" />
+    <ClCompile Include="mod_skeletal_animatevertices_sse.c" />
+    <ClCompile Include="model_alias.c" />
+    <ClCompile Include="model_brush.c" />
+    <ClCompile Include="model_shared.c" />
+    <ClCompile Include="model_sprite.c" />
+    <ClCompile Include="mvm_cmds.c" />
+    <ClCompile Include="netconn.c" />
+    <ClCompile Include="phys.c" />
+    <ClCompile Include="palette.c" />
+    <ClCompile Include="polygon.c" />
+    <ClCompile Include="portals.c" />
+    <ClCompile Include="protocol.c" />
+    <ClCompile Include="prvm_cmds.c" />
+    <ClCompile Include="prvm_edict.c" />
+    <ClCompile Include="prvm_exec.c" />
+    <ClCompile Include="r_explosion.c" />
+    <ClCompile Include="r_lightning.c" />
+    <ClCompile Include="r_modules.c" />
+    <ClCompile Include="r_shadow.c" />
+    <ClCompile Include="r_stats.c" />
+    <ClCompile Include="r_sky.c" />
+    <ClCompile Include="r_sprites.c" />
+    <ClCompile Include="sbar.c" />
+    <ClCompile Include="snd_main.c" />
+    <ClCompile Include="snd_mem.c" />
+    <ClCompile Include="snd_mix.c" />
+    <ClCompile Include="snd_ogg.c" />
+    <ClCompile Include="snd_sdl.c" />
+    <ClCompile Include="snd_wav.c" />
+    <ClCompile Include="snd_xmp.c" />
+    <ClCompile Include="sv_ccmds.c" />
+    <ClCompile Include="sv_demo.c" />
+    <ClCompile Include="sv_ents.c" />
+    <ClCompile Include="sv_ents4.c" />
+    <ClCompile Include="sv_ents5.c" />
+    <ClCompile Include="sv_ents_nq.c" />
+    <ClCompile Include="sv_ents_csqc.c" />
+    <ClCompile Include="sv_main.c" />
+    <ClCompile Include="sv_move.c" />
+    <ClCompile Include="sv_phys.c" />
+    <ClCompile Include="sv_save.c" />
+    <ClCompile Include="sv_send.c" />
+    <ClCompile Include="sv_user.c" />
+    <ClCompile Include="svbsp.c" />
+    <ClCompile Include="svvm_cmds.c" />
+    <ClCompile Include="sys_sdl.c" />
+    <ClCompile Include="sys_shared.c" />
+    <ClCompile Include="taskqueue.c" />
+    <ClCompile Include="thread_sdl.c" />
+    <ClCompile Include="utf8lib.c" />
+    <ClCompile Include="vid_sdl.c" />
+    <ClCompile Include="vid_shared.c" />
+    <ClCompile Include="view.c" />
+    <ClCompile Include="wad.c" />
+    <ClCompile Include="world.c" />
+    <ClCompile Include="zone.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bih.h" />
+    <ClInclude Include="bspfile.h" />
+    <ClInclude Include="cap.h" />
+    <ClInclude Include="cap_avi.h" />
+    <ClInclude Include="cap_ogg.h" />
+    <ClInclude Include="cdaudio.h" />
+    <ClInclude Include="cl_collision.h" />
+    <ClInclude Include="cl_gecko.h" />
+    <ClInclude Include="cl_parse.h" />
+    <ClInclude Include="cl_particles.h" />
+    <ClInclude Include="cl_screen.h" />
+    <ClInclude Include="cl_video.h" />
+    <ClInclude Include="cl_video_libavw.h" />
+    <ClInclude Include="client.h" />
+    <ClInclude Include="clprogdefs.h" />
+    <ClInclude Include="clvm_cmds.h" />
+    <ClInclude Include="cmd.h" />
+    <ClInclude Include="collision.h" />
+    <ClInclude Include="com_game.h" />
+    <ClInclude Include="com_infostring.h" />
+    <ClInclude Include="com_list.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="console.h" />
+    <ClInclude Include="crypto.h" />
+    <ClInclude Include="csprogs.h" />
+    <ClInclude Include="curves.h" />
+    <ClInclude Include="cvar.h" />
+    <ClInclude Include="darkplaces.h" />
+    <ClInclude Include="dpvsimpledecode.h" />
+    <ClInclude Include="draw.h" />
+    <ClInclude Include="filematch.h" />
+    <ClInclude Include="fs.h" />
+    <ClInclude Include="ft2.h" />
+    <ClInclude Include="ft2_defs.h" />
+    <ClInclude Include="ft2_fontdefs.h" />
+    <ClInclude Include="gl_backend.h" />
+    <ClInclude Include="glquake.h" />
+    <ClInclude Include="hmac.h" />
+    <ClInclude Include="host.h" />
+    <ClInclude Include="image.h" />
+    <ClInclude Include="image_png.h" />
+    <ClInclude Include="input.h" />
+    <ClInclude Include="jpeg.h" />
+    <ClInclude Include="keys.h" />
+    <ClInclude Include="lhfont.h" />
+    <ClInclude Include="lhnet.h" />
+    <ClInclude Include="libcurl.h" />
+    <ClInclude Include="mathlib.h" />
+    <ClInclude Include="matrixlib.h" />
+    <ClInclude Include="mdfour.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="meshqueue.h" />
+    <ClInclude Include="mod_skeletal_animatevertices_generic.h" />
+    <ClInclude Include="mod_skeletal_animatevertices_sse.h" />
+    <ClInclude Include="model_alias.h" />
+    <ClInclude Include="model_brush.h" />
+    <ClInclude Include="model_dpmodel.h" />
+    <ClInclude Include="model_iqm.h" />
+    <ClInclude Include="model_psk.h" />
+    <ClInclude Include="model_q1bsp.h" />
+    <ClInclude Include="model_q2bsp.h" />
+    <ClInclude Include="model_q3bsp.h" />
+    <ClInclude Include="model_vbsp.h" />
+    <ClInclude Include="model_shared.h" />
+    <ClInclude Include="model_sprite.h" />
+    <ClInclude Include="model_zymotic.h" />
+    <ClInclude Include="modelgen.h" />
+    <ClInclude Include="mprogdefs.h" />
+    <ClInclude Include="netconn.h" />
+    <ClInclude Include="phys.h" />
+    <ClInclude Include="palette.h" />
+    <ClInclude Include="pmove.h" />
+    <ClInclude Include="polygon.h" />
+    <ClInclude Include="portals.h" />
+    <ClInclude Include="prvm_offsets.h" />
+    <ClInclude Include="pr_comp.h" />
+    <ClInclude Include="progdefs.h" />
+    <ClInclude Include="progs.h" />
+    <ClInclude Include="progsvm.h" />
+    <ClInclude Include="protocol.h" />
+    <ClInclude Include="prvm_cmds.h" />
+    <ClInclude Include="prvm_execprogram.h" />
+    <ClInclude Include="qdefs.h" />
+    <ClInclude Include="qstats.h" />
+    <ClInclude Include="qtypes.h" />
+    <ClInclude Include="quakedef.h" />
+    <ClInclude Include="r_lerpanim.h" />
+    <ClInclude Include="r_modules.h" />
+    <ClInclude Include="r_qshader.h" />
+    <ClInclude Include="r_shadow.h" />
+    <ClInclude Include="r_stats.h" />
+    <ClInclude Include="r_textures.h" />
+    <ClInclude Include="render.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="sbar.h" />
+    <ClInclude Include="screen.h" />
+    <ClInclude Include="SDL.h" />
+    <ClInclude Include="server.h" />
+    <ClInclude Include="shader_glsl.h" />
+    <ClInclude Include="snd_main.h" />
+    <ClInclude Include="snd_ogg.h" />
+    <ClInclude Include="snd_wav.h" />
+    <ClInclude Include="snd_xmp.h" />
+    <ClInclude Include="sound.h" />
+    <ClInclude Include="spritegn.h" />
+    <ClInclude Include="sv_demo.h" />
+    <ClInclude Include="svbsp.h" />
+    <ClInclude Include="sys.h" />
+    <ClInclude Include="taskqueue.h" />
+    <ClInclude Include="thread.h" />
+    <ClInclude Include="timing.h" />
+    <ClInclude Include="utf8lib.h" />
+    <ClInclude Include="vid.h" />
+    <ClInclude Include="view.h" />
+    <ClInclude Include="convex.h" />
+    <ClInclude Include="wad.h" />
+    <ClInclude Include="world.h" />
+    <ClInclude Include="zone.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="darkplaces.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\sdl2.nuget.redist.2.30.2\build\native\sdl2.nuget.redist.targets" Condition="Exists('packages\sdl2.nuget.redist.2.30.2\build\native\sdl2.nuget.redist.targets')" />
+    <Import Project="packages\sdl2.nuget.2.30.2\build\native\sdl2.nuget.targets" Condition="Exists('packages\sdl2.nuget.2.30.2\build\native\sdl2.nuget.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\sdl2.nuget.redist.2.30.2\build\native\sdl2.nuget.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\sdl2.nuget.redist.2.30.2\build\native\sdl2.nuget.redist.targets'))" />
+    <Error Condition="!Exists('packages\sdl2.nuget.2.30.2\build\native\sdl2.nuget.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\sdl2.nuget.2.30.2\build\native\sdl2.nuget.targets'))" />
+  </Target>
+</Project>

@@ -35,6 +35,9 @@ option(ANDROID "Android build" ON)
 set(q3e_src
         q3e.c
         )
+
+add_subdirectory (deplibs/oboe) # 1.8.1
+
 set(q3e_lib
         log
         android
@@ -65,12 +68,18 @@ add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
 
 add_subdirectory (deplibs) # common depend libraries
 
-add_subdirectory (quake2) # Quake 2
-
-add_subdirectory (quake3) # Quake 3 Arena | Team Arena
+add_subdirectory (common)
 
 add_subdirectory (rtcw) # RTCW
 
+add_subdirectory (quake3) # Quake 3 Arena | Team Arena
+
+add_subdirectory (quake2) # Quake 2
+
+add_subdirectory (quake1) # Quake 1
+
 add_subdirectory (tdm) # The Dark Mod
+
+add_subdirectory (doom3bfg/neo) # RBDOOM3-BFG
 
 #add_subdirectory (duke4) # DNF

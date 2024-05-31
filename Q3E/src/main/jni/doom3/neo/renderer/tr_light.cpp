@@ -112,7 +112,12 @@ void R_CreateVertexProgramShadowCache(srfTriangles_t *tri)
 		return;
 	}
 
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	const size_t alloc_size = tri->numVerts * 2 * sizeof(shadowCache_t);
+	_DROID_ALLOC16_DEF(shadowCache_t, alloc_size, temp, 0)
+#else
 	shadowCache_t *temp = (shadowCache_t *)_alloca16(tri->numVerts * 2 * sizeof(shadowCache_t));
+#endif
 
 #if 1
 
@@ -138,6 +143,9 @@ void R_CreateVertexProgramShadowCache(srfTriangles_t *tri)
 #endif
 
 	vertexCache.Alloc(temp, tri->numVerts * 2 * sizeof(shadowCache_t), &tri->shadowCache);
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	_DROID_FREE(temp, 0)
+#endif
 }
 
 /*

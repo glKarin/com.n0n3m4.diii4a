@@ -32,12 +32,6 @@ extern glconfig_t glConfig;
 
 #ifdef __ANDROID__ //karin: sys::local expose on Android
 
-#ifndef _ANDROID_PACKAGE_NAME
-//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
-#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
-#endif
-#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
-
 extern FILE *f_stdout;
 extern int gl_format;
 extern int gl_msaa;
@@ -57,7 +51,7 @@ void Android_PollInput(void);
 extern void (*attach_thread)(void);
 extern void Q3E_CheckNativeWindowChanged(void);
 extern void Q3E_CloseRedirectOutput(void);
-extern void Q3E_PrintInitialContext(int argc, const char **argv);
+extern void Q3E_PrintInitialContext(int argc, char **argv);
 extern void Q3E_RedirectOutput(void);
 extern void Q3E_Start(void);
 extern void Q3E_End(void);

@@ -1,0 +1,73 @@
+language: cpp
+matrix:
+  include:
+  - os: linux
+    env: PROJECT=xonotic OS="linux32"
+    compiler: gcc
+    sudo: false
+    addons:
+      apt:
+        packages:
+          - libxpm-dev:i386
+          - libsdl1.2-dev:i386
+          - libxxf86vm-dev:i386
+          - gcc-multilib
+          - g++-multilib
+          # Workaround packages to install to fix dependency hell.
+          - libcaca-dev:i386
+          - libgl1-mesa-dev:i386
+          - libglib2.0-dev:i386
+          - libglu1-mesa-dev:i386
+          - libpng-dev:i386
+          - libpulse-dev:i386
+          - libslang2-dev:i386
+          - libxext-dev:i386
+          - libxi-dev:i386
+          - libxrandr-dev:i386
+  - os: linux
+    env: PROJECT=xonotic OS="linux64"
+    compiler: gcc
+    sudo: false
+    addons:
+      apt:
+        packages:
+          - libxpm-dev
+          - libsdl1.2-dev
+          - libxi-dev
+          - libxrandr-dev
+          - libxxf86vm-dev
+  - os: linux
+    env: PROJECT=xonotic OS="win32"
+    compiler: gcc
+    sudo: false
+    addons:
+      apt:
+        packages:
+          - gcc-mingw-w64-i686
+          - binutils-mingw-w64-i686
+  - os: linux
+    env: PROJECT=xonotic OS="win64"
+    compiler: gcc
+    sudo: false
+    addons:
+      apt:
+        packages:
+          - gcc-mingw-w64-x86-64
+          - binutils-mingw-w64-x86-64
+  - os: osx
+    env: PROJECT=xonotic OS="osx"
+    compiler: gcc
+before_install:
+- "./.travis-before_install-${PROJECT}.sh $OS"
+install:
+- true
+before_script:
+- true
+script:
+- "./.travis-script-${PROJECT}.sh $OS"
+after_success:
+- true
+after_failure:
+- true
+after_script:
+- true

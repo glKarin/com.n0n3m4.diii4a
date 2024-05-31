@@ -15,6 +15,11 @@ qboolean CanDamage (edict_t *targ, edict_t *inflictor)
 	vec3_t	dest;
 	trace_t	trace;
 
+	if (!targ || !inflictor)
+	{
+		return false;
+	}
+
 	// bmodels need special checking because their origin is 0,0,0
 	if (targ->movetype == MOVETYPE_PUSH)
 	{
@@ -72,8 +77,10 @@ Killed
 */
 void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	if (targ->health < -999)
-		targ->health = -999;
+	if (!targ || !inflictor || !attacker)
+	{
+		return;
+	}
 
 	targ->enemy = attacker;
 
@@ -158,6 +165,11 @@ int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int 
 	int			pa_te_type;
 	int			power;
 	int			power_used;
+
+	if (!ent)
+	{
+		return 0;
+	}
 
 	if (!damage)
 		return 0;
@@ -264,6 +276,11 @@ int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int te_sp
 	int			index;
 	gitem_t		*armor;
 
+	if (!ent)
+	{
+		return 0;
+	}
+
 	if (!damage)
 		return 0;
 
@@ -305,6 +322,11 @@ int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int te_sp
 
 void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 {
+	if (!targ || !attacker)
+	{
+		return;
+	}
+
 	if (!(attacker->client) && !(attacker->svflags & SVF_MONSTER) &&
 		(strcmp (attacker->classname, "monster_autocannon") != 0))
 		return;
@@ -376,6 +398,21 @@ qboolean CheckTeamDamage (edict_t *targ, edict_t *attacker)
 	return false;
 }
 
+static void apply_knockback(edict_t *targ, vec3_t dir, float knockback, float scale)
+{
+	vec3_t	kvel;
+	float	mass;
+
+	if (!knockback)
+		return;
+
+	mass = (targ->mass < 50) ? 50.0f : (float)targ->mass;
+
+	VectorNormalize2 (dir, kvel);
+	VectorScale (kvel, scale * (knockback / mass), kvel);
+	VectorAdd (targ->velocity, kvel, targ->velocity);
+}
+
 void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod)
 {
 	gclient_t	*client;
@@ -384,6 +421,11 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	int			asave;
 	int			psave;
 	int			te_sparks;
+
+	if (!targ || !inflictor || !attacker)
+	{
+		return;
+	}
 
 	if (!targ->takedamage)
 		return;
@@ -404,7 +446,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	meansOfDeath = mod;
 
 	// easy mode takes half damage
-	if (skill->value == 0 && deathmatch->value == 0 && targ->client)
+	if (skill->value == SKILL_EASY && deathmatch->value == 0 && targ->client)
 	{
 		damage *= 0.5;
 		if (!damage)
@@ -425,8 +467,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		te_sparks = TE_BULLET_SPARKS;
 	else
 		te_sparks = TE_SPARKS;
-
-	VectorNormalize(dir);
 
 	// bonus damage for suprising a monster
 	if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
@@ -482,30 +522,20 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	asave += save;
 
 	// figure momentum add
-	if (!(dflags & DAMAGE_NO_KNOCKBACK))
+	if (knockback && !(dflags & DAMAGE_NO_KNOCKBACK) &&
+		(targ->movetype != MOVETYPE_NONE) &&
+		(targ->movetype != MOVETYPE_BOUNCE) &&
+		(targ->movetype != MOVETYPE_BOUNCEFLY) &&
+		(targ->movetype != MOVETYPE_PUSH) &&
+		(targ->movetype != MOVETYPE_STOP))
 	{
-		if ((knockback) && (targ->movetype != MOVETYPE_NONE) && (targ->movetype != MOVETYPE_BOUNCE) && (targ->movetype != MOVETYPE_BOUNCEFLY) && (targ->movetype != MOVETYPE_PUSH) && (targ->movetype != MOVETYPE_STOP))
+		if ((dflags & DAMAGE_ARMORMOSTLY) && damage > take)
 		{
-			vec3_t	kvel;
-			float	mass;
-
-			if((dflags & DAMAGE_ARMORMOSTLY) && damage > take)
-			{
-				knockback = (int)((float)knockback * (((float)(damage - take) / (float)damage) + 1.0));
-			}
-
-			if (targ->mass < 50)
-				mass = 50;
-			else
-				mass = targ->mass;
-
-			if (targ->client  && attacker == targ)
-				VectorScale (dir, 1600.0 * (float)knockback / mass, kvel);	// the rocket jump hack...
-			else
-				VectorScale (dir, 500.0 * (float)knockback / mass, kvel);
-
-			VectorAdd (targ->velocity, kvel, targ->velocity);
+			knockback = (int)((float)knockback * (((float)(damage - take) / (float)damage) + 1.0));
 		}
+
+		apply_knockback (targ, dir, knockback,
+			((client && attacker == targ) ? 1600.0f : 500.0f));
 	}
 
 	// team damage avoidance
@@ -541,7 +571,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		{
 			targ->pain (targ, attacker, knockback, take);
 			// nightmare mode monsters don't go into pain frames often
-			if (skill->value == 3)
+			if (skill->value == SKILL_HARDPLUS)
 				targ->pain_debounce_time = level.time + 5;
 		}
 	}
@@ -582,6 +612,12 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 	vec3_t	v;
 	vec3_t	dir;
 
+
+	if (!inflictor || !attacker || !ignore)
+	{
+		return;
+	}
+
 	while ((ent = findradius(ent, inflictor->s.origin, radius)) != NULL)
 	{
 		if (ent == ignore)
@@ -618,6 +654,12 @@ void T_RadiusDamagePosition (vec3_t origin, edict_t *inflictor, edict_t *attacke
 	edict_t	*ent = NULL;
 	vec3_t	v;
 	vec3_t	dir;
+
+
+	if (!inflictor || !ignore)
+	{
+		return;
+	}
 
 	while ((ent = findradius(ent, origin, radius)) != NULL)
 	{

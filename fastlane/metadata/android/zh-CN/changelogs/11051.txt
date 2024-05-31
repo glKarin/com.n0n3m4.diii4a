@@ -1,0 +1,6 @@
+* 新增`毁灭战士 3 BFG`(RBDOOM-3-BFG ver1.4.0)支持, 游戏数据文件夹名为`doom3bfg/base`.
+* 新增`雷神之锤 I`(Darkplaces)支持, 游戏数据文件夹名为`darkplaces/id1`.
+* 修复The Dark Mod(v2.12)在Mali GPU的着色器错误.
+* 更新雷神之锤2(Yamagi Quake II)版本.
+* 毁灭战士3/雷神之锤4/掠食(2006)支持在多线程下启用调试渲染工具(除r_showSurfaceInfo).
+* 毁灭战士3/雷神之锤4/掠食(2006)支持使用cvar r_noLight 0和2, 允许在游戏中切换是否禁用光照渲染.

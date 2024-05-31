@@ -108,11 +108,6 @@ Killed(edict_t *targ, edict_t *inflictor, edict_t *attacker,
 		return;
 	}
 
-	if (targ->health < -999)
-	{
-		targ->health = -999;
-	}
-
 	targ->enemy = attacker;
 
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
@@ -127,7 +122,7 @@ Killed(edict_t *targ, edict_t *inflictor, edict_t *attacker,
 			}
 
 			/* medics won't heal monsters that they kill themselves */
-			if (strcmp(attacker->classname, "monster_medic") == 0)
+			if (attacker->classname && strcmp(attacker->classname, "monster_medic") == 0)
 			{
 				targ->owner = attacker;
 			}
@@ -470,7 +465,7 @@ M_ReactToDamage(edict_t *targ, edict_t *attacker)
 		}
 	}
 	/* otherwise get mad at whoever they are mad at (help our buddy) unless it is us! */
-	else if (attacker->enemy && (attacker->enemy != targ))
+	else if (attacker->enemy)
 	{
 		if (targ->enemy && targ->enemy->client)
 		{
@@ -484,6 +479,24 @@ M_ReactToDamage(edict_t *targ, edict_t *attacker)
 			FoundTarget(targ);
 		}
 	}
+}
+
+static void
+apply_knockback(edict_t *targ, vec3_t dir, float knockback, float scale)
+{
+	vec3_t kvel;
+	float mass;
+
+	if (!knockback)
+	{
+		return;
+	}
+
+	mass = (targ->mass < 50) ? 50.0f : (float)targ->mass;
+
+	VectorNormalize2(dir, kvel);
+	VectorScale(kvel, scale * (knockback / mass), kvel);
+	VectorAdd(targ->velocity, kvel, targ->velocity);
 }
 
 void
@@ -531,7 +544,7 @@ T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	meansOfDeath = mod;
 
 	/* easy mode takes half damage */
-	if ((skill->value == 0) && (deathmatch->value == 0) && targ->client)
+	if ((skill->value == SKILL_EASY) && (deathmatch->value == 0) && targ->client)
 	{
 		damage *= 0.5;
 
@@ -552,8 +565,6 @@ T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		te_sparks = TE_SPARKS;
 	}
 
-	VectorNormalize(dir);
-
 	/* bonus damage for suprising a monster */
 	if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) &&
 		(attacker->client) && (!targ->enemy) && (targ->health > 0))
@@ -567,36 +578,14 @@ T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	}
 
 	/* figure momentum add */
-	if (!(dflags & DAMAGE_NO_KNOCKBACK))
+	if (!(dflags & DAMAGE_NO_KNOCKBACK) &&
+		(targ->movetype != MOVETYPE_NONE) &&
+		(targ->movetype != MOVETYPE_BOUNCE) &&
+		(targ->movetype != MOVETYPE_PUSH) &&
+		(targ->movetype != MOVETYPE_STOP))
 	{
-		if ((knockback) && (targ->movetype != MOVETYPE_NONE) &&
-			(targ->movetype != MOVETYPE_BOUNCE) &&
-			(targ->movetype != MOVETYPE_PUSH) &&
-			(targ->movetype != MOVETYPE_STOP))
-		{
-			vec3_t kvel;
-			float mass;
-
-			if (targ->mass < 50)
-			{
-				mass = 50;
-			}
-			else
-			{
-				mass = targ->mass;
-			}
-
-			if (targ->client && (attacker == targ))
-			{
-				VectorScale(dir, 1600.0 * (float)knockback / mass, kvel); /* the rocket jump hack... */
-			}
-			else
-			{
-				VectorScale(dir, 500.0 * (float)knockback / mass, kvel);
-			}
-
-			VectorAdd(targ->velocity, kvel, targ->velocity);
-		}
+		apply_knockback (targ, dir, knockback,
+			((client && attacker == targ) ? 1600.0f : 500.0f));
 	}
 
 	take = damage;
@@ -633,12 +622,6 @@ T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 
 	/* treat cheat/powerup savings the same as armor */
 	asave += save;
-
-	/* team damage avoidance */
-	if (!(dflags & DAMAGE_NO_PROTECTION) && false)
-	{
-		return;
-	}
 
 	/* do the damage */
 	if (take)
@@ -677,12 +660,12 @@ T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	{
 		M_ReactToDamage(targ, attacker);
 
-		if (!(targ->monsterinfo.aiflags & AI_DUCKED) && (take))
+		if (!(targ->monsterinfo.aiflags & (AI_DUCKED|AI_IGNORE_PAIN)) && (take))
 		{
 			targ->pain(targ, attacker, knockback, take);
 
 			/* nightmare mode monsters don't go into pain frames often */
-			if (skill->value == 3)
+			if (skill->value == SKILL_HARDPLUS)
 			{
 				targ->pain_debounce_time = level.time + 5;
 			}

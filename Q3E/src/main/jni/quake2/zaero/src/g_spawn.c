@@ -117,6 +117,7 @@ void SP_monster_mutant (edict_t *self);
 void SP_monster_supertank (edict_t *self);
 void SP_monster_boss2 (edict_t *self);
 void SP_monster_jorg (edict_t *self);
+void SP_monster_makron (edict_t *self);
 void SP_monster_boss3_stand (edict_t *self);
 
 void SP_monster_commander_body (edict_t *self);
@@ -259,6 +260,7 @@ spawn_t	spawns[] = {
 	{"monster_supertank", SP_monster_supertank},
 	{"monster_boss2", SP_monster_boss2},
 	{"monster_boss3_stand", SP_monster_boss3_stand},
+	{"monster_makron", SP_monster_makron},
 	{"monster_jorg", SP_monster_jorg},
 
 	{"monster_commander_body", SP_monster_commander_body},
@@ -279,7 +281,7 @@ spawn_t	spawns[] = {
 	{"monster_handler", SP_monster_handler},
 	{"misc_commdish", SP_misc_commdish},
 
-	// mirror level's 
+	// mirror level's
 	{"load_mirrorlevel", SP_load_mirrorlevel},
 
 	{"misc_crate", SP_misc_crate},
@@ -305,6 +307,11 @@ void ED_CallSpawn (edict_t *ent)
 	spawn_t	*s;
 	gitem_t	*item;
 	int		i;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	if (!ent->classname)
 	{
@@ -345,7 +352,12 @@ char *ED_NewString (const char *string)
 {
 	char	*newb, *new_p;
 	int		i,l;
-	
+
+	if (!string)
+	{
+		return NULL;
+	}
+
 	l = strlen(string) + 1;
 
 	newb = gi.TagMalloc (l, TAG_LEVEL);
@@ -354,7 +366,7 @@ char *ED_NewString (const char *string)
 
 	for (i=0 ; i< l ; i++)
 	{
-		if (string[i] == '\\' && i < l-1)
+		if ((i < l-1) && (string[i] == '\\'))
 		{
 			i++;
 			if (string[i] == 'n')
@@ -365,7 +377,7 @@ char *ED_NewString (const char *string)
 		else
 			*new_p++ = string[i];
 	}
-	
+
 	return newb;
 }
 
@@ -384,9 +396,14 @@ void ED_ParseField (const char *key, const char *value, edict_t *ent)
 	float	v;
 	vec3_t	vec;
 
+	if (!ent || !value || !key)
+	{
+		return;
+	}
+
 	for (f=fields ; f->name ; f++)
 	{
-		if (!Q_stricmp(f->name, key))
+		if (!(f->flags & FFL_NOSPAWN) && !Q_stricmp(f->name, key))
 		{	// found it
 			if (f->flags & FFL_SPAWNTEMP)
 				b = (byte *)&st;
@@ -441,12 +458,17 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 	char		keyname[256];
 	const char	*com_token;
 
+	if (!ent)
+	{
+		return NULL;
+	}
+
 	init = false;
 	memset (&st, 0, sizeof(st));
 
 	// go through all the dictionary pairs
 	while (1)
-	{	
+	{
 		// parse key
 		com_token = COM_Parse (&data);
 		if (com_token[0] == '}')
@@ -455,8 +477,8 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 			gi.error ("ED_ParseEntity: EOF without closing brace");
 
 		strncpy (keyname, com_token, sizeof(keyname)-1);
-		
-		// parse value	
+
+		// parse value
 		com_token = COM_Parse (&data);
 		if (!data)
 			gi.error ("ED_ParseEntity: EOF without closing brace");
@@ -464,7 +486,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		if (com_token[0] == '}')
 			gi.error ("ED_ParseEntity: closing brace without data");
 
-		init = true;	
+		init = true;
 
 		// keynames with a leading underscore are used for utility comments,
 		// and are immediately discarded by quake
@@ -530,6 +552,8 @@ void G_FindTeams (void)
 		}
 	}
 
+	// FIXME: DG: G_FixTeams(); like rogue?
+
 	gi.dprintf ("%i teams with %i entities\n", c, c2);
 }
 
@@ -550,7 +574,6 @@ void SpawnEntities (const char *mapname, char *entities, const char *spawnpoint)
 	const char	*com_token;
 	int			i;
 	float		skill_level;
-	int oldmaxent;
 
 	skill_level = floor (skill->value);
 	if (skill_level < 0)
@@ -580,7 +603,7 @@ void SpawnEntities (const char *mapname, char *entities, const char *spawnpoint)
 	// parse ents
 	while (1)
 	{
-		// parse the opening brace	
+		// parse the opening brace
 		com_token = COM_Parse (&entities);
 		if (!entities)
 			break;
@@ -605,21 +628,47 @@ void SpawnEntities (const char *mapname, char *entities, const char *spawnpoint)
 			{
 				if ( (ent->spawnflags & SPAWNFLAG_NOT_DEATHMATCH) || (ent->spawnflags2 & SPAWNFLAG2_NOT_SINGLE) )
 				{
-					G_FreeEdict (ent);	
+					G_FreeEdict (ent);
 					inhibit++;
 					continue;
 				}
 			}
+#if 0 // FIXME: DG: coop stuff from rogue
+			else if (coop->value)
+			{
+				if (ent->spawnflags & SPAWNFLAG_NOT_COOP)
+				{
+					G_FreeEdict(ent);
+					inhibit++;
+					continue;
+				}
+
+				/* stuff marked !easy & !med & !hard are coop only, all levels */
+				if (!((ent->spawnflags & SPAWNFLAG_NOT_EASY) &&
+					  (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM) &&
+					  (ent->spawnflags & SPAWNFLAG_NOT_HARD)))
+				{
+					if (((skill->value == SKILL_EASY) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
+						((skill->value == SKILL_MEDIUM) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
+						(((skill->value == SKILL_HARD) || (skill->value == SKILL_HARDPLUS)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD)))
+					{
+						G_FreeEdict(ent);
+						inhibit++;
+						continue;
+					}
+				}
+			}
+#endif // 0
 			else
 			{
 				if (((!coop->value) && (ent->spawnflags2 & SPAWNFLAG2_NOT_SINGLE)) ||
 						((coop->value) && (ent->spawnflags2 & SPAWNFLAG2_NOT_COOP)) ||
-					((skill->value == 0) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
-					((skill->value == 1) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
-					(((skill->value == 2) || (skill->value == 3)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD))
+					((skill->value == SKILL_EASY) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
+					((skill->value == SKILL_MEDIUM) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
+					(((skill->value == SKILL_HARD) || (skill->value == SKILL_HARDPLUS)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD))
 					)
 					{
-						G_FreeEdict (ent);	
+						G_FreeEdict (ent);
 						inhibit++;
 						continue;
 					}
@@ -629,9 +678,7 @@ void SpawnEntities (const char *mapname, char *entities, const char *spawnpoint)
 		}
 
 		ED_CallSpawn (ent);
-	}	
-
-	oldmaxent = globals.num_edicts;
+	}
 
 	gi.dprintf("%i entities created\n", globals.num_edicts);
 	gi.dprintf ("%i entities inhibited\n", inhibit);
@@ -646,7 +693,7 @@ void SpawnEntities (const char *mapname, char *entities, const char *spawnpoint)
 
 //===================================================================
 
-char *single_statusbar = 
+char *single_statusbar =
 "yb	-24 "
 
 // health
@@ -697,7 +744,7 @@ char *single_statusbar =
 "	pic	9 "
 "endif "
 
-//  help / weapon icon 
+//  help / weapon icon
 "if 11 "
 "	xv	148 "
 "	pic	11 "
@@ -766,7 +813,7 @@ char *dm_statusbar =
 "	pic	9 "
 "endif "
 
-//  help / weapon icon 
+//  help / weapon icon
 "if 11 "
 "	xv	148 "
 "	pic	11 "
@@ -802,6 +849,11 @@ Only used for the world.
 */
 void SP_worldspawn (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;
 	ent->inuse = true;			// since the world doesn't use G_Spawn()
@@ -824,10 +876,10 @@ void SP_worldspawn (edict_t *ent)
 	if (ent->message && ent->message[0])
 	{
 		gi.configstring (CS_NAME, ent->message);
-		strncpy (level.level_name, ent->message, sizeof(level.level_name));
+		Q_strlcpy (level.level_name, ent->message, sizeof(level.level_name));
 	}
 	else
-		strncpy (level.level_name, level.mapname, sizeof(level.level_name));
+		Q_strlcpy (level.level_name, level.mapname, sizeof(level.level_name));
 
 	if (st.sky && st.sky[0])
 		gi.configstring (CS_SKY, st.sky);
@@ -884,9 +936,9 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("*death3.wav");
 	gi.soundindex ("*death4.wav");
 	gi.soundindex ("*fall1.wav");
-	gi.soundindex ("*fall2.wav");	
+	gi.soundindex ("*fall2.wav");
 	gi.soundindex ("*gurp1.wav");		// drowning damage
-	gi.soundindex ("*gurp2.wav");	
+	gi.soundindex ("*gurp2.wav");
 	gi.soundindex ("*jump1.wav");		// player jump
 	gi.soundindex ("*pain25_1.wav");
 	gi.soundindex ("*pain25_2.wav");
@@ -906,7 +958,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("player/watr_out.wav");	// feet leaving water
 
 	gi.soundindex ("player/watr_un.wav");	// head going underwater
-	
+
 	gi.soundindex ("player/u_breath1.wav");
 	gi.soundindex ("player/u_breath2.wav");
 
@@ -935,40 +987,40 @@ void SP_worldspawn (edict_t *ent)
 
 	// 0 normal
 	gi.configstring(CS_LIGHTS+0, "m");
-	
+
 	// 1 FLICKER (first variety)
 	gi.configstring(CS_LIGHTS+1, "mmnmmommommnonmmonqnmmo");
-	
+
 	// 2 SLOW STRONG PULSE
 	gi.configstring(CS_LIGHTS+2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
-	
+
 	// 3 CANDLE (first variety)
 	gi.configstring(CS_LIGHTS+3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
-	
+
 	// 4 FAST STROBE
 	gi.configstring(CS_LIGHTS+4, "mamamamamama");
-	
+
 	// 5 GENTLE PULSE 1
 	gi.configstring(CS_LIGHTS+5,"jklmnopqrstuvwxyzyxwvutsrqponmlkj");
-	
+
 	// 6 FLICKER (second variety)
 	gi.configstring(CS_LIGHTS+6, "nmonqnmomnmomomno");
-	
+
 	// 7 CANDLE (second variety)
 	gi.configstring(CS_LIGHTS+7, "mmmaaaabcdefgmmmmaaaammmaamm");
-	
+
 	// 8 CANDLE (third variety)
 	gi.configstring(CS_LIGHTS+8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
-	
+
 	// 9 SLOW STROBE (fourth variety)
 	gi.configstring(CS_LIGHTS+9, "aaaaaaaazzzzzzzz");
-	
+
 	// 10 FLUORESCENT FLICKER
 	gi.configstring(CS_LIGHTS+10, "mmamammmmammamamaaamammma");
 
 	// 11 SLOW PULSE NOT FADE TO BLACK
 	gi.configstring(CS_LIGHTS+11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-	
+
 	// styles 32-62 are assigned by the light program for switchable lights
 
 	// 63 testing

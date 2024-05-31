@@ -1,6 +1,10 @@
 apply plugin: 'com.android.library'
 
-String[] ABIFILTERS = [ "armeabi-v7a", "arm64-v8a" /*, "armeabi", "x86", "x86_64"*/ ]
+String[] ABIFILTERS = [
+        "armeabi-v7a",
+        "arm64-v8a"
+        /*, "armeabi", "x86", "x86_64"*/
+]
 
 android {
     compileSdk project.properties.compileSdkVersion.toInteger()
@@ -23,8 +27,8 @@ android {
                 cppFlags "-fexceptions", "-frtti"
             }
         }
-        versionCode 131130405
-        versionName '1.3.1.1304.5' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
+        versionCode 131130406
+        versionName '1.3.1.1304.6' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
     }
 
     buildTypes {
@@ -66,4 +70,8 @@ dependencies {
     // F-Droid free version comment 2 lines
 //    implementation files('libs/ouya-sdk.jar')
 //    implementation files('libs/RootTools-2.4.jar')
+    // Using LTS version for lower min SDK version
+    implementation('com.arthenica:mobile-ffmpeg-min:4.4.LTS')
+    //implementation 'com.arthenica:mobile-ffmpeg-full:4.4.LTS'
+    //implementation 'com.arthenica:mobile-ffmpeg-video:4.4.LTS'
 }

@@ -1,0 +1,1388 @@
+DarkPlaces engine readme : updated 20070311:
+
+About the DarkPlaces glquake engine:
+DarkPlaces engine was started because I was unsatisfied with the other engines available soon after the quake source release (which did little more than add some flashy effects), and craved modding features for my DarkPlaces mod, and wanted some real enhancements to the online gaming experience as well.
+
+DarkPlaces engine is the result, I hope everyone likes it.
+
+I am not very good at writing documentation, so this readme is organized as a feature list, with information on each feature, I hope it is still adequate documentation.
+
+If you have any suggestions for features to document in detail in the readme or any other questions/comments/bugreports/suggestions/etc, send me an email with the address darkplacesengine gmail com (add @ and . characters as appropriate)
+
+
+
+
+Input Tips:
+If mouse movement is jerky but framerate is high, try typing "gl_finish 1" (without quotes) into the console (makes cpu wait for gpu before ending frame, which gives lousy input drivers a chance to catch up).
+
+
+
+Graphics Tips:
+Visit the Color Control submenu of Options, it's near the top, fiddle with gamma (or grey level if using the color levels mode) until the grey box surrounding the white/black dither pattern matches up with the grey you see while looking at the dither from a distance, this will calibrate quake to look approximately as id Software intended, and ensure everyone sees it the same. Note: Different resolutions may be different intensities depending on monitor. Note2: ATI Radeon Catalyst 3.10 drivers seem to have a weird gamma limiting 'feature' which rejects gamma settings it doesn't like, feel free to complain to ATI about this if it gets in your way (it probably will).
+
+Visit the Effects Options submenu of Options, and check out the options.
+
+
+
+Networking tips:
+Visit the Player Setup submenu of the Multiplayer menu to configure your network speed (as well as the usual settings from quake like name and colors).
+
+To host a server behind a router/firewall, simply set up a port forward on the UDP port you are running the server on (default is 26000), to forward incoming UDP packets on that port to the server, then people can connect.
+
+To make your server show up on the server browser (in the Join Game menu), either set sv_public 1 in the console, or use the multiplayer new game menu and check the Public server checkbox.
+
+
+
+Supported games:
+Quake : -quake, this is active by default, gamedirs: id1
+Quake: Scourge of Armagon : -hipnotic or hipnotic in executable name or path, gamedirs: hipnotic, id1
+Quake: Dissolution of Eternity : -rogue or rogue in executable name or path, gamedirs: rogue, id1
+Nexuiz : -nexuiz or nexuiz in executable name or path, gamedirs: data
+Nehahra : -nehahra or nehahra in executable name or path, gamedirs: nehahra, id1
+GoodVsBad2 : -goodvsbad2 or gvb2 in executable name or path, gamedirs: rts
+BattleMech : -battlemech or battlemech in executable name or path, gamedirs: base
+PrydonGate : -prydon or prydon in executable name or path, gamedirs: prydon
+These games are considered officially supported, if any problems are seen, please make sure you are running the latest version of the game and engine, if you are, please report the problem.
+
+
+
+Graphics features:
+Redesigned effects including smoke, blood, bubbles and explosions.
+Better looking dynamic lights.
+External texture support (see Replacement Content section below)
+Realtime bumpmapped lighting/shadowing support (r_shadow_realtime_world cvar) with many options.  (note: very slow if you do not have .rtlights files installed, be sure to get some from dpmod or search on the web for rtlights files)
+.rtlights file support (improves performance/appearance of realtime lighting)
+.rtlights file editing (see r_editlights_help in game)
+Alpha blended sprites (instead of glquake's masked sprites).
+Interpolated entity movement and animations (both models and sprites).
+Overbright and fullbright support on walls and models (like winquake).
+Colormapping support on any q1 model (like winquake).
+Fog (set with "fog density red green blue" command)
+Skybox (loadsky "mtnsun_" will load "env/mtnsun_ft.tga" and so on).
+Sky rendering improved (no more glquake distortion).
+Sky polygons obscure geometry just like in winquake.
+Color calibration menu to ensure a proper Quake experience.
+Improved model lighting (directional shading).
+No messy .ms2 model mesh files (no glquake dir anymore either).
+New improved crosshair (team color coded).
+Improved image loading (smoother menus and such).
+Ability to disable particle effects (cl_particles* cvars).
+Decals (cl_decals cvar to enable).
+Stainmaps (cl_stainmap cvar to enable).
+Sorted transparent stuff to render better.
+Improved multitexture support (r_textureunits (1-4 supported), needs gl_combine 1 because of overbright)
+Improved chase cam (chase_active 1 no longer goes into walls)
+More configurable console background (scr_conalpha and scr_conbrightness)
+Optional fullbrights (r_fullbrights 0/1 followed by r_restart)
+Dynamic Farclip (no distance limits in huge maps)
+Improved gl_flashblend (now renders a corona instead of an ugly blob)
+DynamicLight coronas (more realism)
+Transparent statusbar (sbar_alpha) that does not block your view as much.
+No 8bit texture uploads (fixes 'green' walls in the distance).
+Fixed view blends (glquake was quite broken).
+JPEG texture support using libjpeg (Thanks Elric)
+Video Options, Color Control, and Effects Options menus added, and more options.
+.dlit file support (produced by hmap2 -light) for fast per-pixel lighting without shadowing.
+pointfile command is improved (for leak finding in maps when you have a .pnt file from a failed qbsp compile)
+configurable particle effects (effectinfo.txt, can be reloaded at any time by cl_particles_reloadeffects command for quick testing)
+fixed envmap command (makes a skybox of the current scene)
+
+
+
+Sound features:
+Ogg and wav file overrides for cd tracks (example: sound/cdtracks/track01.ogg or .wav) (Thanks Elric)
+Streaming ogg sounds to save memory (Ogg sounds over a certain size are streamed automatically) (Thanks Elric)
+Ogg Vorbis sound support (all .wav sounds look for .ogg if the .wav is missing, useful for making mods smaller, particularly useful for cd tracks) (Thanks Elric)
+Stereo sound file support (useful for cd tracks)
+7.1 surround sound mixing support (snd_channels cvar selects how many to use, default 2 for stereo)
+
+
+
+Client features:
+showtime cvar.
+showdate cvar.
+-benchmark option to run automated timedemo benchmarks (-benchmark demo1 does +timedemo demo1 and quits immediately when finished)
+timedemo automatically puts results in gamedir/benchmark.log
+Slightly improved aiming on quake servers (does not support proquake aiming).
+-sndspeed samplerate (default: 44100, quake used 11025)
+snd_swapstereo cvar (for people with backwards SB16 sound cards)
+Saves video settings to config and restores them properly
+Ability to change video settings during game (video options menu or vid_* cvars)
+showfps cvar.
+Sends 20fps network packets to improve modem play instead of one per frame. (sys_ticrate controls network framerate)
+Allow skin colormaps 14 and 15 (freaky :)
+Longer chat messages.
+No more 72fps limit, cl_maxfps lets you decide.
+Support for more mouse buttons (mouse1-mouse16, mwheelup/mwheeldown are aliases to mouse4 and mouse5).
+Server browser for public (sv_public 1) darkplaces servers as well as quakeworld servers.
+log_file cvar to log console messages to a file.
+condump command to dump recent console history to a file.
+PK3 archive support with compression support using zlib (Thanks Elric)
+maps command lists installed maps
+tab completion of map names on map/changelevel commands
+tab completion of rcon commands
+.ent file replacement allows you to modify sky and fog settings on a per-map basis (use sv_saveentfile command in singleplayer and then edit the worldspawn entity in a text editor, for example setting "sky" "mtnsun_" to load the skybox mtnsun_ in your favorite maps, or "fog" "0.03 0.2 0.2 0.2" to put fog in the level)
+Switchable bindmaps (in_bind command allows you to bind keys in one of 8 bindmaps, 0-7, in_bindmap command allows you to select two active bindmaps to use at once, ones missing in the first are checked in the second)
+Options menu "Reset to Defaults" option works better than in Quake
+cvarlist and cmdlist commands
+improved tab completion of commands and cvars, with default value and description listed
+curl command (downloads a URL to a pk3 archive and loads it)
+fs_rescan command (allows you to load a newly installed pak/pk3 archive without quitting the game)
+saveconfig command (allows you to save settings before quitting the game, mostly useful when debugging the engine if you expect it to crash)
+gamedir command to change current mod (only works while disconnected).
+QuakeWorld support.
+ProQuake message macros (%l location, %d last death location, %h health, %a armor, %x rockets, %c cells, %t current time, %r rocket launcher status (I need RL, I need rockets, I have RL), %p powerup status (quad pent ring), %w weapon status (SSG:NG:SNG:GL:RL:LG).
+Support for ProQuake .loc files (locs/e1m1.loc or maps/e1m1.loc)
+Support for QIZMO .loc files (maps/e1m1.loc)
+Ingame editing of .loc files using locs_* commands (locs_save saves a new .loc file to maps directory)
+bestweapon command (takes a number sequence like bestweapon 87654321, digits corresponding to weapons, first ones are preferred over last ones, only uses weapons that have 1 ammo or more)
+ls and dir commands to list files in the Quake virtual filesystem (useful to find files inside paks)
+toggle command allows you to use a single bind to toggle a cvar between 0 and 1
+slowmo cvar allows you to pause/slow down/speed up demo playback (try using these binds for example: bind f1 "slowmo 0";bind f2 "slowmo 0.1";bind f3 "slowmo 1")
+AVI video recording using builtin I420 codec (bind f4 "toggle cl_capturevideo"), with automatic creation of sequentially numbered avi files for each recording session.  (WARNING: HUGE files, make sure you have several gigabytes of disk space available!  and it is only recommended during demo playback!  You will probably want to reencode these videos using VirtualDub, mencoder, or other utilities before posting them on a website)
+ping display in scoreboard, even on Quake servers (on DarkPlaces servers it also shows packet loss)
+
+
+
+Server features:
+Allows clients to connect through firewalls (automatic feature)
+Works behind firewalls unlike NetQuake (must port forward UDP packets on the relevant port from the firewall to the server, as with any game)
+More accurate movement and precise aiming.
+255 player support.
+sv_cheats cvar controls cheats (no longer based on deathmatch).
+slowmo cvar controls game speed.
+No crash with the buggy 'teleport train' in shub's pit.
+Allow skin colormaps 14 and 15 (freaky :)
+sys_ticrate applies to listen (client) servers as well as dedicated.
+sv_public cvar to advertise to master server.
+log_file cvar to log console messages to a file.
+condump command to dump recent console history to a file.
+PK3 archive support with compression support using zlib (Thanks Elric)
+Option to prevent wallhacks from working (sv_cullentities_trace 1).
+Selectable protocol (sv_protocolname QUAKE for example allows quake clients to play, default is sv_protocolname DP7 or a later protocol)
+Automatic file downloads to DarkPlaces clients.
+Ability to send URLs to DarkPlaces clients to download pk3 archives needed to play on this server.
+rcon support for remote administration by trusted clients with matching rcon_password, or external quakeworld rcon tools
+prvm_edictset, prvm_global, prvm_globals, and prvm_globalset commands aid in QuakeC debugging
+prvm_printfunction function prints out the QuakeC assembly opcodes of a function, can be useful if you can't decompile the progs.dat file
+prvm_profile command gives call count and estimated builtin-function cost
+sys_colortranslation cvar controls processing of Quake3-style ^ color codes in terminal output, default is white text on windows and ANSI color output on Linux/Mac OSX
+sys_specialcharactertranslation controls processing of special Quake characters to make colored names more readable in terminal output
+
+
+
+Modding features:
+HalfLife map support (place your HalfLife wads in quake/id1/textures/ or quake/MODDIR/textures/ as the maps need them)
+Larger q1 and hl map size of +-32768 units.
+Colored lighting (.lit support) for q1 maps.
+Q3 map support (no shaders though), with no limits.
+Q2 and Q3 model support, with greatly increased limits (256 skins, 65536 frames, 65536 vertices, 65536 triangles).  (Note: md2 player models are not supported because they have no skin list)
+Optimized QuakeC interpreter so mods run faster.
+Bounds checking QuakeC interpreter so mods can't do naughty things with memory.
+Warnings for many common QuakeC errors.
+Unprecached models are now a warning (does not kill the server anymore).
+External texture support (see dpextensions.qc DP_GFX_EXTERNALTEXTURES).
+Fog ("fog" key in worldspawn, same parameters as fog command).
+.spr32 and halflife .spr sprites supported.  (Use Krimzon's tool to make spr32, and lhfire can render directly to spr32, or just use replacement textures on .spr).
+Skybox ("sky" key in worldspawn, works like loadsky and quake2).
+Stereo wav sounds supported.
+Ogg Vorbis sounds supported. (Thanks Elric)
+ATTN_NONE sounds are no longer directional (good for music).
+play2 sound testing command (ATTN_NONE variant of play).
+r_texturestats and memstats and memlist commands to give memory use info.
+Lighting on sprites (put ! anywhere in sprite filename to enable).
+More r_speeds info (now a transparent overlay instead of spewing to console).
+Supports rotating bmodels (use avelocity, and keep in mind the bmodel needs the "origin" key set to rotate (read up on hipnotic rotation support in your qbsp docs, or choose another qbsp if yours does not support this feature), or in q3 maps an origin brush works).
+More sound channels.
+More dynamic lights (32 changed to 256).
+More precached models and sounds (256 changed to 4096).
+Many more features documented in dpextensions.qc. (bullet tracing on models, qc player input, etc)
+
+
+
+Replacing Content:
+Formats supported: tga (recommended), png (loads very slowly), jpg (loads slowly), pcx, wal, lmp
+
+Usually you want to put replacement content in either id1/ or another directory such as pretty/ inside your quake directory, in DarkPlaces you can run multiple -game options at once (such as -game ctf -game pretty -game dpmod to have texture overrides from pretty, maps from ctf, and gameplay from dpmod) or multiple gamedirs specified with the gamedir console command (gamedir ctf pretty dpmod).
+
+All texture layers are optional except diffuse (the others are NOT loaded without it)
+
+Replacing skins:
+progs/player.mdl_0.tga - diffuse
+progs/player.mdl_0_norm.tga - normalmap (can have alpha channel with bumpmap height for offsetmapping/reliefmapping)
+progs/player.mdl_0_bump.tga - bumpmap (not loaded if normalmap is present)
+progs/player.mdl_0_glow.tga - glow map (use _luma if tenebrae compatibility is a concern)
+progs/player.mdl_0_luma.tga - alternate tenebrae-compatible name for glow map (use one or the other)
+progs/player.mdl_0_pants.tga - pants image, greyscale and does not cover the same pixels as the diffuse texture (this is additive blended ('Screen' mode in photoshop) ontop of the diffuse texture with a color tint according to your pants color)
+progs/player.mdl_0_shirt.tga - shirt image, same type as pants
+
+Replacing textures in specific maps:
+textures/e1m1/ecop1_6.tga
+textures/e1m1/ecop1_6_norm.tga
+textures/e1m1/ecop1_6_bump.tga
+textures/e1m1/ecop1_6_glow.tga
+textures/e1m1/ecop1_6_luma.tga
+textures/e1m1/ecop1_6_pants.tga - pants and shirt layers are possible on bmodel entities with quakec modifications to set their .colormap field
+textures/e1m1/ecop1_6_shirt.tga
+
+Replacing textures in all maps:
+textures/quake.tga
+textures/quake_norm.tga
+textures/quake_bump.tga
+textures/quake_glow.tga
+textures/quake_luma.tga
+textures/quake_pants.tga
+textures/quake_shirt.tga
+
+Replacing hud and menu pictures:
+gfx/conchars.tga
+
+Replacing models:
+same as in Quake, you can replace a model with exactly the same file name (including file extension), so for example an md3 player model has to be renamed progs/player.mdl, and a small box of shells in md3 format has to be renamed maps/b_shell0.bsp
+
+How to make .skin files for multiple skins on a Quake3 (md3) or DarkPlacesModel (dpm) model:
+These files use the same format as the ones in Quake3 (except being named modelname_0.skin, modelname_1.skin, and so on), they specify what texture to use on each part of the md3 (or zym or dpm or psk) model, their contents look like the following...
+torso,progs/player_default.tga                    says that the model part named "torso" should use the image progs/player_default.tga
+gun,progs/player_default.tga                      says that the model part named "gun" should use the image progs/player_default.tga
+muzzleflash,progs/player_default_muzzleflash.tga  says that the model part named "muzzleflash" should use the image progs/player_default_muzzleflash.tga - this is useful for transparent skin areas which should be kept separate from opaque skins
+tag_head,                                         says that the first tag is named "tag_head" - this is only useful for QuakeC mods using segmented player models so that they can look up/down without their legs rotating, don't worry about it as a user
+tag_torso,                                        second tag name
+tag_weapon,                                       third tag name
+
+How to install a soundtrack in ogg format
+These files must be in ogg or wav format, and numbers begin at 002 if you wish to replace (or install) the Quake cd music - since track 001 was the Quake data track.</p>
+quake/id1/sound/cdtracks/track002.ogg             replacement track for "cd loop 2"
+quake/id1/sound/cdtracks/track003.ogg             replacement track for "cd loop 3"
+
+Example list of filenames:
+quake/id1/progs/player.mdl                        replaces the player model)
+quake/id1/progs/player.mdl_0.skin                 text file that specifies textures to use on an md3 model)
+quake/id1/progs/player_default.tga                texture referenced by the .skin, make sure that any special parts of this are black, like pants should be black here otherwise you get pink pants when you use a red color ingame)
+quake/id1/progs/player_default_pants.tga          white pants area of the skin, this is colored by the engine according to your color settings, additive blended (which is called "Screen" mode in Photoshop if you wish to preview the layers))
+quake/id1/progs/player_default_shirt.tga          white shirt area of the skin, similar to pants described above)
+quake/id1/progs/player_default_norm.tga           normalmap texture for player_default, alpha channel can contain a heightmap for offsetmapping (r_glsl_offsetmapping 1 in console) to use, alternatively you can use _bump.tga instead of this which is only a heightmap and the engine will generate the normalmap for you)
+quake/id1/progs/player_default_gloss.tga          glossmap (shiny areas) for player_default)
+quake/id1/progs/player_default_glow.tga           glowmap (glowing stuff) for player_default, this is fullbrights and such, be sure the corresponding pixels are black in the player_default.tga, because just like pants/shirt this is additive blended)
+quake/id1/textures/quake.tga                      replaces the quake logo on the arch in start.bsp)
+quake/id1/textures/quake_norm.tga                 same as for a player)
+quake/id1/textures/quake_gloss.tga                same as for a player)
+quake/id1/textures/#water1.tga                    replaces *water1 texture in the maps, # is used instead of * in filenames)
+quake/id1/gfx/conchars.tga                        replacement font image, this was in gfx.wad in quake)
+quake/id1/gfx/conback.tga                         replacement console background, just like in quake)
+quake/id1/gfx/mainmenu.tga                        replacement main menu image, just like in quake)
+quake/id1/maps/b_bh25.bsp                         replacement for normal health pack, for example this could be an md3 model instead)
+quake/id1/sound/cdtracks/track002.ogg             replacement track for "cd loop 2"
+quake/id1/sound/cdtracks/track003.ogg             replacement track for "cd loop 3"
+
+
+
+Commandline options as of 2007-03-11:
+BSD GLX: -gl_driver drivername selects a GL driver library, default is libGL.so.1, useful only for using fxmesa or similar, if you don't know what this is for, you don't need it
+BSD GLX: -nogetprocaddress disables GLX_ARB_get_proc_address (not required, more formal method of getting extension functions)
+BSD GLX: -novideosync disables GLX_SGI_swap_control
+BSD Sound: -cddev devicepath chooses which CD drive to use
+Client: -benchmark demoname runs a timedemo and quits, results of any timedemo can be found in gamedir/benchmark.log (for example id1/benchmark.log)
+Client: -demo demoname runs a playdemo and quits
+Client: -forceqmenu disables menu.dat (same as +forceqmenu 1)
+Client: -particles number changes maximum number of particles at once, default 32768
+Client: -texbrightness number sets the quake palette brightness (brightness of black), allowing you to make quake textures brighter/darker, not recommended
+Client: -texcontrast number sets the quake palette contrast, allowing you to make quake textures brighter/darker, not recommended
+Client: -texgamma number sets the quake palette gamma, allowing you to make quake textures brighter/darker, not recommended
+Client: -useqmenu causes the first time you open the menu to use the quake menu, then reverts to menu.dat (if forceqmenu is 0)
+Console: -condebug logs console messages to qconsole.log, see also log_file
+Console: -developer enables warnings and other notices (RECOMMENDED for mod developers)
+Console: -nostdout disables text output to the terminal the game was launched from
+Filesystem: -basedir path chooses what base directory the game data is in, inside this there should be a data directory for the game (for example id1)
+GL: -noanisotropy disables GL_EXT_texture_filter_anisotropic (allows higher quality texturing)
+GL: -nocombine disables GL_ARB_texture_env_combine or GL_EXT_texture_env_combine (required for bumpmapping and faster map rendering)
+GL: -nocubemap disables GL_ARB_texture_cube_map (required for bumpmapping)
+GL: -nocva disables GL_EXT_compiled_vertex_array (renders faster)
+GL: -nodot3 disables GL_ARB_texture_env_dot3 (required for bumpmapping)
+GL: -nodrawrangeelements disables GL_EXT_draw_range_elements (renders faster)
+GL: -noedgeclamp disables GL_EXT_texture_edge_clamp or GL_SGIS_texture_edge_clamp (recommended, some cards do not support the other texture clamp method)
+GL: -nofragmentshader disables GL_ARB_fragment_shader (allows pixel shader effects, can improve per pixel lighting performance and capabilities)
+GL: -nomtex disables GL_ARB_multitexture (required for faster map rendering)
+GL: -noseparatestencil disables use of OpenGL2.0 glStencilOpSeparate and GL_ATI_separate_stencil extensions (which accelerate shadow rendering)
+GL: -noshaderobjects disables GL_ARB_shader_objects (required for vertex shader and fragment shader)
+GL: -noshadinglanguage100 disables GL_ARB_shading_language_100 (required for vertex shader and fragment shader)
+GL: -nostenciltwoside disables GL_EXT_stencil_two_side (which accelerate shadow rendering)
+GL: -notexture3d disables GL_EXT_texture3D (required for spherical lights, otherwise they render as a column)
+GL: -novertexshader disables GL_ARB_vertex_shader (allows vertex shader effects)
+Game: -battlemech runs the multiplayer topdown deathmatch game BattleMech
+Game: -contagiontheory runs the game Contagion Theory
+Game: -darsana runs the game Darsana
+Game: -did2 runs the game Defeat In Detail 2
+Game: -goodvsbad2 runs the psychadelic RTS FPS game Good Vs Bad 2
+Game: -hipnotic runs Quake mission pack 1: The Scourge of Armagon
+Game: -nehahra runs The Seal of Nehahra movie and game
+Game: -neoteric runs the game Neoteric
+Game: -netherworld runs the game Netherworld: Dark Master
+Game: -nexuiz runs the multiplayer game Nexuiz
+Game: -openquartz runs the game OpenQuartz, a standalone GPL replacement of the quake content
+Game: -prydon runs the topdown point and click action-RPG Prydon Gate
+Game: -quake runs the game Quake (default)
+Game: -rogue runs Quake mission pack 2: The Dissolution of Eternity
+Game: -setheral runs the multiplayer game Setheral
+Game: -som runs the multiplayer game Son Of Man
+Game: -tenebrae runs the graphics test mod known as Tenebrae (some features not implemented)
+Game: -teu runs The Evil Unleashed (this option is obsolete as they are not using darkplaces)
+Game: -thehunted runs the game The Hunted
+Game: -transfusion runs Transfusion (the recreation of Blood in Quake)
+Game: -zymotic runs the singleplayer game Zymotic
+Input: -nomouse disables mouse support (see also vid_mouse cvar)
+Input: -nomouse disables mouse support (see also vid_mouse cvar)
+Linux ALSA Sound: -sndpcm devicename selects which pcm device to us, default is "default"
+Linux GLX: -gl_driver drivername selects a GL driver library, default is libGL.so.1, useful only for using fxmesa or similar, if you don't know what this is for, you don't need it
+Linux GLX: -nogetprocaddress disables GLX_ARB_get_proc_address (not required, more formal method of getting extension functions)
+Linux GLX: -novideosync disables GLX_SGI_swap_control
+Linux Sound: -cddev devicepath chooses which CD drive to use
+MacOSX GLX: -nogetprocaddress disables GLX_ARB_get_proc_address (not required, more formal method of getting extension functions)
+MacOSX GLX: -novideosync disables GLX_SGI_swap_control
+SDL GL: -gl_driver drivername selects a GL driver library, default is whatever SDL recommends, useful only for 3dfxogl.dll/3dfxvgl.dll or fxmesa or similar, if you don't know what this is for, you don't need it
+Server: -dedicated [playerlimit] starts a dedicated server (with a command console), default playerlimit is 8
+Server: -ip ipaddress sets the ip address of this machine for purposes of networking (default 0.0.0.0 also known as INADDR_ANY), use only if you have multiple network adapters and need to choose one specifically.
+Server: -listen [playerlimit] starts a multiplayer server with graphical client, like singleplayer but other players can connect, default playerlimit is 8
+Server: -port portnumber sets the port to use for a server (default 26000, the same port as QUAKE itself), useful if you host multiple servers on your machine
+Sound: -nocdaudio disables CD audio support
+Sound: -nosound disables sound (including CD audio)
+Sound: -novorbis disables ogg vorbis sound support
+Sound: -simsound runs sound mixing but with no output
+Sound: -sndbits bits chooses 8 bit or 16 bit sound output
+Sound: -sndmono sets sound output to mono
+Sound: -sndquad sets sound output to 4 channel surround
+Sound: -sndspeed hz chooses sound output rate (supported values are 48000, 44100, 32000, 24000, 22050, 16000, 11025 (quake), 8000)
+Sound: -sndstereo sets sound output to stereo
+Video: -bpp bits performs +vid_bitsperpixel bits (example -bpp 32 or -bpp 16)
+Video: -fullscreen performs +vid_fullscreen 1
+Video: -height pixels performs +vid_height pixels and also +vid_width pixels*4/3 if only -height is specified (example: -height 768 sets 1024x768 mode)
+Video: -width pixels performs +vid_width pixels and also +vid_height pixels*3/4 if only -width is specified (example: -width 1024 sets 1024x768 mode)
+Video: -window performs +vid_fullscreen 0
+Windows DirectSound: -primarysound locks the sound hardware for exclusive use
+Windows DirectSound: -snoforceformat uses the format that DirectSound returns, rather than forcing it
+Windows GDI Input: -noforcemaccel disables setting of mouse acceleration (not used with -dinput, windows only)
+Windows GDI Input: -noforcemparms disables setting of mouse parameters (not used with -dinput, windows only)
+Windows GDI Input: -noforcemspd disables setting of mouse speed (not used with -dinput, windows only)
+Windows Input: -dinput enables DirectInput for mouse/joystick input
+Windows Input: -nojoy disables joystick support, may be a small speed increase
+Windows Sound: -wavonly uses wave sound instead of DirectSound
+Windows WGL: -gl_driver drivername selects a GL driver library, default is opengl32.dll, useful only for 3dfxogl.dll or 3dfxvgl.dll, if you don't know what this is for, you don't need it
+Windows WGL: -novideosync disables WGL_EXT_swap_control
+
+
+
+Full Console Variable List as of 2007-03-11:
+_cl_color                                         0                   internal storage cvar for current player colors (changed by color command)
+_cl_name                                          player              internal storage cvar for current player name (changed by name command)
+_cl_playermodel                                                       internal storage cvar for current player model in Nexuiz (changed by playermodel command)
+_cl_playerskin                                                        internal storage cvar for current player skin in Nexuiz (changed by playerskin command)
+_cl_pmodel                                        0                   internal storage cvar for current player model number in nehahra (changed by pmodel command)
+_cl_rate                                          10000               internal storage cvar for current rate (changed by rate command)
+_snd_mixahead                                     0.1                 how much sound to mix ahead of time
+ambient_fade                                      100                 rate of volume fading when moving from one environment to another
+ambient_level                                     0.3                 volume of environment noises (water and wind)
+bgmvolume                                         1                   volume of background music (such as CD music or replacement files such as sound/cdtracks/track002.ogg)
+cdaudioinitialized                                0                   indicates if CD Audio system is active
+chase_active                                      0                   enables chase cam
+chase_back                                        48                  chase cam distance from the player
+chase_stevie                                      0                   chase cam view from above (used only by GoodVsBad2)
+chase_up                                          24                  chase cam distance from the player
+cl_anglespeedkey                                  1.5                 how much +speed multiplies keyboard turning speed
+cl_autodemo                                       0                   records every game played, using the date/time and map name to name the demo file
+cl_autodemo_nameformat                            %Y-%m-%d_%H-%M      The format of the cl_autodemo filename, followed by the map name
+cl_backspeed                                      400                 backward movement speed
+cl_beams_instantaimhack                           1                   makes your lightning gun aiming update instantly
+cl_beams_lightatend                               0                   make a light at the end of the beam
+cl_beams_polygons                                 1                   use beam polygons instead of models
+cl_beams_quakepositionhack                        1                   makes your lightning gun appear to fire from your waist (as in Quake and QuakeWorld)
+cl_bob                                            0.02                view bobbing amount
+cl_bobcycle                                       0.6                 view bobbing speed
+cl_bob2                                           0                   sideways view bobbing amount
+cl_bob2cycle                                      0.6                 sideways view bobbing speed
+cl_bob2smooth                                     0.05                how fast the view goes back when you stop touching the ground
+cl_bobfall                                        0                   how much the view swings down when falling (influenced by the speed you hit the ground with)
+cl_bobfallcycle                                   3                   speed of the bobfall swing
+cl_bobfallspeed                                   200                 necessary amount of speed for bob-falling to occur
+cl_bobmodel                                       1                   enables gun bobbing
+cl_bobmodel_side                                  0.05                gun bobbing sideways sway amount
+cl_bobmodel_speed                                 7                   gun bobbing speed
+cl_bobmodel_up                                    0.02                gun bobbing upward movement amount
+cl_leanmodel                                      0                   enables gun leaning
+cl_leanmodel_side_speed                           0.7                 gun leaning sideways speed
+cl_leanmodel_side_limit                           35                  gun leaning sideways limit
+cl_leanmodel_side_highpass1                       30                  gun leaning sideways pre-highpass in 1/s
+cl_leanmodel_side_highpass                        3                   gun leaning sideways highpass in 1/s
+cl_leanmodel_side_lowpass                         20                  gun leaning sideways lowpass in 1/s
+cl_leanmodel_up_speed                             0.65                gun leaning upward speed
+cl_leanmodel_up_limit                             50                  gun leaning upward limit
+cl_leanmodel_up_highpass1                         5                   gun leaning upward pre-highpass in 1/s
+cl_leanmodel_up_highpass                          15                  gun leaning upward highpass in 1/s
+cl_leanmodel_up_lowpass                           20                  gun leaning upward lowpass in 1/s
+cl_followmodel                                    0                   enables gun following
+cl_followmodel_side_speed                         0.25                gun following sideways speed
+cl_followmodel_side_limit                         6                   gun following sideways limit
+cl_followmodel_side_highpass1                     30                  gun following sideways pre-highpass in 1/s
+cl_followmodel_side_highpass                      5                   gun following sideways highpass in 1/s
+cl_followmodel_side_lowpass                       10                  gun following sideways lowpass in 1/s
+cl_followmodel_up_speed                           0.5                 gun following upward speed
+cl_followmodel_up_limit                           5                   gun following upward limit
+cl_followmodel_up_highpass1                       60                  gun following upward pre-highpass in 1/s
+cl_followmodel_up_highpass                        2                   gun following upward highpass in 1/s
+cl_followmodel_up_lowpass                         10                  gun following upward lowpass in 1/s
+cl_bobup                                          0.5                 view bobbing adjustment that makes the up or down swing of the bob last longer
+cl_capturevideo                                   0                   enables saving of video to a .avi file using uncompressed I420 colorspace and PCM audio, note that scr_screenshot_gammaboost affects the brightness of the output)
+cl_capturevideo_fps                               30                  how many frames per second to save (29.97 for NTSC, 30 for typical PC video, 15 can be useful)
+cl_capturevideo_number                            1                   number to append to video filename, incremented each time a capture begins
+cl_capturevideo_realtime                          0                   causes video saving to operate in realtime (mostly useful while playing, not while capturing demos), this can produce a much lower quality video due to poor sound/video sync and will abort saving if your machine stalls for over 1 second
+cl_curl_enabled                                   0                   whether client's download support is enabled
+cl_curl_maxdownloads                              1                   maximum number of concurrent HTTP/FTP downloads
+cl_curl_maxspeed                                  100                 maximum download speed (KiB/s)
+cl_deathnoviewmodel                               1                   hides gun model when dead
+cl_deathscoreboard                                1                   shows scoreboard (+showscores) while dead
+cl_decals                                         0                   enables decals (bullet holes, blood, etc)
+cl_decals_fadetime                                20                  how long decals take to fade away
+cl_decals_time                                    0                   how long before decals start to fade away
+cl_dlights_decaybrightness                        1                   reduces brightness of light flashes over time
+cl_dlights_decayradius                            1                   reduces size of light flashes over time
+cl_explosions_alpha_end                           0                   end alpha of an explosion shell (just before it disappears)
+cl_explosions_alpha_start                         1.5                 starting alpha of an explosion shell
+cl_explosions_lifetime                            0.5                 how long an explosion shell lasts
+cl_explosions_size_end                            128                 ending alpha of an explosion shell (just before it disappears)
+cl_explosions_size_start                          16                  starting size of an explosion shell
+cl_forwardspeed                                   400                 forward movement speed
+cl_gravity                                        800                 how much gravity to apply in client physics (should match sv_gravity)
+cl_itembobheight                                  0                   how much items bob up and down (try 8)
+cl_itembobspeed                                   0.5                 how frequently items bob up and down
+cl_joinbeforedownloadsfinish                      1                   if non-zero the game will begin after the map is loaded before other downloads finish
+cl_maxfps                                         1000                maximum fps cap, if game is running faster than this it will wait before running another frame (useful to make cpu time available to other programs)
+cl_movement                                       0                   enables clientside prediction of your player movement
+cl_movement_accelerate                            10                  how fast you accelerate (should match sv_accelerate)
+cl_movement_airaccel_qw                           1                   ratio of QW-style air control as opposed to simple acceleration (should match sv_airaccel_qw)
+cl_movement_airaccel_sideways_friction            0                   anti-sideways movement stabilization (should match sv_airaccel_sideways_friction)
+cl_movement_airaccelerate                         -1                  how fast you accelerate while in the air (should match sv_airaccelerate), if less than 0 the cl_movement_accelerate variable is used instead
+cl_movement_edgefriction                          2                   how much to slow down when you may be about to fall off a ledge (should match edgefriction)
+cl_movement_friction                              4                   how fast you slow down (should match sv_friction)
+cl_movement_jumpvelocity                          270                 how fast you move upward when you begin a jump (should match the quakec code)
+cl_movement_maxairspeed                           30                  how fast you can move while in the air (should match sv_maxairspeed)
+cl_movement_maxspeed                              320                 how fast you can move (should match sv_maxspeed)
+cl_movement_stepheight                            18                  how tall a step you can step in one instant (should match sv_stepheight)
+cl_movement_stopspeed                             100                 speed below which you will be slowed rapidly to a stop rather than sliding endlessly (should match sv_stopspeed)
+cl_movement_wateraccelerate                       -1                  how fast you accelerate while in the air (should match sv_airaccelerate), if less than 0 the cl_movement_accelerate variable is used instead
+cl_movement_waterfriction                         -1                  how fast you slow down (should match sv_friction), if less than 0 the cl_movement_friction variable is used instead
+cl_movespeedkey                                   2.0                 how much +speed multiplies keyboard movement speed
+cl_netinputpacketlosstolerance                    4                   how many packets in a row can be lost without movement issues when using cl_movement (technically how many input messages to repeat in each packet that have not yet been acknowledged by the server)
+cl_netinputpacketspersecond                       50                  how many input packets to send to server each second
+cl_netlocalping                                   0                   lags local loopback connection by this much ping time (useful to play more fairly on your own server with people with higher pings)
+cl_netpacketloss                                  0                   drops this percentage of packets (incoming and outgoing), useful for testing network protocol robustness (effects failing to start, sounds failing to play, etc)
+cl_nettimesyncmode                                2                   selects method of time synchronization in client with regard to server packets, values are: 0 = no sync, 1 = exact sync (reset timing each packet), 2 = loose sync (reset timing only if it is out of bounds), 3 = tight sync and bounding
+cl_nodelta                                        0                   disables delta compression of non-player entities in QW network protocol
+cl_nolerp                                         0                   network update smoothing
+cl_noplayershadow                                 0                   hide player shadow
+cl_particles                                      1                   enables particle effects
+cl_particles_blood                                1                   enables blood effects
+cl_particles_blood_alpha                          0.5                 opacity of blood
+cl_particles_blood_bloodhack                      1                   make certain quake particle() calls create blood effects instead
+cl_particles_bubbles                              1                   enables bubbles (used by multiple effects)
+cl_particles_bulletimpacts                        1                   enables bulletimpact effects
+cl_particles_explosions_shell                     0                   enables polygonal shell from explosions
+cl_particles_explosions_smokes                    0                   enables smoke from explosions
+cl_particles_explosions_sparks                    1                   enables sparks from explosions
+cl_particles_quake                                0                   makes particle effects look mostly like the ones in Quake
+cl_particles_quality                              1                   multiplies number of particles and reduces their alpha
+cl_particles_size                                 1                   multiplies particle size
+cl_particles_smoke                                1                   enables smoke (used by multiple effects)
+cl_particles_smoke_alpha                          0.5                 smoke brightness
+cl_particles_smoke_alphafade                      0.55                brightness fade per second
+cl_particles_sparks                               1                   enables sparks (used by multiple effects)
+cl_pitchspeed                                     150                 keyboard pitch turning speed
+cl_port                                           0                   forces client to use chosen port number if not 0
+cl_prydoncursor                                   0                   enables a mouse pointer which is able to click on entities in the world, useful for point and click mods, see PRYDON_CLIENTCURSOR extension in dpextensions.qc
+cl_rollangle                                      2.0                 how much to tilt the view when strafing
+cl_rollspeed                                      200                 how much strafing is necessary to tilt the view
+cl_serverextension_download                       0                   indicates whether the server supports the download command
+cl_shownet                                        0                   1 = print packet size, 2 = print packet message list
+cl_sidespeed                                      350                 strafe movement speed
+cl_slowmo                                         1                   speed of game time (should match slowmo)
+cl_sound_hknighthit                               hknight/hit.wav     sound to play during TE_KNIGHTSPIKE (empty cvar disables sound)
+cl_sound_r_exp3                                   weapons/r_exp3.wav  sound to play during TE_EXPLOSION and related effects (empty cvar disables sound)
+cl_sound_ric1                                     weapons/ric1.wav    sound to play with 5% chance during TE_SPIKE/TE_SUPERSPIKE (empty cvar disables sound)
+cl_sound_ric2                                     weapons/ric2.wav    sound to play with 5% chance during TE_SPIKE/TE_SUPERSPIKE (empty cvar disables sound)
+cl_sound_ric3                                     weapons/ric3.wav    sound to play with 10% chance during TE_SPIKE/TE_SUPERSPIKE (empty cvar disables sound)
+cl_sound_tink1                                    weapons/tink1.wav   sound to play with 80% chance during TE_SPIKE/TE_SUPERSPIKE (empty cvar disables sound)
+cl_sound_wizardhit                                wizard/hit.wav      sound to play during TE_WIZSPIKE (empty cvar disables sound)
+cl_stainmaps                                      1                   stains lightmaps, much faster than decals but blurred
+cl_stainmaps_clearonload                          1                   clear stainmaps on map restart
+cl_stairsmoothspeed                               160                 how fast your view moves upward/downward when running up/down stairs
+cl_upspeed                                        400                 vertical movement speed (while swimming or flying)
+cl_viewmodel_scale                                1                   changes size of gun model, lower values prevent poking into walls but cause strange artifacts on lighting and especially r_stereo/vid_stereobuffer options where the size of the gun becomes visible
+cl_yawspeed                                       140                 keyboard yaw turning speed
+cmdline                                           0                   contains commandline the engine was launched with
+collision_endnudge                                0                   how much to bias collision trace end
+collision_enternudge                              0                   how much to bias collision entry fraction
+collision_impactnudge                             0.03125             how much to back off from the impact
+collision_leavenudge                              0                   how much to bias collision exit fraction
+collision_prefernudgedfraction                    1                   whether to sort collision events by nudged fraction (1) or real fraction (0)
+collision_startnudge                              0                   how much to bias collision trace start
+con_closeontoggleconsole                          1                   allows toggleconsole binds to close the console as well
+con_chat                                          0                   how many chat lines to show in a dedicated chat area
+con_chatpos                                       0                   where to put chat (negative: lines from bottom of screen, positive: lines below notify, 0: at top)
+con_chatsize                                      8                   chat text size in virtual 2D pixels
+con_chattime                                      30                  how long chat lines last, in seconds
+con_chatwidth                                     1.0                 relative chat window width
+con_notify                                        4                   how many notify lines to show (0-32)
+con_notifyalign                                   3                   how to align notify lines: 0 = left, 0.5 = center, 1 = right, empty string = game default)
+con_notifysize                                    8                   notify text size in virtual 2D pixels
+con_notifytime                                    3                   how long notify lines last, in seconds
+con_textsize                                      8                   console text size in virtual 2D pixels
+coop                                              0                   coop mode, 0 = no coop, 1 = coop mode, multiple players playing through the singleplayer game (coop mode also shuts off deathmatch)
+crosshair                                         0                   selects crosshair to use (0 is none)
+crosshair_color_alpha                             1                   how opaque the crosshair should be
+crosshair_color_blue                              0                   customizable crosshair color
+crosshair_color_green                             0                   customizable crosshair color
+crosshair_color_red                               1                   customizable crosshair color
+crosshair_size                                    1                   adjusts size of the crosshair on the screen
+csqc_progcrc                                      -1                  CRC of csprogs.dat file to load (-1 is none), only used during level changes and then reset to -1
+csqc_progname                                     csprogs.dat         name of csprogs.dat file to load
+csqc_progsize                                     -1                  file size of csprogs.dat file to load (-1 is none), only used during level changes and then reset to -1
+cutscene                                          1                   enables cutscenes in nehahra, can be used by other mods
+deathmatch                                        0                   deathmatch mode, values depend on mod but typically 0 = no deathmatch, 1 = normal deathmatch with respawning weapons, 2 = weapons stay (players can only pick up new weapons)
+demo_nehahra                                      0                   reads all quake demos as nehahra movie protocol
+developer                                         0                   prints additional debugging messages and information (recommended for modders and level designers)
+developer_entityparsing                           0                   prints detailed network entities information each time a packet is received
+developer_memory                                  0                   prints debugging information about memory allocations
+developer_memorydebug                             0                   enables memory corruption checks (very slow)
+developer_networkentities                         0                   prints received entities, value is 0-4 (higher for more info)
+developer_networking                              0                   prints all received and sent packets (recommended only for debugging)
+developer_texturelogging                          0                   produces a textures.log file containing names of skins and map textures the engine tried to load
+edgefriction                                      2                   how much you slow down when nearing a ledge you might fall off
+forceqmenu                                        0                   enables the quake menu instead of the quakec menu.dat (if present)
+fov                                               90                  field of vision, 1-170 degrees, default 90, some players use 110-130
+fraglimit                                         0                   ends level if this many frags is reached by any player
+freelook                                          1                   mouse controls pitch instead of forward/back
+gamecfg                                           0                   unused cvar in quake, can be used by mods
+gameversion                                       0                   version of game data (mod-specific), when client and server gameversion mismatch in the server browser the server is shown as incompatible
+gl_combine                                        1                   faster rendering by using GL_ARB_texture_env_combine extension (part of OpenGL 1.3 and above)
+gl_dither                                         1                   enables OpenGL dithering (16bit looks bad with this off)
+gl_ext_separatetencil                             1                   make use of OpenGL 2.0 glStencilOpSeparate or GL_ATI_separate_stencil extension
+gl_ext_stenciltwoside                             1                   make use of GL_EXT_stenciltwoside extension (NVIDIA only)
+gl_finish                                         0                   make the cpu wait for the graphics processor at the end of each rendered frame (can help with strange input or video lag problems on some machines)
+gl_flashblend                                     0                   render bright coronas for dynamic lights instead of actual lighting, fast but ugly
+gl_fogblue                                        0.3                 nehahra fog color blue value (for Nehahra compatibility only)
+gl_fogdensity                                     0.25                nehahra fog density (recommend values below 0.1) (for Nehahra compatibility only)
+gl_fogenable                                      0                   nehahra fog enable (for Nehahra compatibility only)
+gl_fogend                                         0                   nehahra fog end distance (for Nehahra compatibility only)
+gl_foggreen                                       0.3                 nehahra fog color green value (for Nehahra compatibility only)
+gl_fogred                                         0.3                 nehahra fog color red value (for Nehahra compatibility only)
+gl_fogstart                                       0                   nehahra fog start distance (for Nehahra compatibility only)
+gl_lightmaps                                      0                   draws only lightmaps, no texture (for level designers)
+gl_lockarrays                                     0                   enables use of glLockArraysEXT, may cause glitches with some broken drivers, and may be slower than normal
+gl_lockarrays_minimumvertices                     1                   minimum number of vertices required for use of glLockArraysEXT, setting this too low may reduce performance
+gl_max_size                                       2048                maximum allowed texture size, can be used to reduce video memory usage, note: this is automatically reduced to match video card capabilities (such as 256 on 3Dfx cards before Voodoo4/5)
+gl_mesh_drawrangeelements                         1                   use glDrawRangeElements function if available instead of glDrawElements (for performance comparisons or bug testing)
+gl_mesh_testarrayelement                          0                   use glBegin(GL_TRIANGLES);glArrayElement();glEnd(); primitives instead of glDrawElements (useful to test for driver bugs with glDrawElements)
+gl_mesh_testmanualfeeding                         0                   use glBegin(GL_TRIANGLES);glTexCoord2f();glVertex3f();glEnd(); primitives instead of glDrawElements (useful to test for driver bugs with glDrawElements)
+gl_paranoid                                       0                   enables OpenGL error checking and other tests
+gl_picmip                                         0                   reduces resolution of textures by powers of 2, for example 1 will halve width/height, reducing texture memory usage by 75%
+gl_polyblend                                      1                   tints view while underwater, hurt, etc
+gl_printcheckerror                                0                   prints all OpenGL error checks, useful to identify location of driver crashes
+gl_texture_anisotropy                             1                   anisotropic filtering quality (if supported by hardware), 1 sample (no anisotropy) and 8 sample (8 tap anisotropy) are recommended values
+halflifebsp                                       0                   indicates the current map is hlbsp format (useful to know because of different bounding box sizes)
+host_framerate                                    0                   locks frame timing to this value in seconds, 0.05 is 20fps for example, note that this can easily run too fast, use cl_maxfps if you want to limit your framerate instead, or sys_ticrate to limit server speed
+host_speeds                                       0                   reports how much time is used in server/graphics/sound
+hostname                                          UNNAMED             server message to show in server browser
+in_pitch_max                                      90                  how far upward you can aim (quake used 80
+in_pitch_min                                      -90                 how far downward you can aim (quake used -70
+joy_axisforward                                   1                   which joystick axis to query for forward/backward movement
+joy_axispitch                                     3                   which joystick axis to query for looking up/down
+joy_axisroll                                      -1                  which joystick axis to query for tilting head right/left
+joy_axisside                                      0                   which joystick axis to query for right/left movement
+joy_axisup                                        -1                  which joystick axis to query for up/down movement
+joy_axisyaw                                       2                   which joystick axis to query for looking right/left
+joy_deadzoneforward                               0                   deadzone tolerance, suggested values are in the range 0 to 0.01
+joy_deadzonepitch                                 0                   deadzone tolerance, suggested values are in the range 0 to 0.01
+joy_deadzoneroll                                  0                   deadzone tolerance, suggested values are in the range 0 to 0.01
+joy_deadzoneside                                  0                   deadzone tolerance, suggested values are in the range 0 to 0.01
+joy_deadzoneup                                    0                   deadzone tolerance, suggested values are in the range 0 to 0.01
+joy_deadzoneyaw                                   0                   deadzone tolerance, suggested values are in the range 0 to 0.01
+joy_detected                                      0                   number of joysticks detected by engine
+joy_enable                                        1                   enables joystick support
+joy_index                                         0                   selects which joystick to use if you have multiple
+joy_sensitivityforward                            -1                  movement multiplier
+joy_sensitivitypitch                              1                   movement multiplier
+joy_sensitivityroll                               1                   movement multiplier
+joy_sensitivityside                               1                   movement multiplier
+joy_sensitivityup                                 1                   movement multiplier
+joy_sensitivityyaw                                -1                  movement multiplier
+joyadvanced                                       0                   use more than 2 axis joysticks (configuring this is very technical)
+joyadvaxisr                                       0                   axis mapping for joyadvanced 1 mode
+joyadvaxisu                                       0                   axis mapping for joyadvanced 1 mode
+joyadvaxisv                                       0                   axis mapping for joyadvanced 1 mode
+joyadvaxisx                                       0                   axis mapping for joyadvanced 1 mode
+joyadvaxisy                                       0                   axis mapping for joyadvanced 1 mode
+joyadvaxisz                                       0                   axis mapping for joyadvanced 1 mode
+joyforwardsensitivity                             -1.0                how fast the joystick moves forward
+joyforwardthreshold                               0.15                minimum joystick movement necessary to move forward
+joyname                                           joystick            name of joystick to use (informational only, used only by joyadvanced 1 mode)
+joypitchsensitivity                               1.0                 how fast the joystick looks up/down
+joypitchthreshold                                 0.15                minimum joystick movement necessary to look up/down
+joysidesensitivity                                -1.0                how fast the joystick moves sideways (strafing)
+joysidethreshold                                  0.15                minimum joystick movement necessary to move sideways (strafing)
+joystick                                          0                   enables joysticks
+joywwhack1                                        0.0                 special hack for wingman warrior
+joywwhack2                                        0.0                 special hack for wingman warrior
+joyyawsensitivity                                 -1.0                how fast the joystick turns left/right
+joyyawthreshold                                   0.15                minimum joystick movement necessary to turn left/right
+locs_enable                                       1                   enables replacement of certain % codes in chat messages: %l (location), %d (last death location), %h (health), %a (armor), %x (rockets), %c (cells), %r (rocket launcher status), %p (powerup status), %w (weapon status), %t (current time in level)
+locs_show                                         0                   shows defined locations for editing purposes
+log_file                                                              filename to log messages to
+lookspring                                        0                   returns pitch to level with the floor when no longer holding a pitch key
+lookstrafe                                        0                   move instead of turning
+m_filter                                          0                   smoothes mouse movement, less responsive but smoother aiming
+m_forward                                         1                   mouse forward speed multiplier
+m_pitch                                           0.022               mouse pitch speed multiplier
+m_side                                            0.8                 mouse side speed multiplier
+m_yaw                                             0.022               mouse yaw speed multiplier
+mcbsp                                             0                   indicates the current map is mcbsp format (useful to know because of different bounding box sizes)
+menu_options_colorcontrol_correctionvalue         0.5                 intensity value that matches up to white/black dither pattern, should be 0.5 for linear color
+mod_q3bsp_curves_collisions                       1                   enables collisions with curves (SLOW)
+mod_q3bsp_debugtracebrush                         0                   selects different tracebrush bsp recursion algorithms (for debugging purposes only)
+mod_q3bsp_lightmapmergepower                      4                   merges the quake3 128x128 lightmap textures into larger lightmap group textures to speed up rendering, 1 = 256x256, 2 = 512x512, 3 = 1024x1024, 4 = 2048x2048, 5 = 4096x4096, ...
+mod_q3bsp_optimizedtraceline                      1                   whether to use optimized traceline code for line traces (as opposed to tracebox code)
+nehx00                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx01                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx02                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx03                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx04                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx05                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx06                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx07                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx08                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx09                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx10                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx11                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx12                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx13                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx14                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx15                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx16                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx17                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx18                                            0                   nehahra data storage cvar (used in singleplayer)
+nehx19                                            0                   nehahra data storage cvar (used in singleplayer)
+net_address                                       0.0.0.0             network address to open ports on
+net_address_ipv6                                  [0:0:0:0:0:0:0:0]   network address to open ipv6 ports on
+net_connectfloodblockingtimeout                   5                   when a connection packet is received, it will block all future connect packets from that IP address for this many seconds (cuts down on connect floods)
+net_connecttimeout                                10                  after requesting a connection, the client must reply within this many seconds or be dropped (cuts down on connect floods)
+net_messagetimeout                                300                 drops players who have not sent any packets for this many seconds
+net_slist_maxtries                                3                   how many times to ask the same server for information (more times gives better ping reports but takes longer)
+net_slist_queriesperframe                         4                   maximum number of server information requests to send each rendered frame (guards against low framerates causing problems)
+net_slist_queriespersecond                        20                  how many server information requests to send per second
+net_slist_timeout                                 4                   how long to listen for a server information response before giving up
+noaim                                             1                   QW option to disable vertical autoaim
+noexit                                            0                   kills anyone attempting to use an exit
+nomonsters                                        0                   unused cvar in quake, can be used by mods
+nosound                                           0                   disables sound
+pausable                                          1                   allow players to pause or not
+port                                              26000               server port for players to connect to
+pr_checkextension                                 1                   indicates to QuakeC that the standard quakec extensions system is available (if 0, quakec should not attempt to use extensions)
+prvm_boundscheck                                  1                   enables detection of out of bounds memory access in the QuakeC code being run (in other words, prevents really exceedingly bad QuakeC code from doing nasty things to your computer)
+prvm_statementprofiling                           0                   counts how many times each QuakeC statement has been executed, these counts are displayed in prvm_printfunction output (if enabled)
+prvm_traceqc                                      0                   prints every QuakeC statement as it is executed (only for really thorough debugging!)
+qport                                             0                   identification key for playing on qw servers (allows you to maintain a connection to a quakeworld server even if your port changes)
+r_ambient                                         0                   brightens map, value is 0-128
+r_batchmode                                       1                   selects method of rendering multiple surfaces with one driver call (values are 0, 1, 2, etc...)
+r_bloom                                           0                   enables bloom effect (makes bright pixels affect neighboring pixels)
+r_bloom_blur                                      4                   how large the glow is
+r_bloom_brighten                                  2                   how bright the glow is, after subtract/power
+r_bloom_colorexponent                             1                   how exagerated the glow is
+r_bloom_colorscale                                1                   how bright the glow is
+r_bloom_colorsubtract                             0.125               reduces bloom colors by a certain amount
+r_bloom_resolution                                320                 what resolution to perform the bloom effect at (independent of screen resolution)
+r_coronas                                         1                   brightness of corona flare effects around certain lights, 0 disables corona effects
+r_cullentities_trace                              1                   probabistically cull invisible entities
+r_cullentities_trace_delay                        1                   number of seconds until the entity gets actually culled
+r_cullentities_trace_enlarge                      0                   box enlargement for entity culling
+r_cullentities_trace_samples                      2                   number of samples to test for entity culling
+r_draweffects                                     1                   renders temporary sprite effects
+r_drawentities                                    1                   draw entities (doors, players, projectiles, etc)
+r_drawexplosions                                  1                   enables rendering of explosion shells (see also cl_particles_explosions_shell)
+r_drawparticles                                   1                   enables drawing of particles
+r_drawportals                                     0                   shows portals (separating polygons) in world interior in quake1 maps
+r_drawviewmodel                                   1                   draw your weapon model
+r_dynamic                                         1                   enables dynamic lights (rocket glow and such)
+r_editlights                                      0                   enables .rtlights file editing mode
+r_editlights_cursordistance                       1024                maximum distance of cursor from eye
+r_editlights_cursorgrid                           4                   snaps cursor to this grid size
+r_editlights_cursorpushback                       0                   how far to pull the cursor back toward the eye
+r_editlights_cursorpushoff                        4                   how far to push the cursor off the impacted surface
+r_editlights_quakelightsizescale                  1                   changes size of light entities loaded from a map
+r_explosionclip                                   1                   enables collision detection for explosion shell (so that it flattens against walls and floors)
+r_fullbright                                      0                   makes map very bright and renders faster
+r_fullbrights                                     1                   enables glowing pixels in quake textures (changes need r_restart to take effect)
+r_glsl                                            1                   enables use of OpenGL 2.0 pixel shaders for lighting
+r_glsl_deluxemapping                              1                   use per pixel lighting on deluxemap-compiled q3bsp maps (or a value of 2 forces deluxemap shading even without deluxemaps)
+r_glsl_offsetmapping                              0                   offset mapping effect (also known as parallax mapping or virtual displacement mapping)
+r_glsl_offsetmapping_reliefmapping                0                   relief mapping effect (higher quality)
+r_glsl_offsetmapping_scale                        0.04                how deep the offset mapping effect is
+r_hdr                                             0                   enables High Dynamic Range bloom effect (higher quality version of r_bloom)
+r_hdr_glowintensity                               1                   how bright light emitting textures should appear
+r_hdr_range                                       4                   how much dynamic range to render bloom with (equivilant to multiplying r_bloom_brighten by this value and dividing r_bloom_colorscale by this value)
+r_hdr_scenebrightness                             1                   global rendering brightness
+r_lerpimages                                      1                   bilinear filters images when scaling them up to power of 2 size (mode 1), looks better than glquake (mode 0)
+r_lerpmodels                                      1                   enables animation smoothing on models
+r_lerpsprites                                     1                   enables animation smoothing on sprites
+r_letterbox                                       0                   reduces vertical height of view to simulate a letterboxed movie effect (can be used by mods for cutscenes)
+r_lightmaprgba                                    1                   whether to use RGBA (32bit) or RGB (24bit) lightmaps
+r_lightningbeam_color_blue                        1                   color of the lightning beam effect
+r_lightningbeam_color_green                       1                   color of the lightning beam effect
+r_lightningbeam_color_red                         1                   color of the lightning beam effect
+r_lightningbeam_qmbtexture                        0                   load the qmb textures/particles/lightning.pcx texture instead of generating one, can look better
+r_lightningbeam_repeatdistance                    128                 how far to stretch the texture along the lightning beam effect
+r_lightningbeam_scroll                            5                   speed of texture scrolling on the lightning beam effect
+r_lightningbeam_thickness                         4                   thickness of the lightning beam effect
+r_lockpvs                                         0                   disables pvs switching, allows you to walk around and inspect what is visible from a given location in the map (anything not visible from your current location will not be drawn)
+r_lockvisibility                                  0                   disables visibility updates, allows you to walk around and inspect what is visible from a given viewpoint in the map (anything offscreen at the moment this is enabled will not be drawn)
+r_mipskins                                        0                   mipmaps skins (so they become blurrier in the distance), disabled by default because it tends to blur with strange border colors from the skin
+r_mipsprites                                      1                   mipmaps skins (so they become blurrier in the distance), unlike skins the sprites do not have strange border colors
+r_nearclip                                        1                   distance from camera of nearclip plane
+r_nosurftextures                                  0                   pretends there was no texture lump found in the q1bsp/hlbsp loading (useful for debugging this rare case)
+r_novis                                           0                   draws whole level, see also sv_cullentities_pvs 0
+r_precachetextures                                1                   0 = never upload textures until used, 1 = upload most textures before use (exceptions: rarely used skin colormap layers), 2 = upload all textures before use (can increase texture memory usage significantly)
+r_q3bsp_renderskydepth                            0                   draws sky depth masking in q3 maps (as in q1 maps), this means for example that sky polygons can hide other things
+r_qb1sp_skymasking                                1                   allows sky polygons in quake1 maps to obscure other geometry
+r_render                                          1                   enables rendering calls (you want this on!)
+r_shadow_bumpscale_basetexture                    0                   generate fake bumpmaps from diffuse textures at this bumpyness, try 4 to match tenebrae, higher values increase depth, requires r_restart to take effect
+r_shadow_bumpscale_bumpmap                        4                   what magnitude to interpret _bump.tga textures as, higher values increase depth, requires r_restart to take effect
+r_shadow_culltriangles                            1                   performs more expensive tests to remove unnecessary triangles of lit surfaces
+r_shadow_debuglight                               -1                  renders only one light, for level design purposes or debugging
+r_shadow_frontsidecasting                         1                   whether to cast shadows from illuminated triangles (front side of model) or unlit triangles (back side of model)
+r_shadow_gloss                                    1                   0 disables gloss (specularity) rendering, 1 uses gloss if textures are found, 2 forces a flat metallic specular effect on everything without textures (similar to tenebrae)
+r_shadow_gloss2intensity                          0.125               how bright the forced flat gloss should look if r_shadow_gloss is 2
+r_shadow_glossexponent                            32                  how 'sharp' the gloss should appear (specular power)
+r_shadow_glossintensity                           1                   how bright textured glossmaps should look if r_shadow_gloss is 1 or 2
+r_shadow_lightattenuationpower                    0.5                 changes attenuation texture generation (does not affect r_glsl lighting)
+r_shadow_lightattenuationscale                    1                   changes attenuation texture generation (does not affect r_glsl lighting)
+r_shadow_lightintensityscale                      1                   renders all world lights brighter or darker
+r_shadow_lightradiusscale                         1                   renders all world lights larger or smaller
+r_shadow_portallight                              1                   use portal culling to exactly determine lit triangles when compiling world lights
+r_shadow_projectdistance                          1000000             how far to cast shadows
+r_shadow_realtime_dlight                          1                   enables rendering of dynamic lights such as explosions and rocket light
+r_shadow_realtime_dlight_portalculling            0                   enables portal optimization on dynamic lights (slow!)
+r_shadow_realtime_dlight_shadows                  1                   enables rendering of shadows from dynamic lights
+r_shadow_realtime_dlight_svbspculling             0                   enables svbsp optimization on dynamic lights (very slow!)
+r_shadow_realtime_world                           0                   enables rendering of full world lighting (whether loaded from the map, or a .rtlights file, or a .ent file, or a .lights file produced by hlight)
+r_shadow_realtime_world_compile                   1                   enables compilation of world lights for higher performance rendering
+r_shadow_realtime_world_compileportalculling      1                   enables portal-based culling optimization during compilation
+r_shadow_realtime_world_compileshadow             1                   enables compilation of shadows from world lights for higher performance rendering
+r_shadow_realtime_world_compilesvbsp              1                   enables svbsp optimization during compilation
+r_shadow_realtime_world_lightmaps                 0                   brightness to render lightmaps when using full world lighting, try 0.5 for a tenebrae-like appearance
+r_shadow_realtime_world_shadows                   1                   enables rendering of shadows from world lights
+r_shadow_scissor                                  1                   use scissor optimization of light rendering (restricts rendering to the portion of the screen affected by the light)
+r_shadow_polygonfactor                            0                   how much to enlarge shadow volume polygons when rendering (should be 0!)
+r_shadow_polygonoffset                            1                   how much to push shadow volumes into the distance when rendering, to reduce chances of zfighting artifacts (should not be less than 0)
+r_shadow_texture3d                                1                   use 3D voxel textures for spherical attenuation rather than cylindrical (does not affect r_glsl lighting)
+r_shadows                                         0                   casts fake stencil shadows from models onto the world (rtlights are unaffected by this)
+r_shadows_throwdistance                           500                 how far to cast shadows from models
+r_showcollisionbrushes                            0                   draws collision brushes in quake3 maps (mode 1), mode 2 disables rendering of world (trippy!)
+r_showcollisionbrushes_polygonfactor              -1                  expands outward the brush polygons a little bit, used to make collision brushes appear infront of walls
+r_showcollisionbrushes_polygonoffset              0                   nudges brush polygon depth in hardware depth units, used to make collision brushes appear infront of walls
+r_showdisabledepthtest                            0                   disables depth testing on r_show* cvars, allowing you to see what hidden geometry the graphics card is processing
+r_showlighting                                    0                   shows areas lit by lights, useful for finding out why some areas of a map render slowly (bright orange = lots of passes = slow), a value of 2 disables depth testing which can be interesting but not very useful
+r_shownormals                                     0                   shows per-vertex surface normals and tangent vectors for bumpmapped lighting
+r_showshadowvolumes                               0                   shows areas shadowed by lights, useful for finding out why some areas of a map render slowly (bright blue = lots of passes = slow), a value of 2 disables depth testing which can be interesting but not very useful
+r_showsurfaces                                    0                   1 shows surfaces as different colors, or a value of 2 shows triangle draw order (for analyzing whether meshes are optimized for vertex cache)
+r_showtris                                        0                   shows triangle outlines, value controls brightness (can be above 1)
+r_skeletal_debugbone                              -1                  development cvar for testing skeletal model code
+r_skeletal_debugbonecomponent                     3                   development cvar for testing skeletal model code
+r_skeletal_debugbonevalue                         100                 development cvar for testing skeletal model code
+r_skeletal_debugtranslatex                        1                   development cvar for testing skeletal model code
+r_skeletal_debugtranslatey                        1                   development cvar for testing skeletal model code
+r_skeletal_debugtranslatez                        1                   development cvar for testing skeletal model code
+r_sky                                             1                   enables sky rendering (black otherwise)
+r_skyscroll1                                      1                   speed at which upper clouds layer scrolls in quake sky
+r_skyscroll2                                      2                   speed at which lower clouds layer scrolls in quake sky
+r_smoothnormals_areaweighting                     1                   uses significantly faster (and supposedly higher quality) area-weighted vertex normals and tangent vectors rather than summing normalized triangle normals and tangents
+r_speeds                                          0                   displays rendering statistics and per-subsystem timings
+r_stereo_redblue                                  0                   red/blue anaglyph stereo glasses (note: most of these glasses are actually red/cyan, try that one too)
+r_stereo_redcyan                                  0                   red/cyan anaglyph stereo glasses, the kind given away at drive-in movies like Creature From The Black Lagoon In 3D
+r_stereo_redgreen                                 0                   red/green anaglyph stereo glasses (for those who don't mind yellow)
+r_stereo_separation                               4                   separation of eyes in the world (try negative values too)
+r_stereo_sidebyside                               0                   side by side views (for those who can't afford glasses but can afford eye strain)
+r_subdivide_size                                  128                 how large water polygons should be (smaller values produce more polygons which give better warping effects)
+r_subdivisions_collision_maxtess                  1024                maximum number of subdivisions (prevents curves beyond a certain detail level, limits smoothing)
+r_subdivisions_collision_maxvertices              4225                maximum vertices allowed per subdivided curve
+r_subdivisions_collision_mintess                  1                   minimum number of subdivisions (values above 1 will smooth curves that don't need it)
+r_subdivisions_collision_tolerance                15                  maximum error tolerance on curve subdivision for collision purposes (usually a larger error tolerance than for rendering)
+r_subdivisions_maxtess                            1024                maximum number of subdivisions (prevents curves beyond a certain detail level, limits smoothing)
+r_subdivisions_maxvertices                        65536               maximum vertices allowed per subdivided curve
+r_subdivisions_mintess                            1                   minimum number of subdivisions (values above 1 will smooth curves that don't need it)
+r_subdivisions_tolerance                          4                   maximum error tolerance on curve subdivision for rendering purposes (in other words, the curves will be given as many polygons as necessary to represent curves at this quality)
+r_test                                            0                   internal development use only, leave it alone (usually does nothing anyway)
+r_textshadow                                      0                   draws a shadow on all text to improve readability
+r_textureunits                                    32                  number of hardware texture units reported by driver (note: setting this to 1 turns off gl_combine)
+r_useportalculling                                1                   use advanced portal culling visibility method to improve performance over just Potentially Visible Set, provides an even more significant speed improvement in unvised maps
+r_wateralpha                                      1                   opacity of water polygons
+r_waterscroll                                     1                   makes water scroll around, value controls how much
+r_waterwarp                                       1                   warp view while underwater
+rcon_address                                                          server address to send rcon commands to (when not connected to a server)
+rcon_password                                                         password to authenticate rcon commands
+registered                                        0                   indicates if this is running registered quake (whether gfx/pop.lmp was found)
+samelevel                                         0                   repeats same level if level ends (due to timelimit or someone hitting an exit)
+saved1                                            0                   unused cvar in quake that is saved to config.cfg on exit, can be used by mods
+saved2                                            0                   unused cvar in quake that is saved to config.cfg on exit, can be used by mods
+saved3                                            0                   unused cvar in quake that is saved to config.cfg on exit, can be used by mods
+saved4                                            0                   unused cvar in quake that is saved to config.cfg on exit, can be used by mods
+savedgamecfg                                      0                   unused cvar in quake that is saved to config.cfg on exit, can be used by mods
+sbar_alpha_bg                                     0.4                 opacity value of the statusbar background image
+sbar_alpha_fg                                     1                   opacity value of the statusbar weapon/item icons and numbers
+scr_centertime                                    2                   how long centerprint messages show
+scr_conalpha                                      1                   opacity of console background
+scr_conbrightness                                 1                   brightness of console background (0 = black, 1 = image)
+scr_conforcewhiledisconnected                     1                   forces fullscreen console while disconnected
+scr_menuforcewhiledisconnected                    0                   forces menu while disconnected
+scr_printspeed                                    8                   speed of intermission printing (episode end texts)
+scr_refresh                                       1                   allows you to completely shut off rendering for benchmarking purposes
+scr_screenshot_gammaboost                         1                   gamma correction on saved screenshots and videos, 1.0 saves unmodified images
+scr_screenshot_jpeg                               1                   save jpeg instead of targa
+scr_screenshot_jpeg_quality                       0.9                 image quality of saved jpeg
+scr_screenshot_name                               dp                  prefix name for saved screenshots (changes based on -game commandline, as well as which game mode is running)
+scr_stipple                                       0                   interlacing-like stippling of the display
+scr_zoomwindow                                    0                   displays a zoomed in overlay window
+scr_zoomwindow_fov                                20                  fov of zoom window
+scr_zoomwindow_viewsizex                          20                  horizontal viewsize of zoom window
+scr_zoomwindow_viewsizey                          20                  vertical viewsize of zoom window
+scratch1                                          0                   unused cvar in quake, can be used by mods
+scratch2                                          0                   unused cvar in quake, can be used by mods
+scratch3                                          0                   unused cvar in quake, can be used by mods
+scratch4                                          0                   unused cvar in quake, can be used by mods
+sensitivity                                       3                   mouse speed multiplier
+showbrand                                         0                   shows gfx/brand.tga in a corner of the screen (different values select different positions, including centered)
+showdate                                          0                   shows current date (useful on screenshots)
+showdate_format                                   %Y-%m-%d            format string for date
+showfps                                           0                   shows your rendered fps (frames per second)
+showpause                                         1                   show pause icon when game is paused
+showram                                           1                   show ram icon if low on surface cache memory (not used)
+showspeed                                         0                   shows your current speed (qu per second); number selects unit: 1 = qups, 2 = m/s, 3 = km/h, 4 = mph, 5 = knots
+showtime                                          0                   shows current time of day (useful on screenshots)
+showtime_format                                   %H:%M:%S            format string for time of day
+showturtle                                        0                   show turtle icon when framerate is too low (not used)
+skill                                             1                   difficulty level of game, affects monster layouts in levels, 0 = easy, 1 = normal, 2 = hard, 3 = nightmare (same layout as hard but monsters fire twice)
+skin                                                                  QW player skin name (example: base)
+slowmo                                            1.0                 controls game speed, 0.5 is half speed, 2 is double speed
+snd_channellayout                                 0                   channel layout. Can be 0 (auto - snd_restart needed), 1 (standard layout), or 2 (ALSA layout)
+snd_channels                                      2                   number of channels for the sound ouput (2 for stereo; up to 8 supported for 3D sound)
+snd_initialized                                   0                   indicates the sound subsystem is active
+snd_noextraupdate                                 0                   disables extra sound mixer calls that are meant to reduce the chance of sound breakup at very low framerates
+snd_precache                                      1                   loads sounds before they are used
+snd_show                                          0                   shows some statistics about sound mixing
+snd_soundradius                                   1000                radius of weapon sounds and other standard sound effects (monster idle noises are half this radius and flickering light noises are one third of this radius)
+snd_speed                                         48000               sound output frequency, in hertz
+snd_staticvolume                                  1                   volume of ambient sound effects (such as swampy sounds at the start of e1m2)
+snd_streaming                                     1                   enables keeping compressed ogg sound files compressed, decompressing them only as needed, otherwise they will be decompressed completely at load (may use a lot of memory)
+snd_swapstereo                                    0                   swaps left/right speakers for old ISA soundblaster cards
+snd_width                                         2                   sound output precision, in bytes (1 and 2 supported)
+sv_accelerate                                     10                  rate at which a player accelerates to sv_maxspeed
+sv_adminnick                                                          nick name to use for admin messages instead of host name
+sv_aim                                            2                   maximum cosine angle for quake's vertical autoaim, a value above 1 completely disables the autoaim, quake used 0.93
+sv_airaccelerate                                  -1                  rate at which a player accelerates to sv_maxairspeed while in the air, if less than 0 the sv_accelerate variable is used instead
+sv_allowdownloads                                 1                   whether to allow clients to download files from the server (does not affect http downloads)
+sv_allowdownloads_archive                         0                   whether to allow downloads of archives (pak/pk3)
+sv_allowdownloads_config                          0                   whether to allow downloads of config files (cfg)
+sv_allowdownloads_dlcache                         0                   whether to allow downloads of dlcache files (dlcache/)
+sv_allowdownloads_inarchive                       0                   whether to allow downloads from archives (pak/pk3)
+sv_areagrid_mingridsize                           64                  minimum areagrid cell size, smaller values work better for lots of small objects, higher values for large objects
+sv_cheats                                         0                   enables cheat commands in any game, and cheat impulses in dpmod
+sv_clmovement_enable                              1                   whether to allow clients to use cl_movement prediction, which can cause choppy movement on the server which may annoy other players
+sv_clmovement_minping                             0                   if client ping is below this time in milliseconds, then their ability to use cl_movement prediction is disabled for a while (as they don't need it)
+sv_clmovement_minping_disabletime                 1000                when client falls below minping, disable their prediction for this many milliseconds (should be at least 1000 or else their prediction may turn on/off frequently)
+sv_clmovement_inputtimeout                        0.2                 when a client does not send input for this many seconds, force them to move anyway (unlike QuakeWorld)
+sv_cullentities_nevercullbmodels                  0                   if enabled the clients are always notified of moving doors and lifts and other submodels of world (warning: eats a lot of network bandwidth on some levels!)
+sv_cullentities_pvs                               1                   fast but loose culling of hidden entities
+sv_cullentities_stats                             0                   displays stats on network entities culled by various methods for each client
+sv_cullentities_trace                             0                   somewhat slow but very tight culling of hidden entities, minimizes network traffic and makes wallhack cheats useless
+sv_cullentities_trace_delay                       1                   number of seconds until the entity gets actually culled
+sv_cullentities_trace_enlarge                     0                   box enlargement for entity culling
+sv_cullentities_trace_prediction                  1                   also trace from the predicted player position
+sv_cullentities_trace_samples                     1                   number of samples to test for entity culling
+sv_cullentities_trace_samples_extra               2                   number of samples to test for entity culling when the entity affects its surroundings by e.g. dlight
+sv_curl_defaulturl                                                    default autodownload source URL
+sv_curl_serverpackages                                                list of required files for the clients, separated by spaces
+sv_debugmove                                      0                   disables collision detection optimizations for debugging purposes
+sv_echobprint                                     1                   prints gamecode bprint() calls to server console
+sv_entpatch                                       1                   enables loading of .ent files to override entities in the bsp (for example Threewave CTF server pack contains .ent patch files enabling play of CTF on id1 maps)
+sv_fixedframeratesingleplayer                     0                   allows you to use server-style timing system in singleplayer (don't run faster than sys_ticrate)
+sv_freezenonclients                               0                   freezes time, except for players, allowing you to walk around and take screenshots of explosions
+sv_friction                                       4                   how fast you slow down
+sv_gameplayfix_blowupfallenzombies                1                   causes findradius to detect SOLID_NOT entities such as zombies and corpses on the floor, allowing splash damage to apply to them
+sv_gameplayfix_droptofloorstartsolid              1                   prevents items and monsters that start in a solid area from falling out of the level (makes droptofloor treat trace_startsolid as an acceptable outcome)
+sv_gameplayfix_findradiusdistancetobox            1                   causes findradius to check the distance to the corner of a box rather than the center of the box, makes findradius detect bmodels such as very large doors that would otherwise be unaffected by splash damage
+sv_gameplayfix_grenadebouncedownslopes            1                   prevents MOVETYPE_BOUNCE (grenades) from getting stuck when fired down a downward sloping surface
+sv_gameplayfix_noairborncorpse                    1                   causes entities (corpses) sitting ontop of moving entities (players) to fall when the moving entity (player) is no longer supporting them
+sv_gameplayfix_qwplayerphysics                    1                   changes water jumping to make it easier to get out of water, and prevents friction on landing when bunnyhopping
+sv_gameplayfix_setmodelrealbox                    1                   fixes a bug in Quake that made setmodel always set the entity box to ('-16 -16 -16', '16 16 16') rather than properly checking the model box, breaks some poorly coded mods
+sv_gameplayfix_stepdown                           0                   attempts to step down stairs, not just up them (prevents the familiar thud..thud..thud.. when running down stairs and slopes)
+sv_gameplayfix_stepwhilejumping                   1                   applies step-up onto a ledge even while airborn, useful if you would otherwise just-miss the floor when running across small areas with gaps (for instance running across the moving platforms in dm2, or jumping to the megahealth and red armor in dm2 rather than using the bridge)
+sv_gameplayfix_swiminbmodels                      1                   causes pointcontents (used to determine if you are in a liquid) to check bmodel entities as well as the world model, so you can swim around in (possibly moving) water bmodel entities
+sv_gameplayfix_upwardvelocityclearsongroundflag   1                   prevents monsters, items, and most other objects from being stuck to the floor when pushed around by damage, and other situations in mods
+sv_gravity                                        800                 how fast you fall (512 = roughly earth gravity)
+sv_heartbeatperiod                                120                 how often to send heartbeat in seconds (only used if sv_public is 1)
+sv_idealpitchscale                                0.8                 how much to look up/down slopes and stairs when not using freelook
+sv_jumpstep                                       0                   whether you can step up while jumping (sv_gameplayfix_stepwhilejumping must also be 1)
+sv_master1                                                            user-chosen master server 1
+sv_master2                                                            user-chosen master server 2
+sv_master3                                                            user-chosen master server 3
+sv_master4                                                            user-chosen master server 4
+sv_maxairspeed                                    30                  maximum speed a player can accelerate to when airborn (note that it is possible to completely stop by moving the opposite direction)
+sv_maxrate                                        10000               upper limit on client rate cvar, should reflect your network connection quality
+sv_maxspeed                                       320                 maximum speed a player can accelerate to when on ground (can be exceeded by tricks)
+sv_maxvelocity                                    2000                universal speed limit on all entities
+sv_newflymove                                     0                   enables simpler/buggier player physics (not recommended)
+sv_nostep                                         0                   prevents MOVETYPE_STEP entities (monsters) from moving
+sv_playerphysicsqc                                1                   enables QuakeC function to override player physics
+sv_progs                                          progs.dat           selects which quakec progs.dat file to run
+sv_protocolname                                   DP7                 selects network protocol to host for (values include QUAKE, QUAKEDP, NEHAHRAMOVIE, DP1 and up)
+sv_public                                         0                   1: advertises this server on the master server (so that players can find it in the server browser); 0: allow direct queries only; -1: do not respond to direct queries; -2: do not allow anyone to connect
+sv_qwmaster1                                                          user-chosen qwmaster server 1
+sv_qwmaster2                                                          user-chosen qwmaster server 2
+sv_qwmaster3                                                          user-chosen qwmaster server 3
+sv_qwmaster4                                                          user-chosen qwmaster server 4
+sv_random_seed                                                        random seed; when set, on every map start this random seed is used to initialize the random number generator. Don't touch it unless for benchmarking or debugging
+sv_ratelimitlocalplayer                           0                   whether to apply rate limiting to the local player in a listen server (only useful for testing)
+sv_sound_land                                     demon/dland2.wav    sound to play when MOVETYPE_STEP entity hits the ground at high speed (empty cvar disables the sound)
+sv_sound_watersplash                              misc/h2ohit1.wav    sound to play when MOVETYPE_FLY/TOSS/BOUNCE/STEP entity enters or leaves water (empty cvar disables the sound)
+sv_stepheight                                     18                  how high you can step up (TW_SV_STEPCONTROL extension)
+sv_stopspeed                                      100                 how fast you come to a complete stop
+sv_wallfriction                                   1                   how much you slow down when sliding along a wall
+sv_wateraccelerate                                -1                  rate at which a player accelerates to sv_maxspeed while in the air, if less than 0 the sv_accelerate variable is used instead
+sv_waterfriction                                  -1                  how fast you slow down, if less than 0 the sv_friction variable is used instead
+sys_colortranslation                              0                   terminal console color translation (supported values: 0 = strip color codes, 1 = translate to ANSI codes, 2 = no translation)
+sys_colortranslation                              1                   terminal console color translation (supported values: 0 = strip color codes, 1 = translate to ANSI codes, 2 = no translation)
+sys_specialcharactertranslation                   1                   terminal console conchars to ASCII translation (set to 0 if your conchars.tga is for an 8bit character set or if you want raw output)
+sys_ticrate                                       0.05                how long a server frame is in seconds, 0.05 is 20fps server rate, 0.1 is 10fps (can not be set higher than 0.1), 0 runs as many server frames as possible (makes games against bots a little smoother, overwhelms network players)
+sys_usetimegettime                                1                   use windows timeGetTime function (which has issues on some motherboards) for timing rather than QueryPerformanceCounter timer (which has issues on multicore/multiprocessor machines and processors which are designed to conserve power)
+team                                              none                QW team (4 character limit, example: blue)
+teamplay                                          0                   teamplay mode, values depend on mod but typically 0 = no teams, 1 = no team damage no self damage, 2 = team damage and self damage, some mods support 3 = no team damage but can damage self
+temp1                                             0                   general cvar for mods to use, in stock id1 this selects which death animation to use on players (0 = random death, other values select specific death scenes)
+timeformat                                        [%Y-%m-%d %H:%M:%S] time format to use on timestamped console messages
+timelimit                                         0                   ends level at this time (in minutes)
+timestamps                                        0                   prints timestamps on console messages
+v_brightness                                      0                   brightness of black, useful for monitors that are too dark
+v_centermove                                      0.15                how long before the view begins to center itself (if freelook/+mlook/+jlook/+klook are off)
+v_centerspeed                                     500                 how fast the view centers itself
+v_color_black_b                                   0                   desired color of black
+v_color_black_g                                   0                   desired color of black
+v_color_black_r                                   0                   desired color of black
+v_color_enable                                    0                   enables black-grey-white color correction curve controls
+v_color_grey_b                                    0.5                 desired color of grey
+v_color_grey_g                                    0.5                 desired color of grey
+v_color_grey_r                                    0.5                 desired color of grey
+v_color_white_b                                   1                   desired color of white
+v_color_white_g                                   1                   desired color of white
+v_color_white_r                                   1                   desired color of white
+v_contrast                                        1                   brightness of white (values above 1 give a brighter image with increased color saturation, unlike v_gamma)
+v_deathtilt                                       1                   whether to use sideways view when dead
+v_deathtiltangle                                  80                  what roll angle to use when tilting the view while dead
+v_gamma                                           1                   inverse gamma correction value, a brightness effect that does not affect white or black, and tends to make the image grey and dull
+v_hwgamma                                         1                   enables use of hardware gamma correction ramps if available (note: does not work very well on Windows2000 and above), values are 0 = off, 1 = attempt to use hardware gamma, 2 = use hardware gamma whether it works or not
+v_idlescale                                       0                   how much of the quake 'drunken view' effect to use
+v_ipitch_cycle                                    1                   v_idlescale pitch speed
+v_ipitch_level                                    0.3                 v_idlescale pitch amount
+v_iroll_cycle                                     0.5                 v_idlescale roll speed
+v_iroll_level                                     0.1                 v_idlescale roll amount
+v_iyaw_cycle                                      2                   v_idlescale yaw speed
+v_iyaw_level                                      0.3                 v_idlescale yaw amount
+v_kickpitch                                       0.6                 how much a view kick from damage pitches your view
+v_kickroll                                        0.6                 how much a view kick from damage rolls your view
+v_kicktime                                        0.5                 how long a view kick from damage lasts
+v_psycho                                          0                   easter egg (does not work on Windows2000 or above)
+vid_bitsperpixel                                  32                  how many bits per pixel to render at (32 or 16, 32 is recommended)
+vid_conheight                                     480                 virtual height of 2D graphics system
+vid_conwidth                                      640                 virtual width of 2D graphics system
+vid_dgamouse                                      1                   make use of DGA mouse input
+vid_fullscreen                                    1                   use fullscreen (1) or windowed (0)
+vid_grabkeyboard                                  1                   whether to grab the keyboard when mouse is active (prevents use of volume control keys, music player keys, etc on some keyboards)
+vid_hardwaregammasupported                        1                   indicates whether hardware gamma is supported (updated by attempts to set hardware gamma ramps)
+vid_height                                        480                 resolution
+vid_minheight                                     0                   minimum vid_height that is acceptable (to be set in default.cfg in mods)
+vid_minwidth                                      0                   minimum vid_width that is acceptable (to be set in default.cfg in mods)
+vid_mouse                                         1                   whether to use the mouse in windowed mode (fullscreen always does)
+vid_pixelheight                                   1                   adjusts vertical field of vision to account for non-square pixels (1280x1024 on a CRT monitor for example)
+vid_refreshrate                                   60                  refresh rate to use, in hz (higher values flicker less, if supported by your monitor)
+vid_stereobuffer                                  0                   enables 'quad-buffered' stereo rendering for stereo shutterglasses, HMD (head mounted display) devices, or polarized stereo LCDs, if supported by your drivers
+vid_vsync                                         0                   sync to vertical blank, prevents 'tearing' (seeing part of one frame and part of another on the screen at the same time), automatically disabled when doing timedemo benchmarks
+vid_width                                         640                 resolution
+viewsize                                          100                 how large the view should be, 110 disables inventory bar, 120 disables status bar
+volume                                            0.7                 volume of sound effects
+
+
+
+Full console command list as of 2007-03-11:
++attack                                           begin firing
++back                                             move backward
++button3                                          activate button3 (behavior depends on mod)
++button4                                          activate button4 (behavior depends on mod)
++button5                                          activate button5 (behavior depends on mod)
++button6                                          activate button6 (behavior depends on mod)
++button7                                          activate button7 (behavior depends on mod)
++button8                                          activate button8 (behavior depends on mod)
++button9                                          activate button9 (behavior depends on mod)
++button10                                         activate button10 (behavior depends on mod)
++button11                                         activate button11 (behavior depends on mod)
++button12                                         activate button12 (behavior depends on mod)
++button13                                         activate button13 (behavior depends on mod)
++button14                                         activate button14 (behavior depends on mod)
++button15                                         activate button15 (behavior depends on mod)
++button16                                         activate button16 (behavior depends on mod)
++forward                                          move forward
++jump                                             jump
++klook                                            activate keyboard looking mode, do not recenter view
++left                                             turn left
++lookdown                                         look downward
++lookup                                           look upward
++mlook                                            activate mouse looking mode, do not recenter view
++movedown                                         swim downward
++moveleft                                         strafe left
++moveright                                        strafe right
++moveup                                           swim upward
++right                                            turn right
++showscores                                       show scoreboard
++speed                                            activate run mode (faster movement and turning)
++strafe                                           activate strafing mode (move instead of turn)
++use                                              use something (may be used by some mods)
+-attack                                           stop firing
+-back                                             stop moving backward
+-button3                                          deactivate button3
+-button4                                          deactivate button4
+-button5                                          deactivate button5
+-button6                                          deactivate button6
+-button7                                          deactivate button7
+-button8                                          deactivate button8
+-button9                                          deactivate button9
+-button10                                         deactivate button10
+-button11                                         deactivate button11
+-button12                                         deactivate button12
+-button13                                         deactivate button13
+-button14                                         deactivate button14
+-button15                                         deactivate button15
+-button16                                         deactivate button16
+-forward                                          stop moving forward
+-jump                                             end jump (so you can jump again)
+-klook                                            deactivate keyboard looking mode
+-left                                             stop turning left
+-lookdown                                         stop looking downward
+-lookup                                           stop looking upward
+-mlook                                            deactivate mouse looking mode
+-movedown                                         stop swimming downward
+-moveleft                                         stop strafing left
+-moveright                                        stop strafing right
+-moveup                                           stop swimming upward
+-right                                            stop turning right
+-showscores                                       hide scoreboard
+-speed                                            deactivate run mode
+-strafe                                           deactivate strafing mode
+-use                                              stop using something
+alias                                             create a script function (parameters are passed in as $1 through $9, and $* for all parameters)
+begin                                             signon 3 (client asks server to start sending entities, and will go to signon 4 (playing) when the first entity update is received)
+bestweapon                                        send an impulse number to server to select the first usable weapon out of several (example: 8 7 6 5 4 3 2 1)
+bf                                                briefly flashes a bright color tint on view (used when items are picked up)
+bind                                              binds a command to the specified key in bindmap 0
+bottomcolor                                       QW command to set bottom color without changing top color
+cd                                                execute a CD drive command (cd on/off/reset/remap/close/play/loop/stop/pause/resume/eject/info) - use cd by itself for usage
+cddrive                                           select an SDL-detected CD drive by number
+centerview                                        gradually recenter view (stop looking up/down)
+changelevel                                       change to another level, bringing along all connected clients
+changing                                          sent by qw servers to tell client to wait for level change
+cycleweapon                                       send an impulse number to server to select the next usable weapon out of several, or the first if you are not holding any (example: 8 7 3)
+cl_areastats                                      prints statistics on entity culling during collision traces
+cl_begindownloads                                 used internally by darkplaces client while connecting (causes loading of models and sounds or triggers downloads for missing ones)
+cl_downloadbegin                                  (networking) informs client of download file information, client replies with sv_startsoundload to begin the transfer
+cl_downloadfinished                               signals that a download has finished and provides the client with file size and crc to check its integrity
+cl_particles_reloadeffects                        reloads effectinfo.txt
+clear                                             clear console history
+cmd                                               send a console commandline to the server (used by some mods)
+cmdlist                                           lists all console commands beginning with the specified prefix
+color                                             change your player shirt and pants colors
+condump                                           output console history to a file (see also log_file)
+connect                                           connect to a server by IP address or hostname
+curl                                              download data from an URL and add to search path
+cvar_lockdefaults                                 stores the current values of all cvars into their default values, only used once during startup after parsing default.cfg
+cvar_resettodefaults_all                          sets all cvars to their locked default values
+cvar_resettodefaults_nosaveonly                   sets all non-saved cvars to their locked default values (variables that will not be saved to config.cfg)
+cvar_resettodefaults_saveonly                     sets all saved cvars to their locked default values (variables that will be saved to config.cfg)
+cvarlist                                          lists all console variables beginning with the specified prefix
+demos                                             restart looping demos defined by the last startdemos command
+dir                                               list files in searchpath matching an * filename pattern, one per line
+disconnect                                        disconnect from server (or disconnect all clients if running a server)
+download                                          downloads a specified file from the server
+echo                                              print a message to the console (useful in scripts)
+entities                                          print information on network entities known to client
+envmap                                            render a cubemap (skybox) of the current scene
+exec                                              execute a script file
+fly                                               fly mode (flight)
+fog                                               set global fog parameters (density red green blue mindist maxdist)
+force_centerview                                  recenters view (stops looking up/down)
+fs_rescan                                         rescans filesystem for new pack archives and any other changes
+fullinfo                                          allows client to modify their userinfo
+fullserverinfo                                    internal use only, sent by server to client to update client's local copy of serverinfo string
+gamedir                                           changes active gamedir list (can take multiple arguments), not including base directory (example usage: gamedir ctf)
+give                                              alter inventory
+gl_texturemode                                    set texture filtering mode (GL_NEAREST, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, etc)
+god                                               god mode (invulnerability)
+heartbeat                                         send a heartbeat to the master server (updates your server information)
+help                                              open the help menu
+impulse                                           send an impulse number to server (select weapon, use item, etc)
+in_bind                                           binds a command to the specified key in the selected bindmap
+in_bindmap                                        selects active foreground and background (used only if a key is not bound in the foreground) bindmaps for typing
+in_unbind                                         removes command on the specified key in the selected bindmap
+joyadvancedupdate                                 applies current joyadv* cvar settings to the joystick driver
+kick                                              kick a player off the server by number or name
+kill                                              die instantly
+load                                              load a saved game file
+loadconfig                                        reset everything and reload configs
+loadsky                                           load a skybox by basename (for example loadsky mtnsun_ loads mtnsun_ft.tga and so on)
+locs_add                                          add a point or box location (usage: x y z[ x y z] \
+locs_clear                                        remove all loc points/boxes
+locs_reload                                       reload .loc file for this map
+locs_removenearest                                remove the nearest point or box (note: you need to be very near a box to remove it)
+locs_save                                         save .loc file for this map containing currently defined points and boxes
+ls                                                list files in searchpath matching an * filename pattern, multiple per line
+map                                               kick everyone off the server and start a new level
+maps                                              list information about available maps
+maxplayers                                        sets limit on how many players (or bots) may be connected to the server at once
+memlist                                           prints memory pool information (or if used as memlist 5 lists individual allocations of 5K or larger, 0 lists all allocations)
+memstats                                          prints memory system statistics
+menu_credits                                      open the credits menu
+menu_fallback                                     switch to engine menu (unload menu.dat)
+menu_keys                                         open the key binding menu
+menu_load                                         open the loadgame menu
+menu_main                                         open the main menu
+menu_multiplayer                                  open the multiplayer menu
+menu_options                                      open the options menu
+menu_options_colorcontrol                         open the color control menu
+menu_options_effects                              open the effects options menu
+menu_options_graphics                             open the graphics options menu
+menu_quit                                         open the quit menu
+menu_reset                                        open the reset to defaults menu
+menu_restart                                      restart menu system (reloads menu.dat
+menu_save                                         open the savegame menu
+menu_setup                                        open the player setup menu
+menu_singleplayer                                 open the singleplayer menu
+menu_transfusion_episode                          open the transfusion episode select menu
+menu_transfusion_skill                            open the transfusion skill select menu
+menu_video                                        open the video options menu
+messagemode                                       input a chat message to say to everyone
+messagemode2                                      input a chat message to say to only your team
+modellist                                         prints a list of loaded models
+modelprecache                                     load a model
+name                                              change your player name
+net_slist                                         query dp master servers and print all server information
+net_slistqw                                       query qw master servers and print all server information
+net_stats                                         print network statistics
+nextul                                            sends next fragment of current upload buffer (screenshot for example)
+noclip                                            noclip mode (flight without collisions, move through walls)
+notarget                                          notarget mode (monsters do not see you)
+packet                                            send a packet to the specified address:port containing a text string
+path                                              print searchpath (game directories and archives)
+pause                                             pause the game (if the server allows pausing)
+pausedemo                                         pause demo playback (can also safely pause demo recording if using QUAKE, QUAKEDP or NEHAHRAMOVIE protocol, useful for making movies)
+ping                                              print ping times of all players on the server
+pingplreport                                      command sent by server containing client ping and packet loss values for scoreboard, triggered by pings command from client (not used by QW servers)
+pings                                             command sent by clients to request updated ping and packetloss of players on scoreboard (originally from QW, but also used on NQ servers)
+play                                              play a sound at your current location (not heard by anyone else)
+play2                                             play a sound globally throughout the level (not heard by anyone else)
+playdemo                                          watch a demo file
+playermodel                                       change your player model
+playerskin                                        change your player skin number
+playvideo                                         play a .dpv video file
+playvol                                           play a sound at the specified volume level at your current location (not heard by anyone else)
+pmodel                                            change your player model choice (Nehahra specific)
+pointfile                                         display point file produced by qbsp when a leak was detected in the map (a line leading through the leak hole, to an entity inside the level)
+prespawn                                          signon 1 (client acknowledges that server information has been received)
+prvm_edict                                        print all data about an entity number in the selected VM (server, client, menu)
+prvm_edictcount                                   prints number of active entities in the selected VM (server, client, menu)
+prvm_edicts                                       set a property on an entity number in the selected VM (server, client, menu)
+prvm_edictset                                     changes value of a specified property of a specified entity in the selected VM (server, client, menu)
+prvm_fields                                       prints usage statistics on properties (how many entities have non-zero values) in the selected VM (server, client, menu)
+prvm_global                                       prints value of a specified global variable in the selected VM (server, client, menu)
+prvm_globals                                      prints all global variables in the selected VM (server, client, menu)
+prvm_globalset                                    sets value of a specified global variable in the selected VM (server, client, menu)
+prvm_printfunction                                prints a disassembly (QuakeC instructions) of the specified function in the selected VM (server, client, menu)
+prvm_profile                                      prints execution statistics about the most used QuakeC functions in the selected VM (server, client, menu)
+quit                                              quit the game
+r_editlights_clear                                removes all world lights (let there be darkness!)
+r_editlights_copyinfo                             store a copy of all properties (except origin) of the selected light
+r_editlights_edit                                 changes a property on the selected light
+r_editlights_editall                              changes a property on ALL lights at once (tip: use radiusscale and colorscale to alter these properties)
+r_editlights_help                                 prints documentation on console commands and variables in rtlight editing system
+r_editlights_importlightentitiesfrommap           load lights from .ent file or map entities (ignoring .rtlights or .lights file)
+r_editlights_importlightsfile                     load lights from .lights file (ignoring .rtlights or .ent files and map entities)
+r_editlights_pasteinfo                            apply the stored properties onto the selected light (making it exactly identical except for origin)
+r_editlights_reload                               reloads rtlights file (or imports from .lights file or .ent file or the map itself)
+r_editlights_remove                               remove selected light
+r_editlights_save                                 save .rtlights file for current level
+r_editlights_spawn                                creates a light with default properties (let there be light!)
+r_editlights_togglecorona                         toggle on/off the corona option on the selected light
+r_editlights_toggleshadow                         toggle on/off the shadow option on the selected light
+r_glsl_restart                                    unloads GLSL shaders, they will then be reloaded as needed
+r_listmaptextures                                 list all textures used by the current map
+r_replacemaptexture                               override a map texture for testing purposes
+r_restart                                         restarts renderer
+r_shadow_help                                     prints documentation on console commands and variables used by realtime lighting and shadowing system
+r_texturestats                                    print information about all loaded textures and some statistics
+rate                                              change your network connection speed
+rcon                                              sends a command to the server console (if your rcon_password matches the server's rcon_password), or to the address specified by rcon_address when not connected (again rcon_password must match the server's)
+reconnect                                         reconnect to the last server you were on, or resets a quakeworld connection (do not use if currently playing on a netquake server)
+record                                            record a demo
+restart                                           restart current level
+save                                              save the game to a file
+saveconfig                                        save settings to config.cfg immediately (also automatic when quitting)
+say                                               send a chat message to everyone on the server
+say_team                                          send a chat message to your team on the server
+screenshot                                        takes a screenshot of the next rendered frame
+sendcvar                                          sends the value of a cvar to the server as a sentcvar command, for use by QuakeC
+set                                               create or change the value of a console variable
+seta                                              create or change the value of a console variable that will be saved to config.cfg
+setinfo                                           modifies your userinfo
+sizedown                                          decrease view size (decreases viewsize cvar)
+sizeup                                            increase view size (increases viewsize cvar)
+skins                                             downloads missing qw skins from server
+snd_unloadallsounds                               unload all sound files
+snd_restart                                       restart sound system
+soundinfo                                         print sound system information (such as channels and speed)
+soundlist                                         list loaded sounds
+spawn                                             signon 2 (client has sent player information, and is asking server to send scoreboard rankings)
+startdemos                                        start playing back the selected demos sequentially (used at end of startup script)
+status                                            print server status information
+stop                                              stop recording or playing a demo
+stopdemo                                          stop playing or recording demo (like stop command) and return to looping demos
+stopdownload                                      terminates a download
+stopsound                                         silence
+stopul                                            aborts current upload (screenshot for example)
+stopvideo                                         stop playing a .dpv video file
+stuffcmds                                         execute commandline parameters (must be present in quake.rc script)
+sv_areastats                                      prints statistics on entity culling during collision traces
+sv_saveentfile                                    save map entities to .ent file (to allow external editing)
+sv_startdownload                                  begins sending a file to the client (network protocol use only)
+tell                                              send a chat message to only one person on the server
+timedemo                                          play back a demo as fast as possible and save statistics to benchmark.log
+timerefresh                                       turn quickly and print rendering statistcs
+toggle                                            toggles a console variable's values (use for more info)
+toggleconsole                                     opens or closes the console
+togglemenu                                        opens or closes menu
+topcolor                                          QW command to set top color without changing bottom color
+unbind                                            removes a command on the specified key in bindmap 0
+unbindall                                         removes all commands from all keys in all bindmaps (leaving only shift-escape and escape)
+user                                              prints additional information about a player number or name on the scoreboard
+users                                             prints additional information about all players on the scoreboard
+v_cshift                                          sets tint color of view
+version                                           print engine version
+vid_restart                                       restarts video system (closes and reopens the window, restarts renderer)
+viewframe                                         change animation frame of viewthing entity in current level
+viewmodel                                         change model of viewthing entity in current level
+viewnext                                          change to next animation frame of viewthing entity in current level
+viewprev                                          change to previous animation frame of viewthing entity in current level
+wait                                              make script execution wait for next rendered frame
+which                                             accepts a file name as argument and reports where the file is taken from
+
+
+How to install Quake on Windows:
+All that DarkPlaces needs from the Quake CD is pak files (be sure not to copy opengl32.dll from the Quake CD, it will not work with DarkPlaces!), with this in mind, all you need to do is make a Quake directory, extract the darkplaces engine zip to that directory, then make a quake/id1 directory, and put the pak0.pak and pak1.pak from your Quake CD into the quake/id1 directory, then all should be well.
+
+How to deal with a DOS Quake CD on Windows:
+Try to use the DOS Quake installer if you can, use DOSBox if necessary to run the installer, then copy the pak0.pak and pak1.pak to your id1 directory in the darkplaces installation.  ( http://dosbox.sourceforge.net )
+
+How to deal with a WinQuake CD on Windows:
+Copy the D:\Data\id1\pak0.pak and pak1.pak to your id1 directory.
+
+How to deal with a Linux Quake CD on Windows:
+Find an archiver (perhaps 7zip or winrar) that can extract files from rpm archives, locate the pak files and copy them to your id1 directory.
+
+
+
+How to install Quake on Linux:
+All that DarkPlaces needs from the Quake CD is pak files, with this in mind, all you need to do is make a ~/quake directory, extract the darkplaces engine zip to that directory, then make a quake/id1 directory, and put the pak0.pak and pak1.pak from your Quake CD into the quake/id1 directory, then all should be well, you will probably also want to make a ~/bin/darkplaces script containing the following text:
+#!/bin/sh
+cd ~/quake
+./darkplaces-sdl $*
+Then do chmod +x ~/bin/darkplaces
+
+For more information on Quake installation on Linux see http://www.tldp.org/HOWTO/Quake-HOWTO.html" (the Linux Quake How To)
+
+How to deal with a DOS Quake CD on Linux:
+cat /media/cdrom/resource.001 /media/cdrom/resource.002 >quake.lha
+unlha x quake.lha
+If you can't get unlha or lha for your distribution, try using DOSBox to run the Quake installer.
+
+How to deal with a WinQuake CD on Linux:
+Copy the /media/cdrom/data/id1/pak*.pak to your id1 directory.
+
+How to deal with a Linux Quake CD on Linux:
+mkdir temp
+cd temp
+# in the following line replace quake.rpm with a correct rpm filename
+cat /media/cdrom/quake.rpm | rpm2cpio | cpio -i
+Now you should have a mess of subdirectories, locate the pak files and copy to your id1 directory.
+Alternatively if you have an rpm-based distribution you could install the rpm, but it is easier to maintain your ~/quake directory than /usr/share/games/quake so you may want to copy the id1/pak*.pak from there and uninstall the rpm.
+
+
+
+How to install Quake on Mac OS X:
+All that DarkPlaces needs from the Quake CD is pak files, with this in mind, make a folder named Quake, drag the Darkplaces.app into this Quake folder, make a folder inside the Quake folder (alongside Darkplaces) named id1, and put the pak0.pak and pak1.pak from your Quake CD into the quake/id1 directory, then all should be well, simply run the Darkplaces app
+
+How to deal with a DOS Quake CD on Mac OS X:
+Unknown.  Linux solution may work if you can get hold of lha, otherwise use DOSBox to run the Quake installer.
+
+How to deal with a WinQuake CD on Mac OS X:
+Find the data folder on the cdrom and copy the data/id1/pak*.pak files to your id1 folder.
+
+How to deal with a Linux Quake CD on Mac OS X:
+Unknown.  If you can get hold of rpm2cpio and cpio you should be able to follow the Linux method.
+
+
+Shader parameters for DP's own features:
+- dp_reflect <distort> <r> <g> <b> <a>
+  Makes surfaces of this shader reflective with r_water. The reflection is
+  alpha blended on the texture with the given alpha, and modulated by the given
+  color. distort is used in conjunction with the normalmap to simulate a
+  nonplanar water surface.
+- dp_refract <distort> <r> <g> <b>
+  Makes surfaces of this shader refractive with r_water. The refraction
+  replaces the transparency of the texture. distort is used in conjunction with
+  the normalmap to simulate a nonplanar water surface.
+- dp_water <reflectmin> <reflectmax> <refractdistort> <reflectdistort> <refractr> <refractg> <refractb> <reflectr> <reflectg> <reflectb> <alpha>
+  This combines the effects of dp_reflect and dp_refract to simulate a water
+  surface. However, the refraction and the reflection are mixed using a Fresnel
+  equation that makes the amount of reflection slide from reflectmin when
+  looking parallel to the water to reflectmax when looking directly into the
+  water. The result of this reflection/refraction mix is then layered BELOW the
+  texture of the shader, so basically, it "fills up" the alpha values of the
+  water. The alpha value is a multiplicator for the alpha value on the texture
+  - set this to a small value like 0.1 to emphasize the reflection and make
+  the water transparent; but if r_water is 0, alpha isn't used, so the water can
+  be very visible then too.
+- tcmod page <width> <height> <delay>
+  The texture is shifted by 1/<width> every <delay> seconds, and by 1/<height>
+  every <delay>*<width> seconds. It is some sort of animmap replacement that keeps
+  all animation frames in a single texture.
+  To use it, make a texture with the frames aligned in a grid like this:
+    1   2   3   4
+    5   6   7   8
+  then align it in Radiant so only one of the animation frames can be seen on
+  the surface, and specify "tcmod page 4 2 0.1". DP will then display the frames
+  in order and the cycle will repeat every 0.8 seconds.
+- dppolygonoffset <factor> <offset>
+  This surface gets glPolygonOffset(factor, offset); useful for decals
+
+
+Thanks to:
+Tomaz for adding features, fixing many bugs, and being generally helpful.
+Andreas 'Black' Kirsch for much work on the QuakeC VM (menu.dat, someday clprogs.dat) and other contributions.
+Mathieu 'Elric' Olivier for much work on the sound engine (especially the Ogg vorbis support)
+MoALTz for some bugfixes and cleanups
+Joseph Caporale for adding 5 mouse button support.
+KGB|romi for his contributions to the Quake community, including his rtlights project and many suggestions, his id1 romi_rtlights.pk3 is included in darkplaces mod releases.
+Zombie for making great levels and general DarkPlaces publicity.
+FrikaC for FrikQCC and FrikBot and general community support.
+Transfusion Project for recreating Blood in the world of Quake.
+de-we for the great icons.
+|Rain| for running my favorite anynet IRC server and his bot feh (which although a bit antisocial never seems to grow tired of being my calculator).
+VorteX for the DP_QC_GETTAGINFO extension.
+Ludwig Nussel for the ~/.games/darkplaces/ user directory support on non-Windows platforms (allowing games to be installed in a non-writable system location as is the standard on UNIX but still save configs to the user's home directory).

@@ -77,6 +77,8 @@ cvar_t *flood_waitdelay;
 
 cvar_t *sv_maplist;
 
+cvar_t *aimfix;
+
 void SpawnEntities(char *mapname, char *entities, char *spawnpoint);
 void ClientThink(edict_t *ent, usercmd_t *cmd);
 qboolean ClientConnect(edict_t *ent, char *userinfo);
@@ -281,7 +283,7 @@ EndDMLevel(void)
 		ent = G_Find(NULL, FOFS(classname), "target_changelevel");
 
 		if (!ent)
-		{   
+		{
 			/* the map designer didn't include a changelevel,
 			   so create a fake ent that goes back to the same level */
 			BeginIntermission(CreateTargetChangeLevel(level.mapname));
@@ -386,6 +388,9 @@ ExitLevel(void)
 			ent->health = ent->client->pers.max_health;
 		}
 	}
+
+	gibsthisframe = 0;
+	debristhisframe = 0;
 }
 
 /*
@@ -399,6 +404,9 @@ G_RunFrame(void)
 
 	level.framenum++;
 	level.time = level.framenum * FRAMETIME;
+
+	gibsthisframe = 0;
+	debristhisframe = 0;
 
 	/* choose a client for monsters to target this frame */
 	AI_SetSightClient();

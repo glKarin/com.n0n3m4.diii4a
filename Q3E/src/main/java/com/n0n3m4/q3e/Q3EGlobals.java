@@ -92,15 +92,17 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE3_RTCW = "libidtech3_rtcw.so"; // RTCW
     public static final String LIB_ENGINE4_TDM = "libthedarkmod.so"; // TDM
     public static final String LIB_ENGINE1_QUAKE = "libidtech_quake.so"; // Quake 1
+    public static final String LIB_ENGINE4_D3BFG = "libRBDoom3BFG.so"; // Doom3-BFG
 
     public static final String CONFIG_FILE_DOOM3 = "DoomConfig.cfg"; // DOOM3
     public static final String CONFIG_FILE_QUAKE4 = "Quake4Config.cfg"; // Quake 4
     public static final String CONFIG_FILE_PREY = "preyconfig.cfg"; // Prey 2006
-    public static final String CONFIG_FILE_QUAKE2 = "yq2.cfg"; // Quake 2
+    public static final String CONFIG_FILE_QUAKE2 = "config.cfg"; // Quake 2
     public static final String CONFIG_FILE_QUAKE3 = "q3config.cfg"; // Quake 3
     public static final String CONFIG_FILE_RTCW = "wolfconfig.cfg"; // RTCW
     public static final String CONFIG_FILE_TDM = "Darkmod.cfg"; // TDM
     public static final String CONFIG_FILE_QUAKE1 = "config.cfg"; // Quake 1
+    public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg"; // DOOM3-BFG
 
     public static final String GAME_DOOM3 = "doom3";
     public static final String GAME_QUAKE4 = "quake4";
@@ -110,6 +112,7 @@ public final class Q3EGlobals
     public static final String GAME_RTCW = "rtcw";
     public static final String GAME_TDM = "tdm";
     public static final String GAME_QUAKE1 = "quake1";
+    public static final String GAME_DOOM3BFG = "doom3bfg";
 
     public static final String GAME_NAME_DOOM3 = "DOOM 3";
     public static final String GAME_NAME_QUAKE4 = "Quake 4";
@@ -118,7 +121,8 @@ public final class Q3EGlobals
     public static final String GAME_NAME_QUAKE3 = "Quake 3";
     public static final String GAME_NAME_RTCW = "RTCW"; // "Return to Castle Wolfenstein";
     public static final String GAME_NAME_TDM = "Dark mod"; // The Dark Mod
-    public static final String GAME_NAME_QUAKE1 = "Quake 1"; // The Dark Mod
+    public static final String GAME_NAME_QUAKE1 = "Quake 1";
+    public static final String GAME_NAME_DOOM3BFG = "DOOM 3 BFG";
 
     public static final String GAME_BASE_DOOM3 = "base";
     public static final String GAME_BASE_D3XP = "d3xp";
@@ -129,6 +133,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_RTCW = "main";
     public static final String GAME_BASE_TDM = ""; // the dark mod is standalone
     public static final String GAME_BASE_QUAKE1 = "darkplaces/id1"; // "darkplaces";
+    public static final String GAME_BASE_DOOM3BFG = "base"; // RBDoom3BFG always in doom3bfg folder
 
     public static final String GAME_SUBDIR_DOOM3 = "doom3";
     public static final String GAME_SUBDIR_QUAKE4 = "quake4";
@@ -138,6 +143,7 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_RTCW = "rtcw";
     public static final String GAME_SUBDIR_TDM = "darkmod";
     public static final String GAME_SUBDIR_QUAKE1 = "quake1";
+    public static final String GAME_SUBDIR_DOOMBFG = "doom3bfg";
 
     public static final String[] LIBS = {
             "game",
@@ -177,6 +183,9 @@ public final class Q3EGlobals
     };
     public static final String[] Q1_LIBS = {
             "idtech_quake",
+    };
+    public static final String[] D3BFG_LIBS = {
+            "RBDoom3BFG",
     };
 /*
     public static final String[] QUAKE4_MAPS = {
@@ -274,9 +283,18 @@ public final class Q3EGlobals
     public static final int GLFORMAT_RGBA8888 = 0x8888;
     public static final int GLFORMAT_RGBA1010102 = 0xaaa2;
 
+    public static final int ENUM_BACK_NONE = 0;
+    public static final int ENUM_BACK_ESCAPE = 1;
+    public static final int ENUM_BACK_EXIT = 2;
+    public static final int ENUM_BACK_ALL = 0xFF;
+    public static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL = 1000;
+    public static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT = 3;
+
     public static final String GAME_EXECUABLE = "game.arm";
 
-    public static final String TDM_GLSL_SHADER_VERSION = "2.12.0";
+    public static final String TDM_GLSL_SHADER_VERSION = "2.12.1";
+
+    public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

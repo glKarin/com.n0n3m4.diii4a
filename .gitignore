@@ -12,4 +12,4 @@ build.log
 gradle assembleDebug.bat
 gradle assembleRelease.bat
 
-idTech4Amm/src/main/assets/source/DIII4A.source.tgz
+Q3E/libs/*

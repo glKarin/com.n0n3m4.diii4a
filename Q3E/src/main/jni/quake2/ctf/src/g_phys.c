@@ -144,7 +144,7 @@ SV_Impact(edict_t *e1, trace_t *trace)
 
 /*
  * Slide off of the impacting object
- * returns the blocked flags (1 = floor, 
+ * returns the blocked flags (1 = floor,
  * 2 = step / wall)
  */
 #define STOP_EPSILON 0.1
@@ -229,14 +229,14 @@ SV_FlyMove(edict_t *ent, float time, int mask)
 		trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, mask);
 
 		if (trace.allsolid)
-		{   
+		{
 			/* entity is trapped in another solid */
 			VectorCopy(vec3_origin, ent->velocity);
 			return 3;
 		}
 
 		if (trace.fraction > 0)
-		{   
+		{
 			/* actually covered some distance */
 			VectorCopy(trace.endpos, ent->s.origin);
 			VectorCopy(ent->velocity, original_velocity);
@@ -278,7 +278,7 @@ SV_FlyMove(edict_t *ent, float time, int mask)
 
 		/* cliped to another plane */
 		if (numplanes >= MAX_CLIP_PLANES)
-		{   
+		{
 			/* this shouldn't really happen */
 			VectorCopy(vec3_origin, ent->velocity);
 			return 3;
@@ -310,13 +310,13 @@ SV_FlyMove(edict_t *ent, float time, int mask)
 		}
 
 		if (i != numplanes)
-		{   
+		{
 			/* go along this plane */
 			VectorCopy(new_velocity, ent->velocity);
 		}
 		else
 		{
-			
+
 			/* go along the crease */
 			if (numplanes != 2)
 			{
@@ -329,7 +329,7 @@ SV_FlyMove(edict_t *ent, float time, int mask)
 			VectorScale(dir, d, ent->velocity);
 		}
 
-		/* if original velocity is against the original velocity, 
+		/* if original velocity is against the original velocity,
 		   stop dead to avoid tiny occilations in sloping corners */
 		if (DotProduct(ent->velocity, primal_velocity) <= 0)
 		{
@@ -497,6 +497,22 @@ retry:
 	VectorCopy(trace.endpos, ent->s.origin);
 	gi.linkentity(ent);
 
+	/* Push slightly away from non-horizontal surfaces,
+	   prevent origin stuck in the plane which causes
+	   the entity to be rendered in full black. */
+	if (trace.plane.type != 2)
+	{
+		/* Limit the fix to gibs, debris and dead monsters.
+		   Everything else may break existing maps. Items
+		   may slide to unreachable locations, monsters may
+		   get stuck, etc. */
+		if (((strncmp(ent->classname, "monster_", 8) == 0) && ent->health < 1) ||
+				(strcmp(ent->classname, "debris") == 0) || (ent->s.effects & EF_GIB))
+		{
+			VectorAdd(ent->s.origin, trace.plane.normal, ent->s.origin);
+		}
+	}
+
 	if (trace.fraction != 1.0)
 	{
 		SV_Impact(ent, &trace);
@@ -543,7 +559,7 @@ SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 	vec3_t org, org2, move2, forward, right, up;
 	vec3_t realmins, realmaxs;
 
-	/* clamp the move to 1/8 units, so the position will 
+	/* clamp the move to 1/8 units, so the position will
 	   be accurate for client side prediction */
 	for (i = 0; i < 3; i++)
 	{
@@ -644,7 +660,7 @@ SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 			VectorAdd(check->s.origin, move, check->s.origin);
 
 			if (check->client)
-			{   
+			{
 				check->client->ps.pmove.delta_angles[YAW] += amove[YAW];
 			}
 
@@ -665,13 +681,13 @@ SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 			block = SV_TestEntityPosition(check);
 
 			if (!block)
-			{  
+			{
 			   	/* pushed ok */
 				gi.linkentity(check);
 				continue;
 			}
 
-			/* if it is ok to leave in the old position, do it 
+			/* if it is ok to leave in the old position, do it
 			   this is only relevent for riding entities, not pushed */
 			VectorSubtract(check->s.origin, move, check->s.origin);
 			block = SV_TestEntityPosition(check);
@@ -686,7 +702,7 @@ SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 		/* save off the obstacle so we can call the block function */
 		obstacle = check;
 
-		/* move back any entities we already moved 
+		/* move back any entities we already moved
 		   go backwards, so if the same entity was pushed/
 		   twice, it goes back to the original position */
 		for (p = pushed_p - 1; p >= pushed; p--)
@@ -715,7 +731,7 @@ SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 }
 
 /*
- * Bmodel objects don't interact with each 
+ * Bmodel objects don't interact with each
  * other, but push all box objects
  */
 void
@@ -730,8 +746,8 @@ SV_Physics_Pusher(edict_t *ent)
 		return;
 	}
 
-	/* make sure all team slaves can move before commiting any moves 
-	   or calling any think functions if the move is blocked, all 
+	/* make sure all team slaves can move before commiting any moves
+	   or calling any think functions if the move is blocked, all
 	   moved objects will be backed out */
 	pushed_p = pushed;
 
@@ -739,7 +755,7 @@ SV_Physics_Pusher(edict_t *ent)
 	{
 		if (part->velocity[0] || part->velocity[1] || part->velocity[2] ||
 			part->avelocity[0] || part->avelocity[1] || part->avelocity[2])
-		{   
+		{
 			/* object is moving */
 			VectorScale(part->velocity, FRAMETIME, move);
 			VectorScale(part->avelocity, FRAMETIME, amove);
@@ -751,9 +767,9 @@ SV_Physics_Pusher(edict_t *ent)
 		}
 	}
 
-	if (pushed_p > &pushed[MAX_EDICTS])
+	if (pushed_p > &pushed[MAX_EDICTS-1])
 	{
-		gi.error(ERR_FATAL, "pushed_p > &pushed[MAX_EDICTS], memory corrupted");
+		gi.error("pushed_p > &pushed[MAX_EDICTS-1], memory corrupted");
 	}
 
 	if (part)
@@ -767,8 +783,8 @@ SV_Physics_Pusher(edict_t *ent)
 			}
 		}
 
-		/* if the pusher has a "blocked" function, call it 
-		   otherwise, just stay in place until the obstacle 
+		/* if the pusher has a "blocked" function, call it
+		   otherwise, just stay in place until the obstacle
 		   is gone */
 		if (part->blocked)
 		{
@@ -1036,7 +1052,7 @@ SV_Physics_Step(edict_t *ent)
 	}
 
 	/* add gravity except:
-	     flying monsters 
+	     flying monsters
 	     swimming monsters who are in the water */
 	if (!wasonground)
 	{

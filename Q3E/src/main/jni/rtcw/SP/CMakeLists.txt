@@ -13,6 +13,7 @@ add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl
 
 set(rtcwclient_libs android log GLESv1_CM EGL z)
 set(rtcwclient_libs ${rtcwclient_libs} vorbisfile vorbis ogg)
+set(rtcwclient_libs ${rtcwclient_libs} oboeaudio)
 #set(rtcwclient_libs ${rtcwclient_libs} curl)
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
@@ -50,6 +51,7 @@ elseif(cpu MATCHES "[aA][rR][mM].*") # some kind of arm..
 endif()
 set(ARCH "${cpu}")
 add_definitions(-DARCH_STRING="${ARCH}")
+add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 
 set(rtcwcgame_src
         code/cgame/cg_main.c
@@ -387,6 +389,7 @@ target_include_directories(${RTCWLIBRARY} PRIVATE "code/libogg-1.3.3/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/libvorbis-1.3.6/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/jpeg-8c")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code")
+target_include_directories(${RTCWLIBRARY} PRIVATE "../../common")
 
 add_library(rtcwui SHARED
         ${rtcwui_src}

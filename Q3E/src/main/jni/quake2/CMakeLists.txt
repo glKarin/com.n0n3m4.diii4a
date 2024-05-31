@@ -5,7 +5,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-add_subdirectory (src) # quake2 main
+add_subdirectory (yquake2) # quake2 main and game
 
 # mods
 add_subdirectory (ctf)

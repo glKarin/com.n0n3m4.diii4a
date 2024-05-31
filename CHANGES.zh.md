@@ -2,6 +2,17 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan50 (2024-05-31)
+
+* 新增`毁灭战士 3 BFG`(RBDOOM-3-BFG ver1.4.0)支持, 游戏数据文件夹名为`doom3bfg/base`. 详情[RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG)和[DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
+* 新增`雷神之锤 I`(Darkplaces)支持, 游戏数据文件夹名为`darkplaces/id1`. 详情[DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces)和[Quake I](https://store.steampowered.com/app/2310/Quake/).
+* 修复The Dark Mod(v2.12)在Mali GPU的着色器错误.
+* 更新雷神之锤2(Yamagi Quake II)版本.
+* 毁灭战士3/雷神之锤4/掠食(2006)支持在多线程下启用调试渲染工具(除r_showSurfaceInfo).
+* 毁灭战士3/雷神之锤4/掠食(2006)支持使用cvar r_noLight 0和2, 允许在游戏中切换是否禁用光照渲染.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan50 (2024-04-30)
 
 * 支持新渲染通道: 热浪(例如 BFG9000飞行物的扭曲, 火箭炮的爆炸), colorProcess(例如 marscity2镜子前的血色影片).
@@ -9,7 +20,7 @@
 * `Control`选项卡新增控制虚拟摇杆的显示模式(总是显示; 隐藏; 仅按下显示).
 * 改进Phong/Blinn-Phong光照模型着色器使用高精度.
 * The Dark Mod中强制禁用压缩纹理.
-* 设置中可以启用每个游戏的数据文件夹独立放置: 毁灭战士3 -> doom3/; 雷神之锤4 -> quake4/; 掠食(2006) -> prey/; 雷神之锤1 -> quake1/; 雷神之锤2 -> quake2/; 雷神之锤3 -> quake3/; 重返德军总部 -> rtcw/; The Dark Mod -> darkmod/ (总是独立).
+* 设置中可以启用每个游戏的数据文件夹独立放置: 毁灭战士3 -> doom3/; 雷神之锤4 -> quake4/; 掠食(2006) -> prey/; 雷神之锤1 -> quake1/; 雷神之锤2 -> quake2/; 雷神之锤3 -> quake3/; 重返德军总部 -> rtcw/; The Dark Mod -> darkmod/ (总是独立); 毁灭战士3 BFG -> doom3bfg/ (总是独立).
 
 ----------------------------------------------------------------------------------
 
@@ -17,9 +28,9 @@
 
 * 阴影映射支持镂空图层阴影(cvar `r_forceShadowMapsOnAlphaTestedSurfaces`, 默认0).
 * 新增毁灭战士3 mod `LibreCoop`支持, 游戏数据文件夹命名为`librecoop`. 详情[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
-* 新增`雷神之锤2`支持, 游戏数据文件夹命名为`baseq2`. 详情[Quake II](https://store.steampowered.com/app/2320/Quake_II/).
-* 新增`雷神之锤3竞技场`支持, 游戏数据文件夹命名为`baseq3`; 新增`雷神之锤3团队竞技场`支持, 游戏数据文件夹命名为`missionpack`. 详情[Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
-* 新增`重返德军总部`支持, 游戏数据文件夹命名为`main`. 详情[Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
+* 新增`雷神之锤2`支持, 游戏数据文件夹命名为`baseq2`. 详情[Yamagi Quake II](https://github.com/yquake2/yquake2)和[Quake II](https://store.steampowered.com/app/2320/Quake_II/).
+* 新增`雷神之锤3竞技场`支持, 游戏数据文件夹命名为`baseq3`; 新增`雷神之锤3团队竞技场`支持, 游戏数据文件夹命名为`missionpack`. 详情[ioquake3](https://github.com/ioquake/ioq3)和[Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
+* 新增`重返德军总部`支持, 游戏数据文件夹命名为`main`. 详情[iortcw](https://github.com/iortcw/iortcw)和[Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
 * 新增`The Dark Mod`v2.12支持, 游戏数据文件夹命名为`darkmod`. 详情[The Dark Mod](https://www.thedarkmod.com).
 * 新增一个虚拟按键主题.
 

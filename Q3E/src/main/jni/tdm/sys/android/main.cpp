@@ -469,68 +469,19 @@ void abrt_func( mcheck_status status ) {
 
 /* Android */
 
-#include "sys_android.h"
+static void * game_main(void *data);
 
-extern int gl_format;
-extern int gl_msaa;
+#include "sys_android.cpp"
 
-int gl_version;
-float analogx=0.0f;
-float analogy=0.0f;
-int analogenabled=0;
-
-extern char *native_library_dir;
-extern int screen_width;
-extern int screen_height;
-
-void Android_GrabMouseCursor(bool grabIt);
-void Android_PollInput(void);
-
-extern void (*attach_thread)(void);
-extern void Q3E_CheckNativeWindowChanged(void);
-extern void Q3E_CloseRedirectOutput(void);
-extern void Q3E_PrintInitialContext(int argc, const char **argv);
-extern void Q3E_RedirectOutput(void);
-extern void Q3E_Start(void);
-extern void Q3E_End(void);
-
-// command line arguments
-static int q3e_argc = 0;
-static char **q3e_argv = NULL;
-
-// game main thread
-static pthread_t				main_thread;
-
-// app exit
-volatile bool q3e_running = false;
+extern void Sys_SetArgs(int argc, const char** argv);
 
 void GLimp_CheckGLInitialized(void)
 {
     Q3E_CheckNativeWindowChanged();
 }
 
-static void Q3E_DumpArgs(int argc, const char **argv)
-{
-    ::q3e_argc = argc;
-    ::q3e_argv = (char **) malloc(sizeof(char *) * argc);
-    for (int i = 0; i < argc; i++)
-    {
-        ::q3e_argv[i] = strdup(argv[i]);
-    }
-}
-
-static void Q3E_FreeArgs(void)
-{
-    for(int i = 0; i < q3e_argc; i++)
-    {
-        free(q3e_argv[i]);
-    }
-    free(q3e_argv);
-}
-
-extern void Sys_SetArgs(int argc, const char** argv);
 // doom3 game main thread loop
-static void * doom3_main(void *data)
+void * game_main(void *data)
 {
     attach_thread(); // attach current to JNI for call Android code
 
@@ -568,45 +519,6 @@ static void * doom3_main(void *data)
     return 0;
 }
 
-// start game main thread from Android Surface thread
-static void Q3E_StartGameMainThread(void)
-{
-    if(main_thread)
-        return;
-
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-
-    if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) != 0) {
-        Sys_Printf("[Harmattan]: ERROR: pthread_attr_setdetachstate doom3 main thread failed\n");
-        exit(1);
-    }
-
-    if (pthread_create((pthread_t *)&main_thread, &attr, doom3_main, NULL) != 0) {
-        Sys_Printf("[Harmattan]: ERROR: pthread_create doom3 main thread failed\n");
-        exit(1);
-    }
-
-    pthread_attr_destroy(&attr);
-
-    q3e_running = true;
-    Sys_Printf("[Harmattan]: doom3 main thread start.\n");
-}
-
-// shutdown game main thread
-static void Q3E_ShutdownGameMainThread(void)
-{
-    if(!main_thread)
-        return;
-
-    q3e_running = false;
-    if (pthread_join(main_thread, NULL) != 0) {
-        Sys_Printf("[Harmattan]: ERROR: pthread_join doom3 main thread failed\n");
-    }
-    main_thread = 0;
-    Sys_Printf("[Harmattan]: doom3 main thread quit.\n");
-}
-
 void ShutdownGame(void)
 {
     if(common->IsInitialized())
@@ -626,7 +538,7 @@ static void doom3_exit(void)
     Q3E_CloseRedirectOutput();
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     Q3E_DumpArgs(argc, argv);
 
@@ -640,29 +552,3 @@ int main(int argc, const char **argv)
 
     return 0;
 }
-
-intptr_t Sys_GetMainThread(void)
-{
-    return main_thread;
-}
-
-#ifndef _ANDROID_PACKAGE_NAME
-//#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
-#define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
-#endif
-#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
-const char * Sys_DLLDefaultPath(void)
-{
-    return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
-}
-
-void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
-{
-    if (analogenabled)
-    {
-        side = (int)(KEY_MOVESPEED * analogx);
-        forward = (int)(KEY_MOVESPEED * analogy);
-    }
-}
-
-#include "sys_android.cpp"

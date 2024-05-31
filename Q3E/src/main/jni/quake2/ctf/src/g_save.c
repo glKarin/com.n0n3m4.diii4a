@@ -28,6 +28,10 @@
 
 #include "header/local.h"
 
+#ifndef BUILD_DATE
+#define BUILD_DATE __DATE__
+#endif
+
 field_t fields[] = {
 	{"classname", FOFS(classname), F_LSTRING},
 	{"origin", FOFS(s.origin), F_VECTOR},
@@ -141,7 +145,7 @@ void
 InitGame(void)
 {
 	gi.dprintf("Game is starting up.\n");
-	gi.dprintf("Game is ctf.\n");
+	gi.dprintf("Game is ctf built on %s.\n", GAMEVERSION, BUILD_DATE);
 
 	gun_x = gi.cvar("gun_x", "0", 0);
 	gun_y = gi.cvar("gun_y", "0", 0);
@@ -157,7 +161,7 @@ InitGame(void)
 	/* latched vars */
 	sv_cheats = gi.cvar("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
 	gi.cvar("gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_LATCH);
-	gi.cvar("gamedate", __DATE__, CVAR_SERVERINFO | CVAR_LATCH);
+	gi.cvar("gamedate", BUILD_DATE, CVAR_SERVERINFO | CVAR_LATCH);
 	maxclients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
 	deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
 	coop = gi.cvar("coop", "0", CVAR_LATCH);
@@ -199,6 +203,9 @@ InitGame(void)
 
 	/* dm map list */
 	sv_maplist = gi.cvar("sv_maplist", "", 0);
+
+	/* others */
+	aimfix = gi.cvar("aimfix", "0", CVAR_ARCHIVE);
 
 	/* items */
 	InitItems();
@@ -493,7 +500,7 @@ WriteGame(char *filename, qboolean autosave)
 	}
 
 	memset(str, 0, sizeof(str));
-	strcpy(str, __DATE__);
+	strcpy(str, BUILD_DATE);
 	fwrite(str, sizeof(str), 1, f);
 
 	game.autosaved = autosave;
@@ -526,7 +533,7 @@ ReadGame(char *filename)
 
 	fread(str, sizeof(str), 1, f);
 
-	if (strcmp(str, __DATE__))
+	if (strcmp(str, BUILD_DATE))
 	{
 		fclose(f);
 		gi.error("Savegame from an older version.\n");

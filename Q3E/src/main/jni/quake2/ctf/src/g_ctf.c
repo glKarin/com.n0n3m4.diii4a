@@ -731,7 +731,7 @@ CTFFragBonuses(edict_t *targ, edict_t *inflictor, edict_t *attacker)
 		   flag carrier */
 		attacker->client->resp.score += CTF_CARRIER_DANGER_PROTECT_BONUS;
 		gi.bprintf(PRINT_MEDIUM,
-				"%s defends %s's flag carrier against an agressive enemy\n",
+				"%s defends %s's flag carrier against an aggressive enemy\n",
 				attacker->client->pers.netname,
 				CTFTeamName(attacker->client->resp.ctf_team));
 
@@ -1718,8 +1718,7 @@ CTFGrappleDrawCable(edict_t *self)
 
 	AngleVectors(self->owner->client->v_angle, f, r, NULL);
 	VectorSet(offset, 16, 16, self->owner->viewheight - 8);
-	P_ProjectSource(self->owner->client, self->owner->s.origin,
-			offset, f, r, start);
+	P_ProjectSource(self->owner, offset, f, r, start);
 
 	VectorSubtract(start, self->owner->s.origin, offset);
 
@@ -1903,7 +1902,7 @@ CTFGrappleFire(edict_t *ent, vec3_t g_offset, int damage, int effect)
 	AngleVectors(ent->client->v_angle, forward, right, NULL);
 	VectorSet(offset, 24, 8, ent->viewheight - 8 + 2);
 	VectorAdd(offset, g_offset, offset);
-	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource(ent, offset, forward, right, start);
 
 	VectorScale(forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
@@ -3621,7 +3620,7 @@ CTFWinElection(void)
 			gi.bprintf(PRINT_HIGH, "%s has become an admin.\n",
 				ctfgame.etarget->client->pers.netname);
 			gi.cprintf(ctfgame.etarget, PRINT_HIGH,
-				"Type 'admin' to access the adminstration menu.\n");
+				"Type 'admin' to access the administration menu.\n");
 			break;
 
 		case ELECT_MAP:
@@ -3723,7 +3722,7 @@ CTFReady(edict_t *ent)
 
 	if (ent->client->resp.ready)
 	{
-		gi.cprintf(ent, PRINT_HIGH, "You have already commited.\n");
+		gi.cprintf(ent, PRINT_HIGH, "You have already committed.\n");
 		return;
 	}
 
@@ -3758,8 +3757,8 @@ CTFReady(edict_t *ent)
 
 	if (!j && t1 && t2)
 	{
-		/* everyone has commited */
-		gi.bprintf(PRINT_CHAT, "All players have commited.  Match starting\n");
+		/* everyone has committed */
+		gi.bprintf(PRINT_CHAT, "All players have committed.  Match starting\n");
 		ctfgame.match = MATCH_PREGAME;
 		ctfgame.matchtime = level.time + matchstarttime->value;
 		ctfgame.countdown = false;
@@ -3785,7 +3784,7 @@ CTFNotReady(edict_t *ent)
 
 	if (!ent->client->resp.ready)
 	{
-		gi.cprintf(ent, PRINT_HIGH, "You haven't commited.\n");
+		gi.cprintf(ent, PRINT_HIGH, "You haven't committed.\n");
 		return;
 	}
 
@@ -5013,7 +5012,7 @@ CTFAdmin_Reset(edict_t *ent, pmenuhnd_t *p)
 	PMenu_Close(ent);
 
 	/* go back to normal mode */
-	gi.bprintf(PRINT_CHAT, "Match mode has been terminated, reseting to normal game.\n");
+	gi.bprintf(PRINT_CHAT, "Match mode has been terminated, resetting to normal game.\n");
 	ctfgame.match = MATCH_NONE;
 	gi.cvar_set("competition", "1");
 	CTFResetAllPlayers();
@@ -5082,7 +5081,7 @@ CTFAdmin(edict_t *ent)
 		ent->client->resp.admin = true;
 		gi.bprintf(PRINT_HIGH, "%s has become an admin.\n",
 				ent->client->pers.netname);
-		gi.cprintf(ent, PRINT_HIGH, "Type 'admin' to access the adminstration menu.\n");
+		gi.cprintf(ent, PRINT_HIGH, "Type 'admin' to access the administration menu.\n");
 	}
 
 	if (!ent->client->resp.admin)

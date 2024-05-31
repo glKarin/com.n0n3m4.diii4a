@@ -815,10 +815,5 @@ vertCache_t* idVertexCache::CreateTempVbo(int bytes, bool indexBuffer)
 	return block;
 }
 
-int idVertexCache::GetNextListNum(void) const
-{
-	return (listNum + 1) % NUM_VERTEX_FRAMES;
-}
-
 #endif
 

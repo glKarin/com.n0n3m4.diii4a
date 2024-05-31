@@ -1,0 +1,433 @@
+// progs: Builtin #487 declared but not defined
+// progs: Builtin #488 declared but not defined
+// progs: Builtin #489 declared but not defined
+// progs: Builtin #490 declared but not defined
+// progs: Builtin #491 declared but not defined
+// progs: Builtin #492 declared but not defined
+// progs: Builtin #493 declared but not defined
+// progs: Builtin #608 declared but not defined
+// progs: Field frame2 declared but not defined
+// progs: Field frame3 declared but not defined
+// progs: Field frame4 declared but not defined
+// progs: Field lerpfrac declared but not defined
+// progs: Field lerpfrac3 declared but not defined
+// progs: Field lerpfrac4 declared but not defined
+// progs: Field frame1time declared but not defined
+// progs: Field frame2time declared but not defined
+// progs: Field frame3time declared but not defined
+// progs: Field frame4time declared but not defined
+// menu: Global null_entity declared but not defined
+// progs: Global movedist declared but not defined
+// progs: Global gameover declared but not defined
+// progs: Global string_null declared but not defined
+// progs: Global newmis declared but not defined
+// progs: Global activator declared but not defined
+// progs: Global damage_attacker declared but not defined
+// progs: Global framecount declared but not defined
+// progs: Global skill declared but not defined
+// progs: Field map declared but not defined
+// progs: Field worldtype declared but not defined
+// progs: Field killtarget declared but not defined
+// progs: Field th_stand declared but not defined
+// progs: Field th_walk declared but not defined
+// progs: Field th_run declared but not defined
+// progs: Field th_missile declared but not defined
+// progs: Field th_melee declared but not defined
+// progs: Field th_pain declared but not defined
+// progs: Field th_die declared but not defined
+// progs: Field oldenemy declared but not defined
+// progs: Field speed declared but not defined
+// progs: Field lefty declared but not defined
+// progs: Field search_time declared but not defined
+// progs: Field attack_state declared but not defined
+// progs: Field attack_finished declared but not defined
+// progs: Field pain_finished declared but not defined
+// progs: Field invincible_finished declared but not defined
+// progs: Field invisible_finished declared but not defined
+// progs: Field super_damage_finished declared but not defined
+// progs: Field radsuit_finished declared but not defined
+// progs: Field spawnshieldtime declared but not defined
+// progs: Field invincible_time declared but not defined
+// progs: Field invincible_sound declared but not defined
+// progs: Field invisible_time declared but not defined
+// progs: Field invisible_sound declared but not defined
+// progs: Field super_time declared but not defined
+// progs: Field super_sound declared but not defined
+// progs: Field rad_time declared but not defined
+// progs: Field fly_sound declared but not defined
+// progs: Field show_hostile declared but not defined
+// progs: Field jump_flag declared but not defined
+// progs: Field swim_flag declared but not defined
+// progs: Field air_finished declared but not defined
+// progs: Field bubble_count declared but not defined
+// progs: Field deathtype declared but not defined
+// progs: Field mdl declared but not defined
+// progs: Field mangle declared but not defined
+// progs: Field t_length declared but not defined
+// progs: Field t_width declared but not defined
+// progs: Field dest declared but not defined
+// progs: Field dest1 declared but not defined
+// progs: Field dest2 declared but not defined
+// progs: Field wait declared but not defined
+// progs: Field delay declared but not defined
+// progs: Field trigger_field declared but not defined
+// progs: Field noise4 declared but not defined
+// progs: Field pausetime declared but not defined
+// progs: Field movetarget declared but not defined
+// progs: Field aflag declared but not defined
+// progs: Field dmg declared but not defined
+// progs: Field cnt declared but not defined
+// progs: Field think1 declared but not defined
+// progs: Field count declared but not defined
+// progs: Field lip declared but not defined
+// progs: Field state declared but not defined
+// progs: Field pos1 declared but not defined
+// progs: Field pos2 declared but not defined
+// progs: Field height declared but not defined
+// progs: Field waitmin declared but not defined
+// progs: Field waitmax declared but not defined
+// progs: Field cantrigger declared but not defined
+// progs: Global deathstring1 declared but not defined
+// progs: Global deathstring2 declared but not defined
+// progs: Global deathstring3 declared but not defined
+// progs: Global deathstring4 declared but not defined
+// progs: Global game declared but not defined
+// progs: Global darkmode declared but not defined
+// progs: Field bodyhealth declared but not defined
+// progs: Field iscorpse declared but not defined
+// progs: Field dest3 declared but not defined
+// progs: Field dest4 declared but not defined
+// progs: Field flame declared but not defined
+// progs: Field doobits declared but not defined
+// progs: Field rotate declared but not defined
+// progs: Field group declared but not defined
+// progs: Field keys_silver declared but not defined
+// progs: Field keys_gold declared but not defined
+// progs: Field havocattack declared but not defined
+// progs: Field havocpickup declared but not defined
+// progs: Field pickupevalfunc declared but not defined
+// progs: Field shoulddodge declared but not defined
+// progs: Field dangerrating declared but not defined
+// progs: Field bleedfunc declared but not defined
+// progs: Field count1 declared but not defined
+// progs: Field count2 declared but not defined
+// progs: Field count3 declared but not defined
+// progs: Field count4 declared but not defined
+// progs: Field count5 declared but not defined
+// progs: Field count6 declared but not defined
+// progs: Field cnt1 declared but not defined
+// progs: Field cnt2 declared but not defined
+// progs: Field obitfunc1 declared but not defined
+// progs: Field realowner declared but not defined
+// progs: Global maxclients declared but not defined
+// progs: Global numdecors declared but not defined
+// progs: Global maxdecors declared but not defined
+// progs: Field createdtime declared but not defined
+// progs: Field th_gib declared but not defined
+// progs: Field resist_bullet declared but not defined
+// progs: Field resist_explosive declared but not defined
+// progs: Field resist_energy declared but not defined
+// progs: Field resist_fire declared but not defined
+// progs: Field resist_ice declared but not defined
+// progs: Field resist_axe declared but not defined
+// progs: Field deathmsg declared but not defined
+// progs: Field regenthink declared but not defined
+// progs: Field isdecor declared but not defined
+// progs: Field radiusdamage_amount declared but not defined
+// progs: Field radiusdamage_force declared but not defined
+// progs: Field radiusdamage_hit declared but not defined
+// progs: Field radiusdamage_lasthit declared but not defined
+// progs: Field radiusdamage_ownerdamagescale declared but not defined
+// progs: Global raddamage_lasthit declared but not defined
+// progs: Field frozen declared but not defined
+// progs: Field thawtime declared but not defined
+// progs: Field thawedeffects declared but not defined
+// progs: Field thawedtouch declared but not defined
+// progs: Field thawedmovetype declared but not defined
+// progs: Field thawedthink declared but not defined
+// progs: Field thawedthinkdelay declared but not defined
+// progs: Field knockedloosefunc declared but not defined
+// progs: Field forcescale declared but not defined
+// progs: Field bleedratio declared but not defined
+// progs: Field damagemodifier declared but not defined
+// progs: Field healthregen declared but not defined
+// progs: Field healthlostthisframe declared but not defined
+// progs: Global monsterdamagescale declared but not defined
+// progs: Global monsterresistancescale declared but not defined
+// progs: Global playerdamagescale declared but not defined
+/******************************************
+ * csprogs
+ ******************************************/
+float VM_CL_checkpvs(...) = #240; // DP_UNKNOWN
+float skel_create(...) = #263; // FTE_CSQC_SKELETONOBJECTS
+float skel_build(...) = #264; // FTE_CSQC_SKELETONOBJECTS
+float skel_get_numbones(...) = #265; // FTE_CSQC_SKELETONOBJECTS
+float skel_get_bonename(...) = #266; // FTE_CSQC_SKELETONOBJECTS
+float skel_get_boneparent(...) = #267; // FTE_CSQC_SKELETONOBJECTS
+float skel_find_bone(...) = #268; // FTE_CSQC_SKELETONOBJECTS
+float skel_get_bonerel(...) = #269; // FTE_CSQC_SKELETONOBJECTS
+float skel_get_boneabs(...) = #270; // FTE_CSQC_SKELETONOBJECTS
+float skel_set_bone(...) = #271; // FTE_CSQC_SKELETONOBJECTS
+float skel_mul_bone(...) = #272; // FTE_CSQC_SKELETONOBJECTS
+float skel_mul_bones(...) = #273; // FTE_CSQC_SKELETONOBJECTS
+float skel_copybones(...) = #274; // FTE_CSQC_SKELETONOBJECTS
+float skel_delete(...) = #275; // FTE_CSQC_SKELETONOBJECTS
+float frameforname(...) = #276; // FTE_CSQC_SKELETONOBJECTS
+float frameduration(...) = #277; // FTE_CSQC_SKELETONOBJECTS
+float VM_drawsubpic(...) = #328; // DP_UNKNOWN
+float VM_drawrotpic(...) = #329; // DP_UNKNOWN
+float VM_CL_videoplaying(...) = #355; // DP_UNKNOWN
+float crc16(...) = #494; // DP_QC_CRC16
+float cvar_type(...) = #495; // DP_QC_CVAR_TYPE
+float numentityfields(...) = #496; // QP_QC_ENTITYDATA
+float entityfieldname(...) = #497; // DP_QC_ENTITYDATA
+float entityfieldtype(...) = #498; // DP_QC_ENTITYDATA
+float getentityfieldstring(...) = #499; // DP_QC_ENTITYDATA
+float putentityfieldstring(...) = #500; // DP_QC_ENTITYDATA
+float ReadPicture(...) = #501; // DP_UNKNOWN
+float boxparticles(...) = #502; // DP_CSQC_BOXPARTICLES
+float whichpack(...) = #503; // DP_UNKNOWN
+float uri_escape(...) = #510; // DP_UNKNOWN
+float uri_unescape(...) = #511; // DP_UNKNOWN
+float num_for_edict(...) = #512; // DP_QC_NUM_FOR_EDICT
+float tokenize_console(...) = #514; // DP_QC_TOKENIZE_CONSOLE
+float argv_start_index(...) = #515; // DP_QC_TOKENIZE_CONSOLE
+float argv_end_index(...) = #516; // DP_QC_TOKENIZE_CONSOLE
+float buf_cvarlist(...) = #517; // DP_QC_STRINGBUFFERS_CVARLIST
+float cvar_description(...) = #518; // DP_QC_CVAR_DESCRIPTION
+float gettime(...) = #519; // DP_QC_GETTIME
+float keynumtostring(...) = #520; // DP_UNKNOWN
+float findkeysforcommand(...) = #521; // DP_UNKNOWN
+float VM_loadfromdata(...) = #529; // DP_UNKNOWN
+float VM_loadfromfile(...) = #530; // DP_UNKNOWN
+float VM_log(...) = #532; // DP_UNKNOWN
+float getsoundtime(...) = #533; // DP_SND_GETSOUNDTIME
+float soundlength(...) = #534; // DP_SND_GETSOUNDTIME
+float physics_enable(...) = #540; // DP_PHYSICS_ODE
+float physics_addforce(...) = #541; // DP_PHYSICS_ODE
+float physics_addtorque(...) = #542; // DP_PHYSICS_ODE
+float VM_callfunction(...) = #605; // DP_UNKNOWN
+float VM_writetofile(...) = #606; // DP_UNKNOWN
+float VM_isfunction(...) = #607; // DP_UNKNOWN
+float VM_parseentitydata(...) = #613; // DP_UNKNOWN
+float getextresponse(...) = #624; // DP_UNKNOWN
+float sprintf(...) = #627; // DP_UNKNOWN
+float getsurfacenumpoints(...) = #628; // DP_QC_GETSURFACETRIANGLE
+float getsurfacepoint(...) = #629; // DP_QC_GETSURFACETRIANGLE
+float VM_CL_RotateMoves(...) = #638; // DP_UNKNOWN
+float CSQC_ConsoleCommand; // DP_UNKNOWN
+float CSQC_Init; // DP_UNKNOWN
+float CSQC_InputEvent; // DP_UNKNOWN
+float CSQC_Shutdown; // DP_UNKNOWN
+float CSQC_UpdateView; // DP_UNKNOWN
+float coop; // DP_UNKNOWN
+float deathmatch; // DP_UNKNOWN
+float dmg_origin; // DP_UNKNOWN
+float dmg_save; // DP_UNKNOWN
+float dmg_take; // DP_UNKNOWN
+float drawfontscale; // DP_UNKNOWN
+float gettaginfo_forward; // DP_UNKNOWN
+float gettaginfo_name; // DP_UNKNOWN
+float gettaginfo_offset; // DP_UNKNOWN
+float gettaginfo_parent; // DP_UNKNOWN
+float gettaginfo_right; // DP_UNKNOWN
+float gettaginfo_up; // DP_UNKNOWN
+float particles_alphamax; // DP_UNKNOWN
+float particles_alphamin; // DP_UNKNOWN
+float particles_colormax; // DP_UNKNOWN
+float particles_colormin; // DP_UNKNOWN
+float sb_showscores; // DP_UNKNOWN
+float serverdeltatime; // DP_UNKNOWN
+float serverprevtime; // DP_UNKNOWN
+float servertime; // DP_UNKNOWN
+float trace_dphitcontents; // DP_UNKNOWN
+float trace_dphitq3surfaceflags; // DP_UNKNOWN
+float trace_dphittexturename; // DP_UNKNOWN
+float trace_dpstartcontents; // DP_UNKNOWN
+float trace_networkentity; // DP_UNKNOWN
+.float aiment; // DP_UNKNOWN
+.float alpha; // DP_UNKNOWN
+.float camera_transform; // DP_UNKNOWN
+.float colormod; // DP_UNKNOWN
+.float dimension_hit; // DP_UNKNOWN
+.float dimension_solid; // DP_UNKNOWN
+.float dphitcontentsmask; // DP_UNKNOWN
+.float fatness; // DP_UNKNOWN
+.float forceshader; // DP_UNKNOWN
+.float frame1time; // DP_UNKNOWN
+.float frame2; // DP_UNKNOWN
+.float frame2time; // DP_UNKNOWN
+.float frame3; // DP_UNKNOWN
+.float frame3time; // DP_UNKNOWN
+.float frame4; // DP_UNKNOWN
+.float frame4time; // DP_UNKNOWN
+.float glowmod; // DP_UNKNOWN
+.float groundentity; // DP_UNKNOWN
+.float hull; // DP_UNKNOWN
+.float ideal_yaw; // DP_UNKNOWN
+.float idealpitch; // DP_UNKNOWN
+.float jointtype; // DP_UNKNOWN
+.float lerpfrac; // DP_UNKNOWN
+.float lerpfrac3; // DP_UNKNOWN
+.float lerpfrac4; // DP_UNKNOWN
+.float mass; // DP_UNKNOWN
+.float message; // DP_UNKNOWN
+.float movedir; // DP_UNKNOWN
+.float pitch_speed; // DP_UNKNOWN
+.float renderflags; // DP_UNKNOWN
+.float scale; // DP_UNKNOWN
+.float shadertime; // DP_UNKNOWN
+.float skeletonindex; // FTE_CSQC_SKELETONOBJECTS
+.float tag_entity; // DP_UNKNOWN
+.float tag_index; // DP_UNKNOWN
+.float userwavefunc_param0; // DP_UNKNOWN
+.float userwavefunc_param1; // DP_UNKNOWN
+.float userwavefunc_param2; // DP_UNKNOWN
+.float userwavefunc_param3; // DP_UNKNOWN
+.float yaw_speed; // DP_UNKNOWN
+/******************************************
+ * menu
+ ******************************************/
+float VM_itof(...) = #79; // DP_UNKNOWN
+float VM_ftoe(...) = #80; // DP_UNKNOWN
+float isString(...) = #81; // DP_UNKNOWN
+float VM_altstr_count(...) = #82; // DP_UNKNOWN
+float VM_altstr_prepare(...) = #83; // DP_UNKNOWN
+float VM_altstr_get(...) = #84; // DP_UNKNOWN
+float VM_altstr_set(...) = #85; // DP_UNKNOWN
+float VM_altstr_ins(...) = #86; // DP_UNKNOWN
+float VM_findflags(...) = #87; // DP_UNKNOWN
+float VM_findchainflags(...) = #88; // DP_UNKNOWN
+float VM_cvar_defstring(...) = #89; // DP_UNKNOWN
+float strstrofs(...) = #221; // FTE_STRINGS
+float str2chr(...) = #222; // FTE_STRINGS
+float chr2str(...) = #223; // FTE_STRINGS
+float strconv(...) = #224; // FTE_STRINGS
+float strpad(...) = #225; // FTE_STRINGS
+float infoadd(...) = #226; // FTE_STRINGS
+float infoget(...) = #227; // FTE_STRINGS
+float strncmp(...) = #228; // FTE_STRINGS
+float strcasecmp(...) = #229; // FTE_STRINGS
+float strncasecmp(...) = #230; // FTE_STRINGS
+float keynumtostring(...) = #340; // DP_UNKNOWN
+float VM_CL_isdemo(...) = #349; // DP_UNKNOWN
+float wasfreed(...) = #353; // DP_UNKNOWN
+float VM_CL_videoplaying(...) = #355; // DP_UNKNOWN
+float loadfont(...) = #356; // DP_GFX_FONTS
+float loadfont(...) = #357; // DP_GFX_FONTS
+float buf_create(...) = #440; // DP_QC_STRINGBUFFERS
+float buf_del(...) = #441; // DP_QC_STRINGBUFFERS
+float buf_getsize(...) = #442; // DP_QC_STRINGBUFFERS
+float buf_copy(...) = #443; // DP_QC_STRINGBUFFERS
+float buf_sort(...) = #444; // DP_QC_STRINGBUFFERS
+float buf_implode(...) = #445; // DP_QC_STRINGBUFFERS
+float bufstr_get(...) = #446; // DP_QC_STRINGBUFFERS
+float bufstr_set(...) = #447; // DP_QC_STRINGBUFFERS
+float bufstr_add(...) = #448; // DP_QC_STRINGBUFFERS
+float bufstr_free(...) = #449; // DP_QC_STRINGBUFFERS
+float VM_cin_open(...) = #461; // DP_UNKNOWN
+float VM_cin_close(...) = #462; // DP_UNKNOWN
+float VM_cin_setstate(...) = #463; // DP_UNKNOWN
+float VM_cin_getstate(...) = #464; // DP_UNKNOWN
+float VM_cin_restart(...) = #465; // DP_UNKNOWN
+float VM_drawline(...) = #466; // DP_UNKNOWN
+float VM_stringwidth(...) = #468; // DP_UNKNOWN
+float VM_drawsubpic(...) = #469; // DP_UNKNOWN
+float VM_drawrotpic(...) = #470; // DP_UNKNOWN
+float VM_asin(...) = #471; // DP_QC_ASINACOSATANATAN2TAN
+float VM_acos(...) = #472; // DP_QC_ASINACOSATANATAN2TAN
+float VM_atan(...) = #473; // DP_QC_ASINACOSATANATAN2TAN
+float VM_atan2(...) = #474; // DP_QC_ASINACOSATANATAN2TAN
+float VM_tan(...) = #475; // DP_QC_ASINACOSATANATAN2TAN
+float float(...) = #476; // DP_QC_STRINGCOLORFUNCTIONS
+float string(...) = #477; // DP_QC_STRINGCOLORFUNCTIONS
+float string(...) = #478; // DP_QC_STRFTIME
+float tokenizebyseparator(...) = #479; // DP_QC_TOKENIZEBYSEPARATOR
+float VM_strtolower(...) = #480; // DP_UNKNOWN
+float VM_strtoupper(...) = #481; // DP_UNKNOWN
+float strreplace(...) = #484; // DP_QC_STRREPLACE
+float strireplace(...) = #485; // DP_QC_STRREPLACE
+float gecko_create(...) = #487; // DP_UNKNOWN
+float gecko_destroy(...) = #488; // DP_UNKNOWN
+float gecko_navigate(...) = #489; // DP_UNKNOWN
+float gecko_keyevent(...) = #490; // DP_UNKNOWN
+float gecko_mousemove(...) = #491; // DP_UNKNOWN
+float gecko_resize(...) = #492; // DP_UNKNOWN
+float gecko_get_texture_extent(...) = #493; // DP_UNKNOWN
+float crc16(...) = #494; // DP_QC_CRC16
+float cvar_type(...) = #495; // DP_QC_CVAR_TYPE
+float whichpack(...) = #503; // DP_UNKNOWN
+float uri_escape(...) = #510; // DP_UNKNOWN
+float uri_unescape(...) = #511; // DP_UNKNOWN
+float num_for_edict(...) = #512; // DP_QC_NUM_FOR_EDICT
+float tokenize_console(...) = #514; // DP_QC_TOKENIZE_CONSOLE
+float argv_start_index(...) = #515; // DP_QC_TOKENIZE_CONSOLE
+float argv_end_index(...) = #516; // DP_QC_TOKENIZE_CONSOLE
+float buf_cvarlist(...) = #517; // DP_QC_STRINGBUFFERS_CVARLIST
+float cvar_description(...) = #518; // DP_QC_CVAR_DESCRIPTION
+float VM_log(...) = #532; // DP_UNKNOWN
+float getsoundtime(...) = #533; // DP_SND_GETSOUNDTIME
+float soundlength(...) = #534; // DP_SND_GETSOUNDTIME
+float parseentitydata(...) = #613; // DP_UNKNOWN
+float stringtokeynum(...) = #614; // DP_UNKNOWN
+float resethostcachemasks(...) = #615; // DP_UNKNOWN
+float sethostcachemaskstring(...) = #616; // DP_UNKNOWN
+float sethostcachemasknumber(...) = #617; // DP_UNKNOWN
+float resorthostcache(...) = #618; // DP_UNKNOWN
+float sethostcachesort(...) = #619; // DP_UNKNOWN
+float refreshhostcache(...) = #620; // DP_UNKNOWN
+float gethostcachenumber(...) = #621; // DP_UNKNOWN
+float gethostcacheindexforkey(...) = #622; // DP_UNKNOWN
+float addwantedhostcachekey(...) = #623; // DP_UNKNOWN
+float getextresponse(...) = #624; // DP_UNKNOWN
+float netaddress_resolve(...) = #625; // DP_UNKNOWN
+float getgamedirinfo(...) = #626; // DP_UNKNOWN
+float sprintf(...) = #627; // DP_UNKNOWN
+float drawfont; // DP_UNKNOWN
+float drawfontscale; // DP_UNKNOWN
+.float angles; // DP_UNKNOWN
+.float chain; // DP_UNKNOWN
+.float classname; // DP_UNKNOWN
+.float frame; // OP_STATE
+.float nextthink; // OP_STATE
+.float think; // OP_STATE
+/******************************************
+ * progs
+ ******************************************/
+float setmodelindex(...) = #333; // EXT_CSQC
+float modelnameforindex(...) = #334; // EXT_CSQC
+float isserver(...) = #350; // EXT_CSQC
+float serverkey(...) = #354; // EXT_CSQC
+float VM_parseentitydata(...) = #613; // DP_UNKNOWN
+float ClientConnect; // DP_UNKNOWN
+float ClientDisconnect; // DP_UNKNOWN
+float ClientKill; // DP_UNKNOWN
+float PlayerPostThink; // DP_UNKNOWN
+float PlayerPreThink; // DP_UNKNOWN
+float PutClientInServer; // DP_UNKNOWN
+float SV_InitCmd; // DP_UNKNOWN
+float SetChangeParms; // DP_UNKNOWN
+float SetNewParms; // DP_UNKNOWN
+float StartFrame; // DP_UNKNOWN
+float main; // DP_UNKNOWN
+float require_spawnfunc_prefix; // DP_UNKNOWN
+.float SendEntity; // DP_UNKNOWN
+.float SendFlags; // DP_UNKNOWN
+.float Version; // DP_UNKNOWN
+.float ammo_cells1; // DP_UNKNOWN
+.float ammo_lava_nails; // DP_UNKNOWN
+.float ammo_multi_rockets; // DP_UNKNOWN
+.float ammo_nails1; // DP_UNKNOWN
+.float ammo_plasma; // DP_UNKNOWN
+.float ammo_rockets1; // DP_UNKNOWN
+.float ammo_shells1; // DP_UNKNOWN
+.float dimension_hit; // DP_UNKNOWN
+.float dimension_solid; // DP_UNKNOWN
+.float fatness; // DP_UNKNOWN
+.float fullbright; // DP_UNKNOWN
+.float hull; // DP_UNKNOWN
+.float items2; // DP_UNKNOWN
+.float pmodel; // DP_UNKNOWN
+.float renderamt; // DP_UNKNOWN
+.float rendermode; // DP_UNKNOWN
+.float sendcomplexanimation; // DP_UNKNOWN

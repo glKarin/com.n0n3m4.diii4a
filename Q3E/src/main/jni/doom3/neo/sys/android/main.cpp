@@ -43,6 +43,9 @@ If you have questions concerning this license or the applicable additional terms
 #include <mcheck.h>
 #endif
 
+#define DEFAULT_SYS_RANDOM_MEMORY 1024 // 512
+#define DEFAULT_SYS_CPU_FREQ 2950000000 // 2.75 / 0.000000001
+
 static idStr	basepath;
 static idStr	savepath;
 
@@ -281,23 +284,10 @@ Sys_GetClockticks
 */
 double Sys_GetClockTicks(void)
 {
-#if defined( __i386__ )
-	unsigned long lo, hi;
-
-	__asm__ __volatile__(
-	        "push %%ebx\n"			\
-	        "xor %%eax,%%eax\n"		\
-	        "cpuid\n"					\
-	        "rdtsc\n"					\
-	        "mov %%eax,%0\n"			\
-	        "mov %%edx,%1\n"			\
-	        "pop %%ebx\n"
-	        : "=r"(lo), "=r"(hi));
-	return (double) lo + (double) 0xFFFFFFFF * hi;
-#else
-#warning unsupported CPU
-	return 0;
-#endif
+	timespec timestamp;
+	clock_gettime(CLOCK_MONOTONIC, &timestamp);
+	return timestamp.tv_sec * 1e+9 + timestamp.tv_nsec;
+	// return 0;
 }
 
 /*
@@ -320,6 +310,34 @@ double MeasureClockTicks(void)
 Sys_ClockTicksPerSecond
 ===============
 */
+static bool Sys_GetCPUMaxFreq(int i, double *ret)
+{
+	int fd;
+	int len;
+	char	buf[ 4096 ];
+	double freq;
+	const char *file = va("/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i);
+
+	fd = open(file, O_RDONLY);
+	if (fd == -1) {
+		return false;
+	}
+
+	len = read(fd, buf, 4096);
+	close(fd);
+
+	if (len > 0) {
+		freq = atof(buf);
+		common->Printf("%s CPU frequency: %g MHz\n", file, freq / 1000.0);
+		freq *= 1000;
+		if(ret)
+			*ret = freq;
+		return true;
+	}
+
+	return false;
+}
+
 double Sys_ClockTicksPerSecond(void)
 {
 	static bool		init = false;
@@ -332,29 +350,79 @@ double Sys_ClockTicksPerSecond(void)
 		return ret;
 	}
 
-#if 1 // Android
-	fd = open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", O_RDONLY);
-#else
 	fd = open("/proc/cpuinfo", O_RDONLY);
-#endif
 
 	if (fd == -1) {
-		//common->Printf("couldn't read /proc/cpuinfo\n");
-		ret = MeasureClockTicks();
-		init = true;
-		//common->Printf("measured CPU frequency: %g MHz\n", ret / 1000000.0);
-		return ret;
+		// read cpu0's max freq
+		bool b = Sys_GetCPUMaxFreq(0, &ret); // 0 maybe not max freq
+		if(b)
+		{
+			init = true;
+			return ret;
+		}
+		else
+		{
+			//common->Printf("couldn't read /proc/cpuinfo\n");
+			ret = MeasureClockTicks();
+			init = true;
+			//common->Printf("measured CPU frequency: %g MHz\n", ret / 1000000.0);
+			return ret;
+		}
 	}
 
 	len = read(fd, buf, 4096);
 	close(fd);
 
-#if 1 // Android
-	if (len > 0) {
-		ret = atof(buf);
-		common->Printf("/proc/cpuinfo CPU frequency: %g MHz", ret / 1000.0);
-		ret *= 1000;
-		init = true;
+#if 1 // android
+	pos = 0;
+	double maxfreq = 0.0;
+	int maxcpuid = -1;
+	int numcpu = 0;
+
+	while (pos < len) {
+		if (!idStr::Cmpn(buf + pos, "processor", 9)) {
+			pos = strchr(buf + pos, ':') - buf + 2;
+			end = strchr(buf + pos, '\n') - buf;
+
+			if (pos < len && end < len && pos < end) {
+				char ch = buf[end];
+				buf[end] = '\0';
+				int cpuid = atoi(buf + pos);
+				numcpu++;
+
+				double freq = 0.0;
+				if(Sys_GetCPUMaxFreq(cpuid, &freq))
+				{
+					if(!init)
+					{
+						maxfreq = freq;
+						init = true;
+						maxcpuid = cpuid;
+					}
+					else
+					{
+						if(maxfreq < freq)
+						{
+							maxfreq = freq;
+							maxcpuid = cpuid;
+						}
+					}
+				}
+				buf[end] = ch;
+			} else {
+				break;
+			}
+		}
+
+		char *ptr = strchr(buf + pos, '\n');
+		if(!ptr)
+			break;
+		pos = ptr - buf + 1;
+	}
+	if(init)
+	{
+		ret = maxfreq;
+		common->Printf("Detected %d cpus, max CPU(%d) frequency: %.1f MHz\n", numcpu, maxcpuid, maxfreq / 1000000.0);
 		return ret;
 	}
 #else
@@ -408,14 +476,14 @@ int Sys_GetSystemRam(void)
 
 	if (count == -1) {
 		common->Printf("GetSystemRam: sysconf _SC_PHYS_PAGES failed\n");
-		return 512;
+		return DEFAULT_SYS_RANDOM_MEMORY;
 	}
 
 	page_size = sysconf(_SC_PAGE_SIZE);
 
 	if (page_size == -1) {
 		common->Printf("GetSystemRam: sysconf _SC_PAGE_SIZE failed\n");
-		return 512;
+		return DEFAULT_SYS_RANDOM_MEMORY;
 	}
 
 	mb= (int)((double)count * (double)page_size / (1024 * 1024));
@@ -608,7 +676,7 @@ void GLimp_CheckGLInitialized(void)
 	Q3E_CheckNativeWindowChanged();
 }
 
-static void Q3E_DumpArgs(int argc, const char **argv)
+static void Q3E_DumpArgs(int argc, char **argv)
 {
 	::q3e_argc = argc;
 	::q3e_argv = (char **) malloc(sizeof(char *) * argc);
@@ -721,7 +789,7 @@ static void doom3_exit(void)
 	Q3E_CloseRedirectOutput();
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
 	Q3E_DumpArgs(argc, argv);
 
@@ -741,11 +809,6 @@ intptr_t Sys_GetMainThread(void)
 	return main_thread;
 }
 
-const char * Sys_DLLDefaultPath(void)
-{
-	return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
-}
-
 void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
 {
 	if (analogenabled)
@@ -753,6 +816,28 @@ void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED)
 		side = (int)(KEY_MOVESPEED * analogx);
 		forward = (int)(KEY_MOVESPEED * analogy);
 	}
+}
+
+void Sys_ForceResolution(void)
+{
+    cvarSystem->SetCVarBool("r_fullscreen",  true);
+    cvarSystem->SetCVarInteger("r_mode", -1);
+
+    cvarSystem->SetCVarInteger("r_customWidth", screen_width);
+    cvarSystem->SetCVarInteger("r_customHeight", screen_height);
+
+    float r = (float) screen_width / (float) screen_height;
+
+    if (r > 1.7f) {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
+    } else if (r > 1.55f) {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
+    } else {
+        cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
+    }
+
+    Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
+               -1, screen_width, screen_height);
 }
 
 #include "sys_android.cpp"

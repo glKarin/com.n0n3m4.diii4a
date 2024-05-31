@@ -28,7 +28,7 @@ check_dodge(edict_t *self, vec3_t start, vec3_t dir, int speed)
 	}
 
 	/* easy mode only ducks one quarter the time */
-	if (skill->value == 0)
+	if (skill->value == SKILL_EASY)
 	{
 		if (random() > 0.25)
 		{
@@ -62,6 +62,11 @@ fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
 	vec3_t dir;
 
 	if (!self)
+	{
+		return false;
+	}
+
+	if (!self->enemy)
 	{
 		return false;
 	}
@@ -348,6 +353,7 @@ void
 blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	int mod;
+	vec3_t normal;
 
 	if (!self || !other)
 	{
@@ -371,6 +377,8 @@ blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 		PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
 	}
 
+	get_normal_vector(plane, normal);
+
 	if (other->takedamage)
 	{
 		if (self->spawnflags & 1)
@@ -383,23 +391,14 @@ blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 		}
 
 		T_Damage(other, self, self->owner, self->velocity, self->s.origin,
-				plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
+				normal, self->dmg, 1, DAMAGE_ENERGY, mod);
 	}
 	else
 	{
 		gi.WriteByte(svc_temp_entity);
 		gi.WriteByte(TE_BLASTER);
 		gi.WritePosition(self->s.origin);
-
-		if (!plane)
-		{
-			gi.WriteDir(vec3_origin);
-		}
-		else
-		{
-			gi.WriteDir(plane->normal);
-		}
-
+		gi.WriteDir(normal);
 		gi.multicast(self->s.origin, MULTICAST_PVS);
 	}
 
@@ -758,6 +757,7 @@ void
 rocket_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	vec3_t origin;
+	vec3_t normal;
 	int n;
 
 	if (!ent || !other)
@@ -787,8 +787,10 @@ rocket_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
 	if (other->takedamage)
 	{
+		get_normal_vector(plane, normal);
+
 		T_Damage(other, ent, ent->owner, ent->velocity, ent->s.origin,
-				plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
+				normal, ent->dmg, 0, 0, MOD_ROCKET);
 	}
 	else
 	{
@@ -854,7 +856,7 @@ fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage,
 	rocket->s.modelindex = gi.modelindex("models/objects/rocket/tris.md2");
 	rocket->owner = self;
 	rocket->touch = rocket_touch;
-	rocket->nextthink = level.time + 8000 / speed;
+	rocket->nextthink = level.time + (8000.0f / (float)speed);
 	rocket->think = G_FreeEdict;
 	rocket->dmg = damage;
 	rocket->radius_dmg = radius_damage;
@@ -1021,6 +1023,8 @@ bfg_explode(edict_t *self)
 void
 bfg_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+	vec3_t normal;
+
 	if (!self || !other)
 	{
 		G_FreeEdict(self);
@@ -1046,8 +1050,10 @@ bfg_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 	/* core explosion - prevents firing it into the wall/floor */
 	if (other->takedamage)
 	{
+		get_normal_vector(plane, normal);
+
 		T_Damage(other, self, self->owner, self->velocity, self->s.origin,
-				plane->normal, 200, 0, 0, MOD_BFG_BLAST);
+				normal, 200, 0, 0, MOD_BFG_BLAST);
 	}
 
 	T_RadiusDamage(self, self->owner, 200, other, 100, MOD_BFG_BLAST);
@@ -1055,7 +1061,14 @@ bfg_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 	gi.sound(self, CHAN_VOICE, gi.soundindex("weapons/bfg__x1b.wav"), 1, ATTN_NORM, 0);
 	self->solid = SOLID_NOT;
 	self->touch = NULL;
-	VectorMA(self->s.origin, -1 * FRAMETIME, self->velocity, self->s.origin);
+
+	/* move it back a bit from walls so the effects aren't cut off */
+	if (!other->takedamage)
+	{
+		VectorNormalize(self->velocity);
+		VectorMA(self->s.origin, -40.0f, self->velocity, self->s.origin);
+	}
+
 	VectorClear(self->velocity);
 	self->s.modelindex = gi.modelindex("sprites/s_bfg3.sp2");
 	self->s.frame = 0;
@@ -1064,6 +1077,8 @@ bfg_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 	self->think = bfg_explode;
 	self->nextthink = level.time + FRAMETIME;
 	self->enemy = other;
+
+	gi.linkentity(self);
 
 	gi.WriteByte(svc_temp_entity);
 	gi.WriteByte(TE_BFG_BIGEXPLOSION);
@@ -1201,7 +1216,7 @@ fire_bfg(edict_t *self, vec3_t start, vec3_t dir, int damage,
 	bfg->s.modelindex = gi.modelindex("sprites/s_bfg1.sp2");
 	bfg->owner = self;
 	bfg->touch = bfg_touch;
-	bfg->nextthink = level.time + 8000 / speed;
+	bfg->nextthink = level.time + (8000.0f / (float)speed);
 	bfg->think = G_FreeEdict;
 	bfg->radius_dmg = damage;
 	bfg->dmg_radius = damage_radius;
@@ -1243,7 +1258,9 @@ ionripper_sparks(edict_t *self)
 void
 ionripper_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	if (!self || !other || !plane || !surf)
+	vec3_t normal;
+
+	if (!self || !other)
 	{
 		return;
 	}
@@ -1266,15 +1283,13 @@ ionripper_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 
 	if (other->takedamage)
 	{
-		T_Damage(other, self, self->owner, self->velocity, self->s.origin,
-				plane->normal, self->dmg, 1, DAMAGE_ENERGY, MOD_RIPPER);
-	}
-	else
-	{
-		return;
-	}
+		get_normal_vector(plane, normal);
 
-	G_FreeEdict(self);
+		T_Damage(other, self, self->owner, self->velocity, self->s.origin,
+				normal, self->dmg, 1, DAMAGE_ENERGY, MOD_RIPPER);
+
+		G_FreeEdict(self);
+	}
 }
 
 void
@@ -1336,25 +1351,18 @@ heat_think(edict_t *self)
 	edict_t *target = NULL;
 	edict_t *aquire = NULL;
 	vec3_t vec;
-	int len;
-	int oldlen = 0;
+	float len;
+	float oldlen = 0;
 
 	if (!self)
 	{
 		return;
 	}
 
-	VectorClear(vec);
-
 	/* aquire new target */
 	while ((target = findradius(target, self->s.origin, 1024)) != NULL)
 	{
 		if (self->owner == target)
-		{
-			continue;
-		}
-
-		if (!(target->svflags & SVF_MONSTER))
 		{
 			continue;
 		}
@@ -1369,12 +1377,12 @@ heat_think(edict_t *self)
 			continue;
 		}
 
-		if (!visible(self, target))
+		if (!infront(self, target))
 		{
 			continue;
 		}
 
-		if (!infront(self, target))
+		if (!visible(self, target))
 		{
 			continue;
 		}
@@ -1382,20 +1390,18 @@ heat_think(edict_t *self)
 		VectorSubtract(self->s.origin, target->s.origin, vec);
 		len = VectorLength(vec);
 
-		if ((aquire == NULL) || (len < oldlen))
+		if ((!aquire) || (len < oldlen))
 		{
 			aquire = target;
-			self->target_ent = aquire;
 			oldlen = len;
 		}
 	}
 
-	if (aquire != NULL)
+	if (aquire)
 	{
 		VectorSubtract(aquire->s.origin, self->s.origin, vec);
 		vectoangles(vec, self->s.angles);
 		VectorNormalize(vec);
-		VectorCopy(vec, self->movedir);
 		VectorScale(vec, 500, self->velocity);
 	}
 
@@ -1448,8 +1454,9 @@ void
 plasma_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	vec3_t origin;
+	vec3_t normal;
 
-	if (!ent || !other || !plane || !surf)
+	if (!ent || !other)
 	{
 		return;
 	}
@@ -1475,15 +1482,26 @@ plasma_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
 	if (other->takedamage)
 	{
+		get_normal_vector(plane, normal);
+
 		T_Damage(other, ent, ent->owner, ent->velocity, ent->s.origin,
-				plane->normal, ent->dmg, 0, 0, MOD_PHALANX);
+				normal, ent->dmg, 0, 0, MOD_PHALANX);
 	}
 
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other,
 			ent->dmg_radius, MOD_PHALANX);
 
 	gi.WriteByte(svc_temp_entity);
-	gi.WriteByte(TE_PLASMA_EXPLOSION);
+
+	if (ent->waterlevel)
+	{
+		gi.WriteByte(TE_ROCKET_EXPLOSION_WATER);
+	}
+	else
+	{
+		gi.WriteByte(TE_PLASMA_EXPLOSION);
+	}
+
 	gi.WritePosition(origin);
 	gi.multicast(ent->s.origin, MULTICAST_PVS);
 
@@ -1515,7 +1533,7 @@ fire_plasma(edict_t *self, vec3_t start, vec3_t dir, int damage,
 
 	plasma->owner = self;
 	plasma->touch = plasma_touch;
-	plasma->nextthink = level.time + 8000 / speed;
+	plasma->nextthink = level.time + (8000.0f / (float)speed);
 	plasma->think = G_FreeEdict;
 	plasma->dmg = damage;
 	plasma->radius_dmg = radius_damage;

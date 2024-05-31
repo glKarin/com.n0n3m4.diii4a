@@ -813,11 +813,11 @@ SP_worldspawn(edict_t *ent)
 	if (ent->message && ent->message[0])
 	{
 		gi.configstring(CS_NAME, ent->message);
-		strncpy(level.level_name, ent->message, sizeof(level.level_name));
+		Q_strlcpy(level.level_name, ent->message, sizeof(level.level_name));
 	}
 	else
 	{
-		strncpy(level.level_name, level.mapname, sizeof(level.level_name));
+		Q_strlcpy(level.level_name, level.mapname, sizeof(level.level_name));
 	}
 
 	if (st.sky && st.sky[0])

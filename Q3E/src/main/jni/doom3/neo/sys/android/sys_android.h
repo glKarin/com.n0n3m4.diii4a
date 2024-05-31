@@ -13,7 +13,7 @@ typedef struct
 
     // Input
     void (*Input_grabMouse)(int grab); // Android grab mouse
-    void (*Input_pullEvent)(int execCmd); // Android pull input event
+    int (*Input_pullEvent)(int execCmd); // Android pull input event
 
     // System
     void (*Sys_attachThread)(void); // Attach C/C++ created thread to JNI
@@ -46,13 +46,14 @@ typedef struct
     int mouseAvailable; // using mouse
     int continueWhenNoGLContext; // Continue when missing OpenGL context
     const char *gameDataDir; // game data directory
+    int refreshRate; // screen refresh rate
 } Q3E_InitialContext_t;
 
 // Android::JNI call DOOM3 after main()
 typedef struct
 {
     // any thread(Java): before idCommon Initialized
-    int  (*main)(int argc, const char **argv); // call main(int, const char **)
+    int  (*main)(int argc, char **argv); // call main(int, const char **)
     void (*setCallbacks)(const void *func);
     void (*setInitialContext)(const void *context);
     void (*setResolution)(int width, int height);

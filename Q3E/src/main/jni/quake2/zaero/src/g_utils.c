@@ -32,6 +32,11 @@ edict_t *G_Find (edict_t *from, int fieldofs, char *match)
 	else
 		from++;
 
+	if (!match)
+	{
+		return NULL;
+	}
+
 	for ( ; from < &g_edicts[globals.num_edicts] ; from++)
 	{
 		if (!from->inuse)
@@ -65,6 +70,7 @@ edict_t *findradius (edict_t *from, vec3_t org, float rad)
 		from = g_edicts;
 	else
 		from++;
+
 	for ( ; from < &g_edicts[globals.num_edicts]; from++)
 	{
 		if (!from->inuse)
@@ -131,6 +137,11 @@ edict_t *G_PickTarget (char *targetname)
 
 void Think_Delay (edict_t *ent)
 {
+	if (!ent)
+	{
+		return;
+	}
+
 	G_UseTargets (ent, ent->activator);
 	G_FreeEdict (ent);
 }
@@ -155,12 +166,17 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 {
 	edict_t		*t;
 
+	if (!ent || !activator)
+	{
+		return;
+	}
+
 	//
 	// check for a delay
 	//
 	if (ent->delay)
 	{
-	// create a temp object to fire at a later time
+		// create a temp object to fire at a later time
 		t = G_Spawn();
 		t->classname = "DelayedUse";
 		t->nextthink = level.time + ent->delay;
@@ -173,12 +189,12 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 		t->killtarget = ent->killtarget;
 		return;
 	}
-	
-	
+
+
 	//
 	// print the message
 	//
-	if ((ent->message) && !(activator->svflags & SVF_MONSTER))
+	if (activator != NULL && (ent->message) && !(activator->svflags & SVF_MONSTER))
 	{
 		gi.centerprintf (activator, "%s", ent->message);
 		if (ent->noise_index)
@@ -224,7 +240,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 			else
 			{
 				if (t->use)
-					t->use (t, ent, activator);
+				t->use (t, ent, activator);
 			}
 			if (!ent->inuse)
 			{
@@ -314,7 +330,7 @@ void G_SetMovedir (vec3_t angles, vec3_t movedir)
 float vectoyaw (vec3_t vec)
 {
 	float	yaw;
-	
+
 	if (/*vec[YAW] == 0 &&*/ vec[PITCH] == 0) 
 	{
 		yaw = 0;
@@ -338,7 +354,7 @@ void vectoangles (vec3_t value1, vec3_t angles)
 {
 	float	forward;
 	float	yaw, pitch;
-	
+
 	if (value1[1] == 0 && value1[0] == 0)
 	{
 		yaw = 0;
@@ -372,7 +388,7 @@ void vectoangles (vec3_t value1, vec3_t angles)
 char *G_CopyString (char *in)
 {
 	char	*out;
-	
+
 	out = gi.TagMalloc (strlen(in)+1, TAG_LEVEL);
 	strcpy (out, in);
 	return out;
@@ -381,6 +397,11 @@ char *G_CopyString (char *in)
 
 void G_InitEdict (edict_t *e)
 {
+	if (!e)
+	{
+		return;
+	}
+
 	e->inuse = true;
 	e->classname = "noclass";
 	e->gravity = 1.0;
@@ -414,10 +435,10 @@ edict_t *G_Spawn (void)
 			return e;
 		}
 	}
-	
+
 	if (i == game.maxentities)
 		gi.error ("ED_Alloc: no free edicts");
-		
+
 	globals.num_edicts++;
 	G_InitEdict (e);
 	return e;
@@ -432,6 +453,11 @@ Marks the edict as free
 */
 void G_FreeEdict (edict_t *ed)
 {
+	if (!ed)
+	{
+		return;
+	}
+
 	gi.unlinkentity (ed);		// unlink from world
 
 	if ((ed - g_edicts) <= (maxclients->value + BODY_QUEUE_SIZE))
@@ -457,6 +483,11 @@ void	G_TouchTriggers (edict_t *ent)
 {
 	int			i, num;
 	edict_t		*touch[MAX_EDICTS], *hit;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	// dead things don't activate triggers!
 	if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
@@ -490,6 +521,11 @@ void	G_TouchSolids (edict_t *ent)
 {
 	int			i, num;
 	edict_t		*touch[MAX_EDICTS], *hit;
+
+	if (!ent)
+	{
+		return;
+	}
 
 	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch
 		, MAX_EDICTS, AREA_SOLID);
@@ -528,6 +564,11 @@ qboolean KillBox (edict_t *ent)
 {
 	trace_t		tr;
 
+	if (!ent)
+	{
+		return false;
+	}
+
 	while (1)
 	{
 		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
@@ -557,17 +598,22 @@ qboolean MonsterKillBox (edict_t *ent)
 {
 	trace_t		tr;
 
+	if (!ent)
+	{
+		return false;
+	}
+
 	while (1)
 	{
 		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
 		if (!tr.ent)
 			break;
 
-    if(!((ent->svflags & SVF_MONSTER) && tr.ent->client && tr.ent->health))
-    {
-		  // nail it
-		  T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
-    }
+		if(!((ent->svflags & SVF_MONSTER) && tr.ent->client && tr.ent->health))
+		{
+			// nail it
+			T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+		}
 
 		// if we didn't kill it, fail
 		if (tr.ent->solid)
@@ -589,27 +635,32 @@ qboolean MonsterPlayerKillBox (edict_t *ent)
 {
 	trace_t		tr;
 
+	if (!ent)
+	{
+		return false;
+	}
+
 	while (1)
 	{
 		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, MASK_PLAYERSOLID);
 		if (!tr.ent)
 			break;
 
-    if((ent->svflags & SVF_MONSTER) && tr.ent->client && tr.ent->health)
-    {
-		  // nail myself
-		  T_Damage (ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
-      return true;
-    }
-    else
-    {
-		  // nail it
-		  T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
-    }
+		if((ent->svflags & SVF_MONSTER) && tr.ent->client && tr.ent->health)
+		{
+			// nail myself
+			T_Damage (ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+			return true;
+		}
+		else
+		{
+			// nail it
+			T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+		}
 
 		// if we didn't kill it, fail
 		if (tr.ent->solid)
-			return false;
+		return false;
 	}
 
 	return true;		// all clear

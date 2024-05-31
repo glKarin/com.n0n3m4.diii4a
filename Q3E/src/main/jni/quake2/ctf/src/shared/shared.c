@@ -319,11 +319,8 @@ anglemod(float a)
 	return a;
 }
 
-int i;
-vec3_t corners[2];
-
-/* 
- * This is the slow, general version 
+/*
+ * This is the slow, general version
  */
 int
 BoxOnPlaneSide2(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
@@ -441,7 +438,7 @@ BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 					p->normal[2] * emaxs[2];
 			break;
 		default:
-			dist1 = dist2 = 0; 
+			dist1 = dist2 = 0;
 			break;
 	}
 
@@ -666,31 +663,17 @@ COM_StripExtension(char *in, char *out)
 	*out = 0;
 }
 
-char *
-COM_FileExtension(char *in)
+const char *
+COM_FileExtension(const char *in)
 {
-	static char exten[8];
-	int i;
+	const char *ext = strrchr(in, '.');
 
-	while (*in && *in != '.')
-	{
-		in++;
-	}
-
-	if (!*in)
+	if (!ext || ext == in)
 	{
 		return "";
 	}
 
-	in++;
-
-	for (i = 0; i < 7 && *in; i++, in++)
-	{
-		exten[i] = *in;
-	}
-
-	exten[i] = 0;
-	return exten;
+	return ext + 1;
 }
 
 void
@@ -774,7 +757,7 @@ COM_DefaultExtension(char *path, const char *extension)
 
 qboolean bigendien;
 
-/* can't just use function pointers, or dll linkage can 
+/* can't just use function pointers, or dll linkage can
    mess up when qcommon is included in multiple places */
 short (*_BigShort)(short l);
 short (*_LittleShort)(short l);
@@ -786,37 +769,37 @@ float (*_LittleFloat)(float l);
 short
 BigShort(short l)
 {
-	return _BigShort(l); 
+	return _BigShort(l);
 }
 
 short
 LittleShort(short l)
-{return 
-	_LittleShort(l); 
+{return
+	_LittleShort(l);
 }
 
 int
 BigLong(int l)
 {
-	return _BigLong(l); 
+	return _BigLong(l);
 }
 
 int
 LittleLong(int l)
 {
-	return _LittleLong(l); 
+	return _LittleLong(l);
 }
 
 float
 BigFloat(float l)
 {
-	return _BigFloat(l); 
+	return _BigFloat(l);
 }
 
 float
 LittleFloat(float l)
 {
-	return _LittleFloat(l); 
+	return _LittleFloat(l);
 }
 
 short
@@ -907,11 +890,11 @@ Swap_Init(void)
 }
 
 /*
- * does a varargs printf into a temp buffer, so I don't 
+ * does a varargs printf into a temp buffer, so I don't
  * need to have varargs versions of all text functions.
  */
 char *
-va(const char *format, ...)
+va(char *format, ...)
 {
 	va_list argptr;
 	static char string[1024];
@@ -1089,6 +1072,43 @@ Q_strcasecmp(char *s1, char *s2)
 	return Q_strncasecmp(s1, s2, 99999);
 }
 
+int
+Q_strlcpy(char *dst, const char *src, int size)
+{
+	const char *s = src;
+
+	while (*s)
+	{
+		if (size > 1)
+		{
+			*dst++ = *s;
+			size--;
+		}
+		s++;
+	}
+	if (size > 0)
+	{
+		*dst = '\0';
+	}
+
+	return s - src;
+}
+
+int
+Q_strlcat(char *dst, const char *src, int size)
+{
+	char *d = dst;
+
+	while (size > 0 && *d)
+	{
+		size--;
+		d++;
+	}
+
+	return (d - dst) + Q_strlcpy(d, src, size);
+}
+
+
 void
 Com_sprintf(char *dest, int size, char *fmt, ...)
 {
@@ -1127,7 +1147,7 @@ char *
 Info_ValueForKey(char *s, char *key)
 {
 	char pkey[512];
-	static char value[2][512]; /* use two buffers so compares 
+	static char value[2][512]; /* use two buffers so compares
 							     work without stomping on each other */
 	static int valueindex;
 	char *o;
@@ -1237,7 +1257,7 @@ Info_RemoveKey(char *s, char *key)
 
 		if (!strcmp(key, pkey))
 		{
-			strcpy(start, s); /* remove this part */
+			memmove(start, s, strlen(s) + 1); /* remove this part */
 			return;
 		}
 

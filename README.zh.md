@@ -1,11 +1,11 @@
 ## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006) for Android/Windows/Linux OpenGLES
-#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版. 
+#### DOOM III/Quake 4/Prey(2006)/DOOM 3 BFG for Android/Windows/Linux OpenGLES
+#### 毁灭战士3/雷神之锤4/掠食(2006)/毁灭战士3 BFG/The Dark Mod 安卓/Windows/Linux OpenGLES移植版. 
 #### 原名DIII4A++, 基于n0n3m4的diii4a的OpenGLES版本.
 **最新版本:**
-1.1.0harmattan50(natasha)  
+1.1.0harmattan51(natasha)  
 **最新更新日期:**
-2024-04-30  
+2024-05-31  
 **架构支持:**
 arm64 armv7-a  
 **平台:**
@@ -14,7 +14,7 @@ Android 4.4+
 GPLv3
 
 ----------------------------------------------------------------------------------
-### 支持
+### idTech4引擎支持
 * Linux/Windows(MinGW/MSVC(不支持编辑器))构建
 * 多线程渲染
 * png/dds纹理图片加载
@@ -26,15 +26,11 @@ GPLv3
 * OpenAL(soft)和EFX混响
 * 无光照渲染和无光照材质
 * 半透明模板阴影
-* 毁灭战士3 mods: 毁灭战士3(支持全身mod); The Lost Mission; Classic DOOM; Rivensin; Hardcorps; Overthinked; SABot-a7x; HexenEOC; Fragging-Free; LibreCoop
+* 毁灭战士3(支持全身mod)
 * 雷神之锤4(支持Bot mod; 全身mod)和Raven idTech4引擎
 * 掠食(2006)(支持全身mod)和HumanHead idTech4引擎
-* 雷神之锤2(Yamagi Quake II) 和mods: ctf; rogue; xatrix; zaero
-* 雷神之锤3竞技场/雷神之锤3团队竞技场(ioquake3)
-* 重返德军总部(iortcw)
-* The Dark Mod
 
-###### 和其他OpenGLES移植版本比较
+###### 毁灭战士3和其他OpenGLES移植版本比较
 
 | 功能支持                                                                             |       idTech4A++        |                 其他                  |
 |:---------------------------------------------------------------------------------|:-----------------------:|:-----------------------------------:|
@@ -43,7 +39,22 @@ GPLv3
 | 纹理坐标生成着色器                                                                        |           支持            |                  -                  |
 | 基于阴影图的纯软阴影                                                                       |           支持            |                  -                  |
 | 半透明模板阴影                                                                          |           支持            |                  -                  |
-| OpenGL ES版本                                                                      | 2.0和3.0+<br/>(阴影映射着色器有各自的版本) |            2.0(3.0+下兼容)             |
+| OpenGL ES版本                                                                      | 2.0和3.0+<br/>(阴影映射着色器有各自的版本) |            2.0(3.0+向下兼容)            |
+| 禁用光照                                                                             |               支持<br/>(并且支持游戏中切换)                |                 支持                  |
+
+###### 支持的游戏
+
+| 游戏                           |        引擎         |                      版本                      |     OpenGL ES版本     |                                                                                 Mods                                                                                 |
+|:-----------------------------|:-----------------:|:--------------------------------------------:|:-------------------:|:-----------------------------------------:|
+| 毁灭战士3                        |         -         |                      -                       |       2.0/3.0       | 邪恶复苏<br/>The Lost Mission<br/>Classic DOOM3<br/>Rivensin<br/>HardCorps<br/>Overthinked Doom^3<br/>Sabot(a7x)<br/>HeXen:Edge of Chaos<br/>Fragging Free<br/>LibreCoop |
+| 雷神之锤4                        |         -         |                      -                       |       2.0/3.0       |                                                                                                                                                                      |
+| 掠食(2006)                   |         -         |                      -                       |       2.0/3.0       |                                                                                                                                                                      |
+| 毁灭战士3 BFG(毁灭战士1&2) |   [RBDOOM3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG)   | 1.4.0<br/>(最后一个支持OpenGL渲染的版本) |         3.2         |                                                                                                                                                                      |
+| The Dark Mod                 |    [Dark Mod](https://www.thedarkmod.com)     |                     2.12                     | 3.2<br/>(请求几何着色器支持) |                                                                                                                                                                      |
+| 重返德军总部 |     [iortcw](https://github.com/iortcw/iortcw)      |                      -                       |         1.1         |                                                                                                                                                                      |
+| 雷神之锤3竞技场              |    [ioquake3](https://github.com/ioquake/ioq3)     |                      -                       |         1.1         |                                                                         雷神之锤3团队竞技场                                                                         |
+| 雷神之锤2                     | [Yamagi Quake II](https://github.com/yquake2/yquake2) |                      -                       |         1.1         |                                                                  ctf<br/>rogue<br/>xatrix<br/>zaero                                                                  |
+| 雷神之锤1                      |   [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces)    |                      -                       |         2.0         |                                                                                                                                                                      |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
@@ -59,12 +70,12 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 ### 更新
 
-* 支持新渲染通道: 热浪(例如 BFG9000飞行物的扭曲, 火箭炮的爆炸), colorProcess(例如 marscity2镜子前的血色影片).
-* 雷神之锤4支持新GLSL渲染通道(例如 机枪的瞄准镜特效和弹孔).
-* `Control`选项卡新增控制虚拟摇杆的显示模式(总是显示; 隐藏; 仅按下显示).
-* 改进Phong/Blinn-Phong光照模型着色器使用高精度.
-* The Dark Mod中强制禁用压缩纹理.
-* 设置中可以启用每个游戏的数据文件夹独立放置: 毁灭战士3 -> doom3/; 雷神之锤4 -> quake4/; 掠食(2006) -> prey/; 雷神之锤1 -> quake1/; 雷神之锤2 -> quake2/; 雷神之锤3 -> quake3/; 重返德军总部 -> rtcw/; The Dark Mod -> darkmod/ (总是独立).
+* 新增`毁灭战士 3 BFG`(RBDOOM-3-BFG ver1.4.0)支持, 游戏数据文件夹名为`doom3bfg/base`. 详情[RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG)和[DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
+* 新增`雷神之锤 I`(Darkplaces)支持, 游戏数据文件夹名为`darkplaces/id1`. 详情[DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces)和[Quake I](https://store.steampowered.com/app/2310/Quake/).
+* 修复The Dark Mod(v2.12)在Mali GPU的着色器错误.
+* 更新雷神之锤2(Yamagi Quake II)版本.
+* 毁灭战士3/雷神之锤4/掠食(2006)支持在多线程下启用调试渲染工具(除r_showSurfaceInfo).
+* 毁灭战士3/雷神之锤4/掠食(2006)支持使用cvar r_noLight 0和2, 允许在游戏中切换是否禁用光照渲染.
 
 ----------------------------------------------------------------------------------
 
@@ -108,6 +119,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_bathroom_jill_stars.png" alt="Classic bathroom in Rivensin mod">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" alt="Quake IV on DOOM3">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" alt="Prey(2006) on DOOM3">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg.jpg" alt="DOOM3 BFG">
 
 > Mod
 
@@ -118,7 +130,9 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_arena.jpg" width="50%" alt="Quake III : Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_team_arena.jpg" width="50%" alt="Quake III : Team Arena">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_return_to_castle_wolfenstein.jpg" width="50%" alt="Return to Castle Wolfenstein"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_the_dark_mod.jpg" width="50%" alt="The Dark Mod">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake2.jpg" width="50%" alt="Quake II">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake2.jpg" width="50%" alt="Quake II"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake1.jpg" width="50%" alt="Quake I">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom1.jpg" width="33%" alt="DOOM 3 BFG: DOOM I"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom3.jpg" width="34%" alt="DOOM 3 BFG: DOOM III"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom2.jpg" width="33%" alt="DOOM 3 BFG: DOOM II">
+
 
 ----------------------------------------------------------------------------------
 
@@ -156,6 +170,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 由于`BSE`没开源, 所以我默认使用了一个什么都不做的空实现和一个不完整的但可以工作的基于毁灭战士3原来的Particle/Fx粒子特效系统的实现(使用宏`_RAVEN_FX`标记).
 ##### 关于`BOT`
 声明宏`MOD_BOTS`将编译SABot a7(来自毁灭战士3) mod源码的多人游戏的bot支持.
+##### About `全身模式(第三人称)支持`
+声明宏`_MOD_FULL_BODY_AWARENESS`将编译全身模式(第三人称)支持.
 
 #### 掠食(2006)
 ##### `_HUMANHEAD`, `_PREY`是补丁宏, 在`DIII4A`源码中查找.
@@ -164,6 +180,8 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 2. _PREY: 编译`游戏 (掠食(2006)的SDK源码)`库.
 > 3. 构建core引擎: 声明宏`_HUMANHEAD`
 > 4. 构建游戏库: 声明宏`_HUMANHEAD`, `_PREY`, 和原来SDK的宏`HUMANHEAD`
+##### About `全身模式(第三人称)支持`
+声明宏`_MOD_FULL_BODY_AWARENESS`将编译全身模式(第三人称)支持.
 
 #### 安卓
 ##### 声明宏`__ANDROID__`.
