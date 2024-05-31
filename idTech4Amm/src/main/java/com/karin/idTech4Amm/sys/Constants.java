@@ -13,12 +13,12 @@ import java.util.Date;
 public final class Constants
 {
     public static final int CONST_UPDATE_RELEASE = 51;
-    public static final String CONST_RELEASE = "2024-04-30";
+    public static final String CONST_RELEASE = "2024-05-31";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
-    public static final String CONST_NAME = "DOOM III/Quake 4/Prey(2006) for Android(Harmattan Edition)";
+    public static final String CONST_NAME = "DOOM III/Quake 4/Prey(2006)/DOOM 3 BFG for Android(Harmattan Edition)";
 	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
     public static final String CONST_TIEBA = "https://tieba.baidu.com/p/6825594793";
 	public static final String CONST_DEVELOPER = "https://github.com/glKarin";

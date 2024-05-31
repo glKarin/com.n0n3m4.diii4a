@@ -20,7 +20,7 @@
 * Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).
 * Improving Phong/Blinn-Phong light model interaction shader with high-precision.
 * Force disable using compression texture in The Dark Mod.
-* Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always).
+* Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always); DOOM3 BFG -> doom3bfg/ (always).
 
 ----------------------------------------------------------------------------------
 
@@ -28,9 +28,9 @@
 
 * Support perforated surface shadow in shadow mapping(cvar `r_forceShadowMapsOnAlphaTestedSurfaces`, default 0).
 * Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`. More view in [LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
-* Add `Quake II` support, game data directory named `baseq2`. More view in [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
-* Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
-* Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
+* Add `Quake II` support, game data directory named `baseq2`. More view in [Yamagi Quake II](https://github.com/yquake2/yquake2) and [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
+* Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [ioquake3](https://github.com/ioquake/ioq3) and [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
+* Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [iortcw](https://github.com/iortcw/iortcw) and [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
 * Add `The Dark Mod` 2.12 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
 * Add a on-screen button theme.
 
