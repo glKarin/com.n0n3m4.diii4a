@@ -102,7 +102,7 @@ static int				mt_rb_debugPolygonTime = 0;
 #define __numDebugPolygons (multithreadActive ? mt_rb_numDebugPolygons : ::rb_numDebugPolygons)
 #define __debugPolygonTime (multithreadActive ? mt_rb_debugPolygonTime : ::rb_debugPolygonTime)
 
-static idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER/* | CVAR_ARCHIVE*/, "Enable render tools debug in multi-threading.");
+idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER/* | CVAR_ARCHIVE*/, "Enable render tools debug in multi-threading.");
 
 void RB_SetupRenderTools(void)
 {
@@ -1052,7 +1052,7 @@ Debugging tool
 */
 static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#ifdef _MULTITHREAD //karin: RB_ShowSurfaceInfo using frontend functions, don't support call in backend in multi-threading
+#ifdef _MULTITHREAD //karin: using R_ShowSurfaceInfo on frontend on multi-threading
 	if(multithreadActive)
 		return;
 #endif
@@ -3079,3 +3079,50 @@ void RB_ShutdownDebugTools(void)
 //#endif
 }
 
+#ifdef _MULTITHREAD
+void R_ShowSurfaceInfo(void)
+{
+	if(!r_showSurfaceInfo.GetBool() || !harm_r_renderToolsMultithread.GetBool() || !multithreadActive)
+		return;
+
+	modelTrace_t mt;
+	idVec3 start, end;
+
+	// start far enough away that we don't hit the player model
+	start = tr.primaryView->renderView.vieworg + tr.primaryView->renderView.viewaxis[0] * 16;
+	end = start + tr.primaryView->renderView.viewaxis[0] * 1000.0f;
+
+	if (!tr.primaryWorld->Trace(mt, start, end, 0.0f, false)) {
+		return;
+	}
+
+	idVec3	trans[3];
+	float	matrix[16];
+
+	// transform the object verts into global space
+	R_AxisToModelMatrix(mt.entity->axis, mt.entity->origin, matrix);
+
+	tr.primaryWorld->DrawText(mt.entity->hModel->Name(), mt.point + tr.primaryView->renderView.viewaxis[2] * 12,
+	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
+	tr.primaryWorld->DrawText(mt.material->GetName(), mt.point,
+	                          0.35f, colorBlue, tr.primaryView->renderView.viewaxis);
+#ifdef _K_DEV //karin: show stage texgen
+	idStr str;
+	const char *TG_NAMES[] = {
+		"TG_EXPLICIT",
+		"TG_DIFFUSE_CUBE",
+		"TG_REFLECT_CUBE",
+		"TG_SKYBOX_CUBE",
+		"TG_WOBBLESKY_CUBE",
+		"TG_SCREEN",
+		"TG_SCREEN2",
+		"TG_GLASSWARP",
+	};
+	for(int i = 0; i < mt.material->GetNumStages(); i++)
+		str += va("%d. %s\n", i, TG_NAMES[mt.material->GetStage(i)->texture.texgen]);
+	tr.primaryWorld->DrawText(str.c_str(), mt.point - tr.primaryView->renderView.viewaxis[2] * 12,
+	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
+#endif
+}
+
+#endif
