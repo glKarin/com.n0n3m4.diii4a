@@ -48,7 +48,15 @@ public final class KidTech4Command
     public static String SetProp(String str, String name, Object val)
     {
         str = PreCmd(str);
-        String nname = " +set " + name;
+        String nname;
+        if(name == "-game")
+        {
+        nname = " " + name;
+        }
+        else
+        {
+         nname = " +set " + name;
+        }
         String insertCmd = val.toString().trim();
         if (str.contains(nname))
         {
@@ -82,7 +90,16 @@ public final class KidTech4Command
     public static String GetProp(String str, String name, String...def)
     {
         str = PreCmd(str);
-        String nname = " +set " + name + " ";
+        //String nname = " +set " + name + " ";
+        String nname;
+        if(name == "-game")
+        {
+        nname = " " + name + "";
+        }
+        else
+        {
+         nname = " +set " + name + " ";
+        }
         String defVal = null != def && def.length > 0 ? def[0] : null;
         String val = defVal;
         if (str.contains(nname))
@@ -102,7 +119,16 @@ public final class KidTech4Command
     public static String RemoveProp(String str, String name, boolean[]...b)
     {
         str = PreCmd(str);
-        String nname = " +set " + name;
+        //String nname = " +set " + name;
+        String nname;
+        if(name == "-game")
+        {
+        nname = " " + name;
+        }
+        else
+        {
+         nname = " +set " + name;
+        }
         boolean res = false;
         if (str.contains(nname))
         {
@@ -134,7 +160,16 @@ public final class KidTech4Command
     public static boolean IsProp(String str, String name)
     {
         str = PreCmd(str);
-        String nname = " +set " + name;
+        //String nname = " +set " + name;
+        String nname;
+        if(name == "-game")
+        {
+        nname = " " + name;
+        }
+        else
+        {
+         nname = " +set " + name;
+        }
         int start = str.indexOf(nname) + nname.length();
         if(start == str.length()) // at last
             return true;

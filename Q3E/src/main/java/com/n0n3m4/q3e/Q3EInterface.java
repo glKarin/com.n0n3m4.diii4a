@@ -380,7 +380,7 @@ public class Q3EInterface
 
 	public void SetupTDM()
 	{
-		isD3 = false; // true
+		isD3 = true;
 		isPrey = false;
 		isQ4 = false;
 		isTDM = true;
@@ -507,7 +507,7 @@ public class Q3EInterface
 		else if(isTDM)
 			return "fs_mod";
 		else if(isQ1)
-			return "game";
+			return "-game";
 		else if(isD3BFG)
 			return "fs_game";
 		else
