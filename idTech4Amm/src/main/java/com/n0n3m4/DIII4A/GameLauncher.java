@@ -968,11 +968,11 @@ public class GameLauncher extends Activity
         V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false));
 		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		V.skip_intro.setChecked(skipIntro);
-		if (skipIntro)
+		if (skipIntro && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
 			SetCommand_temp("disconnect", true);
         boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
         V.auto_quick_load.setChecked(autoQuickLoad);
-        if (autoQuickLoad && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech()))
+        if (autoQuickLoad && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW))
             SetParam_temp("loadGame", "QuickSave");
         boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         V.multithreading.setChecked(multithreading);
@@ -2164,6 +2164,9 @@ public class GameLauncher extends Activity
 		GameManager.GameProp prop = m_gameManager.ChangeGameMod(game, userMod);
 		HandleGameProp(prop);
 		SelectCheckbox(GetGameModRadioGroup(), prop.index);
+
+		Q3EUtils.q3ei.start_temporary_extra_command = GetTempBaseCommand();
+		UpdateTempCommand();
     }
 
 	private void SetupCommandTextWatcher(boolean b)
@@ -2354,10 +2357,10 @@ public class GameLauncher extends Activity
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
 		String tempCmd = "";
 		boolean skipIntro = preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
-		if (skipIntro)
+		if (skipIntro && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
 			tempCmd += " +disconnect";
 		boolean quickSave = preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
-		if (quickSave && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech()))
+		if (quickSave && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW))
 			tempCmd += " +loadGame QuickSave";
 		return tempCmd.trim();
 	}

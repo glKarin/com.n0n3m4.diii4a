@@ -12,13 +12,13 @@ import java.util.Date;
  */
 public final class Constants
 {
-    public static final int CONST_UPDATE_RELEASE = 51;
-    public static final String CONST_RELEASE = "2024-05-31";
+    public static final int CONST_UPDATE_RELEASE = 52;
+    public static final String CONST_RELEASE = "2024-06-30";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
-    public static final String CONST_NAME = "DOOM III/Quake 4/Prey(2006)/DOOM 3 BFG for Android(Harmattan Edition)";
+    public static final String CONST_NAME = "DOOM III/Quake 4/Prey(2006)/DOOM3 BFG for Android(Harmattan Edition)";
 	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
     public static final String CONST_TIEBA = "https://tieba.baidu.com/p/6825594793";
 	public static final String CONST_DEVELOPER = "https://github.com/glKarin";
@@ -30,12 +30,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`. More view in `" + TextHelper.GenLinkText("https://github.com/RobertBeckebans/RBDOOM-3-BFG", "RBDOOM-3-BFG") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/agecheck/app/208200/", "DOOM-3-BFG") + "`.",
-            "Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`. More view in `" + TextHelper.GenLinkText("https://github.com/DarkPlacesEngine/darkplaces", "DarkPlaces") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2310/Quake/", "Quake I") + "`.",
-            "Fix some shaders error on Mali GPU in The Dark Mod(v 2.12).",
-            "Upgrade Quake2(Yamagi Quake II) version.",
-            "Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).",
-            "Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006).",
+            "Support r_showSurfaceInfo debug render on multi-threading in DOOM3/Quake4/Prey(2006).",
         };
 	};
 

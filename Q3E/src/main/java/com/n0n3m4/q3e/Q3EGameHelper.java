@@ -100,15 +100,13 @@ public class Q3EGameHelper
             Q3EUtils.q3ei.LoadTypeAndArgTablePreference(m_context);
 
             String extraCommand = "";
-            if(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()/* || Q3EUtils.q3ei.IsTDMTech()*/)
+            if(preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false) && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()/* || Q3EUtils.q3ei.IsTDMTech()*/))
             {
-                if (preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
-                    extraCommand += " +disconnect";
-                if(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech())
-                {
-                    if (preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
-                        extraCommand += " +loadGame QuickSave";
-                }
+                extraCommand += " +disconnect";
+            }
+            if(preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false) && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW))
+            {
+                extraCommand += " +loadGame QuickSave";
             }
             Q3EUtils.q3ei.start_temporary_extra_command = extraCommand.trim();
         }
