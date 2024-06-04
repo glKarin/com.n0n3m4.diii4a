@@ -2,7 +2,7 @@
 
 ----------------------------------------------------------------------------------
 
-> 1.1.0harmattan50 (2024-05-31)
+> 1.1.0harmattan51 (2024-05-31)
 
 * 新增`毁灭战士 3 BFG`(RBDOOM-3-BFG ver1.4.0)支持, 游戏数据文件夹名为`doom3bfg/base`. 详情[RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG)和[DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
 * 新增`雷神之锤 I`(Darkplaces)支持, 游戏数据文件夹名为`darkplaces/id1`. 详情[DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces)和[Quake I](https://store.steampowered.com/app/2310/Quake/).

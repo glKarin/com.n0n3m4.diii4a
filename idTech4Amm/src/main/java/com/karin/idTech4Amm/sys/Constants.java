@@ -34,7 +34,7 @@ public final class Constants
             "Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`. More view in `" + TextHelper.GenLinkText("https://github.com/DarkPlacesEngine/darkplaces", "DarkPlaces") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2310/Quake/", "Quake I") + "`.",
             "Fix some shaders error on Mali GPU in The Dark Mod(v 2.12).",
             "Upgrade Quake2(Yamagi Quake II) version.",
-            "Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).",
+            "Support debug render tools on multi-threading in DOOM3/Quake4/Prey(2006).",
             "Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006).",
         };
 	};

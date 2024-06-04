@@ -818,6 +818,10 @@ void idRenderWorldLocal::RenderScene(const renderView_t *renderView)
 	tr.primaryWorld = this;
 	tr.primaryRenderView = *renderView;
 	tr.primaryView = parms;
+#ifdef _MULTITHREAD // r_showSurfaceInfo in multi-threading
+	// if (r_showSurfaceInfo.GetBool() && harm_r_renderToolsMultithread.GetBool() && multithreadActive)
+	R_ShowSurfaceInfo();
+#endif
 
 	// rendering this view may cause other views to be rendered
 	// for mirrors / portals / shadows / environment maps

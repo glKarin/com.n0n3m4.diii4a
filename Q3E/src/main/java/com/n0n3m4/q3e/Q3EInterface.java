@@ -380,7 +380,7 @@ public class Q3EInterface
 
 	public void SetupTDM()
 	{
-		isD3 = true;
+		isD3 = false; // true
 		isPrey = false;
 		isQ4 = false;
 		isTDM = true;
