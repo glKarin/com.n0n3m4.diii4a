@@ -69,6 +69,8 @@ If you have questions concerning this license or the applicable additional terms
 // Default base path (used only if none could be found)
 #ifdef __APPLE__
 	#define DEFAULT_BASEPATH				"/Applications/RBDOOM-3-BFG.app/Contents/Resources"
+#elif defined(__ANDROID__) //karin: Android's sdcard
+	#define DEFAULT_BASEPATH				"/sdcard/diii4a/doom3bfg"
 #else
 	#define DEFAULT_BASEPATH				"/usr/share/games/doom3bfg"
 #endif

@@ -11,6 +11,7 @@ if(ANDROID)
 	add_definitions(-D_DIII4A) # for DIII4A touchscreen
 	add_definitions(-D_GLES -DGLEW_EGL) # Using OpenGLES3.2
 	add_compile_options(-Wno-non-c-typedef-for-linkage)
+	add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
