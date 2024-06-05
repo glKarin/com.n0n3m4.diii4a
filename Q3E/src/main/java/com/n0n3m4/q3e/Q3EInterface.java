@@ -25,6 +25,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.n0n3m4.q3e.karin.KStr;
+import com.n0n3m4.q3e.karin.KidTech4Command;
+import com.n0n3m4.q3e.karin.KidTechCommand;
+import com.n0n3m4.q3e.karin.KidTechQuakeCommand;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -505,13 +508,39 @@ public class Q3EInterface
 		else if(isRTCW)
 			return "fs_game";
 		else if(isTDM)
-			return "fs_mod";
+			return "fs_currentfm"; // fs_mod
 		else if(isQ1)
 			return "game";
 		else if(isD3BFG)
 			return "fs_game";
 		else
 			return "fs_game";
+	}
+
+	public char GetGameCommandPrefix()
+	{
+		if(isQ1)
+			return KidTechCommand.ARG_PREFIX_QUAKETECH;
+		else
+			return KidTechCommand.ARG_PREFIX_IDTECH;
+	}
+
+	public String GetGameModSubDirectory()
+	{
+		if(isQ1)
+			return "darkplaces";
+		else if(isTDM)
+			return "fms";
+		else
+			return null;
+	}
+
+	public KidTechCommand GetGameCommandEngine(String cmd)
+	{
+		if(isQ1)
+			return new KidTechQuakeCommand(cmd);
+		else
+			return new KidTech4Command(cmd);
 	}
 
     public void InitTextureTable()

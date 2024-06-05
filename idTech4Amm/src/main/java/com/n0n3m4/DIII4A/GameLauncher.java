@@ -103,6 +103,8 @@ import com.n0n3m4.q3e.gl.Q3EGLConstants;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTech4Command;
+import com.n0n3m4.q3e.karin.KidTechCommand;
+import com.n0n3m4.q3e.karin.KidTechQuakeCommand;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 import java.io.File;
@@ -700,13 +702,14 @@ public class GameLauncher extends Activity
 
     public boolean getProp(String name)
     {
-        Boolean b = KidTech4Command.GetBoolProp(GetCmdText(), name, false);
+		Boolean b = Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).GetBoolProp(name, false);
+        // Boolean b = KidTech4Command.GetBoolProp(GetCmdText(), name, false);
         return null != b ? b : false;
     }
 
     public void setProp(String name, boolean val)
     {
-        SetProp(name, KidTech4Command.btostr(val));
+        SetProp(name, KidTechCommand.btostr(val));
     }
 
     public void updatehacktings()
@@ -783,7 +786,7 @@ public class GameLauncher extends Activity
 			if (!IsProp("s_useEAXReverb")) setProp("s_useEAXReverb", false);
 		}
 
-        str = GetProp(Q3EUtils.q3ei.GetGameCommandParm());
+		str = GetGameModFromCommand();
         if (str != null)
         {
             if (!V.fs_game_user.isChecked())
@@ -795,7 +798,7 @@ public class GameLauncher extends Activity
 				}
 /*				else
 				{
-					RemoveProp(Q3EUtils.q3ei.GetGameCommandParm());
+					RemoveGameModFromCommand();
 					RemoveProp("fs_game_base");
 				}*/
             }
@@ -842,15 +845,15 @@ public class GameLauncher extends Activity
         preference.edit().putString(Q3EPreference.pref_harm_game_lib, "").commit();
         if (on)
         {
-            SetProp(Q3EUtils.q3ei.GetGameCommandParm(), game);
+			SetGameModToCommand(game);
             //RemoveProp("fs_game_base");
         }
         else
         {
 			if (!prop.is_user && !game.isEmpty())
-				SetProp(Q3EUtils.q3ei.GetGameCommandParm(), game);
+				SetGameModToCommand(game);
 			else
-				RemoveProp(Q3EUtils.q3ei.GetGameCommandParm());
+				RemoveGameModFromCommand();
             //RemoveProp("fs_game_base");
         }
         V.edt_fs_game.setText(game);
@@ -1020,7 +1023,7 @@ public class GameLauncher extends Activity
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
                 if (V.fs_game_user.isChecked())
-                    SetProp(Q3EUtils.q3ei.GetGameCommandParm(), s);
+					SetGameModToCommand(s.toString());
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after)
@@ -1249,13 +1252,15 @@ public class GameLauncher extends Activity
     {
 		if(!LockCmdUpdate())
 			return;
-        SetCmdText(KidTech4Command.SetProp(GetCmdText(), name, val));
+		SetCmdText(Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).SetProp(name, val).toString());
+        //SetCmdText(KidTech4Command.SetProp(GetCmdText(), name, val));
         UnlockCmdUpdate();
     }
 
     private String GetProp(String name)
     {
-        return KidTech4Command.GetProp(GetCmdText(), name);
+		return Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).Prop(name);
+		// return KidTech4Command.GetProp(GetCmdText(), name);
     }
 
     private void RemoveProp(String name)
@@ -1263,7 +1268,8 @@ public class GameLauncher extends Activity
 		if(!LockCmdUpdate())
 			return;
         boolean[] res = {false};
-        String str = KidTech4Command.RemoveProp(GetCmdText(), name, res);
+        // String str = KidTech4Command.RemoveProp(GetCmdText(), name, res);
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).RemoveProp(name, res).toString();
         if (res[0])
             SetCmdText(str);
         UnlockCmdUpdate();
@@ -1271,7 +1277,8 @@ public class GameLauncher extends Activity
 
     private boolean IsProp(String name)
     {
-        return KidTech4Command.IsProp(GetCmdText(), name);
+		return Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).IsProp(name);
+        // return KidTech4Command.IsProp(GetCmdText(), name);
     }
 
     private void EditFile(String file)
@@ -1280,7 +1287,7 @@ public class GameLauncher extends Activity
             m_editConfigFileFunc = new EditConfigFileFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE);
 
         Bundle bundle = new Bundle();
-        String game = GetProp(Q3EUtils.q3ei.GetGameCommandParm());
+        String game = GetGameModFromCommand();
         if (game == null || game.isEmpty())
             game = Q3EUtils.q3ei.game_base;
 		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir, Q3EUtils.q3ei.GetGameHomeDirectoryPath());
@@ -2028,7 +2035,7 @@ public class GameLauncher extends Activity
 			soundVisible = false;
 			otherVisible = false;
 			openglVisible = false;
-			modVisible = false;
+			// modVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
@@ -2070,7 +2077,7 @@ public class GameLauncher extends Activity
 			soundVisible = false;
 			otherVisible = false;
 			openglVisible = false;
-			modVisible = false;
+			// modVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
@@ -2197,7 +2204,8 @@ public class GameLauncher extends Activity
         if(!LockCmdUpdate())
         	return false;
         boolean[] res = {false};
-        String str = KidTech4Command.RemoveParam(GetCmdText(), name, res);
+        // String str = KidTech4Command.RemoveParam(GetCmdText(), name, res);
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).RemoveParam(name, res).toString();
         if (res[0])
             SetCmdText(str);
         UnlockCmdUpdate();
@@ -2208,13 +2216,15 @@ public class GameLauncher extends Activity
     {
 		if(!LockCmdUpdate())
 			return;
-        SetCmdText(KidTech4Command.SetParam(GetCmdText(), name, val));
+        SetCmdText(Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).SetParam(name, val).toString());
+		// SetCmdText(KidTech4Command.SetParam(GetCmdText(), name, val));
         UnlockCmdUpdate();
     }
 
     private String GetParam(String name)
     {
-        return KidTech4Command.GetParam(GetCmdText(), name);
+		return Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).Param(name);
+        // return KidTech4Command.GetParam(GetCmdText(), name);
     }
 
 	private String GetTempCmdText()
@@ -2225,7 +2235,8 @@ public class GameLauncher extends Activity
     private void RemoveParam_temp(String name)
     {
         boolean[] res = {false};
-        String str = KidTech4Command.RemoveParam(GetTempCmdText(), name, res);
+        String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).RemoveParam(name, res).toString();
+		// String str = KidTech4Command.RemoveParam(GetTempCmdText(), name, res);
         if (res[0])
             Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
@@ -2233,20 +2244,25 @@ public class GameLauncher extends Activity
 
     private void SetParam_temp(String name, Object val)
     {
-        Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetParam(GetTempCmdText(), name, val));
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).SetParam(name, val).toString();
+		// String str = KidTech4Command.SetParam(GetTempCmdText(), name, val);
+        Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
     }
 
 	private void SetCommand_temp(String name, boolean prepend)
 	{
-		Q3EUtils.q3ei.start_temporary_extra_command = (KidTech4Command.SetCommand(GetTempCmdText(), name, prepend));
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).SetCommand(name, prepend).toString();
+		// String str = KidTech4Command.SetCommand(GetTempCmdText(), name, prepend);
+		Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
 	}
 
 	private void RemoveCommand_temp(String name)
 	{
 		boolean[] res = {false};
-		String str = KidTech4Command.RemoveCommand(GetTempCmdText(), name, res);
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).RemoveCommand(name, res).toString();
+		// String str = KidTech4Command.RemoveCommand(GetTempCmdText(), name, res);
 		if (res[0])
 			Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
@@ -2337,7 +2353,7 @@ public class GameLauncher extends Activity
 	private void EditCVar()
 	{
 		Bundle bundle = new Bundle();
-		bundle.putString("game", GetProp(Q3EUtils.q3ei.GetGameCommandParm()));
+		bundle.putString("game", GetGameModFromCommand());
 		bundle.putString("command", Q3EUtils.q3ei.start_temporary_extra_command);
 		bundle.putString("baseCommand", GetTempBaseCommand());
 		CVarEditorFunc cVarEditorFunc = new CVarEditorFunc(this, new Runnable()
@@ -2393,8 +2409,9 @@ public class GameLauncher extends Activity
 			}
 		});
 		Bundle bundle = new Bundle();
+		String path = KStr.AppendPath(preference.getString(Q3EPreference.pref_datapath, default_gamedata), Q3EUtils.q3ei.subdatadir, Q3EUtils.q3ei.GetGameModSubDirectory());
 		bundle.putString("mod", preference.getString(preferenceKey, ""));
-		bundle.putString("path", KStr.AppendPath(preference.getString(Q3EPreference.pref_datapath, default_gamedata), Q3EUtils.q3ei.subdatadir));
+		bundle.putString("path", path);
 		m_chooseGameModFunc.Start(bundle);
 	}
 
@@ -2421,18 +2438,18 @@ public class GameLauncher extends Activity
 		if(prop.is_user)
 		{
 			if (!prop.fs_game.isEmpty())
-				SetProp(Q3EUtils.q3ei.GetGameCommandParm(), prop.fs_game);
+				SetGameModToCommand(prop.fs_game);
 			else
-				RemoveProp(Q3EUtils.q3ei.GetGameCommandParm());
+				RemoveGameModFromCommand();
 			RemoveProp("fs_game_base");
 			RemoveProp("harm_fs_gameLibPath");
 		}
 		else
 		{
 			if(null == prop.fs_game || prop.fs_game.isEmpty() || !prop.IsValid())
-				RemoveProp(Q3EUtils.q3ei.GetGameCommandParm());
+				RemoveGameModFromCommand();
 			else
-				SetProp(Q3EUtils.q3ei.GetGameCommandParm(), prop.fs_game);
+				SetGameModToCommand(prop.fs_game);
 			if(null == prop.fs_game_base || prop.fs_game_base.isEmpty() || !prop.IsValid())
 				RemoveProp("fs_game_base");
 			else
@@ -2510,6 +2527,33 @@ public class GameLauncher extends Activity
 			Toast.makeText(GameLauncher.this, Q3ELang.tr(this, R.string.suggest_game_woring_directory_tips, path), Toast.LENGTH_LONG).show();
 		}
 		m_edtPathFocused = curPath;
+	}
+
+	private void SetGameModToCommand(String mod)
+	{
+		String arg = Q3EUtils.q3ei.GetGameCommandParm();
+		if(Q3EUtils.q3ei.isQ1)
+			SetParam(arg, mod);
+		else
+			SetProp(arg, mod);
+	}
+
+	private String GetGameModFromCommand()
+	{
+		String arg = Q3EUtils.q3ei.GetGameCommandParm();
+		if(Q3EUtils.q3ei.isQ1)
+			return GetParam(arg);
+		else
+			return GetProp(arg);
+	}
+
+	private void RemoveGameModFromCommand()
+	{
+		String arg = Q3EUtils.q3ei.GetGameCommandParm();
+		if(Q3EUtils.q3ei.isQ1)
+			RemoveParam(arg);
+		else
+			RemoveProp(arg);
 	}
 
 
