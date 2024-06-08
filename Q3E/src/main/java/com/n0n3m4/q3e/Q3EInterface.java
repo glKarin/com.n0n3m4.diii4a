@@ -82,7 +82,7 @@ public class Q3EInterface
 	public boolean joystick_unfixed = false;
 	public boolean joystick_smooth = true; // Q3EView::analog
 
-	public String app_storage_path;
+	public String app_storage_path = "/sdcard/diii4a";
 	
 	//RTCW4A:
 	/*

@@ -1,0 +1,379 @@
+// ==============================================================
+
+renderProg interaction
+{
+	vertex
+	{
+#ifdef SKINNED
+		vec3 vModelNormal = attr_Normal.xyz;
+		vec3 vModelTangent = attr_Tangent.xyz;
+		vec3 vModelBinormal = attr_Bitangent.xyz;
+
+		#include "skinning.inc"
+
+		gl_Position = TransformInputVertex(vertex_position, $mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+
+		//# textures 5 takes the base coordinates by the texture matrix
+		vertex_texcoord5.x = dot4( vertex_position, $modelMatrixX );
+		vertex_texcoord5.y = dot4( vertex_position, $modelMatrixY );
+		vertex_texcoord5.z = dot4( vertex_position, $modelMatrixZ );
+		vertex_texcoord5.w = dot4( vertex_position, $modelMatrixW );	
+#else		
+		vec3 vNormal = attr_Normal.xyz;
+		vec3 vTangent = attr_Tangent.xyz;
+		vec3 vBinormal = attr_Bitangent.xyz;
+
+		gl_Position = TransformVertex($mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+
+		//# textures 5 takes the base coordinates by the texture matrix
+		vertex_texcoord5.x = dot4( attr_Position, $modelMatrixX );
+		vertex_texcoord5.y = dot4( attr_Position, $modelMatrixY );
+		vertex_texcoord5.z = dot4( attr_Position, $modelMatrixZ );
+		vertex_texcoord5.w = dot4( attr_Position, $modelMatrixW );	
+#endif
+			
+		vec4 defaultTexCoord = vec4( 0.0f, 0.5f, 0.0f, 1.0f );
+
+		//# textures 4 takes the base coordinates by the texture matrix
+		vertex_texcoord4 = defaultTexCoord;
+		vertex_texcoord4.x = dot4( attr_TexCoord0.xy, $rpdiffusematrixs );
+		vertex_texcoord4.y = dot4( attr_TexCoord0.xy, $rpdiffusematrixt );	
+
+		vertex_texcoord0.xyz = vTangent.xyz;
+		vertex_texcoord0.w = 0.0;
+
+		vertex_texcoord1.xyz = vBinormal.xyz;
+		vertex_texcoord1.w = 0.0;
+
+		vertex_texcoord3.xyz = vNormal.xyz;
+		vertex_texcoord3.w = 0.0;
+
+	}
+
+	pixel
+	{
+//		#define SPEC_ONLY_TEST
+
+		vec3 vTangent = vertex_texcoord0.xyz;
+		vec3 vBinormal = vertex_texcoord1.xyz;
+		vec3 vNormal = vertex_texcoord3.xyz;
+
+		vec4 vertex = vertex_texcoord5;
+
+		vec3 finalColor = vec3(0.0, 0.0, 0.0);
+
+		float time = $screeninfo.z;
+		vec2 st = vertex_texcoord4.xy;
+
+#ifdef WATER_FALL
+		st.y += time * 0.001;
+#endif
+
+		vec4 diffuseMap =			tex2D( $albedotexture, st );
+		//# calculate normalized vector to viewer in R1
+		vec4 toView = normalize( $vieworigin - vertex );
+
+		float dist = distance($vieworigin, vertex);
+
+
+#ifdef WATER_PASS
+		diffuseMap.w = diffuseMap.w * 0.5;
+#endif
+		
+		vec3 viewTangentVector;
+
+		viewTangentVector.x = dot3( vTangent, toView );
+		viewTangentVector.y = dot3( vBinormal, toView );
+		viewTangentVector.z = dot3( vNormal, toView );
+
+		vec4 bumpMap =			tex2D( $bumpmap, st );			
+		vec4 specMap =			tex2D( $specularmap, st );
+
+		vec3 localNormal;
+		localNormal.xy = bumpMap.wy - 0.5;
+		localNormal.z = sqrt( abs( dot( localNormal.xy, localNormal.xy ) - 0.25 ) );
+		localNormal = normalize( localNormal );
+
+		if(diffuseMap.w == 0.0)
+			discard;
+#ifndef NO_LIGHT_PASS
+		for(int i = 0; i < $numLights; i++)
+		{
+			vec3 lc = $lightcolor[i].xyz;
+		
+			float lightType = $lightcolor[i].w;
+
+			vec4 toLight = $globalLightOrigin[i] - vertex;
+			vec4 toLight2 = vertex - $globalLightOrigin[i];
+
+			float noSpecular = $globalLightOrigin[i].w;	
+
+			//# add together to become the half angle vector in object space (non-normalized)
+			vec4 halfAngleVector = toLight + toView;
+			vec3 halfAngleTangentVector;
+			halfAngleTangentVector.x = dot3( vTangent.xyz, halfAngleVector );
+			halfAngleTangentVector.y = dot3( vBinormal, halfAngleVector );
+			halfAngleTangentVector.z = dot3( vNormal, halfAngleVector );
+			
+			vec3 lightTangentVector;
+			lightTangentVector.x = dot3( vTangent, toLight );
+			lightTangentVector.y = dot3( vBinormal, toLight );
+			lightTangentVector.z = dot3( vNormal, toLight );	
+
+			vec3 lightVector = normalize( lightTangentVector.xyz );	
+
+			const float specularPower = 10.0f;
+			float hDotN = dot3( normalize( halfAngleTangentVector ), localNormal );
+
+			// vec3 CalcSpecPBR(vec3 cameraVector, vec4 Cd, vec4 metallic, float roughness, vec3 H, vec3 N, vec3 L)
+			vec3 pbr = vec3(0.0, 0.0, 0.0);
+
+			if(noSpecular == 0.0 || lightType == 2.0)
+			{
+				pbr = CalcSpecPBR(viewTangentVector.xyz, 
+							diffuseMap.xyz, 
+							0.5, 
+							0.5, 
+							normalize(halfAngleTangentVector), localNormal, lightVector);
+			}
+
+			float attenuation = 0.0;
+			
+			// Point light.
+			if(lightType == 1.0)
+			{
+				attenuation = AttenuationPointLight(vertex_texcoord5.xyz, vec4($globalLightOrigin[i].xyz, 1.0), $globalLightExtents[i]);
+			}
+			else if(lightType == 2.0) // Spotlight
+			{
+				float d = distance(vertex.xyz, $globalLightOrigin[i].xyz);
+				float spotFalloff = dot(normalize(toLight2.xyz), -normalize(vec3($globalLightExtents[i].y, $globalLightExtents[i].z, $globalLightExtents[i].w)));
+				float cosAngle = $globalLightOrigin[i].w;
+
+				//spotFalloff = spotFalloff - cosAngle;
+				if(spotFalloff < 0.0)
+					continue;
+
+				attenuation = AttenuationSpotLight(d, $globalLightExtents[i].x, 1.0) * spotFalloff;
+			}
+			
+
+			float lit = dot3( localNormal, lightVector ) * attenuation;
+
+			if(lit <= 0.0)
+				continue;
+
+			float shadow = 1.0f; 
+			vec4 _shadowMapInfo = $shadowMapInfo[i];
+
+			if(_shadowMapInfo.w == 1.0)
+			{
+				shadow = CalculateShadows($atlasLookup, $shadowMapAtlas, vertex_texcoord5.xyz, $globalLightOrigin[i].xyz, _shadowMapInfo, lightType);
+			}
+#ifdef SPEC_ONLY_TEST
+			finalColor += (lc * ((pbr  * shadow * attenuation))) ;
+#else
+			finalColor += (lc * ((lit  * shadow) + (pbr  * shadow * (attenuation * 2.0)))) ;
+#endif
+		}		
+#endif // NO_LIGHT_PASS
+
+
+#ifdef EMISSIVE
+		diffuseMap.w *= length(diffuseMap.xyz);
+#endif
+
+		finalColor = clamp(finalColor, 0.0, 10.0);
+
+#ifdef EXTRA_BRIGHT
+		finalColor.xyz += 0.25;
+#endif
+
+#ifdef SPEC_ONLY_TEST
+		finalpixel_color.xyz = finalColor;
+#else
+
+#ifndef NO_LIGHT_PASS
+
+#ifndef NO_AMBIENT
+		vec4 ambientLight = $ambientLightInfo;
+		ambientLight.xyz = ambientLight.xyz * 1.5;
+#else
+		vec4 ambientLight = vec4(0.0, 0.0, 0.0, $ambientLightInfo.w);
+#endif
+
+		float ue1_detail_map_hack = clamp(bumpMap.g * 1.5, 0.0, 1.0) * length(diffuseMap.xyz);
+
+		if(ambientLight.w == -1.0)
+		{
+			finalpixel_color.xyz = diffuseMap.xyz;
+		}
+		else
+		{
+			finalpixel_color.xyz = diffuseMap.xyz * ((finalColor * ambientLight.w) + (ambientLight.xyz * ue1_detail_map_hack));
+		}
+#else
+		finalpixel_color.xyz = diffuseMap.xyz;
+
+#ifdef EDITOR_SELECT
+		finalpixel_color.xyz *= vec3(1.0, 0.5, 0.0);
+#endif
+
+#endif
+#endif
+		finalpixel_color.w = diffuseMap.w;
+
+		float fog = LinearFog(dist, 1000.0, 2000.0);
+#ifndef EMISSIVE
+		finalpixel_color.xyz = mix(finalpixel_color.xyz, finalpixel_color.xyz * 0.85, fog);
+#else
+		finalpixel_color.xyz = mix(finalpixel_color.xyz, finalpixel_color.xyz * 0.95, fog);
+#endif
+
+#if 1 //k
+		finalpixel_color2.xyz = vertex_texcoord3.xyz;
+		finalpixel_color2.w = diffuseMap.w;
+
+		finalpixel_color3.xyz = vertex.xyz;
+		finalpixel_color3.w = diffuseMap.w;
+#endif
+
+#ifdef EMISSIVE
+		float emissive = 1.0;
+		float skipSSAO = 1.0;
+#else
+		float emissive = 0.0;
+		float skipSSAO = 0.0;
+#endif
+
+#if 1 //k
+		finalpixel_color4 = vec4(skipSSAO, emissive, 0.0, diffuseMap.w);
+		//finalpixel_color = vec4(1.0,0.0,0.0,1.0);
+#endif
+	}
+}
+
+renderProg interaction_skinned
+{
+	inherit interaction
+	define SKINNED
+}
+
+// ==============================================================
+
+renderProg interaction_nolight
+{
+	inherit interaction
+	define NO_LIGHT_PASS
+}
+
+renderProg interaction_nolight_skinned
+{
+	inherit interaction
+	define NO_LIGHT_PASS
+	define SKINNED
+}
+
+// ==============================================================
+
+renderProg interaction_emissive
+{
+	inherit interaction
+	define NO_LIGHT_PASS
+	define EMISSIVE
+}
+
+renderProg interaction_emissive_skinned
+{
+	inherit interaction
+	define NO_LIGHT_PASS
+	define EMISSIVE
+	define SKINNED
+}
+
+// ==============================================================
+
+
+renderProg interaction_lit_emissive
+{
+	inherit interaction
+	define EMISSIVE
+	define EXTRA_BRIGHT
+}
+
+renderProg interaction_lit_emissive_skinned
+{
+	inherit interaction
+	define EMISSIVE
+	define EXTRA_BRIGHT
+	define SKINNED
+}
+
+// ==============================================================
+
+renderProg interaction_water
+{
+	inherit interaction
+	define WATER_PASS
+}
+
+renderProg interaction_water_skinned
+{
+	inherit interaction
+	define WATER_PASS
+	define SKINNED
+}
+
+// ==============================================================
+
+renderProg interaction_waterfall
+{
+	inherit interaction
+	define WATER_PASS
+	define WATER_FALL
+}
+
+renderProg interaction_waterfall_skinned
+{
+	inherit interaction
+	define WATER_PASS
+	define WATER_FALL
+	define SKINNED
+}
+
+// ==============================================================
+
+renderProg interaction_editorsel
+{
+	inherit interaction
+	define NO_LIGHT_PASS
+	define EDITOR_SELECT
+}
+
+renderProg interaction_editorsel_skinned
+{
+	inherit interaction
+	define NO_LIGHT_PASS
+	define EDITOR_SELECT
+	define SKINNED
+}
+
+// ==============================================================
+
+renderProg interaction_lit_emissivew
+{
+	inherit interaction
+	define EMISSIVE
+	define WATER_PASS
+	define NO_AMBIENT
+}
+
+renderProg interaction_lit_emissivew_skinned
+{
+	inherit interaction
+	define EMISSIVE
+	define WATER_PASS
+	define NO_AMBIENT
+	define SKINNED
+}
+// ==============================================================

@@ -1,0 +1,73 @@
+// ================================================================================
+
+renderProg shadowmap
+{
+	vertex
+	{
+		vec4 mvpx = $mvpMatrixX;
+		vec4 mvpy = $mvpMatrixY;
+		vec4 mvpz = $mvpMatrixZ;
+		vec4 mvpw = $mvpMatrixW;
+
+		vertex_texcoord1.x = dot4( attr_TexCoord0.xy, $rpdiffusematrixs );
+		vertex_texcoord1.y = dot4( attr_TexCoord0.xy, $rpdiffusematrixt );
+
+#ifdef SKINNED
+		vec3 vModelNormal = attr_Normal.xyz;
+		vec3 vModelTangent = attr_Tangent.xyz;
+		vec3 vModelBinormal = attr_Bitangent.xyz;
+
+		#include "skinning.inc"
+
+		vertex_texcoord0.x = dot4( vertex_position, $modelMatrixX );
+		vertex_texcoord0.y = dot4( vertex_position, $modelMatrixY );
+		vertex_texcoord0.z = dot4( vertex_position, $modelMatrixZ );
+		vertex_texcoord0.w = dot4( vertex_position, $modelMatrixW );
+
+		gl_Position = TransformInputVertex(vertex_position, mvpx, mvpy, mvpz, mvpw);
+#else	
+		vertex_texcoord0.x = dot4( attr_Position, $modelMatrixX );
+		vertex_texcoord0.y = dot4( attr_Position, $modelMatrixY );
+		vertex_texcoord0.z = dot4( attr_Position, $modelMatrixZ );
+		vertex_texcoord0.w = dot4( attr_Position, $modelMatrixW );
+
+		gl_Position = TransformVertex( mvpx, mvpy, mvpz, mvpw );
+#endif
+	}
+
+	pixel
+	{
+#ifdef SAMPLE_ALBEDO
+		vec4 diffuseMap =	tex2D( $albedotexture, vertex_texcoord1.xy );
+
+		if(diffuseMap.w < 0.5f)
+			discard;
+#endif
+
+		gl_FragDepth = distance(vertex_texcoord0.xyz, $globalLightOrigin[0].xyz) / 3000.0;
+		finalpixel_color = vec4(0.0, 0.0, 0.0, 1.0);
+	}
+}
+
+renderProg shadowmap_skinned
+{
+	inherit shadowmap
+	define SKINNED
+}
+
+// ================================================================================
+
+renderProg shadowMapAlbedoSample
+{
+	inherit shadowmap
+	define SAMPLE_ALBEDO		
+}
+
+renderProg shadowMapAlbedoSample_skinned
+{
+	inherit shadowmap
+	define SAMPLE_ALBEDO	
+	define SKINNED	
+}
+
+// ================================================================================

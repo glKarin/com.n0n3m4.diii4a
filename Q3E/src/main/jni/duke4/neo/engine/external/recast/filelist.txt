@@ -1,0 +1,17 @@
+D:\Projects\Darklight\code\external\recast\filelist.txt
+D:\Projects\Darklight\code\external\recast\Include
+D:\Projects\Darklight\code\external\recast\Source
+D:\Projects\Darklight\code\external\recast\Include\Recast.h
+D:\Projects\Darklight\code\external\recast\Include\RecastAlloc.h
+D:\Projects\Darklight\code\external\recast\Include\RecastAssert.h
+D:\Projects\Darklight\code\external\recast\Source\Recast.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastAlloc.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastArea.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastAssert.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastContour.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastFilter.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastLayers.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastMesh.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastMeshDetail.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastRasterization.cpp
+D:\Projects\Darklight\code\external\recast\Source\RecastRegion.cpp

@@ -62,24 +62,55 @@ target_link_libraries( # Specifies the target library.
         ${q3e_lib}
         )
 
-#add_subdirectory(doom3/neo/externlibs/openal-soft)
+OPTION(GAME_DOOM3       "Build DOOM 3/Quake 4/Prey(2006)"       ON)
+OPTION(GAME_RTCW        "Build Return to Castle Wolfenstein"    ON)
+OPTION(GAME_QUAKE3      "Build Quake 3"                         ON)
+OPTION(GAME_QUAKE2      "Build Quake 2"                         ON)
+OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
+OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
+OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
+OPTION(GAME_DNF         "Build Duke Never Forever"              OFF)
 
+if(NOT GAME_DOOM3)
+add_subdirectory(doom3/neo/externlibs/openal-soft)
+endif()
+
+if(GAME_DOOM3)
 add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
+endif()
 
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_RTCW)
 add_subdirectory (deplibs) # common depend libraries
+endif()
 
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW)
 add_subdirectory (common)
+endif()
 
+if(GAME_RTCW)
 add_subdirectory (rtcw) # RTCW
+endif()
 
+if(GAME_QUAKE3)
 add_subdirectory (quake3) # Quake 3 Arena | Team Arena
+endif()
 
+if(GAME_QUAKE2)
 add_subdirectory (quake2) # Quake 2
+endif()
 
+if(GAME_QUAKE1)
 add_subdirectory (quake1) # Quake 1
+endif()
 
+if(GAME_TDM)
 add_subdirectory (tdm) # The Dark Mod
+endif()
 
+if(GAME_DOOM3BFG)
 add_subdirectory (doom3bfg/neo) # RBDOOM3-BFG
+endif()
 
-#add_subdirectory (duke4) # DNF
+if(GAME_DNF)
+add_subdirectory (duke4/neo) # DNF
+endif()
