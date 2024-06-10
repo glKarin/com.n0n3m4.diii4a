@@ -4,12 +4,12 @@
 
 > 1.1.0harmattan51 (2024-05-31)
 
-* ��������� ��������� `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0), ������� ������ ���� � ������ `doom3bfg/base`. ��������� �������� � [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) � [DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
-* ��������� ��������� `Quake I`(Darkplaces), ������� ������ ���� � ������ `darkplaces/id1`. ��������� �������� � [DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces) � [Quake I](https://store.steampowered.com/app/2310/Quake/).
-* Fix some shaders error on Mali GPU in The Dark Mod(v2.12).
-* Upgrade Quake2(Yamagi Quake II) version.
-* Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).
-* Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006).
+* Добавлена поддержка `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0), каталог данных игры с именем `doom3bfg/base`. Подробнее смотрите в [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) и [DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
+* Добавлена поддержка `Quake I`(Darkplaces), каталог данных игры с именем `darkplaces/id1`. Подробнее смотрите в [DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces) и [Quake I](https://store.steampowered.com/app/2310/Quake/).
+* Исправлены некоторые ошибки шейдеров на графическом процессоре Mali в The Dark Mod(v2.12).
+* Обновлена версия Quake2(Yamagi Quake II).
+* Поддержка инструментов отладки рендеринга(исключая r_showSurfaceInfo) при многопоточности в DOOM3/Quake4/Prey(2006).
+* Поддержка отключения освещения в игре с помощью r_noLight 0 и 2 в DOOM3/Quake4/Prey(2006).
 
 ----------------------------------------------------------------------------------
 
