@@ -1,0 +1,6 @@
+* Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`.
+* Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`.
+* Fix some shaders error on Mali GPU in The Dark Mod(v2.12).
+* Upgrade Quake2(Yamagi Quake II) version.
+* Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).
+* Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006).

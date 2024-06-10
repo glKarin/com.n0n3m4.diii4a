@@ -30,7 +30,16 @@ extern "C"
 {
 #define __STDC_CONSTANT_MACROS
 #include <libavcodec/avcodec.h>
+#ifdef __ANDROID__ //karin: Using dl on Android
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
+#include <libavutil/imgutils.h>
+#endif
 }
+#ifdef __ANDROID__ //karin: Using dl on Android
+#include "../sys/android/android_ffmpeg.h"
+#endif
 #endif
 
 #if defined(USE_BINKDEC)
@@ -58,6 +67,10 @@ CinematicAudio_OpenAL::CinematicAudio_OpenAL():
 void CinematicAudio_OpenAL::InitAudio( void* audioContext )
 {
 #if defined(USE_FFMPEG)
+#ifdef __ANDROID__ //karin: Using dl on Android
+	FFMPEG_IF_AVAILABLE
+	{
+#endif
 	AVCodecContext* dec_ctx2 = ( AVCodecContext* )audioContext;
 	av_rate_cin = dec_ctx2->sample_rate;
 
@@ -87,6 +100,9 @@ void CinematicAudio_OpenAL::InitAudio( void* audioContext )
 			return;
 		}
 	}
+#ifdef __ANDROID__ //karin: Using dl on Android
+	}
+#endif
 #elif defined(USE_BINKDEC)
 	AudioInfo* binkInfo = ( AudioInfo* )audioContext;
 	av_rate_cin = binkInfo->sampleRate;
@@ -134,6 +150,9 @@ void CinematicAudio_OpenAL::PlayAudio( uint8_t* data, int size )
 					alBufferData( bufid, av_sample_cin, tempdata, tempSize, av_rate_cin );
 					// SRS - We must free the audio buffer once it has been copied into an alBuffer
 #if defined(USE_FFMPEG)
+#ifdef __ANDROID__ //karin: Using dl on Android
+					FFMPEG_IF_AVAILABLE
+#endif
 					av_freep( &tempdata );
 #elif defined(USE_BINKDEC)
 					Mem_Free( tempdata );
@@ -158,6 +177,9 @@ void CinematicAudio_OpenAL::PlayAudio( uint8_t* data, int size )
 		alBufferData( alMusicBuffercin[offset], av_sample_cin, data, size, av_rate_cin );
 		// SRS - We must free the audio buffer once it has been copied into an alBuffer
 #if defined(USE_FFMPEG)
+#ifdef __ANDROID__ //karin: Using dl on Android
+		FFMPEG_IF_AVAILABLE
+#endif
 		av_freep( &data );
 #elif defined(USE_BINKDEC)
 		Mem_Free( data );
@@ -214,6 +236,9 @@ void CinematicAudio_OpenAL::ResetAudio()
 		{
 			// SRS - We must free any audio buffers that have not been copied into an alBuffer
 #if defined(USE_FFMPEG)
+#ifdef __ANDROID__ //karin: Using dl on Android
+			FFMPEG_IF_AVAILABLE
+#endif
 			av_freep( &tempdata );
 #elif defined(USE_BINKDEC)
 			Mem_Free( tempdata );
@@ -257,6 +282,9 @@ void CinematicAudio_OpenAL::ShutdownAudio()
 		{
 			// SRS - We must free any audio buffers that have not been copied into an alBuffer
 #if defined(USE_FFMPEG)
+#ifdef __ANDROID__ //karin: Using dl on Android
+			FFMPEG_IF_AVAILABLE
+#endif
 			av_freep( &tempdata );
 #elif defined(USE_BINKDEC)
 			Mem_Free( tempdata );

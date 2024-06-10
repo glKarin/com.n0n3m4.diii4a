@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
@@ -24,6 +25,7 @@ public class Disc extends Paintable implements TouchListener
         public float start;
         public float end;
         public char key;
+        public int keyCode;
         public int textureId = 0;
         public int borderTextureId = 0;
         public boolean pressed;
@@ -100,6 +102,7 @@ public class Disc extends Paintable implements TouchListener
     {
         Part res = new Part();
         res.key = key;
+        res.keyCode = Q3EKeyCodes.GetRealKeyCode(key);
         double P = Math.PI * 2 / total;
         int centerR = size / 2;
         double start = P * index;
@@ -260,8 +263,8 @@ public class Disc extends Paintable implements TouchListener
                                 if (p.pressed)
                                 {
                                     has = true;
-                                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, p.key, 0);
-                                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, p.key, 0);
+                                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, p.keyCode, 0);
+                                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, p.keyCode, 0);
                                 }
                             }
                             p.pressed = false;

@@ -75,7 +75,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 Q3EGlobals.GAME_BASE_DOOM3,
                 Q3EGlobals.GAME_BASE_QUAKE4,
                 Q3EGlobals.GAME_BASE_PREY,
-                Q3EGlobals.GAME_BASE_QUAKE1,
+                Q3EGlobals.GAME_BASE_QUAKE1_DIR,
                 Q3EGlobals.GAME_BASE_QUAKE2,
                 Q3EGlobals.GAME_BASE_QUAKE3,
                 Q3EGlobals.GAME_BASE_RTCW,
@@ -164,7 +164,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             }
             else if(Q3EUtils.q3ei.isQ1)
             {
-                if(Q3EGlobals.GAME_BASE_QUAKE1.equals(fileModel.name))
+                if(Q3EGlobals.GAME_BASE_QUAKE1_DIR.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_QUAKE1;
             }
             else if(Q3EUtils.q3ei.isQ2)

@@ -1,0 +1,18 @@
+renderProg sunburstCasinoProgram
+{
+	vertex
+	{
+		gl_Position = TransformVertex($mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+		vertex_texcoord0 = attr_TexCoord0;
+	}
+
+	pixel
+	{
+		vec4 mask  = texture($customMask,vertex_texcoord0.st * vec2(30.0, 18.0));
+		vec4 albedo = texture($albedotexture,vertex_texcoord0.st)  * 1.2;
+
+		albedo.w = mask.r;		
+
+		finalpixel_color = albedo;
+	}
+}

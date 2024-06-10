@@ -1,0 +1,65 @@
+renderProg guiCrosshair
+{
+	vertex
+	{
+		gl_Position = TransformVertex($mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+		vertex_texcoord0 = attr_TexCoord0;
+	}
+
+	pixel
+	{
+		finalpixel_color = texture($guiCrosshairTexture,vertex_texcoord0.st);
+		finalpixel_color.xyz *= $guiCrosshairColorParam.xyz;
+	}
+}
+
+renderProg guiTexture
+{
+	vertex
+	{
+		gl_Position = TransformVertex($mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+		if($genericinfo.x == 1.0)
+		{
+			vertex_texcoord1 = $vertexcolor;
+		}
+		else
+		{
+			vertex_texcoord1 = $vertexcolor * attr_Color;
+		}
+		vertex_texcoord0 = attr_TexCoord0;
+	}
+
+	pixel
+	{
+		finalpixel_color = texture($albedotexture,vertex_texcoord0.st) * vertex_texcoord1;
+	}
+}
+
+renderProg guiColor
+{
+	vertex
+	{
+		gl_Position = TransformVertex($mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+		vertex_texcoord0 = attr_Color;
+	}
+
+	pixel
+	{
+		finalpixel_color = vertex_texcoord0;
+	}
+}
+
+renderProg albedoNoSSAO
+{
+	vertex
+	{
+		gl_Position = TransformVertex($mvpMatrixX, $mvpMatrixY, $mvpMatrixZ, $mvpMatrixW);
+		vertex_texcoord0 = attr_TexCoord0;
+	}
+
+	pixel
+	{
+		finalpixel_color = texture($albedotexture,vertex_texcoord0.st);
+		finalpixel_color4 = vec4(1.0, 0.0, 0.0, finalpixel_color.w);
+	}
+}

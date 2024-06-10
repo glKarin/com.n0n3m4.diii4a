@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../Framebuffer.h"
 
 #if !defined(USE_VULKAN)
-#ifdef _GLES
+#ifdef _GLES //karin: only for debug
 #if 0
 #define FBD(x) {\
 	while(glGetError() != GL_NO_ERROR); \
@@ -577,12 +577,12 @@ void Framebuffer::Check()
 		printf("GL_COLOR_ATTACHMENT%d::OBJECT_TYPE -> %x %d\n", i, value[0], value[1]);
 	}
 
-	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_COMPONENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, value);
+	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, value);
 	if(value[0] != GL_NONE)
-		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_COMPONENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, value + 1);
+		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, value + 1);
 	else
 		value[1] = 0;
-	printf("GL_DEPTH_COMPONENT::OBJECT_TYPE -> %x %d\n", value[0], value[1]);
+	printf("GL_DEPTH_ATTACHMENT::OBJECT_TYPE -> %x %d\n", value[0], value[1]);
 
 	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, value);
 	if(value[0] != GL_NONE)

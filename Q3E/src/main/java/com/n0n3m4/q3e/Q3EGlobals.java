@@ -133,6 +133,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_RTCW = "main";
     public static final String GAME_BASE_TDM = ""; // the dark mod is standalone
     public static final String GAME_BASE_QUAKE1 = "darkplaces/id1"; // "darkplaces";
+    public static final String GAME_BASE_QUAKE1_DIR = "id1";
     public static final String GAME_BASE_DOOM3BFG = "base"; // RBDoom3BFG always in doom3bfg folder
 
     public static final String GAME_SUBDIR_DOOM3 = "doom3";

@@ -1194,7 +1194,7 @@ GLAPI void GLAPIENTRY glViewport (GLint x, GLint y, GLsizei width, GLsizei heigh
 #    if defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
 #      define GLEW_NO_GLU
 #    endif
-#  elif defined(__ANDROID__)
+#  elif defined(__ANDROID__) //karin: make public using sync game state to on-screen buttons
 #    define GLEW_NO_GLU
 #  endif
 #endif
@@ -1203,7 +1203,7 @@ GLAPI void GLAPIENTRY glViewport (GLint x, GLint y, GLsizei width, GLsizei heigh
 /* this is where we can safely include GLU */
 #  if defined(__APPLE__) && defined(__MACH__)
 #    include <OpenGL/glu.h>
-#  elif defined(__ANDROID__)
+#  elif defined(__ANDROID__) //karin: no GLU on Android
 #    define GLEW_NO_GLU
 #  else
 #    include <GL/glu.h>

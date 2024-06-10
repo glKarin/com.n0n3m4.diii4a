@@ -159,7 +159,11 @@ idCVar r_clear( "r_clear", "2", CVAR_RENDERER, "force screen clear every frame, 
 idCVar r_offsetFactor( "r_offsetfactor", "0", CVAR_RENDERER | CVAR_FLOAT, "polygon offset parameter" );
 // RB: offset factor was 0, and units were -600 which caused some very ugly polygon offsets on Android so I reverted the values to the same as in Q3A
 #if defined(__ANDROID__)
+#ifdef _GLES //karin: r_offsetunits = -600 work well now
+	idCVar r_offsetUnits( "r_offsetunits", "-600", CVAR_RENDERER | CVAR_FLOAT, "polygon offset parameter" );
+#else
 	idCVar r_offsetUnits( "r_offsetunits", "-2", CVAR_RENDERER | CVAR_FLOAT, "polygon offset parameter" );
+#endif
 #else
 	idCVar r_offsetUnits( "r_offsetunits", "-600", CVAR_RENDERER | CVAR_FLOAT, "polygon offset parameter" );
 #endif
@@ -862,7 +866,7 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 				globalFramebuffers.envprobeFBO->Bind();
 
 				glPixelStorei( GL_PACK_ROW_LENGTH, ENVPROBE_CAPTURE_SIZE );
-#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on OpenGLES
 				const int tmpsize = w * h;
 				byte *tmpbuf = ( byte* )R_StaticAlloc( tmpsize * 4 * 2 );
 				glReadPixels( 0, 0, w, h, GL_RGBA, GL_HALF_FLOAT, tmpbuf );
@@ -887,8 +891,8 @@ void R_ReadTiledPixels( int width, int height, byte* buffer, renderView_t* ref =
 			else
 			{
 				glReadBuffer( GL_FRONT );
-#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on GLES
-				byte *tmpbuf = ( byte* )R_StaticAlloc( w * h * 4 ); //TODO: allca
+#ifdef _GLES //karin: glReadPixels only support GL_RGBAxxx on OpenGLES
+				byte *tmpbuf = ( byte* )R_StaticAlloc( w * h * 4 );
 				glReadPixels( 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, tmpbuf );
 				const int tmpsize = sysWidth * sysHeight;
 
@@ -2519,7 +2523,7 @@ idRenderSystemLocal::IsStereoScopicRenderingSupported
 */
 bool idRenderSystemLocal::IsStereoScopicRenderingSupported() const
 {
-#ifdef _GLES //karin: not support glDrawBuffer(GL_LEFT*, GL_RIGHT*)
+#ifdef _GLES //karin: not support stereo glDrawBuffer(GL_LEFT*, GL_RIGHT*)
 	return false;
 #else
 	return true;

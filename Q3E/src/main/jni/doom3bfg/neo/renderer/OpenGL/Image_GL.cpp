@@ -126,7 +126,7 @@ void idImage::Bind()
 		{
 			tmu->current2DMap = texnum;
 
-#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES)
+#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES) //karin: not support on GLES
 			if( glConfig.directStateAccess )
 			{
 				glBindMultiTextureEXT( GL_TEXTURE0 + texUnit, GL_TEXTURE_2D, texnum );
@@ -145,7 +145,7 @@ void idImage::Bind()
 		{
 			tmu->currentCubeMap = texnum;
 
-#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES)
+#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES) //karin: not support on GLES
 			if( glConfig.directStateAccess )
 			{
 				glBindMultiTextureEXT( GL_TEXTURE0 + texUnit, GL_TEXTURE_CUBE_MAP, texnum );
@@ -164,7 +164,7 @@ void idImage::Bind()
 		{
 			tmu->current2DArray = texnum;
 
-#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES)
+#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES) //karin: not support on GLES
 			if( glConfig.directStateAccess )
 			{
 				glBindMultiTextureEXT( GL_TEXTURE0 + texUnit, GL_TEXTURE_2D_ARRAY, texnum );
@@ -183,7 +183,7 @@ void idImage::Bind()
 		{
 			tmu->current2DMap = texnum;
 
-#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES)
+#if !defined(USE_GLES2) && !defined(USE_GLES3) && !defined(_GLES) //karin: not support on GLES
 			if( glConfig.directStateAccess )
 			{
 				glBindMultiTextureEXT( GL_TEXTURE0 + texUnit, GL_TEXTURE_2D_MULTISAMPLE, texnum );
@@ -372,12 +372,12 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 
 	if( opts.format == FMT_RGB565 )
 	{
-#if !defined(USE_GLES3) && !defined(_GLES)
+#if !defined(USE_GLES3) && !defined(_GLES) //karin: not support on OpenGLES
 		glPixelStorei( GL_UNPACK_SWAP_BYTES, GL_TRUE );
 #endif
 	}
 
-#if defined(DEBUG) || defined(__ANDROID__)
+#if defined(DEBUG) // || defined(__ANDROID__) //karin: don't check GL error
 	GL_CheckErrors();
 #endif
 	if( IsCompressed() )
@@ -437,7 +437,7 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 		TID(glTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, dataFormat, dataType, pic ));
 	}
 
-#if defined(DEBUG) || defined(__ANDROID__)
+#if defined(DEBUG) || defined(__ANDROID__) //karin: don't check GL error
 	GL_CheckErrors();
 #endif
 
@@ -678,7 +678,7 @@ void idImage::AllocImage()
 			break;
 
 		case FMT_XRGB8:
-#ifdef _GLES
+#ifdef _GLES //karin: GL_RGBA = GL_RGBA on OpenGLES
 			internalFormat = GL_RGBA;
 #else
 			internalFormat = GL_RGB;

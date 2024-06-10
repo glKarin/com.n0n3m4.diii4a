@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 #include "../RenderCommon.h"
 
-#ifdef _GLES //karin: debug
+#ifdef _GLES //karin: only for debug
 #if 0
 #define BFD(x) {\
 	while(glGetError() != GL_NO_ERROR); \

@@ -2,6 +2,17 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan51 (2024-05-31)
+
+* Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`. More view in [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) and [DOOM-3-BFG](https://store.steampowered.com/agecheck/app/208200/).
+* Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`. More view in [DarkPlaces](https://github.com/DarkPlacesEngine/darkplaces) and [Quake I](https://store.steampowered.com/app/2310/Quake/).
+* Fix some shaders error on Mali GPU in The Dark Mod(v2.12).
+* Upgrade Quake2(Yamagi Quake II) version.
+* Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).
+* Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006).
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan50 (2024-04-30)
 
 * Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).
@@ -9,7 +20,7 @@
 * Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).
 * Improving Phong/Blinn-Phong light model interaction shader with high-precision.
 * Force disable using compression texture in The Dark Mod.
-* Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always).
+* Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always); DOOM3 BFG -> doom3bfg/ (always).
 
 ----------------------------------------------------------------------------------
 
@@ -17,9 +28,9 @@
 
 * Support perforated surface shadow in shadow mapping(cvar `r_forceShadowMapsOnAlphaTestedSurfaces`, default 0).
 * Add `LibreCoop` mod of DOOM3 support, game data directory named `librecoop`. More view in [LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop).
-* Add `Quake II` support, game data directory named `baseq2`. More view in [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
-* Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
-* Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
+* Add `Quake II` support, game data directory named `baseq2`. More view in [Yamagi Quake II](https://github.com/yquake2/yquake2) and [Quake II](https://store.steampowered.com/app/2320/Quake_II/).
+* Add `Quake III Arena` support, game data directory named `baseq3`; Add `Quake III Team Arena` support, game data directory named `missionpack`. More view in [ioquake3](https://github.com/ioquake/ioq3) and [Quake III Arena](https://store.steampowered.com/app/2200/Quake_III_Arena/).
+* Add `Return to Castle Wolfenstein` support, game data directory named `main`. More view in [iortcw](https://github.com/iortcw/iortcw) and [Return to Castle Wolfenstein](https://www.moddb.com/games/return-to-castle-wolfenstein).
 * Add `The Dark Mod` 2.12 support, game data directory named `darkmod`. More view in [The Dark Mod](https://www.thedarkmod.com).
 * Add a on-screen button theme.
 

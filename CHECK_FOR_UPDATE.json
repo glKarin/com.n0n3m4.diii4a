@@ -1,7 +1,7 @@
 {
-    "release":50,
-    "update":"2024-04-30",
-    "version":"1.1.0harmattan50",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan50/idTech4A++_1.1.0harmattan50.apk",
-    "changes":"  * Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).\n  * Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).\n   * Add control on-screen joystick visible mode in `Control` tab(always show; hidden; only show when pressed).\n   * Improving Phong/Blinn-Phong light model interaction shader with high-precision.\n   * Force disable using compression texture in The Dark Mod.\n   * Game data directories are standalone in Settings: DOOM3 -> doom3/; Quake4 -> quake4/; Prey -> prey/; Quake1 -> quake1/; Quake2 -> quake2/; Quake3 -> quake3/; RTCW -> rtcw/; The Dark Mod -> darkmod/ (always)."
+    "release":51,
+    "update":"2024-05-31",
+    "version":"1.1.0harmattan51",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan51/idTech4A++_1.1.0harmattan51.apk",
+    "changes":"  * Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`.\n  * Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`.\n  * Fix some shaders error on Mali GPU in The Dark Mod(v2.12).\n  * Upgrade Quake2(Yamagi Quake II) version.\n  * Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).\n  * Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006)."
 }
