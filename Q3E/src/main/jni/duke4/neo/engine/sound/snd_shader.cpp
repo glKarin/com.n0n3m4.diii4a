@@ -171,6 +171,7 @@ bool idSoundShader::ParseShader( idLexer& src )
 	parms.shakes = 0;
 	parms.soundShaderFlags = 0;
 	parms.soundClass = 0;
+	parms.isDukeVoice = false;
 
 	speakerMask = 0;
 	altSound = NULL;
@@ -198,6 +199,11 @@ bool idSoundShader::ParseShader( idLexer& src )
 		{
 			src.ReadTokenOnLine( &token );
 		}
+// jmarshall
+		else if (!token.Icmp("dukevoice")) {
+			parms.isDukeVoice = true;
+		}
+// jmarshall end
 		// mindistance
 		else if( !token.Icmp( "mindistance" ) )
 		{

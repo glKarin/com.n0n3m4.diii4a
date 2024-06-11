@@ -69,7 +69,7 @@ OPTION(GAME_QUAKE2      "Build Quake 2"                         ON)
 OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
 OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
 OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
-OPTION(GAME_DNF         "Build Duke Never Forever"              OFF)
+OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
 if(NOT GAME_DOOM3)
 add_subdirectory(doom3/neo/externlibs/openal-soft)
