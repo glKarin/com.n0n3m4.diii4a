@@ -706,7 +706,7 @@ void RB_GLSL_DrawInteractions(void)
 #ifdef _SOFT_STENCIL_SHADOW
 	if(SoftStencilShadow)
 	{
-        if(harm_r_stencilShadowSoftBias.GetFloat() > 0.0f || r_stencilShadowSoftAlpha > 0.0)
+        if(harm_r_stencilShadowSoftBias.GetFloat() > 0.0f || r_stencilShadowSoftAlpha < 1.0)
         {
 		    func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_soft_combine : RB_GLSL_DrawInteraction_stencilShadow_soft;
         }
@@ -720,7 +720,7 @@ void RB_GLSL_DrawInteractions(void)
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
 	if(TranslucentStencilShadow)
 	{
-        if(r_stencilShadowAlpha > 0.0f)
+        if(r_stencilShadowAlpha < 1.0f)
         {
             func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_translucent_combine : RB_GLSL_DrawInteraction_stencilShadow_translucent;
         }
