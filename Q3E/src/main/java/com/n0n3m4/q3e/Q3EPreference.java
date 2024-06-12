@@ -86,7 +86,10 @@ public final class Q3EPreference
     public static final String pref_harm_opengl = "q3e_harm_opengl"; //k
     public static final String pref_harm_s_useOpenAL = "q3e_harm_s_useOpenAL"; //k
     public static final String pref_harm_s_useEAXReverb = "q3e_harm_s_useEAXReverb"; //k
-    public static final String pref_harm_r_translucentStencilShadow = "q3e_harm_r_translucentStencilShadow"; //k
+    public static final String pref_harm_r_stencilShadowTranslucent = "q3e_harm_r_stencilShadowTranslucent"; //k
+    public static final String pref_harm_r_stencilShadowAlpha = "q3e_harm_r_stencilShadowAlpha"; //k
+    public static final String pref_harm_r_stencilShadowSoft = "q3e_harm_r_stencilShadowSoft"; //k
+    public static final String pref_harm_r_stencilShadowSoftAlpha = "q3e_harm_r_stencilShadowSoftAlpha"; //k
 
     public static final String RUN_BACKGROUND = "harm_run_background";
     public static final String RENDER_MEM_STATUS = "harm_render_mem_status";

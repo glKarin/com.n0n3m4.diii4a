@@ -31,6 +31,7 @@ public final class Constants
     {
         return new String[] {
             "Support r_showSurfaceInfo debug render on multi-threading in DOOM3/Quake4/Prey(2006).",
+            "Add soft stencil shadow support(cvar harm_r_stencilShadowSoft) with OpenGLES3.1+ in DOOM3/Quake4/Prey(2006).",
         };
 	};
 
