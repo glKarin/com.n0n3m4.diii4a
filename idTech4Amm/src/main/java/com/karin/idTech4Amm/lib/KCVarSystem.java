@@ -51,11 +51,14 @@ public final class KCVarSystem
                                 "1", "prelight shadow using shadow mapping, others using stencil shadow",
                                 "2", "non-prelight shadow using shadow mapping, others using stencil shadow"
                         ),*/
+                        KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map", 0),
 
                         KCVar.CreateCVar("harm_r_stencilShadowTranslucent", "bool", "0", "enable translucent shadow in stencil shadow", 0),
                         KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "0.5", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_stencilShadowCombine", "bool", "0", "combine local and global stencil shadow", 0),
-                        KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map", 0)
+                        KCVar.CreateCVar("harm_r_stencilShadowSoft", "bool", "0", "enable soft stencil shadow(Only OpenGLES3.1+)", 0),
+                        KCVar.CreateCVar("harm_r_stencilShadowSoftAlpha", "float", "0.5", "soft stencil shadow's alpha", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_stencilShadowSoftBias", "float", "5.0", "soft stencil shadow sampler BIAS factory", KCVar.FLAG_POSITIVE)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(

@@ -390,7 +390,6 @@ void idImage::AllocImage() {
 #endif
 		dataType = GL_UNSIGNED_BYTE;
 		break;
-#if !defined(__ANDROID__) //karin: GLES not support
 	case FMT_L8A8:
 #if defined( USE_CORE_PROFILE )
 		internalFormat = GL_RG8;
@@ -440,16 +439,27 @@ void idImage::AllocImage() {
 		dataType = GL_UNSIGNED_BYTE;
 		break;
 	case FMT_X16:
+#ifdef __ANDROID__ //karin: GLES not support GL_LUMINANCE16_ALPHA16
+		internalFormat = GL_R16UI;
+		dataFormat = GL_RED;
+		dataType = GL_UNSIGNED_SHORT;
+#else
 		internalFormat = GL_INTENSITY16;
 		dataFormat = GL_LUMINANCE;
 		dataType = GL_UNSIGNED_SHORT;
+#endif
 		break;
 	case FMT_Y16_X16:
+#ifdef __ANDROID__ //karin: GLES not support GL_LUMINANCE16_ALPHA16
+		internalFormat = GL_RG8;
+		dataFormat = GL_RG;
+		dataType = GL_UNSIGNED_BYTE;
+#else
 		internalFormat = GL_LUMINANCE16_ALPHA16;
 		dataFormat = GL_LUMINANCE_ALPHA;
 		dataType = GL_UNSIGNED_SHORT;
-		break;
 #endif
+		break;
 	default:
 #ifdef __ANDROID__ //karin: default force using GL_RGBA
 		internalFormat = GL_RGBA;

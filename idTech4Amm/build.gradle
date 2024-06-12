@@ -64,6 +64,9 @@ android {
 
         // remove arm64 libraries if testing arm32
         // exclude "lib/arm64-v8a/**"
+
+//        doNotStrip "*/armeabi-v7a/*.so"
+//        doNotStrip "*/arm64-v8a/*.so"
     }
 }
 

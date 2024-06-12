@@ -32,9 +32,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../tr_local.h"
 #include "Framebuffer.h"
 
-idList<Framebuffer*>	Framebuffer::framebuffers;
+idList<idFramebuffer*>	Framebuffer::framebuffers;
 
+#ifdef _SHADOW_MAPPING
 globalFramebuffers_t globalFramebuffers;
+#endif
 
 static void R_ListFramebuffers_f( const idCmdArgs& args )
 {
@@ -45,7 +47,7 @@ static void R_ListFramebuffers_f( const idCmdArgs& args )
 	}
 }
 
-Framebuffer::Framebuffer( const char* name, int w, int h )
+idFramebuffer::idFramebuffer( const char* name, int w, int h )
 {
 	fboName = name;
 	
@@ -64,57 +66,9 @@ Framebuffer::Framebuffer( const char* name, int w, int h )
 	height = h;
 	
 	qglGenFramebuffers( 1, &frameBuffer );
-	
-	framebuffers.Append( this );
 }
 
-void Framebuffer::Init()
-{
-	cmdSystem->AddCommand( "listFramebuffers", R_ListFramebuffers_f, CMD_FL_RENDERER, "lists framebuffers" );
-	
-	backEnd.glState.currentFramebuffer = NULL;
-	
-	int width, height;
-	width = height = r_shadowMapImageSize.GetInteger();
-	
-	for( int i = 0; i < MAX_SHADOWMAP_RESOLUTIONS; i++ )
-	{
-		width = height = shadowMapResolutions[i];
-
-		char name[32];
-		sprintf(name, "_shadowMap_%d", i);
-		globalFramebuffers.shadowFBO[i] = new Framebuffer( name , width, height );
-		globalFramebuffers.shadowFBO[i]->Bind();
-#ifdef GL_ES_VERSION_3_0
-		if(USING_GLES3)
-		{
-#ifdef SHADOW_MAPPING_DEBUG
-			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA8, 0); // for debug, not need render color buffer with OpenGLES3.0
-#endif
-			//globalFramebuffers.shadowFBO[i]->AddDepthBuffer(GL_DEPTH_COMPONENT24);
-			//qglDrawBuffers( 0, NULL );
-		}
-		else
-#endif
-		{
-			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA8, 0); // GL_RGBA4 TODO: check OpenGLES2.0 support GL_RGBA8
-			globalFramebuffers.shadowFBO[i]->AddDepthBuffer(glConfig.depth24Available ? GL_DEPTH_COMPONENT24 : GL_DEPTH_COMPONENT16);
-		}
-		common->Printf( "--- Framebuffer::Bind( name = '%s', handle = %d ) ---\n", globalFramebuffers.shadowFBO[i]->fboName.c_str(), globalFramebuffers.shadowFBO[i]->frameBuffer );
-	}
-//	globalFramebuffers.shadowFBO->AddColorBuffer( GL_RGBA8, 0 );
-//	globalFramebuffers.shadowFBO->AddDepthBuffer( GL_DEPTH_COMPONENT24 );
-//	globalFramebuffers.shadowFBO->Check();
-
-	BindNull();
-}
-
-void Framebuffer::Shutdown()
-{
-	// TODO
-}
-
-void Framebuffer::Bind()
+void idFramebuffer::Bind()
 {
 #if 1
 	if( r_logFile.GetBool() )
@@ -130,17 +84,49 @@ void Framebuffer::Bind()
 	}
 }
 
-void Framebuffer::BindNull()
+void idFramebuffer::Unbind()
 {
-	//if(backEnd.glState.framebuffer != NULL)
+#if 1
+	if( r_logFile.GetBool() )
+{
+		RB_LogComment( "--- Framebuffer::Unbind( name = '%s', handle = %d ) ---\n", fboName.c_str(), frameBuffer );
+	}
+#endif
+	
+	if( backEnd.glState.currentFramebuffer == this )
 	{
 		qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
-		qglBindRenderbuffer( GL_RENDERBUFFER, 0 );
 		backEnd.glState.currentFramebuffer = NULL;
 	}
 }
 
-void Framebuffer::AddColorBuffer( int format, int index )
+void idFramebuffer::BindDirectly()
+{
+#if 1
+	if( r_logFile.GetBool() )
+	{
+		RB_LogComment( "--- Framebuffer::BindDirectly( name = '%s', handle = %d ) ---\n", fboName.c_str(), frameBuffer );
+	}
+#endif
+
+	qglBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
+	backEnd.glState.currentFramebuffer = this;
+}
+
+void idFramebuffer::UnbindDirectly()
+{
+#if 1
+	if( r_logFile.GetBool() )
+	{
+		RB_LogComment( "--- Framebuffer::BindDirectly( name = '%s', handle = %d ) ---\n", fboName.c_str(), frameBuffer );
+	}
+#endif
+
+	qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
+	backEnd.glState.currentFramebuffer = NULL;
+}
+
+void idFramebuffer::AddColorBuffer( int format, int index )
 {
 	if( index < 0 || index >= glConfig.maxColorAttachments )
 	{
@@ -167,7 +153,7 @@ void Framebuffer::AddColorBuffer( int format, int index )
 	GL_CheckErrors();
 }
 
-void Framebuffer::AddDepthBuffer( int format )
+void idFramebuffer::AddDepthBuffer( int format )
 {
 	depthFormat = format;
 	
@@ -188,17 +174,69 @@ void Framebuffer::AddDepthBuffer( int format )
 	GL_CheckErrors();
 }
 
-void Framebuffer::AttachColorBuffer( void )
+void idFramebuffer::AddDepthStencilBuffer( int format )
+{
+	depthFormat = format;
+	
+	bool notCreatedYet = depthBuffer == 0;
+	if( notCreatedYet )
+	{
+		qglGenRenderbuffers( 1, &depthBuffer );
+	}
+	
+	qglBindRenderbuffer( GL_RENDERBUFFER, depthBuffer );
+	qglRenderbufferStorage( GL_RENDERBUFFER, format, width, height );
+	
+	if( notCreatedYet )
+	{
+		qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer );
+	}
+	
+	GL_CheckErrors();
+}
+
+void idFramebuffer::AddStencilBuffer( int format )
+{
+	stencilFormat = format;
+	
+	bool notCreatedYet = stencilBuffer == 0;
+	if( notCreatedYet )
+	{
+		qglGenRenderbuffers( 1, &stencilBuffer );
+	}
+	
+	qglBindRenderbuffer( GL_RENDERBUFFER, stencilBuffer );
+	qglRenderbufferStorage( GL_RENDERBUFFER, format, width, height );
+	
+	if( notCreatedYet )
+	{
+		qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencilBuffer );
+	}
+	
+	GL_CheckErrors();
+}
+
+void idFramebuffer::AttachColorBuffer( void )
 {
 	qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBuffers[0] );
 }
 
-void Framebuffer::AttachDepthBuffer( void )
+void idFramebuffer::AttachDepthBuffer( void )
 {
 	qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer );
 }
 
-void Framebuffer::AttachImage2D( int target, const idImage* image, int index )
+void idFramebuffer::AttachDepthStencilBuffer( void )
+{
+	qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer );
+}
+
+void idFramebuffer::AttachStencilBuffer( void )
+{
+	qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencilBuffer );
+}
+
+void idFramebuffer::AttachImage2D( int target, const idImage* image, int index )
 {
 	if( ( target != GL_TEXTURE_2D ) && ( target < GL_TEXTURE_CUBE_MAP_POSITIVE_X || target > GL_TEXTURE_CUBE_MAP_NEGATIVE_Z ) )
 	{
@@ -215,12 +253,17 @@ void Framebuffer::AttachImage2D( int target, const idImage* image, int index )
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target, image->texnum, 0 );
 }
 
-void Framebuffer::AttachImageDepth( const idImage* image )
+void idFramebuffer::AttachImageDepth( const idImage* image )
 {
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, image->texnum, 0 );
 }
 
-void Framebuffer::AttachImageDepthLayer( const idImage* image, int layer )
+void idFramebuffer::AttachImageDepthStencil( const idImage* image )
+{
+	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, image->texnum, 0 );
+}
+
+void idFramebuffer::AttachImageDepthLayer( const idImage* image, int layer )
 {
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
@@ -232,17 +275,17 @@ void Framebuffer::AttachImageDepthLayer( const idImage* image, int layer )
     qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, image->texnum, 0 );
 }
 
-void Framebuffer::AttachImageDepthSide( const idImage* image, int side )
+void idFramebuffer::AttachImageDepthSide( const idImage* image, int side )
 {
     qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, image->texnum, 0 );
 }
 
-void Framebuffer::AttachImage2D( const idImage* image )
+void idFramebuffer::AttachImage2D( const idImage* image )
 {
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0 );
 }
 
-void Framebuffer::AttachImage2DLayer( const idImage* image, int layer )
+void idFramebuffer::AttachImage2DLayer( const idImage* image, int layer )
 {
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
@@ -254,12 +297,12 @@ void Framebuffer::AttachImage2DLayer( const idImage* image, int layer )
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, image->texnum, 0 );
 }
 
-void Framebuffer::AttachImage2DSide( const idImage* image, int side )
+void idFramebuffer::AttachImage2DSide( const idImage* image, int side )
 {
 	qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, image->texnum, 0 );
 }
 
-void Framebuffer::Check()
+void idFramebuffer::Check()
 {
 	int prev;
 	qglGetIntegerv( GL_FRAMEBUFFER_BINDING, &prev );
@@ -269,17 +312,7 @@ void Framebuffer::Check()
 	int status = qglCheckFramebufferStatus( GL_FRAMEBUFFER );
 	if( status == GL_FRAMEBUFFER_COMPLETE )
 	{
-#if 0
-		int type, handle;
-
-		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
-		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &handle);
-		Sys_Printf("FrameBuffer[%s]: Color-0 current bind(0x%x %s), object handle(%d)\n", fboName.c_str(), type, (type == GL_RENDERBUFFER ? "RENDERBUFFER" : (type == GL_TEXTURE ? "TEXTURE" : "NONE")), handle);
-
-		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
-		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &handle);
-		Sys_Printf("FrameBuffer[%s]: Depth current bind(0x%x %s), object handle(%d)\n", fboName.c_str(), type, (type == GL_RENDERBUFFER ? "RENDERBUFFER" : (type == GL_TEXTURE ? "TEXTURE" : "NONE")), handle);
-#endif
+		PrintFramebuffer();
 		qglBindFramebuffer( GL_FRAMEBUFFER, prev );
 		return;
 	}
@@ -323,4 +356,146 @@ void Framebuffer::Check()
 	};
 	
 	qglBindFramebuffer( GL_FRAMEBUFFER, prev );
+}
+
+void idFramebuffer::PurgeFramebuffer()
+{
+}
+
+void idFramebuffer::PrintFramebuffer(void)
+{
+	printf("Get framebuffer: %s\n", fboName.c_str());
+	GLint value[4] = {0};
+	for(int i = 0; i < 6; i++)
+	{
+		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, value);
+		if(value[0] != GL_NONE)
+			qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, value + 1);
+		else
+			value[1] = 0;
+		printf("GL_COLOR_ATTACHMENT%d::OBJECT_TYPE -> %x %d\n", i, value[0], value[1]);
+	}
+
+	qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, value);
+	if(value[0] != GL_NONE)
+		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, value + 1);
+	else
+		value[1] = 0;
+	printf("GL_DEPTH_ATTACHMENT::OBJECT_TYPE -> %x %d\n", value[0], value[1]);
+
+	qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, value);
+	if(value[0] != GL_NONE)
+		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, value + 1);
+	else
+		value[1] = 0;
+	printf("GL_STENCIL_ATTACHMENT::OBJECT_TYPE -> %x %d\n", value[0], value[1]);
+
+	qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, value);
+	if(value[0] != GL_NONE)
+		qglGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, value + 1);
+	else
+		value[1] = 0;
+	printf("GL_DEPTH_STENCIL_ATTACHMENT::OBJECT_TYPE -> %x %d\n", value[0], value[1]);
+}
+
+
+
+void Framebuffer::Init()
+{
+	cmdSystem->AddCommand( "listFramebuffers", R_ListFramebuffers_f, CMD_FL_RENDERER, "lists framebuffers" );
+	
+	backEnd.glState.currentFramebuffer = NULL;
+	
+#ifdef _SHADOW_MAPPING
+	int width, height;
+	width = height = r_shadowMapImageSize.GetInteger();
+	
+	for( int i = 0; i < MAX_SHADOWMAP_RESOLUTIONS; i++ )
+	{
+		width = height = shadowMapResolutions[i];
+
+		char name[32];
+		sprintf(name, "_shadowMap_%d", i);
+		globalFramebuffers.shadowFBO[i] = new idFramebuffer( name , width, height );
+
+		framebuffers.Append( globalFramebuffers.shadowFBO[i] );
+
+		globalFramebuffers.shadowFBO[i]->Bind();
+#ifdef GL_ES_VERSION_3_0
+		if(USING_GLES3)
+		{
+#ifdef SHADOW_MAPPING_DEBUG
+			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA8, 0); // for debug, not need render color buffer with OpenGLES3.0
+#endif
+			//globalFramebuffers.shadowFBO[i]->AddDepthBuffer(GL_DEPTH_COMPONENT24);
+			//qglDrawBuffers( 0, NULL );
+		}
+		else
+#endif
+		{
+			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA8, 0); // GL_RGBA4 TODO: check OpenGLES2.0 support GL_RGBA8
+			globalFramebuffers.shadowFBO[i]->AddDepthBuffer(glConfig.depth24Available ? GL_DEPTH_COMPONENT24 : GL_DEPTH_COMPONENT16);
+		}
+		common->Printf( "--- Framebuffer::Bind( name = '%s', handle = %d ) ---\n", globalFramebuffers.shadowFBO[i]->fboName.c_str(), globalFramebuffers.shadowFBO[i]->frameBuffer );
+	}
+//	globalFramebuffers.shadowFBO->AddColorBuffer( GL_RGBA8, 0 );
+//	globalFramebuffers.shadowFBO->AddDepthBuffer( GL_DEPTH_COMPONENT24 );
+//	globalFramebuffers.shadowFBO->Check();
+#endif
+
+	BindNull();
+}
+
+void Framebuffer::Shutdown()
+{
+	for(int i = 0; i < framebuffers.Num(); i++)
+	{
+		idFramebuffer *fb = framebuffers[i];
+		if(fb)
+		{
+			fb->PurgeFramebuffer();
+			delete fb;
+		}
+	}
+	framebuffers.Clear();
+}
+
+void Framebuffer::BindNull()
+{
+	{
+		qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
+		qglBindRenderbuffer( GL_RENDERBUFFER, 0 );
+		backEnd.glState.currentFramebuffer = NULL;
+	}
+}
+
+void Framebuffer::Append(idFramebuffer *fb)
+{
+	if(!fb)
+		return;
+	if(framebuffers.FindIndex(fb) != -1)
+		return;
+	framebuffers.Append(fb);
+}
+
+idFramebuffer *	Framebuffer::Find(const char *name)
+{
+	for(int i = 0; i < framebuffers.Num(); i++)
+	{
+		idFramebuffer *fb = framebuffers[i];
+		if(!idStr::Cmp(fb->GetName(), name))
+			return fb;
+	}
+	return NULL;
+}
+
+idFramebuffer * Framebuffer::Alloc(const char *name, int width, int height)
+{
+	idFramebuffer *fb = Find(name);
+	if(fb)
+		return fb;
+
+	fb = new idFramebuffer( name, width, height );
+	framebuffers.Append( fb );
+	return fb;
 }

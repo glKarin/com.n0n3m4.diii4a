@@ -32,7 +32,7 @@ endif()
 set(ARCH "${cpu}")
 add_definitions(-DARCH_STRING="${ARCH}")
 add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
-add_definitions(-DUSE_OPENAL)
+add_definitions(-DUSE_OPENAL -DUSE_FFMPEG)
 
 #add_compile_options(-std=c++14)
 #add_compile_options(-w)

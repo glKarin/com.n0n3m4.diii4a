@@ -172,12 +172,19 @@ QGLPROC(glMapBufferRange, void*, (GLenum target, GLintptr offset, GLsizeiptr len
 QGLPROC(glUnmapBuffer, GLboolean,(GLenum target))
 #endif
 
-// GLES3.0
 #ifdef _OPENGLES3
+// GLES3.0
 QGLPROC(glTexImage3D, void, (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels))
 QGLPROC(glReadBuffer, void, (GLenum src));
 QGLPROC(glDrawBuffers, void, (GLsizei n, const GLenum *bufs));
 QGLPROC(glFramebufferTextureLayer, void, (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer));
+QGLPROC(glBlitFramebuffer, void, (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter))
+
+// GLES3.1
+QGLPROC(glDebugMessageControl, void, (GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled))
+// QGLPROC(glDebugMessageInsert, void, (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *buf))
+QGLPROC(glDebugMessageCallback, void, (GLDEBUGPROC callback, const void *userParam))
+QGLPROC(glGetDebugMessageLog, GLuint, (GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog))
 #endif
 
 #undef QGLPROC

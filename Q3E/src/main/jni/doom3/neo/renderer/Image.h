@@ -207,7 +207,6 @@ class idImage
 		                              textureFilter_t filter, bool allowDownSize,
 		                              textureRepeat_t repeat, textureDepth_t depth);
 
-#ifdef _SHADOW_MAPPING
 	void		GenerateShadow2DRGBAImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
     void		GenerateShadowCubeRGBAImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
 	void		GenerateShadow2DDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
@@ -215,7 +214,7 @@ class idImage
 #ifdef GL_ES_VERSION_3_0
 	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat, int component = 24, bool compare = true );
 #endif
-#endif
+	void		GenerateDepthStencilImage( int width, int height, bool allowDownSize, textureFilter_t filter, textureRepeat_t repeat, int component = 24, int stencilComponent = 8, bool compare = false);
 #if !defined(GL_ES_VERSION_2_0)
 		void		Generate3DImage(const byte *pic, int width, int height, int depth,
 		                                textureFilter_t filter, bool allowDownSize,

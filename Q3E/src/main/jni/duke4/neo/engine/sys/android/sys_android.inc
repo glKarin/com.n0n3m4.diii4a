@@ -2,7 +2,7 @@
 
 #include "q3e/q3e_android.h"
 
-#define Q3E_GAME_NAME "Dukem Never Forever"
+#define Q3E_GAME_NAME "Duke Nukem Forever"
 #define Q3E_IS_INITIALIZED (common->IsInitialized())
 #define Q3E_PRINTF common->Printf
 #define Q3E_WID_RESTART
