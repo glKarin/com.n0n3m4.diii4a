@@ -37,6 +37,9 @@ extern int gl_format;
 extern int gl_msaa;
 extern int gl_version;
 extern bool USING_GLES3;
+#ifdef _OPENGLES3
+extern int GLES3_VERSION;
+#endif
 
 extern float analogx;
 extern float analogy;

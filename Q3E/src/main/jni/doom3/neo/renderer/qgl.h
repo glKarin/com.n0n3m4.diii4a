@@ -98,6 +98,23 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 //#endif
 
+// GLES3.1
+#ifndef GL_DEPTH_STENCIL_TEXTURE_MODE
+#define GL_DEPTH_STENCIL_TEXTURE_MODE     0x90EA
+#endif
+#ifndef GL_STENCIL_INDEX
+#define GL_STENCIL_INDEX                  0x1901
+#endif
+#ifndef GL_DEBUG_OUTPUT_SYNCHRONOUS
+#define GL_DEBUG_OUTPUT_SYNCHRONOUS       0x8242
+#endif
+#ifndef GL_DEBUG_OUTPUT
+#define GL_DEBUG_OUTPUT                   0x92E0
+#endif
+#ifndef GL_DEBUG_TYPE_ERROR
+#define GL_DEBUG_TYPE_ERROR               0x824C
+#endif
+
 #include "matrix/esUtil.h"
 
 typedef void (*GLExtension_t)(void);
@@ -113,6 +130,9 @@ extern "C" {
 #endif
 
 // declare qgl functions
+#ifdef GL_ES_VERSION_3_0 // GLES3.1
+typedef void (GL_APIENTRY  *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
+#endif
 #define QGLPROC(name, rettype, args) extern rettype (GL_APIENTRYP q##name) args;
 #include "qgl_proc.h"
 

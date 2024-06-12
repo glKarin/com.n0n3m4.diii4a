@@ -29,34 +29,34 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __FRAMEBUFFER_H__
 #define __FRAMEBUFFER_H__
 
-#if 1
-static	int shadowMapResolutions[MAX_SHADOWMAP_RESOLUTIONS] = { 2048, 1024, 512, 512, 256 };
-#else
-static	int shadowMapResolutions[MAX_SHADOWMAP_RESOLUTIONS] = { 1024, 1024, 1024, 1024, 1024 };
-#endif
+class Framebuffer;
 
-class Framebuffer
+class idFramebuffer
 {
 public:
 
-	Framebuffer( const char* name, int width, int height );
-	
-	static void				Init();
-	static void				Shutdown();
+	idFramebuffer( const char* name, int width, int height );
 	
 	// deletes OpenGL object but leaves structure intact for reloading
 	void					PurgeFramebuffer();
 	
 	void					Bind();
-	static void				BindNull();
+	void					Unbind();
+	void					BindDirectly();
+	void					UnbindDirectly();
 	
 	void					AddColorBuffer( int format, int index );
 	void					AddDepthBuffer( int format );
+	void					AddDepthStencilBuffer( int format );
+	void					AddStencilBuffer( int format );
 	void					AttachColorBuffer( void );
 	void					AttachDepthBuffer( void );
+	void					AttachDepthStencilBuffer( void );
+	void					AttachStencilBuffer( void );
 	
 	void					AttachImage2D( int target, const idImage* image, int index = 0 );
 	void					AttachImageDepth( const idImage* image );
+	void					AttachImageDepthStencil( const idImage* image );
 	void					AttachImageDepthLayer( const idImage* image, int layer );
 	void					AttachImage2DLayer( const idImage* image, int layer );
 	void					AttachImage2D( const idImage* image );
@@ -69,6 +69,12 @@ public:
 	{
 		return frameBuffer;
 	}
+	const char *			GetName() const {
+		return fboName.c_str();
+	}
+
+private:
+	void					PrintFramebuffer(void);
 	
 public:
 	idStr					fboName;
@@ -88,14 +94,33 @@ public:
 	int						width;
 	int						height;
 	
-	static idList<Framebuffer*>	framebuffers;
+	friend class Framebuffer;
 };
 
+class Framebuffer
+{
+public:
+	static void				Init();
+	static void				Shutdown();
+	static void				BindNull();
+	static void				Append(idFramebuffer *fb);
+	static idFramebuffer *	Alloc(const char *name, int width, int height);
+	static idFramebuffer *	Find(const char *name);
+
+	static idList<idFramebuffer*>	framebuffers;
+};
+
+#ifdef _SHADOW_MAPPING
+#if 1
+static	int shadowMapResolutions[MAX_SHADOWMAP_RESOLUTIONS] = { 2048, 1024, 512, 512, 256 };
+#else
+static	int shadowMapResolutions[MAX_SHADOWMAP_RESOLUTIONS] = { 1024, 1024, 1024, 1024, 1024 };
+#endif
 struct globalFramebuffers_t
 {
-	Framebuffer*				shadowFBO[MAX_SHADOWMAP_RESOLUTIONS];
+	idFramebuffer*				shadowFBO[MAX_SHADOWMAP_RESOLUTIONS];
 };
 extern globalFramebuffers_t globalFramebuffers;
-
+#endif
 
 #endif // __FRAMEBUFFER_H__

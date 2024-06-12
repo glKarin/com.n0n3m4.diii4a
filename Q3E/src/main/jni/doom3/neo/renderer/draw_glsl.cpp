@@ -55,7 +55,7 @@ static idCVar harm_r_specularExponent("harm_r_specularExponent", "4.0", CVAR_FLO
 #ifdef _SHADOW_MAPPING
 #include "glsl/draw_glsl_shadowmapping.cpp"
 #endif
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#if defined(_TRANSLUCENT_STENCIL_SHADOW) || defined(_SOFT_STENCIL_SHADOW)
 #include "glsl/draw_glsl_stencilshadow.cpp"
 #endif
 
@@ -158,6 +158,26 @@ static void R_InitGLSLCvars(void)
 		f = 1.0f;
 	r_stencilShadowAlpha = f;
 #endif
+
+#ifdef _SOFT_STENCIL_SHADOW
+	if(USING_GLES3)
+	{
+		r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
+		f = harm_r_stencilShadowSoftAlpha.GetFloat();
+		if(f < 0.0f)
+			f = 0.0f;
+		if(f > 1.0f)
+			f = 1.0f;
+		r_stencilShadowSoftAlpha = f;
+	}
+	else
+	{
+		r_stencilShadowSoft = false;
+		harm_r_stencilShadowSoft.SetBool(false);
+		harm_r_stencilShadowSoft.ClearModified();
+		harm_r_stencilShadowSoft.SetReadonly();
+	}
+#endif
 	r_stencilShadowCombine = harm_r_stencilShadowCombine.GetBool();
 }
 
@@ -217,6 +237,36 @@ void R_CheckBackEndCvars(void)
 			f = 1.0f;
 		r_stencilShadowAlpha = f;
 		harm_r_stencilShadowAlpha.ClearModified();
+	}
+#endif
+#ifdef _SOFT_STENCIL_SHADOW
+	if(USING_GLES3)
+	{
+		if(harm_r_stencilShadowSoft.IsModified())
+		{
+			r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
+			harm_r_stencilShadowSoft.ClearModified();
+		}
+		if(harm_r_stencilShadowSoftAlpha.IsModified())
+		{
+			float f = harm_r_stencilShadowSoftAlpha.GetFloat();
+			if(f < 0.0f)
+				f = 0.0f;
+			if(f > 1.0f)
+				f = 1.0f;
+			r_stencilShadowSoftAlpha = f;
+			harm_r_stencilShadowSoftAlpha.ClearModified();
+		}
+	}
+	else
+	{
+		if(harm_r_stencilShadowSoft.IsModified())
+		{
+			r_stencilShadowSoft = false;
+			harm_r_stencilShadowSoft.SetBool(false);
+			harm_r_stencilShadowSoft.ClearModified();
+			harm_r_stencilShadowSoft.SetReadonly();
+		}
 	}
 #endif
 	if(harm_r_stencilShadowCombine.IsModified())

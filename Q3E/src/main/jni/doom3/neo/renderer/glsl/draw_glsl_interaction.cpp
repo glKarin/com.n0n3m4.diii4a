@@ -89,6 +89,15 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 		GL_SelectTextureNoClient(6);
 		RB_ShadowMappingInteraction_bindTexture();
 	}
+	else
+#endif
+#ifdef _SOFT_STENCIL_SHADOW
+	if(r_stencilShadowSoft)
+	{
+		// texture 6 is the stencil shadow texture
+		GL_SelectTextureNoClient(6);
+		RB_StencilShadowSoftInteraction_bindTexture();
+	}
 #endif
 
 	GL_SelectTextureNoClient(0); //k2023
@@ -169,6 +178,9 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
 	// disable features
+	GL_SelectTextureNoClient(6);
+	globalImages->BindNull();
+
 	GL_SelectTextureNoClient(5);
 	globalImages->BindNull();
 
@@ -206,6 +218,7 @@ static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow(viewLight_t *vLight)
 	RB_StencilShadowPass(vLight->localShadows);
 	RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
 }
+// default stencil shadow renderer
 static RB_GLSL_DrawInteraction_f RB_GLSL_DrawInteraction_ptr = RB_GLSL_DrawInteraction_stencilShadow;
 
 static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_combine(viewLight_t *vLight)
@@ -243,6 +256,30 @@ static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_translucent_combine(
 	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
 	if(r_stencilShadowAlpha < 1.0f)
 		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, false);
+}
+#endif
+
+#ifdef _SOFT_STENCIL_SHADOW
+// !!!dopy stencil buffer to texture directly!!!
+static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_soft(viewLight_t *vLight)
+{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
+	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 0xFF);
+
+	RB_StencilShadowPass(vLight->localShadows);
+	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
+	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 0xFF);
+}
+
+static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_soft_combine(viewLight_t *vLight)
+{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_StencilShadowPass(vLight->localShadows);
+	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
+
+	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 1);
+	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 2);
 }
 #endif
 
@@ -660,11 +697,37 @@ void RB_GLSL_DrawInteractions(void)
 {
 	RB_GLSL_DrawInteraction_f func;
 
+#ifdef _SOFT_STENCIL_SHADOW
+	const bool SoftStencilShadow = USING_GLES3 && r_stencilShadowSoft && r_shadows.GetBool();
+#endif
 #ifdef _TRANSLUCENT_STENCIL_SHADOW
-	const bool TranslucentStencilShadow = r_stencilShadowTranslucent && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
+	const bool TranslucentStencilShadow = r_stencilShadowTranslucent && r_shadows.GetBool()/* && r_stencilShadowAlpha > 0.0f*/;
+#endif
+#ifdef _SOFT_STENCIL_SHADOW
+	if(SoftStencilShadow)
+	{
+        if(harm_r_stencilShadowSoftBias.GetFloat() > 0.0f || r_stencilShadowSoftAlpha > 0.0)
+        {
+		    func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_soft_combine : RB_GLSL_DrawInteraction_stencilShadow_soft;
+        }
+        else
+        {
+            func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_combine : RB_GLSL_DrawInteraction_stencilShadow;
+        }
+	}
+	else
+#endif
+#ifdef _TRANSLUCENT_STENCIL_SHADOW
 	if(TranslucentStencilShadow)
 	{
-		func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_translucent_combine : RB_GLSL_DrawInteraction_stencilShadow_translucent;
+        if(r_stencilShadowAlpha > 0.0f)
+        {
+            func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_translucent_combine : RB_GLSL_DrawInteraction_stencilShadow_translucent;
+        }
+        else
+        {
+            func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_combine : RB_GLSL_DrawInteraction_stencilShadow;
+        }
 	}
 	else
 #endif

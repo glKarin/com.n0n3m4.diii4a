@@ -82,6 +82,12 @@ int gl_msaa = 0;
 int gl_version = DEFAULT_GLES_VERSION;
 
 bool USING_GLES3 = gl_version != 0x00020000;
+#ifdef _OPENGLES3
+int GLES3_VERSION = USING_GLES3 ? 0 : -1;
+#define USING_GLES30 (GLES3_VERSION > -1)
+#define USING_GLES31 (GLES3_VERSION > 0)
+#define USING_GLES32 (GLES3_VERSION > 1)
+#endif
 
 #define MAX_NUM_CONFIGS 1000
 static bool window_seted = false;
@@ -95,6 +101,48 @@ static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
 
+#ifdef _OPENGLES3
+#define _GLDBG 0
+#if _GLDBG
+static void GLimp_OutputOpenGLCallback_f(GLenum source,
+                                 GLenum type,
+                                 GLuint id,
+                                 GLenum severity,
+                                 GLsizei length,
+                                 const GLchar* message,
+                                 const void* userParam)
+{
+    fprintf( stdout, "\nGL CALLBACK: %s type = 0x%X, severity = 0X%x, id = %u, message = %s\n",
+             ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+             type, severity, id, message );
+}
+
+static void GLimp_DebugOpenGL(bool on)
+{
+    if(!USING_GLES31)
+        return;
+    if(on)
+    {
+        printf("DDD\n");
+        qglEnable( GL_DEBUG_OUTPUT );
+        qglEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        qglDebugMessageCallback( GLimp_OutputOpenGLCallback_f, 0 );
+        qglDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, 0, GL_TRUE);
+    }
+    else
+    {
+        qglDisable( GL_DEBUG_OUTPUT );
+        qglDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        qglDebugMessageCallback( NULL, 0 );
+    }
+}
+#define DEBUG_OPENGL GLimp_DebugOpenGL(true);
+#define NO_DEBUG_OPENGL GLimp_DebugOpenGL(false);
+#else
+#define DEBUG_OPENGL
+#define NO_DEBUG_OPENGL
+#endif
+#endif
 
 static void GLimp_HandleError(const char *func, bool exit = true)
 {
@@ -735,15 +783,66 @@ int GLES_Init(glimpParms_t ap)
 		return false;
 	}
 
-	EGLint ctxAttrib[] = {
-			EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
-			EGL_NONE
-	};
-	if ((eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib)) == EGL_NO_CONTEXT)
+#ifdef _OPENGLES3
+	int gles3_version = 0;
+	if(USING_GLES3)
+	{
+		// first try create OpenGLES3.2 context
+		EGLint ctxAttrib32[] = {
+				// EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
+				EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
+				EGL_CONTEXT_MINOR_VERSION_KHR, 2,
+				EGL_NONE
+		};
+		gles3_version = 2;
+		eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib32);
+
+		if (eglContext == EGL_NO_CONTEXT)
+		{
+			// second try create OpenGLES3.1 context
+			EGLint ctxAttrib31[] = {
+					// EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
+					EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
+					EGL_CONTEXT_MINOR_VERSION_KHR, 1,
+					EGL_NONE
+			};
+			gles3_version = 1;
+			eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib31);
+
+			if (eglContext == EGL_NO_CONTEXT) // finally try create OpenGLES3.0 context
+			{
+				EGLint ctxAttrib[] = {
+						EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
+						EGL_NONE
+				};
+				gles3_version = 0;
+				eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib);
+			}
+		}
+	}
+	else
+#endif
+	{
+		EGLint ctxAttrib[] = {
+				EGL_CONTEXT_CLIENT_VERSION, HARM_EGL_CONTEXT_CLIENT_VERSION,
+				EGL_NONE
+		};
+		eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib);
+	}
+	if (eglContext == EGL_NO_CONTEXT)
 	{
 		GLimp_HandleError("eglCreateContext");
 		return false;
 	}
+#ifdef _OPENGLES3
+	if(USING_GLES3)
+	{
+		GLES3_VERSION = gles3_version;
+		common->Printf("[Harmattan]: Create OpenGL ES3.%d context.\n", GLES3_VERSION);
+	}
+	else
+#endif
+	common->Printf("[Harmattan]: Create OpenGL ES2.0 context.\n");
 
 	if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext))
 	{
@@ -820,6 +919,9 @@ bool GLimp_Init(glimpParms_t a)
 	common->Printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glstring);
 
 	//has_gl_context = true;
+#ifdef _OPENGLES3
+	DEBUG_OPENGL;
+#endif
 	return true;
 }
 

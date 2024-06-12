@@ -447,6 +447,12 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("interactionTranslucent", SHADER_INTERACTIONTRANSLUCENT, &interactionTranslucentShader, INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongTranslucent", SHADER_INTERACTIONBLINNPHONGTRANSLUCENT, &interactionBlinnPhongTranslucentShader, INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
 #endif
+
+	// soft stencil shadow
+#ifdef _SOFT_STENCIL_SHADOW
+	ret.Append(GLSL_SHADER_SOURCE("interactionSoft", SHADER_INTERACTIONSOFT, &interactionSoftShader, INTERACTION_SOFT_VERT, INTERACTION_SOFT_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongSoft", SHADER_INTERACTIONBLINNPHONGSOFT, &interactionBlinnPhongSoftShader, INTERACTION_SOFT_VERT, INTERACTION_SOFT_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
+#endif
 }
 
 static bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name);
@@ -894,6 +900,28 @@ static bool RB_GLSL_InitShaders(void)
 				harm_r_stencilShadowTranslucent.SetBool(false);
 			}
 			harm_r_stencilShadowTranslucent.SetReadonly();
+			break;
+		}
+		shaderManager->Add(prop->program);
+	}
+	REQUIRE_SHADER;
+#endif
+
+#ifdef _SOFT_STENCIL_SHADOW
+	UNNECESSARY_SHADER;
+	for(int i = SHADER_STENCIL_SHADOW_2_BEGIN; i <= SHADER_STENCIL_SHADOW_2_END; i++)
+	{
+		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
+        if(!prop)
+            continue;
+		if(!RB_GLSL_LoadShaderProgramFromProp(prop))
+		{
+			common->Printf("[Harmattan]: soft stencil shadow shader error!\n");
+			if(harm_r_stencilShadowSoft.GetBool())
+			{
+				harm_r_stencilShadowSoft.SetBool(false);
+			}
+			harm_r_stencilShadowSoft.SetReadonly();
 			break;
 		}
 		shaderManager->Add(prop->program);

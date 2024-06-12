@@ -43,3 +43,8 @@ GLSL_PROGRAM_PROC shaderProgram_t depthPerforatedShader_color; //k: depth perfor
 GLSL_PROGRAM_PROC shaderProgram_t	interactionTranslucentShader; //k: PHONG lighting model interaction shader(translucent stencil shadow)
 GLSL_PROGRAM_PROC shaderProgram_t	interactionBlinnPhongTranslucentShader; //k: BLINN-PHONG lighting model interaction shader(translucent stencil shadow)
 #endif
+
+#ifdef _SOFT_STENCIL_SHADOW
+GLSL_PROGRAM_PROC shaderProgram_t	interactionSoftShader; //k: PHONG lighting model interaction shader(soft stencil shadow)
+GLSL_PROGRAM_PROC shaderProgram_t	interactionBlinnPhongSoftShader; //k: BLINN-PHONG lighting model interaction shader(soft stencil shadow)
+#endif

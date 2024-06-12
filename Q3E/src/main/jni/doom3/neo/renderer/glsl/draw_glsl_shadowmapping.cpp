@@ -108,7 +108,7 @@ ID_INLINE void RB_SetMVP( const idRenderMatrix& mvp )
 }
 
 // Attach framebuffer render texture or buffer in shadow map pass
-ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const viewLight_t *vLight, int side)
+ID_INLINE static void RB_ShadowMapping_attachTexture(idFramebuffer *fb, const viewLight_t *vLight, int side)
 {
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
@@ -420,7 +420,7 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
 // Read framebuffer color buffer to file for debug
 void R_SaveColorBuffer(const char *name)
 {
-	Framebuffer *fb = backEnd.glState.currentFramebuffer;
+	idFramebuffer *fb = backEnd.glState.currentFramebuffer;
 	int width;
 	int height;
 	if(fb)
@@ -945,7 +945,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
 
 	if(!harm_r_shadowMapDebug.GetInteger())
 	{
-		Framebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
+		idFramebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
         fb->Bind();
 		RB_ShadowMapping_attachTexture(fb, vLight, side);
 	}
@@ -1244,7 +1244,7 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
 
     if(!harm_r_shadowMapDebug.GetInteger())
     {
-        Framebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
+        idFramebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
         fb->Bind();
         RB_ShadowMapping_attachTexture(fb, vLight, side);
     }
