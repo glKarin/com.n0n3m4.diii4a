@@ -110,18 +110,37 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
 
 #ifdef _SOFT_STENCIL_SHADOW
 static bool r_stencilShadowSoft = false;
+static float r_stencilShadowSoftBias = -1.0f;
 
 ID_INLINE static float RB_StencilShadowSoft_calcBIAS(void)
 {
+#define STENCIL_SHADOW_SOFT_MIN_BIAS 1.0f
     float f = harm_r_stencilShadowSoftBias.GetFloat();
     if(f < 0)
     {
-        float min = 1.0f;
-        float val = idMath::Ceil((float)stencilTexture.Width() / 1024.0);
-        return val > min ? val : min;
+		float w = stencilTexture.Width(), h = stencilTexture.Height();
+		f = w > h ? w : h;
+#if 1
+		return f * 0.001 /* / 1024.0 */ + STENCIL_SHADOW_SOFT_MIN_BIAS;
+#else
+		f = idMath::Ceil(f * 0.001 /* / 1024.0 */);
+		return f > STENCIL_SHADOW_SOFT_MIN_BIAS ? f : STENCIL_SHADOW_SOFT_MIN_BIAS;
+#endif
     }
     else
+	{
         return f;
+	}
+#undef STENCIL_SHADOW_SOFT_MIN_BIAS
+}
+
+ID_INLINE static float RB_StencilShadowSoft_getBIAS(void)
+{
+	if(r_stencilShadowSoftBias < 0.0f)
+	{
+		r_stencilShadowSoftBias = RB_StencilShadowSoft_calcBIAS();
+	}
+	return r_stencilShadowSoftBias;
 }
 
 static void RB_StencilShadowSoftInteraction_setupUniform(void)
@@ -159,7 +178,7 @@ static void RB_StencilShadowSoftInteraction_setupUniform(void)
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[0]), 1.0 - r_stencilShadowAlpha);
 
     // bias
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), RB_StencilShadowSoft_calcBIAS());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), RB_StencilShadowSoft_getBIAS());
 }
 
 void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, int mask)

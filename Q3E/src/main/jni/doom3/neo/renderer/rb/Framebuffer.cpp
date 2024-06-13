@@ -312,7 +312,7 @@ void idFramebuffer::Check()
 	int status = qglCheckFramebufferStatus( GL_FRAMEBUFFER );
 	if( status == GL_FRAMEBUFFER_COMPLETE )
 	{
-		PrintFramebuffer();
+		// PrintFramebuffer();
 		qglBindFramebuffer( GL_FRAMEBUFFER, prev );
 		return;
 	}

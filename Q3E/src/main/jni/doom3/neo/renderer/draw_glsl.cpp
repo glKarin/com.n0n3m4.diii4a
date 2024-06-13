@@ -248,6 +248,11 @@ void R_CheckBackEndCvars(void)
 			r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
 			harm_r_stencilShadowSoft.ClearModified();
 		}
+		if(harm_r_stencilShadowSoftBias.IsModified())
+		{
+			r_stencilShadowSoftBias = RB_StencilShadowSoft_calcBIAS();
+			harm_r_stencilShadowSoftBias.ClearModified();
+		}
 	}
 	else
 	{
