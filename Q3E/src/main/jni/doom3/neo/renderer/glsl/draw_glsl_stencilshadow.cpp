@@ -4,7 +4,11 @@
 
 #include "../tr_local.h"
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
+
+static idCVar harm_r_stencilShadowCombine( "harm_r_stencilShadowCombine", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "combine local and global stencil shadow" );
+static bool r_stencilShadowCombine = false;
+
 static bool r_stencilShadowTranslucent = false;
 static float r_stencilShadowAlpha = 0.5f;
 
@@ -106,7 +110,19 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
 
 #ifdef _SOFT_STENCIL_SHADOW
 static bool r_stencilShadowSoft = false;
-static float r_stencilShadowSoftAlpha = 0.5f;
+
+ID_INLINE static float RB_StencilShadowSoft_calcBIAS(void)
+{
+    float f = harm_r_stencilShadowSoftBias.GetFloat();
+    if(f < 0)
+    {
+        float min = 1.0f;
+        float val = idMath::Ceil((float)stencilTexture.Width() / 1024.0);
+        return val > min ? val : min;
+    }
+    else
+        return f;
+}
 
 static void RB_StencilShadowSoftInteraction_setupUniform(void)
 {
@@ -140,10 +156,10 @@ static void RB_StencilShadowSoftInteraction_setupUniform(void)
 	GL_Uniform4fv(offsetof(shaderProgram_t, windowCoords), parm);
 
     // alpha
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[0]), 1.0 - r_stencilShadowSoftAlpha);
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[0]), 1.0 - r_stencilShadowAlpha);
 
     // bias
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_stencilShadowSoftBias.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), RB_StencilShadowSoft_calcBIAS());
 }
 
 void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, int mask)

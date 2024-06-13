@@ -1523,7 +1523,7 @@ GLSL_SHADER const char ES3_DEPTH_PERFORATED_FRAG[] =
 ;
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 // interaction(translucent)
 GLSL_SHADER const char ES3_INTERACTION_TRANSLUCENT_VERT[] =
 		"#version 300 es\n"
@@ -1688,7 +1688,6 @@ GLSL_SHADER const char ES3_INTERACTION_TRANSLUCENT_FRAG[] =
 		"_gl_FragColor = vec4(color, 1.0) * var_Color * u_uniformParm0;\n"
 		"}\n"
 ;
-#endif
 
 #ifdef _SOFT_STENCIL_SHADOW
 // interaction(soft)
@@ -1884,6 +1883,7 @@ GLSL_SHADER const char ES3_INTERACTION_SOFT_FRAG[] =
 		"_gl_FragColor = vec4(color, 1.0) * var_Color;\n"
 		"}\n"
 ;
+#endif
 #endif
 
 #endif

@@ -319,7 +319,6 @@
     <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">Translucent stencil shadow alpha(harm_r_stencilShadowAlpha):</string>
     <string name="_0_1_default_0_5">0 - 1(default 0.5)</string>
     <string name="soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft">Soft stencil shadow(Only OpenGLES3.1+)(harm_r_stencilShadowSoft)</string>
-    <string name="soft_stencil_shadow_alpha_harm_r_stencilshadowsoftalpha">Soft stencil shadow alpha(harm_r_stencilShadowSoftAlpha):</string>
     <string name="soft_0_1_default_0_5">0 - 1(default 0.5)</string>
 
 </resources>

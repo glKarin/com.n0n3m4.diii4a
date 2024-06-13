@@ -809,10 +809,6 @@ public class GameLauncher extends Activity
 
 		V.cb_stencilShadowSoft.setChecked(getProp("harm_r_stencilShadowSoft", false));
 		if (!IsProp("harm_r_stencilShadowSoft")) setProp("harm_r_stencilShadowTranslucent", false);
-		str = GetProp("harm_r_stencilShadowSoftAlpha");
-		if (null != str)
-			V.edt_harm_r_stencilShadowSoftAlpha.setText(str);
-		if (!IsProp("harm_r_stencilShadowSoftAlpha")) SetProp("harm_r_stencilShadowSoftAlpha", "0.5");
 
 		V.cb_s_useOpenAL.setChecked(getProp("s_useOpenAL", false));
 		if (!IsProp("s_useOpenAL"))
@@ -1188,8 +1184,6 @@ public class GameLauncher extends Activity
 		V.cb_translucentStencilShadow.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.edt_harm_r_stencilShadowAlpha.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_stencilShadowAlpha, 0.5f));
 		V.edt_harm_r_stencilShadowAlpha.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_stencilShadowAlpha", Q3EPreference.pref_harm_r_stencilShadowAlpha, 0.5f));
-		V.edt_harm_r_stencilShadowSoftAlpha.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_stencilShadowSoftAlpha, 0.5f));
-		V.edt_harm_r_stencilShadowSoftAlpha.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_stencilShadowSoftAlpha", Q3EPreference.pref_harm_r_stencilShadowSoftAlpha, 0.5f));
 
 		V.cb_stencilShadowSoft.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_stencilShadowSoft, false));
 		V.cb_stencilShadowSoft.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -1638,7 +1632,6 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowTranslucent, V.cb_translucentStencilShadow.isChecked());
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_stencilShadowAlpha, Q3EUtils.parseFloat_s(V.edt_harm_r_stencilShadowAlpha.getText().toString(), 0.5f));
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowSoft, V.cb_stencilShadowSoft.isChecked());
-		mEdtr.putFloat(Q3EPreference.pref_harm_r_stencilShadowSoftAlpha, Q3EUtils.parseFloat_s(V.edt_harm_r_stencilShadowSoftAlpha.getText().toString(), 0.5f));
 
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -2679,7 +2672,6 @@ public class GameLauncher extends Activity
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
 		public EditText edt_harm_r_stencilShadowAlpha;
-		public EditText edt_harm_r_stencilShadowSoftAlpha;
 
         public void Setup()
         {
@@ -2765,7 +2757,6 @@ public class GameLauncher extends Activity
 			launcher_fs_game_subdir = findViewById(R.id.launcher_fs_game_subdir);
 			cb_stencilShadowSoft = findViewById(R.id.cb_stencilShadowSoft);
 			edt_harm_r_stencilShadowAlpha = findViewById(R.id.edt_harm_r_stencilShadowAlpha);
-			edt_harm_r_stencilShadowSoftAlpha = findViewById(R.id.edt_harm_r_stencilShadowSoftAlpha);
         }
     }
 }

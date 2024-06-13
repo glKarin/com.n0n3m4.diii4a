@@ -55,7 +55,7 @@ static idCVar harm_r_specularExponent("harm_r_specularExponent", "4.0", CVAR_FLO
 #ifdef _SHADOW_MAPPING
 #include "glsl/draw_glsl_shadowmapping.cpp"
 #endif
-#if defined(_TRANSLUCENT_STENCIL_SHADOW) || defined(_SOFT_STENCIL_SHADOW)
+#if defined(_STENCIL_SHADOW_IMPROVE)
 #include "glsl/draw_glsl_stencilshadow.cpp"
 #endif
 
@@ -149,7 +149,7 @@ static void R_InitGLSLCvars(void)
 #endif
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 	r_stencilShadowTranslucent = harm_r_stencilShadowTranslucent.GetBool();
 	f = harm_r_stencilShadowAlpha.GetFloat();
 	if(f < 0.0f)
@@ -157,18 +157,13 @@ static void R_InitGLSLCvars(void)
 	if(f > 1.0f)
 		f = 1.0f;
 	r_stencilShadowAlpha = f;
-#endif
+
+	r_stencilShadowCombine = harm_r_stencilShadowCombine.GetBool();
 
 #ifdef _SOFT_STENCIL_SHADOW
 	if(USING_GLES3)
 	{
 		r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
-		f = harm_r_stencilShadowSoftAlpha.GetFloat();
-		if(f < 0.0f)
-			f = 0.0f;
-		if(f > 1.0f)
-			f = 1.0f;
-		r_stencilShadowSoftAlpha = f;
 	}
 	else
 	{
@@ -178,7 +173,7 @@ static void R_InitGLSLCvars(void)
 		harm_r_stencilShadowSoft.SetReadonly();
 	}
 #endif
-	r_stencilShadowCombine = harm_r_stencilShadowCombine.GetBool();
+#endif
 }
 
 void R_CheckBackEndCvars(void)
@@ -222,7 +217,7 @@ void R_CheckBackEndCvars(void)
 #endif
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 	if(harm_r_stencilShadowTranslucent.IsModified())
 	{
 		r_stencilShadowTranslucent = harm_r_stencilShadowTranslucent.GetBool();
@@ -238,7 +233,13 @@ void R_CheckBackEndCvars(void)
 		r_stencilShadowAlpha = f;
 		harm_r_stencilShadowAlpha.ClearModified();
 	}
-#endif
+
+	if(harm_r_stencilShadowCombine.IsModified())
+	{
+		r_stencilShadowCombine = harm_r_stencilShadowCombine.GetBool();
+		harm_r_stencilShadowCombine.ClearModified();
+	}
+
 #ifdef _SOFT_STENCIL_SHADOW
 	if(USING_GLES3)
 	{
@@ -246,16 +247,6 @@ void R_CheckBackEndCvars(void)
 		{
 			r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
 			harm_r_stencilShadowSoft.ClearModified();
-		}
-		if(harm_r_stencilShadowSoftAlpha.IsModified())
-		{
-			float f = harm_r_stencilShadowSoftAlpha.GetFloat();
-			if(f < 0.0f)
-				f = 0.0f;
-			if(f > 1.0f)
-				f = 1.0f;
-			r_stencilShadowSoftAlpha = f;
-			harm_r_stencilShadowSoftAlpha.ClearModified();
 		}
 	}
 	else
@@ -269,11 +260,7 @@ void R_CheckBackEndCvars(void)
 		}
 	}
 #endif
-	if(harm_r_stencilShadowCombine.IsModified())
-	{
-		r_stencilShadowCombine = harm_r_stencilShadowCombine.GetBool();
-		harm_r_stencilShadowCombine.ClearModified();
-	}
+#endif
 }
 
 void R_GLSL_Init(void)

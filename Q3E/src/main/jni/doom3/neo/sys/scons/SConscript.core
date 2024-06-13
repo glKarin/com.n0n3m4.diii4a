@@ -410,7 +410,7 @@ for i in range( len( core_list ) ):
 
 local_env = g_env.Clone()
 
-local_env.Append( CPPDEFINES = [ '_USING_STB', '_MODEL_OBJ', '_MODEL_DAE', '_SHADOW_MAPPING', '_OPENGLES3', '_NO_LIGHT', '_TRANSLUCENT_STENCIL_SHADOW' ] )
+local_env.Append( CPPDEFINES = [ '_USING_STB', '_MODEL_OBJ', '_MODEL_DAE', '_SHADOW_MAPPING', '_OPENGLES3', '_NO_LIGHT', '_STENCIL_SHADOW_IMPROVE' ] )
 # RAVEN QUAKE4
 if ( local_raven ):
 	local_env.Append( CPPDEFINES = [ '_RAVEN' ] )
