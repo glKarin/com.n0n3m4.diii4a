@@ -263,6 +263,8 @@ static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_translucent_combine(
 // !!!dopy stencil buffer to texture directly!!!
 static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_soft(viewLight_t *vLight)
 {
+	if (vLight->globalShadows || vLight->localShadows)
+	{
 	RB_StencilShadowPass(vLight->globalShadows);
 	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
 	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 0xFF);
@@ -271,15 +273,29 @@ static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_soft(viewLight_t *vL
 	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
 	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 0xFF);
 }
+	else
+	{
+		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+	}
+}
 
 static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_soft_combine(viewLight_t *vLight)
 {
+	if (vLight->globalShadows || vLight->localShadows)
+	{
 	RB_StencilShadowPass(vLight->globalShadows);
 	RB_StencilShadowPass(vLight->localShadows);
 	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
 
 	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 1);
 	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 2);
+	}
+	else
+	{
+		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+	}
 }
 #endif
 

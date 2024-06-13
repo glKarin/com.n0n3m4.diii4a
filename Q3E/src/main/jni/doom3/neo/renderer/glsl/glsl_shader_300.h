@@ -1881,7 +1881,7 @@ GLSL_SHADER const char ES3_INTERACTION_SOFT_FRAG[] =
         "const highp float sampleAvg = 1.0 / float(SAMPLES);\n"
         "shadow *= sampleAvg;\n"
         "color *= shadow;\n"
-		"_gl_FragColor = vec4(color, 1.0) * var_Color * shadow;\n"
+		"_gl_FragColor = vec4(color, 1.0) * var_Color;\n"
 		"}\n"
 ;
 #endif
