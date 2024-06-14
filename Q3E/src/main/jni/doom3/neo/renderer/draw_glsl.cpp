@@ -161,12 +161,15 @@ static void R_InitGLSLCvars(void)
 	r_stencilShadowCombine = harm_r_stencilShadowCombine.GetBool();
 
 #ifdef _SOFT_STENCIL_SHADOW
-	if(USING_GLES3)
+	// if(USING_GLES31)
+	if(idStencilTexture::IsAvailable())
 	{
 		r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
+		r_stencilShadowSoftCopyStencilBuffer = harm_r_stencilShadowSoftCopyStencilBuffer.GetBool();
 	}
 	else
 	{
+		common->Warning("Unsupport soft stencil shadow on OpenGL ES2.0!");
 		r_stencilShadowSoft = false;
 		harm_r_stencilShadowSoft.SetBool(false);
 		harm_r_stencilShadowSoft.ClearModified();
@@ -241,12 +244,22 @@ void R_CheckBackEndCvars(void)
 	}
 
 #ifdef _SOFT_STENCIL_SHADOW
-	if(USING_GLES3)
+	// if(USING_GLES31)
+	if(idStencilTexture::IsAvailable())
 	{
 		if(harm_r_stencilShadowSoft.IsModified())
 		{
 			r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
 			harm_r_stencilShadowSoft.ClearModified();
+		}
+		if(harm_r_stencilShadowSoftCopyStencilBuffer.IsModified())
+		{
+			r_stencilShadowSoftCopyStencilBuffer = harm_r_stencilShadowSoftCopyStencilBuffer.GetBool();
+			harm_r_stencilShadowSoftCopyStencilBuffer.ClearModified();
+			if(r_stencilShadowSoftCopyStencilBuffer)
+				common->Printf("[Harmattan]: Copy stencil buffer directly for soft stencil shadow.\n");
+			else
+				common->Printf("[Harmattan]: Copy depth buffer and render stencil buffer for soft stencil shadow.\n");
 		}
 		if(harm_r_stencilShadowSoftBias.IsModified())
 		{

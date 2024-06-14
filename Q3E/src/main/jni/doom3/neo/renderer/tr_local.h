@@ -2241,6 +2241,7 @@ extern idCVar harm_r_stencilShadowAlpha;
 #ifdef _SOFT_STENCIL_SHADOW
 extern idCVar harm_r_stencilShadowSoft;
 extern idCVar harm_r_stencilShadowSoftBias;
+extern idCVar harm_r_stencilShadowSoftCopyStencilBuffer;
 #endif
 #endif
 

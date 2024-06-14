@@ -119,11 +119,11 @@ static void GLimp_OutputOpenGLCallback_f(GLenum source,
 
 static void GLimp_DebugOpenGL(bool on)
 {
-    if(!USING_GLES31)
+    // if(!USING_GLES31) return;
+    if(!GL_DEBUG_MESSAGE_AVAILABLE())
         return;
     if(on)
     {
-        printf("DDD\n");
         qglEnable( GL_DEBUG_OUTPUT );
         qglEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         qglDebugMessageCallback( GLimp_OutputOpenGLCallback_f, 0 );
@@ -407,7 +407,8 @@ static void R_LoadOpenGLFunc()
 #define QGLPROC(name, rettype, args) \
 	q##name = (rettype(GL_APIENTRYP)args)GLimp_ExtensionPointer(#name); \
 	if (!q##name) \
-		common->FatalError("Unable to initialize OpenGL (%s)", #name);
+		common->FatalError("Unable to initialize OpenGL (%s)", #name); \
+	else common->Printf("GetProc (%s) -> %p\n", #name, q##name);
 
 #include "../../renderer/qgl_proc.h"
 }

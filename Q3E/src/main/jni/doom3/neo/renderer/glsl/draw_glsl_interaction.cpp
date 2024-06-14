@@ -256,8 +256,49 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_combine(viewLigh
 }
 
 #ifdef _SOFT_STENCIL_SHADOW
-// !!!dopy stencil buffer to texture directly!!!
-static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft(viewLight_t *vLight)
+// 1. Copy depth buffer and render stencil directly
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyDepth(viewLight_t *vLight)
+{
+	if (vLight->globalShadows || vLight->localShadows)
+	{
+		RB_StencilShadowSoft_copyDepthBuffer(); // copy depth buffer
+		RB_StencilShadowPass(vLight->globalShadows);
+		RB_StencilShadowSoft_unbindFramebuffer();
+		RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 0xFF);
+
+		RB_StencilShadowSoft_bindFramebuffer();
+		RB_StencilShadowPass(vLight->localShadows);
+		RB_StencilShadowSoft_unbindFramebuffer();
+		RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 0xFF);
+	}
+	else
+	{
+		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+	}
+}
+
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyDepth_combine(viewLight_t *vLight)
+{
+	if (vLight->globalShadows || vLight->localShadows)
+	{
+		RB_StencilShadowSoft_copyDepthBuffer(); // copy depth buffer
+		RB_StencilShadowPass(vLight->globalShadows);
+		RB_StencilShadowPass(vLight->localShadows);
+		RB_StencilShadowSoft_unbindFramebuffer();
+
+		RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 1);
+		RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 2);
+	}
+	else
+	{
+		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+	}
+}
+
+// 2. Copy stencil buffer to texture directly
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil(viewLight_t *vLight)
 {
 	if (vLight->globalShadows || vLight->localShadows)
 	{
@@ -276,7 +317,7 @@ static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft(viewLight_t
 	}
 }
 
-static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_combine(viewLight_t *vLight)
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil_combine(viewLight_t *vLight)
 {
 	if (vLight->globalShadows || vLight->localShadows)
 	{
@@ -715,7 +756,7 @@ void RB_GLSL_DrawInteractions(void)
 	{
 		const bool TranslucentStencilShadow = r_stencilShadowTranslucent/* && r_stencilShadowAlpha > 0.0f*/;
 #ifdef _SOFT_STENCIL_SHADOW
-		const bool SoftStencilShadow = USING_GLES3 && r_stencilShadowSoft;
+		const bool SoftStencilShadow = idStencilTexture::IsAvailable() && r_stencilShadowSoft;
 #endif
 
 #ifdef _SOFT_STENCIL_SHADOW
@@ -723,7 +764,10 @@ void RB_GLSL_DrawInteractions(void)
 		{
 			if(harm_r_stencilShadowSoftBias.GetFloat() != 0.0f || r_stencilShadowAlpha < 1.0)
 			{
-				func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_soft_combine : RB_GLSL_DrawInteraction_stencilShadow_soft;
+				if(r_stencilShadowSoftCopyStencilBuffer)
+					func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil_combine : RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil;
+				else
+					func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_soft_copyDepth_combine : RB_GLSL_DrawInteraction_stencilShadow_soft_copyDepth;
 			}
 		}
 #endif

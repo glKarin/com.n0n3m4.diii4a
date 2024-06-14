@@ -111,6 +111,19 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
 #ifdef _SOFT_STENCIL_SHADOW
 static bool r_stencilShadowSoft = false;
 static float r_stencilShadowSoftBias = -1.0f;
+// I don't sure any GPUs are allowed to copy stencil buffer directly.
+static bool r_stencilShadowSoftCopyStencilBuffer = false; // if false, copy depth buffer
+/*
+ * If copy stencil buffer: 
+ *   1. Render shadow volume for stencil buffer in default framebuffer.
+ *   2. Copy default framebuffer's stencil buffer to stencil framebuffer's texture.
+ *   3. Render interactions with stencil texture in default framebuffer.
+ *
+ * If copy depth buffer: 
+ *   1. Copy default framebuffer's depth buffer to stencil framebuffer, and bind stencil framebuffer and clear the stencil buffer once.
+ *   2. Render shadow volume for stencil buffer to stencil framebuffer's texture in stencil framebuffer.
+ *   3. Bind to default framebuffer, and render interactions with stencil texture in default framebuffer.
+ */
 
 ID_INLINE static float RB_StencilShadowSoft_calcBIAS(void)
 {
@@ -120,17 +133,15 @@ ID_INLINE static float RB_StencilShadowSoft_calcBIAS(void)
     {
 		float w = stencilTexture.Width(), h = stencilTexture.Height();
 		f = w > h ? w : h;
-#if 1
-		return f * 0.001 /* / 1024.0 */ + STENCIL_SHADOW_SOFT_MIN_BIAS;
+#if 0
+		f = f * 0.001 /* / 1024.0 */ + STENCIL_SHADOW_SOFT_MIN_BIAS;
 #else
 		f = idMath::Ceil(f * 0.001 /* / 1024.0 */);
-		return f > STENCIL_SHADOW_SOFT_MIN_BIAS ? f : STENCIL_SHADOW_SOFT_MIN_BIAS;
+		f = f > STENCIL_SHADOW_SOFT_MIN_BIAS ? f : STENCIL_SHADOW_SOFT_MIN_BIAS;
 #endif
     }
-    else
-	{
+	common->Printf("[Harmattan]: Soft stencil shadow sampler BIAS: %f\n", f);
         return f;
-	}
 #undef STENCIL_SHADOW_SOFT_MIN_BIAS
 }
 
@@ -279,8 +290,26 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 
 ID_INLINE static void RB_StencilShadowSoft_copyStencilBuffer(void)
 {
-	stencilTexture.Blit(); // copy stencil buffer
+	stencilTexture.BlitStencil(); // copy stencil buffer
 	qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+ID_INLINE static void RB_StencilShadowSoft_copyDepthBuffer(void)
+{
+	stencilTexture.BlitDepth(); // copy stencil buffer
+	stencilTexture.Bind();
+	qglClear(GL_STENCIL_BUFFER_BIT);
+}
+
+ID_INLINE static void RB_StencilShadowSoft_bindFramebuffer(void)
+{
+	stencilTexture.Bind();
+	//qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+ID_INLINE static void RB_StencilShadowSoft_unbindFramebuffer(void)
+{
+	stencilTexture.Unbind();
 }
 
 ID_INLINE static void RB_StencilShadowSoftInteraction_bindTexture(void)
