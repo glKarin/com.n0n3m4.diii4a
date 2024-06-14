@@ -119,15 +119,17 @@ If you have questions concerning this license or the applicable additional terms
 
 typedef void (*GLExtension_t)(void);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 	GLExtension_t GLimp_ExtensionPointer(const char *name);
+	bool GLimp_ProcIsValid(const void *func);
+	#define GLIMP_PROCISVALID(func) GLimp_ProcIsValid((const void *)(func))
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 
 // declare qgl functions
 #ifdef GL_ES_VERSION_3_0 // GLES3.1
@@ -135,5 +137,9 @@ typedef void (GL_APIENTRY  *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLe
 #endif
 #define QGLPROC(name, rettype, args) extern rettype (GL_APIENTRYP q##name) args;
 #include "qgl_proc.h"
+
+#define GL_BLIT_FRAMEBUFFER_AVAILABLE() ( GLIMP_PROCISVALID(qglBlitFramebuffer) )
+#define GL_DRAW_BUFFERS_AVAILABLE() ( GLIMP_PROCISVALID(qglDrawBuffers) )
+#define GL_DEBUG_MESSAGE_AVAILABLE() ( GLIMP_PROCISVALID(qglDebugMessageControl) && GLIMP_PROCISVALID(qglDebugMessageCallback) && GLIMP_PROCISVALID(qglGetDebugMessageLog))
 
 #endif

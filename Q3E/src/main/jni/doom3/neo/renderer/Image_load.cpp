@@ -3074,7 +3074,7 @@ void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSi
 	}
 	else
 	{
-		if(USING_GLES31)
+		// if(USING_GLES31)
 			qglTexParameteri( GL_TEXTURE_2D, GL_DEPTH_STENCIL_TEXTURE_MODE, GL_STENCIL_INDEX );
 	}
 #endif

@@ -179,9 +179,9 @@ void idStencilTexture::Select(void)
 #ifdef GL_ES_VERSION_3_0
 	assert(depthStencilTexture);
 	depthStencilTexture->Bind();
-	if(!USING_GLES31)
+	// assert(USING_GLES31);
+	// if(!USING_GLES31)
 		qglTexParameteri( GL_TEXTURE_2D, GL_DEPTH_STENCIL_TEXTURE_MODE, GL_STENCIL_INDEX );
-	assert(USING_GLES31);
 #endif
 }
 
@@ -197,13 +197,12 @@ int idStencilTexture::UploadHeight(void) const
 	return depthStencilTexture->uploadHeight;
 }
 
-void idStencilTexture::Blit(void)
+void idStencilTexture::BlitStencil(void)
 {
 #ifdef GL_ES_VERSION_3_0
-	if(!USING_GLES31)
-		return;
+	// if(!USING_GLES31) return;
 
-	assert(USING_GLES31);
+	// assert(USING_GLES31);
 	assert(fb);
 	const bool IsScissorTest = qglIsEnabled(GL_SCISSOR_TEST);
 	if(IsScissorTest)
@@ -215,6 +214,39 @@ void idStencilTexture::Blit(void)
 #if 1 //karin: in shader, texcoord.xy = gl_FragCoord.xy * (vec2(1.0) / vec2(width, height)/* u_windowCoords.xy */ * (depthStencilTexture->uploadWidth / depthStencilTexture->uploadHeight) /* u_nonPowerOfTwo.xy */)
 	// or texcoord.xy = gl_FragCoord.xy / textureSize(depthStencilTexture, 0)
 	qglBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+#else //karin: in shader, texcoord.xy = gl_FragCoord.xy * (vec2(1.0) / vec2(width, height)/* u_windowCoords.xy */)
+	qglBlitFramebuffer(0, 0, width, height, 0, 0, depthStencilTexture->uploadWidth, depthStencilTexture->uploadHeight, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+#endif
+
+	if(IsScissorTest)
+		qglEnable(GL_SCISSOR_TEST);
+	//backEnd.glState.currentFramebuffer = NULL;
+#endif
+}
+
+bool idStencilTexture::IsAvailable(void)
+{
+	return USING_GLES3;
+	// return GL_BLIT_FRAMEBUFFER_AVAILABLE();
+}
+
+void idStencilTexture::BlitDepth(void)
+{
+#ifdef GL_ES_VERSION_3_0
+	// if(!USING_GLES31) return;
+
+	// assert(USING_GLES31);
+	assert(fb);
+	const bool IsScissorTest = qglIsEnabled(GL_SCISSOR_TEST);
+	if(IsScissorTest)
+		qglDisable(GL_SCISSOR_TEST);
+
+	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->GetFramebuffer());
+
+	//qglReadBuffer(GL_BACK);
+#if 1 //karin: in shader, texcoord.xy = gl_FragCoord.xy * (vec2(1.0) / vec2(width, height)/* u_windowCoords.xy */ * (depthStencilTexture->uploadWidth / depthStencilTexture->uploadHeight) /* u_nonPowerOfTwo.xy */)
+	// or texcoord.xy = gl_FragCoord.xy / textureSize(depthStencilTexture, 0)
+	qglBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 #else //karin: in shader, texcoord.xy = gl_FragCoord.xy * (vec2(1.0) / vec2(width, height)/* u_windowCoords.xy */)
 	qglBlitFramebuffer(0, 0, width, height, 0, 0, depthStencilTexture->uploadWidth, depthStencilTexture->uploadHeight, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 #endif

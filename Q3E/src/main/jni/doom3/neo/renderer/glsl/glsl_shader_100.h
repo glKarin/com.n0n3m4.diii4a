@@ -1560,7 +1560,7 @@ PACK_FLOAT_FUNC()
 
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 // interaction(translucent)
 GLSL_SHADER const char INTERACTION_TRANSLUCENT_VERT[] =
 "#version 100\n"
@@ -1724,11 +1724,11 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_FRAG[] =
 	"gl_FragColor = vec4(color, 1.0) * var_Color * u_uniformParm0;\n"
 "}\n"
 ;
-#endif
 
 #ifdef _SOFT_STENCIL_SHADOW
 #define INTERACTION_SOFT_VERT INTERACTION_VERT
 #define INTERACTION_SOFT_FRAG INTERACTION_FRAG
+#endif
 #endif
 
 #endif

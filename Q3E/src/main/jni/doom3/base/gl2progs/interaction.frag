@@ -60,7 +60,7 @@ uniform sampler2D u_fragmentMap2;	/* u_lightProjectionTexture */
 uniform sampler2D u_fragmentMap3;	/* u_diffuseTexture */
 uniform sampler2D u_fragmentMap4;	/* u_specularTexture */
 uniform sampler2D u_fragmentMap5;	/* u_specularFalloffTexture */
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 uniform mediump float u_uniformParm0; // shadow alpha
 #endif
 
@@ -107,7 +107,7 @@ void main(void)
 	color *= lightFalloff;
 
 	gl_FragColor = vec4(color, 1.0) * var_Color
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
         * u_uniformParm0
 #endif
     ;

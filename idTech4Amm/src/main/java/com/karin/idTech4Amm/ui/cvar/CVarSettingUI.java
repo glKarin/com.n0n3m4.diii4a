@@ -31,7 +31,6 @@ public final class CVarSettingUI
                 "harm_fs_gameLibDir",
                 "harm_r_stencilShadowAlpha",
                 "harm_r_stencilShadowSoft",
-                "harm_r_stencilShadowSoftAlpha",
         };
         if(Utility.ArrayContains(IgnoreCVars, cvar.name))
             return TYPE_NONE;

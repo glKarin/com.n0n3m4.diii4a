@@ -37,7 +37,7 @@ class idStencilTexture
 		void Bind(void);
 		void Unbind(void);
 		void Select(void);
-		void Blit(void);
+		void BlitStencil(void);
 		bool Init(int width, int height);
 		void Shutdown(void);
 		// texture size
@@ -50,6 +50,8 @@ class idStencilTexture
 		int	 Height(void) const {
 			return height;
 		}
+		void BlitDepth(void);
+		static bool IsAvailable(void);
 
 	private:
 		int width;

@@ -156,8 +156,7 @@ height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 > 7. _OPENGLES3: 增加OpenGL ES3.0支持.
 > 8. _OPENAL _OPENAL_EFX _OPENAL_SOFT: 增加OpenAL(soft)和EFX混响支持.
 > 9. _NO_LIGHT: 添加无光照渲染支持.
-> 10. _TRANSLUCENT_STENCIL_SHADOW: 添加半透明模板阴影支持.
-> 11. _SOFT_STENCIL_SHADOW: 添加软模板阴影支持.
+> 10. _STENCIL_SHADOW_IMPROVE: 添加模板阴影增强支持(软阴影(OpenGLES3.1+), 半透明阴影, 强制混合全局阴影和自阴影).
 
 #### 如果想要移植`雷神之锤4`和`掠食(2006)`到同基于开源版本的`毁灭战士3`源码的PC端或其他平台, 由于DIII4A基于安卓平台和OpenGLES, 所以和原始的代码有些区别. 但是我把所有修改都用宏在源码上做了标记作为补丁, 但即使这样也要搜索这些宏和手动应用这些补丁.
 #### 为了保持原毁灭战士3的源码结构, 对于全部新增加的源码文件, 我放在了外面的新文件夹中, 并且在这些新文件夹内保持和毁灭战士3一样的目录结构(例如. framework, renderer, idlib...).

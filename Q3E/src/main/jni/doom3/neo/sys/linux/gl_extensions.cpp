@@ -41,6 +41,11 @@ glExtName_t glExtNames[] = {
 
 static void StubFunction(void) { }
 
+bool GLimp_ProcIsValid(const void *func)
+{
+	return func && (intptr_t)func != (intptr_t)StubFunction;
+}
+
 GLExtension_t GLimp_ExtensionPointer(const char *name)
 {
 	if (strstr(name, "wgl") == name) {

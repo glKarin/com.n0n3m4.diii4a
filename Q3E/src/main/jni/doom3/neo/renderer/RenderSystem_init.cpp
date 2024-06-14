@@ -2450,7 +2450,10 @@ void idRenderSystemLocal::InitOpenGL(void)
 		Framebuffer::Init();
 //#endif
 		// offlineScreenRenderer.Init(glConfig.vidWidth, glConfig.vidHeight);
-		stencilTexture.Init(glConfig.vidWidth, glConfig.vidHeight);
+		// if(USING_GLES31)
+		if(idStencilTexture::IsAvailable())
+			stencilTexture.Init(glConfig.vidWidth, glConfig.vidHeight);
+		
 		err = qglGetError();
 
 		if (err != GL_NO_ERROR) {
@@ -2596,13 +2599,13 @@ idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightU
 #include "tr/tr_shadowmapping.cpp"
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 idCVar harm_r_stencilShadowTranslucent( "harm_r_stencilShadowTranslucent", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "enable translucent shadow in stencil shadow" );
 idCVar harm_r_stencilShadowAlpha( "harm_r_stencilShadowAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "translucent shadow's alpha in stencil shadow" );
-#endif
-
 #ifdef _SOFT_STENCIL_SHADOW
 idCVar harm_r_stencilShadowSoft( "harm_r_stencilShadowSoft", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "enable soft stencil shadow(Only OpenGLES3.1+)" );
-idCVar harm_r_stencilShadowSoftAlpha( "harm_r_stencilShadowSoftAlpha", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft stencil shadow's alpha" );
-idCVar harm_r_stencilShadowSoftBias( "harm_r_stencilShadowSoftBias", "5.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft stencil shadow sampler BIAS factory" );
+idCVar harm_r_stencilShadowSoftBias( "harm_r_stencilShadowSoftBias", "-1", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft stencil shadow sampler BIAS(-1 to automatic, 0 to disable)" );
+idCVar harm_r_stencilShadowSoftCopyStencilBuffer( "harm_r_stencilShadowSoftCopyStencilBuffer", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "copy stencil buffer directly for soft stencil shadow. 0: copy depth buffer and bind and renderer stencil buffer to texture directly; 1: copy stencil buffer to texture directly" ); // I don't sure any GPUs are allowed to copy stencil buffer directly.
 #endif
+#endif
+
