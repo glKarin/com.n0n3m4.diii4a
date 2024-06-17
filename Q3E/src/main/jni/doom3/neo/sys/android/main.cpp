@@ -826,18 +826,35 @@ void Sys_ForceResolution(void)
     cvarSystem->SetCVarInteger("r_customWidth", screen_width);
     cvarSystem->SetCVarInteger("r_customHeight", screen_height);
 
-    float r = (float) screen_width / (float) screen_height;
+	int autoAspectRatio = cvarSystem->GetCVarInteger("harm_r_autoAspectRatio");
+	if(autoAspectRatio > 0)
+	{
+        float r = (float) screen_width / (float) screen_height;
 
-    if (r > 1.7f) {
-        cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
-    } else if (r > 1.55f) {
-        cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
-    } else {
-        cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
-    }
+		if(autoAspectRatio == 2)
+		{
+            idStr aspectRatio;
+			if (r > 1.7f) {
+				cvarSystem->SetCVarInteger("r_aspectRatio", 1);    // 16:9
+                aspectRatio = "16:9";
+			} else if (r > 1.55f) {
+				cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
+                aspectRatio = "16:10";
+			} else {
+				cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
+                aspectRatio = "4:3";
+			}
 
-    Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
-               -1, screen_width, screen_height);
+			Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i), r_aspectRatio(%i) = %s\n",
+					   -1, screen_width, screen_height, cvarSystem->GetCVarInteger("r_aspectRatio"), aspectRatio.c_str());
+		}
+		else
+		{
+			cvarSystem->SetCVarInteger("r_aspectRatio", -1);
+            Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i), r_aspectRatio(%i) = %f\n",
+                       -1, screen_width, screen_height, cvarSystem->GetCVarInteger("r_aspectRatio"), r);
+		}
+	}
 }
 
 #include "sys_android.cpp"

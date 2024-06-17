@@ -316,5 +316,9 @@
     <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">半透明模板阴影透明度(harm_r_stencilShadowAlpha):</string>
     <string name="_0_1_default_0_5">0 - 1(默认0.5)</string>
     <string name="soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft">软模板阴影(仅OpenGLES3.1+)(harm_r_stencilShadowSoft)</string>
-    <string name="soft_0_1_default_0_5">0 - 1(默认0.5)</string>
+    <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">组合模板阴影(harm_r_stencilShadowCombine)</string>
+    <string name="automatic_setup_aspect_ratio_harm_r_autoaspectratio">自动设置屏幕高宽比(harm_r_autoAspectRatio)</string>
+    <string name="setup_cvar_r_aspectratio_manually">手动设置cvar `r_aspectRatio`</string>
+    <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">强制设置cvar `r_aspectRatio`为-1(使用实际屏幕的宽高比)</string>
+    <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">自动设置cvar `r_aspectRatio`为0,1,2(根据屏幕的宽高比转为4:3/16:9/16:10)</string>
 </resources>
