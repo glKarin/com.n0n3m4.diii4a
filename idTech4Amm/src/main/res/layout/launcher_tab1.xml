@@ -466,7 +466,7 @@
                     android:text="@string/soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft" />
 
                 <CheckBox
-                    android:id="@+id/cb_translucentStencilShadow"
+                    android:id="@+id/cb_stencilShadowTranslucent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/translucent_stencil_shadow" />
@@ -494,6 +494,45 @@
                         android:inputType="numberDecimal|textNoSuggestions"
                         android:text="0.5" />
                 </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/cb_stencilShadowCombine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/combine_stencil_shadow_harm_r_stencilshadowcombine" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:text="@string/automatic_setup_aspect_ratio_harm_r_autoaspectratio" />
+
+                <RadioGroup
+                    android:id="@+id/rg_r_autoAspectRatio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/rb_r_autoAspectRatio_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setup_cvar_r_aspectratio_manually" />
+
+                    <RadioButton
+                        android:id="@+id/rb_r_autoAspectRatio_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio" />
+
+                    <RadioButton
+                        android:id="@+id/rb_r_autoAspectRatio_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10" />
+
+                </RadioGroup>
 
             </LinearLayout>
 
