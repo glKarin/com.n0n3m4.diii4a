@@ -314,13 +314,13 @@
     <string name="open_system_file_browser">Открыть платформу доступа к хранилищу Android</string>
     <string name="application_pid">"Приложение PID: "</string>
     <string name="doom_3_bfg">DOOM 3 BFG</string>
-    <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">Полупрозрачные тени альфа канал(harm_r_stencilShadowAlpha):</string>
+    <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">Альфа канал теней(harm_r_stencilShadowAlpha):</string>
     <string name="_0_1_default_0_5">0 - 1(по умолчанию 0.5)</string>
     <string name="soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft">Мягкие тени(Только OpenGLES3.1+)(harm_r_stencilShadowSoft)</string>
-    <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">Combine stencil shadow(harm_r_stencilShadowCombine)</string>
-    <string name="automatic_setup_aspect_ratio_harm_r_autoaspectratio">Automatic setup aspect ratio(harm_r_autoAspectRatio)</string>
-    <string name="setup_cvar_r_aspectratio_manually">Setup cvar `r_aspectRatio` manually</string>
-    <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">Force setup cvar `r_aspectRatio` to -1(Using screen real aspect ratio)</string>
-    <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">Automatic setup cvar `r_aspectRatio` to 0,1,2(Convert screen aspect ratio to 4:3/16:9/16:10)</string>
+    <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">Комбинированные тени(harm_r_stencilShadowCombine)</string>
+    <string name="automatic_setup_aspect_ratio_harm_r_autoaspectratio">Автоматическая настройка соотношения сторон(harm_r_autoAspectRatio)</string>
+    <string name="setup_cvar_r_aspectratio_manually">Настройка cvar `r_aspectRatio` вручную</string>
+    <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">Принудительная настройка cvar `r_aspectRatio` на -1(Использование реального соотношения сторон экрана)</string>
+    <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">Автоматическая настройка cvar `r_aspectRatio` на 0,1,2(Преобразовать соотношение сторон экрана в 4:3/16:9/16:10)</string>
 
 </resources>
