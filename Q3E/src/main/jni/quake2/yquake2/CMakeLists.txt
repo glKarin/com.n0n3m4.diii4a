@@ -181,7 +181,7 @@ list(APPEND yquake2ClientLinkerFlags android z oboeaudio)
 # We need an OpenGL implementation.
 set(OpenGL_GL_PREFERENCE GLVND)
 #list(APPEND yquake2IncludeDirectories ${OPENGL_INCLUDE_DIR})
-list(APPEND yquake2OpenGLLinkerFlags android GLESv1_CM EGL)
+list(APPEND yquake2OpenGLLinkerFlags android EGL)
 
 # backtrace lookup
 # Some systems like Linux has it within the libc some like the BSD, Haiku ...
@@ -572,7 +572,54 @@ set(GL1-Header
 	${COMMON_SRC_DIR}/header/shared.h
 	)
 
+set(GL3-Source
+		${REF_SRC_DIR}/gl3/gl3_draw.c
+		${REF_SRC_DIR}/gl3/gl3_image.c
+		${REF_SRC_DIR}/gl3/gl3_light.c
+		${REF_SRC_DIR}/gl3/gl3_lightmap.c
+		${REF_SRC_DIR}/gl3/gl3_main.c
+		${REF_SRC_DIR}/gl3/gl3_mesh.c
+		${REF_SRC_DIR}/gl3/gl3_misc.c
+		${REF_SRC_DIR}/gl3/gl3_model.c
+		${REF_SRC_DIR}/gl3/gl3_surf.c
+		${REF_SRC_DIR}/gl3/gl3_warp.c
+		${REF_SRC_DIR}/gl3/gl3_shaders.c
+		${REF_SRC_DIR}/files/models.c
+		${REF_SRC_DIR}/files/pcx.c
+		${REF_SRC_DIR}/files/stb.c
+		${REF_SRC_DIR}/files/surf.c
+		${REF_SRC_DIR}/files/wal.c
+		${REF_SRC_DIR}/files/pvs.c
+		${COMMON_SRC_DIR}/shared/shared.c
+		${COMMON_SRC_DIR}/md4.c
+		${BACKENDS_SRC_DIR}/android/gles3.c
+		)
+
+set(Glad-GL3-Source ${REF_SRC_DIR}/gl3/glad/src/glad.c)
 set(Glad-GLES3-Source ${REF_SRC_DIR}/gl3/glad-gles3/src/glad.c)
+
+set(GL3-Header
+		${REF_SRC_DIR}/ref_shared.h
+		${REF_SRC_DIR}/constants/anorms.h
+		${REF_SRC_DIR}/constants/anormtab.h
+		${REF_SRC_DIR}/constants/warpsin.h
+		${REF_SRC_DIR}/files/stb_image.h
+		${REF_SRC_DIR}/gl3/header/DG_dynarr.h
+		${REF_SRC_DIR}/gl3/header/HandmadeMath.h
+		${REF_SRC_DIR}/gl3/header/local.h
+		${REF_SRC_DIR}/gl3/header/model.h
+		${COMMON_SRC_DIR}/header/shared.h
+		)
+
+set(Glad-GL3-Header
+		${REF_SRC_DIR}/gl3/glad/include/glad/glad.h
+		${REF_SRC_DIR}/gl3/glad/include/KHR/khrplatform.h
+		)
+
+set(Glad-GLES3-Header
+		${REF_SRC_DIR}/gl3/glad-gles3/include/glad/glad.h
+		${REF_SRC_DIR}/gl3/glad-gles3/include/KHR/khrplatform.h
+		)
 
 set(Glad-GLES3-Header
 	${REF_SRC_DIR}/gl3/glad-gles3/include/glad/glad.h
@@ -619,28 +666,32 @@ add_library(ref_gl1 MODULE ${GL1-Source} ${GL1-Header} ${REF-Platform-Specific-S
 		SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX}
 		)]]
 target_compile_definitions(ref_gl1 PRIVATE _GLES)
-target_link_libraries(ref_gl1 ${yquake2LinkerFlags} ${yquake2OpenGLLinkerFlags}
+target_link_libraries(ref_gl1 ${yquake2LinkerFlags} ${yquake2OpenGLLinkerFlags} GLESv1_CM
 		${yquake2SDLLinkerFlags})
 
 # Build the GLES3 dynamic library
-#[[add_library(ref_gles3 MODULE ${GL3-Source} ${Glad-GLES3-Source} ${GL3-Header} ${Glad-GLES3-Header} ${REF-Platform-Specific-Source})
-set_target_properties(ref_gles3 PROPERTIES
+add_library(ref_gles3 MODULE ${GL3-Source} ${Glad-GLES3-Source} ${GL3-Header} ${Glad-GLES3-Header} ${REF-Platform-Specific-Source})
+target_compile_definitions(ref_gles3 PRIVATE _GLES)
+#[[set_target_properties(ref_gles3 PROPERTIES
 		PREFIX ""
 		#COMPILE_DEFINITIONS "YQ2_GL3_GLES3=1;YQ2_GL3_GLES=1"
 		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
 		SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX}
-		)
-target_include_directories(ref_gles3 PRIVATE ${CMAKE_SOURCE_DIR}/src/client/refresh/gl3/glad-gles3/include)
+		)]]
+#target_include_directories(ref_gles3 PRIVATE ${CMAKE_SOURCE_DIR}/src/client/refresh/gl3/glad-gles3/include)
+target_include_directories(ref_gles3 PRIVATE src/client/refresh/gl3/glad-gles3/include)
 target_compile_definitions(ref_gles3 PRIVATE YQ2_GL3_GLES3=1 YQ2_GL3_GLES=1)
-target_link_libraries(ref_gles3 ${yquake2LinkerFlags} ${yquake2SDLLinkerFlags})]]
+target_link_libraries(ref_gles3 ${yquake2LinkerFlags} ${yquake2OpenGLLinkerFlags} ${yquake2SDLLinkerFlags}) # GLESv3
 
 # Build the soft renderer dynamic library
-#[[add_library(ref_soft MODULE ${SOFT-Source} ${SOFT-Header} ${REF-Platform-Specific-Source})
+if(NOT ANDROID)
+add_library(ref_soft MODULE ${SOFT-Source} ${SOFT-Header} ${REF-Platform-Specific-Source})
 set_target_properties(ref_soft PROPERTIES
 		PREFIX ""
 		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
 		SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX}
 		)
-target_link_libraries(ref_soft ${yquake2LinkerFlags} ${yquake2SDLLinkerFlags})]]
+target_link_libraries(ref_soft ${yquake2LinkerFlags} ${yquake2SDLLinkerFlags})
+endif()

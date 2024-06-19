@@ -436,12 +436,25 @@ GL3_SetMode(void)
 	int err;
 	int fullscreen;
 
+#ifdef __ANDROID__
+	extern int screen_width;
+	extern int screen_height;
+	vid_fullscreen->value = 1;
+	fullscreen = 1;
+
+	/* a bit hackish approach to enable custom resolutions:
+	   Glimp_SetMode needs these values set for mode -1 */
+	vid.width = screen_width;
+	vid.height = screen_height;
+	r_mode->value = -1;
+#else
 	fullscreen = (int)vid_fullscreen->value;
 
 	/* a bit hackish approach to enable custom resolutions:
 	   Glimp_SetMode needs these values set for mode -1 */
 	vid.width = r_customwidth->value;
 	vid.height = r_customheight->value;
+#endif
 
 	if ((err = SetMode_impl(&vid.width, &vid.height, r_mode->value, fullscreen)) == rserr_ok)
 	{

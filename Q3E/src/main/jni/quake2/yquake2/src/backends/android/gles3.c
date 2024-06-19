@@ -1,4 +1,4 @@
-// ref_gl
+// ref_gl3
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -11,7 +11,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include "../../client/refresh/gl1/header/local.h"
+#include "../../client/refresh/gl3/header/local.h"
 
 #define GLFORMAT_RGB565 0x0565
 #define GLFORMAT_RGBA4444 0x4444
@@ -37,27 +37,27 @@ static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
 
-qboolean IsHighDPIaware = false;
 static qboolean vsyncActive = false;
+qboolean IsHighDPIaware = false;
 
 static void GLimp_HandleError(const char *func, qboolean exit)
 {
 	static const char *GLimp_StringErrors[] = {
-		"EGL_SUCCESS",
-		"EGL_NOT_INITIALIZED",
-		"EGL_BAD_ACCESS",
-		"EGL_BAD_ALLOC",
-		"EGL_BAD_ATTRIBUTE",
-		"EGL_BAD_CONFIG",
-		"EGL_BAD_CONTEXT",
-		"EGL_BAD_CURRENT_SURFACE",
-		"EGL_BAD_DISPLAY",
-		"EGL_BAD_MATCH",
-		"EGL_BAD_NATIVE_PIXMAP",
-		"EGL_BAD_NATIVE_WINDOW",
-		"EGL_BAD_PARAMETER",
-		"EGL_BAD_SURFACE",
-		"EGL_CONTEXT_LOST",
+			"EGL_SUCCESS",
+			"EGL_NOT_INITIALIZED",
+			"EGL_BAD_ACCESS",
+			"EGL_BAD_ALLOC",
+			"EGL_BAD_ATTRIBUTE",
+			"EGL_BAD_CONFIG",
+			"EGL_BAD_CONTEXT",
+			"EGL_BAD_CURRENT_SURFACE",
+			"EGL_BAD_DISPLAY",
+			"EGL_BAD_MATCH",
+			"EGL_BAD_NATIVE_PIXMAP",
+			"EGL_BAD_NATIVE_WINDOW",
+			"EGL_BAD_PARAMETER",
+			"EGL_BAD_SURFACE",
+			"EGL_CONTEXT_LOST",
 	};
 	GLint err = eglGetError();
 	if(err == EGL_SUCCESS)
@@ -224,7 +224,7 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_NATIVE_VISUAL_ID, &format);
 	win = w;
 	ANativeWindow_acquire((ANativeWindow *)win);
-    ANativeWindow_setBuffersGeometry((ANativeWindow *)win, screen_width, screen_height, format);
+	ANativeWindow_setBuffersGeometry((ANativeWindow *)win, screen_width, screen_height, format);
 
 	if ((eglSurface = eglCreateWindowSurface(eglDisplay, eglConfig, (NativeWindowType) win, NULL)) == EGL_NO_SURFACE)
 	{
@@ -260,15 +260,15 @@ void GLimp_AndroidQuit(void)
 
 void RI_SetResolution(int aw,int ah)
 {
-    screen_width = aw;
-    screen_height = ah;
+	screen_width = aw;
+	screen_height = ah;
 	printf("[Harmattan]: RI_SetResolution(%d, %d).\n", aw, ah);
 }
 
 void RI_SetGLParms(int f, int msaa)
 {
-    gl_format = f;
-    gl_msaa = msaa;
+	gl_format = f;
+	gl_msaa = msaa;
 	printf( "[Harmattan]: RI_SetGLParms(0x%X, %d).\n", gl_format, msaa);
 }
 #pragma GCC visibility pop
@@ -280,7 +280,7 @@ qboolean GLimp_OpenDisplay(void)
 	}
 
 	R_Printf(PRINT_ALL, "Setup EGL display connection\n" );
- 
+
 	if ( !( eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY) ) ) {
 		R_Printf(PRINT_ALL, "Couldn't open the EGL display\n" );
 		return false;
@@ -305,28 +305,28 @@ static bool GLES_Init_special(void)
 	int alpha_bits = info.alpha;
 	int buffer_bits = info.buffer;
 
-    EGLint attrib[] = {
-            EGL_BUFFER_SIZE, buffer_bits,
-            EGL_ALPHA_SIZE, alpha_bits,
-            EGL_RED_SIZE, red_bits,
-            EGL_BLUE_SIZE, green_bits,
-            EGL_GREEN_SIZE, blue_bits,
-            EGL_DEPTH_SIZE, depth_bits,
+	EGLint attrib[] = {
+			EGL_BUFFER_SIZE, buffer_bits,
+			EGL_ALPHA_SIZE, alpha_bits,
+			EGL_RED_SIZE, red_bits,
+			EGL_BLUE_SIZE, green_bits,
+			EGL_GREEN_SIZE, blue_bits,
+			EGL_DEPTH_SIZE, depth_bits,
 			EGL_STENCIL_SIZE, stencil_bits,
 			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
 			EGL_SAMPLES, gl_msaa,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_NONE,
-    };
+			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+			EGL_NONE,
+	};
 
 	R_Printf(PRINT_ALL, "[Harmattan]: Request special EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
-			red_bits, green_bits,
-			blue_bits, alpha_bits,
-			depth_bits,
-			stencil_bits
+			 red_bits, green_bits,
+			 blue_bits, alpha_bits,
+			 depth_bits,
+			 stencil_bits
 			, attrib[15], attrib[17]
-			);
+	);
 
 	int multisamples = gl_msaa;
 	EGLConfig eglConfigs[MAX_NUM_CONFIGS];
@@ -355,11 +355,11 @@ static bool GLES_Init_special(void)
 			{
 				EGLConfigInfo_t cinfo = GLimp_GetConfigInfo(eglConfigs[i]);
 				R_Printf(PRINT_ALL, "\t%d EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d sample buffers %d.\n",
-								i + 1,
-							  cinfo.red, cinfo.green,
-							  cinfo.blue, cinfo.alpha,
-							  cinfo.depth,
-							  cinfo.stencil
+						 i + 1,
+						 cinfo.red, cinfo.green,
+						 cinfo.blue, cinfo.alpha,
+						 cinfo.depth,
+						 cinfo.stencil
 						, cinfo.samples, cinfo.sample_buffers
 				);
 			}
@@ -390,20 +390,20 @@ static bool GLES_Init_prefer(void)
 		if ((i % 4) == 0 && i) {
 			// one pass, reduce
 			switch (i / 4) {
-			case 2 :
-				if (colorbits == 24)
-					colorbits = 16;
-				break;
-			case 1 :
-				if (depthbits == 24)
-					depthbits = 16;
-				else if (depthbits == 16)
-					depthbits = 8;
-			case 3 :
-				if (stencilbits == 24)
-					stencilbits = 16;
-				else if (stencilbits == 16)
-					stencilbits = 8;
+				case 2 :
+					if (colorbits == 24)
+						colorbits = 16;
+					break;
+				case 1 :
+					if (depthbits == 24)
+						depthbits = 16;
+					else if (depthbits == 16)
+						depthbits = 8;
+				case 3 :
+					if (stencilbits == 24)
+						stencilbits = 16;
+					else if (stencilbits == 16)
+						stencilbits = 8;
 			}
 		}
 
@@ -442,27 +442,27 @@ static bool GLES_Init_prefer(void)
 		int talphabits = channelcolorbits;
 
 		EGLint attrib[] = {
-			EGL_BUFFER_SIZE, channelcolorbits * 4,
-			EGL_ALPHA_SIZE, talphabits,
-			EGL_RED_SIZE, channelcolorbits,
-			EGL_BLUE_SIZE, channelcolorbits,
-			EGL_GREEN_SIZE, channelcolorbits,
-			EGL_DEPTH_SIZE, tdepthbits,
-			EGL_STENCIL_SIZE, tstencilbits,
-			EGL_SAMPLE_BUFFERS, multisamples > 1 ? 1 : 0,
-			EGL_SAMPLES, multisamples,
-			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
-			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-			EGL_NONE,
+				EGL_BUFFER_SIZE, channelcolorbits * 4,
+				EGL_ALPHA_SIZE, talphabits,
+				EGL_RED_SIZE, channelcolorbits,
+				EGL_BLUE_SIZE, channelcolorbits,
+				EGL_GREEN_SIZE, channelcolorbits,
+				EGL_DEPTH_SIZE, tdepthbits,
+				EGL_STENCIL_SIZE, tstencilbits,
+				EGL_SAMPLE_BUFFERS, multisamples > 1 ? 1 : 0,
+				EGL_SAMPLES, multisamples,
+				EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+				EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+				EGL_NONE,
 		};
 
 		R_Printf(PRINT_ALL, "[Harmattan]: Request EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
-				channelcolorbits, channelcolorbits,
-				channelcolorbits, talphabits,
-				tdepthbits,
-				tstencilbits
+				 channelcolorbits, channelcolorbits,
+				 channelcolorbits, talphabits,
+				 tdepthbits,
+				 tstencilbits
 				, attrib[15], attrib[17]
-				);
+		);
 
 		while(1)
 		{
@@ -519,7 +519,7 @@ int GLES_Init(qboolean fullscreen)
 	eglConfig = configs[0];
 
 	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_NATIVE_VISUAL_ID, &format);
-    ANativeWindow_setBuffersGeometry((ANativeWindow *)win, screen_width, screen_height, format);
+	ANativeWindow_setBuffersGeometry((ANativeWindow *)win, screen_width, screen_height, format);
 
 	if ((eglSurface = eglCreateWindowSurface(eglDisplay, eglConfig, (NativeWindowType) win, NULL)) == EGL_NO_SURFACE)
 	{
@@ -528,8 +528,10 @@ int GLES_Init(qboolean fullscreen)
 	}
 
 	EGLint ctxAttrib[] = {
-		EGL_CONTEXT_CLIENT_VERSION, 1,
-		EGL_NONE
+			// EGL_CONTEXT_CLIENT_VERSION, 3,
+			EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
+			EGL_CONTEXT_MINOR_VERSION_KHR, 2,
+			EGL_NONE
 	};
 	if ((eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttrib)) == EGL_NO_CONTEXT)
 	{
@@ -546,16 +548,16 @@ int GLES_Init(qboolean fullscreen)
 	EGLConfigInfo_t info = GLimp_GetConfigInfo(eglConfig);
 
 	R_Printf(PRINT_ALL, "[Harmattan]: EGL context: %d/%d/%d Color bits, %d Alpha bits, %d depth, %d stencil display. samples %d, sample buffers %d.\n",
-					info.red, info.green,
-					info.blue, info.alpha,
-					info.depth,
-					info.stencil
+			 info.red, info.green,
+			 info.blue, info.alpha,
+			 info.depth,
+			 info.stencil
 			, info.samples, info.sample_buffers
-			);
+	);
 
-	gl_state.fullscreen = true;
+	gl3state.fullscreen = true;
 
-	if (gl_state.fullscreen) {
+	if (gl3state.fullscreen) {
 		//Sys_GrabMouseCursor(true);
 	}
 
@@ -602,32 +604,109 @@ qboolean GLimp_InitGL(qboolean fullscreen)
 	return true;
 }
 
-// ----
+// --------
+
+enum {
+	// Not all GL.h header know about GL_DEBUG_SEVERITY_NOTIFICATION_*.
+	// DG: yes, it's the same value in GLES3.2
+	QGL_DEBUG_SEVERITY_NOTIFICATION = 0x826B
+};
+
+/*
+ * Callback function for debug output.
+ */
+static void APIENTRY
+DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+              const GLchar *message, const void *userParam)
+{
+	const char* sourceStr = "Source: Unknown";
+	const char* typeStr = "Type: Unknown";
+	const char* severityStr = "Severity: Unknown";
+
+	switch (severity)
+	{
+#ifdef YQ2_GL3_GLES
+  #define SVRCASE(X, STR)  case GL_DEBUG_SEVERITY_ ## X ## _KHR : severityStr = STR; break;
+#else // Desktop GL
+  #define SVRCASE(X, STR)  case GL_DEBUG_SEVERITY_ ## X ## _ARB : severityStr = STR; break;
+#endif
+
+		case QGL_DEBUG_SEVERITY_NOTIFICATION: return;
+		SVRCASE(HIGH, "Severity: High")
+		SVRCASE(MEDIUM, "Severity: Medium")
+		SVRCASE(LOW, "Severity: Low")
+#undef SVRCASE
+	}
+
+	switch (source)
+	{
+#ifdef YQ2_GL3_GLES
+  #define SRCCASE(X)  case GL_DEBUG_SOURCE_ ## X ## _KHR: sourceStr = "Source: " #X; break;
+#else
+  #define SRCCASE(X)  case GL_DEBUG_SOURCE_ ## X ## _ARB: sourceStr = "Source: " #X; break;
+#endif
+		SRCCASE(API);
+		SRCCASE(WINDOW_SYSTEM);
+		SRCCASE(SHADER_COMPILER);
+		SRCCASE(THIRD_PARTY);
+		SRCCASE(APPLICATION);
+		SRCCASE(OTHER);
+#undef SRCCASE
+	}
+
+	switch(type)
+	{
+#ifdef YQ2_GL3_GLES
+  #define TYPECASE(X)  case GL_DEBUG_TYPE_ ## X ## _KHR: typeStr = "Type: " #X; break;
+#else
+  #define TYPECASE(X)  case GL_DEBUG_TYPE_ ## X ## _ARB: typeStr = "Type: " #X; break;
+#endif
+		TYPECASE(ERROR);
+		TYPECASE(DEPRECATED_BEHAVIOR);
+		TYPECASE(UNDEFINED_BEHAVIOR);
+		TYPECASE(PORTABILITY);
+		TYPECASE(PERFORMANCE);
+		TYPECASE(OTHER);
+#undef TYPECASE
+	}
+
+	// use PRINT_ALL - this is only called with gl3_debugcontext != 0 anyway.
+	R_Printf(PRINT_ALL, "GLDBG %s %s %s: %s\n", sourceStr, typeStr, severityStr, message);
+}
+
+// ---------
 
 /*
  * Swaps the buffers and shows the next frame.
  */
-void
-RI_EndFrame(void)
+void GL3_EndFrame(void)
 {
-	eglSwapBuffers(eglDisplay, eglSurface);
-}
+	if(gl3config.useBigVBO)
+	{
+		// I think this is a good point to orphan the VBO and get a fresh one
+		GL3_BindVAO(gl3state.vao3D);
+		GL3_BindVBO(gl3state.vbo3D);
+		glBufferData(GL_ARRAY_BUFFER, gl3state.vbo3Dsize, NULL, GL_STREAM_DRAW);
+		gl3state.vbo3DcurOffset = 0;
+	}
 
-/*
- * Returns the adress of a GL function
- */
-void *
-RI_GetProcAddress(const char* proc)
-{
-	return eglGetProcAddress(proc);
+	eglSwapBuffers(eglDisplay, eglSurface);
 }
 
 /*
  * Returns whether the vsync is enabled.
  */
-qboolean RI_IsVSyncActive(void)
+qboolean GL3_IsVsyncActive(void)
 {
 	return vsyncActive;
+}
+
+/*
+ * Enables or disables the vsync.
+ */
+void GL3_SetVsync(void)
+{
+	vsyncActive = false;
 }
 
 /*
@@ -635,44 +714,52 @@ qboolean RI_IsVSyncActive(void)
  * creation by GLimp_InitGraphics(). In case of error -1
  * is returned.
  */
-int RI_PrepareForWindow(void)
+int GL3_PrepareForWindow(void)
 {
-	gl_state.stencil = true;
+	gl3config.stencil = true;
 	ri.Cvar_SetValue("r_msaa_samples", gl_msaa);
 
 	return 1;
 }
 
 /*
- * Enables or disables the vsync.
- */
-void RI_SetVsync(void)
-{
-	vsyncActive = false;
-}
-
-/*
- * Updates the gamma ramp.
- */
-void
-RI_UpdateGamma(void)
-{
-}
-
-/*
  * Initializes the OpenGL context. Returns true at
  * success and false at failure.
  */
-int RI_InitContext(void* _win)
+int GL3_InitContext(void* _win)
 {
 	win = _win;
 	GLES_Init(true);
 
-	// Enable vsync if requested.
-	RI_SetVsync();
-
 	// Check if we've got 8 stencil bits.
-	gl_state.stencil = true;
+	gl3config.stencil = true;
+
+	// Enable vsync if requested.
+	GL3_SetVsync();
+
+	// Load GL pointers through GLAD and check context.
+	if( !gladLoadGLES2Loader((void *)eglGetProcAddress))
+	{
+		R_Printf(PRINT_ALL, "GL3_InitContext(): ERROR: loading OpenGL function pointers failed!\n");
+
+		return false;
+	}
+
+	gl3config.debug_output = true;
+	gl3config.anisotropic = false;
+
+	gl3config.major_version = 3;
+	gl3config.minor_version = 2;
+
+	// Debug context setup.
+	if (gl3_debugcontext && gl3_debugcontext->value && gl3config.debug_output)
+	{
+		glDebugMessageCallbackKHR(DebugCallback, NULL);
+
+		// Call GL3_DebugCallback() synchronously, i.e. directly when and
+		// where the error happens (so we can get the cause in a backtrace)
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+	}
 
 	// Initialize gamma.
 	vid_gamma->modified = true;
@@ -683,7 +770,7 @@ int RI_InitContext(void* _win)
 /*
  * Fills the actual size of the drawable into width and height.
  */
-void RI_GetDrawableSize(int* width, int* height)
+void GL3_GetDrawableSize(int* width, int* height)
 {
 	*width = screen_width;
 	*height = screen_height;
@@ -692,18 +779,17 @@ void RI_GetDrawableSize(int* width, int* height)
 /*
  * Shuts the GL context down.
  */
-void
-RI_ShutdownContext(void)
+void GL3_ShutdownContext()
 {
-    GLimp_AndroidQuit();
+	GLimp_AndroidQuit();
 }
 
 /*
  * Returns the SDL major version. Implemented
- * here to not polute gl1_main.c with the SDL
+ * here to not polute gl3_main.c with the SDL
  * headers.
  */
-int RI_GetSDLVersion()
+int GL3_GetSDLVersion()
 {
 	return 2;
 }
