@@ -315,7 +315,7 @@ static bool GLES_Init_special(void)
 			EGL_STENCIL_SIZE, stencil_bits,
 			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
 			EGL_SAMPLES, gl_msaa,
-			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
 			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 			EGL_NONE,
 	};
