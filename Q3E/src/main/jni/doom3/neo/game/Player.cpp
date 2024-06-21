@@ -6973,10 +6973,13 @@ void idPlayer::Think(void)
 		}
 	}
 #ifdef _MOD_FULL_BODY_AWARENESS
-	if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI || !harm_pm_fullBodyAwarenessHeadVisible.GetBool())
-		headRenderEnt->suppressSurfaceInViewID = entityNumber+1;
-	else
-		headRenderEnt->suppressSurfaceInViewID = 0;
+    if(headRenderEnt)
+    {
+        if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI || !harm_pm_fullBodyAwarenessHeadVisible.GetBool())
+            headRenderEnt->suppressSurfaceInViewID = entityNumber+1;
+        else
+            headRenderEnt->suppressSurfaceInViewID = 0;
+    }
 #endif
 
 	// never cast shadows from our first-person muzzle flashes
