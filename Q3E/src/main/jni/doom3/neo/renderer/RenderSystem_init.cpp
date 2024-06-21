@@ -2564,6 +2564,7 @@ void GL_CheckErrors(const char *name)
 
 #include "rb/Framebuffer.cpp"
 #include "rb/OfflineScreenRenderer.cpp"
+#include "rb/StencilTexture.cpp"
 #include "matrix/RenderMatrix.cpp"
 #include "matrix/GLMatrix.cpp"
 

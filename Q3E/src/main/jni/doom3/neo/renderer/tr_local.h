@@ -73,6 +73,7 @@ enum
 
 #include "rb/Framebuffer.h"
 #include "rb/OfflineScreenRenderer.h"
+#include "rb/StencilTexture.h"
 #include "Image.h"
 
 #include "MegaTexture.h"

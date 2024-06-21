@@ -103,6 +103,7 @@ public:
 	static void				Init();
 	static void				Shutdown();
 	static void				BindNull();
+	static void				Default();
 	static void				Append(idFramebuffer *fb);
 	static idFramebuffer *	Alloc(const char *name, int width, int height);
 	static idFramebuffer *	Find(const char *name);

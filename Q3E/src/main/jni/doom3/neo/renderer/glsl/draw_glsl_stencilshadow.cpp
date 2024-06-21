@@ -133,7 +133,7 @@ ID_INLINE static float RB_StencilShadowSoft_calcBIAS(void)
     {
 		float w = stencilTexture.Width(), h = stencilTexture.Height();
 		f = w > h ? w : h;
-#if 0
+#if 1
 		f = f * 0.001 /* / 1024.0 */ + STENCIL_SHADOW_SOFT_MIN_BIAS;
 #else
 		f = idMath::Ceil(f * 0.001 /* / 1024.0 */);
@@ -291,29 +291,30 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 ID_INLINE static void RB_StencilShadowSoft_copyStencilBuffer(void)
 {
 	stencilTexture.BlitStencil(); // copy stencil buffer
-	qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Framebuffer::Default();
 }
 
 ID_INLINE static void RB_StencilShadowSoft_copyDepthBuffer(void)
 {
 	stencilTexture.BlitDepth(); // copy stencil buffer
-	stencilTexture.Bind();
+	stencilTexture.Begin();
 	qglClear(GL_STENCIL_BUFFER_BIT);
 }
 
 ID_INLINE static void RB_StencilShadowSoft_bindFramebuffer(void)
 {
-	stencilTexture.Bind();
-	//qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+	stencilTexture.Begin();
 }
 
 ID_INLINE static void RB_StencilShadowSoft_unbindFramebuffer(void)
 {
-	stencilTexture.Unbind();
+	stencilTexture.End();
 }
 
 ID_INLINE static void RB_StencilShadowSoftInteraction_bindTexture(void)
 {
-	stencilTexture.Select();
+	stencilTexture.Bind();
 }
+
 #endif
