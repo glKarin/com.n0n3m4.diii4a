@@ -27,7 +27,10 @@ void main(void)
     vec4 mask = texture2D( u_fragmentMap2, var_TexCoord0.xy );
     // kill the pixel if the distortion wound up being very small
     mask.xy -= 0.01f;
-     if ( any( lessThan( mask, vec4( 0.0 ) ) ) ) { discard; }
+    if ( any( lessThan( mask, vec4( 0.0 ) ) ) )
+    {
+        discard;
+    }
     // load the filtered normal map and convert to -1 to 1 range
     vec4 bumpMap = ( texture2D( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;
     vec2 localNormal = bumpMap.wy;

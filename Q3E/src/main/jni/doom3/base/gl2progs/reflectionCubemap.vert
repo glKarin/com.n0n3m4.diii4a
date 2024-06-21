@@ -35,12 +35,12 @@ varying lowp vec4 var_Color;
 
 void main(void)
 {
-  var_TexCoord = (u_textureMatrix * reflect( normalize( u_modelViewMatrix * attr_Vertex ),
-                                            // This suppose the modelView matrix is orthogonal
-                                            // Otherwise, we should use the inverse transpose
-                                            u_modelViewMatrix * vec4(attr_TexCoord,0.0) )).xyz ;
+    var_TexCoord = (u_textureMatrix * reflect( normalize( u_modelViewMatrix * attr_Vertex ),
+                    // This suppose the modelView matrix is orthogonal
+                    // Otherwise, we should use the inverse transpose
+                    u_modelViewMatrix * vec4(attr_TexCoord,0.0) )).xyz ;
 
-  var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
-  
-  gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+    var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
+
+    gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

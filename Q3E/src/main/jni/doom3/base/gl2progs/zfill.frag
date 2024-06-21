@@ -28,9 +28,10 @@ varying vec2 var_TexDiffuse;
 
 void main(void)
 {
-	if (u_alphaTest > texture2D(u_fragmentMap0, var_TexDiffuse).a) {
-		discard;
-	}
+    if (u_alphaTest > texture2D(u_fragmentMap0, var_TexDiffuse).a)
+    {
+        discard;
+    }
 
-	gl_FragColor = u_glColor;
+    gl_FragColor = u_glColor;
 }

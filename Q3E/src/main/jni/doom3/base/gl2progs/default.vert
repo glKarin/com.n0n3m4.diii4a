@@ -34,12 +34,12 @@ varying lowp vec4 var_Color;
 
 void main(void)
 {
-	// # glMatrixMode(GL_TEXTURE)
-	var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
+    // # glMatrixMode(GL_TEXTURE)
+    var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
 
-	// # generate the vertex color, which can be 1.0, color, or 1.0 - color
-	var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
+    // # generate the vertex color, which can be 1.0, color, or 1.0 - color
+    var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
 
-	//gl_Position = ftransform();
-	gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+    //gl_Position = ftransform();
+    gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

@@ -31,5 +31,5 @@ out vec4 _gl_FragColor;
 
 void main(void)
 {
-  _gl_FragColor = texture( u_fragmentMap0, var_TexFog ) * texture( u_fragmentMap1, var_TexFogEnter ) * vec4(u_fogColor.rgb, 1.0);
+    _gl_FragColor = texture( u_fragmentMap0, var_TexFog ) * texture( u_fragmentMap1, var_TexFogEnter ) * vec4(u_fogColor.rgb, 1.0);
 }

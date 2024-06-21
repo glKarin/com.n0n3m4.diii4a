@@ -30,5 +30,5 @@ out vec4 _gl_FragColor;
 
 void main(void)
 {
-	_gl_FragColor = texture(u_fragmentMap0, var_TexDiffuse) * u_glColor * var_Color;
+    _gl_FragColor = texture(u_fragmentMap0, var_TexDiffuse) * u_glColor * var_Color;
 }

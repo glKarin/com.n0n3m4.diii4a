@@ -32,9 +32,9 @@ varying vec2 var_TexClip;
 
 void main(void)
 {
-	var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
+    var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
 
-  var_TexClip = vec2( dot( u_clipPlane, attr_Vertex), 0.5 );
+    var_TexClip = vec2( dot( u_clipPlane, attr_Vertex), 0.5 );
 
-  gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+    gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

@@ -30,9 +30,10 @@ out vec4 _gl_FragColor;
 
 void main(void)
 {
-	if (u_alphaTest > texture(u_fragmentMap0, var_TexDiffuse).a) {
-		discard;
-	}
+    if (u_alphaTest > texture(u_fragmentMap0, var_TexDiffuse).a)
+    {
+        discard;
+    }
 
-	_gl_FragColor = u_glColor;
+    _gl_FragColor = u_glColor;
 }

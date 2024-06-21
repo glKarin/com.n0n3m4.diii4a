@@ -2,9 +2,9 @@
 ===========================================================================
 
 Doom 3 BFG Edition GPL Source Code
-Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").
 
 Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,13 +47,13 @@ out lowp vec4 var_Color;
 
 void main(void)
 {
-	gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+    gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 
-	vec4 texcoord0 = vec4(dot( u_texgenS, attr_Vertex ), dot( u_texgenT, attr_Vertex ), 0.0, dot( u_texgenQ, attr_Vertex )); 
+    vec4 texcoord0 = vec4(dot( u_texgenS, attr_Vertex ), dot( u_texgenT, attr_Vertex ), 0.0, dot( u_texgenQ, attr_Vertex ));
 
-	// multiply the texture matrix in
-	var_TexCoord = vec4(dot( u_textureMatrix[0], texcoord0 ), dot( u_textureMatrix[1], texcoord0), texcoord0.z, texcoord0.w);
+    // multiply the texture matrix in
+    var_TexCoord = vec4(dot( u_textureMatrix[0], texcoord0 ), dot( u_textureMatrix[1], texcoord0), texcoord0.z, texcoord0.w);
 
-	// compute vertex modulation
-	var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
+    // compute vertex modulation
+    var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
 }

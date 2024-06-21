@@ -11,6 +11,7 @@ uniform highp vec4 u_nonPowerOfTwo;
 uniform highp vec4 u_windowCoords;
 in highp vec4 var_TexCoord1;
 in highp vec4 var_TexCoord2;
+
 out vec4 _gl_FragColor;
 
 // # texture 0 is _currentRender

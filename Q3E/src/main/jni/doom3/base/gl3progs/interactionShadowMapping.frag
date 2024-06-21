@@ -45,111 +45,126 @@ uniform highp float u_uniformParm5; // 1.0 / textureSize()
 uniform highp float u_uniformParm6; // textureSize()
 uniform highp sampler2DArrayShadow u_fragmentMap6;	/* u_shadowMapTexture */
 #ifdef _POINT_LIGHT
-   in highp vec4 var_VertexPosition;
-   uniform highp mat4 shadowMVPMatrix[6];
-   in highp vec3 var_VertexToLight;
+in highp vec4 var_VertexPosition;
+uniform highp mat4 shadowMVPMatrix[6];
+in highp vec3 var_VertexToLight;
 #else
-   in highp vec4 var_ShadowCoord;
+in highp vec4 var_ShadowCoord;
 #endif
 
 #ifdef _DYNAMIC_BIAS
-   #ifdef _PARALLEL_LIGHT
-		#define BIAS_SCALE 1.0 // 0.999991
-	#else
-		#define BIAS_SCALE 1.0 // 0.999
-   #endif
-   #define BIAS(x) ((x) * BIAS_SCALE)
+#ifdef _PARALLEL_LIGHT
+#define BIAS_SCALE 1.0 // 0.999991
 #else
-	#define BIAS_OFFSET 0.0 // 0.001
-   #define BIAS(x) ((x) - BIAS_OFFSET)
+#define BIAS_SCALE 1.0 // 0.999
+#endif
+#define BIAS(x) ((x) * BIAS_SCALE)
+#else
+#define BIAS_OFFSET 0.0 // 0.001
+#define BIAS(x) ((x) - BIAS_OFFSET)
 #endif
 
 out vec4 _gl_FragColor;
 
 void main(void)
 {
-	//float u_specularExponent = 4.0;
+    //float u_specularExponent = 4.0;
 
-	vec3 L = normalize(var_L);
+    vec3 L = normalize(var_L);
 #if defined(BLINN_PHONG)
-	vec3 H = normalize(var_H);
-	vec3 N = 2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0;
+    vec3 H = normalize(var_H);
+    vec3 N = 2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0;
 #else
-	vec3 V = normalize(var_V);
-	vec3 N = normalize(2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0);
+    vec3 V = normalize(var_V);
+    vec3 N = normalize(2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0);
 #endif
 
-	float NdotL = clamp(dot(N, L), 0.0, 1.0);
+    float NdotL = clamp(dot(N, L), 0.0, 1.0);
 #if defined(HALF_LAMBERT)
-	NdotL *= 0.5;
-	NdotL += 0.5;
-	NdotL = NdotL * NdotL;
+    NdotL *= 0.5;
+    NdotL += 0.5;
+    NdotL = NdotL * NdotL;
 #endif
 #if defined(BLINN_PHONG)
-	float NdotH = clamp(dot(N, H), 0.0, 1.0);
+    float NdotH = clamp(dot(N, H), 0.0, 1.0);
 #endif
 
-	vec3 lightProjection = textureProj(u_fragmentMap2, var_TexLight.xyw).rgb;
-	vec3 lightFalloff = texture(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;
-	vec3 diffuseColor = texture(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;
-	vec3 specularColor = 2.0 * texture(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
+    vec3 lightProjection = textureProj(u_fragmentMap2, var_TexLight.xyw).rgb;
+    vec3 lightFalloff = texture(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;
+    vec3 diffuseColor = texture(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;
+    vec3 specularColor = 2.0 * texture(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
 
 #if defined(BLINN_PHONG)
-	float specularFalloff = pow(NdotH, u_specularExponent);
+    float specularFalloff = pow(NdotH, u_specularExponent);
 #else
-	vec3 R = -reflect(L, N);
-	float RdotV = clamp(dot(R, V), 0.0, 1.0);
-	float specularFalloff = pow(RdotV, u_specularExponent);
+    vec3 R = -reflect(L, N);
+    float RdotV = clamp(dot(R, V), 0.0, 1.0);
+    float specularFalloff = pow(RdotV, u_specularExponent);
 #endif
 
-float shadow = 0.0;
-#define SAMPLES 9
-
-vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
-	vec2(0.0, 0.0),
-	vec2(1.0, 1.0), vec2(1.0, -1.0), vec2(-1.0, -1.0), vec2(-1.0, 1.0),
-	vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, -1.0), vec2(0.0, 1.0)
-);
+    highp float shadow = 0.0;
+#define SAMPLES 17
+    vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
+                                          vec2( -0.94201624, -0.39906216 ),
+                                          vec2( 0.94558609, -0.76890725 ),
+                                          vec2( -0.094184101, -0.92938870 ),
+                                          vec2( 0.34495938, 0.29387760 ),
+                                          vec2( -0.91588581, 0.45771432 ),
+                                          vec2( -0.81544232, -0.87912464 ),
+                                          vec2( -0.38277543, 0.27676845 ),
+                                          vec2( 0.97484398, 0.75648379 ),
+                                          vec2( 0.44323325, -0.97511554 ),
+                                          vec2( 0.53742981, -0.47373420 ),
+                                          vec2( -0.26496911, -0.41893023 ),
+                                          vec2( 0.79197514, 0.19090188 ),
+                                          vec2( -0.24188840, 0.99706507 ),
+                                          vec2( -0.81409955, 0.91437590 ),
+                                          vec2( 0.19984126, 0.78641367 ),
+                                          vec2( 0.14383161, -0.14100790 ),
+                                          vec2( 0.0, 0.0 )
+                                      );
 #ifdef _POINT_LIGHT
-	int shadowIndex = 0;
-	highp vec3 toLightGlobal = normalize( var_VertexToLight );
-	highp float axis[6] = float[6](
-		-toLightGlobal.x,
-		toLightGlobal.x,
-		-toLightGlobal.y,
-		toLightGlobal.y,
-		-toLightGlobal.z,
-		toLightGlobal.z
-	);
-	for( int i = 0; i < 6; i++ ) {
-		//if( axis[i] > axis[shadowIndex] ) {		shadowIndex = i;	}
-		shadowIndex = axis[i] > axis[shadowIndex] ? i : shadowIndex;
-	}
-	highp vec4 shadowPosition = var_VertexPosition * shadowMVPMatrix[shadowIndex];
-	//vec3 c; if(shadowIndex == 0) c = vec3(1.0, 0.0, 0.0); else if(shadowIndex == 1) c = vec3(1.0, 1.0, 0.0); else if(shadowIndex == 2) c = vec3(0.0, 1.0, 0.0); else if(shadowIndex == 3) c = vec3(0.0, 1.0, 1.0); else if(shadowIndex == 4) c = vec3(0.0, 0.0, 1.0); else c = vec3(1.0, 0.0, 1.0);
-	shadowPosition.xyz /= shadowPosition.w;
-	shadowPosition.w = float(shadowIndex);
-	highp float distance = u_uniformParm2 + length(var_VertexToLight) * (0.00000000001 * u_uniformParm6); // more far more large
+    int shadowIndex = 0;
+    highp vec3 toLightGlobal = normalize( var_VertexToLight );
+    highp float axis[6] = float[6](
+                              -toLightGlobal.x,
+                              toLightGlobal.x,
+                              -toLightGlobal.y,
+                              toLightGlobal.y,
+                              -toLightGlobal.z,
+                              toLightGlobal.z
+                          );
+    for( int i = 0; i < 6; i++ )
+    {
+        //if( axis[i] > axis[shadowIndex] ) {		shadowIndex = i;	}
+        shadowIndex = axis[i] > axis[shadowIndex] ? i : shadowIndex;
+    }
+    highp vec4 shadowPosition = var_VertexPosition * shadowMVPMatrix[shadowIndex];
+    //vec3 c; if(shadowIndex == 0) c = vec3(1.0, 0.0, 0.0); else if(shadowIndex == 1) c = vec3(1.0, 1.0, 0.0); else if(shadowIndex == 2) c = vec3(0.0, 1.0, 0.0); else if(shadowIndex == 3) c = vec3(0.0, 1.0, 1.0); else if(shadowIndex == 4) c = vec3(0.0, 0.0, 1.0); else c = vec3(1.0, 0.0, 1.0);
+    shadowPosition.xyz /= shadowPosition.w;
+    shadowPosition.w = float(shadowIndex);
+    highp float distance = u_uniformParm2 + length(var_VertexToLight) * (0.00000000002 * u_uniformParm6); // more far more large // length(var_VertexToLight) / (100000000000.0 * u_uniformParm5)
 #else
-	highp vec4 shadowPosition = vec4(var_ShadowCoord.xyz / var_ShadowCoord.w, 0.0);
-	highp float distance = u_uniformParm2;
+    highp vec4 shadowPosition = vec4(var_ShadowCoord.xyz / var_ShadowCoord.w, 0.0);
+    highp float distance = u_uniformParm2;
 #endif
-   // end light type
-	shadowPosition.z = BIAS(shadowPosition.z);
-	for (int i = 0; i < SAMPLES; ++i) {
-		highp float shadowDepth = texture(u_fragmentMap6, vec4(shadowPosition.st + sampleOffsetTable[i] * distance, shadowPosition.wz));
-		shadow += 1.0 - (1.0 - shadowDepth) * u_uniformParm3;
-		//shadow += shadowDepth > 0.0 ? 1.0 : u_uniformParm3;
-	}
-	const highp float sampleAvg = 1.0 / float(SAMPLES);
-	shadow *= sampleAvg;
+    // end light type
+    shadowPosition.z = BIAS(shadowPosition.z);
+    for (int i = 0; i < SAMPLES; ++i)
+    {
+        highp float shadowDepth = texture(u_fragmentMap6, vec4(shadowPosition.st + sampleOffsetTable[i] * distance, shadowPosition.wz));
+        shadow += 1.0 - (1.0 - shadowDepth) * u_uniformParm3;
+        //shadow += shadowDepth > 0.0 ? 1.0 : u_uniformParm3;
+    }
+    const highp float sampleAvg = 1.0 / float(SAMPLES);
+    shadow *= sampleAvg;
 
-	vec3 color;
-	color = diffuseColor;
-	color += specularFalloff * specularColor;
-	color *= NdotL * lightProjection;
-	color *= lightFalloff;
-	color *= shadow;
+    vec3 color;
+    color = diffuseColor;
+    color += specularFalloff * specularColor;
+    color *= NdotL * lightProjection;
+    color *= lightFalloff;
+    color *= shadow;
 
-	_gl_FragColor = vec4(color, 1.0) * var_Color;
+    _gl_FragColor = vec4(color, 1.0) * var_Color;
 }
