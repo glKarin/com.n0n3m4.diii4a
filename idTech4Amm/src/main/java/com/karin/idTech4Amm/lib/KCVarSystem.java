@@ -80,7 +80,8 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "Head", "Set head joint when without head model in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
                 );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
@@ -109,6 +110,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot level(0 - auto; 1 - 8: difficult level)", KCVar.FLAG_POSITIVE)
                 );
 
@@ -125,7 +127,8 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "neck", "Set head joint when without head model in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
                 );
 
         _cvars.put("RENDERER", RENDERER_CVARS);

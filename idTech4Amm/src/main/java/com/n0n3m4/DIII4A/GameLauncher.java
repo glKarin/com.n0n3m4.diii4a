@@ -814,6 +814,10 @@ public class GameLauncher extends Activity
 		}
 		SelectCheckbox(V.rg_harm_r_shadow, index);
 		if (!IsProp("r_useShadowMapping")) SetProp("r_useShadowMapping", "0");
+		str = GetProp("harm_r_shadowMapAlpha");
+		if (null != str)
+			V.edt_harm_r_shadowMapAlpha.setText(str);
+		if (!IsProp("harm_r_shadowMapAlpha")) SetProp("harm_r_shadowMapAlpha", "0.5");
 
 		V.cb_stencilShadowTranslucent.setChecked(getProp("harm_r_stencilShadowTranslucent", false));
 		if (!IsProp("harm_r_stencilShadowTranslucent")) setProp("harm_r_stencilShadowTranslucent", false);
@@ -1208,6 +1212,8 @@ public class GameLauncher extends Activity
 		V.cb_stencilShadowTranslucent.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.edt_harm_r_stencilShadowAlpha.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_stencilShadowAlpha, 0.5f));
 		V.edt_harm_r_stencilShadowAlpha.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_stencilShadowAlpha", Q3EPreference.pref_harm_r_stencilShadowAlpha, 0.5f));
+		V.edt_harm_r_shadowMapAlpha.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_shadowMapAlpha, 0.5f));
+		V.edt_harm_r_shadowMapAlpha.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_shadowMapAlpha", Q3EPreference.pref_harm_r_shadowMapAlpha, 0.5f));
 
 		V.cb_stencilShadowSoft.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_stencilShadowSoft, false));
 		V.cb_stencilShadowSoft.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -1657,6 +1663,7 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, V.readonly_command.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowTranslucent, V.cb_stencilShadowTranslucent.isChecked());
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_stencilShadowAlpha, Q3EUtils.parseFloat_s(V.edt_harm_r_stencilShadowAlpha.getText().toString(), 0.5f));
+		mEdtr.putFloat(Q3EPreference.pref_harm_r_shadowMapAlpha, Q3EUtils.parseFloat_s(V.edt_harm_r_shadowMapAlpha.getText().toString(), 0.5f));
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowSoft, V.cb_stencilShadowSoft.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowCombine, V.cb_stencilShadowCombine.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, GetCheckboxIndex(V.rg_r_autoAspectRatio));
@@ -2702,6 +2709,7 @@ public class GameLauncher extends Activity
 		public EditText edt_harm_r_stencilShadowAlpha;
 		public RadioGroup rg_r_autoAspectRatio;
 		public CheckBox cb_stencilShadowCombine;
+		public EditText edt_harm_r_shadowMapAlpha;
 
         public void Setup()
         {
@@ -2789,6 +2797,7 @@ public class GameLauncher extends Activity
 			edt_harm_r_stencilShadowAlpha = findViewById(R.id.edt_harm_r_stencilShadowAlpha);
 			rg_r_autoAspectRatio = findViewById(R.id.rg_r_autoAspectRatio);
 			cb_stencilShadowCombine = findViewById(R.id.cb_stencilShadowCombine);
+			edt_harm_r_shadowMapAlpha = findViewById(R.id.edt_harm_r_shadowMapAlpha);
         }
     }
 }

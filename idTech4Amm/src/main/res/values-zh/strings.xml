@@ -321,4 +321,5 @@
     <string name="setup_cvar_r_aspectratio_manually">手动设置cvar `r_aspectRatio`</string>
     <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">强制设置cvar `r_aspectRatio`为-1(使用实际屏幕的宽高比)</string>
     <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">自动设置cvar `r_aspectRatio`为0,1,2(根据屏幕的宽高比转为4:3/16:9/16:10)</string>
+    <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">阴影映射透明度(harm_r_shadowMapAlpha):</string>
 </resources>

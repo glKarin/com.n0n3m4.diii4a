@@ -459,6 +459,30 @@
                         android:text="@string/shadow_mapping" />
                 </RadioGroup>
 
+                <LinearLayout
+                    android:id="@+id/launcher_layout_shadowMapAlpha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/shadow_mapping_alpha_harm_r_shadowmapalpha" />
+
+                    <EditText
+                        android:id="@+id/edt_harm_r_shadowMapAlpha"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/_0_1_default_0_5"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="numberDecimal|textNoSuggestions"
+                        android:text="0.5" />
+                </LinearLayout>
+
                 <CheckBox
                     android:id="@+id/cb_stencilShadowSoft"
                     android:layout_width="wrap_content"

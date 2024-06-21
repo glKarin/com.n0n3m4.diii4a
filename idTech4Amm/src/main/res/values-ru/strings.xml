@@ -322,5 +322,6 @@
     <string name="setup_cvar_r_aspectratio_manually">Настройка cvar `r_aspectRatio` вручную</string>
     <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">Принудительная настройка cvar `r_aspectRatio` на -1(Использование реального соотношения сторон экрана)</string>
     <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">Автоматическая настройка cvar `r_aspectRatio` на 0,1,2(Преобразовать соотношение сторон экрана в 4:3/16:9/16:10)</string>
+    <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">Shadow mapping alpha(harm_r_shadowMapAlpha):</string>
 
 </resources>
