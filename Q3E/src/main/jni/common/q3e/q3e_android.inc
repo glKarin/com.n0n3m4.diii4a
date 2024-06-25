@@ -188,7 +188,7 @@ static char **q3e_argv = NULL;
 static pthread_t main_thread;
 
 // App paused
-volatile Q3Ebool paused = Q3E_FALSE;
+volatile Q3Ebool q3e_paused = Q3E_FALSE;
 
 // Surface window
 volatile ANativeWindow *window = NULL;
@@ -473,14 +473,14 @@ void Q3E_SetInitialContext(const void *context)
 void Q3E_OnPause(void)
 {
     if(Q3E_IS_INITIALIZED)
-        paused = Q3E_TRUE;
+        q3e_paused = Q3E_TRUE;
 }
 
 // View resume
 void Q3E_OnResume(void)
 {
     if(Q3E_IS_INITIALIZED)
-        paused = Q3E_FALSE;
+        q3e_paused = Q3E_FALSE;
 }
 
 // because SurfaceView may be destroy or create new ANativeWindow in DOOM3 main thread

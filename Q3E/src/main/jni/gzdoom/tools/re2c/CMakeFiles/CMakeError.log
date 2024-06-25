@@ -1,0 +1,15 @@
+Determining if the function strndup exists failed with the following output:
+Change Dir: F:/qobj/droid/DIII4A/Q3E/src/main/jni/gzdoom/tools/re2c/CMakeFiles/CMakeTmp
+
+Run Build Command(s):E:/devinst/vc/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_4a10f.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:m && 适用于 .NET Framework MSBuild 版本 17.8.5+b5265ef37
+
+  The vcpkg manifest was disabled, but we found a manifest file in F:\qobj\droid\DIII4A\Q3E\src\main\jni\gzdoom\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.38.33134 版
+  版权所有(C) Microsoft Corporation。保留所有权利。
+  cl /c /I"D:\project\c\vcpkg\installed\x64-windows\include" /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=strndup /D "CMAKE_INTDIR=\"Debug\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_4a10f.dir\Debug\\" /Fd"cmTC_4a10f.dir\Debug\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "E:\devinst\cmake\share\cmake-3.24\Modules\CheckFunctionExists.c"
+  CheckFunctionExists.c
+CheckFunctionExists.obj : error LNK2019: 无法解析的外部符号 strndup，函数 main 中引用了该符号 [F:\qobj\droid\DIII4A\Q3E\src\main\jni\gzdoom\tools\re2c\CMakeFiles\CMakeTmp\cmTC_4a10f.vcxproj]
+F:\qobj\droid\DIII4A\Q3E\src\main\jni\gzdoom\tools\re2c\CMakeFiles\CMakeTmp\Debug\cmTC_4a10f.exe : fatal error LNK1120: 1 个无法解析的外部命令 [F:\qobj\droid\DIII4A\Q3E\src\main\jni\gzdoom\tools\re2c\CMakeFiles\CMakeTmp\cmTC_4a10f.vcxproj]
+
+
+
