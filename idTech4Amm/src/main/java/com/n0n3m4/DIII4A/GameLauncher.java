@@ -2172,7 +2172,7 @@ public class GameLauncher extends Activity
 			soundVisible = false;
 			otherVisible = false;
 			openglVisible = false;
-			modVisible = false;
+			// modVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
@@ -2620,7 +2620,7 @@ public class GameLauncher extends Activity
 	private void SetGameModToCommand(String mod)
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isDOOM)
 			SetParam(arg, mod);
 		else
 			SetProp(arg, mod);
@@ -2629,7 +2629,7 @@ public class GameLauncher extends Activity
 	private String GetGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isDOOM)
 			return GetParam(arg);
 		else
 			return GetProp(arg);
@@ -2638,7 +2638,7 @@ public class GameLauncher extends Activity
 	private void RemoveGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isDOOM)
 			RemoveParam(arg);
 		else
 			RemoveProp(arg);

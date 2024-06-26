@@ -30,7 +30,7 @@ public class FileBrowser
     private int m_sequence = ID_SEQUENCE_ASC;
     private int m_filter = 0;
     private int m_order = ID_ORDER_BY_NAME;
-    private List<String> m_extensions = new ArrayList<>();
+    private final List<String> m_extensions = new ArrayList<>();
     private boolean m_showHidden = true;
     private boolean m_ignoreDotDot = false;
     private boolean m_dirNameWithSeparator = true;
@@ -81,6 +81,8 @@ public class FileBrowser
                 if((m_filter & ID_FILTER_FILE) == 0 && !f.isDirectory())
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
+                    continue;
+                if(!Filter(name))
                     continue;
             }
             if(!m_showHidden && f.isHidden())
@@ -217,6 +219,30 @@ public class FileBrowser
         return this;
     }
 
+    public FileBrowser SetExtension(String...exts)
+    {
+        m_extensions.clear();
+        for (String ext : exts)
+        {
+            m_extensions.add(ext);
+        }
+        return this;
+    }
+
+    private boolean Filter(String name)
+    {
+        if(m_extensions.isEmpty())
+            return true;
+        for (String extension : m_extensions)
+        {
+            if(name.length() < extension.length())
+                continue;
+            if(name.substring(name.length() - extension.length()).equalsIgnoreCase(extension))
+                return true;
+        }
+        return false;
+    }
+
     public FileBrowser SetSequence(int i)
     {
         if (m_sequence != i)
@@ -257,6 +283,8 @@ public class FileBrowser
                 if((m_filter & ID_FILTER_FILE) == 0 && !isDirectory)
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && isDirectory)
+                    continue;
+                if(!Filter(name))
                     continue;
             }
 
@@ -333,6 +361,8 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && isDirectory)
                     continue;
+                if(!Filter(name))
+                    continue;
             }
             if(!m_showHidden && f.isHidden())
                 continue;
@@ -403,6 +433,8 @@ public class FileBrowser
                 if((m_filter & ID_FILTER_FILE) == 0 && !f.isDirectory())
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
+                    continue;
+                if(!Filter(name))
                     continue;
             }
             if(!m_showHidden && name.startsWith("."))

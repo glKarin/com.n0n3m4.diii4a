@@ -62,7 +62,13 @@ public final class ChooseGameModFunc extends GameLauncherFunc
     public void run()
     {
         FileBrowser fileBrowser = new FileBrowser();
-        fileBrowser.SetFilter(FileBrowser.ID_FILTER_DIRECTORY);
+        if(Q3EUtils.q3ei.isDOOM)
+        {
+            fileBrowser.SetExtension(".wad");
+            fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
+        }
+        else
+            fileBrowser.SetFilter(FileBrowser.ID_FILTER_DIRECTORY);
         fileBrowser.SetIgnoreDotDot(true);
         fileBrowser.SetDirNameWithSeparator(false);
         fileBrowser.SetShowHidden(true);
