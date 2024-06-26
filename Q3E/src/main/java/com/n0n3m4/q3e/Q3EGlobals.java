@@ -9,6 +9,7 @@ public final class Q3EGlobals
     public static final String CONST_PACKAGE_NAME = "com.karin.idTech4Amm";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
 
+    // log tag
     public static final String CONST_Q3E_LOG_TAG = "Q3E";
 
     // on-screen buttons index
@@ -83,7 +84,7 @@ public final class Q3EGlobals
     public static final int VIEW_MOTION_CONTROL_GYROSCOPE = 1 << 1;
     public static final int VIEW_MOTION_CONTROL_ALL = VIEW_MOTION_CONTROL_TOUCH | VIEW_MOTION_CONTROL_GYROSCOPE;
 
-    // game
+    // game engine library
     public static final String LIB_ENGINE_ID = "libidtech4.so"; // DOOM3
     public static final String LIB_ENGINE_RAVEN = "libidtech4_raven.so"; // Quake 4
     public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
@@ -93,7 +94,9 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE4_TDM = "libthedarkmod.so"; // TDM
     public static final String LIB_ENGINE1_QUAKE = "libidtech_quake.so"; // Quake 1
     public static final String LIB_ENGINE4_D3BFG = "libRBDoom3BFG.so"; // Doom3-BFG
+    public static final String LIB_ENGINE1_DOOM = "libgzdoom.so"; // GZDOOM
 
+    // game config file
     public static final String CONFIG_FILE_DOOM3 = "DoomConfig.cfg"; // DOOM3
     public static final String CONFIG_FILE_QUAKE4 = "Quake4Config.cfg"; // Quake 4
     public static final String CONFIG_FILE_PREY = "preyconfig.cfg"; // Prey 2006
@@ -103,7 +106,9 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_TDM = "Darkmod.cfg"; // TDM
     public static final String CONFIG_FILE_QUAKE1 = "config.cfg"; // Quake 1
     public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg"; // DOOM3-BFG
+    public static final String CONFIG_FILE_GZDOOM = "gzdoom.ini"; // GZDOOM
 
+    // game type token
     public static final String GAME_DOOM3 = "doom3";
     public static final String GAME_QUAKE4 = "quake4";
     public static final String GAME_PREY = "prey2006";
@@ -113,7 +118,9 @@ public final class Q3EGlobals
     public static final String GAME_TDM = "tdm";
     public static final String GAME_QUAKE1 = "quake1";
     public static final String GAME_DOOM3BFG = "doom3bfg";
+    public static final String GAME_GZDOOM = "gzdoom";
 
+    // game name
     public static final String GAME_NAME_DOOM3 = "DOOM 3";
     public static final String GAME_NAME_QUAKE4 = "Quake 4";
     public static final String GAME_NAME_PREY = "Prey(2006)";
@@ -123,7 +130,9 @@ public final class Q3EGlobals
     public static final String GAME_NAME_TDM = "Dark mod"; // The Dark Mod
     public static final String GAME_NAME_QUAKE1 = "Quake 1";
     public static final String GAME_NAME_DOOM3BFG = "DOOM 3 BFG";
+    public static final String GAME_NAME_GZDOOM = "GZDOOM";
 
+    // game base folder
     public static final String GAME_BASE_DOOM3 = "base";
     public static final String GAME_BASE_D3XP = "d3xp";
     public static final String GAME_BASE_QUAKE4 = "q4base";
@@ -135,7 +144,9 @@ public final class Q3EGlobals
     public static final String GAME_BASE_QUAKE1 = "darkplaces/id1"; // "darkplaces";
     public static final String GAME_BASE_QUAKE1_DIR = "id1";
     public static final String GAME_BASE_DOOM3BFG = "base"; // RBDoom3BFG always in doom3bfg folder
+    public static final String GAME_BASE_GZDOOM = ""; // GZDOOM is standalone
 
+    // game sub directory
     public static final String GAME_SUBDIR_DOOM3 = "doom3";
     public static final String GAME_SUBDIR_QUAKE4 = "quake4";
     public static final String GAME_SUBDIR_PREY = "prey";
@@ -145,7 +156,9 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_TDM = "darkmod";
     public static final String GAME_SUBDIR_QUAKE1 = "quake1";
     public static final String GAME_SUBDIR_DOOMBFG = "doom3bfg";
+    public static final String GAME_SUBDIR_GZDOOM = "gzdoom";
 
+    // game libraries
     public static final String[] LIBS = {
             "game",
             "d3xp",
@@ -187,6 +200,9 @@ public final class Q3EGlobals
     };
     public static final String[] D3BFG_LIBS = {
             "RBDoom3BFG",
+    };
+    public static final String[] GZDOOM_LIBS = {
+            "gzdoom",
     };
 /*
     public static final String[] QUAKE4_MAPS = {
@@ -278,12 +294,14 @@ public final class Q3EGlobals
             "Score",
     };
 
+    // OpenGL Surface color format
     public static final int GLFORMAT_RGB565 = 0x0565;
     public static final int GLFORMAT_RGBA4444 = 0x4444;
     public static final int GLFORMAT_RGBA5551 = 0x5551;
     public static final int GLFORMAT_RGBA8888 = 0x8888;
     public static final int GLFORMAT_RGBA1010102 = 0xaaa2;
 
+    // back key function mask
     public static final int ENUM_BACK_NONE = 0;
     public static final int ENUM_BACK_ESCAPE = 1;
     public static final int ENUM_BACK_EXIT = 2;
@@ -293,9 +311,10 @@ public final class Q3EGlobals
 
     public static final String GAME_EXECUABLE = "game.arm";
 
+    // extra internal game file version
     public static final String TDM_GLSL_SHADER_VERSION = "2.12.1";
-
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
+    public static final String GZDOOM_VERSION = "4.12.2.1";
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

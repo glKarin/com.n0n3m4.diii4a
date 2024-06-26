@@ -183,6 +183,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"></RadioGroup>
 
+            <RadioGroup
+                android:id="@+id/rg_fs_doomgame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></RadioGroup>
+
 
 
         <LinearLayout

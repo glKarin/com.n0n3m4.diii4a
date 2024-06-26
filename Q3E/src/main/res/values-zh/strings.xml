@@ -42,4 +42,5 @@
     <string name="back">返回</string>
     <string name="extract_the_dark_mod_glsl_shader_source_files_fail">提取The Dark Mod GLSL着色器源码文件失败!</string>
     <string name="extract_rbdoom3bfg_hlsl_shader_source_files_fail">提取RBDOOM 3 BFG HLSL着色器源码文件失败!</string>
+    <string name="extract_gzdoom_game_resource_files_fail">提取GZDOOM游戏资源文件失败!</string>
 </resources>

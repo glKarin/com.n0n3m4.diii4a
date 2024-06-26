@@ -88,6 +88,7 @@
     <string name="quake_3">雷神之锤3</string>
     <string name="rtcw">重返德军总部</string>
     <string name="tdm">Dark mod</string>
+    <string name="doom">毁灭战士</string>
     <string name="prey_2006">掠食(2006)</string>
     <string name="settings">设置</string>
     <string name="changes">更新</string>
@@ -291,6 +292,7 @@
     <string name="rtcw_base">重返德军总部</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">毁灭战士3 BFG</string>
+    <string name="doom_base">毁灭战士</string>
     <string name="quake_3_base">雷神之锤3:竞技场</string>
     <string name="quake_3_teamarena">雷神之锤3:团队竞技场</string>
     <string name="stop">停止</string>

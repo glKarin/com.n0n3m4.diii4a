@@ -70,7 +70,7 @@ OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
 OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
 OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
-OPTION(GAME_DOOM        "Build GZDOOM"                          OFF)
+OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
 
 if(NOT GAME_DOOM3)
     message(STATUS "Build OpenAL alone")

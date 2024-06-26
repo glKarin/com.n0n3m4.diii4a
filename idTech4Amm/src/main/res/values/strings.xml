@@ -91,6 +91,7 @@
     <string name="quake_3">Quake 3</string>
     <string name="rtcw">RTCW</string>
     <string name="tdm">Dark mod</string>
+    <string name="doom">DOOM</string>
     <string name="prey_2006">Prey(2006)</string>
     <string name="settings">Settings</string>
     <string name="changes">Changes</string>
@@ -294,6 +295,7 @@
     <string name="rtcw_base">Return to Castle Wolfenstein</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">DOOM 3 BFG</string>
+    <string name="doom_base">DOOM</string>
     <string name="quake_3_base">Quake III:Arena</string>
     <string name="quake_3_teamarena">Quake III:Team Arena</string>
     <string name="stop">Stop</string>

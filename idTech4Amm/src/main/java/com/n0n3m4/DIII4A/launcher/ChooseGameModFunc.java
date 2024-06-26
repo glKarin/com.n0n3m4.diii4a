@@ -80,7 +80,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 Q3EGlobals.GAME_BASE_QUAKE3,
                 Q3EGlobals.GAME_BASE_RTCW,
                 Q3EGlobals.GAME_BASE_DOOM3BFG,
-                Q3EGlobals.GAME_BASE_TDM
+                Q3EGlobals.GAME_BASE_TDM,
+                Q3EGlobals.GAME_BASE_GZDOOM
         ));
         List<String> blackList = new ArrayList<>();
         boolean standalone = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
@@ -96,7 +97,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                     Q3EGlobals.GAME_SUBDIR_QUAKE2,
                     Q3EGlobals.GAME_SUBDIR_QUAKE3,
                     Q3EGlobals.GAME_SUBDIR_RTCW,
-                    Q3EGlobals.GAME_SUBDIR_TDM
+                    Q3EGlobals.GAME_SUBDIR_TDM,
+                    Q3EGlobals.GAME_SUBDIR_GZDOOM
             ));
         }
 
@@ -228,6 +230,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_DOOM3BFG:
                         if(!Q3EUtils.q3ei.isD3BFG)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_GZDOOM:
+                        if(!Q3EUtils.q3ei.isDOOM)
                             continue;
                         break;
                     case Q3EGlobals.GAME_DOOM3:

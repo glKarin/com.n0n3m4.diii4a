@@ -311,7 +311,7 @@ void MessagePump (const Q3E_Event_t *sev)
 
 				switch (sev->key)
 				{
-					case SDL_BUTTON_LEFT:
+					//case SDL_BUTTON_LEFT:
 					case SDLK_KP_ENTER:	event.data1 = GK_RETURN;	break;
 					case SDLK_PAGEUP:	event.data1 = GK_PGUP;		break;
 					case SDLK_PAGEDOWN:	event.data1 = GK_PGDN;		break;
@@ -387,7 +387,7 @@ void MessagePump (const Q3E_Event_t *sev)
 		case Q3E_EVENT_MOUSE:
 			if (!GUICapture)
 			{
-				event.type = sev->state ? EV_GUI_KeyDown : EV_GUI_KeyUp;
+				event.type = sev->state ? EV_KeyDown : EV_KeyUp;
 
 				switch (sev->key)
 				{
@@ -493,7 +493,7 @@ void I_StartFrame ()
 
 void Q3E_KeyEvent(int state, int key, int character)
 {
-	if(key > 8)
+	if(key > 5) // 8
 	{
 		Q3E_KEY_EVENT(state, key, character);
 	}

@@ -25,6 +25,7 @@ extern void ShutdownGame(void);
 
 #include "common/engine/gamestate.h"
 #include "common/console/c_console.h"
+#include "common/menu/menustate.h"
 
 void Sys_SyncState(void)
 {
@@ -34,7 +35,7 @@ void Sys_SyncState(void)
     state = STATE_NONE;
     if(gamestate == GS_FULLCONSOLE)
         state |= STATE_CONSOLE;
-    else if(gamestate == GS_MENUSCREEN || gamestate == GS_TITLELEVEL)
+    else if(menuactive != MENU_Off)
         state |= STATE_MENU;
     else if(gamestate == GS_LEVEL)
         state |= STATE_GAME;

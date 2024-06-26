@@ -104,12 +104,8 @@ public class Q3EMain extends Activity
         // load game
         if (gameHelper.checkGameFiles())
         {
-            // if game is TDM, extract glsl shader
-            if(Q3EUtils.q3ei.IsTDMTech())
-                gameHelper.ExtractTDMGLSLShaderSource();
-            // if game is D3BFG, extract hlsl shader
-            else if(Q3EUtils.q3ei.IsIdTech4BFG())
-                gameHelper.ExtractDOOM3BFGHLSLShaderSource();
+            // extract game required resource in apk
+            gameHelper.ExtractGameResource();
 
             // init GUI component
             InitGUI();

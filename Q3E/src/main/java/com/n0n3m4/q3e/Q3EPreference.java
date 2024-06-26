@@ -63,6 +63,10 @@ public final class Q3EPreference
     public static final String pref_harm_d3bfg_game_lib = "q3e_harm_d3bfg_game_lib"; //k
     public static final String pref_harm_d3bfg_user_mod = "q3e_harm_d3bfg_user_mod"; //k
     public static final String pref_params_d3bfg = "q3e_params_d3bfg"; //k
+    public static final String pref_harm_gzdoom_fs_game = "q3e_harm_gzdoom_fs_game"; //k
+    public static final String pref_harm_gzdoom_game_lib = "q3e_harm_gzdoom_game_lib"; //k
+    public static final String pref_harm_gzdoom_user_mod = "q3e_harm_gzdoom_user_mod"; //k
+    public static final String pref_params_gzdoom = "q3e_params_gzdoom"; //k
     public static final String pref_harm_view_motion_control_gyro = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
     public static final String pref_harm_view_motion_gyro_y_axis_sens = "q3e_harm_view_motion_gyro_y_axis_sens"; //k
