@@ -76,7 +76,7 @@ typedef struct Q3E_Event_s
 	int type; // 1 key; 2 mouse
 	int state;
 	int key;
-	int character;
+	uint8_t character;
 	int x;
 	int y;
 	float dx;
@@ -347,6 +347,23 @@ void MessagePump (const Q3E_Event_t *sev)
 					event.data1 = toupper(event.data1);
 					D_PostEvent (&event);
 				}
+
+				if (GUICapture && sev->state && sev->character)
+				{
+					int size;
+					char text[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};
+					text[0] = sev->character;
+
+					int unichar = utf8_decode((const uint8_t*)text, &size);
+					if (size != 4)
+					{
+						event.type = EV_GUI_Event;
+						event.subtype = EV_GUI_Char;
+						event.data1 = (int16_t)unichar;
+						event.data2 = 0;
+						D_PostEvent (&event);
+					}
+				}
 			}
 			break;
 
@@ -402,7 +419,7 @@ void MessagePump (const Q3E_Event_t *sev)
 				}
 				else
 				{
-					int x = sev->x, y = sev->y;
+					x = sev->x, y = sev->y;
 
 					event.type = EV_GUI_Event;
 					event.data1 = x;

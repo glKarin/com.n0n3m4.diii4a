@@ -1549,7 +1549,7 @@ public class Q3EKeyCodes
 
     public static void InitKeycodes(Class<?> clazz)
     {
-        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "InitKeycodes: " + clazz.getName());
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Using key map: " + clazz.getName());
         for (Field f : KeyCodes.class.getFields())
         {
             try
@@ -1576,7 +1576,7 @@ public class Q3EKeyCodes
                 {
                     String name = field.getName();
                     Field f = KeyCodes.class.getField(name);
-                    //Log.e("TAG", "GetRealKeyCode: " + name + " : " + keycodeGeneric + " -> " + f.get(null));
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Map virtual key: " + name + " = " + keycodeGeneric + " -> " + f.get(null));
                     return (Integer) f.get(null);
                 }
             } catch (Exception ignored) {}
@@ -1719,6 +1719,13 @@ public class Q3EKeyCodes
         return keyCode % 95 + 32;//Magic
     }
 
+    /*
+    * generic key code integer -> KeyCodesGeneric's field name -> KeyCodes's field key code value
+    if(KeyCodesGeneric.K_SOME == KeyCodesGeneric.getFields()[some].get())
+    {
+        return KeyCodes.getField(KeyCodesGeneric.getFields()[some].getName()).get()
+    }
+     */
     public static class KeyCodesGeneric
     {
         public static final int K_MOUSE1 = 187;
@@ -1812,10 +1819,10 @@ public class Q3EKeyCodes
         public static final int K_RBRACKET = 93;
         public static final int K_APOSTROPHE = 39;
 
-        public static final int J_LEFT = 'a';
-        public static final int J_RIGHT = 'd';
-        public static final int J_UP = K_UPARROW;
-        public static final int J_DOWN = K_DOWNARROW;
+        public static final int J_LEFT = -'a';
+        public static final int J_RIGHT = -'d';
+        public static final int J_UP = -K_UPARROW;
+        public static final int J_DOWN = -K_DOWNARROW;
     }
 
     public static final String K_WEAPONS_STR = "1,2,3,4,5,6,7,8,9,q,0";

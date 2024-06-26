@@ -24,6 +24,7 @@ extern void ShutdownGame(void);
 #include "q3e/q3e_android.inc"
 
 #include "common/engine/gamestate.h"
+#include "common/console/c_console.h"
 
 void Sys_SyncState(void)
 {
@@ -32,11 +33,14 @@ void Sys_SyncState(void)
 
     state = STATE_NONE;
     if(gamestate == GS_FULLCONSOLE)
-        state |= STATE_LOADING;
-    else if(gamestate == GS_MENUSCREEN)
+        state |= STATE_CONSOLE;
+    else if(gamestate == GS_MENUSCREEN || gamestate == GS_TITLELEVEL)
         state |= STATE_MENU;
     else if(gamestate == GS_LEVEL)
         state |= STATE_GAME;
+
+    if(ConsoleState == c_down)
+        state |= STATE_CONSOLE;
 
     if (state != prev_state)
     {

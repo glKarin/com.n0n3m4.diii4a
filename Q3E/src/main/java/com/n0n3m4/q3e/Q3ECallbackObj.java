@@ -38,7 +38,7 @@ public class Q3ECallbackObj
     private Q3EGUI gui;
 
     private final LinkedList<Runnable> m_eventQueue = new LinkedList<>();
-    public boolean notinmenu = true;
+    public boolean notinmenu = true; // inGaming
     public boolean inLoading = true;
     public boolean inConsole = false;
 

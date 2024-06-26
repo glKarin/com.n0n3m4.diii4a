@@ -116,8 +116,6 @@ C/C++: xxx F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoo
 			COMMAND zipdir -udf ${PK3_ZIPDIR_OPTIONS} ${ZDOOM_OUTPUT_DIR}/${PK3_NAME} ${PK3_DIR}
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZDOOM_OUTPUT_DIR}/${PK3_NAME} $<TARGET_FILE_DIR:zdoom>/${PK3_NAME}
 			DEPENDS zipdir )
-		MESSAGE("yyy zipdir -udf ${PK3_ZIPDIR_OPTIONS} ${ZDOOM_OUTPUT_DIR}/${PK3_NAME} ${PK3_DIR}")
-		MESSAGE("zzz ${CMAKE_COMMAND} -E copy_if_different ${ZDOOM_OUTPUT_DIR}/${PK3_NAME} $<TARGET_FILE_DIR:zdoom>/${PK3_NAME}")
 	else()
 		add_custom_command( OUTPUT ${ZDOOM_OUTPUT_DIR}/${PK3_NAME}
 			COMMAND zipdir -udf ${PK3_ZIPDIR_OPTIONS} ${ZDOOM_OUTPUT_DIR}/${PK3_NAME} ${PK3_DIR}
@@ -156,7 +154,6 @@ C/C++: xxx F:/qobj/droid/DIII4A/Q3E/.cxx/RelWithDebInfo/4p2dq705/arm64-v8a/gzdoo
 	else()
 		set( INSTALL_PK3_PATH share/games/doom CACHE STRING "Directory where zdoom.pk3 will be placed during install." )
 	endif()
-	MESSAGE("xxx ${PROJECT_BINARY_DIR}/${PK3_NAME} -> ${INSTALL_PK3_PATH}")
 	install(FILES "${PROJECT_BINARY_DIR}/${PK3_NAME}"
 			DESTINATION ${INSTALL_PK3_PATH}
 			COMPONENT "Game resources")

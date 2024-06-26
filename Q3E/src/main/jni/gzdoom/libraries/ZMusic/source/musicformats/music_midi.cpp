@@ -260,7 +260,6 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 	while (dev == nullptr)
 	{
 		selectedDevice = devtype;
-		printf("qqqqqq %d %p \n",devtype,dev);
 		try
 		{
 			switch (devtype)
