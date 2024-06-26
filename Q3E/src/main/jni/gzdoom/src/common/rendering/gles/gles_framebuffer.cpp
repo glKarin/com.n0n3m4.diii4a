@@ -192,7 +192,25 @@ void OpenGLFrameBuffer::CopyScreenToBuffer(int width, int height, uint8_t* scr)
 
 	// strictly speaking not needed as the glReadPixels should block until the scene is rendered, but this is to safeguard against shitty drivers
 	glFinish();
+#ifdef _GLES //karin: glReadPixels using GL_RGBA
+	uint8_t* scr4 = (uint8_t *)calloc(width * height * 4, 1);
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, scr4);
+	for(int y = 0; y < height; y++)
+	{
+		for(int x = 0; x < width; x++)
+		{
+			int index = width * y + x;
+			int srcIndex = index * 3;
+			int src4Index = index * 4;
+			scr[srcIndex] = scr4[src4Index];
+			scr[srcIndex + 1] = scr4[src4Index + 1];
+			scr[srcIndex + 2] = scr4[src4Index + 2];
+		}
+	}
+	free(scr4);
+#else
 	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, scr);
+#endif
 }
 
 //===========================================================================
@@ -390,9 +408,17 @@ TArray<uint8_t> OpenGLFrameBuffer::GetScreenshotBuffer(int &pitch, ESSType &colo
 	// Grab what is in the back buffer.
 	// We cannot rely on SCREENWIDTH/HEIGHT here because the output may have been scaled.
 	TArray<uint8_t> pixels;
+#ifdef _GLES //karin: glReadPixels using GL_RGBA
+	pixels.Resize(viewport.width * viewport.height * 4);
+#else
 	pixels.Resize(viewport.width * viewport.height * 3);
+#endif
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+#ifdef _GLES //karin: glReadPixels using GL_RGBA
+	glReadPixels(viewport.left, viewport.top, viewport.width, viewport.height, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]);
+#else
 	glReadPixels(viewport.left, viewport.top, viewport.width, viewport.height, GL_RGB, GL_UNSIGNED_BYTE, &pixels[0]);
+#endif
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
 	// Copy to screenshot buffer:
@@ -411,7 +437,11 @@ TArray<uint8_t> OpenGLFrameBuffer::GetScreenshotBuffer(int &pitch, ESSType &colo
 			float v = (y + 0.5f) * rcpHeight;
 			int sx = u * viewport.width;
 			int sy = v * viewport.height;
+#ifdef _GLES //karin: glReadPixels using GL_RGBA
+			int sindex = (sx + sy * viewport.width) * 4;
+#else
 			int sindex = (sx + sy * viewport.width) * 3;
+#endif
 			int dindex = (x + (h - y - 1) * w) * 3;
 			ScreenshotBuffer[dindex] = pixels[sindex];
 			ScreenshotBuffer[dindex + 1] = pixels[sindex + 1];
