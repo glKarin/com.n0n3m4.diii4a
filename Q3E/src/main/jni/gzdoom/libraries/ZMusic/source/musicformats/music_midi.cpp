@@ -260,6 +260,7 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 	while (dev == nullptr)
 	{
 		selectedDevice = devtype;
+		printf("Test midi device: %d\n", devtype);
 		try
 		{
 			switch (devtype)
@@ -310,6 +311,7 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 		}
 		catch (std::runtime_error &err)
 		{
+			fprintf(stderr, "Create midi device: %s\n", err.what());
 			//DPrintf(DMSG_WARNING, "%s\n", err.what());
 			checked[devtype] = true;
 			devtype = MDEV_DEFAULT;
@@ -324,14 +326,17 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 			else if (!checked[MDEV_ADL]) devtype = MDEV_ADL;
 			else if (!checked[MDEV_OPN]) devtype = MDEV_OPN;
 			else if (!checked[MDEV_OPL]) devtype = MDEV_OPL;
+			printf("Try midi device: %d\n", devtype);
 
 			if (devtype == MDEV_DEFAULT)
 			{
+				//printf("exit %d\n", devtype);
 				std::string message = std::string(err.what()) + "\n\nFailed to play music: Unable to open any MIDI Device.";
 				throw std::runtime_error(message);
 			}
 		}
 	}
+	printf("Using midi device: %d\n", devtype);
 	if (selectedDevice != requestedDevice && (selectedDevice != lastSelectedDevice || requestedDevice != lastRequestedDevice))
 	{
 		static const char *devnames[] = {

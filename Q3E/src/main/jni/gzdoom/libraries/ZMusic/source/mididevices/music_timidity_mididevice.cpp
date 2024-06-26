@@ -97,11 +97,18 @@ void TimidityMIDIDevice::LoadInstruments()
 	if (gusConfig.dmxgus.size())
 	{
 		// Check if we got some GUS data before using it.
+#ifdef __ANDROID__ //karin: ULTRADIR is null
+		std::string ultradir = "";
+		const char *ULTRADIR = getenv("ULTRADIR");
+		if(ULTRADIR && ULTRADIR[0])
+			ultradir = ULTRADIR;
+#else
 		std::string ultradir = getenv("ULTRADIR");
+#endif
 		if (ultradir.length() || gusConfig.gus_patchdir.length() != 0)
 		{
 			auto psreader = new MusicIO::FileSystemSoundFontReader("");
-			
+
 			// The GUS put its patches in %ULTRADIR%/MIDI so we can try that
 			if (ultradir.length())
 			{
@@ -110,12 +117,12 @@ void TimidityMIDIDevice::LoadInstruments()
 			}
 			// Load DMXGUS lump and patches from gus_patchdir
 			if (gusConfig.gus_patchdir.length() != 0) psreader->add_search_path(gusConfig.gus_patchdir.c_str());
-			
+
 			gusConfig.instruments.reset(new Timidity::Instruments(psreader));
 			bool success = gusConfig.instruments->LoadDMXGUS(gusConfig.gus_memsize, (const char*)gusConfig.dmxgus.data(), gusConfig.dmxgus.size()) >= 0;
 			
 			gusConfig.dmxgus.clear();
-			
+
 			if (success)
 			{
 				gusConfig.loadedConfig = "DMXGUS";
