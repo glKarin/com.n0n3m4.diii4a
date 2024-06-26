@@ -178,8 +178,8 @@ public class Q3EGameHelper
         cmd = binDir + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
         Q3EUtils.q3ei.cmd = cmd;
 
-        if(Q3EUtils.q3ei.isDOOM)
-            Q3EUtils.q3ei.joystick_smooth = false;
+/*        if(Q3EUtils.q3ei.isDOOM)
+            Q3EUtils.q3ei.joystick_smooth = false;*/
     }
 
     private String FindDLL(String fs_game)

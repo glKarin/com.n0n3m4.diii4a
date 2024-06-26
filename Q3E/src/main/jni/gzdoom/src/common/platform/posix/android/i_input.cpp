@@ -64,6 +64,10 @@ extern void Sys_SyncState(void);
 extern int screen_width;
 extern int screen_height;
 
+extern float analogx;
+extern float analogy;
+extern int analogenabled;
+
 enum
 {
 	Q3E_EVENT_NONE = 0,
@@ -528,6 +532,11 @@ void Q3E_MotionEvent(float dx, float dy)
 	Q3E_MOTION_EVENT(dx, dy, mouse_x, mouse_y);
 }
 
-void Sys_Analog()
+void Sys_Analog(int &side, int &forward, const int sidemove, const int forwardmove)
 {
+	if (analogenabled)
+	{
+		forward = (int)(forwardmove * analogy);
+		side = (int)(sidemove * analogx);
+	}
 }

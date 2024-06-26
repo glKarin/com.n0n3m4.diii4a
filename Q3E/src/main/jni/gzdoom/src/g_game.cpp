@@ -578,6 +578,9 @@ ticcmd_t* G_BaseTiccmd()
 // or reads it from the demo buffer.
 // If recording a demo, write it out
 //
+#ifdef __ANDROID__ //karin: joystick smooth movement on Android
+void Sys_Analog(int &side, int &forward, const int forwardmove, const int sidemove);
+#endif
 void G_BuildTiccmd (ticcmd_t *cmd)
 {
 	int 		strafe;
@@ -597,6 +600,9 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	speed = buttonMap.ButtonDown(Button_Speed) ^ (int)cl_run;
 
 	forward = side = fly = 0;
+#ifdef __ANDROID__ //karin: joystick smooth movement on Android
+	Sys_Analog(side, forward, sidemove[speed], forwardmove[speed]);
+#endif
 
 	// [RH] only use two stage accelerative turning on the keyboard
 	//		and not the joystick, since we treat the joystick as
