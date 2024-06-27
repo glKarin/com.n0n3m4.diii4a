@@ -29,7 +29,7 @@
     <string name="prey_preybase">Prey</string>
     <string name="user_mod">Свой мод</string>
     <string name="input_your_mod_folder_name">Имя папки вашего мода</string>
-    <string name="gamelib">GameLib</string>
+    <string name="gamelib">Библиотека игры</string>
     <string name="multi_threading">Многопоточность</string>
     <string name="light_model_cvar_harm_r_lightmodel">Выбрать модель освещения(harm_r_lightModel)</string>
     <string name="phong">Phong</string>
