@@ -77,11 +77,11 @@
     <string name="_4x">4x</string>
     <string name="_16x">16x</string>
     <string name="color_bits">Настройка цвета</string>
-    <string name="_32bits">32Bits</string>
-    <string name="_16bits_rgb565">16Bits(RGB565)</string>
-    <string name="_16bits_rgba4444">16Bits(RGBA4444)</string>
-    <string name="_16bits_rgba5551">16Bits(RGBA5551)</string>
-    <string name="_32bits_rgba1010102">32Bits(RGBA1010102)</string>
+    <string name="_32bits">32Бит</string>
+    <string name="_16bits_rgb565">16Бит(RGB565)</string>
+    <string name="_16bits_rgba4444">16Бит(RGBA4444)</string>
+    <string name="_16bits_rgba5551">16Бит(RGBA5551)</string>
+    <string name="_32bits_rgba1010102">32Бит(RGBA1010102)</string>
     <string name="doom_3">DOOM 3</string>
     <string name="quake_4">Quake 4</string>
     <string name="quake_1">Quake 1</string>
