@@ -290,7 +290,17 @@ MIDIDevice *MIDIStreamer::CreateMIDIDevice(EMidiDevice devtype, int samplerate)
 				// Intentional fall-through for systems without standard midi support
 
 			case MDEV_FLUIDSYNTH:
-				dev = CreateFluidSynthMIDIDevice(samplerate, Args.c_str());
+#ifdef __ANDROID__ //karin: set default patches
+				{
+					std::string patchStr = Args;
+					printf("fluidsynth patchset: %s\n", patchStr.c_str());
+					if(patchStr.empty())
+						patchStr = "soundfonts/gzdoom.sf2";
+					dev = CreateFluidSynthMIDIDevice(samplerate, patchStr.c_str());
+				}
+#elif
+					dev = CreateFluidSynthMIDIDevice(samplerate, Args.c_str());
+#endif
 				break;
 
 			case MDEV_OPL:

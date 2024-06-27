@@ -235,11 +235,18 @@ FPatchSetReader::FPatchSetReader(const char *filename)
 {
 #ifndef _WIN32
 	mCaseSensitivePaths = true;
+#ifdef __ANDROID__ //karin: timidity directory
+	const char *paths[] = {
+			"$HOME/timidity",
+			progdir.GetChars()
+	};
+#else
 	const char *paths[] = {
 		"/usr/local/lib/timidity",
 		"/etc/timidity",
 		"/etc"
 	};
+#endif
 #else
 	const char *paths[] = {
 		"C:/TIMIDITY",

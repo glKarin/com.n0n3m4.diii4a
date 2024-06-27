@@ -137,7 +137,7 @@ static PROC WinGetProcAddress(const char *name)
 		#if defined(__sgi) || defined(__sun) || defined(__unix__)
 #ifdef __ANDROID__ //karin: using EGL on Android
 			#include <EGL/egl.h>
-			#define IntGetProcAddress(name) (*eglGetProcAddress)((const GLubyte*)name)
+			#define IntGetProcAddress(name) eglGetProcAddress((const char *)name)
 #else
 			void* SDL_GL_GetProcAddress(const char* proc);
 			#define IntGetProcAddress(name) SDL_GL_GetProcAddress((const char*)name)

@@ -2943,7 +2943,7 @@ static int PatchSoundNames (int dummy)
 		stripwhite(Line2);
 		FString newname = skipwhite (Line2);
 		ReplaceSoundName((int)strtoll(Line1, nullptr, 10), newname.GetChars());
-		DPrintf (DMSG_SPAMMY, "Sound %d set to:\n%s\n", Line1, newname.GetChars());
+		DPrintf (DMSG_SPAMMY, "Sound %s set to:\n%s\n", Line1, newname.GetChars());
 	}
 
 	return result;
@@ -2978,7 +2978,7 @@ static int PatchSpriteNames (int dummy)
 			int v = GetSpriteIndex(newname.GetChars());
 			memcpy(OrgSprNames[line1val].c, sprites[v].name, 5);
 
-			DPrintf (DMSG_SPAMMY, "Sprite %d set to:\n%s\n", Line1, newname.GetChars());
+			DPrintf (DMSG_SPAMMY, "Sprite %s set to:\n%s\n", Line1, newname.GetChars());
 		}
 		
 		return result;

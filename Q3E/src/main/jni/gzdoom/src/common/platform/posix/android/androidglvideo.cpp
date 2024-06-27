@@ -95,6 +95,9 @@ static EGLContext eglContext = EGL_NO_CONTEXT;
 static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+//#ifdef __ANDROID__ //karin: check GL context
+//extern void GLimp_CheckGLInitialized(void);
+//#endif
 
 static void GLimp_HandleError(const char *func, bool exit = true)
 {
@@ -765,6 +768,7 @@ void SystemGLFrameBuffer::SetVSync( bool vsync )
 void SystemGLFrameBuffer::SwapBuffers()
 {
 	eglSwapBuffers(eglDisplay, eglSurface);
+	//GLimp_CheckGLInitialized();
 }
 
 

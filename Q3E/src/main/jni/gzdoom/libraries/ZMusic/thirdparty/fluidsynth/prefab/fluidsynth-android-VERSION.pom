@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>net.volcanomobile.fluidsynth-android</groupId>
+  <artifactId>fluidsynth-android</artifactId>
+  <version>VERSION</version>
+  <packaging>aar</packaging>
+
+  <name>fluidsynth-android</name>
+  <description>The AAR for FluidSynth Android.</description>
+  <url>https://github.com/VolcanoMobile/fluidsynth-android</url>
+
+  <licenses>
+    <license>
+      <name>The FluidSynth License</name>
+      <url>https://github.com/VolcanoMobile/fluidsynth-android/blob/master/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Philippe Simons</name>
+      <email>philippe.simons@volcanomobile.net</email>
+      <organization>Volcano Mobile</organization>
+      <organizationUrl>https://volcanomobile.net/</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/VolcanoMobile/fluidsynth-android.git</connection>
+    <developerConnection>scm:git:ssh://github.com:VolcanoMobile/fluidsynth-android.git</developerConnection>
+    <url>https://github.com/VolcanoMobile/fluidsynth-android/tree/master</url>
+  </scm>
+</project>

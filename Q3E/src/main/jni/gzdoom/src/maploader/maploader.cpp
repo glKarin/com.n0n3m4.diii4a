@@ -500,7 +500,7 @@ void MapLoader::LoadGLZSegs (FileReader &data, int type)
 
 			if (partner != 0xffffffffu && partner >= Level->segs.Size())
 			{
-				I_Error("partner seg index out of range for subsector %d, seg %d", i, j);
+				I_Error("partner seg index out of range for subsector %d, seg %zd", i, j);
 			}
 
 			if (type >= 2)

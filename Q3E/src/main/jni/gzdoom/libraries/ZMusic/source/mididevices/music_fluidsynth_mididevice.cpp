@@ -225,7 +225,9 @@ FluidSynthMIDIDevice::FluidSynthMIDIDevice(int samplerate, std::vector<std::stri
 		return;
 	}
 
+#if !defined(__ANDROID__) //karin: TODO !!!error!!!
 	delete_fluid_settings(FluidSettings);
+#endif
 	delete_fluid_synth(FluidSynth);
 	FluidSynth = nullptr;
 	FluidSettings = nullptr;

@@ -295,6 +295,50 @@ public class Q3EGameHelper
         }
     }
 
+    private boolean ExtractCopy(String assetFolderPath, String systemFolderPath, boolean overwrite, String...assetPaths)
+    {
+        InputStream bis = null;
+        FileOutputStream fileoutputstream = null;
+
+        try
+        {
+            Q3EUtils.mkdir(systemFolderPath, true);
+
+            for (String assetPath : assetPaths)
+            {
+                String sourcePath = assetFolderPath + "/" + assetPath;
+                bis = m_context.getAssets().open(sourcePath);
+
+                String entryName = systemFolderPath + "/" + assetPath;
+                File file = new File(entryName);
+
+                if(!overwrite && file.exists())
+                    continue;
+
+                Q3EUtils.mkdir(file.getParent(), true);
+
+                fileoutputstream = new FileOutputStream(entryName);
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying " + sourcePath + " to " + entryName);
+                Q3EUtils.Copy(fileoutputstream, bis, 4096);
+                fileoutputstream.close();
+                fileoutputstream = null;
+                bis.close();
+                bis = null;
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            Q3EUtils.Close(fileoutputstream);
+            Q3EUtils.Close(bis);
+        }
+    }
+
     private boolean ExtractZip(String assetPath, String systemFolderPath, boolean overwrite)
     {
         InputStream bis = null;
@@ -438,17 +482,21 @@ public class Q3EGameHelper
         final String versionFile = destname + "/idtech4amm.version";
         final String version = Q3EGlobals.GZDOOM_VERSION;
         final String name = "GZDOOM game resource";
+        final String assetFolder = "pak/gzdoom";
         final String[] files = {
-                "pak/gzdoom/brightmaps.pk3",
-                "pak/gzdoom/game_support.pk3",
-                "pak/gzdoom/game_widescreen_gfx.pk3",
-                "pak/gzdoom/gzdoom.pk3",
-                "pak/gzdoom/lights.pk3"
+                "brightmaps.pk3",
+                "game_support.pk3",
+                "game_widescreen_gfx.pk3",
+                "gzdoom.pk3",
+                "lights.pk3",
+                "soundfonts/gzdoom.sf2",
+                "fm_banks/GENMIDI.GS.wopl",
+                "fm_banks/gs-by-papiezak-and-sneakernets.wopn",
         };
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
-        if(ExtractCopy(destname, overwrite, files))
+        if(ExtractCopy(assetFolder, destname, overwrite, files))
         {
             if (overwrite)
             {

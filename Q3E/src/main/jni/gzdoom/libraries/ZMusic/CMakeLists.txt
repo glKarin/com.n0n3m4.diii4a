@@ -1,6 +1,8 @@
 cmake_minimum_required( VERSION 2.8.7 )
 project(ZMusic)
 
+add_subdirectory(thirdparty/fluidsynth)
+
 set(ZMUSIC_VERSION_MAJOR 1)
 set(ZMUSIC_VERSION_MINOR 1)
 set(ZMUSIC_VERSION_PATCH 0)
