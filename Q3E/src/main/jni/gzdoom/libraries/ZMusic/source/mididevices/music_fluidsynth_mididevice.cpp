@@ -225,7 +225,7 @@ FluidSynthMIDIDevice::FluidSynthMIDIDevice(int samplerate, std::vector<std::stri
 		return;
 	}
 
-#if !defined(__ANDROID__) //karin: TODO !!!error!!!
+#if 1 // !defined(__ANDROID__) //karin: TODO !!!error!!!
 	delete_fluid_settings(FluidSettings);
 #endif
 	delete_fluid_synth(FluidSynth);
@@ -536,7 +536,7 @@ DYN_FLUID_SYM(fluid_synth_set_reverb);
 DYN_FLUID_SYM(fluid_synth_set_chorus);
 DYN_FLUID_SYM(fluid_synth_sysex);
 
-#ifdef __ANDROID__ //karin: OpenAL library path
+#ifdef __ANDROID__ //karin: set native library path
 std::string DLL_Path = "";
 void ZMusic_SetDLLPath(const char *path)
 {
@@ -557,7 +557,7 @@ bool FluidSynthMIDIDevice::LoadFluidSynth(const char *fluid_lib)
 			return true;
 	}
 
-#ifdef __ANDROID__ //karin: OpenAL library path
+#ifdef __ANDROID__ //karin: fluidsynth library path
 	std::string fluidsynth = DLL_Path;
 	fluidsynth += "/libfluidsynth.so";
 	if(!FluidSynthModule.Load({fluidsynth.c_str()}))
