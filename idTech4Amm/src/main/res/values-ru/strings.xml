@@ -29,7 +29,7 @@
     <string name="prey_preybase">Prey</string>
     <string name="user_mod">Свой мод</string>
     <string name="input_your_mod_folder_name">Имя папки вашего мода</string>
-    <string name="gamelib">GameLib</string>
+    <string name="gamelib">Библиотека игры</string>
     <string name="multi_threading">Многопоточность</string>
     <string name="light_model_cvar_harm_r_lightmodel">Выбрать модель освещения(harm_r_lightModel)</string>
     <string name="phong">Phong</string>
@@ -64,7 +64,7 @@
     <string name="top_right_corner">Верхний правый угол</string>
     <string name="bottom_left_corner">Нижний левый угол</string>
     <string name="bottom_right_corner">Нижний правый угол</string>
-    <string name="multitouch_shoot_left_mouse_button_click_on_a_second_touch">Мультисенсор(щелчок левой кнопкой мыши при втором касании)</string>
+    <string name="multitouch_shoot_left_mouse_button_click_on_a_second_touch">Мультисенсор(щелчок левой кнопкой мыши при повторном касании)</string>
     <string name="screen_resolution">Разрешение экрана:</string>
     <string name="normal_1x">Стандартное (1x)</string>
     <string name="half_0_5x">Половина (0.5x)</string>
@@ -77,11 +77,11 @@
     <string name="_4x">4x</string>
     <string name="_16x">16x</string>
     <string name="color_bits">Настройка цвета</string>
-    <string name="_32bits">32Bits</string>
-    <string name="_16bits_rgb565">16Bits(RGB565)</string>
-    <string name="_16bits_rgba4444">16Bits(RGBA4444)</string>
-    <string name="_16bits_rgba5551">16Bits(RGBA5551)</string>
-    <string name="_32bits_rgba1010102">32Bits(RGBA1010102)</string>
+    <string name="_32bits">32Бита</string>
+    <string name="_16bits_rgb565">16Бит(RGB565)</string>
+    <string name="_16bits_rgba4444">16Бит(RGBA4444)</string>
+    <string name="_16bits_rgba5551">16Бит(RGBA5551)</string>
+    <string name="_32bits_rgba1010102">32Бита(RGBA1010102)</string>
     <string name="doom_3">DOOM 3</string>
     <string name="quake_4">Quake 4</string>
     <string name="quake_1">Quake 1</string>
@@ -128,11 +128,11 @@
     <string name="control_game_state_when_application_in_background">Управление состоянием игры, когда приложение находится в фоновом режиме</string>
     <string name="map_back_key">Клавиша возврата</string>
     <string name="setup_back_key_function">Настройка клавиши «Назад»</string>
-    <string name="redirect_output_to_file">Сохранить логи</string>
+    <string name="redirect_output_to_file">Сохранять логи</string>
     <string name="save_game_runtime_output_log_to_stdout_txt_stderr_txt">Сохранить журнал логов в stdout.txt/stderr.txt</string>
-    <string name="function_key_toolbar">Панель функциональных клавиш</string>
+    <string name="function_key_toolbar">Панель клавиш</string>
     <string name="show_function_key_toolbar_when_open_input_method">Показать панель функциональных клавиш при открытии клавиатуры</string>
-    <string name="function_key_toolbar_offset">Смещение панели функциональной клавиши</string>
+    <string name="function_key_toolbar_offset">Смещение панели клавиши</string>
     <string name="setup_function_key_toolbar_position_offset">Настройка смещения положения панели инструментов функциональной клавиши</string>
     <string name="general">Прочее</string>
     <string name="launcher_orientation">Ориентация лаунчера</string>
@@ -189,7 +189,7 @@
     <string name="language">Язык/Language</string>
     <string name="setup_launcher_language">Выбрать язык лаунчера</string>
     <string name="be_available_on_reboot_the_next_time">Язык будет обновлен после перезагрузки лаунчера</string>
-    <string name="bot_q3_bot_support_in_mp_game">Quake4 bot (SABot-a9 mod)</string>
+    <string name="bot_q3_bot_support_in_mp_game">Боты Quake 4 (мод SABot-a9)</string>
     <string name="mp_game_map_aas_files">Файлы игры Quake4 в формате "aas"</string>
     <string name="game_patch_resource">Ресурсы игрового патча</string>
     <string name="extract_all">Извлечь все</string>
@@ -211,7 +211,7 @@
     <string name="choose_restore_preferences_file">выберите файл</string>
     <string name="choose_folder">выбрать папку</string>
     <string name="update_">Обновление:</string>
-    <string name="quake_4_level">Quake 4 Level</string>
+    <string name="quake_4_level">Уровень Quake 4</string>
     <string name="startgame">старт игры</string>
     <string name="file_can_not_access">Файл не может получить доступ:</string>
     <string name="game_library">библиотека игры</string>
@@ -233,10 +233,10 @@
     <string name="load_external_game_library">загрузить внешнюю игровую библиотеку</string>
     <string name="input_external_library_name">Введите имя внешней библиотеки</string>
     <string name="must_input_new_library_name">Необходимо ввести новое имя библиотеки!</string>
-    <string name="e_g">e.g.</string>
+    <string name="e_g">прим.</string>
     <string name="add_game_library_file_success">Файл библиотеки игры успешно добавлен</string>
     <string name="add_game_library_file_fail">Не удалось добавить файл библиотеки игры!</string>
-    <string name="find_game_library_in_game_data_directory">Найти игровую библиотеку в каталоге данных игры</string>
+    <string name="find_game_library_in_game_data_directory">Найти игровую библиотеку в каталоге игры</string>
     <string name="if_game_library_file_named_gameaarch64_so_or_libgameaarch64_so_on_arm64_device_or_named_gamearm_so_or_libgamearm_so_on_arm32_device_found_at_game_working_directory_fs_game_folder_will_load_it_instead_of_default_game_library_of_apk">Файл библиотеки игры (с названием `gameaarch64.so` или `libgameaarch64.so` на устройстве arm64. И с названием `gamearm.so` или `libgamearm.so` на устройстве arm32) находится в `Рабочем каталоге игры`/`fs_game` папка, загрузит ее вместо игровой библиотеки apk по умолчанию.</string>
     <string name="translators">Переводчики</string>
     <string name="note">Примечание</string>
@@ -253,8 +253,8 @@
     <string name="extract_source">Извлечь ресурсы</string>
     <string name="tips">Советы</string>
     <string name="license">Лицензия</string>
-    <string name="maximum_fps_limit_0_unlimited">Максимальный предел FPS (harm_r_maxFps)</string>
-    <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (0 = неограниченный)</string>
+    <string name="maximum_fps_limit_0_unlimited">Максимальный FPS(0 = неограничен)(harm_r_maxFps)</string>
+    <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (0 = неограничен)</string>
     <string name="edit_cvar">Редактор CVar</string>
     <string name="cvar_editor">CVar редактор</string>
     <string name="skip_intro">Пропустить вступительный ролик</string>
@@ -311,7 +311,7 @@
     <string name="pid">PID</string>
     <string name="get_application_pid">Получить PID приложения</string>
     <string name="open_logcat">Открыть лог-код</string>
-    <string name="view_logcat">Показать лог-код</string>
+    <string name="view_logcat">Показать лог-код приложения</string>
     <string name="open_documents">Платформа доступа к хранилищу Android</string>
     <string name="open_system_file_browser">Открыть платформу доступа к хранилищу Android</string>
     <string name="application_pid">"Приложение PID: "</string>
@@ -324,6 +324,6 @@
     <string name="setup_cvar_r_aspectratio_manually">Настройка cvar `r_aspectRatio` вручную</string>
     <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">Принудительная настройка cvar `r_aspectRatio` на -1(Использование реального соотношения сторон экрана)</string>
     <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">Автоматическая настройка cvar `r_aspectRatio` на 0,1,2(Преобразовать соотношение сторон экрана в 4:3/16:9/16:10)</string>
-    <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">Shadow mapping alpha(harm_r_shadowMapAlpha):</string>
+    <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">Альфа канал наложения теней(harm_r_shadowMapAlpha):</string>
 
 </resources>
