@@ -658,6 +658,11 @@ public class Q3EInterface
 		return isD3 || isD3BFG || isQ2 || isQ1 || isQ3 || isRTCW || isTDM || isDOOM;
 	}
 
+	public boolean IsStandaloneGame()
+	{
+		return isTDM || isDOOM;
+	}
+
 	public void SetAppStoragePath(Context context)
 	{
 		Q3EUtils.q3ei.app_storage_path = Q3EUtils.GetAppStoragePath(context, null);
