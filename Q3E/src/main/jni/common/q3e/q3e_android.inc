@@ -107,6 +107,7 @@ extern void Q3E_MotionEvent(float dx, float dy);
 #define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
 #define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib"
 #define _ANDROID_GAME_DATA_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME
+#define _ANDROID_APP_HOME_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME "/files"
 
 // Android AudioTrack
 void (*initAudio)(void *buffer, int size);
@@ -179,6 +180,9 @@ Q3Ebool mouse_available = Q3E_FALSE;
 
 // Game data directory.
 char *game_data_dir = NULL;
+
+// Application home directory.
+char *app_home_dir = NULL;
 
 // Command line arguments
 static int q3e_argc = 0;
@@ -348,6 +352,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("    No handle signals: %d\n", no_handle_signals);
     printf("    Using mouse: %d\n", mouse_available);
     printf("    Game data directory: %s\n", game_data_dir);
+    printf("    Application home directory: %s\n", app_home_dir);
     printf("    Refresh rate: %d\n", refresh_rate);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
@@ -460,8 +465,9 @@ void Q3E_SetInitialContext(const void *context)
     gl_format = ptr->openGL_format;
     gl_msaa = ptr->openGL_msaa;
 
-    native_library_dir = strdup(ptr->nativeLibraryDir);
-    game_data_dir = strdup(ptr->gameDataDir);
+    native_library_dir = strdup(ptr->nativeLibraryDir ? ptr->nativeLibraryDir : "");
+    game_data_dir = strdup(ptr->gameDataDir ? ptr->gameDataDir : "");
+    app_home_dir = strdup(ptr->appHomeDir ? ptr->appHomeDir : "");
     redirect_output_to_file = ptr->redirectOutputToFile ? Q3E_TRUE : Q3E_FALSE;
     no_handle_signals = ptr->noHandleSignals ? Q3E_TRUE : Q3E_FALSE;
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? Q3E_TRUE : Q3E_FALSE;
@@ -572,6 +578,11 @@ const char * Sys_DLLDefaultPath(void)
 const char * Sys_GameDataDefaultPath(void)
 {
     return game_data_dir ? game_data_dir : _ANDROID_GAME_DATA_PATH;
+}
+
+const char * Sys_ApplicationHomePath(void)
+{
+    return app_home_dir ? app_home_dir : _ANDROID_APP_HOME_PATH;
 }
 
 void Android_OpenKeyboard(void)

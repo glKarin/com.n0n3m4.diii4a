@@ -839,9 +839,12 @@ FString ExpandEnvVars(const char *searchpathstring)
 			{
 #ifdef __ANDROID__ //karin: convert Android $HOME -> game data directory
 				extern const char * Sys_GameDataDefaultPath(void);
+				extern const char * Sys_ApplicationHomePath(void);
 				const char *varvalue;
 				if (varname.CompareNoCase("HOME") == 0)
 					varvalue = Sys_GameDataDefaultPath();
+                else if(varname.CompareNoCase("DOOMWADDIR") == 0)
+                    varvalue = Sys_ApplicationHomePath();
 				else
 					varvalue = getenv(varname.GetChars());
 #else
@@ -895,6 +898,8 @@ FString NicePath(const char *path)
 	}
 	if (*path != '~')
 	{
+		FString str = ExpandEnvVars(path);
+		printf("NicePath1: %s -> %s\n", path, str.GetChars());
 		return ExpandEnvVars(path);
 	}
 
@@ -918,6 +923,8 @@ FString NicePath(const char *path)
 	}
 	if (pwstruct == NULL)
 	{
+		FString str = ExpandEnvVars(path);
+		printf("NicePath2: %s -> %s\n", path, str.GetChars());
 		return ExpandEnvVars(path);
 	}
 	FString where(pwstruct->pw_dir);
@@ -925,6 +932,7 @@ FString NicePath(const char *path)
 	{
 		where += ExpandEnvVars(slash);
 	}
+	printf("NicePath: %s -> %s\n", path, where.GetChars());
 	return where;
 #endif
 }

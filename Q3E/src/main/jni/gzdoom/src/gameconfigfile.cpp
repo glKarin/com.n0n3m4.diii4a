@@ -121,12 +121,28 @@ FGameConfigFile::FGameConfigFile ()
 		// Arch Linux likes them in /usr/share/doom
 		// Debian likes them in /usr/share/games/doom
 		// I assume other distributions don't do anything radically different
+#if !defined(__ANDROID__) //karin: not unix path
 		SetValueForKey ("Path", "/usr/local/share/doom", true);
 		SetValueForKey ("Path", "/usr/local/share/games/doom", true);
 		SetValueForKey ("Path", "/usr/share/doom", true);
 		SetValueForKey ("Path", "/usr/share/games/doom", true);
+#else
+		SetValueForKey ("Path", "$HOME", true);
+		SetValueForKey ("Path", "$PROGDIR", true);
+		SetValueForKey ("Path", "$DOOMWADDIR/" GAME_DIR, true);
+		SetValueForKey ("Path", "$DOOMWADDIR/.local/share/games/doom", true);
+#endif
 #endif
 	}
+#ifdef __ANDROID__ //karin: keep internal path
+	SetSection ("IWADSearch.Directories");
+	SetValueForKeyIfNotExists("Path", "$HOME/" GAME_DIR);
+	SetValueForKeyIfNotExists ("Path", "$HOME/.local/share/games/doom");
+	SetValueForKeyIfNotExists ("Path", "$HOME");
+	SetValueForKeyIfNotExists ("Path", "$PROGDIR");
+	SetValueForKeyIfNotExists ("Path", "$DOOMWADDIR/" GAME_DIR);
+	SetValueForKeyIfNotExists ("Path", "$DOOMWADDIR/.local/share/games/doom");
+#endif
 
 	// Set default search paths if none present
 	if (!SetSection ("FileSearch.Directories"))
@@ -137,22 +153,34 @@ FGameConfigFile::FGameConfigFile ()
 		SetValueForKey ("Path", user_app_support.GetChars(), true);
 		SetValueForKey ("Path", "$PROGDIR", true);
 		SetValueForKey ("Path", local_app_support.GetChars(), true);
-#elif defined(__ANDROID__) //karin: game directory
-		SetValueForKey ("Path", "$HOME/" GAME_DIR, true);
-		SetValueForKey ("Path", "$HOME/.local/share/games/doom", true);
 #elif !defined(__unix__)
 		SetValueForKey ("Path", "$PROGDIR", true);
 #else
 		SetValueForKey ("Path", "$HOME/" GAME_DIR, true);
 		SetValueForKey ("Path", "$HOME/.local/share/games/doom", true);
+#if !defined(__ANDROID__) //karin: not unix path
 		SetValueForKey ("Path", SHARE_DIR, true);
 		SetValueForKey ("Path", "/usr/local/share/doom", true);
 		SetValueForKey ("Path", "/usr/local/share/games/doom", true);
 		SetValueForKey ("Path", "/usr/share/doom", true);
 		SetValueForKey ("Path", "/usr/share/games/doom", true);
+#else
+		SetValueForKey ("Path", "$PROGDIR", true);
+		SetValueForKey ("Path", "$DOOMWADDIR/" GAME_DIR, true);
+		SetValueForKey ("Path", "$DOOMWADDIR/.local/share/games/doom", true);
+#endif
 #endif
 		SetValueForKey ("Path", "$DOOMWADDIR", true);
 	}
+#ifdef __ANDROID__ //karin: keep internal path
+	SetSection ("FileSearch.Directories");
+	SetValueForKeyIfNotExists ("Path", "$HOME/" GAME_DIR);
+	SetValueForKeyIfNotExists ("Path", "$HOME/.local/share/games/doom");
+	SetValueForKeyIfNotExists ("Path", "$PROGDIR");
+	SetValueForKeyIfNotExists ("Path", "$DOOMWADDIR/" GAME_DIR);
+	SetValueForKeyIfNotExists ("Path", "$DOOMWADDIR/.local/share/games/doom");
+	SetValueForKeyIfNotExists ("Path", "$DOOMWADDIR");
+#endif
 
 	// Set default search paths if none present
 	if (!SetSection("SoundfontSearch.Directories"))
@@ -167,11 +195,6 @@ FGameConfigFile::FGameConfigFile ()
 		SetValueForKey("Path", "$PROGDIR/fm_banks", true);
 		SetValueForKey("Path", (local_app_support + "/soundfonts").GetChars(), true);
 		SetValueForKey("Path", (local_app_support + "/fm_banks").GetChars(), true);
-#elif defined(__ANDROID__) //karin: soundfont directory
-		SetValueForKey("Path", "$HOME/" GAME_DIR "/soundfonts", true);
-		SetValueForKey("Path", "$HOME/" GAME_DIR "/fm_banks", true);
-		SetValueForKey("Path", "$HOME/.local/share/games/doom/soundfonts", true);
-		SetValueForKey("Path", "$HOME/.local/share/games/doom/fm_banks", true);
 #elif !defined(__unix__)
 		SetValueForKey("Path", "$PROGDIR/soundfonts", true);
 		SetValueForKey("Path", "$PROGDIR/fm_banks", true);
@@ -180,6 +203,7 @@ FGameConfigFile::FGameConfigFile ()
 		SetValueForKey("Path", "$HOME/" GAME_DIR "/fm_banks", true);
 		SetValueForKey("Path", "$HOME/.local/share/games/doom/soundfonts", true);
 		SetValueForKey("Path", "$HOME/.local/share/games/doom/fm_banks", true);
+#if !defined(__ANDROID__) //karin: not unix path
 		SetValueForKey("Path", "/usr/local/share/doom/soundfonts", true);
 		SetValueForKey("Path", "/usr/local/share/doom/fm_banks", true);
 		SetValueForKey("Path", "/usr/local/share/games/doom/soundfonts", true);
@@ -188,8 +212,29 @@ FGameConfigFile::FGameConfigFile ()
 		SetValueForKey("Path", "/usr/share/doom/fm_banks", true);
 		SetValueForKey("Path", "/usr/share/games/doom/soundfonts", true);
 		SetValueForKey("Path", "/usr/share/games/doom/fm_banks", true);
+#else
+		SetValueForKey("Path", "$PROGDIR/soundfonts", true);
+		SetValueForKey("Path", "$PROGDIR/fm_banks", true);
+		SetValueForKey("Path", "$DOOMWADDIR/" GAME_DIR "/soundfonts", true);
+		SetValueForKey("Path", "$DOOMWADDIR/" GAME_DIR "/fm_banks", true);
+		SetValueForKey("Path", "$DOOMWADDIR/.local/share/games/doom/soundfonts", true);
+		SetValueForKey("Path", "$DOOMWADDIR/.local/share/games/doom/fm_banks", true);
+#endif
 #endif
 	}
+#ifdef __ANDROID__ //karin: keep internal path
+	SetSection("SoundfontSearch.Directories");
+	SetValueForKeyIfNotExists("Path", "$HOME/" GAME_DIR "/soundfonts");
+	SetValueForKeyIfNotExists("Path", "$HOME/" GAME_DIR "/fm_banks");
+	SetValueForKeyIfNotExists("Path", "$HOME/.local/share/games/doom/soundfonts");
+	SetValueForKeyIfNotExists("Path", "$HOME/.local/share/games/doom/fm_banks");
+	SetValueForKeyIfNotExists("Path", "$PROGDIR/soundfonts");
+	SetValueForKeyIfNotExists("Path", "$PROGDIR/fm_banks");
+	SetValueForKeyIfNotExists("Path", "$DOOMWADDIR/" GAME_DIR "/soundfonts");
+	SetValueForKeyIfNotExists("Path", "$DOOMWADDIR/" GAME_DIR "/fm_banks");
+	SetValueForKeyIfNotExists("Path", "$DOOMWADDIR/.local/share/games/doom/soundfonts");
+	SetValueForKeyIfNotExists("Path", "$DOOMWADDIR/.local/share/games/doom/fm_banks");
+#endif
 
 	// Add some self-documentation.
 	SetSectionNote("IWADSearch.Directories",

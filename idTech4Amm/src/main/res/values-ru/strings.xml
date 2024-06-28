@@ -70,7 +70,6 @@
     <string name="half_0_5x">Половина (0.5x)</string>
     <string name="double_2x">Двойное (2x)</string>
     <string name="custom">Настроить вручную</string>
-    <string name="custom2">Настроить</string>
     <string name="_0_auto_using_screen_aspect_ratio">(0 - Автонастройка соотношения сторон экрана)</string>
     <string name="msaa_warning_tegra_doesn_t_support_it">MSAA: (Внимание, Tegra не поддерживает)</string>
     <string name="_1x_none">1x (Нет)</string>

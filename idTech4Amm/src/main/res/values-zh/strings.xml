@@ -69,7 +69,6 @@
     <string name="half_0_5x">一半(0.5x)</string>
     <string name="double_2x">双倍(2x)</string>
     <string name="custom">自定义</string>
-    <string name="custom2">自定义:</string>
     <string name="_0_auto_using_screen_aspect_ratio">(0 - 自动使用屏幕比例)</string>
     <string name="msaa_warning_tegra_doesn_t_support_it">抗锯齿: (警告, Tegra不支持)</string>
     <string name="_1x_none">1倍(禁用)</string>

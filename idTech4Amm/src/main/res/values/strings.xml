@@ -72,7 +72,6 @@
     <string name="half_0_5x">Half (0.5x)</string>
     <string name="double_2x">Double (2x)</string>
     <string name="custom">Custom</string>
-    <string name="custom2">Custom2</string>
     <string name="_0_auto_using_screen_aspect_ratio">(0 - Auto using screen aspect ratio)</string>
     <string name="msaa_warning_tegra_doesn_t_support_it">MSAA: (Warning, Tegra doesn\'t support it)</string>
     <string name="_1x_none">1x (None)</string>

@@ -950,3 +950,30 @@ void FConfigFile::SetSectionNote(FConfigSection *section, const char *note)
 		section->Note = note;
 	}
 }
+
+#ifdef __ANDROID__ //karin: setup config if key and value not exists
+void FConfigFile::SetValueForKeyIfNotExists(const char *key, const char *value)
+{
+	if (CurrentSection != NULL)
+	{
+		FConfigEntry *entry;
+
+		entry = FindEntry (CurrentSection, key);
+
+		if(!entry)
+		{
+			NewConfigEntry (CurrentSection, key, value);
+			return;
+		}
+
+		while(entry)
+		{
+			if(strcmp(entry->Value, value) == 0)
+				return;
+			entry = entry->Next;
+		}
+
+		NewConfigEntry (CurrentSection, key, value);
+	}
+}
+#endif
