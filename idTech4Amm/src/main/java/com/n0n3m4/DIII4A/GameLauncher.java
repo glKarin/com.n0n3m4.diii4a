@@ -231,7 +231,7 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_auto_quick_load, isChecked)
 						.commit();
-				if (isChecked && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech()))
+				if (isChecked && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW))
 					SetParam_temp("loadGame", "QuickSave");
 				else
 					RemoveParam_temp("loadGame");
@@ -344,7 +344,7 @@ public class GameLauncher extends Activity
 			int rgId = radioGroup.getId();
 			if (rgId == R.id.rg_scrres)
 			{
-				GameLauncher.this.UpdateCustomerResulotion(id == R.id.res_custom);
+				GameLauncher.this.UpdateCustomerResolution(id == R.id.res_custom);
 				GameLauncher.this.UpdateResolutionScaleScheme(id);
 				index = GetCheckboxIndex(radioGroup, id);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -581,7 +581,7 @@ public class GameLauncher extends Activity
 		{
 			boolean cond = enabled && V.edt_cmdline.isInputMethodTarget() && !IsCmdUpdateLocked();
 			if (cond)
-				updatehacktings();
+				updatehacktings(Q3EUtils.q3ei.IsIdTech4());
 		}
 
 		public void afterTextChanged(Editable s)
@@ -757,98 +757,104 @@ public class GameLauncher extends Activity
         SetProp(name, KidTechCommand.btostr(val));
     }
 
-    public void updatehacktings()
+    public void updatehacktings(boolean all)
     {
     	LockCmdUpdate();
-        //k
-        V.usedxt.setChecked(getProp("r_useDXT", false));
-        V.useetc1.setChecked(getProp("r_useETC1", false));
-        V.useetc1cache.setChecked(getProp("r_useETC1cache", false));
-        V.nolight.setChecked(getProp("r_noLight", false));
+		String str;
 
-        //k fill commandline
-        if (!IsProp("r_useDXT")) setProp("r_useDXT", false);
-        if (!IsProp("r_useETC1")) setProp("r_useETC1", false);
-        if (!IsProp("r_useETC1cache")) setProp("r_useETC1cache", false);
-        if (!IsProp("r_noLight")) setProp("r_noLight", false);
-
-        String str = GetProp("harm_r_clearVertexBuffer");
-        int index = Q3EUtils.parseInt_s(str, 2);
-        SelectCheckbox(V.r_harmclearvertexbuffer, index);
-        if (!IsProp("harm_r_clearVertexBuffer")) SetProp("harm_r_clearVertexBuffer", 2);
-
-        str = GetProp("harm_r_lightModel");
-        index = 0;
-        if (str != null)
-        {
-            if ("blinn_phong".equalsIgnoreCase(str))
-                index = 1;
-        }
-        SelectCheckbox(V.rg_harm_r_lightModel, index);
-        if (!IsProp("harm_r_lightModel")) SetProp("harm_r_lightModel", "phong");
-        str = GetProp("harm_r_specularExponent");
-        if (null != str)
-            V.edt_harm_r_specularExponent.setText(str);
-        if (!IsProp("harm_r_specularExponent")) SetProp("harm_r_specularExponent", "4.0");
-
-        str = GetProp("s_driver");
-        index = 0;
-        if (str != null)
-        {
-            if ("OpenSLES".equalsIgnoreCase(str))
-                index = 1;
-        }
-        SelectCheckbox(V.rg_s_driver, index);
-
-		str = GetProp("harm_r_maxFps");
-		if (null != str)
-			V.edt_harm_r_maxFps.setText(str);
-		if (!IsProp("harm_r_maxFps")) SetProp("harm_r_maxFps", "0");
-
-		str = GetProp("r_useShadowMapping");
-		index = 0;
-		if (str != null)
+		if(all) // only for idTech4 games
 		{
-			if ("1".equalsIgnoreCase(str))
-				index = 1;
+			//k
+			V.usedxt.setChecked(getProp("r_useDXT", false));
+			V.useetc1.setChecked(getProp("r_useETC1", false));
+			V.useetc1cache.setChecked(getProp("r_useETC1cache", false));
+			V.nolight.setChecked(getProp("r_noLight", false));
+
+			//k fill commandline
+			if (!IsProp("r_useDXT")) setProp("r_useDXT", false);
+			if (!IsProp("r_useETC1")) setProp("r_useETC1", false);
+			if (!IsProp("r_useETC1cache")) setProp("r_useETC1cache", false);
+			if (!IsProp("r_noLight")) setProp("r_noLight", false);
+
+			str = GetProp("harm_r_clearVertexBuffer");
+			int index = Q3EUtils.parseInt_s(str, 2);
+			SelectCheckbox(V.r_harmclearvertexbuffer, index);
+			if (!IsProp("harm_r_clearVertexBuffer")) SetProp("harm_r_clearVertexBuffer", 2);
+
+			str = GetProp("harm_r_lightModel");
+			index = 0;
+			if (str != null)
+			{
+				if ("blinn_phong".equalsIgnoreCase(str))
+					index = 1;
+			}
+			SelectCheckbox(V.rg_harm_r_lightModel, index);
+			if (!IsProp("harm_r_lightModel")) SetProp("harm_r_lightModel", "phong");
+			str = GetProp("harm_r_specularExponent");
+			if (null != str)
+				V.edt_harm_r_specularExponent.setText(str);
+			if (!IsProp("harm_r_specularExponent")) SetProp("harm_r_specularExponent", "4.0");
+
+			str = GetProp("s_driver");
+			index = 0;
+			if (str != null)
+			{
+				if ("OpenSLES".equalsIgnoreCase(str))
+					index = 1;
+			}
+			SelectCheckbox(V.rg_s_driver, index);
+
+			str = GetProp("harm_r_maxFps");
+			if (null != str)
+				V.edt_harm_r_maxFps.setText(str);
+			if (!IsProp("harm_r_maxFps")) SetProp("harm_r_maxFps", "0");
+
+			str = GetProp("r_useShadowMapping");
+			index = 0;
+			if (str != null)
+			{
+				if ("1".equalsIgnoreCase(str))
+					index = 1;
+			}
+			SelectCheckbox(V.rg_harm_r_shadow, index);
+			if (!IsProp("r_useShadowMapping")) SetProp("r_useShadowMapping", "0");
+			str = GetProp("harm_r_shadowMapAlpha");
+			if (null != str)
+				V.edt_harm_r_shadowMapAlpha.setText(str);
+			if (!IsProp("harm_r_shadowMapAlpha")) SetProp("harm_r_shadowMapAlpha", "0.5");
+
+			V.cb_stencilShadowTranslucent.setChecked(getProp("harm_r_stencilShadowTranslucent", false));
+			if (!IsProp("harm_r_stencilShadowTranslucent")) setProp("harm_r_stencilShadowTranslucent", false);
+			str = GetProp("harm_r_stencilShadowAlpha");
+			if (null != str)
+				V.edt_harm_r_stencilShadowAlpha.setText(str);
+			if (!IsProp("harm_r_stencilShadowAlpha")) SetProp("harm_r_stencilShadowAlpha", "0.5");
+
+			V.cb_stencilShadowSoft.setChecked(getProp("harm_r_stencilShadowSoft", false));
+			if (!IsProp("harm_r_stencilShadowSoft")) setProp("harm_r_stencilShadowTranslucent", false);
+			V.cb_stencilShadowCombine.setChecked(getProp("harm_r_stencilShadowCombine", false));
+			if (!IsProp("harm_r_stencilShadowCombine")) setProp("harm_r_stencilShadowCombine", false);
+
+			V.cb_s_useOpenAL.setChecked(getProp("s_useOpenAL", false));
+			if (!IsProp("s_useOpenAL"))
+			{
+				setProp("s_useOpenAL", false);
+				V.cb_s_useEAXReverb.setChecked(false);
+				setProp("s_useEAXReverb", false);
+			}
+			else
+			{
+				V.cb_s_useEAXReverb.setChecked(getProp("s_useEAXReverb", false));
+				if (!IsProp("s_useEAXReverb")) setProp("s_useEAXReverb", false);
+			}
+
+			str = GetProp("harm_r_autoAspectRatio");
+			index = Q3EUtils.parseInt_s(str, 1);
+			SelectCheckbox(V.rg_r_autoAspectRatio, index);
+			if (!IsProp("harm_r_autoAspectRatio")) SetProp("harm_r_autoAspectRatio", 1);
 		}
-		SelectCheckbox(V.rg_harm_r_shadow, index);
-		if (!IsProp("r_useShadowMapping")) SetProp("r_useShadowMapping", "0");
-		str = GetProp("harm_r_shadowMapAlpha");
-		if (null != str)
-			V.edt_harm_r_shadowMapAlpha.setText(str);
-		if (!IsProp("harm_r_shadowMapAlpha")) SetProp("harm_r_shadowMapAlpha", "0.5");
 
-		V.cb_stencilShadowTranslucent.setChecked(getProp("harm_r_stencilShadowTranslucent", false));
-		if (!IsProp("harm_r_stencilShadowTranslucent")) setProp("harm_r_stencilShadowTranslucent", false);
-		str = GetProp("harm_r_stencilShadowAlpha");
-		if (null != str)
-			V.edt_harm_r_stencilShadowAlpha.setText(str);
-		if (!IsProp("harm_r_stencilShadowAlpha")) SetProp("harm_r_stencilShadowAlpha", "0.5");
-
-		V.cb_stencilShadowSoft.setChecked(getProp("harm_r_stencilShadowSoft", false));
-		if (!IsProp("harm_r_stencilShadowSoft")) setProp("harm_r_stencilShadowTranslucent", false);
-		V.cb_stencilShadowCombine.setChecked(getProp("harm_r_stencilShadowCombine", false));
-		if (!IsProp("harm_r_stencilShadowCombine")) setProp("harm_r_stencilShadowCombine", false);
-
-		V.cb_s_useOpenAL.setChecked(getProp("s_useOpenAL", false));
-		if (!IsProp("s_useOpenAL"))
-		{
-			setProp("s_useOpenAL", false);
-			V.cb_s_useEAXReverb.setChecked(false);
-			setProp("s_useEAXReverb", false);
-		}
-		else
-		{
-			V.cb_s_useEAXReverb.setChecked(getProp("s_useEAXReverb", false));
-			if (!IsProp("s_useEAXReverb")) setProp("s_useEAXReverb", false);
-		}
-
-		str = GetProp("harm_r_autoAspectRatio");
-		index = Q3EUtils.parseInt_s(str, 1);
-		SelectCheckbox(V.rg_r_autoAspectRatio, index);
-		if (!IsProp("harm_r_autoAspectRatio")) SetProp("harm_r_autoAspectRatio", 1);
-
+		// game mods for every games
 		str = GetGameModFromCommand();
         if (str != null)
         {
@@ -876,8 +882,10 @@ public class GameLauncher extends Activity
         {
             SelectCheckbox(GetGameModRadioGroup(), -1);
         }
+
+		// graphics
 		int checkedRadioButtonId = V.rg_scrres.getCheckedRadioButtonId();
-		GameLauncher.this.UpdateCustomerResulotion(checkedRadioButtonId == R.id.res_custom);
+		GameLauncher.this.UpdateCustomerResolution(checkedRadioButtonId == R.id.res_custom);
 		GameLauncher.this.UpdateResolutionScaleScheme(checkedRadioButtonId);
 
 		UnlockCmdUpdate();
@@ -1240,7 +1248,7 @@ public class GameLauncher extends Activity
 			public void afterTextChanged(Editable s) { }
 		});
 
-        updatehacktings();
+        updatehacktings(Q3EUtils.q3ei.IsIdTech4());
 
 		AfterCreated();
     }
@@ -1820,16 +1828,16 @@ public class GameLauncher extends Activity
         dialog.show(getFragmentManager(), "DebugDialog");
     }
 
-    private void UpdateCustomerResulotion(boolean enabled)
+    private void UpdateCustomerResolution(boolean on)
     {
         LinearLayout layout = V.res_customlayout;
         final int count = layout.getChildCount();
         for (int i = 0; i < count; i++)
         {
-            layout.getChildAt(i).setEnabled(enabled);
+            layout.getChildAt(i).setEnabled(on);
         }
 
-        layout.setEnabled(enabled);
+        layout.setEnabled(on);
     }
 
     private void SetGameDLL(String val)
@@ -2266,7 +2274,7 @@ public class GameLauncher extends Activity
 		if(b)
 		{
 			V.edt_cmdline.addTextChangedListener(m_commandTextWatcher);
-			m_commandTextWatcher.Install(Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech2() || Q3EUtils.q3ei.IsIdTech3() || Q3EUtils.q3ei.IsTDMTech());
+			m_commandTextWatcher.Install(true);
 		}
 		else
 		{
