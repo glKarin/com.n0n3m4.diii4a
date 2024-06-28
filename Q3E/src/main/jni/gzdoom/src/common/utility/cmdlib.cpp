@@ -900,7 +900,7 @@ FString NicePath(const char *path)
 	{
 		FString str = ExpandEnvVars(path);
 		printf("NicePath1: %s -> %s\n", path, str.GetChars());
-		return ExpandEnvVars(path);
+		return str; // ExpandEnvVars(path);
 	}
 
 	passwd *pwstruct;
@@ -925,7 +925,7 @@ FString NicePath(const char *path)
 	{
 		FString str = ExpandEnvVars(path);
 		printf("NicePath2: %s -> %s\n", path, str.GetChars());
-		return ExpandEnvVars(path);
+		return str; // ExpandEnvVars(path);
 	}
 	FString where(pwstruct->pw_dir);
 	if (*slash != '\0')
