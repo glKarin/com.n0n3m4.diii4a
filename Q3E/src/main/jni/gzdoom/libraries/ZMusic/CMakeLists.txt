@@ -2,6 +2,8 @@ cmake_minimum_required( VERSION 2.8.7 )
 project(ZMusic)
 
 add_subdirectory(thirdparty/fluidsynth)
+add_subdirectory(thirdparty/libsndfile) # -1.2.2
+add_subdirectory(thirdparty/mpg123) # -1.28.2
 
 set(ZMUSIC_VERSION_MAJOR 1)
 set(ZMUSIC_VERSION_MINOR 1)

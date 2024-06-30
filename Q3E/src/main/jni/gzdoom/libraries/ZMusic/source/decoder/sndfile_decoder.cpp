@@ -47,7 +47,11 @@ FModule SndFileModule{"SndFile"};
 #elif defined(__APPLE__)
 #define SNDFILELIB "libsndfile.1.dylib"
 #else
+#ifdef __ANDROID__
+#define SNDFILELIB "libsndfile.so"
+#else
 #define SNDFILELIB "libsndfile.so.1"
+#endif
 #endif
 
 bool IsSndFilePresent()
@@ -61,8 +65,14 @@ bool IsSndFilePresent()
 	if (!done)
 	{
 		done = true;
+#ifdef __ANDROID__
+        extern std::string DLL_Path;
+		auto abspath = DLL_Path + "/" SNDFILELIB;
+		cached_result = SndFileModule.Load({abspath.c_str()});
+#else
 		auto abspath = FModule_GetProgDir() + "/" SNDFILELIB;
 		cached_result = SndFileModule.Load({abspath.c_str(), SNDFILELIB});
+#endif
 	}
 	return cached_result;
 #endif
