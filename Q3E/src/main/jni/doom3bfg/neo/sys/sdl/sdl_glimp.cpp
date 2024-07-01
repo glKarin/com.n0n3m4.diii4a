@@ -232,6 +232,12 @@ bool GLimp_Init( glimpParms_t parms )
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 
+#ifdef _GLES //karin: GLES using 3.0
+		glConfig.driverType = GLDRV_OPENGL_MESA;
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+		SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+		SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 0 );
+#else
 		// RB begin
 		if( r_useOpenGL32.GetInteger() > 0 )
 		{
@@ -253,6 +259,7 @@ bool GLimp_Init( glimpParms_t parms )
 			SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
 		}
 		// RB end
+#endif
 
 		// DG: set display num for fullscreen
 		int windowPos = SDL_WINDOWPOS_UNDEFINED;
