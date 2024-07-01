@@ -48,7 +48,7 @@ FModule MPG123Module{"MPG123"};
 #elif defined(__APPLE__)
 #define MPG123LIB "libmpg123.0.dylib"
 #else
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: libmpg123 on Android
 #define MPG123LIB "libmpg123.so"
 #else
 #define MPG123LIB "libmpg123.so.0"
@@ -66,7 +66,7 @@ bool IsMPG123Present()
 	if (!done)
 	{
 		done = true;
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: libmpg123 on Android
         extern std::string DLL_Path;
 		auto abspath = DLL_Path + "/" MPG123LIB;
 		cached_result = MPG123Module.Load({abspath.c_str()});

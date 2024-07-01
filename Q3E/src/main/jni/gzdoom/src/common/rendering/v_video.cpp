@@ -358,6 +358,15 @@ void V_InitScreenSize ()
 
 	if ( (i = Args->CheckValue ("-height")) )
 		height = atoi (i);
+#ifdef __ANDROID__ //karin: setup fixed screen size
+	extern int screen_width;
+	extern int screen_height;
+	if(width == 0 && height == 0)
+	{
+		width = screen_width;
+		height = screen_height;
+	}
+#endif
 
 	if (width == 0)
 	{
