@@ -2500,13 +2500,22 @@ public class GameLauncher extends Activity
 			public void run()
 			{
 				String mod = m_chooseGameModFunc.GetResult();
-				V.edt_fs_game.setText(mod);
+				if(mod.startsWith(":"))
+				{
+					if(":".equals(mod))
+						RemoveParam("file");
+					else
+						SetParam("file", mod.substring(1));
+				}
+				else
+					V.edt_fs_game.setText(mod);
 			}
 		});
 		Bundle bundle = new Bundle();
 		String path = KStr.AppendPath(preference.getString(Q3EPreference.pref_datapath, default_gamedata), Q3EUtils.q3ei.subdatadir, Q3EUtils.q3ei.GetGameModSubDirectory());
 		bundle.putString("mod", preference.getString(preferenceKey, ""));
 		bundle.putString("path", path);
+		bundle.putString("file", GetParam("file"));
 		m_chooseGameModFunc.Start(bundle);
 	}
 

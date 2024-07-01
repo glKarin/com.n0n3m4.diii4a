@@ -9,6 +9,7 @@ import android.util.Log;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
+import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.FileBrowser;
 import com.karin.idTech4Amm.misc.Function;
 import com.n0n3m4.DIII4A.GameLauncher;
@@ -16,6 +17,7 @@ import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,12 +27,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public final class ChooseGameModFunc extends GameLauncherFunc
 {
     private final int m_code;
     private String m_path;
     private String m_mod;
+    private String m_file;
 
     public ChooseGameModFunc(GameLauncher gameLauncher, int code)
     {
@@ -49,6 +53,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
 
         m_path = data.getString("path");
         m_mod = data.getString("mod");
+        m_file = data.getString("file");
 
         int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
@@ -62,11 +67,12 @@ public final class ChooseGameModFunc extends GameLauncherFunc
     public void run()
     {
         FileBrowser fileBrowser = new FileBrowser();
+        final boolean UsingFile = Q3EUtils.q3ei.isDOOM;
+        final boolean AllowExtraFiles = Q3EUtils.q3ei.isDOOM;
         if(Q3EUtils.q3ei.isDOOM)
-        {
             fileBrowser.SetExtension(".wad");
+        if(UsingFile)
             fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
-        }
         else
             fileBrowser.SetFilter(FileBrowser.ID_FILTER_DIRECTORY);
         fileBrowser.SetIgnoreDotDot(true);
@@ -249,18 +255,21 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 }
             }
 
-            String desc = Q3EUtils.file_get_contents(fileModel.path + File.separator + "description.txt");
-            if(null != desc)
+            if(!UsingFile)
             {
-                desc = desc.trim();
-                if(!desc.isEmpty())
-                    name = desc + " (" + fileModel.name + ")";
+                String desc = Q3EUtils.file_get_contents(fileModel.path + File.separator + "description.txt");
+                if(null != desc)
+                {
+                    desc = desc.trim();
+                    if(!desc.isEmpty())
+                        name = desc + " (" + fileModel.name + ")";
+                }
             }
             if(name.isEmpty())
                 name = fileModel.name;
 
-            File dir = new File(fileModel.path);
             /*
+            File dir = new File(fileModel.path);
             name += "\n " + FileUtility.FormatSize(FileUtility.du(fileModel.path, new Function() {
                 @Override
                 public Object Invoke(Object... args)
@@ -320,12 +329,120 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 String lib = values.get(p);
                 Callback(lib);
                 dialog.dismiss();
+                if(AllowExtraFiles)
+                {
+                    ChooseExtraFiles(lib);
+                }
             }
         });
+        if(AllowExtraFiles)
+        {
+            builder.setNeutralButton("Files", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int p)
+                {
+                    ChooseExtraFiles(m_mod);
+                }
+            });
+        }
         builder.setNegativeButton(R.string.unset, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int p)
             {
                 Callback("");
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void ChooseExtraFiles(String excludes)
+    {
+        FileBrowser fileBrowser = new FileBrowser();
+        fileBrowser.SetExtension(".wad", ".pk3", ".deh", ".bex");
+        fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
+
+        fileBrowser.SetIgnoreDotDot(true);
+        fileBrowser.SetDirNameWithSeparator(false);
+        fileBrowser.SetShowHidden(true);
+        fileBrowser.SetCurrentPath(m_path);
+        List<FileBrowser.FileModel> fileModels = fileBrowser.ListAllFiles();
+
+        final List<CharSequence> items = new ArrayList<>();
+        final List<String> files = new ArrayList<>();
+
+        // 1. remove -iwad file
+        fileModels.removeIf(new Predicate<FileBrowser.FileModel>() {
+            @Override
+            public boolean test(FileBrowser.FileModel fileModel)
+            {
+                return fileModel.name.equalsIgnoreCase(excludes);
+            }
+        });
+
+        // 2. setup multi choice items
+        for (FileBrowser.FileModel fileModel : fileModels)
+        {
+            items.add(fileModel.name);
+        }
+
+        // 3. load selected from command line
+        if(KStr.NotBlank(m_file))
+        {
+            String[] split = m_file.split("\\s+");
+            files.addAll(Arrays.asList(split));
+        }
+
+        // 4. remove not exists files from command line
+        files.removeIf(new Predicate<String>() {
+            @Override
+            public boolean test(String s)
+            {
+                return !items.contains(s);
+            }
+        });
+
+        // 5. setup selected items
+        final boolean[] selected = new boolean[fileModels.size()];
+        for (int i = 0; i < fileModels.size(); i++)
+        {
+            FileBrowser.FileModel fileModel = fileModels.get(i);
+            selected[i] = files.contains(fileModel.name);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
+        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(m_gameLauncher, R.string.mod) + ": -file");
+        builder.setMultiChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnMultiChoiceClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked)
+            {
+                String lib = items.get(which).toString();
+                if(isChecked)
+                {
+                    if(!files.contains(lib))
+                        files.add(lib);
+                }
+                else
+                    files.remove(lib);
+            }
+        });
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int p)
+            {
+                String join = KStr.Join(files, " ");
+                Callback(":" + join);
+                dialog.dismiss();
+            }
+        });
+        builder.setNeutralButton(R.string.unset, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int p)
+            {
+                Callback(":");
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int p)
+            {
                 dialog.dismiss();
             }
         });
