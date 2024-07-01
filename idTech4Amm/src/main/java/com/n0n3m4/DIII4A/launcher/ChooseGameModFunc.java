@@ -337,7 +337,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         });
         if(AllowExtraFiles)
         {
-            builder.setNeutralButton("Files", new DialogInterface.OnClickListener() {
+            builder.setNeutralButton("-file", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
                     ChooseExtraFiles(m_mod);
