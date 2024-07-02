@@ -352,7 +352,7 @@ void MessagePump (const Q3E_Event_t *sev)
 					D_PostEvent (&event);
 				}
 
-				if (GUICapture && sev->state && sev->character)
+				if (GUICapture && sev->state && sev->character && isprint(sev->character))
 				{
 					int size;
 					char text[SDL_TEXTINPUTEVENT_TEXT_SIZE] = {0};

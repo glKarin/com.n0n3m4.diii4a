@@ -2893,6 +2893,7 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 
 	switch( r_aspectRatio.GetInteger() ) {
 	default :
+#ifdef _PREY //karin: auto aspect ratio if = -1
 		case -1 :
 			// auto mode => use aspect ratio from resolution, assuming screen's pixels are squares
 			ratio_x = renderSystem->GetScreenWidth();
@@ -2905,6 +2906,7 @@ void idGameLocal::CalcFov( float base_fov, float &fov_x, float &fov_y ) const {
 				return;
 			}
 			break;
+#endif
 	case 0 :
 		// 4:3
 		fov_x = base_fov;
