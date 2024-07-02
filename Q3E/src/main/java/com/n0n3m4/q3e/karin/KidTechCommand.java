@@ -15,6 +15,8 @@ public class KidTechCommand
     public static final char ARG_PREFIX_IDTECH = '+';
     public static final char ARG_PREFIX_QUAKETECH = '-';
 
+    private String m_cmd = Q3EGlobals.GAME_EXECUABLE;
+    private char m_argPrefix = ARG_PREFIX_IDTECH;
     private static String PreCmd(char PLUS, String cmd)
     {
         if(null == cmd)
@@ -58,9 +60,10 @@ public class KidTechCommand
         str = PreCmd(PLUS, str);
         String nname = " " + PLUS + "set " + name;
         String insertCmd = val.toString().trim();
-        if (str.contains(nname))
+        int index = str.indexOf(nname);
+        if (index != -1)
         {
-            int start = str.indexOf(nname) + nname.length();
+            int start = index + nname.length();
             if(start == str.length()) // at last
             {
                 str = str + " " + insertCmd;
@@ -71,12 +74,16 @@ public class KidTechCommand
                 start = str.indexOf(nname);
                 if(start != -1)
                 {
-                    start += nname.length();
-                    int end = str.indexOf(PLUS, start);
+                    start += nname.length() - 1;
+                    int end = str.indexOf(" " + PLUS, start);
                     if (end != -1)
-                        str = str.substring(0, start) + insertCmd + " " + str.substring(end);
+                        str = str.substring(0, start) + " " + insertCmd + str.substring(end);
                     else
-                        str = str.substring(0, start) + insertCmd;
+                        str = str.substring(0, start) + " " + insertCmd;
+                }
+                else
+                {
+                    str += nname + insertCmd;
                 }
             }
         }
@@ -93,10 +100,11 @@ public class KidTechCommand
         String nname = " " + PLUS + "set " + name + " ";
         String defVal = null != def && def.length > 0 ? def[0] : null;
         String val = defVal;
-        if (str.contains(nname))
+        int index = str.indexOf(nname);
+        if (index != -1)
         {
-            int start = str.indexOf(nname) + nname.length();
-            int end = str.indexOf(PLUS, start);
+            int start = index + nname.length();
+            int end = str.indexOf(" " + PLUS, start);
             if (end != -1)
                 val = str.substring(start, end).trim();
             else
@@ -112,12 +120,13 @@ public class KidTechCommand
         str = PreCmd(PLUS, str);
         String nname = " " + PLUS + "set " + name;
         boolean res = false;
-        if (str.contains(nname))
+        int index = str.indexOf(nname);
+        if (index != -1)
         {
-            int start = str.indexOf(nname) + nname.length();
+            int start = index + nname.length();
             if(start == str.length()) // at last
             {
-                str = str.substring(0, start);
+                str = str.substring(0, index);
             }
             else
             {
@@ -125,9 +134,9 @@ public class KidTechCommand
                 start = str.indexOf(nname);
                 if(start != -1)
                 {
-                    int end = str.indexOf(PLUS, start + nname.length());
+                    int end = str.indexOf(" " + PLUS, start + nname.length() - 1);
                     if (end != -1)
-                        str = str.substring(0, start) + " " + str.substring(end);
+                        str = str.substring(0, start) + str.substring(end);
                     else
                         str = str.substring(0, start);
                     res = true;
@@ -168,12 +177,13 @@ public class KidTechCommand
         str = PreCmd(PLUS, str);
         String nname = " " + PLUS + name;
         boolean res = false;
-        if (str.contains(nname))
+        int index = str.indexOf(nname);
+        if (index != -1)
         {
-            int start = str.indexOf(nname) + nname.length();
+            int start = index + nname.length();
             if(start == str.length()) // at last
             {
-                str = str.substring(0, start);
+                str = str.substring(0, index);
                 res = true;
             }
             else
@@ -182,9 +192,9 @@ public class KidTechCommand
                 start = str.indexOf(nname);
                 if(start != -1)
                 {
-                    int end = str.indexOf(PLUS, start + nname.length());
+                    int end = str.indexOf(" " + PLUS, start + nname.length() - 1);
                     if (end != -1)
-                        str = str.substring(0, start) + " " + str.substring(end);
+                        str = str.substring(0, start) + str.substring(end);
                     else
                         str = str.substring(0, start);
                     res = true;
@@ -201,9 +211,10 @@ public class KidTechCommand
         str = PreCmd(PLUS, str);
         String nname = " " + PLUS + name;
         String insertCmd = val.toString().trim();
-        if (str.contains(nname))
+        int index = str.indexOf(nname);
+        if (index != -1)
         {
-            int start = str.indexOf(nname) + nname.length();
+            int start = index + nname.length();
             if(start == str.length()) // at last
             {
                 str = str + " " + insertCmd;
@@ -214,12 +225,16 @@ public class KidTechCommand
                 start = str.indexOf(nname);
                 if(start != -1)
                 {
-                    start += nname.length();
-                    int end = str.indexOf(PLUS, start);
+                    start += nname.length() - 1;
+                    int end = str.indexOf(" " + PLUS, start);
                     if (end != -1)
-                        str = str.substring(0, start) + insertCmd + " " + str.substring(end);
+                        str = str.substring(0, start) + " " + insertCmd + str.substring(end);
                     else
-                        str = str.substring(0, start) + insertCmd;
+                        str = str.substring(0, start) + " " + insertCmd;
+                }
+                else
+                {
+                    str += nname + insertCmd;
                 }
             }
         }
@@ -235,12 +250,24 @@ public class KidTechCommand
         str = PreCmd(PLUS, str);
         String nname = " " + PLUS + name;
         boolean pp = null != prepend && prepend.length > 0 && prepend[0];
-        if (!str.contains(nname))
+        int index = str.indexOf(nname);
+        if (index == -1)
         {
             if(pp)
                 str = nname + str;
             else
                 str += nname;
+        }
+        else
+        {
+            index = index + nname.length();
+            if (index < str.length() - 1 && str.charAt(index) != ' ')
+            {
+                if(pp)
+                    str = nname + str;
+                else
+                    str += nname;
+            }
         }
         return PostCmd(str);
     }
@@ -276,13 +303,14 @@ public class KidTechCommand
     public static String GetParam(char PLUS, String str, String name, String...def)
     {
         str = PreCmd(PLUS, str);
-        String nname = " " + PLUS + name;
+        String nname = " " + PLUS + name + " ";
         String defVal = null != def && def.length > 0 ? def[0] : null;
         String val = defVal;
-        if (str.contains(nname))
+        int index = str.indexOf(nname);
+        if (index != -1)
         {
-            int start = str.indexOf(nname) + nname.length();
-            int end = str.indexOf(PLUS, start);
+            int start = index + nname.length() - 1;
+            int end = str.indexOf(" " + PLUS, start);
             if (end != -1)
                 val = str.substring(start, end).trim();
             else
@@ -303,11 +331,6 @@ public class KidTechCommand
         nname += " ";
         return (str.contains(nname));
     }
-
-
-
-    private String m_cmd = Q3EGlobals.GAME_EXECUABLE;
-    private char m_argPrefix = ARG_PREFIX_IDTECH;
 
     public KidTechCommand(char PLUS, String str)
     {
