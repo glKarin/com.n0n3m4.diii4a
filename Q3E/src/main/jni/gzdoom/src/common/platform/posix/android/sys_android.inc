@@ -3,7 +3,7 @@
 #include "q3e/q3e_android.h"
 
 #define Q3E_GAME_NAME "GZDOOM"
-#define Q3E_IS_INITIALIZED (true/*common->IsInitialized()*/)
+#define Q3E_IS_INITIALIZED (gzdoomIsInitialized)
 #define Q3E_PRINTF printf
 #define Q3E_WID_RESTART
 #define Q3E_DRAW_FRAME { /*GameMain*/ }
@@ -21,11 +21,18 @@ extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
 extern void ShutdownGame(void);
 
+static bool gzdoomIsInitialized = false;
+
 #include "q3e/q3e_android.inc"
 
 #include "common/engine/gamestate.h"
 #include "common/console/c_console.h"
 #include "common/menu/menustate.h"
+
+void Sys_SetInitialized(bool on)
+{
+    gzdoomIsInitialized = on;
+}
 
 void Sys_SyncState(void)
 {

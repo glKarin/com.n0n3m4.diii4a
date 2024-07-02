@@ -883,6 +883,9 @@ static void End2DAndUpdate()
 //
 //==========================================================================
 
+#ifdef __ANDROID__ //karin: Check surface on Android
+extern void GLimp_CheckGLInitialized(void);
+#endif
 void D_Display ()
 {
 	FTexture *wipestart = nullptr;
@@ -897,6 +900,9 @@ void D_Display ()
 		return;
 	}
 
+#ifdef __ANDROID__ //karin: Check surface on Android
+	GLimp_CheckGLInitialized(); // check/wait EGL context
+#endif
 	cycle_t cycles;
 	
 	cycles.Reset();
@@ -1183,6 +1189,9 @@ void D_ErrorCleanup ()
 //
 //==========================================================================
 
+#ifdef __ANDROID__ //karin: sync initialization state
+extern void Sys_SetInitialized(bool on);
+#endif
 void D_DoomLoop ()
 {
 	int lasttic = 0;
@@ -1194,6 +1203,9 @@ void D_DoomLoop ()
 	Advisory.SetInvalid();
 
 	vid_cursor->Callback();
+#ifdef __ANDROID__ //karin: sync initialization state
+	Sys_SetInitialized(true);
+#endif
 
 	for (;;)
 	{
@@ -3912,6 +3924,9 @@ void D_Cleanup()
 	restart++;
 	PClass::bShutdown = false;
 	PClass::bVMOperational = false;
+#ifdef __ANDROID__ //karin: sync initialization state
+	Sys_SetInitialized(false);
+#endif
 }
 
 //==========================================================================
@@ -4019,7 +4034,7 @@ CCMD(fs_dir)
 		auto fnid = fileSystem.GetResourceId(i);
 		auto length = fileSystem.FileLength(i);
 		bool hidden = fileSystem.FindFile(fn1) != i;
-		Printf(PRINT_HIGH | PRINT_NONOTIFY, "%s%-64s %-15s (%5d) %10d %s %s\n", hidden ? TEXTCOLOR_RED : TEXTCOLOR_UNTRANSLATED, fn1, fns, fnid, length, container, hidden ? "(h)" : "");
+		Printf(PRINT_HIGH | PRINT_NONOTIFY, "%s%-64s %-15s (%5d) %10ld %s %s\n", hidden ? TEXTCOLOR_RED : TEXTCOLOR_UNTRANSLATED, fn1, fns, fnid, length, container, hidden ? "(h)" : "");
 	}
 }
 

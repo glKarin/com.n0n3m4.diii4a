@@ -254,12 +254,12 @@ static void Q3E_StartGameMainThread(void)
     pthread_attr_init(&attr);
 
     if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) != 0) {
-        Q3E_PRINTF("[Harmattan]: ERROR: pthread_attr_setdetachstate quake1 main thread failed\n");
+        Q3E_PRINTF("[Harmattan]: ERROR: pthread_attr_setdetachstate " Q3E_GAME_NAME " main thread failed\n");
         exit(1);
     }
 
     if (pthread_create((pthread_t *)&main_thread, &attr, Q3E_THREAD_MAIN, NULL) != 0) {
-        Q3E_PRINTF("[Harmattan]: ERROR: pthread_create quake1 main thread failed\n");
+        Q3E_PRINTF("[Harmattan]: ERROR: pthread_create " Q3E_GAME_NAME " main thread failed\n");
         exit(1);
     }
 
