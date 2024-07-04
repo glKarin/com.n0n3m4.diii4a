@@ -569,10 +569,12 @@ public class Q3EInterface
 			return "fs_game";
 	}
 
-	public char GetGameCommandPrefix()
+	public String GetGameCommandPrefix()
 	{
-		if(isQ1 || isDOOM)
+		if(isQ1)
 			return KidTechCommand.ARG_PREFIX_QUAKETECH;
+		if(isDOOM)
+			return KidTechCommand.ARG_PREFIX_QUAKETECH + KidTechCommand.ARG_PREFIX_IDTECH;
 		else
 			return KidTechCommand.ARG_PREFIX_IDTECH;
 	}

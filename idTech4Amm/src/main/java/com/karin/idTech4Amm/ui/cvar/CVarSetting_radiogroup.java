@@ -60,7 +60,8 @@ public class CVarSetting_radiogroup extends LinearLayout implements CVarSettingI
     @Override
     public void RestoreCommand(String cmd)
     {
-        String value = KidTech4Command.GetProp(cmd, m_cvar.name, m_cvar.defaultValue);
+        String[] defaultValue = {m_cvar.defaultValue};
+        String value = KidTech4Command.GetProp(cmd, m_cvar.name, defaultValue);
         for(int i = 0; i < m_radioGroup.getChildCount(); i++)
         {
             View child = m_radioGroup.getChildAt(i);

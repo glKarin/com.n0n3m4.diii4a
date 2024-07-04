@@ -51,7 +51,8 @@ public class CVarSetting_edittext extends LinearLayout implements CVarSettingInt
     @Override
     public void RestoreCommand(String cmd)
     {
-        String value = KidTech4Command.GetProp(cmd, m_cvar.name, m_cvar.defaultValue);
+        String[] defaultValue = {m_cvar.defaultValue};
+        String value = KidTech4Command.GetProp(cmd, m_cvar.name, defaultValue);
         m_editText.setText(value);
     }
 

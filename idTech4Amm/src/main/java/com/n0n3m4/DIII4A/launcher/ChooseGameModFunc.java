@@ -337,7 +337,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         });
         if(AllowExtraFiles)
         {
-            builder.setNeutralButton("-file", new DialogInterface.OnClickListener() {
+            builder.setNeutralButton(R.string.files, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
                     ChooseExtraFiles(m_mod);
@@ -371,13 +371,14 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         final List<String> files = new ArrayList<>();
 
         // 1. remove -iwad file
-        fileModels.removeIf(new Predicate<FileBrowser.FileModel>() {
-            @Override
-            public boolean test(FileBrowser.FileModel fileModel)
-            {
-                return fileModel.name.equalsIgnoreCase(excludes);
-            }
-        });
+        int m = 0;
+        while (m < fileModels.size())
+        {
+            if(fileModels.get(m).name.equalsIgnoreCase(excludes))
+                fileModels.remove(m);
+            else
+                m++;
+        }
 
         // 2. setup multi choice items
         for (FileBrowser.FileModel fileModel : fileModels)
@@ -393,13 +394,14 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         }
 
         // 4. remove not exists files from command line
-        files.removeIf(new Predicate<String>() {
-            @Override
-            public boolean test(String s)
-            {
-                return !items.contains(s);
-            }
-        });
+        m = 0;
+        while (m < files.size())
+        {
+            if(!items.contains(files.get(m)))
+                files.remove(m);
+            else
+                m++;
+        }
 
         // 5. setup selected items
         final boolean[] selected = new boolean[fileModels.size()];
@@ -410,7 +412,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(m_gameLauncher, R.string.mod) + ": -file");
+        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(m_gameLauncher, R.string.mod) + ": " + Q3ELang.tr(m_gameLauncher, R.string._files));
         builder.setMultiChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnMultiChoiceClickListener(){
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked)

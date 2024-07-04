@@ -1336,10 +1336,9 @@ public class GameLauncher extends Activity
     {
 		if(!LockCmdUpdate())
 			return;
-        boolean[] res = {false};
-        // String str = KidTech4Command.RemoveProp(GetCmdText(), name, res);
-		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).RemoveProp(name, res).toString();
-        if (res[0])
+		String orig = GetCmdText();
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveProp(name).toString();
+        if (!orig.equals(str))
             SetCmdText(str);
         UnlockCmdUpdate();
     }
@@ -2292,17 +2291,15 @@ public class GameLauncher extends Activity
         m_extractPatchResourceFunc.Start(bundle);
     }
 
-    private boolean RemoveParam(String name)
+    private void RemoveParam(String name)
     {
         if(!LockCmdUpdate())
-        	return false;
-        boolean[] res = {false};
-        // String str = KidTech4Command.RemoveParam(GetCmdText(), name, res);
-		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetCmdText()).RemoveParam(name, res).toString();
-        if (res[0])
+        	return;
+        String orig = GetCmdText();
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveParam(name).toString();
+        if (!orig.equals(str))
             SetCmdText(str);
         UnlockCmdUpdate();
-        return res[0];
     }
 
     private void SetParam(String name, Object val)
@@ -2327,10 +2324,10 @@ public class GameLauncher extends Activity
 
     private void RemoveParam_temp(String name)
     {
-        boolean[] res = {false};
-        String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).RemoveParam(name, res).toString();
+		String orig = GetTempCmdText();
+        String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveParam(name).toString();
 		// String str = KidTech4Command.RemoveParam(GetTempCmdText(), name, res);
-        if (res[0])
+        if (!orig.equals(str))
             Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
     }
@@ -2353,10 +2350,10 @@ public class GameLauncher extends Activity
 
 	private void RemoveCommand_temp(String name)
 	{
-		boolean[] res = {false};
-		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).RemoveCommand(name, res).toString();
+		String orig = GetTempCmdText();
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveCommand(name).toString();
 		// String str = KidTech4Command.RemoveCommand(GetTempCmdText(), name, res);
-		if (res[0])
+		if (!orig.equals(str))
 			Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
 	}
@@ -2505,7 +2502,34 @@ public class GameLauncher extends Activity
 					if(":".equals(mod))
 						RemoveParam("file");
 					else
-						SetParam("file", mod.substring(1));
+					{
+						String files = mod.substring(1);
+						String[] split = files.split("\\s+");
+						StringBuilder file = new StringBuilder();
+						StringBuilder deh = new StringBuilder();
+						StringBuilder bex = new StringBuilder();
+
+						for (String s : split)
+						{
+							if(s.toLowerCase().endsWith(".deh"))
+								deh.append(" ").append(s);
+							else if(s.toLowerCase().endsWith(".bex"))
+								bex.append(" ").append(s);
+							else
+								file.append(" ").append(s);
+						}
+
+						RemoveParam("file");
+						RemoveParam("deh");
+						RemoveParam("bex");
+
+						if(file.length() > 0)
+							SetParam("file", file.toString().trim());
+						if(deh.length() > 0)
+							SetParam("deh", deh.toString().trim());
+						if(bex.length() > 0)
+							SetParam("bex", bex.toString().trim());
+					}
 				}
 				else
 					V.edt_fs_game.setText(mod);
@@ -2515,7 +2539,7 @@ public class GameLauncher extends Activity
 		String path = KStr.AppendPath(preference.getString(Q3EPreference.pref_datapath, default_gamedata), Q3EUtils.q3ei.subdatadir, Q3EUtils.q3ei.GetGameModSubDirectory());
 		bundle.putString("mod", preference.getString(preferenceKey, ""));
 		bundle.putString("path", path);
-		bundle.putString("file", GetParam("file"));
+		bundle.putString("file", GetParam("file") + " " + GetParam("deh") + " " + GetParam("bex"));
 		m_chooseGameModFunc.Start(bundle);
 	}
 

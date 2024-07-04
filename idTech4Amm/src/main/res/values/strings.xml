@@ -326,5 +326,7 @@
     <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">Force setup cvar `r_aspectRatio` to -1(Using screen real aspect ratio)</string>
     <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">Automatic setup cvar `r_aspectRatio` to 0,1,2(Convert screen aspect ratio to 4:3/16:9/16:10)</string>
     <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">Shadow mapping alpha(harm_r_shadowMapAlpha):</string>
+    <string name="files">Files</string>
+    <string name="_files">files</string>
 
 </resources>
