@@ -560,7 +560,9 @@ bool FluidSynthMIDIDevice::LoadFluidSynth(const char *fluid_lib)
 #ifdef __ANDROID__ //karin: fluidsynth library path
 	std::string fluidsynth = DLL_Path;
 	fluidsynth += "/libfluidsynth.so";
-	if(!FluidSynthModule.Load({fluidsynth.c_str()}))
+	std::string fluidsynthLite = DLL_Path;
+	fluidsynthLite += "/libfluidlite.so";
+	if(!FluidSynthModule.Load({fluidsynth.c_str(), fluidsynthLite.c_str()}))
 #else
 	if(!FluidSynthModule.Load({FLUIDSYNTHLIB1, FLUIDSYNTHLIB2}))
 #endif
