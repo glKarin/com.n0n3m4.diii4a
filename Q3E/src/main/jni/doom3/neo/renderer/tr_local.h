@@ -1747,6 +1747,7 @@ public:
 	void ActuallyLoad(void); // backend: if in multi-threading, load actually from queue with OpenGL context
 	const shaderProgram_t * Get(shaderHandle_t handle) const;
 	shaderHandle_t GetHandle(const char *name) const;
+	void ReloadShaders(void);
 
 	static idGLSLShaderManager _shaderManager;
 	static const shaderHandle_t INVALID_SHADER_HANDLE;
