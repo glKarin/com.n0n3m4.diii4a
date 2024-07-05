@@ -674,7 +674,7 @@ static bool RB_GLSL_LinkShader(shaderProgram_t *shaderProgram, bool needsAttribu
 	if(!shaderProgram->vertexShader || !shaderProgram->fragmentShader)
 		return false;
 
-    if(qglIsProgram(shaderProgram->program))
+    if(!qglIsProgram(shaderProgram->program))
 	shaderProgram->program = qglCreateProgram();
 
 	qglAttachShader(shaderProgram->program, shaderProgram->vertexShader);
@@ -1396,7 +1396,7 @@ void idGLSLShaderManager::ReloadShaders(void)
     for(int i = 0; i < shaders.Num(); i++)
     {
         shaderProgram_t *shader = shaders[i];
-        common->Printf("[Harmattan]: reload GLSL shader %d -> %s!\n", i, shader->name);
+        common->Printf("[Harmattan]: reload GLSL shader %d -> %s......\n", i, shader->name);
 
         int type = shader->type;
         if(type >= SHADER_BASE_BEGIN && type <= SHADER_BASE_END)
