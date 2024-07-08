@@ -261,6 +261,9 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
 	// disable features
+//	GL_SelectTextureNoClient(7);
+//	globalImages->BindNull();
+
 	GL_SelectTextureNoClient(6);
 	globalImages->BindNull();
 

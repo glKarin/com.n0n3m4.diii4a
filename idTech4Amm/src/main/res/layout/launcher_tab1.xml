@@ -485,7 +485,7 @@
                         android:hint="@string/_0_1_default_0_5"
                         android:imeOptions="flagNoExtractUi"
                         android:inputType="numberDecimal|textNoSuggestions"
-                        android:text="0.5" />
+                        android:text="1.0" />
                 </LinearLayout>
 
                 <CheckBox
@@ -521,7 +521,7 @@
                         android:hint="@string/_0_1_default_0_5"
                         android:imeOptions="flagNoExtractUi"
                         android:inputType="numberDecimal|textNoSuggestions"
-                        android:text="0.5" />
+                        android:text="1.0" />
                 </LinearLayout>
 
                 <CheckBox

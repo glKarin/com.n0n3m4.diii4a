@@ -31,6 +31,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "qgl.h"
 
+#include "matrix/esUtil.h"
+#ifdef GL_ES_VERSION_3_0 // GLES3.1
+#define GL_BLIT_FRAMEBUFFER_AVAILABLE() ( GLIMP_PROCISVALID(qglBlitFramebuffer) )
+#define GL_DRAW_BUFFERS_AVAILABLE() ( GLIMP_PROCISVALID(qglDrawBuffers) )
+#define GL_DEBUG_MESSAGE_AVAILABLE() ( GLIMP_PROCISVALID(qglDebugMessageControl) && GLIMP_PROCISVALID(qglDebugMessageCallback) && GLIMP_PROCISVALID(qglGetDebugMessageLog))
+#endif
+
+
 extern bool USING_GLES3;
 #ifdef _OPENGLES3
 extern int GLES3_VERSION;
@@ -2223,6 +2231,7 @@ extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapNonParallelLightUltra;
+extern idCVar harm_r_shadowMapJitterScale;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;

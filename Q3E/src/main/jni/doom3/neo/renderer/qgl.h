@@ -115,7 +115,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_DEBUG_TYPE_ERROR               0x824C
 #endif
 
-#include "matrix/esUtil.h"
+//#include "matrix/esUtil.h"
 
 typedef void (*GLExtension_t)(void);
 
@@ -137,9 +137,4 @@ typedef void (GL_APIENTRY  *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLe
 #endif
 #define QGLPROC(name, rettype, args) extern rettype (GL_APIENTRYP q##name) args;
 #include "qgl_proc.h"
-
-#define GL_BLIT_FRAMEBUFFER_AVAILABLE() ( GLIMP_PROCISVALID(qglBlitFramebuffer) )
-#define GL_DRAW_BUFFERS_AVAILABLE() ( GLIMP_PROCISVALID(qglDrawBuffers) )
-#define GL_DEBUG_MESSAGE_AVAILABLE() ( GLIMP_PROCISVALID(qglDebugMessageControl) && GLIMP_PROCISVALID(qglDebugMessageCallback) && GLIMP_PROCISVALID(qglGetDebugMessageLog))
-
 #endif

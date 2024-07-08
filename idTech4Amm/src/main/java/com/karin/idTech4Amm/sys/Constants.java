@@ -33,6 +33,8 @@ public final class Constants
             "Support r_showSurfaceInfo debug render on multi-threading in DOOM3/Quake4/Prey(2006).",
             "Add soft stencil shadow support(cvar harm_r_stencilShadowSoft) with OpenGLES3.1+ in DOOM3/Quake4/Prey(2006).",
             "Add GLES3.2 renderer support in Quake2(using +set vid_renderer gles3 for GLES3.2, +set vid_renderer gl1 for GLES1.1).",
+            "Optimize soft shadow shader with shadow mapping in DOOM3/Quake4/Prey(2006).",
+            "Add GZDOOM support on arm64. More view in `" + TextHelper.GenLinkText("https://github.com/ZDoom/gzdoom", "GZDOOM") + "`.",
         };
 	};
 

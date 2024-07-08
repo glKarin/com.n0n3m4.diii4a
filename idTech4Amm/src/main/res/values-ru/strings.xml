@@ -316,7 +316,7 @@
     <string name="application_pid">"Приложение PID: "</string>
     <string name="doom_3_bfg">DOOM 3 BFG</string>
     <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">Альфа канал теней(harm_r_stencilShadowAlpha):</string>
-    <string name="_0_1_default_0_5">0 - 1(по умолчанию 0.5)</string>
+    <string name="_0_1_default_0_5">0 - 1(по умолчанию 1.0)</string>
     <string name="soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft">Мягкие тени(Только OpenGLES3.1+)(harm_r_stencilShadowSoft)</string>
     <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">Комбинированные тени(harm_r_stencilShadowCombine)</string>
     <string name="automatic_setup_aspect_ratio_harm_r_autoaspectratio">Автоматическая настройка соотношения сторон(harm_r_autoAspectRatio)</string>

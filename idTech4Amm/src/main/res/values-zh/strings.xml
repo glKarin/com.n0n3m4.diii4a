@@ -315,7 +315,7 @@
     <string name="application_pid">"程序PID: "</string>
     <string name="doom_3_bfg">毁灭战士3 BFG</string>
     <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">半透明模板阴影透明度(harm_r_stencilShadowAlpha):</string>
-    <string name="_0_1_default_0_5">0 - 1(默认0.5)</string>
+    <string name="_0_1_default_0_5">0 - 1(默认1.0)</string>
     <string name="soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft">软模板阴影(仅OpenGLES3.1+)(harm_r_stencilShadowSoft)</string>
     <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">组合模板阴影(harm_r_stencilShadowCombine)</string>
     <string name="automatic_setup_aspect_ratio_harm_r_autoaspectratio">自动设置屏幕高宽比(harm_r_autoAspectRatio)</string>

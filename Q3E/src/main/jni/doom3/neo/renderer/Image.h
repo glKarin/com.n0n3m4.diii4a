@@ -548,6 +548,7 @@ class idImageManager
 #ifdef GL_ES_VERSION_3_0
 	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
 #endif
+	idImage*			blueNoiseImage256;
 	// RB end
 #endif
 };

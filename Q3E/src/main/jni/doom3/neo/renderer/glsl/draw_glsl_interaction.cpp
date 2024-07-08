@@ -85,6 +85,10 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 		// texture 6 is the shadow map
 		GL_SelectTextureNoClient(6);
 		RB_ShadowMappingInteraction_bindTexture();
+
+		// texture 7 is the noise jitter map
+		GL_SelectTextureNoClient(7);
+		RB_ShadowMappingInteraction_bindJitterTexture();
 	}
 	else
 #endif
@@ -175,6 +179,14 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
 	// disable features
+#ifdef _SHADOW_MAPPING
+	if(r_shadowMapping)
+	{
+		GL_SelectTextureNoClient(7);
+		globalImages->BindNull();
+	}
+#endif
+
 	GL_SelectTextureNoClient(6);
 	globalImages->BindNull();
 
