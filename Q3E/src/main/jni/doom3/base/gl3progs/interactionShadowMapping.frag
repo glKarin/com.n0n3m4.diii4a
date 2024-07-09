@@ -36,14 +36,18 @@ uniform sampler2D u_fragmentMap2;	/* u_lightProjectionTexture */
 uniform sampler2D u_fragmentMap3;	/* u_diffuseTexture */
 uniform sampler2D u_fragmentMap4;	/* u_specularTexture */
 uniform sampler2D u_fragmentMap5;	/* u_specularFalloffTexture */
+uniform highp sampler2DArrayShadow u_fragmentMap6;	/* u_shadowMapTexture */
+uniform sampler2D u_fragmentMap7;    /* u_jitterMapTexture */
 
 uniform highp vec4 globalLightOrigin;
-uniform highp float u_uniformParm2; // sample size
-uniform mediump float u_uniformParm3; // shadow alpha
-uniform highp float u_uniformParm4; // shadow bias
-uniform highp float u_uniformParm5; // 1.0 / textureSize()
-uniform highp float u_uniformParm6; // textureSize()
-uniform highp sampler2DArrayShadow u_fragmentMap6;	/* u_shadowMapTexture */
+uniform mediump float u_uniformParm0; // shadow alpha
+uniform highp vec4 u_uniformParm1; // (shadow map texture size, 1.0 / shadow map texture size, sampler factor, 0)
+uniform highp vec4 u_uniformParm2; // (1.0 / screen width, 1.0 / screen height, jitter texture size, 1.0 / jitter texture size)
+#define SHADOW_ALPHA u_uniformParm0
+#define SHADOW_MAP_SIZE u_uniformParm1.x
+#define SHADOW_MAP_SIZE_MULTIPLICATOR u_uniformParm1.y
+#define JITTER_SCALE u_uniformParm1.z
+#define SCREEN_SIZE_MULTIPLICATOR u_uniformParm2.xy
 #ifdef _POINT_LIGHT
 in highp vec4 var_VertexPosition;
 uniform highp mat4 shadowMVPMatrix[6];
@@ -102,27 +106,24 @@ void main(void)
     float specularFalloff = pow(RdotV, u_specularExponent);
 #endif
 
-    highp float shadow = 0.0;
-#define SAMPLES 17
+#define SAMPLES 12
+#define SAMPLE_MULTIPLICATOR (1.0 / 12.0)
     vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
-                                          vec2( -0.94201624, -0.39906216 ),
-                                          vec2( 0.94558609, -0.76890725 ),
-                                          vec2( -0.094184101, -0.92938870 ),
-                                          vec2( 0.34495938, 0.29387760 ),
-                                          vec2( -0.91588581, 0.45771432 ),
-                                          vec2( -0.81544232, -0.87912464 ),
-                                          vec2( -0.38277543, 0.27676845 ),
-                                          vec2( 0.97484398, 0.75648379 ),
-                                          vec2( 0.44323325, -0.97511554 ),
-                                          vec2( 0.53742981, -0.47373420 ),
-                                          vec2( -0.26496911, -0.41893023 ),
-                                          vec2( 0.79197514, 0.19090188 ),
-                                          vec2( -0.24188840, 0.99706507 ),
-                                          vec2( -0.81409955, 0.91437590 ),
-                                          vec2( 0.19984126, 0.78641367 ),
-                                          vec2( 0.14383161, -0.14100790 ),
-                                          vec2( 0.0, 0.0 )
-                                      );
+        vec2( 0.6111618, 0.1050905 ),
+        vec2( 0.1088336, 0.1127091 ),
+        vec2( 0.3030421, -0.6292974 ),
+        vec2( 0.4090526, 0.6716492 ),
+        vec2( -0.1608387, -0.3867823 ),
+        vec2( 0.7685862, -0.6118501 ),
+        vec2( -0.1935026, -0.856501 ),
+        vec2( -0.4028573, 0.07754025 ),
+        vec2( -0.6411021, -0.4748057 ),
+        vec2( -0.1314865, 0.8404058 ),
+        vec2( -0.7005203, 0.4596822 ),
+        vec2( -0.9713828, -0.06329931 )
+        // , vec2( 0.0, 0.0 )
+    );
+    highp float shadow = 0.0;
 #ifdef _POINT_LIGHT
     int shadowIndex = 0;
     highp vec3 toLightGlobal = normalize( var_VertexToLight );
@@ -143,20 +144,29 @@ void main(void)
     //vec3 c; if(shadowIndex == 0) c = vec3(1.0, 0.0, 0.0); else if(shadowIndex == 1) c = vec3(1.0, 1.0, 0.0); else if(shadowIndex == 2) c = vec3(0.0, 1.0, 0.0); else if(shadowIndex == 3) c = vec3(0.0, 1.0, 1.0); else if(shadowIndex == 4) c = vec3(0.0, 0.0, 1.0); else c = vec3(1.0, 0.0, 1.0);
     shadowPosition.xyz /= shadowPosition.w;
     shadowPosition.w = float(shadowIndex);
-    highp float distance = u_uniformParm2 + length(var_VertexToLight) * (0.00000000002 * u_uniformParm6); // more far more large // length(var_VertexToLight) / (100000000000.0 * u_uniformParm5)
 #else
     highp vec4 shadowPosition = vec4(var_ShadowCoord.xyz / var_ShadowCoord.w, 0.0);
-    highp float distance = u_uniformParm2;
 #endif
     // end light type
+    highp float distance = JITTER_SCALE * SHADOW_MAP_SIZE_MULTIPLICATOR;
+    // float random = (gl_FragCoord.z + shadowPosition.z) * 0.5;
+    float random = texture( u_fragmentMap7, gl_FragCoord.xy * SCREEN_SIZE_MULTIPLICATOR ).r;
+    random *= 3.141592653589793;
+    vec2 rot;
+    rot.x = cos( random );
+    rot.y = sin( random );
     shadowPosition.z = BIAS(shadowPosition.z);
     for (int i = 0; i < SAMPLES; ++i)
     {
-        highp float shadowDepth = texture(u_fragmentMap6, vec4(shadowPosition.st + sampleOffsetTable[i] * distance, shadowPosition.wz));
-        shadow += 1.0 - (1.0 - shadowDepth) * u_uniformParm3;
-        //shadow += shadowDepth > 0.0 ? 1.0 : u_uniformParm3;
+        vec2 jitter = sampleOffsetTable[i];
+        vec2 jitterRotated;
+        jitterRotated.x = jitter.x * rot.x - jitter.y * rot.y;
+        jitterRotated.y = jitter.x * rot.y + jitter.y * rot.x;
+        highp float shadowDepth = texture(u_fragmentMap6, vec4(shadowPosition.st + jitterRotated * distance, shadowPosition.wz));
+        shadow += 1.0 - (1.0 - shadowDepth) * SHADOW_ALPHA;
+        //shadow += shadowDepth > 0.0 ? 1.0 : SHADOW_ALPHA;
     }
-    const highp float sampleAvg = 1.0 / float(SAMPLES);
+    const highp float sampleAvg = SAMPLE_MULTIPLICATOR;
     shadow *= sampleAvg;
 
     vec3 color;

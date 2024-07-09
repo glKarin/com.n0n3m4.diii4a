@@ -1159,7 +1159,7 @@ GLSL_SHADER const char TEXGEN_FRAG[] =
         "    sampleOffsetTable[1] = vec2( 1.0, 1.0); sampleOffsetTable[2] = vec2( 1.0, -1.0); sampleOffsetTable[3] = vec2(-1.0, -1.0); sampleOffsetTable[4] = vec2(-1.0, 1.0);\n" \
         "    sampleOffsetTable[5] = vec2( 1.0, 0.0); sampleOffsetTable[6] = vec2( -1.0, 0.0); sampleOffsetTable[7] = vec2(0.0, -1.0); sampleOffsetTable[8] = vec2(0.0, 1.0);\n"
 #endif
-#define STENCIL_SHADOW_SAMPLE_POISSON_DISK \
+#define SHADOW_MAPPING_SAMPLE_POISSON_DISK \
         "#define SAMPLES 12\n" \
         "#define SAMPLE_MULTIPLICATOR (1.0 / 12.0)\n" \
         "vec2 sampleOffsetTable[SAMPLES];\n"\
@@ -1174,9 +1174,9 @@ GLSL_SHADER const char TEXGEN_FRAG[] =
 		"  sampleOffsetTable[8] = vec2( -0.6411021, -0.4748057 );\n" \
 		"  sampleOffsetTable[9] = vec2( -0.1314865, 0.8404058 );\n" \
 		"  sampleOffsetTable[10] = vec2( -0.7005203, 0.4596822 );\n" \
-		"  sampleOffsetTable[11] = vec2( -0.9713828, -0.06329931 ),\n" \
+		"  sampleOffsetTable[11] = vec2( -0.9713828, -0.06329931 );\n" \
 		"  // sampleOffsetTable[12] = vec2( 0.0, 0.0 );\n"
-#define SHADOW_MAPPING_SAMPLE_POISSON_DISK \
+#define STENCIL_SHADOW_SAMPLE_POISSON_DISK \
         "#define SAMPLES 16\n" \
         "#define SAMPLE_MULTIPLICATOR (1.0 / 16.0)\n" \
         "vec2 sampleOffsetTable[SAMPLES];\n" \

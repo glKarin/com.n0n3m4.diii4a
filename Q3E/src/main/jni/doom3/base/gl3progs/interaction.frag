@@ -120,7 +120,8 @@ void main(void)
 #ifdef _STENCIL_SHADOW_TRANSLUCENT
     _gl_FragColor = vec4(color, 1.0) * var_Color * u_uniformParm0;
 #elif defined(_STENCIL_SHADOW_SOFT)
-#define SAMPLES 17
+#define SAMPLES 16
+#define SAMPLE_MULTIPLICATOR (1.0 / 16.0)
     vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
                                           vec2( -0.94201624, -0.39906216 ),
                                           vec2( 0.94558609, -0.76890725 ),
@@ -137,27 +138,28 @@ void main(void)
                                           vec2( -0.24188840, 0.99706507 ),
                                           vec2( -0.81409955, 0.91437590 ),
                                           vec2( 0.19984126, 0.78641367 ),
-                                          vec2( 0.14383161, -0.14100790 ),
-                                          vec2( 0.0, 0.0 )
+                                          vec2( 0.14383161, -0.14100790 )
+                                          // , vec2( 0.0, 0.0 )
                                       );
 
+    vec2 screenTexCoord = gl_FragCoord.xy * u_windowCoords.xy;
+    screenTexCoord = screenTexCoord * u_nonPowerOfTwo.xy;
+    vec2 factor = u_nonPowerOfTwo.zw * u_uniformParm1;
     float shadow = 0.0;
     for (int i = 0; i < SAMPLES; ++i)
     {
-        vec2 screenTexCoord = gl_FragCoord.xy * u_windowCoords.xy;
-        screenTexCoord = screenTexCoord * u_nonPowerOfTwo.xy;
         /*
           vec2 texSize = vec2(textureSize(u_fragmentMap6, 0));
           vec2 pixSize = vec2(1.0, 1.0) / texSize;
           vec2 baseTexCoord = gl_FragCoord.xy * pixSize;
           screenTexCoord = baseTexCoord;
         */
-        screenTexCoord += sampleOffsetTable[i] * u_nonPowerOfTwo.zw * u_uniformParm1;
-        float t = float(texture(u_fragmentMap6, screenTexCoord).r);
+        vec2 stc = screenTexCoord + sampleOffsetTable[i] * factor;
+        float t = float(texture(u_fragmentMap6, stc).r);
         float f= clamp(129.0 - t, u_uniformParm0, 1.0);
         shadow += f;
     }
-    const highp float sampleAvg = 1.0 / float(SAMPLES);
+    const highp float sampleAvg = SAMPLE_MULTIPLICATOR;
     shadow *= sampleAvg;
     color *= shadow;
     _gl_FragColor = vec4(color, 1.0) * var_Color;
