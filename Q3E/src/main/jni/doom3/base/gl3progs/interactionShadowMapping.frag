@@ -149,17 +149,17 @@ void main(void)
 #endif
     // end light type
     highp float distance = JITTER_SCALE * SHADOW_MAP_SIZE_MULTIPLICATOR;
-    // float random = (gl_FragCoord.z + shadowPosition.z) * 0.5;
-    float random = texture( u_fragmentMap7, gl_FragCoord.xy * SCREEN_SIZE_MULTIPLICATOR ).r;
+    // highp float random = (gl_FragCoord.z + shadowPosition.z) * 0.5;
+    highp float random = texture( u_fragmentMap7, gl_FragCoord.xy * SCREEN_SIZE_MULTIPLICATOR ).r;
     random *= 3.141592653589793;
-    vec2 rot;
+    highp vec2 rot;
     rot.x = cos( random );
     rot.y = sin( random );
     shadowPosition.z = BIAS(shadowPosition.z);
     for (int i = 0; i < SAMPLES; ++i)
     {
-        vec2 jitter = sampleOffsetTable[i];
-        vec2 jitterRotated;
+        highp vec2 jitter = sampleOffsetTable[i];
+        highp vec2 jitterRotated;
         jitterRotated.x = jitter.x * rot.x - jitter.y * rot.y;
         jitterRotated.y = jitter.x * rot.y + jitter.y * rot.x;
         highp float shadowDepth = texture(u_fragmentMap6, vec4(shadowPosition.st + jitterRotated * distance, shadowPosition.wz));

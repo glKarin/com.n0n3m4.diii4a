@@ -60,6 +60,17 @@ uniform highp float u_uniformParm3; // shadow bias for test
 varying highp vec3 var_LightToVertex;
 varying highp vec4 var_VertexPosition;
 uniform highp mat4 shadowMVPMatrix[6];
+bool plane_ray_intersect(highp vec3 plane_point, highp vec3 plane_normal, highp vec3 dir, out highp vec3 ret) {
+	highp float dotProduct = dot(dir, plane_normal);
+	highp float dotProductFactor = 1.0 / dotProduct;
+	// if(dotProduct == 0.0) return false;
+	highp float l2 = dot(plane_normal, plane_point) * dotProductFactor;
+	// if (l2 < 0.0) return false;
+	highp float distance = dot(plane_normal, plane_point);
+	highp float t = - (dot(plane_normal, dir) - distance) * dotProductFactor;
+	ret = dir * t;
+	return true;
+}
 #else
 varying highp vec4 var_ShadowCoord;
 #endif
@@ -146,25 +157,43 @@ void main(void)
         //if( axis[i] > axis[shadowIndex] ) {		shadowIndex = i;	}
         shadowIndex = axis[i] > axis[shadowIndex] ? i : shadowIndex;
     }
+    highp vec3 plane_normal;
+    highp vec3 plane_point;
+    highp float radius = SHADOW_MAP_SIZE * 0.5;
+    if(shadowIndex == 0) { // +X 
+        plane_point = vec3(radius, 0.0, 0.0);
+        plane_normal = vec3(-1.0, 0.0, 0.0);
+    } else if(shadowIndex == 1) { // -X 
+        plane_point = vec3(-radius, 0.0, 0.0);
+        plane_normal = vec3(1.0, 0.0, 0.0);
+    } else if(shadowIndex == 2) { // +Y 
+        plane_point = vec3(0.0, radius, 0.0);
+        plane_normal = vec3(0.0, -1.0, 0.0);
+    } else if(shadowIndex == 3) { // -Y 
+        plane_point = vec3(0.0, -radius, 0.0);
+        plane_normal = vec3(0.0, 1.0, 0.0);
+    } else if(shadowIndex == 4) { // +Z 
+        plane_point = vec3(0.0, 0.0, radius);
+        plane_normal = vec3(0.0, 0.0, -1.0);
+    } else { // -Z 
+        plane_point = vec3(0.0, 0.0, -radius);
+        plane_normal = vec3(0.0, 0.0, 1.0);
+    }
+    highp vec3 texcoordCube;
+    plane_ray_intersect(plane_point, plane_normal, normalize(var_LightToVertex), texcoordCube);
     highp vec4 shadowPosition = var_VertexPosition * shadowMVPMatrix[shadowIndex];
     shadowPosition.xyz /= shadowPosition.w;
     highp float currentDepth = BIAS(shadowPosition.z);
-    highp float distance = JITTER_SCALE * SHADOW_MAP_SIZE_MULTIPLICATOR;
-    highp vec3 texcoordCube = normalize(var_LightToVertex);
+    highp float distance = JITTER_SCALE;
     for (int i = 0; i < SAMPLES; ++i)
     {
-        vec3 jitter = sampleOffsetTable[i];
-        vec3 jitterRotated = jitter;
-        jitterRotated.x = jitter.x * rot.x - jitter.y * rot.y;
-        jitterRotated.y = jitter.x * rot.y + jitter.y * rot.x;
-        jitterRotated.z = jitter.y * rot.y - jitter.x * rot.x;
-        highp float shadowDepth = DC(textureCube(u_fragmentCubeMap6, normalize(var_LightToVertex + jitterRotated * distance)));
+        highp vec3 jitter = sampleOffsetTable[i];
+        highp float shadowDepth = DC(textureCube(u_fragmentCubeMap6, normalize(texcoordCube + jitter * distance)));
         highp float visibility = currentDepth - shadowDepth;
         shadow += 1.0 - step(0.0, visibility) * SHADOW_ALPHA;
         //shadow += visibility < 0.0 ? 1.0 : SHADOW_ALPHA;
     }
 #else
-#define SAMPLES 16
 #define SAMPLES 12
 #define SAMPLE_MULTIPLICATOR (1.0 / 12.0)
     vec2 sampleOffsetTable[SAMPLES];
@@ -181,13 +210,19 @@ void main(void)
     sampleOffsetTable[10] = vec2( -0.7005203, 0.4596822 );
     sampleOffsetTable[11] = vec2( -0.9713828, -0.06329931 );
     // sampleOffsetTable[12] = vec2( 0.0, 0.0 );
+    // highp float random = (gl_FragCoord.z + shadowPosition.z) * 0.5;
+    highp float random = texture2D( u_fragmentMap7, gl_FragCoord.xy * SCREEN_SIZE_MULTIPLICATOR ).r;
+    random *= 3.141592653589793;
+    highp vec2 rot;
+    rot.x = cos( random );
+    rot.y = sin( random );
     highp float distance = JITTER_SCALE * SHADOW_MAP_SIZE_MULTIPLICATOR;
     highp vec3 shadowCoord = var_ShadowCoord.xyz / var_ShadowCoord.w;
     highp float currentDepth = BIAS(shadowCoord.z);
     for (int i = 0; i < SAMPLES; ++i)
     {
-        vec2 jitter = sampleOffsetTable[i];
-        vec2 jitterRotated;
+        highp vec2 jitter = sampleOffsetTable[i];
+        highp vec2 jitterRotated;
         jitterRotated.x = jitter.x * rot.x - jitter.y * rot.y;
         jitterRotated.y = jitter.x * rot.y + jitter.y * rot.x;
         highp float shadowDepth = DC(texture2D(u_fragmentMap6, shadowCoord.st + jitterRotated * distance));
