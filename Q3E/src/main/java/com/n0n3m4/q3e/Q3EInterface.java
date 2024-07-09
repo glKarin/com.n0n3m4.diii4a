@@ -873,9 +873,9 @@ public class Q3EInterface
 	public String GetGameCommandPreferenceKey()
 	{
 		if(Q3EUtils.q3ei.isQ4)
-			return Q3EPreference.pref_params;
+			return Q3EPreference.pref_params_quake4;
 		else if(Q3EUtils.q3ei.isPrey)
-			return Q3EPreference.pref_params;
+			return Q3EPreference.pref_params_prey;
 		else if(Q3EUtils.q3ei.isQ2)
 			return Q3EPreference.pref_params_q2;
 		else if(Q3EUtils.q3ei.isQ3)

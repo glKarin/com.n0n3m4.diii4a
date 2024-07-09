@@ -2252,6 +2252,9 @@ public class GameLauncher extends Activity
 		SetupCommandTextWatcher(true);
 		UnlockCmdUpdate();
 
+		// if is DOOM3/Quake4/Prey, update launcher
+		updatehacktings(Q3EUtils.q3ei.IsIdTech4());
+
 		// put last
 		String game = preference.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
 		if (null == game)

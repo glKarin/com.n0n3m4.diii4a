@@ -45,8 +45,9 @@ public final class KCVarSystem
 
                         KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", 0),
                         KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "1.0", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
-                        /*KCVar.CreateCVar("harm_r_shadowMappingScheme", "integer", "0", "shadow mapping rendering scheme", 0,
+                        KCVar.CreateCVar("harm_r_shadowMapJitterScale", "float", "2.5", "scale factor for jitter offset", KCVar.FLAG_POSITIVE),
+                        /*KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
+                        KCVar.CreateCVar("harm_r_shadowMappingScheme", "integer", "0", "shadow mapping rendering scheme", 0,
                                 "0", "always using shadow mapping",
                                 "1", "prelight shadow using shadow mapping, others using stencil shadow",
                                 "2", "non-prelight shadow using shadow mapping, others using stencil shadow"
