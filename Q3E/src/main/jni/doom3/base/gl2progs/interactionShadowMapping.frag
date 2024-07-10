@@ -88,11 +88,13 @@ highp float unpack (vec4 colour)
 #endif
 
 #ifdef _DYNAMIC_BIAS
-#define BIAS_SCALE 1.0 // 0.999
+#define BIAS_SCALE 0.999
 #define BIAS(x) ((x) * BIAS_SCALE)
-#else
-#define BIAS_OFFSET 0.0 // 0.001
+#elif defined(_FIXED_BIAS)
+#define BIAS_OFFSET 0.001
 #define BIAS(x) ((x) - BIAS_OFFSET)
+#else
+#define BIAS(x) (x)
 #endif
 
 void main(void)
@@ -184,7 +186,7 @@ void main(void)
     highp vec4 shadowPosition = var_VertexPosition * shadowMVPMatrix[shadowIndex];
     shadowPosition.xyz /= shadowPosition.w;
     highp float currentDepth = BIAS(shadowPosition.z);
-    highp float distance = JITTER_SCALE;
+    highp float distance = JITTER_SCALE * 0.5;
     for (int i = 0; i < SAMPLES; ++i)
     {
         highp vec3 jitter = sampleOffsetTable[i];

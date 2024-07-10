@@ -58,14 +58,16 @@ in highp vec4 var_ShadowCoord;
 
 #ifdef _DYNAMIC_BIAS
 #ifdef _PARALLEL_LIGHT
-#define BIAS_SCALE 1.0 // 0.999991
+#define BIAS_SCALE 0.999991
 #else
-#define BIAS_SCALE 1.0 // 0.999
+#define BIAS_SCALE 0.999
 #endif
 #define BIAS(x) ((x) * BIAS_SCALE)
-#else
-#define BIAS_OFFSET 0.0 // 0.001
+#elif defined(_FIXED_BIAS)
+#define BIAS_OFFSET 0.001
 #define BIAS(x) ((x) - BIAS_OFFSET)
+#else
+#define BIAS(x) (x)
 #endif
 
 out vec4 _gl_FragColor;
