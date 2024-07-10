@@ -9,6 +9,7 @@ project(idtech)
 
 add_definitions(-D__ANDROID__)
 option(ANDROID "Android build" ON)
+option(BUILD_TESTING "Build tests" OFF)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -69,8 +70,9 @@ OPTION(GAME_QUAKE2      "Build Quake 2"                         ON)
 OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
 OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
 OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
-OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
+
+OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
 if(NOT GAME_DOOM3)
     message(STATUS "Build OpenAL alone")
@@ -82,7 +84,7 @@ if(GAME_DOOM3)
 add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_RTCW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_RTCW OR GAME_DOOM)
     message(STATUS "Build extras depend shared libraries")
 add_subdirectory (deplibs) # common depend libraries
 endif()
@@ -128,6 +130,10 @@ add_subdirectory (duke4/neo) # DNF
 endif()
 
 if(GAME_DOOM)
-    message(STATUS "Build GZDOOM")
-    add_subdirectory (gzdoom) # GZDOOM
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8 #[[ OR TRUE]]) # GZDOOM only support 64bits system
+        message(STATUS "Build GZDOOM")
+        add_subdirectory (gzdoom) # GZDOOM
+    else()
+        message(WARNING "GZDOOM not support 32bits build!")
+    endif()
 endif()

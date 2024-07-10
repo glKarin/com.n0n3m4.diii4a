@@ -72,7 +72,7 @@ set (oboe_sources
     src/common/Version.cpp
     )
 
-add_library(oboe ${oboe_sources})
+add_library(oboe SHARED ${oboe_sources})
 
 # Specify directories which the compiler should look for headers
 target_include_directories(oboe

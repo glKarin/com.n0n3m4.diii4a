@@ -179,7 +179,7 @@ if(INSTALL_DOCS)
     install(DIRECTORY doc/libogg DESTINATION ${CMAKE_INSTALL_DOCDIR}/html)
 endif()
 
-if(BUILD_TESTING)
+if(0) #k BUILD_TESTING
     add_executable(test_bitwise src/bitwise.c ${OGG_HEADERS})
     target_compile_definitions(test_bitwise PRIVATE _V_SELFTEST)
     target_include_directories(test_bitwise PRIVATE
