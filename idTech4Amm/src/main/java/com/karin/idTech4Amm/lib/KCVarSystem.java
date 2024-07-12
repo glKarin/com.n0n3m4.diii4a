@@ -63,7 +63,8 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_autoAspectRatio", "integer", "1", "automatic setup aspect ratio of view", 0,
                                 "0", "Manual",
                                 "1", "Force setup r_aspectRatio to -1 (default)",
-                                "2", "Automatic setup r_aspectRatio to 0,1,2 by screen size")
+                                "2", "Automatic setup r_aspectRatio to 0,1,2 by screen size"),
+                        KCVar.CreateCVar("harm_r_renderToolsMultithread", "bool", "0", "Enable render tools debug in multi-threading", 0)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(

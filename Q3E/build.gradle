@@ -23,7 +23,7 @@ android {
         externalNativeBuild {
             cmake {
                 abiFilters ABIFILTERS
-                arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21" /*, "-DANDROID_STL=c++_shared"*/
+                arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21"/*, "-DANDROID_STL=c++_shared"*/
                 cppFlags "-fexceptions", "-frtti"
             }
         }

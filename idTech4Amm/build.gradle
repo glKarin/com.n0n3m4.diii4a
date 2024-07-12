@@ -10,8 +10,8 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
-        versionCode 11051
-        versionName '1.1.0harmattan51'
+        versionCode 11052
+        versionName '1.1.0harmattan52'
         versionNameSuffix 'natasha'
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
