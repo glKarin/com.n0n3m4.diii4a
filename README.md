@@ -209,6 +209,7 @@ Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support
 ### About:
 
 * Source in `assets/source` folder in APK file.
+* Using `exportGLSLShaderSource` command can export GLSL shaders.
 	
 ----------------------------------------------------------------------------------
 
