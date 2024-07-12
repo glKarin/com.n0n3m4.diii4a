@@ -304,7 +304,6 @@
     <string name="sub_directory">独立目录: </string>
     <string name="app_is_rebooting">应用重启中......</string>
     <string name="standalone_game_data_directory">游戏数据独立文件夹</string>
-    <string name="game_data_directories_are_standalone"><![CDATA[毁灭战士3: doom3/\n雷神之锤4: quake4/\n掠食(2006): prey/\n雷神之锤1: quake1/\n雷神之锤2: quake2/\n雷神之锤3: quake3/\n重返德军总部: rtcw/\nThe Dark Mod: darkmod/ (总是独立)\n毁灭战士3 BFG: doom3bfg/ (总是独立)]]></string>
     <string name="load_local_engine_library">加载本地引擎库</string>
     <string name="pid">进程PID</string>
     <string name="get_application_pid">获取进程PID</string>
@@ -325,4 +324,7 @@
     <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">阴影映射透明度(harm_r_shadowMapAlpha):</string>
     <string name="files">文件</string>
     <string name="_files">文件</string>
+    <string name="show_game_datas_standalone_directories">显示游戏独立文件夹</string>
+    <string name="make_game_use_standalone_data_directory">游戏使用独立的文件夹</string>
+    <string name="game_datas_standalone_directories">游戏独立文件夹</string>
 </resources>

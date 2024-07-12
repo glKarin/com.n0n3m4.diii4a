@@ -52,8 +52,12 @@
                 android:key="harm_game_standalone_directory"
                 android:persistent="true"
                 android:defaultValue="false"
-                android:summary="@string/game_data_directories_are_standalone"
+                android:summary="@string/make_game_use_standalone_data_directory"
                 />
+            <Preference
+                android:key="standalone_game_data_directories"
+                android:title="@string/show_game_datas_standalone_directories"
+                android:persistent="false"/>
             <CheckBoxPreference
                 android:title="@string/redirect_output_to_file"
                 android:key="harm_redirect_output_to_file"

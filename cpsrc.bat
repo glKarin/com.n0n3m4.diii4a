@@ -39,7 +39,7 @@ del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\premake4.exe
 xcopy /Y/Q %SRC_PATH%\.gitignore %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\build.gradle %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CHANGES.md %DST_PATH%\
-xcopy /Y/Q %SRC_PATH%\CHANGES.zh.md %DST_PATH%\
+rem xcopy /Y/Q %SRC_PATH%\CHANGES.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CHECK_FOR_UPDATE.json %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CMakeLists.txt %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\gradle.properties %DST_PATH%\
@@ -49,7 +49,7 @@ xcopy /Y/Q %SRC_PATH%\idtech4amm.keystore %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\LICENSE %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\local.properties %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\README.md %DST_PATH%\
-xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\
+rem xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\settings.gradle %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\cmake_linux_build.sh %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\cmake_msvc_build.bat %DST_PATH%\
