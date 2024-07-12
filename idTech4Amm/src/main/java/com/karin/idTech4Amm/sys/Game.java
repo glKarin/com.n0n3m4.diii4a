@@ -49,6 +49,9 @@ public enum Game
 
     // Doom3 BFG
     D3BFG_BASE(Q3EGlobals.GAME_DOOM3BFG, "base", "", "", false, R.string.d3bfg_base),
+
+    // GZDOOM
+    GZDOOM_BASE(Q3EGlobals.GAME_GZDOOM, "", "", "", false, R.string.doom_base),
     ;
 
     public final String type; // game type: doom3/quake4/prey2006

@@ -44,18 +44,27 @@ public final class KCVarSystem
                         KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
 
                         KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", 0),
-                        KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "0.5", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
-                        /*KCVar.CreateCVar("harm_r_shadowMappingScheme", "integer", "0", "shadow mapping rendering scheme", 0,
+                        KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "1.0", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_shadowMapJitterScale", "float", "2.5", "scale factor for jitter offset", KCVar.FLAG_POSITIVE),
+                        /*KCVar.CreateCVar("harm_r_shadowMapSampleFactor", "float", "-1", "soft shadow's sample factor in shadow mapping(0: disable, -1: auto, > 0: multiple)", 0),
+                        KCVar.CreateCVar("harm_r_shadowMappingScheme", "integer", "0", "shadow mapping rendering scheme", 0,
                                 "0", "always using shadow mapping",
                                 "1", "prelight shadow using shadow mapping, others using stencil shadow",
                                 "2", "non-prelight shadow using shadow mapping, others using stencil shadow"
                         ),*/
+                        KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map", 0),
 
                         KCVar.CreateCVar("harm_r_stencilShadowTranslucent", "bool", "0", "enable translucent shadow in stencil shadow", 0),
-                        KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "0.5", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "1.0", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_stencilShadowCombine", "bool", "0", "combine local and global stencil shadow", 0),
-                        KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map", 0)
+                        KCVar.CreateCVar("harm_r_stencilShadowSoft", "bool", "0", "enable soft stencil shadow(Only OpenGLES3.1+)", 0),
+                        KCVar.CreateCVar("harm_r_stencilShadowSoftBias", "float", "-1", "soft stencil shadow sampler BIAS(-1 to automatic, 0 to disable)", 0),
+                        KCVar.CreateCVar("harm_r_stencilShadowSoftCopyStencilBuffer", "bool", "0", "copy stencil buffer directly for soft stencil shadow. 0: copy depth buffer and bind and renderer stencil buffer to texture directly; 1: copy stencil buffer to texture directly", 0),
+                        KCVar.CreateCVar("harm_r_autoAspectRatio", "integer", "1", "automatic setup aspect ratio of view", 0,
+                                "0", "Manual",
+                                "1", "Force setup r_aspectRatio to -1 (default)",
+                                "2", "Automatic setup r_aspectRatio to 0,1,2 by screen size"),
+                        KCVar.CreateCVar("harm_r_renderToolsMultithread", "bool", "0", "Enable render tools debug in multi-threading", 0)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(
@@ -73,7 +82,8 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "Head", "Set head joint when without head model in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
                 );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
@@ -102,6 +112,7 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot level(0 - auto; 1 - 8: difficult level)", KCVar.FLAG_POSITIVE)
                 );
 
@@ -118,7 +129,8 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwareness", "bool", "0", "Enables full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "neck", "Set head joint when without head model in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
                 );
 
         _cvars.put("RENDERER", RENDERER_CVARS);

@@ -18,6 +18,7 @@
 #define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
 #define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
 #define _ANDROID_GAME_DATA_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME
+#define _ANDROID_APP_HOME_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME "/files"
 
 #ifdef _MULTITHREAD
 extern bool multithreadActive;
@@ -84,6 +85,9 @@ bool mouse_available = false;
 
 // Game data directory.
 char *game_data_dir = NULL;
+
+// Application home directory.
+char *app_home_dir = NULL;
 
 // Surface window
 volatile ANativeWindow *window = NULL;
@@ -190,6 +194,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
 #endif
     printf("    Using mouse: %d\n", mouse_available);
     printf("    Game data directory: %s\n", game_data_dir);
+    printf("    Application home directory: %s\n", app_home_dir);
     printf("    Refresh rate: %d\n", refresh_rate);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
@@ -321,8 +326,9 @@ void Q3E_SetInitialContext(const void *context)
     USING_GLES3 = false;
 #endif
 
-    native_library_dir = strdup(ptr->nativeLibraryDir);
-    game_data_dir = strdup(ptr->gameDataDir);
+    native_library_dir = strdup(ptr->nativeLibraryDir ? ptr->nativeLibraryDir : "");
+    game_data_dir = strdup(ptr->gameDataDir ? ptr->gameDataDir : "");
+    app_home_dir = strdup(ptr->appHomeDir ? ptr->appHomeDir : "");
     redirect_output_to_file = ptr->redirectOutputToFile ? true : false;
     no_handle_signals = ptr->noHandleSignals ? true : false;
 #ifdef _MULTITHREAD
@@ -436,6 +442,11 @@ const char * Sys_DLLDefaultPath(void)
 const char * Sys_GameDataDefaultPath(void)
 {
     return game_data_dir ? game_data_dir : _ANDROID_GAME_DATA_PATH;
+}
+
+const char * Sys_ApplicationHomePath(void)
+{
+    return app_home_dir ? app_home_dir : _ANDROID_APP_HOME_PATH;
 }
 
 extern "C"

@@ -1,4 +1,5 @@
 package com.karin.idTech4Amm.ui;
+import android.content.Context;
 import android.os.Handler;
 import android.preference.PreferenceFragment;
 import android.os.Bundle;
@@ -7,7 +8,9 @@ import android.preference.Preference;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
+import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import java.util.Set;
 
@@ -38,6 +41,26 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference)
     {
+        String key = preference.getKey();
+        Context context = ContextUtility.GetContext(this);
+        if("standalone_game_data_directories".equals(key))
+        {
+            final String endl = TextHelper.GetDialogMessageEndl();
+            StringBuilder sb = new StringBuilder();
+            sb
+                    .append(Q3ELang.tr(context, R.string.doom_3)).append(": doom3").append(endl)
+                    .append(Q3ELang.tr(context, R.string.quake_4)).append(": quake4").append(endl)
+                    .append(Q3ELang.tr(context, R.string.prey_2006)).append(": prey").append(endl)
+                    .append(Q3ELang.tr(context, R.string.rtcw_base)).append(": rtcw").append(endl)
+                    .append(Q3ELang.tr(context, R.string.quake_3)).append(": quake3").append(endl)
+                    .append(Q3ELang.tr(context, R.string.quake_2)).append(": quake2").append(endl)
+                    .append(Q3ELang.tr(context, R.string.quake_1)).append(": quake1").append(endl)
+                    .append(Q3ELang.tr(context, R.string.d3bfg_base)).append(": doom3bfg (always)").append(endl)
+                    .append(Q3ELang.tr(context, R.string.tdm_base)).append(": darkmod (always)").append(endl)
+                    .append(Q3ELang.tr(context, R.string.doom)).append(": gzdoom (always)")
+            ;
+            ContextUtility.OpenMessageDialog(context, Q3ELang.tr(context, R.string.game_datas_standalone_directories), TextHelper.GetDialogMessage(sb.toString()));
+        }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
     
@@ -45,6 +68,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
     public boolean onPreferenceChange(Preference preference, Object newValue)
     {
         String key = preference.getKey();
+        Context context = ContextUtility.GetContext(this);
         switch (key)
         {
             case PreferenceKey.LAUNCHER_ORIENTATION:
@@ -85,12 +109,12 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             }
             case Q3EPreference.LANG:
             {
-                Toast.makeText(ContextUtility.GetContext(this), R.string.be_available_on_reboot_the_next_time, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.be_available_on_reboot_the_next_time, Toast.LENGTH_SHORT).show();
                 return true;
             }
             case Q3EPreference.GAME_STANDALONE_DIRECTORY:
             {
-                Toast.makeText(ContextUtility.GetContext(this), R.string.app_is_rebooting, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.app_is_rebooting, Toast.LENGTH_SHORT).show();
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {

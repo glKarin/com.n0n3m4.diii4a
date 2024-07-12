@@ -7,8 +7,8 @@
 # Setup build type: Release | Debug
 BUILD_TYPE=Release
 
-echo "Configure and generate MSVC project ......";
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -CMakeLists.txt;
+echo "Configure and generate GNU makefile ......";
+cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} CMakeLists.txt;
 
 echo "Build ${BUILD_TYPE} ......";
 make;

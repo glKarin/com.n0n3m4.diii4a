@@ -13,7 +13,7 @@ varying vec2 var_TexDiffuse;
 
 void main(void)
 {
-	var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
+    var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
 
-	gl_Position = attr_Vertex * u_modelViewProjectionMatrix;
+    gl_Position = attr_Vertex * u_modelViewProjectionMatrix;
 }

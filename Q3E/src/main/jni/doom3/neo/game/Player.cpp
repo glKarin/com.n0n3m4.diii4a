@@ -1614,6 +1614,9 @@ void idPlayer::Spawn(void)
 	idAFAttachment *headEnt = head.GetEntity();
 
 	if (headEnt) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || !harm_pm_fullBodyAwarenessHeadVisible.GetBool())
+#endif
 		headEnt->GetRenderEntity()->suppressSurfaceInViewID = entityNumber+1;
 		headEnt->GetRenderEntity()->noSelfShadow = true;
 	}
@@ -6959,9 +6962,25 @@ void idPlayer::Think(void)
 		renderEntity.suppressShadowInViewID	= entityNumber+1;
 
 		if (headRenderEnt) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+			if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI || !harm_pm_fullBodyAwarenessHeadVisible.GetBool())
+#endif
 			headRenderEnt->suppressShadowInViewID = entityNumber+1;
+#ifdef _MOD_FULL_BODY_AWARENESS
+			else
+				headRenderEnt->suppressShadowInViewID = 0;
+#endif
 		}
 	}
+#ifdef _MOD_FULL_BODY_AWARENESS
+    if(headRenderEnt)
+    {
+        if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || focusUI || !harm_pm_fullBodyAwarenessHeadVisible.GetBool())
+            headRenderEnt->suppressSurfaceInViewID = entityNumber+1;
+        else
+            headRenderEnt->suppressSurfaceInViewID = 0;
+    }
+#endif
 
 	// never cast shadows from our first-person muzzle flashes
 	renderEntity.suppressShadowInLightID = LIGHTID_VIEW_MUZZLE_FLASH + entityNumber;

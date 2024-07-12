@@ -7,7 +7,7 @@
     </string-array>
 
     <string-array name="map_back_labels">
-        <item>Клавиша выхода из карты</item>
+        <item>Клавиша выхода с карты</item>
         <item>3-Нажатия, чтобы выйти</item>
     </string-array>
 
@@ -21,8 +21,8 @@
     <string-array name="onscreen_slider_style_labels">
         <item>Лево-право</item>
         <item>Вниз-право</item>
-        <item>Лево-право(click)</item>
-        <item>Вниз-право(click)</item>
+        <item>Лево-право(нажатие)</item>
+        <item>Вниз-право(нажатие)</item>
     </string-array>
 
     <string-array name="onscreen_type_labels">

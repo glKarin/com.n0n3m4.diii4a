@@ -30,9 +30,7 @@ out lowp vec4 var_Color;
 
 void main(void)
 {
-	gl_Position =
-	    u_modelViewProjectionMatrix * (attr_Vertex.w * u_lightOrigin +
-					   attr_Vertex - u_lightOrigin);
+    gl_Position = u_modelViewProjectionMatrix * (attr_Vertex.w * u_lightOrigin + attr_Vertex - u_lightOrigin);
 
-	var_Color = u_glColor;
+    var_Color = u_glColor;
 }

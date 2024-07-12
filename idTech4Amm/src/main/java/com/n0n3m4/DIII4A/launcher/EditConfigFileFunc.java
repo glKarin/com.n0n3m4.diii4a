@@ -49,7 +49,18 @@ public final class EditConfigFileFunc extends GameLauncherFunc
 
     public void run()
     {
-        String basePath = KStr.AppendPath(m_path, m_game, m_file);
+        String basePath = m_path;
+        if(!Q3EUtils.q3ei.IsStandaloneGame())
+        {
+            String innerDir = Q3EUtils.q3ei.GetGameModSubDirectory();
+            if(KStr.NotEmpty(innerDir))
+            {
+                if(!m_game.startsWith(innerDir))
+                    basePath = KStr.AppendPath(basePath, innerDir);
+            }
+            basePath = KStr.AppendPath(basePath, m_game);
+        }
+        basePath = KStr.AppendPath(basePath, m_file);
         File f = new File(basePath);
         if(!f.isFile() || !f.canWrite() || !f.canRead())
         {

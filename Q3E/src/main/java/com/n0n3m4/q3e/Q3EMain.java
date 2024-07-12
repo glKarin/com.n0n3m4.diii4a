@@ -33,11 +33,14 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.karin.KDebugTextView;
+import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
+import com.n0n3m4.q3e.karin.KidTechCommand;
 
 public class Q3EMain extends Activity
 {
@@ -96,6 +99,10 @@ public class Q3EMain extends Activity
         // create
         super.onCreate(savedInstanceState);
 
+        // check start
+        if(!CheckStart())
+            return;
+
         Q3EUtils.DumpPID(this);
 
         // setup language environment
@@ -104,12 +111,8 @@ public class Q3EMain extends Activity
         // load game
         if (gameHelper.checkGameFiles())
         {
-            // if game is TDM, extract glsl shader
-            if(Q3EUtils.q3ei.IsTDMTech())
-                gameHelper.ExtractTDMGLSLShaderSource();
-            // if game is D3BFG, extract hlsl shader
-            else if(Q3EUtils.q3ei.IsIdTech4BFG())
-                gameHelper.ExtractDOOM3BFGHLSLShaderSource();
+            // extract game required resource in apk
+            gameHelper.ExtractGameResource();
 
             // init GUI component
             InitGUI();
@@ -323,5 +326,29 @@ public class Q3EMain extends Activity
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
         return mControlGLSurfaceView.OnKeyUp(keyCode, event);
+    }
+
+    private boolean CheckStart()
+    {
+        // arm32 not support GZDOOM
+        if(Q3EUtils.q3ei.isDOOM)
+        {
+            if(!Q3EJNI.Is64())
+            {
+                Toast.makeText(this, "GZDOOM not support on arm32 device!", Toast.LENGTH_LONG).show();
+                finish();
+                Q3EUtils.RunLauncher(this);
+                return false;
+            }
+            String iwad = KidTechCommand.GetParam("-+", Q3EUtils.q3ei.cmd, "iwad");
+            if(KStr.IsBlank(iwad))
+            {
+                Toast.makeText(this, "GZDOOM requires -iwad file!", Toast.LENGTH_LONG).show();
+                finish();
+                Q3EUtils.RunLauncher(this);
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -31,7 +31,21 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "qgl.h"
 
+#include "matrix/esUtil.h"
+#ifdef GL_ES_VERSION_3_0 // GLES3.1
+#define GL_BLIT_FRAMEBUFFER_AVAILABLE() ( GLIMP_PROCISVALID(qglBlitFramebuffer) )
+#define GL_DRAW_BUFFERS_AVAILABLE() ( GLIMP_PROCISVALID(qglDrawBuffers) )
+#define GL_DEBUG_MESSAGE_AVAILABLE() ( GLIMP_PROCISVALID(qglDebugMessageControl) && GLIMP_PROCISVALID(qglDebugMessageCallback) && GLIMP_PROCISVALID(qglGetDebugMessageLog))
+#endif
+
+
 extern bool USING_GLES3;
+#ifdef _OPENGLES3
+extern int GLES3_VERSION;
+#define USING_GLES30 (GLES3_VERSION > -1)
+#define USING_GLES31 (GLES3_VERSION > 0)
+#define USING_GLES32 (GLES3_VERSION > 1)
+#endif
 
 //#define _SHADOW_MAPPING
 #ifdef _SHADOW_MAPPING
@@ -39,7 +53,6 @@ extern bool USING_GLES3;
 //#define SHADOW_MAPPING_DEBUG
 
 #define MAX_SHADOWMAP_RESOLUTIONS 5
-#include "rb/Framebuffer.h"
 
 // RB: added multiple subfrustums for cascaded shadow mapping
 enum frustumPlanes_t
@@ -65,6 +78,10 @@ enum
 	MAX_FRUSTUMS,
 };
 #endif
+
+#include "rb/Framebuffer.h"
+#include "rb/OfflineScreenRenderer.h"
+#include "rb/StencilTexture.h"
 #include "Image.h"
 
 #include "MegaTexture.h"
@@ -675,9 +692,9 @@ typedef struct {
 	bool		forceGlState;		// the next GL_State will ignore glStateBits and set everything
 
 	shaderProgram_s	*currentProgram;
-#ifdef _SHADOW_MAPPING
-	Framebuffer*		currentFramebuffer;
-#endif
+//#ifdef _SHADOW_MAPPING
+	idFramebuffer*		currentFramebuffer;
+//#endif
 } glstate_t;
 
 
@@ -1512,9 +1529,14 @@ typedef enum {
 	SHADER_INTERACTIONBLINNPHONGSPOTLIGHT,
 #endif
 	// translucent stencil shadow
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 	SHADER_INTERACTIONTRANSLUCENT,
 	SHADER_INTERACTIONBLINNPHONGTRANSLUCENT,
+
+#ifdef _SOFT_STENCIL_SHADOW
+	SHADER_INTERACTIONSOFT,
+	SHADER_INTERACTIONBLINNPHONGSOFT,
+#endif
 #endif
     // costum
 	SHADER_CUSTOM,
@@ -1531,9 +1553,14 @@ typedef enum {
 #define SHADER_SHADOW_MAPPING_END SHADER_INTERACTIONBLINNPHONGSPOTLIGHT
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
+#ifdef _SOFT_STENCIL_SHADOW
+#define SHADER_STENCIL_SHADOW_BEGIN SHADER_INTERACTIONTRANSLUCENT
+#define SHADER_STENCIL_SHADOW_END SHADER_INTERACTIONBLINNPHONGSOFT
+#else
 #define SHADER_STENCIL_SHADOW_BEGIN SHADER_INTERACTIONTRANSLUCENT
 #define SHADER_STENCIL_SHADOW_END SHADER_INTERACTIONBLINNPHONGTRANSLUCENT
+#endif
 #endif
 
 /*
@@ -1728,6 +1755,7 @@ public:
 	void ActuallyLoad(void); // backend: if in multi-threading, load actually from queue with OpenGL context
 	const shaderProgram_t * Get(shaderHandle_t handle) const;
 	shaderHandle_t GetHandle(const char *name) const;
+	void ReloadShaders(void);
 
 	static idGLSLShaderManager _shaderManager;
 	static const shaderHandle_t INVALID_SHADER_HANDLE;
@@ -2203,6 +2231,7 @@ extern idCVar harm_r_shadowMapFrustumFar;
 extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapNonParallelLightUltra;
+extern idCVar harm_r_shadowMapJitterScale;
 
 extern idBounds bounds_zeroOneCube;
 extern idBounds bounds_unitCube;
@@ -2216,9 +2245,15 @@ void R_SetupFrontEndViewDefMVP(void);
 
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 extern idCVar harm_r_stencilShadowTranslucent;
 extern idCVar harm_r_stencilShadowAlpha;
+
+#ifdef _SOFT_STENCIL_SHADOW
+extern idCVar harm_r_stencilShadowSoft;
+extern idCVar harm_r_stencilShadowSoftBias;
+extern idCVar harm_r_stencilShadowSoftCopyStencilBuffer;
+#endif
 #endif
 
 #ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma

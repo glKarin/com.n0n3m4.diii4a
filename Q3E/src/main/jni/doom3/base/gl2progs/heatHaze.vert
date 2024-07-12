@@ -34,7 +34,7 @@ varying highp vec4 var_TexCoord2;
 // # texCoord[2] is the copied deform magnitude
 void main(void)
 {
-    #if HEATHAZE_BFG // BFG
+#if HEATHAZE_BFG // BFG
     // texture 0 takes the texture coordinates and adds a scroll
     vec4 textureScroll = u_vertexParm0;
     var_TexCoord1 = vec4( attr_TexCoord.xy, 0.0, 0.0 ) + textureScroll;

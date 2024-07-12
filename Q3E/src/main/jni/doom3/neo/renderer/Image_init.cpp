@@ -1014,14 +1014,41 @@ CREATE_SHADOW_MAP_IMAGE_RES_INVOKE(varname, 4, name)
 #define DEPTH_COMPONENT (glConfig.depth24Available ? 24 : 16)
 #endif
 // RB begin
-CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_2D_RGBA, GenerateShadow2DRGBAImage, (size, size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA))
-CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_2D_DEPTH, GenerateShadow2DDepthImage, (size, size, DEPTH_FILTER, true, TR_CLAMP_TO_ZERO_ALPHA, DEPTH_COMPONENT, true))
-CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_CUBE_RGBA, GenerateShadowCubeRGBAImage, (size, TF_LINEAR, true, TR_CLAMP_TO_ZERO_ALPHA))
-CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_CUBE_DEPTH, GenerateShadowCubeDepthImage, (size, DEPTH_FILTER, true, TR_CLAMP_TO_ZERO_ALPHA, DEPTH_COMPONENT, true))
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_2D_RGBA, GenerateShadow2DRGBAImage, (size, size, TF_LINEAR, false, TR_CLAMP_TO_ZERO_ALPHA))
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_2D_DEPTH, GenerateShadow2DDepthImage, (size, size, DEPTH_FILTER, false, TR_CLAMP_TO_ZERO_ALPHA, DEPTH_COMPONENT, true))
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_CUBE_RGBA, GenerateShadowCubeRGBAImage, (size, TF_LINEAR, false, TR_CLAMP_TO_ZERO_ALPHA))
+CREATE_SHADOW_MAP_IMAGE_DECL(GLES2_CUBE_DEPTH, GenerateShadowCubeDepthImage, (size, DEPTH_FILTER, false, TR_CLAMP_TO_ZERO_ALPHA, DEPTH_COMPONENT, true))
 
 #ifdef GL_ES_VERSION_3_0
 CREATE_SHADOW_MAP_IMAGE_DECL(GLES3_2DARRAY_DEPTH, GenerateShadowArray, (size, size, 6, TF_LINEAR, TR_CLAMP_TO_ZERO_ALPHA, 24, true))
 #endif
+
+//#include "image/Image_blueNoiseVC_1M.h" // 256^2 R8 data
+#include "image/Image_blueNoiseVC_2.h" // 512^2 RGB8 data
+
+static void R_CreateBlueNoise256Image( idImage* image )
+{
+	static byte	data[BLUENOISE_TEX_HEIGHT][BLUENOISE_TEX_WIDTH][4];
+
+	for( int x = 0; x < BLUENOISE_TEX_WIDTH; x++ )
+	{
+		for( int y = 0; y < BLUENOISE_TEX_HEIGHT; y++ )
+		{
+#if 1
+			data[x][y][0] = blueNoiseTexBytes[ y * BLUENOISE_TEX_PITCH + x * 3 + 0 ];
+			data[x][y][1] = blueNoiseTexBytes[ y * BLUENOISE_TEX_PITCH + x * 3 + 1 ];
+			data[x][y][2] = blueNoiseTexBytes[ y * BLUENOISE_TEX_PITCH + x * 3 + 2 ];
+#else
+			data[x][y][0] = blueNoiseTexBytes[ y * BLUENOISE_TEX_PITCH + x ];
+			data[x][y][1] = blueNoiseTexBytes[ y * BLUENOISE_TEX_PITCH + x ];
+			data[x][y][2] = blueNoiseTexBytes[ y * BLUENOISE_TEX_PITCH + x ];
+#endif
+			data[x][y][3] = 1;
+		}
+	}
+
+	image->GenerateImage( ( byte* )data, BLUENOISE_TEX_WIDTH, BLUENOISE_TEX_HEIGHT, TF_NEAREST, false, TR_REPEAT, TD_HIGH_QUALITY );
+}
 // RB end
 #endif
 
@@ -2263,6 +2290,7 @@ void idImageManager::Init()
 		CREATE_SHADOW_MAP_IMAGE_INVOKE(shadowImage, GLES3_2DARRAY_DEPTH)
 	}
 #endif
+	blueNoiseImage256 = globalImages->ImageFromFunction( "_blueNoise256", R_CreateBlueNoise256Image );
 	// RB end
 #endif
 }

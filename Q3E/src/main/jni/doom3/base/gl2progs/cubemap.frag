@@ -28,5 +28,5 @@ uniform lowp vec4 u_glColor;
 
 void main(void)
 {
-  gl_FragColor = textureCube(u_fragmentCubeMap0, var_TexCoord) * u_glColor * var_Color;
+    gl_FragColor = textureCube(u_fragmentCubeMap0, var_TexCoord) * u_glColor * var_Color;
 }

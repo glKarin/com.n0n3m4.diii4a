@@ -34,7 +34,7 @@
     <string name="phong">Phong</string>
     <string name="blinn_phong">Blinn-Phong</string>
     <string name="specular_exponent_cvar_harm_r_specularexponent">镜面反射指数(harm_r_specularExponent):</string>
-    <string name="specular_exponent_in_interaction_light_model_default_is_4_0">光照下镜面反射指数(默认 4.0)</string>
+    <string name="specular_exponent_in_interaction_light_model_default_is_4_0">光照下镜面反射指数(默认4.0)</string>
     <string name="sound">音频实现(s_driver)</string>
     <string name="load_quicksave_when_start_game">启动游戏时自动加载快速存档</string>
     <string name="edit_autoexec_cfg">编辑 autoexec.cfg</string>
@@ -69,7 +69,6 @@
     <string name="half_0_5x">一半(0.5x)</string>
     <string name="double_2x">双倍(2x)</string>
     <string name="custom">自定义</string>
-    <string name="custom2">自定义:</string>
     <string name="_0_auto_using_screen_aspect_ratio">(0 - 自动使用屏幕比例)</string>
     <string name="msaa_warning_tegra_doesn_t_support_it">抗锯齿: (警告, Tegra不支持)</string>
     <string name="_1x_none">1倍(禁用)</string>
@@ -88,6 +87,7 @@
     <string name="quake_3">雷神之锤3</string>
     <string name="rtcw">重返德军总部</string>
     <string name="tdm">Dark mod</string>
+    <string name="doom">毁灭战士</string>
     <string name="prey_2006">掠食(2006)</string>
     <string name="settings">设置</string>
     <string name="changes">更新</string>
@@ -291,6 +291,7 @@
     <string name="rtcw_base">重返德军总部</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">毁灭战士3 BFG</string>
+    <string name="doom_base">毁灭战士</string>
     <string name="quake_3_base">雷神之锤3:竞技场</string>
     <string name="quake_3_teamarena">雷神之锤3:团队竞技场</string>
     <string name="stop">停止</string>
@@ -303,7 +304,6 @@
     <string name="sub_directory">独立目录: </string>
     <string name="app_is_rebooting">应用重启中......</string>
     <string name="standalone_game_data_directory">游戏数据独立文件夹</string>
-    <string name="game_data_directories_are_standalone"><![CDATA[毁灭战士3: doom3/\n雷神之锤4: quake4/\n掠食(2006): prey/\n雷神之锤1: quake1/\n雷神之锤2: quake2/\n雷神之锤3: quake3/\n重返德军总部: rtcw/\nThe Dark Mod: darkmod/ (总是独立)\n毁灭战士3 BFG: doom3bfg/ (总是独立)]]></string>
     <string name="load_local_engine_library">加载本地引擎库</string>
     <string name="pid">进程PID</string>
     <string name="get_application_pid">获取进程PID</string>
@@ -313,4 +313,18 @@
     <string name="open_system_file_browser">打开安卓存储访问框架</string>
     <string name="application_pid">"程序PID: "</string>
     <string name="doom_3_bfg">毁灭战士3 BFG</string>
+    <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">半透明模板阴影透明度(harm_r_stencilShadowAlpha):</string>
+    <string name="_0_1_default_0_5">0 - 1(默认1.0)</string>
+    <string name="soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft">软模板阴影(仅OpenGLES3.1+)(harm_r_stencilShadowSoft)</string>
+    <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">组合模板阴影(harm_r_stencilShadowCombine)</string>
+    <string name="automatic_setup_aspect_ratio_harm_r_autoaspectratio">自动设置屏幕高宽比(harm_r_autoAspectRatio)</string>
+    <string name="setup_cvar_r_aspectratio_manually">手动设置cvar `r_aspectRatio`</string>
+    <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">强制设置cvar `r_aspectRatio`为-1(使用实际屏幕的宽高比)</string>
+    <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">自动设置cvar `r_aspectRatio`为0,1,2(根据屏幕的宽高比转为4:3/16:9/16:10)</string>
+    <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">阴影映射透明度(harm_r_shadowMapAlpha):</string>
+    <string name="files">文件</string>
+    <string name="_files">文件</string>
+    <string name="show_game_datas_standalone_directories">显示游戏独立文件夹</string>
+    <string name="make_game_use_standalone_data_directory">游戏使用独立的文件夹</string>
+    <string name="game_datas_standalone_directories">游戏独立文件夹</string>
 </resources>

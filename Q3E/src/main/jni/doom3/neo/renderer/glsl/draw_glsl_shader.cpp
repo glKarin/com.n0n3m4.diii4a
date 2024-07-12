@@ -30,13 +30,13 @@
 #define GL_GetAttribLocation(program, name) qglGetAttribLocation(program, name)
 #define GL_GetUniformLocation(program, name) qglGetUniformLocation(program, name)
 #else
-GLint GL_GetAttribLocation(GLint program, const char *name)
+GLint GL_GetAttribLocation(GLuint program, const char *name)
 {
     GLint attribLocation = qglGetAttribLocation(program, name);
 	Sys_Printf("GL_GetAttribLocation(%s) -> %d\n", name, attribLocation);
 	return attribLocation;
 }
-GLint GL_GetUniformLocation(GLint program, const char *name)
+GLint GL_GetUniformLocation(GLuint program, const char *name)
 {
 	GLint uniformLocation = qglGetUniformLocation(program, name);
 	Sys_Printf("GL_GetUniformLocation(%s) -> %d\n", name, uniformLocation);
@@ -44,6 +44,8 @@ GLint GL_GetUniformLocation(GLint program, const char *name)
 }
 #endif
 
+static bool glslInitialized = false;
+static bool reloadGLSLShaders = false;
 static bool shaderRequired = true;
 #define REQUIRE_SHADER shaderRequired = true;
 #define UNNECESSARY_SHADER shaderRequired = false;
@@ -52,6 +54,20 @@ static bool shaderRequired = true;
 extern bool r_useDepthTexture;
 extern bool r_useCubeDepthTexture;
 extern bool r_usePackColorAsDepth;
+#endif
+
+#ifdef _MULTITHREAD
+void RB_GLSL_HandleShaders(void)
+{
+    if(!multithreadActive)
+        return;
+    shaderManager->ActuallyLoad();
+    if(reloadGLSLShaders)
+    {
+        shaderManager->ReloadShaders();
+        reloadGLSLShaders = false;
+    }
+}
 #endif
 
 static int RB_GLSL_LoadShaderProgram(
@@ -443,9 +459,15 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 #endif
 
 	// translucent stencil shadow
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 	ret.Append(GLSL_SHADER_SOURCE("interactionTranslucent", SHADER_INTERACTIONTRANSLUCENT, &interactionTranslucentShader, INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongTranslucent", SHADER_INTERACTIONBLINNPHONGTRANSLUCENT, &interactionBlinnPhongTranslucentShader, INTERACTION_TRANSLUCENT_VERT, INTERACTION_TRANSLUCENT_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
+
+	// soft stencil shadow
+#ifdef _SOFT_STENCIL_SHADOW
+	ret.Append(GLSL_SHADER_SOURCE("interactionSoft", SHADER_INTERACTIONSOFT, &interactionSoftShader, INTERACTION_SOFT_VERT, INTERACTION_SOFT_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("interactionBlinnphongSoft", SHADER_INTERACTIONBLINNPHONGSOFT, &interactionBlinnPhongSoftShader, INTERACTION_SOFT_VERT, INTERACTION_SOFT_FRAG, "BLINN_PHONG", "BLINN_PHONG"));
+#endif
 #endif
 }
 
@@ -652,6 +674,7 @@ static bool RB_GLSL_LinkShader(shaderProgram_t *shaderProgram, bool needsAttribu
 	if(!shaderProgram->vertexShader || !shaderProgram->fragmentShader)
 		return false;
 
+    if(!qglIsProgram(shaderProgram->program))
 	shaderProgram->program = qglCreateProgram();
 
 	qglAttachShader(shaderProgram->program, shaderProgram->vertexShader);
@@ -879,7 +902,7 @@ static bool RB_GLSL_InitShaders(void)
 	REQUIRE_SHADER;
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 	UNNECESSARY_SHADER;
 	for(int i = SHADER_STENCIL_SHADOW_BEGIN; i <= SHADER_STENCIL_SHADOW_END; i++)
 	{
@@ -910,42 +933,71 @@ void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
 
 	common->Printf("----- R_ReloadGLSLPrograms -----\n");
 
-	if (!RB_GLSL_InitShaders()) {
-		common->Printf("GLSL shaders failed to init.\n");
-	}
+    if(!glslInitialized)
+    {
+        if (!RB_GLSL_InitShaders()) {
+            common->Printf("GLSL shaders failed to init.\n");
+        }
+        // else
+            glslInitialized = true;
 
-	glConfig.allowGLSLPath = true;
+	    glConfig.allowGLSLPath = true;
+    }
+    else
+    {
+#ifdef _MULTITHREAD
+        if(multithreadActive)
+        {
+            reloadGLSLShaders = true;
+            common->Printf("[Harmattan]: reload GLSL shader will run on next renderer thread!\n");
+        }
+        else
+#endif
+        shaderManager->ReloadShaders();
+    }
 
 	common->Printf("-------------------------------\n");
 }
 
 
 
-static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram)
+// new
+static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProgram = true)
 {
-	if(shaderProgram->program)
+    const bool isProgram = shaderProgram->program && qglIsProgram(shaderProgram->program);
+    const bool isVertexShader = shaderProgram->vertexShader && qglIsShader(shaderProgram->vertexShader);
+    const bool isFragmentShader = shaderProgram->fragmentShader && qglIsShader(shaderProgram->fragmentShader);
+    GLuint program = shaderProgram->program;
+
+	if(isProgram)
 	{
-		if(qglIsProgram(shaderProgram->program))
-			qglDeleteProgram(shaderProgram->program);
+	    if(isVertexShader)
+	        qglDetachShader(shaderProgram->program, shaderProgram->vertexShader);
+	    if(isFragmentShader)
+	        qglDetachShader(shaderProgram->program, shaderProgram->fragmentShader);
+	    if(deleteProgram)
+		    qglDeleteProgram(shaderProgram->program);
 	}
 
-	if(shaderProgram->vertexShader)
+	if(isVertexShader)
 	{
-		if(qglIsShader(shaderProgram->vertexShader))
-			qglDeleteShader(shaderProgram->vertexShader);
+		qglDeleteShader(shaderProgram->vertexShader);
 	}
 
-	if(shaderProgram->fragmentShader)
+	if(isFragmentShader)
 	{
-		if(qglIsShader(shaderProgram->fragmentShader))
-			qglDeleteShader(shaderProgram->fragmentShader);
+		qglDeleteShader(shaderProgram->fragmentShader);
 	}
+
 	memset(shaderProgram, 0, sizeof(shaderProgram_t));
+
+	if(!deleteProgram)
+	    shaderProgram->program = program;
 }
 
-static GLint RB_GLSL_CreateShader(GLenum type, const char *source)
+static GLuint RB_GLSL_CreateShader(GLenum type, const char *source)
 {
-	GLint shader = 0;
+	GLuint shader = 0;
 	GLint status;
 
 	shader = qglCreateShader(type);
@@ -971,11 +1023,11 @@ static GLint RB_GLSL_CreateShader(GLenum type, const char *source)
 	return shader;
 }
 
-static GLint RB_GLSL_CreateProgram(GLint vertShader, GLint fragShader, bool needsAttributes = true)
+static GLuint RB_GLSL_CreateProgram(GLuint &program, GLuint vertShader, GLuint fragShader, bool needsAttributes = true)
 {
-	GLint program = 0;
 	GLint result;
 
+    if(!qglIsProgram(program))
 	program = qglCreateProgram();
 	if(program == 0)
 	{
@@ -1042,7 +1094,7 @@ bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *ver
 		return false;
 	}
 
-	shaderProgram->program = RB_GLSL_CreateProgram(shaderProgram->vertexShader, shaderProgram->fragmentShader);
+	shaderProgram->program = RB_GLSL_CreateProgram(shaderProgram->program, shaderProgram->vertexShader, shaderProgram->fragmentShader);
 	if(shaderProgram->program == 0)
 	{
 		RB_GLSL_DeleteShaderProgram(shaderProgram);
@@ -1067,7 +1119,7 @@ int RB_GLSL_LoadShaderProgram(
 		const char *macros
 		)
 {
-	memset(program, 0, sizeof(shaderProgram_t));
+	// memset(program, 0, sizeof(shaderProgram_t));
 
 	common->Printf("[Harmattan]: Load GLSL shader program: %s\n", name);
 
@@ -1332,4 +1384,59 @@ idStr RB_GLSL_ConvertGL2ESFragmentShader(const char *text, int version)
 	ret += source;
 
 	return ret;
+}
+
+void idGLSLShaderManager::ReloadShaders(void)
+{
+	idList<GLSLShaderProp> Props;
+	RB_GLSL_GetShaderSources(Props);
+	shaderProgram_t *originShader = backEnd.glState.currentProgram;
+	GL_UseProgram(NULL);
+
+    for(int i = 0; i < shaders.Num(); i++)
+    {
+        shaderProgram_t *shader = shaders[i];
+        common->Printf("[Harmattan]: reload GLSL shader %d -> %s......\n", i, shader->name);
+
+        int type = shader->type;
+        if(type >= SHADER_BASE_BEGIN && type <= SHADER_BASE_END)
+        {
+            REQUIRE_SHADER;
+        }
+        else
+        {
+	        UNNECESSARY_SHADER;
+        }
+        RB_GLSL_DeleteShaderProgram(shader, false);
+	    if(type < SHADER_CUSTOM)
+	    {
+            const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, type);
+            if(prop)
+            {
+                if(!RB_GLSL_LoadShaderProgramFromProp(prop))
+                {
+                    common->Printf("[Harmattan]: reload GLSL shader error %d -> %s!\n", i, prop->name.c_str());
+                    continue;
+                }
+            }
+	    }
+        else
+        {
+            for(int m = 0; m < customShaders.Num(); m++)
+            {
+		        GLSLShaderProp &prop = customShaders[m];
+                if(shader == prop.program)
+                {
+                    if(!RB_GLSL_LoadShaderProgramFromProp(&prop))
+                    {
+                        common->Printf("[Harmattan]: reload custom GLSL shader error %d(%d) -> %s!\n", i, m, prop.name.c_str());
+                        continue;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+	GL_UseProgram(originShader);
 }

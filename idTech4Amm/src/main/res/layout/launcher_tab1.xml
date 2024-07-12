@@ -183,6 +183,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"></RadioGroup>
 
+            <RadioGroup
+                android:id="@+id/rg_fs_doomgame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></RadioGroup>
+
 
 
         <LinearLayout
@@ -391,14 +396,15 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/launcher_label_specular_exponent"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
                         android:text="@string/specular_exponent_cvar_harm_r_specularexponent" />
 
                     <EditText
                         android:id="@+id/edt_harm_r_specularExponent"
-                        android:layout_width="match_parent"
+                        android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/specular_exponent_in_interaction_light_model_default_is_4_0"
@@ -414,14 +420,15 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/launcher_label_max_fps"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
                         android:text="@string/maximum_fps_limit_0_unlimited" />
 
                     <EditText
                         android:id="@+id/edt_harm_r_maxFps"
-                        android:layout_width="match_parent"
+                        android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/limit_maximum_fps_default_is_0"
@@ -457,11 +464,105 @@
                         android:text="@string/shadow_mapping" />
                 </RadioGroup>
 
+                <LinearLayout
+                    android:id="@+id/launcher_layout_shadowMapAlpha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/shadow_mapping_alpha_harm_r_shadowmapalpha" />
+
+                    <EditText
+                        android:id="@+id/edt_harm_r_shadowMapAlpha"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/_0_1_default_0_5"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="numberDecimal|textNoSuggestions"
+                        android:text="1.0" />
+                </LinearLayout>
+
                 <CheckBox
-                    android:id="@+id/cb_translucentStencilShadow"
+                    android:id="@+id/cb_stencilShadowSoft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft" />
+
+                <CheckBox
+                    android:id="@+id/cb_stencilShadowTranslucent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/translucent_stencil_shadow" />
+
+                <LinearLayout
+                    android:id="@+id/launcher_layout_stencilShadowAlpha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/stencil_shadow_alpha_harm_r_stencilshadowalpha" />
+
+                    <EditText
+                        android:id="@+id/edt_harm_r_stencilShadowAlpha"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/_0_1_default_0_5"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="numberDecimal|textNoSuggestions"
+                        android:text="1.0" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/cb_stencilShadowCombine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/combine_stencil_shadow_harm_r_stencilshadowcombine" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:text="@string/automatic_setup_aspect_ratio_harm_r_autoaspectratio" />
+
+                <RadioGroup
+                    android:id="@+id/rg_r_autoAspectRatio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/rb_r_autoAspectRatio_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setup_cvar_r_aspectratio_manually" />
+
+                    <RadioButton
+                        android:id="@+id/rb_r_autoAspectRatio_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio" />
+
+                    <RadioButton
+                        android:id="@+id/rb_r_autoAspectRatio_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10" />
+
+                </RadioGroup>
+
             </LinearLayout>
 
             <LinearLayout

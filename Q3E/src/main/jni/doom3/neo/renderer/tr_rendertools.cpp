@@ -1052,7 +1052,7 @@ Debugging tool
 */
 static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 {
-#ifdef _MULTITHREAD //karin: RB_ShowSurfaceInfo using frontend functions, don't support call in backend in multi-threading
+#ifdef _MULTITHREAD //karin: using R_ShowSurfaceInfo on frontend on multi-threading
 	if(multithreadActive)
 		return;
 #endif

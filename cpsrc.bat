@@ -17,6 +17,7 @@ mkdir %DST_PATH%\idTech4amm
 mkdir %DST_PATH%\Q3E
 
 echo Copying %SRC_PATH% to %DST_PATH%
+
 xcopy /E/I/Y/Q %SRC_PATH%\idTech4amm\src %DST_PATH%\idTech4amm\src
 xcopy /Y/Q %SRC_PATH%\idTech4amm\build.gradle %DST_PATH%\idTech4amm\
 xcopy /Y/Q %SRC_PATH%\idTech4amm\lint.xml %DST_PATH%\idTech4amm\
@@ -38,7 +39,7 @@ del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\premake4.exe
 xcopy /Y/Q %SRC_PATH%\.gitignore %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\build.gradle %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CHANGES.md %DST_PATH%\
-xcopy /Y/Q %SRC_PATH%\CHANGES.zh.md %DST_PATH%\
+rem xcopy /Y/Q %SRC_PATH%\CHANGES.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CHECK_FOR_UPDATE.json %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CMakeLists.txt %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\gradle.properties %DST_PATH%\
@@ -48,12 +49,15 @@ xcopy /Y/Q %SRC_PATH%\idtech4amm.keystore %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\LICENSE %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\local.properties %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\README.md %DST_PATH%\
-xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\
+rem xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\settings.gradle %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\cmake_linux_build.sh %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\cmake_msvc_build.bat %DST_PATH%\
+xcopy /Y/Q %SRC_PATH%\cmake_linux_build_doom3bfg.sh %DST_PATH%\
 
 echo Done!
 start "" %DST_PATH%
+
+rem F:\qobj\droid\DIII4A\idTech4Amm\src\main\assets\source\DIII4A.source.tgz
 
 pause

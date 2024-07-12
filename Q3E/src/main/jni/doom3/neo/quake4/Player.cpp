@@ -1946,6 +1946,9 @@ void idPlayer::Spawn( void ) {
 	} else {
 		idAFAttachment *headEnt = head.GetEntity();
 		if ( headEnt ) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+			if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || !harm_pm_fullBodyAwarenessHeadVisible.GetBool())
+#endif
 			headEnt->GetRenderEntity()->suppressSurfaceInViewID = entityNumber+1;
 			headEnt->GetRenderEntity()->noSelfShadow = true;
 		}
@@ -3643,7 +3646,14 @@ void idPlayer::DrawShadow( renderEntity_t *headRenderEnt ) {
 		// Only show player shadows for other clients
 		renderEntity.suppressShadowInViewID	= entityNumber+1;
  		if ( headRenderEnt ) {
+#ifdef _MOD_FULL_BODY_AWARENESS
+			if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || IsInVehicle() || IsZoomed() || focusUI || !harm_pm_fullBodyAwarenessHeadVisible.GetBool())
+#endif
  			headRenderEnt->suppressShadowInViewID = entityNumber+1;
+#ifdef _MOD_FULL_BODY_AWARENESS
+			else
+				headRenderEnt->suppressShadowInViewID = 0;
+#endif
    		}
 	}
 }
@@ -9659,7 +9669,14 @@ void idPlayer::Think( void ) {
  		} else {
  			headRenderEnt->customSkin = headSkin;
  		}
+#ifdef _MOD_FULL_BODY_AWARENESS
+		if(!harm_pm_fullBodyAwareness.GetBool() || pm_thirdPerson.GetBool() || IsInVehicle() || IsZoomed() || focusUI || !harm_pm_fullBodyAwarenessHeadVisible.GetBool())
+#endif
  		headRenderEnt->suppressSurfaceInViewID = entityNumber + 1;
+#ifdef _MOD_FULL_BODY_AWARENESS
+		else
+			headRenderEnt->suppressSurfaceInViewID = 0;
+#endif
  	}
 
 	// always show your own shadow

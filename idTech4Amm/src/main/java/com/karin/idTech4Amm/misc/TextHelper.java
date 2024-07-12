@@ -324,6 +324,15 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2024-05-31", 51,
+                        "Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`. More view in `" + TextHelper.GenLinkText("https://github.com/RobertBeckebans/RBDOOM-3-BFG", "RBDOOM-3-BFG") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/agecheck/app/208200/", "DOOM-3-BFG") + "`.",
+                        "Add `Quake I`(Darkplaces) support, game data directory named `darkplaces/id1`. More view in `" + TextHelper.GenLinkText("https://github.com/DarkPlacesEngine/darkplaces", "DarkPlaces") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/app/2310/Quake/", "Quake I") + "`.",
+                        "Fix some shaders error on Mali GPU in The Dark Mod(v 2.12).",
+                        "Upgrade Quake2(Yamagi Quake II) version.",
+                        "Support debug render tools(exclude r_showSurfaceInfo) on multi-threading in DOOM3/Quake4/Prey(2006).",
+                        "Support switch lighting disabled in game with r_noLight 0 and 2 in DOOM3/Quake4/Prey(2006)."
+                ),
+
                 ChangeLog.Create("2024-04-30", 50,
                         "Support new stage rendering of heatHaze shaders(e.g. heat haze distortion of BFG9000's projectile, Rocket Gun's explosion) and colorProcess shader(e.g. blood film on mirror of marscity2).",
                         "Support new shader stage rendering of GLSL shaders in Quake 4(e.g. sniper scope effect of machine gun and bullet hole of machine gun).",
@@ -685,31 +694,6 @@ public final class TextHelper
             sb.append(endl);
         }
         return GetDialogMessage(sb.toString());
-    }
-    
-    public static String Join(Object[] args, String sep)
-    {
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < args.length; i++)
-        {
-            Object o = args[i];
-            if(null == o)
-                continue;
-            sb.append(o);
-            if(i < args.length - 1)
-                sb.append(null != sep ? sep : "");
-        }
-        return sb.toString();
-    }
-
-    public static String Join(Collection<?> args, String sep)
-    {
-        return Join(args.toArray(), sep);
-    }
-
-    public static String Join(String sep, String...args)
-    {
-        return Join(args, sep);
     }
     
 	private TextHelper() {}

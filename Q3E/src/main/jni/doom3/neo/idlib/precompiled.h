@@ -270,11 +270,19 @@ const float MAX_BOUND_SIZE = 65536.0f;
 
 #elif defined(_RAVEN)
 
+#ifdef _SDK
+    #include "../game/Game.h"
+#else
     #include "../quake4/Game.h"
+#endif
 
 #elif defined(_HUMANHEAD)
 
+#ifdef _SDK
+    #include "../game/Game.h"
+#else
     #include "../prey/Game.h"
+#endif
 
 #else
 
@@ -314,11 +322,19 @@ const float MAX_BOUND_SIZE = 65536.0f;
 
 #elif defined(_RAVEN)
 
+#ifdef _SDK
+    #include "../game/Game_local.h"
+#else
     #include "../quake4/Game_local.h"
+#endif
 
 #elif defined(_HUMANHEAD)
 
+#ifdef _SDK
+    #include "../game/Game_local.h"
+#else
     #include "../prey/Game_local.h"
+#endif
 
 #else
 
@@ -342,6 +358,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
 
 #else
 
+#if !defined(_SDK)
 #include "../framework/DemoChecksum.h"
 
 // framework
@@ -362,6 +379,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
 
 // Compilers for map, model, video etc. processing.
 #include "../tools/compilers/compiler_public.h"
+#endif // _SDK
 
 #endif /* !GAME_DLL */
 

@@ -1517,8 +1517,8 @@ if(BUILD_CURL_EXE)
 endif()
 
 cmake_dependent_option(BUILD_TESTING "Build tests"
-  ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
-  OFF)
+  OFF "PERL_FOUND;NOT CURL_DISABLE_TESTS"
+  OFF) #k ON
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()

@@ -14,6 +14,7 @@ in highp vec4 var_TexCoord0;
 in highp vec4 var_TexCoord1;
 in highp vec4 var_TexCoord2;
 in lowp vec4 var_Color;
+
 out vec4 _gl_FragColor;
 
 // # texture 0 is _currentRender
@@ -30,7 +31,10 @@ void main(void)
     // kill the pixel if the distortion wound up being very small
     mask.xy *= var_Color.xy;
     mask.xy -= 0.01f;
-    if ( any( lessThan( mask, vec4( 0.0 ) ) ) ) { discard; }
+    if ( any( lessThan( mask, vec4( 0.0 ) ) ) )
+    {
+        discard;
+    }
     // load the filtered normal map and convert to -1 to 1 range
     vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;
     vec2 localNormal = bumpMap.wy;

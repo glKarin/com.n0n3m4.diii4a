@@ -30,7 +30,7 @@ public class FileBrowser
     private int m_sequence = ID_SEQUENCE_ASC;
     private int m_filter = 0;
     private int m_order = ID_ORDER_BY_NAME;
-    private List<String> m_extensions = new ArrayList<>();
+    private final List<String> m_extensions = new ArrayList<>();
     private boolean m_showHidden = true;
     private boolean m_ignoreDotDot = false;
     private boolean m_dirNameWithSeparator = true;
@@ -81,6 +81,8 @@ public class FileBrowser
                 if((m_filter & ID_FILTER_FILE) == 0 && !f.isDirectory())
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
+                    continue;
+                if(!Filter(name))
                     continue;
             }
             if(!m_showHidden && f.isHidden())
@@ -217,6 +219,30 @@ public class FileBrowser
         return this;
     }
 
+    public FileBrowser SetExtension(String...exts)
+    {
+        m_extensions.clear();
+        for (String ext : exts)
+        {
+            m_extensions.add(ext);
+        }
+        return this;
+    }
+
+    private boolean Filter(String name)
+    {
+        if(m_extensions.isEmpty())
+            return true;
+        for (String extension : m_extensions)
+        {
+            if(name.length() < extension.length())
+                continue;
+            if(name.substring(name.length() - extension.length()).equalsIgnoreCase(extension))
+                return true;
+        }
+        return false;
+    }
+
     public FileBrowser SetSequence(int i)
     {
         if (m_sequence != i)
@@ -257,6 +283,8 @@ public class FileBrowser
                 if((m_filter & ID_FILTER_FILE) == 0 && !isDirectory)
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && isDirectory)
+                    continue;
+                if(!Filter(name))
                     continue;
             }
 
@@ -333,6 +361,8 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && isDirectory)
                     continue;
+                if(!Filter(name))
+                    continue;
             }
             if(!m_showHidden && f.isHidden())
                 continue;
@@ -404,6 +434,8 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
                     continue;
+                if(!Filter(name))
+                    continue;
             }
             if(!m_showHidden && name.startsWith("."))
                 continue;
@@ -454,6 +486,74 @@ public class FileBrowser
             item.type = FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY;
             m_fileList.add(0, item);
         }
+    }
+
+    public List<FileBrowser.FileModel> ListAllFiles()
+    {
+        List<FileBrowser.FileModel> fileList = new ArrayList<>();
+        ListFiles_r(m_currentPath, "", fileList);
+        return fileList;
+    }
+
+    private List<FileBrowser.FileModel> ListFiles_r(String rootPath, String path, List<FileBrowser.FileModel> ret)
+    {
+        File dir;
+        File[] files;
+        FileBrowser.FileModel item;
+
+        path = rootPath + "/" + path;
+
+        dir = new File(path);
+        if (!dir.isDirectory())
+            return null;
+
+        files = dir.listFiles();
+        if (files == null)
+            return null;
+
+        List<FileBrowser.FileModel> fileList = new ArrayList<>();
+        for (File f : files)
+        {
+            String name = f.getName();
+            if (".".equals(name) || "..".equals(name))
+                continue;
+
+            String relativePath = f.getAbsolutePath().substring(rootPath.length() + 1);
+
+            if(f.isDirectory())
+            {
+                ListFiles_r(rootPath, relativePath, ret);
+            }
+
+            if(m_filter != 0)
+            {
+                if((m_filter & ID_FILTER_FILE) == 0 && !f.isDirectory())
+                    continue;
+                if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
+                    continue;
+                if(!Filter(name))
+                    continue;
+            }
+            if(!m_showHidden && f.isHidden())
+                continue;
+
+            if (f.isDirectory() && m_dirNameWithSeparator)
+                relativePath += File.separator;
+
+            item = new FileBrowser.FileModel();
+            item.name = relativePath;
+            item.path = f.getAbsolutePath();
+            item.size = f.length();
+            item.time = f.lastModified();
+            item.type = f.isDirectory() ? FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY : FileBrowser.FileModel.ID_FILE_TYPE_FILE;
+            fileList.add(item);
+        }
+
+        Collections.sort(fileList, m_fileComparator);
+
+        ret.addAll(fileList);
+
+        return fileList;
     }
 
     public static class FileModel

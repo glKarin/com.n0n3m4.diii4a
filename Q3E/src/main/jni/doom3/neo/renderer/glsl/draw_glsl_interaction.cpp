@@ -2,9 +2,6 @@ static const float zero[4] = { 0, 0, 0, 0 };
 static const float one[4] = { 1, 1, 1, 1 };
 static const float negOne[4] = { -1, -1, -1, -1 };
 
-static idCVar harm_r_stencilShadowCombine( "harm_r_stencilShadowCombine", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "combine local and global stencil shadow" );
-static bool r_stencilShadowCombine = false;
-
 /*
 =========================================================================================
 
@@ -88,6 +85,19 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 		// texture 6 is the shadow map
 		GL_SelectTextureNoClient(6);
 		RB_ShadowMappingInteraction_bindTexture();
+
+		// texture 7 is the noise jitter map
+		GL_SelectTextureNoClient(7);
+		RB_ShadowMappingInteraction_bindJitterTexture();
+	}
+	else
+#endif
+#ifdef _SOFT_STENCIL_SHADOW
+	if(r_stencilShadowSoft)
+	{
+		// texture 6 is the stencil shadow texture
+		GL_SelectTextureNoClient(6);
+		RB_StencilShadowSoftInteraction_bindTexture();
 	}
 #endif
 
@@ -169,6 +179,17 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
 	// disable features
+#ifdef _SHADOW_MAPPING
+	if(r_shadowMapping)
+	{
+		GL_SelectTextureNoClient(7);
+		globalImages->BindNull();
+	}
+#endif
+
+	GL_SelectTextureNoClient(6);
+	globalImages->BindNull();
+
 	GL_SelectTextureNoClient(5);
 	globalImages->BindNull();
 
@@ -192,13 +213,13 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 
 typedef void (* RB_GLSL_DrawInteraction_f)(viewLight_t *vLight);
 
-static ID_INLINE void RB_GLSL_DrawInteraction_noShadow(viewLight_t *vLight)
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_noShadow(viewLight_t *vLight)
 {
 	RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
 	RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
 }
 
-static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow(viewLight_t *vLight)
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow(viewLight_t *vLight)
 {
 	RB_StencilShadowPass(vLight->globalShadows);
 	RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
@@ -206,9 +227,38 @@ static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow(viewLight_t *vLight)
 	RB_StencilShadowPass(vLight->localShadows);
 	RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
 }
+// default stencil shadow renderer
 static RB_GLSL_DrawInteraction_f RB_GLSL_DrawInteraction_ptr = RB_GLSL_DrawInteraction_stencilShadow;
 
-static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_combine(viewLight_t *vLight)
+#ifdef _STENCIL_SHADOW_IMPROVE
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_translucent(viewLight_t *vLight)
+{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
+	if(r_stencilShadowAlpha < 1.0f)
+		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, false);
+
+	RB_StencilShadowPass(vLight->localShadows);
+	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
+	if(r_stencilShadowAlpha < 1.0f)
+		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, false);
+}
+
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_translucent_combine(viewLight_t *vLight)
+{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_StencilShadowPass(vLight->localShadows);
+
+	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
+	if(r_stencilShadowAlpha < 1.0f)
+		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, false);
+
+	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
+	if(r_stencilShadowAlpha < 1.0f)
+		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, false);
+}
+
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_combine(viewLight_t *vLight)
 {
 	RB_StencilShadowPass(vLight->globalShadows);
 	RB_StencilShadowPass(vLight->localShadows);
@@ -217,37 +267,90 @@ static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_combine(viewLight_t 
 	RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
 }
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
-static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_translucent(viewLight_t *vLight)
+#ifdef _SOFT_STENCIL_SHADOW
+// 1. Copy depth buffer and render stencil directly
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyDepth(viewLight_t *vLight)
 {
-	RB_StencilShadowPass(vLight->globalShadows);
-	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
-	if(r_stencilShadowAlpha < 1.0f)
-		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, false);
+	if (vLight->globalShadows || vLight->localShadows)
+	{
+		RB_StencilShadowSoft_copyDepthBuffer(); // copy depth buffer
+		RB_StencilShadowPass(vLight->globalShadows);
+		RB_StencilShadowSoft_unbindFramebuffer();
+		RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 0xFF);
 
-	RB_StencilShadowPass(vLight->localShadows);
-	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
-	if(r_stencilShadowAlpha < 1.0f)
-		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, false);
+		RB_StencilShadowSoft_bindFramebuffer();
+		RB_StencilShadowPass(vLight->localShadows);
+		RB_StencilShadowSoft_unbindFramebuffer();
+		RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 0xFF);
+	}
+	else
+	{
+		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+	}
 }
 
-static ID_INLINE void RB_GLSL_DrawInteraction_stencilShadow_translucent_combine(viewLight_t *vLight)
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyDepth_combine(viewLight_t *vLight)
 {
+	if (vLight->globalShadows || vLight->localShadows)
+	{
+		RB_StencilShadowSoft_copyDepthBuffer(); // copy depth buffer
+		RB_StencilShadowPass(vLight->globalShadows);
+		RB_StencilShadowPass(vLight->localShadows);
+		RB_StencilShadowSoft_unbindFramebuffer();
+
+		RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 1);
+		RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 2);
+	}
+	else
+	{
+		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+	}
+}
+
+// 2. Copy stencil buffer to texture directly
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil(viewLight_t *vLight)
+{
+	if (vLight->globalShadows || vLight->localShadows)
+	{
+	RB_StencilShadowPass(vLight->globalShadows);
+	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
+	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 0xFF);
+
+	RB_StencilShadowPass(vLight->localShadows);
+	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
+	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 0xFF);
+}
+	else
+	{
+		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+	}
+}
+
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil_combine(viewLight_t *vLight)
+{
+	if (vLight->globalShadows || vLight->localShadows)
+	{
 	RB_StencilShadowPass(vLight->globalShadows);
 	RB_StencilShadowPass(vLight->localShadows);
+	RB_StencilShadowSoft_copyStencilBuffer(); // copy stencil buffer
 
-	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
-	if(r_stencilShadowAlpha < 1.0f)
-		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, false);
-
-	RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
-	if(r_stencilShadowAlpha < 1.0f)
-		RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, false);
+	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->localInteractions, 1);
+	RB_GLSL_CreateDrawInteractions_softStencilShadow(vLight->globalInteractions, 2);
+	}
+	else
+	{
+		RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
+		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
+	}
 }
+#endif
 #endif
 
 #ifdef _SHADOW_MAPPING
-static ID_INLINE void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLight)
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLight)
 {
 	if(vLight->shadowLOD >= 0)
 	{
@@ -304,7 +407,7 @@ static ID_INLINE void RB_GLSL_DrawInteraction_shadowMapping(viewLight_t *vLight)
 }
 
 #ifdef _CONTROL_SHADOW_MAPPING_RENDERING
-static ID_INLINE void RB_GLSL_DrawInteraction_shadowMapping_control(viewLight_t *vLight)
+static /*ID_INLINE */void RB_GLSL_DrawInteraction_shadowMapping_control(viewLight_t *vLight)
 {
 	if(vLight->shadowLOD >= 0)
 	{
@@ -475,7 +578,7 @@ void RB_GLSL_DrawInteractions(void)
 #endif
 #endif
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 	const bool TranslucentStencilShadow = r_stencilShadowTranslucent && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
 #endif
 	//
@@ -604,7 +707,7 @@ void RB_GLSL_DrawInteractions(void)
 #endif
 		{
             RB_StencilShadowPass(vLight->globalShadows);
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 			if(TranslucentStencilShadow)
 			{
 				RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->localInteractions, true);
@@ -616,7 +719,7 @@ void RB_GLSL_DrawInteractions(void)
 			RB_GLSL_CreateDrawInteractions(vLight->localInteractions);
 
 			RB_StencilShadowPass(vLight->localShadows);
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_IMPROVE
 			if(TranslucentStencilShadow)
 			{
 				RB_GLSL_CreateDrawInteractions_translucentStencilShadow(vLight->globalInteractions, true);
@@ -658,18 +761,44 @@ void RB_GLSL_DrawInteractions(void)
 #else
 void RB_GLSL_DrawInteractions(void)
 {
-	RB_GLSL_DrawInteraction_f func;
+	RB_GLSL_DrawInteraction_f func = NULL;
 
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
-	const bool TranslucentStencilShadow = r_stencilShadowTranslucent && r_shadows.GetBool() && r_stencilShadowAlpha > 0.0f;
-	if(TranslucentStencilShadow)
+#ifdef _STENCIL_SHADOW_IMPROVE
+	if(r_shadows.GetBool())
 	{
-		func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_translucent_combine : RB_GLSL_DrawInteraction_stencilShadow_translucent;
+		const bool TranslucentStencilShadow = r_stencilShadowTranslucent/* && r_stencilShadowAlpha > 0.0f*/;
+#ifdef _SOFT_STENCIL_SHADOW
+		const bool SoftStencilShadow = idStencilTexture::IsAvailable() && r_stencilShadowSoft;
+#endif
+
+#ifdef _SOFT_STENCIL_SHADOW
+		if(SoftStencilShadow)
+		{
+			if(harm_r_stencilShadowSoftBias.GetFloat() != 0.0f || r_stencilShadowAlpha < 1.0)
+			{
+				if(r_stencilShadowSoftCopyStencilBuffer)
+					func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil_combine : RB_GLSL_DrawInteraction_stencilShadow_soft_copyStencil;
+				else
+					func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_soft_copyDepth_combine : RB_GLSL_DrawInteraction_stencilShadow_soft_copyDepth;
+			}
+		}
+#endif
+		if(!func && TranslucentStencilShadow)
+		{
+			if(r_stencilShadowAlpha < 1.0f)
+			{
+				func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_translucent_combine : RB_GLSL_DrawInteraction_stencilShadow_translucent;
+			}
+		}
+		if(!func)
+		{
+			func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_combine : RB_GLSL_DrawInteraction_stencilShadow;
+		}
 	}
 	else
 #endif
 	{
-		func = r_stencilShadowCombine ? RB_GLSL_DrawInteraction_stencilShadow_combine : RB_GLSL_DrawInteraction_stencilShadow;
+		func = RB_GLSL_DrawInteraction_stencilShadow;
 	}
 	RB_GLSL_DrawInteraction_ptr = func;
 

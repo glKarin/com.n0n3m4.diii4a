@@ -442,13 +442,14 @@ static void print_initial_context(const Q3E_InitialContext_t *context)
 	LOGI("OpenGL Version: %x", context->openGL_version);
 	LOGI("Using mouse: %x", context->mouseAvailable);
 	LOGI("Game data directory: %s", context->gameDataDir);
+	LOGI("Application home directory: %s", context->appHomeDir);
 	LOGI("Refresh rate: %d", context->refreshRate);
     LOGI("Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
 	LOGI("<---------");
 }
 
-JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jboolean bContinueNoGLContext)
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc;
@@ -496,6 +497,11 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	const char *native_lib_path = (*env)->GetStringUTFChars(env, nativeLibPath, &iscopy);
 	doom3_path = strdup(native_lib_path);
 	(*env)->ReleaseStringUTFChars(env, nativeLibPath, native_lib_path);
+
+	const char *app_home = (*env)->GetStringUTFChars(env, appHome, &iscopy);
+	char *app_home_dir = strdup(app_home);
+	(*env)->ReleaseStringUTFChars(env, appHome, app_home);
+
 	Q3E_InitialContext_t context;
 	memset(&context, 0, sizeof(context));
 
@@ -504,6 +510,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	context.openGL_version = glVersion;
 
 	context.nativeLibraryDir = doom3_path;
+	context.appHomeDir = app_home_dir;
 	context.redirectOutputToFile = redirectOutputToFile ? 1 : 0;
 	context.noHandleSignals = noHandleSignals ? 1 : 0;
 	context.multithread = bMultithread ? 1 : 0;
@@ -525,6 +532,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 
 	free(argv);
     free(doom3_path);
+	free(app_home_dir);
 
 	return JNI_TRUE;
 }

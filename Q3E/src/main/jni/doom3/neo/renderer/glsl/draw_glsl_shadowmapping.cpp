@@ -108,7 +108,7 @@ ID_INLINE void RB_SetMVP( const idRenderMatrix& mvp )
 }
 
 // Attach framebuffer render texture or buffer in shadow map pass
-ID_INLINE static void RB_ShadowMapping_attachTexture(Framebuffer *fb, const viewLight_t *vLight, int side)
+ID_INLINE static void RB_ShadowMapping_attachTexture(idFramebuffer *fb, const viewLight_t *vLight, int side)
 {
 #ifdef GL_ES_VERSION_3_0
 	if(USING_GLES3)
@@ -211,6 +211,7 @@ ID_INLINE static void RB_ShadowMapping_clearBuffer(void)
 // Setup shadow map sample in interaction pass
 ID_INLINE static void RB_ShadowMapping_setupSample(void)
 {
+#if 0
     float sampleScale = 1.0;
     float sampleFactor = harm_r_shadowMapSampleFactor.GetFloat();
     float lod = sampleFactor != 0 ? SampleFactors[backEnd.vLight->shadowLOD] : 0.0;
@@ -252,9 +253,22 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
     if(sampleFactor > 0.0)
         sampleScale *= sampleFactor;
 
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[2]), lod * sampleScale);
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[5]), SampleFactors[backEnd.vLight->shadowLOD]); // 1.0 / size
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[6]), shadowMapResolutions[backEnd.vLight->shadowLOD]); // textureSize()
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), lod * sampleScale);
+#endif
+    const float ShadowMapTexelSize[] = {
+            shadowMapResolutions[backEnd.vLight->shadowLOD], // textureSize()
+            SampleFactors[backEnd.vLight->shadowLOD], // 1.0 / textureSize()
+            harm_r_shadowMapJitterScale.GetFloat(), // sampler offset scale
+            0
+    };
+    GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[1]), ShadowMapTexelSize);
+    const float ScreenSize[] = {
+            1.0f / tr.GetScreenWidth(), // 1.0 / screen_width
+            1.0f / tr.GetScreenHeight(), // 1.0 / screen_height
+            globalImages->blueNoiseImage256->uploadWidth, // jitter.textureSize()
+            1.0f / globalImages->blueNoiseImage256->uploadWidth, // 1.0 / jitter.textureSize()
+    };
+    GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[2]), ScreenSize);
 }
 
 // Setup polygon offset in shadow map pass
@@ -420,7 +434,7 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
 // Read framebuffer color buffer to file for debug
 void R_SaveColorBuffer(const char *name)
 {
-	Framebuffer *fb = backEnd.glState.currentFramebuffer;
+	idFramebuffer *fb = backEnd.glState.currentFramebuffer;
 	int width;
 	int height;
 	if(fb)
@@ -945,7 +959,7 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
 
 	if(!harm_r_shadowMapDebug.GetInteger())
 	{
-		Framebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
+		idFramebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
         fb->Bind();
 		RB_ShadowMapping_attachTexture(fb, vLight, side);
 	}
@@ -1109,8 +1123,8 @@ void RB_ShadowMapPass( const drawSurf_t* drawSurfs, int side, int type, bool cle
             GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
             GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
 
-            // GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
-            // GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), RB_GetPointLightFrustumFar(vLight));
+            // const float Frustum[] = {harm_r_shadowMapFrustumNear.GetFloat(), RB_GetPointLightFrustumFar(backEnd.vLight), 0, 0};
+            // GL_Unifor4fv(offsetof(shaderProgram_t, u_uniformParm[1]), Frustum);
 
             GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t), vertexCache.Position(drawSurf->geo->shadowCache));
 
@@ -1244,7 +1258,7 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
 
     if(!harm_r_shadowMapDebug.GetInteger())
     {
-        Framebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
+        idFramebuffer *fb = globalFramebuffers.shadowFBO[vLight->shadowLOD];
         fb->Bind();
         RB_ShadowMapping_attachTexture(fb, vLight, side);
     }
@@ -1418,8 +1432,8 @@ void RB_ShadowMapPasses( const drawSurf_t *globalShadowDrawSurf, const drawSurf_
                 GL_Uniform4fv(offsetof(shaderProgram_t, globalLightOrigin), globalLightOrigin);
                 GL_Uniform4fv(offsetof(shaderProgram_t, localLightOrigin), localLight.ToFloatPtr());
 
-                // GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
-                // GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), RB_GetPointLightFrustumFar(vLight));
+                // const float Frustum[] = {harm_r_shadowMapFrustumNear.GetFloat(), RB_GetPointLightFrustumFar(backEnd.vLight), 0, 0};
+                // GL_Unifor4fv(offsetof(shaderProgram_t, u_uniformParm[1]), Frustum);
 
                 GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t), vertexCache.Position(drawSurf->geo->shadowCache));
 
@@ -1563,11 +1577,11 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     shaderProgram_t *shadowInteractionShader = RB_SelectShadowMappingInteractionShader(backEnd.vLight);
     GL_UseProgram(shadowInteractionShader);
 
-    // GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[1]), harm_r_shadowMapFrustumNear.GetFloat());
-    // GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm), RB_GetPointLightFrustumFar(backEnd.vLight));
+    // const float Frustum[] = {harm_r_shadowMapFrustumNear.GetFloat(), RB_GetPointLightFrustumFar(backEnd.vLight), 0, 0};
+    // GL_Unifor4fv(offsetof(shaderProgram_t, u_uniformParm[4]), Frustum);
 
 //#ifdef SHADOW_MAPPING_DEBUG
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), harm_r_shadowMapBias.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[3]), harm_r_shadowMapBias.GetFloat());
 //#endif
 
             // perform setup here that will be constant for all interactions
@@ -1584,7 +1598,7 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
     //GL_Uniform1f(offsetof(shaderProgram_t, bias), harm_r_shadowMapBias.GetFloat());
-    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[3]), harm_r_shadowMapAlpha.GetFloat());
+    GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[0]), harm_r_shadowMapAlpha.GetFloat());
     float globalLightOrigin[4] = {
             backEnd.vLight->globalLightOrigin[0],
             backEnd.vLight->globalLightOrigin[1],
@@ -1637,6 +1651,9 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
     GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
     // disable features
+    GL_SelectTextureNoClient(7);
+    globalImages->BindNull();
+
     GL_SelectTextureNoClient(6);
     globalImages->BindNull();
 
@@ -1778,6 +1795,12 @@ ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
 			    globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
 		}
 	}
+}
+
+// Bind shadow map texture in interaction pass
+ID_INLINE static void RB_ShadowMappingInteraction_bindJitterTexture(void)
+{
+    globalImages->blueNoiseImage256->Bind();
 }
 
 // Get clear color in interaction pass

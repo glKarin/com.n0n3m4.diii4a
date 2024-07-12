@@ -63,6 +63,10 @@ public final class Q3EPreference
     public static final String pref_harm_d3bfg_game_lib = "q3e_harm_d3bfg_game_lib"; //k
     public static final String pref_harm_d3bfg_user_mod = "q3e_harm_d3bfg_user_mod"; //k
     public static final String pref_params_d3bfg = "q3e_params_d3bfg"; //k
+    public static final String pref_harm_gzdoom_fs_game = "q3e_harm_gzdoom_fs_game"; //k
+    public static final String pref_harm_gzdoom_game_lib = "q3e_harm_gzdoom_game_lib"; //k
+    public static final String pref_harm_gzdoom_user_mod = "q3e_harm_gzdoom_user_mod"; //k
+    public static final String pref_params_gzdoom = "q3e_params_gzdoom"; //k
     public static final String pref_harm_view_motion_control_gyro = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
     public static final String pref_harm_view_motion_gyro_y_axis_sens = "q3e_harm_view_motion_gyro_y_axis_sens"; //k
@@ -83,10 +87,17 @@ public final class Q3EPreference
     public static final String pref_harm_skip_intro = "q3e_harm_skip_intro"; //k
     public static final String pref_harm_scale_by_screen_area = "q3e_harm_scale_by_screen_area";
     public static final String pref_harm_r_useShadowMapping = "q3e_harm_r_useShadowMapping"; //k
+    public static final String pref_harm_r_shadowMapAlpha = "q3e_harm_r_shadowMapAlpha"; //k
     public static final String pref_harm_opengl = "q3e_harm_opengl"; //k
     public static final String pref_harm_s_useOpenAL = "q3e_harm_s_useOpenAL"; //k
     public static final String pref_harm_s_useEAXReverb = "q3e_harm_s_useEAXReverb"; //k
-    public static final String pref_harm_r_translucentStencilShadow = "q3e_harm_r_translucentStencilShadow"; //k
+    public static final String pref_harm_r_stencilShadowTranslucent = "q3e_harm_r_stencilShadowTranslucent"; //k
+    public static final String pref_harm_r_stencilShadowAlpha = "q3e_harm_r_stencilShadowAlpha"; //k
+    public static final String pref_harm_r_stencilShadowSoft = "q3e_harm_r_stencilShadowSoft"; //k
+    public static final String pref_harm_r_stencilShadowCombine = "q3e_harm_r_stencilShadowCombine"; //k
+    public static final String pref_harm_r_autoAspectRatio = "q3e_harm_r_autoAspectRatio"; //k
+    public static final String pref_params_quake4 = "q3e_params_quake4"; //k
+    public static final String pref_params_prey = "q3e_params_prey"; //k
 
     public static final String RUN_BACKGROUND = "harm_run_background";
     public static final String RENDER_MEM_STATUS = "harm_render_mem_status";

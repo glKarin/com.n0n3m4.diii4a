@@ -18,6 +18,7 @@
 /*
 	macros:
 		BLINN_PHONG: using blinn-phong instead phong.
+		_STENCIL_SHADOW_TRANSLUCENT: for translucent stencil shadow
 */
 #version 100
 //#pragma optimize(off)
@@ -52,7 +53,7 @@ varying vec3 var_V;
 
 uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;
-//uniform float u_specularExponent;
+uniform float u_specularExponent;
 
 uniform sampler2D u_fragmentMap0;	/* u_bumpTexture */
 uniform sampler2D u_fragmentMap1;	/* u_lightFalloffTexture */
@@ -60,55 +61,55 @@ uniform sampler2D u_fragmentMap2;	/* u_lightProjectionTexture */
 uniform sampler2D u_fragmentMap3;	/* u_diffuseTexture */
 uniform sampler2D u_fragmentMap4;	/* u_specularTexture */
 uniform sampler2D u_fragmentMap5;	/* u_specularFalloffTexture */
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
+#ifdef _STENCIL_SHADOW_TRANSLUCENT
 uniform mediump float u_uniformParm0; // shadow alpha
 #endif
 
 void main(void)
 {
-	float u_specularExponent = 4.0;
+    //float u_specularExponent = 4.0;
 
-	vec3 L = normalize(var_L);
+    vec3 L = normalize(var_L);
 #if defined(BLINN_PHONG)
-	vec3 H = normalize(var_H);
-	vec3 N = 2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0;
+    vec3 H = normalize(var_H);
+    vec3 N = 2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0;
 #else
-	vec3 V = normalize(var_V);
-	vec3 N = normalize(2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0);
+    vec3 V = normalize(var_V);
+    vec3 N = normalize(2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0);
 #endif
 
-	float NdotL = clamp(dot(N, L), 0.0, 1.0);
+    float NdotL = clamp(dot(N, L), 0.0, 1.0);
 #if defined(HALF_LAMBERT)
-	NdotL *= 0.5;
-	NdotL += 0.5;
-	NdotL = NdotL * NdotL;
+    NdotL *= 0.5;
+    NdotL += 0.5;
+    NdotL = NdotL * NdotL;
 #endif
 #if defined(BLINN_PHONG)
-	float NdotH = clamp(dot(N, H), 0.0, 1.0);
+    float NdotH = clamp(dot(N, H), 0.0, 1.0);
 #endif
 
-	vec3 lightProjection = texture2DProj(u_fragmentMap2, var_TexLight.xyw).rgb;
-	vec3 lightFalloff = texture2D(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;
-	vec3 diffuseColor = texture2D(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;
-	vec3 specularColor = 2.0 * texture2D(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
+    vec3 lightProjection = texture2DProj(u_fragmentMap2, var_TexLight.xyw).rgb;
+    vec3 lightFalloff = texture2D(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;
+    vec3 diffuseColor = texture2D(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;
+    vec3 specularColor = 2.0 * texture2D(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
 
 #if defined(BLINN_PHONG)
-	float specularFalloff = pow(NdotH, u_specularExponent);
+    float specularFalloff = pow(NdotH, u_specularExponent);
 #else
-	vec3 R = -reflect(L, N);
-	float RdotV = clamp(dot(R, V), 0.0, 1.0);
-	float specularFalloff = pow(RdotV, u_specularExponent);
+    vec3 R = -reflect(L, N);
+    float RdotV = clamp(dot(R, V), 0.0, 1.0);
+    float specularFalloff = pow(RdotV, u_specularExponent);
 #endif
 
-	vec3 color;
-	color = diffuseColor;
-	color += specularFalloff * specularColor;
-	color *= NdotL * lightProjection;
-	color *= lightFalloff;
+    vec3 color;
+    color = diffuseColor;
+    color += specularFalloff * specularColor;
+    color *= NdotL * lightProjection;
+    color *= lightFalloff;
 
-	gl_FragColor = vec4(color, 1.0) * var_Color
-#ifdef _TRANSLUCENT_STENCIL_SHADOW
-        * u_uniformParm0
+    gl_FragColor = vec4(color, 1.0) * var_Color
+#ifdef _STENCIL_SHADOW_TRANSLUCENT
+                   * u_uniformParm0
 #endif
-    ;
+                   ;
 }

@@ -46,6 +46,10 @@
                 android:id="@+id/main_menu_game_tdm"
                 android:title="@string/tdm"
                 android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_game_doom"
+                android:title="@string/doom"
+                android:showAsAction="never"/>
         </menu>
     </item>
     

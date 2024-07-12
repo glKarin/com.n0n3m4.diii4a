@@ -2570,7 +2570,6 @@ void idImage::Print() const
 	common->Printf(" %s\n", imgName.c_str());
 }
 
-#ifdef _SHADOW_MAPPING
 void		idImage::GenerateShadow2DDepthImage(int width, int height, textureFilter_t filterParm, bool allowDownSizeParm, textureRepeat_t repeatParm, int component, bool compare)
 {
     byte		*scaledBuffer;
@@ -3000,4 +2999,86 @@ void idImage::GenerateShadowArray( int width, int height, int numSides, textureF
 	GL_CheckErrors();
 }
 #endif
+
+void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSizeParm, textureFilter_t filterParm, textureRepeat_t repeatParm, int component, int stencilComponent, bool compare )
+{
+	int			scaled_width, scaled_height;
+	int			i;
+
+	PurgeImage();
+
+	filter = TF_NEAREST;
+	allowDownSize = allowDownSizeParm;
+	repeat = repeatParm;
+	depth = TD_HIGH_QUALITY;
+	cubeFiles = CF_2D;
+
+	type = TT_2D;
+
+	// if we don't have a rendering context, just return after we
+	// have filled in the parms.  We must have the values set, or
+	// an image match from a shader before the render starts would miss
+	// the generated texture
+	if (!glConfig.isInitialized) {
+		return;
+	}
+
+	// make sure it is a power of 2
+	scaled_width = width;
+	scaled_height = height;
+
+	// Optionally modify our width/height based on options/hardware
+	GetDownsize(scaled_width, scaled_height);
+
+	scaled_width = width;
+	scaled_height = height;
+	uploadHeight = scaled_height;
+	uploadWidth = scaled_width;
+
+	GLenum dataType;
+	switch (component) {
+		case 32:
+			internalFormat = GL_DEPTH32F_STENCIL8;
+			dataType = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+			break;
+		case 24:
+		default:
+			internalFormat = GL_DEPTH24_STENCIL8;
+			dataType = GL_UNSIGNED_INT_24_8;
+			break;
+	}
+
+	qglGenTextures(1, &texnum);
+
+	Bind();
+
+	// no other clamp mode makes sense
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// set the minimize / maximize filtering
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// upload the base level
+
+	//GL_CheckErrors("GenerateDepthStencilImage::start");
+	qglTexImage2D( GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_DEPTH_STENCIL, dataType, NULL );
+	//GL_CheckErrors("GenerateDepthStencilImage::end");
+
+#ifdef GL_ES_VERSION_3_0
+	if(compare)
+	{
+		qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
+		qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
+	}
+	else
+	{
+		// if(USING_GLES31)
+			qglTexParameteri( GL_TEXTURE_2D, GL_DEPTH_STENCIL_TEXTURE_MODE, GL_STENCIL_INDEX );
+	}
 #endif
+	// see if we messed anything up
+
+	GL_CheckErrors();
+}

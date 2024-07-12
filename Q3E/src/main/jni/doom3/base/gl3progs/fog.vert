@@ -30,16 +30,16 @@ out vec2 var_TexFogEnter;    // output FogEnter TexCoord
 
 void main(void)
 {
-  gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+    gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 
-  // What will be computed:
-  //
-  // var_TexFog.x      = dot(u_fogMatrix[0], attr_Vertex);
-  // var_TexFog.y      = dot(u_fogMatrix[1], attr_Vertex);
-  // var_TexFogEnter.x = dot(u_fogMatrix[2], attr_Vertex);
-  // var_TexFogEnter.y = dot(u_fogMatrix[3], attr_Vertex);
+    // What will be computed:
+    //
+    // var_TexFog.x      = dot(u_fogMatrix[0], attr_Vertex);
+    // var_TexFog.y      = dot(u_fogMatrix[1], attr_Vertex);
+    // var_TexFogEnter.x = dot(u_fogMatrix[2], attr_Vertex);
+    // var_TexFogEnter.y = dot(u_fogMatrix[3], attr_Vertex);
 
-  // Optimized version:
-  var_TexFog      = vec2(dot(u_fogMatrix[0], attr_Vertex),dot(u_fogMatrix[1], attr_Vertex));
-  var_TexFogEnter = vec2(dot(u_fogMatrix[2], attr_Vertex),dot(u_fogMatrix[3], attr_Vertex));
+    // Optimized version:
+    var_TexFog      = vec2(dot(u_fogMatrix[0], attr_Vertex),dot(u_fogMatrix[1], attr_Vertex));
+    var_TexFogEnter = vec2(dot(u_fogMatrix[2], attr_Vertex),dot(u_fogMatrix[3], attr_Vertex));
 }

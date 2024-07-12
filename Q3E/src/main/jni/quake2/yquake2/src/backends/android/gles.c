@@ -25,9 +25,6 @@ int gl_msaa = 0;
 int screen_width = 640;
 int screen_height = 480;
 
-qboolean IsHighDPIaware = false;
-static qboolean vsyncActive = false;
-
 #define MAX_NUM_CONFIGS 1000
 static bool window_seted = false;
 static volatile ANativeWindow *win;
@@ -39,6 +36,9 @@ static EGLContext eglContext = EGL_NO_CONTEXT;
 static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+
+qboolean IsHighDPIaware = false;
+static qboolean vsyncActive = false;
 
 static void GLimp_HandleError(const char *func, qboolean exit)
 {

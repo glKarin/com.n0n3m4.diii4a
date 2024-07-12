@@ -8,6 +8,7 @@ uniform highp vec4 u_nonPowerOfTwo;
 
 in highp vec4 var_TexCoord;
 in lowp vec4 var_Color;
+
 out vec4 _gl_FragColor;
 
 void main(void)

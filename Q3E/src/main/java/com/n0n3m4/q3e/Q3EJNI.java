@@ -40,7 +40,8 @@ public class Q3EJNI {
             boolean no_handle_signals, // not handle signals
             boolean multithread, // enable multithread
             boolean usingMouse, // using mouse
-			int refreshRate, // refresh rate
+			int refreshRate, // refresh rate,
+			String appHome, // app home path
             boolean continueNoGLContext
     );
 	public static native void drawFrame();

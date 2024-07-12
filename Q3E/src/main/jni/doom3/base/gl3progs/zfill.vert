@@ -30,8 +30,7 @@ out vec2 var_TexDiffuse;
 
 void main(void)
 {
-	// var_TexDiffuse = attr_TexCoord.xy; // origin
-	var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
+    var_TexDiffuse = (u_textureMatrix * attr_TexCoord).xy;
 
-	gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+    gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

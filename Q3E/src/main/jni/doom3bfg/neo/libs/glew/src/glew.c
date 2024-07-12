@@ -13605,6 +13605,12 @@ static GLenum GLEWAPIENTRY glewContextInit ()
       }
     }
   }
+#ifdef _GLES //karin: force using GLES3.0
+#if !defined(GLEW_EGL)
+  __GLEW_ARB_ES2_compatibility = GL_TRUE;
+  __GLEW_ARB_ES3_compatibility = GL_TRUE;
+#endif
+#endif
 #ifdef GL_VERSION_1_2
   if (glewExperimental || GLEW_VERSION_1_2) GLEW_VERSION_1_2 = !_glewInit_GL_VERSION_1_2();
 #endif /* GL_VERSION_1_2 */

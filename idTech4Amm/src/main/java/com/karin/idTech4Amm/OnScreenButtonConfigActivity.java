@@ -23,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.karin.KStr;
 
 import android.view.ViewGroup;
 import java.util.List;
@@ -256,7 +257,7 @@ public class OnScreenButtonConfigActivity extends Activity
                 default:
                     break;
             }
-            keyName = TextHelper.Join(list, "  ");
+            keyName = KStr.Join(list, "  ");
         }
         
         private int[] ToArray()
@@ -524,7 +525,7 @@ public class OnScreenButtonConfigActivity extends Activity
                                 continue;
                             tsb.add(adapter.getItem(key));
                         }
-                        keyStr = TextHelper.Join(tsb, ",");
+                        keyStr = KStr.Join(tsb, ",");
                     }
                     mPrefs.edit().putString(Q3EPreference.WEAPON_PANEL_KEYS, keyStr).commit();
                 }

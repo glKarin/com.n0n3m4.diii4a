@@ -28,5 +28,5 @@ varying lowp vec4 var_Color;
 
 void main(void)
 {
-	gl_FragColor = texture2D(u_fragmentMap0, var_TexDiffuse) * u_glColor * var_Color;
+    gl_FragColor = texture2D(u_fragmentMap0, var_TexDiffuse) * u_glColor * var_Color;
 }
