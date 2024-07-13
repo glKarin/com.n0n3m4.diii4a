@@ -358,7 +358,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
     public void ChooseExtraFiles(String excludes)
     {
         FileBrowser fileBrowser = new FileBrowser();
-        fileBrowser.SetExtension(".wad", ".pk3", ".deh", ".bex");
+        fileBrowser.SetExtension(".wad", ".pk3", ".ipk3", ".deh", ".bex");
         fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
 
         fileBrowser.SetIgnoreDotDot(true);
