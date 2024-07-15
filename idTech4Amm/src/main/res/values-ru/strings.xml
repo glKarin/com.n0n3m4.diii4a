@@ -292,6 +292,8 @@
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">DOOM 3 BFG</string>
     <string name="doom_base">DOOM</string>
+    <string name="doom1_base">DOOM</string>
+    <string name="doom2_base">DOOM II</string>
     <string name="quake_3_base">Quake III:Arena</string>
     <string name="quake_3_teamarena">Quake III:Team Arena</string>
     <string name="option">Опции</string>

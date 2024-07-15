@@ -17,10 +17,8 @@ GPLv3
 ### idTech4's feature
 * Linux/Windows(MinGW/MSVC(without editor)) build
 * multi-threading renderer
-* png/dds texture image
-* jpeg/png/bmp/dds format of screenshot
-* obj format static model
-* dae format static model
+* png/dds texture image, jpeg/png/bmp/dds format of screenshot
+* obj/dae format static model
 * pure soft shadow with shadow-mapping
 * soft shadow with stencil-shadow
 * OpenGLES2.0/OpenGLES3.0

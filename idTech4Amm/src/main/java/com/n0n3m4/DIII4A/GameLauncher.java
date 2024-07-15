@@ -2503,7 +2503,11 @@ public class GameLauncher extends Activity
 				if(mod.startsWith(":"))
 				{
 					if(":".equals(mod))
+					{
 						RemoveParam("file");
+						RemoveParam("deh");
+						RemoveParam("bex");
+					}
 					else
 					{
 						String files = mod.substring(1);

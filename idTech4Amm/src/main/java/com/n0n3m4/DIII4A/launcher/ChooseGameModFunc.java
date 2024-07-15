@@ -70,7 +70,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         final boolean UsingFile = Q3EUtils.q3ei.isDOOM;
         final boolean AllowExtraFiles = Q3EUtils.q3ei.isDOOM;
         if(Q3EUtils.q3ei.isDOOM)
-            fileBrowser.SetExtension(".wad");
+            fileBrowser.SetExtension(".wad", ".ipk3");
         if(UsingFile)
             fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
         else
@@ -242,10 +242,6 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_DOOM3BFG:
                         if(!Q3EUtils.q3ei.isD3BFG)
-                            continue;
-                        break;
-                    case Q3EGlobals.GAME_GZDOOM:
-                        if(!Q3EUtils.q3ei.isDOOM)
                             continue;
                         break;
                     case Q3EGlobals.GAME_DOOM3:

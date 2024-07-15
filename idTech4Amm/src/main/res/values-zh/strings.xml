@@ -292,6 +292,8 @@
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">毁灭战士3 BFG</string>
     <string name="doom_base">毁灭战士</string>
+    <string name="doom1_base">毁灭战士</string>
+    <string name="doom2_base">毁灭战士2</string>
     <string name="quake_3_base">雷神之锤3:竞技场</string>
     <string name="quake_3_teamarena">雷神之锤3:团队竞技场</string>
     <string name="stop">停止</string>
