@@ -17,7 +17,7 @@
     <string name="if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer">如果出现显存溢出引起崩溃, 建议强制清空/删除顶点缓冲区.</string>
     <string name="force_delete_vertex_buffer_on_every_end_frame">每帧强制删除顶点缓冲区</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">同第二项, 并且强制删除顶点缓冲区对象, 可能慢, 但内存安全.</string>
-    <string name="game_cvar_fs_game">游戏(fs_game)</string>
+    <string name="game_cvar_fs_game">游戏</string>
     <string name="doom_iii">毁灭战士3</string>
     <string name="doom3_resurrection_of_evil_d3xp">毁灭战士3:邪恶复苏</string>
     <string name="classic_doom_cdoom">经典毁灭战士</string>

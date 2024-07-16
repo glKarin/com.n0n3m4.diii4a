@@ -130,6 +130,12 @@
                     android:layout_gravity="center_vertical"
                     android:text="@string/game_cvar_fs_game" />
                 <TextView
+                    android:id="@+id/launcher_fs_game_cvar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="" />
+                <TextView
                     android:id="@+id/launcher_fs_game_subdir"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

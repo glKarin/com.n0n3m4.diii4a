@@ -1580,7 +1580,7 @@ public class GameLauncher extends Activity
 
     private void OpenRuntimeLog()
     {
-        String path = V.edt_path.getText().toString() + File.separatorChar + "stdout.txt";
+		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.GetGameDataDirectoryPath("stdout.txt"));
         String text = Q3EUtils.file_get_contents(path);
         if (text != null)
         {
@@ -2221,6 +2221,7 @@ public class GameLauncher extends Activity
 			subdir = "";
 		else
 			subdir += "/";
+		V.launcher_fs_game_cvar.setText("(" + Q3EUtils.q3ei.GetGameCommandParm() + ")");
 		V.launcher_fs_game_subdir.setText(Q3ELang.tr(this, R.string.sub_directory) + subdir);
 		V.launcher_fs_game_subdir.setVisibility(subdir.isEmpty() ? View.GONE : View.VISIBLE);
     }
@@ -2783,6 +2784,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_r_autoAspectRatio;
 		public CheckBox cb_stencilShadowCombine;
 		public EditText edt_harm_r_shadowMapAlpha;
+		public TextView launcher_fs_game_cvar;
 
         public void Setup()
         {
@@ -2872,6 +2874,7 @@ public class GameLauncher extends Activity
 			rg_r_autoAspectRatio = findViewById(R.id.rg_r_autoAspectRatio);
 			cb_stencilShadowCombine = findViewById(R.id.cb_stencilShadowCombine);
 			edt_harm_r_shadowMapAlpha = findViewById(R.id.edt_harm_r_shadowMapAlpha);
+			launcher_fs_game_cvar = findViewById(R.id.launcher_fs_game_cvar);
         }
     }
 }

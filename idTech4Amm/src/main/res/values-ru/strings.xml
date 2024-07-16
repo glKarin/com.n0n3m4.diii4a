@@ -18,7 +18,7 @@
     <string name="if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer">Если нехватка памяти привела к сбою, включите принудительное удаление буфера вершин.</string>
     <string name="force_delete_vertex_buffer_on_every_end_frame">Принудительное удаление буфера вершин в каждом конечном кадре</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">Удаляет буфер вершин, может быть медленнее, но безопаснее для памяти.</string>
-    <string name="game_cvar_fs_game">Выбор игры(fs_game)</string>
+    <string name="game_cvar_fs_game">Выбор игры</string>
     <string name="doom_iii">DOOM III</string>
     <string name="doom3_resurrection_of_evil_d3xp">DOOM3:Resurrection of Evil</string>
     <string name="classic_doom_cdoom">Classic DOOM</string>

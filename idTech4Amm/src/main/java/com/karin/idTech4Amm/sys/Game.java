@@ -52,8 +52,8 @@ public enum Game
 
     // GZDOOM
     //GZDOOM_BASE(Q3EGlobals.GAME_GZDOOM, "", "", "", false, R.string.doom_base),
-    GZDOOM_DOOM1(Q3EGlobals.GAME_GZDOOM, "DOOM.WAD", "DOOM.WAD", "", false, R.string.doom1_base),
-    GZDOOM_DOOM2(Q3EGlobals.GAME_GZDOOM, "DOOM2.WAD", "DOOM2.WAD", "", false, R.string.doom2_base),
+    GZDOOM_DOOM1(Q3EGlobals.GAME_GZDOOM, "DOOM.WAD", "DOOM.WAD", "", true, R.string.doom1_base),
+    GZDOOM_DOOM2(Q3EGlobals.GAME_GZDOOM, "DOOM2.WAD", "DOOM2.WAD", "", true, R.string.doom2_base),
     ;
 
     public final String type; // game type: doom3/quake4/prey2006
