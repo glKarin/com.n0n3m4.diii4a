@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class Divider extends LinearLayout
 {
-    private Map<String, Object> m_initValues = null;
+    private Attr m_initValues = null;
     private final ViewHolder V = new ViewHolder();
 
     @SuppressLint("NewApi")
@@ -54,9 +54,12 @@ public class Divider extends LinearLayout
         if(attrs != null)
         {
             TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.Divider);
-            m_initValues = new HashMap<>();
-            m_initValues.put("lineColor", ta.getColor(R.styleable.Divider_lineColor, Color.argb(255, 0xCC, 0xCC, 0xCC)));
-            m_initValues.put("label", ta.getString(R.styleable.Divider_label));
+            m_initValues = new Attr();
+            m_initValues.lineColor = ta.getColor(R.styleable.Divider_lineColor, Color.argb(255, 0xCC, 0xCC, 0xCC));
+            String label = ta.getString(R.styleable.Divider_label);
+            if(null == label)
+                label = "";
+            m_initValues.label = label;
             ta.recycle();
         }
         SetupUI(inflate);
@@ -67,14 +70,9 @@ public class Divider extends LinearLayout
         V.Setup(view);
         if(m_initValues != null)
         {
-            Object text = m_initValues.get("label");
-            String t = null != text ? (String)text : "";
-            V.text_label.setText(t);
-
-            Object lineColor = m_initValues.get("lineColor");
-            int c = null != lineColor ? (Integer) lineColor : Color.argb(255, 0xCC, 0xCC, 0xCC);
-            V.left_line.setBackgroundColor(c);
-            V.right_line.setBackgroundColor(c);
+            V.text_label.setText(m_initValues.label);
+            V.left_line.setBackgroundColor(m_initValues.lineColor);
+            V.right_line.setBackgroundColor(m_initValues.lineColor);
         }
     }
     
@@ -90,5 +88,11 @@ public class Divider extends LinearLayout
             left_line = view.findViewById(R.id.divider_left_line);
             right_line = view.findViewById(R.id.divider_right_line);
         }
+    }
+
+    private static class Attr
+    {
+        public int lineColor = Color.argb(255, 0xCC, 0xCC, 0xCC);
+        public String label = "";
     }
 }

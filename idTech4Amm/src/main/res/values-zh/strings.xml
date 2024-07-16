@@ -329,4 +329,8 @@
     <string name="show_game_datas_standalone_directories">显示游戏独立文件夹</string>
     <string name="make_game_use_standalone_data_directory">游戏使用独立的文件夹</string>
     <string name="game_datas_standalone_directories">游戏独立文件夹</string>
+    <string name="fullscreen">全屏</string>
+    <string name="scale_by_screen_width_height">按屏幕宽高比例</string>
+    <string name="scale_with_screen_aspect_ratio">屏幕分辨率宽高比缩放</string>
+    <string name="_scale_by_screen_area">按屏幕面积比例</string>
 </resources>

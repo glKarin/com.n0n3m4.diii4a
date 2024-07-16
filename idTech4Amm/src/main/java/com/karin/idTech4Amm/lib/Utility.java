@@ -41,4 +41,9 @@ public final class Utility
     {
         return ArrayIndexOf(arr, target) >= 0;
     }
+
+    public static int Step(int a, int step)
+    {
+        return (int)Math.round((float)a / (float)step) * step;
+    }
 }

@@ -388,32 +388,35 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 		const int dxtWidth = Max(( width + 4 ) & ~4, ( width + 3 ) & ~3);
 		const int dxtHeight = Max(( height + 4 ) & ~4, ( height + 3 ) & ~3);
 		byte *dpic = ( byte* )Mem_Alloc(dxtWidth * dxtHeight * 4, TAG_TEMP );
-		if(opts.format == FMT_DXT1)
-			decoder.DecompressImageDXT1((const byte *)pic, dpic, width, height);
-		else
+		if(dpic)
 		{
-			if( opts.colorFormat == CFM_YCOCG_DXT5 )
-				decoder.DecompressYCoCgDXT5((const byte *)pic, dpic, width, height);
-			else if( opts.colorFormat == CFM_NORMAL_DXT5 )
-				decoder.DecompressNormalMapDXT5Renormalize((const byte *)pic, dpic, width, height);
+			if(opts.format == FMT_DXT1)
+				decoder.DecompressImageDXT1((const byte *)pic, dpic, width, height);
 			else
-				decoder.DecompressImageDXT5((const byte *)pic, dpic, width, height);
-		}
+			{
+				if( opts.colorFormat == CFM_YCOCG_DXT5 )
+					decoder.DecompressYCoCgDXT5((const byte *)pic, dpic, width, height);
+				else if( opts.colorFormat == CFM_NORMAL_DXT5 )
+					decoder.DecompressNormalMapDXT5Renormalize((const byte *)pic, dpic, width, height);
+				else
+					decoder.DecompressImageDXT5((const byte *)pic, dpic, width, height);
+			}
 
 #if 0
-        idStr ff = "ttt/";
-        ff += imgName;
-        ff.StripFileExtension();
-        ff += va("_dxt%d_%d_%d", opts.format == FMT_DXT1 ? 1 : 5, width, height);
-        //ff.SetFileExtension(".png");
-        //R_WritePNG(ff.c_str(), dpic, 4, width, height, true);
-        ff.SetFileExtension(".tga");
-        R_WriteTGA(ff.c_str(), dpic, width, height);
+			idStr ff = "ttt/";
+			ff += imgName;
+			ff.StripFileExtension();
+			ff += va("_dxt%d_%d_%d", opts.format == FMT_DXT1 ? 1 : 5, width, height);
+			//ff.SetFileExtension(".png");
+			//R_WritePNG(ff.c_str(), dpic, 4, width, height, true);
+			ff.SetFileExtension(".tga");
+			R_WriteTGA(ff.c_str(), dpic, width, height);
 #endif
 
-		TID(glTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, GL_RGBA /*dataFormat*/, GL_UNSIGNED_BYTE /*dataType*/, dpic ));
-		if( dpic != NULL )
-			Mem_Free( dpic );
+			TID(glTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, GL_RGBA /*dataFormat*/, GL_UNSIGNED_BYTE /*dataType*/, dpic ));
+			// if( dpic != NULL )
+				Mem_Free( dpic );
+		}
 #else
 		glCompressedTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, internalFormat, compressedSize, pic );
 #endif

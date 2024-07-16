@@ -330,5 +330,9 @@
     <string name="show_game_datas_standalone_directories">Show game standalone directories</string>
     <string name="make_game_use_standalone_data_directory">Make game use standalone data directory</string>
     <string name="game_datas_standalone_directories">Game standalone directories</string>
+    <string name="fullscreen">Fullscreen</string>
+    <string name="scale_by_screen_width_height">Scale by screen width/height</string>
+    <string name="scale_with_screen_aspect_ratio">Scale with screen aspect ratio</string>
+    <string name="_scale_by_screen_area">Scale by screen area</string>
 
 </resources>
