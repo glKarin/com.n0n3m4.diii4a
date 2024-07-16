@@ -1578,18 +1578,42 @@ public class GameLauncher extends Activity
 		dialog.show();
 	}
 
+	private void OpenRuntimeErrorLog()
+	{
+		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.GetGameDataDirectoryPath("stderr.txt"));
+		String text = Q3EUtils.file_get_contents(path);
+
+		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, Q3ELang.tr(this, R.string.last_runtime_log) + ": stderr.txt", text);
+		builder.setNeutralButton("stdout.txt", new AlertDialog.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				OpenRuntimeLog();
+				dialog.dismiss();
+			}
+		});
+		builder.create().show();
+	}
+	
     private void OpenRuntimeLog()
     {
 		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.GetGameDataDirectoryPath("stdout.txt"));
-        String text = Q3EUtils.file_get_contents(path);
-        if (text != null)
-        {
-            ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.last_runtime_log), text);
-        }
-        else
-        {
-            Toast.makeText(this, Q3ELang.tr(this, R.string.file_can_not_access) + path, Toast.LENGTH_LONG).show();
-        }
+		String text = Q3EUtils.file_get_contents(path);
+
+		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, Q3ELang.tr(this, R.string.last_runtime_log), text);
+		builder.setNeutralButton("stderr.txt", new AlertDialog.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				OpenRuntimeErrorLog();
+				dialog.dismiss();
+			}
+		});
+		builder.create().show();
+
+		//Toast.makeText(this, Q3ELang.tr(this, R.string.file_can_not_access) + path, Toast.LENGTH_LONG).show();
     }
 
     @Override
