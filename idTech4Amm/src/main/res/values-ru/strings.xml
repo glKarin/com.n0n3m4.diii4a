@@ -327,12 +327,12 @@
     <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">Альфа канал наложения теней(harm_r_shadowMapAlpha):</string>
     <string name="files">Файлы</string>
     <string name="_files">файлы</string>
-    <string name="show_game_datas_standalone_directories">Show game standalone directories</string>
-    <string name="make_game_use_standalone_data_directory">Make game use standalone data directory</string>
-    <string name="game_datas_standalone_directories">Game standalone directories</string>
-    <string name="fullscreen">Fullscreen</string>
-    <string name="scale_by_screen_width_height">Scale by screen width/height</string>
-    <string name="scale_with_screen_aspect_ratio">Scale with screen aspect ratio</string>
-    <string name="_scale_by_screen_area">Scale by screen area</string>
+    <string name="show_game_datas_standalone_directories">Показывать отдельные каталоги игры</string>
+    <string name="make_game_use_standalone_data_directory">Заставить игру использовать отдельный каталог данных</string>
+    <string name="game_datas_standalone_directories">Отдельные каталоги игр</string>
+    <string name="fullscreen">Полный экран</string>
+    <string name="scale_by_screen_width_height">Масштабировать по ширине/высоте экрана</string>
+    <string name="scale_with_screen_aspect_ratio">Масштабировать с учетом соотношения сторон экрана</string>
+    <string name="_scale_by_screen_area">Масштабировать по площади экрана<</string>
 
 </resources>
