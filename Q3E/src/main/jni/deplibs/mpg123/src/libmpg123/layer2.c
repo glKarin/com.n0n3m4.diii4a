@@ -1,7 +1,7 @@
 /*
 	layer2.c: the layer 2 decoder, root of mpg123
 
-	copyright 1994-2009 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 1994-2021 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Michael Hipp
 
@@ -22,10 +22,14 @@
 
 #include "l12tabs.h"
 
+#ifdef RUNTIME_TABLES
+#include "init_layer12.h"
+#endif
+
 // The layer12_table is already in real format (fixed or float), just needs
 // a little scaling in the MMX/SSE case.
 
-void init_layer12_stuff(mpg123_handle *fr, real* (*init_table)(mpg123_handle *fr, real *table, int m))
+void INT123_init_layer12_stuff(mpg123_handle *fr, real* (*init_table)(mpg123_handle *fr, real *table, int m))
 {
 	int k;
 	real *table;
@@ -36,7 +40,7 @@ void init_layer12_stuff(mpg123_handle *fr, real* (*init_table)(mpg123_handle *fr
 	}
 }
 
-real* init_layer12_table(mpg123_handle *fr, real *table, int m)
+real* INT123_init_layer12_table(mpg123_handle *fr, real *table, int m)
 {
 	int i;
 	for(i=0;i<63;i++)
@@ -45,7 +49,7 @@ real* init_layer12_table(mpg123_handle *fr, real *table, int m)
 }
 
 #ifdef OPT_MMXORSSE
-real* init_layer12_table_mmx(mpg123_handle *fr, real *table, int m)
+real* INT123_init_layer12_table_mmx(mpg123_handle *fr, real *table, int m)
 {
 	int i,j;
 	if(!fr->p.down_sample) 
@@ -320,7 +324,7 @@ static void II_select_table(mpg123_handle *fr)
 }
 
 
-int do_layer2(mpg123_handle *fr)
+int INT123_do_layer2(mpg123_handle *fr)
 {
 	int clip=0;
 	int i,j;

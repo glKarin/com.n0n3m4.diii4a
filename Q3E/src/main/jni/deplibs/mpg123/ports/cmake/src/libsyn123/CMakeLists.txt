@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libsyn123/syn123.h.in" syn123.h)
-
 include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../../src/libsyn123/")
 
 set(TARGET libsyn123)
@@ -22,11 +20,12 @@ target_include_directories(${TARGET} INTERFACE
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 target_link_libraries(${TARGET} PRIVATE
+    $<$<BOOL:${HAVE_M}>:m>
     $<$<BOOL:${WANT_WIN32_UNICODE}>:shlwapi>)
 
 install(TARGETS ${TARGET} EXPORT targets
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/syn123.h"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/include/syn123.h"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")

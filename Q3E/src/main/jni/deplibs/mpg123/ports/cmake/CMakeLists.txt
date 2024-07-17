@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 
 include(cmake/read_api_version.cmake)
-read_api_version(MPG123_VERSION API_VERSION OUTAPI_VERSION SYNAPI_VERSION)
+read_api_version(MPG123_VERSION)
 
 project(mpg123 VERSION ${MPG123_VERSION} LANGUAGES C ASM)
+set(CMAKE_C_STANDARD 99)
 
-option(BUILD_LIBOUT123 "build libout123" ON)
+option(BUILD_LIBOUT123 "build libout123 (prerequisite for included programs)" OFF) # ON
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
     message(WARNING "Output module is not implemented for '${CMAKE_SYSTEM_NAME}' platform.")
     message(WARNING "To prevent build errors 'BUILD_LIBOUT123' option is set to OFF.")
@@ -19,10 +20,12 @@ include(GNUInstallDirs)
 set(PACKAGE_VERSION ${PROJECT_VERSION})
 add_subdirectory("src")
 
+if(NOT ANDROID)
 install(
     EXPORT targets
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
     NAMESPACE MPG123::)
+endif()
 
 configure_package_config_file(
     mpg123-config.cmake.in mpg123-config.cmake
@@ -30,11 +33,13 @@ configure_package_config_file(
 write_basic_package_version_file(
     mpg123-config-version.cmake COMPATIBILITY AnyNewerVersion)
 
+if(NOT ANDROID)
 install(
     FILES
         "${CMAKE_CURRENT_BINARY_DIR}/mpg123-config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/mpg123-config-version.cmake"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+endif()
 
 set(prefix "${CMAKE_INSTALL_PREFIX}")
 set(exec_prefix "${CMAKE_INSTALL_PREFIX}")
@@ -46,11 +51,13 @@ if(BUILD_LIBOUT123)
 endif()
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../../libsyn123.pc.in" libsyn123.pc @ONLY)
 
+if(NOT ANDROID)
 install(
     FILES
         "${CMAKE_CURRENT_BINARY_DIR}/libmpg123.pc"
         "${CMAKE_CURRENT_BINARY_DIR}/libsyn123.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+endif()
 if(BUILD_LIBOUT123)
 install(
     FILES

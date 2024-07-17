@@ -6,7 +6,7 @@
 	initially written by Nicholas J. Humfrey
 */
 
-#include "out123_int.h"
+#include "../out123_int.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,7 +19,7 @@
 #include <pulse/error.h>
 #include <pulse/pulseaudio.h>
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 // Since we learned the async API for enumeration, let's abuse it for
 // a simple check if a pulse server is active before accidentally
@@ -89,7 +89,7 @@ static int check_for_server()
 
 static int open_pulse(out123_handle *ao)
 {
-	int err;
+	int err = 0;
 	pa_simple* pas = NULL;
 	pa_sample_spec ss;
 	/* Check if already open ? */
@@ -225,7 +225,7 @@ static int close_pulse(out123_handle *ao)
 	pa_simple *pas = (pa_simple*)ao->userptr;
 
 	if (pas) {
-		int err; /* Do we really want to handle errors here? End is the end. */
+		int err = 0; /* Do we really want to handle errors here? End is the end. */
 		pa_simple_drain(pas, &err);
 		pa_simple_free(pas);
 		ao->userptr = NULL;
@@ -239,7 +239,7 @@ static void flush_pulse(out123_handle *ao)
 	pa_simple *pas = (pa_simple*)ao->userptr;
 	
 	if (pas) {
-		int err;
+		int err = 0;
 		pa_simple_flush( pas, &err );	
 		if(err && !AOQUIET)
 			error1("Failed to flush audio: %s", pa_strerror(err));

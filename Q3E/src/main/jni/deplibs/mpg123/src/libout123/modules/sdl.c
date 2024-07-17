@@ -10,7 +10,7 @@
 #define _XOPEN_SOURCE 500
 #define _DEFAULT_SOURCE
 
-#include "out123_int.h"
+#include "../out123_int.h"
 #include <math.h>
 
 #include <SDL.h>
@@ -21,9 +21,9 @@
 
 /* Including the sfifo code locally, to avoid module linkage issues. */
 #define SFIFO_STATIC
-#include "sfifo.c"
+#include "../sfifo.c"
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 
 #define SAMPLE_SIZE			(2)

@@ -19,7 +19,7 @@
 
 #include "metaprint.h"
 
-#include "debug.h"
+#include "common/debug.h"
 
 int meta_show_lyrics = 0;
 
@@ -358,7 +358,7 @@ void print_id3_tag(mpg123_handle *mh, int long_id3, FILE *out, int linelimit)
 
 				memcpy(lang, &v2->text[i].lang, 3);
 				lang[3] = 0;
-				printf("Lyrics begin, language: %s; %s\n\n", lang,  v2->text[i].description.fill ? v2->text[i].description.p : "");
+				fprintf(out, "Lyrics begin, language: %s; %s\n\n", lang,  v2->text[i].description.fill ? v2->text[i].description.p : "");
 
 				mpg123_init_string(&innline);
 				mpg123_init_string(&outline);
@@ -369,7 +369,7 @@ void print_id3_tag(mpg123_handle *mh, int long_id3, FILE *out, int linelimit)
 					/* Either found end of a line or end of the string (null byte) */
 					mpg123_set_substring(&innline, uslt->p, a, b-a);
 					mpg_utf8outstr(&outline, &innline, is_term);
-					printf(" %s\n", outline.p);
+					fprintf(out, " %s\n", outline.p);
 
 					if(uslt->p[b] == uslt->fill) break; /* nothing more */
 
@@ -381,10 +381,12 @@ void print_id3_tag(mpg123_handle *mh, int long_id3, FILE *out, int linelimit)
 				mpg123_free_string(&innline);
 				mpg123_free_string(&outline);
 
-				printf("\nLyrics end.\n");
+				fprintf(out, "\nLyrics end.\n");
 			}
 		}
 	}
+	// A separator line just looks nicer.
+	fprintf(out, "\n");
 }
 
 void print_icy(mpg123_handle *mh, FILE *outstream)

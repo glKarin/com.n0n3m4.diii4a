@@ -6,11 +6,11 @@
 	initially written by Martin Denn
 */
 
-#include "out123_int.h"
+#include "../out123_int.h"
 #include <fcntl.h>
 #include <audio/audiolib.h>
 #include <audio/soundlib.h>
-#include "debug.h"
+#include "../../common/debug.h"
 
 typedef struct
 {

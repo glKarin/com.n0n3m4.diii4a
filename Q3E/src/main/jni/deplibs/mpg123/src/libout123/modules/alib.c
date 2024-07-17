@@ -15,7 +15,7 @@
  *  CC=cc \
  *  LDFLAGS=-L/opt/audio/lib \
  *  AUDIO_LIB=-lAlib \
- *  OBJECTS=decode.o dct64.o \
+ *  OBJECTS=decode.o INT123_dct64.o \
  *  CFLAGS=-Ae +O3 -DREAL_IS_FLOAT -D_HPUX_SOURCE -DHPUX -I/opt/audio/include \
  *  mpg123
  */
@@ -30,7 +30,7 @@
 
 /**************************************************************************/
 
-#include "out123_int.h"
+#include "../out123_int.h"
 
 #include <fcntl.h>
 
@@ -44,7 +44,7 @@
 #include <Alib.h>   /* /opt/audio/include */
 #include <CUlib.h>  /* /opt/audio/include */
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 /**************************************************************************/
 

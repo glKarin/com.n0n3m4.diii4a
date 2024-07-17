@@ -6,7 +6,7 @@
 	initially written by Michael Hipp
 */
 
-#include "out123_int.h"
+#include "../out123_int.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -29,7 +29,7 @@
 #endif
 
 #include <fcntl.h>
-#include "debug.h"
+#include "../../common/debug.h"
 
 static void set_format_helper(out123_handle *ao, audio_info_t *ainfo)
 {
@@ -274,7 +274,7 @@ mpg123_module_t mpg123_output_module_info = {
 	/* api_version */	MPG123_MODULE_API_VERSION,
 	/* name */			"sun",						
 	/* description */	"Audio output for Sun Audio.",
-	/* revision */		"$Rev: 4625 $",						
+	/* revision */		"$Rev: 5386 $",						
 	/* handle */		NULL,
 	
 	/* init_output */	init_sun,						

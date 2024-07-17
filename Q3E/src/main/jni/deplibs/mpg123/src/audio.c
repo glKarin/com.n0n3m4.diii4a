@@ -40,7 +40,7 @@
 #include <sys/wait.h>
 #endif
 
-#include "debug.h"
+#include "common/debug.h"
 
 static syn123_handle *sh = NULL;
 static struct mpg123_fmt outfmt = { .encoding=0, .rate=0, .channels=0 };
@@ -425,6 +425,26 @@ static int audio_capabilities(out123_handle *ao, mpg123_handle *mh)
 		{
 			enc1 &= force_fmt;
 			enc2 &= force_fmt;
+		} else
+		{
+			long propflags = 0;
+			out123_getparam_int(ao, OUT123_PROPFLAGS, &propflags);
+			if(!(propflags & OUT123_PROP_LIVE))
+			{
+				fmtcount = out123_formats(ao, NULL, 0, 1, 2, &outfmts);
+				if(fmtcount == 1 && outfmts[0].encoding > 0)
+				{
+					const char *encname = out123_enc_name(outfmts[0].encoding);
+					if(param.verbose > 1)
+						fprintf( stderr, "Note: honouring non-live default encoding of %s\n"
+						,	encname ? encname : "???" );
+					enc1 &= outfmts[0].encoding;
+					enc2 &= outfmts[0].encoding;
+				}
+				free(outfmts);
+				outfmts = NULL;
+			} else if(param.verbose > 1)
+				fprintf(stderr, "Note: negotiating the best encoding with live sink\n");
 		}
 		mdebug("enc mono=0x%x stereo=0x%x", (unsigned)enc1, (unsigned)enc2);
 		if(!enc1 && !enc2)

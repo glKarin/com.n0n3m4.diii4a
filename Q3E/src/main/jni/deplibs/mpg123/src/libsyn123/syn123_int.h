@@ -1,7 +1,7 @@
 /*
 	syn123_int: internal header for libsyn123
 
-	copyright 2018-2020 by the mpg123 project,
+	copyright 2018-2023 by the mpg123 project,
 	licensed under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 
@@ -14,15 +14,21 @@
 #define _ISOC99_SOURCE
 
 #include "config.h"
-#include "intsym.h"
-#include "compat.h"
-#include "abi_align.h"
-/* export DLL symbols */
-#if defined(WIN32) && defined(DYNAMIC_BUILD)
-#define BUILD_MPG123_DLL
+#ifdef LFS_LARGEFILE_64
+#define _LARGEFILE64_SOURCE
 #endif
+#include "../common/abi_align.h"
+#include "../compat/compat.h"
+
 #define SYN123_NO_LARGEFUNC
 #include "syn123.h"
+// A little hack to help MSVC not having ssize_t, duplicated in external header with largefuncs.
+#ifdef _MSC_VER
+typedef ptrdiff_t syn123_ssize_t;
+#else
+typedef ssize_t syn123_ssize_t;
+#endif
+
 
 // Generally, a number of samples we work on in one go to
 // allow the compiler to know our loops.

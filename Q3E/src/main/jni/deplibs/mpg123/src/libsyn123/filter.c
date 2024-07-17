@@ -190,7 +190,7 @@ syn123_setup_filter( syn123_handle *sh
 			{ \
 				type *w = Fw(*tmp, c); \
 				for(unsigned int o=0; o<order; ++o) \
-					w[o] = 0.; \
+					w[o] = (type)0.; \
 			} \
 			tmp->flow = 1; \
 		} \

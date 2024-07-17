@@ -1,7 +1,7 @@
 /*
 	resample: low-latency usable and quick resampler
 
-	copyright 2018-2020 by the mpg123 project
+	copyright 2018-2023 by the mpg123 project
 	licensed under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 
@@ -82,7 +82,7 @@ TODO: initialize with first sample or zero? is there an actual benefit? impulse
 // SSIZE_MAX is not standard C:-/
 #define _POSIX_C_SOURCE 200809L
 #include "syn123_int.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 // coefficient tables generated from coeff-ellip-6-0.01-36-16.txd
 // (coeff-{filter_type}-{order}-{passband_ripple}-{rejection_dB}-{points})
@@ -106,43 +106,43 @@ TODO: initialize with first sample or zero? is there an actual benefit? impulse
 // filter critical frequency in fractions of Nyquist
 static const float lpf_w_c[LPF_POINTS] = 
 {
-	+1.9500000000e-01
-,	+1.9867850841e-01
-,	+2.0682630822e-01
-,	+2.1914822332e-01
-,	+2.3516664873e-01
-,	+2.5424242424e-01
-,	+2.7560276877e-01
-,	+2.9837505460e-01
-,	+3.2162494540e-01
-,	+3.4439723123e-01
-,	+3.6575757576e-01
-,	+3.8483335127e-01
-,	+4.0085177668e-01
-,	+4.1317369178e-01
-,	+4.2132149159e-01
-,	+4.2500000000e-01
+	+1.9500000000e-01f
+,	+1.9867850841e-01f
+,	+2.0682630822e-01f
+,	+2.1914822332e-01f
+,	+2.3516664873e-01f
+,	+2.5424242424e-01f
+,	+2.7560276877e-01f
+,	+2.9837505460e-01f
+,	+3.2162494540e-01f
+,	+3.4439723123e-01f
+,	+3.6575757576e-01f
+,	+3.8483335127e-01f
+,	+4.0085177668e-01f
+,	+4.1317369178e-01f
+,	+4.2132149159e-01f
+,	+4.2500000000e-01f
 };
 
 // actual cutoff frequency in fractions of Nyquist
 static const float lpf_cutoff[LPF_POINTS] = 
 {
-	+2.4618202393e-01
-,	+2.5064642208e-01
-,	+2.6050157602e-01
-,	+2.7531601376e-01
-,	+2.9440817636e-01
-,	+3.1688954073e-01
-,	+3.4172256063e-01
-,	+3.6778811727e-01
-,	+3.9395465344e-01
-,	+4.1914062138e-01
-,	+4.4236385073e-01
-,	+4.6277512916e-01
-,	+4.7967708029e-01
-,	+4.9253194430e-01
-,	+5.0096263453e-01
-,	+5.0475083567e-01
+	+2.4618202393e-01f
+,	+2.5064642208e-01f
+,	+2.6050157602e-01f
+,	+2.7531601376e-01f
+,	+2.9440817636e-01f
+,	+3.1688954073e-01f
+,	+3.4172256063e-01f
+,	+3.6778811727e-01f
+,	+3.9395465344e-01f
+,	+4.1914062138e-01f
+,	+4.4236385073e-01f
+,	+4.6277512916e-01f
+,	+4.7967708029e-01f
+,	+4.9253194430e-01f
+,	+5.0096263453e-01f
+,	+5.0475083567e-01f
 };
 
 // filter bandwidth (passband fraction in percent)
@@ -169,191 +169,191 @@ static const unsigned char lpf_bw[LPF_POINTS] =
 // coefficient b_0
 static const float lpf_b0[LPF_POINTS] = 
 {
-	+2.5060910358e-02
-,	+2.5545546150e-02
-,	+2.6658960397e-02
-,	+2.8449469363e-02
-,	+3.0975593417e-02
-,	+3.4290689410e-02
-,	+3.8423542124e-02
-,	+4.3355834055e-02
-,	+4.8998511458e-02
-,	+5.5171358029e-02
-,	+6.1592382077e-02
-,	+6.7884279531e-02
-,	+7.3603031799e-02
-,	+7.8288471817e-02
-,	+8.1529628810e-02
-,	+8.3031304399e-02
+	+2.5060910358e-02f
+,	+2.5545546150e-02f
+,	+2.6658960397e-02f
+,	+2.8449469363e-02f
+,	+3.0975593417e-02f
+,	+3.4290689410e-02f
+,	+3.8423542124e-02f
+,	+4.3355834055e-02f
+,	+4.8998511458e-02f
+,	+5.5171358029e-02f
+,	+6.1592382077e-02f
+,	+6.7884279531e-02f
+,	+7.3603031799e-02f
+,	+7.8288471817e-02f
+,	+8.1529628810e-02f
+,	+8.3031304399e-02f
 };
 
 // derivative d b_0/d w_c
 static const float lpf_mb0[LPF_POINTS] = 
 {
-	+1.3023622859e-01
-,	+1.3326373417e-01
-,	+1.4006275119e-01
-,	+1.5061692736e-01
-,	+1.6489815146e-01
-,	+1.8285716898e-01
-,	+2.0437030679e-01
-,	+2.2914833420e-01
-,	+2.5663256095e-01
-,	+2.8591120057e-01
-,	+3.1568709259e-01
-,	+3.4431969261e-01
-,	+3.6995119359e-01
-,	+3.9070858956e-01
-,	+4.0495210591e-01
-,	+4.1152140765e-01
+	+1.3023622859e-01f
+,	+1.3326373417e-01f
+,	+1.4006275119e-01f
+,	+1.5061692736e-01f
+,	+1.6489815146e-01f
+,	+1.8285716898e-01f
+,	+2.0437030679e-01f
+,	+2.2914833420e-01f
+,	+2.5663256095e-01f
+,	+2.8591120057e-01f
+,	+3.1568709259e-01f
+,	+3.4431969261e-01f
+,	+3.6995119359e-01f
+,	+3.9070858956e-01f
+,	+4.0495210591e-01f
+,	+4.1152140765e-01f
 };
 
 // coefficients b_1 to b_n
 static const float lpf_b[LPF_POINTS][LPF_ORDER] = 
 {
-	{ -5.1762847048e-02, +8.4153207389e-02, -8.3511150073e-02
-	, +8.4153207389e-02, -5.1762847048e-02, +2.5060910358e-02 }
-,	{ -5.0602124846e-02, +8.2431045673e-02, -8.0086433599e-02
-	, +8.2431045673e-02, -5.0602124846e-02, +2.5545546150e-02 }
-,	{ -4.7865340043e-02, +7.8920478243e-02, -7.2561589822e-02
-	, +7.8920478243e-02, -4.7865340043e-02, +2.6658960397e-02 }
-,	{ -4.3255354022e-02, +7.4480386867e-02, -6.1251009130e-02
-	, +7.4480386867e-02, -4.3255354022e-02, +2.8449469363e-02 }
-,	{ -3.6312512281e-02, +7.0487561023e-02, -4.6392636636e-02
-	, +7.0487561023e-02, -3.6312512281e-02, +3.0975593417e-02 }
-,	{ -2.6445440921e-02, +6.8811704409e-02, -2.7845395780e-02
-	, +6.8811704409e-02, -2.6445440921e-02, +3.4290689410e-02 }
-,	{ -1.3021846935e-02, +7.1687243737e-02, -4.8530219060e-03
-	, +7.1687243737e-02, -1.3021846935e-02, +3.8423542124e-02 }
-,	{ +4.4706427843e-03, +8.1414913409e-02, +2.3941615853e-02
-	, +8.1414913409e-02, +4.4706427843e-03, +4.3355834055e-02 }
-,	{ +2.6209675772e-02, +9.9864368285e-02, +6.0088123327e-02
-	, +9.9864368285e-02, +2.6209675772e-02, +4.8998511458e-02 }
-,	{ +5.1814692315e-02, +1.2783927823e-01, +1.0454069691e-01
-	, +1.2783927823e-01, +5.1814692315e-02, +5.5171358029e-02 }
-,	{ +8.0182308668e-02, +1.6447692384e-01, +1.5672311528e-01
-	, +1.6447692384e-01, +8.0182308668e-02, +6.1592382077e-02 }
-,	{ +1.0945240695e-01, +2.0692267707e-01, +2.1383540251e-01
-	, +2.0692267707e-01, +1.0945240695e-01, +6.7884279531e-02 }
-,	{ +1.3715527898e-01, +2.5049018459e-01, +2.7077975696e-01
-	, +2.5049018459e-01, +1.3715527898e-01, +7.3603031799e-02 }
-,	{ +1.6054360691e-01, +2.8938069305e-01, +3.2088440740e-01
-	, +2.8938069305e-01, +1.6054360691e-01, +7.8288471817e-02 }
-,	{ +1.7705368035e-01, +3.1783679836e-01, +3.5729711842e-01
-	, +3.1783679836e-01, +1.7705368035e-01, +8.1529628810e-02 }
-,	{ +1.8478918080e-01, +3.3142891364e-01, +3.7464012836e-01
-	, +3.3142891364e-01, +1.8478918080e-01, +8.3031304399e-02 }
+	{ -5.1762847048e-02f, +8.4153207389e-02f, -8.3511150073e-02f
+	, +8.4153207389e-02f, -5.1762847048e-02f, +2.5060910358e-02f }
+,	{ -5.0602124846e-02f, +8.2431045673e-02f, -8.0086433599e-02f
+	, +8.2431045673e-02f, -5.0602124846e-02f, +2.5545546150e-02f }
+,	{ -4.7865340043e-02f, +7.8920478243e-02f, -7.2561589822e-02f
+	, +7.8920478243e-02f, -4.7865340043e-02f, +2.6658960397e-02f }
+,	{ -4.3255354022e-02f, +7.4480386867e-02f, -6.1251009130e-02f
+	, +7.4480386867e-02f, -4.3255354022e-02f, +2.8449469363e-02f }
+,	{ -3.6312512281e-02f, +7.0487561023e-02f, -4.6392636636e-02f
+	, +7.0487561023e-02f, -3.6312512281e-02f, +3.0975593417e-02f }
+,	{ -2.6445440921e-02f, +6.8811704409e-02f, -2.7845395780e-02f
+	, +6.8811704409e-02f, -2.6445440921e-02f, +3.4290689410e-02f }
+,	{ -1.3021846935e-02f, +7.1687243737e-02f, -4.8530219060e-03f
+	, +7.1687243737e-02f, -1.3021846935e-02f, +3.8423542124e-02f }
+,	{ +4.4706427843e-03f, +8.1414913409e-02f, +2.3941615853e-02f
+	, +8.1414913409e-02f, +4.4706427843e-03f, +4.3355834055e-02f }
+,	{ +2.6209675772e-02f, +9.9864368285e-02f, +6.0088123327e-02f
+	, +9.9864368285e-02f, +2.6209675772e-02f, +4.8998511458e-02f }
+,	{ +5.1814692315e-02f, +1.2783927823e-01f, +1.0454069691e-01f
+	, +1.2783927823e-01f, +5.1814692315e-02f, +5.5171358029e-02f }
+,	{ +8.0182308668e-02f, +1.6447692384e-01f, +1.5672311528e-01f
+	, +1.6447692384e-01f, +8.0182308668e-02f, +6.1592382077e-02f }
+,	{ +1.0945240695e-01f, +2.0692267707e-01f, +2.1383540251e-01f
+	, +2.0692267707e-01f, +1.0945240695e-01f, +6.7884279531e-02f }
+,	{ +1.3715527898e-01f, +2.5049018459e-01f, +2.7077975696e-01f
+	, +2.5049018459e-01f, +1.3715527898e-01f, +7.3603031799e-02f }
+,	{ +1.6054360691e-01f, +2.8938069305e-01f, +3.2088440740e-01f
+	, +2.8938069305e-01f, +1.6054360691e-01f, +7.8288471817e-02f }
+,	{ +1.7705368035e-01f, +3.1783679836e-01f, +3.5729711842e-01f
+	, +3.1783679836e-01f, +1.7705368035e-01f, +8.1529628810e-02f }
+,	{ +1.8478918080e-01f, +3.3142891364e-01f, +3.7464012836e-01f
+	, +3.3142891364e-01f, +1.8478918080e-01f, +8.3031304399e-02f }
 };
 
 // derivatives (d b_1/d w_c) to (d b_n/d w_c)
 static const float lpf_mb[LPF_POINTS][LPF_ORDER] = 
 {
-	{ +3.0947524511e-01, -4.7927490698e-01, +9.3391532013e-01
-	, -4.7927490702e-01, +3.0947524507e-01, +1.3023622860e-01 }
-,	{ +3.2168974799e-01, -4.5690983225e-01, +9.2827504448e-01
-	, -4.5690983214e-01, +3.2168974795e-01, +1.3326373418e-01 }
-,	{ +3.5049895985e-01, -4.0402713817e-01, +9.1976126033e-01
-	, -4.0402713816e-01, +3.5049895984e-01, +1.4006275120e-01 }
-,	{ +3.9869096973e-01, -3.1471026348e-01, +9.1858562318e-01
-	, -3.1471026347e-01, +3.9869096972e-01, +1.5061692736e-01 }
-,	{ +4.6976534041e-01, -1.8018044797e-01, +9.4154172198e-01
-	, -1.8018044798e-01, +4.6976534042e-01, +1.6489815146e-01 }
-,	{ +5.6706828511e-01, +1.0247608319e-02, +1.0113425453e+00
-	, +1.0247608337e-02, +5.6706828510e-01, +1.8285716898e-01 }
-,	{ +6.9280120305e-01, +2.6709404538e-01, +1.1535785914e+00
-	, +2.6709404540e-01, +6.9280120305e-01, +2.0437030678e-01 }
-,	{ +8.4703144845e-01, +5.9748112137e-01, +1.3910603904e+00
-	, +5.9748112138e-01, +8.4703144845e-01, +2.2914833420e-01 }
-,	{ +1.0268432839e+00, +1.0012919713e+00, +1.7366400230e+00
-	, +1.0012919713e+00, +1.0268432839e+00, +2.5663256095e-01 }
-,	{ +1.2257925890e+00, +1.4678100718e+00, +2.1866645243e+00
-	, +1.4678100718e+00, +1.2257925891e+00, +2.8591120056e-01 }
-,	{ +1.4338418956e+00, +1.9740692730e+00, +2.7173819083e+00
-	, +1.9740692730e+00, +1.4338418956e+00, +3.1568709258e-01 }
-,	{ +1.6379144032e+00, +2.4857766605e+00, +3.2858109638e+00
-	, +2.4857766605e+00, +1.6379144032e+00, +3.4431969261e-01 }
-,	{ +1.8231025322e+00, +2.9609624523e+00, +3.8352350558e+00
-	, +2.9609624523e+00, +1.8231025322e+00, +3.6995119359e-01 }
-,	{ +1.9744172816e+00, +3.3557576586e+00, +4.3041807299e+00
-	, +3.3557576587e+00, +1.9744172816e+00, +3.9070858955e-01 }
-,	{ +2.0788103417e+00, +3.6311428529e+00, +4.6368982737e+00
-	, +3.6311428526e+00, +2.0788103416e+00, +4.0495210591e-01 }
-,	{ +2.1270907033e+00, +3.7592676993e+00, +4.7930965582e+00
-	, +3.7592676992e+00, +2.1270907033e+00, +4.1152140769e-01 }
+	{ +3.0947524511e-01f, -4.7927490698e-01f, +9.3391532013e-01f
+	, -4.7927490702e-01f, +3.0947524507e-01f, +1.3023622860e-01f }
+,	{ +3.2168974799e-01f, -4.5690983225e-01f, +9.2827504448e-01f
+	, -4.5690983214e-01f, +3.2168974795e-01f, +1.3326373418e-01f }
+,	{ +3.5049895985e-01f, -4.0402713817e-01f, +9.1976126033e-01f
+	, -4.0402713816e-01f, +3.5049895984e-01f, +1.4006275120e-01f }
+,	{ +3.9869096973e-01f, -3.1471026348e-01f, +9.1858562318e-01f
+	, -3.1471026347e-01f, +3.9869096972e-01f, +1.5061692736e-01f }
+,	{ +4.6976534041e-01f, -1.8018044797e-01f, +9.4154172198e-01f
+	, -1.8018044798e-01f, +4.6976534042e-01f, +1.6489815146e-01f }
+,	{ +5.6706828511e-01f, +1.0247608319e-02f, +1.0113425453e+00f
+	, +1.0247608337e-02f, +5.6706828510e-01f, +1.8285716898e-01f }
+,	{ +6.9280120305e-01f, +2.6709404538e-01f, +1.1535785914e+00f
+	, +2.6709404540e-01f, +6.9280120305e-01f, +2.0437030678e-01f }
+,	{ +8.4703144845e-01f, +5.9748112137e-01f, +1.3910603904e+00f
+	, +5.9748112138e-01f, +8.4703144845e-01f, +2.2914833420e-01f }
+,	{ +1.0268432839e+00f, +1.0012919713e+00f, +1.7366400230e+00f
+	, +1.0012919713e+00f, +1.0268432839e+00f, +2.5663256095e-01f }
+,	{ +1.2257925890e+00f, +1.4678100718e+00f, +2.1866645243e+00f
+	, +1.4678100718e+00f, +1.2257925891e+00f, +2.8591120056e-01f }
+,	{ +1.4338418956e+00f, +1.9740692730e+00f, +2.7173819083e+00f
+	, +1.9740692730e+00f, +1.4338418956e+00f, +3.1568709258e-01f }
+,	{ +1.6379144032e+00f, +2.4857766605e+00f, +3.2858109638e+00f
+	, +2.4857766605e+00f, +1.6379144032e+00f, +3.4431969261e-01f }
+,	{ +1.8231025322e+00f, +2.9609624523e+00f, +3.8352350558e+00f
+	, +2.9609624523e+00f, +1.8231025322e+00f, +3.6995119359e-01f }
+,	{ +1.9744172816e+00f, +3.3557576586e+00f, +4.3041807299e+00f
+	, +3.3557576587e+00f, +1.9744172816e+00f, +3.9070858955e-01f }
+,	{ +2.0788103417e+00f, +3.6311428529e+00f, +4.6368982737e+00f
+	, +3.6311428526e+00f, +2.0788103416e+00f, +4.0495210591e-01f }
+,	{ +2.1270907033e+00f, +3.7592676993e+00f, +4.7930965582e+00f
+	, +3.7592676992e+00f, +2.1270907033e+00f, +4.1152140769e-01f }
 };
 
 // coefficients a_1 to a_n
 static const float lpf_a[LPF_POINTS][LPF_ORDER] = 
 {
-	{ -3.9678160947e+00, +7.1582705272e+00, -7.3103432700e+00
-	, +4.4271625605e+00, -1.4968822486e+00, +2.2103607837e-01 }
-,	{ -3.9217586689e+00, +7.0245007818e+00, -7.1375017960e+00
-	, +4.3093638600e+00, -1.4547982662e+00, +2.1489651918e-01 }
-,	{ -3.8190188341e+00, +6.7322820225e+00, -6.7643407898e+00
-	, +4.0573843887e+00, -1.3653052102e+00, +2.0191441068e-01 }
-,	{ -3.6618359076e+00, +6.3015570638e+00, -6.2251488099e+00
-	, +3.6990273202e+00, -1.2392343109e+00, +1.8379956602e-01 }
-,	{ -3.4544704643e+00, +5.7631160859e+00, -5.5687366968e+00
-	, +3.2721548186e+00, -1.0907981304e+00, +1.6273969374e-01 }
-,	{ -3.2034885530e+00, +5.1559829152e+00, -4.8508981080e+00
-	, +2.8177192974e+00, -9.3461709876e-01, +1.4091459119e-01 }
-,	{ -2.9178775764e+00, +4.5233648501e+00, -4.1259259822e+00
-	, +2.3730384158e+00, -7.8317396639e-01, +1.2011720880e-01 }
-,	{ -2.6088711387e+00, +3.9075669790e+00, -3.4391290636e+00
-	, +1.9669306242e+00, -6.4531233315e-01, +1.0156466880e-01 }
-,	{ -2.2894468741e+00, +3.3447965777e+00, -2.8221523134e+00
-	, +1.6175400427e+00, -5.2592289748e-01, +8.5891269383e-02 }
-,	{ -1.9735577122e+00, +2.8610227169e+00, -2.2920156678e+00
-	, +1.3327010249e+00, -4.2655597907e-01, +7.3258414200e-02 }
-,	{ -1.6752255568e+00, +2.4698591405e+00, -1.8535096177e+00
-	, +1.1119902037e+00, -3.4650830575e-01, +6.3506595124e-02 }
-,	{ -1.4076456238e+00, +2.1728886190e+00, -1.5035402243e+00
-	, +9.4944185607e-01, -2.8395564864e-01, +5.6296779542e-02 }
-,	{ -1.1824218415e+00, +1.9621904134e+00, -1.2356636112e+00
-	, +8.3617447471e-01, -2.3684730680e-01, +5.1219220854e-02 }
-,	{ -1.0089985054e+00, +1.8243200388e+00, -1.0434432700e+00
-	, +7.6259361700e-01, -2.0344554024e-01, +4.7870210629e-02 }
-,	{ -8.9429544087e-01, +1.7447560305e+00, -9.2208898364e-01
-	, +7.2012730057e-01, -1.8252811740e-01, +4.5906155400e-02 }
-,	{ -8.4251214238e-01, +1.7118654093e+00, -8.6865163772e-01
-	, +7.0252569491e-01, -1.7335864376e-01, +4.5082431755e-02 }
+	{ -3.9678160947e+00f, +7.1582705272e+00f, -7.3103432700e+00f
+	, +4.4271625605e+00f, -1.4968822486e+00f, +2.2103607837e-01f }
+,	{ -3.9217586689e+00f, +7.0245007818e+00f, -7.1375017960e+00f
+	, +4.3093638600e+00f, -1.4547982662e+00f, +2.1489651918e-01f }
+,	{ -3.8190188341e+00f, +6.7322820225e+00f, -6.7643407898e+00f
+	, +4.0573843887e+00f, -1.3653052102e+00f, +2.0191441068e-01f }
+,	{ -3.6618359076e+00f, +6.3015570638e+00f, -6.2251488099e+00f
+	, +3.6990273202e+00f, -1.2392343109e+00f, +1.8379956602e-01f }
+,	{ -3.4544704643e+00f, +5.7631160859e+00f, -5.5687366968e+00f
+	, +3.2721548186e+00f, -1.0907981304e+00f, +1.6273969374e-01f }
+,	{ -3.2034885530e+00f, +5.1559829152e+00f, -4.8508981080e+00f
+	, +2.8177192974e+00f, -9.3461709876e-01f, +1.4091459119e-01f }
+,	{ -2.9178775764e+00f, +4.5233648501e+00f, -4.1259259822e+00f
+	, +2.3730384158e+00f, -7.8317396639e-01f, +1.2011720880e-01f }
+,	{ -2.6088711387e+00f, +3.9075669790e+00f, -3.4391290636e+00f
+	, +1.9669306242e+00f, -6.4531233315e-01f, +1.0156466880e-01f }
+,	{ -2.2894468741e+00f, +3.3447965777e+00f, -2.8221523134e+00f
+	, +1.6175400427e+00f, -5.2592289748e-01f, +8.5891269383e-02f }
+,	{ -1.9735577122e+00f, +2.8610227169e+00f, -2.2920156678e+00f
+	, +1.3327010249e+00f, -4.2655597907e-01f, +7.3258414200e-02f }
+,	{ -1.6752255568e+00f, +2.4698591405e+00f, -1.8535096177e+00f
+	, +1.1119902037e+00f, -3.4650830575e-01f, +6.3506595124e-02f }
+,	{ -1.4076456238e+00f, +2.1728886190e+00f, -1.5035402243e+00f
+	, +9.4944185607e-01f, -2.8395564864e-01f, +5.6296779542e-02f }
+,	{ -1.1824218415e+00f, +1.9621904134e+00f, -1.2356636112e+00f
+	, +8.3617447471e-01f, -2.3684730680e-01f, +5.1219220854e-02f }
+,	{ -1.0089985054e+00f, +1.8243200388e+00f, -1.0434432700e+00f
+	, +7.6259361700e-01f, -2.0344554024e-01f, +4.7870210629e-02f }
+,	{ -8.9429544087e-01f, +1.7447560305e+00f, -9.2208898364e-01f
+	, +7.2012730057e-01f, -1.8252811740e-01f, +4.5906155400e-02f }
+,	{ -8.4251214238e-01f, +1.7118654093e+00f, -8.6865163772e-01f
+	, +7.0252569491e-01f, -1.7335864376e-01f, +4.5082431755e-02f }
 };
 
 // derivatives (d a_1/d w_c) to (d a_n/d w_c)
 static const float lpf_ma[LPF_POINTS][LPF_ORDER] = 
 {
-	{ +1.2492433161e+01, -3.6517018434e+01, +4.7357395713e+01
-	, -3.2369784989e+01, +1.1586055408e+01, -1.6933077254e+00 }
-,	{ +1.2548734957e+01, -3.6212194682e+01, +4.6616582888e+01
-	, -3.1678742548e+01, +1.1296037667e+01, -1.6449911143e+00 }
-,	{ +1.2669371015e+01, -3.5511519947e+01, +4.4983356850e+01
-	, -3.0180967586e+01, +1.0676583147e+01, -1.5427341805e+00 }
-,	{ +1.2841272347e+01, -3.4388021134e+01, +4.2540425267e+01
-	, -2.8002157377e+01, +9.7976496751e+00, -1.3997892255e+00 }
-,	{ +1.3046121049e+01, -3.2820302039e+01, +3.9430990541e+01
-	, -2.5324586959e+01, +8.7534918962e+00, -1.2330749768e+00 }
-,	{ +1.3263302462e+01, -3.0810041034e+01, +3.5857000371e+01
-	, -2.2361001245e+01, +7.6447176195e+00, -1.0593731098e+00 }
-,	{ +1.3473094693e+01, -2.8396265557e+01, +3.2063474406e+01
-	, -1.9323493868e+01, +6.5616850615e+00, -8.9237379829e-01 }
-,	{ +1.3659446627e+01, -2.5661488138e+01, +2.8308712196e+01
-	, -1.6394785270e+01, +5.5731925958e+00, -7.4123740640e-01 }
-,	{ +1.3811818531e+01, -2.2727774254e+01, +2.4827395931e+01
-	, -1.3709404604e+01, +4.7220289931e+00, -6.1062450746e-01 }
-,	{ +1.3925825330e+01, -1.9744316114e+01, +2.1797535816e+01
-	, -1.1348774538e+01, +4.0264909835e+00, -5.0168575497e-01 }
-,	{ +1.4002735155e+01, -1.6870564740e+01, +1.9320924822e+01
-	, -9.3489487064e+00, +3.4855436350e+00, -4.1340259191e-01 }
-,	{ +1.4048120627e+01, -1.4259541011e+01, +1.7421558040e+01
-	, -7.7156336592e+00, +3.0852238544e+00, -3.4381636627e-01 }
-,	{ +1.4070068384e+01, -1.2044779182e+01, +1.6060419989e+01
-	, -6.4399486362e+00, +2.8047048140e+00, -2.9090554179e-01 }
-,	{ +1.4077328201e+01, -1.0332356944e+01, +1.5160803823e+01
-	, -5.5100288590e+00, +2.6213968366e+00, -2.5305663714e-01 }
-,	{ +1.4077683041e+01, -9.1976058009e+00, +1.4636862941e+01
-	, -4.9166414668e+00, +2.5150332199e+00, -2.2919336158e-01 }
-,	{ +1.4076709161e+01, -8.6849570278e+00, +1.4418874781e+01
-	, -4.6538327513e+00, +2.4707840042e+00, -2.1869079956e-01 }
+	{ +1.2492433161e+01f, -3.6517018434e+01f, +4.7357395713e+01f
+	, -3.2369784989e+01f, +1.1586055408e+01f, -1.6933077254e+00f }
+,	{ +1.2548734957e+01f, -3.6212194682e+01f, +4.6616582888e+01f
+	, -3.1678742548e+01f, +1.1296037667e+01f, -1.6449911143e+00f }
+,	{ +1.2669371015e+01f, -3.5511519947e+01f, +4.4983356850e+01f
+	, -3.0180967586e+01f, +1.0676583147e+01f, -1.5427341805e+00f }
+,	{ +1.2841272347e+01f, -3.4388021134e+01f, +4.2540425267e+01f
+	, -2.8002157377e+01f, +9.7976496751e+00f, -1.3997892255e+00f }
+,	{ +1.3046121049e+01f, -3.2820302039e+01f, +3.9430990541e+01f
+	, -2.5324586959e+01f, +8.7534918962e+00f, -1.2330749768e+00f }
+,	{ +1.3263302462e+01f, -3.0810041034e+01f, +3.5857000371e+01f
+	, -2.2361001245e+01f, +7.6447176195e+00f, -1.0593731098e+00f }
+,	{ +1.3473094693e+01f, -2.8396265557e+01f, +3.2063474406e+01f
+	, -1.9323493868e+01f, +6.5616850615e+00f, -8.9237379829e-01f }
+,	{ +1.3659446627e+01f, -2.5661488138e+01f, +2.8308712196e+01f
+	, -1.6394785270e+01f, +5.5731925958e+00f, -7.4123740640e-01f }
+,	{ +1.3811818531e+01f, -2.2727774254e+01f, +2.4827395931e+01f
+	, -1.3709404604e+01f, +4.7220289931e+00f, -6.1062450746e-01f }
+,	{ +1.3925825330e+01f, -1.9744316114e+01f, +2.1797535816e+01f
+	, -1.1348774538e+01f, +4.0264909835e+00f, -5.0168575497e-01f }
+,	{ +1.4002735155e+01f, -1.6870564740e+01f, +1.9320924822e+01f
+	, -9.3489487064e+00f, +3.4855436350e+00f, -4.1340259191e-01f }
+,	{ +1.4048120627e+01f, -1.4259541011e+01f, +1.7421558040e+01f
+	, -7.7156336592e+00f, +3.0852238544e+00f, -3.4381636627e-01f }
+,	{ +1.4070068384e+01f, -1.2044779182e+01f, +1.6060419989e+01f
+	, -6.4399486362e+00f, +2.8047048140e+00f, -2.9090554179e-01f }
+,	{ +1.4077328201e+01f, -1.0332356944e+01f, +1.5160803823e+01f
+	, -5.5100288590e+00f, +2.6213968366e+00f, -2.5305663714e-01f }
+,	{ +1.4077683041e+01f, -9.1976058009e+00f, +1.4636862941e+01f
+	, -4.9166414668e+00f, +2.5150332199e+00f, -2.2919336158e-01f }
+,	{ +1.4076709161e+01f, -8.6849570278e+00f, +1.4418874781e+01f
+	, -4.6538327513e+00f, +2.4707840042e+00f, -2.1869079956e-01f }
 };
 
 // Low pass with 1/4 pass band, 1/4 transition band on top, for
@@ -369,16 +369,16 @@ static const float lpf_ma[LPF_POINTS][LPF_ORDER] =
 
 static const float lpf_4_coeff[2][LPF_4_ORDER+1] =
 {
-	{ +4.942274456389e-04, +2.456588519653e-03, +7.333608109998e-03
-	, +1.564190404912e-02, +2.595749312226e-02, +3.475411633752e-02
-	, +3.823783863736e-02, +3.475411633752e-02, +2.595749312226e-02
-	, +1.564190404912e-02, +7.333608109998e-03, +2.456588519652e-03
-	, +4.942274456389e-04 }
-,	{ +1.000000000000e+00, -3.414853772012e+00, +6.812049477837e+00
-	, -8.988639858221e+00, +8.737226725937e+00, -6.382745001626e+00
-	, +3.590542256812e+00, -1.543464216385e+00, +5.036659057430e-01
-	, -1.203614775500e-01, +2.006360736124e-02, -2.070940463771e-03
-	, +1.010063725617e-04 }
+	{ +4.942274456389e-04f, +2.456588519653e-03f, +7.333608109998e-03f
+	, +1.564190404912e-02f, +2.595749312226e-02f, +3.475411633752e-02f
+	, +3.823783863736e-02f, +3.475411633752e-02f, +2.595749312226e-02f
+	, +1.564190404912e-02f, +7.333608109998e-03f, +2.456588519652e-03f
+	, +4.942274456389e-04f }
+,	{ +1.000000000000e+00f, -3.414853772012e+00f, +6.812049477837e+00f
+	, -8.988639858221e+00f, +8.737226725937e+00f, -6.382745001626e+00f
+	, +3.590542256812e+00f, -1.543464216385e+00f, +5.036659057430e-01f
+	, -1.203614775500e-01f, +2.006360736124e-02f, -2.070940463771e-03f
+	, +1.010063725617e-04f }
 };
 
 // 4th-order pre-emphasis filters for the differing interpolations
@@ -387,31 +387,31 @@ static const float lpf_4_coeff[2][LPF_4_ORDER+1] =
 
 static const float preemp_1xopt4p4o_coeff[2][6] =
 {
-	{ +1.4537908355e+00, -1.5878441906e-01, +7.6588945557e-01
-	, -1.1187528142e-01, +4.9169512092e-02, -6.1692905372e-03 }
-,	{ +1.0000000000e+00, +1.9208553603e-01, +6.4223479412e-01
-	, +8.4340248522e-02, +6.9072561856e-02, +4.2876716239e-03 }
+	{ +1.4537908355e+00f, -1.5878441906e-01f, +7.6588945557e-01f
+	, -1.1187528142e-01f, +4.9169512092e-02f, -6.1692905372e-03f }
+,	{ +1.0000000000e+00f, +1.9208553603e-01f, +6.4223479412e-01f
+	, +8.4340248522e-02f, +6.9072561856e-02f, +4.2876716239e-03f }
 };
 static const float preemp_1xopt6p5o_coeff[2][6] =
 {
-	{ +1.7736168976e+00, -2.9739831101e-01, +8.3183026784e-01
-	, -1.5434578823e-01, +3.0236127398e-02, -2.1054630699e-03 }
-,	{ +1.0000000000e+00, +2.9206686404e-01, +6.5605633523e-01
-	, +1.4922672324e-01, +7.4792388477e-02, +9.6914195316e-03 }
+	{ +1.7736168976e+00f, -2.9739831101e-01f, +8.3183026784e-01f
+	, -1.5434578823e-01f, +3.0236127398e-02f, -2.1054630699e-03f }
+,	{ +1.0000000000e+00f, +2.9206686404e-01f, +6.5605633523e-01f
+	, +1.4922672324e-01f, +7.4792388477e-02f, +9.6914195316e-03f }
 };
 static const float preemp_2xopt4p4o_coeff[2][6] =
 {
-	{ +1.1866573548e+00, +1.1973031478e+00, -9.4241923873e-02
-	, -4.0863707262e-01, -8.0536389300e-02, -3.8911856607e-04 }
-,	{ +1.0000000000e+00, +1.2122990222e+00, +1.0444255630e-01
-	, -3.7674911658e-01, -1.3106237366e-01, -8.7740900285e-03 }
+	{ +1.1866573548e+00f, +1.1973031478e+00f, -9.4241923873e-02f
+	, -4.0863707262e-01f, -8.0536389300e-02f, -3.8911856607e-04f }
+,	{ +1.0000000000e+00f, +1.2122990222e+00f, +1.0444255630e-01f
+	, -3.7674911658e-01f, -1.3106237366e-01f, -8.7740900285e-03f }
 };
 static const float preemp_2xopt6p5o_coeff[2][6] =
 {
-	{ +1.2995411641e+00, +1.3148944902e+00, -4.3762040619e-02
-	, -3.7595940266e-01, -6.2452466903e-02, +8.5987740998e-04 }
-,	{ +1.0000000000e+00, +1.3227482221e+00, +2.6592565819e-01
-	, -3.1166281821e-01, -1.3266510256e-01, -1.1224337963e-02 }
+	{ +1.2995411641e+00f, +1.3148944902e+00f, -4.3762040619e-02f
+	, -3.7595940266e-01f, -6.2452466903e-02f, +8.5987740998e-04f }
+,	{ +1.0000000000e+00f, +1.3227482221e+00f, +2.6592565819e-01f
+	, -3.1166281821e-01f, -1.3266510256e-01f, -1.1224337963e-02f }
 };
 
 // TODO: switch the decimation filter to Direct Form II
@@ -433,7 +433,7 @@ struct lpf4_hist
 // Downside: You never see a true zero if ther is true zero on input.
 // Upside would be that you'd convert to 24 or 32 bit integer anyway,
 // where you'd get your zero back (1 in 32 bit is around 5e-10.
-static const float denorm_base = 1e-15;
+static const float denorm_base = 1e-15f;
 #define DE_DENORM(val, base) (val) += (base);
 #define DE_DENORM_FLIP(base) (base) = -(base);
 #define DE_DENORM_INIT(base, sign) (base) = (sign)*denorm_base;
@@ -591,7 +591,7 @@ struct resample_data
 
 // Constructing the low pass filter for a bit less than claimed cutoff,
 // numerics shift things a bit.
-static const float lpf_cut_scale = 0.995;
+static const float lpf_cut_scale = 0.995f;
 
 // Reference implementation of the cubic spline evaluation.
 // x: time coordinate to evaluate at
@@ -640,13 +640,13 @@ static float lpf_deriv( const float x[LPF_POINTS]
 	{
 		float w1 = x[i+1]-x[i];
 		m += (val[i+1]-val[i])/(w1*w1);
-		w += 1./w1; 
+		w += 1.f/w1; 
 	}
 	if(i>0)
 	{
 		float w0 = x[i]-x[i-1];
 		m += (val[i]-val[i-1])/(w0*w0);
-		w += 1./w0;
+		w += 1.f/w0;
 	}
 	return m/w; 
 }
@@ -984,7 +984,7 @@ static float df2_initval(unsigned int order, float *filter_a, float insample)
 			fprintf(stderr, "unconfigured pre-emphasis\n"); \
 			return ret; \
 		} \
-		for(int c=0; c<channels; ++c) \
+		for(unsigned int c=0; c<channels; ++c) \
 		{ \
 			float iv = df2_initval(PREEMP_ORDER, rd->pre_a[0], initval[c]); \
 			for(int i=0; i<PREEMP_ORDER; ++i) \
@@ -1599,7 +1599,7 @@ static size_t name( struct resample_data *rd \
 		,	bi, rd->decim_stages ); \
 		int fill = BATCH; \
 		memcpy(rd->prebuf, in, fill*sizeof(*in)*rd->channels); \
-		for(int ds = 0; ds<rd->decim_stages; ++ds) \
+		for(unsigned int ds = 0; ds<rd->decim_stages; ++ds) \
 			fill = decimate(rd, ds, rd->prebuf, fill); \
 		lpf(rd, rd->prebuf, fill); \
 		mxdebug(#name " batch %zu interpol " #interpolate, bi); \
@@ -1613,7 +1613,7 @@ static size_t name( struct resample_data *rd \
 	mxdebug( #name " end decim %d and lowpass " #lpf \
 	, rd->decim_stages ); \
 	memcpy(rd->prebuf, in, fill*sizeof(*in)*rd->channels); \
-	for(int ds = 0; ds<rd->decim_stages; ++ds) \
+	for(unsigned int ds = 0; ds<rd->decim_stages; ++ds) \
 		fill = decimate(rd, ds, rd->prebuf, fill); \
 	lpf(rd, rd->prebuf, fill); \
 	xdebug(#name " end interpol " #interpolate); \
@@ -1916,7 +1916,7 @@ int64_t simulate_interpolate(long vinrate, long voutrate, int64_t ins)
 // for more than simple integer division. The overall rounding error
 // is limited at 2 samples, btw.
 int64_t attribute_align_arg
-syn123_resample_total_64(long inrate, long outrate, int64_t ins)
+syn123_resample_total64(long inrate, long outrate, int64_t ins)
 {
 	if(ins < 0)
 		return -1;
@@ -1963,29 +1963,10 @@ syn123_resample_total_64(long inrate, long outrate, int64_t ins)
 	return (tot <= INT64_MAX) ? (int64_t)tot : SYN123_OVERFLOW;
 }
 
-int32_t attribute_align_arg
-syn123_resample_total_32(int32_t inrate, int32_t outrate, int32_t ins)
-{
-	int64_t tot = syn123_resample_total_64(inrate, outrate, ins);
-	return (tot <= INT32_MAX) ? (int32_t)tot : SYN123_OVERFLOW;
-}
-
-lfs_alias_t syn123_resample_total(long inrate, long outrate, lfs_alias_t ins)
-{
-#if   LFS_ALIAS_BITS+0 == 64
-	return syn123_resample_total_64(inrate, outrate, ins);
-#elif LFS_ALIAS_BITS+0 == 32
-	return syn123_resample_total_32(inrate, outrate, ins);
-#else
-	#error "Unexpected LFS_ALIAS_BITS value."
-#endif
-}
-
-
 // The inverse function: How many input samples are needed to get at least
 // the desired amount of output?
 int64_t attribute_align_arg
-syn123_resample_intotal_64(long inrate, long outrate, int64_t outs)
+syn123_resample_intotal64(long inrate, long outrate, int64_t outs)
 {
 	if(outs < 1)
 		return outs == 0 ? 0 : -1;
@@ -2033,23 +2014,50 @@ syn123_resample_intotal_64(long inrate, long outrate, int64_t outs)
 	return (tot <= INT64_MAX) ? (int64_t)tot : SYN123_OVERFLOW;
 }
 
-int32_t attribute_align_arg
-syn123_resample_intotal_32(int32_t inrate, int32_t outrate, int32_t outs)
-{
-	int64_t tot = syn123_resample_intotal_64(inrate, outrate, outs);
-	return (tot <= INT32_MAX) ? (int32_t)tot : SYN123_OVERFLOW;
+#ifndef PORTABLE_API
+// Again the dreadful business of dealing with shape-shifting off_t API.
+// The real implementation is the function with suffix 64, using int64_t.
+// Depending on your OS, there is a native off_t with 32 or 64 bits, and
+// possibly a 64 bit off64_t. The macros here define the appropriate wrappers
+// for the _32 and _64 suffixes promised in the API header, depending on
+// _FILE_OFFSET_BITS value.
+// A special case is a system that does ignore _FILE_OFFSET BITS but has
+// 64 bit offsets: That should still get the plain alias and one with _64,
+// making the header agnostic to that fact, not depending on any build properties
+
+#define resample_total_wrap(type, limit, name, name64) \
+type attribute_align_arg name(long inrate, long outrate, type io) \
+{ \
+	int64_t tot = name64(inrate, outrate, io); \
+	return (tot <= limit) ? (type)tot : SYN123_OVERFLOW; \
+}
+#define resample_total_alias(type, name, name64) \
+type attribute_align_arg name(long inrate, long outrate, type io) \
+{ \
+	return name64(inrate, outrate, io); \
 }
 
-lfs_alias_t syn123_resample_intotal(long inrate, long outrate, lfs_alias_t outs)
-{
-#if   LFS_ALIAS_BITS+0 == 64
-	return syn123_resample_intotal_64(inrate, outrate, outs);
-#elif LFS_ALIAS_BITS+0 == 32
-	return syn123_resample_intotal_32(inrate, outrate, outs);
-#else
-	#error "Unexpected LFS_ALIAS_BITS value."
+#if  SIZEOF_OFF_T == 8
+#ifndef FORCED_OFF_64
+resample_total_alias(off_t, syn123_resample_total, syn123_resample_total64)
+resample_total_alias(off_t, syn123_resample_intotal, syn123_resample_intotal64)
 #endif
-}
+resample_total_alias(off_t, syn123_resample_total_64, syn123_resample_total64)
+resample_total_alias(off_t, syn123_resample_intotal_64, syn123_resample_intotal64)
+#elif SIZEOF_OFF_T == 4
+resample_total_wrap(off_t, INT32_MAX, syn123_resample_total, syn123_resample_total64)
+resample_total_wrap(off_t, INT32_MAX, syn123_resample_intotal, syn123_resample_intotal64)
+resample_total_wrap(off_t, INT32_MAX, syn123_resample_total_32, syn123_resample_total64)
+resample_total_wrap(off_t, INT32_MAX, syn123_resample_intotal_32, syn123_resample_intotal64)
+#ifdef LFS_LARGEFILE_64
+resample_total_alias(off64_t, syn123_resample_total_64, syn123_resample_total64)
+resample_total_alias(off64_t, syn123_resample_intotal_64, syn123_resample_intotal64)
+#endif
+#else
+#error "Unexpected off_t size."
+#endif
+
+#endif
 
 // As any sensible return value is at least 1, this uses the unsigned
 // type and 0 for error/pathological input.
@@ -2071,7 +2079,7 @@ syn123_resample_count(long inrate, long outrate, size_t ins)
 #endif
 	)
 		return 0;
-	int64_t tot = syn123_resample_total_64(inrate, outrate, (int64_t)ins);
+	int64_t tot = syn123_resample_total64(inrate, outrate, (int64_t)ins);
 	return (tot >= 0 && tot <= SIZE_MAX) ? (size_t)tot : 0;
 }
 
@@ -2137,15 +2145,25 @@ syn123_resample_fillcount(long input_rate, long output_rate, size_t outs)
 	return block;
 }
 
+// Store given error value to storage, if non-NULL, return
+// given return value for pass-through usage.
+static size_t size_err(int *err, int value, size_t ret)
+{
+	if(err)
+		*err = value;
+	return ret;
+}
+
 // The exact predictor: How many output samples will I get _now_
 // after feeding the indicated amount? This is concerned with
 // Buffer sizes, so let's drop the 32/64 bit distinction.
 // Since overflow can occur, we need a sign bit to signal errors.
-ssize_t attribute_align_arg
-syn123_resample_expect(syn123_handle *sh, size_t ins)
+size_t attribute_align_arg
+syn123_resample_out(syn123_handle *sh, size_t ins, int *err)
 {
+	size_err(err, SYN123_OK, 0);
 	if(!sh || !sh->rd)
-		return SYN123_BAD_HANDLE;
+		return size_err(err, SYN123_BAD_HANDLE, 0);
 	if(ins < 1)
 		return 0;
 	struct resample_data *rd = sh->rd;
@@ -2174,47 +2192,56 @@ syn123_resample_expect(syn123_handle *sh, size_t ins)
 	}
 #if SIZE_MAX > UINT64_MAX
 	if(ins > UINT64_MAX) // Really?
-		return SYN123_OVERFLOW;
+		return size_err(err, SYN123_OVERFLOW, 0);
 #endif
 	uint64_t vins = ins;
 	if(rd->sflags & oversample_2x)
 	{
 		if(vins > UINT64_MAX/2)
-			return SYN123_OVERFLOW;
+			return size_err(err, SYN123_OVERFLOW, 0);
 		vins *= 2;
 	}
-	int err;
+	int myerr = SYN123_OK;
 	int64_t offset = rd->sflags & inter_flow ? rd->offset : -rd->vinrate;
 	// Interpolation model:
 	//   outs = (vins*voutrate - offset - 1)/vinrate
 	uint64_t tot = muloffdiv64( vins, (uint64_t)rd->voutrate
-	,	(int64_t)(-offset-1), (uint64_t)rd->vinrate, &err, NULL );
+	,	(int64_t)(-offset-1), (uint64_t)rd->vinrate, &myerr, NULL );
 	// Any error is treated as overflow (div by zero -> infinity).
-	if(err)
-		return SYN123_OVERFLOW;
-	return (tot <= SSIZE_MAX) ? (ssize_t)tot : SYN123_OVERFLOW;
+	if(myerr || tot > SIZE_MAX)
+		return size_err(err, SYN123_OVERFLOW, 0);
+	return (size_t)tot;
+}
+
+syn123_ssize_t attribute_align_arg
+syn123_resample_expect(syn123_handle *sh, size_t ins)
+{
+	int err = 0;
+	size_t tot = syn123_resample_out(sh, ins, &err);
+	if(tot >= SSIZE_MAX)
+		err = SYN123_OVERFLOW;
+	return (syn123_ssize_t)(err ? err : tot);
 }
 
 // How many input samples are minimally needed to get at least the
 // minimally desired output right now?
-ssize_t attribute_align_arg
-syn123_resample_inexpect(syn123_handle *sh, size_t outs)
+size_t attribute_align_arg
+syn123_resample_in(syn123_handle *sh, size_t outs, int *err)
 {
+	size_err(err, SYN123_OK, 0);
 	if(!sh || !sh->rd)
-		return SYN123_BAD_HANDLE;
+		return size_err(err, SYN123_BAD_HANDLE, 0);
 	if(outs < 1)
 		return 0;
 	struct resample_data *rd = sh->rd;
 	// This works for outs > 0:
 	// ins = (outs*inrate+offset)/outrate+1
-	int err;
+	int myerr;
 	int64_t offset = rd->sflags & inter_flow ? rd->offset : -rd->vinrate;
 	uint64_t vtot = muloffdiv64(outs, sh->rd->vinrate, offset, rd->voutrate
-	,	&err, NULL);
-	if(err)
-		return SYN123_OVERFLOW;
-	if(vtot == UINT64_MAX)
-		return SYN123_OVERFLOW;
+	,	&myerr, NULL);
+	if(myerr || vtot == UINT64_MAX)
+		return size_err(err, SYN123_OVERFLOW, 0);
 	++vtot;
 	uint64_t tot = vtot;
 	// Un-do oversampling, taking care not to hit overflow.
@@ -2232,17 +2259,27 @@ syn123_resample_inexpect(syn123_handle *sh, size_t outs)
 	{
 		unsigned int i = rd->decim_stages - 1 - j;
 		if(tot > UINT64_MAX/2+1)
-			return SYN123_OVERFLOW;
+			return size_err(err, SYN123_OVERFLOW, 0);
 		tot = (tot - 1) + tot;
 		if( (rd->decim[i].sflags & lowpass_flow)
 		&&	!(rd->decim[i].sflags & decimate_store) )
 		{
 			if(tot == UINT64_MAX)
-				return SYN123_OVERFLOW;
+				return size_err(err, SYN123_OVERFLOW, 0);
 			++tot;
 		}
 	}
-	return (tot <= SSIZE_MAX) ? (ssize_t)tot : SYN123_OVERFLOW;
+	return (size_t)(tot <= SIZE_MAX ? tot : size_err(err, SYN123_OVERFLOW, 0));
+}
+
+syn123_ssize_t attribute_align_arg
+syn123_resample_inexpect(syn123_handle *sh, size_t outs)
+{
+	int err = 0;
+	size_t tot = syn123_resample_in(sh, outs, &err);
+	if(tot >= SSIZE_MAX)
+		err = SYN123_OVERFLOW;
+	return (syn123_ssize_t)(err ? err : tot);
 }
 
 void resample_free(struct resample_data *rd)
@@ -2368,7 +2405,7 @@ syn123_setup_resample( syn123_handle *sh, long inrate, long outrate
 	{
 		if(smooth)
 		{
-			float *sth = safe_realloc( rd->stage_history
+			float *sth = INT123_safe_realloc( rd->stage_history
 			,	sizeof(float)*STAGE_HISTORY*channels*(decim_stages+1) );
 			if(!sth)
 			{
@@ -2377,24 +2414,31 @@ syn123_setup_resample( syn123_handle *sh, long inrate, long outrate
 			}
 			rd->stage_history = sth;
 		}
-		struct decimator_state *nd = safe_realloc( rd->decim
-		,	sizeof(*rd->decim)*decim_stages );
-		struct lpf4_hist *ndh = safe_realloc( rd->decim_hist
-		,	sizeof(*rd->decim_hist)*decim_stages*channels );
-		if(nd)
-			rd->decim = nd;
-		if(ndh)
-			rd->decim_hist = ndh;
-		if(!nd || !ndh)
+		if(decim_stages)
 		{
-			perror("cannot allocate decimator state");
-			err = SYN123_DOOM;
-			goto setup_resample_cleanup;
+			struct decimator_state *nd = INT123_safe_realloc( rd->decim
+			,	sizeof(*rd->decim)*decim_stages );
+			struct lpf4_hist *ndh = INT123_safe_realloc( rd->decim_hist
+			,	sizeof(*rd->decim_hist)*decim_stages*channels );
+			if(nd)
+				rd->decim = nd;
+			if(ndh)
+				rd->decim_hist = ndh;
+			if(!nd || !ndh)
+			{
+				perror("cannot allocate decimator state");
+				err = SYN123_DOOM;
+				goto setup_resample_cleanup;
+			}
+		} else
+		{
+			free(rd->decim); rd->decim = NULL;
+			free(rd->decim_hist); rd->decim_hist = NULL;
 		}
 		// Link up the common memory blocks after each realloc.
 		for(unsigned int dc=0; dc<decim_stages; ++dc)
 		{
-			rd->decim[dc].ch = ndh+dc*channels;
+			rd->decim[dc].ch = rd->decim_hist+dc*channels;
 			rd->decim[dc].out_hist = rd->stage_history
 			?	rd->stage_history+(dc+1)*STAGE_HISTORY*channels
 			:	NULL;
@@ -2437,7 +2481,7 @@ syn123_setup_resample( syn123_handle *sh, long inrate, long outrate
 		// Magnitude must not be too large. Too small is OK.
 		if(noff > LONG_MAX)
 			noff = LONG_MAX;
-		rd->offset = sign*noff;
+		rd->offset = sign*(long)noff;
 		// Total paranoia. This is the crucial condition.
 		if(rd->offset < -vinrate)
 			rd->offset = -vinrate;
@@ -2471,7 +2515,7 @@ syn123_setup_resample( syn123_handle *sh, long inrate, long outrate
 
 	// Round result to single precision, but compute with double to be able
 	// to correctly represent 32 bit longs first.
-	rd->lpf_cutoff = (double)(rd->inrate < rd->outrate ? rd->inrate : rd->voutrate)/rd->vinrate;
+	rd->lpf_cutoff = (float)((double)(rd->inrate < rd->outrate ? rd->inrate : rd->voutrate)/rd->vinrate);
 	mdebug( "lowpass cutoff: %.8f of virtual %.0f Hz = %.0f Hz"
 	,	rd->lpf_cutoff, 0.5*rd->vinrate, rd->lpf_cutoff*0.5*rd->vinrate );
 	mdebug("rates final: %ld|%ld -> %ld|%ld"
@@ -2487,7 +2531,7 @@ syn123_setup_resample( syn123_handle *sh, long inrate, long outrate
 		lpf_init(rd);
 		mdebug( "smooth old scale: %g, new scale: %g"
 		,	scale, lpf_history_scale(rd) );
-		scale = scale > 1e-10 ? lpf_history_scale(rd) / scale : 1.;
+		scale = scale > 1e-10f ? lpf_history_scale(rd) / scale : 1.f;
 		for(unsigned int c=0; c<rd->channels; ++c)
 			for(unsigned int j=0; j<LPF_MAX_TIMES; ++j)
 				for(unsigned int i=0; i<LPF_ORDER; ++i)
@@ -2544,7 +2588,7 @@ syn123_resample( syn123_handle *sh,
 	// Input limit is zero if no resampler configured.
 	if(!samples || samples > sh->rd->input_limit)
 		return 0;
-	mdebug( "calling actual resample function from %p to %p with %"SIZE_P" samples"
-	,	(void*)src, (void*)dst, (size_p)samples );
+	mdebug( "calling actual resample function from %p to %p with %zu samples"
+	,	(void*)src, (void*)dst, samples );
 	return rd->resample_func(rd, src, samples, dst);
 }

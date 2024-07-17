@@ -1,18 +1,19 @@
 /*
 	seek-accuracy: Take some given mpeg file and validate that seeks are indeed accurate.
 
-	copyright 2009-2013 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 2009-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Thomas Orgis
 
 	arguments: decoder preframes testfile.mpeg
 */
 
+#include "config.h"
 #include <mpg123.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include "mpg123.h"
-#include "compat.h"
+#include "../compat/compat.h"
 
 #define SAMPLES 187
 /* Cannot use the const value as fixed array size:-( */
@@ -82,11 +83,11 @@ int main(int argc, char **argv)
 	else fprintf(stderr, "Some failure occured! Unable to test properly!");
 
 	fprintf(stderr,"\n");
-	fprintf(stderr,"1to1 indexed seek errors: %"SIZE_P" / %"SIZE_P"\n", (size_p)errs[0],(size_p)samples);
-	fprintf(stderr,"1to1 non-indexed seek errors: %"SIZE_P" / %"SIZE_P"\n", (size_p)errs[1],(size_p)samples);
-	fprintf(stderr,"NtoM indexed seek errors: %"SIZE_P" / %"SIZE_P"\n", (size_p)errs_ntom[0],(size_p)samples);
-	fprintf(stderr,"NtoM non-indexed seek errors: %"SIZE_P" / %"SIZE_P"\n", (size_p)errs_ntom[1],(size_p)samples);
-	fprintf(stderr,"Errors in getting first sample again: %"SIZE_P"\n", first_sample_errs);
+	fprintf(stderr,"1to1 indexed seek errors: %zu / %zu\n", errs[0], samples);
+	fprintf(stderr,"1to1 non-indexed seek errors: %zu / %zu\n", errs[1], samples);
+	fprintf(stderr,"NtoM indexed seek errors: %zu / %zu\n", errs_ntom[0], samples);
+	fprintf(stderr,"NtoM non-indexed seek errors: %zu / %zu\n", errs_ntom[1], samples);
+	fprintf(stderr,"Errors in getting first sample again: %zu\n", first_sample_errs);
 	fprintf(stderr,"\n");
 
 	if(ret == 0)
@@ -163,7 +164,7 @@ int collect(struct seeko *so)
 	size_t posi = 0;
 	mpg123_scan(m);
 	length = mpg123_length(m);
-	fprintf(stderr,"Estimated length: %"OFF_P"\n", (off_p)length);
+	fprintf(stderr,"Estimated length: %" PRIiMAX "\n", (intmax_t)length);
 	/* Compute the interesting positions */
 	fix_positions(so, length);
 	/*
@@ -180,7 +181,7 @@ int collect(struct seeko *so)
 		while(so->position[posi] < pos_count+buffsamples)
 		{
 			size_t i = (so->position[posi]-pos_count)*channels;
-			fprintf(stderr,"got sample %"SIZE_P" (%"OFF_P")\n", (size_p)posi, (off_p)so->position[posi]);
+			fprintf(stderr,"got sample %zu (%" PRIiMAX ")\n", posi, (intmax_t)so->position[posi]);
 			so->left[posi] = buff[i];
 			if(channels == 2)
 			so->right[posi] = buff[i+1];
@@ -212,7 +213,7 @@ int check_sample(struct seeko *so, size_t i)
 
 	if(mpg123_seek(m, so->position[i], SEEK_SET) != so->position[i])
 	{
-		fprintf(stderr,"Error seeking to %"OFF_P": %s\n", (off_p)so->position[i],  mpg123_strerror(m));
+		fprintf(stderr,"Error seeking to %" PRIiMAX ": %s\n", (intmax_t)so->position[i],  mpg123_strerror(m));
 		return -1;
 	}
 
@@ -220,17 +221,17 @@ int check_sample(struct seeko *so, size_t i)
 		 ||
 		 got/sizeof(short) != channels )
 	{
-		fprintf(stderr,"Error occured on reading sample %"SIZE_P"! (%s)\n", (size_p)i, mpg123_strerror(m));
+		fprintf(stderr,"Error occured on reading sample %zu! (%s)\n", i, mpg123_strerror(m));
 		return -1;
 	}
 	if(same(buf[0], so->left[i]) && (channels == 1 || same(buf[1], so->right[i])))
 	{
-		fprintf(stderr,"sample %"SIZE_P" PASS\n", (size_p)i);
+		fprintf(stderr,"sample %zu PASS\n", i);
 	}
 	else
 	{
-		if(channels == 1) fprintf(stderr,"sample %"SIZE_P" FAIL (%i != %i)\n", (size_p)i, buf[0], so->left[i]);
-		else fprintf(stderr,"sample %"SIZE_P" FAIL (%i != %i || %i != %i)\n", (size_p)i, buf[0], so->left[i], buf[1], so->right[i]);
+		if(channels == 1) fprintf(stderr,"sample %zu FAIL (%i != %i)\n", i, buf[0], so->left[i]);
+		else fprintf(stderr,"sample %zu FAIL (%i != %i || %i != %i)\n", i, buf[0], so->left[i], buf[1], so->right[i]);
 		return -1;
 	}
 	return 0;

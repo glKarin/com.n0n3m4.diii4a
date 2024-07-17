@@ -23,7 +23,7 @@ void free_playlist(void);
 /* Print out the playlist, with optional position indicator. */
 void print_playlist(FILE* out, int showpos);
 /* This prepares a jump to be executed on next get_next_file(). */
-void playlist_jump(ssize_t incr);
+void playlist_jump(mpg123_ssize_t incr);
 /* Aim for the next directory (just trigger next track for random play). */
 void playlist_next_dir(void);
 /* Same for previous one. */

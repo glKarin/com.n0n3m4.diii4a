@@ -2,7 +2,7 @@
 	resolver.c: TCP network stuff, for IPv4 and IPv6
 	Oh, and also some URL parsing... extracting host name and such.
 
-	copyright 2008-2010 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 2008-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written Thomas Orgis (based on httpget.c)
 
@@ -16,7 +16,7 @@
 #include "mpg123app.h"
 
 #ifdef NETWORK
-#include "true.h"
+#include "common/true.h"
 #include "resolver.h"
 #if !defined (WANT_WIN32_SOCKETS)
 #include <netdb.h>
@@ -25,6 +25,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#if defined (IPV6) && defined (__OS2__)
+#include <libcx/net.h>
+#endif
 #endif
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -36,7 +39,7 @@
 #include <sys/types.h>
 #endif
 #include <unistd.h>
-#include "debug.h"
+#include "common/debug.h"
 
 int split_url(mpg123_string *url, mpg123_string *auth, mpg123_string *host, mpg123_string *port, mpg123_string *path)
 {
@@ -219,13 +222,13 @@ static int timeout_connect(int sockfd, const struct sockaddr *serv_addr, socklen
 			}
 			else
 			{
-				error1("error from select(): %s", strerror(errno));
+				error1("error from select(): %s", INT123_strerror(errno));
 				return -1;
 			}
 		}
 		else
 		{
-			error1("connection failed: %s", strerror(errno));
+			error1("connection failed: %s", INT123_strerror(errno));
 			return err;
 		}
 	}
@@ -233,7 +236,7 @@ static int timeout_connect(int sockfd, const struct sockaddr *serv_addr, socklen
 	{
 		if(connect(sockfd, serv_addr, addrlen))
 		{
-			error1("connection failed: %s", strerror(errno));
+			error1("connection failed: %s", INT123_strerror(errno));
 			return -1;
 		}
 		else return 0; /* _good_ */
@@ -269,7 +272,7 @@ int open_connection(mpg123_string *host, mpg123_string *port)
 	{ /* Name lookup. */
 		if (!(myhostent = gethostbyname(host->p))) return -1;
 
-		memcpy (&myaddr, myhostent->h_addr, sizeof(myaddr));
+		memcpy (&myaddr, myhostent->h_addr_list[0], sizeof(myaddr));
 		server.sin_addr.s_addr = myaddr.s_addr;
 	}
 	else  /* Just use the IP. */
@@ -281,7 +284,7 @@ int open_connection(mpg123_string *host, mpg123_string *port)
 
 	if((sock = socket(PF_INET, SOCK_STREAM, 6)) < 0)
 	{
-		error1("Cannot create socket: %s", strerror(errno));
+		error1("Cannot create socket: %s", INT123_strerror(errno));
 		return -1;
 	}
 	if(timeout_connect(sock, (struct sockaddr *)&server, sizeof(server)))

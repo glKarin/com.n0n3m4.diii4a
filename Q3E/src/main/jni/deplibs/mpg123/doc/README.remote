@@ -63,7 +63,9 @@ SEQ <bass> <mid> <treble>: simple eq setting...
 
 PITCH <[+|-]value>: adjust playback speed (+0.01 is 1 % faster)
 
-SILENCE: be silent during playback (meaning silence in text form)
+SILENCE: be silent during playback (no progress info, opposite of PROGRESS)
+
+PROGRESS: turn on progress display (opposite of SILENCE)
 
 STATE: Print auxiliary state info in several lines (just try it to see what info is there).
 
@@ -102,7 +104,7 @@ Note: mpg123 returns errors on stderr, so your frontend should
       look not only at stdout but also at stderr for responses.
       It is a good idea to use --remote-err and just look at stderr.
 
-@R MPG123 (ThOr) v7
+@R MPG123 (ThOr) v10
 	Startup version message. Everything after MPG123 is auxilliary information about behaviour and command support, ID3v2 tag support is new in v3.
 
 @I ID3:<a><b><c>
@@ -175,6 +177,11 @@ to help parsers decide if they got the whole list.
 	a = 0: playing stopped
 	a = 1: playing paused
 	a = 2: playing unpaused
+	a = 3: end of track reached (followed by another status response)
+
+@DRAIN <s>
+	Output buffer of s seconds is being drained, without chance of interruption.
+	(since v11)
 
 @E <a>
 	An error occured

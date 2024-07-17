@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libout123/out123.h.in" out123.h)
-
 include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libout123/")
 add_subdirectory("modules")
 
@@ -33,5 +31,5 @@ install(TARGETS ${TARGET} EXPORT targets
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/out123.h"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/include/out123.h"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")

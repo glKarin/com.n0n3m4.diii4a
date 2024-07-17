@@ -17,7 +17,7 @@
 /* Things are still missing if _DEFAULT_SOURCE is not defined (for recent
    glibc, I presume. */
 #define _DEFAULT_SOURCE
-#include "out123_int.h"
+#include "../out123_int.h"
 #include <errno.h>
 
 /* make ALSA 0.9.x compatible to the 1.0.x API */
@@ -27,7 +27,7 @@
 #include <alloca.h> /* GCC complains about missing declaration of alloca. */
 #include <alsa/asoundlib.h>
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 /* Total buffer size in seconds, 0.2 is more true to what ALSA maximally uses
    here (8192 samples). The earlier default of 0.5 was never true. */

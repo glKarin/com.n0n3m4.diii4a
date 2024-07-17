@@ -1,7 +1,7 @@
 /*
 	id3: ID3v2.3 and ID3v2.4 parsing (a relevant subset)
 
-	copyright 2006-2020 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 2006-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Thomas Orgis
 
@@ -85,7 +85,7 @@
 
 #include "mpg123lib_intern.h"
 #include "id3.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 #ifndef NO_ID3V2 /* Only the main parsing routine will always be there. */
 
@@ -126,7 +126,7 @@ static void null_id3_links(mpg123_handle *fr)
 	fr->id3v2.comment = NULL;
 }
 
-void init_id3(mpg123_handle *fr)
+void INT123_init_id3(mpg123_handle *fr)
 {
 	fr->id3v2.version = 0; /* nothing there */
 	null_id3_links(fr);
@@ -241,7 +241,7 @@ static mpg123_text *add_id3_text( mpg123_text **list, size_t *size
 	}
 	mdebug("add_id3_text: append to list of %zu", *size);
 	// Nothing found, add new one.
-	mpg123_text *x = safe_realloc(*list, sizeof(mpg123_text)*(*size+1));
+	mpg123_text *x = INT123_safe_realloc(*list, sizeof(mpg123_text)*(*size+1));
 	if(x == NULL) return NULL; /* bad */
 
 	*list  = x;
@@ -269,7 +269,7 @@ static mpg123_picture *add_id3_picture(mpg123_picture **list, size_t *size, char
 			return entry;
 	}
 	// Append a new one.
-	mpg123_picture *x = safe_realloc(*list, sizeof(mpg123_picture)*(*size+1));
+	mpg123_picture *x = INT123_safe_realloc(*list, sizeof(mpg123_picture)*(*size+1));
 	if(x == NULL) return NULL; /* bad */
 
 	*list  = x;
@@ -281,7 +281,7 @@ static mpg123_picture *add_id3_picture(mpg123_picture **list, size_t *size, char
 
 /* OK, back to the higher level functions. */
 
-void exit_id3(mpg123_handle *fr)
+void INT123_exit_id3(mpg123_handle *fr)
 {
 	free_picture(fr);
 	free_comment(fr);
@@ -289,14 +289,14 @@ void exit_id3(mpg123_handle *fr)
 	free_text(fr);
 }
 
-void reset_id3(mpg123_handle *fr)
+void INT123_reset_id3(mpg123_handle *fr)
 {
-	exit_id3(fr);
-	init_id3(fr);
+	INT123_exit_id3(fr);
+	INT123_init_id3(fr);
 }
 
 /* Set the id3v2.artist id3v2.title ... links to elements of the array. */
-void id3_link(mpg123_handle *fr)
+void INT123_id3_link(mpg123_handle *fr)
 {
 	size_t i;
 	mpg123_id3v2 *v2 = &fr->id3v2;
@@ -352,7 +352,7 @@ static void store_id3_text(mpg123_string *sb, unsigned char *source, size_t sour
 		}
 		memcpy(sb->p, source, source_size);
 		sb->fill = source_size;
-		debug1("stored undecoded ID3 text of size %"SIZE_P, (size_p)source_size);
+		debug1("stored undecoded ID3 text of size %zu", source_size);
 		return;
 	}
 
@@ -363,7 +363,7 @@ static void store_id3_text(mpg123_string *sb, unsigned char *source, size_t sour
 			error1("Unknown text encoding %u, I take no chances, sorry!", encoding);
 		return;
 	}
-	id3_to_utf8(sb, encoding, source+1, source_size-1, noquiet);
+	INT123_id3_to_utf8(sb, encoding, source+1, source_size-1, noquiet);
 
 	if(sb->fill) debug1("UTF-8 string (the first one): %s", sb->p);
 	else if(noquiet) error("unable to convert string to UTF-8 (out of memory, junk input?)!");
@@ -371,7 +371,7 @@ static void store_id3_text(mpg123_string *sb, unsigned char *source, size_t sour
 
 /* On error, sb->size is 0. */
 /* Also, encoding has been checked already! */
-void id3_to_utf8(mpg123_string *sb, unsigned char encoding, const unsigned char *source, size_t source_size, int noquiet)
+void INT123_id3_to_utf8(mpg123_string *sb, unsigned char encoding, const unsigned char *source, size_t source_size, int noquiet)
 {
 	unsigned int bwidth;
 	if(sb)
@@ -403,9 +403,12 @@ static unsigned char *next_text(unsigned char* prev, unsigned char encoding, siz
 	unsigned char *text = prev;
 	size_t width = encoding_widths[encoding];
 
+	if(limit > PTRDIFF_MAX)
+		return NULL;
+
 	/* So I go lengths to find zero or double zero...
 	   Remember bug 2834636: Only check for aligned NULLs! */
-	while(text-prev < (ssize_t)limit)
+	while(text-prev < (ptrdiff_t)limit)
 	{
 		if(text[0] == 0)
 		{
@@ -494,7 +497,7 @@ static void process_picture(mpg123_handle *fr, unsigned char *realdata, size_t r
 			error("Unable to get mime type for picture; skipping picture.");
 		return;
 	}
-	id3_to_utf8(&mime, 0, realdata, workpoint - realdata, NOQUIET);
+	INT123_id3_to_utf8(&mime, 0, realdata, workpoint - realdata, NOQUIET);
 	realsize -= workpoint - realdata;
 	realdata = workpoint;
 	/* get picture type */
@@ -509,7 +512,7 @@ static void process_picture(mpg123_handle *fr, unsigned char *realdata, size_t r
 		mpg123_free_string(&mime);
 		return;
 	}
-	id3_to_utf8(&description, encoding, realdata, workpoint - realdata, NOQUIET);
+	INT123_id3_to_utf8(&description, encoding, realdata, workpoint - realdata, NOQUIET);
 	realsize -= workpoint - realdata;
 	if(realsize)
 		image_data = (unsigned char*)malloc(realsize);
@@ -564,7 +567,7 @@ static void process_comment(mpg123_handle *fr, enum frame_types tt, unsigned cha
 
 	if(realsize < (size_t)(descr-realdata))
 	{
-		if(NOQUIET) error1("Invalid frame size of %"SIZE_P" (too small for anything).", (size_p)realsize);
+		if(NOQUIET) error1("Invalid frame size of %zu (too small for anything).", realsize);
 		return;
 	}
 	if(encoding > mpg123_id3_enc_max)
@@ -619,8 +622,8 @@ static void process_comment(mpg123_handle *fr, enum frame_types tt, unsigned cha
 
 	if(VERBOSE4) /* Do _not_ print the verbatim text: The encoding might be funny! */
 	{
-		fprintf(stderr, "Note: ID3 comm/uslt desc of length %"SIZE_P".\n", (size_p)xcom->description.fill);
-		fprintf(stderr, "Note: ID3 comm/uslt text of length %"SIZE_P".\n", (size_p)xcom->text.fill);
+		fprintf(stderr, "Note: ID3 comm/uslt desc of length %zu.\n", xcom->description.fill);
+		fprintf(stderr, "Note: ID3 comm/uslt text of length %zu.\n", xcom->text.fill);
 	}
 	/* Look out for RVA info only when we really deal with a straight comment. */
 	if(tt == comment && localcom.description.fill > 0)
@@ -795,7 +798,7 @@ int store_id3v2( mpg123_handle *fr
 ,	unsigned long first4bytes, unsigned char buf[6], unsigned long length )
 {
 	int ret = 1;
-	off_t ret2;
+	int64_t ret2;
 	unsigned long fullen = 10+length;
 	if(fr->id3v2_raw)
 		free(fr->id3v2_raw);
@@ -842,7 +845,7 @@ int store_id3v2( mpg123_handle *fr
 	          1: good, (possibly) new tag info
 	         <0: reader error (may need more data feed, try again)
 */
-int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
+int INT123_parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 {
 	#define UNSYNC_FLAG 128
 	#define EXTHEAD_FLAG 64  /* ID3v2.3+ */
@@ -855,7 +858,7 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 	unsigned long length=0;
 	unsigned char flags = 0;
 	int ret = 1;
-	off_t ret2;
+	int64_t ret2;
 	int storetag = 0;
 	unsigned int footlen = 0;
 #ifndef NO_ID3V2
@@ -961,7 +964,7 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 	{
 		if(VERBOSE3)
 			fprintf(stderr, "Note: skipped tag clearing possibly existing ID3v2 data");
-		reset_id3(fr); // Old data is invalid.
+		INT123_reset_id3(fr); // Old data is invalid.
 #endif
 		if(!storetag && (ret2=fr->rd->skip_bytes(fr,length+footlen))<0)
 			ret=ret2;
@@ -1025,7 +1028,7 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 			{
 				if(VERBOSE3)
 					fprintf(stderr, "Note: non-update tag replacing existing ID3v2 data\n");
-				reset_id3(fr);
+				INT123_reset_id3(fr);
 			}
 			if(ret > 0)
 			{
@@ -1274,13 +1277,13 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 			{
 				if(VERBOSE3)
 					fprintf(stderr, "Note: faulty ID3v2 tag still clearing old data\n");
-				reset_id3(fr);
+				INT123_reset_id3(fr);
 			}
 		} else // No new data, but still there was a tag that invalidates old data.
 		{
 			if(VERBOSE3)
 				fprintf(stderr, "Note: empty ID3v2 clearing old data\n");
-			reset_id3(fr);
+			INT123_reset_id3(fr);
 		}
 tagparse_cleanup:
 		/* Get rid of stored raw data that should not be kept. */
@@ -1345,28 +1348,23 @@ static void convert_latin1(mpg123_string *sb, const unsigned char* s, size_t l, 
 */
 static int check_bom(const unsigned char** source, size_t *len)
 {
-	int this_bom    = 0;
-	int further_bom = 0;
+	int last_bom = 0;
 
-	if(*len < 2) return 0;
-
-	if((*source)[0] == 0xff && (*source)[1] == 0xfe)
-	this_bom = -1;
-
-	if((*source)[0] == 0xfe && (*source)[1] == 0xff)
-	this_bom = 1;
-
-	/* Skip the detected BOM. */
-	if(this_bom != 0)
+	while(*len >= 2)
 	{
+		int this_bom = 0;
+		if((*source)[0] == 0xff && (*source)[1] == 0xfe)
+			this_bom = -1;
+		if((*source)[0] == 0xfe && (*source)[1] == 0xff)
+			this_bom = 1;
+		if(this_bom == 0)
+			break;
+		/* Skip the detected BOM. */
+		last_bom = this_bom;
 		*source += 2;
 		*len    -= 2;
-		/* Check for following BOMs. The last one wins! */
-		further_bom = check_bom(source, len);
-		if(further_bom == 0) return this_bom; /* End of the recursion. */
-		else                 return further_bom;
 	}
-	else return 0;
+	return last_bom;
 }
 
 #define FULLPOINT(f,s) ( (((f)&0x3ff)<<10) + ((s)&0x3ff) + 0x10000 )

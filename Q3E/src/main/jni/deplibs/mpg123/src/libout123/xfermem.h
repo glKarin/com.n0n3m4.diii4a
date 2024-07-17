@@ -20,7 +20,7 @@
 #ifndef _XFERMEM_H_
 #define _XFERMEM_H_
 
-#include "compat.h"
+#include "../compat/compat.h"
 
 typedef struct {
 	size_t freeindex;	/* [W] next free index */
@@ -37,12 +37,12 @@ typedef struct {
  *   All other entries are initialized once.
  */
 
-void xfermem_init (txfermem **xf, size_t bufsize, size_t msize, size_t skipbuf);
-void xfermem_init_writer (txfermem *xf);
-void xfermem_init_reader (txfermem *xf);
+void INT123_xfermem_init (txfermem **xf, size_t bufsize, size_t msize, size_t skipbuf);
+void INT123_xfermem_init_writer (txfermem *xf);
+void INT123_xfermem_init_reader (txfermem *xf);
 
-size_t xfermem_get_freespace (txfermem *xf);
-size_t xfermem_get_usedspace (txfermem *xf);
+size_t INT123_xfermem_get_freespace (txfermem *xf);
+size_t INT123_xfermem_get_usedspace (txfermem *xf);
 
 /* Unless otherwise noted, each command demands a reponse if issued from the
    writer. The reader does not expect responses, only orders. */
@@ -71,16 +71,16 @@ enum xf_cmd_code
 
 #define XF_WRITER 0
 #define XF_READER 1
-int xfermem_getcmd(int fd, int block);
-int xfermem_getcmds(int fd, int block, byte* cmds, int count);
-int xfermem_putcmd(int fd, byte cmd);
-int xfermem_writer_block(txfermem *xf);
+int INT123_xfermem_getcmd(int fd, int block);
+int INT123_xfermem_getcmds(int fd, int block, byte* cmds, int count);
+int INT123_xfermem_putcmd(int fd, byte cmd);
+int INT123_xfermem_writer_block(txfermem *xf);
 /* returns TRUE for being interrupted */
-int xfermem_write(txfermem *xf, void *buffer, size_t bytes);
+int INT123_xfermem_write(txfermem *xf, void *buffer, size_t bytes);
 
-void xfermem_done (txfermem *xf);
-#define xfermem_done_writer xfermem_init_reader
-#define xfermem_done_reader xfermem_init_writer
+void INT123_xfermem_done (txfermem *xf);
+#define xfermem_done_writer INT123_xfermem_init_reader
+#define xfermem_done_reader INT123_xfermem_init_writer
 
 
 #endif 

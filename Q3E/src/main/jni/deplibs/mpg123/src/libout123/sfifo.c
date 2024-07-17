@@ -19,7 +19,7 @@ TODO:
 #include	<stdlib.h>
 
 #include "sfifo.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 /*
  * Alloc buffer, init FIFO etc...

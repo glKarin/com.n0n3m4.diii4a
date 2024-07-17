@@ -224,10 +224,10 @@ static void geiger_init(struct geigerspace *gs, double activity, long rate)
 	// Experimenting, actually. Some relation to the speaker.
 	gs->force_scale = 50000.*gs->mass*0.001/(4.*gs->dead_s*gs->dead_s);
 
-	float event_likelihood = activity*gs->time_interval;
-	if(event_likelihood > 1.)
-		event_likelihood = 1.;
-	gs->thres = 1.-event_likelihood;
+	float event_likelihood = (float)(activity*gs->time_interval);
+	if(event_likelihood > 1.f)
+		event_likelihood = 1.f;
+	gs->thres = 1.f-event_likelihood;
 }
 
 static void geiger_generator(syn123_handle *sh, int samples)

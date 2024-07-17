@@ -14,6 +14,14 @@
 
 /** \file out123.h The header file for the libout123 audio output facility. */
 
+/** A macro to check at compile time which set of API functions to expect.
+ * This must be incremented at least each time a new symbol is added
+ * to the header.
+ */
+#define OUT123_API_VERSION 5
+/** library patch level at client build time */
+#define OUT123_PATCHLEVEL  1
+
 /* We only need size_t definition. */
 #include <stddef.h>
 
@@ -23,15 +31,7 @@
  *  know sizes of encodings added to fmt123.h later on.
  *  If you don't care, just use the macro.
  */
-#include <fmt123.h>
-
-/** A macro to check at compile time which set of API functions to expect.
- * This should be incremented at least each time a new symbol is added
- * to the header.
- */
-#ifndef OUT123_API_VERSION
-#define OUT123_API_VERSION @OUTAPI_VERSION@
-#endif
+#include "fmt123.h"
 
 #ifndef MPG123_EXPORT
 /** Defines needed for MS Visual Studio(tm) DLL builds.
@@ -117,6 +117,23 @@ extern "C" {
 struct out123_struct;
 /** Typedef shortcut as preferrend name for the handle type. */
 typedef struct out123_struct out123_handle;
+
+/** Get version of the mpg123 distribution this library build came with.
+ * (optional means non-NULL)
+ * \param major optional address to store major version number
+ * \param minor optional address to store minor version number
+ * \param patch optional address to store patchlevel version number
+ * \return full version string (like "1.2.3-beta4 (experimental)")
+ */
+MPG123_EXPORT
+const char *out123_distversion(unsigned int *major, unsigned int *minor, unsigned int *patch);
+
+/** Get API version of library build.
+ * \param patch optional address to store patchlevel
+ * \return API version of library
+ */
+MPG123_EXPORT
+unsigned int out123_libversion(unsigned int *patch);
 
 /** Enumeration of codes for the parameters that it is possible to set/get. */
 enum out123_parms

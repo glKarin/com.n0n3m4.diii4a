@@ -19,8 +19,8 @@
 #define NO_SMAX
 #define RAND_XORSHIFT32
 #include "syn123_int.h"
-#include "sample.h"
-#include "debug.h"
+#include "../common/sample.h"
+#include "../common/debug.h"
 // Avoid conflict with pragmas in isnan() and friends.
 #undef warning
 
@@ -105,11 +105,11 @@ static double s32_d(int32_t n)
 }
 static float  s16_f(int16_t n)
 {
-	return (float)n/32767.;
+	return (float)n/32767.f;
 }
 static float  s8_f (int8_t n)
 {
-	return (float)n/127.;
+	return (float)n/127.f;
 }
 static float  u8_f (uint8_t u)      { return s8_f(CONV_US8(u));     }
 static float  u16_f(uint16_t u)     { return s16_f(CONV_US16(u));   }
@@ -157,17 +157,17 @@ syn123_soft_clip( void *buf, int encoding, size_t samples
 	// I wonder how well branch predictors work with this tangle.
 	#define CLIPCODE(type) \
 	{ \
-		type w = width; \
+		type w = (type)width; \
 		type ww = w*w; \
-		type w21 = 2*w-limit; \
-		type h = limit-w; \
-		type l = -limit+w; \
+		type w21 = 2*w-(type)limit; \
+		type h = (type)limit-w; \
+		type l = -(type)limit+w; \
 		type *p = buf; \
 		for(size_t i=0; i<samples; ++i) \
 		{ \
-			if(isnan(p[i]))  { p[i] = 0.;                     ++clipped; } \
-			else if(p[i] > h){ p[i] =  limit - ww/(w21+p[i]); ++clipped; } \
-			else if(p[i] < l){ p[i] = -limit + ww/(w21-p[i]); ++clipped; } \
+			if(isnan(p[i]))  { p[i] = (type)0.;                     ++clipped; } \
+			else if(p[i] > h){ p[i] =  (type)limit - ww/(w21+p[i]); ++clipped; } \
+			else if(p[i] < l){ p[i] = -(type)limit + ww/(w21-p[i]); ++clipped; } \
 		} \
 	}
 	switch(encoding)
@@ -276,7 +276,7 @@ switch(dst_enc) \
 	break; \
 	case MPG123_ENC_FLOAT_32: \
 		for(; tsrc!=tend; ++tsrc, tdest+=4) \
-			*((float*)tdest) = *tsrc; \
+			*((float*)tdest) = (float)*tsrc; \
 	break; \
 	case MPG123_ENC_FLOAT_64: \
 		for(; tsrc!=tend; ++tsrc, tdest+=8) \
@@ -349,7 +349,7 @@ switch(dst_enc) \
 	break; \
 	case MPG123_ENC_FLOAT_32: \
 		for(; tsrc!=tend; ++tsrc, tdest+=4) \
-			*((float*)tdest) = *tsrc; \
+			*((float*)tdest) = (float)*tsrc; \
 	break; \
 	case MPG123_ENC_FLOAT_64: \
 		for(; tsrc!=tend; ++tsrc, tdest+=8) \
@@ -369,14 +369,14 @@ switch(src_enc) \
 	break; \
 	case MPG123_ENC_SIGNED_32: \
 		for(; tdest!=tend; ++tdest, tsrc+=4) \
-			*tdest = s32_d(*(int32_t*)tsrc); \
+			*tdest = (type)s32_d(*(int32_t*)tsrc); \
 	break; \
 	case MPG123_ENC_SIGNED_24: \
 		for(; tdest!=tend; ++tdest, tsrc+=3) \
 		{ \
 			union { int32_t i; char c[4]; } tmp; \
 			ADD4BYTE(tmp.c, tsrc); \
-			*tdest = s32_d(tmp.i); \
+			*tdest = (type)s32_d(tmp.i); \
 		} \
 	break; \
 	case MPG123_ENC_SIGNED_8: \
@@ -404,12 +404,12 @@ switch(src_enc) \
 		{ \
 			union { uint32_t i; char c[4]; } tmp; \
 			ADD4BYTE(tmp.c, tsrc); \
-			*tdest = u32_d(tmp.i); \
+			*tdest = (type)u32_d(tmp.i); \
 		} \
 	break; \
 	case MPG123_ENC_UNSIGNED_32: \
 		for(; tdest!=tend; ++tdest, tsrc+=4) \
-			*tdest = u32_d(*(uint32_t*)tsrc); \
+			*tdest = (type)(u32_d(*(uint32_t*)tsrc)); \
 	break; \
 	case MPG123_ENC_FLOAT_32: \
 		for(; tdest!=tend; ++tdest, tsrc+=4) \
@@ -417,7 +417,7 @@ switch(src_enc) \
 	break; \
 	case MPG123_ENC_FLOAT_64: \
 		for(; tdest!=tend; ++tdest, tsrc+=8) \
-			*tdest = *(double*)tsrc; \
+			*tdest = (type)(*(double*)tsrc); \
 	break; \
 	default: \
 		return SYN123_BAD_CONV; \
@@ -988,7 +988,7 @@ mix_end:
 
 /* All the byte-swappery for those little big endian boxes. */
 
-#include "swap_bytes_impl.h"
+#include "../common/swap_bytes_impl.h"
 
 void attribute_align_arg
 syn123_swap_bytes(void* buf, size_t samplesize, size_t samplecount)

@@ -13,7 +13,7 @@ import java.util.Date;
 public final class Constants
 {
     public static final int CONST_UPDATE_RELEASE = 52;
-    public static final String CONST_RELEASE = "2024-07-11";
+    public static final String CONST_RELEASE = "2024-07-17";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";

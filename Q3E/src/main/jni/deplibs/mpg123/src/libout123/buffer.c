@@ -1,7 +1,7 @@
 /*
 	buffer.c: output buffer
 
-	copyright 1997-2015 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 1997-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Oliver Fromme
 
@@ -18,7 +18,7 @@
 */
 
 /*
-	Communication to the buffer is normally via xfermem_putcmd() and blocking
+	Communication to the buffer is normally via INT123_xfermem_putcmd() and blocking
 	on a response, relying on the buffer process periodically checking for
 	pending commands.
 
@@ -45,7 +45,7 @@
 #endif
 #endif
 
-#include "debug.h"
+#include "../common/debug.h"
 
 #define BUF_CMD_OPEN     XF_CMD_CUSTOM1
 #define BUF_CMD_CLOSE    XF_CMD_CUSTOM2
@@ -63,19 +63,22 @@ int outburst = 32768;
    Another forked buffer process will have its on value. */
 static int intflag = FALSE;
 
-static void catch_interrupt (void)
+static void catch_interrupt (int sig)
 {
 	intflag = TRUE;
 }
 
+static int xfer_write_string(out123_handle *ao, int who, const char *buf);
+static int xfer_read_string(out123_handle *ao, int who, char **buf);
+static int read_buf(int fd, void *addr, size_t size, byte *prebuf, int *preoff, int presize);
 static int read_record(out123_handle *ao
 ,	int who, void **buf, byte *prebuf, int *preoff, int presize, size_t *recsize);
 static int buffer_loop(out123_handle *ao);
 
-static void catch_child(void)
+static void catch_child(int sig)
 {
 	/* Disabled for now. We do not really need that.
-	   Rather get return status in a controlled way in buffer_exit(). */
+	   Rather get return status in a controlled way in INT123_buffer_exit(). */
 	/* while (waitpid(-1, NULL, WNOHANG) > 0); */
 }
 
@@ -84,19 +87,19 @@ static void catch_child(void)
 */
 
 /* Start a buffer process. */
-int buffer_init(out123_handle *ao, size_t bytes)
+int INT123_buffer_init(out123_handle *ao, size_t bytes)
 {
-	buffer_exit(ao);
+	INT123_buffer_exit(ao);
 	if(bytes < outburst) bytes = 2*outburst;
 
 #ifdef DONT_CATCH_SIGNALS
 #error I really need to catch signals here!
 #endif
-	xfermem_init(&ao->buffermem, bytes, 0, 0);
-	/* Is catch_child() really useful? buffer_exit() does waitpid().
-	   And if buffer_exit() is not called, the main process might be
+	INT123_xfermem_init(&ao->buffermem, bytes, 0, 0);
+	/* Is catch_child() really useful? INT123_buffer_exit() does waitpid().
+	   And if INT123_buffer_exit() is not called, the main process might be
 	   killed off and not be able to run a signal handler anyway. */
-	catchsignal(SIGCHLD, catch_child);
+	INT123_catchsignal(SIGCHLD, catch_child);
 	switch((ao->buffer_pid = fork()))
 	{
 		case -1: /* error */
@@ -115,10 +118,10 @@ int buffer_init(out123_handle *ao, size_t bytes)
 			*/
 			ao->buffer_pid = -1;
 			/* Not preparing audio output anymore, that comes later. */
-			xfermem_init_reader(ao->buffermem);
+			INT123_xfermem_init_reader(ao->buffermem);
 			ret = buffer_loop(ao); /* Here the work happens. */
 			xfermem_done_reader(ao->buffermem);
-			xfermem_done(ao->buffermem);
+			INT123_xfermem_done(ao->buffermem);
 			/* Proper cleanup of output handle, including out123_close(). */
 			out123_del(ao);
 			exit(ret);
@@ -126,16 +129,16 @@ int buffer_init(out123_handle *ao, size_t bytes)
 		default: /* parent */
 		{
 			int cmd;
-			xfermem_init_writer(ao->buffermem);
+			INT123_xfermem_init_writer(ao->buffermem);
 			debug("waiting for inital pong from buffer process");
-			if( (cmd=xfermem_getcmd(ao->buffermem->fd[XF_WRITER], TRUE))
+			if( (cmd=INT123_xfermem_getcmd(ao->buffermem->fd[XF_WRITER], TRUE))
 			    != XF_CMD_PONG )
 			{
 				if(!AOQUIET)
 					error2("Got %i instead of expected initial response %i. Killing rogue buffer process."
 					,	cmd, XF_CMD_PONG);
 				kill(ao->buffer_pid, SIGKILL);
-				buffer_exit(ao);
+				INT123_buffer_exit(ao);
 				return -1;
 			}
 		}
@@ -145,24 +148,24 @@ int buffer_init(out123_handle *ao, size_t bytes)
 buffer_init_bad:
 	if(ao->buffermem)
 	{
-		xfermem_done(ao->buffermem);
+		INT123_xfermem_done(ao->buffermem);
 		ao->buffermem = NULL;
 	}
 	return -1;
 }
 
 /* End a buffer process. */
-void buffer_exit(out123_handle *ao)
+void INT123_buffer_exit(out123_handle *ao)
 {
 	int status = 0;
 	if(ao->buffer_pid == -1) return;
 
 	debug("ending buffer");
-	buffer_stop(ao); /* Puts buffer into waiting-for-command mode. */
-	buffer_end(ao);  /* Gives command to end operation. */
+	INT123_buffer_stop(ao); /* Puts buffer into waiting-for-command mode. */
+	INT123_buffer_end(ao);  /* Gives command to end operation. */
 	xfermem_done_writer(ao->buffermem);
 	waitpid(ao->buffer_pid, &status, 0);
-	xfermem_done(ao->buffermem);
+	INT123_xfermem_done(ao->buffermem);
 	ao->buffermem = NULL;
 	ao->buffer_pid = -1;
 	if(WIFEXITED(status))
@@ -184,7 +187,7 @@ static int buffer_cmd_finish(out123_handle *ao)
 {
 	/* Only if buffer returns XF_CMD_OK we got lucky. Otherwise, we expect
 	   the buffer to deliver a reason right after XF_CMD_ERROR. */
-	switch(xfermem_getcmd(ao->buffermem->fd[XF_WRITER], TRUE))
+	switch(INT123_xfermem_getcmd(ao->buffermem->fd[XF_WRITER], TRUE))
 	{
 		case XF_CMD_OK: return 0;
 		case XF_CMD_ERROR:
@@ -198,10 +201,51 @@ static int buffer_cmd_finish(out123_handle *ao)
 	}
 }
 
-int buffer_sync_param(out123_handle *ao)
+/* Serialization of tunable parameters to communicate them between
+   main process and buffer. Make sure these two stay in sync ... */
+
+static int write_parameters(out123_handle *ao, int who)
+{
+	int fd = ao->buffermem->fd[who];
+	if(
+		GOOD_WRITEVAL(fd, ao->flags)
+	&&	GOOD_WRITEVAL(fd, ao->preload)
+	&&	GOOD_WRITEVAL(fd, ao->gain)
+	&&	GOOD_WRITEVAL(fd, ao->device_buffer)
+	&&	GOOD_WRITEVAL(fd, ao->verbose)
+	&& !xfer_write_string(ao, who, ao->name)
+	&& !xfer_write_string(ao, who, ao->bindir)
+	)
+		return 0;
+	else
+		return -1;
+}
+
+static int read_parameters(out123_handle *ao
+,	int who, byte *prebuf, int *preoff, int presize)
+{
+	int fd = ao->buffermem->fd[who];
+#define GOOD_READVAL_BUF(fd, val) \
+	!read_buf(fd, &val, sizeof(val), prebuf, preoff, presize)
+	if(
+		GOOD_READVAL_BUF(fd, ao->flags)
+	&&	GOOD_READVAL_BUF(fd, ao->preload)
+	&&	GOOD_READVAL_BUF(fd, ao->gain)
+	&&	GOOD_READVAL_BUF(fd, ao->device_buffer)
+	&&	GOOD_READVAL_BUF(fd, ao->verbose)
+	&& !read_record(ao, who, (void**)&ao->name, prebuf, preoff, presize, NULL)
+	&& !read_record(ao, who, (void**)&ao->bindir, prebuf, preoff, presize, NULL)
+	)
+		return 0;
+	else
+		return -1;
+#undef GOOD_READVAL_BUF
+}
+
+int INT123_buffer_sync_param(out123_handle *ao)
 {
 	int writerfd = ao->buffermem->fd[XF_WRITER];
-	if(xfermem_putcmd(writerfd, BUF_CMD_PARAM) != 1)
+	if(INT123_xfermem_putcmd(writerfd, BUF_CMD_PARAM) != 1)
 	{
 		ao->errcode = OUT123_BUFFER_ERROR;
 		return -1;
@@ -216,11 +260,11 @@ int buffer_sync_param(out123_handle *ao)
 	return buffer_cmd_finish(ao);
 }
 
-int buffer_open(out123_handle *ao, const char* driver, const char* device)
+int INT123_buffer_open(out123_handle *ao, const char* driver, const char* device)
 {
 	int writerfd = ao->buffermem->fd[XF_WRITER];
 
-	if(xfermem_putcmd(writerfd, BUF_CMD_OPEN) != 1)
+	if(INT123_xfermem_putcmd(writerfd, BUF_CMD_OPEN) != 1)
 	{
 		ao->errcode = OUT123_BUFFER_ERROR;
 		return -1;
@@ -237,16 +281,17 @@ int buffer_open(out123_handle *ao, const char* driver, const char* device)
 		/* Retrieve driver and device name. */
 		return ( xfer_read_string(ao, XF_WRITER, &ao->driver)
 		      || xfer_read_string(ao, XF_WRITER, &ao->device)
-		      || xfer_read_string(ao, XF_WRITER, &ao->realname) );
+		      || xfer_read_string(ao, XF_WRITER, &ao->realname)
+		      || !GOOD_READVAL(writerfd, ao->propflags) );
 	else
 		return -1;
 }
 
-int buffer_encodings(out123_handle *ao)
+int INT123_buffer_encodings(out123_handle *ao)
 {
 	int writerfd = ao->buffermem->fd[XF_WRITER];
 
-	if(xfermem_putcmd(writerfd, BUF_CMD_AUDIOCAP) != 1)
+	if(INT123_xfermem_putcmd(writerfd, BUF_CMD_AUDIOCAP) != 1)
 	{
 		ao->errcode = OUT123_BUFFER_ERROR;
 		return -1;
@@ -275,16 +320,16 @@ int buffer_encodings(out123_handle *ao)
 	else return -1;
 }
 
-int buffer_formats( out123_handle *ao, const long *rates, int ratecount
+int INT123_buffer_formats( out123_handle *ao, const long *rates, int ratecount
                   , int minchannels, int maxchannels
                   , struct mpg123_fmt **fmtlist )
 {
 	int writerfd = ao->buffermem->fd[XF_WRITER];
 	size_t ratesize;
 
-	debug("buffer_formats");
+	debug("INT123_buffer_formats");
 
-	if(xfermem_putcmd(writerfd, BUF_CMD_AUDIOFMT) != 1)
+	if(INT123_xfermem_putcmd(writerfd, BUF_CMD_AUDIOFMT) != 1)
 	{
 		ao->errcode = OUT123_BUFFER_ERROR;
 		return -1;
@@ -317,10 +362,10 @@ int buffer_formats( out123_handle *ao, const long *rates, int ratecount
 	else return -1;
 }
 
-int buffer_start(out123_handle *ao)
+int INT123_buffer_start(out123_handle *ao)
 {
 	int writerfd = ao->buffermem->fd[XF_WRITER];
-	if(xfermem_putcmd(writerfd, BUF_CMD_START) != 1)
+	if(INT123_xfermem_putcmd(writerfd, BUF_CMD_START) != 1)
 	{
 		ao->errcode = OUT123_BUFFER_ERROR;
 		return -1;
@@ -342,40 +387,40 @@ int buffer_start(out123_handle *ao)
 #define BUFFER_SIMPLE_CONTROL(name, cmd) \
 void name(out123_handle *ao) \
 { \
-	xfermem_putcmd(ao->buffermem->fd[XF_WRITER], cmd); \
-	xfermem_getcmd(ao->buffermem->fd[XF_WRITER], TRUE); \
+	INT123_xfermem_putcmd(ao->buffermem->fd[XF_WRITER], cmd); \
+	INT123_xfermem_getcmd(ao->buffermem->fd[XF_WRITER], TRUE); \
 }
 
-BUFFER_SIMPLE_CONTROL(buffer_stop,  BUF_CMD_STOP)
-BUFFER_SIMPLE_CONTROL(buffer_continue, XF_CMD_CONTINUE)
-BUFFER_SIMPLE_CONTROL(buffer_ignore_lowmem, XF_CMD_IGNLOW)
-BUFFER_SIMPLE_CONTROL(buffer_drain, XF_CMD_DRAIN)
-BUFFER_SIMPLE_CONTROL(buffer_end, XF_CMD_TERMINATE)
-BUFFER_SIMPLE_CONTROL(buffer_close, BUF_CMD_CLOSE)
+BUFFER_SIMPLE_CONTROL(INT123_buffer_stop,  BUF_CMD_STOP)
+BUFFER_SIMPLE_CONTROL(INT123_buffer_continue, XF_CMD_CONTINUE)
+BUFFER_SIMPLE_CONTROL(INT123_buffer_ignore_lowmem, XF_CMD_IGNLOW)
+BUFFER_SIMPLE_CONTROL(INT123_buffer_drain, XF_CMD_DRAIN)
+BUFFER_SIMPLE_CONTROL(INT123_buffer_end, XF_CMD_TERMINATE)
+BUFFER_SIMPLE_CONTROL(INT123_buffer_close, BUF_CMD_CLOSE)
 
 #define BUFFER_SIGNAL_CONTROL(name, cmd) \
 void name(out123_handle *ao) \
 { \
 	kill(ao->buffer_pid, SIGINT); \
-	xfermem_putcmd(ao->buffermem->fd[XF_WRITER], cmd); \
-	xfermem_getcmd(ao->buffermem->fd[XF_WRITER], TRUE); \
+	INT123_xfermem_putcmd(ao->buffermem->fd[XF_WRITER], cmd); \
+	INT123_xfermem_getcmd(ao->buffermem->fd[XF_WRITER], TRUE); \
 }
 
-BUFFER_SIGNAL_CONTROL(buffer_pause, XF_CMD_PAUSE)
-BUFFER_SIGNAL_CONTROL(buffer_drop, XF_CMD_DROP)
+BUFFER_SIGNAL_CONTROL(INT123_buffer_pause, XF_CMD_PAUSE)
+BUFFER_SIGNAL_CONTROL(INT123_buffer_drop, XF_CMD_DROP)
 
-size_t buffer_fill(out123_handle *ao)
+size_t INT123_buffer_fill(out123_handle *ao)
 {
-	return xfermem_get_usedspace(ao->buffermem);
+	return INT123_xfermem_get_usedspace(ao->buffermem);
 }
 
-void buffer_ndrain(out123_handle *ao, size_t bytes)
+void INT123_buffer_ndrain(out123_handle *ao, size_t bytes)
 {
 	size_t oldfill;
 	int writerfd = ao->buffermem->fd[XF_WRITER];
 
-	oldfill = buffer_fill(ao);
-	if(xfermem_putcmd(writerfd, BUF_CMD_NDRAIN) != 1)
+	oldfill = INT123_buffer_fill(ao);
+	if(INT123_xfermem_putcmd(writerfd, BUF_CMD_NDRAIN) != 1)
 	{
 		ao->errcode = OUT123_BUFFER_ERROR;
 		return;
@@ -393,7 +438,7 @@ void buffer_ndrain(out123_handle *ao, size_t bytes)
 
 /* The workhorse: Send data to the buffer with some synchronization and even
    error checking. */
-size_t buffer_write(out123_handle *ao, void *buffer, size_t bytes)
+size_t INT123_buffer_write(out123_handle *ao, void *buffer, size_t bytes)
 {
 	/*
 		Writing the whole buffer in one piece is no good as that means
@@ -407,7 +452,7 @@ size_t buffer_write(out123_handle *ao, void *buffer, size_t bytes)
 		size_t count_piece = bytes > max_piece
 		?	max_piece
 		:	bytes;
-		int ret = xfermem_write(ao->buffermem
+		int ret = INT123_xfermem_write(ao->buffermem
 		,	(char*)buffer+written, count_piece);
 		if(ret)
 		{
@@ -498,7 +543,7 @@ static void skip_bytes(int fd, size_t count)
 	while(count)
 	{
 		char buf[1024];
-		if(!unintr_read(fd, buf, (count < sizeof(buf) ? count : sizeof(buf))))
+		if(!INT123_unintr_read(fd, buf, (count < sizeof(buf) ? count : sizeof(buf))))
 			return;
 	}
 }
@@ -523,7 +568,7 @@ int xfer_write_string(out123_handle *ao, int who, const char *buf)
 }
 
 
-int xfer_read_string(out123_handle *ao, int who, char **buf)
+static int xfer_read_string(out123_handle *ao, int who, char **buf)
 {
 	/* ao->errcode set in read_record() */
 	return read_record(ao, who, (void**)buf, NULL, NULL, 0, NULL)
@@ -535,7 +580,7 @@ int xfer_read_string(out123_handle *ao, int who, char **buf)
    This assumes responsible use and avoids needless checking of input.
    And, yes, it modifies the preoff argument!
    Returns 0 on success, modifies prebuffer fill. */
-int read_buf(int fd, void *addr, size_t size, byte *prebuf, int *preoff, int presize)
+static int read_buf(int fd, void *addr, size_t size, byte *prebuf, int *preoff, int presize)
 {
 	size_t need = size;
 
@@ -610,10 +655,10 @@ int buffer_loop(out123_handle *ao)
 
 	ao->flags &= ~OUT123_KEEP_PLAYING; /* No need for that here. */
 	/* Be prepared to use SIGINT for communication. */
-	catchsignal (SIGINT, catch_interrupt);
+	INT123_catchsignal (SIGINT, catch_interrupt);
 	/* sigprocmask (SIG_SETMASK, oldsigset, NULL); */
 	/* Say hello to the writer. */
-	xfermem_putcmd(my_fd, XF_CMD_PONG);
+	INT123_xfermem_putcmd(my_fd, XF_CMD_PONG);
 
 	debug1("buffer with preload %g", ao->preload);
 	while(1)
@@ -621,9 +666,9 @@ int buffer_loop(out123_handle *ao)
 		/* If a device is opened and playing, it is our first duty to keep it playing. */
 		if(mystate == play_live)
 		{
-			size_t bytes = xfermem_get_usedspace(xf);
-			debug4( "Play or preload? Got %"SIZE_P" B / %"SIZE_P" B (%i,%i)."
-			,	(size_p)bytes, (size_p)preload_size(ao), preloading, draining );
+			size_t bytes = INT123_xfermem_get_usedspace(xf);
+			debug4( "Play or preload? Got %zu B / %zu B (%i,%i)."
+			,	bytes, preload_size(ao), preloading, draining );
 			if(preloading)
 				preloading = (bytes < preload_size(ao));
 			if(!preloading)
@@ -659,7 +704,7 @@ int buffer_loop(out123_handle *ao)
 			int cmdcount;
 			int i;
 
-			cmdcount = xfermem_getcmds( my_fd
+			cmdcount = INT123_xfermem_getcmds( my_fd
 			,	(preloading || intflag || (mystate != play_live))
 			,	cmd
 			,	sizeof(cmd) );
@@ -695,10 +740,10 @@ int buffer_loop(out123_handle *ao)
 					/* Expecting ping-pong only while playing! Otherwise, the writer
 					   could get stuck waiting for free space forever. */
 					if(mystate == play_live)
-						xfermem_putcmd(my_fd, XF_CMD_PONG);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_PONG);
 					else
 					{
-						xfermem_putcmd(my_fd, XF_CMD_ERROR);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_ERROR);
 						if(ao->errcode == OUT123_OK)
 							ao->errcode = OUT123_NOT_LIVE;
 						if(!GOOD_WRITEVAL(my_fd, ao->errcode))
@@ -711,7 +756,7 @@ int buffer_loop(out123_handle *ao)
 					   writer will notice soon enough. */
 					read_parameters(ao, XF_READER, cmd, &i, cmdcount);
 					ao->flags &= ~OUT123_KEEP_PLAYING; /* No need for that here. */
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				break;
 				case BUF_CMD_OPEN:
 				{
@@ -733,15 +778,16 @@ int buffer_loop(out123_handle *ao)
 					mystate = ao->state;
 					if(success)
 					{
-						xfermem_putcmd(my_fd, XF_CMD_OK);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 						if(  xfer_write_string(ao, XF_READER, ao->driver)
 						  || xfer_write_string(ao, XF_READER, ao->device)
-						  || xfer_write_string(ao, XF_READER, ao->realname ) )
+						  || xfer_write_string(ao, XF_READER, ao->realname )
+						  || !GOOD_WRITEVAL(my_fd, ao->propflags) )
 							return 2;
 					}
 					else
 					{
-						xfermem_putcmd(my_fd, XF_CMD_ERROR);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_ERROR);
 						/* Again, no sense to bitch around about communication errors,
 						   just quit. */
 						if(!GOOD_WRITEVAL(my_fd, ao->errcode))
@@ -754,7 +800,7 @@ int buffer_loop(out123_handle *ao)
 					out123_close(ao);
 					draining = FALSE;
 					mystate = ao->state;
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				break;
 				case BUF_CMD_AUDIOCAP:
 				{
@@ -770,13 +816,13 @@ int buffer_loop(out123_handle *ao)
 					mystate = ao->state;
 					if(encodings >= 0)
 					{
-						xfermem_putcmd(my_fd, XF_CMD_OK);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 						if(!GOOD_WRITEVAL(my_fd, encodings))
 							return 2;
 					}
 					else
 					{
-						xfermem_putcmd(my_fd, XF_CMD_ERROR);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_ERROR);
 						if(!GOOD_WRITEVAL(my_fd, ao->errcode))
 							return 2;
 					}
@@ -800,7 +846,7 @@ int buffer_loop(out123_handle *ao)
 						read_record( ao, XF_READER, (void**)&rates
 						,	cmd, &i, cmdcount, &blocksize )
 					){
-						xfermem_putcmd(my_fd, XF_CMD_ERROR);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_ERROR);
 						if(!GOOD_WRITEVAL(my_fd, ao->errcode))
 							return 2;
 					}
@@ -814,9 +860,8 @@ int buffer_loop(out123_handle *ao)
 						int success;
 
 						blocksize = sizeof(*fmtlist)*fmtcount;
-						debug2("responding with %i formats (block: %"SIZE_P")"
-						, fmtcount, (size_p)blocksize);
-						xfermem_putcmd(my_fd, XF_CMD_OK);
+						debug2("responding with %i formats (block: %zu)", fmtcount, blocksize);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 						success =
 							GOOD_WRITEVAL(my_fd, fmtcount)
 						&&	GOOD_WRITEVAL(my_fd, blocksize)
@@ -826,7 +871,7 @@ int buffer_loop(out123_handle *ao)
 							return 2;
 					} else
 					{
-						xfermem_putcmd(my_fd, XF_CMD_ERROR);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_ERROR);
 						if(!GOOD_WRITEVAL(my_fd, ao->errcode))
 							return 2;
 					}
@@ -846,12 +891,12 @@ int buffer_loop(out123_handle *ao)
 						out123_pause(ao); /* Be nice, start only on buffer_play(). */
 						mystate = play_live;
 						preloading = TRUE;
-						xfermem_putcmd(my_fd, XF_CMD_OK);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 					}
 					else
 					{
 						mystate = ao->state;
-						xfermem_putcmd(my_fd, XF_CMD_ERROR);
+						INT123_xfermem_putcmd(my_fd, XF_CMD_ERROR);
 						if(!GOOD_WRITEVAL(my_fd, ao->errcode))
 							return 2;
 					}
@@ -861,13 +906,13 @@ int buffer_loop(out123_handle *ao)
 					if(mystate == play_live)
 					{ /* Drain is implied! */
 						size_t bytes;
-						while((bytes = xfermem_get_usedspace(xf)))
+						while((bytes = INT123_xfermem_get_usedspace(xf)))
 							buffer_play(ao, bytes);
 					}
 					out123_stop(ao);
 					draining = FALSE;
 					mystate = ao->state;
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				break;
 				case XF_CMD_CONTINUE:
 					intflag = FALSE;
@@ -875,12 +920,12 @@ int buffer_loop(out123_handle *ao)
 					mystate = play_live; /* We'll get errors reported later if that is not right. */
 					preloading = FALSE; /* It should continue without delay. */
 					draining = FALSE; /* But outburst should be cared for. */
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				break;
 				case XF_CMD_IGNLOW:
 					intflag = FALSE;
 					preloading = FALSE;
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				break;
 				case XF_CMD_DRAIN:
 					debug("buffer drain");
@@ -889,7 +934,7 @@ int buffer_loop(out123_handle *ao)
 					{
 						size_t bytes;
 						while(
-							(bytes = xfermem_get_usedspace(xf))
+							(bytes = INT123_xfermem_get_usedspace(xf))
 						&&	bytes > ao->framesize
 						)
 							buffer_play(ao, bytes);
@@ -897,7 +942,7 @@ int buffer_loop(out123_handle *ao)
 						mystate = ao->state;
 					}
 					draining = FALSE;
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				break;
 				case BUF_CMD_NDRAIN:
 				{
@@ -918,46 +963,45 @@ int buffer_loop(out123_handle *ao)
 					{
 						size_t bytes;
 						while(
-							(bytes = xfermem_get_usedspace(xf))
+							(bytes = INT123_xfermem_get_usedspace(xf))
 						&&	bytes > ao->framesize
 						&&	oldfill >= bytes /* paranoia, overflow would handle it anyway */
 						&&	(oldfill-bytes) < limit
 						)
 							buffer_play(ao, bytes > limit ? limit : bytes);
 						/* Only drain hardware if the end was reached. */
-						if(!xfermem_get_usedspace(xf))
+						if(!INT123_xfermem_get_usedspace(xf))
 						{
 							out123_drain(ao);
 							mystate = ao->state;
 							draining = FALSE;
 						}
-						debug2( "buffer drained %"SIZE_P" / %"SIZE_P
-						,	oldfill-bytes, limit );
+						debug2("buffer drained %zu / %zu", oldfill-bytes, limit);
 					}
 					else
 						debug("drain without playback ... not good");
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				}
 				break;
 				case XF_CMD_TERMINATE:
 					intflag = FALSE;
 					/* Will that response always reach the writer? Well, at worst,
-					   it's an ignored error on xfermem_getcmd(). */
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					   it's an ignored error on INT123_xfermem_getcmd(). */
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 					return 0;
 				case XF_CMD_PAUSE:
 					intflag = FALSE;
 					draining = FALSE;
 					out123_pause(ao);
 					mystate = ao->state;
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				break;
 				case XF_CMD_DROP:
 					intflag = FALSE;
 					draining = FALSE;
 					xf->readindex = xf->freeindex;
 					out123_drop(ao);
-					xfermem_putcmd(my_fd, XF_CMD_OK);
+					INT123_xfermem_putcmd(my_fd, XF_CMD_OK);
 				break;
 				default:
 					if(!AOQUIET)

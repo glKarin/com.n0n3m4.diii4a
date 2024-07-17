@@ -69,7 +69,8 @@ int do_work(mpg123_handle *m)
 	ret = mpg123_open_fd(m, STDIN_FILENO);
 	if(ret != MPG123_OK) return ret;
 
-	while( (ret = mpg123_framebyframe_next(m)) == MPG123_OK || ret == MPG123_NEW_FORMAT )
+	ssize_t wret = 0;
+	while( !wret && (ret = mpg123_framebyframe_next(m)) == MPG123_OK || ret == MPG123_NEW_FORMAT )
 	{
 		unsigned long header;
 		unsigned char *bodydata;
@@ -82,14 +83,20 @@ int do_work(mpg123_handle *m)
 			for(i=0; i<4; ++i) hbuf[i] = (unsigned char) ((header >> ((3-i)*8)) & 0xff);
 
 			/* Now write out both header and data, fire and forget. */
-			write(STDOUT_FILENO, hbuf, 4);
-			write(STDOUT_FILENO, bodydata, bodybytes);
+			wret = write(STDOUT_FILENO, hbuf, 4);
+			if(!wret)
+				wret = write(STDOUT_FILENO, bodydata, bodybytes);
 			fprintf(stderr, "%zu: header 0x%08lx, %zu body bytes\n", ++count, header, bodybytes);
 		}
 	}
 
 	if(ret != MPG123_DONE)
-	fprintf(stderr, "Some error occured (non-fatal?): %s\n", mpg123_strerror(m));
+		fprintf(stderr, "Some error occured (non-fatal?): %s\n", mpg123_strerror(m));
+	if(wret)
+	{
+		fprintf(stderr, "Write error.\n");
+		ret = MPG123_ERR;
+	}
 
 	fprintf(stderr, "Done with %zu MPEG frames.\n", count);
 

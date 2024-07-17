@@ -2,35 +2,51 @@
 
 include src/tests/Makemodule.am
 include src/compat/Makemodule.am
-include src/libmpg123/Makemodule.am
+include src/common/Makemodule.am
+if NEED_LIB
 include src/libout123/Makemodule.am
+if NEED_MAINLIB
+include src/libmpg123/Makemodule.am
 include src/libsyn123/Makemodule.am
+endif
+endif
 
+if BUILD_PROGRAMS
+bin_PROGRAMS += src/out123
+if HAVE_LFS_WRAP
 bin_PROGRAMS += \
   src/mpg123 \
-  src/out123 \
   src/mpg123-id3dump \
   src/mpg123-strip
+endif
+endif
+
+if NEED_LIB
+if NEED_MAINLIB
+# All main libraries need fmt123 header installed.
+include_HEADERS += src/include/fmt123.h
+endif
+endif
 
 src_mpg123_LDADD = \
   src/compat/libcompat.la \
-  src/libmpg123/libmpg123.la \
-  src/libout123/libout123.la \
-  src/libsyn123/libsyn123.la \
+  $(LIBMPG123) \
+  $(LIBOUT123) \
+  $(LIBSYN123) \
   @PROG_LIBS@
 
 src_mpg123_LDFLAGS = @EXEC_LT_LDFLAGS@
 
 src_out123_LDADD = \
   src/compat/libcompat.la \
-  src/libsyn123/libsyn123.la \
-  src/libout123/libout123.la \
+  $(LIBSYN123) \
+  $(LIBOUT123) \
   @PROG_LIBS@
 
 src_out123_LDFLAGS = @EXEC_LT_LDFLAGS@
 
 EXTRA_DIST += \
-  src/intsym.h \
+  src/version.h \
   src/mpg123-with-modules \
   src/out123-with-modules
 
@@ -38,12 +54,12 @@ CLEANFILES += src/*.a
 
 src_mpg123_id3dump_LDADD = \
   src/compat/libcompat.la \
-  src/libmpg123/libmpg123.la \
+  $(LIBMPG123) \
   @PROG_LIBS@
 
 src_mpg123_strip_LDADD = \
   src/compat/libcompat.la \
-  src/libmpg123/libmpg123.la \
+  $(LIBMPG123) \
   @PROG_LIBS@
 
 src_mpg123_SOURCES = \
@@ -75,6 +91,7 @@ src_mpg123_SOURCES = \
   src/streamdump.c \
   src/term.c \
   src/term.h \
+  src/terms.h \
   src/win32_support.h
 
 # Does that finally work to build/link the correct object file?
@@ -105,10 +122,44 @@ src_mpg123_strip_SOURCES = \
   src/getlopt.c \
   src/getlopt.h
 
+if TERM_POSIX
+src_mpg123_SOURCES += src/term_posix.c
+endif
+
+if TERM_WIN32
+src_mpg123_SOURCES += src/term_win32.c
+endif
+
+if TERM_NONE
+src_mpg123_SOURCES += src/term_none.c
+endif
+
+if NET123
+src_mpg123_SOURCES += src/net123.h
+endif
+
+if NET123_EXEC
+src_mpg123_SOURCES += src/net123_exec.c
+endif
+
+if NET123_WINHTTP
+src_mpg123_SOURCES += src/net123_winhttp.c
+src_mpg123_LDADD += -lwinhttp
+endif
+
+if NET123_WININET
+src_mpg123_SOURCES += src/net123_wininet.c
+src_mpg123_LDADD += -lwininet
+endif
+
 if WIN32_CODES
 src_mpg123_SOURCES += \
-  src/win32_support.c \
-  src/win32_net.c
+  src/win32_support.c
+
+if NETWORK_WINSOCK
+src_mpg123_SOURCES += src/win32_net.c
+src_mpg123_LDADD += -lws2_32
+endif
 
 src_out123_SOURCES+= \
   src/win32_support.c

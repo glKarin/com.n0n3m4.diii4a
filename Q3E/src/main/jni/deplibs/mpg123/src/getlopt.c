@@ -8,9 +8,9 @@
 */
 
 #include "config.h"
-#include "compat.h"
+#include "compat/compat.h"
 #include "getlopt.h"
-#include "debug.h"
+#include "common/debug.h"
 
 int loptind = 1;	/* index in argv[] */
 int loptchr = 0;	/* index in argv[loptind] */
@@ -44,7 +44,7 @@ static void setcharoption(topt *opt, char *value)
 		free(*((char**)opt->var));
 	if(value)
 	{
-		*((char **) opt->var) = compat_strdup(value);
+		*((char **) opt->var) = INT123_compat_strdup(value);
 		opt->flags |= GLO_VAR_MEM;
 	} else
 	{
@@ -106,15 +106,29 @@ static int performoption (int argc, char *argv[], topt *opt, topt *opts)
 			return (GLO_NOARG);
 		loptarg = argv[loptind++]+loptchr;
 		loptchr = 0;
+		errno = 0;
 		if (opt->var) {
+			char *endptr = NULL;
 			if (opt->flags & GLO_CHAR) /* var is *char */
 				setcharoption(opt, loptarg);
-			else if(opt->flags & GLO_LONG)
-				*((long *) opt->var) = atol(loptarg);
-			else if(opt->flags & GLO_INT)
-				*((int *) opt->var) = atoi(loptarg);
+			else if(opt->flags & (GLO_LONG | GLO_INT))
+			{
+				long val = strtol(loptarg, &endptr, 10);
+				if(errno || endptr == loptarg || (endptr && *endptr))
+					return GLO_BADARG;
+				if(opt->flags & GLO_LONG)
+					*((long *) opt->var) = val;
+				else if(val <= INT_MAX && val >= INT_MIN)
+					*((int *) opt->var) = val;
+				else
+					return GLO_BADARG;
+			}
 			else if(opt->flags & GLO_DOUBLE)
-				*((double *) opt->var) = atof(loptarg);
+			{
+				*((double *) opt->var) = strtod(loptarg, &endptr);
+				if(errno || endptr == loptarg || (endptr && *endptr))
+					return GLO_BADARG;
+			}
 			else prog_error();
 		}
 #if 0 /* Oliver: What was this for?! --ThOr */

@@ -1,11 +1,14 @@
 /*
 	syn123: some audio signal synthesis and format conversion
 
-	copyright 2017-2020 by the mpg123 project,
+	copyright 2017-2023 by the mpg123 project,
 	free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 
 	initially written by Thomas Orgis
+
+	Consider defining SYN123_PORTABLE_API to limit the definitions to
+	a safer subset without some problematic features (mainly off_t usage).
 */
 
 #ifndef SYN123_H
@@ -14,15 +17,15 @@
 /** \file syn123.h The header file for the libsyn123 library. */
 
 /* Common audio encoding specification. */
-#include <fmt123.h>
+#include "fmt123.h"
 
 /** A macro to check at compile time which set of API functions to expect.
- * This should be incremented at least each time a new symbol is added
+ * This must be incremented at least each time a new symbol is added
  * to the header.
  */
-#ifndef SYN123_API_VERSION
-#define SYN123_API_VERSION @SYNAPI_VERSION@
-#endif
+#define SYN123_API_VERSION 2
+/** library patch level at client build time */
+#define SYN123_PATCHLEVEL  3
 
 #ifndef MPG123_EXPORT
 /** Defines needed for MS Visual Studio(tm) DLL builds.
@@ -57,12 +60,13 @@
 #endif
 #endif
 
-/* Enable use of this file without configure. */
-/* Also make sure to define _FILE_OFFSET_BITS, too. */
-#ifndef MPG123_NO_CONFIGURE
-@INCLUDE_STDLIB_H@
-@INCLUDE_SYS_TYPE_H@
+// for off_t and ssize_t
+#ifndef SYN123_PORTABLE_API
+#include <sys/types.h>
 #endif
+
+#include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -144,6 +148,23 @@ extern "C" {
 struct syn123_struct;
 /** Typedef shortcut as preferrend name for the handle type. */
 typedef struct syn123_struct syn123_handle;
+
+/** Get version of the mpg123 distribution this library build came with.
+ * (optional means non-NULL)
+ * \param major optional address to store major version number
+ * \param minor optional address to store minor version number
+ * \param patch optional address to store patchlevel version number
+ * \return full version string (like "1.2.3-beta4 (experimental)")
+ */
+MPG123_EXPORT
+const char *syn123_distversion(unsigned int *major, unsigned int *minor, unsigned int *patch);
+
+/** Get API version of library build.
+ * \param patch optional address to store patchlevel
+ * \return API version of library
+ */
+MPG123_EXPORT
+unsigned int syn123_libversion(unsigned int *patch);
 
 /** Functions that return an integer success code either return
  *  SYN123_OK if everything went fine, or one of the other detailed
@@ -945,55 +966,35 @@ size_t syn123_resample_maxincount(long input_rate, long output_rate);
  *  when feeding the resampler the given additional input samples now,
  *  given the current resampler state contained in the handle.
  *
+ *  On error, zero is returned and the error code is set to a nonzero
+ *  syn123 error code.
+ *
  *  \param sh syn123 handle
  *  \param ins input sample count
- *  \return output sample count (>=0) or error code
+ *  \param err location to store error code
+ *  \return output sample count
  */
 MPG123_EXPORT
-ssize_t syn123_resample_expect(syn123_handle *sh, size_t ins);
+size_t syn123_resample_out(syn123_handle *sh, size_t ins, int *err);
 
 /** Give minimum input sample count needed now for given output.
  *
  *  This give you the minimal number of input samples needed right
  *  now to yield at least the specified amount of output samples.
  *  Since one input sample can result in several output sampels in one
- *  go, you have to check using syn123_resample_expect() how many
+ *  go, you have to check using syn123_resample_out() how many
  *  output samples to really expect.
+ *
+ *  On error, zero is returned and the error code is set to a nonzero
+ *  syn123 error code.
  *
  *  \param sh syn123 handle
  *  \param outs output sample count
- *  \return minimal input sample count (>= 0) or error code
+ *  \param err location to store error code
+ *  \return minimal input sample count
  */
 MPG123_EXPORT
-ssize_t syn123_resample_inexpect(syn123_handle *sh, size_t outs);
-
-
-#ifndef SYN123_NO_LARGEFUNC
-
-/* The whole block of off_t-using API is optional to be able to build
-   the underlying code without confusing the compiler with prototype
-   mismatch. */
-
-/* Lightweight large file hackery to enable worry-reduced use of off_t.
-   Depending on the size of off_t in your client build, the corresponding
-   library function needs to be chosen. */
-#ifndef MPG123_NO_CONFIGURE
-#if !defined(MPG123_NO_LARGENAME) && @BUILD_NO_LARGENAME@
-#define MPG123_NO_LARGENAME
-#endif
-#endif
-
-#if defined(_FILE_OFFSET_BITS) && !defined(MPG123_NO_LARGENAME)
-#  if _FILE_OFFSET_BITS+0 == 32
-#    define syn123_resample_total   syn123_resample_total_32
-#    define syn123_resample_intotal syn123_resample_intotal_32
-#  elif _FILE_OFFSET_BITS+0 == 64
-#    define syn123_resample_total   syn123_resample_total_64
-#    define syn123_resample_intotal syn123_resample_intotal_64
-#  else
-#    error "Unpredicted _FILE_OFFSET_BITS value."
-#  endif
-#endif
+size_t syn123_resample_in(syn123_handle *sh, size_t outs, int *err);
 
 /** Give exact output sample count for total input sample count.
  *
@@ -1010,7 +1011,7 @@ ssize_t syn123_resample_inexpect(syn123_handle *sh, size_t outs);
  *    (bad/too large sampling rates, integer overflow)
  */
 MPG123_EXPORT
-off_t syn123_resample_total(long inrate, long outrate, off_t ins);
+int64_t syn123_resample_total64(long inrate, long outrate, int64_t ins);
 
 /** Give minimum input sample count for total output sample count.
  *
@@ -1030,9 +1031,7 @@ off_t syn123_resample_total(long inrate, long outrate, off_t ins);
  *    (bad/too large sampling rates, integer overflow)
  */
 MPG123_EXPORT
-off_t syn123_resample_intotal(long inrate, long outrate, off_t outs);
-
-#endif
+int64_t syn123_resample_intotal64(long inrate, long outrate, int64_t outs);
 
 /** Resample input buffer to output buffer.
  *
@@ -1108,6 +1107,100 @@ void syn123_le2host(void *buf, size_t samplesize, size_t samplecount);
  */
 MPG123_EXPORT
 void syn123_be2host(void *buf, size_t samplesize, size_t samplecount);
+
+// You are invited to defined SYN123_PORTABLE_API to avoid seeing shape-shifting off_t
+// anywhere, also to avoid using non-standard types like ssize_t.
+#if !defined(SYN123_PORTABLE_API) && !defined(SYN123_NO_LARGEFUNC)
+
+/* A little hack to help MSVC not having ssize_t, duplicated in internal header. */
+#ifdef _MSC_VER
+#include <stddef.h>
+typedef ptrdiff_t syn123_ssize_t;
+#else
+typedef ssize_t syn123_ssize_t;
+#endif
+
+/** Give exact output sample count for feeding given input now.
+ *
+ *  Old variant of syn123_resample_out() that (ab)uses ssize_t.
+ *
+ *  \deprecated Use syn123_resample_out() instead.
+ *    The return of errors (integer overflow in
+ *    calculation)is broken, as both the error codes and the valid results
+ *    are positive integers. I screwed up.
+ *
+ *  \param sh syn123 handle
+ *  \param ins input sample count
+ *  \return output sample count or error code, hard to distinguish
+ */
+MPG123_EXPORT
+syn123_ssize_t syn123_resample_expect(syn123_handle *sh, size_t ins);
+
+/** Give minimum input sample count needed now for given output.
+ *
+ *  Old variant of syn123_resample_in() that (ab)uses ssize_t.
+ *
+ *  \deprecated Use syn123_resample_in() instead.
+ *    The return of errors (integer overflow in
+ *    calculation)is broken, as both the error codes and the valid results
+ *    are positive integers. I screwed up.
+ *
+ *  \param sh syn123 handle
+ *  \param outs output sample count
+ *  \return minimal input sample count or error code, hard to distinguish
+ */
+MPG123_EXPORT
+syn123_ssize_t syn123_resample_inexpect(syn123_handle *sh, size_t outs);
+
+/* Lightweight large file hackery to enable worry-reduced use of off_t.
+   Depending on the size of off_t in your client build, the corresponding
+   library function needs to be chosen. */
+
+#if defined(_FILE_OFFSET_BITS) && !defined(MPG123_NO_LARGENAME)
+#  if _FILE_OFFSET_BITS+0 == 32
+#    define syn123_resample_total   syn123_resample_total_32
+#    define syn123_resample_intotal syn123_resample_intotal_32
+#  elif _FILE_OFFSET_BITS+0 == 64
+#    define syn123_resample_total   syn123_resample_total_64
+#    define syn123_resample_intotal syn123_resample_intotal_64
+#  else
+#    error "Unpredicted _FILE_OFFSET_BITS value."
+#  endif
+#endif
+
+/** Give exact output sample count for total input sample count.
+ *
+ *  This is syn123_resample_total64() with shape-shifting off_t,
+ *  possibly renamed by macro. For type safety, use the former.
+ *
+ *  \deprecated Use syn123_resample_total64() instead.
+ *
+ *  \param inrate input sample rate
+ *  \param outrate output sample rate
+ *  \param ins input sample count for the whole stream
+ *  \return number of output samples or -1 if the computation fails
+ *    (bad/too large sampling rates, integer overflow)
+ */
+MPG123_EXPORT
+off_t syn123_resample_total(long inrate, long outrate, off_t ins);
+
+/** Give minimum input sample count for total output sample count.
+ *
+ *  This is syn123_resample_intotal64() with shape-shifting off_t,
+ *  possibly renamed by macro. For type safety, use the former.
+ *
+ *  \deprecated Use syn123_resample_intotal64() instead.
+ *
+ *  \param inrate input sample rate
+ *  \param outrate output sample rate
+ *  \param outs output sample count for the whole stream
+ *  \return number of input samples or -1 if the computation fails
+ *    (bad/too large sampling rates, integer overflow)
+ */
+MPG123_EXPORT
+off_t syn123_resample_intotal(long inrate, long outrate, off_t outs);
+
+#endif
 
 /** @} */
 

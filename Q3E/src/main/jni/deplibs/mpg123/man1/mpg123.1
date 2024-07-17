@@ -1,4 +1,4 @@
-.TH mpg123 1 "26 Apr 2020"
+.TH mpg123 1 "11 Jul 2022"
 .SH NAME
 mpg123 \- play audio MPEG 1.0/2.0/2.5 stream (layers 1, 2 and 3)
 .SH SYNOPSIS
@@ -25,9 +25,10 @@ The path name(s) of one or more input files.  They must be
 valid MPEG-1.0/2.0/2.5 audio layer 1, 2 or 3 bit streams.
 If a dash ``\-'' is specified, MPEG data will
 be read from the standard input.  Furthermore, any name
-starting with ``http://'' is recognized as
+starting with ``http://'' or ``https://'' is recognized as
 .I URL
-(see next section).
+(see next section), while a leading ``file://'' is being stripped for
+normal local file access, for consistency (since mpg123 1.30.1).
 .SH OPTIONS
 .B mpg123
 options may be either the traditional POSIX one letter options,
@@ -59,7 +60,7 @@ the input file. Normally,
 tries to keep the playback alive at all costs, including skipping invalid material and searching new header when something goes wrong.
 With this switch you can make it bail out on data errors
 (and perhaps spare your ears a bad time). Note that this switch has been renamed from \-\-resync.
-The old name still works, but is not advertised or recommened to use (subject to removal in future).
+The old name still works, but is not advertised or recommended to use (subject to removal in future).
 .TP
 .BR \-F ", " \-\^\-no\-frankenstein
 Disable support for Frankenstein streams. Normally, mpg123 stays true to the concept of MPEG audio being
@@ -72,26 +73,23 @@ This comes a bit closer to the notion of a MP3 file as a defined collection
 of MPEG frames that belong together, but gets rid of the flexibility that can be fun at times but
 mostly is hell for the programmer of the parser and decoder ...
 .TP
+\fB\-\^\-network \fI backend
+Select network  backend (helper program), choices are usually auto, wget, and curl.
+Auto means to try the first available backend.
+.TP
 \fB\-\^-resync\-limit \fIbytes\fR
 Set number of bytes to search for valid MPEG data once lost in stream; <0 means search whole stream.
 If you know there are huge chunks of invalid data in your files... here is your hammer.
 Note: Only since version 1.14 this also increases the amount of junk skipped on beginning.
 .TP
-\fB\-p \fIURL \fR| \fBnone\fR, \fB\-\^\-proxy \fIURL \fR| \fBnone
-The specified
-.I proxy
-will be used for HTTP requests.  It
-should be specified as full URL (``http://host.domain:port/''),
-but the ``http://'' prefix, the port number and the trailing
-slash are optional (the default port is 80).  Specifying
-.B none
-means not to use any proxy, and to retrieve files directly
-from the respective servers.  See also the
-``HTTP SUPPORT'' section.
-.TP
 \fB\-u \fIauth\fR, \fB\-\^\-auth \fIauth
-HTTP authentication to use when recieving files via HTTP.
-The format used is user:password.
+HTTP authentication to use when receiving files via HTTP.
+The format used is user:password. Mpg123 will clear this quickly, but it may still appear
+in sight of other users or even just in your shell history. You may seek alternative ways
+to specify that to your network backend.
+.TP
+\fB\-\^\-auth-file \fIauthfile
+Provide the authentication info via given file instead of command line directly.
 .TP
 \fB\-\^\-ignore\-mime
 Ignore MIME types given by HTTP server. If you know better and want mpg123
@@ -126,12 +124,18 @@ or an URL pointing to a an appropriate list file.  Note: only
 one
 .B \-@
 option can be used (if more than one is specified, only the
-last one will be recognized).
+last one will be recognized). Furthermore, for HTTP resources, the
+MIME type information will be used to re-open an actual MPEG stream as
+such instead of treating it as playlist file. So you could just always
+use
+.B \-@
+for web resources without bothering if it is a playlist or already the resolved
+stream address.
 .TP
 \fB\-l \fIn\fR, \fB\-\^\-listentry \fIn
 Of the playlist, play specified entry only. 
 .I n
-is the number of entry starting at 1. A value of 0 is the default and means playling the whole list,  a negative value means showing of the list of titles with their numbers...
+is the number of entry starting at 1. A value of 0 is the default and means playing the whole list,  a negative value means showing of the list of titles with their numbers...
 .TP
 \fB\-\^\-continue
 Enable playlist continuation mode. This changes frame skipping to apply only to the first track and also continues to play following tracks in playlist after the selected one. Also, the option to play a number of frames only applies to the whole playlist. Basically, this tries to treat the playlist more like one big stream (like, an audio book).
@@ -229,7 +233,7 @@ Forces reopen of the audiodevice after ever song
 .BR \-\-cpu\ \fIdecoder\-type
 Selects a certain decoder (optimized for specific CPU), for example i586 or MMX.
 The list of available decoders can vary; depending on the build and what your CPU supports.
-This options is only availabe when the build actually includes several optimized decoders.
+This option is only available when the build actually includes several optimized decoders.
 .TP
 .BR \-\-test\-cpu
 Tests your CPU and prints a list of possible choices for \-\-cpu.
@@ -335,6 +339,10 @@ whitespace.  They specify the multipliers for left and right channel of
 a certain frequency band, respectively.  The first line corresponds to the
 lowest, the 32nd to the highest frequency band.
 Note that you can control the equalizer interactively with the generic control interface.
+Also note that these are the 32 bands of the MPEG codec, not spaced like you
+would see for a usual graphic equalizer. The upside is that there is zero computational
+cost in addition to decoding. The downside is that you roughly have bass in band 0,
+(upper) mids in band 1, treble in all others.
 .TP
 \fB\-\^\-gapless
 Enable code that cuts (junk) samples at beginning and end of tracks, enabling gapless transitions between MPEG files when encoder padding and codec delays would prevent it.
@@ -404,7 +412,8 @@ Quiet.  Suppress diagnostic messages.
 Enable terminal control keys. This is enabled automatically if a terminal is detected.
 By default use 's' or the space bar to stop/restart (pause, unpause) playback, 'f' to jump forward to the next song, 'b' to jump back to the
 beginning of the song, ',' to rewind, '.' to fast forward, and 'q' to quit.
-Type 'h' for a full list of available controls.
+Type 'h' for a full list of available controls. The A-B loop feature with key 'o' changes the preset loop interval to the interval
+between two presses of 'o', the third press (or 'p') ending the looped playback. The key 'p' will use the updated loop interval after that.
 .TP
 \fB\-\^\-no\-control
 Disable terminal control even if terminal is detected.
@@ -412,6 +421,10 @@ Disable terminal control even if terminal is detected.
 \fB\-\^\-title
 In an xterm, rxvt, screen, iris-ansi (compatible, TERM environment variable is examined), change the window's title to the name of song currently
 playing.
+.TP
+\fB\-\^\-pauseloop \fIseconds
+Set the length of the loop interval in terminal control fixed looping mode, away from the default of 0.5 seconds, as a floating
+point number. This value can be overwritten at runtime using the A-B loop feature.
 .TP
 \fB\-\^\-name \fIname
 Set the name of this instance, possibly used in various places. This sets the client name for JACK output.
@@ -431,9 +444,7 @@ Issue ``help'' to get a full list of commands and syntax.
 .TP
 .BR \-\^\-remote\-err
 Print responses for generic control mode to standard error, not standard out.
-This is automatically triggered when using 
-.B -s
-N.
+This is automatically triggered when using \fB-s\fR.
 .TP
 \fB\-\-fifo \fIpath
 Create a fifo / named pipe on the given path and use that for reading commands instead of standard input.
@@ -453,32 +464,32 @@ Shows long usage instructions.
 .TP
 .BR \-\^\-version
 Print the version string.
+.TP
+.BR \-\^\-libversion
+Print version information on the mpg123 libraries being used (libmpg123, libout123, libsyn123).
 .SH HTTP SUPPORT
 In addition to reading MPEG audio streams from ordinary
 files and from the standard input,
 .B mpg123
-supports retrieval of MPEG audio files or playlists via the HTTP protocol, 
+supports retrieval of MPEG audio streams or playlists via the HTTP  protocol,
 which is used in the World Wide Web (WWW).  Such files are
-specified using a so-called URL, which starts with ``http://''.  When a file with
-that prefix is encountered,
+specified using a so-called URL, which starts with http:// or https://.
+When a file with that prefix is encountered,
 .B mpg123
-attempts to open an HTTP connection to the server in order to
-retrieve that file to decode and play it.
-.P
-It is often useful to retrieve files through a WWW cache or
-so-called proxy.  To accomplish this,
+since 1.30.0 will by default call an external helper program (either
+.BR wget (1)
+or
+.BR curl (1),
+see the
+.B \-\^\-network
+option)
+to retrieve the resource. You can configure access via a proxy
+server using the standard environment variables those programs support. The
+.BR \-\^\-proxy
+option that
 .B mpg123
-examines the environment for variables named
-.BR MP3_HTTP_PROXY ", " http_proxy " and " HTTP_PROXY ,
-in this order.  The value of the first one that is set will
-be used as proxy specification.  To override this, you can
-use the
-.B \-p
-command line option (see the ``OPTIONS'' section).  Specifying
-.B "\-p none"
-will enforce contacting the server directly without using
-any proxy, even if one of the above environment variables
-is set.
+before 1.30.0 used for its internal network code is gone
+in the default build now and will probably disappear for good with 1.31.1.
 .P
 Note that, in order to play MPEG audio files from a WWW
 server, it is necessary that the connection to that server
@@ -494,9 +505,8 @@ to your local harddisk (e.g. using
 .BR wget (1))
 and then play them from there.
 .P
-If authentication is needed to access the file it can be
-specified with the 
-.BR "\-u user:pass".
+Streams with embedded ICY metadata are supported, the interval being communicated via HTTP
+headers or \fB\-\^\-icy-interval\fR.
 .SH INTERRUPT
 When in terminal control mode, you can quit via pressing the q key, 
 while any time you can abort
@@ -610,7 +620,9 @@ input side.
 Mostly MPEG-1 layer 2 and 3 are tested in real life.
 Please report any issues and provide test files to help fixing them.
 .P
-No CRC error checking is performed.
+No CRC error checking is performed. But the decoder is built and tested
+to behave nicely with damaged streams. Mostly, damaged frames will just be
+silent.
 .P
 Some platforms lack audio hardware support; you may be able to use the
 .B -s

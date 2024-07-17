@@ -5,24 +5,28 @@ mpg123 install hints
 
 You really need:
 
-- a C compiler; we try to keep the code ANSI C89/ISO C90 compatible
-  gcc from 2.95 on should work, others, too - please report any issues
-  Actually, we have a confirmed working build (svn trunk leading to
-  release 0.67) on SunOS 4.1.4 with gcc-2.7.0 .
+- a C99 compiler (moderate C99 support)
 
 - an (UNIX-like) operating system with standard tools; MinGW32 and
   Cygwin are working for Microsoft Windows, too. We also have users happily
   on OS/2.
-- For the library only, you may get lucky with MSVC++ using the project
-  files under ports/
+
+- For the library only, you may get lucky with MSVC++ using CMake and
+  ports/cmake as source directory. You can also use CMake on other
+  platforms for a full build, but its main purpose is for portability
+  where autotools don't do the trick.
+
 - For other exotic platforms, also see ports/
-- If building from direct SCM checkout, you need GNU autotools installed
-  (see below).
+
+- If building from direct source code repository checkout, as opposed to
+  a release or snapshot tarball, you need GNU autotools installed
+  (see Developer Build below).
 
 You want:
 
 - working assembler (recent GNU binutils) if using certain CPU
   optimizations
+
 - headers and lib for certain audio output drivers (libasound for alsa,
   sdl for sdl...)
 
@@ -31,10 +35,11 @@ You want:
 There is one main supported way to get your mpg123 installation
 consisting of
 
-a) the mpg123, mpg123-strip, out123 program binaries
+a) the mpg123, mpg123-strip, mpg123-id3dump, out123 program binaries
   - with libmpg123, libout123, and libsyn123 as shared libraries or
     statically linked
   - with audio output plugins for libout123, or one statically linked
+
 b) man pages
 
 (you may want to copy some of the documentation - README, etc - to

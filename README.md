@@ -5,7 +5,7 @@
 **Latest version:**
 1.1.0harmattan52(natasha)  
 **Latest update:**
-2024-07-11  
+2024-07-17  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -29,6 +29,11 @@ GPLv3
 * DOOM3(with full body awareness mod)
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
+
+###### Build DOOM3/Quake4/Prey(2006) mod for Android idTech4A++
+[DOOM 3 & RoE SDK](https://github.com/glKarin/idtech4amm_doom3_sdk)  
+[Quake 4 SDK](https://github.com/glKarin/idtech4amm_quake4_sdk)  
+[Prey(2006) SDK](https://github.com/glKarin/idtech4amm_prey_sdk)  
 
 ###### Compare with other OpenGLES rendering version of DOOM3
 
@@ -79,6 +84,7 @@ Tag with `-free` only for F-Droid update.
 * Add GLES3.2 renderer support in Quake2(using +set vid_renderer gles3 for GLES3.2, +set vid_renderer gl1 for GLES1.1).
 * Add GZDOOM support on arm64, game data directory named `gzdoom`. More view in [GZDOOM](https://github.com/ZDoom/gzdoom).
 
+----------------------------------------------------------------------------------
 
 * 毁灭战士3/雷神之锤4/掠食(2006)在OpenGLES3.1+下新增模板软阴影(cvar `harm_r_stencilShadowSoft`).
 * 毁灭战士3/雷神之锤4/掠食(2006)优化阴影图光照着色器.

@@ -14,9 +14,9 @@
 
 #include "mangle.h"
 
-	.globl ASM_NAME(dct64_3dnow)
-/*	.type	 ASM_NAME(dct64_3dnow),@function */
-ASM_NAME(dct64_3dnow):
+	.globl ASM_NAME(INT123_dct64_3dnow)
+/*	.type	 ASM_NAME(INT123_dct64_3dnow),@function */
+ASM_NAME(INT123_dct64_3dnow):
 	subl $256,%esp
 	pushl %ebp
 	pushl %edi
@@ -36,11 +36,11 @@ ASM_NAME(dct64_3dnow):
 	/* femms */
 
 	/* 1 */
-#if defined(PIC) && defined(__APPLE__)
-	movl GLOBAL_VAR_PTR(pnts),%eax
+#ifdef PIC_GLOBAL_PTR
+	movl GLOBAL_VAR_PTR(INT123_pnts),%eax
 	movl (%eax),%eax
 #else
-	movl GLOBAL_VAR(pnts),%eax
+	movl GLOBAL_VAR(INT123_pnts),%eax
 #endif
 	movq 0(%edi),%mm0
         movq %mm0,%mm1
@@ -140,11 +140,11 @@ ASM_NAME(dct64_3dnow):
 	movd %mm5,64(%ebx)
 	
 	/* 2 */
-#if defined(PIC) && defined(__APPLE__)
-	movl GLOBAL_VAR_PTR(pnts),%eax
+#ifdef PIC_GLOBAL_PTR
+	movl GLOBAL_VAR_PTR(INT123_pnts),%eax
 	movl 4(%eax),%eax
 #else
-	movl 4+GLOBAL_VAR(pnts),%eax
+	movl 4+GLOBAL_VAR(INT123_pnts),%eax
 #endif
 	/* 0,14 */
 	movq 0(%ebx),%mm0
@@ -248,11 +248,11 @@ ASM_NAME(dct64_3dnow):
 	movd %mm5,96(%esi)
 
 	/* 3 */
-#if defined(PIC) && defined(__APPLE__)
-	movl GLOBAL_VAR_PTR(pnts),%eax
+#ifdef PIC_GLOBAL_PTR
+	movl GLOBAL_VAR_PTR(INT123_pnts),%eax
 	movl 8(%eax),%eax
 #else
-	movl 8+GLOBAL_VAR(pnts),%eax
+	movl 8+GLOBAL_VAR(INT123_pnts),%eax
 #endif
 	movq 0(%eax),%mm0
 	movq 8(%eax),%mm1
@@ -354,11 +354,11 @@ ASM_NAME(dct64_3dnow):
 	movd %mm6,112(%ebx)
 	
 	/*  4 */
-#if defined(PIC) && defined(__APPLE__)
-	movl GLOBAL_VAR_PTR(pnts),%eax
+#ifdef PIC_GLOBAL_PTR
+	movl GLOBAL_VAR_PTR(INT123_pnts),%eax
 	movl 12(%eax),%eax
 #else
-	movl 12+GLOBAL_VAR(pnts),%eax
+	movl 12+GLOBAL_VAR(INT123_pnts),%eax
 #endif
 	movq 0(%eax),%mm0
 	/*  0 */
@@ -469,11 +469,11 @@ ASM_NAME(dct64_3dnow):
 	pi2fd %mm0,%mm0	
 	movd %eax,%mm1
 	pi2fd %mm1,%mm1
-#if defined(PIC) && defined(__APPLE__)
-	movl GLOBAL_VAR_PTR(pnts),%eax
+#ifdef PIC_GLOBAL_PTR
+	movl GLOBAL_VAR_PTR(INT123_pnts),%eax
 	movl 16(%eax),%eax
 #else
-	movl 16+GLOBAL_VAR(pnts),%eax
+	movl 16+GLOBAL_VAR(INT123_pnts),%eax
 #endif
 	movd 0(%eax),%mm2
 	/*  1.0 | cos0 */
@@ -741,8 +741,8 @@ ASM_NAME(dct64_3dnow):
 
 #if defined(PIC) && defined(__APPLE__)
 	.section	__IMPORT,__pointers,non_lazy_symbol_pointers
-L_pnts:
-	.indirect_symbol	ASM_NAME(pnts)
+L_INT123_pnts:
+	.indirect_symbol	ASM_NAME(INT123_pnts)
 	.long	0
 #endif
 

@@ -1,7 +1,7 @@
 /*
 	xfermem: unidirectional fast pipe
 
-	copyright ?-2015 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright ?-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Oliver Fromme
 	old timestamp: Sun Apr  6 02:26:26 MET DST 1997
@@ -10,7 +10,7 @@
 */
 
 #include "config.h"
-#include "compat.h"
+#include "../compat/compat.h"
 #include "xfermem.h"
 #include <string.h>
 #include <errno.h>
@@ -24,13 +24,13 @@
 #include <sys/shm.h>
 #endif
 
-#include "debug.h"
+#include "../common/debug.h"
 
 #if defined (HAVE_MMAP) && defined(MAP_ANONYMOUS) && !defined(MAP_ANON)
 #define MAP_ANON MAP_ANONYMOUS
 #endif
 
-void xfermem_init (txfermem **xf, size_t bufsize, size_t msize, size_t skipbuf)
+void INT123_xfermem_init (txfermem **xf, size_t bufsize, size_t msize, size_t skipbuf)
 {
 	size_t regsize = bufsize + msize + skipbuf + sizeof(txfermem);
 
@@ -68,13 +68,13 @@ void xfermem_init (txfermem **xf, size_t bufsize, size_t msize, size_t skipbuf)
 	}
 	if (shmctl(shmemid, IPC_RMID, &shmemds) == -1) {
 		perror ("shmctl()");
-		xfermem_done (*xf);
+		INT123_xfermem_done (*xf);
 		exit (1);
 	}
 #endif
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, (*xf)->fd) < 0) {
 		perror ("socketpair()");
-		xfermem_done (*xf);
+		INT123_xfermem_done (*xf);
 		exit (1);
 	}
 	(*xf)->freeindex = (*xf)->readindex = 0;
@@ -84,7 +84,7 @@ void xfermem_init (txfermem **xf, size_t bufsize, size_t msize, size_t skipbuf)
 	(*xf)->metasize = msize + skipbuf;
 }
 
-void xfermem_done (txfermem *xf)
+void INT123_xfermem_done (txfermem *xf)
 {
 	if(!xf)
 		return;
@@ -101,21 +101,21 @@ void xfermem_done (txfermem *xf)
 #endif
 }
 
-void xfermem_init_writer (txfermem *xf)
+void INT123_xfermem_init_writer (txfermem *xf)
 {
 	if(xf)
 		close (xf->fd[XF_READER]);
 	debug1("xfermem writer fd=%i", xf->fd[XF_WRITER]);
 }
 
-void xfermem_init_reader (txfermem *xf)
+void INT123_xfermem_init_reader (txfermem *xf)
 {
 	if(xf)
 		close (xf->fd[XF_WRITER]);
 	debug1("xfermem reader fd=%i", xf->fd[XF_READER]);
 }
 
-size_t xfermem_get_freespace (txfermem *xf)
+size_t INT123_xfermem_get_freespace (txfermem *xf)
 {
 	size_t freeindex, readindex;
 
@@ -131,7 +131,7 @@ size_t xfermem_get_freespace (txfermem *xf)
 		return ((xf->size - (freeindex - readindex)) - 1);
 }
 
-size_t xfermem_get_usedspace (txfermem *xf)
+size_t INT123_xfermem_get_usedspace (txfermem *xf)
 {
 	size_t freeindex, readindex;
 
@@ -193,36 +193,36 @@ static int xfermem_getcmd_raw (int fd, int block, byte *cmds, int count)
 }
 
 /* Verbose variant for debugging communication. */
-int xfermem_getcmd(int fd, int block)
+int INT123_xfermem_getcmd(int fd, int block)
 {
 	byte cmd;
 	int res = xfermem_getcmd_raw(fd, block, &cmd, 1);
-	debug3("xfermem_getcmd(%i, %i) = %i", fd, block, res == 1 ? cmd : res);
+	debug3("INT123_xfermem_getcmd(%i, %i) = %i", fd, block, res == 1 ? cmd : res);
 	return res == 1 ? cmd : res;
 }
 
-int xfermem_getcmds(int fd, int block, byte *cmds, int count)
+int INT123_xfermem_getcmds(int fd, int block, byte *cmds, int count)
 {
 	int res = xfermem_getcmd_raw(fd, block, cmds, count);
-	debug5("xfermem_getcmds(%i, %i, %p, %i) = %i"
+	debug5("INT123_xfermem_getcmds(%i, %i, %p, %i) = %i"
 	,	fd, block, (void*)cmds, count
 	,	res);
 	return res;
 }
 
 
-int xfermem_putcmd (int fd, byte cmd)
+int INT123_xfermem_putcmd (int fd, byte cmd)
 {
 	for (;;) {
 		switch (write(fd, &cmd, 1)) {
 			case 1:
-				debug2("xfermem_putcmd(%i, %i) = 1", fd, cmd);
+				debug2("INT123_xfermem_putcmd(%i, %i) = 1", fd, cmd);
 				return (1);
 			case -1:
 				if (errno != EINTR)
 				{
-					debug3("xfermem_putcmd(%i, %i) = -1 (%s)"
-					,	fd, cmd, strerror(errno));
+					debug3("INT123_xfermem_putcmd(%i, %i) = -1 (%s)"
+					,	fd, cmd, INT123_strerror(errno));
 					return (-1);
 				}
 		}
@@ -241,9 +241,9 @@ int xfermem_putcmd (int fd, byte cmd)
 	hanging for a while. The critical side is that of the reader.
 
 	Because of that, it is only sensible to provide a voluntary
-	xfermem_writer_block() here. The reader does not need such a function.
+	INT123_xfermem_writer_block() here. The reader does not need such a function.
 	Only if it has nothing else to do, it will simply block on
-	xfermem_getcmd(), and the writer promises to xfermem_putcmd() when
+	INT123_xfermem_getcmd(), and the writer promises to INT123_xfermem_putcmd() when
 	something happens.
 
 	The writer always sends a wakeup command to the reader since the latter
@@ -257,13 +257,13 @@ int xfermem_putcmd (int fd, byte cmd)
 
 /* Wait a bit to get a sign of life from the reader.
    Returns -1 if even that did not work. */
-int xfermem_writer_block(txfermem *xf)
+int INT123_xfermem_writer_block(txfermem *xf)
 {
 	int myfd = xf->fd[XF_WRITER];
 	int result;
 
-	xfermem_putcmd(myfd, XF_CMD_PING);
-	result = xfermem_getcmd(myfd, TRUE);
+	INT123_xfermem_putcmd(myfd, XF_CMD_PING);
+	result = INT123_xfermem_getcmd(myfd, TRUE);
 	/* Only a pong to my ping is the expected good answer.
 	   Everything else is a problem to be communicated. */
 	return (result == XF_CMD_PONG) ? 0 : result;
@@ -272,14 +272,14 @@ int xfermem_writer_block(txfermem *xf)
 /* Return: 0 on success, -1 on communication error, > 0 for
    error on buffer side, some special return code from buffer to be
    evaluated. */
-int xfermem_write(txfermem *xf, void *buffer, size_t bytes)
+int INT123_xfermem_write(txfermem *xf, void *buffer, size_t bytes)
 {
 	if(buffer == NULL || bytes < 1) return 0;
 
 	/* You weren't so braindead not allocating enough space at all, right? */
-	while (xfermem_get_freespace(xf) < bytes)
+	while (INT123_xfermem_get_freespace(xf) < bytes)
 	{
-		int cmd = xfermem_writer_block(xf);
+		int cmd = INT123_xfermem_writer_block(xf);
 		if(cmd) /* Non-successful wait. */
 			return cmd;
 	}
@@ -298,7 +298,7 @@ int xfermem_write(txfermem *xf, void *buffer, size_t bytes)
 	xf->freeindex = (xf->freeindex + bytes) % xf->size;
 	/* Always notify the buffer process. */
 	debug("write waking");
-	return xfermem_putcmd(xf->fd[XF_WRITER], XF_CMD_DATA) < 0
+	return INT123_xfermem_putcmd(xf->fd[XF_WRITER], XF_CMD_DATA) < 0
 	?	-1
 	:	0;
 }

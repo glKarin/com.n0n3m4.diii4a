@@ -899,7 +899,7 @@ FString NicePath(const char *path)
 	if (*path != '~')
 	{
 		FString str = ExpandEnvVars(path);
-		printf("NicePath1: %s -> %s\n", path, str.GetChars());
+		// printf("NicePath1: %s -> %s\n", path, str.GetChars());
 		return str; // ExpandEnvVars(path);
 	}
 
@@ -924,7 +924,7 @@ FString NicePath(const char *path)
 	if (pwstruct == NULL)
 	{
 		FString str = ExpandEnvVars(path);
-		printf("NicePath2: %s -> %s\n", path, str.GetChars());
+		// printf("NicePath2: %s -> %s\n", path, str.GetChars());
 		return str; // ExpandEnvVars(path);
 	}
 	FString where(pwstruct->pw_dir);
@@ -932,7 +932,7 @@ FString NicePath(const char *path)
 	{
 		where += ExpandEnvVars(slash);
 	}
-	printf("NicePath: %s -> %s\n", path, where.GetChars());
+	// printf("NicePath: %s -> %s\n", path, where.GetChars());
 	return where;
 #endif
 }

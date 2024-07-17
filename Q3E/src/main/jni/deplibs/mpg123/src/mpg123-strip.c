@@ -1,13 +1,14 @@
 /*
 	extract_frams: utlize the framebyframe API and mpg123_framedata to extract the MPEG frames out of a stream (strip off anything else).
 
-	copyright 2011-2013 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 2011-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Thomas Orgis
 */
 
 #include "config.h"
-#include "compat.h"
+#include "version.h"
+#include "compat/compat.h"
 
 #if defined(WIN32) && defined(DYNAMIC_BUILD)
 #define LINK_MPG123_DLL
@@ -40,7 +41,7 @@ static void usage(int err)
 		fprintf(o, "You made some mistake in program usage... let me briefly remind you:\n\n");
 	}
 	fprintf(o, "Extract only MPEG frames from a stream using libmpg123 (stdin to stdout)\n");
-	fprintf(o, "\tversion %s; written and copyright by Thomas Orgis and the mpg123 project\n", PACKAGE_VERSION);
+	fprintf(o, "\tversion %s; written and copyright by Thomas Orgis and the mpg123 project\n", MPG123_VERSION);
 	fprintf(o,"\nusage: %s [option(s)] < input > output\n", progname);
 	fprintf(o,"\noptions:\n");
 	fprintf(o," -h     --help              give usage help\n");
@@ -101,6 +102,8 @@ int main(int argc, char **argv)
 	{
 		ret = mpg123_param(m, MPG123_VERBOSE, param.verbose, 0.);
 		if(ret == MPG123_OK)
+			mpg123_param(m, MPG123_RESYNC_LIMIT, -1, 0.0);
+		if(ret == MPG123_OK)
 		{
 			if(param.verbose)
 			fprintf(stderr, "Info frame handling: %s\n",
@@ -131,6 +134,8 @@ int do_work(mpg123_handle *m)
 {
 	int ret;
 	size_t count = 0;
+	INT123_compat_binmode(STDIN_FILENO, TRUE);
+	INT123_compat_binmode(STDOUT_FILENO, TRUE);
 	ret = mpg123_open_fd(m, STDIN_FILENO);
 	if(ret != MPG123_OK) return ret;
 
@@ -147,23 +152,23 @@ int do_work(mpg123_handle *m)
 			for(i=0; i<4; ++i) hbuf[i] = (unsigned char) ((header >> ((3-i)*8)) & 0xff);
 
 			/* Now write out both header and data, fire and forget. */
-			if( 4 != unintr_write(STDOUT_FILENO, hbuf, 4) ||
-			    bodybytes != unintr_write(STDOUT_FILENO, bodydata, bodybytes) )
+			if( 4 != INT123_unintr_write(STDOUT_FILENO, hbuf, 4) ||
+			    bodybytes != INT123_unintr_write(STDOUT_FILENO, bodydata, bodybytes) )
 			{
-				fprintf(stderr, "Failed to write data: %s\n", strerror(errno));
+				fprintf(stderr, "Failed to write data: %s\n", INT123_strerror(errno));
 				return MPG123_ERR;
 			}
 			if(param.verbose)
-			fprintf(stderr, "%"SIZE_P": header 0x%08lx, %"SIZE_P" body bytes\n"
-			, (size_p)++count, header, (size_p)bodybytes);
+			fprintf(stderr, "%zu: header 0x%08lx, %zu body bytes\n"
+			, ++count, header, bodybytes);
 		}
 	}
 
 	if(ret != MPG123_DONE)
 	fprintf(stderr, "Some error occured (non-fatal?): %s\n", mpg123_strerror(m));
 
-	if(param.verbose) fprintf(stderr, "Done with %"SIZE_P" MPEG frames.\n"
-	, (size_p)count);
+	if(param.verbose)
+		fprintf(stderr, "Done with %zu MPEG frames.\n", count);
 
 	return MPG123_OK;
 }

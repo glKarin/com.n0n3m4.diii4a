@@ -10,7 +10,7 @@
 #ifndef MPG123_H_STRINGLISTS
 #define MPG123_H_STRINGLISTS
 
-int stringlists_add( char ***alist, char ***blist
+int INT123_stringlists_add( char ***alist, char ***blist
                    , const char *atext, const char *btext, int *count);
 
 #endif

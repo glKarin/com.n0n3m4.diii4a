@@ -22,18 +22,7 @@
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif
-#include "compat.h"
-
-#ifdef __EMX__
-/* Special ways for OS/2 EMX */
-#include <stdlib.h>
-#else
-/* POSIX stuff */
-#ifdef HAVE_TERMIOS
-#include <termios.h>
-#include <sys/ioctl.h>
-#endif
-#endif
+#include "compat/compat.h"
 
 #include "local.h"
 
@@ -50,13 +39,13 @@
 #include <wincon.h>
 #endif
 
-#include "debug.h"
+#include "common/debug.h"
 
 int utf8force = 0; // enforce UTF-8 workings
 int utf8env = 0; // produce UTF-8 text output
 int utf8loc = 0; // have actual UTF-8 locale (so that mbstowcs() works)
 
-static int term_is_fun = -1;
+//static int term_is_fun = -1;
 
 static const char joker_symbol = '?';
 static const char *uni_repl = "\xef\xbf\xbd";
@@ -118,76 +107,6 @@ static int is_utf8(const char *lang)
 	return 0;
 }
 
-int term_have_fun(int fd, int want_visuals)
-{
-	if(term_is_fun > -1)
-		return term_is_fun;
-	else
-		term_is_fun = 0;
-#ifdef HAVE_TERMIOS
-	if(term_width(fd) > 0 && want_visuals)
-	{
-		/* Only play with non-dumb terminals. */
-		char *tname = compat_getenv("TERM");
-		if(tname)
-		{
-			if(strcmp(tname, "") && strcmp(tname, "dumb"))
-				term_is_fun = 1;
-			free(tname);
-		}
-	}
-#endif
-	return term_is_fun;
-}
-
-/* Also serves as a way to detect if we have an interactive terminal. */
-int term_width(int fd)
-{
-#ifdef __EMX__
-/* OS/2 */
-	int s[2];
-	_scrsize (s);
-	if (s[0] >= 0)
-		return s[0];
-#else
-#ifdef HAVE_TERMIOS
-/* POSIX */
-	struct winsize geometry;
-	geometry.ws_col = 0;
-	if(ioctl(fd, TIOCGWINSZ, &geometry) >= 0)
-		return (int)geometry.ws_col;
-#else
-#ifdef WIN32
-	CONSOLE_SCREEN_BUFFER_INFO pinfo;
-	HANDLE hStdout;
-	DWORD handle;
-
-	switch(fd){
-	case STDIN_FILENO:
-		handle = STD_INPUT_HANDLE;
-		break;
-	case STDOUT_FILENO:
-		handle = STD_OUTPUT_HANDLE;
-		break;
-	case STDERR_FILENO:
-		handle = STD_ERROR_HANDLE;
-		break;
-	default:
-		return -1;
-	}
-
-	hStdout = GetStdHandle(handle);
-	if(hStdout == INVALID_HANDLE_VALUE || hStdout == NULL)
-		return -1;
-	if(GetConsoleScreenBufferInfo(hStdout, &pinfo)){
-		return pinfo.dwMaximumWindowSize.X;
-	}
-#endif
-#endif
-#endif
-	return -1;
-}
-
 // Moved encoding stuff over from metaprint.c and removed references to libmpg123,
 // meaning no mpg123_string for you!
 
@@ -197,7 +116,7 @@ int unknown2utf8(char **dest, const char *source, int len)
 		return -1;
 	if(!source)
 	{
-		*dest = safer_realloc(*dest, 0);
+		*dest = INT123_safer_realloc(*dest, 0);
 		return -1;
 	}
 	size_t count = len < 0 ? strlen(source) : (size_t)len;
@@ -215,7 +134,7 @@ int unknown2utf8(char **dest, const char *source, int len)
 		ulen += c >= 0x80 ? uni_repl_len : 1;
 	}
 
-	if(NULL == (*dest = safer_realloc(*dest, ulen)))
+	if(NULL == (*dest = INT123_safer_realloc(*dest, ulen)))
 		return -1;
 
 	unsigned char *p = (unsigned char*)*dest;
@@ -282,7 +201,7 @@ static size_t utf8_ascii_work(char **dest_, const char *source
 		return 0;
 	if(!source)
 	{
-		*dest_ = safer_realloc(*dest_, 0);
+		*dest_ = INT123_safer_realloc(*dest_, 0);
 		return 0;
 	}
 
@@ -311,7 +230,7 @@ static size_t utf8_ascii_work(char **dest_, const char *source
 	}
 	// Do nothing with nothing or if allocation fails. Neatly catches overflow
 	// of ++dlen.
-	if(!dlen || !(dest=safer_realloc(dest, dlen)))
+	if(!dlen || !(dest=INT123_safer_realloc(dest, dlen)))
 		goto utf8_ascii_bad;
 	p = (unsigned char*)dest;
 	c2lead = 0;
@@ -334,7 +253,7 @@ static size_t utf8_ascii_work(char **dest_, const char *source
 		dest[dlen-1] = 0;
 	goto utf8_ascii_end;
 utf8_ascii_bad:
-	dest = safer_realloc(dest, 0);
+	dest = INT123_safer_realloc(dest, 0);
 utf8_ascii_end:
 	*dest_ = dest;
 	return dest ? strlen(dest)+1 : 0;
@@ -363,7 +282,7 @@ size_t utf8outstr(char **dest_, const char *source, int to_terminal)
 		return 0;
 	if(!source)
 	{
-		*dest_ = safer_realloc(*dest_, 0);
+		*dest_ = INT123_safer_realloc(*dest_, 0);
 		return 0;
 	}
 	char *dest = *dest_;
@@ -416,13 +335,13 @@ size_t utf8outstr(char **dest_, const char *source, int to_terminal)
 				size_t bytelen = wcstombs(NULL, flt, 0);
 				if(
 					columns >= 0 && bytelen != (size_t)-1
-					&& (dest=safer_realloc(dest, bytelen+1))
+					&& (dest=INT123_safer_realloc(dest, bytelen+1))
 					&& wcstombs(dest, flt, bytelen+1) == bytelen
 				){
 					width = columns;
 				}
 				else
-					dest=safer_realloc(dest, 0);
+					dest=INT123_safer_realloc(dest, 0);
 			}
 			free(flt);
 			free(pre);
@@ -435,7 +354,7 @@ size_t utf8outstr(char **dest_, const char *source, int to_terminal)
 			// That is, 0x01 to 0x19 (keeping 0x20, space) and 0x7f (DEL) to 0x9f.
 			// Since the input and output is UTF-8, we'll keep that intact.
 			// C1 is mapped to 0xc280 till 0xc29f.
-			dest = safer_realloc(dest, source_fill);
+			dest = INT123_safer_realloc(dest, source_fill);
 			if(!dest)
 				goto utf8outstr_bad;
 			size_t dest_fill = 0;
@@ -464,7 +383,7 @@ size_t utf8outstr(char **dest_, const char *source, int to_terminal)
 			dest[dest_fill-1] = 0;
 		} else
 		{
-			dest = safer_realloc(dest, source_fill);
+			dest = INT123_safer_realloc(dest, source_fill);
 			if(!dest)
 				goto utf8outstr_bad;
 			size_t dest_fill = 0;
@@ -496,7 +415,7 @@ size_t utf8outstr(char **dest_, const char *source, int to_terminal)
 
 	goto utf8outstr_end;
 utf8outstr_bad:
-	dest = safer_realloc(dest, 0);
+	dest = INT123_safer_realloc(dest, 0);
 	width = 0;
 utf8outstr_end:
 	*dest_ = dest;
@@ -521,7 +440,7 @@ int outstr(char **dest, const char *str, int is_utf8, int is_term)
 		return -1;
 	if(!str)
 	{
-		*dest = safer_realloc(*dest, 0);
+		*dest = INT123_safer_realloc(*dest, 0);
 		return -1;
 	}
 	int ret = 0;
@@ -543,7 +462,7 @@ int outstr(char **dest, const char *str, int is_utf8, int is_term)
 		free(usrc);
 	} else
 	{
-		*dest = compat_strdup(str);
+		*dest = INT123_compat_strdup(str);
 		if(!*dest)
 			ret = -1;
 	}

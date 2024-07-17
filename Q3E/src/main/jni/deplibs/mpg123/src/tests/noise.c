@@ -1,7 +1,7 @@
 #include "config.h"
-#include "compat.h"
-#include "dither.h"
-#include "debug.h"
+#include "../compat/compat.h"
+#include "../libmpg123/dither.h"
+#include "../common/debug.h"
 
 /* Directly include the code for testing, avoiding
    build of same object with and without libtool. */

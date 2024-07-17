@@ -8,7 +8,7 @@
 
 /* First the common header, including config.h
    ...this is important for stuff like _FILE_OFFSET_BITS */
-#include "out123_int.h"
+#include "../out123_int.h"
 
 #include <esd.h>
 #include <errno.h>
@@ -22,7 +22,7 @@
 #include <sys/ioctl.h>
 #include <sys/audioio.h>
 #endif
-#include "debug.h"
+#include "../../common/debug.h"
 
 static unsigned esd_rate = 0, esd_format = 0, esd_channels = 0;
 
@@ -162,7 +162,7 @@ mpg123_module_t mpg123_output_module_info = {
 	/* api_version */	MPG123_MODULE_API_VERSION,
 	/* name */			"esd",						
 	/* description */	"Output audio using ESounD (The Enlightened Sound Daemon).",
-	/* revision */		"$Rev: 3915 $",						
+	/* revision */		"$Rev: 5386 $",						
 	/* handle */		NULL,
 	
 	/* init_output */	init_esound,						

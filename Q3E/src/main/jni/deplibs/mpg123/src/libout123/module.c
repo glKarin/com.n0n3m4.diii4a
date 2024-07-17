@@ -1,7 +1,7 @@
 /*
 	module.c: modular code loader
 
-	copyright 1995-2015 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 1995-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Nicholas J Humfrey
 */
@@ -10,13 +10,12 @@
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
 #include "config.h"
-#include "intsym.h"
 #include "stringlists.h"
-#include "compat.h"
+#include "../compat/compat.h"
 #include <errno.h>
 
 #include "module.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 #ifndef USE_MODULES
 #error This is a build without modules. Why am I here?
@@ -42,12 +41,12 @@ static char *get_module_dir(int verbose, const char* bindir)
 	char *moddir = NULL;
 	char *defaultdir;
 	/* First the environment override, then relative to bindir, then installation prefix. */
-	defaultdir = compat_getenv("MPG123_MODDIR");
+	defaultdir = INT123_compat_getenv("MPG123_MODDIR");
 	if(defaultdir)
 	{
 		if(verbose > 1)
 			fprintf(stderr, "Trying module directory from environment: %s\n", defaultdir);
-		if(compat_isdir(defaultdir))
+		if(INT123_compat_isdir(defaultdir))
 			moddir = defaultdir;
 		else
 			free(defaultdir);
@@ -61,12 +60,12 @@ static char *get_module_dir(int verbose, const char* bindir)
 				fprintf(stderr, "Module dir search relative to: %s\n", bindir);
 			for(i=0; i<sizeof(modulesearch)/sizeof(char*); ++i)
 			{
-				moddir = compat_catpath(bindir, modulesearch[i]);
+				moddir = INT123_compat_catpath(bindir, modulesearch[i]);
 				if(!moddir)
 					continue;
 				if(verbose > 1)
 					fprintf(stderr, "Looking for module dir: %s\n", moddir);
-				if(compat_isdir(moddir))
+				if(INT123_compat_isdir(moddir))
 					break; /* found it! */
 				else
 				{
@@ -77,11 +76,11 @@ static char *get_module_dir(int verbose, const char* bindir)
 		}
 		if(!moddir) /* Resort to installation prefix. */
 		{
-			if(compat_isdir(PKGLIBDIR))
+			if(INT123_compat_isdir(PKGLIBDIR))
 			{
 				if(verbose > 1)
 					fprintf(stderr, "Using default module dir: %s\n", PKGLIBDIR);
-				moddir = compat_strdup(PKGLIBDIR);
+				moddir = INT123_compat_strdup(PKGLIBDIR);
 			}
 		}
 	}
@@ -109,11 +108,11 @@ mpg123_module_t* open_module_here( const char *dir, const char* type
 	if(!module_file)
 	{
 		if(verbose > -1)
-			error1( "Failed to allocate memory for module name: %s", strerror(errno) );
+			error1( "Failed to allocate memory for module name: %s", INT123_strerror(errno) );
 		return NULL;
 	}
 	snprintf(module_file, module_file_len, "%s_%s%s", type, name, LT_MODULE_EXT);
-	module_path = compat_catpath(dir, module_file);
+	module_path = INT123_compat_catpath(dir, module_file);
 	free(module_file);
 	if(!module_path)
 	{
@@ -125,7 +124,7 @@ mpg123_module_t* open_module_here( const char *dir, const char* type
 		fprintf(stderr, "Module path: %s\n", module_path );
 
 	/* Open the module */
-	handle = compat_dlopen(module_path);
+	handle = INT123_compat_dlopen(module_path);
 	free(module_path);
 	if (handle==NULL)
 	{
@@ -141,14 +140,14 @@ mpg123_module_t* open_module_here( const char *dir, const char* type
 	module_symbol = malloc(module_symbol_len);
 	if (module_symbol == NULL) {
 		if(verbose > -1)
-			error1( "Failed to allocate memory for module symbol: %s", strerror(errno) );
+			error1( "Failed to allocate memory for module symbol: %s", INT123_strerror(errno) );
 		return NULL;
 	}
 	snprintf( module_symbol, module_symbol_len, "%s%s%s", MODULE_SYMBOL_PREFIX, type, MODULE_SYMBOL_SUFFIX );
 	debug1( "Module symbol: %s", module_symbol );
 	
 	/* Get the information structure from the module */
-	module = (mpg123_module_t*)compat_dlsym(handle, module_symbol);
+	module = (mpg123_module_t*)INT123_compat_dlsym(handle, module_symbol);
 	free( module_symbol );
 	if (module==NULL) {
 		if(verbose > -1)
@@ -161,7 +160,7 @@ mpg123_module_t* open_module_here( const char *dir, const char* type
 	{
 		if(verbose > -1)
 			error2( "API version of module does not match (got %i, expected %i).", module->api_version, MPG123_MODULE_API_VERSION);
-		compat_dlclose(handle);
+		INT123_compat_dlclose(handle);
 		return NULL;
 	}
 
@@ -172,7 +171,7 @@ mpg123_module_t* open_module_here( const char *dir, const char* type
 
 
 /* Open a module, including directory search. */
-mpg123_module_t* open_module( const char* type, const char* name, int verbose
+mpg123_module_t* INT123_open_module( const char* type, const char* name, int verbose
 ,	const char* bindir )
 {
 	mpg123_module_t *module = NULL;
@@ -192,12 +191,12 @@ mpg123_module_t* open_module( const char* type, const char* name, int verbose
 	return module;
 }
 
-void close_module( mpg123_module_t* module, int verbose )
+void INT123_close_module( mpg123_module_t* module, int verbose )
 {
-	compat_dlclose(module->handle);
+	INT123_compat_dlclose(module->handle);
 }
 
-int list_modules( const char *type, char ***names, char ***descr, int verbose
+int INT123_list_modules( const char *type, char ***names, char ***descr, int verbose
 ,	const char* bindir )
 {
 	char *moddir  = NULL;
@@ -220,16 +219,16 @@ int list_modules( const char *type, char ***names, char ***descr, int verbose
 	debug1("module dir: %s", moddir);
 
 	/* Open the module directory */
-	dir = compat_diropen(moddir);
+	dir = INT123_compat_diropen(moddir);
 	if (dir==NULL) {
 		if(verbose > -1)
 			error2("Failed to open the module directory (%s): %s\n"
-			,	moddir, strerror(errno));
+			,	moddir, INT123_strerror(errno));
 		free(moddir);
 		return -1;
 	}
 
-	while((filename=compat_nextfile(dir)))
+	while((filename=INT123_compat_nextfile(dir)))
 	{
 		/* Pointers to the pieces. */
 		char *module_name = NULL;
@@ -286,17 +285,17 @@ int list_modules( const char *type, char ***names, char ***descr, int verbose
 		   Yes, this re-builds the file name we chopped to pieces just now. */
 		if((module=open_module_here(moddir, module_type, module_name, verbose)))
 		{
-			if( stringlists_add( names, descr
+			if( INT123_stringlists_add( names, descr
 			,	module->name, module->description, &count) )
 				if(verbose > -1)
 					error("OOM");
 			/* Close the module again */
-			close_module(module, verbose);
+			INT123_close_module(module, verbose);
 		}
 list_modules_continue:
 		free(filename);
 	}
-	compat_dirclose(dir);
+	INT123_compat_dirclose(dir);
 	return count;
 }
 

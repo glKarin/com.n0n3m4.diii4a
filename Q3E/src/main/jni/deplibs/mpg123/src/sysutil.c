@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include "sysutil.h"
 
-#include "debug.h"
+#include "common/debug.h"
 
 #if 0
 /* removed the strndup for better portability */
@@ -55,7 +55,7 @@ int split_dir_file (const char *path, char **dname, char **fname)
 
 	if ((slashpos = strrchr(path, '/'))) {
 		*fname = slashpos + 1;
-		*dname = compat_strdup(path); /* , 1 + slashpos - path); */
+		*dname = INT123_compat_strdup(path); /* , 1 + slashpos - path); */
 		if(!(*dname)) {
 			perror("failed to allocate memory for dir name");
 			return 0;
