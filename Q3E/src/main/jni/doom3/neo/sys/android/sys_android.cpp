@@ -396,7 +396,7 @@ void Q3E_exit(void)
     if(window)
         window = NULL;
     GLimp_AndroidQuit();
-    Sys_Printf("[Harmattan]: doom3 exit.\n");
+    printf("[Harmattan]: idTech4 exit.\n");
 }
 
 // Setup OpenGL context variables in Android SurfaceView's thread

@@ -2,6 +2,13 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan53 (2024-07-17)
+
+* Fix GZDOOM sound.
+* Update screen resolution settings on launcher.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan52 (2024-07-11)
 
 * Add soft stencil shadow support(cvar harm_r_stencilShadowSoft) with OpenGLES3.1+ in DOOM3/Quake4/Prey(2006).
