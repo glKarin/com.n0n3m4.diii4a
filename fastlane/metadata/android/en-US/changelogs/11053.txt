@@ -1,0 +1,2 @@
+* Fix GZDOOM sound.
+* Update screen resolution settings on launcher.
