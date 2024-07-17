@@ -333,6 +333,6 @@
     <string name="fullscreen">Полный экран</string>
     <string name="scale_by_screen_width_height">Масштабировать по ширине/высоте экрана</string>
     <string name="scale_with_screen_aspect_ratio">Масштабировать с учетом соотношения сторон экрана</string>
-    <string name="_scale_by_screen_area">Масштабировать по площади экрана<</string>
+    <string name="_scale_by_screen_area">Масштабировать по площади экрана</string>
 
 </resources>
