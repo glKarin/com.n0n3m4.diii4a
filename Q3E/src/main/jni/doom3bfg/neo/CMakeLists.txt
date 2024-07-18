@@ -1910,8 +1910,11 @@ else()
 		set(RBDoom3BFG_sys_libs)
 		if(ANDROID)
 			target_include_directories(RBDoom3BFG PRIVATE ../../common)
+			target_include_directories(RBDoom3BFG PRIVATE ../../deplibs/etc2comp/EtcLib)
+			target_include_directories(RBDoom3BFG PRIVATE ../../deplibs/etc2comp/EtcLib/Etc)
+			target_include_directories(RBDoom3BFG PRIVATE ../../deplibs/etc2comp/EtcLib/EtcCodec)
 			set(OPENGL_LIBRARIES GLESv3 EGL)
-			set(RBDoom3BFG_sys_libs openal android z log) # ${FFmpeg_LIBRARIES}
+			set(RBDoom3BFG_sys_libs openal android z log EtcLib) # ${FFmpeg_LIBRARIES}
 		else()
 			if(NOT "${CMAKE_SYSTEM}" MATCHES "Darwin")
 				set(RT_LIBRARY rt)

@@ -36,6 +36,8 @@ add_subdirectory (libsndfile) # -1.2.2
 add_subdirectory (fluidsynth)
 #add_subdirectory(fluidsynth-lite)
 
+add_subdirectory (etc2comp/EtcLib)
+
 #add_subdirectory (ktx) # KTX-Software-3.0.1
 
 #add_subdirectory (sdl2) # 2.30.2
