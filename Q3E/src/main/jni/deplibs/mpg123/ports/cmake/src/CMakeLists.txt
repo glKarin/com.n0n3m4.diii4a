@@ -65,6 +65,11 @@ check_function_exists(ctermid HAVE_CTERMID)
 check_function_exists(clock_gettime HAVE_CLOCK_GETTIME)
 
 check_type_size(off_t SIZEOF_OFF_T)
+if(ANDROID) # TODO: SIZEOF_OFF_T is 8 on Android arm 32
+    if(CMAKE_SIZEOF_VOID_P LESS 8)
+        set(SIZEOF_OFF_T 4)
+    endif()
+endif()
 
 if(SIZEOF_OFF_T LESS 8)
 check_function_exists(lseek64 LFS_LARGEFILE_64)
