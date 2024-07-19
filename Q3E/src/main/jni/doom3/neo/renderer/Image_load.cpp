@@ -341,13 +341,13 @@ There is no way to specify explicit mip map levels
 
 static int isopaque(GLint width, GLint height, const GLvoid *pixels)
 {
-   unsigned char const *cpixels = (unsigned char const *)pixels;
-   int i;
-   for (i = 0; i < width * height; i++) {
-      if (cpixels[i*4+3] != 0xff)
-         return 0;
-   }
-   return 1;
+	unsigned char const *cpixels = (unsigned char const *) pixels;
+	int i;
+	for (i = 0; i < width * height; i++) {
+		if (cpixels[i * 4 + 3] != 0xff)
+			return 0;
+	}
+	return 1;
 }
 
 void rgba4444_convert_tex_image(
@@ -362,28 +362,28 @@ void rgba4444_convert_tex_image(
    GLenum type,
    const GLvoid *pixels)
 {
-   unsigned char const *cpixels = (unsigned char const *)pixels;
-   unsigned short *rgba4444data = 
-	   (unsigned short *)
-	   malloc(2*width*height+1);
-   ((unsigned char*)rgba4444data)[0]=1;
-   rgba4444data=(unsigned short *)((unsigned char*)rgba4444data+1);
-   int i;
-   for (i = 0; i < width * height; i++) {
-      unsigned char r,g,b,a;
-      r = cpixels[4*i]>>4;
-      g = cpixels[4*i+1]>>4;
-      b = cpixels[4*i+2]>>4;
-      a = cpixels[4*i+3]>>4;
-      rgba4444data[i] = r << 12 | g << 8 | b << 4 | a;
-   }
-   qglTexImage2D(target, level, format, width, height,border,format,GL_UNSIGNED_SHORT_4_4_4_4,rgba4444data);
-   rgba4444data=(unsigned short *)((unsigned char*)rgba4444data-1);
-   if (cachefname!=0)
-   {
-	fileSystem->WriteFile(cachefname, rgba4444data, width*height*2+1);
-   }
-   free(rgba4444data);
+	unsigned char const *cpixels = (unsigned char const *) pixels;
+	unsigned short *rgba4444data =
+			(unsigned short *)
+					malloc(2 * width * height + 1);
+	((unsigned char *) rgba4444data)[0] = 1;
+	rgba4444data = (unsigned short *) ((unsigned char *) rgba4444data + 1);
+	int i;
+	for (i = 0; i < width * height; i++) {
+		unsigned char r, g, b, a;
+		r = cpixels[4 * i] >> 4;
+		g = cpixels[4 * i + 1] >> 4;
+		b = cpixels[4 * i + 2] >> 4;
+		a = cpixels[4 * i + 3] >> 4;
+		rgba4444data[i] = r << 12 | g << 8 | b << 4 | a;
+	}
+	qglTexImage2D(target, level, format, width, height, border, format, GL_UNSIGNED_SHORT_4_4_4_4,
+				  rgba4444data);
+	rgba4444data = (unsigned short *) ((unsigned char *) rgba4444data - 1);
+	if (cachefname != 0) {
+		fileSystem->WriteFile(cachefname, rgba4444data, width * height * 2 + 1);
+	}
+	free(rgba4444data);
 }
 //#define USE_RG_ETC1
 #ifdef USE_RG_ETC1
@@ -393,7 +393,7 @@ void rgba4444_convert_tex_image(
 #endif
 
 unsigned int etc1_data_size(unsigned int width, unsigned int height) {
-    return (((width + 3) & ~3) * ((height + 3) & ~3)) >> 1;
+	return (((width + 3) & ~3) * ((height + 3) & ~3)) >> 1;
 }
 
 void etc1_compress_tex_image(
@@ -408,93 +408,92 @@ void etc1_compress_tex_image(
    GLenum type,
    const GLvoid *pixels)
 {
-   unsigned char const *cpixels = (unsigned char const *)pixels;
-   unsigned char *etc1data;
-   unsigned int size=etc1_data_size(width,height);
-   etc1data = 
-	   (unsigned char *)
-	   malloc(size+1);
-   etc1data[0]=0;
-   etc1data++;
-   #ifdef USE_RG_ETC1
-   rg_etc1::etc1_encode_image(cpixels, width, height,
-        4, width*4, etc1data);
-   #else
-   etc1_encode_image(cpixels, width, height,
-        4, width*4, etc1data);
-   #endif
-   qglCompressedTexImage2D(
-      target,
-      level,
-      GL_ETC1_RGB8_OES,
-      width,
-      height,
-      0,
-      size,
-      etc1data);
-   etc1data--;
-   if (cachefname!=0)
-   {
-	fileSystem->WriteFile(cachefname, etc1data, size+1);
-   }
-   free(etc1data);
+	unsigned char const *cpixels = (unsigned char const *) pixels;
+	unsigned char *etc1data;
+	unsigned int size = etc1_data_size(width, height);
+	etc1data =
+			(unsigned char *)
+					malloc(size + 1);
+	etc1data[0] = 0;
+	etc1data++;
+#ifdef USE_RG_ETC1
+    rg_etc1::etc1_encode_image(cpixels, width, height,
+         4, width*4, etc1data);
+#else
+	etc1_encode_image(cpixels, width, height,
+					  4, width * 4, etc1data);
+#endif
+	qglCompressedTexImage2D(
+			target,
+			level,
+			GL_ETC1_RGB8_OES,
+			width,
+			height,
+			0,
+			size,
+			etc1data);
+	etc1data--;
+	if (cachefname != 0) {
+		fileSystem->WriteFile(cachefname, etc1data, size + 1);
+	}
+	free(etc1data);
 }
 
 int etcavail(char* cachefname)
 {
-return (r_useETC1Cache.GetBool())&&(r_useETC1.GetBool())&&(cachefname!=0)&&(fileSystem->ReadFile(cachefname,0,0)!=-1);
+	return (r_useETC1Cache.GetBool()) && (r_useETC1.GetBool()) && (cachefname != 0) &&
+		   (fileSystem->ReadFile(cachefname, 0, 0) != -1);
 }
 
-int uploadetc(char* cachefname,GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type)
+int uploadetc(char *cachefname, GLenum target, GLint level, GLint internalformat, GLsizei width,
+			  GLsizei height, GLint border, GLenum format, GLenum type)
 {
-	char* tmp;
-	int failed=0;
-	int sz=fileSystem->ReadFile(cachefname,
-			(void **)
-			&tmp,0);
-	if (tmp[0]==0)
-	{
-	if (sz==etc1_data_size(width,height)+1)
-	{
-	tmp++;
-	qglCompressedTexImage2D(target,level,GL_ETC1_RGB8_OES,width,height,0,etc1_data_size(width,height),tmp);
-	}
-	else
-		failed=1;
-	}
-	else
-	{
-	if (sz==width*height*2+1)
-	{
-	tmp++;
-	qglTexImage2D(target,level,format,width,height,border,format,GL_UNSIGNED_SHORT_4_4_4_4,tmp);
-	}
-	else
-		failed=1;
+	char *tmp;
+	int failed = 0;
+	int sz = fileSystem->ReadFile(cachefname,
+								  (void **)
+										  &tmp, 0);
+	if (tmp[0] == 0) {
+		if (sz == etc1_data_size(width, height) + 1) {
+			tmp++;
+			qglCompressedTexImage2D(target, level, GL_ETC1_RGB8_OES, width, height, 0,
+									etc1_data_size(width, height), tmp);
+		} else
+			failed = 1;
+	} else {
+		if (sz == width * height * 2 + 1) {
+			tmp++;
+			qglTexImage2D(target, level, format, width, height, border, format,
+						  GL_UNSIGNED_SHORT_4_4_4_4, tmp);
+		} else
+			failed = 1;
 	}
 	tmp--;
 	fileSystem->FreeFile(tmp);
 	return failed;
 }
 
-void myglTexImage2D(char* cachefname,GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels)
+void
+myglTexImage2D(char *cachefname, GLenum target, GLint level, GLint internalformat, GLsizei width,
+			   GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels)
 {
-   static int opaque = 0;
-   if (r_useETC1.GetBool() && format == GL_RGBA && type == GL_UNSIGNED_BYTE) {
+	static int opaque = 0;
+	if (r_useETC1.GetBool() && format == GL_RGBA && type == GL_UNSIGNED_BYTE) {
 
-      if (level == 0)
-         opaque = isopaque(width, height, pixels);
+		if (level == 0)
+			opaque = isopaque(width, height, pixels);
 
-      if (!r_useETC1Cache.GetBool())
-	cachefname=0;
+		if (!r_useETC1Cache.GetBool())
+			cachefname = 0;
 
-      if (opaque)
-         etc1_compress_tex_image(cachefname,target, level, format, width, height, border, format, type, pixels);
-      else
-         rgba4444_convert_tex_image(cachefname,target, level, format, width, height, border, format, type, pixels);
-   }
-   else
-   qglTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
+		if (opaque)
+			etc1_compress_tex_image(cachefname, target, level, format, width, height, border,
+									format, type, pixels);
+		else
+			rgba4444_convert_tex_image(cachefname, target, level, format, width, height, border,
+									   format, type, pixels);
+	} else
+		qglTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 }
 
 //end
