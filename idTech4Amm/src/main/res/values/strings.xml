@@ -336,5 +336,7 @@
     <string name="scale_by_screen_width_height">Scale by screen width/height</string>
     <string name="scale_with_screen_aspect_ratio">Scale with screen aspect ratio</string>
     <string name="_scale_by_screen_area">Scale by screen area</string>
+    <string name="freedoom1_base">FreeDOOM 1</string>
+    <string name="freedoom2_base">FreeDOOM 2</string>
 
 </resources>

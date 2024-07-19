@@ -8,12 +8,14 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.misc.PreferenceBackup;
+import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -50,9 +52,32 @@ public final class ExtractSourceFunc extends GameLauncherFunc
         run();
     }
 
+    private String GetSourceCodeUrl()
+    {
+        return "https://github.com/glKarin/com.n0n3m4.diii4a/archive/refs/tags/v1.1.0harmattan" + Constants.CONST_UPDATE_RELEASE + ".zip";
+    }
+
+    private boolean SourceCodeExists()
+    {
+        try
+        {
+            String[] sources = m_gameLauncher.getAssets().list("source");
+            for (String source : sources)
+            {
+                if(source.equals("DIII4A.source.tgz"))
+                    return true;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public void run()
     {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT && SourceCodeExists())
         {
             Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -64,7 +89,7 @@ public final class ExtractSourceFunc extends GameLauncherFunc
         }
         else
         {
-            Toast_long(m_gameLauncher.getString(R.string.not_supported));
+            ContextUtility.OpenUrlExternally(m_gameLauncher, GetSourceCodeUrl());
         }
     }
 

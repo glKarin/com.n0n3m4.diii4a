@@ -333,4 +333,6 @@
     <string name="scale_by_screen_width_height">按屏幕宽高比例</string>
     <string name="scale_with_screen_aspect_ratio">屏幕分辨率宽高比缩放</string>
     <string name="_scale_by_screen_area">按屏幕面积比例</string>
+    <string name="freedoom1_base">FreeDOOM 1</string>
+    <string name="freedoom2_base">FreeDOOM 2</string>
 </resources>

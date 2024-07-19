@@ -334,5 +334,7 @@
     <string name="scale_by_screen_width_height">Масштабировать по ширине/высоте экрана</string>
     <string name="scale_with_screen_aspect_ratio">Масштабировать с учетом соотношения сторон экрана</string>
     <string name="_scale_by_screen_area">Масштабировать по площади экрана</string>
+    <string name="freedoom1_base">FreeDOOM 1</string>
+    <string name="freedoom2_base">FreeDOOM 2</string>
 
 </resources>

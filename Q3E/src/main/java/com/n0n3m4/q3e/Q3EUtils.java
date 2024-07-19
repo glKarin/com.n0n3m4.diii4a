@@ -48,6 +48,7 @@ import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.karin.KFDManager;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,6 +60,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -493,6 +495,28 @@ public class Q3EUtils
         }
 
         return size;
+    }
+
+    public static String Read(InputStream in) throws RuntimeException
+    {
+        if(null == in)
+            return "";
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try
+        {
+            Copy(os, in);
+            byte[] bytes = os.toByteArray();
+            return new String(bytes, StandardCharsets.UTF_8);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+        finally
+        {
+            Q3EUtils.Close(os);
+        }
     }
 
     public static long cp(String src, String dst)
