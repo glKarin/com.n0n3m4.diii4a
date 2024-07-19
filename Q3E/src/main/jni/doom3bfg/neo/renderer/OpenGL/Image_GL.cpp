@@ -48,11 +48,10 @@ Contains the Image implementation for OpenGL.
 #endif
 
 // for ETC2 compression texture encode
-#include "Etc/Etc.h"
+#include "../etc/EtcLib/Etc/Etc.h"
 
 // for ETC1 compression texture encode
-#include "../etc/etc1_android.h"
-#include "../etc/etc_android.cpp"
+#include "../etc/etc1/etc1_android.h"
 
 static idCVar harm_image_useCompression( "harm_image_useCompression", "0", CVAR_INTEGER | CVAR_INIT, "Use ETC1/2 compression or RGBA4444 texture for low memory(e.g. 32bits device), it will using lower memory but loading slower\n  0 = using RGBA8;\n  1 = using ETC1 compression(no alpha);\n  2 = using ETC2 compression;\n  3 = RGBA4444" );
 #define image_useETCCompression (harm_image_useCompression.GetInteger() == 1)
