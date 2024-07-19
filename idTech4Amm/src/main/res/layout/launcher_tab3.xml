@@ -135,12 +135,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <TextView
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginRight="5dp"
-                android:text="@string/scale_with_screen_aspect_ratio" />
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
+                    android:text="@string/scale_with_screen_aspect_ratio" />
+                <TextView
+                    android:id="@+id/tv_scale_current"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#FF000000"
+                    android:text="100%" />
+            </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -148,23 +162,14 @@
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.33"
+                    android:layout_weight="0.5"
                     android:layout_gravity="center_vertical"
                     android:gravity="left"
                     android:text="10%" />
                 <TextView
-                    android:id="@+id/tv_scale_current"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.34"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center"
-                    android:textColor="#FF000000"
-                    android:text="100%" />
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.33"
+                    android:layout_weight="0.5"
                     android:layout_gravity="center_vertical"
                     android:gravity="right"
                     android:text="200%" />
