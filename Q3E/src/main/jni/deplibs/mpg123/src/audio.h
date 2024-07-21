@@ -16,7 +16,7 @@
 #ifndef _MPG123_AUDIO_H_
 #define _MPG123_AUDIO_H_
 
-#include "compat.h"
+#include "compat/compat.h"
 #include "mpg123.h"
 #include "out123.h"
 

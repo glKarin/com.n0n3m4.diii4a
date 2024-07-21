@@ -29,7 +29,11 @@
 #include	"id3.h"
 
 #if HAVE_MPEG
+#ifdef __ANDROID__
+#include	<lame.h>
+#else
 #include	<lame/lame.h>
+#endif
 
 struct id3v1_genre_handler_userdata
 {	int number ;

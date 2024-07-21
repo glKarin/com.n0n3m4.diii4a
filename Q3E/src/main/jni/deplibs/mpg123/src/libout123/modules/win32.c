@@ -9,18 +9,25 @@
     Closing buffer playback fixed by David Wohlferd <limegreensocks (*) yahoo dod com>
 */
 
-#include "out123_int.h"
+#include "../out123_int.h"
 #include <windows.h>
-#include "debug.h"
+#include "../../common/debug.h"
 
 /*
     Buffer size and number of buffers in the playback ring
     NOTE: This particular num/size combination performs best under heavy
     loads for my system, however this may not be true for any hardware/OS out there.
     Generally, BUFFER_SIZE < 8k || NUM_BUFFERS > 16 || NUM_BUFFERS < 4 are not recommended.
+
+    Introducing user-settable device buffer. We fix 8 buffers, scale the individual
+    buffer size, rounded/truncated a bit to not be too odd. The old default of 64K
+    buffers leads to 2.97 s with CD-DA. Quite excessive. We will probably reduce this
+    soon.
 */
-#define BUFFER_SIZE 0x10000
-#define NUM_BUFFERS 8  /* total 512k roughly 2.5 sec of CD quality sound */
+#define DEFAULT_DEVICE_BUFFER 0.25
+// Buffers are multiples of this.
+#define BUFFER_GRANULARITY 256
+#define NUM_BUFFERS 8
 
 static void wait_for_buffer(WAVEHDR* hdr, HANDLE hEvent);
 static void drain_win32(out123_handle *ao);
@@ -29,6 +36,7 @@ static void drain_win32(out123_handle *ao);
 struct queue_state
 {
     WAVEHDR buffer_headers[NUM_BUFFERS];
+    size_t bufsize;
     /* The next buffer to be filled and put in playback */
     int next_buffer;
     /* Buffer playback completion event */
@@ -100,11 +108,18 @@ static int open_win32(out123_handle *ao)
             ereturn(-1, "Unable to open wave output device.");
     }
 
+    state->bufsize = (size_t)( (double)
+      (ao->device_buffer > 0. ? ao->device_buffer : DEFAULT_DEVICE_BUFFER)
+    *   out_fmt.nAvgBytesPerSec / NUM_BUFFERS / BUFFER_GRANULARITY);
+    if(state->bufsize < 1)
+        state->bufsize = 1;
+    state->bufsize *= BUFFER_GRANULARITY;
+
     /* Reset event from the "device open" message */
     ResetEvent(state->play_done_event);
     /* Allocate playback buffers */
     for(i = 0; i < NUM_BUFFERS; i++)
-    if(!(state->buffer_headers[i].lpData = (LPSTR)malloc(BUFFER_SIZE)))
+    if(!(state->buffer_headers[i].lpData = (LPSTR)malloc(state->bufsize)))
     {
     ereturn(-1, "Out of memory for playback buffers.");
     }
@@ -112,7 +127,7 @@ static int open_win32(out123_handle *ao)
     {
         /* Tell waveOutPrepareHeader the maximum value of dwBufferLength
         we will ever send */
-        state->buffer_headers[i].dwBufferLength = BUFFER_SIZE;
+        state->buffer_headers[i].dwBufferLength = state->bufsize;
         state->buffer_headers[i].dwFlags = 0;
         res = waveOutPrepareHeader(state->waveout, &state->buffer_headers[i], sizeof(WAVEHDR));
         if(res != MMSYSERR_NOERROR) ereturn(-1, "Can't write to audio output device (prepare).");
@@ -154,11 +169,10 @@ static void wait_for_buffer(WAVEHDR* hdr, HANDLE hEvent)
 static int get_formats_win32(out123_handle *ao)
 {
     WAVEOUTCAPSA caps;
-    MMRESULT mr;
     int ret = 0;
     UINT dev_id = dev_select(ao);
 
-    mr = waveOutGetDevCaps(dev_id, &caps, sizeof(caps));
+    MMRESULT mr = waveOutGetDevCaps(dev_id, &caps, sizeof(caps));
     if(mr != MMSYSERR_NOERROR)
       return 0; /* no formats? */
 
@@ -231,13 +245,13 @@ static int write_win32(out123_handle *ao, unsigned char *buf, int len)
     wait_for_buffer(hdr, state->play_done_event);
 
     /* Now see how much we want to stuff in and then stuff it in. */
-    bufill = BUFFER_SIZE - hdr->dwBufferLength;
+    bufill = state->bufsize - hdr->dwBufferLength;
     if(len < bufill) bufill = len;
 
     rest_len = len - bufill;
     memcpy(hdr->lpData + hdr->dwBufferLength, buf, bufill);
     hdr->dwBufferLength += bufill;
-    if(hdr->dwBufferLength == BUFFER_SIZE)
+    if(hdr->dwBufferLength == state->bufsize)
     { /* Send the buffer out when it's full. */
         hdr->dwFlags |= WHDR_PREPARED;
 
@@ -354,6 +368,21 @@ static int enumerate_win32( out123_handle *ao, int (*store_device)(void *devlist
     memset(id, 0, sizeof(id));
     memset(&caps, 0, sizeof(caps));
     mr = waveOutGetDevCaps(i, &caps, sizeof(caps));
+    if (mr != MMSYSERR_NOERROR) {
+      switch(mr) {
+        case MMSYSERR_BADDEVICEID:
+          error("enumerate_win32: Specified device identifier is out of range.");
+          break;
+        case MMSYSERR_NODRIVER:
+          error("enumerate_win32: No device driver is present.");
+          break;
+        case MMSYSERR_NOMEM:
+          error("enumerate_win32: Unable to allocate or lock memory.");
+          break;
+        default:
+          merror("enumerate_win32: Uknown error 0x%x.", mr);
+        }
+    }
     mdebug("waveOutGetDevCaps mr %x", mr);
     snprintf(id, sizeof(id) - 1, "%u", i);
     store_device(devlist, id, caps.szPname);

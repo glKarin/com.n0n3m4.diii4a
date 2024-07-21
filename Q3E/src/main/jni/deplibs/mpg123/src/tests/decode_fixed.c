@@ -1,6 +1,6 @@
-#include "compat.h"
+#include "../compat/compat.h"
 #include <mpg123.h>
-#include "debug.h"
+#include "../common/debug.h"
 
 
 int work(mpg123_handle *mh, int ch, int enc)
@@ -25,7 +25,7 @@ int work(mpg123_handle *mh, int ch, int enc)
 			continue;
 		fprintf(stderr, "Got first sample %d and last sample %d out of %zu\n"
 		,	buffer[0], buffer[done/sizeof(*buffer)-1], done/sizeof(*buffer) );
-		unintr_write(STDOUT_FILENO, buffer, done);
+		INT123_unintr_write(STDOUT_FILENO, buffer, done);
 	}
 	if(ret != MPG123_DONE)
 	{

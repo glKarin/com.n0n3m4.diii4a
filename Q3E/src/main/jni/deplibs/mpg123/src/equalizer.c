@@ -7,7 +7,7 @@
 */
 
 #include "mpg123app.h"
-#include "debug.h"
+#include "common/debug.h"
 
 /* Load the settings from the path in the global variable equalfile.
    If there is no file, restore equalizer defaults. 

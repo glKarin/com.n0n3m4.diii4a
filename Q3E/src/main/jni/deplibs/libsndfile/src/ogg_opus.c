@@ -162,8 +162,13 @@
 #if HAVE_EXTERNAL_XIPH_LIBS
 
 #include <ogg/ogg.h>
+#ifdef __ANDROID__
+#include <opus.h>
+#include <opus_multistream.h>
+#else
 #include <opus/opus.h>
 #include <opus/opus_multistream.h>
+#endif
 
 #include "ogg.h"
 #include "ogg_vcomment.h"

@@ -7,13 +7,13 @@
     written by Mike Gorchak <mike.gorchak.qnx@gmail.com>
 */
 
-#include "out123_int.h"
+#include "../out123_int.h"
 #include <errno.h>
 
 #include <stdint.h>
 #include <sys/asoundlib.h>
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 typedef struct _qsa_mp_map
 {

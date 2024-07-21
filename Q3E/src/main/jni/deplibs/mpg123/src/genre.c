@@ -6,6 +6,9 @@
 	initially written by Shane Wegner
 */
 
+// Just to trigger recompilation on reconfigure (with differing --host).
+#include "config.h"
+
 char *genre_table[] =
 {
 	"Blues",

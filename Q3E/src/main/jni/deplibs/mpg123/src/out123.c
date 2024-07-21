@@ -1,7 +1,7 @@
 /*
 	out123: stream data from libmpg123 or libsyn123 to an audio output device
 
-	copyright 1995-2021 by the mpg123 project,
+	copyright 1995-2023 by the mpg123 project,
 	free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 
@@ -28,12 +28,13 @@
 
 #define ME "out123"
 #include "config.h"
-#include "compat.h"
+#include "version.h"
+#include "compat/compat.h"
 #include <ctype.h>
-#if WIN32
+#if _WIN32
 #include "win32_support.h"
 #endif
-#if defined(WIN32) && defined(DYNAMIC_BUILD)
+#if defined(_WIN32) && defined(DYNAMIC_BUILD)
 #define LINK_MPG123_DLL
 #endif
 #include "out123.h"
@@ -61,7 +62,7 @@
 #include "syn123.h"
 #include "filters.h"
 
-#include "debug.h"
+#include "common/debug.h"
 
 /* be paranoid about setpriority support */
 #ifndef PRIO_PROCESS
@@ -76,6 +77,7 @@ static void long_usage(int err);
 static void want_long_usage(char* arg, topt *opts);
 static void print_title(FILE* o);
 static void give_version(char* arg, topt *opts);
+static void give_libversion(char* arg, topt *);
 
 static int verbose = 0;
 static int quiet = FALSE;
@@ -87,9 +89,6 @@ enum runmodes
 };
 
 static int runmode = RUN_MAIN;
-
-int stdout_is_term = FALSE; // It's an interactive terminal.
-int stderr_is_term = FALSE; // It's an interactive terminal.
 
 static FILE* input = NULL;
 static char *encoding_name = NULL;
@@ -111,7 +110,9 @@ static int realtime = FALSE;
 #ifdef HAVE_WINDOWS_H
 static int w32_priority = 0;
 #endif
+#ifdef HAVE_SETPRIORITY
 static int aggressive = FALSE;
+#endif
 static double preload = 0.2;
 static long outflags = 0;
 double preamp = 0.;
@@ -212,7 +213,7 @@ static void safe_exit(int code)
 	char *dummy, *dammy;
 
 	if(input && input != stdin)
-		compat_fclose(input);
+		INT123_compat_fclose(input);
 
 	if(!code)
 		controlled_drain();
@@ -658,6 +659,7 @@ topt opts[] = {
 	{'?', "help",            0,  want_usage, 0,           0 },
 	{0 , "longhelp" ,        0,  want_long_usage, 0,      0 },
 	{0 , "version" ,         0,  give_version, 0,         0 },
+	{0 , "libversion" ,      0,  give_libversion, 0,      0 },
 	{'e', "encoding", GLO_ARG|GLO_CHAR, 0, &encoding_name, 0},
 	{0, "endian",     GLO_ARG|GLO_CHAR, set_out_endian, 0, 0},
 	{'E', "inputenc", GLO_ARG|GLO_CHAR, 0, &inputenc_name, 0},
@@ -1076,10 +1078,10 @@ void push_output(unsigned char *buf, size_t samples)
 
 	mdebug("playing %zu bytes", bytes);
 	check_fatal_output(out123_play(ao, buf, bytes) < (int)bytes);
-	if(also_stdout && unintr_fwrite(buf, pcmframe, samples, stdout) < samples)
+	if(also_stdout && INT123_unintr_fwrite(buf, pcmframe, samples, stdout) < samples)
 	{
 		if(!quiet)
-			error1( "failed to copy stream to stdout: %s", strerror(errno));
+			error1( "failed to copy stream to stdout: %s", INT123_strerror(errno));
 		safe_exit(133);
 	}
 }
@@ -1111,10 +1113,10 @@ FILE* open_next_file(int argc, char** argv, int firstrun)
 	{
 		char *filename = argv[loptind++];
 		errno = 0;
-		in = strcmp(filename, "-") ? compat_fopen(filename, "rb") : stdin;
+		in = strcmp(filename, "-") ? INT123_compat_fopen(filename, "rb") : stdin;
 		if(!in)
 			merror( "Failed to open input file '%s' (%s), ignoring."
-			,	filename, strerror(errno) );
+			,	filename, INT123_strerror(errno) );
 		else
 			had_something = 1;
 	}
@@ -1271,7 +1273,7 @@ int play_frame(void)
 }
 
 #if !defined(WIN32) && !defined(GENERIC)
-static void catch_interrupt(void)
+static void catch_interrupt(int sig)
 {
         intflag = TRUE;
 }
@@ -1466,9 +1468,7 @@ static void setup_processing(void)
 int main(int sys_argc, char ** sys_argv)
 {
 	int result;
-#if defined(WIN32)
-	_setmode(STDIN_FILENO,  _O_BINARY);
-#endif
+	INT123_compat_binmode(STDIN_FILENO, TRUE);
 	check_locale();
 
 #if defined (WANT_WIN32_UNICODE)
@@ -1482,7 +1482,7 @@ int main(int sys_argc, char ** sys_argv)
 	argc = sys_argc;
 #endif
 
-	if(!(fullprogname = compat_strdup(argv[0])))
+	if(!(fullprogname = INT123_compat_strdup(argv[0])))
 	{
 		error("OOM"); /* Out Of Memory. Don't waste bytes on that error. */
 		safe_exit(1);
@@ -1509,12 +1509,10 @@ int main(int sys_argc, char ** sys_argv)
 		out123_del(paro);
 	}
 
-#ifdef OS2
+#ifdef __OS2__
         _wildcard(&argc,&argv);
 #endif
 
-	stderr_is_term = term_width(STDERR_FILENO) >= 0;
-	stdout_is_term = term_width(STDOUT_FILENO) >= 0;
 	while ((result = getlopt(argc, argv, opts)))
 	switch (result) {
 		case GLO_UNKNOWN:
@@ -1522,6 +1520,9 @@ int main(int sys_argc, char ** sys_argv)
 			usage(1);
 		case GLO_NOARG:
 			fprintf (stderr, ME": missing argument for parameter: %s\n", loptarg);
+			usage(1);
+		case GLO_BADARG:
+			fprintf(stderr, ME": bad option argument: %s\n", loptarg);
 			usage(1);
 	}
 	finish_endian();
@@ -1569,8 +1570,8 @@ int main(int sys_argc, char ** sys_argv)
 	}
 	/* Ensure cleanup before we cause too much mess. */
 #if !defined(WIN32) && !defined(GENERIC)
-	catchsignal(SIGINT, catch_interrupt);
-	catchsignal(SIGTERM, catch_interrupt);
+	INT123_catchsignal(SIGINT, catch_interrupt);
+	INT123_catchsignal(SIGTERM, catch_interrupt);
 #endif
 	ao = out123_new();
 	if(!ao){ error("Failed to allocate output."); exit(1); }
@@ -1717,7 +1718,7 @@ int main(int sys_argc, char ** sys_argv)
 		if(!intflag && !generate && !just_stdin)
 		{
 			if(input && input != stdin)
-				compat_fclose(input);
+				INT123_compat_fclose(input);
 			input = open_next_file(argc, argv, 0);
 		}
 	} while(!intflag && !generate && input && !just_stdin);
@@ -1763,7 +1764,7 @@ static char* output_enclist(void)
 static void print_title(FILE *o)
 {
 	fprintf(o, "Simple audio output with raw PCM input\n");
-	fprintf(o, "\tversion %s; derived from mpg123 by Michael Hipp and others\n", PACKAGE_VERSION);
+	fprintf(o, "\tversion %s; derived from mpg123 by Michael Hipp and others\n", MPG123_VERSION);
 	fprintf(o, "\tfree software (LGPL) without any warranty but with best wishes\n");
 }
 
@@ -1937,6 +1938,17 @@ static void want_long_usage(char* arg, topt *opts)
 
 static void give_version(char* arg, topt *opts)
 {
-	fprintf(stdout, "out123 "PACKAGE_VERSION"\n");
+	fprintf(stdout, "out123 "MPG123_VERSION"\n");
 	safe_exit(0);
 }
+
+static void give_libversion(char* arg, topt *opts)
+{
+	unsigned int pl = 0;
+	unsigned int al = out123_libversion(&pl);
+	printf("libout123 from mpg123 %s, API version %u, patchlevel %u\n", out123_distversion(NULL, NULL, NULL), al, pl);
+	al = syn123_libversion(&pl);
+	printf("libsyn123 from mpg123 %s, API version %u, patchlevel %u\n", syn123_distversion(NULL, NULL, NULL), al, pl);
+	safe_exit(0);
+}
+

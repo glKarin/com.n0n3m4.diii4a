@@ -389,6 +389,11 @@ target_include_directories (sndfile
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
 	)
 if(ANDROID)
+	target_include_directories (sndfile PRIVATE
+			${CMAKE_CURRENT_SOURCE_DIR}/../opus/include
+			${CMAKE_CURRENT_SOURCE_DIR}/../mp3lame/src
+			${CMAKE_CURRENT_SOURCE_DIR}/../mpg123/src/include
+			)
 	target_link_libraries (sndfile
 			PRIVATE
 			m
@@ -397,7 +402,7 @@ if(ANDROID)
 			FLAC
 			$<$<AND:$<BOOL:${ENABLE_EXPERIMENTAL}>,$<BOOL:${HAVE_EXTERNAL_XIPH_LIBS}>,$<BOOL:${HAVE_SPEEX}>>:Speex::Speex>
 			opus
-			mpg123
+			libmpg123
 			mp3lame
 			)
 else()

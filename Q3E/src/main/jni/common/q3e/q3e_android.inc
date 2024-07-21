@@ -346,6 +346,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("  OpenGL: \n");
     printf("    Format: 0x%X\n", gl_format);
     printf("    MSAA: %d\n", gl_msaa);
+    printf("    Screen size: %d x %d\n", screen_width, screen_height);
     printf("  Variables: \n");
     printf("    Native library directory: %s\n", native_library_dir);
     printf("    Redirect output to file: %d\n", redirect_output_to_file);

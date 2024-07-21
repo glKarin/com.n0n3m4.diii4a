@@ -11,7 +11,7 @@
 #define NO_GROW_BUF
 #define NO_SMAX
 #include "syn123_int.h"
-#include "debug.h"
+#include "../common/debug.h"
 // Avoid conflict with pragmas in isnan() and friends.
 #undef warning
 

@@ -84,7 +84,7 @@ if(GAME_DOOM3)
 add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_RTCW OR GAME_DOOM)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM)
     message(STATUS "Build extras depend shared libraries")
 add_subdirectory (deplibs) # common depend libraries
 endif()

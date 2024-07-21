@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
 option(NO_FEATURE_REPORT "Disable feature report function" OFF)
-option(NO_LFS_ALIAS "disable alias wrappers for largefile bitness (mpg123_seek_32 or mpg123_seek_64 in addition to mpg123_seek, or the other way around; It is a mess, do not play with this!)" OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    option(WITH_SSE "x86: build with SSE support if detected. Turn OFF for older devices where autodetection is misleading." ON)
+endif()
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/")
 
@@ -40,8 +42,6 @@ else()
 endif()
 message(STATUS "Detected machine: ${MACHINE}")
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/mpg123.h.in" mpg123.h)
-
 set(TARGET lib${PROJECT_NAME})
 add_library(${TARGET}
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/parse.c"
@@ -60,7 +60,6 @@ add_library(${TARGET}
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${NO_LAYER1}>>:layer1.c>"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<OR:$<BOOL:${NO_LAYER1}>,$<BOOL:${NO_LAYER2}>>>:layer2.c>"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${NO_LAYER3}>>:layer3.c>"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${NO_LFS_ALIAS}>>:lfs_alias.c>"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${NO_NTOM}>>:ntom.c>"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${NO_8BIT}>>:synth_8bit.c>"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${NO_16BIT}>>:synth.c>"
@@ -68,8 +67,21 @@ add_library(${TARGET}
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<AND:$<BOOL:${HAVE_FPU}>,$<NOT:$<BOOL:${NO_REAL}>>>:synth_real.c>"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${NO_STRING}>>:stringbuf.c>"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${NO_FEATURE_REPORT}>>:feature.c>"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<BOOL:${LFS_SENSITIVE}>:lfs_wrap.c>"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/$<$<NOT:$<BOOL:${PORTABLE_API}>>:lfs_wrap.c>"
     $<TARGET_OBJECTS:compat>)
+
+if(MSVC)
+    if(MACHINE MATCHES "x86|amd64")
+      find_program(YASM_ASSEMBLER yasm)
+      if(NOT YASM_ASSEMBLER)
+          message(WARNING "Couldn't find yasm assembler for optimizded decoders. Please set YASM_ASSEMBLER variable")
+          set(MACHINE generic)
+      endif()
+    else()
+      message(WARNING "Need work to support non-x86 assembly optimizations with MSVC.")
+      set(MACHINE generic)
+    endif()
+endif()
 
 if(MACHINE STREQUAL "amd64")
     if(HAVE_FPU)
@@ -112,6 +124,9 @@ elseif(MACHINE STREQUAL "x86")
     endif()
 
     cmake_host_system_information(RESULT HAVE_SSE QUERY HAS_SSE)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+        set(HAVE_SSE ${WITH_SSE})
+    endif()
     if(HAVE_SSE)
         set(PLATFORM_DEFINITIONS OPT_SSE)
         set(PLATFORM_SOURCES
@@ -131,14 +146,8 @@ elseif(MACHINE STREQUAL "x86")
                 "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/dct64_sse.S"
                 "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/synth_sse.S")
         endif()
-        target_sources(${TARGET} PRIVATE
-            "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/dct64_i386.c")
     endif()
 elseif(MACHINE STREQUAL "arm64")
-    if(MSVC)
-        set(PLATFORM_DEFINITIONS OPT_GENERIC)
-        message(WARNING "Cannot use platform-specific assembly sources on MSVC")
-    else()
         set(PLATFORM_DEFINITIONS OPT_MULTI OPT_GENERIC OPT_GENERIC_DITHER OPT_NEON64)
         set(PLATFORM_SOURCES
             "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/dct36_neon64.S"
@@ -160,13 +169,8 @@ elseif(MACHINE STREQUAL "arm64")
         target_sources(${TARGET} PRIVATE
             "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/dither.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/getcpuflags_arm.c")
-    endif()
 elseif(MACHINE STREQUAL "arm32")
     if(HAVE_FPU)
-        if(MSVC)
-            set(PLATFORM_DEFINITIONS OPT_GENERIC)
-            message(WARNING "Cannot use platform-specific assembly sources on MSVC")
-        else()
             set(PLATFORM_DEFINITIONS OPT_MULTI OPT_GENERIC OPT_GENERIC_DITHER OPT_NEON)
             set(PLATFORM_SOURCES
                 "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/dct36_neon.S"
@@ -191,12 +195,7 @@ elseif(MACHINE STREQUAL "arm32")
             target_sources(${TARGET} PRIVATE ${PLATFORM_SOURCES})
             target_sources(${TARGET} PRIVATE
                 "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/dither.c")
-        endif()
     else()
-        if(MSVC)
-            set(PLATFORM_DEFINITIONS OPT_GENERIC)
-            message(WARNING "Cannot use platform-specific assembly sources on MSVC")
-        else()
             set(PLATFORM_DEFINITIONS OPT_ARM)
             if(ACCURATE_ROUNDING)
                 set(PLATFORM_SOURCES
@@ -206,7 +205,6 @@ elseif(MACHINE STREQUAL "arm32")
                     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/synth_arm.S")
             endif()
             target_sources(${TARGET} PRIVATE ${PLATFORM_SOURCES})
-        endif()
     endif()
 elseif(MACHINE STREQUAL "generic")
     set(PLATFORM_DEFINITIONS OPT_GENERIC)
@@ -215,15 +213,14 @@ endif()
 set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME mpg123)
 
 target_compile_definitions(${TARGET} PRIVATE
+    $<$<BOOL:$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>>:PIC>)
+
+target_compile_definitions(${TARGET} PRIVATE
     ${PLATFORM_DEFINITIONS}
     $<$<BOOL:${HAVE_FPU}>:REAL_IS_FLOAT>
     $<$<NOT:$<BOOL:${HAVE_FPU}>>:REAL_IS_FIXED>)
 
-if(MSVC AND MACHINE MATCHES "x86|amd64")
-    find_program(YASM_ASSEMBLER yasm)
-    if(NOT YASM_ASSEMBLER)
-        message(FATAL_ERROR "Couldn't find yasm assembler. Please set YASM_ASSEMBLER variable")
-    endif()
+if(MSVC AND MACHINE MATCHES "x86|amd64" AND YASM_ASSEMBLER)
     list(TRANSFORM PLATFORM_DEFINITIONS PREPEND /D)
     foreach(FILE ${PLATFORM_SOURCES})
         get_filename_component(FILENAME ${FILE} NAME)
@@ -255,8 +252,8 @@ install(TARGETS ${TARGET} EXPORT targets
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/mpg123.h"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/include/mpg123.h"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/fmt123.h"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/include/fmt123.h"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 

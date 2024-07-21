@@ -1,7 +1,7 @@
 /*
 	mpg123lib_intern: Common non-public stuff for libmpg123
 
-	copyright 1995-2008 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 1995-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 
 	derived from the old mpg123.h
@@ -14,15 +14,14 @@
 #define MPG123_ENCODINGS 12
 
 #include "config.h" /* Load this before _anything_ */
-#include "intsym.h" /* Prefixing of internal symbols that still are public in a static lib. */
 
-#include "abi_align.h"
+#include "../common/abi_align.h"
 
-/* export DLL symbols */
-#if defined(WIN32) && defined(DYNAMIC_BUILD)
-#define BUILD_MPG123_DLL
-#endif
-#include "compat.h"
+#include "../compat/compat.h"
+
+// Only portable API plays a role in the library itself, outside of lfs_wrap.c.
+// Also, we need to ensure no suffix renaming for the primary implementations.
+#define MPG123_PORTABLE_API
 #define MPG123_ENUM_API
 #include "mpg123.h"
 
@@ -39,12 +38,37 @@
 #define memmove(dst,src,size) bcopy(src,dst,size)
 #endif
 
-/* We don't really do long double... there are 3 options for REAL:
-   float, long and double. */
+// The real type is either 32 bit float or integer. We do not attempt
+// double precision for MPEG audio decoding (or any audio storage/compression
+// format, even).
+// The calctables tool works in double precision float, but converts to fixed
+// point 'real' on output in addition to floating point.
 
-#if defined(REAL_IS_FLOAT) && !defined(FORCE_FIXED)
-#  define real float
-#elif defined(REAL_IS_FIXED) || defined(FORCE_FIXED)
+// The base type used in the computation code.
+// With C11 we  could rely on tgmath for sin() to use the right precision.
+#ifdef CALCTABLES
+#	define clreal double
+#	define COS    cos
+#	define SIN    sin
+#	define TAN    tan
+#	define POW    pow
+#else
+#	define clreal float
+#	define COS    cosf
+#	define SIN    sinf
+#	define TAN    tanf
+#	define POW    powf
+#endif
+
+#if defined(REAL_IS_FLOAT) && !defined(CALCTABLES)
+
+#define real float
+
+#elif defined(REAL_IS_FIXED) || defined(CALCTABLES)
+
+#ifdef RUNTIME_TABLES
+#error "Runtime tables are only for floating point decoders."
+#endif
 
 # define real  int32_t
 # define dreal int64_t
@@ -53,7 +77,6 @@
   for fixed-point decoders, use pre-calculated tables to avoid expensive floating-point maths
   undef this macro for run-time calculation
 */
-#define PRECALC_TABLES
 
 # define REAL_RADIX				24
 # define REAL_FACTOR			16777216.0
@@ -207,12 +230,6 @@ static inline int32_t scale_rounded(int32_t x, int shift)
 
 #endif
 
-#ifndef REAL_IS_FIXED
-# if (defined SIZEOF_INT32_T) && (SIZEOF_INT32_T != 4)
-#  error "Bad 32bit types!!!"
-# endif
-#endif
-
 #ifndef DOUBLE_TO_REAL
 # define DOUBLE_TO_REAL(x)					(real)(x)
 #endif
@@ -261,7 +278,7 @@ static inline int32_t scale_rounded(int32_t x, int shift)
    now: factor on minimum frame buffer size (which takes upsampling into account) */
 #define		AUDIOBUFSIZE		2
 
-#include "true.h"
+#include "../common/true.h"
 
 #define         MAX_NAME_SIZE           81
 #define         SBLIMIT                 32
@@ -297,22 +314,31 @@ static inline int32_t scale_rounded(int32_t x, int shift)
 #define VERBOSE4 (NOQUIET && fr->p.verbose > 3)
 #define PVERB(mp, level) (!((mp)->flags & MPG123_QUIET) && (mp)->verbose >= (level))
 
-int decode_update(mpg123_handle *mh);
+int INT123_decode_update(mpg123_handle *mh);
 /* residing in format.c  */
-off_t decoder_synth_bytes(mpg123_handle *fr , off_t s);
-off_t samples_to_bytes(mpg123_handle *fr , off_t s);
-off_t bytes_to_samples(mpg123_handle *fr , off_t b);
-off_t outblock_bytes(mpg123_handle *fr, off_t s);
+int64_t INT123_decoder_synth_bytes(mpg123_handle *fr , int64_t s);
+int64_t INT123_samples_to_bytes(mpg123_handle *fr , int64_t s);
+int64_t INT123_bytes_to_samples(mpg123_handle *fr , int64_t b);
+int64_t INT123_outblock_bytes(mpg123_handle *fr, int64_t s);
 /* Postprocessing format conversion of freshly decoded buffer. */
-void postprocess_buffer(mpg123_handle *fr);
-
-int open_fixed_pre(mpg123_handle *mh, int channels, int encoding);
-int open_fixed_post(mpg123_handle *mh, int channels, int encoding);
+void INT123_postprocess_buffer(mpg123_handle *fr);
 
 /* If networking is enabled and we really mean internal networking, the timeout_read function is available. */
 #if defined (NETWORK) && !defined (WANT_WIN32_SOCKETS)
 /* Does not work with win32 */
 #define TIMEOUT_READ
 #endif
+
+// Change a given linear factor by the given dB value, bounded
+// to +/- 60 dB.
+static inline double dbchange(double base_factor, double db)
+{
+	double nscale = base_factor * pow(10, db/20);
+	if(nscale < 0.001) // -60 dB
+		nscale = 0.001;
+	if(nscale > 1000)
+		nscale = 1000; // +60 dB
+	return nscale;
+}
 
 #endif

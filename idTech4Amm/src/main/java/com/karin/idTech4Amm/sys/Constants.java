@@ -12,8 +12,8 @@ import java.util.Date;
  */
 public final class Constants
 {
-    public static final int CONST_UPDATE_RELEASE = 52;
-    public static final String CONST_RELEASE = "2024-07-11";
+    public static final int CONST_UPDATE_RELEASE = 53;
+    public static final String CONST_RELEASE = "2024-07-17";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -30,11 +30,9 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add soft stencil shadow support(cvar `harm_r_stencilShadowSoft`) with OpenGLES3.1+ in DOOM3/Quake4/Prey(2006).",
-            "Optimize soft shadow shader with shadow mapping in DOOM3/Quake4/Prey(2006).",
-            "Support r_showSurfaceInfo debug render on multi-threading in DOOM3/Quake4/Prey(2006), need to set cvar `harm_r_renderToolsMultithread` to 1 to enable debug render on multi-threading manually.",
-            "Add GLES3.2 renderer support in Quake2(using +set vid_renderer gles3 for GLES3.2, +set vid_renderer gl1 for GLES1.1).",
-            "Add GZDOOM support on arm64, game data directory named `gzdoom`. More view in `" + TextHelper.GenLinkText("https://github.com/ZDoom/gzdoom", "GZDOOM") + "`.",
+            "Fix GZDOOM sound.",
+            "Update screen resolution settings on launcher.",
+            "Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower) on DOOM3-BFG.",
         };
 	};
 

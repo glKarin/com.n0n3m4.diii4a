@@ -1,17 +1,18 @@
-function(read_api_version project_version api_version outapi_version synapi_version )
+function(read_api_version project_version)
 
-    file( READ "${CMAKE_SOURCE_DIR}/../../configure.ac" configure_ac )
+    file( READ "${CMAKE_CURRENT_SOURCE_DIR}/../../src/version.h" version_h )
 
-    string( REGEX MATCH "AC_INIT\\(\\[mpg123\\], \\[([0-9\\.]+)" result ${configure_ac} )
-    set( ${project_version} ${CMAKE_MATCH_1} PARENT_SCOPE )
+    string( REGEX MATCH "#define +MPG123_MAJOR +([0-9]+)" result ${version_h} )
+    set( major_version ${CMAKE_MATCH_1})
+    string( REGEX MATCH "#define +MPG123_MINOR +([0-9]+)" result ${version_h} )
+    set( minor_version ${CMAKE_MATCH_1})
 
-    string( REGEX MATCH "API_VERSION=([0-9]+)" result ${configure_ac} )
-    set( ${api_version} ${CMAKE_MATCH_1} PARENT_SCOPE )
+    string( REGEX MATCH "#define +MPG123_PATCH +([0-9]+)" result ${version_h} )
+    set( patch_version ${CMAKE_MATCH_1})
 
-    string( REGEX MATCH "OUTAPI_VERSION=([0-9]+)" result ${configure_ac} )
-    set( ${outapi_version} ${CMAKE_MATCH_1} PARENT_SCOPE )
-
-    string( REGEX MATCH "SYNAPI_VERSION=([0-9]+)" result ${configure_ac} )
-    set( ${synapi_version} ${CMAKE_MATCH_1} PARENT_SCOPE )
+#    string( REGEX MATCH "#define +MPG123_SUFFIX +\"([^\"]+)\"" result ${version_h} )
+#    set( version_suffix ${CMAKE_MATCH_1})
+# CMake project() chokes on version with suffix, so give it just the numbers.
+    set( ${project_version} ${major_version}.${minor_version}.${patch_version} PARENT_SCOPE)
 
 endfunction()

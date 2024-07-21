@@ -10,4 +10,4 @@ set_target_properties(${TARGET}_dl PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_library(${TARGET}_str OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/compat/compat_str.c")
-set_target_properties(${TARGET}_dl PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(${TARGET}_str PROPERTIES POSITION_INDEPENDENT_CODE ON)

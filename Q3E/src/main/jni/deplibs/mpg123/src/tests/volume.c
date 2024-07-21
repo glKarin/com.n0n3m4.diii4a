@@ -1,3 +1,4 @@
+#include "config.h"
 #include "syn123.h"
 #include <math.h>
 #include <stdio.h>

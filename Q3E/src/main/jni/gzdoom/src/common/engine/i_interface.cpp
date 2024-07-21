@@ -5,9 +5,7 @@
 #include "c_cvars.h"
 #include "gstrings.h"
 
-#if !defined(__ANDROID__) //karin: TODO 32bits
 static_assert(sizeof(void*) == 8, "32 builds are not supported");
-#endif
 
 // Some global engine variables taken out of the backend code.
 FStartupScreen* StartWindow;

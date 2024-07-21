@@ -6,16 +6,22 @@
 
 	based on win32.c
 */
-#define _WIN32_WINNT 0x601
+#if  defined(_WIN32_WINNT)
+# if _WIN32_WINNT < 0x0601
+#  error "wrong _WIN32_WINNT value"
+# endif
+#else
+# define _WIN32_WINNT 0x0601
+#endif
 #define COBJMACROS 1
-#include "out123_int.h"
+#include "../out123_int.h"
 #include <inttypes.h>
 #include <initguid.h>
 #include <audioclient.h>
 #include <mmdeviceapi.h>
 #include <avrt.h>
 #include <functiondiscoverykeys_devpkey.h>
-#include "debug.h"
+#include "../../common/debug.h"
 
 #ifdef _MSC_VER
 
@@ -122,7 +128,7 @@ static int open_win32(out123_handle *ao){
   EXIT_ON_ERROR(hr)
 
   if (ao->device) {
-    devlen = win32_utf8_wide(ao->device, &device, NULL);
+    devlen = INT123_win32_utf8_wide(ao->device, &device, NULL);
     if(device && devlen > 0) {
       hr = IMMDeviceEnumerator_GetDevice(state->pEnumerator, device, &state->pDevice);
       mdebug("IMMDeviceEnumerator_GetDevice %x", hr);
@@ -512,7 +518,6 @@ static int close_win32(out123_handle *ao)
 static int enumerate_win32( out123_handle *ao, int (*store_device)(void *devlist
 ,       const char *name, const char *description), void *devlist )
 {
-	int len;
 	char *pszID = NULL, *pszDesc = NULL;
 	HRESULT hr = S_OK;
 	UINT pcDevices = 0, i = 0;
@@ -540,7 +545,7 @@ static int enumerate_win32( out123_handle *ao, int (*store_device)(void *devlist
 		if(FAILED(hr) || pProps == NULL) goto Exit;
 
 		/* get ID */
-		win32_wide_utf8(pwszID, &pszID, NULL);
+		INT123_win32_wide_utf8(pwszID, &pszID, NULL);
 		if(pszID == NULL) goto Exit;
 
 		/* get Property */
@@ -552,7 +557,7 @@ static int enumerate_win32( out123_handle *ao, int (*store_device)(void *devlist
 		}
 
 		/* get Description*/
-		win32_wide_utf8(varName.pwszVal, &pszDesc, NULL);
+		INT123_win32_wide_utf8(varName.pwszVal, &pszDesc, NULL);
 		PropVariantClear(&varName);
 		if(pszDesc == NULL) goto Exit;
 
@@ -608,6 +613,7 @@ static int init_win32(out123_handle* ao){
 	ao->close = close_win32;
 	ao->userptr = NULL;
 	ao->enumerate = enumerate_win32;
+	ao->deinit = deinit_win32;
 
 	/* Success */
 	return 0;

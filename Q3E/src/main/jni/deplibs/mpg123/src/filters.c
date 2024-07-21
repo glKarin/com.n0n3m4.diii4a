@@ -1,7 +1,7 @@
 /*
 	filters: parse filter specifications
 
-	copyright 2020 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 2020-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Thomas Orgis
 */
@@ -9,7 +9,7 @@
 #include "filters.h"
 #include <ctype.h>
 
-#include "debug.h"
+#include "common/debug.h"
 
 // Validate syntax of filter specification, returning the number
 // of configured filters.
@@ -91,7 +91,7 @@ static int store_filters(struct filterlist *fl, const char *spec)
 		}
 		if(errno)
 		{
-			merror("Number parsing error on validated spec: %s", strerror(errno));
+			merror("Number parsing error on validated spec: %s", INT123_strerror(errno));
 			return -1;
 		}
 		if(*spec) // Skip ":"

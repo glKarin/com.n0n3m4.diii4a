@@ -1,7 +1,7 @@
 /*
 	jack: audio output via JACK Audio Connection Kit
 
-	copyright 2006-2016 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 2006-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Nicholas J. Humfrey
 
@@ -14,7 +14,7 @@
 	There's always a deadlock. --ThOr
 */
 
-#include "out123_int.h"
+#include "../out123_int.h"
 
 #include <math.h>
 
@@ -26,7 +26,7 @@
 #include <semaphore.h>
 #include <sys/errno.h>
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 typedef struct {
 	int alive;
@@ -147,8 +147,7 @@ static int process_callback( jack_nframes_t nframes, void *arg )
 		got_piece = jack_ringbuffer_read( handle->rb
 		,	handle->procbuf, (avail_piece > piece ? piece : avail_piece)
 		*	handle->framesize ) / handle->framesize;
-		debug2( "fetched %"SIZE_P" frames from ringbuffer (wanted %"SIZE_P")"
-		,	(size_p)got_piece, (size_p)piece );
+		debug2("fetched %zu frames from ringbuffer (wanted %zu)", got_piece, piece);
 		/* If this is the last piece, fill up, not time to wait. */
 		if(to_read > piece)
 			piece = got_piece; /* We got further loop cycle(s) to get the rest. */
@@ -305,7 +304,7 @@ static int connect_jack_ports(out123_handle *ao
 				++wish_channels;
 		debug1("wish_channels: %i", wish_channels);
 		wishlist = malloc(sizeof(char*)*(wish_channels+1));
-		devcopy = compat_strdup(ao->device);
+		devcopy = INT123_compat_strdup(ao->device);
 		if(devcopy == NULL || wishlist == NULL)
 		{
 			if(devcopy)
@@ -326,7 +325,7 @@ static int connect_jack_ports(out123_handle *ao
 			for(c=0;c<wish_channels;++c)
 			{
 				while(devcopy[i] != 0 && devcopy[i] != ',') ++i;
-				debug2("devcopy[%"SIZE_P"]=%i", i, devcopy[i]);
+				debug2("devcopy[%zu]=%i", i, devcopy[i]);
 				if(devcopy[i] == ',')
 				{
 					/* Terminate previous port name, assign next one. */
@@ -362,9 +361,9 @@ static void drain_jack(out123_handle *ao)
 	while(  handle && handle->alive && handle->rb
 	     && jack_ringbuffer_write_space(handle->rb)+1 < handle->rb_size )
 	{
-		debug2( "JACK close wait %"SIZE_P" < %"SIZE_P"\n"
-		,	(size_p)jack_ringbuffer_write_space(handle->rb)
-		,	(size_p)handle->rb_size );
+		debug2( "JACK close wait %zu < %zu\n"
+		,	jack_ringbuffer_write_space(handle->rb)
+		,	handle->rb_size );
 		sem_wait(&handle->sem);
 	}
 }
@@ -486,7 +485,7 @@ static int open_jack(out123_handle *ao)
 	handle->procbuf_frames = jack_get_buffer_size(handle->client);
 	if(handle->rb_size < 2*handle->procbuf_frames)
 		handle->rb_size = 2*handle->procbuf_frames;
-	debug1("JACK ringbuffer for %"SIZE_P" PCM frames", (size_p)handle->rb_size);
+	debug1("JACK ringbuffer for %zu PCM frames", handle->rb_size);
 	/* Convert to bytes. */
 	handle->rb_size *= handle->framesize;
 	handle->rb = jack_ringbuffer_create(handle->rb_size);
@@ -522,7 +521,7 @@ static int open_jack(out123_handle *ao)
 	}
 
 	debug("Jack open successful.\n");
-	ao->realname = compat_strdup(realname);
+	ao->realname = INT123_compat_strdup(realname);
 	return 0;
 }
 
@@ -553,7 +552,7 @@ static int write_jack(out123_handle *ao, unsigned char *buf, int len)
 		debug("writing to ringbuffer");
 		/* No help: piece1 = jack_ringbuffer_write_space(handle->rb); */
 		piece = jack_ringbuffer_write(handle->rb, (char*)buf, bytes_left);
-		debug1("wrote %"SIZE_P" B", (size_p)piece);
+		debug1("wrote %zu B", piece);
 		buf += piece;
 		bytes_left -= piece;
 		/* Allow nothing being written some times, but not too often. 

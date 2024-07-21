@@ -98,6 +98,8 @@ public final class Q3EPreference
     public static final String pref_harm_r_autoAspectRatio = "q3e_harm_r_autoAspectRatio"; //k
     public static final String pref_params_quake4 = "q3e_params_quake4"; //k
     public static final String pref_params_prey = "q3e_params_prey"; //k
+    public static final String pref_scrres_scheme = "harm_q3e_scrres";
+    public static final String pref_scrres_scale = "harm_q3e_scrres_scale";
 
     public static final String RUN_BACKGROUND = "harm_run_background";
     public static final String RENDER_MEM_STATUS = "harm_render_mem_status";

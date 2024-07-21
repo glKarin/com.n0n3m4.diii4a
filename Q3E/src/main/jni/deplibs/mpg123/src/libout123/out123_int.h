@@ -1,7 +1,7 @@
 /*
 	out123_int: internal header for libout123
 
-	copyright ?-2021 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright ?-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Michael Hipp (some traces left)
 */
@@ -12,13 +12,8 @@
 #define MPG123_ENUM_API
 
 #include "config.h"
-#include "intsym.h"
-#include "abi_align.h"
-/* export DLL symbols */
-#if defined(WIN32) && defined(DYNAMIC_BUILD)
-#define BUILD_MPG123_DLL
-#endif
-#include "compat.h"
+#include "../common/abi_align.h"
+#include "../compat/compat.h"
 #include "out123.h"
 #include "module.h"
 
@@ -106,20 +101,16 @@ struct out123_struct
 /* Lazy. */
 #define AOQUIET ((ao->auxflags | ao->flags) & OUT123_QUIET)
 #define AOVERBOSE(v) (!AOQUIET && ao->verbose >= (v))
-#define GOOD_WRITEVAL(fd, val)     (unintr_write(fd, &(val), sizeof((val))) == sizeof((val)))
-#define GOOD_WRITEBUF(fd, addr, n) (unintr_write(fd, (addr), (n)) == (n))
-#define GOOD_READVAL(fd, val)      (unintr_read(fd, &(val), sizeof((val))) == sizeof((val)))
-#define GOOD_READBUF(fd, addr, n)  (unintr_read(fd, (addr), (n)) == (n))
+#define GOOD_WRITEVAL(fd, val)     (INT123_unintr_write(fd, &(val), sizeof((val))) == sizeof((val)))
+#define GOOD_WRITEBUF(fd, addr, n) (INT123_unintr_write(fd, (addr), (n)) == (n))
+#define GOOD_READVAL(fd, val)      (INT123_unintr_read(fd, &(val), sizeof((val))) == sizeof((val)))
+#define GOOD_READBUF(fd, addr, n)  (INT123_unintr_read(fd, (addr), (n)) == (n))
 
 struct audio_format_name {
 	int  val;
 	char *name;
 	char *sname;
 };
-
-int write_parameters(out123_handle *ao, int fd);
-int read_parameters(out123_handle *ao
-,	int fd, byte *prebuf, int *preoff, int presize);
 
 #endif
 

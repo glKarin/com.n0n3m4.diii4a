@@ -10,12 +10,12 @@
 	functions just for returning driver module lists.
 */
 
-#include "compat.h"
+#include "../compat/compat.h"
 #include "out123.h"
 
 static char* always_strdup(const char *in)
 {
-	char *out = in ? compat_strdup(in) : malloc(1);
+	char *out = in ? INT123_compat_strdup(in) : malloc(1);
 	if(!in && out)
 		out[0] = 0;
 	return out;
@@ -24,7 +24,7 @@ static char* always_strdup(const char *in)
 /* Construction helper for paired string lists.
    Returns 0 on success. */
 // Also converts NULL to empty string for safer use later.
-int stringlists_add( char ***alist, char ***blist
+int INT123_stringlists_add( char ***alist, char ***blist
                    , const char *atext, const char *btext, int *count)
 {
 	char *atextcopy = NULL;
@@ -35,9 +35,9 @@ int stringlists_add( char ***alist, char ***blist
 	/* If one of these succeeded, the old memory is gone, so always overwrite
 	   the old pointer, worst case is wasted but not leaked memory in an
 	   out-of-memory situation. */
-	if((morealist = safe_realloc(*alist, sizeof(char*)*(*count+1))))
+	if((morealist = INT123_safe_realloc(*alist, sizeof(char*)*(*count+1))))
 		*alist = morealist;
-	if((moreblist = safe_realloc(*blist, sizeof(char*)*(*count+1))))
+	if((moreblist = INT123_safe_realloc(*blist, sizeof(char*)*(*count+1))))
 		*blist = moreblist;
 	if(!morealist || !moreblist)
 		return -1;

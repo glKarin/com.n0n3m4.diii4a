@@ -39,6 +39,106 @@ Contains the Image implementation for OpenGL.
 
 #ifdef _GLES //karin: decompress texture to RGBA instead of glCompressedXXX on OpenGLES
 #include "../DXT/DXTCodec.h"
+
+#ifndef GL_ETC1_RGB8_OES
+#define GL_ETC1_RGB8_OES                  0x8D64
+#endif
+#ifndef GL_COMPRESSED_RGBA8_ETC2_EAC
+#define GL_COMPRESSED_RGBA8_ETC2_EAC      0x9278
+#endif
+
+// for ETC2 compression texture encode
+#include "../etc/EtcLib/Etc/Etc.h"
+
+// for ETC1 compression texture encode
+#include "../etc/etc1/etc1_android.h"
+
+static idCVar harm_image_useCompression( "harm_image_useCompression", "0", CVAR_INTEGER | CVAR_INIT, "Use ETC1/2 compression or RGBA4444 texture for low memory(e.g. 32bits device), it will using lower memory but loading slower\n  0 = using RGBA8;\n  1 = using ETC1 compression(no alpha);\n  2 = using ETC2 compression;\n  3 = RGBA4444" );
+#define image_useETCCompression (harm_image_useCompression.GetInteger() == 1)
+#define image_useETC2Compression (harm_image_useCompression.GetInteger() == 2)
+#define image_useRGBA4444 (harm_image_useCompression.GetInteger() == 3)
+
+static ID_INLINE unsigned int etc1_data_size(unsigned int width, unsigned int height) {
+	return (((width + 3) & ~3) * ((height + 3) & ~3)) >> 1;
+}
+
+static ID_INLINE unsigned short CalcExtendedDimension(unsigned short a_ushOriginalDimension)
+{
+	return (unsigned short)((a_ushOriginalDimension + 3) & ~3);
+}
+
+static ID_INLINE unsigned int etc2_data_size(unsigned int wh) {
+	return CalcExtendedDimension((unsigned short)wh);
+}
+
+static ID_INLINE unsigned int etc2_data_size(unsigned int width, unsigned int height) {
+	return etc2_data_size(width) * etc2_data_size(height);
+}
+
+static void * rgba4444_convert_tex_image(unsigned int width, unsigned int height, const void *pixels)
+{
+	unsigned char const *cpixels = (unsigned char const *) pixels;
+	unsigned short *rgba4444data = (unsigned short *)malloc(2 * width * height);
+	rgba4444data = (unsigned short *) ((unsigned char *) rgba4444data);
+	int i;
+	for (i = 0; i < width * height; i++) {
+		unsigned char r, g, b, a;
+		r = cpixels[4 * i] >> 4;
+		g = cpixels[4 * i + 1] >> 4;
+		b = cpixels[4 * i + 2] >> 4;
+		a = cpixels[4 * i + 3] >> 4;
+		rgba4444data[i] = r << 12 | g << 8 | b << 4 | a;
+	}
+	return rgba4444data;
+}
+
+static void * etc1_compress_tex_image(unsigned int width, unsigned int height, const void *pixels)
+{
+	unsigned char const *cpixels = (unsigned char const *) pixels;
+	unsigned char *etc1data;
+	unsigned int size = etc1_data_size(width, height);
+	etc1data = (unsigned char *)malloc(size);
+	etc1_encode_image(cpixels, width, height, 4, width * 4, etc1data);
+	return etc1data;
+}
+
+extern void Sys_CPUCount( int& logicalNum, int& coreNum, int& packageNum );
+static void * etc2_compress_tex_image(unsigned int width, unsigned int height, const void *pixels, unsigned int *size, unsigned int *rwidth, unsigned int *rheight)
+{
+	unsigned char *paucEncodingBits;
+	unsigned int uiEncodingBitsBytes;
+	unsigned int uiExtendedWidth;
+	unsigned int uiExtendedHeight;
+	int iEncodingTime_ms;
+
+	static bool getCPUInfo = false;
+	static int numPhysicalCpuCores;
+	static int numLogicalCpuCores;
+	static int numCpuPackages;
+
+	if(!getCPUInfo)
+	{
+		Sys_CPUCount( numLogicalCpuCores, numPhysicalCpuCores, numCpuPackages );
+		getCPUInfo = true;
+	}
+
+	Etc::Encode((float *)pixels,
+				width, height,
+				Etc::Image::Format::RGBA8,
+				Etc::ErrorMetric::RGBA,
+				0, // fEffort,
+				numPhysicalCpuCores,
+				numLogicalCpuCores,
+				&paucEncodingBits, &uiEncodingBitsBytes,
+				&uiExtendedWidth, &uiExtendedHeight,
+				&iEncodingTime_ms);
+
+	*size = uiEncodingBitsBytes;
+	*rwidth = uiExtendedWidth;
+	*rheight = uiExtendedHeight;
+	return paucEncodingBits;
+}
+
 #endif
 #if 0
 #define TID(x) {\
@@ -388,32 +488,70 @@ void idImage::SubImageUpload( int mipLevel, int x, int y, int z, int width, int 
 		const int dxtWidth = Max(( width + 4 ) & ~4, ( width + 3 ) & ~3);
 		const int dxtHeight = Max(( height + 4 ) & ~4, ( height + 3 ) & ~3);
 		byte *dpic = ( byte* )Mem_Alloc(dxtWidth * dxtHeight * 4, TAG_TEMP );
-		if(opts.format == FMT_DXT1)
-			decoder.DecompressImageDXT1((const byte *)pic, dpic, width, height);
-		else
+		if(dpic)
 		{
-			if( opts.colorFormat == CFM_YCOCG_DXT5 )
-				decoder.DecompressYCoCgDXT5((const byte *)pic, dpic, width, height);
-			else if( opts.colorFormat == CFM_NORMAL_DXT5 )
-				decoder.DecompressNormalMapDXT5Renormalize((const byte *)pic, dpic, width, height);
+			if(opts.format == FMT_DXT1)
+				decoder.DecompressImageDXT1((const byte *)pic, dpic, width, height);
 			else
-				decoder.DecompressImageDXT5((const byte *)pic, dpic, width, height);
-		}
+			{
+				if( opts.colorFormat == CFM_YCOCG_DXT5 )
+					decoder.DecompressYCoCgDXT5((const byte *)pic, dpic, width, height);
+				else if( opts.colorFormat == CFM_NORMAL_DXT5 )
+					decoder.DecompressNormalMapDXT5Renormalize((const byte *)pic, dpic, width, height);
+				else
+					decoder.DecompressImageDXT5((const byte *)pic, dpic, width, height);
+			}
 
 #if 0
-        idStr ff = "ttt/";
-        ff += imgName;
-        ff.StripFileExtension();
-        ff += va("_dxt%d_%d_%d", opts.format == FMT_DXT1 ? 1 : 5, width, height);
-        //ff.SetFileExtension(".png");
-        //R_WritePNG(ff.c_str(), dpic, 4, width, height, true);
-        ff.SetFileExtension(".tga");
-        R_WriteTGA(ff.c_str(), dpic, width, height);
+			idStr ff = "ttt/";
+			ff += imgName;
+			ff.StripFileExtension();
+			ff += va("_dxt%d_%d_%d", opts.format == FMT_DXT1 ? 1 : 5, width, height);
+			//ff.SetFileExtension(".png");
+			//R_WritePNG(ff.c_str(), dpic, 4, width, height, true);
+			ff.SetFileExtension(".tga");
+			R_WriteTGA(ff.c_str(), dpic, width, height);
 #endif
 
-		TID(glTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, GL_RGBA /*dataFormat*/, GL_UNSIGNED_BYTE /*dataType*/, dpic ));
-		if( dpic != NULL )
-			Mem_Free( dpic );
+			if(image_useETCCompression)
+			{
+				void *etc1_data = etc1_compress_tex_image(width, height, dpic);
+				TID(glCompressedTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, GL_ETC1_RGB8_OES, etc1_data_size(width, height), etc1_data ));
+				free(etc1_data);
+			}
+			else if(image_useETC2Compression)
+			{
+				unsigned int etc2_size;
+				unsigned int etc2_width;
+				unsigned int etc2_height;
+
+				unsigned int floatSize = width * height * sizeof(Etc::ColorFloatRGBA);
+				Etc::ColorFloatRGBA* floatData = ( Etc::ColorFloatRGBA* )malloc( floatSize );
+				const int Size = width * height;
+				for(int i = 0; i < Size; i++)
+				{
+					floatData[i] = Etc::ColorFloatRGBA::ConvertFromRGBA8(dpic[i * 4], dpic[i * 4 + 1], dpic[i * 4 + 2], dpic[i * 4 + 3]);
+				}
+
+				void *etc2_data = etc2_compress_tex_image(width, height, floatData, &etc2_size, &etc2_width, &etc2_height);
+				TID(glCompressedTexSubImage2D( uploadTarget, mipLevel, x, y, etc2_width, etc2_height, GL_COMPRESSED_RGBA8_ETC2_EAC, etc2_size, etc2_data ));
+
+				free(floatData);
+				free(etc2_data);
+			}
+			else if(image_useRGBA4444)
+			{
+				void *rgba4444_data = rgba4444_convert_tex_image(width, height, dpic);
+				TID(glTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, GL_RGBA /*dataFormat*/, GL_UNSIGNED_SHORT_4_4_4_4, rgba4444_data ));
+				free(rgba4444_data);
+			}
+			else
+			{
+				TID(glTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, GL_RGBA /*dataFormat*/, GL_UNSIGNED_BYTE /*dataType*/, dpic ));
+			}
+			// if( dpic != NULL )
+				Mem_Free( dpic );
+		}
 #else
 		glCompressedTexSubImage2D( uploadTarget, mipLevel, x, y, width, height, internalFormat, compressedSize, pic );
 #endif
@@ -924,13 +1062,56 @@ void idImage::AllocImage()
 					{
 						HeapFree( GetProcessHeap(), 0, data );
 					}
-#elif defined(_GLES) //karin: decompress texture instead of glCompressedXXX on OpenGLES
-					compressedSize = w * h * 4;
-					byte* data = ( byte* )Mem_Alloc( compressedSize, TAG_TEMP );
-					TID(glTexImage2D( uploadTarget + side, level, GL_RGBA /*internalFormat*/, w, h, 0, GL_RGBA /*dataFormat*/, GL_UNSIGNED_BYTE /*dataType*/, data ));
-					if( data != NULL )
+#elif defined(_GLES) //karin: decompress texture instead of glCompressedXXX or ETC1 ETC2 RGBA4444 on OpenGLES
+					if(image_useETCCompression)
 					{
-						Mem_Free( data );
+						compressedSize = etc1_data_size(w, h);
+						byte* data = ( byte* )Mem_Alloc( compressedSize, TAG_TEMP );
+						TID(glCompressedTexImage2D( uploadTarget + side, level, GL_ETC1_RGB8_OES, w, h, 0, compressedSize, data ));
+						if( data != NULL )
+						{
+							Mem_Free( data );
+						}
+					}
+					else if(image_useETC2Compression)
+					{
+						compressedSize = etc2_data_size(w, h);
+						byte* data = ( byte* )Mem_Alloc( compressedSize, TAG_TEMP );
+						if( data != NULL )
+						{
+							memset(data, 0, compressedSize);
+							unsigned int etc2_width = etc2_data_size(w);
+							unsigned int etc2_height = etc2_data_size(h);
+							//void *etc2_data = etc2_compress_tex_image(w, h, data, &etc2_size, &etc2_width, &etc2_height);
+							TID(glCompressedTexImage2D( uploadTarget + side, level, GL_COMPRESSED_RGBA8_ETC2_EAC, etc2_width, etc2_height, 0, compressedSize, data ));
+							//free(etc2_data);
+						}
+						else
+							TID(glCompressedTexImage2D( uploadTarget + side, level, GL_COMPRESSED_RGBA8_ETC2_EAC, w, h, 0, compressedSize, data ));
+						if( data != NULL )
+						{
+							Mem_Free( data );
+						}
+					}
+					else if(image_useRGBA4444)
+					{
+						compressedSize = w * h * 2;
+						byte* data = ( byte* )Mem_Alloc( compressedSize, TAG_TEMP );
+						TID(glTexImage2D( uploadTarget + side, level, GL_RGBA /*internalFormat*/, w, h, 0, GL_RGBA /*dataFormat*/, GL_UNSIGNED_SHORT_4_4_4_4 /*dataType*/, data ));
+						if( data != NULL )
+						{
+							Mem_Free( data );
+						}
+					}
+					else
+					{
+						compressedSize = w * h * 4;
+						byte* data = ( byte* )Mem_Alloc( compressedSize, TAG_TEMP );
+						TID(glTexImage2D( uploadTarget + side, level, GL_RGBA /*internalFormat*/, w, h, 0, GL_RGBA /*dataFormat*/, GL_UNSIGNED_BYTE /*dataType*/, data ));
+						if( data != NULL )
+						{
+							Mem_Free( data );
+						}
 					}
 #else
 					byte* data = ( byte* )Mem_Alloc( compressedSize, TAG_TEMP );

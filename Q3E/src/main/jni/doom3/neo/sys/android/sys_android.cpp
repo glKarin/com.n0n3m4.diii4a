@@ -185,6 +185,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("    Format: 0x%X\n", gl_format);
     printf("    MSAA: %d\n", gl_msaa);
     printf("    Version: %08x\n", gl_version);
+    printf("    Screen size: %d x %d\n", screen_width, screen_height);
     printf("  Variables: \n");
     printf("    Native library directory: %s\n", native_library_dir);
     printf("    Redirect output to file: %d\n", redirect_output_to_file);
@@ -395,7 +396,7 @@ void Q3E_exit(void)
     if(window)
         window = NULL;
     GLimp_AndroidQuit();
-    Sys_Printf("[Harmattan]: doom3 exit.\n");
+    printf("[Harmattan]: idTech4 exit.\n");
 }
 
 // Setup OpenGL context variables in Android SurfaceView's thread

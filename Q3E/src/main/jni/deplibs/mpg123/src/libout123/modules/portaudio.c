@@ -9,7 +9,7 @@
 /* Need usleep(). */
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
-#include "out123_int.h"
+#include "../out123_int.h"
 #include <math.h>
 #include <portaudio.h>
 
@@ -19,9 +19,9 @@
 
 /* Including the sfifo code locally, to avoid module linkage issues. */
 #define SFIFO_STATIC
-#include "sfifo.c"
+#include "../sfifo.c"
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 #define SAMPLE_SIZE			(2)
 #define FRAMES_PER_BUFFER	(256)

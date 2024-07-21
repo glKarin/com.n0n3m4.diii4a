@@ -186,6 +186,7 @@ public final class TextHelper
                 " " + GenLinkText("https://www.moddb.com/games/return-to-castle-wolfenstein", "Return to Castle Wolfenstein: main"),
                 " " + GenLinkText("https://www.thedarkmod.com", "The Dark Mod: darkmod"),
                 " " + GenLinkText("https://store.steampowered.com/agecheck/app/208200/", "DOOM3 BFG: doom3bfg/base"),
+                " " + GenLinkText("https://github.com/ZDoom/gzdoom", "GZDOOM: gzdoom"),
                 null,
             "For playing Prey(2006)(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
@@ -293,7 +294,9 @@ public final class TextHelper
             null,
             "Rename from `DIII4A++`, base on original `n0n3m4`'s `DIII4A`.",
             "idTech4 engine's games support on Android.",
-            "e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, `Prey(2006)`, and some mods(e.g. `The Dark Mod`, `DOOM3 BFG`).",
+            " e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, `Prey(2006)`, `The Dark Mod`, `DOOM 3 BFG`, and some mods(e.g. `The Lost Mission`).",
+            "And other idTech engine's games runtime environment.",
+            " e.g. `Return to Castle Wolfenstein`, `Quake III`, `Quake II`, `Quake`, `GZDOOM`.",
             null,
             "Source in `assets/source` folder in APK file.",
             " `DIII4A.source.tgz`: launcher frontend source and game source, game source and OpenGLES2.0/3.0 shader source in `/Q3E/src/main/jni/doom3` of archive package.",
@@ -323,6 +326,14 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
+
+                ChangeLog.Create("2024-07-11", 52,
+                        "Add soft stencil shadow support(cvar `harm_r_stencilShadowSoft`) with OpenGLES3.1+ in DOOM3/Quake4/Prey(2006).",
+                        "Optimize soft shadow shader with shadow mapping in DOOM3/Quake4/Prey(2006).",
+                        "Support r_showSurfaceInfo debug render on multi-threading in DOOM3/Quake4/Prey(2006), need to set cvar `harm_r_renderToolsMultithread` to 1 to enable debug render on multi-threading manually.",
+                        "Add GLES3.2 renderer support in Quake2(using +set vid_renderer gles3 for GLES3.2, +set vid_renderer gl1 for GLES1.1).",
+                        "Add GZDOOM support on arm64, game data directory named `gzdoom`. More view in `" + TextHelper.GenLinkText("https://github.com/ZDoom/gzdoom", "GZDOOM") + "`."
+                ),
 
                 ChangeLog.Create("2024-05-31", 51,
                         "Add `DOOM 3 BFG`(RBDOOM-3-BFG ver1.4.0) support, game data directory named `doom3bfg/base`. More view in `" + TextHelper.GenLinkText("https://github.com/RobertBeckebans/RBDOOM-3-BFG", "RBDOOM-3-BFG") + "` and `" + TextHelper.GenLinkText("https://store.steampowered.com/agecheck/app/208200/", "DOOM-3-BFG") + "`.",

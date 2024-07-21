@@ -12,10 +12,6 @@
 #include "mpg123app.h"
 #include "audio.h"
 
-#ifdef HAVE_TERMIOS
-
-#define LOOP_CYCLES	0.500000	/* Loop time in sec */
-
 /* 
  * Defines the keybindings in term.c - change to your 
  * own preferences.
@@ -25,6 +21,7 @@
 #define MPG123_BACK_KEY	'b'
 #define MPG123_NEXT_KEY	'f'
 #define MPG123_PAUSE_KEY	'p'
+#define MPG123_LOOP_KEY	'o'
 #define MPG123_QUIT_KEY	'q'
 /* space bar is alias for that */
 #define MPG123_STOP_KEY	's'
@@ -58,6 +55,16 @@
 #define MPG123_PITCH_DOWN_KEY  'x'
 #define MPG123_PITCH_BDOWN_KEY 'X'
 #define MPG123_PITCH_ZERO_KEY  'w'
+
+#define MPG123_EQ_RESET_KEY 'e'
+#define MPG123_EQ_SHOW_KEY 'E'
+#define MPG123_BASS_UP_KEY 'A'
+#define MPG123_BASS_DOWN_KEY 'a'
+#define MPG123_MID_UP_KEY 'J'
+#define MPG123_MID_DOWN_KEY 'j'
+#define MPG123_TREBLE_UP_KEY 'N'
+#define MPG123_TREBLE_DOWN_KEY 'n'
+
 #define MPG123_BOOKMARK_KEY    'k'
 /* This counts as "undocumented" and can disappear */
 #define MPG123_FRAME_INDEX_KEY 'i'
@@ -70,8 +77,9 @@
 #define MPG123_PITCH_VAL 0.001
 #define MPG123_PITCH_BVAL 0.01
 
-#define MPG123_PAUSED_STRING	"Paused. \b\b\b\b\b\b\b\b"
+#define MPG123_PAUSED_STRING	"Looping.\b\b\b\b\b\b\b\b"
 #define MPG123_STOPPED_STRING	"Stopped.\b\b\b\b\b\b\b\b"
+#define MPG123_AB_STRING		"Loop A-?\b\b\b\b\b\b\b\b"
 #define MPG123_EMPTY_STRING	"        \b\b\b\b\b\b\b\b"
 
 /* Need it as string for the param struct, change according to the above. */
@@ -79,11 +87,10 @@
 #define MPG123_TERM_USR2 "f"
 
 
-void term_init(void);
+int term_init(void); // -1 on error, 0 success or no terminal desired
 void term_exit(void);
+void term_new_track(void); // prepare for a new track being played
 off_t term_control(mpg123_handle *mh, out123_handle *ao);
 void term_hint(void); /* Print a message hinting at terminal usage. */
-
-#endif
 
 #endif

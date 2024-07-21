@@ -12,6 +12,8 @@
 #include "config.h"
 /* This source file does need _POSIX_SOURCE to get some sigaction. */
 #define _POSIX_SOURCE
+/* Fix pedantic error about w2upath being unused */
+#define HIDE_w2upath
 #include "compat.h"
 
 #ifdef _MSC_VER
@@ -45,7 +47,7 @@
 #  endif
 #endif
 
-#include "debug.h"
+#include "../common/debug.h"
 
 #include "wpathconv.h"
 
@@ -60,7 +62,7 @@
 	clobbering each other when setting/restoring across different threads.
 */
 
-void *compat_dlopen(const char *path)
+void *INT123_compat_dlopen(const char *path)
 {
 	void *handle = NULL;
 #ifdef WANT_WIN32_UNICODE
@@ -81,20 +83,20 @@ void *compat_dlopen(const char *path)
 	return handle;
 }
 
-void *compat_dlsym(void *handle, const char *name)
+void *INT123_compat_dlsym(void *handle, const char *name)
 {
 	void *sym = NULL;
 	if(!handle)
 		return NULL;
 #ifdef WANT_WIN32_UNICODE
-	sym = GetProcAddress(handle, name);
+	sym = (void *)(uintptr_t)GetProcAddress(handle, name);
 #else
 	sym = dlsym(handle, name);
 #endif
 	return sym;
 }
 
-void compat_dlclose(void *handle)
+void INT123_compat_dlclose(void *handle)
 {
 	if(!handle)
 		return;

@@ -8,7 +8,7 @@
 	untested since quite some years now ...
 */
 
-#include "out123_int.h"
+#include "../out123_int.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 /* use AUDIO_BSIZE to set the msec for audio buffering in Ultimedia library
  */

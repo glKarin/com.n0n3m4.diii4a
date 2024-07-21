@@ -1,7 +1,7 @@
 /*
 	id3dump: Print ID3 tags of files, scanned using libmpg123.
 
-	copyright 2007-2021 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 2007-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Thomas Orgis
 */
@@ -10,7 +10,8 @@
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
 #include "config.h"
-#include "compat.h"
+#include "version.h"
+#include "compat/compat.h"
 #if defined(WIN32) && defined(DYNAMIC_BUILD)
 #define LINK_MPG123_DLL
 #endif
@@ -20,7 +21,7 @@
 #include <ctype.h>
 #include "win32_support.h"
 
-#include "debug.h"
+#include "common/debug.h"
 
 static int errors = 0;
 
@@ -47,7 +48,7 @@ static void usage(int err)
 		fprintf(o, "You made some mistake in program usage... let me briefly remind you:\n\n");
 	}
 	fprintf(o, "Tool to dump ID3 meta data from MPEG audio files using libmpg123\n");
-	fprintf(o, "\tversion %s; written and copyright by Thomas Orgis and the mpg123 project\n", PACKAGE_VERSION);
+	fprintf(o, "\tversion %s; written and copyright by Thomas Orgis and the mpg123 project\n", MPG123_VERSION);
 	fprintf(o,"\nusage: %s [option(s)] file(s)\n", progname);
 	fprintf(o,"\noptions:\n");
 	fprintf(o," -h     --help              give usage help\n");
@@ -227,8 +228,8 @@ void print_raw_v2(mpg123_id3v2 *v2)
 		mpg123_picture* pic;
 
 		pic = &v2->picture[i];
-		fprintf(stderr, "APIC type(%i, %s) mime(%s) size(%"SIZE_P")\n",
-			pic->type, pic_type(pic->type), pic->mime_type.p, (size_p)pic->size);
+		fprintf(stderr, "APIC type(%i, %s) mime(%s) size(%zu)\n",
+			pic->type, pic_type(pic->type), pic->mime_type.p, pic->size);
 		print_lines(" ", &pic->description);
 	}
 }
@@ -292,7 +293,7 @@ int open_picfile(const char* prefix, mpg123_picture* pic)
 	pfn[len] = 0;
 
 	errno = 0;
-	fd = compat_open(pfn, O_CREAT|O_WRONLY|O_EXCL);
+	fd = INT123_compat_open(pfn, O_CREAT|O_WRONLY|O_EXCL);
 	while(fd < 0 && errno == EEXIST && ++count < ULONG_MAX)
 	{
 		char dum[3];
@@ -302,12 +303,12 @@ int open_picfile(const char* prefix, mpg123_picture* pic)
 		// Modern compiler diagnostics complain if limit is smaller than
 		// format string, so increasing dummy to 3 characters.
 		digits = snprintf(dum, 3, "%lu", count);
-		if(!(pfn=safe_realloc(pfn, len+digits+1))) exit(11);
+		if(!(pfn=INT123_safe_realloc(pfn, len+digits+1))) exit(11);
 
 		sprintf(pfn, "%s.%s%lu.%s", prefix, typestr, count, end);
 		pfn[len+digits] = 0;
 		errno = 0;		
-		fd = compat_open(pfn, O_CREAT|O_WRONLY|O_EXCL);
+		fd = INT123_compat_open(pfn, O_CREAT|O_WRONLY|O_EXCL);
 	}
 	printf("writing %s\n", pfn);
 	if(fd < 0)
@@ -335,10 +336,10 @@ static void store_pictures(const char* prefix, mpg123_id3v2 *v2)
 		fd = open_picfile(prefix, pic);
 		if(fd >= 0)
 		{ /* stream I/O for not having to care about interruptions */
-			FILE* picfile = compat_fdopen(fd, "w");
+			FILE* picfile = INT123_compat_fdopen(fd, "w");
 			if(picfile)
 			{
-				if(unintr_fwrite(pic->data, pic->size, 1, picfile) != 1)
+				if(INT123_unintr_fwrite(pic->data, pic->size, 1, picfile) != 1)
 				{
 					error("Failure to write data.");
 					++errors;
@@ -351,7 +352,7 @@ static void store_pictures(const char* prefix, mpg123_id3v2 *v2)
 			}
 			else
 			{
-				error1("Unable to fdopen output: %s)", strerror(errno));
+				error1("Unable to fdopen output: %s)", INT123_strerror(errno));
 				++errors;
 			}
 		}
@@ -388,6 +389,7 @@ int main(int argc, char **argv)
 	m = mpg123_new(NULL, NULL);
 	mpg123_param(m, MPG123_ADD_FLAGS, MPG123_PICTURE, 0.);
 	mpg123_param(m, MPG123_VERBOSE, param.verbose ? 4 : 0, 0.);
+	mpg123_param(m, MPG123_RESYNC_LIMIT, -1, 0.0);
 
 	for(i=loptind; i < argc; ++i)
 	{

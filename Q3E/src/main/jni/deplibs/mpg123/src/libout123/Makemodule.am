@@ -1,12 +1,32 @@
 # Module for non-recursive mpg123 build system.
 
-include src/libout123/modules/Makemodule.am
+# Component selection:
+# If HAVE_MODULES, the library can be built fully independently.
+# If not, the library depends on the one builtin module from
+# the subdirectory.
 
-# Precursor to the proper libout123.
-# For now only wrapping the module loader or the legacy module.
+# For dynamic modules.
+if HAVE_MODULES
+include src/libout123/modules/Makemodule.am
+endif
+
+if NEED_MAINLIB
+if BUILD_LIBOUT123
+
+# Just for libdefaultmodule.la.
+if !HAVE_MODULES
+include src/libout123/modules/Makemodule.am
+endif
+
+include_HEADERS += src/include/out123.h
+
 noinst_LTLIBRARIES += src/libout123/libmodule.la
 
 lib_LTLIBRARIES += src/libout123/libout123.la
+
+endif
+endif
+
 src_libout123_libout123_la_SOURCES = \
   src/libout123/libout123.c \
   src/libout123/stringlists.h \
@@ -63,9 +83,6 @@ endif
 
 # The sfifo code is directly used in some modules.
 EXTRA_DIST += \
-  src/libout123/out123.h.in \
   src/libout123/sfifo.c \
   src/libout123/sfifo.h
 
-nodist_include_HEADERS += \
-  src/libout123/out123.h

@@ -1125,6 +1125,19 @@ if(UNIX)
 	endif()
 endif()
 
+# ETC compression texture
+file(GLOB RENDERER_ETC1_INCLUDES renderer/etc/etc1/*.h)
+file(GLOB RENDERER_ETC1_SOURCES renderer/etc/etc1/*.cpp)
+
+file(GLOB RENDERER_ETC2_INCLUDES renderer/etc/EtcLib/Etc/*.h renderer/etc/EtcLib/EtcCodec/*.h)
+file(GLOB RENDERER_ETC2_SOURCES renderer/etc/EtcLib/Etc/*.cpp renderer/etc/EtcLib/EtcCodec/*.cpp)
+
+source_group("renderer\\etc\\etc1" FILES ${RENDERER_ETC1_INCLUDES})
+source_group("renderer\\etc\\etc1" FILES ${RENDERER_ETC1_SOURCES})
+
+source_group("renderer\\etc\\etc2" FILES ${RENDERER_ETC2_INCLUDES})
+source_group("renderer\\etc\\etc2" FILES ${RENDERER_ETC2_SOURCES})
+
 source_group("aas" FILES ${AAS_INCLUDES})
 source_group("aas" FILES ${AAS_SOURCES})
 
@@ -1454,6 +1467,13 @@ set(RBDOOM3_SOURCES
 			${GAMED3XP_PHYSICS_SOURCES}
 			${GAMED3XP_SCRIPT_SOURCES}
 			)
+
+# ETC compression texture
+list(APPEND RBDOOM3_INCLUDES ${RENDERER_ETC1_INCLUDES})
+list(APPEND RBDOOM3_SOURCES ${RENDERER_ETC1_SOURCES})
+
+list(APPEND RBDOOM3_INCLUDES ${RENDERER_ETC2_INCLUDES})
+list(APPEND RBDOOM3_SOURCES ${RENDERER_ETC2_SOURCES})
 
 if(DOOM_CLASSIC)
 	add_definitions(-DUSE_DOOMCLASSIC)
@@ -1894,6 +1914,8 @@ else()
 
 	if(ANDROID)
 		add_library(RBDoom3BFG SHARED ${RBDOOM3_SOURCES})
+		target_include_directories(RBDoom3BFG PRIVATE renderer/etc/EtcLib/Etc)
+		target_include_directories(RBDoom3BFG PRIVATE renderer/etc/EtcLib/EtcCodec)
 	else()
 	add_executable(RBDoom3BFG WIN32 ${RBDOOM3_SOURCES})
 	endif()
@@ -1910,8 +1932,11 @@ else()
 		set(RBDoom3BFG_sys_libs)
 		if(ANDROID)
 			target_include_directories(RBDoom3BFG PRIVATE ../../common)
+#			target_include_directories(RBDoom3BFG PRIVATE ../../deplibs/etc2comp/EtcLib)
+#			target_include_directories(RBDoom3BFG PRIVATE ../../deplibs/etc2comp/EtcLib/Etc)
+#			target_include_directories(RBDoom3BFG PRIVATE ../../deplibs/etc2comp/EtcLib/EtcCodec)
 			set(OPENGL_LIBRARIES GLESv3 EGL)
-			set(RBDoom3BFG_sys_libs openal android z log) # ${FFmpeg_LIBRARIES}
+			set(RBDoom3BFG_sys_libs openal android z log) #  EtcLib ${FFmpeg_LIBRARIES}
 		else()
 			if(NOT "${CMAKE_SYSTEM}" MATCHES "Darwin")
 				set(RT_LIBRARY rt)

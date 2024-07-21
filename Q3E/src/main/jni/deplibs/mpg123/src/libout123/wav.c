@@ -1,7 +1,7 @@
 /*
 	wav.c: write wav/au/cdr files (and headerless raw
 
-	copyright ?-2015 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright ?-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Samuel Audet
 
@@ -28,7 +28,7 @@
 #include "wav.h"
 
 #include <errno.h>
-#include "debug.h"
+#include "../common/debug.h"
 
 /* Create the two WAV headers. */
 
@@ -98,7 +98,7 @@ static void wavdata_del(struct wavdata *wdat)
 {
 	if(!wdat) return;
 	if(wdat->wavfp && wdat->wavfp != stdout)
-		compat_fclose(wdat->wavfp);
+		INT123_compat_fclose(wdat->wavfp);
 	if(wdat->the_header)
 		free(wdat->the_header);
 	free(wdat);
@@ -144,11 +144,12 @@ static long from_little(byte *inval, int b)
 
 static int testEndian(void) 
 {
-  long i,a=0,b=0,c=0;
+  long a=0,b=0,c=0;
   int ret = 0;
+  size_t i;
 
   for(i=0;i<sizeof(long);i++) {
-    ((byte *)&a)[i] = i;
+    ((byte *)&a)[i] = (byte)i;
     b<<=8;
     b |= i;
     c |= i << (i*8);
@@ -170,9 +171,7 @@ static int open_file(struct wavdata *wdat, char *filename)
 	if(!filename || !strcmp("-",filename) || !strcmp("", filename))
 	{
 		wdat->wavfp = stdout;
-#ifdef WIN32
-		_setmode(STDOUT_FILENO, _O_BINARY);
-#endif
+		INT123_compat_binmode(STDOUT_FILENO, TRUE);
 		/* If stdout is redirected to a file, seeks suddenly can work.
 		Doing one here to ensure that such a file has the same output
 		it had when opening directly as such. */
@@ -181,7 +180,7 @@ static int open_file(struct wavdata *wdat, char *filename)
 	}
 	else
 	{
-		wdat->wavfp = compat_fopen(filename, "wb");
+		wdat->wavfp = INT123_compat_fopen(filename, "wb");
 		if(!wdat->wavfp)
 			return -1;
 		else
@@ -199,10 +198,10 @@ static int close_file(out123_handle *ao)
 
 	if(wdat->wavfp != NULL && wdat->wavfp != stdout)
 	{
-		if(compat_fclose(wdat->wavfp))
+		if(INT123_compat_fclose(wdat->wavfp))
 		{
 			if(!AOQUIET)
-				error1("problem closing the audio file, probably because of flushing to disk: %s\n", strerror(errno));
+				error1("problem closing the audio file, probably because of flushing to disk: %s\n", INT123_strerror(errno));
 			ret = -1;
 		}
 	}
@@ -231,13 +230,13 @@ static int write_header(out123_handle *ao)
 	)
 	{
 		if(!AOQUIET)
-			error1("cannot write header: %s", strerror(errno));
+			error1("cannot write header: %s", INT123_strerror(errno));
 		return -1;
 	}
 	else return 0;
 }
 
-int au_open(out123_handle *ao)
+int INT123_au_open(out123_handle *ao)
 {
 	struct wavdata *wdat   = NULL;
 	struct auhead  *auhead = NULL;
@@ -316,7 +315,7 @@ au_open_bad:
 	return -1;
 }
 
-int cdr_open(out123_handle *ao)
+int INT123_cdr_open(out123_handle *ao)
 {
 	struct wavdata *wdat   = NULL;
 
@@ -363,7 +362,7 @@ cdr_open_bad:
 }
 
 /* RAW files are headerless WAVs where the format does not matter. */
-int raw_open(out123_handle *ao)
+int INT123_raw_open(out123_handle *ao)
 {
 	struct wavdata *wdat;
 
@@ -392,7 +391,7 @@ raw_open_bad:
 	return -1;
 }
 
-int wav_open(out123_handle *ao)
+int INT123_wav_open(out123_handle *ao)
 {
 	int bps;
 	struct wavdata    *wdat      = NULL;
@@ -541,7 +540,7 @@ wav_open_bad:
 	return -1;
 }
 
-int wav_write(out123_handle *ao, unsigned char *buf, int len)
+int INT123_wav_write(out123_handle *ao, unsigned char *buf, int len)
 {
 	struct wavdata *wdat = ao->userptr;
 	int temp;
@@ -597,7 +596,7 @@ int wav_write(out123_handle *ao, unsigned char *buf, int len)
 if(fflush(wdat->wavfp))
 {
 	if(!AOQUIET)
-		error1("flushing failed: %s\n", strerror(errno));
+		error1("flushing failed: %s\n", INT123_strerror(errno));
 	return -1;
 }
 #endif
@@ -606,7 +605,7 @@ if(fflush(wdat->wavfp))
 	return temp;
 }
 
-int wav_close(out123_handle *ao)
+int INT123_wav_close(out123_handle *ao)
 {
 	struct wavdata *wdat = ao->userptr;
 
@@ -620,7 +619,7 @@ int wav_close(out123_handle *ao)
 	if(fflush(wdat->wavfp))
 	{
 		if(!AOQUIET)
-			error1("cannot flush WAV stream: %s", strerror(errno));
+			error1("cannot flush WAV stream: %s", INT123_strerror(errno));
 		return close_file(ao);
 	}
 	if(fseek(wdat->wavfp, 0L, SEEK_SET) >= 0)
@@ -660,7 +659,7 @@ int wav_close(out123_handle *ao)
 	return close_file(ao);
 }
 
-int au_close(out123_handle *ao)
+int INT123_au_close(out123_handle *ao)
 {
 	struct wavdata *wdat = ao->userptr;
 
@@ -674,7 +673,7 @@ int au_close(out123_handle *ao)
 	if(fflush(wdat->wavfp))
 	{
 		if(!AOQUIET)
-			error1("cannot flush WAV stream: %s", strerror(errno));
+			error1("cannot flush WAV stream: %s", INT123_strerror(errno));
 		return close_file(ao);
 	}
 	if(fseek(wdat->wavfp, 0L, SEEK_SET) >= 0)
@@ -692,7 +691,7 @@ int au_close(out123_handle *ao)
 }
 
 /* CDR data also uses that. */
-int raw_close(out123_handle *ao)
+int INT123_raw_close(out123_handle *ao)
 {
 	struct wavdata *wdat = ao->userptr;
 
@@ -707,7 +706,7 @@ int raw_close(out123_handle *ao)
 
 /* Some trivial functions to interface with out123's module architecture. */
 
-int cdr_formats(out123_handle *ao)
+int INT123_cdr_formats(out123_handle *ao)
 {
 	if(ao->rate == 44100 && ao->channels == 2)
 		return MPG123_ENC_SIGNED_16;
@@ -715,17 +714,17 @@ int cdr_formats(out123_handle *ao)
 		return 0;
 }
 
-int au_formats(out123_handle *ao)
+int INT123_au_formats(out123_handle *ao)
 {
 	return MPG123_ENC_SIGNED_16|MPG123_ENC_UNSIGNED_8|MPG123_ENC_ULAW_8;
 }
 
-int raw_formats(out123_handle *ao)
+int INT123_raw_formats(out123_handle *ao)
 {
 	return MPG123_ENC_ANY;
 }
 
-int wav_formats(out123_handle *ao)
+int INT123_wav_formats(out123_handle *ao)
 {
 	return
 		MPG123_ENC_SIGNED_16
@@ -739,7 +738,7 @@ int wav_formats(out123_handle *ao)
    One could call fsync(), too, but to be safe, that would need to
    be called on the directory, too. Also, apps randomly calling
    fsync() can cause annoying issues in a system. */
-void wav_drain(out123_handle *ao)
+void INT123_wav_drain(out123_handle *ao)
 {
 	struct wavdata *wdat = ao->userptr;
 
@@ -747,5 +746,5 @@ void wav_drain(out123_handle *ao)
 		return;
 
 	if(fflush(wdat->wavfp) && !AOQUIET)
-		error1("flushing failed: %s\n", strerror(errno));
+		error1("flushing failed: %s\n", INT123_strerror(errno));
 }

@@ -3,9 +3,9 @@
 #### 毁灭战士3/雷神之锤4/掠食(2006)/毁灭战士3 BFG/The Dark Mod 安卓/Windows/Linux OpenGLES移植版.
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan52(natasha)  
+1.1.0harmattan53(natasha)  
 **Latest update:**
-2024-07-11  
+2024-07-17  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -17,10 +17,8 @@ GPLv3
 ### idTech4's feature
 * Linux/Windows(MinGW/MSVC(without editor)) build
 * multi-threading renderer
-* png/dds texture image
-* jpeg/png/bmp/dds format of screenshot
-* obj format static model
-* dae format static model
+* png/dds texture image, jpeg/png/bmp/dds format of screenshot
+* obj/dae format static model
 * pure soft shadow with shadow-mapping
 * soft shadow with stencil-shadow
 * OpenGLES2.0/OpenGLES3.0
@@ -31,6 +29,11 @@ GPLv3
 * DOOM3(with full body awareness mod)
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
+
+###### Build DOOM3/Quake4/Prey(2006) mod for Android idTech4A++
+[DOOM 3 & RoE SDK](https://github.com/glKarin/idtech4amm_doom3_sdk)  
+[Quake 4 SDK](https://github.com/glKarin/idtech4amm_quake4_sdk)  
+[Prey(2006) SDK](https://github.com/glKarin/idtech4amm_prey_sdk)  
 
 ###### Compare with other OpenGLES rendering version of DOOM3
 
@@ -75,18 +78,15 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add soft stencil shadow support(cvar `harm_r_stencilShadowSoft`) with OpenGLES3.1+ in DOOM3/Quake4/Prey(2006).
-* Optimize soft shadow shader with shadow mapping in DOOM3/Quake4/Prey(2006).
-* Support r_showSurfaceInfo debug render on multi-threading in DOOM3/Quake4/Prey(2006), need to set cvar `harm_r_renderToolsMultithread` to 1 to enable debug render on multi-threading manually.
-* Add GLES3.2 renderer support in Quake2(using +set vid_renderer gles3 for GLES3.2, +set vid_renderer gl1 for GLES1.1).
-* Add GZDOOM support on arm64, game data directory named `gzdoom`. More view in [GZDOOM](https://github.com/ZDoom/gzdoom).
+* Fix GZDOOM sound.
+* Update screen resolution settings on launcher.
+* Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower) on DOOM3-BFG.
 
+----------------------------------------------------------------------------------
 
-* 毁灭战士3/雷神之锤4/掠食(2006)在OpenGLES3.1+下新增模板软阴影(cvar `harm_r_stencilShadowSoft`).
-* 毁灭战士3/雷神之锤4/掠食(2006)优化阴影图光照着色器.
-* 毁灭战士3/雷神之锤4/掠食(2006)多线程下支持r_showSurfaceInfo调试渲染, 多线程下开启调试渲染工具需要手动设置 cvar `harm_r_renderToolsMultithread`为1才开启.
-* 雷神之锤2新增GLES3.2渲染器支持(命令行 GLES3.2渲染器: +set vid_renderer gles3 for GLES3.2, GLES1.1渲染器: +set vid_renderer gl1).
-* 新增GZDOOM支持(仅arm64), 游戏数据文件夹为`gzdoom`. 更多详情[GZDOOM](https://github.com/ZDoom/gzdoom).
+* 修复GZDOOM声音.
+* 启动器更新屏幕分辨率设置.
+* 毁灭战士3BFG新增cvar `harm_image_useCompression`启用压缩纹理支持(对于低内存设备(如32位设备), 但会加载缓慢).
 
 ----------------------------------------------------------------------------------
 

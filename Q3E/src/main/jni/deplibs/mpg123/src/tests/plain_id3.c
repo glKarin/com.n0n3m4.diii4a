@@ -1,8 +1,9 @@
 /* Just printing out ID3 tags with plain data from libmpg123 and explicitly called conversion routine. */
 
-#include "compat.h"
+#include "config.h"
+#include "../compat/compat.h"
 #include <mpg123.h>
-#include "debug.h"
+#include "../common/debug.h"
 
 int test_whence(const char* path, int scan_before)
 {
@@ -29,7 +30,7 @@ int test_whence(const char* path, int scan_before)
 	mpg123_close(mh);
 	mpg123_delete(mh);
 
-	fprintf(stdout, "length %"OFF_P" vs. pos %"OFF_P"\n", length, pos);
+	fprintf(stdout, "length %" PRIiMAX " vs. pos %" PRIiMAX "\n", (intmax_t)length, (intmax_t)pos);
 
 	return (pos == length) ? 0 : -1;
 }

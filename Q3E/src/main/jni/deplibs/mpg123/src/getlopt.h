@@ -66,6 +66,7 @@ for .... no flag) */
 #define GLO_UNKNOWN	-1
 #define GLO_NOARG	-2
 #define GLO_CONTINUE	-3
+#define GLO_BADARG	-4
 
 int getlopt (int argc, char *argv[], topt *opts);
 // Helper to set a char parameter, avoiding memory leaks.

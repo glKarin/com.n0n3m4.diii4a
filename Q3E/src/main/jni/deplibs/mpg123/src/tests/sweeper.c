@@ -1,7 +1,9 @@
+#include "config.h"
+#define SYN123_PORTABLE_API
 #include <syn123.h>
 #include <out123.h>
 
-#include "compat.h"
+#include "../compat/compat.h"
 
 static long block_rate(long rate, double speed, double factor, off_t bi)
 {
@@ -73,32 +75,36 @@ int main(int argc, char **argv)
 	float *outbuf = malloc(sizeof(float)*maxoutblock);
 	float *inbuf = malloc(sizeof(float)*maxinblock);
 	if(!outbuf || !inbuf)
+	{
+		fprintf(stderr, "D'OOM!\n");
 		return -13;
+	}
 
 	off_t intotal  = 0;
 	off_t outtotal = 0;
 	while(bi < out_limit)
 	{
 		long outrate = block_rate(rate, speed, factor, bi);
-		fprintf(stderr, "block %"OFF_P" rate %ld\n", (off_p)bi, outrate);
+		fprintf(stderr, "block %" PRIiMAX " rate %ld\n", (intmax_t)bi, outrate);
 		if(syn123_setup_resample(syn, rate, outrate, 1, 0, smooth))
 		{
 			ret = -11;
 			break;
 		}
 		// Determine how many input samples to feed to get block output samples.
-		ssize_t inblock = syn123_resample_inexpect(syn, block);
-		if(inblock <= 0 || inblock > maxinblock)
+		int err;
+		size_t inblock = syn123_resample_in(syn, block, &err);
+		if(err || inblock <= 0 || inblock > maxinblock)
 		{
-			fprintf(stderr, "bad inblock: %zd\n", inblock);
+			fprintf(stderr, "bad inblock: %zu (%i)\n", inblock, err);
 			ret = -15;
 			break;
 		}
-		ssize_t outblock = syn123_resample_expect(syn, inblock);
+		size_t outblock = syn123_resample_out(syn, inblock, &err);
 		fprintf(stderr, "in %zu out %zu\n", inblock, outblock);
-		if(outblock <= 0 || outblock > maxoutblock || outblock < block)
+		if(err || outblock <= 0 || outblock > maxoutblock || outblock < block)
 		{
-			fprintf(stderr, "bad outblock: %zd\n", outblock);
+			fprintf(stderr, "bad outblock: %zu (%d)\n", outblock, err);
 			ret = -16;
 			break;
 		}
@@ -118,10 +124,10 @@ int main(int argc, char **argv)
 		}
 		intotal  += inblock;
 		outtotal += outblock;
-		//fprintf( stderr, "ratio: %f %"OFF_P":%"OFF_P" to %"OFF_P":%"OFF_P"\n"
-		//,	(double)intotal/outtotal, (off_p)intotal
-		//,	(off_p)syn123_resample_intotal(rate, outrate, outtotal)
-		//,	(off_p)outtotal, (off_p)syn123_resample_total(rate, outrate, intotal) );
+		//fprintf( stderr, "ratio: %f %" PRIiMAX ":%" PRIiMAX " to %" PRIiMAX ":%" PRIiMAX "\n"
+		//,	(double)intotal/outtotal, (intmax_t)intotal
+		//,	(intmax_t)syn123_resample_intotal(rate, outrate, outtotal)
+		//,	(intmax_t)outtotal, (intmax_t)syn123_resample_total(rate, outrate, intotal) );
 		syn123_amp(outbuf, MPG123_ENC_FLOAT_32, outsamples, syn123_db2lin(-12), 0, NULL, NULL);
 		if(out123_play(out, outbuf, sizeof(float)*outsamples) != sizeof(float)*outsamples)
 		{

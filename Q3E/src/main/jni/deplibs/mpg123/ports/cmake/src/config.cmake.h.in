@@ -1,3 +1,6 @@
+// Define to only include portable API in libraries.
+#cmakedefine PORTABLE_API 1
+
 // Define to use proper rounding.
 #cmakedefine ACCURATE_ROUNDING 1
 
@@ -30,19 +33,21 @@
 #cmakedefine HAVE_DLFCN_H 1
 #cmakedefine HAVE_INTTYPES_H 1
 #cmakedefine HAVE_LANGINFO_H 1
-#cmakedefine HAVE_LIMITS_H 1
 #cmakedefine HAVE_LOCALE_H 1
 #cmakedefine HAVE_NL_LANGINFO 1
 #cmakedefine HAVE_RANDOM 1
 #cmakedefine HAVE_SCHED_H 1
 #cmakedefine HAVE_SETLOCALE 1
+#cmakedefine HAVE_USELOCALE 1
 #cmakedefine HAVE_SETPRIORITY 1
 #cmakedefine HAVE_SIGNAL_H 1
-#cmakedefine HAVE_STDIO_H 1
-#cmakedefine HAVE_STDINT_H 1
-#cmakedefine HAVE_STDLIB_H 1
 #cmakedefine HAVE_STRERROR 1
-#cmakedefine HAVE_STRING_H 1
+#cmakedefine HAVE_STRERROR_L 1
+#cmakedefine HAVE_FORK 1
+#cmakedefine HAVE_EXECVP 1
+#cmakedefine HAVE_CTERMID 1
+#cmakedefine HAVE_CLOCK_GETTIME 1
+#cmakedefine HAVE_STRINGS_H 1
 #cmakedefine HAVE_SYS_IOCTL_H 1
 #cmakedefine HAVE_SYS_RESOURCE_H 1
 #cmakedefine HAVE_SYS_SELECT_H 1
@@ -66,11 +71,15 @@
 // Define if IPV6 support is enabled.
 #cmakedefine IPV6 1
 
-#define LFS_ALIAS_BITS @LFS_ALIAS_BITS@
 #define LT_MODULE_EXT "@CMAKE_SHARED_MODULE_SUFFIX@"
 
 // Define if network support is enabled.
 #cmakedefine NETWORK 1
+// Define for new-style network code.
+#cmakedefine NET123 1
+#cmakedefine NET123_EXEC 1
+#cmakedefine NET123_WINHTTP 1
+#cmakedefine NET123_WININET 1
 
 // Define to disable downsampled decoding.
 #cmakedefine NO_DOWNSAMPLE 1
@@ -134,8 +143,8 @@
 
 #define PKGLIBDIR "@CMAKE_INSTALL_LIBDIR@/@PROJECT_NAME@"
 
-#define SIZEOF_LONG @SIZEOF_LONG@
-#define SIZEOF_OFF_T @SIZEOF_OFF_T@
+// CMake leaves it emtpy for non-existing type. Autoconf sets it to 0.
+#define SIZEOF_OFF_T (@SIZEOF_OFF_T@+0)
 
 #cmakedefine STDERR_FILENO @STDERR_FILENO@
 #cmakedefine STDIN_FILENO @STDIN_FILENO@
@@ -152,7 +161,7 @@
 // Define to use Unicode for Windows
 #cmakedefine WANT_WIN32_UNICODE 1
 
-#if WANT_WIN32_UNICODE == 1
+#ifdef WANT_WIN32_UNICODE
 # define strcasecmp _stricmp
 # define strncasecmp _strnicmp
 #endif
@@ -162,8 +171,6 @@
 
 #cmakedefine WORDS_BIGENDIAN 1
 
-// Number of bits in a file offset, on hosts where this is settable.
-#cmakedefine _FILE_OFFSET_BITS @_FILE_OFFSET_BITS@
-
-// Define to the native offset type (long or actually off_t).
-#define lfs_alias_t @LFS_ALIAS_TYPE@
+#cmakedefine LFS_LARGEFILE_64 1
+#cmakedefine LFS_SENSITIVE 1
+#cmakedefine HAVE_O_LARGEFILE 1

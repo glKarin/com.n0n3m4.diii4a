@@ -36,6 +36,8 @@ import com.n0n3m4.q3e.karin.KidTech4Command;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -589,6 +591,13 @@ public class Q3EGameHelper
 
     private int[] GetFrameSize(int w, int h)
     {
+        int[] size = Q3EUtils.GetSurfaceViewSize(m_context, w, h);
+        Log.i("Q3EView", "FrameSize: (" + size[0] + ", " + size[1] + ")");
+        return size;
+    }
+
+    private int[] GetFrameSize_old(int w, int h)
+    {
         int width;
         int height;
         SharedPreferences mPrefs=PreferenceManager.getDefaultSharedPreferences(m_context);
@@ -603,7 +612,7 @@ public class Q3EGameHelper
             case 1:
                 if(scaleByScreenArea)
                 {
-                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, 0.5f);
+                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, new BigDecimal("0.5"));
                     width = size[0];
                     height = size[1];
                 }
@@ -616,7 +625,7 @@ public class Q3EGameHelper
             case 2:
                 if(scaleByScreenArea)
                 {
-                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, 2);
+                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, new BigDecimal("2"));
                     width = size[0];
                     height = size[1];
                 }
@@ -686,7 +695,7 @@ public class Q3EGameHelper
             case 8: // 1/3
                 if(scaleByScreenArea)
                 {
-                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, 1.0f / 3.0f);
+                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, BigDecimal.ONE.divide(new BigDecimal("3"), 2, RoundingMode.HALF_UP));
                     width = size[0];
                     height = size[1];
                 }
@@ -699,7 +708,7 @@ public class Q3EGameHelper
             case 9: // 1/4
                 if(scaleByScreenArea)
                 {
-                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, 1.0f / 4.0f);
+                    int[] size = Q3EUtils.CalcSizeByScaleScreenArea(w, h, new BigDecimal("0.25"));
                     width = size[0];
                     height = size[1];
                 }

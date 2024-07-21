@@ -8,8 +8,8 @@
 	initially written by Thomas Orgis
 */
 
-#include "mpg123app.h"
-#include "local.h"
+#include "../mpg123app.h"
+#include "../local.h"
 
 // A number of UTF-8 strings to test.
 

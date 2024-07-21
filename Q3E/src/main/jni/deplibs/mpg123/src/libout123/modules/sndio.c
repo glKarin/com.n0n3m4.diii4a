@@ -17,11 +17,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "out123_int.h"
+#include "../out123_int.h"
 
 #include <sndio.h>
 
-#include "debug.h"
+#include "../../common/debug.h"
 
 static int sndio_to_mpg123_enc(int sign, int bits)
 {

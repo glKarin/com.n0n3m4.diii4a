@@ -19,7 +19,7 @@
 #ifndef MPG123_FILTERS_H
 #define MPG123_FILTERS_H
 
-#include "compat.h"
+#include "compat/compat.h"
 
 struct filter
 {

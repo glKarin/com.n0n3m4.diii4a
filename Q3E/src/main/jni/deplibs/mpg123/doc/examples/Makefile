@@ -2,6 +2,7 @@ targets = \
   feedseek \
   mpg123_to_out123 \
   mpg123_to_wav_replaced_io \
+  mpg123_to_wav_reader64 \
   scan \
   id3dump \
   mpglib \
@@ -38,6 +39,9 @@ mpg123_to_out123: mpg123_to_out123.c
 	$(compile) -o $@ $< $(OUT123_CFLAGS) $(OUT123_LDFLAGS) $(linkflags)
 
 mpg123_to_wav_replaced_io: mpg123_to_wav_replaced_io.c
+	$(compile) -o $@ $< $(OUT123_CFLAGS) $(OUT123_LDFLAGS) $(linkflags)
+
+mpg123_to_wav_reader64: mpg123_to_wav_reader64.c
 	$(compile) -o $@ $< $(OUT123_CFLAGS) $(OUT123_LDFLAGS) $(linkflags)
 
 feedseek: feedseek.c

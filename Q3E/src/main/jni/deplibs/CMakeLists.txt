@@ -29,12 +29,14 @@ add_subdirectory (opus) # -1.4
 
 add_subdirectory (mp3lame) #
 
-add_subdirectory (mpg123) # -1.28.2
+add_subdirectory (mpg123/ports/cmake) # -1.32.6
 
 add_subdirectory (libsndfile) # -1.2.2
 
 add_subdirectory (fluidsynth)
 #add_subdirectory(fluidsynth-lite)
+
+#add_subdirectory (etc2comp/EtcLib)
 
 #add_subdirectory (ktx) # KTX-Software-3.0.1
 

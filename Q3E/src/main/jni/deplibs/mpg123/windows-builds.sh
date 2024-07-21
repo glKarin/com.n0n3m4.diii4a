@@ -58,8 +58,13 @@ txt="README COPYING NEWS"
 opts="LDFLAGS=-static-libgcc"
 #opts="--with-audio=win32 --disable-modules"
 
-# Get the version for the build from configure.ac .
-version=`sed -n 's/^AC_INIT([^,]*, \[\([^,]*\)\], .*$/\1/p' < configure.ac`
+# Get the version for the build from version.h.
+major=$(grep '#define MPG123_MAJOR' src/version.h | cut -f 3 -d ' ')
+minor=$(grep '#define MPG123_MINOR' src/version.h | cut -f 3 -d ' ')
+patch=$(grep '#define MPG123_PATCH' src/version.h | cut -f 3 -d ' ')
+suffix=$(grep '#define MPG123_SUFFIX' src/version.h | cut -f 2 -d '"')
+version="$major.$minor.$patch$suffix"
+
 echo "Building binaries for version $version"
 
 prepare_dir()

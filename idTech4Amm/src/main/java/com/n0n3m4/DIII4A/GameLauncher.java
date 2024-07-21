@@ -51,6 +51,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TabHost;
@@ -272,12 +273,12 @@ public class GameLauncher extends Activity
 				else
 					RemoveCommand_temp("disconnect");
 			}
-			else if (id == R.id.scale_by_screen_area)
+/*			else if (id == R.id.scale_by_screen_area)
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, isChecked)
 						.commit();
-			}
+			}*/
 			else if (id == R.id.cb_s_useOpenAL)
 			{
 				setProp("s_useOpenAL", isChecked);
@@ -342,22 +343,21 @@ public class GameLauncher extends Activity
         {
             int index;
 			int rgId = radioGroup.getId();
-			if (rgId == R.id.rg_scrres)
-			{
-				GameLauncher.this.UpdateCustomerResolution(id == R.id.res_custom);
-				GameLauncher.this.UpdateResolutionScaleScheme(id);
-				index = GetCheckboxIndex(radioGroup, id);
-				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putInt(Q3EPreference.pref_scrres, index)
-						.commit();
-			}
-			else if (rgId == R.id.r_harmclearvertexbuffer)
+			if (rgId == R.id.r_harmclearvertexbuffer)
 			{
 				index = GetCheckboxIndex(radioGroup, id);
 				SetProp("harm_r_clearVertexBuffer", index);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, index)
 						.commit();
+			}
+			else if (rgId == R.id.rg_scrres)
+			{
+				index = GetCheckboxIndex(radioGroup, id);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putInt(Q3EPreference.pref_scrres_scheme, index)
+						.commit();
+				UpdateResolution(id);
 			}
 			else if (rgId == R.id.rg_harm_r_lightModel)
 			{
@@ -501,12 +501,19 @@ public class GameLauncher extends Activity
     {
         private final String name;
         private final String defValue;
+		private final Runnable runnable;
 
         public SavePreferenceTextWatcher(String name, String defValue)
         {
-            this.name = name;
-            this.defValue = defValue;
+            this(name, defValue, null);
         }
+
+		public SavePreferenceTextWatcher(String name, String defValue, Runnable runnable)
+		{
+			this.name = name;
+			this.defValue = defValue;
+			this.runnable = runnable;
+		}
 
         public SavePreferenceTextWatcher(String name)
         {
@@ -527,6 +534,8 @@ public class GameLauncher extends Activity
             PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
                     .putString(name, value)
                     .commit();
+			if(null != runnable)
+				runnable.run();
         }
     }
 	private class SaveFloatPreferenceTextWatcher implements TextWatcher
@@ -885,8 +894,7 @@ public class GameLauncher extends Activity
 
 		// graphics
 		int checkedRadioButtonId = V.rg_scrres.getCheckedRadioButtonId();
-		GameLauncher.this.UpdateCustomerResolution(checkedRadioButtonId == R.id.res_custom);
-		GameLauncher.this.UpdateResolutionScaleScheme(checkedRadioButtonId);
+		UpdateResolution(checkedRadioButtonId);
 
 		UnlockCmdUpdate();
     }
@@ -976,6 +984,7 @@ public class GameLauncher extends Activity
         th.addTab(th.newTabSpec("tab3").setIndicator(Q3ELang.tr(this, R.string.graphics)).setContent(R.id.launcher_tab3));
 
         V.Setup();
+
 		InitGameList();
 
 		V.main_ad_layout.setVisibility(mPrefs.getBoolean(PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
@@ -1019,8 +1028,38 @@ public class GameLauncher extends Activity
         UpdateMouseManualMenu(!V.detectmouse.isChecked());
 
         SelectCheckbox(V.rg_curpos, mPrefs.getInt(Q3EPreference.pref_mousepos, 3));
-        V.rg_scrres.setOnCheckedChangeListener(m_groupCheckChangeListener);
-        SelectCheckbox(V.rg_scrres, mPrefs.getInt(Q3EPreference.pref_scrres, 0));
+		V.rg_scrres.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		SelectCheckbox(V.rg_scrres, mPrefs.getInt(Q3EPreference.pref_scrres_scheme, 0));
+		int scrresScheme = Utility.Step(mPrefs.getInt(Q3EPreference.pref_scrres_scale, 100), 10);
+		V.res_scale.setProgress(scrresScheme);
+		V.tv_scale_current.setText(V.res_scale.getProgress() + "%");
+		V.res_scale.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+		{
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+			{
+				int newProgress = Utility.Step(progress, 10);
+				if(newProgress != progress)
+				{
+					seekBar.setProgress(newProgress);
+					return;
+				}
+				V.tv_scale_current.setText(progress + "%");
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar)
+			{
+
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar)
+			{
+				mPrefs.edit().putInt(Q3EPreference.pref_scrres_scale, seekBar.getProgress()).commit();
+				UpdateResolutionText();
+			}
+		});
         SelectCheckbox(V.rg_msaa, mPrefs.getInt(Q3EPreference.pref_msaa, 0));
         V.rg_msaa.setOnCheckedChangeListener(m_groupCheckChangeListener);
         //k
@@ -1117,10 +1156,16 @@ public class GameLauncher extends Activity
         V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 4.0f));
 		V.edt_harm_r_maxFps.setText(Q3EPreference.GetStringFromInt(mPrefs, Q3EPreference.pref_harm_r_maxFps, 0));
 
-        V.res_x.setText(mPrefs.getString(Q3EPreference.pref_resx, "" + Q3EGlobals.SCREEN_WIDTH));
+		Runnable customResChanged = new Runnable() {
+			@Override
+			public void run() {
+				UpdateResolutionText();
+			}
+		};
+		V.res_x.setText(mPrefs.getString(Q3EPreference.pref_resx, "" + Q3EGlobals.SCREEN_WIDTH));
         V.res_y.setText(mPrefs.getString(Q3EPreference.pref_resy, "" + Q3EGlobals.SCREEN_HEIGHT));
-        V.res_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resx, "" + Q3EGlobals.SCREEN_WIDTH));
-        V.res_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resy, "" + Q3EGlobals.SCREEN_HEIGHT));
+        V.res_x.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resx, "" + Q3EGlobals.SCREEN_WIDTH, customResChanged));
+        V.res_y.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_resy, "" + Q3EGlobals.SCREEN_HEIGHT, customResChanged));
         V.launcher_tab1_game_data_chooser_button.setOnClickListener(m_buttonClickListener);
         V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
         V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
@@ -1202,8 +1247,8 @@ public class GameLauncher extends Activity
 		V.skip_intro.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.multithreading.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.find_dll.setOnCheckedChangeListener(m_checkboxChangeListener);
-		V.scale_by_screen_area.setOnCheckedChangeListener(m_checkboxChangeListener);
-		V.scale_by_screen_area.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_scale_by_screen_area, false));
+//		V.scale_by_screen_area.setOnCheckedChangeListener(m_checkboxChangeListener);
+//		V.scale_by_screen_area.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_scale_by_screen_area, false));
 		boolean useOpenAL = mPrefs.getBoolean(Q3EPreference.pref_harm_s_useOpenAL, true);
 		V.cb_s_useOpenAL.setChecked(useOpenAL);
 		V.cb_s_useEAXReverb.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_s_useEAXReverb, true));
@@ -1578,18 +1623,42 @@ public class GameLauncher extends Activity
 		dialog.show();
 	}
 
+	private void OpenRuntimeErrorLog()
+	{
+		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.GetGameDataDirectoryPath("stderr.txt"));
+		String text = Q3EUtils.file_get_contents(path);
+
+		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, Q3ELang.tr(this, R.string.last_runtime_log) + ": stderr.txt", text);
+		builder.setNeutralButton("stdout.txt", new AlertDialog.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				OpenRuntimeLog();
+				dialog.dismiss();
+			}
+		});
+		builder.create().show();
+	}
+
     private void OpenRuntimeLog()
     {
-        String path = V.edt_path.getText().toString() + File.separatorChar + "stdout.txt";
-        String text = Q3EUtils.file_get_contents(path);
-        if (text != null)
-        {
-            ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.last_runtime_log), text);
-        }
-        else
-        {
-            Toast.makeText(this, Q3ELang.tr(this, R.string.file_can_not_access) + path, Toast.LENGTH_LONG).show();
-        }
+		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.GetGameDataDirectoryPath("stdout.txt"));
+		String text = Q3EUtils.file_get_contents(path);
+
+		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, Q3ELang.tr(this, R.string.last_runtime_log), text);
+		builder.setNeutralButton("stderr.txt", new AlertDialog.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				OpenRuntimeErrorLog();
+				dialog.dismiss();
+			}
+		});
+		builder.create().show();
+
+		//Toast.makeText(this, Q3ELang.tr(this, R.string.file_can_not_access) + path, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -1652,7 +1721,7 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_2fingerlmb, V.secfinglmb.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_detectmouse, V.detectmouse.isChecked());
         mEdtr.putInt(Q3EPreference.pref_mousepos, GetCheckboxIndex(V.rg_curpos));
-        mEdtr.putInt(Q3EPreference.pref_scrres, GetCheckboxIndex(V.rg_scrres));
+		mEdtr.putInt(Q3EPreference.pref_scrres_scheme, GetCheckboxIndex(V.rg_scrres));
         mEdtr.putInt(Q3EPreference.pref_msaa, GetCheckboxIndex(V.rg_msaa));
         mEdtr.putString(Q3EPreference.pref_resx, V.res_x.getText().toString());
         mEdtr.putString(Q3EPreference.pref_resy, V.res_y.getText().toString());
@@ -1671,7 +1740,7 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, V.launcher_tab2_joystick_unfixed.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_joystick_visible, getResources().getIntArray(R.array.joystick_visible_mode_values)[V.launcher_tab2_joystick_visible.getSelectedItemPosition()]);
         mEdtr.putBoolean(Q3EPreference.pref_harm_find_dll, V.find_dll.isChecked());
-		mEdtr.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, V.scale_by_screen_area.isChecked());
+//		mEdtr.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, V.scale_by_screen_area.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, V.cb_s_useEAXReverb.isChecked());
 		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, V.readonly_command.isChecked());
@@ -1827,16 +1896,37 @@ public class GameLauncher extends Activity
         dialog.show(getFragmentManager(), "DebugDialog");
     }
 
+	private void UpdateResolution(int rgid)
+	{
+		int type;
+
+		if(rgid == R.id.rg_scrres_scheme_custom)
+			type = 3;
+		else if(rgid == R.id.rg_scrres_scheme_scale_area)
+			type = 2;
+		else if(rgid == R.id.rg_scrres_scheme_scale_length)
+			type = 1;
+		else
+			type = 0;
+
+		UpdateCustomerResolution(type == 3);
+		UpdateResolutionScaleSchemeBar(type == 1 || type == 2);
+		UpdateResolutionText();
+	}
+
+	private void UpdateResolutionText()
+	{
+		int[] size = Q3EUtils.GetFullScreenSize(this);
+		size = Q3EUtils.GetSurfaceViewSize(this, size[0], size[1]);
+		V.tv_scrres_size.setText(size[0] + " x " + size[1]);
+	}
+
     private void UpdateCustomerResolution(boolean on)
     {
-        LinearLayout layout = V.res_customlayout;
-        final int count = layout.getChildCount();
-        for (int i = 0; i < count; i++)
-        {
-            layout.getChildAt(i).setEnabled(on);
-        }
-
-        layout.setEnabled(on);
+		V.res_x.setEnabled(on);
+		V.res_y.setEnabled(on);
+		V.res_customlayout.setEnabled(on);
+		V.res_customlayout.setVisibility(on ? View.VISIBLE : View.GONE);
     }
 
     private void SetGameDLL(String val)
@@ -2221,6 +2311,7 @@ public class GameLauncher extends Activity
 			subdir = "";
 		else
 			subdir += "/";
+		V.launcher_fs_game_cvar.setText("(" + Q3EUtils.q3ei.GetGameCommandParm() + ")");
 		V.launcher_fs_game_subdir.setText(Q3ELang.tr(this, R.string.sub_directory) + subdir);
 		V.launcher_fs_game_subdir.setVisibility(subdir.isEmpty() ? View.GONE : View.VISIBLE);
     }
@@ -2503,7 +2594,11 @@ public class GameLauncher extends Activity
 				if(mod.startsWith(":"))
 				{
 					if(":".equals(mod))
+					{
 						RemoveParam("file");
+						RemoveParam("deh");
+						RemoveParam("bex");
+					}
 					else
 					{
 						String files = mod.substring(1);
@@ -2546,6 +2641,7 @@ public class GameLauncher extends Activity
 		m_chooseGameModFunc.Start(bundle);
 	}
 
+/*
 	private void UpdateResolutionScaleScheme(int checkedId)
 	{
 		boolean usingPercent = checkedId == R.id.res_05x
@@ -2554,6 +2650,14 @@ public class GameLauncher extends Activity
 				|| checkedId == R.id.res_1p4x
 				;
 		V.scale_by_screen_area.setEnabled(usingPercent);
+	}
+*/
+
+	private void UpdateResolutionScaleSchemeBar(boolean on)
+	{
+		V.res_scale.setEnabled(on);
+		V.res_scale_layout.setEnabled(on);
+		V.res_scale_layout.setVisibility(on ? View.VISIBLE : View.GONE);
 	}
 
 	public String GetDefaultGameDirectory()
@@ -2700,7 +2804,6 @@ public class GameLauncher extends Activity
         public CheckBox useetc1;
         public CheckBox usedxt;
         public RadioGroup r_harmclearvertexbuffer;
-        public RadioGroup rg_scrres;
         public RadioGroup rg_msaa;
         public RadioGroup rg_color_bits;
         public RadioGroup rg_fs_game;
@@ -2750,7 +2853,7 @@ public class GameLauncher extends Activity
 		public EditText edt_cmdline_temp;
 		public CheckBox skip_intro;
 		public Button launcher_tab1_game_mod_button;
-		public CheckBox scale_by_screen_area;
+//		public CheckBox scale_by_screen_area;
 		public RadioGroup rg_harm_r_shadow;
 		public RadioGroup rg_opengl;
 		public CheckBox cb_s_useOpenAL;
@@ -2779,6 +2882,12 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_r_autoAspectRatio;
 		public CheckBox cb_stencilShadowCombine;
 		public EditText edt_harm_r_shadowMapAlpha;
+		public TextView launcher_fs_game_cvar;
+		public SeekBar res_scale;
+		public RadioGroup rg_scrres;
+		public TextView tv_scrres_size;
+		public TextView tv_scale_current;
+		public LinearLayout res_scale_layout;
 
         public void Setup()
         {
@@ -2789,7 +2898,6 @@ public class GameLauncher extends Activity
             useetc1 = findViewById(R.id.useetc1);
             usedxt = findViewById(R.id.usedxt);
             r_harmclearvertexbuffer = findViewById(R.id.r_harmclearvertexbuffer);
-            rg_scrres = findViewById(R.id.rg_scrres);
             rg_msaa = findViewById(R.id.rg_msaa);
             rg_color_bits = findViewById(R.id.rg_color_bits);
             rg_fs_game = findViewById(R.id.rg_fs_game);
@@ -2839,7 +2947,7 @@ public class GameLauncher extends Activity
 			edt_cmdline_temp = findViewById(R.id.edt_cmdline_temp);
 			skip_intro = findViewById(R.id.skip_intro);
 			launcher_tab1_game_mod_button = findViewById(R.id.launcher_tab1_game_mod_button);
-			scale_by_screen_area = findViewById(R.id.scale_by_screen_area);
+//			scale_by_screen_area = findViewById(R.id.scale_by_screen_area);
 			rg_harm_r_shadow = findViewById(R.id.rg_harm_r_shadow);
 			rg_opengl = findViewById(R.id.rg_opengl);
 			cb_s_useOpenAL = findViewById(R.id.cb_s_useOpenAL);
@@ -2868,6 +2976,12 @@ public class GameLauncher extends Activity
 			rg_r_autoAspectRatio = findViewById(R.id.rg_r_autoAspectRatio);
 			cb_stencilShadowCombine = findViewById(R.id.cb_stencilShadowCombine);
 			edt_harm_r_shadowMapAlpha = findViewById(R.id.edt_harm_r_shadowMapAlpha);
+			launcher_fs_game_cvar = findViewById(R.id.launcher_fs_game_cvar);
+			res_scale = findViewById(R.id.res_scale);
+			rg_scrres = findViewById(R.id.rg_scrres);
+			tv_scrres_size = findViewById(R.id.tv_scrres_size);
+			tv_scale_current = findViewById(R.id.tv_scale_current);
+			res_scale_layout = findViewById(R.id.res_scale_layout);
         }
     }
 }

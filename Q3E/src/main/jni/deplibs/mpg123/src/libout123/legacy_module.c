@@ -7,7 +7,7 @@
 */
 
 #include "out123_int.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 /* A single module is staticly compiled in for each type */
 extern mpg123_module_t mpg123_output_module_info;
@@ -16,7 +16,7 @@ extern mpg123_module_t mpg123_output_module_info;
 
 /* Open a module */
 mpg123_module_t*
-open_module(const char* type, const char* name, int verbose, const char *bindir)
+INT123_open_module(const char* type, const char* name, int verbose, const char *bindir)
 {
 	mpg123_module_t *mod = NULL;
 	
@@ -56,18 +56,18 @@ open_module(const char* type, const char* name, int verbose, const char *bindir)
 }
 
 
-void close_module(mpg123_module_t* module, int verbose)
+void INT123_close_module(mpg123_module_t* module, int verbose)
 {
-	debug("close_module()");
+	debug("INT123_close_module()");
 	
 	/* Module was never really 'loaded', so nothing to do here. */
 }
 
 
-int list_modules(const char *type, char ***names, char ***descr, int verbose
+int INT123_list_modules(const char *type, char ***names, char ***descr, int verbose
 ,	const char *bindir)
 {
-	debug("list_modules()" );
+	debug("INT123_list_modules()" );
 
 	*names = NULL;
 	*descr = NULL;
@@ -75,10 +75,10 @@ int list_modules(const char *type, char ***names, char ***descr, int verbose
 	if(
 		(*names=malloc(sizeof(char*)))
 	&&	!((*names)[0]=NULL) /* for safe cleanup */
-	&&	((*names)[0]=compat_strdup(mpg123_output_module_info.name))
+	&&	((*names)[0]=INT123_compat_strdup(mpg123_output_module_info.name))
 	&&	(*descr=malloc(sizeof(char*)))
 	&&	!((*descr)[0]=NULL) /* for safe cleanup */
-	&& ((*descr)[0]=compat_strdup(mpg123_output_module_info.description))
+	&& ((*descr)[0]=INT123_compat_strdup(mpg123_output_module_info.description))
 	)
 		return 1;
 	else

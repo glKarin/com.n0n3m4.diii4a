@@ -13,14 +13,24 @@
 #define MPG123_H
 #include "config.h"
 
+#ifndef _FILE_OFFSET_BITS
+#ifdef LFS_SENSITIVE
+#ifdef LFS_LARGEFILE_64
+#define _FILE_OFFSET_BITS 64
+#endif
+#endif
+#endif
+
 /* everyone needs it */
-#include "compat.h"
+#include "compat/compat.h"
 /* import DLL symbols on windows */
 
 #include "httpget.h"
-#if WIN32
+#if _WIN32
 #include "win32_support.h"
 #endif
+
+#include "streamdump.h"
 
 #if defined(WIN32) && defined(DYNAMIC_BUILD)
 #define LINK_MPG123_DLL
@@ -41,6 +51,7 @@
 #define VERBOSE_MAX 3
 
 extern char* binpath; /* argv[0], actually... */
+extern int stdin_is_term;
 extern int stdout_is_term;
 extern int stderr_is_term;
 
@@ -57,13 +68,11 @@ struct parameter
 	const char* output_module;	/* audio output module to use */
 	const char* output_device;	/* audio output device to use */
 	long  output_flags;	/* out123 flags */
-#ifdef HAVE_TERMIOS
 	int term_ctrl;
 	int term_visual;
 	/* Those are supposed to be single characters. */
 	char* term_usr1;
 	char* term_usr2;
-#endif
 	int checkrange;
 	int force_reopen;
 	long realtime;
@@ -96,6 +105,7 @@ struct parameter
 	long resync_limit;
 	int smooth;
 	double pitch; /* <0 or >0, 0.05 for 5% speedup. */
+	double pauseloop; // terminal control 'pause' loop length
 	unsigned long appflags; /* various switches for mpg123 application */
 	char *proxyurl;
 	int keep_open; /* Whether to keep files open after end reached, for remote control mode, perhaps terminal control, too. */
@@ -109,6 +119,12 @@ struct parameter
 	long icy_interval;
 	const char* name; /* name for this player instance */
 	double device_buffer; /* output device buffer */
+#if defined(NETWORK) || defined(NET123)
+	char *httpauth; /* HTTP auth data */
+#endif
+#if defined(NET123)
+	char *network_backend;
+#endif
 };
 
 enum mpg123app_flags
@@ -123,8 +139,7 @@ enum mpg123app_flags
 
 extern char *equalfile;
 extern off_t framenum;
-extern struct httpdata htd;
-
+extern struct stream *filept;
 extern int intflag;
 
 #ifdef VARMODESUPPORT
@@ -133,6 +148,7 @@ extern int playlimit;
 #endif
 
 /* why extern? */
+void play_prebuffer();
 extern int play_frame(void);
 
 extern int control_generic(mpg123_handle *fr);

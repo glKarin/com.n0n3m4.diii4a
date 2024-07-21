@@ -20,7 +20,7 @@ import com.karin.idTech4Amm.R;
  */
 public class SeekBarPreference extends DialogPreference
 {
-    private Map<String, Object> m_initValues = null;
+    private Attr m_initValues = null;
     private final ViewHolder V = new ViewHolder();
     
     @SuppressLint("NewApi")
@@ -53,11 +53,14 @@ public class SeekBarPreference extends DialogPreference
         if(attrs != null)
         {
             TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.SeekBarDialogPreference);
-            m_initValues = new HashMap<>();
-            m_initValues.put("min", ta.getInt(R.styleable.SeekBarDialogPreference_min, 0));
-            m_initValues.put("max", ta.getInt(R.styleable.SeekBarDialogPreference_max, 100));  
-            m_initValues.put("suffix", ta.getString(R.styleable.SeekBarDialogPreference_suffix));
-            m_initValues.put("editable", ta.getBoolean(R.styleable.SeekBarDialogPreference_editable, true));   
+            m_initValues = new Attr();
+            m_initValues.min = ta.getInt(R.styleable.SeekBarDialogPreference_min, 0);
+            m_initValues.max = ta.getInt(R.styleable.SeekBarDialogPreference_max, 100);
+            String suffix = ta.getString(R.styleable.SeekBarDialogPreference_suffix);
+            if(null == suffix)
+                suffix = "";
+            m_initValues.suffix = suffix;
+            m_initValues.editable = ta.getBoolean(R.styleable.SeekBarDialogPreference_editable, true);
             ta.recycle();
         }
     }
@@ -68,18 +71,11 @@ public class SeekBarPreference extends DialogPreference
         if(m_initValues != null)
         {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Object min = m_initValues.get("min");
-                V.seek_bar.setMin(min != null ? (int)min : V.seek_bar.getMin());
+                V.seek_bar.setMin(m_initValues.min);
             }
-            Object max = m_initValues.get("max");
-            if(max != null)
-                V.seek_bar.setMax((int)max);
-            Object suffix = m_initValues.get("suffix");
-            if(suffix != null)
-                V.suffix.setText(suffix.toString());
-            Object editable = m_initValues.get("editable");
-            if(editable != null)
-                V.seek_bar.setEnabled((boolean)editable);
+            V.seek_bar.setMax(m_initValues.max);
+            V.suffix.setText(m_initValues.suffix);
+            V.seek_bar.setEnabled(m_initValues.editable);
         }
         V.seek_bar.setProgress(getPersistedInt(0));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -134,5 +130,13 @@ public class SeekBarPreference extends DialogPreference
             progress = view.findViewById(R.id.seek_bar_dialog_preference_layout_progress);
             suffix = view.findViewById(R.id.seek_bar_dialog_preference_layout_suffix);
         }
+    }
+
+    private static class Attr
+    {
+        public int min = 0;
+        public int max = 100;
+        public String suffix = "";
+        public boolean editable = true;
     }
 }

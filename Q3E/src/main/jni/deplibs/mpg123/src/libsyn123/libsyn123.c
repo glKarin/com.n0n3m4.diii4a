@@ -1,7 +1,7 @@
 /*
 	libsyn123: libsyn123 entry code and wave generators
 
-	copyright 2017-2018 by the mpg123 project
+	copyright 2017-2023 by the mpg123 project
 	licensed under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 
@@ -20,8 +20,27 @@
 */
 
 #include "syn123_int.h"
-#include "sample.h"
-#include "debug.h"
+#include "../version.h"
+#include "../common/sample.h"
+#include "../common/debug.h"
+
+const char * attribute_align_arg syn123_distversion(unsigned int *major, unsigned int *minor, unsigned int *patch)
+{
+	if(major)
+		*major = MPG123_MAJOR;
+	if(minor)
+		*minor = MPG123_MINOR;
+	if(patch)
+		*patch = MPG123_PATCH;
+	return MPG123_VERSION;
+}
+
+unsigned int attribute_align_arg syn123_libversion(unsigned int *patch)
+{
+	if(patch)
+		*patch = SYN123_PATCHLEVEL;
+	return SYN123_API_VERSION;
+}
 
 static const double freq_error = 1e-4;
 /* For our precisions, that value will always be good enough. */
@@ -77,7 +96,7 @@ static double common_samples_per_period( long rate, size_t count
 		)
 			periods++;
 		spp*=periods;
-		debug3( "samples_per_period + %f Hz = %g (%" SIZE_P " periods)"
+		debug3( "samples_per_period + %f Hz = %g (%zu periods)"
 		,	waves[i].freq, spp, periods );
 	}
 	return spp;
@@ -108,7 +127,7 @@ static size_t tablesize( long rate, size_t count
 
 	/* Ensure size limit. Even it is ridiculous. */
 	ts = smin(ts, size_limit);
-	debug1("table size: %" SIZE_P, ts);
+	debug1("table size: %zu", ts);
 	return ts;
 }
 
@@ -189,7 +208,7 @@ static double wave_shot(double p)
 // Actual wave worker function, to be used to give up to
 // bufblock samples in one go. This takes a vector of phases
 // and multiplies the resulting amplitudes into the output buffer.
-static void evaluate_wave( double outbuf[bufblock], int samples
+static void evaluate_wave( double outbuf[bufblock], size_t samples
 ,	enum syn123_wave_id id, double phase[bufblock] )
 {
 	// Ensuring that the inner loop is inside the switch.
@@ -197,7 +216,7 @@ static void evaluate_wave( double outbuf[bufblock], int samples
 	// to write it down the right way from the beginning.
 	#define PHASE phase[pi]
 	#define PI_LOOP( code ) \
-		for(int pi=0; pi<samples; ++pi) \
+		for(size_t pi=0; pi<samples; ++pi) \
 			outbuf[pi] *= code;
 	switch(id)
 	{
@@ -303,11 +322,11 @@ const char* syn123_strerror(int errcode)
 // task from actually evaluating the wave functions.
 // The code is actually smaller and better abstracted that way.
 
-static void add_some_wave( double outbuf[bufblock], int samples
+static void add_some_wave( double outbuf[bufblock], size_t samples
 ,	enum syn123_wave_id id, double pps, double phase
 ,	double workbuf[bufblock] )
 {
-	for(int pi=0; pi<samples; ++pi)
+	for(size_t pi=0; pi<samples; ++pi)
 		workbuf[pi] = phasefrac(pi*pps+phase);
 	evaluate_wave(outbuf, samples, id, workbuf);
 }
@@ -317,7 +336,7 @@ static void wave_fit_table( size_t samples
 , long rate, struct syn123_wave *wave )
 {
 	double pps = wave->freq/rate;
-	debug3("wave_fit_table %" SIZE_P " %ld %g", samples, rate, wave->freq);
+	debug3("wave_fit_table %zu %ld %g", samples, rate, wave->freq);
 	size_t periods = smax(round2size(pps*samples), 1);
 	pps = (double)periods/samples;
 	wave->freq = pps*rate;
@@ -331,7 +350,7 @@ static void wave_add_buffer( double outbuf[bufblock], size_t samples
 ,	long rate, struct syn123_wave *wave, double workbuf[bufblock] )
 {
 	double pps = wave->freq/rate;
-	debug3("wave_add_buffer %" SIZE_P " %ld %g", samples, rate, wave->freq);
+	debug3("wave_add_buffer %zu %ld %g", samples, rate, wave->freq);
 	debug4( "adding wave: %c %i @ %g Hz + %g"
 	,	wave->backwards ? '<' : '>', wave->id, wave->freq, wave->phase );
 	if(wave->backwards)
@@ -378,7 +397,7 @@ static void wave_generator(syn123_handle *sh, int samples)
 	for(int i=0; i<samples; ++i)
 		sh->workbuf[1][i] = 1;
 	/* Add individual waves. */
-	for(int c=0; c<sh->wave_count; ++c)
+	for(size_t c=0; c<sh->wave_count; ++c)
 		wave_add_buffer( sh->workbuf[1], samples, sh->fmt.rate, sh->waves+c
 		,	sh->workbuf[0] );
 }
@@ -856,8 +875,7 @@ syn123_read( syn123_handle *sh, void *dest, size_t dest_bytes )
 		while(dest_samples)
 		{
 			size_t block = smin(dest_samples, sh->samples - sh->offset);
-			debug3( "offset: %"SIZE_P" block: %" SIZE_P" out of %"SIZE_P
-			,	sh->offset, block, sh->samples );
+			debug3("offset: %zu block: %zu out of %zu", sh->offset, block, sh->samples);
 			syn123_mono2many(cdest, (char*)sh->buf+sh->offset*samplesize
 			,	sh->fmt.channels, samplesize, block );
 			cdest  += framesize*block;
@@ -899,7 +917,7 @@ syn123_read( syn123_handle *sh, void *dest, size_t dest_bytes )
 			extracted += block;
 		}
 	}
-	debug1("extracted: %" SIZE_P, extracted);
+	debug1("extracted: %zu", extracted);
 	return extracted*framesize;
 }
 

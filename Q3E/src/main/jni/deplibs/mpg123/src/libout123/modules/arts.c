@@ -8,9 +8,9 @@
 */
 
 
-#include "out123_int.h"
+#include "../out123_int.h"
 #include <artsc.h>
-#include "debug.h"
+#include "../../common/debug.h"
 
 typedef struct
 {
