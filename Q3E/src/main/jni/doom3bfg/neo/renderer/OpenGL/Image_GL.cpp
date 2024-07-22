@@ -58,21 +58,18 @@ static idCVar harm_image_useCompression( "harm_image_useCompression", "0", CVAR_
 #define image_useETC2Compression (harm_image_useCompression.GetInteger() == 2)
 #define image_useRGBA4444 (harm_image_useCompression.GetInteger() == 3)
 
-static ID_INLINE unsigned int etc1_data_size(unsigned int width, unsigned int height) {
+ID_INLINE static unsigned int etc1_data_size(unsigned int width, unsigned int height) {
 	return (((width + 3) & ~3) * ((height + 3) & ~3)) >> 1;
 }
 
-static ID_INLINE unsigned short CalcExtendedDimension(unsigned short a_ushOriginalDimension)
+ID_INLINE static unsigned short CalcExtendedDimension(unsigned short a_ushOriginalDimension)
 {
 	return (unsigned short)((a_ushOriginalDimension + 3) & ~3);
 }
 
-static ID_INLINE unsigned int etc2_data_size(unsigned int wh) {
-	return CalcExtendedDimension((unsigned short)wh);
-}
-
-static ID_INLINE unsigned int etc2_data_size(unsigned int width, unsigned int height) {
-	return etc2_data_size(width) * etc2_data_size(height);
+ID_INLINE static unsigned int etc2_data_size(unsigned int width, unsigned int height) {
+	// return etc2_data_size(width) * etc2_data_size(height);
+	return (CalcExtendedDimension(width) >> 2) * (CalcExtendedDimension(height) >> 2) * Etc::Block4x4EncodingBits::GetBytesPerBlock(Etc::Block4x4EncodingBits::Format::RGBA8);
 }
 
 static void * rgba4444_convert_tex_image(unsigned int width, unsigned int height, const void *pixels)
@@ -1080,8 +1077,8 @@ void idImage::AllocImage()
 						if( data != NULL )
 						{
 							memset(data, 0, compressedSize);
-							unsigned int etc2_width = etc2_data_size(w);
-							unsigned int etc2_height = etc2_data_size(h);
+							unsigned int etc2_width = CalcExtendedDimension(w);
+							unsigned int etc2_height = CalcExtendedDimension(h);
 							//void *etc2_data = etc2_compress_tex_image(w, h, data, &etc2_size, &etc2_width, &etc2_height);
 							TID(glCompressedTexImage2D( uploadTarget + side, level, GL_COMPRESSED_RGBA8_ETC2_EAC, etc2_width, etc2_height, 0, compressedSize, data ));
 							//free(etc2_data);
