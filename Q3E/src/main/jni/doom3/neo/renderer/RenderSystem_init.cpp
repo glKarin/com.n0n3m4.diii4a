@@ -68,9 +68,12 @@ idCVar r_znear("r_znear", "3", CVAR_RENDERER | CVAR_FLOAT, "near Z clip plane di
 #ifdef _NO_LIGHT
 idCVar r_noLight("r_noLight", "0", CVAR_RENDERER | CVAR_INTEGER/*CVAR_BOOL | CVAR_ARCHIVE*/, "lighting disable hack: 0 - using interaction lighting; 1 - disable lighting(not allow switch); 2 - disable lighting(allow switch with 0)");
 #endif
-idCVar r_useETC1("r_useETC1", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use ETC1 compression");
-idCVar r_useETC1Cache("r_useETC1cache", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use ETC1 compression");
-idCVar r_useDXT("r_useDXT", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "use DXT compression if possible");
+idCVar r_useETC1("r_useETC1", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "use ETC1 compression");
+idCVar r_useETC1Cache("r_useETC1cache", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "use ETC1 compression");
+idCVar r_useDXT("r_useDXT", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "use DXT compression if possible");
+#ifdef _OPENGLES3
+idCVar r_useETC2("r_useETC2", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "use ETC2 compression on OpenGLES3.0+");
+#endif
 
 idCVar r_ignoreGLErrors("r_ignoreGLErrors", "1", CVAR_RENDERER | CVAR_BOOL, "ignore GL errors");
 idCVar r_finish("r_finish", "0", CVAR_RENDERER | CVAR_BOOL, "force a call to glFinish() every frame");

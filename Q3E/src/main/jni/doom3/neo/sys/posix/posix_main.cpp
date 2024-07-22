@@ -1231,3 +1231,129 @@ uint64_t Sys_Microseconds( void )
 	uint64_t curtime = (tp.tv_sec) * 1000000LL + tp.tv_usec;
 	return curtime;
 }
+
+/*
+========================
+Sys_CPUCount
+
+numLogicalCPUCores	- the total number of logical CPU cores (equal to the total number of threads from all CPU)
+numPhysicalCPUCores	- the total number of physical CPU cores
+numCPUPackages		- the total number of packages (physical processors)
+========================
+*/
+// RB begin
+void Sys_CPUCount( int& numLogicalCPUCores, int& numPhysicalCPUCores, int& numCPUPackages )
+{
+	static bool		init = false;
+	static bool		CPUCoresIsFound = false; // needed for sysconf()
+	static bool		SiblingsIsFound = false; // needed for sysconf()
+	static double	ret;
+
+	static int		s_numLogicalCPUCores;
+	static int		s_numPhysicalCPUCores;
+	static int		s_numCPUPackages;
+
+	int		fd, len, pos, end;
+	char	buf[ 4096 ];
+	char	number[100];
+
+	if( init )
+	{
+		numPhysicalCPUCores = s_numPhysicalCPUCores;
+		numLogicalCPUCores = s_numLogicalCPUCores;
+		numCPUPackages = s_numCPUPackages;
+	}
+
+	s_numPhysicalCPUCores = 1;
+	s_numLogicalCPUCores = 1;
+	s_numCPUPackages = 1;
+
+	fd = open( "/proc/cpuinfo", O_RDONLY );
+	if( fd != -1 )
+	{
+		len = read( fd, buf, 4096 );
+		close( fd );
+		pos = 0;
+		while( pos < len )
+		{
+			if( !idStr::Cmpn( buf + pos, "cpu cores", 9 ) )
+			{
+				pos = strchr( buf + pos, ':' ) - buf + 2;
+				end = strchr( buf + pos, '\n' ) - buf;
+				if( pos < len && end < len )
+				{
+					idStr::Copynz( number, buf + pos, sizeof( number ) );
+					assert( ( end - pos ) > 0 && ( end - pos ) < sizeof( number ) );
+					number[ end - pos ] = '\0';
+
+					int processor = atoi( number );
+
+					if( ( processor ) > s_numPhysicalCPUCores )
+					{
+						s_numPhysicalCPUCores = processor;
+						CPUCoresIsFound = true;
+					}
+				}
+				else
+				{
+					common->Printf( "failed parsing /proc/cpuinfo\n" );
+					CPUCoresIsFound = false;
+					break;
+				}
+			}
+			else if( !idStr::Cmpn( buf + pos, "siblings", 8 ) )
+			{
+				pos = strchr( buf + pos, ':' ) - buf + 2;
+				end = strchr( buf + pos, '\n' ) - buf;
+				if( pos < len && end < len )
+				{
+					idStr::Copynz( number, buf + pos, sizeof( number ) );
+					assert( ( end - pos ) > 0 && ( end - pos ) < sizeof( number ) );
+					number[ end - pos ] = '\0';
+
+					int coreId = atoi( number );
+
+					if( ( coreId ) > s_numLogicalCPUCores )
+					{
+						s_numLogicalCPUCores = coreId;
+						SiblingsIsFound = true;
+					}
+				}
+				else
+				{
+					common->Printf( "failed parsing /proc/cpuinfo\n" );
+					SiblingsIsFound = false;
+					break;
+				}
+			}
+
+			pos = strchr( buf + pos, '\n' ) - buf + 1;
+		}
+		if( CPUCoresIsFound == false && SiblingsIsFound == false )
+		{
+			common->Printf( "failed parsing /proc/cpuinfo\n" );
+			common->Printf( "alternative method used\n" );
+			s_numPhysicalCPUCores = sysconf( _SC_NPROCESSORS_CONF ); // _SC_NPROCESSORS_ONLN may not be reliable on Android
+			s_numLogicalCPUCores = s_numPhysicalCPUCores; // hack for CPU without Hyper-Threading (HT) technology
+		}
+		else if( CPUCoresIsFound == true && SiblingsIsFound == false )
+		{
+			s_numLogicalCPUCores = s_numPhysicalCPUCores; // hack for CPU without Hyper-Threading (HT) technology
+		}
+	}
+	else
+	{
+		common->Printf( "failed to read /proc/cpuinfo\n" );
+		common->Printf( "alternative method used\n" );
+		s_numPhysicalCPUCores = sysconf( _SC_NPROCESSORS_CONF ); // _SC_NPROCESSORS_ONLN may not be reliable on Android
+		s_numLogicalCPUCores = s_numPhysicalCPUCores; // hack for CPU without Hyper-Threading (HT) technology
+	}
+
+	common->Printf( "/proc/cpuinfo CPU processors: %d\n", s_numPhysicalCPUCores );
+	common->Printf( "/proc/cpuinfo CPU logical cores: %d\n", s_numLogicalCPUCores );
+
+	numPhysicalCPUCores = s_numPhysicalCPUCores;
+	numLogicalCPUCores = s_numLogicalCPUCores;
+	numCPUPackages = s_numCPUPackages;
+}
+// RB end

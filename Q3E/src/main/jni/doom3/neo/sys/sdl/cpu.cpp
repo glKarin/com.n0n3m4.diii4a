@@ -236,3 +236,19 @@ void Sys_FPU_SetPrecision() {
 	_controlfp(_PC_64, _MCW_PC);
 #endif
 }
+
+/*
+========================
+Sys_CPUCount
+
+numLogicalCPUCores	- the number of logical CPU per core
+numPhysicalCPUCores	- the total number of cores per package
+numCPUPackages		- the total number of packages (physical processors)
+========================
+*/
+void Sys_CPUCount( int& numLogicalCPUCores, int& numPhysicalCPUCores, int& numCPUPackages )
+{
+	numPhysicalCPUCores = 1;
+	numLogicalCPUCores = SDL_GetCPUCount();
+	numCPUPackages = 1;
+}
