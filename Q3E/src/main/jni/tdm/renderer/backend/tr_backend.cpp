@@ -561,7 +561,7 @@ static void	RB_SetBuffer( const void *data ) {
 #if !defined(__ANDROID__)
 	qglDrawBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
 #endif
-#ifdef _OPENGLES3
+#ifdef _GLES
 	qglReadBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK ); //karin: OpenGLES3.0
 #endif
 

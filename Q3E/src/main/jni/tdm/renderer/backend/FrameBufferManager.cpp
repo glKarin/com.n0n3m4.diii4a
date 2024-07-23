@@ -247,7 +247,7 @@ void FrameBufferManager::CopyRender( const copyRenderCommand_t &cmd ) {
 	int backEndStartTime = Sys_Milliseconds();
 
 	if ( activeFbo == defaultFbo ) { // #4425: not applicable, raises gl errors
-#ifdef _OPENGLES3 //karin: OpenGLES3.0
+#ifdef _GLES //karin: OpenGLES3.0
 		qglReadBuffer( GL_BACK );
 #endif
 	}

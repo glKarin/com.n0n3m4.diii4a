@@ -158,7 +158,7 @@ if(ANDROID)
             FROM TDM_SOURCE_FILES
     )
     add_definitions(-D_NO_TRACY)
-    add_definitions(-D_OPENGLES3)
+    add_definitions(-D_GLES)
 else()
     include_directories(
             "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include"
@@ -224,6 +224,16 @@ ucm_remove_files(
 		FROM TDM_SOURCE_FILES
 )
 
+OPTION(TDM_USE_INTERNAL_MINIZIP OFF)
+if(TDM_USE_INTERNAL_MINIZIP)
+    ucm_add_files(
+            "ThirdParty/artefacts/minizip/src/ioapi.c"
+            "ThirdParty/artefacts/minizip/src/miniunz.c"
+            "ThirdParty/artefacts/minizip/src/minizip.c"
+            "ThirdParty/artefacts/minizip/src/unzip.c"
+            "ThirdParty/artefacts/minizip/src/zip.c"
+            TO TDM_SOURCE_FILES)
+endif()
 target_sources(TheDarkMod PRIVATE ${TDM_SOURCE_FILES})
 
 if (MSVC)
@@ -311,7 +321,6 @@ include_directories(
         "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/doctest/include"
         "${D3_DEPLIBS_PATH}/openal-soft"
         "${DEPLIBS_PATH}"
-        "${DEPLIBS_PATH}/minizip"
         "${DEPLIBS_PATH}/curl/include"
         "${DEPLIBS_PATH}/libjpeg/libjpeg"
         "${DEPLIBS_PATH}/libpng"
@@ -320,9 +329,20 @@ include_directories(
         "${DEPLIBS_PATH}/libvorbis/include"
         "${DEPINCS_PATH}"
 )
+if(TDM_USE_INTERNAL_MINIZIP)
+    include_directories(
+            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/minizip/include"
+            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/minizip/include/minizip"
+    )
+else()
+    include_directories(
+            "${DEPLIBS_PATH}/minizip"
+    )
+    SET(TDM_MINIZIP_LIB "minizip")
+endif()
 target_link_libraries(TheDarkMod
 		z
-		minizip
+		${TDM_MINIZIP_LIB}
 		vorbis
 		ogg
 		mbedtls

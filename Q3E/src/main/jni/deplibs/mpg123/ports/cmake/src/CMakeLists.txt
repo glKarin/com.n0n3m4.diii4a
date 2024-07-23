@@ -188,7 +188,11 @@ endif()
 if(WIN32)
     set(HAVE_FPU 1)
 else()
+   #[[ if(ANDROID)
+        set(HAVE_FPU 1)
+    else()]]
     cmake_host_system_information(RESULT HAVE_FPU QUERY HAS_FPU)
+    #[[endif()]]
 endif()
 
 if(NOT HAVE_FPU)
