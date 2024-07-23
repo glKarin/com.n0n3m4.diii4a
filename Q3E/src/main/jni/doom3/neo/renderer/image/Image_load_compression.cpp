@@ -5,11 +5,11 @@
 #if 1
 #if !defined(_MSC_VER)
 //#define IC_PRINT(fmt, args...) { printf(fmt, ##args); }
-#define IC_PRINT(x)
+#define IC_PRINT(fmt, args...)
 #define IC_ERROR(fmt, args...) { printf(fmt, ##args); }
 #else
 //#define IC_PRINT(fmt, ...) { printf(fmt, __VA_ARGS__); }
-#define IC_PRINT(x)
+#define IC_PRINT(fmt, ...)
 #define IC_ERROR(fmt, ...) { printf(fmt, __VA_ARGS__); }
 #endif
 #else

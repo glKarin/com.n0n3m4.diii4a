@@ -528,7 +528,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
     
     qmain(argc, argv);
 
-	LOGI("idTech4A++ game data directory: %s\n", game_data_dir);
+	LOGI("idTech4A++(arm%d) game data directory: %s\n", sizeof(void *) == 8 ? 64 : 32, game_data_dir);
 
 	free(argv);
     free(doom3_path);

@@ -620,7 +620,7 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
         qglDrawElements(GL_TRIANGLES,
                        r_singleTriangle.GetBool() ? 3 : numIndexes,
                        GL_INDEX_TYPE,
-                       (int *)vertexCache.Position(tri->indexCache) + start);
+                       (glIndex_t *)vertexCache.Position(tri->indexCache) + start);
         backEnd.pc.c_vboIndexes += numIndexes;
     } else {
         vertexCache.UnbindIndex();
