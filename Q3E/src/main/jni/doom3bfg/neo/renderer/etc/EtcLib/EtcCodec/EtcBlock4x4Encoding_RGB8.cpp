@@ -24,12 +24,12 @@ Block4x4Encoding_ETC1 encodes the ETC1 subset of RGB8.
 
 */
 
-#include "EtcConfig.h"
+#include "../Etc/EtcConfig.h"
 #include "EtcBlock4x4Encoding_RGB8.h"
 
 #include "EtcBlock4x4EncodingBits.h"
 #include "EtcBlock4x4.h"
-#include "EtcMath.h"
+#include "../Etc/EtcMath.h"
 
 #include <stdio.h>
 #include <string.h>

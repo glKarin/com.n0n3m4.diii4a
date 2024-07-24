@@ -21,7 +21,7 @@ Block4x4Encoding_RG11 is the encoder to use when targetting file format RG11 and
 
 */
 
-#include "EtcConfig.h"
+#include "../Etc/EtcConfig.h"
 #include "EtcBlock4x4Encoding_RG11.h"
 
 #include "EtcBlock4x4EncodingBits.h"

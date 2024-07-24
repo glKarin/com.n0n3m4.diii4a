@@ -18,8 +18,8 @@
 
 //#include "Etc.h"
 #include "EtcColorFloatRGBA.h"
-#include "EtcBlock4x4EncodingBits.h"
-#include "EtcErrorMetric.h"
+#include "../EtcCodec/EtcBlock4x4EncodingBits.h"
+#include "../EtcCodec/EtcErrorMetric.h"
 
 
 namespace Etc

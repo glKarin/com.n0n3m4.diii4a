@@ -24,7 +24,7 @@ The sorting is done with buckets, where each bucket is an indication of how much
 
 */
 
-#include "EtcConfig.h"
+#include "../Etc/EtcConfig.h"
 #include "EtcSortedBlockList.h"
 
 #include "EtcBlock4x4.h"

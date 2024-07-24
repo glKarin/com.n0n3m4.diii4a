@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "EtcColorFloatRGBA.h"
+#include "../Etc/EtcColorFloatRGBA.h"
 
 #include "EtcErrorMetric.h"
 

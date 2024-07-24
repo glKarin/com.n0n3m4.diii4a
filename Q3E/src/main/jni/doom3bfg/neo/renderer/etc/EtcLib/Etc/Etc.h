@@ -19,7 +19,7 @@
 #include "EtcConfig.h"
 #include "EtcImage.h"
 #include "EtcColor.h"
-#include "EtcErrorMetric.h"
+#include "../EtcCodec/EtcErrorMetric.h"
 #include <memory>
 
 #define ETCCOMP_MIN_EFFORT_LEVEL (0.0f)

@@ -24,13 +24,13 @@ alpha of NAN
 
 */
 
-#include "EtcConfig.h"
+#include "../Etc/EtcConfig.h"
 #include "EtcBlock4x4.h"
 
 #include "EtcBlock4x4EncodingBits.h"
-#include "EtcColor.h"
-#include "EtcImage.h"
-#include "EtcColorFloatRGBA.h"
+#include "../Etc/EtcColor.h"
+#include "../Etc/EtcImage.h"
+#include "../Etc/EtcColorFloatRGBA.h"
 #include "EtcBlock4x4Encoding_RGB8.h"
 #include "EtcBlock4x4Encoding_RGBA8.h"
 #include "EtcBlock4x4Encoding_RGB8A1.h"

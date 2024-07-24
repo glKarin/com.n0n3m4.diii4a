@@ -126,3 +126,40 @@ namespace Etc
 	//
 
 }
+
+void EncodeC(const unsigned char *a_pafSourceRGBA,
+			 unsigned int a_uiSourceWidth,
+			 unsigned int a_uiSourceHeight,
+			 int a_format,
+			 int a_eErrMetric,
+			 float a_fEffort,
+			 unsigned int a_uiJobs,
+			 unsigned int a_uimaxJobs,
+			 unsigned char **a_ppaucEncodingBits,
+			 unsigned int *a_puiEncodingBitsBytes,
+			 unsigned int *a_puiExtendedWidth,
+			 unsigned int *a_puiExtendedHeight)
+{
+	unsigned int floatSize = a_uiSourceWidth * a_uiSourceHeight * sizeof(Etc::ColorFloatRGBA);
+	Etc::ColorFloatRGBA* floatData = ( Etc::ColorFloatRGBA* )malloc( floatSize );
+	const int Size = a_uiSourceWidth * a_uiSourceHeight;
+	for(int i = 0; i < Size; i++)
+	{
+		floatData[i] = Etc::ColorFloatRGBA::ConvertFromRGBA8(a_pafSourceRGBA[i * 4], a_pafSourceRGBA[i * 4 + 1], a_pafSourceRGBA[i * 4 + 2], a_pafSourceRGBA[i * 4 + 3]);
+	}
+
+	int iEncodingTime_ms;
+	Etc::Encode((float *)floatData,
+				a_uiSourceWidth, a_uiSourceHeight,
+				static_cast<Etc::Image::Format>(a_format),
+				static_cast<Etc::ErrorMetric>(a_eErrMetric),
+				a_fEffort, // fEffort,
+				a_uiJobs,
+				a_uimaxJobs,
+				a_ppaucEncodingBits, a_puiEncodingBitsBytes,
+				a_puiExtendedWidth, a_puiExtendedHeight,
+				&iEncodingTime_ms,
+				false);
+
+	free(floatData);
+}

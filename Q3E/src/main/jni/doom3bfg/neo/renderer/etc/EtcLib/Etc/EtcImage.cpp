@@ -28,9 +28,9 @@ Image is an array of 4x4 blocks that represent the encoding of the source image
 #include "EtcImage.h"
 
 #include "Etc.h"
-#include "EtcBlock4x4.h"
-#include "EtcBlock4x4EncodingBits.h"
-#include "EtcSortedBlockList.h"
+#include "../EtcCodec/EtcBlock4x4.h"
+#include "../EtcCodec/EtcBlock4x4EncodingBits.h"
+#include "../EtcCodec/EtcSortedBlockList.h"
 
 #if ETC_WINDOWS
 #include <windows.h>
