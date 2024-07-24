@@ -80,13 +80,13 @@ Tag with `-free` only for F-Droid update.
 
 * Fix GZDOOM sound.
 * Update screen resolution settings on launcher.
-* Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower) on DOOM3-BFG.
+* Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower), and using cvar `harm_image_useCompressionCache` enable caching on DOOM3-BFG.
 
 ----------------------------------------------------------------------------------
 
 * 修复GZDOOM声音.
 * 启动器更新屏幕分辨率设置.
-* 毁灭战士3BFG新增cvar `harm_image_useCompression`启用压缩纹理支持(对于低内存设备(如32位设备), 但会加载缓慢).
+* 毁灭战士3BFG新增cvar `harm_image_useCompression`启用压缩纹理支持(对于低内存设备(如32位设备), 并且可以通过cvar `harm_image_useCompressionCache`启用缓存, 但会加载缓慢).
 
 ----------------------------------------------------------------------------------
 

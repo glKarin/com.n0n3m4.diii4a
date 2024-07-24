@@ -32,7 +32,7 @@ public final class Constants
         return new String[] {
             "Fix GZDOOM sound.",
             "Update screen resolution settings on launcher.",
-            "Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower) on DOOM3-BFG.",
+            "Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower), and using cvar `harm_image_useCompressionCache` enable caching on DOOM3-BFG.",
         };
 	};
 

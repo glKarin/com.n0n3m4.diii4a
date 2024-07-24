@@ -95,9 +95,9 @@ static bool R_LoadCompression(byte *data, int length, imageCompression_t *image)
         IC_ERROR("Invalid idTech4A++ compression texture magic: %u != %u.\n", header.magic, IMAGE_COMPRESSION_MAGIC);
         return false;
 	}
-    if(header.version > IMAGE_COMPRESSION_VERSION)
+    if(header.version != IMAGE_COMPRESSION_VERSION) // only support current version
 	{
-        IC_ERROR("Invalid idTech4A++ compression texture version: %u > %u.\n", header.version, IMAGE_COMPRESSION_VERSION);
+        IC_ERROR("Invalid idTech4A++ compression texture version: %u != %u.\n", header.version, IMAGE_COMPRESSION_VERSION);
         return false;
 	}
     // if(type);

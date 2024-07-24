@@ -24,8 +24,8 @@
 
 #if 1
 #if !defined(_MSC_VER)
-#define IC_PRINT(fmt, args...) { printf(fmt, ##args); }
-//#define IC_PRINT(fmt, args...)
+//#define IC_PRINT(fmt, args...) { printf(fmt, ##args); }
+#define IC_PRINT(fmt, args...)
 #define IC_ERROR(fmt, args...) { printf(fmt, ##args); }
 #else
 //#define IC_PRINT(fmt, ...) { printf(fmt, __VA_ARGS__); }
@@ -59,7 +59,7 @@ enum {
 // for ETC1 compression texture encode
 #include "etc1/etc1_android.h"
 
-static idCVar harm_image_useCompression( "harm_image_useCompression", "0", CVAR_INTEGER | CVAR_INIT, "Use ETC1/2 compression or RGBA4444 texture for low memory(e.g. 32bits device), it will using lower memory but loading slower\n  0 = using RGBA8;\n  1 = using ETC1 compression(no alpha);\n  2 = using ETC2 compression;\n  3 = RGBA4444" );
+static idCVar harm_image_useCompression( "harm_image_useCompression", "0", CVAR_INTEGER | CVAR_INIT, "Use ETC1/2 compression or RGBA4444 texture for low memory(e.g. 32bits device), it will using lower memory but loading slower\n  0 = RGBA8;\n  1 = ETC1 compression(no alpha);\n  2 = ETC2 compression;\n  3 = RGBA4444" );
 static idCVar harm_image_useCompressionCache( "harm_image_useCompressionCache", "0", CVAR_BOOL | CVAR_INIT, "Cache ETC1/2 compression or RGBA4444 texture to filesystem" );
 #define image_useETCCompression (harm_image_useCompression.GetInteger() == 1)
 #define image_useETC2Compression (harm_image_useCompression.GetInteger() == 2)
