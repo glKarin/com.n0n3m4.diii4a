@@ -133,12 +133,24 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
                 );
 
+        KCVar.Group DOOM3BFG_CVARS = new KCVar.Group("DOOM 3 BFG", false)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_image_useCompression", "integer", "0", "SUse ETC1/2 compression or RGBA4444 texture for low memory(e.g. 32bits device), it will using lower memory but loading slower", KCVar.FLAG_NO_ARCHIVE,
+                                "0", "RGBA8",
+                                "1", "ETC1 compression(no alpha)",
+                                "2", "ETC2 compression",
+                                "3", "RGBA4444"
+                        ),
+                        KCVar.CreateCVar("harm_image_useCompressionCache", "bool", "0", "Cache ETC1/2 compression or RGBA4444 texture to filesystem", KCVar.FLAG_NO_ARCHIVE)
+                );
+
         _cvars.put("RENDERER", RENDERER_CVARS);
         _cvars.put("FRAMEWORK", FRAMEWORK_CVARS);
         _cvars.put("base", GAME_CVARS);
         _cvars.put("rivensin", RIVENSIN_CVARS);
         _cvars.put("q4base", QUAKE4_CVARS);
         _cvars.put("preybase", PREY_CVARS);
+        _cvars.put("DOOM3BFG", DOOM3BFG_CVARS);
 
         return _cvars;
     }
@@ -165,7 +177,7 @@ public final class KCVarSystem
             else if(Q3EUtils.q3ei.isTDM)
                 return new ArrayList<>();
             else if(Q3EUtils.q3ei.isD3BFG)
-                return new ArrayList<>();
+                return Arrays.asList(_cvars.get("DOOM3BFG"));
             else if(Q3EUtils.q3ei.isDOOM)
                 return new ArrayList<>();
             else

@@ -26,6 +26,7 @@
   // Linux needs this to support file operation on files larger then 4+GB
   // But might need better if/def to select just the platforms that needs them.
 
+#if defined(__ANDROID__) && defined(__aarch64__)
         #ifndef __USE_FILE_OFFSET64
                 #define __USE_FILE_OFFSET64
         #endif
@@ -38,6 +39,7 @@
         #ifndef _FILE_OFFSET_BIT
                 #define _FILE_OFFSET_BIT 64
         #endif
+#endif
 
 #endif
 

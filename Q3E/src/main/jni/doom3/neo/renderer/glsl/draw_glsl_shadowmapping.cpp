@@ -256,7 +256,7 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
     GL_Uniform1f(offsetof(shaderProgram_t, u_uniformParm[4]), lod * sampleScale);
 #endif
     const float ShadowMapTexelSize[] = {
-            shadowMapResolutions[backEnd.vLight->shadowLOD], // textureSize()
+            (float)shadowMapResolutions[backEnd.vLight->shadowLOD], // textureSize()
             SampleFactors[backEnd.vLight->shadowLOD], // 1.0 / textureSize()
             harm_r_shadowMapJitterScale.GetFloat(), // sampler offset scale
             0
@@ -265,7 +265,7 @@ ID_INLINE static void RB_ShadowMapping_setupSample(void)
     const float ScreenSize[] = {
             1.0f / tr.GetScreenWidth(), // 1.0 / screen_width
             1.0f / tr.GetScreenHeight(), // 1.0 / screen_height
-            globalImages->blueNoiseImage256->uploadWidth, // jitter.textureSize()
+            (float)globalImages->blueNoiseImage256->uploadWidth, // jitter.textureSize()
             1.0f / globalImages->blueNoiseImage256->uploadWidth, // 1.0 / jitter.textureSize()
     };
     GL_Uniform4fv(offsetof(shaderProgram_t, u_uniformParm[2]), ScreenSize);
@@ -620,7 +620,7 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
         qglDrawElements(GL_TRIANGLES,
                        r_singleTriangle.GetBool() ? 3 : numIndexes,
                        GL_INDEX_TYPE,
-                       (int *)vertexCache.Position(tri->indexCache) + start);
+                       (glIndex_t *)vertexCache.Position(tri->indexCache) + start);
         backEnd.pc.c_vboIndexes += numIndexes;
     } else {
         vertexCache.UnbindIndex();

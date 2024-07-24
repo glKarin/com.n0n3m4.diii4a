@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.karin.idTech4Amm"
-    android:versionCode="11052"
-    android:versionName="1.1.0harmattan52"
+    android:versionCode="11053"
+    android:versionName="1.1.0harmattan53"
     android:installLocation="preferExternal"
     >
 

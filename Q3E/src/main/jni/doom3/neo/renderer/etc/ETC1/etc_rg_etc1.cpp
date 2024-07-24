@@ -2439,6 +2439,12 @@ found_perfect_match:
       return static_cast<unsigned int>(best_error);
    }
 
+   void init_pack_etc1_block(void)
+   {
+      static int initd=0;
+      if (!initd) {pack_etc1_block_init();initd=1;}
+   }
+
    int etc1_encode_image(const unsigned char* pIn, unsigned int width, unsigned int height,
       unsigned int pixelSize, unsigned int stride, unsigned char* pOut){
     if (pixelSize < 2 || pixelSize > 4) {
@@ -2450,8 +2456,7 @@ found_perfect_match:
     etc1_pack_params parms;
     parms.m_quality=cLowQuality;
 
-    static int initd=0;
-    if (!initd) {pack_etc1_block_init();initd=1;}
+    init_pack_etc1_block();
 
     unsigned int encodedWidth = (width + 3) & ~3;
     unsigned int encodedHeight = (height + 3) & ~3;

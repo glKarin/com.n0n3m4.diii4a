@@ -20,7 +20,7 @@
     <string name="if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer">If graphics out of memory and crash, suggest to force clear/delete vertex buffer.</string>
     <string name="force_delete_vertex_buffer_on_every_end_frame">Force delete vertex buffer on every end frame</string>
     <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">Also like 2nd, and delete VBO handle, maybe slower, but memory safer.</string>
-    <string name="game_cvar_fs_game">Game(fs_game)</string>
+    <string name="game_cvar_fs_game">Game</string>
     <string name="doom_iii">DOOM III</string>
     <string name="doom3_resurrection_of_evil_d3xp">DOOM3:Resurrection of Evil</string>
     <string name="classic_doom_cdoom">Classic DOOM</string>
@@ -295,6 +295,8 @@
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">DOOM 3 BFG</string>
     <string name="doom_base">DOOM</string>
+    <string name="doom1_base">DOOM</string>
+    <string name="doom2_base">DOOM II</string>
     <string name="quake_3_base">Quake III:Arena</string>
     <string name="quake_3_teamarena">Quake III:Team Arena</string>
     <string name="stop">Stop</string>
@@ -330,5 +332,11 @@
     <string name="show_game_datas_standalone_directories">Show game standalone directories</string>
     <string name="make_game_use_standalone_data_directory">Make game use standalone data directory</string>
     <string name="game_datas_standalone_directories">Game standalone directories</string>
+    <string name="fullscreen">Fullscreen</string>
+    <string name="scale_by_screen_width_height">Scale by screen width/height</string>
+    <string name="scale_with_screen_aspect_ratio">Scale with screen aspect ratio: </string>
+    <string name="_scale_by_screen_area">Scale by screen area</string>
+    <string name="freedoom1_base">FreeDOOM 1</string>
+    <string name="freedoom2_base">FreeDOOM 2</string>
 
 </resources>

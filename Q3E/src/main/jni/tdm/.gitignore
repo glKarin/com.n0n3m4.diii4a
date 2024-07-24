@@ -11,4 +11,5 @@ Darkmod.log
 
 ThirdParty/artefacts/*/lib
 ThirdParty/artefacts/*/bin
+ThirdParty/artefacts/minizip/src
 #ThirdParty/include

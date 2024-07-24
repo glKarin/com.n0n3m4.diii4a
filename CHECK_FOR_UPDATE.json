@@ -3,5 +3,5 @@
     "update":"2024-07-17",
     "version":"1.1.0harmattan53",
     "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan53/idTech4A++_1.1.0harmattan53.apk",
-    "changes":"  * Fix GZDOOM sound.\n  * Update screen resolution settings on launcher.\n  * Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower) on DOOM3-BFG."
+    "changes":"  * Fix GZDOOM sound.\n  * Update screen resolution settings on launcher.\n  * Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower), and using cvar `harm_image_useCompressionCache` enable caching on DOOM3-BFG."
 }

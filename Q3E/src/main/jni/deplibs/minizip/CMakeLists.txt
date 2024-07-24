@@ -40,15 +40,21 @@ endif()
 
 if(UNIX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -O3")
+  if(ANDROID)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   add_definitions(-D__USE_FILE_OFFSET64)
   add_definitions(-D__USE_LARGEFILE64)
   add_definitions(-D_LARGEFILE64_SOURCE)
   add_definitions(-D_FILE_OFFSET_BIT=64)
 endif()
+  endif()
+endif()
 add_definitions(-DHAVE_UNISTD_H=1)
 
+if(NOT ANDROID)
 if(CMAKE_C_COMPILER MATCHES ".*clang")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3 -msse4.1 -maes")
+endif()
 endif()
 
 # create minizip library

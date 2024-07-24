@@ -1,3 +1,3 @@
 * 修复GZDOOM声音.
 * 启动器更新屏幕分辨率设置.
-* 毁灭战士3BFG新增cvar `harm_image_useCompression`启用压缩纹理支持(对于低内存设备(如32位设备), 但会加载缓慢).
+* 毁灭战士3BFG新增cvar `harm_image_useCompression`启用压缩纹理支持(对于低内存设备(如32位设备), 并且可以通过cvar `harm_image_useCompressionCache`启用缓存, 但会加载缓慢).

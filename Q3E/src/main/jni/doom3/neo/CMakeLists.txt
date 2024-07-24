@@ -151,6 +151,8 @@ if(EXTRAS_TOOLS)
 	message(STATUS "Build extras tools support")
 endif()
 
+add_subdirectory(renderer/etc/EtcLib)
+set(local_libs "static_EtcLib")
 # Using traditional C++98
 set(CMAKE_CXX_STANDARD "98")
 
@@ -541,7 +543,7 @@ function(add_globbed_headers SRCLIST PATHPREFIX)
 	set(${SRCLIST} ${tmp_hdrs} ${${SRCLIST}})
 endfunction()
 
-set(local_libs static_ogg)
+set(local_libs ${local_libs} static_ogg)
 if(COMPILE_CURL STREQUAL "1")
 	if(NOT WIN32)
 		set(local_libs ${local_libs} static_curl)
@@ -695,9 +697,8 @@ set(src_renderer
 	renderer/tr_trace.cpp
 	renderer/tr_trisurf.cpp
 	renderer/tr_turboshadow.cpp
-	renderer/etc/etc_android.cpp
-	renderer/etc/etc_rg_etc1.cpp
 	renderer/tr_rendertools.cpp
+	renderer/etc/etc.cpp
     renderer/matrix/esTransform.c
 )
 

@@ -17,6 +17,7 @@ public final class KCVar
     public static final int CATEGORY_COMMAND = 2;
 
     public static final int FLAG_POSITIVE = 1;
+    public static final int FLAG_NO_ARCHIVE = 1 << 1;
 
     public final String name;
     public final String type;
