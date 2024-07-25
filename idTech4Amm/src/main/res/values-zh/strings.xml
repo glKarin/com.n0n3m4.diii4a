@@ -335,4 +335,5 @@
     <string name="_scale_by_screen_area">按屏幕面积比例</string>
     <string name="freedoom1_base">FreeDOOM 1</string>
     <string name="freedoom2_base">FreeDOOM 2</string>
+    <string name="setup_launcher_theme">设置启动器主题</string>
 </resources>

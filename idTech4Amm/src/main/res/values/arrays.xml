@@ -86,6 +86,20 @@
         <item>Only pressed</item>
     </string-array>
 
+    <string-array name="theme_labels">
+        <item>System</item>
+        <item>Traditional</item>
+        <item>Holo</item>
+        <item>Material</item>
+    </string-array>
+
+    <string-array name="theme_values">
+        <item>system</item>
+        <item>traditional</item>
+        <item>holo</item>
+        <item>material</item>
+    </string-array>
+
     <string-array name="key_map_names">
         <item>Mouse 1</item>
         <item>Mouse 2</item>

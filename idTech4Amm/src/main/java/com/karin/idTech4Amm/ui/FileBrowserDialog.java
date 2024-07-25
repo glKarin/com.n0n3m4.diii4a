@@ -75,8 +75,11 @@ public class FileBrowserDialog extends AlertDialog {
 
     private void Open(int position)
     {
-        String path = m_adapter.Get(position);
-        SetPath(path);
+        if(m_adapter.IsDirectory(position))
+        {
+            String path = m_adapter.Get(position);
+            SetPath(path);
+        }
     }
 
     public void SetPath(String path)

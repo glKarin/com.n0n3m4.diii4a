@@ -10,6 +10,7 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.karin.idTech4Amm.sys.Theme;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import java.util.Set;
@@ -36,6 +37,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         findPreference(Q3EPreference.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.LANG).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.GAME_STANDALONE_DIRECTORY).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.THEME).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -121,6 +123,13 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
                         ContextUtility.RestartApp(LauncherSettingPreference.this.getActivity());
                     }
                 }, 1000);
+                return true;
+            }
+            case Q3EPreference.THEME:
+            {
+                Toast.makeText(context, R.string.app_is_rebooting, Toast.LENGTH_SHORT).show();
+                Theme.Reset(null);
+                ContextUtility.RestartApp(getActivity());
                 return true;
             }
             default:

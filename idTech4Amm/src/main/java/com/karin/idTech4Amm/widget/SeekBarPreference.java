@@ -83,6 +83,7 @@ public class SeekBarPreference extends DialogPreference
         }
         V.max.setText("" + V.seek_bar.getMax());
         V.progress.setText("" + V.seek_bar.getProgress());
+        V.progress.setTextColor(Color.GRAY);
         V.seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
                 {
@@ -94,7 +95,7 @@ public class SeekBarPreference extends DialogPreference
                 }
                 public void onStopTrackingTouch(SeekBar seekBar)
                 {
-                    V.progress.setTextColor(Color.BLACK);
+                    V.progress.setTextColor(Color.GRAY);
                 }
         });
     }

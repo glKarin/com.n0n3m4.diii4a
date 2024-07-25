@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.karin.idTech4Amm.sys.Theme;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KLogcat;
@@ -50,6 +51,7 @@ public class LogcatActivity extends Activity
         boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false);
         ContextUtility.SetScreenOrientation(this, o ? 0 : 1);
 
+        Theme.SetTheme(this, false);
         setContentView(R.layout.logcat_page);
 
         m_logcat = new KLogcat();
@@ -98,6 +100,7 @@ public class LogcatActivity extends Activity
 
     private void SetupUI()
     {
+        //V.logtext.setTextColor(Theme.BlackColor(this));
     }
 
     @Override

@@ -117,5 +117,14 @@
                 android:entryValues="@array/lang_values"
                 android:entries="@array/lang_labels"
                 />
+            <ListPreference
+                android:title="@string/theme"
+                android:key="harm_theme"
+                android:persistent="true"
+                android:defaultValue="system"
+                android:summary="@string/setup_launcher_theme"
+                android:entryValues="@array/theme_values"
+                android:entries="@array/theme_labels"
+                />
         </PreferenceCategory>
     </PreferenceScreen>

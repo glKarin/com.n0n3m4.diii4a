@@ -336,5 +336,6 @@
     <string name="_scale_by_screen_area">Масштабировать по площади экрана</string>
     <string name="freedoom1_base">FreeDOOM 1</string>
     <string name="freedoom2_base">FreeDOOM 2</string>
+    <string name="setup_launcher_theme">Setup launcher theme</string>
 
 </resources>

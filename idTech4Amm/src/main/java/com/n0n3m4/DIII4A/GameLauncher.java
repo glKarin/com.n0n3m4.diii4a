@@ -68,6 +68,7 @@ import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.karin.idTech4Amm.sys.Theme;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
@@ -964,6 +965,7 @@ public class GameLauncher extends Activity
         final SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         ContextUtility.SetScreenOrientation(this, mPrefs.getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false) ? 0 : 1);
 
+		Theme.SetTheme(this, false);
         setContentView(R.layout.main);
 
         ActionBar actionBar = getActionBar();

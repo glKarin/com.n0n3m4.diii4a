@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.misc.FileBrowser;
+import com.karin.idTech4Amm.sys.Theme;
 
 public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
 {
@@ -38,7 +39,7 @@ public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
 
         textView = (TextView)view;
         textView.setText(data.name);
-        textView.setTextColor(data.IsDirectory() ? Color.BLACK : Color.GRAY);
+        textView.setTextColor(data.IsDirectory() ? Theme.BlackColor(getContext()) : Color.GRAY);
         return view;
     }
 
@@ -68,6 +69,16 @@ public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
         if(item == null)
             return null;
         return item.path;
+    }
+
+    public boolean IsDirectory(int index)
+    {
+        FileBrowser.FileModel item;
+
+        item = m_fileBrowser.GetFileModel(index);
+        if(item == null)
+            return false;
+        return item.type == FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY;
     }
 
     public void OpenPath(String path)
