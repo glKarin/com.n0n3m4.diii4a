@@ -60,8 +60,7 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:imeOptions="flagNoExtractUi"
-                    android:inputType="textNoSuggestions|textMultiLine"
-                    android:textColor="#FF000000" />
+                    android:inputType="textNoSuggestions|textMultiLine" />
 
                 <Switch
                     android:id="@+id/editable_temp_command"

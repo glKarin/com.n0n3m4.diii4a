@@ -12,7 +12,6 @@
 		android:gravity="left|center_vertical"
 		android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_marginTop="5dp"
-		android:color="#FF000000"
 		android:textSize="16sp"
 		android:textStyle="bold"/>
     

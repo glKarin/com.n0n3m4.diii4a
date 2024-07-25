@@ -22,7 +22,6 @@
 		android:layout_gravity="center"
 		android:layout_marginLeft="2dp"
 		android:layout_marginRight="2dp"
-		android:textColor="#FF000000"
 		android:textSize="16sp"
 		android:text=""/>
 	<View
