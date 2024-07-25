@@ -232,7 +232,9 @@ public class OnScreenButtonConfigActivity extends Activity
             {
                 try
                 {
-                    this.texture = BitmapFactory.decodeStream(getAssets().open(texture));
+                    String[] split = texture.split(";");
+                    String texturePath = split[0];
+                    this.texture = BitmapFactory.decodeStream(getAssets().open(texturePath));
                 }
                 catch(Exception e)
                 {
