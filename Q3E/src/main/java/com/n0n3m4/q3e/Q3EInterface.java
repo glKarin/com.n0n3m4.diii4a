@@ -809,7 +809,7 @@ public class Q3EInterface
 		else if(Q3EUtils.q3ei.isQ3)
 			return Q3EPreference.pref_harm_q3_fs_game;
 		else if(Q3EUtils.q3ei.isRTCW)
-			return Q3EPreference.pref_harm_rtqw_fs_game;
+			return Q3EPreference.pref_harm_rtcw_fs_game;
 		else if(Q3EUtils.q3ei.isTDM)
 			return Q3EPreference.pref_harm_tdm_fs_game;
 		else if(Q3EUtils.q3ei.isQ1)
@@ -833,7 +833,7 @@ public class Q3EInterface
 		else if(Q3EUtils.q3ei.isQ3)
 			return Q3EPreference.pref_harm_q3_user_mod;
 		else if(Q3EUtils.q3ei.isRTCW)
-			return Q3EPreference.pref_harm_rtqw_user_mod;
+			return Q3EPreference.pref_harm_rtcw_user_mod;
 		else if(Q3EUtils.q3ei.isTDM)
 			return Q3EPreference.pref_harm_tdm_user_mod;
 		else if(Q3EUtils.q3ei.isQ1)
@@ -857,7 +857,7 @@ public class Q3EInterface
 		else if(Q3EUtils.q3ei.isQ3)
 			return Q3EPreference.pref_harm_q3_game_lib;
 		else if(Q3EUtils.q3ei.isRTCW)
-			return Q3EPreference.pref_harm_rtqw_game_lib;
+			return Q3EPreference.pref_harm_rtcw_game_lib;
 		else if(Q3EUtils.q3ei.isTDM)
 			return Q3EPreference.pref_harm_tdm_game_lib;
 		else if(Q3EUtils.q3ei.isQ1)
@@ -881,7 +881,7 @@ public class Q3EInterface
 		else if(Q3EUtils.q3ei.isQ3)
 			return Q3EPreference.pref_params_q3;
 		else if(Q3EUtils.q3ei.isRTCW)
-			return Q3EPreference.pref_params_rtqw;
+			return Q3EPreference.pref_params_rtcw;
 		else if(Q3EUtils.q3ei.isTDM)
 			return Q3EPreference.pref_params_tdm;
 		else if(Q3EUtils.q3ei.isQ1)
@@ -892,6 +892,30 @@ public class Q3EInterface
 			return Q3EPreference.pref_params_gzdoom;
 		else
 			return Q3EPreference.pref_params;
+	}
+
+	public String GetGameCommandRecordPreferenceKey()
+	{
+		if(Q3EUtils.q3ei.isQ4)
+			return Q3EPreference.pref_harm_q4_command_record;
+		else if(Q3EUtils.q3ei.isPrey)
+			return Q3EPreference.pref_harm_prey_command_record;
+		else if(Q3EUtils.q3ei.isQ2)
+			return Q3EPreference.pref_harm_q2_command_record;
+		else if(Q3EUtils.q3ei.isQ3)
+			return Q3EPreference.pref_harm_q3_command_record;
+		else if(Q3EUtils.q3ei.isRTCW)
+			return Q3EPreference.pref_harm_rtcw_command_record;
+		else if(Q3EUtils.q3ei.isTDM)
+			return Q3EPreference.pref_harm_tdm_command_record;
+		else if(Q3EUtils.q3ei.isQ1)
+			return Q3EPreference.pref_harm_q1_command_record;
+		else if(Q3EUtils.q3ei.isD3BFG)
+			return Q3EPreference.pref_harm_d3bfg_command_record;
+		else if(Q3EUtils.q3ei.isDOOM)
+			return Q3EPreference.pref_harm_gzdoom_command_record;
+		else
+			return Q3EPreference.pref_harm_command_record;
 	}
 
 	public String GetGameHomeDirectoryPath()

@@ -75,6 +75,7 @@ import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.CVarEditorFunc;
 import com.n0n3m4.DIII4A.launcher.CheckForUpdateFunc;
+import com.n0n3m4.DIII4A.launcher.ChooseCommandRecordFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameFolderFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameModFunc;
@@ -143,6 +144,7 @@ public class GameLauncher extends Activity
 	private OpenSourceLicenseFunc m_openSourceLicenseFunc;
 	private ExtractSourceFunc m_extractSourceFunc;
 	private ChooseGameModFunc m_chooseGameModFunc;
+	private ChooseCommandRecordFunc m_chooseCommandRecordFunc;
 
     public static final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -466,6 +468,10 @@ public class GameLauncher extends Activity
 			else if (id == R.id.launcher_tab1_game_mod_button)
 			{
 				OpenGameModChooser();
+			}
+			else if (id == R.id.launcher_tab1_command_record)
+			{
+				OpenCommandChooser();
 			}
         }
     };
@@ -1114,6 +1120,7 @@ public class GameLauncher extends Activity
         V.launcher_tab1_edit_autoexec.setOnClickListener(m_buttonClickListener);
         V.launcher_tab1_edit_doomconfig.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_edit_cvar.setOnClickListener(m_buttonClickListener);
+		V.launcher_tab1_command_record.setOnClickListener(m_buttonClickListener);
 
         boolean userMod = mPrefs.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
         V.fs_game_user.setChecked(userMod);
@@ -1880,6 +1887,29 @@ public class GameLauncher extends Activity
         bundle.putString("path", GetExternalGameLibraryPath());
         m_chooseGameLibFunc.Start(bundle);
     }
+
+	private void OpenCommandChooser()
+	{
+		final String PreferenceKey = Q3EUtils.q3ei.GetGameCommandRecordPreferenceKey();
+		String cmd = GetCmdText();
+		if (null == m_chooseCommandRecordFunc)
+		{
+			m_chooseCommandRecordFunc = new ChooseCommandRecordFunc(this, new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					String cmdResult = m_chooseCommandRecordFunc.GetResult();
+					if(null != cmdResult && !cmd.equals(cmdResult))
+						SetCmdText(cmdResult);
+				}
+			});
+		}
+		Bundle bundle = new Bundle();
+		bundle.putString("command", cmd);
+		bundle.putString("key", PreferenceKey);
+		m_chooseCommandRecordFunc.Start(bundle);
+	}
 
     private void Test()
     {
@@ -2897,6 +2927,7 @@ public class GameLauncher extends Activity
 		public TextView tv_scrres_size;
 		public TextView tv_scale_current;
 		public LinearLayout res_scale_layout;
+		public Button launcher_tab1_command_record;
 
         public void Setup()
         {
@@ -2991,6 +3022,7 @@ public class GameLauncher extends Activity
 			tv_scrres_size = findViewById(R.id.tv_scrres_size);
 			tv_scale_current = findViewById(R.id.tv_scale_current);
 			res_scale_layout = findViewById(R.id.res_scale_layout);
+			launcher_tab1_command_record = findViewById(R.id.launcher_tab1_command_record);
         }
     }
 }

@@ -641,6 +641,13 @@
                     android:layout_height="wrap_content"
                     android:text="@string/load_quicksave_when_start_game" />
 
+            <Button
+                android:id="@+id/launcher_tab1_command_record"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/command_record"
+                android:textAllCaps="false" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

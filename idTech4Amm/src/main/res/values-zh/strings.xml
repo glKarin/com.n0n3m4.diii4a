@@ -336,4 +336,8 @@
     <string name="freedoom1_base">FreeDOOM 1</string>
     <string name="freedoom2_base">FreeDOOM 2</string>
     <string name="setup_launcher_theme">设置启动器主题</string>
+    <string name="command_record">命令记录</string>
+    <string name="choose_command_record">选择命令记录</string>
+    <string name="choose">选择</string>
+    <string name="must_choose_a_command">必须只选择一个命令</string>
 </resources>

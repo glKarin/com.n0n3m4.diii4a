@@ -339,5 +339,9 @@
     <string name="freedoom1_base">FreeDOOM 1</string>
     <string name="freedoom2_base">FreeDOOM 2</string>
     <string name="setup_launcher_theme">Setup launcher theme</string>
+    <string name="command_record">Command record</string>
+    <string name="choose_command_record">Choose command record</string>
+    <string name="choose">Choose</string>
+    <string name="must_choose_a_command">Must choose a command</string>
 
 </resources>
