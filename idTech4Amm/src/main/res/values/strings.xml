@@ -343,5 +343,9 @@
     <string name="choose_command_record">Choose command record</string>
     <string name="choose">Choose</string>
     <string name="must_choose_a_command">Must choose a command</string>
+    <string name="empty_content">Empty content</string>
+    <string name="edit_command_record">Edit command record</string>
+    <string name="command">Command</string>
+    <string name="command_exists">Command exists</string>
 
 </resources>

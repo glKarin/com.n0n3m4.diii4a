@@ -199,13 +199,16 @@ public final class ContextUtility
         builder.create().show();
     }
 
-    public static void Input(Context context, CharSequence title, CharSequence message, String[] args, final Runnable yes, final Runnable no, Runnable other, String otherName)
+    public static AlertDialog Input(Context context, CharSequence title, CharSequence message, String val, String[] args, final Runnable yes, final Runnable no, String otherName, Runnable other)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         EditText editText = new EditText(context);
+        editText.setSingleLine(true);
         if(null != message)
             editText.setHint(message);
+        if(null != val)
+            editText.setText(val);
         builder.setView(editText);
         builder.setCancelable(true);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -240,7 +243,9 @@ public final class ContextUtility
                 }
             });
         }
-        builder.create().show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        return dialog;
     }
     
     public static String NativeLibDir(Context context)

@@ -68,7 +68,7 @@ public final class AddExternalLibraryFunc extends GameLauncherFunc
     private void InputFileName(Uri uri)
     {
         String[] args = {""};
-        ContextUtility.Input(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.input_external_library_name), Q3ELang.tr(m_gameLauncher, R.string.e_g) + " libxxxxx.so", args, new Runnable()
+        ContextUtility.Input(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.input_external_library_name), Q3ELang.tr(m_gameLauncher, R.string.e_g) + " libxxxxx.so", null, args, new Runnable()
         {
             @Override
             public void run()

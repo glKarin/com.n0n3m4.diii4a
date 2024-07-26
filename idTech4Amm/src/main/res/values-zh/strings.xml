@@ -340,4 +340,8 @@
     <string name="choose_command_record">选择命令记录</string>
     <string name="choose">选择</string>
     <string name="must_choose_a_command">必须只选择一个命令</string>
+    <string name="empty_content">内容为空</string>
+    <string name="edit_command_record">编辑命令记录</string>
+    <string name="command">命令</string>
+    <string name="command_exists">命令存在</string>
 </resources>
