@@ -641,33 +641,55 @@
                     android:layout_height="wrap_content"
                     android:text="@string/load_quicksave_when_start_game" />
 
-            <Button
-                android:id="@+id/launcher_tab1_command_record"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/command_record"
-                android:textAllCaps="false" />
-
             <LinearLayout
+                android:id="@+id/extras_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/launcher_tab1_edit_autoexec"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:text="@string/edit_autoexec_cfg"
-                    android:textAllCaps="false" />
+                    android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/launcher_tab1_edit_doomconfig"
-                    android:layout_width="0dp"
+                    <Button
+                        android:id="@+id/launcher_tab1_command_record"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/command_record"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/launcher_tab1_edit_cvar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/edit_cvar"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:text="@string/edit_doomconfig_cfg"
-                    android:textAllCaps="false" />
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/launcher_tab1_edit_autoexec"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/edit_autoexec_cfg"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/launcher_tab1_edit_doomconfig"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/edit_doomconfig_cfg"
+                        android:textAllCaps="false" />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -683,14 +705,6 @@
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/launcher_tab1_edit_cvar"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/edit_cvar"
-                        android:textAllCaps="false" />
-
-                    <Button
                         android:id="@+id/launcher_tab1_game_lib_button"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -699,6 +713,7 @@
                         android:textAllCaps="false" />
                 </LinearLayout>
             </LinearLayout>
+
         </LinearLayout>
 
     </RelativeLayout>

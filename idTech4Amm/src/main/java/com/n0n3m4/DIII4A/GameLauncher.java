@@ -2214,8 +2214,7 @@ public class GameLauncher extends Activity
 
 		boolean rendererVisible = true;
 		boolean soundVisible = true;
-		boolean cvarVisible = true;
-		boolean gamelibVisible = true;
+		boolean otherVisible = true;
 		boolean openglVisible = true;
 		boolean modVisible = true;
 		boolean dllVisible = true;
@@ -2235,8 +2234,7 @@ public class GameLauncher extends Activity
 			q1Visible = true;
 			rendererVisible = false;
 			soundVisible = false;
-			cvarVisible = false;
-			gamelibVisible = false;
+			otherVisible = false;
 			openglVisible = false;
 			// modVisible = false;
 			dllVisible = false;
@@ -2248,8 +2246,7 @@ public class GameLauncher extends Activity
 			q2Visible = true;
 			rendererVisible = false;
 			soundVisible = false;
-			cvarVisible = false;
-			gamelibVisible = false;
+			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2260,8 +2257,7 @@ public class GameLauncher extends Activity
 			q3Visible = true;
 			rendererVisible = false;
 			soundVisible = false;
-			cvarVisible = false;
-			gamelibVisible = false;
+			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2271,8 +2267,7 @@ public class GameLauncher extends Activity
 			rtcwVisible = true;
 			rendererVisible = false;
 			soundVisible = false;
-			cvarVisible = false;
-			gamelibVisible = false;
+			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 		}
@@ -2281,8 +2276,7 @@ public class GameLauncher extends Activity
 			tdmVisible = true;
 			rendererVisible = false;
 			soundVisible = false;
-			cvarVisible = false;
-			gamelibVisible = false;
+			otherVisible = false;
 			openglVisible = false;
 			// modVisible = false;
 			dllVisible = false;
@@ -2294,7 +2288,7 @@ public class GameLauncher extends Activity
 			d3bfgVisible = true;
 			rendererVisible = false;
 			soundVisible = false;
-			gamelibVisible = false;
+			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2305,8 +2299,7 @@ public class GameLauncher extends Activity
 			doomVisible = true;
 			rendererVisible = false;
 			soundVisible = false;
-			cvarVisible = false;
-			gamelibVisible = false;
+			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2337,8 +2330,7 @@ public class GameLauncher extends Activity
 
 		V.renderer_section.setVisibility(rendererVisible ? View.VISIBLE : View.GONE);
 		V.sound_section.setVisibility(soundVisible ? View.VISIBLE : View.GONE);
-		V.launcher_tab1_edit_cvar.setVisibility(cvarVisible ? View.VISIBLE : View.GONE);
-		V.launcher_tab1_game_lib_button.setVisibility(gamelibVisible ? View.VISIBLE : View.GONE);
+		V.other_section.setVisibility(otherVisible ? View.VISIBLE : View.GONE);
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.mod_section.setVisibility(modVisible ? View.VISIBLE : View.GONE);
 		V.dll_section.setVisibility(dllVisible ? View.VISIBLE : View.GONE);
