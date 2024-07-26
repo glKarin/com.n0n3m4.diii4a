@@ -78,6 +78,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                     result.add(cmd);
                 else
                     result.remove(cmd);
+
                 AlertDialog alert = (AlertDialog) dialog;
                 Button button = alert.getButton(AlertDialog.BUTTON_NEUTRAL);
                 if (AllowAdd)
@@ -94,7 +95,17 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                     }
                 }
                 else
-                    button.setEnabled(result.size() == 1);
+                {
+                    if(result.isEmpty())
+                    {
+                        button.setText(R.string.add);
+                    }
+                    else
+                    {
+                        button.setText(R.string.edit);
+                    }
+                    button.setEnabled(result.size() <= 1);
+                }
                 alert.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(!result.isEmpty());
                 alert.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(result.size() == 1);
             }
@@ -120,14 +131,20 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                         }
                         else
                         {
-                            if(result.size() != 1)
+                            int csize = result.size();
+                            if(csize == 0)
                             {
-                                Toast_short(Q3ELang.tr(m_gameLauncher, R.string.must_choose_a_command));
+                                dialog.dismiss();
+                                AddNew();
                             }
-                            else
+                            else if(csize == 1)
                             {
                                 dialog.dismiss();
                                 Edit(result);
+                            }
+                            else
+                            {
+                                Toast_short(Q3ELang.tr(m_gameLauncher, R.string.must_choose_a_command));
                             }
                         }
                     }
@@ -170,7 +187,17 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                     }
                 }
                 else
-                    button.setEnabled(result.size() == 1);
+                {
+                    if(result.isEmpty())
+                    {
+                        button.setText(R.string.add);
+                    }
+                    else
+                    {
+                        button.setText(R.string.edit);
+                    }
+                    button.setEnabled(result.size() <= 1);
+                }
                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(!result.isEmpty());
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(result.size() == 1);
             }
@@ -248,6 +275,52 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
             }
         });
         return 1;
+    }
+
+    private void AddNew()
+    {
+        String[] args = {""};
+        boolean[] error = {false};
+        AlertDialog input = ContextUtility.Input(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.add_command_record), Q3ELang.tr(m_gameLauncher, R.string.command), null, args, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                String arg = args[0];
+                if (arg.isEmpty())
+                {
+                    error[0] = true;
+                    Toast_short(Q3ELang.tr(m_gameLauncher, R.string.empty_content));
+                }
+                else
+                {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher);
+                    List<String> records = new ArrayList<>(preferences.getStringSet(m_key, new HashSet<>()));
+                    if(records.contains(arg))
+                    {
+                        error[0] = true;
+                        Toast_short(Q3ELang.tr(m_gameLauncher, R.string.command_exists));
+                    }
+                    else
+                    {
+                        m_cmd = arg;
+                        records.add(arg);
+                        preferences.edit().putStringSet(m_key, new LinkedHashSet<>(records)).commit();
+                    }
+                }
+            }
+        }, null, null, null);
+        input.setOnDismissListener(new DialogInterface.OnDismissListener()
+        {
+            @Override
+            public void onDismiss(DialogInterface dialog)
+            {
+                if(error[0])
+                    new Handler().postDelayed(ChooseCommandRecordFunc.this, 200);
+                else
+                    run();
+            }
+        });
     }
 
     private int Remove(Set<String> cmds)

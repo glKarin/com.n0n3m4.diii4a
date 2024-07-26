@@ -347,5 +347,6 @@
     <string name="edit_command_record">Edit command record</string>
     <string name="command">Command</string>
     <string name="command_exists">Command exists</string>
+    <string name="add_command_record">Add command record</string>
 
 </resources>

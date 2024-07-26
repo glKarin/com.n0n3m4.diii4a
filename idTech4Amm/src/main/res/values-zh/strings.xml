@@ -344,4 +344,5 @@
     <string name="edit_command_record">编辑命令记录</string>
     <string name="command">命令</string>
     <string name="command_exists">命令存在</string>
+    <string name="add_command_record">新增命令记录</string>
 </resources>
