@@ -801,7 +801,7 @@ public class GameLauncher extends Activity
 			index = 0;
 			if (str != null)
 			{
-				index = Q3EUtils.parseInt_s(str);
+				index = Q3EUtils.parseInt_s(str, 1) - 1;
 			}
 			SelectCheckbox(V.rg_harm_r_lightModel, index);
 			if (!IsProp("harm_r_lightModel")) SetProp("harm_r_lightModel", "1");
