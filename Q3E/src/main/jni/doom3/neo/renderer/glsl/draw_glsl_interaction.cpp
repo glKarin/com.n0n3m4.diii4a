@@ -126,9 +126,9 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 			backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-	if(r_usePhong == HARM_INTERACTION_SHADER_BLINNPHONG)
+	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
 		GL_UseProgram(&interactionBlinnPhongShader);
-	else if(r_usePhong == HARM_INTERACTION_SHADER_PBR)
+	else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
 		GL_UseProgram(&interactionPBRShader);
 	else
 		GL_UseProgram(&interactionShader);

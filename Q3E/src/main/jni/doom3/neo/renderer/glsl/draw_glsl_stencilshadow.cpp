@@ -28,9 +28,9 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
 			 backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-	if(r_usePhong == HARM_INTERACTION_SHADER_BLINNPHONG)
+	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
 		GL_UseProgram(&interactionBlinnPhongTranslucentShader);
-	else if(r_usePhong == HARM_INTERACTION_SHADER_PBR)
+	else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
 		GL_UseProgram(&interactionPBRTranslucentShader);
 	else
 		GL_UseProgram(&interactionTranslucentShader);
@@ -209,9 +209,9 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 			 backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-	if(r_usePhong == HARM_INTERACTION_SHADER_BLINNPHONG)
+	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
 		GL_UseProgram(&interactionBlinnPhongSoftShader);
-	else if(r_usePhong == HARM_INTERACTION_SHADER_PBR)
+	else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
 		GL_UseProgram(&interactionPBRSoftShader);
 	else
 		GL_UseProgram(&interactionSoftShader);

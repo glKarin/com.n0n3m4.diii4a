@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "glsl/draw_glsl_shader.cpp"
 
-#define r_usePhong harm_r_lightModel.GetInteger()
+#define r_interactionLightingModel harm_r_lightModel.GetInteger()
 #define r_specularExponent harm_r_specularExponent.GetFloat()
 
 #if 1

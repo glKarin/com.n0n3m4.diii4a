@@ -398,7 +398,7 @@ ID_INLINE static shaderProgram_t * RB_SelectPerforatedShadowMapShader(const view
 ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const viewLight_t* vLight)
 {
     shaderProgram_t *shadowInteractionShader;
-    if(r_usePhong == HARM_INTERACTION_SHADER_BLINNPHONG)
+    if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
     {
         if( vLight->parallel )
         {
@@ -413,7 +413,7 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
             shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
         }
     }
-    else if(r_usePhong == HARM_INTERACTION_SHADER_PBR)
+    else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
     {
         if( vLight->parallel )
         {

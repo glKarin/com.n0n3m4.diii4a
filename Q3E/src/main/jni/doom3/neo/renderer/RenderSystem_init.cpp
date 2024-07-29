@@ -2241,6 +2241,7 @@ void R_InitCommands(void)
 #endif
 	extern void R_ExportGLSLShaderSource_f(const idCmdArgs &args);
 	extern void R_PrintGLSLShaderSource_f(const idCmdArgs &args);
+	common->Printf("[Harmattan]: GLSL command features: \n    exportGLSLShaderSource: export GLSL shader source to filesystem.\n    reloadGLSLprograms: reload external shader source.\n    printGLSLShaderSource: print shader source.\n");
 	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export internal GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
 	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print internal GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
 #ifdef _EXTRAS_TOOLS
