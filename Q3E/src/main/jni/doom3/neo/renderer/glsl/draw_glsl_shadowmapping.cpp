@@ -398,22 +398,7 @@ ID_INLINE static shaderProgram_t * RB_SelectPerforatedShadowMapShader(const view
 ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const viewLight_t* vLight)
 {
     shaderProgram_t *shadowInteractionShader;
-    if(r_usePhong)
-    {
-        if( vLight->parallel )
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
-        }
-        else if( vLight->pointLight )
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-        }
-        else
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_spotLight;
-        }
-    }
-    else
+    if(r_usePhong == HARM_INTERACTION_SHADER_BLINNPHONG)
     {
         if( vLight->parallel )
         {
@@ -426,6 +411,36 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
         else
         {
             shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
+        }
+    }
+    else if(r_usePhong == HARM_INTERACTION_SHADER_PBR)
+    {
+        if( vLight->parallel )
+        {
+            shadowInteractionShader = &interactionShadowMappingPBRShader_parallelLight;
+        }
+        else if( vLight->pointLight )
+        {
+            shadowInteractionShader = &interactionShadowMappingPBRShader_pointLight;
+        }
+        else
+        {
+            shadowInteractionShader = &interactionShadowMappingPBRShader_spotLight;
+        }
+    }
+    else
+    {
+        if( vLight->parallel )
+        {
+            shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
+        }
+        else if( vLight->pointLight )
+        {
+            shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+        }
+        else
+        {
+            shadowInteractionShader = &interactionShadowMappingShader_spotLight;
         }
     }
     return shadowInteractionShader;

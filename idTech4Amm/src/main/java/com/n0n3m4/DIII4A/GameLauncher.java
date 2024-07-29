@@ -364,7 +364,7 @@ public class GameLauncher extends Activity
 			}
 			else if (rgId == R.id.rg_harm_r_lightModel)
 			{
-				String value = GetCheckboxIndex(radioGroup, id) == 1 ? "blinn_phong" : "phong";
+				String value = "" + (GetCheckboxIndex(radioGroup, id) + 1);
 				SetProp("harm_r_lightModel", value);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putString(Q3EPreference.pref_harm_r_lightModel, value)
@@ -801,11 +801,10 @@ public class GameLauncher extends Activity
 			index = 0;
 			if (str != null)
 			{
-				if ("blinn_phong".equalsIgnoreCase(str))
-					index = 1;
+				index = Q3EUtils.parseInt_s(str);
 			}
 			SelectCheckbox(V.rg_harm_r_lightModel, index);
-			if (!IsProp("harm_r_lightModel")) SetProp("harm_r_lightModel", "phong");
+			if (!IsProp("harm_r_lightModel")) SetProp("harm_r_lightModel", "1");
 			str = GetProp("harm_r_specularExponent");
 			if (null != str)
 				V.edt_harm_r_specularExponent.setText(str);
@@ -1079,7 +1078,7 @@ public class GameLauncher extends Activity
         V.rg_color_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.r_harmclearvertexbuffer, mPrefs.getInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, 2));
         V.r_harmclearvertexbuffer.setOnCheckedChangeListener(m_groupCheckChangeListener);
-        SelectCheckbox(V.rg_harm_r_lightModel, "blinn_phong".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_r_lightModel, "phong")) ? 1 : 0);
+        SelectCheckbox(V.rg_harm_r_lightModel, Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_harm_r_lightModel, "1")) - 1);
         V.rg_harm_r_lightModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
         V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
@@ -1718,7 +1717,7 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_32bit, index == -1);
         mEdtr.putInt(Q3EPreference.pref_harm_16bit, index);
         mEdtr.putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
-        mEdtr.putString(Q3EPreference.pref_harm_r_lightModel, GetCheckboxIndex(V.rg_harm_r_lightModel) == 1 ? "blinn_phong" : "phong");
+        mEdtr.putString(Q3EPreference.pref_harm_r_lightModel, "" + (GetCheckboxIndex(V.rg_harm_r_lightModel) + 1));
         mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 4.0f));
         mEdtr.putString(Q3EPreference.pref_harm_s_driver, GetCheckboxIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
 		mEdtr.putInt(Q3EPreference.pref_harm_r_maxFps, Q3EUtils.parseInt_s(V.edt_harm_r_maxFps.getText().toString(), 0));

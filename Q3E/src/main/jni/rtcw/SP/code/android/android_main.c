@@ -706,7 +706,7 @@ static void * game_main(void *data)
 	Q3E_End();
 	main_thread = 0;
 	//IsInitialized = false;
-	Com_Printf("[Harmattan]: Leave RTCW main thread.\n");
+	Com_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
 	return 0;
 }
 

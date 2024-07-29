@@ -53,7 +53,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	GL_Uniform4fv(offsetof(shaderProgram_t, specularColor), din->specularColor.ToFloatPtr());
 
 	// material may be NULL for shadow volumes
-	GL_Uniform1fv(offsetof(shaderProgram_t, specularExponent), &r_specularExponent);
+	GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), r_specularExponent);
 
 	// set the textures
 
@@ -126,10 +126,12 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 			backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-	if(r_usePhong)
-		GL_UseProgram(&interactionShader);
-	else
+	if(r_usePhong == HARM_INTERACTION_SHADER_BLINNPHONG)
 		GL_UseProgram(&interactionBlinnPhongShader);
+	else if(r_usePhong == HARM_INTERACTION_SHADER_PBR)
+		GL_UseProgram(&interactionPBRShader);
+	else
+		GL_UseProgram(&interactionShader);
 
 	// enable the vertex arrays
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));

@@ -3,6 +3,75 @@
 
 // Unuse C++11 raw string literals for Traditional C++98
 
+#define _PBR_GENERAL_FUNCTION \
+"float dot2_4(vec2 a, vec4 b) {\n" \
+"    return dot(vec4(a, 0.0, 0.0), b);\n" \
+"}\n" \
+"\n" \
+"vec2 CenterScale( vec2 inTC, vec2 centerScale ) {\n" \
+"    float scaleX = centerScale.x;\n" \
+"    float scaleY = centerScale.y;\n" \
+"    vec4 tc0 = vec4( scaleX, 0.0, 0.0, 0.5 - ( 0.5f * scaleX ) );\n" \
+"    vec4 tc1 = vec4( 0.0, scaleY, 0.0, 0.5 - ( 0.5f * scaleY ) );\n" \
+"    vec2 finalTC;\n" \
+"    finalTC.x = dot2_4( inTC, tc0 );\n" \
+"    finalTC.y = dot2_4( inTC, tc1 );\n" \
+"    return finalTC;\n" \
+"}\n" \
+"\n" \
+"vec2 Rotate2D( vec2 inTC, vec2 cs ) {\n" \
+"    float sinValue = cs.y;\n" \
+"    float cosValue = cs.x;\n" \
+"\n" \
+"    vec4 tc0 = vec4( cosValue, -sinValue, 0.0, ( -0.5f * cosValue ) + ( 0.5f * sinValue ) + 0.5f );\n" \
+"    vec4 tc1 = vec4( sinValue, cosValue, 0.0, ( -0.5f * sinValue ) + ( -0.5f * cosValue ) + 0.5f );\n" \
+"    vec2 finalTC;\n" \
+"    finalTC.x = dot2_4( inTC, tc0 );\n" \
+"    finalTC.y = dot2_4( inTC, tc1 );\n" \
+"    return finalTC;\n" \
+"}\n" \
+"\n" \
+"// better noise function available at https://github.com/ashima/webgl-noise\n" \
+"float rand( vec2 co ) {\n" \
+"    return fract( sin( dot( co.xy, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 );\n" \
+"}\n" \
+"\n" \
+"float DistributionGGX(vec3 N, vec3 H, float roughness)\n" \
+"{\n" \
+"    float a      = roughness*roughness;\n" \
+"    float a2     = a*a;\n" \
+"    float NdotH  = max(dot(N, H), 0.0);\n" \
+"    float NdotH2 = NdotH*NdotH;\n" \
+"    float PI = 3.14159265359;\n" \
+"    float num   = a2;\n" \
+"    float denom = (NdotH2 * (a2 - 1.0) + 1.0);\n" \
+"    denom = PI * denom * denom;\n" \
+"    return num / denom;\n" \
+"}\n" \
+"\n" \
+"float GeometrySchlickGGX(float NdotV, float roughness)\n" \
+"{\n" \
+"    float r = (roughness + 1.0);\n" \
+"    float k = (r*r) / 8.0;\n" \
+"    float num   = NdotV;\n" \
+"    float denom = NdotV * (1.0 - k) + k;\n" \
+"    return num / denom;\n" \
+"}\n" \
+"float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)\n" \
+"{\n" \
+"    float NdotV = max(dot(N, V), 0.0);\n" \
+"    float NdotL = max(dot(N, L), 0.0);\n" \
+"    float ggx2  = GeometrySchlickGGX(NdotV, roughness);\n" \
+"    float ggx1  = GeometrySchlickGGX(NdotL, roughness);\n" \
+"    return ggx1 * ggx2;\n" \
+"}\n" \
+"\n" \
+"vec3 fresnelSchlick(float cosTheta, vec3 F0)\n" \
+"{\n" \
+"    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);\n" \
+"}\n" \
+"\n"
+
 // diffuse map
 GLSL_SHADER const char DEFAULT_VERT[] = 
 "#version 100\n"
@@ -141,7 +210,9 @@ GLSL_SHADER const char HEATHAZE_VERT[] =
             "vec4 deformMagnitude = u_vertexParm1;\n"
             "var_TexCoord2 = vec4(x) * deformMagnitude;\n"
             "gl_Position = u_modelViewProjectionMatrix * attr_Vertex;\n"
+
         #else // 2004
+
         " vec4 R0, R1, R2; // TEMP R0, R1, R2;\n"
         "\n"
         " // # texture 1 takes the texture coordinates and adds a scroll\n"
@@ -201,7 +272,9 @@ GLSL_SHADER const char HEATHAZE_FRAG[] =
             "screenTexCoord = clamp( screenTexCoord, vec2(0.0), vec2(1.0) );\n"
             "screenTexCoord = screenTexCoord * u_nonPowerOfTwo.xy;\n"
             "gl_FragColor = texture2D( u_fragmentMap0, screenTexCoord );\n"
+
         #else // 2004
+
         " vec4 localNormal, R0; // TEMP localNormal, R0;\n"
         "\n"
         " vec4 subOne = vec4(-1.0, -1.0, -1.0, -1.0); // PARAM subOne = { -1, -1, -1, -1 };\n"
@@ -292,7 +365,9 @@ GLSL_SHADER const char HEATHAZEWITHMASK_VERT[] =
             "vec4 deformMagnitude = u_vertexParm1;\n"
             "var_TexCoord2 = vec4(x) * deformMagnitude;\n"
             "gl_Position = u_modelViewProjectionMatrix * attr_Vertex;\n"
+
         #else // 2004
+
         " vec4 R0, R1, R2; // TEMP R0, R1, R2;\n"
         "\n"
         " // # texture 0 takes the texture coordinates unmodified\n"
@@ -364,7 +439,9 @@ GLSL_SHADER const char HEATHAZEWITHMASK_FRAG[] =
             "screenTexCoord = clamp( screenTexCoord, vec2(0.0), vec2(1.0) );\n"
             "screenTexCoord = screenTexCoord * u_nonPowerOfTwo.xy;\n"
             "gl_FragColor = texture2D( u_fragmentMap0, screenTexCoord );\n"
+
         #else // 2004
+
         " vec4 localNormal, mask, R0; // TEMP localNormal, mask, R0;\n"
         "\n"
         " vec4 subOne = vec4(-1.0, -1.0, -1.0, -1.0); // PARAM subOne = { -1, -1, -1, -1 };\n"
@@ -468,7 +545,9 @@ GLSL_SHADER const char HEATHAZEWITHMASKANDVERTEX_VERT[] =
             "var_TexCoord2 = vec4(x) * deformMagnitude;\n"
             "var_Color = attr_Color / 255.0;\n"
             "gl_Position = u_modelViewProjectionMatrix * attr_Vertex;\n"
+
         #else // 2004
+
         " vec4 R0, R1, R2; // TEMP R0, R1, R2;\n"
         "\n"
         " // # texture 0 takes the texture coordinates unmodified\n"
@@ -544,7 +623,9 @@ GLSL_SHADER const char HEATHAZEWITHMASKANDVERTEX_FRAG[] =
             "screenTexCoord = clamp( screenTexCoord, vec2(0.0), vec2(1.0) );\n"
             "screenTexCoord = screenTexCoord * u_nonPowerOfTwo.xy;\n"
             "gl_FragColor = texture2D( u_fragmentMap0, screenTexCoord );\n"
+
         #else // 2004
+
         " vec4 localNormal, mask, R0; // TEMP localNormal, mask, R0;\n"
         "\n"
         " vec4 subOne = vec4(-1.0, -1.0, -1.0, -1.0); // PARAM subOne = { -1, -1, -1, -1 };\n"
@@ -629,9 +710,9 @@ GLSL_SHADER const char COLORPROCESS_FRAG[] =
         "\n"
         "void main(void)\n"
         "{\n"
-        "vec4 src = texture2D( u_fragmentMap0, var_TexCoord.xy * u_nonPowerOfTwo.xy /* scale by the screen non-power-of-two-adjust */ );\n"
+        "    vec4 src = texture2D( u_fragmentMap0, var_TexCoord.xy * u_nonPowerOfTwo.xy /* scale by the screen non-power-of-two-adjust */ );\n"
         "vec4 target = var_Color * dot( vec3( 0.333, 0.333, 0.333 ), src.xyz );\n"
-        "gl_FragColor = mix( src, target, var_TexCoord.z );\n"
+        "    gl_FragColor = mix( src, target, var_TexCoord.z );\n"
         "}\n"
 ;
 
@@ -643,6 +724,7 @@ GLSL_SHADER const char INTERACTION_VERT[] =
 "precision highp float;\n"
 "\n"
 "//#define BLINN_PHONG\n"
+"//#define _PBR\n"
 "\n"
 "varying vec2 var_TexDiffuse;\n"
 "varying vec2 var_TexNormal;\n"
@@ -650,9 +732,10 @@ GLSL_SHADER const char INTERACTION_VERT[] =
 "varying vec4 var_TexLight;\n"
 "varying lowp vec4 var_Color;\n"
 "varying vec3 var_L;\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
 "varying vec3 var_H;\n"
-"#else\n"
+"#endif\n"
+"#if !defined(BLINN_PHONG) || defined(_PBR)\n"
 "varying vec3 var_V;\n"
 "#endif\n"
 "\n"
@@ -703,14 +786,15 @@ GLSL_SHADER const char INTERACTION_VERT[] =
 "\n"
     "vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;\n"
     "vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
     "vec3 H = normalize(L) + normalize(V);\n"
 "#endif\n"
 "\n"
     "var_L = L * M;\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
     "var_H = H * M;\n"
-"#else\n"
+"#endif\n"
+"#if !defined(BLINN_PHONG) || defined(_PBR)\n"
     "var_V = V * M;\n"
 "#endif\n"
 "\n"
@@ -726,6 +810,7 @@ GLSL_SHADER const char INTERACTION_FRAG[] =
 "precision highp float;\n"
 "\n"
 "//#define BLINN_PHONG\n"
+"//#define _PBR\n"
 "\n"
 "//#define HALF_LAMBERT\n"
 "\n"
@@ -735,9 +820,10 @@ GLSL_SHADER const char INTERACTION_FRAG[] =
 "varying vec4 var_TexLight;\n"
 "varying lowp vec4 var_Color;\n"
 "varying vec3 var_L;\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
 "varying vec3 var_H;\n"
-"#else\n"
+"#endif\n"
+"#if !defined(BLINN_PHONG) || defined(_PBR)\n"
 "varying vec3 var_V;\n"
 "#endif\n"
 "\n"
@@ -752,17 +838,23 @@ GLSL_SHADER const char INTERACTION_FRAG[] =
 "uniform sampler2D u_fragmentMap4;    /* u_specularTexture */\n"
 "uniform sampler2D u_fragmentMap5;    /* u_specularFalloffTexture */\n"
 "\n"
+"#if defined(_PBR)\n"
+_PBR_GENERAL_FUNCTION
+"#endif\n"
 "void main(void)\n"
 "{\n"
     "//float u_specularExponent = 4.0;\n"
 "\n"
     "vec3 L = normalize(var_L);\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
     "vec3 H = normalize(var_H);\n"
-    "vec3 N = 2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0;\n"
-"#else\n"
-    "vec3 V = normalize(var_V);\n"
-    "vec3 N = normalize(2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0);\n"
+"#endif\n"
+"#if defined(BLINN_PHONG)\n"
+"    vec3 N = 2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0;\n"
+"#endif\n"
+"#if !defined(BLINN_PHONG) || defined(_PBR)\n"
+"    vec3 V = normalize(var_V);\n"
+"    vec3 N = normalize(2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0);\n"
 "#endif\n"
 "\n"
     "float NdotL = clamp(dot(N, L), 0.0, 1.0);\n"
@@ -771,30 +863,52 @@ GLSL_SHADER const char INTERACTION_FRAG[] =
     "NdotL += 0.5;\n"
     "NdotL = NdotL * NdotL;\n"
 "#endif\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
     "float NdotH = clamp(dot(N, H), 0.0, 1.0);\n"
 "#endif\n"
 "\n"
-    "vec3 lightProjection = texture2DProj(u_fragmentMap2, var_TexLight.xyw).rgb;\n"
-    "vec3 lightFalloff = texture2D(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;\n"
-    "vec3 diffuseColor = texture2D(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;\n"
-    "vec3 specularColor = 2.0 * texture2D(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;\n"
+"    vec3 lightProjection = texture2DProj(u_fragmentMap2, var_TexLight.xyw).rgb;\n"
+"    vec3 lightFalloff = texture2D(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;\n"
+"    vec3 diffuseColor = texture2D(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;\n"
+"#if defined(_PBR)\n"
+"    vec4 Cd = vec4(diffuseColor.rgb, 1.0);\n"
+"    vec4 specTex = texture2D(u_fragmentMap4, var_TexSpecular);\n"
+"    vec4 roughness = vec4(specTex.r, specTex.r, specTex.r, specTex.r);\n"
+"    vec4 metallic = vec4(specTex.g, specTex.g, specTex.g, specTex.g);\n"
+"\n"
+"    vec4 Cl = vec4(lightProjection * lightFalloff, 1.0);\n"
+"    vec3 F0 = vec3(0.04); \n"
+"    F0 = mix(F0, Cd.xyz, metallic.xyz);\n"
+"\n"
+"    // cook-torrance brdf\n"
+"    float NDF = DistributionGGX(N, H, roughness.x);        \n"
+"    float G   = GeometrySmith(N, V, L, roughness.x);      \n"
+"    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       \n"
+"\n"
+"    vec3 numerator    = NDF * G * F;\n"
+"    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);\n"
+"    vec3 pbr     = numerator / max(denominator, 0.001);  \n"
+"\n"
+"   gl_FragColor = var_Color * Cl * NdotL * Cd + (vec4(pbr.x, pbr.y, pbr.z, 0.0) * (u_specularColor /* *Cl */));\n"
+"#else\n"
+"    vec3 specularColor = 2.0 * texture2D(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;\n"
 "\n"
 "#if defined(BLINN_PHONG)\n"
-    "float specularFalloff = pow(NdotH, u_specularExponent);\n"
+"    float specularFalloff = pow(NdotH, u_specularExponent);\n"
 "#else\n"
-    "vec3 R = -reflect(L, N);\n"
-    "float RdotV = clamp(dot(R, V), 0.0, 1.0);\n"
-    "float specularFalloff = pow(RdotV, u_specularExponent);\n"
+"    vec3 R = -reflect(L, N);\n"
+"    float RdotV = clamp(dot(R, V), 0.0, 1.0);\n"
+"    float specularFalloff = pow(RdotV, u_specularExponent);\n"
 "#endif\n"
 "\n"
-    "vec3 color;\n"
-    "color = diffuseColor;\n"
-    "color += specularFalloff * specularColor;\n"
-    "color *= NdotL * lightProjection;\n"
-    "color *= lightFalloff;\n"
+"    vec3 color;\n"
+"    color = diffuseColor;\n"
+"    color += specularFalloff * specularColor;\n"
+"    color *= NdotL * lightProjection;\n"
+"    color *= lightFalloff;\n"
 "\n"
-    "gl_FragColor = vec4(color, 1.0) * var_Color;\n"
+"    gl_FragColor = vec4(color, 1.0) * var_Color;\n"
+"#endif\n"
 "}\n"
 ;
 
@@ -834,11 +948,11 @@ GLSL_SHADER const char ZFILL_FRAG[] =
 "\n"
 "void main(void)\n"
 "{\n"
-    "if (u_alphaTest > texture2D(u_fragmentMap0, var_TexDiffuse).a) {\n"
-        "discard;\n"
-    "}\n"
+"    if (u_alphaTest > texture2D(u_fragmentMap0, var_TexDiffuse).a) {\n"
+"        discard;\n"
+"    }\n"
 "\n"
-    "gl_FragColor = u_glColor;\n"
+"    gl_FragColor = u_glColor;\n"
 "}\n"
 ;
 
@@ -1308,6 +1422,7 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_VERT[] =
         "precision highp float;\n"
         "\n"
         "//#define BLINN_PHONG\n"
+        "//#define _PBR\n"
         "\n"
         "varying vec2 var_TexDiffuse;\n"
         "varying vec2 var_TexNormal;\n"
@@ -1315,9 +1430,10 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_VERT[] =
         "varying vec4 var_TexLight;\n"
         "varying lowp vec4 var_Color;\n"
         "varying vec3 var_L;\n"
-        "#if defined(BLINN_PHONG)\n"
+        "#if defined(BLINN_PHONG) || defined(_PBR)\n"
         "varying vec3 var_H;\n"
-        "#else\n"
+        "#endif\n"
+        "#if !defined(BLINN_PHONG) || defined(_PBR)\n"
         "varying vec3 var_V;\n"
         "#endif\n"
         "\n"
@@ -1379,14 +1495,15 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_VERT[] =
         "\n"
         "    vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;\n"
         "    vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;\n"
-        "#if defined(BLINN_PHONG)\n"
+        "#if defined(BLINN_PHONG) || defined(_PBR)\n"
         "    vec3 H = normalize(L) + normalize(V);\n"
         "#endif\n"
         "\n"
         "    var_L = L * M;\n"
-        "#if defined(BLINN_PHONG)\n"
+        "#if defined(BLINN_PHONG) || defined(_PBR)\n"
         "    var_H = H * M;\n"
-        "#else\n"
+        "#endif\n"
+        "#if !defined(BLINN_PHONG) || defined(_PBR)\n"
         "    var_V = V * M;\n"
         "#endif\n"
         "\n"
@@ -1409,6 +1526,7 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "precision highp float;\n"
         "\n"
         "//#define BLINN_PHONG\n"
+        "//#define _PBR\n"
         "\n"
         "//#define HALF_LAMBERT\n"
         "\n"
@@ -1418,9 +1536,10 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "varying vec4 var_TexLight;\n"
         "varying lowp vec4 var_Color;\n"
         "varying vec3 var_L;\n"
-        "#if defined(BLINN_PHONG)\n"
+        "#if defined(BLINN_PHONG) || defined(_PBR)\n"
         "varying vec3 var_H;\n"
-        "#else\n"
+        "#endif\n"
+        "#if !defined(BLINN_PHONG) || defined(_PBR)\n"
         "varying vec3 var_V;\n"
         "#endif\n"
         "\n"
@@ -1479,7 +1598,11 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "#endif\n"
         "\n"
         "#ifdef _DYNAMIC_BIAS\n"
-        "   #define BIAS_SCALE 0.999\n"
+        "   #ifdef _PARALLEL_LIGHT\n"
+        "       #define BIAS_SCALE 0.999991\n"
+        "   #else\n"
+        "       #define BIAS_SCALE 0.999\n"
+        "   #endif\n"
         "   #define BIAS(x) ((x) * BIAS_SCALE)\n"
         "#elif defined(_FIXED_BIAS)\n"
         "    #define BIAS_OFFSET 0.001\n"
@@ -1488,15 +1611,22 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "   #define BIAS(x) (x)\n"
         "#endif\n"
         "\n"
+        "#if defined(_PBR)\n"
+        _PBR_GENERAL_FUNCTION
+        "#endif\n"
+        "\n"
         "void main(void)\n"
         "{\n"
         "    //float u_specularExponent = 4.0;\n"
         "\n"
         "    vec3 L = normalize(var_L);\n"
-        "#if defined(BLINN_PHONG)\n"
+        "#if defined(BLINN_PHONG) || defined(_PBR)\n"
         "    vec3 H = normalize(var_H);\n"
+        "#endif\n"
+        "#if defined(BLINN_PHONG)\n"
         "    vec3 N = 2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0;\n"
-        "#else\n"
+        "#endif\n"
+        "#if !defined(BLINN_PHONG) || defined(_PBR)\n"
         "    vec3 V = normalize(var_V);\n"
         "    vec3 N = normalize(2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0);\n"
         "#endif\n"
@@ -1507,13 +1637,34 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "    NdotL += 0.5;\n"
         "    NdotL = NdotL * NdotL;\n"
         "#endif\n"
-        "#if defined(BLINN_PHONG)\n"
+        "#if defined(BLINN_PHONG) || defined(_PBR)\n"
         "    float NdotH = clamp(dot(N, H), 0.0, 1.0);\n"
         "#endif\n"
         "\n"
         "    vec3 lightProjection = texture2DProj(u_fragmentMap2, var_TexLight.xyw).rgb;\n"
         "    vec3 lightFalloff = texture2D(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;\n"
         "    vec3 diffuseColor = texture2D(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;\n"
+        "#if defined(_PBR)\n"
+        "    vec4 Cd = vec4(diffuseColor.rgb, 1.0);\n"
+        "    vec4 specTex = texture2D(u_fragmentMap4, var_TexSpecular);\n"
+        "    vec4 roughness = vec4(specTex.r, specTex.r, specTex.r, specTex.r);\n"
+        "    vec4 metallic = vec4(specTex.g, specTex.g, specTex.g, specTex.g);\n"
+        "\n"
+        "    vec4 Cl = vec4(lightProjection * lightFalloff, 1.0);\n"
+        "    vec3 F0 = vec3(0.04); \n"
+        "    F0 = mix(F0, Cd.xyz, metallic.xyz);\n"
+        "\n"
+        "    // cook-torrance brdf\n"
+        "    float NDF = DistributionGGX(N, H, roughness.x);        \n"
+        "    float G   = GeometrySmith(N, V, L, roughness.x);      \n"
+        "    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       \n"
+        "\n"
+        "    vec3 numerator    = NDF * G * F;\n"
+        "    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);\n"
+        "    vec3 pbr     = numerator / max(denominator, 0.001);  \n"
+        "\n"
+        "   vec4 color = var_Color * Cl * NdotL * Cd + (vec4(pbr.x, pbr.y, pbr.z, 0.0) * (u_specularColor /* *Cl */));\n"
+        "#else\n"
         "    vec3 specularColor = 2.0 * texture2D(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;\n"
         "\n"
         "#if defined(BLINN_PHONG)\n"
@@ -1522,6 +1673,7 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "    vec3 R = -reflect(L, N);\n"
         "    float RdotV = clamp(dot(R, V), 0.0, 1.0);\n"
         "    float specularFalloff = pow(RdotV, u_specularExponent);\n"
+        "#endif\n"
         "#endif\n"
         "\n"
         "    highp float shadow = 0.0;\n"
@@ -1601,6 +1753,9 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "    const highp float sampleAvg = SAMPLE_MULTIPLICATOR;\n"
         "    shadow *= sampleAvg;\n"
         "\n"
+        "#if defined(_PBR)\n"
+        "    gl_FragColor = vec4(color.rgb * shadow, color.a);\n"
+        "#else\n"
         "    vec3 color;\n"
         "    color = diffuseColor;\n"
         "    color += specularFalloff * specularColor;\n"
@@ -1609,6 +1764,7 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "    color *= shadow;\n"
         "\n"
         "    gl_FragColor = vec4(color, 1.0) * var_Color;\n"
+        "#endif\n"
         "}\n"
 ;
 
@@ -1683,6 +1839,7 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_VERT[] =
 "precision highp float;\n"
 "\n"
 "//#define BLINN_PHONG\n"
+"//#define _PBR\n"
 "\n"
 "varying vec2 var_TexDiffuse;\n"
 "varying vec2 var_TexNormal;\n"
@@ -1690,9 +1847,10 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_VERT[] =
 "varying vec4 var_TexLight;\n"
 "varying lowp vec4 var_Color;\n"
 "varying vec3 var_L;\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
 "varying vec3 var_H;\n"
-"#else\n"
+"#endif\n"
+"#if !defined(BLINN_PHONG) || defined(_PBR)\n"
 "varying vec3 var_V;\n"
 "#endif\n"
 "\n"
@@ -1743,14 +1901,15 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_VERT[] =
 "\n"
     "vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;\n"
     "vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
     "vec3 H = normalize(L) + normalize(V);\n"
 "#endif\n"
 "\n"
     "var_L = L * M;\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
     "var_H = H * M;\n"
-"#else\n"
+"#endif\n"
+"#if !defined(BLINN_PHONG) || defined(_PBR)\n"
     "var_V = V * M;\n"
 "#endif\n"
 "\n"
@@ -1766,6 +1925,7 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_FRAG[] =
 "precision highp float;\n"
 "\n"
 "//#define BLINN_PHONG\n"
+"//#define _PBR\n"
 "\n"
 "//#define HALF_LAMBERT\n"
 "\n"
@@ -1775,9 +1935,10 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_FRAG[] =
 "varying vec4 var_TexLight;\n"
 "varying lowp vec4 var_Color;\n"
 "varying vec3 var_L;\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
 "varying vec3 var_H;\n"
-"#else\n"
+"#endif\n"
+"#if !defined(BLINN_PHONG) || defined(_PBR)\n"
 "varying vec3 var_V;\n"
 "#endif\n"
 "\n"
@@ -1791,17 +1952,23 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_FRAG[] =
 "uniform sampler2D u_fragmentMap3;    /* u_diffuseTexture */\n"
 "uniform sampler2D u_fragmentMap4;    /* u_specularTexture */\n"
 "uniform sampler2D u_fragmentMap5;    /* u_specularFalloffTexture */\n"
-"uniform mediump float u_uniformParm0; // shadow alpha\n"
+"uniform lowp float u_uniformParm0; // shadow alpha\n"
 "\n"
+"#if defined(_PBR)\n"
+_PBR_GENERAL_FUNCTION
+"#endif\n"
 "void main(void)\n"
 "{\n"
     "//float u_specularExponent = 4.0;\n"
 "\n"
     "vec3 L = normalize(var_L);\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
     "vec3 H = normalize(var_H);\n"
+"#endif\n"
+"#if defined(BLINN_PHONG)\n"
     "vec3 N = 2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0;\n"
-"#else\n"
+"#endif\n"
+"#if !defined(BLINN_PHONG) || defined(_PBR)\n"
     "vec3 V = normalize(var_V);\n"
     "vec3 N = normalize(2.0 * texture2D(u_fragmentMap0, var_TexNormal.st).agb - 1.0);\n"
 "#endif\n"
@@ -1812,13 +1979,34 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_FRAG[] =
     "NdotL += 0.5;\n"
     "NdotL = NdotL * NdotL;\n"
 "#endif\n"
-"#if defined(BLINN_PHONG)\n"
+"#if defined(BLINN_PHONG) || defined(_PBR)\n"
     "float NdotH = clamp(dot(N, H), 0.0, 1.0);\n"
 "#endif\n"
 "\n"
     "vec3 lightProjection = texture2DProj(u_fragmentMap2, var_TexLight.xyw).rgb;\n"
     "vec3 lightFalloff = texture2D(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;\n"
     "vec3 diffuseColor = texture2D(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;\n"
+"#if defined(_PBR)\n"
+"    vec4 Cd = vec4(diffuseColor.rgb, 1.0);\n"
+"    vec4 specTex = texture2D(u_fragmentMap4, var_TexSpecular);\n"
+"    vec4 roughness = vec4(specTex.r, specTex.r, specTex.r, specTex.r);\n"
+"    vec4 metallic = vec4(specTex.g, specTex.g, specTex.g, specTex.g);\n"
+"\n"
+"    vec4 Cl = vec4(lightProjection * lightFalloff, 1.0);\n"
+"    vec3 F0 = vec3(0.04); \n"
+"    F0 = mix(F0, Cd.xyz, metallic.xyz);\n"
+"\n"
+"    // cook-torrance brdf\n"
+"    float NDF = DistributionGGX(N, H, roughness.x);        \n"
+"    float G   = GeometrySmith(N, V, L, roughness.x);      \n"
+"    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       \n"
+"\n"
+"    vec3 numerator    = NDF * G * F;\n"
+"    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);\n"
+"    vec3 pbr     = numerator / max(denominator, 0.001);  \n"
+"\n"
+"   vec4 color = var_Color * Cl * NdotL * Cd + (vec4(pbr.x, pbr.y, pbr.z, 0.0) * (u_specularColor /* *Cl */));\n"
+"#else\n"
     "vec3 specularColor = 2.0 * texture2D(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;\n"
 "\n"
 "#if defined(BLINN_PHONG)\n"
@@ -1828,7 +2016,11 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_FRAG[] =
     "float RdotV = clamp(dot(R, V), 0.0, 1.0);\n"
     "float specularFalloff = pow(RdotV, u_specularExponent);\n"
 "#endif\n"
+"#endif\n"
 "\n"
+"#if defined(_PBR)\n"
+    "gl_FragColor = color * u_uniformParm0;\n"
+"#else\n"
     "vec3 color;\n"
     "color = diffuseColor;\n"
     "color += specularFalloff * specularColor;\n"
@@ -1836,6 +2028,7 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_FRAG[] =
     "color *= lightFalloff;\n"
 "\n"
     "gl_FragColor = vec4(color, 1.0) * var_Color * u_uniformParm0;\n"
+"#endif\n"
 "}\n"
 ;
 

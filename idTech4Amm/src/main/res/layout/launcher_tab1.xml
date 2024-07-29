@@ -392,6 +392,12 @@
                         android:layout_height="wrap_content"
                         android:text="@string/blinn_phong" />
 
+                    <RadioButton
+                        android:id="@+id/harm_r_lightModel_pbr"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pbr" />
+
                 </RadioGroup>
 
                 <LinearLayout

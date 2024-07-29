@@ -205,7 +205,7 @@ void * game_main(void *data)
 	//common->Quit();
 	Q3E_End();
 	main_thread = 0;
-	printf("[Harmattan]: Leave doom3 main thread.\n");
+	printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
 
 	return (void *)(intptr_t)result;
 }
