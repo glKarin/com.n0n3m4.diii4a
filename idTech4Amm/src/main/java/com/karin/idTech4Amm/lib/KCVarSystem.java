@@ -31,7 +31,9 @@ public final class KCVarSystem
                                 "2", "Blinn-Phong",
                                 "3", "PBR"
                         ),
-                        KCVar.CreateCVar("harm_r_specularExponent", "float", "4.0", "Specular exponent in interaction light model", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction light model", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction light model", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "1.0", "Specular exponent in PBR interaction light model(1 = using vertex normal, 0 = using bump texture, 0 - 1 = vertex normal * harm_r_pbrSpecularExponent + bump texture * (1 - harm_r_pbrSpecularExponent))", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE),
 
                         KCVar.CreateCVar("r_screenshotFormat", "integer", "0", "Screenshot format", 0,

@@ -24,6 +24,8 @@ public final class CVarSettingUI
                 "harm_r_clearVertexBuffer",
                 "harm_r_lightModel",
                 "harm_r_specularExponent",
+                "harm_r_specularExponentBlinnPhong",
+                "harm_r_specularExponentPBR",
                 "harm_fs_gameLibPath",
                 "harm_r_maxFps",
                 "r_useShadowMapping",

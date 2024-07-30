@@ -30,6 +30,7 @@ import android.text.util.Linkify;
 import android.text.method.LinkMovementMethod;
 
 import com.karin.idTech4Amm.R;
+import com.karin.idTech4Amm.misc.Function;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3ELang;
@@ -199,16 +200,17 @@ public final class ContextUtility
         builder.create().show();
     }
 
-    public static AlertDialog Input(Context context, CharSequence title, CharSequence message, String val, String[] args, final Runnable yes, final Runnable no, String otherName, Runnable other)
+    public static AlertDialog Input(Context context, CharSequence title, CharSequence message, String val, String[] args, final Runnable yes, final Runnable no, String otherName, Runnable other, Function editTextConfig)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         EditText editText = new EditText(context);
-        editText.setSingleLine(true);
         if(null != message)
             editText.setHint(message);
         if(null != val)
             editText.setText(val);
+        if(null != editTextConfig)
+            editTextConfig.Invoke(editText);
         builder.setView(editText);
         builder.setCancelable(true);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {

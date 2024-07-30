@@ -8,9 +8,11 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
+import com.karin.idTech4Amm.misc.Function;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.karin.KStr;
@@ -262,7 +264,17 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                     }
                 }
             }
-        }, null, null, null);
+        }, null, null, null, new Function()
+        {
+            @Override
+            public Object Invoke(Object... args)
+            {
+                EditText editText = (EditText)args[0];
+                editText.setMaxLines(5);
+                editText.setSingleLine(false);
+                return null;
+            }
+        });
         input.setOnDismissListener(new DialogInterface.OnDismissListener()
         {
             @Override
@@ -296,7 +308,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                 {
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher);
                     List<String> records = new ArrayList<>(preferences.getStringSet(m_key, new HashSet<>()));
-                    if(records.contains(arg))
+                    if (records.contains(arg))
                     {
                         error[0] = true;
                         Toast_short(Q3ELang.tr(m_gameLauncher, R.string.command_exists));
@@ -309,7 +321,17 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                     }
                 }
             }
-        }, null, null, null);
+        }, null, null, null, new Function()
+        {
+            @Override
+            public Object Invoke(Object... args)
+            {
+                EditText editText = (EditText)args[0];
+                editText.setMaxLines(5);
+                editText.setSingleLine(false);
+                return null;
+            }
+        });
         input.setOnDismissListener(new DialogInterface.OnDismissListener()
         {
             @Override

@@ -34,8 +34,7 @@
     <string name="light_model_cvar_harm_r_lightmodel">Выбрать модель освещения(harm_r_lightModel)</string>
     <string name="phong">Phong</string>
     <string name="blinn_phong">Blinn-Phong</string>
-    <string name="specular_exponent_cvar_harm_r_specularexponent">Зеркальность(harm_r_specularExponent):</string>
-    <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности света(по умолчанию 4.0)</string>
+    <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности света</string>
     <string name="sound">Выбор звука(s_driver)</string>
     <string name="load_quicksave_when_start_game">Загружать автосохранение при запуске игры</string>
     <string name="edit_autoexec_cfg">Редактировать autoexec.cfg</string>
@@ -347,5 +346,14 @@
     <string name="command_exists">Command exists</string>
     <string name="add_command_record">Add command record</string>
     <string name="pbr">PBR</string>
+    <string name="specular_exponent_cvar_harm_r_specularexponent">Phong Specular exponent(harm_r_specularExponent):</string>
+    <string name="use_etc2_compression">Use ETC2 compression</string>
+    <string name="blinnphong_specular_exponent_cvar_harm_r_specularexponentblinnphong">Blinn-Phong Specular exponent(harm_r_specularExponentBlinnphong):</string>
+    <string name="blinnphong_specular_exponent_cvar_harm_r_specularexponentpbr">PBR Specular exponent(harm_r_specularExponentPBR):</string>
+    <string name="blinnphong_specular_exponent">Blinn-Phong specular exponent</string>
+    <string name="pbr_specular_exponent">PBR specular exponent</string>
+    <string name="lighting">Lighting</string>
+    <string name="shadow">Shadow</string>
+    <string name="image">Image</string>
 
 </resources>

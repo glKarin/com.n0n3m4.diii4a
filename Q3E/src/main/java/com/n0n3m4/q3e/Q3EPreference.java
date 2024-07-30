@@ -25,9 +25,12 @@ public final class Q3EPreference
     public static final String pref_useetc1cache = "q3e_useetc1cache";
     public static final String pref_controlprefix = "q3e_controls_";
 
+    public static final String pref_harm_image_useetc2 = "q3e_image_useetc2"; //k
     public static final String pref_harm_16bit = "q3e_harm_16bit"; //k
     public static final String pref_harm_r_harmclearvertexbuffer = "q3e_r_harmclearvertexbuffer"; //k
     public static final String pref_harm_r_specularExponent = "q3e_harm_r_specularExponent"; //k
+    public static final String pref_harm_r_specularExponentBlinnPhong = "q3e_harm_r_specularExponentBlinnPhong"; //k
+    public static final String pref_harm_r_specularExponentPBR = "q3e_harm_r_specularExponentPBR"; //k
     public static final String pref_harm_r_lightModel = "q3e_harm_r_lightModel"; //k
     public static final String pref_harm_mapBack = "q3e_harm_map_back"; //k
     public static final String pref_harm_game = "q3e_harm_game"; //k

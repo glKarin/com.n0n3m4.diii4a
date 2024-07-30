@@ -33,8 +33,8 @@
     <string name="light_model_cvar_harm_r_lightmodel">光照模型(harm_r_lightModel)</string>
     <string name="phong">Phong</string>
     <string name="blinn_phong">Blinn-Phong</string>
-    <string name="specular_exponent_cvar_harm_r_specularexponent">镜面反射指数(harm_r_specularExponent):</string>
-    <string name="specular_exponent_in_interaction_light_model_default_is_4_0">光照下镜面反射指数(默认4.0)</string>
+    <string name="specular_exponent_cvar_harm_r_specularexponent">Phong镜面反射指数(harm_r_specularExponent):</string>
+    <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Phong光照下镜面反射指数</string>
     <string name="sound">音频实现(s_driver)</string>
     <string name="load_quicksave_when_start_game">启动游戏时自动加载快速存档</string>
     <string name="edit_autoexec_cfg">编辑 autoexec.cfg</string>
@@ -346,4 +346,12 @@
     <string name="command_exists">命令存在</string>
     <string name="add_command_record">新增命令记录</string>
     <string name="pbr">PBR</string>
+    <string name="use_etc2_compression">使用ETC2压缩纹理代替RGBA4444</string>
+    <string name="blinnphong_specular_exponent_cvar_harm_r_specularexponentblinnphong">Blinn-Phong镜面反射指数(harm_r_specularExponentBlinnphong):</string>
+    <string name="blinnphong_specular_exponent_cvar_harm_r_specularexponentpbr">PBR镜面反射指数(harm_r_specularExponentPBR):</string>
+    <string name="blinnphong_specular_exponent">Blinn-Phong光照下镜面反射指数</string>
+    <string name="pbr_specular_exponent">PBR光照下镜面反射指数</string>
+    <string name="lighting">光照</string>
+    <string name="shadow">阴影</string>
+    <string name="image">纹理</string>
 </resources>

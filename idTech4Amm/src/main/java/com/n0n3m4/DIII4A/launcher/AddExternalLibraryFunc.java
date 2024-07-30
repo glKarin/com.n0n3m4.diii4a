@@ -87,7 +87,7 @@ public final class AddExternalLibraryFunc extends GameLauncherFunc
                     Write(uri, args[0]);
                 }
             }
-        }, null, null, null);
+        }, null, null, null, null);
     }
 
     private void Save(Uri uri)

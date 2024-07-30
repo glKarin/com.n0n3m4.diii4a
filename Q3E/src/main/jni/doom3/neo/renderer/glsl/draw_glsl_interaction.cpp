@@ -53,7 +53,12 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	GL_Uniform4fv(offsetof(shaderProgram_t, specularColor), din->specularColor.ToFloatPtr());
 
 	// material may be NULL for shadow volumes
-	GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), r_specularExponent);
+	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+		GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
+	else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+		GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentPBR.GetFloat());
+	else
+		GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
 
 	// set the textures
 

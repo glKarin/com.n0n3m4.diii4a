@@ -337,6 +337,13 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_r_stencilShadowCombine, isChecked)
 						.commit();
 			}
+			else if (id == R.id.image_useetc2)
+			{
+				setProp("r_useETC2", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_image_useetc2, isChecked)
+						.commit();
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -792,6 +799,9 @@ public class GameLauncher extends Activity
 			if (!IsProp("r_useETC1cache")) setProp("r_useETC1cache", false);
 			if (!IsProp("r_noLight")) setProp("r_noLight", false);
 
+			V.image_useetc2.setChecked(getProp("r_useETC2", false));
+			if (!IsProp("r_useETC2")) setProp("r_useETC2", false);
+
 			str = GetProp("harm_r_clearVertexBuffer");
 			int index = Q3EUtils.parseInt_s(str, 2);
 			SelectCheckbox(V.r_harmclearvertexbuffer, index);
@@ -805,10 +815,21 @@ public class GameLauncher extends Activity
 			}
 			SelectCheckbox(V.rg_harm_r_lightModel, index);
 			if (!IsProp("harm_r_lightModel")) SetProp("harm_r_lightModel", "1");
+
 			str = GetProp("harm_r_specularExponent");
 			if (null != str)
 				V.edt_harm_r_specularExponent.setText(str);
-			if (!IsProp("harm_r_specularExponent")) SetProp("harm_r_specularExponent", "4.0");
+			if (!IsProp("harm_r_specularExponent")) SetProp("harm_r_specularExponent", "3.0");
+
+			str = GetProp("harm_r_specularExponentBlinnPhong");
+			if (null != str)
+				V.edt_harm_r_specularExponentBlinnPhong.setText(str);
+			if (!IsProp("harm_r_specularExponentBlinnPhong")) SetProp("harm_r_specularExponentBlinnPhong", "12.0");
+
+			str = GetProp("harm_r_specularExponentPBR");
+			if (null != str)
+				V.edt_harm_r_specularExponentPBR.setText(str);
+			if (!IsProp("harm_r_specularExponentPBR")) SetProp("harm_r_specularExponentPBR", "1.0");
 
 			str = GetProp("s_driver");
 			index = 0;
@@ -1074,6 +1095,7 @@ public class GameLauncher extends Activity
         V.useetc1.setChecked(mPrefs.getBoolean(Q3EPreference.pref_useetc1, false));
         V.useetc1cache.setChecked(mPrefs.getBoolean(Q3EPreference.pref_useetc1cache, false));
         V.nolight.setChecked(mPrefs.getBoolean(Q3EPreference.pref_nolight, false));
+		V.image_useetc2.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_image_useetc2, false));
         SelectCheckbox(V.rg_color_bits, mPrefs.getInt(Q3EPreference.pref_harm_16bit, -1) + 1);
         V.rg_color_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.r_harmclearvertexbuffer, mPrefs.getInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, 2));
@@ -1161,7 +1183,9 @@ public class GameLauncher extends Activity
         });
         V.launcher_tab1_game_lib_button.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_game_mod_button.setOnClickListener(m_buttonClickListener);
-        V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 4.0f));
+        V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 3.0f));
+		V.edt_harm_r_specularExponentBlinnPhong.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponentBlinnPhong, 12.0f));
+		V.edt_harm_r_specularExponentPBR.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponentPBR, 1.0f));
 		V.edt_harm_r_maxFps.setText(Q3EPreference.GetStringFromInt(mPrefs, Q3EPreference.pref_harm_r_maxFps, 0));
 
 		Runnable customResChanged = new Runnable() {
@@ -1180,7 +1204,9 @@ public class GameLauncher extends Activity
 
         //DIII4A-specific
 		SetupCommandTextWatcher(true);
-        V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 4.0f));
+        V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 3.0f));
+		V.edt_harm_r_specularExponentBlinnPhong.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentBlinnPhong", Q3EPreference.pref_harm_r_specularExponentBlinnPhong, 12.0f));
+		V.edt_harm_r_specularExponentPBR.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentPBR", Q3EPreference.pref_harm_r_specularExponentPBR, 3.0f));
 		V.edt_harm_r_maxFps.addTextChangedListener(new TextWatcher()
 		{
 			public void onTextChanged(CharSequence s, int start, int before, int count)
@@ -1200,6 +1226,7 @@ public class GameLauncher extends Activity
         V.useetc1.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.useetc1cache.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.nolight.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.image_useetc2.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.smoothjoy.setOnCheckedChangeListener(m_checkboxChangeListener);
         V.launcher_tab2_joystick_unfixed.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.launcher_tab2_joystick_visible.setOnItemSelectedListener(m_itemSelectedListener);
@@ -1718,7 +1745,9 @@ public class GameLauncher extends Activity
         mEdtr.putInt(Q3EPreference.pref_harm_16bit, index);
         mEdtr.putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
         mEdtr.putString(Q3EPreference.pref_harm_r_lightModel, "" + (GetCheckboxIndex(V.rg_harm_r_lightModel) + 1));
-        mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 4.0f));
+        mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 3.0f));
+		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentBlinnPhong, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentBlinnPhong.getText().toString(), 12.0f));
+		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentPBR, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentPBR.getText().toString(), 1.0f));
         mEdtr.putString(Q3EPreference.pref_harm_s_driver, GetCheckboxIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
 		mEdtr.putInt(Q3EPreference.pref_harm_r_maxFps, Q3EUtils.parseInt_s(V.edt_harm_r_maxFps.getText().toString(), 0));
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_useShadowMapping, GetCheckboxIndex(V.rg_harm_r_shadow) == 1);
@@ -1737,6 +1766,7 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_useetc1, V.useetc1.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_usedxt, V.usedxt.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_nolight, V.nolight.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_image_useetc2, V.image_useetc2.isChecked());
         mEdtr.putBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), V.fs_game_user.isChecked());
         mEdtr.putString(Q3EPreference.pref_harm_game, Q3EUtils.q3ei.game);
         mEdtr.putBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, V.launcher_tab2_enable_gyro.isChecked());
@@ -2919,6 +2949,9 @@ public class GameLauncher extends Activity
 		public TextView tv_scale_current;
 		public LinearLayout res_scale_layout;
 		public Button launcher_tab1_command_record;
+		public CheckBox image_useetc2;
+		public EditText edt_harm_r_specularExponentBlinnPhong;
+		public EditText edt_harm_r_specularExponentPBR;
 
         public void Setup()
         {
@@ -3014,6 +3047,9 @@ public class GameLauncher extends Activity
 			tv_scale_current = findViewById(R.id.tv_scale_current);
 			res_scale_layout = findViewById(R.id.res_scale_layout);
 			launcher_tab1_command_record = findViewById(R.id.launcher_tab1_command_record);
+			image_useetc2 = findViewById(R.id.image_useetc2);
+			edt_harm_r_specularExponentBlinnPhong = findViewById(R.id.edt_harm_r_specularExponentBlinnPhong);
+			edt_harm_r_specularExponentPBR = findViewById(R.id.edt_harm_r_specularExponentPBR);
         }
     }
 }
