@@ -1831,8 +1831,8 @@ PACK_FLOAT_FUNC()
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
-// interaction(translucent)
-GLSL_SHADER const char INTERACTION_TRANSLUCENT_VERT[] =
+// interaction(stencil shadow augmented)
+GLSL_SHADER const char INTERACTION_STENCIL_SHADOW_VERT[] =
 "#version 100\n"
 "//#pragma optimize(off)\n"
 "\n"
@@ -1840,6 +1840,7 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_VERT[] =
 "\n"
 "//#define BLINN_PHONG\n"
 "//#define _PBR\n"
+"//#define _TRANSLUCENT\n"
 "\n"
 "varying vec2 var_TexDiffuse;\n"
 "varying vec2 var_TexNormal;\n"
@@ -1918,7 +1919,7 @@ GLSL_SHADER const char INTERACTION_TRANSLUCENT_VERT[] =
     "gl_Position = u_modelViewProjectionMatrix * attr_Vertex;\n"
 "}\n"
 ;
-GLSL_SHADER const char INTERACTION_TRANSLUCENT_FRAG[] =
+GLSL_SHADER const char INTERACTION_STENCIL_SHADOW_FRAG[] =
 "#version 100\n"
 "//#pragma optimize(off)\n"
 "\n"
@@ -2027,15 +2028,14 @@ _PBR_GENERAL_FUNCTION
     "color *= NdotL * lightProjection;\n"
     "color *= lightFalloff;\n"
 "\n"
-    "gl_FragColor = vec4(color, 1.0) * var_Color * u_uniformParm0;\n"
+    "gl_FragColor = vec4(color, 1.0) * var_Color\n"
+    "#ifdef _TRANSLUCENT\n"
+    "     * u_uniformParm0\n"
+    "#endif // _TRANSLUCENT\n"
+    "    ;\n"
 "#endif\n"
 "}\n"
 ;
-
-#ifdef _SOFT_STENCIL_SHADOW
-#define INTERACTION_SOFT_VERT INTERACTION_VERT
-#define INTERACTION_SOFT_FRAG INTERACTION_FRAG
-#endif
 #endif
 
 #endif
