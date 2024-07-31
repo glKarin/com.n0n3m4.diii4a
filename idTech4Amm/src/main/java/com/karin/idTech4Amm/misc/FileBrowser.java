@@ -1,8 +1,11 @@
 package com.karin.idTech4Amm.misc;
 
+import android.content.Context;
+import android.net.Uri;
 import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
+import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 
 import java.io.File;
@@ -15,6 +18,8 @@ import java.util.Set;
 
 public class FileBrowser
 {
+    private static final String TAG = "FileBrowser";
+
     public static final int ID_ORDER_BY_NAME = 1;
     public static final int ID_ORDER_BY_TIME = 2;
 
@@ -24,6 +29,7 @@ public class FileBrowser
     public static final int ID_FILTER_FILE = 1;
     public static final int ID_FILTER_DIRECTORY = 1 << 1;
 
+    private Context m_context;
     private String m_currentPath;
     private final Set<String> m_history = new LinkedHashSet<>();
     private final List<FileBrowser.FileModel> m_fileList = new ArrayList<>();
@@ -34,15 +40,37 @@ public class FileBrowser
     private boolean m_showHidden = true;
     private boolean m_ignoreDotDot = false;
     private boolean m_dirNameWithSeparator = true;
+    private Listener m_callback = null;
+
+    public interface Listener
+    {
+        public void OnPathCannotAccess(String path);
+    };
 
     public FileBrowser()
     {
     }
 
+    public FileBrowser(Context context)
+    {
+        m_context = context;
+    }
+
     public FileBrowser(String path)
     {
+        this(null, path);
+    }
+
+    public FileBrowser(Context context, String path)
+    {
+        this(context);
         if (path != null && !path.isEmpty())
             SetCurrentPath(path);
+    }
+
+    public void SetListener(Listener l)
+    {
+        m_callback = l;
     }
 
     protected boolean ListFiles(String path)
@@ -119,18 +147,72 @@ public class FileBrowser
         return true;
     }
 
+    private boolean Check(String path)
+    {
+        if(null == m_context)
+            return true;
+        if(!ContextUtility.NeedGrantUriPermission(m_context, path))
+            return true;
+        if(ContextUtility.IsUriPermissionGrantPrefix(m_context, path))
+            return true;
+        if(null != m_callback)
+            m_callback.OnPathCannotAccess(path);
+        return false;
+    }
+
     public boolean SetCurrentPath(String path)
     {
+        if(!Check(path))
+            return false;
+
+        boolean res = false;
         if (path != null && !path.equals(m_currentPath))
         {
-            if (ListFiles(path))
+            if(null == m_context)
             {
-                //m_currentPath = path;
-                m_history.add(m_currentPath);
-                return true;
+                res = ListFiles(path);
+            }
+            else
+            {
+                if(ContextUtility.NeedListPackagesAsFiles(m_context, path))
+                {
+                    String[] packages = ContextUtility.ListPackages(m_context);
+                    Log.d(TAG, "Using packages: " + packages.length);
+                    res = ListGivenFiles(path, packages);
+                }
+                else if(ContextUtility.NeedUsingDocumentFile(m_context, path))
+                {
+                    DocumentFile documentFile = ContextUtility.DirectoryDocument(m_context, path);
+                    Log.d(TAG, "Using DocumentFile: " + documentFile.getUri());
+                    if(ContextUtility.IsUriPermissionGrant(m_context, path))
+                        res = ListDocumentFiles(path, documentFile);
+                    else
+                    {
+                        Uri uri = ContextUtility.GetPermissionGrantedUri(m_context, path);
+                        if(null != uri)
+                        {
+                            DocumentFile parentDocumentFile = DocumentFile.fromTreeUri(m_context, uri);
+                            String parentPath = FileUtility.GetPathFromUri(uri);
+                            String subPath = FileUtility.GetRelativePath(path, parentPath);
+                            res = ListDocumentFiles(path, parentDocumentFile, subPath);
+                        }
+                        else
+                            res = ListDocumentFiles(path, documentFile);
+                    }
+                }
+                else
+                {
+                    Log.d(TAG, "Using File");
+                    res = ListFiles(path);
+                }
             }
         }
-        return false;
+        if (res)
+        {
+            //m_currentPath = path;
+            m_history.add(m_currentPath);
+        }
+        return res;
     }
 
     public void Rescan()

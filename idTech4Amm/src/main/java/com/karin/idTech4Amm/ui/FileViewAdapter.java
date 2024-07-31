@@ -2,15 +2,11 @@ package com.karin.idTech4Amm.ui;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
-import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.karin.idTech4Amm.lib.ContextUtility;
-import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.misc.FileBrowser;
 import com.karin.idTech4Amm.sys.Theme;
 
@@ -28,7 +24,16 @@ public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
     public FileViewAdapter(Context context, String path)
     {
         super(context, android.R.layout.select_dialog_item);
-        m_fileBrowser = new FileBrowser();
+        m_fileBrowser = new FileBrowser(context);
+        m_fileBrowser.SetListener(new FileBrowser.Listener()
+        {
+            @Override
+            public void OnPathCannotAccess(String path)
+            {
+                if(null != m_listener)
+                    m_listener.OnGrantPermission(path);
+            }
+        });
         if(null != path && !path.isEmpty())
             OpenPath(path);
     }
@@ -86,39 +91,7 @@ public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
         boolean res;
 
         Log.d(TAG, "Open directory: " + path);
-        Context context = getContext();
-        if(ContextUtility.NeedListPackagesAsFiles(context, path))
-        {
-            String[] packages = ContextUtility.ListPackages(context);
-            Log.d(TAG, "Using packages: " + packages.length);
-            // for (int i = 0; i < packages.length; i++) packages[i] += "/";
-            res = m_fileBrowser.ListGivenFiles(path, packages);
-        }
-        else if(ContextUtility.NeedUsingDocumentFile(context, path))
-        {
-            DocumentFile documentFile = ContextUtility.DirectoryDocument(context, path);
-            Log.d(TAG, "Using DocumentFile: " + documentFile.getUri());
-            if(ContextUtility.IsUriPermissionGrant(context, path))
-                res = m_fileBrowser.ListDocumentFiles(path, documentFile);
-            else
-            {
-                Uri uri = ContextUtility.GetPermissionGrantedUri(context, path);
-                if(null != uri)
-                {
-                    DocumentFile parentDocumentFile = DocumentFile.fromTreeUri(context, uri);
-                    String parentPath = FileUtility.GetPathFromUri(uri);
-                    String subPath = FileUtility.GetRelativePath(path, parentPath);
-                    res = m_fileBrowser.ListDocumentFiles(path, parentDocumentFile, subPath);
-                }
-                else
-                    res = m_fileBrowser.ListDocumentFiles(path, documentFile);
-            }
-        }
-        else
-        {
-            Log.d(TAG, "Using File");
-            res = m_fileBrowser.SetCurrentPath(path);
-        }
+        res = m_fileBrowser.SetCurrentPath(path);
 
         if(true || res) // always update
         {
@@ -152,10 +125,16 @@ public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
         return m_file;
     }
 
+    public FileBrowser GetFileBrowser()
+    {
+        return m_fileBrowser;
+    }
+
     public interface FileAdapterListener
     {
         public void OnPathChanged(String path);
         public void OnFileSelected(String file, String path);
+        public void OnGrantPermission(String path);
     }
 
     public void SetListener(FileAdapterListener l)

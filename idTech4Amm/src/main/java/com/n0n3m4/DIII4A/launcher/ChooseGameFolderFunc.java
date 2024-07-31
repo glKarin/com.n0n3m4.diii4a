@@ -97,14 +97,9 @@ public final class ChooseGameFolderFunc extends GameLauncherFunc
         FileBrowserDialog.FileBrowserCallback callback = new FileBrowserDialog.FileBrowserCallback()
         {
             @Override
-            public boolean Check(String path)
+            public void Check(String path)
             {
-                if(!ContextUtility.NeedGrantUriPermission(m_gameLauncher, path))
-                    return true;
-                if(ContextUtility.IsUriPermissionGrantPrefix(m_gameLauncher, path))
-                    return true;
                 ContextUtility.GrantUriPermission(m_gameLauncher, path, m_uriCode);
-                return false;
             }
         };
 

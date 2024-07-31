@@ -10,6 +10,7 @@ import android.widget.ListView;
 import android.app.AlertDialog;
 
 import com.karin.idTech4Amm.R;
+import com.karin.idTech4Amm.misc.FileBrowser;
 import com.n0n3m4.q3e.Q3ELang;
 
 /**
@@ -36,6 +37,14 @@ public class FileBrowserDialog extends AlertDialog {
         {
 
         }
+
+        @Override
+        public void OnGrantPermission(String path)
+        {
+            if(null != m_callback)
+                m_callback.Check(path);
+        }
+
     };
     
     public FileBrowserDialog(Context context)
@@ -84,11 +93,6 @@ public class FileBrowserDialog extends AlertDialog {
 
     public void SetPath(String path)
     {
-        if(null != m_callback)
-        {
-            if(!m_callback.Check(path))
-                return;
-        }
         m_adapter.OpenPath(path);
     }
 
@@ -104,7 +108,7 @@ public class FileBrowserDialog extends AlertDialog {
 
     public interface FileBrowserCallback
     {
-        public boolean Check(String path);
+        public void Check(String path);
     }
 }
 
