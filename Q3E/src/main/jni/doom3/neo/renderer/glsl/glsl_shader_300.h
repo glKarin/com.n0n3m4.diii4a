@@ -11,8 +11,8 @@
 "vec2 CenterScale( vec2 inTC, vec2 centerScale ) {\n" \
 "    float scaleX = centerScale.x;\n" \
 "    float scaleY = centerScale.y;\n" \
-"    vec4 tc0 = vec4( scaleX, 0.0, 0.0, 0.5 - ( 0.5f * scaleX ) );\n" \
-"    vec4 tc1 = vec4( 0.0, scaleY, 0.0, 0.5 - ( 0.5f * scaleY ) );\n" \
+"    vec4 tc0 = vec4( scaleX, 0.0, 0.0, 0.5 - ( 0.5 * scaleX ) );\n" \
+"    vec4 tc1 = vec4( 0.0, scaleY, 0.0, 0.5 - ( 0.5 * scaleY ) );\n" \
 "    vec2 finalTC;\n" \
 "    finalTC.x = dot2_4( inTC, tc0 );\n" \
 "    finalTC.y = dot2_4( inTC, tc1 );\n" \
@@ -23,8 +23,8 @@
 "    float sinValue = cs.y;\n" \
 "    float cosValue = cs.x;\n" \
 "\n" \
-"    vec4 tc0 = vec4( cosValue, -sinValue, 0.0, ( -0.5f * cosValue ) + ( 0.5f * sinValue ) + 0.5f );\n" \
-"    vec4 tc1 = vec4( sinValue, cosValue, 0.0, ( -0.5f * sinValue ) + ( -0.5f * cosValue ) + 0.5f );\n" \
+"    vec4 tc0 = vec4( cosValue, -sinValue, 0.0, ( -0.5 * cosValue ) + ( 0.5 * sinValue ) + 0.5 );\n" \
+"    vec4 tc1 = vec4( sinValue, cosValue, 0.0, ( -0.5 * sinValue ) + ( -0.5 * cosValue ) + 0.5 );\n" \
 "    vec2 finalTC;\n" \
 "    finalTC.x = dot2_4( inTC, tc0 );\n" \
 "    finalTC.y = dot2_4( inTC, tc1 );\n" \
@@ -202,7 +202,7 @@ GLSL_SHADER const char ES3_HEATHAZE_VERT[] =
             "// magicProjectionAdjust is a magic scalar that scales the projection since we changed from \n"
             "// using the X axis to the Y axis to calculate R1.  It is an approximation to closely match \n"
             "// what the original game did\n"
-            "const float magicProjectionAdjust = 0.43f;\n"
+            "const float magicProjectionAdjust = 0.43;\n"
             "float x = dot ( vec, u_projectionMatrix[1] ) * magicProjectionAdjust;\n"
             "float w = dot ( vec, u_projectionMatrix[3] );\n"
             "// don't let the recip get near zero for polygons that cross the view plane\n"
@@ -268,7 +268,7 @@ GLSL_SHADER const char ES3_HEATHAZE_FRAG[] =
         "{\n"
 #if HEATHAZE_BFG // BFG
             "// load the filtered normal map and convert to -1 to 1 range\n"
-            "vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;\n"
+            "vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0 ) - 1.0;\n"
             "vec2 localNormal = bumpMap.wy;\n"
             "// calculate the screen texcoord in the 0.0 to 1.0 range\n"
             "vec2 screenTexCoord = (gl_FragCoord.xy ) * u_windowCoords.xy;\n"
@@ -358,7 +358,7 @@ GLSL_SHADER const char ES3_HEATHAZEWITHMASK_VERT[] =
             "// magicProjectionAdjust is a magic scalar that scales the projection since we changed from \n"
             "// using the X axis to the Y axis to calculate R1.  It is an approximation to closely match \n"
             "// what the original game did\n"
-            "const float magicProjectionAdjust = 0.43f;\n"
+            "const float magicProjectionAdjust = 0.43;\n"
             "float x = dot ( vec, u_projectionMatrix[1] ) * magicProjectionAdjust;\n"
             "float w = dot ( vec, u_projectionMatrix[3] );\n"
             "// don't let the recip get near zero for polygons that cross the view plane\n"
@@ -432,10 +432,10 @@ GLSL_SHADER const char ES3_HEATHAZEWITHMASK_FRAG[] =
             "// load the distortion map\n"
             "vec4 mask = texture( u_fragmentMap2, var_TexCoord0.xy );\n"
             "// kill the pixel if the distortion wound up being very small\n"
-            "mask.xy -= 0.01f;\n"
+            "mask.xy -= 0.01;\n"
             " if ( any( lessThan( mask, vec4( 0.0 ) ) ) ) { discard; } \n"
             "// load the filtered normal map and convert to -1 to 1 range\n"
-            "vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;\n"
+            "vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0 ) - 1.0;\n"
             "vec2 localNormal = bumpMap.wy;\n"
             "localNormal *= mask.xy;\n"
             "// calculate the screen texcoord in the 0.0 to 1.0 range\n"
@@ -538,7 +538,7 @@ GLSL_SHADER const char ES3_HEATHAZEWITHMASKANDVERTEX_VERT[] =
             "// magicProjectionAdjust is a magic scalar that scales the projection since we changed from \n"
             "// using the X axis to the Y axis to calculate x.  It is an approximation to closely match \n"
             "// what the original game did\n"
-            "const float magicProjectionAdjust = 0.43f;\n"
+            "const float magicProjectionAdjust = 0.43;\n"
             "float x = dot ( vec, u_projectionMatrix[1] ) * magicProjectionAdjust;\n"
             "float w = dot ( vec, u_projectionMatrix[3] );\n"
             "// don't let the recip get near zero for polygons that cross the view plane\n"
@@ -617,10 +617,10 @@ GLSL_SHADER const char ES3_HEATHAZEWITHMASKANDVERTEX_FRAG[] =
             "vec4 mask = texture( u_fragmentMap2, var_TexCoord0.xy );\n"
             "// kill the pixel if the distortion wound up being very small\n"
             "mask.xy *= var_Color.xy;\n"
-            "mask.xy -= 0.01f;\n"
+            "mask.xy -= 0.01;\n"
             " if ( any( lessThan( mask, vec4( 0.0 ) ) ) ) { discard; } \n"
             "// load the filtered normal map and convert to -1 to 1 range\n"
-            "vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;\n"
+            "vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0 ) - 1.0;\n"
             "vec2 localNormal = bumpMap.wy;\n"
             "localNormal *= mask.xy;\n"
             "// calculate the screen texcoord in the 0.0 to 1.0 range\n"
@@ -698,7 +698,7 @@ GLSL_SHADER const char ES3_COLORPROCESS_VERT[] =
         "\n"
         "    var_Color = u_vertexParm1;\n"
         "    var_TexCoord.x = attr_TexCoord.x;\n"
-        "    var_TexCoord.y = 1.0f - attr_TexCoord.y;\n"
+        "    var_TexCoord.y = 1.0 - attr_TexCoord.y;\n"
         "    var_TexCoord.z = u_vertexParm0.x;\n"
         "}\n"
 ;
@@ -1972,8 +1972,8 @@ GLSL_SHADER const char ES3_INTERACTION_STENCIL_SHADOW_FRAG[] =
         */
         "        vec2 stc = screenTexCoord + sampleOffsetTable[i] * factor;\n"
         "        float t = float(texture(u_fragmentMap6, stc).r);\n"
-        "        float f= clamp(129.0 - t, u_uniformParm0, 1.0);\n"
-        "        shadow += f;\n"
+        "        float shadowColor = clamp(129.0 - t, u_uniformParm0, 1.0);\n"
+        "        shadow += shadowColor;\n"
         "    }\n"
         "    const highp float sampleAvg = SAMPLE_MULTIPLICATOR;\n"
         "    shadow *= sampleAvg;\n"
