@@ -367,7 +367,7 @@ public class FileBrowser
             if(!m_showHidden && f.isHidden())
                 continue;
 
-            if (isDirectory && !m_dirNameWithSeparator)
+            if (isDirectory && m_dirNameWithSeparator)
                 name += File.separator;
 
             item = new FileBrowser.FileModel();
