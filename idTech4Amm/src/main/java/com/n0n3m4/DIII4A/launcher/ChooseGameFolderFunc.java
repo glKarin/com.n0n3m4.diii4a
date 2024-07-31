@@ -101,7 +101,7 @@ public final class ChooseGameFolderFunc extends GameLauncherFunc
             {
                 if(!ContextUtility.NeedGrantUriPermission(m_gameLauncher, path))
                     return true;
-                if(ContextUtility.IsUriPermissionGrant(m_gameLauncher, path))
+                if(ContextUtility.IsUriPermissionGrantPrefix(m_gameLauncher, path))
                     return true;
                 ContextUtility.GrantUriPermission(m_gameLauncher, path, m_uriCode);
                 return false;

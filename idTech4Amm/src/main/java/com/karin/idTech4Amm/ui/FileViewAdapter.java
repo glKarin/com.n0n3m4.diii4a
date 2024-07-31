@@ -98,7 +98,21 @@ public class FileViewAdapter extends ArrayAdapter_base<FileBrowser.FileModel>
         {
             DocumentFile documentFile = ContextUtility.DirectoryDocument(context, path);
             Log.d(TAG, "Using DocumentFile: " + documentFile.getUri());
-            res = m_fileBrowser.ListDocumentFiles(path, documentFile);
+            if(ContextUtility.IsUriPermissionGrant(context, path))
+                res = m_fileBrowser.ListDocumentFiles(path, documentFile);
+            else
+            {
+                Uri uri = ContextUtility.GetPermissionGrantedUri(context, path);
+                if(null != uri)
+                {
+                    DocumentFile parentDocumentFile = DocumentFile.fromTreeUri(context, uri);
+                    String parentPath = FileUtility.GetPathFromUri(uri);
+                    String subPath = FileUtility.GetRelativePath(path, parentPath);
+                    res = m_fileBrowser.ListDocumentFiles(path, parentDocumentFile, subPath);
+                }
+                else
+                    res = m_fileBrowser.ListDocumentFiles(path, documentFile);
+            }
         }
         else
         {

@@ -35,11 +35,13 @@ import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -593,11 +595,41 @@ public final class ContextUtility
         {
             Uri uri = FileUtility.PathUri(path);
             //Log.e("TAG", "IsUriPermissionGrant: " +uri + "|" + persistedUriPermission.getUri()+"="+persistedUriPermission.getUri().equals(uri));
-            // if(uri.toString().startsWith(persistedUriPermission.getUri().toString()))
             if(uri.equals(persistedUriPermission.getUri()))
                 return true;
         }
         return false;
+    }
+
+    public static boolean IsUriPermissionGrantPrefix(Context context, String path)
+    {
+        if(!NeedGrantUriPermission(context, path))
+            return true;
+        List<UriPermission> persistedUriPermissions = context.getContentResolver().getPersistedUriPermissions();
+        for (UriPermission persistedUriPermission : persistedUriPermissions)
+        {
+            Uri uri = FileUtility.PathUri(path);
+            //Log.e("TAG", "IsUriPermissionGrantPrefix: " +uri + "|" + persistedUriPermission.getUri()+"="+persistedUriPermission.getUri().equals(uri));
+            if(uri.toString().startsWith(persistedUriPermission.getUri().toString()))
+                return true;
+        }
+        return false;
+    }
+
+    public static Uri GetPermissionGrantedUri(Context context, String path)
+    {
+        if(!NeedGrantUriPermission(context, path))
+            return null;
+        List<UriPermission> persistedUriPermissions = context.getContentResolver().getPersistedUriPermissions();
+        for (UriPermission persistedUriPermission : persistedUriPermissions)
+        {
+            Uri uri = FileUtility.PathUri(path);
+            //Log.e("TAG", "IsUriPermissionGrantPrefix: " +uri + "|" + persistedUriPermission.getUri()+"="+persistedUriPermission.getUri().equals(uri));
+            Uri grantedUri = persistedUriPermission.getUri();
+            if(uri.toString().startsWith(grantedUri.toString()))
+                return grantedUri;
+        }
+        return null;
     }
 
     public static boolean GrantUriPermission(Activity activity, String path, int resultCode)
@@ -653,8 +685,7 @@ public final class ContextUtility
 
     public static DocumentFile DirectoryDocument(Context context, String path)
     {
-        DocumentFile documentFile = DocumentFile.fromTreeUri(context, FileUtility.PathUri(path));
-        return documentFile;
+        return DocumentFile.fromTreeUri(context, FileUtility.PathUri(path));
     }
 
     public static void OpenDocumentsUI(Context context)
