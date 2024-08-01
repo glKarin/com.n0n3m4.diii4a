@@ -704,7 +704,7 @@ extern clientStatic_t cls;
 
 extern qboolean com_fullyInitialized;
 
-static void * game_main(void *data);
+static void * game_main(int argc, char **argv);
 
 #include "sys_android.c"
 
@@ -714,7 +714,7 @@ void GLimp_CheckGLInitialized(void)
 }
 
 // Quake3 game main thread loop
-void * game_main(void *data)
+void * game_main(int argc, char **argv)
 {
 	int   i;
 	char  commandLine[ MAX_STRING_CHARS ] = { 0 };
@@ -726,40 +726,40 @@ void * game_main(void *data)
 	attach_thread(); // attach current to JNI for call Android code
 	Q3E_Start();
 
-	Sys_LaunchAutoupdater(q3e_argc, q3e_argv);
+	Sys_LaunchAutoupdater(argc, argv);
 
 	Sys_PlatformInit( );
 
 	// Set the initial time base
 	Sys_Milliseconds( );
 
-	Sys_ParseArgs( q3e_argc, q3e_argv );
-	Sys_SetBinaryPath( Sys_Dirname( q3e_argv[ 0 ] ) );
+	Sys_ParseArgs( argc, argv );
+	Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );
 	Sys_SetDefaultInstallPath( DEFAULT_BASEDIR );
 
 	// Concatenate the command line for passing to Com_Init
-	for( i = 1; i < q3e_argc; i++ )
+	for( i = 1; i < argc; i++ )
 	{
 		qboolean containsSpaces;
 
 		// For security reasons we always detect --uri, even when PROTOCOL_HANDLER is undefined
 		// Any arguments after "--uri quake3://..." is ignored
-		if ( !strcmp( q3e_argv[i], "--uri" ) )
+		if ( !strcmp( argv[i], "--uri" ) )
 		{
 #ifdef PROTOCOL_HANDLER
-			if ( q3e_argc > i+1 )
+			if ( argc > i+1 )
 			{
-				protocolCommand = Sys_ParseProtocolUri( q3e_argv[i+1] );
+				protocolCommand = Sys_ParseProtocolUri( argv[i+1] );
 			}
 #endif
 			break;
 		}
 
-		containsSpaces = strchr(q3e_argv[i], ' ') != NULL;
+		containsSpaces = strchr(argv[i], ' ') != NULL;
 		if (containsSpaces)
 			Q_strcat( commandLine, sizeof( commandLine ), "\"" );
 
-		Q_strcat( commandLine, sizeof( commandLine ), q3e_argv[ i ] );
+		Q_strcat( commandLine, sizeof( commandLine ), argv[ i ] );
 
 		if (containsSpaces)
 			Q_strcat( commandLine, sizeof( commandLine ), "\"" );

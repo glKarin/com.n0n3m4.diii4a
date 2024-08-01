@@ -244,6 +244,15 @@ static void Q3E_FreeArgs(void)
     q3e_argc = 0;
 }
 
+void Q3E_exit(void);
+static void * Q3E_MainLoop(void *data)
+{
+    void *ret = Q3E_THREAD_MAIN(q3e_argc, q3e_argv);
+    main_thread = 0;
+    Q3E_exit();
+    return ret;
+}
+
 // start game main thread from Android Surface thread
 static void Q3E_StartGameMainThread(void)
 {
@@ -258,7 +267,7 @@ static void Q3E_StartGameMainThread(void)
         exit(1);
     }
 
-    if (pthread_create((pthread_t *)&main_thread, &attr, Q3E_THREAD_MAIN, NULL) != 0) {
+    if (pthread_create((pthread_t *)&main_thread, &attr, Q3E_MainLoop, NULL) != 0) {
         Q3E_PRINTF("[Harmattan]: ERROR: pthread_create " Q3E_GAME_NAME " main thread failed\n");
         exit(1);
     }

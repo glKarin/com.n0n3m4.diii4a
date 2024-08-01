@@ -633,7 +633,7 @@ extern clientStatic_t cls;
 
 extern qboolean com_fullyInitialized;
 
-static void * game_main(void *data);
+static void * game_main(int argc, char **argv);
 
 #include "sys_android.c"
 
@@ -643,7 +643,7 @@ void GLimp_CheckGLInitialized(void)
 }
 
 // RTCW game main thread loop
-static void * game_main(void *data)
+void * game_main(int argc, char **argv)
 {
 	int   i;
 	char  commandLine[ MAX_STRING_CHARS ] = { 0 };
@@ -662,18 +662,18 @@ static void * game_main(void *data)
 		argc = 1;
 #endif
 
-	Sys_ParseArgs( q3e_argc, q3e_argv );
-	Sys_SetBinaryPath( Sys_Dirname( q3e_argv[ 0 ] ) );
+	Sys_ParseArgs( argc, argv );
+	Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );
 	Sys_SetDefaultInstallPath( DEFAULT_BASEDIR );
 
 	// Concatenate the command line for passing to Com_Init
-	for( i = 1; i < q3e_argc; i++ )
+	for( i = 1; i < argc; i++ )
 	{
-		const qboolean containsSpaces = strchr(q3e_argv[i], ' ') != NULL;
+		const qboolean containsSpaces = strchr(argv[i], ' ') != NULL;
 		if (containsSpaces)
 			Q_strcat( commandLine, sizeof( commandLine ), "\"" );
 
-		Q_strcat( commandLine, sizeof( commandLine ), q3e_argv[ i ] );
+		Q_strcat( commandLine, sizeof( commandLine ), argv[ i ] );
 
 		if (containsSpaces)
 			Q_strcat( commandLine, sizeof( commandLine ), "\"" );

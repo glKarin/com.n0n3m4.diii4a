@@ -215,7 +215,7 @@ void abrt_func(mcheck_status status)
 
 /* Android */
 
-static void * game_main(void *data);
+static void * game_main(int argc, char **argv);
 
 #include "sys_android.inc"
 
@@ -224,8 +224,8 @@ void GLimp_CheckGLInitialized(void)
 	Q3E_CheckNativeWindowChanged();
 }
 
-// doom3 game main thread loop
-static void * game_main(void *data)
+// DNF game main thread loop
+void * game_main(int argc, char **argv)
 {
 	attach_thread(); // attach current to JNI for call Android code
 
@@ -239,8 +239,8 @@ static void * game_main(void *data)
 	Posix_EarlyInit();
 	Sys_Printf("[Harmattan]: Enter doom3 main thread -> %lu\n", pthread_self());
 
-	if (q3e_argc > 1) {
-		common->Init(q3e_argc-1, (const char **)&q3e_argv[1], NULL);
+	if (argc > 1) {
+		common->Init(argc-1, (const char **)&argv[1], NULL);
 	} else {
 		common->Init(0, NULL, NULL);
 	}

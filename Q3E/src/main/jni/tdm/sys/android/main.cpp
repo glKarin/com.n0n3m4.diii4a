@@ -469,7 +469,7 @@ void abrt_func( mcheck_status status ) {
 
 /* Android */
 
-static void * game_main(void *data);
+static void * game_main(int argc, char **argv);
 
 #include "sys_android.cpp"
 
@@ -480,13 +480,13 @@ void GLimp_CheckGLInitialized(void)
     Q3E_CheckNativeWindowChanged();
 }
 
-// doom3 game main thread loop
-void * game_main(void *data)
+// TDM game main thread loop
+void * game_main(int argc, char **argv)
 {
     attach_thread(); // attach current to JNI for call Android code
 
     // DG: needed for Sys_ReLaunch()
-    Sys_SetArgs(q3e_argc, (const char **)(q3e_argv));
+    Sys_SetArgs(argc, (const char **)(argv));
     // DG end
 #ifdef ID_MCHECK
     // must have -lmcheck linkage
@@ -498,8 +498,8 @@ void * game_main(void *data)
     Posix_EarlyInit();
     Sys_Printf("[Harmattan]: Enter doom3 main thread -> %s\n", "main");
 
-    if (q3e_argc > 1) {
-        common->Init(q3e_argc-1, (const char **)&q3e_argv[1], NULL);
+    if (argc > 1) {
+        common->Init(argc-1, (const char **)&argv[1], NULL);
     } else {
         common->Init(0, NULL, NULL);
     }
