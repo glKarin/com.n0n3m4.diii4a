@@ -568,6 +568,12 @@ public final class ContextUtility
         if (!path.startsWith("/Android/data") && !path.startsWith("/Android/obb"))
             return false;
 
+        String npath = path;
+        if(npath.endsWith("/"))
+            npath = npath.substring(0, npath.length() - 1);
+        if (npath.equals("/Android/data") || npath.equals("/Android/obb"))
+            return false;
+
         String packageName = context.getApplicationContext().getPackageName();
         if(path.startsWith("/Android/data/" + packageName) || path.startsWith("/Android/obb/" + packageName))
             return false;

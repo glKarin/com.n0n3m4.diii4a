@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
+import com.karin.idTech4Amm.lib.Utility;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -657,6 +658,90 @@ public class FileBrowser
         }
     }
 
+    public boolean IsDirectory(String path)
+    {
+        return GetFileType(path) == FileModel.ID_FILE_TYPE_DIRECTORY;
+    }
+
+    public int GetFileType(String path)
+    {
+        File file = new File(path);
+        String pPath = file.getParent();
+
+        if(!Check(pPath))
+            return FileModel.ID_FILE_TYPE_NOT_EXISTS;
+
+        int res = FileModel.ID_FILE_TYPE_NOT_EXISTS;
+        if(ContextUtility.NeedListPackagesAsFiles(m_context, pPath))
+        {
+            String name = file.getName();
+            String[] packages = ContextUtility.ListPackages(m_context);
+            Log.d(TAG, "Using packages: " + packages.length);
+            if(Utility.ArrayContains(packages, name))
+                res = FileModel.ID_FILE_TYPE_DIRECTORY;
+        }
+        else if(ContextUtility.NeedUsingDocumentFile(m_context, path))
+        {
+            if(ContextUtility.IsUriPermissionGrant(m_context, path))
+            {
+                DocumentFile documentFile = ContextUtility.DirectoryDocument(m_context, path);
+                Log.d(TAG, "Using DocumentFile: " + documentFile.getUri());
+                if(documentFile.isDirectory())
+                    res = FileModel.ID_FILE_TYPE_DIRECTORY;
+                else if(documentFile.exists())
+                    res = FileModel.ID_FILE_TYPE_FILE;
+            }
+            else
+            {
+                Uri uri = ContextUtility.GetPermissionGrantedUri(m_context, path);
+                if(null != uri)
+                {
+                    DocumentFile parentDocumentFile = DocumentFile.fromTreeUri(m_context, uri);
+                    String parentPath = FileUtility.GetPathFromUri(uri);
+                    String subPath = FileUtility.GetRelativePath(path, parentPath);
+
+                    String[] parts = FileUtility.SplitPathParts(subPath);
+                    DocumentFile dir = parentDocumentFile;
+                    int i = 0;
+                    for (; i < parts.length; i++)
+                    {
+                        String part = parts[i];
+                        dir = dir.findFile(part);
+                        if(null == dir)
+                        {
+                            break;
+                        }
+                    }
+                    if(i == parts.length && null != dir)
+                    {
+                        if(dir.isDirectory())
+                            res = FileModel.ID_FILE_TYPE_DIRECTORY;
+                        else if(dir.exists())
+                            res = FileModel.ID_FILE_TYPE_FILE;
+                    }
+                }
+                else
+                {
+                    DocumentFile documentFile = ContextUtility.DirectoryDocument(m_context, path);
+                    Log.d(TAG, "Using DocumentFile: " + documentFile.getUri());
+                    if(documentFile.isDirectory())
+                        res = FileModel.ID_FILE_TYPE_DIRECTORY;
+                    else if(documentFile.exists())
+                        res = FileModel.ID_FILE_TYPE_FILE;
+                }
+            }
+        }
+        else
+        {
+            Log.d(TAG, "Using File");
+            if(file.isDirectory())
+                res = FileModel.ID_FILE_TYPE_DIRECTORY;
+            else if(file.exists())
+                res = FileModel.ID_FILE_TYPE_FILE;
+        }
+        return res;
+    }
+
     public List<FileBrowser.FileModel> ListAllFiles()
     {
         List<FileBrowser.FileModel> fileList = new ArrayList<>();
@@ -727,6 +812,7 @@ public class FileBrowser
 
     public static class FileModel
     {
+        public static final int ID_FILE_TYPE_NOT_EXISTS = -1;
         public static final int ID_FILE_TYPE_FILE = 0;
         public static final int ID_FILE_TYPE_DIRECTORY = 1;
         public static final int ID_FILE_TYPE_SYMBOL = 2;

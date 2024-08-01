@@ -60,6 +60,11 @@ public class FileBrowserDialog extends AlertDialog {
         //SetupUI();
     }
 
+    public void SetupUI(String title)
+    {
+        SetupUI(title, null);
+    }
+
     public void SetupUI(String title, String path)
     {
         Context context = getContext();
@@ -79,7 +84,8 @@ public class FileBrowserDialog extends AlertDialog {
                 }
             });
         m_adapter.SetListener(m_listener);
-        SetPath(path);
+        if(null != path)
+            SetPath(path);
     }
 
     private void Open(int position)
@@ -104,6 +110,11 @@ public class FileBrowserDialog extends AlertDialog {
     public void SetCallback(FileBrowserCallback c)
     {
         m_callback = c;
+    }
+
+    public FileBrowser GetFileBrowser()
+    {
+        return m_adapter.GetFileBrowser();
     }
 
     public interface FileBrowserCallback
