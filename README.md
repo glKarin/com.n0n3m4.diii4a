@@ -20,12 +20,11 @@ GPLv3
 * png/dds texture image, jpeg/png/bmp/dds format of screenshot
 * obj/dae format static model
 * pure soft shadow with shadow-mapping
-* soft shadow with stencil-shadow
+* soft shadow with stencil-shadow and translucent stencil shadow
+* lighting model: phong/blinn-phong/PBR/no-lighting
+* debug render tools support with programming render pipeline
 * OpenGLES2.0/OpenGLES3.0
 * OpenAL(soft) and EFX Reverb
-* no-lighting rendering and no-lighting material
-* translucent stencil shadow
-* debug render tools support
 * DOOM3(with full body awareness mod)
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
@@ -48,6 +47,7 @@ GPLv3
 | OpenGL ES version                                                                          |            2.0 and 3.0+<br/>(shadow mapping shaders has different version)             |                      2.0(3.0+ compat)                       |
 | No lighting                                                                                |                         Yes<br/>(And support switch in gaming)                         |                             Yes                             |
 | Debug render tools                                                                         | Yes<br/>(need to set harm_r_renderToolsMultithread to 1 if in multi-threading enabled) |                              -                              |
+| PBR lighting model                                                                         |       Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr))        |                              -                              |
 
 ###### Support games
 
