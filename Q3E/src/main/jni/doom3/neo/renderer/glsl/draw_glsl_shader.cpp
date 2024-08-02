@@ -70,6 +70,7 @@ void RB_GLSL_HandleShaders(void)
 }
 #endif
 
+static void RB_GLSL_PrintShaderSource(const char *filename, const char *source);
 static int RB_GLSL_LoadShaderProgram(
 		const char *name,
         int type,
@@ -633,6 +634,7 @@ static void RB_GLSL_LoadShader(const char *name, shaderProgram_t *shaderProgram,
 	buffer = (char *)_alloca(strlen(fileBuffer) + 1);
 	strcpy(buffer, fileBuffer);
 	fileSystem->FreeFile(fileBuffer);
+	GLuint shader = 0;
 
 	switch (type) {
 		case GL_VERTEX_SHADER:
@@ -640,16 +642,28 @@ static void RB_GLSL_LoadShader(const char *name, shaderProgram_t *shaderProgram,
 			shaderProgram->vertexShader = qglCreateShader(GL_VERTEX_SHADER);
 			qglShaderSource(shaderProgram->vertexShader, 1, (const GLchar **)&buffer, 0);
 			qglCompileShader(shaderProgram->vertexShader);
+			shader = shaderProgram->vertexShader;
 			break;
 		case GL_FRAGMENT_SHADER:
 			// create fragment shader
 			shaderProgram->fragmentShader = qglCreateShader(GL_FRAGMENT_SHADER);
 			qglShaderSource(shaderProgram->fragmentShader, 1, (const GLchar **)&buffer, 0);
 			qglCompileShader(shaderProgram->fragmentShader);
+			shader = shaderProgram->fragmentShader;
 			break;
 		default:
 			common->Printf("RB_GLSL_LoadShader: unexpected type\n");
 			return;
+	}
+
+	GLint status;
+	qglGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if(!status)
+	{
+		RB_GLSL_PrintShaderSource(fullPath.c_str(), buffer);
+		GLchar log[LOG_LEN];
+		qglGetShaderInfoLog(shader, sizeof(GLchar) * LOG_LEN, NULL, log);
+		common->Warning("[Harmattan]: %s::glCompileShader(%s) -> \n%s", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER", log);
 	}
 }
 
@@ -1001,7 +1015,7 @@ static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool del
 	    shaderProgram->program = program;
 }
 
-static GLuint RB_GLSL_CreateShader(GLenum type, const char *source)
+static GLuint RB_GLSL_CreateShader(GLenum type, const char *source, const char *name)
 {
 	GLuint shader = 0;
 	GLint status;
@@ -1019,9 +1033,14 @@ static GLuint RB_GLSL_CreateShader(GLenum type, const char *source)
 	qglGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	if(!status)
 	{
+		idStr innerName("<builtin>/");
+		innerName.Append(name);
+		innerName.Append(".");
+		innerName.Append(type == GL_VERTEX_SHADER ? "vert" : "frag");
+		RB_GLSL_PrintShaderSource(innerName.c_str(), source);
 		GLchar log[LOG_LEN];
 		qglGetShaderInfoLog(shader, sizeof(GLchar) * LOG_LEN, NULL, log);
-		SHADER_ERROR("[Harmattan]: %s::glCompileShader(%s) -> %s!\n", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER", log);
+		SHADER_ERROR("[Harmattan]: %s::glCompileShader(%s) -> \n%s\n", __func__, type == GL_VERTEX_SHADER ? "GL_VERTEX_SHADER" : "GL_FRAGMENT_SHADER", log);
 		qglDeleteShader(shader);
 		shader = 0;
 	}
@@ -1079,21 +1098,25 @@ static GLuint RB_GLSL_CreateProgram(GLuint &program, GLuint vertShader, GLuint f
 bool RB_GLSL_CreateShaderProgram(shaderProgram_t *shaderProgram, const char *vert, const char *frag , const char *name, int type)
 {
 #ifdef _DEBUG_VERT_SHADER_SOURCE
-	Sys_Printf("---------- Vertex shader source: ----------\n");
-	Sys_Printf(vert);
-	Sys_Printf("--------------------------------------------------\n");
+	{
+		idStr shaderType(name);
+		shaderType.Append(".vert");
+		RB_GLSL_PrintShaderSource(shaderType.c_str(), vert);
+	}
 #endif
 #ifdef _DEBUG_FRAG_SHADER_SOURCE
-	Sys_Printf("---------- Fragment shader source: ----------\n");
-	Sys_Printf(frag);
-	Sys_Printf("--------------------------------------------------\n");
+	{
+		idStr shaderType(name);
+		shaderType.Append(".frag");
+		RB_GLSL_PrintShaderSource(shaderType.c_str(), frag);
+	}
 #endif
 	RB_GLSL_DeleteShaderProgram(shaderProgram);
-	shaderProgram->vertexShader = RB_GLSL_CreateShader(GL_VERTEX_SHADER, vert);
+	shaderProgram->vertexShader = RB_GLSL_CreateShader(GL_VERTEX_SHADER, vert, name);
 	if(shaderProgram->vertexShader == 0)
 		return false;
 
-	shaderProgram->fragmentShader = RB_GLSL_CreateShader(GL_FRAGMENT_SHADER, frag);
+	shaderProgram->fragmentShader = RB_GLSL_CreateShader(GL_FRAGMENT_SHADER, frag, name);
 	if(shaderProgram->fragmentShader == 0)
 	{
 		RB_GLSL_DeleteShaderProgram(shaderProgram);
@@ -1445,4 +1468,27 @@ void idGLSLShaderManager::ReloadShaders(void)
     }
 
 	GL_UseProgram(originShader);
+}
+
+void RB_GLSL_PrintShaderSource(const char *filename, const char *source)
+{
+	idStr str(source);
+	int line = 1;
+	int index;
+	int start = 0;
+
+	common->Printf("---------- GLSL shader: %s ----------\n", filename ? filename : "<implicit file>");
+	while((index = str.Find('\n', start)) != -1)
+	{
+		idStr sub = str.Mid(start, index - start);
+		common->Printf("%4d: %s\n", line, sub.c_str());
+		start = index + 1;
+		line++;
+	}
+    if(start < str.Length() - 1)
+	{
+		idStr sub = str.Right(str.Length() - start);
+		common->Printf("%4d: %s\n", line, sub.c_str());
+	}
+	common->Printf("--------------------------------------------------\n");
 }

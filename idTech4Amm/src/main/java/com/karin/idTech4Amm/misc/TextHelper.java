@@ -327,6 +327,12 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2024-07-17", 53,
+                        "Fix GZDOOM sound.",
+                        "Update screen resolution settings on launcher.",
+                        "Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower), and using cvar `harm_image_useCompressionCache` enable caching on DOOM3-BFG."
+                ),
+
                 ChangeLog.Create("2024-07-11", 52,
                         "Add soft stencil shadow support(cvar `harm_r_stencilShadowSoft`) with OpenGLES3.1+ in DOOM3/Quake4/Prey(2006).",
                         "Optimize soft shadow shader with shadow mapping in DOOM3/Quake4/Prey(2006).",
