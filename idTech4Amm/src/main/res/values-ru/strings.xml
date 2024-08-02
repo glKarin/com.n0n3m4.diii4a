@@ -340,7 +340,7 @@
     <string name="choose_command_record">Выбрать запись команд</string>
     <string name="choose">Выбрать</string>
     <string name="must_choose_a_command">Необходимо выбрать команду</string>
-    <string name="empty_content">Пустой контент</string>
+    <string name="empty_content">Пустой контэнт</string>
     <string name="edit_command_record">Редактировать запись команд</string>
     <string name="command">Команды</string>
     <string name="command_exists">Команды существуют</string>
