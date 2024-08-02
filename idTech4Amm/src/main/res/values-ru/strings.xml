@@ -355,6 +355,6 @@
     <string name="lighting">Освещение</string>
     <string name="shadow">Тени</string>
     <string name="image">Изображение</string>
-    <string name="current_game_data_path">Current game data path</string>
+    <string name="current_game_data_path">Текущий путь к данным игры</string>
 
 </resources>
