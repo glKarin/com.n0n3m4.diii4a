@@ -87,15 +87,15 @@
     </string-array>
 
     <string-array name="theme_labels">
-        <item>System</item>
-        <item>Traditional</item>
+        <item>Default</item>
+        <item>Classic</item>
         <item>Holo</item>
         <item>Material</item>
     </string-array>
 
     <string-array name="theme_values">
-        <item>system</item>
-        <item>traditional</item>
+        <item>default</item>
+        <item>classic</item>
         <item>holo</item>
         <item>material</item>
     </string-array>

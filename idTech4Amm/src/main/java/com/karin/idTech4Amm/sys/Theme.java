@@ -16,7 +16,7 @@ public final class Theme
     private static final int THEME_UNINITIALIZED = -2; // uninitialized
     private static final int THEME_UNSET = -1; // unset
     private static final int THEME_DEFAULT = 0; // system
-    private static final int THEME_TRADITIONAL = 1; // Android 2/3 style
+    private static final int THEME_CLASSIC = 1; // Android 2/3 style
     private static final int THEME_HOLO = 2; // Android 4 style
     private static final int THEME_MATERIAL = 3; // Android 5+ style
 
@@ -27,7 +27,7 @@ public final class Theme
         Init(context);
         switch (Theme)
         {
-            case THEME_TRADITIONAL:
+            case THEME_CLASSIC:
                 return android.R.style.Theme_WithActionBar;
             case THEME_HOLO:
                 return android.R.style.Theme_Holo_Light_DarkActionBar;
@@ -58,8 +58,8 @@ public final class Theme
             String theme = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.THEME, "system");
             switch (theme)
             {
-                case "traditional":
-                    themeId = THEME_TRADITIONAL;
+                case "classic":
+                    themeId = THEME_CLASSIC;
                     break;
                 case "holo":
                     themeId = THEME_HOLO;
@@ -80,13 +80,13 @@ public final class Theme
     public static int BlackColor(Context context)
     {
         Init(context);
-        return Theme == THEME_TRADITIONAL ? Color.WHITE : Color.BLACK;
+        return Theme == THEME_CLASSIC ? Color.WHITE : Color.BLACK;
     }
 
     public static int WhiteColor(Context context)
     {
         Init(context);
-        return Theme == THEME_TRADITIONAL ? Color.BLACK : Color.WHITE;
+        return Theme == THEME_CLASSIC ? Color.BLACK : Color.WHITE;
     }
 
     public static void Reset(Context context)

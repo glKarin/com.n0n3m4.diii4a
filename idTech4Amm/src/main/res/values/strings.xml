@@ -357,5 +357,6 @@
     <string name="lighting">Lighting</string>
     <string name="shadow">Shadow</string>
     <string name="image">Image</string>
+    <string name="current_game_data_path">Current game data path</string>
 
 </resources>

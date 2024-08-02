@@ -81,6 +81,7 @@ import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameModFunc;
 import com.n0n3m4.DIII4A.launcher.DebugPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
+import com.n0n3m4.DIII4A.launcher.DirectoryHelperFunc;
 import com.n0n3m4.DIII4A.launcher.EditConfigFileFunc;
 import com.n0n3m4.DIII4A.launcher.EditExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.ExtractPatchResourceFunc;
@@ -145,6 +146,7 @@ public class GameLauncher extends Activity
 	private ExtractSourceFunc m_extractSourceFunc;
 	private ChooseGameModFunc m_chooseGameModFunc;
 	private ChooseCommandRecordFunc m_chooseCommandRecordFunc;
+	private DirectoryHelperFunc m_directoryHelperFunc;
 
     public static final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -479,6 +481,10 @@ public class GameLauncher extends Activity
 			else if (id == R.id.launcher_tab1_command_record)
 			{
 				OpenCommandChooser();
+			}
+			else if (id == R.id.show_directory_helper)
+			{
+				OpenDirectoryHelper();
 			}
         }
     };
@@ -1142,6 +1148,7 @@ public class GameLauncher extends Activity
         V.launcher_tab1_edit_doomconfig.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_edit_cvar.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_command_record.setOnClickListener(m_buttonClickListener);
+		V.show_directory_helper.setOnClickListener(m_buttonClickListener);
 
         boolean userMod = mPrefs.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
         V.fs_game_user.setChecked(userMod);
@@ -1938,6 +1945,16 @@ public class GameLauncher extends Activity
 		bundle.putString("command", cmd);
 		bundle.putString("key", PreferenceKey);
 		m_chooseCommandRecordFunc.Start(bundle);
+	}
+
+	private void OpenDirectoryHelper()
+	{
+		if (null == m_directoryHelperFunc)
+		{
+			m_directoryHelperFunc = new DirectoryHelperFunc(this);
+		}
+		Bundle bundle = new Bundle();
+		m_directoryHelperFunc.Start(bundle);
 	}
 
     private void Test()
@@ -2952,6 +2969,7 @@ public class GameLauncher extends Activity
 		public CheckBox image_useetc2;
 		public EditText edt_harm_r_specularExponentBlinnPhong;
 		public EditText edt_harm_r_specularExponentPBR;
+		public View show_directory_helper;
 
         public void Setup()
         {
@@ -3050,6 +3068,7 @@ public class GameLauncher extends Activity
 			image_useetc2 = findViewById(R.id.image_useetc2);
 			edt_harm_r_specularExponentBlinnPhong = findViewById(R.id.edt_harm_r_specularExponentBlinnPhong);
 			edt_harm_r_specularExponentPBR = findViewById(R.id.edt_harm_r_specularExponentPBR);
+			show_directory_helper = findViewById(R.id.show_directory_helper);
         }
     }
 }

@@ -354,4 +354,5 @@
     <string name="lighting">光照</string>
     <string name="shadow">阴影</string>
     <string name="image">纹理</string>
+    <string name="current_game_data_path">当前游戏数据路径</string>
 </resources>

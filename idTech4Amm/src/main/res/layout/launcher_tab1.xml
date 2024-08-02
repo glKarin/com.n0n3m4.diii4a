@@ -80,11 +80,27 @@
                 android:visibility="gone"
                 />-->
 
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <TextView
                 android:id="@+id/tv_path"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:text="@string/game_working_directory" />
+
+            <TextView
+                android:id="@+id/show_directory_helper"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/game_working_directory" />
+                android:text="@string/tips"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

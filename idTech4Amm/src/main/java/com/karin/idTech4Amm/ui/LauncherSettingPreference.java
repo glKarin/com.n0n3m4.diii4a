@@ -128,8 +128,13 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
             case Q3EPreference.THEME:
             {
                 Toast.makeText(context, R.string.app_is_rebooting, Toast.LENGTH_SHORT).show();
-                Theme.Reset(null);
-                ContextUtility.RestartApp(getActivity());
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Theme.Reset(null);
+                        ContextUtility.RestartApp(LauncherSettingPreference.this.getActivity());
+                    }
+                }, 1000);
                 return true;
             }
             default:
