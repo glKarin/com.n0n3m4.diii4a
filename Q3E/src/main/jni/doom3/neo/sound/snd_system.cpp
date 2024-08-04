@@ -727,7 +727,11 @@ idSoundSystemLocal::GetCurrent44kHzTime
 */
 int idSoundSystemLocal::GetCurrent44kHzTime(void) const
 {
-	if (snd_audio_hw) {
+	if (snd_audio_hw
+/*#ifdef _OPENAL
+        || useOpenAL
+#endif*/
+	) {
 		return CurrentSoundTime;
 	} else {
 		// NOTE: this would overflow 31bits within about 1h20 ( not that important since we get a snd_audio_hw right away pbly )
