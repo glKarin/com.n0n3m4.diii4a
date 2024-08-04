@@ -197,6 +197,52 @@ static voidpf ZCALLBACK fopen_file_func_utf(voidpf opaque, const char *filename,
  *
  */
 
+#ifdef __ANDROID__ //karin: FS_AddDirToRawPath without realpath()
+static void FS_AddDirToRawPathWithoutRealpath (const char *rawdir, qboolean create, qboolean required) {
+	char dir[MAX_OSPATH] = {0};
+
+	Q_strlcpy(dir, rawdir, sizeof(dir));
+
+	// Convert backslashes to forward slashes.
+	for (int i = 0; i < strlen(dir); i++)
+	{
+		if (dir[i] == '\\')
+		{
+			dir[i] = '/';
+		}
+	}
+
+	// Make sure that the dir doesn't end with a slash.
+	for (size_t s = strlen(dir) - 1; s > 0; s--)
+	{
+		if (dir[s] == '/')
+		{
+			dir[s] = '\0';
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	// Bail out if the dir was already added.
+	for (fsRawPath_t *search = fs_rawPath; search; search = search->next)
+	{
+		if (strcmp(search->path, dir) == 0)
+		{
+			return;
+		}
+	}
+
+	// Add the directory.
+	fsRawPath_t *search = Z_Malloc(sizeof(fsRawPath_t));
+	Q_strlcpy(search->path, dir, sizeof(search->path));
+	search->create = create;
+	search->next = fs_rawPath;
+	fs_rawPath = search;
+}
+#endif
+
 /*
  * Returns the path up to, but not including the last '/'.
  */
@@ -250,7 +296,6 @@ FS_CreatePath(char *path)
 	char *old; /* Old '/'. */
 
 	FS_DPrintf("FS_CreatePath(%s)\n", path);
-	printf("FS_CreatePath(%s)\n", path);
 
 	if (strstr(path, "..") != NULL)
 	{
@@ -1847,7 +1892,6 @@ void FS_BuildGenericSearchPath(void) {
 	fs_baseSearchPaths = fs_searchPaths;
 
 	// We need to create the game directory.
-	printf("fs_gamedir(%s)\n", fs_gamedir);
 	Sys_Mkdir(fs_gamedir);
 
 	// We need to create the screenshot directory since the
@@ -1943,7 +1987,6 @@ FS_BuildGameSpecificSearchPath(char *dir)
 	}
 
 	// Create the game directory.
-	printf("fs_gamedir222(%s)\n", fs_gamedir);
 	Sys_Mkdir(fs_gamedir);
 
 	// We need to create the screenshot directory since the
@@ -2098,6 +2141,13 @@ void FS_BuildRawPath(void) {
 	if (fs_cddir->string[0] != '\0') {
 		FS_AddDirToRawPath(fs_cddir->string, false, true);
 	}
+#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is highest
+	extern const char * Sys_ApplicationHomePath(void);
+	const char *path = Sys_ApplicationHomePath();
+	if(path && path[0]) {
+		FS_AddDirToRawPathWithoutRealpath(path, false, false);
+	}
+#endif
 }
 
 // --------
