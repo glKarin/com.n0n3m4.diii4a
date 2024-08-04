@@ -13,7 +13,7 @@ import java.util.Date;
 public final class Constants
 {
     public static final int CONST_UPDATE_RELEASE = 55;
-    public static final String CONST_RELEASE = "2024-08-01";
+    public static final String CONST_RELEASE = "2024-08-05";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -31,6 +31,8 @@ public final class Constants
     {
         return new String[] {
             "Add PBR interaction lighting model in DOOM3/Quake4/Prey.",
+            "Fix large shake of player view with OpenAL in DOOM3/Quake4/Prey.",
+            "Add `/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a` to game data search path(exclude Quake1), add current game data path tips.",
             "Add launcher theme setting.",
         };
 	};

@@ -1,10 +1,24 @@
 /*
+ * Copyright (C) 2012  Oliver McFadden <omcfadde@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+/*
 	macros:
 		BLINN_PHONG: using blinn-phong instead phong.
 		_PBR: using PBR.
-		_POINT_LIGHT: light type is point light.
-		_PARALLEL_LIGHT: light type is parallel light.
-		_SPOT_LIGHT: light type is spot light.
+		_TRANSLUCENT: for translucent stencil shadow
 */
 #version 100
 //#pragma optimize(off)
@@ -13,6 +27,7 @@ precision highp float;
 
 //#define BLINN_PHONG
 //#define _PBR
+//#define _TRANSLUCENT
 
 varying vec2 var_TexDiffuse;
 varying vec2 var_TexNormal;
@@ -57,17 +72,6 @@ uniform vec4 u_specularMatrixT;
 
 uniform highp mat4 u_modelViewProjectionMatrix;
 
-uniform highp mat4 u_modelMatrix;
-uniform highp vec4 globalLightOrigin;
-
-#ifdef _POINT_LIGHT
-    varying highp vec3 var_LightToVertex;
-    varying highp vec4 var_VertexPosition;
-#else
-    uniform highp mat4 shadowMVPMatrix;
-    varying highp vec4 var_ShadowCoord;
-#endif
-
 void main(void)
 {
     mat3 M = mat3(attr_Tangent, attr_Bitangent, attr_Normal);
@@ -88,29 +92,22 @@ void main(void)
 
     vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;
     vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;
-#if defined(BLINN_PHONG) || defined(_PBR)
+    #if defined(BLINN_PHONG) || defined(_PBR)
     vec3 H = normalize(L) + normalize(V);
-#endif
+    #endif
 
     var_L = L * M;
-#if defined(BLINN_PHONG) || defined(_PBR)
+    #if defined(BLINN_PHONG) || defined(_PBR)
     var_H = H * M;
-#endif
-#if !defined(BLINN_PHONG) || defined(_PBR)
+    #endif
+    #if !defined(BLINN_PHONG) || defined(_PBR)
     var_V = V * M;
-#endif
-#ifdef _PBR
+    #endif
+    #ifdef _PBR
     var_Normal = attr_Normal * M;
-#endif
+    #endif
 
     var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
 
-#ifdef _POINT_LIGHT
-    highp vec4 posInLight = u_modelMatrix * attr_Vertex;
-    var_LightToVertex = posInLight.xyz - globalLightOrigin.xyz;
-    var_VertexPosition = attr_Vertex;
-#else
-    var_ShadowCoord = attr_Vertex * shadowMVPMatrix;
-#endif
     gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

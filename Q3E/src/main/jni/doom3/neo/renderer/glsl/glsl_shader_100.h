@@ -850,6 +850,7 @@ GLSL_SHADER const char INTERACTION_FRAG[] =
 "#if defined(_PBR)\n"
 _PBR_GENERAL_FUNCTION
 "#endif\n"
+"\n"
 "void main(void)\n"
 "{\n"
     "//float u_specularExponent = 4.0;\n"
@@ -894,6 +895,10 @@ _PBR_GENERAL_FUNCTION
 "    float NDF = DistributionGGX(AN, H, roughness.x);        \n"
 "    float G   = GeometrySmith(AN, V, L, roughness.x);      \n"
 "    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       \n"
+"\n"
+"    // vec3 kS = F;\n"
+"    // vec3 kD = vec3(1.0) - kS;\n"
+"    // kD *= 1.0 - metallic;\n"
 "\n"
 "    vec3 numerator    = NDF * G * F;\n"
 "    float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);\n"
@@ -1286,7 +1291,7 @@ GLSL_SHADER const char TEXGEN_FRAG[] =
 #define SHADOW_MAPPING_SAMPLE_POISSON_DISK \
         "#define SAMPLES 12\n" \
         "#define SAMPLE_MULTIPLICATOR (1.0 / 12.0)\n" \
-        "vec2 sampleOffsetTable[SAMPLES];\n"\
+        "vec2 sampleOffsetTable[SAMPLES];\n" \
 		"  sampleOffsetTable[0] = vec2( 0.6111618, 0.1050905 );\n" \
 		"  sampleOffsetTable[1] = vec2( 0.1088336, 0.1127091 );\n" \
 		"  sampleOffsetTable[2] = vec2( 0.3030421, -0.6292974 );\n" \
@@ -1679,6 +1684,10 @@ GLSL_SHADER const char INTERACTION_SHADOW_MAPPING_FRAG[] =
         "    float G   = GeometrySmith(AN, V, L, roughness.x);      \n"
         "    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       \n"
         "\n"
+        "    // vec3 kS = F;\n"
+        "    // vec3 kD = vec3(1.0) - kS;\n"
+        "    // kD *= 1.0 - metallic;\n"
+        "\n"
         "    vec3 numerator    = NDF * G * F;\n"
         "    float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);\n"
         "    vec3 pbr     = numerator / max(denominator, 0.001);  \n"
@@ -1987,6 +1996,7 @@ GLSL_SHADER const char INTERACTION_STENCIL_SHADOW_FRAG[] =
 "#if defined(_PBR)\n"
 _PBR_GENERAL_FUNCTION
 "#endif\n"
+"\n"
 "void main(void)\n"
 "{\n"
     "//float u_specularExponent = 4.0;\n"
@@ -2031,6 +2041,10 @@ _PBR_GENERAL_FUNCTION
 "    float NDF = DistributionGGX(AN, H, roughness.x);        \n"
 "    float G   = GeometrySmith(AN, V, L, roughness.x);      \n"
 "    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       \n"
+"\n"
+"    // vec3 kS = F;\n"
+"    // vec3 kD = vec3(1.0) - kS;\n"
+"    // kD *= 1.0 - metallic;\n"
 "\n"
 "    vec3 numerator    = NDF * G * F;\n"
 "    float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);\n"

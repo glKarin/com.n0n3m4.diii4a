@@ -18,17 +18,15 @@
 /*
 	macros:
 		BLINN_PHONG: using blinn-phong instead phong.
+		_PBR: using PBR.
 */
 #version 100
 //#pragma optimize(off)
 
 precision highp float;
 
-/*
- * Pixel values between vertices are interpolated by Gouraud shading by default,
- * rather than the more computationally-expensive Phong shading.
- */
 //#define BLINN_PHONG
+//#define _PBR
 
 varying vec2 var_TexDiffuse;
 varying vec2 var_TexNormal;
@@ -36,10 +34,14 @@ varying vec2 var_TexSpecular;
 varying vec4 var_TexLight;
 varying lowp vec4 var_Color;
 varying vec3 var_L;
-#if defined(BLINN_PHONG)
+#if defined(BLINN_PHONG) || defined(_PBR)
 varying vec3 var_H;
-#else
+#endif
+#if !defined(BLINN_PHONG) || defined(_PBR)
 varying vec3 var_V;
+#endif
+#ifdef _PBR
+varying vec3 var_Normal;
 #endif
 
 attribute vec4 attr_TexCoord;
@@ -89,16 +91,20 @@ void main(void)
 
     vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;
     vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;
-#if defined(BLINN_PHONG)
+    #if defined(BLINN_PHONG) || defined(_PBR)
     vec3 H = normalize(L) + normalize(V);
-#endif
+    #endif
 
     var_L = L * M;
-#if defined(BLINN_PHONG)
+    #if defined(BLINN_PHONG) || defined(_PBR)
     var_H = H * M;
-#else
+    #endif
+    #if !defined(BLINN_PHONG) || defined(_PBR)
     var_V = V * M;
-#endif
+    #endif
+    #ifdef _PBR
+    var_Normal = attr_Normal * M;
+    #endif
 
     var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
 

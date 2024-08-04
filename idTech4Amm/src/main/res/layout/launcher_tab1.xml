@@ -97,6 +97,7 @@
                 android:id="@+id/show_directory_helper"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
                 android:text="@string/tips"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_gravity="center_vertical"/>

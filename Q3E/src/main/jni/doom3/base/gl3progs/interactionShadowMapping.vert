@@ -1,6 +1,7 @@
 /*
 	macros:
 		BLINN_PHONG: using blinn-phong instead phong.
+		_PBR: using PBR.
 		_POINT_LIGHT: light type is point light.
 		_PARALLEL_LIGHT: light type is parallel light.
 		_SPOT_LIGHT: light type is spot light.
@@ -11,6 +12,7 @@
 precision highp float;
 
 //#define BLINN_PHONG
+//#define _PBR
 
 out vec2 var_TexDiffuse;
 out vec2 var_TexNormal;
@@ -18,10 +20,14 @@ out vec2 var_TexSpecular;
 out vec4 var_TexLight;
 out lowp vec4 var_Color;
 out vec3 var_L;
-#if defined(BLINN_PHONG)
+#if defined(BLINN_PHONG) || defined(_PBR)
 out vec3 var_H;
-#else
+#endif
+#if !defined(BLINN_PHONG) || defined(_PBR)
 out vec3 var_V;
+#endif
+#ifdef _PBR
+out vec3 var_Normal;
 #endif
 
 in vec4 attr_TexCoord;
@@ -82,15 +88,19 @@ void main(void)
 
     vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;
     vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;
-#if defined(BLINN_PHONG)
+#if defined(BLINN_PHONG) || defined(_PBR)
     vec3 H = normalize(L) + normalize(V);
 #endif
 
     var_L = L * M;
-#if defined(BLINN_PHONG)
+#if defined(BLINN_PHONG) || defined(_PBR)
     var_H = H * M;
-#else
+#endif
+#if !defined(BLINN_PHONG) || defined(_PBR)
     var_V = V * M;
+#endif
+#ifdef _PBR
+    var_Normal = attr_Normal * M;
 #endif
 
     var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
