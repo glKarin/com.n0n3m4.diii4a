@@ -3045,6 +3045,13 @@ void idFileSystemLocal::SetupGameDirectories( const char* gameName )
 	{
 		AddGameDirectory( fs_savepath.GetString(), gameName );
 	}
+#ifdef _DIII4A //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is highest
+	extern const char * Sys_ApplicationHomePath(void);
+	const char *path = Sys_ApplicationHomePath();
+	if(path && path[0]) {
+		AddGameDirectory(path, gameName);
+	}
+#endif
 }
 
 /*
