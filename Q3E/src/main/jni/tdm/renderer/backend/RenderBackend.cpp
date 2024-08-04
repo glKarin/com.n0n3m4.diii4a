@@ -34,7 +34,7 @@ RenderBackend *renderBackend = &renderBackendImpl;
 namespace {
 	void CreateLightgemFbo( FrameBuffer *fbo ) {
 		fbo->Init( DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH );
-#ifdef __ANDROID__ //karin: only GL_RGBA8 for render buffer
+#ifdef _GLES //karin: only GL_RGBA8 for render buffer
         fbo->AddColorRenderBuffer( 0, GL_RGBA8 );
 #else
         fbo->AddColorRenderBuffer( 0, GL_RGB8 );
@@ -61,7 +61,7 @@ void RenderBackend::Init() {
 	qglGenBuffers( 3, lightgemPbos );
 	for ( int i = 0; i < 3; ++i ) {
 		qglBindBuffer( GL_PIXEL_PACK_BUFFER, lightgemPbos[i] );
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 		qglBufferData( GL_PIXEL_PACK_BUFFER, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * 4, nullptr, GL_STREAM_READ );
 #else
 		qglBufferData( GL_PIXEL_PACK_BUFFER, DARKMOD_LG_RENDER_WIDTH * DARKMOD_LG_RENDER_WIDTH * 3, nullptr, GL_STREAM_READ );
@@ -197,7 +197,7 @@ void RenderBackend::DrawView( const viewDef_t *viewDef, bool colorIsBackground )
 		RB_STD_FogAllLights( true ); // 2.08: second fog pass, translucent only
 	}
 
-#if !defined(__ANDROID__) //karin: TODO: crash when build release
+#if !defined(_GLES) //karin: TODO: crash when build release
 	RB_RenderDebugTools( drawSurfs, numDrawSurfs );
 #endif
 
@@ -219,7 +219,7 @@ void RenderBackend::DrawLightgem( const viewDef_t *viewDef, byte *lightgemData )
 	// asynchronously copy contents of the lightgem framebuffer to a pixel buffer
 	qglBindBuffer( GL_PIXEL_PACK_BUFFER, lightgemPbos[currentLightgemPbo] );
 	qglPixelStorei( GL_PACK_ALIGNMENT, 1 );	// otherwise small rows get padded to 32 bits
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 	qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGBA, GL_UNSIGNED_BYTE, nullptr );
 #else
     qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGB, GL_UNSIGNED_BYTE, nullptr );

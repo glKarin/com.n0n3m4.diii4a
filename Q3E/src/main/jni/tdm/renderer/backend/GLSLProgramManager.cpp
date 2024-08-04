@@ -68,7 +68,7 @@ void GLSLProgramManager::Shutdown() {
 GLSLProgram * GLSLProgramManager::Load( const idStr &name, const idHashMapDict &defines ) {
 	Generator generator = [=]( GLSLProgram *program ) {
 		if( fileSystem->FindFile( idStr(
-#ifdef __ANDROID__ //karin: using glslprops/ for avoid override
+#ifdef _GLES //karin: using glslprops/ for avoid override
                 "glslprogs/"
 #else
                 "glprogs/"
@@ -200,7 +200,7 @@ namespace {
 		return programManager->LoadFromGenerator( baseName, [=]( GLSLProgram *program ) {
 			idStr geometrySource = baseName + ".gs";
 			if( fileSystem->FindFile( idStr(
-#ifdef __ANDROID__ //karin: using glslprops/ for avoid override
+#ifdef _GLES //karin: using glslprops/ for avoid override
                     "glslprogs/"
 #else
                     "glprogs/"

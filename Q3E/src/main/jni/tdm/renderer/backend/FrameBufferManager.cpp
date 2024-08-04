@@ -24,7 +24,7 @@ FrameBufferManager *frameBuffers = &frameBuffersImpl;
 
 namespace {
 	GLenum ColorBufferFormat() {
-#ifdef __ANDROID__ //karin: only GL_RGBA8 for render buffer
+#ifdef _GLES //karin: only GL_RGBA8 for render buffer
         return GL_RGBA8;
 #else
 		if ( r_fboColorBits.GetInteger() == 64 ) {
@@ -357,7 +357,7 @@ void FrameBufferManager::CopyRender( unsigned char *buffer, int x, int y, int im
 		static int pboSize = -1;
 
 		if ( !pbo ) {
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 			pboSize = imageWidth * imageHeight * 4;
 #else
 			pboSize = imageWidth * imageHeight * 3;
@@ -368,7 +368,7 @@ void FrameBufferManager::CopyRender( unsigned char *buffer, int x, int y, int im
 			qglBindBuffer( GL_PIXEL_PACK_BUFFER, 0 );
 		}
 
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 		if ( imageWidth * imageHeight * 4 != pboSize ) {
 #else
 		if ( imageWidth * imageHeight * 3 != pboSize ) {
@@ -386,14 +386,14 @@ void FrameBufferManager::CopyRender( unsigned char *buffer, int x, int y, int im
 		}
 
 		// revelator: added c++11 nullptr
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 		qglReadPixels( x, y, imageWidth, imageHeight, GL_RGBA, GL_UNSIGNED_BYTE, nullptr );
 #else
         qglReadPixels( x, y, imageWidth, imageHeight, GL_RGB, GL_UNSIGNED_BYTE, nullptr );
 #endif
 		qglBindBuffer( GL_PIXEL_PACK_BUFFER, 0 );
 	} else {
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 		qglReadPixels( x, y, imageWidth, imageHeight, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
 #else
         qglReadPixels( x, y, imageWidth, imageHeight, GL_RGB, GL_UNSIGNED_BYTE, buffer );

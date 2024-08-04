@@ -2004,7 +2004,7 @@ bool idSessionLocal::SaveGame( const char *saveName, bool autosave, bool skipChe
 		// stgatilov: render image to buffer
 		int width, height;
 		renderSystem->GetCurrentRenderCropSize(width, height);
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 		byte *imgData = (byte*)Mem_Alloc(height * width * 4);
 		renderSystem->CaptureRenderToBuffer(imgData);
 #else

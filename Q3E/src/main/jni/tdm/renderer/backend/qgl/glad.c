@@ -623,7 +623,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define GLAD_COMPILE_LOADER
-#ifdef __ANDROID__ //karin: GLES3.2
+#ifdef _GLES //karin: GLES3.2
 #define GL_ES_VERSION_2_0 1
 #define GL_ES_VERSION_3_0 1
 #define GL_ES_VERSION_3_1 1
@@ -679,7 +679,7 @@ void close_gl(void) {
         libGL = NULL;
     }
 }
-#elif defined(__ANDROID__) //karin: using EGL load GL functions
+#elif defined(_GLES) //karin: using EGL load GL functions
 #include <EGL/egl.h>
 static int open_gl(void) {
     printf("EGL::open_gl: using eglGetProcAddress\n");
@@ -738,7 +738,7 @@ void close_gl(void) {
 }
 #endif
 
-#ifdef __ANDROID__ //karin: debug eglGetProcAddress for print missing GL functions with GLES3.2
+#ifdef _GLES //karin: debug eglGetProcAddress for print missing GL functions with GLES3.2
 #define _HARM_DEBUG_GET_PROC
 #ifdef _HARM_DEBUG_GET_PROC
 static void * droidGetProcAddress(const char *name)
@@ -758,7 +758,7 @@ static void * droidGetProcAddress(const char *name)
 static
 void* get_proc(const char *namez) {
     void* result = NULL;
-#ifdef __ANDROID__ //karin: debug eglGetProcAddress
+#ifdef _GLES //karin: debug eglGetProcAddress
     result = (void*)droidGetProcAddress(namez);
 #else
     if(libGL == NULL) return NULL;
@@ -4461,7 +4461,7 @@ PFNGLREPLACEMENTCODEUITEXCOORD2FNORMAL3FVERTEX3FSUNPROC glad_glReplacementCodeui
 PFNGLREPLACEMENTCODEUITEXCOORD2FNORMAL3FVERTEX3FVSUNPROC glad_glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN = NULL;
 PFNGLREPLACEMENTCODEUITEXCOORD2FCOLOR4FNORMAL3FVERTEX3FSUNPROC glad_glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN = NULL;
 PFNGLREPLACEMENTCODEUITEXCOORD2FCOLOR4FNORMAL3FVERTEX3FVSUNPROC glad_glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN = NULL;
-#ifdef __ANDROID__ //karin: load GL functions with GLES3.2, if missing using empty function instead it
+#ifdef _GLES //karin: load GL functions with GLES3.2, if missing using empty function instead it
 static intptr_t GLimp_FunctionPlaceholder()
 {
     return 0;
@@ -8724,7 +8724,7 @@ static int find_extensionsGL(void) {
 	GLAD_GL_APPLE_vertex_array_range = has_ext("GL_APPLE_vertex_array_range");
 	GLAD_GL_APPLE_vertex_program_evaluators = has_ext("GL_APPLE_vertex_program_evaluators");
 	GLAD_GL_APPLE_ycbcr_422 = has_ext("GL_APPLE_ycbcr_422");
-#ifdef __ANDROID__
+#ifdef _GLES
 #if GL_ES_VERSION_2_0
 	GLAD_GL_ARB_ES2_compatibility = 1;
 #else

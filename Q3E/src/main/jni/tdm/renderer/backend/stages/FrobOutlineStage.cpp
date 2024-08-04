@@ -164,7 +164,7 @@ void FrobOutlineStage::Shutdown() {}
 void FrobOutlineStage::CreateFbo( int idx ) {
 	int width = frameBuffers->renderWidth / 4;
 	int height = frameBuffers->renderHeight / 4;
-#ifdef __ANDROID__ //karin: only GL_RGBA if texture
+#ifdef _GLES //karin: only GL_RGBA if texture
 	colorTex[idx]->GenerateAttachment( width, height, GL_RGBA );
 #else
     colorTex[idx]->GenerateAttachment( width, height, GL_R8 );
@@ -177,7 +177,7 @@ void FrobOutlineStage::CreateDrawFbo() {
 	int width = frameBuffers->renderWidth / 4;
 	int height = frameBuffers->renderHeight / 4;
 	drawFbo->Init( width, height, 4 );
-#ifdef __ANDROID__ //karin: only GL_RGBA8 if render buffer
+#ifdef _GLES //karin: only GL_RGBA8 if render buffer
 	drawFbo->AddColorRenderBuffer( 0, GL_RGBA8 );
 #else
     drawFbo->AddColorRenderBuffer( 0, GL_R8 );

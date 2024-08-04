@@ -38,7 +38,7 @@ void RB_SetDefaultGLState( void ) {
 	TRACE_GL_SCOPE( "RB_SetDefaultGLState" );
 	GL_CheckErrors();
 
-#ifdef __ANDROID__ //karin: GLES
+#ifdef _GLES //karin: GLES
 	qglClearDepthf( 1.0f );
 #else
 	qglClearDepth( 1.0f );
@@ -558,7 +558,7 @@ static void	RB_SetBuffer( const void *data ) {
 
 	backEnd.frameCount = cmd->frameCount;
 
-#if !defined(__ANDROID__)
+#if !defined(_GLES)
 	qglDrawBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
 #endif
 #ifdef _GLES
