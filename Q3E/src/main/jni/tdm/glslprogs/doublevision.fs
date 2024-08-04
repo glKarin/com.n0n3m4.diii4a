@@ -26,7 +26,7 @@ uniform vec4 u_localParam0;
 void main() {
 	vec2 tc = gl_FragCoord.xy * u_scaleWindowToUnit.xy;
 	float shift = u_localParam0.x;
-	vec2 tcMin = tc * (1 - shift);
+	vec2 tcMin = tc * (1.0 - shift);
 	vec2 tcMax = tcMin + vec2(shift);
 	vec4 color00 = texture(u_texture0, tcMin);
 	vec4 color11 = texture(u_texture0, tcMax);
