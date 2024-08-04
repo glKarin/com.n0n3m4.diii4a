@@ -64,7 +64,11 @@ char *Sys_DefaultHomePath(void)
 
 	if( !*homePath && com_homepath != NULL )
 	{
+#ifdef __ANDROID__ //karin: HOME env to cwd
+		if( ( p = getenv( "HOME" ) ) != NULL || (p = Sys_Cwd()) != NULL )
+#else
 		if( ( p = getenv( "HOME" ) ) != NULL )
+#endif
 		{
 			Com_sprintf(homePath, sizeof(homePath), "%s%c", p, PATH_SEP);
 #ifdef __APPLE__

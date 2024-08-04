@@ -3410,6 +3410,13 @@ static void FS_Startup( const char *gameName )
 		FS_CreatePath ( fs_homepath->string );
 		FS_AddGameDirectory ( fs_homepath->string, gameName );
 	}
+#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is highest
+	extern const char * Sys_ApplicationHomePath(void);
+	const char *app_path = Sys_ApplicationHomePath();
+	if(app_path && app_path[0]) {
+		FS_AddGameDirectory(app_path, gameName);
+	}
+#endif
 
 	// check for additional base game so mods can be based upon other mods
 	if ( fs_basegame->string[0] && Q_stricmp( fs_basegame->string, gameName ) ) {
@@ -3425,6 +3432,11 @@ static void FS_Startup( const char *gameName )
 		if (fs_homepath->string[0] && Q_stricmp(fs_homepath->string,fs_basepath->string)) {
 			FS_AddGameDirectory(fs_homepath->string, fs_basegame->string);
 		}
+#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is highest
+		if(app_path && app_path[0]) {
+			FS_AddGameDirectory(app_path, fs_basegame->string);
+		}
+#endif
 	}
 
 	// check for additional game folder for mods
@@ -3441,6 +3453,11 @@ static void FS_Startup( const char *gameName )
 		if (fs_homepath->string[0] && Q_stricmp(fs_homepath->string,fs_basepath->string)) {
 			FS_AddGameDirectory(fs_homepath->string, fs_gamedirvar->string);
 		}
+#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is highest
+		if(app_path && app_path[0]) {
+			FS_AddGameDirectory(app_path, fs_gamedirvar->string);
+		}
+#endif
 	}
 
 #ifndef STANDALONE

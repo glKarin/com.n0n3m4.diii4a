@@ -924,6 +924,8 @@ public class Q3EInterface
 			return ".local/share/rbdoom3bfg";
 		else if(Q3EUtils.q3ei.isQ2)
 			return ".yq2";
+		else if(Q3EUtils.q3ei.isQ3)
+			return ".q3a";
 		else if(Q3EUtils.q3ei.isDOOM)
 			return ".config/gzdoom";
 		else
