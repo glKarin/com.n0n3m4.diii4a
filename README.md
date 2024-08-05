@@ -1,6 +1,6 @@
 ## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006)/DOOM 3 BFG/The Dark Mod for Android/Windows/Linux OpenGLES
-#### 毁灭战士3/雷神之锤4/掠食(2006)/毁灭战士3 BFG/The Dark Mod 安卓/Windows/Linux OpenGLES移植版.
+#### DOOM III/Quake 4/Prey(2006) for Android/Windows/Linux OpenGLES; DOOM 3 BFG/The Dark Mod for Android OpenGLES
+#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版; 毁灭战士3 BFG/The Dark Mod 安卓OpenGLES移植版.
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
 1.1.0harmattan53(natasha)  
@@ -21,7 +21,7 @@ GPLv3
 * obj/dae format static model
 * pure soft shadow with shadow-mapping
 * soft shadow with stencil-shadow and translucent stencil shadow
-* lighting model: phong/blinn-phong/PBR/no-lighting
+* lighting model: Phong/Blinn-phong/PBR/no-lighting
 * debug render tools support with programming render pipeline
 * OpenGLES2.0/OpenGLES3.0
 * OpenAL(soft) and EFX Reverb
@@ -71,9 +71,10 @@ GPLv3
 Or download the latest APK from the [Releases Section](https://github.com/glKarin/com.n0n3m4.diii4a/releases/latest).
 Tag with `-free` only for F-Droid update.
 
-| Feature | Github | F-Droid  |
-|:--------|:------:|:--------:|
-| Ouya TV |   Yes  |    No    |
+| Feature            | Github | F-Droid  |
+|:-------------------|:------:|:--------:|
+| Ouya TV            |   Yes  |    No    |
+| Source code in apk |   Yes  |    No    |
 
 ----------------------------------------------------------------------------------
 ### Update
@@ -101,9 +102,9 @@ Tag with `-free` only for F-Droid update.
 * DISABLE = only for disable something and keep original source code
 
 | CVar | Type | Default | Description | Flag | Range | Scope | Remark | Platform |
-|:---|:---:|:---:|:---|:---:|:---:|:---|:---|:---:|
+|:---|:---:|:--:|:---|:---:|:---:|:---|:---|:---:|
 | harm_r_openglVersion | String | GLES3.0 | OpenGL version | INIT | GLES2, GLES3.0 | Engine/Renderer | setup with launcher on Android | Windows, Linux |
-| harm_r_multithread | Bool | 0 | Multithread backend | INIT |  | Engine/Renderer | setup with launcher on Android | Windows, Linux |
+| harm_r_multithread | Bool | 1 | Multithread backend | INIT |  | Engine/Renderer | setup with launcher on Android | Windows, Linux |
 | harm_r_clearVertexBuffer | Integer | 2 | Clear vertex buffer on every frame | ARCHIVE, FIXED | 0, 1, 2 | Engine/Renderer | 0 = not clear(original);<br/> 1 = only free memory;<br/> 2 = free memory and delete VBO handle(only without multi-threading, else same as 1) | All |
 | harm_r_maxAllocStackMemory | Integer | 524288 | Control allocate temporary memory when load model data | ARCHIVE |  | Engine/Renderer | For load large model, because stack memory is limited on OS.<br/> 0 = Always heap;<br/> Negative = Always stack;<br/> Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory) | All |
 | harm_r_shaderProgramDir | String |  | Setup external OpenGLES2 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glslprogs(default) | All |
@@ -144,7 +145,7 @@ Tag with `-free` only for F-Droid update.
 | harm_com_consoleHistory | Integer | 2 | Save/load console history | ARCHIVE | 0, 1, 2 | Engine/Framework | 0 = disable;<br/> 1 = loading in engine initialization, and saving in engine shutdown;<br/> 2 = loading in engine initialization, and saving in every e executing | All |
 | r_scaleMenusTo43 | Bool | 0 | Scale menus, fullscreen videos and PDA to 4:3 aspect ratio | ARCHIVE |  | Engine/GUI |  | All |
 | s_driver | String | AudioTrack | sound driver | ARCHIVE | AudioTrack, OpenSLES | Engine/Sound | sound if without OpenAL on Android | Android |
-| harm_s_OpenSLESBufferCount | Integer | 3 | Audio buffer count for OpenSLES | ARCHIVE | &gt;=3 | Engine/Sound | min is 3, only for if without OpenAL and use OpenSLES on Android | Android |
+| harm_s_OpenSLESBufferCount | Integer | 3 | Audio buffer count for OpenSLES | ARCHIVE | &gt;= 3 | Engine/Sound | min is 3, only for if without OpenAL and use OpenSLES on Android | Android |
 | harm_s_useAmplitudeDataOpenAL | Bool | 0 | Use amplitude data on OpenAL | DISABLE, ISSUE |  | Engine/Sound | It cause large shake | All |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/DOOM3 |  | All |
@@ -174,6 +175,26 @@ Tag with `-free` only for F-Droid update.
 | harm_ui_translateAlienFontDistance | Float | 200 | Setup max distance of GUI to view origin for enable translate `alien` font text | ARCHIVE |  | Engine/Prey/GUI | 0 = disable;<br/> -1 = always;<br/> positive: distance value | All |
 | harm_ui_subtitlesTextScale | Float | 0.32 | Subtitles's text scale | ARCHIVE |  | Engine/Prey/GUI | &lt;= 0 to unset | All |
 | harm_r_skipHHBeam | Bool | 0 | Skip beam model render | DEBUG |  | Engine/Prey/Renderer |  | All |
+
+----------------------------------------------------------------------------------
+
+##### idTech4's new command
+
+| Command | Description | Usage | Scope | Remark | Platform |
+|:---|:---|:---|:---|:---|:---:|
+| exportGLSLShaderSource | export GLSL shader source to filesystem |  | Engine/Renderer | Only export shaders of using OpenGLES2.0 or OpenGLES3.0 | All |
+| printGLSLShaderSource | print internal GLSL shader source |  | Engine/Renderer | Only print shaders of using OpenGLES2.0 or OpenGLES3.0 | All |
+| exportDevShaderSource | export internal original C-String GLSL shader source for developer |  | Engine/Renderer | Export all shaders of OpenGLES2.0 and OpenGLES3.0 | All |
+| reloadGLSLprograms | reloads GLSL programs |  | Engine/Renderer |  | All |
+| convertImage | convert image format |  | Engine/Renderer |  | All |
+| r_multithread | print multi-threading state |  | Engine/Renderer | Only for tell user r_multithread is not a cvar | All |
+| glConfig | print OpenGL config |  | Engine/Renderer | print glConfig variable | All |
+| botRunAAS | compiles an AAS file for a map for Quake 4 multiplayer-game |  | Game/Quake4 | Only for generate bot aas file if map has not aas file | All |
+| addBot | adds a new bot |  | Game/Quake4 | need SABotA9 files | All |
+| removeBot | removes bot specified by id (0,15) |  | Game/Quake4 | need SABotA9 files | All |
+| addbots | adds multiplayer bots batch |  | Game/Quake4 | need SABotA9 files | All |
+| fillbots | fill bots |  | Game/Quake4 | need SABotA9 files | All |
+| sabot | debug SaBot info |  | Game/Quake4 | need SABotA9 files | All |
 
 ----------------------------------------------------------------------------------
 

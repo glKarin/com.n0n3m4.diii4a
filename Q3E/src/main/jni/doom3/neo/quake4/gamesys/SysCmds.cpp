@@ -3239,7 +3239,7 @@ void idGameLocal::InitConsoleCommands( void ) {
 	cmdSystem->AddCommand( "addBot",				botAi::Addbot_f,			CMD_FL_GAME,				"adds a new bot", botAi::ArgCompletion_addBot );
     cmdSystem->AddCommand( "removeBot",				botAi::Removebot_f,			CMD_FL_GAME,				"removes bot specified by id (0,15)" /*, idCmdSystem::ArgCompletion_Integer<0,( botAi::BOT_MAX_BOTS - 1 )>*/ );
 
-	cmdSystem->AddCommand("addbots", botAi::Cmd_AddBot_f, CMD_FL_GAME, "adds a multiplayer bot", botAi::ArgCompletion_addBot);
+	cmdSystem->AddCommand("addbots", botAi::Cmd_AddBot_f, CMD_FL_GAME, "adds multiplayer bots batch", botAi::ArgCompletion_addBot);
 	cmdSystem->AddCommand("fillbots", botAi::Cmd_FillBots_f, CMD_FL_GAME, "fill bots");
 	cmdSystem->AddCommand("sabot", botAi::Cmd_BotInfo_f, CMD_FL_GAME, "debug SaBot info");
 #endif

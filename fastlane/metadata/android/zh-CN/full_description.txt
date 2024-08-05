@@ -12,8 +12,8 @@
   纯阴影图映射软阴影
   OpenGLES2.0/OpenGLES3.0
   OpenAL(soft)和EFX混响
-  无光照渲染
-  半透明模板阴影
+  Phong/Blinn-phong/PBR/无光照 光照模型
+  半透明/软模板阴影
 
 游戏/mod文件夹名称:
   毁灭战士3: base (支持全身mod)

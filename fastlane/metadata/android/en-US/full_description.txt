@@ -12,8 +12,8 @@ Feature
   pure soft shadow with shadow-mapping
   OpenGLES2.0/OpenGLES3.0
   OpenAL(soft) and EFX Reverb
-  no-lighting rendering
-  translucent stencil shadow
+  Phong/Blinn-phong/PBR/no-lighting rendering
+  translucent/soft stencil shadow
 
 Folder name of games/mods:
   DOOM3: base (with full body awareness mod)
