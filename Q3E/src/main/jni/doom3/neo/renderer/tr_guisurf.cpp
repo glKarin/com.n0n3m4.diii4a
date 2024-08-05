@@ -191,8 +191,8 @@ const char	*harm_ui_translateAlienFontArgs[]	= {
 	"fonts",
 	"fonts/menu",
 	NULL };
-static idCVar harm_ui_translateAlienFont( "harm_ui_translateAlienFont", harm_ui_translateAlienFontArgs[0], CVAR_GUI | CVAR_ARCHIVE, "[Harmattan]: Setup font name for automitic translate `alien` font text of GUI(empty to disable).", idCmdSystem::ArgCompletion_String<harm_ui_translateAlienFontArgs> );
-static idCVar harm_ui_translateAlienFontDistance( "harm_ui_translateAlienFontDistance", "200", CVAR_GUI | CVAR_FLOAT | CVAR_ARCHIVE, "[Harmattan]: Setup max distance of GUI to view origin for enable translate `alien` font text(0 to disable, -1 to always)." ); //karin: initial distance see in prey/Prey/game_player.cpp::UpdateFocus is 70(for interactive GUI)
+static idCVar harm_ui_translateAlienFont( "harm_ui_translateAlienFont", harm_ui_translateAlienFontArgs[0], CVAR_GUI | CVAR_ARCHIVE, "Setup font name for automitic translate `alien` font text of GUI(empty to disable).", idCmdSystem::ArgCompletion_String<harm_ui_translateAlienFontArgs> );
+static idCVar harm_ui_translateAlienFontDistance( "harm_ui_translateAlienFontDistance", "200", CVAR_GUI | CVAR_FLOAT | CVAR_ARCHIVE, "Setup max distance of GUI to view origin for enable translate `alien` font text(0 = disable; -1 = always; positive: distance value)." ); //karin: initial distance see in prey/Prey/game_player.cpp::UpdateFocus is 70(for interactive GUI)
 #endif
 void R_RenderGuiSurf(idUserInterface *gui, drawSurf_t *drawSurf)
 {

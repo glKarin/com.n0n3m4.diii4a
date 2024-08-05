@@ -66,7 +66,7 @@ idCVar r_useInfiniteFarZ("r_useInfiniteFarZ", "1", CVAR_RENDERER | CVAR_BOOL, "u
 idCVar r_znear("r_znear", "3", CVAR_RENDERER | CVAR_FLOAT, "near Z clip plane distance", 0.001f, 200.0f);
 
 #ifdef _NO_LIGHT
-idCVar r_noLight("r_noLight", "0", CVAR_RENDERER | CVAR_INTEGER/*CVAR_BOOL | CVAR_ARCHIVE*/, "lighting disable hack: 0 - using interaction lighting; 1 - disable lighting(not allow switch); 2 - disable lighting(allow switch with 0)");
+idCVar r_noLight("r_noLight", "0", CVAR_RENDERER | CVAR_INTEGER/*CVAR_BOOL | CVAR_ARCHIVE*/, "lighting disable hack: 0 = using interaction lighting; 1 = disable lighting(not allow switch); 2 = disable lighting(allow switch with 0)");
 #endif
 idCVar r_useETC1("r_useETC1", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "use ETC1 compression");
 idCVar r_useETC1Cache("r_useETC1cache", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "use ETC1 compression");
@@ -226,12 +226,12 @@ idCVar r_materialOverride("r_materialOverride", "", CVAR_RENDERER, "overrides al
 idCVar r_debugRenderToTexture("r_debugRenderToTexture", "0", CVAR_RENDERER | CVAR_INTEGER, "");
 
 idCVar harm_r_maxFps( "r_maxFps", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "Limit maximum FPS. 0 = unlimited" );
-idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Stencil shadow using Carmack-Inverse.");
+idCVar harm_r_shadowCarmackInverse("harm_r_shadowCarmackInverse", "0", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Stencil shadow using Carmack-Inverse.");
 idCVar r_scaleMenusTo43( "r_scaleMenusTo43", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio" );
 //k: temp memory allocate in stack / heap control on Android
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
 // #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
-/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Control allocate temporary memory when load model data on Android, default value is `524288` bytes(Because stack memory is limited on Android, exam `game/le_hell` map's `models/mapobjects/hell/hellintro.lwo` in `DOOM3: The lost mission` mod). If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory(0 - Always heap, Negative - Always stack, Positive - Max stack memory limit).");
+/*static */idCVar harm_r_maxAllocStackMemory("harm_r_maxAllocStackMemory", "524288", CVAR_INTEGER|CVAR_RENDERER|CVAR_ARCHIVE, "Control allocate temporary memory when load model data, default value is `524288` bytes(Because stack memory is limited on OS:\n 0 = Always heap;\n Negative = Always stack;\n Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)).");
 #endif
 
 #ifdef _USING_STB
@@ -2594,7 +2594,7 @@ idCVar r_shadowMapOccluderFacing( "r_shadowMapOccluderFacing", "2", CVAR_RENDERE
 idCVar r_forceShadowMapsOnAlphaTestedSurfaces( "r_forceShadowMapsOnAlphaTestedSurfaces", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "0 = same shadowing as with stencil shadows, 1 = ignore noshadows for alpha tested materials" );
 // RB end
 
-idCVar harm_r_shadowMapLod( "harm_r_shadowMapLod", "-1", CVAR_RENDERER | CVAR_INTEGER, "force using shadow map LOD(0 - 4, -1: auto)" );
+idCVar harm_r_shadowMapLod( "harm_r_shadowMapLod", "-1", CVAR_RENDERER | CVAR_INTEGER, "force using shadow map LOD(0 - 4, -1 = auto)" );
 idCVar harm_r_shadowMapBias( "harm_r_shadowMapBias", "0.001", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's depth compare BIAS in shadow mapping" );
 idCVar harm_r_shadowMapAlpha( "harm_r_shadowMapAlpha", "1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow's alpha in shadow mapping" );
 #if 0
@@ -2603,7 +2603,7 @@ idCVar harm_r_shadowMapFrustumNear( "harm_r_shadowMapFrustumNear", "4.0", CVAR_R
 idCVar harm_r_shadowMapFrustumFar( "harm_r_shadowMapFrustumFar", "-2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "shadow map render frustum far(0: 2.5 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)" );
 #endif
 idCVar harm_r_useLightScissors("harm_r_useLightScissors", "3", CVAR_RENDERER | CVAR_INTEGER, "0 = no scissor, 1 = non-clipped scissor, 2 = near-clipped scissor, 3 = fully-clipped scissor", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
-idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
+idCVar harm_r_shadowMapDepthBuffer( "harm_r_shadowMapDepthBuffer", "0", CVAR_RENDERER | CVAR_INIT | CVAR_INTEGER, "render depth to color or depth texture in OpenGLES2.0. 0 = Auto; 1 = depth texture; 2 = color texture's red; 3 = color texture's rgba", 0, 3, idCmdSystem::ArgCompletion_Integer<0, 3> );
 idCVar harm_r_shadowMapNonParallelLightUltra( "harm_r_shadowMapNonParallelLightUltra", "0", CVAR_RENDERER | CVAR_BOOL/*//k next version open: | CVAR_ARCHIVE*/, "non parallel light allow ultra quality shadow map texture" );
 idCVar harm_r_shadowMapJitterScale( "harm_r_shadowMapJitterScale", "2.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "scale factor for jitter offset" );
 
@@ -2615,7 +2615,7 @@ idCVar harm_r_stencilShadowTranslucent( "harm_r_stencilShadowTranslucent", "0", 
 idCVar harm_r_stencilShadowAlpha( "harm_r_stencilShadowAlpha", "1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "translucent shadow's alpha in stencil shadow" );
 #ifdef _SOFT_STENCIL_SHADOW
 idCVar harm_r_stencilShadowSoft( "harm_r_stencilShadowSoft", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "enable soft stencil shadow(Only OpenGLES3.1+)" );
-idCVar harm_r_stencilShadowSoftBias( "harm_r_stencilShadowSoftBias", "-1", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft stencil shadow sampler BIAS(-1 to automatic, 0 to disable)" );
+idCVar harm_r_stencilShadowSoftBias( "harm_r_stencilShadowSoftBias", "-1", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "soft stencil shadow sampler BIAS(-1 = automatic; 0 = disable; positive = value)" );
 idCVar harm_r_stencilShadowSoftCopyStencilBuffer( "harm_r_stencilShadowSoftCopyStencilBuffer", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "copy stencil buffer directly for soft stencil shadow.\n0 = copy depth buffer and bind and renderer stencil buffer to texture directly\n1 = copy stencil buffer to texture directly" ); // I don't sure any GPUs are allowed to copy stencil buffer directly.
 #endif
 #endif

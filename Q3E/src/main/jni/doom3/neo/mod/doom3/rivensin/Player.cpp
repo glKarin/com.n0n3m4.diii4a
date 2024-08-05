@@ -8842,7 +8842,7 @@ idPlayer::OffsetThirdPersonView
 #ifdef _RIVENSIN //karin: third-person camera
 #define HARM_PREFER_CROUCH_VIEW_HEIGHT 32
 #if HARM_PREFER_CROUCH_VIEW_HEIGHT > 0
-static idCVar	harm_pm_preferCrouchViewHeight("harm_pm_preferCrouchViewHeight", "32", CVAR_GAME | CVAR_FLOAT | CVAR_ARCHIVE, "[Harmattan]: Set prefer crouch view height in Third-Person(suggest 32 - 39, less or equals 0 to disable).");
+static idCVar	harm_pm_preferCrouchViewHeight("harm_pm_preferCrouchViewHeight", "32", CVAR_GAME | CVAR_FLOAT | CVAR_ARCHIVE, "Set prefer crouch view height in Third-Person(suggest 32 - 39, less or equals 0 to disable).");
 #endif
 #endif
 void idPlayer::OffsetThirdPersonView( float angle, float range, float height, bool clip ) {

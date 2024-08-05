@@ -4089,7 +4089,7 @@ const char * idSessionLocal::GetDeathwalkMapName(const char *mapName) const
 	return dwMap;
 }
 
-static idCVar harm_ui_subtitlesTextScale( "harm_ui_subtitlesTextScale", "0.32", CVAR_GUI | CVAR_FLOAT | CVAR_ARCHIVE, "[Harmattan]: Subtitles's text scale(<= 0: unset)." ); //karin: setup subtitles's text scale
+static idCVar harm_ui_subtitlesTextScale( "harm_ui_subtitlesTextScale", "0.32", CVAR_GUI | CVAR_FLOAT | CVAR_ARCHIVE, "Subtitles's text scale(<= 0 to unset)." ); //karin: setup subtitles's text scale
 void idSessionLocal::ShowSubtitle(const idStrList &strList)
 {
 	int num;

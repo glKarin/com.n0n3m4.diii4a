@@ -46,10 +46,10 @@ If you have questions concerning this license or the applicable additional terms
 #define HARM_INTERACTION_SHADER_PHONG 1
 #define HARM_INTERACTION_SHADER_BLINNPHONG 2
 #define HARM_INTERACTION_SHADER_PBR 3
-static idCVar harm_r_lightModel("harm_r_lightModel", "1", CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Light model when draw interactions(1 - Phong(default), 2 - Blinn-Phong, 3 - PBR.)", HARM_INTERACTION_SHADER_PHONG, HARM_INTERACTION_SHADER_PBR);
-static idCVar harm_r_specularExponent("harm_r_specularExponent", "3.0"/* "4.0"*/, CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Specular exponent in Phong interaction light model");
-static idCVar harm_r_specularExponentBlinnPhong("harm_r_specularExponentBlinnPhong", "12.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Specular exponent in Blinn-Phong interaction light model");
-static idCVar harm_r_specularExponentPBR("harm_r_specularExponentPBR", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "[Harmattan]: Specular exponent in PBR interaction light model(1 = pure using bump texture, 0 = pure using vertex normal, 0 - 1 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", 0, 1);
+static idCVar harm_r_lightModel("harm_r_lightModel", "1", CVAR_RENDERER|CVAR_ARCHIVE, "Light model when draw interactions(1 = Phong(default); 2 = Blinn-Phong; 3 = PBR.)", HARM_INTERACTION_SHADER_PHONG, HARM_INTERACTION_SHADER_PBR);
+static idCVar harm_r_specularExponent("harm_r_specularExponent", "3.0"/* "4.0"*/, CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Phong interaction light model");
+static idCVar harm_r_specularExponentBlinnPhong("harm_r_specularExponentBlinnPhong", "12.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Blinn-Phong interaction light model");
+static idCVar harm_r_specularExponentPBR("harm_r_specularExponentPBR", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in PBR interaction light model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", 0, 1);
 
 #include "glsl/draw_glsl_backend.cpp"
 

@@ -71,7 +71,7 @@ int c_pmove = 0;
 #ifdef _RIVENSIN //karin: double-jump from hardcorps
 const int DOUBLE_JUMP_MIN_DELAY		= 500;	// ms
 
-static idCVar	harm_pm_doubleJump("harm_pm_doubleJump", "1", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Enable double-jump.");
+static idCVar	harm_pm_doubleJump("harm_pm_doubleJump", "1", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "Enable double-jump.");
 #endif
 
 /*

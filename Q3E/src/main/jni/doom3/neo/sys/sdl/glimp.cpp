@@ -112,7 +112,7 @@ const char	*r_openglesArgs[]	= {
         "GLES2",
         "GLES3.0",
         NULL };
-idCVar harm_sys_openglVersion("harm_sys_openglVersion",
+idCVar harm_r_openglVersion("harm_r_openglVersion",
                               r_openglesArgs[1]
         , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
                               "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);

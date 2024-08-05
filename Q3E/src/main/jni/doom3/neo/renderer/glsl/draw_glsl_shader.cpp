@@ -391,11 +391,11 @@ idGLSLShaderManager idGLSLShaderManager::_shaderManager;
 idGLSLShaderManager *shaderManager = &idGLSLShaderManager::_shaderManager;
 
 #define _GLPROGS "glslprogs" // "gl2progs"
-static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
+static idCVar	harm_r_shaderProgramDir("harm_r_shaderProgramDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup external OpenGLES2 GLSL shader program directory path(default is empty, means using `" _GLPROGS "`).");
 
 #ifdef GL_ES_VERSION_3_0
 #define _GL3PROGS "glsl3progs"
-static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
+static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup external OpenGLES3 GLSL shader program directory path(default is empty, means using `" _GL3PROGS "`).");
 #endif
 
 static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)

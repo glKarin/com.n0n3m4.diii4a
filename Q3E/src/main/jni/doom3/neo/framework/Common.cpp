@@ -101,7 +101,7 @@ idCVar com_videoRam("com_videoRam", "64", CVAR_INTEGER | CVAR_SYSTEM | CVAR_NOCH
 
 idCVar com_product_lang_ext("com_product_lang_ext", "1", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Extension to use when creating language files.");
 
-idCVar harm_com_consoleHistory("harm_com_consoleHistory", "2", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Save/load console history(0: disable; 1: loading in engine initialization, and saving in engine shutdown; 2: loading in engine initialization, and saving in every e executing).");
+idCVar harm_com_consoleHistory("harm_com_consoleHistory", "2", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE, "Save/load console history(0 = disable; 1 = loading in engine initialization, and saving in engine shutdown; 2 = loading in engine initialization, and saving in every e executing).");
 
 // com_speeds times
 int				time_gameFrame;
@@ -2914,10 +2914,10 @@ idCommonLocal::LoadGameDLL
 #define _DEFAULT_LIBRARY_DIR "<executable application path>"
 #endif
 
-static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library. e.g. "
+static idCVar	harm_fs_gameLibPath("harm_fs_gameLibPath", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup game dynamic library. e.g. "
 		"`<harm_fs_gameLibPath>/lib" _HARM_BASE_GAME_DLL DLL_SUFFIX "`, "
 		"default is empty will load by cvar `fs_game`."); // This cvar priority is higher than `fs_game`.
-static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "[Harmattan]: Special game dynamic library directory path(default is empty, means using `" _DEFAULT_LIBRARY_DIR "`).");
+static idCVar	harm_fs_gameLibDir("harm_fs_gameLibDir", "", CVAR_SYSTEM | CVAR_INIT | CVAR_SERVERINFO, "Setup game dynamic library directory path(default is empty, means using `" _DEFAULT_LIBRARY_DIR "`).");
 void idCommonLocal::LoadGameDLL(void)
 {
 #ifdef __DOOM_DLL__
@@ -3251,12 +3251,12 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 #endif
 #ifdef _OPENGLES3
 #if !defined(__ANDROID__) //karin: check OpenGL version from command cvar
-		const char *openglVersion = cvarSystem->GetCVarString("harm_sys_openglVersion");
+		const char *openglVersion = cvarSystem->GetCVarString("harm_r_openglVersion");
 		if(openglVersion && openglVersion[0])
 		{
 			extern int gl_version;
 		    extern bool USING_GLES3;
-			Sys_Printf("[Harmattan]: harm_sys_openglVersion = %s\n", openglVersion);
+			Sys_Printf("[Harmattan]: harm_r_openglVersion = %s\n", openglVersion);
 			if(!idStr::Icmp("GLES2", openglVersion))
 			{
 				gl_version = 0x00020000;

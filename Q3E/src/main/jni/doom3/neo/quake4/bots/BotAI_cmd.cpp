@@ -1,6 +1,6 @@
 // #ifdef MOD_BOTS
 
-idCVar harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "[Harmattan]: Automatic fill bots after map loaded in multiplayer game(0: disable; other number: bot num).", 0, botAi::BOT_MAX_BOTS );
+idCVar harm_si_autoFillBots( "harm_si_autoFillBots", "0", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT | CVAR_ARCHIVE, "Automatic fill bots after map loaded in multiplayer game(0 = disable; other number = bot num).", 0, botAi::BOT_MAX_BOTS );
 //karin: auto gen aas file for mp game map with bot
 idCVar harm_g_autoGenAASFileInMPGame( "harm_g_autoGenAASFileInMPGame", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic.");
 

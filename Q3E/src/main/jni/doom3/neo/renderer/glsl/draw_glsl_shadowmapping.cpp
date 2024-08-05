@@ -50,11 +50,13 @@
 
 #include "../tr_local.h"
 
+#if 0
 #define POINT_LIGHT_FRUSTUM_FAR 7996.0f
 #define POINT_LIGHT_FRUSTUM_FAR_FACTOR 2.5 // 2
 
 #define POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH 0
 #define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR 1
+#endif
 
 #define SHADOW_MAPPING_VOLUME 1 // render shadow volume
 #define SHADOW_MAPPING_SURFACE 2 // render model surface
@@ -85,8 +87,8 @@ static int r_shadowMappingScheme = SHADOW_MAPPING_PURE;
 static idCVar harm_r_shadowMappingScheme( "harm_r_shadowMappingScheme", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "shadow mapping rendering scheme. 0 = always using shadow mapping; 1 = prelight shadow using shadow mapping, others using stencil shadow; 2 = non-prelight shadow using shadow mapping, others using stencil shadow", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 #endif
 
-static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug light type mask. 1: parallel, 2: point, 4: spot");
-static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug shadow map frame buffer.");
+static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "debug light type mask in shadow mapping. 1 = parallel; 2 = point; 4 = spot");
+static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "debug shadow map frame buffer.");
 
 char RB_ShadowMapPass_T = 'G'; // G - global shadow, L - local shadow
 
