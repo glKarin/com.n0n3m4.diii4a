@@ -42,8 +42,6 @@
  * r_shadowMapFrustumFOV: float, 90, point light view FOV
  * harm_r_shadowMapLod: int, -1, force using shadow map LOD(0 - 4), -1 is auto
  * harm_r_shadowMapAlpha: float, 0.5, shadow alpha(0 - 1)
- * harm_r_shadowMapSampleFactor: float, -1.0, 0 multiple, 0 is disable, < 0 is auto, > 0 multi with fixed value
- * harm_r_shadowMapFrustumFar: float, -2.5, shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)
  *
  */
 
@@ -328,6 +326,7 @@ ID_INLINE static bool RB_ShadowMapping_filterLightType(void)
     return false;
 }
 
+#if 0
 // Get frustum far value for point light in shadow map/interaction pass
 ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
 {
@@ -345,6 +344,7 @@ ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
     }
     return _far;
 }
+#endif
 
 // Choose shader by light in shadow map pass
 ID_INLINE static shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* vLight, int side)

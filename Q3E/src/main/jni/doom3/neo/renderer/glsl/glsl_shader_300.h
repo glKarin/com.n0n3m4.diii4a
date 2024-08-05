@@ -1,5 +1,5 @@
-#ifndef _KARIN_GLSL_SHADER_330_H
-#define _KARIN_GLSL_SHADER_330_H
+#ifndef _KARIN_GLSL_SHADER_300_H
+#define _KARIN_GLSL_SHADER_300_H
 
 // Unuse C++11 raw string literals for Traditional C++98
 
@@ -906,7 +906,7 @@ _ES3_PBR_GENERAL_FUNCTION
 "\n"
 "    // vec3 kS = F;\n"
 "    // vec3 kD = vec3(1.0) - kS;\n"
-"    // kD *= 1.0 - metallic;\n"
+"    // kD *= 1.0 - metallic.r;\n"
 "\n"
 "    vec3 numerator    = NDF * G * F;\n"
 "    float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);\n"
@@ -1625,7 +1625,7 @@ GLSL_SHADER const char ES3_INTERACTION_SHADOW_MAPPING_FRAG[] =
         "\n"
         "    // vec3 kS = F;\n"
         "    // vec3 kD = vec3(1.0) - kS;\n"
-        "    // kD *= 1.0 - metallic;\n"
+        "    // kD *= 1.0 - metallic.r;\n"
         "\n"
         "    vec3 numerator    = NDF * G * F;\n"
         "    float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);\n"
@@ -1951,7 +1951,7 @@ GLSL_SHADER const char ES3_INTERACTION_STENCIL_SHADOW_FRAG[] =
         "\n"
         "    // vec3 kS = F;\n"
         "    // vec3 kD = vec3(1.0) - kS;\n"
-        "    // kD *= 1.0 - metallic;\n"
+        "    // kD *= 1.0 - metallic.r;\n"
         "\n"
         "    vec3 numerator    = NDF * G * F;\n"
         "    float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);\n"

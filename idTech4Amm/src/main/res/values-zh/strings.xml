@@ -253,7 +253,7 @@
     <string name="extract_source">提取源码</string>
     <string name="tips">提示</string>
     <string name="license">开源许可证</string>
-    <string name="maximum_fps_limit_0_unlimited">最大FPS(harm_r_maxFps)</string>
+    <string name="maximum_fps_limit_0_unlimited">最大FPS(r_maxFps)</string>
     <string name="limit_maximum_fps_default_is_0">限制最大FPS(0 不限制)</string>
     <string name="edit_cvar">编辑CVar</string>
     <string name="cvar_editor">CVar编辑器</string>
@@ -266,8 +266,8 @@
     <string name="view">查看</string>
     <string name="scale_by_screen_area">如果使用比例, 则按屏幕面积的比例而不是宽高比例</string>
     <string name="shadow_cvar_r_useShadowMapping">阴影(r_useShadowMapping)</string>
-    <string name="shadow_volume">Shadow volume</string>
-    <string name="shadow_mapping">Shadow mapping</string>
+    <string name="shadow_volume">光锥阴影</string>
+    <string name="shadow_mapping">阴影映射</string>
     <string name="renderer">渲染</string>
     <string name="_sound">声音</string>
     <string name="using_openal">启用OpenAL(s_useOpenAL)</string>
@@ -355,4 +355,6 @@
     <string name="shadow">阴影</string>
     <string name="image">纹理</string>
     <string name="current_game_data_path">当前游戏数据路径</string>
+    <string name="render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces">渲染镂空材质阴影(r_forceShadowMapsOnAlphaTestedSurfaces)</string>
+    <string name="stencil_shadow">模板阴影</string>
 </resources>

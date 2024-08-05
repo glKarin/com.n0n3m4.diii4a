@@ -18,7 +18,7 @@ cmake --build . --config "%BUILD_TYPE%"
 
 rem clean: cmake --build . --config "%BUILD_TYPE%" --target clean
 
-set TARGET_PATH=%cd%\Q3E\src\main\jni\doom3\neo\\%BUILD_TYPE%
+set TARGET_PATH=%cd%\Q3E\src\main\jni\doom3\neo\%BUILD_TYPE%
 echo Open target directory: %TARGET_PATH% ......
 start "" %TARGET_PATH%
 

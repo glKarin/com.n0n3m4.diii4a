@@ -1492,3 +1492,127 @@ void RB_GLSL_PrintShaderSource(const char *filename, const char *source)
 	}
 	common->Printf("--------------------------------------------------\n");
 }
+
+static void RB_GLSL_ExportDevGLSLShaderSource(const char *source, const char *name, const char *dir)
+{
+	idStr path = dir;
+
+	if(!path.IsEmpty() && path[path.Length() - 1] != '/')
+		path += "/";
+
+	common->Printf("[Harmattan]: Save base GLSL shader source '%s' to '%s'\n", name, path.c_str());
+
+
+	idStr p(path);
+	p.Append(name);
+	fileSystem->WriteFile(p.c_str(), source, strlen(source), "fs_basepath");
+}
+
+void R_ExportDevShaderSource_f(const idCmdArgs &args)
+{
+#undef _KARIN_GLSL_SHADER_H
+#undef _KARIN_GLSL_SHADER_100_H
+#undef _KARIN_GLSL_SHADER_300_H
+#include "glsl_shader.h"
+#undef _KARIN_GLSL_SHADER_H
+#undef _KARIN_GLSL_SHADER_100_H
+#undef _KARIN_GLSL_SHADER_300_H
+#ifdef GL_ES_VERSION_3_0
+#define EXPORT_SHADER_SOURCE(source, name, type) \
+	{ \
+	if(gl2) \
+		RB_GLSL_ExportDevGLSLShaderSource(source, name "." type, SHADER_ES_PATH); \
+	else \
+		RB_GLSL_ExportDevGLSLShaderSource(ES3_##source, name "." type, SHADER_ES_PATH); \
+	}
+#else
+#define EXPORT_SHADER_SOURCE(source, name, type) RB_GLSL_ExportBaseGLSLShaderSource(source, name "." type, SHADER_ES_PATH);
+#endif
+
+#define EXPORT_BASE_SHADER() \
+	EXPORT_SHADER_SOURCE(INTERACTION_VERT, "interaction", "vert"); \
+	EXPORT_SHADER_SOURCE(INTERACTION_FRAG, "interaction", "frag"); \
+ \
+	EXPORT_SHADER_SOURCE(SHADOW_VERT, "shadow", "vert"); \
+	EXPORT_SHADER_SOURCE(SHADOW_FRAG, "shadow", "frag"); \
+ \
+	EXPORT_SHADER_SOURCE(DEFAULT_VERT, "default", "vert"); \
+	EXPORT_SHADER_SOURCE(DEFAULT_FRAG, "default", "frag"); \
+	 \
+	EXPORT_SHADER_SOURCE(ZFILL_VERT, "zfill", "vert"); \
+	EXPORT_SHADER_SOURCE(ZFILL_FRAG, "zfill", "frag"); \
+	 \
+	EXPORT_SHADER_SOURCE(ZFILLCLIP_VERT, "zfillClip", "vert"); \
+	EXPORT_SHADER_SOURCE(ZFILLCLIP_FRAG, "zfillClip", "frag"); \
+ \
+	EXPORT_SHADER_SOURCE(CUBEMAP_VERT, "cubemap", "vert"); \
+	EXPORT_SHADER_SOURCE(CUBEMAP_FRAG, "cubemap", "frag"); \
+ \
+	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_VERT, "reflectionCubemap", "vert"); \
+ \
+	EXPORT_SHADER_SOURCE(FOG_VERT, "fog", "vert"); \
+	EXPORT_SHADER_SOURCE(FOG_FRAG, "fog", "frag"); \
+ \
+	EXPORT_SHADER_SOURCE(BLENDLIGHT_VERT, "blendLight", "vert"); \
+ \
+	EXPORT_SHADER_SOURCE(DIFFUSE_CUBEMAP_VERT, "diffuseCubemap", "vert"); \
+ \
+	EXPORT_SHADER_SOURCE(TEXGEN_VERT, "texgen", "vert"); \
+	EXPORT_SHADER_SOURCE(TEXGEN_FRAG, "texgen", "frag"); \
+	EXPORT_SHADER_SOURCE(HEATHAZE_VERT, "heatHaze", "vert"); \
+	EXPORT_SHADER_SOURCE(HEATHAZE_FRAG, "heatHaze", "frag"); \
+	 \
+	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASK_VERT, "heatHazeWithMask", "vert"); \
+	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASK_FRAG, "heatHazeWithMask", "frag"); \
+	 \
+	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASKANDVERTEX_VERT, "heatHazeWithMaskAndVertex", "vert"); \
+	EXPORT_SHADER_SOURCE(HEATHAZEWITHMASKANDVERTEX_FRAG, "heatHazeWithMaskAndVertex", "frag"); \
+	 \
+	EXPORT_SHADER_SOURCE(COLORPROCESS_VERT, "colorProcess", "vert"); \
+	EXPORT_SHADER_SOURCE(COLORPROCESS_FRAG, "colorProcess", "frag");
+	 
+#ifdef _SHADOW_MAPPING
+#define EXPORT_SHADOW_MAPPING_SHADER() \
+	EXPORT_SHADER_SOURCE(DEPTH_VERT, "depth", "vert"); \
+	EXPORT_SHADER_SOURCE(DEPTH_FRAG, "depth", "frag"); \
+	 \
+	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_VERT, "depthPerforated", "vert"); \
+	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_FRAG, "depthPerforated", "frag"); \
+	 \
+	EXPORT_SHADER_SOURCE(INTERACTION_SHADOW_MAPPING_VERT, "interactionShadowMapping", "vert"); \
+	EXPORT_SHADER_SOURCE(INTERACTION_SHADOW_MAPPING_FRAG, "interactionShadowMapping", "frag");
+#endif
+
+#ifdef _STENCIL_SHADOW_IMPROVE
+#define EXPORT_STENCIL_SHADOW_SHADER() \
+	EXPORT_SHADER_SOURCE(INTERACTION_STENCIL_SHADOW_VERT, "interactionStencilShadow", "vert"); \
+	EXPORT_SHADER_SOURCE(INTERACTION_STENCIL_SHADOW_FRAG, "interactionStencilShadow", "frag");
+#endif
+
+#define SHADER_ES_PATH glprogs.c_str()
+	bool gl2 = true;
+	idStr glprogs;
+
+	glprogs = "dev/glslprogs";
+	EXPORT_BASE_SHADER()
+#ifdef _SHADOW_MAPPING
+	EXPORT_SHADOW_MAPPING_SHADER()
+#endif
+#ifdef _STENCIL_SHADOW_IMPROVE
+	EXPORT_STENCIL_SHADOW_SHADER()
+#endif
+
+#ifdef GL_ES_VERSION_3_0
+	gl2 = false;
+	glprogs = "dev/glsl3progs";
+
+	EXPORT_BASE_SHADER()
+#ifdef _SHADOW_MAPPING
+	EXPORT_SHADOW_MAPPING_SHADER()
+#endif
+#ifdef _STENCIL_SHADOW_IMPROVE
+	EXPORT_STENCIL_SHADOW_SHADER()
+#endif
+
+#endif
+}

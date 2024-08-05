@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    <style name="TraditionalTheme" parent="@android:style/Theme">
+        &lt;!&ndash;<item name="colorAccent">@color/colorAccent</item>&ndash;&gt;
+        <item name="android:windowActionBar">true</item>
+        <item name="android:isLightTheme">true</item>
+    </style>
+    <style name="UniformTheme" parent="@android:style/Theme.WithActionBar">
+        &lt;!&ndash;<item name="colorAccent">@color/colorAccent</item>&ndash;&gt;
+        <item name="android:windowActionBar">true</item>
+    </style>-->
+</resources>

@@ -73,16 +73,25 @@ idCVar idSoundSystemLocal::s_skipHelltimeFX("s_skipHelltimeFX", "0", CVAR_SOUND 
 #if ID_OPENAL
 // off by default. OpenAL DLL gets loaded on-demand
 #ifdef _WIN32
+#ifdef _OPENAL_SOFT
+idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal.dll", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
+#else
 idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
+#endif
 #else
 idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "./libopenal.so", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
 #endif
+#ifdef _WIN32 //karin: enable OpenAL default on Windows
+idCVar idSoundSystemLocal::s_useOpenAL("s_useOpenAL", "1", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use OpenAL");
+idCVar idSoundSystemLocal::s_useEAXReverb("s_useEAXReverb", "1", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use EAX reverb");
+#else
 idCVar idSoundSystemLocal::s_useOpenAL("s_useOpenAL", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use OpenAL");
 idCVar idSoundSystemLocal::s_useEAXReverb("s_useEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use EAX reverb");
+#endif
 idCVar idSoundSystemLocal::s_muteEAXReverb("s_muteEAXReverb", "0", CVAR_SOUND | CVAR_BOOL, "mute eax reverb");
 idCVar idSoundSystemLocal::s_decompressionLimit("s_decompressionLimit", "6", CVAR_SOUND | CVAR_INTEGER | CVAR_ARCHIVE, "specifies maximum uncompressed sample length in seconds");
 #else
-idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL is not supported in this build");
+idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ROM, "OpenAL is not supported in this build");
 idCVar idSoundSystemLocal::s_useOpenAL("s_useOpenAL", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "OpenAL is not supported in this build");
 idCVar idSoundSystemLocal::s_useEAXReverb("s_useEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "EAX not available in this build");
 idCVar idSoundSystemLocal::s_muteEAXReverb("s_muteEAXReverb", "0", CVAR_SOUND | CVAR_BOOL | CVAR_ROM, "mute eax reverb");

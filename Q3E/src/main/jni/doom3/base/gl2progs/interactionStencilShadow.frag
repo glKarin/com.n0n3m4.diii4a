@@ -158,7 +158,7 @@ void main(void)
 
     // vec3 kS = F;
     // vec3 kD = vec3(1.0) - kS;
-    // kD *= 1.0 - metallic;
+    // kD *= 1.0 - metallic.r;
 
     vec3 numerator    = NDF * G * F;
     float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);

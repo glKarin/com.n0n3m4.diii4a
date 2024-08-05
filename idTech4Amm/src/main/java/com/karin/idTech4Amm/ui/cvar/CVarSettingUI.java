@@ -27,7 +27,7 @@ public final class CVarSettingUI
                 "harm_r_specularExponentBlinnPhong",
                 "harm_r_specularExponentPBR",
                 "harm_fs_gameLibPath",
-                "harm_r_maxFps",
+                "r_maxFps",
                 "r_useShadowMapping",
                 "harm_r_stencilShadowTranslucent",
                 "harm_fs_gameLibDir",
@@ -36,6 +36,7 @@ public final class CVarSettingUI
                 "harm_r_stencilShadowCombine",
                 "harm_r_autoAspectRatio",
                 "harm_r_shadowMapAlpha",
+                "r_forceShadowMapsOnAlphaTestedSurfaces",
         };
         if(Utility.ArrayContains(IgnoreCVars, cvar.name))
             return TYPE_NONE;

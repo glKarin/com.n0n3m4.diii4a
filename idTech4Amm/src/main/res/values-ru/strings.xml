@@ -251,7 +251,7 @@
     <string name="extract_source">Извлечь ресурсы</string>
     <string name="tips">Советы</string>
     <string name="license">Лицензия</string>
-    <string name="maximum_fps_limit_0_unlimited">Максимальный FPS(0 = неограничен)(harm_r_maxFps)</string>
+    <string name="maximum_fps_limit_0_unlimited">Максимальный FPS(0 = неограничен)(r_maxFps)</string>
     <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (0 = неограничен)</string>
     <string name="edit_cvar">Редактор CVar</string>
     <string name="cvar_editor">CVar редактор</string>
@@ -356,5 +356,7 @@
     <string name="shadow">Тени</string>
     <string name="image">Изображение</string>
     <string name="current_game_data_path">Текущий путь к данным игры</string>
+    <string name="render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces">Render perforated material shadow(r_forceShadowMapsOnAlphaTestedSurfaces)</string>
+    <string name="stencil_shadow">Stencil shadow</string>
 
 </resources>

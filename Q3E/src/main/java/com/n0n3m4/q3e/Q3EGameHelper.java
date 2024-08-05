@@ -750,7 +750,8 @@ public class Q3EGameHelper
         // if(Q3EUtils.q3ei.isTDM) subdatadir = "dnf"; // Test a new game using TDM
 
         int refreshRate = (int)Q3EUtils.GetRefreshRate(m_context);
-        String appHome = Q3EUtils.GetAppInternalSearchPath(m_context, "/" + subdatadir);
+        String appHome = Q3EUtils.GetAppInternalSearchPath(m_context, null);
+		appHome = KStr.AppendPath(appHome, subdatadir);
 
         boolean res = Q3EJNI.init(
                 GetEngineLib(),
