@@ -31,7 +31,7 @@
     <string name="input_your_mod_folder_name">Имя папки вашего мода</string>
     <string name="gamelib">Библиотека игры</string>
     <string name="multi_threading">Многопоточность</string>
-    <string name="light_model_cvar_harm_r_lightmodel">Выбрать модель освещения(harm_r_lightModel)</string>
+    <string name="light_model_cvar_harm_r_lightmodel">Выбрать модель освещения(harm_r_lightingModel)</string>
     <string name="phong">Phong</string>
     <string name="blinn_phong">Blinn-Phong</string>
     <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности света</string>

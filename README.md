@@ -1,20 +1,23 @@
-## idTech4A++ (Harmattan Edition)
-#### DOOM III/Quake 4/Prey(2006) for Android/Windows/Linux OpenGLES; DOOM 3 BFG/The Dark Mod for Android OpenGLES
-#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版; 毁灭战士3 BFG/The Dark Mod 安卓OpenGLES移植版.
+## idTech4A++ (Harmattan Edition)  
+**idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
+#### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
+##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM OpenGLES on Android  
+#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版  
+##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan53(natasha)  
+1.1.0harmattan55(natasha) for **DOOM3 20th Anniversary Edition**  
 **Latest update:**
-2024-07-17  
+2024-08-05  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
 Android 4.4+  
 **License:**
-GPLv3
+GPLv3  
 
 ----------------------------------------------------------------------------------
-### idTech4's feature
+> **idTech4's feature**  
 * Linux/Windows(MinGW/MSVC(without editor)) build
 * multi-threading renderer
 * png/dds texture image, jpeg/png/bmp/dds format of screenshot
@@ -29,40 +32,40 @@ GPLv3
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
 * Prey(2006)(with full body awareness mod) and HumanHead's idTech4 engine
 
-##### Build DOOM3/Quake4/Prey(2006) mod for Android idTech4A++
+> **Build DOOM3/Quake4/Prey(2006) mod for Android idTech4A++**  
+
 [DOOM 3 & RoE SDK](https://github.com/glKarin/idtech4amm_doom3_sdk)  
 [Quake 4 SDK](https://github.com/glKarin/idtech4amm_quake4_sdk)  
 [Prey(2006) SDK](https://github.com/glKarin/idtech4amm_prey_sdk)  
 
-##### Compare with other OpenGLES rendering version of DOOM3
+> **Compare with other OpenGLES rendering version of DOOM3**  
 
-| Feature                                                                                    |                                       idTech4A++                                       |                            Other                            |
-|:-------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------:|:-----------------------------------------------------------:|
-| Multi-threading                                                                            |                        Support<br/>(but can't switch in gaming)                        | d3es-multithread support<br/>(and support switch in gaming) |
-| New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess) |                                          Yes                                           |                              -                              |
-| TexGen shader                                                                              |                                          Yes                                           |                              -                              |
-| Shadow mapping for pure soft shadow                                                        |                                          Yes                                           |                              -                              |
-| Translucent stencil shadow                                                                 |                                          Yes                                           |                              -                              |
-| Soft stencil shadow                                                                        |                              Yes<br/>(Only OpenGLES3.1+)                               |                              -                              |
-| OpenGL ES version                                                                          |            2.0 and 3.0+<br/>(shadow mapping shaders has different version)             |                      2.0(3.0+ compat)                       |
-| No lighting                                                                                |                         Yes<br/>(And support switch in gaming)                         |                             Yes                             |
-| Debug render tools                                                                         | Yes<br/>(need to set harm_r_renderToolsMultithread to 1 if in multi-threading enabled) |                              -                              |
-| PBR lighting model                                                                         |       Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr))        |                              -                              |
+| Feature | idTech4A++ | Other |
+|:-----|:-----:|:-----:|
+| Multi-threading | Support<br/>(but can't switch in gaming) | d3es-multithread support<br/>(and support switch in gaming) |
+| New stage shader<br/>(heatHaze, heatHazeWithMask, heatHazeWithMaskAndVertex, colorProcess) | Yes | - |
+| TexGen shader | Yes | - |
+| Shadow mapping for pure soft shadow | Yes | - |
+| Soft/Translucent stencil shadow | Yes<br/>(Soft stencil shadow only support on OpenGLES3.1+) | - |
+| OpenGL ES version | 2.0 and 3.0+<br/>(point light shadow mapping shader use cubemap on OpenGLES2.0, use texture array on OpenGLES3.0+) | 2.0(3.0+ compat) |
+| No lighting | Yes<br/>(And support switch in gaming) | Yes |
+| Debug render tools | Yes<br/>(need to set harm_r_renderToolsMultithread to 1 if with multi-threading) | - |
+| PBR lighting model | Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr)) | - |
 
-##### Support games
+> **Support games**
 
-| Game                         |                             Engine                              |                 Version                 |             OpenGL ES version             |                                                                                         Mods                                                                                         |
-|:-----------------------------|:---------------------------------------------------------------:|:---------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
-| DOOM III                     |                         n0n3m4's dante                          |                    -                    |                  2.0/3.0                  | Resurrection of Evil<br/>The Lost Mission<br/>Classic DOOM3<br/>Rivensin<br/>HardCorps<br/>Overthinked Doom^3<br/>Sabot(a7x)<br/>HeXen:Edge of Chaos<br/>Fragging Free<br/>LibreCoop |
-| Quake IV                     |                         n0n3m4's dante                          |                    -                    |                  2.0/3.0                  |                                                                                                                                                                                      |
-| Prey(2006)                   |                         n0n3m4's dante                          |                    -                    |                  2.0/3.0                  |                                                                                                                                                                                      |
-| DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) |                    3.0                    |                                                                                                                                                                                      |
-| The Dark Mod                 |             [Dark Mod](https://www.thedarkmod.com)              |                  2.12                   | 3.2<br/>(require geometry shader support) |                                                                                                                                                                                      |
-| Return to Castle Wolfenstein |           [iortcw](https://github.com/iortcw/iortcw)            |                    -                    |                    1.1                    |                                           |
-| Quake III Arena              |           [ioquake3](https://github.com/ioquake/ioq3)           |                    -                    |                    1.1                    |                                                                                 Quake III Team Arena                                                                                 |
-| Quake II                     |      [Yamagi Quake II](https://github.com/yquake2/yquake2)      |                    -                    |                  1.1/3.2                  |                                                                          ctf<br/>rogue<br/>xatrix<br/>zaero                                                                          |
-| Quake I                      |  [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces)   |                    -                    |                    2.0                    |                                                                                                                                                                                      |
-| GZDOOM                       |        [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits         |                    -                    |                    3.2                    |                                                                                                                                                                                      |
+| Game | Engine | Version | OpenGL ES version | Mods |
+|:-----|:-----:|:-----:|:-----:|:-----:|
+| DOOM III | n0n3m4's dante | - | 2.0/3.0 | Resurrection of Evil<br/>The Lost Mission<br/>Classic DOOM3<br/>Rivensin<br/>HardCorps<br/>Overthinked Doom^3<br/>Sabot(a7x)<br/>HeXen:Edge of Chaos<br/>Fragging Free<br/>LibreCoop |
+| Quake IV | n0n3m4's dante | - | 2.0/3.0 |  |
+| Prey(2006) | n0n3m4's dante | - | 2.0/3.0 |  |
+| DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) | 3.0 |  |
+| The Dark Mod | [Dark Mod](https://www.thedarkmod.com) | 2.12 | 3.2<br/>(require geometry shader support) |  |
+| Return to Castle Wolfenstein | [iortcw](https://github.com/iortcw/iortcw) | - | 1.1 |  |
+| Quake III Arena | [ioquake3](https://github.com/ioquake/ioq3) | - | 1.1 | Quake III Team Arena |
+| Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2 | ctf<br/>rogue<br/>xatrix<br/>zaero |
+| Quake I | [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces) | - | 2.0 |  |
+| GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | - | 3.2 |  |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -79,15 +82,21 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Fix GZDOOM sound.
-* Update screen resolution settings on launcher.
-* Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower), and using cvar `harm_image_useCompressionCache` enable caching on DOOM3-BFG.
+* Add PBR interaction lighting model([jmarshall23's idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr))(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.
+* Fix large shake of player view with OpenAL in DOOM3/Quake4/Prey.
+* Add command history record manager in launcher.
+* Add `/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a` to game data search path(exclude Quake1), add current game data path tips.
+* Optimize ETC1 compression texture cache in DOOM3/Quake4/Prey, add ETC2 compression texture support(cvar r_useETC2) in OpenGLES3.0.
+* Add launcher theme setting.
 
 ----------------------------------------------------------------------------------
 
-* 修复GZDOOM声音.
-* 启动器更新屏幕分辨率设置.
-* 毁灭战士3BFG新增cvar `harm_image_useCompression`启用压缩纹理支持(对于低内存设备(如32位设备), 并且可以通过cvar `harm_image_useCompressionCache`启用缓存, 但会加载缓慢).
+* 毁灭战士3/雷神之锤4/掠食(2006)新增PBR光照模型([jmarshall23's idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr))(设置cvar harm_r_lightingModel 3).
+* 毁灭战士3/雷神之锤4/掠食(2006)修复OpenAL下玩家视角大幅度抖动.
+* 启动器新增命令历史记录管理器.
+* 添加`/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a`到游戏数据文件搜索路径(除了雷神之锤1), 新增当前游戏数据文件路径提示.
+* 毁灭战士3/雷神之锤4/掠食(2006)优化ETC1压缩纹理缓存, OpenGLES3.0新增ETC2压缩纹理支持(cvar r_useETC2).
+* 新增启动器主题设置.
 
 ----------------------------------------------------------------------------------
 
@@ -110,7 +119,7 @@ Tag with `-free` only for F-Droid update.
 | harm_r_shaderProgramDir | String |  | Setup external OpenGLES2 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glslprogs(default) | All |
 | harm_r_shaderProgramES3Dir | String |  | Setup external OpenGLES3 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glsl3progs(default) | All |
 | harm_r_shadowCarmackInverse | Bool | 0 | Stencil shadow using Carmack-Inverse | ARCHIVE |  | Engine/Renderer |  | All |
-| harm_r_lightModel | Integer | 1 | Light model when draw interactions | ARCHIVE | 1, 2, 3 | Engine/Renderer | 1 = Phong(default);<br/> 2 = Blinn-Phong;<br/> 3 = PBR | All |
+| harm_r_lightingModel | Integer | 1 | Lighting model when draw interactions | ARCHIVE | 1, 2, 3 | Engine/Renderer | 1 = Phong(default);<br/> 2 = Blinn-Phong;<br/> 3 = PBR | All |
 | harm_r_specularExponent | Float | 3.0 | Specular exponent in Phong interaction light model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
 | harm_r_specularExponentBlinnPhong | Float | 12.0 | Specular exponent in Blinn-Phong interaction light model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
 | harm_r_specularExponentPBR | Float | 1.0 | Specular exponent in PBR interaction light model | ARCHIVE | [0.0 - 1.0] | Engine/Renderer | 1 = pure using bump texture;<br/> 0 = pure using vertex normal;<br/> 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR) | All |

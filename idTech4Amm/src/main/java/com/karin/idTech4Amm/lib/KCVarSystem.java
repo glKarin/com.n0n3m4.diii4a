@@ -26,7 +26,7 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_shaderProgramES3Dir", "string", "glsl3progs", "Special external OpenGLES3.0 GLSL shader program directory path", 0),
 
                         KCVar.CreateCVar("harm_r_shadowCarmackInverse", "bool", "0", "Stencil shadow using Carmack-Inverse", 0),
-                        KCVar.CreateCVar("harm_r_lightModel", "string", "1", "Light model when draw interactions", 0,
+                        KCVar.CreateCVar("harm_r_lightingModel", "string", "1", "Lighting model when draw interactions", 0,
                                 "1", "Phong",
                                 "2", "Blinn-Phong",
                                 "3", "PBR"

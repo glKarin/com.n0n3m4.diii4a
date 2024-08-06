@@ -22,7 +22,7 @@ public final class CVarSettingUI
             return TYPE_NONE;
         final String[] IgnoreCVars = {
                 "harm_r_clearVertexBuffer",
-                "harm_r_lightModel",
+                "harm_r_lightingModel",
                 "harm_r_specularExponent",
                 "harm_r_specularExponentBlinnPhong",
                 "harm_r_specularExponentPBR",

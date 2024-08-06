@@ -378,12 +378,12 @@ public class GameLauncher extends Activity
 						.commit();
 				UpdateResolution(id);
 			}
-			else if (rgId == R.id.rg_harm_r_lightModel)
+			else if (rgId == R.id.rg_harm_r_lightingModel)
 			{
 				String value = "" + (GetCheckboxIndex(radioGroup, id) + 1);
-				SetProp("harm_r_lightModel", value);
+				SetProp("harm_r_lightingModel", value);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putString(Q3EPreference.pref_harm_r_lightModel, value)
+						.putString(Q3EPreference.pref_harm_r_lightingModel, value)
 						.commit();
 			}
 			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_q3game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame || rgId == R.id.rg_fs_q1game || rgId == R.id.rg_fs_d3bfggame || rgId == R.id.rg_fs_doomgame)
@@ -820,14 +820,14 @@ public class GameLauncher extends Activity
 			SelectCheckbox(V.r_harmclearvertexbuffer, index);
 			if (!IsProp("harm_r_clearVertexBuffer")) SetProp("harm_r_clearVertexBuffer", 2);
 
-			str = GetProp("harm_r_lightModel");
+			str = GetProp("harm_r_lightingModel");
 			index = 0;
 			if (str != null)
 			{
 				index = Q3EUtils.parseInt_s(str, 1) - 1;
 			}
-			SelectCheckbox(V.rg_harm_r_lightModel, index);
-			if (!IsProp("harm_r_lightModel")) SetProp("harm_r_lightModel", "1");
+			SelectCheckbox(V.rg_harm_r_lightingModel, index);
+			if (!IsProp("harm_r_lightingModel")) SetProp("harm_r_lightingModel", "1");
 
 			str = GetProp("harm_r_specularExponent");
 			if (null != str)
@@ -1115,8 +1115,8 @@ public class GameLauncher extends Activity
         V.rg_color_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.r_harmclearvertexbuffer, mPrefs.getInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, 2));
         V.r_harmclearvertexbuffer.setOnCheckedChangeListener(m_groupCheckChangeListener);
-        SelectCheckbox(V.rg_harm_r_lightModel, Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_harm_r_lightModel, "1")) - 1);
-        V.rg_harm_r_lightModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
+        SelectCheckbox(V.rg_harm_r_lightingModel, Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_harm_r_lightingModel, "1")) - 1);
+        V.rg_harm_r_lightingModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
         V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		SelectCheckbox(V.rg_harm_r_shadow, mPrefs.getBoolean(Q3EPreference.pref_harm_r_useShadowMapping, false) ? 1 : 0);
@@ -1762,7 +1762,7 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_32bit, index == -1);
         mEdtr.putInt(Q3EPreference.pref_harm_16bit, index);
         mEdtr.putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
-        mEdtr.putString(Q3EPreference.pref_harm_r_lightModel, "" + (GetCheckboxIndex(V.rg_harm_r_lightModel) + 1));
+        mEdtr.putString(Q3EPreference.pref_harm_r_lightingModel, "" + (GetCheckboxIndex(V.rg_harm_r_lightingModel) + 1));
         mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 3.0f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentBlinnPhong, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentBlinnPhong.getText().toString(), 12.0f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentPBR, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentPBR.getText().toString(), 1.0f));
@@ -2920,7 +2920,7 @@ public class GameLauncher extends Activity
         public Button launcher_tab1_game_data_chooser_button;
         public RadioGroup rg_curpos;
         public EditText edt_harm_r_specularExponent;
-        public RadioGroup rg_harm_r_lightModel;
+        public RadioGroup rg_harm_r_lightingModel;
         public Button onscreen_button_setting;
         public LinearLayout launcher_tab1_user_game_layout;
         public RadioGroup rg_fs_q4game;
@@ -3020,7 +3020,7 @@ public class GameLauncher extends Activity
             launcher_tab1_game_data_chooser_button = findViewById(R.id.launcher_tab1_game_data_chooser_button);
             rg_curpos = findViewById(R.id.rg_curpos);
             edt_harm_r_specularExponent = findViewById(R.id.edt_harm_r_specularExponent);
-            rg_harm_r_lightModel = findViewById(R.id.rg_harm_r_lightModel);
+            rg_harm_r_lightingModel = findViewById(R.id.rg_harm_r_lightingModel);
             onscreen_button_setting = findViewById(R.id.onscreen_button_setting);
             launcher_tab1_user_game_layout = findViewById(R.id.launcher_tab1_user_game_layout);
             rg_fs_q4game = findViewById(R.id.rg_fs_q4game);

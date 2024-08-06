@@ -1,4 +1,4 @@
-* 毁灭战士3/雷神之锤4/掠食(2006)新增PBR光照模型(jmarshall23's idtech4_pbr).
+* 毁灭战士3/雷神之锤4/掠食(2006)新增PBR光照模型(jmarshall23's idtech4_pbr)(设置cvar harm_r_lightingModel 3).
 * 毁灭战士3/雷神之锤4/掠食(2006)修复OpenAL下玩家视角大幅度抖动.
 * 启动器新增命令历史记录管理器.
 * 添加`/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a`到游戏数据文件搜索路径(除了雷神之锤1), 新增当前游戏数据文件路径提示.

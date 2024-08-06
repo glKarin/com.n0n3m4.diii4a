@@ -618,7 +618,7 @@ public final class TextHelper
                              "Fix `Berserk`, `Grabber`, `Helltime` vision effect(First set cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` and `harm_g_skipHelltimeVision` to 0).",
                              "Fix screen capture image when quick save game or mission tips.",
                              "Fix machine gun's ammo panel.",
-                             "Add light model setting with `Phong` and `Blinn-Phong` when render interaction shader pass(string cvar `harm_r_lightModel`).",
+                             "Add light model setting with `Phong` and `Blinn-Phong` when render interaction shader pass(string cvar `harm_r_lightingModel`).",
                              "Add specular exponent setting in light model(float cvar `harm_r_specularExponent`).",
                              "Default using program internal OpenGL shader.",
                              "Reset extras virtual button size, and add Console(~) key.",

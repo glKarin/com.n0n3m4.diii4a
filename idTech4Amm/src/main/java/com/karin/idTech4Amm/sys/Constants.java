@@ -16,7 +16,7 @@ public final class Constants
     public static final String CONST_RELEASE = "2024-08-05";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
-    public static final String CONST_CODE = "Harmattan(DOOM3 20th Anniversary version)";
+    public static final String CONST_CODE = "Harmattan[DOOM3 20th Anniversary Edition]";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
     public static final String CONST_NAME = "DOOM III/Quake 4/Prey(2006)/DOOM 3 BFG for Android(Harmattan Edition)";
 	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
@@ -30,7 +30,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add PBR interaction lighting model(" + TextHelper.GenLinkText("https://github.com/jmarshall23/idtech4_pbr", "jmarshall23's idtech4_pbr") + ") in DOOM3/Quake4/Prey.",
+            "Add PBR interaction lighting model(" + TextHelper.GenLinkText("https://github.com/jmarshall23/idtech4_pbr", "jmarshall23's idtech4_pbr") + ")(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.",
             "Fix large shake of player view with OpenAL in DOOM3/Quake4/Prey.",
             "Add command history record manager in launcher.",
             "Add `/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a` to game data search path(exclude Quake1), add current game data path tips.",

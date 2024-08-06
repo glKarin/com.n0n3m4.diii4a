@@ -30,7 +30,7 @@
     <string name="input_your_mod_folder_name">游戏mod文件夹名称</string>
     <string name="gamelib">游戏运行库</string>
     <string name="multi_threading">多线程(渲染线程独立于游戏线程)</string>
-    <string name="light_model_cvar_harm_r_lightmodel">光照模型(harm_r_lightModel)</string>
+    <string name="light_model_cvar_harm_r_lightmodel">光照模型(harm_r_lightingModel)</string>
     <string name="phong">Phong</string>
     <string name="blinn_phong">Blinn-Phong</string>
     <string name="specular_exponent_cvar_harm_r_specularexponent">Phong镜面反射指数(harm_r_specularExponent):</string>
