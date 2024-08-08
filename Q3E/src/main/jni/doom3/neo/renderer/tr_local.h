@@ -1171,7 +1171,7 @@ void	GL_ClearStateDelta(void);
 void	GL_State(int stateVector);
 void	GL_TexEnv(int env);
 void	GL_Cull(int cullType);
-void    GL_CheckErrors(const char *name);
+bool    GL_CheckErrors(const char *name);
 void	GL_SelectTextureForce(int unit);
 
 const int GLS_SRCBLEND_ZERO						= 0x00000001;

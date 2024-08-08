@@ -462,7 +462,7 @@ void RB_SetProgramEnvironment(void)
 	parm[1] = backEnd.viewDef->renderView.vieworg[1];
 	parm[2] = backEnd.viewDef->renderView.vieworg[2];
 	parm[3] = 1.0;
-	GL_UniformMatrix4fv(offsetof(shaderProgram_t, eyeOrigin), parm);
+    GL_Uniform4fv(offsetof(shaderProgram_t, eyeOrigin), parm);
 }
 
 /*
@@ -472,8 +472,9 @@ RB_SetProgramEnvironmentSpace
 Sets variables related to the current space that can be used by all vertex programs
 ==================
 */
-void RB_SetProgramEnvironmentSpace(void)
+void RB_SetProgramEnvironmentSpace(const struct viewEntity_s *space)
 {
+#if 0
 	const struct viewEntity_s *space = backEnd.currentSpace;
 
 	// set eye position in local space
@@ -490,6 +491,11 @@ void RB_SetProgramEnvironmentSpace(void)
 	float	mat[16];
 	myGlMultMatrix(space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+#endif
+    idVec4 localViewOrigin;
+    R_GlobalPointToLocal(space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewOrigin.ToVec3());
+    localViewOrigin[3] = 1.0f;
+    GL_Uniform4fv(offsetof(shaderProgram_t, localViewOrigin), localViewOrigin.ToFloatPtr());
 }
 
 /*
@@ -857,10 +863,11 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		}
 		if(!uniformIsSet[texgen])
 		{
-/*			RB_SetProgramEnvironment();
-
-			RB_SetProgramEnvironmentSpace();
+/*			
+			RB_SetProgramEnvironment();
 */ //k2023 not used
+            RB_SetProgramEnvironmentSpace(surf->space);
+
 			GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
 			uniformIsSet[texgen] = true;
 		}

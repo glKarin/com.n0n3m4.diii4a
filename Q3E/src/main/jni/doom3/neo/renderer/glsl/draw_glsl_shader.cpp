@@ -416,7 +416,7 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("zfill", SHADER_ZFILL, &depthFillShader, ZFILL_VERT, ZFILL_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("zfillClip", SHADER_ZFILLCLIP, &depthFillClipShader, ZFILLCLIP_VERT, ZFILLCLIP_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("cubemap", SHADER_CUBEMAP, &cubemapShader, CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("reflectionCubemap", SHADER_REFLECTIONCUBEMAP, &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("reflectionCubemap", SHADER_REFLECTIONCUBEMAP, &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, REFLECTION_CUBEMAP_FRAG /* CUBEMAP_FRAG */, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("fog", SHADER_FOG, &fogShader, FOG_VERT, FOG_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("blendLight", SHADER_BLENDLIGHT, &blendLightShader, BLENDLIGHT_VERT, FOG_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("interactionPBR", SHADER_INTERACTIONPBR, &interactionPBRShader, INTERACTION_VERT, INTERACTION_FRAG, "_PBR", "_PBR"));
@@ -1549,6 +1549,7 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	EXPORT_SHADER_SOURCE(CUBEMAP_FRAG, "cubemap", "frag"); \
  \
 	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_VERT, "reflectionCubemap", "vert"); \
+	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_FRAG, "reflectionCubemap", "frag"); \
  \
 	EXPORT_SHADER_SOURCE(FOG_VERT, "fog", "vert"); \
 	EXPORT_SHADER_SOURCE(FOG_FRAG, "fog", "frag"); \
@@ -1559,6 +1560,7 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
  \
 	EXPORT_SHADER_SOURCE(TEXGEN_VERT, "texgen", "vert"); \
 	EXPORT_SHADER_SOURCE(TEXGEN_FRAG, "texgen", "frag"); \
+ \
 	EXPORT_SHADER_SOURCE(HEATHAZE_VERT, "heatHaze", "vert"); \
 	EXPORT_SHADER_SOURCE(HEATHAZE_FRAG, "heatHaze", "frag"); \
 	 \

@@ -2526,19 +2526,15 @@ int idRenderSystemLocal::GetScreenHeight(void) const
 	return glConfig.vidHeight;
 }
 
-void GL_CheckErrors(const char *name)
+bool GL_CheckErrors(const char *name)
 {
 	int		err;
 	char	s[64];
-	int		i;
+	int		i = 0;
 
 	// check for up to 10 errors pending
-	err = qglGetError();
-
-	if (err == GL_NO_ERROR) {
-		common->Printf("GL_CheckErrors for %s: NO_ERROR\n", name);
-		return;
-	}
+    while ((err = qglGetError()) != GL_NO_ERROR) {
+        i++;
 
 	switch (err) {
 		case GL_INVALID_ENUM:
@@ -2565,7 +2561,13 @@ void GL_CheckErrors(const char *name)
 			idStr::snPrintf(s, sizeof(s), "%x", err);
 			break;
 	}
-	common->Printf("GL_CheckErrors for %s: %s\n", name, s);
+        common->Printf("GL_CheckErrors(%d) for %s: %s\n", i, name, s);
+    }
+
+    if (i == 0) {
+        common->Printf("GL_CheckErrors for %s: NO_ERROR\n", name);
+    }
+    return i == 0;
 }
 
 #include "rb/Framebuffer.cpp"
