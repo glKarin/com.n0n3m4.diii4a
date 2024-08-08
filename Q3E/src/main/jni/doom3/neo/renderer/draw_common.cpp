@@ -462,7 +462,7 @@ void RB_SetProgramEnvironment(void)
 	parm[1] = backEnd.viewDef->renderView.vieworg[1];
 	parm[2] = backEnd.viewDef->renderView.vieworg[2];
 	parm[3] = 1.0;
-	GL_UniformMatrix4fv(offsetof(shaderProgram_t, eyeOrigin), parm);
+	GL_Uniform4fv(offsetof(shaderProgram_t, eyeOrigin), parm);
 }
 
 /*
