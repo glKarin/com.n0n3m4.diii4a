@@ -180,7 +180,7 @@ This may need to scan six cube map images
 GLenum idImage::SelectInternalFormat(const byte **dataPtrs, int numDataPtrs, int width, int height,
                                      textureDepth_t minimumDepth) const
 {
-	return GL_RGBA8;	// four bytes
+	return GL_RGBA;	// four bytes
 }
 
 /*
@@ -530,7 +530,7 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 #endif
 	{
 		char filename[MAX_IMAGE_NAME];
-		char*fptr=&filename[0];
+		char *fptr = &filename[0];
 		ImageProgramStringToCompressedFileName(imgName, filename);
         idStr glesCompressionName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", 0);
 		myglTexImage2D(glesCompressionName.c_str(), GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
@@ -575,8 +575,6 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 		} else
 #endif
 		{
-			char*fptr=&filename[0];
-			ImageProgramStringToCompressedFileName(imgName, filename);
             char filename[MAX_IMAGE_NAME];
             char *fptr = &filename[0];
             ImageProgramStringToCompressedFileName(imgName, filename);
