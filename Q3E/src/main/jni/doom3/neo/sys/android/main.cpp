@@ -696,7 +696,7 @@ static void Q3E_FreeArgs(void)
 }
 
 // idTech4 game main thread loop
-static void * doom3_main(void *data)
+static void * doom3_main(int argc, char **argv)
 {
 	attach_thread(); // attach current to JNI for call Android code
 
@@ -710,8 +710,8 @@ static void * doom3_main(void *data)
 	Posix_EarlyInit();
 	Sys_Printf("[Harmattan]: Enter idTech4 main thread -> %s\n", Sys_GetThreadName());
 
-	if (q3e_argc > 1) {
-		common->Init(q3e_argc-1, (const char **)&q3e_argv[1], NULL);
+	if (argc > 1) {
+		common->Init(argc-1, (const char **)&argv[1], NULL);
 	} else {
 		common->Init(0, NULL, NULL);
 	}
@@ -733,6 +733,11 @@ static void * doom3_main(void *data)
 	return 0;
 }
 
+static void * Q3E_MainLoop(void *data)
+{
+	return doom3_main(q3e_argc, q3e_argv);
+}
+
 // start game main thread from Android Surface thread
 static void Q3E_StartGameMainThread(void)
 {
@@ -747,7 +752,7 @@ static void Q3E_StartGameMainThread(void)
 		exit(1);
 	}
 
-	if (pthread_create((pthread_t *)&main_thread, &attr, doom3_main, NULL) != 0) {
+	if (pthread_create((pthread_t *)&main_thread, &attr, Q3E_MainLoop, NULL) != 0) {
 		Sys_Printf("[Harmattan]: ERROR: pthread_create idTech4 main thread failed\n");
 		exit(1);
 	}

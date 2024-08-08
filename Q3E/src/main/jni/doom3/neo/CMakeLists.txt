@@ -85,6 +85,12 @@ option(DEDICATED							"Build the dedicated server" 												OFF)
 option(ONATIVE								"Optimize for the host CPU" 												OFF)
 option(REPRODUCIBLE_BUILD 					"Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 
+# For dev: Quick build
+option(BUILD_D3								"Build DOOM 3"																ON)
+option(BUILD_Q4								"Build Quake 4"																ON)
+option(BUILD_PREY							"Build Prey"																ON)
+option(BUILD_MOD							"Build all mods"															ON)
+
 # Extras engine extensions
 if(ANDROID)
 	option(OPENSLES							"OpenSLES support"															ON)
@@ -101,12 +107,17 @@ option(STENCIL_SHADOW_IMPROVE				"Improve stencil shadow(translucent, soft(Only 
 option(EXTRAS_TOOLS							"Add extras commands" 														OFF)
 
 # DOOM3 cores
+if(BUILD_D3)
 option(CORE									"Build the core" 															ON)
 option(BASE									"Build the base game code" 													ON)
+
+option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" 								ON)
+endif()
+
+if(BUILD_MOD)
+# DOOM3 mods
 option(D3XP									"Build the d3xp game code" 													ON)
 
-# DOOM3 mods
-option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" 								ON)
 option(D3LE									"Build the d3le game code" 													ON)
 option(CDOOM								"Build the cdoom game code" 												ON)
 option(RIVENSIN								"Build the rivensin game code" 												ON)
@@ -116,18 +127,23 @@ option(SABOT								"Build the sabot game code" 												ON)
 option(HEXENEOC								"Build the hexeneoc game code" 												ON)
 option(FRAGGINGFREE							"Build the fraggingfree game code" 											ON)
 option(LIBRECOOP							"Build the librecoop game code" 											ON)
+endif()
 
 # Quake4
+if(BUILD_Q4)
 option(RAVEN								"Build the raven core" 														ON)
 option(RAVEN_BSE_FX							"OpenBSE with Fx in Raven Quake 4" 											ON)
 option(QUAKE4								"Build the quake4 game code" 												ON)
 option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod support" 								ON)
 option(Q4_MOD_BOTS							"Build quake4 bots mod support" 											ON)
+endif()
 
 # Prey 2006
+if(BUILD_PREY)
 option(HUMANHEAD							"Build the humanhead core" 													ON)
 option(PREY									"Build the prey game code" 													ON)
 option(PREY_MOD_FULL_BODY_AWARENESS			"Build prey full body awareness mod support" 								ON)
+endif()
 
 # Print env
 if(OPENSLES)
@@ -151,8 +167,10 @@ if(EXTRAS_TOOLS)
 	message(STATUS "Build extras tools support")
 endif()
 
+# ETC2 support: but using C++11, so build a static library
 add_subdirectory(renderer/etc/EtcLib)
 set(local_libs "static_EtcLib")
+
 # Using traditional C++98
 set(CMAKE_CXX_STANDARD "98")
 
@@ -1265,6 +1283,7 @@ if(PREY)
 	message(STATUS "Build prey")
 endif()
 
+message(STATUS "=================================")
 message(STATUS "C++ STL: ${CMAKE_ANDROID_STL_TYPE}")
 message(STATUS "arch ABI: ${CMAKE_ANDROID_ARCH_ABI}")
 message(STATUS "API level: ${CMAKE_SYSTEM_VERSION}")
@@ -1277,8 +1296,9 @@ message(STATUS "-l(static): ${local_libs}")
 message(STATUS "pointer size: ${CMAKE_SIZEOF_VOID_P}")
 message(STATUS "CORE_DEFINES: ${CORE_DEFINES}")
 message(STATUS "ldflags: ${ldflags}")
+message(STATUS "=================================")
 
-#message(FATAL_ERROR "STOP")
+# message(FATAL_ERROR "STOP") # For debug output
 
 if(CORE)
 	if(ANDROID)

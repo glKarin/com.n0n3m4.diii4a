@@ -856,7 +856,7 @@ If ref isn't specified, the full session UpdateScreen will be done.
 */
 void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref = NULL ) {
 	// include extra space for OpenGL padding to word boundaries
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 	byte *temp = ( byte * )R_StaticAlloc( glConfig.vidWidth * glConfig.vidHeight * 4 );
 #else
 	byte *temp = ( byte * )R_StaticAlloc( glConfig.vidWidth * glConfig.vidHeight * 3 );
@@ -896,7 +896,7 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 				qglReadBuffer( GL_FRONT );
 #endif
 				qglPixelStorei( GL_PACK_ALIGNMENT, 1 );	// otherwise small rows get padded to 32 bits
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 				qglReadPixels( 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, temp );
 #else
 				qglReadPixels( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, temp );
@@ -904,7 +904,7 @@ void R_ReadTiledPixels( int width, int height, byte *buffer, renderView_t *ref =
 			}
 
 			for ( int y = 0 ; y < h ; y++ ) {
-#ifdef __ANDROID__ //karin: RGBA
+#ifdef _GLES //karin: RGBA
 				memcpy( buffer + ( ( yo + y )* width + xo ) * 4, temp + y * oldWidth * 4, w * 4 );
 #else
                 memcpy( buffer + ( ( yo + y )* width + xo ) * 3, temp + y * oldWidth * 3, w * 3 );
@@ -970,7 +970,7 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 	takingScreenshot = true;
 
 	int	pix = width * height;
-#ifdef __ANDROID__
+#ifdef _GLES
 	byte *buffer = ( byte * )R_StaticAlloc( pix * 4 );
 #else
     byte *buffer = ( byte * )R_StaticAlloc( pix * 3 );
@@ -978,7 +978,7 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 
 	if ( blends <= 1 ) {
 		R_ReadTiledPixels( width, height, buffer, ref );
-#ifdef __ANDROID__
+#ifdef _GLES
         byte *buffer3 = ( byte * )R_StaticAlloc( pix * 3 );
         for ( int i = 0 ; i < pix ; i++ ) {
             buffer3[i * 3] = buffer[i * 4];
@@ -998,7 +998,7 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 		for ( int i = 0 ; i < blends ; i++ ) {
 			R_ReadTiledPixels( width, height, buffer, ref );
 
-#ifdef __ANDROID__
+#ifdef _GLES
 			for ( int j = 0 ; j < pix ; j++ ) {
 				shortBuffer[j * 3] += buffer[j * 4];
 				shortBuffer[j * 3 + 1] += buffer[j * 4 + 1];
@@ -1012,7 +1012,7 @@ void idRenderSystemLocal::TakeScreenshot( int width, int height, const char *fil
 		}
 
 		// divide back to bytes
-#ifdef __ANDROID__
+#ifdef _GLES
         byte *buffer3 = ( byte * )R_StaticAlloc( pix * 3 );
 		for ( int i = 0 ; i < pix * 3 ; i++ ) {
 			buffer3[i] = shortBuffer[i] / blends;

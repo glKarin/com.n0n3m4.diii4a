@@ -57,7 +57,7 @@ const char	*harm_gui_defaultFontArgs[]	= {
 	"r_strogg", 
 	"strogg", 
 	NULL };
-static idCVar harm_gui_defaultFont("harm_gui_defaultFont", harm_gui_defaultFontArgs[0], CVAR_ARCHIVE | CVAR_GUI, "[Harmattan]: Setup default GUI font. It will be available in next running.", harm_gui_defaultFontArgs, idCmdSystem::ArgCompletion_String<harm_gui_defaultFontArgs>);
+static idCVar harm_gui_defaultFont("harm_gui_defaultFont", harm_gui_defaultFontArgs[0], CVAR_ARCHIVE | CVAR_GUI, "Setup default GUI font. It will be available in next running.", harm_gui_defaultFontArgs, idCmdSystem::ArgCompletion_String<harm_gui_defaultFontArgs>);
 #endif
 int idDeviceContext::FindFont(const char *name)
 {

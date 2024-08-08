@@ -133,7 +133,7 @@ void StencilShadowStage::DrawSurfs( const viewDef_t *viewDef, const viewLight_t 
 }
 
 #define max(x, y) idMath::Fmax(x, y)
-#ifdef __ANDROID__ //karin: using glslprops/ for avoid override
+#ifdef _GLES //karin: using glslprops/ for avoid override
 #include "glslprogs/tdm_shadowstencilsoft_shared.glsl"
 #else
 #include "glprogs/tdm_shadowstencilsoft_shared.glsl"
@@ -206,7 +206,7 @@ void StencilShadowStage::FillStencilShadowMipmaps( const viewDef_t *viewDef, con
 		if ( newProps.softShadowQuality > 0 ) {
 			stencilShadowMipmap.Init(
 				TiledCustomMipmapStage::MM_STENCIL_SHADOW,
-#ifdef __ANDROID__ //karin: only GL_RGBA if texture
+#ifdef _GLES //karin: only GL_RGBA if texture
                 GL_RGBA,
 #else
                 GL_R8,

@@ -85,7 +85,7 @@ namespace {
 
 	void CreateSSAOColorFBO(FrameBuffer *fbo, idImageScratch *color) {
 		fbo->Init( frameBuffers->renderWidth, frameBuffers->renderHeight );
-#ifdef __ANDROID__ //karin: only GL_RGBA if texture
+#ifdef _GLES //karin: only GL_RGBA if texture
 		color->GenerateAttachment( frameBuffers->renderWidth, frameBuffers->renderHeight, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE );
 #else
         color->GenerateAttachment( frameBuffers->renderWidth, frameBuffers->renderHeight, GL_RGBA8, GL_LINEAR, GL_CLAMP_TO_EDGE );

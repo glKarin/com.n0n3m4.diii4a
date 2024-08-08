@@ -553,7 +553,11 @@ void idSoundEmitterLocal::CheckForCompletion(int current44kHzTime)
 
 						continue;
 					}
-				} else if ((chan->trigger44kHzTime + chan->leadinSample->LengthIn44kHzSamples() < current44kHzTime)) {
+				} else if ((chan->trigger44kHzTime + chan->leadinSample->LengthIn44kHzSamples() < current44kHzTime)
+#ifdef _OPENAL
+                    || ( state == AL_STOPPED ) //k: 2024
+#endif
+				) {
 					chan->Stop();
 
 					// free hardware resources

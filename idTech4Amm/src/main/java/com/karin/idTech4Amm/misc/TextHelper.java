@@ -327,6 +327,12 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2024-07-17", 53,
+                        "Fix GZDOOM sound.",
+                        "Update screen resolution settings on launcher.",
+                        "Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower), and using cvar `harm_image_useCompressionCache` enable caching on DOOM3-BFG."
+                ),
+
                 ChangeLog.Create("2024-07-11", 52,
                         "Add soft stencil shadow support(cvar `harm_r_stencilShadowSoft`) with OpenGLES3.1+ in DOOM3/Quake4/Prey(2006).",
                         "Optimize soft shadow shader with shadow mapping in DOOM3/Quake4/Prey(2006).",
@@ -404,7 +410,7 @@ public final class TextHelper
                         "In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).",
                         "Fix Setting's tab GUI in Prey2006.",
                         "Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).",
-                        "Support max FPS limit(cvar `harm_r_maxFps`).",
+                        "Support max FPS limit(cvar `r_maxFps`).",
                         "Support obj/dae static model, and fix png image load.",
                         "Add skip intro support.",
                         "Add simple CVar editor.",
@@ -612,7 +618,7 @@ public final class TextHelper
                              "Fix `Berserk`, `Grabber`, `Helltime` vision effect(First set cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` and `harm_g_skipHelltimeVision` to 0).",
                              "Fix screen capture image when quick save game or mission tips.",
                              "Fix machine gun's ammo panel.",
-                             "Add light model setting with `Phong` and `Blinn-Phong` when render interaction shader pass(string cvar `harm_r_lightModel`).",
+                             "Add light model setting with `Phong` and `Blinn-Phong` when render interaction shader pass(string cvar `harm_r_lightingModel`).",
                              "Add specular exponent setting in light model(float cvar `harm_r_specularExponent`).",
                              "Default using program internal OpenGL shader.",
                              "Reset extras virtual button size, and add Console(~) key.",

@@ -73,7 +73,7 @@ bool GLimp_CheckExtension( const char *name, int available ) {
 void GLimp_CheckRequiredFeatures( void ) {
 	common->Printf( "Checking required OpenGL features...\n" );
 	bool reqs = true;
-#if !defined(__ANDROID__) //karin: GLES3.2
+#if !defined(_GLES) //karin: GLES3.2
 	reqs = reqs && CHECK_FEATURE(GL_VERSION_3_3);
 	reqs = reqs && CHECK_FEATURE(GL_EXT_texture_compression_s3tc);
 #endif

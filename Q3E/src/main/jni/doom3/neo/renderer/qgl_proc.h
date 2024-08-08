@@ -185,6 +185,8 @@ QGLPROC(glDebugMessageControl, void, (GLenum source, GLenum type, GLenum severit
 // QGLPROC(glDebugMessageInsert, void, (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *buf))
 QGLPROC(glDebugMessageCallback, void, (GLDEBUGPROC callback, const void *userParam))
 QGLPROC(glGetDebugMessageLog, GLuint, (GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog))
+QGLPROC(glGetTexLevelParameteriv, void, (GLenum target, GLint level, GLenum pname, GLint * params))
+QGLPROC(glGetInternalformativ, void, (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params))
 #endif
 
 #undef QGLPROC

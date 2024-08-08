@@ -12,13 +12,13 @@ import java.util.Date;
  */
 public final class Constants
 {
-    public static final int CONST_UPDATE_RELEASE = 53;
-    public static final String CONST_RELEASE = "2024-07-17";
+    public static final int CONST_UPDATE_RELEASE = 55;
+    public static final String CONST_RELEASE = "2024-08-05";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
-    public static final String CONST_CODE = "Harmattan";
+    public static final String CONST_CODE = "Harmattan[DOOM3 20th Anniversary Edition]";
     public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
-    public static final String CONST_NAME = "DOOM III/Quake 4/Prey(2006)/DOOM3 BFG for Android(Harmattan Edition)";
+    public static final String CONST_NAME = "DOOM III/Quake 4/Prey(2006)/DOOM 3 BFG for Android(Harmattan Edition)";
 	public static final String CONST_MAIN_PAGE = "https://github.com/glKarin/com.n0n3m4.diii4a";
     public static final String CONST_TIEBA = "https://tieba.baidu.com/p/6825594793";
 	public static final String CONST_DEVELOPER = "https://github.com/glKarin";
@@ -30,9 +30,12 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Fix GZDOOM sound.",
-            "Update screen resolution settings on launcher.",
-            "Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower), and using cvar `harm_image_useCompressionCache` enable caching on DOOM3-BFG.",
+            "Add PBR interaction lighting model(" + TextHelper.GenLinkText("https://github.com/jmarshall23/idtech4_pbr", "jmarshall23's idtech4_pbr") + ")(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.",
+            "Fix large shake of player view with OpenAL in DOOM3/Quake4/Prey.",
+            "Add command history record manager in launcher.",
+            "Add `/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a` to game data search path(exclude Quake1), add current game data path tips.",
+            "Optimize ETC1 compression texture cache in DOOM3/Quake4/Prey, add ETC2 compression texture support(cvar r_useETC2) in OpenGLES3.0.",
+            "Add launcher theme setting.",
         };
 	};
 

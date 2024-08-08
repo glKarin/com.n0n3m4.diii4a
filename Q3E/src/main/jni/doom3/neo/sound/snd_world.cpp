@@ -2291,10 +2291,20 @@ float idSoundWorldLocal::FindAmplitude(idSoundEmitterLocal *sound, const int loc
 			}
 		} else {
 			int offset = (localTime - localTriggerTimes);	// offset in samples
+#if 0 //k: 2024 check NULL???
 			if ((!looping && !chan->leadinSample)||(looping && !chan->soundShader->entries[0]))
 			{
 			return 0.0;
 			}
+#else
+			if ((!looping && !chan->leadinSample)||(looping && !chan->soundShader->entries[0]))
+			{
+				// get actual sample data
+				chan->GatherChannelSamples(offset, AMPLITUDE_SAMPLES, sourceBuffer);
+			}
+			else
+#endif
+			{
 			int size = (looping ? chan->soundShader->entries[0]->LengthIn44kHzSamples() : chan->leadinSample->LengthIn44kHzSamples());
 			short *amplitudeData = (short *)(looping ? chan->soundShader->entries[0]->amplitudeData : chan->leadinSample->amplitudeData);
 			if (amplitudeData) {
@@ -2310,6 +2320,7 @@ float idSoundWorldLocal::FindAmplitude(idSoundEmitterLocal *sound, const int loc
 			} else {
 				// get actual sample data
 				chan->GatherChannelSamples(offset, AMPLITUDE_SAMPLES, sourceBuffer);
+			}
 			}
 		}
 

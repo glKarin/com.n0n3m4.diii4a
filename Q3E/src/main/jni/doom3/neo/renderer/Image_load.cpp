@@ -575,9 +575,11 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 		} else
 #endif
 		{
-			char filename[MAX_IMAGE_NAME];
 			char*fptr=&filename[0];
 			ImageProgramStringToCompressedFileName(imgName, filename);
+            char filename[MAX_IMAGE_NAME];
+            char *fptr = &filename[0];
+            ImageProgramStringToCompressedFileName(imgName, filename);
             idStr glesCompressionMipmapName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", miplevel);
             myglTexImage2D(glesCompressionMipmapName.c_str(), GL_TEXTURE_2D, miplevel, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
 		}
@@ -1502,15 +1504,15 @@ int idImage::GenerateImageETC(int width, int height,
 	int	scaled_width, scaled_height;
 
 	{
-	char filename[MAX_IMAGE_NAME];
-	char*fptr=&filename[0];
+		char filename[MAX_IMAGE_NAME];
+		char *fptr = &filename[0];
 		int	sw = MakePowerOfTwo(width);
 		int sh = MakePowerOfTwo(height);
 		if (sw != width || sh != height) {
 			common->Error("R_CreateImage: not a power of 2 image");
 		}
 		GetDownsize(sw, sh);
-	ImageProgramStringToCompressedFileName(imgName, filename);
+		ImageProgramStringToCompressedFileName(imgName, filename);
 		idStr glesCompressionName = R_GenerateCompressionFileName(fptr, sw, sh, "etc", 0);
 		if (!etcavail(glesCompressionName.c_str()))
 			return 0;
@@ -1586,11 +1588,11 @@ int idImage::GenerateImageETC(int width, int height,
 	// upload the main image level
 	Bind();
 
-	int failed=0;
+	int failed = 0;
 
 	{
 		char filename[MAX_IMAGE_NAME];
-		char*fptr=&filename[0];
+		char *fptr = &filename[0];
 		ImageProgramStringToCompressedFileName(imgName, filename);
         idStr glesCompressionName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", 0);
 		failed += uploadetc(glesCompressionName.c_str(), GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0,
@@ -1621,7 +1623,7 @@ int idImage::GenerateImageETC(int width, int height,
 		miplevel++;
 		{
 			char filename[MAX_IMAGE_NAME];
-			char*fptr=&filename[0];
+			char *fptr = &filename[0];
 			ImageProgramStringToCompressedFileName(imgName, filename);
 			idStr glesCompressionName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", miplevel);
 			failed += uploadetc(glesCompressionName.c_str(), GL_TEXTURE_2D, miplevel, internalFormat, scaled_width,
@@ -1634,7 +1636,7 @@ int idImage::GenerateImageETC(int width, int height,
 
 	SetImageFilterAndRepeat();
 	GL_CheckErrors();
-	return (failed==0);
+	return (failed == 0);
 }
 
 #ifdef _MULTITHREAD
@@ -1772,7 +1774,7 @@ void	idImage::ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd)
 		// imageHash = MD4_BlockChecksum(pic, width * height * 4);
 		imageHash = imgName.FileNameHash();
 		if (!GenerateImageETC(width,height,filter,allowDownSize,repeat,depth))
-		GenerateImage(pic, width, height, filter, allowDownSize, repeat, depth);
+			GenerateImage(pic, width, height, filter, allowDownSize, repeat, depth);
 		timestamp = timestamp;
 		precompressedFile = false;
 
@@ -2059,6 +2061,8 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 		uploadHeight = potHeight;
 
 		if (potWidth == imageWidth && potHeight == imageHeight) {
+
+			//karin: TODO: In Intel graphics card, cause GL_INVALID_OPERATION if in OpenGLES3.0
 			qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, imageWidth, imageHeight, 0);
 		} else {
 			byte	*junk;
@@ -2738,7 +2742,6 @@ void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm,
 void idImage::GenerateShadowArray( int width, int height, int numSides, textureFilter_t filterParm, textureRepeat_t repeatParm, int component, bool compare )
 {
 	int			scaled_width, scaled_height;
-	int			i;
 
 	PurgeImage();
 
@@ -2832,7 +2835,6 @@ void idImage::GenerateShadowArray( int width, int height, int numSides, textureF
 void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSizeParm, textureFilter_t filterParm, textureRepeat_t repeatParm, int component, int stencilComponent, bool compare )
 {
 	int			scaled_width, scaled_height;
-	int			i;
 
 	PurgeImage();
 

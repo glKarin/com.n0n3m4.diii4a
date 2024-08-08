@@ -12,8 +12,8 @@ import android.preference.PreferenceManager;
 
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.Utility;
-import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.karin.idTech4Amm.sys.Theme;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -72,6 +72,7 @@ public class OnScreenButtonConfigActivity extends Activity
         // Map<Integer, String> m_typeMap = BuildKeyValueMapFromResource(R.array.onscreen_type_values, R.array.onscreen_type_labels);
         m_keyMap = BuildKeyValueMapFromResource(R.array.key_map_codes, R.array.key_map_names);
 
+        Theme.SetTheme(this, false);
         setContentView(R.layout.onscreen_button_config_page);
         V = new ViewHolder();
         m_adapter = new OnScreenButtonAdapter(R.layout.onscreen_button_config_list_delegate, m_list);
@@ -231,7 +232,9 @@ public class OnScreenButtonConfigActivity extends Activity
             {
                 try
                 {
-                    this.texture = BitmapFactory.decodeStream(getAssets().open(texture));
+                    String[] split = texture.split(";");
+                    String texturePath = split[0];
+                    this.texture = BitmapFactory.decodeStream(getAssets().open(texturePath));
                 }
                 catch(Exception e)
                 {

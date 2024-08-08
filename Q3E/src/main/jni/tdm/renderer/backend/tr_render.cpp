@@ -182,7 +182,7 @@ RB_EnterWeaponDepthHack
 ===============
 */
 void RB_EnterWeaponDepthHack() {
-#ifdef __ANDROID__ //karin: GLES
+#ifdef _GLES //karin: GLES
 	qglDepthRangef( 0.0f, 0.5f );
 #else
 	qglDepthRange( 0.0f, 0.5f );
@@ -210,7 +210,7 @@ RB_EnterModelDepthHack
 void RB_EnterModelDepthHack( float depth ) {
 	// FIXME: this is completely broken, is it even still needed?
 	
-#ifdef __ANDROID__ //karin: GLES
+#ifdef _GLES //karin: GLES
 	qglDepthRangef( 0.0f, 1.0f );
 #else
 	qglDepthRange( 0.0f, 1.0f );
@@ -235,7 +235,7 @@ RB_LeaveDepthHack
 ===============
 */
 void RB_LeaveDepthHack() {
-#ifdef __ANDROID__ //karin: GLES
+#ifdef _GLES //karin: GLES
 	qglDepthRangef( 0.0f, 1.0f );
 #else
 	qglDepthRange( 0.0f, 1.0f );

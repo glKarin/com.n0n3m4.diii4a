@@ -19,7 +19,7 @@ import java.util.List;
 public final class ExtractPatchResourceFunc extends GameLauncherFunc
 {
     private final String[] m_patchResources = {
-            "glslprogs.pk4",
+            // "glslprogs.pk4",
             "q4base/sabot_a9.pk4",
             "rivensin/play_original_doom3_level.pk4",
     };
@@ -49,7 +49,7 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
         m_path = data.getString("path");
         // D3-format fonts don't need on longer
         final String[] Names = {
-                Q3ELang.tr(m_gameLauncher, R.string.opengles_shader),
+                // Q3ELang.tr(m_gameLauncher, R.string.opengles_shader),
                 Q3ELang.tr(m_gameLauncher, R.string.bot_q3_bot_support_in_mp_game),
                 Q3ELang.tr(m_gameLauncher, R.string.rivensin_play_original_doom3_level),
         };

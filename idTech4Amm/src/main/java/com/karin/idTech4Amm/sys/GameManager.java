@@ -159,6 +159,11 @@ public final class GameManager
         return null;
     }
 
+    public List<GameProp> GetGame(String game)
+    {
+        return GameProps.get(game);
+    }
+
     public static int GetGameIcon()
     {
         if (Q3EUtils.q3ei.isPrey)
@@ -205,5 +210,29 @@ public final class GameManager
             return R.color.theme_gzdoom_main_color;
         else
             return R.color.theme_doom3_main_color;
+    }
+
+    public static int GetGameNameTs(String name)
+    {
+        if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+            return R.string.prey_2006;
+        else if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+            return R.string.quake_4;
+        else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+            return R.string.quake_2;
+        else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+            return R.string.quake_3;
+        else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+            return R.string.rtcw;
+        else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+            return R.string.tdm;
+        else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+            return R.string.quake_1;
+        else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+            return R.string.doom_3_bfg;
+        else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+            return R.string.doom;
+        else
+            return R.string.doom_3;
     }
 }

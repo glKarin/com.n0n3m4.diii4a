@@ -1,4 +1,5 @@
 package com.karin.idTech4Amm.ui;
+
 import android.content.Context;
 import android.os.Handler;
 import android.preference.PreferenceFragment;
@@ -9,9 +10,13 @@ import android.preference.Preference;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.misc.TextHelper;
+import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.karin.idTech4Amm.sys.Theme;
+import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
+
 import java.util.Set;
 
 import android.view.View;
@@ -36,6 +41,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         findPreference(Q3EPreference.pref_harm_function_key_toolbar_y).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.LANG).setOnPreferenceChangeListener(this);
         findPreference(Q3EPreference.GAME_STANDALONE_DIRECTORY).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.THEME).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -45,20 +51,15 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
         Context context = ContextUtility.GetContext(this);
         if("standalone_game_data_directories".equals(key))
         {
-            final String endl = TextHelper.GetDialogMessageEndl();
             StringBuilder sb = new StringBuilder();
-            sb
-                    .append(Q3ELang.tr(context, R.string.doom_3)).append(": doom3").append(endl)
-                    .append(Q3ELang.tr(context, R.string.quake_4)).append(": quake4").append(endl)
-                    .append(Q3ELang.tr(context, R.string.prey_2006)).append(": prey").append(endl)
-                    .append(Q3ELang.tr(context, R.string.rtcw_base)).append(": rtcw").append(endl)
-                    .append(Q3ELang.tr(context, R.string.quake_3)).append(": quake3").append(endl)
-                    .append(Q3ELang.tr(context, R.string.quake_2)).append(": quake2").append(endl)
-                    .append(Q3ELang.tr(context, R.string.quake_1)).append(": quake1").append(endl)
-                    .append(Q3ELang.tr(context, R.string.d3bfg_base)).append(": doom3bfg (always)").append(endl)
-                    .append(Q3ELang.tr(context, R.string.tdm_base)).append(": darkmod (always)").append(endl)
-                    .append(Q3ELang.tr(context, R.string.doom)).append(": gzdoom (always)")
-            ;
+            final String endl = TextHelper.GetDialogMessageEndl();
+            for (String game : GameManager.Games)
+            {
+                String gameName = Q3ELang.tr(context, GameManager.GetGameNameTs(game));
+                String path = Q3EInterface.GetGameStandaloneDirectory(game);
+                String pathText = TextHelper.GenLinkText("file://" + path, path);
+                sb.append(gameName).append(": ").append(pathText).append(endl);
+            }
             ContextUtility.OpenMessageDialog(context, Q3ELang.tr(context, R.string.game_datas_standalone_directories), TextHelper.GetDialogMessage(sb.toString()));
         }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -118,6 +119,18 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        ContextUtility.RestartApp(LauncherSettingPreference.this.getActivity());
+                    }
+                }, 1000);
+                return true;
+            }
+            case Q3EPreference.THEME:
+            {
+                Toast.makeText(context, R.string.app_is_rebooting, Toast.LENGTH_SHORT).show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Theme.Reset(null);
                         ContextUtility.RestartApp(LauncherSettingPreference.this.getActivity());
                     }
                 }, 1000);

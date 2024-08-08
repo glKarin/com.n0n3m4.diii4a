@@ -25,7 +25,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "framework/LoadStack.h"
 #include "tests/testing.h"
 
-#ifdef __ANDROID__ //karin: debug glTexImage2D
+#ifdef _GLES //karin: debug glTexImage2D
 #if 0
 #define myqglTexImage2D(a, b, c, d, e, f, g, h, i) \
 {                                             \
@@ -74,7 +74,7 @@ This may need to scan six cube map images
 ===============
 */
 GLenum idImageAsset::SelectInternalFormat( byte const* const* dataPtrs, int numDataPtrs, int width, int height, textureDepth_t minimumDepth, GLint const* *swizzleMask ) {
-#ifdef __ANDROID__ //karin: only GL_RGBA
+#ifdef _GLES //karin: only GL_RGBA
     return GL_RGBA;
 #else
 	int			i, c;
@@ -252,11 +252,11 @@ void idImage::SetImageFilterAndRepeat() const {
 			qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 			break;
 		case TR_CLAMP_TO_ZERO_ALPHA:
-#if !defined(__ANDROID__) //karin: only GL_CLAMP_TO_EDGE
+#if !defined(_GLES) //karin: only GL_CLAMP_TO_EDGE
 			qglTexParameteriv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, trCtZA );
 #endif
 		case TR_CLAMP_TO_ZERO:
-#if !defined(__ANDROID__) //karin: only GL_CLAMP_TO_EDGE
+#if !defined(_GLES) //karin: only GL_CLAMP_TO_EDGE
 			qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 			qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 			break;
@@ -559,7 +559,7 @@ void idImageScratch::GenerateAttachment( int width, int height, GLenum format, G
 		dataFormat = GL_RG;
 		break;
 	case GL_RGB: case GL_RGB8: case GL_RGB16: case GL_RGB16F: case GL_RGB32F:
-#ifdef __ANDROID__ //karin: only GL_RGBA
+#ifdef _GLES //karin: only GL_RGBA
 case GL_RGBA: case GL_RGBA8:
             dataFormat = GL_RGBA;
             dataType = GL_UNSIGNED_BYTE;
@@ -1545,7 +1545,7 @@ void idImageScratch::UploadScratch( const byte *data, int cols, int rows ) {
 
 			// upload the base level
 			for ( i = 0 ; i < 6 ; i++ ) {
-#ifdef __ANDROID__ //karin: only GL_RGBA
+#ifdef _GLES //karin: only GL_RGBA
 				qglTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, cols, rows, 0,
 				               GL_RGBA, GL_UNSIGNED_BYTE, data + cols * rows * 4 * i );
 #else
@@ -1576,7 +1576,7 @@ void idImageScratch::UploadScratch( const byte *data, int cols, int rows ) {
 
 		if ( texnum == idImage::TEXTURE_NOT_LOADED ) {
 			// load for first data upload
-#ifdef __ANDROID__ //karin: only GL_RGBA
+#ifdef _GLES //karin: only GL_RGBA
 			GenerateAttachment( rows, cols, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE );
 #else
             GenerateAttachment( rows, cols, GL_RGBA8, GL_LINEAR, GL_CLAMP_TO_EDGE );
@@ -1588,7 +1588,7 @@ void idImageScratch::UploadScratch( const byte *data, int cols, int rows ) {
 		if ( cols != uploadWidth || rows != uploadHeight ) {
 			uploadWidth = cols;
 			uploadHeight = rows;
-#ifdef __ANDROID__ //karin: only GL_RGBA
+#ifdef _GLES //karin: only GL_RGBA
 			qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 #else
             qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );

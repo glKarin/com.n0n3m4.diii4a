@@ -31,11 +31,10 @@
     <string name="input_your_mod_folder_name">Имя папки вашего мода</string>
     <string name="gamelib">Библиотека игры</string>
     <string name="multi_threading">Многопоточность</string>
-    <string name="light_model_cvar_harm_r_lightmodel">Выбрать модель освещения(harm_r_lightModel)</string>
+    <string name="light_model_cvar_harm_r_lightmodel">Выбрать модель освещения(harm_r_lightingModel)</string>
     <string name="phong">Phong</string>
     <string name="blinn_phong">Blinn-Phong</string>
-    <string name="specular_exponent_cvar_harm_r_specularexponent">Зеркальность(harm_r_specularExponent):</string>
-    <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности света(по умолчанию 4.0)</string>
+    <string name="specular_exponent_in_interaction_light_model_default_is_4_0">Показатель зеркальности света</string>
     <string name="sound">Выбор звука(s_driver)</string>
     <string name="load_quicksave_when_start_game">Загружать автосохранение при запуске игры</string>
     <string name="edit_autoexec_cfg">Редактировать autoexec.cfg</string>
@@ -252,7 +251,7 @@
     <string name="extract_source">Извлечь ресурсы</string>
     <string name="tips">Советы</string>
     <string name="license">Лицензия</string>
-    <string name="maximum_fps_limit_0_unlimited">Максимальный FPS(0 = неограничен)(harm_r_maxFps)</string>
+    <string name="maximum_fps_limit_0_unlimited">Максимальный FPS(0 = неограничен)(r_maxFps)</string>
     <string name="limit_maximum_fps_default_is_0">Ограничить максимальный FPS (0 = неограничен)</string>
     <string name="edit_cvar">Редактор CVar</string>
     <string name="cvar_editor">CVar редактор</string>
@@ -336,5 +335,28 @@
     <string name="_scale_by_screen_area">Масштабировать по площади экрана</string>
     <string name="freedoom1_base">FreeDOOM 1</string>
     <string name="freedoom2_base">FreeDOOM 2</string>
+    <string name="setup_launcher_theme">Настройка темы лаунчера</string>
+    <string name="command_record">Запись команд</string>
+    <string name="choose_command_record">Выбрать запись команд</string>
+    <string name="choose">Выбрать</string>
+    <string name="must_choose_a_command">Необходимо выбрать команду</string>
+    <string name="empty_content">Пустой контэнт</string>
+    <string name="edit_command_record">Редактировать запись команд</string>
+    <string name="command">Команды</string>
+    <string name="command_exists">Команды существуют</string>
+    <string name="add_command_record">Добавить запись команд</string>
+    <string name="pbr">PBR</string>
+    <string name="specular_exponent_cvar_harm_r_specularexponent">Показатель зеркальности Phong(harm_r_specularExponent):</string>
+    <string name="use_etc2_compression">Использовать ETC2 сжатие</string>
+    <string name="blinnphong_specular_exponent_cvar_harm_r_specularexponentblinnphong">Показатель зеркальности Blinn-Phong(harm_r_specularExponentBlinnphong):</string>
+    <string name="blinnphong_specular_exponent_cvar_harm_r_specularexponentpbr">Показатель зеркальности PBR(harm_r_specularExponentPBR):</string>
+    <string name="blinnphong_specular_exponent">Показатель зеркальности Blinn-Phong</string>
+    <string name="pbr_specular_exponent">Показатель зеркальности PBR</string>
+    <string name="lighting">Освещение</string>
+    <string name="shadow">Тени</string>
+    <string name="image">Изображение</string>
+    <string name="current_game_data_path">Текущий путь к данным игры</string>
+    <string name="render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces">Render perforated material shadow(r_forceShadowMapsOnAlphaTestedSurfaces)</string>
+    <string name="stencil_shadow">Stencil shadow</string>
 
 </resources>

@@ -1,7 +1,10 @@
 package com.karin.idTech4Amm.sys;
 
+import android.content.Context;
+
 import com.karin.idTech4Amm.R;
 import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3ELang;
 
 // game config
 // config this can change launcher's game mod list.
@@ -73,5 +76,15 @@ public enum Game
         this.fs_game_base = fs_game_base;
         this.is_mod = is_mod;
         this.name = name;
+    }
+
+    public String GetName(Context context)
+    {
+        if(name instanceof Integer)
+            return Q3ELang.tr(context, (Integer)name);
+        else if(name instanceof String)
+            return (String)name;
+        else
+            return "";
     }
 }

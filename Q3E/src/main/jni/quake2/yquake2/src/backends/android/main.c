@@ -46,7 +46,7 @@ qboolean IsInitialized = false;
 
 extern void Qcommon_Mainloop(void);
 
-static void * game_main(void *data);
+static void * game_main(int argc, char **argv);
 
 #include "../android/sys_android.c"
 
@@ -55,8 +55,8 @@ void GLimp_CheckGLInitialized(void)
 	Q3E_CheckNativeWindowChanged();
 }
 
-// quake2 game main thread loop
-void * game_main(void *data)
+// Quake2 game main thread loop
+void * game_main(int argc, char **argv)
 {
 	attach_thread(); // attach current to JNI for call Android code
 
@@ -71,32 +71,32 @@ void * game_main(void *data)
 
 	// Implement command line options that the rather
 	// crappy argument parser can't parse.
-	for (int i = 0; i < q3e_argc; i++)
+	for (int i = 0; i < argc; i++)
 	{
 		// Are we portable?
-		if (strcmp(q3e_argv[i], "-portable") == 0)
+		if (strcmp(argv[i], "-portable") == 0)
 		{
 			is_portable = true;
 		}
 
 		// Inject a custom data dir.
-		if (strcmp(q3e_argv[i], "-datadir") == 0)
+		if (strcmp(argv[i], "-datadir") == 0)
 		{
 			// Mkay, did the user give us an argument?
-			if (i != (q3e_argc - 1))
+			if (i != (argc - 1))
 			{
 				// Check if it exists.
 				struct stat sb;
 
-				if (stat(q3e_argv[i + 1], &sb) == 0)
+				if (stat(argv[i + 1], &sb) == 0)
 				{
 					if (!S_ISDIR(sb.st_mode))
 					{
-						printf("-datadir %s is not a directory\n", q3e_argv[i + 1]);
+						printf("-datadir %s is not a directory\n", argv[i + 1]);
 						return (void *)(intptr_t)1;
 					}
 
-					if(realpath(q3e_argv[i + 1], datadir) == NULL)
+					if(realpath(argv[i + 1], datadir) == NULL)
 					{
 						printf("realpath(datadir) failed: %s\n", strerror(errno));
 						datadir[0] = '\0';
@@ -104,7 +104,7 @@ void * game_main(void *data)
 				}
 				else
 				{
-					printf("-datadir %s could not be found\n", q3e_argv[i + 1]);
+					printf("-datadir %s could not be found\n", argv[i + 1]);
 					return (void *)(intptr_t)1;
 				}
 			}
@@ -116,12 +116,12 @@ void * game_main(void *data)
 		}
 
 		// Inject a custom config dir.
-		if (strcmp(q3e_argv[i], "-cfgdir") == 0)
+		if (strcmp(argv[i], "-cfgdir") == 0)
 		{
 			// We need an argument.
-			if (i != (q3e_argc - 1))
+			if (i != (argc - 1))
 			{
-				Q_strlcpy(cfgdir, q3e_argv[i + 1], sizeof(cfgdir));
+				Q_strlcpy(cfgdir, argv[i + 1], sizeof(cfgdir));
 			}
 			else
 			{
@@ -151,7 +151,7 @@ void * game_main(void *data)
 
 	// Initialize the game.
 	// Never returns.
-	Qcommon_Init(q3e_argc, q3e_argv);
+	Qcommon_Init(argc, argv);
 
 	Q3E_FreeArgs();
 
@@ -160,7 +160,7 @@ void * game_main(void *data)
 	Q3E_End();
 	main_thread = 0;
 	IsInitialized = false;
-	Com_Printf("[Harmattan]: Leave quake2 main thread.\n");
+	Com_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
 	return 0;
 }
 

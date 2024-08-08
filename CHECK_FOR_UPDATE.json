@@ -1,7 +1,7 @@
 {
-    "release":53,
-    "update":"2024-07-17",
-    "version":"1.1.0harmattan53",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan53/idTech4A++_1.1.0harmattan53.apk",
-    "changes":"  * Fix GZDOOM sound.\n  * Update screen resolution settings on launcher.\n  * Add compression textures support with cvar `harm_image_useCompression` for low memory device(e.g. 32bits device, but load slower), and using cvar `harm_image_useCompressionCache` enable caching on DOOM3-BFG."
+    "release":55,
+    "update":"2024-08-05",
+    "version":"1.1.0harmattan55",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan55/idTech4A++_1.1.0harmattan55.apk",
+    "changes":"  * Add PBR interaction lighting model(jmarshall23's idtech4_pbr)(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.\n  * Fix large shake of player view with OpenAL in DOOM3/Quake4/Prey.\n  * Add command history record manager in launcher.\n  * Add `/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a` to game data search path(exclude Quake1), add current game data path tips.\n  * Optimize ETC1 compression texture cache in DOOM3/Quake4/Prey, add ETC2 compression texture support(cvar r_useETC2) in OpenGLES3.0.\n  * Add launcher theme setting."
 }

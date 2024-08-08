@@ -850,4 +850,11 @@ public class Q3EUtils
         }
         return new int[]{width, height};
     }
+
+    public static String GetAppInternalSearchPath(Context context, String path)
+    {
+        if(null == path)
+            path = "";
+        return Q3EUtils.GetAppStoragePath(context, "/diii4a" + path);
+    }
 }

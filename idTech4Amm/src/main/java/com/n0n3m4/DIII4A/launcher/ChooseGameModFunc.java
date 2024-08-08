@@ -161,7 +161,23 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 blackList.remove(Q3EGlobals.GAME_BASE_DOOM3);
         }
 
-        for (FileBrowser.FileModel fileModel : fileBrowser.FileList())
+        String gameHomePath = Q3EUtils.q3ei.GetGameHomeDirectoryPath();
+        if(null != gameHomePath)
+        {
+            int i = gameHomePath.indexOf("/");
+            if(i > 0)
+                blackList.add(gameHomePath.substring(0, i));
+            else
+                blackList.add(gameHomePath);
+        }
+
+        List<FileBrowser.FileModel> fileModels;
+        if(UsingFile)
+            fileModels = fileBrowser.ListAllFiles();
+        else
+            fileModels = fileBrowser.FileList();
+
+        for (FileBrowser.FileModel fileModel : fileModels)
         {
             String name = "";
             if(blackList.contains(fileModel.name))

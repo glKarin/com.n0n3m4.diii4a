@@ -48,7 +48,7 @@ idCVar idImageManager::image_downSize( "image_downSize", "0", CVAR_RENDERER | CV
 idCVar idImageManager::image_forceDownSize( "image_forceDownSize", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "" );
 idCVar idImageManager::image_colorMipLevels( "image_colorMipLevels", "0", CVAR_RENDERER | CVAR_BOOL, "development aid to see texture mip usage" );
 idCVar idImageManager::image_preload( "image_preload", "1", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "if 0, dynamically load all images" );
-#ifdef __ANDROID__
+#ifdef _GLES
 idCVar idImageManager::image_useCompression( "image_useCompression", "0", CVAR_RENDERER | CVAR_INIT | CVAR_BOOL | CVAR_ROM, "1 = load compressed (DDS) images, 0 = force everything to high quality. 0 does not work for TDM as all our textures are DDS.(Disabled on Android, always using GL_RGBA non-compression)" );
 idCVar idImageManager::image_useNormalCompression( "image_useNormalCompression", "0", CVAR_RENDERER | CVAR_INIT | CVAR_BOOL | CVAR_ROM, "use compression for normal maps if available, 0 = no, 1 = GL_COMPRESSED_RG_RGTC2(Disabled on Android, always using GL_RGBA non-compression)" );
 idCVar idImageManager::image_usePrecompressedTextures( "image_usePrecompressedTextures", "0", CVAR_RENDERER | CVAR_INIT | CVAR_BOOL | CVAR_ROM, "Use .dds files if present.(Disabled on Android, always using GL_RGBA non-compression)" );

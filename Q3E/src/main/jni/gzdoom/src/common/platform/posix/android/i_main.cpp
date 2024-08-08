@@ -60,7 +60,7 @@
 
 extern "C" int cc_install_handlers(int, char**, int, int*, const char*, int(*)(char*, char*));
 
-static void * game_main(void *data);
+static void * game_main(int argc, char **argv);
 
 #include "sys_android.inc"
 
@@ -153,7 +153,8 @@ void I_DetectOS()
 void I_StartupJoysticks();
 extern void ZMusic_SetDLLPath(const char *path);
 
-void * game_main(void *data)
+// GZDOOM game main thread loop
+void * game_main(int argc, char **argv)
 {
 	attach_thread(); // attach current to JNI for call Android code
 	Q3E_Start();
@@ -161,7 +162,7 @@ void * game_main(void *data)
 
 	{
 		int s[4] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS };
-		cc_install_handlers(q3e_argc, q3e_argv, 4, s, GAMENAMELOWERCASE "-crash.log", GetCrashInfo);
+		cc_install_handlers(argc, argv, 4, s, GAMENAMELOWERCASE "-crash.log", GetCrashInfo);
 	}
 
 	printf(GAMENAME" %s - %s - SDL version\nCompiled on %s\n",
@@ -177,15 +178,15 @@ void * game_main(void *data)
 
 	printf("\n");
 
-	Args = new FArgs(q3e_argc, q3e_argv);
+	Args = new FArgs(argc, argv);
 
 #define PROGDIR Sys_GameDataDefaultPath()
 #ifdef PROGDIR
 	progdir = PROGDIR;
 #else
 	char program[PATH_MAX];
-	if (realpath (q3e_argv[0], program) == NULL)
-		strcpy (program, q3e_argv[0]);
+	if (realpath (argv[0], program) == NULL)
+		strcpy (program, argv[0]);
 	char *slash = strrchr (program, '/');
 	if (slash != NULL)
 	{
@@ -205,7 +206,7 @@ void * game_main(void *data)
 	//common->Quit();
 	Q3E_End();
 	main_thread = 0;
-	printf("[Harmattan]: Leave doom3 main thread.\n");
+	printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
 
 	return (void *)(intptr_t)result;
 }

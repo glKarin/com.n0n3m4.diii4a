@@ -21,17 +21,25 @@ public final class KGLBitmapTexture
         final float radius = (float)width / 2.0f;
         final float internalsize = radius - ringWidth;
 
-        Bitmap bmp = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmp);
-        Paint p = new Paint();
-        p.setAntiAlias(true);
-        p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
-        c.drawARGB(0, 0, 0, 0);
-        c.drawCircle(radius, radius, radius, p);
-        p.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
-        c.drawCircle(radius, radius, internalsize, p);
+        try
+        {
+            Bitmap bmp = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmp);
+            Paint p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
+            c.drawARGB(0, 0, 0, 0);
+            c.drawCircle(radius, radius, radius, p);
+            p.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
+            c.drawCircle(radius, radius, internalsize, p);
 
-        return Q3EGL.loadGLTexture(gl, bmp);
+            return Q3EGL.loadGLTexture(gl, bmp);
+        }
+        catch (OutOfMemoryError e)
+        {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     public static int GenCircleTexture(GL10 gl, int width, int[] rgba)
@@ -41,15 +49,23 @@ public final class KGLBitmapTexture
 
         final float radius = (float)width / 2.0f;
 
-        Bitmap bmp = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmp);
-        Paint p = new Paint();
-        p.setAntiAlias(true);
-        p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
-        c.drawARGB(0, 0, 0, 0);
-        c.drawCircle(radius, radius, radius, p);
+        try
+        {
+            Bitmap bmp = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmp);
+            Paint p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
+            c.drawARGB(0, 0, 0, 0);
+            c.drawCircle(radius, radius, radius, p);
 
-        return Q3EGL.loadGLTexture(gl, bmp);
+            return Q3EGL.loadGLTexture(gl, bmp);
+        }
+        catch (OutOfMemoryError e)
+        {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     public static int GenRectBorderTexture(GL10 gl, int width, int height, float borderWidth, int[] rgba)
@@ -60,17 +76,26 @@ public final class KGLBitmapTexture
         if(height <= 0)
             height = width;
         Rect rect = new Rect(0, 0, width, height);
-        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmp);
-        Paint p = new Paint();
-        p.setAntiAlias(true);
-        p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
-        c.drawARGB(0, 0, 0, 0);
-        c.drawRect(rect, p);
-        p.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
-        RectF rectf = new RectF(borderWidth, borderWidth, width - borderWidth, height - borderWidth);
-        c.drawRect(rectf, p);
 
-        return Q3EGL.loadGLTexture(gl, bmp);
+        try
+        {
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmp);
+            Paint p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
+            c.drawARGB(0, 0, 0, 0);
+            c.drawRect(rect, p);
+            p.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
+            RectF rectf = new RectF(borderWidth, borderWidth, width - borderWidth, height - borderWidth);
+            c.drawRect(rectf, p);
+
+            return Q3EGL.loadGLTexture(gl, bmp);
+        }
+        catch (OutOfMemoryError e)
+        {
+            e.printStackTrace();
+            return 0;
+        }
     }
 }

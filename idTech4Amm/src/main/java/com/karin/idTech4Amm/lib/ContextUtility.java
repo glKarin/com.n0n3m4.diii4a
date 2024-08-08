@@ -30,15 +30,18 @@ import android.text.util.Linkify;
 import android.text.method.LinkMovementMethod;
 
 import com.karin.idTech4Amm.R;
+import com.karin.idTech4Amm.misc.Function;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -199,13 +202,17 @@ public final class ContextUtility
         builder.create().show();
     }
 
-    public static void Input(Context context, CharSequence title, CharSequence message, String[] args, final Runnable yes, final Runnable no, Runnable other, String otherName)
+    public static AlertDialog Input(Context context, CharSequence title, CharSequence message, String val, String[] args, final Runnable yes, final Runnable no, String otherName, Runnable other, Function editTextConfig)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         EditText editText = new EditText(context);
         if(null != message)
             editText.setHint(message);
+        if(null != val)
+            editText.setText(val);
+        if(null != editTextConfig)
+            editTextConfig.Invoke(editText);
         builder.setView(editText);
         builder.setCancelable(true);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -240,7 +247,9 @@ public final class ContextUtility
                 }
             });
         }
-        builder.create().show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        return dialog;
     }
     
     public static String NativeLibDir(Context context)
@@ -559,6 +568,12 @@ public final class ContextUtility
         if (!path.startsWith("/Android/data") && !path.startsWith("/Android/obb"))
             return false;
 
+        String npath = path;
+        if(npath.endsWith("/"))
+            npath = npath.substring(0, npath.length() - 1);
+        if (npath.equals("/Android/data") || npath.equals("/Android/obb"))
+            return false;
+
         String packageName = context.getApplicationContext().getPackageName();
         if(path.startsWith("/Android/data/" + packageName) || path.startsWith("/Android/obb/" + packageName))
             return false;
@@ -586,11 +601,41 @@ public final class ContextUtility
         {
             Uri uri = FileUtility.PathUri(path);
             //Log.e("TAG", "IsUriPermissionGrant: " +uri + "|" + persistedUriPermission.getUri()+"="+persistedUriPermission.getUri().equals(uri));
-            // if(uri.toString().startsWith(persistedUriPermission.getUri().toString()))
             if(uri.equals(persistedUriPermission.getUri()))
                 return true;
         }
         return false;
+    }
+
+    public static boolean IsUriPermissionGrantPrefix(Context context, String path)
+    {
+        if(!NeedGrantUriPermission(context, path))
+            return true;
+        List<UriPermission> persistedUriPermissions = context.getContentResolver().getPersistedUriPermissions();
+        for (UriPermission persistedUriPermission : persistedUriPermissions)
+        {
+            Uri uri = FileUtility.PathUri(path);
+            //Log.e("TAG", "IsUriPermissionGrantPrefix: " +uri + "|" + persistedUriPermission.getUri()+"="+persistedUriPermission.getUri().equals(uri));
+            if(uri.toString().startsWith(persistedUriPermission.getUri().toString()))
+                return true;
+        }
+        return false;
+    }
+
+    public static Uri GetPermissionGrantedUri(Context context, String path)
+    {
+        if(!NeedGrantUriPermission(context, path))
+            return null;
+        List<UriPermission> persistedUriPermissions = context.getContentResolver().getPersistedUriPermissions();
+        for (UriPermission persistedUriPermission : persistedUriPermissions)
+        {
+            Uri uri = FileUtility.PathUri(path);
+            //Log.e("TAG", "IsUriPermissionGrantPrefix: " +uri + "|" + persistedUriPermission.getUri()+"="+persistedUriPermission.getUri().equals(uri));
+            Uri grantedUri = persistedUriPermission.getUri();
+            if(uri.toString().startsWith(grantedUri.toString()))
+                return grantedUri;
+        }
+        return null;
     }
 
     public static boolean GrantUriPermission(Activity activity, String path, int resultCode)
@@ -646,8 +691,7 @@ public final class ContextUtility
 
     public static DocumentFile DirectoryDocument(Context context, String path)
     {
-        DocumentFile documentFile = DocumentFile.fromTreeUri(context, FileUtility.PathUri(path));
-        return documentFile;
+        return DocumentFile.fromTreeUri(context, FileUtility.PathUri(path));
     }
 
     public static void OpenDocumentsUI(Context context)

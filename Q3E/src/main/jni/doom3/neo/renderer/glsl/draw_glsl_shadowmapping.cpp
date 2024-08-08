@@ -42,8 +42,6 @@
  * r_shadowMapFrustumFOV: float, 90, point light view FOV
  * harm_r_shadowMapLod: int, -1, force using shadow map LOD(0 - 4), -1 is auto
  * harm_r_shadowMapAlpha: float, 0.5, shadow alpha(0 - 1)
- * harm_r_shadowMapSampleFactor: float, -1.0, 0 multiple, 0 is disable, < 0 is auto, > 0 multi with fixed value
- * harm_r_shadowMapFrustumFar: float, -2.5, shadow map render frustum far(0: 2 x light's radius, < 0: light's radius x multiple, > 0: using fixed value)
  *
  */
 
@@ -52,11 +50,13 @@
 
 #include "../tr_local.h"
 
+#if 0
 #define POINT_LIGHT_FRUSTUM_FAR 7996.0f
 #define POINT_LIGHT_FRUSTUM_FAR_FACTOR 2.5 // 2
 
 #define POINT_LIGHT_RENDER_METHOD_Z_AS_DEPTH 0
 #define POINT_LIGHT_RENDER_METHOD_USING_FRUSTUM_FAR 1
+#endif
 
 #define SHADOW_MAPPING_VOLUME 1 // render shadow volume
 #define SHADOW_MAPPING_SURFACE 2 // render model surface
@@ -87,8 +87,8 @@ static int r_shadowMappingScheme = SHADOW_MAPPING_PURE;
 static idCVar harm_r_shadowMappingScheme( "harm_r_shadowMappingScheme", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "shadow mapping rendering scheme. 0 = always using shadow mapping; 1 = prelight shadow using shadow mapping, others using stencil shadow; 2 = non-prelight shadow using shadow mapping, others using stencil shadow", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2> );
 #endif
 
-static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug light type mask. 1: parallel, 2: point, 4: spot");
-static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "[Harmattan]: debug shadow map frame buffer.");
+static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "debug light type mask in shadow mapping. 1 = parallel; 2 = point; 4 = spot");
+static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "debug shadow map frame buffer.");
 
 char RB_ShadowMapPass_T = 'G'; // G - global shadow, L - local shadow
 
@@ -328,6 +328,7 @@ ID_INLINE static bool RB_ShadowMapping_filterLightType(void)
     return false;
 }
 
+#if 0
 // Get frustum far value for point light in shadow map/interaction pass
 ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
 {
@@ -345,6 +346,7 @@ ID_INLINE static float RB_GetPointLightFrustumFar(const viewLight_t* vLight)
     }
     return _far;
 }
+#endif
 
 // Choose shader by light in shadow map pass
 ID_INLINE static shaderProgram_t * RB_SelectShadowMapShader(const viewLight_t* vLight, int side)
@@ -398,22 +400,7 @@ ID_INLINE static shaderProgram_t * RB_SelectPerforatedShadowMapShader(const view
 ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const viewLight_t* vLight)
 {
     shaderProgram_t *shadowInteractionShader;
-    if(r_usePhong)
-    {
-        if( vLight->parallel )
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
-        }
-        else if( vLight->pointLight )
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_pointLight;
-        }
-        else
-        {
-            shadowInteractionShader = &interactionShadowMappingShader_spotLight;
-        }
-    }
-    else
+    if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
     {
         if( vLight->parallel )
         {
@@ -426,6 +413,36 @@ ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const
         else
         {
             shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
+        }
+    }
+    else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+    {
+        if( vLight->parallel )
+        {
+            shadowInteractionShader = &interactionShadowMappingPBRShader_parallelLight;
+        }
+        else if( vLight->pointLight )
+        {
+            shadowInteractionShader = &interactionShadowMappingPBRShader_pointLight;
+        }
+        else
+        {
+            shadowInteractionShader = &interactionShadowMappingPBRShader_spotLight;
+        }
+    }
+    else
+    {
+        if( vLight->parallel )
+        {
+            shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
+        }
+        else if( vLight->pointLight )
+        {
+            shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+        }
+        else
+        {
+            shadowInteractionShader = &interactionShadowMappingShader_spotLight;
         }
     }
     return shadowInteractionShader;

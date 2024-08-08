@@ -6,7 +6,7 @@
 
 // Simple beam model. different with idRenderModelBeam, the line's start point is not view origin.
 
-static idCVar harm_r_skipHHBeam("harm_r_skipHHBeam",                                        "0", CVAR_RENDERER | CVAR_BOOL, "[Harmattan]: Skip beam model render");
+static idCVar harm_r_skipHHBeam("harm_r_skipHHBeam",                                        "0", CVAR_RENDERER | CVAR_BOOL, "Skip beam model render");
 static const struct viewDef_s *current_view; // temp, should as a parameter
 
 void hhRenderModelBeam::InitFromFile( const char *fileName )

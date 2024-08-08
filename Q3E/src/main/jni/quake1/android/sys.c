@@ -11,7 +11,7 @@
 
 /* Android */
 
-static void * game_main(void *data);
+static void * game_main(int argc, char **argv);
 
 #include "sys_android.c"
 
@@ -20,8 +20,8 @@ void GLimp_CheckGLInitialized(void)
 	Q3E_CheckNativeWindowChanged();
 }
 
-// quake1 game main thread loop
-void * game_main(void *data)
+// Quake1 game main thread loop
+void * game_main(int argc, char **argv)
 {
 	attach_thread(); // attach current to JNI for call Android code
 
@@ -29,7 +29,7 @@ void * game_main(void *data)
 
 	Con_Printf("[Harmattan]: Enter " Q3E_GAME_NAME " main thread -> %s\n", "main");
 
-	Sys_Main(q3e_argc, q3e_argv);
+	Sys_Main(argc, argv);
 
 	Q3E_End();
 	main_thread = 0;

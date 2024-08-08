@@ -10,8 +10,8 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
-        versionCode 11053
-        versionName '1.1.0harmattan53'
+        versionCode 11055
+        versionName '1.1.0harmattan55'
         versionNameSuffix 'natasha'
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
@@ -72,5 +72,6 @@ android {
 
 dependencies {
     implementation project(':Q3E')
+    // implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:documentfile:28.0.0'
 }

@@ -1171,7 +1171,7 @@ void	GL_ClearStateDelta(void);
 void	GL_State(int stateVector);
 void	GL_TexEnv(int env);
 void	GL_Cull(int cullType);
-void    GL_CheckErrors(const char *name);
+bool    GL_CheckErrors(const char *name);
 void	GL_SelectTextureForce(int unit);
 
 const int GLS_SRCBLEND_ZERO						= 0x00000001;
@@ -1510,6 +1510,7 @@ typedef enum {
 	SHADER_REFLECTIONCUBEMAP,
 	SHADER_FOG,
 	SHADER_BLENDLIGHT,
+	SHADER_INTERACTIONPBR,
 	SHADER_INTERACTIONBLINNPHONG,
 	SHADER_DIFFUSECUBEMAP,
 	SHADER_TEXGEN,
@@ -1525,19 +1526,24 @@ typedef enum {
 	SHADER_DEPTHCOLOR, // OpenGLES2.0 only
 	SHADER_DEPTHPERFORATEDCOLOR, // OpenGLES2.0 only
 	SHADER_INTERACTIONPOINTLIGHT,
+	SHADER_INTERACTIONPBRPOINTLIGHT,
 	SHADER_INTERACTIONBLINNPHONGPOINTLIGHT,
 	SHADER_INTERACTIONPARALLELLIGHT,
+	SHADER_INTERACTIONPBRPARALLELLIGHT,
 	SHADER_INTERACTIONBLINNPHONGPARALLELLIGHT,
 	SHADER_INTERACTIONSPOTLIGHT,
+	SHADER_INTERACTIONPBRSPOTLIGHT,
 	SHADER_INTERACTIONBLINNPHONGSPOTLIGHT,
 #endif
 	// translucent stencil shadow
 #ifdef _STENCIL_SHADOW_IMPROVE
 	SHADER_INTERACTIONTRANSLUCENT,
+	SHADER_INTERACTIONPBRTRANSLUCENT,
 	SHADER_INTERACTIONBLINNPHONGTRANSLUCENT,
 
 #ifdef _SOFT_STENCIL_SHADOW
 	SHADER_INTERACTIONSOFT,
+	SHADER_INTERACTIONPBRSOFT,
 	SHADER_INTERACTIONBLINNPHONGSOFT,
 #endif
 #endif
@@ -2228,9 +2234,11 @@ extern idCVar r_forceShadowMapsOnAlphaTestedSurfaces;
 extern idCVar harm_r_shadowMapLod;
 extern idCVar harm_r_shadowMapBias;
 extern idCVar harm_r_shadowMapAlpha;
+#if 0
 extern idCVar harm_r_shadowMapSampleFactor;
 extern idCVar harm_r_shadowMapFrustumNear;
 extern idCVar harm_r_shadowMapFrustumFar;
+#endif
 extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapNonParallelLightUltra;

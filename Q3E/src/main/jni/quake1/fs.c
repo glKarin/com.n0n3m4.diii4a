@@ -1399,6 +1399,13 @@ static void FS_AddGameHierarchy (const char *dir)
 
 	if (*fs_userdir)
 		FS_AddGameDirectory(va(vabuf, sizeof(vabuf), "%s%s/", fs_userdir, dir));
+#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is highest
+	extern const char * Sys_ApplicationHomePath(void);
+	const char *app_path = Sys_ApplicationHomePath();
+	if(app_path && app_path[0]) {
+		FS_AddGameDirectory(va(vabuf, sizeof(vabuf), "%s%s/", app_path, dir));
+	}
+#endif
 }
 
 
@@ -2027,6 +2034,13 @@ static int FS_ChooseUserDir(userdirmode_t userdirmode, char *userdir, size_t use
 		break;
 	case USERDIRMODE_HOME:
 		homedir = getenv("HOME");
+#ifdef __ADNROID__ //kairn: HOME env to cwd
+		if(!homedir || !homedir[0])
+		{
+			extern const char * Sys_GameDataDefaultPath(void);
+			homedir = Sys_GameDataDefaultPath();
+		}
+#endif
 		if(homedir)
 		{
 			dpsnprintf(userdir, userdirsize, "%s/.%s/", homedir, gameuserdirname);
@@ -2035,6 +2049,13 @@ static int FS_ChooseUserDir(userdirmode_t userdirmode, char *userdir, size_t use
 		return -1;
 	case USERDIRMODE_SAVEDGAMES:
 		homedir = getenv("HOME");
+#ifdef __ADNROID__ //kairn: HOME env to cwd
+		if(!homedir || !homedir[0])
+		{
+			extern const char * Sys_GameDataDefaultPath(void);
+			homedir = Sys_GameDataDefaultPath();
+		}
+#endif
 		if(homedir)
 		{
 #ifdef MACOSX

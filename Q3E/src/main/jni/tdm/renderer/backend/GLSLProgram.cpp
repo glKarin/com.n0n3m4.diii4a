@@ -189,7 +189,7 @@ namespace {
 	std::string ReadFile( const char *sourceFile ) {
 		void *buf = nullptr;
 		int len = fileSystem->ReadFile( idStr(
-#ifdef __ANDROID__ //karin: using glslprops/ for avoid override
+#ifdef _GLES //karin: using glslprops/ for avoid override
                 "glslprogs/"
 #else
                 "glprogs/"
@@ -404,7 +404,7 @@ void GLSLProgram::SetDefaultUniformBlockBindings() {
 
 namespace {
 	const std::string BASIC_SHADER =
-#ifdef __ANDROID__ //karin: OpenGLES3.2 on Android for geometry shader
+#ifdef _GLES //karin: OpenGLES3.2 on Android for geometry shader
         "#version 320 es\n"
 #else
         "#version 150\n"
@@ -417,7 +417,7 @@ namespace {
 		"  return someParam * 2;\n"
 		"}\n";
 	const std::string INCLUDE_SHADER =
-#ifdef __ANDROID__ //karin: OpenGLES3.2 on Android for geometry shader
+#ifdef _GLES //karin: OpenGLES3.2 on Android for geometry shader
         "#version 320 es\n"
 #else
         "#version 140\n"
@@ -432,7 +432,7 @@ namespace {
 		"}";
 
 	const std::string ADVANCED_INCLUDES =
-#ifdef __ANDROID__ //karin: OpenGLES3.2 on Android for geometry shader
+#ifdef _GLES //karin: OpenGLES3.2 on Android for geometry shader
         "#version 320 es\n"
 #else
         "#version 330\n"
@@ -447,7 +447,7 @@ namespace {
 		"#pragma tdm_include \"tests/basic_shader.glsl\"\n";
 
 	const std::string EXPANDED_INCLUDE_SHADER =
-#ifdef __ANDROID__ //karin: OpenGLES3.2 on Android for geometry shader
+#ifdef _GLES //karin: OpenGLES3.2 on Android for geometry shader
         "#version 320 es\n"
 #else
         "#version 140\n"
@@ -461,7 +461,7 @@ namespace {
 		"\n#line 2 0\n"
 		"void main() {}\n";
 	const std::string EXPANDED_ADVANCED_INCLUDES =
-#ifdef __ANDROID__ //karin: OpenGLES3.2 on Android for geometry shader
+#ifdef _GLES //karin: OpenGLES3.2 on Android for geometry shader
 		"#version 320 es\n"
 #else
         "#version 330\n"
@@ -485,7 +485,7 @@ namespace {
 		"  float myVar = myFunc();\n"
 		"}\n"
 		"#line 0 3\n"
-#ifdef __ANDROID__ //karin: OpenGLES3.2 on Android for geometry shader
+#ifdef _GLES //karin: OpenGLES3.2 on Android for geometry shader
         "#version 320 es\n"
 #else
         "#version 150\n"
@@ -502,7 +502,7 @@ namespace {
 
 	TEST_CASE("Shader include handling") {
 		INFO( "Preparing test shaders" );
-#ifdef __ANDROID__ //karin: using glslprops/ for avoid override
+#ifdef _GLES //karin: using glslprops/ for avoid override
 #define TEST_GLPROGS_DIR "glslprogs"
 #else
 #define TEST_GLPROGS_DIR "glprogs"
@@ -535,7 +535,7 @@ namespace {
 
 	TEST_CASE("Shader defines handling") {
 		const std::string shaderWithDynamicDefines =
-#ifdef __ANDROID__ //karin: OpenGLES3.2 on Android for geometry shader
+#ifdef _GLES //karin: OpenGLES3.2 on Android for geometry shader
 			"#version 320 es\n"
 #else
             "#version 140\n"
@@ -550,7 +550,7 @@ namespace {
 			"}\n" ;
 
 		const std::string expectedResult =
-#ifdef __ANDROID__ //karin: OpenGLES3.2 on Android for geometry shader
+#ifdef _GLES //karin: OpenGLES3.2 on Android for geometry shader
 			"#version 320 es\n"
 #else
             "#version 140\n"

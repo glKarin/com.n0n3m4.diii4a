@@ -82,6 +82,16 @@ char *Sys_DefaultHomePath(void)
 			else
 				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_MACOSX);
 		}
+#elif defined(__ANDROID__) //karin: HOME env to cwd
+		if( ( p1 = getenv( "HOME" ) ) != NULL || (p1 = Sys_Cwd()) != NULL )
+		{
+			Com_sprintf(homePath, sizeof(homePath), "%s%c", p1, PATH_SEP);
+
+			if(com_homepath->string[0])
+				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
+			else
+				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_UNIX);
+		}
 #else
 #ifdef USE_XDG
 		if( ( p1 = getenv( "XDG_DATA_HOME" ) ) != NULL )

@@ -865,7 +865,7 @@ static void RB_ShowTris( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	qglEnable( GL_DEPTH_TEST );
 	qglDisable( GL_POLYGON_OFFSET_LINE );
 
-#ifdef __ANDROID__ //karin: GLES
+#ifdef _GLES //karin: GLES
 	qglDepthRangef( 0, 1 );
 #else
 	qglDepthRange( 0, 1 );
@@ -937,7 +937,7 @@ static void RB_ShowSurfaceInfo( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 	qglEnable( GL_DEPTH_TEST );
 	qglDisable( GL_POLYGON_OFFSET_LINE );
 
-#ifdef __ANDROID__ //karin: GLES
+#ifdef _GLES //karin: GLES
 	qglDepthRangef( 0, 1 );
 #else
 	qglDepthRange( 0, 1 );
@@ -1016,7 +1016,7 @@ static void RB_ShowViewEntitys( viewEntity_t *vModels ) {
 	qglEnable( GL_DEPTH_TEST );
 	qglDisable( GL_POLYGON_OFFSET_LINE );
 
-#ifdef __ANDROID__ //karin: GLES
+#ifdef _GLES //karin: GLES
 	qglDepthRangef( 0, 1 );
 #else
 	qglDepthRange( 0, 1 );
@@ -2195,7 +2195,7 @@ void RB_ShowDebugPolygons( void ) {
 		qglDisable( GL_POLYGON_OFFSET_LINE );
 	}
 
-#ifdef __ANDROID__ //karin: GLES
+#ifdef _GLES //karin: GLES
 	qglDepthRangef( 0, 1 );
 #else
 	qglDepthRange( 0, 1 );

@@ -41,7 +41,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #define GL_ARB_texture_storage					1	//core since 4.2
 #define GL_ARB_multi_draw_indirect				1	//core since 4.3
 #define GL_ARB_vertex_attrib_binding			1	//core since 4.3
-#ifdef __ANDROID__ //karin: GLES3.2
+#ifdef _GLES //karin: GLES3.2
 #define GL_ES_VERSION_2_0 1
 #define GL_ES_VERSION_3_0 1
 #define GL_ES_VERSION_3_1 1

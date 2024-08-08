@@ -10,6 +10,7 @@ import android.widget.ListView;
 import android.app.AlertDialog;
 
 import com.karin.idTech4Amm.R;
+import com.karin.idTech4Amm.misc.FileBrowser;
 import com.n0n3m4.q3e.Q3ELang;
 
 /**
@@ -36,6 +37,14 @@ public class FileBrowserDialog extends AlertDialog {
         {
 
         }
+
+        @Override
+        public void OnGrantPermission(String path)
+        {
+            if(null != m_callback)
+                m_callback.Check(path);
+        }
+
     };
     
     public FileBrowserDialog(Context context)
@@ -49,6 +58,11 @@ public class FileBrowserDialog extends AlertDialog {
         super.onCreate(savedInstanceState);
 
         //SetupUI();
+    }
+
+    public void SetupUI(String title)
+    {
+        SetupUI(title, null);
     }
 
     public void SetupUI(String title, String path)
@@ -70,22 +84,21 @@ public class FileBrowserDialog extends AlertDialog {
                 }
             });
         m_adapter.SetListener(m_listener);
-        SetPath(path);
+        if(null != path)
+            SetPath(path);
     }
 
     private void Open(int position)
     {
-        String path = m_adapter.Get(position);
-        SetPath(path);
+        if(m_adapter.IsDirectory(position))
+        {
+            String path = m_adapter.Get(position);
+            SetPath(path);
+        }
     }
 
     public void SetPath(String path)
     {
-        if(null != m_callback)
-        {
-            if(!m_callback.Check(path))
-                return;
-        }
         m_adapter.OpenPath(path);
     }
 
@@ -99,9 +112,14 @@ public class FileBrowserDialog extends AlertDialog {
         m_callback = c;
     }
 
+    public FileBrowser GetFileBrowser()
+    {
+        return m_adapter.GetFileBrowser();
+    }
+
     public interface FileBrowserCallback
     {
-        public boolean Check(String path);
+        public void Check(String path);
     }
 }
 

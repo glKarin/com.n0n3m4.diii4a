@@ -53,7 +53,7 @@ idWorldspawn::Spawn
 ================
 */
 #ifdef _RIVENSIN //karin: auto change to third-person in original DOOM3 game
-static idCVar	harm_pm_autoForceThirdPerson("harm_pm_autoForceThirdPerson", "1", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "[Harmattan]: Force set third person view after game level load end.");
+static idCVar	harm_pm_autoForceThirdPerson("harm_pm_autoForceThirdPerson", "1", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "Force set third person view after game level load end.");
 #endif
 void idWorldspawn::Spawn( void ) {
 	idStr				scriptname;

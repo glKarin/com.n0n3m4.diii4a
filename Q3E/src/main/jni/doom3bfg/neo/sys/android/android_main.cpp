@@ -1,6 +1,6 @@
 /* Android */
 
-static void * game_main(void *data);
+static void * game_main(int argc, char **argv);
 
 // called first thing. does InitSigs and various things
 extern void		Posix_EarlyInit( );
@@ -23,13 +23,13 @@ void GLimp_CheckGLInitialized(void)
     Q3E_CheckNativeWindowChanged();
 }
 
-// doom3 game main thread loop
-void * game_main(void *data)
+// Doom3BFG game main thread loop
+void * game_main(int argc, char **argv)
 {
     attach_thread(); // attach current to JNI for call Android code
 
     // DG: needed for Sys_ReLaunch()
-    Sys_SetArgs(q3e_argc, (const char**)q3e_argv);
+    Sys_SetArgs(argc, (const char**)argv);
     // DG end
 #ifdef ID_MCHECK
     // must have -lmcheck linkage
@@ -50,9 +50,9 @@ void * game_main(void *data)
     Posix_EarlyInit();
     Sys_Printf("[Harmattan]: Enter doom3 main thread -> %s\n", "main");
 
-    if( q3e_argc > 1 )
+    if( argc > 1 )
     {
-        common->Init( q3e_argc - 1, &q3e_argv[1], NULL );
+        common->Init( argc - 1, &argv[1], NULL );
     }
     else
     {
@@ -70,7 +70,7 @@ void * game_main(void *data)
     common->Quit();
     Q3E_End();
     main_thread = 0;
-    Sys_Printf("[Harmattan]: Leave doom3 main thread.\n");
+    Sys_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
     return 0;
 }
 

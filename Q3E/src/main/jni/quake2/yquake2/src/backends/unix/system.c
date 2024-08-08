@@ -543,6 +543,13 @@ Sys_GetHomeDir(void)
 	char *home;
 
 	home = getenv("HOME");
+#ifdef __ADNROID__ //kairn: HOME env to cwd
+	if(!home || !home[0])
+	{
+		extern const char * Sys_GameDataDefaultPath(void);
+		home = Sys_GameDataDefaultPath();
+	}
+#endif
 
 	if (!home)
 	{

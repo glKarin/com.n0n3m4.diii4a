@@ -10,6 +10,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.karin.idTech4Amm.lib.KCVar;
+import com.karin.idTech4Amm.sys.Theme;
 
 public class CVarSettingField extends LinearLayout implements CompoundButton.OnCheckedChangeListener
 {
@@ -44,7 +45,7 @@ public class CVarSettingField extends LinearLayout implements CompoundButton.OnC
         TextView label = new TextView(context);
         label.setTextSize(16);
         label.setText(name);
-        label.setTextColor(Color.BLACK);
+        label.setTextColor(Theme.BlackColor(context));
         labelLayout.addView(label, params);
 
         params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);

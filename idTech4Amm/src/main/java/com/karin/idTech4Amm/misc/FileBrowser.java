@@ -1,9 +1,13 @@
 package com.karin.idTech4Amm.misc;
 
+import android.content.Context;
+import android.net.Uri;
 import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
+import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
+import com.karin.idTech4Amm.lib.Utility;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,6 +19,8 @@ import java.util.Set;
 
 public class FileBrowser
 {
+    private static final String TAG = "FileBrowser";
+
     public static final int ID_ORDER_BY_NAME = 1;
     public static final int ID_ORDER_BY_TIME = 2;
 
@@ -24,6 +30,7 @@ public class FileBrowser
     public static final int ID_FILTER_FILE = 1;
     public static final int ID_FILTER_DIRECTORY = 1 << 1;
 
+    private Context m_context;
     private String m_currentPath;
     private final Set<String> m_history = new LinkedHashSet<>();
     private final List<FileBrowser.FileModel> m_fileList = new ArrayList<>();
@@ -34,15 +41,37 @@ public class FileBrowser
     private boolean m_showHidden = true;
     private boolean m_ignoreDotDot = false;
     private boolean m_dirNameWithSeparator = true;
+    private Listener m_callback = null;
+
+    public interface Listener
+    {
+        public void OnPathCannotAccess(String path);
+    };
 
     public FileBrowser()
     {
     }
 
+    public FileBrowser(Context context)
+    {
+        m_context = context;
+    }
+
     public FileBrowser(String path)
     {
+        this(null, path);
+    }
+
+    public FileBrowser(Context context, String path)
+    {
+        this(context);
         if (path != null && !path.isEmpty())
             SetCurrentPath(path);
+    }
+
+    public void SetListener(Listener l)
+    {
+        m_callback = l;
     }
 
     protected boolean ListFiles(String path)
@@ -119,18 +148,72 @@ public class FileBrowser
         return true;
     }
 
+    private boolean Check(String path)
+    {
+        if(null == m_context)
+            return true;
+        if(!ContextUtility.NeedGrantUriPermission(m_context, path))
+            return true;
+        if(ContextUtility.IsUriPermissionGrantPrefix(m_context, path))
+            return true;
+        if(null != m_callback)
+            m_callback.OnPathCannotAccess(path);
+        return false;
+    }
+
     public boolean SetCurrentPath(String path)
     {
+        if(!Check(path))
+            return false;
+
+        boolean res = false;
         if (path != null && !path.equals(m_currentPath))
         {
-            if (ListFiles(path))
+            if(null == m_context)
             {
-                //m_currentPath = path;
-                m_history.add(m_currentPath);
-                return true;
+                res = ListFiles(path);
+            }
+            else
+            {
+                if(ContextUtility.NeedListPackagesAsFiles(m_context, path))
+                {
+                    String[] packages = ContextUtility.ListPackages(m_context);
+                    Log.d(TAG, "Using packages: " + packages.length);
+                    res = ListGivenFiles(path, packages);
+                }
+                else if(ContextUtility.NeedUsingDocumentFile(m_context, path))
+                {
+                    DocumentFile documentFile = ContextUtility.DirectoryDocument(m_context, path);
+                    Log.d(TAG, "Using DocumentFile: " + documentFile.getUri());
+                    if(ContextUtility.IsUriPermissionGrant(m_context, path))
+                        res = ListDocumentFiles(path, documentFile);
+                    else
+                    {
+                        Uri uri = ContextUtility.GetPermissionGrantedUri(m_context, path);
+                        if(null != uri)
+                        {
+                            DocumentFile parentDocumentFile = DocumentFile.fromTreeUri(m_context, uri);
+                            String parentPath = FileUtility.GetPathFromUri(uri);
+                            String subPath = FileUtility.GetRelativePath(path, parentPath);
+                            res = ListDocumentFiles(path, parentDocumentFile, subPath);
+                        }
+                        else
+                            res = ListDocumentFiles(path, documentFile);
+                    }
+                }
+                else
+                {
+                    Log.d(TAG, "Using File");
+                    res = ListFiles(path);
+                }
             }
         }
-        return false;
+        if (res)
+        {
+            //m_currentPath = path;
+            m_history.add(m_currentPath);
+        }
+        return res;
     }
 
     public void Rescan()
@@ -367,7 +450,7 @@ public class FileBrowser
             if(!m_showHidden && f.isHidden())
                 continue;
 
-            if (isDirectory && !m_dirNameWithSeparator)
+            if (isDirectory && m_dirNameWithSeparator)
                 name += File.separator;
 
             item = new FileBrowser.FileModel();
@@ -471,6 +554,93 @@ public class FileBrowser
         return true;
     }
 
+    public boolean ListDocumentFiles(String path, DocumentFile dirDoc, String subPath)
+    {
+        DocumentFile[] files;
+        DocumentFile dir;
+        FileBrowser.FileModel item;
+
+        if (path == null || path.isEmpty())
+            return false;
+
+        String[] parts = FileUtility.SplitPathParts(subPath);
+        if(null == parts || parts.length == 0)
+            return false;
+
+        if (dirDoc == null)
+        {
+            if (!path.equals(m_currentPath))
+            {
+                m_currentPath = path;
+                SetupEmptyList(path);
+            }
+            return false;
+        }
+
+        if (!dirDoc.isDirectory())
+            return false;
+
+        m_fileList.clear();
+
+        dir = dirDoc;
+        for (String part : parts)
+        {
+            dir = dir.findFile(part);
+            //Log.e("TAG", "ListDocumentFiles: " + dir.getUri());
+            if(null == dir || !dir.isDirectory())
+                return false;
+        }
+
+        files = dir.listFiles();
+
+        for (DocumentFile f : files)
+        {
+            String name = f.getName();
+            if (".".equals(name))
+                continue;
+            if(m_filter != 0)
+            {
+                if((m_filter & ID_FILTER_FILE) == 0 && !f.isDirectory())
+                    continue;
+                if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
+                    continue;
+                if(!Filter(name))
+                    continue;
+            }
+            if(!m_showHidden && name.startsWith("."))
+                continue;
+
+            if (f.isDirectory() && m_dirNameWithSeparator)
+                name += File.separator;
+
+            item = new FileBrowser.FileModel();
+            item.name = name;
+            item.path = path + "/" + f.getName();
+            item.size = f.length();
+            item.time = f.lastModified();
+            item.type = f.isDirectory() ? FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY : FileBrowser.FileModel.ID_FILE_TYPE_FILE;
+            m_fileList.add(item);
+        }
+
+        Collections.sort(m_fileList, m_fileComparator);
+        //m_fileList.sort(m_fileComparator);
+
+        // add parent directory
+        if (!m_ignoreDotDot && !"/".equals(path))
+        {
+            item = new FileBrowser.FileModel();
+            item.name = "../";
+            item.path = FileUtility.ParentPath(path);
+            item.size = dir.length();
+            item.time = dir.lastModified();
+            item.type = dir.isDirectory() ? FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY : FileBrowser.FileModel.ID_FILE_TYPE_FILE;
+            m_fileList.add(0, item);
+        }
+        m_currentPath = path;
+
+        return true;
+    }
+
     private void SetupEmptyList(String path)
     {
         FileBrowser.FileModel item;
@@ -486,6 +656,90 @@ public class FileBrowser
             item.type = FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY;
             m_fileList.add(0, item);
         }
+    }
+
+    public boolean IsDirectory(String path)
+    {
+        return GetFileType(path) == FileModel.ID_FILE_TYPE_DIRECTORY;
+    }
+
+    public int GetFileType(String path)
+    {
+        File file = new File(path);
+        String pPath = file.getParent();
+
+        if(!Check(pPath))
+            return FileModel.ID_FILE_TYPE_NOT_EXISTS;
+
+        int res = FileModel.ID_FILE_TYPE_NOT_EXISTS;
+        if(ContextUtility.NeedListPackagesAsFiles(m_context, pPath))
+        {
+            String name = file.getName();
+            String[] packages = ContextUtility.ListPackages(m_context);
+            Log.d(TAG, "Using packages: " + packages.length);
+            if(Utility.ArrayContains(packages, name))
+                res = FileModel.ID_FILE_TYPE_DIRECTORY;
+        }
+        else if(ContextUtility.NeedUsingDocumentFile(m_context, path))
+        {
+            if(ContextUtility.IsUriPermissionGrant(m_context, path))
+            {
+                DocumentFile documentFile = ContextUtility.DirectoryDocument(m_context, path);
+                Log.d(TAG, "Using DocumentFile: " + documentFile.getUri());
+                if(documentFile.isDirectory())
+                    res = FileModel.ID_FILE_TYPE_DIRECTORY;
+                else if(documentFile.exists())
+                    res = FileModel.ID_FILE_TYPE_FILE;
+            }
+            else
+            {
+                Uri uri = ContextUtility.GetPermissionGrantedUri(m_context, path);
+                if(null != uri)
+                {
+                    DocumentFile parentDocumentFile = DocumentFile.fromTreeUri(m_context, uri);
+                    String parentPath = FileUtility.GetPathFromUri(uri);
+                    String subPath = FileUtility.GetRelativePath(path, parentPath);
+
+                    String[] parts = FileUtility.SplitPathParts(subPath);
+                    DocumentFile dir = parentDocumentFile;
+                    int i = 0;
+                    for (; i < parts.length; i++)
+                    {
+                        String part = parts[i];
+                        dir = dir.findFile(part);
+                        if(null == dir)
+                        {
+                            break;
+                        }
+                    }
+                    if(i == parts.length && null != dir)
+                    {
+                        if(dir.isDirectory())
+                            res = FileModel.ID_FILE_TYPE_DIRECTORY;
+                        else if(dir.exists())
+                            res = FileModel.ID_FILE_TYPE_FILE;
+                    }
+                }
+                else
+                {
+                    DocumentFile documentFile = ContextUtility.DirectoryDocument(m_context, path);
+                    Log.d(TAG, "Using DocumentFile: " + documentFile.getUri());
+                    if(documentFile.isDirectory())
+                        res = FileModel.ID_FILE_TYPE_DIRECTORY;
+                    else if(documentFile.exists())
+                        res = FileModel.ID_FILE_TYPE_FILE;
+                }
+            }
+        }
+        else
+        {
+            Log.d(TAG, "Using File");
+            if(file.isDirectory())
+                res = FileModel.ID_FILE_TYPE_DIRECTORY;
+            else if(file.exists())
+                res = FileModel.ID_FILE_TYPE_FILE;
+        }
+        return res;
     }
 
     public List<FileBrowser.FileModel> ListAllFiles()
@@ -558,6 +812,7 @@ public class FileBrowser
 
     public static class FileModel
     {
+        public static final int ID_FILE_TYPE_NOT_EXISTS = -1;
         public static final int ID_FILE_TYPE_FILE = 0;
         public static final int ID_FILE_TYPE_DIRECTORY = 1;
         public static final int ID_FILE_TYPE_SYMBOL = 2;

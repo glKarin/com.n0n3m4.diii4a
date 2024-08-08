@@ -2,11 +2,11 @@ package com.karin.idTech4Amm.lib;
 
 import android.net.Uri;
 import android.os.Environment;
-import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
 import com.karin.idTech4Amm.misc.Function;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,6 +19,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Local file IO utility
@@ -285,6 +287,43 @@ public final class FileUtility
         int i = path.lastIndexOf('/');
         path = i > 0 ? path.substring(0, i) : "/";
         return path;
+    }
+
+    public static String GetPathFromUri(Uri uri)
+    {
+        String path = uri.toString();
+        path = path.replaceAll("content://com\\.android\\.externalstorage\\.documents/tree/primary%3A", "/storage/emulated/0/");
+        path = path.replaceAll("%2F", "/");
+        //Log.e("TAG", "GetPathFromUri: " + path);
+        return path;
+    }
+
+    public static String GetRelativePath(String target, String parent)
+    {
+        if(!parent.endsWith("/"))
+            parent += "/";
+        int i = target.indexOf(parent);
+        if(i != 0)
+            return null;
+        return target.substring(parent.length());
+    }
+
+    public static String[] SplitPathParts(String path)
+    {
+        String[] split = path.split("/");
+        List<String> list = new ArrayList<>();
+        for (String str : split)
+        {
+            if(KStr.NotEmpty(str))
+                list.add(str);
+        }
+        return list.toArray(new String[0]);
+    }
+
+    public static String[] GetRelativePathParts(String target, String parent)
+    {
+        String path = GetRelativePath(target, parent);
+        return SplitPathParts(path);
     }
     
     private FileUtility() {}

@@ -14,3 +14,13 @@ gradle assembleDebug.bat
 gradle assembleRelease.bat
 
 idTech4Amm/src/main/assets/source/DIII4A.source.tgz
+idTech4Amm/src/main/assets/source/LICENSE
+
+# VSMC
+CMakeFiles
+*.vcxproj*
+cmake_install.cmake
+CMakeCache.txt
+*.sln
+x64
+x86

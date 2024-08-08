@@ -18,8 +18,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.karin.idTech4Amm.lib.ContextUtility;
-import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.karin.idTech4Amm.sys.Theme;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
 
@@ -58,6 +58,7 @@ public class ConfigEditorActivity extends Activity
         boolean o = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKey.LAUNCHER_ORIENTATION, false);
         ContextUtility.SetScreenOrientation(this, o ? 0 : 1);
 
+        Theme.SetTheme(this, false);
         setContentView(R.layout.editor_page);
 
         V.SetupUI();
@@ -89,7 +90,7 @@ public class ConfigEditorActivity extends Activity
         V.editText.setText("");
         V.titleText.setText("");
         V.editText.setFocusableInTouchMode(false);
-        V.titleText.setTextColor(Color.BLACK);
+        V.titleText.setTextColor(Theme.BlackColor(this));
     }
 
     private boolean LoadFile(String path)
@@ -191,7 +192,7 @@ public class ConfigEditorActivity extends Activity
                 {
                     m_edited = false;
                     V.titleText.setText(m_filePath);
-                    V.titleText.setTextColor(Color.BLACK);
+                    V.titleText.setTextColor(Theme.BlackColor(this));
                     if (V.saveBtn != null)
                         V.saveBtn.setEnabled(false);
                     if (V.reloadBtn != null)

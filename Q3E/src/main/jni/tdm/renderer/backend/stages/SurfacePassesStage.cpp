@@ -22,7 +22,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "renderer/backend/GLSLProgramManager.h"
 #include "renderer/backend/FrameBuffer.h"
 #include "renderer/backend/FrameBufferManager.h"
-#ifdef __ANDROID__ //karin: using glslprops/ for avoid override
+#ifdef _GLES //karin: using glslprops/ for avoid override
 #include "glslprogs/stages/surface_passes/texgen_shared.glsl"
 #else
 #include "glprogs/stages/surface_passes/texgen_shared.glsl"

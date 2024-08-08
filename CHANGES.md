@@ -2,6 +2,17 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan55 (2024-08-05) **DOOM3 20th Anniversary Edition**
+
+* Add PBR interaction lighting model([jmarshall23's idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr))(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.
+* Fix large shake of player view with OpenAL in DOOM3/Quake4/Prey.
+* Add command history record manager in launcher.
+* Add `/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a` to game data search path(exclude Quake1), add current game data path tips.
+* Optimize ETC1 compression texture cache in DOOM3/Quake4/Prey, add ETC2 compression texture support(cvar r_useETC2) in OpenGLES3.0.
+* Add launcher theme setting.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan53 (2024-07-17)
 
 * Fix GZDOOM sound.
@@ -104,7 +115,7 @@
 * In Quake4, remove Bot FakeClient in multiplayer-game, and add SABot-a9 mod support in multiplayer-game(need extract resource first).
 * Fix Setting's tab GUI in Prey2006.
 * Add `full-body awareness` mod in Quake4. Set bool cvar `harm_pm_fullBodyAwareness` to 1 enable, and using `harm_pm_fullBodyAwarenessOffset` setup offset(also change to third-person mode), and using `harm_pm_fullBodyAwarenessHeadJoint` setup head joint name(view position).
-* Support max FPS limit(cvar `harm_r_maxFps`).
+* Support max FPS limit(cvar `r_maxFps`).
 * Support obj/dae static model, and fix png image load.
 * Add skip intro support.
 * Add simple CVar editor.
@@ -366,7 +377,7 @@ Update:
 * Fix `Berserk`, `Grabber`, `Helltime` vision effect(First set cvar `harm_g_skipBerserkVision`, `harm_g_skipWarpVision` and `harm_g_skipHelltimeVision` to 0).
 * Fix screen capture image when quick save game or mission tips.
 * Fix machine gun's ammo panel.
-* Add light model setting with `Phong` and `Blinn-Phong` when render interaction shader pass(string cvar `harm_r_lightModel`).
+* Add light model setting with `Phong` and `Blinn-Phong` when render interaction shader pass(string cvar `harm_r_lightingModel`).
 * Add specular exponent setting in light model(float cvar `harm_r_specularExponent`).
 * Default using program internal OpenGL shader.
 * Reset extras virtual button size, and add Console(~) key.

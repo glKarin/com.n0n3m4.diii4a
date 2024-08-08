@@ -1,1 +1,7 @@
 cmake-*
+
+# VSMC
+*.dir
+*.vcxproj*
+cmake_install.cmake
+Release
