@@ -33,7 +33,7 @@ void main() {
 
 	// load the filtered normal map, then normalize to full scale,
 	vec3 localNormal = texture(u_normalTexture, var_texCoord).rgb;
-	localNormal = localNormal * vec3(2) - vec3(1);
+	localNormal = localNormal * vec3(2.0) - vec3(1.0);
 	localNormal.z = sqrt(max(0.0, 1.0 - localNormal.x * localNormal.x - localNormal.y * localNormal.y));
 	localNormal = normalize(localNormal);
 

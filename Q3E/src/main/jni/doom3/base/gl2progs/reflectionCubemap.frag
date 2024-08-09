@@ -14,7 +14,9 @@ uniform lowp vec4 u_glColor;
 void main(void)
 {
 #if 1
+    // normalize surface normal
     vec3 normal = normalize(var_normalLocal);
+    // normalize vector to eye
     vec3 toEye = normalize(var_toEyeLocal);
 
     // calculate reflection vector

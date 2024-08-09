@@ -6,6 +6,7 @@ precision mediump float;
 attribute highp vec4 attr_Vertex;
 attribute lowp vec4 attr_Color;
 attribute vec3 attr_TexCoord;
+attribute vec3 attr_Normal;
 
 uniform highp mat4 u_modelViewProjectionMatrix;
 uniform mat4 u_modelViewMatrix;
@@ -22,7 +23,7 @@ varying vec3 var_toEyeLocal;
 void main(void)
 {
 #if 1
-    var_normalLocal = attr_TexCoord;
+    var_normalLocal = attr_Normal;
     var_toEyeLocal = vec3(u_viewOrigin - attr_Vertex);
 #else // d3asm
     var_TexCoord = (u_textureMatrix * reflect( normalize( u_modelViewMatrix * attr_Vertex ),

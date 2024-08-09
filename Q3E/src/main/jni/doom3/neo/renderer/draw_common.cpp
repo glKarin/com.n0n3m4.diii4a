@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #define _HARM_SKIP_RENDER_SHADER_PASS
 #endif
 #ifdef _HARM_SKIP_RENDER_SHADER_PASS
-static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9000. All. greater than 0: skip, less than 0: only, 0 disabled.");
+static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9. TG_REFLECT_CUBE(Bumpy), 9000. All. greater than 0: skip, less than 0: only, 0 disabled.");
 #endif
 
 /*
@@ -134,7 +134,28 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 	}
 
 	else if (pStage->texture.texgen == TG_REFLECT_CUBE) {
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+		// old d3asm: GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+		
+        GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
+        GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+
+        // see if there is also a bump map specified
+        const shaderStage_t *bumpStage = surf->material->GetBumpStage();
+        if ( bumpStage ) {
+            // per-pixel reflection mapping with bump mapping
+            GL_SelectTexture( 1 );
+            bumpStage->texture.image->Bind();
+            GL_SelectTexture( 0 );
+
+            GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
+            GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
+            GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
+            GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
+        }
+
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), surf->space->modelMatrix);
+
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), surf->space->modelViewMatrix);
 
 		float mat[16];
@@ -160,10 +181,23 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 	}
 
 	if (pStage->texture.texgen == TG_DIFFUSE_CUBE || pStage->texture.texgen == TG_SKYBOX_CUBE
-			//k: reflection cubemap
-	    || pStage->texture.texgen == TG_REFLECT_CUBE
+			//k: reflection cubemap // || pStage->texture.texgen == TG_REFLECT_CUBE
 	    || pStage->texture.texgen == TG_WOBBLESKY_CUBE) {
 		 GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
+	} else if (pStage->texture.texgen == TG_REFLECT_CUBE) {
+        // GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
+        GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+
+        // see if there is also a bump map specified
+        const shaderStage_t *bumpStage = surf->material->GetBumpStage();
+        if ( bumpStage ) {
+            GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
+            GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
+
+            GL_SelectTexture( 1 );
+            globalImages->BindNull();
+            GL_SelectTexture( 0 );
+        }
 	}
 
 	if (pStage->texture.hasMatrix) {
@@ -811,13 +845,21 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		const int texgen = pStage->texture.texgen;
 		bool usingTexCoord = true;
 #ifdef _HARM_SKIP_RENDER_SHADER_PASS
+        int testTexgen = texgen;
+        if(testTexgen == TG_REFLECT_CUBE)
+        {
+            const shaderStage_t *bumpStage = surf->material->GetBumpStage();
+            if ( bumpStage )
+                testTexgen = 8;
+        }
+        testTexgen += 1;
 		int skipShaderPass = harm_r_skipShaderPass.GetInteger();
-		if(skipShaderPass == 9000 || skipShaderPass == texgen + 1)
+		if(skipShaderPass == 9000 || skipShaderPass == testTexgen)
 		{
 			RB_LogComment("skip\n");
 			continue;
 		}
-		if(skipShaderPass < 0 && -skipShaderPass != texgen + 1)
+		if(skipShaderPass < 0 && -skipShaderPass != testTexgen)
 		{
 			RB_LogComment("skip ~\n");
 			continue;
@@ -830,8 +872,14 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			case TG_WOBBLESKY_CUBE:
 				GL_UseProgram(&cubemapShader);
 				break;
-			case TG_REFLECT_CUBE:
+			case TG_REFLECT_CUBE: {
+                // see if there is also a bump map specified
+                const shaderStage_t *bumpStage = surf->material->GetBumpStage();
+                if ( bumpStage )
+                    GL_UseProgram(&reflectionCubemapBumpyShader);
+                else
 				GL_UseProgram(&reflectionCubemapShader);
+            }
 				break;
 			case TG_DIFFUSE_CUBE:
 				GL_UseProgram(&diffuseCubemapShader);

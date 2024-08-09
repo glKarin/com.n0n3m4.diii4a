@@ -312,7 +312,7 @@ public final class Q3EGlobals
     public static final String GAME_EXECUABLE = "game.arm";
 
     // extra internal game file version
-    public static final String TDM_GLSL_SHADER_VERSION = "2.12.2";
+    public static final String TDM_GLSL_SHADER_VERSION = "2.12.3";
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
     public static final String GZDOOM_VERSION = "4.12.2.2";
 

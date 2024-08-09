@@ -417,6 +417,7 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("zfillClip", SHADER_ZFILLCLIP, &depthFillClipShader, ZFILLCLIP_VERT, ZFILLCLIP_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("cubemap", SHADER_CUBEMAP, &cubemapShader, CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("reflectionCubemap", SHADER_REFLECTIONCUBEMAP, &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, REFLECTION_CUBEMAP_FRAG /* CUBEMAP_FRAG */, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("reflectionCubemapBumpy", SHADER_REFLECTIONCUBEMAPBUMPY, &reflectionCubemapBumpyShader, REFLECTION_CUBEMAP_BUMPY_VERT, REFLECTION_CUBEMAP_BUMPY_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("fog", SHADER_FOG, &fogShader, FOG_VERT, FOG_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("blendLight", SHADER_BLENDLIGHT, &blendLightShader, BLENDLIGHT_VERT, FOG_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("interactionPBR", SHADER_INTERACTIONPBR, &interactionPBRShader, INTERACTION_VERT, INTERACTION_FRAG, "_PBR", "_PBR"));
@@ -741,7 +742,9 @@ static bool RB_GLSL_ValidateProgram(shaderProgram_t *shaderProgram)
 	qglGetProgramiv(shaderProgram->program, GL_VALIDATE_STATUS, &validProgram);
 
 	if (!validProgram) {
-		common->Printf("RB_GLSL_ValidateProgram: program invalid\n");
+        GLchar log[LOG_LEN];
+        qglGetProgramInfoLog(shaderProgram->program, sizeof(GLchar) * LOG_LEN, NULL, log);
+        common->Warning("[Harmattan]: %s::glValidateProgram() -> %s", __func__, log);
 		return false;
 	}
 
@@ -949,8 +952,6 @@ static bool RB_GLSL_InitShaders(void)
 
 void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
 {
-	int		i;
-
 	common->Printf("----- R_ReloadGLSLPrograms -----\n");
 
     if(!glslInitialized)
@@ -1085,11 +1086,9 @@ static GLuint RB_GLSL_CreateProgram(GLuint &program, GLuint vertShader, GLuint f
 	{
 		GLchar log[LOG_LEN];
 		qglGetProgramInfoLog(program, sizeof(GLchar) * LOG_LEN, NULL, log);
-		SHADER_ERROR("[Harmattan]: %s::glValidateProgram() -> %s!\n", __func__, log);
-#if 0
-		qglDeleteProgram(program);
-		program = 0;
-#endif
+        common->Warning("[Harmattan]: %s::glValidateProgram() -> %s!", __func__, log);
+//		qglDeleteProgram(program);
+//		program = 0;
 	}
 
 	return program;
@@ -1550,6 +1549,9 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
  \
 	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_VERT, "reflectionCubemap", "vert"); \
 	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_FRAG, "reflectionCubemap", "frag"); \
+ \
+	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_BUMPY_VERT, "reflectionCubemapBumpy", "vert"); \
+	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_BUMPY_FRAG, "reflectionCubemapBumpy", "frag"); \
  \
 	EXPORT_SHADER_SOURCE(FOG_VERT, "fog", "vert"); \
 	EXPORT_SHADER_SOURCE(FOG_FRAG, "fog", "frag"); \
