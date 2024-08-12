@@ -380,7 +380,7 @@ public class GameLauncher extends Activity
 			}
 			else if (rgId == R.id.rg_harm_r_lightingModel)
 			{
-				String value = "" + (GetCheckboxIndex(radioGroup, id) + 1);
+				String value = "" + ((GetCheckboxIndex(radioGroup, id) + 1) % V.rg_harm_r_lightingModel.getChildCount());
 				SetProp("harm_r_lightingModel", value);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putString(Q3EPreference.pref_harm_r_lightingModel, value)
@@ -825,6 +825,8 @@ public class GameLauncher extends Activity
 			if (str != null)
 			{
 				index = Q3EUtils.parseInt_s(str, 1) - 1;
+				if(index < 0)
+					index = V.rg_harm_r_lightingModel.getChildCount() - 1;
 			}
 			SelectCheckbox(V.rg_harm_r_lightingModel, index);
 			if (!IsProp("harm_r_lightingModel")) SetProp("harm_r_lightingModel", "1");
@@ -1115,7 +1117,10 @@ public class GameLauncher extends Activity
         V.rg_color_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.r_harmclearvertexbuffer, mPrefs.getInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, 2));
         V.r_harmclearvertexbuffer.setOnCheckedChangeListener(m_groupCheckChangeListener);
-        SelectCheckbox(V.rg_harm_r_lightingModel, Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_harm_r_lightingModel, "1")) - 1);
+		int index = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_harm_r_lightingModel, "1"), 1) - 1;
+		if(index < 0)
+			index = V.rg_harm_r_lightingModel.getChildCount() - 1;
+        SelectCheckbox(V.rg_harm_r_lightingModel, index);
         V.rg_harm_r_lightingModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
         V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
@@ -1762,7 +1767,7 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_32bit, index == -1);
         mEdtr.putInt(Q3EPreference.pref_harm_16bit, index);
         mEdtr.putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
-        mEdtr.putString(Q3EPreference.pref_harm_r_lightingModel, "" + (GetCheckboxIndex(V.rg_harm_r_lightingModel) + 1));
+        mEdtr.putString(Q3EPreference.pref_harm_r_lightingModel, "" + ((GetCheckboxIndex(V.rg_harm_r_lightingModel) + 1) % V.rg_harm_r_lightingModel.getChildCount()));
         mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 3.0f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentBlinnPhong, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentBlinnPhong.getText().toString(), 12.0f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentPBR, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentPBR.getText().toString(), 1.0f));

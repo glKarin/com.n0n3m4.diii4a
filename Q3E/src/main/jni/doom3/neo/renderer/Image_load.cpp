@@ -55,6 +55,18 @@ int MakePowerOfTwo(int num)
 	return pot;
 }
 
+static GLint R_SelectColorInternalFormat(void)
+{
+
+#ifdef GL_ES_VERSION_3_0
+    if(USING_GLES3)
+        return GL_RGBA8; // sized
+    else
+#endif
+        return GL_RGBA;	// unsized
+}
+#define IF_GL_RGBA (R_SelectColorInternalFormat())
+
 /*
 ================
 BitsForInternalFormat
@@ -180,7 +192,7 @@ This may need to scan six cube map images
 GLenum idImage::SelectInternalFormat(const byte **dataPtrs, int numDataPtrs, int width, int height,
                                      textureDepth_t minimumDepth) const
 {
-	return GL_RGBA8;	// four bytes
+	return IF_GL_RGBA;	// four bytes
 }
 
 /*
@@ -2059,6 +2071,7 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 		uploadHeight = potHeight;
 
 		if (potWidth == imageWidth && potHeight == imageHeight) {
+			//karin: TODO: In Intel graphics card, cause GL_INVALID_OPERATION if in OpenGLES3.0
 			qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, imageWidth, imageHeight, 0);
 		} else {
 			byte	*junk;
@@ -2170,7 +2183,7 @@ void idImage::UploadScratch(const byte *data, int cols, int rows)
 
 			// upload the base level
 			for (i = 0 ; i < 6 ; i++) {
-				qglTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL_RGBA, cols, rows, 0,
+				qglTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, IF_GL_RGBA, cols, rows, 0,
 				              GL_RGBA, GL_UNSIGNED_BYTE, data + cols*rows*4*i);
 			}
 		} else {
@@ -2200,7 +2213,7 @@ void idImage::UploadScratch(const byte *data, int cols, int rows)
 		if (cols != uploadWidth || rows != uploadHeight) {
 			uploadWidth = cols;
 			uploadHeight = rows;
-			qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			qglTexImage2D(GL_TEXTURE_2D, 0, IF_GL_RGBA, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		} else {
 			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
 			// it and don't try and do a texture compression
@@ -2519,7 +2532,7 @@ void		idImage::GenerateShadow2DRGBAImage(int width, int height, textureFilter_t 
 	qglGenTextures(1, &texnum);
 
 	// select proper internal format before we resample
-	internalFormat = GL_RGBA;
+	internalFormat = IF_GL_RGBA;
 
 	uploadHeight = scaled_height;
 	uploadWidth = scaled_width;
@@ -2580,7 +2593,7 @@ void idImage::GenerateShadowCubeRGBAImage(int size, textureFilter_t filterParm, 
 	qglGenTextures(1, &texnum);
 
 	// select proper internal format before we resample
-	internalFormat = GL_RGBA;
+	internalFormat = IF_GL_RGBA;
 
 	// don't bother with downsample for now
 	scaled_width = width;
@@ -2738,7 +2751,6 @@ void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm,
 void idImage::GenerateShadowArray( int width, int height, int numSides, textureFilter_t filterParm, textureRepeat_t repeatParm, int component, bool compare )
 {
 	int			scaled_width, scaled_height;
-	int			i;
 
 	PurgeImage();
 
@@ -2832,7 +2844,6 @@ void idImage::GenerateShadowArray( int width, int height, int numSides, textureF
 void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSizeParm, textureFilter_t filterParm, textureRepeat_t repeatParm, int component, int stencilComponent, bool compare )
 {
 	int			scaled_width, scaled_height;
-	int			i;
 
 	PurgeImage();
 

@@ -3047,7 +3047,7 @@ bool idMaterial::Parse(const char *text, const int textLength)
 	}
 
 #ifdef _NO_LIGHT
-	if (r_noLight./*GetBool*/GetInteger() == 1 || noLight)
+	if (r_noLight.GetBool() || noLight)
 	{
 		int bumpcnt=0;
 

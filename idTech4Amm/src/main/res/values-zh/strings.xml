@@ -357,4 +357,5 @@
     <string name="current_game_data_path">当前游戏数据路径</string>
     <string name="render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces">渲染镂空材质阴影(r_forceShadowMapsOnAlphaTestedSurfaces)</string>
     <string name="stencil_shadow">模板阴影</string>
+    <string name="ambient">环境光</string>
 </resources>

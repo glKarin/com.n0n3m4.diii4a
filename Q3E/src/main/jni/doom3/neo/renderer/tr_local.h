@@ -2311,4 +2311,11 @@ void MD5Anim_AddCommand(void);
 void ModelTest_AddCommand(void);
 #endif
 
+extern idCVar harm_r_lightingModel;
+#define r_interactionLightingModel harm_r_lightingModel.GetInteger()
+#define HARM_INTERACTION_SHADER_PHONG 1
+#define HARM_INTERACTION_SHADER_BLINNPHONG 2
+#define HARM_INTERACTION_SHADER_PBR 3
+#define HARM_INTERACTION_SHADER_AMBIENT 0
+
 #endif /* !__TR_LOCAL_H__ */

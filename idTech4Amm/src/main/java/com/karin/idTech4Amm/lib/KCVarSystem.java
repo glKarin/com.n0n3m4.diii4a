@@ -29,7 +29,8 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_lightingModel", "string", "1", "Lighting model when draw interactions", 0,
                                 "1", "Phong",
                                 "2", "Blinn-Phong",
-                                "3", "PBR"
+                                "3", "PBR",
+                                "0", "Ambient(No lighting)"
                         ),
                         KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction light model", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction light model", KCVar.FLAG_POSITIVE),

@@ -1703,7 +1703,7 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 	int hash;
 
 #ifdef _NO_LIGHT
-	if ( r_noLight./*GetBool*/GetInteger() == 1 && ( depth == TD_BUMP || depth == TD_SPECULAR ) )
+	if ( r_noLight.GetBool() && ( depth == TD_BUMP || depth == TD_SPECULAR ) )
 		return globalImages->defaultImage;
 #endif
 

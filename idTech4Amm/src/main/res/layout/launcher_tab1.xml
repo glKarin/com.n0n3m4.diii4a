@@ -304,7 +304,7 @@
                     android:id="@+id/rg_harm_r_lightingModel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
                     <RadioButton
                         android:id="@+id/harm_r_lightModel_phong"
@@ -324,6 +324,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/pbr" />
+
+                    <RadioButton
+                        android:id="@+id/harm_r_lightModel_ambient"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ambient" />
 
                 </RadioGroup>
 
