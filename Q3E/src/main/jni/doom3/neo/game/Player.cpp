@@ -6152,6 +6152,12 @@ void idPlayer::PerformImpulse(int impulse)
 			UseVehicle();
 			break;
 		}
+
+        // RAVEN: bind "t" "_impulse51" in DoomConfig.cfg
+        case 51 /* IMPULSE_51 */: {
+            LastWeapon();
+            break;
+        }
 	}
 }
 
@@ -9423,4 +9429,23 @@ bool idPlayer::NeedsIcon(void)
 {
 	// local clients don't render their own icons... they're only info for other clients
 	return entityNumber != gameLocal.localClientNum && (isLagged || isChatting);
+}
+
+/*
+===============
+idPlayer::LastWeapon
+===============
+*/
+void idPlayer::LastWeapon( void ) {
+    // Dont bother if previousWeapon is invalid or the player is spectating
+    if ( spectating || previousWeapon < 0 )	{
+        return;
+    }
+
+    // Do we have the weapon still?
+    if ( !(inventory.weapons & ( 1 << previousWeapon ) ) ) {
+        return;
+    }
+
+    idealWeapon = previousWeapon;
 }
