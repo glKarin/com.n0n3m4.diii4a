@@ -2982,7 +2982,11 @@ void idCommonLocal::LoadGameDLL(void)
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
 #elif defined(_HUMANHEAD) // prey2006 base game dll
-			if(!fsgame.Icmp("preybase") || fsgame.IsEmpty()) // load Prey game so.
+			if(!fsgame.Icmp("preybase") 
+#if !defined(__ANDROID__)
+					|| !fsgame.Icmp("base")
+#endif
+					|| fsgame.IsEmpty()) // load Prey game so.
 			{
 				common->Printf("[Harmattan]: Load Prey2006 game......\n");
 				idStr dllFile(dir);

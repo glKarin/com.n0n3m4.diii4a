@@ -936,6 +936,7 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 	}
 
 #else
+#ifdef __ANDROID__ //karin: use preybase on Android
 #ifdef _HUMANHEAD //k: for windows game data path, e.g. C:\PREY\base/type/file.ext
 				  // first search standard prey path, and then search diii4a prey path
 #define RAW_BASE_GAMEDIR "base"
@@ -960,6 +961,7 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 	if(!base || !base[0])
 	{
 #endif
+#endif
 
 	// look for the first complete directory name
 	base = (char *)strstr(OSPath, BASE_GAMEDIR);
@@ -980,8 +982,10 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 		base = strstr(base + 1, BASE_GAMEDIR);
 	}
 
+#ifdef __ANDROID__ //karin: use preybase on Android
 #ifdef _HUMANHEAD
 	}
+#endif
 #endif
 
 #endif
@@ -997,9 +1001,11 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 			fsgame = fs_game_base.GetString();
 		}
 
+#ifdef __ANDROID__ //karin: use preybase on Android
 #ifdef _HUMANHEAD
 		if(fsgame && !idStr::Icmp(fsgame, "preybase"))
 			fsgame = "";
+#endif
 #endif
 
 		if (base == NULL && fsgame && strlen(fsgame)) {
