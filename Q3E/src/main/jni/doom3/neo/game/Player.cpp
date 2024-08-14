@@ -9437,6 +9437,9 @@ idPlayer::LastWeapon
 ===============
 */
 void idPlayer::LastWeapon( void ) {
+    if(gameLocal.isMultiplayer)
+        return;
+
     // Dont bother if previousWeapon is invalid or the player is spectating
     if ( spectating || previousWeapon < 0 )	{
         return;
