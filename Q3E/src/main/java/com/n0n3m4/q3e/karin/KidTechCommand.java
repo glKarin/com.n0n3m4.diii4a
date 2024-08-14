@@ -133,7 +133,20 @@ public class KidTechCommand
             int valueI = blank2I + 1;
             if(!RequireType(valueI, CMD_PART_VALUE))
             {
-                InsertPart(valueI, CMD_PART_VALUE, val);
+                CmdPart lastBlank = GetPart(blank2I);
+                if(null != lastBlank && lastBlank.str.length() >= 2)
+                {
+                    lastBlank.str = " ";
+                    InsertPart(valueI, CMD_PART_VALUE, val);
+                    InsertBlankPart(valueI + 1);
+                }
+                else
+                {
+                    InsertPart(valueI, CMD_PART_VALUE, val);
+                    int nextBlankI = valueI + 1;
+                    if(!IsEnd(nextBlankI) && !RequireType(nextBlankI, CMD_PART_BLANK))
+                        InsertBlankPart(nextBlankI);
+                }
                 return this;
             }
 
@@ -353,7 +366,20 @@ public class KidTechCommand
             int valueI = blank1I + 1;
             if(!RequireType(valueI, CMD_PART_VALUE))
             {
-                InsertPart(valueI, CMD_PART_VALUE, val);
+                CmdPart lastBlank = GetPart(blank1I);
+                if(null != lastBlank && lastBlank.str.length() >= 2)
+                {
+                    lastBlank.str = " ";
+                    InsertPart(valueI, CMD_PART_VALUE, val);
+                    InsertBlankPart(valueI + 1);
+                }
+                else
+                {
+                    InsertPart(valueI, CMD_PART_VALUE, val);
+                    int nextBlankI = valueI + 1;
+                    if(!IsEnd(nextBlankI) && !RequireType(nextBlankI, CMD_PART_BLANK))
+                        InsertBlankPart(nextBlankI);
+                }
                 return this;
             }
 
@@ -682,6 +708,13 @@ public class KidTechCommand
         if(null == o)
             return "";
         return o.toString();
+    }
+
+    private CmdPart GetPart(int index)
+    {
+        if(index < 0 || index >= cmdParts.size())
+            return null;
+        return cmdParts.get(index);
     }
 
     private boolean IsEnd(int i)
