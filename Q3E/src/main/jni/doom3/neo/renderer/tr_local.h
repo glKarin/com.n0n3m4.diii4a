@@ -1156,6 +1156,7 @@ GL wrapper/helper functions
 void	GL_SelectTexture(int unit);
 void	GL_UseProgram(shaderProgram_s *program);
 void	GL_Uniform1fv(GLint location, const GLfloat *value);
+void	GL_Uniform2fv(GLint location, const GLfloat *value);
 void	GL_Uniform3fv(GLint location, const GLfloat *value);
 void	GL_Uniform4fv(GLint location, const GLfloat *value);
 void 	GL_Uniform1i(GLint location, GLint w);
@@ -1699,8 +1700,8 @@ typedef struct shaderProgram_s {
 #ifdef _SHADOW_MAPPING
 	GLint		shadowMVPMatrix;
 	GLint		globalLightOrigin;
-    GLint		bias;
 #endif
+
 	char 		name[HARM_SHADER_NAME_LENGTH];
     int         type; // glsl_program_t
 } shaderProgram_t;

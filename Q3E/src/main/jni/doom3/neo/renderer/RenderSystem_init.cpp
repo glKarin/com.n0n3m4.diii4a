@@ -2536,31 +2536,31 @@ bool GL_CheckErrors(const char *name)
     while ((err = qglGetError()) != GL_NO_ERROR) {
         i++;
 
-	switch (err) {
-		case GL_INVALID_ENUM:
-			strcpy(s, "GL_INVALID_ENUM");
-			break;
-		case GL_INVALID_VALUE:
-			strcpy(s, "GL_INVALID_VALUE");
-			break;
-		case GL_INVALID_OPERATION:
-			strcpy(s, "GL_INVALID_OPERATION");
-			break;
+        switch (err) {
+            case GL_INVALID_ENUM:
+                strcpy(s, "GL_INVALID_ENUM");
+                break;
+            case GL_INVALID_VALUE:
+                strcpy(s, "GL_INVALID_VALUE");
+                break;
+            case GL_INVALID_OPERATION:
+                strcpy(s, "GL_INVALID_OPERATION");
+                break;
 #if !defined(GL_ES_VERSION_2_0)
-			case GL_STACK_OVERFLOW:
+                case GL_STACK_OVERFLOW:
             strcpy(s, "GL_STACK_OVERFLOW");
             break;
         case GL_STACK_UNDERFLOW:
             strcpy(s, "GL_STACK_UNDERFLOW");
             break;
 #endif
-		case GL_OUT_OF_MEMORY:
-			strcpy(s, "GL_OUT_OF_MEMORY");
-			break;
-		default:
-			idStr::snPrintf(s, sizeof(s), "%x", err);
-			break;
-	}
+            case GL_OUT_OF_MEMORY:
+                strcpy(s, "GL_OUT_OF_MEMORY");
+                break;
+            default:
+                idStr::snPrintf(s, sizeof(s), "%x", err);
+                break;
+        }
         common->Printf("GL_CheckErrors(%d) for %s: %s\n", i, name, s);
     }
 

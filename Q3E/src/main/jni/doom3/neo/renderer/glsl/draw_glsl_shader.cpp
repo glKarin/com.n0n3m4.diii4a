@@ -830,7 +830,6 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 #ifdef _SHADOW_MAPPING
 	shader->shadowMVPMatrix = GL_GetUniformLocation(shader->program, "shadowMVPMatrix");
     shader->globalLightOrigin = GL_GetUniformLocation(shader->program, "globalLightOrigin");
-    shader->bias = GL_GetUniformLocation(shader->program, "bias");
 #endif
 
 	// get attribute location

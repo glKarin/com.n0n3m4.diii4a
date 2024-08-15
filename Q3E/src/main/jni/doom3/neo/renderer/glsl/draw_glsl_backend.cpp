@@ -92,6 +92,21 @@ void GL_Uniform1i(GLint location, GLint w)
 
 /*
 ====================
+GL_Uniform2fv
+====================
+*/
+void GL_Uniform2fv(GLint location, const GLfloat *value)
+{
+    HARM_CHECK_SHADER("GL_Uniform2fv");
+
+    HARM_CHECK_SHADER_INDEX(location);
+    qglUniform2fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
+
+    HARM_CHECK_SHADER_ERROR("GL_Uniform2fv");
+}
+
+/*
+====================
 GL_Uniform3fv
 ====================
 */

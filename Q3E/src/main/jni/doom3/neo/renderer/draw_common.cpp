@@ -156,7 +156,7 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 
         GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), surf->space->modelMatrix);
 
-		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), surf->space->modelViewMatrix);
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), surf->space->modelViewMatrix);
 
 		float mat[16];
 		R_TransposeGLMatrix(backEnd.viewDef->worldSpace.modelViewMatrix, mat);
@@ -198,7 +198,7 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
             globalImages->BindNull();
             GL_SelectTexture( 0 );
         }
-	}
+    }
 
 	if (pStage->texture.hasMatrix) {
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, textureMatrix), mat4_identity.ToFloatPtr());
@@ -866,7 +866,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
                 if ( bumpStage )
                     GL_UseProgram(&reflectionCubemapBumpyShader);
                 else
-				GL_UseProgram(&reflectionCubemapShader);
+                    GL_UseProgram(&reflectionCubemapShader);
             }
 				break;
 			case TG_DIFFUSE_CUBE:
@@ -951,24 +951,24 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
                     else
                         GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
                 }
-            }
+        }
         else
 #endif
         {
 			if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
-            {
+			{
 				if (pStage->lighting == SL_AMBIENT)
-                    GL_State(pStage->drawStateBits);
-                else
-                {
-                    if (shader->TestMaterialFlag(MF_POLYGONOFFSET))
-                        GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|GLS_DEPTHFUNC_LESS);
-                    else
-                        GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
-                }
-            }
-		else
-		GL_State(pStage->drawStateBits);
+	                GL_State(pStage->drawStateBits);
+	            else
+	            {
+	                if (shader->TestMaterialFlag(MF_POLYGONOFFSET))
+	                    GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|GLS_DEPTHFUNC_LESS);
+	                else
+	                    GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
+	            }
+	        }
+			else
+				GL_State(pStage->drawStateBits);
 		}
 
 		RB_PrepareStageTexturing(pStage, surf, ac);
