@@ -1983,8 +1983,16 @@ idModList *idFileSystemLocal::ListMods(void)
 		}
 	}
 
+#ifdef _RAVEN //karin: base game in mods list
+	list->mods.Insert("");
+	list->descriptions.Insert("Quake 4");
+#elif defined(_HUMANHEAD) //karin: base game in mods list
+	list->mods.Insert("");
+	list->descriptions.Insert("Prey");
+#else
 	list->mods.Insert("");
 	list->descriptions.Insert("Doom 3");
+#endif
 
 	assert(list->mods.Num() == list->descriptions.Num());
 
