@@ -64,8 +64,10 @@ idFramebuffer::idFramebuffer( const char* name, int w, int h )
 	
 	width = w;
 	height = h;
-	
+
 	qglGenFramebuffers( 1, &frameBuffer );
+
+    printf("idFramebuffer create: %s -> %d\n", fboName.c_str(), frameBuffer);
 }
 
 void idFramebuffer::Bind()
@@ -358,8 +360,73 @@ void idFramebuffer::Check()
 	qglBindFramebuffer( GL_FRAMEBUFFER, prev );
 }
 
-void idFramebuffer::PurgeFramebuffer()
+void idFramebuffer::Purge()
 {
+    if(frameBuffer > 0 && qglIsFramebuffer(frameBuffer))
+    {
+        qglBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        qglBindRenderbuffer( GL_RENDERBUFFER, 0 );
+
+        int count = sizeof(colorBuffers) / sizeof(colorBuffers[0]);
+        for(int i = 0; i < count; i++)
+        {
+            qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, 0 );
+
+            uint32_t &handle = colorBuffers[i];
+            if(handle > 0 && qglIsRenderbuffer(handle))
+            {
+                qglDeleteRenderbuffers(1, &handle);
+            }
+        }
+
+        qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0 );
+        qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0 );
+        qglFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0 );
+
+        if(depthBuffer && qglIsRenderbuffer(depthBuffer))
+        {
+            qglDeleteRenderbuffers(1, &depthBuffer);
+        }
+        if(stencilBuffer && qglIsRenderbuffer(stencilBuffer))
+        {
+            qglDeleteRenderbuffers(1, &stencilBuffer);
+        }
+
+        qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0 );
+        qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0 );
+        for(int i = 0; i < 6; i++)
+        {
+#ifdef GL_ES_VERSION_3_0
+            if(USING_GLES3)
+            {
+                qglFramebufferTextureLayer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0, i );
+                qglFramebufferTextureLayer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 0, 0, i );
+            }
+            else
+#endif
+            {
+                qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0 );
+                qglFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0 );
+            }
+        }
+
+        qglDeleteFramebuffers(1, &frameBuffer);
+
+        qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    printf("idFramebuffer purge: %s -> %d\n", fboName.c_str(), frameBuffer);
+
+    frameBuffer = 0;
+
+    memset( colorBuffers, 0, sizeof( colorBuffers ) );
+    colorFormat = 0;
+
+    depthBuffer = 0;
+    depthFormat = 0;
+
+    stencilBuffer = 0;
+    stencilFormat = 0;
 }
 
 void idFramebuffer::PrintFramebuffer(void)
@@ -436,7 +503,7 @@ void Framebuffer::Init()
 			globalFramebuffers.shadowFBO[i]->AddColorBuffer(GL_RGBA8, 0); // GL_RGBA4 TODO: check OpenGLES2.0 support GL_RGBA8
 			globalFramebuffers.shadowFBO[i]->AddDepthBuffer(glConfig.depth24Available ? GL_DEPTH_COMPONENT24 : GL_DEPTH_COMPONENT16);
 		}
-		common->Printf( "--- Framebuffer::Bind( name = '%s', handle = %d ) ---\n", globalFramebuffers.shadowFBO[i]->fboName.c_str(), globalFramebuffers.shadowFBO[i]->frameBuffer );
+		common->Printf( "--- Framebuffer::Bind( name = '%s', handle = %d, size = %d x %d ) ---\n", globalFramebuffers.shadowFBO[i]->fboName.c_str(), globalFramebuffers.shadowFBO[i]->frameBuffer, globalFramebuffers.shadowFBO[i]->width, globalFramebuffers.shadowFBO[i]->height );
 	}
 //	globalFramebuffers.shadowFBO->AddColorBuffer( GL_RGBA8, 0 );
 //	globalFramebuffers.shadowFBO->AddDepthBuffer( GL_DEPTH_COMPONENT24 );
@@ -444,20 +511,38 @@ void Framebuffer::Init()
 #endif
 
 	BindNull();
+
+    // if(USING_GLES31)
+    if(idStencilTexture::IsAvailable())
+    {
+        printf("Stencil texture creating: %d x %d\n", glConfig.vidWidth, glConfig.vidHeight);
+        stencilTexture.Init(glConfig.vidWidth, glConfig.vidHeight);
+    }
 }
 
 void Framebuffer::Shutdown()
 {
+    printf("Framebuffer shutdown: %d\n", framebuffers.Num());
 	for(int i = 0; i < framebuffers.Num(); i++)
 	{
 		idFramebuffer *fb = framebuffers[i];
 		if(fb)
 		{
-			fb->PurgeFramebuffer();
+			fb->Purge();
 			delete fb;
 		}
 	}
 	framebuffers.Clear();
+
+    printf("Shadow map framebuffer purged\n");
+    memset(globalFramebuffers.shadowFBO, 0, sizeof(globalFramebuffers.shadowFBO));
+
+    // if(USING_GLES31)
+    if(idStencilTexture::IsAvailable())
+    {
+        printf("Stencil texture purged\n");
+        stencilTexture.Shutdown();
+    }
 }
 
 void Framebuffer::BindNull()

@@ -25,6 +25,7 @@ public:
     void                    BackendThreadShutdown(void);
     void                    BackendThreadWait(void);
     void                    BackendThreadTask(void);
+    bool                    IsActive(void) const;
 
 private:
     idRenderThread(const idRenderThread &);

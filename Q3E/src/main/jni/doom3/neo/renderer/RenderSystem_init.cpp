@@ -481,6 +481,22 @@ vidmode_t r_vidModes[] = {
 	{ "Mode  6: 1152x864",		1152,	864 },
 	{ "Mode  7: 1280x1024",		1280,	1024 },
 	{ "Mode  8: 1600x1200",		1600,	1200 },
+        // DG: from here on: modes I added.
+    { "Mode  9: 1280x720",		1280,	720 },
+    { "Mode 10: 1366x768",		1366,	768 },
+    { "Mode 11: 1440x900",		1440,	900 },
+    { "Mode 12: 1400x1050",		1400,	1050 },
+    { "Mode 13: 1600x900",		1600,	900 },
+    { "Mode 14: 1680x1050",		1680,	1050 },
+    { "Mode 15: 1920x1080",		1920,	1080 },
+    { "Mode 16: 1920x1200",		1920,	1200 },
+    { "Mode 17: 2048x1152",		2048,	1152 },
+    { "Mode 18: 2560x1600",		2560,	1600 },
+    { "Mode 19: 3200x2400",		3200,	2400 },
+    { "Mode 20: 3840x2160",		3840,   2160 },
+    { "Mode 21: 4096x2304",		4096,   2304 },
+    { "Mode 22: 2880x1800",		2880,   1800 },
+    { "Mode 23: 2560x1440",		2560,   1440 },
 };
 static int	s_numVidModes = (sizeof(r_vidModes) / sizeof(r_vidModes[0]));
 
@@ -617,6 +633,9 @@ void R_InitOpenGL(void)
 
 	cmdSystem->AddCommand("reloadGLSLprograms", R_ReloadGLSLPrograms_f, CMD_FL_RENDERER, "reloads GLSL programs");
 	R_ReloadGLSLPrograms_f(idCmdArgs());
+
+    // Init framebuffer: shadow map, stencil texture
+    Framebuffer::Init();
 
 	// allocate the vertex array range or vertex objects
 	vertexCache.Init();
@@ -2058,6 +2077,12 @@ void R_VidRestart_f(const idCmdArgs &args)
 		soundSystem->ShutdownHW();
 		Sys_ShutdownInput();
 		globalImages->PurgeAllImages();
+
+        // delete framebuffer: shadow map, stencil texture
+        Framebuffer::Shutdown();
+        // delete all shaders
+        R_GLSL_Shutdown();
+
 		// free the context and close the window
 		GLimp_Shutdown();
 		glConfig.isInitialized = false;
@@ -2387,6 +2412,9 @@ void idRenderSystemLocal::Shutdown(void)
 
 	globalImages->Shutdown();
 
+    // delete framebuffer: shadow map, stencil texture
+    Framebuffer::Shutdown();
+
 	// close the r_logFile
 	if (logFile) {
 		fprintf(logFile, "*** CLOSING LOG ***\n");
@@ -2409,6 +2437,8 @@ void idRenderSystemLocal::Shutdown(void)
 
 	Clear();
 
+    // delete all shaders
+    R_GLSL_Shutdown();
 	ShutdownOpenGL();
 }
 
@@ -2452,14 +2482,6 @@ void idRenderSystemLocal::InitOpenGL(void)
 		R_InitOpenGL();
 
 		globalImages->ReloadAllImages();
-
-//#ifdef _SHADOW_MAPPING
-		Framebuffer::Init();
-//#endif
-		// offlineScreenRenderer.Init(glConfig.vidWidth, glConfig.vidHeight);
-		// if(USING_GLES31)
-		if(idStencilTexture::IsAvailable())
-			stencilTexture.Init(glConfig.vidWidth, glConfig.vidHeight);
 		
 		err = qglGetError();
 

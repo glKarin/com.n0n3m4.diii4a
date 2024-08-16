@@ -121,6 +121,11 @@ void idRenderThread::BackendThreadWait(void)
     }
 }
 
+bool idRenderThread::IsActive(void) const
+{
+    return multithreadActive && Sys_ThreadIsRunning(&render_thread);
+}
+
 bool Sys_InRenderThread(void)
 {
     return Sys_InThread(&renderThreadInstance.render_thread);

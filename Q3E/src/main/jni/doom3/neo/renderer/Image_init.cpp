@@ -986,7 +986,8 @@ void R_QuadraticImage(idImage *image)
 static void R_CreateShadowMapImage_##name##_Res##res( idImage* image ) \
 { \
 	int size = shadowMapResolutions[res]; \
-	image->func parms; \
+	image->func parms;                                              \
+    printf("CreateShadowMapImage: %s(%s) -> %d x %d\n", #name, #func, size, size);  \
 }
 
 #define CREATE_SHADOW_MAP_IMAGE_DECL(name, func, parms) \
@@ -1173,7 +1174,7 @@ void idImageManager::ChangeTextureFilter(void)
 idImage::Reload
 ===============
 */
-void idImage::Reload(bool checkPrecompressed, bool force)
+void idImage::Reload(bool checkPrecompressed, bool force, bool fromBackEnd)
 {
 	// always regenerate functional images
 	if (generatorFunction) {
@@ -1202,7 +1203,7 @@ void idImage::Reload(bool checkPrecompressed, bool force)
 
 	PurgeImage(
 #ifdef _MULTITHREAD
-			true // AddPurgeList
+            fromBackEnd ? false : true // AddPurgeList
 #endif
 			);
 
@@ -1211,7 +1212,7 @@ void idImage::Reload(bool checkPrecompressed, bool force)
 	// Load is from the front end, so the back end must be synced
 	ActuallyLoadImage(checkPrecompressed, false
 #ifdef _MULTITHREAD
-			, true // AddAllocList
+			, fromBackEnd ? false : true // AddAllocList
 #endif
 			);
 }
@@ -1679,7 +1680,7 @@ idImage *idImageManager::ImageFromFunction(const char *_name, void (*generatorFu
 		image->referencedOutsideLevelLoad = true;
 		image->ActuallyLoadImage(true, false
 #ifdef _MULTITHREAD
-				, true // AddAllocList
+				, renderThread->IsActive() // If call on OpenGL thread! // !true // !AddAllocList
 #endif
 				);
 	}
@@ -1917,7 +1918,7 @@ void idImageManager::PurgeAllImages()
 		image = images[i];
 		image->PurgeImage(
 #ifdef _MULTITHREAD
-				true // AddPurgeList
+				renderThread->IsActive() // PurgeAllImages must run on OpenGL thread! !AddPurgeList
 #endif
 				);
 	}
@@ -1936,6 +1937,22 @@ void idImageManager::ReloadAllImages()
 	SetNormalPalette();
 
 	args.TokenizeString("reloadImages reload", false);
+#ifdef _MULTITHREAD
+    if(multithreadActive)
+    {
+        // this probably isn't necessary...
+        globalImages->ChangeTextureFilter();
+
+        bool all = false;
+        bool checkPrecompressed = false;		// if we are doing this as a vid_restart, look for precompressed like normal
+
+        for (int i = 0 ; i < globalImages->images.Num() ; i++) {
+            idImage	*image = globalImages->images[ i ];
+            image->Reload(checkPrecompressed, all, true /* Only run on OpenGL thread */);
+        }
+    }
+    else
+#endif
 	R_ReloadImages_f(args);
 }
 
@@ -2302,6 +2319,18 @@ Shutdown
 */
 void idImageManager::Shutdown()
 {
+#ifdef _MULTITHREAD //karin: reset address that idMaterial::stages[]::texture::image::imageReferencePtr(it point to address of idMaterial::stages[]::texture::image) to NULL. Because it will access image on idMaterial::FreeData() when reload engine.
+	if (multithreadActive)
+	{
+		for (int i = 0; i < images.Num(); i++)
+		{
+			idImage* image = images[i];
+			if (image && image->imageReferencePtr && *image->imageReferencePtr)
+				*image->imageReferencePtr = NULL;
+            image->imageReferencePtr = NULL;
+		}
+	}
+#endif
 	images.DeleteContents(true);
 #ifdef _MULTITHREAD
 	while(imagesAlloc.Num() > 0)

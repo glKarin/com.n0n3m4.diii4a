@@ -1759,7 +1759,7 @@ class idGLSLShaderManager
 public:
 	~idGLSLShaderManager();
 	int Add(shaderProgram_t *shader); // return added shader's index
-	void Clear(void);
+    void Shutdown(void);
 	const shaderProgram_t * Find(const char *name) const;
 	const shaderProgram_t * Find(GLuint handle) const; // handle is OpenGL shader program's handle
 	shaderHandle_t Load(const GLSLShaderProp &prop); // frontend: if in multi-threading, only add on queue, because current thread has not OpenGL context; else if not in multi-threading, actual load directly. however always return a shader program handle, if has loaded, return OpenGL program handle(> 0), else return -(customShaders::index + 1), error return 0.
@@ -1792,6 +1792,7 @@ extern idGLSLShaderManager *shaderManager;
 /* This file was automatically generated.  Do not edit! */
 void R_ReloadGLSLPrograms_f(const idCmdArgs &args);
 void R_GLSL_Init(void);
+void R_GLSL_Shutdown(void);
 void RB_GLSL_DrawInteractions(void);
 void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf);
 void RB_GLSL_DrawInteraction(const drawInteraction_t *din);

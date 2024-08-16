@@ -81,6 +81,7 @@ static int RB_GLSL_LoadShaderProgram(
 		const char *fragment_shader_source_file,
 		const char *macros
 );
+static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProgram = true);
 
 static bool RB_GLSL_LoadShaderProgramFromProp(const GLSLShaderProp *prop)
 {
@@ -134,11 +135,6 @@ int idGLSLShaderManager::Add(shaderProgram_t *shader)
 	}
 	common->Printf("idGLSLShaderManager::Add shader program '%s'.\n", shader->name);
 	return shaders.Append(shader);
-}
-
-void idGLSLShaderManager::Clear(void)
-{
-	shaders.Clear();
 }
 
 const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
@@ -371,19 +367,36 @@ void idGLSLShaderManager::ActuallyLoad(void)
 
 idGLSLShaderManager::~idGLSLShaderManager()
 {
-	printf("[Harmattan]: GLSL shader manager destroying......\n");
-	//queue.Clear();
-	queueCurrentIndex = customShaders.Num();
-	for(int i = 0; i < customShaders.Num(); i++)
-	{
-		GLSLShaderProp &prop = customShaders[i];
-		if(prop.program)
-		{
-			free(prop.program);
-			prop.program = NULL;
-		}
-	}
-	Clear();
+}
+
+void idGLSLShaderManager::Shutdown(void)
+{
+    printf("[Harmattan]: GLSL shader manager destroying: %d shaders, %d customer shaders\n", shaders.Num(), customShaders.Num());
+    // stop load queue;
+    queueCurrentIndex = customShaders.Num();
+    // delete shader programs
+    for(int i = 0; i < shaders.Num(); i++)
+    {
+        shaderProgram_t *shader = shaders[i];
+        if(shader)
+        {
+            RB_GLSL_DeleteShaderProgram(shader, true);
+        }
+    }
+    shaders.Clear();
+    // clear load queue
+    for(int i = 0; i < customShaders.Num(); i++)
+    {
+        GLSLShaderProp &prop = customShaders[i];
+        if(prop.program)
+        {
+            free(prop.program);
+            prop.program = NULL;
+        }
+    }
+    queueCurrentIndex = 0;
+    customShaders.Clear();
+    printf("[Harmattan]: GLSL shader manager shotdown\n");
 }
 
 idGLSLShaderManager idGLSLShaderManager::_shaderManager;
@@ -979,11 +992,24 @@ void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
 	common->Printf("-------------------------------\n");
 }
 
+void R_GLSL_Shutdown(void)
+{
+    common->Printf("----- R_GLSL_Shutdown -----\n");
+    shaderManager->Shutdown();
+    glslInitialized = false;
+    common->Printf("-------------------------------\n");
+}
+
 
 
 // new
-static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProgram = true)
+void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProgram)
 {
+    if(deleteProgram)
+        common->Printf("[Harmattan]: Delete GLSL shader '%s': %d\n", shaderProgram->name, shaderProgram->program);
+    else
+        common->Printf("[Harmattan]: Purge GLSL shader '%s': %d\n", shaderProgram->name, shaderProgram->program);
+
     const bool isProgram = shaderProgram->program && qglIsProgram(shaderProgram->program);
     const bool isVertexShader = shaderProgram->vertexShader && qglIsShader(shaderProgram->vertexShader);
     const bool isFragmentShader = shaderProgram->fragmentShader && qglIsShader(shaderProgram->fragmentShader);
@@ -1423,7 +1449,7 @@ void idGLSLShaderManager::ReloadShaders(void)
     for(int i = 0; i < shaders.Num(); i++)
     {
         shaderProgram_t *shader = shaders[i];
-        common->Printf("[Harmattan]: reload GLSL shader %d -> %s......\n", i, shader->name);
+        common->Printf("[Harmattan]: Reload GLSL shader %d -> %s......\n", i, shader->name);
 
         int type = shader->type;
         if(type >= SHADER_BASE_BEGIN && type <= SHADER_BASE_END)
@@ -1442,7 +1468,7 @@ void idGLSLShaderManager::ReloadShaders(void)
             {
                 if(!RB_GLSL_LoadShaderProgramFromProp(prop))
                 {
-                    common->Printf("[Harmattan]: reload GLSL shader error %d -> %s!\n", i, prop->name.c_str());
+                    common->Printf("[Harmattan]: Reload GLSL shader error %d -> %s!\n", i, prop->name.c_str());
                     continue;
                 }
             }
@@ -1456,7 +1482,7 @@ void idGLSLShaderManager::ReloadShaders(void)
                 {
                     if(!RB_GLSL_LoadShaderProgramFromProp(&prop))
                     {
-                        common->Printf("[Harmattan]: reload custom GLSL shader error %d(%d) -> %s!\n", i, m, prop.name.c_str());
+                        common->Printf("[Harmattan]: Reload custom GLSL shader error %d(%d) -> %s!\n", i, m, prop.name.c_str());
                         continue;
                     }
                     break;
