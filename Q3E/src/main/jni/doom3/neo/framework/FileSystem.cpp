@@ -265,7 +265,11 @@ static idInitExclusions	initExclusions;
 
 typedef struct fileInPack_s {
 	idStr				name;						// name of the file
-	unsigned long		pos;						// file info position in zip
+#if !defined(_MINIZ)
+    unsigned long		pos;						// file info position in zip
+#else
+    fileInPack_pos_t    pos;						// file info position in zip
+#endif
 	struct fileInPack_s *next;						// next file in the hash
 } fileInPack_t;
 
@@ -1459,9 +1463,9 @@ pack_t *idFileSystemLocal::LoadZipFile(const char *zipfile)
 	pack_t 		*pack;
 	unzFile			uf;
 	int				err;
-	unz_global_info gi;
+	d3_unz_global_info gi;
 	char			filename_inzip[MAX_ZIPPED_FILE_NAME];
-	unz_file_info	file_info;
+    d3_unz_file_info	file_info;
 	int				i;
 	int				hash;
 	int				fs_numHeaderLongs;
@@ -1484,7 +1488,7 @@ pack_t *idFileSystemLocal::LoadZipFile(const char *zipfile)
 	fs_numHeaderLongs = 0;
 
 	uf = unzOpen(zipfile);
-	err = unzGetGlobalInfo(uf, &gi);
+	err = d3_unzGetGlobalInfo(uf, &gi);
 
 	if (err != UNZ_OK) {
 		return NULL;
@@ -1515,7 +1519,7 @@ pack_t *idFileSystemLocal::LoadZipFile(const char *zipfile)
 	fs_headerLongs = (int *)Mem_ClearedAlloc(gi.number_entry * sizeof(int));
 
 	for (i = 0; i < (int)gi.number_entry; i++) {
-		err = unzGetCurrentFileInfo(uf, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0);
+		err = d3_unzGetCurrentFileInfo(uf, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0);
 
 		if (err != UNZ_OK) {
 			break;
@@ -1530,7 +1534,7 @@ pack_t *idFileSystemLocal::LoadZipFile(const char *zipfile)
 		buildBuffer[i].name.ToLower();
 		buildBuffer[i].name.BackSlashesToSlashes();
 		// store the file position in the zip
-		unzGetCurrentFileInfoPosition(uf, &buildBuffer[i].pos);
+        unzGetCurrentFileInfoPosition(uf, &buildBuffer[i].pos);
 		// add the file to the hash
 		buildBuffer[i].next = pack->hashTable[hash];
 		pack->hashTable[hash] = &buildBuffer[i];
@@ -3506,6 +3510,7 @@ idFileSystemLocal::ReadFileFromZip
 */
 idFile_InZip *idFileSystemLocal::ReadFileFromZip(pack_t *pak, fileInPack_t *pakFile, const char *relativePath)
 {
+#if !defined(_MINIZ)
 	unz_s 			*zfi;
 	FILE 			*fp;
 	idFile_InZip *file = new idFile_InZip();
@@ -3533,6 +3538,37 @@ idFile_InZip *idFileSystemLocal::ReadFileFromZip(pack_t *pak, fileInPack_t *pakF
 	file->zipFilePos = pakFile->pos;
 	file->fileSize = zfi->cur_file_info.uncompressed_size;
 	return file;
+#else
+    // relativePath == pakFile->name according to FilenameCompare()
+    // pakFile->Pos is position of that file within the zip
+
+    // set position in pk4 file to the file (in the zip/pk4) we want a handle on
+    d3_unzSetOffset( pak->handle, pakFile->pos );
+
+    // clone handle and assign a new internal filestream to zip file to it
+    unzFile uf = unzReOpen( pak->pakFilename, pak->handle );
+    if ( uf == NULL ) {
+        common->FatalError( "Couldn't reopen %s", pak->pakFilename.c_str() );
+    }
+
+    // the following stuff is needed to get the uncompress filesize (for file->fileSize)
+    char	filename_inzip[MAX_ZIPPED_FILE_NAME];
+    d3_unz_file_info	file_info;
+    int err = d3_unzGetCurrentFileInfo( uf, &file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0 );
+    if ( err != UNZ_OK ) {
+        common->FatalError( "Couldn't get file info for %s in %s, pos %llu", relativePath, pak->pakFilename.c_str(), pakFile->pos );
+    }
+
+    // create idFile_InZip and set fields accordingly
+    idFile_InZip *file = new idFile_InZip();
+    file->z = uf;
+    file->name = relativePath;
+    file->fullPath = pak->pakFilename + "/" + relativePath;
+    file->zipFilePos = pakFile->pos;
+    file->fileSize = file_info.uncompressed_size;
+
+    return file;
+#endif
 }
 
 /*

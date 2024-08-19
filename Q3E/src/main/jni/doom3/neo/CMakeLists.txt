@@ -105,6 +105,7 @@ option(SHADOW_MAPPING						"Shadow mapping support" 													ON)
 option(NO_LIGHT								"r_noLight support" 														ON)
 option(STENCIL_SHADOW_IMPROVE				"Improve stencil shadow(translucent, soft(Only OpenGLES3.1+))" 				ON)
 option(EXTRAS_TOOLS							"Add extras commands" 														OFF)
+option(USE_MINIZ							"use miniz and minizip" 													OFF)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -290,8 +291,12 @@ if(CMAKE_MAJOR_VERSION LESS 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_V
 endif()
 
 # libs
+if(USE_MINIZ)
+	add_definitions(-D_MINIZ)
+else()
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
+endif()
 
 # OpenAL using internal OpenAL-soft
 #[[find_package(OpenAL REQUIRED)
@@ -508,9 +513,15 @@ if(WIN32)
 			dsound ksuser #k
 			)
 elseif(ANDROID)
-	set(sys_libs ${sys_libs} android dl EGL z)
+	set(sys_libs ${sys_libs} android dl EGL)
+	if(NOT USE_MINIZ)
+		set(sys_libs ${sys_libs} z)
+	endif()
 else() #TODO linux
-	set(sys_libs ${sys_libs} X11 dl EGL z pthread)
+	set(sys_libs ${sys_libs} X11 dl EGL pthread)
+	if(NOT USE_MINIZ)
+		set(sys_libs ${sys_libs} z)
+	endif()
 endif()
 
 # fallback for cmake versions without GNUInstallDirs
@@ -600,6 +611,9 @@ if(STENCIL_SHADOW_IMPROVE)
 		message(STATUS "Add soft stencil shadow support")
 	endif()
 	message(STATUS "Add stencil shadow support: ${stencil_shadow_improve_desc}")
+endif()
+if(USE_MINIZ)
+	message(STATUS "Using minizip and miniz instead of zlib")
 endif()
 
 if(OPENAL)

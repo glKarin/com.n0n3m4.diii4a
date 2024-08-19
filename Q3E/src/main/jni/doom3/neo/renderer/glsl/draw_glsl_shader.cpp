@@ -1005,11 +1005,6 @@ void R_GLSL_Shutdown(void)
 // new
 void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProgram)
 {
-    if(deleteProgram)
-        common->Printf("[Harmattan]: Delete GLSL shader '%s': %d\n", shaderProgram->name, shaderProgram->program);
-    else
-        common->Printf("[Harmattan]: Purge GLSL shader '%s': %d\n", shaderProgram->name, shaderProgram->program);
-
     const bool isProgram = shaderProgram->program && qglIsProgram(shaderProgram->program);
     const bool isVertexShader = shaderProgram->vertexShader && qglIsShader(shaderProgram->vertexShader);
     const bool isFragmentShader = shaderProgram->fragmentShader && qglIsShader(shaderProgram->fragmentShader);
@@ -1017,6 +1012,11 @@ void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProg
 
 	if(isProgram)
 	{
+        if(deleteProgram)
+            common->Printf("[Harmattan]: Delete GLSL shader '%s': %d\n", shaderProgram->name, shaderProgram->program);
+        else
+            common->Printf("[Harmattan]: Purge GLSL shader '%s': %d\n", shaderProgram->name, shaderProgram->program);
+
 	    if(isVertexShader)
 	        qglDetachShader(shaderProgram->program, shaderProgram->vertexShader);
 	    if(isFragmentShader)
