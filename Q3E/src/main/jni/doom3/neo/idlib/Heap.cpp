@@ -30,7 +30,10 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #ifndef USE_LIBC_MALLOC
-#define USE_LIBC_MALLOC		0
+	//stgatilov: idHeap seems to increase memory usage
+	//it was removed from Doom 3 BFG, and most likely it is worse than the now-default LFH
+	//besides, using standard heap makes it easier to analyze crash dumps and integrate heap profiling applications
+#define USE_LIBC_MALLOC		1 // 0
 #endif
 
 #ifndef CRASH_ON_STATIC_ALLOCATION

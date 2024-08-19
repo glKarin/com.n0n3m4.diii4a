@@ -687,6 +687,7 @@ void GLimp_Shutdown() {
         window = NULL;
     }
 #endif
+    common->Printf("------------------------------\n");
 }
 
 /*
