@@ -302,7 +302,7 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 void idGLSLShaderManager::ActuallyLoad(void)
 {
 	unsigned int index = queueCurrentIndex;
-	const int num = customShaders.Num();
+	const unsigned int num = customShaders.Num();
 
 	if(
 			// !queue.Num()
@@ -702,7 +702,6 @@ static bool RB_GLSL_LinkShader(shaderProgram_t *shaderProgram, bool needsAttribu
 {
 	char buf[BUFSIZ];
 	int len;
-	GLint status;
 	GLint linked;
 
 	if(!shaderProgram->vertexShader || !shaderProgram->fragmentShader)

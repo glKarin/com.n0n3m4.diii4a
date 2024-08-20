@@ -1015,7 +1015,7 @@ void R_SetupProjection(void)
 	float	xmin, xmax, ymin, ymax;
 	float	width, height;
 	float	zNear;
-	float   zFar;
+	// float   zFar;
 	float	jitterx, jittery;
 	static	idRandom random;
 
