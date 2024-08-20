@@ -76,14 +76,24 @@ double Sys_GetClockTicks( void ) {
 Sys_ClockTicksPerSecond
 ================
 */
+static idCVar sys_clockTicksPerSecond("sys_clockTicksPerSecond", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_FLOAT, "System CPU clock ticks per second (GHz) - 0: autodetect", 0, 100);
+#define MIN_SYS_CLOCK_TICKS_PER_SECOND (2.9 / 0.000000001) // make it allow Ultra quality >= 2.75
 double Sys_ClockTicksPerSecond( void ) {
 	static double ticks = 0;
+    if ( !ticks ) {
+        if(sys_clockTicksPerSecond.GetFloat() > 0.0f)
+        {
+            ticks = sys_clockTicksPerSecond.GetFloat() / 0.000000001;
+        }
+    }
 #if !defined(_MSC_VER) || defined(_WIN64)
 
 	if ( !ticks ) {
 		LARGE_INTEGER li;
 		QueryPerformanceFrequency( &li );
 		ticks = li.QuadPart;
+        if(ticks < MIN_SYS_CLOCK_TICKS_PER_SECOND)
+            ticks = MIN_SYS_CLOCK_TICKS_PER_SECOND;
 	}
 
 #else

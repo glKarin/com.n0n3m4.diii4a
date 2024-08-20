@@ -1,7 +1,26 @@
 #include "../../idlib/precompiled.h"
 
+#define DEFAULT_SYS_VIDEO_MEMORY 512 // 64
+idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
+                    "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 1024);
 int Sys_GetVideoRam( void ) {
-    return 64;
+	// return 64;
+    static int run_once = 0;
+
+    if (run_once) {
+        return run_once;
+    }
+
+    if (sys_videoRam.GetInteger()) {
+        run_once = sys_videoRam.GetInteger();
+        return sys_videoRam.GetInteger();
+    }
+
+    // try a few strategies to guess the amount of video ram
+    common->Printf("guessing video ram ( use +set sys_videoRam to force ) ..\n");
+
+    run_once = DEFAULT_SYS_VIDEO_MEMORY;
+    return run_once;
 }
 
 
