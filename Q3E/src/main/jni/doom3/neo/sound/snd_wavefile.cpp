@@ -47,6 +47,9 @@ idWaveFile::idWaveFile(void)
 	mpbData		= NULL;
 	ogg			= NULL;
 	isOgg		= false;
+#ifdef _USING_STB_OGG
+    oggData 	= NULL;
+#endif
 }
 
 //-----------------------------------------------------------------------------
