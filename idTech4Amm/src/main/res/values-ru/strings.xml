@@ -359,5 +359,6 @@
     <string name="render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces">Render perforated material shadow(r_forceShadowMapsOnAlphaTestedSurfaces)</string>
     <string name="stencil_shadow">Stencil shadow</string>
     <string name="ambient">Ambient</string>
+    <string name="librecoop_roe">LibreCoop:RoE</string>
 
 </resources>

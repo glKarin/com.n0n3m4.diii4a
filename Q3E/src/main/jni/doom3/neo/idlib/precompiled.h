@@ -264,6 +264,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
         #include "../mod/doom3/sabot/Game.h"
     #elif defined(_FRAGGINGFREE)
         #include "../framework/Game.h"
+    #elif defined(_LIBRECOOPXP)
+        #include "../framework/Game.h"
     #else
         #include "../d3xp/Game.h"
     #endif
@@ -316,6 +318,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
         #include "../mod/doom3/sabot/Game_local.h"
     #elif defined(_FRAGGINGFREE)
         #include "../mod/doom3/fraggingfree/Game_local.h"
+    #elif defined(_LIBRECOOPXP)
+        #include "../mod/doom3/librecoopxp/Game_local.h"
     #else
         #include "../d3xp/Game_local.h"
     #endif

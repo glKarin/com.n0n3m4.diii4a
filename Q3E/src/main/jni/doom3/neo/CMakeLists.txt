@@ -129,6 +129,7 @@ option(SABOT								"Build the sabot game code" 												ON)
 option(HEXENEOC								"Build the hexeneoc game code" 												ON)
 option(FRAGGINGFREE							"Build the fraggingfree game code" 											ON)
 option(LIBRECOOP							"Build the librecoop game code" 											ON)
+option(LIBRECOOPXP							"Build the librecoopxp game code" 											ON)
 endif()
 
 # Quake4
@@ -1253,6 +1254,7 @@ if(HUMANHEAD OR PREY)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_humanhead})
 endif()
 
+# DOOM3
 if(CORE)
 	message(STATUS "Build core")
 endif()
@@ -1289,12 +1291,17 @@ endif()
 if(LIBRECOOP)
 	message(STATUS "Build librecoop")
 endif()
+if(LIBRECOOPXP)
+	message(STATUS "Build librecoopxp")
+endif()
+# Quake 4
 if(RAVEN)
 	message(STATUS "Build raven core")
 endif()
 if(QUAKE4)
 	message(STATUS "Build q4base")
 endif()
+# Prey
 if(HUMANHEAD)
 	message(STATUS "Build humanhead core")
 endif()
@@ -1681,6 +1688,35 @@ if(LIBRECOOP)
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
 		install(TARGETS librecoop
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(LIBRECOOPXP)
+	# librecoopxp
+	set(src_librecoopxp ${base_game_src})
+	set(librecoopxp_game_src
+			Grabber.cpp
+			physics/Force_Grab.cpp
+			)
+	list(APPEND src_librecoopxp ${librecoopxp_game_src})
+	set_src_dir(src_librecoopxp "${DOOM3_MOD_DIR}/librecoopxp" ${src_librecoopxp})
+	add_globbed_headers(src_librecoopxp "${DOOM3_MOD_DIR}/librecoopxp")
+
+	add_library(librecoopxp SHARED ${src_librecoopxp})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_librecoopxp})
+	#set_target_properties(librecoopxp PROPERTIES PREFIX "")
+	set_target_properties(librecoopxp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_LIBRECOOPXP")
+	target_include_directories(librecoopxp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/librecoopxp")
+	set_target_properties(librecoopxp PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(librecoopxp PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(librecoopxp idlib)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS librecoopxp
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
