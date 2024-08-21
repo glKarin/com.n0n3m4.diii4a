@@ -35,6 +35,7 @@ option(BUILD_TESTING "Build tests" OFF)
 
 set(q3e_src
         q3e.c
+        eventqueue.cpp
         )
 
 add_subdirectory (deplibs/oboe) # 1.8.1

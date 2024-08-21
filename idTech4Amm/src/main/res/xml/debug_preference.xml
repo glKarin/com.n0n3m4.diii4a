@@ -39,6 +39,15 @@
             android:defaultValue="false"
             android:summary="@string/load_local_engine_library"
             />
+        <ListPreference
+            android:title="Event queue"
+            android:key="harm_event_queue"
+            android:persistent="true"
+            android:defaultValue="0"
+            android:summary="Choose event queue scheme"
+            android:entryValues="@array/event_queue_values"
+            android:entries="@array/event_queue_labels"
+            />
         <Preference
             android:key="get_pid"
             android:title="@string/pid"

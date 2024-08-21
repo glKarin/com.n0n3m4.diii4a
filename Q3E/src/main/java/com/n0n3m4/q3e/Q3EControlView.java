@@ -699,20 +699,23 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         {
             if (Q3EUtils.q3ei.callbackObj.notinmenu && !Q3EUtils.q3ei.callbackObj.inLoading)
             {
-                float x, y;
-                switch (m_display.getRotation()) {
-                    case Surface.ROTATION_270: // invert
-                        x = -event.values[0];
-                        y = -event.values[1];
-                        break;
-                    case Surface.ROTATION_90:
-                    default:
-                        x = event.values[0];
-                        y = event.values[1];
-                        break;
-                }
+                //if(event.values[0] != 0.0f || event.values[1] != 0.0f)
+                {
+                    float x, y;
+                    switch (m_display.getRotation()) {
+                        case Surface.ROTATION_270: // invert
+                            x = -event.values[0];
+                            y = -event.values[1];
+                            break;
+                        case Surface.ROTATION_90:
+                        default:
+                            x = event.values[0];
+                            y = event.values[1];
+                            break;
+                    }
 
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
+                    Q3EUtils.q3ei.callbackObj.sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
+                }
             }
         }
     }

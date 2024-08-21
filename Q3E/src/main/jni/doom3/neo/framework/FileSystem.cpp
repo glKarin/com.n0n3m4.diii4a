@@ -1940,7 +1940,17 @@ idModList *idFileSystemLocal::ListMods(void)
 
 		dirs.Remove(".");
 		dirs.Remove("..");
+#ifdef _RAVEN //karin: base game in mods list
+        dirs.Remove("q4base");
+#elif defined(_HUMANHEAD) //karin: base game in mods list
+#ifdef __ANDROID__ //karin: use preybase on Android
+        dirs.Remove("preybase");
+#else
+        dirs.Remove("base");
+#endif
+#else
 		dirs.Remove("base");
+#endif
 		dirs.Remove("pb");
 
 		// see if there are any pk4 files in each directory

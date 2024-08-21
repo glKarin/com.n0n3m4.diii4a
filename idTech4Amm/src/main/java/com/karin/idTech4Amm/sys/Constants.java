@@ -30,7 +30,8 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Change PBR interaction lighting model in DOOM3/Quake4/Prey.",
+            "Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.",
+            "Fix environment reflection shader in DOOM3/Quake4/Prey.",
             "Support switch weapon in DOOM 3(write `bind \"YOUR_KEY\" \"IMPULSE_51\"` to your DoomConfig.cfg or autoexec.cfg).",
         };
 	};

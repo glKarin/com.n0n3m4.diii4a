@@ -22,6 +22,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent
   (JNIEnv *, jclass, jfloat, jfloat);
 
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y);
+
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_vidRestart
   (JNIEnv *, jclass);    
   
@@ -41,6 +43,17 @@ Java_com_n0n3m4_q3e_Q3EJNI_OnResume(JNIEnv *env, jclass clazz);
 
 JNIEXPORT void JNICALL
 Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushKeyEvent
+(JNIEnv *, jclass, jint, jint, jint);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent
+(JNIEnv *, jclass, jfloat, jfloat);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y);
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit
+        (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }
