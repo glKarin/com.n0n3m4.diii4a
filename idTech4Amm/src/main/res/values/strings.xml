@@ -363,5 +363,7 @@
     <string name="stencil_shadow">Stencil shadow</string>
     <string name="ambient">Ambient</string>
     <string name="librecoop_roe">LibreCoop:RoE</string>
+    <string name="perfected_doom_3">Perfected Doom 3</string>
+    <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
 
 </resources>

@@ -526,7 +526,6 @@ void idGameLocal::SaveGame( idFile *f ) {
 
 #ifdef _HEXENEOC
 	savegame.WriteBuildNumber( DHEWM3_BUILD_NUMBER );
-
 #else
 	savegame.WriteBuildNumber( BUILD_NUMBER );
 #endif

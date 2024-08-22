@@ -148,6 +148,7 @@ If you have questions concerning this license or the applicable additional terms
 #define ID_GAME_API					__declspec(dllexport)
 #else
 #define ID_GAME_API					__attribute__((visibility ("default")))
+// #define ID_GAME_API
 #endif
 #else
 #define ID_GAME_API

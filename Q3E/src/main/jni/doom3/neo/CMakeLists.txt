@@ -130,6 +130,8 @@ option(HEXENEOC								"Build the hexeneoc game code" 												ON)
 option(FRAGGINGFREE							"Build the fraggingfree game code" 											ON)
 option(LIBRECOOP							"Build the librecoop game code" 											ON)
 option(LIBRECOOPXP							"Build the librecoopxp game code" 											ON)
+option(PERFECTED							"Build the perfected game code" 											ON)
+option(PERFECTEDROE							"Build the perfected_roe game code" 											ON)
 endif()
 
 # Quake4
@@ -1294,6 +1296,12 @@ endif()
 if(LIBRECOOPXP)
 	message(STATUS "Build librecoopxp")
 endif()
+if(PERFECTED)
+	message(STATUS "Build perfected")
+endif()
+if(PERFECTEDROE)
+	message(STATUS "Build perfected_roe")
+endif()
 # Quake 4
 if(RAVEN)
 	message(STATUS "Build raven core")
@@ -1717,6 +1725,66 @@ if(LIBRECOOPXP)
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
 		install(TARGETS librecoopxp
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(PERFECTED)
+	# perfected
+	set(src_perfected ${base_game_src})
+	set(perfected_game_src
+			Grab.cpp
+			Grabber.cpp
+			physics/Force_Grab.cpp
+			)
+	list(APPEND src_perfected ${perfected_game_src})
+	set_src_dir(src_perfected "${DOOM3_MOD_DIR}/perfected" ${src_perfected})
+	add_globbed_headers(src_perfected "${DOOM3_MOD_DIR}/perfected")
+
+	add_library(perfected SHARED ${src_perfected})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_perfected})
+	#set_target_properties(perfected PROPERTIES PREFIX "")
+	set_target_properties(perfected PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_PERFECTED")
+	target_include_directories(perfected PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/perfected")
+	set_target_properties(perfected PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(perfected PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(perfected idlib)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS perfected
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(PERFECTEDROE)
+	# perfected_roe
+	set(src_perfectedroe ${base_game_src})
+	set(perfectedroe_game_src
+			Grab.cpp
+			Grabber.cpp
+			physics/Force_Grab.cpp
+			)
+	list(APPEND src_perfectedroe ${perfectedroe_game_src})
+	set_src_dir(src_perfectedroe "${DOOM3_MOD_DIR}/perfectedroe" ${src_perfectedroe})
+	add_globbed_headers(src_perfectedroe "${DOOM3_MOD_DIR}/perfectedroe")
+
+	add_library(perfectedroe SHARED ${src_perfectedroe})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_perfectedroe})
+	#set_target_properties(perfectedroe PROPERTIES PREFIX "")
+	set_target_properties(perfectedroe PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_PERFECTEDROE")
+	target_include_directories(perfectedroe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/perfectedroe")
+	set_target_properties(perfectedroe PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(perfectedroe PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(perfectedroe idlib)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS perfectedroe
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"

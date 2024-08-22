@@ -595,11 +595,12 @@ void idSoundSample::Load(void)
 		if (objectInfo.wFormatTag == WAVE_FORMAT_TAG_OGG) {
 #if defined(_OPENAL_SOFT)
 
-			if ((objectSize < ((int) objectInfo.nSamplesPerSec * idSoundSystemLocal::s_decompressionLimit.GetInteger()))) {
+			if ((objectSize < ((int) objectInfo.nSamplesPerSec * idSoundSystemLocal::s_decompressionLimit.GetInteger())))
 #else
 
-			if ((alIsExtensionPresent(ID_ALCHAR "EAX-RAM") == AL_TRUE) && (objectSize < ((int) objectInfo.nSamplesPerSec * idSoundSystemLocal::s_decompressionLimit.GetInteger()))) {
+			if ((alIsExtensionPresent(ID_ALCHAR "EAX-RAM") == AL_TRUE) && (objectSize < ((int) objectInfo.nSamplesPerSec * idSoundSystemLocal::s_decompressionLimit.GetInteger())))
 #endif
+			{
 				alGetError();
 				alGenBuffers(1, &openalBuffer);
 

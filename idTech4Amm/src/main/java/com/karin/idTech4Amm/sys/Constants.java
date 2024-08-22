@@ -33,6 +33,9 @@ public final class Constants
             "Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.",
             "Fix environment reflection shader in DOOM3/Quake4/Prey.",
             "Support switch weapon in DOOM 3(write `bind \"YOUR_KEY\" \"IMPULSE_51\"` to your DoomConfig.cfg or autoexec.cfg).",
+            "Add `LibreCoop(RoE)` mod of DOOM3 support, game data directory named `librecoopxp`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop") + "`.",
+            "Add `Perfected Doom 3` mod of DOOM3 support, game data directory named `perfected`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3") + "`.",
+            "Add `Perfected Doom 3 : Resurrection of Evil` mod of DOOM3 support, game data directory named `perfectedroe`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3 : Resurrection of Evil") + "`.",
         };
 	};
 

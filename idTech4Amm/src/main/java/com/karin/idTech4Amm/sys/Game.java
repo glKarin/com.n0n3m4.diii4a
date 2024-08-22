@@ -7,23 +7,28 @@ import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 
 // game config
-// config this can change launcher's game mod list.
+/*
+ * config this can change launcher's game mod list.
+ * If you want add a idTech4's mod and you have completed compiling c++ source code, you just edit this enum now.
+ */
 public enum Game
 {
     // DOOM 3
     DOOM3_BASE(Q3EGlobals.GAME_DOOM3, "base", "", "", false, R.string.doom_iii),
     DOOM3_D3XP(Q3EGlobals.GAME_DOOM3, "d3xp", "d3xp", "", true, R.string.doom3_resurrection_of_evil_d3xp),
+
     DOOM3_CDOOM(Q3EGlobals.GAME_DOOM3, "cdoom", "cdoom", "", true, R.string.classic_doom_cdoom),
     DOOM3_D3LE(Q3EGlobals.GAME_DOOM3, "d3le", "d3le", "d3xp", true, R.string.doom3_bfg_the_lost_mission_d3le),
     DOOM3_RIVENSIN(Q3EGlobals.GAME_DOOM3, "rivensin", "rivensin", "", true, R.string.rivensin_rivensin),
     DOOM3_HARDCORPS(Q3EGlobals.GAME_DOOM3, "hardcorps", "hardcorps", "", true, R.string.hardcorps_hardcorps),
-
     DOOM3_OVERTHINKED(Q3EGlobals.GAME_DOOM3, "overthinked", "overthinked", "", true, R.string.overthinked_doom_3),
     DOOM3_SABOT(Q3EGlobals.GAME_DOOM3, "sabot", "sabot", "d3xp", true, R.string.stupid_angry_bot_a7x),
     DOOM3_HEXENEOC(Q3EGlobals.GAME_DOOM3, "hexeneoc", "hexeneoc", "", true, R.string.hexen_edge_of_chaos),
     DOOM3_FRAGGINGFREE(Q3EGlobals.GAME_DOOM3, "fraggingfree", "fraggingfree", "d3xp", true, R.string.fragging_free),
     DOOM3_LIBRECOOP(Q3EGlobals.GAME_DOOM3, "librecoop", "librecoop", "", true, R.string.librecoop),
     DOOM3_LIBRECOOPXP(Q3EGlobals.GAME_DOOM3, "librecoopxp", "librecoopxp", "d3xp", true, R.string.librecoop_roe),
+    DOOM3_PERFECTED(Q3EGlobals.GAME_DOOM3, "perfected", "perfected", "", true, R.string.perfected_doom_3),
+    DOOM3_PERFECTEDROE(Q3EGlobals.GAME_DOOM3, "perfectedroe", "perfectedroe", "d3xp", true, R.string.perfected_doom_3_resurrection_of_evil),
 
     // Quake 4
     QUAKE4_BASE(Q3EGlobals.GAME_QUAKE4, "q4base", "", "", false, R.string.quake_iv_q4base),
@@ -62,10 +67,10 @@ public enum Game
     GZDOOM_FREEDOOM2(Q3EGlobals.GAME_GZDOOM, "freedoom2.wad", "freedoom2.wad", "", true, R.string.freedoom2_base),
     ;
 
-    public final String type; // game type: doom3/quake4/prey2006
+    public final String type; // game type: doom3/quake4/prey2006/......
     public final String game; // game id: unique
     public final String fs_game; // game data folder name
-    public final String fs_game_base; // game mod data base folder name
+    public final String fs_game_base; // game mod data base folder name, e.g. d3xp
     public final boolean is_mod; // is a mod
     public final Object name; // game name string resource's id or game name string
 
