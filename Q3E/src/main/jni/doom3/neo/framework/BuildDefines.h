@@ -147,8 +147,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _MSC_VER
 #define ID_GAME_API					__declspec(dllexport)
 #else
-#define ID_GAME_API
-//#define ID_GAME_API					__attribute__((visibility ("default")))
+#define ID_GAME_API					__attribute__((visibility ("default")))
 #endif
 #else
 #define ID_GAME_API
