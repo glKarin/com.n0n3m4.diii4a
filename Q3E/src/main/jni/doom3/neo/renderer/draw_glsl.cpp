@@ -45,7 +45,7 @@ idCVar harm_r_lightingModel("harm_r_lightingModel", "1", CVAR_RENDERER|CVAR_ARCH
 static idCVar harm_r_specularExponent("harm_r_specularExponent", "3.0"/* "4.0"*/, CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Phong interaction lighting model");
 static idCVar harm_r_specularExponentBlinnPhong("harm_r_specularExponentBlinnPhong", "12.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Blinn-Phong interaction lighting model");
 static idCVar harm_r_specularExponentPBR("harm_r_specularExponentPBR", "5.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in PBR interaction lighting model");
-static idCVar harm_r_normalCorrectionPBR("harm_r_normalCorrectionPBR", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", 0, 1);
+static idCVar harm_r_normalCorrectionPBR("harm_r_normalCorrectionPBR", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_normalCorrectionPBR + vertex normal * (1 - harm_r_normalCorrectionPBR))", 0, 1);
 
 #include "glsl/draw_glsl_backend.cpp"
 

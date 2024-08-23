@@ -48,7 +48,11 @@ varying vec3 var_Normal;
 
 uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;
+#ifdef _PBR
+uniform vec2 u_specularExponent;
+#else
 uniform float u_specularExponent;
+#endif
 
 uniform sampler2D u_fragmentMap0;    /* u_bumpTexture */
 uniform sampler2D u_fragmentMap1;    /* u_lightFalloffTexture */
@@ -57,7 +61,7 @@ uniform sampler2D u_fragmentMap3;    /* u_diffuseTexture */
 uniform sampler2D u_fragmentMap4;    /* u_specularTexture */
 uniform sampler2D u_fragmentMap5;    /* u_specularFalloffTexture */
 
-#if defined(_PBR)
+#ifdef _PBR
 float dot2_4(vec2 a, vec4 b) {
     return dot(vec4(a, 0.0, 0.0), b);
 }
@@ -156,7 +160,7 @@ float NdotH = clamp(dot(N, H), 0.0, 1.0);
     vec3 lightFalloff = texture2D(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;
     vec3 diffuseColor = texture2D(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;
 #if defined(_PBR)
-    vec3 AN = mix(normalize(var_Normal), N, u_specularExponent);
+    vec3 AN = normalize(mix(normalize(var_Normal), N, u_specularExponent.y));
     vec4 Cd = vec4(diffuseColor.rgb, 1.0);
     vec4 specTex = texture2D(u_fragmentMap4, var_TexSpecular);
     vec4 roughness = vec4(specTex.r, specTex.r, specTex.r, specTex.r);
@@ -169,17 +173,22 @@ float NdotH = clamp(dot(N, H), 0.0, 1.0);
     // cook-torrance brdf
     float NDF = DistributionGGX(AN, H, roughness.x);        
     float G   = GeometrySmith(AN, V, L, roughness.x);      
-    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       
+    vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0); //max       
 
-    // vec3 kS = F;
-    // vec3 kD = vec3(1.0) - kS;
-    // kD *= 1.0 - metallic.r;
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic.r;
 
     vec3 numerator    = NDF * G * F;
     float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);
     vec3 pbr     = numerator / max(denominator, 0.001);  
 
-   gl_FragColor = var_Color * Cl * NdotL * Cd + (vec4(pbr.x, pbr.y, pbr.z, 0.0) * (u_specularColor /* *Cl */));
+#if 1
+    vec4 Lo = (Cd/* * vec4(kD, 1.0)*/ + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * u_specularColor)) * NdotL * Cl;
+    gl_FragColor = vec4(Lo.rgb, 1.0) * var_Color;
+#else
+    gl_FragColor = var_Color * Cl * NdotL * Cd + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * (u_specularColor/* * Cl*/));
+#endif
 #else
     vec3 specularColor = 2.0 * texture2D(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
 

@@ -35,7 +35,11 @@ varying vec3 var_Normal;
 
 uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;
+#ifdef _PBR
+uniform vec2 u_specularExponent;
+#else
 uniform float u_specularExponent;
+#endif
 
 uniform sampler2D u_fragmentMap0;    /* u_bumpTexture */
 uniform sampler2D u_fragmentMap1;    /* u_lightFalloffTexture */
@@ -106,7 +110,7 @@ highp float unpack (vec4 colour)
    #define BIAS(x) (x)
 #endif
 
-#if defined(_PBR)
+#ifdef _PBR
 float dot2_4(vec2 a, vec4 b) {
     return dot(vec4(a, 0.0, 0.0), b);
 }
@@ -205,7 +209,7 @@ void main(void)
     vec3 lightFalloff = texture2D(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;
     vec3 diffuseColor = texture2D(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;
 #if defined(_PBR)
-    vec3 AN = mix(normalize(var_Normal), N, u_specularExponent);
+    vec3 AN = normalize(mix(normalize(var_Normal), N, u_specularExponent.y));
     vec4 Cd = vec4(diffuseColor.rgb, 1.0);
     vec4 specTex = texture2D(u_fragmentMap4, var_TexSpecular);
     vec4 roughness = vec4(specTex.r, specTex.r, specTex.r, specTex.r);
@@ -218,17 +222,22 @@ void main(void)
     // cook-torrance brdf
     float NDF = DistributionGGX(AN, H, roughness.x);        
     float G   = GeometrySmith(AN, V, L, roughness.x);      
-    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       
+    vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0); //max       
 
-    // vec3 kS = F;
-    // vec3 kD = vec3(1.0) - kS;
-    // kD *= 1.0 - metallic.r;
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic.r;
 
     vec3 numerator    = NDF * G * F;
     float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);
     vec3 pbr     = numerator / max(denominator, 0.001);  
 
-   vec4 color = var_Color * Cl * NdotL * Cd + (vec4(pbr.x, pbr.y, pbr.z, 0.0) * (u_specularColor /* *Cl */));
+#if 1
+    vec4 color = (Cd/* * vec4(kD, 1.0)*/ + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * u_specularColor)) * NdotL * Cl;
+    color = vec4(color.rgb, 1.0) * var_Color;
+#else
+    vec4 color = var_Color * Cl * NdotL * Cd + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * (u_specularColor/* * Cl*/));
+#endif
 #else
     vec3 specularColor = 2.0 * texture2D(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
 
@@ -255,8 +264,7 @@ void main(void)
     // sampleOffsetTable[20] = vec3(0.0, 0.0, 0.0);
 
     highp vec3 toLightGlobal = normalize( -var_LightToVertex );
-    int shadowIndex = 0;
-    highp float axis[6];
+    int shadowIndex = 0;    highp float axis[6];
     axis[0] = -toLightGlobal.x;
     axis[1] =  toLightGlobal.x;
     axis[2] = -toLightGlobal.y;
@@ -318,7 +326,7 @@ void main(void)
       sampleOffsetTable[9] = vec2( -0.1314865, 0.8404058 );
       sampleOffsetTable[10] = vec2( -0.7005203, 0.4596822 );
       sampleOffsetTable[11] = vec2( -0.9713828, -0.06329931 );
-      // sampleOffsetTable[12] = vec2( 0.0, 0.0 );\n
+// sampleOffsetTable[12] = vec2( 0.0, 0.0 );
 
     // highp float random = (gl_FragCoord.z + shadowPosition.z) * 0.5;
     highp float random = texture2D( u_fragmentMap7, gl_FragCoord.xy * SCREEN_SIZE_MULTIPLICATOR ).r;

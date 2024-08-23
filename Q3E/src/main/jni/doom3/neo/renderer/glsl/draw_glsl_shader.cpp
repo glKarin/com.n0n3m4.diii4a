@@ -1601,8 +1601,8 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	 
 #ifdef _SHADOW_MAPPING
 #define EXPORT_SHADOW_MAPPING_SHADER() \
-	EXPORT_SHADER_SOURCE(DEPTH_VERT, "depth", "vert"); \
-	EXPORT_SHADER_SOURCE(DEPTH_FRAG, "depth", "frag"); \
+	EXPORT_SHADER_SOURCE(DEPTH_VERT, "depthShadowMapping", "vert"); \
+	EXPORT_SHADER_SOURCE(DEPTH_FRAG, "depthShadowMapping", "frag"); \
 	 \
 	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_VERT, "depthPerforated", "vert"); \
 	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_FRAG, "depthPerforated", "frag"); \

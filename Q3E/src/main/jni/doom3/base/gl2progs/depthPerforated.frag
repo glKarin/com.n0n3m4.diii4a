@@ -28,8 +28,7 @@ vec4 pack (highp float depth)
 
 void main(void)
 {
-    if (u_alphaTest > texture2D(u_fragmentMap0, var_TexDiffuse).a)
-    {
+    if (u_alphaTest > texture2D(u_fragmentMap0, var_TexDiffuse).a) {
         discard;
     }
 
