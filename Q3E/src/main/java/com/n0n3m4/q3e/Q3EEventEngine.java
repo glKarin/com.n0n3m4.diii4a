@@ -77,8 +77,8 @@ class Q3EEventEngineJava implements Q3EEventEngine
 	private static class KeyEventRunnable extends KOnceRunnable
 	{
 		public final boolean down;
-		public final int keycode;
-		public final int charcode;
+		public final int     keycode;
+		public final int     charcode;
 
 		public KeyEventRunnable(boolean down, int keycode, int charcode)
 		{
@@ -115,8 +115,8 @@ class Q3EEventEngineJava implements Q3EEventEngine
 	private static class AnalogEventRunnable extends KOnceRunnable
 	{
 		public final boolean down;
-		public final float x;
-		public final float y;
+		public final float   x;
+		public final float   y;
 
 		public AnalogEventRunnable(boolean down, float x, float y)
 		{

@@ -24,10 +24,10 @@ public class FileBrowser
     public static final int ID_ORDER_BY_NAME = 1;
     public static final int ID_ORDER_BY_TIME = 2;
 
-    public static final int ID_SEQUENCE_ASC = 1;
+    public static final int ID_SEQUENCE_ASC  = 1;
     public static final int ID_SEQUENCE_DESC = 2;
 
-    public static final int ID_FILTER_FILE = 1;
+    public static final int ID_FILTER_FILE      = 1;
     public static final int ID_FILTER_DIRECTORY = 1 << 1;
 
     private Context m_context;
