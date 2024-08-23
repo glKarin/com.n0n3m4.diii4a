@@ -27,6 +27,9 @@
   Fragging Free: fraggingfree
   HeXen - Edge of Chaos: hexeneoc
   LibreCoop: librecoop
+  LibreCoop - D3XP: librecoopxp
+  Perfected Doom 3: perfected
+  Perfected Doom 3 - RoE: perfected_roe
 
   雷神之锤4: q4base (支持bot mod和全身mod)
 

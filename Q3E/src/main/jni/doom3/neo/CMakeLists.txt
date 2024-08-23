@@ -106,7 +106,7 @@ option(NO_LIGHT								"r_noLight support" 														ON)
 option(STENCIL_SHADOW_IMPROVE				"Improve stencil shadow(translucent, soft(Only OpenGLES3.1+))" 				ON)
 option(EXTRAS_TOOLS							"Add extras commands" 														OFF)
 option(USE_MINIZ							"use miniz and minizip" 													OFF)
-option(USE_STB_OGG							"use stb_vorbis" 														OFF)
+option(USE_STB_OGG							"use stb_vorbis" 															OFF)
 
 # DOOM3 cores
 if(BUILD_D3)

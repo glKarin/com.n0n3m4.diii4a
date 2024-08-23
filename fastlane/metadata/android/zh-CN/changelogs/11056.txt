@@ -1,0 +1,8 @@
+* 毁灭战士3/雷神之锤4/掠食(2006)优化PBR光照模型渲染.
+* 毁灭战士3/雷神之锤4/掠食(2006)修复环境反射着色器.
+* 毁灭战士3/雷神之锤4/掠食(2006)新增使用`harm_r_lightingModel`为0进渲染环境光, 移除r_noLight=2.
+* 毁灭战士3/雷神之锤4/掠食(2006)切换mod/reloadEngine/vid_restart减少游戏崩溃.
+* 毁灭战士3支持切换武器(通过写入`bind "YOUR_KEY" "IMPULSE_51"`到DoomConfig.cfg或autoexec.cfg文件中).
+* 新增毁灭战士3 mod `LibreCoop(RoE)`支持, 游戏数据文件夹命名为`librecoopxp`.
+* 新增毁灭战士3 mod `Perfected Doom 3`支持, 游戏数据文件夹命名为`perfected`.
+* 新增毁灭战士3 mod `Perfected Doom 3 : Resurrection of Evil`支持, 游戏数据文件夹命名为`perfected_roe`.

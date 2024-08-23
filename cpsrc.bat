@@ -51,8 +51,8 @@ xcopy /Y/Q %SRC_PATH%\local.properties %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\README.md %DST_PATH%\
 rem xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\settings.gradle %DST_PATH%\
-xcopy /Y/Q %SRC_PATH%\cmake_linux_build.sh %DST_PATH%\
-xcopy /Y/Q %SRC_PATH%\cmake_msvc_build.bat %DST_PATH%\
+xcopy /Y/Q %SRC_PATH%\cmake_linux_build_doom3_quak4_prey.sh %DST_PATH%\
+xcopy /Y/Q %SRC_PATH%\cmake_msvc_build_doom3_quak4_prey.bat %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\cmake_linux_build_doom3bfg.sh %DST_PATH%\
 
 echo Done!

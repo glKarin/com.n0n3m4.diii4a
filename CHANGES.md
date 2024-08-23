@@ -2,6 +2,19 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan56 (2024-08-23)
+
+* Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.
+* Fix environment reflection shader in DOOM3/Quake4/Prey.
+* Add ambient lighting model with `harm_r_lightingModel` 0 and remove r_noLight=2 in DOOM3/Quake4/Prey.
+* Reduce game crash when change mod/reloadEngine/vid_restart in DOOM3/Quake4/Prey.
+* Support switch weapon in DOOM 3(write `bind "YOUR_KEY" "IMPULSE_51"` to your DoomConfig.cfg or autoexec.cfg).
+* Add `LibreCoop(RoE)` mod of DOOM3 support, game data directory named `librecoopxp`. More view in [LibreCoop(RoE)](https://www.moddb.com/mods/librecoop-dhewm3-coop).
+* Add `Perfected Doom 3` mod of DOOM3 support, game data directory named `perfected`. More view in [Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500).
+* Add `Perfected Doom 3 : Resurrection of Evil` mod of DOOM3 support, game data directory named `perfected_roe`. More view in [Perfected Doom 3 : Resurrection of Evil](https://www.moddb.com/mods/perfected-doom-3-version-500).
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan55 (2024-08-05) **DOOM3 20th Anniversary Edition**
 
 * Add PBR interaction lighting model([jmarshall23's idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr))(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.
