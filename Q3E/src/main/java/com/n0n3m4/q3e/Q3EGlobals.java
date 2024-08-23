@@ -158,52 +158,6 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_DOOMBFG = "doom3bfg";
     public static final String GAME_SUBDIR_GZDOOM = "gzdoom";
 
-    // game libraries
-    public static final String[] LIBS = {
-            "game",
-            "d3xp",
-            "cdoom",
-            "d3le",
-            "rivensin",
-            "hardcorps",
-
-            "overthinked",
-            "sabot",
-            "hexeneoc",
-            "fraggingfree",
-            "librecoop",
-    };
-    public static final String[] Q4_LIBS = {
-            "q4game",
-    };
-    public static final String[] PREY_LIBS = {
-            "preygame",
-    };
-    public static final String[] Q2_LIBS = {
-            "q2game",
-            "q2ctf",
-            "q2rogue",
-            "q2xatrix",
-            "q2zaero",
-    };
-    public static final String[] Q3_LIBS = {
-            "qagame",
-    };
-    public static final String[] RTCW_LIBS = {
-            "rtcwgame",
-    };
-    public static final String[] TDM_LIBS = {
-            "thedarkmod",
-    };
-    public static final String[] Q1_LIBS = {
-            "idtech_quake",
-    };
-    public static final String[] D3BFG_LIBS = {
-            "RBDoom3BFG",
-    };
-    public static final String[] GZDOOM_LIBS = {
-            "gzdoom",
-    };
 /*
     public static final String[] QUAKE4_MAPS = {
             "airdefense1",

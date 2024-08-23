@@ -180,7 +180,7 @@ public final class TextHelper
                 " " + GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop: librecoop"),
                 " " + GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop(RoE): librecoopxp"),
                 " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3: perfected"),
-                " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3-Resurrection of Evil: perfectedroe"),
+                " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3-Resurrection of Evil: perfected_roe"),
                 " " + GenLinkText("https://store.steampowered.com/app/2210/Quake_4/", "Quake4: q4base"),
                 " Prey(2006): preybase",
                 " " + GenLinkText("https://store.steampowered.com/app/2320/Quake_II/", "Quake II: baseq2"),

@@ -34,14 +34,15 @@ import java.util.Set;
 
 public class Q3EInterface
 {
-	private static int[] _defaultArgs;
-	private static int[] _defaultType;
 	static {
 		Q3EKeyCodes.InitD3Keycodes();
 		InitDefaultTypeTable();
 		InitDefaultArgTable();
 	}
-	
+
+	private static int[] _defaultArgs;
+	private static int[] _defaultType;
+
 	public int UI_SIZE;
 	public String[] defaults_table;
 	public String[] texture_table;
@@ -52,27 +53,26 @@ public class Q3EInterface
 	public boolean isQ1=false;
 	public boolean isQ2=false;
 	public boolean isQ3=false;
-	public boolean isD3=false;	
+	public boolean isD3=false;
 	public boolean isD3BFG=false;
     public boolean isQ4 = false;
 	public boolean isPrey = false;
 	public boolean isTDM = false;
 	public boolean isDOOM = false;
-	
+
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
-	
+
 	public String libname;
 	public String config_name;
 	public String game;
 	public String game_name;
 	public String game_base;
-	public String[] libs;
 	public String datadir;
 	public boolean standalone = false;
 	public String subdatadir;
 
 	public Q3ECallbackObj callbackObj;
-    
+
     public boolean view_motion_control_gyro = false;
     public String start_temporary_extra_command = "";
 	public String cmd = Q3EGlobals.GAME_EXECUABLE;
@@ -215,30 +215,6 @@ public class Q3EInterface
 			return Q3EGlobals.GAME_BASE_DOOM3;
 	}
 
-	public String[] GameLibs()
-	{
-		if(isPrey)
-			return Q3EGlobals.PREY_LIBS;
-		else if(isQ4)
-			return Q3EGlobals.Q4_LIBS;
-		else if(isQ2)
-			return Q3EGlobals.Q2_LIBS;
-		else if(isQ3)
-			return Q3EGlobals.Q3_LIBS;
-		else if(isRTCW)
-			return Q3EGlobals.RTCW_LIBS;
-		else if(isTDM)
-			return Q3EGlobals.TDM_LIBS;
-		else if(isQ1)
-			return Q3EGlobals.Q1_LIBS;
-		else if(isD3BFG)
-			return Q3EGlobals.D3BFG_LIBS;
-		else if(isDOOM)
-			return Q3EGlobals.GZDOOM_LIBS;
-		else
-			return Q3EGlobals.LIBS;
-	}
-
 	public String GameSubDirectory()
 	{
 		if(isQ4)
@@ -320,11 +296,6 @@ public class Q3EInterface
 		game_base = GameBase();
 	}
 
-	private void SetupGameLibs()
-	{
-		libs = GameLibs();
-	}
-
 	public void SetupGame(String name)
 	{
 		Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "SetupGame: " + name);
@@ -354,7 +325,6 @@ public class Q3EInterface
 	{
 		SetupGameTypeAndName();
 		SetupEngineLib();
-		SetupGameLibs();
 		SetupConfigFile();
 		SetupKeycodes();
 		SetupSubDir();

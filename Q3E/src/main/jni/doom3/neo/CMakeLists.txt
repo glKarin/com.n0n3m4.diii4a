@@ -1774,17 +1774,17 @@ if(PERFECTEDROE)
 	set_src_dir(src_perfectedroe "${DOOM3_MOD_DIR}/perfectedroe" ${src_perfectedroe})
 	add_globbed_headers(src_perfectedroe "${DOOM3_MOD_DIR}/perfectedroe")
 
-	add_library(perfectedroe SHARED ${src_perfectedroe})
+	add_library(perfected_roe SHARED ${src_perfectedroe})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_perfectedroe})
-	#set_target_properties(perfectedroe PROPERTIES PREFIX "")
-	set_target_properties(perfectedroe PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_PERFECTEDROE")
-	target_include_directories(perfectedroe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/perfectedroe")
-	set_target_properties(perfectedroe PROPERTIES LINK_FLAGS "${ldflags}")
-	set_target_properties(perfectedroe PROPERTIES INSTALL_NAME_DIR "@executable_path")
-	target_link_libraries(perfectedroe idlib)
+	#set_target_properties(perfected_roe PROPERTIES PREFIX "")
+	set_target_properties(perfected_roe PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_PERFECTEDROE")
+	target_include_directories(perfected_roe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/perfectedroe")
+	set_target_properties(perfected_roe PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(perfected_roe PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(perfected_roe idlib)
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
-		install(TARGETS perfectedroe
+		install(TARGETS perfected_roe
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"

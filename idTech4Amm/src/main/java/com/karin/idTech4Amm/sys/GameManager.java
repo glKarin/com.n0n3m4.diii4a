@@ -34,20 +34,21 @@ public final class GameManager
 
     public static class GameProp
     {
-        public final int index;
-        public final String game;
-        public final String fs_game;
-        public final String fs_game_base;
-        //public boolean harm_fs_gameLibPath = true;
+        public final int     index;
+        public final String  game;
+        public final String  fs_game;
+        public final String  fs_game_base;
         public final boolean is_user;
+        public final String  lib;
 
-        public GameProp(int index, String game, String fs_game, String fs_game_base, boolean is_user)
+        public GameProp(int index, String game, String fs_game, String fs_game_base, boolean is_user, String lib)
         {
             this.index = index;
             this.game = game;
             this.fs_game = fs_game;
             this.fs_game_base = fs_game_base;
             this.is_user = is_user;
+            this.lib = lib;
         }
 
         public boolean IsGame(String game)
@@ -79,7 +80,7 @@ public final class GameManager
         for (Game value : values)
         {
             props = GameProps.get(value.type);
-            prop = new GameProp(props.size(), value.game, value.fs_game, value.fs_game_base, false);
+            prop = new GameProp(props.size(), value.game, value.fs_game, value.fs_game_base, false, value.lib);
             props.add(prop);
         }
     }
@@ -141,7 +142,7 @@ public final class GameManager
             }
         }
         if(null == res)
-            res = new GameProp(0, "", game, "", userMod);
+            res = new GameProp(0, "", game, "", userMod, "");
         return res;
     }
 
@@ -234,5 +235,27 @@ public final class GameManager
             return R.string.doom;
         else
             return R.string.doom_3;
+    }
+
+    public String[] GetGameLibs(String name, boolean makePlatform)
+    {
+        List<GameProp> gameProps = GameProps.get(name);
+        List<String> list = new ArrayList<>();
+        for (GameProp gameProp : gameProps)
+        {
+            if(!list.contains(gameProp.lib))
+                list.add(gameProp.lib);
+        }
+        if(!makePlatform)
+            return list.toArray(new String[0]);
+        else
+        {
+            String[] res = new String[list.size()];
+            for (int i = 0; i < list.size(); i++)
+            {
+                res[i] = "lib" + list.get(i) + ".so";
+            }
+            return res;
+        }
     }
 }
