@@ -100,6 +100,16 @@
         <item>material</item>
     </string-array>
 
+    <string-array name="event_queue_labels">
+        <item>Java</item>
+        <item>Native</item>
+    </string-array>
+
+    <string-array name="event_queue_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
     <string-array name="key_map_names">
         <item>Mouse 1</item>
         <item>Mouse 2</item>

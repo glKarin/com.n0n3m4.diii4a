@@ -88,29 +88,29 @@ void main(void)
 
     vec3 L = u_lightOrigin.xyz - attr_Vertex.xyz;
     vec3 V = u_viewOrigin.xyz - attr_Vertex.xyz;
-#if defined(BLINN_PHONG) || defined(_PBR)
+    #if defined(BLINN_PHONG) || defined(_PBR)
     vec3 H = normalize(L) + normalize(V);
-#endif
+    #endif
 
     var_L = L * M;
-#if defined(BLINN_PHONG) || defined(_PBR)
+    #if defined(BLINN_PHONG) || defined(_PBR)
     var_H = H * M;
-#endif
+    #endif
 #if !defined(BLINN_PHONG) || defined(_PBR)
     var_V = V * M;
-#endif
+    #endif
 #ifdef _PBR
     var_Normal = attr_Normal * M;
-#endif
+    #endif
 
     var_Color = (attr_Color / 255.0) * u_colorModulate + u_colorAdd;
 
-#ifdef _POINT_LIGHT
+    #ifdef _POINT_LIGHT
     highp vec4 posInLight = u_modelMatrix * attr_Vertex;
     var_VertexToLight = globalLightOrigin.xyz - posInLight.xyz;
     var_VertexPosition = attr_Vertex;
-#else
+    #else
     var_ShadowCoord = attr_Vertex * shadowMVPMatrix;
-#endif
+    #endif
     gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
 }

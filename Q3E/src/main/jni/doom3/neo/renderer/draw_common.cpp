@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #define _HARM_SKIP_RENDER_SHADER_PASS
 #endif
 #ifdef _HARM_SKIP_RENDER_SHADER_PASS
-static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9000. All. greater than 0: skip, less than 0: only, 0 disabled.");
+static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9. TG_REFLECT_CUBE(Bumpy), 9000. All. greater than 0: skip, less than 0: only, 0 disabled.");
 #endif
 
 /*
@@ -134,8 +134,29 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 	}
 
 	else if (pStage->texture.texgen == TG_REFLECT_CUBE) {
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
-		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), surf->space->modelViewMatrix);
+		// old d3asm: GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+		
+        GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
+        GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+
+        // see if there is also a bump map specified
+        const shaderStage_t *bumpStage = surf->material->GetBumpStage();
+        if ( bumpStage ) {
+            // per-pixel reflection mapping with bump mapping
+            GL_SelectTexture( 1 );
+            bumpStage->texture.image->Bind();
+            GL_SelectTexture( 0 );
+
+            GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
+            GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
+            GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
+            GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
+        }
+
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), surf->space->modelMatrix);
+
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), surf->space->modelViewMatrix);
 
 		float mat[16];
 		R_TransposeGLMatrix(backEnd.viewDef->worldSpace.modelViewMatrix, mat);
@@ -160,11 +181,24 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 	}
 
 	if (pStage->texture.texgen == TG_DIFFUSE_CUBE || pStage->texture.texgen == TG_SKYBOX_CUBE
-			//k: reflection cubemap
-	    || pStage->texture.texgen == TG_REFLECT_CUBE
+			//k: reflection cubemap // || pStage->texture.texgen == TG_REFLECT_CUBE
 	    || pStage->texture.texgen == TG_WOBBLESKY_CUBE) {
 		 GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
-	}
+	} else if (pStage->texture.texgen == TG_REFLECT_CUBE) {
+        // GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
+        GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+
+        // see if there is also a bump map specified
+        const shaderStage_t *bumpStage = surf->material->GetBumpStage();
+        if ( bumpStage ) {
+            GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
+            GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
+
+            GL_SelectTexture( 1 );
+            globalImages->BindNull();
+            GL_SelectTexture( 0 );
+        }
+    }
 
 	if (pStage->texture.hasMatrix) {
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, textureMatrix), mat4_identity.ToFloatPtr());
@@ -462,7 +496,7 @@ void RB_SetProgramEnvironment(void)
 	parm[1] = backEnd.viewDef->renderView.vieworg[1];
 	parm[2] = backEnd.viewDef->renderView.vieworg[2];
 	parm[3] = 1.0;
-	GL_Uniform4fv(offsetof(shaderProgram_t, eyeOrigin), parm);
+    GL_Uniform4fv(offsetof(shaderProgram_t, eyeOrigin), parm);
 }
 
 /*
@@ -472,8 +506,9 @@ RB_SetProgramEnvironmentSpace
 Sets variables related to the current space that can be used by all vertex programs
 ==================
 */
-void RB_SetProgramEnvironmentSpace(void)
+void RB_SetProgramEnvironmentSpace(const struct viewEntity_s *space)
 {
+#if 0
 	const struct viewEntity_s *space = backEnd.currentSpace;
 
 	// set eye position in local space
@@ -490,6 +525,11 @@ void RB_SetProgramEnvironmentSpace(void)
 	float	mat[16];
 	myGlMultMatrix(space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+#endif
+    idVec4 localViewOrigin;
+    R_GlobalPointToLocal(space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewOrigin.ToVec3());
+    localViewOrigin[3] = 1.0f;
+    GL_Uniform4fv(offsetof(shaderProgram_t, localViewOrigin), localViewOrigin.ToFloatPtr());
 }
 
 /*
@@ -515,8 +555,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 	tri = surf->geo;
 	shader = surf->material;
 
-#ifdef _NO_LIGHT
-	if(r_noLight.GetInteger() > 1)
+	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
 	{
 		if(!shader->HasAmbient() && !shader->ReceivesLighting())
 			return;
@@ -526,11 +565,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		if(!shader->HasAmbient())
 			return;
 	}
-#else
-	if (!shader->HasAmbient()) {
-		return;
-	}
-#endif
 
 	if (shader->IsPortalSky()) {
 		return;
@@ -606,8 +640,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		}
 
 		// skip the stages involved in lighting
-#ifdef _NO_LIGHT
-		if(r_noLight.GetInteger() > 1)
+		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
 		{
 			if(pStage->lighting != SL_AMBIENT && pStage->lighting != SL_DIFFUSE)
 				continue;
@@ -617,11 +650,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			if(pStage->lighting != SL_AMBIENT)
 				continue;
 		}
-#else
-		if (pStage->lighting != SL_AMBIENT) {
-			continue;
-		}
-#endif
 
 		// skip if the stage is ( GL_ZERO, GL_ONE ), which is used for some alpha masks
 		if ((pStage->drawStateBits & (GLS_SRCBLEND_BITS|GLS_DSTBLEND_BITS)) == (GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE)) {
@@ -805,13 +833,21 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		const int texgen = pStage->texture.texgen;
 		bool usingTexCoord = true;
 #ifdef _HARM_SKIP_RENDER_SHADER_PASS
+        int testTexgen = texgen;
+        if(testTexgen == TG_REFLECT_CUBE)
+        {
+            const shaderStage_t *bumpStage = surf->material->GetBumpStage();
+            if ( bumpStage )
+                testTexgen = 8;
+        }
+        testTexgen += 1;
 		int skipShaderPass = harm_r_skipShaderPass.GetInteger();
-		if(skipShaderPass == 9000 || skipShaderPass == texgen + 1)
+		if(skipShaderPass == 9000 || skipShaderPass == testTexgen)
 		{
 			RB_LogComment("skip\n");
 			continue;
 		}
-		if(skipShaderPass < 0 && -skipShaderPass != texgen + 1)
+		if(skipShaderPass < 0 && -skipShaderPass != testTexgen)
 		{
 			RB_LogComment("skip ~\n");
 			continue;
@@ -824,8 +860,14 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			case TG_WOBBLESKY_CUBE:
 				GL_UseProgram(&cubemapShader);
 				break;
-			case TG_REFLECT_CUBE:
-				GL_UseProgram(&reflectionCubemapShader);
+			case TG_REFLECT_CUBE: {
+                // see if there is also a bump map specified
+                const shaderStage_t *bumpStage = surf->material->GetBumpStage();
+                if ( bumpStage )
+                    GL_UseProgram(&reflectionCubemapBumpyShader);
+                else
+                    GL_UseProgram(&reflectionCubemapShader);
+            }
 				break;
 			case TG_DIFFUSE_CUBE:
 				GL_UseProgram(&diffuseCubemapShader);
@@ -857,10 +899,11 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		}
 		if(!uniformIsSet[texgen])
 		{
-/*			RB_SetProgramEnvironment();
-
-			RB_SetProgramEnvironmentSpace();
+/*			
+			RB_SetProgramEnvironment();
 */ //k2023 not used
+            RB_SetProgramEnvironmentSpace(surf->space);
+
 			GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
 			uniformIsSet[texgen] = true;
 		}
@@ -899,9 +942,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 #ifdef _NO_LIGHT
 		if (r_noLight.GetBool() || shader->IsNoLight())
         {
-            if (r_noLight.GetInteger() > 1 && !shader->IsNoLight())
-            {
-                if (pStage->lighting == SL_AMBIENT)
+			if (pStage->drawStateBits!=9000)
                     GL_State(pStage->drawStateBits);
                 else
                 {
@@ -910,24 +951,25 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
                     else
                         GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
                 }
-            }
-            else/* if (shader->IsNoLight())*/
-            {
-                if (pStage->drawStateBits!=9000)
-                    GL_State(pStage->drawStateBits);
-                else
-                {
-                    if (shader->TestMaterialFlag(MF_POLYGONOFFSET))
-                        GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|GLS_DEPTHFUNC_LESS);
-                    else
-                        GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
-                }
-            }
-            // else GL_State(pStage->drawStateBits);
         }
-		else
+        else
 #endif
-		GL_State(pStage->drawStateBits);
+        {
+			if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
+			{
+				if (pStage->lighting == SL_AMBIENT)
+	                GL_State(pStage->drawStateBits);
+	            else
+	            {
+	                if (shader->TestMaterialFlag(MF_POLYGONOFFSET))
+	                    GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|GLS_DEPTHFUNC_LESS);
+	                else
+	                    GL_State(GLS_SRCBLEND_ONE|GLS_DSTBLEND_ONE|backEnd.depthFunc);
+	            }
+	        }
+			else
+				GL_State(pStage->drawStateBits);
+		}
 
 		RB_PrepareStageTexturing(pStage, surf, ac);
 
@@ -1752,9 +1794,11 @@ void	RB_STD_DrawView(void)
 	// main light renderer
 	qglEnable(GL_BLEND);
 
+	if (r_interactionLightingModel != HARM_INTERACTION_SHADER_AMBIENT
 #ifdef _NO_LIGHT
-	if (!r_noLight.GetBool())
+			&& !r_noLight.GetBool()
 #endif
+	   )
 		RB_GLSL_DrawInteractions();
 
 	// disable stencil shadow test

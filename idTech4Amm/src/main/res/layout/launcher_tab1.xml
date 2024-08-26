@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
     android:id="@+id/launcher_tab1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -138,30 +138,55 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginTop="1dp"
-                android:layout_marginBottom="1dp">
-                <TextView
-                    android:id="@+id/launcher_fs_game"
+                android:layout_marginBottom="1dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center_vertical">
+                    <TextView
+                        android:id="@+id/launcher_fs_game"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/game_cvar_fs_game" />
+                    <TextView
+                        android:id="@+id/launcher_fs_game_cvar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="" />
+                    <TextView
+                        android:id="@+id/launcher_fs_game_subdir"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/collapse_mods"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:text="@string/game_cvar_fs_game" />
-                <TextView
-                    android:id="@+id/launcher_fs_game_cvar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="" />
-                <TextView
-                    android:id="@+id/launcher_fs_game_subdir"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="2dp"
-                    android:layout_gravity="center_vertical"
-                    android:text="" />
+                    android:checked="false"/>
             </LinearLayout>
 
+            <android.support.v4.widget.NestedScrollView
+                android:id="@+id/mods_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/mods_container_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
             <RadioGroup
                 android:id="@+id/rg_fs_game"
                 android:layout_width="wrap_content"
@@ -211,7 +236,8 @@
                 android:id="@+id/rg_fs_doomgame"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"></RadioGroup>
-
+            </LinearLayout>
+            </android.support.v4.widget.NestedScrollView>
 
 
         <LinearLayout
@@ -274,7 +300,7 @@
                     android:layout_marginLeft="32dp"
                     android:layout_marginTop="0dp"
                     android:layout_marginBottom="0dp"
-                    android:text="@string/if_game_library_file_named_gameaarch64_so_or_libgameaarch64_so_on_arm64_device_or_named_gamearm_so_or_libgamearm_so_on_arm32_device_found_at_game_working_directory_fs_game_folder_will_load_it_instead_of_default_game_library_of_apk"
+                    android:text="@string/using_external_game_library"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -304,7 +330,7 @@
                     android:id="@+id/rg_harm_r_lightingModel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
                     <RadioButton
                         android:id="@+id/harm_r_lightModel_phong"
@@ -324,6 +350,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/pbr" />
+
+                    <RadioButton
+                        android:id="@+id/harm_r_lightModel_ambient"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ambient" />
 
                 </RadioGroup>
 
@@ -847,7 +879,7 @@
 
         </LinearLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 
-</ScrollView>
+</android.support.v4.widget.NestedScrollView>
 

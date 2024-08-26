@@ -32,6 +32,7 @@
 #include <android/native_window_jni.h>
 
 #include "q3e.h"
+#include "eventqueue.h"
 
 #include "doom3/neo/sys/android/sys_android.h"
 
@@ -41,7 +42,11 @@
 
 #define LOGD(fmt, args...) { printf("[" LOG_TAG " debug]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##args); }
 #define LOGI(fmt, args...) { printf("[" LOG_TAG " info]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_INFO, LOG_TAG, fmt, ##args); }
+#define LOGW(fmt, args...) { printf("[" LOG_TAG " warning]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_WARN, LOG_TAG, fmt, ##args); }
 #define LOGE(fmt, args...) { printf("[" LOG_TAG " error]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##args); }
+
+#define EVENT_QUEUE_TYPE_JAVA 0
+#define EVENT_QUEUE_TYPE_NATIVE 1
 
 //#define AUDIOTRACK_BYTEBUFFER 1
 
@@ -77,6 +82,7 @@ static char *arg_str = NULL;
 
 static void *libdl;
 static ANativeWindow *window = NULL;
+static int usingNativeEventQueue = 0;
 
 // Java object ref
 static JavaVM *jVM;
@@ -252,6 +258,8 @@ void setState(int state)
 static void q3e_exit(void)
 {
 	LOGI("Q3E JNI exit");
+	if(Q3E_EventManagerIsInitialized())
+    	Q3E_ShutdownEventManager();
 	if(game_data_dir)
 	{
 		free(game_data_dir);
@@ -525,6 +533,9 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 
 	window = ANativeWindow_fromSurface(env, view);
 	set_gl_context(window);
+
+	if(usingNativeEventQueue)
+    	Q3E_InitEventManager(onKeyEvent, onMotionEvent, onAnalog);
     
     qmain(argc, argv);
 
@@ -605,7 +616,11 @@ int pull_input_event(int num)
 {
 	ATTACH_JNI(env)
 
-    return (*env)->CallIntMethod(env, q3eCallbackObj, android_PullEvent_method, (jint)num);
+    jint jres = (*env)->CallIntMethod(env, q3eCallbackObj, android_PullEvent_method, (jint)num);
+	if(usingNativeEventQueue)
+		return Q3E_PullEvent(num);
+	else
+		return jres;
 }
 
 void grab_mouse(int grab)
@@ -704,4 +719,24 @@ FILE * android_tmpfile(void)
 	LOGD("android_tmpfile create: %s", tmp_file);
 	free(tmp_file);
 	return res;
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushKeyEvent(JNIEnv *env, jclass clazz, jint down, jint keycode, jint charcode)
+{
+    Q3E_PushKeyEvent(down, keycode, charcode);
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent(JNIEnv *env, jclass clazz, jfloat deltax, jfloat deltay)
+{
+    Q3E_PushMotionEvent(deltax, deltay);
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y)
+{
+    Q3E_PushAnalogEvent(enable, x, y);
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass clazz, jint eventQueueType)
+{
+	usingNativeEventQueue = eventQueueType == EVENT_QUEUE_TYPE_NATIVE;
 }

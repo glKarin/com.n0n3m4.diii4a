@@ -34,7 +34,11 @@ in vec3 var_Normal;
 
 uniform vec4 u_diffuseColor;
 uniform vec4 u_specularColor;
+#ifdef _PBR
+uniform vec2 u_specularExponent;
+#else
 uniform float u_specularExponent;
+#endif
 
 uniform sampler2D u_fragmentMap0;    /* u_bumpTexture */
 uniform sampler2D u_fragmentMap1;    /* u_lightFalloffTexture */
@@ -79,7 +83,7 @@ in highp vec4 var_ShadowCoord;
 #endif
 out vec4 _gl_FragColor;
 
-#if defined(_PBR)
+#ifdef _PBR
 float dot2_4(vec2 a, vec4 b) {
     return dot(vec4(a, 0.0, 0.0), b);
 }
@@ -146,6 +150,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
+
 #endif
 
 void main(void)
@@ -153,87 +158,95 @@ void main(void)
     //float u_specularExponent = 4.0;
 
     vec3 L = normalize(var_L);
-#if defined(BLINN_PHONG) || defined(_PBR)
+    #if defined(BLINN_PHONG) || defined(_PBR)
     vec3 H = normalize(var_H);
-#endif
+    #endif
 #if defined(BLINN_PHONG)
     vec3 N = 2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0;
-#endif
+    #endif
 #if !defined(BLINN_PHONG) || defined(_PBR)
     vec3 V = normalize(var_V);
     vec3 N = normalize(2.0 * texture(u_fragmentMap0, var_TexNormal.st).agb - 1.0);
-#endif
+    #endif
 
     float NdotL = clamp(dot(N, L), 0.0, 1.0);
-#if defined(HALF_LAMBERT)
+    #if defined(HALF_LAMBERT)
     NdotL *= 0.5;
     NdotL += 0.5;
     NdotL = NdotL * NdotL;
-#endif
+    #endif
 #if defined(BLINN_PHONG) || defined(_PBR)
     float NdotH = clamp(dot(N, H), 0.0, 1.0);
-#endif
+    #endif
 
     vec3 lightProjection = textureProj(u_fragmentMap2, var_TexLight.xyw).rgb;
     vec3 lightFalloff = texture(u_fragmentMap1, vec2(var_TexLight.z, 0.5)).rgb;
     vec3 diffuseColor = texture(u_fragmentMap3, var_TexDiffuse).rgb * u_diffuseColor.rgb;
-#if defined(_PBR)
-    vec3 AN = mix(normalize(var_Normal), N, u_specularExponent);
+    #if defined(_PBR)
+    vec3 AN = normalize(mix(normalize(var_Normal), N, u_specularExponent.y));
     vec4 Cd = vec4(diffuseColor.rgb, 1.0);
     vec4 specTex = texture(u_fragmentMap4, var_TexSpecular);
     vec4 roughness = vec4(specTex.r, specTex.r, specTex.r, specTex.r);
     vec4 metallic = vec4(specTex.g, specTex.g, specTex.g, specTex.g);
 
     vec4 Cl = vec4(lightProjection * lightFalloff, 1.0);
-    vec3 F0 = vec3(0.04); 
+    vec3 F0 = vec3(0.04);
     F0 = mix(F0, Cd.xyz, metallic.xyz);
 
     // cook-torrance brdf
-    float NDF = DistributionGGX(AN, H, roughness.x);        
-    float G   = GeometrySmith(AN, V, L, roughness.x);      
-    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       
+    float NDF = DistributionGGX(AN, H, roughness.x);
+    float G   = GeometrySmith(AN, V, L, roughness.x);
+    vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0); //max
 
-    // vec3 kS = F;
-    // vec3 kD = vec3(1.0) - kS;
-    // kD *= 1.0 - metallic.r;
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic.r;
 
     vec3 numerator    = NDF * G * F;
     float denominator = 4.0 * max(dot(AN, V), 0.0) * max(dot(AN, L), 0.0);
-    vec3 pbr     = numerator / max(denominator, 0.001);  
+    vec3 pbr     = numerator / max(denominator, 0.001);
 
-   vec4 color = var_Color * Cl * NdotL * Cd + (vec4(pbr.x, pbr.y, pbr.z, 0.0) * (u_specularColor /* *Cl */));
+    #if 1
+    vec4 color = (Cd/* * vec4(kD, 1.0)*/ + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * u_specularColor)) * NdotL * Cl;
+    color = vec4(color.rgb, 1.0) * var_Color;
+    #else
+    vec4 color = var_Color * Cl * NdotL * Cd + (u_specularExponent.x * vec4(pbr.rgb, 0.0) * (u_specularColor/* * Cl*/));
+    #endif
 #else
     vec3 specularColor = 2.0 * texture(u_fragmentMap4, var_TexSpecular).rgb * u_specularColor.rgb;
 
-#if defined(BLINN_PHONG)
+    #if defined(BLINN_PHONG)
     float specularFalloff = pow(NdotH, u_specularExponent);
-#else
+    #else
     vec3 R = -reflect(L, N);
     float RdotV = clamp(dot(R, V), 0.0, 1.0);
     float specularFalloff = pow(RdotV, u_specularExponent);
-#endif
+    #endif
 #endif
 
-    #define SAMPLES 12
-    #define SAMPLE_MULTIPLICATOR (1.0 / 12.0)
-    vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](\
-        vec2( 0.6111618, 0.1050905 ),
-        vec2( 0.1088336, 0.1127091 ),
-        vec2( 0.3030421, -0.6292974 ),
-        vec2( 0.4090526, 0.6716492 ),
-        vec2( -0.1608387, -0.3867823 ),
-        vec2( 0.7685862, -0.6118501 ),
-        vec2( -0.1935026, -0.856501 ),
-        vec2( -0.4028573, 0.07754025 ),
-        vec2( -0.6411021, -0.4748057 ),
-        vec2( -0.1314865, 0.8404058 ),
-        vec2( -0.7005203, 0.4596822 ),
-        vec2( -0.9713828, -0.06329931 )
-        // , vec2( 0.0, 0.0 )
-    );
-
+#define SAMPLES 16
+#define SAMPLE_MULTIPLICATOR (1.0 / 16.0)
+vec2 sampleOffsetTable[SAMPLES] = vec2[SAMPLES](
+    vec2( -0.94201624, -0.39906216 ),
+    vec2( 0.94558609, -0.76890725 ),
+    vec2( -0.094184101, -0.92938870 ),
+    vec2( 0.34495938, 0.29387760 ),
+    vec2( -0.91588581, 0.45771432 ),
+    vec2( -0.81544232, -0.87912464 ),
+    vec2( -0.38277543, 0.27676845 ),
+    vec2( 0.97484398, 0.75648379 ),
+    vec2( 0.44323325, -0.97511554 ),
+    vec2( 0.53742981, -0.47373420 ),
+    vec2( -0.26496911, -0.41893023 ),
+    vec2( 0.79197514, 0.19090188 ),
+    vec2( -0.24188840, 0.99706507 ),
+    vec2( -0.81409955, 0.91437590 ),
+    vec2( 0.19984126, 0.78641367 ),
+    vec2( 0.14383161, -0.14100790 )
+// , vec2( 0.0, 0.0 )
+);
     highp float shadow = 0.0;
-#ifdef _POINT_LIGHT
+    #ifdef _POINT_LIGHT
     int shadowIndex = 0;
     highp vec3 toLightGlobal = normalize( var_VertexToLight );
     highp float axis[6] = float[6](
@@ -252,9 +265,9 @@ void main(void)
     //vec3 c; if(shadowIndex == 0) c = vec3(1.0, 0.0, 0.0); else if(shadowIndex == 1) c = vec3(1.0, 1.0, 0.0); else if(shadowIndex == 2) c = vec3(0.0, 1.0, 0.0); else if(shadowIndex == 3) c = vec3(0.0, 1.0, 1.0); else if(shadowIndex == 4) c = vec3(0.0, 0.0, 1.0); else c = vec3(1.0, 0.0, 1.0);
     shadowPosition.xyz /= shadowPosition.w;
     shadowPosition.w = float(shadowIndex);
-#else
+    #else
     highp vec4 shadowPosition = vec4(var_ShadowCoord.xyz / var_ShadowCoord.w, 0.0);
-#endif
+    #endif
    // end light type
     highp float distance = JITTER_SCALE * SHADOW_MAP_SIZE_MULTIPLICATOR;
     // highp float random = (gl_FragCoord.z + shadowPosition.z) * 0.5;
@@ -276,9 +289,9 @@ void main(void)
     const highp float sampleAvg = SAMPLE_MULTIPLICATOR;
     shadow *= sampleAvg;
 
-#if defined(_PBR)
+    #if defined(_PBR)
     _gl_FragColor = vec4(color.rgb * shadow, color.a);
-#else
+    #else
     vec3 color;
     color = diffuseColor;
     color += specularFalloff * specularColor;
@@ -287,5 +300,5 @@ void main(void)
     color *= shadow;
 
     _gl_FragColor = vec4(color, 1.0) * var_Color;
-#endif
+    #endif
 }

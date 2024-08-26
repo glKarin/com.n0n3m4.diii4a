@@ -151,8 +151,8 @@ static void * etc2_compress_tex_image(unsigned int width, unsigned int height, c
                 Etc::Image::Format::RGBA8,
                 Etc::ErrorMetric::RGBA,
                 0, // fEffort,
-                numPhysicalCpuCores,
-                numLogicalCpuCores,
+                numPhysicalCpuCores * numCpuPackages,
+                numLogicalCpuCores * numCpuPackages,
                 &paucEncodingBits, &uiEncodingBitsBytes,
                 &uiExtendedWidth, &uiExtendedHeight,
                 &iEncodingTime_ms);

@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class ChooseCommandRecordFunc extends GameLauncherFunc
 {
@@ -46,6 +48,17 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
         run();
     }
 
+    private String FormatCommand(String cmd)
+    {
+        if(KStr.IsEmpty(cmd))
+            return "";
+        final int MaxPartLength = 30;
+        final int MaxLength = MaxPartLength * 2 + 6;
+        if(cmd.length() <= MaxLength)
+            return cmd;
+        return cmd.substring(0, MaxPartLength) + "......" + cmd.substring(cmd.length() - MaxPartLength);
+    }
+
     public void run()
     {
         Set<String> records = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher).getStringSet(m_key, new HashSet<>());
@@ -59,7 +72,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
         int i = 0;
         for (String f : records)
         {
-            items[i] = f;
+            items[i] = FormatCommand(f);
             values[i] = f;
             selected[i] = f.equals(m_cmd);
             if(selected[i])
@@ -108,6 +121,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                     }
                     button.setEnabled(result.size() <= 1);
                 }
+                //Log.i("TAG", "onClick: " + result.stream().collect(Collectors.joining("\n")));
                 alert.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(!result.isEmpty());
                 alert.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(result.size() == 1);
             }

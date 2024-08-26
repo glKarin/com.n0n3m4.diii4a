@@ -180,7 +180,11 @@ If you have questions concerning this license or the applicable additional terms
 //#ifdef ID_DEMO_BUILD
 //	#define BASE_GAMEDIR					"demo"
 //#else
+#ifdef __ANDROID__ //karin: using `preybase` On Android, because DOOM3 also use `base`
 #define	BASE_GAMEDIR					"preybase" // base
+#else
+#define	BASE_GAMEDIR					"base"
+#endif
 //#endif
 
 // filenames

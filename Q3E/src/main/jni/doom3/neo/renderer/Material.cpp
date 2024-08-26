@@ -177,7 +177,7 @@ void idMaterial::FreeData()
 		// delete any idCinematic textures
 		for (i = 0; i < numStages; i++) {
 			if (stages[i].texture.cinematic != NULL) {
-#ifdef _MULTITHREAD //karin: set image's cinematic to null
+#ifdef _MULTITHREAD //karin: set image's cinematic to null if with OpenAL, image isn't deleted pointer by setting idImage::imageReferencePtr to NULL
 				if(multithreadActive)
 				{
 					if(stages[i].texture.image)
@@ -3047,7 +3047,7 @@ bool idMaterial::Parse(const char *text, const int textLength)
 	}
 
 #ifdef _NO_LIGHT
-	if (r_noLight./*GetBool*/GetInteger() == 1 || noLight)
+	if (r_noLight.GetBool() || noLight)
 	{
 		int bumpcnt=0;
 
@@ -3090,6 +3090,19 @@ bool idMaterial::Parse(const char *text, const int textLength)
 	if (numStages) {
 		stages = (shaderStage_t *)R_StaticAlloc(numStages * sizeof(stages[0]));
 		memcpy(stages, pd->parseStages, numStages * sizeof(stages[0]));
+#ifdef _MULTITHREAD //karin: Reference address of idMaterial::stages[]::texture::image to idImage::imageReferencePtr, it will set NULL when call globalImages->Shutdown()
+        if(multithreadActive)
+        {
+            for(int m = 0; m < numStages; m++)
+            {
+                textureStage_t *ts = &stages[m].texture;
+                if(ts->cinematic && ts->image)
+                {
+                    ts->image->imageReferencePtr = &ts->image;
+                }
+            }
+        }
+#endif
 	}
 
 	if (numOps) {
@@ -3424,7 +3437,7 @@ void idMaterial::CloseCinematic(void) const
 	for (int i = 0; i < numStages; i++) {
 		if (stages[i].texture.cinematic) {
 			stages[i].texture.cinematic->Close();
-#ifdef _MULTITHREAD //karin: set image's cinematic to null
+#ifdef _MULTITHREAD //karin: set image's cinematic to null if with OpenAL, image isn't deleted pointer by setting idImage::imageReferencePtr to NULL
 			if(multithreadActive)
 			{
 				if(stages[i].texture.image)

@@ -81,6 +81,7 @@ static int RB_GLSL_LoadShaderProgram(
 		const char *fragment_shader_source_file,
 		const char *macros
 );
+static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProgram = true);
 
 static bool RB_GLSL_LoadShaderProgramFromProp(const GLSLShaderProp *prop)
 {
@@ -134,11 +135,6 @@ int idGLSLShaderManager::Add(shaderProgram_t *shader)
 	}
 	common->Printf("idGLSLShaderManager::Add shader program '%s'.\n", shader->name);
 	return shaders.Append(shader);
-}
-
-void idGLSLShaderManager::Clear(void)
-{
-	shaders.Clear();
 }
 
 const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
@@ -306,7 +302,7 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 void idGLSLShaderManager::ActuallyLoad(void)
 {
 	unsigned int index = queueCurrentIndex;
-	const int num = customShaders.Num();
+	const unsigned int num = customShaders.Num();
 
 	if(
 			// !queue.Num()
@@ -371,19 +367,36 @@ void idGLSLShaderManager::ActuallyLoad(void)
 
 idGLSLShaderManager::~idGLSLShaderManager()
 {
-	printf("[Harmattan]: GLSL shader manager destroying......\n");
-	//queue.Clear();
-	queueCurrentIndex = customShaders.Num();
-	for(int i = 0; i < customShaders.Num(); i++)
-	{
-		GLSLShaderProp &prop = customShaders[i];
-		if(prop.program)
-		{
-			free(prop.program);
-			prop.program = NULL;
-		}
-	}
-	Clear();
+}
+
+void idGLSLShaderManager::Shutdown(void)
+{
+    printf("[Harmattan]: GLSL shader manager destroying: %d shaders, %d customer shaders\n", shaders.Num(), customShaders.Num());
+    // stop load queue;
+    queueCurrentIndex = customShaders.Num();
+    // delete shader programs
+    for(int i = 0; i < shaders.Num(); i++)
+    {
+        shaderProgram_t *shader = shaders[i];
+        if(shader)
+        {
+            RB_GLSL_DeleteShaderProgram(shader, true);
+        }
+    }
+    shaders.Clear();
+    // clear load queue
+    for(int i = 0; i < customShaders.Num(); i++)
+    {
+        GLSLShaderProp &prop = customShaders[i];
+        if(prop.program)
+        {
+            free(prop.program);
+            prop.program = NULL;
+        }
+    }
+    queueCurrentIndex = 0;
+    customShaders.Clear();
+    printf("[Harmattan]: GLSL shader manager shotdown\n");
 }
 
 idGLSLShaderManager idGLSLShaderManager::_shaderManager;
@@ -416,7 +429,8 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("zfill", SHADER_ZFILL, &depthFillShader, ZFILL_VERT, ZFILL_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("zfillClip", SHADER_ZFILLCLIP, &depthFillClipShader, ZFILLCLIP_VERT, ZFILLCLIP_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("cubemap", SHADER_CUBEMAP, &cubemapShader, CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("reflectionCubemap", SHADER_REFLECTIONCUBEMAP, &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("reflectionCubemap", SHADER_REFLECTIONCUBEMAP, &reflectionCubemapShader, REFLECTION_CUBEMAP_VERT, REFLECTION_CUBEMAP_FRAG /* CUBEMAP_FRAG */, "", ""));
+    ret.Append(GLSL_SHADER_SOURCE("reflectionCubemapBumpy", SHADER_REFLECTIONCUBEMAPBUMPY, &reflectionCubemapBumpyShader, REFLECTION_CUBEMAP_BUMPY_VERT, REFLECTION_CUBEMAP_BUMPY_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("fog", SHADER_FOG, &fogShader, FOG_VERT, FOG_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("blendLight", SHADER_BLENDLIGHT, &blendLightShader, BLENDLIGHT_VERT, FOG_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("interactionPBR", SHADER_INTERACTIONPBR, &interactionPBRShader, INTERACTION_VERT, INTERACTION_FRAG, "_PBR", "_PBR"));
@@ -688,7 +702,6 @@ static bool RB_GLSL_LinkShader(shaderProgram_t *shaderProgram, bool needsAttribu
 {
 	char buf[BUFSIZ];
 	int len;
-	GLint status;
 	GLint linked;
 
 	if(!shaderProgram->vertexShader || !shaderProgram->fragmentShader)
@@ -741,7 +754,9 @@ static bool RB_GLSL_ValidateProgram(shaderProgram_t *shaderProgram)
 	qglGetProgramiv(shaderProgram->program, GL_VALIDATE_STATUS, &validProgram);
 
 	if (!validProgram) {
-		common->Printf("RB_GLSL_ValidateProgram: program invalid\n");
+        GLchar log[LOG_LEN];
+        qglGetProgramInfoLog(shaderProgram->program, sizeof(GLchar) * LOG_LEN, NULL, log);
+        common->Warning("[Harmattan]: %s::glValidateProgram() -> %s", __func__, log);
 		return false;
 	}
 
@@ -827,7 +842,6 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 #ifdef _SHADOW_MAPPING
 	shader->shadowMVPMatrix = GL_GetUniformLocation(shader->program, "shadowMVPMatrix");
     shader->globalLightOrigin = GL_GetUniformLocation(shader->program, "globalLightOrigin");
-    shader->bias = GL_GetUniformLocation(shader->program, "bias");
 #endif
 
 	// get attribute location
@@ -949,8 +963,6 @@ static bool RB_GLSL_InitShaders(void)
 
 void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
 {
-	int		i;
-
 	common->Printf("----- R_ReloadGLSLPrograms -----\n");
 
     if(!glslInitialized)
@@ -979,10 +991,18 @@ void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
 	common->Printf("-------------------------------\n");
 }
 
+void R_GLSL_Shutdown(void)
+{
+    common->Printf("----- R_GLSL_Shutdown -----\n");
+    shaderManager->Shutdown();
+    glslInitialized = false;
+    common->Printf("-------------------------------\n");
+}
+
 
 
 // new
-static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProgram = true)
+void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProgram)
 {
     const bool isProgram = shaderProgram->program && qglIsProgram(shaderProgram->program);
     const bool isVertexShader = shaderProgram->vertexShader && qglIsShader(shaderProgram->vertexShader);
@@ -991,6 +1011,11 @@ static void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool del
 
 	if(isProgram)
 	{
+        if(deleteProgram)
+            common->Printf("[Harmattan]: Delete GLSL shader '%s': %d\n", shaderProgram->name, shaderProgram->program);
+        else
+            common->Printf("[Harmattan]: Purge GLSL shader '%s': %d\n", shaderProgram->name, shaderProgram->program);
+
 	    if(isVertexShader)
 	        qglDetachShader(shaderProgram->program, shaderProgram->vertexShader);
 	    if(isFragmentShader)
@@ -1085,11 +1110,9 @@ static GLuint RB_GLSL_CreateProgram(GLuint &program, GLuint vertShader, GLuint f
 	{
 		GLchar log[LOG_LEN];
 		qglGetProgramInfoLog(program, sizeof(GLchar) * LOG_LEN, NULL, log);
-		SHADER_ERROR("[Harmattan]: %s::glValidateProgram() -> %s!\n", __func__, log);
-#if 0
-		qglDeleteProgram(program);
-		program = 0;
-#endif
+        common->Warning("[Harmattan]: %s::glValidateProgram() -> %s!", __func__, log);
+//		qglDeleteProgram(program);
+//		program = 0;
 	}
 
 	return program;
@@ -1425,7 +1448,7 @@ void idGLSLShaderManager::ReloadShaders(void)
     for(int i = 0; i < shaders.Num(); i++)
     {
         shaderProgram_t *shader = shaders[i];
-        common->Printf("[Harmattan]: reload GLSL shader %d -> %s......\n", i, shader->name);
+        common->Printf("[Harmattan]: Reload GLSL shader %d -> %s......\n", i, shader->name);
 
         int type = shader->type;
         if(type >= SHADER_BASE_BEGIN && type <= SHADER_BASE_END)
@@ -1444,7 +1467,7 @@ void idGLSLShaderManager::ReloadShaders(void)
             {
                 if(!RB_GLSL_LoadShaderProgramFromProp(prop))
                 {
-                    common->Printf("[Harmattan]: reload GLSL shader error %d -> %s!\n", i, prop->name.c_str());
+                    common->Printf("[Harmattan]: Reload GLSL shader error %d -> %s!\n", i, prop->name.c_str());
                     continue;
                 }
             }
@@ -1458,7 +1481,7 @@ void idGLSLShaderManager::ReloadShaders(void)
                 {
                     if(!RB_GLSL_LoadShaderProgramFromProp(&prop))
                     {
-                        common->Printf("[Harmattan]: reload custom GLSL shader error %d(%d) -> %s!\n", i, m, prop.name.c_str());
+                        common->Printf("[Harmattan]: Reload custom GLSL shader error %d(%d) -> %s!\n", i, m, prop.name.c_str());
                         continue;
                     }
                     break;
@@ -1549,6 +1572,10 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	EXPORT_SHADER_SOURCE(CUBEMAP_FRAG, "cubemap", "frag"); \
  \
 	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_VERT, "reflectionCubemap", "vert"); \
+	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_FRAG, "reflectionCubemap", "frag"); \
+ \
+	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_BUMPY_VERT, "reflectionCubemapBumpy", "vert"); \
+	EXPORT_SHADER_SOURCE(REFLECTION_CUBEMAP_BUMPY_FRAG, "reflectionCubemapBumpy", "frag"); \
  \
 	EXPORT_SHADER_SOURCE(FOG_VERT, "fog", "vert"); \
 	EXPORT_SHADER_SOURCE(FOG_FRAG, "fog", "frag"); \
@@ -1559,6 +1586,7 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
  \
 	EXPORT_SHADER_SOURCE(TEXGEN_VERT, "texgen", "vert"); \
 	EXPORT_SHADER_SOURCE(TEXGEN_FRAG, "texgen", "frag"); \
+ \
 	EXPORT_SHADER_SOURCE(HEATHAZE_VERT, "heatHaze", "vert"); \
 	EXPORT_SHADER_SOURCE(HEATHAZE_FRAG, "heatHaze", "frag"); \
 	 \
@@ -1573,8 +1601,8 @@ void R_ExportDevShaderSource_f(const idCmdArgs &args)
 	 
 #ifdef _SHADOW_MAPPING
 #define EXPORT_SHADOW_MAPPING_SHADER() \
-	EXPORT_SHADER_SOURCE(DEPTH_VERT, "depth", "vert"); \
-	EXPORT_SHADER_SOURCE(DEPTH_FRAG, "depth", "frag"); \
+	EXPORT_SHADER_SOURCE(DEPTH_VERT, "depthShadowMapping", "vert"); \
+	EXPORT_SHADER_SOURCE(DEPTH_FRAG, "depthShadowMapping", "frag"); \
 	 \
 	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_VERT, "depthPerforated", "vert"); \
 	EXPORT_SHADER_SOURCE(DEPTH_PERFORATED_FRAG, "depthPerforated", "frag"); \

@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __UNZIP_H__
 #define __UNZIP_H__
 
+#if !defined(_MINIZ)
 
 #if defined(STRICTUNZIP) || defined(STRICTZIPUNZIP)
 /* like the STRICT of WIN32, we define a pointer that cannot be converted
@@ -339,4 +340,38 @@ extern int unzGetLocalExtrafield(unzFile file, void *buf, unsigned len);
 	the error code
 */
 
+typedef unz_file_info d3_unz_file_info;
+typedef unz_global_info d3_unz_global_info;
+typedef unsigned long fileInPack_pos_t;
+#define d3_unzGetCurrentFileInfo unzGetCurrentFileInfo
+#define d3_unzGetGlobalInfo unzGetGlobalInfo
+#define d3_unzSetOffset unzSetOffset
+#define d3_unzGetOffset unzGetOffset
+#else
+#include "../externlibs/miniz/miniz.h"
+#include "../externlibs/minizip/unzip.h"
+
+// Compat
+#if defined(__ANDROID__) && __ANDROID_API__ < 24
+typedef unz_file_info d3_unz_file_info;
+typedef unz_global_info d3_unz_global_info;
+typedef uLong fileInPack_pos_t; // unsigned long
+#define d3_unzGetCurrentFileInfo unzGetCurrentFileInfo
+#define d3_unzGetGlobalInfo unzGetGlobalInfo
+#define d3_unzSetOffset unzSetOffset
+#define d3_unzGetOffset unzGetOffset
+#else
+typedef unz_file_info64 d3_unz_file_info;
+typedef unz_global_info64 d3_unz_global_info;
+typedef ZPOS64_T fileInPack_pos_t;
+#define d3_unzGetCurrentFileInfo unzGetCurrentFileInfo64
+#define d3_unzGetGlobalInfo unzGetGlobalInfo64
+#define d3_unzSetOffset unzSetOffset64
+#define d3_unzGetOffset unzGetOffset64
+#endif
+
+#define unzSetCurrentFileInfoPosition d3_unzSetOffset
+#define unzGetCurrentFileInfoPosition(uf, pos) (*(pos)) = d3_unzGetOffset(uf)
+
+#endif // _MINIZ
 #endif /* __UNZIP_H__ */

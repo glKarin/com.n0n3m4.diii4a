@@ -248,7 +248,12 @@ numCPUPackages		- the total number of packages (physical processors)
 */
 void Sys_CPUCount( int& numLogicalCPUCores, int& numPhysicalCPUCores, int& numCPUPackages )
 {
-	numPhysicalCPUCores = 1;
-	numLogicalCPUCores = SDL_GetCPUCount();
+#ifdef _WIN32
+    extern void Sys_Win_CPUCount( int& numLogicalCPUCores, int& numPhysicalCPUCores, int& numCPUPackages );
+    Sys_Win_CPUCount(numLogicalCPUCores, numPhysicalCPUCores, numCPUPackages);
+#else
+    numPhysicalCPUCores = SDL_GetCPUCount();
+	numLogicalCPUCores = numPhysicalCPUCores;
 	numCPUPackages = 1;
+#endif
 }

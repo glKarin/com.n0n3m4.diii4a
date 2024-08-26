@@ -67,7 +67,7 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
     {
         final SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher);
         final String libPath = ContextUtility.NativeLibDir(m_gameLauncher) + "/";
-        final String[] Libs = Q3EUtils.q3ei.libs;
+        final String[] Libs = m_gameLauncher.GetGameManager().GetGameLibs(Q3EUtils.q3ei.game, false);
         final String PreferenceKey = m_key;
         final List<CharSequence> items = new ArrayList<>();
         final List<String> values = new ArrayList<>();

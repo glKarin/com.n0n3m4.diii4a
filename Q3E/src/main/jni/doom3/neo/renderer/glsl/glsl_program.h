@@ -9,7 +9,8 @@ GLSL_PROGRAM_PROC shaderProgram_t	defaultShader; // default texture and color sh
 GLSL_PROGRAM_PROC shaderProgram_t	depthFillShader; // z-fill shader
 GLSL_PROGRAM_PROC shaderProgram_t	depthFillClipShader; //k: z-fill shader(clipped)
 GLSL_PROGRAM_PROC shaderProgram_t   cubemapShader; //k: skybox shader
-GLSL_PROGRAM_PROC shaderProgram_t   reflectionCubemapShader; //k: reflection shader
+GLSL_PROGRAM_PROC shaderProgram_t   reflectionCubemapShader; //k: reflection shader(environment)
+GLSL_PROGRAM_PROC shaderProgram_t   reflectionCubemapBumpyShader; //k: reflection shader(Bumpy environment)
 GLSL_PROGRAM_PROC shaderProgram_t	fogShader; //k: fog shader
 GLSL_PROGRAM_PROC shaderProgram_t	blendLightShader; //k: blend light shader
 GLSL_PROGRAM_PROC shaderProgram_t	interactionPBRShader; //k: PBR lighting model interaction shader

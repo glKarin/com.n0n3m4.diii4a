@@ -30,13 +30,10 @@ void main(void)
     vec4 mask = texture( u_fragmentMap2, var_TexCoord0.xy );
     // kill the pixel if the distortion wound up being very small
     mask.xy *= var_Color.xy;
-    mask.xy -= 0.01f;
-    if ( any( lessThan( mask, vec4( 0.0 ) ) ) )
-    {
-        discard;
-    }
+    mask.xy -= 0.01;
+    if ( any( lessThan( mask, vec4( 0.0 ) ) ) ) { discard; } 
     // load the filtered normal map and convert to -1 to 1 range
-    vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;
+    vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0 ) - 1.0;
     vec2 localNormal = bumpMap.wy;
     localNormal *= mask.xy;
     // calculate the screen texcoord in the 0.0 to 1.0 range

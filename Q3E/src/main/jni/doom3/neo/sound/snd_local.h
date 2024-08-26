@@ -267,6 +267,9 @@ class idWaveFile
 
 		void 			*ogg;			// only !NULL when !s_realTimeDecoding
 		bool			isOgg;
+#ifdef _USING_STB_OGG
+        byte*			oggData; // the contents of the .ogg for stbi_vorbis (it doesn't support custom reading callbacks)
+#endif
 
 	private:
 		int				ReadMMIO(void);

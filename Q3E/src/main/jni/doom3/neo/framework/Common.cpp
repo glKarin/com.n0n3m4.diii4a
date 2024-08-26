@@ -41,6 +41,7 @@ extern bool Sys_InRenderThread(void);
 #define _HARM_DEBUG_MULTITHREAD
 #endif
 #endif
+#define HARM_ONLY_DETECT_SYS_MEMORY 1
 
 typedef enum {
 	ERP_NONE,
@@ -1637,6 +1638,7 @@ void Com_ExecMachineSpec_f(const idCmdArgs &args)
 		cvarSystem->SetCVarInteger("r_multiSamples", 0, CVAR_ARCHIVE);
 	}
 
+#if ! HARM_ONLY_DETECT_SYS_MEMORY
 	if (Sys_GetVideoRam() < 128) {
 		cvarSystem->SetCVarBool("image_ignoreHighQuality", true, CVAR_ARCHIVE);
 		cvarSystem->SetCVarInteger("image_downSize", 1, CVAR_ARCHIVE);
@@ -1646,6 +1648,7 @@ void Com_ExecMachineSpec_f(const idCmdArgs &args)
 		cvarSystem->SetCVarInteger("image_downSizeBump", 1, CVAR_ARCHIVE);
 		cvarSystem->SetCVarInteger("image_downSizeBumpLimit", 256, CVAR_ARCHIVE);
 	}
+#endif
 
 	if (Sys_GetSystemRam() < 512) {
 		cvarSystem->SetCVarBool("image_ignoreHighQuality", true, CVAR_ARCHIVE);
@@ -2982,7 +2985,11 @@ void idCommonLocal::LoadGameDLL(void)
 				common->Printf("[Harmattan]: Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
 #elif defined(_HUMANHEAD) // prey2006 base game dll
-			if(!fsgame.Icmp("preybase") || fsgame.IsEmpty()) // load Prey game so.
+			if(!fsgame.Icmp("preybase") 
+#if !defined(__ANDROID__)
+					|| !fsgame.Icmp("base")
+#endif
+					|| fsgame.IsEmpty()) // load Prey game so.
 			{
 				common->Printf("[Harmattan]: Load Prey2006 game......\n");
 				idStr dllFile(dir);
@@ -3156,12 +3163,27 @@ idCommonLocal::SetMachineSpec
 void idCommonLocal::SetMachineSpec(void)
 {
 	cpuid_t	cpu = Sys_GetProcessorId();
-	double ghz = Sys_ClockTicksPerSecond() * 0.000000001f;
+	double ghz = Sys_ClockTicksPerSecond() * 0.000000001;
 	int vidRam = Sys_GetVideoRam();
 	int sysRam = Sys_GetSystemRam();
 
 	Printf("Detected\n \t%.2f GHz CPU\n\t%i MB of System memory\n\t%i MB of Video memory\n\n", ghz, sysRam, vidRam);
 
+#if HARM_ONLY_DETECT_SYS_MEMORY
+    if (sysRam >= 1024) {
+        Printf("This system qualifies for Ultra quality!\n");
+        com_machineSpec.SetInteger(3);
+    } else if (sysRam >= 512) {
+        Printf("This system qualifies for High quality!\n");
+        com_machineSpec.SetInteger(2);
+    } else if (sysRam >= 384) {
+        Printf("This system qualifies for Medium quality.\n");
+        com_machineSpec.SetInteger(1);
+    } else {
+        Printf("This system qualifies for Low quality.\n");
+        com_machineSpec.SetInteger(0);
+    }
+#else
 	if (ghz >= 2.75f && vidRam >= 512 && sysRam >= 1024) {
 		Printf("This system qualifies for Ultra quality!\n");
 		com_machineSpec.SetInteger(3);
@@ -3177,6 +3199,7 @@ void idCommonLocal::SetMachineSpec(void)
 	}
 
 	com_videoRam.SetInteger(vidRam);
+#endif
 }
 
 /*

@@ -73,11 +73,7 @@ idCVar idSoundSystemLocal::s_skipHelltimeFX("s_skipHelltimeFX", "0", CVAR_SOUND 
 #if ID_OPENAL
 // off by default. OpenAL DLL gets loaded on-demand
 #ifdef _WIN32
-#ifdef _OPENAL_SOFT
-idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal.dll", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
-#else
 idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
-#endif
 #else
 idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "./libopenal.so", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
 #endif

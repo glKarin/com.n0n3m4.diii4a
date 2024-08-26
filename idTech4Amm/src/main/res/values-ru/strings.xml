@@ -12,12 +12,6 @@
     <string name="use_etc1_or_rgba4444_compression">Использовать ETC1 (или RGBA4444) сжатие</string>
     <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">Очистить буфер вершин(harm_r_clearVertexBuffer)</string>
     <string name="use_etc1_or_rgba4444_cache">Использовать ETC1 (или RGBA4444) кэш</string>
-    <string name="don_t_clear_and_do_nothing">Без очистки</string>
-    <string name="it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen">Оригинал по умолчанию, возможно нехватка памяти приведет к сбою с флэш-экраном.</string>
-    <string name="force_clear_vertex_buffer_on_every_end_frame">Принудительно очищать буфер вершин в каждом конечном кадре</string>
-    <string name="if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer">Если нехватка памяти привела к сбою, включите принудительное удаление буфера вершин.</string>
-    <string name="force_delete_vertex_buffer_on_every_end_frame">Принудительное удаление буфера вершин в каждом конечном кадре</string>
-    <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">Удаляет буфер вершин, может быть медленнее, но безопаснее для памяти.</string>
     <string name="game_cvar_fs_game">Выбор игры</string>
     <string name="doom_iii">DOOM III</string>
     <string name="doom3_resurrection_of_evil_d3xp">DOOM3:Resurrection of Evil</string>
@@ -234,8 +228,6 @@
     <string name="e_g">прим.</string>
     <string name="add_game_library_file_success">Файл библиотеки игры успешно добавлен</string>
     <string name="add_game_library_file_fail">Не удалось добавить файл библиотеки игры!</string>
-    <string name="find_game_library_in_game_data_directory">Найти игровую библиотеку в каталоге игры</string>
-    <string name="if_game_library_file_named_gameaarch64_so_or_libgameaarch64_so_on_arm64_device_or_named_gamearm_so_or_libgamearm_so_on_arm32_device_found_at_game_working_directory_fs_game_folder_will_load_it_instead_of_default_game_library_of_apk">Файл библиотеки игры (с названием `gameaarch64.so` или `libgameaarch64.so` на устройстве arm64. И с названием `gamearm.so` или `libgamearm.so` на устройстве arm32) находится в `Рабочем каталоге игры`/`fs_game` папка, загрузит ее вместо игровой библиотеки apk по умолчанию.</string>
     <string name="translators">Переводчики</string>
     <string name="note">Примечание</string>
     <string name="open_source_license">OPEN-SOURCE ЛИЦЕНЗИЯ</string>
@@ -358,5 +350,17 @@
     <string name="current_game_data_path">Текущий путь к данным игры</string>
     <string name="render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces">Render perforated material shadow(r_forceShadowMapsOnAlphaTestedSurfaces)</string>
     <string name="stencil_shadow">Stencil shadow</string>
+    <string name="ambient">Ambient</string>
+    <string name="librecoop_roe">LibreCoop:RoE</string>
+    <string name="don_t_clear_and_do_nothing">Do nothing</string>
+    <string name="it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen">Default original, it maybe cause crash with out of memory</string>
+    <string name="force_clear_vertex_buffer_on_every_end_frame">Free VBO on every frame</string>
+    <string name="if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer">Suggest to free/delete VBO if graphics crash with out of memory</string>
+    <string name="force_delete_vertex_buffer_on_every_end_frame">Free and delete VBO on every frame</string>
+    <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">Also like 2nd, and delete VBO handle, maybe slower but memory safer</string>
+    <string name="find_game_library_in_game_data_directory">Find external game library in game data directory instead of default game library of apk</string>
+    <string name="using_external_game_library">Game library file name: arm64 = `gameaarch64.so` or `libgameaarch64.so`; arm32 = `gamearm.so` or `libgamearm.so`</string>
+    <string name="perfected_doom_3">Perfected Doom 3</string>
+    <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
 
 </resources>

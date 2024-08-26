@@ -207,14 +207,14 @@ class idImage
 		                              textureFilter_t filter, bool allowDownSize,
 		                              textureRepeat_t repeat, textureDepth_t depth);
 
-	void		GenerateShadow2DRGBAImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
-    void		GenerateShadowCubeRGBAImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
-	void		GenerateShadow2DDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
-	void		GenerateShadowCubeDepthImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
+	    void		GenerateShadow2DRGBAImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
+        void		GenerateShadowCubeRGBAImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm);
+	    void		GenerateShadow2DDepthImage(int width, int height, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
+	    void		GenerateShadowCubeDepthImage(int size, textureFilter_t filter, bool allowDownSize, textureRepeat_t repeatParm, int component = 24, bool compare = false);
 #ifdef GL_ES_VERSION_3_0
-	void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat, int component = 24, bool compare = true );
+	    void		GenerateShadowArray( int width, int height, int numSides, textureFilter_t filter, textureRepeat_t repeat, int component = 24, bool compare = true );
 #endif
-	void		GenerateDepthStencilImage( int width, int height, bool allowDownSize, textureFilter_t filter, textureRepeat_t repeat, int component = 24, int stencilComponent = 8, bool compare = false);
+	    void		GenerateDepthStencilImage( int width, int height, bool allowDownSize, textureFilter_t filter, textureRepeat_t repeat, int component = 24, int stencilComponent = 8, bool compare = false);
 #if !defined(GL_ES_VERSION_2_0)
 		void		Generate3DImage(const byte *pic, int width, int height, int depth,
 		                                textureFilter_t filter, bool allowDownSize,
@@ -240,7 +240,7 @@ class idImage
 		void		Print() const;
 
 		// check for changed timestamp on disk and reload if necessary
-		void		Reload(bool checkPrecompressed, bool force);
+		void		Reload(bool checkPrecompressed, bool force, bool fromBackEnd = false);
 
 		void		AddReference()				{
 			refCount++;
@@ -311,11 +311,12 @@ class idImage
 
 		int					refCount;				// overall ref count
 #ifdef _MULTITHREAD
-	//If bound to a cinematic
-	idCinematic *		cinematic;
-	int					cinmaticNextTime;
+		//If bound to a cinematic
+		idCinematic *		cinematic;
+		int					cinmaticNextTime;
+        idImage **          imageReferencePtr; // A idImage address that point to reference this, it will set NULL when image deleted on globalImages->Shutdown()
 
-	bool				purgePending;
+		bool				purgePending;
 #endif
 };
 
@@ -353,6 +354,8 @@ ID_INLINE idImage::idImage()
 	purgePending = false;
 	cinematic = NULL;
 	cinmaticNextTime = 0;
+
+    imageReferencePtr = NULL;
 #endif
 }
 
@@ -529,27 +532,27 @@ class idImageManager
 		const static int MAX_BACKGROUND_IMAGE_LOADS = 8;
 
 #ifdef _MULTITHREAD
-	idList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
-	idList<idImage*>	imagesPurge; //List for the backend thread
+	    idList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
+	    idList<idImage*>	imagesPurge; //List for the backend thread
 
-	void				AddAllocList(idImage * image, bool checkForPrecompressed, bool fromBackEnd);
-	void				AddPurgeList(idImage * image);
+	    void				AddAllocList(idImage * image, bool checkForPrecompressed, bool fromBackEnd);
+	    void				AddPurgeList(idImage * image);
 
-	bool				GetNextAllocImage(ActuallyLoadImage_data_t &ret);
-	idImage *			GetNextPurgeImage();
-	void HandlePendingImage(void);
+	    bool				GetNextAllocImage(ActuallyLoadImage_data_t &ret);
+	    idImage *			GetNextPurgeImage();
+	    void                HandlePendingImage(void);
 #endif
 #ifdef _SHADOW_MAPPING
-	// RB begin
-	idImage*			shadowImage_2DRGBA[MAX_SHADOWMAP_RESOLUTIONS];
-	idImage*			shadowImage_2DDepth[MAX_SHADOWMAP_RESOLUTIONS];
-	idImage*			shadowImage_CubeRGBA[MAX_SHADOWMAP_RESOLUTIONS];
-	idImage*			shadowImage_CubeDepth[MAX_SHADOWMAP_RESOLUTIONS];
+	    // RB begin
+	    idImage*			shadowImage_2DRGBA[MAX_SHADOWMAP_RESOLUTIONS];
+	    idImage*			shadowImage_2DDepth[MAX_SHADOWMAP_RESOLUTIONS];
+	    idImage*			shadowImage_CubeRGBA[MAX_SHADOWMAP_RESOLUTIONS];
+	    idImage*			shadowImage_CubeDepth[MAX_SHADOWMAP_RESOLUTIONS];
 #ifdef GL_ES_VERSION_3_0
-	idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
+	    idImage*			shadowImage[MAX_SHADOWMAP_RESOLUTIONS];
 #endif
-	idImage*			blueNoiseImage256;
-	// RB end
+	    idImage*			blueNoiseImage256;
+	    // RB end
 #endif
 };
 

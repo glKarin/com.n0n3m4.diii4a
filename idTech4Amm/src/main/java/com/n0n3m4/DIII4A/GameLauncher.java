@@ -43,6 +43,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -51,6 +52,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -353,6 +355,13 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_r_shadowMapPerforatedShadow, isChecked)
 						.commit();
 			}
+			else if (id == R.id.collapse_mods)
+			{
+				CollapseMods(isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(PreferenceKey.COLLAPSE_MODS, isChecked)
+						.commit();
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -380,7 +389,7 @@ public class GameLauncher extends Activity
 			}
 			else if (rgId == R.id.rg_harm_r_lightingModel)
 			{
-				String value = "" + (GetCheckboxIndex(radioGroup, id) + 1);
+				String value = "" + ((GetCheckboxIndex(radioGroup, id) + 1) % V.rg_harm_r_lightingModel.getChildCount());
 				SetProp("harm_r_lightingModel", value);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putString(Q3EPreference.pref_harm_r_lightingModel, value)
@@ -688,7 +697,15 @@ public class GameLauncher extends Activity
         Q3EUtils.q3ei = q3ei;
     }
 
-    @Override
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus)
+	{
+		super.onWindowFocusChanged(hasFocus);
+		if(hasFocus)
+			CollapseMods(V.collapse_mods.isChecked());
+	}
+
+	@Override
     public void onAttachedToWindow()
     {
         super.onAttachedToWindow();
@@ -825,6 +842,8 @@ public class GameLauncher extends Activity
 			if (str != null)
 			{
 				index = Q3EUtils.parseInt_s(str, 1) - 1;
+				if(index < 0)
+					index = V.rg_harm_r_lightingModel.getChildCount() - 1;
 			}
 			SelectCheckbox(V.rg_harm_r_lightingModel, index);
 			if (!IsProp("harm_r_lightingModel")) SetProp("harm_r_lightingModel", "1");
@@ -842,7 +861,7 @@ public class GameLauncher extends Activity
 			str = GetProp("harm_r_specularExponentPBR");
 			if (null != str)
 				V.edt_harm_r_specularExponentPBR.setText(str);
-			if (!IsProp("harm_r_specularExponentPBR")) SetProp("harm_r_specularExponentPBR", "1.0");
+			if (!IsProp("harm_r_specularExponentPBR")) SetProp("harm_r_specularExponentPBR", "5.0");
 
 			str = GetProp("s_driver");
 			index = 0;
@@ -1115,7 +1134,10 @@ public class GameLauncher extends Activity
         V.rg_color_bits.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.r_harmclearvertexbuffer, mPrefs.getInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, 2));
         V.r_harmclearvertexbuffer.setOnCheckedChangeListener(m_groupCheckChangeListener);
-        SelectCheckbox(V.rg_harm_r_lightingModel, Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_harm_r_lightingModel, "1")) - 1);
+		int index = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_harm_r_lightingModel, "1"), 1) - 1;
+		if(index < 0)
+			index = V.rg_harm_r_lightingModel.getChildCount() - 1;
+        SelectCheckbox(V.rg_harm_r_lightingModel, index);
         V.rg_harm_r_lightingModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
         SelectCheckbox(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
         V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
@@ -1201,7 +1223,7 @@ public class GameLauncher extends Activity
 		V.launcher_tab1_game_mod_button.setOnClickListener(m_buttonClickListener);
         V.edt_harm_r_specularExponent.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponent, 3.0f));
 		V.edt_harm_r_specularExponentBlinnPhong.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponentBlinnPhong, 12.0f));
-		V.edt_harm_r_specularExponentPBR.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponentPBR, 1.0f));
+		V.edt_harm_r_specularExponentPBR.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_specularExponentPBR, 5.0f));
 		V.edt_harm_r_maxFps.setText(Q3EPreference.GetStringFromInt(mPrefs, Q3EPreference.pref_harm_r_maxFps, 0));
 
 		Runnable customResChanged = new Runnable() {
@@ -1222,7 +1244,7 @@ public class GameLauncher extends Activity
 		SetupCommandTextWatcher(true);
         V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 3.0f));
 		V.edt_harm_r_specularExponentBlinnPhong.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentBlinnPhong", Q3EPreference.pref_harm_r_specularExponentBlinnPhong, 12.0f));
-		V.edt_harm_r_specularExponentPBR.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentPBR", Q3EPreference.pref_harm_r_specularExponentPBR, 3.0f));
+		V.edt_harm_r_specularExponentPBR.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentPBR", Q3EPreference.pref_harm_r_specularExponentPBR, 5.0f));
 		V.edt_harm_r_maxFps.addTextChangedListener(new TextWatcher()
 		{
 			public void onTextChanged(CharSequence s, int start, int before, int count)
@@ -1314,6 +1336,7 @@ public class GameLauncher extends Activity
 		V.readonly_command.setChecked(readonlyCommand);
 		SetupCommandLine(readonlyCommand);
 		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_stencilShadowTranslucent.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_stencilShadowTranslucent, false));
 		V.cb_stencilShadowTranslucent.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.edt_harm_r_stencilShadowAlpha.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_stencilShadowAlpha, 1.0f));
@@ -1327,6 +1350,11 @@ public class GameLauncher extends Activity
 		V.cb_stencilShadowCombine.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_perforatedShadow.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_shadowMapPerforatedShadow, false));
 		V.cb_perforatedShadow.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		boolean collapseMods = mPrefs.getBoolean(PreferenceKey.COLLAPSE_MODS, false);
+		V.collapse_mods.setChecked(collapseMods);
+		CollapseMods(collapseMods);
+		V.collapse_mods.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		SetupTempCommandLine(false);
 		V.editable_temp_command.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -1379,7 +1407,7 @@ public class GameLauncher extends Activity
 		}
 	}
 
-    @Override
+	@Override
     protected void onDestroy()
     {
         super.onDestroy();
@@ -1762,10 +1790,10 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EPreference.pref_32bit, index == -1);
         mEdtr.putInt(Q3EPreference.pref_harm_16bit, index);
         mEdtr.putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, GetCheckboxIndex(V.r_harmclearvertexbuffer));
-        mEdtr.putString(Q3EPreference.pref_harm_r_lightingModel, "" + (GetCheckboxIndex(V.rg_harm_r_lightingModel) + 1));
+        mEdtr.putString(Q3EPreference.pref_harm_r_lightingModel, "" + ((GetCheckboxIndex(V.rg_harm_r_lightingModel) + 1) % V.rg_harm_r_lightingModel.getChildCount()));
         mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponent, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponent.getText().toString(), 3.0f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentBlinnPhong, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentBlinnPhong.getText().toString(), 12.0f));
-		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentPBR, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentPBR.getText().toString(), 1.0f));
+		mEdtr.putFloat(Q3EPreference.pref_harm_r_specularExponentPBR, Q3EUtils.parseFloat_s(V.edt_harm_r_specularExponentPBR.getText().toString(), 5.0f));
         mEdtr.putString(Q3EPreference.pref_harm_s_driver, GetCheckboxIndex(V.rg_s_driver) == 1 ? "OpenSLES" : "AudioTrack");
 		mEdtr.putInt(Q3EPreference.pref_harm_r_maxFps, Q3EUtils.parseInt_s(V.edt_harm_r_maxFps.getText().toString(), 0));
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_useShadowMapping, GetCheckboxIndex(V.rg_harm_r_shadow) == 1);
@@ -1807,6 +1835,7 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowCombine, V.cb_stencilShadowCombine.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_shadowMapPerforatedShadow, V.cb_perforatedShadow.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, GetCheckboxIndex(V.rg_r_autoAspectRatio));
+		mEdtr.putBoolean(PreferenceKey.COLLAPSE_MODS, V.collapse_mods.isChecked());
 
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -2403,6 +2432,8 @@ public class GameLauncher extends Activity
 		V.launcher_fs_game_cvar.setText("(" + Q3EUtils.q3ei.GetGameCommandParm() + ")");
 		V.launcher_fs_game_subdir.setText(Q3ELang.tr(this, R.string.sub_directory) + subdir);
 		V.launcher_fs_game_subdir.setVisibility(subdir.isEmpty() ? View.GONE : View.VISIBLE);
+
+		CollapseMods(V.collapse_mods.isChecked());
     }
 
     private void ChangeGame(String... games)
@@ -2887,6 +2918,52 @@ public class GameLauncher extends Activity
 			RemoveProp(arg);
 	}
 
+	private void CollapseMods(boolean on)
+	{
+		final int VisibleRadioCount = 4;
+		RadioGroup radioGroup = null;
+		int childCount = V.mods_container_layout.getChildCount();
+		for(int i = 0; i < childCount; i++)
+		{
+			View view = V.mods_container_layout.getChildAt(i);
+			if(view.getVisibility() == View.VISIBLE)
+			{
+				int radioCount = ((RadioGroup)view).getChildCount();
+				if(radioCount > VisibleRadioCount)
+				{
+					radioGroup = (RadioGroup)view;
+				}
+				break;
+			}
+		}
+
+		ViewGroup.LayoutParams layoutParams = V.mods_container.getLayoutParams();
+		if(null == radioGroup)
+		{
+			layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+			V.mods_container.setLayoutParams(layoutParams);
+			V.mods_container.setNestedScrollingEnabled(false);
+			return;
+		}
+
+		if(on)
+		{
+			int height = 0;
+			for (int m = 0; m < VisibleRadioCount; m++)
+			{
+				View radio = radioGroup.getChildAt(m);
+				height += Math.max(radio.getHeight(), radio.getMeasuredHeight());
+			}
+			layoutParams.height = height;
+		}
+		else
+		{
+			layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+		}
+		V.mods_container.setLayoutParams(layoutParams);
+		V.mods_container.setNestedScrollingEnabled(on);
+	}
+
 
 
     private class ViewHolder
@@ -2989,6 +3066,9 @@ public class GameLauncher extends Activity
 		public EditText edt_harm_r_specularExponentPBR;
 		public View show_directory_helper;
 		public CheckBox cb_perforatedShadow;
+		public Switch collapse_mods;
+		public android.support.v4.widget.NestedScrollView mods_container;
+		public LinearLayout mods_container_layout;
 
         public void Setup()
         {
@@ -3089,6 +3169,9 @@ public class GameLauncher extends Activity
 			edt_harm_r_specularExponentPBR = findViewById(R.id.edt_harm_r_specularExponentPBR);
 			show_directory_helper = findViewById(R.id.show_directory_helper);
 			cb_perforatedShadow = findViewById(R.id.cb_perforatedShadow);
+			collapse_mods = findViewById(R.id.collapse_mods);
+			mods_container = findViewById(R.id.mods_container);
+			mods_container_layout = findViewById(R.id.mods_container_layout);
         }
     }
 }

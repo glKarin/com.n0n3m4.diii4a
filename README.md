@@ -6,9 +6,9 @@
 ##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan55(natasha) for **DOOM3 20th Anniversary Edition**  
+1.1.0harmattan56(natasha)  
 **Latest update:**
-2024-08-05  
+2024-08-23  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -24,7 +24,7 @@ GPLv3
 * obj/dae format static model
 * pure soft shadow with shadow-mapping
 * soft shadow with stencil-shadow and translucent stencil shadow
-* lighting model: Phong/Blinn-phong/PBR/no-lighting
+* lighting model: Phong/Blinn-phong/PBR/Ambient(no-lighting)
 * debug render tools support with programming render pipeline
 * OpenGLES2.0/OpenGLES3.0
 * OpenAL(soft) and EFX Reverb
@@ -48,7 +48,7 @@ GPLv3
 | Shadow mapping for pure soft shadow | Yes | - |
 | Soft/Translucent stencil shadow | Yes<br/>(Soft stencil shadow only support on OpenGLES3.1+) | - |
 | OpenGL ES version | 2.0 and 3.0+<br/>(point light shadow mapping shader use cubemap on OpenGLES2.0, use texture array on OpenGLES3.0+) | 2.0(3.0+ compat) |
-| No lighting | Yes<br/>(And support switch in gaming) | Yes |
+| No lighting | Yes<br/>(And support switch in gaming by set harm_r_lightingModel to 0) | Yes |
 | Debug render tools | Yes<br/>(need to set harm_r_renderToolsMultithread to 1 if with multi-threading) | - |
 | PBR lighting model | Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr)) | - |
 
@@ -56,7 +56,7 @@ GPLv3
 
 | Game | Engine | Version | OpenGL ES version | Mods |
 |:-----|:-----:|:-----:|:-----:|:-----:|
-| DOOM III | n0n3m4's dante | - | 2.0/3.0 | Resurrection of Evil<br/>The Lost Mission<br/>Classic DOOM3<br/>Rivensin<br/>HardCorps<br/>Overthinked Doom^3<br/>Sabot(a7x)<br/>HeXen:Edge of Chaos<br/>Fragging Free<br/>LibreCoop |
+| DOOM III | n0n3m4's dante | - | 2.0/3.0 | Resurrection of Evil<br/>The Lost Mission<br/>Classic DOOM3<br/>Rivensin<br/>HardCorps<br/>Overthinked Doom^3<br/>Sabot(a7x)<br/>HeXen:Edge of Chaos<br/>Fragging Free<br/>LibreCoop<br/>LibreCoop D3XP<br/>Perfected Doom 3<br/>Perfected Doom 3:RoE |
 | Quake IV | n0n3m4's dante | - | 2.0/3.0 |  |
 | Prey(2006) | n0n3m4's dante | - | 2.0/3.0 |  |
 | DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) | 3.0 |  |
@@ -82,21 +82,25 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add PBR interaction lighting model([jmarshall23's idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr))(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.
-* Fix large shake of player view with OpenAL in DOOM3/Quake4/Prey.
-* Add command history record manager in launcher.
-* Add `/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a` to game data search path(exclude Quake1), add current game data path tips.
-* Optimize ETC1 compression texture cache in DOOM3/Quake4/Prey, add ETC2 compression texture support(cvar r_useETC2) in OpenGLES3.0.
-* Add launcher theme setting.
+* Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.
+* Fix environment reflection shader in DOOM3/Quake4/Prey.
+* Add ambient lighting model with `harm_r_lightingModel` 0 and remove r_noLight=2 in DOOM3/Quake4/Prey.
+* Reduce game crash when change mod/reloadEngine/vid_restart in DOOM3/Quake4/Prey.
+* Support switch weapon in DOOM 3(write `bind "YOUR_KEY" "IMPULSE_51"` to your DoomConfig.cfg or autoexec.cfg).
+* Add `LibreCoop(RoE)` mod of DOOM3 support, game data directory named `librecoopxp`. More view in [LibreCoop(RoE)](https://www.moddb.com/mods/librecoop-dhewm3-coop).
+* Add `Perfected Doom 3` mod of DOOM3 support, game data directory named `perfected`. More view in [Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500).
+* Add `Perfected Doom 3 : Resurrection of Evil` mod of DOOM3 support, game data directory named `perfected_roe`. More view in [Perfected Doom 3 : Resurrection of Evil](https://www.moddb.com/mods/perfected-doom-3-version-500).
 
 ----------------------------------------------------------------------------------
 
-* 毁灭战士3/雷神之锤4/掠食(2006)新增PBR光照模型([jmarshall23's idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr))(设置cvar harm_r_lightingModel 3).
-* 毁灭战士3/雷神之锤4/掠食(2006)修复OpenAL下玩家视角大幅度抖动.
-* 启动器新增命令历史记录管理器.
-* 添加`/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a`到游戏数据文件搜索路径(除了雷神之锤1), 新增当前游戏数据文件路径提示.
-* 毁灭战士3/雷神之锤4/掠食(2006)优化ETC1压缩纹理缓存, OpenGLES3.0新增ETC2压缩纹理支持(cvar r_useETC2).
-* 新增启动器主题设置.
+* 毁灭战士3/雷神之锤4/掠食(2006)优化PBR光照模型渲染.
+* 毁灭战士3/雷神之锤4/掠食(2006)修复环境反射着色器.
+* 毁灭战士3/雷神之锤4/掠食(2006)新增使用`harm_r_lightingModel`为0进渲染环境光, 移除r_noLight=2.
+* 毁灭战士3/雷神之锤4/掠食(2006)切换mod/reloadEngine/vid_restart减少游戏崩溃.
+* 毁灭战士3支持切换武器(通过写入`bind "YOUR_KEY" "IMPULSE_51"`到DoomConfig.cfg或autoexec.cfg文件中).
+* 新增毁灭战士3 mod `LibreCoop(RoE)`支持, 游戏数据文件夹命名为`librecoopxp`. 详情 [LibreCoop(RoE)](https://www.moddb.com/mods/librecoop-dhewm3-coop).
+* 新增毁灭战士3 mod `Perfected Doom 3`支持, 游戏数据文件夹命名为`perfected`. 详情 [Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500).
+* 新增毁灭战士3 mod `Perfected Doom 3 : Resurrection of Evil`支持, 游戏数据文件夹命名为`perfected_roe`. 详情 [Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500).
 
 ----------------------------------------------------------------------------------
 
@@ -114,15 +118,16 @@ Tag with `-free` only for F-Droid update.
 |:---|:---:|:--:|:---|:---:|:---:|:---|:---|:---:|
 | harm_r_openglVersion | String | GLES3.0 | OpenGL version | INIT | GLES2, GLES3.0 | Engine/Renderer | setup with launcher on Android | Windows, Linux |
 | harm_r_multithread | Bool | 1 | Multithread backend | INIT |  | Engine/Renderer | setup with launcher on Android | Windows, Linux |
-| harm_r_clearVertexBuffer | Integer | 2 | Clear vertex buffer on every frame | ARCHIVE, FIXED | 0, 1, 2 | Engine/Renderer | 0 = not clear(original);<br/> 1 = only free memory;<br/> 2 = free memory and delete VBO handle(only without multi-threading, else same as 1) | All |
+| harm_r_clearVertexBuffer | Integer | 2 | Clear vertex buffer on every frame | ARCHIVE, FIXED | 0, 1, 2 | Engine/Renderer | 0 = not clear(original);<br/> 1 = only free VBO memory;<br/> 2 = free VBO memory and delete VBO handle(only without multi-threading, else same as 1) | All |
 | harm_r_maxAllocStackMemory | Integer | 524288 | Control allocate temporary memory when load model data | ARCHIVE |  | Engine/Renderer | For load large model, because stack memory is limited on OS.<br/> 0 = Always heap;<br/> Negative = Always stack;<br/> Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory) | All |
 | harm_r_shaderProgramDir | String |  | Setup external OpenGLES2 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glslprogs(default) | All |
 | harm_r_shaderProgramES3Dir | String |  | Setup external OpenGLES3 GLSL shader program directory path | ARCHIVE |  | Engine/Renderer | empty is glsl3progs(default) | All |
 | harm_r_shadowCarmackInverse | Bool | 0 | Stencil shadow using Carmack-Inverse | ARCHIVE |  | Engine/Renderer |  | All |
-| harm_r_lightingModel | Integer | 1 | Lighting model when draw interactions | ARCHIVE | 1, 2, 3 | Engine/Renderer | 1 = Phong(default);<br/> 2 = Blinn-Phong;<br/> 3 = PBR | All |
-| harm_r_specularExponent | Float | 3.0 | Specular exponent in Phong interaction light model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
-| harm_r_specularExponentBlinnPhong | Float | 12.0 | Specular exponent in Blinn-Phong interaction light model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
-| harm_r_specularExponentPBR | Float | 1.0 | Specular exponent in PBR interaction light model | ARCHIVE | [0.0 - 1.0] | Engine/Renderer | 1 = pure using bump texture;<br/> 0 = pure using vertex normal;<br/> 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR) | All |
+| harm_r_lightingModel | Integer | 1 | Lighting model when draw interactions | ARCHIVE | 0, 1, 2, 3 | Engine/Renderer | 1 = Phong(default);<br/> 2 = Blinn-Phong;<br/> 3 = PBR;<br/> 0 = Ambient(no lighting) | All |
+| harm_r_specularExponent | Float | 3.0 | Specular exponent in Phong interaction lighting model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
+| harm_r_specularExponentBlinnPhong | Float | 12.0 | Specular exponent in Blinn-Phong interaction lighting model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
+| harm_r_specularExponentPBR | Float | 5.0 | Specular exponent in PBR interaction lighting model | ARCHIVE | &gt;= 0.0 | Engine/Renderer |  | All |
+| harm_r_normalCorrectionPBR | Float | 1.0 | Vertex normal correction in PBR interaction lighting model | ARCHIVE | [0.0 - 1.0] | Engine/Renderer | 1 = pure using bump texture;<br/> 0 = pure using vertex normal;<br/> 0.0 - 1.0 = bump texture * harm_r_normalCorrectionPBR + vertex normal * (1 - harm_r_normalCorrectionPBR) | All |
 | r_maxFps | Integer | 0 | Limit maximum FPS. | ARCHIVE | &gt;= 0 | Engine/Renderer | 0 = unlimited | All |
 | r_screenshotFormat | Integer | 0 | Screenshot format | ARCHIVE | 0, 1, 2, 3, 4 | Engine/Renderer | 0 = TGA (default),<br/> 1 = BMP,<br/> 2 = PNG,<br/> 3 = JPG,<br/> 4 = DDS | All |
 | r_screenshotJpgQuality | Integer | 75 | Screenshot quality for JPG images | ARCHIVE | [0 - 100] | Engine/Renderer |  | All |
@@ -147,8 +152,8 @@ Tag with `-free` only for F-Droid update.
 | r_useETC1 | Bool | 0 | use ETC1 compression | INIT |  | Engine/Renderer |  | All |
 | r_useETC1cache | Bool | 0 | use ETC1 compression | INIT |  | Engine/Renderer |  | All |
 | r_useDXT | Bool | 0 | use DXT compression if possible | INIT |  | Engine/Renderer |  | All |
-| r_useETC2 | Bool | 0 | use ETC2 compression | INIT |  | Engine/Renderer | Only for OpenGLES3.0+ | All |
-| r_noLight | Integer | 0 | lighting disable hack |  | 0, 1, 2 | Engine/Renderer | 0 = using interaction lighting;<br/> 1 = disable lighting(not allow switch);<br/> 2 = disable lighting(allow switch with 0) | All |
+| r_useETC2 | Bool | 0 | use ETC2 compression instead of RGBA4444 | INIT |  | Engine/Renderer | Only for OpenGLES3.0+ | All |
+| r_noLight | Bool | 0 | lighting disable hack | INIT |  | Engine/Renderer | 1 = disable lighting(not allow switch, must setup on command line) | All |
 | harm_fs_gameLibPath | String |  | Setup game dynamic library | ARCHIVE |  | Engine/Framework |  | Android |
 | harm_fs_gameLibDir | String |  | Setup game dynamic library directory path | ARCHIVE |  | Engine/Framework |  | Android |
 | harm_com_consoleHistory | Integer | 2 | Save/load console history | ARCHIVE | 0, 1, 2 | Engine/Framework | 0 = disable;<br/> 1 = loading in engine initialization, and saving in engine shutdown;<br/> 2 = loading in engine initialization, and saving in every e executing | All |
@@ -269,6 +274,8 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 
 ### Build:
+* idTech4A++ using std libc's malloc/free in Mem_Alloc/Mem_Free in idlib/Heap.cpp
+* idTech4A++ force using generic SIMD, not compile all SIMD of processor in all platform(TODO: enable them on windows/Linux)
 
 #### Engine
 > 1. _MULTITHREAD: Add multithread support for rendering.
@@ -280,7 +287,10 @@ Tag with `-free` only for F-Droid update.
 > 7. _OPENGLES3: Add OpenGLES3.0 support.
 > 8. _OPENAL _OPENAL_EFX _OPENAL_SOFT: Add OpenAL(soft) and EFX Reverb support.
 > 9. _NO_LIGHT: Add no lighting support.
-> 10. _STENCIL_SHADOW_IMPROVE: Add stencil shadow improve support(soft shadow(OpenGLES3.1+), translucent shadow, force combine global shadow and self local shadow).
+> 10. _STENCIL_SHADOW_IMPROVE: Add stencil shadow improve support(translucent shadow, force combine global shadow and self local shadow).
+> 11. _SOFT_STENCIL_SHADOW: soft shadow(OpenGLES3.1+), must defined `_STENCIL_SHADOW_IMPROVE` first.
+> 12. _MINIZ: Using miniz instead of zlib, using minizip instead of DOOM3's UnZip(Disabled).
+> 13. _USING_STB_OGG: Using stb_vorbis instead of libogg and libvorbis(Disabled).
 
 #### If want to port `Quake4` or `Prey(2006)` to PC or other platform of based on `DOOM3` engine open-source version, because DIII4A based on Android platform and OpenGLES, so has some differences with original version. But I mark some macros in source as patches at all changes, although must find these macros in source code and manual use these patches.
 #### And for keeping original DOOM3 source file structures, for all new source files, I put them on a new folder, and in these folder has same directory structure with DOOM3(e.g. framework, renderer, idlib...).
@@ -315,11 +325,13 @@ Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support
 
 #### Linux
 > 1. REQUIRE ALSA, zlib, X11, EGL
-> 2. ./cmake_linux_build.sh
+> 2. ./cmake_linux_build_doom3_quak4_prey.sh
 
-#### Windows(MinGW/MSVC)
-> 1. REQUIRE SDL2, zlib, cURL
-> 2. cmake_msvc_build.bat
+#### Windows(MSVC)
+> 1. REQUIRE SDL2, cURL, zlib: vcpkg install SDL2 curl
+> 2. Setup your vcpkg.cmake path
+> 3. cmake_msvc_build_doom3_quak4_prey.bat
+> 4. Copy OpenAL32.dll from vcpkg package path to binary path: vcpkg install OpenAL-Soft
 
 ----------------------------------------------------------------------------------
 

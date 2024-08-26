@@ -178,6 +178,9 @@ public final class TextHelper
                 " " + GenLinkText("https://www.moddb.com/mods/fragging-free", "Fragging Free: fraggingfree"),
                 " " + GenLinkText("https://www.moddb.com/mods/hexen-edge-of-chaos", "HeXen:Edge of Chaos: hexeneoc"),
                 " " + GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop: librecoop"),
+                " " + GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop(RoE): librecoopxp"),
+                " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3: perfected"),
+                " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3-Resurrection of Evil: perfected_roe"),
                 " " + GenLinkText("https://store.steampowered.com/app/2210/Quake_4/", "Quake4: q4base"),
                 " Prey(2006): preybase",
                 " " + GenLinkText("https://store.steampowered.com/app/2320/Quake_II/", "Quake II: baseq2"),
@@ -326,6 +329,15 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
+
+                ChangeLog.Create("2024-08-05", 55,
+                        "Add PBR interaction lighting model(" + TextHelper.GenLinkText("https://github.com/jmarshall23/idtech4_pbr", "jmarshall23's idtech4_pbr") + ")(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.",
+                        "Fix large shake of player view with OpenAL in DOOM3/Quake4/Prey.",
+                        "Add command history record manager in launcher.",
+                        "Add `/sdcard/Android/data/com.karin.idTech4Amm/files/diii4a` to game data search path(exclude Quake1), add current game data path tips.",
+                        "Optimize ETC1 compression texture cache in DOOM3/Quake4/Prey, add ETC2 compression texture support(cvar r_useETC2) in OpenGLES3.0.",
+                        "Add launcher theme setting."
+                ),
 
                 ChangeLog.Create("2024-07-17", 53,
                         "Fix GZDOOM sound.",

@@ -126,9 +126,9 @@ public class Q3EAudioTrack extends AudioTrack
 
     protected class AudioOptRunnable implements Runnable
     {
-        private byte[] m_data = null;
-        public int m_length = 0;
-        private boolean m_flush = false;
+        private byte[]  m_data   = null;
+        public  int     m_length = 0;
+        private boolean m_flush  = false;
 
         public AudioOptRunnable(ByteBuffer audioData, int offset, int len)
         {

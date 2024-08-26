@@ -20,8 +20,8 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
+import android.util.Log;
 
-import com.n0n3m4.q3e.karin.KOnceRunnable;
 import com.n0n3m4.q3e.onscreen.Q3EGUI;
 
 import java.nio.ByteBuffer;
@@ -29,6 +29,7 @@ import java.util.LinkedList;
 
 public class Q3ECallbackObj
 {
+    private static final String TAG = "Q3ECallbackObj";
     public Q3EAudioTrack mAudioTrack;
     public Q3EControlView vw;
     public int state = Q3EGlobals.STATE_NONE;
@@ -36,6 +37,7 @@ public class Q3ECallbackObj
     public static boolean reqThreadrunning = false;
 
     private Q3EGUI gui;
+    private Q3EEventEngine eventEngine = new Q3EEventEngineJava();
 
     private final LinkedList<Runnable> m_eventQueue = new LinkedList<>();
     public boolean notinmenu = true; // inGaming
@@ -224,43 +226,33 @@ public class Q3ECallbackObj
 
     public void sendAnalog(final boolean down, final float x, final float y)
     {
-        PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendAnalog(down ? 1 : 0, x, y);
-            }
-        });
+        eventEngine.SendAnalogEvent(down, x, y);
     }
 
     public void sendKeyEvent(final boolean down, final int keycode, final int charcode)
     {
-        PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendKeyEvent(down ? 1 : 0, keycode, charcode);
-            }
-        });
+        eventEngine.SendKeyEvent(down, keycode, charcode);
     }
 
     public void sendMotionEvent(final float deltax, final float deltay)
     {
-        PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendMotionEvent(deltax, deltay);
-            }
-        });
+        eventEngine.SendMotionEvent(deltax, deltay);
     }
 
     public void InitGUIInterface(Activity context)
     {
         gui = new Q3EGUI(context);
+        int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, 0);
+        if(eventQueue == 1)
+        {
+            Log.i(TAG, "Using native event queue");
+            eventEngine = new Q3EEventEngineNative();
+        }
+        else
+        {
+            Log.i(TAG, "Using java event queue");
+            eventEngine = new Q3EEventEngineJava();
+        }
     }
 
     public void ShowToast(String text)

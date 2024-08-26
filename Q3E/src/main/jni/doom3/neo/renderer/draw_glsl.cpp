@@ -33,8 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "glsl/draw_glsl_shader.cpp"
 
-#define r_interactionLightingModel harm_r_lightingModel.GetInteger()
-
 #if 1
 #define ENABLE_STENCIL_TEST() qglEnable(GL_STENCIL_TEST);
 #define DISABLE_STENCIL_TEST() qglDisable(GL_STENCIL_TEST);
@@ -43,13 +41,11 @@ If you have questions concerning this license or the applicable additional terms
 #define DISABLE_STENCIL_TEST() qglStencilFunc(GL_ALWAYS, 128, 255);
 #endif
 
-#define HARM_INTERACTION_SHADER_PHONG 1
-#define HARM_INTERACTION_SHADER_BLINNPHONG 2
-#define HARM_INTERACTION_SHADER_PBR 3
-static idCVar harm_r_lightingModel("harm_r_lightingModel", "1", CVAR_RENDERER|CVAR_ARCHIVE, "Lighting model when draw interactions(1 = Phong(default); 2 = Blinn-Phong; 3 = PBR.)", HARM_INTERACTION_SHADER_PHONG, HARM_INTERACTION_SHADER_PBR);
-static idCVar harm_r_specularExponent("harm_r_specularExponent", "3.0"/* "4.0"*/, CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Phong interaction light model");
-static idCVar harm_r_specularExponentBlinnPhong("harm_r_specularExponentBlinnPhong", "12.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Blinn-Phong interaction light model");
-static idCVar harm_r_specularExponentPBR("harm_r_specularExponentPBR", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in PBR interaction light model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", 0, 1);
+idCVar harm_r_lightingModel("harm_r_lightingModel", "1", CVAR_RENDERER|CVAR_ARCHIVE, "Lighting model when draw interactions(1 = Phong(default); 2 = Blinn-Phong; 3 = PBR; 0 = Ambient.)", HARM_INTERACTION_SHADER_PHONG, HARM_INTERACTION_SHADER_PBR);
+static idCVar harm_r_specularExponent("harm_r_specularExponent", "3.0"/* "4.0"*/, CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Phong interaction lighting model");
+static idCVar harm_r_specularExponentBlinnPhong("harm_r_specularExponentBlinnPhong", "12.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in Blinn-Phong interaction lighting model");
+static idCVar harm_r_specularExponentPBR("harm_r_specularExponentPBR", "5.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Specular exponent in PBR interaction lighting model");
+static idCVar harm_r_normalCorrectionPBR("harm_r_normalCorrectionPBR", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_normalCorrectionPBR + vertex normal * (1 - harm_r_normalCorrectionPBR))", 0, 1);
 
 #include "glsl/draw_glsl_backend.cpp"
 

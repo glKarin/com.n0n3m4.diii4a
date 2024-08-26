@@ -45,7 +45,9 @@ may touch, including the editor.
 */
 void RB_SetDefaultGLState(void)
 {
+#if !defined(GL_ES_VERSION_2_0)
 	int		i;
+#endif
 
 	RB_LogComment("--- R_SetDefaultGLState ---\n");
 

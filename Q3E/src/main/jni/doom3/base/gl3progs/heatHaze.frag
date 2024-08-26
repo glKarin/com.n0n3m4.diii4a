@@ -23,7 +23,7 @@ void main(void)
 {
 #if HEATHAZE_BFG // BFG
     // load the filtered normal map and convert to -1 to 1 range
-    vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0f ) - 1.0f;
+    vec4 bumpMap = ( texture( u_fragmentMap1, var_TexCoord1.xy ) * 2.0 ) - 1.0;
     vec2 localNormal = bumpMap.wy;
     // calculate the screen texcoord in the 0.0 to 1.0 range
     vec2 screenTexCoord = (gl_FragCoord.xy ) * u_windowCoords.xy;

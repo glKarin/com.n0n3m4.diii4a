@@ -56,7 +56,10 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
 		GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
 	else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-		GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentPBR.GetFloat());
+    {
+        float se[2] = { harm_r_specularExponentPBR.GetFloat(), harm_r_normalCorrectionPBR.GetFloat() };
+        GL_Uniform2fv(offsetof(shaderProgram_t, specularExponent), se);
+    }
 	else
 		GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
 

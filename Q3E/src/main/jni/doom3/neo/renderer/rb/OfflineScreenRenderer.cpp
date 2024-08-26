@@ -16,7 +16,6 @@ idOfflineScreenRenderer::idOfflineScreenRenderer()
 
 idOfflineScreenRenderer::~idOfflineScreenRenderer()
 {
-	Shutdown();
 }
 
 bool idOfflineScreenRenderer::Init(int w, int h)
@@ -49,7 +48,7 @@ void idOfflineScreenRenderer::Shutdown(void)
 {
 	if(fb)
 	{
-		fb->PurgeFramebuffer();
+		fb->Purge();
 		delete fb;
 		fb = NULL;
 	}

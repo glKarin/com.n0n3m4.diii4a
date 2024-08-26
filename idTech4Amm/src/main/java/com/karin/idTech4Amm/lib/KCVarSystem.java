@@ -29,11 +29,13 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_lightingModel", "string", "1", "Lighting model when draw interactions", 0,
                                 "1", "Phong",
                                 "2", "Blinn-Phong",
-                                "3", "PBR"
+                                "3", "PBR",
+                                "0", "Ambient(No lighting)"
                         ),
-                        KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction light model", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction light model", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "1.0", "Specular exponent in PBR interaction light model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction lighting model", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_normalCorrectionPBR", "float", "1.0", "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE),
 
                         KCVar.CreateCVar("r_screenshotFormat", "integer", "0", "Screenshot format", 0,

@@ -14,11 +14,11 @@ import com.n0n3m4.q3e.Q3EPreference;
 public final class Theme
 {
     private static final int THEME_UNINITIALIZED = -2; // uninitialized
-    private static final int THEME_UNSET = -1; // unset
-    private static final int THEME_DEFAULT = 0; // system
-    private static final int THEME_CLASSIC = 1; // Android 2/3 style
-    private static final int THEME_HOLO = 2; // Android 4 style
-    private static final int THEME_MATERIAL = 3; // Android 5+ style
+    private static final int THEME_UNSET         = -1; // unset
+    private static final int THEME_DEFAULT       = 0; // system
+    private static final int THEME_CLASSIC       = 1; // Android 2/3 style
+    private static final int THEME_HOLO          = 2; // Android 4 style
+    private static final int THEME_MATERIAL      = 3; // Android 5+ style
 
     private static int Theme = THEME_UNINITIALIZED;
 

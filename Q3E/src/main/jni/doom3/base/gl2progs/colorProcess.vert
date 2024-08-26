@@ -24,6 +24,6 @@ void main(void)
 
     var_Color = u_vertexParm1;
     var_TexCoord.x = attr_TexCoord.x;
-    var_TexCoord.y = 1.0f - attr_TexCoord.y;
+    var_TexCoord.y = 1.0 - attr_TexCoord.y;
     var_TexCoord.z = u_vertexParm0.x;
 }

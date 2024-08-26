@@ -26,7 +26,6 @@ idStencilTexture::idStencilTexture()
 
 idStencilTexture::~idStencilTexture()
 {
-	Shutdown();
 }
 
 bool idStencilTexture::Init(int w, int h)
@@ -65,7 +64,7 @@ void idStencilTexture::Shutdown(void)
 {
 	if(fb)
 	{
-		fb->PurgeFramebuffer();
+		fb->Purge();
 		delete fb;
 		fb = NULL;
 	}

@@ -147,10 +147,19 @@ static void SetSDLIcon()
 	amask = 0xff000000;
 #endif
 
+#ifdef _RAVEN //karin: Quake4 icon
+	#include "quake4_icon.h" // contains the struct q4_icon
+	#define _GAME_ICON q4_icon
+#elif defined(_HUMANHEAD) //karin: Prey icon
+	#include "prey_icon.h" // contains the struct prey_icon
+	#define _GAME_ICON prey_icon
+#else
 	#include "doom_icon.h" // contains the struct d3_icon
+	#define _GAME_ICON d3_icon
+#endif
 
-	SDL_Surface* icon = SDL_CreateRGBSurfaceFrom((void*)d3_icon.pixel_data, d3_icon.width, d3_icon.height,
-			d3_icon.bytes_per_pixel*8, d3_icon.bytes_per_pixel*d3_icon.width,
+	SDL_Surface* icon = SDL_CreateRGBSurfaceFrom((void*)_GAME_ICON.pixel_data, _GAME_ICON.width, _GAME_ICON.height,
+			_GAME_ICON.bytes_per_pixel*8, _GAME_ICON.bytes_per_pixel*_GAME_ICON.width,
 			rmask, gmask, bmask, amask);
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -678,6 +687,7 @@ void GLimp_Shutdown() {
         window = NULL;
     }
 #endif
+    common->Printf("------------------------------\n");
 }
 
 /*

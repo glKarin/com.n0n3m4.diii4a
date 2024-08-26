@@ -27,6 +27,9 @@ Folder name of games/mods:
   Fragging Free: fraggingfree
   HeXen - Edge of Chaos: hexeneoc
   LibreCoop: librecoop
+  LibreCoop - D3XP: librecoopxp
+  Perfected Doom 3: perfected
+  Perfected Doom 3 - RoE: perfected_roe
 
   Quake4: q4base (with bot mod, full body awareness mod)
 

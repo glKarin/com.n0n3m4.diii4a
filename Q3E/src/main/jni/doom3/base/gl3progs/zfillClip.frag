@@ -32,8 +32,7 @@ out vec4 _gl_FragColor;
 
 void main(void)
 {
-    if (u_alphaTest > (texture(u_fragmentMap0, var_TexDiffuse).a * texture(u_fragmentMap1, var_TexClip).a) )
-    {
+    if (u_alphaTest > (texture(u_fragmentMap0, var_TexDiffuse).a * texture(u_fragmentMap1, var_TexClip).a) ) {
         discard;
     }
 

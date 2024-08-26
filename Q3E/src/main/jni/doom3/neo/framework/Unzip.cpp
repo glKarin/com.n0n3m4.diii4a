@@ -3,6 +3,8 @@
 
 #include "Unzip.h"
 
+#if !defined(_MINIZ)
+
 /* unzip.h -- IO for uncompress .zip files using zlib
    Version 0.15 beta, Mar 19th, 1998,
 
@@ -4638,3 +4640,9 @@ void  zcfree(voidp opaque, voidp ptr)
 
 	if (opaque) return; /* make compiler happy */
 }
+
+#else
+#include "../externlibs/miniz/miniz.c"
+#include "../externlibs/minizip/ioapi.c"
+#include "../externlibs/minizip/unzip.cpp"
+#endif // _MINIZ

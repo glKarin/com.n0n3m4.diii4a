@@ -49,7 +49,7 @@ void main(void)
     // magicProjectionAdjust is a magic scalar that scales the projection since we changed from
     // using the X axis to the Y axis to calculate R1.  It is an approximation to closely match
     // what the original game did
-    const float magicProjectionAdjust = 0.43f;
+    const float magicProjectionAdjust = 0.43;
     float x = dot ( vec, u_projectionMatrix[1] ) * magicProjectionAdjust;
     float w = dot ( vec, u_projectionMatrix[3] );
     // don't let the recip get near zero for polygons that cross the view plane

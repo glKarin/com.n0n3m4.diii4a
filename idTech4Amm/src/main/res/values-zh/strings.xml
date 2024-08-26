@@ -12,11 +12,11 @@
     <string name="clear_vertex_buffer_cvar_harm_r_clearvertexbuffer">清理顶点缓冲区(harm_r_clearVertexBuffer)</string>
     <string name="use_etc1_or_rgba4444_cache">缓存生成的ETC1(或RGBA4444)压缩纹理文件</string>
     <string name="don_t_clear_and_do_nothing">不清理任何</string>
-    <string name="it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen">原来默认行为, 可能会出现显存溢出从而引起崩溃.</string>
-    <string name="force_clear_vertex_buffer_on_every_end_frame">每帧强制清空顶点缓冲区</string>
-    <string name="if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer">如果出现显存溢出引起崩溃, 建议强制清空/删除顶点缓冲区.</string>
-    <string name="force_delete_vertex_buffer_on_every_end_frame">每帧强制删除顶点缓冲区</string>
-    <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">同第二项, 并且强制删除顶点缓冲区对象, 可能慢, 但内存安全.</string>
+    <string name="it_is_default_original_graphics_maybe_and_out_of_memory_lead_to_crash_with_flash_screen">原来的默认行为, 可能会出现显存溢出从而引起崩溃</string>
+    <string name="force_clear_vertex_buffer_on_every_end_frame">每帧释放顶点缓冲区</string>
+    <string name="if_graphics_out_of_memory_and_crash_suggest_to_force_clear_vertex_buffer">如果出现显存溢出引起崩溃, 建议释放/删除顶点缓冲区</string>
+    <string name="force_delete_vertex_buffer_on_every_end_frame">每帧释放并删除顶点缓冲区</string>
+    <string name="also_like_2nd_and_delete_vbo_handle_maybe_slower_but_memory_safer">同第二项, 并且删除顶点缓冲区对象, 可能慢, 但内存安全</string>
     <string name="game_cvar_fs_game">游戏</string>
     <string name="doom_iii">毁灭战士3</string>
     <string name="doom3_resurrection_of_evil_d3xp">毁灭战士3:邪恶复苏</string>
@@ -236,8 +236,8 @@
     <string name="add_external_game_library">添加外部游戏运行库</string>
     <string name="access_external_game_library">访问外部游戏运行库</string>
     <string name="load_external_game_library">载入外部游戏运行库</string>
-    <string name="find_game_library_in_game_data_directory">优先使用游戏数据文件夹下的游戏动态库</string>
-    <string name="if_game_library_file_named_gameaarch64_so_or_libgameaarch64_so_on_arm64_device_or_named_gamearm_so_or_libgamearm_so_on_arm32_device_found_at_game_working_directory_fs_game_folder_will_load_it_instead_of_default_game_library_of_apk">如果在`游戏运行目录`/`fs_game`目录下存在游戏动态库文件(arm64位系统命名为`gameaarch64.so`或`libgameaarch64.so`, arm32位系统命名为`gamearm.so`或`libgamearm.so`), 将加载该游戏动态库来代替apk内置游戏动态库.</string>
+    <string name="find_game_library_in_game_data_directory">优先使用外部游戏数据文件夹下的游戏动态库代替apk内置的</string>
+    <string name="using_external_game_library">游戏动态库文件名: arm64 = `gameaarch64.so`或`libgameaarch64.so`; arm32 = `gamearm.so`或`libgamearm.so`</string>
     <string name="not_supported">不支持!</string>
     <string name="translators">翻译者</string>
     <string name="note">声明</string>
@@ -357,4 +357,8 @@
     <string name="current_game_data_path">当前游戏数据路径</string>
     <string name="render_perforated_material_shadow_r_forceshadowmapsonalphatestedsurfaces">渲染镂空材质阴影(r_forceShadowMapsOnAlphaTestedSurfaces)</string>
     <string name="stencil_shadow">模板阴影</string>
+    <string name="ambient">环境光</string>
+    <string name="librecoop_roe">LibreCoop:RoE</string>
+    <string name="perfected_doom_3">Perfected Doom 3</string>
+    <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
 </resources>

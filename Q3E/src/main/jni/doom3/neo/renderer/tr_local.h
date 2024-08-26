@@ -1156,6 +1156,7 @@ GL wrapper/helper functions
 void	GL_SelectTexture(int unit);
 void	GL_UseProgram(shaderProgram_s *program);
 void	GL_Uniform1fv(GLint location, const GLfloat *value);
+void	GL_Uniform2fv(GLint location, const GLfloat *value);
 void	GL_Uniform3fv(GLint location, const GLfloat *value);
 void	GL_Uniform4fv(GLint location, const GLfloat *value);
 void 	GL_Uniform1i(GLint location, GLint w);
@@ -1508,6 +1509,7 @@ typedef enum {
 	SHADER_ZFILLCLIP,
 	SHADER_CUBEMAP,
 	SHADER_REFLECTIONCUBEMAP,
+    SHADER_REFLECTIONCUBEMAPBUMPY,
 	SHADER_FOG,
 	SHADER_BLENDLIGHT,
 	SHADER_INTERACTIONPBR,
@@ -1698,8 +1700,8 @@ typedef struct shaderProgram_s {
 #ifdef _SHADOW_MAPPING
 	GLint		shadowMVPMatrix;
 	GLint		globalLightOrigin;
-    GLint		bias;
 #endif
+
 	char 		name[HARM_SHADER_NAME_LENGTH];
     int         type; // glsl_program_t
 } shaderProgram_t;
@@ -1757,7 +1759,7 @@ class idGLSLShaderManager
 public:
 	~idGLSLShaderManager();
 	int Add(shaderProgram_t *shader); // return added shader's index
-	void Clear(void);
+    void Shutdown(void);
 	const shaderProgram_t * Find(const char *name) const;
 	const shaderProgram_t * Find(GLuint handle) const; // handle is OpenGL shader program's handle
 	shaderHandle_t Load(const GLSLShaderProp &prop); // frontend: if in multi-threading, only add on queue, because current thread has not OpenGL context; else if not in multi-threading, actual load directly. however always return a shader program handle, if has loaded, return OpenGL program handle(> 0), else return -(customShaders::index + 1), error return 0.
@@ -1790,6 +1792,7 @@ extern idGLSLShaderManager *shaderManager;
 /* This file was automatically generated.  Do not edit! */
 void R_ReloadGLSLPrograms_f(const idCmdArgs &args);
 void R_GLSL_Init(void);
+void R_GLSL_Shutdown(void);
 void RB_GLSL_DrawInteractions(void);
 void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf);
 void RB_GLSL_DrawInteraction(const drawInteraction_t *din);
@@ -2296,12 +2299,12 @@ extern float RB_overbright;
 	}
 #endif
 
-#define HARM_CHECK_SHADER_ERROR() GL_CheckErrors();
+#define HARM_CHECK_SHADER_ERROR(x) GL_CheckErrors(x);
 
 #else
 #define HARM_CHECK_SHADER(x)
 #define HARM_CHECK_SHADER_ATTR(x, index)
-#define HARM_CHECK_SHADER_ERROR()
+#define HARM_CHECK_SHADER_ERROR(x)
 #endif
 
 #ifdef _EXTRAS_TOOLS
@@ -2309,5 +2312,12 @@ void ModelTest_TestModel(int time);
 void MD5Anim_AddCommand(void);
 void ModelTest_AddCommand(void);
 #endif
+
+extern idCVar harm_r_lightingModel;
+#define r_interactionLightingModel harm_r_lightingModel.GetInteger()
+#define HARM_INTERACTION_SHADER_PHONG 1
+#define HARM_INTERACTION_SHADER_BLINNPHONG 2
+#define HARM_INTERACTION_SHADER_PBR 3
+#define HARM_INTERACTION_SHADER_AMBIENT 0
 
 #endif /* !__TR_LOCAL_H__ */

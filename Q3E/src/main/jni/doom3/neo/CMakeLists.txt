@@ -98,13 +98,15 @@ endif()
 option(OPENGLES3							"OpenGLES3 support"															ON)
 option(OPENAL								"OpenAL(soft, OpenSL as backend) support"									ON)
 option(MULTITHREAD							"Multi-Thread support"														ON)
-option(USING_STB							"Using stb"																	ON)
+option(USE_STB_IMAGE						"Using stb_image"															ON)
 option(SUPPORT_OBJ							"Support obj model"															ON)
 option(SUPPORT_DAE							"Support dae model" 														ON)
 option(SHADOW_MAPPING						"Shadow mapping support" 													ON)
 option(NO_LIGHT								"r_noLight support" 														ON)
 option(STENCIL_SHADOW_IMPROVE				"Improve stencil shadow(translucent, soft(Only OpenGLES3.1+))" 				ON)
 option(EXTRAS_TOOLS							"Add extras commands" 														OFF)
+option(USE_MINIZ							"use miniz and minizip" 													OFF)
+option(USE_STB_OGG							"use stb_vorbis" 															OFF)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -127,6 +129,9 @@ option(SABOT								"Build the sabot game code" 												ON)
 option(HEXENEOC								"Build the hexeneoc game code" 												ON)
 option(FRAGGINGFREE							"Build the fraggingfree game code" 											ON)
 option(LIBRECOOP							"Build the librecoop game code" 											ON)
+option(LIBRECOOPXP							"Build the librecoopxp game code" 											ON)
+option(PERFECTED							"Build the perfected game code" 											ON)
+option(PERFECTEDROE							"Build the perfected_roe game code" 											ON)
 endif()
 
 # Quake4
@@ -236,11 +241,11 @@ add_definitions(-DD3_ARCH="${cpu}" -DD3_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 # Stores in variable <var> either 1 or 0 indicating whether the target architecture is big or little endian.
 # test_big_endian(big_endian)
 if(CMAKE_CXX_BYTE_ORDER EQUAL BIG_ENDIAN)
-	set(big_endian, "1")
+	set(big_endian 1)
 else()
-	set(big_endian, "0")
+	set(big_endian 0)
 endif()
-add_definitions(-BUILD_IS_BIG_ENDIAN="${big_endian}")
+add_definitions(-DBUILD_IS_BIG_ENDIAN=${big_endian})
 
 # target os
 if(APPLE)
@@ -290,8 +295,12 @@ if(CMAKE_MAJOR_VERSION LESS 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_V
 endif()
 
 # libs
+if(USE_MINIZ)
+	add_definitions(-D_MINIZ)
+else()
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
+endif()
 
 # OpenAL using internal OpenAL-soft
 #[[find_package(OpenAL REQUIRED)
@@ -508,9 +517,15 @@ if(WIN32)
 			dsound ksuser #k
 			)
 elseif(ANDROID)
-	set(sys_libs ${sys_libs} android dl EGL z)
+	set(sys_libs ${sys_libs} android dl EGL)
+	if(NOT USE_MINIZ)
+		set(sys_libs ${sys_libs} z)
+	endif()
 else() #TODO linux
-	set(sys_libs ${sys_libs} X11 dl EGL z pthread)
+	set(sys_libs ${sys_libs} X11 dl EGL pthread)
+	if(NOT USE_MINIZ)
+		set(sys_libs ${sys_libs} z)
+	endif()
 endif()
 
 # fallback for cmake versions without GNUInstallDirs
@@ -561,7 +576,6 @@ function(add_globbed_headers SRCLIST PATHPREFIX)
 	set(${SRCLIST} ${tmp_hdrs} ${${SRCLIST}})
 endfunction()
 
-set(local_libs ${local_libs} static_ogg)
 if(COMPILE_CURL STREQUAL "1")
 	if(NOT WIN32)
 		set(local_libs ${local_libs} static_curl)
@@ -571,9 +585,13 @@ if(COMPILE_CURL STREQUAL "1")
 	message(STATUS "Build cURL")
 endif()
 
-if(USING_STB)
+if(USE_STB_IMAGE)
 	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB")
 	message(STATUS "Using stb jpeg image")
+endif()
+if(USE_STB_OGG)
+	set(CORE_DEFINES "${CORE_DEFINES};_USING_STB_OGG")
+	message(STATUS "Using stb oggvorbis")
 endif()
 if(SUPPORT_OBJ)
 	set(CORE_DEFINES "${CORE_DEFINES};_MODEL_OBJ")
@@ -600,6 +618,9 @@ if(STENCIL_SHADOW_IMPROVE)
 		message(STATUS "Add soft stencil shadow support")
 	endif()
 	message(STATUS "Add stencil shadow support: ${stencil_shadow_improve_desc}")
+endif()
+if(USE_MINIZ)
+	message(STATUS "Using minizip and miniz instead of zlib")
 endif()
 
 if(OPENAL)
@@ -1100,6 +1121,7 @@ add_library(static_ogg STATIC ${src_ogg})
 target_include_directories(static_ogg PRIVATE "externlibs/libogg/include/ogg")
 target_include_directories(static_ogg PRIVATE "externlibs/libvorbis/include/vorbis")
 target_include_directories(static_ogg PRIVATE "externlibs/libvorbis/lib")
+set(local_libs ${local_libs} static_ogg)
 
 set(src_core
 	${src_renderer}
@@ -1234,6 +1256,7 @@ if(HUMANHEAD OR PREY)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_humanhead})
 endif()
 
+# DOOM3
 if(CORE)
 	message(STATUS "Build core")
 endif()
@@ -1270,12 +1293,23 @@ endif()
 if(LIBRECOOP)
 	message(STATUS "Build librecoop")
 endif()
+if(LIBRECOOPXP)
+	message(STATUS "Build librecoopxp")
+endif()
+if(PERFECTED)
+	message(STATUS "Build perfected")
+endif()
+if(PERFECTEDROE)
+	message(STATUS "Build perfected_roe")
+endif()
+# Quake 4
 if(RAVEN)
 	message(STATUS "Build raven core")
 endif()
 if(QUAKE4)
 	message(STATUS "Build q4base")
 endif()
+# Prey
 if(HUMANHEAD)
 	message(STATUS "Build humanhead core")
 endif()
@@ -1662,6 +1696,95 @@ if(LIBRECOOP)
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
 		install(TARGETS librecoop
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(LIBRECOOPXP)
+	# librecoopxp
+	set(src_librecoopxp ${base_game_src})
+	set(librecoopxp_game_src
+			Grabber.cpp
+			physics/Force_Grab.cpp
+			)
+	list(APPEND src_librecoopxp ${librecoopxp_game_src})
+	set_src_dir(src_librecoopxp "${DOOM3_MOD_DIR}/librecoopxp" ${src_librecoopxp})
+	add_globbed_headers(src_librecoopxp "${DOOM3_MOD_DIR}/librecoopxp")
+
+	add_library(librecoopxp SHARED ${src_librecoopxp})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_librecoopxp})
+	#set_target_properties(librecoopxp PROPERTIES PREFIX "")
+	set_target_properties(librecoopxp PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_LIBRECOOPXP")
+	target_include_directories(librecoopxp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/librecoopxp")
+	set_target_properties(librecoopxp PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(librecoopxp PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(librecoopxp idlib)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS librecoopxp
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(PERFECTED)
+	# perfected
+	set(src_perfected ${base_game_src})
+	set(perfected_game_src
+			Grab.cpp
+			Grabber.cpp
+			physics/Force_Grab.cpp
+			)
+	list(APPEND src_perfected ${perfected_game_src})
+	set_src_dir(src_perfected "${DOOM3_MOD_DIR}/perfected" ${src_perfected})
+	add_globbed_headers(src_perfected "${DOOM3_MOD_DIR}/perfected")
+
+	add_library(perfected SHARED ${src_perfected})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_perfected})
+	#set_target_properties(perfected PROPERTIES PREFIX "")
+	set_target_properties(perfected PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_PERFECTED")
+	target_include_directories(perfected PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/perfected")
+	set_target_properties(perfected PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(perfected PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(perfected idlib)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS perfected
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(PERFECTEDROE)
+	# perfected_roe
+	set(src_perfectedroe ${base_game_src})
+	set(perfectedroe_game_src
+			Grab.cpp
+			Grabber.cpp
+			physics/Force_Grab.cpp
+			)
+	list(APPEND src_perfectedroe ${perfectedroe_game_src})
+	set_src_dir(src_perfectedroe "${DOOM3_MOD_DIR}/perfectedroe" ${src_perfectedroe})
+	add_globbed_headers(src_perfectedroe "${DOOM3_MOD_DIR}/perfectedroe")
+
+	add_library(perfected_roe SHARED ${src_perfectedroe})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_perfectedroe})
+	#set_target_properties(perfected_roe PROPERTIES PREFIX "")
+	set_target_properties(perfected_roe PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_PERFECTEDROE")
+	target_include_directories(perfected_roe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/perfectedroe")
+	set_target_properties(perfected_roe PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(perfected_roe PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(perfected_roe idlib)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS perfected_roe
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"

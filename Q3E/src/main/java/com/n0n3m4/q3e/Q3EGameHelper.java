@@ -753,6 +753,9 @@ public class Q3EGameHelper
         String appHome = Q3EUtils.GetAppInternalSearchPath(m_context, null);
 		appHome = KStr.AppendPath(appHome, subdatadir);
 
+        int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, 0);
+        Q3EJNI.PreInit(eventQueue);
+
         boolean res = Q3EJNI.init(
                 GetEngineLib(),
                 Q3EUtils.GetGameLibDir(m_context),
