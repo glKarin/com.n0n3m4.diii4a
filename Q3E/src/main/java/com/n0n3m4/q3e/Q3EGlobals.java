@@ -31,7 +31,40 @@ public final class Q3EGlobals
     public static final int UI_INTERACT     = 15;
     public static final int UI_WEAPON_PANEL = 16;
     public static final int UI_SCORE        = 17;
-    public static final int UI_SIZE         = UI_SCORE + 1;
+    public static final int UI_0            = 18;
+    public static final int UI_4            = 19;
+    public static final int UI_5            = 20;
+    public static final int UI_6            = 21;
+    public static final int UI_7            = 22;
+    public static final int UI_8            = 23;
+    public static final int UI_9            = 24;
+    public static final int UI_SIZE         = UI_9 + 1;
+    /*public static final int UI_A            = 25;
+    public static final int UI_B            = 26;
+    public static final int UI_C            = 27;
+    public static final int UI_D            = 28;
+    public static final int UI_E            = 29;
+    public static final int UI_F            = 30;
+    public static final int UI_G            = 31;
+    public static final int UI_H            = 32;
+    public static final int UI_I            = 33;
+    public static final int UI_J            = 34;
+    public static final int UI_K            = 35;
+    public static final int UI_L            = 36;
+    public static final int UI_M            = 37;
+    public static final int UI_N            = 38;
+    public static final int UI_O            = 39;
+    public static final int UI_P            = 40;
+    public static final int UI_Q            = 41;
+    public static final int UI_R            = 42;
+    public static final int UI_S            = 43;
+    public static final int UI_T            = 44;
+    public static final int UI_U            = 45;
+    public static final int UI_V            = 46;
+    public static final int UI_W            = 47;
+    public static final int UI_X            = 48;
+    public static final int UI_Y            = 49;
+    public static final int UI_Z            = 50;*/
 
     // on-screen item type
     public static final int TYPE_BUTTON   = 0;
@@ -246,6 +279,13 @@ public final class Q3EGlobals
             "Interact",
             "Weapon",
             "Score",
+            "Extra 0",
+            "Extra 4",
+            "Extra 5",
+            "Extra 6",
+            "Extra 7",
+            "Extra 8",
+            "Extra 9",
     };
 
     // OpenGL Surface color format
