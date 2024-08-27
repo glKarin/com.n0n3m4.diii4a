@@ -195,8 +195,8 @@ void Sys_FPU_SetFTZ(bool enable) {
 Sys_GetProcessorId
 ================
 */
-cpuid_t Sys_GetProcessorId( void ) {
-#if 1 //k: force generic
+int Sys_GetProcessorId( void ) {
+#if 0 //k: force generic
     return CPUID_GENERIC;
 #else
 	int flags = CPUID_GENERIC;

@@ -272,9 +272,9 @@ double			idSysLocal::ClockTicksPerSecond(void)
 {
 	return 1.0;
 }
-cpuid_t			idSysLocal::GetProcessorId(void)
+int			idSysLocal::GetProcessorId(void)
 {
-	return (cpuid_t)0;
+	return 0;
 }
 const char 	*idSysLocal::GetProcessorString(void)
 {

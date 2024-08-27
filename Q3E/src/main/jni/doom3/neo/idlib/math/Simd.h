@@ -102,7 +102,7 @@ class idSIMDProcessor
 		}
 		virtual							~idSIMDProcessor() { };
 
-		cpuid_t							cpuid;
+        int							    cpuid;
 
 		virtual const char *VPCALL		GetName(void) const = 0;
 

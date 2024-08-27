@@ -543,7 +543,7 @@ static bool HasDAZ( void ) {
 Sys_GetCPUId
 ================
 */
-cpuid_t Sys_GetCPUId( void ) {
+int Sys_GetCPUId( void ) {
 #if defined(_MSC_VER) && !defined(_WIN64)
 	int flags;
 
@@ -599,7 +599,7 @@ cpuid_t Sys_GetCPUId( void ) {
 		flags |= CPUID_DAZ;
 	}
 
-	return (cpuid_t)flags;
+	return flags;
 #else
     return CPUID_UNSUPPORTED;
 #endif
