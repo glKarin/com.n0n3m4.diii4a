@@ -361,4 +361,5 @@
     <string name="librecoop_roe">LibreCoop:RoE</string>
     <string name="perfected_doom_3">Perfected Doom 3</string>
     <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
+    <string name="nolighting">无光照</string>
 </resources>

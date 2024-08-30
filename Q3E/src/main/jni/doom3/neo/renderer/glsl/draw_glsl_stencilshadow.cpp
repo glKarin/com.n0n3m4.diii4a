@@ -28,12 +28,19 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
 			 backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-		GL_UseProgram(&interactionBlinnPhongTranslucentShader);
-	else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-		GL_UseProgram(&interactionPBRTranslucentShader);
-	else
-		GL_UseProgram(&interactionTranslucentShader);
+    if(backEnd.vLight->lightShader->IsAmbientLight())
+        GL_UseProgram(&ambientLightingTranslucentShader);
+    else
+    {
+		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+			GL_UseProgram(&interactionBlinnPhongTranslucentShader);
+		else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+			GL_UseProgram(&interactionPBRTranslucentShader);
+        else if (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT )
+            GL_UseProgram(&ambientLightingTranslucentShader);
+		else
+			GL_UseProgram(&interactionTranslucentShader);
+    }
 
 
 	// enable the vertex arrays
@@ -209,12 +216,19 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 			 backEnd.depthFunc);
 
 	// bind the vertex and fragment shader
-	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-		GL_UseProgram(&interactionBlinnPhongSoftShader);
-	else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-		GL_UseProgram(&interactionPBRSoftShader);
-	else
-		GL_UseProgram(&interactionSoftShader);
+    if(backEnd.vLight->lightShader->IsAmbientLight())
+        GL_UseProgram(&ambientLightingSoftShader);
+    else
+    {
+		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+			GL_UseProgram(&interactionBlinnPhongSoftShader);
+		else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+			GL_UseProgram(&interactionPBRSoftShader);
+        else if (r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT )
+            GL_UseProgram(&ambientLightingSoftShader);
+		else
+			GL_UseProgram(&interactionSoftShader);
+    }
 
 	// enable the vertex arrays
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));

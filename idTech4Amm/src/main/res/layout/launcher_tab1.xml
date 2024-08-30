@@ -357,6 +357,12 @@
                         android:layout_height="wrap_content"
                         android:text="@string/ambient" />
 
+                    <RadioButton
+                        android:id="@+id/harm_r_lightModel_nolighting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nolighting" />
+
                 </RadioGroup>
 
                 <LinearLayout

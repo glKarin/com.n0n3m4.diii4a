@@ -400,49 +400,82 @@ ID_INLINE static shaderProgram_t * RB_SelectPerforatedShadowMapShader(const view
 ID_INLINE static shaderProgram_t * RB_SelectShadowMappingInteractionShader(const viewLight_t* vLight)
 {
     shaderProgram_t *shadowInteractionShader;
-    if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+    if(vLight->lightShader->IsAmbientLight())
     {
         if( vLight->parallel )
         {
-            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_parallelLight;
+            shadowInteractionShader = &ambientLightingShadowMappingShader_parallelLight;
         }
         else if( vLight->pointLight )
         {
-            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+            shadowInteractionShader = &ambientLightingShadowMappingShader_pointLight;
         }
         else
         {
-            shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
-        }
-    }
-    else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-    {
-        if( vLight->parallel )
-        {
-            shadowInteractionShader = &interactionShadowMappingPBRShader_parallelLight;
-        }
-        else if( vLight->pointLight )
-        {
-            shadowInteractionShader = &interactionShadowMappingPBRShader_pointLight;
-        }
-        else
-        {
-            shadowInteractionShader = &interactionShadowMappingPBRShader_spotLight;
+            shadowInteractionShader = &ambientLightingShadowMappingShader_spotLight;
         }
     }
     else
     {
-        if( vLight->parallel )
+        if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
         {
-            shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
+            if( vLight->parallel )
+            {
+                shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_parallelLight;
+            }
+            else if( vLight->pointLight )
+            {
+                shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_pointLight;
+            }
+            else
+            {
+                shadowInteractionShader = &interactionShadowMappingBlinnPhongShader_spotLight;
+            }
         }
-        else if( vLight->pointLight )
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
         {
-            shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+            if( vLight->parallel )
+            {
+                shadowInteractionShader = &interactionShadowMappingPBRShader_parallelLight;
+            }
+            else if( vLight->pointLight )
+            {
+                shadowInteractionShader = &interactionShadowMappingPBRShader_pointLight;
+            }
+            else
+            {
+                shadowInteractionShader = &interactionShadowMappingPBRShader_spotLight;
+            }
+        }
+        else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
+        {
+            if( vLight->parallel )
+            {
+                shadowInteractionShader = &ambientLightingShadowMappingShader_parallelLight;
+            }
+            else if( vLight->pointLight )
+            {
+                shadowInteractionShader = &ambientLightingShadowMappingShader_pointLight;
+            }
+            else
+            {
+                shadowInteractionShader = &ambientLightingShadowMappingShader_spotLight;
+            }
         }
         else
         {
-            shadowInteractionShader = &interactionShadowMappingShader_spotLight;
+            if( vLight->parallel )
+            {
+                shadowInteractionShader = &interactionShadowMappingShader_parallelLight;
+            }
+            else if( vLight->pointLight )
+            {
+                shadowInteractionShader = &interactionShadowMappingShader_pointLight;
+            }
+            else
+            {
+                shadowInteractionShader = &interactionShadowMappingShader_spotLight;
+            }
         }
     }
     return shadowInteractionShader;

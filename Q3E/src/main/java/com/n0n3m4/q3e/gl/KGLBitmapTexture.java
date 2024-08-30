@@ -8,11 +8,13 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 
 import javax.microedition.khronos.opengles.GL10;
+/*
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Map;
+*/
 
 public final class KGLBitmapTexture
 {

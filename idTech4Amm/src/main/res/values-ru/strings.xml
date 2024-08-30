@@ -362,5 +362,6 @@
     <string name="using_external_game_library">Game library file name: arm64 = `gameaarch64.so` or `libgameaarch64.so`; arm32 = `gamearm.so` or `libgamearm.so`</string>
     <string name="perfected_doom_3">Perfected Doom 3</string>
     <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
+    <string name="nolighting">No lighting</string>
 
 </resources>

@@ -555,7 +555,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 	tri = surf->geo;
 	shader = surf->material;
 
-	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
+	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_NOLIGHTING)
 	{
 		if(!shader->HasAmbient() && !shader->ReceivesLighting())
 			return;
@@ -640,7 +640,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 		}
 
 		// skip the stages involved in lighting
-		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
+		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_NOLIGHTING)
 		{
 			if(pStage->lighting != SL_AMBIENT && pStage->lighting != SL_DIFFUSE)
 				continue;
@@ -864,9 +864,9 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
                 // see if there is also a bump map specified
                 const shaderStage_t *bumpStage = surf->material->GetBumpStage();
                 if ( bumpStage )
-                    GL_UseProgram(&reflectionCubemapBumpyShader);
+                    GL_UseProgram(&bumpyEnvironmentShader);
                 else
-                    GL_UseProgram(&reflectionCubemapShader);
+                    GL_UseProgram(&environmentShader);
             }
 				break;
 			case TG_DIFFUSE_CUBE:
@@ -955,7 +955,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
         else
 #endif
         {
-			if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
+			if(r_interactionLightingModel == HARM_INTERACTION_SHADER_NOLIGHTING)
 			{
 				if (pStage->lighting == SL_AMBIENT)
 	                GL_State(pStage->drawStateBits);
@@ -1794,7 +1794,7 @@ void	RB_STD_DrawView(void)
 	// main light renderer
 	qglEnable(GL_BLEND);
 
-	if (r_interactionLightingModel != HARM_INTERACTION_SHADER_AMBIENT
+	if (r_interactionLightingModel != HARM_INTERACTION_SHADER_NOLIGHTING
 #ifdef _NO_LIGHT
 			&& !r_noLight.GetBool()
 #endif
