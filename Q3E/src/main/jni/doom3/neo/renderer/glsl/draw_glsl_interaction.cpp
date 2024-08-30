@@ -52,18 +52,21 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	GL_Uniform4fv(offsetof(shaderProgram_t, diffuseColor), din->diffuseColor.ToFloatPtr());
 	GL_Uniform4fv(offsetof(shaderProgram_t, specularColor), din->specularColor.ToFloatPtr());
 
-	// material may be NULL for shadow volumes
-	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
-		GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
-	else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
-    {
-        float se[2] = { harm_r_specularExponentPBR.GetFloat(), harm_r_normalCorrectionPBR.GetFloat() };
-        GL_Uniform2fv(offsetof(shaderProgram_t, specularExponent), se);
+    if ( backEnd.vLight->lightShader->IsAmbientLight() && r_interactionLightingModel != HARM_INTERACTION_SHADER_AMBIENT ) {
+        GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), 1.0f);
+    } else {
+		if(r_interactionLightingModel == HARM_INTERACTION_SHADER_BLINNPHONG)
+			GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponentBlinnPhong.GetFloat());
+		else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_PBR)
+	    {
+	        float se[2] = { harm_r_specularExponentPBR.GetFloat(), harm_r_normalCorrectionPBR.GetFloat() };
+	        GL_Uniform2fv(offsetof(shaderProgram_t, specularExponent), se);
+	    }
+	    else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
+	        GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingExponent.GetFloat());
+		else
+			GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
     }
-    else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
-        GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingExponent.GetFloat());
-	else
-		GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
 
 	// set the textures
 
