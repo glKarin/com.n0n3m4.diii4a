@@ -63,7 +63,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	        GL_Uniform2fv(offsetof(shaderProgram_t, specularExponent), se);
 	    }
 	    else if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT)
-	        GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingExponent.GetFloat());
+	        GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_ambientLightingBrightness.GetFloat());
 		else
 			GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), harm_r_specularExponent.GetFloat());
     }

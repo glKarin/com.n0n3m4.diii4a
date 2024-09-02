@@ -366,5 +366,7 @@
     <string name="perfected_doom_3">Perfected Doom 3</string>
     <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
     <string name="nolighting">No lighting</string>
+    <string name="ambient_lighting_brightness_harm_r_ambientlightingbrightness">Ambient lighting brightness(harm_r_ambientLightingBrightness):</string>
+    <string name="ambient_lighting_brightness">Ambient lighting brightness</string>
 
 </resources>
