@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.Toast;
@@ -203,7 +204,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
     private boolean NormalizeTgtPosition(FingerUi fn)
     {
-        if (m_unit <= 0)
+        if (m_unit <= 1)
             return false;
 
         if (fn.target instanceof Slider)
@@ -406,6 +407,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             for (int i = 0; i < fingers.length; i++)
                 fingers[i] = new FingerUi(null, i);
 
+            if(m_unit <= 0)
+                m_unit = GetPerfectGridSize();
             MakeGrid();
             mInit = true;
         }
@@ -485,7 +488,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
     private void MakeGrid()
     {
-        if (m_unit <= 0)
+        if (m_unit <= 1)
             return;
 
         final int countX = width / m_unit + (width % m_unit != 0 ? 1 : 0);
@@ -788,10 +791,42 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         {
             m_numGridLineVertex = 0;
             m_gridBuffer = null;
-            m_unit = unit;
+            if(unit <= 0)
+                m_unit = GetPerfectGridSize();
+            else
+                m_unit = unit;
             MakeGrid();
         }
 
         //requestRender();
+    }
+
+    private int GetPerfectGridSize()
+    {
+        final int UNIT = 2;
+        final int PERFECT = 50;
+        int res = 2;
+
+        for(int i = res; i < Math.min(width, height); i += UNIT)
+        {
+            if(width % i != 0)
+                continue;
+            if(height % i != 0)
+                continue;
+
+            int diffa = i - PERFECT;
+            int diffb = res - PERFECT;
+            int diffabsa = Math.abs(diffa);
+            int diffabsb = Math.abs(diffb);
+            if(diffabsa < diffabsb)
+                res = i;
+            else if(diffabsa == diffabsb)
+            {
+                if(diffa > diffb)
+                    res = i;
+            }
+        }
+        Log.i("Q3EUiView", "GetPerfectGridSize -> " + res);
+        return res;
     }
 }

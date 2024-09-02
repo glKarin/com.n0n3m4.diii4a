@@ -34,13 +34,13 @@
     <string name="enable_unfixed_joystick_the_range_is_joystick_allowed_to_start_pressing_if_less_than_1_0_using_joystick_s_radius">- 当启用`非固定摇杆`: 该外部范围是允许开始按下摇杆的有效范围(如果小于1.0, 则使用摇杆的半径).</string>
     <string name="disable_unfixed_joystick_the_range_is_joystick_valid_motion_area">- 当禁用 `非固定摇杆`: 该外部范围是摇杆有效的移动的最大范围.</string>
     <string name="joystick_inner_dead_zone_radius_s_percentage_0_disable">摇杆内部死区(半径的百分比, 0 - 禁用)</string>
-    <string name="on_screen_buttons_position_unit">虚拟按键位置单位</string>
-    <string name="on_screen_buttons_layout_with_grid_limit_multiple_of_5">虚拟按键位置布局单位网格限制(5的倍数)</string>
-    <string name="position_unit">位置单位</string>
+    <string name="on_screen_buttons_position_unit">按键位置单位</string>
+    <string name="on_screen_buttons_layout_with_grid_limit">按键编辑器网格大小</string>
     <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">虚拟按键位置单位必须是5的倍数或0</string>
     <string name="setup_joystick_done">摇杆设置完成.</string>
     <string name="back">返回</string>
     <string name="extract_the_dark_mod_glsl_shader_source_files_fail">提取The Dark Mod GLSL着色器源码文件失败!</string>
     <string name="extract_rbdoom3bfg_hlsl_shader_source_files_fail">提取RBDOOM 3 BFG HLSL着色器源码文件失败!</string>
     <string name="extract_gzdoom_game_resource_files_fail">提取GZDOOM游戏资源文件失败!</string>
+    <string name="position_unit">位置单位(0为自动, 1为禁用)</string>
 </resources>

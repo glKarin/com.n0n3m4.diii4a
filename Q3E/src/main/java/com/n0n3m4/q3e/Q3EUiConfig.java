@@ -467,7 +467,7 @@ public class Q3EUiConfig extends Activity
         editText.setEms(10);
         editText.setInputType(EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
         editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
-        editText.setHint(R.string.on_screen_buttons_layout_with_grid_limit_multiple_of_5);
+        editText.setHint(R.string.on_screen_buttons_layout_with_grid_limit);
 
         TextView textView = widget.findViewById(R.id.edit_line_label);
         textView.setText(R.string.position_unit);
@@ -482,7 +482,7 @@ public class Q3EUiConfig extends Activity
                 .setNeutralButton(R.string.reset, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SetupOnScreenButtonPositionUnit(50);
+                        SetupOnScreenButtonPositionUnit(0);
                     }
                 })
                 .setNegativeButton(R.string.cancel, null);
@@ -494,11 +494,11 @@ public class Q3EUiConfig extends Activity
     {
         if(unit < 0)
             unit = 0;
-        else if(unit % 5 != 0)
+/*        else if(unit % 5 != 0)
         {
             Toast.makeText(this, R.string.on_screen_buttons_position_unit_must_is_multiple_of_5_or_0, Toast.LENGTH_SHORT).show();
             return;
-        }
+        }*/
         Q3EPreference.SetStringFromInt(this, Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, unit);
         vw.UpdateGrid(unit);
     }
