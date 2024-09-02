@@ -1,6 +1,7 @@
 package com.n0n3m4.q3e.onscreen;
 
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.preference.PreferenceManager;
 import android.view.View;
 
@@ -88,5 +89,44 @@ public class UiLoader
             }
         }
         return null;
+    }
+
+    public boolean CheckVisible(int id)
+    {
+        SharedPreferences shp = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
+        String tmp = shp.getString(Q3EPreference.pref_controlprefix + id, null);
+        if (tmp == null) tmp = defaults_table[id];
+        UiElement el = new UiElement(tmp);
+        final Rect ScreenRect = new Rect(0, 0, width, height);
+        Rect btnRect;
+        switch (Q3EUtils.q3ei.type_table[id])
+        {
+            case Q3EGlobals.TYPE_BUTTON:
+                int bh = el.size;
+                if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL)
+                    bh =  el.size;
+                else if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM)
+                    bh =  el.size;
+                else if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_CENTER)
+                    bh =  el.size / 2;
+                btnRect = new Rect(-el.size / 2 + el.cx, -bh / 2 + el.cy, el.size / 2 + el.cx, bh / 2 + el.cy);
+                return ScreenRect.intersect(btnRect);
+            case Q3EGlobals.TYPE_JOYSTICK: {
+                return true;
+            }
+            case Q3EGlobals.TYPE_SLIDER:
+                int sh = el.size;
+                if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
+                    sh = el.size / 2;
+                btnRect = new Rect(-el.size / 2 + el.cx, -sh / 2 + el.cy, el.size / 2 + el.cx, sh / 2 + el.cy);
+                return ScreenRect.intersect(btnRect);
+            case Q3EGlobals.TYPE_DISC:
+            {
+                int r = el.size * 2;
+                btnRect = new Rect(-r / 2 + el.cx, -r / 2 + el.cy, r / 2 + el.cx, r / 2 + el.cy);
+                return ScreenRect.intersect(btnRect);
+            }
+        }
+        return false;
     }
 }

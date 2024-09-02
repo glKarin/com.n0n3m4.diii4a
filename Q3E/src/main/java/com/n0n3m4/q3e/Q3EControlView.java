@@ -243,6 +243,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
             for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
             {
+                boolean visible = uildr.CheckVisible(i);
+                Log.i("Q3EControlView", "On-screen button " + i + " -> " + (visible ? "show" : "hide"));
+                if(!visible)
+                    continue;
                 Object o = uildr.LoadElement(i, false);
                 touch_elements.add((TouchListener) o);
                 paint_elements.add((Paintable) o);
