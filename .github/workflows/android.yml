@@ -39,3 +39,13 @@ jobs:
       run: |
         cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk idTech4Amm-test.apk
       working-directory: ${{ github.workspace }}
+
+    - name: Create release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.TOKEN }}"
+        automatic_release_tag: "test"
+        prerelease: true
+        title: "Testing(Automatic CI builds)"
+        files: |
+          idTech4Amm-test.apk
