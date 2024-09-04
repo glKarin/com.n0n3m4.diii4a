@@ -64,14 +64,14 @@ target_link_libraries( # Specifies the target library.
         ${q3e_lib}
         )
 
-OPTION(GAME_DOOM3       "Build DOOM 3/Quake 4/Prey(2006)"       OFF)
-OPTION(GAME_RTCW        "Build Return to Castle Wolfenstein"    OFF)
-OPTION(GAME_QUAKE3      "Build Quake 3"                         OFF)
-OPTION(GAME_QUAKE2      "Build Quake 2"                         OFF)
-OPTION(GAME_QUAKE1      "Build Quake 1"                         OFF)
-OPTION(GAME_TDM         "Build The Dark Mod"                    OFF)
-OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      OFF)
-OPTION(GAME_DOOM        "Build GZDOOM"                          OFF)
+OPTION(GAME_DOOM3       "Build DOOM 3/Quake 4/Prey(2006)"       ON)
+OPTION(GAME_RTCW        "Build Return to Castle Wolfenstein"    ON)
+OPTION(GAME_QUAKE3      "Build Quake 3"                         ON)
+OPTION(GAME_QUAKE2      "Build Quake 2"                         ON)
+OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
+OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
+OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
+OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
 
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 

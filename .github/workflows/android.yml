@@ -1,3 +1,5 @@
+# Only for building testing version by Github CI workflow
+
 name: Android apk CI
 
 on:
@@ -15,7 +17,7 @@ jobs:
         working-directory: .
         
     steps:
-    - name: checkout code
+    - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Setup jdk 11
@@ -47,8 +49,8 @@ jobs:
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.TOKEN }}"
-        automatic_release_tag: "test"
+        automatic_release_tag: "testing"
         prerelease: true
-        title: "Testing(Automatic CI builds)"
+        title: "Testing (Non-release. Automatic CI builds)"
         files: |
           ${{ steps.rename_apk.outputs.value }}
