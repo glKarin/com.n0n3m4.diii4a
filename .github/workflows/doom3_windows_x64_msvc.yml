@@ -45,7 +45,7 @@ jobs:
         format: "YYYY-MM-DD_HH-mm-ss"
 
     - name: Prepare package
-      id: prepare_package
+      id: prepare_package2
       run: |
         echo ::set-output name=value::idTech4A++-test_windows_x64_release-${{ steps.current_datetime2.outputs.time }}.zip
 
