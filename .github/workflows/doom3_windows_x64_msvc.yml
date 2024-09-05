@@ -5,12 +5,12 @@ name: DOOM3 Windows X64 MSVC CI
 on:
   push:
     branches: [ "master" ]
-    paths:
-      - 'Q3E/src/main/jni/doom3/neo/**'
+    #paths:
+      #- 'Q3E/src/main/jni/doom3/neo/**'
   pull_request:
     branches: [ "master" ]
-    paths:
-      - 'Q3E/src/main/jni/doom3/neo/**'
+    #paths:
+      #- 'Q3E/src/main/jni/doom3/neo/**'
 
 jobs:
   build-android:
