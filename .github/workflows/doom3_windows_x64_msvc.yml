@@ -41,17 +41,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Prepare package2
-      id: prepare_release2
-      run: |
-        dir Q3E\src\main\jni\doom3\neo
-        set d=%date%
-        set t=%time%
-        set now=%d:~0,4%-%d:~5,2%-%d:~8,2%_%t:~0,2%-%t:~3,2%-%t:~6,2%
-        set now=%now: =0%
-        set zip_file=idTech4A++-test_windows_x64_release-%now%.zip
-        echo ::set-output name=value::%apk_file%
-
     - name: Install CMake and Ninja
       uses: lukka/get-cmake@latest
       with:
@@ -85,13 +74,13 @@ jobs:
         set t=%time%
         set now=%d:~0,4%-%d:~5,2%-%d:~8,2%_%t:~0,2%-%t:~3,2%-%t:~6,2%
         set now=%now: =0%
-        zip_file=idTech4A++-test_windows_x64_release-%now%.zip
+        set zip_file=idTech4A++-test_windows_x64_release-%now%.zip
         echo ::set-output name=value::%apk_file%
 
     - name: Package
       uses: vimtor/action-zip@v1.2
       with:
-        files: Q3E\src\main\jni\doom3\neo\Release\*.dll Q3E\src\main\jni\doom3\neo\Release\Doom3.exe Q3E\src\main\jni\doom3\neo\Release\Quake4.exe Q3E\src\main\jni\doom3\neo\Release\Prey.exe
+        files: Q3E\src\main\jni\doom3\neo\Release\*.dll Q3E\src\main\jni\doom3\neo\Release\Doom3.exe
         dest: ${{ steps.prepare_release.outputs.value }}
         recursive: false
 
