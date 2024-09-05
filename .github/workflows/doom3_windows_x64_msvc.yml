@@ -38,13 +38,15 @@ jobs:
         working-directory: .
         
     steps:
-    - name: Get current time
-      uses: gerred/actions/current-time@master
-      id: current-time
-    - name: Use current time
-      env:
-        TIME: "${{ steps.current-time.outputs.time }}"
-      run: echo $TIME
+    - name: Test1
+      id: t1
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+        format: "yyyy-MM-dd_HH-mm-ss"
+
+    - name: Output1
+      run: |
+        echo "The time was ${{ steps.t1.outputs.time }}"
 
     - name: Checkout code
       uses: actions/checkout@v2
