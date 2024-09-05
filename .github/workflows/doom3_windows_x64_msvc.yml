@@ -86,7 +86,7 @@ jobs:
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.TOKEN }}"
-        automatic_release_tag: "windows_x64_release_testing"
+        automatic_release_tag: "windows_x64_testing"
         prerelease: true
         title: "Windows X64 testing (Non-release. Automatic CI builds)"
         files: |
