@@ -1,0 +1,60 @@
+# Only for building testing version by Github CI workflow
+
+name: DOOM3 Windows X64 MSVC CI
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'Q3E/src/main/jni/doom3/neo/**'
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      - 'Q3E/src/main/jni/doom3/neo/**'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Q3E/src/main/jni/doom3/neo
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install CMake and Ninja
+      uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.25.2"
+
+    - name: Setup anew vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        runVcpkgInstall: true
+
+    - name: Install SDL2
+      run: |
+        vcpkg install SDL2:x64-windows
+
+    - name: Install curl
+      run: |
+        vcpkg install curl:x64-windows
+
+    - name: Install OpenAL-soft
+      run: |
+        vcpkg install openal-soft:x64-windows
+
+    - name: Configure project with CMake
+      run: |
+        cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake CMakeLists.txt
+
+    - name: Build with Ninja
+      run: |
+        cmake --build . --config Release
+
+    - name: Package
+      run: |
+        dir Release
+      working-directory: ${{ github.workspace }}
