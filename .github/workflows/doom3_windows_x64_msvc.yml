@@ -46,10 +46,12 @@ jobs:
       with:
         cmakeVersion: "3.25.2"
 
-    - name: Setup anew vcpkg
-      uses: lukka/run-vcpkg@v11
+    - name: Setup vcpkg
+      uses: johnwason/vcpkg-action@v6
       with:
-        runVcpkgInstall: true
+        triplet: x64-windows-release
+        token: ${{ secrets.TOKEN }}
+        github-binarycache: true
 
     - name: Install SDL2
       run: |
