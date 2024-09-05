@@ -86,7 +86,7 @@ jobs:
       uses: vimtor/action-zip@v1.2
       with:
         files: windows_x64_release/
-        dest: ${{ env.ZIP_FILE }}
+        dest: idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
         recursive: false
 
     - name: Create release
@@ -97,4 +97,4 @@ jobs:
         prerelease: true
         title: "Windows X64 testing (Non-release. Automatic CI builds)"
         files: |
-          ${{ env.ZIP_FILE }}
+          idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
