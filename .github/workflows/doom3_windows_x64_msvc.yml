@@ -38,15 +38,13 @@ jobs:
         working-directory: .
         
     steps:
-    - name: Prepare package
-      shell: cmd
-      run: |
-        set d=%date%
-        set t=%time%
-        set now=%d:~0,4%-%d:~5,2%-%d:~8,2%_%t:~0,2%-%t:~3,2%-%t:~6,2%
-        set now=%now: =0%
-        set zip_file=idTech4A++-test_windows_x64_release-%now%.zip
-        call echo %zip_file%
+    - name: Get current time
+      uses: gerred/actions/current-time@master
+      id: current-time
+    - name: Use current time
+      env:
+        TIME: "${{ steps.current-time.outputs.time }}"
+      run: echo $TIME
 
     - name: Checkout code
       uses: actions/checkout@v2
