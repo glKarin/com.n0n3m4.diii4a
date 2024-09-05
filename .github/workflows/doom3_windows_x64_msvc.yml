@@ -35,7 +35,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: Q3E/src/main/jni/doom3/neo
+        working-directory: .
         
     steps:
     - name: Checkout code
@@ -49,13 +49,14 @@ jobs:
     - name: Setup vcpkg
       uses: johnwason/vcpkg-action@v6
       with:
-        pkgs: 'SDL2 curl openal-soft'
+        pkgs: 'SDL2 curl openal-soft zlib'
         triplet: x64-windows-release
         token: ${{ secrets.TOKEN }}
         github-binarycache: true
 
     - name: Configure project with CMake
       run: |
+        dir .\vcpkg\packages
         cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake CMakeLists.txt
 
     - name: Build with Ninja
