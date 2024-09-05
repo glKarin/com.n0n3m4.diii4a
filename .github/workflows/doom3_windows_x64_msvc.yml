@@ -41,12 +41,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Test zip
-      uses: vimtor/action-zip@v1.2
-      with:
-        files: CMakeList.txt .github
-        dest: dest.zip
-
     - name: Install CMake and Ninja
       uses: lukka/get-cmake@latest
       with:
@@ -72,11 +66,8 @@ jobs:
       run: |
         xcopy /Y/Q ${{ github.workspace }}\vcpkg\packages\openal-soft_x64-windows\bin\OpenAL32.dll Q3E\src\main\jni\doom3\neo\Release\
 
-    - name: Install zip
-      uses: montudor/action-zip@v1
-
-    - name: Package
-      id: package_release
+    - name: Prepare package
+      id: prepare_release
       run: |
         dir Q3E\src\main\jni\doom3\neo\Release
         set d=%date%
@@ -84,9 +75,14 @@ jobs:
         set now=%d:~0,4%-%d:~5,2%-%d:~8,2%_%t:~0,2%-%t:~3,2%-%t:~6,2%
         set now=%now: =0%
         zip_file=idTech4A++-test_windows_x64_release-%now%.zip
-        zip -v %zip_file% Q3E\src\main\jni\doom3\neo\Release\*.dll Q3E\src\main\jni\doom3\neo\Release\Doom3.exe Q3E\src\main\jni\doom3\neo\Release\Quake4.exe Q3E\src\main\jni\doom3\neo\Release\Prey.exe
         echo ::set-output name=value::%apk_file%
-      working-directory: ${{ github.workspace }}
+
+    - name: Package
+      uses: vimtor/action-zip@v1.2
+      with:
+        files: Q3E\src\main\jni\doom3\neo\Release\*.dll Q3E\src\main\jni\doom3\neo\Release\Doom3.exe Q3E\src\main\jni\doom3\neo\Release\Quake4.exe Q3E\src\main\jni\doom3\neo\Release\Prey.exe
+        dest: ${{ steps.prepare_release.outputs.value }}
+        recursive: false
 
     - name: Create release
       uses: "marvinpinto/action-automatic-releases@latest"
@@ -96,4 +92,4 @@ jobs:
         prerelease: true
         title: "Windows X64 testing (Non-release. Automatic CI builds)"
         files: |
-          ${{ steps.package_release.outputs.value }}
+          ${{ steps.prepare_release.outputs.value }}
