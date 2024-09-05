@@ -49,7 +49,7 @@ jobs:
         set t=%time%
         set now=%d:~0,4%-%d:~5,2%-%d:~8,2%_%t:~0,2%-%t:~3,2%-%t:~6,2%
         set now=%now: =0%
-        zip_file=idTech4A++-test_windows_x64_release-%now%.zip
+        set zip_file=idTech4A++-test_windows_x64_release-%now%.zip
         echo ::set-output name=value::%apk_file%
 
     - name: Install CMake and Ninja
