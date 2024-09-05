@@ -38,15 +38,16 @@ jobs:
         working-directory: .
         
     steps:
-    - name: Test1
-      id: t1
+    - name: Get current date time
+      id: current_datetime
       uses: Kaven-Universe/github-action-current-date-time@v1
       with:
-        format: "yyyy-MM-dd_HH-mm-ss"
+        format: "YYYY-MM-DD_HH-mm-ss"
 
-    - name: Output1
+    - name: Prepare package
+      id: prepare_package
       run: |
-        echo "The time was ${{ steps.t1.outputs.time }}"
+        echo ::set-output name=value::idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -76,20 +77,20 @@ jobs:
       run: |
         xcopy /Y/Q ${{ github.workspace }}\vcpkg\packages\openal-soft_x64-windows\bin\OpenAL32.dll Q3E\src\main\jni\doom3\neo\Release\
 
+    - name: Get current date time
+      id: current_datetime
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+        format: "YYYY-MM-DD_HH-mm-ss"
+
     - name: Prepare package
       id: prepare_package
       run: |
         dir Q3E\src\main\jni\doom3\neo\Release
-        set d=%date%
-        set t=%time%
-        set now=%d:~0,4%-%d:~5,2%-%d:~8,2%_%t:~0,2%-%t:~3,2%-%t:~6,2%
-        set now=%now: =0%
-        set zip_file=idTech4A++-test_windows_x64_release-%now%.zip
         mkdir Release
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.dll windows_x64_release\
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.exe windows_x64_release\
-        echo %zip_file%
-        echo ::set-output name=value::%zip_file%
+        echo ::set-output name=value::idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
 
     - name: Package
       uses: vimtor/action-zip@v1.2
