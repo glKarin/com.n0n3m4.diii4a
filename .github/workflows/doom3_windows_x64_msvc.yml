@@ -79,14 +79,14 @@ jobs:
         mkdir Release
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.dll windows_x64_release\
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.exe windows_x64_release\
-        dir Release
-        echo ::set-output name=value::idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
+        dir windows_x64_release
+        echo ::set-env name=ZIP_FILE value=idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
 
     - name: Package
       uses: vimtor/action-zip@v1.2
       with:
         files: windows_x64_release/
-        dest: ${{ steps.prepare_package.outputs.value }}
+        dest: ${{ env.ZIP_FILE }}
         recursive: false
 
     - name: Create release
@@ -97,4 +97,4 @@ jobs:
         prerelease: true
         title: "Windows X64 testing (Non-release. Automatic CI builds)"
         files: |
-          ${{ steps.prepare_package.outputs.value }}
+          ${{ env.ZIP_FILE }}
