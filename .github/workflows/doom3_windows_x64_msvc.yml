@@ -41,6 +41,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Test zip
+      uses: vimtor/action-zip@v1.2
+      with:
+        files: CMakeList.txt .github
+        dest: dest.zip
+
     - name: Install CMake and Ninja
       uses: lukka/get-cmake@latest
       with:
