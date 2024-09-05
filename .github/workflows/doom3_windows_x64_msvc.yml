@@ -38,17 +38,6 @@ jobs:
         working-directory: .
         
     steps:
-    - name: Get current date time
-      id: current_datetime2
-      uses: Kaven-Universe/github-action-current-date-time@v1
-      with:
-        format: "YYYY-MM-DD_HH-mm-ss"
-
-    - name: Prepare package
-      id: prepare_package2
-      run: |
-        echo ::set-output name=value::idTech4A++-test_windows_x64_release-${{ steps.current_datetime2.outputs.time }}.zip
-
     - name: Checkout code
       uses: actions/checkout@v2
 
@@ -90,6 +79,7 @@ jobs:
         mkdir Release
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.dll windows_x64_release\
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.exe windows_x64_release\
+        dir Release
         echo ::set-output name=value::idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
 
     - name: Package
