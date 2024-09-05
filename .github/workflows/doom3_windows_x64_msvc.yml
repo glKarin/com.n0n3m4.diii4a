@@ -39,6 +39,7 @@ jobs:
         
     steps:
     - name: Prepare package
+      shell: cmd
       run: |
         set d=%date%
         set t=%time%
