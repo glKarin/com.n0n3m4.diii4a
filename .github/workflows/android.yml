@@ -7,12 +7,12 @@ on:
     branches: [ "master" ]
     paths:
       - 'idTech4Amm/**'
-      #- 'Q3E/**'
+      - 'Q3E/**'
   pull_request:
     branches: [ "master" ]
     paths:
       - 'idTech4Amm/**'
-      #- 'Q3E/**'
+      - 'Q3E/**'
 
 jobs:
   build-android:

@@ -5,12 +5,12 @@ name: DOOM3 Windows X64 MSVC CI
 on:
   push:
     branches: [ "master" ]
-    #paths:
-      #- 'Q3E/src/main/jni/doom3/neo/**'
+    paths:
+      - 'Q3E/src/main/jni/doom3/neo/**'
   pull_request:
     branches: [ "master" ]
-    #paths:
-      #- 'Q3E/src/main/jni/doom3/neo/**'
+    paths:
+      - 'Q3E/src/main/jni/doom3/neo/**'
 
 jobs:
   build-doom3-windows-x64-msvc:
@@ -80,7 +80,7 @@ jobs:
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.dll windows_x64_release\
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.exe windows_x64_release\
         dir windows_x64_release
-        echo ::set-env name=ZIP_FILE value=idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
+# echo ::set-env name=ZIP_FILE value=idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
 
     - name: Package
       uses: vimtor/action-zip@v1.2

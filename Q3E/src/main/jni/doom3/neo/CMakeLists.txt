@@ -87,9 +87,9 @@ option(REPRODUCIBLE_BUILD 					"Replace __DATE__ and __TIME__ by hardcoded value
 
 # For dev: Quick build
 option(BUILD_D3								"Build DOOM 3"																ON)
-option(BUILD_Q4								"Build Quake 4"																OFF)
-option(BUILD_PREY							"Build Prey"																OFF)
-option(BUILD_MOD							"Build all mods"															OFF)
+option(BUILD_Q4								"Build Quake 4"																ON)
+option(BUILD_PREY							"Build Prey"																ON)
+option(BUILD_MOD							"Build all mods"															ON)
 
 # Extras engine extensions
 if(ANDROID)
