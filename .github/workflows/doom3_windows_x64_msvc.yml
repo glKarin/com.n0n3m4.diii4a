@@ -13,8 +13,25 @@ on:
       #- 'Q3E/src/main/jni/doom3/neo/**'
 
 jobs:
-  build-android:
-    runs-on: ubuntu-latest
+  build-doom3-windows-x64-msvc:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os: [windows-latest]
+        build_type: [Release]
+        c_compiler: [cl]
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+        exclude:
+          - os: windows-latest
+            c_compiler: gcc
+          - os: windows-latest
+            c_compiler: clang
 
     defaults:
       run:
