@@ -66,8 +66,10 @@ jobs:
       run: |
         xcopy /Y/Q ${{ github.workspace }}\vcpkg\packages\openal-soft_x64-windows\bin\OpenAL32.dll Q3E\src\main\jni\doom3\neo\Release\
 
-    - name: Package
+    - name: Install zip
       uses: montudor/action-zip@v1
+
+    - name: Package
       id: package_release
       run: |
         dir Q3E\src\main\jni\doom3\neo\Release
