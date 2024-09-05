@@ -39,7 +39,7 @@ jobs:
         
     steps:
     - name: Get current date time
-      id: current_datetime
+      id: current_datetime2
       uses: Kaven-Universe/github-action-current-date-time@v1
       with:
         format: "YYYY-MM-DD_HH-mm-ss"
@@ -47,7 +47,7 @@ jobs:
     - name: Prepare package
       id: prepare_package
       run: |
-        echo ::set-output name=value::idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
+        echo ::set-output name=value::idTech4A++-test_windows_x64_release-${{ steps.current_datetime2.outputs.time }}.zip
 
     - name: Checkout code
       uses: actions/checkout@v2
