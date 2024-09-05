@@ -8,11 +8,13 @@ on:
     paths:
       - 'idTech4Amm/**'
       - 'Q3E/**'
+      - '.github/workflows/android.yml'
   pull_request:
     branches: [ "master" ]
     paths:
       - 'idTech4Amm/**'
       - 'Q3E/**'
+      - '.github/workflows/android.yml'
 
 jobs:
   build-android:
@@ -50,6 +52,14 @@ jobs:
         cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk $apk_file
         echo "::set-output name=value::$apk_file"
       working-directory: ${{ github.workspace }}
+
+    - name: Delete tag and release
+      uses: dev-drprasad/delete-tag-and-release@v1.1
+      with:
+        tag_name: android_testing
+        delete_release: true
+        repo: glKarin/com.n0n3m4.diii4a
+        github_token: ${{ secrets.TOKEN }}
 
     - name: Create release
       uses: "marvinpinto/action-automatic-releases@latest"
