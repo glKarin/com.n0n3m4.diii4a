@@ -49,21 +49,10 @@ jobs:
     - name: Setup vcpkg
       uses: johnwason/vcpkg-action@v6
       with:
+        pkgs: 'SDL2 curl openal-soft'
         triplet: x64-windows-release
         token: ${{ secrets.TOKEN }}
         github-binarycache: true
-
-    - name: Install SDL2
-      run: |
-        vcpkg install SDL2:x64-windows
-
-    - name: Install curl
-      run: |
-        vcpkg install curl:x64-windows
-
-    - name: Install OpenAL-soft
-      run: |
-        vcpkg install openal-soft:x64-windows
 
     - name: Configure project with CMake
       run: |
