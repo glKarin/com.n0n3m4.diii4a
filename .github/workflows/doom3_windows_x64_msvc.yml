@@ -38,6 +38,16 @@ jobs:
         working-directory: .
         
     steps:
+    - name: Prepare package
+      run: |
+        dir Q3E\src\main\jni\doom3\neo
+        set d=%date%
+        set t=%time%
+        set now=%d:~0,4%-%d:~5,2%-%d:~8,2%_%t:~0,2%-%t:~3,2%-%t:~6,2%
+        set now=%now: =0%
+        set zip_file=idTech4A++-test_windows_x64_release-%now%.zip
+        echo %zip_file%
+
     - name: Checkout code
       uses: actions/checkout@v2
 
