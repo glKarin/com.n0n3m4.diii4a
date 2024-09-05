@@ -5,8 +5,14 @@ name: Android apk CI
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - 'idTech4Amm/**'
+      - 'Q3E/**'
   pull_request:
     branches: [ "master" ]
+    paths:
+      - 'idTech4Amm/**'
+      - 'Q3E/**'
 
 jobs:
   build-android:
@@ -49,8 +55,8 @@ jobs:
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.TOKEN }}"
-        automatic_release_tag: "testing"
+        automatic_release_tag: "android_testing"
         prerelease: true
-        title: "Testing (Non-release. Automatic CI builds)"
+        title: "Android testing (Non-release. Automatic CI builds)"
         files: |
           ${{ steps.rename_apk.outputs.value }}
