@@ -78,13 +78,14 @@ jobs:
         mkdir Release
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.dll windows_x64_release\
         xcopy /Y/Q Q3E\src\main\jni\doom3\neo\Release\*.exe windows_x64_release\
+        echo %zip_file%
         echo ::set-output name=value::%zip_file%
 
     - name: Package
       uses: vimtor/action-zip@v1.2
       with:
-        files: windows_x64_release
-        dest: ${{ steps.prepare_release.outputs.value }}
+        files: windows_x64_release/
+        dest: ${{ steps.prepare_package.outputs.value }}
         recursive: false
 
     - name: Create release
