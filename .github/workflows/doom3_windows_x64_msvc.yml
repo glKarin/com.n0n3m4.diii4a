@@ -7,10 +7,12 @@ on:
     branches: [ "master" ]
     paths:
       - 'Q3E/src/main/jni/doom3/neo/**'
+      - '.github/workflows/doom3_windows_x64_msvc.yml'
   pull_request:
     branches: [ "master" ]
     paths:
       - 'Q3E/src/main/jni/doom3/neo/**'
+      - '.github/workflows/doom3_windows_x64_msvc.yml'
 
 jobs:
   build-doom3-windows-x64-msvc:
@@ -88,6 +90,14 @@ jobs:
         files: windows_x64_release/
         dest: idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip
         recursive: false
+
+    - name: Delete tag and release
+    - uses: dev-drprasad/delete-tag-and-release@v1.1
+      with:
+        tag_name: windows_x64_testing
+        delete_release: true
+        repo: glKarin/com.n0n3m4.diii4a
+        github_token: ${{ secrets.TOKEN }}
 
     - name: Create release
       uses: "marvinpinto/action-automatic-releases@latest"
