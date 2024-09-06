@@ -124,16 +124,22 @@ public class Q3EGameHelper
         Q3EUtils.q3ei.joystick_smooth = preferences.getBoolean(Q3EPreference.pref_analog, true);
         Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_UP_KEY, Q3EKeyCodes.KeyCodesGeneric.K_F3));
         Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_DOWN_KEY, Q3EKeyCodes.KeyCodesGeneric.K_F2));
-        // DOOM 3: hardscorps mod template disable smooth joystick
-        /*if(Q3EUtils.q3ei.joystick_smooth)
+
+        // DOOM 3: Hardscorps and Quake4: hardqore mod template disable smooth joystick
+        if(Q3EUtils.q3ei.joystick_smooth)
         {
-            if(!Q3EUtils.q3ei.isQ4 && !Q3EUtils.q3ei.isPrey && !Q3EUtils.q3ei.isQ2)
+            String game = preferences.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
+            if(Q3EUtils.q3ei.isQ4)
             {
-                String game = preferences.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
+                if("hardqore".equals(game))
+                    Q3EUtils.q3ei.joystick_smooth = false;
+            }
+            else if(Q3EUtils.q3ei.isD3)
+            {
                 if("hardscorps".equals(game))
                     Q3EUtils.q3ei.joystick_smooth = false;
             }
-        }*/
+        }
 
         Q3EUtils.q3ei.SetAppStoragePath(m_context);
 

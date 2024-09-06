@@ -1,6 +1,6 @@
 # Only for building testing version by Github CI workflow
 
-name: DOOM3 Windows X64 MSVC CI
+name: DOOM3/Quake4/Prey Windows x64 MSVC CI
 
 on:
   push:
@@ -105,6 +105,6 @@ jobs:
         repo_token: "${{ secrets.TOKEN }}"
         automatic_release_tag: "windows_x64_testing"
         prerelease: true
-        title: "Windows X64 testing (Non-release. Automatic CI builds)"
+        title: "Windows x64 testing (Non-release. Automatic CI builds)"
         files: |
           idTech4A++-test_windows_x64_release-${{ steps.current_datetime.outputs.time }}.zip

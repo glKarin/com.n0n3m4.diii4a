@@ -89,7 +89,8 @@ option(REPRODUCIBLE_BUILD 					"Replace __DATE__ and __TIME__ by hardcoded value
 option(BUILD_D3								"Build DOOM 3"																ON)
 option(BUILD_Q4								"Build Quake 4"																ON)
 option(BUILD_PREY							"Build Prey"																ON)
-option(BUILD_MOD							"Build all mods"															ON)
+option(BUILD_D3_MOD							"Build all DOOM3 mods"														ON)
+option(BUILD_Q4_MOD							"Build all Quake4 mods"														ON)
 
 # Extras engine extensions
 if(ANDROID)
@@ -116,8 +117,8 @@ option(BASE									"Build the base game code" 													ON)
 option(D3_MOD_FULL_BODY_AWARENESS			"Build doom3 full body awareness mod support" 								ON)
 endif()
 
-if(BUILD_MOD)
 # DOOM3 mods
+if(BUILD_D3_MOD)
 option(D3XP									"Build the d3xp game code" 													ON)
 
 option(D3LE									"Build the d3le game code" 													ON)
@@ -141,6 +142,11 @@ option(RAVEN_BSE_FX							"OpenBSE with Fx in Raven Quake 4" 											ON)
 option(QUAKE4								"Build the quake4 game code" 												ON)
 option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod support" 								ON)
 option(Q4_MOD_BOTS							"Build quake4 bots mod support" 											ON)
+endif()
+
+# Quake4 mods
+if(BUILD_Q4_MOD)
+option(HARDQORE								"Build the hardqore game code" 												ON)
 endif()
 
 # Prey 2006
@@ -1006,6 +1012,112 @@ set(base_game_src
 		physics/Push.cpp
 		)
 
+set(base_q4game_src ${base_game_src})
+list(REMOVE_ITEM base_q4game_src
+		Fx.cpp
+		PlayerIcon.cpp
+		SmokeParticles.cpp
+		ai/AI_Vagary.cpp
+		#gamesys/TypeInfo.cpp
+		)
+list(APPEND base_q4game_src
+		Effect.cpp
+		FreeView.cpp
+		Game_Debug.cpp
+		Game_Log.cpp
+		Healing_Station.cpp
+		IconManager.cpp
+		Instance.cpp
+		Playback.cpp
+		Player_Cheats.cpp
+		Player_States.cpp
+		spawner.cpp
+		SplineMover.cpp
+		Icon.cpp
+		LipSync.cpp
+		TramGate.cpp
+		gamesys/State.cpp
+		script/ScriptFuncUtility.cpp
+		vehicle/Vehicle.cpp
+		vehicle/VehicleAnimated.cpp
+		vehicle/VehicleController.cpp
+		vehicle/VehicleDriver.cpp
+		vehicle/VehicleMonster.cpp
+		vehicle/VehicleParts.cpp
+		vehicle/VehiclePosition.cpp
+		vehicle/VehicleRigid.cpp
+		vehicle/VehicleSpline.cpp
+		vehicle/VehicleStatic.cpp
+		vehicle/Vehicle_DropPod.cpp
+		vehicle/Vehicle_Walker.cpp
+		client/ClientAFEntity.cpp
+		client/ClientEffect.cpp
+		client/ClientEntity.cpp
+		client/ClientModel.cpp
+		client/ClientMoveable.cpp
+		ai/AAS_Find.cpp
+		ai/Monster_Berserker.cpp
+		ai/Monster_BossBuddy.cpp
+		ai/Monster_BossMakron.cpp
+		ai/Monster_ConvoyGround.cpp
+		ai/Monster_ConvoyHover.cpp
+		ai/Monster_FailedTransfer.cpp
+		ai/Monster_Fatty.cpp
+		ai/Monster_Gladiator.cpp
+		ai/Monster_Grunt.cpp
+		ai/Monster_Gunner.cpp
+		ai/Monster_Harvester.cpp
+		ai/Monster_HarvesterDispersal.cpp
+		ai/Monster_HeavyHoverTank.cpp
+		ai/Monster_IronMaiden.cpp
+		ai/Monster_LightTank.cpp
+		ai/Monster_NetworkGuardian.cpp
+		ai/Monster_RepairBot.cpp
+		ai/Monster_Scientist.cpp
+		ai/Monster_Sentry.cpp
+		ai/Monster_SlimyTransfer.cpp
+		ai/Monster_StreamProtector.cpp
+		ai/Monster_StroggFlyer.cpp
+		ai/Monster_StroggHover.cpp
+		ai/Monster_StroggMarine.cpp
+		ai/Monster_TeleportDropper.cpp
+		ai/Monster_Turret.cpp
+		ai/Monster_TurretFlying.cpp
+		ai/AI_Actions.cpp
+		ai/AI_Announcements.cpp
+		ai/AI_Debug.cpp
+		ai/AI_Manager.cpp
+		ai/AI_Medic.cpp
+		ai/AI_Move.cpp
+		ai/AI_States.cpp
+		ai/AI_Tactical.cpp
+		ai/AI_Util.cpp
+		ai/VehicleAI.cpp
+		ai/AAS_tactical.cpp
+		weapon/WeaponBlaster.cpp
+		weapon/WeaponGrenadeLauncher.cpp
+		weapon/WeaponMachinegun.cpp
+		weapon/WeaponRailgun.cpp
+		weapon/WeaponDarkMatterGun.cpp
+		weapon/WeaponHyperblaster.cpp
+		weapon/WeaponNailgun.cpp
+		weapon/WeaponRocketLauncher.cpp
+		weapon/WeaponGauntlet.cpp
+		weapon/WeaponLightningGun.cpp
+		weapon/WeaponNapalmGun.cpp
+		weapon/WeaponShotgun.cpp
+		mp/Buying.cpp
+		mp/CTF.cpp
+		mp/GameState.cpp
+		mp/Tourney.cpp
+		mp/VoiceComms.cpp
+		mp/stats/StatEvent.cpp
+		mp/stats/StatManager.cpp
+		mp/stats/StatWindow.cpp
+		physics/Physics_Particle.cpp
+		physics/Physics_VehicleMonster.cpp
+		)
+
 function(set_src_dir DSTLIST PATHPREFIX SRCLIST)
 	set(list, "")
 	math(EXPR last_index "${ARGC}-1")
@@ -1225,7 +1337,7 @@ endif()
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib})
 
 # raven
-if(RAVEN OR QUAKE4)
+if(RAVEN OR QUAKE4 OR BUILD_Q4_MOD)
 	set(raven_idlib_src
 			raven/idlib/LexerFactory.cpp
 			raven/idlib/TextCompiler.cpp
@@ -1240,6 +1352,7 @@ if(RAVEN OR QUAKE4)
 		set_target_properties(idlib_raven PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
 	set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN")
+	target_include_directories(idlib_raven PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_raven})
 endif()
@@ -1258,6 +1371,7 @@ if(HUMANHEAD OR PREY)
 		set_target_properties(idlib_humanhead PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
 	set_target_properties(idlib_humanhead PROPERTIES COMPILE_DEFINITIONS "_HUMANHEAD;HUMANHEAD")
+	target_include_directories(idlib_humanhead PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/humanhead")
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_humanhead})
 endif()
@@ -1314,6 +1428,9 @@ if(RAVEN)
 endif()
 if(QUAKE4)
 	message(STATUS "Build q4base")
+endif()
+if(HARDQORE)
+	message(STATUS "Build hardqore")
 endif()
 # Prey
 if(HUMANHEAD)
@@ -1869,6 +1986,7 @@ if(RAVEN)
 	endif()
 	set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "${raven_compile_definitions};${CORE_DEFINES}")
 	set_target_properties(${QUAKE4BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
+	target_include_directories(${QUAKE4BINARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
 	target_link_libraries(${QUAKE4BINARY}
 			idlib_raven
@@ -1887,113 +2005,11 @@ endif()
 
 if(QUAKE4)
 	# quake4 game source
-	set(src_quake4 ${base_game_src})
+	set(src_quake4 ${base_q4game_src})
 	set(quake4_game_src
-			Effect.cpp
-			FreeView.cpp
-			Game_Debug.cpp
-			Game_Log.cpp
-			Healing_Station.cpp
-			IconManager.cpp
-			Instance.cpp
-			Playback.cpp
-			Player_Cheats.cpp
-			Player_States.cpp
-			spawner.cpp
-			SplineMover.cpp
-			Icon.cpp
-			LipSync.cpp
-			TramGate.cpp
-			gamesys/State.cpp
-			script/ScriptFuncUtility.cpp
-			vehicle/Vehicle.cpp
-			vehicle/VehicleAnimated.cpp
-			vehicle/VehicleController.cpp
-			vehicle/VehicleDriver.cpp
-			vehicle/VehicleMonster.cpp
-			vehicle/VehicleParts.cpp
-			vehicle/VehiclePosition.cpp
-			vehicle/VehicleRigid.cpp
-			vehicle/VehicleSpline.cpp
-			vehicle/VehicleStatic.cpp
-			vehicle/Vehicle_DropPod.cpp
-			vehicle/Vehicle_Walker.cpp
-			client/ClientAFEntity.cpp
-			client/ClientEffect.cpp
-			client/ClientEntity.cpp
-			client/ClientModel.cpp
-			client/ClientMoveable.cpp
-			ai/AAS_Find.cpp
-			ai/Monster_Berserker.cpp
-			ai/Monster_BossBuddy.cpp
-			ai/Monster_BossMakron.cpp
-			ai/Monster_ConvoyGround.cpp
-			ai/Monster_ConvoyHover.cpp
-			ai/Monster_FailedTransfer.cpp
-			ai/Monster_Fatty.cpp
-			ai/Monster_Gladiator.cpp
-			ai/Monster_Grunt.cpp
-			ai/Monster_Gunner.cpp
-			ai/Monster_Harvester.cpp
-			ai/Monster_HarvesterDispersal.cpp
-			ai/Monster_HeavyHoverTank.cpp
-			ai/Monster_IronMaiden.cpp
-			ai/Monster_LightTank.cpp
-			ai/Monster_NetworkGuardian.cpp
-			ai/Monster_RepairBot.cpp
-			ai/Monster_Scientist.cpp
-			ai/Monster_Sentry.cpp
-			ai/Monster_SlimyTransfer.cpp
-			ai/Monster_StreamProtector.cpp
-			ai/Monster_StroggFlyer.cpp
-			ai/Monster_StroggHover.cpp
-			ai/Monster_StroggMarine.cpp
-			ai/Monster_TeleportDropper.cpp
-			ai/Monster_Turret.cpp
-			ai/Monster_TurretFlying.cpp
-			ai/AI_Actions.cpp
-			ai/AI_Announcements.cpp
-			ai/AI_Debug.cpp
-			ai/AI_Manager.cpp
-			ai/AI_Medic.cpp
-			ai/AI_Move.cpp
-			ai/AI_States.cpp
-			ai/AI_Tactical.cpp
-			ai/AI_Util.cpp
-			ai/VehicleAI.cpp
-			ai/AAS_tactical.cpp
-			weapon/WeaponBlaster.cpp
-			weapon/WeaponGrenadeLauncher.cpp
-			weapon/WeaponMachinegun.cpp
-			weapon/WeaponRailgun.cpp
-			weapon/WeaponDarkMatterGun.cpp
-			weapon/WeaponHyperblaster.cpp
-			weapon/WeaponNailgun.cpp
-			weapon/WeaponRocketLauncher.cpp
-			weapon/WeaponGauntlet.cpp
-			weapon/WeaponLightningGun.cpp
-			weapon/WeaponNapalmGun.cpp
-			weapon/WeaponShotgun.cpp
-			mp/Buying.cpp
-			mp/CTF.cpp
-			mp/GameState.cpp
-			mp/Tourney.cpp
-			mp/VoiceComms.cpp
-			mp/stats/StatEvent.cpp
-			mp/stats/StatManager.cpp
-			mp/stats/StatWindow.cpp
-			physics/Physics_Particle.cpp
-			physics/Physics_VehicleMonster.cpp
 			bots/BotAASBuild.cpp
 			bots/BotAI.cpp
 			bots/BotSabot.cpp
-			)
-	list(REMOVE_ITEM src_quake4
-			Fx.cpp
-			PlayerIcon.cpp
-			SmokeParticles.cpp
-			ai/AI_Vagary.cpp
-			#gamesys/TypeInfo.cpp
 			)
 	list(APPEND src_quake4 ${quake4_game_src})
 	set_src_dir(src_quake4 "quake4" ${src_quake4})
@@ -2016,9 +2032,35 @@ if(QUAKE4)
 	set_target_properties(q4game PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(q4game PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(q4game idlib_raven)
+	target_include_directories(q4game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
 		install(TARGETS q4game
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(HARDQORE)
+	# hardqore game source
+	set(src_hardqore ${base_q4game_src})
+	set_src_dir(src_hardqore "${QUAKE4_MOD_DIR}/hardqore" ${src_hardqore})
+	add_globbed_headers(src_hardqore "${QUAKE4_MOD_DIR}/hardqore")
+
+	add_library(hardqore SHARED ${src_hardqore})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hardqore})
+	#set_target_properties(hardqore PROPERTIES PREFIX "")
+	set_target_properties(hardqore PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;_HARDQORE")
+	target_include_directories(hardqore PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${QUAKE4_MOD_DIR}/hardqore")
+	set_target_properties(hardqore PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(hardqore PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(hardqore idlib_raven)
+	target_include_directories(hardqore PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS hardqore
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
@@ -2081,6 +2123,7 @@ if(HUMANHEAD)
 
 	set_target_properties(${PREYBINARY} PROPERTIES COMPILE_DEFINITIONS "_HUMANHEAD;${CORE_DEFINES}")
 	set_target_properties(${PREYBINARY} PROPERTIES LINK_FLAGS "${ldflags}")
+	target_include_directories(${PREYBINARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/humanhead")
 
 	target_link_libraries(${PREYBINARY}
 			idlib_humanhead
@@ -2288,6 +2331,7 @@ if(PREY)
 	set_target_properties(preygame PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(preygame PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	target_link_libraries(preygame idlib_humanhead)
+	target_include_directories(preygame PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/humanhead")
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
 		install(TARGETS preygame

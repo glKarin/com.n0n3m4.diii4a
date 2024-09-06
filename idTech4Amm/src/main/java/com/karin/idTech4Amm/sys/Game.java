@@ -32,6 +32,7 @@ public enum Game
 
     // Quake 4
     QUAKE4_BASE(Q3EGlobals.GAME_QUAKE4, "q4base", "", "q4game", "", false, R.string.quake_iv_q4base),
+    QUAKE4_HARDQORE(Q3EGlobals.GAME_QUAKE4, "hardqore", "hardqore", "hardqore",  "", true, R.string.hardqore),
 
     // Prey(2006)
     PREY_BASE(Q3EGlobals.GAME_PREY, "preybase", "", "preygame", "", false, R.string.prey_preybase),

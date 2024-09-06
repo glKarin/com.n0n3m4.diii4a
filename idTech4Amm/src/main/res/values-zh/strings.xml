@@ -364,4 +364,5 @@
     <string name="nolighting">无光照</string>
     <string name="ambient_lighting_brightness_harm_r_ambientlightingbrightness">环境光照亮度(harm_r_ambientLightingBrightness):</string>
     <string name="ambient_lighting_brightness">环境光照亮度</string>
+    <string name="hardqore">Hardqore</string>
 </resources>

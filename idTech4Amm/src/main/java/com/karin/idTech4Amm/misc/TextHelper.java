@@ -182,6 +182,7 @@ public final class TextHelper
                 " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3: perfected"),
                 " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3-Resurrection of Evil: perfected_roe"),
                 " " + GenLinkText("https://store.steampowered.com/app/2210/Quake_4/", "Quake4: q4base"),
+                " " + GenLinkText("https://www.moddb.com/mods/quake-4-hardqore", "Hardqore"),
                 " Prey(2006): preybase",
                 " " + GenLinkText("https://store.steampowered.com/app/2320/Quake_II/", "Quake II: baseq2"),
                 " " + GenLinkText("https://store.steampowered.com/app/2200/Quake_III_Arena/", "Quake III Arena: baseq3"),
@@ -329,6 +330,17 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
+
+                ChangeLog.Create("2024-08-23", 56,
+                        "Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.",
+                        "Fix environment reflection shader in DOOM3/Quake4/Prey.",
+                        "Add no-lighting with `harm_r_lightingModel` 0 and remove r_noLight=2 in DOOM3/Quake4/Prey.",
+                        "Reduce game crash when change mod/reloadEngine/vid_restart in DOOM3/Quake4/Prey.",
+                        "Support switch weapon in DOOM 3(write `bind \"YOUR_KEY\" \"IMPULSE_51\"` to your DoomConfig.cfg or autoexec.cfg).",
+                        "Add `LibreCoop(RoE)` mod of DOOM3 support, game data directory named `librecoopxp`(d3xp required). More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop") + "`.",
+                        "Add `Perfected Doom 3` mod of DOOM3 support, game data directory named `perfected`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3") + "`.",
+                        "Add `Perfected Doom 3 : Resurrection of Evil` mod of DOOM3 support, game data directory named `perfected_roe`(d3xp required). More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3 : Resurrection of Evil") + "`."
+                ),
 
                 ChangeLog.Create("2024-08-05", 55,
                         "Add PBR interaction lighting model(" + TextHelper.GenLinkText("https://github.com/jmarshall23/idtech4_pbr", "jmarshall23's idtech4_pbr") + ")(setup cvar harm_r_lightingModel 3) in DOOM3/Quake4/Prey.",

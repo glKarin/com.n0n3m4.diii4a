@@ -47,22 +47,43 @@ const float	USERCMD_ONE_OVER_HZ = (1.0f / USERCMD_HZ); // HUMANHEAD JRM
 const int BUTTON_ATTACK			= BIT(0);
 const int BUTTON_RUN			= BIT(1);
 const int BUTTON_ZOOM			= BIT(2);
-#ifdef _HUMANHEAD
+#ifdef _RAVEN // quake4 user cmd
+const int BUTTON_SCORES			= BIT(3);
+const int BUTTON_MLOOK			= BIT(4);
+// RAVEN BEGIN
+// ddynerman: stats
+const int BUTTON_INGAMESTATS	= BIT(5);
+// jscott: for voicechat
+const int BUTTON_VOICECHAT		= BIT(6);
+// ddynerman: tourney display
+const int BUTTON_TOURNEY		= BIT(7);
+// twhitaker: strafe
+const int BUTTON_STRAFE			= BIT(8);
+// RAVEN END
+
+#ifdef _HARDQORE
+// PHIL BEGIN
+const int BUTTON_1            = BIT(9);
+const int BUTTON_2            = BIT(10);
+const int BUTTON_3            = BIT(11);
+const int BUTTON_4            = BIT(12);
+const int BUTTON_5            = BIT(13);
+const int BUTTON_6            = BIT(14);
+// PHIL END
+#endif
+
+#elif defined(_HUMANHEAD)
 const int BUTTON_ATTACK_ALT		= BIT(3);
 const int BUTTON_SCORES			= BIT(4);
 const int BUTTON_MLOOK			= BIT(5);
+const int BUTTON_6				= BIT(6);
+const int BUTTON_7				= BIT(7);
 #else
 const int BUTTON_SCORES			= BIT(3);
 const int BUTTON_MLOOK			= BIT(4);
 const int BUTTON_5				= BIT(5);
-#endif
 const int BUTTON_6				= BIT(6);
 const int BUTTON_7				= BIT(7);
-#ifdef _RAVEN // quake4 user cmd
-// ddynerman: stats
-const int BUTTON_INGAMESTATS = BUTTON_5;
-// twhitaker: strafe
-const int BUTTON_STRAFE = BIT(8);
 #endif
 
 // usercmd_t->impulse commands
