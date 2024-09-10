@@ -527,18 +527,19 @@ idVec3 rvDeclEffectParser::ParseTint(rvBSEParticleStage *stage, int n)
 		stage->color[0] = p[0];
 		stage->color[1] = p[1];
 		stage->color[2] = p[2];
-		stage->color[3] = 1.0;
 		//stage->entityColor = false; // comment it, for line lighting
+
+        stage->fadeColor[0] = p[0];
+        stage->fadeColor[1] = p[1];
+        stage->fadeColor[2] = p[2];
 	}
-#if 0
 	else
 	{
 		stage->fadeColor[0] = p[0];
 		stage->fadeColor[1] = p[1];
 		stage->fadeColor[2] = p[2];
-		stage->fadeColor[3] = 1.0;
+        stage->fade = true;
 	}
-#endif
 	return p;
 }
 
@@ -560,10 +561,10 @@ void rvDeclEffectParser::ParseFade(rvBSEParticleStage *stage, int n)
 		idVec3 p(0.0f, 0.0f, 0.0f);
 		ParsePoint(p);
 		if(n == STAGE_START)
-			stage->fadeInFraction = p[0];
+			stage->color[3] = p[0];
 		else
-			stage->fadeOutFraction = p[0];
-		stage->fadeOutFraction = p[0]; // TODO: always fade out
+            stage->fade = true;
+		stage->fadeColor[3] = p[0];
 	}
 	else if(!idStr::Icmp(token, "line"))
 	{
@@ -571,10 +572,10 @@ void rvDeclEffectParser::ParseFade(rvBSEParticleStage *stage, int n)
 		b.Zero();
 		ParseLine(b);
 		if(n == STAGE_START)
-			stage->fadeInFraction = b[0][0];
+			stage->color[3] = b[0][0];
 		else
-			stage->fadeOutFraction = b[0][0];
-		stage->fadeOutFraction = b[0][0]; // TODO: always fade out
+            stage->fade = true;
+		stage->fadeColor[3] = b[0][0];
 	}
 	else
 	{
@@ -1348,6 +1349,8 @@ rvBSEParticleStage * rvDeclEffectParser::Alloc_rvBSEParticleStage(void)
 	stage->speed.from = 0;
 	stage->speed.to = 0;
 	stage->deadTime = 0;
+
+    stage->fade = false;
 	return stage;
 }
 

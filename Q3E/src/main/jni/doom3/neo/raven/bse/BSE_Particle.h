@@ -146,6 +146,7 @@ class rvBSEParticleStage
 
 		idBounds				bounds;				// derived
 
+        bool fade;
 		int rvptype;
 		idRenderModel	*model;
 };
