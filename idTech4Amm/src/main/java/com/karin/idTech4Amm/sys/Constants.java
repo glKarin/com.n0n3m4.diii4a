@@ -32,6 +32,8 @@ public final class Constants
         return new String[] {
             "Add `ambientLighting` shader, add ambient lighting model with `harm_r_lightingModel` 4 in DOOM3/Quake4/Prey.",
             "Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/quake-4-hardqore", "Quake 4: Hardqore") + "`.",
+            "Add effects color alpha in Quake4.",
+            "Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.",
         };
 	};
 

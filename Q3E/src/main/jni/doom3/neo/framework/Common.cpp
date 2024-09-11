@@ -3340,6 +3340,15 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 
 		if(harm_com_consoleHistory.GetInteger() != 0)
 			console->LoadHistory();
+#ifdef __ANDROID__ //karin: for in smooth joystick on Android.
+		extern bool smooth_joystick;
+		idCVar *in_smoothJoystick = cvarSystem->Find("harm_in_smoothJoystick");
+		if(in_smoothJoystick)
+		{
+			in_smoothJoystick->SetBool(smooth_joystick);
+			in_smoothJoystick->ClearModified();
+		}
+#endif
 
 		com_fullyInitialized = true;
 	}

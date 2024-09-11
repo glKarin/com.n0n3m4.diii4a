@@ -50,6 +50,7 @@ extern int screen_height;
 
 void Android_GrabMouseCursor(bool grabIt);
 void Android_PollInput(void);
+void Android_EnableSmoothJoystick(bool enable = true);
 
 extern void (*attach_thread)(void);
 extern void Q3E_CheckNativeWindowChanged(void);

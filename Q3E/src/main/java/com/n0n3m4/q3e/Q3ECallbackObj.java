@@ -294,5 +294,10 @@ public class Q3ECallbackObj
             vw.ToggleToolbar(on);
         }
     }
+
+    public void SetupSmoothJoystick(boolean enable)
+    {
+        Q3EUtils.q3ei.joystick_smooth = enable;
+    }
 }
 

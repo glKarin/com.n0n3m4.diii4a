@@ -75,6 +75,7 @@ static char * get_clipboard_text(void);
 static void show_toast(const char *text);
 static void open_keyboard(void);
 static void close_keyboard(void);
+static void setup_smooth_joystick(int enable);
 
 // data
 static char *game_data_dir = NULL;
@@ -93,6 +94,7 @@ static const jbyte *audio_track_buffer = NULL;
 // Java method
 static jmethodID android_PullEvent_method;
 static jmethodID android_GrabMouse_method;
+static jmethodID android_SetupSmoothJoystick_method;
 static jmethodID android_CopyToClipboard_method;
 static jmethodID android_GetClipboardText_method;
 
@@ -335,6 +337,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	//k
 	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(I)I");
 	android_GrabMouse_method = (*env)->GetMethodID(env, q3eCallbackClass, "GrabMouse", "(Z)V");
+	android_SetupSmoothJoystick_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetupSmoothJoystick", "(Z)V");
 	android_CopyToClipboard_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyToClipboard", "(Ljava/lang/String;)V");
 	android_GetClipboardText_method = (*env)->GetMethodID(env, q3eCallbackClass, "GetClipboardText", "()Ljava/lang/String;");
 	android_ShowToast_method = (*env)->GetMethodID(env, q3eCallbackClass, "ShowToast", "(Ljava/lang/String;)V");
@@ -431,6 +434,7 @@ static void setup_Q3E_callback(void)
 	callback.Sys_getClipboardText = &get_clipboard_text;
 	callback.Sys_openKeyboard = &open_keyboard;
 	callback.Sys_closeKeyboard = &close_keyboard;
+	callback.Input_setupSmoothJoystick = &setup_smooth_joystick;
 
 	callback.Gui_ShowToast = &show_toast;
 
@@ -452,12 +456,13 @@ static void print_initial_context(const Q3E_InitialContext_t *context)
 	LOGI("Game data directory: %s", context->gameDataDir);
 	LOGI("Application home directory: %s", context->appHomeDir);
 	LOGI("Refresh rate: %d", context->refreshRate);
+	LOGI("Smooth joystick: %d", context->smoothJoystick);
     LOGI("Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
 	LOGI("<---------");
 }
 
-JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean bContinueNoGLContext)
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc;
@@ -526,6 +531,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;
 	context.gameDataDir = game_data_dir;
 	context.refreshRate = refreshRate;
+	context.smoothJoystick = smoothJoystick ? 1 : 0;
 
 	print_initial_context(&context);
 
@@ -690,6 +696,13 @@ void close_keyboard(void)
 
 	LOGI("Close keyboard");
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_CloseVKB_method);
+}
+
+void setup_smooth_joystick(int enable)
+{
+	ATTACH_JNI(env)
+
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_SetupSmoothJoystick_method, (jboolean)enable);
 }
 
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"

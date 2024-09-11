@@ -779,6 +779,7 @@ public class Q3EGameHelper
                 usingMouse,
                 refreshRate,
                 appHome,
+                Q3EUtils.q3ei.joystick_smooth,
                 runBackground > 0
         );
         if(!res)

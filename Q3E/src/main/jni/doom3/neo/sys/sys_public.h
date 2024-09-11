@@ -698,6 +698,7 @@ FILE * Sys_tmpfile(void);
 void Sys_SyncState(void);
 void Sys_ForceResolution(void);
 void Sys_Analog(int &side, int &forward, const int &KEY_MOVESPEED);
+extern
 #endif
 
 #ifdef _MULTITHREAD

@@ -47,6 +47,9 @@ FILE * (*itmpfile)(void);
 // return pull event num
 int (*pull_input_event)(int execCmd);
 
+// setup smooth joystick
+void (*setup_smooth_joystick)(int enable);
+
 // Grab mouse
 void (*grab_mouse)(int grab);
 
@@ -89,6 +92,9 @@ char *game_data_dir = NULL;
 // Application home directory.
 char *app_home_dir = NULL;
 
+// Smooth joystick
+bool smooth_joystick = false;
+
 // Surface window
 volatile ANativeWindow *window = NULL;
 static volatile bool window_changed = false;
@@ -112,6 +118,15 @@ void Android_PollInput(void)
 {
     //if(pull_input_event)
         pull_input_event(-1);
+}
+
+void Android_EnableSmoothJoystick(bool enable)
+{
+    // if(smooth_joystick != enable)
+    {
+        setup_smooth_joystick(enable);
+        smooth_joystick = enable;
+    }
 }
 
 FILE * Sys_tmpfile(void)
@@ -197,6 +212,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("    Game data directory: %s\n", game_data_dir);
     printf("    Application home directory: %s\n", app_home_dir);
     printf("    Refresh rate: %d\n", refresh_rate);
+    printf("    Smooth joystick: %d\n", smooth_joystick);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
@@ -208,6 +224,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("  Input: \n");
     printf("    grab_mouse: %p\n", grab_mouse);
     printf("    pull_input_event: %p\n", pull_input_event);
+    printf("    setup_smooth_joystick: %p\n", setup_smooth_joystick);
     printf("  System: \n");
     printf("    attach_thread: %p\n", attach_thread);
     printf("    tmpfile: %p\n", itmpfile);
@@ -246,8 +263,9 @@ void Q3E_SetCallbacks(const void *callbacks)
     writeAudio = ptr->AudioTrack_write;
     shutdownAudio = ptr->AudioTrack_shutdown;
 
-    pull_input_event = ptr->Input_pullEvent;
     grab_mouse = ptr->Input_grabMouse;
+    pull_input_event = ptr->Input_pullEvent;
+    setup_smooth_joystick = ptr->Input_setupSmoothJoystick;
 
     attach_thread = ptr->Sys_attachThread;
     itmpfile = ptr->Sys_tmpfile;
@@ -338,6 +356,7 @@ void Q3E_SetInitialContext(const void *context)
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
     mouse_available = ptr->mouseAvailable ? true : false;
     refresh_rate = ptr->refreshRate <= 0 ? 60 : ptr->refreshRate;
+    smooth_joystick = ptr->smoothJoystick ? true : false;
 }
 
 // View paused
