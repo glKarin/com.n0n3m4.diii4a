@@ -84,6 +84,7 @@ endif()
 option(DEDICATED							"Build the dedicated server" 												OFF)
 option(ONATIVE								"Optimize for the host CPU" 												OFF)
 option(REPRODUCIBLE_BUILD 					"Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
+option(CONSOLE								"Run on console" 															OFF)
 
 # For dev: Quick build
 option(BUILD_D3								"Build DOOM 3"																ON)
@@ -1468,12 +1469,21 @@ if(CORE)
 				)
 	else()
 		set(DOOM3BINARY "Doom3")
+		if(CONSOLE)
 		add_executable(${DOOM3BINARY}
 				${src_core}
 				${src_sys_base}
 				${src_sys_core}
 				${src_editor_tools}
 				)
+		else()
+			add_executable(${DOOM3BINARY} WIN32 MACOSX_BUNDLE
+					${src_core}
+					${src_sys_base}
+					${src_sys_core}
+					${src_editor_tools}
+					)
+		endif()
 	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
@@ -1970,12 +1980,21 @@ if(RAVEN)
 				)
 	else()
 		set(QUAKE4BINARY "Quake4")
+		if(CONSOLE)
 		add_executable(${QUAKE4BINARY}
 				${src_core_raven}
 				${src_sys_base}
 				${src_sys_core}
 				${src_editor_tools}
 		)
+		else()
+			add_executable(${QUAKE4BINARY} WIN32 MACOSX_BUNDLE
+					${src_core_raven}
+					${src_sys_base}
+					${src_sys_core}
+					${src_editor_tools}
+					)
+		endif()
 	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
@@ -2111,12 +2130,21 @@ if(HUMANHEAD)
 				)
 	else()
 		set(PREYBINARY "Prey")
+		if(CONSOLE)
 		add_executable(${PREYBINARY}
 				${src_core_humanhead}
 				${src_sys_base}
 				${src_sys_core}
 				${src_editor_tools}
 				)
+		else()
+			add_executable(${PREYBINARY} WIN32 MACOSX_BUNDLE
+					${src_core_humanhead}
+					${src_sys_base}
+					${src_sys_core}
+					${src_editor_tools}
+					)
+		endif()
 	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_humanhead} ${src_sys_base} ${src_sys_core} ${src_editor_tools})

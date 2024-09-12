@@ -55,6 +55,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <SDL_main.h>
 
+#ifdef _RAVEN //karin: win log file name
+#define GAME_NAME_ID "quake4"
+#elif defined(_HUMANHEAD)
+#define GAME_NAME_ID "prey"
+#else
+#define GAME_NAME_ID "doom3"
+#endif
+
 idCVar Win32Vars_t::win_outputDebugString( "win_outputDebugString", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_outputEditString( "win_outputEditString", "1", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_viewlog( "win_viewlog", "0", CVAR_SYSTEM | CVAR_INTEGER, "" );
@@ -398,7 +406,7 @@ extern "C" { // DG: I need this in SDL_win32_main.c
 		if (len == 0)
 			return 0;
 
-		idStr::Append(dst, size, "/My Games/dhewm3");
+		idStr::Append(dst, size, "/My Games/idTech4Amm/" GAME_NAME);
 
 		return len;
 	}
@@ -822,7 +830,7 @@ void Sys_Init( void ) {
 	{
 		idStr savepath;
 		Sys_GetPath( PATH_SAVE, savepath );
-		common->Printf( "Logging console output to %s/dhewm3log.txt\n", savepath.c_str() );
+		common->Printf( "Logging console output to %s/" GAME_NAME_ID "_log.txt\n", savepath.c_str() );
 	}
 
 	//

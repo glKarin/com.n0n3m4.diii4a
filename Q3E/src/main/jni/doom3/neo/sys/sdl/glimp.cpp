@@ -124,6 +124,8 @@ bool USING_GLES3 = false;
 int gl_version = DEFAULT_GLES_VERSION;
 
 static idCVar r_fullscreenDesktop( "r_fullscreenDesktop", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0: 'real' fullscreen mode 1: keep resolution 'desktop' fullscreen mode" );
+static idCVar win_xpos( "win_xpos", "-1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "horizontal position of window" );
+static idCVar win_ypos( "win_ypos", "-1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "vertical position of window" );
 
 const int GRAB_GRABMOUSE	= (1 << 0);
 const int GRAB_HIDECURSOR	= (1 << 1);
@@ -365,9 +367,25 @@ bool GLimp_Init(glimpParms_t parms) {
         }
 #endif
 
+        int win_x;
+        int win_y;
+        if(parms.fullScreen)
+        {
+            win_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex);
+            win_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex);
+        }
+        else
+        {
+            win_x = win_xpos.GetInteger();
+            win_y = win_ypos.GetInteger();
+            if(win_x < 0)
+                win_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex);
+            if(win_y < 0)
+                win_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex);
+        }
         window = SDL_CreateWindow(ENGINE_VERSION,
-                                    SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),
-                                    SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),
+                                    win_x,
+                                    win_y,
                                     parms.width, parms.height, flags);
 
         if (!window) {

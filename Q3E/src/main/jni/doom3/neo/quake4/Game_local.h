@@ -1444,5 +1444,4 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 // TinMan: BotZ0r
 #include "bots/BotAI.h"
 #endif
-
 #endif	/* !__GAME_LOCAL_H__ */

@@ -7,6 +7,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef _RAVEN //karin: win log file name
+#define GAME_NAME_ID "quake4"
+#elif defined(_HUMANHEAD)
+#define GAME_NAME_ID "prey"
+#else
+#define GAME_NAME_ID "doom3"
+#endif
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -37,8 +45,8 @@
 #endif /* main */
 
 /* The standard output files */
-#define STDOUT_FILE	TEXT("dhewm3log.txt") /* DG: renamed this */
-#define STDERR_FILE	TEXT("stderr.txt")
+#define STDOUT_FILE	TEXT(GAME_NAME_ID "_log.txt") /* DG: renamed this */
+#define STDERR_FILE	TEXT(GAME_NAME_ID "_stderr.txt")
 
 /* Set a variable to tell if the stdio redirect has been enabled. */
 static int stdioRedirectEnabled = 0;
@@ -199,6 +207,25 @@ static void cleanup_output(void) {
 
 extern int Win_GetHomeDir(char *dst, size_t size);
 
+static void mkdir_r(const char *path)
+{
+    struct _stat st;
+    printf("AAA %s\n", path);
+    if (_stat(path, &st) == -1) {
+        char myGamesPath[MAX_PATH];
+        char* lastslash;
+        memcpy(myGamesPath, path, MAX_PATH);
+        lastslash = strrchr(myGamesPath, '/');
+        if (lastslash != NULL) {
+            *lastslash = '\0';
+        }
+        mkdir_r(myGamesPath); // create parent
+
+        printf("CCC %s\n", path);
+        _mkdir(path); // create self
+    }
+}
+
 /* Redirect the output (stdout and stderr) to a file */
 static void redirect_output(void)
 {
@@ -213,6 +240,9 @@ static void redirect_output(void)
 	 *     instead of the binary, which might not be writable */
 	Win_GetHomeDir(path, sizeof(path));
 
+#if 1
+    mkdir_r(path); /* create My Documents/My Games/idTech4Amm/<game> */
+#else
 	if (_stat(path, &st) == -1) {
 		/* oops, "My Documents/My Games/dhewm3" doesn't exist - does My Games/ at least exist? */
 		char myGamesPath[MAX_PATH];
@@ -229,6 +259,7 @@ static void redirect_output(void)
 		
 		_mkdir(path); /* create My Documents/My Games/dhewm3/ */
 	}
+#endif
 	
 
 #endif
@@ -255,12 +286,12 @@ static void redirect_output(void)
 #ifdef _WIN32_WCE
 		wchar_t stdoutPathBK[MAX_PATH];
 		wcsncpy( stdoutPathBK, path, SDL_arraysize(stdoutPath) );
-		wcsncat( stdoutPathBK, DIR_SEPERATOR TEXT("dhewm3log-old.txt"), SDL_arraysize(stdoutPath) );
+		wcsncat( stdoutPathBK, DIR_SEPERATOR TEXT(GAME_NAME_ID "_log-old.txt"), SDL_arraysize(stdoutPath) );
 		_wrename( stdoutPath, stdoutpathBK );
 #else
 		char stdoutPathBK[MAX_PATH];
 		SDL_strlcpy( stdoutPathBK, path, SDL_arraysize(stdoutPath) );
-		SDL_strlcat( stdoutPathBK, DIR_SEPERATOR TEXT("dhewm3log-old.txt"), SDL_arraysize(stdoutPath) );
+		SDL_strlcat( stdoutPathBK, DIR_SEPERATOR TEXT(GAME_NAME_ID "_log-old.txt"), SDL_arraysize(stdoutPath) );
 		rename( stdoutPath, stdoutPathBK );
 #endif
 	} /* DG end */

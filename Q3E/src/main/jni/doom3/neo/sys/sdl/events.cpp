@@ -758,6 +758,27 @@ sysEvent_t Sys_GetEvent() {
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					in_hasFocus = false;
 					break;
+
+                // win_xpos and win_ypos declared on glimp.cpp
+                case SDL_WINDOWEVENT_MOVED:
+                    if(!glConfig.isFullscreen)
+                    {
+                        cvarSystem->SetCVarInteger("win_xpos", ev.window.data1);
+                        cvarSystem->SetCVarInteger("win_ypos", ev.window.data2);
+                    }
+                    break;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+                case SDL_WINDOWEVENT_CLOSE:
+                    if(!glConfig.isFullscreen)
+                    {
+                        int win_x, win_y;
+                        SDL_Window *window = SDL_GetWindowFromID(ev.window.windowID);
+                        SDL_GetWindowPosition(window, &win_x, &win_y);
+                        cvarSystem->SetCVarInteger("win_xpos", win_x);
+                        cvarSystem->SetCVarInteger("win_ypos", win_y);
+                    }
+                    break;
+#endif
 			}
 
 			continue; // handle next event
