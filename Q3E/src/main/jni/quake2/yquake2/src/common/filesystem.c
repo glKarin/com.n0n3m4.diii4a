@@ -2103,6 +2103,13 @@ static void FS_AddDirToRawPath (const char *rawdir, qboolean create, qboolean re
 
 
 void FS_BuildRawPath(void) {
+#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is lowest
+	extern const char * Sys_ApplicationHomePath(void);
+	const char *app_path = Sys_ApplicationHomePath();
+	if(app_path && app_path[0]) {
+		FS_AddDirToRawPathWithoutRealpath(app_path, false, false);
+	}
+#endif
 	// Add $HOME/.yq2, MUST be the last dir! Required,
 	// otherwise the config cannot be written.
 	if (!is_portable) {
@@ -2141,13 +2148,6 @@ void FS_BuildRawPath(void) {
 	if (fs_cddir->string[0] != '\0') {
 		FS_AddDirToRawPath(fs_cddir->string, false, true);
 	}
-#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is highest
-	extern const char * Sys_ApplicationHomePath(void);
-	const char *app_path = Sys_ApplicationHomePath();
-	if(app_path && app_path[0]) {
-		FS_AddDirToRawPathWithoutRealpath(app_path, false, false);
-	}
-#endif
 }
 
 // --------
