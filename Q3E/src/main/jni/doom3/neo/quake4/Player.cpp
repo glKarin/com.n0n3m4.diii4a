@@ -27,6 +27,9 @@
 #include "../sys/xenon/xen_input.h"
 #endif
 // RAVEN END
+#ifdef _MOD_VIEW_BODY
+#include "ViewBody.cpp"
+#endif
 
 idCVar net_predictionErrorDecay( "net_predictionErrorDecay", "112", CVAR_FLOAT | CVAR_GAME | CVAR_NOCHEAT, "time in milliseconds it takes to fade away prediction errors", 0.0f, 200.0f );
 idCVar net_showPredictionError( "net_showPredictionError", "-1", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT, "show prediction errors for the given client", -1, MAX_CLIENTS );
@@ -1415,6 +1418,10 @@ void idPlayer::SetWeapon( int weaponIndex ) {
 	if ( !weaponEnabled ) {
 		Event_DisableWeapon( );
 	}
+#ifdef _MOD_VIEW_BODY
+	if(viewBody)
+		viewBody->UpdateWeapon();
+#endif
 }
  
 /*
@@ -1569,6 +1576,9 @@ void idPlayer::Init( void ) {
 	bobCycle	= 0;
 
 	SetupWeaponEntity( );
+#ifdef _MOD_VIEW_BODY
+    SetupViewBody();
+#endif
 	currentWeapon = -1;
 	previousWeapon = -1;
 	
@@ -1970,6 +1980,9 @@ void idPlayer::Spawn( void ) {
 		if ( !gameLocal.isClient ) {
 			// set yourself ready to spawn. idMultiplayerGame will decide when/if appropriate and call SpawnFromSpawnSpot
 			SetupWeaponEntity( );
+#ifdef _MOD_VIEW_BODY
+            SetupViewBody();
+#endif
 			SpawnFromSpawnSpot( );
 			spectator = entityNumber;
 			forceRespawn = true;
@@ -1980,6 +1993,9 @@ void idPlayer::Spawn( void ) {
 		{
 			// set yourself ready to spawn. idMultiplayerGame will decide when/if appropriate and call SpawnFromSpawnSpot
 			SetupWeaponEntity( );
+#ifdef _MOD_VIEW_BODY
+            SetupViewBody();
+#endif
 			SpawnFromSpawnSpot( );
 			spectator = entityNumber;
 			forceRespawn = true;
@@ -1988,6 +2004,9 @@ void idPlayer::Spawn( void ) {
 #endif
 	} else {
  		SetupWeaponEntity( );
+#ifdef _MOD_VIEW_BODY
+        SetupViewBody();
+#endif
 		SpawnFromSpawnSpot( );
 	}
 
@@ -2105,6 +2124,9 @@ idPlayer::~idPlayer() {
 	delete weaponWorldModel;
 	delete weapon;
 	delete aasSensor;
+#ifdef _MOD_VIEW_BODY
+    delete viewBody;
+#endif
 	
 	SetPhysics( NULL );
 }
@@ -8187,6 +8209,13 @@ void idPlayer::Spectate( bool spectate, bool force ) {
 			weaponViewModel = NULL;
 			delete weaponWorldModel;
 			weaponWorldModel = NULL;
+#ifdef _MOD_VIEW_BODY
+            if(viewBody)
+            {
+                delete viewBody;
+                viewBody = NULL;
+            }
+#endif
 		}
 	} else {
 		// put everything back together again
@@ -9734,6 +9763,9 @@ void idPlayer::Think( void ) {
 		UpdateSpectating();
 	} else if ( health > 0 && !gameLocal.inCinematic ) {
 		UpdateWeapon();
+#ifdef _MOD_VIEW_BODY
+        UpdateBody();
+#endif
 	}
 
 	UpdateAir();
@@ -12199,6 +12231,11 @@ void idPlayer::LocalClientPredictionThink( void ) {
  	if ( !gameLocal.inCinematic && weaponViewModel && ( health > 0 ) && !( gameLocal.isMultiplayer && spectating ) ) {
 		UpdateWeapon();
 	}
+#ifdef _MOD_VIEW_BODY
+    if ( !gameLocal.inCinematic && viewBody && ( health > 0 ) && !( gameLocal.isMultiplayer && spectating ) ) {
+        UpdateBody();
+    }
+#endif
 
 	UpdateHud();
 
@@ -12380,6 +12417,11 @@ void idPlayer::NonLocalClientPredictionThink( void ) {
  	if ( !gameLocal.inCinematic && weaponViewModel && ( health > 0 ) && !( gameLocal.isMultiplayer && spectating ) ) {
 		UpdateWeapon();
 	}
+#ifdef _MOD_VIEW_BODY
+    if ( !gameLocal.inCinematic && viewBody && ( health > 0 ) && !( gameLocal.isMultiplayer && spectating ) ) {
+        UpdateBody();
+    }
+#endif
 
 	if ( gameLocal.isLastPredictFrame ) {
 		// this may use firstPersonView, or a thirdPerson / camera view
@@ -14397,3 +14439,102 @@ int idPlayer::CanSelectWeapon(const char* weaponName)
 }
 
 // RITUAL END
+
+#ifdef _MOD_VIEW_BODY
+/*
+==============
+idPlayer::SetupViewBody
+==============
+*/
+void idPlayer::SetupViewBody( void ) {
+    int						w;
+    const char				*weap;
+    const idDeclEntityDef	*decl;
+    idEntity				*spawn;
+
+    // don't setup weapons for spectators
+#ifdef MOD_BOTS
+    if ( !IS_BOT() && ( gameLocal.isClient || viewBody || spectating )  )
+#else
+    if ( gameLocal.isClient || viewBody || spectating )
+#endif
+    {
+        return;
+    }
+
+    idDict					args;
+
+#define VIEW_BODY_DEFAULT_CLASSNAME "player_viewbody"
+    if ( !viewBody ) {
+        // setup the view model
+        idStr player_viewbody_classname;
+        spawnArgs.GetString("player_viewbody", VIEW_BODY_DEFAULT_CLASSNAME, player_viewbody_classname);
+
+        if(!player_viewbody_classname.Length())
+            player_viewbody_classname = VIEW_BODY_DEFAULT_CLASSNAME;
+
+        decl = static_cast< const idDeclEntityDef * >( declManager->FindType( DECL_ENTITYDEF, player_viewbody_classname, false, false ) );
+        if ( !decl ) {
+            gameLocal.Warning( "entityDef not found: '%s'", player_viewbody_classname.c_str() );
+            if( idStr::Cmp(player_viewbody_classname, VIEW_BODY_DEFAULT_CLASSNAME) )
+            {
+                player_viewbody_classname = VIEW_BODY_DEFAULT_CLASSNAME;
+                decl = static_cast< const idDeclEntityDef * >( declManager->FindType( DECL_ENTITYDEF, player_viewbody_classname, false, false ) );
+            }
+        }
+        if ( !decl ) {
+            gameLocal.Warning( "entityDef not found: '%s'", player_viewbody_classname.c_str() );
+            return;
+        }
+
+        args.Set( "name", va( "%s_viewBody", name.c_str() ) );
+        args.SetInt( "instance", instance );
+        args.Set( "classname", decl->GetName() );
+        spawn = NULL;
+        gameLocal.SpawnEntityDef( args, &spawn );
+        if ( !spawn ) {
+            gameLocal.Warning( "idPlayer::SetupViewBody: failed to spawn viewBody" );
+            return;
+        }
+        viewBody = static_cast<idViewBody*>(spawn);
+        viewBody->Init( this, true );
+        viewBody->SetName( va("%s_viewBody", name.c_str() ) );
+        viewBody->SetInstance( instance );
+        gameLocal.Printf( "idPlayer::SetupViewBody: spawn viewBody -> %s\n", viewBody->GetName() );
+    }
+
+    viewBody->fl.persistAcrossInstances = true;
+}
+
+/*
+===============
+idPlayer::UpdateBody
+===============
+*/
+void idPlayer::UpdateBody( void ) {
+    if ( !viewBody ) {
+        return;
+    }
+
+    if ( health <= 0 ) {
+        return;
+    }
+
+    assert( !spectating );
+
+    // clients need to wait till the weapon and it's world model entity
+    // are present and synchronized ( weapon.worldModel idEntityPtr to idAnimatedEntity )
+    if ( gameLocal.isClient && !viewBody ) {
+        return;
+    }
+
+    // if ( hiddenWeapon )
+
+    // update weapon state, particles, dlights, etc
+    viewBody->PresentBody( harm_ui_showViewBody.GetBool()
+#ifdef _MOD_FULL_BODY_AWARENESS
+			&& !harm_pm_fullBodyAwareness.GetBool()
+#endif
+			);
+}
+#endif

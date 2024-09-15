@@ -1432,6 +1432,9 @@ void idClass::RegisterClasses( void )
 	REGISTER(botAi);	// bots/BotAI.cpp
 	REGISTER(botSabot);	// bots/botSabot.cpp
 #endif
+#ifdef _MOD_VIEW_BODY
+    REGISTER(idViewBody); // ..\..\code\game\ViewBody.cpp
+#endif
 #undef REGISTER
 }
 
