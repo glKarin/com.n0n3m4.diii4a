@@ -477,22 +477,19 @@ idViewBody::GetBodyAnim
 int idViewBody::GetBodyAnim( const char *animname ) {
 	int			anim;
 	const char *temp;
-	idAnimator *animatorPtr;
-
-	animatorPtr = viewAnimator;
 
 	// Allow for anim substitution
 	animname = spawnArgs.GetString ( va("anim %s", animname ), animname );
 
 	if ( owner->animPrefix.Length() ) {
 		temp = va( "%s_%s", owner->animPrefix.c_str(), animname );
-		anim = animatorPtr->GetAnim( temp );
+		anim = animator.GetAnim( temp );
 		if ( anim ) {
 			return anim;
 		}
 	}
 
-	anim = animatorPtr->GetAnim( animname );
+	anim = animator.GetAnim( animname );
 
 	return anim;
 }

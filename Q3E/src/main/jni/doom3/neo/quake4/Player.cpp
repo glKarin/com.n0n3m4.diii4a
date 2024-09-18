@@ -13948,6 +13948,11 @@ void idPlayer::SetInstance( int newInstance ) {
 	if( weaponViewModel ) {
 		weaponViewModel->SetInstance( newInstance );
 	}
+#ifdef _MOD_VIEW_BODY
+	if( viewBody ) {
+		viewBody->SetInstance( newInstance );
+	}
+#endif
 
 	// reschedule time announcements if needed
 	if( this == gameLocal.GetLocalPlayer() ) {
@@ -14532,6 +14537,7 @@ void idPlayer::UpdateBody( void ) {
 
     // update weapon state, particles, dlights, etc
     viewBody->PresentBody( harm_ui_showViewBody.GetBool()
+    		&& !IsInVehicle()
 #ifdef _MOD_FULL_BODY_AWARENESS
 			&& !harm_pm_fullBodyAwareness.GetBool()
 #endif
