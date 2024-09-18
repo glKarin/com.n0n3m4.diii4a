@@ -9,6 +9,10 @@
 #define NSS_DEBUG(x)
 #endif
 
+#define VIEW_ORIGIN_X (-1)
+#define VIEW_ORIGIN_Y (-2)
+#define VIEW_ORIGIN_Z (-3)
+
 template<class T>
 void rvNewShaderStageParm__Init(rvNewShaderStage::rvNewShaderStageParm<T> *p) {
     p->index = -1;
@@ -50,13 +54,34 @@ bool rvNewShaderStage::ParseShaderParm(idLexer &src, idMaterial *material)
     p->index = numShaderParms;
 
     src.ReadTokenOnLine(&token);
-    p->name = token;
+    p->name = token.c_str();
+
+    if(!idStr::Icmp(p->name, "EyeVector"))
+    {
+        p->value[0] = material->GetExpressionConstant(0);
+        p->value[1] = material->GetExpressionConstant(0);
+        p->value[2] = material->GetExpressionConstant(0);
+        p->value[3] = material->GetExpressionConstant(1);
+
+        src.ReadTokenOnLine(&token);
+
+        if(!idStr::Icmp(token, "viewOrigin"))
+        {
+            p->value[0] = VIEW_ORIGIN_X;
+            p->value[1] = VIEW_ORIGIN_Y;
+            p->value[2] = VIEW_ORIGIN_Z;
+        }
+        numShaderParms++;
+        p->numValue = 4;
+        return true;
+    }
 
     p->value[0] = material->ParseExpression(src);
 
     src.ReadTokenOnLine(&token);
 
-    if (!token[0] || token.Icmp(",")) {
+    if (!token[0] || token.Icmp(","))
+    {
         p->value[1] =
         p->value[2] =
         p->value[3] = p->value[0];
@@ -228,9 +253,27 @@ void rvNewShaderStage::BindUniform(const shaderProgram_t *shader, const float *r
     // setting local parameters (specified in material definition)
     for ( int i = 0; i < numShaderParms; i++ ) {
         rvNewShaderStageParm<int[4]> *p = shaderParms + i;
+
         idVec4 vparm;
         for (int d = 0; d < 4; d++)
-            vparm[d] = regs[ p->value[d] ];
+        {
+            int m = p->value[d];
+            switch (m) {
+                case VIEW_ORIGIN_X:
+                    vparm[d] = backEnd.viewDef->renderView.vieworg[0];
+                    break;
+                case VIEW_ORIGIN_Y:
+                    vparm[d] = backEnd.viewDef->renderView.vieworg[1];
+                    break;
+                case VIEW_ORIGIN_Z:
+                    vparm[d] = backEnd.viewDef->renderView.vieworg[2];
+                    break;
+                default:
+                    vparm[d] = regs[ m ];
+                    break;
+            }
+        }
+
         GLint location = GetLocation(shader, p);
         switch(p->numValue)
         {

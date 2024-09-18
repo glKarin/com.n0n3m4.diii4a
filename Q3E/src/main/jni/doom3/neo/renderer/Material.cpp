@@ -742,6 +742,10 @@ int idMaterial::ParseTerm(idLexer &src)
 	if (!token.Icmp("VertexRandomizer")) {
 		return GetExpressionConstant(0.0f);
 	}
+    if (!token.Icmp("viewOrigin")) {
+        pd->registersAreConstant = false;
+        return GetExpressionConstant(0.0f);
+    }
 #endif
 
 #ifdef _HUMANHEAD

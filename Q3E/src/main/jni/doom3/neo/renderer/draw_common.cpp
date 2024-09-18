@@ -682,8 +682,15 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf, const float mat[16])
 			GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), &ac->color);
 			GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
 
+            // set the color
+            color[0] = regs[ pStage->color.registers[0] ];
+            color[1] = regs[ pStage->color.registers[1] ];
+            color[2] = regs[ pStage->color.registers[2] ];
+            color[3] = regs[ pStage->color.registers[3] ];
+            GL_Uniform4fv(SHADER_PARM_ADDR(glColor), color);
+
 			// set standard transformations
-			GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mat);
+            GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mat);
 
 			GL_State( pStage->drawStateBits );
 

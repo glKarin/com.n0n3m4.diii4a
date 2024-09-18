@@ -1321,10 +1321,12 @@ void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
  * 	+ attribute highp vec4 attr_TexCoord;
  * 	+ attribute lowp vec4 attr_Color;
  * 	+ attribute vec3 attr_Normal;
+ * 	+ uniform vec4 u_glColor;
+ * 	+ uniform mat4 u_modelViewProjectionMatrix;
  * 	ftransform() -> u_modelViewProjectionMatrix * attr_Vertex
  * 	gl_Vertex -> attr_Vertex
  * 	gl_MultiTexCoord0 -> attr_TexCoord
- * 	gl_Color -> (attr_Color / 255.0)
+ * 	gl_Color -> u_glColor // * (attr_Color / 255.0)
  * 	gl_Normal -> attr_Normal
  *
  * ES3.0
@@ -1334,12 +1336,14 @@ void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
  * 	+ in highp vec4 attr_TexCoord;
  * 	+ in lowp vec4 attr_Color;
  * 	+ in vec3 attr_Normal;
+ * 	+ uniform vec4 u_glColor;
+ * 	+ uniform mat4 u_modelViewProjectionMatrix;
  *	attribute -> in
  *	varying -> out
  * 	ftransform() -> u_modelViewProjectionMatrix * attr_Vertex
  * 	gl_Vertex -> attr_Vertex
  * 	gl_MultiTexCoord0 -> attr_TexCoord
- * 	gl_Color -> (attr_Color / 255.0)
+ * 	gl_Color -> u_glColor // * (attr_Color / 255.0)
  * 	gl_Normal -> attr_Normal
  */
 idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
@@ -1364,7 +1368,9 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
 	source.Replace("ftransform()", "u_modelViewProjectionMatrix * attr_Vertex");
 	source.Replace("gl_Vertex", "attr_Vertex");
 	source.Replace("gl_MultiTexCoord0", "attr_TexCoord");
-	source.Replace("gl_Color", "(attr_Color / 255.0)");
+	//source.Replace("gl_Color", "(attr_Color / 255.0)");
+    //source.Replace("gl_Color", "(u_glColor * attr_Color / 255.0)");
+    source.Replace("gl_Color", "u_glColor");
 	source.Replace("gl_Normal", "attr_Normal");
 
 	idStr ret;
@@ -1382,6 +1388,7 @@ idStr RB_GLSL_ConvertGL2ESVertexShader(const char *text, int version)
 	ret += attribute + " vec3 attr_Normal;\n";
 	ret += "\n";
 
+    ret += "uniform lowp vec4 u_glColor;\n";
 	ret += "uniform highp mat4 u_modelViewProjectionMatrix;\n";
 	ret += "\n";
 
