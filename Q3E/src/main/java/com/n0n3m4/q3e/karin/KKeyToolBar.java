@@ -130,6 +130,12 @@ public class KKeyToolBar extends LinearLayout {
 
         setFocusable(false);
         setFocusableInTouchMode(false);
+        m_movableView.setFocusable(false);
+        m_movableView.setFocusableInTouchMode(false);
+        m_closeView.setFocusable(false);
+        m_closeView.setFocusableInTouchMode(false);
+        m_toolbar.setFocusable(false);
+        m_toolbar.setFocusableInTouchMode(false);
 
         m_movableView.setOnTouchListener(m_onTouchEvent);
         m_closeView.setOnClickListener(new OnClickListener() {
