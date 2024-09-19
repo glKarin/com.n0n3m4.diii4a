@@ -31,7 +31,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.opengl.GLES11;
-import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -46,10 +45,8 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
-import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.Q3EConfigChooser;
 import com.n0n3m4.q3e.karin.KKeyToolBar;
-import com.n0n3m4.q3e.karin.KOnceRunnable;
 import com.n0n3m4.q3e.onscreen.Button;
 import com.n0n3m4.q3e.onscreen.Disc;
 import com.n0n3m4.q3e.onscreen.Finger;
@@ -60,9 +57,6 @@ import com.n0n3m4.q3e.onscreen.Slider;
 import com.n0n3m4.q3e.onscreen.TouchListener;
 import com.n0n3m4.q3e.onscreen.UiLoader;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -267,9 +261,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 touch_elements.clear();
             }
             //must be last
-            touch_elements.add(new MouseControl(this, false));
+            //touch_elements.add(new MouseControl(this, false));
             touch_elements.add(new MouseControl(this, mPrefs.getBoolean(Q3EPreference.pref_2fingerlmb, false)));
-            touch_elements.add(new MouseControl(this, false));
+            //touch_elements.add(new MouseControl(this, false));
 
             SortOnScreenButtons(); //k sort priority
 
@@ -549,32 +543,36 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         //k try
         {
             Arrays.fill(handle_elements, null);
-            int handled = 0;
+            int handledIndexOfElements = 0;
             for (Finger f : fingers)
             {
                 if (f.target != null)
                 {
                     // check is handled: only once on a button
                     int i = 0;
-                    while(i < handled)
+                    while(i < handledIndexOfElements)
                     {
                         if(null == handle_elements[i] || handle_elements[i] == f.target)
                             break;
                         i++;
                     }
-                    if(i < handled)
-                        continue;
-                    handle_elements[handled] = f.target;
-                    handled++;
+                    if(i < handledIndexOfElements)
+                    {
+                        if(!f.target.SupportMultiTouch())
+                            continue;
+                    }
+                    else
+                    {
+                        handle_elements[handledIndexOfElements] = f.target;
+                        handledIndexOfElements++;
+                    }
 
                     if (!f.onTouchEvent(event))
                         f.target = null;
                 }
             }
         }
-        //k catch (Exception ignored)
-        {
-        }
+        //k catch (Exception ignored) { }
 
         if ((actionMasked == MotionEvent.ACTION_UP) || (actionMasked == MotionEvent.ACTION_POINTER_UP) || (actionMasked == MotionEvent.ACTION_CANCEL))
         {

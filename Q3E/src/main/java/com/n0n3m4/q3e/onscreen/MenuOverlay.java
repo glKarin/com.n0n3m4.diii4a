@@ -226,7 +226,7 @@ public class MenuOverlay extends Paintable implements TouchListener
     }
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act)
+    public boolean onTouchEvent(int x, int y, int act, int id)
     {
         if (act == 1)
         {
@@ -295,5 +295,11 @@ public class MenuOverlay extends Paintable implements TouchListener
     public boolean isInside(int x, int y)
     {
         return ((!hidden) && (2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height));
+    }
+
+    @Override
+    public boolean SupportMultiTouch()
+    {
+        return false;
     }
 }

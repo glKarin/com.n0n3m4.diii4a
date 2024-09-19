@@ -89,7 +89,7 @@ public class Button extends Paintable implements TouchListener
     private int ly;
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act)
+    public boolean onTouchEvent(int x, int y, int act, int id)
     {
         if (canbeheld)
         {
@@ -190,5 +190,11 @@ public class Button extends Paintable implements TouchListener
     {
         cx = x;
         cy = y;
+    }
+
+    @Override
+    public boolean SupportMultiTouch()
+    {
+        return false;
     }
 }
