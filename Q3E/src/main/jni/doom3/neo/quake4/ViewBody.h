@@ -136,6 +136,7 @@ private:
 	idStrList						hideSurfaces;
 	bool							allChannel;
 	bool							usePlayerModel;
+	int								animChannel;
 
     friend class idPlayer;
 

@@ -15,7 +15,8 @@
 #define viewAnimator GetAnimator()
 #define PostAnimState PostState
 
-#define ANIMCHANNEL_BODY (allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS)
+//#define ANIMCHANNEL_BODY (allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS)
+#define ANIMCHANNEL_BODY animChannel
 #define CHECK_MODEL(); if ( !animator.ModelHandle() ) return;
 
 CLASS_STATES_DECLARATION ( idViewBody )
@@ -73,6 +74,7 @@ idViewBody::idViewBody() {
 	usePlayerModel		= false;
     bodyOffset.Zero();
 	allChannel			= true;
+	animChannel			= ANIMCHANNEL_ALL;
     Clear();
 
     memset ( &animDoneTime, 0, sizeof(animDoneTime) );
@@ -122,6 +124,7 @@ void idViewBody::Spawn( void ) {
 	}
     spawnArgs.GetVector("body_offset", "0 0 0", bodyOffset);
     allChannel = spawnArgs.GetBool("body_allChannel", "1");
+	animChannel = allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS;
 }
 
 /*
@@ -214,6 +217,8 @@ void idViewBody::Restore( idRestoreGame *savefile ) {
 
     savefile->ReadVec3( bodyOffset );
 	savefile->ReadBool( allChannel );
+
+	animChannel = allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS;
 }
 
 /*
@@ -971,7 +976,7 @@ stateResult_t idViewBody::State_Legs_Jump ( const stateParms_t& parms ) {
     switch ( parms.stage ) {
         case STAGE_INIT:
             // prevent infinite recursion
-            owner->pfl.jump = false;
+            //owner->pfl.jump = false;
             if ( owner->pfl.run ) {
                 PlayAnim( ANIMCHANNEL_BODY,  "run_jump", parms.blendFrames );
             } else {

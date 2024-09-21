@@ -6831,11 +6831,11 @@ void idPlayer::UpdateFocus( void ) {
 
         // clip
         idBounds bounds(idVec3(-4, -4, -4), idVec3(4, 4, 4));
-        trace_t trace;
-        gameLocal.TraceBounds(this, trace, start_orig, start, bounds, MASK_SOLID, this);
+        trace_t tracei;
+        gameLocal.TraceBounds(this, tracei, start_orig, start, bounds, MASK_SOLID, this);
 
-        if (trace.fraction != 1.0f) {
-            start = trace.endpos;
+        if (tracei.fraction != 1.0f) {
+            start = tracei.endpos;
         }
         viewAngles = viewAxis.ToAngles();
     }
