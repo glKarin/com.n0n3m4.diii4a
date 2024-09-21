@@ -679,6 +679,9 @@ void idRenderWorldLocal::AddAreaEntityRefs(int areaNum, const portalStack_t *ps)
 			continue;
 		}
 
+#ifdef _RAVEN //karin: Quake4 not use weaponDepthHack, instead of weaponDepthHackInViewID
+		entity->parms.weaponDepthHack = entity->parms.weaponDepthHackInViewID == tr.viewDef->renderView.viewID;
+#endif
 		vEnt = R_SetEntityDefViewEntity(entity);
 
 		// possibly expand the scissor rect
