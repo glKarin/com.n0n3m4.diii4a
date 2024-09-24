@@ -33,6 +33,9 @@ public final class Constants
             "Add `ambientLighting` shader, add ambient lighting model with `harm_r_lightingModel` to 4 in DOOM3/Quake4/Prey.",
             "Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/quake-4-hardqore", "Quake 4: Hardqore") + "`.",
             "Add effects color alpha in Quake4.",
+            "Fix `displacement` and `displacementcube` GLSL shader in Quake4. e.g. water in `recomp` map and blood pool in `waste` map.",
+            "Fix weapon depth hack in player view in Quake4.",
+            "Add player body view in DOOM3/Quake4.",
             "Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.",
         };
 	};

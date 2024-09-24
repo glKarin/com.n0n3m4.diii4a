@@ -260,6 +260,9 @@ extern idCVar harm_pm_fullBodyAwarenessFixed;
 extern idCVar harm_pm_fullBodyAwarenessHeadVisible;
 extern idCVar harm_pm_fullBodyAwarenessFirstPerson;
 #endif
+#ifdef _MOD_VIEW_BODY
+extern idCVar harm_ui_showViewBody;
+#endif
 #ifdef __ANDROID__ //karin: re-normalize player movement direction. only for DIII4A smooth onscreen joystick control
 extern idCVar harm_in_smoothJoystick;
 extern idCVar harm_g_normalizeMovementDirection;

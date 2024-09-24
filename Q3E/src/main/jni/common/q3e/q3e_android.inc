@@ -625,6 +625,16 @@ void Android_CloseKeyboard(void)
     close_keyboard();
 }
 
+void Android_ShowDialog(const char *title, const char *message)
+{
+    if(show_toast)
+        show_toast(message);
+}
+
+void Android_OpenURL(const char *url)
+{
+}
+
 volatile ANativeWindow * Android_GetWindow(void)
 {
     return window;
