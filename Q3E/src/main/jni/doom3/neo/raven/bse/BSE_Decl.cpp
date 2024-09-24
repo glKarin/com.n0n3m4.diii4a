@@ -133,13 +133,43 @@ void rvDeclEffect::FreeData(void)
 {
 	mFlags = 0;
 	events.Clear();
-	for(int i = 0; i < particles.Num(); i++)
+    particles.Clear();
+	for(int i = 0; i < particle_decl_hash.Num(); i++)
 	{
-		rvBSEParticle *decl = BSE_SetDeclParticle(particles[i]);
-		decl->FreeData();
-		delete decl;
+        rvBSEParticle *p = particle_decl_hash[i];
+        p->FreeData();
 	}
-	particles.Clear();
+    particle_decl_hash.DeleteContents(true);
+}
+
+rvBSEParticle * rvDeclEffect::GetParticle(const char *name)
+{
+    for(int m = 0; m < particles.Num(); m++)
+    {
+        if(!idStr::Icmp(particles[m], name))
+        {
+            return particle_decl_hash[m];
+        }
+    }
+    return NULL;
+}
+
+const rvBSEParticle * rvDeclEffect::GetParticle(const char *name) const
+{
+    for(int m = 0; m < particles.Num(); m++)
+    {
+        if(!idStr::Icmp(particles[m], name))
+        {
+            return particle_decl_hash[m];
+        }
+    }
+    return NULL;
+}
+
+void rvDeclEffect::AppendParticle(const char *name, rvBSEParticle *particle)
+{
+    particles.Append(name);
+    particle_decl_hash.Append(particle);
 }
 
 bool rvDeclEffect::SetDefaultText()

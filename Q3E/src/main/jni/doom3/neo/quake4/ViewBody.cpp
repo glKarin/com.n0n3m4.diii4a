@@ -17,7 +17,7 @@
 
 //#define ANIMCHANNEL_BODY (allChannel ? ANIMCHANNEL_ALL : ANIMCHANNEL_LEGS)
 #define ANIMCHANNEL_BODY animChannel
-#define CHECK_MODEL(); if ( !animator.ModelHandle() ) return;
+#define CHECK_MODEL() if ( !animator.ModelHandle() ) return;
 
 CLASS_STATES_DECLARATION ( idViewBody )
 
@@ -70,6 +70,7 @@ idViewBody::idViewBody()
 */
 idViewBody::idViewBody() {
     modelDefHandle		= -1;
+
     owner				= NULL;
 	usePlayerModel		= false;
     bodyOffset.Zero();
@@ -135,6 +136,7 @@ idViewBody::Init
 void idViewBody::Init( idPlayer* _owner, bool setstate )
 {
     owner = _owner;
+
     stateThread.SetName( va("%s_%s_%s", owner->GetName(), GetName ( ), spawnArgs.GetString("classname") ) );
     stateThread.SetOwner( this );
 

@@ -7,7 +7,7 @@
 #include "BSE.h"
 
 #ifdef _RAVEN_FX
-extern rvBSEParticle * BSE_GetDeclParticle(const char *name);
+extern const rvBSEParticle * BSE_GetDeclParticle(const char *name);
 
 static const char *parametricParticle_SnapshotName = "_ParametricParticle_Snapshot_";
 
