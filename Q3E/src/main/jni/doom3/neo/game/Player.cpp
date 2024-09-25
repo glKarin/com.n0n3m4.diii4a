@@ -4270,7 +4270,9 @@ void idPlayer::Weapon_Combat(void)
 
 			weaponCatchup = false;
 #ifdef _MOD_VIEW_BODY
-			viewBody.GetEntity()->UpdateWeapon();
+			if(viewBody.GetEntity()) {
+				viewBody.GetEntity()->UpdateWeapon();
+			}
 #endif
 		} else {
 			if (weapon.GetEntity()->IsReady()) {
@@ -4293,7 +4295,9 @@ void idPlayer::Weapon_Combat(void)
 
 				weapon.GetEntity()->Raise();
 #ifdef _MOD_VIEW_BODY
-				viewBody.GetEntity()->UpdateWeapon();
+				if(viewBody.GetEntity()) {
+					viewBody.GetEntity()->UpdateWeapon();
+				}
 #endif
 			}
 		}
@@ -4482,7 +4486,9 @@ void idPlayer::UpdateWeapon(void)
 			weapon.GetEntity()->GetWeaponDef(animPrefix, inventory.clip[ idealWeapon ]);
 			assert(weapon.GetEntity()->IsLinked());
 #ifdef _MOD_VIEW_BODY
-			viewBody.GetEntity()->UpdateWeapon();
+			if(viewBody.GetEntity()) {
+				viewBody.GetEntity()->UpdateWeapon();
+			}
 #endif
 		} else {
 			return;
