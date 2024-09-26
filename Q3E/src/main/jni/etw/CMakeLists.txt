@@ -98,7 +98,7 @@ option(FEATURE_AUTH				"Enable central authentication support"					OFF) #k ON
 cmake_dependent_option(FEATURE_WINDOWS_CONSOLE	"Build win32 executables with Windows console"	ON "WIN32" OFF)
 
 if(DIII4A)
-option(FORCE_OMNIBOT "" ON)
+#option(FORCE_OMNIBOT "" ON)
 endif()
 cmake_dependent_option(FEATURE_LUA		"Enable Lua support (mod)"						ON "BUILD_SERVER_MOD" OFF)
 cmake_dependent_option(FEATURE_LUASQL	"Enable LuaSQL sqlite3 backend (mod)"			ON "FEATURE_LUA" OFF)
