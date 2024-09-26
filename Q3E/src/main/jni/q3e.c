@@ -76,6 +76,8 @@ static void show_toast(const char *text);
 static void open_keyboard(void);
 static void close_keyboard(void);
 static void setup_smooth_joystick(int enable);
+static void open_url(const char *url);
+static int open_dialog(const char *title, const char *message, int num, const char *buttons[]);
 
 // data
 static char *game_data_dir = NULL;
@@ -106,6 +108,8 @@ static jmethodID android_writeAudio_array;
 static jmethodID android_ShowToast_method;
 static jmethodID android_OpenVKB_method;
 static jmethodID android_CloseVKB_method;
+static jmethodID android_OpenURL_method;
+static jmethodID android_OpenDialog_method;
 
 #define ATTACH_JNI(env) \
 	JNIEnv *env = 0; \
@@ -343,6 +347,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_ShowToast_method = (*env)->GetMethodID(env, q3eCallbackClass, "ShowToast", "(Ljava/lang/String;)V");
 	android_OpenVKB_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenVKB", "()V");
 	android_CloseVKB_method = (*env)->GetMethodID(env, q3eCallbackClass, "CloseVKB", "()V");
+	android_OpenURL_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenURL", "(Ljava/lang/String;)V");
+	android_OpenDialog_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenDialog", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)I");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -425,6 +431,7 @@ static void setup_Q3E_callback(void)
 
 	callback.Input_grabMouse = &grab_mouse;
 	callback.Input_pullEvent = &pull_input_event;
+	callback.Input_setupSmoothJoystick = &setup_smooth_joystick;
 
 	callback.Sys_attachThread = &Android_AttachThread;
 
@@ -434,9 +441,10 @@ static void setup_Q3E_callback(void)
 	callback.Sys_getClipboardText = &get_clipboard_text;
 	callback.Sys_openKeyboard = &open_keyboard;
 	callback.Sys_closeKeyboard = &close_keyboard;
-	callback.Input_setupSmoothJoystick = &setup_smooth_joystick;
+	callback.Sys_openURL = &open_url;
 
 	callback.Gui_ShowToast = &show_toast;
+	callback.Gui_openDialog = &open_dialog;
 
 	setCallbacks(&callback);
 }
@@ -646,6 +654,7 @@ void copy_to_clipboard(const char *text)
 		return;
 	}
 
+	LOGI("Copy clipboard: %s", text);
 	jstring str = (*env)->NewStringUTF(env, text);
 	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
 	(*env)->DeleteLocalRef(env, str);
@@ -660,6 +669,7 @@ char * get_clipboard_text(void)
 	if(!str)
 		return NULL;
 
+	LOGI("Read clipboard");
 	const char *nstr = (*env)->GetStringUTFChars(env, str, NULL);
 	char *res = NULL;
 	if(nstr)
@@ -696,6 +706,67 @@ void close_keyboard(void)
 
 	LOGI("Close keyboard");
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_CloseVKB_method);
+}
+
+void open_url(const char *url)
+{
+	ATTACH_JNI(env)
+
+	if(!url)
+	{
+		return;
+	}
+
+	LOGI("Open URL: %s", url);
+	jstring str = (*env)->NewStringUTF(env, url);
+	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_OpenURL_method, nstr);
+}
+
+int open_dialog(const char *title, const char *message, int num, const char *buttons[])
+{
+	ATTACH_JNI(env)
+
+	if(!title || !message)
+	{
+		return -1;
+	}
+
+	LOGI("Open Dialog: %s\n%s", title, message);
+	jstring str = (*env)->NewStringUTF(env, title);
+	jstring titleStr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	str = (*env)->NewStringUTF(env, message);
+	jstring messageStr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	jobjectArray buttonArray = NULL;
+	jclass stringClazz = (*env)->FindClass(env, "java/lang/String");
+	LOGI("Open Dialog: num buttons -> %d", num);
+	if(num > 0)
+	{
+		buttonArray = (*env)->NewObjectArray(env, num, stringClazz, NULL);
+		int i;
+
+		for(i = 0; i < num; i++)
+		{
+			LOGI("Open Dialog: button %d -> %s", i, buttons[i] ? buttons[i] : "");
+			if(!buttons[i])
+				continue;
+			str = (*env)->NewStringUTF(env, buttons[i]);
+			jstring nStr = (*env)->NewWeakGlobalRef(env, str);
+			(*env)->DeleteLocalRef(env, str);
+			(*env)->SetObjectArrayElement(env, buttonArray, i, nStr);
+		}
+
+		jobjectArray nArr = (*env)->NewWeakGlobalRef(env, buttonArray);
+		(*env)->DeleteLocalRef(env, buttonArray);
+		buttonArray = nArr;
+	}
+	jint res = (*env)->CallIntMethod(env, q3eCallbackObj, android_OpenDialog_method, titleStr, messageStr, buttonArray);
+	LOGI("Open Dialog: result -> %d", res);
+
+	return res;
 }
 
 void setup_smooth_joystick(int enable)

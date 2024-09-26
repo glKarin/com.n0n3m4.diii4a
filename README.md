@@ -367,3 +367,14 @@ Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support
 * [Baidu贴吧: BEYONDK2000](https://tieba.baidu.com/p/6825594793)
 * [F-Droid(different signature)](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
+
+Open source licence
+> DOOM 3
+GPLv3
+> curl
+The curl license
+> freeyype
+The FreeType License / The GNU General Public License version 2
+flac
+GNU Free Documentation License / GNU GENERAL PUBLIC LICENSE Version 2 / GNU LESSER GENERAL PUBLIC LICENSE Version 2.1 / BSD-3-Clause license
+----------------------------------------------------------------------------------

@@ -14,6 +14,12 @@
 #define STATE_MENU (1 << 5) // any menu excludes guiLoading
 #define STATE_DEMO (1 << 6) // demo
 
+#define DIALOG_RESULT_ERROR -1
+#define DIALOG_RESULT_CANCEL 0
+#define DIALOG_RESULT_YES 1
+#define DIALOG_RESULT_NO 2
+#define DIALOG_RESULT_OTHER 3
+
 //#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
 #define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
 #define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
@@ -45,7 +51,7 @@ FILE * (*itmpfile)(void);
 // Pull input event
 // num = 0: only clear; > 0: max num; -1: all.
 // return pull event num
-int (*pull_input_event)(int execCmd);
+int (*pull_input_event)(int num);
 
 // setup smooth joystick
 void (*setup_smooth_joystick)(int enable);
@@ -60,8 +66,16 @@ void (*attach_thread)(void);
 void (*copy_to_clipboard)(const char *text);
 char * (*get_clipboard_text)(void);
 
-// Show a Android toast as dialog
+// Show a Android toast or dialog
 void (*show_toast)(const char *text);
+int (*open_dialog)(const char *title, const char *message, int num, const char *buttons[]);
+
+// Access Android keyboard
+void (*open_keyboard)(void);
+void (*close_keyboard)(void);
+
+// Open URL
+void (*open_url)(const char *url);
 
 // Surface window size
 int screen_width = 640;
@@ -118,6 +132,18 @@ void Android_PollInput(void)
 {
     //if(pull_input_event)
         pull_input_event(-1);
+}
+
+void Android_ClearEvents(void)
+{
+    //if(pull_input_event)
+    pull_input_event(0);
+}
+
+int Android_PollEvents(int num)
+{
+    //if(pull_input_event)
+    return pull_input_event(num);
 }
 
 void Android_EnableSmoothJoystick(bool enable)
@@ -191,6 +217,36 @@ char * Android_GetClipboardData(void)
     return ptr;
 }
 
+void Android_OpenURL(const char *url)
+{
+    //if(open_url)
+    open_url(url);
+}
+
+void Android_OpenKeyboard(void)
+{
+    //if(open_keyboard)
+    open_keyboard();
+}
+
+void Android_CloseKeyboard(void)
+{
+    //if(close_keyboard)
+    close_keyboard();
+}
+
+void Android_ShowInfo(const char *info)
+{
+    //if(show_toast)
+    show_toast(info);
+}
+
+int Android_OpenDialog(const char *title, const char *message, int num, const char *buttons[])
+{
+    //if(open_dialog)
+    return open_dialog(title, message, num, buttons);
+}
+
 void Q3E_PrintInitialContext(int argc, char **argv)
 {
     printf("[Harmattan]: DOOM3 start\n\n");
@@ -230,8 +286,12 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("    tmpfile: %p\n", itmpfile);
     printf("    copy_to_clipboard: %p\n", copy_to_clipboard);
     printf("    get_clipboard_text: %p\n", get_clipboard_text);
+    printf("    open_keyboard: %p\n", open_keyboard);
+    printf("    close_keyboard: %p\n", close_keyboard);
+    printf("    open_url: %p\n", open_url);
     printf("  GUI: \n");
     printf("    show_toast: %p\n", show_toast);
+    printf("    open_dialog: %p\n", open_dialog);
     printf("  Other: \n");
     printf("    setState: %p\n", setState);
     printf("\n");
@@ -271,8 +331,12 @@ void Q3E_SetCallbacks(const void *callbacks)
     itmpfile = ptr->Sys_tmpfile;
     copy_to_clipboard = ptr->Sys_copyToClipboard;
     get_clipboard_text = ptr->Sys_getClipboardText;
+    open_keyboard = ptr->Sys_openKeyboard;
+    close_keyboard = ptr->Sys_closeKeyboard;
+    open_url = ptr->Sys_openURL;
 
     show_toast = ptr->Gui_ShowToast;
+    open_dialog = ptr->Gui_openDialog;
 
     setState = ptr->set_state;
 }

@@ -38,6 +38,14 @@ add_subdirectory (fluidsynth)
 
 #add_subdirectory (etc2comp/EtcLib)
 
+add_subdirectory (sqlite) # sqlite-amalgamation-3460100
+
+add_subdirectory (cjson) # -1.7.18
+
+add_subdirectory (iconv) # https://github.com/q384264619/android_iconv/tree/master
+
+add_subdirectory (lua) # -5.4.5
+
 #add_subdirectory (ktx) # KTX-Software-3.0.1
 
 #add_subdirectory (sdl2) # 2.30.2

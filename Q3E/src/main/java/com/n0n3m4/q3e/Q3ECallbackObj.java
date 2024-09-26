@@ -20,6 +20,9 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import com.n0n3m4.q3e.onscreen.Q3EGUI;
@@ -293,6 +296,26 @@ public class Q3ECallbackObj
         {
             vw.ToggleToolbar(on);
         }
+    }
+
+
+    public void OpenURL(String url)
+    {
+        if (null != vw)
+        {
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            vw.getContext().startActivity(intent);
+        }
+    }
+
+    public int OpenDialog(String title, String message, String[] buttons)
+    {
+        if(null != gui)
+            return gui.MessageDialog(title, message, buttons);
+        else
+            return Q3EGUI.DIALOG_ERROR;
     }
 
     public void SetupSmoothJoystick(boolean enable)

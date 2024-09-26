@@ -395,7 +395,7 @@ public class GameLauncher extends Activity
 						.putString(Q3EPreference.pref_harm_r_lightingModel, value)
 						.commit();
 			}
-			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_q3game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame || rgId == R.id.rg_fs_q1game || rgId == R.id.rg_fs_d3bfggame || rgId == R.id.rg_fs_doomgame)
+			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_q3game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame || rgId == R.id.rg_fs_q1game || rgId == R.id.rg_fs_d3bfggame || rgId == R.id.rg_fs_doomgame || rgId == R.id.rg_fs_etwgame)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
 				SetGameDLL((String)checked.getTag());
@@ -1012,6 +1012,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_tdmgame.setEnabled(!on);
 		V.rg_fs_d3bfggame.setEnabled(!on);
 		V.rg_fs_doomgame.setEnabled(!on);
+		V.rg_fs_etwgame.setEnabled(!on);
         V.fs_game_user.setText(on ? R.string.mod_ : R.string.user_mod);
         //V.launcher_tab1_game_lib_button.setEnabled(on);
         V.edt_fs_game.setEnabled(on);
@@ -1205,6 +1206,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_tdmgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_d3bfggame.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_doomgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		V.rg_fs_etwgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
         V.edt_fs_game.addTextChangedListener(new TextWatcher()
         {
             public void onTextChanged(CharSequence s, int start, int before, int count)
@@ -1657,6 +1659,11 @@ public class GameLauncher extends Activity
 		else if (itemId == R.id.main_menu_game_doom)
 		{
 			ChangeGame(Q3EGlobals.GAME_GZDOOM);
+			return true;
+		}
+		else if (itemId == R.id.main_menu_game_etw)
+		{
+			ChangeGame(Q3EGlobals.GAME_ETW);
 			return true;
 		}
 		else if (itemId == android.R.id.home)
@@ -2306,6 +2313,7 @@ public class GameLauncher extends Activity
 		boolean tdmVisible = false;
 		boolean d3bfgVisible = false;
 		boolean doomVisible = false;
+		boolean etwVisible = false;
 
 		boolean rendererVisible = true;
 		boolean soundVisible = true;
@@ -2400,6 +2408,16 @@ public class GameLauncher extends Activity
 			quickloadVisible = false;
 			skipintroVisible = false;
 		}
+		else if (Q3EUtils.q3ei.isETW)
+		{
+			etwVisible = true;
+			rendererVisible = false;
+			soundVisible = false;
+			otherVisible = false;
+			openglVisible = false;
+			dllVisible = false;
+			quickloadVisible = false;
+		}
         else
         {
             d3Visible = true;
@@ -2422,6 +2440,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_tdmgame.setVisibility(tdmVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_d3bfggame.setVisibility(d3bfgVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_doomgame.setVisibility(doomVisible ? View.VISIBLE : View.GONE);
+		V.rg_fs_etwgame.setVisibility(etwVisible ? View.VISIBLE : View.GONE);
 
 		V.renderer_section.setVisibility(rendererVisible ? View.VISIBLE : View.GONE);
 		V.sound_section.setVisibility(soundVisible ? View.VISIBLE : View.GONE);
@@ -2637,6 +2656,8 @@ public class GameLauncher extends Activity
 			return V.rg_fs_d3bfggame;
 		else if(Q3EUtils.q3ei.isDOOM)
 			return V.rg_fs_doomgame;
+		else if(Q3EUtils.q3ei.isETW)
+			return V.rg_fs_etwgame;
 		else
         	return V.rg_fs_game;
     }
@@ -2849,6 +2870,7 @@ public class GameLauncher extends Activity
 		groups.put(Q3EGlobals.GAME_TDM, V.rg_fs_tdmgame);
 		groups.put(Q3EGlobals.GAME_DOOM3BFG, V.rg_fs_d3bfggame);
 		groups.put(Q3EGlobals.GAME_GZDOOM, V.rg_fs_doomgame);
+		groups.put(Q3EGlobals.GAME_ETW, V.rg_fs_etwgame);
 		Game[] values = Game.values();
 
 		for (Game value : values)
@@ -3055,6 +3077,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_tdmgame;
 		public RadioGroup rg_fs_d3bfggame;
 		public RadioGroup rg_fs_doomgame;
+		public RadioGroup rg_fs_etwgame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -3182,6 +3205,7 @@ public class GameLauncher extends Activity
 			mods_container = findViewById(R.id.mods_container);
 			mods_container_layout = findViewById(R.id.mods_container_layout);
 			edt_harm_r_ambientLightingBrightness = findViewById(R.id.edt_harm_r_ambientLightingBrightness);
+			rg_fs_etwgame = findViewById(R.id.rg_fs_etwgame);
         }
     }
 }

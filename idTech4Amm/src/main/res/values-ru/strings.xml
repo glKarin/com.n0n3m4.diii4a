@@ -80,6 +80,7 @@
     <string name="quake_2">Quake 2</string>
     <string name="quake_3">Quake 3</string>
     <string name="rtcw">RTCW</string>
+    <string name="etw">ETW</string>
     <string name="tdm">Dark mod</string>
     <string name="doom">DOOM</string>
     <string name="prey_2006">Prey(2006)</string>
@@ -366,5 +367,6 @@
     <string name="ambient_lighting_brightness_harm_r_ambientlightingbrightness">Ambient lighting brightness(harm_r_ambientLightingBrightness):</string>
     <string name="ambient_lighting_brightness">Ambient lighting brightness</string>
     <string name="hardqore">Hardqore</string>
+    <string name="etw_base">Wolfenstein: Enemy Territory</string>
 
 </resources>

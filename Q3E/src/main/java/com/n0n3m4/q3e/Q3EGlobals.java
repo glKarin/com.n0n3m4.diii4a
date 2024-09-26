@@ -7,7 +7,7 @@ import java.io.IOException;
 public final class Q3EGlobals
 {
     public static final String CONST_PACKAGE_NAME = "com.karin.idTech4Amm";
-    public static final String CONST_APP_NAME = "idTech4A++"; // "DIII4A++";
+    public static final String CONST_APP_NAME     = "idTech4A++"; // "DIII4A++";
 
     // log tag
     public static final String CONST_Q3E_LOG_TAG = "Q3E";
@@ -128,6 +128,7 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE1_QUAKE    = "libidtech_quake.so"; // Quake 1
     public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
     public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
+    public static final String LIB_ENGINE3_ETW      = "libidtech3_etw.so"; // ETW
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg"; // DOOM3
@@ -140,6 +141,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_QUAKE1   = "config.cfg"; // Quake 1
     public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg"; // DOOM3-BFG
     public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini"; // GZDOOM
+    public static final String CONFIG_FILE_ETW      = "etconfig.cfg"; // ETW
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -152,6 +154,7 @@ public final class Q3EGlobals
     public static final String GAME_QUAKE1   = "quake1";
     public static final String GAME_DOOM3BFG = "doom3bfg";
     public static final String GAME_GZDOOM   = "gzdoom";
+    public static final String GAME_ETW      = "etw";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -164,6 +167,7 @@ public final class Q3EGlobals
     public static final String GAME_NAME_QUAKE1   = "Quake 1";
     public static final String GAME_NAME_DOOM3BFG = "DOOM 3 BFG";
     public static final String GAME_NAME_GZDOOM   = "GZDOOM";
+    public static final String GAME_NAME_ETW      = "ETW"; // "Wolfenstein: Enemy Territory";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -178,6 +182,7 @@ public final class Q3EGlobals
     public static final String GAME_BASE_QUAKE1_DIR = "id1";
     public static final String GAME_BASE_DOOM3BFG   = "base"; // RBDoom3BFG always in doom3bfg folder
     public static final String GAME_BASE_GZDOOM     = ""; // GZDOOM is standalone
+    public static final String GAME_BASE_ETW        = "etmain";
 
     // game sub directory
     public static final String GAME_SUBDIR_DOOM3   = "doom3";
@@ -190,6 +195,7 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_QUAKE1  = "quake1";
     public static final String GAME_SUBDIR_DOOMBFG = "doom3bfg";
     public static final String GAME_SUBDIR_GZDOOM  = "gzdoom";
+    public static final String GAME_SUBDIR_ETW     = "etw";
 
 /*
     public static final String[] QUAKE4_MAPS = {
@@ -302,7 +308,7 @@ public final class Q3EGlobals
     public static final int ENUM_BACK_ALL    = 0xFF;
 
     public static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL = 1000;
-    public static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT = 3;
+    public static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT    = 3;
 
     public static final String GAME_EXECUABLE = "game.arm";
 
@@ -314,15 +320,15 @@ public final class Q3EGlobals
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 
 
-    public static boolean IS_NEON = false; // only armv7-a 32. arm64 always support, but using hard
-    public static boolean IS_64 = false;
-    public static boolean SYSTEM_64 = false;
-    public static String ARCH = "";
+    public static  boolean IS_NEON      = false; // only armv7-a 32. arm64 always support, but using hard
+    public static  boolean IS_64        = false;
+    public static  boolean SYSTEM_64    = false;
+    public static  String  ARCH         = "";
     private static boolean _is_detected = false;
 
     private static boolean GetCpuInfo()
     {
-        if (_is_detected)
+        if(_is_detected)
             return true;
         IS_64 = Q3EJNI.Is64();
         ARCH = IS_64 ? "aarch64" : "arm";
@@ -331,13 +337,13 @@ public final class Q3EGlobals
         {
             br = new BufferedReader(new FileReader("/proc/cpuinfo"));
             String l;
-            while ((l = br.readLine()) != null)
+            while((l = br.readLine()) != null)
             {
-                if ((l.contains("Features")) && (l.contains("neon")))
+                if((l.contains("Features")) && (l.contains("neon")))
                 {
                     IS_NEON = true;
                 }
-                if (l.contains("Processor") && (l.contains("AArch64")))
+                if(l.contains("Processor") && (l.contains("AArch64")))
                 {
                     SYSTEM_64 = true;
                     IS_NEON = true;
@@ -345,17 +351,20 @@ public final class Q3EGlobals
 
             }
             _is_detected = true;
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             e.printStackTrace();
             _is_detected = false;
-        } finally
+        }
+        finally
         {
             try
             {
-                if (br != null)
+                if(br != null)
                     br.close();
-            } catch (IOException ioe)
+            }
+            catch(IOException ioe)
             {
                 ioe.printStackTrace();
             }
@@ -363,9 +372,12 @@ public final class Q3EGlobals
         return _is_detected;
     }
 
-    static {
+    static
+    {
         GetCpuInfo();
     }
 
-    private Q3EGlobals() {}
+    private Q3EGlobals()
+    {
+    }
 }

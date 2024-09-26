@@ -260,6 +260,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         if(!Q3EUtils.q3ei.isD3BFG)
                             continue;
                         break;
+                    case Q3EGlobals.GAME_ETW:
+                        if(!Q3EUtils.q3ei.isETW)
+                            continue;
+                        break;
                     case Q3EGlobals.GAME_DOOM3:
                         if((Q3EUtils.q3ei.isQ4 || Q3EUtils.q3ei.isPrey) && !Q3EUtils.q3ei.isD3)
                             continue;

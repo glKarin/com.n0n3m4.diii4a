@@ -246,16 +246,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 paint_elements.add((Paintable) o);
             }
 
-/*            if (Q3EUtils.q3ei.isRTCW)
-            {
-                actbutton = (Button) touch_elements.get(Q3EUtils.q3ei.RTCW4A_UI_ACTION);
-                kickbutton = (Button) touch_elements.get(Q3EUtils.q3ei.RTCW4A_UI_KICK);
-            } else
-            {
-                actbutton = null;
-                kickbutton = null;
-            }*/
-
             if (hideonscr)
             {
                 touch_elements.clear();

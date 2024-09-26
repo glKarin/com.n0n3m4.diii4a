@@ -89,6 +89,7 @@
     <string name="quake_2">Quake 2</string>
     <string name="quake_3">Quake 3</string>
     <string name="rtcw">RTCW</string>
+    <string name="etw">ETW</string>
     <string name="tdm">Dark mod</string>
     <string name="doom">DOOM</string>
     <string name="prey_2006">Prey(2006)</string>
@@ -292,6 +293,7 @@
     <string name="quake_2_xatrix">Quake II:xatrix</string>
     <string name="quake_2_zaero">Quake II:zaero</string>
     <string name="rtcw_base">Return to Castle Wolfenstein</string>
+    <string name="etw_base">Wolfenstein: Enemy Territory</string>
     <string name="tdm_base">The Dark Mod</string>
 
     <string name="d3bfg_base">DOOM 3 BFG</string>

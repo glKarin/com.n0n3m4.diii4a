@@ -1,0 +1,263 @@
+//GLSL Shader definitions
+
+/*
+sample
+{
+	filename "sample"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING
+	extramacros "LIGHT_PROJ"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+	fragfilename "samplefrag"
+	vertexLibraries "sample_vertex_lib sample_vertex_lib2"
+	fragmentLibraries "sample_fragment_lib sample_fragment_lib2"
+	uniform int u_ColorMap 0
+}
+*/
+
+generic
+{
+	filename "generic"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES USE_TCGEN_ENVIRONMENT USE_TCGEN_LIGHTMAP
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+}
+
+lightMapping
+{
+	filename "lightMapping"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING USE_DEFORM_VERTEXES USE_NORMAL_MAPPING USE_PARALLAX_MAPPING USE_REFLECTIONS USE_SPECULAR
+	extramacros "TWOSIDED"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_LIGHTCOORD ATTR_NORMAL
+	vertexLibraries "lib/deformVertexes"
+	fragmentLibraries "lib/reliefMapping lib/normalMapping"
+}
+
+vertexLighting_DBS_entity
+{
+	filename "vertexLighting_DBS_entity"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES USE_NORMAL_MAPPING USE_PARALLAX_MAPPING USE_REFLECTIONS USE_SPECULAR
+	extramacros "TWOSIDED"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+	fragmentLibraries "lib/reliefMapping lib/normalMapping"
+}
+
+vertexLighting_DBS_world
+{
+	filename "vertexLighting_DBS_world"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING USE_DEFORM_VERTEXES USE_NORMAL_MAPPING USE_PARALLAX_MAPPING USE_REFLECTIONS USE_SPECULAR
+	extramacros "TWOSIDED"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL ATTR_COLOR
+	vertexLibraries "lib/deformVertexes"
+	fragmentLibraries "lib/reliefMapping lib/normalMapping"
+}
+
+forwardLighting_omniXYZ
+{
+	filename "forwardLighting"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES USE_NORMAL_MAPPING USE_PARALLAX_MAPPING USE_SHADOWING
+	extramacros "TWOSIDED"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+	fragmentLibraries "lib/reliefMapping"
+}
+
+forwardLighting_projXYZ
+{
+	filename "forwardLighting"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES USE_NORMAL_MAPPING USE_PARALLAX_MAPPING USE_SHADOWING
+	extramacros "LIGHT_PROJ TWOSIDED"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+	fragmentLibraries "lib/reliefMapping"
+}
+
+forwardLighting_directionalSun
+{
+	filename "forwardLighting"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES USE_NORMAL_MAPPING USE_PARALLAX_MAPPING USE_SHADOWING
+	extramacros "LIGHT_DIRECTIONAL TWOSIDED"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+	fragmentLibraries "lib/reliefMapping"
+}
+
+shadowFill
+{
+	filename "shadowFill"
+	macros USE_PORTAL_CLIPPING USE_ALPHA_TESTING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES LIGHT_DIRECTIONAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+}
+
+reflection
+{
+	filename "reflection_CB"
+	macros USE_PORTAL_CLIPPING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES USE_NORMAL_MAPPING
+	extramacros "TWOSIDED"
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+}
+
+skybox
+{
+	filename "skybox"
+	macros USE_PORTAL_CLIPPING
+	attribs ATTR_POSITION
+}
+
+fogQuake3
+{
+	filename "fogQuake3"
+	macros USE_PORTAL_CLIPPING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES EYE_OUTSIDE
+	attribs ATTR_POSITION ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+}
+
+fogGlobal
+{
+	filename "simple"
+	fragfilename "fogGlobal"
+	attribs ATTR_POSITION
+}
+
+heatHaze
+{
+	filename "heatHaze"
+	macros USE_PORTAL_CLIPPING USE_VERTEX_SKINNING USE_VERTEX_ANIMATION USE_DEFORM_VERTEXES
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning lib/vertexAnimation lib/deformVertexes"
+}
+
+screen
+{
+	filename "screen"
+	attribs ATTR_POSITION
+}
+
+portal
+{
+	filename "portal"
+	attribs ATTR_POSITION
+}
+
+toneMapping
+{
+	filename "simple"
+	fragfilename "toneMapping"
+	macros BRIGHTPASS_FILTER
+	attribs ATTR_POSITION
+}
+
+contrast
+{
+	filename "simple"
+	attribs ATTR_POSITION
+	fragfilename "contrast"
+}
+
+cameraEffects
+{
+	filename "cameraEffects"
+	attribs ATTR_POSITION ATTR_TEXCOORD
+}
+
+blurX
+{
+	filename "simple"
+	attribs ATTR_POSITION
+	fragfilename "blur/blurX"
+}
+
+blurY
+{
+	filename "simple"
+	attribs ATTR_POSITION
+	fragfilename "blur/blurY"
+}
+
+debugShadowMap
+{
+	filename "debugShadowMap"
+	attribs ATTR_POSITION
+}
+
+liquid
+{
+	filename "liquid"
+	macros USE_PORTAL_CLIPPING USE_NORMAL_MAPPING USE_PARALLAX_MAPPING USE_SPECULAR USE_REFLECTIONS USE_WATER
+	attribs ATTR_POSITION ATTR_TEXCOORD ATTR_TANGENT ATTR_BINORMAL ATTR_NORMAL ATTR_COLOR
+}
+
+rotoscope
+{
+	filename "simple"
+	fragfilename "rotoscope"
+	attribs ATTR_POSITION ATTR_TEXCOORD
+	uniform int u_BlurMagnitude 1
+}
+
+bloom
+{
+	filename "simple"
+	attribs ATTR_POSITION
+	fragfilename "bloom"
+	uniform int u_BlurMagnitude 2
+}
+
+refraction
+{
+	filename "refraction_C"
+	macros USE_VERTEX_SKINNING
+	attribs ATTR_POSITION ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning"
+}
+
+depthToColor
+{
+	filename "depthToColor"
+	macros USE_VERTEX_SKINNING
+	attribs ATTR_POSITION ATTR_NORMAL
+	vertexLibraries "lib/vertexSkinning"
+}
+
+volumetricFog
+{
+	filename "simple"
+	fragfilename "volumetricFog"
+	attribs ATTR_POSITION
+}
+
+lightVolume_omni
+{
+	filename "simple"
+	fragfilename "lightVolume_omni"
+	attribs ATTR_POSITION
+}
+
+dispersion
+{
+	filename "dispersion_C"
+	macros USE_VERTEX_SKINNING
+	attribs ATTR_POSITION ATTR_NORMAL
+}
+
+colorCorrection
+{
+	filename "simple"
+	fragfilename "color"
+}
+
+depthOfField
+{
+	filename "simple"
+	fragfilename "depthOfField"
+	attribs ATTR_POSITION
+}
+
+SSAO
+{
+	filename "simple"
+	fragfilename "screenSpaceAmbientOcclusion"
+	attribs ATTR_POSITION
+}

@@ -23,9 +23,11 @@ typedef struct
     char * (*Sys_getClipboardText)(void); // get text from clipboard
     void (*Sys_openKeyboard)(void); // open virtual keyboard
     void (*Sys_closeKeyboard)(void); // close virtual keyboard
+    void (*Sys_openURL)(const char *url); // open URL
 
     // GUI
-    void (*Gui_ShowToast)(const char *text); // get text from clipboard
+    void (*Gui_ShowToast)(const char *text); // show info
+    int (*Gui_openDialog)(const char *title, const char *message, int num, const char *buttons[]); // open dialog(allow buttons and block current thread)
 
     // Other
     void (*set_state)(int st); // Tell Android game current state

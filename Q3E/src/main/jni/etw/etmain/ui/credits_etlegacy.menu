@@ -1,0 +1,248 @@
+#include "ui/menudef.h"
+#include "ui/menumacros.h"
+
+// Defines //
+#define WINDOW_X		16
+#define WINDOW_Y		16
+#define WINDOW_WIDTH	608
+#define WINDOW_HEIGHT	448
+#define GROUP_NAME		"grpCreditsetlegacy"
+
+// System Menu //
+menuDef {
+	name		"credits_etlegacy"
+	visible		0
+	fullscreen	0
+	rect		WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+	style		WINDOW_STYLE_FILLED
+
+	onESC {
+		close credits_etlegacy ;
+#ifdef FUI
+		open main
+#else
+		open ingame_main
+#endif
+	}
+
+// Window //
+	itemDef {
+		name		"window"
+		group		GROUP_NAME
+		rect		0 0 WINDOW_WIDTH WINDOW_HEIGHT
+		style		WINDOW_STYLE_FILLED
+		backcolor	0 0 0 .8
+		border		WINDOW_BORDER_FULL
+		bordercolor	.5 .5 .5 .5
+		visible		1
+		decoration
+	}
+
+// Logo //
+	itemDef {
+		name		"logo"
+		rect		$evalfloat(.5*(WINDOW_WIDTH-128)) $evalfloat(12) 128 64
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/etl_logo"
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"headerLogo"
+		group		GROUP_NAME
+		rect		6 80 $evalfloat(WINDOW_WIDTH-12) 16
+		text		_("DEVELOPED BY ET: LEGACY TEAM")
+		textfont	UI_FONT_ARIBLK_16
+		textstyle	ITEM_TEXTSTYLE_SHADOWED
+		textscale	.3
+		textalign	ITEM_ALIGN_CENTER
+		textalignx	$evalfloat(.5*(WINDOW_WIDTH-12))
+		textaligny	14
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	LABELWHITE( 6, 106, WINDOW_WIDTH-12, 10, "Continuing Wolfenstein: Enemy Territory's legacy", .2, ITEM_ALIGN_CENTER, .5*(WINDOW_WIDTH-12), 8 )
+
+// Credits Section //
+#define CREDITS_Y	64
+
+	itemDef {
+		name		"headerContributors"
+		group		GROUP_NAME
+		rect		6 $evalfloat(CREDITS_Y+70) $evalfloat(WINDOW_WIDTH-12) 12
+		text		_("^1THE TEAM ^7/ ^1CONTRIBUTORS ^7/ ^1HELPING HANDS")
+		textfont	UI_FONT_ARIBLK_16
+		textstyle	ITEM_TEXTSTYLE_SHADOWED
+		textscale	.19
+		textalign	ITEM_ALIGN_CENTER
+		textalignx	$evalfloat(.5*(WINDOW_WIDTH-12))
+		textaligny	10
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	LABELWHITE( 6, CREDITS_Y+86, WINDOW_WIDTH-12, 10, _("See HALL OF FAME below"), .2, ITEM_ALIGN_CENTER, .5*(WINDOW_WIDTH-12), 8 )
+
+	itemDef {
+		name		"headerGreetings"
+		group		GROUP_NAME
+		rect		6 $evalfloat(CREDITS_Y+112) $evalfloat(WINDOW_WIDTH-12) 12
+		text		_("^1GREETINGS")
+		textfont	UI_FONT_ARIBLK_16
+		textstyle	ITEM_TEXTSTYLE_SHADOWED
+		textscale	.19
+		textalign	ITEM_ALIGN_CENTER
+		textalignx	$evalfloat(.5*(WINDOW_WIDTH-12))
+		textaligny	10
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	LABELWHITE( 6, CREDITS_Y+128, WINDOW_WIDTH-12, 10, "ETPro Team - ETPub Team - ioQuake3 - ioWolfET - Jaymod Team\nNoQuarter Team - Omni-Bot Team - Q3MME Team - QtZ Team - Raedwulf-ET\nRTCW COOP Team - Unvanquished Team - Xreal Team - and more!", .2, ITEM_ALIGN_CENTER, .5*(WINDOW_WIDTH-12), 8 )
+
+	itemDef {
+		name		"headerJoin"
+		group		GROUP_NAME
+		rect		6 $evalfloat(CREDITS_Y+176) $evalfloat(WINDOW_WIDTH-12) 12
+		text		_("^1JOIN US")
+		textfont	UI_FONT_ARIBLK_16
+		textstyle	ITEM_TEXTSTYLE_SHADOWED
+		textscale	.19
+		textalign	ITEM_ALIGN_CENTER
+		textalignx	$evalfloat(.5*(WINDOW_WIDTH-12))
+		textaligny	10
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	LABELWHITE( 6, CREDITS_Y+192, WINDOW_WIDTH-12, 10, "ET: Legacy is a collaborative effort done in an open, transparent\nand friendly manner. Anyone is welcome to join our efforts!", .2, ITEM_ALIGN_CENTER, .5*(WINDOW_WIDTH-12), 8 )
+
+// Community buttons
+	itemDef {
+		name		"logoETLegacyShadow"
+		rect		$evalfloat(.15*(WINDOW_WIDTH-48)+1) $evalfloat(320+1) 48 48
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/logo_etlegacy"
+		forecolor	0 0 0 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"logoETLegacy"
+		rect		$evalfloat(.15*(WINDOW_WIDTH-48)-1) $evalfloat(320-1) 48 48
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/logo_etlegacy"
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"headerNews"
+		group		GROUP_NAME
+		rect		6 294 $evalfloat(WINDOW_WIDTH-12) 12
+		text		_("^1NEWS")
+		textfont	UI_FONT_ARIBLK_16
+		textstyle	ITEM_TEXTSTYLE_SHADOWED
+		textscale	.19
+		textalign	ITEM_ALIGN_CENTER
+		textalignx	$evalfloat(.175*(WINDOW_WIDTH-12))
+		textaligny	10
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"logoDiscordShadow"
+		rect		$evalfloat(.5*(WINDOW_WIDTH-48)+1) $evalfloat(320+1) 48 48
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/logo_discord"
+		forecolor	0 0 0 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"logoDiscord"
+		rect		$evalfloat(.5*(WINDOW_WIDTH-48)-1) $evalfloat(320-1) 48 48
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/logo_discord"
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"headerChat"
+		group		GROUP_NAME
+		rect		6 294 $evalfloat(WINDOW_WIDTH-12) 12
+		text		_("^1CHAT")
+		textfont	UI_FONT_ARIBLK_16
+		textstyle	ITEM_TEXTSTYLE_SHADOWED
+		textscale	.19
+		textalign	ITEM_ALIGN_CENTER
+		textalignx	$evalfloat(.5*(WINDOW_WIDTH-12))
+		textaligny	10
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"logoGithubShadow"
+		rect		$evalfloat(.85*(WINDOW_WIDTH-48)+1) $evalfloat(320+1) 48 48
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/logo_github"
+		forecolor	0 0 0 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"logoGithub"
+		rect		$evalfloat(.85*(WINDOW_WIDTH-48)-1) $evalfloat(320-1) 48 48
+		style		WINDOW_STYLE_SHADER
+		background	"ui/assets/logo_github"
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	itemDef {
+		name		"headerDevelopment"
+		group		GROUP_NAME
+		rect		6 294 $evalfloat(WINDOW_WIDTH-12) 12
+		text		_("^1DEVELOPMENT")
+		textfont	UI_FONT_ARIBLK_16
+		textstyle	ITEM_TEXTSTYLE_SHADOWED
+		textscale	.19
+		textalign	ITEM_ALIGN_CENTER
+		textalignx	$evalfloat(.825*(WINDOW_WIDTH-12))
+		textaligny	10
+		forecolor	1 1 1 1
+		visible		1
+		decoration
+	}
+
+	BUTTON( .1125*(WINDOW_WIDTH - 100), 388, 100, 18, _("WEBSITE"), .3, 14, clearFocus ; open etlegacy_website )
+	BUTTON( .5*(WINDOW_WIDTH - 100), 388, 100, 18, _("DISCORD"), .3, 14, clearFocus ; open etlegacy_discord )
+	BUTTON( .8875*(WINDOW_WIDTH - 100), 388, 100, 18, _("GITHUB"), .3, 14, clearFocus ; open etlegacy_github )
+
+// Buttons //
+#ifdef FUI
+	BUTTON( 6, WINDOW_HEIGHT - 24, .33 * (WINDOW_WIDTH - 24), 18, _("BACK"), .3, 14, close credits_etlegacy ; open main )
+#else
+	BUTTON( 6, WINDOW_HEIGHT - 24, .33 * (WINDOW_WIDTH - 24), 18, _("BACK"), .3, 14, close credits_etlegacy ; open ingame_main )
+#endif
+	BUTTON( 6 + .33 * (WINDOW_WIDTH - 24) + 6, WINDOW_HEIGHT - 24, .34 * (WINDOW_WIDTH - 24), 18, _("HALL OF FAME"), .3, 14, clearFocus ; open etlegacy_halloffame )
+	BUTTON( 6 + .33 * (WINDOW_WIDTH - 24) + 6 + .34 * (WINDOW_WIDTH - 24) + 6, WINDOW_HEIGHT - 24, .33 * (WINDOW_WIDTH - 24), 18, "SPLASH DAMAGE", .3, 14, close credits_etlegacy ; open credits_splashdamage )
+}
