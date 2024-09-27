@@ -13,6 +13,7 @@ set(SQLITE3_INCLUDE_DIR "${DEPLIBS_PATH}/sqlite")
 set(ICONV_INCLUDE_DIR "${DEPLIBS_PATH}/iconv/include")
 set(CURL_INCLUDE_DIR "${DEPLIBS_PATH}/curl/include")
 set(LUA_INCLUDE_DIR "${DEPLIBS_PATH}/lua/lua-5.4.5/include")
+set(OPENSSL_INCLUDE_DIR "${GEN_DEPLIBS_PATH}/openssl/include" "${DEPLIBS_PATH}/openssl/include")
 
 include_directories(
 	${LIBPNG_INCLUDE_DIRS}
@@ -25,6 +26,7 @@ include_directories(
 	${ICONV_INCLUDE_DIR}
 	${CURL_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
+	${OPENSSL_INCLUDE_DIR}
 	${DEPCOMMON_PATH}
 )
 
@@ -42,3 +44,4 @@ set(CJSON_LIBRARY "cjson")
 set(CURL_LIBRARIES "curl")
 set(LUA_LIBRARIES "lua_shared")
 set(ICONV_LIBRARIES "iconv")
+set(OPENSSL_LIBRARIES "ssl") # "ssl_1_1" "crypto_1_1"

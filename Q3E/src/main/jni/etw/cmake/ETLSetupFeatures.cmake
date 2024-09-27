@@ -274,7 +274,7 @@ if(BUILD_CLIENT OR BUILD_SERVER)
 				target_compile_definitions(engine_libraries INTERFACE USING_SCHANNEL)
 			endif ()
 		elseif(BUNDLED_OPENSSL)
-			target_link_libraries(engine_libraries INTERFACE bundled_openssl_int)
+			target_link_libraries(engine_libraries INTERFACE ${OPENSSL_LIBRARIES} #[[bundled_openssl_int]])
 			target_compile_definitions(engine_libraries INTERFACE USING_OPENSSL)
 		else() #BUNDLED_WOLFSSL
 			target_link_libraries(engine_libraries INTERFACE bundled_wolfssl_int)

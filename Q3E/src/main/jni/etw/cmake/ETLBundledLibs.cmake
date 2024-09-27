@@ -6,7 +6,7 @@
 # or error out the build
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libs/CMakeLists.txt")
 	message(STATUS "Using bundled libraries located at ${CMAKE_CURRENT_SOURCE_DIR}/libs")
-    include(libs/CMakeLists.txt)
+    include(libs/CMakeLists.txt) #k add
 else()
 	message(STATUS "======================================================")
 	message(STATUS "Bundled libraries were not found on your system!")

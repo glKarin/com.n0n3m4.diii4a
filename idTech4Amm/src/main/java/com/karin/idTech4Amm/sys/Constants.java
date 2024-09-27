@@ -30,6 +30,8 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game standalone directory named `etmain` and `legacy`. More view in `" + TextHelper.GenLinkText("https://www.etlegacy.com", "ET: Legacy") + "`.",
+            "Add effects color alpha in Quake4.",
             "Add `ambientLighting` shader, add ambient lighting model with `harm_r_lightingModel` to 4 in DOOM3/Quake4/Prey.",
             "Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/quake-4-hardqore", "Quake 4: Hardqore") + "`.",
             "Add effects color alpha in Quake4.",

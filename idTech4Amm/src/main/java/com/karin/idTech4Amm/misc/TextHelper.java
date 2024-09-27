@@ -191,6 +191,7 @@ public final class TextHelper
                 " " + GenLinkText("https://www.thedarkmod.com", "The Dark Mod: darkmod"),
                 " " + GenLinkText("https://store.steampowered.com/agecheck/app/208200/", "DOOM3 BFG: doom3bfg/base"),
                 " " + GenLinkText("https://github.com/ZDoom/gzdoom", "GZDOOM: gzdoom"),
+                " " + GenLinkText("https://www.etlegacy.com", "ET-Legacy: etmain legacy"),
                 null,
             "For playing Prey(2006)(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
