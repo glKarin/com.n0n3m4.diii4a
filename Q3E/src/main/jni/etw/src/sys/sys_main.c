@@ -723,6 +723,9 @@ void *Sys_LoadDll(const char *name, qboolean useSystemLib)
 	return dllhandle;
 }
 
+#ifdef _DIII4A //karin: for caching portable raw library name for Sys_LoadGameDll(), and keep Sys_TryLibraryLoad() declaration
+static const char *_load_dll_name = NULL;
+#endif
 /**
  * @brief Used by Sys_LoadGameDll to get handle on a mod library
  *
@@ -823,8 +826,23 @@ static void *Sys_TryLibraryLoad(const char *base, const char *gamedir, const cha
 #ifndef __ANDROID__
 	libHandle = Sys_LoadLibrary(fn);
 #else
-	// const char * Sys_DLLDefaultPath(void);
+#ifdef _DIII4A //karin: game libraries have different file name
+#define Sys_GetDLLName_DIII4A(x) "libetw" x DLL_EXT
+	if(_load_dll_name)
+	{
+		char realLibName[MAX_OSPATH];
+		Com_sprintf(realLibName, sizeof(realLibName), Sys_GetDLLName_DIII4A("%s"), _load_dll_name);
+		Com_Printf("[Harmattan]: Load library '%s' in '%s'\n", _load_dll_name, realLibName);
+		libHandle = Sys_LoadLibrary(realLibName);
+		_load_dll_name = NULL;
+	}
+	else
+	{
+		libHandle = Sys_LoadLibrary(fname);
+	}
+#else
 	libHandle = Sys_LoadLibrary(fname);
+#endif
 #endif
 
 	if (!libHandle)
@@ -867,6 +885,9 @@ void *Sys_LoadGameDll(const char *name, qboolean extract,
 	etl_assert(name);
 
 	Com_sprintf(fname, sizeof(fname), Sys_GetDLLName("%s"), name);
+#ifdef _DIII4A //karin: cache portable raw library name
+	_load_dll_name = name;
+#endif
 
 	// TODO: use fs_searchpaths from files.c
 	basepath = Cvar_VariableString("fs_basepath");
@@ -905,7 +926,6 @@ void *Sys_LoadGameDll(const char *name, qboolean extract,
 #define SEARCHPATH2 basepath
 #endif
 
-#if !defined(__ANDROID__) //karin: don't unpack pk3 to find library on Android
 #ifndef DEDICATED
 	if (LIB_DO_UNPACK && extract)
 	{
@@ -920,11 +940,9 @@ void *Sys_LoadGameDll(const char *name, qboolean extract,
 		}
 	}
 #endif
-#endif
 
 	libHandle = Sys_TryLibraryLoad(SEARCHPATH1, gamedir, fname);
 
-#if !defined(__ANDROID__) //karin: don't unpack pk3 to find library on Android
 	if (!libHandle && SEARCHPATH2)
 	{
 		libHandle = Sys_TryLibraryLoad(SEARCHPATH2, gamedir, fname);
@@ -958,7 +976,6 @@ void *Sys_LoadGameDll(const char *name, qboolean extract,
 			}
 		}
 	}
-#endif
 #endif
 
 	if (!libHandle)

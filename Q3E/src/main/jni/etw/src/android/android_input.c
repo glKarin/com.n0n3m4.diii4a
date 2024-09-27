@@ -90,11 +90,11 @@ void Q3E_KeyEvent(int state,int key,int character)
 			{
 				Com_QueueEvent(lasttime, SE_CHAR, CTRL(key), 0, 0, NULL);
 			}
-		}
-		if ((state==1)&&(character!=0))
-		{
-			//Com_DPrintf("SE_CHAR key=%d state=%d\n", character, state);
-			Com_QueueEvent(lasttime, SE_CHAR, character, 0, 0, NULL);
+			else if (character != 0)
+			{
+				//Com_DPrintf("SE_CHAR key=%d state=%d\n", character, state);
+				Com_QueueEvent(lasttime, SE_CHAR, character, 0, 0, NULL);
+			}
 		}
 		lastKeyDown = key;
 	}

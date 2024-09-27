@@ -1358,11 +1358,7 @@ qboolean IN_IsNumLockDown(void);
 #elif __APPLE__
 #define Sys_GetDLLName(x) x DLL_EXT
 #elif __ANDROID__
-#ifdef _DIII4A //karin: libraries have etw prefix on Android
-#define Sys_GetDLLName(x) "libetw" x DLL_EXT
-#else
 #define Sys_GetDLLName(x) "lib" x ".mp.android." ARCH_STRING DLL_EXT
-#endif
 #else
 #define Sys_GetDLLName(x) x ".mp." ARCH_STRING DLL_EXT
 #endif

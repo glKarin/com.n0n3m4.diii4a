@@ -1104,11 +1104,7 @@ void SV_Init(void)
 	// added cvar_t for sv_cheats so server engine can reference it
 	sv_cheats   = Cvar_Get("sv_cheats", "1", CVAR_SYSTEMINFO | CVAR_ROM);
 	sv_serverid = Cvar_Get("sv_serverid", "0", CVAR_SYSTEMINFO | CVAR_ROM);
-#if !defined(_DIII4A) //karin: default not pure server
 	sv_pure     = Cvar_Get("sv_pure", "1", CVAR_SYSTEMINFO);
-#else
-	sv_pure     = Cvar_Get("sv_pure", "0", CVAR_SYSTEMINFO);
-#endif
 	Cvar_Get("sv_paks", "", CVAR_SYSTEMINFO | CVAR_ROM);
 	Cvar_Get("sv_pakNames", "", CVAR_SYSTEMINFO | CVAR_ROM);
 	Cvar_Get("sv_referencedPaks", "", CVAR_SYSTEMINFO | CVAR_ROM);
