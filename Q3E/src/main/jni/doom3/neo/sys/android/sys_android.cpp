@@ -77,6 +77,9 @@ void (*close_keyboard)(void);
 // Open URL
 void (*open_url)(const char *url);
 
+// Finish
+void (*exit_finish)(void);
+
 // Surface window size
 int screen_width = 640;
 int screen_height = 480;
@@ -235,6 +238,12 @@ void Android_CloseKeyboard(void)
     close_keyboard();
 }
 
+void Android_ExitFinish(void)
+{
+    //if(exit_finish)
+    exit_finish();
+}
+
 void Android_ShowInfo(const char *info)
 {
     //if(show_toast)
@@ -289,6 +298,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("    open_keyboard: %p\n", open_keyboard);
     printf("    close_keyboard: %p\n", close_keyboard);
     printf("    open_url: %p\n", open_url);
+    printf("    exit_finish: %p\n", exit_finish);
     printf("  GUI: \n");
     printf("    show_toast: %p\n", show_toast);
     printf("    open_dialog: %p\n", open_dialog);
@@ -334,6 +344,7 @@ void Q3E_SetCallbacks(const void *callbacks)
     open_keyboard = ptr->Sys_openKeyboard;
     close_keyboard = ptr->Sys_closeKeyboard;
     open_url = ptr->Sys_openURL;
+    exit_finish = ptr->Sys_exitFinish;
 
     show_toast = ptr->Gui_ShowToast;
     open_dialog = ptr->Gui_openDialog;
@@ -480,6 +491,7 @@ void Q3E_exit(void)
         window = NULL;
     GLimp_AndroidQuit();
     printf("[Harmattan]: idTech4 exit.\n");
+    Android_ExitFinish();
 }
 
 // Setup OpenGL context variables in Android SurfaceView's thread

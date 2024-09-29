@@ -677,7 +677,7 @@ public class GameLauncher extends Activity
     {
         // Q3EKeyCodes.InitD3Keycodes();
         Q3EInterface q3ei = new Q3EInterface();
-		q3ei.standalone = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
+		q3ei.standalone = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
 
         q3ei.InitD3();
 

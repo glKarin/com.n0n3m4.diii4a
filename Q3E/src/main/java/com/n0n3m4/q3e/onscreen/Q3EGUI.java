@@ -3,10 +3,10 @@ package com.n0n3m4.q3e.onscreen;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.Q3E;
 
 public class Q3EGUI
 {

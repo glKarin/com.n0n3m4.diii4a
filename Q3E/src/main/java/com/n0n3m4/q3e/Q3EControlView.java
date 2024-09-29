@@ -615,12 +615,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             Toast.makeText(getContext(), R.string.click_back_again_to_exit, Toast.LENGTH_LONG).show();
         else if (m_pressBackCount == Q3EGlobals.CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
         {
-            m_renderView.Shutdown();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                ((Activity) getContext()).finishAffinity();
-            else
-                ((Activity) getContext()).finish();
-            System.exit(0);
+            //m_renderView.Shutdown();
+            Q3E.Finish();
             return true;
         }
         return res;

@@ -96,7 +96,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 Q3EGlobals.GAME_BASE_GZDOOM
         ));
         List<String> blackList = new ArrayList<>();
-        boolean standalone = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
+        boolean standalone = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
         if(!standalone)
         {
             blackList.addAll(TotalList);

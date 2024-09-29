@@ -78,6 +78,7 @@ static void close_keyboard(void);
 static void setup_smooth_joystick(int enable);
 static void open_url(const char *url);
 static int open_dialog(const char *title, const char *message, int num, const char *buttons[]);
+static void finish(void);
 
 // data
 static char *game_data_dir = NULL;
@@ -110,6 +111,7 @@ static jmethodID android_OpenVKB_method;
 static jmethodID android_CloseVKB_method;
 static jmethodID android_OpenURL_method;
 static jmethodID android_OpenDialog_method;
+static jmethodID android_Finish_method;
 
 #define ATTACH_JNI(env) \
 	JNIEnv *env = 0; \
@@ -349,6 +351,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_CloseVKB_method = (*env)->GetMethodID(env, q3eCallbackClass, "CloseVKB", "()V");
 	android_OpenURL_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenURL", "(Ljava/lang/String;)V");
 	android_OpenDialog_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenDialog", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)I");
+	android_Finish_method = (*env)->GetMethodID(env, q3eCallbackClass, "Finish", "()V");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -442,6 +445,7 @@ static void setup_Q3E_callback(void)
 	callback.Sys_openKeyboard = &open_keyboard;
 	callback.Sys_closeKeyboard = &close_keyboard;
 	callback.Sys_openURL = &open_url;
+	callback.Sys_exitFinish = &finish;
 
 	callback.Gui_ShowToast = &show_toast;
 	callback.Gui_openDialog = &open_dialog;
@@ -767,6 +771,14 @@ int open_dialog(const char *title, const char *message, int num, const char *but
 	LOGI("Open Dialog: result -> %d", res);
 
 	return res;
+}
+
+void finish(void)
+{
+	ATTACH_JNI(env)
+
+	LOGI("Finish");
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_Finish_method);
 }
 
 void setup_smooth_joystick(int enable)

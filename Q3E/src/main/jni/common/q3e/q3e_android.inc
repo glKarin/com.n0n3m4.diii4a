@@ -155,6 +155,9 @@ void (*close_keyboard)(void);
 // Open URL
 void (*open_url)(const char *url);
 
+// Finish
+void (*exit_finish)(void);
+
 // Surface window size
 int screen_width = 640;
 int screen_height = 480;
@@ -421,6 +424,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("    open_keyboard: %p\n", open_keyboard);
     printf("    close_keyboard: %p\n", close_keyboard);
     printf("    open_url: %p\n", open_url);
+    printf("    exit_finish: %p\n", exit_finish);
     printf("  GUI: \n");
     printf("    show_toast: %p\n", show_toast);
     printf("    open_dialog: %p\n", open_dialog);
@@ -466,6 +470,7 @@ void Q3E_SetCallbacks(const void *callbacks)
     open_keyboard = ptr->Sys_openKeyboard;
     close_keyboard = ptr->Sys_closeKeyboard;
     open_url = ptr->Sys_openURL;
+    exit_finish = ptr->Sys_exitFinish;
 
     show_toast = ptr->Gui_ShowToast;
     open_dialog = ptr->Gui_openDialog;
@@ -575,17 +580,6 @@ void Q3E_CheckNativeWindowChanged(void)
     }
 }
 
-// Request exit
-void Q3E_exit(void)
-{
-    q3e_running = Q3E_FALSE;
-    Q3E_SHUTDOWN_GAME;
-    if(window)
-        window = NULL;
-    Q3E_QUIT_WINDOW();
-    Q3E_PRINTF("[Harmattan]: " Q3E_GAME_NAME " exit.\n");
-}
-
 // Setup OpenGL context variables in Android SurfaceView's thread
 void Q3E_SetGLContext(ANativeWindow *w)
 {
@@ -657,9 +651,27 @@ void Android_ShowInfo(const char *info)
         show_toast(info);
 }
 
+void Android_ExitFinish(void)
+{
+    //if(exit_finish)
+    exit_finish();
+}
+
 volatile ANativeWindow * Android_GetWindow(void)
 {
     return window;
+}
+
+// Request exit
+void Q3E_exit(void)
+{
+    q3e_running = Q3E_FALSE;
+    Q3E_SHUTDOWN_GAME;
+    if(window)
+        window = NULL;
+    Q3E_QUIT_WINDOW();
+    Q3E_PRINTF("[Harmattan]: " Q3E_GAME_NAME " exit.\n");
+    Android_ExitFinish();
 }
 
 #ifdef __cplusplus

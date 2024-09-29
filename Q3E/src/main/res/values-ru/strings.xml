@@ -42,4 +42,8 @@
     <string name="extract_gzdoom_game_resource_files_fail">Extract GZDOOM game resource files fail!</string>
     <string name="on_screen_buttons_layout_with_grid_limit">Button editor grid size</string>
     <string name="position_unit">Position unit(0 = automatic, 1 = disable)</string>
+    <string name="warning">Предупреждение</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="button_setting_has_changed_can_you_save_it">Button setting has changed! Can you save it?</string>
 </resources>

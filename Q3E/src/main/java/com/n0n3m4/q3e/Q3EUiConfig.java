@@ -59,6 +59,7 @@ public class Q3EUiConfig extends Activity
     private Q3EUiView vw;
     //k
     private boolean m_hideNav = true;
+    private boolean m_autoSave = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -84,6 +85,7 @@ public class Q3EUiConfig extends Activity
 
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
+        m_autoSave = preferences.getBoolean(Q3EPreference.AUTOSAVE_BUTTON_SETTINGS, true);
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         RelativeLayout.LayoutParams params;
@@ -116,17 +118,58 @@ public class Q3EUiConfig extends Activity
     }
 
     @Override
+    protected void onDestroy()
+    {
+        if(m_autoSave)
+            vw.SaveAll();
+        super.onDestroy();
+    }
+
+/*    @Override
     protected void onPause()
     {
-        vw.SaveAll();
+        if(m_autoSave)
+            vw.SaveAll();
         super.onPause();
-    }
+    }*/
 
     @Override
     public void onBackPressed()
     {
-        vw.SaveAll();
-        super.onBackPressed();
+        if(!m_autoSave && vw.IsModified())
+        {
+            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    switch(which)
+                    {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            vw.SaveAll();
+                            dialog.dismiss();
+                            finish();
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            dialog.dismiss();
+                            finish();
+                            break;
+                        case DialogInterface.BUTTON_NEUTRAL:
+                        default:
+                            dialog.dismiss();
+                            break;
+                    }
+                }
+            };
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.warning);
+            builder.setMessage(R.string.button_setting_has_changed_can_you_save_it);
+            builder.setPositiveButton(R.string.yes, listener);
+            builder.setNegativeButton(R.string.no, listener);
+            builder.setNeutralButton(R.string.cancel, listener);
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+        else
+            super.onBackPressed();
     }
 
     //k

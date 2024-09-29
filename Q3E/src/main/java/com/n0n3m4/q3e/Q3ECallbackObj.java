@@ -260,62 +260,69 @@ public class Q3ECallbackObj
 
     public void ShowToast(String text)
     {
-        if(null != gui)
+        //if(null != gui)
             gui.Toast(text);
     }
 
     public void CloseVKB()
     {
-        if (null != vw)
-        {
-            vw.post(new Runnable() {
-                @Override
-                public void run() {
-                    Q3EUtils.CloseVKB(vw);
-                }
-            });
-        }
+        vw.post(new Runnable() {
+            @Override
+            public void run() {
+                Q3EUtils.CloseVKB(vw);
+            }
+        });
     }
 
     public void OpenVKB()
     {
-        if (null != vw)
-        {
-            vw.post(new Runnable() {
-                @Override
-                public void run() {
-                    Q3EUtils.OpenVKB(vw);
-                }
-            });
-        }
+        vw.post(new Runnable() {
+            @Override
+            public void run() {
+                Q3EUtils.OpenVKB(vw);
+            }
+        });
     }
 
     public void ToggleToolbar(boolean on)
     {
-        if (null != vw)
-        {
-            vw.ToggleToolbar(on);
-        }
+        vw.ToggleToolbar(on);
     }
 
 
     public void OpenURL(String url)
     {
-        if (null != vw)
+        vw.post(new Runnable()
         {
-            Uri uri = Uri.parse(url);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-            vw.getContext().startActivity(intent);
-        }
+            @Override
+            public void run()
+            {
+                Uri uri = Uri.parse(url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                vw.getContext().startActivity(intent);
+            }
+        });
     }
 
     public int OpenDialog(String title, String message, String[] buttons)
     {
-        if(null != gui)
+        //if(null != gui)
             return gui.MessageDialog(title, message, buttons);
-        else
-            return Q3EGUI.DIALOG_ERROR;
+        //else return Q3EGUI.DIALOG_ERROR;
+    }
+
+    public void Finish()
+    {
+        if(null == Q3E.activity || Q3E.activity.isFinishing())
+            return;
+        Q3E.activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run()
+            {
+                Q3E.Finish();
+            }
+        });
     }
 
     public void SetupSmoothJoystick(boolean enable)

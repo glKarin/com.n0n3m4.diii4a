@@ -43,4 +43,8 @@
     <string name="extract_rbdoom3bfg_hlsl_shader_source_files_fail">提取RBDOOM 3 BFG HLSL着色器源码文件失败!</string>
     <string name="extract_gzdoom_game_resource_files_fail">提取GZDOOM游戏资源文件失败!</string>
     <string name="position_unit">位置单位(0为自动, 1为禁用)</string>
+    <string name="warning">警告</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="button_setting_has_changed_can_you_save_it">按键配置已经被修改! 是否保存?</string>
 </resources>

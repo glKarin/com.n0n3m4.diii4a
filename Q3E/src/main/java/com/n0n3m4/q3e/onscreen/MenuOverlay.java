@@ -151,6 +151,7 @@ public class MenuOverlay extends Paintable implements TouchListener
         int step = ((Q3EUiView) view).step;
         Object o = fngr.target;
         int st = dir ? step : -step;
+        ((Q3EUiView) view).SetModified();
         if (o instanceof Button)
         {
             Button tmp = (Button) o;
@@ -211,6 +212,7 @@ public class MenuOverlay extends Paintable implements TouchListener
     {
         Paintable target = (Paintable) fngr.target;
         target.alpha += dir ? 0.1 : -0.1;
+        ((Q3EUiView) view).SetModified();
         if (target.alpha < 0.01)
         {
             target.alpha = 0.1f;

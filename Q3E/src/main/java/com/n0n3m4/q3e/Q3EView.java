@@ -28,6 +28,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -105,7 +106,11 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         if(mInit)
-            Q3EJNI.SetSurface(getHolder().getSurface());
+        {
+            Surface surface = getHolder().getSurface();
+            Q3EJNI.SetSurface(surface);
+            Q3E.surface = surface;
+        }
     }
 
     @Override
@@ -122,8 +127,11 @@ class Q3EView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder holder)
     {
         if(mInit)
+        {
             Q3EJNI.SetSurface(null);
-		/*Q3EJNI.shutdown();
+            Q3E.surface = null;
+        }
+		/*
         super.surfaceDestroyed(holder);*/
     }
 }

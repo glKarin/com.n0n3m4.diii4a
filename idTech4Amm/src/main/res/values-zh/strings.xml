@@ -367,4 +367,7 @@
     <string name="ambient_lighting_brightness">环境光照亮度</string>
     <string name="hardqore">Hardqore</string>
     <string name="etw_base">深入敌后: 德军总部</string>
+    <string name="launcher">启动器</string>
+    <string name="auto_save_buttons_settings_immediately_if_changed">如果按键设置被修改立即保存</string>
+    <string name="auto_save_button_settings">自动保存按键设置</string>
 </resources>

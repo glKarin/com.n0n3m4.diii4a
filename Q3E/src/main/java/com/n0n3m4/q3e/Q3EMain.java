@@ -44,22 +44,24 @@ import com.n0n3m4.q3e.karin.KidTechCommand;
 
 public class Q3EMain extends Activity
 {
-    private Q3ECallbackObj mAudio;
-    private Q3EView mGLSurfaceView;
+    private       Q3ECallbackObj mAudio;
+    private       Q3EView        mGLSurfaceView;
     // k
-    private boolean m_hideNav = true;
-    private int m_runBackground = 1;
-    private int m_renderMemStatus = 0;
-    private Q3EControlView mControlGLSurfaceView;
-    private KDebugTextView memoryUsageText;
-    private boolean m_coverEdges = true;
+    private       boolean        m_hideNav         = true;
+    private       int            m_runBackground   = 1;
+    private       int            m_renderMemStatus = 0;
+    private       Q3EControlView mControlGLSurfaceView;
+    private       KDebugTextView memoryUsageText;
+    private       boolean        m_coverEdges      = true;
     @SuppressLint("StaticFieldLeak")
-    public static Q3EGameHelper gameHelper;
+    public static Q3EGameHelper  gameHelper;
 
     @SuppressLint("ResourceType")
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
+        Q3E.activity = this;
+
         gameHelper = new Q3EGameHelper();
         gameHelper.SetContext(this);
         
@@ -152,8 +154,13 @@ public class Q3EMain extends Activity
     @Override
     protected void onDestroy()
     {
+        Q3E.activity = null;
+        Q3E.gameView = null;
+        Q3E.controlView = null;
+
         if (null != mGLSurfaceView)
             mGLSurfaceView.Shutdown();
+
         super.onDestroy();
         if (null != mAudio)
             mAudio.OnDestroy();
@@ -268,16 +275,16 @@ public class Q3EMain extends Activity
             Q3EUtils.isOuya = false;
 
         if (mAudio == null)
-        {
             mAudio = new Q3ECallbackObj();
-            mAudio.InitGUIInterface(this);
-        }
+        mAudio.InitGUIInterface(this);
         Q3EUtils.q3ei.callbackObj = mAudio;
         Q3EJNI.setCallbackObject(mAudio);
         if (mGLSurfaceView == null)
             mGLSurfaceView = new Q3EView(this);
+        Q3E.gameView = mGLSurfaceView;
         if (mControlGLSurfaceView == null)
             mControlGLSurfaceView = new Q3EControlView(this);
+        Q3E.controlView = mControlGLSurfaceView;
         mAudio.vw = mControlGLSurfaceView;
         mControlGLSurfaceView.EnableGyroscopeControl(Q3EUtils.q3ei.view_motion_control_gyro);
         float gyroXSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS);

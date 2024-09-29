@@ -87,7 +87,7 @@ public class Q3EGameHelper
 
         if (!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
         {
-            Q3EUtils.q3ei.standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
+            Q3EUtils.q3ei.standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
 
             Q3EKeyCodes.InitD3Keycodes();
 
