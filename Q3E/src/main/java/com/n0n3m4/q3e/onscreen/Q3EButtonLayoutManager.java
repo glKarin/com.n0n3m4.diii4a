@@ -111,17 +111,17 @@ public class Q3EButtonLayoutManager
         final int Height = Math.min(w, h);
 
         final int LargeButton_Width = Dip2px_s(60); //k 64 // button width/height // 75
-        final int MediumButton_Width = Dip2px_s(56); //k 60
-        final int SmallButton_Width = Dip2px_s(52); //k 56
+        final int MediumButton_Width = Dip2px_s(55); //k 60
+        final int SmallButton_Width = Dip2px_s(50); //k 56
         // int rightoffset = 0; // LargeButton_Width * 3 / 4;
         final int Sliders_Width = Dip2px_s(120); // slider width
         final int Joystick_Radius = Dip2px_s(75); // half width
         final int Attack_Width = Dip2px_s(80); //k 100
-        final int Panel_Radius = Dip2px_s(24); //k 24
-        final int Crouch_Width = Dip2px_s(72); //k 80
-        final int Horizontal_Space = Dip2px_s(6); //k 4
-        final int Vertical_Space = Dip2px_s(4); //k 2
-        final int Attack_right_Margin = Dip2px_s(30); //k 20
+        final int Panel_Radius = Dip2px_s(25); //k 24
+        final int Crouch_Width = Dip2px_s(70); //k 80
+        final int Horizontal_Space = Dip2px_s(5); //k 4
+        final int Vertical_Space = Dip2px_s(5); //k 2
+        final int Attack_right_Margin = Dip2px_s(40); //k 20
         final int Attack_Bottom_Margin = Dip2px_s(40); //k 20
         final int JoyStick_Left_Margin = Dip2px_s(30); //k 30
         final int JoyStick_Bottom_Margin = Dip2px_s(40); //k 30
@@ -141,10 +141,10 @@ public class Q3EButtonLayoutManager
         layouts[Q3EGlobals.UI_JUMP].Set(Width - LargeButton_Width / 2, layouts[Q3EGlobals.UI_SHOOT].y - LargeButton_Width / 2 - Attack_Width / 2 - Horizontal_Space, LargeButton_Width, Alpha);
         layouts[Q3EGlobals.UI_CROUCH].Set(Width - Crouch_Width / 2, Height - Crouch_Width / 2, Crouch_Width, Alpha);
 
-        int bottomLineRight = layouts[Q3EGlobals.UI_SHOOT].x - Attack_right_Margin + Horizontal_Space;
         layouts[Q3EGlobals.UI_PDA].Set(start + Sliders_Width + SmallButton_Width / 2 + SmallButton_Width + Horizontal_Space * 2, SmallButton_Width / 2 + Vertical_Space, SmallButton_Width, Alpha);
         layouts[Q3EGlobals.UI_SCORE].Set(start + Sliders_Width + SmallButton_Width / 2 + SmallButton_Width * 2 + Horizontal_Space * 3, SmallButton_Width / 2 + Vertical_Space, SmallButton_Width, Alpha);
 
+        int bottomLineRight = layouts[Q3EGlobals.UI_SHOOT].x - Attack_right_Margin + Horizontal_Space * 2;
         layouts[Q3EGlobals.UI_ZOOM].Set(bottomLineRight - MediumButton_Width - Horizontal_Space, Height - MediumButton_Width / 2, MediumButton_Width, Alpha);
         layouts[Q3EGlobals.UI_FLASHLIGHT].Set(bottomLineRight - MediumButton_Width * 2 - Horizontal_Space * 2, Height - MediumButton_Width / 2, MediumButton_Width, Alpha);
         layouts[Q3EGlobals.UI_RUN].Set(bottomLineRight - MediumButton_Width * 3 - Horizontal_Space * 3, Height - MediumButton_Width / 2, MediumButton_Width, Alpha);

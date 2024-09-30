@@ -51,8 +51,8 @@ public class Button extends Paintable implements TouchListener
         byte[] indices = {0, 1, 2, 0, 2, 3};
         for (int i = 0; i < verts.length; i += 2)
         {
-            verts[i] = verts[i] * w + cx;
-            verts[i + 1] = verts[i + 1] * h + cy;
+            verts[i] = verts[i] * w;
+            verts[i + 1] = verts[i + 1] * h;
         }
 
         verts_p = ByteBuffer.allocateDirect(4 * verts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -82,7 +82,7 @@ public class Button extends Paintable implements TouchListener
     public void Paint(GL11 gl)
     {
         super.Paint(gl);
-        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
     }
 
     private int lx;

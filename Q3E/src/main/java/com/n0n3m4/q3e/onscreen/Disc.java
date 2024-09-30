@@ -66,8 +66,8 @@ public class Disc extends Paintable implements TouchListener
         float[] tmp = new float[verts_back.length];
         for (int i = 0; i < verts_back.length; i += 2)
         {
-            tmp[i] = verts_back[i] * size + cx;
-            tmp[i + 1] = verts_back[i + 1] * size + cy;
+            tmp[i] = verts_back[i] * size;
+            tmp[i + 1] = verts_back[i + 1] * size;
         }
 
         verts_p = ByteBuffer.allocateDirect(4 * verts_back.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -85,8 +85,8 @@ public class Disc extends Paintable implements TouchListener
         float[] tmp2 = new float[verts_back.length];
         for (int i = 0; i < verts_back.length; i += 2)
         {
-            tmp2[i] = verts_back[i] * dot_size + cx;
-            tmp2[i + 1] = verts_back[i + 1] * dot_size + cy;
+            tmp2[i] = verts_back[i] * dot_size;
+            tmp2[i + 1] = verts_back[i + 1] * dot_size;
         }
 
         m_fanVertexArray = ByteBuffer.allocateDirect(4 * verts_back.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -192,7 +192,7 @@ public class Disc extends Paintable implements TouchListener
     {
         //main paint
         super.Paint(gl);
-        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+        Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
         if (null == m_parts || m_parts.length == 0)
             return;
 
@@ -202,9 +202,9 @@ public class Disc extends Paintable implements TouchListener
             {
                 //DrawVerts(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red,green,blue,p.pressed ? (float)Math.max(alpha, 0.9) : (float)(Math.min(alpha, 0.1)));
                 if (p.pressed)
-                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
+                    Q3EGL.DrawVerts_GL1(gl, p.borderTextureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha + (1.0f - alpha) * 0.5f);
                 else
-                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, 0, 0, red, green, blue, alpha - (alpha * 0.5f));
+                    Q3EGL.DrawVerts_GL1(gl, p.textureId, 6, tex_p, m_fanVertexArray, inds_p, cx, cy, red, green, blue, alpha - (alpha * 0.5f));
             }
         }
     }

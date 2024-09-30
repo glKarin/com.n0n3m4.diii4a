@@ -133,8 +133,7 @@ public class Q3EUiConfig extends Activity
         super.onPause();
     }*/
 
-    @Override
-    public void onBackPressed()
+    private boolean CheckModified()
     {
         if(!m_autoSave && vw.IsModified())
         {
@@ -167,8 +166,16 @@ public class Q3EUiConfig extends Activity
             builder.setNeutralButton(R.string.cancel, listener);
             AlertDialog dialog = builder.create();
             dialog.show();
+            return true;
         }
         else
+            return false;
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if(!CheckModified())
             super.onBackPressed();
     }
 
@@ -233,7 +240,8 @@ public class Q3EUiConfig extends Activity
         }
         else if (itemId == R.id.uiconfig_back)
         {
-            finish();
+            if(!CheckModified())
+                finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
