@@ -236,7 +236,7 @@ static void redirect_output(void)
 	char path[MAX_PATH];
 	struct _stat st;
 
-	/* DG: use "My Documents/My Games/dhewm3" to write stdout.txt and stderr.txt
+	/* DG: use "My Documents/My Games/idtech4amm/<game>" to write stdout.txt and stderr.txt
 	 *     instead of the binary, which might not be writable */
 	Win_GetHomeDir(path, sizeof(path));
 
@@ -244,7 +244,7 @@ static void redirect_output(void)
     mkdir_r(path); /* create My Documents/My Games/idTech4Amm/<game> */
 #else
 	if (_stat(path, &st) == -1) {
-		/* oops, "My Documents/My Games/dhewm3" doesn't exist - does My Games/ at least exist? */
+		/* oops, "My Documents/My Games/idTech4Amm/<game>" doesn't exist - does My Games/ at least exist? */
 		char myGamesPath[MAX_PATH];
 		char* lastslash;
 		memcpy(myGamesPath, path, MAX_PATH);
@@ -253,11 +253,11 @@ static void redirect_output(void)
 			*lastslash = '\0';
 		}
 		if (_stat(myGamesPath, &st) == -1) {
-			/* if My Documents/My Games/ doesn't exist, create it */
+			/* if My Documents/My Games/idTech4Amm/<game> doesn't exist, create it */
 			_mkdir(myGamesPath);
 		}
 		
-		_mkdir(path); /* create My Documents/My Games/dhewm3/ */
+		_mkdir(path); /* create My Documents/My Games/idTech4Amm/<game> */
 	}
 #endif
 	

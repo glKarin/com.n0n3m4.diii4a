@@ -1,14 +1,14 @@
 ## idTech4A++ (Harmattan Edition)  
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
-##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM OpenGLES on Android  
+##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW OpenGLES on Android  
 #### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版  
-##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM 安卓OpenGLES移植版  
+##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan56(natasha)  
+1.1.0harmattan57(natasha)  
 **Latest update:**
-2024-08-23  
+2024-10-01  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -50,14 +50,14 @@ GPLv3
 | OpenGL ES version | 2.0 and 3.0+<br/>(point light shadow mapping shader use cubemap on OpenGLES2.0, use texture array on OpenGLES3.0+) | 2.0(3.0+ compat) |
 | No lighting | Yes<br/>(And support switch in gaming by set harm_r_lightingModel to 0) | Yes |
 | Debug render tools | Yes<br/>(need to set harm_r_renderToolsMultithread to 1 if with multi-threading) | - |
-| PBR lighting model | Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr)) | - |
+| PBR lighting model | Yes<br/>(using [idtech4_pbr](https://github.com/jmarshall23/idtech4_pbr). But specular textures are not RMAO format in idTech4 game data) | - |
 
 > **Support games**
 
 | Game | Engine | Version | OpenGL ES version | Mods |
 |:-----|:-----:|:-----:|:-----:|:-----:|
-| DOOM III | n0n3m4's dante | - | 2.0/3.0 | Resurrection of Evil<br/>The Lost Mission<br/>Classic DOOM3<br/>Rivensin<br/>HardCorps<br/>Overthinked Doom^3<br/>Sabot(a7x)<br/>HeXen:Edge of Chaos<br/>Fragging Free<br/>LibreCoop<br/>LibreCoop D3XP<br/>Perfected Doom 3<br/>Perfected Doom 3:RoE |
-| Quake IV | n0n3m4's dante | - | 2.0/3.0 |  |
+| DOOM III | n0n3m4's dante | - | 2.0/3.0 | [Resurrection of Evil]()<br/>[The Lost Mission](https://www.moddb.com/mods/the-lost-mission)<br/>[Classic DOOM3](https://www.moddb.com/mods/classic-doom-3)<br/>[Rivensin](https://www.moddb.com/mods/ruiner)<br/>[HardCorps](https://www.moddb.com/mods/hardcorps)<br/>[Overthinked Doom^3](https://www.moddb.com/mods/overthinked-doom3)<br/>[Sabot(a7x)](https://www.moddb.com/games/doom-3-resurrection-of-evil/downloads/sabot-alpha-7x)<br/>[HeXen:Edge of Chaos](https://www.moddb.com/mods/hexen-edge-of-chaos)<br/>[Fragging Free](https://www.moddb.com/mods/fragging-free)<br/>[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[LibreCoop D3XP](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Perfected Doom 3:RoE](https://www.moddb.com/mods/perfected-doom-3-version-500) |
+| Quake IV | n0n3m4's dante | - | 2.0/3.0 | [Hardqore](https://www.moddb.com/mods/quake-4-hardqore) |
 | Prey(2006) | n0n3m4's dante | - | 2.0/3.0 |  |
 | DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) | 3.0 |  |
 | The Dark Mod | [Dark Mod](https://www.thedarkmod.com) | 2.12 | 3.2<br/>(require geometry shader support) |  |
@@ -66,6 +66,7 @@ GPLv3
 | Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2 | ctf<br/>rogue<br/>xatrix<br/>zaero |
 | Quake I | [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces) | - | 2.0 |  |
 | GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | - | 3.2 |  |
+| Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) | 2.8.1 | 1.1 |  |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -79,28 +80,32 @@ Tag with `-free` only for F-Droid update.
 | Ouya TV            |   Yes  |    No    |
 | Source code in apk |   Yes  |    No    |
 
+> Testing version(Non-release. Automatic CI building By Github actions when pushing commits)
+* idTech4A++ for Android: [Android testing](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing).
+* DOOM 3/Quake 4/Prey(2006) for Windows x64: [Windows x64 testing](https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/windows_x64_testing).
+
 ----------------------------------------------------------------------------------
 ### Update
 
-* Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.
-* Fix environment reflection shader in DOOM3/Quake4/Prey.
-* Add ambient lighting model with `harm_r_lightingModel` 0 and remove r_noLight=2 in DOOM3/Quake4/Prey.
-* Reduce game crash when change mod/reloadEngine/vid_restart in DOOM3/Quake4/Prey.
-* Support switch weapon in DOOM 3(write `bind "YOUR_KEY" "IMPULSE_51"` to your DoomConfig.cfg or autoexec.cfg).
-* Add `LibreCoop(RoE)` mod of DOOM3 support, game data directory named `librecoopxp`. More view in [LibreCoop(RoE)](https://www.moddb.com/mods/librecoop-dhewm3-coop).
-* Add `Perfected Doom 3` mod of DOOM3 support, game data directory named `perfected`. More view in [Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500).
-* Add `Perfected Doom 3 : Resurrection of Evil` mod of DOOM3 support, game data directory named `perfected_roe`. More view in [Perfected Doom 3 : Resurrection of Evil](https://www.moddb.com/mods/perfected-doom-3-version-500).
+* Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game data directory named `etmain` and `legacy`. More view in [ET: Legacy](https://www.etlegacy.com).
+* Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in [Quake 4: Hardqore](https://www.moddb.com/mods/quake-4-hardqore).
+* Add `ambientLighting` shader, add ambient lighting model(`harm_r_lightingModel` to 4) in DOOM3/Quake4/Prey.
+* Add effects color alpha in Quake4.
+* Fix `displacement` and `displacementcube` GLSL shader in Quake4. e.g. water in `recomp` map and blood pool in `waste` map.
+* Fix weapon model depth hack in player view in Quake4.
+* Add player body view in DOOM3/Quake4.
+* Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.
 
 ----------------------------------------------------------------------------------
 
-* 毁灭战士3/雷神之锤4/掠食(2006)优化PBR光照模型渲染.
-* 毁灭战士3/雷神之锤4/掠食(2006)修复环境反射着色器.
-* 毁灭战士3/雷神之锤4/掠食(2006)新增使用`harm_r_lightingModel`为0进渲染环境光, 移除r_noLight=2.
-* 毁灭战士3/雷神之锤4/掠食(2006)切换mod/reloadEngine/vid_restart减少游戏崩溃.
-* 毁灭战士3支持切换武器(通过写入`bind "YOUR_KEY" "IMPULSE_51"`到DoomConfig.cfg或autoexec.cfg文件中).
-* 新增毁灭战士3 mod `LibreCoop(RoE)`支持, 游戏数据文件夹命名为`librecoopxp`. 详情 [LibreCoop(RoE)](https://www.moddb.com/mods/librecoop-dhewm3-coop).
-* 新增毁灭战士3 mod `Perfected Doom 3`支持, 游戏数据文件夹命名为`perfected`. 详情 [Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500).
-* 新增毁灭战士3 mod `Perfected Doom 3 : Resurrection of Evil`支持, 游戏数据文件夹命名为`perfected_roe`. 详情 [Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500).
+* 新增`深入敌后: 德军总部`支持, 游戏独立文件夹名为`etw`, 游戏数据文件夹为`etmain`和`legacy`, 更多详情[ET: Legacy](https://www.etlegacy.com).
+* 雷神之锤4新增`Hardqore` mod支持, 游戏数据文件夹为`hardqore`, 更多详情[Quake 4: Hardqore](https://www.moddb.com/mods/quake-4-hardqore).
+* 毁灭战士3/雷神之锤4/掠食(2006)新增`ambientLighting`着色器, 新增环境光光照模型(`harm_r_lightingModel`设为4).
+* 雷神之锤4特效支持颜色透明度.
+* 雷神之锤4修复`displacement`和`displacementcube`着色器. 例如`recomp`关卡的水, `waste`关卡的血池.
+* 雷神之锤4修复玩家视角内武器模型的错误裁剪.
+* 毁灭战士3/雷神之锤4新增玩家身体视角模型.
+* 毁灭战士3/雷神之锤4/掠食(2006)新增cvar `harm_in_smoothJoystick`控制启用平滑摇杆.
 
 ----------------------------------------------------------------------------------
 
@@ -161,25 +166,33 @@ Tag with `-free` only for F-Droid update.
 | s_driver | String | AudioTrack | sound driver | ARCHIVE | AudioTrack, OpenSLES | Engine/Sound | sound if without OpenAL on Android | Android |
 | harm_s_OpenSLESBufferCount | Integer | 3 | Audio buffer count for OpenSLES | ARCHIVE | &gt;= 3 | Engine/Sound | min is 3, only for if without OpenAL and use OpenSLES on Android | Android |
 | harm_s_useAmplitudeDataOpenAL | Bool | 0 | Use amplitude data on OpenAL | DISABLE, ISSUE |  | Engine/Sound | It cause large shake | All |
+| harm_in_smoothJoystick | Bool | 0 | Enable smooth joystick |  |  | Engine/Input | Automatic setup initial value by Android layer | Android |
+| harm_g_normalizeMovementDirection | Integer | -1 | Re-normalize player/walker movement direction | ARCHIVE | -1, 0, &gt; 0 | Game/DOOM3 | 0 = disable; -1 = automcatic; &gt;0 = max degree | Android |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | Head | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessFixed | Bool | 0 | Do not attach view position to head in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_fullBodyAwarenessHeadVisible | Bool | 0 | Do not suppress head in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_ui_showViewBody | Bool | 0 | Show view body | ARCHIVE |  | Game/DOOM3 |  | All |
+| harm_pm_fullBodyAwarenessFirstPerson | Bool | 0 | Enable first person view in full-body awareness | ARCHIVE |  | Game/DOOM3 |  | All |
 | harm_pm_doubleJump | Bool | 0 | Enable double-jump | ARCHIVE |  | Game/DOOM3/Rivensin |  | All |
 | harm_pm_autoForceThirdPerson | Bool | 1 | Force set third person view after game level load end | ARCHIVE |  | Game/DOOM3/Rivensin |  | All |
 | harm_pm_preferCrouchViewHeight | Float | 32 | Set prefer crouch view height in Third-Person | ARCHIVE | &gt;= 0 | Game/DOOM3/Rivensin | suggest 32 - 39, less or equals 0 to disable | All |
+| harm_g_normalizeMovementDirection | Integer | -1 | Re-normalize player/walker movement direction | ARCHIVE | -1, 0, &gt; 0 | Game/Quake4 | 0 = disable; -1 = automcatic; &gt;0 = max degree | Android |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | head_channel | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessFixed | Bool | 0 | Do not attach view position to head in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_pm_fullBodyAwarenessHeadVisible | Bool | 0 | Do not suppress head in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
+| harm_pm_fullBodyAwarenessFirstPerson | Bool | 0 | Enable first person view in full-body awareness | ARCHIVE |  | Game/Quake4 |  | All |
+| harm_ui_showViewBody | Bool | 0 | Show view body | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_g_autoGenAASFileInMPGame | Bool | 1 | For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic | ARCHIVE |  | Game/Quake4 |  | All |
 | harm_g_vehicleWalkerMoveNormalize | Bool | 1 | Re-normalize vehicle walker movement | ARCHIVE |  | Game/Quake4 | Only for smooth jotstick on DIII4A | Android |
 | harm_gui_defaultFont | String | chain | Default font name | ARCHIVE | chain, lowpixel, marine, profont, r_strogg, strogg | Engine/Quake4/GUI | It will be available in next running | All |
 | harm_si_autoFillBots | Bool | 1 | Automatic fill bots after map loaded in multiplayer game | ARCHIVE | &gt;=0 | Game/Quake4 | 0 = disable; other number = bot num | All |
 | harm_si_botLevel | Integer | 0 | Bot level | ARCHIVE | [0 - 8] | Game/Quake4 | 0 = auto; 1 - 8 = difficult level | All |
 | harm_g_mutePlayerFootStep | Bool | 0 | Mute player's footstep sound | ARCHIVE |  | Game/Quake4 |  | All |
+| harm_g_normalizeMovementDirection | Integer | -1 | Re-normalize player/walker movement direction | ARCHIVE | -1, 0, &gt; 0 | Game/Prey | 0 = disable; -1 = automcatic; &gt;0 = max degree | Android |
 | harm_pm_fullBodyAwareness | Bool | 0 | Enables full-body awareness | ARCHIVE |  | Game/Prey |  | All |
 | harm_pm_fullBodyAwarenessOffset | Vector3 String | 0 0 0 | Full-body awareness offset(&lt;forward-offset&gt; &lt;side-offset&gt; &lt;up-offset&gt;) | ARCHIVE |  | Game/Prey |  | All |
 | harm_pm_fullBodyAwarenessHeadJoint | String | neck | Set head joint when without head model in full-body awareness | ARCHIVE |  | Game/Prey |  | All |
@@ -308,6 +321,7 @@ Because `BSE` not open-source, so I default supply a `NULL` implement and a unco
 Define macro `MOD_BOTS` will compile SABot a7(from DOOM3) mod source code for bot support in multiplayer-game.
 ##### About `Full body awareness support`
 Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support.
+Define macro `_MOD_VIEW_BODY` will compile view-body support.
 
 #### Prey(2006)
 ##### `_HUMANHEAD`, `_PREY` is patches macros, find them in `DIII4A` source code.
@@ -332,6 +346,89 @@ Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support
 > 2. Setup your vcpkg.cmake path
 > 3. cmake_msvc_build_doom3_quak4_prey.bat
 > 4. Copy OpenAL32.dll from vcpkg package path to binary path: vcpkg install OpenAL-Soft
+
+----------------------------------------------------------------------------------
+
+### Player body view in DOOM3/Quake4
+> 1. Declaration player_viewbody
+```
+entityDef player_viewbody { // default name is player_viewbody, or setup in player entity with property 'player_viewbody'
+    "spawnclass"				"idViewBody"
+    "body_model"                "player_model_torso_and_lower_body" // body's md5 model: animations's name same as player model: string
+    "body_offset"               "-15 0 0" // extras model offset: vector <forward right up>, default = 0 0 0
+    "body_allChannel"			"0" // play animation with all channels, else only play with legs channel: bool, default = 1
+    "body_usePlayerModel"		"0" // use player model and not use 'body_model': bool, default = 0
+    // "anim run_forward" 		"walk_forward" // override model animation name: string, "anim <model animation name>" "<replace animation name>"
+	
+	// Hide surface only for Quake4
+    "body_hidesurfaces" 		"shader_head,shader_toast" // hide surface names, separate by ',': string
+    "hidesurface1" 			"shader_arm" // hide surface name by entity property: string, hidesurfaceXXX
+    "hidesurface5" 			"shader_neck"
+    "hidesurface6" 			"shader_hand"
+}
+```
+> 2. DOOM3's player view body model declaration(animations name same as idPlayer's model)
+```
+// DOOM3 view body model example:
+model player_model_torso_and_lower_body {
+    offset (0 0 0)
+    model models/md5/player_model_torso_and_lower_body.md5mesh
+
+// loop anims:
+    idle models/md5/player_model_torso_and_lower_body/idle.md5anim
+    run_forward models/md5/player_model_torso_and_lower_body/run_forward.md5anim
+    run_backwards models/md5/player_model_torso_and_lower_body/run_backwards.md5anim
+    run_strafe_left models/md5/player_model_torso_and_lower_body/run_strafe_left.md5anim
+    run_strafe_right models/md5/player_model_torso_and_lower_body/run_strafe_right.md5anim
+    walk models/md5/player_model_torso_and_lower_body/walk.md5anim
+    walk_backwards models/md5/player_model_torso_and_lower_body/walk_backwards.md5anim
+    walk_strafe_left models/md5/player_model_torso_and_lower_body/walk_strafe_left.md5anim
+    walk_strafe_right models/md5/player_model_torso_and_lower_body/walk_strafe_right.md5anim
+    crouch models/md5/player_model_torso_and_lower_body/crouch.md5anim
+    crouch_walk models/md5/player_model_torso_and_lower_body/crouch_walk.md5anim
+    crouch_walk_backwards models/md5/player_model_torso_and_lower_body/crouch_walk_backwards.md5anim
+    fall models/md5/player_model_torso_and_lower_body/fall.md5anim
+
+// single anims:
+    crouch_down models/md5/player_model_torso_and_lower_body/crouch_down.md5anim
+    crouch_up models/md5/player_model_torso_and_lower_body/crouch_up.md5anim
+    run_jump models/md5/player_model_torso_and_lower_body/run_jump.md5anim
+    jump models/md5/player_model_torso_and_lower_body/jump.md5anim
+    hard_land models/md5/player_model_torso_and_lower_body/hard_land.md5anim
+    soft_land models/md5/player_model_torso_and_lower_body/soft_land.md5anim
+}
+```
+> 3. Quake4's player view body model declaration(animations name same as idPlayer's model)
+```
+// Quake4 view body model example:
+model player_model_torso_and_lower_body {
+    offset (0 0 0)
+    model models/md5/player_model_torso_and_lower_body.md5mesh
+
+// loop anims:
+    idle models/md5/player_model_torso_and_lower_body/idle.md5anim
+    run_forward models/md5/player_model_torso_and_lower_body/run_forward.md5anim
+    run_backwards models/md5/player_model_torso_and_lower_body/run_backwards.md5anim
+    run_strafe_left models/md5/player_model_torso_and_lower_body/run_strafe_left.md5anim
+    run_strafe_right models/md5/player_model_torso_and_lower_body/run_strafe_right.md5anim
+    walk_forward models/md5/player_model_torso_and_lower_body/walk_forward.md5anim
+    walk_backwards models/md5/player_model_torso_and_lower_body/walk_backwards.md5anim
+    walk_left models/md5/player_model_torso_and_lower_body/walk_left.md5anim
+    walk_right models/md5/player_model_torso_and_lower_body/walk_right.md5anim
+    crouch models/md5/player_model_torso_and_lower_body/crouch.md5anim
+    crouch_walk models/md5/player_model_torso_and_lower_body/crouch_walk.md5anim
+    crouch_walk_backward models/md5/player_model_torso_and_lower_body/crouch_walk_backward.md5anim
+    fall models/md5/player_model_torso_and_lower_body/fall.md5anim
+
+// single anims:
+    crouch_down models/md5/player_model_torso_and_lower_body/crouch_down.md5anim
+    crouch_up models/md5/player_model_torso_and_lower_body/crouch_up.md5anim
+    run_jump models/md5/player_model_torso_and_lower_body/run_jump.md5anim
+    jump models/md5/player_model_torso_and_lower_body/jump.md5anim
+    hard_land models/md5/player_model_torso_and_lower_body/hard_land.md5anim
+    soft_land models/md5/player_model_torso_and_lower_body/soft_land.md5anim
+}
+```
 
 ----------------------------------------------------------------------------------
 
@@ -368,13 +465,47 @@ Define macro `_MOD_FULL_BODY_AWARENESS` will compile Full-body-awareness support
 * [F-Droid(different signature)](https://f-droid.org/packages/com.karin.idTech4Amm/)
 ----------------------------------------------------------------------------------
 
-Open source licence
-> DOOM 3
-GPLv3
-> curl
-The curl license
-> freeyype
-The FreeType License / The GNU General Public License version 2
-flac
-GNU Free Documentation License / GNU GENERAL PUBLIC LICENSE Version 2 / GNU LESSER GENERAL PUBLIC LICENSE Version 2.1 / BSD-3-Clause license
+### Open source licence
+> Game engine
+* DOOM 3: GPLv3
+* Quake4 SDK
+* Prey SDK
+* RBDOOM-3-BFG
+* TheDarkMod
+* ioq3
+* iortcw
+* yQuake2
+* Darkplaces
+* GZDOOM
+* ETLegacy
+> Library(Source)
+* cJSON 
+* curl: The curl license
+* etc2comp
+* flac: GNU Free Documentation License / GNU GENERAL PUBLIC LICENSE Version 2 / GNU LESSER GENERAL PUBLIC LICENSE Version 2.1 / BSD-3-Clause license
+* fluidsynth
+* freetype: The FreeType License / The GNU General Public License version 2
+* iconv
+* irrxml
+* libjpeg
+* libogg
+* libpng
+* libsndfile
+* libvorbis
+* lua
+* mbedtls
+* miniz
+* minizip
+* mp3lame
+* mpg123
+* oboe
+* openal-soft
+* openssl
+* opus
+* pugixml
+* soil
+* sqlite
+* stb
+> Library(Binary)
+* ffmpeg-mobile
 ----------------------------------------------------------------------------------

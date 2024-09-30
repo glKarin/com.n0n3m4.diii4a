@@ -2,6 +2,19 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan57 (2024-10-01)
+
+* Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game data directory named `etmain` and `legacy`. More view in [ET: Legacy](https://www.etlegacy.com).
+* Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in [Quake 4: Hardqore](https://www.moddb.com/mods/quake-4-hardqore).
+* Add `ambientLighting` shader, add ambient lighting model(`harm_r_lightingModel` to 4) in DOOM3/Quake4/Prey.
+* Add effects color alpha in Quake4.
+* Fix `displacement` and `displacementcube` GLSL shader in Quake4. e.g. water in `recomp` map and blood pool in `waste` map.
+* Fix weapon model depth hack in player view in Quake4.
+* Add player body view in DOOM3/Quake4.
+* Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan56 (2024-08-23)
 
 * Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.

@@ -18,7 +18,7 @@ entityDef player_viewbody { // default name is player_viewbody, or setup in play
 	// "hidesurface5" "shader_neck"
 	// "hidesurface0" "shader_hand"
 	// "anim run_forward" "walk_forward" // override model animation name: string, "anim <model animation name>" "<replace animation name>"
-}:
+}
 
 // model example:
 model player_model_torso_and_lower_body {

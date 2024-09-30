@@ -549,20 +549,15 @@ if( HAVE_PARALLEL_FOR )
 elseif( HAVE_DISPATCH_APPLY )
 	add_definitions( -DHAVE_DISPATCH_APPLY=1 )
 else()
-	option( NO_OPENMP "Disable usage of OpenMP" OFF )
+	option( NO_OPENMP "Disable usage of OpenMP" ON ) #k OFF
 
 	if( NOT NO_OPENMP )
-		if(NOT ANDROID)
 		include( FindOpenMP )
 
 		if( OPENMP_FOUND )
 			set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
 			set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
 		endif( OPENMP_FOUND )
-		else()
-			set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -static-openmp" )
-			set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -static-openmp" )
-		endif()
 	endif( NOT NO_OPENMP )
 endif()
 

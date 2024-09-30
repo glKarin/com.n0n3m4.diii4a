@@ -275,7 +275,7 @@ void idViewBody::Clear( void ) {
 
 /*
 ================
-idViewBody::SetModel
+idViewBody::SetViewModel
 ================
 */
 void idViewBody::SetViewModel( const char *modelname ) {

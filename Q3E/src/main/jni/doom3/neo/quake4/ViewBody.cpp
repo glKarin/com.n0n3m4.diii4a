@@ -309,7 +309,7 @@ int idViewBody::SplitSurfaces(const char *surfaces, idStrList &ret) const
 
 /*
 ================
-idViewBody::SetModel
+idViewBody::SetViewModel
 ================
 */
 void idViewBody::SetViewModel( const char *modelname ) {

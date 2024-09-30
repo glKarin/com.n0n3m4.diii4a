@@ -13,12 +13,8 @@ entityDef player_viewbody { // default name is player_viewbody, or setup in play
     "body_offset"               "-15 0 0" // extras model offset: vector <forward right up>, default = 0 0 0
 	"body_allChannel"			"0" // play animation with all channels, else only play with legs channel: bool, default = 1
 	"body_usePlayerModel"		"0" // use player model and not use 'body_model': bool, default = 0
-	"body_hidesurfaces" "shader_head,shader_toast" // hide surface names, separate by ',': string
-	// "hidesurface1" "shader_arm" // hide surface name by entity property: string, hidesurfaceXXX
-	// "hidesurface5" "shader_neck"
-	// "hidesurface0" "shader_hand"
 	// "anim run_forward" "walk_forward" // override model animation name: string, "anim <model animation name>" "<replace animation name>"
-}:
+}
 
 // model example:
 model player_model_torso_and_lower_body {
@@ -31,13 +27,13 @@ model player_model_torso_and_lower_body {
     run_backwards models/md5/player_model_torso_and_lower_body/run_backwards.md5anim
     run_strafe_left models/md5/player_model_torso_and_lower_body/run_strafe_left.md5anim
     run_strafe_right models/md5/player_model_torso_and_lower_body/run_strafe_right.md5anim
-    walk_forward models/md5/player_model_torso_and_lower_body/walk_forward.md5anim
+    walk models/md5/player_model_torso_and_lower_body/walk.md5anim
     walk_backwards models/md5/player_model_torso_and_lower_body/walk_backwards.md5anim
-    walk_left models/md5/player_model_torso_and_lower_body/walk_left.md5anim
-    walk_right models/md5/player_model_torso_and_lower_body/walk_right.md5anim
+    walk_strafe_left models/md5/player_model_torso_and_lower_body/walk_strafe_left.md5anim
+    walk_strafe_right models/md5/player_model_torso_and_lower_body/walk_strafe_right.md5anim
     crouch models/md5/player_model_torso_and_lower_body/crouch.md5anim
     crouch_walk models/md5/player_model_torso_and_lower_body/crouch_walk.md5anim
-    crouch_walk_backward models/md5/player_model_torso_and_lower_body/crouch_walk_backward.md5anim
+    crouch_walk_backwards models/md5/player_model_torso_and_lower_body/crouch_walk_backwards.md5anim
     fall models/md5/player_model_torso_and_lower_body/fall.md5anim
 
 // single anims:

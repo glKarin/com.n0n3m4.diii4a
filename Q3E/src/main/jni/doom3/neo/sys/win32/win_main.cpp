@@ -384,7 +384,7 @@ static int WPath2A(char *dst, size_t size, const WCHAR *src) {
 
 /*
 ==============
-Returns "My Documents"/My Games/dhewm3 directory (or equivalent - "CSIDL_PERSONAL").
+Returns "My Documents"/My Games/idtech4amm/<game> directory (or equivalent - "CSIDL_PERSONAL").
 To be used with Sys_GetPath(PATH_SAVE), so savegames, screenshots etc will be
 saved to the users files instead of systemwide.
 
@@ -1092,7 +1092,7 @@ int main(int argc, char *argv[]) {
     freopen("stderr.txt","w",stderr);
     setvbuf(stderr, NULL, _IONBF, 0);
 #endif
-	// SDL_win32_main.c creates the dhewm3log.txt and redirects stdout into it
+	// SDL_win32_main.c creates the <game>_log.txt and redirects stdout into it
 	// so here we can log its (approx.) creation time before anything else is logged:
 	{
 		time_t tt = time(NULL);
