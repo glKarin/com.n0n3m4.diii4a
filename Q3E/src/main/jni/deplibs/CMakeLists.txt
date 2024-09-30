@@ -11,8 +11,6 @@ add_subdirectory (libvorbis) # -1.3.7
 
 add_subdirectory (libjpeg) # 9f
 
-add_subdirectory (curl) # -8.5.0
-
 add_subdirectory (libpng) #
 
 add_subdirectory (pugixml) #
@@ -47,6 +45,8 @@ add_subdirectory (iconv) # https://github.com/q384264619/android_iconv/tree/mast
 add_subdirectory (lua) # -5.4.5
 
 add_subdirectory (openssl) # openssl-cmake-1.1.1w-20231130 https://github.com/janbar/openssl-cmake
+
+add_subdirectory (curl) # -8.5.0
 
 #add_subdirectory (ktx) # KTX-Software-3.0.1
 

@@ -278,7 +278,7 @@ else()
   add_submodule ( . threads_pthread.c )
 endif()
 
-add_library( crypto ${LIBSRC} ${OBJECTS_SRC} )
+add_library( crypto SHARED ${LIBSRC} ${OBJECTS_SRC} )
 
 target_include_directories( crypto PUBLIC ${PROJECT_BINARY_DIR}/include )
 

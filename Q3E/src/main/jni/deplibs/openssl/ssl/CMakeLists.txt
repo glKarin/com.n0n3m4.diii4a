@@ -43,7 +43,7 @@ include_directories( BEFORE SYSTEM
   ${PROJECT_SOURCE_DIR}/ # e_os.h
 )
 
-add_library( ssl ${LIBSRC} )
+add_library( ssl SHARED ${LIBSRC} )
 
 target_include_directories( ssl PUBLIC ${PROJECT_BINARY_DIR}/include )
 
