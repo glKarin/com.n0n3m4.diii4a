@@ -38,6 +38,7 @@ public final class Constants
             "Fix weapon model depth hack in player view in Quake4.",
             "Add player body view in DOOM3/Quake4.",
             "Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.",
+            "Default enable `Standalone game data directory`.",
         };
 	};
 

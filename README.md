@@ -95,6 +95,7 @@ Tag with `-free` only for F-Droid update.
 * Fix weapon model depth hack in player view in Quake4.
 * Add player body view in DOOM3/Quake4.
 * Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.
+* Default enable `Standalone game data directory`.
 
 ----------------------------------------------------------------------------------
 
@@ -106,6 +107,7 @@ Tag with `-free` only for F-Droid update.
 * 雷神之锤4修复玩家视角内武器模型的错误裁剪.
 * 毁灭战士3/雷神之锤4新增玩家身体视角模型.
 * 毁灭战士3/雷神之锤4/掠食(2006)新增cvar `harm_in_smoothJoystick`控制启用平滑摇杆.
+* 默认启用`游戏数据独立文件夹`.
 
 ----------------------------------------------------------------------------------
 

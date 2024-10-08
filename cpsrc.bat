@@ -35,6 +35,8 @@ del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\maps
 del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\*.cfg
 del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\astyle.*
 del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\premake4.exe
+del /S/Q %DST_PATH%\Q3E\src\main\jni\etw\etmain
+rmdir /S/Q %DST_PATH%\Q3E\src\main\etw\etmain\*
 
 rem xcopy /Y/Q %SRC_PATH%\CHANGES.zh.md %DST_PATH%\
 rem xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\

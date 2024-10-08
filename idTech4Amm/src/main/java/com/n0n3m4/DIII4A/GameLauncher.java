@@ -113,8 +113,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 @SuppressLint({"ApplySharedPref", "CommitPrefEdits"})
 public class GameLauncher extends Activity
@@ -1022,6 +1027,7 @@ public class GameLauncher extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
 		Q3EUtils.DumpPID(this);
         Q3ELang.Locale(this);
 
@@ -1766,7 +1772,7 @@ public class GameLauncher extends Activity
             if (grantResults[i] != PackageManager.PERMISSION_GRANTED)
             {
                 if (list == null)
-                    list = new ArrayList<String>();
+                    list = new ArrayList<>();
                 list.add(permissions[i]);
             }
         }
@@ -1864,7 +1870,26 @@ public class GameLauncher extends Activity
     private void OpenUpdate()
     {
         if (IsUpdateRelease())
-            ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.update_) + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetUpdateText(this));
+		{
+			Object[] args = new Object[1];
+			Runnable callback = new Runnable() {
+				@Override
+				public void run()
+				{
+					AlertDialog.Builder builder = (AlertDialog.Builder)args[0];
+					builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+						@Override
+						public void onDismiss(DialogInterface dialog)
+						{
+							OpenUpdateTips();
+						}
+					});
+				}
+			};
+			ContextUtility.OpenMessageDialog(this, Q3ELang.tr(this, R.string.update_) + Constants.CONST_APP_NAME + "(" + Constants.CONST_CODE + ")", TextHelper.GetUpdateText(this), callback, args);
+		}
+		else
+			OpenUpdateTips();
     }
 
     private boolean IsUpdateRelease()
@@ -1878,6 +1903,133 @@ public class GameLauncher extends Activity
         return true;
     }
 
+	private static class TipState
+	{
+		public final String name;
+		public final int    version;
+		public       int    checked;
+
+		public TipState(String name, int version, int checked)
+		{
+			this.name = name;
+			this.version = version;
+			this.checked = checked;
+		}
+
+		public TipState(String str)
+		{
+			String[] part = str.trim().split(" ");
+			name = part[0];
+			version = Integer.parseInt(part[1]);
+			checked = Integer.parseInt(part[2]);
+		}
+
+		public boolean NeedCheck(String n)
+		{
+			return name.equals(n) && checked == 0 && Constants.CONST_UPDATE_RELEASE >= version;
+		}
+
+		public String ToString()
+		{
+			return name + " " + version + " " + checked;
+		}
+	}
+
+	private void OpenUpdateTips()
+	{
+		Map<String, Integer> defaultTips = new LinkedHashMap<>();
+		defaultTips.put("STANDALONE_DIRECTORY", 57);
+
+		OpenUpdateTipsDialog(defaultTips, null);
+	}
+
+	private void OpenUpdateTipsDialog(Map<String, Integer> defaultTips, Set<String> ignore)
+	{
+		final String UPDATE_TIPS = "UPDATE_TIPS";
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		Set<String> stateSet = pref.getStringSet(UPDATE_TIPS, new TreeSet<>());
+		Set<String> writeSet = new TreeSet<>(stateSet);
+
+		Set<String> handled = new HashSet<>();
+		if(null != ignore)
+			handled.addAll(ignore);
+
+		for(Map.Entry<String, Integer> def : defaultTips.entrySet())
+		{
+			if(handled.contains(def.getKey()))
+				continue;
+
+			handled.add(def.getKey());
+
+			TipState tmp = null;
+			for(String state : writeSet)
+			{
+				TipState tt = new TipState(state);
+				if(def.getKey().equals(tt.name))
+				{
+					tmp = tt;
+					writeSet.remove(state);
+					break;
+				}
+			}
+			final TipState t = null == tmp ? new TipState(def.getKey(), def.getValue(), 0) : tmp;
+
+			if(t.NeedCheck("STANDALONE_DIRECTORY") || !pref.contains(Q3EPreference.GAME_STANDALONE_DIRECTORY))
+			{
+				String Endl = TextHelper.GetDialogMessageEndl();
+				String message = Q3ELang.tr(GameLauncher.this, R.string.idtech4amm_requires_enable_game_standalone_directory_since_version_57) + Endl
+						+ Q3ELang.tr(GameLauncher.this, R.string.you_can_also_disable_it_like_older_version) + Endl
+						+ Q3ELang.tr(GameLauncher.this, R.string.you_can_also_change_it_manually_on_launcher_settings) + Endl
+						+ Q3ELang.tr(GameLauncher.this, R.string.you_can_view_all_support_games_data_directory_path_by_tips_button_above_chooser_button_in_launcher)
+						;
+
+				AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, Q3ELang.tr(GameLauncher.this, R.string.enable_game_standalone_directory), TextHelper.GetDialogMessage(message));
+				builder.setPositiveButton(R.string.enable, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+						t.checked = 1;
+						writeSet.add(t.ToString());
+						pref.edit().putBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true)
+								.putStringSet(UPDATE_TIPS, writeSet)
+								.commit();
+					}
+				});
+				builder.setNeutralButton(R.string.ignore, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+						t.checked = 3;
+						writeSet.add(t.ToString());
+						pref.edit().putStringSet(UPDATE_TIPS, writeSet).commit();
+					}
+				});
+				builder.setNegativeButton(R.string.disable, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+						t.checked = 2;
+						writeSet.add(t.ToString());
+						pref.edit().putBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false)
+								.putStringSet(UPDATE_TIPS, writeSet)
+								.commit();
+					}
+				});
+				builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+					@Override
+					public void onDismiss(DialogInterface dialog)
+					{
+						OpenUpdateTipsDialog(defaultTips, handled);
+					}
+				});
+				AlertDialog dialog = builder.create();
+				dialog.show();
+			}
+
+			break;
+		}
+	}
+
 	private void SetCmdText(String text)
     {
 		if(null == text || text.isEmpty())
@@ -1887,18 +2039,15 @@ public class GameLauncher extends Activity
             return;
         int pos = edit.getSelectionStart();
         edit.setText(text);
-        if (text != null && !text.isEmpty())
-        {
-            pos = Math.max(0, Math.min(pos, text.length()));
-            try
-            {
-                edit.setSelection(pos);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
+		pos = Math.max(0, Math.min(pos, text.length()));
+		try
+		{
+			edit.setSelection(pos);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
     }
 
 	private String GetCmdText()
