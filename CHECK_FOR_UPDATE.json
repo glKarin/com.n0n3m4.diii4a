@@ -2,6 +2,6 @@
     "release":57,
     "update":"2024-10-01",
     "version":"1.1.0harmattan57",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan57/idTech4A++_1.1.0harmattan57.apk",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan57/idTech4A++_1.1.0harmattan57-2.apk",
     "changes":"  * Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game data directory named `etmain` and `legacy`. More view in `https://www.etlegacy.com`.\n  * Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in `https://www.moddb.com/mods/quake-4-hardqore`.\n  * Add `ambientLighting` shader, add ambient lighting model(`harm_r_lightingModel` to 4) in DOOM3/Quake4/Prey.\n  * Add effects color alpha in Quake4.\n  * Fix `displacement` and `displacementcube` GLSL shader in Quake4. e.g. water in `recomp` map and blood pool in `waste` map.\n  * Fix weapon model depth hack in player view in Quake4.\n  * Add player body view in DOOM3/Quake4.\n  * Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.\n  * Default enable `Standalone game data directory`."
 }
