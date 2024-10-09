@@ -9553,10 +9553,8 @@ void VPCALL idSIMD_SSE::MatX_MultiplyMatX(idMatX &dst, const idMatX &m1, const i
 											// Calculating first 4 elements in the third row of the destination matrix.
 											movss		xmm4, dword ptr [edx+48]
 											movss		xmm5, dword ptr [edx+52]
-											movlps		qword ptr [eax+24], xmm7 ;
-											save 2nd
-											movhps		qword ptr [eax+32], xmm7 ;
-											row
+											movlps		qword ptr [eax+24], xmm7 ; save 2nd
+											movhps		qword ptr [eax+32], xmm7 ; row
 											movss		xmm6, dword ptr [edx+56]
 											movss		xmm7, dword ptr [edx+60]
 											shufps		xmm4, xmm4, 0

@@ -72,7 +72,7 @@ OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
 OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
 OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
 OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
-OPTION(GAME_ETW         "Build Enemy Territory Wolfenstein"     ON)
+OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
 
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
@@ -91,7 +91,7 @@ if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTC
     add_subdirectory (deplibs) # common depend libraries
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTC OR GAME_ETW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW)
     message(STATUS "Build common static libraries")
     add_subdirectory (common)
 endif()
@@ -141,6 +141,6 @@ if(GAME_DOOM)
 endif()
 
 if(GAME_ETW)
-    message(STATUS "Build Enemy Territory Wolfenstein")
+    message(STATUS "Build Wolfenstein: Enemy Territory")
     add_subdirectory (etw) # ETW
 endif()

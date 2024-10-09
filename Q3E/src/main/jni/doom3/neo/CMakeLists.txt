@@ -233,7 +233,15 @@ elseif(cpu STREQUAL "aarch64")
 elseif(cpu MATCHES "i.86")
 	set(cpu "x86")
 elseif(cpu MATCHES "[aA][mM][dD]64" OR cpu MATCHES "[xX]64")
+	if(MSVC)
+		if(CMAKE_SIZEOF_VOID_P EQUAL 8) # sizeof(void*) == 8 => must be amd64
+			set(cpu "x86_64")
+		else() # should be i386
+			set(cpu "x86")
+		endif()
+	else()
 	set(cpu "x86_64")
+	endif()
 elseif(cpu MATCHES "[aA][rR][mM].*") # some kind of arm..
 	# On 32bit Raspbian gcc -dumpmachine returns sth starting with "arm-",
 	# while clang -dumpmachine says "arm6k-..." - try to unify that to "arm"
@@ -323,7 +331,7 @@ if(WIN32)
 	include_directories(${SDL2_INCLUDE_DIR})
 	set(SDLx_LIBRARY ${SDL2_LIBRARIES})
 	add_definitions(-D_SDL)
-	include_directories("externlibs/include")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/include")
 	set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
 endif()
 
@@ -523,6 +531,7 @@ if(WIN32)
 			ole32
 			dsound ksuser #k
 			)
+	set(DIRECTXSDK_INCLUDE_DIR)
 elseif(ANDROID)
 	set(sys_libs ${sys_libs} android dl EGL)
 	if(NOT USE_MINIZ)
@@ -689,7 +698,7 @@ set(src_jpeg
 		)
 
 add_globbed_headers(src_jpeg "externlibs/jpeg-8d")
-include_directories("externlibs/jpeg-8d")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/jpeg-8d")
 add_library(static_jpeg STATIC ${src_jpeg})
 
 set(local_libs ${local_libs} static_jpeg)
@@ -1133,7 +1142,7 @@ set(DOOM3_MOD_DIR "${MOD_DIR}/doom3")
 set(QUAKE4_MOD_DIR "${MOD_DIR}/quake4")
 set(PREY_MOD_DIR "${MOD_DIR}/prey")
 
-include_directories("externlibs")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs")
 
 if(NOT WIN32)
 	if(COMPILE_CURL STREQUAL "1")
@@ -1235,11 +1244,13 @@ add_globbed_headers(src_ogg "externlibs/libogg")
 add_globbed_headers(src_ogg "externlibs/libvorbis")
 include_directories("externlibs/libogg/include")
 include_directories("externlibs/libvorbis/include")
+if(ANDROID)
 include_directories("sys/android")
+endif()
 add_library(static_ogg STATIC ${src_ogg})
-target_include_directories(static_ogg PRIVATE "externlibs/libogg/include/ogg")
-target_include_directories(static_ogg PRIVATE "externlibs/libvorbis/include/vorbis")
-target_include_directories(static_ogg PRIVATE "externlibs/libvorbis/lib")
+target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libogg/include/ogg")
+target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/include/vorbis")
+target_include_directories(static_ogg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/externlibs/libvorbis/lib")
 set(local_libs ${local_libs} static_ogg)
 
 set(src_core
@@ -1483,6 +1494,9 @@ if(CORE)
 					${src_sys_core}
 					${src_editor_tools}
 					)
+		endif()
+		if(WIN32 AND MSVC AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+			target_include_directories(${DOOM3BINARY} PRIVATE ${DIRECTXSDK_INCLUDE_PATH})
 		endif()
 	endif()
 
@@ -1996,6 +2010,9 @@ if(RAVEN)
 					${src_editor_tools}
 					)
 		endif()
+		if(WIN32 AND MSVC AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+			target_include_directories(${QUAKE4BINARY} PRIVATE ${DIRECTXSDK_INCLUDE_PATH})
+		endif()
 	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
@@ -2146,6 +2163,9 @@ if(HUMANHEAD)
 					${src_sys_core}
 					${src_editor_tools}
 					)
+		endif()
+		if(WIN32 AND MSVC AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+			target_include_directories(${PREYBINARY} PRIVATE ${DIRECTXSDK_INCLUDE_PATH})
 		endif()
 	endif()
 
