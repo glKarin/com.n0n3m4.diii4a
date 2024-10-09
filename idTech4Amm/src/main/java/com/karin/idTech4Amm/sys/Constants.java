@@ -12,8 +12,8 @@ import java.util.Date;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 56;
-    public static final String CONST_RELEASE = "2024-08-23";
+    public static final int    CONST_UPDATE_RELEASE = 57;
+    public static final String CONST_RELEASE = "2024-10-01";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -30,14 +30,15 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.",
-            "Fix environment reflection shader in DOOM3/Quake4/Prey.",
-            "Add ambient lighting model with `harm_r_lightingModel` 0 and remove r_noLight=2 in DOOM3/Quake4/Prey.",
-            "Reduce game crash when change mod/reloadEngine/vid_restart in DOOM3/Quake4/Prey.",
-            "Support switch weapon in DOOM 3(write `bind \"YOUR_KEY\" \"IMPULSE_51\"` to your DoomConfig.cfg or autoexec.cfg).",
-            "Add `LibreCoop(RoE)` mod of DOOM3 support, game data directory named `librecoopxp`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop") + "`.",
-            "Add `Perfected Doom 3` mod of DOOM3 support, game data directory named `perfected`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3") + "`.",
-            "Add `Perfected Doom 3 : Resurrection of Evil` mod of DOOM3 support, game data directory named `perfected_roe`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3 : Resurrection of Evil") + "`.",
+            "Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game data directory named `etmain` and `legacy`. More view in `" + TextHelper.GenLinkText("https://www.etlegacy.com", "ET: Legacy") + "`.",
+            "Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/quake-4-hardqore", "Quake 4: Hardqore") + "`.",
+            "Add `ambientLighting` shader, add ambient lighting model(`harm_r_lightingModel` to 4) in DOOM3/Quake4/Prey.",
+            "Add effects color alpha in Quake4.",
+            "Fix `displacement` and `displacementcube` GLSL shader in Quake4. e.g. water in `recomp` map and blood pool in `waste` map.",
+            "Fix weapon model depth hack in player view in Quake4.",
+            "Add player body view in DOOM3/Quake4.",
+            "Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.",
+            "Default enable `Standalone game data directory`.",
         };
 	};
 

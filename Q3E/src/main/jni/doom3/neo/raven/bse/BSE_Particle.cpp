@@ -182,25 +182,7 @@ void rvBSEParticle::ParseParametric(idLexer &src, rvBSEParticleParm *parm)
 		return;
 	}
 
-#ifdef _HUMANHEAD
-#define NEG_NUMBER_TOKEN(token) \
-	if(!idStr::Cmp(token, "-")) { \
-		if(!src.ReadToken(&token)) { \
-			src.Error("`-` missing number"); \
-			return; \
-		} \
-	}
-#endif
-
-#ifdef _HUMANHEAD
-	if (token.IsNumeric() || !idStr::Cmp(token, "-"))
-#else
-	if (token.IsNumeric())
-#endif
-	{
-#ifdef _HUMANHEAD
-		NEG_NUMBER_TOKEN(token);
-#endif
+	if (token.IsNumeric()) {
 		// can have a to + 2nd parm
 		parm->from = parm->to = atof(token);
 
@@ -211,31 +193,11 @@ void rvBSEParticle::ParseParametric(idLexer &src, rvBSEParticleParm *parm)
 					return;
 				}
 
-#ifdef _HUMANHEAD
-				NEG_NUMBER_TOKEN(token);
-#endif
 				parm->to = atof(token);
 			} else {
 				src.UnreadToken(&token);
 			}
 		}
-#ifdef _HUMANHEAD
-		if(src.ReadToken(&token)) // a to b with c
-		{
-			if(!idStr::Icmp(token, "with"))
-			{
-				NEG_NUMBER_TOKEN(token);
-				src.ReadToken(&token); // a number
-			}
-			else
-				src.UnreadToken(&token);
-		}
-		else
-			src.UnreadToken(&token);
-#endif
-#ifdef _HUMANHEAD
-#undef NEG_NUMBER_TOKEN
-#endif
 	} else {
 		// table
 		parm->table = static_cast<const idDeclTable *>(declManager->FindType(DECL_TABLE, token, false));
@@ -477,13 +439,6 @@ rvBSEParticleStage *rvBSEParticle::ParseParticleStage(idLexer &src)
 			continue;
 		}
 
-#ifdef _HUMANHEAD
-		if (!token.Icmp("lowSkippable")) {
-			src.ReadToken(&token);
-			continue;
-		}
-#endif
-
 		src.Error("unknown token %s\n", token.c_str());
 	}
 
@@ -536,17 +491,6 @@ bool rvBSEParticle::Parse(const char *text, const int textLength, bool noCaching
 			continue;
 		}
 
-#ifdef _HUMANHEAD
-		if (!token.Icmp("bounds")) {
-			src.ParseFloat();
-			src.ParseFloat();
-			src.ParseFloat();
-			src.ParseFloat();
-			src.ParseFloat();
-			src.ParseFloat();
-			continue;
-		}
-#endif
 
 		src.Warning("bad token %s", token.c_str());
 		MakeDefault();
@@ -921,13 +865,20 @@ void rvBSEParticleStage::Default()
 	fadeColor.y = 0.0f;
 	fadeColor.z = 0.0f;
 	fadeColor.w = 0.0f;
+#if 1
+    fadeInFraction = 0.0f;
+    fadeOutFraction = 0.0f;
+#else
 	fadeInFraction = 0.1f;
 	fadeOutFraction = 0.25f;
+#endif
 	fadeIndexFraction = 0.0f;
 	boundsExpansion = 0.0f;
 	randomDistribution = true;
 	entityColor = false;
 	cycleMsec = (particleLife + deadTime) * 1000;
+
+    fade = false;
 }
 
 /*
@@ -1479,7 +1430,7 @@ rvBSEParticleStage::ParticleColors
 */
 void rvBSEParticleStage::ParticleColors(rvBSE_particleGen_t *g, idDrawVert *verts) const
 {
-	float	fadeFraction = 1.0f;
+	float	fadeFraction = fade ? g->frac : 1.0f;
 
 	// most particles fade in at the beginning and fade out at the end
 	if (g->frac < fadeInFraction) {

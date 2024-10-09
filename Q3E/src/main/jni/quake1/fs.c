@@ -1394,18 +1394,18 @@ FS_AddGameHierarchy
 static void FS_AddGameHierarchy (const char *dir)
 {
 	char vabuf[1024];
-	// Add the common game directory
-	FS_AddGameDirectory (va(vabuf, sizeof(vabuf), "%s%s/", fs_basedir, dir));
-
-	if (*fs_userdir)
-		FS_AddGameDirectory(va(vabuf, sizeof(vabuf), "%s%s/", fs_userdir, dir));
-#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is highest
+#ifdef __ANDROID__ //karin: add /Android/data/<package>/files/diii4a/<game_if_enable standalone_directory>/<mod>: priority is lowest
 	extern const char * Sys_ApplicationHomePath(void);
 	const char *app_path = Sys_ApplicationHomePath();
 	if(app_path && app_path[0]) {
 		FS_AddGameDirectory(va(vabuf, sizeof(vabuf), "%s%s/", app_path, dir));
 	}
 #endif
+	// Add the common game directory
+	FS_AddGameDirectory (va(vabuf, sizeof(vabuf), "%s%s/", fs_basedir, dir));
+
+	if (*fs_userdir)
+		FS_AddGameDirectory(va(vabuf, sizeof(vabuf), "%s%s/", fs_userdir, dir));
 }
 
 

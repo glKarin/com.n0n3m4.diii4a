@@ -110,21 +110,22 @@ public class KDebugTextView extends TextView {
             m_memoryInfo.Mb();
 
             long app_total_used = m_memoryInfo.native_memory + m_memoryInfo.java_memory;
-            String total_used_str = m_memoryInfo.graphics_memory >= 0 ? "" + (app_total_used + m_memoryInfo.graphics_memory) : (app_total_used + "<Excluding graphics memory>");
-            String graphics_mem_str = m_memoryInfo.graphics_memory >= 0 ? "" + m_memoryInfo.graphics_memory : "unknown";
+            String total_used_str = m_memoryInfo.graphics_memory >= 0 ? "" + (app_total_used + m_memoryInfo.graphics_memory) : (app_total_used + "(Excluding graphics memory)");
+            String graphics_mem_str = m_memoryInfo.graphics_memory >= 0 ? "" + m_memoryInfo.graphics_memory : "<unknown>";
             int percent = (int)Math.round(((double) m_memoryInfo.used_memory / (double)m_memoryInfo.total_memory) * 100);
             long availMem = m_memoryInfo.total_memory - m_memoryInfo.used_memory;
 
-            String sb = "App->" +
-                    "Dalvik:" + m_memoryInfo.java_memory + "|" +
-                    "Native:" + m_memoryInfo.native_memory + "|" +
-                    "Graphics:" + graphics_mem_str + "|" +
-                    "≈" + total_used_str + "\n" +
-                    "Sys->" +
-                    "Used:" + m_memoryInfo.used_memory +
-                    "/Total:" + m_memoryInfo.total_memory + "|" +
-                    percent + "%" + "|" +
-                    "≈" + availMem;
+            String sb = "App:"
+                    + "Dalvik(" + m_memoryInfo.java_memory + ")+"
+                    + "Native(" + m_memoryInfo.native_memory + ")+"
+                    + "Graphics(" + graphics_mem_str + ")"
+                    + "≈" + total_used_str + "\n"
+                    + "Sys:"
+                    + "Used(" + m_memoryInfo.used_memory + ")/"
+                    + "Total(" + m_memoryInfo.total_memory + ")"
+                    + "≈" + percent + "%"
+                    + "-=" + availMem
+                    ;
             return sb;
         }
 

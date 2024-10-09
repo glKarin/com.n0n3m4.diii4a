@@ -1,0 +1,612 @@
+; ------------------------
+; ET:L NSIS installer
+; ------------------------
+; Before running NSIS, ensure to add in the misc\wininstaller folder (Unicode versions):
+; - the NSIS zip plug-in             (https://nsis.sourceforge.io/ZipDLL_plug-in)
+; - the NSIS UnTGZ plug-in           (https://nsis.sourceforge.io/UnTGZ_plug-in)
+; - the NSIS md5 plug-in             (https://nsis.sourceforge.io/MD5_plugin)
+; - the NSIS simple firewall plug-in (https://nsis.sourceforge.io/NSIS_Simple_Firewall_Plugin)
+
+!define VERSION "@CPACK_PACKAGE_VERSION@"
+!define RESOURCE_PATH "@SOURCE_DIR@\misc\"
+
+; ------------------------
+; GENERAL
+; ------------------------
+Unicode True
+
+!addplugindir "@SOURCE_DIR@\misc\wininstaller\plugins"
+CRCCheck on
+RequestExecutionLevel admin
+
+; Variables
+Name "ET: Legacy ${VERSION}"
+OutFile "@CPACK_PACKAGE_FILE_NAME@.exe"
+BrandingText "ET: Legacy ${VERSION} | https://www.etlegacy.com"
+!define PRODUCT_DIR_REGKEY "SOFTWARE\ETLegacy"
+!define PRODUCT_UNINST_KEY "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\ETLegacy"
+InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" "InstallPath"
+InstallDir "$PROGRAMFILES@CPACK_BITS@\ETLegacy\"
+
+; Header file
+!include MUI2.nsh
+!include Sections.nsh
+
+!include FileFunc.nsh
+!include LogicLib.nsh
+
+; Interface configuration
+!define MUI_ICON "${RESOURCE_PATH}\etl.ico"
+!define MUI_UNICON "${RESOURCE_PATH}\etl.ico"
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_BITMAP "${RESOURCE_PATH}\wininstaller\header.bmp"     ; 150x57
+!define MUI_WELCOMEFINISHPAGE_BITMAP "${RESOURCE_PATH}\wininstaller\side.bmp" ; 164x314
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "${RESOURCE_PATH}\wininstaller\side.bmp"
+!define MUI_COMPONENTSPAGE_SMALLDESC
+!define MUI_ABORTWARNING
+!define MUI_UNCOMPONENTSPAGE_SMALLDESC
+
+; Pages
+!define MUI_FINISHPAGE_TEXT $(DESC_Section0)
+!define MUI_FINISHPAGE_RUN "$INSTDIR\etl.exe"
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "${RESOURCE_PATH}\wininstaller\COPYING.txt"
+!define MUI_PAGE_HEADER_TEXT "License Agreement - Assets"
+!insertmacro MUI_PAGE_LICENSE "${RESOURCE_PATH}\wininstaller\EULA_Wolfenstein_Enemy_Territory.txt"
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+!insertmacro MUI_UNPAGE_WELCOME
+!insertmacro MUI_UNPAGE_COMPONENTS
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
+
+; Language files
+!insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "Polish"
+;insertmacro MUI_LANGUAGE "German"
+;!insertmacro MUI_LANGUAGE "Spanish"
+;!insertmacro MUI_LANGUAGE "Japanese"
+;!insertmacro MUI_LANGUAGE "Korean"
+;!insertmacro MUI_LANGUAGE "Italian"
+;!insertmacro MUI_LANGUAGE "Dutch"
+;!insertmacro MUI_LANGUAGE "Danish"
+;!insertmacro MUI_LANGUAGE "Swedish"
+;!insertmacro MUI_LANGUAGE "Norwegian"
+;!insertmacro MUI_LANGUAGE "NorwegianNynorsk"
+;!insertmacro MUI_LANGUAGE "Finnish"
+;!insertmacro MUI_LANGUAGE "Greek"
+;!insertmacro MUI_LANGUAGE "Russian"
+;!insertmacro MUI_LANGUAGE "Portuguese"
+;!insertmacro MUI_LANGUAGE "PortugueseBR"
+;!insertmacro MUI_LANGUAGE "Ukrainian"
+;!insertmacro MUI_LANGUAGE "Czech"
+;!insertmacro MUI_LANGUAGE "Slovak"
+;!insertmacro MUI_LANGUAGE "Croatian"
+;!insertmacro MUI_LANGUAGE "Bulgarian"
+;!insertmacro MUI_LANGUAGE "Hungarian"
+;!insertmacro MUI_LANGUAGE "Romanian"
+;!insertmacro MUI_LANGUAGE "Latvian"
+;!insertmacro MUI_LANGUAGE "Macedonian"
+;!insertmacro MUI_LANGUAGE "Estonian"
+;!insertmacro MUI_LANGUAGE "Turkish"
+;!insertmacro MUI_LANGUAGE "Lithuanian"
+;!insertmacro MUI_LANGUAGE "Slovenian"
+;!insertmacro MUI_LANGUAGE "Serbian"
+
+; ---------------------
+; Lang Strings
+; ---------------------
+
+; English
+LangString DESC_Section0 ${LANG_ENGLISH} "ET: Legacy ${VERSION} has been installed on your computer.$\n$\n\
+You will find your ETKEY, profile folder and all downloaded files in the $DOCUMENTS\ETLegacy directory."
+LangString DESC_Section1 ${LANG_ENGLISH} "Integrity Error: Assets MD5 checksum failed."
+LangString DESC_Section2 ${LANG_ENGLISH} "Download Error: Couldn't fetch Installer file."
+LangString DESC_Section3 ${LANG_ENGLISH} "Integrity Error: Installer MD5 checksum failed."
+LangString DESC_Section4 ${LANG_ENGLISH} "During extraction of Wolfenstein: Enemy Territory assets the screen will get black for a few seconds."
+LangString DESC_Section5 ${LANG_ENGLISH} "Fatal Error: Installer extraction failed."
+LangString DESC_Section6 ${LANG_ENGLISH} "Fatal Error: Assets copy failed."
+LangString DESC_Section7 ${LANG_ENGLISH} "Download Error: Couldn't fetch Patch file."
+LangString DESC_Section8 ${LANG_ENGLISH} "Integrity Error: Patch MD5 checksum failed."
+LangString DESC_Section9 ${LANG_ENGLISH} "Fatal Error: Patch extraction failed."
+LangString DESC_Section10 ${LANG_ENGLISH} "Make sure to copy Wolfenstein: Enemy Territory assets (pak0.pk3, pak1.pk3, pak2.pk3) into $INSTDIR\etmain before you run ET: Legacy."
+LangString DESC_Section11 ${LANG_ENGLISH} "Download Error: Couldn't fetch Omni-bot files."
+LangString DESC_Section12 ${LANG_ENGLISH} "Fatal Error: Omni-bot extraction failed."
+LangString DESC_Section13 ${LANG_ENGLISH} "No ETKEY found. ET: Legacy will create a new ETKEY upon start. If you got a backup of your own ETKEY copy it to $DOCUMENTS\ETLegacy\etmain."
+LangString DESC_Section14 ${LANG_ENGLISH} "Install ET: Legacy files."
+LangString DESC_Section15 ${LANG_ENGLISH} "Retrieve Wolfenstein: Enemy Territory assets. Data files will be downloaded if not found locally."
+LangString DESC_Section16 ${LANG_ENGLISH} "Install Omni-bot files for your server or offline training. The latest version will be downloaded."
+LangString DESC_Section17 ${LANG_ENGLISH} "Uninstall ET: Legacy."
+LangString DESC_Section18 ${LANG_ENGLISH} "Delete Wolfenstein: Enemy Territory assets."
+LangString DESC_Section19 ${LANG_ENGLISH} "Delete ETKEY and all created or downloaded files inside the $DOCUMENTS\ETLegacy folder."
+LangString DESC_Section20 ${LANG_ENGLISH} "ET: Legacy requires MS VC++ 2013 Redistributable, do you want to install it?"
+LangString DESC_Section21 ${LANG_ENGLISH} "Download Error: Couldn't fetch GeoIP file."
+LangString DESC_Section22 ${LANG_ENGLISH} "Fatal Error: GeoIP extraction failed."
+LangString DESC_Section23 ${LANG_ENGLISH} "Install GeoIP file. The latest version will be downloaded."
+LangString DESC_Section24 ${LANG_ENGLISH} "Download Error: Couldn't fetch WolfAdmin files."
+LangString DESC_Section25 ${LANG_ENGLISH} "Fatal Error: WolfAdmin extraction failed."
+LangString DESC_Section26 ${LANG_ENGLISH} "Install WolfAdmin files. The latest version will be downloaded."
+VIProductVersion "@FILE_VERSION@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "ET: Legacy Installer"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "ETL game installer"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "ET: Legacy Team"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "2012-@CPACK_PACKAGE_YEAR@ ET: Legacy Team"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "2012-@CPACK_PACKAGE_YEAR@ ET: Legacy Team"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "ETL Installer"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@FILE_VERSION@"
+
+; Polish
+LangString DESC_Section0 ${LANG_POLISH} "ET: Legacy ${VERSION} zostalo zainstalowane na twoim komputerze.$\n$\n\
+ETKEY, folder profilu i wszystkie sciagniete pliki znajdziesz w katalogu $DOCUMENTS\ETLegacy."
+LangString DESC_Section1 ${LANG_POLISH} "Blad Integrarnosci: Zla suma kontrolna MD5 glowne pliki."
+LangString DESC_Section2 ${LANG_POLISH} "Blad Pobierania: Nie udalo sie sciagnac Instalatora."
+LangString DESC_Section3 ${LANG_POLISH} "Blad Integrarnosci: Zla suma kontrolna MD5 Instalatora."
+LangString DESC_Section4 ${LANG_POLISH} "Podczas wypakowywania plikow Wolfenstein: Enemy Territory ekran stanie sie czarny na kilka sekund."
+LangString DESC_Section5 ${LANG_POLISH} "Blad Krytyczny: Wypakowywanie Instalatora nie powiodlo sie."
+LangString DESC_Section6 ${LANG_POLISH} "Blad Krytyczny: Kopiowanie nie powiodlo sie."
+LangString DESC_Section7 ${LANG_POLISH} "Blad Pobierania: Nie udalo sie sciagnac Latki."
+LangString DESC_Section8 ${LANG_POLISH} "Blad Integrarnosci: Zla suma kontrolna MD5 Latki."
+LangString DESC_Section9 ${LANG_POLISH} "Blad Krytyczny: Wypakowywanie Latki nie powiodlo sie."
+LangString DESC_Section10 ${LANG_POLISH} "Pamietaj, aby skopiowac glowne pliki Wolfenstein: Enemy Territory (pak0.pk3, pak1.pk3, pak2.pk3) do $INSTDIR\etmain przed uruchomieniem ET: Legacy."
+LangString DESC_Section11 ${LANG_POLISH} "Blad Pobierania: Nie udalo sie sciagnac plikow Omni-bot."
+LangString DESC_Section12 ${LANG_POLISH} "Blad Krytyczny: Wypakowywanie Omni-bot nie powiodlo sie."
+LangString DESC_Section13 ${LANG_POLISH} "Nie znaleziono ETKEY-a. ET: Legacy stworzy nowy ETKEY na starcie. Jesli masz kopie zapasowa swojego wlasnego ETKEY-a, skopiuj go do $DOCUMENTS\ETLegacy\etmain."
+LangString DESC_Section14 ${LANG_POLISH} "Zainstaluj pliki ET: Legacy."
+LangString DESC_Section15 ${LANG_POLISH} "Skopiuj glowne pliki Wolfenstein: Enemy Territory. W przypadku nieznalezienia na dysku twardym zostana one sciagniete."
+LangString DESC_Section16 ${LANG_POLISH} "Zainstaluj pliki Omni-bot dla twojego serwera lub treningu offline. Pobrana zostanie najnowsza wersja."
+LangString DESC_Section17 ${LANG_POLISH} "Odinstaluj ET: Legacy."
+LangString DESC_Section18 ${LANG_POLISH} "Usun glowne pliki Wolfenstein: Enemy Territory."
+LangString DESC_Section19 ${LANG_POLISH} "Usun ETKEY i wszystkie inne pliki z folderu $DOCUMENTS\ETLegacy."
+LangString DESC_Section20 ${LANG_POLISH} "ET: Legacy wymaga MS VC++ 2013 Redistributable, czy chcesz to zaintalowac?"
+LangString DESC_Section21 ${LANG_POLISH} "Blad Pobierania: Nie udalo sie sciagnac GeoIP."
+LangString DESC_Section22 ${LANG_POLISH} "Blad Krytyczny: Wypakowywanie GeoIP nie powiodlo sie."
+LangString DESC_Section23 ${LANG_POLISH} "Zainstaluj GeoIP. Pobrana zostanie najnowsza wersja."
+LangString DESC_Section24 ${LANG_POLISH} "Blad Pobierania: Nie udalo sie sciagnac WolfAdmina."
+LangString DESC_Section25 ${LANG_POLISH} "Blad Krytyczny: Wypakowywanie WolfAdmin nie powiodlo sie."
+LangString DESC_Section26 ${LANG_POLISH} "Zainstaluj WolfAdmin. Pobrana zostanie najnowsza wersja."
+
+VIAddVersionKey /LANG=${LANG_POLISH} "ProductName" "Instalator ET: Legacy"
+VIAddVersionKey /LANG=${LANG_POLISH} "Comments" "Instalator gry ETL"
+VIAddVersionKey /LANG=${LANG_POLISH} "CompanyName" "ET: Legacy Team"
+VIAddVersionKey /LANG=${LANG_POLISH} "LegalTrademarks" "2012-@CPACK_PACKAGE_YEAR@ ET: Legacy Team"
+VIAddVersionKey /LANG=${LANG_POLISH} "LegalCopyright" "2012-@CPACK_PACKAGE_YEAR@ ET: Legacy Team"
+VIAddVersionKey /LANG=${LANG_POLISH} "FileDescription" "Instalator ETL"
+VIAddVersionKey /LANG=${LANG_POLISH} "FileVersion" "@FILE_VERSION@"
+
+
+; ------------------------
+; INSTALL
+; ------------------------
+
+; Sections
+Section "ET: Legacy" FILES
+	SectionIn RO
+	SetOverwrite on
+	SetOutPath $INSTDIR
+	File /r /x omni-bot /x GeoIP.dat /x lualibs /x luascripts /x *.toml "@CPACK_PACKAGE_FILE_NAME@\*"
+
+	SimpleFC::AddApplication "ET: Legacy" "$INSTDIR\etl.exe" 0 2 "" 1
+	SimpleFC::AddApplication "ET: Legacy server" "$INSTDIR\etlded.exe" 0 2 "" 1
+SectionEnd
+
+!macro Packager pak hash next download
+	DetailPrint "Checking $INSTDIR for ${pak}"
+	IfFileExists "$INSTDIR\etmain\${pak}" 0 +3
+	StrCpy $tmp_path "$INSTDIR\etmain\${pak}"
+	GOTO ${pak}_hash
+
+	DetailPrint "Checking $EXEDIR for ${pak}"
+	IfFileExists "$EXEDIR\etmain\${pak}" 0 +3
+	StrCpy $tmp_path "$EXEDIR\etmain\${pak}"
+	GOTO ${pak}_hash
+
+	DetailPrint "Checking vanilla for ${pak}"
+	IfFileExists "$vanilla\etmain\${pak}" 0 +3
+	StrCpy $tmp_path "$vanilla\etmain\${pak}"
+	GOTO ${pak}_hash
+
+	DetailPrint "Checking Temp for ${pak}"
+	IfFileExists "$TEMP\etl_install\${pak}" 0 +3
+	StrCpy $tmp_path "$TEMP\etl_install\${pak}"
+	GOTO ${pak}_hash
+
+	GOTO ${download}
+
+	${pak}_hash:
+	md5dll::GetMD5File "$tmp_path"
+	Pop $0
+	${If} $0 == "${hash}"
+		${If} "$tmp_path" != "$INSTDIR\etmain\${pak}"
+			CopyFiles "$tmp_path" "$INSTDIR\etmain\"
+		${EndIf}
+		GOTO ${next}
+	${Else}
+		DetailPrint "Hash '${hash}' does not match ${pak}"
+		;Delete "$EXEDIR\${pak}"
+		MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(DESC_Section1) \
+			/SD IDCANCEL \
+			IDCANCEL USERCANCEL IDRETRY ${download}
+	${EndIf}
+!macroend
+
+Section "Wolfenstein: Enemy Territory assets" ASSETS
+	SetOverwrite ifdiff
+	AddSize 224530
+	SetOutPath $TEMP
+
+	var /GLOBAL tmp_path
+	var /GLOBAL vanilla
+
+	; Need to read the Vanilla clients installation path from the 32bit registry
+	SetRegView 32
+	ReadRegStr $vanilla HKLM "Software\Activision\Wolfenstein - Enemy Territory" "InstallPath"
+	; Pop back in to the installer target registry
+	SetRegView @CPACK_BITS@
+
+	GOTO COPY_PAK0
+
+	COPY_PAK0:
+		!insertmacro Packager "pak0.pk3" "9558347f477bfbdc65b06768ce2e31d1" COPY_PAK1 GET_INSTALL
+
+	COPY_PAK1:
+		!insertmacro Packager "pak1.pk3" "2502d531f5505d920ee1129baf392925" COPY_PAK2 GET_PATCH
+
+	COPY_PAK2:
+		!insertmacro Packager "pak2.pk3" "256da2aa10c43728f36515ddad1aa582" END GET_PATCH
+
+	GET_INSTALL:
+		IfFileExists "$TEMP\WolfET.exe" CHECK_INSTALL
+		IfFileExists "$EXEDIR\WolfET.exe" 0 +3
+		CopyFiles "$EXEDIR\WolfET.exe" "$TEMP\"
+		GOTO CHECK_INSTALL
+		NSISdl::download "https://wolffiles.de/filebase/ET/Full%20Version/WolfET.exe" WolfET.exe
+		IfFileExists "$TEMP\WolfET.exe" CHECK_INSTALL
+		NSISdl::download "https://mirror.etlegacy.com/WolfET.exe" WolfET.exe
+		IfFileExists "$TEMP\WolfET.exe" CHECK_INSTALL
+		MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(DESC_Section2) \
+			/SD IDCANCEL \
+			IDCANCEL USERCANCEL IDRETRY GET_INSTALL
+
+	CHECK_INSTALL:
+		md5dll::GetMD5File "$TEMP\WolfET.exe"
+		Pop $0
+		${If} $0 == "5cc104767ecdf0feb3a36210adf46a8e"
+		GOTO UNPACK_INSTALL
+		${Else}
+		Delete "$TEMP\WolfET.exe"
+		MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(DESC_Section3) \
+			/SD IDCANCEL \
+			IDCANCEL USERCANCEL IDRETRY GET_INSTALL
+		${EndIf}
+
+	UNPACK_INSTALL:
+		MessageBox MB_ICONINFORMATION|MB_OK $(DESC_Section4) /SD IDOK
+		ExecWait "$TEMP\WolfET.exe /x $TEMP\etl_install"
+		IfFileExists "$TEMP\etl_install\pak0.pk3" +2
+		MessageBox MB_ICONEXCLAMATION|MB_OK $(DESC_Section5) /SD IDOK
+		CopyFiles "$TEMP\etl_install\pak0.pk3" "$INSTDIR\etmain"
+		IfFileExists "$INSTDIR\etmain\pak0.pk3" +1
+		GOTO COPY_PAK0
+		MessageBox MB_ICONEXCLAMATION|MB_OK $(DESC_Section6) /SD IDOK
+
+	GET_PATCH:
+		IfFileExists "$TEMP\ET_Patch_2_60.exe" CHECK_PATCH
+		IfFileExists "$EXEDIR\ET_Patch_2_60.exe" 0 +3
+		CopyFiles "$EXEDIR\ET_Patch_2_60.exe" "$TEMP\"
+		GOTO CHECK_PATCH
+		NSISdl::download "https://wolffiles.de/filebase/ET/Patches/ET_Patch_2_60.exe" ET_Patch_2_60.exe
+		IfFileExists "$TEMP\ET_Patch_2_60.exe" CHECK_PATCH
+		NSISdl::download "https://mirror.etlegacy.com/ET_Patch_2_60.exe" ET_Patch_2_60.exe
+		IfFileExists "$TEMP\ET_Patch_2_60.exe" CHECK_PATCH
+		MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(DESC_Section7) \
+			/SD IDCANCEL \
+			IDCANCEL USERCANCEL IDRETRY GET_PATCH
+
+	CHECK_PATCH:
+		md5dll::GetMD5File "$TEMP\ET_Patch_2_60.exe"
+		Pop $0
+		${If} $0 == "a7ba6fdee3de6150b887068d58e91729"
+		GOTO UNPACK_PATCH
+		${Else}
+		Delete "$TEMP\ET_Patch_2_60.exe"
+		MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(DESC_Section8) \
+			/SD IDCANCEL \
+			IDCANCEL USERCANCEL IDRETRY GET_PATCH
+		${EndIf}
+
+	UNPACK_PATCH:
+		ExecWait "$TEMP\ET_Patch_2_60.exe /x $TEMP\etl_install"
+		GOTO COPY_PAK1
+
+	USERCANCEL:
+		Messagebox MB_OK|MB_ICONEXCLAMATION $(DESC_Section10) /SD IDOK
+
+	END:
+SectionEnd
+
+Section "Omni-bot" OMNIBOT
+	AddSize 65000 ; approx
+	SetOutPath $TEMP
+	GOTO GET_BOT
+
+	GET_BOT:
+		IfFileExists "$EXEDIR\@OMNIBOT_ARCHIVE@" 0 +3
+		CopyFiles "$EXEDIR\@OMNIBOT_ARCHIVE@" "$TEMP\"
+		GOTO UNPACK_BOT
+		IfFileExists "$TEMP\@OMNIBOT_ARCHIVE@" UNPACK_BOT
+		NSISdl::download "@OMNIBOT_ARCHIVE_URL@" @OMNIBOT_ARCHIVE@
+		IfFileExists "$TEMP\@OMNIBOT_ARCHIVE@" UNPACK_BOT
+		MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(DESC_Section11) \
+			/SD IDCANCEL \
+			IDCANCEL END IDRETRY GET_BOT
+
+	UNPACK_BOT:
+		; Lets not log the output, since it will actually slow down the unpacking
+		; nsisunz::UnzipToLog "$TEMP\@OMNIBOT_ARCHIVE@" "$INSTDIR\legacy"
+		nsisunz::Unzip "$TEMP\@OMNIBOT_ARCHIVE@" "$INSTDIR\legacy"
+		IfFileExists "$INSTDIR\legacy\omni-bot\*.*" END
+		MessageBox MB_ICONEXCLAMATION|MB_OK $(DESC_Section12) /SD IDOK
+
+	END:
+		SetOutPath $INSTDIR
+		CreateDirectory "$SMPROGRAMS\ETLegacy"
+		CreateShortCut "$SMPROGRAMS\ETLegacy\Launch ETLegacy with Omni-bot.lnk" "$INSTDIR\etl.exe"  "+set omnibot_enable 1 +set omnibot_path legacy\omni-bot\"
+SectionEnd
+
+Section "GeoIP" GEOIP
+	AddSize 600 ; approx
+	SetOutPath $TEMP
+	GOTO GET_GEOIP
+
+	GET_GEOIP:
+		IfFileExists "$EXEDIR\@GEOIP_ARCHIVE@" 0 +3
+		CopyFiles "$EXEDIR\@GEOIP_ARCHIVE@" "$TEMP\"
+		GOTO UNPACK_GEOIP
+		IfFileExists "$TEMP\@GEOIP_ARCHIVE@" UNPACK_GEOIP
+		NSISdl::download "@GEOIP_ARCHIVE_URL@" @GEOIP_ARCHIVE@
+		IfFileExists "$TEMP\@GEOIP_ARCHIVE@" UNPACK_GEOIP
+		MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(DESC_Section21) \
+			/SD IDCANCEL \
+			IDCANCEL END IDRETRY GET_GEOIP
+
+	UNPACK_GEOIP:
+		untgz::extract "$TEMP\@GEOIP_ARCHIVE@"
+		CopyFiles GeoIP.dat "$INSTDIR\legacy"
+		IfFileExists "$INSTDIR\legacy\GeoIP.dat" END
+		MessageBox MB_ICONEXCLAMATION|MB_OK $(DESC_Section22) /SD IDOK
+
+	END:
+SectionEnd
+
+Section "WolfAdmin" WOLFADMIN
+	AddSize 1800 ; approx
+	SetOutPath $TEMP
+	GOTO GET_WOLFADMIN
+
+	GET_WOLFADMIN:
+		IfFileExists "$EXEDIR\@WOLFADMIN_ARCHIVE@" 0 +3
+		CopyFiles "$EXEDIR\@WOLFADMIN_ARCHIVE@" "$TEMP\"
+		GOTO UNPACK_WOLFADMIN
+		IfFileExists "$TEMP\@WOLFADMIN_ARCHIVE@" UNPACK_WOLFADMIN
+		NSISdl::download "@WOLFADMIN_ARCHIVE_URL@" @WOLFADMIN_ARCHIVE@
+		IfFileExists "$TEMP\@WOLFADMIN_ARCHIVE@" UNPACK_WOLFADMIN
+		MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(DESC_Section24) \
+			/SD IDCANCEL \
+			IDCANCEL END IDRETRY GET_WOLFADMIN
+
+	UNPACK_WOLFADMIN:
+		untgz::extract "$TEMP\@WOLFADMIN_ARCHIVE@"
+		CopyFiles "wolfadmin\luascripts" "$INSTDIR\legacy"
+		CopyFiles "wolfadmin\lualibs" "$INSTDIR\legacy"
+		CopyFiles "wolfadmin\config\*.toml" "$INSTDIR\legacy"
+		IfFileExists "$INSTDIR\legacy\GeoIP.dat" END
+		MessageBox MB_ICONEXCLAMATION|MB_OK $(DESC_Section25) /SD IDOK
+
+	END:
+SectionEnd
+
+Section -URI
+	WriteRegStr HKCR "et" "URL Protocol" ""
+	WriteRegStr HKCR "et" "" "URL: Enemy Territory Protocol"
+	WriteRegStr HKCR "et\DefaultIcon" "" "$INSTDIR\etl.exe"
+	WriteRegStr HKCR "et\shell\open\command" "" "$INSTDIR\etl.exe +set fs_basepath $\"$INSTDIR$\" +connect $\"%1$\""
+SectionEnd
+
+Section -ETKEY
+	IfFileExists "$DOCUMENTS\ETLegacy\etmain\etkey" END
+	IfFileExists "$LOCALAPPDATA\Punkbuster\ET\etmain\etkey" COPYAPPDATA
+	ReadRegStr $1 HKLM "Software\Activision\Wolfenstein - Enemy Territory" "InstallPath"
+	IfFileExists "$1\etmain\etkey" COPYETMAIN
+	GOTO NOKEY
+
+	COPYAPPDATA:
+		MessageBox MB_YESNO "ETKEY found. Do you want to use it with ET: Legacy?" /SD IDYES IDNO END
+		CreateDirectory `$DOCUMENTS\ETLegacy\etmain`
+		CopyFiles `$LOCALAPPDATA\Punkbuster\ET\etmain\etkey` `$DOCUMENTS\ETLegacy\etmain`
+		GOTO END
+
+	COPYETMAIN:
+		MessageBox MB_YESNO "ETKEY found. Do you want to use it with ET: Legacy?" /SD IDYES IDNO END
+		CreateDirectory `$DOCUMENTS\ETLegacy\etmain`
+		CopyFiles `$1\etmain\etkey` `$DOCUMENTS\ETLegacy\etmain`
+		GOTO END
+
+	NOKEY:
+		Messagebox MB_OK|MB_ICONINFORMATION $(DESC_Section13) /SD IDOK
+		GOTO END
+
+	END:
+SectionEnd
+
+Section -Shortcuts SHORTCUTS
+	SetOutPath $INSTDIR
+	CreateDirectory "$SMPROGRAMS\ETLegacy"
+	CreateShortCut "$SMPROGRAMS\ETLegacy\Visit ETLegacy Homepage.lnk" "https://www.etlegacy.com" "" "$INSTDIR\etl.exe" 0
+	CreateShortCut "$SMPROGRAMS\ETLegacy\Launch ETLegacy.lnk" "$INSTDIR\etl.exe" "+set cl_renderer opengl1 +set com_hunkmegs 128"
+
+	; Do not add the Renderer 2 shortcut if we have not actually built it
+	${If} "@CPACK_RENDERER2_ACTIVE@" == "1"
+		CreateShortCut "$SMPROGRAMS\ETLegacy\Launch ETLegacy - Renderer2.lnk" "$INSTDIR\etl.exe" "+set cl_renderer opengl2 +set com_hunkmegs 512"
+	${EndIf}
+
+	CreateShortCut "$SMPROGRAMS\ETLegacy\Play on Official Server.lnk" "et://etlegacy.com:27960" "" "$INSTDIR\etl.exe" 0
+	CreateShortCut "$SMPROGRAMS\ETLegacy\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+	CreateShortCut "$DESKTOP\ETLegacy.lnk" "$INSTDIR\etl.exe"
+SectionEnd
+
+Section -Post
+	WriteUninstaller "$INSTDIR\uninstall.exe"
+	WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "InstallPath" "$INSTDIR"
+	WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "Version" "${VERSION}"
+	WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayName" "ET: Legacy"
+	WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${VERSION}"
+	WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "Publisher" "ET: Legacy Team"
+	WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "https://www.etlegacy.com"
+	WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\etl.exe"
+	WriteRegDWORD HKLM "${PRODUCT_UNINST_KEY}" "NoModify" 1
+	WriteRegDWORD HKLM "${PRODUCT_UNINST_KEY}" "NoRepair" 1
+	WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninstall.exe"
+SectionEnd
+
+; Section descriptions
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT ${FILES} $(DESC_Section14)
+!insertmacro MUI_DESCRIPTION_TEXT ${ASSETS} $(DESC_Section15)
+!insertmacro MUI_DESCRIPTION_TEXT ${OMNIBOT} $(DESC_Section16)
+!insertmacro MUI_DESCRIPTION_TEXT ${GEOIP} $(DESC_Section23)
+!insertmacro MUI_DESCRIPTION_TEXT ${WOLFADMIN} $(DESC_Section26)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+; ------------------------
+; UNINSTALL
+; ------------------------
+
+Section "un.ET: Legacy" UNFILES
+	SectionIN RO
+	Delete "$INSTDIR\*.*"
+	Delete "$INSTDIR\etmain\*.cfg"
+	RMDir /r "$INSTDIR\legacy"
+	DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
+	DeleteRegKey HKLM "${PRODUCT_UNINST_KEY}"
+	DeleteRegKey HKCR "et"
+	RMDir /r "$SMPROGRAMS\ETLegacy"
+	Delete "$DESKTOP\ETLegacy.lnk"
+	SimpleFC::RemoveApplication "$INSTDIR\etl.exe"
+	SimpleFC::RemoveApplication "$INSTDIR\etlded.exe"
+SectionEnd
+
+Section /o "un.Wolf: ET assets" UNASSETS
+	Delete "$INSTDIR\etmain\*.pk3"
+	RMDir "$INSTDIR\etmain"
+	RMDir "$INSTDIR"
+SectionEND
+
+Section /o "un.ET: Legacy User files" WOLFETL
+	RMDir /r "$DOCUMENTS\ETLegacy"
+SectionEND
+
+; Section descriptions
+!insertmacro MUI_UNFUNCTION_DESCRIPTION_BEGIN
+	!insertmacro MUI_DESCRIPTION_TEXT ${UNFILES} $(DESC_Section17)
+	!insertmacro MUI_DESCRIPTION_TEXT ${UNASSETS} $(DESC_Section18)
+	!insertmacro MUI_DESCRIPTION_TEXT ${WOLFETL} $(DESC_Section19)
+!insertmacro MUI_UNFUNCTION_DESCRIPTION_END
+
+; ------------------------
+; Init callbacks
+; ------------------------
+
+; User for setting the registry access for 32 or 64 bit
+Function .onInit
+	SetRegView @CPACK_BITS@
+
+	; Get parameters
+	var /GLOBAL cmdLineParams
+	Push $R0
+	${GetParameters} $cmdLineParams
+	; /? param (help)
+	ClearErrors
+	${GetOptions} $cmdLineParams '/?' $R0
+	IfErrors +3 0
+	MessageBox MB_OK "Available parameters are: /noassets /noomnibot /nogeoip /nowolfadmin /noshortcuts"
+	Abort
+	Pop $R0
+
+	; Initialise options
+	Var /GLOBAL option_noAssets
+	Var /GLOBAL option_noOmniBot
+	Var /GLOBAL option_noGeoIP
+	Var /GLOBAL option_noWolfAdmin
+	Var /GLOBAL option_noShortcuts
+
+	StrCpy $option_noAssets				0
+	StrCpy $option_noOmniBot			0
+	StrCpy $option_noGeoIP 				0
+	StrCpy $option_noWolfAdmin			0
+	StrCpy $option_noShortcuts			0
+
+	; Parse Parameters
+	Push $R0
+	Call parseParameters
+	Call processOptions
+	Pop $R0
+FunctionEnd
+
+Function un.onInit
+	SetRegView @CPACK_BITS@
+FunctionEnd
+
+; ------------------------
+; Functions
+; ------------------------
+
+Function parseParameters
+	; /noassets
+	${GetOptions} $cmdLineParams '/noassets' $R0
+	IfErrors +2 0
+	StrCpy $option_noAssets 1
+
+	; /noomnibot
+	${GetOptions} $cmdLineParams '/noomnibot' $R0
+	IfErrors +2 0
+	StrCpy $option_noOmniBot 1
+
+	; /nogeoip
+	${GetOptions} $cmdLineParams '/nogeoip' $R0
+	IfErrors +2 0
+	StrCpy $option_noGeoIP 1
+
+	; /nowolfadmin
+	${GetOptions} $cmdLineParams '/nowolfadmin' $R0
+	IfErrors +2 0
+	StrCpy $option_noWolfAdmin 1
+
+	; /noshortcuts
+	${GetOptions} $cmdLineParams '/noshortcuts' $R0
+	IfErrors +2 0
+	StrCpy $option_noShortcuts 1
+FunctionEnd
+
+Function processOptions
+	${If} $option_noAssets == "1"
+		!insertmacro UnselectSection ASSETS
+	${EndIf}
+
+	${If} $option_noOmniBot == "1"
+		!insertmacro UnselectSection OMNIBOT
+	${EndIf}
+
+	${If} $option_noGeoIP == "1"
+		!insertmacro UnselectSection GEOIP
+	${EndIf}
+
+	${If} $option_noWolfAdmin == "1"
+		!insertmacro UnselectSection WOLFADMIN
+	${EndIf}
+
+	${If} $option_noShortcuts == "1"
+		!insertmacro UnselectSection SHORTCUTS
+	${EndIf}
+FunctionEnd

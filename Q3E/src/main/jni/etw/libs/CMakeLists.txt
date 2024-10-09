@@ -1,0 +1,47 @@
+set(DEPLIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../deplibs")
+set(OPENAL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../doom3/neo/externlibs/openal-soft")
+set(GEN_DEPLIBS_PATH "${CMAKE_BINARY_DIR}/deplibs")
+set(DEPCOMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../common")
+
+set(LIBPNG_INCLUDE_DIRS "${DEPLIBS_PATH}")
+set(MINIZIP_INCLUDE_DIRS "${DEPLIBS_PATH}/minizip")
+set(JPEG_INCLUDE_DIR "${DEPLIBS_PATH}/libjpeg/libjpeg")
+set(FREETYPE_INCLUDE_DIRS "${DEPLIBS_PATH}/freetype/include")
+set(OPENAL_INCLUDE_DIR "${OPENAL_PATH}/include")
+set(VORBIS_INCLUDE_DIR "${DEPLIBS_PATH}/libogg/include" "${GEN_DEPLIBS_PATH}/libogg/include" "${DEPLIBS_PATH}/libvorbis/include")
+set(SQLITE3_INCLUDE_DIR "${DEPLIBS_PATH}/sqlite")
+set(ICONV_INCLUDE_DIR "${DEPLIBS_PATH}/iconv/include")
+set(CURL_INCLUDE_DIR "${DEPLIBS_PATH}/curl/include")
+set(LUA_INCLUDE_DIR "${DEPLIBS_PATH}/lua/lua-5.4.5/include")
+set(OPENSSL_INCLUDE_DIR "${GEN_DEPLIBS_PATH}/openssl/include" "${DEPLIBS_PATH}/openssl/include")
+
+include_directories(
+	${LIBPNG_INCLUDE_DIRS}
+	${MINIZIP_INCLUDE_DIRS}
+	${JPEG_INCLUDE_DIR}
+	${FREETYPE_INCLUDE_DIRS}
+	${VORBIS_INCLUDE_DIR}
+	${SQLITE3_INCLUDE_DIR}
+	${OPENAL_INCLUDE_DIR}
+	${ICONV_INCLUDE_DIR}
+	${CURL_INCLUDE_DIR}
+	${LUA_INCLUDE_DIR}
+	${OPENSSL_INCLUDE_DIR}
+	${DEPCOMMON_PATH}
+)
+
+set(JPEG_LIBRARY "jpeg")
+set(MINIZIP_LIBRARIES "minizip")
+set(LIBPNG_LIBRARIES "png")
+set(FREETYPE_LIBRARIES "freetype")
+set(OPENAL_LIBRARY "openal")
+set(OGG_LIBRARY "ogg")
+set(VORBIS_FILE_LIBRARY "vorbisfile")
+set(VORBIS_LIBRARY "vorbis")
+set(SQLITE3_LIBRARY "sqlite")
+set(ZLIB_LIBRARIES "z")
+set(CJSON_LIBRARY "cjson")
+set(CURL_LIBRARIES "curl")
+set(LUA_LIBRARIES "lua_shared")
+set(ICONV_LIBRARIES "iconv")
+set(OPENSSL_LIBRARIES "ssl") # "ssl_1_1" "crypto_1_1"

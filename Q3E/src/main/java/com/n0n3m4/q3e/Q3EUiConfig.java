@@ -59,6 +59,7 @@ public class Q3EUiConfig extends Activity
     private Q3EUiView vw;
     //k
     private boolean m_hideNav = true;
+    private boolean m_autoSave = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -84,6 +85,7 @@ public class Q3EUiConfig extends Activity
 
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
+        m_autoSave = preferences.getBoolean(Q3EPreference.AUTOSAVE_BUTTON_SETTINGS, true);
 
         RelativeLayout mainLayout = new RelativeLayout(this);
         RelativeLayout.LayoutParams params;
@@ -116,17 +118,65 @@ public class Q3EUiConfig extends Activity
     }
 
     @Override
+    protected void onDestroy()
+    {
+        if(m_autoSave)
+            vw.SaveAll();
+        super.onDestroy();
+    }
+
+/*    @Override
     protected void onPause()
     {
-        vw.SaveAll();
+        if(m_autoSave)
+            vw.SaveAll();
         super.onPause();
+    }*/
+
+    private boolean CheckModified()
+    {
+        if(!m_autoSave && vw.IsModified())
+        {
+            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    switch(which)
+                    {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            vw.SaveAll();
+                            dialog.dismiss();
+                            finish();
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            dialog.dismiss();
+                            finish();
+                            break;
+                        case DialogInterface.BUTTON_NEUTRAL:
+                        default:
+                            dialog.dismiss();
+                            break;
+                    }
+                }
+            };
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.warning);
+            builder.setMessage(R.string.button_setting_has_changed_can_you_save_it);
+            builder.setPositiveButton(R.string.yes, listener);
+            builder.setNegativeButton(R.string.no, listener);
+            builder.setNeutralButton(R.string.cancel, listener);
+            AlertDialog dialog = builder.create();
+            dialog.show();
+            return true;
+        }
+        else
+            return false;
     }
 
     @Override
     public void onBackPressed()
     {
-        vw.SaveAll();
-        super.onBackPressed();
+        if(!CheckModified())
+            super.onBackPressed();
     }
 
     //k
@@ -190,7 +240,8 @@ public class Q3EUiConfig extends Activity
         }
         else if (itemId == R.id.uiconfig_back)
         {
-            finish();
+            if(!CheckModified())
+                finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -467,7 +518,7 @@ public class Q3EUiConfig extends Activity
         editText.setEms(10);
         editText.setInputType(EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS | EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
         editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
-        editText.setHint(R.string.on_screen_buttons_layout_with_grid_limit_multiple_of_5);
+        editText.setHint(R.string.on_screen_buttons_layout_with_grid_limit);
 
         TextView textView = widget.findViewById(R.id.edit_line_label);
         textView.setText(R.string.position_unit);
@@ -482,7 +533,7 @@ public class Q3EUiConfig extends Activity
                 .setNeutralButton(R.string.reset, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SetupOnScreenButtonPositionUnit(50);
+                        SetupOnScreenButtonPositionUnit(0);
                     }
                 })
                 .setNegativeButton(R.string.cancel, null);
@@ -494,11 +545,11 @@ public class Q3EUiConfig extends Activity
     {
         if(unit < 0)
             unit = 0;
-        else if(unit % 5 != 0)
+/*        else if(unit % 5 != 0)
         {
             Toast.makeText(this, R.string.on_screen_buttons_position_unit_must_is_multiple_of_5_or_0, Toast.LENGTH_SHORT).show();
             return;
-        }
+        }*/
         Q3EPreference.SetStringFromInt(this, Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, unit);
         vw.UpdateGrid(unit);
     }

@@ -267,6 +267,9 @@ public:
 	int						secretAreasDiscovered;
 };
 
+#ifdef _MOD_VIEW_BODY
+class idViewBody;
+#endif
 class idPlayer : public idActor {
 #ifdef MOD_BOTS
 	friend class botAi;
@@ -431,6 +434,12 @@ public:
 	idVec3 firstPersonViewOrigin_playerViewOrigin; // melee
 	idVec3 firstPersonViewOrigin_viewWeaponOrigin; // launch
 	idVec3 fullBodyAwarenessOffset;
+#endif
+#ifdef _MOD_VIEW_BODY
+    idEntityPtr<idViewBody>	viewBody;
+    void SetupViewBody( void );
+    void UpdateBody(void);
+    friend class idViewBody;
 #endif
 
 public:

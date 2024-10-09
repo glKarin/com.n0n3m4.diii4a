@@ -93,7 +93,9 @@ If you have questions concerning this license or the applicable additional terms
 
 // This turns on support for PPC intrinsics in the SIMD_AltiVec.cpp file. Right now it's only used for frsqrte. GCC
 // supports these intrinsics but XLC does not.
+#if defined(__GNUC__) && defined(__ALTIVEC__)
 #define PPC_INTRINSICS
+#endif
 
 // This assumes that the idDrawVert array that is used in DeriveUnsmoothedTangents is aligned. If its not aligned,
 // then we don't get any speedup
@@ -107,7 +109,7 @@ If you have questions concerning this license or the applicable additional terms
 
 class idSIMD_AltiVec : public idSIMD_Generic
 {
-#if defined(MACOS_X) && defined(__ppc__)
+#if defined(MACOS_X) && defined(__GNUC__) && defined(__ALTIVEC__)
 	public:
 
 		virtual const char *VPCALL GetName(void) const;

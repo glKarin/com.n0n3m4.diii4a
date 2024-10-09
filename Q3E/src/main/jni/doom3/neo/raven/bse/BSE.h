@@ -247,17 +247,21 @@ public:
 	virtual 						~rvDeclEffect(void) { }
 
 	virtual bool					SetDefaultText(void);
-	virtual const char* DefaultDefinition(void) const;
+	virtual const char*             DefaultDefinition(void) const;
 	virtual bool					Parse(const char* text, const int textLength, bool noCaching = false);
 	virtual void					FreeData(void);
 	virtual size_t					Size(void) const;
 #ifdef _RAVEN_FX
-	virtual void			Print(void) const;
-	virtual void			List(void) const;
+	virtual void			        Print(void) const;
+	virtual void			        List(void) const;
+    rvBSEParticle *                 GetParticle(const char *name);
+    const rvBSEParticle *           GetParticle(const char *name) const;
+    void                            AppendParticle(const char *name, rvBSEParticle *particle);
 
-	idList<rvFXSingleAction>events;
-	idStr					joint;
-	idList<idStr> particles;
+	idList<rvFXSingleAction>        events;
+	idStr					        joint;
+	idList<idStr>                   particles;
+    idList<rvBSEParticle *>         particle_decl_hash; // index sync with `particles`
 
 	friend class rvDeclEffectParser;
 #endif

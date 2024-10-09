@@ -1,5 +1,5 @@
 安卓设备上的基于idTech引擎的游戏运行环境
-支持毁灭战士3/雷神之锤4/掠食(2006)/毁灭战士3 BFG/雷神之锤1/雷神之锤2/雷神之锤3/重返德军总部/The Dark Mod/GZDOOM
+支持毁灭战士3/雷神之锤4/掠食(2006)/毁灭战士3 BFG/雷神之锤1/雷神之锤2/雷神之锤3/重返德军总部/The Dark Mod/GZDOOM/德军总部: 深入敌后
 
   1. 把你的PC上的游戏数据(包括外部的文件夹)放到启动器中`Game working directory`所设置的目录下(默认为`/sdcard/diii4a`).
   2. 点击顶部栏的左边图标或右边的游戏名称选择游戏, 然后在选项卡`GENERAL`下的`Game`选择游戏mod.
@@ -32,10 +32,11 @@
   Perfected Doom 3 - RoE: perfected_roe
 
   雷神之锤4: q4base (支持bot mod和全身mod)
+  Hardqore: hardqore
 
   掠食(2006): preybase (支持全身mod)
 
-  雷神之锤I: darkplaces/id1
+  雷神之锤1: darkplaces/id1
 
   雷神之锤2: baseq2
 
@@ -50,3 +51,5 @@
   毁灭战士3 BFG: doom3bfg/base
 
   GZDOOM: gzdoom
+
+  德军总部 - 深入敌后: etmain

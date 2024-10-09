@@ -61,8 +61,8 @@ public class Slider extends Paintable implements TouchListener
         byte[] indices = {0, 1, 2, 0, 2, 3};
         for (int i = 0; i < verts.length; i += 2)
         {
-            verts[i] = verts[i] * width + cx;
-            verts[i + 1] = verts[i + 1] * height + cy;
+            verts[i] = verts[i] * width;
+            verts[i + 1] = verts[i + 1] * height;
         }
 
         verts_p = ByteBuffer.allocateDirect(4 * verts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -112,8 +112,8 @@ public class Slider extends Paintable implements TouchListener
                 {
                     for (int i = 0; i < verts.length; i += 2)
                     {
-                        verts[i] = verts[i] * width / 2 + cx;
-                        verts[i + 1] = verts[i + 1] * height / 2 + cy;
+                        verts[i] = verts[i] * width / 2;
+                        verts[i + 1] = verts[i + 1] * height / 2;
                     }
                     m_split = SPLIT_DOWN_RIGHT;
                 }
@@ -121,8 +121,8 @@ public class Slider extends Paintable implements TouchListener
                 {
                     for (int i = 0; i < verts.length; i += 2)
                     {
-                        verts[i] = verts[i] * width / 3 + cx;
-						verts[i + 1] = verts[i + 1] * height + cy;
+                        verts[i] = verts[i] * width / 3;
+						verts[i + 1] = verts[i + 1] * height;
 //                        verts[i + 1] = Math.min(verts[i] * width / 3, verts[i + 1] * height) + cy;
 //                        verts[i] = verts[i] * width / 2 + cx;
 //                        verts[i + 1] = verts[i + 1] * height + cy;
@@ -161,16 +161,16 @@ public class Slider extends Paintable implements TouchListener
             case SPLIT_DOWN_RIGHT: {
                 int x = width / 4;
                 int y = height / 4;
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, -x, y, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, -x, -y, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, tex_p, verts_p, inds_p, x, -y, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, cx-x, cy+y, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, cx-x, cy-y, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, tex_p, verts_p, inds_p, cx+x, cy-y, red, green, blue, alpha);
             }
                 break;
             case SPLIT_LEFT_RIGHT: {
                 int x = width / 3;
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, -x, 0, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
-                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, tex_p, verts_p, inds_p, x, 0, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, cx-x, cy, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_inds[2], 6, tex_p, verts_p, inds_p, cx+x, cy, red, green, blue, alpha);
 //                int x = width / 2;
 //                Q3EGL.DrawVerts(gl, tex_inds[0], 6, tex_p, verts_p, inds_p, -x, 0, red, green, blue, alpha);
 //                Q3EGL.DrawVerts(gl, tex_inds[1], 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
@@ -178,12 +178,12 @@ public class Slider extends Paintable implements TouchListener
             }
                 break;
             default:
-                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, 0, 0, red, green, blue, alpha);
+                Q3EGL.DrawVerts_GL1(gl, tex_ind, 6, tex_p, verts_p, inds_p, cx, cy, red, green, blue, alpha);
         }
     }
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act)
+    public boolean onTouchEvent(int x, int y, int act, int id)
     {
         if (act == 1)
         {
@@ -317,5 +317,11 @@ public class Slider extends Paintable implements TouchListener
     {
         cx = x;
         cy = y;
+    }
+
+    @Override
+    public boolean SupportMultiTouch()
+    {
+        return false;
     }
 }

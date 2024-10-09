@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.Toast;
@@ -60,6 +61,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     private int m_numGridLineVertex = 0;
     private Toast m_info;
     private final Object m_gridLock = new Object();
+    private boolean m_edited = false;
 
     public Q3EUiView(Context context)
     {
@@ -171,6 +173,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             fn.target = newb;
             touch_elements.set(touch_elements.indexOf(tmp), newb);
             paint_elements.set(paint_elements.indexOf(tmp), newb);
+            m_edited = true;
         }
         else if (fn.target instanceof Joystick)
         {
@@ -179,6 +182,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             fn.target = newj;
             touch_elements.set(touch_elements.indexOf(tmp), newj);
             paint_elements.set(paint_elements.indexOf(tmp), newj);
+            m_edited = true;
         }
         else if (fn.target instanceof Slider)
         {
@@ -187,6 +191,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             fn.target = news;
             touch_elements.set(touch_elements.indexOf(tmp), news);
             paint_elements.set(paint_elements.indexOf(tmp), news);
+            m_edited = true;
         }
         //k
         else if (fn.target instanceof Disc)
@@ -196,6 +201,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             fn.target = newd;
             touch_elements.set(touch_elements.indexOf(tmp), newd);
             paint_elements.set(paint_elements.indexOf(tmp), newd);
+            m_edited = true;
         }
 
         PrintInfo(fn);
@@ -203,7 +209,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
     private boolean NormalizeTgtPosition(FingerUi fn)
     {
-        if (m_unit <= 0)
+        if (m_unit <= 1)
             return false;
 
         if (fn.target instanceof Slider)
@@ -352,6 +358,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             }
         }
         mEdtr.commit();
+        m_edited = false;
     }
 
     UiLoader uildr;
@@ -406,6 +413,8 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             for (int i = 0; i < fingers.length; i++)
                 fingers[i] = new FingerUi(null, i);
 
+            if(m_unit <= 0)
+                m_unit = GetPerfectGridSize();
             MakeGrid();
             mInit = true;
         }
@@ -485,7 +494,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
     private void MakeGrid()
     {
-        if (m_unit <= 0)
+        if (m_unit <= 1)
             return;
 
         final int countX = width / m_unit + (width % m_unit != 0 ? 1 : 0);
@@ -638,6 +647,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             {
                 p.alpha = alpha;
             }
+            m_edited = true;
         }
     }
 
@@ -702,6 +712,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
                     if (null != finger && finger.target == touchListener)
                         finger.target = newTL;
                 }
+                m_edited = true;
             }
         }
 
@@ -788,10 +799,52 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         {
             m_numGridLineVertex = 0;
             m_gridBuffer = null;
-            m_unit = unit;
+            if(unit <= 0)
+                m_unit = GetPerfectGridSize();
+            else
+                m_unit = unit;
             MakeGrid();
         }
 
         //requestRender();
+    }
+
+    private int GetPerfectGridSize()
+    {
+        final int UNIT = 2;
+        final int PERFECT = 50;
+        int res = 2;
+
+        for(int i = res; i < Math.min(width, height); i += UNIT)
+        {
+            if(width % i != 0)
+                continue;
+            if(height % i != 0)
+                continue;
+
+            int diffa = i - PERFECT;
+            int diffb = res - PERFECT;
+            int diffabsa = Math.abs(diffa);
+            int diffabsb = Math.abs(diffb);
+            if(diffabsa < diffabsb)
+                res = i;
+            else if(diffabsa == diffabsb)
+            {
+                if(diffa > diffb)
+                    res = i;
+            }
+        }
+        Log.i("Q3EUiView", "GetPerfectGridSize -> " + res);
+        return res;
+    }
+
+    public void SetModified()
+    {
+        m_edited = true;
+    }
+
+    public boolean IsModified()
+    {
+        return m_edited;
     }
 }

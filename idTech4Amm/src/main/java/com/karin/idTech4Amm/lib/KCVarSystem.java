@@ -36,6 +36,7 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("harm_r_normalCorrectionPBR", "float", "1.0", "Vertex normal correction in PBR interaction lighting model(1 = pure using bump texture; 0 = pure using vertex normal; 0.0 - 1.0 = bump texture * harm_r_specularExponentPBR + vertex normal * (1 - harm_r_specularExponentPBR))", KCVar.FLAG_POSITIVE),
+                        KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE),
                         KCVar.CreateCVar("r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE),
 
                         KCVar.CreateCVar("r_screenshotFormat", "integer", "0", "Screenshot format", 0,
@@ -184,6 +185,8 @@ public final class KCVarSystem
             else if(Q3EUtils.q3ei.isD3BFG)
                 return Arrays.asList(_cvars.get("DOOM3BFG"));
             else if(Q3EUtils.q3ei.isDOOM)
+                return new ArrayList<>();
+            else if(Q3EUtils.q3ei.isETW)
                 return new ArrayList<>();
             else
                 return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("base"));

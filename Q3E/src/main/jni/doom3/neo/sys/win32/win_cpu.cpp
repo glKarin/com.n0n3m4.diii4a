@@ -80,6 +80,9 @@ static idCVar sys_clockTicksPerSecond("sys_clockTicksPerSecond", "0", CVAR_SYSTE
 #define MIN_SYS_CLOCK_TICKS_PER_SECOND (2.9 / 0.000000001) // make it allow Ultra quality >= 2.75
 double Sys_ClockTicksPerSecond( void ) {
 	static double ticks = 0;
+    // extern void Sys_Win_CPUCount( int& numLogicalCPUCores, int& numPhysicalCPUCores, int& numCPUPackages );
+    // int numLogicalCPUCores, numPhysicalCPUCores, numCPUPackages;
+    // Sys_Win_CPUCount(numLogicalCPUCores, numPhysicalCPUCores, numCPUPackages);
     if ( !ticks ) {
         if(sys_clockTicksPerSecond.GetFloat() > 0.0f)
         {
@@ -543,7 +546,7 @@ static bool HasDAZ( void ) {
 Sys_GetCPUId
 ================
 */
-cpuid_t Sys_GetCPUId( void ) {
+int Sys_GetCPUId( void ) {
 #if defined(_MSC_VER) && !defined(_WIN64)
 	int flags;
 
@@ -599,7 +602,7 @@ cpuid_t Sys_GetCPUId( void ) {
 		flags |= CPUID_DAZ;
 	}
 
-	return (cpuid_t)flags;
+	return flags;
 #else
     return CPUID_UNSUPPORTED;
 #endif

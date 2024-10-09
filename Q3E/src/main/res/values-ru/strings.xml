@@ -34,12 +34,16 @@
     <string name="disable_unfixed_joystick_the_range_is_joystick_valid_motion_area">- Отключить «Нефиксированный джойстик»: диапазон является допустимой областью движения джойстика.</string>
     <string name="joystick_inner_dead_zone_radius_s_percentage_0_disable">Внутренняя мертвая зона джойстика (процент радиуса, 0 - для отключения)</string>
     <string name="on_screen_buttons_position_unit">Размер сетки</string>
-    <string name="on_screen_buttons_layout_with_grid_limit_multiple_of_5">Расположение экранных кнопок с ограничением по сетке (кратно 5).</string>
-    <string name="position_unit">Единица положения</string>
     <string name="on_screen_buttons_position_unit_must_is_multiple_of_5_or_0">Единица позиции экранных кнопок должна быть кратна 5 или 0</string>
     <string name="setup_joystick_done">Настройка джойстика выполнена.</string>
     <string name="back">Назад</string>
     <string name="extract_the_dark_mod_glsl_shader_source_files_fail">Extract The dark mod GLSL shader source files fail!</string>
     <string name="extract_rbdoom3bfg_hlsl_shader_source_files_fail">Extract RBDOOM 3 BFG HLSL shader source files fail!</string>
     <string name="extract_gzdoom_game_resource_files_fail">Extract GZDOOM game resource files fail!</string>
+    <string name="on_screen_buttons_layout_with_grid_limit">Button editor grid size</string>
+    <string name="position_unit">Position unit(0 = automatic, 1 = disable)</string>
+    <string name="warning">Предупреждение</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="button_setting_has_changed_can_you_save_it">Button setting has changed! Can you save it?</string>
 </resources>

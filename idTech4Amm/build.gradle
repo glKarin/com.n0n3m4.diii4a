@@ -10,8 +10,8 @@ android {
         applicationId "com.karin.idTech4Amm"
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
-        versionCode 11056
-        versionName '1.1.0harmattan56'
+        versionCode 11057
+        versionName '1.1.0harmattan57'
         versionNameSuffix 'natasha'
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
@@ -61,6 +61,12 @@ android {
         exclude "lib/*/libmobileffmpeg*.so"
         // remove all armv7 neon libraries
         exclude "lib/armeabi-v7a/*_neon.so"
+
+        // remove system libraries
+        exclude "lib/*/libGLESv1_CM.so"
+        exclude "lib/*/libOpenSLES.so"
+        exclude "lib/*/libz.so"
+        exclude "lib/*/liblog.so"
 
         // remove arm64 libraries if testing arm32
         // exclude "lib/arm64-v8a/**"

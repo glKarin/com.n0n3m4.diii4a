@@ -14,6 +14,12 @@
 #define STATE_MENU (1 << 5) // any menu excludes guiLoading
 #define STATE_DEMO (1 << 6) // demo
 
+#define DIALOG_RESULT_ERROR -1
+#define DIALOG_RESULT_CANCEL 0
+#define DIALOG_RESULT_YES 1
+#define DIALOG_RESULT_NO 2
+#define DIALOG_RESULT_OTHER 3
+
 //#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
 #define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
 #define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
@@ -45,7 +51,10 @@ FILE * (*itmpfile)(void);
 // Pull input event
 // num = 0: only clear; > 0: max num; -1: all.
 // return pull event num
-int (*pull_input_event)(int execCmd);
+int (*pull_input_event)(int num);
+
+// setup smooth joystick
+void (*setup_smooth_joystick)(int enable);
 
 // Grab mouse
 void (*grab_mouse)(int grab);
@@ -57,8 +66,19 @@ void (*attach_thread)(void);
 void (*copy_to_clipboard)(const char *text);
 char * (*get_clipboard_text)(void);
 
-// Show a Android toast as dialog
+// Show a Android toast or dialog
 void (*show_toast)(const char *text);
+int (*open_dialog)(const char *title, const char *message, int num, const char *buttons[]);
+
+// Access Android keyboard
+void (*open_keyboard)(void);
+void (*close_keyboard)(void);
+
+// Open URL
+void (*open_url)(const char *url);
+
+// Finish
+void (*exit_finish)(void);
 
 // Surface window size
 int screen_width = 640;
@@ -89,6 +109,9 @@ char *game_data_dir = NULL;
 // Application home directory.
 char *app_home_dir = NULL;
 
+// Smooth joystick
+bool smooth_joystick = false;
+
 // Surface window
 volatile ANativeWindow *window = NULL;
 static volatile bool window_changed = false;
@@ -112,6 +135,27 @@ void Android_PollInput(void)
 {
     //if(pull_input_event)
         pull_input_event(-1);
+}
+
+void Android_ClearEvents(void)
+{
+    //if(pull_input_event)
+    pull_input_event(0);
+}
+
+int Android_PollEvents(int num)
+{
+    //if(pull_input_event)
+    return pull_input_event(num);
+}
+
+void Android_EnableSmoothJoystick(bool enable)
+{
+    // if(smooth_joystick != enable)
+    {
+        setup_smooth_joystick(enable);
+        smooth_joystick = enable;
+    }
 }
 
 FILE * Sys_tmpfile(void)
@@ -176,6 +220,42 @@ char * Android_GetClipboardData(void)
     return ptr;
 }
 
+void Android_OpenURL(const char *url)
+{
+    //if(open_url)
+    open_url(url);
+}
+
+void Android_OpenKeyboard(void)
+{
+    //if(open_keyboard)
+    open_keyboard();
+}
+
+void Android_CloseKeyboard(void)
+{
+    //if(close_keyboard)
+    close_keyboard();
+}
+
+void Android_ExitFinish(void)
+{
+    //if(exit_finish)
+    exit_finish();
+}
+
+void Android_ShowInfo(const char *info)
+{
+    //if(show_toast)
+    show_toast(info);
+}
+
+int Android_OpenDialog(const char *title, const char *message, int num, const char *buttons[])
+{
+    //if(open_dialog)
+    return open_dialog(title, message, num, buttons);
+}
+
 void Q3E_PrintInitialContext(int argc, char **argv)
 {
     printf("[Harmattan]: DOOM3 start\n\n");
@@ -197,6 +277,7 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("    Game data directory: %s\n", game_data_dir);
     printf("    Application home directory: %s\n", app_home_dir);
     printf("    Refresh rate: %d\n", refresh_rate);
+    printf("    Smooth joystick: %d\n", smooth_joystick);
     printf("    Continue when missing OpenGL context: %d\n", continue_when_no_gl_context);
     printf("\n");
 
@@ -208,13 +289,19 @@ void Q3E_PrintInitialContext(int argc, char **argv)
     printf("  Input: \n");
     printf("    grab_mouse: %p\n", grab_mouse);
     printf("    pull_input_event: %p\n", pull_input_event);
+    printf("    setup_smooth_joystick: %p\n", setup_smooth_joystick);
     printf("  System: \n");
     printf("    attach_thread: %p\n", attach_thread);
     printf("    tmpfile: %p\n", itmpfile);
     printf("    copy_to_clipboard: %p\n", copy_to_clipboard);
     printf("    get_clipboard_text: %p\n", get_clipboard_text);
+    printf("    open_keyboard: %p\n", open_keyboard);
+    printf("    close_keyboard: %p\n", close_keyboard);
+    printf("    open_url: %p\n", open_url);
+    printf("    exit_finish: %p\n", exit_finish);
     printf("  GUI: \n");
     printf("    show_toast: %p\n", show_toast);
+    printf("    open_dialog: %p\n", open_dialog);
     printf("  Other: \n");
     printf("    setState: %p\n", setState);
     printf("\n");
@@ -246,15 +333,21 @@ void Q3E_SetCallbacks(const void *callbacks)
     writeAudio = ptr->AudioTrack_write;
     shutdownAudio = ptr->AudioTrack_shutdown;
 
-    pull_input_event = ptr->Input_pullEvent;
     grab_mouse = ptr->Input_grabMouse;
+    pull_input_event = ptr->Input_pullEvent;
+    setup_smooth_joystick = ptr->Input_setupSmoothJoystick;
 
     attach_thread = ptr->Sys_attachThread;
     itmpfile = ptr->Sys_tmpfile;
     copy_to_clipboard = ptr->Sys_copyToClipboard;
     get_clipboard_text = ptr->Sys_getClipboardText;
+    open_keyboard = ptr->Sys_openKeyboard;
+    close_keyboard = ptr->Sys_closeKeyboard;
+    open_url = ptr->Sys_openURL;
+    exit_finish = ptr->Sys_exitFinish;
 
     show_toast = ptr->Gui_ShowToast;
+    open_dialog = ptr->Gui_openDialog;
 
     setState = ptr->set_state;
 }
@@ -338,6 +431,7 @@ void Q3E_SetInitialContext(const void *context)
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
     mouse_available = ptr->mouseAvailable ? true : false;
     refresh_rate = ptr->refreshRate <= 0 ? 60 : ptr->refreshRate;
+    smooth_joystick = ptr->smoothJoystick ? true : false;
 }
 
 // View paused
@@ -397,6 +491,7 @@ void Q3E_exit(void)
         window = NULL;
     GLimp_AndroidQuit();
     printf("[Harmattan]: idTech4 exit.\n");
+    Android_ExitFinish();
 }
 
 // Setup OpenGL context variables in Android SurfaceView's thread

@@ -49,6 +49,11 @@
             android:entries="@array/event_queue_labels"
             />
         <Preference
+            android:key="show_preference"
+            android:title="@string/show_preferences"
+            android:summary="@string/show_application_setting_preferences_contents"
+            android:persistent="false"/>
+        <Preference
             android:key="get_pid"
             android:title="@string/pid"
             android:summary="@string/get_application_pid"

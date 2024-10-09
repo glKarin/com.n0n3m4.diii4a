@@ -1,0 +1,9 @@
+* 新增`深入敌后: 德军总部`支持, 游戏独立文件夹名为`etw`, 游戏数据文件夹为`etmain`和`legacy`, 更多详情[ET: Legacy].
+* 雷神之锤4新增`Hardqore` mod支持, 游戏数据文件夹为`hardqore`, 更多详情[Quake 4: Hardqore].
+* 毁灭战士3/雷神之锤4/掠食(2006)新增`ambientLighting`着色器, 新增环境光光照模型(`harm_r_lightingModel`设为4).
+* 雷神之锤4特效支持颜色透明度.
+* 雷神之锤4修复`displacement`和`displacementcube`着色器. 例如`recomp`关卡的水, `waste`关卡的血池.
+* 雷神之锤4修复玩家视角内武器模型的错误裁剪.
+* 毁灭战士3/雷神之锤4新增玩家身体视角模型.
+* 毁灭战士3/雷神之锤4/掠食(2006)新增cvar `harm_in_smoothJoystick`控制启用平滑摇杆.
+* 默认启用`游戏数据独立文件夹`.

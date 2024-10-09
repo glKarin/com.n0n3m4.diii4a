@@ -25,23 +25,22 @@ enum {
 	STAGE_END
 };
 
-static idHashTable<rvBSEParticle *> particle_decl_hash;
-rvBSEParticle * BSE_GetDeclParticle(const char *name)
+const rvBSEParticle * BSE_GetDeclParticle(const char *name)
 {
-	rvBSEParticle **res;
+	const rvBSEParticle *res;
 
-	bool b = particle_decl_hash.Get(name, &res);
-	return b ? *res : NULL;
-}
-
-static rvBSEParticle * BSE_SetDeclParticle(const char *name, rvBSEParticle *particle = NULL)
-{
-	rvBSEParticle *p = BSE_GetDeclParticle(name);
-	if(!particle)
-		particle_decl_hash.Remove(name);
-	else
-		particle_decl_hash.Set(name, particle);
-	return p;
+    int num = declManager->GetNumDecls(DECL_EFFECT);
+    for(int i = 0; i < num; i++)
+    {
+        const rvDeclEffect *effect = (rvDeclEffect *)declManager->DeclByIndex(DECL_EFFECT, i, false);
+        if(effect)
+        {
+            res = effect->GetParticle(name);
+            if(res)
+                return res;
+        }
+    }
+    return NULL;
 }
 
 // https://web.archive.org/web/20101225045355/http://iddevnet.com/quake4/Basic_FX_file_structure
@@ -64,7 +63,7 @@ class rvDeclEffectParser
 		idStr BuildParticleSource(rvBSEParticle *particle, const char *name);
 		int ParseVec(int *flagNum = 0);
 		float ParseSize(rvBSEParticleStage *stage, int n);
-		void ParsePosition(rvBSEParticleStage *stage);
+		void ParsePosition(rvBSEParticleStage *stage, bool *useEndOrigin = 0);
 		idVec3 ParseOffset(rvBSEParticleStage *stage);
 		float ParseLength(rvBSEParticleStage *stage, bool *useEndOrigin = 0);
 		// A segment consisting of polygons that always face the player.
@@ -340,8 +339,7 @@ int rvDeclEffectParser::ParseCylinder(idSphere &res, int *parmsCount)
 
 void rvDeclEffectParser::AppendDeclParticle(const char *name, rvBSEParticle *particle)
 {
-	decl->particles.Append(name);
-	BSE_SetDeclParticle(name, particle);
+    decl->AppendParticle(name, particle);
 }
 
 void rvDeclEffectParser::FinishDeclParticle(rvBSEParticle *particle, rvBSEParticleStage *instage, rvFXSingleAction &FXAction)
@@ -527,18 +525,19 @@ idVec3 rvDeclEffectParser::ParseTint(rvBSEParticleStage *stage, int n)
 		stage->color[0] = p[0];
 		stage->color[1] = p[1];
 		stage->color[2] = p[2];
-		stage->color[3] = 1.0;
 		//stage->entityColor = false; // comment it, for line lighting
+
+        stage->fadeColor[0] = p[0];
+        stage->fadeColor[1] = p[1];
+        stage->fadeColor[2] = p[2];
 	}
-#if 0
 	else
 	{
 		stage->fadeColor[0] = p[0];
 		stage->fadeColor[1] = p[1];
 		stage->fadeColor[2] = p[2];
-		stage->fadeColor[3] = 1.0;
+        stage->fade = true;
 	}
-#endif
 	return p;
 }
 
@@ -560,10 +559,10 @@ void rvDeclEffectParser::ParseFade(rvBSEParticleStage *stage, int n)
 		idVec3 p(0.0f, 0.0f, 0.0f);
 		ParsePoint(p);
 		if(n == STAGE_START)
-			stage->fadeInFraction = p[0];
-		else
-			stage->fadeOutFraction = p[0];
-		stage->fadeOutFraction = p[0]; // TODO: always fade out
+			stage->color[3] = p[0];
+        else
+            stage->fade = true;
+		stage->fadeColor[3] = p[0];
 	}
 	else if(!idStr::Icmp(token, "line"))
 	{
@@ -571,10 +570,10 @@ void rvDeclEffectParser::ParseFade(rvBSEParticleStage *stage, int n)
 		b.Zero();
 		ParseLine(b);
 		if(n == STAGE_START)
-			stage->fadeInFraction = b[0][0];
-		else
-			stage->fadeOutFraction = b[0][0];
-		stage->fadeOutFraction = b[0][0]; // TODO: always fade out
+			stage->color[3] = b[0][0];
+        else
+            stage->fade = true;
+		stage->fadeColor[3] = b[0][0];
 	}
 	else
 	{
@@ -639,7 +638,7 @@ void rvDeclEffectParser::ParseVelocity(rvBSEParticleStage *stage, int n)
 	}
 }
 
-void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
+void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage, bool *useEndOrigin)
 {
 	idToken token;
 	int count;
@@ -658,7 +657,7 @@ void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
 		ParsePoint(p);
 		stage->distributionType = PDIST_POINT;
 	}
-	else if(!idStr::Icmp(token, "box"))
+	else if(!idStr::Icmp(token, "box")) // Origin::Box
 	{
 		idBounds b;
 		b.Zero();
@@ -668,7 +667,7 @@ void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
 		stage->distributionParms[2] = b[1][2];
 		stage->distributionType = PDIST_RECT;
 	}
-	else if(!idStr::Icmp(token, "line"))
+	else if(!idStr::Icmp(token, "line")) // Origin::Linear
 	{
 		idBounds b;
 		b.Zero();
@@ -678,7 +677,7 @@ void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
 		stage->distributionParms[2] = b[1][2] - b[0][2];
 		stage->distributionType = PDIST_RECT;
 	}
-	else if(!idStr::Icmp(token, "cylinder"))
+	else if(!idStr::Icmp(token, "cylinder")) // Origin::Cylinder
 	{
 		idSphere s;
 		s.Zero();
@@ -690,7 +689,7 @@ void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
 		stage->distributionParms[3] = s.GetRadius();
 		stage->distributionType = PDIST_CYLINDER;
 	}
-	else if(!idStr::Icmp(token, "sphere"))
+	else if(!idStr::Icmp(token, "sphere")) // Origin::Sphere
 	{
 		idSphere s;
 		s.Zero();
@@ -700,9 +699,9 @@ void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
 		stage->distributionParms[1] = v[1];
 		stage->distributionParms[2] = v[2];
 		stage->distributionParms[3] = s.GetRadius();
-		stage->distributionType = PDIST_CYLINDER;
+		stage->distributionType = PDIST_SPHERE;
 	}
-	else if(!idStr::Icmp(token, "spiral"))
+	else if(!idStr::Icmp(token, "spiral")) // Origin::Spiral
 	{
 		idBounds b;
 		float i7 = 0.0;
@@ -713,7 +712,10 @@ void rvDeclEffectParser::ParsePosition(rvBSEParticleStage *stage)
 		stage->customPathParms[0] = v[0];
 		stage->customPathParms[1] = v[1];
 		stage->customPathParms[2] = v[2];
+        stage->customPathParms[3] = i7;
 		stage->customPathParms[4] = i7;
+        //if(useEndOrigin && HasVecFlag("useEndOrigin"))
+            //*useEndOrigin = true;
 	}
 	else
 	{
@@ -787,8 +789,8 @@ float rvDeclEffectParser::ParseLength(rvBSEParticleStage *stage, bool *useEndOri
 		src.SkipRestOfLine();
 	}
 
-	if(useEndOrigin)
-		*useEndOrigin = HasVecFlag("useEndOrigin");
+    if(useEndOrigin && HasVecFlag("useEndOrigin"))
+		*useEndOrigin = true;
 	if(res < 0.0)
 		res = -res;
 
@@ -919,7 +921,7 @@ void rvDeclEffectParser::ParseStage(rvFXSingleAction &FXAction, rvBSEParticleSta
 		}
 
 		if (!token.Icmp("position")) {
-			ParsePosition(stage);
+			ParsePosition(stage, &FXAction.useEndOrigin);
 			continue;
 		}
 
@@ -934,7 +936,7 @@ void rvDeclEffectParser::ParseStage(rvFXSingleAction &FXAction, rvBSEParticleSta
 		}
 
 		if (!token.Icmp("offset")) {
-			FXAction.offset = ParseOffset(stage);
+			/*FXAction.offset = */ParseOffset(stage);
 			continue;
 		}
 
@@ -955,10 +957,10 @@ void rvDeclEffectParser::ParseStage(rvFXSingleAction &FXAction, rvBSEParticleSta
 		LOGW_SKIP("Skip stage: %s -> %s", GetName(), token.c_str());
 		Skip();
 	}
-	if(stage && stage->customPathType == PPATH_HELIX)
+	/*if(stage && stage->customPathType == PPATH_HELIX)
 	{
 		FXAction.useEndOrigin = false;
-	}
+	}*/
 }
 
 void rvDeclEffectParser::Skip(void)
@@ -1348,6 +1350,8 @@ rvBSEParticleStage * rvDeclEffectParser::Alloc_rvBSEParticleStage(void)
 	stage->speed.from = 0;
 	stage->speed.to = 0;
 	stage->deadTime = 0;
+
+    stage->fade = false;
 	return stage;
 }
 
@@ -1739,7 +1743,7 @@ void rvDeclEffectParser::ParseTrail(rvFXSingleAction &FXAction)
 {
 	ParseSpawner(FXAction);
 	FXAction.seg = SEG_TRAIL;
-	rvBSEParticle *particle = BSE_GetDeclParticle(FXAction.data.c_str());
+	rvBSEParticle *particle = decl->GetParticle(FXAction.data.c_str());
 	if(particle && particle->stages.Num() > 0)
 	{
 		rvBSEParticleStage *stage = particle->stages[0];

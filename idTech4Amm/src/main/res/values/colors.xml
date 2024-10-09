@@ -10,5 +10,7 @@
     <color name="theme_tdm_main_color">#FF763F20</color>
     <color name="theme_d3bfg_main_color">#FFB54C13</color>
     <color name="theme_gzdoom_main_color">#FF0C377A</color>
+    <color name="theme_etw_main_color">#FFA7605A</color>
     <color name="launcher_divider_color">#FFCCCCCC</color>
+    <color name="pie_color">#FF4585E1</color>
 </resources>

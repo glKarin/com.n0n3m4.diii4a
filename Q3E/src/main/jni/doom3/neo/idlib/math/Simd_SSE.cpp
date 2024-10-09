@@ -40,11 +40,6 @@ If you have questions concerning this license or the applicable additional terms
 //                                                        E
 //===============================================================
 
-
-#if defined(MACOS_X) && defined(__i386__)
-
-#include <xmmintrin.h>
-
 #define DRAWVERT_SIZE				60
 #define DRAWVERT_XYZ_OFFSET			(0*4)
 #define DRAWVERT_ST_OFFSET			(3*4)
@@ -52,6 +47,10 @@ If you have questions concerning this license or the applicable additional terms
 #define DRAWVERT_TANGENT0_OFFSET	(8*4)
 #define DRAWVERT_TANGENT1_OFFSET	(11*4)
 #define DRAWVERT_COLOR_OFFSET		(14*4)
+
+#if defined(__GNUC__) && defined(__SSE__)
+
+#include <xmmintrin.h>
 
 #define SHUFFLEPS( x, y, z, w )		(( (x) & 3 ) << 6 | ( (y) & 3 ) << 4 | ( (z) & 3 ) << 2 | ( (w) & 3 ))
 #define R_SHUFFLEPS( x, y, z, w )	(( (w) & 3 ) << 6 | ( (z) & 3 ) << 4 | ( (y) & 3 ) << 2 | ( (x) & 3 ))
@@ -95,7 +94,7 @@ void VPCALL idSIMD_SSE::Dot(float *dst, const idPlane &constant, const idDrawVer
 	char *dst_p = (char *) dst;                             // dst_p = ecx
 
 	assert(sizeof(idDrawVert) == DRAWVERT_SIZE);
-	assert((int)&((idDrawVert *)0)->xyz == DRAWVERT_XYZ_OFFSET);
+    assert( ptrdiff_t(&src->xyz) - ptrdiff_t(src) == DRAWVERT_XYZ_OFFSET );
 
 	/*
 		and			eax, ~3
@@ -262,7 +261,7 @@ void VPCALL idSIMD_SSE::MinMax(idVec3 &min, idVec3 &max, const idDrawVert *src, 
 {
 
 	assert(sizeof(idDrawVert) == DRAWVERT_SIZE);
-	assert((int)&((idDrawVert *)0)->xyz == DRAWVERT_XYZ_OFFSET);
+    assert( ptrdiff_t(&src->xyz) - ptrdiff_t(src) == DRAWVERT_XYZ_OFFSET );
 
 	__m128 xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7;
 	char *indexes_p;
@@ -472,6 +471,14 @@ void VPCALL idSIMD_SSE::Dot(float *dst, const idVec3 &constant, const idPlane *s
 	char *dst_p;
 	__m128 xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7;
 
+    // DG: GCC and clang warn about xmm1-4 maybe being used uninitialized below.
+    //     according to https://stackoverflow.com/a/18749079 the initialization
+    //     code is generated anyway, so make it explicit to shut up the warning
+    xmm1 = _mm_setzero_ps();
+    xmm2 = _mm_setzero_ps();
+    xmm3 = _mm_setzero_ps();
+    xmm4 = _mm_setzero_ps();
+
 	/*
 		mov			eax, count
 		mov			edi, constant
@@ -505,7 +512,7 @@ void VPCALL idSIMD_SSE::Dot(float *dst, const idVec3 &constant, const idPlane *s
 	/*
 		jz			startVert1
 	*/
-	if (count != 0) {
+	if (count_l4 != 0) { // count
 		/*
 			imul		eax, 16
 			add			esi, eax
@@ -635,7 +642,7 @@ void VPCALL idSIMD_SSE::Dot(float *dst, const idVec3 &constant, const idPlane *s
 	*/
 }
 
-#elif defined(_WIN32)
+#elif defined(_MSC_VER) && defined(_M_IX86)
 
 #include <xmmintrin.h>
 
@@ -9546,10 +9553,8 @@ void VPCALL idSIMD_SSE::MatX_MultiplyMatX(idMatX &dst, const idMatX &m1, const i
 											// Calculating first 4 elements in the third row of the destination matrix.
 											movss		xmm4, dword ptr [edx+48]
 											movss		xmm5, dword ptr [edx+52]
-											movlps		qword ptr [eax+24], xmm7 ;
-											save 2nd
-											movhps		qword ptr [eax+32], xmm7 ;
-											row
+											movlps		qword ptr [eax+24], xmm7 ; save 2nd
+											movhps		qword ptr [eax+32], xmm7 ; row
 											movss		xmm6, dword ptr [edx+56]
 											movss		xmm7, dword ptr [edx+60]
 											shufps		xmm4, xmm4, 0
@@ -16469,6 +16474,10 @@ void idSIMD_SSE::UpSamplePCMTo44kHz(float *dest, const short *src, const int num
 	}
 }
 
+
+// DG: at least in the 22KHz Stereo OGG case with numSamples % 4 != 0 this is broken (writes 4 floats too much which can destroy the stack, see #303),
+//     so let's just not use it anymore its MSVC+32bit only anyway and I doubt it gets noticable speedups, so I don't feel like trying to understand and fix it..
+#if 0
 /*
 ============
 SSE_UpSample11kHzMonoOGGTo44kHz
@@ -16786,6 +16795,7 @@ void idSIMD_SSE::UpSampleOGGTo44kHz(float *dest, const float *const *ogg, const 
 		assert(0);
 	}
 }
+#endif
 
 /*
 ============

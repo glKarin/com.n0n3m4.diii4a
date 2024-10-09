@@ -1,0 +1,90 @@
+#
+# Project specific
+#
+/build*/
+/project
+/obj
+/doc
+/Makefile
+/*.make
+CMakeLists.txt.user
+etmain/ui/git_version.h
+
+#
+# OS specific
+#
+
+# Linux/KDE
+*~
+*.sh
+!/misc/*.sh
+!/release.sh
+/.directory
+*.kdev4
+
+# Mac
+.DS_STORE
+Brewfile.lock.json
+
+# Windows
+Thumbs.db
+win_resource.aps
+
+#
+# Editor specific
+#
+*.bak
+
+# Eclipse
+/.project
+/.settings
+
+# CDT-specific
+/.cproject
+
+# CTags
+.tags*
+
+# Clangd file for LSP
+.clangd
+
+# SublimeText
+*.sublime-workspace
+*.sublime-project
+
+# Clion
+.idea/
+.run/
+/cmake-build-*
+
+# Visual Studio 2017
+# CMakeSettings.json
+/.vs/*
+!/.vs/launch.vs.json
+
+# Visual Studio Code
+/.vscode/
+*.code-workspace
+
+# Do not under any circumstances ignore these
+!/easybuild.sh
+!/easybuild.bat
+!/gradlew
+!/gradlew.bat
+
+node_modules/
+package.json
+package-lock.json
+
+# Android
+.gradle/
+.idea/
+app/.externalNativeBuild/
+app/.cxx
+app/build/
+build/
+gradle/
+/local.properties
+
+/Omnibot
+

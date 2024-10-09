@@ -14,6 +14,7 @@ typedef struct
     // Input
     void (*Input_grabMouse)(int grab); // Android grab mouse
     int (*Input_pullEvent)(int num); // Android pull input event
+    void (*Input_setupSmoothJoystick)(int enable); // enable Android smooth joystick
 
     // System
     void (*Sys_attachThread)(void); // Attach C/C++ created thread to JNI
@@ -22,9 +23,12 @@ typedef struct
     char * (*Sys_getClipboardText)(void); // get text from clipboard
     void (*Sys_openKeyboard)(void); // open virtual keyboard
     void (*Sys_closeKeyboard)(void); // close virtual keyboard
+    void (*Sys_openURL)(const char *url); // open URL
+    void (*Sys_exitFinish)(void); // finish activity
 
     // GUI
-    void (*Gui_ShowToast)(const char *text); // get text from clipboard
+    void (*Gui_ShowToast)(const char *text); // show info
+    int (*Gui_openDialog)(const char *title, const char *message, int num, const char *buttons[]); // open dialog(allow buttons and block current thread)
 
     // Other
     void (*set_state)(int st); // Tell Android game current state
@@ -48,6 +52,7 @@ typedef struct
     const char *gameDataDir; // game data directory
     const char *appHomeDir; // application home directory
     int refreshRate; // screen refresh rate
+    int smoothJoystick; // smooth joystick
 } Q3E_InitialContext_t;
 
 // Android::JNI call DOOM3 after main()

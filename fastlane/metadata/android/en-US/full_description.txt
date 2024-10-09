@@ -1,5 +1,5 @@
 idTech4A++ is idTech game runtime environment for Android.
-Support DOOM III/Quake 4/Prey(2006)/DOOM3 BFG/Quake 1/Quake 2/Quake 3/Return to Castle Wolfenstein/The Dark Mod/GZDOOM
+Support DOOM III/Quake 4/Prey(2006)/DOOM3 BFG/Quake 1/Quake 2/Quake 3/Return to Castle Wolfenstein/The Dark Mod/GZDOOM/Wolfenstein: Enemy Territory
 
   1. Putting your PC game data(external folder) to launcher setting `Game working directory`(default `/sdcard/diii4a`).
   2. Click left icon or right game name text of launcher status bar for choosing game, and select game mod in tab `GENERAL`'s `Game`.
@@ -32,6 +32,7 @@ Folder name of games/mods:
   Perfected Doom 3 - RoE: perfected_roe
 
   Quake4: q4base (with bot mod, full body awareness mod)
+  Hardqore: hardqore
 
   Prey(2006): preybase (with full body awareness mod)
 
@@ -50,3 +51,5 @@ Folder name of games/mods:
   DOOM 3 BFG: doom3bfg/base
 
   GZDOOM: gzdoom
+  
+  Wolfenstein - Enemy Territory: etmain

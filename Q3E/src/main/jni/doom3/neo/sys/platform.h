@@ -17,7 +17,7 @@
 #ifdef __aarch64__
 #define BUILD_CPU "aarch64"
 #else
-#define BUILD_CPU "arm32"
+#define BUILD_CPU "arm"
 #endif
 #endif
 

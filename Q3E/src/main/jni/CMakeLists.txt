@@ -72,62 +72,63 @@ OPTION(GAME_QUAKE1      "Build Quake 1"                         ON)
 OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
 OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
 OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
+OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
 
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
 if(NOT GAME_DOOM3)
     message(STATUS "Build OpenAL alone")
-add_subdirectory(doom3/neo/externlibs/openal-soft)
+    add_subdirectory(doom3/neo/externlibs/openal-soft)
 endif()
 
 if(GAME_DOOM3)
     message(STATUS "Build DOOM 3/Quake 4/Prey(2006)")
-add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
+    add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW)
     message(STATUS "Build extras depend shared libraries")
-add_subdirectory (deplibs) # common depend libraries
+    add_subdirectory (deplibs) # common depend libraries
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW)
     message(STATUS "Build common static libraries")
-add_subdirectory (common)
+    add_subdirectory (common)
 endif()
 
 if(GAME_RTCW)
     message(STATUS "Build Return to Castle Wolfenstein")
-add_subdirectory (rtcw) # RTCW
+    add_subdirectory (rtcw) # RTCW
 endif()
 
 if(GAME_QUAKE3)
     message(STATUS "Build Quake 3")
-add_subdirectory (quake3) # Quake 3 Arena | Team Arena
+    add_subdirectory (quake3) # Quake 3 Arena | Team Arena
 endif()
 
 if(GAME_QUAKE2)
     message(STATUS "Build Quake 2")
-add_subdirectory (quake2) # Quake 2
+    add_subdirectory (quake2) # Quake 2
 endif()
 
 if(GAME_QUAKE1)
     message(STATUS "Build Quake 1")
-add_subdirectory (quake1) # Quake 1
+    add_subdirectory (quake1) # Quake 1
 endif()
 
 if(GAME_TDM)
     message(STATUS "Build The Dark Mod")
-add_subdirectory (tdm) # The Dark Mod
+    add_subdirectory (tdm) # The Dark Mod
 endif()
 
 if(GAME_DOOM3BFG)
     message(STATUS "Build DOOM 3 BFG")
-add_subdirectory (doom3bfg/neo) # RBDOOM3-BFG
+    add_subdirectory (doom3bfg/neo) # RBDOOM3-BFG
 endif()
 
 if(GAME_DNF)
     message(STATUS "Build Duke Nukem Forever")
-add_subdirectory (duke4/neo) # DNF
+    add_subdirectory (duke4/neo) # DNF
 endif()
 
 if(GAME_DOOM)
@@ -137,4 +138,9 @@ if(GAME_DOOM)
     else()
         message(WARNING "GZDOOM not support 32bits build!")
     endif()
+endif()
+
+if(GAME_ETW)
+    message(STATUS "Build Wolfenstein: Enemy Territory")
+    add_subdirectory (etw) # ETW
 endif()

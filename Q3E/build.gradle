@@ -27,8 +27,8 @@ android {
                 cppFlags "-fexceptions", "-frtti"
             }
         }
-        versionCode 131130408
-        versionName '1.3.1.1304.8' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
+        versionCode 131130409
+        versionName '1.3.1.1304.9' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
     }
 
     buildTypes {

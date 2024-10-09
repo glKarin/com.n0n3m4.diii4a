@@ -1,0 +1,54 @@
+/**
+ * @def MODNAME
+ * @brief Mod name
+ */
+#define MODNAME "@MODNAME@"
+
+/**
+ * @def MODURL
+ * @brief Mod URL
+ */
+#define MODURL "@MODURL@"
+
+/**
+ * @def ETLEGACY_VERSION
+ * @brief Version in long format.
+ *
+ * If the current commit is tagged, then it is just the tag.
+ * Otherwise, it consists of three parts separated by dashes:
+ * 1. most recent tag
+ * 2. commits made since last tagging
+ * 3. abbreviated SHA1 of the current commit
+ */
+#define ETLEGACY_VERSION "@ETL_CMAKE_VERSION@"
+
+/**
+ * @def ETLEGACY_VERSION_SHORT
+ * @brief Version in short format. Contains only the most recent tag.
+ */
+#define ETLEGACY_VERSION_SHORT "@ETL_CMAKE_VERSION_SHORT@"
+
+/**
+ * @def ETLEGACY_VERSION_INT
+ * @brief Version in integral format.
+ */
+#define ETLEGACY_VERSION_INT @ETL_CMAKE_VERSION_INT@
+
+/**
+* @def PRODUCT_VERSION
+* @brief Version data used for windows RC compiler
+*/
+#define PRODUCT_VERSION @ETL_CMAKE_PROD_VERSION@
+#define PRODUCT_VERSION_STR "@ETL_CMAKE_PROD_VERSION_STR@"
+
+/**
+* @def PRODUCT_BUILD_TIME
+* @brief Build time information in UTC
+*/
+#define PRODUCT_BUILD_TIME "@ETL_CMAKE_BUILD_TIME@ UTC"
+
+/**
+* @def PRODUCT_BUILD_FEATURES
+* @brief Build time enabled feature set
+*/
+#define PRODUCT_BUILD_FEATURES "@ETL_COMPILE_FEATURES@"

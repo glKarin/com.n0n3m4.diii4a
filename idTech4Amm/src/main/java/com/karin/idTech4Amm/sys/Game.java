@@ -32,6 +32,7 @@ public enum Game
 
     // Quake 4
     QUAKE4_BASE(Q3EGlobals.GAME_QUAKE4, "q4base", "", "q4game", "", false, R.string.quake_iv_q4base),
+    QUAKE4_HARDQORE(Q3EGlobals.GAME_QUAKE4, "hardqore", "hardqore", "hardqore",  "", true, R.string.hardqore),
 
     // Prey(2006)
     PREY_BASE(Q3EGlobals.GAME_PREY, "preybase", "", "preygame", "", false, R.string.prey_preybase),
@@ -65,6 +66,9 @@ public enum Game
     GZDOOM_DOOM2(Q3EGlobals.GAME_GZDOOM, "DOOM2.WAD", "DOOM2.WAD", "gzdoom", "", true, R.string.doom2_base),
     GZDOOM_FREEDOOM1(Q3EGlobals.GAME_GZDOOM, "freedoom1.wad", "freedoom1.wad", "gzdoom", "", true, R.string.freedoom1_base),
     GZDOOM_FREEDOOM2(Q3EGlobals.GAME_GZDOOM, "freedoom2.wad", "freedoom2.wad", "gzdoom", "", true, R.string.freedoom2_base),
+
+    // Wolfenstein: Enemy Territory
+    ETW_BASE(Q3EGlobals.GAME_ETW, "etmain", "", "etwgame", "", false, R.string.etw_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

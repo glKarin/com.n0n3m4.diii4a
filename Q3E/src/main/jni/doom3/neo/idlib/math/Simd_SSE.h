@@ -40,13 +40,13 @@ If you have questions concerning this license or the applicable additional terms
 class idSIMD_SSE : public idSIMD_MMX
 {
 	public:
-#if defined(MACOS_X) && defined(__i386__)
+#if defined(__GNUC__) && defined(__SSE__)
+
 		virtual const char *VPCALL GetName(void) const;
 		virtual void VPCALL Dot(float *dst,			const idPlane &constant,const idDrawVert *src,	const int count);
 		virtual	void VPCALL MinMax(idVec3 &min,		idVec3 &max,			const idDrawVert *src,	const int *indexes,		const int count);
 		virtual void VPCALL Dot(float *dst,			const idVec3 &constant,	const idPlane *src,		const int count);
 
-//#elif defined(_WIN32) //k win32
 #elif defined(_MSC_VER) && defined(_M_IX86)
 		virtual const char *VPCALL GetName(void) const;
 
@@ -130,7 +130,10 @@ class idSIMD_SSE : public idSIMD_MMX
 		virtual int  VPCALL CreateVertexProgramShadowCache(idVec4 *vertexCache, const idDrawVert *verts, const int numVerts);
 
 		virtual void VPCALL UpSamplePCMTo44kHz(float *dest, const short *pcm, const int numSamples, const int kHz, const int numChannels);
+    // DG: the following is broken at least in the 22KHz Stereo case with numSamples % 4 != 0 (writes 4 floats too much which can destroy the stack), so let's not use it anymore.
+#if 0
 		virtual void VPCALL UpSampleOGGTo44kHz(float *dest, const float *const *ogg, const int numSamples, const int kHz, const int numChannels);
+#endif
 		virtual void VPCALL MixSoundTwoSpeakerMono(float *mixBuffer, const float *samples, const int numSamples, const float lastV[2], const float currentV[2]);
 		virtual void VPCALL MixSoundTwoSpeakerStereo(float *mixBuffer, const float *samples, const int numSamples, const float lastV[2], const float currentV[2]);
 		virtual void VPCALL MixSoundSixSpeakerMono(float *mixBuffer, const float *samples, const int numSamples, const float lastV[6], const float currentV[6]);

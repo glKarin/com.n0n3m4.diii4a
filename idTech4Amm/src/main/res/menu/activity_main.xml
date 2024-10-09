@@ -50,6 +50,10 @@
                 android:id="@+id/main_menu_game_doom"
                 android:title="@string/doom"
                 android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_game_etw"
+                android:title="@string/etw"
+                android:showAsAction="never"/>
         </menu>
     </item>
     

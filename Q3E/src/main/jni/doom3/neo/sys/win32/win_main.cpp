@@ -55,6 +55,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <SDL_main.h>
 
+#ifdef _RAVEN //karin: win log file name
+#define GAME_NAME_ID "quake4"
+#elif defined(_HUMANHEAD)
+#define GAME_NAME_ID "prey"
+#else
+#define GAME_NAME_ID "doom3"
+#endif
+
 idCVar Win32Vars_t::win_outputDebugString( "win_outputDebugString", "0", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_outputEditString( "win_outputEditString", "1", CVAR_SYSTEM | CVAR_BOOL, "" );
 idCVar Win32Vars_t::win_viewlog( "win_viewlog", "0", CVAR_SYSTEM | CVAR_INTEGER, "" );
@@ -376,7 +384,7 @@ static int WPath2A(char *dst, size_t size, const WCHAR *src) {
 
 /*
 ==============
-Returns "My Documents"/My Games/dhewm3 directory (or equivalent - "CSIDL_PERSONAL").
+Returns "My Documents"/My Games/idtech4amm/<game> directory (or equivalent - "CSIDL_PERSONAL").
 To be used with Sys_GetPath(PATH_SAVE), so savegames, screenshots etc will be
 saved to the users files instead of systemwide.
 
@@ -398,7 +406,7 @@ extern "C" { // DG: I need this in SDL_win32_main.c
 		if (len == 0)
 			return 0;
 
-		idStr::Append(dst, size, "/My Games/dhewm3");
+		idStr::Append(dst, size, "/My Games/idTech4Amm/" GAME_NAME);
 
 		return len;
 	}
@@ -822,7 +830,7 @@ void Sys_Init( void ) {
 	{
 		idStr savepath;
 		Sys_GetPath( PATH_SAVE, savepath );
-		common->Printf( "Logging console output to %s/dhewm3log.txt\n", savepath.c_str() );
+		common->Printf( "Logging console output to %s/" GAME_NAME_ID "_log.txt\n", savepath.c_str() );
 	}
 
 	//
@@ -1084,7 +1092,7 @@ int main(int argc, char *argv[]) {
     freopen("stderr.txt","w",stderr);
     setvbuf(stderr, NULL, _IONBF, 0);
 #endif
-	// SDL_win32_main.c creates the dhewm3log.txt and redirects stdout into it
+	// SDL_win32_main.c creates the <game>_log.txt and redirects stdout into it
 	// so here we can log its (approx.) creation time before anything else is logged:
 	{
 		time_t tt = time(NULL);

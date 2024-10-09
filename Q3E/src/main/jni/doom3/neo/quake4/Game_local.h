@@ -1409,6 +1409,37 @@ ID_INLINE idEntityPtr<type>::operator type * ( void ) const {
 //k
 #include "../raven/idlib/containers/ListGame.h"
 
+#ifdef __ANDROID__ //karin: for in smooth joystick on Android
+#define _INCR_AVA_DEG(x) ((x) + _AVA_DEG)
+#define _DECR_AVA_DEG(x) ((x) - _AVA_DEG)
+#define GAME_SETUPCMDDIRECTION(_cmd, _ava_deg, _forward, _backward, _left, _right) \
+{ \
+	const float _AVA_DEG = _ava_deg < 0 ? 60 : _ava_deg; \
+	if(_cmd.forwardmove != 0 || _cmd.rightmove != 0) { \
+		float a = (float)atan2(_cmd.rightmove, _cmd.forwardmove); \
+		a = RAD2DEG(a); \
+		if (a >= 360.0f || a < 0.0f) { \
+			a -= floor(a / 360.0f) * 360.0f; \
+			if (a >= 360.0f) { \
+				a -= 360.0f; \
+			} \
+			else if (a < 0.0f) { \
+				a += 360.0f; \
+			} \
+		} \
+		_forward = ((a >= 0 && a <= _INCR_AVA_DEG(0)) || (a >= _DECR_AVA_DEG(360) && a <= 360)); \
+		_backward = (a >= _DECR_AVA_DEG(180) && a <= _INCR_AVA_DEG(180)); \
+		_left = (a > _DECR_AVA_DEG(270) && a < _INCR_AVA_DEG(270)); \
+		_right = (a > _DECR_AVA_DEG(90) && a < _INCR_AVA_DEG(90)); \
+	} else { \
+		_forward = false; \
+		_backward = false; \
+		_left = false; \
+		_right = false; \
+	} \
+}
+#endif
+
 #ifdef MOD_BOTS
 // TinMan: BotZ0r
 #include "bots/BotAI.h"

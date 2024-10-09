@@ -65,7 +65,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
         final String endl = TextHelper.GetDialogMessageEndl();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher);
         final String DataDir = preferences.getString(Q3EPreference.pref_datapath, "");
-        final boolean Standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, false);
+        final boolean Standalone = preferences.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
         Game[] values = Game.values();
         for (String game : GameManager.Games)
         {
@@ -80,22 +80,23 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
                 String subdir = GetSubDir(value.type, Standalone);
                 String name = value.GetName(m_gameLauncher);
                 sb.append(" ").append(String.format("%2d", i)).append(". ").append(name).append(" -> ").append(endl);
-                String path = "";
+                String path = KStr.AppendPath(DataDir, subdir, value.game);
+
+                String pathText = TextHelper.GenLinkText("file://" + path, path);
+                sb.append(" * ").append(pathText).append(endl);
 
                 if(!game.equals(Q3EGlobals.GAME_QUAKE1))
                 {
                     String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
-                    path = KStr.AppendPath(appHome, subdir, value.game);
-                    String pathText = TextHelper.GenLinkText("file://" + path, path);
-                    sb.append(" * ").append(pathText).append(endl);
+                    String path2 = KStr.AppendPath(appHome, subdir, value.game);
+
+                    if(!path2.equals(path))
+                    {
+                        String pathText2 = TextHelper.GenLinkText("file://" + path2, path2);
+                        sb.append(" * ").append(pathText2).append(endl);
+                    }
                 }
 
-                String path2 = KStr.AppendPath(DataDir, subdir, value.game);
-                if(!path2.equals(path))
-                {
-                    String pathText = TextHelper.GenLinkText("file://" + path2, path2);
-                    sb.append(" * ").append(pathText).append(endl);
-                }
                 i++;
             }
 

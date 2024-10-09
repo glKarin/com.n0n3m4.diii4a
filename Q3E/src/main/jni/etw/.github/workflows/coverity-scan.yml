@@ -1,0 +1,63 @@
+name: "Coverity Scan"
+
+on:
+  # push:
+  #   branches: [ master ]
+  # pull_request:
+  #   branches: [ master ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * FRI'
+
+jobs:
+  latest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nasm libwayland-dev wayland-protocols libgl1-mesa-dev libglu1-mesa-dev libasound2-dev pulseaudio libpulse-dev
+
+      - name: Checkout
+        run: git clone --recurse-submodules --jobs 8 --branch master --depth 1 https://github.com/etlegacy/etlegacy .
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE='Debug' -DCMAKE_INSTALL_PREFIX=/
+          -DCMAKE_LIBRARY_PATH=/usr/lib -DCMAKE_INCLUDE_PATH=/usr/include
+          -DINSTALL_DEFAULT_BASEDIR=. -DINSTALL_DEFAULT_BINDIR=.
+          -DINSTALL_DEFAULT_SHAREDIR=. -DINSTALL_DEFAULT_MODDIR=.
+          -DCROSS_COMPILE32=0 -DBUNDLED_LIBS=1 -DINSTALL_EXTRA=0
+          -DFEATURE_SSL=0 -DFEATURE_AUTH=0 -DFEATURE_CURL=0
+
+      - name: Download Coverity Build Tool
+        run: |
+          wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=etlegacy/etlegacy" -O cov-analysis-linux64.tar.gz
+          mkdir cov-analysis-linux64
+          tar -xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+
+      - name: Build with cov-build
+        run: |
+          export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
+          cd build
+          cov-build --dir cov-int make
+
+      - name: Submit result to Coverity Scan
+        run: |
+          version=$(git describe --always | cut -d 'g' -f2- | cut -c -7)
+          cd build
+          tar -czvf etlegacy.tgz cov-int
+          curl -k \
+            --form project=etlegacy \
+            --form token=$TOKEN \
+            --form email=$EMAIL \
+            --form file=@etlegacy.tgz \
+            --form version="${version}" \
+            --form description="development" \
+            https://scan.coverity.com/builds?project=etlegacy%2Fetlegacy
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}

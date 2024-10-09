@@ -184,23 +184,23 @@ void rvStatAllocator::Report()
 {
 	// shouchard:  for debugging and tuning only
 	common->Printf( "rvStatAllocator:  dump of usage stats\n" );
-	common->Printf( "\t%d total bytes handed out in %d requests\n", GetTotalBytesUsed(), GetTotalAllocations() );
-	common->Printf( "\tbegin game:    %3d;  end game:      %3d\n", 
+	common->Printf( "\t%zd total bytes handed out in %zd requests\n", GetTotalBytesUsed(), GetTotalAllocations() );
+	common->Printf( "\tbegin game:    %3zd;  end game:      %3zd\n",
 		GetAllocationsByType( ST_BEGIN_GAME ), 
 		GetAllocationsByType( ST_END_GAME ) );
-	common->Printf( "\tplayer hit:    %3d;  player kill:   %3d\n", 
+	common->Printf( "\tplayer hit:    %3zd;  player kill:   %3zd\n",
 		GetAllocationsByType( ST_HIT ), 
 		GetAllocationsByType( ST_KILL ) );
-	common->Printf( "\tplayer death:  %3d;\n", 
+	common->Printf( "\tplayer death:  %3zd;\n",
 		GetAllocationsByType( ST_DEATH ) );
-	common->Printf( "\tdamage dealt:  %3d;  damage taken:  %3d\n", 
+	common->Printf( "\tdamage dealt:  %3zd;  damage taken:  %3zd\n",
 		GetAllocationsByType( ST_DAMAGE_DEALT ),
 		GetAllocationsByType( ST_DAMAGE_TAKEN ) );
-	common->Printf( "\tstat team:     %3d\n",
+	common->Printf( "\tstat team:     %3zd\n",
 		GetAllocationsByType( ST_STAT_TEAM ) );
-	common->Printf( "\tflag capture:  %3d;\n",
+	common->Printf( "\tflag capture:  %3zd;\n",
 		GetAllocationsByType( ST_CTF_FLAG_CAPTURE ) ),
-	common->Printf( "\tflag drop:     %3d;  flag return:   %3d\n",
+	common->Printf( "\tflag drop:     %3zd;  flag return:   %3zd\n",
 		GetAllocationsByType( ST_CTF_FLAG_DROP ),
 		GetAllocationsByType( ST_CTF_FLAG_RETURN ) );
 }

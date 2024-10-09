@@ -1,0 +1,23 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/LuaTargets.cmake")
+
+set_and_check(LUA_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include")
+add_library(Lua::Library ALIAS "Lua::@LUA_EXPORT_LIBRARY@")
+get_target_property(LUA_CONFIG "Lua::@LUA_EXPORT_LIBRARY@" IMPORTED_CONFIGURATIONS)
+get_target_property(LUA_LIBRARY "Lua::@LUA_EXPORT_LIBRARY@" "IMPORTED_LOCATION_${LUA_CONFIG}")
+set(LUA_LIBRARIES "${LUA_LIBRARY}")
+add_library(LUA_INCLUDE_LIB INTERFACE)
+target_include_directories(LUA_INCLUDE_LIB INTERFACE "${LUA_INCLUDE_DIR}")
+list(APPEND LUA_LIBRARIES LUA_INCLUDE_LIB)
+
+foreach(LIB_NAME @LUA_LINKED_LIBRARIES@)
+    find_library(LIB_LOCATION "${LIB_NAME}")
+    if(NOT LIB_LOCATION)
+        message(FATAL_ERROR "lib${LIB_NAME} not found and is required by lua")
+    else()
+        list(APPEND LUA_LIBRARIES "${LIB_LOCATION}")
+    endif()
+endforeach()
+
+check_required_components(Lua)

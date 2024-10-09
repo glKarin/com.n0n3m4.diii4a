@@ -58,6 +58,7 @@ public final class EditConfigFileFunc extends GameLauncherFunc
                 if(!m_game.startsWith(innerDir))
                     basePath = KStr.AppendPath(basePath, innerDir);
             }
+            if(!Q3EUtils.q3ei.isETW)
             basePath = KStr.AppendPath(basePath, m_game);
         }
         basePath = KStr.AppendPath(basePath, m_file);

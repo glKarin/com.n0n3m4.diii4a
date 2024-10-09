@@ -339,4 +339,12 @@ idCVar harm_pm_fullBodyAwarenessOffset("harm_pm_fullBodyAwarenessOffset", "0 0 0
 idCVar harm_pm_fullBodyAwarenessHeadJoint( "harm_pm_fullBodyAwarenessHeadJoint", "Head", CVAR_GAME | CVAR_ARCHIVE, "head joint when without head model in full-body awareness" );
 idCVar harm_pm_fullBodyAwarenessFixed( "harm_pm_fullBodyAwarenessFixed", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "do not attach view position to head in full-body awareness" );
 idCVar harm_pm_fullBodyAwarenessHeadVisible( "harm_pm_fullBodyAwarenessHeadVisible", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "do not suppress head in full-body awareness" );
+idCVar harm_pm_fullBodyAwarenessFirstPerson( "harm_pm_fullBodyAwarenessFirstPerson", "0", CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL | CVAR_ARCHIVE, "enable first person view in full-body awareness" );
+#endif
+#ifdef _MOD_VIEW_BODY
+idCVar harm_ui_showViewBody( "harm_ui_showViewBody", "0", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "show view body" );
+#endif
+#ifdef __ANDROID__ //karin: re-normalize player movement direction. only for DIII4A smooth onscreen joystick control
+idCVar harm_in_smoothJoystick("harm_in_smoothJoystick", "0", CVAR_SYSTEM | CVAR_BOOL, "Enable smooth joystick(Automatic setup by Android layer)"); // created on engine
+idCVar harm_g_normalizeMovementDirection("harm_g_normalizeMovementDirection", "-1", CVAR_GAME | CVAR_INTEGER | CVAR_ARCHIVE, "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree");
 #endif

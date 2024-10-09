@@ -32,6 +32,7 @@ public final class Q3EPreference
     public static final String pref_harm_r_specularExponentBlinnPhong = "q3e_harm_r_specularExponentBlinnPhong"; //k
     public static final String pref_harm_r_specularExponentPBR        = "q3e_harm_r_specularExponentPBR"; //k
     public static final String pref_harm_r_lightingModel              = "q3e_harm_r_lightingModel"; //k
+    public static final String pref_harm_r_ambientLightingBrightness        = "q3e_harm_r_ambientLightingBrightness"; //k
     public static final String pref_harm_mapBack                      = "q3e_harm_map_back"; //k
     public static final String pref_harm_game                         = "q3e_harm_game"; //k
 
@@ -95,6 +96,12 @@ public final class Q3EPreference
     public static final String pref_harm_gzdoom_user_mod       = "q3e_harm_gzdoom_user_mod"; //k
     public static final String pref_params_gzdoom              = "q3e_params_gzdoom"; //k
     public static final String pref_harm_gzdoom_command_record = "q3e_harm_gzdoom_command_record";
+    // ETW
+    public static final String pref_harm_etw_fs_game          = "q3e_harm_etw_fs_game"; //k
+    public static final String pref_harm_etw_game_lib         = "q3e_harm_etw_game_lib"; //k
+    public static final String pref_harm_etw_user_mod         = "q3e_harm_etw_user_mod"; //k
+    public static final String pref_params_etw                = "q3e_params_etw"; //k
+    public static final String pref_harm_etw_command_record   = "q3e_harm_etw_command_record";
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
@@ -145,6 +152,7 @@ public final class Q3EPreference
     public static final String LOAD_LOCAL_ENGINE_LIB         = "harm_load_local_engine_lib";
     public static final String THEME                         = "harm_theme";
     public static final String EVENT_QUEUE                   = "harm_event_queue"; // 0 - java 1 - native
+    public static final String AUTOSAVE_BUTTON_SETTINGS      = "harm_autosave_button_settings";
 
     public static float GetFloatFromString(Context context, String name, float defVal)
     {

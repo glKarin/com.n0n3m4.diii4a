@@ -236,8 +236,13 @@
                 android:id="@+id/rg_fs_doomgame"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"></RadioGroup>
+
+            <RadioGroup
+                android:id="@+id/rg_fs_etwgame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></RadioGroup>
             </LinearLayout>
-            </android.support.v4.widget.NestedScrollView>
+        </android.support.v4.widget.NestedScrollView>
 
 
         <LinearLayout
@@ -357,6 +362,12 @@
                         android:layout_height="wrap_content"
                         android:text="@string/ambient" />
 
+                    <RadioButton
+                        android:id="@+id/harm_r_lightModel_nolighting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nolighting" />
+
                 </RadioGroup>
 
                 <LinearLayout
@@ -426,6 +437,30 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/pbr_specular_exponent"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="numberDecimal|textNoSuggestions"
+                        android:text="1.0" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/launcher_layout_ambient_lighting_brightness"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/ambient_lighting_brightness_harm_r_ambientlightingbrightness" />
+
+                    <EditText
+                        android:id="@+id/edt_harm_r_ambientLightingBrightness"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/ambient_lighting_brightness"
                         android:imeOptions="flagNoExtractUi"
                         android:inputType="numberDecimal|textNoSuggestions"
                         android:text="1.0" />

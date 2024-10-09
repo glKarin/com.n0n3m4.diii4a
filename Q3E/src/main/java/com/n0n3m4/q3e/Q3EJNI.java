@@ -42,6 +42,7 @@ public class Q3EJNI {
             boolean usingMouse, // using mouse
 			int refreshRate, // refresh rate,
 			String appHome, // app home path
+			boolean smoothJoystick, // is smooth joystick
             boolean continueNoGLContext
     );
 	public static native void drawFrame();

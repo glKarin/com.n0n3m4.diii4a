@@ -75,6 +75,10 @@ static char * get_clipboard_text(void);
 static void show_toast(const char *text);
 static void open_keyboard(void);
 static void close_keyboard(void);
+static void setup_smooth_joystick(int enable);
+static void open_url(const char *url);
+static int open_dialog(const char *title, const char *message, int num, const char *buttons[]);
+static void finish(void);
 
 // data
 static char *game_data_dir = NULL;
@@ -93,6 +97,7 @@ static const jbyte *audio_track_buffer = NULL;
 // Java method
 static jmethodID android_PullEvent_method;
 static jmethodID android_GrabMouse_method;
+static jmethodID android_SetupSmoothJoystick_method;
 static jmethodID android_CopyToClipboard_method;
 static jmethodID android_GetClipboardText_method;
 
@@ -104,6 +109,9 @@ static jmethodID android_writeAudio_array;
 static jmethodID android_ShowToast_method;
 static jmethodID android_OpenVKB_method;
 static jmethodID android_CloseVKB_method;
+static jmethodID android_OpenURL_method;
+static jmethodID android_OpenDialog_method;
+static jmethodID android_Finish_method;
 
 #define ATTACH_JNI(env) \
 	JNIEnv *env = 0; \
@@ -335,11 +343,15 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	//k
 	android_PullEvent_method = (*env)->GetMethodID(env, q3eCallbackClass, "PullEvent", "(I)I");
 	android_GrabMouse_method = (*env)->GetMethodID(env, q3eCallbackClass, "GrabMouse", "(Z)V");
+	android_SetupSmoothJoystick_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetupSmoothJoystick", "(Z)V");
 	android_CopyToClipboard_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyToClipboard", "(Ljava/lang/String;)V");
 	android_GetClipboardText_method = (*env)->GetMethodID(env, q3eCallbackClass, "GetClipboardText", "()Ljava/lang/String;");
 	android_ShowToast_method = (*env)->GetMethodID(env, q3eCallbackClass, "ShowToast", "(Ljava/lang/String;)V");
 	android_OpenVKB_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenVKB", "()V");
 	android_CloseVKB_method = (*env)->GetMethodID(env, q3eCallbackClass, "CloseVKB", "()V");
+	android_OpenURL_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenURL", "(Ljava/lang/String;)V");
+	android_OpenDialog_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenDialog", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)I");
+	android_Finish_method = (*env)->GetMethodID(env, q3eCallbackClass, "Finish", "()V");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -422,6 +434,7 @@ static void setup_Q3E_callback(void)
 
 	callback.Input_grabMouse = &grab_mouse;
 	callback.Input_pullEvent = &pull_input_event;
+	callback.Input_setupSmoothJoystick = &setup_smooth_joystick;
 
 	callback.Sys_attachThread = &Android_AttachThread;
 
@@ -431,8 +444,11 @@ static void setup_Q3E_callback(void)
 	callback.Sys_getClipboardText = &get_clipboard_text;
 	callback.Sys_openKeyboard = &open_keyboard;
 	callback.Sys_closeKeyboard = &close_keyboard;
+	callback.Sys_openURL = &open_url;
+	callback.Sys_exitFinish = &finish;
 
 	callback.Gui_ShowToast = &show_toast;
+	callback.Gui_openDialog = &open_dialog;
 
 	setCallbacks(&callback);
 }
@@ -452,12 +468,13 @@ static void print_initial_context(const Q3E_InitialContext_t *context)
 	LOGI("Game data directory: %s", context->gameDataDir);
 	LOGI("Application home directory: %s", context->appHomeDir);
 	LOGI("Refresh rate: %d", context->refreshRate);
+	LOGI("Smooth joystick: %d", context->smoothJoystick);
     LOGI("Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
 
 	LOGI("<---------");
 }
 
-JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean bContinueNoGLContext)
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc;
@@ -526,6 +543,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;
 	context.gameDataDir = game_data_dir;
 	context.refreshRate = refreshRate;
+	context.smoothJoystick = smoothJoystick ? 1 : 0;
 
 	print_initial_context(&context);
 
@@ -640,6 +658,7 @@ void copy_to_clipboard(const char *text)
 		return;
 	}
 
+	LOGI("Copy clipboard: %s", text);
 	jstring str = (*env)->NewStringUTF(env, text);
 	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
 	(*env)->DeleteLocalRef(env, str);
@@ -654,6 +673,7 @@ char * get_clipboard_text(void)
 	if(!str)
 		return NULL;
 
+	LOGI("Read clipboard");
 	const char *nstr = (*env)->GetStringUTFChars(env, str, NULL);
 	char *res = NULL;
 	if(nstr)
@@ -690,6 +710,82 @@ void close_keyboard(void)
 
 	LOGI("Close keyboard");
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_CloseVKB_method);
+}
+
+void open_url(const char *url)
+{
+	ATTACH_JNI(env)
+
+	if(!url)
+	{
+		return;
+	}
+
+	LOGI("Open URL: %s", url);
+	jstring str = (*env)->NewStringUTF(env, url);
+	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_OpenURL_method, nstr);
+}
+
+int open_dialog(const char *title, const char *message, int num, const char *buttons[])
+{
+	ATTACH_JNI(env)
+
+	if(!title || !message)
+	{
+		return -1;
+	}
+
+	LOGI("Open Dialog: %s\n%s", title, message);
+	jstring str = (*env)->NewStringUTF(env, title);
+	jstring titleStr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	str = (*env)->NewStringUTF(env, message);
+	jstring messageStr = (*env)->NewWeakGlobalRef(env, str);
+	(*env)->DeleteLocalRef(env, str);
+	jobjectArray buttonArray = NULL;
+	jclass stringClazz = (*env)->FindClass(env, "java/lang/String");
+	LOGI("Open Dialog: num buttons -> %d", num);
+	if(num > 0)
+	{
+		buttonArray = (*env)->NewObjectArray(env, num, stringClazz, NULL);
+		int i;
+
+		for(i = 0; i < num; i++)
+		{
+			LOGI("Open Dialog: button %d -> %s", i, buttons[i] ? buttons[i] : "");
+			if(!buttons[i])
+				continue;
+			str = (*env)->NewStringUTF(env, buttons[i]);
+			jstring nStr = (*env)->NewWeakGlobalRef(env, str);
+			(*env)->DeleteLocalRef(env, str);
+			(*env)->SetObjectArrayElement(env, buttonArray, i, nStr);
+		}
+
+		jobjectArray nArr = (*env)->NewWeakGlobalRef(env, buttonArray);
+		(*env)->DeleteLocalRef(env, buttonArray);
+		buttonArray = nArr;
+	}
+	jint res = (*env)->CallIntMethod(env, q3eCallbackObj, android_OpenDialog_method, titleStr, messageStr, buttonArray);
+	LOGI("Open Dialog: result -> %d", res);
+
+	return res;
+}
+
+void finish(void)
+{
+	ATTACH_JNI(env)
+
+	LOGI("Finish");
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_Finish_method);
+}
+
+void setup_smooth_joystick(int enable)
+{
+	ATTACH_JNI(env)
+
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_SetupSmoothJoystick_method, (jboolean)enable);
 }
 
 #define TMPFILE_NAME "idtech4amm_harmattan_tmpfile_XXXXXX"

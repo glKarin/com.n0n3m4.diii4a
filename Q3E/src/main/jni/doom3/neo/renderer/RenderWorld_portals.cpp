@@ -679,6 +679,9 @@ void idRenderWorldLocal::AddAreaEntityRefs(int areaNum, const portalStack_t *ps)
 			continue;
 		}
 
+#ifdef _RAVEN //karin: Quake4 not use weaponDepthHack, instead of weaponDepthHackInViewID
+		entity->parms.weaponDepthHack = entity->parms.weaponDepthHackInViewID == tr.viewDef->renderView.viewID;
+#endif
 		vEnt = R_SetEntityDefViewEntity(entity);
 
 		// possibly expand the scissor rect
@@ -784,7 +787,7 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
 	viewLight_t			*vLight;
 	renderLight_t tmp;
 
-	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_AMBIENT
+	if(r_interactionLightingModel == HARM_INTERACTION_SHADER_NOLIGHTING
 #ifdef _NO_LIGHT
 			|| r_noLight.GetBool()
 #endif

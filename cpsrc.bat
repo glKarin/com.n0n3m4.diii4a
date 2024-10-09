@@ -35,11 +35,14 @@ del /S/Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\maps
 del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\*.cfg
 del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\astyle.*
 del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\premake4.exe
+del /S/Q %DST_PATH%\Q3E\src\main\jni\etw\etmain
+rmdir /S/Q %DST_PATH%\Q3E\src\main\etw\etmain\*
 
+rem xcopy /Y/Q %SRC_PATH%\CHANGES.zh.md %DST_PATH%\
+rem xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\.gitignore %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\build.gradle %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CHANGES.md %DST_PATH%\
-rem xcopy /Y/Q %SRC_PATH%\CHANGES.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CHECK_FOR_UPDATE.json %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\CMakeLists.txt %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\gradle.properties %DST_PATH%\
@@ -49,7 +52,6 @@ xcopy /Y/Q %SRC_PATH%\idtech4amm.keystore %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\LICENSE %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\local.properties %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\README.md %DST_PATH%\
-rem xcopy /Y/Q %SRC_PATH%\README.zh.md %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\settings.gradle %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\cmake_linux_build_doom3_quak4_prey.sh %DST_PATH%\
 xcopy /Y/Q %SRC_PATH%\cmake_msvc_build_doom3_quak4_prey.bat %DST_PATH%\

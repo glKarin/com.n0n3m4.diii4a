@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 //===============================================================
 
-#if defined(MACOS_X) && defined(__i386__)
+#if defined(__GNUC__) && defined(__SSE3__)
 
 /*
 ============
@@ -54,7 +54,7 @@ const char *idSIMD_SSE3::GetName(void) const
 	return "MMX & SSE & SSE2 & SSE3";
 }
 
-#elif defined(_WIN32)
+#elif defined(_MSC_VER) && defined(_M_IX86)
 
 #include <xmmintrin.h>
 

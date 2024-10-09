@@ -105,7 +105,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_STATIC_LIBS "Build static libraries" OFF)
 option(BUILD_STATIC_CURL "Build curl executable with static libcurl" OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
-option(CURL_DISABLE_INSTALL "Set to ON to disable instalation targets" OFF)
+option(CURL_DISABLE_INSTALL "Set to ON to disable instalation targets" ON) #k OFF
 
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
@@ -186,7 +186,7 @@ endif()
 
 include(CurlSymbolHiding)
 
-option(CURL_ENABLE_EXPORT_TARGET "to enable cmake export target" ON)
+option(CURL_ENABLE_EXPORT_TARGET "to enable cmake export target" OFF) # ON
 mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
 
 option(CURL_DISABLE_ALTSVC "disables alt-svc support" OFF)
@@ -423,8 +423,8 @@ cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENAB
 set(openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
   set(openssl_default OFF)
-elseif(ANDROID) #k
-  set(openssl_default OFF)
+#elseif(ANDROID) #k
+  #set(openssl_default OFF)
 endif()
 cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${openssl_default} CURL_ENABLE_SSL OFF)
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
@@ -486,7 +486,11 @@ if(use_core_foundation_and_core_services)
 endif()
 
 if(CURL_USE_OPENSSL)
+  if(NOT ANDROID) #k
   find_package(OpenSSL REQUIRED)
+  else()
+  set(OPENSSL_INCLUDE_DIR "${CMAKE_BINARY_DIR}/deplibs/openssl/include" "${CMAKE_CURRENT_SOURCE_DIR}/../openssl/include")
+  endif()
   set(SSL_ENABLED ON)
   set(USE_OPENSSL ON)
 
@@ -494,7 +498,12 @@ if(CURL_USE_OPENSSL)
   # version of CMake.  This allows our dependents to get our dependencies
   # transitively.
   if(NOT CMAKE_VERSION VERSION_LESS 3.4)
+    if(NOT ANDROID) #k
     list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
+    else()
+    list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
+    include_directories(${OPENSSL_INCLUDE_DIR})
+    endif()
   else()
     list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
     include_directories(${OPENSSL_INCLUDE_DIR})
@@ -1510,6 +1519,10 @@ if(USE_MANUAL)
   add_subdirectory(docs)
 endif()
 
+if(ANDROID) #k
+set(OPENSSL_LIBRARIES "ssl")
+list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
+endif()
 add_subdirectory(lib)
 
 if(BUILD_CURL_EXE)

@@ -80,6 +80,7 @@
     <string name="quake_2">Quake 2</string>
     <string name="quake_3">Quake 3</string>
     <string name="rtcw">RTCW</string>
+    <string name="etw">ETW</string>
     <string name="tdm">Dark mod</string>
     <string name="doom">DOOM</string>
     <string name="prey_2006">Prey(2006)</string>
@@ -362,5 +363,24 @@
     <string name="using_external_game_library">Game library file name: arm64 = `gameaarch64.so` or `libgameaarch64.so`; arm32 = `gamearm.so` or `libgamearm.so`</string>
     <string name="perfected_doom_3">Perfected Doom 3</string>
     <string name="perfected_doom_3_resurrection_of_evil">Perfected Doom 3:Resurrection of Evil</string>
+    <string name="nolighting">No lighting</string>
+    <string name="ambient_lighting_brightness_harm_r_ambientlightingbrightness">Ambient lighting brightness(harm_r_ambientLightingBrightness):</string>
+    <string name="ambient_lighting_brightness">Ambient lighting brightness</string>
+    <string name="hardqore">Hardqore</string>
+    <string name="etw_base">Wolfenstein: Enemy Territory</string>
+    <string name="launcher">Launcher</string>
+    <string name="auto_save_buttons_settings_immediately_if_changed">Auto save buttons settings immediately if changed</string>
+    <string name="auto_save_button_settings">Auto save button settings</string>
+    <string name="copy">Copy</string>
+    <string name="show_preferences">Show preferences</string>
+    <string name="show_application_setting_preferences_contents">Show application setting preferences contents</string>
+    <string name="enable">Enable</string>
+    <string name="disable">Disable</string>
+    <string name="ignore">Ignore</string>
+    <string name="enable_game_standalone_directory">Enable game standalone directory</string>
+    <string name="idtech4amm_requires_enable_game_standalone_directory_since_version_57">idTech4A++ requires enable game standalone directory since version 57.</string>
+    <string name="you_can_also_disable_it_like_older_version">You can also disable it like older version.</string>
+    <string name="you_can_view_all_support_games_data_directory_path_by_tips_button_above_chooser_button_in_launcher">You can view all support games data directory path by `Tips` button above `Chooser` button in launcher.</string>
+    <string name="you_can_also_change_it_manually_on_launcher_settings">You can also change it manually on launcher settings.</string>
 
 </resources>
