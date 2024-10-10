@@ -209,6 +209,7 @@ Sys_InitPIDFile
 void Sys_InitPIDFile( const char *gamedir ) {
 	if( Sys_WritePIDFile( gamedir ) ) {
 #ifndef DEDICATED
+#if !defined(__ANDROID__) //karin: don't show reset config confirm dialog
 		char message[1024];
 		char modName[MAX_OSPATH];
 
@@ -222,6 +223,7 @@ void Sys_InitPIDFile( const char *gamedir ) {
 		if( Sys_Dialog( DT_YES_NO, message, "Abnormal Exit" ) == DR_YES ) {
 			Cvar_Set( "com_abnormalExit", "1" );
 		}
+#endif
 #endif
 	}
 }

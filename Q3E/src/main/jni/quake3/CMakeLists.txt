@@ -4,6 +4,12 @@ project(quake3)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 98)
 
+option(USE_INTERNAL_JPEG "" ON)
+option(USE_INTERNAL_VORBIS "" ON)
+option(USE_INTERNAL_OGG "" ON)
+option(USE_INTERNAL_ZLIB "" OFF)
+option(USE_FREETYPE "" ON)
+
 # build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -11,14 +17,32 @@ endif()
 
 add_definitions(-DNO_VM_COMPILED) # base
 add_definitions(-DUSE_OPENAL -DUSE_OPENAL_DLOPEN) # OpenAL dlopen
-add_definitions(-DUSE_INTERNAL_JPEG) # jpeg
 add_definitions(-DUSE_OPENGLES) # OpenGLES 1.1
 add_definitions(-DUSE_CODEC_VORBIS) # ogg
-add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl
+add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl dlopen
+add_definitions(-DUSE_CODEC_OPUS -DOPUS_BUILD -DHAVE_LRINTF -DFLOATING_POINT -DFLOAT_APPROX -DUSE_ALLOCA) # opus
 
-set(q3client_libs android log GLESv1_CM EGL z)
-set(q3client_libs ${q3client_libs} vorbisfile vorbis ogg)
+set(q3client_libs android log GLESv1_CM EGL)
 set(q3client_libs ${q3client_libs} oboeaudio)
+if(USE_FREETYPE)
+set(q3client_libs ${q3client_libs} freetype)
+endif()
+if(NOT USE_INTERNAL_OGG)
+set(q3client_libs ${q3client_libs} ogg)
+endif()
+if(NOT USE_INTERNAL_VORBIS)
+set(q3client_libs ${q3client_libs} vorbisfile vorbis)
+endif()
+if(NOT USE_INTERNAL_JPEG)
+    set(q3client_libs ${q3client_libs} jpeg)
+else()
+    add_definitions(-DUSE_INTERNAL_JPEG) # jpeg
+endif()
+if(NOT USE_INTERNAL_ZLIB)
+    set(q3client_libs ${q3client_libs} z)
+else()
+    add_definitions(-DNO_GZIP) # zlib
+endif()
 #set(q3client_libs ${q3client_libs} curl)
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
@@ -252,6 +276,7 @@ code/qcommon/q_shared.c
 code/ui/ui_syscalls.c
         )
 
+if(USE_INTERNAL_JPEG)
 set(q3jpeglib_src
         code/jpeg-8c/jaricom.c
         code/jpeg-8c/jcapimin.c
@@ -300,6 +325,7 @@ set(q3jpeglib_src
         code/jpeg-8c/jquant2.c
         code/jpeg-8c/jutils.c
         )
+endif()
 
 set(q3renderer_src
         code/renderergl1/tr_altivec.c
@@ -433,6 +459,205 @@ code/android/ifaddrs.c
 code/sys/con_passive.c
 code/sys/sys_unix.c
         )
+        
+set(q3_opus_dir "opus-1.2.1")
+set(q3_opusfile_dir "opusfile-0.9")
+set(q3_opus_src
+        code/${q3_opus_dir}/src/opus.c
+        code/${q3_opus_dir}/src/opus_decoder.c
+        code/${q3_opus_dir}/src/opus_encoder.c
+        code/${q3_opus_dir}/src/opus_multistream.c
+        code/${q3_opus_dir}/src/opus_multistream_encoder.c
+        code/${q3_opus_dir}/src/opus_multistream_decoder.c
+        code/${q3_opus_dir}/src/repacketizer.c
+        code/${q3_opus_dir}/src/analysis.c
+        code/${q3_opus_dir}/src/mlp.c
+        code/${q3_opus_dir}/src/mlp_data.c
+        code/${q3_opus_dir}/celt/bands.c
+        code/${q3_opus_dir}/celt/celt.c
+        code/${q3_opus_dir}/celt/celt_encoder.c
+        code/${q3_opus_dir}/celt/celt_decoder.c
+        code/${q3_opus_dir}/celt/cwrs.c
+        code/${q3_opus_dir}/celt/entcode.c
+        code/${q3_opus_dir}/celt/entdec.c
+        code/${q3_opus_dir}/celt/entenc.c
+        code/${q3_opus_dir}/celt/kiss_fft.c
+        code/${q3_opus_dir}/celt/laplace.c
+        code/${q3_opus_dir}/celt/mathops.c
+        code/${q3_opus_dir}/celt/mdct.c
+        code/${q3_opus_dir}/celt/modes.c
+        code/${q3_opus_dir}/celt/pitch.c
+        code/${q3_opus_dir}/celt/celt_lpc.c
+        code/${q3_opus_dir}/celt/quant_bands.c
+        code/${q3_opus_dir}/celt/rate.c
+        code/${q3_opus_dir}/celt/vq.c
+        code/${q3_opus_dir}/silk/CNG.c
+        code/${q3_opus_dir}/silk/code_signs.c
+        code/${q3_opus_dir}/silk/init_decoder.c
+        code/${q3_opus_dir}/silk/decode_core.c
+        code/${q3_opus_dir}/silk/decode_frame.c
+        code/${q3_opus_dir}/silk/decode_parameters.c
+        code/${q3_opus_dir}/silk/decode_indices.c
+        code/${q3_opus_dir}/silk/decode_pulses.c
+        code/${q3_opus_dir}/silk/decoder_set_fs.c
+        code/${q3_opus_dir}/silk/dec_API.c
+        code/${q3_opus_dir}/silk/enc_API.c
+        code/${q3_opus_dir}/silk/encode_indices.c
+        code/${q3_opus_dir}/silk/encode_pulses.c
+        code/${q3_opus_dir}/silk/gain_quant.c
+        code/${q3_opus_dir}/silk/interpolate.c
+        code/${q3_opus_dir}/silk/LP_variable_cutoff.c
+        code/${q3_opus_dir}/silk/NLSF_decode.c
+        code/${q3_opus_dir}/silk/NSQ.c
+        code/${q3_opus_dir}/silk/NSQ_del_dec.c
+        code/${q3_opus_dir}/silk/PLC.c
+        code/${q3_opus_dir}/silk/shell_coder.c
+        code/${q3_opus_dir}/silk/tables_gain.c
+        code/${q3_opus_dir}/silk/tables_LTP.c
+        code/${q3_opus_dir}/silk/tables_NLSF_CB_NB_MB.c
+        code/${q3_opus_dir}/silk/tables_NLSF_CB_WB.c
+        code/${q3_opus_dir}/silk/tables_other.c
+        code/${q3_opus_dir}/silk/tables_pitch_lag.c
+        code/${q3_opus_dir}/silk/tables_pulses_per_block.c
+        code/${q3_opus_dir}/silk/VAD.c
+        code/${q3_opus_dir}/silk/control_audio_bandwidth.c
+        code/${q3_opus_dir}/silk/quant_LTP_gains.c
+        code/${q3_opus_dir}/silk/VQ_WMat_EC.c
+        code/${q3_opus_dir}/silk/HP_variable_cutoff.c
+        code/${q3_opus_dir}/silk/NLSF_encode.c
+        code/${q3_opus_dir}/silk/NLSF_VQ.c
+        code/${q3_opus_dir}/silk/NLSF_unpack.c
+        code/${q3_opus_dir}/silk/NLSF_del_dec_quant.c
+        code/${q3_opus_dir}/silk/process_NLSFs.c
+        code/${q3_opus_dir}/silk/stereo_LR_to_MS.c
+        code/${q3_opus_dir}/silk/stereo_MS_to_LR.c
+        code/${q3_opus_dir}/silk/check_control_input.c
+        code/${q3_opus_dir}/silk/control_SNR.c
+        code/${q3_opus_dir}/silk/init_encoder.c
+        code/${q3_opus_dir}/silk/control_codec.c
+        code/${q3_opus_dir}/silk/A2NLSF.c
+        code/${q3_opus_dir}/silk/ana_filt_bank_1.c
+        code/${q3_opus_dir}/silk/biquad_alt.c
+        code/${q3_opus_dir}/silk/bwexpander_32.c
+        code/${q3_opus_dir}/silk/bwexpander.c
+        code/${q3_opus_dir}/silk/debug.c
+        code/${q3_opus_dir}/silk/decode_pitch.c
+        code/${q3_opus_dir}/silk/inner_prod_aligned.c
+        code/${q3_opus_dir}/silk/lin2log.c
+        code/${q3_opus_dir}/silk/log2lin.c
+        code/${q3_opus_dir}/silk/LPC_analysis_filter.c
+        code/${q3_opus_dir}/silk/LPC_inv_pred_gain.c
+        code/${q3_opus_dir}/silk/table_LSF_cos.c
+        code/${q3_opus_dir}/silk/NLSF2A.c
+        code/${q3_opus_dir}/silk/NLSF_stabilize.c
+        code/${q3_opus_dir}/silk/NLSF_VQ_weights_laroia.c
+        code/${q3_opus_dir}/silk/pitch_est_tables.c
+        code/${q3_opus_dir}/silk/resampler.c
+        code/${q3_opus_dir}/silk/resampler_down2_3.c
+        code/${q3_opus_dir}/silk/resampler_down2.c
+        code/${q3_opus_dir}/silk/resampler_private_AR2.c
+        code/${q3_opus_dir}/silk/resampler_private_down_FIR.c
+        code/${q3_opus_dir}/silk/resampler_private_IIR_FIR.c
+        code/${q3_opus_dir}/silk/resampler_private_up2_HQ.c
+        code/${q3_opus_dir}/silk/resampler_rom.c
+        code/${q3_opus_dir}/silk/sigm_Q15.c
+        code/${q3_opus_dir}/silk/sort.c
+        code/${q3_opus_dir}/silk/sum_sqr_shift.c
+        code/${q3_opus_dir}/silk/stereo_decode_pred.c
+        code/${q3_opus_dir}/silk/stereo_encode_pred.c
+        code/${q3_opus_dir}/silk/stereo_find_predictor.c
+        code/${q3_opus_dir}/silk/stereo_quant_pred.c
+        code/${q3_opus_dir}/silk/LPC_fit.c
+        code/${q3_opus_dir}/silk/float/apply_sine_window_FLP.c
+        code/${q3_opus_dir}/silk/float/corrMatrix_FLP.c
+        code/${q3_opus_dir}/silk/float/encode_frame_FLP.c
+        code/${q3_opus_dir}/silk/float/find_LPC_FLP.c
+        code/${q3_opus_dir}/silk/float/find_LTP_FLP.c
+        code/${q3_opus_dir}/silk/float/find_pitch_lags_FLP.c
+        code/${q3_opus_dir}/silk/float/find_pred_coefs_FLP.c
+        code/${q3_opus_dir}/silk/float/LPC_analysis_filter_FLP.c
+        code/${q3_opus_dir}/silk/float/LTP_analysis_filter_FLP.c
+        code/${q3_opus_dir}/silk/float/LTP_scale_ctrl_FLP.c
+        code/${q3_opus_dir}/silk/float/noise_shape_analysis_FLP.c
+        code/${q3_opus_dir}/silk/float/process_gains_FLP.c
+        code/${q3_opus_dir}/silk/float/regularize_correlations_FLP.c
+        code/${q3_opus_dir}/silk/float/residual_energy_FLP.c
+        code/${q3_opus_dir}/silk/float/warped_autocorrelation_FLP.c
+        code/${q3_opus_dir}/silk/float/wrappers_FLP.c
+        code/${q3_opus_dir}/silk/float/autocorrelation_FLP.c
+        code/${q3_opus_dir}/silk/float/burg_modified_FLP.c
+        code/${q3_opus_dir}/silk/float/bwexpander_FLP.c
+        code/${q3_opus_dir}/silk/float/energy_FLP.c
+        code/${q3_opus_dir}/silk/float/inner_product_FLP.c
+        code/${q3_opus_dir}/silk/float/k2a_FLP.c
+        code/${q3_opus_dir}/silk/float/LPC_inv_pred_gain_FLP.c
+        code/${q3_opus_dir}/silk/float/pitch_analysis_core_FLP.c
+        code/${q3_opus_dir}/silk/float/scale_copy_vector_FLP.c
+        code/${q3_opus_dir}/silk/float/scale_vector_FLP.c
+        code/${q3_opus_dir}/silk/float/schur_FLP.c
+        code/${q3_opus_dir}/silk/float/sort_FLP.c
+        code/${q3_opusfile_dir}/src/info.c
+        code/${q3_opusfile_dir}/src/internal.c
+        code/${q3_opusfile_dir}/src/opusfile.c
+        code/${q3_opusfile_dir}/src/stream.c
+        code/${q3_opusfile_dir}/src/http.c
+        )
+
+set(q3_ogg_dir "libogg-1.3.3")
+if(USE_INTERNAL_OGG)
+    set(q3_ogg_src
+            code/${q3_ogg_dir}/src/bitwise.c
+            code/${q3_ogg_dir}/src/framing.c
+            )
+endif()
+
+set(q3_vorbis_dir "libvorbis-1.3.6")
+if(USE_INTERNAL_VORBIS)
+    set(q3_vorbis_src
+            code/${q3_vorbis_dir}/lib/analysis.c
+            code/${q3_vorbis_dir}/lib/bitrate.c
+            code/${q3_vorbis_dir}/lib/block.c
+            code/${q3_vorbis_dir}/lib/codebook.c
+            code/${q3_vorbis_dir}/lib/envelope.c
+            code/${q3_vorbis_dir}/lib/floor0.c
+            code/${q3_vorbis_dir}/lib/floor1.c
+            code/${q3_vorbis_dir}/lib/info.c
+            code/${q3_vorbis_dir}/lib/lookup.c
+            code/${q3_vorbis_dir}/lib/lpc.c
+            code/${q3_vorbis_dir}/lib/lsp.c
+            code/${q3_vorbis_dir}/lib/mapping0.c
+            code/${q3_vorbis_dir}/lib/mdct.c
+            code/${q3_vorbis_dir}/lib/psy.c
+            code/${q3_vorbis_dir}/lib/registry.c
+            code/${q3_vorbis_dir}/lib/res0.c
+            code/${q3_vorbis_dir}/lib/sharedbook.c
+            code/${q3_vorbis_dir}/lib/smallft.c
+            code/${q3_vorbis_dir}/lib/synthesis.c
+            code/${q3_vorbis_dir}/lib/vorbisenc.c
+            code/${q3_vorbis_dir}/lib/vorbisfile.c
+            code/${q3_vorbis_dir}/lib/window.c
+            )
+endif()
+
+set(q3_zlib_dir "zlib")
+if(USE_INTERNAL_ZLIB)
+    set(q3_zlib_src
+            code/${q3_zlib_dir}/adler32.c
+            code/${q3_zlib_dir}/crc32.c
+            code/${q3_zlib_dir}/inffast.c
+            code/${q3_zlib_dir}/inflate.c
+            code/${q3_zlib_dir}/inftrees.c
+            code/${q3_zlib_dir}/zutil.c
+            )
+endif()
+
+# struct define conflict with opus
+add_library(q3_vorbis STATIC
+        ${q3_vorbis_src}
+)
+set_target_properties(q3_vorbis PROPERTIES COMPILE_FLAGS "-fPIC")
+target_include_directories(q3_vorbis PRIVATE "code/${q3_vorbis_dir}/include" "code/${q3_vorbis_dir}/lib")
+target_include_directories(q3_vorbis PRIVATE "code/${q3_ogg_dir}/include")
 
 add_library(q3renderer1 STATIC
         ${q3renderer_src}
@@ -445,18 +670,29 @@ set(Q3LIBRARY idtech3)
 add_library(${Q3LIBRARY} SHARED
         ${q3client_src}
         ${q3jpeglib_src}
+        ${q3_opus_src}
+        ${q3_ogg_src}
+        ${q3_zlib_src}
         )
 set_target_properties(${Q3LIBRARY} PROPERTIES COMPILE_DEFINITIONS "BOTLIB")
 target_link_libraries(${Q3LIBRARY}
         ${q3client_libs}
+        q3_vorbis
 		q3renderer1
         )
 target_include_directories(${Q3LIBRARY} PRIVATE "code/curl-7.54.0/include")
-target_include_directories(${Q3LIBRARY} PRIVATE "code/libogg-1.3.3/include")
-target_include_directories(${Q3LIBRARY} PRIVATE "code/libvorbis-1.3.6/include")
+target_include_directories(${Q3LIBRARY} PRIVATE "code/${q3_ogg_dir}/include")
+target_include_directories(${Q3LIBRARY} PRIVATE "code/${q3_vorbis_dir}/include")
+target_include_directories(${Q3LIBRARY} PRIVATE "code/${q3_opus_dir}/include" "code/${q3_opus_dir}/celt" "code/${q3_opus_dir}/silk" "code/${q3_opus_dir}/silk/float" "code/${q3_opusfile_dir}/include")
 target_include_directories(${Q3LIBRARY} PRIVATE "code/jpeg-8c")
 target_include_directories(${Q3LIBRARY} PRIVATE "code")
 target_include_directories(${Q3LIBRARY} PRIVATE "../common")
+if(USE_FREETYPE)
+    target_include_directories(${Q3LIBRARY} PRIVATE "../deplibs/freetype/include")
+endif()
+if(USE_INTERNAL_ZLIB)
+    target_include_directories(${Q3LIBRARY} PRIVATE "code/${q3_zlib_dir}")
+endif()
 
 # Quake III Arena
 add_library(q3ui SHARED
