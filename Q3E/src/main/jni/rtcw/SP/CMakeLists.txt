@@ -4,18 +4,34 @@ project(rtcw)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 98)
 
+set(RTCW_VERSION "1.51d-SP")
+
+option(USE_CODEC_OPUS "" ON)
+option(USE_FREETYPE "" ON)
 option(USE_INTERNAL_JPEG "" ON)
 option(USE_INTERNAL_VORBIS "" ON)
 option(USE_INTERNAL_OGG "" ON)
 option(USE_INTERNAL_FREETYPE "" ON)
 option(USE_INTERNAL_ZLIB "" OFF)
+option(USE_BLOOM "" ON)
+option(USE_VOIP "" OFF)
+option(USE_MUMBLE "" OFF)
 
-add_definitions(-DNO_VM_COMPILED) # base
+add_definitions(-DPRODUCT_VERSION=\"${RTCW_VERSION}\")
+add_definitions(-DNO_VM_COMPILED -DUSE_LOCAL_HEADERS) # base
 add_definitions(-DUSE_OPENAL -DUSE_OPENAL_DLOPEN) # OpenAL dlopen
 add_definitions(-DUSE_OPENGLES) # OpenGLES 1.1
 add_definitions(-DUSE_CODEC_VORBIS) # ogg
 add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl dlopen
-add_definitions(-DUSE_CODEC_OPUS -DOPUS_BUILD -DHAVE_LRINTF -DFLOATING_POINT -DFLOAT_APPROX -DUSE_ALLOCA) # opus
+if(USE_CODEC_OPUS)
+    add_definitions(-DUSE_CODEC_OPUS -DOPUS_BUILD -DHAVE_LRINTF -DFLOATING_POINT -DFLOAT_APPROX -DUSE_ALLOCA) # opus
+endif()
+if(USE_VOIP)
+add_definitions(-DUSE_VOIP)
+endif()
+if(USE_BLOOM)
+add_definitions(-DUSE_BLOOM)
+endif()
 
 set(rtcwclient_libs android log GLESv1_CM EGL)
 set(rtcwclient_libs ${rtcwclient_libs} oboeaudio)
@@ -30,10 +46,12 @@ if(NOT USE_INTERNAL_JPEG)
 else()
     add_definitions(-DUSE_INTERNAL_JPEG) # jpeg
 endif()
-if(NOT USE_INTERNAL_FREETYPE)
-    set(rtcwclient_libs ${rtcwclient_libs} freetype)
-else()
-    add_definitions(-DFT2_BUILD_LIBRARY) # freetype2
+if(USE_FREETYPE)
+    if(NOT USE_INTERNAL_FREETYPE)
+        set(rtcwclient_libs ${rtcwclient_libs} freetype)
+    else()
+        add_definitions(-DFT2_BUILD_LIBRARY) # freetype2
+    endif()
 endif()
 if(NOT USE_INTERNAL_ZLIB)
     set(rtcwclient_libs ${rtcwclient_libs} z)
@@ -44,8 +62,8 @@ endif()
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
 
 # Switch off some annoying warnings
 if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
@@ -298,6 +316,9 @@ set(rtcwrenderer_src
         code/renderer/tr_surface.c
         code/renderer/tr_world.c
         )
+if(USE_BLOOM)
+set(rtcwrenderer_src ${rtcwrenderer_src} code/renderer/tr_bloom.c)
+endif()
 
 set(rtcwclient_src
         code/client/cl_cgame.c
@@ -402,6 +423,7 @@ set(rtcwclient_src
         code/sys/con_passive.c
         )
 
+if(USE_CODEC_OPUS)
 set(rtcw_opus_dir "opus-1.2.1")
 set(rtcw_opusfile_dir "opusfile-0.9")
 set(rtcw_opus_src
@@ -544,7 +566,9 @@ set(rtcw_opus_src
         code/${rtcw_opusfile_dir}/src/stream.c
         code/${rtcw_opusfile_dir}/src/http.c
         )
+endif()
 
+if(USE_FREETYPE)
 set(rtcw_freetype_dir "freetype-2.9")
 if(USE_INTERNAL_FREETYPE)
 set(rtcw_freetype_src
@@ -591,6 +615,7 @@ set(rtcw_freetype_src
         code/${rtcw_freetype_dir}/src/psaux/psaux.c
         code/${rtcw_freetype_dir}/src/psnames/psnames.c
         )
+endif()
 endif()
 
 set(rtcw_ogg_dir "libogg-1.3.3")
@@ -669,8 +694,12 @@ target_include_directories(${RTCWLIBRARY} PRIVATE "code/curl-7.60.0/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_ogg_dir}/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_vorbis_dir}/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/jpeg-8c")
-target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_opus_dir}/include" "code/${rtcw_opus_dir}/celt" "code/${rtcw_opus_dir}/silk" "code/${rtcw_opus_dir}/silk/float" "code/${rtcw_opusfile_dir}/include")
-target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_freetype_dir}/include")
+if(USE_CODEC_OPUS)
+    target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_opus_dir}/include" "code/${rtcw_opus_dir}/celt" "code/${rtcw_opus_dir}/silk" "code/${rtcw_opus_dir}/silk/float" "code/${rtcw_opusfile_dir}/include")
+endif()
+if(USE_FREETYPE)
+    target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_freetype_dir}/include")
+endif()
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/jpeg-8c")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code")
 target_include_directories(${RTCWLIBRARY} PRIVATE "../../common")
