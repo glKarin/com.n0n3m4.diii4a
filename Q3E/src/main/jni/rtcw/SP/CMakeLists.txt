@@ -4,16 +4,42 @@ project(rtcw)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 98)
 
+option(USE_INTERNAL_JPEG "" ON)
+option(USE_INTERNAL_VORBIS "" ON)
+option(USE_INTERNAL_OGG "" ON)
+option(USE_INTERNAL_FREETYPE "" ON)
+option(USE_INTERNAL_ZLIB "" OFF)
+
 add_definitions(-DNO_VM_COMPILED) # base
 add_definitions(-DUSE_OPENAL -DUSE_OPENAL_DLOPEN) # OpenAL dlopen
-add_definitions(-DUSE_INTERNAL_JPEG) # jpeg
 add_definitions(-DUSE_OPENGLES) # OpenGLES 1.1
 add_definitions(-DUSE_CODEC_VORBIS) # ogg
-add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl
+add_definitions(-DUSE_CURL -DUSE_CURL_DLOPEN) # curl dlopen
+add_definitions(-DUSE_CODEC_OPUS -DOPUS_BUILD -DHAVE_LRINTF -DFLOATING_POINT -DFLOAT_APPROX -DUSE_ALLOCA) # opus
 
-set(rtcwclient_libs android log GLESv1_CM EGL z)
-set(rtcwclient_libs ${rtcwclient_libs} vorbisfile vorbis ogg)
+set(rtcwclient_libs android log GLESv1_CM EGL)
 set(rtcwclient_libs ${rtcwclient_libs} oboeaudio)
+if(NOT USE_INTERNAL_OGG)
+set(rtcwclient_libs ${rtcwclient_libs} ogg)
+endif()
+if(NOT USE_INTERNAL_VORBIS)
+set(rtcwclient_libs ${rtcwclient_libs} vorbisfile vorbis)
+endif()
+if(NOT USE_INTERNAL_JPEG)
+    set(rtcwclient_libs ${rtcwclient_libs} jpeg)
+else()
+    add_definitions(-DUSE_INTERNAL_JPEG) # jpeg
+endif()
+if(NOT USE_INTERNAL_FREETYPE)
+    set(rtcwclient_libs ${rtcwclient_libs} freetype)
+else()
+    add_definitions(-DFT2_BUILD_LIBRARY) # freetype2
+endif()
+if(NOT USE_INTERNAL_ZLIB)
+    set(rtcwclient_libs ${rtcwclient_libs} z)
+else()
+    add_definitions(-DNO_GZIP) # zlib
+endif()
 #set(rtcwclient_libs ${rtcwclient_libs} curl)
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
@@ -156,6 +182,7 @@ set(rtcwui_src
         code/ui/ui_syscalls.c
         )
 
+if(USE_INTERNAL_JPEG)
 set(rtcwjpeglib_src
         code/jpeg-8c/jaricom.c
         code/jpeg-8c/jcapimin.c
@@ -204,6 +231,7 @@ set(rtcwjpeglib_src
         code/jpeg-8c/jquant2.c
         code/jpeg-8c/jutils.c
         )
+endif()
 
 set(rtcwbotlib_src
         code/src/botlib/be_aas_bspq3.c
@@ -374,22 +402,281 @@ set(rtcwclient_src
         code/sys/con_passive.c
         )
 
+set(rtcw_opus_dir "opus-1.2.1")
+set(rtcw_opusfile_dir "opusfile-0.9")
+set(rtcw_opus_src
+        code/${rtcw_opus_dir}/src/opus.c
+        code/${rtcw_opus_dir}/src/opus_decoder.c
+        code/${rtcw_opus_dir}/src/opus_encoder.c
+        code/${rtcw_opus_dir}/src/opus_multistream.c
+        code/${rtcw_opus_dir}/src/opus_multistream_encoder.c
+        code/${rtcw_opus_dir}/src/opus_multistream_decoder.c
+        code/${rtcw_opus_dir}/src/repacketizer.c
+        code/${rtcw_opus_dir}/src/analysis.c
+        code/${rtcw_opus_dir}/src/mlp.c
+        code/${rtcw_opus_dir}/src/mlp_data.c
+        code/${rtcw_opus_dir}/celt/bands.c
+        code/${rtcw_opus_dir}/celt/celt.c
+        code/${rtcw_opus_dir}/celt/celt_encoder.c
+        code/${rtcw_opus_dir}/celt/celt_decoder.c
+        code/${rtcw_opus_dir}/celt/cwrs.c
+        code/${rtcw_opus_dir}/celt/entcode.c
+        code/${rtcw_opus_dir}/celt/entdec.c
+        code/${rtcw_opus_dir}/celt/entenc.c
+        code/${rtcw_opus_dir}/celt/kiss_fft.c
+        code/${rtcw_opus_dir}/celt/laplace.c
+        code/${rtcw_opus_dir}/celt/mathops.c
+        code/${rtcw_opus_dir}/celt/mdct.c
+        code/${rtcw_opus_dir}/celt/modes.c
+        code/${rtcw_opus_dir}/celt/pitch.c
+        code/${rtcw_opus_dir}/celt/celt_lpc.c
+        code/${rtcw_opus_dir}/celt/quant_bands.c
+        code/${rtcw_opus_dir}/celt/rate.c
+        code/${rtcw_opus_dir}/celt/vq.c
+        code/${rtcw_opus_dir}/silk/CNG.c
+        code/${rtcw_opus_dir}/silk/code_signs.c
+        code/${rtcw_opus_dir}/silk/init_decoder.c
+        code/${rtcw_opus_dir}/silk/decode_core.c
+        code/${rtcw_opus_dir}/silk/decode_frame.c
+        code/${rtcw_opus_dir}/silk/decode_parameters.c
+        code/${rtcw_opus_dir}/silk/decode_indices.c
+        code/${rtcw_opus_dir}/silk/decode_pulses.c
+        code/${rtcw_opus_dir}/silk/decoder_set_fs.c
+        code/${rtcw_opus_dir}/silk/dec_API.c
+        code/${rtcw_opus_dir}/silk/enc_API.c
+        code/${rtcw_opus_dir}/silk/encode_indices.c
+        code/${rtcw_opus_dir}/silk/encode_pulses.c
+        code/${rtcw_opus_dir}/silk/gain_quant.c
+        code/${rtcw_opus_dir}/silk/interpolate.c
+        code/${rtcw_opus_dir}/silk/LP_variable_cutoff.c
+        code/${rtcw_opus_dir}/silk/NLSF_decode.c
+        code/${rtcw_opus_dir}/silk/NSQ.c
+        code/${rtcw_opus_dir}/silk/NSQ_del_dec.c
+        code/${rtcw_opus_dir}/silk/PLC.c
+        code/${rtcw_opus_dir}/silk/shell_coder.c
+        code/${rtcw_opus_dir}/silk/tables_gain.c
+        code/${rtcw_opus_dir}/silk/tables_LTP.c
+        code/${rtcw_opus_dir}/silk/tables_NLSF_CB_NB_MB.c
+        code/${rtcw_opus_dir}/silk/tables_NLSF_CB_WB.c
+        code/${rtcw_opus_dir}/silk/tables_other.c
+        code/${rtcw_opus_dir}/silk/tables_pitch_lag.c
+        code/${rtcw_opus_dir}/silk/tables_pulses_per_block.c
+        code/${rtcw_opus_dir}/silk/VAD.c
+        code/${rtcw_opus_dir}/silk/control_audio_bandwidth.c
+        code/${rtcw_opus_dir}/silk/quant_LTP_gains.c
+        code/${rtcw_opus_dir}/silk/VQ_WMat_EC.c
+        code/${rtcw_opus_dir}/silk/HP_variable_cutoff.c
+        code/${rtcw_opus_dir}/silk/NLSF_encode.c
+        code/${rtcw_opus_dir}/silk/NLSF_VQ.c
+        code/${rtcw_opus_dir}/silk/NLSF_unpack.c
+        code/${rtcw_opus_dir}/silk/NLSF_del_dec_quant.c
+        code/${rtcw_opus_dir}/silk/process_NLSFs.c
+        code/${rtcw_opus_dir}/silk/stereo_LR_to_MS.c
+        code/${rtcw_opus_dir}/silk/stereo_MS_to_LR.c
+        code/${rtcw_opus_dir}/silk/check_control_input.c
+        code/${rtcw_opus_dir}/silk/control_SNR.c
+        code/${rtcw_opus_dir}/silk/init_encoder.c
+        code/${rtcw_opus_dir}/silk/control_codec.c
+        code/${rtcw_opus_dir}/silk/A2NLSF.c
+        code/${rtcw_opus_dir}/silk/ana_filt_bank_1.c
+        code/${rtcw_opus_dir}/silk/biquad_alt.c
+        code/${rtcw_opus_dir}/silk/bwexpander_32.c
+        code/${rtcw_opus_dir}/silk/bwexpander.c
+        code/${rtcw_opus_dir}/silk/debug.c
+        code/${rtcw_opus_dir}/silk/decode_pitch.c
+        code/${rtcw_opus_dir}/silk/inner_prod_aligned.c
+        code/${rtcw_opus_dir}/silk/lin2log.c
+        code/${rtcw_opus_dir}/silk/log2lin.c
+        code/${rtcw_opus_dir}/silk/LPC_analysis_filter.c
+        code/${rtcw_opus_dir}/silk/LPC_inv_pred_gain.c
+        code/${rtcw_opus_dir}/silk/table_LSF_cos.c
+        code/${rtcw_opus_dir}/silk/NLSF2A.c
+        code/${rtcw_opus_dir}/silk/NLSF_stabilize.c
+        code/${rtcw_opus_dir}/silk/NLSF_VQ_weights_laroia.c
+        code/${rtcw_opus_dir}/silk/pitch_est_tables.c
+        code/${rtcw_opus_dir}/silk/resampler.c
+        code/${rtcw_opus_dir}/silk/resampler_down2_3.c
+        code/${rtcw_opus_dir}/silk/resampler_down2.c
+        code/${rtcw_opus_dir}/silk/resampler_private_AR2.c
+        code/${rtcw_opus_dir}/silk/resampler_private_down_FIR.c
+        code/${rtcw_opus_dir}/silk/resampler_private_IIR_FIR.c
+        code/${rtcw_opus_dir}/silk/resampler_private_up2_HQ.c
+        code/${rtcw_opus_dir}/silk/resampler_rom.c
+        code/${rtcw_opus_dir}/silk/sigm_Q15.c
+        code/${rtcw_opus_dir}/silk/sort.c
+        code/${rtcw_opus_dir}/silk/sum_sqr_shift.c
+        code/${rtcw_opus_dir}/silk/stereo_decode_pred.c
+        code/${rtcw_opus_dir}/silk/stereo_encode_pred.c
+        code/${rtcw_opus_dir}/silk/stereo_find_predictor.c
+        code/${rtcw_opus_dir}/silk/stereo_quant_pred.c
+        code/${rtcw_opus_dir}/silk/LPC_fit.c
+        code/${rtcw_opus_dir}/silk/float/apply_sine_window_FLP.c
+        code/${rtcw_opus_dir}/silk/float/corrMatrix_FLP.c
+        code/${rtcw_opus_dir}/silk/float/encode_frame_FLP.c
+        code/${rtcw_opus_dir}/silk/float/find_LPC_FLP.c
+        code/${rtcw_opus_dir}/silk/float/find_LTP_FLP.c
+        code/${rtcw_opus_dir}/silk/float/find_pitch_lags_FLP.c
+        code/${rtcw_opus_dir}/silk/float/find_pred_coefs_FLP.c
+        code/${rtcw_opus_dir}/silk/float/LPC_analysis_filter_FLP.c
+        code/${rtcw_opus_dir}/silk/float/LTP_analysis_filter_FLP.c
+        code/${rtcw_opus_dir}/silk/float/LTP_scale_ctrl_FLP.c
+        code/${rtcw_opus_dir}/silk/float/noise_shape_analysis_FLP.c
+        code/${rtcw_opus_dir}/silk/float/process_gains_FLP.c
+        code/${rtcw_opus_dir}/silk/float/regularize_correlations_FLP.c
+        code/${rtcw_opus_dir}/silk/float/residual_energy_FLP.c
+        code/${rtcw_opus_dir}/silk/float/warped_autocorrelation_FLP.c
+        code/${rtcw_opus_dir}/silk/float/wrappers_FLP.c
+        code/${rtcw_opus_dir}/silk/float/autocorrelation_FLP.c
+        code/${rtcw_opus_dir}/silk/float/burg_modified_FLP.c
+        code/${rtcw_opus_dir}/silk/float/bwexpander_FLP.c
+        code/${rtcw_opus_dir}/silk/float/energy_FLP.c
+        code/${rtcw_opus_dir}/silk/float/inner_product_FLP.c
+        code/${rtcw_opus_dir}/silk/float/k2a_FLP.c
+        code/${rtcw_opus_dir}/silk/float/LPC_inv_pred_gain_FLP.c
+        code/${rtcw_opus_dir}/silk/float/pitch_analysis_core_FLP.c
+        code/${rtcw_opus_dir}/silk/float/scale_copy_vector_FLP.c
+        code/${rtcw_opus_dir}/silk/float/scale_vector_FLP.c
+        code/${rtcw_opus_dir}/silk/float/schur_FLP.c
+        code/${rtcw_opus_dir}/silk/float/sort_FLP.c
+        code/${rtcw_opusfile_dir}/src/info.c
+        code/${rtcw_opusfile_dir}/src/internal.c
+        code/${rtcw_opusfile_dir}/src/opusfile.c
+        code/${rtcw_opusfile_dir}/src/stream.c
+        code/${rtcw_opusfile_dir}/src/http.c
+        )
+
+set(rtcw_freetype_dir "freetype-2.9")
+if(USE_INTERNAL_FREETYPE)
+set(rtcw_freetype_src
+        code/${rtcw_freetype_dir}/src/base/ftsystem.c
+        code/${rtcw_freetype_dir}/src/base/ftdebug.c
+        code/${rtcw_freetype_dir}/src/base/ftinit.c
+        code/${rtcw_freetype_dir}/src/base/ftbase.c
+        code/${rtcw_freetype_dir}/src/base/ftbbox.c
+        code/${rtcw_freetype_dir}/src/base/ftbdf.c
+        code/${rtcw_freetype_dir}/src/base/ftbitmap.c
+        code/${rtcw_freetype_dir}/src/base/ftcid.c
+        code/${rtcw_freetype_dir}/src/base/ftfntfmt.c
+        code/${rtcw_freetype_dir}/src/base/ftfstype.c
+        code/${rtcw_freetype_dir}/src/base/ftgasp.c
+        code/${rtcw_freetype_dir}/src/base/ftglyph.c
+        code/${rtcw_freetype_dir}/src/base/ftgxval.c
+        code/${rtcw_freetype_dir}/src/base/ftlcdfil.c
+        code/${rtcw_freetype_dir}/src/base/ftmm.c
+        code/${rtcw_freetype_dir}/src/base/ftotval.c
+        code/${rtcw_freetype_dir}/src/base/ftpatent.c
+        code/${rtcw_freetype_dir}/src/base/ftpfr.c
+        code/${rtcw_freetype_dir}/src/base/ftstroke.c
+        code/${rtcw_freetype_dir}/src/base/ftsynth.c
+        code/${rtcw_freetype_dir}/src/base/fttype1.c
+        code/${rtcw_freetype_dir}/src/base/ftwinfnt.c
+        code/${rtcw_freetype_dir}/src/truetype/truetype.c
+        code/${rtcw_freetype_dir}/src/type1/type1.c
+        code/${rtcw_freetype_dir}/src/cff/cff.c
+        code/${rtcw_freetype_dir}/src/cid/type1cid.c
+        code/${rtcw_freetype_dir}/src/pfr/pfr.c
+        code/${rtcw_freetype_dir}/src/type42/type42.c
+        code/${rtcw_freetype_dir}/src/winfonts/winfnt.c
+        code/${rtcw_freetype_dir}/src/pcf/pcf.c
+        code/${rtcw_freetype_dir}/src/bdf/bdf.c
+        code/${rtcw_freetype_dir}/src/sfnt/sfnt.c
+        code/${rtcw_freetype_dir}/src/autofit/autofit.c
+        code/${rtcw_freetype_dir}/src/pshinter/pshinter.c
+        code/${rtcw_freetype_dir}/src/raster/raster.c
+        code/${rtcw_freetype_dir}/src/smooth/smooth.c
+        code/${rtcw_freetype_dir}/src/cache/ftcache.c
+        code/${rtcw_freetype_dir}/src/gzip/ftgzip.c
+        code/${rtcw_freetype_dir}/src/lzw/ftlzw.c
+        code/${rtcw_freetype_dir}/src/bzip2/ftbzip2.c
+        code/${rtcw_freetype_dir}/src/psaux/psaux.c
+        code/${rtcw_freetype_dir}/src/psnames/psnames.c
+        )
+endif()
+
+set(rtcw_ogg_dir "libogg-1.3.3")
+if(USE_INTERNAL_OGG)
+    set(rtcw_ogg_src
+            code/${rtcw_ogg_dir}/src/bitwise.c
+            code/${rtcw_ogg_dir}/src/framing.c
+            )
+endif()
+
+set(rtcw_vorbis_dir "libvorbis-1.3.6")
+if(USE_INTERNAL_VORBIS)
+    set(rtcw_vorbis_src
+            code/${rtcw_vorbis_dir}/lib/analysis.c
+            code/${rtcw_vorbis_dir}/lib/bitrate.c
+            code/${rtcw_vorbis_dir}/lib/block.c
+            code/${rtcw_vorbis_dir}/lib/codebook.c
+            code/${rtcw_vorbis_dir}/lib/envelope.c
+            code/${rtcw_vorbis_dir}/lib/floor0.c
+            code/${rtcw_vorbis_dir}/lib/floor1.c
+            code/${rtcw_vorbis_dir}/lib/info.c
+            code/${rtcw_vorbis_dir}/lib/lookup.c
+            code/${rtcw_vorbis_dir}/lib/lpc.c
+            code/${rtcw_vorbis_dir}/lib/lsp.c
+            code/${rtcw_vorbis_dir}/lib/mapping0.c
+            code/${rtcw_vorbis_dir}/lib/mdct.c
+            code/${rtcw_vorbis_dir}/lib/psy.c
+            code/${rtcw_vorbis_dir}/lib/registry.c
+            code/${rtcw_vorbis_dir}/lib/res0.c
+            code/${rtcw_vorbis_dir}/lib/sharedbook.c
+            code/${rtcw_vorbis_dir}/lib/smallft.c
+            code/${rtcw_vorbis_dir}/lib/synthesis.c
+            code/${rtcw_vorbis_dir}/lib/vorbisenc.c
+            code/${rtcw_vorbis_dir}/lib/vorbisfile.c
+            code/${rtcw_vorbis_dir}/lib/window.c
+            )
+endif()
+
+set(rtcw_zlib_dir "zlib-1.2.11")
+if(USE_INTERNAL_ZLIB)
+    set(rtcw_zlib_src
+            code/${rtcw_zlib_dir}/adler32.c
+            code/${rtcw_zlib_dir}/crc32.c
+            code/${rtcw_zlib_dir}/inffast.c
+            code/${rtcw_zlib_dir}/inflate.c
+            code/${rtcw_zlib_dir}/inftrees.c
+            code/${rtcw_zlib_dir}/zutil.c
+            )
+endif()
+
 set(RTCWLIBRARY idtech3_rtcw)
+
+# struct define conflict with opus
+add_library(rtcw_vorbis STATIC
+        ${rtcw_vorbis_src}
+)
+set_target_properties(rtcw_vorbis PROPERTIES COMPILE_FLAGS "-fPIC")
+target_include_directories(rtcw_vorbis PRIVATE "code/${rtcw_vorbis_dir}/include" "code/${rtcw_vorbis_dir}/lib")
+target_include_directories(rtcw_vorbis PRIVATE "code/${rtcw_ogg_dir}/include")
+
 add_library(${RTCWLIBRARY} SHARED
         ${rtcwrenderer_src}
         ${rtcwclient_src}
         ${rtcwjpeglib_src}
+        ${rtcw_opus_src}
+        ${rtcw_freetype_src}
+        ${rtcw_ogg_src}
+        ${rtcw_zlib_src}
         )
 set_target_properties(${RTCWLIBRARY} PROPERTIES COMPILE_DEFINITIONS "BOTLIB")
 target_link_libraries(${RTCWLIBRARY}
         ${rtcwclient_libs}
+        rtcw_vorbis
         )
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/curl-7.60.0/include")
-target_include_directories(${RTCWLIBRARY} PRIVATE "code/libogg-1.3.3/include")
-target_include_directories(${RTCWLIBRARY} PRIVATE "code/libvorbis-1.3.6/include")
+target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_ogg_dir}/include")
+target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_vorbis_dir}/include")
+target_include_directories(${RTCWLIBRARY} PRIVATE "code/jpeg-8c")
+target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_opus_dir}/include" "code/${rtcw_opus_dir}/celt" "code/${rtcw_opus_dir}/silk" "code/${rtcw_opus_dir}/silk/float" "code/${rtcw_opusfile_dir}/include")
+target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_freetype_dir}/include")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code/jpeg-8c")
 target_include_directories(${RTCWLIBRARY} PRIVATE "code")
 target_include_directories(${RTCWLIBRARY} PRIVATE "../../common")
+if(USE_INTERNAL_ZLIB)
+    target_include_directories(${RTCWLIBRARY} PRIVATE "code/${rtcw_zlib_dir}")
+endif()
 
 add_library(rtcwui SHARED
         ${rtcwui_src}

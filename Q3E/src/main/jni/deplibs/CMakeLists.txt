@@ -9,23 +9,23 @@ add_subdirectory (libogg) # -1.3.5
 
 add_subdirectory (libvorbis) # -1.3.7
 
-add_subdirectory (libjpeg) # 9f
+add_subdirectory (libjpeg) # 9f of 14-Jan-2024
 
-add_subdirectory (libpng) #
+add_subdirectory (libpng) # 1.6.44.git
 
-add_subdirectory (pugixml) #
+add_subdirectory (pugixml) # 1.14
 
 add_subdirectory (mbedtls) # -3.5.2
 
 add_subdirectory (minizip) # -ng-1.2
 
-add_subdirectory (freetype) #
+add_subdirectory (freetype) # 2.13.2
 
 add_subdirectory (flac) # -1.4.3
 
 add_subdirectory (opus) # -1.4
 
-add_subdirectory (mp3lame) #
+add_subdirectory (mp3lame) # 3.100-2 ???
 
 add_subdirectory (mpg123/ports/cmake) # -1.32.6
 

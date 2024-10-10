@@ -141,12 +141,12 @@ char *Sys_ConsoleInput(void)
 #endif
 
 #ifdef ETL_CLIENT
-#ifdef _DIII4A //karin: show toast on Android
+#ifdef _DIII4A //karin: show dialog on Android
 extern int Android_OpenDialog(const char *title, const char *message, int num, const char *buttons[]);
 #endif
 dialogResult_t Sys_SDLDialog(dialogType_t type, const char *message, const char *title)
 {
-#ifdef _DIII4A //karin: show toast on Android
+#ifdef _DIII4A //karin: show dialog on Android
     const char *buttons[4] = { NULL, NULL, NULL, NULL };
     int base = 0;
     int res = -1;
