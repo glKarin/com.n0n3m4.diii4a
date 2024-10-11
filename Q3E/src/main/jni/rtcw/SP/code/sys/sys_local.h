@@ -23,8 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 
-#if !defined(__ANDROID__) //karin: without SDL on Android
 #ifndef DEDICATED
+#if !defined(__ANDROID__) //karin: unuse SDL on Android
 #ifdef USE_LOCAL_HEADERS
 #	include "SDL_version.h"
 #else

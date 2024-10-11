@@ -305,6 +305,13 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 	{
 		glConfig.isFullscreen = qfalse;
 	}
+	glConfig.isFullscreen = qtrue;
+    ri.Cvar_Set( "r_fullscreen", "1" );
+    glConfig.displayFrequency = refresh_rate;
+    Cvar_SetValue( "r_customwidth", screen_width );
+    Cvar_SetValue( "r_customheight", screen_height );
+    Cvar_Set( "r_mode", "-1" );
+    Cvar_SetValue( "r_customPixelAspect", glConfig.windowAspect );
 
 	glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
 
@@ -592,7 +599,7 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 	}
 }
 
-#define R_MODE_FALLBACK 3 // 640 * 480
+#define R_MODE_FALLBACK -1 //k 3 // 640 * 480
 
 /*
 ===============
@@ -614,7 +621,7 @@ void GLimp_Init( qboolean fixedFunction )
 	if( ri.Cvar_VariableIntegerValue( "com_abnormalExit" ) )
 	{
 		ri.Cvar_Set( "r_mode", va( "%d", R_MODE_FALLBACK ) );
-		ri.Cvar_Set( "r_fullscreen", "0" );
+		ri.Cvar_Set( "r_fullscreen", "1" ); //k 0
 		ri.Cvar_Set( "r_centerWindow", "0" );
 		ri.Cvar_Set( "com_abnormalExit", "0" );
 	}

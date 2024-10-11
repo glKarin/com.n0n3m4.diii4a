@@ -20,6 +20,7 @@ extern int gl_format;
 extern int gl_msaa;
 extern int screen_width;
 extern int screen_height;
+extern int refresh_rate;
 
 #define MAX_NUM_CONFIGS 1000
 static bool window_seted = false;
@@ -543,7 +544,7 @@ int GLES_Init(qboolean fullscreen)
     glConfig.stencilBits = info.stencil;
     glConfig.depthBits = info.depth;
 
-	glConfig.isFullscreen = true;
+	glConfig.isFullscreen = fullscreen;
 
 	if (glConfig.isFullscreen) {
 		//Sys_GrabMouseCursor(true);
