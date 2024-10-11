@@ -73,6 +73,7 @@ OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
 OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
 OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
 OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
+OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
@@ -86,12 +87,12 @@ if(GAME_DOOM3)
     add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory (deplibs) # common depend libraries
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW)
     message(STATUS "Build common static libraries")
     add_subdirectory (common)
 endif()
@@ -143,4 +144,9 @@ endif()
 if(GAME_ETW)
     message(STATUS "Build Wolfenstein: Enemy Territory")
     add_subdirectory (etw) # ETW
+endif()
+
+if(GAME_REALRTCW)
+    message(STATUS "Build RealRTCW")
+    add_subdirectory (realrtcw) # RealRTCW
 endif()

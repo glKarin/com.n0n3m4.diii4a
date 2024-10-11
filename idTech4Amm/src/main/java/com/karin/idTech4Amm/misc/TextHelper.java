@@ -192,6 +192,7 @@ public final class TextHelper
                 " " + GenLinkText("https://store.steampowered.com/agecheck/app/208200/", "DOOM3 BFG: doom3bfg/base"),
                 " " + GenLinkText("https://github.com/ZDoom/gzdoom", "GZDOOM: gzdoom"),
                 " " + GenLinkText("https://www.etlegacy.com", "ET-Legacy: etmain legacy"),
+                " " + GenLinkText("https://github.com/wolfetplayer/RealRTCW", "RealRTCW"),
                 null,
             "For playing Prey(2006)(Based on `" + GenLinkText("https://github.com/jmarshall23", "jmarshall") + "`'s `" + GenLinkText("https://github.com/jmarshall23/PreyDoom", "PreyDoom") + "`): ",
             " 1. Putting PC Prey game data file to `preybase` folder and START directly.",
@@ -301,7 +302,7 @@ public final class TextHelper
             "idTech4 engine's games support on Android.",
             " e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, `Prey(2006)`, `The Dark Mod`, `DOOM 3 BFG`, and some mods(e.g. `The Lost Mission`).",
             "And other idTech engine's games runtime environment.",
-            " e.g. `Return to Castle Wolfenstein`, `Quake III`, `Quake II`, `Quake`, `GZDOOM`.",
+            " e.g. `Return to Castle Wolfenstein`, `Quake III`, `Quake II`, `Quake`, `GZDOOM`, `Wolfenstein: Enemy Territory`, `RealRTCW`.",
             null,
             "Source in `assets/source` folder in APK file.",
             " `DIII4A.source.tgz`: launcher frontend source and game source, game source and OpenGLES2.0/3.0 shader source in `/Q3E/src/main/jni/doom3` of archive package.",
@@ -331,6 +332,18 @@ public final class TextHelper
     {
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
+
+                ChangeLog.Create("2024-10-01", 57,
+                        "Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game data directory named `etmain` and `legacy`. More view in `" + TextHelper.GenLinkText("https://www.etlegacy.com", "ET: Legacy") + "`.",
+                        "Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/quake-4-hardqore", "Quake 4: Hardqore") + "`.",
+                        "Add `ambientLighting` shader, add ambient lighting model(`harm_r_lightingModel` to 4) in DOOM3/Quake4/Prey.",
+                        "Add effects color alpha in Quake4.",
+                        "Fix `displacement` and `displacementcube` GLSL shader in Quake4. e.g. water in `recomp` map and blood pool in `waste` map.",
+                        "Fix weapon model depth hack in player view in Quake4.",
+                        "Add player body view in DOOM3/Quake4.",
+                        "Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.",
+                        "Default enable `Standalone game data directory`."
+                ),
 
                 ChangeLog.Create("2024-08-23", 56,
                         "Optimize PBR interaction lighting model in DOOM3/Quake4/Prey.",

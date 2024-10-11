@@ -26,6 +26,7 @@ public final class GameManager
             Q3EGlobals.GAME_TDM,
             Q3EGlobals.GAME_GZDOOM,
             Q3EGlobals.GAME_ETW,
+            Q3EGlobals.GAME_REALRTCW,
     };
 
     public GameManager()
@@ -132,6 +133,10 @@ public final class GameManager
         {
             list = GameProps.get(Q3EGlobals.GAME_ETW);
         }
+        else if (Q3EUtils.q3ei.isRealRTCW)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_REALRTCW);
+        }
         else
         {
             list = GameProps.get(Q3EGlobals.GAME_DOOM3);
@@ -192,6 +197,8 @@ public final class GameManager
             return R.drawable.gzdoom_icon;
         else if (Q3EUtils.q3ei.isETW)
             return R.drawable.etw_icon;
+        else if (Q3EUtils.q3ei.isRealRTCW)
+            return R.drawable.realrtcw_icon;
         else
             return R.drawable.d3_icon;
     }
@@ -218,6 +225,8 @@ public final class GameManager
             return R.color.theme_gzdoom_main_color;
         else if (Q3EUtils.q3ei.isETW)
             return R.color.theme_etw_main_color;
+        else if (Q3EUtils.q3ei.isRealRTCW)
+            return R.color.theme_realrtcw_main_color;
         else
             return R.color.theme_doom3_main_color;
     }
@@ -244,6 +253,8 @@ public final class GameManager
             return R.string.doom;
         else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
             return R.string.etw;
+        else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+            return R.string.realrtcw;
         else
             return R.string.doom_3;
     }

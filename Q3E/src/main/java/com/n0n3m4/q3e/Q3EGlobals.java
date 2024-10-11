@@ -129,6 +129,7 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
     public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
     public static final String LIB_ENGINE3_ETW      = "libidtech3_etw.so"; // ETW
+    public static final String LIB_ENGINE3_REALRTCW = "libRealRTCW.so"; // RealRTCW
 
     // game config file
     public static final String CONFIG_FILE_DOOM3    = "DoomConfig.cfg"; // DOOM3
@@ -142,6 +143,7 @@ public final class Q3EGlobals
     public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg"; // DOOM3-BFG
     public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini"; // GZDOOM
     public static final String CONFIG_FILE_ETW      = "etconfig.cfg"; // ETW
+    public static final String CONFIG_FILE_REALRTCW = "realrtcwconfig.cfg"; // RealRTCW
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -155,6 +157,7 @@ public final class Q3EGlobals
     public static final String GAME_DOOM3BFG = "doom3bfg";
     public static final String GAME_GZDOOM   = "gzdoom";
     public static final String GAME_ETW      = "etw";
+    public static final String GAME_REALRTCW = "realrtcw";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -168,6 +171,7 @@ public final class Q3EGlobals
     public static final String GAME_NAME_DOOM3BFG = "DOOM 3 BFG";
     public static final String GAME_NAME_GZDOOM   = "GZDOOM";
     public static final String GAME_NAME_ETW      = "ETW"; // "Wolfenstein: Enemy Territory";
+    public static final String GAME_NAME_REALRTCW = "RealRTCW";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -183,19 +187,21 @@ public final class Q3EGlobals
     public static final String GAME_BASE_DOOM3BFG   = "base"; // RBDoom3BFG always in doom3bfg folder
     public static final String GAME_BASE_GZDOOM     = ""; // GZDOOM is standalone
     public static final String GAME_BASE_ETW        = "etmain";
+    public static final String GAME_BASE_REALRTCW   = "Main";
 
     // game sub directory
-    public static final String GAME_SUBDIR_DOOM3   = "doom3";
-    public static final String GAME_SUBDIR_QUAKE4  = "quake4";
-    public static final String GAME_SUBDIR_PREY    = "prey";
-    public static final String GAME_SUBDIR_QUAKE2  = "quake2";
-    public static final String GAME_SUBDIR_QUAKE3  = "quake3";
-    public static final String GAME_SUBDIR_RTCW    = "rtcw";
-    public static final String GAME_SUBDIR_TDM     = "darkmod";
-    public static final String GAME_SUBDIR_QUAKE1  = "quake1";
-    public static final String GAME_SUBDIR_DOOMBFG = "doom3bfg";
-    public static final String GAME_SUBDIR_GZDOOM  = "gzdoom";
-    public static final String GAME_SUBDIR_ETW     = "etw";
+    public static final String GAME_SUBDIR_DOOM3    = "doom3";
+    public static final String GAME_SUBDIR_QUAKE4   = "quake4";
+    public static final String GAME_SUBDIR_PREY     = "prey";
+    public static final String GAME_SUBDIR_QUAKE2   = "quake2";
+    public static final String GAME_SUBDIR_QUAKE3   = "quake3";
+    public static final String GAME_SUBDIR_RTCW     = "rtcw";
+    public static final String GAME_SUBDIR_TDM      = "darkmod";
+    public static final String GAME_SUBDIR_QUAKE1   = "quake1";
+    public static final String GAME_SUBDIR_DOOMBFG  = "doom3bfg";
+    public static final String GAME_SUBDIR_GZDOOM   = "gzdoom";
+    public static final String GAME_SUBDIR_ETW      = "etw";
+    public static final String GAME_SUBDIR_REALRTCW = "realrtcw";
 
 /*
     public static final String[] QUAKE4_MAPS = {

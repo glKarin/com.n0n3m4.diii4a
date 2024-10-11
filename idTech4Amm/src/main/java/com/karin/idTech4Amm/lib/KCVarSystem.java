@@ -188,6 +188,8 @@ public final class KCVarSystem
                 return new ArrayList<>();
             else if(Q3EUtils.q3ei.isETW)
                 return new ArrayList<>();
+            else if(Q3EUtils.q3ei.isRealRTCW)
+                return new ArrayList<>();
             else
                 return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("base"));
         }

@@ -69,6 +69,9 @@ public enum Game
 
     // Wolfenstein: Enemy Territory
     ETW_BASE(Q3EGlobals.GAME_ETW, "etmain", "", "etwgame", "", false, R.string.etw_base),
+
+    // RealRTCW
+    REALRTCW_BASE(Q3EGlobals.GAME_REALRTCW, "Main", "", "realrtcwgame", "", false, R.string.realrtcw_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

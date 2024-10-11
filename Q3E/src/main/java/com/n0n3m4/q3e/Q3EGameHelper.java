@@ -106,7 +106,7 @@ public class Q3EGameHelper
             {
                 extraCommand += " +disconnect";
             }
-            if(preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false) && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW))
+            if(preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false) && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isRealRTCW))
             {
                 extraCommand += " +loadGame QuickSave";
             }
