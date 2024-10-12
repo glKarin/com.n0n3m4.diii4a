@@ -666,7 +666,7 @@ if(USE_INTERNAL_ZLIB)
             )
 endif()
 
-set(RTCWLIBRARY idtech3_rtcw)
+set(RTCWLIBRARY iowolfsp)
 
 # struct define conflict with opus
 add_library(rtcw_vorbis STATIC

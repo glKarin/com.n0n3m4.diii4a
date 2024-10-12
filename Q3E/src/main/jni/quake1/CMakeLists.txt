@@ -177,7 +177,7 @@ set(q1sys_src
 
 add_definitions(-DCONFIG_MENU -D_FILE_OFFSET_BITS=64 -D__KERNEL_STRICT_NAMES)
 add_definitions(-D_DIII4A -D_NOSDL -D_GLDL -D_NOKTX -DLINK_TO_LIBJPEG=1) # _GLDBG
-set(Q1LIBRARY idtech_quake)
+set(Q1LIBRARY darkplaces)
 add_library(${Q1LIBRARY} SHARED
         ${q1common_src}
         ${q1menu_src}

@@ -680,7 +680,7 @@ set_target_properties(q3renderer1 PROPERTIES COMPILE_FLAGS "-fPIC")
 target_include_directories(q3renderer1 PRIVATE "code/jpeg-8c")
 target_include_directories(q3renderer1 PRIVATE "code/curl-7.54.0/include")
 
-set(Q3LIBRARY idtech3)
+set(Q3LIBRARY ioquake3)
 add_library(${Q3LIBRARY} SHARED
         ${q3client_src}
         ${q3jpeglib_src}

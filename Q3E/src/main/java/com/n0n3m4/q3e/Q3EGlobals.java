@@ -67,11 +67,12 @@ public final class Q3EGlobals
     public static final int UI_Z            = 50;*/
 
     // on-screen item type
-    public static final int TYPE_BUTTON   = 0;
-    public static final int TYPE_SLIDER   = 1;
-    public static final int TYPE_JOYSTICK = 2;
-    public static final int TYPE_DISC     = 3;
-    public static final int TYPE_MOUSE    = -1;
+    public static final int TYPE_BUTTON       = 0;
+    public static final int TYPE_SLIDER       = 1;
+    public static final int TYPE_JOYSTICK     = 2;
+    public static final int TYPE_DISC         = 3;
+    public static final int TYPE_MOUSE        = -1;
+    public static final int TYPE_MOUSE_BUTTON = -2;
 
     // mouse
     public static final int MOUSE_EVENT  = 1;
@@ -121,14 +122,14 @@ public final class Q3EGlobals
     public static final String LIB_ENGINE_ID        = "libidtech4.so"; // DOOM3
     public static final String LIB_ENGINE_RAVEN     = "libidtech4_raven.so"; // Quake 4
     public static final String LIB_ENGINE_HUMANHEAD = "libidtech4_humanhead.so"; // Prey 2006
-    public static final String LIB_ENGINE2_ID       = "libidtech2.so"; // Quake 2
-    public static final String LIB_ENGINE3_ID       = "libidtech3.so"; // Quake 3
-    public static final String LIB_ENGINE3_RTCW     = "libidtech3_rtcw.so"; // RTCW
-    public static final String LIB_ENGINE4_TDM      = "libthedarkmod.so"; // TDM
-    public static final String LIB_ENGINE1_QUAKE    = "libidtech_quake.so"; // Quake 1
+    public static final String LIB_ENGINE2_ID       = "libyquake2.so"; // Quake 2
+    public static final String LIB_ENGINE3_ID       = "libioquake3.so"; // Quake 3
+    public static final String LIB_ENGINE3_RTCW     = "libiowolfsp.so"; // RTCW
+    public static final String LIB_ENGINE4_TDM      = "libTheDarkMod.so"; // TDM
+    public static final String LIB_ENGINE1_QUAKE    = "libdarkplaces.so"; // Quake 1
     public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
     public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
-    public static final String LIB_ENGINE3_ETW      = "libidtech3_etw.so"; // ETW
+    public static final String LIB_ENGINE3_ETW      = "libetl.so"; // ETW
     public static final String LIB_ENGINE3_REALRTCW = "libRealRTCW.so"; // RealRTCW
 
     // game config file

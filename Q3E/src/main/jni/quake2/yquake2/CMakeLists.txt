@@ -627,7 +627,7 @@ set(Glad-GLES3-Header
 	)
 
 # Main Quake 2 executable
-set(QUAKE2LIBRARY idtech2)
+set(QUAKE2LIBRARY yquake2)
 add_library(${QUAKE2LIBRARY} ${Client-Source} ${Client-SDL-Source} ${Client-Header}
 		${Platform-Specific-Source} ${Backends-Generic-Source})
 target_compile_definitions(${QUAKE2LIBRARY} PRIVATE _GLES)

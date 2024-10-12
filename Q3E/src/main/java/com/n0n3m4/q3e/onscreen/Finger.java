@@ -26,7 +26,7 @@ public class Finger
         }
         final int pointerIndex = event.findPointerIndex(id);
         if(pointerIndex != -1)
-            return target.onTouchEvent((int) event.getX(pointerIndex), (int) event.getY(pointerIndex), act, id);
+            return target.onTouchEvent((int) event.getX(pointerIndex), (int) event.getY(pointerIndex), act/*, id*/);
         else
             return false;
     }
