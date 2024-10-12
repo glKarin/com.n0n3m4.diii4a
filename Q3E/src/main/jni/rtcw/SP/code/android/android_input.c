@@ -28,167 +28,78 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/types.h>
 #include <unistd.h>
 
-//#include "android_glimp.h"
 #include "../client/client.h"
-#include "../renderer/tr_local.h"
+#include "../sys/sys_local.h"
 #include "../qcommon/q_shared.h"
-#include <android/log.h>
 
-/* These variables are for confining menu input to 640x480 */
-static float scale_ratio;
-static int offset_x;
+static cvar_t *in_keyboardDebug     = NULL;
 
-/* Shared cursor position between touch and trackball code */
-static float cursor_x=0, cursor_y=0;
-
-static qboolean motion_event = qfalse;
-static float motion_dx=0;
-static float motion_dy=0;
-
-static qboolean trackball_event = qfalse;
-static float trackball_dx = 0;
-static float trackball_dy = 0;
-
+static qboolean mouseAvailable = qfalse;
 static qboolean mouseActive = qfalse;
+
+static cvar_t *in_mouse             = NULL;
 static cvar_t *in_nograb;
+
+static cvar_t *in_joystick          = NULL;
+static cvar_t *in_joystickThreshold = NULL;
+static cvar_t *in_joystickNo        = NULL;
+static cvar_t *in_joystickUseAnalog = NULL;
+
+static int vidRestartTime = 0;
+
+static int in_eventTime = 0;
+
+#define CTRL(a) ((a)-'a'+1)
+
 extern void Android_GrabMouseCursor(qboolean grabIt);
+extern void Android_PollInput(void);
+extern void Sys_SyncState(void);
 
-#if 0
-void Com_PushEvent( sysEvent_t *event );
-
-void Com_QueueEvent(int evTime,
-					sysEventType_t evType,
-					int evValue, int evValue2,
-					int evPtrLength,
-					void *evPtr)
-{
-	sysEvent_t ev;
-	memset( &ev, 0, sizeof( ev ) );
-	ev.evTime=evTime;
-	ev.evType=evType;
-	ev.evValue=evValue;
-	ev.evValue2=evValue2;
-	ev.evPtrLength=evPtrLength;
-	ev.evPtr=evPtr;
-	Com_PushEvent(&ev);
-}
-#endif
+#define IN_IsConsoleKey( key, character ) ( (key) == '`' || (character) == '`' )
 
 void Q3E_KeyEvent(int state,int key,int character)
 {
-	int t = Sys_Milliseconds();
-	if (key!=0)
+	static keyNum_t lastKeyDown = 0;
+	if( IN_IsConsoleKey( key, character ) )
 	{
-		Com_QueueEvent(t, SE_KEY, key, state, 0, NULL);
-		//Com_DPrintf("SE_KEY key=%d state=%d\n", key, state);
+		// Console keys can't be bound or generate characters
+		key = K_CONSOLE;
 	}
-	if ((state==1)&&(character!=0))
+	if(state)
 	{
-		//Com_DPrintf("SE_CHAR key=%d state=%d\n", character, state);
-		Com_QueueEvent(t, SE_CHAR, character, 0, 0, NULL);
+		if (key!=0)
+		{
+			Com_QueueEvent(in_eventTime, SE_KEY, key, qtrue, 0, NULL);
+			if (key == K_BACKSPACE)
+                Com_QueueEvent( in_eventTime, SE_CHAR, CTRL('h'), 0, 0, NULL );
+			else if (keys[K_CTRL].down && key >= 'a' && key <= 'z')
+                Com_QueueEvent( in_eventTime, SE_CHAR, CTRL(key), 0, 0, NULL );
+			else if (character != 0 && character != '`')
+			{
+				//Com_DPrintf("SE_CHAR key=%d state=%d\n", character, state);
+				Com_QueueEvent(in_eventTime, SE_CHAR, character, 0, 0, NULL);
+			}
+		}
+		lastKeyDown = key;
+	}
+	else
+	{
+		if (key!=0)
+		{
+			Com_QueueEvent(in_eventTime, SE_KEY, key, qfalse, 0, NULL);
+		}
+		lastKeyDown = 0;
 	}
 }
-
-enum Action
-{
-	ACTION_DOWN=0,
-	ACTION_UP=1,
-	ACTION_MOVE=2
-};
-
 
 void Q3E_MotionEvent(float dx, float dy)
 {
-	motion_event = qtrue;
-	motion_dx += dx;
-	motion_dy += dy;
-}
-
-/* The quake3 menu is 640x480, make sure the coordinates originating from this area are scaled.
- * The UI code already contains clamping to 640x480, so don't perform it here.
- */
-inline int scale_x_input(float x)
-{
-	return (int)((x - offset_x)*scale_ratio);
-}
-
-inline int scale_y_input(float y)
-{
-	return (int)(y*scale_ratio);
-}
-
-static void processMotionEvents(void)
-{
-	if(motion_event)
+	if (mouseActive)
 	{
-		int t = Sys_Milliseconds();
-		Com_QueueEvent(t, SE_MOUSE, (int)(motion_dx), (int)(motion_dy), 0, NULL);
-		motion_event = qfalse;
-		motion_dx = 0;
-		motion_dy = 0;
-	}
-}
-
-void queueTrackballEvent(int action, float dx, float dy)
-{
-	int t = Sys_Milliseconds();
-	static int keyPress=0;
-
-	switch(action)
-	{
-		case ACTION_DOWN:
-			Com_QueueEvent(t, SE_KEY, K_MOUSE1, 1, 0, NULL);
-			keyPress=1;
-			break;
-		case ACTION_UP:
-			if(keyPress)
-				Com_QueueEvent(t, SE_KEY, K_MOUSE1, 0, 0, NULL);
-			keyPress=0;
-	}
-
-	trackball_dx += dx;
-	trackball_dy += dy;
-	trackball_event = qtrue;
-}
-
-inline float clamp_to_screen_width(float x)
-{
-	if(x > SCREEN_WIDTH)
-		return SCREEN_WIDTH;
-	else if(x < 0)
-		return 0;
-	return x;
-}
-
-inline float clamp_to_screen_height(float y)
-{
-	if(y > SCREEN_HEIGHT)
-		return SCREEN_HEIGHT;
-	else if(y < 0)
-		return 0;
-	return y;
-}
-
-static void processTrackballEvents(void)
-{
-	if(trackball_event)
-	{
-		int t = Sys_Milliseconds(); //what time should we use?
-
-		/* Trackball dx/dy are <1.0, so make them a bit bigger to prevent kilometers of scrolling */
-		trackball_dx *= 50.0;
-		trackball_dy *= 50.0;
-		cursor_x += trackball_dx;
-		cursor_y += trackball_dy;
-
-		cursor_x = clamp_to_screen_width(cursor_x);
-		cursor_y = clamp_to_screen_height(cursor_y);
-
-		Com_QueueEvent(t, SE_MOUSE, (int)trackball_dx, (int)trackball_dy, 0, NULL);
-
-		trackball_event = qfalse;
-		trackball_dx = 0;
-		trackball_dy = 0;
+		if (dx != 0.0 || dy != 0.0)
+		{
+			Com_QueueEvent(in_eventTime, SE_MOUSE, dx, dy, 0, NULL);
+		}
 	}
 }
 
@@ -197,21 +108,32 @@ static void processTrackballEvents(void)
 IN_ActivateMouse
 ===============
 */
-static void IN_ActivateMouse( void )
+static void IN_ActivateMouse( qboolean isFullscreen )
 {
-	if(!in_nograb)
-	{
-		Android_GrabMouseCursor( qtrue );
-	}
-	else if( in_nograb->modified || !mouseActive )
-	{
-		if( in_nograb->integer ) {
-			Android_GrabMouseCursor( qfalse );
-		} else {
-			Android_GrabMouseCursor( qtrue );
-		}
+	if (!mouseAvailable)
+		return;
 
-		in_nograb->modified = qfalse;
+	if (!mouseActive)
+	{
+		Android_GrabMouseCursor( 1 );
+	}
+
+	// in_nograb makes no sense in fullscreen mode
+	if( !isFullscreen )
+	{
+		if (in_nograb->modified || !mouseActive)
+		{
+			if (in_nograb->integer)
+			{
+		        Android_GrabMouseCursor( 0 );
+			}
+			else
+			{
+		        Android_GrabMouseCursor( 1 );
+			}
+
+			in_nograb->modified = qfalse;
+		}
 	}
 
 	mouseActive = qtrue;
@@ -222,31 +144,65 @@ static void IN_ActivateMouse( void )
 IN_DeactivateMouse
 ===============
 */
-static void IN_DeactivateMouse( void )
+static void IN_DeactivateMouse( qboolean isFullscreen )
 {
-	if( mouseActive )
+	if( !mouseAvailable )
+		return;
+
+	if (mouseActive)
 	{
-		Android_GrabMouseCursor( qfalse );
+        Android_GrabMouseCursor( 0 );
 
 		mouseActive = qfalse;
 	}
 }
 
-extern void Android_PollInput(void);
-extern void Sys_SyncState(void);
-void IN_Frame(void)
+/*
+===============
+IN_ProcessEvents
+===============
+*/
+static void IN_ProcessEvents( void )
 {
-	if( ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) )
-		IN_DeactivateMouse();
-	else
-		IN_ActivateMouse();
-
 	Android_PollInput();
 
-	processMotionEvents();
-	processTrackballEvents();
-
 	Sys_SyncState();
+}
+
+void IN_Frame(void)
+{
+	qboolean loading;
+
+	// If not DISCONNECTED (main menu) or ACTIVE (in game), we're loading
+	loading = ( clc.state != CA_DISCONNECTED && clc.state != CA_ACTIVE );
+
+	// update isFullscreen since it might of changed since the last vid_restart
+	cls.glconfig.isFullscreen = Cvar_VariableIntegerValue( "r_fullscreen" ) != 0;
+
+	if( !cls.glconfig.isFullscreen && ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) )
+	{
+		// Console is down in windowed mode
+		IN_DeactivateMouse( cls.glconfig.isFullscreen );
+	}
+	else if( !cls.glconfig.isFullscreen && loading )
+	{
+		// Loading in windowed mode
+		IN_DeactivateMouse( cls.glconfig.isFullscreen );
+	}
+	else
+		IN_ActivateMouse( cls.glconfig.isFullscreen );
+
+	IN_ProcessEvents( );
+
+	// Set event time for next frame to earliest possible time an event could happen
+	in_eventTime = Sys_Milliseconds( );
+
+	// In case we had to delay actual restart of video system
+	if( ( vidRestartTime != 0 ) && ( vidRestartTime < Sys_Milliseconds( ) ) )
+	{
+		vidRestartTime = 0;
+		Cbuf_AddText( "vid_restart\n" );
+	}
 }
 
 /*
@@ -256,10 +212,22 @@ IN_Init
 */
 void IN_Init( void *windowData )
 {
+	int appState;
+
 	Com_DPrintf( "\n------- Input Initialization -------\n" );
-	scale_ratio = (float)SCREEN_HEIGHT/glConfig.vidHeight;
-	offset_x = (glConfig.vidWidth - ((float)SCREEN_WIDTH/scale_ratio))/2;
+
+	in_keyboardDebug = Cvar_Get( "in_keyboardDebug", "0", CVAR_ARCHIVE );
+
+	// mouse variables
+	in_mouse = Cvar_Get( "in_mouse", "1", CVAR_ARCHIVE );
 	in_nograb = Cvar_Get( "in_nograb", "0", CVAR_ARCHIVE );
+
+	in_joystick = Cvar_Get( "in_joystick", "0", CVAR_LATCH );
+	in_joystickThreshold = Cvar_Get( "joy_threshold", "0.15", CVAR_ARCHIVE );
+
+	mouseAvailable = ( in_mouse->value != 0 );
+	IN_DeactivateMouse( Cvar_VariableIntegerValue( "r_fullscreen" ) != 0 );
+
 	Com_DPrintf( "------------------------------------\n" );
 }
 
@@ -270,8 +238,8 @@ IN_Shutdown
 */
 void IN_Shutdown( void )
 {
-	Com_DPrintf( "\n------- Input Shutdown -------\n" );
-	Com_DPrintf( "------------------------------------\n" );
+	IN_DeactivateMouse( Cvar_VariableIntegerValue( "r_fullscreen" ) != 0 );
+	mouseAvailable = qfalse;
 }
 
 /*
