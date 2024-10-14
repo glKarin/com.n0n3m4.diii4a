@@ -18,6 +18,7 @@ option(USE_VOIP "" OFF)
 option(USE_MUMBLE "" OFF)
 
 add_definitions(-DPRODUCT_VERSION=\"${RTCW_VERSION}\")
+add_definitions(-D_DIII4A) # android
 add_definitions(-DNO_VM_COMPILED -DUSE_LOCAL_HEADERS) # base
 add_definitions(-DUSE_OPENAL -DUSE_OPENAL_DLOPEN) # OpenAL dlopen
 add_definitions(-DUSE_OPENGLES) # OpenGLES 1.1

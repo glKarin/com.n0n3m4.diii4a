@@ -47,7 +47,13 @@ int demo_protocols[] =
 
 #define MIN_DEDICATED_COMHUNKMEGS 1
 #define MIN_COMHUNKMEGS		256
+#ifdef __ANDROID__ //karin: memory limit on Android 32bits device
+#if _SIZEOFPTR == 4
+#define DEF_COMHUNKMEGS 	512 //iortcw default is 256
+#else
 #define DEF_COMHUNKMEGS 	1024
+#endif
+#endif
 #define DEF_COMZONEMEGS		128
 #define DEF_COMHUNKMEGS_S	XSTRING(DEF_COMHUNKMEGS)
 #define DEF_COMZONEMEGS_S	XSTRING(DEF_COMZONEMEGS)

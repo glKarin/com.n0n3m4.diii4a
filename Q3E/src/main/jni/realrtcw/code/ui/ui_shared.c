@@ -90,9 +90,29 @@ static qboolean Menu_OverActiveItem( menuDef_t *menu, float x, float y );
 #define MEM_POOL_SIZE  128 * 1024
 #else
 #define MEM_POOL_SIZE  2048 * 1024
+
+#ifdef __ANDROID__ //karin: why crash with receiving signal 7 using static memory on Android 32bits device?
+#if _SIZEOFPTR == 4
+#warning "Using heap memory instead of static memory for UI memory pool on Android armv7 32bits device!"
+#define _MEMORYPOOL_USING_HEAP 1
+#endif
+#endif
 #endif
 
+#if _MEMORYPOOL_USING_HEAP
+static char *memoryPool = NULL;
+static void UI_FreeMemoryPool(void)
+{
+	if(memoryPool)
+	{
+		printf("Free UI heap memory pool on Android armv7 32bits device!\n");
+		free(memoryPool);
+		memoryPool = NULL;
+	}
+}
+#else
 static char memoryPool[MEM_POOL_SIZE];
+#endif
 static int allocPoint, outOfMemory;
 
 // these are expected to be translated by the strings.txt file
@@ -326,6 +346,20 @@ void *UI_Alloc( int size ) {
 		return NULL;
 	}
 
+#if _MEMORYPOOL_USING_HEAP
+	if(!memoryPool)
+	{
+		printf("Using heap memory instead of static memory for UI memory pool on Android armv7 32bits device!\n");
+		memoryPool = calloc(1, MEM_POOL_SIZE);
+		if(!memoryPool)
+		{
+			fprintf(stderr, "Alloc %d heap memory fail for UI memory pool!\n", MEM_POOL_SIZE);
+			abort();
+		}
+		printf("Alloc %d heap memory for UI memory pool.\n", MEM_POOL_SIZE);
+		atexit(UI_FreeMemoryPool);
+	}
+#endif
 	p = &memoryPool[allocPoint];
 
 	allocPoint += ( size + 15 ) & ~15;
