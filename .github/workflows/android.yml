@@ -38,7 +38,7 @@ jobs:
     - name: Setup build environment
       run: |
         sudo apt-get update
-        sudo apt-get -y install build-essential libtinfo5
+        sudo apt-get -y install build-essential # libtinfo5
 
     - name: Build with Gradle
       run: |

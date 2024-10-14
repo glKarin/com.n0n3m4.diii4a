@@ -97,6 +97,12 @@ endif()
 set(ARCH "${cpu}")
 add_definitions(-DARCH_STRING="${ARCH}")
 add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
+if(CMAKE_CXX_BYTE_ORDER EQUAL BIG_ENDIAN)
+    set(big_endian 1)
+else()
+    set(big_endian 0)
+endif()
+add_definitions(-D_IS_BIG_ENDIAN=${big_endian})
 
 set(rtcwcgame_src
         code/cgame/cg_main.c
