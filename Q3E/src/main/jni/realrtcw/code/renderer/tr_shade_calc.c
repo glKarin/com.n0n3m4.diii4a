@@ -778,19 +778,34 @@ void RB_CalcWaveAlpha( const waveForm_t *wf, unsigned char *dstColors ) {
 */
 void RB_CalcModulateColorsByFog( unsigned char *colors ) {
 	int i;
+#ifdef __ANDROID__ //karin: maybe large for Android stack memory, so use heap memory
+	float *texCoords = (float *)calloc(SHADER_MAX_VERTEXES * 2, sizeof(float));
+#else
 	float texCoords[SHADER_MAX_VERTEXES][2] = {{0.0f}};
+#endif
 
 	// calculate texcoords so we can derive density
 	// this is not wasted, because it would only have
 	// been previously called if the surface was opaque
+#ifdef __ANDROID__ //karin: heap pointer, not 2d array
+	RB_CalcFogTexCoords( texCoords );
+#else
 	RB_CalcFogTexCoords( texCoords[0] );
+#endif
 
 	for ( i = 0; i < tess.numVertexes; i++, colors += 4 ) {
+#ifdef __ANDROID__ //karin: heap pointer, not 2d array
+		float f = 1.0 - R_FogFactor( texCoords[i * 2], texCoords[i * 2 + 1] );
+#else
 		float f = 1.0 - R_FogFactor( texCoords[i][0], texCoords[i][1] );
+#endif
 		colors[0] *= f;
 		colors[1] *= f;
 		colors[2] *= f;
 	}
+#ifdef __ANDROID__ //karin: use heap memory on Android
+	free(texCoords);
+#endif
 }
 
 /*
@@ -798,17 +813,32 @@ void RB_CalcModulateColorsByFog( unsigned char *colors ) {
 */
 void RB_CalcModulateAlphasByFog( unsigned char *colors ) {
 	int i;
+#ifdef __ANDROID__ //karin: maybe large for Android stack memory, so use heap memory
+	float *texCoords = (float *)calloc(SHADER_MAX_VERTEXES * 2, sizeof(float));
+#else
 	float texCoords[SHADER_MAX_VERTEXES][2] = {{0.0f}};
+#endif
 
 	// calculate texcoords so we can derive density
 	// this is not wasted, because it would only have
 	// been previously called if the surface was opaque
+#ifdef __ANDROID__ //karin: heap pointer, not 2d array
+	RB_CalcFogTexCoords( texCoords );
+#else
 	RB_CalcFogTexCoords( texCoords[0] );
+#endif
 
 	for ( i = 0; i < tess.numVertexes; i++, colors += 4 ) {
+#ifdef __ANDROID__ //karin: heap pointer, not 2d array
+		float f = 1.0 - R_FogFactor( texCoords[i * 2], texCoords[i * 2 + 1] );
+#else
 		float f = 1.0 - R_FogFactor( texCoords[i][0], texCoords[i][1] );
+#endif
 		colors[3] *= f;
 	}
+#ifdef __ANDROID__ //karin: use heap memory on Android
+	free(texCoords);
+#endif
 }
 
 /*
@@ -816,20 +846,35 @@ void RB_CalcModulateAlphasByFog( unsigned char *colors ) {
 */
 void RB_CalcModulateRGBAsByFog( unsigned char *colors ) {
 	int i;
+#ifdef __ANDROID__ //karin: maybe large for Android stack memory, so use heap memory
+	float *texCoords = (float *)calloc(SHADER_MAX_VERTEXES * 2, sizeof(float));
+#else
 	float texCoords[SHADER_MAX_VERTEXES][2] = {{0.0f}};
+#endif
 
 	// calculate texcoords so we can derive density
 	// this is not wasted, because it would only have
 	// been previously called if the surface was opaque
+#ifdef __ANDROID__ //karin: heap pointer, not 2d array
+	RB_CalcFogTexCoords( texCoords );
+#else
 	RB_CalcFogTexCoords( texCoords[0] );
+#endif
 
 	for ( i = 0; i < tess.numVertexes; i++, colors += 4 ) {
+#ifdef __ANDROID__ //karin: heap pointer, not 2d array
+		float f = 1.0 - R_FogFactor( texCoords[i * 2], texCoords[i * 2 + 1] );
+#else
 		float f = 1.0 - R_FogFactor( texCoords[i][0], texCoords[i][1] );
+#endif
 		colors[0] *= f;
 		colors[1] *= f;
 		colors[2] *= f;
 		colors[3] *= f;
 	}
+#ifdef __ANDROID__ //karin: use heap memory on Android
+	free(texCoords);
+#endif
 }
 
 

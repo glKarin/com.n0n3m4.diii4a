@@ -484,10 +484,17 @@ static void ProjectDlightTexture_scalar( void ) {
 	vec3_t	origin;
 	float	*texCoords;
 	byte	*colors;
+#ifdef __ANDROID__ //karin: too large for Android stack memory
+	byte	*clipBits;
+	float	*texCoordsArray;
+	byte	*colorArray;
+	glIndex_t	*hitIndexes;
+#else
 	byte	clipBits[SHADER_MAX_VERTEXES];
 	float	texCoordsArray[SHADER_MAX_VERTEXES][2];
 	byte	colorArray[SHADER_MAX_VERTEXES][4];
 	glIndex_t	hitIndexes[SHADER_MAX_INDEXES];
+#endif
 	int		numIndexes;
 	float	scale;
 	float	radius;
@@ -502,14 +509,25 @@ static void ProjectDlightTexture_scalar( void ) {
 		return;
 	}
 
+#ifdef __ANDROID__ //karin: use heap memory on Android
+	clipBits = (byte *)malloc(sizeof(byte) * SHADER_MAX_VERTEXES);
+	texCoordsArray = (float *)malloc(sizeof(float) * SHADER_MAX_VERTEXES * 2);
+	colorArray = (byte *)malloc(sizeof(byte) * SHADER_MAX_VERTEXES * 4);
+	hitIndexes = (glIndex_t *)malloc(sizeof(glIndex_t) * SHADER_MAX_INDEXES);
+#endif
 	for ( l = 0 ; l < backEnd.refdef.num_dlights ; l++ ) {
 		dlight_t	*dl;
 
 		if ( !( tess.dlightBits & ( 1 << l ) ) ) {
 			continue;	// this surface definately doesn't have any of this light
 		}
+#ifdef __ANDROID__ //karin: heap pointer, not 2d array
+		texCoords = texCoordsArray;
+		colors = colorArray;
+#else
 		texCoords = texCoordsArray[0];
 		colors = colorArray[0];
+#endif
 
 		dl = &backEnd.refdef.dlights[l];
 		VectorCopy( dl->transformed, origin );
@@ -615,7 +633,11 @@ static void ProjectDlightTexture_scalar( void ) {
 		}
 
 		qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+#ifdef __ANDROID__ //karin: heap pointer, not 2d array
+		qglTexCoordPointer( 2, GL_FLOAT, 0, texCoordsArray );
+#else
 		qglTexCoordPointer( 2, GL_FLOAT, 0, texCoordsArray[0] );
+#endif
 
 		qglEnableClientState( GL_COLOR_ARRAY );
 		qglColorPointer( 4, GL_UNSIGNED_BYTE, 0, colorArray );
@@ -658,6 +680,12 @@ static void ProjectDlightTexture_scalar( void ) {
 			}
 		}
 	}
+#ifdef __ANDROID__ //karin: use heap memory on Android
+	free(clipBits);
+	free(texCoordsArray);
+	free(colorArray);
+	free(hitIndexes);
+#endif
 }
 
 static void ProjectDlightTexture( void ) {

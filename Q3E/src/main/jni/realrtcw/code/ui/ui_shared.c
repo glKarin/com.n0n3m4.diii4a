@@ -91,7 +91,7 @@ static qboolean Menu_OverActiveItem( menuDef_t *menu, float x, float y );
 #else
 #define MEM_POOL_SIZE  2048 * 1024
 
-#ifdef __ANDROID__ //karin: why crash with receiving signal 7 using static memory on Android 32bits device?
+#ifdef __ANDROID__ //karin: why crash with receiving signal 7 using static memory on Android 32bits device, large static memory?
 #if _SIZEOFPTR == 4
 #warning "Using heap memory instead of static memory for UI memory pool on Android armv7 32bits device!"
 #define _MEMORYPOOL_USING_HEAP 1

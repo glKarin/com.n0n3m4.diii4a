@@ -1254,8 +1254,13 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 	srfIQModel_t	*surf = (srfIQModel_t *)surface;
 	iqmData_t	*data = surf->data;
 	float		poseMats[IQM_MAX_JOINTS * 12];
+#ifdef __ANDROID__ //karin: too large for Android stack memory, so use heap memory
+	float		*influenceVtxMat = (float *)malloc(sizeof(float) * SHADER_MAX_VERTEXES * 12);
+	float		*influenceNrmMat = (float *)malloc(sizeof(float) * SHADER_MAX_VERTEXES * 9);
+#else
 	float		influenceVtxMat[SHADER_MAX_VERTEXES * 12];
 	float		influenceNrmMat[SHADER_MAX_VERTEXES * 9];
+#endif
 	int		i;
 
 	float		*xyz;
@@ -1455,6 +1460,10 @@ void RB_IQMSurfaceAnim( surfaceType_t *surface ) {
 
 	tess.numIndexes += 3 * surf->num_triangles;
 	tess.numVertexes += surf->num_vertexes;
+#ifdef __ANDROID__ //karin: use heap memory on Android
+	free(influenceVtxMat);
+	free(influenceNrmMat);
+#endif
 }
 
 int R_IQMLerpTag( orientation_t *tag, iqmData_t *data,
