@@ -384,5 +384,8 @@
     <string name="you_can_also_change_it_manually_on_launcher_settings">You can also change it manually on launcher settings.</string>
     <string name="realrtcw">RealRTCW</string>
     <string name="realrtcw_base">RealRTCW</string>
+    <string name="input_event_queue">Input event queue</string>
+    <string name="choose_input_event_queue_scheme">Choose input event queue scheme</string>
+    <string name="filter">Filter</string>
 
 </resources>

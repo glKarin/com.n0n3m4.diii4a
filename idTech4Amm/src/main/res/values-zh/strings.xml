@@ -383,4 +383,7 @@
     <string name="you_can_also_disable_it_like_older_version">也可以禁用, 像之前版本一样.</string>
     <string name="you_can_view_all_support_games_data_directory_path_by_tips_button_above_chooser_button_in_launcher">启动器中可以通过`选择器`上方的`提示`按钮显示所有支持的游戏的游戏数据文件放置路径.</string>
     <string name="you_can_also_change_it_manually_on_launcher_settings">也可以在启动器设置中手动修改.</string>
+    <string name="input_event_queue">输入事件队列</string>
+    <string name="choose_input_event_queue_scheme">选择输入事件队列方案</string>
+    <string name="filter">过滤</string>
 </resources>

@@ -40,11 +40,11 @@
             android:summary="@string/load_local_engine_library"
             />
         <ListPreference
-            android:title="Event queue"
+            android:title="@string/input_event_queue"
             android:key="harm_event_queue"
             android:persistent="true"
             android:defaultValue="0"
-            android:summary="Choose event queue scheme"
+            android:summary="@string/choose_input_event_queue_scheme"
             android:entryValues="@array/event_queue_values"
             android:entries="@array/event_queue_labels"
             />
