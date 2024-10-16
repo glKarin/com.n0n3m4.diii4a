@@ -72,6 +72,7 @@ import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.sys.Theme;
 import com.karin.idTech4Amm.ui.DebugDialog;
+import com.karin.idTech4Amm.ui.ExperimentalDialog;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
@@ -1588,6 +1589,11 @@ public class GameLauncher extends Activity
 			OpenDebugDialog();
 			return true;
 		}
+		else if (itemId == R.id.main_menu_experimental)
+		{
+			OpenExperimentalDialog();
+			return true;
+		}
 		else if (itemId == R.id.main_menu_test)
 		{
 			Test();
@@ -2185,6 +2191,12 @@ public class GameLauncher extends Activity
         DebugDialog dialog = DebugDialog.newInstance();
         dialog.show(getFragmentManager(), "DebugDialog");
     }
+
+	private void OpenExperimentalDialog()
+	{
+		ExperimentalDialog dialog = ExperimentalDialog.newInstance();
+		dialog.show(getFragmentManager(), "ExperimentalDialog");
+	}
 
 	private void UpdateResolution(int rgid)
 	{

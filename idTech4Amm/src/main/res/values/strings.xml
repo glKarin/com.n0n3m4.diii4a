@@ -178,7 +178,7 @@
     <string name="last_crash_info">Last crash info</string>
     <string name="file_chooser">File chooser</string>
     <string name="update_interval_second_0_disable">Update interval(Second): 0 - Disable</string>
-    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">If you do not want to debug memory usage status, please do not enable it! Because it is a taking-time operation!</string>
+    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">If you do not want to debug memory usage status, please do not enable it!</string>
     <string name="render_memory_status_0_is_disable">Render memory status(0 is disable)</string>
     <string name="no_handle_signals">No handle signals</string>
     <string name="do_not_handle_signals">Do not handle signals</string>
@@ -390,5 +390,9 @@
     <string name="input_event_queue">Input event queue</string>
     <string name="choose_input_event_queue_scheme">Choose input event queue scheme</string>
     <string name="filter">Filter</string>
+    <string name="experimental">Experimental</string>
+    <string name="log">Log</string>
+    <string name="util">Util</string>
+    <string name="input">Input</string>
 
 </resources>

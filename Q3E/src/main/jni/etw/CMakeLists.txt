@@ -22,6 +22,11 @@ endif()
 if(ANDROID)
 add_definitions("-D_DIII4A")
 option(DIII4A "DIII4A" ON)
+
+# build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

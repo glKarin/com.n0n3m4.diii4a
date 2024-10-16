@@ -48,7 +48,7 @@ jobs:
     - name: Rename APK
       id: rename_apk
       run: |
-        apk_file=idTech4A++-test-`date "+%Y_%m_%d-%H_%M_%S"`.apk
+        apk_file=idTech4A++-testing-`date "+%Y_%m_%d-%H_%M_%S"`.apk
         cp ./idTech4Amm/build/outputs/apk/release/idTech4Amm-release.apk $apk_file
         echo "::set-output name=value::$apk_file"
       working-directory: ${{ github.workspace }}

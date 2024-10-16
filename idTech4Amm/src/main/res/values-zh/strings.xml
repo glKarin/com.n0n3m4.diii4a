@@ -176,7 +176,7 @@
     <string name="last_crash_info">最新崩溃信息</string>
     <string name="file_chooser">文件选择器</string>
     <string name="update_interval_second_0_disable">更新间隔(秒): 0 - 禁用</string>
-    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">如果不想要调试内存使用状态, 请不要启用(此操作费时)!</string>
+    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">如果不想要调试内存使用状态, 请不要启用!</string>
     <string name="render_memory_status_0_is_disable">渲染内存状态(0为禁用)</string>
     <string name="no_handle_signals">不处理信号</string>
     <string name="do_not_handle_signals">不处理信号</string>
@@ -386,4 +386,8 @@
     <string name="input_event_queue">输入事件队列</string>
     <string name="choose_input_event_queue_scheme">选择输入事件队列方案</string>
     <string name="filter">过滤</string>
+    <string name="experimental">实验性</string>
+    <string name="log">日志</string>
+    <string name="util">工具</string>
+    <string name="input">输入</string>
 </resources>

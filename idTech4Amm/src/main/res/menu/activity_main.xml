@@ -121,6 +121,10 @@
                 android:title="@string/extract_resource"
                 android:showAsAction="never"/>
             <item
+                android:id="@+id/main_menu_experimental"
+                android:title="@string/experimental"
+                android:showAsAction="never"/>
+            <item
                 android:id="@+id/main_menu_support_developer"
                 android:title="@string/support_the_developer"
                 android:showAsAction="never"/>

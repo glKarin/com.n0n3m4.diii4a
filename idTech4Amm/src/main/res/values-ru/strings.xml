@@ -167,7 +167,7 @@
     <string name="last_crash_info">Информация о последних ошибках</string>
     <string name="file_chooser">Выбор файла</string>
     <string name="update_interval_second_0_disable">Интервал обновления (секунда): 0 - для отключения</string>
-    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">Если вы не хотите отлаживать состояние использования памяти, не включайте его! Потому что это длительная операция!</string>
+    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">Если вы не хотите отлаживать состояние использования памяти, не включайте его!</string>
     <string name="render_memory_status_0_is_disable">Состояние памяти рендеринга</string>
     <string name="no_handle_signals">Не обрабатывать сигналы</string>
     <string name="do_not_handle_signals">Отключить обработку сигналов</string>
@@ -387,5 +387,9 @@
     <string name="input_event_queue">Input event queue</string>
     <string name="choose_input_event_queue_scheme">Choose input event queue scheme</string>
     <string name="filter">Filter</string>
+    <string name="experimental">Experimental</string>
+    <string name="log">Log</string>
+    <string name="util">Util</string>
+    <string name="input">Input</string>
 
 </resources>
