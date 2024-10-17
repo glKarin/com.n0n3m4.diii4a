@@ -746,7 +746,7 @@ void idRenderWorldLocal::RenderScene(const renderView_t *renderView)
 	if (!glConfig.isInitialized) {
 		return;
 	}
-#ifdef _EXTRAS_TOOLS
+#ifdef _ENGINE_MODEL_VIEWER
 	ModelTest_TestModel(renderView->time);
 #endif
 

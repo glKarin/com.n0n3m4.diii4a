@@ -107,6 +107,7 @@ option(SHADOW_MAPPING						"Shadow mapping support" 													ON)
 option(NO_LIGHT								"r_noLight support" 														ON)
 option(STENCIL_SHADOW_IMPROVE				"Improve stencil shadow(translucent, soft(Only OpenGLES3.1+))" 				ON)
 option(EXTRAS_TOOLS							"Add extras commands" 														OFF)
+option(MODEL_VIEWER							"Add model viewer in engine" 												OFF)
 option(USE_MINIZ							"use miniz and minizip" 													OFF)
 option(USE_STB_OGG							"use stb_vorbis" 															OFF)
 
@@ -177,6 +178,11 @@ endif()
 if(EXTRAS_TOOLS)
 	add_definitions(-D_EXTRAS_TOOLS)
 	message(STATUS "Build extras tools support")
+endif()
+
+if(MODEL_VIEWER)
+	add_definitions(-D_ENGINE_MODEL_VIEWER)
+	message(STATUS "Build engine model viewer support")
 endif()
 
 # ETC2 support: but using C++11, so build a static library

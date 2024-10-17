@@ -1,4 +1,4 @@
-package com.n0n3m4.q3e.onscreen;
+package com.n0n3m4.q3e;
 
 import android.app.Activity;
 import android.app.AlertDialog;

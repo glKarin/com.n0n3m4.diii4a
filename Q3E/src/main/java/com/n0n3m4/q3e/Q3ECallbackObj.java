@@ -20,12 +20,9 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
-
-import com.n0n3m4.q3e.onscreen.Q3EGUI;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
