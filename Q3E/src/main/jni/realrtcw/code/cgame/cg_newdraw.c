@@ -822,23 +822,6 @@ static void CG_DrawPlayerScore( rectDef_t *rect, int font, float scale, vec4_t c
 }
 
 
-
-static void CG_DrawPlayerKills( rectDef_t *rect, int font, float scale, vec4_t color, qhandle_t shader, int textStyle ) {
-	char num[16];
-	int value = cg.snap->ps.persistant[PERS_KILLS];
-
-	if ( shader ) {
-		trap_R_SetColor( color );
-		CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
-		trap_R_SetColor( NULL );
-	} else {
-		Com_sprintf( num, sizeof( num ), "%i", value );
-		value = CG_Text_Width( num, font, scale, 0 );
-		CG_Text_Paint( rect->x + ( rect->w - value ) / 2, rect->y + rect->h, font, scale, color, num, 0, 0, textStyle );
-	}
-}
-
-
 static void CG_DrawHoldableItem( rectDef_t *rect, int font, float scale, qboolean draw2D ) {
 	int	value;
 	gitem_t	*item;
@@ -867,29 +850,6 @@ static void CG_DrawHoldableItem( rectDef_t *rect, int font, float scale, qboolea
 			CG_DrawPic( rect->x, rect->y, rect->w, rect->h, cg_items[item - bg_itemlist].icons[0] );
 		}
 	}
-}
-
-static void CG_DrawPerks( rectDef_t *rect, int font, float scale, qboolean draw2D ) {
-    int i;
-    gitem_t *item;
-    float x = 320; // Start at the center of the screen
-    float y = 440; // Lower part of the screen
-
-    if ( cg_fixedAspect.integer == 2 ) {
-        CG_SetScreenPlacement(PLACE_RIGHT, PLACE_CENTER);
-    }
-
-    for ( i = 0; i < MAX_PERKS; i++ ) {
-        if ( cg.snap->ps.perks[i] > 0 || (cg.snap->ps.stats[STAT_PERK] & (1 << i)) ) {
-            item = BG_FindItemForPerk( i );
-
-            if ( item ) {
-                CG_RegisterItemVisuals( item - bg_itemlist );
-                CG_DrawPic( x, y, rect->w, rect->h, cg_items[item - bg_itemlist].icons[0] );
-                x += rect->w + 5; // 5 is the space between icons
-            }
-        }
-    }
 }
 
 void flubfoo( void ) {
@@ -1408,9 +1368,6 @@ float CG_GetValue( int ownerDraw, int type ) {
 		break;
 	case CG_PLAYER_SCORE:
 		return cg.snap->ps.persistant[PERS_SCORE];
-		break;
-	case CG_PLAYER_KILLS:
-		return cg.snap->ps.persistant[PERS_KILLS];
 		break;
 	case CG_PLAYER_HEALTH:
 		return ps->stats[STAT_HEALTH];
@@ -2182,17 +2139,11 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x, float text_
 	case CG_PLAYER_HOLDABLE:
 		CG_DrawHoldableItem( &rect, font, scale, ownerDrawFlags & CG_SHOW_2DONLY );
 		break;
-	case CG_PLAYER_PERKS:
-		CG_DrawPerks( &rect, font, scale, ownerDrawFlags & CG_SHOW_2DONLY );
-		break;
 	case CG_PLAYER_ITEM:
 		CG_DrawPlayerItem( &rect, font, scale, ownerDrawFlags & CG_SHOW_2DONLY );
 		break;
 	case CG_PLAYER_SCORE:
 		CG_DrawPlayerScore( &rect, font, scale, color, shader, textStyle );
-		break;
-	case CG_PLAYER_KILLS:
-		CG_DrawPlayerKills( &rect, font, scale, color, shader, textStyle );
 		break;
 	case CG_PLAYER_HEALTH:
 		CG_DrawPlayerHealth( &rect, font, scale, color, shader, textStyle );

@@ -587,63 +587,6 @@ AICharacterDefaults_t aiDefaults[NUM_CHARACTERS] = {
 		NULL,
 		AISTATE_ALERT
 	},
-
-	//AICHAR_ZOMBIE_SURV
-	{
-		"Zombie Surv",
-		{ // Default
-			0
-		},
-		{
-			"zombieSightPlayer",
-			"zombieAttackPlayer",
-			"zombieOrders",
-			"zombieDeath",
-			"zombieSilentDeath",				//----(SA)	added
-			"zombieFlameDeath",					//----(SA)	added
-			"zombiePain",
-			"sound/weapons/melee/fstatck.wav",	// stay - you're told to stay put
-			"sound/weapons/melee/fstmiss.wav",	// follow - go with ordering player ("i'm with you" rather than "yes sir!")
-			"zombieOrdersDeny",					// deny - refuse orders (doing something else)
-		},
-		AITEAM_MONSTER,
-		"zombie/default",
-		{ WP_MONSTER_ATTACK2, WP_MONSTER_ATTACK3},
-		BBOX_SMALL, {32,48},
-		/*AIFL_NOPAIN|AIFL_WALKFORWARD|*/ AIFL_NO_RELOAD,
-		AIFunc_ZombieFlameAttackStart, AIFunc_ZombieAttack2Start, AIFunc_ZombieMeleeStart,
-		NULL,
-		AISTATE_ALERT
-	},
-
-	//AICHAR_ZOMBIE_GHOST
-	{
-		"Zombie Ghost",
-		{ // Default
-			0
-		},
-		{
-			"zombieSightPlayer",
-			"zombieAttackPlayer",
-			"zombieOrders",
-			"zombieDeath",
-			"zombieSilentDeath",				//----(SA)	added
-			"zombieFlameDeath",					//----(SA)	added
-			"zombiePain",
-			"sound/weapons/melee/fstatck.wav",	// stay - you're told to stay put
-			"sound/weapons/melee/fstmiss.wav",	// follow - go with ordering player ("i'm with you" rather than "yes sir!")
-			"zombieOrdersDeny",					// deny - refuse orders (doing something else)
-		},
-		AITEAM_MONSTER,
-		"zombie/ghost",
-		{ WP_MONSTER_ATTACK2, WP_MONSTER_ATTACK3},
-		BBOX_SMALL, {32,48},
-		/*AIFL_NOPAIN|AIFL_WALKFORWARD|*/ AIFL_NO_RELOAD,
-		AIFunc_ZombieFlameAttackStart, AIFunc_ZombieAttack2Start, AIFunc_ZombieMeleeStart,
-		NULL,
-		AISTATE_ALERT
-	},
-
 };
 //---------------------------------------------------------------------------
 
@@ -756,9 +699,6 @@ void AIChar_Death( gentity_t *ent, gentity_t *attacker, int damage, int mod ) { 
 	// need this check otherwise sound will overwrite gib message
 	if ( ent->health > GIB_HEALTH  ) {
 		if ( ent->client->ps.eFlags & EF_HEADSHOT ) {
-			if ( g_gametype.integer == GT_SURVIVAL )  {
-			    attacker->client->ps.persistant[PERS_SCORE] += 5;
-			}
 			G_AddEvent( ent, EV_GENERAL_SOUND, G_SoundIndex( aiDefaults[ent->aiCharacter].soundScripts[QUIETDEATHSOUNDSCRIPT] ) );
 		} else {
 			switch ( mod ) {               //----(SA)	modified to add 'quiet' deaths
@@ -1600,27 +1540,6 @@ void SP_ai_blackguard( gentity_t *ent ) {
 	AICast_DelayedSpawnCast( ent, AICHAR_BLACKGUARD );
 }
 
-/*
-============
-SP_ai_zombie_surv
-============
-*/
-void SP_ai_zombie_surv( gentity_t *ent ) {
-	ent->r.svFlags |= SVF_NOFOOTSTEPS;
-	AICast_DelayedSpawnCast( ent, AICHAR_ZOMBIE_SURV );
-}
-
-
-/*
-============
-SP_ai_zombie_ghost
-============
-*/
-void SP_ai_zombie_ghost( gentity_t *ent ) {
-	ent->r.svFlags |= SVF_NOFOOTSTEPS;
-	AICast_DelayedSpawnCast( ent, AICHAR_ZOMBIE_GHOST );
-}
-
 // Load behavior parameters from .aidefaults file
 void AI_LoadBehaviorTable( AICharacters_t characterNum )
 {
@@ -1661,8 +1580,6 @@ char *BG_GetCharacterFilename( AICharacters_t characterNum )
 		case AICHAR_SOLDIER:           return "soldier.aidefaults";
 		case AICHAR_AMERICAN:          return "american.aidefaults";
 		case AICHAR_ZOMBIE:            return "zombie.aidefaults";
-		case AICHAR_ZOMBIE_SURV:       return "zombie_surv.aidefaults";
-		case AICHAR_ZOMBIE_GHOST:      return "zombie_ghost.aidefaults";
 		case AICHAR_WARZOMBIE:         return "warzombie.aidefaults";
 		case AICHAR_VENOM:             return "venom.aidefaults";
 		case AICHAR_LOPER:             return "loper.aidefaults";

@@ -77,12 +77,6 @@ char *AIFunc_Battle( cast_state_t *cs );
 
 static bot_moveresult_t *moveresult;
 
-// Survival mode
-int activeAI[NUM_CHARACTERS];
-int survivalKillCount;
-int maxActiveAI[NUM_CHARACTERS];
-
-
 /*
 ============
 AIFunc_Restore()
@@ -354,295 +348,6 @@ float AICast_SpeedScaleForDistance( cast_state_t *cs, float startdist, float ide
 	}
 }
 
-void AICast_IncreaseMaxActiveAI() {
-
-    // Increase maxActiveAI for AICHAR_SOLDIER based on survivalKillCount
-    if (survivalKillCount % 10 == 0) {
-        maxActiveAI[AICHAR_SOLDIER] += 1;
-    }
-
-    // Clamp maxActiveAI for AICHAR_SOLDIER to a maximum value
-    if (maxActiveAI[AICHAR_SOLDIER] > 10) {
-        maxActiveAI[AICHAR_SOLDIER] = 10;
-    }
-
-    if (survivalKillCount % 10 == 0) {
-        maxActiveAI[AICHAR_ZOMBIE_SURV] += 1;
-    }
-
-    if (maxActiveAI[AICHAR_ZOMBIE_SURV] > 15) {
-        maxActiveAI[AICHAR_ZOMBIE_SURV] = 15;
-    }
-
-    if (survivalKillCount % 20 == 0) {
-        maxActiveAI[AICHAR_ELITEGUARD] += 2;
-    }
-
-    if (maxActiveAI[AICHAR_ELITEGUARD] > 4) {
-        maxActiveAI[AICHAR_ELITEGUARD] = 4;
-    }
-
-    if (survivalKillCount % 20 == 0) {
-        maxActiveAI[AICHAR_WARZOMBIE] += 2;
-    }
-
-    if (maxActiveAI[AICHAR_WARZOMBIE] > 5) {
-        maxActiveAI[AICHAR_WARZOMBIE] = 5;
-    }
-
-    if (survivalKillCount % 30 == 0) {
-        maxActiveAI[AICHAR_BLACKGUARD] += 2;
-    }
-
-    if (maxActiveAI[AICHAR_BLACKGUARD] > 4) {
-        maxActiveAI[AICHAR_BLACKGUARD] = 4;
-    }
-
-	if (survivalKillCount % 30 == 0) {
-        maxActiveAI[AICHAR_ZOMBIE_GHOST] += 1;
-    }
-
-    if (maxActiveAI[AICHAR_ZOMBIE_GHOST] > 3) {
-        maxActiveAI[AICHAR_ZOMBIE_GHOST] = 3;
-    }
-
-    if (survivalKillCount % 40 == 0) {
-        maxActiveAI[AICHAR_VENOM] += 2;
-    }
-
-    if (maxActiveAI[AICHAR_VENOM] > 4) {
-        maxActiveAI[AICHAR_VENOM] = 2;
-    }
-}
-
-/*
-============
-AICast_SurvivalRespawn
-============
-*/
-void AICast_SurvivalRespawn(gentity_t *ent, cast_state_t *cs) {
-
-   vec3_t mins, maxs;
-   int touch[10], numTouch;
-   float oldmaxZ;
-   int i;
-   gentity_t *player;
-   vec3_t spawn_origin, spawn_angles;
-
-			if ( ent->aiCharacter != AICHAR_ZOMBIE && ent->aiCharacter != AICHAR_HELGA
-				 && ent->aiCharacter != AICHAR_HEINRICH ) {
-
-				for ( i = 0 ; i < g_maxclients.integer ; i++ ) {
-					player = &g_entities[i];
-
-					if ( !player || !player->inuse ) {
-						continue;
-					}
-
-					if ( player->r.svFlags & SVF_CASTAI ) {
-						continue;
-					}
-				}
-			}
-
-
-			//cs->rebirthTime = level.time + 5000 + rand() % 2000;
-
-
-			oldmaxZ = ent->r.maxs[2];
-
-			// make sure the area is clear
-			AIChar_SetBBox( ent, cs, qfalse );
-
-			VectorAdd( ent->r.currentOrigin, ent->r.mins, mins );
-			VectorAdd( ent->r.currentOrigin, ent->r.maxs, maxs );
-			trap_UnlinkEntity( ent );
-
-			numTouch = trap_EntitiesInBox( mins, maxs, touch, 10 );
-
-			if ( numTouch ) {
-				for ( i = 0; i < numTouch; i++ ) {
-					if ( g_entities[touch[i]].r.contents & MASK_PLAYERSOLID ) {
-						break;
-					}
-				}
-				if ( i == numTouch ) {
-					numTouch = 0;
-				}
-			}
-
-			
-			if ( numTouch == 0 ) {    // ok to spawn
-
-				// give them health when they start reviving, so we won't gib after
-				// just a couple shots while reviving
-				
-
-
-			int health_increase = survivalKillCount / 2;
-			float speed_increase = survivalKillCount / 50;
-		    float crouchSpeedScale = 1;
-			float runSpeedScale = 1;
-			float sprintSpeedScale = 1;
-			int newHealth = 50; 
-
-
-			switch (cs->aiCharacter)
-			{
-			case AICHAR_SOLDIER:
-				newHealth = 30 + health_increase;
-				if (newHealth > 60) {
-					newHealth = 60;
-				}
-			case AICHAR_ZOMBIE_SURV:
-				newHealth = 40 + health_increase;
-				if (newHealth > 300) {
-					newHealth = 300;
-				}
-				runSpeedScale = 0.8 + speed_increase;
-				if (runSpeedScale > 1.2) {
-					runSpeedScale = 1.2;
-				}
-				sprintSpeedScale = 1.2 + speed_increase;
-				if (runSpeedScale > 1.6) {
-					runSpeedScale = 1.6;
-				}
-				crouchSpeedScale = 0.25 + speed_increase;
-				if (crouchSpeedScale > 0.5) {
-					crouchSpeedScale = 0.5;
-				}
-				break;
-			case AICHAR_ZOMBIE_GHOST:
-				newHealth = 40 + health_increase;
-				if (newHealth > 300) {
-					newHealth = 300;
-				}
-				runSpeedScale = 0.8 + speed_increase;
-				if (runSpeedScale > 1.6) {
-					runSpeedScale = 1.6;
-				}
-				sprintSpeedScale = 1.2 + speed_increase;
-				if (runSpeedScale > 2.0) {
-					runSpeedScale = 2.0;
-				}
-				crouchSpeedScale = 0.25 + speed_increase;
-				if (crouchSpeedScale > 0.75) {
-					crouchSpeedScale = 0.75;
-				}
-				break;
-			case AICHAR_WARZOMBIE:
-				newHealth = 60 + health_increase;
-				if (newHealth > 350) {
-					newHealth = 350;
-				}
-				runSpeedScale = 0.8 + speed_increase;
-				if (runSpeedScale > 1.6) {
-					runSpeedScale = 1.6;
-				}
-				sprintSpeedScale = 1.2 + speed_increase;
-				if (runSpeedScale > 2.0) {
-					runSpeedScale = 2.0;
-				}
-				crouchSpeedScale = 0.25 + speed_increase;
-				if (crouchSpeedScale > 0.75) {
-					crouchSpeedScale = 0.75;
-				}
-				break;
-			case AICHAR_PRIEST:
-				newHealth = 80 + health_increase;
-				if (newHealth > 250) {
-					newHealth = 250;
-				}
-				runSpeedScale = 0.8 + speed_increase;
-				if (runSpeedScale > 1.4) {
-					runSpeedScale = 1.4;
-				}
-				sprintSpeedScale = 1.2 + speed_increase;
-				if (runSpeedScale > 2.0) {
-					runSpeedScale = 2.0;
-				}
-				crouchSpeedScale = 0.25 + speed_increase;
-				if (crouchSpeedScale > 0.5) {
-					crouchSpeedScale = 0.5;
-				}
-				break;
-			case AICHAR_ELITEGUARD:
-				newHealth = 35 + health_increase;
-				if (newHealth > 80) {
-					newHealth = 80;
-				}
-				break;
-			case AICHAR_BLACKGUARD:
-			    newHealth = 50 + health_increase;
-				if (newHealth > 100) {
-					newHealth = 100;
-				}
-				break;
-			case AICHAR_VENOM:
-			    newHealth = 80 + health_increase;
-				if (newHealth > 160) {
-					newHealth = 160;
-				}
-				break;
-			default:
-				break;
-			}
-
-
-                ent->health = ent->client->ps.stats[STAT_HEALTH] = ent->client->ps.stats[STAT_MAX_HEALTH] = cs->attributes[STARTING_HEALTH] = newHealth;
-				ent->client->ps.runSpeedScale = runSpeedScale;
-				ent->client->ps.sprintSpeedScale = sprintSpeedScale;
-				ent->client->ps.crouchSpeedScale = crouchSpeedScale;				
-				ent->r.contents = CONTENTS_BODY;
-				ent->clipmask = MASK_PLAYERSOLID | CONTENTS_MONSTERCLIP;
-				ent->takedamage = qtrue;
-				ent->waterlevel = 0;
-				ent->watertype = 0;
-				ent->flags = 0;
-				ent->die = AICast_Die;
-				ent->client->ps.eFlags &= ~EF_DEAD;
-				ent->s.eFlags &= ~EF_DEAD;
-				player = AICast_FindEntityForName( "player" );
-
-                // Selecting the spawn point for the AI
-				SelectSpawnPoint_AI( player, spawn_origin, spawn_angles );
-				G_SetOrigin( ent, spawn_origin );
-				VectorCopy( spawn_origin, ent->client->ps.origin );
-				SetClientViewAngle( ent, spawn_angles );
-
-				// Activate respawn scripts for AI
-				AICast_ScriptEvent(cs, "respawn", "");
-                
-				// Turn off Headshot flag and reattach hat
-				ent->client->ps.eFlags &= ~EF_HEADSHOT;
-				G_AddEvent( ent, EV_REATTACH_HAT, 0 );
-
-				cs->rebirthTime = 0;
-				cs->deathTime = 0;
-
-				ent->client->ps.eFlags &= ~EF_DEATH_FRAME;
-				ent->client->ps.eFlags &= ~EF_FORCE_END_FRAME;
-				ent->client->ps.eFlags |= EF_NO_TURN_ANIM;
-
-				// play the revive animation
-				cs->revivingTime = level.time + BG_AnimScriptEvent( &ent->client->ps, ANIM_ET_REVIVE, qfalse, qtrue );
-
-				AICast_StateChange( cs, AISTATE_RELAXED );
-				cs->enemyNum = -1;
-				
-				// Increment the counter for active AI characters
-                //activeAI[ent->aiCharacter]++;
-
-			} else {
-				// can't spawn yet, so set bbox back, and wait
-				ent->r.maxs[2] = oldmaxZ;
-				ent->client->ps.maxs[2] = ent->r.maxs[2];
-			}
-			trap_LinkEntity( ent );
-
-
-}
-
 /*
 ============
 AICast_SpecialFunc
@@ -742,8 +447,6 @@ void AICast_SpecialFunc( cast_state_t *cs ) {
 		}
 		break;
 	case AICHAR_ZOMBIE:
-	case AICHAR_ZOMBIE_SURV:
-	case AICHAR_ZOMBIE_GHOST:
 		if ( COM_BitCheck( cs->bs->cur_ps.weapons, WP_MONSTER_ATTACK1 ) ) { // flaming zombie, run
 			BG_UpdateConditionValue( cs->entityNum, ANIM_COND_CHARGING, 1, qfalse );
 		}
@@ -3100,7 +2803,7 @@ char *AIFunc_BattleChase( cast_state_t *cs ) {
 	}
 	//
 	// Flaming Zombie? Shoot flames while running
-	if ( ( cs->aiCharacter == AICHAR_ZOMBIE || cs->aiCharacter == AICHAR_ZOMBIE_SURV || cs->aiCharacter == AICHAR_ZOMBIE_GHOST) &&
+	if ( ( cs->aiCharacter == AICHAR_ZOMBIE ) &&
 		 ( IS_FLAMING_ZOMBIE( ent->s ) ) &&
 		 ( fabs( cs->ideal_viewangles[YAW] - cs->viewangles[YAW] ) < 5 ) ) {
 		if ( fabs( sin( ( level.time + cs->entityNum * 314 ) / 1000 ) * cos( ( level.time + cs->entityNum * 267 ) / 979 ) ) < 0.5 ) {
@@ -5293,8 +4996,6 @@ char *AIFunc_DefaultStart( cast_state_t *cs ) {
 	//
 	switch ( cs->aiCharacter ) {
 	case AICHAR_ZOMBIE:
-	case AICHAR_ZOMBIE_SURV:
-	case AICHAR_ZOMBIE_GHOST:
 		// portal zombie, requires spawning effect
 		if ( first && ( g_entities[cs->entityNum].spawnflags & 4 ) ) {
 			return AIFunc_FlameZombie_PortalStart( cs );

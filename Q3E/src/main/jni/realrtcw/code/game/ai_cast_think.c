@@ -471,7 +471,7 @@ void AICast_Think( int client, float thinktime ) {
 	// turn off flags that are set each frame if needed
 	ent->client->ps.eFlags &= ~( EF_NOSWINGANGLES | EF_MONSTER_EFFECT | EF_MONSTER_EFFECT2 | EF_MONSTER_EFFECT3 );
 	// conditional flags
-	if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST ) {
+	if ( ent->aiCharacter == AICHAR_ZOMBIE ) {
 		if ( COM_BitCheck( ent->client->ps.weapons, WP_MONSTER_ATTACK1 ) ) {
 			cs->aiFlags |= AIFL_NO_FLAME_DAMAGE;
 			SET_FLAMING_ZOMBIE( ent->s, 1 );
@@ -506,14 +506,6 @@ void AICast_Think( int client, float thinktime ) {
 			cs->revivingTime = 0;
 		}
 		//
-
-        if ( g_gametype.integer == GT_SURVIVAL )  { // Survival Respawn
-		if ( cs->rebirthTime && cs->rebirthTime < level.time ) {
-           AICast_SurvivalRespawn(ent, cs);
-		}
-
-		} else { // Normal Respawn
-
 		if ( cs->rebirthTime && cs->rebirthTime < level.time ) {
 			vec3_t mins, maxs;
 			int touch[10], numTouch;
@@ -610,8 +602,6 @@ void AICast_Think( int client, float thinktime ) {
 			}
 			trap_LinkEntity( ent );
 		}
-		}
-
 		// ZOMBIE should set effect flag if really dead
 		if ( cs->aiCharacter == AICHAR_ZOMBIE && !ent->r.contents ) {
 			ent->client->ps.eFlags |= EF_MONSTER_EFFECT2;

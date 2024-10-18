@@ -1278,24 +1278,6 @@ qboolean AICast_ScriptAction_SetMoveSpeed( cast_state_t *cs, char *params ) {
 }
 
 
-/*
-==============
-AICast_ScriptAction_GiveScore
-	syntax: givescore <amount>
-
-==============
-*/
-qboolean AICast_ScriptAction_GiveScore( cast_state_t *cs, char *params ) {
-	if ( !params || !params[0] ) {
-		G_Error( "AI Scripting: setarmor requires an armor value" );
-	}
-
-	g_entities[cs->entityNum].client->ps.persistant[PERS_SCORE] += atoi( params );
-
-	return qtrue;
-}
-
-
 //----(SA)	added
 /*
 ==============
@@ -1438,7 +1420,6 @@ qboolean AICast_ScriptAction_GiveWeapon( cast_state_t *cs, char *params ) {
 	int weapon;
 	int i;
 	gentity_t   *ent = &g_entities[cs->entityNum];
-	int slotId = G_GetFreeWeaponSlot( ent );
 
 	weapon = WP_NONE;
 
@@ -1469,27 +1450,8 @@ qboolean AICast_ScriptAction_GiveWeapon( cast_state_t *cs, char *params ) {
 		}
 	}
 
-	if ( weapon != WP_KNIFE ) {
-		if ( slotId < 0 ) {
-			return qfalse;
-		}
-
-	} else {
-		slotId = 0;
-	}
-
-
 	if ( weapon != WP_NONE ) {
 		COM_BitSet( g_entities[cs->entityNum].client->ps.weapons, weapon );
-
-		// if ( weapon == WP_KNIFE ) {
-		// 	if ( ent->client->ps.weaponSlots[ 0 ] != WP_NONE ) {
-		// 		ent->client->ps.weaponSlots[ slotId ] = ent->client->ps.weaponSlots[ 0 ];
-		// 		ent->client->ps.weaponSlots[ 0 ] = weapon;
-		// 	}
-		// }
-
-		ent->client->ps.weaponSlots[ slotId ] = weapon;
 
 //----(SA)	some weapons always go together (and they share a clip, so this is okay)
 		if ( weapon == WP_GARAND ) {
@@ -1524,7 +1486,7 @@ qboolean AICast_ScriptAction_GiveWeapon( cast_state_t *cs, char *params ) {
 		}
 
 		// conditional flags
-		if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST ) {
+		if ( ent->aiCharacter == AICHAR_ZOMBIE ) {
 			if ( COM_BitCheck( ent->client->ps.weapons, WP_MONSTER_ATTACK1 ) ) {
 				cs->aiFlags |= AIFL_NO_FLAME_DAMAGE;
 				SET_FLAMING_ZOMBIE( ent->s, 1 );
@@ -1581,7 +1543,7 @@ qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params ) {
         
 		   // Find all weapons
            for (int i = 0; i < maxAmmo; i++) {
-                if ( !( ammoTable[i].weaponClass & WEAPON_CLASS_UNUSED && ammoTable[i].weaponClass & WEAPON_CLASS_MELEE && ammoTable[i].weaponClass & WEAPON_CLASS_AKIMBO && ammoTable[i].weaponClass & WEAPON_CLASS_GRENADE ) )
+                if (ammoTable[i].weaponClass != WEAPON_CLASS_UNUSED || ammoTable[i].weaponClass != WEAPON_CLASS_MELEE || ammoTable[i].weaponClass != WEAPON_CLASS_AKIMBO || ammoTable[i].weaponClass != WEAPON_CLASS_GRENADE )
 				{
                    wpnIndices[numWpns] = i;
                    numWpns++;
@@ -1603,7 +1565,8 @@ qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params ) {
         
 		   // Find all pistols
            for (int i = 0; i < maxAmmo; i++) {
-                if ( ammoTable[i].weaponClass & WEAPON_CLASS_PISTOL ) {
+                if (ammoTable[i].weaponClass == WEAPON_CLASS_PISTOL)
+				{
                    pistolIndices[numPistols] = i;
                    numPistols++;
                 }
@@ -1625,7 +1588,8 @@ qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params ) {
         
 		   // Find all SMGs
            for (int i = 0; i < maxAmmo; i++) {
-                if ( ammoTable[i].weaponClass & WEAPON_CLASS_SMG ) {
+                if (ammoTable[i].weaponClass == WEAPON_CLASS_SMG)
+				{
                    smgIndices[numSmgs] = i;
                    numSmgs++;
                 }
@@ -1646,7 +1610,8 @@ qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params ) {
         
 		   // Find all Rifles
            for (int i = 0; i < maxAmmo; i++) {
-                if ( ammoTable[i].weaponClass & WEAPON_CLASS_RIFLE || ammoTable[i].weaponClass & WEAPON_CLASS_ASSAULT_RIFLE ) {
+                if (ammoTable[i].weaponClass == WEAPON_CLASS_RIFLE || ammoTable[i].weaponClass == WEAPON_CLASS_ASSAULT_RIFLE)
+				{
                    rifleIndices[numRifles] = i;
                    numRifles++;
                 }
@@ -1667,7 +1632,8 @@ qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params ) {
         
 		   // Find all Heavy weapons
            for (int i = 0; i < maxAmmo; i++) {
-                if ( ammoTable[i].weaponClass & WEAPON_CLASS_MG || ammoTable[i].weaponClass & WEAPON_CLASS_LAUNCHER || ammoTable[i].weaponClass & WEAPON_CLASS_BEAM || ammoTable[i].weaponClass & WEAPON_CLASS_SHOTGUN ) {
+                if (ammoTable[i].weaponClass == WEAPON_CLASS_MG || ammoTable[i].weaponClass == WEAPON_CLASS_LAUNCHER || ammoTable[i].weaponClass == WEAPON_CLASS_BEAM || ammoTable[i].weaponClass == WEAPON_CLASS_SHOTGUN  )
+				{
                    heavyIndices[numHeavies] = i;
                    numHeavies++;
                 }
@@ -1688,7 +1654,8 @@ qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params ) {
         
 		   // Find all Axis Weapons
            for (int i = 0; i < maxAmmo; i++) {
-                if ( ( ammoTable[i].weaponTeam == WEAPON_TEAM_AXIS || ammoTable[i].weaponTeam == WEAPON_TEAM_COMMON ) && !( ammoTable[i].weaponClass & WEAPON_CLASS_UNUSED ) && !( ammoTable[i].weaponClass & WEAPON_CLASS_GRENADE ) ) {
+                if ( (ammoTable[i].weaponTeam == WEAPON_TEAM_AXIS || ammoTable[i].weaponTeam == WEAPON_TEAM_COMMON) && ammoTable[i].weaponClass != WEAPON_CLASS_UNUSED && ammoTable[i].weaponClass != WEAPON_CLASS_GRENADE )
+				{
                    axisIndices[numAxis] = i;
                    numAxis++;
                 }
@@ -1709,7 +1676,8 @@ qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params ) {
         
 		   // Find all Allied Weapons
            for (int i = 0; i < maxAmmo; i++) {
-                if ( ( ammoTable[i].weaponTeam == WEAPON_TEAM_ALLIES || ammoTable[i].weaponTeam == WEAPON_TEAM_COMMON) && !( ammoTable[i].weaponClass & WEAPON_CLASS_UNUSED) && !( ammoTable[i].weaponClass & WEAPON_CLASS_GRENADE ) ) {
+                if ( (ammoTable[i].weaponTeam == WEAPON_TEAM_ALLIES || ammoTable[i].weaponTeam == WEAPON_TEAM_COMMON) && ammoTable[i].weaponClass != WEAPON_CLASS_UNUSED && ammoTable[i].weaponClass != WEAPON_CLASS_GRENADE )
+				{
                    alliesIndices[numAllies] = i;
                    numAllies++;
                 }
@@ -1730,7 +1698,8 @@ if ( !Q_strcasecmp (params, "soviet_random") )
         
 		   // Find all Soviet Weapons
            for (int i = 0; i < maxAmmo; i++) {
-                if ( ( ammoTable[i].weaponTeam == WEAPON_TEAM_SOVIET || ammoTable[i].weaponTeam == WEAPON_TEAM_COMMON) && !( ammoTable[i].weaponClass & WEAPON_CLASS_UNUSED ) && !( ammoTable[i].weaponClass & WEAPON_CLASS_GRENADE ) ) {
+                if ( (ammoTable[i].weaponTeam == WEAPON_TEAM_SOVIET || ammoTable[i].weaponTeam == WEAPON_TEAM_COMMON) && ammoTable[i].weaponClass != WEAPON_CLASS_UNUSED && ammoTable[i].weaponClass != WEAPON_CLASS_GRENADE )
+				{
                    sovietIndices[numSoviet] = i;
                    numSoviet++;
                 }
@@ -1798,7 +1767,7 @@ if ( !Q_strcasecmp (params, "soviet_random") )
 		}    
 		
 		// conditional flags
-		if ( ent->aiCharacter == AICHAR_ZOMBIE || ent->aiCharacter == AICHAR_ZOMBIE_SURV || ent->aiCharacter == AICHAR_ZOMBIE_GHOST ) {
+		if ( ent->aiCharacter == AICHAR_ZOMBIE ) {
 			if ( COM_BitCheck( ent->client->ps.weapons, WP_MONSTER_ATTACK1 ) ) {
 				cs->aiFlags |= AIFL_NO_FLAME_DAMAGE;
 				SET_FLAMING_ZOMBIE( ent->s, 1 );
@@ -2023,37 +1992,6 @@ qboolean AICast_ScriptAction_GiveInventory( cast_state_t *cs, char *params ) {
 		g_entities[cs->entityNum].client->ps.holdable[item->giTag] += 1;   // add default of 1
 	    }
 		g_entities[cs->entityNum].client->ps.stats[STAT_HOLDABLE_ITEM] |= ( 1 << item->giTag );
-	}
-
-	return qtrue;
-}
-
-/*
-==============
-AICast_ScriptAction_GivePerk
-==============
-*/
-qboolean AICast_ScriptAction_GivePerk( cast_state_t *cs, char *params ) {
-	int i;
-	gitem_t     *item = 0;
-
-	for ( i = 1; bg_itemlist[i].classname; i++ ) {
-		if ( !Q_strcasecmp( params, bg_itemlist[i].classname ) ) {
-			item = &bg_itemlist[i];
-		}
-
-		if ( !Q_strcasecmp( params, bg_itemlist[i].pickup_name ) ) {
-			item = &bg_itemlist[i];
-		}
-	}
-
-	if ( !item ) { // item not found
-		G_Error( "AI Scripting: giveperk %s, unknown item", params );
-	}
-
-     if ( item->giType == IT_PERK )  {
-		g_entities[cs->entityNum].client->ps.perks[item->giTag] += 1;   // add default of 1
-		g_entities[cs->entityNum].client->ps.stats[STAT_PERK] |= ( 1 << item->giTag );
 	}
 
 	return qtrue;
@@ -2336,7 +2274,7 @@ qboolean AICast_ScriptAction_DropWeapon(cast_state_t* cs, char* params) {
 	}
 	weapon = cs->weaponNum;
 	if (weapon != WP_NONE) {
-		TossClientWeapons( ent );
+		TossClientItems(ent);
 		COM_BitClear(g_entities[cs->entityNum].client->ps.weapons, cs->weaponNum);
 		g_entities[cs->entityNum].client->ps.weapon = WP_NONE;
 	}
@@ -3402,27 +3340,6 @@ qboolean AICast_ScriptAction_EndGame( cast_state_t *cs, char *params ) {
 	return qtrue;
 }
 
-
-/*
-===================
-AICast_ScriptAction_Announce
-
-  syntax: wm_announce <"text to send to all clients">
-===================
-*/
-qboolean AICast_ScriptAction_Announce( gentity_t *ent, char *params ) {
-	char *pString, *token;
-
-	pString = params;
-	token = COM_Parse( &pString );
-	if ( !token[0] ) {
-		G_Error( "AI_ScriptAction_Announce: statement parameter required\n" );
-	}
-
-	trap_SendServerCommand( -1, va( "cp \"%s\"", token ) );
-
-	return qtrue;
-}
 
 
 

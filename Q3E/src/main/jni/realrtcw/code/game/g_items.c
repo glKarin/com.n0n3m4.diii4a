@@ -37,8 +37,6 @@ If you have questions concerning this license or the applicable additional terms
  *				movers and respawn apropriately.
  *
 */
-#include <pthread.h>
-#include <unistd.h>
 
 #include "g_local.h"
 
@@ -53,7 +51,6 @@ If you have questions concerning this license or the applicable additional terms
 #define RESPAWN_HEALTH      35
 #define RESPAWN_AMMO        40
 #define RESPAWN_HOLDABLE    60
-#define RESPAWN_PERK        65
 #define RESPAWN_MEGAHEALTH  120
 #define RESPAWN_POWERUP     120
 #define RESPAWN_PARTIAL     998     // for multi-stage ammo/health
@@ -61,20 +58,6 @@ If you have questions concerning this license or the applicable additional terms
 
 
 //======================================================================
-
-
-void *remove_powerup_after_delay(void *arg) {
-    gentity_t *other = (gentity_t *)arg;
-
-    // Sleep for 30 seconds
-    sleep(30);
-
-    // Remove the FL_NOTARGET flag
-    other->flags &= ~FL_NOTARGET;
-
-    return NULL;
-}
-
 
 int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
 	int quantity;
@@ -114,15 +97,6 @@ int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
 			other->client->ps.powerups[PW_NOFATIGUE] = 60000;
 		}
 	}
-   
-
-    // DIRTY HACK!!!!! If the invisibility powerup is picked up, set FL_NOTARGET and start a timer to remove it
-    if (ent->item->giTag == PW_INVIS) {
-        other->flags |= FL_NOTARGET;
-
-        pthread_t thread_id;
-        pthread_create(&thread_id, NULL, remove_powerup_after_delay, (void *)other);
-    }
 
 	if ( ent->s.density == 2 ) {   // multi-stage health first stage
 		return RESPAWN_PARTIAL;
@@ -177,10 +151,6 @@ int Pickup_Treasure( gentity_t *ent, gentity_t *other ) {
 	player->numTreasureFound++;
 	G_SendMissionStats();
 	return RESPAWN_SP;  // no respawn
-
-	if ( g_gametype.integer == GT_SURVIVAL ) {
-	    other->client->ps.persistant[PERS_SCORE] += 50;
-	}
 }
 
 
@@ -362,25 +332,6 @@ int Pickup_Holdable( gentity_t *ent, gentity_t *other ) {
 
 //======================================================================
 
-int Pickup_Perk( gentity_t *ent, gentity_t *other ) {
-	gitem_t *item;
-
-	item = ent->item;
-
-	other->client->ps.perks[item->giTag] += 1;   // add default of 1
-
-	other->client->ps.stats[STAT_PERK] |= ( 1 << ent->item->giTag );   //----(SA)	added
-
-		if ( !( ent->spawnflags & 8 ) ) {
-			return RESPAWN_SP;
-		}
-
-	return RESPAWN_PERK;
-}
-
-
-//======================================================================
-
 /*
 ==============
 Fill_Clip
@@ -487,8 +438,6 @@ void Add_Ammo( gentity_t *ent, int weapon, int count, qboolean fillClip ) {
 
 }
 
-int G_GetWeaponPrice( int weapon );
-int G_GetAmmoPrice( int weapon );
 
 /*
 ==============
@@ -497,7 +446,6 @@ Pickup_Ammo
 */
 int Pickup_Ammo( gentity_t *ent, gentity_t *other ) {
 	int quantity;
-
 
 			if (g_decaychallenge.integer) {
 			quantity = 999;
@@ -557,7 +505,6 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 
 	weapon = ent->item->giTag;
 
-
 	if ( ent->count < 0 ) {
 		quantity = 0; // None for you, sir!
 	} else {
@@ -566,11 +513,6 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 		} else {
 			quantity = ( random() * ( ammoTable[weapon].maxclip - 4 ) ) + 4;    // giving 4-<item default count>
 		}
-
-		// Increase quantity if player has PERK_SCAVENGER
-        if (other->client->ps.perks[PERK_SCAVENGER] > 0) {
-            quantity *= 2; // Increase quantity
-        }
 
 		if (g_decaychallenge.integer) {
 			quantity = 999;
@@ -673,325 +615,8 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 	return g_weaponRespawn.integer;
 }
 
-//======================================================================
-
-int G_FindWeaponSlot( gentity_t *other, int weapon ) {
-	int i;
-
-	for ( i = 1; i < MAX_WEAPON_SLOTS; ++i ) {
-		if ( other->client->ps.weaponSlots[i] == weapon ) {
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-int G_GetFreeWeaponSlot( gentity_t *other ) {
-	return G_FindWeaponSlot( other, WP_NONE );
-}
-
-int GetCurrentSlotId( gentity_t *other ) {
-	return G_FindWeaponSlot( other, other->client->ps.weapon );
-}
-
-qboolean IsThereEmptySlot( gentity_t *other ) {
-	return G_GetFreeWeaponSlot( other ) > 0;
-}
-
-weapon_t GetComplexWeapon( weapon_t weapon ) {
-	switch ( weapon )
-	{
-	case WP_LUGER:
-	case WP_GARAND:
-	case WP_FG42:
-	case WP_M1GARAND:
-	case WP_COLT:
-	case WP_TT33:
-	case WP_MAUSER:
-	case WP_DELISLE:
-	case WP_M1941:
-		return GetWeaponTableData( weapon )->weapAlts;
-	default:
-		return weapon;
-	}
-}
-
-weapon_t GetSimpleWeapon( weapon_t weapon ) {
-	switch ( weapon )
-	{
-	case WP_SILENCER:
-	case WP_SNOOPERSCOPE:
-	case WP_FG42SCOPE:
-	case WP_M7:
-	case WP_AKIMBO:
-	case WP_DUAL_TT33:
-	case WP_SNIPERRIFLE:
-	case WP_DELISLESCOPE:
-	case WP_M1941SCOPE:
-		return GetWeaponTableData( weapon )->weapAlts;
-	default:
-		return weapon;
-	}
-}
-
-qboolean IsWeaponComplex( weapon_t weapon ) {
-	switch ( weapon )
-	{
-	case WP_LUGER:
-	case WP_GARAND:
-	case WP_FG42:
-	case WP_M1GARAND:
-
-	case WP_SILENCER:
-	case WP_SNOOPERSCOPE:
-	case WP_FG42SCOPE:
-	case WP_M7:
-
-	// semi complex
-	case WP_SNIPERRIFLE:
-	case WP_DELISLESCOPE:
-	case WP_M1941SCOPE:
-		return qtrue;
-	default:
-		return qfalse;
-	}
-}
-
-qboolean IsUpgradingWeapon( gentity_t *other, weapon_t weapon ) {
-	weapon_t simpleWeapon = GetSimpleWeapon( weapon );
-	weapon_t complexWeapon = GetComplexWeapon( weapon );
-	int simpleWeaponSlotId = G_FindWeaponSlot( other, simpleWeapon );
-
-	return simpleWeaponSlotId > 0 && other->client->ps.weaponSlots[ simpleWeaponSlotId ] == simpleWeapon && weapon == complexWeapon;
-}
-
-qboolean NeedAmmo(gentity_t *other, weapon_t weapon ) {
-	int ammoweap;
-
-	if ( G_FindWeaponSlot( other, weapon ) < 0 ) {
-		weapon_t altWeapon = GetWeaponTableData( weapon )->weapAlts;
-
-		if ( !altWeapon ) {
-			return qfalse;
-		}
-
-		if ( G_FindWeaponSlot( other, altWeapon ) < 0 ) {
-			return qfalse;
-		}
-
-		ammoweap = BG_FindAmmoForWeapon( altWeapon );
-
-	} else {
-		ammoweap = BG_FindAmmoForWeapon( weapon );
-	}
-
-	return other->client->ps.ammo[ ammoweap ] < ammoTable[ ammoweap ].maxammo;
-}
-
-/**
- * @brief Drop Weapon
- * @param[in] ent
- * @param[in] weapon
- */
-void G_DropWeapon( gentity_t *ent, weapon_t weapon ) {
-	vec3_t    angles, velocity, org, offset, mins, maxs;
-	gclient_t *client = ent->client;
-	gentity_t *ent2;
-	gitem_t   *item;
-	trace_t   tr;
-
-	if ( !IS_VALID_WEAPON( weapon ) ) {
-		return;
-	}
-
-	// item = BG_GetItem( GetWeaponTableData( weapon )->item );
-	item = BG_FindItemForWeapon( GetWeaponTableData( weapon )->weaponindex );
-
-	if ( item->giType != IT_WEAPON || item->giWeapon != weapon ) {
-		Com_Error( ERR_DROP, "Couldn't get item for weapon %i", weapon );
-	}
-
-	VectorCopy( client->ps.viewangles, angles );
-
-	// clamp pitch
-	if ( angles[ PITCH ] < -30 ) {
-		angles[ PITCH ] = -30;
-	} else if ( angles[ PITCH ] > 30 ) {
-		angles[ PITCH ] = 30;
-	}
-
-	AngleVectors( angles, velocity, NULL, NULL );
-	VectorScale( velocity, 64, offset );
-	offset[ 2 ] += client->ps.viewheight / 2.f;
-	VectorScale( velocity, 75, velocity );
-	velocity[ 2 ] += 50 + random( ) * 35;
-
-	VectorAdd( client->ps.origin, offset, org );
-
-	VectorSet( mins, -ITEM_RADIUS, -ITEM_RADIUS, 0 );
-	VectorSet( maxs, ITEM_RADIUS, ITEM_RADIUS, 2 * ITEM_RADIUS );
-
-	trap_Trace( &tr, client->ps.origin, mins, maxs, org, ent->s.number, MASK_SOLID );
-	VectorCopy( tr.endpos, org );
-
-	ent2 = LaunchItem( item, org, velocity );
-
-	if ( IsWeaponComplex( weapon ) ) {
-		weapon_t altWeapon = GetWeaponTableData( weapon )->weapAlts;
-		int complexWeaponSlotId = G_FindWeaponSlot( ent, weapon );
-		COM_BitClear( ent->client->ps.weapons, weapon );
-		COM_BitClear( ent->client->ps.weapons, altWeapon );
-		ent->client->ps.weaponSlots[ complexWeaponSlotId ] = WP_NONE;
-		
-	} else {
-		int simpleSlotId = G_FindWeaponSlot( ent, weapon );
-		COM_BitClear( ent->client->ps.weapons, weapon );
-		ent->client->ps.weaponSlots[ simpleSlotId ] = WP_NONE;
-	}
-
-	// Clear out empty weapon, change to next best weapon
-	// 																G_AddEvent( ent, EV_CHANGE_WEAPON, 0 );
-
-	if ( weapon == client->ps.weapon ) {
-		client->ps.weapon = 0;
-	}
-
-	// now pickup the other one
-	client->dropWeaponTime = level.time;
-}
 
 //======================================================================
-
-int Pickup_Weapon_New_Inventory( gentity_t *ent, gentity_t *other ) {
-	int quantity;
-	qboolean alreadyHave = qfalse;
-	weapon_t weapon = ent->item->giTag;
-
-	if ( ent->count < 0 ) {
-		quantity = 0; // None for you, sir!
-	} else {
-		if ( ent->count ) {
-			quantity = ent->count;
-		} else {
-			quantity = ( random() * ( ammoTable[ weapon ].maxclip - 4 ) ) + 4;    // giving 4-<item default count>
-		}
-
-		if ( g_decaychallenge.integer ) {
-			quantity = 999;
-		}
-	}
-
-	if ( ( weapon == WP_PPSH ) && strstr ( level.scriptAI, "Factory" ) ) {
-		if ( !g_cheats.integer ) {
-			steamSetAchievement( "ACH_PPSH" );
-		}
-	}
-
-	if ( ( weapon == WP_MOSIN ) && strstr ( level.scriptAI, "Village2_118" ) ) {
-		if ( !g_cheats.integer ) {
-			steamSetAchievement( "ACH_MOSIN" );
-		}
-	}
-
-	if ( ( weapon == WP_TESLA ) && strstr ( level.scriptAI, "Escape #2" ) ) {
-		if ( !g_cheats.integer ) {
-			steamSetAchievement( "ACH_WINTERSTEIN_TESLA" );
-		}
-	}
-
-	if ( ( weapon == WP_REVOLVER ) && strstr ( level.scriptAI, "Escape #2") ) {
-		if ( !g_cheats.integer ) {
-			steamSetAchievement( "ACH_AGENT1" );
-		}
-	}
-
-	// check for special colt->akimbo add (if you've got a colt already, add the second now)
-	if ( weapon == WP_COLT ) {
-		if ( COM_BitCheck( other->client->ps.weapons, WP_COLT ) ) {
-			weapon = WP_AKIMBO;
-		}
-	}
-
-	if ( weapon == WP_TT33 ) {
-		if ( COM_BitCheck( other->client->ps.weapons, WP_TT33 ) ) {
-			weapon = WP_DUAL_TT33;
-		}
-	}
-
-	if ( weapon == WP_KNIFE ) {
-		if ( other->client->ps.ammoclip[ weapon ] < ammoTable[ WP_KNIFE ].maxammo ) {
-			Add_Ammo( other, weapon, quantity, qfalse );
-		}
-
-		if ( !( ent->spawnflags & 8 ) ) {
-			return RESPAWN_SP;
-		}
-
-		return g_weaponRespawn.integer;
-	}
-
-	if ( level.time - other->client->dropWeaponTime < 1000 ) {
-		ent->active = qtrue;
-		return 0;
-	}
-
-	if ( !COM_BitCheck( other->client->ps.weapons, weapon ) ) {
-		if ( IsThereEmptySlot( other ) || IsUpgradingWeapon( other, weapon ) || other->client->latched_buttons & BUTTON_ACTIVATE ) {
-			if ( IsUpgradingWeapon( other, weapon ) ) {
-				weapon_t simpleWeapon = GetSimpleWeapon( weapon );
-				int simpleWeaponSlotId = G_FindWeaponSlot( other, simpleWeapon );
-				COM_BitSet( other->client->ps.weapons, weapon );
-				other->client->ps.weaponSlots[ simpleWeaponSlotId ] = weapon;
-
-			} else {
-				int slotId;
-
-				if ( IsThereEmptySlot( other ) ) {
-					int freeWeaponSlotId = G_GetFreeWeaponSlot( other );
-
-					slotId = freeWeaponSlotId;
-
-				} else {
-					int currentWeaponSlotId = GetCurrentSlotId( other );
-
-					if ( currentWeaponSlotId < 1 ) {
-						slotId = 1;
-
-					} else {
-						slotId = currentWeaponSlotId;
-					}
-
-					G_DropWeapon( other, other->client->ps.weaponSlots[ slotId ] );
-				}
-
-				if ( IsWeaponComplex( weapon ) ) {
-					weapon_t altWeapon = GetWeaponTableData( weapon )->weapAlts;
-					COM_BitSet( other->client->ps.weapons, weapon );
-					COM_BitSet( other->client->ps.weapons, altWeapon );
-					other->client->ps.weaponSlots[ slotId ] = GetComplexWeapon( weapon );
-
-				} else {
-					COM_BitSet( other->client->ps.weapons, weapon );
-					other->client->ps.weaponSlots[ slotId ] = weapon;
-				}
-			}
-		}
-	}
-
-	if ( NeedAmmo( other, weapon ) ) {
-		Add_Ammo( other, weapon, quantity, !alreadyHave );
-	} else {
-		ent->active = qtrue;
-		return 0;
-	}
-
-	if ( !( ent->spawnflags & 8 ) ) {
-		return RESPAWN_SP;
-	}
-
-	return g_weaponRespawn.integer;
-}
 
 int Pickup_Health( gentity_t *ent, gentity_t *other ) {
 	int max;
@@ -1171,28 +796,10 @@ void Touch_Item( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 	// call the item-specific pickup function
 	switch ( ent->item->giType ) {
 	case IT_WEAPON:
-		if (g_newinventory.integer > 0 || g_gametype.integer == GT_SURVIVAL)
-		{
-			respawn = Pickup_Weapon_New_Inventory(ent, other);
-		}
-		else
-		{
-			respawn = Pickup_Weapon(ent, other);
-		}
-
-		if (g_gametype.integer == GT_SURVIVAL)
-		{
-			ent->wait = -1;
-		}
-
+		respawn = Pickup_Weapon( ent, other );
 		break;
 	case IT_AMMO:
 		respawn = Pickup_Ammo( ent, other );
-
-		if ( g_gametype.integer == GT_SURVIVAL) {
-			ent->wait = -1;
-		}
-
 		break;
 	case IT_ARMOR:
 		respawn = Pickup_Armor( ent, other );
@@ -1208,9 +815,6 @@ void Touch_Item( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 		break;
 	case IT_HOLDABLE:
 		respawn = Pickup_Holdable( ent, other );
-		break;
-	case IT_PERK:
-		respawn = Pickup_Perk( ent, other );
 		break;
 	case IT_KEY:
 		respawn = Pickup_Key( ent, other );
@@ -1361,14 +965,10 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity ) {
 
 	dropped->classname = item->classname;
 	dropped->item = item;
-    
-	if (item->giType == IT_POWERUP) {
-		VectorSet( dropped->r.mins, -ITEM_RADIUS, -ITEM_RADIUS, -ITEM_RADIUS );
-		VectorSet( dropped->r.maxs, ITEM_RADIUS, ITEM_RADIUS, ITEM_RADIUS );
-	} else {
-	   VectorSet( dropped->r.mins, -ITEM_RADIUS, -ITEM_RADIUS, 0 );            //----(SA)	so items sit on the ground
-	   VectorSet( dropped->r.maxs, ITEM_RADIUS, ITEM_RADIUS, 2 * ITEM_RADIUS );  //----(SA)	so items sit on the ground
-	}
+//	VectorSet (dropped->r.mins, -ITEM_RADIUS, -ITEM_RADIUS, -ITEM_RADIUS);
+//	VectorSet (dropped->r.maxs, ITEM_RADIUS, ITEM_RADIUS, ITEM_RADIUS);
+	VectorSet( dropped->r.mins, -ITEM_RADIUS, -ITEM_RADIUS, 0 );            //----(SA)	so items sit on the ground
+	VectorSet( dropped->r.maxs, ITEM_RADIUS, ITEM_RADIUS, 2 * ITEM_RADIUS );  //----(SA)	so items sit on the ground
 	dropped->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
 
 	dropped->touch = Touch_Item_Auto;
@@ -1384,18 +984,9 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity ) {
 	dropped->physicsFlush = qtrue;
 
 	// (SA) TODO: FIXME: don't do this right now.  bug needs to be found.
-	if (item->giType == IT_POWERUP)
-	{
-		dropped->s.eFlags |= EF_SPINNING; // spin the weapon as it flies from the dead player.  it will stop when it hits the ground
-		// Add dynamic light to the dropped powerup
-		dropped->s.constantLight = 150;			 // RGB intensity
-		dropped->s.constantLight |= (255 << 8);	 // R
-		dropped->s.constantLight |= (223 << 16); // G
-		dropped->s.constantLight |= (0 << 24);	 // B
+//	if(item->giType == IT_WEAPON)
+//		dropped->s.eFlags |= EF_SPINNING;	// spin the weapon as it flies from the dead player.  it will stop when it hits the ground
 
-		// Play a sound at the location of the dropped item
-		dropped->s.loopSound = G_SoundIndex("sound/misc/powerup_ambience.wav");
-	}
 
 	if ( item->giType == IT_TEAM ) { // Special case for CTF flags
 		dropped->think = Team_DroppedFlagThink;

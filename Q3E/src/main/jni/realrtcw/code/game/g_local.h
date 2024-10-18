@@ -441,9 +441,6 @@ struct gentity_s {
 	// if working on a post release patch, new variables should ONLY be inserted after this point
 
 	int canSpeak;               // can this entity speak?
-	int price;                 // item price, survival mode
-    char  *buy_item;
-	int isWeapon;               
 };
 
 // Ridah
@@ -620,7 +617,6 @@ struct gclient_s {
 	gentity_t   *cameraPortal;              // grapple hook if out
 	vec3_t cameraOrigin;
 
-	int dropWeaponTime;         // JPW NERVE last time a weapon was dropped
 	int limboDropWeapon;         // JPW NERVE weapon to drop in limbo
 	int deployQueueNumber;         // JPW NERVE player order in reinforcement FIFO queue
 	int sniperRifleFiredTime;         // JPW NERVE last time a sniper rifle was fired (for muzzle flip effects)
@@ -813,10 +809,6 @@ void    Add_Ammo( gentity_t *ent, int weapon, int count, qboolean fillClip );
 void Touch_Item( gentity_t *ent, gentity_t *other, trace_t *trace );
 qboolean AddMagicAmmo( gentity_t *receiver, int numOfClips );
 
-int G_FindWeaponSlot( gentity_t *other, int weapon );
-int G_GetFreeWeaponSlot( gentity_t *other );
-void G_DropWeapon( gentity_t *ent, weapon_t weapon );
-
 // Touch_Item_Auto is bound by the rules of autoactivation (if cg_autoactivate is 0, only touch on "activate")
 void Touch_Item_Auto( gentity_t *ent, gentity_t *other, trace_t *trace );
 
@@ -877,8 +869,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod );
 qboolean G_RadiusDamage2( vec3_t origin, gentity_t *inflictor, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod, RadiusScope scope );
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
-void TossClientWeapons( gentity_t *self );
-void TossClientPowerups( gentity_t *self, gentity_t *attacker );
+void TossClientItems( gentity_t *self );
 
 // damage flags
 #define DAMAGE_RADIUS               0x00000001  // damage was indirect
@@ -964,7 +955,6 @@ int TeamCount( int ignoreClientNum, team_t team );
 team_t PickTeam( int ignoreClientNum );
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectSpawnPoint( vec3_t avoidPoint, vec3_t origin, vec3_t angles );
-gentity_t *SelectSpawnPoint_AI( gentity_t *player, vec3_t origin, vec3_t angles );
 void ClientRespawn(gentity_t *ent);
 void BeginIntermission( void );
 void InitBodyQue( void );
@@ -1118,8 +1108,6 @@ extern gentity_t       *g_camEnt;
 #define	FOFS(x) ((size_t)&(((gentity_t *)0)->x))
 
 extern vmCvar_t g_gametype;
-
-extern vmCvar_t g_newinventory;
 
 // Rafael gameskill
 extern vmCvar_t g_gameskill;

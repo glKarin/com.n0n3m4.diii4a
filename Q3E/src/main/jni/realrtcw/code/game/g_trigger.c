@@ -633,10 +633,6 @@ void heal_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		return;
 	}
 
-	if (other->client->ps.persistant[PERS_SCORE] < 20) {
-        return;
-    }
-
 	for ( i = 0; i < clientcount; i++ ) {
 		healvalue = min( touchClients[i]->client->ps.stats[STAT_MAX_HEALTH] - touchClients[i]->health, self->damage );
 		if ( self->health != -9999 ) {
@@ -649,10 +645,6 @@ void heal_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		touchClients[i]->health += healvalue;
 		// add the medicheal event (to get sound, etc.)
 		G_AddPredictableEvent( other, EV_ITEM_PICKUP, BG_FindItemForClassName( "item_health_wall" ) - bg_itemlist );
-
-			if ( g_gametype.integer == GT_SURVIVAL )  {
-			    other->client->ps.persistant[PERS_SCORE] -= 20;
-			}
 
 		if ( self->health != -9999 ) {
 			self->health -= healvalue;
@@ -818,12 +810,6 @@ void ammo_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		count = min( clientcount, self->health / (float)self->damage );
 	}
 
-	if (g_gametype.integer == GT_SURVIVAL) {
-        if (other->client->ps.persistant[PERS_SCORE] < 20) {
-             return;
-        }
-    }
-
 	for ( i = 0; i < count; i++ ) {
 		int ammoAdded = qfalse;
 
@@ -833,9 +819,6 @@ void ammo_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		if ( ammoAdded ) {
 			// add the cell event (to get sound, etc.)
 			G_AddPredictableEvent( touchClients[i], EV_ITEM_PICKUP, BG_FindItem( "Ammo Pack" ) - bg_itemlist );
-			if ( g_gametype.integer == GT_SURVIVAL )  {
-			    other->client->ps.persistant[PERS_SCORE] -= 20;
-			}
 			if ( self->health != -9999 ) {
 				// reduce the ammount of available ammo by the added clip number
 				self->health -= self->damage;
@@ -1272,46 +1255,31 @@ You specify which objective it is with a number in "count"
 
 void Touch_objective_info( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 
-    int price;
-	int ammoPrice;
-    char *weaponName;
-	int isWeapon;
+	if ( other->timestamp > level.time ) {
+		return;
+	}
 
-    price = ent->price;
-    weaponName = ent->buy_item;
-	ammoPrice = price /2;
-	isWeapon = ent->isWeapon;
-	
+	other->timestamp = level.time + 4500;
 
-    if ( price && weaponName ) {
-		if (isWeapon) {
-        trap_SendServerCommand( other - g_entities, va( "cpbuy \"Weapon: %s\nPrice: %d\nAmmo Price: %d\"", weaponName, price, ammoPrice));
+	if ( ent->track ) {
+		if ( ent->spawnflags & AXIS_OBJECTIVE ) {
+			trap_SendServerCommand( other - g_entities, va( "oid 0 \"" S_COLOR_RED "You are near %s\n\"", ent->track ) );
+		} else if ( ent->spawnflags & ALLIED_OBJECTIVE ) {
+			trap_SendServerCommand( other - g_entities, va( "oid 1 \"" S_COLOR_BLUE "You are near %s\n\"", ent->track ) );
 		} else {
-		trap_SendServerCommand( other - g_entities, va( "cpbuy \"Item: %s\nPrice: %d\"", weaponName, price));
+			trap_SendServerCommand( other - g_entities, va( "oid -1 \"You are near %s\n\"", ent->track ) );
 		}
-    } else if ( other->timestamp <= level.time ) {
-        other->timestamp = level.time + 4500;
+	} else {
+		if ( ent->spawnflags & AXIS_OBJECTIVE ) {
+			trap_SendServerCommand( other - g_entities, va( "oid 0 \"" S_COLOR_RED "You are near objective #%i\n\"", ent->count ) );
+		} else if ( ent->spawnflags & ALLIED_OBJECTIVE ) {
+			trap_SendServerCommand( other - g_entities, va( "oid 1 \"" S_COLOR_BLUE "You are near objective #%i\n\"", ent->count ) );
+		} else {
+			trap_SendServerCommand( other - g_entities, va( "oid -1 \"You are near objective #%i\n\"", ent->count ) );
+		}
+	}
 
-        if ( ent->track ) {
-            if ( ent->spawnflags & AXIS_OBJECTIVE ) {
-                trap_SendServerCommand( other - g_entities, va( "oid 0 \"" S_COLOR_RED "You are near %s\n\"", ent->track ) );
-            } else if ( ent->spawnflags & ALLIED_OBJECTIVE ) {
-                trap_SendServerCommand( other - g_entities, va( "oid 1 \"" S_COLOR_BLUE "You are near %s\n\"", ent->track ) );
-            } else {
-                trap_SendServerCommand( other - g_entities, va( "oid -1 \"You are near %s\n\"", ent->track ) );
-            }
-        } else {
-            if ( ent->spawnflags & AXIS_OBJECTIVE ) {
-                trap_SendServerCommand( other - g_entities, va( "oid 0 \"" S_COLOR_RED "You are near objective #%i\n\"", ent->count ) );
-            } else if ( ent->spawnflags & ALLIED_OBJECTIVE ) {
-                trap_SendServerCommand( other - g_entities, va( "oid 1 \"" S_COLOR_BLUE "You are near objective #%i\n\"", ent->count ) );
-            } else {
-                trap_SendServerCommand( other - g_entities, va( "oid -1 \"You are near objective #%i\n\"", ent->count ) );
-            }
-        }
-    }
 }
-
 
 void SP_trigger_objective_info( gentity_t *ent ) {
 	ent->touch  = Touch_objective_info;

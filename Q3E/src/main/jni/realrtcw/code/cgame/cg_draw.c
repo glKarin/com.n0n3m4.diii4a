@@ -1062,9 +1062,8 @@ static void CG_DrawUpperRight(stereoFrame_t stereoFrame) {
 	if (cg_drawFPS.integer && (stereoFrame == STEREO_CENTER || stereoFrame == STEREO_RIGHT)) {
 		y = CG_DrawFPS( y );
 	}
-	if (cg_drawTimer.integer || cgs.gametype == GT_SURVIVAL)
-	{
-		y = CG_DrawTimer(y);
+	if ( cg_drawTimer.integer ) {
+		y = CG_DrawTimer( y );
 	}
 // (SA) disabling drawattacker for the time being
 	if ( cg_oldWolfUI.integer ) {
@@ -1751,42 +1750,6 @@ void CG_CenterPrint( const char *str, int y, int charWidth ) {
 	}
 }
 
-
-/*
-==============
-CG_BuyPrint
-
-Called for important messages that should stay in the center of the screen
-for a few moments
-==============
-*/
-void CG_BuyPrint( const char *str, int y, int charWidth ) {
-	char   *s;
-
-//----(SA)	added translation lookup
-	Q_strncpyz( cg.buyPrint, CG_translateString( (char*)str ), sizeof( cg.buyPrint ) );
-//----(SA)	end
-
-
-	cg.buyPrintTime = cg.time;
-	cg.buyPrintY = y;
-	cg.buyPrintCharWidth = charWidth;
-
-	// count the number of lines for centering
-	cg.buyPrintLines = 1;
-	s = cg.buyPrint;
-	while ( *s ) {
-		if ( *s == '\n' ) {
-			cg.buyPrintLines++;
-		}
-		if ( !Q_strncmp( s, "\\n", 1 ) ) {
-			cg.buyPrintLines++;
-			s++;
-		}
-		s++;
-	}
-}
-
 /*
 ==============
 CG_BonusCenterPrint
@@ -1931,71 +1894,6 @@ static void CG_DrawCenterString( void ) {
 		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.centerPrintCharWidth, (int)( cg.centerPrintCharWidth * 1.5 ), 0 );
 
 		y += cg.centerPrintCharWidth * 2;
-
-		while ( *start && ( *start != '\n' ) ) {
-			if ( !Q_strncmp( start, "\\n", 1 ) ) {
-				start++;
-				break;
-			}
-			start++;
-		}
-		if ( !*start ) {
-			break;
-		}
-		start++;
-	}
-
-	trap_R_SetColor( NULL );
-}
-
-/*
-===================
-CG_DrawBuyString
-===================
-*/
-static void CG_DrawBuyString( void ) {
-	char    *start;
-	int l;
-	int x, y, w;
-	float   *color;
-
-	if ( !cg.buyPrintTime ) {
-		return;
-	}
-
-	color = CG_FadeColor( cg.buyPrintTime, 1000 * cg_buyprinttime.value );
-	if ( !color ) {
-		return;
-	}
-
-	if ( cg_fixedAspect.integer ) {
-		CG_SetScreenPlacement(PLACE_CENTER, PLACE_CENTER);
-	}
-
-	trap_R_SetColor( color );
-
-	start = cg.buyPrint;
-
-	y = cg.buyPrintY - cg.buyPrintLines * BIGCHAR_HEIGHT / 2;
-
-	while ( 1 ) {
-		char linebuffer[1024];
-
-		for ( l = 0; l < 50; l++ ) {
-			if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
-				break;
-			}
-			linebuffer[l] = start[l];
-		}
-		linebuffer[l] = 0;
-
-		w = cg.buyPrintCharWidth * CG_DrawStrlen( linebuffer );
-
-		x = ( SCREEN_WIDTH - w ) / 2;
-
-		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.buyPrintCharWidth, (int)( cg.buyPrintCharWidth * 1.5 ), 0 );
-
-		y += cg.buyPrintCharWidth * 2;
 
 		while ( *start && ( *start != '\n' ) ) {
 			if ( !Q_strncmp( start, "\\n", 1 ) ) {
@@ -3128,7 +3026,6 @@ CG_DrawIntermission
 static void CG_DrawIntermission( void ) {
 
 	CG_DrawCenterString();
-	CG_DrawBuyString();
 	CG_DrawSubtitleString();
 	return;
 
@@ -3879,7 +3776,6 @@ if ( !cg_oldWolfUI.integer ) {
 	// don't draw center string if scoreboard is up
 	if ( !CG_DrawScoreboard() ) {
 		CG_DrawCenterString();
-		CG_DrawBuyString();
 		CG_DrawSubtitleString();
 		CG_DrawObjectiveInfo();     // NERVE - SMF
 	}

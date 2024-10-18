@@ -45,25 +45,9 @@ Adds score to both the client and his team
 ============
 */
 void AddScore( gentity_t *ent, int score ) {
-	if ( !ent->client ) {
-		return;
-	}
-	// no scoring during pre-match warmup
-	if ( level.warmupTime ) {
-		return;
-	}
 
-	// Ridah, no scoring during single player
-	// DHM - Nerve :: fix typo
-	if ( g_gametype.integer != GT_SURVIVAL ) {
-		return;
-	}
-	// done.
-
-
-	ent->client->ps.persistant[PERS_SCORE] += score;
-
-	//CalculateRanks();
+	return;
+	
 }
 
 
@@ -72,187 +56,122 @@ extern qboolean G_ThrowChair( gentity_t *ent, vec3_t dir, qboolean force );
 
 /*
 =================
-TossClientWeapons
+TossClientItems
 
-Toss the weapon and powerups for the killed entity
+Toss the weapon and powerups for the killed player
 =================
 */
-void TossClientWeapons( gentity_t *self )
-{
-	gitem_t *item;
+void TossClientItems( gentity_t *self ) {
+	gitem_t     *item;
 	vec3_t forward;
 	int weapon;
-	gentity_t *drop = 0;
+	float angle;
+	int i;
+	gentity_t   *drop = 0;
 
 	// drop the weapon if not a gauntlet or machinegun
 	weapon = self->s.weapon;
-
-	if (g_gametype.integer == GT_GOTHIC)
-	{ // Gothicstein. Robots never drop weapons.
-		switch (self->aiCharacter)
-		{
-		case AICHAR_ZOMBIE:
-		case AICHAR_WARZOMBIE:
-		case AICHAR_LOPER:
-		case AICHAR_PROTOSOLDIER:
-		case AICHAR_SUPERSOLDIER:
-		case AICHAR_SUPERSOLDIER_LAB:
-		case AICHAR_DOG:
-		case AICHAR_PRIEST:
-		case AICHAR_XSHEPHERD:
-			return;
-		default:
-			break;
-		}
+    
+    if ( g_gametype.integer == GT_GOTHIC ) { // Gothicstein. Robots never drop weapons.
+	switch ( self->aiCharacter ) {
+	case AICHAR_ZOMBIE:
+	case AICHAR_WARZOMBIE:
+	case AICHAR_LOPER:
+	case AICHAR_PROTOSOLDIER:
+	case AICHAR_SUPERSOLDIER:
+	case AICHAR_SUPERSOLDIER_LAB:
+	case AICHAR_DOG:
+	case AICHAR_PRIEST:
+	case AICHAR_XSHEPHERD:
+		return;       
+	default:
+		break;
 	}
-	else
-	{ // Default case. Robots do drop weapons.
-		switch (self->aiCharacter)
-		{
-		case AICHAR_ZOMBIE:
-		case AICHAR_WARZOMBIE:
-		case AICHAR_LOPER:
-		case AICHAR_DOG:
-		case AICHAR_PRIEST:
-		case AICHAR_XSHEPHERD:
-			return;
-		default:
-			break;
-		}
+	} else {  // Default case. Robots do drop weapons.
+	switch ( self->aiCharacter ) {
+	case AICHAR_ZOMBIE:
+	case AICHAR_WARZOMBIE:
+	case AICHAR_LOPER:
+	case AICHAR_DOG:
+	case AICHAR_PRIEST:
+	case AICHAR_XSHEPHERD:
+		return;       
+	default:
+		break;
+	} 
 	}
 
-	AngleVectors(self->r.currentAngles, forward, NULL, NULL);
+	AngleVectors( self->r.currentAngles, forward, NULL, NULL );
 
-	G_ThrowChair(self, forward, qtrue); // drop chair if you're holding one  //----(SA)	added
+	G_ThrowChair( self, forward, qtrue ); // drop chair if you're holding one  //----(SA)	added
 
 	// make a special check to see if they are changing to a new
 	// weapon that isn't the mg or gauntlet.  Without this, a client
 	// can pick up a weapon, be killed, and not drop the weapon because
 	// their weapon change hasn't completed yet and they are still holding the MG.
 
-	// (SA) always drop what you were switching to
-	if (1)
-	{
-		if (self->client->ps.weaponstate == WEAPON_DROPPING || self->client->ps.weaponstate == WEAPON_DROPPING_TORELOAD)
-		{
+    // (SA) always drop what you were switching to
+	if ( 1 ) {
+		if ( self->client->ps.weaponstate == WEAPON_DROPPING || self->client->ps.weaponstate == WEAPON_DROPPING_TORELOAD ) {
 			weapon = self->client->pers.cmd.weapon;
 		}
-		if (!(COM_BitCheck(self->client->ps.weapons, weapon)))
-		{
+		if ( !( COM_BitCheck( self->client->ps.weapons, weapon ) ) ) {
 			weapon = WP_NONE;
 		}
 	}
 
-	//----(SA)	added
-	if (weapon == WP_SNOOPERSCOPE)
-	{
+//----(SA)	added
+	if ( weapon == WP_SNOOPERSCOPE ) {
 		weapon = WP_GARAND;
 	}
-	if (weapon == WP_FG42SCOPE)
-	{
+	if ( weapon == WP_FG42SCOPE ) {
 		weapon = WP_FG42;
 	}
-	if (weapon == WP_AKIMBO)
-	{ //----(SA)	added
+	if ( weapon == WP_AKIMBO ) { //----(SA)	added
 		weapon = WP_COLT;
 	}
-	if (weapon == WP_DUAL_TT33)
-	{ //----(SA)	added
+	if ( weapon == WP_DUAL_TT33 ) { //----(SA)	added
 		weapon = WP_TT33;
 	}
-	//----(SA)	end
+//----(SA)	end
 
-	if (weapon > WP_NONE && weapon < WP_MONSTER_ATTACK1 && self->client->ps.ammo[BG_FindAmmoForWeapon(weapon)])
-	{
+
+	if ( weapon > WP_NONE && weapon < WP_MONSTER_ATTACK1 && self->client->ps.ammo[ BG_FindAmmoForWeapon( weapon )] ) {
 		// find the item type for this weapon
-		item = BG_FindItemForWeapon(weapon);
+		item = BG_FindItemForWeapon( weapon );
 		// spawn the item
 
 		// Rafael
-		if (!(self->client->ps.persistant[PERS_HWEAPON_USE]))
-		{
-			drop = Drop_Item(self, item, 0, qfalse);
+		if ( !( self->client->ps.persistant[PERS_HWEAPON_USE] ) ) {
+			drop = Drop_Item( self, item, 0, qfalse );
 		}
 	}
 
-	// dropped items stay forever in SP
-	if (drop)
-	{
-		if (g_gametype.integer == GT_SURVIVAL)
-		{
-			drop->nextthink = level.time + 100000;
-		}
-		else
-		{
+ // dropped items stay forever in SP
+		if ( drop ) {
 			drop->nextthink = 0;
 		}
 
-	}
-}
-
-
-/*
-=================
-TossClientPowerups
-
-Toss the powerups for the killed entity
-=================
-*/
-void TossClientPowerups(gentity_t *self, gentity_t *attacker)
-{
-	gitem_t *item;
-	vec3_t forward;
-	float angle;
-	gentity_t *drop = 0;
-	int powerup = 0;
-
-	AngleVectors(self->r.currentAngles, forward, NULL, NULL);
-
-
 		angle = 45;
-
-		// Drop random powerup in survival mode
-		int dropChance = 10; // Base drop chance
-
-		// Increase drop chance if attacker has PERK_SCAVENGER
-		if (attacker->client->ps.perks[PERK_SCAVENGER] > 0)
-		{
-			dropChance += 7;
-		}
-
-		if (rand() % 100 < dropChance)
-		{
-			switch (rand() % 5)
-			{ // Random number
-			case 0:
-				powerup = PW_HASTE_SURV;
-				break;
-			case 1:
-				powerup = PW_QUAD;
-				break;
-			case 2:
-				powerup = PW_INVIS;
-				break;
-			case 3:
-				powerup = PW_BATTLESUIT_SURV;
-				break;
-			case 4:
-				powerup = PW_VAMPIRE;
-				break;
-			}
-			item = BG_FindItemForPowerup(powerup);
-			if (item)
-			{
-				drop = Drop_Item(self, item, 0, qfalse);
-				if (drop)
-				{
-					drop->nextthink = level.time + 30000; // Stay for 30 seconds
-					angle += 45;
+		for ( i = 1 ; i < PW_NUM_POWERUPS ; i++ ) {
+			if ( self->client->ps.powerups[ i ] > level.time ) {
+				item = BG_FindItemForPowerup( i );
+				if ( !item ) {
+					continue;
 				}
+				drop = Drop_Item( self, item, angle, qfalse );
+				// decide how many seconds it has left
+				drop->count = ( self->client->ps.powerups[ i ] - level.time ) / 1000;
+				if ( drop->count < 1 ) {
+					drop->count = 1;
+				}
+				drop->nextthink = 0;    // stay forever
+				angle += 45;
 			}
 		}
 	
 }
+
 
 /*
 ==================
@@ -501,10 +420,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 		contents = trap_PointContents( self->r.currentOrigin, -1 );
 		if ( !( contents & CONTENTS_NODROP ) ) {
-			TossClientWeapons( self );
-			if (g_gametype.integer == GT_SURVIVAL) {
-			TossClientPowerups( self, attacker );
-			}
+			TossClientItems( self );
 		}
 
 	Cmd_Score_f( self );        // show scores
@@ -693,8 +609,6 @@ qboolean IsHeadShotWeapon( int mod, gentity_t *targ, gentity_t *attacker ) {
 	switch ( targ->aiCharacter ) {
 	// get out quick for ai's that don't take headshots
 	case AICHAR_ZOMBIE:
-	case AICHAR_ZOMBIE_SURV:
-	case AICHAR_ZOMBIE_GHOST:
 	case AICHAR_WARZOMBIE:
 	case AICHAR_HELGA:     
 	case AICHAR_LOPER:
@@ -1173,14 +1087,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// and protects 50% against all damage
 	if ( client && client->ps.powerups[PW_BATTLESUIT] ) {
 		G_AddEvent( targ, EV_POWERUP_BATTLESUIT, 0 );
+		/*if ( dflags & DAMAGE_RADIUS ) {
+			return;
+		}*/
 
 		damage *= 0.30;
-	}
-
-	if ( client && client->ps.powerups[PW_BATTLESUIT_SURV] ) {
-		G_AddEvent( targ, EV_POWERUP_BATTLESUIT_SURV, 0 );
-
-		damage *= 0.05;
 	}
 
 	// always give half damage if hurting self

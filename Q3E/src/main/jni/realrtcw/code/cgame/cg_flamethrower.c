@@ -229,12 +229,12 @@ void CG_FireFlameChunks( centity_t *cent, vec3_t origin, vec3_t angles, float sp
 	}
 //----(SA)	end
 
-// only do one ignition flame for zombie and zombie_surv
-  if ( (cent->currentState.aiChar == AICHAR_ZOMBIE || cent->currentState.aiChar == AICHAR_ZOMBIE_SURV || cent->currentState.aiChar == AICHAR_ZOMBIE_GHOST) && !firing ) { 
-    if ( !centInfo->lastFiring ) {
-        return;
-    }
-  }
+	// only do one ignition flame for zombie
+	if ( cent->currentState.aiChar == AICHAR_ZOMBIE && !firing ) {
+		if ( !centInfo->lastFiring ) {
+			return;
+		}
+	}
 
 	// if this point is in water, no flames
 	if ( CG_PointContents( origin, cent->currentState.number ) & ( CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) {
@@ -1509,7 +1509,7 @@ void CG_UpdateFlamethrowerSounds( void ) {
 			}
 
 			if ( centFlameStatus[f->ownerCent].streamVolume ) {
-				if ( cg_entities[f->ownerCent].currentState.aiChar != AICHAR_ZOMBIE && cg_entities[f->ownerCent].currentState.aiChar != AICHAR_ZOMBIE_SURV && cg_entities[f->ownerCent].currentState.aiChar != AICHAR_ZOMBIE_GHOST ) {
+				if ( cg_entities[f->ownerCent].currentState.aiChar != AICHAR_ZOMBIE ) {
 					CG_S_AddLoopingSound( f->ownerCent, f->org, vec3_origin, cgs.media.flameStreamSound, (int)( 255.0 ) );
 				} else {
 					CG_S_AddLoopingSound( f->ownerCent, f->org, vec3_origin, cgs.media.flameCrackSound, (int)( 255.0 * centFlameStatus[f->ownerCent].streamVolume ) );

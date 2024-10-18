@@ -1342,12 +1342,10 @@ typedef enum
 
 // bit field limits
 #define MAX_STATS               16
-#define MAX_PERSISTANT          32
+#define MAX_PERSISTANT          16
 #define MAX_POWERUPS            16
 #define MAX_WEAPONS             64  // (SA) and yet more!
 #define MAX_HOLDABLE            16
-#define MAX_PERKS 			    16
-
 
 // Ridah, increased this
 //#define	MAX_PS_EVENTS			2
@@ -1446,7 +1444,6 @@ typedef struct playerState_s {
 	int holdable[MAX_HOLDABLE];
 	int holding;                        // the current item in holdable[] that is selected (held)
 	int weapons[MAX_WEAPONS / ( sizeof( int ) * 8 )];   // 64 bits for weapons held
-	int perks[MAX_PERKS];                // Perks
 
 	// Ridah, allow for individual bounding boxes
 	vec3_t mins, maxs;
@@ -1702,8 +1699,6 @@ typedef struct entityState_s {
 	aistateEnum_t aiState;
 
 	int animMovetype;       // clients can't derive movetype of other clients for anim scripting system
-
-	int perks;
 
 
 } entityState_t;

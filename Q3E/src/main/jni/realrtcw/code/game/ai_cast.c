@@ -432,13 +432,8 @@ gentity_t *AICast_CreateCharacter( gentity_t *ent, float *attributes, cast_weapo
 	} else {
 		newent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = cs->attributes[STARTING_HEALTH];
 	}
-    
-	// Unlimited respawn in Survival mode
-	if ( g_gametype.integer == GT_SURVIVAL )  {
-	    cs->respawnsleft = -1;
-	} else {
-		cs->respawnsleft = g_airespawn.integer;
-	}
+
+	cs->respawnsleft = g_airespawn.integer;
 	//
 	cs->weaponInfo = weaponInfo;
 	//
@@ -486,18 +481,6 @@ void AICast_Init( void ) {
 	numcast = 0;
 	numSpawningCast = 0;
 	saveGamePending = qtrue;
-
-    // Initial count of AIs for survival mode
-    if ( g_gametype.integer == GT_SURVIVAL )  {
-	    maxActiveAI[AICHAR_SOLDIER] = 4;
-	    maxActiveAI[AICHAR_ZOMBIE_SURV] = 4;
-	    maxActiveAI[AICHAR_ZOMBIE_GHOST] = 0;
-	    maxActiveAI[AICHAR_WARZOMBIE] = 0;
-	    maxActiveAI[AICHAR_PRIEST] = 0;
-	    maxActiveAI[AICHAR_ELITEGUARD] = 0;
-		maxActiveAI[AICHAR_BLACKGUARD] = 0;
-		maxActiveAI[AICHAR_VENOM] = 0;
-	}
 
 	trap_Cvar_Register( &aicast_debug, "aicast_debug", "0", 0 );
 	trap_Cvar_Register( &aicast_debugname, "aicast_debugname", "", 0 );
@@ -605,9 +588,6 @@ void AIChar_AIScript_AlertEntity( gentity_t *ent ) {
 	vec3_t mins, maxs;
 	int numTouch, touch[10], i;
 	cast_state_t    *cs;
-	vec3_t spawn_origin, spawn_angles;
-
-	gentity_t *player = AICast_FindEntityForName( "player" );
 
 	if ( !ent->aiInactive ) {
 		return;
@@ -642,23 +622,6 @@ void AIChar_AIScript_AlertEntity( gentity_t *ent ) {
 		return;
 	}
 
-    if ( g_gametype.integer == GT_SURVIVAL )  {
-	   if ( activeAI[ent->aiCharacter] >= maxActiveAI[ent->aiCharacter])  { 
-		cs->aiFlags |= AIFL_WAITINGTOSPAWN;
-		return;
-	   }
-	}
-
-	// Selecting the spawn point for the AI
-    if ( g_gametype.integer == GT_SURVIVAL )  {
-				SelectSpawnPoint_AI( player, spawn_origin, spawn_angles );
-				G_SetOrigin( ent, spawn_origin );
-				VectorCopy( spawn_origin, ent->client->ps.origin );
-				SetClientViewAngle( ent, spawn_angles );
-				// Increment the counter for active AI characters
-                activeAI[ent->aiCharacter]++;
-	}
-
 	// RF, has to disable this so I could test some maps which have erroneously placed alertentity calls
 	//ent->AIScript_AlertEntity = NULL;
 	cs->aiFlags &= ~AIFL_WAITINGTOSPAWN;
@@ -666,11 +629,7 @@ void AIChar_AIScript_AlertEntity( gentity_t *ent ) {
 	trap_LinkEntity( ent );
 
 	// trigger a spawn script event
-	if ( g_gametype.integer == GT_SURVIVAL )  {
-	   AICast_ScriptEvent( AICast_GetCastState( ent->s.number ), "respawn", "" );
-	} else {
-	   AICast_ScriptEvent( AICast_GetCastState( ent->s.number ), "spawn", "" );
-	}
+	AICast_ScriptEvent( AICast_GetCastState( ent->s.number ), "spawn", "" );
 	// make it think so we update animations/angles
 	AICast_Think( ent->s.number, (float)FRAMETIME / 1000 );
 	cs->lastThink = level.time;

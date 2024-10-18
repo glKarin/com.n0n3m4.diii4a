@@ -1333,7 +1333,7 @@ void ThrowKnife( gentity_t *ent )
 	// entity handling
 	knife						= G_Spawn();
 	knife->classname 			= "knife";
-	knife->nextthink 			= 0;
+	knife->nextthink 			= level.time + 100000;
 	knife->think				= G_FreeEntity;
 
 	// misc
@@ -1980,8 +1980,6 @@ void FireWeapon( gentity_t *ent ) {
 		case AICHAR_WARZOMBIE:
 			break;
 		case AICHAR_ZOMBIE:
-		case AICHAR_ZOMBIE_SURV:
-		case AICHAR_ZOMBIE_GHOST:
 			// temp just to show it works
 			// G_Printf("ptoo\n");
 			weapon_zombiespit( ent );

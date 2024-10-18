@@ -1320,8 +1320,6 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ELITE_STEP ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_STEP ][footstepcnt] );
-			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_SURV ) {
-				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_STEP ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_LOPER ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_LOPER_STEP ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_PROTOSOLDIER ) {
@@ -1371,8 +1369,6 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ELITE_WOOD ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_WOOD ][footstepcnt] );
-			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_SURV ) {
-				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_WOOD ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_LOPER ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_LOPER_WOOD ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_PROTOSOLDIER ) {
@@ -1417,8 +1413,6 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 			if ( cent->currentState.aiChar == AICHAR_ELITEGUARD ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ELITE_GRAVEL ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE ) {
-				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_GRAVEL ][footstepcnt] );
-			} else if ( cent->currentState.aiChar == AICHAR_ZOMBIE_SURV ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_ZOMBIE_GRAVEL ][footstepcnt] );
 			} else if ( cent->currentState.aiChar == AICHAR_PROTOSOLDIER ) {
 				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.footsteps[ FOOTSTEP_PROTOSOLDIER_GRAVEL][footstepcnt] );
@@ -1750,26 +1744,19 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		DEBUGNAME( "EV_EMPTYCLIP" );
 		break;
 
-case EV_FILL_CLIP:
-    DEBUGNAME( "EV_FILL_CLIP" );
-    if ( cg_weapons[es->weapon].reloadSound ) {
-        if ( cg.predictedPlayerState.powerups[PW_HASTE_SURV] || cg.predictedPlayerState.perks[PERK_WEAPONHANDLING] ) {
-            trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSoundFast );
-        } else {
-            trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSound );
-        }
-    }
-    break;
-case EV_FILL_CLIP_FULL:
-    DEBUGNAME( "EV_FILL_CLIP_FULL" );
-    if ( cg_weapons[es->weapon].reloadFullSound ) {
-        if ( cg.predictedPlayerState.powerups[PW_HASTE_SURV] || cg.predictedPlayerState.perks[PERK_WEAPONHANDLING] ) {
-            trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFullSoundFast );
-        } else {
-            trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFullSound );
-        }
-    }
-    break;
+	case EV_FILL_CLIP:
+		DEBUGNAME( "EV_FILL_CLIP" );
+		if ( cg_weapons[es->weapon].reloadSound ) {
+			trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadSound ); // JPW NERVE following sherman's SP fix, should allow killing reload sound when player dies
+		}
+		break;
+
+	case EV_FILL_CLIP_FULL:
+		DEBUGNAME( "EV_FILL_CLIP_FULL" );
+		if ( cg_weapons[es->weapon].reloadFullSound ) {
+			trap_S_StartSound( NULL, es->number, CHAN_WEAPON, cg_weapons[es->weapon].reloadFullSound ); // JPW NERVE following sherman's SP fix, should allow killing reload sound when player dies
+		}
+		break;
 	case EV_FILL_CLIP_AI:
 		DEBUGNAME( "EV_FILL_CLIP_AI" );
 		if ( cg_weapons[es->weapon].reloadSound ) {
@@ -1796,9 +1783,7 @@ case EV_FILL_CLIP_FULL:
 			trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.noAmmoSound );
 		}
 		if ( es->number == cg.snap->ps.clientNum && cg_autoReload.integer == 1 ) {
-            if (cg_newinventory.integer <= 0 && cg_gameType.integer != GT_SURVIVAL) {
-				CG_OutOfAmmoChange();
-			}
+			CG_OutOfAmmoChange();
 		}
 		break;
 	case EV_NOQUICKGRENAMMO:
@@ -2271,14 +2256,6 @@ case EV_FILL_CLIP_FULL:
 		}
 		//trap_S_StartSound( NULL, es->number, CHAN_ITEM, trap_S_RegisterSound( "sound/items/protect3.wav" ) );
 		break;
-	case EV_POWERUP_BATTLESUIT_SURV:
-		DEBUGNAME( "EV_POWERUP_BATTLESUIT_SURV" );
-		if ( es->number == cg.snap->ps.clientNum ) {
-			cg.powerupActive = PW_BATTLESUIT_SURV;
-			cg.powerupTime = cg.time;
-		}
-		trap_S_StartSound( NULL, es->number, CHAN_ITEM, trap_S_RegisterSound( "sound/items/protect3.wav" ) );
-		break;
 	case EV_POWERUP_REGEN:
 		DEBUGNAME( "EV_POWERUP_REGEN" );
 		if ( es->number == cg.snap->ps.clientNum ) {
@@ -2296,12 +2273,6 @@ case EV_FILL_CLIP_FULL:
 		CG_LoseHat( cent, dir );
 		break;
 
-	case EV_REATTACH_HAT:
-		DEBUGNAME( "EV_REATTACH_HAT" );
-		ByteToDir( es->eventParm, dir );
-		CG_Player( cent );
-		break;
-
 	case EV_GIB_HEAD:
 		DEBUGNAME( "EV_GIB_HEAD" );
 		trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.gibSound );
@@ -2314,7 +2285,7 @@ case EV_FILL_CLIP_FULL:
 
 	case EV_GIB_PLAYER:
 		DEBUGNAME( "EV_GIB_PLAYER" );
-		if ( es->aiChar == AICHAR_ZOMBIE || es->aiChar == AICHAR_ZOMBIE_SURV || es->aiChar == AICHAR_ZOMBIE_GHOST ) {
+		if ( es->aiChar == AICHAR_ZOMBIE ) {
 			trap_S_StartSound( es->pos.trBase, es->number, CHAN_VOICE, cgs.media.zombieDeathSound );
 		} else {
 			trap_S_StartSound( es->pos.trBase, es->number, CHAN_VOICE, cgs.media.gibSound );
@@ -2324,7 +2295,7 @@ case EV_FILL_CLIP_FULL:
 		break;
 	case EV_GIB_VAMPIRISM:
 		DEBUGNAME( "EV_GIB_VAMPIRISM" );
-		if ( es->aiChar == AICHAR_ZOMBIE || es->aiChar == AICHAR_ZOMBIE_SURV || es->aiChar == AICHAR_ZOMBIE_GHOST ) {
+		if ( es->aiChar == AICHAR_ZOMBIE ) {
 			trap_S_StartSound( es->pos.trBase, es->number, CHAN_VOICE, cgs.media.zombieDeathSound );
 		} else {
 			trap_S_StartSound( es->pos.trBase, es->number, CHAN_VOICE, cgs.media.gibSound );
@@ -2377,12 +2348,7 @@ case EV_FILL_CLIP_FULL:
 	{
 		int old;
 		old = cent->currentState.aiChar;
-    // Add condition for AICHAR_ZOMBIE_SURV
-    if (cent->currentState.aiChar == AICHAR_ZOMBIE_SURV) {
-        cent->currentState.aiChar = AICHAR_ZOMBIE_SURV;
-    } else {
-        cent->currentState.aiChar = AICHAR_ZOMBIE;
-    }
+		cent->currentState.aiChar = AICHAR_ZOMBIE;
 
 		// shoot this only in bursts
 

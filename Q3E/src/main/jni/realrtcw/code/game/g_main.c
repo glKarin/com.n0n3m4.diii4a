@@ -61,8 +61,6 @@ extern int bg_pmove_gameskill_integer;
 
 vmCvar_t g_gametype;
 
-vmCvar_t g_newinventory;
-
 // Rafael gameskill
 vmCvar_t g_gameskill;
 // done
@@ -190,8 +188,6 @@ cvarTable_t gameCvarTable[] = {
 
 	// latched vars
 	{ &g_gametype, "g_gametype", "0", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },
-
-	{ &g_newinventory, "g_newinventory", "0", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse  },
 
 	// Rafael gameskill
 	{ &g_gameskill, "g_gameskill", "2", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },   // (SA) new default '2' (was '1')
@@ -2117,12 +2113,12 @@ void CheckExitRules( void ) {
 				continue;
 			}
 
-			/*if ( cl->ps.persistant[PERS_SCORE] >= g_fraglimit.integer ) {
+			if ( cl->ps.persistant[PERS_SCORE] >= g_fraglimit.integer ) {
 				LogExit( "Fraglimit hit." );
 				trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " hit the fraglimit.\n\"",
 												cl->pers.netname ) );
 				return;
-			}*/
+			}
 		}
 	}
 

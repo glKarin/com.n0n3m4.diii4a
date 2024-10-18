@@ -100,7 +100,6 @@ itemInfo_t cg_items[MAX_ITEMS];
 vmCvar_t cg_bobbing;
 vmCvar_t cg_railTrailTime;
 vmCvar_t cg_centertime;
-vmCvar_t cg_buyprinttime;
 vmCvar_t cg_runpitch;
 vmCvar_t cg_runroll;
 vmCvar_t cg_bobup;
@@ -185,8 +184,6 @@ vmCvar_t cg_zoomStepBinoc;
 vmCvar_t cg_zoomStepSniper;
 vmCvar_t cg_zoomStepSnooper;
 vmCvar_t cg_zoomStepFG;         //----(SA)	added
-vmCvar_t cg_zoomSensitivity;
-vmCvar_t cg_zoomSensitivityFovScaled;
 vmCvar_t cg_zoomDefaultBinoc;
 vmCvar_t cg_zoomDefaultSniper;
 vmCvar_t cg_zoomDefaultSnooper;
@@ -229,7 +226,6 @@ vmCvar_t cg_wolfparticles;
 
 // Ridah
 vmCvar_t cg_gameType;
-vmCvar_t cg_newinventory;
 vmCvar_t cg_bloodTime;
 vmCvar_t cg_norender;
 vmCvar_t cg_skybox;
@@ -332,8 +328,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_zoomDefaultSniper, "cg_zoomDefaultSniper", "15", CVAR_ARCHIVE },
 	{ &cg_zoomDefaultSnooper, "cg_zoomDefaultSnooper", "40", CVAR_ARCHIVE },
 	{ &cg_zoomDefaultFG, "cg_zoomDefaultFG", "55", CVAR_ARCHIVE },                //----(SA)	added
-	{ &cg_zoomSensitivityFovScaled, "cg_zoomSensitivityFovScaled", "1", CVAR_ARCHIVE },
-	{ &cg_zoomSensitivity, "cg_zoomSensitivity", "1", CVAR_ARCHIVE },
 	{ &cg_zoomStepBinoc, "cg_zoomStepBinoc", "3", CVAR_ARCHIVE },
 	{ &cg_zoomStepSniper, "cg_zoomStepSniper", "2", CVAR_ARCHIVE },
 	{ &cg_zoomStepSnooper, "cg_zoomStepSnooper", "5", CVAR_ARCHIVE },
@@ -393,7 +387,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_gun_y, "cg_gunY", "0", CVAR_CHEAT  },
 	{ &cg_gun_z, "cg_gunZ", "0", CVAR_CHEAT  },
 	{ &cg_centertime, "cg_centertime", "3", CVAR_CHEAT },
-	{ &cg_buyprinttime, "cg_buyprinttime", "1", CVAR_CHEAT },
 	{ &cg_runpitch, "cg_runpitch", "0.002", CVAR_ARCHIVE},
 	{ &cg_runroll, "cg_runroll", "0.005", CVAR_ARCHIVE },
 	{ &cg_bobup, "cg_bobup", "0.005", CVAR_ARCHIVE },
@@ -495,7 +488,6 @@ cvarTable_t cvarTable[] = {
 
 	// Ridah
 	{ &cg_gameType, "g_gametype", "0", 0 }, // communicated by systeminfo
-	{ &cg_newinventory, "g_newinventory", "0", CVAR_ARCHIVE }, // communicated by systeminfo
 	{ &cg_norender, "cg_norender", "0", 0 },  // only used during single player, to suppress rendering until the server is ready
 
 	{ &cg_gameSkill, "g_gameskill", "2", 0 }, // communicated by systeminfo	// (SA) new default '2' (was '1')
@@ -1517,7 +1509,6 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.invisShader = trap_R_RegisterShader("powerups/invisibility" );
 //	cgs.media.regenShader = trap_R_RegisterShader("powerups/regen" );
 	cgs.media.hastePuffShader = trap_R_RegisterShader("hasteSmokePuff" );
-	cgs.media.redQuadShader = trap_R_RegisterShader("powerups/vampire" );
 
 	CG_LoadingString( " - models" );
 
