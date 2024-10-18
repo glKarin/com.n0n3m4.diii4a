@@ -7,8 +7,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -pipe -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O3 -pipe -fPIC")
 
 set(oboeaudio_src
         snd_oboe.cpp
