@@ -394,5 +394,8 @@
     <string name="log">Log</string>
     <string name="util">Util</string>
     <string name="input">Input</string>
+    <string name="use_external_library_path">Use external library path</string>
+    <string name="load_game_library_from_getdatadir"><![CDATA[Load external local game libraries from `<game working directory>/lib/<arm64|arm>/` to `/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`]]></string>
+    <string name="load_engine_library_from_getdatadir"><![CDATA[Load external local game engine library from `<game working directory>/[<Game standalone directory>/]<game engine library>` to `/data/user/<UID>/com.karin.idTech4Amm/cache/<game engine library>`]]></string>
 
 </resources>

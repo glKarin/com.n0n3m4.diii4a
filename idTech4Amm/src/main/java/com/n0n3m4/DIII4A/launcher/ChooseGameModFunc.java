@@ -31,6 +31,8 @@ import java.util.function.Predicate;
 
 public final class ChooseGameModFunc extends GameLauncherFunc
 {
+    public static final String FILE_SEP = " /// ";
+
     private final int m_code;
     private String m_path;
     private String m_mod;
@@ -374,7 +376,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {
-                String lib = values.get(p);
+                String lib = KStr.CmdStr(values.get(p));
                 Callback(lib);
                 dialog.dismiss();
                 if(AllowExtraFiles)
@@ -478,7 +480,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int p)
             {
-                String join = KStr.Join(files, " ");
+                List<String> norFiles = new ArrayList<>(files.size());
+                for(String file : files)
+                    norFiles.add(KStr.CmdStr(file));
+                String join = KStr.Join(norFiles, FILE_SEP);
                 Callback(":" + join);
                 dialog.dismiss();
             }

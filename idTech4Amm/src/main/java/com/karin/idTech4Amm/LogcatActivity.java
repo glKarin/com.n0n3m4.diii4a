@@ -2,15 +2,11 @@ package com.karin.idTech4Amm;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,16 +16,10 @@ import com.karin.idTech4Amm.misc.Function;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.sys.Theme;
-import com.n0n3m4.DIII4A.launcher.ChooseCommandRecordFunc;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
-import com.n0n3m4.q3e.karin.KLogcat;
+import com.karin.idTech4Amm.misc.KLogcat;
 import com.n0n3m4.q3e.karin.KStr;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
 
 /**
  * logcat viewer

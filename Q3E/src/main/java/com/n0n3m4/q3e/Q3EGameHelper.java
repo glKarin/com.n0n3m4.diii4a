@@ -38,6 +38,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -218,41 +220,6 @@ public class Q3EGameHelper
                 Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload user game library fail: " + cacheFile);
         }
         return res;
-    }
-
-    public String GetEngineLib()
-    {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
-        String libname = Q3EUtils.q3ei.libname;
-        // if(Q3EUtils.q3ei.isTDM) libname = "libDukeNukemForever.so"; // Test a new game using TDM
-        String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + libname; // Q3EUtils.q3ei.libname;
-        //if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = "dnf"; // Test a new game using TDM
-        if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
-        {
-            String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(libname);
-            // if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = Q3EGlobals.GAME_SUBDIR_TDM; // Test a new game using TDM
-            File file = new File(localLibPath);
-            if(!file.isFile() || !file.canRead())
-            {
-                Log.w(Q3EGlobals.CONST_Q3E_LOG_TAG, "Local engine library not file or unreadable: " + localLibPath);
-            }
-            else
-            {
-                String cacheFile = m_context.getCacheDir() + File.separator + /*Q3EUtils.q3ei.*/libname;
-                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found local engine library file: " + localLibPath);
-                long r = Q3EUtils.cp(localLibPath, cacheFile);
-                if(r > 0)
-                {
-                    libPath = cacheFile;
-                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load local engine library: " + cacheFile);
-                }
-                else
-                {
-                    Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local engine library fail: " + cacheFile);
-                }
-            }
-        }
-        return libPath;
     }
 
     private boolean ExtractCopy(String systemFolderPath, boolean overwrite, String...assetPaths)
@@ -734,6 +701,138 @@ public class Q3EGameHelper
         return new int[] { width, height };
     }
 
+    private String GetExternalLibPath()
+    {
+        String arch = Q3EJNI.Is64() ? "arm64" : "arm";
+        return m_context.getCacheDir() + File.separator + "lib" + File.separator + arch;
+    }
+
+    private String CopyLocalLibraries()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
+        if(!preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false))
+            return Q3EUtils.GetGameLibDir(m_context);
+
+        String targetPath = GetExternalLibPath();
+
+        // clean old libraries
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Clean external libraries: " + targetPath);
+        File dir = new File(targetPath);
+        if(dir.isDirectory())
+        {
+            File[] files = dir.listFiles();
+            if(null != files && files.length > 0)
+            {
+                for(File f : files)
+                {
+                    if(!f.isFile() || !f.canRead())
+                        continue;
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Delete external library: " + f.getAbsolutePath());
+                    f.delete();
+                }
+            }
+        }
+
+        String arch = Q3EJNI.Is64() ? "arm64" : "arm";
+        String localPath = Q3EUtils.GetDataPath(File.separator + "lib" + File.separator + arch);
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Find local external libraries: " + localPath);
+        File file = new File(localPath);
+        if(!file.isDirectory())
+            return targetPath;
+
+        File[] files = file.listFiles();
+        if(null == files || files.length == 0)
+            return targetPath;
+
+        List<File> list = new ArrayList<>();
+        for(File f : files)
+        {
+            if(!f.isFile() || !f.canRead())
+                continue;
+            String name = f.getName();
+            if(!name.startsWith("lib") || !name.endsWith(".so"))
+                continue;
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Find local external library: " + (list.size() + 1) + " -> " + f.getAbsolutePath());
+            list.add(f);
+        }
+
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Get local libraries: " + list.size());
+
+        if(list.isEmpty())
+            return targetPath;
+
+        if(!dir.isDirectory())
+        {
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Create external library directory: " + targetPath);
+            if(!Q3EUtils.mkdir(targetPath, true))
+            {
+                Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Create external library directory fail: " + targetPath);
+                return targetPath;
+            }
+        }
+
+        for(File f : list)
+        {
+            String localFilePath = f.getAbsolutePath();
+            String targetFilePath = targetPath + File.separator + f.getName();
+            if(Q3EUtils.cp(f.getAbsolutePath(), targetFilePath) > 0)
+            {
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copy local library to external: " + localFilePath + " -> " + targetFilePath);
+                //new File(targetFilePath).deleteOnExit();
+            }
+            else
+            {
+                Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copy local library to external fail: " + localFilePath + " -> " + targetFilePath);
+            }
+        }
+        return targetPath;
+    }
+
+    public String GetEngineLib()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
+        String libname = Q3EUtils.q3ei.libname;
+        // if(Q3EUtils.q3ei.isTDM) libname = "libDukeNukemForever.so"; // Test a new game using TDM
+        String libPath = Q3EUtils.GetGameLibDir(m_context) + "/" + libname; // Q3EUtils.q3ei.libname;
+        //if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = "dnf"; // Test a new game using TDM
+        if(preferences.getBoolean(Q3EPreference.LOAD_LOCAL_ENGINE_LIB, false))
+        {
+            String localLibPath = Q3EUtils.q3ei.GetGameDataDirectoryPath(libname);
+            // if(Q3EUtils.q3ei.isTDM) Q3EUtils.q3ei.subdatadir = Q3EGlobals.GAME_SUBDIR_TDM; // Test a new game using TDM
+            File file = new File(localLibPath);
+            if(!file.isFile() || !file.canRead())
+            {
+                Log.w(Q3EGlobals.CONST_Q3E_LOG_TAG, "Local engine library not file or unreadable: " + localLibPath);
+            }
+            else
+            {
+                String cacheFile = m_context.getCacheDir() + File.separator + /*Q3EUtils.q3ei.*/libname;
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Found local engine library file: " + localLibPath);
+                long r = Q3EUtils.cp(localLibPath, cacheFile);
+                if(r > 0)
+                {
+                    libPath = cacheFile;
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load local engine library: " + cacheFile);
+                }
+                else
+                {
+                    Log.e(Q3EGlobals.CONST_Q3E_LOG_TAG, "Upload local engine library fail: " + cacheFile);
+                }
+            }
+        }
+        else if(preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false))
+        {
+            String cacheFile = GetExternalLibPath() + File.separator + /*Q3EUtils.q3ei.*/libname;
+            File file = new File(cacheFile);
+            if(file.isFile() && file.canRead())
+            {
+                libPath = cacheFile;
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Load external engine library: " + cacheFile);
+            }
+        }
+        return libPath;
+    }
+
     public boolean Start(Surface surface, int surfaceWidth, int surfaceHeight)
     {
         // GL
@@ -751,6 +850,7 @@ public class Q3EGameHelper
         int runBackground = Q3EUtils.parseInt_s(preferences.getString(Q3EPreference.RUN_BACKGROUND, "0"), 0);
         int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
+        boolean useExternalLibPath = preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false);
 
         String subdatadir = Q3EUtils.q3ei.subdatadir;
         // if(Q3EUtils.q3ei.isTDM) subdatadir = "dnf"; // Test a new game using TDM
@@ -762,9 +862,14 @@ public class Q3EGameHelper
         int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, 0);
         Q3EJNI.PreInit(eventQueue);
 
+        String libpath = CopyLocalLibraries();
+        String engineLib = GetEngineLib();
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Engine library: " + engineLib);
+        Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Game libraries directory: " + libpath);
+
         boolean res = Q3EJNI.init(
-                GetEngineLib(),
-                Q3EUtils.GetGameLibDir(m_context),
+                engineLib,
+                libpath,
                 width,
                 height,
                 Q3EUtils.q3ei.datadir,

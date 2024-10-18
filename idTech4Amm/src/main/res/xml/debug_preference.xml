@@ -32,7 +32,14 @@
             android:key="harm_load_local_engine_lib"
             android:persistent="true"
             android:defaultValue="false"
-            android:summary="@string/load_local_engine_library"
+            android:summary="@string/load_engine_library_from_getdatadir"
+            />
+        <CheckBoxPreference
+            android:title="@string/use_external_library_path"
+            android:key="harm_use_external_lib_path"
+            android:persistent="true"
+            android:defaultValue="false"
+            android:summary="@string/load_game_library_from_getdatadir"
             />
     </PreferenceCategory>
 

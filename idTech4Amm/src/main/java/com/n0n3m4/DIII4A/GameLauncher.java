@@ -2938,7 +2938,7 @@ public class GameLauncher extends Activity
 					else
 					{
 						String files = mod.substring(1);
-						String[] split = files.split("\\s+");
+						String[] split = files.split(ChooseGameModFunc.FILE_SEP);
 						StringBuilder file = new StringBuilder();
 						StringBuilder deh = new StringBuilder();
 						StringBuilder bex = new StringBuilder();

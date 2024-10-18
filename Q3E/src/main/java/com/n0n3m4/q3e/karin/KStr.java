@@ -145,5 +145,15 @@ public final class KStr
         return Join(args, sep);
     }
 
+    public static String CmdStr(String str)
+    {
+        if(null == str)
+            return "";
+        if(str.contains(" "))
+            return '"' + str + '"';
+        else
+            return str;
+    }
+
     private KStr() {}
 }

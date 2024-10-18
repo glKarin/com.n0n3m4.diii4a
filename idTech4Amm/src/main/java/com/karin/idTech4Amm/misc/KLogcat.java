@@ -1,4 +1,4 @@
-package com.n0n3m4.q3e.karin;
+package com.karin.idTech4Amm.misc;
 
 import android.os.Build;
 import android.util.Log;

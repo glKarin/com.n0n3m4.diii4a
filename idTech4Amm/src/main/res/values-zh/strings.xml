@@ -390,4 +390,7 @@
     <string name="log">日志</string>
     <string name="util">工具</string>
     <string name="input">输入</string>
+    <string name="use_external_library_path">使用外部动态库目录</string>
+    <string name="load_game_library_from_getdatadir"><![CDATA[从外部`<游戏运行目录>/lib/<arm64|arm>/`读取游戏动态库到`/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`下并加载]]></string>
+    <string name="load_engine_library_from_getdatadir"><![CDATA[从外部`<游戏运行目录>/[<独立游戏文件夹>/]<游戏动态库>`读取游戏引擎动态库到`/data/user/<UID>/com.karin.idTech4Amm/cache/<游戏动态库>`下并加载]]></string>
 </resources>

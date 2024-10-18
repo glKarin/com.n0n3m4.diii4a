@@ -156,6 +156,7 @@ public final class Q3EPreference
     public static final String ONSCREEN_BUTTON               = "harm_onscreen_key"; // old = "harm_onscreen_button"
     public static final String GAME_STANDALONE_DIRECTORY     = "harm_game_standalone_directory";
     public static final String LOAD_LOCAL_ENGINE_LIB         = "harm_load_local_engine_lib";
+    public static final String USE_EXTERNAL_LIB_PATH         = "harm_use_external_lib_path";
     public static final String THEME                         = "harm_theme";
     public static final String EVENT_QUEUE                   = "harm_event_queue"; // 0 - java 1 - native
     public static final String AUTOSAVE_BUTTON_SETTINGS      = "harm_autosave_button_settings";
