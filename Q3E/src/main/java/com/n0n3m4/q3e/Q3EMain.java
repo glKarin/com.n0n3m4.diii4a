@@ -21,6 +21,7 @@ package com.n0n3m4.q3e;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
@@ -78,7 +79,7 @@ public class Q3EMain extends Activity
         KUncaughtExceptionHandler.HandleUnexpectedException(this);
 
         // init game environment
-        gameHelper.InitGlobalEnv();
+        SetupGame();
 
         // init gui props
         InitProps();
@@ -357,5 +358,20 @@ public class Q3EMain extends Activity
             }
         }
         return true;
+    }
+
+    private void SetupGame()
+    {
+        Intent intent = getIntent();
+        String intentGame = null;
+        if(null != intent)
+        {
+            Bundle extras = intent.getExtras();
+            if(null != extras)
+            {
+                intentGame = extras.getString("game");
+            }
+        }
+        gameHelper.InitGlobalEnv(intentGame);
     }
 }

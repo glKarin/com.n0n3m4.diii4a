@@ -46,7 +46,7 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
 
         int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(m_gameLauncher, R.string.load_external_game_library)));
+            Toast_long(Tr(R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Tr(R.string.load_external_game_library)));
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
 
@@ -120,7 +120,7 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
         else
             sb.append("armv7-a");
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(m_gameLauncher, R.string.game_library) + "(" + sb.toString() + ")");
+        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Tr(R.string.game_library) + "(" + sb.toString() + ")");
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {

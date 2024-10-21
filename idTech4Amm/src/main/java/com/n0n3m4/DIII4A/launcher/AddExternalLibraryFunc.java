@@ -45,7 +45,7 @@ public final class AddExternalLibraryFunc extends GameLauncherFunc
         m_path = data.getString("path");
         int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(m_gameLauncher, R.string.access_external_game_library)));
+            Toast_long(Tr(R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Tr(R.string.access_external_game_library)));
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
         run();
@@ -68,14 +68,14 @@ public final class AddExternalLibraryFunc extends GameLauncherFunc
     private void InputFileName(Uri uri)
     {
         String[] args = {""};
-        ContextUtility.Input(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.input_external_library_name), Q3ELang.tr(m_gameLauncher, R.string.e_g) + " libxxxxx.so", null, args, new Runnable()
+        ContextUtility.Input(m_gameLauncher, Tr(R.string.input_external_library_name), Tr(R.string.e_g) + " libxxxxx.so", null, args, new Runnable()
         {
             @Override
             public void run()
             {
                 if(args[0].isEmpty())
                 {
-                    Toast_short(Q3ELang.tr(m_gameLauncher, R.string.must_input_new_library_name));
+                    Toast_short(Tr(R.string.must_input_new_library_name));
                     // InputFileName(uri);
                 }
                 else

@@ -30,7 +30,7 @@ public final class OpenSourceLicenseFunc extends GameLauncherFunc
     {
         m_text = GetLicenseInAPK();
         if(KStr.IsBlank(m_text))
-            m_text = Q3ELang.tr(m_gameLauncher, R.string.get_open_source_license);
+            m_text = Tr(R.string.get_open_source_license);
 
     }
 
@@ -46,9 +46,9 @@ public final class OpenSourceLicenseFunc extends GameLauncherFunc
             public void run() {
                 m_text = args[0];
                 if(null == m_text)
-                    m_text = Q3ELang.tr(m_gameLauncher, R.string.network_error);
+                    m_text = Tr(R.string.network_error);
                 else if(m_text.isEmpty())
-                    m_text = Q3ELang.tr(m_gameLauncher, R.string.empty_response_data);
+                    m_text = Tr(R.string.empty_response_data);
                 if(null != m_dialog)
                 {
                     TextView message = m_dialog.findViewById(android.R.id.message);

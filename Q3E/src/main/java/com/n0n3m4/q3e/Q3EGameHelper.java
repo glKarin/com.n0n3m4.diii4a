@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 
@@ -83,9 +84,16 @@ public class Q3EGameHelper
         return true;
     }
 
-    public void InitGlobalEnv()
+    public void InitGlobalEnv(String gameTypeName)
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
+        if(KStr.IsEmpty(gameTypeName))
+            gameTypeName = preferences.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3);
+        else
+        {
+            Q3EUtils.q3ei.ResetGameState();
+            KLog.I("Game initial: " + gameTypeName);
+        }
 
         if (!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
         {
@@ -99,7 +107,7 @@ public class Q3EGameHelper
 
             Q3EUtils.q3ei.default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
-            Q3EUtils.q3ei.SetupGame(preferences.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3));
+            Q3EUtils.q3ei.SetupGame(gameTypeName);
 
             Q3EUtils.q3ei.LoadTypeAndArgTablePreference(m_context);
 

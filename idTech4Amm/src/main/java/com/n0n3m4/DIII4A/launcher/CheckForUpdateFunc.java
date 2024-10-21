@@ -37,7 +37,7 @@ public final class CheckForUpdateFunc extends GameLauncherFunc
         super.Start(data);
         Reset();
 
-        ProgressDialog dialog = ContextUtility.Progress(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.check_for_update), Q3ELang.tr(m_gameLauncher, R.string.network_for_github), new Runnable()
+        ProgressDialog dialog = ContextUtility.Progress(m_gameLauncher, Tr(R.string.check_for_update), Tr(R.string.network_for_github), new Runnable()
         {
             @Override
             public void run()
@@ -86,9 +86,9 @@ public final class CheckForUpdateFunc extends GameLauncherFunc
         {
             StringBuilder sb = new StringBuilder();
             final String endl = TextHelper.GetDialogMessageEndl();
-            sb.append(Q3ELang.tr(m_gameLauncher, R.string.version_)).append(version).append(endl);
-            sb.append(Q3ELang.tr(m_gameLauncher, R.string.update_)).append(update).append(endl);
-            sb.append(Q3ELang.tr(m_gameLauncher, R.string.changes_)).append(endl);
+            sb.append(Tr(R.string.version_)).append(version).append(endl);
+            sb.append(Tr(R.string.update_)).append(update).append(endl);
+            sb.append(Tr(R.string.changes_)).append(endl);
             if(null != changes && !changes.isEmpty())
             {
                 String[] changesArr = changes.split("\n");
@@ -100,7 +100,7 @@ public final class CheckForUpdateFunc extends GameLauncherFunc
                 }
             }
             CharSequence msg = TextHelper.GetDialogMessage(sb.toString());
-            builder.setTitle(Q3ELang.tr(m_gameLauncher, R.string.new_update_release) + "(" + release + ")")
+            builder.setTitle(Tr(R.string.new_update_release) + "(" + release + ")")
                     .setMessage(msg)
                     .setPositiveButton(R.string.download, new DialogInterface.OnClickListener() {
                         @Override

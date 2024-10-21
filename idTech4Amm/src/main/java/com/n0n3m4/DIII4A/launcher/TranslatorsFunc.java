@@ -42,7 +42,7 @@ public final class TranslatorsFunc extends GameLauncherFunc
     public void run()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3ELang.tr(m_gameLauncher, R.string.translators) + "(" + Q3ELang.tr(m_gameLauncher, R.string.sorting_by_add_time) + ")");
+        builder.setTitle(Tr(R.string.translators) + "(" + Tr(R.string.sorting_by_add_time) + ")");
         ListView view = new ListView(m_gameLauncher);
         view.setAdapter(new TranslatorAdapter(m_gameLauncher));
         view.setDivider(null);
@@ -71,25 +71,25 @@ public final class TranslatorsFunc extends GameLauncherFunc
 
             List<Translator> m_list = new ArrayList<>();
 
-            Translator tr;
+            Translator tror;
 
-            tr = new Translator();
-/*        tr.lang = "English";
-        tr.author = "n0n3m4";
+            tror = new Translator();
+/*        tror.lang = "English";
+        tror.author = "n0n3m4";
         m_list.add(tr);*/
 
-            tr = new Translator();
-            tr.lang = "中文";
-            tr.author = "Karin Zhao";
-            tr.url = Constants.CONST_EMAIL;
-            m_list.add(tr);
+            tror = new Translator();
+            tror.lang = "中文";
+            tror.author = "Karin Zhao";
+            tror.url = Constants.CONST_EMAIL;
+            m_list.add(tror);
 
-            tr = new Translator();
-            tr.lang = "Русский";
-            tr.author = "ALord7";
-            tr.group = "4pda";
-            tr.url = "https://4pda.ru/forum/index.php?showuser=5043340";
-            m_list.add(tr);
+            tror = new Translator();
+            tror.lang = "Русский";
+            tror.author = "ALord7";
+            tror.group = "4pda";
+            tror.url = "https://4pda.ru/forum/index.php?showuser=5043340";
+            m_list.add(tror);
 
             SetData(m_list);
         }

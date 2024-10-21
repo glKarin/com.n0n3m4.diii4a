@@ -37,14 +37,14 @@ public final class SupportDeveloperFunc extends GameLauncherFunc
     {
         AlertDialog.Builder bldr=new AlertDialog.Builder(m_gameLauncher);
         bldr.setTitle(R.string.do_you_want_to_support_the_developer);
-        bldr.setPositiveButton(Q3ELang.tr(m_gameLauncher, R.string.donate_to) + "F-Droid", new AlertDialog.OnClickListener() {
+        bldr.setPositiveButton(Tr(R.string.donate_to) + "F-Droid", new AlertDialog.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ContextUtility.OpenUrlExternally(m_gameLauncher, "https://f-droid.org/donate/");
                 dialog.dismiss();
             }
         });
-        bldr.setNeutralButton(Q3ELang.tr(m_gameLauncher, R.string.more_apps_in) + "F-Droid", new AlertDialog.OnClickListener() {
+        bldr.setNeutralButton(Tr(R.string.more_apps_in) + "F-Droid", new AlertDialog.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if(!ContextUtility.OpenApp(m_gameLauncher, "org.fdroid.fdroid"))

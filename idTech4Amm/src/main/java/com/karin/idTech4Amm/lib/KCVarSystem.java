@@ -81,7 +81,8 @@ public final class KCVarSystem
                             "1", "loading in engine initialization, and saving in engine shutdown",
                             "2", "loading in engine initialization, and saving in every e executing"
                     ),
-                    KCVar.CreateCVar("r_scaleMenusTo43", "bool", "0", "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio", 0)
+                    KCVar.CreateCVar("r_scaleMenusTo43", "bool", "0", "Scale menus, fullscreen videos and PDA to 4:3 aspect ratio", 0),
+                    KCVar.CreateCVar("harm_in_smoothJoystick", "bool", "0", "Enable smooth joystick(Automatic setup by Android layer)", KCVar.FLAG_AUTO)
                 );
         KCVar.Group GAME_CVARS = new KCVar.Group("DOOM3", false)
                 .AddCVar(
@@ -89,7 +90,9 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "Head", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
+                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
                 );
         KCVar.Group RIVENSIN_CVARS = new KCVar.Group("Rivensin", false)
                 .AddCVar(
@@ -101,7 +104,7 @@ public final class KCVarSystem
         KCVar.Group QUAKE4_CVARS = new KCVar.Group("Quake4", false)
                 .AddCVar(
                     KCVar.CreateCVar("harm_g_autoGenAASFileInMPGame", "bool", "1", "For bot in Multiplayer-Game, if AAS file load fail and not exists, server can generate AAS file for Multiplayer-Game map automatic", 0),
-                    KCVar.CreateCVar("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movement", 0),
+                    KCVar.CreateCVar("harm_g_vehicleWalkerMoveNormalize", "bool", "1", "Re-normalize vehicle walker movment", 0),
                     KCVar.CreateCVar("harm_gui_defaultFont", "string", "chain", "Default font name", 0,
                             "chain", "fonts/chain",
                             "lowpixel", "fonts/lowpixel",
@@ -119,7 +122,9 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "head_channel", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_si_botLevel", "integer", "0", "Bot level(0 = auto; 1 - 8 = difficult level)", KCVar.FLAG_POSITIVE)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_ui_showViewBody", "bool", "0", "show view body(mod)", 0),
+                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
                 );
 
         KCVar.Group PREY_CVARS = new KCVar.Group("Prey(2006)", false)
@@ -136,18 +141,25 @@ public final class KCVarSystem
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessOffset", "vector3", "0 0 0", "Full-body awareness offset(<forward-offset> <side-offset> <up-offset>)", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadJoint", "string", "neck", "Set head joint when without head model in full-body awareness", 0),
                     KCVar.CreateCVar("harm_pm_fullBodyAwarenessFixed", "bool", "0", "Do not attach view position to head in full-body awareness", 0),
-                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0)
+                    KCVar.CreateCVar("harm_pm_fullBodyAwarenessHeadVisible", "bool", "0", "Do not suppress head in full-body awareness", 0),
+                    KCVar.CreateCVar("harm_g_normalizeMovementDirection", "integer", "-1", "Re-normalize player/walker movement direction. 0 = disable; -1 = automcatic; >0 = max degree", 0)
                 );
 
-        KCVar.Group DOOM3BFG_CVARS = new KCVar.Group("DOOM 3 BFG", false)
+        KCVar.Group DOOM3BFG_CVARS = new KCVar.Group("DOOM 3 BFG", true)
                 .AddCVar(
-                        KCVar.CreateCVar("harm_image_useCompression", "integer", "0", "SUse ETC1/2 compression or RGBA4444 texture for low memory(e.g. 32bits device), it will using lower memory but loading slower", KCVar.FLAG_NO_ARCHIVE,
+                        KCVar.CreateCVar("harm_image_useCompression", "integer", "0", "Use ETC1/2 compression or RGBA4444 texture for low memory(e.g. 32bits device), it will using lower memory but loading slower", KCVar.FLAG_NO_ARCHIVE,
                                 "0", "RGBA8",
                                 "1", "ETC1 compression(no alpha)",
                                 "2", "ETC2 compression",
                                 "3", "RGBA4444"
                         ),
                         KCVar.CreateCVar("harm_image_useCompressionCache", "bool", "0", "Cache ETC1/2 compression or RGBA4444 texture to filesystem", KCVar.FLAG_NO_ARCHIVE)
+                );
+
+        KCVar.Group REALRTCW_CVARS = new KCVar.Group("RealRTCW", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_sv_cheats", "bool", "0", "Disable change `sv_cheats` when load map and disconnect for allow cheats", KCVar.FLAG_NO_ARCHIVE
+                        )
                 );
 
         _cvars.put("RENDERER", RENDERER_CVARS);
@@ -157,6 +169,7 @@ public final class KCVarSystem
         _cvars.put("q4base", QUAKE4_CVARS);
         _cvars.put("preybase", PREY_CVARS);
         _cvars.put("DOOM3BFG", DOOM3BFG_CVARS);
+        _cvars.put("RealRTCW", REALRTCW_CVARS);
 
         return _cvars;
     }
@@ -164,46 +177,48 @@ public final class KCVarSystem
     public static List<KCVar.Group> Match(String game)
     {
         Map<String, KCVar.Group> _cvars = CVars();
-        if(null == game || game.isEmpty()
-                || !_cvars.containsKey(game)
-        )
+        List<KCVar.Group> res = new ArrayList<>();
+        if(Q3EUtils.q3ei.isPrey)
+        {
+            res.add(_cvars.get("RENDERER"));
+            res.add(_cvars.get("FRAMEWORK"));
+        }
+        else if(Q3EUtils.q3ei.isQ4)
+        {
+            res.add(_cvars.get("RENDERER"));
+            res.add(_cvars.get("FRAMEWORK"));
+        }
+        else if(Q3EUtils.q3ei.isQ1) ;
+        else if(Q3EUtils.q3ei.isQ2) ;
+        else if(Q3EUtils.q3ei.isQ3) ;
+        else if(Q3EUtils.q3ei.isRTCW) ;
+        else if(Q3EUtils.q3ei.isTDM) ;
+        else if(Q3EUtils.q3ei.isD3BFG)
+            res.add(_cvars.get("DOOM3BFG"));
+        else if(Q3EUtils.q3ei.isDOOM) ;
+        else if(Q3EUtils.q3ei.isETW) ;
+        else if(Q3EUtils.q3ei.isRealRTCW)
+            res.add(_cvars.get("RealRTCW"));
+        else
+        {
+            res.add(_cvars.get("RENDERER"));
+            res.add(_cvars.get("FRAMEWORK"));
+        }
+
+        if(null == game || game.isEmpty())
         {
             if(Q3EUtils.q3ei.isPrey)
-                return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("preybase"));
+                res.add(_cvars.get("preybase"));
             else if(Q3EUtils.q3ei.isQ4)
-                return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("q4base"));
-            else if(Q3EUtils.q3ei.isQ1)
-                return new ArrayList<>();
-            else if(Q3EUtils.q3ei.isQ2)
-                return new ArrayList<>();
-            else if(Q3EUtils.q3ei.isQ3)
-                return new ArrayList<>();
-            else if(Q3EUtils.q3ei.isRTCW)
-                return new ArrayList<>();
-            else if(Q3EUtils.q3ei.isTDM)
-                return new ArrayList<>();
-            else if(Q3EUtils.q3ei.isD3BFG)
-                return Arrays.asList(_cvars.get("DOOM3BFG"));
-            else if(Q3EUtils.q3ei.isDOOM)
-                return new ArrayList<>();
-            else if(Q3EUtils.q3ei.isETW)
-                return new ArrayList<>();
-            else if(Q3EUtils.q3ei.isRealRTCW)
-                return new ArrayList<>();
-            else
-                return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get("base"));
+                res.add(_cvars.get("q4base"));
+            else if(Q3EUtils.q3ei.isD3)
+                res.add(_cvars.get("base"));
         }
         else
         {
             if(_cvars.containsKey(game))
-                return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"), _cvars.get(game));
-            else
-            {
-                if(Q3EUtils.q3ei.IsIdTech4())
-                    return Arrays.asList(_cvars.get("RENDERER"), _cvars.get("FRAMEWORK"));
-                else
-                    return new ArrayList<>();
-            }
+                res.add(_cvars.get(game));
         }
+        return res;
     }
 }

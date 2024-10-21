@@ -43,7 +43,7 @@ public final class RestorePreferenceFunc extends GameLauncherFunc
         Reset();
         int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(m_gameLauncher, R.string.read_preferences_file)));
+            Toast_long(Tr(R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Tr(R.string.read_preferences_file)));
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
         run();
@@ -84,7 +84,7 @@ public final class RestorePreferenceFunc extends GameLauncherFunc
             {
                 String[] args = {""};
                 backup.GetError(args);
-                Toast_long(Q3ELang.tr(m_gameLauncher, R.string.restore_preferences_file_fail) + args[0]);
+                Toast_long(Tr(R.string.restore_preferences_file_fail) + args[0]);
             }
         }
         catch (Exception e)

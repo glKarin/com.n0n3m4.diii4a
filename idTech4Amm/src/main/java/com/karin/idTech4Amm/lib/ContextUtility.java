@@ -33,8 +33,10 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.Function;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.File;
@@ -136,6 +138,7 @@ public final class ContextUtility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // Android M
         {
             boolean granted = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+            KLog.I("Check permission: %s -> %b", permission, granted);
             if(granted)
                 return CHECK_PERMISSION_RESULT_GRANTED;
             if (false && !context.shouldShowRequestPermissionRationale(permission)) // do not ask
@@ -143,6 +146,7 @@ public final class ContextUtility
                 ContextUtility.OpenAppSetting(context);
                 return CHECK_PERMISSION_RESULT_REJECT; // goto app detail settings activity
             }
+            KLog.I("Request permission: %s, code=%b", permission, resultCode);
             context.requestPermissions(new String[] { permission }, resultCode);
             return CHECK_PERMISSION_RESULT_REQUEST;
         }

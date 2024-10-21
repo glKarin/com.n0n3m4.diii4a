@@ -125,16 +125,12 @@
                 android:title="@string/experimental"
                 android:showAsAction="never"/>
             <item
-                android:id="@+id/main_menu_support_developer"
-                android:title="@string/support_the_developer"
-                android:showAsAction="never"/>
-            <item
                 android:id="@+id/main_menu_check_for_update"
                 android:title="@string/check_for_update"
                 android:showAsAction="never"/>
             <item
-                android:id="@+id/main_menu_debug"
-                android:title="@string/debug"
+                android:id="@+id/main_menu_shortcut"
+                android:title="@string/shortcut"
                 android:showAsAction="never"/>
         </menu>
     </item>
@@ -155,6 +151,14 @@
             <item
                 android:id="@+id/main_menu_translators"
                 android:title="@string/translators"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_support_developer"
+                android:title="@string/support_the_developer"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_debug"
+                android:title="@string/debug"
                 android:showAsAction="never"/>
         </menu>
     </item>

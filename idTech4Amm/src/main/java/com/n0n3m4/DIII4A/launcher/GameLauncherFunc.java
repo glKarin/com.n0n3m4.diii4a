@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.widget.Toast;
 
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3ELang;
 
 public abstract class GameLauncherFunc implements Runnable
 {
@@ -105,6 +106,11 @@ public abstract class GameLauncherFunc implements Runnable
     {
         if(null != m_data)
             m_data.putBoolean(CONST_RESULT_KEY, object);
+    }
+
+    protected String Tr(int resId, Object...args)
+    {
+        return Q3ELang.tr(m_gameLauncher, resId, args);
     }
 
     public <T> T GetResult()

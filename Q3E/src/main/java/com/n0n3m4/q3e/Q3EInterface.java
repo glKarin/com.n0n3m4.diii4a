@@ -364,7 +364,7 @@ public class Q3EInterface
 		SetupSubDir();
 	}
 
-	private void InitGameState()
+	public void ResetGameState()
 	{
 		isD3 = false;
 		isPrey = false;
@@ -382,14 +382,14 @@ public class Q3EInterface
 
 	public void SetupDOOM3()
 	{
-		InitGameState();
+		ResetGameState();
 		isD3 = true;
 		SetupGameConfig();
 	}
 
 	public void SetupPrey()
 	{
-		InitGameState();
+		ResetGameState();
 		isD3 = true;
 		isPrey = true;
 		SetupGameConfig();
@@ -397,7 +397,7 @@ public class Q3EInterface
 
 	public void SetupQuake4()
 	{
-		InitGameState();
+		ResetGameState();
 		isD3 = true;
 		isQ4 = true;
 		SetupGameConfig();
@@ -405,63 +405,63 @@ public class Q3EInterface
 
 	public void SetupTDM()
 	{
-		InitGameState();
+		ResetGameState();
 		isTDM = true;
 		SetupGameConfig();
 	}
 
 	public void SetupQuake2()
 	{
-		InitGameState();
+		ResetGameState();
 		isQ2 = true;
 		SetupGameConfig();
 	}
 
 	public void SetupRTCW()
 	{
-		InitGameState();
+		ResetGameState();
 		isRTCW = true;
 		SetupGameConfig();
 	}
 
 	public void SetupQuake3()
 	{
-		InitGameState();
+		ResetGameState();
 		isQ3 = true;
 		SetupGameConfig();
 	}
 
 	public void SetupQuake1()
 	{
-		InitGameState();
+		ResetGameState();
 		isQ1 = true;
 		SetupGameConfig();
 	}
 
 	public void SetupDoom3BFG()
 	{
-		InitGameState();
+		ResetGameState();
 		isD3BFG = true;
 		SetupGameConfig();
 	}
 
 	public void SetupGZDoom()
 	{
-		InitGameState();
+		ResetGameState();
 		isDOOM = true;
 		SetupGameConfig();
 	}
 
 	public void SetupETW()
 	{
-		InitGameState();
+		ResetGameState();
 		isETW = true;
 		SetupGameConfig();
 	}
 
 	public void SetupRealRTCW()
 	{
-		InitGameState();
+		ResetGameState();
 		isRealRTCW = true;
 		SetupGameConfig();
 	}
@@ -619,7 +619,7 @@ public class Q3EInterface
     public void InitD3()
     {
         isD3 = true;
-        isD3BFG = true;
+        isD3BFG = true; // ???
 		InitTable();
     }
 
