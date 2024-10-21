@@ -326,6 +326,11 @@ static void SV_Map_f( void ) {
 	// start up the map
 	SV_SpawnServer( mapname, killBots );
 
+#ifdef __ANDROID__ //karin: allow cheats on Android
+	cvar_t *harm_sv_cheats = Cvar_Get( "harm_sv_cheats", "0", CVAR_INIT );
+	if(harm_sv_cheats->integer > 0)
+		cheat = Cvar_VariableIntegerValue( "sv_cheats" ) > 0 ? qtrue : qfalse;
+#endif
 	// set the cheat value
 	// if the level was started with "map <levelname>", then
 	// cheats will not be allowed.  If started with "devmap <levelname>"

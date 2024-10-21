@@ -1472,6 +1472,10 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	// allow cheats locally
 #ifndef WOLF_SP_DEMO
 	// except for demo
+#ifdef __ANDROID__ //karin: allow cheats on Android
+	cvar_t *harm_sv_cheats = Cvar_Get( "harm_sv_cheats", "1", CVAR_INIT );
+	if(harm_sv_cheats->integer == 0)
+#endif
 	Cvar_Set( "sv_cheats", "0" );
 #endif
 
