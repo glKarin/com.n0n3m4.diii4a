@@ -397,6 +397,29 @@ void R_AddAnimSurfaces( trRefEntity_t *ent ) {
 			shader = R_GetShaderByHandle( surface->shaderIndex );
 		}
 
+//karin: add stencil shadow for new animation model
+		// stencil shadows can't do personal models unless I polyhedron clip
+		if ( !personalModel
+			 && r_shadows->integer == 2
+			 && fogNum == 0
+			 && !(ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
+			 && shader->sort == SS_OPAQUE )
+		{
+			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, qfalse, ATI_TESS_TRUFORM );
+		}
+
+#if 0 //karin: tr.projectionShadowShader is not initialized
+		// projection shadows work fine with personal models
+		if ( r_shadows->integer == 3
+			 && fogNum == 0
+			 && (ent->e.renderfx & RF_SHADOW_PLANE )
+			 && shader->sort == SS_OPAQUE )
+		{
+			R_AddDrawSurf( (void *)surface, tr.projectionShadowShader, 0, qfalse, ATI_TESS_TRUFORM );
+		}
+#endif
+//karin: end
+
 		// don't add third_person objects if not viewing through a portal
 		if ( !personalModel ) {
 			// GR - always tessellate these objects
