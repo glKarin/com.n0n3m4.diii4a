@@ -392,7 +392,7 @@
     <string name="util">Утилита</string>
     <string name="input">Вход</string>
     <string name="use_external_library_path">Использовать путь к внешней библиотеке</string>
-    <string name="load_game_library_from_getdatadir"><![CDATA[Загрузите внешние локальные игровые библиотеки из `<рабочий каталог игры>/lib/<arm64|arm>/`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`-->
+    <string name="load_game_library_from_getdatadir"><![CDATA[Загрузите внешнюю локальные игровые библиотеки из `<рабочий каталог игры>/lib/<arm64|arm>/`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`-->
     <string name="load_engine_library_from_getdatadir"><![CDATA[Загрузите внешнюю локальную библиотеку игрового движка из `<рабочий каталог игры>/[<отдельный каталог игры>/]<библиотека игрового движка>`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/<game engine library>`-->
     <string name="shortcut">Ярлык</string>
     <string name="create_desktop_shortcut_success">Создание ярлыка %s %s на рабочем столе успешно выполнено.</string>
