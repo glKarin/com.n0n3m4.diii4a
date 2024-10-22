@@ -392,14 +392,14 @@
     <string name="util">Утилита</string>
     <string name="input">Вход</string>
     <string name="use_external_library_path">Использовать путь к внешней библиотеке</string>
-    <string name="load_game_library_from_getdatadir"><![CDATA[Загрузите внешнюю локальные игровые библиотеки из `<рабочий каталог игры>/lib/<arm64|arm>/`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`-->
+    <string name="load_game_library_from_getdatadir"><![CDATA[Загрузите внешнюю локальную игровую библиотеку из `<рабочий каталог игры>/lib/<arm64|arm>/`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`-->
     <string name="load_engine_library_from_getdatadir"><![CDATA[Загрузите внешнюю локальную библиотеку игрового движка из `<рабочий каталог игры>/[<отдельный каталог игры>/]<библиотека игрового движка>`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/<game engine library>`-->
     <string name="shortcut">Ярлык</string>
-    <string name="create_desktop_shortcut_success">Создание ярлыка %s %s на рабочем столе успешно выполнено.</string>
+    <string name="create_desktop_shortcut_success">Создание ярлыка %s %s на рабочем столе завершено успешно.</string>
     <string name="create_desktop_shortcut_fail">Создание ярлыка %s %s на рабочем столе завершилось неудачей!</string>
-    <string name="create_desktop_shortcut">Создайть ярлык на рабочем столе</string>
-    <string name="unsupport_create_desktop_shortcut">Отменить создания ярлыка на рабочем столе!</string>
-    <string name="only_support_on_android_version_7_1"><![CDATA[Для создания ярлыка на рабочем столе требудется Андроид версии 7.1 или выше.]]></string>
+    <string name="create_desktop_shortcut">Создать ярлык на рабочем столе</string>
+    <string name="unsupport_create_desktop_shortcut">Отменить создание ярлыка на рабочем столе!</string>
+    <string name="only_support_on_android_version_7_1"><![CDATA[Для создания ярлыка на рабочем столе требуется Андроид версии 7.1 или выше.]]></string>
     <string name="all">Всё</string>
 
 </resources>
