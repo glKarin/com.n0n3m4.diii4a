@@ -32,7 +32,8 @@ public final class Constants
         return new String[] {
             "Add `RealRTCW` support, game standalone directory named `realrtcw`, game data directory named `Main`. More view in `" + TextHelper.GenLinkText("https://github.com/wolfetplayer/RealRTCW", "RealRTCW") + "`.",
             "Fix light bar indicator of player's HUD by `darkness257` on The Dark Mod, now setup `tdm_lg_weak` to 1 automatically. More view in `" + TextHelper.GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a/issues/244", "The Darkmod light bar indicator bug") + "`.",
-            "Support create desktop shortcut for games on `Option` menu of launcher.",
+            "Support create desktop shortcut for games or current command on `Option` menu of launcher.",
+            "Fix stencil shadow with `cg_shadows` = 2 on Quake 3.",
         };
 	};
 

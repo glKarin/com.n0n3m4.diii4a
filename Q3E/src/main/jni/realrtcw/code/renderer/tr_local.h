@@ -2098,4 +2098,14 @@ extern int drawskyboxportal;
 void *R_Hunk_Begin( void );
 void R_Hunk_End( void );
 
+#ifdef USE_OPENGLES //karin: stencil shadow
+#define USE_SHADOW_XYZ //karin: over SHRT_MAX, so use int instead of short for stencil shadow
+#define USE_SHADOW_CAP //karin: render near and far caps
+#define USE_SHADOW_INF //karin: use 4-components, far.w = 0.0
+
+extern cvar_t *harm_r_stencilShadowModel;
+#define STENCIL_SHADOW_ANIMATION_MODEL() (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & 1))
+#define STENCIL_SHADOW_STATIC_MODEL() (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & 2))
+#endif
+
 #endif //TR_LOCAL_H (THIS MUST BE LAST!!)

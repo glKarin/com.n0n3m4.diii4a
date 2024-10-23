@@ -215,6 +215,18 @@ int max_polys;
 cvar_t  *r_maxpolyverts;
 int max_polyverts;
 
+#ifdef USE_OPENGLES //karin: stencil shadow
+cvar_t  *harm_r_stencilShadowModel; // control render animation/static model stencil shadow
+#ifdef USE_SHADOW_CAP
+cvar_t  *harm_r_stencilShadowCap; // render near and far caps
+cvar_t  *harm_r_shadowPolygonOffset; // stencil shadow volume polygon offset units
+cvar_t  *harm_r_shadowPolygonFactor; // stencil shadow volume polygon offset factor
+#endif
+#ifdef USE_SHADOW_INF
+cvar_t  *harm_r_stencilShadowInfinite; // use 4-components, far.w = 0.0
+#endif
+#endif
+
 #ifndef USE_OPENGLES
 //----(SA)	added
 void ( APIENTRY * qglPNTrianglesiATI )( GLenum pname, GLint param );
@@ -1379,6 +1391,17 @@ void R_Register( void ) {
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va( "%d", MAX_POLYVERTS ), 0 );
 
 	r_highQualityVideo = ri.Cvar_Get( "r_highQualityVideo", "1", CVAR_ARCHIVE );
+#ifdef USE_OPENGLES //karin: stencil shadow
+	harm_r_stencilShadowModel = ri.Cvar_Get("harm_r_stencilShadowModel", "1", CVAR_ARCHIVE);
+#ifdef USE_SHADOW_CAP
+	harm_r_stencilShadowCap = ri.Cvar_Get("harm_r_stencilShadowCap", "0", CVAR_ARCHIVE);
+	harm_r_shadowPolygonOffset = ri.Cvar_Get("harm_r_shadowPolygonOffset", "0", CVAR_ARCHIVE); // -1
+	harm_r_shadowPolygonFactor = ri.Cvar_Get("harm_r_shadowPolygonFactor", "0", CVAR_ARCHIVE);
+#endif
+#ifdef USE_SHADOW_INF
+	harm_r_stencilShadowInfinite = ri.Cvar_Get("harm_r_stencilShadowInfinite", "1", CVAR_ARCHIVE);
+#endif
+#endif
 	// make sure all the commands added here are also
 	// removed in R_Shutdown
 	ri.Cmd_AddCommand( "imagelist", R_ImageList_f );

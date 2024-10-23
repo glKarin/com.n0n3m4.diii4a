@@ -426,6 +426,9 @@ void R_AddMDCSurfaces( trRefEntity_t *ent ) {
 		// stencil shadows can't do personal models unless I polyhedron clip
 		if ( !personalModel
 			 && r_shadows->integer == 2
+#ifdef USE_OPENGLES //karin: only render non-animation model shadow
+			 && STENCIL_SHADOW_STATIC_MODEL()
+#endif
 			 && fogNum == 0
 			 && !( ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
 			 && shader->sort == SS_OPAQUE ) {
