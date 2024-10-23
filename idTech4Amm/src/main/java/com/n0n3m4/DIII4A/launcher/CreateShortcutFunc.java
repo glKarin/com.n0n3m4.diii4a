@@ -45,10 +45,9 @@ public final class CreateShortcutFunc extends GameLauncherFunc
     {
         super.Start(data);
         Reset();
-        //k check external storage permission
         int res = ContextUtility.CheckPermission(m_gameLauncher, android.Manifest.permission.INSTALL_SHORTCUT, m_code);
         if (res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast_long("android.Manifest.permission.INSTALL_SHORTCUT not granted");
+            Toast_long(Tr(R.string.permission_not_granted, "android.Manifest.permission.INSTALL_SHORTCUT"));
         if (res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
         run();
@@ -206,7 +205,7 @@ public final class CreateShortcutFunc extends GameLauncherFunc
             if(!id.startsWith("idTech4Amm_"))
                 continue;
             id = id.substring("idTech4Amm_".length());
-            String[] arr = id.split("_");
+            String[] arr = id.split("_", 3);
             String game = arr[0];
             String type = arr[1];
             int mask = 0;

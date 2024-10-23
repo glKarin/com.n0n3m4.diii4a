@@ -259,6 +259,34 @@ public final class GameManager
             return R.string.doom_iii;
     }
 
+    public static int GetGameName()
+    {
+        if (Q3EUtils.q3ei.isPrey)
+            return R.string.prey_preybase;
+        else if (Q3EUtils.q3ei.isQ4)
+            return R.string.quake_iv_q4base;
+        else if (Q3EUtils.q3ei.isQ2)
+            return R.string.quake_2_base;
+        else if (Q3EUtils.q3ei.isQ3)
+            return R.string.quake_3_base;
+        else if (Q3EUtils.q3ei.isRTCW)
+            return R.string.rtcw_base;
+        else if (Q3EUtils.q3ei.isTDM)
+            return R.string.tdm_base;
+        else if (Q3EUtils.q3ei.isQ1)
+            return R.string.quake_1_base;
+        else if (Q3EUtils.q3ei.isD3BFG)
+            return R.string.d3bfg_base;
+        else if (Q3EUtils.q3ei.isDOOM)
+            return R.string.doom_base;
+        else if (Q3EUtils.q3ei.isETW)
+            return R.string.etw_base;
+        else if (Q3EUtils.q3ei.isRealRTCW)
+            return R.string.realrtcw_base;
+        else
+            return R.string.doom_iii;
+    }
+
     public static int GetGameThemeColor()
     {
         if (Q3EUtils.q3ei.isPrey)

@@ -364,14 +364,16 @@ public class Q3EMain extends Activity
     {
         Intent intent = getIntent();
         String intentGame = null;
+        String intentCommand = null;
         if(null != intent)
         {
             Bundle extras = intent.getExtras();
             if(null != extras)
             {
                 intentGame = extras.getString("game");
+                intentCommand = extras.getString("command");
             }
         }
-        gameHelper.InitGlobalEnv(intentGame);
+        gameHelper.InitGlobalEnv(intentGame, intentCommand);
     }
 }

@@ -206,15 +206,15 @@ public final class ContextUtility
         builder.create().show();
     }
 
-    public static AlertDialog Input(Context context, CharSequence title, CharSequence message, String val, String[] args, final Runnable yes, final Runnable no, String otherName, Runnable other, Function editTextConfig)
+    public static AlertDialog Input(Context context, CharSequence title, CharSequence message, String[] args, final Runnable yes, final Runnable no, String otherName, Runnable other, Function editTextConfig)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         EditText editText = new EditText(context);
         if(null != message)
             editText.setHint(message);
-        if(null != val)
-            editText.setText(val);
+        if(null != args && args.length > 0 && null != args[0])
+            editText.setText(args[0]);
         if(null != editTextConfig)
             editTextConfig.Invoke(editText);
         builder.setView(editText);

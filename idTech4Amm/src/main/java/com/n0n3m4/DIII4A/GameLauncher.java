@@ -82,6 +82,7 @@ import com.n0n3m4.DIII4A.launcher.ChooseCommandRecordFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameFolderFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameModFunc;
+import com.n0n3m4.DIII4A.launcher.CreateCommandShortcutFunc;
 import com.n0n3m4.DIII4A.launcher.CreateShortcutFunc;
 import com.n0n3m4.DIII4A.launcher.DebugPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.DebugTextHistoryFunc;
@@ -140,23 +141,25 @@ public class GameLauncher extends Activity
 	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD     = 11;
 	private static final int CONST_RESULT_CODE_ACCESS_ANDROID_DATA                              = 12;
 	private static final int CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT                          = 13;
+	private static final int CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT_WITH_COMMAND             = 14;
 
 	private final GameManager m_gameManager = new GameManager();
     // GameLauncher function
-	private ExtractPatchResourceFunc m_extractPatchResourceFunc;
-	private CheckForUpdateFunc       m_checkForUpdateFunc;
-	private BackupPreferenceFunc     m_backupPreferenceFunc;
-	private RestorePreferenceFunc    m_restorePreferenceFunc;
-	private EditConfigFileFunc       m_editConfigFileFunc;
-	private ChooseGameFolderFunc     m_chooseGameFolderFunc;
-	private StartGameFunc            m_startGameFunc;
-	private AddExternalLibraryFunc   m_addExternalLibraryFunc;
-	private ChooseGameLibFunc        m_chooseGameLibFunc;
-	private EditExternalLibraryFunc  m_editExternalLibraryFunc;
-	private OpenSourceLicenseFunc    m_openSourceLicenseFunc;
-	private ExtractSourceFunc        m_extractSourceFunc;
-	private ChooseGameModFunc        m_chooseGameModFunc;
-	private CreateShortcutFunc       m_createShortcutFunc;
+	private ExtractPatchResourceFunc  m_extractPatchResourceFunc;
+	private CheckForUpdateFunc        m_checkForUpdateFunc;
+	private BackupPreferenceFunc      m_backupPreferenceFunc;
+	private RestorePreferenceFunc     m_restorePreferenceFunc;
+	private EditConfigFileFunc        m_editConfigFileFunc;
+	private ChooseGameFolderFunc      m_chooseGameFolderFunc;
+	private StartGameFunc             m_startGameFunc;
+	private AddExternalLibraryFunc    m_addExternalLibraryFunc;
+	private ChooseGameLibFunc         m_chooseGameLibFunc;
+	private EditExternalLibraryFunc   m_editExternalLibraryFunc;
+	private OpenSourceLicenseFunc     m_openSourceLicenseFunc;
+	private ExtractSourceFunc         m_extractSourceFunc;
+	private ChooseGameModFunc         m_chooseGameModFunc;
+	private CreateShortcutFunc        m_createShortcutFunc;
+	private CreateCommandShortcutFunc m_createCommandShortcutFunc;
 
     public static final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -1639,6 +1642,11 @@ public class GameLauncher extends Activity
 			OpenShortcutCreator();
 			return true;
 		}
+		else if (itemId == R.id.main_menu_shortcut_command)
+		{
+			OpenShortcutWithCommandCreator();
+			return true;
+		}
 
 		else if (itemId == R.id.main_menu_game_doom3)
 		{
@@ -2199,6 +2207,27 @@ public class GameLauncher extends Activity
 		m_createShortcutFunc.Start(bundle);
 	}
 
+	private void OpenShortcutWithCommandCreator()
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
+		{
+			Toast.makeText(this, R.string.only_support_on_android_version_7_1, Toast.LENGTH_LONG).show();
+			return;
+		}
+		if (null == m_createCommandShortcutFunc)
+		{
+			m_createCommandShortcutFunc = new CreateCommandShortcutFunc(this, CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT_WITH_COMMAND);
+		}
+		Bundle bundle = new Bundle();
+		bundle.putString("game", Q3EUtils.q3ei.GameType());
+		String cmd = GetCmdText();
+		String tmpCmd = GetTempCmdText();
+		if(KStr.NotBlank(tmpCmd))
+			cmd += " " + tmpCmd;
+		bundle.putString("command", cmd);
+		m_createCommandShortcutFunc.Start(bundle);
+	}
+
     private void Test()
     {
 		// test function
@@ -2415,6 +2444,10 @@ public class GameLauncher extends Activity
 				case CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT:
 					if (null != m_createShortcutFunc)
 						m_createShortcutFunc.run();
+					break;
+				case CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT_WITH_COMMAND:
+					if (null != m_createCommandShortcutFunc)
+						m_createCommandShortcutFunc.run();
 					break;
                 default:
                     break;

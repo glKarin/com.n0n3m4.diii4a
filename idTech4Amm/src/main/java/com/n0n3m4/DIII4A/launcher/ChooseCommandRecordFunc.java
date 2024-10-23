@@ -242,10 +242,10 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
             return 0;
         }
         final String cmd = cmds.iterator().next();
-        String[] args = {""};
+        String[] args = { cmd };
         boolean[] error = {false};
         m_cmd = cmd;
-        AlertDialog input = ContextUtility.Input(m_gameLauncher, Tr(R.string.edit_command_record), Tr(R.string.command), cmd, args, new Runnable()
+        AlertDialog input = ContextUtility.Input(m_gameLauncher, Tr(R.string.edit_command_record), Tr(R.string.command), args, new Runnable()
         {
             @Override
             public void run()
@@ -307,7 +307,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
     {
         String[] args = {""};
         boolean[] error = {false};
-        AlertDialog input = ContextUtility.Input(m_gameLauncher, Tr(R.string.add_command_record), Tr(R.string.command), null, args, new Runnable()
+        AlertDialog input = ContextUtility.Input(m_gameLauncher, Tr(R.string.add_command_record), Tr(R.string.command), args, new Runnable()
         {
             @Override
             public void run()

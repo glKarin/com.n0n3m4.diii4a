@@ -248,8 +248,8 @@ public class LogcatActivity extends Activity
 
     private void OpenFilterDialog()
     {
-        String[] args = {""};
-        AlertDialog input = ContextUtility.Input(this, Q3ELang.tr(this, R.string.filter), Q3ELang.tr(this, R.string.filter), m_filterText, args, new Runnable() {
+        String[] args = { m_filterText };
+        AlertDialog input = ContextUtility.Input(this, Q3ELang.tr(this, R.string.filter), Q3ELang.tr(this, R.string.filter), args, new Runnable() {
             @Override
             public void run()
             {

@@ -84,16 +84,15 @@ public class Q3EGameHelper
         return true;
     }
 
-    public void InitGlobalEnv(String gameTypeName)
+    public void InitGlobalEnv(String gameTypeName, String gameCommand)
     {
+        KLog.I("Game initial: " + gameTypeName + " -> " + gameCommand);
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         if(KStr.IsEmpty(gameTypeName))
             gameTypeName = preferences.getString(Q3EPreference.pref_harm_game, Q3EGlobals.GAME_DOOM3);
         else
-        {
             Q3EUtils.q3ei.ResetGameState();
-            KLog.I("Game initial: " + gameTypeName);
-        }
 
         if (!Q3EUtils.q3ei.IsInitGame()) // not from GameLauncher::startActivity
         {
@@ -162,42 +161,50 @@ public class Q3EGameHelper
             preferences.edit().putString(Q3EPreference.pref_datapath, Q3EUtils.q3ei.datadir).commit();
         }
 
-        String cmd = preferences.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EUtils.q3ei.libname);
+        final boolean useUserCommand = null != gameCommand;
+        String cmd;
+        if(useUserCommand)
+            cmd = gameCommand;
+        else
+            cmd = preferences.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EUtils.q3ei.libname);
         if(null == cmd)
             cmd = Q3EGlobals.GAME_EXECUABLE;
-        if(preferences.getBoolean(Q3EPreference.pref_harm_find_dll, false)
-                && Q3EUtils.q3ei.IsIdTech4()
-        )
-        {
-            KidTech4Command command = new KidTech4Command(cmd);
-            String fs_game = command.Prop(Q3EUtils.q3ei.GetGameCommandParm());
-            if(null == fs_game || fs_game.isEmpty())
-            {
-                switch (Q3EUtils.q3ei.game)
-                {
-                    case Q3EGlobals.GAME_PREY:
-                        fs_game = "preybase";
-                        break;
-                    case Q3EGlobals.GAME_QUAKE4:
-                        fs_game = "q4base";
-                        break;
-                    case Q3EGlobals.GAME_DOOM3:
-                    default:
-                        fs_game = "base";
-                        break;
-                }
-            }
-            String dll = FindDLL(fs_game);
-            if(null != dll)
-                command.SetProp("harm_fs_gameLibPath", dll);
-            cmd = command.toString();
-        }
-        String binDir = Q3EUtils.q3ei.GetGameDataDirectoryPath(null);
-        cmd = binDir + "/" + cmd + " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
-        Q3EUtils.q3ei.cmd = cmd;
 
-/*        if(Q3EUtils.q3ei.isDOOM)
-            Q3EUtils.q3ei.joystick_smooth = false;*/
+        if(!useUserCommand)
+        {
+            if(preferences.getBoolean(Q3EPreference.pref_harm_find_dll, false)
+                    && Q3EUtils.q3ei.IsIdTech4()
+            )
+            {
+                KidTech4Command command = new KidTech4Command(cmd);
+                String fs_game = command.Prop(Q3EUtils.q3ei.GetGameCommandParm());
+                if(null == fs_game || fs_game.isEmpty())
+                {
+                    switch (Q3EUtils.q3ei.game)
+                    {
+                        case Q3EGlobals.GAME_PREY:
+                            fs_game = "preybase";
+                            break;
+                        case Q3EGlobals.GAME_QUAKE4:
+                            fs_game = "q4base";
+                            break;
+                        case Q3EGlobals.GAME_DOOM3:
+                        default:
+                            fs_game = "base";
+                            break;
+                    }
+                }
+                String dll = FindDLL(fs_game);
+                if(null != dll)
+                    command.SetProp("harm_fs_gameLibPath", dll);
+                cmd = command.toString();
+            }
+            cmd += " " + Q3EUtils.q3ei.start_temporary_extra_command/* + " +set harm_fs_gameLibDir " + lib_dir*/;
+        }
+
+        String binDir = Q3EUtils.q3ei.GetGameDataDirectoryPath(null);
+        cmd = binDir + "/" + cmd;
+        Q3EUtils.q3ei.cmd = cmd;
     }
 
     private String FindDLL(String fs_game)

@@ -1,5 +1,9 @@
 package com.karin.idTech4Amm.lib;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 /**
  * Common utility
  */
@@ -45,5 +49,34 @@ public final class Utility
     public static int Step(int a, int step)
     {
         return (int)Math.round((float)a / (float)step) * step;
+    }
+
+    public static String Hex(byte[] bytes)
+    {
+        StringBuilder buf = new StringBuilder();
+
+        for(byte b : bytes)
+        {
+            String hex = Integer.toString(Byte.toUnsignedInt(b) & 0xFF, 16).toLowerCase();
+            if(hex.length() < 2)
+                buf.append("0");
+            buf.append(hex);
+        }
+
+        return buf.toString();
+    }
+
+    public static String MD5(String str)
+    {
+        try
+        {
+            byte[] bytes = MessageDigest.getInstance("MD5").digest(str.getBytes(StandardCharsets.UTF_8));
+            return Hex(bytes);
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

@@ -401,5 +401,9 @@
     <string name="unsupport_create_desktop_shortcut">Отменить создание ярлыка на рабочем столе!</string>
     <string name="only_support_on_android_version_7_1"><![CDATA[Для создания ярлыка на рабочем столе требуется Андроид версии 7.1 или выше.]]></string>
     <string name="all">Всё</string>
+    <string name="permission_not_granted">Permission \'%s\' not granted</string>
+    <string name="command_shortcut">Shortcut(Current command)</string>
+    <string name="create_shortcut_with_current_command_and_game">Create shortcut(current command and game)</string>
+    <string name="input_desktop_shortcut_name">Input desktop shortcut name</string>
 
 </resources>
