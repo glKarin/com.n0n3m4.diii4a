@@ -408,5 +408,6 @@
     <string name="command_shortcut">Shortcut(Current command)</string>
     <string name="create_shortcut_with_current_command_and_game">Create shortcut(current command and game)</string>
     <string name="input_desktop_shortcut_name">Input desktop shortcut name</string>
+    <string name="game_desktop_shortcut_has_created">Game %s desktop shortcut has created(%s).</string>
 
 </resources>

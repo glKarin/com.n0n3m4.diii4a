@@ -59,6 +59,12 @@ public final class CreateCommandShortcutFunc extends GameLauncherFunc
     public void run()
     {
         String rs = Tr(GameManager.GetGameNameRS(m_game));
+        if(CheckPinnedShortcut(m_game, m_cmd))
+        {
+            Toast_long(Tr(R.string.game_desktop_shortcut_has_created, rs, m_cmd));
+            return;
+        }
+
         String[] args = { rs };
         AlertDialog input = ContextUtility.Input(m_gameLauncher, Tr(R.string.create_shortcut_with_current_command_and_game), Tr(R.string.input_desktop_shortcut_name), args, new Runnable() {
             @Override
@@ -72,6 +78,30 @@ public final class CreateCommandShortcutFunc extends GameLauncherFunc
         }, null, null, null, null);
     }
 
+    private String GenShortcutId(String game, String command)
+    {
+        return "idTech4Amm_" + game + "_" + "command" + "-" + Utility.MD5(command);
+    }
+
+    private boolean CheckPinnedShortcut(String game, String command)
+    {
+        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
+            return false;
+
+        ShortcutManager shortcutManager = (ShortcutManager) m_gameLauncher.getSystemService(Context.SHORTCUT_SERVICE);
+        if (null == shortcutManager)
+            return false;
+
+        List<ShortcutInfo> pinnedShortcuts = shortcutManager.getPinnedShortcuts();
+        String shortcutId = GenShortcutId(game, command);
+        for(ShortcutInfo info : pinnedShortcuts)
+        {
+            if(info.getId().equals(shortcutId))
+                return true;
+        }
+        return false;
+    }
+
     private void CreateShortcut(String game, String name, String command)
     {
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
@@ -82,7 +112,7 @@ public final class CreateCommandShortcutFunc extends GameLauncherFunc
         {
             int iconId = GameManager.GetGameIcon(game);
             Class<?> activity = Q3EMain.class;
-            String shortcutId = "idTech4Amm_" + game + "_" + "command" + "-" + Utility.MD5(command);
+            String shortcutId = GenShortcutId(game, command);
             String gameName = name;
             String longName = gameName;
 

@@ -404,4 +404,5 @@
     <string name="command_shortcut">快捷方式(当前命令)</string>
     <string name="create_shortcut_with_current_command_and_game">创建桌面快捷方式(当前的命令行和游戏)</string>
     <string name="input_desktop_shortcut_name">输入桌面快捷方式名称</string>
+    <string name="game_desktop_shortcut_has_created">%s桌面快捷方式已被创建(%s).</string>
 </resources>
