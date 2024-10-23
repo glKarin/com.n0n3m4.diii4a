@@ -56,6 +56,12 @@ static vec3_t shadowXyz[SHADER_MAX_VERTEXES];
 #endif
 
 #ifdef USE_OPENGLES
+
+extern cvar_t *harm_r_stencilShadowMask;
+
+GLenum stencilIncr = GL_INCR;
+GLenum stencilDecr = GL_DECR;
+
 #ifdef USE_SHADOW_INF
 extern cvar_t *harm_r_stencilShadowInfinite;
 #endif
@@ -78,10 +84,11 @@ static int idx = 0;
 
 #ifdef USE_SHADOW_CAP
 static shadowIndex_t caps_indexes[SHADER_MAX_INDEXES];
+static int caps_idx = 0;
 extern cvar_t *harm_r_stencilShadowCap;
+#endif
 extern cvar_t *harm_r_shadowPolygonOffset;
 extern cvar_t *harm_r_shadowPolygonFactor;
-#endif
 #endif
 
 void R_AddEdgeDef( int i1, int i2, int facing ) {
@@ -197,6 +204,77 @@ void R_RenderShadowEdges( void ) {
 #endif
 }
 
+#ifdef USE_OPENGLES
+static void RB_BeginShadow( void ) {
+	//qglClearStencil(1<<(glConfig.stencilBits-1)); // 128
+
+	qglClear(GL_STENCIL_BUFFER_BIT);
+}
+
+static void RB_ShadowMask( void ) {
+	GLboolean clipPlane0 = qglIsEnabled(GL_CLIP_PLANE0);
+	int faceCulling = glState.faceCulling;
+	unsigned long glStateBits = glState.glStateBits;
+	GLfloat color[4];
+	glGetFloatv(GL_CURRENT_COLOR, color);
+	GLboolean writeDepth;
+	qglGetBooleanv(GL_DEPTH_WRITEMASK, &writeDepth);
+	if(writeDepth)
+		qglDepthMask(GL_FALSE);
+	GLboolean rgba[4];
+	qglGetBooleanv(GL_COLOR_WRITEMASK, rgba);
+	qglColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+
+	qglEnable( GL_STENCIL_TEST );
+	qglStencilFunc( GL_NOTEQUAL, 0, 255 );
+
+	if(clipPlane0)
+		qglDisable( GL_CLIP_PLANE0 );
+	GL_Cull( CT_TWO_SIDED );
+
+	GL_Bind( tr.whiteImage );
+
+	qglPushMatrix();
+	qglLoadIdentity();
+
+	qglColor3f( 0.6f, 0.6f, 0.6f );
+	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO );
+
+//	qglColor3f( 1, 0, 0 );
+//	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO );
+
+	GLboolean text = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
+	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
+	if (text)
+		qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	if (glcol)
+		qglDisableClientState( GL_COLOR_ARRAY );
+	GLfloat vtx[] = {
+			-100,  100, -10,
+			100,  100, -10,
+			100, -100, -10,
+			-100, -100, -10
+	};
+	qglVertexPointer  ( 3, GL_FLOAT, 0, vtx );
+	qglDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
+	if (text)
+		qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	if (glcol)
+		qglEnableClientState( GL_COLOR_ARRAY );
+
+	qglColor4f( color[0], color[1], color[2], color[3] );
+	qglDisable( GL_STENCIL_TEST );
+
+	qglColorMask(rgba[0], rgba[1], rgba[2], rgba[3]);
+	if(writeDepth)
+		qglDepthMask(GL_TRUE);
+	GL_State( glStateBits );
+	qglPopMatrix();
+	GL_Cull( faceCulling );
+	if(clipPlane0)
+		qglEnable( GL_CLIP_PLANE0 );
+}
+#endif
 /*
 =================
 RB_ShadowTessEnd
@@ -222,18 +300,31 @@ void RB_ShadowTessEnd( void ) {
 	VectorCopy( backEnd.currentEntity->lightDir, lightDir );
 
 #ifdef USE_OPENGLES //karin: use shadowXyz for stencil shadow
+	caps_idx = 0;
+#ifdef USE_SHADOW_INF
+	float volumeLength;
+	if(harm_r_stencilShadowInfinite->integer > 0)
+		volumeLength = -harm_r_stencilShadowInfinite->integer;
+	else if(harm_r_stencilShadowInfinite->integer < 0)
+		volumeLength = harm_r_stencilShadowInfinite->integer;
+	else
+		volumeLength = -512;
+#else
+#define volumeLength -512
+#endif
+
 	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
 #ifdef USE_SHADOW_XYZ
 		VectorCopy( tess.xyz[i], shadowXyz[i] );
 #ifdef USE_SHADOW_INF
 		shadowXyz[i][3] = 1.0f;
 #endif
-		VectorMA( tess.xyz[i], -512, lightDir, shadowXyz[i+tess.numVertexes] );
+		VectorMA( tess.xyz[i], volumeLength, lightDir, shadowXyz[i+tess.numVertexes] );
 #ifdef USE_SHADOW_INF
 		shadowXyz[i+tess.numVertexes][3] = 0.0f;
 #endif
 #else
-		VectorMA( tess.xyz[i], -512, lightDir, tess.xyz[i+tess.numVertexes] );
+		VectorMA( tess.xyz[i], volumeLength, lightDir, tess.xyz[i+tess.numVertexes] );
 #ifdef USE_SHADOW_INF
 		tess.xyz[i][3] = 1.0f; // !!! need ???
 		tess.xyz[i+tess.numVertexes][3] = 0.0f;
@@ -278,16 +369,18 @@ void RB_ShadowTessEnd( void ) {
 				caps_indexes[ i * 3 + 0 ] = i1;
 				caps_indexes[ i * 3 + 1 ] = i2;
 				caps_indexes[ i * 3 + 2 ] = i3;
+				caps_idx += 3;
 			}
 #endif
 		} else {
 			facing[ i ] = 0;
 #ifdef USE_SHADOW_CAP
-			if(harm_r_stencilShadowCap->integer)
+			if(harm_r_stencilShadowCap->integer == 1)
 			{
 				caps_indexes[ i * 3 + 0 ] = tess.numVertexes + i1;
 				caps_indexes[ i * 3 + 1 ] = tess.numVertexes + i2;
 				caps_indexes[ i * 3 + 2 ] = tess.numVertexes + i3;
+				caps_idx += 3;
 			}
 #endif
 		}
@@ -297,6 +390,23 @@ void RB_ShadowTessEnd( void ) {
 		R_AddEdgeDef( i2, i3, facing[ i ] );
 		R_AddEdgeDef( i3, i1, facing[ i ] );
 	}
+#ifdef USE_SHADOW_CAP
+	if(harm_r_stencilShadowCap->integer == 2)
+	{
+		int num = caps_idx;
+		int m;
+		for(m = 0; m < num; m += 3)
+		{
+			int i1 = caps_indexes[ m + 0 ];
+			int i2 = caps_indexes[ m + 1 ];
+			int i3 = caps_indexes[ m + 2 ];
+			caps_indexes[ num + m + 0 ] = tess.numVertexes + i2;
+			caps_indexes[ num + m + 1 ] = tess.numVertexes + i1;
+			caps_indexes[ num + m + 2 ] = tess.numVertexes + i3;
+			caps_idx += 3;
+		}
+	}
+#endif
 
 	// draw the silhouette edges
 
@@ -312,9 +422,11 @@ void RB_ShadowTessEnd( void ) {
 	qglStencilFunc( GL_ALWAYS, 1, 255 );
 
 #ifdef USE_OPENGLES
+	if(harm_r_stencilShadowMask->integer)
+		RB_BeginShadow();
 #ifdef USE_SHADOW_XYZ
 #ifdef USE_SHADOW_INF
-	if(harm_r_stencilShadowInfinite->integer)
+	if(harm_r_stencilShadowInfinite->integer < 0)
 		qglVertexPointer (4, GL_FLOAT, 0, shadowXyz);
 	else
 		qglVertexPointer (3, GL_FLOAT, 16, shadowXyz);
@@ -323,7 +435,7 @@ void RB_ShadowTessEnd( void ) {
 #endif
 #else
 #ifdef USE_SHADOW_INF
-	if(harm_r_stencilShadowInfinite->integer)
+	if(harm_r_stencilShadowInfinite->integer < 0)
 		qglVertexPointer (4, GL_FLOAT, 0, tess.xyz);
 	else
 		qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);
@@ -339,8 +451,16 @@ void RB_ShadowTessEnd( void ) {
 		qglDisableClientState( GL_COLOR_ARRAY );
 #endif
 
-	GL_Cull( CT_BACK_SIDED );
-	qglStencilOp( GL_KEEP, GL_KEEP, GL_INCR );
+	if(USE_Z_FAIL)
+	{
+		GL_Cull( CT_FRONT_SIDED );
+		qglStencilOp(GL_KEEP, stencilIncr, GL_KEEP);
+	}
+	else
+	{
+		GL_Cull( CT_BACK_SIDED );
+		qglStencilOp( GL_KEEP, GL_KEEP, stencilIncr );
+	}
 
 #ifdef USE_SHADOW_CAP
 	qboolean setupPolygonOffset = harm_r_shadowPolygonOffset->value || harm_r_shadowPolygonFactor->value;
@@ -359,16 +479,24 @@ void RB_ShadowTessEnd( void ) {
 	}
 
 	if(harm_r_stencilShadowCap->integer)
-		qglDrawElements(GL_TRIANGLES, tess.numIndexes, GL_SHADOW_INDEX_TYPE, caps_indexes);
+		qglDrawElements(GL_TRIANGLES, caps_idx, GL_SHADOW_INDEX_TYPE, caps_indexes);
 #endif
 	R_RenderShadowEdges();
 
-	GL_Cull( CT_FRONT_SIDED );
-	qglStencilOp( GL_KEEP, GL_KEEP, GL_DECR );
+	if(USE_Z_FAIL)
+	{
+		GL_Cull( CT_BACK_SIDED );
+		qglStencilOp( GL_KEEP, stencilDecr, GL_KEEP );
+	}
+	else
+	{
+		GL_Cull( CT_FRONT_SIDED );
+		qglStencilOp( GL_KEEP, GL_KEEP, stencilDecr );
+	}
 
 #ifdef USE_SHADOW_CAP
 	if(harm_r_stencilShadowCap->integer)
-		qglDrawElements(GL_TRIANGLES, tess.numIndexes, GL_SHADOW_INDEX_TYPE, caps_indexes);
+		qglDrawElements(GL_TRIANGLES, caps_idx, GL_SHADOW_INDEX_TYPE, caps_indexes);
 #endif
 #ifdef USE_OPENGLES
 	qglDrawElements(GL_TRIANGLES, idx, GL_SHADOW_INDEX_TYPE, indexes);
@@ -391,6 +519,9 @@ void RB_ShadowTessEnd( void ) {
 		qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 	if (glcol)
 		qglEnableClientState( GL_COLOR_ARRAY );
+
+	if(harm_r_stencilShadowMask->integer)
+		RB_ShadowMask();
 #endif
 	// reenable writing to the color buffer
 	qglColorMask(rgba[0], rgba[1], rgba[2], rgba[3]);
@@ -408,6 +539,10 @@ overlap and double darken.
 =================
 */
 void RB_ShadowFinish( void ) {
+#ifdef USE_OPENGLES
+	if(harm_r_stencilShadowMask->integer)
+		return;
+#endif
 	if ( r_shadows->integer != 2 ) {
 		return;
 	}

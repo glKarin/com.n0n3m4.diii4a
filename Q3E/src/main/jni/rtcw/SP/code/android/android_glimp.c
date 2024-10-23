@@ -376,8 +376,6 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
     Cvar_Set( "r_mode", "-1" );
     Cvar_SetValue( "r_customPixelAspect", glConfig.windowAspect );
 
-	glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
-
 	GLimp_GetProcAddresses( fixedFunction );
 
 	qglClearColor( 0, 0, 0, 1 );

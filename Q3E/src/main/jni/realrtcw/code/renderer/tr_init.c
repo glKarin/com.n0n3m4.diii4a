@@ -217,13 +217,15 @@ int max_polyverts;
 
 #ifdef USE_OPENGLES //karin: stencil shadow
 cvar_t  *harm_r_stencilShadowModel; // control render animation/static model stencil shadow
+cvar_t  *harm_r_stencilShadowOp; // stencil shadow use Z-Pass or Z-Fail
+cvar_t  *harm_r_stencilShadowMask; // stencil shadow mask rendering
 #ifdef USE_SHADOW_CAP
 cvar_t  *harm_r_stencilShadowCap; // render near and far caps
+#endif
 cvar_t  *harm_r_shadowPolygonOffset; // stencil shadow volume polygon offset units
 cvar_t  *harm_r_shadowPolygonFactor; // stencil shadow volume polygon offset factor
-#endif
 #ifdef USE_SHADOW_INF
-cvar_t  *harm_r_stencilShadowInfinite; // use 4-components, far.w = 0.0
+cvar_t  *harm_r_stencilShadowInfinite; // use 4-components(xyzw, far.w = 0.0) or 3-components(xyz)
 #endif
 #endif
 
@@ -1392,14 +1394,16 @@ void R_Register( void ) {
 
 	r_highQualityVideo = ri.Cvar_Get( "r_highQualityVideo", "1", CVAR_ARCHIVE );
 #ifdef USE_OPENGLES //karin: stencil shadow
-	harm_r_stencilShadowModel = ri.Cvar_Get("harm_r_stencilShadowModel", "1", CVAR_ARCHIVE);
+	harm_r_stencilShadowModel = ri.Cvar_Get("harm_r_stencilShadowModel", "1", CVAR_ARCHIVE); // 1=animation model; 2=static model; 0=all model
+	harm_r_stencilShadowOp = ri.Cvar_Get("harm_r_stencilShadowOp", "1", CVAR_ARCHIVE); // 1=z-fail; 0=z-pass
+	harm_r_stencilShadowMask = ri.Cvar_Get("harm_r_stencilShadowMask", "1", CVAR_ARCHIVE); // 1=render mask every render shadow volume; 0=render mask after all surfaces render finish
 #ifdef USE_SHADOW_CAP
-	harm_r_stencilShadowCap = ri.Cvar_Get("harm_r_stencilShadowCap", "0", CVAR_ARCHIVE);
-	harm_r_shadowPolygonOffset = ri.Cvar_Get("harm_r_shadowPolygonOffset", "0", CVAR_ARCHIVE); // -1
-	harm_r_shadowPolygonFactor = ri.Cvar_Get("harm_r_shadowPolygonFactor", "0", CVAR_ARCHIVE);
+	harm_r_stencilShadowCap = ri.Cvar_Get("harm_r_stencilShadowCap", "1", CVAR_ARCHIVE); // 1=render shadow volume's caps(near cap: facing light source; far cap: back facing light source); 2=render shadow volume's caps(near cap: facing light source; far cap: facing light source); 0=don't render shadow volume's caps
 #endif
+	harm_r_shadowPolygonOffset = ri.Cvar_Get("harm_r_shadowPolygonOffset", "0", CVAR_ARCHIVE); // render shadow volume's polygon offset units: DOOM3 default is -1
+	harm_r_shadowPolygonFactor = ri.Cvar_Get("harm_r_shadowPolygonFactor", "0", CVAR_ARCHIVE); // render shadow volume's polygon offset factor
 #ifdef USE_SHADOW_INF
-	harm_r_stencilShadowInfinite = ri.Cvar_Get("harm_r_stencilShadowInfinite", "1", CVAR_ARCHIVE);
+	harm_r_stencilShadowInfinite = ri.Cvar_Get("harm_r_stencilShadowInfinite", "0", CVAR_ARCHIVE); // <0=edge's far.w = 0.0 and use 4-components(xyzw); >=0=use 3-components(xyz)
 #endif
 #endif
 	// make sure all the commands added here are also

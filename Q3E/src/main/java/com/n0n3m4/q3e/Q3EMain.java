@@ -256,7 +256,7 @@ public class Q3EMain extends Activity
     private void InitProps()
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Q3EGL.usegles20 = false; // Q3EUtils.q3ei.isD3 || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isD3BFG;
+        Q3EGL.usegles20 = false;
         m_coverEdges = preferences.getBoolean(Q3EPreference.COVER_EDGES, true);
 
         m_hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);

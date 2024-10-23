@@ -2103,9 +2103,19 @@ void R_Hunk_End( void );
 #define USE_SHADOW_CAP //karin: render near and far caps
 #define USE_SHADOW_INF //karin: use 4-components, far.w = 0.0
 
+#if !defined(GL_INCR_WRAP)
+#define GL_INCR_WRAP                      0x8507
+#endif
+#if !defined(GL_DECR_WRAP)
+#define GL_DECR_WRAP                      0x8508
+#endif
+
 extern cvar_t *harm_r_stencilShadowModel;
+extern cvar_t *harm_r_stencilShadowOp;
 #define STENCIL_SHADOW_ANIMATION_MODEL() (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & 1))
 #define STENCIL_SHADOW_STATIC_MODEL() (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & 2))
+#define USE_Z_PASS (harm_r_stencilShadowOp->integer == 0)
+#define USE_Z_FAIL (harm_r_stencilShadowOp->integer == 1)
 #endif
 
 #endif //TR_LOCAL_H (THIS MUST BE LAST!!)

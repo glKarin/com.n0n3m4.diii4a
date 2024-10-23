@@ -165,8 +165,7 @@ public class GameLauncher extends Activity
     private final ViewHolder V = new ViewHolder();
     private boolean m_cmdUpdateLock = false;
 	private String m_edtPathFocused = "";
-    private final CompoundButton.OnCheckedChangeListener m_checkboxChangeListener = new CompoundButton.OnCheckedChangeListener()
-    {
+    private final CompoundButton.OnCheckedChangeListener m_checkboxChangeListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
         {
@@ -688,7 +687,8 @@ public class GameLauncher extends Activity
     {
         // Q3EKeyCodes.InitD3Keycodes();
         Q3EInterface q3ei = new Q3EInterface();
-		q3ei.standalone = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
+		SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		q3ei.standalone = mPrefs.getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
 
         q3ei.InitD3();
 
@@ -706,6 +706,10 @@ public class GameLauncher extends Activity
 			q3ei.SetupGame(game);
 
         Q3EUtils.q3ei = q3ei;
+
+		Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
+		Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
+		Q3EUtils.q3ei.joystick_inner_dead_zone = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
     }
 
 	@Override
@@ -1052,9 +1056,6 @@ public class GameLauncher extends Activity
             actionBar.setDisplayHomeAsUpEnabled(true);
 
         InitQ3E(null); // gameType
-        Q3EUtils.q3ei.joystick_release_range = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
-        Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
-        Q3EUtils.q3ei.joystick_inner_dead_zone = mPrefs.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
         Q3EUtils.q3ei.SetAppStoragePath(this);
 
         TabHost th = (TabHost) findViewById(R.id.tabhost);
@@ -1126,8 +1127,7 @@ public class GameLauncher extends Activity
 		int scrresScheme = Utility.Step(mPrefs.getInt(Q3EPreference.pref_scrres_scale, 100), 10);
 		V.res_scale.setProgress(scrresScheme);
 		V.tv_scale_current.setText(V.res_scale.getProgress() + "%");
-		V.res_scale.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
-		{
+		V.res_scale.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
 			{
@@ -1189,8 +1189,7 @@ public class GameLauncher extends Activity
 		V.multithreading.setChecked(multithreading);
 		SelectCheckbox(V.rg_r_autoAspectRatio, mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1));
 		V.rg_r_autoAspectRatio.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener()
-		{
+		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView view, int id, KeyEvent ev)
 			{
 				if (ev.getKeyCode() == KeyEvent.KEYCODE_ENTER)
@@ -1233,8 +1232,7 @@ public class GameLauncher extends Activity
 		V.rg_fs_doomgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_etwgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.rg_fs_realrtcwgame.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		V.edt_fs_game.addTextChangedListener(new TextWatcher()
-		{
+		V.edt_fs_game.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count)
 			{
 				if (V.fs_game_user.isChecked())
@@ -1280,8 +1278,7 @@ public class GameLauncher extends Activity
 		V.edt_harm_r_specularExponentBlinnPhong.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentBlinnPhong", Q3EPreference.pref_harm_r_specularExponentBlinnPhong, 12.0f));
 		V.edt_harm_r_specularExponentPBR.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponentPBR", Q3EPreference.pref_harm_r_specularExponentPBR, 5.0f));
 		V.edt_harm_r_ambientLightingBrightness.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_ambientLightingBrightness", Q3EPreference.pref_harm_r_ambientLightingBrightness, 1.0f));
-		V.edt_harm_r_maxFps.addTextChangedListener(new TextWatcher()
-		{
+		V.edt_harm_r_maxFps.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count)
 			{
 				SetProp("r_maxFps", s);
@@ -1315,8 +1312,7 @@ public class GameLauncher extends Activity
 		V.launcher_tab2_gyro_x_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
 		V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
 		UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
-		V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher()
-		{
+		V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count)
 			{
 			}
@@ -1333,8 +1329,7 @@ public class GameLauncher extends Activity
 						.commit();
 			}
 		});
-		V.launcher_tab2_gyro_y_axis_sens.addTextChangedListener(new TextWatcher()
-		{
+		V.launcher_tab2_gyro_y_axis_sens.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count)
 			{
 			}
@@ -1393,8 +1388,7 @@ public class GameLauncher extends Activity
 
 		SetupTempCommandLine(false);
 		V.editable_temp_command.setOnCheckedChangeListener(m_checkboxChangeListener);
-		V.edt_cmdline_temp.addTextChangedListener(new TextWatcher()
-		{
+		V.edt_cmdline_temp.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count)
 			{
 				if (V.edt_cmdline_temp.isInputMethodTarget())

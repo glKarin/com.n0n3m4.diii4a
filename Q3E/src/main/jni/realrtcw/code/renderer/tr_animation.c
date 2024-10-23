@@ -399,7 +399,12 @@ void R_AddAnimSurfaces( trRefEntity_t *ent ) {
 
 //karin: add stencil shadow for new animation model
 		// stencil shadows can't do personal models unless I polyhedron clip
-		if ( !personalModel
+		if (
+#ifdef USE_OPENGLES //karin: only render animation model shadow
+			 (!personalModel || USE_Z_FAIL)
+#else
+			 !personalModel
+#endif
 			 && r_shadows->integer == 2
 #ifdef USE_OPENGLES //karin: only render animation model shadow
 			 && STENCIL_SHADOW_ANIMATION_MODEL()
@@ -1628,7 +1633,12 @@ void R_MDRAddAnimSurfaces( trRefEntity_t *ent ) {
 		// we will add shadows even if the main object isn't visible in the view
 
 		// stencil shadows can't do personal models unless I polyhedron clip
-		if ( !personalModel
+		if (
+#ifdef USE_OPENGLES //karin: only render animation model shadow
+			 (!personalModel || USE_Z_FAIL)
+#else
+			 !personalModel
+#endif
 		        && r_shadows->integer == 2
 #ifdef USE_OPENGLES //karin: only render animation model shadow
 			    && STENCIL_SHADOW_ANIMATION_MODEL()

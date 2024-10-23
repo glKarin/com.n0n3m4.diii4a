@@ -311,8 +311,6 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
     Cvar_SetValue( "r_customwidth", screen_width );
     Cvar_SetValue( "r_customheight", screen_height );
     Cvar_Set( "r_mode", "-1" );
-
-	glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
 	Cvar_SetValue( "r_customPixelAspect", glConfig.windowAspect );
 
 	GLimp_GetProcAddresses( fixedFunction );

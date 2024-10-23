@@ -619,7 +619,7 @@ public class Q3EInterface
     public void InitD3()
     {
         isD3 = true;
-        isD3BFG = true; // ???
+        //isD3BFG = true; // ???
 		InitTable();
     }
 
