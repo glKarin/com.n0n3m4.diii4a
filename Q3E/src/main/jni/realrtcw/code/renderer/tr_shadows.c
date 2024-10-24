@@ -58,9 +58,15 @@ static vec3_t shadowXyz[SHADER_MAX_VERTEXES];
 #ifdef USE_OPENGLES
 
 extern cvar_t *harm_r_stencilShadowMask;
+extern cvar_t *harm_r_stencilShadowOp;
 
+#if 1
+#define stencilIncr GL_INCR
+#define stencilDecr GL_DECR
+#else
 GLenum stencilIncr = GL_INCR;
 GLenum stencilDecr = GL_DECR;
+#endif
 
 #ifdef USE_SHADOW_INF
 extern cvar_t *harm_r_stencilShadowInfinite;
@@ -82,11 +88,10 @@ typedef glIndex_t shadowIndex_t;
 static shadowIndex_t indexes[6*MAX_EDGE_DEFS*SHADER_MAX_VERTEXES];
 static int idx = 0;
 
-#ifdef USE_SHADOW_CAP
 static shadowIndex_t caps_indexes[SHADER_MAX_INDEXES];
 static int caps_idx = 0;
 extern cvar_t *harm_r_stencilShadowCap;
-#endif
+
 extern cvar_t *harm_r_shadowPolygonOffset;
 extern cvar_t *harm_r_shadowPolygonFactor;
 #endif
@@ -300,17 +305,22 @@ void RB_ShadowTessEnd( void ) {
 	VectorCopy( backEnd.currentEntity->lightDir, lightDir );
 
 #ifdef USE_OPENGLES //karin: use shadowXyz for stencil shadow
+	qboolean useZFail = harm_r_stencilShadowOp->integer == 2
+			|| ((backEnd.currentEntity->e.renderfx & RF_THIRD_PERSON) && !backEnd.viewParms.isPortal) // personal
+			;
+	qboolean useCaps = useZFail || harm_r_stencilShadowCap->integer;
+
 	caps_idx = 0;
 #ifdef USE_SHADOW_INF
 	float volumeLength;
 	if(harm_r_stencilShadowInfinite->integer > 0)
-		volumeLength = -harm_r_stencilShadowInfinite->integer;
-	else if(harm_r_stencilShadowInfinite->integer < 0)
 		volumeLength = harm_r_stencilShadowInfinite->integer;
+	else if(harm_r_stencilShadowInfinite->integer < 0)
+		volumeLength = -harm_r_stencilShadowInfinite->integer;
 	else
-		volumeLength = -512;
+		volumeLength = 512;
 #else
-#define volumeLength -512
+#define volumeLength 512
 #endif
 
 	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
@@ -319,12 +329,12 @@ void RB_ShadowTessEnd( void ) {
 #ifdef USE_SHADOW_INF
 		shadowXyz[i][3] = 1.0f;
 #endif
-		VectorMA( tess.xyz[i], volumeLength, lightDir, shadowXyz[i+tess.numVertexes] );
+		VectorMA( tess.xyz[i], -volumeLength, lightDir, shadowXyz[i+tess.numVertexes] );
 #ifdef USE_SHADOW_INF
 		shadowXyz[i+tess.numVertexes][3] = 0.0f;
 #endif
 #else
-		VectorMA( tess.xyz[i], volumeLength, lightDir, tess.xyz[i+tess.numVertexes] );
+		VectorMA( tess.xyz[i], -volumeLength, lightDir, tess.xyz[i+tess.numVertexes] );
 #ifdef USE_SHADOW_INF
 		tess.xyz[i][3] = 1.0f; // !!! need ???
 		tess.xyz[i+tess.numVertexes][3] = 0.0f;
@@ -363,26 +373,22 @@ void RB_ShadowTessEnd( void ) {
 		d = DotProduct( normal, lightDir );
 		if ( d > 0 ) {
 			facing[ i ] = 1;
-#ifdef USE_SHADOW_CAP
-			if(harm_r_stencilShadowCap->integer)
+			if(useCaps)
 			{
 				caps_indexes[ i * 3 + 0 ] = i1;
 				caps_indexes[ i * 3 + 1 ] = i2;
 				caps_indexes[ i * 3 + 2 ] = i3;
 				caps_idx += 3;
 			}
-#endif
 		} else {
 			facing[ i ] = 0;
-#ifdef USE_SHADOW_CAP
-			if(harm_r_stencilShadowCap->integer == 1)
+			if(useCaps && harm_r_stencilShadowCap->integer != 2)
 			{
 				caps_indexes[ i * 3 + 0 ] = tess.numVertexes + i1;
 				caps_indexes[ i * 3 + 1 ] = tess.numVertexes + i2;
 				caps_indexes[ i * 3 + 2 ] = tess.numVertexes + i3;
 				caps_idx += 3;
 			}
-#endif
 		}
 
 		// create the edges
@@ -390,8 +396,7 @@ void RB_ShadowTessEnd( void ) {
 		R_AddEdgeDef( i2, i3, facing[ i ] );
 		R_AddEdgeDef( i3, i1, facing[ i ] );
 	}
-#ifdef USE_SHADOW_CAP
-	if(harm_r_stencilShadowCap->integer == 2)
+	if(useCaps && harm_r_stencilShadowCap->integer == 2)
 	{
 		int num = caps_idx;
 		int m;
@@ -406,7 +411,6 @@ void RB_ShadowTessEnd( void ) {
 			caps_idx += 3;
 		}
 	}
-#endif
 
 	// draw the silhouette edges
 
@@ -451,7 +455,7 @@ void RB_ShadowTessEnd( void ) {
 		qglDisableClientState( GL_COLOR_ARRAY );
 #endif
 
-	if(USE_Z_FAIL)
+	if(useZFail)
 	{
 		GL_Cull( CT_FRONT_SIDED );
 		qglStencilOp(GL_KEEP, stencilIncr, GL_KEEP);
@@ -462,7 +466,6 @@ void RB_ShadowTessEnd( void ) {
 		qglStencilOp( GL_KEEP, GL_KEEP, stencilIncr );
 	}
 
-#ifdef USE_SHADOW_CAP
 	qboolean setupPolygonOffset = harm_r_shadowPolygonOffset->value || harm_r_shadowPolygonFactor->value;
 	GLboolean polygonOffset = qfalse;
 	GLfloat polygonOffsetFactor = 0.0f;
@@ -478,12 +481,11 @@ void RB_ShadowTessEnd( void ) {
 		qglPolygonOffset( harm_r_shadowPolygonFactor->value, -harm_r_shadowPolygonOffset->value );
 	}
 
-	if(harm_r_stencilShadowCap->integer)
+	if(useCaps)
 		qglDrawElements(GL_TRIANGLES, caps_idx, GL_SHADOW_INDEX_TYPE, caps_indexes);
-#endif
 	R_RenderShadowEdges();
 
-	if(USE_Z_FAIL)
+	if(useZFail)
 	{
 		GL_Cull( CT_BACK_SIDED );
 		qglStencilOp( GL_KEEP, stencilDecr, GL_KEEP );
@@ -494,10 +496,8 @@ void RB_ShadowTessEnd( void ) {
 		qglStencilOp( GL_KEEP, GL_KEEP, stencilDecr );
 	}
 
-#ifdef USE_SHADOW_CAP
-	if(harm_r_stencilShadowCap->integer)
+	if(useCaps)
 		qglDrawElements(GL_TRIANGLES, caps_idx, GL_SHADOW_INDEX_TYPE, caps_indexes);
-#endif
 #ifdef USE_OPENGLES
 	qglDrawElements(GL_TRIANGLES, idx, GL_SHADOW_INDEX_TYPE, indexes);
 	qglDisable( GL_POLYGON_OFFSET_FILL );
@@ -505,14 +505,12 @@ void RB_ShadowTessEnd( void ) {
 	R_RenderShadowEdges();
 #endif
 
-#ifdef USE_SHADOW_CAP
 	if(setupPolygonOffset)
 	{
 		if(!polygonOffset)
 			qglDisable( GL_POLYGON_OFFSET_FILL );
 		qglPolygonOffset( polygonOffsetFactor, polygonOffsetUnits );
 	}
-#endif
 
 #ifdef USE_OPENGLES
 	if (text)

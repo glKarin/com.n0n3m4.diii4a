@@ -401,7 +401,7 @@ void R_AddAnimSurfaces( trRefEntity_t *ent ) {
 		// stencil shadows can't do personal models unless I polyhedron clip
 		if (
 #ifdef USE_OPENGLES //karin: only render animation model shadow
-			 (!personalModel || USE_Z_FAIL)
+			 (!personalModel || harm_r_stencilShadowPersonal->integer)
 #else
 			 !personalModel
 #endif
@@ -1635,7 +1635,7 @@ void R_MDRAddAnimSurfaces( trRefEntity_t *ent ) {
 		// stencil shadows can't do personal models unless I polyhedron clip
 		if (
 #ifdef USE_OPENGLES //karin: only render animation model shadow
-			 (!personalModel || USE_Z_FAIL)
+			 (!personalModel || harm_r_stencilShadowPersonal->integer)
 #else
 			 !personalModel
 #endif

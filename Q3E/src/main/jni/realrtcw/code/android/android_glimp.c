@@ -659,6 +659,7 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 		ri.Printf( PRINT_ALL, "...GL_SGIS_texture_edge_clamp not found\n" );
 	}
 
+#if 0
 	extern GLenum stencilIncr;
 	extern GLenum stencilDecr;
 	if(GLimp_ExtensionSupported("GL_OES_stencil_wrap"))
@@ -681,6 +682,7 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 	}
 	//stencilIncr = GL_INCR;
 	//stencilDecr = GL_DECR;
+#endif
 }
 
 #define R_MODE_FALLBACK -1 //k 3 // 640 * 480
