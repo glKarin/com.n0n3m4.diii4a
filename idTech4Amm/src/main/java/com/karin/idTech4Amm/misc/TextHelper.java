@@ -721,17 +721,35 @@ public final class TextHelper
         }
         else
             sb.append(FormatDialogMessageSpace("  *[CVar] ")).append(cvar.name).append(" (").append(cvar.type).append(") default: ").append(cvar.defaultValue);
+        sb.append(endl);
+        if(cvar.HasFlags(~(Integer.MAX_VALUE & KCVar.FLAG_LAUNCHER)))
+        {
+            sb.append(FormatDialogMessageSpace("    [["));
+            if(cvar.HasFlag(KCVar.FLAG_POSITIVE))
+                sb.append(" Positive");
+            if(cvar.HasFlag(KCVar.FLAG_INIT))
+                sb.append(" CommandLine-Only");
+            if(cvar.HasFlag(KCVar.FLAG_AUTO))
+                sb.append(" Auto-Setup");
+            if(cvar.HasFlag(KCVar.FLAG_READONLY))
+                sb.append(" Readonly");
+            if(cvar.HasFlag(KCVar.FLAG_DISABLED))
+                sb.append(" Disabled");
+            sb.append(FormatDialogMessageSpace(" ]]"));
+            sb.append(endl);
+        }
         sb.append(FormatDialogMessageSpace("    ")).append(cvar.description);
         sb.append(endl);
         if(null != cvar.values)
         {
             for(KCVar.Value str : cvar.values)
             {
-                sb.append(FormatDialogMessageSpace("    "));
+                sb.append(FormatDialogMessageSpace("      "));
                 sb.append(str.value).append(" - ").append(str.desc);
                 sb.append(endl);
             }
         }
+        sb.append(endl);
         return sb.toString();
     }
     

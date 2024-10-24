@@ -172,28 +172,32 @@ public class GameLauncher extends Activity
 			int id = buttonView.getId();
 			if (id == R.id.useetc1cache)
 			{
-				setProp("r_useETC1cache", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("r_useETC1cache", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_useetc1cache, isChecked)
 						.commit();
 			}
 			else if (id == R.id.nolight)
 			{
-				setProp("r_noLight", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("r_noLight", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_nolight, isChecked)
 						.commit();
 			}
 			else if (id == R.id.useetc1)
 			{
-				setProp("r_useETC1", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("r_useETC1", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_useetc1, isChecked)
 						.commit();
 			}
 			else if (id == R.id.usedxt)
 			{
-				setProp("r_useDXT", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("r_useDXT", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_usedxt, isChecked)
 						.commit();
@@ -298,7 +302,8 @@ public class GameLauncher extends Activity
 			}*/
 			else if (id == R.id.cb_s_useOpenAL)
 			{
-				setProp("s_useOpenAL", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("s_useOpenAL", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, isChecked)
 						.commit();
@@ -314,7 +319,8 @@ public class GameLauncher extends Activity
 				{
 					V.cb_s_useOpenAL.setChecked(true);
 				}
-				setProp("s_useEAXReverb", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("s_useEAXReverb", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, isChecked)
 						.commit();
@@ -332,35 +338,40 @@ public class GameLauncher extends Activity
 			}
 			else if (id == R.id.cb_stencilShadowTranslucent)
 			{
-				setProp("harm_r_stencilShadowTranslucent", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("harm_r_stencilShadowTranslucent", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_r_stencilShadowTranslucent, isChecked)
 						.commit();
 			}
 			else if (id == R.id.cb_stencilShadowSoft)
 			{
-				setProp("harm_r_stencilShadowSoft", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("harm_r_stencilShadowSoft", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_r_stencilShadowSoft, isChecked)
 						.commit();
 			}
 			else if (id == R.id.cb_stencilShadowCombine)
 			{
-				setProp("harm_r_stencilShadowCombine", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("harm_r_stencilShadowCombine", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_r_stencilShadowCombine, isChecked)
 						.commit();
 			}
 			else if (id == R.id.image_useetc2)
 			{
-				setProp("r_useETC2", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("r_useETC2", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_image_useetc2, isChecked)
 						.commit();
 			}
 			else if (id == R.id.cb_perforatedShadow)
 			{
-				setProp("r_forceShadowMapsOnAlphaTestedSurfaces", isChecked);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("r_forceShadowMapsOnAlphaTestedSurfaces", isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_r_shadowMapPerforatedShadow, isChecked)
 						.commit();
@@ -384,7 +395,8 @@ public class GameLauncher extends Activity
 			if (rgId == R.id.r_harmclearvertexbuffer)
 			{
 				index = GetCheckboxIndex(radioGroup, id);
-				SetProp("harm_r_clearVertexBuffer", index);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					SetProp("harm_r_clearVertexBuffer", index);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putInt(Q3EPreference.pref_harm_r_harmclearvertexbuffer, index)
 						.commit();
@@ -400,15 +412,11 @@ public class GameLauncher extends Activity
 			else if (rgId == R.id.rg_harm_r_lightingModel)
 			{
 				String value = "" + ((GetCheckboxIndex(radioGroup, id) + 1) % V.rg_harm_r_lightingModel.getChildCount());
-				SetProp("harm_r_lightingModel", value);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					SetProp("harm_r_lightingModel", value);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putString(Q3EPreference.pref_harm_r_lightingModel, value)
 						.commit();
-			}
-			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_q3game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame || rgId == R.id.rg_fs_q1game || rgId == R.id.rg_fs_d3bfggame || rgId == R.id.rg_fs_doomgame || rgId == R.id.rg_fs_etwgame || rgId == R.id.rg_fs_realrtcwgame)
-			{
-				RadioButton checked = radioGroup.findViewById(id);
-				SetGameDLL((String)checked.getTag());
 			}
 			else if (rgId == R.id.rg_msaa)
 			{
@@ -435,7 +443,8 @@ public class GameLauncher extends Activity
 			else if (rgId == R.id.rg_s_driver)
 			{
 				String value2 = GetCheckboxIndex(radioGroup, id) == 1 ? "OpenSLES" : "AudioTrack";
-				SetProp("s_driver", value2);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					SetProp("s_driver", value2);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putString(Q3EPreference.pref_harm_s_driver, value2)
 						.commit();
@@ -444,7 +453,8 @@ public class GameLauncher extends Activity
 			{
 				boolean useShadowMapping = GetCheckboxIndex(radioGroup, id) == 1;
 				String value = useShadowMapping ? "1" : "0";
-				SetProp("r_useShadowMapping", value);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					SetProp("r_useShadowMapping", value);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_r_useShadowMapping, useShadowMapping)
 						.commit();
@@ -459,10 +469,16 @@ public class GameLauncher extends Activity
 			else if (rgId == R.id.rg_r_autoAspectRatio)
 			{
 				index = GetCheckboxIndex(radioGroup, id);
-				SetProp("harm_r_autoAspectRatio", index);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					SetProp("harm_r_autoAspectRatio", index);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, index)
 						.commit();
+			}
+			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_q3game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame || rgId == R.id.rg_fs_q1game || rgId == R.id.rg_fs_d3bfggame || rgId == R.id.rg_fs_doomgame || rgId == R.id.rg_fs_etwgame || rgId == R.id.rg_fs_realrtcwgame)
+			{
+				RadioButton checked = radioGroup.findViewById(id);
+				SetGameDLL((String)checked.getTag());
 			}
         }
     };
@@ -599,7 +615,8 @@ public class GameLauncher extends Activity
 
 		public void onTextChanged(CharSequence s, int start, int before, int count)
 		{
-			SetProp(name, s);
+			if(Q3EUtils.q3ei.IsIdTech4())
+				SetProp(name, s);
 		}
 
 		public void beforeTextChanged(CharSequence s, int start, int count, int after)
@@ -1281,7 +1298,8 @@ public class GameLauncher extends Activity
 		V.edt_harm_r_maxFps.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count)
 			{
-				SetProp("r_maxFps", s);
+				if(Q3EUtils.q3ei.IsIdTech4())
+					SetProp("r_maxFps", s);
 			}
 
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -2936,8 +2954,8 @@ public class GameLauncher extends Activity
 		bundle.putString("game", GetGameModFromCommand());
 		bundle.putString("command", Q3EUtils.q3ei.start_temporary_extra_command);
 		bundle.putString("baseCommand", GetTempBaseCommand());
-		CVarEditorFunc cVarEditorFunc = new CVarEditorFunc(this, new Runnable()
-		{
+		// bundle.putString("persistentCommand", GetCmdText());
+		CVarEditorFunc cVarEditorFunc = new CVarEditorFunc(this, new Runnable() {
 			@Override
 			public void run()
 			{
