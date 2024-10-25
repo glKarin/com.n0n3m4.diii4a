@@ -327,9 +327,9 @@ public class GameLauncher extends Activity
 			}
 			else if (id == R.id.readonly_command)
 			{
-				SetupCommandLine(isChecked);
+				SetupCommandLine(!isChecked);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putBoolean(PreferenceKey.READONLY_COMMAND, isChecked)
+						.putBoolean(PreferenceKey.READONLY_COMMAND, !isChecked)
 						.commit();
 			}
 			else if (id == R.id.editable_temp_command)
@@ -1381,9 +1381,8 @@ public class GameLauncher extends Activity
 			V.cb_s_useEAXReverb.setEnabled(false);
 		}
 		boolean readonlyCommand = mPrefs.getBoolean(PreferenceKey.READONLY_COMMAND, false);
-		V.readonly_command.setChecked(readonlyCommand);
+		V.readonly_command.setChecked(!readonlyCommand);
 		SetupCommandLine(readonlyCommand);
-		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.readonly_command.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_stencilShadowTranslucent.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_stencilShadowTranslucent, false));
 		V.cb_stencilShadowTranslucent.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -1896,7 +1895,7 @@ public class GameLauncher extends Activity
 //		mEdtr.putBoolean(Q3EPreference.pref_harm_scale_by_screen_area, V.scale_by_screen_area.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useOpenAL, V.cb_s_useOpenAL.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_s_useEAXReverb, V.cb_s_useEAXReverb.isChecked());
-		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, V.readonly_command.isChecked());
+		mEdtr.putBoolean(PreferenceKey.READONLY_COMMAND, !V.readonly_command.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowTranslucent, V.cb_stencilShadowTranslucent.isChecked());
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_stencilShadowAlpha, Q3EUtils.parseFloat_s(V.edt_harm_r_stencilShadowAlpha.getText().toString(), 1.0f));
 		mEdtr.putFloat(Q3EPreference.pref_harm_r_shadowMapAlpha, Q3EUtils.parseFloat_s(V.edt_harm_r_shadowMapAlpha.getText().toString(), 1.0f));
