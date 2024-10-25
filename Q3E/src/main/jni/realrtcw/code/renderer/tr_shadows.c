@@ -57,9 +57,16 @@ static vec3_t shadowXyz[SHADER_MAX_VERTEXES];
 
 #ifdef USE_OPENGLES
 
+#define SHADOW_CAP_NEAR_BACK_AND_FAR_BACK 1
+#define SHADOW_CAP_NEAR_FRONT_AND_FAR_BACK 2
+#define SHADOW_CAP_NEAR_FRONT_AND_FAR_FRONT 3
+
+#define SHADOW_CAP_DEFAULT_IMPL SHADOW_CAP_NEAR_BACK_AND_FAR_BACK
+
 extern cvar_t *harm_r_stencilShadowMask;
 extern cvar_t *harm_r_stencilShadowOp;
 extern cvar_t *harm_r_stencilShadowDebug;
+extern cvar_t *harm_r_stencilShadowMaxAngle;
 
 #if 1
 #define stencilIncr GL_INCR
@@ -463,9 +470,49 @@ void RB_ShadowTessEnd( void ) {
 		return;
 	}
 
+#ifdef USE_OPENGLES //karin: check invalid light direction
+// karin
+#define FLOAT_ZERO 1e-6
+	if(
+	    (backEnd.currentEntity->lightDir[0] < FLOAT_ZERO && backEnd.currentEntity->lightDir[0] > -FLOAT_ZERO)
+	    && (backEnd.currentEntity->lightDir[1] < FLOAT_ZERO && backEnd.currentEntity->lightDir[1] > -FLOAT_ZERO)
+	    && (backEnd.currentEntity->lightDir[2] < FLOAT_ZERO && backEnd.currentEntity->lightDir[2] > -FLOAT_ZERO)
+	)
+	{
+        //Com_Printf("zzz\n");
+        return;
+	}
+#endif
+
 	VectorCopy( backEnd.currentEntity->lightDir, lightDir );
 
 #ifdef USE_OPENGLES //karin: use shadowXyz for stencil shadow
+    static float r_stencilShadowDotP = -2.0;
+    static int r_stencilShadowDeg = -1;
+    if(r_stencilShadowDeg != harm_r_stencilShadowMaxAngle->integer)
+    {
+        r_stencilShadowDeg = harm_r_stencilShadowMaxAngle->integer;
+        if(harm_r_stencilShadowMaxAngle->integer < 0)
+        {
+            r_stencilShadowDotP = -2.0;
+        }
+        else
+        {
+            r_stencilShadowDotP = cos(DEG2RAD(( (float) ( /*360 - */r_stencilShadowDeg % 360 ) )));
+        }
+    }
+	//karin: check light is under model
+	if(r_stencilShadowDeg >= 0)
+	{
+        vec3_t upz = { 0.0f, 0.0f, 1.0f };
+        float zd = DotProduct( upz, lightDir ); // lightDir is model position to light source
+        /*float zdrad = acos(zd);
+        float zdreg = RAD2DEG(zdrad);
+        Com_Printf("xxx %f %f %f | %f <= %f | %f <= %d | %s\n", lightDir[0], lightDir[1], lightDir[2], zd, r_stencilShadowDotP, zdreg, r_stencilShadowDeg, zd <= r_stencilShadowDotP ? "NO" : "YES");*/
+        if(zd <= r_stencilShadowDotP)
+            return;
+	}
+
 	qboolean useZFail = harm_r_stencilShadowOp->integer == 2
 			|| ((backEnd.currentEntity->e.renderfx & RF_THIRD_PERSON) && !backEnd.viewParms.isPortal) // personal
 			;
@@ -536,23 +583,39 @@ void RB_ShadowTessEnd( void ) {
 		d = DotProduct( normal, lightDir );
 		if ( d > 0 ) { // back CCW
 			facing[ i ] = 1;
-			if(useCaps && harm_r_stencilShadowCap->integer != 2)
+			if(useCaps)
 			{
-				far_cap_indexes[ far_cap_idx + 0 ] = tess.numVertexes + i1;
-				far_cap_indexes[ far_cap_idx + 1 ] = tess.numVertexes + i3;
-				far_cap_indexes[ far_cap_idx + 2 ] = tess.numVertexes + i2;
-				far_cap_idx += 3;
+				// back as far cap
+				if(harm_r_stencilShadowCap->integer != 3)
+				{
+					far_cap_indexes[ far_cap_idx + 0 ] = tess.numVertexes + i1;
+					far_cap_indexes[ far_cap_idx + 1 ] = tess.numVertexes + i3;
+					far_cap_indexes[ far_cap_idx + 2 ] = tess.numVertexes + i2;
+					far_cap_idx += 3;
+				}
+				// back as near cap
+				if(harm_r_stencilShadowCap->integer != 2 && harm_r_stencilShadowCap->integer != 3)
+				{
+					front_cap_indexes[ front_cap_idx + 0 ] = i1;
+					front_cap_indexes[ front_cap_idx + 1 ] = i2;
+					front_cap_indexes[ front_cap_idx + 2 ] = i3;
+					front_cap_idx += 3;
+				}
 			}
 		} else { // front CW
 			facing[ i ] = 0;
 			if(useCaps)
 			{
-				front_cap_indexes[ front_cap_idx + 0 ] = i1;
-				front_cap_indexes[ front_cap_idx + 1 ] = i3;
-				front_cap_indexes[ front_cap_idx + 2 ] = i2;
-				front_cap_idx += 3;
-
-				if(harm_r_stencilShadowCap->integer == 2)
+				// front as near cap
+				if(harm_r_stencilShadowCap->integer == 2 || harm_r_stencilShadowCap->integer == 3)
+				{
+					front_cap_indexes[ front_cap_idx + 0 ] = i1;
+					front_cap_indexes[ front_cap_idx + 1 ] = i3;
+					front_cap_indexes[ front_cap_idx + 2 ] = i2;
+					front_cap_idx += 3;
+				}
+				// front as far cap
+				if(harm_r_stencilShadowCap->integer == 3)
 				{
 					far_cap_indexes[ far_cap_idx + 0 ] = tess.numVertexes + i1;
 					far_cap_indexes[ far_cap_idx + 1 ] = tess.numVertexes + i2;

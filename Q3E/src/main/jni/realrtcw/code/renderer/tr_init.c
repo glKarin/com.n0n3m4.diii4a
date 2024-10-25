@@ -216,12 +216,15 @@ cvar_t  *r_maxpolyverts;
 int max_polyverts;
 
 #ifdef USE_OPENGLES //karin: stencil shadow
+cvar_t  *harm_r_stencilShadowPersonal; // render personal stencil shadow
+
 cvar_t  *harm_r_stencilShadowDebug; // debug stencil shadow
 cvar_t  *harm_r_stencilShadowModel; // control render animation/static model stencil shadow
-cvar_t  *harm_r_stencilShadowOp; // stencil shadow use Z-Pass or Z-Fail
 cvar_t  *harm_r_stencilShadowMask; // stencil shadow mask rendering
-cvar_t  *harm_r_stencilShadowPersonal; // render personal stencil shadow
+cvar_t  *harm_r_stencilShadowOp; // stencil shadow use Z-Pass or Z-Fail
 cvar_t  *harm_r_stencilShadowCap; // render near and far caps
+cvar_t  *harm_r_stencilShadowMaxAngle; // stencil shadow light direction and Z-Up dot product
+
 cvar_t  *harm_r_shadowPolygonOffset; // stencil shadow volume polygon offset units
 cvar_t  *harm_r_shadowPolygonFactor; // stencil shadow volume polygon offset factor
 #ifdef USE_SHADOW_INF
@@ -1400,12 +1403,15 @@ void R_Register( void ) {
 #else
 #define STENCIL_SHADOW_CVAR_FLAG CVAR_ARCHIVE
 #endif
+	harm_r_stencilShadowPersonal = ri.Cvar_Get("harm_r_stencilShadowPersonal", "1", CVAR_ARCHIVE); // 1=force using z-fail and caps; 0=
+	harm_r_stencilShadowMaxAngle = ri.Cvar_Get("harm_r_stencilShadowMaxAngle", "-1", CVAR_ARCHIVE); // if( dot( lightDir, vec3(0, 0, 1) ) > cos(DEG2RAD(harm_r_stencilShadowMaxAngle)) ) render stencil shadow. e.g. <0=allow all angle; 0=disable all; 180=allow all; 90=only when light direction is down
+	harm_r_stencilShadowMask = ri.Cvar_Get("harm_r_stencilShadowMask", "0", STENCIL_SHADOW_CVAR_FLAG); // 1=render mask every render shadow volume; 0=render mask after all surfaces render
+
 	harm_r_stencilShadowDebug = ri.Cvar_Get("harm_r_stencilShadowDebug", "0", 0);  // debug stencil shadow: 1=render edges; 2=render front cap; 4=render far cap
 	harm_r_stencilShadowModel = ri.Cvar_Get("harm_r_stencilShadowModel", "1", STENCIL_SHADOW_CVAR_FLAG); // 1=animation model; 2=static model; 0=all model
-	harm_r_stencilShadowOp = ri.Cvar_Get("harm_r_stencilShadowOp", "0", STENCIL_SHADOW_CVAR_FLAG); // 1=z-pass; 2=z-fail; 0=auto(personal: z-fail)
-	harm_r_stencilShadowMask = ri.Cvar_Get("harm_r_stencilShadowMask", "1", STENCIL_SHADOW_CVAR_FLAG); // 1=render mask every render shadow volume; 0=render mask after all surfaces render finish
-	harm_r_stencilShadowPersonal = ri.Cvar_Get("harm_r_stencilShadowPersonal", "1", CVAR_ARCHIVE); // 1=force using z-fail and caps; 0=
-	harm_r_stencilShadowCap = ri.Cvar_Get("harm_r_stencilShadowCap", "0", STENCIL_SHADOW_CVAR_FLAG); // 1=render shadow volume's caps(near cap: facing light source; far cap: back facing light source); 2=render shadow volume's caps(near cap: facing light source; far cap: facing light source); 0=don't render shadow volume's caps exclude personal
+	harm_r_stencilShadowOp = ri.Cvar_Get("harm_r_stencilShadowOp", "0", STENCIL_SHADOW_CVAR_FLAG); // 1=z-pass; 2=z-fail; 0=auto(personal: z-fail)finish
+	harm_r_stencilShadowCap = ri.Cvar_Get("harm_r_stencilShadowCap", "0", STENCIL_SHADOW_CVAR_FLAG); // 1=render shadow volume's caps(near cap: back facing light source; far cap: back facing light source); 2=render shadow volume's caps(near cap: facing light source; far cap: back facing light source); 3=render shadow volume's caps(near cap: facing light source; far cap: facing light source); 0=don't render shadow volume's caps exclude personal(personal is same as 1)
+
 	harm_r_shadowPolygonOffset = ri.Cvar_Get("harm_r_shadowPolygonOffset", "0", STENCIL_SHADOW_CVAR_FLAG); // render shadow volume's polygon offset units: DOOM3 default is -1
 	harm_r_shadowPolygonFactor = ri.Cvar_Get("harm_r_shadowPolygonFactor", "0", STENCIL_SHADOW_CVAR_FLAG); // render shadow volume's polygon offset factor
 #ifdef USE_SHADOW_INF
