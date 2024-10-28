@@ -235,7 +235,7 @@ public class Disc extends Paintable implements TouchListener
     }
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act/* 1: Down, -1: Up */, int id)
+    public boolean onTouchEvent(int x, int y, int act/* 1: Down, -1: Up */)
     {
         if (null == m_parts || m_parts.length == 0)
             return true;
@@ -335,11 +335,5 @@ public class Disc extends Paintable implements TouchListener
     {
         cx = x;
         cy = y;
-    }
-
-    @Override
-    public boolean SupportMultiTouch()
-    {
-        return false;
     }
 }

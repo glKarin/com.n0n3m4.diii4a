@@ -6,8 +6,8 @@
 >
 
     <PreferenceCategory
-        android:key="debug"
-        android:title="@string/debug"
+        android:key="debug_game"
+        android:title="@string/game"
     >
         <com.karin.idTech4Amm.widget.SeekBarPreference
             android:dialogTitle="@string/update_interval_second_0_disable"
@@ -27,27 +27,26 @@
             android:defaultValue="false"
             android:summary="@string/do_not_handle_signals"
         />
-        <Preference
-            android:key="last_dalvik_crash_info"
-            android:title="@string/last_dalvik_crash_info"
-            android:summary="@string/last_dalvik_crash_info"
-            android:persistent="false"/>
         <CheckBoxPreference
             android:title="@string/load_local_engine_library"
             android:key="harm_load_local_engine_lib"
             android:persistent="true"
             android:defaultValue="false"
-            android:summary="@string/load_local_engine_library"
+            android:summary="@string/load_engine_library_from_getdatadir"
             />
-        <ListPreference
-            android:title="Event queue"
-            android:key="harm_event_queue"
+        <CheckBoxPreference
+            android:title="@string/use_external_library_path"
+            android:key="harm_use_external_lib_path"
             android:persistent="true"
-            android:defaultValue="0"
-            android:summary="Choose event queue scheme"
-            android:entryValues="@array/event_queue_values"
-            android:entries="@array/event_queue_labels"
+            android:defaultValue="false"
+            android:summary="@string/load_game_library_from_getdatadir"
             />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="debug_launcher"
+        android:title="@string/launcher"
+        >
         <Preference
             android:key="show_preference"
             android:title="@string/show_preferences"
@@ -58,11 +57,28 @@
             android:title="@string/pid"
             android:summary="@string/get_application_pid"
             android:persistent="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:key="debug_log"
+            android:title="@string/log"
+    >
+        <Preference
+                android:key="last_dalvik_crash_info"
+                android:title="@string/last_dalvik_crash_info"
+                android:summary="@string/last_dalvik_crash_info"
+                android:persistent="false"/>
         <Preference
             android:key="open_logcat"
             android:title="@string/open_logcat"
             android:summary="@string/view_logcat"
             android:persistent="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:key="debug_util"
+            android:title="@string/util"
+    >
         <Preference
             android:key="open_documentsui"
             android:title="@string/open_documents"

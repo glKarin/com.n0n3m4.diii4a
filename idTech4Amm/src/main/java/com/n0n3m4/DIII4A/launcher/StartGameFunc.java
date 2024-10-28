@@ -40,7 +40,7 @@ public final class StartGameFunc extends GameLauncherFunc
         //k check external storage permission
         int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
         if (res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(m_gameLauncher, R.string.startgame)));
+            Toast_long(Tr(R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Tr(R.string.startgame)));
         if (res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
         run();

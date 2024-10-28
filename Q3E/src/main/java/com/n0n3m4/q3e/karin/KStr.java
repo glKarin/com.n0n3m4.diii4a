@@ -145,5 +145,22 @@ public final class KStr
         return Join(args, sep);
     }
 
+    public static String CmdStr(String str)
+    {
+        if(null == str)
+            return "";
+        if(str.contains(" "))
+            return '"' + str + '"';
+        else
+            return str;
+    }
+
+    public static String ucfirst(String str)
+    {
+        if(IsBlank(str))
+            return str;
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
     private KStr() {}
 }

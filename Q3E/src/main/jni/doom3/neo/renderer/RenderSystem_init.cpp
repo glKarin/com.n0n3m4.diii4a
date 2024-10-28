@@ -2273,6 +2273,8 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export internal original C-String GLSL shader source for developer");
 #ifdef _EXTRAS_TOOLS
 	MD5Anim_AddCommand();
+#endif
+#ifdef _ENGINE_MODEL_VIEWER
 	ModelTest_AddCommand();
 #endif
 }

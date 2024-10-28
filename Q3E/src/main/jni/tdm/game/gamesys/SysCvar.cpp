@@ -594,7 +594,11 @@ idCVar cv_lg_ozoffs("tdm_lg_ozoffs",		"-20",		CVAR_GAME | CVAR_FLOAT,	"Sets the 
 idCVar cv_lg_interleave("tdm_lg_interleave",	"1",	CVAR_GAME | CVAR_INTEGER | CVAR_ARCHIVE,		"If set to 0 no lightgem processing is done. Any other values determines how often the lightgem should be processed.\n1 (default) means to process every frame." );
 // nbohr1more #4369 Dynamic Lightgem Interleave
 idCVar cv_lg_interleave_min("tdm_lg_interleave_min",	"40",	CVAR_GAME | CVAR_INTEGER | CVAR_ARCHIVE,	"The minimum FPS to activate Lightgem Interleave. Defaults to 40FPS" );
+#ifdef __ANDROID__ //karin: _GLES: light bar indicator, see https://github.com/glKarin/com.n0n3m4.diii4a/issues/244
+idCVar cv_lg_weak("tdm_lg_weak",			"1",		CVAR_GAME | CVAR_BOOL/* | CVAR_ARCHIVE*/,		"Switches to the weaker algorithm, but may be faster." );
+#else
 idCVar cv_lg_weak("tdm_lg_weak",			"0",		CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE,		"Switches to the weaker algorithm, but may be faster." );
+#endif
 
 idCVar cv_lg_model("tdm_lg_model",		"models/darkmod/misc/system/lightgem.lwo",	CVAR_GAME | CVAR_ARCHIVE,	"Set the lightgem model file. Map has to be restarted to take effect." );
 idCVar cv_lg_adjust("tdm_lg_adjust",		"0",		CVAR_GAME | CVAR_FLOAT,	"Adds a constant value to the lightgem." );

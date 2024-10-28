@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/debug"
+>
+
+    <PreferenceCategory
+        android:key="experimental"
+        android:title="@string/input"
+    >
+        <ListPreference
+            android:title="@string/input_event_queue"
+            android:key="harm_event_queue"
+            android:persistent="true"
+            android:defaultValue="0"
+            android:summary="@string/choose_input_event_queue_scheme"
+            android:entryValues="@array/event_queue_values"
+            android:entries="@array/event_queue_labels"
+            />
+    </PreferenceCategory>
+    
+</PreferenceScreen>

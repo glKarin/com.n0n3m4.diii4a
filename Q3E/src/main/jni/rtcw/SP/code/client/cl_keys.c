@@ -2238,11 +2238,7 @@ void CL_KeyDownEvent( int key, unsigned time )
 	}
 
 	// console key is hardcoded, so the user can never unbind it
-	if( key == K_CONSOLE
-#ifdef __ANDROID__ //karin: Q3E console key
-|| key == '`' // 96
-#endif
-	|| ( keys[K_SHIFT].down && key == K_ESCAPE ) )
+	if( key == K_CONSOLE || ( keys[K_SHIFT].down && key == K_ESCAPE ) )
 	{
 		Con_ToggleConsole_f ();
 		Key_ClearStates ();

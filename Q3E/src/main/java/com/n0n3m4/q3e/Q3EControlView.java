@@ -52,6 +52,7 @@ import com.n0n3m4.q3e.onscreen.Disc;
 import com.n0n3m4.q3e.onscreen.Finger;
 import com.n0n3m4.q3e.onscreen.Joystick;
 import com.n0n3m4.q3e.onscreen.MouseControl;
+import com.n0n3m4.q3e.onscreen.MouseButton;
 import com.n0n3m4.q3e.onscreen.Paintable;
 import com.n0n3m4.q3e.onscreen.Slider;
 import com.n0n3m4.q3e.onscreen.TouchListener;
@@ -252,7 +253,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             }
             //must be last
             //touch_elements.add(new MouseControl(this, false));
-            touch_elements.add(new MouseControl(this, mPrefs.getBoolean(Q3EPreference.pref_2fingerlmb, false)));
+            touch_elements.add(new MouseControl(this));
+            if(mPrefs.getBoolean(Q3EPreference.pref_2fingerlmb, false))
+                touch_elements.add(new MouseButton(this));
             //touch_elements.add(new MouseControl(this, false));
 
             SortOnScreenButtons(); //k sort priority
@@ -513,9 +516,14 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             return true;
         }
 
-        int actionMasked = event.getActionMasked();
         int actionIndex = event.getActionIndex();
         int pid = event.getPointerId(actionIndex);
+        if(pid >= fingers.length)
+        {
+            return true;
+        }
+
+        int actionMasked = event.getActionMasked();
         if ((actionMasked == MotionEvent.ACTION_DOWN) || (actionMasked == MotionEvent.ACTION_POINTER_DOWN))
         {
             int x = (int) event.getX(actionIndex);
@@ -548,7 +556,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                     }
                     if(i < handledIndexOfElements)
                     {
-                        if(!f.target.SupportMultiTouch())
+                        // if(!f.target.SupportMultiTouch())
                             continue;
                     }
                     else
@@ -805,7 +813,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             return Q3EGlobals.TYPE_JOYSTICK;
         if(touchListener instanceof Disc)
             return Q3EGlobals.TYPE_DISC;
-        return Q3EGlobals.TYPE_MOUSE;
+        if(touchListener instanceof MouseControl)
+            return Q3EGlobals.TYPE_MOUSE;
+        return Q3EGlobals.TYPE_MOUSE_BUTTON;
     }
 
     private void SortOnScreenButtons()
@@ -816,7 +826,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 Q3EGlobals.TYPE_SLIDER,
                 Q3EGlobals.TYPE_DISC,
                 Q3EGlobals.TYPE_JOYSTICK,
-                Q3EGlobals.TYPE_MOUSE
+                Q3EGlobals.TYPE_MOUSE,
+                Q3EGlobals.TYPE_MOUSE_BUTTON
         );
 
         Arrays.sort(touchListeners, new Comparator<TouchListener>() {

@@ -275,7 +275,7 @@ public class Joystick extends Paintable implements TouchListener
     }
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act, int id)
+    public boolean onTouchEvent(int x, int y, int act)
     {
         return m_unfixed ? HandleEvent_unfixed(x, y, act) : HandleEvent_fixed(x, y, act);
     }
@@ -560,7 +560,8 @@ public class Joystick extends Paintable implements TouchListener
 
     private float CalcRingWidth()
     {
-        return size / 24.0f;
+        return Math.min(12.0f, size / 24.0f);
+        // return size / 24.0f;
     }
 
     private int NormalizeDegree(int angle)
@@ -661,11 +662,5 @@ public class Joystick extends Paintable implements TouchListener
             m_innerTexture = KGLBitmapTexture.GenCircleRingTexture(gl, m_deadZoneRadius * 2, CONST_HELPER_BORDER_WIDTH, color);
         }
         m_updateTexture = false;
-    }
-
-    @Override
-    public boolean SupportMultiTouch()
-    {
-        return false;
     }
 }

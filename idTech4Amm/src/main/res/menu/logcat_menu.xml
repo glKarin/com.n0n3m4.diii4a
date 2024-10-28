@@ -5,6 +5,20 @@
     <item android:id="@+id/logcat_menu_down"
         android:title="@string/scroll_to_bottom"
         android:showAsAction="always"/>
+
+
+    <item
+        android:id="@+id/logcat_menu_options"
+        android:title="@string/option"
+        android:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/logcat_menu_filter"
+                android:title="@string/filter"
+                android:showAsAction="never"/>
+        </menu>
+    </item>
+
     <item android:id="@+id/logcat_menu_dump"
         android:title="@string/save"
         android:showAsAction="never"/>

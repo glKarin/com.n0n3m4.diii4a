@@ -1,11 +1,11 @@
 安卓设备上的基于idTech引擎的游戏运行环境
-支持毁灭战士3/雷神之锤4/掠食(2006)/毁灭战士3 BFG/雷神之锤1/雷神之锤2/雷神之锤3/重返德军总部/The Dark Mod/GZDOOM/德军总部: 深入敌后
+支持毁灭战士3/雷神之锤4/掠食(2006)/毁灭战士3 BFG/雷神之锤1/雷神之锤2/雷神之锤3/重返德军总部/The Dark Mod/GZDOOM/德军总部: 深入敌后/真·重返德军总部
 
   1. 把你的PC上的游戏数据(包括外部的文件夹)放到启动器中`Game working directory`所设置的目录下(默认为`/sdcard/diii4a`).
   2. 点击顶部栏的左边图标或右边的游戏名称选择游戏, 然后在选项卡`GENERAL`下的`Game`选择游戏mod.
   3. 点击`START GAME`开始游戏.
 
-支持
+支持:
   多线程渲染
   png/dds纹理图片加载, jpeg/png/bmp格式截屏
   obj/dae格式静态模型
@@ -14,42 +14,64 @@
   OpenAL(soft)和EFX混响
   Phong/Blinn-phong/PBR/无光照 光照模型
   半透明/软模板阴影
+  
+游戏独立文件夹:
+  由于支持的游戏类型的增多, 每个游戏的mod都在同一个共有文件夹下, 会有同名情况, 并且不易管理和查看. 所以自1.1.0harmattan57版本后默认启用`游戏文件夹独立`功能. 也可以在启动器设置菜单中关闭.
+  
+  如果启用`游戏独立文件夹`功能, 游戏本体文件夹或mod文件夹应放在对应`游戏独立文件夹`下(如下).
+  
+  可选游戏独立文件夹的游戏及其文件名名称:
+  毁灭战士3: doom3/
+  雷神之锤4: quake4/
+  掠食(2006): prey/
+  雷神之锤1: quake1/
+  雷神之锤2: quake2/
+  雷神之锤3: quake3/
+  重返德军总部: rtcw/
+  毁灭战士3 BFG: doom3bfg/
+  德军总部 - 深入敌后: etw/
+  真·重返德军总部: realrtcw/
+  
+  总是游戏独立文件夹的游戏:
+  The Dark Mod: darkmod/
+  GZDOOM: gzdoom/
 
 游戏/mod文件夹名称:
-  毁灭战士3: base (支持全身mod)
-  毁灭战士3 - 邪恶复苏: d3xp
-  毁灭战士3 - 失落的任务: d3le
-  经典毁灭战士3: cdoom
-  Rivensin: rivensin
-  Hardcorps: hardcorps
-  Stupid Angry Bot(a7x): sabot
-  Overthinked DooM^3: overthinked
-  Fragging Free: fraggingfree
-  HeXen - Edge of Chaos: hexeneoc
-  LibreCoop: librecoop
-  LibreCoop - D3XP: librecoopxp
-  Perfected Doom 3: perfected
-  Perfected Doom 3 - RoE: perfected_roe
+  毁灭战士3: base/
+  毁灭战士3 - 邪恶复苏: d3xp/
+  毁灭战士3 - 失落的任务: d3le/
+  经典毁灭战士3: cdoom/
+  Rivensin: rivensin/
+  Hardcorps: hardcorps/
+  Stupid Angry Bot(a7x): sabot/
+  Overthinked DooM^3: overthinked/
+  Fragging Free: fraggingfree/
+  HeXen - Edge of Chaos: hexeneoc/
+  LibreCoop: librecoop/
+  LibreCoop - D3XP: librecoopxp/
+  Perfected Doom 3: perfected/
+  Perfected Doom 3 - RoE: perfected_roe/
 
-  雷神之锤4: q4base (支持bot mod和全身mod)
-  Hardqore: hardqore
+  雷神之锤4: q4base/
+  Hardqore: hardqore/
 
-  掠食(2006): preybase (支持全身mod)
+  掠食(2006): preybase/
 
-  雷神之锤1: darkplaces/id1
+  雷神之锤1: darkplaces/id1/
 
-  雷神之锤2: baseq2
+  雷神之锤2: baseq2/
 
-  雷神之锤3竞技场: baseq3
+  雷神之锤3竞技场: baseq3/
+  雷神之锤3团队竞技场: missionpack/
 
-  雷神之锤3团队竞技场: missionpack
+  重返德军总部: main/
 
-  重返德军总部: main
+  The Dark Mod: darkmod/
 
-  The Dark Mod: darkmod
+  毁灭战士3 BFG: base/
 
-  毁灭战士3 BFG: doom3bfg/base
+  GZDOOM: gzdoom/
 
-  GZDOOM: gzdoom
+  德军总部 - 深入敌后: etmain/
 
-  德军总部 - 深入敌后: etmain
+  真·重返德军总部: Main/

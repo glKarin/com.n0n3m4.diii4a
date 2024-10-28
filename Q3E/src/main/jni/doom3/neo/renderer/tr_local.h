@@ -2313,8 +2313,10 @@ extern float RB_overbright;
 #endif
 
 #ifdef _EXTRAS_TOOLS
-void ModelTest_TestModel(int time);
 void MD5Anim_AddCommand(void);
+#endif
+#ifdef _ENGINE_MODEL_VIEWER
+void ModelTest_TestModel(int time);
 void ModelTest_AddCommand(void);
 #endif
 

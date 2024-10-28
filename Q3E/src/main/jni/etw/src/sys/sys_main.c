@@ -141,12 +141,12 @@ char *Sys_ConsoleInput(void)
 #endif
 
 #ifdef ETL_CLIENT
-#ifdef _DIII4A //karin: show toast on Android
+#ifdef _DIII4A //karin: show dialog on Android
 extern int Android_OpenDialog(const char *title, const char *message, int num, const char *buttons[]);
 #endif
 dialogResult_t Sys_SDLDialog(dialogType_t type, const char *message, const char *title)
 {
-#ifdef _DIII4A //karin: show toast on Android
+#ifdef _DIII4A //karin: show dialog on Android
     const char *buttons[4] = { NULL, NULL, NULL, NULL };
     int base = 0;
     int res = -1;
@@ -830,8 +830,9 @@ static void *Sys_TryLibraryLoad(const char *base, const char *gamedir, const cha
 #define Sys_GetDLLName_DIII4A(x) "libetw" x DLL_EXT
 	if(_load_dll_name)
 	{
+		const char * Sys_DLLDefaultPath(void);
 		char realLibName[MAX_OSPATH];
-		Com_sprintf(realLibName, sizeof(realLibName), Sys_GetDLLName_DIII4A("%s"), _load_dll_name);
+		Com_sprintf(realLibName, sizeof(realLibName), "%s/" Sys_GetDLLName_DIII4A("%s"), Sys_DLLDefaultPath(), _load_dll_name);
 		Com_Printf("[Harmattan]: Load library '%s' in '%s'\n", _load_dll_name, realLibName);
 		libHandle = Sys_LoadLibrary(realLibName);
 		_load_dll_name = NULL;

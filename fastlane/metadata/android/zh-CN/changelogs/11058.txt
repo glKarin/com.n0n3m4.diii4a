@@ -1,0 +1,5 @@
+* 新增`真·重返德军总部`(ver 5.0)支持, 游戏独立文件夹名为`etw`, 游戏数据文件夹为`Main`.
+* The Dark Mod修复玩家HUD上的亮度指示条 by `darkness257`, 当前自动设置`tdm_lg_weak`为1. 更多详情在Github issue `The Darkmod light bar indicator bug`.
+* 启动器`Option`菜单增加以游戏或当前命令行来创建桌面快捷方式.
+* 修复雷神之锤3的模板阴影当`cg_shadows` = 2.
+* 改进真·重返德军总部的模板阴影当`cg_shadows` = 2.

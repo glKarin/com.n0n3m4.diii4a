@@ -102,6 +102,12 @@ public final class Q3EPreference
     public static final String pref_harm_etw_user_mod         = "q3e_harm_etw_user_mod"; //k
     public static final String pref_params_etw                = "q3e_params_etw"; //k
     public static final String pref_harm_etw_command_record   = "q3e_harm_etw_command_record";
+    // RealRTCW
+    public static final String pref_harm_realrtcw_fs_game          = "q3e_harm_realrtcw_fs_game"; //k
+    public static final String pref_harm_realrtcw_game_lib         = "q3e_harm_realrtcw_game_lib"; //k
+    public static final String pref_harm_realrtcw_user_mod         = "q3e_harm_realrtcw_user_mod"; //k
+    public static final String pref_params_realrtcw                = "q3e_params_realrtcw"; //k
+    public static final String pref_harm_realrtcw_command_record   = "q3e_harm_realrtcw_command_record";
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
@@ -150,6 +156,7 @@ public final class Q3EPreference
     public static final String ONSCREEN_BUTTON               = "harm_onscreen_key"; // old = "harm_onscreen_button"
     public static final String GAME_STANDALONE_DIRECTORY     = "harm_game_standalone_directory";
     public static final String LOAD_LOCAL_ENGINE_LIB         = "harm_load_local_engine_lib";
+    public static final String USE_EXTERNAL_LIB_PATH         = "harm_use_external_lib_path";
     public static final String THEME                         = "harm_theme";
     public static final String EVENT_QUEUE                   = "harm_event_queue"; // 0 - java 1 - native
     public static final String AUTOSAVE_BUTTON_SETTINGS      = "harm_autosave_button_settings";

@@ -8,63 +8,39 @@ import java.util.Arrays;
 
 public class MouseControl implements TouchListener
 {
-    private Q3EControlView view;
+    private final Q3EControlView view;
     private int lx;
     private int ly;
-    private boolean isleftbutton;
-    private int alreadydown_main;
-    private int alreadydown_second;
+    private boolean clicked = false;
 
-    public MouseControl(Q3EControlView vw, boolean islmb)
+    public MouseControl(Q3EControlView vw)
     {
         view = vw;
-        alreadydown_main = -1;
-        alreadydown_second = -1;
-        isleftbutton = islmb;
     }
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act, int id)
+    public boolean onTouchEvent(int x, int y, int act)
     {
         if (act == 1)
         {
-            if(alreadydown_main >= 0 && (alreadydown_second >= 0 || !isleftbutton))
-                return true;
-
-            if(alreadydown_main < 0)
-            {
-                alreadydown_main = id;
-                lx = x;
-                ly = y;
-            }
-            else
-            {
-                alreadydown_second = id;
-                Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
-            }
+            clicked = true;
+            lx = x;
+            ly = y;
         }
         else if (act == -1)
         {
-            if(alreadydown_main == id)
-            {
-                alreadydown_main = -1;
-                lx = 0;
-                ly = 0;
-            }
-            else if(alreadydown_second == id)
-            {
-                alreadydown_second = -1;
-                Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MOUSE1, 0);//Can be sent twice, unsafe.
-            }
+            clicked = false;
+            lx = 0;
+            ly = 0;
         }
         else
         {
-            if(alreadydown_main == id)
+            if(clicked)
             {
                 Q3EUtils.q3ei.callbackObj.sendMotionEvent(x - lx, y - ly);
-                lx = x;
-                ly = y;
             }
+            lx = x;
+            ly = y;
         }
         return true;
     }
@@ -72,12 +48,6 @@ public class MouseControl implements TouchListener
     @Override
     public boolean isInside(int x, int y)
     {
-        return true;
-    }
-
-    @Override
-    public boolean SupportMultiTouch()
-    {
-        return isleftbutton;
+        return !clicked;
     }
 }

@@ -18,27 +18,32 @@ public class CVarSettingField extends LinearLayout implements CompoundButton.OnC
     private CVarSettingInterface m_field;
     private Switch m_checkBox; // CheckBox
 
-    public CVarSettingField(Context context, String name, View view)
+    public CVarSettingField(Context context, String name, View view, boolean disabled)
     {
         super(context);
         m_field = (CVarSettingInterface) view;
-        Setup(name, view);
+        Setup(name, view, disabled);
     }
 
-    private void Setup(String name, View view)
+    private void Setup(String name, View view, boolean disabled)
     {
         Context context = getContext();
         LayoutParams params;
 
         setOrientation(VERTICAL);
 
+        final boolean enabled = CONST_DEFAULT_ENABLED && !disabled;
+
         LinearLayout labelLayout = new LinearLayout(context);
         labelLayout.setOrientation(HORIZONTAL);
         m_checkBox = new Switch(context);
         params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        m_checkBox.setChecked(CONST_DEFAULT_ENABLED);
-        m_field.SetEnabled(CONST_DEFAULT_ENABLED);
-        m_checkBox.setOnCheckedChangeListener(this);
+        m_checkBox.setChecked(enabled);
+        m_field.SetEnabled(enabled);
+        if(!disabled)
+            m_checkBox.setOnCheckedChangeListener(this);
+        else
+            m_checkBox.setClickable(false);
         labelLayout.addView(m_checkBox, params);
 
         params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -66,7 +71,15 @@ public class CVarSettingField extends LinearLayout implements CompoundButton.OnC
         View view = CVarSettingUI.GenerateSettingUI(context, cvar);
         if(null == view)
             return null;
-        return new CVarSettingField(context, cvar.name, view);
+        String name = cvar.name;
+        String flag = "";
+        if(cvar.HasFlag(KCVar.FLAG_READONLY))
+            flag += "RO ";
+        if(cvar.HasFlag(KCVar.FLAG_INIT))
+            flag += "CMD ";
+        if(!flag.isEmpty())
+            name += " [" + flag.trim() + "]";
+        return new CVarSettingField(context, name, view, cvar.HasFlag(KCVar.FLAG_READONLY));
     }
 
     public boolean IsEnabled()

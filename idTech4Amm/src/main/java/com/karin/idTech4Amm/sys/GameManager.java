@@ -26,6 +26,7 @@ public final class GameManager
             Q3EGlobals.GAME_TDM,
             Q3EGlobals.GAME_GZDOOM,
             Q3EGlobals.GAME_ETW,
+            Q3EGlobals.GAME_REALRTCW,
     };
 
     public GameManager()
@@ -132,6 +133,10 @@ public final class GameManager
         {
             list = GameProps.get(Q3EGlobals.GAME_ETW);
         }
+        else if (Q3EUtils.q3ei.isRealRTCW)
+        {
+            list = GameProps.get(Q3EGlobals.GAME_REALRTCW);
+        }
         else
         {
             list = GameProps.get(Q3EGlobals.GAME_DOOM3);
@@ -192,8 +197,94 @@ public final class GameManager
             return R.drawable.gzdoom_icon;
         else if (Q3EUtils.q3ei.isETW)
             return R.drawable.etw_icon;
+        else if (Q3EUtils.q3ei.isRealRTCW)
+            return R.drawable.realrtcw_icon;
         else
             return R.drawable.d3_icon;
+    }
+
+    public static int GetGameIcon(String name)
+    {
+        if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+            return R.drawable.prey_icon;
+        else if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+            return R.drawable.q4_icon;
+        else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+            return R.drawable.q2_icon;
+        else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+            return R.drawable.q3_icon;
+        else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+            return R.drawable.rtcw_icon;
+        else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+            return R.drawable.tdm_icon;
+        else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+            return R.drawable.q1_icon;
+        else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+            return R.drawable.d3bfg_icon;
+        else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+            return R.drawable.gzdoom_icon;
+        else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
+            return R.drawable.etw_icon;
+        else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+            return R.drawable.realrtcw_icon;
+        else
+            return R.drawable.d3_icon;
+    }
+
+    public static int GetGameNameRS(String name)
+    {
+        if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+            return R.string.prey_preybase;
+        else if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+            return R.string.quake_iv_q4base;
+        else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+            return R.string.quake_2_base;
+        else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+            return R.string.quake_3_base;
+        else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+            return R.string.rtcw_base;
+        else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+            return R.string.tdm_base;
+        else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+            return R.string.quake_1_base;
+        else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+            return R.string.d3bfg_base;
+        else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+            return R.string.doom_base;
+        else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
+            return R.string.etw_base;
+        else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+            return R.string.realrtcw_base;
+        else
+            return R.string.doom_iii;
+    }
+
+    public static int GetGameName()
+    {
+        if (Q3EUtils.q3ei.isPrey)
+            return R.string.prey_preybase;
+        else if (Q3EUtils.q3ei.isQ4)
+            return R.string.quake_iv_q4base;
+        else if (Q3EUtils.q3ei.isQ2)
+            return R.string.quake_2_base;
+        else if (Q3EUtils.q3ei.isQ3)
+            return R.string.quake_3_base;
+        else if (Q3EUtils.q3ei.isRTCW)
+            return R.string.rtcw_base;
+        else if (Q3EUtils.q3ei.isTDM)
+            return R.string.tdm_base;
+        else if (Q3EUtils.q3ei.isQ1)
+            return R.string.quake_1_base;
+        else if (Q3EUtils.q3ei.isD3BFG)
+            return R.string.d3bfg_base;
+        else if (Q3EUtils.q3ei.isDOOM)
+            return R.string.doom_base;
+        else if (Q3EUtils.q3ei.isETW)
+            return R.string.etw_base;
+        else if (Q3EUtils.q3ei.isRealRTCW)
+            return R.string.realrtcw_base;
+        else
+            return R.string.doom_iii;
     }
 
     public static int GetGameThemeColor()
@@ -218,6 +309,8 @@ public final class GameManager
             return R.color.theme_gzdoom_main_color;
         else if (Q3EUtils.q3ei.isETW)
             return R.color.theme_etw_main_color;
+        else if (Q3EUtils.q3ei.isRealRTCW)
+            return R.color.theme_realrtcw_main_color;
         else
             return R.color.theme_doom3_main_color;
     }
@@ -244,6 +337,8 @@ public final class GameManager
             return R.string.doom;
         else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
             return R.string.etw;
+        else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+            return R.string.realrtcw;
         else
             return R.string.doom_3;
     }

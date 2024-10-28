@@ -31,6 +31,8 @@ import java.util.function.Predicate;
 
 public final class ChooseGameModFunc extends GameLauncherFunc
 {
+    public static final String FILE_SEP = " /// ";
+
     private final int m_code;
     private String m_path;
     private String m_mod;
@@ -57,7 +59,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
 
         int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(m_gameLauncher, R.string.load_game_mod_list)));
+            Toast_long(Tr(R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Tr(R.string.load_game_mod_list)));
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return;
 
@@ -94,7 +96,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 Q3EGlobals.GAME_BASE_DOOM3BFG,
                 Q3EGlobals.GAME_BASE_TDM,
                 Q3EGlobals.GAME_BASE_GZDOOM,
-                Q3EGlobals.GAME_BASE_ETW
+                Q3EGlobals.GAME_BASE_ETW,
+                Q3EGlobals.GAME_BASE_REALRTCW
         ));
         List<String> blackList = new ArrayList<>();
         boolean standalone = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher).getBoolean(Q3EPreference.GAME_STANDALONE_DIRECTORY, true);
@@ -112,7 +115,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                     Q3EGlobals.GAME_SUBDIR_RTCW,
                     Q3EGlobals.GAME_SUBDIR_TDM,
                     Q3EGlobals.GAME_SUBDIR_GZDOOM,
-                    Q3EGlobals.GAME_SUBDIR_ETW
+                    Q3EGlobals.GAME_SUBDIR_ETW,
+                    Q3EGlobals.GAME_SUBDIR_REALRTCW
             ));
         }
 
@@ -157,6 +161,13 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 blackList.add(Q3EGlobals.GAME_BASE_ETW);
             else
                 blackList.remove(Q3EGlobals.GAME_BASE_ETW);
+        }
+        else if(Q3EUtils.q3ei.isRealRTCW)
+        {
+            if(standalone)
+                blackList.add(Q3EGlobals.GAME_BASE_REALRTCW);
+            else
+                blackList.remove(Q3EGlobals.GAME_BASE_REALRTCW);
         }
 /*        else if(Q3EUtils.q3ei.isTDM)
         {
@@ -226,6 +237,11 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 if(Q3EGlobals.GAME_BASE_ETW.equals(fileModel.name))
                     name = Q3EGlobals.GAME_NAME_ETW;
             }
+            else if(Q3EUtils.q3ei.isRealRTCW)
+            {
+                if(Q3EGlobals.GAME_BASE_REALRTCW.equals(fileModel.name))
+                    name = Q3EGlobals.GAME_NAME_REALRTCW;
+            }
 /*            else if(Q3EUtils.q3ei.isTDM)
             {
                 if(Q3EGlobals.GAME_BASE_TDM.equals(fileModel.name))
@@ -276,6 +292,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                         break;
                     case Q3EGlobals.GAME_ETW:
                         if(!Q3EUtils.q3ei.isETW)
+                            continue;
+                        break;
+                    case Q3EGlobals.GAME_REALRTCW:
+                        if(!Q3EUtils.q3ei.isRealRTCW)
                             continue;
                         break;
                     case Q3EGlobals.GAME_DOOM3:
@@ -352,11 +372,11 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(m_gameLauncher, R.string.mod));
+        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Tr(R.string.mod));
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {
-                String lib = values.get(p);
+                String lib = KStr.CmdStr(values.get(p));
                 Callback(lib);
                 dialog.dismiss();
                 if(AllowExtraFiles)
@@ -442,7 +462,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Q3ELang.tr(m_gameLauncher, R.string.mod) + ": " + Q3ELang.tr(m_gameLauncher, R.string._files));
+        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Tr(R.string.mod) + ": " + Tr(R.string._files));
         builder.setMultiChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnMultiChoiceClickListener(){
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked)
@@ -460,7 +480,10 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int p)
             {
-                String join = KStr.Join(files, " ");
+                List<String> norFiles = new ArrayList<>(files.size());
+                for(String file : files)
+                    norFiles.add(KStr.CmdStr(file));
+                String join = KStr.Join(norFiles, FILE_SEP);
                 Callback(":" + join);
                 dialog.dismiss();
             }

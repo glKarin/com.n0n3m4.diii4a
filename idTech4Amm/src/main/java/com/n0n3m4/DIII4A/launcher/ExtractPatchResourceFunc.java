@@ -49,9 +49,9 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
         m_path = data.getString("path");
         // D3-format fonts don't need on longer
         final String[] Names = {
-                // Q3ELang.tr(m_gameLauncher, R.string.opengles_shader),
-                Q3ELang.tr(m_gameLauncher, R.string.bot_q3_bot_support_in_mp_game),
-                Q3ELang.tr(m_gameLauncher, R.string.rivensin_play_original_doom3_level),
+                // Tr(R.string.opengles_shader),
+                Tr(R.string.bot_q3_bot_support_in_mp_game),
+                Tr(R.string.rivensin_play_original_doom3_level),
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.game_patch_resource)
@@ -82,7 +82,7 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
 
         int res = ContextUtility.CheckFilePermission(m_gameLauncher, m_code);
         if(res == ContextUtility.CHECK_PERMISSION_RESULT_REJECT)
-            Toast_long(Q3ELang.tr(m_gameLauncher, R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Q3ELang.tr(m_gameLauncher, R.string.access_file)));
+            Toast_long(Tr(R.string.can_t_s_read_write_external_storage_permission_is_not_granted, Tr(R.string.access_file)));
         if(res != ContextUtility.CHECK_PERMISSION_RESULT_GRANTED)
             return -1;
 
@@ -107,6 +107,6 @@ public final class ExtractPatchResourceFunc extends GameLauncherFunc
             if(ok)
                 r++;
         }
-        Toast_short(Q3ELang.tr(m_gameLauncher, R.string.extract_path_resource_) + r);
+        Toast_short(Tr(R.string.extract_path_resource_) + r);
     }
 }

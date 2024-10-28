@@ -178,7 +178,7 @@
     <string name="last_crash_info">Last crash info</string>
     <string name="file_chooser">File chooser</string>
     <string name="update_interval_second_0_disable">Update interval(Second): 0 - Disable</string>
-    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">If you do not want to debug memory usage status, please do not enable it! Because it is a taking-time operation!</string>
+    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">If you do not want to debug memory usage status, please do not enable it!</string>
     <string name="render_memory_status_0_is_disable">Render memory status(0 is disable)</string>
     <string name="no_handle_signals">No handle signals</string>
     <string name="do_not_handle_signals">Do not handle signals</string>
@@ -295,6 +295,7 @@
     <string name="rtcw_base">Return to Castle Wolfenstein</string>
     <string name="etw_base">Wolfenstein: Enemy Territory</string>
     <string name="tdm_base">The Dark Mod</string>
+    <string name="realrtcw_base">RealRTCW</string>
 
     <string name="d3bfg_base">DOOM 3 BFG</string>
     <string name="doom_base">DOOM</string>
@@ -385,5 +386,28 @@
     <string name="you_can_also_disable_it_like_older_version">You can also disable it like older version.</string>
     <string name="you_can_view_all_support_games_data_directory_path_by_tips_button_above_chooser_button_in_launcher">You can view all support games data directory path by `Tips` button above `Chooser` button in launcher.</string>
     <string name="you_can_also_change_it_manually_on_launcher_settings">You can also change it manually on launcher settings.</string>
+    <string name="realrtcw">RealRTCW</string>
+    <string name="input_event_queue">Input event queue</string>
+    <string name="choose_input_event_queue_scheme">Choose input event queue scheme</string>
+    <string name="filter">Filter</string>
+    <string name="experimental">Experimental</string>
+    <string name="log">Log</string>
+    <string name="util">Util</string>
+    <string name="input">Input</string>
+    <string name="use_external_library_path">Use external library path</string>
+    <string name="load_game_library_from_getdatadir"><![CDATA[Load external local game libraries from `<game working directory>/lib/<arm64|arm>/`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`-->
+    <string name="load_engine_library_from_getdatadir"><![CDATA[Load external local game engine library from `<game working directory>/[<Game standalone directory>/]<game engine library>`]]></string> <!-- to `/data/user/<UID>/com.karin.idTech4Amm/cache/<game engine library>`-->
+    <string name="shortcut">Shortcut</string>
+    <string name="create_desktop_shortcut_success">Create %s %s desktop shortcut success.</string>
+    <string name="create_desktop_shortcut_fail">Create %s %s desktop shortcut fail!</string>
+    <string name="create_desktop_shortcut">Create desktop shortcut</string>
+    <string name="unsupport_create_desktop_shortcut">Unsupport create desktop shortcut!</string>
+    <string name="only_support_on_android_version_7_1"><![CDATA[Only support on Android version >= 7.1 for create desktop shortcut.]]></string>
+    <string name="all">All</string>
+    <string name="permission_not_granted">Permission \'%s\' not granted</string>
+    <string name="command_shortcut">Shortcut(Current command)</string>
+    <string name="create_shortcut_with_current_command_and_game">Create shortcut(current command and game)</string>
+    <string name="input_desktop_shortcut_name">Input desktop shortcut name</string>
+    <string name="game_desktop_shortcut_has_created">Game %s desktop shortcut has created(%s).</string>
 
 </resources>

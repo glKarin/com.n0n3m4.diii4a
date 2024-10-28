@@ -741,28 +741,6 @@ char *Sys_GetClipboardData(void)
 #endif
 }
 
-void Sys_SyncState(void)
-{
-	//if (setState)
-	{
-		static int prev_state = -1;
-		/* We are in game and neither console/ui is active */
-		//if (cls.state == CA_ACTIVE && Key_GetCatcher() == 0)
-
-		int state = (((cl.snap.ps.serverCursorHint==HINT_DOOR_ROTATING)||(cl.snap.ps.serverCursorHint==HINT_DOOR)
-				  ||(cl.snap.ps.serverCursorHint==HINT_BUTTON)||(cl.snap.ps.serverCursorHint==HINT_ACTIVATE)) << 0) | ((clc.state == CA_ACTIVE && Key_GetCatcher() == 0) << 1) | ((cl.snap.ps.serverCursorHint==HINT_BREAKABLE) << 2);
-//cl.snap.ps.pm_flags & PMF_DUCKED;
-//    else
-//        state = 0;
-
-		if (state != prev_state)
-		{
-			setState(state);
-			prev_state = state;
-		}
-	}
-}
-
 /*
 =================
 main

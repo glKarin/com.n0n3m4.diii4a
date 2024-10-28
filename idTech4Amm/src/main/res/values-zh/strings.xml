@@ -87,6 +87,7 @@
     <string name="quake_3">雷神之锤3</string>
     <string name="rtcw">重返德军总部</string>
     <string name="etw">德军总部: 深入敌后</string>
+    <string name="realrtcw">真·重返德军总部</string>
     <string name="tdm">Dark mod</string>
     <string name="doom">毁灭战士</string>
     <string name="prey_2006">掠食(2006)</string>
@@ -175,7 +176,7 @@
     <string name="last_crash_info">最新崩溃信息</string>
     <string name="file_chooser">文件选择器</string>
     <string name="update_interval_second_0_disable">更新间隔(秒): 0 - 禁用</string>
-    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">如果不想要调试内存使用状态, 请不要启用(此操作费时)!</string>
+    <string name="if_you_do_not_want_to_debug_memory_usage_status_please_do_not_check_it_because_it_is_a_taking_time_operation">如果不想要调试内存使用状态, 请不要启用!</string>
     <string name="render_memory_status_0_is_disable">渲染内存状态(0为禁用)</string>
     <string name="no_handle_signals">不处理信号</string>
     <string name="do_not_handle_signals">不处理信号</string>
@@ -290,6 +291,7 @@
     <string name="quake_2_xatrix">雷神之锤2:xatrix</string>
     <string name="quake_2_zaero">雷神之锤2:zaero</string>
     <string name="rtcw_base">重返德军总部</string>
+    <string name="realrtcw_base">真·重返德军总部</string>
     <string name="tdm_base">The Dark Mod</string>
     <string name="d3bfg_base">毁灭战士3 BFG</string>
     <string name="doom_base">毁灭战士</string>
@@ -381,4 +383,26 @@
     <string name="you_can_also_disable_it_like_older_version">也可以禁用, 像之前版本一样.</string>
     <string name="you_can_view_all_support_games_data_directory_path_by_tips_button_above_chooser_button_in_launcher">启动器中可以通过`选择器`上方的`提示`按钮显示所有支持的游戏的游戏数据文件放置路径.</string>
     <string name="you_can_also_change_it_manually_on_launcher_settings">也可以在启动器设置中手动修改.</string>
+    <string name="input_event_queue">输入事件队列</string>
+    <string name="choose_input_event_queue_scheme">选择输入事件队列方案</string>
+    <string name="filter">过滤</string>
+    <string name="experimental">实验性</string>
+    <string name="log">日志</string>
+    <string name="util">工具</string>
+    <string name="input">输入</string>
+    <string name="use_external_library_path">使用外部动态库目录</string>
+    <string name="load_game_library_from_getdatadir"><![CDATA[从外部`<游戏运行目录>/lib/<arm64|arm>/`加载游戏动态库]]></string> <!--到`/data/user/<UID>/com.karin.idTech4Amm/cache/lib/<arm64|arm>/`下并加载-->
+    <string name="load_engine_library_from_getdatadir"><![CDATA[从外部`<游戏运行目录>/[<独立游戏文件夹>/]<游戏引擎动态库>`加载游戏引擎动态库]]></string> <!--到`/data/user/<UID>/com.karin.idTech4Amm/cache/<游戏动态库>`下并加载-->
+    <string name="shortcut">快捷方式</string>
+    <string name="create_desktop_shortcut_success">创建%s %s桌面快捷方式成功.</string>
+    <string name="create_desktop_shortcut_fail">创建%s %s桌面快捷方式失败!</string>
+    <string name="create_desktop_shortcut">创建桌面快捷方式</string>
+    <string name="unsupport_create_desktop_shortcut">不支持创建桌面快捷方式!</string>
+    <string name="only_support_on_android_version_7_1"><![CDATA[创建桌面快捷方式仅支持Android 7.1及其以上版本]]></string>
+    <string name="all">全部</string>
+    <string name="permission_not_granted">未授权 %s 权限</string>
+    <string name="command_shortcut">快捷方式(当前命令)</string>
+    <string name="create_shortcut_with_current_command_and_game">创建桌面快捷方式(当前的命令行和游戏)</string>
+    <string name="input_desktop_shortcut_name">输入桌面快捷方式名称</string>
+    <string name="game_desktop_shortcut_has_created">%s桌面快捷方式已被创建(%s).</string>
 </resources>

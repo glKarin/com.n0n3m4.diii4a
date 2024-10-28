@@ -56,7 +56,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
 
     public void run()
     {
-        ContextUtility.OpenMessageDialog(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.current_game_data_path), GetHelperText());
+        ContextUtility.OpenMessageDialog(m_gameLauncher, Tr(R.string.current_game_data_path), GetHelperText());
     }
 
     public CharSequence GetHelperText()
@@ -69,7 +69,7 @@ public final class DirectoryHelperFunc extends GameLauncherFunc
         Game[] values = Game.values();
         for (String game : GameManager.Games)
         {
-            String gameName = Q3ELang.tr(m_gameLauncher, GameManager.GetGameNameTs(game));
+            String gameName = Tr(GameManager.GetGameNameTs(game));
             sb.append("------- ").append(gameName).append(" -------").append(endl);
             int i = 1;
             for (Game value : values)

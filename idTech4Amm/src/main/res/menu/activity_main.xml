@@ -13,47 +13,63 @@
             <item
                 android:id="@+id/main_menu_game_doom3"
                 android:title="@string/doom_3"
-                android:showAsAction="never"/>
+                android:icon="@drawable/d3_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_quake4"
                 android:title="@string/quake_4"
-                android:showAsAction="never"/>
+                android:icon="@drawable/q4_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_prey"
                 android:title="@string/prey_2006"
-                android:showAsAction="never"/>
+                android:icon="@drawable/prey_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_rtcw"
                 android:title="@string/rtcw"
-                android:showAsAction="never"/>
+                android:icon="@drawable/rtcw_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_quake3"
                 android:title="@string/quake_3"
-                android:showAsAction="never"/>
+                android:icon="@drawable/q3_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_quake2"
                 android:title="@string/quake_2"
-                android:showAsAction="never"/>
+                android:icon="@drawable/q2_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_quake1"
                 android:title="@string/quake_1"
-                android:showAsAction="never"/>
+                android:icon="@drawable/q1_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_doom3bfg"
                 android:title="@string/doom_3_bfg"
-                android:showAsAction="never"/>
+                android:icon="@drawable/d3bfg_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_tdm"
                 android:title="@string/tdm"
-                android:showAsAction="never"/>
+                android:icon="@drawable/tdm_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_doom"
                 android:title="@string/doom"
-                android:showAsAction="never"/>
+                android:icon="@drawable/gzdoom_icon"
+                android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_etw"
                 android:title="@string/etw"
-                android:showAsAction="never"/>
+                android:icon="@drawable/etw_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_realrtcw"
+                android:title="@string/realrtcw"
+                android:icon="@drawable/realrtcw_icon"
+                android:showAsAction="never|withText"/>
         </menu>
     </item>
     
@@ -105,16 +121,20 @@
                 android:title="@string/extract_resource"
                 android:showAsAction="never"/>
             <item
-                android:id="@+id/main_menu_support_developer"
-                android:title="@string/support_the_developer"
+                android:id="@+id/main_menu_experimental"
+                android:title="@string/experimental"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_check_for_update"
                 android:title="@string/check_for_update"
                 android:showAsAction="never"/>
             <item
-                android:id="@+id/main_menu_debug"
-                android:title="@string/debug"
+                android:id="@+id/main_menu_shortcut"
+                android:title="@string/shortcut"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_shortcut_command"
+                android:title="@string/command_shortcut"
                 android:showAsAction="never"/>
         </menu>
     </item>
@@ -135,6 +155,14 @@
             <item
                 android:id="@+id/main_menu_translators"
                 android:title="@string/translators"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_support_developer"
+                android:title="@string/support_the_developer"
+                android:showAsAction="never"/>
+            <item
+                android:id="@+id/main_menu_debug"
+                android:title="@string/debug"
                 android:showAsAction="never"/>
         </menu>
     </item>

@@ -1458,7 +1458,6 @@ int FS_FindVM(void **startSearch, char *found, int foundlen, const char *name, i
 	if(enableDll)
 		Com_sprintf(dllName, sizeof(dllName), "%s" ARCH_STRING DLL_EXT, name);
 
-	Com_sprintf(qvmName, sizeof(qvmName), "vm/%s.qvm", name);
 #ifdef __ANDROID__ //karin: load *.so on Android
 	if(enableDll)
 	{
@@ -1486,6 +1485,8 @@ int FS_FindVM(void **startSearch, char *found, int foundlen, const char *name, i
 		}
 	}
 #endif
+
+	Com_sprintf(qvmName, sizeof(qvmName), "vm/%s.qvm", name);
 
 	lastSearch = *startSearch;
 	if(*startSearch == NULL)

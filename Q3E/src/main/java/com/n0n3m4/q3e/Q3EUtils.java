@@ -47,6 +47,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.karin.KFDManager;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -306,6 +307,16 @@ public class Q3EUtils
         return is;
     }
 
+    public static String GetDataPath(String filename)
+    {
+        String path = "";
+        if(null != q3ei.datadir)
+            path += q3ei.datadir;
+        if(KStr.NotEmpty(filename))
+            path += filename;
+        return path;
+    }
+
     public static String GetAppStoragePath(Context context)
     {
         String path = Q3EUtils.GetAppStoragePath(context, null);
@@ -332,7 +343,7 @@ public class Q3EUtils
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             path = context.getDataDir().getAbsolutePath();
         else
-            path = context.getCacheDir().getAbsolutePath();
+            path = context.getCacheDir().getAbsolutePath() + "/..";
         if(null != filename && !filename.isEmpty())
             path += filename;
         return path;

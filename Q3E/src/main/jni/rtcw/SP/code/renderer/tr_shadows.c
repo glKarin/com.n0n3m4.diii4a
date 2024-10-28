@@ -51,10 +51,16 @@ typedef struct {
 static edgeDef_t edgeDefs[SHADER_MAX_VERTEXES][MAX_EDGE_DEFS];
 static int numEdgeDefs[SHADER_MAX_VERTEXES];
 static int facing[SHADER_MAX_INDEXES / 3];
+#if !defined(USE_OPENGLES) //karin: unused on OpenGLES
 static vec3_t shadowXyz[SHADER_MAX_VERTEXES];
+#endif
 
-#ifdef USE_OPENGLES
-static unsigned short indexes[6*MAX_EDGE_DEFS*SHADER_MAX_VERTEXES];
+#ifdef USE_OPENGLES //karin: over SHRT_MAX, so use int instead of short for stencil shadow
+#define USE_SHADOW_XYZ
+#ifdef USE_SHADOW_XYZ
+static	vec3_t		shadowXyz[SHADER_MAX_VERTEXES * 2]; //karin: RB_EndSurface() - SHADER_MAX_INDEXES hit
+#endif
+static glIndex_t indexes[6*MAX_EDGE_DEFS*SHADER_MAX_VERTEXES];
 static int idx = 0;
 #endif
 
@@ -165,7 +171,7 @@ void R_RenderShadowEdges( void ) {
 	}
 
 #ifdef USE_OPENGLES
-	qglDrawElements(GL_TRIANGLES, idx, GL_UNSIGNED_SHORT, indexes);
+	qglDrawElements(GL_TRIANGLES, idx, GL_INDEX_TYPE, indexes);
 #endif
 
 #endif
@@ -195,10 +201,21 @@ void RB_ShadowTessEnd( void ) {
 
 	VectorCopy( backEnd.currentEntity->lightDir, lightDir );
 
+#ifdef USE_OPENGLES //karin: use shadowXyz for stencil shadow
+	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
+#ifdef USE_SHADOW_XYZ
+		VectorCopy( tess.xyz[i], shadowXyz[i] );
+		VectorMA( tess.xyz[i], -512, lightDir, shadowXyz[i+tess.numVertexes] );
+#else
+		VectorMA( tess.xyz[i], -512, lightDir, tess.xyz[i+tess.numVertexes] );
+#endif
+	}
+#else
 	// project vertexes away from light direction
 	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
 		VectorMA( tess.xyz[i], -512, lightDir, shadowXyz[i] );
 	}
+#endif
 
 	// decide which triangles face the light
 	memset( numEdgeDefs, 0, 4 * tess.numVertexes );
@@ -249,7 +266,11 @@ void RB_ShadowTessEnd( void ) {
 	qglStencilFunc( GL_ALWAYS, 1, 255 );
 
 #ifdef USE_OPENGLES
+#ifdef USE_SHADOW_XYZ
+	qglVertexPointer (3, GL_FLOAT, 0, shadowXyz);
+#else
 	qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);
+#endif
 	GLboolean text = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
 	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
 	if (text)
@@ -267,7 +288,7 @@ void RB_ShadowTessEnd( void ) {
 	qglStencilOp( GL_KEEP, GL_KEEP, GL_DECR );
 
 #ifdef USE_OPENGLES
-	qglDrawElements(GL_TRIANGLES, idx, GL_UNSIGNED_SHORT, indexes);
+	qglDrawElements(GL_TRIANGLES, idx, GL_INDEX_TYPE, indexes);
 #else
 	R_RenderShadowEdges();
 #endif

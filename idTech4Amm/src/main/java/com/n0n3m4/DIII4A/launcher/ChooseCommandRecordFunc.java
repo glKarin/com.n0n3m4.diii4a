@@ -30,9 +30,9 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
     private String m_cmd;
     private String m_key;
 
-    public ChooseCommandRecordFunc(GameLauncher gameLauncher, Runnable runnable)
+    public ChooseCommandRecordFunc(GameLauncher gameLauncher)
     {
-        super(gameLauncher, runnable);
+        super(gameLauncher);
     }
 
     public void Reset()
@@ -160,7 +160,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                             }
                             else
                             {
-                                Toast_short(Q3ELang.tr(m_gameLauncher, R.string.must_choose_a_command));
+                                Toast_short(Tr(R.string.must_choose_a_command));
                             }
                         }
                     }
@@ -238,14 +238,14 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
     {
         if(cmds.size() != 1)
         {
-            Toast_short(Q3ELang.tr(m_gameLauncher, R.string.must_choose_a_command));
+            Toast_short(Tr(R.string.must_choose_a_command));
             return 0;
         }
         final String cmd = cmds.iterator().next();
-        String[] args = {""};
+        String[] args = { cmd };
         boolean[] error = {false};
         m_cmd = cmd;
-        AlertDialog input = ContextUtility.Input(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.edit_command_record), Q3ELang.tr(m_gameLauncher, R.string.command), cmd, args, new Runnable()
+        AlertDialog input = ContextUtility.Input(m_gameLauncher, Tr(R.string.edit_command_record), Tr(R.string.command), args, new Runnable()
         {
             @Override
             public void run()
@@ -254,7 +254,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                 if (arg.isEmpty())
                 {
                     error[0] = true;
-                    Toast_short(Q3ELang.tr(m_gameLauncher, R.string.empty_content));
+                    Toast_short(Tr(R.string.empty_content));
                 }
                 else if(!cmd.equals(arg))
                 {
@@ -267,7 +267,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                         if(records.contains(arg))
                         {
                             error[0] = true;
-                            Toast_short(Q3ELang.tr(m_gameLauncher, R.string.command_exists));
+                            Toast_short(Tr(R.string.command_exists));
                         }
                         else
                         {
@@ -307,7 +307,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
     {
         String[] args = {""};
         boolean[] error = {false};
-        AlertDialog input = ContextUtility.Input(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.add_command_record), Q3ELang.tr(m_gameLauncher, R.string.command), null, args, new Runnable()
+        AlertDialog input = ContextUtility.Input(m_gameLauncher, Tr(R.string.add_command_record), Tr(R.string.command), args, new Runnable()
         {
             @Override
             public void run()
@@ -316,7 +316,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                 if (arg.isEmpty())
                 {
                     error[0] = true;
-                    Toast_short(Q3ELang.tr(m_gameLauncher, R.string.empty_content));
+                    Toast_short(Tr(R.string.empty_content));
                 }
                 else
                 {
@@ -325,7 +325,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
                     if (records.contains(arg))
                     {
                         error[0] = true;
-                        Toast_short(Q3ELang.tr(m_gameLauncher, R.string.command_exists));
+                        Toast_short(Tr(R.string.command_exists));
                     }
                     else
                     {
@@ -377,7 +377,7 @@ public final class ChooseCommandRecordFunc extends GameLauncherFunc
     {
         if(cmds.size() != 1)
         {
-            Toast_short(Q3ELang.tr(m_gameLauncher, R.string.must_choose_a_command));
+            Toast_short(Tr(R.string.must_choose_a_command));
             return null;
         }
         return cmds.iterator().next();

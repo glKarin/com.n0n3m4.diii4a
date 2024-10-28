@@ -183,7 +183,7 @@ public class Slider extends Paintable implements TouchListener
     }
 
     @Override
-    public boolean onTouchEvent(int x, int y, int act, int id)
+    public boolean onTouchEvent(int x, int y, int act)
     {
         if (act == 1)
         {
@@ -317,11 +317,5 @@ public class Slider extends Paintable implements TouchListener
     {
         cx = x;
         cy = y;
-    }
-
-    @Override
-    public boolean SupportMultiTouch()
-    {
-        return false;
     }
 }

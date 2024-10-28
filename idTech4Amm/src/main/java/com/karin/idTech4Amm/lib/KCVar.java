@@ -6,26 +6,30 @@ import java.util.List;
 
 public final class KCVar
 {
-    public static final String TYPE_NONE = "";
-    public static final String TYPE_STRING = "string";
-    public static final String TYPE_BOOL = "bool";
+    public static final String TYPE_NONE    = "";
+    public static final String TYPE_STRING  = "string";
+    public static final String TYPE_BOOL    = "bool";
     public static final String TYPE_INTEGER = "integer";
-    public static final String TYPE_FLOAT = "float";
+    public static final String TYPE_FLOAT   = "float";
     public static final String TYPE_VECTOR3 = "vector3";
 
-    public static final int CATEGORY_CVAR = 1;
+    public static final int CATEGORY_CVAR    = 1;
     public static final int CATEGORY_COMMAND = 2;
 
-    public static final int FLAG_POSITIVE = 1;
-    public static final int FLAG_NO_ARCHIVE = 1 << 1;
+    public static final int FLAG_POSITIVE = 0x00000001; // number is positive
+    public static final int FLAG_INIT     = 0x00000002; // only allow setup on command line, not save to file/load from from
+    public static final int FLAG_AUTO     = 0x00000004; // auto setting when run game
+    public static final int FLAG_READONLY = 0x00000100; // not allow modify
+    public static final int FLAG_DISABLED = 0x00000200; // disabled
+    public static final int FLAG_LAUNCHER = 0x00010000; // setting exists on launcher
 
-    public final String name;
-    public final String type;
-    public final String defaultValue;
-    public final String description;
+    public final String  name;
+    public final String  type;
+    public final String  defaultValue;
+    public final String  description;
     public final Value[] values;
-    public final int flags;
-    public final int category;
+    public final int     flags;
+    public final int     category;
 
     private KCVar(String name, String type, String defaultValue, String description, int category, int flags, Value[] values)
     {
@@ -43,6 +47,11 @@ public final class KCVar
         return (flags & flag) == flag;
     }
 
+    public boolean HasFlags(int flag)
+    {
+        return (flags & flag) != 0;
+    }
+
     public static class Value {
         public final String value;
         public final String desc;
@@ -55,8 +64,8 @@ public final class KCVar
     }
 
     public static class Group {
-        public final String name;
-        public final boolean engine;
+        public final String      name;
+        public final boolean     engine;
         public final List<KCVar> list;
 
         public Group(String name, boolean engine)

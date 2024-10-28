@@ -20,26 +20,10 @@ public final class CVarSettingUI
     {
         if(cvar.category == KCVar.CATEGORY_COMMAND)
             return TYPE_NONE;
-        final String[] IgnoreCVars = {
-                "harm_r_clearVertexBuffer",
-                "harm_r_lightingModel",
-                "harm_r_specularExponent",
-                "harm_r_specularExponentBlinnPhong",
-                "harm_r_specularExponentPBR",
-                "harm_fs_gameLibPath",
-                "r_maxFps",
-                "r_useShadowMapping",
-                "harm_r_stencilShadowTranslucent",
-                "harm_fs_gameLibDir",
-                "harm_r_stencilShadowAlpha",
-                "harm_r_stencilShadowSoft",
-                "harm_r_stencilShadowCombine",
-                "harm_r_autoAspectRatio",
-                "harm_r_shadowMapAlpha",
-                "r_forceShadowMapsOnAlphaTestedSurfaces",
-        };
-        if(Utility.ArrayContains(IgnoreCVars, cvar.name))
+
+        if(cvar.HasFlags(KCVar.FLAG_LAUNCHER | KCVar.FLAG_AUTO | KCVar.FLAG_DISABLED))
             return TYPE_NONE;
+
         if(null != cvar.values)
             return TYPE_SELECTION;
         else if(KCVar.TYPE_BOOL.equals(cvar.type))

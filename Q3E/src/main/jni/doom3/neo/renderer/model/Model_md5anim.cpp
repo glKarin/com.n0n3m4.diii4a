@@ -592,339 +592,508 @@ namespace md5anim
         return str;
     }
 
-    static void R_CutAnim_f(const idCmdArgs &args)
+    typedef struct editAnim_s
     {
-        if (args.Argc() < 4)
-        {
-            common->Printf("Usage: cutAnim <anim_file> <start_frame> <end_frame>");
-            return;
-        }
+        int cmd;
+        idStr animFile;
+        int startFrame;
+        int endFrame;
+    } editAnim_t;
 
-        md5anim::idMD5AnimFile file;
-        const char *filename = args.Argv(1);
-        if(!file.LoadAnim(filename))
-        {
-            common->Warning("Load md5anim file error: %s", filename);
-            return;
-        }
-
-        const char *start = args.Argv(2);
-        const char *end = args.Argv(3);
-        if(!file.CutAnim(atoi(start), atoi(end)))
-        {
-            common->Warning("Cut md5anim error: %s(%s - %s)", filename, start, end);
-            return;
-        }
-
-        idStr text = file.ToString();
-        idStr basePath;
-
-        idStr targetPath;
-        if(!basePath.IsEmpty())
-        {
-            targetPath = basePath;
-            targetPath.AppendPath(filename);
-        }
-        else
-        {
-            targetPath = filename;
-            targetPath.StripFileExtension();
-            targetPath.Append(va("_cut_%s_%s", start, end));
-            targetPath.Append(".md5anim");
-        }
-        idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
-        md5anim::WriteText(text, f);
-        fileSystem->CloseFile(f);
-
-        common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
-    }
-
-    static void R_ReverseAnim_f(const idCmdArgs &args)
+    class idAnimEditor
     {
-        if (args.Argc() < 2)
-        {
-            common->Printf("Usage: reverseAnim <anim_file> [<start_frame> <end_frame>]");
-            return;
-        }
+    public:
+        idAnimEditor(void);
+        virtual ~idAnimEditor(void);
+        bool Parse(const idCmdArgs &args);
+        bool Handle(void);
 
-        md5anim::idMD5AnimFile file;
-        const char *filename = args.Argv(1);
-        if(!file.LoadAnim(filename))
-        {
-            common->Warning("Load md5anim file error: %s", filename);
-            return;
-        }
+    private:
+        enum {
+            CMD_INVALID = 0,
+            CMD_CUT = 1,
+            CMD_REVERSE,
+            CMD_LOOP,
+            CMD_LINK,
+            CMD_OUT,
+        };
+        int ParseCmd(const idCmdArgs &args, int &start);
+        bool ParseCut(const idCmdArgs &args, int &start);
+        bool ParseReverse(const idCmdArgs &args, int &start);
+        bool ParseLoop(const idCmdArgs &args, int &start);
+        bool ParseLink(const idCmdArgs &args, int &start);
+        bool ParseOut(const idCmdArgs &args, int &start);
 
-        int startFrame = 0;
-        int endFrame = -1;
-        if(args.Argc() > 2)
-            startFrame = atoi(args.Argv(2));
-        if(args.Argc() > 3)
-            endFrame = atoi(args.Argv(3));
-        if(!file.ReverseAnim(startFrame, endFrame))
-        {
-            common->Warning("Reverse md5anim error: %s(%d - %d)", filename, startFrame, endFrame);
-            return;
-        }
+        bool HandleCut(const editAnim_t &edit);
+        bool HandleReverse(const editAnim_t &edit);
+        bool HandleLoop(const editAnim_t &edit);
+        bool HandleLink(const editAnim_t &edit);
+        bool HandleOut(const editAnim_t &edit);
 
-        idStr text = file.ToString();
-        idStr basePath;
+        bool CheckAnimFile(const char *str) const;
+        void PrintEdit(const editAnim_t &edit) const;
+        int AddEdit(const editAnim_t &edit);
+        bool IsNumeric(const char *token) const;
 
-        idStr targetPath;
-        if(!basePath.IsEmpty())
-        {
-            targetPath = basePath;
-            targetPath.AppendPath(filename);
-        }
-        else
-        {
-            targetPath = filename;
-            targetPath.StripFileExtension();
-            targetPath.Append("_reverse");
-            if(args.Argc() > 2)
-                targetPath.Append(va("_%d", startFrame));
-            if(args.Argc() > 3)
-                targetPath.Append(va("_%d", endFrame));
-            targetPath.Append(".md5anim");
-        }
-        idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
-        md5anim::WriteText(text, f);
-        fileSystem->CloseFile(f);
+    private:
+        idStr animFile;
+        idList<editAnim_t> cmds;
 
-        common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
-    }
-
-    static void R_LoopAnim_f(const idCmdArgs &args)
-    {
-        if (args.Argc() < 2)
-        {
-            common->Printf("Usage: loopAnim <anim_file> [<start_frame> <end_frame>]");
-            return;
-        }
-
-        md5anim::idMD5AnimFile file;
-        const char *filename = args.Argv(1);
-        if(!file.LoadAnim(filename))
-        {
-            common->Warning("Load md5anim file error: %s", filename);
-            return;
-        }
-
-        int startFrame = 0;
-        int endFrame = -1;
-        if(args.Argc() > 2)
-            startFrame = atoi(args.Argv(2));
-        if(args.Argc() > 3)
-            endFrame = atoi(args.Argv(3));
-        if(!file.LoopAnim(startFrame, endFrame))
-        {
-            common->Warning("Loop md5anim error: %s(%d - %d)", filename, startFrame, endFrame);
-            return;
-        }
-
-        idStr text = file.ToString();
-        idStr basePath;
-
-        idStr targetPath;
-        if(!basePath.IsEmpty())
-        {
-            targetPath = basePath;
-            targetPath.AppendPath(filename);
-        }
-        else
-        {
-            targetPath = filename;
-            targetPath.StripFileExtension();
-            targetPath.Append("_loop");
-            if(args.Argc() > 2)
-                targetPath.Append(va("_%d", startFrame));
-            if(args.Argc() > 3)
-                targetPath.Append(va("_%d", endFrame));
-            targetPath.Append(".md5anim");
-        }
-        idFile *f = fileSystem->OpenFileWrite(targetPath.c_str(), "fs_savepath");
-        md5anim::WriteText(text, f);
-        fileSystem->CloseFile(f);
-
-        common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
-    }
-
-    struct animPart_s
-    {
-        idStr file_name;
-        int start;
-        int end;
-    };
-    struct animLoad_s
-    {
-        idStr file_name;
-        md5anim::idMD5AnimFile anim;
+        idMD5AnimFile *md5anim;
+        int currentIndex;
     };
 
-    static void R_LinkAnim_f(const idCmdArgs &args)
+    idAnimEditor::idAnimEditor(void)
+    : md5anim(NULL),
+      currentIndex(-1)
     {
-        if (args.Argc() < 5)
+    }
+
+    idAnimEditor::~idAnimEditor(void)
+    {
+        delete md5anim;
+    }
+
+    int idAnimEditor::ParseCmd(const idCmdArgs &args, int &start)
+    {
+        const char *token = args.Argv(start);
+        if(idStr::Cmp(token, "-"))
         {
-            common->Printf("Usage: cutAnim <new_anim_file> [-a <anim_file> [-f] <start_frame> <end_frame> ......]");
-            return;
+            common->Warning("Require '-' token, but read '%s'!", token);
+            return -1;
+        }
+        if(start + 1 >= args.Argc())
+        {
+            common->Warning("Missing argument token!");
+            return -2;
+        }
+        token = args.Argv(start + 1);
+        int cmd = CMD_INVALID;
+        if(!idStr::Icmp("cut", token) || !idStr::Icmp("c", token))
+        {
+            cmd = CMD_CUT;
+        }
+        else if(!idStr::Icmp("reverse", token) || !idStr::Icmp("r", token))
+        {
+            cmd = CMD_REVERSE;
+        }
+        else if(!idStr::Icmp("loop", token) || !idStr::Icmp("p", token))
+        {
+            cmd = CMD_LOOP;
+        }
+        else if(!idStr::Icmp("link", token) || !idStr::Icmp("l", token))
+        {
+            cmd = CMD_LINK;
+        }
+        else if(!idStr::Icmp("output", token) || !idStr::Icmp("o", token))
+        {
+            cmd = CMD_OUT;
         }
 
-#define PARSE_SHORT_ARG(what) \
-		if(argType != 1) \
-		{ \
-			common->Warning("Required short argument"); \
-            continue; \
-		} \
-		i++; \
-		if(i >= args.Argc()) \
-		{                           \
-            readNum = -1; \
-            common->Warning("Missing short argument `" what "` value"); \
-			break; \
-		} \
-		arg = args.Argv(i);
-
-        idList<animPart_s> parts;
-        idList<animLoad_s> loadeds;
-
-        animPart_s part;
-        bool partSeted = false;
-        int readNum = -1;
-        for(int i = 2; i < args.Argc(); i++)
+        if(cmd == CMD_INVALID)
         {
-            idStr arg = args.Argv(i);
-            int argType = 0;
-            if(!arg.Cmp("-"))
-            {
-                i++;
-                if(i >= args.Argc())
-                {
-                    common->Warning("Missing short argument");
-                    break;
-                }
-                arg = args.Argv(i);
-                argType = 1;
-            }
-
-            if(argType == 1)
-            {
-                if(partSeted)
-                {
-                    parts.Append(part);
-                    part.start = 0;
-                    part.end = -1;
-                    readNum = 0;
-                }
-
-                if(arg == "a")
-                {
-                    PARSE_SHORT_ARG("a");
-                    part.file_name = arg;
-                    part.start = 0;
-                    part.end = -1;
-                    partSeted = true;
-                    readNum = 0;
-                }
-                else if(arg == "f")
-                {
-                    PARSE_SHORT_ARG("f");
-                    if(!partSeted)
-                    {
-                        common->Warning("Missing animation file");
-                        continue;
-                    }
-                    part.start = part.end = atoi(arg.c_str());
-                    readNum = 1;
-                }
-                else
-                {
-                    readNum = -1;
-                    partSeted = false;
-                    common->Warning("Missing short argument");
-                    continue;
-                }
-            }
-            else
-            {
-                if(!partSeted)
-                {
-                    common->Warning("Missing animation file");
-                    continue;
-                }
-                if(readNum == 0)
-                {
-                    part.start = part.end = atoi(arg.c_str());
-                    readNum++;
-                }
-                else if(readNum == 1)
-                {
-                    part.end = atoi(arg.c_str());
-                    readNum++;
-                }
-                else
-                {
-                    readNum = -1;
-                    partSeted = false;
-                    common->Warning("More frame index: %s", arg.c_str());
-                    continue;
-                }
-            }
-        }
-        if(readNum >= 0)
-            parts.Append(part);
-
-        for(int i = 0; i < parts.Num(); i++)
-        {
-            const animPart_s &part = parts[i];
-            common->Printf("Link %d: %s(%d - %d)\n", i, part.file_name.c_str(), part.start, part.end);
-
-            // check need cache
-            bool exists = false;
-            for(int m = 0; m < loadeds.Num(); m++)
-            {
-                if(loadeds[i].file_name == part.file_name)
-                {
-                    exists = true;
-                    break;
-                }
-            }
-            // cache
-            if(!exists)
-            {
-                animLoad_s loaded;
-                if(!loaded.anim.LoadAnim(part.file_name))
-                {
-                    common->Warning("Load md5anim file error: %s", part.file_name.c_str());
-                    return;
-                }
-                loaded.file_name = part.file_name;
-                loadeds.Append(loaded);
-            }
+            common->Warning("Invalid command token '%s'!", token);
+            return CMD_INVALID;
         }
 
-        md5anim::idMD5AnimFile file;
-        for(int i = 0; i < parts.Num(); i++)
+        start += 2;
+        return cmd;
+    }
+
+    bool idAnimEditor::ParseCut(const idCmdArgs &args, int &start)
+    {
+        editAnim_t edit;
+        edit.cmd = CMD_CUT;
+        const char *token = args.Argv(start);
+
+        if(!IsNumeric(token))
         {
-            const animPart_s &part = parts[i];
-            const md5anim::idMD5AnimFile *f = NULL;
-            for(int m = 0; m < loadeds.Num(); m++)
-            {
-                if(loadeds[i].file_name == part.file_name)
-                {
-                    f = &loadeds[i].anim;
-                    break;
-                }
-            }
-            if(!file.AppendAnim(*f, part.start, part.end))
-            {
-                common->Warning("Append md5anim error: %d - %s(%d - %d)", i, part.file_name.c_str(), part.start, part.end);
+            common->Warning("Cut command require number for start frame, but read '%s'!", token);
+            return false;
+        }
+        edit.startFrame = atoi(token);
+
+        token = args.Argv(start + 1);
+        if(!IsNumeric(token))
+        {
+            common->Warning("Cut command require number for end frame, but read '%s'!", token);
+            return false;
+        }
+        edit.endFrame = atoi(token);
+
+        start += 2;
+        AddEdit(edit);
+        return true;
+    }
+
+    bool idAnimEditor::ParseReverse(const idCmdArgs &args, int &start)
+    {
+        editAnim_t edit;
+        edit.cmd = CMD_REVERSE;
+        edit.startFrame = 0;
+        edit.endFrame = -1;
+        const char *token = args.Argv(start);
+
+        if(!IsNumeric(token))
+        {
+            AddEdit(edit);
+            return true;
+        }
+        edit.startFrame = atoi(token);
+
+        token = args.Argv(start + 1);
+        if(!IsNumeric(token))
+        {
+            start++;
+            AddEdit(edit);
+            return true;
+        }
+        edit.endFrame = atoi(token);
+
+        start += 2;
+        AddEdit(edit);
+        return true;
+    }
+
+    bool idAnimEditor::ParseLoop(const idCmdArgs &args, int &start)
+    {
+        editAnim_t edit;
+        edit.cmd = CMD_LOOP;
+        edit.startFrame = 0;
+        edit.endFrame = -1;
+        const char *token = args.Argv(start);
+
+        if(!IsNumeric(token))
+        {
+            AddEdit(edit);
+            return true;
+        }
+        edit.startFrame = atoi(token);
+
+        token = args.Argv(start + 1);
+        if(!IsNumeric(token))
+        {
+            start++;
+            AddEdit(edit);
+            return true;
+        }
+        edit.endFrame = atoi(token);
+
+        start += 2;
+        AddEdit(edit);
+        return true;
+    }
+
+    bool idAnimEditor::ParseLink(const idCmdArgs &args, int &start)
+    {
+        editAnim_t edit;
+        edit.cmd = CMD_LINK;
+        edit.startFrame = 0;
+        edit.endFrame = -1;
+        const char *token = args.Argv(start);
+
+        if(!idStr::Cmp("-", token))
+        {
+            common->Warning("Link command require anim file, but read '%s'!", token);
+            return false;
+        }
+        if(!CheckAnimFile(token))
+        {
+            common->Warning("Link command anim file not available '%s'!", token);
+            return false;
+        }
+        edit.animFile = token;
+
+        token = args.Argv(start + 1);
+        if(!IsNumeric(token))
+        {
+            start++;
+            AddEdit(edit);
+            return true;
+        }
+        edit.startFrame = atoi(token);
+
+        token = args.Argv(start + 2);
+        if(!IsNumeric(token))
+        {
+            start++;
+            AddEdit(edit);
+            return true;
+        }
+        edit.endFrame = atoi(token);
+
+        start += 3;
+        AddEdit(edit);
+        return true;
+    }
+
+    bool idAnimEditor::ParseOut(const idCmdArgs &args, int &start)
+    {
+        editAnim_t edit;
+        edit.cmd = CMD_OUT;
+        edit.startFrame = 0;
+        edit.endFrame = -1;
+        const char *token = args.Argv(start);
+
+        if(!idStr::Cmp("-", token))
+        {
+            common->Warning("Output command require anim file, but read '%s'!", token);
+            return false;
+        }
+        edit.animFile = token;
+
+        if(!IsNumeric(token + 1))
+        {
+            start++;
+            AddEdit(edit);
+            return true;
+        }
+        edit.startFrame = atoi(token);
+
+        token = args.Argv(start + 2);
+        if(!IsNumeric(token))
+        {
+            start++;
+            AddEdit(edit);
+            return true;
+        }
+        edit.endFrame = atoi(token);
+
+        start += 3;
+        AddEdit(edit);
+        return true;
+    }
+
+    bool idAnimEditor::CheckAnimFile(const char *str) const
+    {
+        idMD5AnimFile file;
+        return file.LoadAnim(str);
+    }
+
+    int idAnimEditor::AddEdit(const editAnim_t &edit)
+    {
+        currentIndex = cmds.Num() + 1;
+        PrintEdit(edit);
+        return cmds.Append(edit);
+    }
+
+    bool idAnimEditor::IsNumeric(const char *token) const
+    {
+        return(idStr::Cmp("-", token) && idStr::IsNumeric(token));
+    }
+
+    void idAnimEditor::PrintEdit(const editAnim_t &edit) const
+    {
+        idStr str;
+        switch (edit.cmd) {
+            case CMD_CUT:
+                str.Append("Cut");
+                break;
+            case CMD_REVERSE:
+                str.Append("Reverse");
+                break;
+            case CMD_LOOP:
+                str.Append("Loop");
+                break;
+            case CMD_LINK:
+                str.Append("Link");
+                break;
+            case CMD_OUT:
+                str.Append("Output");
+                break;
+            default:
                 return;
+        }
+        str.Append(" ");
+        if(edit.cmd == CMD_LINK || edit.cmd == CMD_OUT)
+        {
+            str.Append("-> ");
+            str.Append(edit.animFile);
+            str.Append(" ");
+        }
+        str.Append(va("(%d, %d)", edit.startFrame, edit.endFrame));
+        common->Printf("%2d: %s\n", currentIndex, str.c_str());
+    }
+
+    bool idAnimEditor::Parse(const idCmdArgs &args)
+    {
+        if(args.Argc() < 3)
+        {
+            common->Printf("[Usage]: %s <animation file> [-cut|c <start frame> <end frame>] [-reverse|r [<start frame> [<end frame>]]] [-loop|p [<start frame> [<end frame>]]] [-link|l <other animation file> [<start frame> [<end frame>]]] [-output|o <output animation file path> [<start frame> [<end frame>]]]\n", args.Argv(0));
+            return false;
+        }
+
+        common->Printf("[idAnimEditor]: Parsing arguments(%d)\n", args.Argc());
+        const char *token = args.Argv(1);
+        if(!CheckAnimFile(token))
+        {
+            common->Warning("Input animation file not available '%s'!", token);
+            return false;
+        }
+
+        animFile = token;
+
+        bool hasOut = false;
+        idStr lastOut;
+        int start = 2;
+        while(start < args.Argc())
+        {
+            int cmd = ParseCmd(args, start);
+
+            switch (cmd) {
+                case CMD_CUT:
+                    if(!ParseCut(args, start))
+                        return false;
+                    break;
+                case CMD_REVERSE:
+                    if(!ParseReverse(args, start))
+                        return false;
+                    break;
+                case CMD_LOOP:
+                    if(!ParseLoop(args, start))
+                        return false;
+                    break;
+                case CMD_LINK:
+                    if(!ParseLink(args, start))
+                        return false;
+                    break;
+                case CMD_OUT:
+                    if(!ParseOut(args, start))
+                        return false;
+                    hasOut = true;
+                    lastOut = cmds[cmds.Num() - 1].animFile;
+                    break;
+                default:
+                    return false;
+            }
+        }
+        if(cmds.Num() == 0)
+        {
+            common->Warning("Require 1 command!\n");
+            return false;
+        }
+        if(!hasOut)
+        {
+            common->Warning("Require 1 output command!\n");
+            return false;
+        }
+
+        // make sure last is output command
+        if(cmds[cmds.Num() - 1].cmd != CMD_OUT)
+        {
+            editAnim_t edit;
+            edit.cmd = CMD_OUT;
+            edit.startFrame = 0;
+            edit.endFrame = -1;
+            edit.animFile = lastOut;
+            AddEdit(edit);
+        }
+
+        common->Printf("[idAnimEditor]: Finish parse arguments(%s %d)\n", animFile.c_str(), cmds.Num());
+        return true;
+    }
+
+    bool idAnimEditor::Handle(void)
+    {
+        common->Printf("[idAnimEditor]: Handling commands(%s %d)\n", animFile.c_str(), cmds.Num());
+        delete md5anim;
+
+        md5anim = new idMD5AnimFile;
+        md5anim->LoadAnim(animFile);
+        common->Printf("[idAnimEditor]: Input animation %d frames)\n", md5anim->NumFrames());
+        currentIndex = 0;
+
+        for(int i = 0; i < cmds.Num(); i++)
+        {
+            const editAnim_t &edit = cmds[i];
+            currentIndex++;
+            switch (edit.cmd)
+            {
+                case CMD_CUT:
+                    if(!HandleCut(edit))
+                        return false;
+                    break;
+                case CMD_REVERSE:
+                    if(!HandleReverse(edit))
+                        return false;
+                    break;
+                case CMD_LOOP:
+                    if(!HandleLoop(edit))
+                        return false;
+                    break;
+                case CMD_LINK:
+                    if(!HandleLink(edit))
+                        return false;
+                    break;
+                case CMD_OUT:
+                    if(!HandleOut(edit))
+                        return false;
+                    break;
+                default:
+                    return false;
             }
         }
 
-        idStr text = file.ToString();
+        common->Printf("[idAnimEditor]: Finish handle commands(%s %d)\n", animFile.c_str(), cmds.Num());
+        return true;
+    }
+
+    bool idAnimEditor::HandleCut(const editAnim_t &edit)
+    {
+        if(!md5anim->CutAnim(edit.startFrame, edit.endFrame))
+        {
+            common->Warning("%2d. Cut md5anim error: (%d - %d)", currentIndex, edit.startFrame, edit.endFrame);
+            return false;
+        }
+
+        common->Printf("%2d. Cut md5anim: (%d - %d)\n", currentIndex, edit.startFrame, edit.endFrame);
+        return true;
+    }
+
+    bool idAnimEditor::HandleReverse(const md5anim::editAnim_t &edit)
+    {
+        if(!md5anim->ReverseAnim(edit.startFrame, edit.endFrame))
+        {
+            common->Warning("%2d. Reverse md5anim error: (%d - %d)", currentIndex, edit.startFrame, edit.endFrame);
+            return false;
+        }
+
+        common->Printf("%2d. Reverse md5anim: (%d - %d)\n", currentIndex, edit.startFrame, edit.endFrame);
+        return true;
+    }
+
+    bool idAnimEditor::HandleLoop(const md5anim::editAnim_t &edit)
+    {
+        if(!md5anim->LoopAnim(edit.startFrame, edit.endFrame))
+        {
+            common->Warning("%2d. Loop md5anim error: %s(%d - %d)", currentIndex, edit.startFrame, edit.endFrame);
+            return false;
+        }
+
+        common->Printf("%2d. Loop md5anim: (%d - %d)\n", currentIndex, edit.startFrame, edit.endFrame);
+        return true;
+    }
+
+    bool idAnimEditor::HandleLink(const md5anim::editAnim_t &edit)
+    {
+        md5anim::idMD5AnimFile file;
+
+        file.LoadAnim(edit.animFile);
+        if(!md5anim->AppendAnim(file, edit.startFrame, edit.endFrame))
+        {
+            common->Warning("%2d. Append md5anim error: %s (%d - %d)", currentIndex, edit.animFile.c_str(), edit.startFrame, edit.endFrame);
+            return false;
+        }
+
+        common->Printf("%2d. Append md5anim: %s (%d - %d)\n", currentIndex, edit.animFile.c_str(), edit.startFrame, edit.endFrame);
+        return true;
+    }
+
+    bool idAnimEditor::HandleOut(const md5anim::editAnim_t &edit)
+    {
+        idStr text = md5anim->ToString();
         idStr basePath;
-        idStr filename = args.Argv(1);
+        idStr filename = edit.animFile;
         if(filename.Length() < strlen(".md5anim") || idStr::Icmp(filename.Right(strlen(".md5anim")), ".md5anim"))
             filename.Append(".md5anim");
 
@@ -942,20 +1111,116 @@ namespace md5anim
         md5anim::WriteText(text, f);
         fileSystem->CloseFile(f);
 
-        common->Printf("Target md5anim save to %s(frames: %d)\n", targetPath.c_str(), file.NumFrames());
+        common->Printf("%2d. Output md5anim save to '%s' (frames: %d)\n", currentIndex, targetPath.c_str(), md5anim->NumFrames());
 
-#undef PARSE_SHORT_ARG
+        return true;
     }
 
     static void ArgCompletion_AnimName(const idCmdArgs &args, void(*callback)(const char *s))
     {
         cmdSystem->ArgCompletion_FolderExtension(args, callback, "models/", false, ".md5anim", NULL);
     }
+
+    static void R_EditAnim_f(const idCmdArgs &args)
+    {
+        idAnimEditor editor;
+        if(editor.Parse(args))
+            editor.Handle();
+    }
+
+    static void R_CutAnim_f(const idCmdArgs &args)
+    {
+        if(args.Argc() < 5)
+        {
+            common->Printf("[Useage]: %s <output animation file path> <input animation file> <start frame> <end frame>", args.Argv(0));
+            return;
+        }
+        idStr cmd;
+        cmd.Append("editAnim ");
+        cmd.Append(args.Argv(2));
+        cmd.Append(" -cut ");
+        for(int i = 3; i < args.Argc(); i++)
+        {
+            cmd.Append(args.Argv(i));
+            cmd.Append(" ");
+        }
+        cmd.Append("-o ");
+        cmd.Append(args.Argv(1));
+        common->Printf("cutAnim -> %s\n", cmd.c_str());
+        cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
+    }
+
+    static void R_ReverseAnim_f(const idCmdArgs &args)
+    {
+        if(args.Argc() < 3)
+        {
+            common->Printf("[Useage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            return;
+        }
+        idStr cmd;
+        cmd.Append("editAnim ");
+        cmd.Append(args.Argv(2));
+        cmd.Append(" -reverse ");
+        for(int i = 3; i < args.Argc(); i++)
+        {
+            cmd.Append(args.Argv(i));
+            cmd.Append(" ");
+        }
+        cmd.Append("-o ");
+        cmd.Append(args.Argv(1));
+        common->Printf("reverseAnim -> %s\n", cmd.c_str());
+        cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
+    }
+
+    static void R_LoopAnim_f(const idCmdArgs &args)
+    {
+        if(args.Argc() < 3)
+        {
+            common->Printf("[Useage]: %s <output animation file path> <input animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            return;
+        }
+        idStr cmd;
+        cmd.Append("editAnim ");
+        cmd.Append(args.Argv(2));
+        cmd.Append(" -loop ");
+        for(int i = 3; i < args.Argc(); i++)
+        {
+            cmd.Append(args.Argv(i));
+            cmd.Append(" ");
+        }
+        cmd.Append("-o ");
+        cmd.Append(args.Argv(1));
+        common->Printf("loopAnim -> %s\n", cmd.c_str());
+        cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
+    }
+
+    static void R_LinkAnim_f(const idCmdArgs &args)
+    {
+        if(args.Argc() < 4)
+        {
+            common->Printf("[Useage]: %s <output animation file path> <input animation file> <append animation file> [<start frame> [<end frame>]]", args.Argv(0));
+            return;
+        }
+        idStr cmd;
+        cmd.Append("editAnim ");
+        cmd.Append(args.Argv(2));
+        cmd.Append(" -link ");
+        for(int i = 3; i < args.Argc(); i++)
+        {
+            cmd.Append(args.Argv(i));
+            cmd.Append(" ");
+        }
+        cmd.Append("-o ");
+        cmd.Append(args.Argv(1));
+        common->Printf("linkAnim -> %s\n", cmd.c_str());
+        cmdSystem->BufferCommandText(CMD_EXEC_NOW, cmd.c_str());
+    }
 }
 
 void MD5Anim_AddCommand(void)
 {
     using namespace md5anim;
+    cmdSystem->AddCommand("editAnim", R_EditAnim_f, CMD_FL_RENDERER, "Edit md5 animation file", ArgCompletion_AnimName);
     cmdSystem->AddCommand("cutAnim", R_CutAnim_f, CMD_FL_RENDERER, "cut md5 anim", ArgCompletion_AnimName);
     cmdSystem->AddCommand("reverseAnim", R_ReverseAnim_f, CMD_FL_RENDERER, "reverse md5 anim", ArgCompletion_AnimName);
     cmdSystem->AddCommand("linkAnim", R_LinkAnim_f, CMD_FL_RENDERER, "link md5 anim", ArgCompletion_AnimName);

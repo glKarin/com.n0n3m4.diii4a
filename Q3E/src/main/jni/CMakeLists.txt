@@ -63,6 +63,9 @@ target_link_libraries( # Specifies the target library.
         #${log-lib}
         ${q3e_lib}
         )
+target_compile_options(q3eloader PRIVATE -O3 -pipe -fPIC)
+
+
 
 OPTION(GAME_DOOM3       "Build DOOM 3/Quake 4/Prey(2006)"       ON)
 OPTION(GAME_RTCW        "Build Return to Castle Wolfenstein"    ON)
@@ -73,6 +76,7 @@ OPTION(GAME_TDM         "Build The Dark Mod"                    ON)
 OPTION(GAME_DOOM3BFG    "Build DOOM 3 BFG"                      ON)
 OPTION(GAME_DOOM        "Build GZDOOM"                          ON)
 OPTION(GAME_ETW         "Build Wolfenstein: Enemy Territory"    ON)
+OPTION(GAME_REALRTCW    "Build RealRTCW"                        ON)
 
 OPTION(GAME_DNF         "Build Duke Nukem Forever"              OFF)
 
@@ -86,17 +90,17 @@ if(GAME_DOOM3)
     add_subdirectory (doom3/neo) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory (deplibs) # common depend libraries
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW)
     message(STATUS "Build common static libraries")
     add_subdirectory (common)
 endif()
 
-if(GAME_RTCW)
+if(GAME_RTCW) # 438e7d413b5f7277187c35b032eb0ef9093ae778 | May 27, 2024 | All: Fix compilation on FreeBSD
     message(STATUS "Build Return to Castle Wolfenstein")
     add_subdirectory (rtcw) # RTCW
 endif()
@@ -116,12 +120,12 @@ if(GAME_QUAKE1)
     add_subdirectory (quake1) # Quake 1
 endif()
 
-if(GAME_TDM)
+if(GAME_TDM) # 2.12 | 5f4793f69bc0b61cbf2f921496455fb9e9296bcd | Feb 24, 2024 | Merged some changes from trunk.
     message(STATUS "Build The Dark Mod")
     add_subdirectory (tdm) # The Dark Mod
 endif()
 
-if(GAME_DOOM3BFG)
+if(GAME_DOOM3BFG) # 1.4.0 | f81a8c1dd9b762774a233ba071837b2c7a374751 | Mar 6, 2022 | Updated release notes
     message(STATUS "Build DOOM 3 BFG")
     add_subdirectory (doom3bfg/neo) # RBDOOM3-BFG
 endif()
@@ -131,7 +135,7 @@ if(GAME_DNF)
     add_subdirectory (duke4/neo) # DNF
 endif()
 
-if(GAME_DOOM)
+if(GAME_DOOM) # g4.12.2 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 2024 | Reworked clientside lerping
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 #[[ OR TRUE]]) # GZDOOM only support 64bits system
         message(STATUS "Build GZDOOM")
         add_subdirectory (gzdoom) # GZDOOM
@@ -140,7 +144,12 @@ if(GAME_DOOM)
     endif()
 endif()
 
-if(GAME_ETW)
+if(GAME_ETW) # v2.82.1 | 0a24c70f84cf21940277ddabd736ce83535cb794 | Apr 19, 2024 | Incrementing version number to 2.82.1
     message(STATUS "Build Wolfenstein: Enemy Territory")
     add_subdirectory (etw) # ETW
+endif()
+
+if(GAME_REALRTCW)
+    message(STATUS "Build RealRTCW")
+    add_subdirectory (realrtcw) # RealRTCW
 endif()

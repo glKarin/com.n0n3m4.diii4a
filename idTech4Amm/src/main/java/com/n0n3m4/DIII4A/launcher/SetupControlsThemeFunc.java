@@ -128,7 +128,7 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
                 + "&lt;CURRENT ALL SEARCH PATH&gt; (.zipak is zip archive file): " + endl
                 + sb
                 ;
-        ContextUtility.OpenMessageDialog(m_gameLauncher, Q3ELang.tr(m_gameLauncher, R.string.tips), TextHelper.GetDialogMessage(Tips));
+        ContextUtility.OpenMessageDialog(m_gameLauncher, Tr(R.string.tips), TextHelper.GetDialogMessage(Tips));
     }
 
     private static class ControlsThemeAdapter extends ArrayAdapter_base<ControlsTheme>
