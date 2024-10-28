@@ -2111,8 +2111,10 @@ void R_Hunk_End( void );
 
 extern cvar_t *harm_r_stencilShadowModel;
 extern cvar_t *harm_r_stencilShadowPersonal;
-#define STENCIL_SHADOW_ANIMATION_MODEL() (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & 1))
-#define STENCIL_SHADOW_STATIC_MODEL() (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & 2))
+
+#define STENCIL_SHADOW_MODEL(x) (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & x))
+
+qboolean R_HasAlphaTest(const shader_t *shader);
 #endif
 
 #endif //TR_LOCAL_H (THIS MUST BE LAST!!)

@@ -424,14 +424,21 @@ void R_AddMDCSurfaces( trRefEntity_t *ent ) {
 		// we will add shadows even if the main object isn't visible in the view
 
 		// stencil shadows can't do personal models unless I polyhedron clip
-		if ( !personalModel
-			 && r_shadows->integer == 2
-#ifdef USE_OPENGLES //karin: only render non-animation model shadow
-			 && STENCIL_SHADOW_STATIC_MODEL()
+		if ( 
+#ifdef USE_OPENGLES //karin: allow player model shadow
+			 (!personalModel || harm_r_stencilShadowPersonal->integer)
+#else
+			 !personalModel
 #endif
+			 && r_shadows->integer == 2
 			 && fogNum == 0
 			 && !( ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
-			 && shader->sort == SS_OPAQUE ) {
+			 && shader->sort == SS_OPAQUE 
+#ifdef USE_OPENGLES //karin: ignore alpha test shader pass and special model type exclude player model
+			&& (STENCIL_SHADOW_MODEL(8) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
+			&& !R_HasAlphaTest(shader)
+#endif
+			 ) {
 // GR - tessellate according to model capabilities
 			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, qfalse, tr.currentModel->ATI_tess );
 		}

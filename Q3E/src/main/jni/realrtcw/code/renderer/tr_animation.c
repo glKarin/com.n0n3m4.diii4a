@@ -400,18 +400,20 @@ void R_AddAnimSurfaces( trRefEntity_t *ent ) {
 //karin: add stencil shadow for new animation model
 		// stencil shadows can't do personal models unless I polyhedron clip
 		if (
-#ifdef USE_OPENGLES //karin: only render animation model shadow
+#ifdef USE_OPENGLES //karin: allow player model shadow
 			 (!personalModel || harm_r_stencilShadowPersonal->integer)
 #else
 			 !personalModel
 #endif
 			 && r_shadows->integer == 2
-#ifdef USE_OPENGLES //karin: only render animation model shadow
-			 && STENCIL_SHADOW_ANIMATION_MODEL()
-#endif
 			 && fogNum == 0
 			 && !(ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
-			 && shader->sort == SS_OPAQUE )
+			 && shader->sort == SS_OPAQUE 
+#ifdef USE_OPENGLES //karin: ignore alpha test shader pass and special model type exclude player model
+			&& (STENCIL_SHADOW_MODEL(1) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
+			&& !R_HasAlphaTest(shader)
+#endif
+			 )
 		{
 			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, qfalse, ATI_TESS_TRUFORM );
 		}
@@ -1634,18 +1636,20 @@ void R_MDRAddAnimSurfaces( trRefEntity_t *ent ) {
 
 		// stencil shadows can't do personal models unless I polyhedron clip
 		if (
-#ifdef USE_OPENGLES //karin: only render animation model shadow
+#ifdef USE_OPENGLES //karin: allow player model shadow
 			 (!personalModel || harm_r_stencilShadowPersonal->integer)
 #else
 			 !personalModel
 #endif
 		        && r_shadows->integer == 2
-#ifdef USE_OPENGLES //karin: only render animation model shadow
-			    && STENCIL_SHADOW_ANIMATION_MODEL()
-#endif
 			&& fogNum == 0
 			&& !(ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
-			&& shader->sort == SS_OPAQUE )
+			&& shader->sort == SS_OPAQUE 
+#ifdef USE_OPENGLES //karin: ignore alpha test shader pass and special model type exclude player model
+			&& (STENCIL_SHADOW_MODEL(2) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
+			&& !R_HasAlphaTest(shader)
+#endif
+			)
 		{
 			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, qfalse, ATI_TESS_TRUFORM );
 		}

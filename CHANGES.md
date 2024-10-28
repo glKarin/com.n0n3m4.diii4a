@@ -2,6 +2,16 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan58 (2024-10-29)
+
+* Add `RealRTCW`(ver 5.0) support, game standalone directory named `realrtcw`, game data directory named `Main`. More view in [RealRTCW](https://github.com/wolfetplayer/RealRTCW).
+* Fix light bar indicator of player's HUD by `darkness257` on The Dark Mod, now setup `tdm_lg_weak` to 1 automatically. More view in [The Darkmod light bar indicator bug](https://github.com/glKarin/com.n0n3m4.diii4a/issues/244).
+* Support create desktop shortcut for games or current command on `Option` menu of launcher.
+* Fix stencil shadow with `cg_shadows` = 2 on Quake 3.
+* Improve stencil shadow with `cg_shadows` = 2 on RealRTCW.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan57 (2024-10-01)
 
 * Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game data directory named `etmain` and `legacy`. More view in [ET: Legacy](https://www.etlegacy.com).

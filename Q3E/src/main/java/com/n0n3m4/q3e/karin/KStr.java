@@ -155,5 +155,12 @@ public final class KStr
             return str;
     }
 
+    public static String ucfirst(String str)
+    {
+        if(IsBlank(str))
+            return str;
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
     private KStr() {}
 }

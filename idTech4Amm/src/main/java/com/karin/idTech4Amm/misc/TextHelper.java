@@ -7,6 +7,7 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.lib.KCVar;
 import com.karin.idTech4Amm.lib.KCVarSystem;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -716,28 +717,32 @@ public final class TextHelper
         if(cvar.category == KCVar.CATEGORY_COMMAND)
         {
             sb.append(FormatDialogMessageSpace("  *[Command] ")).append(cvar.name);
+            sb.append(endl);
             if(!KCVar.TYPE_NONE.equals(cvar.type))
-                sb.append(" (").append(cvar.type).append(")");
+                sb.append(FormatDialogMessageSpace("    (")).append(cvar.type).append(")");
         }
         else
-            sb.append(FormatDialogMessageSpace("  *[CVar] ")).append(cvar.name).append(" (").append(cvar.type).append(") default: ").append(cvar.defaultValue);
-        sb.append(endl);
-        if(cvar.HasFlags(~(Integer.MAX_VALUE & KCVar.FLAG_LAUNCHER)))
         {
-            sb.append(FormatDialogMessageSpace("    [["));
-            if(cvar.HasFlag(KCVar.FLAG_POSITIVE))
-                sb.append(" Positive");
-            if(cvar.HasFlag(KCVar.FLAG_INIT))
-                sb.append(" CommandLine-Only");
-            if(cvar.HasFlag(KCVar.FLAG_AUTO))
-                sb.append(" Auto-Setup");
-            if(cvar.HasFlag(KCVar.FLAG_READONLY))
-                sb.append(" Readonly");
-            if(cvar.HasFlag(KCVar.FLAG_DISABLED))
-                sb.append(" Disabled");
-            sb.append(FormatDialogMessageSpace(" ]]"));
+            sb.append(FormatDialogMessageSpace("  *[CVar] ")).append(cvar.name);
             sb.append(endl);
+            sb.append(FormatDialogMessageSpace("    - ")).append(KStr.ucfirst(cvar.type)).append(FormatDialogMessageSpace("  default: ")).append(cvar.defaultValue);
+            if(cvar.HasFlags(Integer.MAX_VALUE & ~(Integer.MAX_VALUE & KCVar.FLAG_LAUNCHER)))
+            {
+                sb.append(FormatDialogMessageSpace("  ("));
+                if(cvar.HasFlag(KCVar.FLAG_POSITIVE))
+                    sb.append(" Positive");
+                if(cvar.HasFlag(KCVar.FLAG_INIT))
+                    sb.append(" CommandLine-Only");
+                if(cvar.HasFlag(KCVar.FLAG_AUTO))
+                    sb.append(" Auto-Setup");
+                if(cvar.HasFlag(KCVar.FLAG_READONLY))
+                    sb.append(" Readonly");
+                if(cvar.HasFlag(KCVar.FLAG_DISABLED))
+                    sb.append(" Disabled");
+                sb.append(" )");
+            }
         }
+        sb.append(endl);
         sb.append(FormatDialogMessageSpace("    ")).append(cvar.description);
         sb.append(endl);
         if(null != cvar.values)

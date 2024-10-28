@@ -56,6 +56,7 @@ static vec3_t shadowXyz[SHADER_MAX_VERTEXES];
 #endif
 
 #ifdef USE_OPENGLES
+#define FLOAT_ZERO 1e-6
 
 #define SHADOW_CAP_NEAR_BACK_AND_FAR_BACK 1
 #define SHADOW_CAP_NEAR_FRONT_AND_FAR_BACK 2
@@ -105,6 +106,23 @@ extern cvar_t *harm_r_stencilShadowCap;
 
 extern cvar_t *harm_r_shadowPolygonOffset;
 extern cvar_t *harm_r_shadowPolygonFactor;
+
+qboolean R_HasAlphaTest(const shader_t *shader)
+{
+	int mask = GLS_ATEST_GT_0 | GLS_ATEST_GE_80 | GLS_ATEST_LT_80;
+	int m;
+	for(m = 0; m < MAX_SHADER_STAGES; m++)
+	{
+		const shaderStage_t *stage = shader->stages[m];
+		if(!stage)
+			break;
+		if(stage->stateBits & mask)
+		{
+			return qtrue;
+		}
+	}
+	return qfalse;
+}
 #endif
 
 void R_AddEdgeDef( int i1, int i2, int facing ) {
@@ -183,6 +201,10 @@ void R_RenderShadowEdges( void ) {
 			for ( k = 0 ; k < c2 ; k++ ) {
 				if ( edgeDefs[ i2 ][ k ].i2 == i ) {
 					hit[ edgeDefs[ i2 ][ k ].facing ]++;
+#ifdef USE_OPENGLES //karin: optmize
+					if( edgeDefs[ i2 ][ k ].facing )
+						break;
+#endif
 				}
 			}
 
@@ -571,6 +593,17 @@ void RB_ShadowTessEnd( void ) {
 		i1 = tess.indexes[ i * 3 + 0 ];
 		i2 = tess.indexes[ i * 3 + 1 ];
 		i3 = tess.indexes[ i * 3 + 2 ];
+#if 0
+		if(i1==i2||i1==i3||i2==i3)
+		{
+			facing[ i ] = 0;
+			R_AddEdgeDef( i1, i2, facing[ i ] );
+			R_AddEdgeDef( i2, i3, facing[ i ] );
+			R_AddEdgeDef( i3, i1, facing[ i ] );
+			//Com_Printf("zzz\n");
+			continue;
+		}
+#endif
 
 		v1 = tess.xyz[ i1 ];
 		v2 = tess.xyz[ i2 ];

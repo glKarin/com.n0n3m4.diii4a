@@ -29,7 +29,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -42,6 +45,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -1545,7 +1549,19 @@ public class GameLauncher extends Activity
         }
         V.main_menu_game = menu.findItem(R.id.main_menu_game);
         V.main_menu_game.setTitle(Q3EUtils.q3ei.game_name);
-        return super.onCreateOptionsMenu(menu);
+		SubMenu subMenu = V.main_menu_game.getSubMenu();
+		for(int i = 0; i < subMenu.size(); i++)
+		{
+			MenuItem item = subMenu.getItem(i);
+			Drawable icon = item.getIcon();
+			if(icon instanceof BitmapDrawable)
+			{
+				Bitmap bitmap = ((BitmapDrawable) icon).getBitmap();
+				Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 32, 32, true);
+				item.setIcon(new BitmapDrawable(getResources(), scaledBitmap));
+			}
+		}
+		return super.onCreateOptionsMenu(menu);
     }
 
     @Override
