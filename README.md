@@ -108,21 +108,21 @@ Tag with `-free` only for F-Droid update.
   
   If enable `Standalone game directory`, game data directory should put on `Standalone game directory` itself(e.g.).
   
-  Games of `Standalone game directory` and folder name:
-  DOOM III: doom3/
-  Quake 4: quake4/
-  Prey(2006): prey/
-  Quake I: quake1/
-  Quake II: quake2/
-  Quake III: quake3/
-  Return to Castle Wolfenstein: rtcw/
-  DOOM 3 BFG: doom3bfg/
-  Wolfenstein - Enemy Territory: etw/
-  RealRTCW: realrtcw/
+> Games of `Standalone game directory` and folder name:
+* **DOOM III**: doom3/
+* **Quake 4**: quake4/
+* **Prey(2006)**: prey/
+* **Quake I**: quake1/
+* **Quake II**: quake2/
+* **Quake III**: quake3/
+* **Return to Castle Wolfenstein**: rtcw/
+* **DOOM 3 BFG**: doom3bfg/
+* **Wolfenstein - Enemy Territory**: etw/
+* **RealRTCW**: realrtcw/
   
-  Games of always force `Standalone game directory`:
-  The Dark Mod: darkmod/
-  GZDOOM: gzdoom
+> Games of always force `Standalone game directory`:
+* **The Dark Mod**: darkmod/
+* **GZDOOM**: gzdoom/
 
 ----------------------------------------------------------------------------------
 

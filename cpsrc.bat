@@ -36,17 +36,17 @@ del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\base\*.cfg
 del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\astyle.*
 del /Q %DST_PATH%\Q3E\src\main\jni\doom3bfg\neo\premake4.exe
 del /S/Q %DST_PATH%\Q3E\src\main\jni\etw\etmain
-rmdir /S/Q %DST_PATH%\Q3E\src\main\etw\etmain\*
+rmdir /S/Q %DST_PATH%\Q3E\src\main\etw\etmain\static
 del /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc\static
-rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc\*
+rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc\static
 del /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_bm\static
-rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_bm\*
+rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_bm\static
 del /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_extra\static
-rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_extra\*
+rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_extra\static
 del /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_lights\static
-rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_lights\*
+rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_lights\static
 del /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_widepix\static
-rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_widepix\*
+rmdir /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\wadsrc_widepix\static
 del /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\soundfont
 del /S/Q %DST_PATH%\Q3E\src\main\jni\gzdoom\fm_banks
 

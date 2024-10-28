@@ -34,7 +34,7 @@ Standalone game directory:
   
   Games of always force `Standalone game directory`:
   The Dark Mod: darkmod/
-  GZDOOM: gzdoom
+  GZDOOM: gzdoom/
 
 Folder name of games/mods:
   DOOM III: base/

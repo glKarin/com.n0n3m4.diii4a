@@ -34,7 +34,7 @@
   
   总是游戏独立文件夹的游戏:
   The Dark Mod: darkmod/
-  GZDOOM: gzdoom
+  GZDOOM: gzdoom/
 
 游戏/mod文件夹名称:
   毁灭战士3: base/
