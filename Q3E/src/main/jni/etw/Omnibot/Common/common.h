@@ -136,14 +136,9 @@ public:
 		operator[](pos) = val;
 	}
 
-	bool test(int target) const
+	bool test(int pos) const
 	{
-		for(int i = 0; i < size(); i++)
-		{
-			if(target & (operator[](i) << i))
-				return true;
-		}
-		return false;
+        return operator[](pos) != 0;
 	}
 };
 
