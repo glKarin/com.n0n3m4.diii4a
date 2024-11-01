@@ -86,5 +86,17 @@ build/
 gradle/
 /local.properties
 
-/Omnibot
+#/Omnibot/BM
+#/Omnibot/D3
+#/Omnibot/DOD
+#/Omnibot/ETQW
+#/Omnibot/FF
+#/Omnibot/HL2DM
+#/Omnibot/JA
+#/Omnibot/MC
+#/Omnibot/OF
+#/Omnibot/Q4
+#/Omnibot/TF2
+#/Omnibot/SKELETON
+#/Omnibot/WOLF
 

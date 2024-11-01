@@ -1,0 +1,80 @@
+The following files may be redistributed (as described in the End User
+License Agreement ("EULA")).
+
+Binaries needed to run code built with Detours:
+
+  bin\detoured.dll
+
+Samples (redistributable in either source or binary form):
+
+  samples\common.mak
+  samples\Makefile
+  samples\ReadMe.Txt
+  samples\commem\commem.cpp
+  samples\commem\Makefile
+  samples\cping\cping.cpp
+  samples\cping\iping.idl
+  samples\cping\Makefile
+  samples\cping\README.TXT
+  samples\disas\disas.cpp
+  samples\disas\ia64.asm
+  samples\disas\Makefile
+  samples\disas\x64.asm
+  samples\disas\x86.asm
+  samples\dtest\dtest.cpp
+  samples\dtest\Makefile
+  samples\dumpe\dumpe.cpp
+  samples\dumpe\Makefile
+  samples\dumpi\dumpi.cpp
+  samples\dumpi\Makefile
+  samples\einst\edll1.cpp
+  samples\einst\edll2.cpp
+  samples\einst\edll3.cpp
+  samples\einst\einst.cpp
+  samples\einst\Makefile
+  samples\excep\excep.cpp
+  samples\excep\firstexc.cpp
+  samples\excep\firstexc.h
+  samples\excep\Makefile
+  samples\impmunge\impmunge.cpp
+  samples\impmunge\Makefile
+  samples\member\Makefile
+  samples\member\member.cpp
+  samples\setdll\Makefile
+  samples\setdll\setdll.cpp
+  samples\simple\Makefile
+  samples\simple\simple.cpp
+  samples\simple\sleep5.cpp
+  samples\slept\dslept.cpp
+  samples\slept\Makefile
+  samples\slept\NORMAL.TXT
+  samples\slept\sleepbed.cpp
+  samples\slept\sleepnew.cpp
+  samples\slept\sleepold.cpp
+  samples\slept\slept.cpp
+  samples\slept\slept.h
+  samples\slept\TEST.CMD
+  samples\slept\verify.cpp
+  samples\syelog\Makefile
+  samples\syelog\sltest.cpp
+  samples\syelog\sltestp.cpp
+  samples\syelog\syelog.cpp
+  samples\syelog\syelog.h
+  samples\syelog\syelogd.cpp
+  samples\traceapi\Makefile
+  samples\traceapi\traceapi.cpp
+  samples\traceapi\_win32.cpp
+  samples\tracelnk\Makefile
+  samples\tracelnk\tracelnk.cpp
+  samples\tracemem\Makefile
+  samples\tracemem\tracemem.cpp
+  samples\tracereg\Makefile
+  samples\tracereg\tracereg.cpp
+  samples\traceser\Makefile
+  samples\traceser\traceser.cpp
+  samples\tracessl\Makefile
+  samples\tracessl\tracessl.cpp
+  samples\tracetcp\Makefile
+  samples\tracetcp\tracetcp.cpp
+  samples\withdll\Makefile
+  samples\withdll\withdll.cpp

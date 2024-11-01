@@ -1,0 +1,66 @@
+AdjustingContainer - the hands-free Guichan widget!
+By Josh Matthews, January 2007
+===================================================
+
+AdjustingContainers are an easy way to have Guichan position a
+group of widgets for you.  It organizes elements in a table
+layout, with fixed columns and variable rows.  The user specifies
+
+1) the number of columns
+2) horizontal spacing between columns
+3) vertical spacing between rows
+4) padding around the sides of the container
+5) each column's alignment
+
+These properties give the user a lot of flexibility to make the
+widgets look just right.
+
+
+Example:
+--------
+
+AdjustingContainer *adjust = new AdjustingContainer;
+adjust->setPadding(5, 5, 5, 5); //left, right, top, bottom
+adjust->setHorizontalSpacing(3);
+adjust->setVerticalSpacing(3);
+adjust->setColumns(3);
+adjust->setColumnAlignment(0, AdjustingContainer::LEFT);
+adjust->setColumnAlignment(1, AdjustingContainer::CENTER);
+adjust->setColumnAlignment(2, AdjustingContainer::RIGHT);
+top->add(adjust);
+
+for(int j = 0; j < 9; j++)
+{
+	gcn::Label *l;
+	int r = rand() % 3;
+	if(r == 0)
+		l = new gcn::Label("Short");
+	else if(r == 1)
+		l = new gcn::Label("A longer phrase");
+	else
+		l = new gcn::Label("Extravagent and wordy text");
+		adjust->add(l);
+}
+
+Output
+------
+
++---------------------------------------------------------------------------+
+|                                                                           |
+| A longer phrase              Short             Extravagent and wordy text |
+|                                                                           |
+| Short             Extravagent and wordy text                        Short |
+|                                                                           |
+| Short                   A longer phrase                   A longer phrase |
+|                                                                           |
++---------------------------------------------------------------------------+
+
+As you can see, each column is only as big as its largest element.
+The AdjustingContainer will resize itself and rearrange its contents
+based on whatever widgets it contains, allowing dynamic addition and
+removal while the program is running.  It also plays nicely with ScrollAreas,
+allowing you to show a fixed, maximum size while not limiting the actual
+container.
+
+For more help with using AdjustingContainers, try the Guichan forums
+(http://guichan.sourceforge.net/forum/) or email mrlachatte@gmail.com.

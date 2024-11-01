@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <PropertyPageSchema
+      Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml" />
+    <AvailableItemName
+      Include="BuildExternal">
+      <Targets>_BuildExternal</Targets>
+    </AvailableItemName>
+  </ItemGroup>
+  <UsingTask
+    TaskName="BuildExternal"
+    TaskFactory="XamlTaskFactory"
+    AssemblyName="Microsoft.Build.Tasks.v4.0">
+    <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
+  </UsingTask>
+  <Target
+    Name="_BuildExternal"
+    BeforeTargets="$(BuildExternalBeforeTargets)"
+    AfterTargets="$(BuildExternalAfterTargets)"
+    Condition="'@(BuildExternal)' != ''"
+    DependsOnTargets="$(BuildExternalDependsOn);ComputeBuildExternalOutput"
+    Outputs="%(BuildExternal.Outputs)"
+    Inputs="%(BuildExternal.Identity);%(BuildExternal.AdditionalDependencies);$(MSBuildProjectFile)">
+    <ItemGroup
+      Condition="'@(SelectedFiles)' != ''">
+      <BuildExternal
+        Remove="@(BuildExternal)"
+        Condition="'%(Identity)' != '@(SelectedFiles)'" />
+    </ItemGroup>
+    <ItemGroup>
+      <BuildExternal_tlog
+        Include="%(BuildExternal.Outputs)"
+        Condition="'%(BuildExternal.Outputs)' != '' and '%(BuildExternal.ExcludedFromBuild)' != 'true'">
+        <Source>@(BuildExternal, '|')</Source>
+      </BuildExternal_tlog>
+    </ItemGroup>
+    <Message
+      Importance="High"
+      Text="%(BuildExternal.ExecutionDescription)" />
+    <WriteLinesToFile
+      Condition="'@(BuildExternal_tlog)' != '' and '%(BuildExternal_tlog.ExcludedFromBuild)' != 'true'"
+      File="$(IntDir)$(ProjectName).write.1.tlog"
+      Lines="^%(BuildExternal_tlog.Source);@(BuildExternal_tlog-&gt;'%(Fullpath)')" />
+    <BuildExternal
+      Condition="'@(BuildExternal)' != '' and '%(BuildExternal.ExcludedFromBuild)' != 'true'"
+      CommandLineTemplate="%(BuildExternal.CommandLineTemplate)"
+      Solution="%(BuildExternal.Solution)"
+      Config="%(BuildExternal.Config)"
+      AdditionalOptions="%(BuildExternal.AdditionalOptions)"
+      Inputs="%(BuildExternal.Identity)" />
+  </Target>
+  <PropertyGroup>
+    <ComputeLinkInputsTargets>
+            $(ComputeLinkInputsTargets);
+            ComputeBuildExternalOutput;
+          </ComputeLinkInputsTargets>
+    <ComputeLibInputsTargets>
+            $(ComputeLibInputsTargets);
+            ComputeBuildExternalOutput;
+          </ComputeLibInputsTargets>
+  </PropertyGroup>
+  <Target
+    Name="ComputeBuildExternalOutput"
+    Condition="'@(BuildExternal)' != ''">
+    <ItemGroup>
+      <BuildExternalDirsToMake
+        Condition="'@(BuildExternal)' != '' and '%(BuildExternal.ExcludedFromBuild)' != 'true'"
+        Include="%(BuildExternal.Outputs)" />
+      <Link
+        Include="%(BuildExternalDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+      <Lib
+        Include="%(BuildExternalDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+      <ImpLib
+        Include="%(BuildExternalDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+    </ItemGroup>
+    <MakeDir
+      Directories="@(BuildExternalDirsToMake-&gt;'%(RootDir)%(Directory)')" />
+  </Target>
+</Project>

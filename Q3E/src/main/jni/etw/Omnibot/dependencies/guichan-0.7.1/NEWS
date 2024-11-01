@@ -1,0 +1,84 @@
+2008-04-26 Thirteenth Beta release Guichan 0.8.1
+
+A minor release that fixes a soname problem along with a couple of GCC
+3.4.2 issues.
+
+2008-04-06 Twelfth Beta release Guichan 0.8.0
+
+The new version of Guichan has better HGE support, enhanced API documentation,
+enhanced examples and two new widgets called TabbedArea and Tab. Also a 
+number of nasty bugs have been fixed.
+
+2007-07-11 Tenth Beta release Guichan 0.7.1
+
+Small update compared to the 0.7.0 release. Missing source for the add ons, 
+the HGE support and the OpenLayer support was added.
+
+2007-06-30 Ninth Beta release Guichan 0.7.0
+
+The new version of Guichan contains support for the library OpenLayer 
+and experimental support for the library HGE. As users have had many 
+problems related to binary incompatibility with DLLs we are not going 
+to provide pre-compiled binaries anymore. From now on users are encourage 
+to compile Guichan themselves either by making DLLs and library files or 
+by simply including the source of Guichan in to the project using Guichan.
+
+2007-01-23 Eigth Beta release Guichan 0.6.1
+
+A small update compared to the 0.6.0 release which fixes a prolem 
+with inclusion OpenGL headers on Macintosh and removes some unneccesary
+container functions from Widget.
+
+2007-01-14 Seventh Beta release Guichan 0.6.0
+
+We are getting closer and closer to a final stable 1.0 release. This
+release introduced events to Guichan. The way Guichan handles input
+has been refactored and should now be powerfull and flexible.
+
+2006-06-29 Sixth Beta release Guichan 0.5.0
+
+After a long awating comes the sixth beta release of Guichan. The major
+change since the last version is a refactoring of the way Guichan handles
+images, it should now be easier to extend Guichan with backends for 
+graphics handling. Also, containers have gone through a refactoring as 
+well making it much easier to make container widgets of your own.
+
+2005-05-17 Fith Beta release (and Norways national day) Guichan 0.4.0
+
+And here comes yet yet another beta release of Guichan. The major
+feature add to this version is modal focus. For a complete list
+of changes, see the ChangeLog.
+
+2005-03-18 Fourth Beta release Guichan 0.3.0
+
+And here comes yet another beta release of Guichan. This time
+we have included everything we didn't have time to include for
+the 0.2.0 release. For a complete list of changes, see the 
+ChangeLog. 
+
+Again a big thank you to Thorbjørn Lindeijer. This Guichan release 
+contains many API improvements suggested by Thorbjørn. 
+
+2004-12-17 Third Beta release Guichan 0.2.0
+
+Here comes a new version of Guichan! This could be seen as
+a "half release" of sorts, there were some things we would have
+liked to put in this release, but didn't. We felt it was more
+important to get a new version out before christmas, as a lot of
+bugs had been fixed. See the ChangeLog for further details.
+
+Big thanks goes to Thorbjørn Lindeijer and the rest of 
+"The Mana World"-team for helping in finding bugs, and suggesting
+API improvements (that you probably will see implemented in 0.3.0)
+
+2004-09-24 Second Beta release Guichan 0.1.0
+
+Ten days after the first Beta comes the second which contains
+some improvments, bug fixes and new implementations. For a 
+complete list of changes, check out the ChangeLog.
+
+2004-09-14 First Beta release Guichan 0.0.1
+
+The first Guichan API is ready for testing and evaluation.
+Please send us feedbacks.
+

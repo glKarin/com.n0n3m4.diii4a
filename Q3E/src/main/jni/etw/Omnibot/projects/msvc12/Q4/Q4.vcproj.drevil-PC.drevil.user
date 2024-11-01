@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioUserFile
+	ProjectType="Visual C++"
+	Version="9.00"
+	ShowAllFiles="false"
+	>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			>
+			<DebugSettings
+				Command="&quot;$(Q4DIR)\Quake4.exe&quot;"
+				WorkingDirectory="&quot;$(Q4DIR)&quot;"
+				CommandArguments="+set fs_game omnibot +sv_cheats 1 +disconnect +set win_allowMultipleInstances 1 +set si_pure 0 +exec q4ctf1.cfg"
+				Attach="false"
+				DebuggerType="3"
+				Remote="1"
+				RemoteMachine="DREVIL"
+				RemoteCommand=""
+				HttpUrl=""
+				PDBPath=""
+				SQLDebugging=""
+				Environment=""
+				EnvironmentMerge="true"
+				DebuggerFlavor="0"
+				MPIRunCommand=""
+				MPIRunArguments=""
+				MPIRunWorkingDirectory=""
+				ApplicationCommand=""
+				ApplicationArguments=""
+				ShimCommand=""
+				MPIAcceptMode=""
+				MPIAcceptFilter=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			>
+			<DebugSettings
+				Command="&quot;$(Q4DIR)\Quake4.exe&quot;"
+				WorkingDirectory="&quot;$(Q4DIR)&quot;"
+				CommandArguments="+set fs_game omnibot +sv_cheats 1 +disconnect +set win_allowMultipleInstances 1 +set si_pure 0 +exec q4ctf1.cfg"
+				Attach="false"
+				DebuggerType="3"
+				Remote="1"
+				RemoteMachine="DREVIL"
+				RemoteCommand=""
+				HttpUrl=""
+				PDBPath=""
+				SQLDebugging=""
+				Environment=""
+				EnvironmentMerge="true"
+				DebuggerFlavor="0"
+				MPIRunCommand=""
+				MPIRunArguments=""
+				MPIRunWorkingDirectory=""
+				ApplicationCommand=""
+				ApplicationArguments=""
+				ShimCommand=""
+				MPIAcceptMode=""
+				MPIAcceptFilter=""
+			/>
+		</Configuration>
+	</Configurations>
+</VisualStudioUserFile>

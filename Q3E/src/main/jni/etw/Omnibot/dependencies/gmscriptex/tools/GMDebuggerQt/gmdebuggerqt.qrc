@@ -1,0 +1,16 @@
+<RCC>
+  <qresource prefix="GMDebuggerQt">
+    <file>Resources/script_open.png</file>
+    <file>Resources/disconnect.png</file>
+    <file>Resources/breakpoint.png</file>
+    <file>Resources/connect.png</file>
+    <file>Resources/linearrow.png</file>
+    <file>Resources/step_in.png</file>
+    <file>Resources/step_out.png</file>
+    <file>Resources/step_over.png</file>
+    <file>Resources/thread_run.png</file>
+    <file>Resources/thread_runall.png</file>
+    <file>Resources/thread_stop.png</file>
+    <file>Resources/thread_stopall.png</file>
+  </qresource>
+</RCC>

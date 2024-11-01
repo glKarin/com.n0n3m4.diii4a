@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioUserFile
+	ProjectType="Visual C++"
+	Version="9.00"
+	ShowAllFiles="false"
+	>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			>
+			<DebugSettings
+				Command="&quot;E:\Games\Steam\steamapps\tgdrevil@yahoo.com\source sdk base 2007\hl2.exe&quot;"
+				WorkingDirectory="E:\Games\Steam\steamapps\tgdrevil@yahoo.com\source sdk base 2007"
+				CommandArguments="-dev -allowdebug -sw -game &quot;E:\Games\Steam\SteamApps\SourceMods\modularcombat_svn&quot;"
+				Attach="false"
+				DebuggerType="3"
+				Remote="1"
+				RemoteMachine="DREVIL-PC"
+				RemoteCommand=""
+				HttpUrl=""
+				PDBPath=""
+				SQLDebugging=""
+				Environment=""
+				EnvironmentMerge="true"
+				DebuggerFlavor="0"
+				MPIRunCommand=""
+				MPIRunArguments=""
+				MPIRunWorkingDirectory=""
+				ApplicationCommand=""
+				ApplicationArguments=""
+				ShimCommand=""
+				MPIAcceptMode=""
+				MPIAcceptFilter=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			>
+			<DebugSettings
+				Command="&quot;E:\Games\Steam\steamapps\tgdrevil@yahoo.com\source sdk base 2007\hl2.exe&quot;"
+				WorkingDirectory="E:\Games\Steam\steamapps\tgdrevil@yahoo.com\source sdk base 2007"
+				CommandArguments="-dev -sw -game &quot;E:\Games\Steam\SteamApps\SourceMods\modularcombat_svn&quot;"
+				Attach="false"
+				DebuggerType="3"
+				Remote="1"
+				RemoteMachine="DREVIL-PC"
+				RemoteCommand=""
+				HttpUrl=""
+				PDBPath=""
+				SQLDebugging=""
+				Environment=""
+				EnvironmentMerge="true"
+				DebuggerFlavor="0"
+				MPIRunCommand=""
+				MPIRunArguments=""
+				MPIRunWorkingDirectory=""
+				ApplicationCommand=""
+				ApplicationArguments=""
+				ShimCommand=""
+				MPIAcceptMode=""
+				MPIAcceptFilter=""
+			/>
+		</Configuration>
+	</Configurations>
+</VisualStudioUserFile>

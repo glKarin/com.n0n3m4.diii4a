@@ -1,0 +1,12 @@
+#include "PrecompETQW.h"
+#include "PrecompETQW.cpp"
+
+#include "BotExports.cpp"
+#include "gmETQWBinds.cpp"
+#include "ETQW_FilterClosest.cpp"
+#include "ETQW_BaseStates.cpp"
+#include "ETQW_Client.cpp"
+#include "ETQW_Game.cpp"
+#include "ETQW_VoiceMacros.cpp"
+#include "ETQW_GoalManager.cpp"
+#include "ETQW_InterfaceFuncs.cpp"

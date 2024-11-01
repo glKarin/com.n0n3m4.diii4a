@@ -1,0 +1,99 @@
+# Root jam file for Omni-bot.
+
+import modules ;
+
+BOOST = [ modules.peek : BOOST ] ; 
+BOOST_LIB = [ modules.peek : BOOST_LIB ] ; 
+BOOST_SUFFIX = [ modules.peek : BOOST_SUFFIX ] ; 
+
+# define requirements common to all subprojects
+project Omnibot
+	: build-dir ./build
+	: requirements 
+	<include>$(BOOST)
+	<include>dependencies/iprof
+	<include>dependencies/wildmagic
+	<include>dependencies/gmscriptex/gmsrc_ex/src/3rdParty
+	<include>dependencies/gmscriptex/gmsrc_ex/src/gm
+	<include>dependencies/gmscriptex/gmsrc_ex/src/binds
+	<include>dependencies/gmscriptex/gmsrc_ex/src/3rdParty/gmbinder2
+	<toolset>msvc:<include>dependencies/gmscriptex/gmsrc_ex/src/platform/win32msvc
+	<toolset>gcc:<include>dependencies/gmscriptex/gmsrc_ex/src/platform/win32gcc
+	<target-os>darwin:<include>dependencies/gmscriptex/gmsrc_ex/src/platform/osx
+	<conditional>@os-requirements
+	<toolset>gcc:<define>__linux__
+	<variant>debug:<define>_DEBUG
+	<variant>release:<define>NDEBUG
+	<warnings>off
+	;
+
+rule os-requirements ( properties * )
+{
+	local result ;
+	if <target-os>windows in $(properties)
+	{
+		result = <define>WIN32 <runtime-link>static ; 
+	}
+	else
+	{
+		result = <cxxflags>-std=c++11 <cflags>-fno-strict-aliasing ;
+		if <address-model>64 in $(properties)
+		{
+			result += <cflags>-fPIC ;
+		}
+	}
+	if <target-os>darwin in $(properties)
+	{
+		result += <linkflags>"-framework IOKit -framework Carbon" ;
+	}
+	return $(result) ;
+}
+
+# define external libs
+lib boost_filesystem : : <file>$(BOOST_LIB)/libboost_filesystem$(BOOST_SUFFIX).a ;
+lib boost_regex : : <file>$(BOOST_LIB)/libboost_regex$(BOOST_SUFFIX).a ;
+lib boost_date_time : : <file>$(BOOST_LIB)/libboost_date_time$(BOOST_SUFFIX).a ;
+lib boost_system : : <file>$(BOOST_LIB)/libboost_system$(BOOST_SUFFIX).a ;
+
+lib boost_filesystem : : <target-os>windows <file>$(BOOST_LIB)/libboost_filesystem$(BOOST_SUFFIX).lib ;
+lib boost_regex : : <target-os>windows <file>$(BOOST_LIB)/libboost_regex$(BOOST_SUFFIX).lib ;
+lib boost_date_time : : <target-os>windows <file>$(BOOST_LIB)/libboost_date_time$(BOOST_SUFFIX).lib ;
+lib boost_system : : <target-os>windows <file>$(BOOST_LIB)/libboost_system$(BOOST_SUFFIX).lib ;
+
+# define alias for convenience and to force static linking
+alias boost_all : boost_filesystem boost_regex boost_date_time boost_system : <link>static ;
+
+# target suffix
+rule tag ( name : type ? : property-set )
+{
+	if $(type) = SHARED_LIB
+	{
+		if [ $(property-set).get <target-os> ] = darwin
+		{
+			return $(name)_mac.so ;
+		}
+		else if [ $(property-set).get <target-os> ] = windows
+		{
+			if [ $(property-set).get <address-model> ] = 64
+			{
+				return $(name)_x64.dll ;
+			}
+			else
+			{
+				return $(name).dll ;
+			}
+		}
+		else if [ $(property-set).get <address-model> ] = 64
+		{
+			return $(name).x86_64.so ;
+		}
+		else
+		{
+			return $(name).so ;
+		}
+	}
+}
+
+build-project Common ; 
+build-project ET ;
+build-project RTCW ; 

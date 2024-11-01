@@ -1,0 +1,7 @@
+add event params to script param table
+
+add bool CheckValidBuildSpot(int _buildabletype) event
+add max velocity accessors to the code, add Arrive() functionality to better reach precise locations
+add error detection and retrying to build attempts, CFFBuildableInfo?
+change Notify_SentrySpottedEnemy to a set aim notification
+

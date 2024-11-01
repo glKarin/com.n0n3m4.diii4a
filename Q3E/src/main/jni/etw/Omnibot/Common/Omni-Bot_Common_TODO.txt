@@ -1,0 +1,7 @@
+finish gmSyncThread
+add a signal variable type that allows multiple fields to be used
+add a signal end flag to threads so they can optionally broadcast a signal when a thread is deleted
+merge latest gm code
+send all player events into the code(optionally to db, emulate sound events, etc)
+look into an 'enum' type
+log game data to sql db

@@ -1202,6 +1202,11 @@ void Sys_PlatformInit(void)
 {
 	const char *term = getenv("TERM");
 
+#ifdef _DIII4A //karin: no handle signals
+    extern qboolean no_handle_signals;
+    if(!no_handle_signals)
+    {
+#endif
 // don't set signal handlers for anything that will generate coredump (in DEBUG builds)
 #if !defined(ETLEGACY_DEBUG)
 	signal(SIGTRAP, Sys_SigHandler);
@@ -1210,6 +1215,9 @@ void Sys_PlatformInit(void)
 	signal(SIGHUP, Sys_SigHandler);
 	signal(SIGABRT, Sys_SigHandler);
 	signal(SIGQUIT, Sys_SigHandler);
+#ifdef _DIII4A //karin: no handle signals
+    }
+#endif
 
 	stdinIsATTY = isatty(STDIN_FILENO) &&
 	              !(term && (!strcmp(term, "raw") || !strcmp(term, "dumb")));
