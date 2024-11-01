@@ -861,7 +861,9 @@ public class Q3EGameHelper
         String cmd = Q3EUtils.q3ei.cmd;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         boolean redirectOutputToFile = preferences.getBoolean(Q3EPreference.REDIRECT_OUTPUT_TO_FILE, true);
-        boolean noHandleSignals = preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false);
+        //boolean noHandleSignals = preferences.getBoolean(Q3EPreference.NO_HANDLE_SIGNALS, false);
+        int signalsHandler = Q3EPreference.GetIntFromString(m_context, Q3EPreference.SIGNALS_HANDLER, Q3EGlobals.SIGNALS_HANDLER_GAME);
+        // final boolean noHandleSignals = signalsHandler != Q3EGlobals.SIGNALS_HANDLER_GAME;
         int runBackground = Q3EUtils.parseInt_s(preferences.getString(Q3EPreference.RUN_BACKGROUND, "0"), 0);
         int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
@@ -894,7 +896,7 @@ public class Q3EGameHelper
                 glFormat,
                 msaa, glVersion,
                 redirectOutputToFile,
-                noHandleSignals,
+                signalsHandler, // noHandleSignals,
                 Q3EUtils.q3ei.multithread,
                 usingMouse,
                 refreshRate,

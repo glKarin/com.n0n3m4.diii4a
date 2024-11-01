@@ -47,4 +47,6 @@
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="button_setting_has_changed_can_you_save_it">按键配置已经被修改! 是否保存?</string>
+    <string name="exit">退出</string>
+    <string name="copy">复制</string>
 </resources>

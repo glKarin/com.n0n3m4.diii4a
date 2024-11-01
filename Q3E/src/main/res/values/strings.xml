@@ -48,4 +48,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="button_setting_has_changed_can_you_save_it">Button setting has changed! Can you save it?</string>
+    <string name="exit">Exit</string>
+    <string name="copy">Copy</string>
 </resources>

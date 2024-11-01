@@ -42,4 +42,10 @@
         <item>隐藏</item>
         <item>仅按下</item>
     </string-array>
+
+    <string-array name="signals_handler_labels">
+        <item>由游戏引擎自行处理</item>
+        <item>不处理</item>
+        <item>记录回退栈</item>
+    </string-array>
 </resources>

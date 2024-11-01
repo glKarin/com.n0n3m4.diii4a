@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-project(oboeaudio)
+project(q3e_oboeaudio)
 
 # build type
 if(NOT CMAKE_BUILD_TYPE)

@@ -72,7 +72,7 @@ public class KUncaughtExceptionHandler implements Thread.UncaughtExceptionHandle
             StackTraceElement[] arr = e.getStackTrace();
 
             sb.append("********** DUMP **********\n");
-            sb.append("----- Time: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())).append('\n');
+            sb.append("----- Time: " + Q3EUtils.date_format("yyyy-MM-dd HH:mm:ss")).append('\n');
             sb.append('\n');
 
             sb.append("----- Thread: " + t).append('\n');

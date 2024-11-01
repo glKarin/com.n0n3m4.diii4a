@@ -118,6 +118,11 @@ public final class Q3EGlobals
     public static final int VIEW_MOTION_CONTROL_GYROSCOPE = 1 << 1;
     public static final int VIEW_MOTION_CONTROL_ALL       = VIEW_MOTION_CONTROL_TOUCH | VIEW_MOTION_CONTROL_GYROSCOPE;
 
+    // signals handler
+    public static final int SIGNALS_HANDLER_GAME      = 0;
+    public static final int SIGNALS_HANDLER_NO_HANDLE = 1;
+    public static final int SIGNALS_HANDLER_BACKTRACE = 2;
+
     // game engine library
     public static final String LIB_ENGINE_ID        = "libidtech4.so"; // DOOM3
     public static final String LIB_ENGINE_RAVEN     = "libidtech4_raven.so"; // Quake 4

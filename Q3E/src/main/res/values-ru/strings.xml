@@ -45,5 +45,7 @@
     <string name="warning">Предупреждение</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
+    <string name="copy">Копировать</string>
     <string name="button_setting_has_changed_can_you_save_it">Button setting has changed! Can you save it?</string>
+    <string name="exit">Exit</string>
 </resources>

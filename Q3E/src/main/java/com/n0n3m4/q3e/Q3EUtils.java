@@ -62,6 +62,8 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -867,5 +869,11 @@ public class Q3EUtils
         if(null == path)
             path = "";
         return Q3EUtils.GetAppStoragePath(context, "/diii4a" + path);
+    }
+
+    public static String date_format(String format, Date...date)
+    {
+        Date d = null != date && date.length > 0 && null != date[0] ? date[0] : new Date();
+        return new SimpleDateFormat(format).format(d);
     }
 }

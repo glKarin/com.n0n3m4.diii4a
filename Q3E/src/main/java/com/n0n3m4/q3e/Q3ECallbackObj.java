@@ -24,6 +24,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import com.n0n3m4.q3e.karin.KBacktraceHandler;
+
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
@@ -320,6 +322,14 @@ public class Q3ECallbackObj
                 Q3E.Finish();
             }
         });
+    }
+
+    public boolean Backtrace(int signnum, int pid, int tid, int mask, String[] strs)
+    {
+        KBacktraceHandler.HandleBacktrace(Q3E.activity);
+        String text = KBacktraceHandler.Instance().Backtrace(signnum, pid, tid, mask, strs);
+        String title = "Backtrace: ";
+        return gui.BacktraceDialog(title, text);
     }
 
     public void SetupSmoothJoystick(boolean enable)

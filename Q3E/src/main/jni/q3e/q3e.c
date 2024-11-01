@@ -33,6 +33,7 @@
 
 #include "q3e.h"
 #include "eventqueue.h"
+#include "bt.h"
 
 #include "doom3/neo/sys/android/sys_android.h"
 
@@ -88,6 +89,8 @@ static void *libdl;
 static ANativeWindow *window = NULL;
 static int usingNativeEventQueue = 0;
 
+static int backtrace_exit = 0;
+
 // Java object ref
 static JavaVM *jVM;
 static jobject audioBuffer=0;
@@ -112,6 +115,7 @@ static jmethodID android_CloseVKB_method;
 static jmethodID android_OpenURL_method;
 static jmethodID android_OpenDialog_method;
 static jmethodID android_Finish_method;
+static jmethodID android_Backtrace_method;
 
 #define ATTACH_JNI(env) \
 	JNIEnv *env = 0; \
@@ -123,6 +127,83 @@ static jmethodID android_Finish_method;
 static void Android_AttachThread(void)
 {
 	ATTACH_JNI(env)
+}
+
+static int backtrace_after_caught_signal(int signnum)
+{
+	ATTACH_JNI(env)
+
+	LOGI("idTech4A++ caught signal: %d, application exiting......", signnum);
+	Q3E_BT_Shutdown();
+	if(!backtrace_exit)
+	{
+		if(q3eCallbackObj && android_Finish_method)
+			finish();
+		else
+			exit(0);
+	}
+	return 0;
+}
+
+static void backtrace_signal_caughted(int num, int pid, int tid, int mask, const char *cfi, const char *fp, const char *eh)
+{
+	ATTACH_JNI(env)
+
+	LOGI("Backtrace dialog: %d\n", num);
+
+	jstring str;
+	jobjectArray stackArray = NULL;
+	jclass stringClazz = (*env)->FindClass(env, "java/lang/String");
+	stackArray = (*env)->NewObjectArray(env, 3, stringClazz, NULL);
+
+	if(mask > 0)
+	{
+		if(mask & SAMPLE_SOLUTION_CFI)
+		{
+			if(cfi)
+			{
+				str = (*env)->NewStringUTF(env, cfi);
+				jstring nStr = (*env)->NewWeakGlobalRef(env, str);
+				(*env)->DeleteLocalRef(env, str);
+				(*env)->SetObjectArrayElement(env, stackArray, 0, nStr);
+			}
+		}
+		if(mask & SAMPLE_SOLUTION_FP)
+		{
+			if(fp)
+			{
+				str = (*env)->NewStringUTF(env, fp);
+				jstring nStr = (*env)->NewWeakGlobalRef(env, str);
+				(*env)->DeleteLocalRef(env, str);
+				(*env)->SetObjectArrayElement(env, stackArray, 1, nStr);
+			}
+		}
+		if(mask & SAMPLE_SOLUTION_EH)
+		{
+			if(eh)
+			{
+				str = (*env)->NewStringUTF(env, eh);
+				jstring nStr = (*env)->NewWeakGlobalRef(env, str);
+				(*env)->DeleteLocalRef(env, str);
+				(*env)->SetObjectArrayElement(env, stackArray, 2, nStr);
+			}
+		}
+
+		jobjectArray nArr = (*env)->NewWeakGlobalRef(env, stackArray);
+		(*env)->DeleteLocalRef(env, stackArray);
+		stackArray = nArr;
+	}
+	jboolean res = (*env)->CallIntMethod(env, q3eCallbackObj, android_Backtrace_method, num, pid, tid, mask, stackArray);
+	LOGI("Backtrace dialog: result -> %d", res);
+	backtrace_exit = res ? 1 : 0;
+}
+
+static void setup_backtrace(void)
+{
+	Q3E_BT_Init();
+	Q3E_BT_SetupSolution(0xFF);
+	Q3E_BT_AfterCaught(backtrace_after_caught_signal);
+	Q3E_BT_SignalCaughted(backtrace_signal_caughted);
 }
 
 static void print_interface(void)
@@ -266,6 +347,7 @@ void setState(int state)
 static void q3e_exit(void)
 {
 	LOGI("Q3E JNI exit");
+	Q3E_BT_Shutdown();
 	if(Q3E_EventManagerIsInitialized())
     	Q3E_ShutdownEventManager();
 	if(game_data_dir)
@@ -352,6 +434,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_OpenURL_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenURL", "(Ljava/lang/String;)V");
 	android_OpenDialog_method = (*env)->GetMethodID(env, q3eCallbackClass, "OpenDialog", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)I");
 	android_Finish_method = (*env)->GetMethodID(env, q3eCallbackClass, "Finish", "()V");
+	android_Backtrace_method = (*env)->GetMethodID(env, q3eCallbackClass, "Backtrace", "(IIII[Ljava/lang/String;)Z");
 }
 
 static void UnEscapeQuotes( char *arg )
@@ -474,11 +557,16 @@ static void print_initial_context(const Q3E_InitialContext_t *context)
 	LOGI("<---------");
 }
 
-JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jboolean noHandleSignals, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jboolean bContinueNoGLContext)
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc;
 	jboolean iscopy;
+
+	if(signalsHandler == 2) // using backtrace
+	{
+		setup_backtrace();
+	}
 
 	const char *engineLibPath = (*env)->GetStringUTFChars(env, LibPath, &iscopy);
 	LOGI("idTech4a++ engine native library file: %s", engineLibPath);
@@ -537,7 +625,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	context.nativeLibraryDir = doom3_path;
 	context.appHomeDir = app_home_dir;
 	context.redirectOutputToFile = redirectOutputToFile ? 1 : 0;
-	context.noHandleSignals = noHandleSignals ? 1 : 0;
+	context.noHandleSignals = signalsHandler ? 1 : 0;
 	context.multithread = bMultithread ? 1 : 0;
 	context.mouseAvailable = mouseAvailable ? 1 : 0;
 	context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;

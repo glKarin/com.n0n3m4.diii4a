@@ -147,6 +147,7 @@ public final class Q3EPreference
     public static final String VOLUME_DOWN_KEY               = "harm_volume_down_key";
     public static final String WEAPON_PANEL_KEYS             = "harm_weapon_panel_keys";
     public static final String CONTROLS_CONFIG_POSITION_UNIT = "harm_controls_config_position_unit";
+    public static final String SIGNALS_HANDLER               = "harm_signals_handler";
     public static final String NO_HANDLE_SIGNALS             = "harm_no_handle_signals";
     public static final String REDIRECT_OUTPUT_TO_FILE       = "harm_redirect_output_to_file";
     public static final String COVER_EDGES                   = "harm_cover_edges";

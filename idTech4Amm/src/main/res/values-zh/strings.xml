@@ -372,7 +372,6 @@
     <string name="launcher">启动器</string>
     <string name="auto_save_buttons_settings_immediately_if_changed">如果按键设置被修改立即保存</string>
     <string name="auto_save_button_settings">自动保存按键设置</string>
-    <string name="copy">复制</string>
     <string name="show_preferences">显示偏好</string>
     <string name="show_application_setting_preferences_contents">显示程序设置偏好内容</string>
     <string name="enable">启用</string>
@@ -405,4 +404,7 @@
     <string name="create_shortcut_with_current_command_and_game">创建桌面快捷方式(当前的命令行和游戏)</string>
     <string name="input_desktop_shortcut_name">输入桌面快捷方式名称</string>
     <string name="game_desktop_shortcut_has_created">%s桌面快捷方式已被创建(%s).</string>
+    <string name="signals_handler">信号处理器</string>
+    <string name="setup_signals_handler_when_game_crash">设置当前游戏崩溃时的信号处理方式</string>
+    <string name="last_backtrace_info">最后回退栈信息</string>
 </resources>
