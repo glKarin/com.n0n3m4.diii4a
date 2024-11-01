@@ -85,6 +85,9 @@ option(DEDICATED							"Build the dedicated server" 												OFF)
 option(ONATIVE								"Optimize for the host CPU" 												OFF)
 option(REPRODUCIBLE_BUILD 					"Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 option(CONSOLE								"Run on console" 															OFF)
+if(LINUX)
+	option(USE_X11							"Use X11"																	OFF) # else SDL2
+endif()
 
 # For dev: Quick build
 option(BUILD_D3								"Build DOOM 3"																ON)
@@ -289,6 +292,7 @@ endif()
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
+#set(CMAKE_BUILD_TYPE "ReleaseWithDebInfo")
 
 # precompiled libraries from the dhewm3-libs repo
 #[[if(DHEWM3LIBS)
@@ -544,7 +548,26 @@ elseif(ANDROID)
 		set(sys_libs ${sys_libs} z)
 	endif()
 else() #TODO linux
-	set(sys_libs ${sys_libs} X11 dl EGL pthread)
+	set(sys_libs ${sys_libs} dl pthread)
+	if(USE_X11)
+		set(LINUX_SDL FALSE)
+		message(STATUS "use X11 + EGL")
+		set(sys_libs ${sys_libs} X11 EGL)
+	else() # SDL2
+		find_package(SDL2)
+		if(SDL2_FOUND)
+			set(LINUX_SDL TRUE)
+			message(STATUS "use SDL2")
+			include_directories(${SDL2_INCLUDE_DIR})
+			set(SDLx_LIBRARY ${SDL2_LIBRARIES})
+			add_definitions(-D_SDL)
+			set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
+		else()
+			set(LINUX_SDL FALSE)
+			message(STATUS "SDL2 not found, using X11 + EGL")
+			set(sys_libs ${sys_libs} X11 EGL)
+		endif()
+	endif()
 	if(NOT USE_MINIZ)
 		set(sys_libs ${sys_libs} z)
 	endif()
@@ -1330,6 +1353,28 @@ elseif(WIN32)
 			sys/sdl/glimp.cpp
 			)
 else()
+	if(LINUX_SDL)
+		set(src_sys_base
+			sys/sys_local.cpp
+			sys/sdl/threads.cpp
+			sys/sdl/events.cpp
+			sys/sdl/cpu.cpp
+			sys/sdl/sdl.cpp
+			sys/linux/stack.cpp
+			sys/posix/posix_net.cpp
+			sys/posix/posix_main.cpp
+			sys/posix/posix_signal.cpp
+		)
+		set(src_sys_base
+			${src_sys_base}
+			sys/linux/sound.cpp
+			sys/linux/sound_alsa.cpp
+			sys/linux/sdlmain.cpp
+		)
+		set(src_sys_core
+			sys/sdl/glimp.cpp
+		)
+	else()
 	set(src_sys_base
 		${src_sys_base}
 		sys/linux/main.cpp
@@ -1340,6 +1385,8 @@ else()
 	set(src_sys_core
 		sys/linux/gles2.cpp
 	)
+endif()
+
 endif()
 
 include_directories(${CMAKE_BINARY_DIR})
