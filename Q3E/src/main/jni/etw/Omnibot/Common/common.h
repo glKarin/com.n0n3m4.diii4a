@@ -297,7 +297,7 @@ typedef boost::dynamic_bitset<obuint32> DynBitSet32;
 //typedef boost::dynamic_bitset<obuint64> DynBitSet64;
 
 #if __cplusplus >= 201103L //karin: using C++11 instead of boost
-#define REGEX_OPTIONS std::regex::basic|std::regex::icase|std::regex::grep
+#define REGEX_OPTIONS /* std::regex::basic|//karin: C++ std::regex only allow 1 type flag */std::regex::icase|std::regex::grep
 #else
 #define REGEX_OPTIONS boost::regex::basic|boost::regex::icase|boost::regex::grep
 #endif
