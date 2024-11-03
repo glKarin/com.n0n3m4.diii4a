@@ -436,7 +436,7 @@ void R_AddMDCSurfaces( trRefEntity_t *ent ) {
 			 && shader->sort == SS_OPAQUE 
 #ifdef USE_OPENGLES //karin: ignore alpha test shader pass and special model type exclude player model
 			&& (STENCIL_SHADOW_MODEL(8) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
-			&& !R_HasAlphaTest(shader)
+			&& ((personalModel && harm_r_stencilShadowPersonal->integer == 1) || !R_HasAlphaTest(shader))
 #endif
 			 ) {
 // GR - tessellate according to model capabilities
