@@ -2099,8 +2099,7 @@ void *R_Hunk_Begin( void );
 void R_Hunk_End( void );
 
 #ifdef USE_OPENGLES //karin: stencil shadow
-#define USE_SHADOW_XYZ //karin: over SHRT_MAX, so use int instead of short for stencil shadow
-#define USE_SHADOW_INF //karin: use 4-components, far.w = 0.0
+#define STENCIL_SHADOW_IMPROVE //karin: improve stencil shadow
 
 #if !defined(GL_INCR_WRAP)
 #define GL_INCR_WRAP                      0x8507
@@ -2111,8 +2110,10 @@ void R_Hunk_End( void );
 
 extern cvar_t *harm_r_stencilShadowModel;
 extern cvar_t *harm_r_stencilShadowPersonal;
+extern cvar_t  *harm_r_stencilShadowInfinite;
 
 #define STENCIL_SHADOW_MODEL(x) (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & x))
+#define STENCIL_SHADOW_INFINITE() (r_shadows->integer == 2 && (harm_r_stencilShadowPersonal->integer || harm_r_stencilShadowInfinite->integer < 0))
 
 qboolean R_HasAlphaTest(const shader_t *shader);
 #endif

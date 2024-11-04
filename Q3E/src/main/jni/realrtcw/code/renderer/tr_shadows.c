@@ -77,16 +77,8 @@ GLenum stencilIncr = GL_INCR;
 GLenum stencilDecr = GL_DECR;
 #endif
 
-#ifdef USE_SHADOW_INF
-extern cvar_t *harm_r_stencilShadowInfinite;
-#endif
-
-#ifdef USE_SHADOW_XYZ
-#ifdef USE_SHADOW_INF
+#ifdef STENCIL_SHADOW_IMPROVE
 typedef vec4_t shadow_vec_t;
-#else
-typedef vec3_t shadow_vec_t;
-#endif
 static	shadow_vec_t		shadowXyz[SHADER_MAX_VERTEXES * 2]; //karin: RB_EndSurface() - SHADER_MAX_INDEXES hit
 typedef unsigned int shadowIndex_t;
 #define GL_SHADOW_INDEX_TYPE GL_UNSIGNED_INT
@@ -247,9 +239,9 @@ static void RB_ShadowDebug( void ) {
 	if(!harm_r_stencilShadowDebug->integer)
 		return;
 
-	qboolean useZFail = harm_r_stencilShadowOp->integer == 2
-						|| ((backEnd.currentEntity->e.renderfx & RF_THIRD_PERSON) && !backEnd.viewParms.isPortal) // personal
-	;
+	qboolean personalModel = ((backEnd.currentEntity->e.renderfx & RF_THIRD_PERSON) && !backEnd.viewParms.isPortal); // personal
+	qboolean infinite = personalModel || harm_r_stencilShadowInfinite->integer < 0;
+	qboolean useZFail = harm_r_stencilShadowOp->integer == 2 || personalModel;
 	qboolean useCaps = useZFail || harm_r_stencilShadowCap->integer;
 	if(harm_r_stencilShadowDebug->integer == 1 && idx == 0)
 	{
@@ -288,24 +280,13 @@ static void RB_ShadowDebug( void ) {
 		farCapColor[0] = 0.0f; farCapColor[1] = 0.0f; farCapColor[2] = 1.0f; farCapColor[3] = alpha;
 	}
 
-#ifdef USE_SHADOW_XYZ
-#ifdef USE_SHADOW_INF
-	if(harm_r_stencilShadowInfinite->integer < 0)
+#ifdef STENCIL_SHADOW_IMPROVE
+	if(infinite)
 		qglVertexPointer (4, GL_FLOAT, 0, shadowXyz);
 	else
 		qglVertexPointer (3, GL_FLOAT, 16, shadowXyz);
 #else
-	qglVertexPointer (3, GL_FLOAT, 0, shadowXyz);
-#endif
-#else
-	#ifdef USE_SHADOW_INF
-	if(harm_r_stencilShadowInfinite->integer < 0)
-		qglVertexPointer (4, GL_FLOAT, 0, tess.xyz);
-	else
-		qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);
-#else
 	qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);
-#endif
 #endif
 
 	int faceCulling = glState.faceCulling;
@@ -535,15 +516,14 @@ void RB_ShadowTessEnd( void ) {
             return;
 	}
 
-	qboolean useZFail = harm_r_stencilShadowOp->integer == 2
-			|| ((backEnd.currentEntity->e.renderfx & RF_THIRD_PERSON) && !backEnd.viewParms.isPortal) // personal
-			;
+	qboolean personalModel = ((backEnd.currentEntity->e.renderfx & RF_THIRD_PERSON) && !backEnd.viewParms.isPortal); // personal
+	qboolean infinite = personalModel || harm_r_stencilShadowInfinite->integer < 0;
+	qboolean useZFail = harm_r_stencilShadowOp->integer == 2 || personalModel;
 	qboolean useCaps = useZFail || harm_r_stencilShadowCap->integer;
 
 	front_cap_idx = 0;
 	far_cap_idx = 0;
 
-#ifdef USE_SHADOW_INF
 	float volumeLength;
 	if(harm_r_stencilShadowInfinite->integer > 0)
 		volumeLength = harm_r_stencilShadowInfinite->integer;
@@ -551,26 +531,15 @@ void RB_ShadowTessEnd( void ) {
 		volumeLength = -harm_r_stencilShadowInfinite->integer;
 	else
 		volumeLength = 512;
-#else
-#define volumeLength 512
-#endif
 
 	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
-#ifdef USE_SHADOW_XYZ
+#ifdef STENCIL_SHADOW_IMPROVE
 		VectorCopy( tess.xyz[i], shadowXyz[i] );
-#ifdef USE_SHADOW_INF
 		shadowXyz[i][3] = 1.0f;
-#endif
 		VectorMA( tess.xyz[i], -volumeLength, lightDir, shadowXyz[i+tess.numVertexes] );
-#ifdef USE_SHADOW_INF
 		shadowXyz[i+tess.numVertexes][3] = 0.0f;
-#endif
 #else
 		VectorMA( tess.xyz[i], -volumeLength, lightDir, tess.xyz[i+tess.numVertexes] );
-#ifdef USE_SHADOW_INF
-		tess.xyz[i][3] = 1.0f; // !!! need ???
-		tess.xyz[i+tess.numVertexes][3] = 0.0f;
-#endif
 #endif
 	}
 #else
@@ -680,24 +649,13 @@ void RB_ShadowTessEnd( void ) {
 #ifdef USE_OPENGLES
 	if(harm_r_stencilShadowMask->integer)
 		RB_BeginShadow();
-#ifdef USE_SHADOW_XYZ
-#ifdef USE_SHADOW_INF
-	if(harm_r_stencilShadowInfinite->integer < 0)
+#ifdef STENCIL_SHADOW_IMPROVE
+	if(infinite)
 		qglVertexPointer (4, GL_FLOAT, 0, shadowXyz);
 	else
 		qglVertexPointer (3, GL_FLOAT, 16, shadowXyz);
 #else
-	qglVertexPointer (3, GL_FLOAT, 0, shadowXyz);
-#endif
-#else
-#ifdef USE_SHADOW_INF
-	if(harm_r_stencilShadowInfinite->integer < 0)
-		qglVertexPointer (4, GL_FLOAT, 0, tess.xyz);
-	else
-		qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);
-#else
 	qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);
-#endif
 #endif
 	GLboolean text = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
 	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);

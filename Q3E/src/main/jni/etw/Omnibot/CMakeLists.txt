@@ -54,7 +54,11 @@ find_package(Boost COMPONENTS system filesystem regex date_time REQUIRED)
 target_link_libraries(omni-shared INTERFACE Boost::boost Boost::filesystem Boost::regex Boost::date_time)
 endif()
 
-OPTION(CMAKE '' ON) #//karin: using cmake defaines check little/big ndian and 32/64 bits, and stdint.h
+# build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 if(CMAKE_CXX_BYTE_ORDER EQUAL BIG_ENDIAN)
     set(big_endian 1)

@@ -899,6 +899,15 @@ void R_SetupProjection(viewParms_t *dest, float zProj, qboolean computeFrustum)
 	// Now that we have all the data for the projection matrix we can also setup the view frustum.
 	if(computeFrustum)
 		R_SetupFrustum(dest, xmin, xmax, ymax, zProj, stereoSep);
+#ifdef STENCIL_SHADOW_IMPROVE //karin: if using z-fail and w-infinite, make far plane as infinite
+	if(STENCIL_SHADOW_INFINITE())
+	{
+	dest->projectionMatrix[2] = 0;
+	dest->projectionMatrix[6] = 0;
+	dest->projectionMatrix[10] = -0.999f;
+	dest->projectionMatrix[14] = -2.0f*zProj;
+	}
+#endif
 }
 
 /*
@@ -916,10 +925,24 @@ void R_SetupProjectionZ(viewParms_t *dest)
 	zFar	= dest->zFar;	
 	depth	= zFar - zNear;
 
+#ifdef STENCIL_SHADOW_IMPROVE //karin: if using z-fail and w-infinite, make far plane as infinite
+	if(STENCIL_SHADOW_INFINITE())
+	{
+		dest->projectionMatrix[2] = 0;
+		dest->projectionMatrix[6] = 0;
+		dest->projectionMatrix[10] = -0.999f;
+		dest->projectionMatrix[14] = -2.0f*zNear;
+	}
+	else
+	{
+#endif
 	dest->projectionMatrix[2] = 0;
 	dest->projectionMatrix[6] = 0;
 	dest->projectionMatrix[10] = -( zFar + zNear ) / depth;
 	dest->projectionMatrix[14] = -2 * zFar * zNear / depth;
+#ifdef STENCIL_SHADOW_IMPROVE //karin: if using z-fail and w-infinite, make far plane as infinite
+	}
+#endif
 }
 
 
