@@ -407,4 +407,11 @@
     <string name="signals_handler">信号处理器</string>
     <string name="setup_signals_handler_when_game_crash">设置当前游戏崩溃时的信号处理方式</string>
     <string name="last_backtrace_info">最后回退栈信息</string>
+    <string name="compression_texture_harm_image_usecompression">压缩纹理(harm_image_useCompression)</string>
+    <string name="allow_cheats_harm_sv_cheats">允许作弊(harm_sv_cheats)</string>
+    <string name="render_personal_model_shadow_harm_r_stencilshadowpersonal">渲染个人模型阴影(harm_r_stencilShadowPersonal)</string>
+    <string name="blur">模糊</string>
+    <string name="shodow_cg_shadows">阴影(cg_shadows)</string>
+    <string name="renderer_vid_renderer">渲染器(vid_renderer)</string>
+    <string name="cache_compression_texture_harm_image_usecompressioncache">缓存压缩纹理(harm_image_useCompressionCache)</string>
 </resources>

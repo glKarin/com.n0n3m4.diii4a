@@ -387,6 +387,32 @@ public class GameLauncher extends Activity
 						.putBoolean(PreferenceKey.COLLAPSE_MODS, isChecked)
 						.commit();
 			}
+
+			// Doom 3 BFG
+			else if (id == R.id.doom3bfg_useCompressionCache)
+			{
+				if(Q3EUtils.q3ei.isD3BFG)
+					setProp("harm_image_useCompressionCache", isChecked);
+			}
+
+			// RealRTCW
+			else if (id == R.id.realrtcw_sv_cheats)
+			{
+				if(Q3EUtils.q3ei.isRealRTCW)
+					setProp("harm_sv_cheats", isChecked);
+			}
+			else if (id == R.id.realrtcw_stencilShadowPersonal)
+			{
+				if(Q3EUtils.q3ei.isRealRTCW)
+					setProp("harm_r_stencilShadowPersonal", isChecked);
+			}
+
+			// ETW
+			else if (id == R.id.etw_omnibot_enable)
+			{
+				if(Q3EUtils.q3ei.isETW)
+					setProp("omnibot_enable", isChecked);
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -479,10 +505,49 @@ public class GameLauncher extends Activity
 						.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, index)
 						.commit();
 			}
-			else if (rgId == R.id.rg_fs_game || rgId == R.id.rg_fs_q4game || rgId == R.id.rg_fs_preygame || rgId == R.id.rg_fs_q2game || rgId == R.id.rg_fs_q3game || rgId == R.id.rg_fs_rtcwgame || rgId == R.id.rg_fs_tdmgame || rgId == R.id.rg_fs_q1game || rgId == R.id.rg_fs_d3bfggame || rgId == R.id.rg_fs_doomgame || rgId == R.id.rg_fs_etwgame || rgId == R.id.rg_fs_realrtcwgame)
+
+			// change game mods
+			else if (
+					rgId == R.id.rg_fs_game
+					|| rgId == R.id.rg_fs_q4game
+					|| rgId == R.id.rg_fs_preygame
+					|| rgId == R.id.rg_fs_q2game
+					|| rgId == R.id.rg_fs_q3game
+					|| rgId == R.id.rg_fs_rtcwgame
+					|| rgId == R.id.rg_fs_tdmgame
+					|| rgId == R.id.rg_fs_q1game
+					|| rgId == R.id.rg_fs_d3bfggame
+					|| rgId == R.id.rg_fs_doomgame
+					|| rgId == R.id.rg_fs_etwgame
+					|| rgId == R.id.rg_fs_realrtcwgame
+			)
 			{
 				RadioButton checked = radioGroup.findViewById(id);
 				SetGameDLL((String)checked.getTag());
+			}
+
+			// Quake 2
+			else if (rgId == R.id.yquake2_vid_renderer)
+			{
+				String value2 = GetCheckboxIndex(radioGroup, id) == 1 ? "gles3" : "gl1";
+				if(Q3EUtils.q3ei.isQ2)
+					SetProp("vid_renderer", value2);
+			}
+
+			// Doom 3 BFG
+			else if (rgId == R.id.doom3bfg_useCompression)
+			{
+				index = GetCheckboxIndex(radioGroup, id);
+				if(Q3EUtils.q3ei.isD3BFG)
+					SetProp("harm_image_useCompression", index);
+			}
+
+			// RealRTCW
+			else if (rgId == R.id.realrtcw_shadows)
+			{
+				index = GetCheckboxIndex(radioGroup, id);
+				if(Q3EUtils.q3ei.isRealRTCW)
+					SetProp("cg_shadows", index);
 			}
         }
     };
@@ -657,7 +722,7 @@ public class GameLauncher extends Activity
 		{
 			boolean cond = enabled && V.edt_cmdline.isInputMethodTarget() && !IsCmdUpdateLocked();
 			if (cond)
-				updatehacktings(Q3EUtils.q3ei.IsIdTech4());
+				updatehacktings();
 		}
 
 		public void afterTextChanged(Editable s)
@@ -846,12 +911,14 @@ public class GameLauncher extends Activity
         SetProp(name, KidTechCommand.btostr(val));
     }
 
-    public void updatehacktings(boolean all)
+	// update widget from command line
+    public void updatehacktings()
     {
     	LockCmdUpdate();
 		String str;
+		int index;
 
-		if(all) // only for idTech4 games
+		if(Q3EUtils.q3ei.IsIdTech4()) // only for idTech4 games
 		{
 			//k
 			V.usedxt.setChecked(getProp("r_useDXT", false));
@@ -869,7 +936,7 @@ public class GameLauncher extends Activity
 			if (!IsProp("r_useETC2")) setProp("r_useETC2", false);
 
 			str = GetProp("harm_r_clearVertexBuffer");
-			int index = Q3EUtils.parseInt_s(str, 2);
+			index = Q3EUtils.parseInt_s(str, 2);
 			SelectCheckbox(V.r_harmclearvertexbuffer, index);
 			if (!IsProp("harm_r_clearVertexBuffer")) SetProp("harm_r_clearVertexBuffer", 2);
 
@@ -964,6 +1031,22 @@ public class GameLauncher extends Activity
 			SelectCheckbox(V.rg_r_autoAspectRatio, index);
 			if (!IsProp("harm_r_autoAspectRatio")) SetProp("harm_r_autoAspectRatio", 1);
 		}
+		else if(Q3EUtils.q3ei.isQ2)
+		{
+			Updatehacktings_Quake2();
+		}
+		else if(Q3EUtils.q3ei.isD3BFG)
+		{
+			Updatehacktings_Doom3BFG();
+		}
+		else if(Q3EUtils.q3ei.isRealRTCW)
+		{
+			Updatehacktings_RealRTCW();
+		}
+		else if(Q3EUtils.q3ei.isETW)
+		{
+			Updatehacktings_ETW();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
@@ -1000,6 +1083,64 @@ public class GameLauncher extends Activity
 
 		UnlockCmdUpdate();
     }
+
+	private void Updatehacktings_Quake2()
+	{
+		String str;
+		int index;
+
+		str = GetProp("vid_renderer");
+		index = 0;
+		if (str != null)
+		{
+			if ("gles3".equalsIgnoreCase(str))
+				index = 1;
+		}
+		SelectCheckbox(V.yquake2_vid_renderer, index);
+	}
+
+	private void Updatehacktings_Doom3BFG()
+	{
+		String str;
+		int index;
+
+		str = GetProp("harm_image_useCompression");
+		index = 0;
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 0);
+		}
+		SelectCheckbox(V.doom3bfg_useCompression, index);
+
+		V.doom3bfg_useCompressionCache.setChecked(getProp("harm_image_useCompressionCache", false));
+		if (!IsProp("harm_image_useCompressionCache")) setProp("harm_image_useCompressionCache", false);
+	}
+
+	private void Updatehacktings_RealRTCW()
+	{
+		String str;
+		int index;
+
+		str = GetProp("cg_shadows");
+		index = 0;
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 1);
+		}
+		SelectCheckbox(V.realrtcw_shadows, index);
+
+		V.realrtcw_sv_cheats.setChecked(getProp("harm_sv_cheats", false));
+		if (!IsProp("harm_sv_cheats")) setProp("harm_sv_cheats", false);
+
+		V.realrtcw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
+		if (!IsProp("harm_r_stencilShadowPersonal")) setProp("harm_r_stencilShadowPersonal", true);
+	}
+
+	private void Updatehacktings_ETW()
+	{
+		V.etw_omnibot_enable.setChecked(getProp("omnibot_enable", false));
+		if (!IsProp("omnibot_enable")) setProp("omnibot_enable", false);
+	}
 
     private void ThrowException()
     {
@@ -1091,7 +1232,7 @@ public class GameLauncher extends Activity
 
 		SetupUI();
 
-        updatehacktings(Q3EUtils.q3ei.IsIdTech4());
+        updatehacktings();
 
 		AfterCreated();
     }
@@ -1293,6 +1434,18 @@ public class GameLauncher extends Activity
 		V.onscreen_button_setting.setOnClickListener(m_buttonClickListener);
 		V.setup_onscreen_button_theme.setOnClickListener(m_buttonClickListener);
 
+		// Quake2
+		SetupUI_Quake2();
+
+		// DOOM 3 BFG
+		SetupUI_Doom3BFG();
+
+		// RealRTCW
+		SetupUI_RealRTCW();
+
+		// ETW
+		SetupUI_ETW();
+
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
 		V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 3.0f));
@@ -1424,6 +1577,52 @@ public class GameLauncher extends Activity
 			public void afterTextChanged(Editable s) { }
 		});
 	}
+
+	private void SetupUI_Quake2()
+	{
+		SelectCheckbox(V.yquake2_vid_renderer, "gles3".equals(GetProp("vid_renderer")) ? 1 : 0);
+		V.yquake2_vid_renderer.setOnCheckedChangeListener(m_groupCheckChangeListener);
+	}
+
+	private void SetupUI_Doom3BFG()
+	{
+		int index = 0;
+		String str = GetProp("harm_image_useCompression");
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 0);
+		}
+		SelectCheckbox(V.doom3bfg_useCompression, index);
+		V.doom3bfg_useCompression.setOnCheckedChangeListener(m_groupCheckChangeListener);
+
+		V.doom3bfg_useCompressionCache.setChecked(getProp("harm_image_useCompressionCache", false));
+		V.doom3bfg_useCompressionCache.setOnCheckedChangeListener(m_checkboxChangeListener);
+	}
+
+	private void SetupUI_RealRTCW()
+	{
+		int index = 0;
+		String str = GetProp("cg_shadows");
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 1);
+		}
+		SelectCheckbox(V.realrtcw_shadows, index);
+		V.realrtcw_shadows.setOnCheckedChangeListener(m_groupCheckChangeListener);
+
+		V.realrtcw_sv_cheats.setChecked(getProp("harm_sv_cheats", false));
+		V.realrtcw_sv_cheats.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		V.realrtcw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
+		V.realrtcw_stencilShadowPersonal.setOnCheckedChangeListener(m_checkboxChangeListener);
+	}
+
+	private void SetupUI_ETW()
+	{
+		V.etw_omnibot_enable.setChecked(getProp("omnibot_enable", false));
+		V.etw_omnibot_enable.setOnCheckedChangeListener(m_checkboxChangeListener);
+	}
+
 	private void AfterCreated()
 	{
 		try
@@ -2203,7 +2402,15 @@ public class GameLauncher extends Activity
 			{
 				String cmdResult = m_chooseCommandRecordFunc.GetResult();
 				if(null != cmdResult && !cmd.equals(cmdResult))
-					SetCmdText(cmdResult);
+				{
+					// lock -> unregister listener -> set cmd text -> register listener -> unlock -> update GUI widgets
+					LockCmdUpdate();
+					SetupCommandTextWatcher(false);
+					V.edt_cmdline.setText(cmdResult); // SetCmdText(cmdResult);
+					SetupCommandTextWatcher(true);
+					UnlockCmdUpdate();
+					updatehacktings();
+				}
 			}
 		});
 		Bundle bundle = new Bundle();
@@ -2575,9 +2782,6 @@ public class GameLauncher extends Activity
 		boolean etwVisible = false;
 		boolean realrtcwVisible = false;
 
-		boolean rendererVisible = true;
-		boolean soundVisible = true;
-		boolean otherVisible = true;
 		boolean openglVisible = true;
 		boolean modVisible = true;
 		boolean dllVisible = true;
@@ -2595,9 +2799,6 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isQ1)
 		{
 			q1Visible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			// modVisible = false;
 			dllVisible = false;
@@ -2607,9 +2808,6 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isQ2)
 		{
 			q2Visible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2618,9 +2816,6 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isQ3)
 		{
 			q3Visible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2628,18 +2823,12 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isRTCW)
 		{
 			rtcwVisible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isTDM)
 		{
 			tdmVisible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			// modVisible = false;
 			dllVisible = false;
@@ -2649,9 +2838,6 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isD3BFG)
 		{
 			d3bfgVisible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2660,9 +2846,6 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isDOOM)
 		{
 			doomVisible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2671,9 +2854,6 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isETW)
 		{
 			etwVisible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 			quickloadVisible = false;
@@ -2681,9 +2861,6 @@ public class GameLauncher extends Activity
 		else if (Q3EUtils.q3ei.isRealRTCW)
 		{
 			realrtcwVisible = true;
-			rendererVisible = false;
-			soundVisible = false;
-			otherVisible = false;
 			openglVisible = false;
 			dllVisible = false;
 		}
@@ -2712,9 +2889,12 @@ public class GameLauncher extends Activity
 		V.rg_fs_etwgame.setVisibility(etwVisible ? View.VISIBLE : View.GONE);
 		V.rg_fs_realrtcwgame.setVisibility(realrtcwVisible ? View.VISIBLE : View.GONE);
 
-		V.renderer_section.setVisibility(rendererVisible ? View.VISIBLE : View.GONE);
-		V.sound_section.setVisibility(soundVisible ? View.VISIBLE : View.GONE);
-		V.other_section.setVisibility(otherVisible ? View.VISIBLE : View.GONE);
+		V.idtech4_section.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
+		V.yquake2_section.setVisibility(Q3EUtils.q3ei.isQ2 ? View.VISIBLE : View.GONE);
+		V.doom3bfg_section.setVisibility(Q3EUtils.q3ei.isD3BFG ? View.VISIBLE : View.GONE);
+		V.realrtcw_section.setVisibility(Q3EUtils.q3ei.isRealRTCW ? View.VISIBLE : View.GONE);
+		V.etw_section.setVisibility(Q3EUtils.q3ei.isETW ? View.VISIBLE : View.GONE);
+
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.mod_section.setVisibility(modVisible ? View.VISIBLE : View.GONE);
 		V.dll_section.setVisibility(dllVisible ? View.VISIBLE : View.GONE);
@@ -2761,7 +2941,7 @@ public class GameLauncher extends Activity
 		UnlockCmdUpdate();
 
 		// if is DOOM3/Quake4/Prey, update launcher
-		updatehacktings(Q3EUtils.q3ei.IsIdTech4());
+		updatehacktings();
 
 		// put last
 		String game = preference.getString(Q3EUtils.q3ei.GetGameModPreferenceKey(), "");
@@ -3337,9 +3517,7 @@ public class GameLauncher extends Activity
 		public CheckBox cb_stencilShadowTranslucent;
 		public Switch editable_temp_command;
 		public LinearLayout temp_cmdline;
-		public LinearLayout renderer_section;
-		public LinearLayout sound_section;
-		public LinearLayout other_section;
+		public LinearLayout idtech4_section;
 		public LinearLayout opengl_section;
 		public LinearLayout mod_section;
 		public LinearLayout dll_section;
@@ -3375,6 +3553,17 @@ public class GameLauncher extends Activity
 		public android.support.v4.widget.NestedScrollView mods_container;
 		public LinearLayout mods_container_layout;
 		public EditText edt_harm_r_ambientLightingBrightness;
+		public LinearLayout yquake2_section;
+		public RadioGroup yquake2_vid_renderer;
+		public LinearLayout doom3bfg_section;
+		public RadioGroup doom3bfg_useCompression;
+		public CheckBox doom3bfg_useCompressionCache;
+		public LinearLayout realrtcw_section;
+		public CheckBox realrtcw_sv_cheats;
+		public RadioGroup realrtcw_shadows;
+		public CheckBox realrtcw_stencilShadowPersonal;
+		public LinearLayout etw_section;
+		public CheckBox etw_omnibot_enable;
 
         public void Setup()
         {
@@ -3443,9 +3632,7 @@ public class GameLauncher extends Activity
 			cb_stencilShadowTranslucent = findViewById(R.id.cb_stencilShadowTranslucent);
 			editable_temp_command = findViewById(R.id.editable_temp_command);
 			temp_cmdline = findViewById(R.id.temp_cmdline);
-			renderer_section = findViewById(R.id.renderer_section);
-			sound_section = findViewById(R.id.sound_section);
-			other_section = findViewById(R.id.other_section);
+			idtech4_section = findViewById(R.id.idtech4_section);
 			opengl_section = findViewById(R.id.opengl_section);
 			dll_section = findViewById(R.id.dll_section);
 			mod_section = findViewById(R.id.mod_section);
@@ -3481,6 +3668,17 @@ public class GameLauncher extends Activity
 			edt_harm_r_ambientLightingBrightness = findViewById(R.id.edt_harm_r_ambientLightingBrightness);
 			rg_fs_etwgame = findViewById(R.id.rg_fs_etwgame);
 			rg_fs_realrtcwgame = findViewById(R.id.rg_fs_realrtcwgame);
+			yquake2_section = findViewById(R.id.yquake2_section);
+			yquake2_vid_renderer = findViewById(R.id.yquake2_vid_renderer);
+			doom3bfg_section = findViewById(R.id.doom3bfg_section);
+			doom3bfg_useCompression = findViewById(R.id.doom3bfg_useCompression);
+			doom3bfg_useCompressionCache = findViewById(R.id.doom3bfg_useCompressionCache);
+			realrtcw_section = findViewById(R.id.realrtcw_section);
+			realrtcw_sv_cheats = findViewById(R.id.realrtcw_sv_cheats);
+			realrtcw_shadows = findViewById(R.id.realrtcw_shadows);
+			realrtcw_stencilShadowPersonal = findViewById(R.id.realrtcw_stencilShadowPersonal);
+			etw_section = findViewById(R.id.etw_section);
+			etw_omnibot_enable = findViewById(R.id.etw_omnibot_enable);
         }
     }
 }

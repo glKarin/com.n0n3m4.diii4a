@@ -7,12 +7,13 @@
     android:fillViewport="true">
 
     <LinearLayout
+        android:id="@+id/lay_tab1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/lay_tab1"
+            android:id="@+id/gamedata_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -35,7 +36,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:checked="false"/>
+                    android:checked="false" />
             </LinearLayout>
 
             <EditText
@@ -44,8 +45,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:imeOptions="flagNoExtractUi"
-                android:textSize="16sp"
-                android:inputType="textNoSuggestions|textMultiLine"/>
+                android:inputType="textNoSuggestions|textMultiLine"
+                android:textSize="16sp" />
 
             <LinearLayout
                 android:id="@+id/temp_cmdline"
@@ -60,16 +61,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ems="10"
-                    android:textSize="16sp"
                     android:imeOptions="flagNoExtractUi"
-                    android:inputType="textNoSuggestions|textMultiLine" />
+                    android:inputType="textNoSuggestions|textMultiLine"
+                    android:textSize="16sp" />
 
                 <Switch
                     android:id="@+id/editable_temp_command"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:checked="false"/>
+                    android:checked="false" />
             </LinearLayout>
             <!--<TextView
                 android:id="@+id/edt_cmdline_temp"
@@ -81,27 +82,28 @@
                 />-->
 
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/tv_path"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:text="@string/game_working_directory" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/show_directory_helper"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
-                android:text="@string/tips"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:layout_gravity="center_vertical"/>
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_path"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/game_working_directory" />
+
+                <TextView
+                    android:id="@+id/show_directory_helper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:text="@string/tips"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -115,20 +117,23 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:imeOptions="flagNoExtractUi"
-                    android:inputType="textNoSuggestions">
-
-                </EditText>
+                    android:inputType="textNoSuggestions" />
 
                 <Button
                     android:id="@+id/launcher_tab1_game_data_chooser_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/chooser"
-                    android:textAllCaps="false">
-
-                </Button>
-
+                    android:textAllCaps="false" />
             </LinearLayout>
+
+        </LinearLayout> <!-- end game data section -->
+
+        <LinearLayout
+            android:id="@+id/gamemod_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <com.karin.idTech4Amm.widget.Divider
                 android:layout_width="match_parent"
@@ -146,27 +151,30 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:orientation="horizontal"
-                    android:layout_gravity="center_vertical">
+                    android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/launcher_fs_game"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:text="@string/game_cvar_fs_game" />
+
                     <TextView
                         android:id="@+id/launcher_fs_game_cvar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:text="" />
+
                     <TextView
                         android:id="@+id/launcher_fs_game_subdir"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
                         android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="2dp"
                         android:text="" />
                 </LinearLayout>
 
@@ -175,146 +183,156 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:checked="false"/>
+                    android:checked="false" />
             </LinearLayout>
 
             <android.support.v4.widget.NestedScrollView
                 android:id="@+id/mods_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/mods_container_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_game"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_q4game"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_preygame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_q1game"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_q2game"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_q3game"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_rtcwgame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_tdmgame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_d3bfggame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_doomgame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_etwgame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+
+                    <RadioGroup
+                        android:id="@+id/rg_fs_realrtcwgame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"></RadioGroup>
+                </LinearLayout>
+            </android.support.v4.widget.NestedScrollView>
+
             <LinearLayout
-                android:id="@+id/mods_container_layout"
+                android:id="@+id/mod_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-            <RadioGroup
-                android:id="@+id/rg_fs_game"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_q4game"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_preygame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_q1game"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_q2game"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_q3game"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_rtcwgame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_tdmgame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_d3bfggame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_doomgame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/rg_fs_etwgame"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></RadioGroup>
-
-                <RadioGroup
-                    android:id="@+id/rg_fs_realrtcwgame"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"></RadioGroup>
-            </LinearLayout>
-        </android.support.v4.widget.NestedScrollView>
-
-
-        <LinearLayout
-            android:id="@+id/mod_section"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="bottom">
-
-                <CheckBox
-                    android:id="@+id/fs_game_user"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/user_mod" />
 
                 <LinearLayout
-                    android:id="@+id/launcher_tab1_user_game_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="bottom">
 
-                    <EditText
-                        android:id="@+id/edt_fs_game"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:hint="@string/input_your_mod_folder_name"
-                        android:imeOptions="flagNoExtractUi"
-                        android:inputType="textNoSuggestions"/>
-
-                    <Button
-                        android:id="@+id/launcher_tab1_game_mod_button"
+                    <CheckBox
+                        android:id="@+id/fs_game_user"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/chooser"
-                        android:textAllCaps="false"/>
+                        android:text="@string/user_mod" />
 
+                    <LinearLayout
+                        android:id="@+id/launcher_tab1_user_game_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="bottom">
+
+                        <EditText
+                            android:id="@+id/edt_fs_game"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ems="10"
+                            android:hint="@string/input_your_mod_folder_name"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="textNoSuggestions" />
+
+                        <Button
+                            android:id="@+id/launcher_tab1_game_mod_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/chooser"
+                            android:textAllCaps="false" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/dll_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <CheckBox
+                        android:id="@+id/find_dll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/find_game_library_in_game_data_directory" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="0dp"
+                        android:text="@string/using_external_game_library"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/dll_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+        </LinearLayout> <!-- end game mod section -->
 
-                <CheckBox
-                    android:id="@+id/find_dll"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/find_game_library_in_game_data_directory" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="32dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="0dp"
-                    android:text="@string/using_external_game_library"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textSize="12sp" />
-            </LinearLayout>
-        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/idtech4_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/renderer_section"
@@ -384,8 +402,8 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
                         android:text="@string/specular_exponent_cvar_harm_r_specularexponent" />
 
                     <EditText
@@ -408,8 +426,8 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
                         android:text="@string/blinnphong_specular_exponent_cvar_harm_r_specularexponentblinnphong" />
 
                     <EditText
@@ -432,8 +450,8 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
                         android:text="@string/blinnphong_specular_exponent_cvar_harm_r_specularexponentpbr" />
 
                     <EditText
@@ -456,8 +474,8 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
                         android:text="@string/ambient_lighting_brightness_harm_r_ambientlightingbrightness" />
 
                     <EditText
@@ -514,8 +532,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="@string/shadow_mapping" />
+                    android:text="@string/shadow_mapping"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -533,8 +551,8 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
                             android:text="@string/shadow_mapping_alpha_harm_r_shadowmapalpha" />
 
                         <EditText
@@ -558,8 +576,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="@string/stencil_shadow" />
+                    android:text="@string/stencil_shadow"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -589,8 +607,8 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
                             android:text="@string/stencil_shadow_alpha_harm_r_stencilshadowalpha" />
 
                         <EditText
@@ -630,6 +648,7 @@
                     android:layout_marginTop="1dp"
                     android:layout_marginBottom="1dp"
                     android:text="@string/clear_vertex_buffer_cvar_harm_r_clearvertexbuffer" />
+
                 <RadioGroup
                     android:id="@+id/r_harmclearvertexbuffer"
                     android:layout_width="wrap_content"
@@ -694,8 +713,8 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
                         android:text="@string/maximum_fps_limit_0_unlimited" />
 
                     <EditText
@@ -715,6 +734,7 @@
                     android:layout_marginTop="1dp"
                     android:layout_marginBottom="1dp"
                     android:text="@string/automatic_setup_aspect_ratio_harm_r_autoaspectratio" />
+
                 <RadioGroup
                     android:id="@+id/rg_r_autoAspectRatio"
                     android:layout_width="wrap_content"
@@ -771,7 +791,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/use_etc2_compression" />
 
-            </LinearLayout>
+            </LinearLayout> <!-- end idTech4::renderer section -->
 
             <LinearLayout
                 android:id="@+id/sound_section"
@@ -825,7 +845,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/using_efx_reverb" />
-            </LinearLayout>
+            </LinearLayout> <!-- end idTech4::sound section -->
+
+            <LinearLayout
+                android:id="@+id/other_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <com.karin.idTech4Amm.widget.Divider
                     android:layout_width="match_parent"
@@ -833,16 +859,65 @@
                     myapp:label="@string/other"
                     myapp:lineColor="@color/launcher_divider_color" />
 
-                <CheckBox
-                    android:id="@+id/skip_intro"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/skip_intro" />
-                <CheckBox
-                    android:id="@+id/auto_quick_load"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/load_quicksave_when_start_game" />
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/launcher_tab1_game_lib_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/gamelib"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+            </LinearLayout> <!-- end idTech4::other section -->
+
+        </LinearLayout> <!-- end idTech4 section -->
+
+        <include
+            android:id="@+id/yquake2_section"
+            layout="@layout/launcher_quake2"
+            android:visibility="gone"></include>
+
+        <include
+            android:id="@+id/doom3bfg_section"
+            layout="@layout/launcher_doom3bfg"
+            android:visibility="gone"></include>
+
+        <include
+            android:id="@+id/realrtcw_section"
+            layout="@layout/launcher_realrtcw"
+            android:visibility="gone"></include>
+
+        <include
+            android:id="@+id/etw_section"
+            layout="@layout/launcher_etw"
+            android:visibility="gone"></include>
+
+        <LinearLayout
+            android:id="@+id/general_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.karin.idTech4Amm.widget.Divider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                myapp:label="@string/general"
+                myapp:lineColor="@color/launcher_divider_color" />
+
+            <CheckBox
+                android:id="@+id/skip_intro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/skip_intro" />
+
+            <CheckBox
+                android:id="@+id/auto_quick_load"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/load_quicksave_when_start_game" />
 
             <LinearLayout
                 android:id="@+id/extras_section"
@@ -896,30 +971,9 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/other_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+        </LinearLayout> <!-- end general section -->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/launcher_tab1_game_lib_button"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/gamelib"
-                        android:textAllCaps="false" />
-                </LinearLayout>
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </LinearLayout> <!-- end launcher tab1 main -->
 
 </android.support.v4.widget.NestedScrollView>
 

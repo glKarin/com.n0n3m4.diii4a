@@ -411,5 +411,12 @@
     <string name="signals_handler">Signals handler</string>
     <string name="setup_signals_handler_when_game_crash">Setup signals handler when game crash</string>
     <string name="last_backtrace_info">Last backtrace info</string>
+    <string name="compression_texture_harm_image_usecompression">Compression texture(harm_image_useCompression)</string>
+    <string name="allow_cheats_harm_sv_cheats">Allow cheats(harm_sv_cheats)</string>
+    <string name="render_personal_model_shadow_harm_r_stencilshadowpersonal">Render personal model shadow(harm_r_stencilShadowPersonal)</string>
+    <string name="blur">Blur</string>
+    <string name="shodow_cg_shadows">Shodow(cg_shadows)</string>
+    <string name="renderer_vid_renderer">Renderer(vid_renderer)</string>
+    <string name="cache_compression_texture_harm_image_usecompressioncache">Cache compression texture(harm_image_useCompressionCache)</string>
 
 </resources>

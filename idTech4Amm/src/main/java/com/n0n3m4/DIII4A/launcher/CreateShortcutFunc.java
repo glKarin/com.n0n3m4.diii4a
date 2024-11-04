@@ -1,5 +1,6 @@
 package com.n0n3m4.DIII4A.launcher;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -248,6 +249,7 @@ public final class CreateShortcutFunc extends GameLauncherFunc
         return mask;
     }
 
+    @SuppressLint("NewApi")
     private void CreateShortcut(String game, int type)
     {
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
