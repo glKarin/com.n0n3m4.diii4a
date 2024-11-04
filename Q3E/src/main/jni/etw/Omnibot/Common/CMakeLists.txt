@@ -1,8 +1,9 @@
 # Omnibot common build
 
-file(GLOB COMMON_SRC CONFIGURE_DEPENDS
+file(GLOB COMMON_SRC 
+	# CONFIGURE_DEPENDS #//karin: not changes
     ${DEPENDENCIES_PATH}/gmscriptex/gmsrc_ex/src/gm/*.cpp
-    ${DEPENDENCIES_PATH}/gmscriptex/gmsrc_ex/src/platform/cmake/*.cpp #//karin: using cmake defaines check little/big ndian and 32/64 bits, and stdint.h
+    ${DEPENDENCIES_PATH}/gmscriptex/gmsrc_ex/src/platform/cmake/*.cpp #//karin: using cmake defines check little/big ndian and 32/64 bits, and stdint.h
     ${DEPENDENCIES_PATH}/gmscriptex/gmsrc_ex/src/binds/*.cpp
     ${DEPENDENCIES_PATH}/gmscriptex/gmsrc_ex/src/binds/gmSqliteLib.cpp
     ${DEPENDENCIES_PATH}/gmscriptex/gmsrc_ex/src/3rdParty/mathlib/*.cpp

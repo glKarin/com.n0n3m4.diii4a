@@ -53,6 +53,8 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     packagingOptions {
+		// only pick arm xunwind library
+        pickFirst "lib/arm**/libxunwind.so"
         // remove unused ffmpeg libraries
         // remove all x86/x86-64 libraries
         exclude "lib/x86/**"
@@ -71,9 +73,9 @@ android {
         // remove arm64 libraries if testing arm32
         // exclude "lib/arm64-v8a/**"
 
-//        doNotStrip "*/armeabi-v7a/*.so"
-//        doNotStrip "*/arm64-v8a/*.so"
-        pickFirst '**/libxunwind.so'
+		// keep debug info
+        // doNotStrip "*/armeabi-v7a/*.so"
+        // doNotStrip "*/arm64-v8a/*.so"
     }
 }
 
