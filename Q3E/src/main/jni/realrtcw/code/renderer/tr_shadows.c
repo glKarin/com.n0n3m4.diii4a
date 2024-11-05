@@ -55,7 +55,7 @@ static int facing[SHADER_MAX_INDEXES / 3];
 static vec3_t shadowXyz[SHADER_MAX_VERTEXES];
 #endif
 
-#ifdef USE_OPENGLES
+#ifdef STENCIL_SHADOW_IMPROVE
 #define FLOAT_ZERO 1e-6
 
 #define SHADOW_CAP_NEAR_BACK_AND_FAR_BACK 1
@@ -77,15 +77,13 @@ GLenum stencilIncr = GL_INCR;
 GLenum stencilDecr = GL_DECR;
 #endif
 
-#ifdef STENCIL_SHADOW_IMPROVE
 typedef vec4_t shadow_vec_t;
 static	shadow_vec_t		shadowXyz[SHADER_MAX_VERTEXES * 2]; //karin: RB_EndSurface() - SHADER_MAX_INDEXES hit
 typedef unsigned int shadowIndex_t;
 #define GL_SHADOW_INDEX_TYPE GL_UNSIGNED_INT
-#else
-typedef glIndex_t shadowIndex_t;
-#define GL_SHADOW_INDEX_TYPE GL_INDEX_TYPE
-#endif
+//typedef glIndex_t shadowIndex_t;
+//#define GL_SHADOW_INDEX_TYPE GL_INDEX_TYPE
+
 static shadowIndex_t indexes[6*MAX_EDGE_DEFS*SHADER_MAX_VERTEXES];
 static int idx = 0;
 
@@ -94,8 +92,8 @@ static int front_cap_idx = 0;
 
 static shadowIndex_t far_cap_indexes[SHADER_MAX_INDEXES];
 static int far_cap_idx = 0;
-extern cvar_t *harm_r_stencilShadowCap;
 
+extern cvar_t *harm_r_stencilShadowCap;
 extern cvar_t *harm_r_shadowPolygonOffset;
 extern cvar_t *harm_r_shadowPolygonFactor;
 
@@ -193,7 +191,7 @@ void R_RenderShadowEdges( void ) {
 			for ( k = 0 ; k < c2 ; k++ ) {
 				if ( edgeDefs[ i2 ][ k ].i2 == i ) {
 					hit[ edgeDefs[ i2 ][ k ].facing ]++;
-#ifdef USE_OPENGLES //karin: optmize
+#ifdef STENCIL_SHADOW_IMPROVE //karin: optmize
 					if( edgeDefs[ i2 ][ k ].facing )
 						break;
 #endif
@@ -234,7 +232,7 @@ void R_RenderShadowEdges( void ) {
 #endif
 }
 
-#ifdef USE_OPENGLES
+#ifdef STENCIL_SHADOW_IMPROVE
 static void RB_ShadowDebug( void ) {
 	if(!harm_r_stencilShadowDebug->integer)
 		return;
@@ -280,14 +278,10 @@ static void RB_ShadowDebug( void ) {
 		farCapColor[0] = 0.0f; farCapColor[1] = 0.0f; farCapColor[2] = 1.0f; farCapColor[3] = alpha;
 	}
 
-#ifdef STENCIL_SHADOW_IMPROVE
 	if(infinite)
 		qglVertexPointer (4, GL_FLOAT, 0, shadowXyz);
 	else
 		qglVertexPointer (3, GL_FLOAT, 16, shadowXyz);
-#else
-	qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);
-#endif
 
 	int faceCulling = glState.faceCulling;
 	unsigned long glStateBits = glState.glStateBits;
@@ -371,7 +365,6 @@ static ID_INLINE void R_RenderShadowCaps( void )
 
 static void RB_BeginShadow( void ) {
 	//qglClearStencil(1<<(glConfig.stencilBits-1)); // 128
-
 	qglClear(GL_STENCIL_BUFFER_BIT);
 }
 
@@ -473,23 +466,20 @@ void RB_ShadowTessEnd( void ) {
 		return;
 	}
 
-#ifdef USE_OPENGLES //karin: check invalid light direction
-// karin
-#define FLOAT_ZERO 1e-6
+#ifdef STENCIL_SHADOW_IMPROVE //karin: check invalid light direction
 	if(
 	    (backEnd.currentEntity->lightDir[0] < FLOAT_ZERO && backEnd.currentEntity->lightDir[0] > -FLOAT_ZERO)
 	    && (backEnd.currentEntity->lightDir[1] < FLOAT_ZERO && backEnd.currentEntity->lightDir[1] > -FLOAT_ZERO)
 	    && (backEnd.currentEntity->lightDir[2] < FLOAT_ZERO && backEnd.currentEntity->lightDir[2] > -FLOAT_ZERO)
 	)
 	{
-        //Com_Printf("zzz\n");
         return;
 	}
 #endif
 
 	VectorCopy( backEnd.currentEntity->lightDir, lightDir );
 
-#ifdef USE_OPENGLES //karin: use shadowXyz for stencil shadow
+#ifdef STENCIL_SHADOW_IMPROVE //karin: use shadowXyz for stencil shadow
     static float r_stencilShadowDotP = -2.0;
     static int r_stencilShadowDeg = -1;
     if(r_stencilShadowDeg != harm_r_stencilShadowMaxAngle->integer)
@@ -533,14 +523,10 @@ void RB_ShadowTessEnd( void ) {
 		volumeLength = 512;
 
 	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
-#ifdef STENCIL_SHADOW_IMPROVE
 		VectorCopy( tess.xyz[i], shadowXyz[i] );
 		shadowXyz[i][3] = 1.0f;
 		VectorMA( tess.xyz[i], -volumeLength, lightDir, shadowXyz[i+tess.numVertexes] );
 		shadowXyz[i+tess.numVertexes][3] = 0.0f;
-#else
-		VectorMA( tess.xyz[i], -volumeLength, lightDir, tess.xyz[i+tess.numVertexes] );
-#endif
 	}
 #else
 	// project vertexes away from light direction
@@ -585,6 +571,7 @@ void RB_ShadowTessEnd( void ) {
 		d = DotProduct( normal, lightDir );
 		if ( d > 0 ) { // back CCW
 			facing[ i ] = 1;
+#ifdef STENCIL_SHADOW_IMPROVE //karin: make cap for stencil shadow
 			if(useCaps)
 			{
 				// back as far cap
@@ -604,8 +591,10 @@ void RB_ShadowTessEnd( void ) {
 					front_cap_idx += 3;
 				}
 			}
+#endif
 		} else { // front CW
 			facing[ i ] = 0;
+#ifdef STENCIL_SHADOW_IMPROVE //karin: make cap for stencil shadow
 			if(useCaps)
 			{
 				// front as near cap
@@ -625,6 +614,7 @@ void RB_ShadowTessEnd( void ) {
 					far_cap_idx += 3;
 				}
 			}
+#endif
 		}
 
 		// create the edges
@@ -646,25 +636,24 @@ void RB_ShadowTessEnd( void ) {
 	qglEnable( GL_STENCIL_TEST );
 	qglStencilFunc( GL_ALWAYS, 1, 255 );
 
-#ifdef USE_OPENGLES
+#ifdef STENCIL_SHADOW_IMPROVE
 	if(harm_r_stencilShadowMask->integer)
 		RB_BeginShadow();
-#ifdef STENCIL_SHADOW_IMPROVE
+
 	if(infinite)
 		qglVertexPointer (4, GL_FLOAT, 0, shadowXyz);
 	else
 		qglVertexPointer (3, GL_FLOAT, 16, shadowXyz);
-#else
-	qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);
 #endif
+
 	GLboolean text = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
 	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
 	if (text)
 		qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
 	if (glcol)
 		qglDisableClientState( GL_COLOR_ARRAY );
-#endif
 
+#ifdef STENCIL_SHADOW_IMPROVE
 	if(useZFail)
 	{
 		GL_Cull( CT_FRONT_SIDED );
@@ -708,11 +697,8 @@ void RB_ShadowTessEnd( void ) {
 
 	if(useCaps)
 		R_RenderShadowCaps();
-#ifdef USE_OPENGLES
 	qglDrawElements(GL_TRIANGLES, idx, GL_SHADOW_INDEX_TYPE, indexes);
-#else
-	R_RenderShadowEdges();
-#endif
+	// R_RenderShadowEdges();
 
 	if(setupPolygonOffset)
 	{
@@ -721,17 +707,16 @@ void RB_ShadowTessEnd( void ) {
 		qglPolygonOffset( polygonOffsetFactor, polygonOffsetUnits );
 	}
 
-#ifdef USE_OPENGLES
 	if(harm_r_stencilShadowMask->integer)
 		RB_ShadowMask();
 
 	RB_ShadowDebug(); //debug
+#endif
 
 	if (text)
 		qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 	if (glcol)
 		qglEnableClientState( GL_COLOR_ARRAY );
-#endif
 	// reenable writing to the color buffer
 	qglColorMask(rgba[0], rgba[1], rgba[2], rgba[3]);
 }
@@ -748,16 +733,16 @@ overlap and double darken.
 =================
 */
 void RB_ShadowFinish( void ) {
-#ifdef USE_OPENGLES
-	if(harm_r_stencilShadowMask->integer)
-		return;
-#endif
 	if ( r_shadows->integer != 2 ) {
 		return;
 	}
 	if ( glConfig.stencilBits < 4 ) {
 		return;
 	}
+#ifdef STENCIL_SHADOW_IMPROVE
+	if(harm_r_stencilShadowMask->integer)
+		return;
+#endif
 	qglEnable( GL_STENCIL_TEST );
 	qglStencilFunc( GL_NOTEQUAL, 0, 255 );
 

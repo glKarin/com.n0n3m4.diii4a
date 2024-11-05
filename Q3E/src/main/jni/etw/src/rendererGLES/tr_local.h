@@ -2277,4 +2277,24 @@ extern cvar_t *r_wolfFog;
 
 extern cvar_t *r_gfxInfo;
 
+#define STENCIL_SHADOW_IMPROVE //karin: improve stencil shadow
+#ifdef STENCIL_SHADOW_IMPROVE //karin: stencil shadow
+
+#if !defined(GL_INCR_WRAP)
+#define GL_INCR_WRAP                      0x8507
+#endif
+#if !defined(GL_DECR_WRAP)
+#define GL_DECR_WRAP                      0x8508
+#endif
+
+extern cvar_t *harm_r_stencilShadowModel;
+extern cvar_t *harm_r_stencilShadowPersonal;
+extern cvar_t  *harm_r_stencilShadowInfinite;
+
+#define STENCIL_SHADOW_MODEL(x) (harm_r_stencilShadowModel->integer == 0 || (harm_r_stencilShadowModel->integer & x))
+#define STENCIL_SHADOW_INFINITE() (r_shadows->integer == 2 && (harm_r_stencilShadowPersonal->integer || harm_r_stencilShadowInfinite->integer < 0))
+
+qboolean R_HasAlphaTest(const shader_t *shader);
+#endif
+
 #endif //TR_LOCAL_H

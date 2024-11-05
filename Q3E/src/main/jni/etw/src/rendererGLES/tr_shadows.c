@@ -58,6 +58,61 @@ static int            facing[SHADER_MAX_INDEXES / 3];
 static unsigned short indexes[6 * MAX_EDGE_DEFS * SHADER_MAX_VERTEXES];
 static int            idx = 0;
 
+#ifdef STENCIL_SHADOW_IMPROVE
+#define FLOAT_ZERO 1e-6
+
+#define SHADOW_CAP_NEAR_BACK_AND_FAR_BACK 1
+#define SHADOW_CAP_NEAR_FRONT_AND_FAR_BACK 2
+#define SHADOW_CAP_NEAR_FRONT_AND_FAR_FRONT 3
+
+#define SHADOW_CAP_DEFAULT_IMPL SHADOW_CAP_NEAR_BACK_AND_FAR_BACK
+
+extern cvar_t *harm_r_stencilShadowMask;
+extern cvar_t *harm_r_stencilShadowOp;
+extern cvar_t *harm_r_stencilShadowDebug;
+extern cvar_t *harm_r_stencilShadowMaxAngle;
+
+#if 1
+#define stencilIncr GL_INCR
+#define stencilDecr GL_DECR
+#else
+GLenum stencilIncr = GL_INCR;
+GLenum stencilDecr = GL_DECR;
+#endif
+
+typedef vec4_t shadow_vec_t;
+static	shadow_vec_t		shadowXyz[SHADER_MAX_VERTEXES * 2]; //karin: RB_EndSurface() - SHADER_MAX_INDEXES hit
+typedef glIndex_t shadowIndex_t;
+#define GL_SHADOW_INDEX_TYPE GL_INDEX_TYPE
+
+static shadowIndex_t front_cap_indexes[SHADER_MAX_INDEXES];
+static int front_cap_idx = 0;
+
+static shadowIndex_t far_cap_indexes[SHADER_MAX_INDEXES];
+static int far_cap_idx = 0;
+extern cvar_t *harm_r_stencilShadowCap;
+
+extern cvar_t *harm_r_shadowPolygonOffset;
+extern cvar_t *harm_r_shadowPolygonFactor;
+
+qboolean R_HasAlphaTest(const shader_t *shader)
+{
+	int mask = GLS_ATEST_BITS;
+	int m;
+	for(m = 0; m < MAX_SHADER_STAGES; m++)
+	{
+		const shaderStage_t *stage = shader->stages[m];
+		if(!stage)
+			break;
+		if(stage->stateBits & mask)
+		{
+			return qtrue;
+		}
+	}
+	return qfalse;
+}
+#endif
+
 /**
  * @brief R_AddEdgeDef
  * @param[in] i1
@@ -89,6 +144,7 @@ void R_RenderShadowEdges(void)
 	int i2;
 	// int c_edges = 0, c_rejected = 0;  // TODO: remove ?
 	int hit[2];
+    idx = 0; //karin: add reset idx
 
 	// an edge is NOT a silhouette edge if its face doesn't face the light,
 	// or if it has a reverse paired edge that also faces the light.
@@ -115,6 +171,10 @@ void R_RenderShadowEdges(void)
 				if (edgeDefs[i2][k].i2 == i)
 				{
 					hit[edgeDefs[i2][k].facing]++;
+#ifdef STENCIL_SHADOW_IMPROVE //karin: optmize
+                    if( edgeDefs[ i2 ][ k ].facing )
+						break;
+#endif
 				}
 			}
 
@@ -144,6 +204,218 @@ void R_RenderShadowEdges(void)
 	glDrawElements(GL_TRIANGLES, idx, GL_UNSIGNED_SHORT, indexes);
 }
 
+#ifdef STENCIL_SHADOW_IMPROVE
+static void RB_ShadowDebug( void ) {
+	if(!harm_r_stencilShadowDebug->integer)
+		return;
+
+	qboolean personalModel = ((backEnd.currentEntity->e.renderfx & RF_THIRD_PERSON) && !backEnd.viewParms.isPortal); // personal
+	qboolean infinite = personalModel || harm_r_stencilShadowInfinite->integer < 0;
+	qboolean useZFail = harm_r_stencilShadowOp->integer == 2 || personalModel;
+	qboolean useCaps = useZFail || harm_r_stencilShadowCap->integer;
+	if(harm_r_stencilShadowDebug->integer == 1 && idx == 0)
+	{
+		Com_Printf("No edges\n");
+		return;
+	}
+	if(harm_r_stencilShadowDebug->integer & (2 | 4))
+	{
+		if(!useCaps)
+			return;
+		if(harm_r_stencilShadowDebug->integer == 2 && front_cap_idx == 0)
+		{
+			Com_Printf("No front caps\n");
+			return;
+		}
+		if(harm_r_stencilShadowDebug->integer == 4 && far_cap_idx == 0)
+		{
+			Com_Printf("No far caps\n");
+			return;
+		}
+	}
+	GLfloat edgeColor[4];
+	GLfloat frontCapColor[4];
+	GLfloat farCapColor[4];
+	GLfloat alpha = 1.0f;
+	if(useZFail)
+	{
+		edgeColor[0] = 1.0f; edgeColor[1] = 1.0f; edgeColor[2] = 0.0f; edgeColor[3] = alpha;
+		frontCapColor[0] = 0.0f; frontCapColor[1] = 1.0f; frontCapColor[2] = 1.0f; frontCapColor[3] = alpha;
+		farCapColor[0] = 1.0f; farCapColor[1] = 0.0f; farCapColor[2] = 1.0f; farCapColor[3] = alpha;
+	}
+	else
+	{
+		edgeColor[0] = 1.0f; edgeColor[1] = 0.0f; edgeColor[2] = 0.0f; edgeColor[3] = alpha;
+		frontCapColor[0] = 0.0f; frontCapColor[1] = 1.0f; frontCapColor[2] = 0.0f; frontCapColor[3] = alpha;
+		farCapColor[0] = 0.0f; farCapColor[1] = 0.0f; farCapColor[2] = 1.0f; farCapColor[3] = alpha;
+	}
+
+	if(infinite)
+		glVertexPointer (4, GL_FLOAT, 0, shadowXyz);
+	else
+		glVertexPointer (3, GL_FLOAT, 16, shadowXyz);
+
+	int faceCulling = glState.faceCulling;
+	unsigned long glStateBits = glState.glStateBits;
+	GLfloat color[4];
+	GLboolean clipPlane0;
+	GLboolean depthTest;
+    GLboolean stencilTest;
+	GLboolean writeDepth;
+	GLboolean rgba[4];
+	GLboolean blend;
+
+	depthTest = glIsEnabled(GL_DEPTH_TEST);
+	blend = glIsEnabled(GL_BLEND);
+    stencilTest = glIsEnabled(GL_STENCIL_TEST);
+	clipPlane0 = glIsEnabled(GL_CLIP_PLANE0);
+	glGetFloatv(GL_CURRENT_COLOR, color);
+	glGetBooleanv(GL_DEPTH_WRITEMASK, &writeDepth);
+	glGetBooleanv(GL_COLOR_WRITEMASK, rgba);
+	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+
+	if(writeDepth)
+		glDepthMask(GL_FALSE);
+//	if(depthTest)
+//		glDisable(GL_DEPTH_TEST);
+    if(stencilTest)
+        glDisable(GL_STENCIL_TEST);
+	if(blend)
+		glDisable(GL_BLEND);
+
+	if(clipPlane0)
+		glDisable( GL_CLIP_PLANE0 );
+	//GL_Cull( CT_TWO_SIDED );
+	GL_Cull( CT_BACK_SIDED );
+
+	GL_Bind( tr.whiteImage );
+
+	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO );
+
+//	glColor3f( 1, 0, 0 );
+//	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO );
+
+	if((harm_r_stencilShadowDebug->integer & 1) && idx != 0)
+	{
+		glColor4f(edgeColor[0], edgeColor[1], edgeColor[2], edgeColor[3]);
+		glDrawElements(GL_TRIANGLES, idx, GL_SHADOW_INDEX_TYPE, indexes);
+	}
+	if((harm_r_stencilShadowDebug->integer & 2) && front_cap_idx != 0)
+	{
+		glColor4f(frontCapColor[0], frontCapColor[1], frontCapColor[2], frontCapColor[3]);
+		glDrawElements(GL_TRIANGLES, front_cap_idx, GL_SHADOW_INDEX_TYPE, front_cap_indexes);
+	}
+	if((harm_r_stencilShadowDebug->integer & 4) && far_cap_idx != 0)
+	{
+		glColor4f(farCapColor[0], farCapColor[1], farCapColor[2], farCapColor[3]);
+		glDrawElements(GL_TRIANGLES, far_cap_idx, GL_SHADOW_INDEX_TYPE, far_cap_indexes);
+	}
+
+	GL_State( glStateBits );
+	GL_Cull( faceCulling );
+	glColor4f( color[0], color[1], color[2], color[3] );
+	glColorMask(rgba[0], rgba[1], rgba[2], rgba[3]);
+	if(writeDepth)
+		glDepthMask(GL_TRUE);
+	if(clipPlane0)
+		glEnable( GL_CLIP_PLANE0 );
+	if(depthTest)
+		glEnable(GL_DEPTH_TEST);
+    if(stencilTest)
+        glEnable(GL_STENCIL_TEST);
+	if(blend)
+		glEnable(GL_BLEND);
+}
+
+static ID_INLINE void R_RenderShadowCaps( void )
+{
+	if(front_cap_idx > 0)
+		glDrawElements(GL_TRIANGLES, front_cap_idx, GL_SHADOW_INDEX_TYPE, front_cap_indexes);
+	if(far_cap_idx > 0)
+		glDrawElements(GL_TRIANGLES, far_cap_idx, GL_SHADOW_INDEX_TYPE, far_cap_indexes);
+}
+
+static void RB_BeginShadow( void ) {
+	glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+static void RB_ShadowMask( void ) {
+	int faceCulling = glState.faceCulling;
+	unsigned long glStateBits = glState.glStateBits;
+	GLfloat color[4];
+	GLboolean clipPlane0;
+	GLboolean depthTest;
+	GLboolean writeDepth;
+	GLboolean rgba[4];
+
+	depthTest = glIsEnabled(GL_DEPTH_TEST);
+	clipPlane0 = glIsEnabled(GL_CLIP_PLANE0);
+	glGetFloatv(GL_CURRENT_COLOR, color);
+	glGetBooleanv(GL_DEPTH_WRITEMASK, &writeDepth);
+	glGetBooleanv(GL_COLOR_WRITEMASK, rgba);
+	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+
+	if(writeDepth)
+		glDepthMask(GL_FALSE);
+	if(depthTest)
+		glDisable(GL_DEPTH_TEST);
+
+	glEnable( GL_STENCIL_TEST );
+	glStencilFunc( GL_NOTEQUAL, 0, 255 );
+
+	if(clipPlane0)
+		glDisable( GL_CLIP_PLANE0 );
+	GL_Cull( CT_TWO_SIDED );
+
+	GL_Bind( tr.whiteImage );
+
+	glPushMatrix();
+	glLoadIdentity();
+
+	glColor4f( 0.6f, 0.6f, 0.6f, 1.0f );
+	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO );
+
+//	glColor3f( 1, 0, 0 );
+//	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO );
+#if 0
+	GLboolean text = glIsEnabled(GL_TEXTURE_COORD_ARRAY);
+	GLboolean glcol = glIsEnabled(GL_COLOR_ARRAY);
+	if (text)
+		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	if (glcol)
+		glDisableClientState( GL_COLOR_ARRAY );
+#endif
+	GLfloat vtx[] = {
+			-100,  100, -10,
+			100,  100, -10,
+			100, -100, -10,
+			-100, -100, -10
+	};
+	glVertexPointer  ( 3, GL_FLOAT, 0, vtx );
+	glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
+#if 0
+	if (text)
+		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	if (glcol)
+		glEnableClientState( GL_COLOR_ARRAY );
+#endif
+
+	glDisable( GL_STENCIL_TEST );
+
+	glPopMatrix();
+	GL_State( glStateBits );
+	GL_Cull( faceCulling );
+	glColor4f( color[0], color[1], color[2], color[3] );
+	glColorMask(rgba[0], rgba[1], rgba[2], rgba[3]);
+	if(writeDepth)
+		glDepthMask(GL_TRUE);
+	if(clipPlane0)
+		glEnable( GL_CLIP_PLANE0 );
+	if(depthTest)
+		glEnable(GL_DEPTH_TEST);
+}
+#endif
+
 /**
  * @brief RB_ShadowTessEnd
  *
@@ -160,23 +432,84 @@ void RB_ShadowTessEnd(void)
 	vec3_t lightDir;
 
 	// we can only do this if we have enough space in the vertex buffers
+#if !defined(STENCIL_SHADOW_IMPROVE) //karin: always enough
 	if (tess.numVertexes >= SHADER_MAX_VERTEXES / 2)
 	{
 		return;
 	}
+#endif
 
 	if (glConfig.stencilBits < 4)
 	{
 		return;
 	}
 
+#ifdef STENCIL_SHADOW_IMPROVE //karin: check invalid light direction
+	if(
+	    (backEnd.currentEntity->lightDir[0] < FLOAT_ZERO && backEnd.currentEntity->lightDir[0] > -FLOAT_ZERO)
+	    && (backEnd.currentEntity->lightDir[1] < FLOAT_ZERO && backEnd.currentEntity->lightDir[1] > -FLOAT_ZERO)
+	    && (backEnd.currentEntity->lightDir[2] < FLOAT_ZERO && backEnd.currentEntity->lightDir[2] > -FLOAT_ZERO)
+	)
+	{
+        return;
+	}
+#endif
+
 	VectorCopy(backEnd.currentEntity->lightDir, lightDir);
 
+#ifdef STENCIL_SHADOW_IMPROVE //karin: use shadowXyz for stencil shadow
+    static float r_stencilShadowDotP = -2.0;
+    static int r_stencilShadowDeg = -1;
+    if(r_stencilShadowDeg != harm_r_stencilShadowMaxAngle->integer)
+    {
+        r_stencilShadowDeg = harm_r_stencilShadowMaxAngle->integer;
+        if(harm_r_stencilShadowMaxAngle->integer < 0)
+        {
+            r_stencilShadowDotP = -2.0;
+        }
+        else
+        {
+            r_stencilShadowDotP = cos(DEG2RAD(( (float) ( /*360 - */r_stencilShadowDeg % 360 ) )));
+        }
+    }
+	//karin: check light is under model
+	if(r_stencilShadowDeg >= 0)
+	{
+        vec3_t upz = { 0.0f, 0.0f, 1.0f };
+        float zd = DotProduct( upz, lightDir ); // lightDir is model position to light source
+        if(zd <= r_stencilShadowDotP)
+            return;
+	}
+
+	qboolean personalModel = ((backEnd.currentEntity->e.renderfx & RF_THIRD_PERSON) && !backEnd.viewParms.isPortal); // personal
+	qboolean infinite = personalModel || harm_r_stencilShadowInfinite->integer < 0;
+	qboolean useZFail = harm_r_stencilShadowOp->integer == 2 || personalModel;
+	qboolean useCaps = useZFail || harm_r_stencilShadowCap->integer;
+
+	front_cap_idx = 0;
+	far_cap_idx = 0;
+
+	float volumeLength;
+	if(harm_r_stencilShadowInfinite->integer > 0)
+		volumeLength = harm_r_stencilShadowInfinite->integer;
+	else if(harm_r_stencilShadowInfinite->integer < 0)
+		volumeLength = -harm_r_stencilShadowInfinite->integer;
+	else
+		volumeLength = 512;
+
+	for ( i = 0 ; i < tess.numVertexes ; i++ ) {
+		VectorCopy( tess.xyz[i], shadowXyz[i] );
+		shadowXyz[i][3] = 1.0f;
+		VectorMA( tess.xyz[i], -volumeLength, lightDir, shadowXyz[i+tess.numVertexes] );
+		shadowXyz[i+tess.numVertexes][3] = 0.0f;
+	}
+#else
 	// project vertexes away from light direction
 	for (i = 0 ; i < tess.numVertexes ; i++)
 	{
 		VectorMA(tess.xyz[i], -512, lightDir, tess.xyz[i + tess.numVertexes]);
 	}
+#endif
 
 	// decide which triangles face the light
 	Com_Memset(numEdgeDefs, 0, 4 * tess.numVertexes);
@@ -207,10 +540,52 @@ void RB_ShadowTessEnd(void)
 			if (d > 0)
 			{
 				facing[i] = 1;
+#ifdef STENCIL_SHADOW_IMPROVE //karin: make cap for stencil shadow
+                if(useCaps)
+                {
+                    // back as far cap
+                    if(harm_r_stencilShadowCap->integer != 3)
+                    {
+                        far_cap_indexes[ far_cap_idx + 0 ] = tess.numVertexes + i1;
+                        far_cap_indexes[ far_cap_idx + 1 ] = tess.numVertexes + i3;
+                        far_cap_indexes[ far_cap_idx + 2 ] = tess.numVertexes + i2;
+                        far_cap_idx += 3;
+                    }
+                    // back as near cap
+                    if(harm_r_stencilShadowCap->integer != 2 && harm_r_stencilShadowCap->integer != 3)
+                    {
+                        front_cap_indexes[ front_cap_idx + 0 ] = i1;
+                        front_cap_indexes[ front_cap_idx + 1 ] = i2;
+                        front_cap_indexes[ front_cap_idx + 2 ] = i3;
+                        front_cap_idx += 3;
+                    }
+                }
+#endif
 			}
 			else
 			{
 				facing[i] = 0;
+#ifdef STENCIL_SHADOW_IMPROVE //karin: make cap for stencil shadow
+                if(useCaps)
+                {
+                    // front as near cap
+                    if(harm_r_stencilShadowCap->integer == 2 || harm_r_stencilShadowCap->integer == 3)
+                    {
+                        front_cap_indexes[ front_cap_idx + 0 ] = i1;
+                        front_cap_indexes[ front_cap_idx + 1 ] = i3;
+                        front_cap_indexes[ front_cap_idx + 2 ] = i2;
+                        front_cap_idx += 3;
+                    }
+                    // front as far cap
+                    if(harm_r_stencilShadowCap->integer == 3)
+                    {
+                        far_cap_indexes[ far_cap_idx + 0 ] = tess.numVertexes + i1;
+                        far_cap_indexes[ far_cap_idx + 1 ] = tess.numVertexes + i2;
+                        far_cap_indexes[ far_cap_idx + 2 ] = tess.numVertexes + i3;
+                        far_cap_idx += 3;
+                    }
+                }
+#endif
 			}
 
 			// create the edges
@@ -234,7 +609,97 @@ void RB_ShadowTessEnd(void)
 	glEnable(GL_STENCIL_TEST);
 	glStencilFunc(GL_ALWAYS, 1, 255);
 
+#ifdef STENCIL_SHADOW_IMPROVE
+    if(harm_r_stencilShadowMask->integer)
+		RB_BeginShadow();
+	if(infinite)
+		glVertexPointer (4, GL_FLOAT, 0, shadowXyz);
+	else
+		glVertexPointer (3, GL_FLOAT, 16, shadowXyz);
+	GLboolean text = glIsEnabled(GL_TEXTURE_COORD_ARRAY);
+	GLboolean glcol = glIsEnabled(GL_COLOR_ARRAY);
+	if (text)
+		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	if (glcol)
+		glDisableClientState( GL_COLOR_ARRAY );
+
 	// mirrors have the culling order reversed
+	if (backEnd.viewParms.isMirror)
+	{
+        if(useZFail)
+        {
+            glCullFace(GL_BACK);
+            glStencilOp(GL_KEEP, stencilIncr, GL_KEEP);
+        }
+        else
+        {
+            glCullFace(GL_FRONT);
+            glStencilOp( GL_KEEP, GL_KEEP, stencilIncr );
+        }
+
+        if(useCaps)
+            R_RenderShadowCaps();
+		R_RenderShadowEdges();
+
+        if(useZFail)
+        {
+            glCullFace(GL_FRONT);
+            glStencilOp( GL_KEEP, stencilDecr, GL_KEEP );
+        }
+        else
+        {
+            glCullFace(GL_BACK);
+            glStencilOp( GL_KEEP, GL_KEEP, stencilDecr );
+        }
+
+        if(useCaps)
+            R_RenderShadowCaps();
+        glDrawElements(GL_TRIANGLES, idx, GL_SHADOW_INDEX_TYPE, indexes);
+	}
+	else
+	{
+        if(useZFail)
+        {
+            glCullFace(GL_FRONT);
+            glStencilOp(GL_KEEP, stencilIncr, GL_KEEP);
+        }
+        else
+        {
+            glCullFace(GL_BACK);
+            glStencilOp( GL_KEEP, GL_KEEP, stencilIncr );
+        }
+
+        if(useCaps)
+            R_RenderShadowCaps();
+		R_RenderShadowEdges();
+
+        if(useZFail)
+        {
+            glCullFace(GL_BACK);
+            glStencilOp( GL_KEEP, stencilDecr, GL_KEEP );
+        }
+        else
+        {
+            glCullFace(GL_FRONT);
+            glStencilOp( GL_KEEP, GL_KEEP, stencilDecr );
+        }
+
+        if(useCaps)
+            R_RenderShadowCaps();
+        glDrawElements(GL_TRIANGLES, idx, GL_SHADOW_INDEX_TYPE, indexes);
+	}
+
+    if(harm_r_stencilShadowMask->integer)
+		RB_ShadowMask();
+
+	RB_ShadowDebug(); //debug
+
+	if (text)
+		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	if (glcol)
+		glEnableClientState( GL_COLOR_ARRAY );
+#else
+    // mirrors have the culling order reversed
 	if (backEnd.viewParms.isMirror)
 	{
 		glCullFace(GL_FRONT);
@@ -259,6 +724,7 @@ void RB_ShadowTessEnd(void)
 
 		R_RenderShadowEdges();
 	}
+#endif
 
 	// reenable writing to the color buffer
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -281,6 +747,10 @@ void RB_ShadowFinish(void)
 	{
 		return;
 	}
+#ifdef STENCIL_SHADOW_IMPROVE
+    if(harm_r_stencilShadowMask->integer)
+        return;
+#endif
 	glEnable(GL_STENCIL_TEST);
 	glStencilFunc(GL_NOTEQUAL, 0, 255);
 

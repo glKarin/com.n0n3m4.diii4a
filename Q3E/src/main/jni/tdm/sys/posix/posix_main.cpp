@@ -31,6 +31,12 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "posix_public.h"
 
+#ifdef __ANDROID__ //karin: char is unsigned on arm
+typedef int tty_char_t; // signed char, char is unsigned
+#else
+typedef char tty_char_t;
+#endif
+
 #define					MAX_OSPATH 256
 #define					COMMAND_HISTORY 64
 
@@ -666,7 +672,7 @@ void tty_Show() {
 }
 
 void tty_FlushIn() {
-  char key;
+  tty_char_t key;
   while ( ( key = getchar() ) != EOF ) {
 	  Sys_Printf( "'%d' ", key );
   }
@@ -683,7 +689,7 @@ Return NULL if a complete line is not ready.
 char *Posix_ConsoleInput( void ) {
 	if ( tty_enabled ) {
 		int		ret;
-		char	key;
+        tty_char_t	key;
 		bool	hidden = false;
 		while ( ( key = getchar() ) != EOF ) {
 			if ( !hidden ) {

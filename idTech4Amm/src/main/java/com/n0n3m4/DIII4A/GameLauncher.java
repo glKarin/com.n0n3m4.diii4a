@@ -413,6 +413,11 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isETW)
 					setProp("omnibot_enable", isChecked);
 			}
+			else if (id == R.id.etw_stencilShadowPersonal)
+			{
+				if(Q3EUtils.q3ei.isETW)
+					setProp("harm_r_stencilShadowPersonal", isChecked);
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -547,6 +552,14 @@ public class GameLauncher extends Activity
 			{
 				index = GetCheckboxIndex(radioGroup, id);
 				if(Q3EUtils.q3ei.isRealRTCW)
+					SetProp("cg_shadows", index);
+			}
+
+			// ETW
+			else if (rgId == R.id.etw_shadows)
+			{
+				index = GetCheckboxIndex(radioGroup, id);
+				if(Q3EUtils.q3ei.isETW)
 					SetProp("cg_shadows", index);
 			}
         }
@@ -1138,8 +1151,22 @@ public class GameLauncher extends Activity
 
 	private void Updatehacktings_ETW()
 	{
+		String str;
+		int index;
+
 		V.etw_omnibot_enable.setChecked(getProp("omnibot_enable", false));
 		if (!IsProp("omnibot_enable")) setProp("omnibot_enable", false);
+
+		str = GetProp("cg_shadows");
+		index = 0;
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 1);
+		}
+		SelectCheckbox(V.etw_shadows, index);
+
+		V.etw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
+		if (!IsProp("harm_r_stencilShadowPersonal")) setProp("harm_r_stencilShadowPersonal", true);
 	}
 
     private void ThrowException()
@@ -1619,8 +1646,23 @@ public class GameLauncher extends Activity
 
 	private void SetupUI_ETW()
 	{
+		int index;
+		String str;
+
 		V.etw_omnibot_enable.setChecked(getProp("omnibot_enable", false));
 		V.etw_omnibot_enable.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		index = 0;
+		str = GetProp("cg_shadows");
+		if (str != null)
+		{
+			index = Q3EUtils.parseInt_s(str, 1);
+		}
+		SelectCheckbox(V.etw_shadows, index);
+		V.etw_shadows.setOnCheckedChangeListener(m_groupCheckChangeListener);
+
+		V.etw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
+		V.etw_stencilShadowPersonal.setOnCheckedChangeListener(m_checkboxChangeListener);
 	}
 
 	private void AfterCreated()
@@ -2783,8 +2825,6 @@ public class GameLauncher extends Activity
 		boolean realrtcwVisible = false;
 
 		boolean openglVisible = true;
-		boolean modVisible = true;
-		boolean dllVisible = true;
 		boolean quickloadVisible = true;
 		boolean skipintroVisible = true;
 
@@ -2800,8 +2840,6 @@ public class GameLauncher extends Activity
 		{
 			q1Visible = true;
 			openglVisible = false;
-			// modVisible = false;
-			dllVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
 		}
@@ -2809,7 +2847,6 @@ public class GameLauncher extends Activity
 		{
 			q2Visible = true;
 			openglVisible = false;
-			dllVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
 		}
@@ -2817,21 +2854,17 @@ public class GameLauncher extends Activity
 		{
 			q3Visible = true;
 			openglVisible = false;
-			dllVisible = false;
 			quickloadVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isRTCW)
 		{
 			rtcwVisible = true;
 			openglVisible = false;
-			dllVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isTDM)
 		{
 			tdmVisible = true;
 			openglVisible = false;
-			// modVisible = false;
-			dllVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
 		}
@@ -2839,7 +2872,6 @@ public class GameLauncher extends Activity
 		{
 			d3bfgVisible = true;
 			openglVisible = false;
-			dllVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
 		}
@@ -2847,7 +2879,6 @@ public class GameLauncher extends Activity
 		{
 			doomVisible = true;
 			openglVisible = false;
-			dllVisible = false;
 			quickloadVisible = false;
 			skipintroVisible = false;
 		}
@@ -2855,14 +2886,12 @@ public class GameLauncher extends Activity
 		{
 			etwVisible = true;
 			openglVisible = false;
-			dllVisible = false;
 			quickloadVisible = false;
 		}
 		else if (Q3EUtils.q3ei.isRealRTCW)
 		{
 			realrtcwVisible = true;
 			openglVisible = false;
-			dllVisible = false;
 		}
         else
         {
@@ -2896,8 +2925,6 @@ public class GameLauncher extends Activity
 		V.etw_section.setVisibility(Q3EUtils.q3ei.isETW ? View.VISIBLE : View.GONE);
 
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
-		V.mod_section.setVisibility(modVisible ? View.VISIBLE : View.GONE);
-		V.dll_section.setVisibility(dllVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
 		V.skip_intro.setVisibility(skipintroVisible ? View.VISIBLE : View.GONE);
 
@@ -3564,6 +3591,8 @@ public class GameLauncher extends Activity
 		public CheckBox realrtcw_stencilShadowPersonal;
 		public LinearLayout etw_section;
 		public CheckBox etw_omnibot_enable;
+		public RadioGroup etw_shadows;
+		public CheckBox etw_stencilShadowPersonal;
 
         public void Setup()
         {
@@ -3679,6 +3708,8 @@ public class GameLauncher extends Activity
 			realrtcw_stencilShadowPersonal = findViewById(R.id.realrtcw_stencilShadowPersonal);
 			etw_section = findViewById(R.id.etw_section);
 			etw_omnibot_enable = findViewById(R.id.etw_omnibot_enable);
+			etw_shadows = findViewById(R.id.etw_shadows);
+			etw_stencilShadowPersonal = findViewById(R.id.etw_stencilShadowPersonal);
         }
     }
 }

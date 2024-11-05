@@ -334,6 +334,14 @@ public final class TextHelper
         final ChangeLog[] CHANGES = {
             ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2024-10-01", 58,
+                        "Add `RealRTCW`(ver 5.0) support, game standalone directory named `realrtcw`, game data directory named `Main`. More view in `" + TextHelper.GenLinkText("https://github.com/wolfetplayer/RealRTCW", "RealRTCW") + "`.",
+                        "Fix light bar indicator of player's HUD by `darkness257` on The Dark Mod, now setup `tdm_lg_weak` to 1 automatically. More view in `" + TextHelper.GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a/issues/244", "The Darkmod light bar indicator bug") + "`.",
+                        "Support create desktop shortcut for games or current command on `Option` menu of launcher.",
+                        "Fix stencil shadow with `cg_shadows` = 2 on Quake 3.",
+                        "Improve stencil shadow with `cg_shadows` = 2 on RealRTCW."
+                ),
+
                 ChangeLog.Create("2024-10-01", 57,
                         "Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game data directory named `etmain` and `legacy`. More view in `" + TextHelper.GenLinkText("https://www.etlegacy.com", "ET: Legacy") + "`.",
                         "Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/quake-4-hardqore", "Quake 4: Hardqore") + "`.",
