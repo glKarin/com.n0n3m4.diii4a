@@ -151,7 +151,7 @@ jobs:
         name: Upload Zip artifacts
         with:
           name: "${{ matrix.os }}-${{ matrix.bits }}-release"
-          path: "idTech4A++-test_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release-${{ steps.current_datetime.outputs.time }}.${{matrix.os == ubuntu && 'tar.gz' || 'zip'}}"
+          path: "idTech4A++-test_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release-${{ steps.current_datetime.outputs.time }}.${{matrix.os == 'ubuntu' && 'tar.gz' || 'zip'}}"
           retention-days: 1
 
   collect:
