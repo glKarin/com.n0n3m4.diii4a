@@ -140,10 +140,10 @@ jobs:
         run: |
           ls --color Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}
           mkdir ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/*.so ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/lib*.so ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Doom3 ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Quake4 ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Prey ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
+          #cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Quake4 ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
+          #cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Prey ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
           dir ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release
           tar zcvf idTech4A++-test_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release-${{ steps.current_datetime.outputs.time }}.tar.gz ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
 
