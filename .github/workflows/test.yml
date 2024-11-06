@@ -89,21 +89,23 @@ jobs:
       - name: Build with Ninja
         if: matrix.os == 'windows-latest'
         run: |
+          cd Q3E\src\main\jni\doom3\neo
+          dir win_x${{ steps.strings.outputs.arch }}
           cmake --build win_x${{ steps.strings.outputs.arch }} --config Release
 
       - name: Copy OpenAL32.dll
         if: matrix.os == 'windows-latest'
         run: |
-          xcopy /Y/Q ${{ github.workspace }}\vcpkg\packages\openal-soft_x${{ steps.strings.outputs.arch }}-windows\bin\OpenAL32.dll win_x${{ steps.strings.outputs.arch }}\Release\
+          xcopy /Y/Q ${{ github.workspace }}\vcpkg\packages\openal-soft_x${{ steps.strings.outputs.arch }}-windows\bin\OpenAL32.dll Q3E\src\main\jni\doom3\neo\win_x${{ steps.strings.outputs.arch }}\Release\
 
       - name: Prepare package
         if: matrix.os == 'windows-latest'
         id: prepare_package
         run: |
-          dir win_x${{ steps.strings.outputs.arch }}\Release
+          dir Q3E\src\main\jni\doom3\neo\win_x${{ steps.strings.outputs.arch }}\Release
           mkdir Release
-          xcopy /Y/Q win_x${{ steps.strings.outputs.arch }}\Release\*.dll windows_x${{ steps.strings.outputs.arch }}_release\
-          xcopy /Y/Q win_x${{ steps.strings.outputs.arch }}\Release\*.exe windows_x${{ steps.strings.outputs.arch }}_release\
+          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\win_x${{ steps.strings.outputs.arch }}\Release\*.dll windows_x${{ steps.strings.outputs.arch }}_release\
+          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\win_x${{ steps.strings.outputs.arch }}\Release\*.exe windows_x${{ steps.strings.outputs.arch }}_release\
           dir windows_x${{ steps.strings.outputs.arch }}_release
 
       - name: Package(64)
