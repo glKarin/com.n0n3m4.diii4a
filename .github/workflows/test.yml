@@ -67,7 +67,7 @@ jobs:
         uses: johnwason/vcpkg-action@v6
         with:
           pkgs: 'SDL2 curl openal-soft zlib'
-          triplet: x${{ steps.strings.outputs.arch }}-windows-release
+          triplet: x${{ steps.strings.outputs.arch }}-windows
           token: ${{ secrets.TOKEN }}
           github-binarycache: true
 
