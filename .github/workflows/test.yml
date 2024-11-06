@@ -43,6 +43,13 @@ jobs:
         working-directory: .
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 1
+          fetch-tags: true
+
       - name: Set strings
         id: strings
         shell: bash
