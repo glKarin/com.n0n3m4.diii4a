@@ -58,7 +58,7 @@ jobs:
         run: |
           echo ${{ github.workspace }} ${{ matrix.os }}-${{ matrix.bits }}
           if [ "x${{ matrix.bits }}" = "x32" ]; then echo "arch=86" >> "$GITHUB_OUTPUT"; else echo "arch=64" >> "$GITHUB_OUTPUT"; fi
-          if [ "x${{ matrix.os }}" = "xubuntu" ]; then echo "os=linux" >> "$GITHUB_OUTPUT"; else echo "os=win" >> "$GITHUB_OUTPUT"; fi
+          if [ "x${{ matrix.os }}" = "xubuntu-latest" ]; then echo "os=linux" >> "$GITHUB_OUTPUT"; else echo "os=win" >> "$GITHUB_OUTPUT"; fi
 
       - name: Get current date time
         id: current_datetime
@@ -141,9 +141,9 @@ jobs:
           ls --color Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}
           mkdir ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/*.so ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Release/Doom3 ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Release/Quake4 ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Release/Prey ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Doom3 ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Quake4 ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Prey ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
           dir ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release
           tar zcvf idTech4A++-test_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release-${{ steps.current_datetime.outputs.time }}.tar.gz ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
 
