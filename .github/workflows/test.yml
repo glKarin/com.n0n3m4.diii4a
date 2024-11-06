@@ -39,6 +39,8 @@ jobs:
             bits: 32
           - os: windows-latest
             bits: 64
+          - os: windows-latest
+            bits: 32
 
     defaults:
       run:
