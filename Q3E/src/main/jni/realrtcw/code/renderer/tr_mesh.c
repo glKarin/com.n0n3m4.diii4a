@@ -436,7 +436,9 @@ void R_AddMD3Surfaces( trRefEntity_t *ent ) {
 			 !personalModel
 #endif
 			 && r_shadows->integer == 2
+#if !defined(STENCIL_SHADOW_IMPROVE) //karin: allow shadow on fog
 			 && fogNum == 0
+#endif
 			 && !( ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
 			 && shader->sort == SS_OPAQUE 
 #ifdef STENCIL_SHADOW_IMPROVE //karin: ignore alpha test shader pass and special model type exclude player model

@@ -558,7 +558,7 @@ else() #TODO linux
 		if(SDL2_FOUND)
 			set(LINUX_SDL TRUE)
 			message(STATUS "use SDL2")
-			include_directories(${SDL2_INCLUDE_DIR})
+			include_directories(${SDL2_INCLUDE_DIRS})
 			set(SDLx_LIBRARY ${SDL2_LIBRARIES})
 			add_definitions(-D_SDL)
 			set(sys_libs ${sys_libs} ${SDLx_LIBRARY})

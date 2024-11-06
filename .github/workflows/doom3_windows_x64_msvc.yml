@@ -6,12 +6,12 @@ on:
   push:
     branches: [ "master" ]
     paths:
-      - 'Q3E/src/main/jni/doom3/neo/**'
+      #- 'Q3E/src/main/jni/doom3/neo/**'
       - '.github/workflows/doom3_windows_x64_msvc.yml'
   pull_request:
     branches: [ "master" ]
     paths:
-      - 'Q3E/src/main/jni/doom3/neo/**'
+      #- 'Q3E/src/main/jni/doom3/neo/**'
       - '.github/workflows/doom3_windows_x64_msvc.yml'
 
 jobs:
