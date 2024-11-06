@@ -24,7 +24,7 @@ jobs:
 
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         build_type: [ Release ]
         bits: [ 64, 32 ]
         include:
@@ -47,7 +47,7 @@ jobs:
         id: strings
         shell: bash
         run: |
-          if [ "x${ ${{ matrix.bits }} }" = "x86" ]; then echo "arch=86" >> "$GITHUB_OUTPUT"; else echo "arch=64" >> "$GITHUB_OUTPUT"; fi
+          if [ "x${{ matrix.bits }}" = "x86" ]; then echo "arch=86" >> "$GITHUB_OUTPUT"; else echo "arch=64" >> "$GITHUB_OUTPUT"; fi
 
       - name: echo
         run: echo ${{ steps.strings.outputs.arch }} ${{ github.workspace }} ${{ matrix.os }}-${{ matrix.bits }}
