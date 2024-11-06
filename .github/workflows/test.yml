@@ -100,7 +100,6 @@ jobs:
 
       - name: Prepare package
         if: matrix.os == 'windows-latest'
-        id: prepare_package
         run: |
           dir Q3E\src\main\jni\doom3\neo\win_x${{ steps.strings.outputs.arch }}\Release
           mkdir Release
@@ -108,13 +107,44 @@ jobs:
           xcopy /Y/Q Q3E\src\main\jni\doom3\neo\win_x${{ steps.strings.outputs.arch }}\Release\*.exe windows_x${{ steps.strings.outputs.arch }}_release\
           dir windows_x${{ steps.strings.outputs.arch }}_release
 
-      - name: Package(64)
+      - name: Package
         if: matrix.os == 'windows-latest'
         uses: vimtor/action-zip@v1.2
         with:
           files: windows_x${{ steps.strings.outputs.arch }}_release/
           dest: idTech4A++-test_windows_x${{ steps.strings.outputs.arch }}_release-${{ steps.current_datetime.outputs.time }}.zip
           recursive: false
+
+      - name: run apt
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt install -y gcc-multilib g++-multilib libsdl2-dev libopenal-dev zlib1g-dev libcurl4-openssl-dev
+
+      - name: Configure CMake Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd Q3E/src/main/jni/doom3/neo
+          cmake -B linux_x${{ steps.strings.outputs.arch }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF CMakeLists.txt
+
+      - name: Build with make
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd Q3E/src/main/jni/doom3/neo
+          dir linux_x${{ steps.strings.outputs.arch }}
+          cmake --build linux_x${{ steps.strings.outputs.arch }} --config Release
+
+      - name: Prepare package
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          ls --color Q3E/src/main/jni/doom3/neo/linux_x${{ steps.strings.outputs.arch }}/Release
+          mkdir linux_x${{ steps.strings.outputs.arch }}_release
+          cp Q3E/src/main/jni/doom3/neo/linux_x${{ steps.strings.outputs.arch }}/*.so linux_x${{ steps.strings.outputs.arch }}_release/
+          cp Q3E/src/main/jni/doom3/neo/linux_x${{ steps.strings.outputs.arch }}/Release/Doom3 linux_x${{ steps.strings.outputs.arch }}_release/
+          cp Q3E/src/main/jni/doom3/neo/linux_x${{ steps.strings.outputs.arch }}/Release/Quake4 linux_x${{ steps.strings.outputs.arch }}_release/
+          cp Q3E/src/main/jni/doom3/neo/linux_x${{ steps.strings.outputs.arch }}/Release/Prey linux_x${{ steps.strings.outputs.arch }}_release/
+          dir linux_x${{ steps.strings.outputs.arch }}_release
+          tar zcvf idTech4A++-test_linux_x${{ steps.strings.outputs.arch }}_release-${{ steps.current_datetime.outputs.time }}.tar.gz linux_x${{ steps.strings.outputs.arch }}_release/
 
       - uses: actions/upload-artifact@v4
         name: Upload Zip artifacts
