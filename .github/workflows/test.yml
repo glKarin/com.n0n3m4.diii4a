@@ -85,7 +85,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd Q3E\src\main\jni\doom3\neo
-          cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -B ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt
+          cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -B ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_D3_MOD=ON -DBUILD_Q4=ON -DBUILD_PREY=ON -DBUILD_Q4_MOD=ON -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt
 
       - name: Build with Ninja
         if: matrix.os == 'windows-latest'
@@ -113,7 +113,7 @@ jobs:
         uses: vimtor/action-zip@v1.2
         with:
           files: ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
-          dest: idTech4A++-test_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}-${{ steps.current_datetime.outputs.time }}.zip
+          dest: idTech4A++-testing_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}-${{ steps.current_datetime.outputs.time }}.zip
           recursive: false
 
       - name: run apt
@@ -126,7 +126,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           cd Q3E/src/main/jni/doom3/neo
-          cmake -B ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF CMakeLists.txt
+          cmake -B ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_D3_MOD=ON -DBUILD_Q4=ON -DBUILD_PREY=ON -DBUILD_Q4_MOD=ON CMakeLists.txt
 
       - name: Build with make
         if: matrix.os == 'ubuntu-latest'
@@ -145,13 +145,13 @@ jobs:
           #cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Quake4 ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
           #cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}/Prey ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
           dir ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release
-          tar zcvf idTech4A++-test_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}-${{ steps.current_datetime.outputs.time }}.tar.gz ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
+          tar zcvf idTech4A++-testing_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}-${{ steps.current_datetime.outputs.time }}.tar.gz ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release/
 
       - uses: actions/upload-artifact@v4
         name: Upload package archive artifacts
         with:
-          name: "${{ matrix.os }}-${{ matrix.bits }}-release"
-          path: "idTech4A++-test_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}-${{ steps.current_datetime.outputs.time }}.${{ steps.strings.outputs.archive }}"
+          name: "${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}-release"
+          path: "idTech4A++-testing_${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}-${{ steps.current_datetime.outputs.time }}.${{ steps.strings.outputs.archive }}"
           retention-days: 1
 
   collect:
@@ -171,7 +171,7 @@ jobs:
       - name: Delete tag and release
         uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
-          tag_name: windows_x64_testing
+          tag_name: win_linux_testing
           delete_release: true
           repo: glKarin/com.n0n3m4.diii4a
           github_token: ${{ secrets.TOKEN }}
@@ -180,9 +180,9 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: "windows_x64_testing"
+          automatic_release_tag: "win_linux_testing"
           prerelease: true
-          title: "Windows/Linux x64 testing (Non-release. Automatic CI builds)"
+          title: "Windows/Linux testing (Non-release. Automatic CI builds)"
           files: |
-            idTech4A++-test_win_x64-*.zip
-            idTech4A++-test_linux_x64-*.tar.gz
+            idTech4A++-testing_win_x64-*.zip
+            idTech4A++-testing_linux_x64-*.tar.gz
