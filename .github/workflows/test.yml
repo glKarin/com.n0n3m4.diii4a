@@ -80,8 +80,10 @@ jobs:
 
       - name: Configure project with CMake
         if: matrix.os == 'windows-latest'
-        run: |
+        run: >
           cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake 
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF 
           -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }}
