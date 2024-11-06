@@ -104,11 +104,11 @@ jobs:
         run: |
           dir Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}\Release
           mkdir Release
-          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}\Release\*.dll windows_x${{ steps.strings.outputs.arch }}_release\
-          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}\Release\*.exe windows_x${{ steps.strings.outputs.arch }}_release\
-          dir windows_x${{ steps.strings.outputs.arch }}_release
+          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}\Release\*.dll ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release\
+          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}\Release\*.exe ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release\
+          dir ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}_release
 
-      - name: Package
+      - name: Package to zip
         if: matrix.os == 'windows-latest'
         uses: vimtor/action-zip@v1.2
         with:
@@ -135,7 +135,7 @@ jobs:
           ls ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}
           cmake --build ${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }} --config Release
 
-      - name: Prepare package
+      - name: Package to tgz
         if: matrix.os == 'ubuntu-latest'
         run: |
           ls --color Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.os }}_x${{ steps.strings.outputs.arch }}
@@ -184,5 +184,5 @@ jobs:
           prerelease: true
           title: "Windows/Linux x64 testing (Non-release. Automatic CI builds)"
           files: |
-            idTech4A++-test_win_x64-${{ steps.current_datetime.outputs.time }}.zip
-            idTech4A++-test_linux_x64-${{ steps.current_datetime.outputs.time }}.tar.gz
+            idTech4A++-test_win_x64-*.zip
+            idTech4A++-test_linux_x64-*.tar.gz
