@@ -142,7 +142,7 @@ jobs:
         name: Upload package archive artifacts
         with:
           name: "${{ steps.strings.outputs.name }}-${{ matrix.build_type }}"
-          path: "idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.${{ steps.strings.outputsive }}"
+          path: "idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.${{ steps.strings.outputs.archive }}"
           retention-days: 1
 
   collect:
