@@ -6,13 +6,15 @@ on:
   push:
     branches: [ "master" ]
     paths:
-      - 'Q3E/src/main/jni/doom3/neo/**'
-      - '.github/workflows/test.yml'
+      #- 'Q3E/src/main/jni/doom3/neo/**'
+      - '.github/workflows/win_linux_build.yml'
+      - '.github/workflows/win_linux_build'
   pull_request:
     branches: [ "master" ]
     paths:
-      - 'Q3E/src/main/jni/doom3/neo/**'
-      - '.github/workflows/test.yml'
+      #- 'Q3E/src/main/jni/doom3/neo/**'
+      - '.github/workflows/win_linux_build.yml'
+      - '.github/workflows/win_linux_build'
 
 jobs:
   build:
@@ -37,8 +39,6 @@ jobs:
         exclude:
           - os: ubuntu-latest
             bits: 32
-          - os: windows-latest
-            bits: 64
 
     defaults:
       run:
@@ -86,7 +86,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd Q3E\src\main\jni\doom3\neo
-          cmake ${{ steps.vcpkg_setup.outputs.vcpkg-cmake-config }} -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DDIRECTXSDK_INCLUDE_PATH=${{ github.workspace }}/vcpkg/packages/directxsdk_${{steps.strings.outputs.arch}}-windows/include/directxsdk -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt
+          cmake ${{ steps.vcpkg_setup.outputs.vcpkg-cmake-config }} -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DDIRECTXSDK_INCLUDE_PATH=${{ github.workspace }}/vcpkg/packages/directxsdk_${{steps.strings.outputs.arch}}-windows/include/directxsdk -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
 
       - name: Run apt
         if: matrix.os == 'ubuntu-latest'
@@ -98,7 +98,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           cd Q3E/src/main/jni/doom3/neo
-          cmake -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_MINIZ=ON -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF CMakeLists.txt
+          cmake -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_MINIZ=ON CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
 
       - name: Build with Make/Ninja
         run: |
@@ -135,8 +135,8 @@ jobs:
           mkdir ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/lib*.so ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          #cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          #cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           tar zcvf idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.tar.gz ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
 
       - uses: actions/upload-artifact@v4
