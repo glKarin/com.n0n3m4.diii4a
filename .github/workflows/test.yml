@@ -37,8 +37,8 @@ jobs:
         exclude:
           - os: ubuntu-latest
             bits: 32
-          - os: windows-latest
-            bits: 32
+          #- os: windows-latest
+            #bits: 32
 
     defaults:
       run:
@@ -171,7 +171,7 @@ jobs:
         id: release_datetime
         uses: Kaven-Universe/github-action-current-date-time@v1
         with:
-          format: "YYYY-MM-DD_HH-mm-ss"
+          format: "YYYYMMDD-HHmmss"
 
       - name: Create release
         uses: "marvinpinto/action-automatic-releases@latest"
