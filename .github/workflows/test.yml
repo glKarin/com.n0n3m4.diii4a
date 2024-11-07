@@ -37,8 +37,8 @@ jobs:
         exclude:
           - os: ubuntu-latest
             bits: 32
-          #- os: windows-latest
-            #bits: 32
+          - os: windows-latest
+            bits: 64
 
     defaults:
       run:
@@ -74,6 +74,7 @@ jobs:
 
       - name: Setup vcpkg and install depends
         if: matrix.os == 'windows-latest'
+        id: vcpkg_setup
         uses: johnwason/vcpkg-action@v6
         with:
           pkgs: 'SDL2 curl openal-soft zlib'
@@ -85,7 +86,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd Q3E\src\main\jni\doom3\neo
-          cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt
+          cmake ${{ steps.vcpkg_setup.outputs.vcpkg-cmake-config }} -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt
 
       - name: Run apt
         if: matrix.os == 'ubuntu-latest'
