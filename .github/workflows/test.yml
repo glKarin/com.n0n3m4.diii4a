@@ -132,10 +132,10 @@ jobs:
         run: |
           ls --color Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}
           mkdir ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/lib*.so ${{ steps.strings.outputs.name }}_${{ matrix.build_type }} || true/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }} || true/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }} || true/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }} || true/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/lib*.so ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          #cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          #cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           tar zcvf idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.tar.gz ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
 
       - uses: actions/upload-artifact@v4
