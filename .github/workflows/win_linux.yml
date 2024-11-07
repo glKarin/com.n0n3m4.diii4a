@@ -7,14 +7,14 @@ on:
     branches: [ "master" ]
     paths:
       #- 'Q3E/src/main/jni/doom3/neo/**'
-      - '.github/workflows/win_linux_build.yml'
-      - '.github/workflows/win_linux_build'
+      - '.github/workflows/win_linux.yml'
+      - '.github/workflows/win_linux.changelog'
   pull_request:
     branches: [ "master" ]
     paths:
       #- 'Q3E/src/main/jni/doom3/neo/**'
-      - '.github/workflows/win_linux_build.yml'
-      - '.github/workflows/win_linux_build'
+      - '.github/workflows/win_linux.yml'
+      - '.github/workflows/win_linux.changelog'
 
 jobs:
   build:
@@ -52,7 +52,7 @@ jobs:
           fetch-depth: 1
           fetch-tags: true
 
-      - name: Set strings
+      - name: Set env strings
         id: strings
         shell: bash
         run: |
@@ -168,7 +168,7 @@ jobs:
           repo: glKarin/com.n0n3m4.diii4a
           github_token: ${{ secrets.TOKEN }}
           
-      - name: Get current date time
+      - name: Get release date time
         id: release_datetime
         uses: Kaven-Universe/github-action-current-date-time@v1
         with:
