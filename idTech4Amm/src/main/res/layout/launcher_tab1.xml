@@ -934,15 +934,23 @@
                         android:id="@+id/launcher_tab1_command_record"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
+                        android:layout_weight="0.33"
                         android:text="@string/command_record"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/launcher_tab1_create_shortcut"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.34"
+                        android:text="@string/commandshortcut"
                         android:textAllCaps="false" />
 
                     <Button
                         android:id="@+id/launcher_tab1_edit_cvar"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
+                        android:layout_weight="0.33"
                         android:text="@string/edit_cvar"
                         android:textAllCaps="false" />
                 </LinearLayout>

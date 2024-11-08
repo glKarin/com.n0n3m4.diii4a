@@ -606,6 +606,10 @@ public class GameLauncher extends Activity
 			{
 				OpenCommandChooser();
 			}
+			else if (id == R.id.launcher_tab1_create_shortcut)
+			{
+				OpenShortcutWithCommandCreator();
+			}
 			else if (id == R.id.show_directory_helper)
 			{
 				OpenDirectoryHelper();
@@ -1398,6 +1402,7 @@ public class GameLauncher extends Activity
 		V.launcher_tab1_edit_doomconfig.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_edit_cvar.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_command_record.setOnClickListener(m_buttonClickListener);
+		V.launcher_tab1_create_shortcut.setOnClickListener(m_buttonClickListener);
 		V.show_directory_helper.setOnClickListener(m_buttonClickListener);
 
 		boolean userMod = mPrefs.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
@@ -1910,11 +1915,11 @@ public class GameLauncher extends Activity
 			OpenShortcutCreator();
 			return true;
 		}
-		else if (itemId == R.id.main_menu_shortcut_command)
+/*		else if (itemId == R.id.main_menu_shortcut_command)
 		{
 			OpenShortcutWithCommandCreator();
 			return true;
-		}
+		}*/
 
 		else if (itemId == R.id.main_menu_game_doom3)
 		{
@@ -3571,6 +3576,7 @@ public class GameLauncher extends Activity
 		public TextView tv_scale_current;
 		public LinearLayout res_scale_layout;
 		public Button launcher_tab1_command_record;
+		public Button launcher_tab1_create_shortcut;
 		public CheckBox image_useetc2;
 		public EditText edt_harm_r_specularExponentBlinnPhong;
 		public EditText edt_harm_r_specularExponentPBR;
@@ -3686,6 +3692,7 @@ public class GameLauncher extends Activity
 			tv_scale_current = findViewById(R.id.tv_scale_current);
 			res_scale_layout = findViewById(R.id.res_scale_layout);
 			launcher_tab1_command_record = findViewById(R.id.launcher_tab1_command_record);
+			launcher_tab1_create_shortcut = findViewById(R.id.launcher_tab1_create_shortcut);
 			image_useetc2 = findViewById(R.id.image_useetc2);
 			edt_harm_r_specularExponentBlinnPhong = findViewById(R.id.edt_harm_r_specularExponentBlinnPhong);
 			edt_harm_r_specularExponentPBR = findViewById(R.id.edt_harm_r_specularExponentPBR);

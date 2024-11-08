@@ -56,25 +56,25 @@ public final class CreateShortcutFunc extends GameLauncherFunc
 
     public void run()
     {
-        final List<CharSequence> items = new ArrayList<>();
-        final List<String> values = new ArrayList<>();
+        final CharSequence[] items = new CharSequence[GameManager.Games.length];
+        final String[] values = new String[GameManager.Games.length];
         // Map<String, Integer> pinnedShortcuts = GetPinnedShortcuts();
         int selected = -1;
         for(int i = 0; i < GameManager.Games.length; i++)
         {
             String game = GameManager.Games[i];
-            items.add(Tr(GameManager.GetGameNameRS(game)));
-            values.add(game);
+            items[i] = Tr(GameManager.GetGameNameRS(game));
+            values[i] = game;
             if(game.equals(m_game))
                 selected = i;
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.create_desktop_shortcut);
-        builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
+        builder.setSingleChoiceItems(items, selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {
-                String g = values.get(p);
+                String g = values[p];
                 UpdateDialogButtonState((AlertDialog)dialog, g);
             }
         });

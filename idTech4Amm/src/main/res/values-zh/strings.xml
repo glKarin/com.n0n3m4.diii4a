@@ -414,4 +414,5 @@
     <string name="shodow_cg_shadows">阴影(cg_shadows)</string>
     <string name="renderer_vid_renderer">渲染器(vid_renderer)</string>
     <string name="cache_compression_texture_harm_image_usecompressioncache">缓存压缩纹理(harm_image_useCompressionCache)</string>
+    <string name="commandshortcut">命令快捷方式</string>
 </resources>

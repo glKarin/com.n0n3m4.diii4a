@@ -92,13 +92,23 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo dpkg --add-architecture i386
-          sudo apt install -y gcc-multilib g++-multilib libsdl2-dev libopenal-dev # zlib1g-dev # libcurl4-openssl-dev
+          sudo apt install -y gcc-multilib g++-multilib libopenal-dev libsdl2-dev # libwayland-dev libxext-dev # zlib1g-dev libcurl4-openssl-dev
+
+#      - name: Download SDL2(Linux)
+#        if: matrix.os == 'ubuntu-latest'
+#        run: |
+#          cd Q3E/src/main/jni/doom3/neo/externlibs
+#          cd SDL2
+#          wget https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-2.30.9.tar.gz
+#          tar zxvf SDL2-2.30.9.tar.gz -C SDL2
+#          mv SDL2/SDL2-2.30.9/* SDL2/
+#          ls SDL2
 
       - name: Configure project with CMake(Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           cd Q3E/src/main/jni/doom3/neo
-          cmake -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_MINIZ=ON CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
+          cmake -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_MINIZ=ON -DUSE_LOCAL_SDL=OFF CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
 
       - name: Build with Make/Ninja
         run: |
@@ -182,5 +192,4 @@ jobs:
           prerelease: true
           title: "[${{steps.release_datetime.outputs.time}}] Windows/Linux testing (Non-release. Automatic CI builds)"
           files: |
-            idTech4A++-testing_win*.zip
-            idTech4A++-testing_linux*.tar.gz
+            idTech4A++-testing_*

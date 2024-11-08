@@ -418,5 +418,6 @@
     <string name="shodow_cg_shadows">Shodow(cg_shadows)</string>
     <string name="renderer_vid_renderer">Renderer(vid_renderer)</string>
     <string name="cache_compression_texture_harm_image_usecompressioncache">Cache compression texture(harm_image_useCompressionCache)</string>
+    <string name="commandshortcut">Command shortcut</string>
 
 </resources>
