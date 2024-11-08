@@ -158,9 +158,45 @@ public final class KCVarSystem
 
         KCVar.Group REALRTCW_CVARS = new KCVar.Group("RealRTCW", true)
                 .AddCVar(
-                        KCVar.CreateCVar("harm_sv_cheats", "bool", "0", "Disable change `sv_cheats` when load map and disconnect for allow cheats", KCVar.FLAG_INIT
+                        KCVar.CreateCVar("harm_sv_cheats", "bool", "0", "Disable change `sv_cheats` when load map and disconnect for allow cheats", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER
                         ),
-                        KCVar.CreateCVar("harm_r_stencilShadowPersonal", "bool", "1", "Render personal stencil shadow when `cg_shadows` = 2", 0
+                        KCVar.CreateCVar("harm_r_stencilShadowPersonal", "bool", "1", "Render personal stencil shadow when `cg_shadows` = 2", KCVar.FLAG_LAUNCHER
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowOp", "integer", "0", "Stencil testing operation", 0,
+                                "0", "Automatic(Personal shadow using Z-Fail, other shadow using Z-Pass)",
+                                "1", "Z-Pass",
+                                "2", "Z-Fail"
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowMaxAngle", "integer", "-1", "Limit stencil shadow of light direction and negative-Z-axis max angle(-1=not limit)", 0
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowModel", "integer", "3", "Render stencil shadow model type mask(mask bit are 1 2 4 8 16, 0=all models; 3=all animation model)", KCVar.FLAG_POSITIVE
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowCap", "bool", "1", "Render stencil shadow volume caps(0=don't render caps, personal shadow is always render)", 0
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowInfinite", "float", "0", "Stencil shadow volume far is infinite(absolute value as volume's length; 0=512. negative value is infinite, personal shadow is always infinite)", 0
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowMask", "bool", "0", "Render stencil shadow mask(0=render mask after all shadows; 1=render mask every shadow volume)", 0
+                        )
+                );
+
+        KCVar.Group ETW_CVARS = new KCVar.Group("ETW", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_r_stencilShadowPersonal", "bool", "1", "Render personal stencil shadow when `cg_shadows` = 2", KCVar.FLAG_LAUNCHER
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowOp", "integer", "0", "Stencil testing operation", 0,
+                                "0", "Automatic(Personal shadow using Z-Fail, other shadow using Z-Pass)",
+                                "1", "Z-Pass",
+                                "2", "Z-Fail"
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowMaxAngle", "integer", "-1", "Limit stencil shadow of light direction and negative-Z-axis max angle(-1=not limit)", 0
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowModel", "integer", "3", "Render stencil shadow model type mask(mask bit are 1 2 4 8, 0=all models; 3=all animation model)", KCVar.FLAG_POSITIVE
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowCap", "bool", "1", "Render stencil shadow volume caps(0=don't render caps, personal shadow is always render)", 0
+                        ),
+                        KCVar.CreateCVar("harm_r_stencilShadowInfinite", "float", "0", "Stencil shadow volume far is infinite(absolute value as volume's length; 0=512. negative value is infinite, personal shadow is always infinite)", 0
+                                ),
+                        KCVar.CreateCVar("harm_r_stencilShadowMask", "bool", "0", "Render stencil shadow mask(0=render mask after all shadows; 1=render mask every shadow volume)", 0
                         )
                 );
 
@@ -172,6 +208,7 @@ public final class KCVarSystem
         _cvars.put("preybase", PREY_CVARS);
         _cvars.put("DOOM3BFG", DOOM3BFG_CVARS);
         _cvars.put("RealRTCW", REALRTCW_CVARS);
+        _cvars.put("ETW", REALRTCW_CVARS);
 
         return _cvars;
     }
@@ -198,7 +235,8 @@ public final class KCVarSystem
         else if(Q3EUtils.q3ei.isD3BFG)
             res.add(_cvars.get("DOOM3BFG"));
         else if(Q3EUtils.q3ei.isDOOM) ;
-        else if(Q3EUtils.q3ei.isETW) ;
+        else if(Q3EUtils.q3ei.isETW)
+            res.add(_cvars.get("ETW"));
         else if(Q3EUtils.q3ei.isRealRTCW)
             res.add(_cvars.get("RealRTCW"));
         else

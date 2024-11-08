@@ -24,3 +24,6 @@ CMakeCache.txt
 *.sln
 x64
 x86
+build
+Release
+Debug

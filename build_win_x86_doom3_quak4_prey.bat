@@ -8,7 +8,7 @@ rem Replace your `vcpkg` path
 set VCPKG_PATH=D:\project\c\vcpkg
 
 rem Setup build arch: x64 | x86
-set BUILD_ARCH=x64
+set BUILD_ARCH=x86
 
 set VCPKG_CMAKE_TOOLCHAIN=%VCPKG_PATH%\scripts\buildsystems\vcpkg.cmake
 set DIRECTXSDK_INCLUDE_PATH="%VCPKG_PATH%/packages/directxsdk_%BUILD_ARCH%-windows/include/directxsdk"
@@ -28,7 +28,7 @@ if %BUILD_ARCH% == x86 (
 ) else (
     echo Platform: x86-64
     cmake -B %WORK_DIR% "-A x64" -DCMAKE_TOOLCHAIN_FILE=%VCPKG_CMAKE_TOOLCHAIN% CMakeLists.txt
-    rem -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
+    rem -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF 
 )
 
 echo Build %BUILD_TYPE% ......
