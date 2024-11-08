@@ -11,7 +11,7 @@ TARGET_PATH="`pwd`/Q3E/src/main/jni/doom3bfg/neo";
 cd ${TARGET_PATH};
 
 echo "Configure and generate GNU makefile ......";
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} CMakeLists.txt;
+cmake  -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_FLAGS="-Werror=nonnull" CMakeLists.txt;
 
 echo "Build ${BUILD_TYPE} ......";
 make;

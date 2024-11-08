@@ -95,23 +95,39 @@ idDataQueue::Append
 template< int maxItems, int maxBuffer >
 bool idDataQueue< maxItems, maxBuffer >::Append( int sequence, const byte* b1, int b1Len, const byte* b2, int b2Len )
 {
-	if( items.Num() == items.Max() )
-	{
-		return false;
-	}
-	if( dataLength + b1Len + b2Len >= maxBuffer )
-	{
-		return false;
-	}
-	msgItem_t& item = *items.Alloc();
-	item.length = b1Len + b2Len;
-	item.sequence = sequence;
-	item.dataOffset = dataLength;
-	memcpy( data + dataLength, b1, b1Len );
-	dataLength += b1Len;
-	memcpy( data + dataLength, b2, b2Len );
-	dataLength += b2Len;
-	return true;
+
+    if (b1 == NULL || b1Len < 0) {
+        return false;
+    }
+
+
+    if (b2 == NULL) {
+        b2Len = 0;
+    }
+
+    if (items.Num() == items.Max()) {
+        return false;
+    }
+    if (dataLength + b1Len + b2Len >= maxBuffer) {
+        return false;
+    }
+
+    msgItem_t& item = *items.Alloc();
+    item.length = b1Len + b2Len;
+    item.sequence = sequence;
+    item.dataOffset = dataLength;
+
+
+    memcpy(data + dataLength, b1, b1Len);
+    dataLength += b1Len;
+
+
+    if (b2Len > 0) {
+        memcpy(data + dataLength, b2, b2Len);
+        dataLength += b2Len;
+    }
+	//ArtemS2 fix :)
+    return true;
 }
 
 #endif // DATAQUEUE_H
