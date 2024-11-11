@@ -572,11 +572,11 @@ public class GameLauncher extends Activity
 			int id = view.getId();
 			if (id == R.id.launcher_tab1_edit_autoexec)
 			{
-				EditFile("autoexec.cfg");
+				EditFile("autoexec.cfg", false);
 			}
 			else if (id == R.id.launcher_tab1_edit_doomconfig)
 			{
-				EditFile(Q3EUtils.q3ei.config_name);
+				EditFile(Q3EUtils.q3ei.config_name, true);
 			}
 			else if (id == R.id.launcher_tab1_game_lib_button)
 			{
@@ -1767,7 +1767,7 @@ public class GameLauncher extends Activity
         // return KidTech4Command.IsProp(GetCmdText(), name);
     }
 
-    private void EditFile(String file)
+    private void EditFile(String file, boolean findInHome)
     {
         if (null == m_editConfigFileFunc)
             m_editConfigFileFunc = new EditConfigFileFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_EDIT_CONFIG_FILE);
@@ -1776,7 +1776,9 @@ public class GameLauncher extends Activity
         String game = GetGameModFromCommand();
         if (game == null || game.isEmpty())
             game = Q3EUtils.q3ei.game_base;
-		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir, Q3EUtils.q3ei.GetGameHomeDirectoryPath());
+		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.subdatadir);
+		if(findInHome)
+			path = KStr.AppendPath(path, Q3EUtils.q3ei.GetGameHomeDirectoryPath());
         bundle.putString("game", game);
 		bundle.putString("path", path);
         bundle.putString("file", file);
@@ -2475,11 +2477,11 @@ public class GameLauncher extends Activity
 
 	private void OpenShortcutCreator()
 	{
-		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
+/*		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
 		{
 			Toast.makeText(this, R.string.only_support_on_android_version_7_1, Toast.LENGTH_LONG).show();
 			return;
-		}
+		}*/
 		if (null == m_createShortcutFunc)
 		{
 			m_createShortcutFunc = new CreateShortcutFunc(this, CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT);
@@ -2490,11 +2492,11 @@ public class GameLauncher extends Activity
 
 	private void OpenShortcutWithCommandCreator()
 	{
-		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
+/*		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
 		{
 			Toast.makeText(this, R.string.only_support_on_android_version_7_1, Toast.LENGTH_LONG).show();
 			return;
-		}
+		}*/
 		if (null == m_createCommandShortcutFunc)
 		{
 			m_createCommandShortcutFunc = new CreateCommandShortcutFunc(this, CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT_WITH_COMMAND);

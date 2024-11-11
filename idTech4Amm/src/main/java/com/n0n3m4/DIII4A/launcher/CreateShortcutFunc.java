@@ -252,53 +252,63 @@ public final class CreateShortcutFunc extends GameLauncherFunc
     @SuppressLint("NewApi")
     private void CreateShortcut(String game, int type)
     {
-        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N_MR1)
-            return;
+        boolean isLauncher = TYPE_LAUNCHER == type;
+        Class<?> activity = isLauncher ? GameLauncher.class : Q3EMain.class;
+        int iconId = GameManager.GetGameIcon(game);
+        String gameName = Tr(GameManager.GetGameNameRS(game));
+        String typeName = isLauncher ? Tr(R.string.launcher) : Tr(R.string.game);
 
-        ShortcutManager shortcutManager = (ShortcutManager) m_gameLauncher.getSystemService(Context.SHORTCUT_SERVICE);
-        if (null != shortcutManager && shortcutManager.isRequestPinShortcutSupported())
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1)
         {
-            boolean isLauncher = TYPE_LAUNCHER == type;
-            int iconId = GameManager.GetGameIcon(game);
-            Class<?> activity = isLauncher ? GameLauncher.class : Q3EMain.class;
-            String shortcutId = "idTech4Amm_" + game + "_" + (isLauncher ? "launcher" : "game");
-            String gameName = Tr(GameManager.GetGameNameRS(game));
-            String longName = gameName;
-            if(isLauncher)
-                longName += " " + Tr(R.string.launcher);
-            String typeName = isLauncher ? Tr(R.string.launcher) : Tr(R.string.game);
-
-            Intent intent = new Intent(m_gameLauncher, activity)
-                    .putExtra("game", game)
-                    .setAction(Intent.ACTION_VIEW)
-                    ;
-            ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(m_gameLauncher, shortcutId)
-                    .setShortLabel(gameName)
-                    .setLongLabel(longName)
-                    .setIcon(Icon.createWithResource(m_gameLauncher, iconId))
-                    .setIntent(intent)
-                    .build();
-
-            Intent pinnedShortcutCallbackIntent = shortcutManager.createShortcutResultIntent(shortcutInfo);
-            PendingIntent successCallback = PendingIntent.getBroadcast(m_gameLauncher, 0, pinnedShortcutCallbackIntent, 0);
-
-            try
+            ShortcutManager shortcutManager = (ShortcutManager) m_gameLauncher.getSystemService(Context.SHORTCUT_SERVICE);
+            if (null != shortcutManager && shortcutManager.isRequestPinShortcutSupported())
             {
-                if(shortcutManager.requestPinShortcut(shortcutInfo, successCallback.getIntentSender()))
-                    Toast_long(Tr(R.string.create_desktop_shortcut_success, gameName, typeName));
-                else
-                    Toast_long(Tr(R.string.create_desktop_shortcut_fail, gameName, typeName));
+                String shortcutId = "idTech4Amm_" + game + "_" + (isLauncher ? "launcher" : "game");
+                String longName = gameName;
+                if(isLauncher)
+                    longName += " " + Tr(R.string.launcher);
+
+                Intent intent = new Intent(m_gameLauncher, activity)
+                        .putExtra("game", game)
+                        .setAction(Intent.ACTION_VIEW)
+                        ;
+                ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(m_gameLauncher, shortcutId)
+                        .setShortLabel(gameName)
+                        .setLongLabel(longName)
+                        .setIcon(Icon.createWithResource(m_gameLauncher, iconId))
+                        .setIntent(intent)
+                        .build();
+
+                Intent pinnedShortcutCallbackIntent = shortcutManager.createShortcutResultIntent(shortcutInfo);
+                PendingIntent successCallback = PendingIntent.getBroadcast(m_gameLauncher, 0, pinnedShortcutCallbackIntent, 0);
+
+                try
+                {
+                    if(shortcutManager.requestPinShortcut(shortcutInfo, successCallback.getIntentSender()))
+                        Toast_long(Tr(R.string.create_desktop_shortcut_success, gameName, typeName));
+                    else
+                        Toast_long(Tr(R.string.create_desktop_shortcut_fail, gameName, typeName));
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                    Toast_long(Tr(R.string.create_desktop_shortcut_fail, gameName, typeName) + ": " + e.getMessage());
+                }
+                run();
+                return;
             }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                Toast_long(Tr(R.string.create_desktop_shortcut_fail, gameName, typeName) + ": " + e.getMessage());
-            }
-            run();
         }
-        else
-        {
-            Toast_long(R.string.unsupport_create_desktop_shortcut);
-        }
+
+        Intent intent = new Intent(m_gameLauncher, activity);
+
+        Intent shortcutIntent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+        shortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, gameName);
+        shortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(m_gameLauncher, iconId));
+        //shortcutIntent.putExtra("duplicate", false);
+        shortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, intent);
+        m_gameLauncher.sendBroadcast(shortcutIntent);
+        Toast_long(Tr(R.string.create_desktop_shortcut_success, gameName, typeName));
+        //Toast_long(R.string.unsupport_create_desktop_shortcut);
+        run();
     }
 }

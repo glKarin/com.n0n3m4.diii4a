@@ -485,7 +485,7 @@ public class KidTechCommand
     private static final int CMD_PART_SET   = 3; // +set
     private static final int CMD_PART_NAME = 4; // r_shadows
     private static final int CMD_PART_VALUE = 5; // 1
-    private static class CmdPart
+    public static class CmdPart
     {
         public int type;
         public String str;
@@ -506,7 +506,7 @@ public class KidTechCommand
             return String.format("{%s|%s}", tname, str);
         }
     }
-    private final List<CmdPart> cmdParts = new ArrayList<>();
+    public final List<CmdPart> cmdParts = new ArrayList<>();
 
     private void Parse()
     {
@@ -518,11 +518,32 @@ public class KidTechCommand
         while(i < m_cmd.length())
         {
             char c = m_cmd.charAt(i);
-            if(c == '+' || c == '-')
+            if (c == '"')
+            {
+                if(readingSet)
+                {
+                    readingSet = false;
+                    String val = ReadWordWithQuotes(m_cmd, i);
+                    AddPart(CMD_PART_NAME, val);
+                    i += val.length();
+                }
+                else
+                {
+                    String val = ReadUtil(m_cmd, i, argPrefix);
+                    if(!hasArg0)
+                        AddPart(CMD_PART_EXECUTION, val);
+                    else
+                        AddPart(CMD_PART_VALUE, val);
+                    i += val.length();
+                }
+                hasArg0 = true;
+            }
+            else if(c == '+' || c == '-')
             {
                 readingSet = false;
-                String cmd = ReadWord(m_cmd, i);
-                boolean isSet = cmd.substring(1).equals("set");
+                String cmd = ReadWord(m_cmd, i + 1);
+                boolean isSet = cmd.equals("set") || cmd.equals("\"set\"");
+                cmd = c + cmd;
                 if(isSet)
                     AddPart(CMD_PART_SET, cmd);
                 else
@@ -602,6 +623,11 @@ public class KidTechCommand
 
     private String ReadWord(String str, int start)
     {
+        if(str.charAt(start) == '\"')
+        {
+            return ReadWordWithQuotes(str, start);
+        }
+
         StringBuilder ret = new StringBuilder();
         int i = start;
         while(i < str.length())
@@ -615,6 +641,23 @@ public class KidTechCommand
         return ret.toString();
     }
 
+    private String ReadWordWithQuotes(String str, int start)
+    {
+        char quoteStart = str.charAt(start);
+        StringBuilder ret = new StringBuilder();
+        ret.append(quoteStart);
+        int i = start + 1;
+        char lastp = 0;
+        while(i < str.length() && ( str.charAt(i) != quoteStart || lastp == '\\' ))
+        {
+            lastp = str.charAt(i);
+            ret.append(lastp);
+            i++;
+        }
+        ret.append(quoteStart);
+        return ret.toString(); // with quotes
+    }
+
     private String ReadUtil(String str, int start, String chars)
     {
         StringBuilder ret = new StringBuilder();
@@ -622,6 +665,14 @@ public class KidTechCommand
         while(i < str.length())
         {
             char c = str.charAt(i);
+            if(c == '"')
+            {
+                String val = ReadWordWithQuotes(str, i);
+                ret.append(val);
+                i += val.length();
+                continue;
+            }
+
             if(Character.isSpaceChar(c))
             {
                 if(i + 1 < str.length())
