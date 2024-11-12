@@ -623,7 +623,7 @@ public class KidTechCommand
 
     private static String ReadWord(String str, int start)
     {
-        if(str.charAt(start) == '\"')
+        if(start < str.length() && str.charAt(start) == '\"')
         {
             return ReadWordWithQuotes(str, start);
         }
