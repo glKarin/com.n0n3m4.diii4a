@@ -149,8 +149,8 @@ public final class KStr
     {
         if(null == str)
             return "";
-        if(str.contains(" "))
-            return '"' + str + '"';
+        if(str.contains(" ") || str.contains("\""))
+            return KidTechCommand.EscapeQuotes(str);
         else
             return str;
     }

@@ -606,7 +606,7 @@ public class KidTechCommand
         cmdParts.add(i, part);
     }
 
-    private String SkipBlank(String str, int start)
+    private static String SkipBlank(String str, int start)
     {
         StringBuilder ret = new StringBuilder();
         int i = start;
@@ -621,7 +621,7 @@ public class KidTechCommand
         return ret.toString();
     }
 
-    private String ReadWord(String str, int start)
+    private static String ReadWord(String str, int start)
     {
         if(str.charAt(start) == '\"')
         {
@@ -641,7 +641,7 @@ public class KidTechCommand
         return ret.toString();
     }
 
-    private String ReadWordWithQuotes(String str, int start)
+    private static String ReadWordWithQuotes(String str, int start)
     {
         char quoteStart = str.charAt(start);
         StringBuilder ret = new StringBuilder();
@@ -658,7 +658,7 @@ public class KidTechCommand
         return ret.toString(); // with quotes
     }
 
-    private String ReadUtil(String str, int start, String chars)
+    private static String ReadUtil(String str, int start, String chars)
     {
         StringBuilder ret = new StringBuilder();
         int i = start;
@@ -759,6 +759,90 @@ public class KidTechCommand
         if(null == o)
             return "";
         return o.toString();
+    }
+
+    public static List<String> SplitValue(String value, boolean unescape)
+    {
+        value = value.trim();
+        List<String> ret = new ArrayList<>();
+        int i = 0;
+        while(i < value.length())
+        {
+            char c = value.charAt(i);
+            if(Character.isSpaceChar(c))
+            {
+                i += SkipBlank(value, i).length();
+            }
+            else
+            {
+                String val = ReadWord(value, i);
+                i += val.length();
+                if(unescape && val.startsWith("\""))
+                    val = UnEscapeQuotes(val);
+                ret.add(val);
+            }
+        }
+        return ret;
+    }
+
+    public static String UnEscapeQuotes( String arg )
+    {
+        char[] arr = arg.toCharArray();
+        char first = '"';
+        char last = 0;
+        int _i = 0;
+        int last_i = 0;
+        while( _i < arr.length ) {
+            char ch = arr[_i];
+            if( ch == first && last == '\\' ) {
+                int c_curr = _i;
+                int c_last = last_i;
+                while( c_curr < arr.length ) {
+                    arr[c_last] = arr[c_curr];
+                    c_last = c_curr;
+                    c_curr++;
+                }
+                arr[c_last] = '\0';
+            }
+            last_i = _i;
+            last = ch;
+            _i++;
+        }
+
+        StringBuilder buf = new StringBuilder();
+        for(_i = 1; _i < arr.length; _i++)
+        {
+            if(arr[_i] == 0)
+                break;
+            buf.append(arr[_i]);
+        }
+        if(buf.length() == 0)
+            return "";
+        buf.delete(buf.length() - 1, buf.length());
+        return buf.toString();
+    }
+
+    public static String JoinValue(List<String> list, boolean escape)
+    {
+        String split = " ";
+        StringBuilder buf = new StringBuilder();
+        for(int i = 0; i < list.size(); i++)
+        {
+            String str = list.get(i);
+            if(null == str)
+                str = "";
+            else if(escape && (str.contains(split) || str.contains("\"")))
+                str = EscapeQuotes(str);
+            buf.append(str);
+            if(i < list.size() - 1)
+                buf.append(split);
+        }
+        return buf.toString();
+    }
+
+    public static String EscapeQuotes( String arg )
+    {
+        return "\"" + arg.replaceAll("\"", "\\\\\"") + "\"";
     }
 
     private CmdPart GetPart(int index)

@@ -3244,30 +3244,30 @@ public class GameLauncher extends Activity
 					{
 						String files = mod.substring(1);
 						String[] split = files.split(ChooseGameModFunc.FILE_SEP);
-						StringBuilder file = new StringBuilder();
-						StringBuilder deh = new StringBuilder();
-						StringBuilder bex = new StringBuilder();
+						List<String> file = new ArrayList<>();
+						List<String> deh = new ArrayList<>();
+						List<String> bex = new ArrayList<>();
 
 						for (String s : split)
 						{
 							if(s.toLowerCase().endsWith(".deh"))
-								deh.append(" ").append(s);
+								deh.add(s);
 							else if(s.toLowerCase().endsWith(".bex"))
-								bex.append(" ").append(s);
+								bex.add(s);
 							else
-								file.append(" ").append(s);
+								file.add(s);
 						}
 
 						RemoveParam("file");
 						RemoveParam("deh");
 						RemoveParam("bex");
 
-						if(file.length() > 0)
-							SetParam("file", file.toString().trim());
-						if(deh.length() > 0)
-							SetParam("deh", deh.toString().trim());
-						if(bex.length() > 0)
-							SetParam("bex", bex.toString().trim());
+						if(!file.isEmpty())
+							SetParam("file", KidTechCommand.JoinValue(file, true));
+						if(!deh.isEmpty())
+							SetParam("deh", KidTechCommand.JoinValue(deh, true));
+						if(!bex.isEmpty())
+							SetParam("bex", KidTechCommand.JoinValue(bex, true));
 					}
 				}
 				else
@@ -3278,7 +3278,8 @@ public class GameLauncher extends Activity
 		String path = KStr.AppendPath(preference.getString(Q3EPreference.pref_datapath, default_gamedata), Q3EUtils.q3ei.subdatadir, Q3EUtils.q3ei.GetGameModSubDirectory());
 		bundle.putString("mod", preference.getString(preferenceKey, ""));
 		bundle.putString("path", path);
-		bundle.putString("file", GetParam("file") + " " + GetParam("deh") + " " + GetParam("bex"));
+		if(Q3EUtils.q3ei.isDOOM)
+			bundle.putString("file", GetParam("file") + " " + GetParam("deh") + " " + GetParam("bex"));
 		m_chooseGameModFunc.Start(bundle);
 	}
 

@@ -18,6 +18,7 @@ import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KStr;
+import com.n0n3m4.q3e.karin.KidTechCommand;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -439,8 +440,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         // 3. load selected from command line
         if(KStr.NotBlank(m_file))
         {
-            String[] split = m_file.split("\\s+");
-            files.addAll(Arrays.asList(split));
+            List<String> strings = KidTechCommand.SplitValue(m_file, true);
+            files.addAll(strings);
         }
 
         // 4. remove not exists files from command line
@@ -480,10 +481,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int p)
             {
-                List<String> norFiles = new ArrayList<>(files.size());
-                for(String file : files)
-                    norFiles.add(KStr.CmdStr(file));
-                String join = KStr.Join(norFiles, FILE_SEP);
+                String join = KStr.Join(files, FILE_SEP);
                 Callback(":" + join);
                 dialog.dismiss();
             }
