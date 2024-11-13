@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -63,9 +64,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class Q3EUtils
 {
@@ -875,5 +880,160 @@ public class Q3EUtils
     {
         Date d = null != date && date.length > 0 && null != date[0] ? date[0] : new Date();
         return new SimpleDateFormat(format).format(d);
+    }
+
+    public static long Write(String filePath, InputStream in, int...bufferSizeArg) throws RuntimeException
+    {
+        FileOutputStream fileoutputstream = null;
+
+        try
+        {
+            fileoutputstream = new FileOutputStream(filePath);
+            return Q3EUtils.Copy(fileoutputstream, in, bufferSizeArg);
+        }
+        catch(FileNotFoundException e)
+        {
+            throw new RuntimeException(e);
+        }
+        finally
+        {
+            Q3EUtils.Close(fileoutputstream);
+        }
+    }
+
+    public static boolean ExtractCopyFile(Context context, String assetFilePath, String systemFilePath, boolean overwrite)
+    {
+        InputStream bis = null;
+
+        try
+        {
+            File srcFile = new File(assetFilePath);
+            String systemFolderPath;
+            String toFilePath;
+            if(systemFilePath.endsWith("/"))
+            {
+                systemFolderPath = systemFilePath.substring(0, systemFilePath.length() - 1);
+                toFilePath = systemFilePath + srcFile.getName();
+            }
+            else
+            {
+                File f = new File(systemFilePath);
+                systemFolderPath = f.getParent();
+                toFilePath = systemFilePath;
+            }
+
+            Q3EUtils.mkdir(systemFolderPath, true);
+
+            bis = context.getAssets().open(assetFilePath);
+
+            File file = new File(toFilePath);
+            if(!overwrite && file.exists())
+                return false;
+
+            Q3EUtils.mkdir(file.getParent(), true);
+
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying " + assetFilePath + " to " + toFilePath);
+            Q3EUtils.Write(toFilePath, bis, 4096);
+            bis.close();
+            bis = null;
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            Q3EUtils.Close(bis);
+        }
+    }
+
+    public static boolean ExtractCopyDir(Context context, String assetFolderPath, String systemFolderPath, boolean overwrite, String...assetPaths)
+    {
+        InputStream bis = null;
+
+        try
+        {
+            Q3EUtils.mkdir(systemFolderPath, true);
+
+            List<String> fileList;
+            if(null == assetPaths)
+            {
+                String[] list = context.getAssets().list(assetFolderPath);
+                if(null == list)
+                    fileList = new ArrayList<>();
+                else
+                    fileList = Arrays.asList(list);
+            }
+            else
+                fileList = Arrays.asList(assetPaths);
+
+            for (String assetPath : fileList)
+            {
+                String sourcePath = assetFolderPath + "/" + assetPath;
+                String entryName = systemFolderPath + "/" + assetPath;
+                ExtractCopyFile(context, sourcePath, entryName, overwrite);
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            Q3EUtils.Close(bis);
+        }
+    }
+
+    public static boolean ExtractZip(Context context, String assetPath, String systemFolderPath, boolean overwrite)
+    {
+        InputStream bis = null;
+        ZipInputStream zipinputstream = null;
+
+        try
+        {
+            bis = context.getAssets().open(assetPath);
+            zipinputstream = new ZipInputStream(bis);
+
+            ZipEntry zipentry;
+            Q3EUtils.mkdir(systemFolderPath, true);
+            while ((zipentry = zipinputstream.getNextEntry()) != null)
+            {
+                String tmpname = zipentry.getName();
+
+                String toFilePath = systemFolderPath + "/" + tmpname;
+                toFilePath = toFilePath.replace('/', File.separatorChar);
+                toFilePath = toFilePath.replace('\\', File.separatorChar);
+                File file = new File(toFilePath);
+
+                if (zipentry.isDirectory())
+                {
+                    if(!file.exists())
+                        Q3EUtils.mkdir(toFilePath, true);
+                    continue;
+                }
+
+                if(!overwrite && file.exists())
+                    continue;
+
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Extracting " + tmpname + " to " + systemFolderPath);
+                Q3EUtils.Write(toFilePath, zipinputstream, 4096);
+                zipinputstream.closeEntry();
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            Q3EUtils.Close(zipinputstream);
+            Q3EUtils.Close(bis);
+        }
     }
 }

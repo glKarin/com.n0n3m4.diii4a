@@ -614,6 +614,10 @@ public class GameLauncher extends Activity
 			{
 				OpenDirectoryHelper();
 			}
+			else if (id == R.id.launcher_tab1_patch_resource)
+			{
+				OpenResourceFileDialog(false);
+			}
         }
     };
 
@@ -798,6 +802,7 @@ public class GameLauncher extends Activity
         InitUIDefaultLayout(q3ei);
 
         q3ei.default_path = default_gamedata;
+		q3ei.datadir = mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata); //k add 20241113
 
         q3ei.SetupDOOM3(); //k armv7-a only support neon now
 
@@ -1404,6 +1409,7 @@ public class GameLauncher extends Activity
 		V.launcher_tab1_command_record.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_create_shortcut.setOnClickListener(m_buttonClickListener);
 		V.show_directory_helper.setOnClickListener(m_buttonClickListener);
+		V.launcher_tab1_patch_resource.setOnClickListener(m_buttonClickListener);
 
 		boolean userMod = mPrefs.getBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), false);
 		V.fs_game_user.setChecked(userMod);
@@ -1507,7 +1513,12 @@ public class GameLauncher extends Activity
 		V.smoothjoy.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.launcher_tab2_joystick_unfixed.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.launcher_tab2_joystick_visible.setOnItemSelectedListener(m_itemSelectedListener);
-		V.edt_path.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_datapath, default_gamedata));
+		V.edt_path.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_datapath, default_gamedata, new Runnable() {
+			@Override
+			public void run() {
+				Q3EUtils.q3ei.datadir = V.edt_path.getText().toString();
+			}
+		}));
 		V.edt_mouse.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_eventdev, "/dev/input/event???"));
 		V.rg_curpos.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.secfinglmb.setOnCheckedChangeListener(m_checkboxChangeListener);
@@ -1853,7 +1864,7 @@ public class GameLauncher extends Activity
 		}
 		else if (itemId == R.id.main_menu_extract_resource)
 		{
-			OpenResourceFileDialog();
+			OpenResourceFileDialog(true);
 			return true;
 		}
 		else if (itemId == R.id.main_menu_save_settings)
@@ -3007,12 +3018,14 @@ public class GameLauncher extends Activity
 		}
 	}
 
-    private void OpenResourceFileDialog()
+    private void OpenResourceFileDialog(boolean all)
     {
         if (null == m_extractPatchResourceFunc)
             m_extractPatchResourceFunc = new ExtractPatchResourceFunc(this, CONST_RESULT_CODE_REQUEST_EXTRACT_PATCH_RESOURCE);
         Bundle bundle = new Bundle();
         bundle.putString("path", V.edt_path.getText().toString());
+		bundle.putString("game", Q3EUtils.q3ei.game);
+		bundle.putBoolean("all", all);
         m_extractPatchResourceFunc.Start(bundle);
     }
 
@@ -3540,6 +3553,7 @@ public class GameLauncher extends Activity
         public CheckBox find_dll;
 		public EditText edt_harm_r_maxFps;
 		public Button launcher_tab1_edit_cvar;
+		public Button launcher_tab1_patch_resource;
 		public EditText edt_cmdline_temp;
 		public CheckBox skip_intro;
 		public Button launcher_tab1_game_mod_button;
@@ -3658,6 +3672,7 @@ public class GameLauncher extends Activity
             find_dll = findViewById(R.id.find_dll);
 			edt_harm_r_maxFps = findViewById(R.id.edt_harm_r_maxFps);
 			launcher_tab1_edit_cvar = findViewById(R.id.launcher_tab1_edit_cvar);
+			launcher_tab1_patch_resource = findViewById(R.id.launcher_tab1_patch_resource);
 			edt_cmdline_temp = findViewById(R.id.edt_cmdline_temp);
 			skip_intro = findViewById(R.id.skip_intro);
 			launcher_tab1_game_mod_button = findViewById(R.id.launcher_tab1_game_mod_button);

@@ -10,11 +10,11 @@ import com.n0n3m4.q3e.Q3E;
 
 public class Q3EGUI
 {
-    public final static int DIALOG_ERROR = -1;
+    public final static int DIALOG_ERROR  = -1;
     public final static int DIALOG_CANCEL = 0;
-    public final static int DIALOG_YES = 1;
-    public final static int DIALOG_NO = 2;
-    public final static int DIALOG_OTHER = 3;
+    public final static int DIALOG_YES    = 1;
+    public final static int DIALOG_NO     = 2;
+    public final static int DIALOG_OTHER  = 3;
 
     private final Activity m_context;
 

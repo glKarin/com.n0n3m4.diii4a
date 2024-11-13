@@ -49,4 +49,10 @@
     <string name="button_setting_has_changed_can_you_save_it">按键配置已经被修改! 是否保存?</string>
     <string name="exit">退出</string>
     <string name="copy">复制</string>
+    <string name="bot_q3_bot_support_in_mp_game">雷神之锤4 Bot(SABot-a9 mod)</string>
+    <string name="mp_game_map_aas_files">多人游戏地图aas文件</string>
+    <string name="rivensin_play_original_doom3_level">Rivensin加载原毁灭战士3关卡</string>
+    <string name="rbdoom3_bfg_hlsl_shader">RBDOOM3-BFG HLSL着色器</string>
+    <string name="the_dark_mod_glsl_shader">The Dark Mod GLSL着色器</string>
+    <string name="gzdoom_builtin_resource">GZDOOM内置资源</string>
 </resources>

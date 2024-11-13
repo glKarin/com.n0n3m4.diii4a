@@ -303,6 +303,20 @@ public class Q3EInterface
 		config_name = ConfigFileName();
 	}
 
+	public static String GetStandaloneDirectory(boolean standalone, String game)
+	{
+		String subdir = GetGameStandaloneDirectory(game);
+		if(standalone)
+			return subdir;
+		else if(Q3EGlobals.GAME_TDM.equals(game)
+				|| Q3EGlobals.GAME_DOOM3BFG.equals(game)
+				|| Q3EGlobals.GAME_GZDOOM.equals(game)
+		)
+			return subdir;
+		else
+			return null;
+	}
+
 	private void SetupSubDir()
 	{
 		String subdir = GameSubDirectory();
@@ -819,6 +833,90 @@ public class Q3EInterface
 			return ".realrtcw";
 		else
 			return null;
+	}
+
+	public static String GetGameModPreferenceKey(String name)
+	{
+		if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q4_fs_game;
+		else if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_prey_fs_game;
+		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q2_fs_game;
+		else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q3_fs_game;
+		else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_rtcw_fs_game;
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_tdm_fs_game;
+		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q1_fs_game;
+		else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_d3bfg_fs_game;
+		else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_gzdoom_fs_game;
+		else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_etw_fs_game;
+		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_realrtcw_fs_game;
+		else
+			return Q3EPreference.pref_harm_fs_game;
+	}
+
+	public static String GetEnableModPreferenceKey(String name)
+	{
+		if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q4_user_mod;
+		else if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_prey_user_mod;
+		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q2_user_mod;
+		else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q3_user_mod;
+		else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_rtcw_user_mod;
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_tdm_user_mod;
+		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q1_user_mod;
+		else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_d3bfg_user_mod;
+		else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_gzdoom_user_mod;
+		else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_etw_user_mod;
+		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_realrtcw_user_mod;
+		else
+			return Q3EPreference.pref_harm_user_mod;
+	}
+
+	public static String GetGameBaseDirectory(String name)
+	{
+		if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_PREY;
+		else if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_QUAKE4;
+		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_QUAKE2;
+		else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_QUAKE3;
+		else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_RTCW;
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_TDM;
+		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_QUAKE1;
+		else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_DOOM3BFG;
+		else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_GZDOOM;
+		else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_ETW;
+		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_REALRTCW;
+		else
+			return Q3EGlobals.GAME_BASE_DOOM3;
 	}
 
 	public void SetAppStoragePath(Context context)

@@ -209,6 +209,15 @@ public final class Q3EGlobals
     public static final String GAME_SUBDIR_ETW      = "etw";
     public static final String GAME_SUBDIR_REALRTCW = "realrtcw";
 
+    public enum PatchResource
+    {
+        QUAKE4_SABOT,
+        DOOM3_RIVENSIN_ORIGIANL_LEVELS,
+        DOOM3BFG_HLSL_SHADER,
+        TDM_GLSL_SHADER,
+        GZDOOM_RESOURCE,
+    }
+
 /*
     public static final String[] QUAKE4_MAPS = {
             "airdefense1",

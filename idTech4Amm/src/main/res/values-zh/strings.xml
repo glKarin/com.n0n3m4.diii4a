@@ -191,8 +191,6 @@
     <string name="language">语言/Language</string>
     <string name="setup_launcher_language">设置启动器语言</string>
     <string name="be_available_on_reboot_the_next_time">重启或下次启动生效</string>
-    <string name="bot_q3_bot_support_in_mp_game">Bot(SABot-a9 mod)</string>
-    <string name="mp_game_map_aas_files">多人游戏地图aas文件</string>
     <string name="game_patch_resource">游戏补丁资源</string>
     <string name="extract_all">全部提取</string>
     <string name="can_t_s_read_write_external_storage_permission_is_not_granted">无法%s! 没有授权读写外部存储权限!</string>
@@ -220,7 +218,6 @@
     <string name="request_necessary_permissions">请求必要的权限</string>
     <string name="grant">授权</string>
     <string name="extract_path_resource_">提取补丁资源: </string>
-    <string name="rivensin_play_original_doom3_level">Rivensin加载原毁灭战士3关卡</string>
     <string name="save_preferences_file">保存偏好文件</string>
     <string name="read_preferences_file">读取偏好文件</string>
     <string name="version_">版本:</string>
@@ -415,4 +412,5 @@
     <string name="renderer_vid_renderer">渲染器(vid_renderer)</string>
     <string name="cache_compression_texture_harm_image_usecompressioncache">缓存压缩纹理(harm_image_useCompressionCache)</string>
     <string name="commandshortcut">命令快捷方式</string>
+    <string name="patch_resource">补丁资源</string>
 </resources>

@@ -182,8 +182,6 @@
     <string name="language">Язык/Language</string>
     <string name="setup_launcher_language">Выбрать язык лаунчера</string>
     <string name="be_available_on_reboot_the_next_time">Язык будет обновлен после перезагрузки лаунчера</string>
-    <string name="bot_q3_bot_support_in_mp_game">Боты Quake 4 (мод SABot-a9)</string>
-    <string name="mp_game_map_aas_files">Файлы игры Quake4 в формате "aas"</string>
     <string name="game_patch_resource">Ресурсы игрового патча</string>
     <string name="extract_all">Извлечь все</string>
     <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Разрешение на чтение/запись внешнего хранилища не предоставлено!</string>
@@ -211,7 +209,6 @@
     <string name="request_necessary_permissions">необходимо предоставить разрешение</string>
     <string name="grant">предоставить</string>
     <string name="extract_path_resource_">Извлечь ресурс пути: </string>
-    <string name="rivensin_play_original_doom3_level">Rivensin на оригинальных уровнях DOOM3</string>
     <string name="save_preferences_file">сохранить файл настроек</string>
     <string name="read_preferences_file">загрузить файл настроек</string>
     <string name="version_">Версия:</string>
@@ -416,5 +413,6 @@
     <string name="renderer_vid_renderer">Renderer(vid_renderer)</string>
     <string name="cache_compression_texture_harm_image_usecompressioncache">Cache compression texture(harm_image_useCompressionCache)</string>
     <string name="commandshortcut">Command shortcut</string>
+    <string name="patch_resource">Patch resource</string>
 
 </resources>

@@ -426,15 +426,14 @@ public class Q3EGameHelper
 
     public void ExtractTDMGLSLShaderSource()
     {
-        final String destname = Q3EUtils.q3ei.datadir + "/darkmod";
-        final String versionFile = destname + "/glslprogs/idtech4amm.version";
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "darkmod", "glslprogs/idtech4amm.version");
         final String version = Q3EGlobals.TDM_GLSL_SHADER_VERSION;
         final String name = "The Dark Mod GLSL shader source";
-        final String zip = "pak/darkmod/glprogs.pk4";
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
-        if(ExtractZip(zip, destname, overwrite))
+        if(manager.Fetch(Q3EGlobals.PatchResource.TDM_GLSL_SHADER, overwrite) != null)
         {
             if (overwrite)
             {
@@ -447,15 +446,14 @@ public class Q3EGameHelper
 
     public void ExtractDOOM3BFGHLSLShaderSource()
     {
-        final String destname = Q3EUtils.q3ei.datadir + "/doom3bfg/base";
-        final String versionFile = destname + "/renderprogs/idtech4amm.version";
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "doom3bfg/base", "renderprogs/idtech4amm.version");
         final String version = Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION;
         final String name = "RBDOOM 3 BFG HLSL shader source";
-        final String zip = "pak/doom3bfg/renderprogs.pk4";
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
-        if(ExtractZip(zip, destname, overwrite))
+        if(manager.Fetch(Q3EGlobals.PatchResource.DOOM3BFG_HLSL_SHADER, overwrite) != null)
         {
             if (overwrite)
             {
@@ -468,25 +466,14 @@ public class Q3EGameHelper
 
     public void ExtractGZDOOMResource()
     {
-        final String destname = Q3EUtils.q3ei.datadir + "/gzdoom";
-        final String versionFile = destname + "/idtech4amm.version";
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.version");
         final String version = Q3EGlobals.GZDOOM_VERSION;
         final String name = "GZDOOM game resource";
-        final String assetFolder = "pak/gzdoom";
-        final String[] files = {
-                "brightmaps.pk3",
-                "game_support.pk3",
-                "game_widescreen_gfx.pk3",
-                "gzdoom.pk3",
-                "lights.pk3",
-                "soundfonts/gzdoom.sf2",
-                "fm_banks/GENMIDI.GS.wopl",
-                "fm_banks/gs-by-papiezak-and-sneakernets.wopn",
-        };
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
-        if(ExtractCopy(assetFolder, destname, overwrite, files))
+        if(manager.Fetch(Q3EGlobals.PatchResource.GZDOOM_RESOURCE, overwrite) != null)
         {
             if (overwrite)
             {
