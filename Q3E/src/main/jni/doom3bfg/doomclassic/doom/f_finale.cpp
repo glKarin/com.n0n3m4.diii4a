@@ -719,55 +719,55 @@ F_DrawPatchCol( int x, patch_t* patch, int col ) {
 //
 // F_BunnyScroll
 //
-void F_BunnyScroll (void)
+void F_BunnyScroll(void)
 {
-    int		scrolled;
-    int		x;
-    patch_t*	p1;
-    patch_t*	p2;
-    char	name[10];
-    int		stage;
-		
-    p1 = (patch_t*)W_CacheLumpName ("PFUB2", PU_LEVEL_SHARED);
-    p2 = (patch_t*)W_CacheLumpName ("PFUB1", PU_LEVEL_SHARED);
+    int scrolled;
+    int x;
+    patch_t* p1;
+    patch_t* p2;
+    char name[14]; // Увеличен размер массива
+    int stage;
 
-    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
-	
-    scrolled = 320 - (::g->finalecount-230)/2;
+    p1 = (patch_t*)W_CacheLumpName("PFUB2", PU_LEVEL_SHARED);
+    p2 = (patch_t*)W_CacheLumpName("PFUB1", PU_LEVEL_SHARED);
+
+    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
+
+    scrolled = 320 - (::g->finalecount - 230) / 2;
     if (scrolled > 320)
-	scrolled = 320;
+        scrolled = 320;
     if (scrolled < 0)
-	scrolled = 0;
-		
-    for ( x=0 ; x<ORIGINAL_WIDTH ; x++)
+        scrolled = 0;
+
+    for (x = 0; x < ORIGINAL_WIDTH; x++)
     {
-	if (x+scrolled < 320)
-	    F_DrawPatchCol (x, p1, x+scrolled);
-	else
-	    F_DrawPatchCol (x, p2, x+scrolled - 320);		
+        if (x + scrolled < 320)
+            F_DrawPatchCol(x, p1, x + scrolled);
+        else
+            F_DrawPatchCol(x, p2, x + scrolled - 320);
     }
-	
+
     if (::g->finalecount < 1130)
-	return;
+        return;
     if (::g->finalecount < 1180)
     {
-	V_DrawPatch ((ORIGINAL_WIDTH-13*8)/2,
-		     (ORIGINAL_HEIGHT-8*8)/2,0, (patch_t*)W_CacheLumpName ("END0",PU_CACHE_SHARED));
-	::g->laststage = 0;
-	return;
+        V_DrawPatch((ORIGINAL_WIDTH - 13 * 8) / 2,
+                    (ORIGINAL_HEIGHT - 8 * 8) / 2, 0, (patch_t*)W_CacheLumpName("END0", PU_CACHE_SHARED));
+        ::g->laststage = 0;
+        return;
     }
-	
-    stage = (::g->finalecount-1180) / 5;
+
+    stage = (::g->finalecount - 1180) / 5;
     if (stage > 6)
-	stage = 6;
+        stage = 6;
     if (stage > ::g->laststage)
     {
-	S_StartSound (NULL, sfx_pistol);
-	::g->laststage = stage;
+        S_StartSound(NULL, sfx_pistol);
+        ::g->laststage = stage;
     }
-	
-    sprintf (name,"END%i",stage);
-    V_DrawPatch ((ORIGINAL_WIDTH-13*8)/2, (ORIGINAL_HEIGHT-8*8)/2,0, (patch_t*)W_CacheLumpName (name,PU_CACHE_SHARED));
+
+    snprintf(name, sizeof(name), "END%i", stage); // Используйте snprintf
+    V_DrawPatch((ORIGINAL_WIDTH - 13 * 8) / 2, (ORIGINAL_HEIGHT - 8 * 8) / 2, 0, (patch_t*)W_CacheLumpName(name, PU_CACHE_SHARED));
 }
 
 

@@ -316,21 +316,34 @@ char ForeignTranslation(unsigned char ch)
 
 void HU_Init(void)
 {
+    int i;
+    int j;
+    char buffer[17]; // Увеличен размер массива до 17
 
-	int		i;
-	int		j;
-	char	buffer[9];
+    shiftxform = english_shiftxform;
 
-	shiftxform = english_shiftxform;
-
-	// load the heads-up font
-	j = HU_FONTSTART;
-	for (i=0;i<HU_FONTSIZE;i++)
-	{
-		sprintf(buffer, "STCFN%.3d", j++);
-		::g->hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC_SHARED);
-	}
-
+    // load the heads-up font
+    j = HU_FONTSTART;
+    for (i = 0; i < HU_FONTSIZE; i++)
+    {
+        if (j < 10000) // Проверка, чтобы избежать переполнения
+        {
+            snprintf(buffer, sizeof(buffer), "STCFN%04d", j++); // Используйте %04d для дополнения нулями
+            if (g != NULL) // Проверка на NULL
+            {
+                g->hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC_SHARED);
+            }
+            else
+            {
+                // Обработка ошибки: g не инициализирован
+            }
+        }
+        else
+        {
+            // Обработка ошибки: j превышает допустимое значение
+            break; // Выход из цикла, если j слишком велик
+        }
+    }
 }
 
 void HU_Stop(void)

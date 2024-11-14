@@ -5,7 +5,7 @@
 
 
 # Setup build type: Release | Debug
-BUILD_TYPE=Release
+BUILD_TYPE=ReleaseWithDebInfo
 TARGET_PATH="`pwd`/Q3E/src/main/jni/doom3bfg/neo";
 
 WORK_DIR=build
