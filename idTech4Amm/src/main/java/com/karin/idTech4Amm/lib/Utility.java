@@ -41,9 +41,32 @@ public final class Utility
         return -1;
     }
 
+    public static int ArrayIndexOf(String[] arr, String target, boolean cs)
+    {
+        for(int i = 0; i < arr.length; i++)
+        {
+            if(cs)
+            {
+                if(target.equals(arr[i]))
+                    return i;
+            }
+            else
+            {
+                if(target.equalsIgnoreCase(arr[i]))
+                    return i;
+            }
+        }
+        return -1;
+    }
+
     public static boolean ArrayContains(Object[] arr, Object target)
     {
         return ArrayIndexOf(arr, target) >= 0;
+    }
+
+    public static boolean ArrayContains(String[] arr, String target, boolean cs)
+    {
+        return ArrayIndexOf(arr, target, cs) >= 0;
     }
 
     public static int Step(int a, int step)

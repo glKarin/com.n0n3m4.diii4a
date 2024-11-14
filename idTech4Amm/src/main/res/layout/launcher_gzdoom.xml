@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <com.karin.idTech4Amm.widget.Divider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        myapp:label="@string/doom"
+        myapp:lineColor="@color/launcher_divider_color" />
+
+    <CheckBox
+        android:id="@+id/gzdoom_load_lights_pk3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/load_lights_pk3" />
+
+    <CheckBox
+        android:id="@+id/gzdoom_load_game_support_pk3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/load_game_support_pk3" />
+
+    <CheckBox
+        android:id="@+id/gzdoom_load_brightmaps_pk3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/load_brightmaps_pk3" />
+
+</LinearLayout>

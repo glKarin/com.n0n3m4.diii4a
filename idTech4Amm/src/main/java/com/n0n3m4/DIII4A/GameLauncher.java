@@ -418,6 +418,27 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isETW)
 					setProp("harm_r_stencilShadowPersonal", isChecked);
 			}
+			else if (id == R.id.gzdoom_load_lights_pk3)
+			{
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, isChecked)
+						.commit();
+				SetupGZDOOMFiles("file", "lights.pk3", isChecked);
+			}
+			else if (id == R.id.gzdoom_load_game_support_pk3)
+			{
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, isChecked)
+						.commit();
+				SetupGZDOOMFiles("file", "game_support.pk3", isChecked);
+			}
+			else if (id == R.id.gzdoom_load_brightmaps_pk3)
+			{
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, isChecked)
+						.commit();
+				SetupGZDOOMFiles("file", "brightmaps.pk3", isChecked);
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener()
@@ -1069,6 +1090,10 @@ public class GameLauncher extends Activity
 		{
 			Updatehacktings_ETW();
 		}
+		else if(Q3EUtils.q3ei.isDOOM)
+		{
+			Updatehacktings_GZDOOM();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
@@ -1176,6 +1201,12 @@ public class GameLauncher extends Activity
 
 		V.etw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
 		if (!IsProp("harm_r_stencilShadowPersonal")) setProp("harm_r_stencilShadowPersonal", true);
+	}
+
+	private void Updatehacktings_GZDOOM()
+	{
+		/*List<String> file = GetParamList("file");
+		V.gzdoom_load_lights_pk3.setChecked(null != file && file.contains("lights.pk3"));*/
 	}
 
     private void ThrowException()
@@ -1484,6 +1515,9 @@ public class GameLauncher extends Activity
 		// ETW
 		SetupUI_ETW();
 
+		// GZDOOM
+		SetupUI_GZDOOM();
+
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
 		V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 3.0f));
@@ -1679,6 +1713,32 @@ public class GameLauncher extends Activity
 
 		V.etw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
 		V.etw_stencilShadowPersonal.setOnCheckedChangeListener(m_checkboxChangeListener);
+	}
+
+	private void SetupUI_GZDOOM()
+	{
+		SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		boolean load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, true);
+		V.gzdoom_load_lights_pk3.setChecked(load);
+		if (load && (Q3EUtils.q3ei.isDOOM))
+			AddParam_temp("file", "lights.pk3");
+		V.gzdoom_load_lights_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, true);
+		V.gzdoom_load_game_support_pk3.setChecked(load);
+		if (load && (Q3EUtils.q3ei.isDOOM))
+			AddParam_temp("file", "game_support.pk3");
+		V.gzdoom_load_game_support_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, true);
+		V.gzdoom_load_brightmaps_pk3.setChecked(load);
+		if (load && (Q3EUtils.q3ei.isDOOM))
+			AddParam_temp("file", "brightmaps.pk3");
+		V.gzdoom_load_brightmaps_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		/*List<String> file = GetParamList("file");
+		V.gzdoom_load_lights_pk3.setChecked(null != file && file.contains("lights.pk3"));*/
 	}
 
 	private void AfterCreated()
@@ -2180,6 +2240,9 @@ public class GameLauncher extends Activity
 		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, GetCheckboxIndex(V.rg_r_autoAspectRatio));
 		mEdtr.putBoolean(PreferenceKey.COLLAPSE_MODS, V.collapse_mods.isChecked());
 
+		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, V.gzdoom_load_lights_pk3.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, V.gzdoom_load_game_support_pk3.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, V.gzdoom_load_brightmaps_pk3.isChecked());
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
     }
@@ -2941,6 +3004,7 @@ public class GameLauncher extends Activity
 		V.doom3bfg_section.setVisibility(Q3EUtils.q3ei.isD3BFG ? View.VISIBLE : View.GONE);
 		V.realrtcw_section.setVisibility(Q3EUtils.q3ei.isRealRTCW ? View.VISIBLE : View.GONE);
 		V.etw_section.setVisibility(Q3EUtils.q3ei.isETW ? View.VISIBLE : View.GONE);
+		V.gzdoom_section.setVisibility(Q3EUtils.q3ei.isDOOM ? View.VISIBLE : View.GONE);
 
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
@@ -3000,7 +3064,7 @@ public class GameLauncher extends Activity
 		HandleGameProp(prop);
 		SelectCheckbox(GetGameModRadioGroup(), prop.index);
 
-		Q3EUtils.q3ei.start_temporary_extra_command = GetTempBaseCommand();
+		Q3EUtils.q3ei.start_temporary_extra_command = Q3EUtils.q3ei.MakeTempBaseCommand(this);
 		UpdateTempCommand();
     }
 
@@ -3055,20 +3119,44 @@ public class GameLauncher extends Activity
         // return KidTech4Command.GetParam(GetCmdText(), name);
     }
 
+	private List<String> GetParamList(String name)
+	{
+		String parm = GetParam(name);
+		if(null == parm)
+			return null;
+		else if(parm.trim().isEmpty())
+			return new ArrayList<>();
+		else
+			return KidTechCommand.SplitValue(parm, true);
+	}
+
+	private void SetParamList(String name, List<String> parms)
+	{
+		SetParam(name, KidTechCommand.JoinValue(parms, true));
+	}
+
 	private String GetTempCmdText()
 	{
 		return V.edt_cmdline_temp.getText().toString();
 	}
 
-    private void RemoveParam_temp(String name)
+    private void RemoveParam_temp(String name, String...val)
     {
 		String orig = GetTempCmdText();
-        String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveParam(name).toString();
+        String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveParam(name, val).toString();
 		// String str = KidTech4Command.RemoveParam(GetTempCmdText(), name, res);
         if (!orig.equals(str))
             Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
     }
+
+	private void AddParam_temp(String name, Object val)
+	{
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).AddParam(name, val).toString();
+		// String str = KidTech4Command.SetParam(GetTempCmdText(), name, val);
+		Q3EUtils.q3ei.start_temporary_extra_command = str;
+		UpdateTempCommand();
+	}
 
     private void SetParam_temp(String name, Object val)
     {
@@ -3195,7 +3283,7 @@ public class GameLauncher extends Activity
 		Bundle bundle = new Bundle();
 		bundle.putString("game", GetGameModFromCommand());
 		bundle.putString("command", Q3EUtils.q3ei.start_temporary_extra_command);
-		bundle.putString("baseCommand", GetTempBaseCommand());
+		bundle.putString("baseCommand", Q3EUtils.q3ei.MakeTempBaseCommand(this));
 		// bundle.putString("persistentCommand", GetCmdText());
 		CVarEditorFunc cVarEditorFunc = new CVarEditorFunc(this, new Runnable() {
 			@Override
@@ -3208,21 +3296,10 @@ public class GameLauncher extends Activity
 		cVarEditorFunc.Start(bundle);
 	}
 
-	private String GetTempBaseCommand()
-	{
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GameLauncher.this);
-		String tempCmd = "";
-		boolean skipIntro = preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
-		if (skipIntro && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
-			tempCmd += " +disconnect";
-		boolean quickSave = preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
-		if (quickSave && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isRealRTCW))
-			tempCmd += " +loadGame QuickSave";
-		return tempCmd.trim();
-	}
-
 	private void UpdateTempCommand()
 	{
+		Q3EUtils.q3ei.start_temporary_extra_command = Q3EUtils.q3ei.start_temporary_extra_command.trim(); //k: trim it 20241114
+
 		if(Q3EUtils.q3ei.start_temporary_extra_command.equals(GetTempCmdText()))
 			return;
 
@@ -3239,8 +3316,7 @@ public class GameLauncher extends Activity
 			m_chooseGameModFunc = new ChooseGameModFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_GAME_MOD);
 		}
 
-		m_chooseGameModFunc.SetCallback(new Runnable()
-		{
+		m_chooseGameModFunc.SetCallback(new Runnable() {
 			@Override
 			public void run()
 			{
@@ -3271,16 +3347,18 @@ public class GameLauncher extends Activity
 								file.add(s);
 						}
 
+						// if(V.gzdoom_load_lights_pk3.isChecked() && !file.contains("lights.pk3")) file.add("light3.pk3");
+
 						RemoveParam("file");
 						RemoveParam("deh");
 						RemoveParam("bex");
 
 						if(!file.isEmpty())
-							SetParam("file", KidTechCommand.JoinValue(file, true));
+							SetParamList("file", file);
 						if(!deh.isEmpty())
-							SetParam("deh", KidTechCommand.JoinValue(deh, true));
+							SetParamList("deh", deh);
 						if(!bex.isEmpty())
-							SetParam("bex", KidTechCommand.JoinValue(bex, true));
+							SetParamList("bex", bex);
 					}
 				}
 				else
@@ -3447,6 +3525,45 @@ public class GameLauncher extends Activity
 			RemoveParam(arg);
 		else
 			RemoveProp(arg);
+	}
+
+	private void SetupGZDOOMFiles(String name, String file, boolean checked)
+	{
+		PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+				.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, checked)
+				.commit();
+		if (checked)
+			AddParam_temp(name, file);
+		else
+			RemoveParam_temp(name, file);
+/*
+// from parsing command
+		boolean changed = false;
+		List<String> files = GetParamList(name);
+		if(checked)
+		{
+			if(null == files)
+			{
+				files = new ArrayList<>();
+				files.add(file);
+				changed = true;
+			}
+			else if(!files.contains(file))
+			{
+				files.add(0, file);
+				changed = true;
+			}
+		}
+		else
+		{
+			if(null != files && files.contains(file))
+			{
+				files.remove(file);
+				changed = true;
+			}
+		}
+		if(changed)
+			SetParamList(name, files);*/
 	}
 
 	private void CollapseMods(boolean on)
@@ -3616,6 +3733,10 @@ public class GameLauncher extends Activity
 		public CheckBox etw_omnibot_enable;
 		public RadioGroup etw_shadows;
 		public CheckBox etw_stencilShadowPersonal;
+		public LinearLayout gzdoom_section;
+		public CheckBox gzdoom_load_lights_pk3;
+		public CheckBox gzdoom_load_game_support_pk3;
+		public CheckBox gzdoom_load_brightmaps_pk3;
 
         public void Setup()
         {
@@ -3735,6 +3856,10 @@ public class GameLauncher extends Activity
 			etw_omnibot_enable = findViewById(R.id.etw_omnibot_enable);
 			etw_shadows = findViewById(R.id.etw_shadows);
 			etw_stencilShadowPersonal = findViewById(R.id.etw_stencilShadowPersonal);
+			gzdoom_section = findViewById(R.id.gzdoom_section);
+			gzdoom_load_lights_pk3 = findViewById(R.id.gzdoom_load_lights_pk3);
+			gzdoom_load_game_support_pk3 = findViewById(R.id.gzdoom_load_game_support_pk3);
+			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);
         }
     }
 }

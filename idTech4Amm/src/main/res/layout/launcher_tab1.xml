@@ -895,6 +895,11 @@
             layout="@layout/launcher_etw"
             android:visibility="gone"></include>
 
+        <include
+            android:id="@+id/gzdoom_section"
+            layout="@layout/launcher_gzdoom"
+            android:visibility="gone"></include>
+
         <LinearLayout
             android:id="@+id/general_section"
             android:layout_width="match_parent"

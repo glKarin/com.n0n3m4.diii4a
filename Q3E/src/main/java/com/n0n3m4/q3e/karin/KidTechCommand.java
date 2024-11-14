@@ -71,14 +71,19 @@ public class KidTechCommand
         return new KidTechCommand(PLUS, str).SetBoolProp(name, val).toString();
     }
 
-    public static String RemoveParam(String PLUS, String str, String name)
+    public static String RemoveParam(String PLUS, String str, String name, String...val)
     {
-        return new KidTechCommand(PLUS, str).RemoveParam(name).toString();
+        return new KidTechCommand(PLUS, str).RemoveParam(name, val).toString();
     }
 
     public static String SetParam(String PLUS, String str, String name, Object val)
     {
         return new KidTechCommand(PLUS, str).SetParam(name, val).toString();
+    }
+
+    public static String AddParam(String PLUS, String str, String name, Object val)
+    {
+        return new KidTechCommand(PLUS, str).AddParam(name, val).toString();
     }
 
     public static String SetCommand(String PLUS, String str, String name, boolean...prepend)
@@ -96,9 +101,9 @@ public class KidTechCommand
         return new KidTechCommand(PLUS, str).Param(name, def);
     }
 
-    public static boolean HasParam(String PLUS, String str, String name)
+    public static boolean HasParam(String PLUS, String str, String name, String...val)
     {
-        return new KidTechCommand(PLUS, str).HasParam(name);
+        return new KidTechCommand(PLUS, str).HasParam(name, val);
     }
 
     public KidTechCommand SetProp(String name, Object val)
@@ -278,7 +283,7 @@ public class KidTechCommand
         return false;
     }
 
-    public boolean HasParam(String name)
+    public boolean HasParam(String name, String...val)
     {
         int i = 0;
         while(!IsEnd(i = FindNext(i, CMD_PART_PARAM)))
@@ -286,7 +291,18 @@ public class KidTechCommand
             CmdPart part = cmdParts.get(i);
 
             if(EqualsParam(part.str, name))
-                return true;
+            {
+                if(null != val && val.length > 0 && null != val[0])
+                {
+                    int valueI = i + 2;
+                    boolean value = RequireType(valueI, CMD_PART_VALUE);
+
+                    if(value && val[0].equals(cmdParts.get(valueI).str))
+                        return true;
+                }
+                else
+                    return true;
+            }
             i++;
         }
         return false;
@@ -305,7 +321,7 @@ public class KidTechCommand
         return SetProp(name, btostr(val));
     }
 
-    public KidTechCommand RemoveParam(String name)
+    public KidTechCommand RemoveParam(String name, String...val)
     {
         int i = 0;
         while(!IsEnd(i = FindNext(i, CMD_PART_PARAM)))
@@ -322,6 +338,14 @@ public class KidTechCommand
             boolean blank1 = RequireType(blank1I, CMD_PART_BLANK);
             boolean value = RequireType(valueI, CMD_PART_VALUE);
             boolean blank2 = RequireType(blank2I, CMD_PART_BLANK);
+
+            if(null != val && val.length > 0 && null != val[0])
+            {
+                if(!value)
+                    continue;
+                if(!val[0].equals(cmdParts.get(valueI).str))
+                    continue;
+            }
 
             int end = start;
             if(blank1)
@@ -386,6 +410,21 @@ public class KidTechCommand
             cmdParts.get(valueI).str = ValueToString(val);
             return this;
         }
+
+        if(!EndsWithBlank())
+            AddBlankPart();
+
+        AddPart(CMD_PART_PARAM, GetArgPrefixChar() + name);
+        AddBlankPart();
+        AddPart(CMD_PART_VALUE, val);
+
+        return this;
+    }
+
+    public KidTechCommand AddParam(String name, Object val)
+    {
+        if(HasParam(name, ValueToString(val)))
+            return this;
 
         if(!EndsWithBlank())
             AddBlankPart();

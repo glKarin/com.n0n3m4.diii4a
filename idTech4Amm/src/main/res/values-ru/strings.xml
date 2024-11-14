@@ -414,5 +414,8 @@
     <string name="cache_compression_texture_harm_image_usecompressioncache">Cache compression texture(harm_image_useCompressionCache)</string>
     <string name="commandshortcut">Command shortcut</string>
     <string name="patch_resource">Patch resource</string>
+    <string name="load_lights_pk3">Load lights.pk3</string>
+    <string name="load_game_support_pk3">Load game_support.pk3</string>
+    <string name="load_brightmaps_pk3">Load brightmaps.pk3</string>
 
 </resources>
