@@ -118,7 +118,7 @@ public class UiLoader
                     long l = Integer.toUnsignedLong(discName);
                     for(int i = 0; i < 4; i++)
                     {
-                        long c = (l >> i) & 0xFF;
+                        long c = (l >> (i * 8)) & 0xFF;
                         if(c == 0)
                             break;
                         buf.insert(0, (char) c);
