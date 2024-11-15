@@ -28,6 +28,7 @@
     <string-array name="onscreen_type_labels">
         <item>Кнопка</item>
         <item>Ползунок</item>
+        <item>Disc panel</item>
     </string-array>
 
     <string-array name="lang_labels">
@@ -41,5 +42,10 @@
         <item>Always</item>
         <item>Hidden</item>
         <item>Only pressed</item>
+    </string-array>
+
+    <string-array name="onscreen_disc_style_labels">
+        <item>Swipe</item>
+        <item>Click</item>
     </string-array>
 </resources>

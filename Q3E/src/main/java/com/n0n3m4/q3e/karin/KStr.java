@@ -2,6 +2,7 @@ package com.n0n3m4.q3e.karin;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Objects;
 
 public final class KStr
 {
@@ -160,6 +161,11 @@ public final class KStr
         if(IsBlank(str))
             return str;
         return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
+    public static String Str(Object str)
+    {
+        return Objects.toString(str, "");
     }
 
     private KStr() {}

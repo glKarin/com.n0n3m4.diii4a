@@ -31,6 +31,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.gl.KGLBitmapTexture;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.onscreen.Button;
 import com.n0n3m4.q3e.onscreen.Disc;
@@ -55,13 +56,14 @@ import javax.microedition.khronos.opengles.GL11;
 
 public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
-    private int m_unit = 0;
-    public final int step = Q3EUtils.dip2px(getContext(), 5);
-    private FloatBuffer m_gridBuffer = null;
-    private int m_numGridLineVertex = 0;
-    private Toast m_info;
-    private final Object m_gridLock = new Object();
-    private boolean m_edited = false;
+    private       int         m_unit              = 0;
+    public final  int         step                = Q3EUtils.dip2px(getContext(), 5);
+    private       FloatBuffer m_gridBuffer        = null;
+    private       int         m_numGridLineVertex = 0;
+    private       Toast       m_info;
+    private final Object      m_gridLock          = new Object();
+    private       boolean     m_edited            = false;
+    private final int[] drawerTextureId           = { 0, 0 };
 
     public Q3EUiView(Context context)
     {
@@ -113,26 +115,29 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         gl.glVertexPointer(2, gl.GL_FLOAT, 0, linebuffer);
         gl.glDrawArrays(gl.GL_LINES, 0, 2);
 
-        gl.glColor4f(1, 1, 1, 0.2f);
+        gl.glColor4f(1, 1, 1, 1); // 0.2f
         gl.glVertexPointer(2, gl.GL_FLOAT, 0, notifybuffer);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        gl.glTexCoordPointer(2, gl.GL_FLOAT, 0, notifyTexCoordBuffer);
         gl.glPushMatrix();
         {
             if (yoffset == 0)
             {
+                gl.glBindTexture(gl.GL_TEXTURE_2D, drawerTextureId[0]);
                 gl.glTranslatef(0, height - height / 8, 0);
                 gl.glDrawArrays(gl.GL_TRIANGLE_STRIP, 0, 4);
                 //gl.glTranslatef(0, -(height-height/8), 0);
             }
             else
             {
+                gl.glBindTexture(gl.GL_TEXTURE_2D, drawerTextureId[1]);
                 gl.glTranslatef(0, yoffset, 0);
                 gl.glDrawArrays(gl.GL_TRIANGLE_STRIP, 0, 4);
                 //gl.glTranslatef(0, -yoffset, 0);
             }
         }
         gl.glPopMatrix();
-
-        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
 
         synchronized (paint_elements) {
             for (Paintable p : paint_elements)
@@ -367,6 +372,7 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     public int yoffset = 0;
     FloatBuffer linebuffer = ByteBuffer.allocateDirect(4 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     FloatBuffer notifybuffer = ByteBuffer.allocateDirect(4 * 8).order(ByteOrder.nativeOrder()).asFloatBuffer();
+    private FloatBuffer notifyTexCoordBuffer = ByteBuffer.allocateDirect(4 * 8).order(ByteOrder.nativeOrder()).asFloatBuffer();
 
     @Override
     public void onSurfaceChanged(GL10 gl, int w, int h)
@@ -396,6 +402,10 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
             notifybuffer.put(notifyquad);
             notifybuffer.position(0);
 
+            float[] notifyquadTexCoord = {0, 0, 1, 0, 0, 1, 1, 1};
+            notifyTexCoordBuffer.put(notifyquadTexCoord);
+            notifyTexCoordBuffer.position(0);
+
             uildr = new UiLoader(this, gl, width, height);
 
             mover = new MenuOverlay(0, 0, width / 4, width / 6, this);
@@ -412,6 +422,13 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 
             for (int i = 0; i < fingers.length; i++)
                 fingers[i] = new FingerUi(null, i);
+
+
+            int[] notifyColor = { 102, 255, 255, 255 };
+            int[] notifyOpenTextColor = { 204, 0, 255, 0 };
+            int[] notifyCloseTextColor = { 204, 255, 0, 0 };
+            drawerTextureId[0] = KGLBitmapTexture.GenRectTexture(gl, width, height / 8, notifyColor, "↑↑↑ " + Q3ELang.tr(getContext(), R.string.open) + " ↑↑↑", height / 16, notifyOpenTextColor);
+            drawerTextureId[1] = KGLBitmapTexture.GenRectTexture(gl, width, height / 8, notifyColor, "↓↓↓ " + Q3ELang.tr(getContext(), R.string.close) + " ↓↓↓", height / 16, notifyCloseTextColor);
 
             if(m_unit <= 0)
                 m_unit = GetPerfectGridSize();

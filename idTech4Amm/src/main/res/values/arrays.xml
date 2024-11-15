@@ -53,12 +53,24 @@
     <string-array name="onscreen_type_labels">
         <item>Button</item>
         <item>Slider</item>
+        <item>Disc panel</item>
     </string-array>
 
     <integer-array name="onscreen_type_values">
         <item>0</item>
         <item>1</item>
+        <item>3</item>
 	</integer-array>
+
+    <string-array name="onscreen_disc_style_labels">
+        <item>Swipe</item>
+        <item>Click</item>
+    </string-array>
+
+    <integer-array name="onscreen_disc_style_values">
+        <item>0</item>
+        <item>1</item>
+    </integer-array>
 
     <string-array name="lang_labels">
         <item>System</item>

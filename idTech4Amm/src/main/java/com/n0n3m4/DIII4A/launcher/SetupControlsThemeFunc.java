@@ -195,16 +195,24 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
                 }
             }
 
-            // weapon panel
-            str = Q3EUtils.q3ei.texture_table[Q3EGlobals.UI_WEAPON_PANEL];
-            ControlsTheme theme = new ControlsTheme();
-            theme.name = Q3ELang.tr(getContext(), R.string.weapon_panel);
-            if(null != str && !str.isEmpty())
+            // disc panel
+
+            for(int i = 0; i < Q3EUtils.q3ei.type_table.length; i++)
             {
-                String[] split = str.split(";");
-                theme.path = split[0];
+                if(Q3EUtils.q3ei.type_table[i] != Q3EGlobals.TYPE_DISC)
+                    continue;
+
+                str = Q3EUtils.q3ei.texture_table[i];
+                ControlsTheme theme = new ControlsTheme();
+                theme.name = Q3EGlobals.CONTROLS_NAMES[i]; // Q3ELang.tr(getContext(), R.string.weapon_panel);
+                if(null != str && !str.isEmpty())
+                {
+                    String[] split = str.split(";");
+                    theme.path = split[0];
+                }
+                m_list.add(theme);
             }
-            m_list.add(theme);
+
             SetData(m_list);
         }
 

@@ -420,5 +420,9 @@
     <string name="load_lights_pk3">Load lights.pk3</string>
     <string name="load_game_support_pk3">Load game_support.pk3</string>
     <string name="load_brightmaps_pk3">Load brightmaps.pk3</string>
+    <string name="disc_panel">Disc panel</string>
+    <string name="disc_panel_type">Disc panel type</string>
+    <string name="keys">Keys</string>
+    <string name="not_allowed">Not allowed</string>
 
 </resources>

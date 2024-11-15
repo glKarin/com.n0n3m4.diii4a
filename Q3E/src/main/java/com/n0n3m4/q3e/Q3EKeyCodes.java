@@ -1513,6 +1513,17 @@ public class Q3EKeyCodes
         public static int K_7;
         public static int K_8;
         public static int K_9;
+
+        public static int K_KP_1;
+        public static int K_KP_2;
+        public static int K_KP_3;
+        public static int K_KP_4;
+        public static int K_KP_5;
+        public static int K_KP_6;
+        public static int K_KP_7;
+        public static int K_KP_8;
+        public static int K_KP_9;
+        public static int K_KP_0;
     }
 
     ;
@@ -1813,7 +1824,7 @@ public class Q3EKeyCodes
         public static final int K_MINUS = 45;
         public static final int K_PERIOD = 46;
         public static final int K_SLASH = 47;
-        public static final int K_GRAVE = 96;
+        public static final int K_GRAVE = 96; // 192
         public static final int K_LBRACKET = 91;
         public static final int K_BACKSLASH = 92;
         public static final int K_RBRACKET = 93;
@@ -1823,7 +1834,29 @@ public class Q3EKeyCodes
         public static final int J_RIGHT = -'d';
         public static final int J_UP = -K_UPARROW;
         public static final int J_DOWN = -K_DOWNARROW;
+
+        public static final int K_KP_1 = 1;
+        public static final int K_KP_2 = 2;
+        public static final int K_KP_3 = 3;
+        public static final int K_KP_4 = 4;
+        public static final int K_KP_5 = 5;
+        public static final int K_KP_6 = 6;
+        public static final int K_KP_7 = 7;
+        public static final int K_KP_8 = 8;
+        public static final int K_KP_9 = 9;
+        public static final int K_KP_0 = 10;
     }
 
-    public static final String K_WEAPONS_STR = "1,2,3,4,5,6,7,8,9,q,0";
+    public static final int ONSCRREN_DISC_KEYS_WEAPON = 1;
+    public static final int ONSCRREN_DISC_KEYS_NUM    = 2;
+
+    // disc button keys
+    public static final String[] ONSCRREN_DISC_KEYS_STRS = new String[] {
+            "1,2,3,4,5,6,7,8,9,q,0",
+            "1,2,3,4,5,6,7,8,9,0",
+    };
+    public static final int[][] ONSCRREN_DISC_KEYS_KEYCODES = new int[][] {
+            null,
+            {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+    };
 }

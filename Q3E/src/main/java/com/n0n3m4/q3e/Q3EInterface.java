@@ -41,8 +41,8 @@ public class Q3EInterface
 		InitDefaultArgTable();
 	}
 
-	private static int[] _defaultArgs;
-	private static int[] _defaultType;
+	public static int[] _defaultArgs;
+	public static int[] _defaultType;
 
 	public int UI_SIZE;
 	public String[] defaults_table;
@@ -604,6 +604,12 @@ public class Q3EInterface
 		texture_table[Q3EGlobals.UI_7] = "btn_7.png";
 		texture_table[Q3EGlobals.UI_8] = "btn_8.png";
 		texture_table[Q3EGlobals.UI_9] = "btn_9.png";
+		texture_table[Q3EGlobals.UI_Y] = "btn_y.png";
+		texture_table[Q3EGlobals.UI_N] = "btn_n.png";
+		texture_table[Q3EGlobals.UI_PLUS] = "btn_plus.png";
+		texture_table[Q3EGlobals.UI_MINUS] = "btn_minus.png";
+
+		texture_table[Q3EGlobals.UI_NUM_PANEL] = "disc_num.png";
     }
 
     public void InitTypeTable()
@@ -979,11 +985,16 @@ public class Q3EInterface
 		type_table[Q3EGlobals.UI_INTERACT] = Q3EGlobals.TYPE_BUTTON;
 
 		type_table[Q3EGlobals.UI_WEAPON_PANEL] = Q3EGlobals.TYPE_DISC;
+		type_table[Q3EGlobals.UI_NUM_PANEL] = Q3EGlobals.TYPE_DISC;
 
 		type_table[Q3EGlobals.UI_SCORE] = Q3EGlobals.TYPE_BUTTON;
 
 		for(int i = Q3EGlobals.UI_0; i <= Q3EGlobals.UI_9; i++)
 			type_table[i] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_Y] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_N] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_PLUS] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_MINUS] = Q3EGlobals.TYPE_BUTTON;
 
 		_defaultType = Arrays.copyOf(type_table, type_table.length);
 	}
@@ -1107,6 +1118,36 @@ public class Q3EInterface
 		arg_table[Q3EGlobals.UI_9 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_9 * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_9 * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_WEAPON_PANEL * 4] = Q3EKeyCodes.ONSCRREN_DISC_KEYS_WEAPON; // all keys map index
+		arg_table[Q3EGlobals.UI_WEAPON_PANEL * 4 + 1] = Q3EGlobals.ONSCRREN_DISC_SWIPE;
+		arg_table[Q3EGlobals.UI_WEAPON_PANEL * 4 + 2] = 0; // 4 chars name
+		arg_table[Q3EGlobals.UI_WEAPON_PANEL * 4 + 3] = 0; // keep
+
+		arg_table[Q3EGlobals.UI_NUM_PANEL * 4] = Q3EKeyCodes.ONSCRREN_DISC_KEYS_NUM;
+		arg_table[Q3EGlobals.UI_NUM_PANEL * 4 + 1] = Q3EGlobals.ONSCRREN_DISC_CLICK;
+		arg_table[Q3EGlobals.UI_NUM_PANEL * 4 + 2] = ('N' << 16) | ('u' << 8) | 'm';
+		arg_table[Q3EGlobals.UI_NUM_PANEL * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_Y * 4] = Q3EKeyCodes.KeyCodesGeneric.K_Y;
+		arg_table[Q3EGlobals.UI_Y * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_Y * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_Y * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_N * 4] = Q3EKeyCodes.KeyCodesGeneric.K_N;
+		arg_table[Q3EGlobals.UI_N * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_N * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_N * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_PLUS * 4] = Q3EKeyCodes.KeyCodesGeneric.K_EQUALS;
+		arg_table[Q3EGlobals.UI_PLUS * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_PLUS * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_PLUS * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_MINUS * 4] = Q3EKeyCodes.KeyCodesGeneric.K_MINUS;
+		arg_table[Q3EGlobals.UI_MINUS * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_MINUS * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_MINUS * 4 + 3] = 0;
 
 		_defaultArgs = Arrays.copyOf(arg_table, arg_table.length);
 	}

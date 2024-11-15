@@ -38,7 +38,12 @@ public final class Q3EGlobals
     public static final int UI_7            = 22;
     public static final int UI_8            = 23;
     public static final int UI_9            = 24;
-    public static final int UI_SIZE         = UI_9 + 1;
+    public static final int UI_NUM_PANEL    = 25;
+    public static final int UI_Y            = 26;
+    public static final int UI_N            = 27;
+    public static final int UI_PLUS         = 28;
+    public static final int UI_MINUS        = 29;
+    public static final int UI_SIZE         = UI_MINUS + 1;
     /*public static final int UI_A            = 25;
     public static final int UI_B            = 26;
     public static final int UI_C            = 27;
@@ -102,6 +107,10 @@ public final class Q3EGlobals
     public static final int ONSCRREN_JOYSTICK_VISIBLE_ALWAYS       = 0;
     public static final int ONSCRREN_JOYSTICK_VISIBLE_HIDDEN       = 1;
     public static final int ONSCRREN_JOYSTICK_VISIBLE_ONLY_PRESSED = 2;
+
+    // disc button trigger
+    public static final int ONSCRREN_DISC_SWIPE = 0;
+    public static final int ONSCRREN_DISC_CLICK = 1;
 
     // game state
     public static final int STATE_NONE    = 0;
@@ -313,6 +322,11 @@ public final class Q3EGlobals
             "Extra 7",
             "Extra 8",
             "Extra 9",
+            "Number",
+            "Y",
+            "N",
+            "+",
+            "-",
     };
 
     // OpenGL Surface color format
@@ -328,7 +342,7 @@ public final class Q3EGlobals
     public static final int ENUM_BACK_EXIT   = 2;
     public static final int ENUM_BACK_ALL    = 0xFF;
 
-    public static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL = 1000;
+    public static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_INTERVAL = 500; // 1000
     public static final int CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT    = 3;
 
     public static final String GAME_EXECUABLE = "game.arm";

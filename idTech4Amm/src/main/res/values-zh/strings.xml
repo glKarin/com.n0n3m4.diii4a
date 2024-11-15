@@ -416,4 +416,8 @@
     <string name="load_lights_pk3">加载lights.pk3</string>
     <string name="load_game_support_pk3">加载game_support.pk3</string>
     <string name="load_brightmaps_pk3">加载brightmaps.pk3</string>
+    <string name="disc_panel">轮盘</string>
+    <string name="disc_panel_type">轮盘类型</string>
+    <string name="keys">按键</string>
+    <string name="not_allowed">不允许</string>
 </resources>
