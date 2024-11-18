@@ -147,6 +147,7 @@ public final class KCVarSystem
 
         KCVar.Group DOOM3BFG_CVARS = new KCVar.Group("DOOM 3 BFG", true)
                 .AddCVar(
+                        KCVar.CreateCVar("harm_r_useMediumPrecision", "bool", "0", "Use medium precision float instead of high precision in GLSL shader", KCVar.FLAG_INIT),
                         KCVar.CreateCVar("harm_image_useCompression", "integer", "0", "Use ETC1/2 compression or RGBA4444 texture for low memory(e.g. 32bits device), it will using lower memory but loading slower", KCVar.FLAG_INIT,
                                 "0", "RGBA8",
                                 "1", "ETC1 compression(no alpha)",
@@ -154,6 +155,12 @@ public final class KCVarSystem
                                 "3", "RGBA4444"
                         ),
                         KCVar.CreateCVar("harm_image_useCompressionCache", "bool", "0", "Cache ETC1/2 compression or RGBA4444 texture to filesystem", KCVar.FLAG_INIT)
+                );
+
+        KCVar.Group TDM_CVARS = new KCVar.Group("The Dark Mod", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_r_useMediumPrecision", "bool", "0", "Use medium precision float instead of high precision in GLSL shader", KCVar.FLAG_INIT),
+                        KCVar.CreateCVar("harm_r_outputGLSLSource", "bool", "0", "Output all generated GLSL shaders to 'generated_glsl/'", KCVar.FLAG_INIT)
                 );
 
         KCVar.Group REALRTCW_CVARS = new KCVar.Group("RealRTCW", true)
@@ -209,6 +216,7 @@ public final class KCVarSystem
         _cvars.put("DOOM3BFG", DOOM3BFG_CVARS);
         _cvars.put("RealRTCW", REALRTCW_CVARS);
         _cvars.put("ETW", REALRTCW_CVARS);
+        _cvars.put("TDM", TDM_CVARS);
 
         return _cvars;
     }
@@ -231,7 +239,8 @@ public final class KCVarSystem
         else if(Q3EUtils.q3ei.isQ2) ;
         else if(Q3EUtils.q3ei.isQ3) ;
         else if(Q3EUtils.q3ei.isRTCW) ;
-        else if(Q3EUtils.q3ei.isTDM) ;
+        else if(Q3EUtils.q3ei.isTDM)
+            res.add(_cvars.get("TDM"));
         else if(Q3EUtils.q3ei.isD3BFG)
             res.add(_cvars.get("DOOM3BFG"));
         else if(Q3EUtils.q3ei.isDOOM) ;

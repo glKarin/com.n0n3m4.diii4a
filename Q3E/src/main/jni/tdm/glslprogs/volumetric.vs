@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-precision mediump float;
+precision highp float;
 
 #pragma tdm_include "tdm_transform.glsl"
 in vec4 attr_Position;

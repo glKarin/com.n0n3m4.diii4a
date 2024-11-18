@@ -394,6 +394,11 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isD3BFG)
 					setProp("harm_image_useCompressionCache", isChecked);
 			}
+			else if (id == R.id.doom3bfg_useMediumPrecision)
+			{
+				if(Q3EUtils.q3ei.isD3BFG)
+					setProp("harm_r_useMediumPrecision", isChecked);
+			}
 
 			// RealRTCW
 			else if (id == R.id.realrtcw_sv_cheats)
@@ -418,6 +423,8 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isETW)
 					setProp("harm_r_stencilShadowPersonal", isChecked);
 			}
+
+			// GZDOOM
 			else if (id == R.id.gzdoom_load_lights_pk3)
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -438,6 +445,13 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, isChecked)
 						.commit();
 				SetupGZDOOMFiles("file", "brightmaps.pk3", isChecked);
+			}
+
+			// The Dark Mod
+			else if (id == R.id.tdm_useMediumPrecision)
+			{
+				if(Q3EUtils.q3ei.isTDM)
+					setProp("harm_r_useMediumPrecision", isChecked);
 			}
         }
     };
@@ -1094,6 +1108,10 @@ public class GameLauncher extends Activity
 		{
 			Updatehacktings_GZDOOM();
 		}
+		else if(Q3EUtils.q3ei.isTDM)
+		{
+			Updatehacktings_TDM();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
@@ -1161,6 +1179,15 @@ public class GameLauncher extends Activity
 
 		V.doom3bfg_useCompressionCache.setChecked(getProp("harm_image_useCompressionCache", false));
 		if (!IsProp("harm_image_useCompressionCache")) setProp("harm_image_useCompressionCache", false);
+
+		V.doom3bfg_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
+		if (!IsProp("harm_r_useMediumPrecision")) setProp("harm_r_useMediumPrecision", false);
+	}
+
+	private void Updatehacktings_TDM()
+	{
+		V.tdm_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
+		if (!IsProp("harm_r_useMediumPrecision")) setProp("harm_r_useMediumPrecision", false);
 	}
 
 	private void Updatehacktings_RealRTCW()
@@ -1518,6 +1545,9 @@ public class GameLauncher extends Activity
 		// GZDOOM
 		SetupUI_GZDOOM();
 
+		// The Dark Mod
+		SetupUI_TDM();
+
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
 		V.edt_harm_r_specularExponent.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_specularExponent", Q3EPreference.pref_harm_r_specularExponent, 3.0f));
@@ -1674,6 +1704,15 @@ public class GameLauncher extends Activity
 
 		V.doom3bfg_useCompressionCache.setChecked(getProp("harm_image_useCompressionCache", false));
 		V.doom3bfg_useCompressionCache.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		V.doom3bfg_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
+		V.doom3bfg_useMediumPrecision.setOnCheckedChangeListener(m_checkboxChangeListener);
+	}
+
+	private void SetupUI_TDM()
+	{
+		V.tdm_useMediumPrecision.setChecked(getProp("harm_r_useMediumPrecision", false));
+		V.tdm_useMediumPrecision.setOnCheckedChangeListener(m_checkboxChangeListener);
 	}
 
 	private void SetupUI_RealRTCW()
@@ -3005,6 +3044,7 @@ public class GameLauncher extends Activity
 		V.realrtcw_section.setVisibility(Q3EUtils.q3ei.isRealRTCW ? View.VISIBLE : View.GONE);
 		V.etw_section.setVisibility(Q3EUtils.q3ei.isETW ? View.VISIBLE : View.GONE);
 		V.gzdoom_section.setVisibility(Q3EUtils.q3ei.isDOOM ? View.VISIBLE : View.GONE);
+		V.tdm_section.setVisibility(Q3EUtils.q3ei.isTDM ? View.VISIBLE : View.GONE);
 
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
@@ -3725,6 +3765,7 @@ public class GameLauncher extends Activity
 		public LinearLayout doom3bfg_section;
 		public RadioGroup doom3bfg_useCompression;
 		public CheckBox doom3bfg_useCompressionCache;
+		public CheckBox doom3bfg_useMediumPrecision;
 		public LinearLayout realrtcw_section;
 		public CheckBox realrtcw_sv_cheats;
 		public RadioGroup realrtcw_shadows;
@@ -3737,6 +3778,8 @@ public class GameLauncher extends Activity
 		public CheckBox gzdoom_load_lights_pk3;
 		public CheckBox gzdoom_load_game_support_pk3;
 		public CheckBox gzdoom_load_brightmaps_pk3;
+		public LinearLayout tdm_section;
+		public CheckBox tdm_useMediumPrecision;
 
         public void Setup()
         {
@@ -3848,6 +3891,7 @@ public class GameLauncher extends Activity
 			doom3bfg_section = findViewById(R.id.doom3bfg_section);
 			doom3bfg_useCompression = findViewById(R.id.doom3bfg_useCompression);
 			doom3bfg_useCompressionCache = findViewById(R.id.doom3bfg_useCompressionCache);
+			doom3bfg_useMediumPrecision = findViewById(R.id.doom3bfg_useMediumPrecision);
 			realrtcw_section = findViewById(R.id.realrtcw_section);
 			realrtcw_sv_cheats = findViewById(R.id.realrtcw_sv_cheats);
 			realrtcw_shadows = findViewById(R.id.realrtcw_shadows);
@@ -3860,6 +3904,8 @@ public class GameLauncher extends Activity
 			gzdoom_load_lights_pk3 = findViewById(R.id.gzdoom_load_lights_pk3);
 			gzdoom_load_game_support_pk3 = findViewById(R.id.gzdoom_load_game_support_pk3);
 			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);
+			tdm_section = findViewById(R.id.tdm_section);
+			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
         }
     }
 }

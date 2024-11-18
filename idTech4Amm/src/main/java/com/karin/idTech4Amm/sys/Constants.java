@@ -31,6 +31,8 @@ public final class Constants
     {
         return new String[] {
             "Support Omni-Bot on Wolfenstein: Enemy Territory.",
+            "Fix rendering in Mali GPU on DOOM 3-BFG.",
+            "Fix rendering in Mali GPU on The Dark Mod.",
             "Fix stencil shadow with `cg_shadows` = 2 on Wolfenstein: Enemy Territory.",
             "Support choose a mod directory on GZDOOM.",
             "Add some options on Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM"

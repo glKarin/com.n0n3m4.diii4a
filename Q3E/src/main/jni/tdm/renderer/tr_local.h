@@ -1130,6 +1130,11 @@ extern idCVar r_glCoreProfile;
 extern idCVar r_volumetricSamples;
 extern idCVar r_volumetricDither;
 
+#ifdef _GLES //karin: force use medium precision in GLSL shader: Mali GPU must use high precision, Adreno GPU can use medium precision
+extern idCVar harm_r_useMediumPrecision;
+extern idCVar harm_r_outputGLSLSource;
+#endif
+
 /*
 ====================================================================
 

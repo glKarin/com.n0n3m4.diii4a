@@ -12,6 +12,12 @@
         myapp:label="@string/doom_3_bfg"
         myapp:lineColor="@color/launcher_divider_color" />
 
+    <CheckBox
+        android:id="@+id/doom3bfg_useMediumPrecision"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/use_medium_precision_float_in_glsl_shader_harm_r_usemediumprecision" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

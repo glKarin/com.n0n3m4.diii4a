@@ -841,7 +841,11 @@ const char* vertexInsert_GLSL_ES_3_00 =
 {
 	"#version 300 es\n"
 	"#define PC\n"
+#ifdef _GLES //karin: use high precision float in GLSL shader
+	"precision highp float;\n"
+#else
 	"precision mediump float;\n"
+#endif
 
 	//"#extension GL_ARB_gpu_shader5 : enable\n"
 	"\n"
@@ -857,7 +861,11 @@ const char* fragmentInsert_GLSL_ES_3_00 =
 {
 	"#version 300 es\n"
 	"#define PC\n"
+#ifdef _GLES //karin: use high precision float in GLSL shader
+	"precision highp float;\n"
+#else
 	"precision mediump float;\n"
+#endif
 	"precision lowp sampler2D;\n"
 #ifdef _GLES //karin: depth texture using highp precision
 	"precision highp sampler2DShadow;\n"
@@ -1526,7 +1534,9 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 #ifdef _GLES //karin: interaction shader using high precision float
 	idStr nameStr(name);
 	nameStr.StripPath();
-	const bool IsInteractionShader = nameStr.Find("interaction", false) == 0;
+	const bool IsInteractionShader = nameStr.Find("interaction", false) == 0
+	                                    || nameStr.Find("ambient", false) == 0
+	 ;
 #endif
 	// RB: changed to allow multiple versions of GLSL
 	if( stage == SHADER_STAGE_VERTEX )
@@ -1539,9 +1549,9 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 #ifdef _GLES //karin: interaction shader using high precision float
 				idStr p(vertexInsert_GLSL_ES_3_00);
 				p.Insert(filenameHint, p.Find('\n') + 1); //karin: #version must on first line on mali GPU
-				if(IsInteractionShader)
+				if(!IsInteractionShader && harm_r_useMediumPrecision.GetBool())
 				{
-					p.Replace("precision mediump float;", "precision highp float;");
+					p.Replace("precision highp float;", "precision mediump float;");
 				}
 				out.Append(p);
 #else
@@ -1570,9 +1580,9 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 #ifdef _GLES //karin: interaction shader using high precision float
 				idStr p(fragmentInsert_GLSL_ES_3_00);
 				p.Insert(filenameHint, p.Find('\n') + 1); //karin: #version must on first line on mali GPU
-				if(IsInteractionShader)
+				if(!IsInteractionShader && harm_r_useMediumPrecision.GetBool())
 				{
-					p.Replace("precision mediump float;", "precision highp float;");
+					p.Replace("precision highp float;", "precision mediump float;");
 				}
 				out.Append(p);
 #else

@@ -347,8 +347,8 @@ public final class Q3EGlobals
 
     public static final String GAME_EXECUABLE = "game.arm";
 
-    // extra internal game file version
-    public static final String TDM_GLSL_SHADER_VERSION        = "2.12.3";
+    // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
+    public static final String TDM_GLSL_SHADER_VERSION        = "2.12.5"; // 5: change all shaders default precision from mediump to highp
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
     public static final String GZDOOM_VERSION                 = "4.12.2.2";
 

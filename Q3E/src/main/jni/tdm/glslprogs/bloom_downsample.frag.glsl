@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-precision mediump float;
+precision highp float;
 #pragma tdm_define "BLOOM_BRIGHTPASS"
 
 /**
