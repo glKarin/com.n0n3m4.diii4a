@@ -421,4 +421,5 @@
     <string name="keys">按键</string>
     <string name="not_allowed">不允许</string>
     <string name="use_medium_precision_float_in_glsl_shader_harm_r_usemediumprecision">GLSL着色器使用中精度浮点数代替高精度浮点数(harm_r_useMediumPrecision)</string>
+    <string name="phobos">Phobos</string>
 </resources>

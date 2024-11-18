@@ -29,6 +29,7 @@ public enum Game
     DOOM3_LIBRECOOPXP(Q3EGlobals.GAME_DOOM3, "librecoopxp", "librecoopxp", "librecoopxp", "d3xp", true, R.string.librecoop_roe),
     DOOM3_PERFECTED(Q3EGlobals.GAME_DOOM3, "perfected", "perfected", "perfected",  "", true, R.string.perfected_doom_3),
     DOOM3_PERFECTEDROE(Q3EGlobals.GAME_DOOM3, "perfected_roe", "perfected_roe", "perfected_roe",  "d3xp", true, R.string.perfected_doom_3_resurrection_of_evil),
+    DOOM3_PHOBOS(Q3EGlobals.GAME_DOOM3, "tfphobos", "tfphobos", "tfphobos", "d3xp", true, R.string.phobos),
 
     // Quake 4
     QUAKE4_BASE(Q3EGlobals.GAME_QUAKE4, "q4base", "", "q4game", "", false, R.string.quake_iv_q4base),

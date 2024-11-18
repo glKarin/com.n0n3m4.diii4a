@@ -341,7 +341,9 @@ GLuint GLSLProgram::CompileShader( GLint shaderType, const char *sourceFile, con
 	}
 
 #ifdef _GLES //karin: force use medium precision in GLSL shader
-    if(harm_r_useMediumPrecision.GetBool())
+    const std::string nameStr(sourceFile);
+    const bool IsInteractionShader = nameStr.find("interaction") == 0;
+    if(!IsInteractionShader && harm_r_useMediumPrecision.GetBool())
     {
         const std::string highp("precision highp float;");
         const std::string mediump("precision mediump float;");
@@ -350,7 +352,10 @@ GLuint GLSLProgram::CompileShader( GLint shaderType, const char *sourceFile, con
             source.replace(pos, highp.size(), mediump);
             pos += mediump.size();
         }
+        common->Printf("'%s' float precision: medium\n", sourceFile);
     }
+    else
+        common->Printf("'%s' float precision: high\n", sourceFile);
 #endif
 	std::vector<std::string> sourceFiles { sourceFile };
 	ResolveIncludes( source, sourceFiles );

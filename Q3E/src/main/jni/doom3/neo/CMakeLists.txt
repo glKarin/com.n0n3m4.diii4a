@@ -138,7 +138,8 @@ option(FRAGGINGFREE							"Build the fraggingfree game code" 											ON)
 option(LIBRECOOP							"Build the librecoop game code" 											ON)
 option(LIBRECOOPXP							"Build the librecoopxp game code" 											ON)
 option(PERFECTED							"Build the perfected game code" 											ON)
-option(PERFECTEDROE							"Build the perfected_roe game code" 											ON)
+option(PERFECTEDROE							"Build the perfected_roe game code" 										ON)
+option(PHOBOS								"Build the tfphobos game code" 												ON)
 endif()
 
 # Quake4
@@ -1498,6 +1499,9 @@ endif()
 if(PERFECTEDROE)
 	message(STATUS "Build perfected_roe")
 endif()
+if(PHOBOS)
+	message(STATUS "Build tfphobos")
+endif()
 # Quake 4
 if(RAVEN)
 	message(STATUS "Build raven core")
@@ -1997,6 +2001,35 @@ if(PERFECTEDROE)
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
 		install(TARGETS perfected_roe
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(PHOBOS)
+	# tfphobos
+	set(src_tfphobos ${base_game_src})
+	set(tfphobos_game_src
+			Grabber.cpp
+			physics/Force_Grab.cpp
+			)
+	list(APPEND src_tfphobos ${tfphobos_game_src})
+	set_src_dir(src_tfphobos "${DOOM3_MOD_DIR}/tfphobos" ${src_tfphobos})
+	add_globbed_headers(src_tfphobos "${DOOM3_MOD_DIR}/tfphobos")
+
+	add_library(tfphobos SHARED ${src_tfphobos})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_tfphobos})
+	#set_target_properties(tfphobos PROPERTIES PREFIX "")
+	set_target_properties(tfphobos PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_PHOBOS")
+	target_include_directories(tfphobos PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/tfphobos")
+	set_target_properties(tfphobos PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(tfphobos PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(tfphobos idlib)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS tfphobos
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"

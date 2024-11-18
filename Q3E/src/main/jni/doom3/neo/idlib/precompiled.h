@@ -268,6 +268,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
         #include "../framework/Game.h"
     #elif defined(_PERFECTEDROE)
         #include "../framework/Game.h"
+    #elif defined(_PHOBOS)
+        #include "../framework/Game.h"
     #else
         #include "../d3xp/Game.h"
     #endif
@@ -330,6 +332,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
         #include "../mod/doom3/librecoopxp/Game_local.h"
     #elif defined(_PERFECTEDROE)
         #include "../mod/doom3/perfectedroe/Game_local.h"
+    #elif defined(_PHOBOS)
+        #include "../mod/doom3/tfphobos/Game_local.h"
     #else
         #include "../d3xp/Game_local.h"
     #endif

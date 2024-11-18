@@ -1552,7 +1552,10 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 				if(!IsInteractionShader && harm_r_useMediumPrecision.GetBool())
 				{
 					p.Replace("precision highp float;", "precision mediump float;");
+					common->Printf("'%s' float precision: medium\n", nameStr.c_str());
 				}
+				else
+					common->Printf("'%s' float precision: high\n", nameStr.c_str());
 				out.Append(p);
 #else
 				out += filenameHint;
@@ -1583,7 +1586,10 @@ idStr idRenderProgManager::ConvertCG2GLSL( const idStr& in, const char* name, rp
 				if(!IsInteractionShader && harm_r_useMediumPrecision.GetBool())
 				{
 					p.Replace("precision highp float;", "precision mediump float;");
+					common->Printf("'%s' float precision: medium\n", nameStr.c_str());
 				}
+				else
+					common->Printf("'%s' float precision: high\n", nameStr.c_str());
 				out.Append(p);
 #else
 				out += filenameHint;

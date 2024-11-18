@@ -422,5 +422,6 @@
     <string name="keys">Keys</string>
     <string name="not_allowed">Not allowed</string>
     <string name="use_medium_precision_float_in_glsl_shader_harm_r_usemediumprecision">Use medium precision float instead of high precision in GLSL shader(harm_r_useMediumPrecision)</string>
+    <string name="phobos">Phobos</string>
 
 </resources>
