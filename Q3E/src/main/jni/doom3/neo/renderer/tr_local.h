@@ -2178,26 +2178,40 @@ struct idAllocAutoHeap {
 // alloc in heap memory
 #define _alloca16_heap( x )					((void *)((((intptr_t)calloc( (x)+15 ,1 )) + 15) & ~15))
 
-	// Using heap memory. Also reset RLIMIT_STACK by call `setrlimit`.
+// Using heap memory. Also reset RLIMIT_STACK by call `setrlimit`.
 #define _DROID_ALLOC16_DEF(T, alloc_size, varname, x) \
 	idAllocAutoHeap _allocAutoHeap##x; \
 	T *varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
 	if(_allocAutoHeap##x.IsAlloc()) { \
-		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
+		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca16 on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
 	}
 
 #define _DROID_ALLOC16(T, alloc_size, varname, x) \
 	idAllocAutoHeap _allocAutoHeap##x; \
 	varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc16(alloc_size) : _alloca16(alloc_size)); \
 	if(_allocAutoHeap##x.IsAlloc()) { \
+		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca16 on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
+	}
+
+#define _DROID_ALLOC_DEF(T, alloc_size, varname, x) \
+	idAllocAutoHeap _allocAutoHeap##x; \
+	T *varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc(alloc_size) : _alloca(alloc_size)); \
+	if(_allocAutoHeap##x.IsAlloc()) { \
+		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
+	}
+
+#define _DROID_ALLOC(T, alloc_size, varname, x) \
+	idAllocAutoHeap _allocAutoHeap##x; \
+	varname = (T *) (HARM_MAX_STACK_ALLOC_SIZE == 0 || (HARM_MAX_STACK_ALLOC_SIZE > 0 && (alloc_size) >= HARM_MAX_STACK_ALLOC_SIZE) ? _allocAutoHeap##x.Alloc(alloc_size) : _alloca(alloc_size)); \
+	if(_allocAutoHeap##x.IsAlloc()) { \
 		_ALLOC_DEBUG(common->Printf("[Harmattan]: Alloca on heap memory %s %p(%zu bytes)\n", #varname, varname, (size_t)alloc_size)); \
 	}
 
 	// free memory when not call alloca()
-#define _DROID_FREE(varname, x)/* \
+#define _DROID_FREE(varname, x) \
 	{ \
-		common->Printf("[Harmattan]: Free alloca heap memory %p\n", varname); \
-	}*/
+		_ALLOC_DEBUG(common->Printf("[Harmattan]: Free alloca heap memory %p\n", varname)); \
+	}
 
 #endif
 

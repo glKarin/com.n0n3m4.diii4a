@@ -341,8 +341,9 @@ GLuint GLSLProgram::CompileShader( GLint shaderType, const char *sourceFile, con
 	}
 
 #ifdef _GLES //karin: force use medium precision in GLSL shader
-    const std::string nameStr(sourceFile);
-    const bool IsInteractionShader = nameStr.find("interaction") == 0;
+    idStr nameStr(sourceFile);
+    nameStr.StripPath();
+    const bool IsInteractionShader = nameStr.Find("interaction") == 0;
     if(!IsInteractionShader && harm_r_useMediumPrecision.GetBool())
     {
         const std::string highp("precision highp float;");

@@ -2147,7 +2147,7 @@ public class GameLauncher extends Activity
 
 	private void OpenRuntimeErrorLog()
 	{
-		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.GetGameDataDirectoryPath("stderr.txt"));
+		String path = Q3EUtils.q3ei.GetGameDataDirectoryPath("stderr.txt");
 		String text = Q3EUtils.file_get_contents(path);
 
 		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, Q3ELang.tr(this, R.string.last_runtime_log) + ": stderr.txt", text);
@@ -2165,7 +2165,7 @@ public class GameLauncher extends Activity
 
     private void OpenRuntimeLog()
     {
-		String path = KStr.AppendPath(V.edt_path.getText().toString(), Q3EUtils.q3ei.GetGameDataDirectoryPath("stdout.txt"));
+		String path = Q3EUtils.q3ei.GetGameDataDirectoryPath("stdout.txt");
 		String text = Q3EUtils.file_get_contents(path);
 
 		AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(this, Q3ELang.tr(this, R.string.last_runtime_log), text);
