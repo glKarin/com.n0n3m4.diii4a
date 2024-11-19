@@ -2342,4 +2342,6 @@ extern idCVar harm_r_lightingModel;
 #define HARM_INTERACTION_SHADER_PBR 3
 #define HARM_INTERACTION_SHADER_AMBIENT 4
 
+extern idCVar harm_r_useHighPrecision;
+
 #endif /* !__TR_LOCAL_H__ */

@@ -387,6 +387,14 @@ public class GameLauncher extends Activity
 						.putBoolean(PreferenceKey.COLLAPSE_MODS, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_useHighPrecision)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("harm_r_useHighPrecision", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_r_useHighPrecision, isChecked)
+						.commit();
+			}
 
 			// Doom 3 BFG
 			else if (id == R.id.doom3bfg_useCompressionCache)
@@ -432,13 +440,13 @@ public class GameLauncher extends Activity
 						.commit();
 				SetupGZDOOMFiles("file", "lights.pk3", isChecked);
 			}
-			else if (id == R.id.gzdoom_load_game_support_pk3)
+/*			else if (id == R.id.gzdoom_load_game_support_pk3)
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, isChecked)
 						.commit();
 				SetupGZDOOMFiles("file", "game_support.pk3", isChecked);
-			}
+			}*/
 			else if (id == R.id.gzdoom_load_brightmaps_pk3)
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -1064,7 +1072,7 @@ public class GameLauncher extends Activity
 			if (!IsProp("harm_r_stencilShadowAlpha")) SetProp("harm_r_stencilShadowAlpha", "1.0");
 
 			V.cb_stencilShadowSoft.setChecked(getProp("harm_r_stencilShadowSoft", false));
-			if (!IsProp("harm_r_stencilShadowSoft")) setProp("harm_r_stencilShadowTranslucent", false);
+			if (!IsProp("harm_r_stencilShadowSoft")) setProp("harm_r_stencilShadowSoft", false);
 			V.cb_stencilShadowCombine.setChecked(getProp("harm_r_stencilShadowCombine", false));
 			if (!IsProp("harm_r_stencilShadowCombine")) setProp("harm_r_stencilShadowCombine", false);
 			V.cb_perforatedShadow.setChecked(getProp("r_forceShadowMapsOnAlphaTestedSurfaces", false));
@@ -1087,6 +1095,9 @@ public class GameLauncher extends Activity
 			index = Q3EUtils.parseInt_s(str, 1);
 			SelectCheckbox(V.rg_r_autoAspectRatio, index);
 			if (!IsProp("harm_r_autoAspectRatio")) SetProp("harm_r_autoAspectRatio", 1);
+
+			V.cb_useHighPrecision.setChecked(getProp("harm_r_useHighPrecision", false));
+			if (!IsProp("harm_r_useHighPrecision")) setProp("harm_r_useHighPrecision", false);
 		}
 		else if(Q3EUtils.q3ei.isQ2)
 		{
@@ -1661,6 +1672,8 @@ public class GameLauncher extends Activity
 		V.cb_stencilShadowCombine.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_perforatedShadow.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_shadowMapPerforatedShadow, false));
 		V.cb_perforatedShadow.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_useHighPrecision.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_useHighPrecision, false));
+		V.cb_useHighPrecision.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		boolean collapseMods = mPrefs.getBoolean(PreferenceKey.COLLAPSE_MODS, false);
 		V.collapse_mods.setChecked(collapseMods);
@@ -1764,11 +1777,11 @@ public class GameLauncher extends Activity
 			AddParam_temp("file", "lights.pk3");
 		V.gzdoom_load_lights_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
 
-		load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, true);
+/*		load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, true);
 		V.gzdoom_load_game_support_pk3.setChecked(load);
 		if (load && (Q3EUtils.q3ei.isDOOM))
 			AddParam_temp("file", "game_support.pk3");
-		V.gzdoom_load_game_support_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.gzdoom_load_game_support_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);*/
 
 		load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, true);
 		V.gzdoom_load_brightmaps_pk3.setChecked(load);
@@ -2276,11 +2289,12 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowSoft, V.cb_stencilShadowSoft.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowCombine, V.cb_stencilShadowCombine.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_shadowMapPerforatedShadow, V.cb_perforatedShadow.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_r_useHighPrecision, V.cb_useHighPrecision.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, GetCheckboxIndex(V.rg_r_autoAspectRatio));
 		mEdtr.putBoolean(PreferenceKey.COLLAPSE_MODS, V.collapse_mods.isChecked());
 
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, V.gzdoom_load_lights_pk3.isChecked());
-		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, V.gzdoom_load_game_support_pk3.isChecked());
+//		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, V.gzdoom_load_game_support_pk3.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, V.gzdoom_load_brightmaps_pk3.isChecked());
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -3721,6 +3735,7 @@ public class GameLauncher extends Activity
 		public CheckBox cb_s_useEAXReverb;
 		public Switch readonly_command;
 		public CheckBox cb_stencilShadowTranslucent;
+		public CheckBox cb_useHighPrecision;
 		public Switch editable_temp_command;
 		public LinearLayout temp_cmdline;
 		public LinearLayout idtech4_section;
@@ -3776,7 +3791,7 @@ public class GameLauncher extends Activity
 		public CheckBox etw_stencilShadowPersonal;
 		public LinearLayout gzdoom_section;
 		public CheckBox gzdoom_load_lights_pk3;
-		public CheckBox gzdoom_load_game_support_pk3;
+		//public CheckBox gzdoom_load_game_support_pk3;
 		public CheckBox gzdoom_load_brightmaps_pk3;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
@@ -3847,6 +3862,7 @@ public class GameLauncher extends Activity
 			cb_s_useEAXReverb = findViewById(R.id.cb_s_useEAXReverb);
 			readonly_command = findViewById(R.id.readonly_command);
 			cb_stencilShadowTranslucent = findViewById(R.id.cb_stencilShadowTranslucent);
+			cb_useHighPrecision = findViewById(R.id.cb_useHighPrecision);
 			editable_temp_command = findViewById(R.id.editable_temp_command);
 			temp_cmdline = findViewById(R.id.temp_cmdline);
 			idtech4_section = findViewById(R.id.idtech4_section);
@@ -3902,7 +3918,7 @@ public class GameLauncher extends Activity
 			etw_stencilShadowPersonal = findViewById(R.id.etw_stencilShadowPersonal);
 			gzdoom_section = findViewById(R.id.gzdoom_section);
 			gzdoom_load_lights_pk3 = findViewById(R.id.gzdoom_load_lights_pk3);
-			gzdoom_load_game_support_pk3 = findViewById(R.id.gzdoom_load_game_support_pk3);
+			//gzdoom_load_game_support_pk3 = findViewById(R.id.gzdoom_load_game_support_pk3);
 			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);

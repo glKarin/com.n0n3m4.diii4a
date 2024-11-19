@@ -619,6 +619,12 @@
                     android:layout_height="wrap_content"
                     android:text="@string/multi_threading" />
 
+                <CheckBox
+                    android:id="@+id/cb_useHighPrecision"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/use_high_precision_float_on_glsl_shader_harm_r_usehighprecision" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

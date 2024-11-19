@@ -943,8 +943,8 @@ public class Q3EInterface
 		{
 			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, true))
 				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "lights.pk3").toString();
-			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, true))
-				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "game_support.pk3").toString();
+//			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, true))
+//				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "game_support.pk3").toString();
 			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, true))
 				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "brightmaps.pk3").toString();
 		}
