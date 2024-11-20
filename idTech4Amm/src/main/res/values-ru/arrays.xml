@@ -39,13 +39,13 @@
     </string-array>
 
     <string-array name="joystick_visible_mode_names">
-        <item>Always</item>
-        <item>Hidden</item>
-        <item>Only pressed</item>
+        <item>Всегда</item>
+        <item>Скрыть</item>
+        <item>Одно нажатие</item>
     </string-array>
 
     <string-array name="onscreen_disc_style_labels">
-        <item>Swipe</item>
-        <item>Click</item>
+        <item>Листать</item>
+        <item>Нажатие</item>
     </string-array>
 </resources>
