@@ -40,27 +40,19 @@ body:
       label: What platform?
       multiple: true
       options:
-        - label: Android
-        - label: Windows
-        - label: Linux
-    validations:
-      required: true
-  - type: dropdown
-    id: arch
-    attributes:
-      label: What arch?
-      multiple: true
-      options:
-        - label: x86-64
-        - label: x86
-        - label: arm64
-        - label: arm
+        - Android arm-v8
+        - Android arm-v7a
+        - Windows x86-64
+        - Windows x86
+        - Linux x86-64
+        - Linux x86
+        - Linux arm
     validations:
       required: true
   - type: input
     id: mod
     attributes:
-      label: Game mod
+      label: What game mod?
       placeholder: "e.g. "
     validations:
       required: false
@@ -68,38 +60,38 @@ body:
     id: gpu
     attributes:
       label: What GPU brand?
-      multiple: true
+      multiple: false
       options:
-        - label: Snapdragon Adreno
-        - label: Mali
-        - label: Other
+        - Snapdragon Adreno
+        - Mali
+        - Other(Enter below)
     validations:
-      required: true
+      required: false
   - type: input
     id: gpu_model
     attributes:
       label: CPU/GPU model
       placeholder: "e.g. Snapdragon 845 or Adreno 720"
     validations:
-      required: true
+      required: false
   - type: textarea
     id: description
     attributes:
-      label: Description
-      placeholder: "Description"
+      label: Description or screenshot
+      placeholder: "Description or screenshot files"
     validations:
       required: true
   - type: textarea
     id: stdout_log
     attributes:
       label: stdout.txt
-      placeholder: "Copy and paste `stdout.txt` file contents"
+      placeholder: "Copy and paste / upload `stdout.txt` file contents"
     validations:
       required: false
   - type: textarea
     id: stderr_log
     attributes:
       label: stderr.txt
-      placeholder: "Copy and paste `stderr.txt` file contents"
+      placeholder: "Copy and paste / upload `stderr.txt` file contents"
     validations:
       required: false
