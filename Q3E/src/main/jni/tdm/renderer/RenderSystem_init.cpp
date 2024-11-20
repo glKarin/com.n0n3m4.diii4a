@@ -255,6 +255,11 @@ idCVar r_cinematic_legacyRoq( "r_cinematic_legacyRoq", "0", CVAR_RENDERER | CVAR
                               "Play cinematics with original Doom3 code or with FFmpeg libraries. "
                               "0 - always use FFmpeg libraries, 1 - use original Doom3 code for ROQ and FFmpeg for other videos, 2 - never use FFmpeg" );
 
+#ifdef _GLES //karin: force use medium precision in GLSL shader: Mali GPU must use high precision, Adreno GPU can use medium precision
+idCVar harm_r_useMediumPrecision( "harm_r_useMediumPrecision", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "Use medium precision float instead of high precision in GLSL shader" );
+idCVar harm_r_outputGLSLSource( "harm_r_outputGLSLSource", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "Output all generated GLSL shaders to 'generated_glsl/'" );
+#endif
+
 namespace {
 	std::map<int, int> glDebugMessageIdLastSeenInFrame;
 	const int SUPPRESS_FOR_NUM_FRAMES = 300;

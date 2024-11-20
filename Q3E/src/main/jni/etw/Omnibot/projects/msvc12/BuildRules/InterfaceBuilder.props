@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup
+    Condition="'$(BuildExternalBeforeTargets)' == '' and '$(BuildExternalAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
+    <BuildExternalBeforeTargets>Midl</BuildExternalBeforeTargets>
+    <BuildExternalAfterTargets>CustomBuild</BuildExternalAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup>
+    <BuildExternalDependsOn
+      Condition="'$(ConfigurationType)' != 'Makefile'">_SelectedFiles;$(BuildExternalDependsOn)</BuildExternalDependsOn>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <BuildExternal>
+      <Config>0</Config>
+      <CommandLineTemplate>devenv.exe [Solution] /build [Config] /out %(Filename).results</CommandLineTemplate>
+      <Outputs>%(Filename).bld1</Outputs>
+      <ExecutionDescription>Building External Project [Solution]</ExecutionDescription>
+    </BuildExternal>
+  </ItemDefinitionGroup>
+</Project>

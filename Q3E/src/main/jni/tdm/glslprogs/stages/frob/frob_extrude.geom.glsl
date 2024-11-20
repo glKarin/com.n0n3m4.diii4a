@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-precision mediump float;
+precision highp float;
 
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 18) out;

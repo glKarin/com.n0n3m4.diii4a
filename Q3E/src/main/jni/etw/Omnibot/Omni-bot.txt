@@ -1,0 +1,28 @@
+    Script: Omni-bot
+    ___________________________________________________________________________
+
+    Version Beta 0.7
+
+    Copyright (C) 2003-2005 Jeremy Swigart
+
+    http://www.omni-bot.com
+
+
+    About: License
+
+        See <Omni-bot Licence>
+
+    Topic: Omni-bot Overview
+    
+		Summary of what Omni-bot is all about.
+        - Omni-bot is a game and mod independant artificial intelligence framework.
+
+	Topic: Omni-bot Changelog
+		- See <Omni-bot Changelog History>.
+
+    Topic: Documentation
+    
+		Code and Script documentation for Omni-bot. Useful for developers and scripters.    
+		- This documentation was generated with Naturaldocs http://naturaldocs.org
+		- If you find anything that appears to be an error in the documentation, please send DrEvil a message
+		  through the Omni-bot website linked above.

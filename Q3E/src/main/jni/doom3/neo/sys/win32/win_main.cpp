@@ -190,6 +190,9 @@ void Sys_Error( const char *error, ... ) {
 Sys_Quit
 ==============
 */
+#ifdef _SDL
+#include <SDL.h>
+#endif
 void Sys_Quit( void ) {
 #ifdef ID_ALLOW_TOOLS
 	// Free OpenGL DLL.
@@ -197,6 +200,11 @@ void Sys_Quit( void ) {
 	{
 		FreeLibrary(hOpenGL_DLL);
 	}
+#endif
+
+#ifdef _SDL
+	//karin: SQL_Quit in here from framework::Shutdown
+	SDL_Quit();
 #endif
 
 	timeEndPeriod( 1 );
@@ -1132,8 +1140,11 @@ int main(int argc, char *argv[]) {
 	loadWGLpointers();
 #endif
 
+#ifdef _SDL
+	//karin: SDL init in here from idCommon::Init
     extern void Sys_InitSDL(void);
     Sys_InitSDL();
+#endif
 
 	if ( argc > 1 ) {
 		common->Init( argc-1, (const char**)&argv[1], NULL );
@@ -1141,6 +1152,7 @@ int main(int argc, char *argv[]) {
 		common->Init( 0, NULL, NULL );
 	}
 
+	//karin: do not use SDL_Timer in framework/Common.cpp
     Sys_StartAsyncThread();
 
 	// hide or show the early console as necessary

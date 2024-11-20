@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+	<REPO_ROOT>$(SolutionDir)..\..\..\</REPO_ROOT>
+	<BOOST>$(REPO_ROOT)\libs\boost\boost_1_85_0</BOOST>
+	<InterfaceDir>$(REPO_ROOT)\GameInterfaces</InterfaceDir>
+	<OMNIBOT_INST>$(REPO_ROOT)\Installer\Files</OMNIBOT_INST>
+	<REMOTEDEBUGLIB>$(REPO_ROOT)\Tools\RemoteDebugWindow\RemoteDebugLib</REMOTEDEBUGLIB>
+	<ETDIR>C:\games\Wolfenstein - Enemy Territory</ETDIR>
+	<RTCWDIR>C:\games\Return to Castle Wolfenstein</RTCWDIR>
+	<ET_INST>$(ETDIR)\omni-bot</ET_INST>
+	<RTCW_INST>$(RTCWDIR)\omni-bot</RTCW_INST>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <BuildMacro Include="REPO_ROOT">
+      <Value>$(REPO_ROOT)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>  
+    <BuildMacro Include="BOOST">
+      <Value>$(BOOST)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="InterfaceDir">
+      <Value>$(InterfaceDir)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="OMNIBOT_INST">
+      <Value>$(OMNIBOT_INST)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="REMOTEDEBUGLIB">
+      <Value>$(REMOTEDEBUGLIB)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ETDIR">
+      <Value>$(ETDIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>	
+  </ItemGroup>
+</Project>

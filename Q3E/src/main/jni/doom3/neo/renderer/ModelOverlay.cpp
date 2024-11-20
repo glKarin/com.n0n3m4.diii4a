@@ -136,8 +136,19 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 	}
 
 	// make temporary buffers for the building process
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	overlayVertex_t	*overlayVerts;
+	glIndex_t *overlayIndexes;
+
+	const int overlayVerts_size = maxVerts * sizeof(*overlayVerts);
+	const int overlayIndexes_size = maxIndexes * sizeof(*overlayIndexes);
+
+	_DROID_ALLOC(overlayVertex_t, overlayVerts_size, overlayVerts, 0);
+	_DROID_ALLOC16(glIndex_t, overlayIndexes_size, overlayIndexes, 1);
+#else
 	overlayVertex_t	*overlayVerts = (overlayVertex_t *)_alloca(maxVerts * sizeof(*overlayVerts));
 	glIndex_t *overlayIndexes = (glIndex_t *)_alloca16(maxIndexes * sizeof(*overlayIndexes));
+#endif
 
 	// pull out the triangles we need from the base surfaces
 	for (surfNum = 0; surfNum < model->NumBaseSurfaces(); surfNum++) {
@@ -253,6 +264,10 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 			materials[i]->surfaces.RemoveIndex(0);
 		}
 	}
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+	_DROID_FREE(overlayVerts, 0)
+	_DROID_FREE(overlayIndexes, 1)
+#endif
 }
 
 /*

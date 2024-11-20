@@ -470,11 +470,23 @@ void R_AddMD3Surfaces(trRefEntity_t *ent)
 		// we will add shadows even if the main object isn't visible in the view
 
 		// stencil shadows can't do personal models unless I polyhedron clip
-		if (!personalModel
+		if (
+#ifdef STENCIL_SHADOW_IMPROVE //karin: allow player model shadow
+			 (!personalModel || harm_r_stencilShadowPersonal->integer)
+#else
+			 !personalModel
+#endif
 		    && r_shadows->integer == 2
+#if !defined(STENCIL_SHADOW_IMPROVE) //karin: not check in fog
 		    && fogNum == 0
+#endif
 		    && !(ent->e.renderfx & (RF_NOSHADOW | RF_DEPTHHACK))
-		    && shader->sort == SS_OPAQUE)
+		    && shader->sort == SS_OPAQUE
+#ifdef STENCIL_SHADOW_IMPROVE //karin: ignore alpha test shader pass and special model type exclude player model
+			&& (STENCIL_SHADOW_MODEL(4) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
+			&& ((personalModel && harm_r_stencilShadowPersonal->integer == 1) || !R_HasAlphaTest(shader))
+#endif
+			)
 		{
 			R_AddDrawSurf((void *)surface, tr.shadowShader, 0, 0, 0);
 		}

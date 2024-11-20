@@ -52,7 +52,7 @@
 			android:id="@+id/onscreen_button_config_dialog_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:dropDownWidth="128dp"
+            android:dropDownWidth="256dp"
 			android:layout_gravity="right|center_vertical"
 			android:spinnerMode="dropdown"
 			android:entries="@array/onscreen_button_style_labels"/>
@@ -74,10 +74,32 @@
             android:id="@+id/onscreen_button_config_dialog_slider_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:dropDownWidth="128dp"
+            android:dropDownWidth="256dp"
             android:layout_gravity="right|center_vertical"
             android:spinnerMode="dropdown"
             android:entries="@array/onscreen_slider_style_labels"/>
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/onscreen_button_config_dialog_disc_style_layout"
+		android:layout_width="match_parent"
+		android:layout_height="48dp"
+		android:orientation="horizontal">
+		<TextView
+			android:layout_width="0dp"
+			android:layout_height="match_parent"
+			android:layout_weight="1"
+			android:gravity="center_vertical"
+			android:text="@string/disc_panel_type"
+			android:textAppearance="?android:attr/textAppearanceMedium"/>
+		<Spinner
+			android:id="@+id/onscreen_button_config_dialog_disc_style"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:dropDownWidth="256dp"
+			android:layout_gravity="right|center_vertical"
+			android:spinnerMode="dropdown"
+			android:entries="@array/onscreen_disc_style_labels"/>
 	</LinearLayout>
 
     <LinearLayout
@@ -144,6 +166,24 @@
             android:layout_gravity="right|center_vertical"
             android:spinnerMode="dropdown"
             android:entries="@array/key_map_names"/>
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/onscreen_button_config_dialog_keys_layout"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="match_parent"
+			android:text="@string/keys"
+			android:textAppearance="?android:attr/textAppearanceMedium"/>
+		<LinearLayout
+			android:id="@+id/onscreen_button_config_dialog_keys"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical">
+		</LinearLayout>
 	</LinearLayout>
 
 </LinearLayout>

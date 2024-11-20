@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-precision mediump float;
+precision highp float;
 
 uniform highp float u_screenTex;
 uniform sampler2D u_tex0;

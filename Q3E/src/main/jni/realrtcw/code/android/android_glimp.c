@@ -376,8 +376,6 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
     Cvar_Set( "r_mode", "-1" );
     Cvar_SetValue( "r_customPixelAspect", glConfig.windowAspect );
 
-	glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
-
 	GLimp_GetProcAddresses( fixedFunction );
 
 	qglClearColor( 0, 0, 0, 1 );
@@ -660,6 +658,31 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 	{
 		ri.Printf( PRINT_ALL, "...GL_SGIS_texture_edge_clamp not found\n" );
 	}
+
+#if 0
+	extern GLenum stencilIncr;
+	extern GLenum stencilDecr;
+	if(GLimp_ExtensionSupported("GL_OES_stencil_wrap"))
+	{
+		ri.Printf( PRINT_ALL, "...using GL_OES_stencil_wrap\n" );
+        stencilIncr = GL_INCR_WRAP;
+		stencilDecr = GL_DECR_WRAP;
+	}
+	else if(GLimp_ExtensionSupported("GL_EXT_stencil_wrap"))
+	{
+		ri.Printf( PRINT_ALL, "...using GL_EXT_stencil_wrap\n" );
+		stencilIncr = GL_INCR_WRAP;
+		stencilDecr = GL_DECR_WRAP;
+	}
+	else
+	{
+		ri.Printf( PRINT_ALL, "...GL_OES_stencil_wrap and GL_EXT_stencil_wrap not found\n" );
+		stencilIncr = GL_INCR;
+		stencilDecr = GL_DECR;
+	}
+	//stencilIncr = GL_INCR;
+	//stencilDecr = GL_DECR;
+#endif
 }
 
 #define R_MODE_FALLBACK -1 //k 3 // 640 * 480

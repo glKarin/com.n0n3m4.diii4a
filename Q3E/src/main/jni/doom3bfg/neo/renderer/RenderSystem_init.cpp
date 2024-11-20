@@ -326,6 +326,10 @@ idCVar r_useLightGrid( "r_useLightGrid", "1", CVAR_RENDERER | CVAR_BOOL, "" );
 idCVar r_exposure( "r_exposure", "0.5", CVAR_ARCHIVE | CVAR_RENDERER | CVAR_FLOAT, "HDR exposure or LDR brightness [0.0 .. 1.0]", 0.0f, 1.0f );
 // RB end
 
+#ifdef _GLES //karin: force use medium precision in GLSL shader: Mali GPU must use high precision, Adreno GPU can use medium precision
+idCVar harm_r_useMediumPrecision( "harm_r_useMediumPrecision", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_INIT, "Use medium precision float instead of high precision in GLSL shader" );
+#endif
+
 const char* fileExten[4] = { "tga", "png", "jpg", "exr" };
 const char* envDirection[6] = { "_px", "_nx", "_py", "_ny", "_pz", "_nz" };
 const char* skyDirection[6] = { "_forward", "_back", "_left", "_right", "_up", "_down" };

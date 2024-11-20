@@ -111,9 +111,9 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
                     continue;
-                if(!Filter(name))
-                    continue;
             }
+            if(f.isFile() && !FilterExtension(name))
+                continue;
             if(!m_showHidden && f.isHidden())
                 continue;
 
@@ -312,7 +312,7 @@ public class FileBrowser
         return this;
     }
 
-    private boolean Filter(String name)
+    private boolean FilterExtension(String name)
     {
         if(m_extensions.isEmpty())
             return true;
@@ -367,9 +367,9 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && isDirectory)
                     continue;
-                if(!Filter(name))
-                    continue;
             }
+            if(!isDirectory && !FilterExtension(name))
+                continue;
 
             if (isDirectory && !m_dirNameWithSeparator)
                 name = p;
@@ -444,9 +444,9 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && isDirectory)
                     continue;
-                if(!Filter(name))
-                    continue;
             }
+            if(f.isFile() && !FilterExtension(name))
+                continue;
             if(!m_showHidden && f.isHidden())
                 continue;
 
@@ -517,9 +517,9 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
                     continue;
-                if(!Filter(name))
-                    continue;
             }
+            if(f.isFile() && !FilterExtension(name))
+                continue;
             if(!m_showHidden && name.startsWith("."))
                 continue;
 
@@ -604,9 +604,9 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
                     continue;
-                if(!Filter(name))
-                    continue;
             }
+            if(f.isFile() && !FilterExtension(name))
+                continue;
             if(!m_showHidden && name.startsWith("."))
                 continue;
 
@@ -785,9 +785,9 @@ public class FileBrowser
                     continue;
                 if((m_filter & ID_FILTER_DIRECTORY) == 0 && f.isDirectory())
                     continue;
-                if(!Filter(name))
-                    continue;
             }
+            if(f.isFile() && !FilterExtension(name))
+                continue;
             if(!m_showHidden && f.isHidden())
                 continue;
 
@@ -859,4 +859,13 @@ public class FileBrowser
             return res;
         }
     };
+
+    public static class NameComparator implements Comparator<FileBrowser.FileModel>
+    {
+        @Override
+        public int compare(FileModel a, FileModel b)
+        {
+            return a.name.compareTo(b.name);
+        }
+    }
 }

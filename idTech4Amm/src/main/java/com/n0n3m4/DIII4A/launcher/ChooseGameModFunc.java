@@ -18,6 +18,7 @@ import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KStr;
+import com.n0n3m4.q3e.karin.KidTechCommand;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -71,20 +72,14 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         FileBrowser fileBrowser = new FileBrowser();
         final boolean UsingFile = Q3EUtils.q3ei.isDOOM;
         final boolean AllowExtraFiles = Q3EUtils.q3ei.isDOOM;
-        if(Q3EUtils.q3ei.isDOOM)
-            fileBrowser.SetExtension(".wad", ".ipk3");
-        if(UsingFile)
-            fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
-        else
-            fileBrowser.SetFilter(FileBrowser.ID_FILTER_DIRECTORY);
+        fileBrowser.SetFilter(FileBrowser.ID_FILTER_DIRECTORY);
         fileBrowser.SetIgnoreDotDot(true);
-        fileBrowser.SetDirNameWithSeparator(false);
-        fileBrowser.SetShowHidden(true);
+        fileBrowser.SetShowHidden(false);
         fileBrowser.SetCurrentPath(m_path);
 
         final List<CharSequence> items = new ArrayList<>();
         Map<String, String> map = new HashMap<>();
-        final List<String> values = new ArrayList<>();
+        final List<FileBrowser.FileModel> values = new ArrayList<>();
         final List<String> TotalList = new ArrayList<>(Arrays.asList(
                 Q3EGlobals.GAME_BASE_DOOM3,
                 Q3EGlobals.GAME_BASE_QUAKE4,
@@ -193,9 +188,23 @@ public final class ChooseGameModFunc extends GameLauncherFunc
 
         List<FileBrowser.FileModel> fileModels;
         if(UsingFile)
-            fileModels = fileBrowser.ListAllFiles();
+        {
+            fileBrowser.SetDirNameWithSeparator(true);
+            fileModels = new ArrayList<>(fileBrowser.FileList());
+
+            if(Q3EUtils.q3ei.isDOOM)
+                fileBrowser.SetExtension(".wad", ".ipk3");
+            fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
+            List<FileBrowser.FileModel> allFiles = fileBrowser.ListAllFiles();
+            fileModels.addAll(allFiles);
+
+            fileModels.sort(new FileBrowser.NameComparator());
+        }
         else
+        {
+            fileBrowser.SetDirNameWithSeparator(false);
             fileModels = fileBrowser.FileList();
+        }
 
         for (FileBrowser.FileModel fileModel : fileModels)
         {
@@ -307,63 +316,43 @@ public final class ChooseGameModFunc extends GameLauncherFunc
 
             if(!UsingFile)
             {
-                String desc = Q3EUtils.file_get_contents(fileModel.path + File.separator + "description.txt");
-                if(null != desc)
-                {
-                    desc = desc.trim();
-                    if(!desc.isEmpty())
-                        name = desc + " (" + fileModel.name + ")";
-                }
+                String desc = GetDescription(fileModel.path);
+                if(KStr.NotBlank(desc))
+                    name = desc + " (" + fileModel.name + ")";
             }
             if(name.isEmpty())
                 name = fileModel.name;
 
-            /*
-            File dir = new File(fileModel.path);
-            name += "\n " + FileUtility.FormatSize(FileUtility.du(fileModel.path, new Function() {
-                @Override
-                public Object Invoke(Object... args)
-                {
-                    File f = (File)args[0];
-                    String relativePath = FileUtility.RelativePath(dir, f);
-                    if(f.isDirectory())
-                    {
-                        return !"/savegames".equalsIgnoreCase(relativePath);
-                    }
-                    else
-                    {
-                        return !"/.console_history.dat".equalsIgnoreCase(relativePath);
-                    }
-                }
-            }));
-*/
+            // name += "\n " + FormatSize(fileModel.path);
+
             map.put(fileModel.name, name);
-            values.add(fileModel.name);
+            values.add(fileModel);
         }
 
-        Collections.sort(values, new Comparator<String>() {
+        Collections.sort(values, new Comparator<FileBrowser.FileModel>() {
             @Override
-            public int compare(String a, String b)
+            public int compare(FileBrowser.FileModel a, FileBrowser.FileModel b)
             {
-                if(TotalList.contains(a))
+                if(TotalList.contains(a.name))
                     return -1;
-                if(TotalList.contains(b))
+                if(TotalList.contains(b.name))
                     return 1;
-                return a.compareTo(b);
+                return a.name.compareTo(b.name);
             }
         });
 
-        for (String value : values)
+        for (FileBrowser.FileModel value : values)
         {
-            items.add(map.get(value));
+            items.add(map.get(value.name));
         }
 
         int selected = -1;
-        if(null != m_mod && !m_mod.isEmpty())
+        String mod = null != m_mod ? KidTechCommand.UnEscapeQuotes(m_mod) : null;
+        if(null != mod && !mod.isEmpty())
         {
             for (int i = 0; i < values.size(); i++)
             {
-                if(values.get(i).equals(m_mod))
+                if(values.get(i).name.equals(mod))
                 {
                     selected = i;
                     break;
@@ -376,12 +365,13 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {
-                String lib = KStr.CmdStr(values.get(p));
-                Callback(lib);
+                FileBrowser.FileModel file = values.get(p);
+                List<String> efiles = new ArrayList<>();
+                String[] lib = SelectMod(file, efiles);
                 dialog.dismiss();
                 if(AllowExtraFiles)
                 {
-                    ChooseExtraFiles(lib);
+                    ChooseExtraFiles(efiles, lib);
                 }
             }
         });
@@ -390,7 +380,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             builder.setNeutralButton(R.string.files, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int p)
                 {
-                    ChooseExtraFiles(m_mod);
+                    ChooseExtraFiles(null, mod);
                 }
             });
         }
@@ -405,7 +395,79 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         dialog.show();
     }
 
-    public void ChooseExtraFiles(String excludes)
+    private String GetDescription(String path)
+    {
+        String desc = Q3EUtils.file_get_contents(KStr.AppendPath(path, "description.txt"));
+        if(null != desc)
+        {
+            desc = desc.trim();
+            return desc;
+        }
+        else
+            return null;
+    }
+
+    private String FormatSize(String path)
+    {
+        File dir = new File(path);
+        return FileUtility.FormatSize(FileUtility.du(path, new Function() {
+            @Override
+            public Object Invoke(Object... args)
+            {
+                File f = (File)args[0];
+                String relativePath = FileUtility.RelativePath(dir, f);
+                if(f.isDirectory())
+                {
+                    return !"/savegames".equalsIgnoreCase(relativePath);
+                }
+                else
+                {
+                    return !"/.console_history.dat".equalsIgnoreCase(relativePath);
+                }
+            }
+        }));
+    }
+
+    private String[] SelectMod(FileBrowser.FileModel file, List<String> efiles)
+    {
+        String[] lib;
+        if(Q3EUtils.q3ei.isDOOM && file.type == FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY)
+        {
+            List<FileBrowser.FileModel> fileModels = ListGZDOOMFiles(file.path);
+            List<String> wads = new ArrayList<>();
+
+            for(FileBrowser.FileModel fileModel : fileModels)
+            {
+                String relativePath = FileUtility.RelativePath(fileModel.path, m_path);
+                relativePath = KStr.TrimLeft(relativePath, File.separatorChar);
+                if(fileModel.name.toLowerCase().endsWith(".wad"))
+                    wads.add(relativePath);
+                else
+                    efiles.add(relativePath);
+            }
+
+            lib = wads.toArray(new String[0]);
+
+            wads.clear();
+            for(String wad : lib)
+            {
+                wads.add(KStr.CmdStr(wad));
+            }
+            Callback(String.join(" ", wads));
+        }
+        else
+        {
+            //String relativePath = FileUtility.RelativePath(file.path, m_path);
+            lib = new String[] {
+                file.name
+            };
+            Callback(KStr.CmdStr(lib[0]));
+        }
+
+        return lib;
+    }
+
+    private List<FileBrowser.FileModel> ListGZDOOMFiles(String path)
     {
         FileBrowser fileBrowser = new FileBrowser();
         fileBrowser.SetExtension(".wad", ".pk3", ".ipk3", ".deh", ".bex");
@@ -414,20 +476,28 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         fileBrowser.SetIgnoreDotDot(true);
         fileBrowser.SetDirNameWithSeparator(false);
         fileBrowser.SetShowHidden(true);
-        fileBrowser.SetCurrentPath(m_path);
-        List<FileBrowser.FileModel> fileModels = fileBrowser.ListAllFiles();
+        fileBrowser.SetCurrentPath(null != path ? path : m_path);
+        return fileBrowser.ListAllFiles();
+    }
+
+    private void ChooseExtraFiles(List<String> selectFiles, String...excludes)
+    {
+        List<FileBrowser.FileModel> fileModels = ListGZDOOMFiles(null);
 
         final List<CharSequence> items = new ArrayList<>();
         final List<String> files = new ArrayList<>();
+        int m = 0;
 
         // 1. remove -iwad file
-        int m = 0;
-        while (m < fileModels.size())
+        if(null != excludes && excludes.length > 0)
         {
-            if(fileModels.get(m).name.equalsIgnoreCase(excludes))
-                fileModels.remove(m);
-            else
-                m++;
+            while (m < fileModels.size())
+            {
+                if(Utility.ArrayContains(excludes, fileModels.get(m).name, false))
+                    fileModels.remove(m);
+                else
+                    m++;
+            }
         }
 
         // 2. setup multi choice items
@@ -439,8 +509,16 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         // 3. load selected from command line
         if(KStr.NotBlank(m_file))
         {
-            String[] split = m_file.split("\\s+");
-            files.addAll(Arrays.asList(split));
+            List<String> strings = KidTechCommand.SplitValue(m_file, true);
+            files.addAll(strings);
+        }
+        if(null != selectFiles)
+        {
+            for(String selectFile : selectFiles)
+            {
+                if(!files.contains(selectFile))
+                    files.add(selectFile);
+            }
         }
 
         // 4. remove not exists files from command line
@@ -480,10 +558,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int p)
             {
-                List<String> norFiles = new ArrayList<>(files.size());
-                for(String file : files)
-                    norFiles.add(KStr.CmdStr(file));
-                String join = KStr.Join(norFiles, FILE_SEP);
+                String join = KStr.Join(files, FILE_SEP);
                 Callback(":" + join);
                 dialog.dismiss();
             }

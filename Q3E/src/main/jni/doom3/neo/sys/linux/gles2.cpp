@@ -781,6 +781,6 @@ int Sys_GetVideoRam(void)
 	// try a few strategies to guess the amount of video ram
 	common->Printf("guessing video ram ( use +set sys_videoRam to force ) ..\n");
 
-	run_once = 64;
+	run_once = 512;
 	return run_once;
 }

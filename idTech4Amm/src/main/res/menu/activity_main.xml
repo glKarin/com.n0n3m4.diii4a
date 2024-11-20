@@ -132,6 +132,10 @@
                 android:id="@+id/main_menu_shortcut"
                 android:title="@string/shortcut"
                 android:showAsAction="never"/>
+<!--            <item
+                android:id="@+id/main_menu_shortcut_command"
+                android:title="@string/command_shortcut"
+                android:showAsAction="never"/>-->
         </menu>
     </item>
     

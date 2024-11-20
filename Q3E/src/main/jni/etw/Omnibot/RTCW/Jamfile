@@ -1,0 +1,9 @@
+# The RTCW Library.
+
+project RTCW
+	: requirements <include>../Common ;
+
+# Compile ALL .cpp files and link to Common.lib to create our dll
+
+lib omnibot_rtcw : RTCW_BatchBuild.cpp ..//boost_all ..//Common 
+	: <tag>@tag ;

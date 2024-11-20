@@ -71,14 +71,19 @@ public class KidTechCommand
         return new KidTechCommand(PLUS, str).SetBoolProp(name, val).toString();
     }
 
-    public static String RemoveParam(String PLUS, String str, String name)
+    public static String RemoveParam(String PLUS, String str, String name, String...val)
     {
-        return new KidTechCommand(PLUS, str).RemoveParam(name).toString();
+        return new KidTechCommand(PLUS, str).RemoveParam(name, val).toString();
     }
 
     public static String SetParam(String PLUS, String str, String name, Object val)
     {
         return new KidTechCommand(PLUS, str).SetParam(name, val).toString();
+    }
+
+    public static String AddParam(String PLUS, String str, String name, Object val)
+    {
+        return new KidTechCommand(PLUS, str).AddParam(name, val).toString();
     }
 
     public static String SetCommand(String PLUS, String str, String name, boolean...prepend)
@@ -96,9 +101,9 @@ public class KidTechCommand
         return new KidTechCommand(PLUS, str).Param(name, def);
     }
 
-    public static boolean HasParam(String PLUS, String str, String name)
+    public static boolean HasParam(String PLUS, String str, String name, String...val)
     {
-        return new KidTechCommand(PLUS, str).HasParam(name);
+        return new KidTechCommand(PLUS, str).HasParam(name, val);
     }
 
     public KidTechCommand SetProp(String name, Object val)
@@ -278,7 +283,7 @@ public class KidTechCommand
         return false;
     }
 
-    public boolean HasParam(String name)
+    public boolean HasParam(String name, String...val)
     {
         int i = 0;
         while(!IsEnd(i = FindNext(i, CMD_PART_PARAM)))
@@ -286,7 +291,18 @@ public class KidTechCommand
             CmdPart part = cmdParts.get(i);
 
             if(EqualsParam(part.str, name))
-                return true;
+            {
+                if(null != val && val.length > 0 && null != val[0])
+                {
+                    int valueI = i + 2;
+                    boolean value = RequireType(valueI, CMD_PART_VALUE);
+
+                    if(value && val[0].equals(cmdParts.get(valueI).str))
+                        return true;
+                }
+                else
+                    return true;
+            }
             i++;
         }
         return false;
@@ -305,7 +321,7 @@ public class KidTechCommand
         return SetProp(name, btostr(val));
     }
 
-    public KidTechCommand RemoveParam(String name)
+    public KidTechCommand RemoveParam(String name, String...val)
     {
         int i = 0;
         while(!IsEnd(i = FindNext(i, CMD_PART_PARAM)))
@@ -322,6 +338,14 @@ public class KidTechCommand
             boolean blank1 = RequireType(blank1I, CMD_PART_BLANK);
             boolean value = RequireType(valueI, CMD_PART_VALUE);
             boolean blank2 = RequireType(blank2I, CMD_PART_BLANK);
+
+            if(null != val && val.length > 0 && null != val[0])
+            {
+                if(!value)
+                    continue;
+                if(!val[0].equals(cmdParts.get(valueI).str))
+                    continue;
+            }
 
             int end = start;
             if(blank1)
@@ -386,6 +410,21 @@ public class KidTechCommand
             cmdParts.get(valueI).str = ValueToString(val);
             return this;
         }
+
+        if(!EndsWithBlank())
+            AddBlankPart();
+
+        AddPart(CMD_PART_PARAM, GetArgPrefixChar() + name);
+        AddBlankPart();
+        AddPart(CMD_PART_VALUE, val);
+
+        return this;
+    }
+
+    public KidTechCommand AddParam(String name, Object val)
+    {
+        if(HasParam(name, ValueToString(val)))
+            return this;
 
         if(!EndsWithBlank())
             AddBlankPart();
@@ -485,7 +524,7 @@ public class KidTechCommand
     private static final int CMD_PART_SET   = 3; // +set
     private static final int CMD_PART_NAME = 4; // r_shadows
     private static final int CMD_PART_VALUE = 5; // 1
-    private static class CmdPart
+    public static class CmdPart
     {
         public int type;
         public String str;
@@ -506,7 +545,7 @@ public class KidTechCommand
             return String.format("{%s|%s}", tname, str);
         }
     }
-    private final List<CmdPart> cmdParts = new ArrayList<>();
+    public final List<CmdPart> cmdParts = new ArrayList<>();
 
     private void Parse()
     {
@@ -518,11 +557,32 @@ public class KidTechCommand
         while(i < m_cmd.length())
         {
             char c = m_cmd.charAt(i);
-            if(c == '+' || c == '-')
+            if (c == '"')
+            {
+                if(readingSet)
+                {
+                    readingSet = false;
+                    String val = ReadWordWithQuotes(m_cmd, i);
+                    AddPart(CMD_PART_NAME, val);
+                    i += val.length();
+                }
+                else
+                {
+                    String val = ReadUtil(m_cmd, i, argPrefix);
+                    if(!hasArg0)
+                        AddPart(CMD_PART_EXECUTION, val);
+                    else
+                        AddPart(CMD_PART_VALUE, val);
+                    i += val.length();
+                }
+                hasArg0 = true;
+            }
+            else if(c == '+' || c == '-')
             {
                 readingSet = false;
-                String cmd = ReadWord(m_cmd, i);
-                boolean isSet = cmd.substring(1).equals("set");
+                String cmd = ReadWord(m_cmd, i + 1);
+                boolean isSet = cmd.equals("set") || cmd.equals("\"set\"");
+                cmd = c + cmd;
                 if(isSet)
                     AddPart(CMD_PART_SET, cmd);
                 else
@@ -585,7 +645,7 @@ public class KidTechCommand
         cmdParts.add(i, part);
     }
 
-    private String SkipBlank(String str, int start)
+    private static String SkipBlank(String str, int start)
     {
         StringBuilder ret = new StringBuilder();
         int i = start;
@@ -600,8 +660,13 @@ public class KidTechCommand
         return ret.toString();
     }
 
-    private String ReadWord(String str, int start)
+    private static String ReadWord(String str, int start)
     {
+        if(start < str.length() && str.charAt(start) == '\"')
+        {
+            return ReadWordWithQuotes(str, start);
+        }
+
         StringBuilder ret = new StringBuilder();
         int i = start;
         while(i < str.length())
@@ -615,13 +680,38 @@ public class KidTechCommand
         return ret.toString();
     }
 
-    private String ReadUtil(String str, int start, String chars)
+    private static String ReadWordWithQuotes(String str, int start)
+    {
+        char quoteStart = str.charAt(start);
+        StringBuilder ret = new StringBuilder();
+        ret.append(quoteStart);
+        int i = start + 1;
+        char lastp = 0;
+        while(i < str.length() && ( str.charAt(i) != quoteStart || lastp == '\\' ))
+        {
+            lastp = str.charAt(i);
+            ret.append(lastp);
+            i++;
+        }
+        ret.append(quoteStart);
+        return ret.toString(); // with quotes
+    }
+
+    private static String ReadUtil(String str, int start, String chars)
     {
         StringBuilder ret = new StringBuilder();
         int i = start;
         while(i < str.length())
         {
             char c = str.charAt(i);
+            if(c == '"')
+            {
+                String val = ReadWordWithQuotes(str, i);
+                ret.append(val);
+                i += val.length();
+                continue;
+            }
+
             if(Character.isSpaceChar(c))
             {
                 if(i + 1 < str.length())
@@ -708,6 +798,90 @@ public class KidTechCommand
         if(null == o)
             return "";
         return o.toString();
+    }
+
+    public static List<String> SplitValue(String value, boolean unescape)
+    {
+        value = value.trim();
+        List<String> ret = new ArrayList<>();
+        int i = 0;
+        while(i < value.length())
+        {
+            char c = value.charAt(i);
+            if(Character.isSpaceChar(c))
+            {
+                i += SkipBlank(value, i).length();
+            }
+            else
+            {
+                String val = ReadWord(value, i);
+                i += val.length();
+                if(unescape && val.startsWith("\""))
+                    val = UnEscapeQuotes(val);
+                ret.add(val);
+            }
+        }
+        return ret;
+    }
+
+    public static String UnEscapeQuotes( String arg )
+    {
+        char[] arr = arg.toCharArray();
+        char first = '"';
+        char last = 0;
+        int _i = 0;
+        int last_i = 0;
+        while( _i < arr.length ) {
+            char ch = arr[_i];
+            if( ch == first && last == '\\' ) {
+                int c_curr = _i;
+                int c_last = last_i;
+                while( c_curr < arr.length ) {
+                    arr[c_last] = arr[c_curr];
+                    c_last = c_curr;
+                    c_curr++;
+                }
+                arr[c_last] = '\0';
+            }
+            last_i = _i;
+            last = ch;
+            _i++;
+        }
+
+        StringBuilder buf = new StringBuilder();
+        for(_i = 1; _i < arr.length; _i++)
+        {
+            if(arr[_i] == 0)
+                break;
+            buf.append(arr[_i]);
+        }
+        if(buf.length() == 0)
+            return "";
+        buf.delete(buf.length() - 1, buf.length());
+        return buf.toString();
+    }
+
+    public static String JoinValue(List<String> list, boolean escape)
+    {
+        String split = " ";
+        StringBuilder buf = new StringBuilder();
+        for(int i = 0; i < list.size(); i++)
+        {
+            String str = list.get(i);
+            if(null == str)
+                str = "";
+            else if(escape && (str.contains(split) || str.contains("\"")))
+                str = EscapeQuotes(str);
+            buf.append(str);
+            if(i < list.size() - 1)
+                buf.append(split);
+        }
+        return buf.toString();
+    }
+
+    public static String EscapeQuotes( String arg )
+    {
+        return "\"" + arg.replaceAll("\"", "\\\\\"") + "\"";
     }
 
     private CmdPart GetPart(int index)

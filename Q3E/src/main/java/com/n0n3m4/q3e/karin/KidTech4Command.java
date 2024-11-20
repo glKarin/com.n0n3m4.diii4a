@@ -35,14 +35,19 @@ public final class KidTech4Command extends KidTechCommand
         return KidTech4Command.SetProp(str, name, btostr(val));
     }
 
-    public static String RemoveParam(String str, String name)
+    public static String RemoveParam(String str, String name, String...val)
     {
-        return KidTechCommand.RemoveParam(ARG_PREFIX_IDTECH, str, name);
+        return KidTechCommand.RemoveParam(ARG_PREFIX_IDTECH, str, name, val);
     }
 
     public static String SetParam(String str, String name, Object val)
     {
         return KidTechCommand.SetParam(ARG_PREFIX_IDTECH, str, name, val);
+    }
+
+    public static String AddParam(String str, String name, Object val)
+    {
+        return KidTechCommand.AddParam(ARG_PREFIX_IDTECH, str, name, val);
     }
 
     public static String SetCommand(String str, String name, boolean...prepend)
@@ -60,9 +65,9 @@ public final class KidTech4Command extends KidTechCommand
         return KidTechCommand.GetParam(ARG_PREFIX_IDTECH, str, name, def);
     }
 
-    public static boolean HasParam(String str, String name)
+    public static boolean HasParam(String str, String name, String...val)
     {
-        return KidTechCommand.HasParam(ARG_PREFIX_IDTECH, str, name);
+        return KidTechCommand.HasParam(ARG_PREFIX_IDTECH, str, name, val);
     }
 
     public KidTech4Command(String str)

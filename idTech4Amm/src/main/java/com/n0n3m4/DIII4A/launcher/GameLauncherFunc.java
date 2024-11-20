@@ -1,8 +1,10 @@
 package com.n0n3m4.DIII4A.launcher;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.n0n3m4.DIII4A.GameLauncher;
@@ -123,6 +125,10 @@ public abstract class GameLauncherFunc implements Runnable
         return null != data ? (T)data.get(CONST_RESULT_KEY) : null;
     }
 
+    protected SharedPreferences SharedPreferences()
+    {
+        return PreferenceManager.getDefaultSharedPreferences(m_gameLauncher);
+    }
 
     public Context getContext()
     {

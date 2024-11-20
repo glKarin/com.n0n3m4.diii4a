@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-precision mediump float;
+precision highp float;
 
 // per-pixel cubic parallax-corrected reflection map calculation
 

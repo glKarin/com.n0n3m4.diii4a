@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-precision mediump float;
+precision highp float;
 
 /**
  * This is a 9-tap Gaussian blur accelerated by making use of the GPU filtering hardware

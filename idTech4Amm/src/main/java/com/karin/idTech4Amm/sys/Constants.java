@@ -12,8 +12,8 @@ import java.util.Date;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 58;
-    public static final String CONST_RELEASE = "2024-10-18";
+    public static final int    CONST_UPDATE_RELEASE = 59;
+    public static final String CONST_RELEASE = "2024-11-20";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -30,9 +30,13 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add `RealRTCW` support, game standalone directory named `realrtcw`, game data directory named `Main`. More view in `" + TextHelper.GenLinkText("https://github.com/wolfetplayer/RealRTCW", "RealRTCW") + "`.",
-            "Fix light bar indicator of player's HUD by `darkness257` on The Dark Mod, now setup `tdm_lg_weak` to 1 automatically. More view in `" + TextHelper.GenLinkText("https://github.com/glKarin/com.n0n3m4.diii4a/issues/244", "The Darkmod light bar indicator bug") + "`.",
-            "Support create desktop shortcut for games on `Option` menu of launcher.",
+            "Support `Omni-Bot` in Wolfenstein: Enemy Territory.",
+            "Fix rendering on Mali GPU in DOOM 3-BFG.",
+            "Fix rendering on Mali GPU in The Dark Mod.",
+            "Fix stencil shadow with `cg_shadows` = 2 in Wolfenstein: Enemy Territory.",
+            "Support choose a mod directory in GZDOOM.",
+            "Add some new features options on launcher in Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM, The Dark Mod.",
+            "Add use high precision float on GLSL shaders(cvar `harm_r_useHighPrecision`) in DOOM 3/Quake 4/Prey.",
         };
 	};
 

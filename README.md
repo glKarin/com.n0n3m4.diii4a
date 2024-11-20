@@ -1,14 +1,14 @@
 ## idTech4A++ (Harmattan Edition)  
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
-##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW OpenGLES on Android  
+##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW OpenGLES on Android  
 #### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版  
-##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部 安卓OpenGLES移植版  
+##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan57(natasha)  
+1.1.0harmattan58(natasha)  
 **Latest update:**
-2024-10-01  
+2024-10-29  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -67,6 +67,7 @@ GPLv3
 | Quake I | [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces) | - | 2.0 |  |
 | GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | - | 3.2 |  |
 | Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) | 2.8.1 | 1.1 |  |
+| RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.0 | 1.1 |  |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -87,27 +88,41 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add `Wolfenstein: Enemy Territory` support, game standalone directory named `etw`, game data directory named `etmain` and `legacy`. More view in [ET: Legacy](https://www.etlegacy.com).
-* Add `Quake 4: Hardqore` mod of Quake4 support, game data directory named `hardqore`. More view in [Quake 4: Hardqore](https://www.moddb.com/mods/quake-4-hardqore).
-* Add `ambientLighting` shader, add ambient lighting model(`harm_r_lightingModel` to 4) in DOOM3/Quake4/Prey.
-* Add effects color alpha in Quake4.
-* Fix `displacement` and `displacementcube` GLSL shader in Quake4. e.g. water in `recomp` map and blood pool in `waste` map.
-* Fix weapon model depth hack in player view in Quake4.
-* Add player body view in DOOM3/Quake4.
-* Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.
-* Default enable `Standalone game data directory`.
+* Add `RealRTCW`(ver 5.0) support, game standalone directory named `realrtcw`, game data directory named `Main`. More view in [RealRTCW](https://github.com/wolfetplayer/RealRTCW).
+* Fix light bar indicator of player's HUD by `darkness257` on The Dark Mod, now setup `tdm_lg_weak` to 1 automatically. More view in [The Darkmod light bar indicator bug](https://github.com/glKarin/com.n0n3m4.diii4a/issues/244).
+* Support create desktop shortcut for games or current command on `Option` menu of launcher.
+* Fix stencil shadow with `cg_shadows` = 2 on Quake 3.
+* Improve stencil shadow with `cg_shadows` = 2 on RealRTCW.
 
 ----------------------------------------------------------------------------------
 
-* 新增`深入敌后: 德军总部`支持, 游戏独立文件夹名为`etw`, 游戏数据文件夹为`etmain`和`legacy`, 更多详情[ET: Legacy](https://www.etlegacy.com).
-* 雷神之锤4新增`Hardqore` mod支持, 游戏数据文件夹为`hardqore`, 更多详情[Quake 4: Hardqore](https://www.moddb.com/mods/quake-4-hardqore).
-* 毁灭战士3/雷神之锤4/掠食(2006)新增`ambientLighting`着色器, 新增环境光光照模型(`harm_r_lightingModel`设为4).
-* 雷神之锤4特效支持颜色透明度.
-* 雷神之锤4修复`displacement`和`displacementcube`着色器. 例如`recomp`关卡的水, `waste`关卡的血池.
-* 雷神之锤4修复玩家视角内武器模型的错误裁剪.
-* 毁灭战士3/雷神之锤4新增玩家身体视角模型.
-* 毁灭战士3/雷神之锤4/掠食(2006)新增cvar `harm_in_smoothJoystick`控制启用平滑摇杆.
-* 默认启用`游戏数据独立文件夹`.
+* 新增`真·重返德军总部`(ver 5.0)支持, 游戏独立文件夹名为`etw`, 游戏数据文件夹为`Main`. 更多详情[RealRTCW](https://github.com/wolfetplayer/RealRTCW).
+* The Dark Mod修复玩家HUD上的亮度指示条 by `darkness257`, 当前自动设置`tdm_lg_weak`为1. 更多详情[The Darkmod light bar indicator bug](https://github.com/glKarin/com.n0n3m4.diii4a/issues/244).
+* 启动器`Option`菜单增加以游戏或当前命令行来创建桌面快捷方式.
+* 修复雷神之锤3的模板阴影当`cg_shadows` = 2.
+* 改进真·重返德军总部的模板阴影当`cg_shadows` = 2.
+
+----------------------------------------------------------------------------------
+### Standalone game directory
+  Because more support games, it cause all game mods data directory put on a shared folder, them maybe have same name, and diffcult to view/manage. So application default enable `Standalone game directory` since version 1.1.0harmattan57, and you can also disable it on launcher settings.
+  
+  If enable `Standalone game directory`, game data directory should put on `Standalone game directory` itself(e.g.).
+  
+> Games of `Standalone game directory` and folder name:
+* **DOOM III**: doom3/
+* **Quake 4**: quake4/
+* **Prey(2006)**: prey/
+* **Quake I**: quake1/
+* **Quake II**: quake2/
+* **Quake III**: quake3/
+* **Return to Castle Wolfenstein**: rtcw/
+* **DOOM 3 BFG**: doom3bfg/
+* **Wolfenstein - Enemy Territory**: etw/
+* **RealRTCW**: realrtcw/
+  
+> Games of always force `Standalone game directory`:
+* **The Dark Mod**: darkmod/
+* **GZDOOM**: gzdoom/
 
 ----------------------------------------------------------------------------------
 
@@ -280,6 +295,7 @@ Tag with `-free` only for F-Droid update.
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake2.jpg" width="50%" alt="Quake II"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake1.jpg" width="50%" alt="Quake I">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom1.jpg" width="33%" alt="DOOM 3 BFG: DOOM I"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom3.jpg" width="34%" alt="DOOM 3 BFG: DOOM III"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom2.jpg" width="33%" alt="DOOM 3 BFG: DOOM II">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_wolfenstein_enemy_territory.jpg" width="50%" alt="Wolfenstein: Enemy Territory">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_realrtcw.jpg" width="50%" alt="RealRTCW">
 
 ----------------------------------------------------------------------------------
 
@@ -481,6 +497,7 @@ model player_model_torso_and_lower_body {
 * Darkplaces
 * GZDOOM
 * ETLegacy
+* RealRTCW
 > Library(Source)
 * cJSON 
 * curl: The curl license

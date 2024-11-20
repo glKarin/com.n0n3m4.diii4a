@@ -397,6 +397,41 @@ void R_AddAnimSurfaces( trRefEntity_t *ent ) {
 			shader = R_GetShaderByHandle( surface->shaderIndex );
 		}
 
+//karin: add stencil shadow for new animation model
+		// stencil shadows can't do personal models unless I polyhedron clip
+		if (
+#ifdef STENCIL_SHADOW_IMPROVE //karin: allow player model shadow
+			 (!personalModel || harm_r_stencilShadowPersonal->integer)
+#else
+			 !personalModel
+#endif
+			 && r_shadows->integer == 2
+#if !defined(STENCIL_SHADOW_IMPROVE) //karin: allow shadow on fog
+			 && fogNum == 0
+#endif
+			 && !(ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
+			 && shader->sort == SS_OPAQUE 
+#ifdef STENCIL_SHADOW_IMPROVE //karin: ignore alpha test shader pass and special model type exclude player model
+			&& (STENCIL_SHADOW_MODEL(1) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
+			&& ((personalModel && harm_r_stencilShadowPersonal->integer == 1) || !R_HasAlphaTest(shader))
+#endif
+			 )
+		{
+			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, qfalse, ATI_TESS_TRUFORM );
+		}
+
+#if 0 //karin: tr.projectionShadowShader is not initialized
+		// projection shadows work fine with personal models
+		if ( r_shadows->integer == 3
+			 && fogNum == 0
+			 && (ent->e.renderfx & RF_SHADOW_PLANE )
+			 && shader->sort == SS_OPAQUE )
+		{
+			R_AddDrawSurf( (void *)surface, tr.projectionShadowShader, 0, qfalse, ATI_TESS_TRUFORM );
+		}
+#endif
+//karin: end
+
 		// don't add third_person objects if not viewing through a portal
 		if ( !personalModel ) {
 			// GR - always tessellate these objects
@@ -1602,11 +1637,23 @@ void R_MDRAddAnimSurfaces( trRefEntity_t *ent ) {
 		// we will add shadows even if the main object isn't visible in the view
 
 		// stencil shadows can't do personal models unless I polyhedron clip
-		if ( !personalModel
+		if (
+#ifdef STENCIL_SHADOW_IMPROVE //karin: allow player model shadow
+			 (!personalModel || harm_r_stencilShadowPersonal->integer)
+#else
+			 !personalModel
+#endif
 		        && r_shadows->integer == 2
+#if !defined(STENCIL_SHADOW_IMPROVE) //karin: allow shadow on fog
 			&& fogNum == 0
+#endif
 			&& !(ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
-			&& shader->sort == SS_OPAQUE )
+			&& shader->sort == SS_OPAQUE 
+#ifdef STENCIL_SHADOW_IMPROVE //karin: ignore alpha test shader pass and special model type exclude player model
+			&& (STENCIL_SHADOW_MODEL(2) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
+			&& ((personalModel && harm_r_stencilShadowPersonal->integer == 1) || !R_HasAlphaTest(shader))
+#endif
+			)
 		{
 			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, qfalse, ATI_TESS_TRUFORM );
 		}

@@ -193,8 +193,6 @@
     <string name="language">Language</string>
     <string name="setup_launcher_language">Setup launcher language</string>
     <string name="be_available_on_reboot_the_next_time">Be available on reboot the next time</string>
-    <string name="bot_q3_bot_support_in_mp_game">Quake4 Bot(SABot-a9 mod)</string>
-    <string name="mp_game_map_aas_files">Quake4 MP game map aas files</string>
     <string name="game_patch_resource">Game patch resource</string>
     <string name="extract_all">Extract all</string>
     <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Can\'t %s! Read/Write external storage permission is not granted!</string>
@@ -222,7 +220,6 @@
     <string name="request_necessary_permissions">request necessary permissions</string>
     <string name="grant">Grant</string>
     <string name="extract_path_resource_">Extract path resource: </string>
-    <string name="rivensin_play_original_doom3_level">Rivensin play original DOOM3 level</string>
     <string name="save_preferences_file">save preferences file</string>
     <string name="read_preferences_file">read preferences file</string>
     <string name="version_">Version:</string>
@@ -375,7 +372,6 @@
     <string name="launcher">Launcher</string>
     <string name="auto_save_buttons_settings_immediately_if_changed">Auto save buttons settings immediately if changed</string>
     <string name="auto_save_button_settings">Auto save button settings</string>
-    <string name="copy">Copy</string>
     <string name="show_preferences">Show preferences</string>
     <string name="show_application_setting_preferences_contents">Show application setting preferences contents</string>
     <string name="enable">Enable</string>
@@ -404,5 +400,36 @@
     <string name="unsupport_create_desktop_shortcut">Unsupport create desktop shortcut!</string>
     <string name="only_support_on_android_version_7_1"><![CDATA[Only support on Android version >= 7.1 for create desktop shortcut.]]></string>
     <string name="all">All</string>
+    <string name="permission_not_granted">Permission \'%s\' not granted</string>
+    <string name="command_shortcut">Shortcut(Current command)</string>
+    <string name="create_shortcut_with_current_command_and_game">Create shortcut(current command and game)</string>
+    <string name="input_desktop_shortcut_name">Input desktop shortcut name</string>
+    <string name="game_desktop_shortcut_has_created">Game %s desktop shortcut has created(%s).</string>
+    <string name="signals_handler">Signals handler</string>
+    <string name="setup_signals_handler_when_game_crash">Setup signals handler when game crash</string>
+    <string name="last_backtrace_info">Last backtrace info</string>
+    <string name="compression_texture_harm_image_usecompression">Compression texture(harm_image_useCompression)</string>
+    <string name="allow_cheats_harm_sv_cheats">Allow cheats(harm_sv_cheats)</string>
+    <string name="render_personal_model_shadow_harm_r_stencilshadowpersonal">Render personal model shadow(harm_r_stencilShadowPersonal)</string>
+    <string name="blur">Blur</string>
+    <string name="shodow_cg_shadows">Shodow(cg_shadows)</string>
+    <string name="renderer_vid_renderer">Renderer(vid_renderer)</string>
+    <string name="cache_compression_texture_harm_image_usecompressioncache">Cache compression texture(harm_image_useCompressionCache)</string>
+    <string name="commandshortcut">Command shortcut</string>
+    <string name="patch_resource">Patch resource</string>
+    <string name="load_lights_pk3">Load lights.pk3</string>
+    <string name="load_game_support_pk3">Load game_support.pk3</string>
+    <string name="load_brightmaps_pk3">Load brightmaps.pk3</string>
+    <string name="disc_panel">Disc panel</string>
+    <string name="disc_panel_type">Disc panel type</string>
+    <string name="keys">Keys</string>
+    <string name="not_allowed">Not allowed</string>
+    <string name="use_medium_precision_float_in_glsl_shader_harm_r_usemediumprecision">Use medium precision float instead of high precision in GLSL shader(harm_r_useMediumPrecision)</string>
+    <string name="phobos">Phobos</string>
+    <string name="use_high_precision_float_on_glsl_shader_harm_r_usehighprecision">Use high precision float on GLSL shader(harm_r_useHighPrecision)</string>
+    <string name="enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread">Enable debug render tools in multi-threading(harm_r_renderToolsMultithread)</string>
+    <string name="release_">Release:</string>
+    <string name="build_">Build:</string>
+    <string name="dev_">Dev:</string>
 
 </resources>

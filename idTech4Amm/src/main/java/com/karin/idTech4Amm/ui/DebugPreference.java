@@ -5,29 +5,19 @@ import android.preference.PreferenceFragment;
 import android.os.Bundle;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
-import android.content.SharedPreferences;
 import android.content.Context;
-import android.preference.PreferenceManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.karin.idTech4Amm.LogcatActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
-import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KBacktraceHandler;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
-
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * Debug preference fragment
@@ -65,6 +55,10 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         else if("show_preference".equals(key))
         {
             ShowPreference();
+        }
+        else if("last_backtrace".equals(key))
+        {
+            OpenBacktraceInfo();
         }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
@@ -128,7 +122,37 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
 
     private void ShowPreference()
     {
-        new SharedPreferenceViewer(getContext()).run();
+        Context activity = ContextUtility.GetContext(this);
+        new SharedPreferenceViewer(activity).run();
+    }
+
+    private void OpenBacktraceInfo()
+    {
+        Context activity = ContextUtility.GetContext(this);
+        KBacktraceHandler.HandleBacktrace(activity);
+        String text = KBacktraceHandler.GetDumpExceptionContent();
+        AlertDialog.Builder builder = ContextUtility.CreateMessageDialogBuilder(activity, Q3ELang.tr(activity, R.string.last_backtrace_info), text != null ? text : Q3ELang.tr(activity, R.string.none));
+        if(text != null)
+        {
+            builder.setNegativeButton(R.string.clear, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id)
+                {
+                    KBacktraceHandler.ClearDumpBacktraceContent();
+                    dialog.dismiss();
+                }
+            });
+            builder.setNeutralButton(R.string.copy, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id)
+                {
+                    Q3EUtils.CopyToClipboard(activity, text);
+                    Toast.makeText(activity, R.string.success, Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }
+            });
+        }
+        builder.create().show();
     }
 
     @Override

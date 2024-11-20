@@ -40,24 +40,21 @@ public final class CVarEditorFunc extends GameLauncherFunc
         CVarSettingWidget widget = new CVarSettingWidget(m_gameLauncher);
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.cvar_editor)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
-                {
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
                         SetCmdText(widget.DumpCommand(GetCmdText()));
                     }
                 })
-                .setNegativeButton(R.string.remove, new DialogInterface.OnClickListener()
-                {
+                .setNegativeButton(R.string.remove, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
                         SetCmdText(m_baseCommand);
                     }
                 })
-                .setNeutralButton(R.string.reset, new DialogInterface.OnClickListener()
-                {
+                .setNeutralButton(R.string.reset, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {

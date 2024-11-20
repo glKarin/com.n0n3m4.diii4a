@@ -1,0 +1,51 @@
+///////////////////////////////////
+// gmRealtimeGL
+// by psycho, http://psycho.mypage.sk
+// [license: whatever, but let me know]
+//
+// script language: http://www.somedude.net/gamemonkey/
+//
+// you can use all openGL (1.1) constants, and functions that take:
+// - int values: GLenum, GLsizei, GLint, GLuint, GLboolean, GLbitfield
+// - float values: GLfloat, GLdouble, GLclampf, GLclampd
+//
+// use ctrl+s to save file -> gmRealtimeGL will automatically reload it
+///////////////////////////////////
+
+
+
+// this is only called once (every time that file is reloaded)
+global initGL = function()
+{
+	glClearColor(0.7f, 0.4f, 0.0f, 0.0f);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glClearDepth(1.0f);
+};
+
+
+// this is called every frame
+global displayGL = function()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
+
+	// move camera a little back
+	glTranslatef(0, 0, -5);
+
+	global a;
+	a += 0.1f;
+	glRotatef(a, 0.0f, 0.0f, 1.0f);
+
+	glColor3f(0.5, 0.5, 0.5);
+	glBegin(GL_QUADS);
+	glVertex3f(-0.5f, -0.5f,  0.5f);
+	glVertex3f( 0.5f, -0.5f,  0.5f);
+	glVertex3f( 0.5f,  0.5f,  0.5f);
+	glVertex3f(-0.5f,  0.5f,  0.5f);
+	glEnd();
+
+
+};
+

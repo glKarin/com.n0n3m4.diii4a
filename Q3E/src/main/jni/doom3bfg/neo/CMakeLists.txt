@@ -7,13 +7,16 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
 if(ANDROID)
-
 	add_definitions(-D_DIII4A) # for DIII4A touchscreen
 	add_compile_options(-Wno-non-c-typedef-for-linkage)
 	add_definitions(-DGLEW_EGL) # Using OpenGLES3.2
 endif()
 add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
 add_definitions(-D_GLES) # Using OpenGLES3.2
+option(DEPTH_COMPONENTS_32 "Use 32 depth components depth texture(default 24)" OFF)
+if(DEPTH_COMPONENTS_32)
+	add_definitions(-D_DEPTH_COMPONENTS_32) # Using 32 depth components depth texture
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

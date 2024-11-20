@@ -1,0 +1,32 @@
+# The Omni-bot Common Static Library.
+
+project Common
+	: requirements 
+	<include>./
+	<include>../dependencies/physfs
+	<include>../dependencies/physfs/lzma/C
+	<include>../dependencies/physfs/zlib123
+	<define>PHYSFS_SUPPORTS_ZIP
+	<define>PHYSFS_SUPPORTS_7Z
+	<define>PHYSFS_NO_CDROM_SUPPORT
+	;
+
+SOURCES = [ glob ../dependencies/gmscriptex/gmsrc_ex/src/gm/*.cpp ] 
+		  [ glob ../dependencies/gmscriptex/gmsrc_ex/src/platform/win32gcc/*.cpp ]
+		  [ glob ../dependencies/gmscriptex/gmsrc_ex/src/binds/*.cpp : ../dependencies/gmscriptex/gmsrc_ex/src/binds/gmSqliteLib.cpp ../dependencies/gmscriptex/gmsrc_ex/src/binds/gmSystemLib.cpp ]
+		  [ glob ../dependencies/gmscriptex/gmsrc_ex/src/3rdParty/mathlib/*.cpp ]
+		  [ glob ../dependencies/gmscriptex/gmsrc_ex/src/3rdParty/gmbinder2/*.cpp ]
+		  [ glob ../dependencies/wildmagic/*.cpp : ../dependencies/wildmagic/Wm3IntrPlane3Plane3.cpp ] 
+		  [ glob ../dependencies/physfs/*.c ] 
+		  [ glob ../dependencies/physfs/archivers/*.c ] 
+		  [ glob ../dependencies/physfs/lzma/C/*.c ] 
+		  [ glob ../dependencies/physfs/lzma/C/Archive/7z/*.c ] 
+		  [ glob ../dependencies/physfs/lzma/C/Compress/Lzma/*.c : ../dependencies/physfs/lzma/C/Compress/Lzma/LzmaDecodeSize.c ] 
+		  [ glob ../dependencies/physfs/lzma/C/Compress/Branch/*.c ] 
+		  [ glob ../dependencies/physfs/zlib123/*.c ] 
+		  [ glob ../dependencies/physfs/platform/*.c ] 
+#		  [ glob ../dependencies/iprof/*.c ] 
+		  BatchBuild.cpp
+		;
+
+lib Common : $(SOURCES) : <link>static ;

@@ -136,9 +136,14 @@ public final class Q3EPreference
     public static final String pref_harm_r_stencilShadowSoft          = "q3e_harm_r_stencilShadowSoft"; //k
     public static final String pref_harm_r_stencilShadowCombine       = "q3e_harm_r_stencilShadowCombine"; //k
     public static final String pref_harm_r_autoAspectRatio            = "q3e_harm_r_autoAspectRatio"; //k
+    public static final String pref_harm_r_useHighPrecision           = "q3e_harm_r_useHighPrecision"; //k
+    public static final String pref_harm_r_renderToolsMultithread     = "q3e_harm_r_renderToolsMultithread"; //k
     public static final String pref_scrres_scheme                     = "harm_q3e_scrres";
     public static final String pref_scrres_scale                      = "harm_q3e_scrres_scale";
     public static final String pref_harm_r_shadowMapPerforatedShadow  = "q3e_harm_r_shadowMapPerforatedShadow"; //k
+    public static final String pref_harm_gzdoom_load_lights_pk3       = "harm_gzdoom_load_lights_pk3";
+    //public static final String pref_harm_gzdoom_load_game_support_pk3 = "harm_gzdoom_load_game_support_pk3";
+    public static final String pref_harm_gzdoom_load_brightmaps_pk3   = "harm_gzdoom_load_brightmaps_pk3";
 
     public static final String RUN_BACKGROUND                = "harm_run_background";
     public static final String RENDER_MEM_STATUS             = "harm_render_mem_status";
@@ -147,6 +152,7 @@ public final class Q3EPreference
     public static final String VOLUME_DOWN_KEY               = "harm_volume_down_key";
     public static final String WEAPON_PANEL_KEYS             = "harm_weapon_panel_keys";
     public static final String CONTROLS_CONFIG_POSITION_UNIT = "harm_controls_config_position_unit";
+    public static final String SIGNALS_HANDLER               = "harm_signals_handler";
     public static final String NO_HANDLE_SIGNALS             = "harm_no_handle_signals";
     public static final String REDIRECT_OUTPUT_TO_FILE       = "harm_redirect_output_to_file";
     public static final String COVER_EDGES                   = "harm_cover_edges";
@@ -160,6 +166,7 @@ public final class Q3EPreference
     public static final String THEME                         = "harm_theme";
     public static final String EVENT_QUEUE                   = "harm_event_queue"; // 0 - java 1 - native
     public static final String AUTOSAVE_BUTTON_SETTINGS      = "harm_autosave_button_settings";
+    public static final String DISC_PANEL_KEYS_PREFIX        = "harm_disc_panel_keys_";
 
     public static float GetFloatFromString(Context context, String name, float defVal)
     {

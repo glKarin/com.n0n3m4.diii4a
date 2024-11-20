@@ -19,15 +19,16 @@
     </string-array>
 
     <string-array name="onscreen_slider_style_labels">
-        <item>左-右方向</item>
-        <item>下-右方向</item>
+        <item>左-右方向(滑动)</item>
+        <item>下-右方向(滑动)</item>
         <item>左-右方向(点击)</item>
         <item>下-右方向(点击)</item>
     </string-array>
 
     <string-array name="onscreen_type_labels">
         <item>普通按键</item>
-        <item>滑动按键</item>
+        <item>组合按键</item>
+        <item>圆盘</item>
     </string-array>
 
     <string-array name="lang_labels">
@@ -41,5 +42,16 @@
         <item>总是</item>
         <item>隐藏</item>
         <item>仅按下</item>
+    </string-array>
+
+    <string-array name="signals_handler_labels">
+        <item>由游戏引擎自行处理</item>
+        <item>不处理</item>
+        <item>记录回退栈</item>
+    </string-array>
+
+    <string-array name="onscreen_disc_style_labels">
+        <item>滑动</item>
+        <item>点击</item>
     </string-array>
 </resources>

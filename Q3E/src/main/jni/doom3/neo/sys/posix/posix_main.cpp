@@ -156,8 +156,15 @@ void idSysLocal::StartProcess(const char *exeName, bool quit)
 Sys_Quit
 ================
 */
+#ifdef _SDL
+#include <SDL.h>
+#endif
 void Sys_Quit(void)
 {
+#ifdef _SDL
+	//karin: SQL_Quit in here from framework::Shutdown
+	SDL_Quit();
+#endif
 	Posix_Exit(EXIT_SUCCESS);
 }
 
@@ -166,6 +173,7 @@ void Sys_Quit(void)
 Sys_Milliseconds
 ================
 */
+#if !defined(_SDL) // in sdl/threads.cpp
 /* base time in seconds, that's our origin
    timeval:tv_sec is an int:
    assuming this wraps every 0x7fffffff - ~68 years since the Epoch (1970) - we're safe till 2038
@@ -192,6 +200,7 @@ int Sys_Milliseconds(void)
 
 	return curtime;
 }
+#endif
 
 /*
 ================
@@ -324,6 +333,7 @@ void Posix_QueEvent(sysEventType_t type, int value, int value2,
 #endif
 }
 
+#if !defined(_SDL) // in sdl/events.cpp
 /*
 ================
 Sys_GetEvent
@@ -354,6 +364,7 @@ void Sys_ClearEvents(void)
 {
 	eventHead = eventTail = 0;
 }
+#endif
 
 /*
 ================
@@ -476,6 +487,7 @@ long Sys_FileTimeStamp(FILE *fp)
 	return st.st_mtime;
 }
 
+#if !defined(_SDL) // in sdl/threads.cpp
 void Sys_Sleep(int msec)
 {
 	if (msec < 20) {
@@ -495,6 +507,7 @@ void Sys_Sleep(int msec)
 	if (usleep(msec * 1000) == -1)
 		Sys_Printf("usleep: %s\n", strerror(errno));
 }
+#endif
 
 char *Sys_GetClipboardData(void)
 {
@@ -604,7 +617,9 @@ void Posix_EarlyInit(void)
 	Posix_InitSigs();
 	// set the base time
 	Sys_Milliseconds();
+#if !defined(_SDL)
 	Posix_InitPThreads();
+#endif
 }
 
 /*
@@ -1105,6 +1120,7 @@ called during frame loops, pacifier updates etc.
 this is only for console input polling and misc mouse grab tasks
 the actual mouse and keyboard input is in the Sys_Poll logic
 */
+#if !defined(_SDL) // in sdl/events.cpp
 void Sys_GenerateEvents(void)
 {
 	char *s;
@@ -1119,6 +1135,7 @@ void Sys_GenerateEvents(void)
 		Posix_QueEvent(SE_CONSOLE, 0, 0, len, b);
 	}
 }
+#endif
 
 /*
 ===============
@@ -1232,6 +1249,7 @@ uint64_t Sys_Microseconds( void )
 	return curtime;
 }
 
+#if !defined(_SDL) // in sdl/cpu.cpp
 /*
 ========================
 Sys_CPUCount
@@ -1357,3 +1375,4 @@ void Sys_CPUCount( int& numLogicalCPUCores, int& numPhysicalCPUCores, int& numCP
 	numCPUPackages = s_numCPUPackages;
 }
 // RB end
+#endif

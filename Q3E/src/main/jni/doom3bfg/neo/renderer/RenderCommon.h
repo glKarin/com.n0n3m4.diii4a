@@ -1223,6 +1223,10 @@ extern idCVar r_useLightGrid;
 extern idCVar r_exposure;
 // RB end
 
+#ifdef _GLES //karin: force use medium precision in GLSL shader: Mali GPU must use high precision, Adreno GPU can use medium precision
+extern idCVar harm_r_useMediumPrecision;
+#endif
+
 /*
 ====================================================================
 

@@ -340,6 +340,24 @@ GLuint GLSLProgram::CompileShader( GLint shaderType, const char *sourceFile, con
 		return 0;
 	}
 
+#ifdef _GLES //karin: force use medium precision in GLSL shader
+    idStr nameStr(sourceFile);
+    nameStr.StripPath();
+    const bool IsInteractionShader = nameStr.Find("interaction") == 0;
+    if(!IsInteractionShader && harm_r_useMediumPrecision.GetBool())
+    {
+        const std::string highp("precision highp float;");
+        const std::string mediump("precision mediump float;");
+        std::string::size_type pos = 0;
+        while((pos = source.find(highp, pos)) != std::string::npos){
+            source.replace(pos, highp.size(), mediump);
+            pos += mediump.size();
+        }
+        common->Printf("'%s' float precision: medium\n", sourceFile);
+    }
+    else
+        common->Printf("'%s' float precision: high\n", sourceFile);
+#endif
 	std::vector<std::string> sourceFiles { sourceFile };
 	ResolveIncludes( source, sourceFiles );
 	idHashMapDict definesPlus( defines );
@@ -355,6 +373,14 @@ GLuint GLSLProgram::CompileShader( GLint shaderType, const char *sourceFile, con
 	GLuint shader = qglCreateShader( shaderType );
 	GLint length = source.size();
 	const char *sourcePtr = source.c_str();
+#ifdef _GLES //karin: output final generated GLSL shader source for debug
+    if(harm_r_outputGLSLSource.GetBool())
+    {
+        std::string testfile("generated_glsl/");
+        testfile += sourceFile;
+        fileSystem->WriteFile( testfile.c_str(), sourcePtr, length, "fs_savepath", "" );
+    }
+#endif
 	qglShaderSource( shader, 1, &sourcePtr, &length );
 	qglCompileShader( shader );
 

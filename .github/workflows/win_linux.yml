@@ -1,0 +1,195 @@
+# Only for building testing version on Windows/Linux by Github CI workflow
+
+name: Windows/Linux testing build
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      #- 'Q3E/src/main/jni/doom3/neo/**'
+      - '.github/workflows/win_linux.yml'
+      - '.github/workflows/win_linux.changelog'
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      #- 'Q3E/src/main/jni/doom3/neo/**'
+      - '.github/workflows/win_linux.yml'
+      - '.github/workflows/win_linux.changelog'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        build_type: [ Release ]
+        bits: [ 64, 32 ]
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+          - os: ubuntu-latest
+            c_compiler: gcc # clang
+            cpp_compiler: g++ # clang++
+        exclude:
+          - os: ubuntu-latest
+            bits: 32
+
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 1
+          fetch-tags: true
+
+      - name: Set env strings
+        id: strings
+        shell: bash
+        run: |
+          echo ${{ github.workspace }} ${{ matrix.os }}-${{ matrix.bits }}
+          if [ "x${{ matrix.bits }}" = "x32" ]; then echo "arch=86" >> "$GITHUB_OUTPUT"; else echo "arch=64" >> "$GITHUB_OUTPUT"; fi
+          if [ "x${{ matrix.os }}" = "xubuntu-latest" ]; then echo "os=linux" >> "$GITHUB_OUTPUT"; echo "archive=tar.gz" >> "$GITHUB_OUTPUT"; if [ "x${{ matrix.bits }}" = "x32" ]; then echo "name=linux_i386" >> "$GITHUB_OUTPUT"; else echo "name=linux_amd64" >> "$GITHUB_OUTPUT"; fi else echo "os=win" >> "$GITHUB_OUTPUT"; echo "archive=zip" >> "$GITHUB_OUTPUT"; if [ "x${{ matrix.bits }}" = "x32" ]; then echo "name=win_x86" >> "$GITHUB_OUTPUT"; else echo "name=win_x64" >> "$GITHUB_OUTPUT"; fi fi
+
+      - name: Get current date time
+        id: current_datetime
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+          format: "YYYY-MM-DD_HH-mm-ss"
+
+      - name: Install CMake and Ninja
+        if: matrix.os == 'windows-latest'
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "3.25.2"
+
+      - name: Setup vcpkg and install depends
+        if: matrix.os == 'windows-latest'
+        id: vcpkg_setup
+        uses: johnwason/vcpkg-action@v6
+        with:
+          pkgs: 'SDL2 curl openal-soft zlib' # directxsdk
+          triplet: x${{ steps.strings.outputs.arch }}-windows
+          token: ${{ secrets.TOKEN }}
+          github-binarycache: true
+
+      - name: Configure project with CMake(Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd Q3E\src\main\jni\doom3\neo
+          cmake ${{ steps.vcpkg_setup.outputs.vcpkg-cmake-config }} -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DDIRECTXSDK_INCLUDE_PATH=${{ github.workspace }}/vcpkg/packages/directxsdk_${{steps.strings.outputs.arch}}-windows/include/directxsdk -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
+
+      - name: Run apt
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt install -y gcc-multilib g++-multilib libopenal-dev libsdl2-dev # libwayland-dev libxext-dev # zlib1g-dev libcurl4-openssl-dev
+
+#      - name: Download SDL2(Linux)
+#        if: matrix.os == 'ubuntu-latest'
+#        run: |
+#          cd Q3E/src/main/jni/doom3/neo/externlibs
+#          cd SDL2
+#          wget https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-2.30.9.tar.gz
+#          tar zxvf SDL2-2.30.9.tar.gz -C SDL2
+#          mv SDL2/SDL2-2.30.9/* SDL2/
+#          ls SDL2
+
+      - name: Configure project with CMake(Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd Q3E/src/main/jni/doom3/neo
+          cmake -B ${{ steps.strings.outputs.name }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_MINIZ=ON -DUSE_LOCAL_SDL=OFF CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
+
+      - name: Build with Make/Ninja
+        run: |
+          cd Q3E/src/main/jni/doom3/neo
+          ls ${{ steps.strings.outputs.name }}
+          cmake --build ${{ steps.strings.outputs.name }} --config ${{ matrix.build_type }}
+          
+      - name: Copy OpenAL32.dll
+        if: matrix.os == 'windows-latest'
+        run: |
+          xcopy /Y/Q ${{ github.workspace }}\vcpkg\packages\openal-soft_x${{ steps.strings.outputs.arch }}-windows\bin\OpenAL32.dll Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\
+
+      - name: Prepare package
+        if: matrix.os == 'windows-latest'
+        run: |
+          dir Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}
+          mkdir ${{ matrix.build_type }}
+          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\*.dll ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}\
+          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\*.exe ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}\
+          dir ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}
+
+      - name: Package to zip
+        if: matrix.os == 'windows-latest'
+        uses: vimtor/action-zip@v1.2
+        with:
+          files: ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          dest: idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.zip
+          recursive: false
+
+      - name: Package to tgz
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          ls --color Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}
+          mkdir ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/lib*.so ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          tar zcvf idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.tar.gz ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+
+      - uses: actions/upload-artifact@v4
+        name: Upload package archive artifacts
+        with:
+          name: "${{ steps.strings.outputs.name }}-${{ matrix.build_type }}"
+          path: "idTech4A++-testing_${{ steps.strings.outputs.name }}-${{ steps.current_datetime.outputs.time }}.${{ steps.strings.outputs.archive }}"
+          retention-days: 1
+
+  collect:
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    steps:
+      - uses: actions/download-artifact@v4
+        name: Download all artifacts
+        with:
+          # path: packages
+          merge-multiple: true
+          
+      - name: List all packages
+        run: |
+          ls --color;
+
+      - name: Delete tag and release
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          tag_name: win_linux_testing
+          delete_release: true
+          repo: glKarin/com.n0n3m4.diii4a
+          github_token: ${{ secrets.TOKEN }}
+          
+      - name: Get release date time
+        id: release_datetime
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+          format: "YYYYMMDD-HHmmss"
+
+      - name: Create release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.TOKEN }}"
+          automatic_release_tag: "win_linux_testing"
+          prerelease: true
+          title: "[${{steps.release_datetime.outputs.time}}] Windows/Linux testing (Non-release. Automatic CI builds)"
+          files: |
+            idTech4A++-testing_*

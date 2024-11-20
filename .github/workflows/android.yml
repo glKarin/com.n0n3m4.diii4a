@@ -6,15 +6,17 @@ on:
   push:
     branches: [ "master" ]
     paths:
-      - 'idTech4Amm/**'
-      - 'Q3E/**'
+      #- 'idTech4Amm/**'
+      #- 'Q3E/**'
       - '.github/workflows/android.yml'
+      - '.github/workflows/android.changelog'
   pull_request:
     branches: [ "master" ]
     paths:
-      - 'idTech4Amm/**'
-      - 'Q3E/**'
+      #- 'idTech4Amm/**'
+      #- 'Q3E/**'
       - '.github/workflows/android.yml'
+      - '.github/workflows/android.changelog'
 
 jobs:
   build-android:

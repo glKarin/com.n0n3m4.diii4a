@@ -182,8 +182,6 @@
     <string name="language">Язык/Language</string>
     <string name="setup_launcher_language">Выбрать язык лаунчера</string>
     <string name="be_available_on_reboot_the_next_time">Язык будет обновлен после перезагрузки лаунчера</string>
-    <string name="bot_q3_bot_support_in_mp_game">Боты Quake 4 (мод SABot-a9)</string>
-    <string name="mp_game_map_aas_files">Файлы игры Quake4 в формате "aas"</string>
     <string name="game_patch_resource">Ресурсы игрового патча</string>
     <string name="extract_all">Извлечь все</string>
     <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Разрешение на чтение/запись внешнего хранилища не предоставлено!</string>
@@ -211,7 +209,6 @@
     <string name="request_necessary_permissions">необходимо предоставить разрешение</string>
     <string name="grant">предоставить</string>
     <string name="extract_path_resource_">Извлечь ресурс пути: </string>
-    <string name="rivensin_play_original_doom3_level">Rivensin на оригинальных уровнях DOOM3</string>
     <string name="save_preferences_file">сохранить файл настроек</string>
     <string name="read_preferences_file">загрузить файл настроек</string>
     <string name="version_">Версия:</string>
@@ -371,7 +368,6 @@
     <string name="launcher">Лаунчер</string>
     <string name="auto_save_buttons_settings_immediately_if_changed">Автоматическое сохранение настроек сразу, как они были изменены</string>
     <string name="auto_save_button_settings">Автоматическое сохранение настроек кнопок</string>
-    <string name="copy">Копировать</string>
     <string name="show_preferences">Показать предпочтения</string>
     <string name="show_application_setting_preferences_contents">Показать содержимое настроек предпочтений приложения</string>
     <string name="enable">Включить</string>
@@ -401,5 +397,36 @@
     <string name="unsupport_create_desktop_shortcut">Отменить создание ярлыка на рабочем столе!</string>
     <string name="only_support_on_android_version_7_1"><![CDATA[Для создания ярлыка на рабочем столе требуется Андроид версии 7.1 или выше.]]></string>
     <string name="all">Всё</string>
+    <string name="permission_not_granted">Permission \'%s\' not granted</string>
+    <string name="command_shortcut">Shortcut(Current command)</string>
+    <string name="create_shortcut_with_current_command_and_game">Create shortcut(current command and game)</string>
+    <string name="input_desktop_shortcut_name">Input desktop shortcut name</string>
+    <string name="game_desktop_shortcut_has_created">Game %s desktop shortcut has created(%s).</string>
+    <string name="signals_handler">Signals handler</string>
+    <string name="setup_signals_handler_when_game_crash">Setup signals handler when game crash</string>
+    <string name="last_backtrace_info">Last backtrace info</string>
+    <string name="compression_texture_harm_image_usecompression">Compression texture(harm_image_useCompression)</string>
+    <string name="allow_cheats_harm_sv_cheats">Allow cheats(harm_sv_cheats)</string>
+    <string name="render_personal_model_shadow_harm_r_stencilshadowpersonal">Render personal model shadow(harm_r_stencilShadowPersonal)</string>
+    <string name="blur">Blur</string>
+    <string name="shodow_cg_shadows">Shodow(cg_shadows)</string>
+    <string name="renderer_vid_renderer">Renderer(vid_renderer)</string>
+    <string name="cache_compression_texture_harm_image_usecompressioncache">Cache compression texture(harm_image_useCompressionCache)</string>
+    <string name="commandshortcut">Command shortcut</string>
+    <string name="patch_resource">Patch resource</string>
+    <string name="load_lights_pk3">Load lights.pk3</string>
+    <string name="load_game_support_pk3">Load game_support.pk3</string>
+    <string name="load_brightmaps_pk3">Load brightmaps.pk3</string>
+    <string name="disc_panel">Disc panel</string>
+    <string name="disc_panel_type">Disc panel type</string>
+    <string name="keys">Keys</string>
+    <string name="not_allowed">Not allowed</string>
+    <string name="use_medium_precision_float_in_glsl_shader_harm_r_usemediumprecision">Use medium precision float instead of high precision in GLSL shader(harm_r_useMediumPrecision)</string>
+    <string name="phobos">Phobos</string>
+    <string name="use_high_precision_float_on_glsl_shader_harm_r_usehighprecision">Use high precision float on GLSL shader(harm_r_useHighPrecision)</string>
+    <string name="enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread">Enable debug render tools in multi-threading(harm_r_renderToolsMultithread)</string>
+    <string name="release_">Release:</string>
+    <string name="build_">Build:</string>
+    <string name="dev_">Dev:</string>
 
 </resources>

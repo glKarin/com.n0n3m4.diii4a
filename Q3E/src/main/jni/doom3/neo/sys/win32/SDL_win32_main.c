@@ -7,14 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef _RAVEN //karin: win log file name
-#define GAME_NAME_ID "quake4"
-#elif defined(_HUMANHEAD)
-#define GAME_NAME_ID "prey"
-#else
-#define GAME_NAME_ID "doom3"
-#endif
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -43,6 +35,14 @@
 #  undef main
 # endif /* _WIN32_WCE_EMULATION */
 #endif /* main */
+
+#ifdef _RAVEN //karin: win log file name
+#define GAME_NAME_ID "quake4"
+#elif defined(_HUMANHEAD)
+#define GAME_NAME_ID "prey"
+#else
+#define GAME_NAME_ID "doom3"
+#endif
 
 /* The standard output files */
 #define STDOUT_FILE	TEXT(GAME_NAME_ID "_log.txt") /* DG: renamed this */

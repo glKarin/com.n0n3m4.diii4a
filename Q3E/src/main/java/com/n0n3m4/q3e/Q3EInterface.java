@@ -20,6 +20,7 @@
 package com.n0n3m4.q3e;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -40,8 +41,8 @@ public class Q3EInterface
 		InitDefaultArgTable();
 	}
 
-	private static int[] _defaultArgs;
-	private static int[] _defaultType;
+	public static int[] _defaultArgs;
+	public static int[] _defaultType;
 
 	public int UI_SIZE;
 	public String[] defaults_table;
@@ -301,6 +302,20 @@ public class Q3EInterface
 	private void SetupConfigFile()
 	{
 		config_name = ConfigFileName();
+	}
+
+	public static String GetStandaloneDirectory(boolean standalone, String game)
+	{
+		String subdir = GetGameStandaloneDirectory(game);
+		if(standalone)
+			return subdir;
+		else if(Q3EGlobals.GAME_TDM.equals(game)
+				|| Q3EGlobals.GAME_DOOM3BFG.equals(game)
+				|| Q3EGlobals.GAME_GZDOOM.equals(game)
+		)
+			return subdir;
+		else
+			return null;
 	}
 
 	private void SetupSubDir()
@@ -589,6 +604,12 @@ public class Q3EInterface
 		texture_table[Q3EGlobals.UI_7] = "btn_7.png";
 		texture_table[Q3EGlobals.UI_8] = "btn_8.png";
 		texture_table[Q3EGlobals.UI_9] = "btn_9.png";
+		texture_table[Q3EGlobals.UI_Y] = "btn_y.png";
+		texture_table[Q3EGlobals.UI_N] = "btn_n.png";
+		texture_table[Q3EGlobals.UI_PLUS] = "btn_plus.png";
+		texture_table[Q3EGlobals.UI_MINUS] = "btn_minus.png";
+
+		texture_table[Q3EGlobals.UI_NUM_PANEL] = "disc_num.png";
     }
 
     public void InitTypeTable()
@@ -619,7 +640,7 @@ public class Q3EInterface
     public void InitD3()
     {
         isD3 = true;
-        isD3BFG = true; // ???
+        //isD3BFG = true; // ???
 		InitTable();
     }
 
@@ -821,9 +842,113 @@ public class Q3EInterface
 			return null;
 	}
 
+	public static String GetGameModPreferenceKey(String name)
+	{
+		if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q4_fs_game;
+		else if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_prey_fs_game;
+		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q2_fs_game;
+		else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q3_fs_game;
+		else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_rtcw_fs_game;
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_tdm_fs_game;
+		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q1_fs_game;
+		else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_d3bfg_fs_game;
+		else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_gzdoom_fs_game;
+		else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_etw_fs_game;
+		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_realrtcw_fs_game;
+		else
+			return Q3EPreference.pref_harm_fs_game;
+	}
+
+	public static String GetEnableModPreferenceKey(String name)
+	{
+		if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q4_user_mod;
+		else if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_prey_user_mod;
+		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q2_user_mod;
+		else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q3_user_mod;
+		else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_rtcw_user_mod;
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_tdm_user_mod;
+		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_q1_user_mod;
+		else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_d3bfg_user_mod;
+		else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_gzdoom_user_mod;
+		else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_etw_user_mod;
+		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+			return Q3EPreference.pref_harm_realrtcw_user_mod;
+		else
+			return Q3EPreference.pref_harm_user_mod;
+	}
+
+	public static String GetGameBaseDirectory(String name)
+	{
+		if(Q3EGlobals.GAME_PREY.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_PREY;
+		else if(Q3EGlobals.GAME_QUAKE4.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_QUAKE4;
+		else if(Q3EGlobals.GAME_QUAKE2.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_QUAKE2;
+		else if(Q3EGlobals.GAME_QUAKE3.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_QUAKE3;
+		else if(Q3EGlobals.GAME_RTCW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_RTCW;
+		else if(Q3EGlobals.GAME_TDM.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_TDM;
+		else if(Q3EGlobals.GAME_QUAKE1.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_QUAKE1;
+		else if(Q3EGlobals.GAME_DOOM3BFG.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_DOOM3BFG;
+		else if(Q3EGlobals.GAME_GZDOOM.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_GZDOOM;
+		else if(Q3EGlobals.GAME_ETW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_ETW;
+		else if(Q3EGlobals.GAME_REALRTCW.equalsIgnoreCase(name))
+			return Q3EGlobals.GAME_BASE_REALRTCW;
+		else
+			return Q3EGlobals.GAME_BASE_DOOM3;
+	}
+
 	public void SetAppStoragePath(Context context)
 	{
 		Q3EUtils.q3ei.app_storage_path = Q3EUtils.GetAppStoragePath(context, null);
+	}
+
+	public String MakeTempBaseCommand(Context context)
+	{
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		String extraCommand = "";
+		if ((Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()) && preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
+			extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).SetCommand("disconnect", true).toString();
+		if ((Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isRealRTCW) && preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
+			extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).SetParam("loadGame", "QuickSave").toString();
+		if (Q3EUtils.q3ei.isDOOM)
+		{
+			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, true))
+				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "lights.pk3").toString();
+//			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, true))
+//				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "game_support.pk3").toString();
+			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, true))
+				extraCommand = Q3EUtils.q3ei.GetGameCommandEngine(extraCommand).AddParam("file", "brightmaps.pk3").toString();
+		}
+		return extraCommand.trim();
 	}
 
 	public static void DumpDefaultOnScreenConfig(int[] args, int[] type)
@@ -860,11 +985,16 @@ public class Q3EInterface
 		type_table[Q3EGlobals.UI_INTERACT] = Q3EGlobals.TYPE_BUTTON;
 
 		type_table[Q3EGlobals.UI_WEAPON_PANEL] = Q3EGlobals.TYPE_DISC;
+		type_table[Q3EGlobals.UI_NUM_PANEL] = Q3EGlobals.TYPE_DISC;
 
 		type_table[Q3EGlobals.UI_SCORE] = Q3EGlobals.TYPE_BUTTON;
 
 		for(int i = Q3EGlobals.UI_0; i <= Q3EGlobals.UI_9; i++)
 			type_table[i] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_Y] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_N] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_PLUS] = Q3EGlobals.TYPE_BUTTON;
+		type_table[Q3EGlobals.UI_MINUS] = Q3EGlobals.TYPE_BUTTON;
 
 		_defaultType = Arrays.copyOf(type_table, type_table.length);
 	}
@@ -907,7 +1037,7 @@ public class Q3EInterface
 		arg_table[Q3EGlobals.UI_SAVE * 4] = Q3EKeyCodes.KeyCodesGeneric.K_F5;
 		arg_table[Q3EGlobals.UI_SAVE * 4 + 1] = Q3EKeyCodes.KeyCodesGeneric.K_ESCAPE;
 		arg_table[Q3EGlobals.UI_SAVE * 4 + 2] = Q3EKeyCodes.KeyCodesGeneric.K_F9;
-		arg_table[Q3EGlobals.UI_SAVE * 4 + 3] = Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT;
+		arg_table[Q3EGlobals.UI_SAVE * 4 + 3] = Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT_SPLIT_CLICK;
 
 		arg_table[Q3EGlobals.UI_1 * 4] = Q3EKeyCodes.KeyCodesGeneric.K_F1;
 		arg_table[Q3EGlobals.UI_1 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
@@ -988,6 +1118,36 @@ public class Q3EInterface
 		arg_table[Q3EGlobals.UI_9 * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
 		arg_table[Q3EGlobals.UI_9 * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
 		arg_table[Q3EGlobals.UI_9 * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_WEAPON_PANEL * 4] = Q3EKeyCodes.ONSCRREN_DISC_KEYS_WEAPON; // all keys map index
+		arg_table[Q3EGlobals.UI_WEAPON_PANEL * 4 + 1] = Q3EGlobals.ONSCRREN_DISC_SWIPE;
+		arg_table[Q3EGlobals.UI_WEAPON_PANEL * 4 + 2] = 0; // 4 chars name
+		arg_table[Q3EGlobals.UI_WEAPON_PANEL * 4 + 3] = 0; // keep
+
+		arg_table[Q3EGlobals.UI_NUM_PANEL * 4] = Q3EKeyCodes.ONSCRREN_DISC_KEYS_NUM;
+		arg_table[Q3EGlobals.UI_NUM_PANEL * 4 + 1] = Q3EGlobals.ONSCRREN_DISC_CLICK;
+		arg_table[Q3EGlobals.UI_NUM_PANEL * 4 + 2] = ('N' << 16) | ('u' << 8) | 'm';
+		arg_table[Q3EGlobals.UI_NUM_PANEL * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_Y * 4] = Q3EKeyCodes.KeyCodesGeneric.K_Y;
+		arg_table[Q3EGlobals.UI_Y * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_Y * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_Y * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_N * 4] = Q3EKeyCodes.KeyCodesGeneric.K_N;
+		arg_table[Q3EGlobals.UI_N * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_N * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_N * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_PLUS * 4] = Q3EKeyCodes.KeyCodesGeneric.K_EQUALS;
+		arg_table[Q3EGlobals.UI_PLUS * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_PLUS * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_PLUS * 4 + 3] = 0;
+
+		arg_table[Q3EGlobals.UI_MINUS * 4] = Q3EKeyCodes.KeyCodesGeneric.K_MINUS;
+		arg_table[Q3EGlobals.UI_MINUS * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_NOT_HOLD;
+		arg_table[Q3EGlobals.UI_MINUS * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL;
+		arg_table[Q3EGlobals.UI_MINUS * 4 + 3] = 0;
 
 		_defaultArgs = Arrays.copyOf(arg_table, arg_table.length);
 	}

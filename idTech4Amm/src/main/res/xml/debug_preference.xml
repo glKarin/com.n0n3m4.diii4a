@@ -20,13 +20,22 @@
             android:title="@string/render_memory_status_0_is_disable"
             android:defaultValue="0"
         />
-        <CheckBoxPreference
+<!--        <CheckBoxPreference
             android:title="@string/no_handle_signals"
             android:key="harm_no_handle_signals"
             android:persistent="true"
             android:defaultValue="false"
             android:summary="@string/do_not_handle_signals"
-        />
+        />-->
+        <ListPreference
+            android:title="@string/signals_handler"
+            android:key="harm_signals_handler"
+            android:persistent="true"
+            android:defaultValue="0"
+            android:summary="@string/setup_signals_handler_when_game_crash"
+            android:entryValues="@array/signals_handler_values"
+            android:entries="@array/signals_handler_labels"
+            />
         <CheckBoxPreference
             android:title="@string/load_local_engine_library"
             android:key="harm_load_local_engine_lib"
@@ -64,10 +73,15 @@
             android:title="@string/log"
     >
         <Preference
-                android:key="last_dalvik_crash_info"
-                android:title="@string/last_dalvik_crash_info"
-                android:summary="@string/last_dalvik_crash_info"
-                android:persistent="false"/>
+            android:key="last_dalvik_crash_info"
+            android:title="@string/last_dalvik_crash_info"
+            android:summary="@string/last_dalvik_crash_info"
+            android:persistent="false"/>
+        <Preference
+            android:key="last_backtrace"
+            android:title="@string/last_backtrace_info"
+            android:summary="@string/last_backtrace_info"
+            android:persistent="false"/>
         <Preference
             android:key="open_logcat"
             android:title="@string/open_logcat"

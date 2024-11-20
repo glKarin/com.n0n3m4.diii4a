@@ -2759,7 +2759,7 @@ extern const char *bg_fireteamNamesAxis[MAX_FIRETEAMS / 2];
 typedef struct
 {
 	int ident;
-	char joinOrder[MAX_CLIENTS];    ///< order in which clients joined the fire team (server), client uses to store if a client is on this fireteam
+	signed /*//karin: char is unsigned on arm char, or compile with -fsigned-char arguments */ joinOrder[MAX_CLIENTS];    ///< order in which clients joined the fire team (server), client uses to store if a client is on this fireteam
 	int leader;                     ///< leader = joinOrder[0] on server, stored here on client
 	qboolean inuse;
 	qboolean priv;
