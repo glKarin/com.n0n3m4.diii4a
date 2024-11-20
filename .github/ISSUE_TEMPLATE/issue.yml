@@ -34,26 +34,75 @@ body:
         - Other game/New game
     validations:
       required: true
-  - type: checkboxes
+  - type: dropdown
     id: OS
     attributes:
       label: What platform?
+      multiple: true
       options:
         - label: Android
         - label: Windows
         - label: Linux
-        - label: Other
     validations:
       required: true
-  - type: checkboxes
+  - type: dropdown
     id: arch
     attributes:
       label: What arch?
+      multiple: true
       options:
         - label: x86-64
         - label: x86
         - label: arm64
         - label: arm
+    validations:
+      required: true
+  - type: input
+    id: mod
+    attributes:
+      label: Game mod
+      placeholder: "e.g. "
+    validations:
+      required: false
+  - type: dropdown
+    id: gpu
+    attributes:
+      label: What GPU brand?
+      multiple: true
+      options:
+        - label: Snapdragon Adreno
+        - label: Mali
         - label: Other
     validations:
       required: true
+  - type: input
+    id: gpu_model
+    attributes:
+      label: CPU/GPU model
+      placeholder: "e.g. Snapdragon 845 or Adreno 720"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: "Description"
+      value: |
+    validations:
+      required: true
+  - type: textarea
+    id: stdout_log
+    attributes:
+      label: stdout.txt
+      placeholder: "Copy and paste `stdout.txt` file contents"
+      value: |
+    validations:
+      required: false
+  - type: textarea
+    id: stderr_log
+    attributes:
+      label: stderr.txt
+      placeholder: "Copy and paste `stderr.txt` file contents"
+      value: |
+    validations:
+      required: false
