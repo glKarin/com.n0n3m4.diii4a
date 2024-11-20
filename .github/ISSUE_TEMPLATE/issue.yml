@@ -1,0 +1,61 @@
+name: Create new issue
+description: Create new issue(bugs | request)
+title: ''
+labels: ''
+
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: |
+        Version name or [release name](https://github.com/glKarin/com.n0n3m4.diii4a/releases) or [tag name](https://github.com/glKarin/com.n0n3m4.diii4a/tags).
+      placeholder: "e.g. `1.1.0harmattan50` or `since 1.1.0harmattan50` or `testing version` or `all version`"
+    validations:
+      required: true
+  - type: dropdown
+    id: gameid
+    attributes:
+      label: Which game type?
+      multiple: true
+      options:
+        - DOOM 3
+        - Quake 4
+        - Prey(2006)
+        - Quake II
+        - Quake III
+        - Return to Castle Wolfenstein
+        - Quake I
+        - The Dark Mod
+        - DOOM 3 BFG
+        - GZDOOM
+        - Wolfenstein - Enemy Territory
+        - RealRTCW
+        - Other game/New game
+    validations:
+      required: true
+  - type: checkboxes
+    id: OS
+    attributes:
+      label: What platform?
+      multiple: true
+      options:
+        - label: Android
+        - label: Windows
+        - label: Linux
+        - label: Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: arch
+    attributes:
+      label: What arch?
+      multiple: true
+      options:
+        - label: x86-64
+        - label: x86
+        - label: arm64
+        - label: arm
+        - label: Other
+    validations:
+      required: true
