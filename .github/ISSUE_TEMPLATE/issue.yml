@@ -1,7 +1,7 @@
 name: Create new issue
 description: Create new issue(bugs | request)
-title: ''
-labels: ''
+title: '* '
+labels: 'issue'
 
 body:
   - type: input
@@ -38,7 +38,6 @@ body:
     id: OS
     attributes:
       label: What platform?
-      multiple: true
       options:
         - label: Android
         - label: Windows
@@ -50,7 +49,6 @@ body:
     id: arch
     attributes:
       label: What arch?
-      multiple: true
       options:
         - label: x86-64
         - label: x86
