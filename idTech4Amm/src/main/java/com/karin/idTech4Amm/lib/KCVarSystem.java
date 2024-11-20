@@ -1,6 +1,8 @@
 package com.karin.idTech4Amm.lib;
 
+import com.karin.idTech4Amm.misc.TextHelper;
 import com.n0n3m4.q3e.Q3EUtils;
+import com.n0n3m4.q3e.karin.KStr;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -70,7 +72,8 @@ public final class KCVarSystem
                                 "0", "Manual",
                                 "1", "Force setup r_aspectRatio to -1 (default)",
                                 "2", "Automatic setup r_aspectRatio to 0,1,2 by screen size"),
-                        KCVar.CreateCVar("harm_r_renderToolsMultithread", "bool", "0", "Enable render tools debug with GLES in multi-threading", 0)
+                        KCVar.CreateCVar("harm_r_renderToolsMultithread", "bool", "0", "Enable render tools debug with GLES in multi-threading", KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_useHighPrecision", "bool", "0", "Use high precision float on GLSL shader", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(
@@ -215,7 +218,7 @@ public final class KCVarSystem
         _cvars.put("preybase", PREY_CVARS);
         _cvars.put("DOOM3BFG", DOOM3BFG_CVARS);
         _cvars.put("RealRTCW", REALRTCW_CVARS);
-        _cvars.put("ETW", REALRTCW_CVARS);
+        _cvars.put("ETW", ETW_CVARS);
         _cvars.put("TDM", TDM_CVARS);
 
         return _cvars;
@@ -269,5 +272,52 @@ public final class KCVarSystem
                 res.add(_cvars.get(game));
         }
         return res;
+    }
+
+    public static String GenCVarString(KCVar cvar, String endl)
+    {
+        StringBuilder sb = new StringBuilder();
+        if(cvar.category == KCVar.CATEGORY_COMMAND)
+        {
+            sb.append(TextHelper.FormatDialogMessageSpace("  *[Command] ")).append(cvar.name);
+            sb.append(endl);
+            if(!KCVar.TYPE_NONE.equals(cvar.type))
+                sb.append(TextHelper.FormatDialogMessageSpace("    (")).append(cvar.type).append(")");
+        }
+        else
+        {
+            sb.append(TextHelper.FormatDialogMessageSpace("  *[CVar] ")).append(cvar.name);
+            sb.append(endl);
+            sb.append(TextHelper.FormatDialogMessageSpace("    - ")).append(KStr.ucfirst(cvar.type)).append(TextHelper.FormatDialogMessageSpace("  default: ")).append(cvar.defaultValue);
+            if(cvar.HasFlags(Integer.MAX_VALUE & ~(Integer.MAX_VALUE & KCVar.FLAG_LAUNCHER)))
+            {
+                sb.append(TextHelper.FormatDialogMessageSpace("  ("));
+                if(cvar.HasFlag(KCVar.FLAG_POSITIVE))
+                    sb.append(" Positive");
+                if(cvar.HasFlag(KCVar.FLAG_INIT))
+                    sb.append(" CommandLine-Only");
+                if(cvar.HasFlag(KCVar.FLAG_AUTO))
+                    sb.append(" Auto-Setup");
+                if(cvar.HasFlag(KCVar.FLAG_READONLY))
+                    sb.append(" Readonly");
+                if(cvar.HasFlag(KCVar.FLAG_DISABLED))
+                    sb.append(" Disabled");
+                sb.append(" )");
+            }
+        }
+        sb.append(endl);
+        sb.append(TextHelper.FormatDialogMessageSpace("    ")).append(cvar.description);
+        sb.append(endl);
+        if(null != cvar.values)
+        {
+            for(KCVar.Value str : cvar.values)
+            {
+                sb.append(TextHelper.FormatDialogMessageSpace("      "));
+                sb.append(str.value).append(" - ").append(str.desc);
+                sb.append(endl);
+            }
+        }
+        sb.append(endl);
+        return sb.toString();
     }
 }

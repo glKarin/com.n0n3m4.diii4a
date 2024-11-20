@@ -13,7 +13,7 @@ import java.util.Date;
 public final class Constants
 {
     public static final int    CONST_UPDATE_RELEASE = 59;
-    public static final String CONST_RELEASE = "2024-11-05";
+    public static final String CONST_RELEASE = "2024-11-20";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -30,12 +30,13 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Support Omni-Bot on Wolfenstein: Enemy Territory.",
-            "Fix rendering in Mali GPU on DOOM 3-BFG.",
-            "Fix rendering in Mali GPU on The Dark Mod.",
-            "Fix stencil shadow with `cg_shadows` = 2 on Wolfenstein: Enemy Territory.",
-            "Support choose a mod directory on GZDOOM.",
-            "Add some options on Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM"
+            "Support `Omni-Bot` in Wolfenstein: Enemy Territory.",
+            "Fix rendering on Mali GPU in DOOM 3-BFG.",
+            "Fix rendering on Mali GPU in The Dark Mod.",
+            "Fix stencil shadow with `cg_shadows` = 2 in Wolfenstein: Enemy Territory.",
+            "Support choose a mod directory in GZDOOM.",
+            "Add some new features options on launcher in Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM, The Dark Mod.",
+            "Add use high precision float on GLSL shaders(cvar `harm_r_useHighPrecision`) in DOOM 3/Quake 4/Prey.",
         };
 	};
 

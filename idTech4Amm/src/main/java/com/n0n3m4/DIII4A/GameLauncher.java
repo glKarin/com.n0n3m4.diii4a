@@ -395,6 +395,14 @@ public class GameLauncher extends Activity
 						.putBoolean(Q3EPreference.pref_harm_r_useHighPrecision, isChecked)
 						.commit();
 			}
+			else if (id == R.id.cb_renderToolsMultithread)
+			{
+				if(Q3EUtils.q3ei.IsIdTech4())
+					setProp("harm_r_renderToolsMultithread", isChecked);
+				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+						.putBoolean(Q3EPreference.pref_harm_r_renderToolsMultithread, isChecked)
+						.commit();
+			}
 
 			// Doom 3 BFG
 			else if (id == R.id.doom3bfg_useCompressionCache)
@@ -1098,6 +1106,9 @@ public class GameLauncher extends Activity
 
 			V.cb_useHighPrecision.setChecked(getProp("harm_r_useHighPrecision", false));
 			if (!IsProp("harm_r_useHighPrecision")) setProp("harm_r_useHighPrecision", false);
+
+			V.cb_renderToolsMultithread.setChecked(getProp("harm_r_renderToolsMultithread", false));
+			if (!IsProp("harm_r_renderToolsMultithread")) setProp("harm_r_renderToolsMultithread", false);
 		}
 		else if(Q3EUtils.q3ei.isQ2)
 		{
@@ -1674,6 +1685,8 @@ public class GameLauncher extends Activity
 		V.cb_perforatedShadow.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_useHighPrecision.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_useHighPrecision, false));
 		V.cb_useHighPrecision.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.cb_renderToolsMultithread.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_renderToolsMultithread, false));
+		V.cb_renderToolsMultithread.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		boolean collapseMods = mPrefs.getBoolean(PreferenceKey.COLLAPSE_MODS, false);
 		V.collapse_mods.setChecked(collapseMods);
@@ -2290,6 +2303,7 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_stencilShadowCombine, V.cb_stencilShadowCombine.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_shadowMapPerforatedShadow, V.cb_perforatedShadow.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_r_useHighPrecision, V.cb_useHighPrecision.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_r_renderToolsMultithread, V.cb_renderToolsMultithread.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, GetCheckboxIndex(V.rg_r_autoAspectRatio));
 		mEdtr.putBoolean(PreferenceKey.COLLAPSE_MODS, V.collapse_mods.isChecked());
 
@@ -3736,6 +3750,7 @@ public class GameLauncher extends Activity
 		public Switch readonly_command;
 		public CheckBox cb_stencilShadowTranslucent;
 		public CheckBox cb_useHighPrecision;
+		public CheckBox cb_renderToolsMultithread;
 		public Switch editable_temp_command;
 		public LinearLayout temp_cmdline;
 		public LinearLayout idtech4_section;
@@ -3863,6 +3878,7 @@ public class GameLauncher extends Activity
 			readonly_command = findViewById(R.id.readonly_command);
 			cb_stencilShadowTranslucent = findViewById(R.id.cb_stencilShadowTranslucent);
 			cb_useHighPrecision = findViewById(R.id.cb_useHighPrecision);
+			cb_renderToolsMultithread = findViewById(R.id.cb_renderToolsMultithread);
 			editable_temp_command = findViewById(R.id.editable_temp_command);
 			temp_cmdline = findViewById(R.id.temp_cmdline);
 			idtech4_section = findViewById(R.id.idtech4_section);

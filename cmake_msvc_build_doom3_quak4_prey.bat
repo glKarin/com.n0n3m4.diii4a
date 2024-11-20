@@ -34,7 +34,7 @@ if %BUILD_ARCH% == x86 (
 echo Build %BUILD_TYPE% ......
 cmake --build %WORK_DIR% --config "%BUILD_TYPE%"
 
-rem clean: cmake --build . --config "%BUILD_TYPE%" --target clean
+rem clean: cmake --build %WORK_DIR% --config "%BUILD_TYPE%" --target clean
 
 set TARGET_PATH=%cd%\%WORK_DIR%\%PROJECT_PATH%\%BUILD_TYPE%
 

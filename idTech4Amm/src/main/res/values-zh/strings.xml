@@ -221,7 +221,7 @@
     <string name="save_preferences_file">保存偏好文件</string>
     <string name="read_preferences_file">读取偏好文件</string>
     <string name="version_">版本:</string>
-    <string name="changes_">变更:</string>
+    <string name="changes_">更新:</string>
     <string name="new_update_release">新版本更新</string>
     <string name="add">添加</string>
     <string name="edit">编辑</string>
@@ -423,4 +423,8 @@
     <string name="use_medium_precision_float_in_glsl_shader_harm_r_usemediumprecision">GLSL着色器使用中精度浮点数代替高精度浮点数(harm_r_useMediumPrecision)</string>
     <string name="phobos">Phobos</string>
     <string name="use_high_precision_float_on_glsl_shader_harm_r_usehighprecision">GLSL着色器使用高精度浮点数(harm_r_useHighPrecision)</string>
+    <string name="enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread">多线程下启用调试渲染功能(harm_r_renderToolsMultithread)</string>
+    <string name="release_">发布:</string>
+    <string name="build_">构建:</string>
+    <string name="dev_">维护人:</string>
 </resources>

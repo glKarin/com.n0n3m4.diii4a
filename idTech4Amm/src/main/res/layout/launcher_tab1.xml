@@ -102,6 +102,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginRight="10dp"
                     android:text="@string/tips"
+                    android:textColor="#FFF56C6C"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
 
@@ -710,6 +711,12 @@
                         android:inputType="number|textNoSuggestions"
                         android:text="0" />
                 </LinearLayout>
+
+                <CheckBox
+                        android:id="@+id/cb_renderToolsMultithread"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread" />
 
                 <TextView
                     android:layout_width="wrap_content"

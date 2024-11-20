@@ -424,5 +424,9 @@
     <string name="use_medium_precision_float_in_glsl_shader_harm_r_usemediumprecision">Use medium precision float instead of high precision in GLSL shader(harm_r_useMediumPrecision)</string>
     <string name="phobos">Phobos</string>
     <string name="use_high_precision_float_on_glsl_shader_harm_r_usehighprecision">Use high precision float on GLSL shader(harm_r_useHighPrecision)</string>
+    <string name="enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread">Enable debug render tools in multi-threading(harm_r_renderToolsMultithread)</string>
+    <string name="release_">Release:</string>
+    <string name="build_">Build:</string>
+    <string name="dev_">Dev:</string>
 
 </resources>
