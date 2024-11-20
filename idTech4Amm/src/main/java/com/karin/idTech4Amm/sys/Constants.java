@@ -37,6 +37,7 @@ public final class Constants
             "Support choose a mod directory in GZDOOM.",
             "Add some new features options on launcher in Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM, The Dark Mod.",
             "Add use high precision float on GLSL shaders(cvar `harm_r_useHighPrecision`) in DOOM 3/Quake 4/Prey.",
+            "Add 5 onscreen buttons.",
         };
 	};
 
