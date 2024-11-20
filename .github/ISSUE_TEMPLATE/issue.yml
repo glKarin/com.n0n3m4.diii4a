@@ -87,7 +87,6 @@ body:
     attributes:
       label: Description
       placeholder: "Description"
-      value: |
     validations:
       required: true
   - type: textarea
@@ -95,7 +94,6 @@ body:
     attributes:
       label: stdout.txt
       placeholder: "Copy and paste `stdout.txt` file contents"
-      value: |
     validations:
       required: false
   - type: textarea
@@ -103,6 +101,5 @@ body:
     attributes:
       label: stderr.txt
       placeholder: "Copy and paste `stderr.txt` file contents"
-      value: |
     validations:
       required: false
