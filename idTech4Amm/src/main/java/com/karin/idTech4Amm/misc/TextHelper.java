@@ -124,6 +124,7 @@ public final class TextHelper
                 " " + GenLinkText("https://www.moddb.com/mods/librecoop-dhewm3-coop", "LibreCoop(RoE): librecoopxp"),
                 " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3: perfected"),
                 " " + GenLinkText("https://www.moddb.com/mods/perfected-doom-3-version-500", "Perfected Doom 3-Resurrection of Evil: perfected_roe"),
+                " " + GenLinkText("https://www.moddb.com/mods/phobos", "Doom 3: Phobos: tfphobos") + "(" + GenLinkText("https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch", "dhewm3 compatibility patch") + ")",
                 " " + GenLinkText("https://store.steampowered.com/app/2210/Quake_4/", "Quake4: q4base"),
                 " " + GenLinkText("https://www.moddb.com/mods/quake-4-hardqore", "Hardqore"),
                 " Prey(2006): preybase",
