@@ -182,8 +182,6 @@
     <string name="language">Язык/Language</string>
     <string name="setup_launcher_language">Выбрать язык лаунчера</string>
     <string name="be_available_on_reboot_the_next_time">Язык будет обновлен после перезагрузки лаунчера</string>
-    <string name="bot_q3_bot_support_in_mp_game">Боты Quake 4 (мод SABot-a9)</string>
-    <string name="mp_game_map_aas_files">Файлы игры Quake4 в формате "aas"</string>
     <string name="game_patch_resource">Ресурсы игрового патча</string>
     <string name="extract_all">Извлечь все</string>
     <string name="can_t_s_read_write_external_storage_permission_is_not_granted">Разрешение на чтение/запись внешнего хранилища не предоставлено!</string>
@@ -211,7 +209,6 @@
     <string name="request_necessary_permissions">необходимо предоставить разрешение</string>
     <string name="grant">предоставить</string>
     <string name="extract_path_resource_">Извлечь ресурс пути: </string>
-    <string name="rivensin_play_original_doom3_level">Rivensin на оригинальных уровнях DOOM3</string>
     <string name="save_preferences_file">сохранить файл настроек</string>
     <string name="read_preferences_file">загрузить файл настроек</string>
     <string name="version_">Версия:</string>
@@ -308,7 +305,7 @@
     <string name="open_system_file_browser">Открыть платформу доступа к хранилищу Android</string>
     <string name="application_pid">"Приложение PID: "</string>
     <string name="doom_3_bfg">DOOM 3 BFG</string>
-    <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">Альфа канал теней(harm_r_stencilShadowAlpha):</string>
+    <string name="stencil_shadow_alpha_harm_r_stencilshadowalpha">Альфа канал стенсильных теней(harm_r_stencilShadowAlpha):</string>
     <string name="_0_1_default_0_5">0 - 1(по умолчанию 1.0)</string>
     <string name="soft_stencil_shadow_only_opengles3_1_harm_r_stencilshadowsoft">Мягкие тени(Только OpenGLES3.1+)(harm_r_stencilShadowSoft)</string>
     <string name="combine_stencil_shadow_harm_r_stencilshadowcombine">Комбинированные тени(harm_r_stencilShadowCombine)</string>
@@ -316,7 +313,7 @@
     <string name="setup_cvar_r_aspectratio_manually">Настройка cvar `r_aspectRatio` вручную</string>
     <string name="force_setup_cvar_r_aspectratio_to_1_using_screen_real_aspect_ratio">Принудительная настройка cvar `r_aspectRatio` на -1(Использование реального соотношения сторон экрана)</string>
     <string name="automatic_setup_cvar_r_aspectratio_to_0_1_2_convert_screen_aspect_ratio_to_4_3_16_9_16_10">Автоматическая настройка cvar `r_aspectRatio` на 0,1,2(Преобразовать соотношение сторон экрана в 4:3/16:9/16:10)</string>
-    <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">Альфа канал наложения теней(harm_r_shadowMapAlpha):</string>
+    <string name="shadow_mapping_alpha_harm_r_shadowmapalpha">Альфа канал карт теней(harm_r_shadowMapAlpha):</string>
     <string name="files">Файлы</string>
     <string name="_files">файлы</string>
     <string name="show_game_datas_standalone_directories">Показывать отдельные каталоги игры</string>
@@ -371,7 +368,6 @@
     <string name="launcher">Лаунчер</string>
     <string name="auto_save_buttons_settings_immediately_if_changed">Автоматическое сохранение настроек сразу, как они были изменены</string>
     <string name="auto_save_button_settings">Автоматическое сохранение настроек кнопок</string>
-    <string name="copy">Копировать</string>
     <string name="show_preferences">Показать предпочтения</string>
     <string name="show_application_setting_preferences_contents">Показать содержимое настроек предпочтений приложения</string>
     <string name="enable">Включить</string>
@@ -401,10 +397,36 @@
     <string name="unsupport_create_desktop_shortcut">Отменить создание ярлыка на рабочем столе!</string>
     <string name="only_support_on_android_version_7_1"><![CDATA[Для создания ярлыка на рабочем столе требуется Андроид версии 7.1 или выше.]]></string>
     <string name="all">Всё</string>
-    <string name="permission_not_granted">Permission \'%s\' not granted</string>
-    <string name="command_shortcut">Shortcut(Current command)</string>
-    <string name="create_shortcut_with_current_command_and_game">Create shortcut(current command and game)</string>
-    <string name="input_desktop_shortcut_name">Input desktop shortcut name</string>
-    <string name="game_desktop_shortcut_has_created">Game %s desktop shortcut has created(%s).</string>
+    <string name="permission_not_granted">Разрешение \'%s\' не предоставлено</string>
+    <string name="command_shortcut">Ярлык(Текущая команда)</string>
+    <string name="create_shortcut_with_current_command_and_game">Создать ярлык(текущая команда и игра)</string>
+    <string name="input_desktop_shortcut_name">Введите имя ярлыка на рабочем столе</string>
+    <string name="game_desktop_shortcut_has_created">Создан ярлык игры %s на рабочем столе(%s).</string>
+    <string name="signals_handler">Обработчик сигналов</string>
+    <string name="setup_signals_handler_when_game_crash">Настройка обработчика сигналов при сбое игры</string>
+    <string name="last_backtrace_info">Последняя информация о трассировке</string>
+    <string name="compression_texture_harm_image_usecompression">Сжатие текстур(harm_image_useCompression)</string>
+    <string name="allow_cheats_harm_sv_cheats">Разрешить читы(harm_sv_cheats)</string>
+    <string name="render_personal_model_shadow_harm_r_stencilshadowpersonal">Рендеринг личной тени модели(harm_r_stencilShadowPersonal)</string>
+    <string name="blur">Размытие</string>
+    <string name="shodow_cg_shadows">Shodow(cg_shadows)</string>
+    <string name="renderer_vid_renderer">Renderer(vid_renderer)</string>
+    <string name="cache_compression_texture_harm_image_usecompressioncache">Сжатие кэша текстур(harm_image_useCompressionCache)</string>
+    <string name="commandshortcut">Ярлык команды</string>
+    <string name="patch_resource">Ресурс патча</string>
+    <string name="load_lights_pk3">Загрузка lights.pk3</string>
+    <string name="load_game_support_pk3">Загрузка game_support.pk3</string>
+    <string name="load_brightmaps_pk3">Загрузка brightmaps.pk3</string>
+    <string name="disc_panel">Панель диска</string>
+    <string name="disc_panel_type">Тип панели диска</string>
+    <string name="keys">Ключи</string>
+    <string name="not_allowed">Не разрешено</string>
+    <string name="use_medium_precision_float_in_glsl_shader_harm_r_usemediumprecision">Используйте float средней точности вместо высокой точности в шейдере GLSL(harm_r_useMediumPrecision)</string>
+    <string name="phobos">Phobos</string>
+    <string name="use_high_precision_float_on_glsl_shader_harm_r_usehighprecision">Используйте высокоточное число float в шейдере GLSL(harm_r_useHighPrecision)</string>
+    <string name="enable_render_debug_info_in_multi_threading_harm_r_rendertoolsmultithread">Включить инструменты отладки рендеринга в многопоточности(harm_r_renderToolsMultithread)</string>
+    <string name="release_">Релиз:</string>
+    <string name="build_">Билд:</string>
+    <string name="dev_">Разработчик:</string>
 
 </resources>

@@ -530,39 +530,23 @@ static int RB_GLSL_ParseMacros(const char *macros, idStrList &ret)
 	return counter;
 }
 
-static idStr RB_GLSL_SetupPrecision(const char *source, const char *precision)
+static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros, bool highp = false)
 {
-    if(!precision || !precision[0])
-        return idStr(source);
-
     idStr res(source);
-    res.Replace("precision", "// precision");
+    if(highp)
+    {
+        res.Replace("precision mediump float;", "precision highp float;");
+        res.Replace("precision lowp float;", "precision highp float;");
+	}
 
-    int index = res.Find("#version");
-    if(index == -1)
-    SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
-
-    index = res.Find('\n', index);
-    if(index == -1 || index + 1 == res.Length())
-    SHADER_ERROR("[Harmattan]: GLSL shader source '#version' not completed\n.");
-
-    res.Insert(idStr("precision ") + precision + " float;\n", index + 1);
-
-    //printf("%d|%s|\n%s\n", n, macros, res.c_str());
-    return res;
-}
-
-static idStr RB_GLSL_ExpandMacros(const char *source, const char *macros)
-{
 	if(!macros || !macros[0])
-		return idStr(source);
+		return res;
 
 	idStrList list;
 	int n = RB_GLSL_ParseMacros(macros, list);
 	if(0 == n)
-		return idStr(source);
+		return res;
 
-	idStr res(source);
 	int index = res.Find("#version");
 	if(index == -1)
 		SHADER_ERROR("[Harmattan]: GLSL shader source can not find '#version'\n.");
@@ -1190,8 +1174,10 @@ int RB_GLSL_LoadShaderProgram(
 
 	if (!RB_GLSL_LinkShader(program, true)/* && !RB_GLSL_ValidateProgram(program)*/) {
 		common->Printf("[Harmattan]: 2. Load internal shader source\n");
-		idStr vs = RB_GLSL_ExpandMacros(default_vertex_shader_source, macros);
-		idStr fs = RB_GLSL_ExpandMacros(default_fragment_shader_source, macros);
+		if(harm_r_useHighPrecision.GetBool())
+			common->Printf("'%s' use high precision float\n", name);
+		idStr vs = RB_GLSL_ExpandMacros(default_vertex_shader_source, macros, harm_r_useHighPrecision.GetBool());
+		idStr fs = RB_GLSL_ExpandMacros(default_fragment_shader_source, macros, harm_r_useHighPrecision.GetBool());
 		if(!RB_GLSL_CreateShaderProgram(program, vs.c_str(), fs.c_str(), name, type))
 		{
 			SHADER_ERROR("[Harmattan]: Load internal shader program fail!\n");
@@ -1248,13 +1234,13 @@ void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
 		fs = prop.default_fragment_shader_source.c_str();
 		macros = prop.macros.c_str();
 
-		idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros);
+		idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros, harm_r_useHighPrecision.GetBool());
 		idStr p(path);
 		p.Append(prop.vertex_shader_source_file);
 		fileSystem->WriteFile(p.c_str(), vsSrc.c_str(), vsSrc.Length(), "fs_basepath");
 		common->Printf("GLSL vertex shader: '%s'\n", p.c_str());
 
-		idStr fsSrc = RB_GLSL_ExpandMacros(fs, macros);
+		idStr fsSrc = RB_GLSL_ExpandMacros(fs, macros, harm_r_useHighPrecision.GetBool());
 		p = path;
 		p.Append(prop.fragment_shader_source_file);
 		fileSystem->WriteFile(p.c_str(), fsSrc.c_str(), fsSrc.Length(), "fs_basepath");
@@ -1299,12 +1285,12 @@ void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
 		macros = prop.macros.c_str();
 		common->Printf("GLSL shader: %s\n\n", prop.name.c_str());
 
-		idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros);
+		idStr vsSrc = RB_GLSL_ExpandMacros(vs, macros, harm_r_useHighPrecision.GetBool());
 		common->Printf("  Vertex shader: \n");
 		R_PrintGLSLShaderSource(vsSrc);
 		common->Printf("\n");
 
-		idStr fsSrc = RB_GLSL_ExpandMacros(fs, macros);
+		idStr fsSrc = RB_GLSL_ExpandMacros(fs, macros, harm_r_useHighPrecision.GetBool());
 		common->Printf("  Fragment shader: \n");
 		R_PrintGLSLShaderSource(fsSrc);
 		common->Printf("\n");

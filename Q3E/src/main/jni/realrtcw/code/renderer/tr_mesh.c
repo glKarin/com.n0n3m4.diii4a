@@ -430,18 +430,20 @@ void R_AddMD3Surfaces( trRefEntity_t *ent ) {
 
 		// stencil shadows can't do personal models unless I polyhedron clip
 		if (
-#ifdef USE_OPENGLES //karin: allow player model shadow
+#ifdef STENCIL_SHADOW_IMPROVE //karin: allow player model shadow
 			 (!personalModel || harm_r_stencilShadowPersonal->integer)
 #else
 			 !personalModel
 #endif
 			 && r_shadows->integer == 2
+#if !defined(STENCIL_SHADOW_IMPROVE) //karin: allow shadow on fog
 			 && fogNum == 0
+#endif
 			 && !( ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
 			 && shader->sort == SS_OPAQUE 
-#ifdef USE_OPENGLES //karin: ignore alpha test shader pass and special model type exclude player model
+#ifdef STENCIL_SHADOW_IMPROVE //karin: ignore alpha test shader pass and special model type exclude player model
 			&& (STENCIL_SHADOW_MODEL(4) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
-			&& !R_HasAlphaTest(shader)
+			&& ((personalModel && harm_r_stencilShadowPersonal->integer == 1) || !R_HasAlphaTest(shader))
 #endif
 			 ) {
 // GR - tessellate according to model capabilities

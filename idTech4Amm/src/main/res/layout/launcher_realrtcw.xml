@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <com.karin.idTech4Amm.widget.Divider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        myapp:label="@string/realrtcw"
+        myapp:lineColor="@color/launcher_divider_color" />
+
+    <CheckBox
+        android:id="@+id/realrtcw_sv_cheats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/allow_cheats_harm_sv_cheats" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
+        android:text="@string/shodow_cg_shadows" />
+    <RadioGroup
+        android:id="@+id/realrtcw_shadows"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton
+            android:id="@+id/realrtcw_shadows_disable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/disable" />
+        <RadioButton
+            android:id="@+id/realrtcw_shadows_blur"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/blur" />
+        <RadioButton
+            android:id="@+id/realrtcw_shadows_stencil"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stencil_shadow" />
+    </RadioGroup>
+
+    <CheckBox
+        android:id="@+id/realrtcw_stencilShadowPersonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/render_personal_model_shadow_harm_r_stencilshadowpersonal" />
+
+</LinearLayout>

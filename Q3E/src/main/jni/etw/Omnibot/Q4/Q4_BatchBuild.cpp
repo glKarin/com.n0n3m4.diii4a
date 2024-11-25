@@ -1,0 +1,10 @@
+#include "PrecompQ4.h"
+#include "PrecompQ4.cpp"
+
+#include "BotExports.cpp"
+#include "Q4_BaseStates.cpp"
+#include "Q4_GoalManager.cpp"
+#include "gmQ4Binds.cpp"
+#include "Q4_Client.cpp"
+#include "Q4_Game.cpp"
+#include "Q4_InterfaceFuncs.cpp"

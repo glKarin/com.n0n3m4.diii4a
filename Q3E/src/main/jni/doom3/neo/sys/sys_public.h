@@ -70,13 +70,6 @@ If you have questions concerning this license or the applicable additional terms
 #define assertmem( x, y )				assert( _CrtIsValidPointer( x, y, true ) )
 
 bool Sys_IsMainThread();
-
-enum sysPath_t {
-    PATH_BASE,
-    PATH_CONFIG,
-    PATH_SAVE,
-    PATH_EXE
-};
 #endif
 
 // Mac OSX
@@ -199,6 +192,14 @@ enum sysPath_t {
 #define id_attribute(x)
 #endif
 
+#ifdef _SDL
+enum sysPath_t {
+    PATH_BASE,
+    PATH_CONFIG,
+    PATH_SAVE,
+    PATH_EXE
+};
+#endif
 typedef enum {
 	CPUID_NONE							= 0x00000,
 	CPUID_UNSUPPORTED					= 0x00001,	// unsupported (386/486)
@@ -332,7 +333,7 @@ double			Sys_ClockTicksPerSecond(void);
 
 // returns a selection of the CPUID_* flags
 int			    Sys_GetProcessorId(void);
-const char 	*Sys_GetProcessorString(void);
+const char 	*   Sys_GetProcessorString(void);
 
 // returns true if the FPU stack is empty
 bool			Sys_FPU_StackIsEmpty(void);

@@ -102,7 +102,7 @@ static int				mt_rb_debugPolygonTime = 0;
 #define __numDebugPolygons (multithreadActive ? mt_rb_numDebugPolygons : ::rb_numDebugPolygons)
 #define __debugPolygonTime (multithreadActive ? mt_rb_debugPolygonTime : ::rb_debugPolygonTime)
 
-idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER/* | CVAR_ARCHIVE*/, "Enable render tools debug with GLES in multi-threading.");
+idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Enable render tools debug with GLES in multi-threading.");
 
 void RB_SetupRenderTools(void)
 {

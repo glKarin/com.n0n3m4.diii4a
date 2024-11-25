@@ -449,7 +449,11 @@ void RB_BeginDrawingView(void)
 		clearBits |= GL_STENCIL_BUFFER_BIT;
 	}
 	// global q3 fog volume
+#ifdef STENCIL_SHADOW_IMPROVE //karinL: should not `else if`
+	if (tr.world && tr.world->globalFog >= 0)
+#else
 	else if (tr.world && tr.world->globalFog >= 0)
+#endif
 	{
 		clearBits |= GL_DEPTH_BUFFER_BIT;
 		clearBits |= GL_COLOR_BUFFER_BIT;

@@ -452,6 +452,22 @@ void R_MDM_AddAnimSurfaces(trRefEntity_t *ent)
 			shader = R_GetShaderByHandle(surface->shaderIndex);
 		}
 
+#ifdef STENCIL_SHADOW_IMPROVE //karin: allow player model shadow
+		if ( (!personalModel || harm_r_stencilShadowPersonal->integer)
+				&& r_shadows->integer == 2
+#if !defined(STENCIL_SHADOW_IMPROVE) //karin: not check in fog
+				&& fogNum == 0
+#endif
+				&& !(ent->e.renderfx & ( RF_NOSHADOW | RF_DEPTHHACK ) )
+				&& shader->sort == SS_OPAQUE
+				&& (STENCIL_SHADOW_MODEL(1) || (personalModel && harm_r_stencilShadowPersonal->integer == 1))
+				&& ((personalModel && harm_r_stencilShadowPersonal->integer == 1) || !R_HasAlphaTest(shader))
+			 )
+		{
+			R_AddDrawSurf( (void *)surface, tr.shadowShader, 0, 0, 0 );
+		}
+#endif
+
 		// don't add third_person objects if not viewing through a portal
 		if (!personalModel)
 		{

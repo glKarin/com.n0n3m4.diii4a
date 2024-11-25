@@ -3,6 +3,7 @@ package com.karin.idTech4Amm;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
 import android.widget.Toast;
@@ -16,6 +17,7 @@ import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.sys.Theme;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import android.view.Menu;
@@ -57,6 +59,7 @@ public class OnScreenButtonConfigActivity extends Activity
     private Map<Integer, String> m_styleMap;
     private Map<Integer, String> m_sliderStyleMap;
     private Map<Integer, String> m_keyMap;
+    private Map<Integer, String> m_discStyleMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -69,6 +72,7 @@ public class OnScreenButtonConfigActivity extends Activity
         
         m_styleMap = BuildKeyValueMapFromResource(R.array.onscreen_button_style_values, R.array.onscreen_button_style_labels);
         m_sliderStyleMap = BuildKeyValueMapFromResource(R.array.onscreen_slider_style_values, R.array.onscreen_slider_style_labels);
+        m_discStyleMap = BuildKeyValueMapFromResource(R.array.onscreen_disc_style_values, R.array.onscreen_disc_style_labels);
         // Map<Integer, String> m_typeMap = BuildKeyValueMapFromResource(R.array.onscreen_type_values, R.array.onscreen_type_labels);
         m_keyMap = BuildKeyValueMapFromResource(R.array.key_map_codes, R.array.key_map_names);
 
@@ -112,7 +116,7 @@ public class OnScreenButtonConfigActivity extends Activity
         for(int i = 0; i < Q3EGlobals.UI_SIZE; i++)
         {
             int type = q3ei.type_table[i];
-            if(type == Q3EGlobals.TYPE_JOYSTICK || type == Q3EGlobals.TYPE_DISC)
+            if(type == Q3EGlobals.TYPE_JOYSTICK)
                 continue;
             if(i == Q3EGlobals.UI_KBD || i == Q3EGlobals.UI_CONSOLE)
                 continue;
@@ -129,6 +133,9 @@ public class OnScreenButtonConfigActivity extends Activity
                 public void run()
                 {
                     SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).edit();
+                    preferences.remove(Q3EPreference.ONSCREEN_BUTTON);
+                    for(int i = 0; i < Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length; i++)
+                        preferences.remove(Q3EPreference.DISC_PANEL_KEYS_PREFIX + (i + 1));
                     preferences.remove(Q3EPreference.ONSCREEN_BUTTON);
                     preferences.commit();
                     Q3EInterface.RestoreDefaultOnScreenConfig(Q3EUtils.q3ei.arg_table, Q3EUtils.q3ei.type_table);
@@ -155,14 +162,31 @@ public class OnScreenButtonConfigActivity extends Activity
         int[] args = Q3EUtils.q3ei.arg_table;
         int[] type = Q3EUtils.q3ei.type_table;
         Set<String> list = new LinkedHashSet<>();
+        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(this).edit();
         for(OnScreenButton btn : m_list)
         {
             int[] a = btn.ToArray();
             System.arraycopy(a, 0, args, btn.index * 4, a.length);
             type[btn.index] = btn.type;
             list.add(btn.toString());
+
+            if(btn.type == Q3EGlobals.TYPE_DISC)
+            {
+                if(btn.config[0] <= 0)
+                    btn.config[0] = 1;
+                else if(btn.config[0] > Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length)
+                    btn.config[0] = Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length;
+                List<String> keys = new ArrayList<>();
+                Set<Map.Entry<String, Boolean>> entries = btn.keysMap.entrySet();
+                for(Map.Entry<String, Boolean> entry : entries)
+                {
+                    if(entry.getValue())
+                        keys.add(entry.getKey());
+                }
+                edit.putString(Q3EPreference.DISC_PANEL_KEYS_PREFIX + btn.config[0], KStr.Join(keys, ","));
+            }
         }
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putStringSet(Q3EPreference.ONSCREEN_BUTTON, list).commit();
+        edit.putStringSet(Q3EPreference.ONSCREEN_BUTTON, list).commit();
         m_adapter.notifyDataSetChanged();
     }
 
@@ -178,14 +202,13 @@ public class OnScreenButtonConfigActivity extends Activity
     public boolean onOptionsItemSelected(MenuItem item)
     {
         int itemId = item.getItemId();
-        if (itemId == R.id.onscreen_button_config_weapon_panel)
-        {
-            OpenWeaponPanelKeysSetting();
-        }
-        else if (itemId == R.id.onscreen_button_config_reset)
+
+        if (itemId == R.id.onscreen_button_config_reset)
         {
             RestoreConfig();
         }
+        /*else if (itemId == R.id.onscreen_button_config_weapon_panel)
+            OpenWeaponPanelKeysSetting();*/
         else
         {
             return super.onOptionsItemSelected(item);
@@ -195,23 +218,27 @@ public class OnScreenButtonConfigActivity extends Activity
     
     private class OnScreenButton
     {
-        public int index;
-        public int[] key;
-        public String name;
-        public boolean hold;
-        public int style;
-        public int type;
-        public Bitmap texture;
-        public String keyName;
+        public int                  index;
+        public int[]                key;
+        public String               name;
+        public boolean              hold;
+        public int                  style;
+        public int                  type;
+        public int[]                config;
+        public Bitmap               texture;
+        public String               keyName;
+        public Map<String, Boolean> keysMap;
         
         public OnScreenButton(int index, int type, int[] arr, String texture, String name)
         {
             this.index = index;
             this.type = type;
             this.name = name;
-            int keys = 3;
+            final int keys = 3;
             this.key = new int[keys];
             System.arraycopy(arr, 0, this.key, 0, keys);
+            config = new int[arr.length];
+            System.arraycopy(arr, 0, config, 0, arr.length);
             switch(type)
             {
                 case Q3EGlobals.TYPE_BUTTON:
@@ -224,6 +251,21 @@ public class OnScreenButtonConfigActivity extends Activity
                     this.key[0] = arr[0];
                     this.key[1] = arr[1];
                     this.key[2] = arr[2];
+                    break;
+                case Q3EGlobals.TYPE_DISC:
+                    if(config[0] <= 0)
+                        config[0] = 1;
+                    else if(config[0] > Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length)
+                        config[0] = Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length;
+                    this.style = arr[1];
+                    this.keysMap = new LinkedHashMap<>();
+                    String fullStrs = Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[config[0] - 1];
+                    String keyStr = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this).getString(Q3EPreference.DISC_PANEL_KEYS_PREFIX + config[0], fullStrs);
+
+                    String[] fullKeys = fullStrs.split(",");
+                    String[] settingKeys = keyStr.split(",");
+                    for(String fullKey : fullKeys)
+                        this.keysMap.put(fullKey, Utility.ArrayContains(settingKeys, fullKey, false));
                     break;
                 default:
                     break;
@@ -241,6 +283,7 @@ public class OnScreenButtonConfigActivity extends Activity
                     e.printStackTrace();
                 }
             }
+
             Update();
         }
         
@@ -256,6 +299,14 @@ public class OnScreenButtonConfigActivity extends Activity
                     list.add(m_keyMap.get(key[0]));
                     list.add(m_keyMap.get(key[1]));
                     list.add(m_keyMap.get(key[2]));
+                    break;
+                case Q3EGlobals.TYPE_DISC:
+                    Set<Map.Entry<String, Boolean>> entries = keysMap.entrySet();
+                    for(Map.Entry<String, Boolean> entry : entries)
+                    {
+                        if(entry.getValue())
+                            list.add(entry.getKey());
+                    }
                     break;
                 default:
                     break;
@@ -278,6 +329,15 @@ public class OnScreenButtonConfigActivity extends Activity
                     res[1] = key[1];
                     res[2] = key[2];
                     res[3] = style;
+                    break;
+                case Q3EGlobals.TYPE_DISC:
+                    if(config[0] <= 0)
+                        config[0] = 1;
+                    else if(config[0] > Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length)
+                        config[0] = Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length;
+                    res[0] = config[0];
+                    res[1] = style;
+                    res[2] = config[2];
                     break;
                 default:
                 break;
@@ -342,6 +402,10 @@ public class OnScreenButtonConfigActivity extends Activity
                     holdTextView.setText(R.string.slider);
                     styleTextView.setText(m_sliderStyleMap.get(data.style) != null ? m_sliderStyleMap.get(data.style) : "");
                     break;
+                case Q3EGlobals.TYPE_DISC:
+                    holdTextView.setText(R.string.disc_panel);
+                    styleTextView.setText(KStr.Str(m_discStyleMap.get(data.style)));
+                    break;
                 default:
                     break;
             }
@@ -366,6 +430,8 @@ public class OnScreenButtonConfigActivity extends Activity
         final int[] typeValues = rsc.getIntArray(R.array.onscreen_type_values);
         final int[] keyCodes = rsc.getIntArray(R.array.key_map_codes);
         final int[] sliderStyleValues = rsc.getIntArray(R.array.onscreen_slider_style_values);
+        final int[] discStyleValues = rsc.getIntArray(R.array.onscreen_disc_style_values);
+
         View view = getLayoutInflater().inflate(R.layout.onscreen_button_config_dialog, null, false);
         final CheckBox holdCheckBox = view.findViewById(R.id.onscreen_button_config_dialog_hold);
         final Spinner styleSpinner = view.findViewById(R.id.onscreen_button_config_dialog_style);
@@ -380,18 +446,26 @@ public class OnScreenButtonConfigActivity extends Activity
         final View key2Layout = view.findViewById(R.id.onscreen_button_config_dialog_key2_layout);
         final View key3Layout = view.findViewById(R.id.onscreen_button_config_dialog_key3_layout);
         final View sliderStyleLayout = view.findViewById(R.id.onscreen_button_config_dialog_slider_style_layout);
+        final View discStyleLayout = view.findViewById(R.id.onscreen_button_config_dialog_disc_style_layout);
+        final Spinner discStyleSpinner = view.findViewById(R.id.onscreen_button_config_dialog_disc_style);
+        final View discKeysLayout = view.findViewById(R.id.onscreen_button_config_dialog_keys_layout);
+        final LinearLayout discKeysSpinner = view.findViewById(R.id.onscreen_button_config_dialog_keys);
+
         final Runnable runnable = new Runnable() {
             public void run() {
                 typeSpinner.setSelection(Utility.ArrayIndexOf(typeValues, btn.type));
                 switch(btn.type)
                 {
                     case Q3EGlobals.TYPE_BUTTON:
-                        holdLayout.setVisibility(View.VISIBLE);
-                        styleLayout.setVisibility(View.VISIBLE);
-                        keyLayout.setVisibility(View.VISIBLE);
                         key2Layout.setVisibility(View.GONE);
                         key3Layout.setVisibility(View.GONE);
                         sliderStyleLayout.setVisibility(View.GONE);
+                        discStyleLayout.setVisibility(View.GONE);
+                        discKeysLayout.setVisibility(View.GONE);
+
+                        holdLayout.setVisibility(View.VISIBLE);
+                        styleLayout.setVisibility(View.VISIBLE);
+                        keyLayout.setVisibility(View.VISIBLE);
                         holdCheckBox.setChecked(btn.hold);
                         styleSpinner.setSelection(Utility.ArrayIndexOf(styleValues, btn.style));
                         keySpinner.setSelection(Utility.ArrayIndexOf(keyCodes, btn.key[0]));
@@ -399,6 +473,9 @@ public class OnScreenButtonConfigActivity extends Activity
                     case Q3EGlobals.TYPE_SLIDER:
                         holdLayout.setVisibility(View.GONE);
                         styleLayout.setVisibility(View.GONE);
+                        discStyleLayout.setVisibility(View.GONE);
+                        discKeysLayout.setVisibility(View.GONE);
+
                         sliderStyleLayout.setVisibility(View.VISIBLE);
                         sliderStyleSpinner.setSelection(Utility.ArrayIndexOf(sliderStyleValues, btn.style));
                         keyLayout.setVisibility(View.VISIBLE);
@@ -408,43 +485,99 @@ public class OnScreenButtonConfigActivity extends Activity
                         key2Spinner.setSelection(Utility.ArrayIndexOf(keyCodes, btn.key[1]));
                         key3Spinner.setSelection(Utility.ArrayIndexOf(keyCodes, btn.key[2]));
                         break;
+                    case Q3EGlobals.TYPE_DISC:
+                        holdLayout.setVisibility(View.GONE);
+                        styleLayout.setVisibility(View.GONE);
+                        keyLayout.setVisibility(View.GONE);
+                        key2Layout.setVisibility(View.GONE);
+                        key3Layout.setVisibility(View.GONE);
+                        sliderStyleLayout.setVisibility(View.GONE);
+
+                        discStyleLayout.setVisibility(View.VISIBLE);
+                        discStyleSpinner.setSelection(Utility.ArrayIndexOf(discStyleValues, btn.style));
+                        discKeysLayout.setVisibility(View.VISIBLE);
+
+                        discKeysSpinner.removeAllViews();
+                        Set<Map.Entry<String, Boolean>> entries = btn.keysMap.entrySet();
+                        for(Map.Entry<String, Boolean> entry : entries)
+                        {
+                            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                            CheckBox checkBox = new CheckBox(discKeysLayout.getContext());
+                            checkBox.setText(entry.getKey().toUpperCase());
+                            checkBox.setTag(entry.getKey());
+                            checkBox.setChecked(entry.getValue());
+                            discKeysSpinner.addView(checkBox, lp);
+                        }
+                        break;
                     default:
                         break;
                 }
-            }  
+            }
         };
+
+        boolean canChangeType = btn.type == Q3EGlobals.TYPE_BUTTON || btn.type == Q3EGlobals.TYPE_SLIDER;
+        typeSpinner.setEnabled(canChangeType);
         runnable.run();
-        typeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-           public void onItemSelected(AdapterView adapter, View view, int position, long id)
-           {
-               int type = typeValues[position];
-               switch(type)
-               {
-                   case Q3EGlobals.TYPE_BUTTON:
-                       holdLayout.setVisibility(View.VISIBLE);
-                       styleLayout.setVisibility(View.VISIBLE);
-                       keyLayout.setVisibility(View.VISIBLE);
-                       key2Layout.setVisibility(View.GONE);
-                       key3Layout.setVisibility(View.GONE);
-                       sliderStyleLayout.setVisibility(View.GONE);
-                       break;
-                   case Q3EGlobals.TYPE_SLIDER:
-                       holdLayout.setVisibility(View.GONE);
-                       styleLayout.setVisibility(View.GONE);
-                       sliderStyleLayout.setVisibility(View.VISIBLE);
-                       keyLayout.setVisibility(View.VISIBLE);
-                       key2Layout.setVisibility(View.VISIBLE);
-                       key3Layout.setVisibility(View.VISIBLE);
-                       break;
-                   default:
-                       break;
-               }
-           }
-           public void onNothingSelected(AdapterView adapter)
-           {
-               
-           }
-        });
+        if(canChangeType)
+        {
+            typeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(AdapterView adapter, View view, int position, long id)
+                {
+                    int type = typeValues[position];
+                    if(type != Q3EGlobals.TYPE_BUTTON && type != Q3EGlobals.TYPE_SLIDER)
+                    {
+                        type = btn.type;
+                        typeSpinner.setSelection(Utility.ArrayIndexOf(typeValues, type));
+                        Toast.makeText(OnScreenButtonConfigActivity.this, R.string.not_allowed, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    switch(type)
+                    {
+                        case Q3EGlobals.TYPE_BUTTON:
+                            key2Layout.setVisibility(View.GONE);
+                            key3Layout.setVisibility(View.GONE);
+                            sliderStyleLayout.setVisibility(View.GONE);
+                            discStyleLayout.setVisibility(View.GONE);
+                            discKeysLayout.setVisibility(View.GONE);
+
+                            holdLayout.setVisibility(View.VISIBLE);
+                            styleLayout.setVisibility(View.VISIBLE);
+                            keyLayout.setVisibility(View.VISIBLE);
+                            break;
+                        case Q3EGlobals.TYPE_SLIDER:
+                            holdLayout.setVisibility(View.GONE);
+                            styleLayout.setVisibility(View.GONE);
+                            discStyleLayout.setVisibility(View.GONE);
+                            discKeysLayout.setVisibility(View.GONE);
+
+                            sliderStyleLayout.setVisibility(View.VISIBLE);
+                            keyLayout.setVisibility(View.VISIBLE);
+                            key2Layout.setVisibility(View.VISIBLE);
+                            key3Layout.setVisibility(View.VISIBLE);
+                            break;
+/*                        case Q3EGlobals.TYPE_DISC:
+                            holdLayout.setVisibility(View.GONE);
+                            styleLayout.setVisibility(View.GONE);
+                            sliderStyleLayout.setVisibility(View.GONE);
+                            keyLayout.setVisibility(View.GONE);
+                            key2Layout.setVisibility(View.GONE);
+                            key3Layout.setVisibility(View.GONE);
+
+                            discStyleLayout.setVisibility(View.VISIBLE);
+                            discKeysLayout.setVisibility(View.VISIBLE);
+                            break;*/
+                        default:
+                            break;
+                    }
+                }
+                public void onNothingSelected(AdapterView adapter)
+                {
+                }
+            });
+        }
+        else
+            typeSpinner.setOnItemSelectedListener(null);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(btn.name);
         builder.setView(view);
@@ -465,6 +598,14 @@ public class OnScreenButtonConfigActivity extends Activity
                         btn.key[1] = keyCodes[key2Spinner.getSelectedItemPosition()];
                         btn.key[2] = keyCodes[key3Spinner.getSelectedItemPosition()];
                         break;
+                    case Q3EGlobals.TYPE_DISC:
+                        btn.style = discStyleValues[discStyleSpinner.getSelectedItemPosition()];
+                        for(int i = 0; i < discKeysSpinner.getChildCount(); i++)
+                        {
+                            CheckBox checkBox = (CheckBox)discKeysSpinner.getChildAt(i);
+                            btn.keysMap.put((String)checkBox.getTag(), checkBox.isChecked());
+                        }
+                        break;
                     default:
                         return;
                 }
@@ -473,7 +614,45 @@ public class OnScreenButtonConfigActivity extends Activity
             }
         });
         builder.setNegativeButton(R.string.cancel, null);
-        builder.setNeutralButton(R.string.restore, null);
+        builder.setNeutralButton(R.string.restore, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(OnScreenButtonConfigActivity.this);
+                Set<String> saved = preferences.getStringSet(Q3EPreference.ONSCREEN_BUTTON, null);
+                if(null == saved || saved.isEmpty())
+                {
+                    LoadConfig();
+                }
+                else
+                {
+                    btn.type = Q3EInterface._defaultType[btn.index];
+                    switch(Q3EInterface._defaultType[btn.index])
+                    {
+                        case Q3EGlobals.TYPE_BUTTON:
+                            btn.hold = Q3EInterface._defaultArgs[btn.index * 4 + 1] == Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
+                            btn.style = Q3EInterface._defaultArgs[btn.index * 4 + 2];
+                            btn.key[0] = Q3EInterface._defaultArgs[btn.index * 4];
+                            break;
+                        case Q3EGlobals.TYPE_SLIDER:
+                            btn.style = Q3EInterface._defaultArgs[btn.index * 4 + 3];
+                            btn.key[0] = Q3EInterface._defaultArgs[btn.index * 4];
+                            btn.key[1] = Q3EInterface._defaultArgs[btn.index * 4 + 1];
+                            btn.key[2] = Q3EInterface._defaultArgs[btn.index * 4 + 2];
+                            break;
+                        case Q3EGlobals.TYPE_DISC:
+                            btn.style = Q3EInterface._defaultArgs[btn.index * 4 + 1];
+                            for(String k : btn.keysMap.keySet())
+                                btn.keysMap.put(k, true);
+                            break;
+                        default:
+                            return;
+                    }
+                    btn.Update();
+                    SaveConfig();
+                }
+            }
+        });
         AlertDialog dialog = builder.create();
         dialog.show();
         dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
@@ -483,7 +662,7 @@ public class OnScreenButtonConfigActivity extends Activity
         });
     }
 
-    private void OpenWeaponPanelKeysSetting()
+/*    private void OpenWeaponPanelKeysSetting()
     {
         final String[] Keys = {
             "1", "2", "3", "4", "5", "6", "7", "8", "9", "q", "0",
@@ -536,5 +715,5 @@ public class OnScreenButtonConfigActivity extends Activity
         builder.setNegativeButton(R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
-	}
+	}*/
 }

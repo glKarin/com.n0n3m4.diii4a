@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-precision mediump float;
+precision highp float;
 
 /**
  * This is the upsampling portion of the "dual filtering" blur as suggested in the Siggraph 2015 talk

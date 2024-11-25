@@ -6,9 +6,9 @@
 ##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部 安卓OpenGLES移植版  
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan58(natasha)  
+1.1.0harmattan59(natasha)  
 **Latest update:**
-2024-10-29  
+2024-11-20  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -56,7 +56,7 @@ GPLv3
 
 | Game | Engine | Version | OpenGL ES version | Mods |
 |:-----|:-----:|:-----:|:-----:|:-----:|
-| DOOM III | n0n3m4's dante | - | 2.0/3.0 | [Resurrection of Evil]()<br/>[The Lost Mission](https://www.moddb.com/mods/the-lost-mission)<br/>[Classic DOOM3](https://www.moddb.com/mods/classic-doom-3)<br/>[Rivensin](https://www.moddb.com/mods/ruiner)<br/>[HardCorps](https://www.moddb.com/mods/hardcorps)<br/>[Overthinked Doom^3](https://www.moddb.com/mods/overthinked-doom3)<br/>[Sabot(a7x)](https://www.moddb.com/games/doom-3-resurrection-of-evil/downloads/sabot-alpha-7x)<br/>[HeXen:Edge of Chaos](https://www.moddb.com/mods/hexen-edge-of-chaos)<br/>[Fragging Free](https://www.moddb.com/mods/fragging-free)<br/>[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[LibreCoop D3XP](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Perfected Doom 3:RoE](https://www.moddb.com/mods/perfected-doom-3-version-500) |
+| DOOM III | n0n3m4's dante | - | 2.0/3.0 | [Resurrection of Evil]()<br/>[The Lost Mission](https://www.moddb.com/mods/the-lost-mission)<br/>[Classic DOOM3](https://www.moddb.com/mods/classic-doom-3)<br/>[Rivensin](https://www.moddb.com/mods/ruiner)<br/>[HardCorps](https://www.moddb.com/mods/hardcorps)<br/>[Overthinked Doom^3](https://www.moddb.com/mods/overthinked-doom3)<br/>[Sabot(a7x)](https://www.moddb.com/games/doom-3-resurrection-of-evil/downloads/sabot-alpha-7x)<br/>[HeXen:Edge of Chaos](https://www.moddb.com/mods/hexen-edge-of-chaos)<br/>[Fragging Free](https://www.moddb.com/mods/fragging-free)<br/>[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[LibreCoop D3XP](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Perfected Doom 3:RoE](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Doom 3: Phobos](https://www.moddb.com/mods/phobos)([Dhewm3 compatibility patch](https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch)) |
 | Quake IV | n0n3m4's dante | - | 2.0/3.0 | [Hardqore](https://www.moddb.com/mods/quake-4-hardqore) |
 | Prey(2006) | n0n3m4's dante | - | 2.0/3.0 |  |
 | DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) | 3.0 |  |
@@ -66,7 +66,7 @@ GPLv3
 | Quake II | [Yamagi Quake II](https://github.com/yquake2/yquake2) | - | 1.1/3.2 | ctf<br/>rogue<br/>xatrix<br/>zaero |
 | Quake I | [Darkplaces](https://github.com/DarkPlacesEngine/darkplaces) | - | 2.0 |  |
 | GZDOOM | [GZDOOM](https://github.com/ZDoom/gzdoom) 64bits | - | 3.2 |  |
-| Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) | 2.8.1 | 1.1 |  |
+| Wolfenstein: Enemy Territory | [ET: Legacy](https://www.etlegacy.com) Omni-Bot support | 2.8.1 | 1.1 |  |
 | RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.0 | 1.1 |  |
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
@@ -88,19 +88,26 @@ Tag with `-free` only for F-Droid update.
 ----------------------------------------------------------------------------------
 ### Update
 
-* Add `RealRTCW`(ver 5.0) support, game standalone directory named `realrtcw`, game data directory named `Main`. More view in [RealRTCW](https://github.com/wolfetplayer/RealRTCW).
-* Fix light bar indicator of player's HUD by `darkness257` on The Dark Mod, now setup `tdm_lg_weak` to 1 automatically. More view in [The Darkmod light bar indicator bug](https://github.com/glKarin/com.n0n3m4.diii4a/issues/244).
-* Support create desktop shortcut for games or current command on `Option` menu of launcher.
-* Fix stencil shadow with `cg_shadows` = 2 on Quake 3.
-* Improve stencil shadow with `cg_shadows` = 2 on RealRTCW.
+* Support `Omni-Bot` in Wolfenstein: Enemy Territory.
+* Fix rendering on Mali GPU in DOOM 3-BFG.
+* Fix rendering on Mali GPU in The Dark Mod.
+* Fix stencil shadow with `cg_shadows` = 2 in Wolfenstein: Enemy Territory.
+* Support choose a mod directory in GZDOOM.
+* Add some new features options on launcher in Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM, The Dark Mod.
+* Add use high precision float on GLSL shaders(cvar `harm_r_useHighPrecision`) in DOOM 3/Quake 4/Prey.
+* Add 5 onscreen buttons.
+* Add `Phobos(for Dhewm3)` mod of DOOM3 support, game data directory named `tfphobos`(d3xp and dhewm3 compatibility patch required). More view in [Doom 3: Phobos](https://www.moddb.com/mods/phobos) and [Doom 3: Phobos - dhewm3 compatibility patch](https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch).
 
 ----------------------------------------------------------------------------------
 
-* 新增`真·重返德军总部`(ver 5.0)支持, 游戏独立文件夹名为`etw`, 游戏数据文件夹为`Main`. 更多详情[RealRTCW](https://github.com/wolfetplayer/RealRTCW).
-* The Dark Mod修复玩家HUD上的亮度指示条 by `darkness257`, 当前自动设置`tdm_lg_weak`为1. 更多详情[The Darkmod light bar indicator bug](https://github.com/glKarin/com.n0n3m4.diii4a/issues/244).
-* 启动器`Option`菜单增加以游戏或当前命令行来创建桌面快捷方式.
-* 修复雷神之锤3的模板阴影当`cg_shadows` = 2.
-* 改进真·重返德军总部的模板阴影当`cg_shadows` = 2.
+* 深入敌后:德军总部新增`Omni-Bot`支持.
+* 毁灭战士3-BFG修复在Mali GPU上的渲染问题.
+* The Dark Mod修复在Mali GPU上的渲染问题.
+* 修复深入敌后:德军总部的模板阴影当`cg_shadows` = 2.
+* GZDOOM选择mod时支持选择整个文件夹.
+* 启动器新增一些新特性的设置功能: 深入敌后:德军总部, 真·重返德军总部, 毁灭战士3-BFG, 雷神之锤2, GZDOOM, The Dark Mod.
+* 毁灭战士3/雷神之锤 4/掠食(2006)支持GLSL着色器中使用高精度浮点数(cvar `harm_r_useHighPrecision`).
+* 新增5个虚拟按键.
 
 ----------------------------------------------------------------------------------
 ### Standalone game directory
@@ -170,12 +177,13 @@ Tag with `-free` only for F-Droid update.
 | harm_r_stencilShadowSoftBias | Float | -1 | soft stencil shadow sampler BIAS | ARCHIVE |  | Engine/Renderer | -1 to automatic; 0 = disable; positive = value | All |
 | harm_r_stencilShadowSoftCopyStencilBuffer | Bool | 0 | copy stencil buffer directly for soft stencil shadow | ARCHIVE | 0 = copy depth buffer and bind and renderer stencil buffer to texture directly<br/>1 = copy stencil buffer to texture directly | Engine/Renderer |  | All |
 | harm_r_autoAspectRatio | Integer | 1 | automatic setup aspect ratio of view | ARCHIVE | 0, 1, 2 | Engine/Renderer | 0 = manual<br/>1 = force setup r_aspectRatio to -1<br/>2 = automatic setup r_aspectRatio to 0,1,2 by screen size | Android |
-| harm_r_renderToolsMultithread | Bool | 0 | Enable render tools debug with GLES in multi-threading |  |  | Engine/Renderer |  | All |
+| harm_r_renderToolsMultithread | Bool | 0 | Enable render tools debug with GLES in multi-threading | ARCHIVE |  | Engine/Renderer |  | All |
 | r_useETC1 | Bool | 0 | use ETC1 compression | INIT |  | Engine/Renderer |  | All |
 | r_useETC1cache | Bool | 0 | use ETC1 compression | INIT |  | Engine/Renderer |  | All |
 | r_useDXT | Bool | 0 | use DXT compression if possible | INIT |  | Engine/Renderer |  | All |
 | r_useETC2 | Bool | 0 | use ETC2 compression instead of RGBA4444 | INIT |  | Engine/Renderer | Only for OpenGLES3.0+ | All |
 | r_noLight | Bool | 0 | lighting disable hack | INIT |  | Engine/Renderer | 1 = disable lighting(not allow switch, must setup on command line) | All |
+| harm_r_useHighPrecision | Bool | Android = 0; Other = 1 | Use high precision float on GLSL shade | INIT |  | Engine/Renderer |  | All |
 | harm_fs_gameLibPath | String |  | Setup game dynamic library | ARCHIVE |  | Engine/Framework |  | Android |
 | harm_fs_gameLibDir | String |  | Setup game dynamic library directory path | ARCHIVE |  | Engine/Framework |  | Android |
 | harm_com_consoleHistory | Integer | 2 | Save/load console history | ARCHIVE | 0, 1, 2 | Engine/Framework | 0 = disable;<br/> 1 = loading in engine initialization, and saving in engine shutdown;<br/> 2 = loading in engine initialization, and saving in every e executing | All |
@@ -519,6 +527,7 @@ model player_model_torso_and_lower_body {
 * mp3lame
 * mpg123
 * oboe
+* Omni-Bot
 * openal-soft
 * openssl
 * opus

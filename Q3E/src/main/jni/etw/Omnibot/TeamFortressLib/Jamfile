@@ -1,0 +1,19 @@
+# $LastChangedBy$
+# $LastChangedDate$
+# $LastChangedRevision$
+
+# The Omni-bot Team Fortress Static Library.
+
+project TeamFortressLib
+	: requirements <include>./
+	: requirements <include>../Common
+	: requirements <include>../dependencies/zlib
+	: requirements <include>../dependencies/bzip2-1.0.3	
+	: requirements <include>../dependencies/sqlite-3.2.8
+	;
+
+SOURCES = [ glob *.cpp ] ;
+
+lib TeamFortressLib : $(SOURCES) 
+		 : <link>static <toolset>gcc:<cflags>-w <cflags>-pthread
+		 ;

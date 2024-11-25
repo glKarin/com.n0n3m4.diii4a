@@ -57,6 +57,7 @@
             <Preference
                 android:key="standalone_game_data_directories"
                 android:title="@string/show_game_datas_standalone_directories"
+                android:dependency="harm_game_standalone_directory"
                 android:persistent="false"/>
             <CheckBoxPreference
                 android:title="@string/redirect_output_to_file"

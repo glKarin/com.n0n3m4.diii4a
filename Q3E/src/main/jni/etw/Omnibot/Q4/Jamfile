@@ -1,0 +1,19 @@
+# $LastChangedBy$
+# $LastChangedDate$
+# $LastChangedRevision$
+
+# The Quake4 Library.
+
+project Q4
+	: requirements <include>./
+	: requirements <include>../Common
+   	;
+
+# Declare an alias to the common library
+alias common_lib : ..//Common : <link>static ;
+
+# Compile ALL .cpp files and link to Common.lib to create our dll
+
+SOURCES = [ glob *.cpp : Q4_BatchBuild.cpp ] ../Common/BotExports.cpp ..//boost_fs ..//boost_regx ..//boost_th ..//boost_dt common_lib ;
+
+lib omnibot_q4 : $(SOURCES) : <toolset>gcc:<cflags>-w <cflags>-pthread <linkflags>-pthread <cflags>-ffriend-injection ;

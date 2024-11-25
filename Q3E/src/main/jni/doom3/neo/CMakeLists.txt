@@ -85,6 +85,10 @@ option(DEDICATED							"Build the dedicated server" 												OFF)
 option(ONATIVE								"Optimize for the host CPU" 												OFF)
 option(REPRODUCIBLE_BUILD 					"Replace __DATE__ and __TIME__ by hardcoded values for reproducible builds" OFF)
 option(CONSOLE								"Run on console" 															OFF)
+if(LINUX AND NOT ANDROID)
+	option(USE_X11							"Use X11"																	OFF) # else SDL2
+	option(USE_LOCAL_SDL					"Use local SDL library"														OFF) # else system
+endif()
 
 # For dev: Quick build
 option(BUILD_D3								"Build DOOM 3"																ON)
@@ -134,7 +138,8 @@ option(FRAGGINGFREE							"Build the fraggingfree game code" 											ON)
 option(LIBRECOOP							"Build the librecoop game code" 											ON)
 option(LIBRECOOPXP							"Build the librecoopxp game code" 											ON)
 option(PERFECTED							"Build the perfected game code" 											ON)
-option(PERFECTEDROE							"Build the perfected_roe game code" 											ON)
+option(PERFECTEDROE							"Build the perfected_roe game code" 										ON)
+option(PHOBOS								"Build the tfphobos game code" 												ON)
 endif()
 
 # Quake4
@@ -289,6 +294,7 @@ endif()
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
+#set(CMAKE_BUILD_TYPE "ReleaseWithDebInfo")
 
 # precompiled libraries from the dhewm3-libs repo
 #[[if(DHEWM3LIBS)
@@ -544,7 +550,36 @@ elseif(ANDROID)
 		set(sys_libs ${sys_libs} z)
 	endif()
 else() #TODO linux
-	set(sys_libs ${sys_libs} X11 dl EGL pthread)
+	set(sys_libs ${sys_libs} dl pthread)
+	if(USE_X11)
+		set(LINUX_SDL FALSE)
+		message(STATUS "use X11 + EGL")
+		set(sys_libs ${sys_libs} X11 EGL)
+	else() # SDL2
+	    if(USE_LOCAL_SDL)
+	        add_subdirectory(externlibs/SDL2)
+            set(LINUX_SDL TRUE)
+            message(STATUS "use local SDL2")
+            include_directories(externlibs/SDL2/include)
+            set(SDLx_LIBRARY "SDL2::SDL2")
+            add_definitions(-D_SDL)
+            set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
+	    else()
+		    find_package(SDL2)
+            if(SDL2_FOUND)
+                set(LINUX_SDL TRUE)
+                message(STATUS "use system SDL2")
+                include_directories(${SDL2_INCLUDE_DIRS})
+                set(SDLx_LIBRARY ${SDL2_LIBRARIES})
+                add_definitions(-D_SDL)
+                set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
+            else()
+                set(LINUX_SDL FALSE)
+                message(STATUS "SDL2 not found, using X11 + EGL")
+                set(sys_libs ${sys_libs} X11 EGL)
+            endif()
+	    endif()
+	endif()
 	if(NOT USE_MINIZ)
 		set(sys_libs ${sys_libs} z)
 	endif()
@@ -1330,6 +1365,28 @@ elseif(WIN32)
 			sys/sdl/glimp.cpp
 			)
 else()
+	if(LINUX_SDL)
+		set(src_sys_base
+			sys/sys_local.cpp
+			sys/sdl/threads.cpp
+			sys/sdl/events.cpp
+			sys/sdl/cpu.cpp
+			sys/sdl/sdl.cpp
+			sys/linux/stack.cpp
+			sys/posix/posix_net.cpp
+			sys/posix/posix_main.cpp
+			sys/posix/posix_signal.cpp
+		)
+		set(src_sys_base
+			${src_sys_base}
+			sys/linux/sound.cpp
+			sys/linux/sound_alsa.cpp
+			sys/linux/sdlmain.cpp
+		)
+		set(src_sys_core
+			sys/sdl/glimp.cpp
+		)
+	else()
 	set(src_sys_base
 		${src_sys_base}
 		sys/linux/main.cpp
@@ -1340,6 +1397,8 @@ else()
 	set(src_sys_core
 		sys/linux/gles2.cpp
 	)
+endif()
+
 endif()
 
 include_directories(${CMAKE_BINARY_DIR})
@@ -1439,6 +1498,9 @@ if(PERFECTED)
 endif()
 if(PERFECTEDROE)
 	message(STATUS "Build perfected_roe")
+endif()
+if(PHOBOS)
+	message(STATUS "Build tfphobos")
 endif()
 # Quake 4
 if(RAVEN)
@@ -1939,6 +2001,35 @@ if(PERFECTEDROE)
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
 		install(TARGETS perfected_roe
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+				)
+	endif()
+endif()
+
+if(PHOBOS)
+	# tfphobos
+	set(src_tfphobos ${base_game_src})
+	set(tfphobos_game_src
+			Grabber.cpp
+			physics/Force_Grab.cpp
+			)
+	list(APPEND src_tfphobos ${tfphobos_game_src})
+	set_src_dir(src_tfphobos "${DOOM3_MOD_DIR}/tfphobos" ${src_tfphobos})
+	add_globbed_headers(src_tfphobos "${DOOM3_MOD_DIR}/tfphobos")
+
+	add_library(tfphobos SHARED ${src_tfphobos})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_tfphobos})
+	#set_target_properties(tfphobos PROPERTIES PREFIX "")
+	set_target_properties(tfphobos PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_D3XP;CTF;_PHOBOS")
+	target_include_directories(tfphobos PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${DOOM3_MOD_DIR}/tfphobos")
+	set_target_properties(tfphobos PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(tfphobos PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(tfphobos idlib)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS tfphobos
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"

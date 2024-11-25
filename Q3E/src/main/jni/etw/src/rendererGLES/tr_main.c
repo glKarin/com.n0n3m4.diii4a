@@ -933,10 +933,24 @@ void R_SetupProjection(void)
 	tr.viewParms.projectionMatrix[9]  = (ymax + ymin) / height;     // normally 0
 	tr.viewParms.projectionMatrix[13] = 0;
 
+#ifdef STENCIL_SHADOW_IMPROVE //karin: if using z-fail and w-infinite, make far plane as infinite
+    if(STENCIL_SHADOW_INFINITE())
+    {
+        tr.viewParms.projectionMatrix[2] = 0;
+        tr.viewParms.projectionMatrix[6] = 0;
+        tr.viewParms.projectionMatrix[10] = -0.999f;
+        tr.viewParms.projectionMatrix[14] = -2.0f*zNear;
+    }
+    else
+    {
+#endif
 	tr.viewParms.projectionMatrix[2]  = 0;
 	tr.viewParms.projectionMatrix[6]  = 0;
 	tr.viewParms.projectionMatrix[10] = -(zFar + zNear) / depth;
 	tr.viewParms.projectionMatrix[14] = -2 * zFar * zNear / depth;
+#ifdef STENCIL_SHADOW_IMPROVE //karin: if using z-fail and w-infinite, make far plane as infinite
+    }
+#endif
 
 	tr.viewParms.projectionMatrix[3]  = 0;
 	tr.viewParms.projectionMatrix[7]  = 0;

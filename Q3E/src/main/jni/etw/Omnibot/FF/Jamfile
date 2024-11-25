@@ -1,0 +1,21 @@
+# $LastChangedBy$
+# $LastChangedDate$
+# $LastChangedRevision$
+
+# The FF Library.
+
+project FF
+	: requirements <include>./
+	: requirements <include>../Common
+	: requirements <include>../TeamFortressLib
+   	;
+
+# Declare an alias to the common library
+alias common_lib : ..//Common : <link>static ;
+alias tf_lib : ..//TeamFortressLib : <link>static ;
+
+# Compile ALL .cpp files and link to Common.lib to create our dll
+
+SOURCES = [ glob *.cpp : FF_BatchBuild.cpp ] ../Common/BotExports.cpp ..//boost_fs ..//boost_regx ..//boost_th ..//boost_dt common_lib tf_lib ;
+
+lib omnibot_ff : $(SOURCES) : <toolset>gcc:<cflags>-w <cflags>-pthread <linkflags>-pthread <cflags>-ffriend-injection ;

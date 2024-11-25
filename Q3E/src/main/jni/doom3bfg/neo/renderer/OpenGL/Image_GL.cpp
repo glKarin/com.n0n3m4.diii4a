@@ -37,7 +37,15 @@ Contains the Image implementation for OpenGL.
 
 #include "../RenderCommon.h"
 
+#ifdef _GLES //karin: decompress texture to RGBA instead of glCompressedXXX on OpenGLES
+#include "../DXT/DXTCodec.h"
+
+#define TID(x) x
+#include "../etc/etc.cpp"
+#endif
+
 #if 0
+#undef TID
 #define TID(x) {\
 	while(glGetError() != GL_NO_ERROR); \
 	x; \
@@ -45,12 +53,6 @@ Contains the Image implementation for OpenGL.
 	}
 #else
 #define TID(x) x
-#endif
-
-#ifdef _GLES //karin: decompress texture to RGBA instead of glCompressedXXX on OpenGLES
-#include "../DXT/DXTCodec.h"
-
-#include "../etc/etc.cpp"
 #endif
 
 /*
@@ -766,28 +768,54 @@ void idImage::AllocImage()
 
 		case FMT_DEPTH:
 #ifdef _GLES //karin: using GL_DEPTH_COMPONENT24 instead of GL_DEPTH_COMPONENT on OpenGLES
-			internalFormat = GL_DEPTH_COMPONENT24;
+#ifdef _DEPTH_COMPONENTS_32
+			internalFormat = GL_DEPTH_COMPONENT32F;
+			dataType = GL_FLOAT;
 #else
-			internalFormat = GL_DEPTH_COMPONENT;
+			internalFormat = GL_DEPTH_COMPONENT24;
+			dataType = GL_UNSIGNED_INT;
 #endif
 			dataFormat = GL_DEPTH_COMPONENT;
+#else
+			internalFormat = GL_DEPTH_COMPONENT;
+			dataFormat = GL_DEPTH_COMPONENT;
 			dataType = GL_UNSIGNED_BYTE;
+#endif
 			break;
 
 		case FMT_DEPTH_STENCIL:
+#ifdef _GLES //karin: using GL_DEPTH_COMPONENT24 instead of GL_DEPTH_COMPONENT on OpenGLES
+#ifdef _DEPTH_COMPONENTS_32
+			internalFormat = GL_DEPTH32F_STENCIL8;
+			dataFormat = GL_DEPTH_STENCIL;
+			dataType = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+#else
 			internalFormat = GL_DEPTH24_STENCIL8;
 			dataFormat = GL_DEPTH_STENCIL;
 			dataType = GL_UNSIGNED_INT_24_8;
+#endif
+#else
+			internalFormat = GL_DEPTH24_STENCIL8;
+			dataFormat = GL_DEPTH_STENCIL;
+			dataType = GL_UNSIGNED_INT_24_8;
+#endif
 			break;
 
 		case FMT_SHADOW_ARRAY:
 #ifdef _GLES //karin: using GL_DEPTH_COMPONENT24 instead of GL_DEPTH_COMPONENT on OpenGLES
-			internalFormat = GL_DEPTH_COMPONENT24;
+#ifdef _DEPTH_COMPONENTS_32
+			internalFormat = GL_DEPTH_COMPONENT32F;
+			dataType = GL_FLOAT;
 #else
-			internalFormat = GL_DEPTH_COMPONENT;
+			internalFormat = GL_DEPTH_COMPONENT24;
+			dataType = GL_UNSIGNED_INT;
 #endif
 			dataFormat = GL_DEPTH_COMPONENT;
+#else
+			internalFormat = GL_DEPTH_COMPONENT;
+			dataFormat = GL_DEPTH_COMPONENT;
 			dataType = GL_UNSIGNED_BYTE;
+#endif
 			break;
 
 		case FMT_RG16F:
@@ -901,7 +929,7 @@ void idImage::AllocImage()
 	if( opts.textureType == TT_2D_ARRAY )
 	{
 #ifdef _GLES //karin: GL_DEPTH_XXX data type must GL_UNSIGNED_INT on OpenGLES
-		TID(glTexImage3D( uploadTarget, 0, internalFormat, opts.width, opts.height, numSides, 0, dataFormat, GL_UNSIGNED_INT, NULL ));
+		TID(glTexImage3D( uploadTarget, 0, internalFormat, opts.width, opts.height, numSides, 0, dataFormat, internalFormat == GL_DEPTH_COMPONENT24 ? GL_UNSIGNED_INT : GL_FLOAT, NULL ));
 #else
 		glTexImage3D( uploadTarget, 0, internalFormat, opts.width, opts.height, numSides, 0, dataFormat, GL_UNSIGNED_BYTE, NULL );
 #endif

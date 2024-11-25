@@ -18,7 +18,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #define STGATILOV_USEGATHER 1
 
-precision mediump float;
+precision highp float;
 
 out vec4 FragColor;
 

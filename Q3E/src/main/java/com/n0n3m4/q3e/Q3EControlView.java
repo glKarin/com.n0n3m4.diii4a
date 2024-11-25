@@ -23,7 +23,9 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.hardware.Sensor;
@@ -623,8 +625,20 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             Toast.makeText(getContext(), R.string.click_back_again_to_exit, Toast.LENGTH_LONG).show();
         else if (m_pressBackCount == Q3EGlobals.CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
         {
-            //m_renderView.Shutdown();
-            Q3E.Finish();
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle(R.string.exit_game);
+            builder.setMessage(R.string.are_you_sure_exit_game);
+            builder.setCancelable(true);
+            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int v)
+                {
+                    dialog.dismiss();
+                    //m_renderView.Shutdown();
+                    Q3E.Finish();
+                }
+            });
+            builder.setNegativeButton(R.string.cancel, null);
+            builder.create().show();
             return true;
         }
         return res;

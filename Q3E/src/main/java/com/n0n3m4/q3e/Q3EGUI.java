@@ -10,11 +10,11 @@ import com.n0n3m4.q3e.Q3E;
 
 public class Q3EGUI
 {
-    public final static int DIALOG_ERROR = -1;
+    public final static int DIALOG_ERROR  = -1;
     public final static int DIALOG_CANCEL = 0;
-    public final static int DIALOG_YES = 1;
-    public final static int DIALOG_NO = 2;
-    public final static int DIALOG_OTHER = 3;
+    public final static int DIALOG_YES    = 1;
+    public final static int DIALOG_NO     = 2;
+    public final static int DIALOG_OTHER  = 3;
 
     private final Activity m_context;
 
@@ -103,6 +103,71 @@ public class Q3EGUI
             }
         }
 
+        return res[0];
+    }
+
+    public boolean BacktraceDialog(String title, String text)
+    {
+        final Object lock = new Object();
+        boolean[] res = { false };
+        synchronized(lock) {
+            try
+            {
+                Q3EUtils.q3ei.callbackObj.vw.post(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(m_context);
+                        builder.setTitle(title)
+                                .setMessage(text)
+                                .setCancelable(false)
+                        ;
+                        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        builder.setNeutralButton(R.string.copy, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                Q3EUtils.CopyToClipboard(m_context, text);
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                res[0] = true;
+                                Q3E.Finish();
+                                dialog.dismiss();
+                            }
+                        });
+                        AlertDialog dialog = builder.create();
+                        dialog.setOnDismissListener(new DialogInterface.OnDismissListener()
+                        {
+                            @Override
+                            public void onDismiss(DialogInterface dialog)
+                            {
+                                synchronized(lock) {
+                                    lock.notifyAll();
+                                }
+                            }
+                        });
+                        dialog.show();
+                    }
+                });
+                lock.wait();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
         return res[0];
     }
 }

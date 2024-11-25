@@ -1,0 +1,92 @@
+Index: RecastRasterization.cpp
+===================================================================
+--- RecastRasterization.cpp	(revision 122)
++++ RecastRasterization.cpp	(working copy)
+@@ -83,7 +83,7 @@
+ 	hf.freelist = ptr;
+ }
+ 
+-static void addSpan(rcHeightfield& hf, const int x, const int y,
++static bool addSpan(rcHeightfield& hf, const int x, const int y,
+ 					const unsigned short smin, const unsigned short smax,
+ 					const unsigned short flags, const int flagMergeThr)
+ {
+@@ -95,11 +95,13 @@
+ 	s->flags = flags;
+ 	s->next = 0;
+ 	
++	bool spanAdded = true;
++
+ 	// Empty cell, add he first span.
+ 	if (!hf.spans[idx])
+ 	{
+ 		hf.spans[idx] = s;
+-		return;
++		return spanAdded;
+ 	}
+ 	rcSpan* prev = 0;
+ 	rcSpan* cur = hf.spans[idx];
+@@ -130,6 +132,10 @@
+ 			if (rcAbs((int)s->smax - (int)cur->smax) <= flagMergeThr)
+ 				s->flags |= cur->flags;
+ 			
++			// new span is already handled?
++			if (cur->smin >= s->smin && cur->smax <= s->smax)
++				spanAdded = false;
++
+ 			// Remove current span.
+ 			rcSpan* next = cur->next;
+ 			freeSpan(hf, cur);
+@@ -152,6 +158,7 @@
+ 		s->next = hf.spans[idx];
+ 		hf.spans[idx] = s;
+ 	}
++	return spanAdded;
+ }
+ 
+ static int clipPoly(const float* in, int n, float* out, float pnx, float pnz, float pd)
+@@ -354,3 +361,44 @@
+ 	if (rcGetBuildTimes())
+ 		rcGetBuildTimes()->rasterizeTriangles += rcGetDeltaTimeUsec(startTime, endTime);
+ }
++
++bool rcRasterizeVertex(const float* vert, unsigned char flags, rcHeightfield& solid, const int flagMergeThr)
++{
++	const float ics = 1.0f/solid.cs;
++	const float ich = 1.0f/solid.ch;
++
++	const int w = solid.width;
++	const int h = solid.height;
++	float tmin[3], tmax[3];
++	const float by = solid.bmax[1] - solid.bmin[1];
++
++	// Calculate the bounding box of the triangle.
++	vcopy(tmin, vert);
++	vcopy(tmax, vert);
++
++	// If the triangle does not touch the bbox of the heightfield, skip the triagle.
++	if (!overlapBounds(solid.bmin, solid.bmax, tmin, tmax))
++		return false;
++
++	// Calculate the footprint of the vertex on the grid.
++	int x0 = (int)((vert[0] - solid.bmin[0])*ics);
++	int y0 = (int)((vert[2] - solid.bmin[2])*ics);
++	x0 = rcClamp(x0, 0, w-1);
++	y0 = rcClamp(y0, 0, h-1);
++
++	// Calculate min and max of the span.
++	float smin = vert[1] - solid.bmin[1];
++	float smax = vert[1] - solid.bmin[1];
++
++	// Skip the span if it is outside the heightfield bbox
++	if (smax < 0.0f) return false;
++	if (smin > by) return false;
++	// Clamp the span to the heightfield bbox.
++	if (smin < 0.0f) smin = 0;
++	if (smax > by) smax = by;
++
++	unsigned short ismin = (unsigned short)rcClamp((int)floorf(smin * ich), 0, 0x7fff);
++	unsigned short ismax = (unsigned short)rcClamp((int)ceilf(smax * ich), 0, 0x7fff);
++
++	return addSpan(solid, x0, y0, ismin, ismax, flags, flagMergeThr);
++}

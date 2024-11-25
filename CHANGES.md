@@ -2,6 +2,20 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan59 (2024-11-20)
+
+* Support `Omni-Bot` in Wolfenstein: Enemy Territory.
+* Fix rendering on Mali GPU in DOOM 3-BFG.
+* Fix rendering on Mali GPU in The Dark Mod.
+* Fix stencil shadow with `cg_shadows` = 2 in Wolfenstein: Enemy Territory.
+* Support choose a mod directory in GZDOOM.
+* Add some new features options on launcher in Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM, The Dark Mod.
+* Add use high precision float on GLSL shaders(cvar `harm_r_useHighPrecision`) in DOOM 3/Quake 4/Prey.
+* Add 5 onscreen buttons.
+* Add `Phobos(for Dhewm3)` mod of DOOM3 support, game data directory named `tfphobos`(d3xp and dhewm3 compatibility patch required). More view in [Doom 3: Phobos](https://www.moddb.com/mods/phobos) and [Doom 3: Phobos - dhewm3 compatibility patch](https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch).
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan58 (2024-10-29)
 
 * Add `RealRTCW`(ver 5.0) support, game standalone directory named `realrtcw`, game data directory named `Main`. More view in [RealRTCW](https://github.com/wolfetplayer/RealRTCW).
@@ -22,7 +36,7 @@
 * Fix weapon model depth hack in player view in Quake4.
 * Add player body view in DOOM3/Quake4.
 * Add cvar `harm_in_smoothJoystick` to control setup smooth joystick in DOOM3/Quake4/Prey.
-* Default enable `Standalone game data directory`.
+* Default enable `Standalone game data directory`.[README.md](README.md)
 
 ----------------------------------------------------------------------------------
 

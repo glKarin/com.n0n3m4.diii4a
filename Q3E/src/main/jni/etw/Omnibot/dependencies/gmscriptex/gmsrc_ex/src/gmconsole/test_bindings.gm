@@ -1,0 +1,48 @@
+bc = BindClass();
+assert(bc, "cant create default bindclass");
+bc2 = Under.BindClass();
+assert(bc2, "cant create bindclass under global table");
+assert(bc.TestInt==1,"Bad Int");
+assert(bc.TestFloat==2,"Bad Float");
+assert(bc.TestStdString=="foo","Bad string");
+assert(bc.TestFloatReadOnly==50,"Bad Float");
+
+bc.TestInt = 5;
+bc.TestFloat = 10.0;
+
+bc.TestStdString = "bar";
+assert(bc.TestInt==5,"Bad Set Int");
+assert(bc.TestFloat==10,"Bad Set Float");
+assert(bc.TestStdString=="bar","Bad Set string");
+
+bc.FuncNoRetNoArg();
+if(bc.FuncBoolNoArg()==true)
+{
+	print("success!");
+}
+else
+{
+	print("FuncBoolNoArg failed!");
+}
+print("FuncStringNoArg :", bc.FuncStringNoArg());
+print("FuncStringNoArg :", bc.FuncStringArg("it works!"));
+
+bc.TestFloatReadOnly = 20;
+
+print("TestVector :", bc.TestVector);
+bc.TestVector = Vector3(2,4,6);
+print("TestVector :", bc.TestVector);
+assert(bc.TestVector==Vector3(2,4,6),"Bad Set Vector");
+print("FuncRaw :", bc.FuncRaw());
+
+global TestFunc = function(arg1,arg2,arg3,arg4,arg5)
+{
+	print("TestFunc",arg1,arg2,arg3,arg4,arg5);
+	return "Test";
+};
+global InTable = {};
+InTable.TestFunc = function(arg1,arg2,arg3,arg4,arg5)
+{
+	print("InTable.TestFunc",arg1,arg2,arg3,arg4,arg5);
+	return "Test2";
+};

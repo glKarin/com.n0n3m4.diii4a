@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="Build Interface"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="BuildExternal"
+			DisplayName="Build External Project"
+			CommandLine="devenv.exe [Solution] /build [Config] /out $(InputName).results"
+			Outputs="$(InputName).bld1"
+			FileExtensions="*.bld"
+			ExecutionDescription="Building External Project [Solution]"
+			>
+			<Properties>
+				<EnumProperty
+					Name="Config"
+					DisplayName="Config"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							Switch="Debug"
+							DisplayName="Debug"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="Release"
+							DisplayName="Release"
+						/>
+						<EnumValue
+							Value="2"
+							Switch="DebugInline"
+							DisplayName="DebugInline"
+						/>
+					</Values>
+				</EnumProperty>
+				<StringProperty
+					Name="Solution"
+					DisplayName="Solution"
+					Switch="&quot;[value]&quot;"
+				/>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

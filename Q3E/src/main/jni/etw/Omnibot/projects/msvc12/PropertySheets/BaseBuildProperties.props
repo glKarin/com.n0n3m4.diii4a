@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir>..\build\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>..\build\$(ProjectName)\$(Configuration)\</IntDir>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+  </PropertyGroup>
+  <ItemGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>$(BOOST);..\..\..\dependencies\guichan-0.7.1\include;..\..\..\dependencies\guichan-0.7.1\addons;..\..\..\dependencies\iprof;..\..\..\dependencies\wildmagic;..\..\..\dependencies\gmscriptex\gmsrc_ex\src\3rdParty;..\..\..\dependencies\gmscriptex\gmsrc_ex\src\3rdParty\gmbinder2;..\..\..\dependencies\gmscriptex\gmsrc_ex\src\gm;..\..\..\dependencies\gmscriptex\gmsrc_ex\src\binds;..\..\..\dependencies\gmscriptex\gmsrc_ex\src\platform\win32msvc;..\..\..\dependencies\VisualLeakDetector\include;..\..\..\dependencies\sqlite3;..\..\..\dependencies\Detours Express 2.1\src;..\..\..\dependencies\Recast\Recast\Include;..\..\..\dependencies\Recast\Detour\Include;..\..\..\dependencies\Recast\DebugUtils\Include;$(REMOTEDEBUGLIB);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;VC_EXTRA_LEAN;WIN32_EXTRA_LEAN;NOWINRES;NOSERVICE;NOMCX;NOIME;NOMINMAX;DETOURS_X86;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>true</MinimalRebuild>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>true</EnablePREfast>
+    </ClCompile>
+    <Link>
+      <ProgramDatabaseFile>$(TargetDir)$(TargetName)_$(ConfigurationName).pdb</ProgramDatabaseFile>
+    </Link>
+    <Link>
+      <GenerateMapFile>true</GenerateMapFile>
+    </Link>
+    <Link>
+      <MapFileName>$(TargetDir)$(TargetName)_$(ConfigurationName).map</MapFileName>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+</Project>

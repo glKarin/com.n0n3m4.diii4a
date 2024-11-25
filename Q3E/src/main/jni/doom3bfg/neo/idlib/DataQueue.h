@@ -95,6 +95,18 @@ idDataQueue::Append
 template< int maxItems, int maxBuffer >
 bool idDataQueue< maxItems, maxBuffer >::Append( int sequence, const byte* b1, int b1Len, const byte* b2, int b2Len )
 {
+#if !defined(__ANDROID__) && defined(__linux__)
+#define ARTEMS2_FIX //ArtemS2 fix :)
+#endif
+#ifdef ARTEMS2_FIX
+	if (b1 == NULL || b1Len < 0) {
+		return false;
+	}
+	if (b2 == NULL) {
+		b2Len = 0;
+	}
+#endif
+
 	if( items.Num() == items.Max() )
 	{
 		return false;
@@ -109,8 +121,14 @@ bool idDataQueue< maxItems, maxBuffer >::Append( int sequence, const byte* b1, i
 	item.dataOffset = dataLength;
 	memcpy( data + dataLength, b1, b1Len );
 	dataLength += b1Len;
+#ifdef ARTEMS2_FIX
+	if (b2Len > 0) {
+#endif
 	memcpy( data + dataLength, b2, b2Len );
 	dataLength += b2Len;
+#ifdef ARTEMS2_FIX
+	}
+#endif
 	return true;
 }
 

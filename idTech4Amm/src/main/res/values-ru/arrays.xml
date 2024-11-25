@@ -28,6 +28,7 @@
     <string-array name="onscreen_type_labels">
         <item>Кнопка</item>
         <item>Ползунок</item>
+        <item>Disc panel</item>
     </string-array>
 
     <string-array name="lang_labels">
@@ -35,5 +36,16 @@
         <item>English</item>
         <item>中文</item>
         <item>Русский</item>
+    </string-array>
+
+    <string-array name="joystick_visible_mode_names">
+        <item>Всегда</item>
+        <item>Скрыть</item>
+        <item>Одно нажатие</item>
+    </string-array>
+
+    <string-array name="onscreen_disc_style_labels">
+        <item>Листать</item>
+        <item>Нажатие</item>
     </string-array>
 </resources>

@@ -1,0 +1,205 @@
+
+get step height
+
+HL2DM Events
+
+Printing out ALL game, server and MOD events...
+Game events:
+Event "team_info"
+{
+   "teamid" (TYPE_BYTE)
+   "teamname" (TYPE_STRING)
+}
+Event "team_score"
+{
+   "teamid" (TYPE_BYTE)
+   "score" (TYPE_SHORT)
+}
+Event "player_team"
+{
+   "userid" (TYPE_SHORT)
+   "team" (TYPE_BYTE)
+   "oldteam" (TYPE_BYTE)
+   "disconnect" (TYPE_BOOL)
+}
+Event "player_class"
+{
+   "userid" (TYPE_SHORT)
+   "class" (TYPE_STRING)
+}
+Event "player_death"
+{
+   "userid" (TYPE_SHORT)
+   "attacker" (TYPE_SHORT)
+}
+Event "player_hurt"
+{
+   "userid" (TYPE_SHORT)
+   "attacker" (TYPE_SHORT)
+   "health" (TYPE_BYTE)
+}
+Event "player_chat"
+{
+   "teamonly" (TYPE_BOOL)
+   "userid" (TYPE_SHORT)
+   "text" (TYPE_STRING)
+}
+Event "player_score"
+{
+   "userid" (TYPE_SHORT)
+   "kills" (TYPE_SHORT)
+   "deaths" (TYPE_SHORT)
+   "score" (TYPE_SHORT)
+}
+Event "player_spawn"
+{
+   "userid" (TYPE_SHORT)
+}
+Event "player_shoot"
+{
+   "userid" (TYPE_SHORT)
+   "weapon" (TYPE_BYTE)
+   "mode" (TYPE_BYTE)
+}
+Event "player_use"
+{
+   "userid" (TYPE_SHORT)
+   "entity" (TYPE_SHORT)
+}
+Event "player_changename"
+{
+   "userid" (TYPE_SHORT)
+   "oldname" (TYPE_STRING)
+   "newname" (TYPE_STRING)
+}
+Event "game_newmap"
+{
+   "mapname" (TYPE_STRING)
+}
+Event "game_start"
+{
+   "roundslimit" (TYPE_LONG)
+   "timelimit" (TYPE_LONG)
+   "fraglimit" (TYPE_LONG)
+   "objective" (TYPE_STRING)
+}
+Event "game_end"
+{
+   "winner" (TYPE_BYTE)
+}
+Event "round_start"
+{
+   "timelimit" (TYPE_LONG)
+   "fraglimit" (TYPE_LONG)
+   "objective" (TYPE_STRING)
+}
+Event "round_end"
+{
+   "winner" (TYPE_BYTE)
+   "reason" (TYPE_BYTE)
+   "message" (TYPE_STRING)
+}
+Event "game_message"
+{
+   "target" (TYPE_BYTE)
+   "text" (TYPE_STRING)
+}
+Event "break_breakable"
+{
+   "entindex" (TYPE_LONG)
+   "userid" (TYPE_SHORT)
+   "material" (TYPE_BYTE)
+}
+Event "break_prop"
+{
+   "entindex" (TYPE_LONG)
+   "userid" (TYPE_SHORT)
+}
+20 game events.
+
+Engine events:
+Event "server_spawn"
+{
+   "hostname" (TYPE_STRING)
+   "address" (TYPE_STRING)
+   "port" (TYPE_SHORT)
+   "game" (TYPE_STRING)
+   "mapname" (TYPE_STRING)
+   "maxplayers" (TYPE_LONG)
+   "os" (TYPE_STRING)
+   "dedicated" (TYPE_BOOL)
+   "password" (TYPE_BOOL)
+}
+Event "server_shutdown"
+{
+   "reason" (TYPE_STRING)
+}
+Event "server_cvar"
+{
+   "cvarname" (TYPE_STRING)
+   "cvarvalue" (TYPE_STRING)
+}
+Event "server_message"
+{
+   "text" (TYPE_STRING)
+}
+Event "server_addban"
+{
+   "name" (TYPE_STRING)
+   "userid" (TYPE_SHORT)
+   "networkid" (TYPE_STRING)
+   "ip" (TYPE_STRING)
+   "duration" (TYPE_STRING)
+   "by" (TYPE_STRING)
+   "kicked" (TYPE_BOOL)
+}
+Event "server_removeban"
+{
+   "networkid" (TYPE_STRING)
+   "ip" (TYPE_STRING)
+   "by" (TYPE_STRING)
+}
+Event "player_connect"
+{
+   "name" (TYPE_STRING)
+   "index" (TYPE_BYTE)
+   "userid" (TYPE_SHORT)
+   "networkid" (TYPE_STRING)
+   "bot" (TYPE_BOOL)
+   "address" (TYPE_STRING)
+}
+Event "player_info"
+{
+   "name" (TYPE_STRING)
+   "index" (TYPE_BYTE)
+   "userid" (TYPE_SHORT)
+   "networkid" (TYPE_STRING)
+   "bot" (TYPE_BOOL)
+}
+Event "player_disconnect"
+{
+   "userid" (TYPE_SHORT)
+   "reason" (TYPE_STRING)
+   "name" (TYPE_STRING)
+   "networkid" (TYPE_STRING)
+}
+Event "player_activate"
+{
+   "userid" (TYPE_SHORT)
+}
+Event "player_say"
+{
+   "userid" (TYPE_SHORT)
+   "text" (TYPE_STRING)
+}
+11 engine events.
+
+MOD events:
+Event "player_death"
+{
+   "userid" (TYPE_SHORT)
+   "attacker" (TYPE_SHORT)
+   "weapon" (TYPE_STRING)
+}
+1 MOD event.
+

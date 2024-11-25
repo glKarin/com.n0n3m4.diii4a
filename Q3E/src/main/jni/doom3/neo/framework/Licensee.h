@@ -150,6 +150,7 @@ If you have questions concerning this license or the applicable additional terms
 #else
 #define DEFAULT_BASE_PATH				"/usr/local/games/quake4"
 #endif
+#define LINUX_DEFAULT_PATH			DEFAULT_BASE_PATH
 
 // CD Key file info
 #define CDKEY_FILE						"quake4key"

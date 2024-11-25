@@ -1,0 +1,33 @@
+[09:16] whatshisnutz6979:  solid =2 explosivedamage = 4 resurectable is 8 compass is 16
+[09:16] geekfeststarter: thats for script_mover, hang on
+[09:16] whatshisnutz6979: there more for that one?
+[09:16] geekfeststarter: yea and diff
+[09:19] geekfeststarter: no #defines in the code
+[09:19] geekfeststarter: TRIGGERSPAWN               1 
+ SOLID                    2 
+ EXPLOSIVEDAMAGEONLY     4 
+ RESURECTABLE               8 
+ COMPASS                    16 
+ ALLIED                    32 
+ AXIS                         64 
+ MOUNTED_GUN               128
+[09:20] geekfeststarter: script_mover
+[09:20] geekfeststarter: TRIGGERSPAWN wont spawn until activated 
+ SOLID non-solid unless set 
+ EXPLOSIVEDAMAGEONLY will only take damage from explosive weapons 
+ RESURECTABLE will not disappear when fully damaged 
+ COMPASS shows up on compass 
+ ALLIED only axis can damage 
+ AXIS only allies can damage 
+ MOUNTED_GUN has a mounted gun attached to it
+ 
+[09:15] geekfeststarter: func_constructible 
+  
+ #define CONSTRUCTIBLE_START_BUILT     1 
+ #define CONSTRUCTIBLE_INVULNERABLE     2 
+ #define AXIS_CONSTRUCTIBLE               4 
+ #define ALLIED_CONSTRUCTIBLE          8 
+ #define CONSTRUCTIBLE_BLOCK_PATHS_WHEN_BUILD     16 
+ #define CONSTRUCTIBLE_NO_AAS_BLOCKING               32 
+ #define CONSTRUCTIBLE_AAS_SCRIPTED                    64 
+ 128, 512 and 1024 show up in ai_main.c but its not clear what they do

@@ -1,6 +1,6 @@
 #version 320 es
 
-precision mediump float;
+precision highp float;
 
 // display the occlusion channel from the SSAO texture for debug purposes
 

@@ -48,4 +48,16 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="button_setting_has_changed_can_you_save_it">Button setting has changed! Can you save it?</string>
+    <string name="exit">Exit</string>
+    <string name="copy">Copy</string>
+    <string name="bot_q3_bot_support_in_mp_game">Quake4 Bot(SABot-a9 mod)</string>
+    <string name="mp_game_map_aas_files">Quake4 MP game map aas files</string>
+    <string name="rivensin_play_original_doom3_level">Rivensin play original DOOM3 level</string>
+    <string name="rbdoom3_bfg_hlsl_shader">RBDOOM3-BFG HLSL shader</string>
+    <string name="the_dark_mod_glsl_shader">The Dark Mod GLSL shader</string>
+    <string name="gzdoom_builtin_resource">GZDOOM built-in resource</string>
+    <string name="close">Close</string>
+    <string name="open">Open</string>
+    <string name="exit_game">Exit game</string>
+    <string name="are_you_sure_exit_game">Are you sure exit game?</string>
 </resources>

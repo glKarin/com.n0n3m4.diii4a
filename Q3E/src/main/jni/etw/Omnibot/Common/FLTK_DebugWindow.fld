@@ -1,0 +1,212 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0107 
+header_name {.h} 
+code_name {.cxx}
+decl {\#include "PrecompCommon.h"} {selected
+} 
+
+decl {\#ifdef DEBUG_WINDOW_SUPPORT} {} 
+
+decl {\#ifdef DEBUG_WINDOW_SUPPORT} {public
+} 
+
+decl {\#include "DebugWindowCallbacks.h"} {} 
+
+decl {\#include <FL/Fl_Text_Buffer.H>} {} 
+
+decl {\#include <FL/Fl_Multiline_Input.H>} {public
+} 
+
+decl {\#include <FL/fl_draw.H>} {public
+} 
+
+decl {\#include <FLU/Flu_Tree_Browser.h>} {public
+} 
+
+decl {class ProfilerGroup;} {public
+} 
+
+decl {class BehaviorTree;} {public
+} 
+
+decl {class MapViewport;} {public
+} 
+
+decl {class BehaviorTreeInfo;} {public
+} 
+
+Function {MakeOmnibotDebugWindow()} {open
+} {
+  Fl_Window m_MainWindow {
+    label {Omni-bot Debug Window} open
+    xywh {-981 242 800 600} type Double resizable visible
+  } {
+    Fl_Group m_ScriptConsole {
+      label {Script Console} open
+      xywh {0 0 800 370} color 55 selection_color 55 labeltype NO_LABEL labelcolor 55 align 17 when 0 hide
+    } {
+      Fl_Browser m_ScriptConsoleOutput {
+        xywh {0 0 590 310} box ENGRAVED_BOX color 34 selection_color 55 labelsize 12 labelcolor 55 textsize 12 textcolor 55
+      }
+      Fl_Input m_ScriptConsoleInput {
+        label Input
+        callback {if(Fl::event_key() == FL_KP + '8')
+		ScriptConsoleCallbacks::OnScriptInputCycleHistory(false);
+	else if(Fl::event_key() == FL_KP + '2')
+		ScriptConsoleCallbacks::OnScriptInputCycleHistory(true);
+	{
+		if(Fl::event_key() == FL_Enter)
+		{
+			if(!Fl::get_key(FL_Shift_L) && !Fl::get_key(FL_Shift_R) && !Fl::event_state(FL_SCROLL_LOCK)) 
+			{
+				ScriptConsoleCallbacks::OnScriptInputEntered(o->value());
+				o->value("");
+				return;
+			}
+		}
+		ScriptConsoleCallbacks::OnScriptInputChanged(o->value());
+	}}
+        xywh {0 310 800 60} type Multiline box ENGRAVED_BOX color 55 labeltype NO_LABEL labelsize 12 align 18 when 1 textsize 12
+      }
+      Fl_Browser m_AutoCompleteBox {
+        label Autocomplete
+        callback {Fl_Browser *b = static_cast<Fl_Browser*>(o);
+ScriptConsoleCallbacks::OnAutoCompleteSelectionChanged(b->text(b->value()));}
+        xywh {590 0 210 310} type Select box ENGRAVED_BOX color 34 selection_color 34 labeltype NO_LABEL labelsize 12 labelcolor 17 align 1 textsize 12 textcolor 55
+      }
+    }
+    Fl_Group m_LogConsole {
+      label {Log Console}
+      xywh {0 0 800 580} labeltype NO_LABEL align 17 when 0 hide
+    } {
+      Fl_Browser m_LogConsoleOutput {
+        xywh {0 0 800 580} box ENGRAVED_BOX color 34 labelsize 12 textsize 12
+      }
+    }
+    Fl_Group m_PlayerTabs {
+      label BotName open
+      xywh {0 20 645 550} color 40
+    } {
+      Fl_Tabs {} {open
+        xywh {0 20 640 545}
+      } {
+        Fl_Group {} {
+          label Players open
+          xywh {0 45 640 520}
+        } {
+          Fl_Group m_StateTree {
+            label {Behaviour Tree} open
+            xywh {5 60 330 500} box DOWN_FRAME
+            class BehaviorTree
+          } {}
+          Fl_Group m_StateInfoTree {
+            label {Behaviour Info} open
+            xywh {335 60 300 500} box DOWN_FRAME
+            class BehaviorTreeInfo
+          } {}
+        }
+        Fl_Group {} {
+          label Map open
+          xywh {0 45 640 520} hide
+        } {
+          Fl_Group m_MapViewport {open
+            xywh {5 50 630 490}
+            class MapViewport
+          } {}
+          Fl_Check_Button m_DrawWaypoints {
+            label Waypoints
+            xywh {5 542 95 15} down_box DOWN_BOX
+            code0 {o->value(1);}
+          }
+          Fl_Check_Button m_DrawRadius {
+            label Radius
+            xywh {106 542 72 15} down_box DOWN_BOX
+            code0 {o->value(1);}
+          }
+          Fl_Check_Button m_DrawPaths {
+            label Paths
+            xywh {185 542 60 15} down_box DOWN_BOX
+            code0 {o->value(1);}
+          }
+          Fl_Check_Button m_DrawPlayers {
+            label Players
+            xywh {252 542 70 15} down_box DOWN_BOX
+            code0 {o->value(1);}
+          }
+          Fl_Check_Button m_DrawEntities {
+            label Entities
+            xywh {329 542 70 15} down_box DOWN_BOX
+            code0 {o->value(1);}
+          }
+          Fl_Check_Button m_DrawGoals {
+            label Goals
+            xywh {406 542 70 15} down_box DOWN_BOX
+          }
+          Fl_Check_Button m_DrawBotPaths {
+            label {Bot Paths}
+            xywh {483 542 85 15} down_box DOWN_BOX
+          }
+          Fl_Check_Button m_DrawInfo {
+            label Info
+            xywh {575 542 53 15} down_box DOWN_BOX
+            code0 {o->value(1);}
+          }
+        }
+      }
+    }
+    Fl_Browser m_CurrentPlayers {
+      label {Current Players} user_data_type long
+      callback {Fl_Browser *b = static_cast<Fl_Browser*>(o);
+ScriptConsoleCallbacks::OnPlayerSelectionChanged((int)b->data(b->value()));}
+      xywh {645 20 155 550} type Select align 1 when 3
+    }
+    Fl_Group m_ProfileRenderSurface {
+      label Profiler open
+      xywh {170 370 450 230} box ENGRAVED_BOX color 32 labeltype NO_LABEL labelsize 12 align 17 hide resizable
+      class ProfilerGroup
+    } {}
+    Fl_Button m_ScriptConsoleButton {
+      label Console
+      callback {if(m_ScriptConsole->visible())
+		  m_ScriptConsole->hide();
+	  else
+		  m_ScriptConsole->show();}
+      private xywh {731 580 68 20} shortcut 0x60 labeltype ENGRAVED_LABEL
+    }
+    Fl_Button m_LogButton {
+      label Log
+      callback {if(m_LogConsole->visible())
+		  m_LogConsole->hide();
+	  else
+		  m_LogConsole->show();}
+      private xywh {590 580 68 20} shortcut 0x6c labeltype ENGRAVED_LABEL
+    }
+    Fl_Button m_ProfilerButton {
+      label Profiler
+      callback {if(m_ProfileRenderSurface->visible())
+		  m_ProfileRenderSurface->hide();
+	  else
+		  m_ProfileRenderSurface->show();}
+      private xywh {660 580 68 20} shortcut 0x70 labeltype ENGRAVED_LABEL
+    }
+    Fl_Button m_PlayersButton {
+      label Game
+      callback {if(m_PlayerTabs->visible())
+{
+	m_CurrentPlayers->hide();
+	m_PlayerTabs->hide();
+}
+else
+{
+	m_CurrentPlayers->show();
+	m_PlayerTabs->show();
+}}
+      private xywh {520 580 68 20} shortcut 0x6c labeltype ENGRAVED_LABEL
+    }
+  }
+} 
+
+decl {\#endif} {} 
+
+decl {\#endif} {public
+} 

@@ -1,0 +1,13 @@
+---------------- Log begins on Sun Sep 13 01:11:24 2009
+ ---------------
+I 09/13 01:11:24 gmParser
+I 09/13 01:11:24 Initializing PhysFS File System
+F 09/13 01:11:24 +-  FileSystem::InitRawFileSystem
+I 09/13 01:11:24 |   Your base directory is: D:\CVS\Omnibot\head\Omnibot\projects\msvc90\gmParser
+I 09/13 01:11:24 |   PhysFS: Version 1.1.1
+I 09/13 01:11:24 |   Supported Archive Types
+I 09/13 01:11:24 |    * ZIP: PkZip/WinZip/Info-Zip compatible
+I 09/13 01:11:24 |   Written by Ryan C. Gordon <icculus@icculus.org>, http://icculus.org/physfs/
+I 09/13 01:11:24 |    * 7Z: LZMA (7zip) format
+I 09/13 01:11:24 |   Written by Dennis Schridde <devurandom@gmx.net>, http://icculus.org/physfs/
+F 09/13 01:11:24 +-  

@@ -1,0 +1,1 @@
+SUBDIRS = adjustingcontainer allegrotruetypefont sdltruetypefont

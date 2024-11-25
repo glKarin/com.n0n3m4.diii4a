@@ -8,13 +8,15 @@
 BUILD_TYPE=Release
 TARGET_PATH="`pwd`/Q3E/src/main/jni/doom3bfg/neo";
 
+WORK_DIR=build
+
 cd ${TARGET_PATH};
 
 echo "Configure and generate GNU makefile ......";
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} CMakeLists.txt;
+cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_FLAGS="-Werror=nonnull" CMakeLists.txt;
 
 echo "Build ${BUILD_TYPE} ......";
-make;
+cmake --build ${WORK_DIR} --config ${BUILD_TYPE}
 
 # clean: make clean;
 

@@ -14,7 +14,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-precision mediump float;
+precision highp float;
 
 // same as TiledCustomMipmapStage::MipmapMode
 #pragma tdm_define "MIPMAP_MODE"

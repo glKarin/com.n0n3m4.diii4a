@@ -1,0 +1,304 @@
+Version 0.8.1
+=============
+* A couple of minor GCC 3.4.2. issues have been fixed.
+* Add ons are now refered to as contribs all contribs have been added
+  to the main source directory under the contrib directory. All
+  contribs now also reside in a namespace called contrib.
+* ScrollArea::isOpaque and ScrollArea::setOpaque have been added to
+  control if a scroll area should draw its background or not.
+* DELETE is now undefined in Key.hpp if present. It should hopefully
+  take care of some problems with windows.h defining delete which
+  sometimes breaks Key.hpp.
+* Soname support has been fixed. The correct version number should
+  now be used in the produced binaries.
+	
+Version 0.8.0
+=============
+* Widget::showPart has been added to be used when a specific
+  part of a widget should be visible. An example is when a text
+  area wants a specific text part to be visible in a scroll area.
+  This function uses BasicContainer::showWidgetPart.
+* ListBox::setWrappingKeyboardSelection and
+  ListBox::isWrappingKeyboardSelection have been renamed to
+  ListBox::setWrappingEnabled and ListBox::isWrappingEnabled.
+* Rectangle::intersect has been renamed to Rectangle::isIntersecting.
+* Widget::hasModalFocus and Widget::hasModalMouseInputFocus has been
+  renamed to Widget::isModalFocused and Widget::isModalMouseInputFocused.
+* Widget::generateAction has been renamed to
+  Widget::distributeActionEvent.
+* All the examples have been improved. Examples have been added for
+  HGE, OpenGL with SDL and for OpenGL with Allegro.
+* Widget::drawBorder, Widget::getBorderSize and Widget::setBorderSize
+  have been renamed to Widget::drawFrame, Widget::getFrameSize and
+  Widget::setFrameSize.
+* The alignment enum in Graphics, the orientation enum in Slider and
+  the scroll policy enum in ScrollArea are no longer anonymous enums.
+* RadioButton::setMarked and RadioButton::isMarked have been
+  renamed to RadioButton::setSelected and RadioButton::isSelected.
+* CheckBox::setMarked, CheckBox::isMarked and CheckBox::toggle have been
+  renamed to CheckBox::setSelected, CheckBox::isSelected and
+  CheckBox::toggleSelected.
+* An image button widget, a button capable of displaying an image,
+  has been added.
+* A widget listener has been added used to listen for resized events,
+  hidden events, shown events and moved events from a widget.
+* Two new widgets have been added, a tabbed area widget and a tab widget
+  to be used with the tabbed widget.
+* A selection listener interface has been added used to listen for
+  value change events from a list box and a drop down.
+* A bug has been fixed where mouse entered and exited events weren't
+  honored when a widget gained or released modal focus or modal mouse input
+  focus.
+* An id property has been added to Widget. The property can be used to uniquely
+  identify widgets inside a container. BasicContainer and Container have been
+  enhanced with the ability to find a widget given an id. An id can be
+  useful when using GUIs created from an XML file or created with a Gui
+  editor.
+* An OpenGL image loader that uses Allegro to load images has been
+  added along with an example of how to use Guichan with AllegroGL.
+* A bug with setting the selection colour for DropDown has been fixed.
+  Before the fix the selection coloured was ignored by the internal
+  ListBox of DropDown.
+* Distribution of mouse entered and mouse exited events have been fixed.
+  A mouse entered event is distributed to a widget when the mouse enters
+  a widget and a mouse exited event is distributed to a widget as soon
+  as the mouse leaves the widget.
+* OpenGL true type font has been added as an add on. The font uses the OGLFT 
+  font library, http://oglft.sourceforge.net/.
+* A bug has been fixed where a segfault could occur when a drop down widget
+  was deleted.
+* Button now has configurable spacing.
+
+Version 0.7.1
+=============
+* A problem with make dist has been fixed to include the source of the
+  addons, the HGE support and the OpenLayer support.
+
+Version 0.7.0
+=============
+* Focus has been changed to be applied synchronously, hence
+  FocusHandler::applyChanges has been removed.
+* Mouse coordinates in mouse events have been changed so they always are 
+  relative to the widget receiving the event and not as before relative to 
+  the source widget.
+* The distribution of key events has changed. Key events are now distributed
+  like mouse events, events are first distributed to the source widget followed
+  by the parents of the source widget.
+* HGE support has been added.
+* OpenLayer support has been added.
+* A focus listener has been added. Due to the addition of a focus listener
+  the functions Widget::focusLost and Widget::focusGained have been removed.
+  To receive widget focus events a widget should now inherit from FocusListener
+  and listen for events from itself.
+* Many small bug fixes.
+
+Version 0.6.1
+=============
+* The functions add, remove and clear have been removed from Widget.
+  They now reside protected in basic container.
+* Inclusion of OpenGL headers has been fixed on Mac.
+
+Version 0.6.0
+=============
+* A lot of function definitions from BasicContainer have been moved down to
+  Widget, but Widget doesn't provide any useful implementations of these
+  functions. Useful implementations still reside in BasicContainer.
+  For container widget implementations inheriting from BasicContainer, as before,
+  should work just fine. The reason for the move of definitions is to be able to
+  consider a widget a container for the sake of simplicity when it comes to
+  distribution of input.
+* The functions Widget::lostFocus andWidget::gotFocus have been renamed to
+  Widget::focusLost and Widget::focusGained.
+* DeathListener is a new interface which can be used to listen for a widget's
+  death. Because of the presence of death listeners the function
+  BasicContainer::_announceDeath has been removed.
+* MouseListener now has the function mouseDragged which is called if a widget
+  is dragged.
+* All distribution of input is now handled by the Gui class. Because of this
+  all functions regarding input have been removed from the classes Widget
+  and BasicContainer.
+* All functions of KeyListener and MouseListener have been renamed. The reason
+  for this is that the functions now bear the names of the well known Java
+  listeners which will hopefully be more intuitive for most people.
+* All input events can now be consumed making it easier to implement hot key
+  bindings.
+* Mouse input (now called mouse events) are now distributed bottom up starting
+  from the widget directly under the mouse.
+* Widgets can now ask for modal mouse input focus. A widget with modal mouse input
+  focus will be the only widget recieving mouse input, no matter where the mouse
+  input occurs. This can be very useful for some widgets, like a drop down which
+  acquires modal mouse input focus when folded down to be able to fold back up as
+  soon as the mouse is pressed outside of the drop down.
+* Events are now present in Guichan. All listener classes now take event classes
+  as parameters which is a very big API change. The presence of events has propagated
+  changes to all input classes to better reflect the new usage of events.
+* DropDown now acts on mouse wheel up and mouse wheel down when having focus.
+* ListBox now acts on mouse wheel up and mouse wheel down when having focus.
+* Widgets will no longer acquire focus if a mouse wheel up or a mouse wheel down
+  occurs over a widget.
+* The header exception.hpp is now included properly in openglsdlimageloader.hpp.
+* Many small fixes.
+
+Version 0.5.0
+=============
+* Slider now acts on the mouse wheel moving the slider to the left on
+  mouse wheel down and to the right on mouse wheen up.
+* ListBox now has the ability to wrap keyboard selection. Wrapping means
+  that if the key up is pressed and the first item is selected, then
+  the last item will get selected. If the key down is pressed and the last
+  item is selected, then the first item will get selected.
+* Redesign of the Image class. Image now has different subclasses for
+  different Graphics objects. The static method load in the Image class
+  loads the appropiate type of image if an ImageLoader is set.
+* The function action in ActionListener now takes a pointer to the
+  Widget who called the function, it makes handling of action events,
+  hopefully, cleaner.
+* ScrollArea now scrolls if the open space around the markers is clicked.
+* ScrollArea now has functions to set the amount to scroll when ScrollArea's
+  buttons are pushed, each button can have it's own amount.
+* Changed the function name of Widget::hasFocus and FocusHandler::hasFocus
+  to isFocused.
+* Moved a lot of common container functionality into BasicContainer.
+  This made the code and API a lot cleaner. Affected classes are:
+  BasicContainer - now holds a lot of common functionality for containers.
+  Container - implementation is now a lot smaller.
+  Window - window now inherits from Container and can have several child
+  widgets.
+  ScrollArea - smaller, nicer code.
+  TextBox & ListBox - Takes advantage of the new Container API to get rid
+  of a dynamic cast.
+* Added drawBackground to ScrollArea to simplify overloading.
+* Added functions for global KeyListeners in Gui. Global KeyListeners
+  can be just about any object inheriting from KeyListener.
+* Fixed an offset by one error in AllegroGraphics::_beginDraw.
+  The initial clip area is now correct.
+* Added alpha blending with SDL for 16bpp and 24 bpp mode.
+
+Version 0.4.0
+=============
+* The GCN_EXCEPTION macro is now capable of determine the function in
+  which the exception was thrown. Also, you can get the function name
+  from the Exception class.
+* Added a fix to make both versions of drawImage in
+  AllegroGraphics, OpenGLGraphics and SDLGraphics visible
+  and usable.
+* Optimized fillRect in SDLGraphics slightly when using alpha
+  blending. However, SDLGraphics still needs a lot of optimizing
+  in other parts.
+* Removed the filename from the Image class, as it wasn't really
+  used for anything.
+* Updated ImageFont with support for font images with several rows
+  of glyphs.
+* Added modal focus to widgets. Widgets can now request modal focus
+  stealing all input from other widgets. Can be useful when making
+  dialog windows.
+* Many small fixes.
+
+Version 0.3.0
+=============
+* Every Guichan library now contains a C function which can be
+  used with autotools check, for instance the Guichan SDL library
+  contains the function gcnSDL wich can be used when struggling
+  with autoconf. Other functions are gcnAllegro in Guichan Allegro,
+  gcnOpenGL in Guichan OpenGL and gcnGuichanVersion in the Guichan
+  core.
+* Slider now stores only the current selected value and calculates
+  everything from that value. It should take care of some resizing
+  problems. Also, slider has now an orientation, which means you can
+  create a slider which has a vertical or horizontal orientation.
+  The previous slider had only a horizontal orientation.
+* Fixed alpha problem with images loaded and displayed with SDL.
+* Added a new widget, the window widget.
+* SDL.h is now included the proper way meaning you can install
+  SDL anywhere and Guichan will include the right headers as long
+  as sdl-config knows where the headers are.
+* Added ability to disable widgets.
+* Changed slightly how focus works. Focus is now applied after the
+  input is processed. This resolved some problems when widgets
+  fight over focus.
+* Changed the behaviour of the mouse handling. Widgets will get
+  mouse input if the mouse is dragged outside of the widget,
+  even if they don't have focus.
+* Many small fixes.
+
+Version 0.2.0
+=============
+* Added isPressed() method to the Button.
+* Doubleclicking now works with SDL
+* Added --enable-force argument for Allegro, SDL, SDL Image and OpenGL
+  to the configure script which forces Guichan to compile with the
+  forced support.
+* Updated platform.hpp to be able to handle compilation with MinGW.
+* Splited DECLSPEC define into GCN_CORE_DECLSPEC and
+  GCN_EXTENSION_DECLSPEC.
+* Fixed bugs in ScrollArea and DropDown involving focus and mouse input,
+* Changed the look when CheckBox is marked.
+* Changed the look when CheckBox and RadioButton are focused.
+  They now draw a rectangle around their captions (common behaivour in Guis).
+* Removed unaccesary logic functions (which didn't do anything) in
+  widget RadioButton and CheckBox.
+* Added a new widget called Slider, and it is a... slider!
+* Removed getWidth for glyphs in Font.
+* Removed function drawGlyph in Font and in addon SDLTrueTypeFont.
+  Added drawGlyph function in ImageFont and DefaultFont.
+  drawGlyph in Font is easy to missunderstand and could lead to
+  strange implementations of Font.
+* Added getCurrentClipArea function in Graphics.
+* All functions in container are now virtual (thanks to Garo pointing this out).
+* Added function setSize in Widget.
+* Added an "addons" directory in the distrobution. It will contain
+  usefull classes with Guichan that are not compiled into the library.
+  They are not compiled because they need dependencies other then
+  Guichans or are to specific. For now, "addons" only contain one
+  class, SDLTrueTypeFont giving True Type Font abilities to Guichan
+  through the SDL_ttf library and hence will only work with SDLGraphics.
+  SDLTrueTypeFont was contributed by Walluce Pinkham (and edited by us).
+  Thank you Walluce!
+* Added getColor function in Graphics. Implemented in SDLGraphics,
+  AllegroGraphics and OpenGLGraphics.
+* Fixed a problem with the DropDown widget. When the widget was focused
+  with a mouse press, you couldn't select elements with up and down keys.
+* Merged drawText, drawTextCenter and drawTextRight into one function
+  drawText which takes an alignment parameter (thanks Ted!).
+  Widgets taking advantage of this are Button and Label.
+* As a result of the added border support, almost every widget have
+  been changed for the better, e.g removal of offsets.
+* Added support for borders. This is a major API change introducing
+  some new functions to Widget.
+* Lots of small bugfixes
+
+Version 0.1.0
+=============
+* Guichan_allegro MSVC 6 compatibility fix.
+* TextBox doesn't draw its caret if its not editable.
+* Better exception with more information in ImageFont,
+  added row spacing and glyph spacing functions.
+* Fixed problem in ImageFont when loading a corrupt file.
+  It will now throw an exception (thanks Terin!).
+* Implemented _getRawData() in AllegroImageLoader.
+* Fixed Image. It is now overloadable.
+* DropDown sets the colors for its internal widgets if they are
+  not custom widgets (not given to the DropDown by the user).
+* Now all default widgets respect the alpha channel in the colors.
+* Non focusable widgets will now not recieve key input ever.
+  In previous version, focused widgets would still remain focused
+  after setting them to not be focusable.
+* Moved tab handling from Gui to the FocusHandler.
+* Splitted setTabable to setTabInEnabled and setTabOutEnabled.
+  Widgets can now have different behaviours on tab in and tab out.
+  The old setTabable is equivalent to setTabInEnabled.
+* isVisisble now checks if parent is visible
+* Added alpha channel support in AllegroGraphics for
+  drawing primitives
+* Added experimental alpha channel support in SDLGraphics
+  for 32 bpp
+* Added full alpha channel support in OpenGLGraphics
+* Fixed OpenGL graphics to disable GL_LIGHTING before draw
+* Fixed container problem. Nonvisible widgets no longer
+  recieves mouse input.
+* Fixed mouse out problem with SDLInput
+* Fixed alpha problem with the SDLImageLoader
+
+Version 0.0.1
+=============
+* Initial release

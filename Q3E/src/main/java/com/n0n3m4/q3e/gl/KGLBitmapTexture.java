@@ -49,6 +49,45 @@ public final class KGLBitmapTexture
         }
     }
 
+    public static int GenCircleRingTexture(GL10 gl, int width, float ringWidth, int[] rgba, String text, int fontSize)
+    {
+        if(width <= 0)
+            return 0;
+
+        final float radius = (float)width / 2.0f;
+        final float internalsize = radius - ringWidth;
+
+        try
+        {
+            Bitmap bmp = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmp);
+            Paint p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
+            c.drawARGB(0, 0, 0, 0);
+            c.drawCircle(radius, radius, radius, p);
+            p.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
+            c.drawCircle(radius, radius, internalsize, p);
+
+            p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
+            p.setStrokeWidth(fontSize);
+            p.setTextSize(fontSize);
+            p.setTextAlign(Paint.Align.CENTER);
+            Paint.FontMetrics fontMetrics = p.getFontMetrics();
+            float fontHeight = (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent;
+            c.drawText(text, radius, radius + (int) (fontHeight), p);
+
+            return Q3EGL.loadGLTexture(gl, bmp);
+        }
+        catch (OutOfMemoryError e)
+        {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public static int GenCircleTexture(GL10 gl, int width, int[] rgba)
     {
         if(width <= 0)
@@ -96,6 +135,43 @@ public final class KGLBitmapTexture
             p.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
             RectF rectf = new RectF(borderWidth, borderWidth, width - borderWidth, height - borderWidth);
             c.drawRect(rectf, p);
+
+            return Q3EGL.loadGLTexture(gl, bmp);
+        }
+        catch (OutOfMemoryError e)
+        {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public static int GenRectTexture(GL10 gl, int width, int height, int[] rgba, String text, int fontSize, int[] text_rgba)
+    {
+        if(width <= 0)
+            return 0;
+
+        if(height <= 0)
+            height = width;
+        Rect rect = new Rect(0, 0, width, height);
+
+        try
+        {
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmp);
+            Paint p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(rgba[0], rgba[1], rgba[2], rgba[3]);
+            c.drawRect(rect, p);
+
+            p = new Paint();
+            p.setAntiAlias(true);
+            p.setARGB(text_rgba[0], text_rgba[1], text_rgba[2], text_rgba[3]);
+            p.setStrokeWidth(fontSize);
+            p.setTextSize(fontSize);
+            p.setTextAlign(Paint.Align.CENTER);
+            Paint.FontMetrics fontMetrics = p.getFontMetrics();
+            float fontHeight = (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent;
+            c.drawText(text, width / 2, height / 2 + (int) (fontHeight), p);
 
             return Q3EGL.loadGLTexture(gl, bmp);
         }

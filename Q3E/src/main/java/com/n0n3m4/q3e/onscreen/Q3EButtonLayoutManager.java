@@ -157,8 +157,15 @@ public class Q3EButtonLayoutManager
 
         layouts[Q3EGlobals.UI_WEAPON_PANEL].Set(Width - Math.max(Sliders_Width + MediumButton_Width / 2 + Horizontal_Space, SmallButton_Width * 3 + Horizontal_Space * 2) - Panel_Radius * 5 / 2 - Horizontal_Space * 4, Panel_Radius + Sliders_Width / 2 + SmallButton_Width / 2 + Vertical_Space, Panel_Radius, Alpha);
 
-        for (int i = Q3EGlobals.UI_0; i < Q3EGlobals.UI_SIZE; i++)
-            layouts[i].Set(SmallButton_Width / 2 + SmallButton_Width * (i - Q3EGlobals.UI_0), Height + SmallButton_Width / 2, SmallButton_Width, Alpha);
+        int extraX = 0;
+        for (int i = Q3EGlobals.UI_0; i <= Q3EGlobals.UI_9; i++)
+            layouts[i].Set(extraX = SmallButton_Width / 2 + SmallButton_Width * (i - Q3EGlobals.UI_0), Height + SmallButton_Width / 2, SmallButton_Width, Alpha);
+
+        extraX += SmallButton_Width;
+        layouts[Q3EGlobals.UI_NUM_PANEL].Set(extraX, Height + Panel_Radius, Panel_Radius, Alpha);
+        extraX += Panel_Radius * 2;
+        for (int i = Q3EGlobals.UI_Y; i <= Q3EGlobals.UI_MINUS; i++)
+            layouts[i].Set(extraX + SmallButton_Width * (i - Q3EGlobals.UI_Y), Height + SmallButton_Width / 2, SmallButton_Width, Alpha);
 
         return Q3EButtonGeometry.ToStrings(layouts);
     }
