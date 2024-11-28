@@ -667,7 +667,8 @@ void idRenderSystemLocal::EndFrame( int *frontEndMsec, int *backEndMsec ) {
 
 	try {
 #ifdef __ANDROID__ //karin: Check surface on Android
-        GLimp_CheckGLInitialized(); // check/wait EGL context
+        if(!GLimp_CheckGLInitialized()) // check/wait EGL context
+            return;
 #endif
 		RB_CopyDebugPrimitivesToBackend();
 		common->SetErrorIndirection( true );

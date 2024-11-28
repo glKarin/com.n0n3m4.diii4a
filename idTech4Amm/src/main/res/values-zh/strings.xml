@@ -414,7 +414,6 @@
     <string name="commandshortcut">命令快捷方式</string>
     <string name="patch_resource">补丁资源</string>
     <string name="load_lights_pk3">加载lights.pk3</string>
-    <string name="load_game_support_pk3">加载game_support.pk3</string>
     <string name="load_brightmaps_pk3">加载brightmaps.pk3</string>
     <string name="disc_panel">轮盘</string>
     <string name="disc_panel_type">轮盘类型</string>
@@ -427,4 +426,6 @@
     <string name="release_">发布:</string>
     <string name="build_">构建:</string>
     <string name="dev_">维护人:</string>
+    <string name="game_thread">游戏线程</string>
+    <string name="choose_game_thread_create_scheme">选择游戏线程创建方案</string>
 </resources>

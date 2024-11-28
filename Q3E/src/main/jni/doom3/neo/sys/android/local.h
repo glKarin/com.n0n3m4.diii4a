@@ -32,7 +32,6 @@ extern glconfig_t glConfig;
 
 #ifdef __ANDROID__ //karin: sys::local expose on Android
 
-extern FILE *f_stdout;
 extern int gl_format;
 extern int gl_msaa;
 extern int gl_version;
@@ -52,13 +51,7 @@ void Android_GrabMouseCursor(bool grabIt);
 void Android_PollInput(void);
 void Android_EnableSmoothJoystick(bool enable = true);
 
-extern void (*attach_thread)(void);
-extern void Q3E_CheckNativeWindowChanged(void);
-extern void Q3E_CloseRedirectOutput(void);
-extern void Q3E_PrintInitialContext(int argc, char **argv);
-extern void Q3E_RedirectOutput(void);
-extern void Q3E_Start(void);
-extern void Q3E_End(void);
+extern bool Q3E_CheckNativeWindowChanged(void);
 #endif
 
 #endif

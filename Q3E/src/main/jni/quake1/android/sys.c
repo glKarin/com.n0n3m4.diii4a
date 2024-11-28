@@ -10,52 +10,30 @@
 #include <unistd.h>
 
 /* Android */
-
-static void * game_main(int argc, char **argv);
-
 #include "sys_android.c"
 
-void GLimp_CheckGLInitialized(void)
+qbool GLimp_CheckGLInitialized(void)
 {
-	Q3E_CheckNativeWindowChanged();
+	return Q3E_CheckNativeWindowChanged();
 }
 
-// Quake1 game main thread loop
-void * game_main(int argc, char **argv)
-{
-	attach_thread(); // attach current to JNI for call Android code
-
-	Q3E_Start();
-
-	Con_Printf("[Harmattan]: Enter " Q3E_GAME_NAME " main thread -> %s\n", "main");
-
-	Sys_Main(argc, argv);
-
-	Q3E_End();
-	main_thread = 0;
-	Con_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
-	return 0;
+/*
+=================
+main
+=================
+*/
+int main( int argc, char* argv[] ) {
+	return Sys_Main(argc, argv);
 }
 
 void ShutdownGame(void)
 {
-	if(Q3E_IS_INITIALIZED)
+	if(q3e_running && Q3E_IS_INITIALIZED)
 	{
-		TRIGGER_WINDOW_CREATED; // if quake1 main thread is waiting new window
-		Q3E_ShutdownGameMainThread();
-		//common->Quit();
+		Host_Shutdown();
+		NOTIFY_EXIT;
+		q3e_running = false;
 	}
-}
-
-static void game_exit(void)
-{
-	Con_Printf("[Harmattan]: quake1 exit.\n");
-
-	sys.argc = 0;
-	sys.argv = NULL;
-	Q3E_FreeArgs();
-
-	Q3E_CloseRedirectOutput();
 }
 
 void Sys_SyncState(void)
@@ -72,24 +50,6 @@ void Sys_SyncState(void)
 			prev_state = state;
 		}
 	}
-}
-
-int
-main(int argc, char **argv)
-{
-	Q3E_DumpArgs(argc, argv);
-
-	Q3E_RedirectOutput();
-
-	Q3E_PrintInitialContext(argc, argv);
-
-	INIT_Q3E_THREADS;
-
-	Q3E_StartGameMainThread();
-
-	atexit(game_exit);
-
-	return 0;
 }
 
 

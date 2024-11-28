@@ -36,7 +36,6 @@ extern int gl_format;
 extern int gl_msaa;
 
 #define MAX_NUM_CONFIGS 1000
-static bool window_seted = false;
 static volatile ANativeWindow *win;
 //volatile bool has_gl_context = false;
 
@@ -252,17 +251,18 @@ static EGLConfigInfo_t GLimp_GetConfigInfo(const EGLConfig eglConfig)
     return info;
 }
 
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
+{
+    if(!w)
+        return;
+    win = w;
+    ANativeWindow_acquire((ANativeWindow *)win);
+}
+
 void GLimp_AndroidInit(volatile ANativeWindow *w)
 {
     if(!w)
         return;
-    if(!window_seted)
-    {
-        win = w;
-        ANativeWindow_acquire((ANativeWindow *)win);
-        window_seted = true;
-        return;
-    }
 
     if(eglDisplay == EGL_NO_DISPLAY)
         return;

@@ -1150,7 +1150,8 @@ int Sys_GameLoop(void)
 #ifdef _DIII4A //karin: Q3E running control
 		if(!q3e_running) // exit
 			break;
-		Q3E_CheckNativeWindowChanged();
+		if(!GLimp_CheckGLInitialized())
+            break;
 #endif
 #if defined(_MSC_VER) && defined(ETLEGACY_DEBUG) && !defined(_WIN64)
 		// set low precision every frame, because some system calls

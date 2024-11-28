@@ -1832,7 +1832,7 @@ idScreenRect R_CalcIntersectionScissor( const idRenderLightLocal *lightDef,
 #include "renderer/VertexCache.h"
 
 #ifdef __ANDROID__ // Check GL context initialized, only for Android
-extern void GLimp_CheckGLInitialized(void);
+extern bool GLimp_CheckGLInitialized(void);
 #endif
 #if 0
 void RB_DumpFramebuffer( const char *fileName );

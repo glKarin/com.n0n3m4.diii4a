@@ -22,7 +22,6 @@ extern int screen_width;
 extern int screen_height;
 
 #define MAX_NUM_CONFIGS 1000
-static bool window_seted = false;
 static volatile ANativeWindow *win;
 //volatile bool has_gl_context = false;
 
@@ -205,18 +204,18 @@ void GLimp_DeactivateContext()
 	eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 }
 
-#pragma GCC visibility push(default)
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
+{
+	if(!w)
+		return;
+	win = w;
+	ANativeWindow_acquire((ANativeWindow *)win);
+}
+
 void GLimp_AndroidInit(volatile ANativeWindow *w)
 {
 	if(!w)
 		return;
-	if(!window_seted)
-	{
-		win = w;
-		ANativeWindow_acquire((ANativeWindow *)win);
-		window_seted = true;
-		return;
-	}
 
 	if(eglDisplay == EGL_NO_DISPLAY)
 		return;
@@ -257,7 +256,6 @@ void GLimp_AndroidQuit(void)
 	win = NULL;
 	Con_Printf("[Harmattan]: EGL surface destroyed and no EGL context.\n");
 }
-#pragma GCC visibility pop
 
 qbool GLimp_OpenDisplay(void)
 {

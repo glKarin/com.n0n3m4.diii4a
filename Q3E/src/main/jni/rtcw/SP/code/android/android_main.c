@@ -633,23 +633,22 @@ extern clientStatic_t cls;
 
 extern qboolean com_fullyInitialized;
 
-static void * game_main(int argc, char **argv);
-
 #include "sys_android.c"
 
-void GLimp_CheckGLInitialized(void)
+qboolean GLimp_CheckGLInitialized(void)
 {
-	Q3E_CheckNativeWindowChanged();
+	return Q3E_CheckNativeWindowChanged();
 }
 
-// RTCW game main thread loop
-void * game_main(int argc, char **argv)
+/*
+=================
+main
+=================
+*/
+int main( int argc, char **argv )
 {
 	int   i;
 	char  commandLine[ MAX_STRING_CHARS ] = { 0 };
-
-	attach_thread(); // attach current to JNI for call Android code
-	Q3E_Start();
 
 	Sys_PlatformInit( );
 
@@ -694,37 +693,24 @@ void * game_main(int argc, char **argv)
 		signal( SIGINT, Sys_SigHandler );
 	}
 
-	Q3E_FreeArgs();
-
 	while (1) {
 		if(!q3e_running) // exit
 			break;
-		Q3E_CheckNativeWindowChanged();
+		if(!GLimp_CheckGLInitialized())
+			break;
 		Com_Frame( );
 	}
 
-	Q3E_End();
-	main_thread = 0;
-	//IsInitialized = false;
-	Com_Printf("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
 	return 0;
 }
 
 void ShutdownGame(void)
 {
-	if(com_fullyInitialized)
+	if(q3e_running/* && com_fullyInitialized*/)
 	{
-		TRIGGER_WINDOW_CREATED; // if RTCW main thread is waiting new window
-		Q3E_ShutdownGameMainThread();
-		//common->Quit();
+		q3e_running = qfalse;
+		NOTIFY_EXIT;
 	}
-}
-
-static void game_exit(void)
-{
-	Com_Printf("[Harmattan]: RTCW exit.\n");
-
-	Q3E_CloseRedirectOutput();
 }
 
 /*
@@ -739,25 +725,4 @@ char *Sys_GetClipboardData(void)
 #else
 	return Android_GetClipboardData();
 #endif
-}
-
-/*
-=================
-main
-=================
-*/
-int main( int argc, char* argv[] ) {
-	Q3E_DumpArgs(argc, argv);
-
-	Q3E_RedirectOutput();
-
-	Q3E_PrintInitialContext(argc, argv);
-
-	INIT_Q3E_THREADS;
-
-	Q3E_StartGameMainThread();
-
-	atexit(game_exit);
-
-	return 0;
 }

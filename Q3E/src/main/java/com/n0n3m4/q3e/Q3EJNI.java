@@ -45,11 +45,9 @@ public class Q3EJNI {
 			boolean smoothJoystick, // is smooth joystick
             boolean continueNoGLContext
     );
-	public static native void drawFrame();
 	public static native void sendKeyEvent(int state,int key,int character);
 	public static native void sendAnalog(int enable,float x,float y);
 	public static native void sendMotionEvent(float x, float y);
-	public static native void vidRestart();
     public static native void shutdown();
     public static native boolean Is64();
     public static native void OnPause();
@@ -58,7 +56,11 @@ public class Q3EJNI {
 	public static native void PushKeyEvent(int state, int key, int character);
 	public static native void PushAnalogEvent(int enable, float x, float y);
 	public static native void PushMotionEvent(float x, float y);
-	public static native void PreInit(int eventQueueType);
+	public static native void PreInit(int eventQueueType, int gameThreadType);
+	public static native int main();
+	public static native long StartThread();
+	public static native void StopThread();
+	public static native void NotifyExit();
 
 	static {
 		System.loadLibrary("q3eloader");

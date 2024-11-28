@@ -90,7 +90,6 @@ int GLES3_VERSION = USING_GLES3 ? 0 : -1;
 #endif
 
 #define MAX_NUM_CONFIGS 1000
-static bool window_seted = false;
 static volatile ANativeWindow *win;
 //volatile bool has_gl_context = false;
 
@@ -306,17 +305,18 @@ static EGLConfigInfo_t GLimp_GetConfigInfo(const EGLConfig eglConfig)
 	return info;
 }
 
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
+{
+	if(!w)
+		return;
+	win = w;
+	ANativeWindow_acquire((ANativeWindow *)win);
+}
+
 void GLimp_AndroidInit(volatile ANativeWindow *w)
 {
 	if(!w)
 		return;
-	if(!window_seted)
-	{
-		win = w;
-		ANativeWindow_acquire((ANativeWindow *)win);
-		window_seted = true;
-		return;
-	}
 
 	if(eglDisplay == EGL_NO_DISPLAY)
 		return;
@@ -365,7 +365,7 @@ void GLimp_WakeBackEnd(void *a)
 
 void GLimp_EnableLogging(bool log)
 {
-	tr.logFile = log ? f_stdout : NULL;
+	tr.logFile = log ? stdout : NULL;
 	//common->DPrintf("GLimp_EnableLogging stub\n");
 }
 

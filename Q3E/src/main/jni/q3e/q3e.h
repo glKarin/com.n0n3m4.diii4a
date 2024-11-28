@@ -13,9 +13,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init
   (JNIEnv *, jclass, jstring, jstring, jint, jint, jstring, jstring, jstring, jobject, jint, jint, jint, jboolean, jint, jboolean, jboolean, jint, jstring, jboolean, jboolean);
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_drawFrame
-  (JNIEnv *, jclass);
-
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent
   (JNIEnv *, jclass, jint, jint, jint);
 
@@ -23,9 +20,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent
   (JNIEnv *, jclass, jfloat, jfloat);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y);
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_vidRestart
-  (JNIEnv *, jclass);    
   
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setRenderer
   (JNIEnv *env, jclass c, jobject obj);
@@ -53,7 +47,16 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit
-        (JNIEnv *, jclass, jint);
+        (JNIEnv *, jclass, jint, jint);
+
+JNIEXPORT jint JNICALL Java_com_n0n3m4_q3e_Q3EJNI_main
+        (JNIEnv *, jclass);
+
+JNIEXPORT jlong JNICALL Java_com_n0n3m4_q3e_Q3EJNI_StartThread
+        (JNIEnv *, jclass);
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_StopThread
+(JNIEnv *, jclass);
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_NotifyExit(JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }

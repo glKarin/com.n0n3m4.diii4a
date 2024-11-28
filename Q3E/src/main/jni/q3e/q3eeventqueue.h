@@ -1,5 +1,5 @@
-#ifndef _EVENTQUEUE_H
-#define _EVENTQUEUE_H
+#ifndef _Q3E_EVENTQUEUE_H
+#define _Q3E_EVENTQUEUE_H
 
 typedef void (* SendAnalog_f)(int down, float x, float y);
 typedef void (* SendKey_f)(int down, int keycode, int charcode);
@@ -20,4 +20,4 @@ void Q3E_PushAnalogEvent(int down, float x, float y);
 };
 #endif
 
-#endif //_EVENTQUEUE_H
+#endif // _Q3E_EVENTQUEUE_H

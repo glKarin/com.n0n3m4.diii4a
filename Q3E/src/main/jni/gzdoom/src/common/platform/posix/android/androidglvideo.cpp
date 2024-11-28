@@ -75,7 +75,6 @@ extern int gl_format;
 extern int gl_msaa;
 
 #define MAX_NUM_CONFIGS 1000
-static bool window_seted = false;
 static volatile ANativeWindow *win;
 //volatile bool has_gl_context = false;
 
@@ -95,9 +94,6 @@ static EGLContext eglContext = EGL_NO_CONTEXT;
 static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
-//#ifdef __ANDROID__ //karin: check GL context
-//extern void GLimp_CheckGLInitialized(void);
-//#endif
 
 static void GLimp_HandleError(const char *func, bool exit = true)
 {
@@ -136,17 +132,18 @@ void GLimp_DeactivateContext() {
 	eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 }
 
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
+{
+	if(!w)
+		return;
+	win = w;
+	ANativeWindow_acquire((ANativeWindow *)win);
+}
+
 void GLimp_AndroidInit(volatile ANativeWindow *w)
 {
 	if(!w)
 		return;
-	if(!window_seted)
-	{
-		win = w;
-		ANativeWindow_acquire((ANativeWindow *)win);
-		window_seted = true;
-		return;
-	}
 
 	if(eglDisplay == EGL_NO_DISPLAY)
 		return;
@@ -768,7 +765,6 @@ void SystemGLFrameBuffer::SetVSync( bool vsync )
 void SystemGLFrameBuffer::SwapBuffers()
 {
 	eglSwapBuffers(eglDisplay, eglSurface);
-	//GLimp_CheckGLInitialized();
 }
 
 

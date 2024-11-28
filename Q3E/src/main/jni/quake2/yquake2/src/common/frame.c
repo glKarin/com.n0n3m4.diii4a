@@ -171,7 +171,7 @@ Qcommon_Buildstring(void)
 
 #ifdef __ANDROID__
 extern volatile qboolean q3e_running;
-extern void Q3E_CheckNativeWindowChanged(void);
+extern qboolean GLimp_CheckGLInitialized(void);
 #else
 static
 #endif
@@ -225,8 +225,9 @@ Qcommon_Mainloop(void)
 		// Save global time for network- und input code.
 		curtime = (int)(newtime / 1000ll);
 
-#ifdef __ANDROID__
-		Q3E_CheckNativeWindowChanged();
+#ifdef __ANDROID__ // check GL context
+		if(!GLimp_CheckGLInitialized())
+			break;
 #endif
 		Qcommon_Frame(newtime - oldtime);
 		oldtime = newtime;

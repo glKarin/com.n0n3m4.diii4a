@@ -884,7 +884,8 @@ static void End2DAndUpdate()
 //==========================================================================
 
 #ifdef __ANDROID__ //karin: Check surface on Android
-extern void GLimp_CheckGLInitialized(void);
+extern bool GLimp_CheckGLInitialized(void);
+extern volatile bool q3e_running;
 #endif
 void D_Display ()
 {
@@ -901,7 +902,8 @@ void D_Display ()
 	}
 
 #ifdef __ANDROID__ //karin: Check surface on Android
-	GLimp_CheckGLInitialized(); // check/wait EGL context
+	if(!GLimp_CheckGLInitialized()) // check/wait EGL context
+		return;
 #endif
 	cycle_t cycles;
 	
@@ -1190,6 +1192,27 @@ void D_ErrorCleanup ()
 //==========================================================================
 
 #ifdef __ANDROID__ //karin: sync initialization state
+void D_DoomShutdown(void)
+{
+	// Unless something really bad happened, the game should only exit through this single point in the code.
+	// No more 'exit', please.
+	D_Cleanup();
+	CloseNetwork();
+	GC::FinalGC = true;
+	GC::FullGC();
+	GC::DelSoftRootHead();	// the soft root head will not be collected by a GC so we have to do it explicitly
+	C_DeinitConsole();
+	R_DeinitColormaps();
+	R_Shutdown();
+	I_ShutdownGraphics();
+	I_ShutdownInput();
+	M_SaveDefaultsFinal();
+	DeleteStartupScreen();
+	C_UninitCVars(); // must come last so that nothing will access the CVARs anymore after deletion.
+	delete Args;
+	Args = nullptr;
+}
+
 extern void Sys_SetInitialized(bool on);
 #endif
 void D_DoomLoop ()
@@ -1211,6 +1234,10 @@ void D_DoomLoop ()
 	{
 		try
 		{
+#ifdef __ANDROID__ //karin: leave game loop
+			if(!q3e_running) // exit
+				throw CExitEvent(0);
+#endif
 			// frame syncronous IO operations
 			if (gametic > lasttic)
 			{

@@ -448,13 +448,6 @@ public class GameLauncher extends Activity
 						.commit();
 				SetupGZDOOMFiles("file", "lights.pk3", isChecked);
 			}
-/*			else if (id == R.id.gzdoom_load_game_support_pk3)
-			{
-				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, isChecked)
-						.commit();
-				SetupGZDOOMFiles("file", "game_support.pk3", isChecked);
-			}*/
 			else if (id == R.id.gzdoom_load_brightmaps_pk3)
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
@@ -555,11 +548,13 @@ public class GameLauncher extends Activity
 			else if (rgId == R.id.rg_r_autoAspectRatio)
 			{
 				index = GetCheckboxIndex(radioGroup, id);
-				if(Q3EUtils.q3ei.IsIdTech4())
-					SetProp("harm_r_autoAspectRatio", index);
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, index)
 						.commit();
+				if (index > 0 && Q3EUtils.q3ei.IsIdTech4())
+					SetProp_temp("harm_r_autoAspectRatio", index);
+				else
+					RemoveProp_temp("harm_r_autoAspectRatio");
 			}
 
 			// change game mods
@@ -1099,11 +1094,6 @@ public class GameLauncher extends Activity
 				if (!IsProp("s_useEAXReverb")) setProp("s_useEAXReverb", false);
 			}
 
-			str = GetProp("harm_r_autoAspectRatio");
-			index = Q3EUtils.parseInt_s(str, 1);
-			SelectCheckbox(V.rg_r_autoAspectRatio, index);
-			if (!IsProp("harm_r_autoAspectRatio")) SetProp("harm_r_autoAspectRatio", 1);
-
 			V.cb_useHighPrecision.setChecked(getProp("harm_r_useHighPrecision", false));
 			if (!IsProp("harm_r_useHighPrecision")) setProp("harm_r_useHighPrecision", false);
 
@@ -1455,17 +1445,20 @@ public class GameLauncher extends Activity
 		SelectCheckbox(V.rg_opengl, mPrefs.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion()) == Q3EGLConstants.OPENGLES30 ? 1 : 0);
 		V.rg_opengl.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.launcher_tab2_enable_gyro.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false));
+		int autoAspectRatio = mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1);
+		if(autoAspectRatio > 0 && Q3EUtils.q3ei.IsIdTech4())
+			SetProp_temp("harm_r_autoAspectRatio", autoAspectRatio);
+		SelectCheckbox(V.rg_r_autoAspectRatio, mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1));
 		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		V.skip_intro.setChecked(skipIntro);
 		if (skipIntro && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.IsIdTech3()))
-			SetCommand_temp("disconnect", true);
+			SetCommand_temp("disconnect", false);
 		boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
 		V.auto_quick_load.setChecked(autoQuickLoad);
 		if (autoQuickLoad && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isRealRTCW))
 			SetParam_temp("loadGame", "QuickSave");
 		boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
 		V.multithreading.setChecked(multithreading);
-		SelectCheckbox(V.rg_r_autoAspectRatio, mPrefs.getInt(Q3EPreference.pref_harm_r_autoAspectRatio, 1));
 		V.rg_r_autoAspectRatio.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView view, int id, KeyEvent ev)
@@ -1789,12 +1782,6 @@ public class GameLauncher extends Activity
 		if (load && (Q3EUtils.q3ei.isDOOM))
 			AddParam_temp("file", "lights.pk3");
 		V.gzdoom_load_lights_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
-
-/*		load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, true);
-		V.gzdoom_load_game_support_pk3.setChecked(load);
-		if (load && (Q3EUtils.q3ei.isDOOM))
-			AddParam_temp("file", "game_support.pk3");
-		V.gzdoom_load_game_support_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);*/
 
 		load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, true);
 		V.gzdoom_load_brightmaps_pk3.setChecked(load);
@@ -2308,7 +2295,6 @@ public class GameLauncher extends Activity
 		mEdtr.putBoolean(PreferenceKey.COLLAPSE_MODS, V.collapse_mods.isChecked());
 
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, V.gzdoom_load_lights_pk3.isChecked());
-//		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_game_support_pk3, V.gzdoom_load_game_support_pk3.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, V.gzdoom_load_brightmaps_pk3.isChecked());
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
@@ -3077,6 +3063,7 @@ public class GameLauncher extends Activity
 		V.opengl_section.setVisibility(openglVisible ? View.VISIBLE : View.GONE);
 		V.auto_quick_load.setVisibility(quickloadVisible ? View.VISIBLE : View.GONE);
 		V.skip_intro.setVisibility(skipintroVisible ? View.VISIBLE : View.GONE);
+		V.autoAspectRatio.setVisibility(Q3EUtils.q3ei.IsIdTech4() ? View.VISIBLE : View.GONE);
 
 		String subdir = Q3EUtils.q3ei.subdatadir;
 		if(null == subdir)
@@ -3212,7 +3199,6 @@ public class GameLauncher extends Activity
     {
 		String orig = GetTempCmdText();
         String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveParam(name, val).toString();
-		// String str = KidTech4Command.RemoveParam(GetTempCmdText(), name, res);
         if (!orig.equals(str))
             Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
@@ -3221,7 +3207,6 @@ public class GameLauncher extends Activity
 	private void AddParam_temp(String name, Object val)
 	{
 		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).AddParam(name, val).toString();
-		// String str = KidTech4Command.SetParam(GetTempCmdText(), name, val);
 		Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
 	}
@@ -3229,15 +3214,29 @@ public class GameLauncher extends Activity
     private void SetParam_temp(String name, Object val)
     {
 		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).SetParam(name, val).toString();
-		// String str = KidTech4Command.SetParam(GetTempCmdText(), name, val);
         Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
     }
 
+	private void SetProp_temp(String name, Object val)
+	{
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).SetProp(name, val).toString();
+		Q3EUtils.q3ei.start_temporary_extra_command = str;
+		UpdateTempCommand();
+	}
+
+	private void RemoveProp_temp(String name)
+	{
+		String orig = GetTempCmdText();
+		String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveProp(name).toString();
+		if (!orig.equals(str))
+			Q3EUtils.q3ei.start_temporary_extra_command = str;
+		UpdateTempCommand();
+	}
+
 	private void SetCommand_temp(String name, boolean prepend)
 	{
 		String str = Q3EUtils.q3ei.GetGameCommandEngine(GetTempCmdText()).SetCommand(name, prepend).toString();
-		// String str = KidTech4Command.SetCommand(GetTempCmdText(), name, prepend);
 		Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
 	}
@@ -3246,7 +3245,6 @@ public class GameLauncher extends Activity
 	{
 		String orig = GetTempCmdText();
 		String str = Q3EUtils.q3ei.GetGameCommandEngine(orig).RemoveCommand(name).toString();
-		// String str = KidTech4Command.RemoveCommand(GetTempCmdText(), name, res);
 		if (!orig.equals(str))
 			Q3EUtils.q3ei.start_temporary_extra_command = str;
 		UpdateTempCommand();
@@ -3727,6 +3725,7 @@ public class GameLauncher extends Activity
         public EditText launcher_tab2_gyro_x_axis_sens;
         public EditText launcher_tab2_gyro_y_axis_sens;
         public CheckBox auto_quick_load;
+		public LinearLayout autoAspectRatio;
         public RadioGroup rg_fs_preygame;
         public CheckBox multithreading;
         public RadioGroup rg_s_driver;
@@ -3806,7 +3805,6 @@ public class GameLauncher extends Activity
 		public CheckBox etw_stencilShadowPersonal;
 		public LinearLayout gzdoom_section;
 		public CheckBox gzdoom_load_lights_pk3;
-		//public CheckBox gzdoom_load_game_support_pk3;
 		public CheckBox gzdoom_load_brightmaps_pk3;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
@@ -3855,6 +3853,7 @@ public class GameLauncher extends Activity
             launcher_tab2_gyro_x_axis_sens = findViewById(R.id.launcher_tab2_gyro_x_axis_sens);
             launcher_tab2_gyro_y_axis_sens = findViewById(R.id.launcher_tab2_gyro_y_axis_sens);
             auto_quick_load = findViewById(R.id.auto_quick_load);
+			autoAspectRatio = findViewById(R.id.autoAspectRatio);
             rg_fs_preygame = findViewById(R.id.rg_fs_preygame);
             multithreading = findViewById(R.id.multithreading);
             rg_s_driver = findViewById(R.id.rg_s_driver);
@@ -3934,7 +3933,6 @@ public class GameLauncher extends Activity
 			etw_stencilShadowPersonal = findViewById(R.id.etw_stencilShadowPersonal);
 			gzdoom_section = findViewById(R.id.gzdoom_section);
 			gzdoom_load_lights_pk3 = findViewById(R.id.gzdoom_load_lights_pk3);
-			//gzdoom_load_game_support_pk3 = findViewById(R.id.gzdoom_load_game_support_pk3);
 			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);

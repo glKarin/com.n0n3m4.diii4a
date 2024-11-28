@@ -104,12 +104,13 @@ RenderCommandBuffers
 ====================
 */
 #ifdef __ANDROID__ //karin: Check surface on Android
-extern void GLimp_CheckGLInitialized(void);
+extern bool GLimp_CheckGLInitialized(void);
 #endif
 void idRenderSystemLocal::RenderCommandBuffers( const emptyCommand_t* const cmdHead )
 {
 #ifdef __ANDROID__ //karin: check/wait EGL context
-	GLimp_CheckGLInitialized();
+	if(!GLimp_CheckGLInitialized())
+		return;
 #endif
 	// if there isn't a draw view command, do nothing to avoid swapping a bad frame
 	bool	hasView = false;

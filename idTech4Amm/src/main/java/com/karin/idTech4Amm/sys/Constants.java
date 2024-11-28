@@ -12,8 +12,8 @@ import java.util.Date;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 59;
-    public static final String CONST_RELEASE = "2024-11-20";
+    public static final int    CONST_UPDATE_RELEASE = 60;
+    public static final String CONST_RELEASE = "2024-12-23";
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -30,15 +30,6 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Support `Omni-Bot` in Wolfenstein: Enemy Territory.",
-            "Fix rendering on Mali GPU in DOOM 3-BFG.",
-            "Fix rendering on Mali GPU in The Dark Mod.",
-            "Fix stencil shadow with `cg_shadows` = 2 in Wolfenstein: Enemy Territory.",
-            "Support choose a mod directory in GZDOOM.",
-            "Add some new features options on launcher in Wolfenstein: Enemy Territory, RealRTCW, DOOM3-BFG, Quake 2, GZDOOM, The Dark Mod.",
-            "Add use high precision float on GLSL shaders(cvar `harm_r_useHighPrecision`) in DOOM 3/Quake 4/Prey.",
-            "Add 5 onscreen buttons.",
-            "Add `Phobos(for Dhewm3)` mod of DOOM3 support, game data directory named `tfphobos`(d3xp and dhewm3 compatibility patch required). More view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/phobos", "Doom 3: Phobos") + "` and .`" + TextHelper.GenLinkText("https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch", "Doom 3: Phobos - dhewm3 compatibility patch") + "`.",
         };
 	};
 

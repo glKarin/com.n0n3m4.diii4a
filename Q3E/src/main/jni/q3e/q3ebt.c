@@ -1,6 +1,4 @@
-#include "bt.h"
-
-#define Q3E_PRINTF printf
+#include "q3ebt.h"
 
 #include <android/log.h>
 #include <errno.h>
@@ -15,12 +13,9 @@
 
 #include "q_xunwind.h"
 
-#define Q3E_XUNWIND_LOG_TAG        "Q3E_xunwind"
-#define Q3E_XUNWIND_LOG_PRIORITY   ANDROID_LOG_INFO
-#define Q3E_XUNWIND_LOG(fmt, ...) do { \
-__android_log_print(Q3E_XUNWIND_LOG_PRIORITY, Q3E_XUNWIND_LOG_TAG, fmt, ##__VA_ARGS__); \
-Q3E_PRINTF(fmt "\n", ##__VA_ARGS__);                               \
-} while(0);
+#define LOG_TAG        "Q3E::bt"
+
+#include "q3estd.h"
 
 #define Q3E_XUNWIND_MAX_FRAMES 128
 #define Q3E_XUNWIND_PREFIX "\t"
@@ -43,21 +38,21 @@ static void print_frames(int signum, int mask, const char *str)
 {
     pid_t pid = getpid();
     pid_t tid = gettid();
-    Q3E_XUNWIND_LOG("Signal caught: %d, pid=%d, tid=%d", signum, pid, tid);
+    LOGI("Signal caught: %d, pid=%d, tid=%d", signum, pid, tid);
     if(mask == SAMPLE_SOLUTION_FP)
     {
-        Q3E_XUNWIND_LOG("Backtrace: FP (Frame Pointer)");
-        Q3E_XUNWIND_LOG("%s", str ? str : "<NULL>");
+        LOGI("Backtrace: FP (Frame Pointer)");
+        LOGI("%s", str ? str : "<NULL>");
     }
     else if(mask == SAMPLE_SOLUTION_EH)
     {
-        Q3E_XUNWIND_LOG("Backtrace: EH (Exception handling GCC extension)");
-        Q3E_XUNWIND_LOG("%s", str ? str : "<NULL>");
+        LOGI("Backtrace: EH (Exception handling GCC extension)");
+        LOGI("%s", str ? str : "<NULL>");
     }
     else if(mask == SAMPLE_SOLUTION_CFI)
     {
-        Q3E_XUNWIND_LOG("Backtrace: CFI (Call Frame Info)");
-        Q3E_XUNWIND_LOG("%s", str ? str : "<NULL>");
+        LOGI("Backtrace: CFI (Call Frame Info)");
+        LOGI("%s", str ? str : "<NULL>");
     }
 }
 
@@ -80,7 +75,7 @@ static void sample_sigsegv_handler(int signum, siginfo_t *siginfo, void *context
 
     signal(signum, SIG_DFL); // forbidden double
 
-    Q3E_XUNWIND_LOG("Caught signal: %d", signum);
+    LOGI("Caught signal: %d", signum);
 
     int mask = 0;
     char *fp = NULL;
@@ -104,7 +99,7 @@ static void sample_sigsegv_handler(int signum, siginfo_t *siginfo, void *context
         print_frames(signum, SAMPLE_SOLUTION_FP, fp);
 #else
         (void) context;
-        Q3E_XUNWIND_LOG("FP unwinding is only supported on arm64.");
+        LOGE("FP unwinding is only supported on arm64.");
 #endif
     }
 
@@ -148,7 +143,7 @@ void Q3E_BT_Init(void)
         act.sa_flags = SA_RESTART | SA_SIGINFO | SA_ONSTACK | SA_RESETHAND;
         sigaction(sigs[i], &act, NULL);
         //signal(sigs[i], sigsegv_handler);
-        Q3E_XUNWIND_LOG("[%d] Register signal: %d", i, sigs[i]);
+        LOGI("[%d] Register signal: %d", i, sigs[i]);
     }
 }
 
@@ -160,7 +155,7 @@ void Q3E_BT_Shutdown(void)
         int i;
         for (i = 0; i < sizeof(sigs) / sizeof(sigs[0]); i++) {
             signal(sigs[i], SIG_DFL);
-            Q3E_XUNWIND_LOG("[%d] Unregister signal: %d", i, sigs[i]);
+            LOGI("[%d] Unregister signal: %d", i, sigs[i]);
         }
     }
 }

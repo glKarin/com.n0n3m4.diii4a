@@ -855,7 +855,8 @@ public class Q3EGameHelper
 		appHome = KStr.AppendPath(appHome, subdatadir);
 
         int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, 0);
-        Q3EJNI.PreInit(eventQueue);
+        int gameThread = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD, 0);
+        Q3EJNI.PreInit(eventQueue, gameThread);
 
         String libpath = CopyLocalLibraries();
         String engineLib = GetEngineLib();
@@ -882,7 +883,9 @@ public class Q3EGameHelper
                 Q3EUtils.q3ei.joystick_smooth,
                 runBackground > 0
         );
-        if(!res)
+        if(res)
+            Q3E.Start();
+        else
         {
             if(m_context instanceof Activity)
             {
@@ -897,6 +900,7 @@ public class Q3EGameHelper
                 });
             }
         }
+
         return res;
     }
 

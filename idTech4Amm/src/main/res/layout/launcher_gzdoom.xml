@@ -19,13 +19,6 @@
         android:checked="true"
         android:text="@string/load_lights_pk3" />
 
-<!--    <CheckBox
-        android:id="@+id/gzdoom_load_game_support_pk3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="true"
-        android:text="@string/load_game_support_pk3" />-->
-
     <CheckBox
         android:id="@+id/gzdoom_load_brightmaps_pk3"
         android:layout_width="wrap_content"

@@ -19,6 +19,8 @@
     along with Q3E.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "q3e.h"
+
 #include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
@@ -30,24 +32,20 @@
 #include <stdarg.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+#include <pthread.h>
 
-#include "q3e.h"
-#include "eventqueue.h"
-#include "bt.h"
+#include "q3estd.h"
+#include "q3eeventqueue.h"
+#include "q3ebt.h"
+#include "q3ethread.h"
+#include "q3eutility.h"
+#include "q3emisc.h"
 
 #include "doom3/neo/sys/android/sys_android.h"
 
-#define LOG_TAG "Q3E_JNI"
+#define LOG_TAG "Q3E::JNI"
 
 #define JNI_Version JNI_VERSION_1_4
-
-#define LOGD(fmt, args...) { printf("[" LOG_TAG " debug]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##args); }
-#define LOGI(fmt, args...) { printf("[" LOG_TAG " info]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_INFO, LOG_TAG, fmt, ##args); }
-#define LOGW(fmt, args...) { printf("[" LOG_TAG " warning]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_WARN, LOG_TAG, fmt, ##args); }
-#define LOGE(fmt, args...) { printf("[" LOG_TAG " error]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##args); }
-
-#define EVENT_QUEUE_TYPE_JAVA 0
-#define EVENT_QUEUE_TYPE_NATIVE 1
 
 //#define AUDIOTRACK_BYTEBUFFER 1
 
@@ -56,13 +54,12 @@ static void (*setResolution)(int width, int height);
 static void (*Q3E_SetInitialContext)(const void *context);
 static void (*setCallbacks)(const void *func);
 static void (*set_gl_context)(ANativeWindow *window);
+static void (*request_thread_quit)(void);
 
 static int  (*qmain)(int argc, char **argv);
-static void (*onFrame)();
 static void (*onKeyEvent)(int state, int key,int chr);
 static void (*onAnalog)(int enable, float x, float y);
 static void (*onMotionEvent)(float x, float y);
-static void (*vidRestart)();
 static void (*on_pause)(void);
 static void (*on_resume)(void);
 static void (*qexit)(void);
@@ -88,6 +85,9 @@ static char *arg_str = NULL;
 static void *libdl;
 static ANativeWindow *window = NULL;
 static int usingNativeEventQueue = 0;
+static int usingNativeThread = 1;
+
+static int resultCode = -1;
 
 static int backtrace_exit = 0;
 
@@ -96,6 +96,9 @@ static JavaVM *jVM;
 static jobject audioBuffer=0;
 static jobject q3eCallbackObj=0;
 static const jbyte *audio_track_buffer = NULL;
+
+// game main thread
+static pthread_t				main_thread;
 
 // Java method
 static jmethodID android_PullEvent_method;
@@ -149,7 +152,7 @@ static void backtrace_signal_caughted(int num, int pid, int tid, int mask, const
 {
 	ATTACH_JNI(env)
 
-	LOGI("Backtrace dialog: %d\n", num);
+	LOGI("Backtrace dialog: %d", num);
 
 	jstring str;
 	jobjectArray stackArray = NULL;
@@ -206,37 +209,13 @@ static void setup_backtrace(void)
 	Q3E_BT_SignalCaughted(backtrace_signal_caughted);
 }
 
-static void print_interface(void)
-{
-	LOGI("idTech4A++ interface ---------> ");
-
-	LOGI("Main function: %p", qmain);
-	LOGI("Setup callbacks: %p", setCallbacks);
-	LOGI("Setup initial context: %p", Q3E_SetInitialContext);
-	LOGI("Setup resolution: %p", setResolution);
-	LOGI("On pause: %p", on_pause);
-	LOGI("On resume: %p", on_resume);
-	LOGI("Exit function: %p", qexit);
-
-	LOGI("Setup OpenGL context: %p", set_gl_context);
-
-	LOGI("On frame: %p", onFrame);
-	LOGI("Restart OpenGL: %p", vidRestart);
-
-	LOGI("Key event: %p", onKeyEvent);
-	LOGI("Analog event: %p", onAnalog);
-	LOGI("Motion event: %p", onMotionEvent);
-
-	LOGI("<---------");
-}
-
 static int loadLib(const char* libpath)
 {
-	LOGI("Load library: %s......\n", libpath);
+	LOGI("Load library: %s......", libpath);
     libdl = dlopen(libpath, RTLD_NOW | RTLD_GLOBAL);
     if(!libdl)
     {
-        LOGE("Unable to load library '%s': %s\n", libpath, dlerror());
+        LOGE("Unable to load library '%s': %s", libpath, dlerror());
 
 		char text[1024];
 		snprintf(text, sizeof(text), "Unable to load library '%s': %s", libpath, dlerror());
@@ -251,25 +230,22 @@ static int loadLib(const char* libpath)
 	Q3E_Interface_t d3interface;
 	GetIDTechAPI(&d3interface);
 
+	Q3E_PrintInterface(&d3interface);
+
 	qmain = d3interface.main;
 	setCallbacks = d3interface.setCallbacks;
 	Q3E_SetInitialContext = d3interface.setInitialContext;
-	setResolution = d3interface.setResolution;
 
 	on_pause = d3interface.pause;
 	on_resume = d3interface.resume;
 	qexit = d3interface.exit;
 
 	set_gl_context = d3interface.setGLContext;
-
-	onFrame = d3interface.frame;
-	vidRestart = d3interface.vidRestart;
+	request_thread_quit = d3interface.requestThreadQuit;
 
 	onKeyEvent = d3interface.keyEvent;
 	onAnalog = d3interface.analogEvent;
 	onMotionEvent = d3interface.motionEvent;
-
-	print_interface();
 
 	return 0;
 }
@@ -347,6 +323,10 @@ void setState(int state)
 static void q3e_exit(void)
 {
 	LOGI("Q3E JNI exit");
+    if(main_thread)
+        Q3E_QuitThread(&main_thread, NULL, 1);
+
+	Q3E_FreeArgs();
 	Q3E_BT_Shutdown();
 	if(Q3E_EventManagerIsInitialized())
     	Q3E_ShutdownEventManager();
@@ -364,7 +344,9 @@ static void q3e_exit(void)
 	{
 		dlclose(libdl);
 		libdl = NULL;
+	    LOGI("Unload game library");
 	}
+	Q3E_CloseRedirectOutput();
 }
 
 int JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -437,75 +419,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_Backtrace_method = (*env)->GetMethodID(env, q3eCallbackClass, "Backtrace", "(IIII[Ljava/lang/String;)Z");
 }
 
-static void UnEscapeQuotes( char *arg )
-{
-	char *last = NULL;
-	while( *arg ) {
-		if( *arg == '"' && *last == '\\' ) {
-			char *c_curr = arg;
-			char *c_last = last;
-			while( *c_curr ) {
-				*c_last = *c_curr;
-				c_last = c_curr;
-				c_curr++;
-			}
-			*c_last = '\0';
-		}
-		last = arg;
-		arg++;
-	}
-}
-
-static int ParseCommandLine(char *cmdline, char **argv)
-{
-	char *bufp;
-	char *lastp = NULL;
-	int argc, last_argc;
-	argc = last_argc = 0;
-	for ( bufp = cmdline; *bufp; ) {		
-		while ( isspace(*bufp) ) {
-			++bufp;
-		}		
-		if ( *bufp == '"' ) {
-			++bufp;
-			if ( *bufp ) {
-				if ( argv ) {
-					argv[argc] = bufp;
-				}
-				++argc;
-			}			
-			while ( *bufp && ( *bufp != '"' || *lastp == '\\' ) ) {
-				lastp = bufp;
-				++bufp;
-			}
-		} else {
-			if ( *bufp ) {
-				if ( argv ) {
-					argv[argc] = bufp;
-				}
-				++argc;
-			}			
-			while ( *bufp && ! isspace(*bufp) ) {
-				++bufp;
-			}
-		}
-		if ( *bufp ) {
-			if ( argv ) {
-				*bufp = '\0';
-			}
-			++bufp;
-		}
-		if( argv && last_argc != argc ) {
-			UnEscapeQuotes( argv[last_argc] );	
-		}
-		last_argc = argc;	
-	}
-	if ( argv ) {
-		argv[argc] = NULL;
-	}
-	return(argc);
-}
-
 static void setup_Q3E_callback(void)
 {
 	Q3E_Callback_t callback;
@@ -533,28 +446,9 @@ static void setup_Q3E_callback(void)
 	callback.Gui_ShowToast = &show_toast;
 	callback.Gui_openDialog = &open_dialog;
 
+	Q3E_PrintCallbacks(&callback);
+
 	setCallbacks(&callback);
-}
-
-static void print_initial_context(const Q3E_InitialContext_t *context)
-{
-	LOGI("idTech4A++ initial context ---------> ");
-
-	LOGI("Native library directory: %s", context->nativeLibraryDir);
-	LOGI("Redirect output to file: %d", context->redirectOutputToFile);
-	LOGI("Don't handle signals: %d", context->noHandleSignals);
-	LOGI("Enable multi-thread: %d", context->multithread);
-	LOGI("OpenGL format: 0x%X", context->openGL_format);
-	LOGI("OpenGL MSAA: %d", context->openGL_msaa);
-	LOGI("OpenGL Version: %x", context->openGL_version);
-	LOGI("Using mouse: %x", context->mouseAvailable);
-	LOGI("Game data directory: %s", context->gameDataDir);
-	LOGI("Application home directory: %s", context->appHomeDir);
-	LOGI("Refresh rate: %d", context->refreshRate);
-	LOGI("Smooth joystick: %d", context->smoothJoystick);
-    LOGI("Continue when missing OpenGL context: %d", context->continueWhenNoGLContext);
-
-	LOGI("<---------");
 }
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jboolean bContinueNoGLContext)
@@ -592,11 +486,15 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 		game_data_dir = game_path;
 		(*env)->ReleaseStringUTFChars(env, gameSubDir, game_type);
 	}
-	LOGI("idTech4A++ game data directory: %s\n", game_data_dir);
 	chdir(game_data_dir);
 
+	if(redirectOutputToFile)
+		Q3E_RedirectOutput();
+
+	LOGI("idTech4A++ game data directory: %s", game_data_dir);
+
 	const char *arg = (*env)->GetStringUTFChars(env, Cmdline, &iscopy);
-	LOGI("idTech4A++ game command: %s\n", arg);
+	LOGI("idTech4A++ game command: %s", arg);
 	argv = malloc(sizeof(char*) * 255);
     arg_str = strdup(arg);
 	argc = ParseCommandLine(arg_str, argv);
@@ -604,7 +502,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 
 	setup_Q3E_callback();
 
-	setResolution(width, height);
+	// setResolution(width, height);
 	char *doom3_path = NULL;
 
 	const char *native_lib_path = (*env)->GetStringUTFChars(env, nativeLibPath, &iscopy);
@@ -614,6 +512,8 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	const char *app_home = (*env)->GetStringUTFChars(env, appHome, &iscopy);
 	char *app_home_dir = strdup(app_home);
 	(*env)->ReleaseStringUTFChars(env, appHome, app_home);
+
+	Q3E_DumpArgs(argc, argv);
 
 	Q3E_InitialContext_t context;
 	memset(&context, 0, sizeof(context));
@@ -633,30 +533,29 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	context.refreshRate = refreshRate;
 	context.smoothJoystick = smoothJoystick ? 1 : 0;
 
-	print_initial_context(&context);
+	window = ANativeWindow_fromSurface(env, view);
+	// set_gl_context(window);
+
+	context.window = window;
+	context.width = width;
+	context.height = height;
+
+	Q3E_PrintInitialContext(&context);
 
 	Q3E_SetInitialContext(&context);
 
-	window = ANativeWindow_fromSurface(env, view);
-	set_gl_context(window);
-
 	if(usingNativeEventQueue)
     	Q3E_InitEventManager(onKeyEvent, onMotionEvent, onAnalog);
-    
-    qmain(argc, argv);
 
-	LOGI("idTech4A++(arm%d) game data directory: %s\n", sizeof(void *) == 8 ? 64 : 32, game_data_dir);
+    // qmain(argc, argv);
+
+	LOGI("idTech4A++(arm%d) game data directory: %s", sizeof(void *) == 8 ? 64 : 32, game_data_dir);
 
 	free(argv);
     free(doom3_path);
 	free(app_home_dir);
 
 	return JNI_TRUE;
-}
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_drawFrame(JNIEnv *env, jclass c)
-{
-    onFrame();
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent(JNIEnv *env, jclass c, jint state, jint key, jint chr)
@@ -672,18 +571,6 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent(JNIEnv *env, jclass c, jfloat x, jfloat y)
 {
     onMotionEvent(x, y);
-}
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_vidRestart(JNIEnv *env, jclass c)
-{    
-	vidRestart();
-}
-
-
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_shutdown(JNIEnv *env, jclass c)
-{
-    if(qexit)  
-        qexit();
 }
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Is64(JNIEnv *env, jclass c)
@@ -716,6 +603,89 @@ Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
 		window = ANativeWindow_fromSurface(env, view);
 	}
 	set_gl_context(window);
+}
+
+void finish(void)
+{
+	ATTACH_JNI(env)
+
+	LOGI("Finish");
+	(*env)->CallVoidMethod(env, q3eCallbackObj, android_Finish_method);
+}
+
+static void * Q3E_MainLoop(void *data)
+{
+	LOGI("Enter native game main thread.");
+	Android_AttachThread();
+	q3e_pthread_cancelable();
+	resultCode = qmain(q3e_argc, q3e_argv);
+	main_thread = 0;
+    /*Q3E_exit();*/
+	LOGI("Leave native game main thread.");
+	finish();
+	return (void *)(intptr_t)resultCode;
+}
+
+// start game main thread from Android Surface thread(call by Surface view thread)
+static void Q3E_StartGameMainThread(void)
+{
+	if(main_thread)
+		return;
+
+	int res = Q3E_CreateThread(&main_thread, Q3E_MainLoop, NULL);
+	if(main_thread < 0)
+	{
+	    exit(res);
+	}
+}
+
+// shutdown game main thread(call by Java main thread)
+static void Q3E_ShutdownGameMainThread(void)
+{
+	if(!main_thread)
+		return;
+
+	LOGI("Stop native game main thread......");
+	//request_thread_quit();
+	Q3E_QuitThread(&main_thread, NULL, 0);
+}
+
+// call game main thread(call by Java game thread or Surface view thread)
+JNIEXPORT jint JNICALL Java_com_n0n3m4_q3e_Q3EJNI_main(JNIEnv *env, jclass clazz)
+{
+	LOGI("Enter java game main thread.");
+	resultCode = qmain(q3e_argc, q3e_argv);
+	LOGI("Leave java game main thread: %d.", resultCode);
+	return resultCode;
+}
+
+JNIEXPORT jlong JNICALL Java_com_n0n3m4_q3e_Q3EJNI_StartThread(JNIEnv *env, jclass clazz)
+{
+    Q3E_StartGameMainThread();
+	return (jlong)main_thread;
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_StopThread(JNIEnv *env, jclass clazz)
+{
+	Q3E_ShutdownGameMainThread();
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_NotifyExit(JNIEnv *env, jclass clazz)
+{
+	request_thread_quit();
+}
+
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_shutdown(JNIEnv *env, jclass c)
+{
+    LOGI("Shutdown result code: %d", resultCode);
+	if(resultCode < 0)
+	{
+		request_thread_quit();
+		if(qexit)
+		{
+			qexit();
+		}
+	}
 }
 
 int pull_input_event(int num)
@@ -861,14 +831,6 @@ int open_dialog(const char *title, const char *message, int num, const char *but
 	return res;
 }
 
-void finish(void)
-{
-	ATTACH_JNI(env)
-
-	LOGI("Finish");
-	(*env)->CallVoidMethod(env, q3eCallbackObj, android_Finish_method);
-}
-
 void setup_smooth_joystick(int enable)
 {
 	ATTACH_JNI(env)
@@ -920,7 +882,8 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, j
     Q3E_PushAnalogEvent(enable, x, y);
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass clazz, jint eventQueueType)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit(JNIEnv *env, jclass clazz, jint eventQueueType, jint gameThreadType)
 {
 	usingNativeEventQueue = eventQueueType == EVENT_QUEUE_TYPE_NATIVE;
+	usingNativeThread = gameThreadType != GAME_THREAD_TYPE_JAVA;
 }

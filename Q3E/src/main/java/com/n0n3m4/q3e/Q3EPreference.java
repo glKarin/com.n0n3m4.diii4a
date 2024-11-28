@@ -142,7 +142,6 @@ public final class Q3EPreference
     public static final String pref_scrres_scale                      = "harm_q3e_scrres_scale";
     public static final String pref_harm_r_shadowMapPerforatedShadow  = "q3e_harm_r_shadowMapPerforatedShadow"; //k
     public static final String pref_harm_gzdoom_load_lights_pk3       = "harm_gzdoom_load_lights_pk3";
-    //public static final String pref_harm_gzdoom_load_game_support_pk3 = "harm_gzdoom_load_game_support_pk3";
     public static final String pref_harm_gzdoom_load_brightmaps_pk3   = "harm_gzdoom_load_brightmaps_pk3";
 
     public static final String RUN_BACKGROUND                = "harm_run_background";
@@ -165,6 +164,7 @@ public final class Q3EPreference
     public static final String USE_EXTERNAL_LIB_PATH         = "harm_use_external_lib_path";
     public static final String THEME                         = "harm_theme";
     public static final String EVENT_QUEUE                   = "harm_event_queue"; // 0 - java 1 - native
+    public static final String GAME_THREAD                   = "harm_game_thread"; // 0 - native 1 - java
     public static final String AUTOSAVE_BUTTON_SETTINGS      = "harm_autosave_button_settings";
     public static final String DISC_PANEL_KEYS_PREFIX        = "harm_disc_panel_keys_";
 

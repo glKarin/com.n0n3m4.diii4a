@@ -415,7 +415,6 @@
     <string name="commandshortcut">Ярлык команды</string>
     <string name="patch_resource">Ресурс патча</string>
     <string name="load_lights_pk3">Загрузка lights.pk3</string>
-    <string name="load_game_support_pk3">Загрузка game_support.pk3</string>
     <string name="load_brightmaps_pk3">Загрузка brightmaps.pk3</string>
     <string name="disc_panel">Панель диска</string>
     <string name="disc_panel_type">Тип панели диска</string>
@@ -428,5 +427,7 @@
     <string name="release_">Релиз:</string>
     <string name="build_">Билд:</string>
     <string name="dev_">Разработчик:</string>
+    <string name="game_thread">Game thread</string>
+    <string name="choose_game_thread_create_scheme">Choose game thread create scheme</string>
 
 </resources>

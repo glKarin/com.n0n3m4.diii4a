@@ -1,4 +1,4 @@
-#include "eventqueue.h"
+#include "q3eeventqueue.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -9,18 +9,9 @@
 
 #include <android/log.h>
 
-#define LOG_TAG "Q3E::idEventManager"
+#define LOG_TAG "Q3E::Event"
 
-#define LOGD(fmt, args...) { printf("[" LOG_TAG " debug]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##args); }
-#define LOGI(fmt, args...) { printf("[" LOG_TAG " info]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_INFO, LOG_TAG, fmt, ##args); }
-#define LOGW(fmt, args...) { printf("[" LOG_TAG " warning]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_WARN, LOG_TAG, fmt, ##args); }
-#define LOGE(fmt, args...) { printf("[" LOG_TAG " error]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##args); }
-
-#if 1
-#define ASSERT(x)
-#else
-#define ASSERT assert
-#endif
+#include "q3estd.h"
 
 typedef enum EventType_e {
     Event_Key = 1,
@@ -180,7 +171,7 @@ inline void idEventManager::SendEvent(const Event_t *ev)
         }
             break;
         default:
-            LOGE("Unexpected event type: %d\n", ev->type);
+            LOGE("Unexpected event type: %d", ev->type);
             ABORT();
             break;
     }
@@ -242,28 +233,28 @@ void Q3E_InitEventManager(SendKey_f sendKey, SendMotion_f sendMotion, SendAnalog
 {
     if(eventManager)
     {
-        LOGW("idEventManager has initialized\n");
+        LOGW("idEventManager has initialized");
         return;
     }
 
-    LOGI("idEventManager initialization\n");
+    LOGI("idEventManager initialization");
     eventManager = new idEventManager;
     eventManager->SetCallback(sendKey, sendMotion, sendAnalog);
-    LOGI("-----------------------\n");
+    LOGI("-----------------------");
 }
 
 void Q3E_ShutdownEventManager()
 {
     if(!eventManager)
     {
-        LOGW("idEventManager not initialized\n");
+        LOGW("idEventManager not initialized");
         return;
     }
 
-    LOGI("idEventManager shutdown\n");
+    LOGI("idEventManager shutdown");
     delete eventManager;
     eventManager = nullptr;
-    LOGI("-----------------------\n");
+    LOGI("-----------------------");
 }
 
 int Q3E_PullEvent(int num)

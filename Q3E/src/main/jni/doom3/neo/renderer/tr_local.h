@@ -2221,7 +2221,7 @@ struct idAllocAutoHeap {
 #include "../raven/renderer/NewShaderStage.h"
 #endif
 
-extern void GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
+extern bool GLimp_CheckGLInitialized(void); // Check GL context initialized, only for Android
 //extern volatile bool has_gl_context;
 extern unsigned int lastRenderTime;
 extern int r_maxFps;

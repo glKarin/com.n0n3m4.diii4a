@@ -72,17 +72,12 @@ void GLimp_SetRef(void *init, void *quit, void *setGLParms, void *setResolution)
 	((RI_SetResolution)setResolution)(screen_width, screen_height);
 }
 
-void GLimp_AndroidInit(volatile ANativeWindow *w)
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
 {
 	if(!w)
 		return;
-	if(!window_seted)
-	{
-		win = w;
-		ANativeWindow_acquire((ANativeWindow *)win);
-		window_seted = true;
-		return;
-	}
+	win = w;
+	ANativeWindow_acquire((ANativeWindow *)win);
 }
 
 void GLimp_AndroidQuit(void)
@@ -92,7 +87,7 @@ void GLimp_AndroidQuit(void)
 		GLref_AndroidQuit();
 }
 
-void GLimp_WindowChanged(volatile ANativeWindow *w)
+void GLimp_AndroidInit(volatile ANativeWindow *w)
 {
 	win = w;
     if(GLref_AndroidInit)

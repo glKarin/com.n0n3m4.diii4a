@@ -5,17 +5,25 @@
 #define Q3E_GAME_NAME "DOOM3-BFG"
 #define Q3E_IS_INITIALIZED (common->IsInitialized())
 #define Q3E_PRINTF common->Printf
-#define Q3E_WID_RESTART
-#define Q3E_DRAW_FRAME { common->Frame(); }
 #define Q3E_SHUTDOWN_GAME ShutdownGame()
 #define Q3Ebool bool
 #define Q3E_TRUE true
 #define Q3E_FALSE false
-#define Q3E_THREAD_MAIN game_main
-#define Q3E_INIT_WINDOW GLimp_AndroidInit
+#define Q3E_INIT_WINDOW GLimp_AndroidOpenWindow
 #define Q3E_QUIT_WINDOW GLimp_AndroidQuit
 #define Q3E_CHANGE_WINDOW GLimp_AndroidInit
 #define Q3E_REQUIRE_THREAD
+#if defined(USE_FFMPEG)
+#ifdef _DL_FFMPEG
+#define Q3E_AT_EXIT FFmpeg_Shutdown()
+#define Q3E_POST_START { \
+    if(FFmpeg_Init()) \
+        Sys_Printf("[Harmattan]: Using FFmpeg for playing bink cinematic.\n"); \
+    else \
+        Sys_Printf("[Harmattan]: FFmpeg is disabled for playing bink cinematic!\n"); \
+    }
+#endif
+#endif
 
 #include "precompiled.h"
 #include "../../framework/Common_local.h"
@@ -29,6 +37,7 @@ extern void Sys_SetClassicDOOMGameState(int state)
 }
 #endif
 
+extern void GLimp_AndroidOpenWindow(volatile ANativeWindow *win);
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
 extern void ShutdownGame(void);
@@ -108,9 +117,4 @@ void Sys_ForceResolution(void)
 
     Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
                -1, screen_width, screen_height);
-}
-
-intptr_t Sys_GetMainThread(void)
-{
-    return main_thread;
 }

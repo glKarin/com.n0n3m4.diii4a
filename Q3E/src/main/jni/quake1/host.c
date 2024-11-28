@@ -564,7 +564,10 @@ Host_Shutdown
 Cleanly shuts down after the main loop exits.
 ===============
 */
-static void Host_Shutdown(void)
+#if !defined(_DIII4A) //karin: make Host_Shutdown extern
+static
+#endif
+void Host_Shutdown(void)
 {
 	if (Sys_CheckParm("-profilegameonly"))
 		Sys_AllowProfiling(false);
@@ -690,7 +693,8 @@ void Host_Main(void)
 #ifdef _DIII4A
 		if(!q3e_running) // exit
 			break;
-		Q3E_CheckNativeWindowChanged();
+		if(!GLimp_CheckGLInitialized())
+			break;
 #endif
 		// Something bad happened, or the server disconnected
 		if (setjmp(host.abortframe))

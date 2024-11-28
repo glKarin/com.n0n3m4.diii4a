@@ -396,7 +396,7 @@ void idGLSLShaderManager::Shutdown(void)
     }
     queueCurrentIndex = 0;
     customShaders.Clear();
-    printf("[Harmattan]: GLSL shader manager shotdown\n");
+    printf("[Harmattan]: GLSL shader manager shutdown\n");
 }
 
 idGLSLShaderManager idGLSLShaderManager::_shaderManager;

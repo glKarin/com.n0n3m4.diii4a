@@ -1,6 +1,7 @@
 #ifndef _KARIN_SYS_ANDROID_H
 #define _KARIN_SYS_ANDROID_H
 
+#include <stdio.h>
 #include <android/native_window.h>
 
 // DOOM3 call Android::JNI, all in DOOM3 main thread
@@ -13,7 +14,7 @@ typedef struct
 
     // Input
     void (*Input_grabMouse)(int grab); // Android grab mouse
-    int (*Input_pullEvent)(int num); // Android pull input event
+    int (*Input_pullEvent)(int execCmd); // Android pull input event
     void (*Input_setupSmoothJoystick)(int enable); // enable Android smooth joystick
 
     // System
@@ -53,6 +54,10 @@ typedef struct
     const char *appHomeDir; // application home directory
     int refreshRate; // screen refresh rate
     int smoothJoystick; // smooth joystick
+
+    ANativeWindow *window;
+    int width;
+    int height;
 } Q3E_InitialContext_t;
 
 // Android::JNI call DOOM3 after main()
@@ -62,7 +67,6 @@ typedef struct
     int  (*main)(int argc, char **argv); // call main(int, const char **)
     void (*setCallbacks)(const void *func);
     void (*setInitialContext)(const void *context);
-    void (*setResolution)(int width, int height);
 
     // any thread(Java): after idCommon Initialized
     void (*pause)(void); // pause
@@ -71,10 +75,7 @@ typedef struct
 
     // SurfaceView thread(Java)
     void (*setGLContext)(ANativeWindow *window); // set OpenGL surface view window
-
-    // GLSurfaceView render thread(Java)
-    void (*frame)(void); // call common->Frame()
-    void (*vidRestart)(void); // UNUSED
+    void (*requestThreadQuit)(void); // request main thread quit
 
     // DOOM3 main thread(C/C++)
     void (*keyEvent)(int state, int key, int chr); // mouse-click/keyboard event

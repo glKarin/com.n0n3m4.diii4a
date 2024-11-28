@@ -181,8 +181,7 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
 
 	renderThread->backendFinished = false;
 
-	GLimp_CheckGLInitialized(); // check/wait EGL context
-
+	if(GLimp_CheckGLInitialized()) // check/wait EGL context
 	//if(has_gl_context)
     {
         renderThread->BackendThreadExecute();
@@ -198,7 +197,7 @@ static void RenderCommands(renderCrop_t *pc = 0, byte *pix = 0)
     }
 /*	else
     {
-        backendFinished = true;
+        renderThread->backendFinished = true;
     }*/
 
 	R_ToggleSmpFrame();
