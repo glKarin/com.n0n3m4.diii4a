@@ -20,13 +20,13 @@ GPLv3
 > **idTech4's feature**  
 * Linux/Windows(MinGW/MSVC(without editor)) build
 * multi-threading renderer
-* png/dds texture image, jpeg/png/bmp/dds format of screenshot
-* obj/dae format static model
 * pure soft shadow with shadow-mapping
 * soft shadow with stencil-shadow and translucent stencil shadow
-* lighting model: Phong/Blinn-phong/PBR/Ambient(no-lighting)
+* lighting model: Phong/Blinn-phong/PBR/Ambient/No-lighting
 * debug render tools support with programming render pipeline
 * OpenGLES2.0/OpenGLES3.0
+* png/dds texture image, jpeg/png/bmp/dds format of screenshot
+* obj/dae format static model
 * OpenAL(soft) and EFX Reverb
 * DOOM3(with full body awareness mod)
 * Quake4(with bot mod, full body awareness mod) and Raven's idTech4 engine
