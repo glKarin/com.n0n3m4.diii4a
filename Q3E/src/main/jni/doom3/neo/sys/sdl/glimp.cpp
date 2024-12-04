@@ -832,4 +832,7 @@ void GLimp_GrabInput(int flags) {
 
 void GLimp_EnableLogging(bool enable) { }
 
-void GLimp_CheckGLInitialized(void) { }
+bool GLimp_CheckGLInitialized(void) {
+    // Not need do anything
+    return true;
+}

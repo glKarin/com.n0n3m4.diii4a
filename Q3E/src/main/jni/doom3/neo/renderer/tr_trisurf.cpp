@@ -838,9 +838,7 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 	int i;
 
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	int *remap;
-	size_t alloc_size = tri->numVerts * sizeof(remap[0]);
-	_DROID_ALLOC16(int, alloc_size, remap, 0)
+	_DROID_ALLOC16_DEF(int, remap, (tri->numVerts * sizeof(remap[0])));
 #else
 	int *remap = (int *) _alloca16(tri->numVerts * sizeof(remap[0]));
 #endif
@@ -857,9 +855,7 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 
 	// create duplicate vertex index based on the vertex remap
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	int *tempDupVerts;
-	alloc_size = tri->numVerts * 2 * sizeof(tempDupVerts[0]);
-	_DROID_ALLOC16(int, alloc_size, tempDupVerts, 1)
+	_DROID_ALLOC16_DEF(int, tempDupVerts, (tri->numVerts * 2 * sizeof(tempDupVerts[0])));
 #else
 	int *tempDupVerts = (int *) _alloca16(tri->numVerts * 2 * sizeof(tempDupVerts[0]));
 #endif
@@ -876,8 +872,8 @@ void R_CreateDupVerts(srfTriangles_t *tri)
 	tri->dupVerts = triDupVertAllocator.Alloc(tri->numDupVerts * 2);
 	memcpy(tri->dupVerts, tempDupVerts, tri->numDupVerts * 2 * sizeof(tri->dupVerts[0]));
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	_DROID_FREE(remap, 0)
-	_DROID_FREE(tempDupVerts, 1)
+	_DROID_FREE(remap);
+	_DROID_FREE(tempDupVerts);
 #endif
 }
 
@@ -1368,8 +1364,7 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	int				numMirror;
 
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	const size_t alloc_size = tri->numVerts * sizeof(*tverts);
-	_DROID_ALLOC16(tangentVert_t, alloc_size, tverts, 0)
+	_DROID_ALLOC16(tangentVert_t, tverts, (tri->numVerts * sizeof(*tverts)));
 #else
 	tverts = (tangentVert_t *)_alloca16(tri->numVerts * sizeof(*tverts));
 #endif
@@ -1406,7 +1401,7 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 	if (totalVerts == tri->numVerts) {
 		tri->mirroredVerts = NULL;
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	_DROID_FREE(tverts, 0)
+	_DROID_FREE(tverts);
 #endif
 		return;
 	}
@@ -1447,7 +1442,7 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 
 	tri->numVerts = totalVerts;
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	_DROID_FREE(tverts, 0)
+	_DROID_FREE(tverts);
 #endif
 }
 
@@ -1493,8 +1488,7 @@ void R_DeriveTangentsWithoutNormals(srfTriangles_t *tri)
 	idDrawVert		*vert;
 
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	const size_t alloc_size = sizeof(faceTangents[0]) * tri->numIndexes/3;
-	_DROID_ALLOC16(faceTangents_t, alloc_size, faceTangents, 0)
+	_DROID_ALLOC16(faceTangents_t, faceTangents, (sizeof(faceTangents[0]) * tri->numIndexes/3));
 #else
 	faceTangents = (faceTangents_t *)_alloca16(sizeof(faceTangents[0]) * tri->numIndexes/3);
 #endif
@@ -1558,7 +1552,7 @@ void R_DeriveTangentsWithoutNormals(srfTriangles_t *tri)
 	tri->tangentsCalculated = true;
 
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	_DROID_FREE(faceTangents, 0)
+	_DROID_FREE(faceTangents);
 #endif
 }
 
@@ -1811,8 +1805,7 @@ void R_DeriveTangents(srfTriangles_t *tri, bool allocFacePlanes)
 
 	if (!planes) {
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-		const size_t alloc_size = (tri->numIndexes / 3) * sizeof(planes[0]);
-		_DROID_ALLOC16(idPlane, alloc_size, planes, 0)
+		_DROID_ALLOC16(idPlane, planes, (tri->numIndexes / 3) * sizeof(planes[0]));
 #else
 		planes = (idPlane *)_alloca16((tri->numIndexes / 3) * sizeof(planes[0]));
 #endif
@@ -1980,7 +1973,7 @@ void R_DeriveTangents(srfTriangles_t *tri, bool allocFacePlanes)
 	tri->tangentsCalculated = true;
 	tri->facePlanesCalculated = true;
 #ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
-	_DROID_FREE(planes, 0)
+	_DROID_FREE(planes);
 #endif
 }
 

@@ -597,7 +597,7 @@ const int MAX_TRIGGER_EVENTS		= (
 + 3
 #endif
 #ifdef _MULTITHREAD
-+ 2
++ 4
 #endif
 #ifdef _OPENSLES
 + 2

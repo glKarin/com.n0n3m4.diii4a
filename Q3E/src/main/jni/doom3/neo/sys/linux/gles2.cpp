@@ -112,9 +112,10 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 		common->Printf("[Harmattan]: EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 }
 
-void GLimp_CheckGLInitialized(void)
+bool GLimp_CheckGLInitialized(void)
 {
 	// Not need do anything
+    return true;
 }
 
 void GLimp_WakeBackEnd(void *a)
