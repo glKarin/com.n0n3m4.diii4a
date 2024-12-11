@@ -113,7 +113,6 @@ void Sys_ForceResolution(void)
     }
 #endif
     cvarSystem->SetCVarInteger("r_displayRefresh", refresh_rate);
-    cvarSystem->SetCVarInteger("r_antiAliasing", 0);
 
     Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i)",
                -1, screen_width, screen_height);

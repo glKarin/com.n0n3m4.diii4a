@@ -18,6 +18,16 @@ public final class Q3ELang
         return context.getResources().getString(id, args);
     }
 
+    public static String Str(Context context, Object text, Object...args)
+    {
+        if(text instanceof String)
+            return String.format((String) text, args);
+        else if(text instanceof Integer)
+            return context.getResources().getString((Integer)text, args);
+        else
+            return null;
+    }
+
     public static void Locale(Context context)
     {
         String lang = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.LANG, CONST_LANG_SYSTEM);

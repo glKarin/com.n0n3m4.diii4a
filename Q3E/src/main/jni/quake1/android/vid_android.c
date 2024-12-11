@@ -41,6 +41,8 @@ extern void Android_CloseKeyboard(void);
 extern void Android_PollInput(void);
 extern void Sys_SyncState(void);
 
+qbool vid_restart = false;
+
 #include "gles.c"
 
 // Input handling
@@ -192,7 +194,9 @@ static qbool VID_InitModeGL(const viddef_mode_t *mode)
 	vid.stencil           = mode->bitsperpixel > 16;
 	vid_wmborder_waiting = vid_wmborderless = false;
 
-	GLES_Init(true);
+	gl_multiSamples = gl_msaa < 0 ? mode->samples : gl_msaa;
+
+	GLimp_InitGL(true);
 
 	GL_InitFunctions();
 
@@ -245,8 +249,16 @@ void VID_Shutdown (void)
 		eglDestroySurface(eglDisplay, eglSurface);
 		eglSurface = EGL_NO_SURFACE;
 	}
-	ANativeWindow_release((ANativeWindow *)win);
-	win = NULL;
+	if(!vid_restart)
+	{
+		ANativeWindow_release((ANativeWindow *)win);
+		win = NULL;
+	}
+	else
+	{
+		vid_restart = false; // reset state
+		Con_Printf("[Harmattan]: Keep ANativeWindow for vid restart.\n");
+	}
 	Con_Printf("[Harmattan]: EGL surface destroyed and no EGL context.\n");
 }
 

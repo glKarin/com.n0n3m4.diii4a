@@ -493,6 +493,9 @@ public class Q3EGameHelper
             case 0: msaa = 0;break;
             case 1: msaa = 4;break;
             case 2: msaa = 16;break;
+            case 3: msaa = 2; break;
+            case 4: msaa = 8; break;
+            case 5: msaa = -1; break;
         }
         return msaa;
     }

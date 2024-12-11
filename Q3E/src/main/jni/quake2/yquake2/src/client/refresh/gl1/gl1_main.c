@@ -1564,7 +1564,11 @@ RI_Init(void)
 	/* Non power of two textures */
 	R_Printf(PRINT_ALL, " - Non power of two textures: ");
 
+#ifdef __ANDROID__ //karin: npot texture extension name
+	if (strstr(gl_config.extensions_string, "GL_OES_texture_npot"))
+#else
 	if (strstr(gl_config.extensions_string, "GL_ARB_texture_non_power_of_two"))
+#endif
 	{
 		gl_config.npottextures = true;
 		R_Printf(PRINT_ALL, "Okay\n");

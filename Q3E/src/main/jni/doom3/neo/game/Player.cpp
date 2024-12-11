@@ -9697,7 +9697,7 @@ void idPlayer::SetupViewBody( void ) {
         spawn = NULL;
         gameLocal.SpawnEntityDef( args, &spawn );
         if ( !spawn ) {
-            gameLocal.Warning( "idPlayer::SetupViewBody: failed to spawn viewBody" );
+            gameLocal.Printf( "idPlayer::SetupViewBody: failed to spawn viewBody\n" );
             return;
         }
         viewBody = static_cast<idViewBody*>(spawn);

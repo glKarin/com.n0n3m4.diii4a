@@ -428,4 +428,7 @@
     <string name="dev_">维护人:</string>
     <string name="game_thread">游戏线程</string>
     <string name="choose_game_thread_create_scheme">选择游戏线程创建方案</string>
+    <string name="_2x">2倍</string>
+    <string name="_8x">8倍</string>
+    <string name="use_game_setting">使用游戏设置</string>
 </resources>

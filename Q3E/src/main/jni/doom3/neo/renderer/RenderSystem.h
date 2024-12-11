@@ -93,6 +93,7 @@ typedef struct glconfig_s {
 	bool depthTextureCubeMapAvailable;
 	bool depth24Available;
 	bool gl_FragDepthAvailable;
+	int multiSamples;
 } glconfig_t;
 
 

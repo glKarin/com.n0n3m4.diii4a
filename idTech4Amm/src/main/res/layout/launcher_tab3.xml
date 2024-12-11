@@ -211,6 +211,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/_16x" />
+
+            <RadioButton
+                android:id="@+id/msaa_2x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_2x" />
+
+            <RadioButton
+                android:id="@+id/msaa_8x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_8x" />
+
+            <RadioButton
+                android:id="@+id/msaa_game"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/use_game_setting" />
+
         </RadioGroup>
 
 

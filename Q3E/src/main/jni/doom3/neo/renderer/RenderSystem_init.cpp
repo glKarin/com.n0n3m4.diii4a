@@ -1172,6 +1172,7 @@ void R_ShowglConfig_f(const idCmdArgs &args)
 	common->Printf("depthTextureCubeMapAvailable: %d\n", glConfig.depthTextureCubeMapAvailable);
 	common->Printf("depth24Available: %d\n", glConfig.depth24Available);
 	common->Printf("gl_FragDepthAvailable: %d\n", glConfig.gl_FragDepthAvailable);
+	common->Printf("multiSamples: %d\n", glConfig.multiSamples);
 #ifdef _SHADOW_MAPPING
 	extern bool r_useDepthTexture;
 	extern bool r_useCubeDepthTexture;

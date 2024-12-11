@@ -536,7 +536,7 @@ bool GLimp_OpenDisplay(void)
 GLES_Init
 ===============
 */
-static bool GLES_Init_special(void)
+static bool GLES_Init_special(const glimpParms_t &ap)
 {
 	EGLint config_count = 0;
 	EGLConfigInfo_t info = GLimp_FormatInfo(gl_format);
@@ -547,6 +547,7 @@ static bool GLES_Init_special(void)
 	int blue_bits = info.blue;
 	int alpha_bits = info.alpha;
 	int buffer_bits = info.buffer;
+	int multisamples = gl_msaa < 0 ? ap.multiSamples : gl_msaa;
 
 	EGLint attrib[] = {
 			EGL_BUFFER_SIZE, buffer_bits,
@@ -556,8 +557,8 @@ static bool GLES_Init_special(void)
 			EGL_GREEN_SIZE, blue_bits,
 			EGL_DEPTH_SIZE, depth_bits,
 			EGL_STENCIL_SIZE, stencil_bits,
-			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
-			EGL_SAMPLES, gl_msaa,
+			EGL_SAMPLE_BUFFERS, multisamples > 1 ? 1 : 0,
+			EGL_SAMPLES, multisamples,
 			EGL_RENDERABLE_TYPE, HARM_EGL_OPENGL_ES_BIT,
 			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 			EGL_NONE,
@@ -571,7 +572,6 @@ static bool GLES_Init_special(void)
 			, attrib[15], attrib[17]
 	);
 
-	int multisamples = gl_msaa;
 	EGLConfig eglConfigs[MAX_NUM_CONFIGS];
 	while(1)
 	{
@@ -613,7 +613,7 @@ static bool GLES_Init_special(void)
 	return true;
 }
 
-static bool GLES_Init_prefer(void)
+static bool GLES_Init_prefer(const glimpParms_t &ap)
 {
 	EGLint config_count = 0;
 	int colorbits = 24;
@@ -623,7 +623,7 @@ static bool GLES_Init_prefer(void)
 
 	for (int i = 0; i < 16; i++) {
 
-		int multisamples = gl_msaa;
+		int multisamples = gl_msaa < 0 ? ap.multiSamples : gl_msaa;
 		suc = false;
 
 		// 0 - default
@@ -735,7 +735,7 @@ static bool GLES_Init_prefer(void)
 	return suc;
 }
 
-int GLES_Init(glimpParms_t ap)
+int GLES_Init(glimpParms_t &ap)
 {
 	unsigned long mask;
 	int actualWidth, actualHeight;
@@ -762,9 +762,9 @@ int GLES_Init(glimpParms_t ap)
 
 	common->Printf("Initializing OpenGL display\n");
 
-	if(!GLES_Init_special())
+	if(!GLES_Init_special(ap))
 	{
-		if(!GLES_Init_prefer())
+		if(!GLES_Init_prefer(ap))
 		{
 			common->Error("Initializing EGL error");
 			return false;
@@ -774,6 +774,10 @@ int GLES_Init(glimpParms_t ap)
 	actualWidth = glConfig.vidWidth;
 	actualHeight = glConfig.vidHeight;
 	eglConfig = configs[0];
+
+	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_SAMPLES, &glConfig.multiSamples);
+	// ap.multiSamples = glConfig.multiSamples;
+	// r_multiSamples.SetInteger(glConfig.multiSamples);
 
 	eglGetConfigAttrib(eglDisplay, eglConfig, EGL_NATIVE_VISUAL_ID, &format);
 	ANativeWindow_setBuffersGeometry((ANativeWindow *)win, screen_width, screen_height, format);

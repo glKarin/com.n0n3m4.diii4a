@@ -33,6 +33,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -1035,5 +1037,30 @@ public class Q3EUtils
             Q3EUtils.Close(zipinputstream);
             Q3EUtils.Close(bis);
         }
+    }
+
+    public static boolean InMainThread(Context context)
+    {
+        return context.getMainLooper().getThread() == Thread.currentThread();
+    }
+
+    public static void RunOnUiThread(Context context, Runnable runnable)
+    {
+        if(context instanceof Activity)
+        {
+            ((Activity)context).runOnUiThread(runnable);
+        }
+        else
+        {
+            if(InMainThread(context))
+                runnable.run();
+            else
+                Post(context, runnable);
+        }
+    }
+
+    public static void Post(Context context, Runnable runnable)
+    {
+        new Handler(context.getMainLooper()).post(runnable);
     }
 }

@@ -87,6 +87,8 @@ static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
 
+static int gl_multiSamples = 0;
+
 static void GLimp_HandleError(const char *func, qboolean exit)
 {
 	static const char *GLimp_StringErrors[] = {
@@ -352,8 +354,8 @@ static bool GLES_Init_special(void)
             EGL_GREEN_SIZE, blue_bits,
             EGL_DEPTH_SIZE, depth_bits,
 			EGL_STENCIL_SIZE, stencil_bits,
-			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
-			EGL_SAMPLES, gl_msaa,
+			EGL_SAMPLE_BUFFERS, gl_multiSamples > 1 ? 1 : 0,
+			EGL_SAMPLES, gl_multiSamples,
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_NONE,
@@ -367,7 +369,7 @@ static bool GLES_Init_special(void)
 			, attrib[15], attrib[17]
 			);
 
-	int multisamples = gl_msaa;
+    int multisamples = gl_multiSamples;
 	EGLConfig eglConfigs[MAX_NUM_CONFIGS];
 	while(1)
 	{
@@ -419,7 +421,7 @@ static bool GLES_Init_prefer(void)
 
 	for (int i = 0; i < 16; i++) {
 
-		int multisamples = gl_msaa;
+		int multisamples = gl_multiSamples;
 		suc = false;
 
 		// 0 - default
@@ -634,20 +636,6 @@ qboolean GLimp_InitGL(glconfig_t *glConfig, qboolean fullscreen)
 	//has_gl_context = true;
 	return true;
 }
-
-#pragma GCC visibility push(default)
-void AndroidSetResolution(int aw,int ah)
-{
-	screen_width = aw;
-	screen_height = ah;
-}
-
-void R_SetGLParms(int f, int msaa)
-{
-	gl_format = f;
-	gl_msaa = msaa;
-}
-#pragma GCC visibility pop
 
 #define GLFORMAT_RGB565 0x0565
 #define GLFORMAT_RGBA4444 0x4444
@@ -937,6 +925,8 @@ static int GLimp_SetMode(glconfig_t *glConfig, int mode, qboolean fullscreen, qb
 	glConfig->windowHeight = glConfig->vidHeight;
 
 	glConfig->isFullscreen = qtrue;
+
+    gl_multiSamples = gl_msaa < 0 ? context->samples : gl_msaa;
 
 	GLimp_InitGL(glConfig, glConfig->isFullscreen);
 

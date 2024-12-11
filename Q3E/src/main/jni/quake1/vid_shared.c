@@ -1539,6 +1539,10 @@ void VID_Restart_f(cmd_state_t *cmd)
 
 	SCR_DeferLoadingPlaque(false);
 	R_Modules_Shutdown();
+#ifdef _DIII4A //karin: mark shutdown reason is for vid restart
+	extern qbool vid_restart;
+	vid_restart = true;
+#endif
 	VID_Shutdown();
 	if (!VID_Mode(NULL))
 	{

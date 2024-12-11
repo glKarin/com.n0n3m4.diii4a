@@ -432,5 +432,8 @@
     <string name="dev_">Dev:</string>
     <string name="game_thread">Game thread</string>
     <string name="choose_game_thread_create_scheme">Choose game thread create scheme</string>
+    <string name="_2x">2x</string>
+    <string name="_8x">8x</string>
+    <string name="use_game_setting">Use game setting</string>
 
 </resources>

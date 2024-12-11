@@ -295,6 +295,8 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 	glConfig.vidHeight = screen_height;
 	glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
 
+	gl_multiSamples = gl_msaa < 0 ? r_ext_multisample->value : gl_msaa;
+
 	GLimp_InitGL(qtrue);
 
 	if( fullscreen )

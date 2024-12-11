@@ -37,6 +37,8 @@ static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
 
+static int gl_multiSamples = 0;
+
 qboolean IsHighDPIaware = false;
 static qboolean vsyncActive = false;
 
@@ -313,8 +315,8 @@ static bool GLES_Init_special(void)
             EGL_GREEN_SIZE, blue_bits,
             EGL_DEPTH_SIZE, depth_bits,
 			EGL_STENCIL_SIZE, stencil_bits,
-			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
-			EGL_SAMPLES, gl_msaa,
+			EGL_SAMPLE_BUFFERS, gl_multiSamples > 1 ? 1 : 0,
+			EGL_SAMPLES, gl_multiSamples,
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_NONE,
@@ -328,7 +330,7 @@ static bool GLES_Init_special(void)
 			, attrib[15], attrib[17]
 			);
 
-	int multisamples = gl_msaa;
+	int multisamples = gl_multiSamples;
 	EGLConfig eglConfigs[MAX_NUM_CONFIGS];
 	while(1)
 	{
@@ -380,7 +382,7 @@ static bool GLES_Init_prefer(void)
 
 	for (int i = 0; i < 16; i++) {
 
-		int multisamples = gl_msaa;
+		int multisamples = gl_multiSamples;
 		suc = false;
 
 		// 0 - default
@@ -506,6 +508,18 @@ int GLES_Init(qboolean fullscreen)
 	}
 
 	R_Printf(PRINT_ALL, "Initializing OpenGL display\n");
+
+	if(gl_msaa < 0)
+	{
+		gl_multiSamples = gl_msaa_samples->value;
+
+		if (gl_multiSamples > 0)
+		{
+			gl_multiSamples /= 2;
+		}
+	}
+	else
+		gl_multiSamples = gl_msaa;
 
 	if(!GLES_Init_special())
 	{
@@ -638,7 +652,7 @@ qboolean RI_IsVSyncActive(void)
 int RI_PrepareForWindow(void)
 {
 	gl_state.stencil = true;
-	ri.Cvar_SetValue("r_msaa_samples", gl_msaa);
+	// ri.Cvar_SetValue("r_msaa_samples", gl_multiSamples);
 
 	return 1;
 }

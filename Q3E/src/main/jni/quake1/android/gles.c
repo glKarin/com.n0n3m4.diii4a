@@ -32,6 +32,8 @@ static EGLConfig configs[1];
 static EGLConfig eglConfig = 0;
 static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
 
+static int gl_multiSamples = 0;
+
 static void GLimp_HandleError(const char *func, qbool exit)
 {
 	static const char *GLimp_StringErrors[] = {
@@ -297,8 +299,8 @@ static bool GLES_Init_special(void)
             EGL_GREEN_SIZE, blue_bits,
             EGL_DEPTH_SIZE, depth_bits,
 			EGL_STENCIL_SIZE, stencil_bits,
-			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
-			EGL_SAMPLES, gl_msaa,
+			EGL_SAMPLE_BUFFERS, gl_multiSamples > 1 ? 1 : 0,
+			EGL_SAMPLES, gl_multiSamples,
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_NONE,
@@ -312,7 +314,7 @@ static bool GLES_Init_special(void)
 			, attrib[15], attrib[17]
 			);
 
-	int multisamples = gl_msaa;
+	int multisamples = gl_multiSamples;
 	EGLConfig eglConfigs[MAX_NUM_CONFIGS];
 	while(1)
 	{
@@ -364,7 +366,7 @@ static bool GLES_Init_prefer(void)
 
 	for (int i = 0; i < 16; i++) {
 
-		int multisamples = gl_msaa;
+		int multisamples = gl_multiSamples;
 		suc = false;
 
 		// 0 - default
@@ -476,13 +478,10 @@ static bool GLES_Init_prefer(void)
 	return suc;
 }
 
-int GLES_Init(qbool fullscreen)
+int GLES_Init(void)
 {
 	EGLint major, minor;
 
-	if (!GLimp_OpenDisplay()) {
-		return false;
-	}
 	if (!eglInitialize(eglDisplay, &major, &minor))
 	{
 		GLimp_HandleError("eglInitialize", true);
@@ -570,18 +569,21 @@ qbool GLimp_InitGL(qbool fullscreen)
 		return false;
 	}
 
-	if (!GLES_Init(fullscreen)) {
+	if (!GLES_Init()) {
 		return false;
 	}
 
+	const char * (* _qglGetString)(GLenum);
+	_qglGetString = (void *)eglGetProcAddress("glGetString");
+
 	const char *glstring;
-	glstring = (const char *) qglGetString(GL_RENDERER);
+	glstring = (const char *) _qglGetString(GL_RENDERER);
 	Con_Printf("GL_RENDERER: %s\n", glstring);
 
-	glstring = (const char *) qglGetString(GL_EXTENSIONS);
+	glstring = (const char *) _qglGetString(GL_EXTENSIONS);
 	Con_Printf("GL_EXTENSIONS: %s\n", glstring);
 
-	glstring = (const char *) qglGetString(GL_VERSION);
+	glstring = (const char *) _qglGetString(GL_VERSION);
 	Con_Printf("GL_VERSION: %s\n", glstring);
 
 	//has_gl_context = true;

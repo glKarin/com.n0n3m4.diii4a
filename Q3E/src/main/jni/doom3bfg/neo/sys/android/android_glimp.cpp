@@ -80,6 +80,8 @@ static EGLint format = WINDOW_FORMAT_RGBA_8888; // AHARDWAREBUFFER_FORMAT_R8G8B8
 
 static bool grabbed = false;
 
+static int gl_multiSamples = 0;
+
 extern void Android_GrabMouseCursor(bool grabIt);
 extern void Sys_ForceResolution(void);
 
@@ -352,8 +354,8 @@ static bool GLES_Init_special(void)
 			EGL_GREEN_SIZE, blue_bits,
 			EGL_DEPTH_SIZE, depth_bits,
 			EGL_STENCIL_SIZE, stencil_bits,
-			EGL_SAMPLE_BUFFERS, gl_msaa > 1 ? 1 : 0,
-			EGL_SAMPLES, gl_msaa,
+			EGL_SAMPLE_BUFFERS, gl_multiSamples > 1 ? 1 : 0,
+			EGL_SAMPLES, gl_multiSamples,
 			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
 			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 			EGL_NONE,
@@ -367,7 +369,7 @@ static bool GLES_Init_special(void)
 			, attrib[15], attrib[17]
 	);
 
-	int multisamples = gl_msaa;
+	int multisamples = gl_multiSamples;
 	EGLConfig eglConfigs[MAX_NUM_CONFIGS];
 	while(1)
 	{
@@ -419,7 +421,7 @@ static bool GLES_Init_prefer(void)
 
 	for (int i = 0; i < 16; i++) {
 
-		int multisamples = gl_msaa;
+		int multisamples = gl_multiSamples;
 		suc = false;
 
 		// 0 - default
@@ -531,7 +533,7 @@ static bool GLES_Init_prefer(void)
 	return suc;
 }
 
-int GLES_Init() {
+int GLES_Init(glimpParms_t &ap) {
 	EGLint major, minor;
 
 	if (!GLimp_OpenDisplay()) {
@@ -544,6 +546,8 @@ int GLES_Init() {
 	}
 
 	common->Printf("Initializing OpenGL display\n");
+
+	gl_multiSamples = gl_msaa < 0 ? ap.multiSamples : gl_msaa;
 
 	if(!GLES_Init_special())
 	{
@@ -599,8 +603,10 @@ int GLES_Init() {
 	glConfig.nativeScreenWidth = screen_width;
 	glConfig.nativeScreenHeight = screen_height;
 	glConfig.displayFrequency = refresh_rate;
-	glConfig.multisamples = gl_msaa > 1 ? gl_msaa / 2 : 0;
+	glConfig.multisamples = info.samples > 1 ? info.samples / 2 : 0;
 	glConfig.pixelAspect = 1.0f;	// FIXME: some monitor modes may be distorted
+
+	gl_multiSamples = info.samples;
 
 	if (glConfig.isFullscreen) {
 		Sys_GrabMouseCursor(true);
@@ -647,7 +653,7 @@ bool GLimp_Init( glimpParms_t parms )
 		return false;
 	}
 
-	if (!GLES_Init()) {
+	if (!GLES_Init(parms)) {
 		return false;
 	}
 
@@ -687,7 +693,7 @@ bool GLimp_SetScreenParms( glimpParms_t parms )
 	glConfig.nativeScreenWidth = screen_width;
 	glConfig.nativeScreenHeight = screen_height;
 	glConfig.displayFrequency = refresh_rate;
-	glConfig.multisamples = gl_msaa > 1 ? gl_msaa / 2 : 0;
+	glConfig.multisamples = gl_multiSamples > 1 ? gl_multiSamples / 2 : 0;
 	glConfig.pixelAspect = 1.0f;	// FIXME: some monitor modes may be distorted
 
 	return true;
