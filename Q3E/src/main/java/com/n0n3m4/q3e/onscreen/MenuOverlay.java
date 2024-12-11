@@ -1,10 +1,13 @@
 package com.n0n3m4.q3e.onscreen;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUiView;
@@ -20,11 +23,13 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
-public class MenuOverlay extends Paintable implements TouchListener
+// MenuOverlay with OpenGL
+public class MenuOverlay extends Paintable implements UiViewOverlay
 {
     private static final int ON_SCREEN_BUTTON_MIN_SIZE = 0;
     private static final int ON_SCREEN_BUTTON_HOLD_INTERVAL = 500; // 100
     boolean mover_down = false;
+    private Toast m_info;
 
     View view;
     int cx;
@@ -57,8 +62,8 @@ public class MenuOverlay extends Paintable implements TouchListener
 
         for (int i = 0; i < verts.length; i += 2)
         {
-            myvrts[i] = verts[i] * width + cx;
-            myvrts[i + 1] = verts[i + 1] * height + cy;
+            myvrts[i] = verts[i] * width;
+            myvrts[i + 1] = verts[i + 1] * height;
         }
 
         verts_p = ByteBuffer.allocateDirect(4 * myvrts.length).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -123,15 +128,9 @@ public class MenuOverlay extends Paintable implements TouchListener
         cx = x;
         cy = y;
         fngr = new FingerUi(fn.target, 9000);
-        float[] myvrts = new float[verts.length];
-        for (int i = 0; i < verts.length; i += 2)
-        {
-            myvrts[i] = verts[i] * width + cx;
-            myvrts[i + 1] = verts[i + 1] * height + cy;
-        }
-        verts_p.put(myvrts);
-        verts_p.position(0);
         hidden = false;
+
+        PrintInfo(fn);
     }
 
     @Override
@@ -143,69 +142,21 @@ public class MenuOverlay extends Paintable implements TouchListener
         gl.glBindTexture(GL10.GL_TEXTURE_2D, tex_ind);
         gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, tex_p);
         gl.glVertexPointer(2, GL10.GL_FLOAT, 0, verts_p);
-        gl.glDrawElements(GL10.GL_TRIANGLES, 6, GL10.GL_UNSIGNED_BYTE, inds_p);
+        gl.glPushMatrix();
+        {
+            gl.glTranslatef(cx, cy, 0.0f);
+            gl.glDrawElements(GL10.GL_TRIANGLES, 6, GL10.GL_UNSIGNED_BYTE, inds_p);
+        }
+        gl.glPopMatrix();
     }
 
     public boolean tgtresize(boolean dir)
     {
-        int step = ((Q3EUiView) view).step;
-        Object o = fngr.target;
-        int st = dir ? step : -step;
-        ((Q3EUiView) view).SetModified();
-        if (o instanceof Button)
-        {
-            Button tmp = (Button) o;
-            if (tmp.width <= 0)
-                return false;
-            float aspect = (float) tmp.height / tmp.width;
-            if (tmp.width + st > step)
-            {
-                tmp.width += st;
-                tmp.height = (int) (aspect * tmp.width + 0.5f);
-            }
-            else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
-                return false;
-        }
-        else if (o instanceof Slider)
-        {
-            Slider tmp = (Slider) o;
-            if (tmp.width <= 0)
-                return false;
-            float aspect = (float) tmp.height / tmp.width;
-            if (tmp.width + st > step)
-            {
-                tmp.width += st;
-                tmp.height = (int) (aspect * tmp.width + 0.5f);
-            }
-            else if (tmp.width + st <= ON_SCREEN_BUTTON_MIN_SIZE)
-                return false;
-        }
-        else if (o instanceof Joystick)
-        {
-            Joystick tmp = (Joystick) o;
-            if (tmp.size <= 0)
-                return false;
-            if (tmp.size + st > step)
-            {
-                tmp.size += st;
-            }
-            else if (tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
-                return false;
-        }
-        //k
-        else if (o instanceof Disc)
-        {
-            Disc tmp = (Disc) o;
-            if (tmp.size <= 0)
-                return false;
-            if (tmp.size + st > step)
-                tmp.size += st;
-            else if (tmp.size + st <= ON_SCREEN_BUTTON_MIN_SIZE)
-                return false;
-        }
-        // else return false;
-        ((Q3EUiView) view).RefreshTgt(fngr);
-        return true;
+        Q3EUiView uiView = (Q3EUiView) view;
+        boolean res = UiViewOverlay.Resize(dir, uiView.step, fngr, uiView);
+        if(res)
+            PrintInfo(fngr);
+        return res;
     }
 
     public boolean tgtalpha(boolean dir)
@@ -223,7 +174,7 @@ public class MenuOverlay extends Paintable implements TouchListener
             target.alpha = 1.0f;
             return false;
         }
-        ((Q3EUiView) view).PrintInfo(fngr);
+        PrintInfo(fngr);
         return true;
     }
 
@@ -297,5 +248,96 @@ public class MenuOverlay extends Paintable implements TouchListener
     public boolean isInside(int x, int y)
     {
         return ((!hidden) && (2 * Math.abs(cx - x) < width) && (2 * Math.abs(cy - y) < height));
+    }
+
+    public void PrintInfo(FingerUi fn)
+    {
+        if (null != m_info)
+        {
+            m_info.cancel();
+            m_info = null;
+        }
+
+        Context context = view.getContext();
+        StringBuilder sb = new StringBuilder();
+        if (fn.target instanceof Slider)
+        {
+            Slider tmp = (Slider) fn.target;
+            sb.append(Q3ELang.tr(context, R.string.position_))
+                    .append(tmp.cx)
+                    .append(", ")
+                    .append(tmp.cy)
+            ;
+            sb.append("\n");
+            sb.append(Q3ELang.tr(context, R.string.size_))
+                    .append(tmp.width)
+                    .append("x")
+                    .append(tmp.height)
+            ;
+            sb.append("\n");
+            sb.append(Q3ELang.tr(context, R.string.opacity_))
+                    .append(String.format("%.1f", tmp.alpha))
+            ;
+        }
+        else if (fn.target instanceof Button)
+        {
+            Button tmp = (Button) fn.target;
+            sb.append(Q3ELang.tr(context, R.string.position_))
+                    .append(tmp.cx)
+                    .append(", ")
+                    .append(tmp.cy)
+            ;
+            sb.append("\n");
+            sb.append(Q3ELang.tr(context, R.string.size_))
+                    .append(tmp.width)
+                    .append("x")
+                    .append(tmp.height)
+            ;
+            sb.append("\n");
+            sb.append(Q3ELang.tr(context, R.string.opacity_))
+                    .append(String.format("%.1f", tmp.alpha))
+            ;
+        }
+        else if (fn.target instanceof Joystick)
+        {
+            Joystick tmp = (Joystick) fn.target;
+            sb.append(Q3ELang.tr(context, R.string.position_))
+                    .append(tmp.cx)
+                    .append(", ")
+                    .append(tmp.cy)
+            ;
+            sb.append("\n");
+            sb.append(Q3ELang.tr(context, R.string.radius_))
+                    .append(tmp.size)
+            ;
+            sb.append("\n");
+            sb.append(Q3ELang.tr(context, R.string.opacity_))
+                    .append(String.format("%.1f", tmp.alpha))
+            ;
+        }
+        //k
+        else if (fn.target instanceof Disc)
+        {
+            Disc tmp = (Disc) fn.target;
+            sb.append(Q3ELang.tr(context, R.string.position_))
+                    .append(tmp.cx)
+                    .append(", ")
+                    .append(tmp.cy)
+            ;
+            sb.append("\n");
+            sb.append(Q3ELang.tr(context, R.string.center_radius_))
+                    .append(tmp.size)
+            ;
+            sb.append("\n");
+            sb.append(Q3ELang.tr(context, R.string.opacity_))
+                    .append(String.format("%.1f", tmp.alpha))
+            ;
+        }
+        if (sb.length() > 0)
+        {
+            m_info = Toast.makeText(view.getContext(), sb.toString(), Toast.LENGTH_SHORT);
+            m_info.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 0);
+            m_info.show();
+        }
     }
 }

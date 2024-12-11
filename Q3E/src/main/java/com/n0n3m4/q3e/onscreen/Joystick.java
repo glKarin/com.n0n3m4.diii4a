@@ -35,8 +35,8 @@ public class Joystick extends Paintable implements TouchListener
     private final float[] posx = new float[8];
     private final float[] posy = new float[8];
     public int size;
-    private final int dot_size;
-    private final float internalsize;
+    private int dot_size;
+    private float internalsize;
 
     private int dot_pos = CONST_INVALID_DIRECTION;
     private int dotx, doty;
@@ -48,7 +48,7 @@ public class Joystick extends Paintable implements TouchListener
     private final boolean[] enarr = new boolean[4];
 
     private int m_joystickReleaseRange_2 = 0;
-    private final int m_size_2;
+    private int m_size_2;
     private int m_posX;
     private int m_posY;
     private int m_fullZoneRadius = 0;
@@ -62,6 +62,8 @@ public class Joystick extends Paintable implements TouchListener
     private int m_outerTexture; // outer ring texture
     private int m_innerTexture; // inner ring texture
     private int m_borderTexture; // outer border texture
+    private float m_fullZonePercent = 0.0f;
+    private float m_deadZonePercent = 0.0f;
     private int m_deadZoneRadius = 0;
     private int m_joystickDeadZone_2 = 0;
     private boolean m_updateTexture = false;
@@ -71,6 +73,9 @@ public class Joystick extends Paintable implements TouchListener
     {
         int fullZoneRadius = fullZonePercent >= 1.0f ? (int)((float)r * fullZonePercent) : 0;
         int deadZoneRadius = deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(deadZonePercent, 1.0f))) : 0;
+
+        this.m_fullZonePercent = fullZonePercent;
+        this.m_deadZonePercent = deadZonePercent;
 
         Q3EKeyCodes.ConvertRealKeyCodes(codes);
         Q3EKeyCodes.ConvertRealKeyCodes(Menu_Codes);
@@ -87,7 +92,7 @@ public class Joystick extends Paintable implements TouchListener
         if(deadZoneRadius >= r)
             deadZoneRadius = 0;
 
-        this.m_range.set(
+        m_range.set(
                 m_posX - fullZoneRadius,
                 m_posY - fullZoneRadius,
                 m_posX + fullZoneRadius,
@@ -538,6 +543,12 @@ public class Joystick extends Paintable implements TouchListener
         m_posY += dy;
         cx += dx;
         cy += dy;
+        m_range.set(
+                m_posX - m_fullZoneRadius,
+                m_posY - m_fullZoneRadius,
+                m_posX + m_fullZoneRadius,
+                m_posY + m_fullZoneRadius
+        );
     }
 
     public void SetPosition(int x, int y)
@@ -546,6 +557,12 @@ public class Joystick extends Paintable implements TouchListener
         m_posY = y;
         cx = x;
         cy = y;
+        m_range.set(
+                m_posX - m_fullZoneRadius,
+                m_posY - m_fullZoneRadius,
+                m_posX + m_fullZoneRadius,
+                m_posY + m_fullZoneRadius
+        );
     }
 
     private boolean NotInDeadZone(int dx, int dy)
@@ -662,5 +679,79 @@ public class Joystick extends Paintable implements TouchListener
             m_innerTexture = KGLBitmapTexture.GenCircleRingTexture(gl, m_deadZoneRadius * 2, CONST_HELPER_BORDER_WIDTH, color);
         }
         m_updateTexture = false;
+    }
+
+    // run on GL thread
+    public void Resize(int r)
+    {
+        int fullZoneRadius = m_fullZonePercent >= 1.0f ? (int)((float)r * m_fullZonePercent) : 0;
+        int deadZoneRadius = m_deadZonePercent > 0.0f ? (int)((float)r * Math.max(0.0f, Math.min(m_deadZonePercent, 1.0f))) : 0;
+
+        size = r * 2;
+        if(m_unfixed && m_fullZoneRadius < r) // if unfixed, min range is circle radius
+            m_fullZoneRadius = r;
+        if(m_deadZoneRadius >= r)
+            m_deadZoneRadius = 0;
+
+        m_range.set(
+                m_posX - fullZoneRadius,
+                m_posY - fullZoneRadius,
+                m_posX + fullZoneRadius,
+                m_posY + fullZoneRadius
+        );
+
+        if (fullZoneRadius >= r)
+        {
+            m_fullZoneRadius = fullZoneRadius;
+            m_joystickReleaseRange_2 = m_fullZoneRadius * m_fullZoneRadius * 4;
+        }
+        if (deadZoneRadius > 0)
+        {
+            m_deadZoneRadius = deadZoneRadius;
+            m_joystickDeadZone_2 = m_deadZoneRadius * m_deadZoneRadius * 4;
+        }
+        m_size_2 = size * size;
+        dot_size = this.m_unfixed ? size / 2 : size / 3;
+
+        float[] verts_dot = MakeVertexArray(dot_size);
+        float[] verts_back = MakeVertexArray(size);
+        verts_p.put(verts_back);
+        verts_p.position(0);
+        vertsd_p.put(verts_dot);
+        vertsd_p.position(0);
+
+        internalsize = (size / 2.0f - CalcRingWidth()) - ((float) size / 3.0f) / 2.0f;
+        for (int i = 0; i < 8; i++)
+        {
+            posx[i] = (float) (internalsize * Math.sin(i * Math.PI / 4));
+            posy[i] = -(float) (internalsize * Math.cos(i * Math.PI / 4));
+        }
+
+        if(m_editMode)
+        {
+            float[] verts;
+            if(m_fullZoneRadius > 0)
+            {
+                if(m_unfixed)
+                {
+                    verts = MakeVertexArray(m_fullZoneRadius * 2.0f);
+                    m_borderVertexBuffer.put(verts);
+                    m_borderVertexBuffer.position(0);
+                }
+                else
+                {
+                    verts = MakeVertexArray(m_fullZoneRadius * 2.0f);
+                    m_outerVertexBuffer.put(verts);
+                    m_outerVertexBuffer.position(0);
+                }
+            }
+
+            if(m_deadZoneRadius > 0)
+            {
+                verts = MakeVertexArray(m_deadZoneRadius * 2.0f);
+                m_innerVertexBuffer.put(verts);
+                m_innerVertexBuffer.position(0);
+            }
+        }
     }
 }

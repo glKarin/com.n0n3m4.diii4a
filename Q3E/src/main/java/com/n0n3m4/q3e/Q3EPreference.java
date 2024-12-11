@@ -156,6 +156,7 @@ public final class Q3EPreference
     public static final String REDIRECT_OUTPUT_TO_FILE       = "harm_redirect_output_to_file";
     public static final String COVER_EDGES                   = "harm_cover_edges";
     public static final String CONTROLS_THEME                = "harm_controls_theme";
+    public static final String FRIENDLY_EDGE                 = "harm_friendly_edge";
     public static final String LANG                          = "harm_lang";
     public static final String MAP_BACK                      = "harm_map_back";
     public static final String ONSCREEN_BUTTON               = "harm_onscreen_key"; // old = "harm_onscreen_button"

@@ -54,7 +54,8 @@ public class Q3EUiConfig extends Activity
 {
     private static int m_onScreenButtonGlobalOpacity = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
     private static float m_onScreenButtonGlobalSizeScale = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE;
-    private static boolean m_onScreenButtonFriendlyEdge = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE;
+    
+    private boolean m_onScreenButtonFriendlyEdge = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE;
 
     private Q3EUiView vw;
     //k
@@ -68,6 +69,8 @@ public class Q3EUiConfig extends Activity
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        m_onScreenButtonFriendlyEdge = preferences.getBoolean(Q3EPreference.FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && preferences.getBoolean(Q3EPreference.COVER_EDGES, true))
         {
@@ -94,6 +97,7 @@ public class Q3EUiConfig extends Activity
         vw = new Q3EUiView(this);
 		//vw.setZOrderOnTop();
 		vw.setZOrderMediaOverlay(true);
+        vw.SetLayout(mainLayout);
         mainLayout.addView(vw, params);
 
         int px = Q3EUtils.dip2px(this, 48);
@@ -378,6 +382,9 @@ public class Q3EUiConfig extends Activity
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 m_onScreenButtonFriendlyEdge = isChecked;
+                PreferenceManager.getDefaultSharedPreferences(Q3EUiConfig.this).edit()
+                        .putBoolean(Q3EPreference.FRIENDLY_EDGE, isChecked)
+                        .commit();
             }
         });
 
@@ -552,5 +559,10 @@ public class Q3EUiConfig extends Activity
         }*/
         Q3EPreference.SetStringFromInt(this, Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, unit);
         vw.UpdateGrid(unit);
+    }
+
+    public boolean FriendlyEdge()
+    {
+        return m_onScreenButtonFriendlyEdge;
     }
 }

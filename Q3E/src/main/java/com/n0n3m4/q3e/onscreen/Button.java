@@ -2,6 +2,7 @@ package com.n0n3m4.q3e.onscreen;
 
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
@@ -32,7 +33,7 @@ public class Button extends Paintable implements TouchListener
     private final int style;
     private final float initalpha;
     private final boolean canbeheld;
-    private final int m_width_2;
+    private int m_width_2;
 
     public Button(View vw, GL10 gl, int center_x, int center_y, int w, int h, String texid, int keyc, int stl, boolean canbheld, float a)
     {
@@ -190,5 +191,53 @@ public class Button extends Paintable implements TouchListener
     {
         cx = x;
         cy = y;
+    }
+
+    // run on GL thread
+    public void Resize(int w, int h)
+    {
+        width = w;
+        height = h;
+
+        float[] verts = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
+        for (int i = 0; i < verts.length; i += 2)
+        {
+            verts[i] = verts[i] * w;
+            verts[i + 1] = verts[i + 1] * h;
+        }
+
+        verts_p.put(verts);
+        verts_p.position(0);
+
+        m_width_2 = width * width;
+    }
+
+    public int Style()
+    {
+        return style;
+    }
+
+    public static int HeightForWidth(int width, int type)
+    {
+        int bh = width;
+        if (type == Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL)
+            bh = width;
+        else if (type == Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM)
+            bh = width;
+        else if (type == Q3EGlobals.ONSCREEN_BUTTON_TYPE_CENTER)
+            bh = width / 2;
+        return bh;
+    }
+
+    // height / width
+    public static float CalcAspect(int type)
+    {
+        if (type == Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL)
+            return 1.0f;
+        else if (type == Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM)
+            return 1.0f;
+        else if (type == Q3EGlobals.ONSCREEN_BUTTON_TYPE_CENTER)
+            return 0.5f;
+        return 1.0f;
     }
 }
