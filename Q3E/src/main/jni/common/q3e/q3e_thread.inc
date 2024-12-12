@@ -1,3 +1,10 @@
+/* Thread functions */
+
+#ifdef Q3E_THREAD_INC
+#error "q3e_thread.inc included many times!"
+#endif
+#define Q3E_THREAD_INC
+
 #ifdef Q3E_REQUIRE_THREAD
 
 #define ENTER_CRITICAL_SECTION() (Q3E_Sys_EnterCriticalSection(Q3E_MAX_LOCAL_CRITICAL_SECTIONS - 1));

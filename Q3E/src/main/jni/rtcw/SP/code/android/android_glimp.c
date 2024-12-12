@@ -25,22 +25,65 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <android/native_window.h>
-#include <android/native_window_jni.h>
-
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-
 #include "../client/client.h"
 #include "../renderer/tr_local.h"
 
-#include "gles.c"
 
-#define GLFORMAT_RGB565 0x0565
-#define GLFORMAT_RGBA4444 0x4444
-#define GLFORMAT_RGBA5551 0x5551
-#define GLFORMAT_RGBA8888 0x8888
-#define GLFORMAT_RGBA1010102 0xaaa2
+
+#define Q3E_PRINTF Com_Printf
+#define Q3E_ERRORF(...) Com_Error(ERR_FATAL, __VA_ARGS__)
+#define Q3E_DEBUGF(...) fprintf(stderr, __VA_ARGS__)
+#define Q3Ebool qboolean
+#define Q3E_TRUE qtrue
+#define Q3E_FALSE qfalse
+#define Q3E_POST_GL_INIT GLES_PostInit();
+
+static void GLES_PostInit(void);
+
+#include "q3e/q3e_glimp.inc"
+
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
+{
+	Q3E_RequireWindow(w);
+}
+
+void GLimp_AndroidInit(volatile ANativeWindow *w)
+{
+	if(Q3E_NoDisplay())
+		return;
+
+	if(Q3E_RequireWindow(w))
+		Q3E_RestoreGL();
+}
+
+void GLimp_AndroidQuit(void)
+{
+	Q3E_DestroyGL(qtrue);
+}
+
+qboolean GLimp_InitGL(qboolean fullscreen)
+{
+	Q3E_GL_CONFIG_SET(fullscreen, 1);
+	Q3E_GL_CONFIG_ES_1_1();
+
+	qboolean res = Q3E_InitGL();
+	return res;
+}
+
+void GLES_PostInit(void)
+{
+	glConfig.colorBits = Q3E_GL_CONFIG(red) + Q3E_GL_CONFIG(green) + Q3E_GL_CONFIG(blue);
+	glConfig.stencilBits = Q3E_GL_CONFIG(stencil);
+	glConfig.depthBits = Q3E_GL_CONFIG(depth);
+
+	glConfig.isFullscreen = Q3E_GL_CONFIG(fullscreen);
+
+	if (glConfig.isFullscreen) {
+		//Sys_GrabMouseCursor(true);
+	}
+}
+
+
 
 void myglMultiTexCoord2f( GLenum texture, GLfloat s, GLfloat t )
 {
@@ -98,26 +141,7 @@ void GLimp_Shutdown( void )
 {
 	ri.IN_Shutdown();
 
-	//has_gl_context = false;
-	GLimp_DeactivateContext();
-	//eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-	if(eglContext != EGL_NO_CONTEXT)
-	{
-		eglDestroyContext(eglDisplay, eglContext);
-		eglContext = EGL_NO_CONTEXT;
-	}
-	if(eglSurface != EGL_NO_SURFACE)
-	{
-		eglDestroySurface(eglDisplay, eglSurface);
-		eglSurface = EGL_NO_SURFACE;
-	}
-	if(eglDisplay != EGL_NO_DISPLAY)
-	{
-		eglTerminate(eglDisplay);
-		eglDisplay = EGL_NO_DISPLAY;
-	}
-
-	Com_Printf("[Harmattan]: EGL destroyed.\n");
+	Q3E_ShutdownGL();
 }
 
 /*
@@ -205,7 +229,7 @@ static qboolean GLimp_GetProcAddresses( qboolean fixedFunction ) {
 	qboolean success = qtrue;
 	const char *version;
 
-#define GLE( ret, name, ... ) qgl##name = (name##proc *) eglGetProcAddress("gl" #name); \
+#define GLE( ret, name, ... ) qgl##name = (name##proc *) Q3E_GET_PROC_ADDRESS("gl" #name); \
 	if ( qgl##name == NULL ) { \
 		ri.Printf( PRINT_ALL, "ERROR: Missing OpenGL function %s\n", "gl" #name ); \
 		success = qfalse; \
@@ -358,7 +382,7 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 	glConfig.vidHeight = screen_height;
 	glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
 
-	gl_multiSamples = gl_msaa < 0 ? r_ext_multisample->value : gl_msaa;
+    Q3E_GL_CONFIG_SET(samples, r_ext_multisample->value);
 
 	GLimp_InitGL(qtrue);
 
@@ -382,19 +406,13 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 
 	qglClearColor( 0, 0, 0, 1 );
 	qglClear( GL_COLOR_BUFFER_BIT );
-	eglSwapBuffers(eglDisplay, eglSurface);
+	Q3E_SwapBuffers();
 
 	ri.Printf( PRINT_ALL, "Using %d color bits, %d depth, %d stencil display.\n",
 			   glConfig.colorBits, glConfig.depthBits, glConfig.stencilBits );
 
 	glstring = (char *) qglGetString (GL_RENDERER);
 	ri.Printf( PRINT_ALL, "GL_RENDERER: %s\n", glstring );
-
-	glstring = (const char *) qglGetString(GL_EXTENSIONS);
-	ri.Printf(PRINT_ALL, "GL_EXTENSIONS: %s\n", glstring);
-
-	glstring = (const char *) qglGetString(GL_VERSION);
-	ri.Printf(PRINT_ALL, "GL_VERSION: %s\n", glstring);
 
 	return RSERR_OK;
 }
@@ -433,29 +451,6 @@ static qboolean GLimp_StartDriverAndSetMode(int mode, qboolean fullscreen, qbool
 	return qtrue;
 }
 
-static qboolean GLimp_ExtensionSupported(const char *name)
-{
-    const char *exts = (const char *)qglGetString (GL_EXTENSIONS);
-
-    size_t size = strlen(exts) + 1 + 1;
-    char *new_exts = malloc(size);
-    strncpy(new_exts, exts, size - 2);
-    new_exts[size - 2] = ' ';
-    new_exts[size - 1] = '\0';
-
-    size_t name_size = strlen(name) + 1 + 1;
-    char *new_name = malloc(name_size);
-    strncpy(new_name, name, name_size - 2);
-    new_name[name_size - 2] = ' ';
-    new_name[name_size - 1] = '\0';
-
-    qboolean has = strstr(new_exts, new_name) != NULL;
-	Com_Printf("[Harmattan]: OpenGL extension '%s' -> %s\n", name, has ? "support" : "missing");
-    free(new_exts);
-    free(new_name);
-	return has;
-}
-
 /*
 ===============
 GLimp_InitExtensions
@@ -474,8 +469,8 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 	glConfig.textureCompression = TC_NONE;
 
 	// GL_EXT_texture_compression_s3tc
-	if ( GLimp_ExtensionSupported( "GL_ARB_texture_compression" ) &&
-	     GLimp_ExtensionSupported( "GL_EXT_texture_compression_s3tc" ) )
+	if ( Q3E_GL_ExtensionSupported( "GL_ARB_texture_compression" ) &&
+	     Q3E_GL_ExtensionSupported( "GL_EXT_texture_compression_s3tc" ) )
 	{
 		if ( r_ext_compressed_textures->value )
 		{
@@ -495,7 +490,7 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 	// GL_S3_s3tc ... legacy extension before GL_EXT_texture_compression_s3tc.
 	if (glConfig.textureCompression == TC_NONE)
 	{
-		if ( GLimp_ExtensionSupported( "GL_S3_s3tc" ) )
+		if ( Q3E_GL_ExtensionSupported( "GL_S3_s3tc" ) )
 		{
 			if ( r_ext_compressed_textures->value )
 			{
@@ -522,7 +517,7 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 		ri.Printf( PRINT_ALL, "...using GL_EXT_texture_env_add\n" );
 #else
 		glConfig.textureEnvAddAvailable = qfalse;
-		if ( GLimp_ExtensionSupported( "GL_EXT_texture_env_add" ) )
+		if ( Q3E_GL_ExtensionSupported( "GL_EXT_texture_env_add" ) )
 		{
 			if ( r_ext_texture_env_add->integer )
 			{
@@ -550,8 +545,8 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 		//ri.Printf( PRINT_ALL, "...not using GL_ARB_multitexture, %i texture units\n", glConfig.maxActiveTextures );
 		//glConfig.maxActiveTextures=4;
 		qglMultiTexCoord2fARB = myglMultiTexCoord2f;
-		qglActiveTextureARB = eglGetProcAddress( "glActiveTexture" );
-		qglClientActiveTextureARB = eglGetProcAddress( "glClientActiveTexture" );
+		qglActiveTextureARB = Q3E_GET_PROC_ADDRESS( "glActiveTexture" );
+		qglClientActiveTextureARB = Q3E_GET_PROC_ADDRESS( "glClientActiveTexture" );
 		if ( glConfig.numTextureUnits > 1 )
 		{
 			ri.Printf( PRINT_ALL, "...using GL_ARB_multitexture (%i texture units)\n", glConfig.numTextureUnits );
@@ -564,13 +559,13 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 			ri.Printf( PRINT_ALL, "...not using GL_ARB_multitexture, < 2 texture units\n" );
 		}
 #else
-		if ( GLimp_ExtensionSupported( "GL_ARB_multitexture" ) )
+		if ( Q3E_GL_ExtensionSupported( "GL_ARB_multitexture" ) )
 		{
 			if ( r_ext_multitexture->value )
 			{
-				qglMultiTexCoord2fARB = eglGetProcAddress( "glMultiTexCoord2fARB" );
-				qglActiveTextureARB = eglGetProcAddress( "glActiveTextureARB" );
-				qglClientActiveTextureARB = eglGetProcAddress( "glClientActiveTextureARB" );
+				qglMultiTexCoord2fARB = Q3E_GET_PROC_ADDRESS( "glMultiTexCoord2fARB" );
+				qglActiveTextureARB = Q3E_GET_PROC_ADDRESS( "glActiveTextureARB" );
+				qglClientActiveTextureARB = Q3E_GET_PROC_ADDRESS( "glClientActiveTextureARB" );
 
 				if ( qglActiveTextureARB )
 				{
@@ -602,13 +597,13 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 #endif
 
 		// GL_EXT_compiled_vertex_array
-		if ( GLimp_ExtensionSupported( "GL_EXT_compiled_vertex_array" ) )
+		if ( Q3E_GL_ExtensionSupported( "GL_EXT_compiled_vertex_array" ) )
 		{
 			if ( r_ext_compiled_vertex_array->value )
 			{
 				ri.Printf( PRINT_ALL, "...using GL_EXT_compiled_vertex_array\n" );
-				qglLockArraysEXT = ( void ( APIENTRY * )( GLint, GLint ) ) eglGetProcAddress( "glLockArraysEXT" );
-				qglUnlockArraysEXT = ( void ( APIENTRY * )( void ) ) eglGetProcAddress( "glUnlockArraysEXT" );
+				qglLockArraysEXT = ( void ( APIENTRY * )( GLint, GLint ) ) Q3E_GET_PROC_ADDRESS( "glLockArraysEXT" );
+				qglUnlockArraysEXT = ( void ( APIENTRY * )( void ) ) Q3E_GET_PROC_ADDRESS( "glUnlockArraysEXT" );
 				if (!qglLockArraysEXT || !qglUnlockArraysEXT)
 				{
 					ri.Error (ERR_FATAL, "bad getprocaddress");
@@ -626,7 +621,7 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 	}
 
 	textureFilterAnisotropic = qfalse;
-	if ( GLimp_ExtensionSupported( "GL_EXT_texture_filter_anisotropic" ) )
+	if ( Q3E_GL_ExtensionSupported( "GL_EXT_texture_filter_anisotropic" ) )
 	{
 		if ( r_ext_texture_filter_anisotropic->integer ) {
 			qglGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, (GLint *)&maxAnisotropy );
@@ -651,7 +646,7 @@ static void GLimp_InitExtensions( qboolean fixedFunction )
 	}
 
 	haveClampToEdge = qfalse;
-	if ( QGL_VERSION_ATLEAST( 1, 2 ) || QGLES_VERSION_ATLEAST( 1, 0 ) || GLimp_ExtensionSupported( "GL_SGIS_texture_edge_clamp" ) )
+	if ( QGL_VERSION_ATLEAST( 1, 2 ) || QGLES_VERSION_ATLEAST( 1, 0 ) || Q3E_GL_ExtensionSupported( "GL_SGIS_texture_edge_clamp" ) )
 	{
 		ri.Printf( PRINT_ALL, "...using GL_SGIS_texture_edge_clamp\n" );
 		haveClampToEdge = qtrue;
@@ -784,7 +779,7 @@ void GLimp_EndFrame( void )
 	// don't flip if drawing to front buffer
 	if ( Q_stricmp( r_drawBuffer->string, "GL_FRONT" ) != 0 )
 	{
-		eglSwapBuffers(eglDisplay, eglSurface);
+		Q3E_SwapBuffers();
 	}
 
 	if( r_fullscreen->modified )

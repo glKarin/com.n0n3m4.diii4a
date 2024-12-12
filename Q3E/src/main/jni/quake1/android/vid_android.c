@@ -40,10 +40,76 @@ extern void Android_OpenKeyboard(void);
 extern void Android_CloseKeyboard(void);
 extern void Android_PollInput(void);
 extern void Sys_SyncState(void);
+extern void Android_GrabMouseCursor(qbool grabIt);
 
 qbool vid_restart = false;
 
-#include "gles.c"
+
+
+#define Q3E_PRINTF Con_Printf
+#define Q3E_ERRORF Sys_Error
+#define Q3E_DEBUGF printf
+#define Q3Ebool qbool
+#define Q3E_TRUE true
+#define Q3E_FALSE false
+
+#include "q3e/q3e_glimp.inc"
+
+void GLimp_AndroidOpenWindow(volatile ANativeWindow *w)
+{
+	Q3E_RequireWindow(w);
+}
+
+void GLimp_AndroidInit(volatile ANativeWindow *w)
+{
+	if(Q3E_NoDisplay())
+		return;
+
+	if(Q3E_RequireWindow(w))
+		Q3E_RestoreGL();
+}
+
+void GLimp_AndroidQuit(void)
+{
+	Q3E_DestroyGL(true);
+}
+
+/*
+===============
+GLES_Init
+===============
+*/
+/*
+static void GLES_PostInit(void)
+{
+	gl_state.fullscreen = true;
+
+	if (gl_state.fullscreen) {
+		//Sys_GrabMouseCursor(true);
+	}
+}
+*/
+
+qbool GLimp_InitGL(qbool fullscreen)
+{
+	Q3E_GL_CONFIG_SET(fullscreen, 1);
+	Q3E_GL_CONFIG_ES_2_0();
+
+	qbool res = Q3E_InitGL();
+	return res;
+}
+
+/*
+ * (Un)grab Input
+ */
+void
+GLimp_GrabInput(qbool grab)
+{
+	if(Android_GrabMouseCursor)
+		(*Android_GrabMouseCursor)(grab);
+}
+
+
 
 // Input handling
 
@@ -136,7 +202,7 @@ void Sys_SDL_HandleEvents(void)
 void *GL_GetProcAddress(const char *name)
 {
 	void *p = NULL;
-	p = eglGetProcAddress(name);
+	p = Q3E_GET_PROC_ADDRESS(name);
 	return p;
 }
 
@@ -194,9 +260,10 @@ static qbool VID_InitModeGL(const viddef_mode_t *mode)
 	vid.stencil           = mode->bitsperpixel > 16;
 	vid_wmborder_waiting = vid_wmborderless = false;
 
-	gl_multiSamples = gl_msaa < 0 ? mode->samples : gl_msaa;
+    Q3E_GL_CONFIG_SET(samples, mode->samples);
 
-	GLimp_InitGL(true);
+	if(!GLimp_InitGL(true))
+		return false;
 
 	GL_InitFunctions();
 
@@ -239,27 +306,12 @@ void VID_Shutdown (void)
 	VID_EnableJoystick(false);
 	VID_SetMouse(false, false);
 
-	//has_gl_context = false;
-	if(!win)
-		return;
-	if(eglDisplay != EGL_NO_DISPLAY)
-		GLimp_DeactivateContext();
-	if(eglSurface != EGL_NO_SURFACE)
-	{
-		eglDestroySurface(eglDisplay, eglSurface);
-		eglSurface = EGL_NO_SURFACE;
-	}
-	if(!vid_restart)
-	{
-		ANativeWindow_release((ANativeWindow *)win);
-		win = NULL;
-	}
-	else
+	Q3E_DestroyGL(!vid_restart);
+	if(vid_restart)
 	{
 		vid_restart = false; // reset state
-		Con_Printf("[Harmattan]: Keep ANativeWindow for vid restart.\n");
+		printf("Keep ANativeWindow for vid restart.\n");
 	}
-	Con_Printf("[Harmattan]: EGL surface destroyed and no EGL context.\n");
 }
 
 void VID_Finish (void)
@@ -275,7 +327,7 @@ void VID_Finish (void)
 			CHECKGLERROR
 			if (r_speeds.integer == 2 || gl_finish.integer)
 				GL_Finish();
-			eglSwapBuffers(eglDisplay, eglSurface);
+			Q3E_SwapBuffers();
 			break;
 		}
 	}

@@ -685,6 +685,7 @@ add_library(q3renderer1 STATIC
 set_target_properties(q3renderer1 PROPERTIES COMPILE_FLAGS "-fPIC")
 target_include_directories(q3renderer1 PRIVATE "code/jpeg-8c")
 target_include_directories(q3renderer1 PRIVATE "code/curl-7.54.0/include")
+target_include_directories(q3renderer1 PRIVATE "../common")
 
 set(Q3LIBRARY ioquake3)
 add_library(${Q3LIBRARY} SHARED

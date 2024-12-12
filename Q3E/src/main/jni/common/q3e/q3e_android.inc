@@ -1,5 +1,10 @@
 /* Android functions */
 
+#ifdef Q3E_ANDROID_INC
+#error "q3e_android.inc included many times!"
+#endif
+#define Q3E_ANDROID_INC
+
 #if !defined(Q3E_GAME_NAME)
 #error "Q3E_GAME_NAME must defined for as game name!"
 #endif

@@ -1441,14 +1441,16 @@ static int VID_Mode(viddef_mode_t *mode)
 #ifdef _DIII4A
 		extern int screen_width;
 		extern int screen_height;
+		extern int refresh_rate;
 		mode->display           = 0;
 		mode->fullscreen        = true;
 		mode->desktopfullscreen = true;
 		mode->width             = screen_width;
 		mode->height            = screen_height;
 		mode->bitsperpixel      = 32;
-		mode->refreshrate       = 60;
+		mode->refreshrate       = refresh_rate;
 		mode->stereobuffer      = 0;
+		mode->samples      		= vid_samples.integer;
 #endif
 	}
 	cl_ignoremousemoves = 2;

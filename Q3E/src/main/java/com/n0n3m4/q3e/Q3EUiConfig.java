@@ -54,7 +54,7 @@ public class Q3EUiConfig extends Activity
 {
     private static int m_onScreenButtonGlobalOpacity = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_OPACITY;
     private static float m_onScreenButtonGlobalSizeScale = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_SIZE_SCALE;
-    
+
     private boolean m_onScreenButtonFriendlyEdge = Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE;
 
     private Q3EUiView vw;
