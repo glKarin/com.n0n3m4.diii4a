@@ -1420,6 +1420,9 @@ void UI_LoadMenus(const char *menuFile, qboolean reset)
 
 #ifdef __ANDROID__
 	// Show the UI a bit differently on mobile devices
+#ifdef _DIII4A //karin: disable ANDROID macros for show `HOST` menu
+    if(trap_Cvar_VariableValue("harm_ui_disableAndroidMacro") == 0.0f) // defined in cl_main.c
+#endif
 	trap_PC_AddGlobalDefine("ANDROID");
 #endif
 

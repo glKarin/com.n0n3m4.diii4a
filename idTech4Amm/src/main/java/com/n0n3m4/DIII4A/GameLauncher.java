@@ -439,6 +439,11 @@ public class GameLauncher extends Activity
 				if(Q3EUtils.q3ei.isETW)
 					setProp("harm_r_stencilShadowPersonal", isChecked);
 			}
+			else if (id == R.id.etw_ui_disableAndroidMacro)
+			{
+				if(Q3EUtils.q3ei.isETW)
+					setProp("harm_ui_disableAndroidMacro", isChecked);
+			}
 
 			// GZDOOM
 			else if (id == R.id.gzdoom_load_lights_pk3)
@@ -1240,6 +1245,9 @@ public class GameLauncher extends Activity
 
 		V.etw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
 		if (!IsProp("harm_r_stencilShadowPersonal")) setProp("harm_r_stencilShadowPersonal", true);
+
+		V.etw_ui_disableAndroidMacro.setChecked(getProp("harm_ui_disableAndroidMacro", false));
+		if (!IsProp("harm_ui_disableAndroidMacro")) setProp("harm_ui_disableAndroidMacro", false);
 	}
 
 	private void Updatehacktings_GZDOOM()
@@ -1771,6 +1779,9 @@ public class GameLauncher extends Activity
 
 		V.etw_stencilShadowPersonal.setChecked(getProp("harm_r_stencilShadowPersonal", true));
 		V.etw_stencilShadowPersonal.setOnCheckedChangeListener(m_checkboxChangeListener);
+
+		V.etw_ui_disableAndroidMacro.setChecked(getProp("harm_ui_disableAndroidMacro", false));
+		V.etw_ui_disableAndroidMacro.setOnCheckedChangeListener(m_checkboxChangeListener);
 	}
 
 	private void SetupUI_GZDOOM()
@@ -3803,6 +3814,7 @@ public class GameLauncher extends Activity
 		public CheckBox etw_omnibot_enable;
 		public RadioGroup etw_shadows;
 		public CheckBox etw_stencilShadowPersonal;
+		public CheckBox etw_ui_disableAndroidMacro;
 		public LinearLayout gzdoom_section;
 		public CheckBox gzdoom_load_lights_pk3;
 		public CheckBox gzdoom_load_brightmaps_pk3;
@@ -3931,6 +3943,7 @@ public class GameLauncher extends Activity
 			etw_omnibot_enable = findViewById(R.id.etw_omnibot_enable);
 			etw_shadows = findViewById(R.id.etw_shadows);
 			etw_stencilShadowPersonal = findViewById(R.id.etw_stencilShadowPersonal);
+			etw_ui_disableAndroidMacro = findViewById(R.id.etw_ui_disableAndroidMacro);
 			gzdoom_section = findViewById(R.id.gzdoom_section);
 			gzdoom_load_lights_pk3 = findViewById(R.id.gzdoom_load_lights_pk3);
 			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);

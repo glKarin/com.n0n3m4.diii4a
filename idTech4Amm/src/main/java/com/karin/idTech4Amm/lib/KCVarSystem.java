@@ -207,6 +207,8 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_r_stencilShadowInfinite", "float", "0", "Stencil shadow volume far is infinite(absolute value as volume's length; 0=512. negative value is infinite, personal shadow is always infinite)", 0
                                 ),
                         KCVar.CreateCVar("harm_r_stencilShadowMask", "bool", "0", "Render stencil shadow mask(0=render mask after all shadows; 1=render mask every shadow volume)", 0
+                        ),
+                        KCVar.CreateCVar("harm_ui_disableAndroidMacro", "bool", "0", "Disable `ANDROID` menu macro, show `HOST` menu for create game server", KCVar.FLAG_LAUNCHER
                         )
                 );
 

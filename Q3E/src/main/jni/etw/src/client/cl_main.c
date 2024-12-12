@@ -3270,6 +3270,9 @@ void CL_Init(void)
 	// Auto-update
 	com_updateavailable = Cvar_Get("com_updateavailable", "0", CVAR_ROM);
 	com_updatefiles     = Cvar_Get("com_updatefiles", "", CVAR_ROM);
+#ifdef _DIII4A //karin: extras Android cvars
+    Cvar_Get("harm_ui_disableAndroidMacro", "0", CVAR_ARCHIVE);
+#endif
 
 	// register our commands
 	Cmd_AddCommand("cmd", CL_ForwardToServer_f, "Executes a reliable server command.");
