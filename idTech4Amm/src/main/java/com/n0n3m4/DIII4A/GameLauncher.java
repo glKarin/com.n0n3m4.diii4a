@@ -56,7 +56,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -77,12 +76,14 @@ import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.karin.idTech4Amm.sys.Theme;
 import com.karin.idTech4Amm.ui.DebugDialog;
 import com.karin.idTech4Amm.ui.ExperimentalDialog;
+import com.karin.idTech4Amm.ui.FileTreeView;
 import com.karin.idTech4Amm.ui.LauncherSettingsDialog;
 import com.n0n3m4.DIII4A.launcher.AddExternalLibraryFunc;
 import com.n0n3m4.DIII4A.launcher.BackupPreferenceFunc;
 import com.n0n3m4.DIII4A.launcher.CVarEditorFunc;
 import com.n0n3m4.DIII4A.launcher.CheckForUpdateFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseCommandRecordFunc;
+import com.n0n3m4.DIII4A.launcher.ChooseExtrasFileFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameFolderFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameLibFunc;
 import com.n0n3m4.DIII4A.launcher.ChooseGameModFunc;
@@ -123,7 +124,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -146,6 +146,7 @@ public class GameLauncher extends Activity
 	private static final int CONST_RESULT_CODE_ACCESS_ANDROID_DATA                              = 12;
 	private static final int CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT                          = 13;
 	private static final int CONST_RESULT_CODE_REQUEST_CREATE_SHORTCUT_WITH_COMMAND             = 14;
+	private static final int CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_EXTRAS_FILE       = 15;
 
 	private final GameManager m_gameManager = new GameManager();
     // GameLauncher function
@@ -164,6 +165,7 @@ public class GameLauncher extends Activity
 	private ChooseGameModFunc         m_chooseGameModFunc;
 	private CreateShortcutFunc        m_createShortcutFunc;
 	private CreateCommandShortcutFunc m_createCommandShortcutFunc;
+	private ChooseExtrasFileFunc      m_chooseExtrasFileFunc;
 
     public static final String default_gamedata = Environment.getExternalStorageDirectory() + "/diii4a";
     private final ViewHolder V = new ViewHolder();
@@ -668,6 +670,10 @@ public class GameLauncher extends Activity
 			else if (id == R.id.launcher_tab1_patch_resource)
 			{
 				OpenResourceFileDialog(false);
+			}
+			else if (id == R.id.gzdoom_choose_extras_file)
+			{
+				OpenExtrasFileChooser();
 			}
         }
     };
@@ -1802,6 +1808,8 @@ public class GameLauncher extends Activity
 
 		/*List<String> file = GetParamList("file");
 		V.gzdoom_load_lights_pk3.setChecked(null != file && file.contains("lights.pk3"));*/
+
+		V.gzdoom_choose_extras_file.setOnClickListener(m_buttonClickListener);
 	}
 
 	private void AfterCreated()
@@ -2241,6 +2249,73 @@ public class GameLauncher extends Activity
         bundle.putString("path", V.edt_path.getText().toString());
         m_chooseGameFolderFunc.Start(bundle);
     }
+
+	private void SetupExtrasFiles(String extrasFiles)
+	{
+		if(":".equals(extrasFiles))
+		{
+			RemoveParam("file");
+			RemoveParam("deh");
+			RemoveParam("bex");
+		}
+		else
+		{
+			String files = extrasFiles.substring(1);
+			String[] split = files.split(ChooseExtrasFileFunc.FILE_SEP);
+			List<String> file = new ArrayList<>();
+			List<String> deh = new ArrayList<>();
+			List<String> bex = new ArrayList<>();
+
+			for (String s : split)
+			{
+				if(s.toLowerCase().endsWith(".deh"))
+					deh.add(s);
+				else if(s.toLowerCase().endsWith(".bex"))
+					bex.add(s);
+				else
+					file.add(s);
+			}
+
+			// if(V.gzdoom_load_lights_pk3.isChecked() && !file.contains("lights.pk3")) file.add("light3.pk3");
+
+			RemoveParam("file");
+			RemoveParam("deh");
+			RemoveParam("bex");
+
+			if(!file.isEmpty())
+				SetParamList("file", file);
+			if(!deh.isEmpty())
+				SetParamList("deh", deh);
+			if(!bex.isEmpty())
+				SetParamList("bex", bex);
+		}
+	}
+
+	private void OpenExtrasFileChooser()
+	{
+		SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
+		String preferenceKey = Q3EUtils.q3ei.GetGameModPreferenceKey();
+
+		if (null == m_chooseExtrasFileFunc)
+			m_chooseExtrasFileFunc = new ChooseExtrasFileFunc(this, CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_EXTRAS_FILE);
+
+		m_chooseExtrasFileFunc.SetCallback(new Runnable() {
+			@Override
+			public void run()
+			{
+				String extrasFiles = m_chooseExtrasFileFunc.GetResult();
+				SetupExtrasFiles(extrasFiles);
+			}
+		});
+
+		Bundle bundle = new Bundle();
+		String path = KStr.AppendPath(preference.getString(Q3EPreference.pref_datapath, default_gamedata), Q3EUtils.q3ei.subdatadir, Q3EUtils.q3ei.GetGameModSubDirectory());
+		bundle.putString("mod", preference.getString(preferenceKey, ""));
+		bundle.putString("path", path);
+		if(Q3EUtils.q3ei.isDOOM)
+			bundle.putString("file", GetParam("file") + " " + GetParam("deh") + " " + GetParam("bex"));
+		m_chooseExtrasFileFunc.Start(bundle);
+	}
 
     private void WritePreferences()
     {
@@ -2870,6 +2945,10 @@ public class GameLauncher extends Activity
 					if (null != m_createCommandShortcutFunc)
 						m_createCommandShortcutFunc.run();
 					break;
+				case CONST_RESULT_CODE_REQUEST_EXTERNAL_STORAGE_FOR_CHOOSE_EXTRAS_FILE:
+					if (null != m_chooseExtrasFileFunc)
+						m_chooseExtrasFileFunc.run();
+					break;
                 default:
                     break;
             }
@@ -3399,45 +3478,7 @@ public class GameLauncher extends Activity
 			{
 				String mod = m_chooseGameModFunc.GetResult();
 				if(mod.startsWith(":"))
-				{
-					if(":".equals(mod))
-					{
-						RemoveParam("file");
-						RemoveParam("deh");
-						RemoveParam("bex");
-					}
-					else
-					{
-						String files = mod.substring(1);
-						String[] split = files.split(ChooseGameModFunc.FILE_SEP);
-						List<String> file = new ArrayList<>();
-						List<String> deh = new ArrayList<>();
-						List<String> bex = new ArrayList<>();
-
-						for (String s : split)
-						{
-							if(s.toLowerCase().endsWith(".deh"))
-								deh.add(s);
-							else if(s.toLowerCase().endsWith(".bex"))
-								bex.add(s);
-							else
-								file.add(s);
-						}
-
-						// if(V.gzdoom_load_lights_pk3.isChecked() && !file.contains("lights.pk3")) file.add("light3.pk3");
-
-						RemoveParam("file");
-						RemoveParam("deh");
-						RemoveParam("bex");
-
-						if(!file.isEmpty())
-							SetParamList("file", file);
-						if(!deh.isEmpty())
-							SetParamList("deh", deh);
-						if(!bex.isEmpty())
-							SetParamList("bex", bex);
-					}
-				}
+					SetupExtrasFiles(mod);
 				else
 					V.edt_fs_game.setText(mod);
 			}
@@ -3818,6 +3859,7 @@ public class GameLauncher extends Activity
 		public LinearLayout gzdoom_section;
 		public CheckBox gzdoom_load_lights_pk3;
 		public CheckBox gzdoom_load_brightmaps_pk3;
+		public Button gzdoom_choose_extras_file;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
 
@@ -3947,6 +3989,7 @@ public class GameLauncher extends Activity
 			gzdoom_section = findViewById(R.id.gzdoom_section);
 			gzdoom_load_lights_pk3 = findViewById(R.id.gzdoom_load_lights_pk3);
 			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);
+			gzdoom_choose_extras_file = findViewById(R.id.gzdoom_choose_extras_file);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
         }

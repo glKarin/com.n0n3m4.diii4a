@@ -620,7 +620,7 @@ public final class ContextUtility
         {
             Uri uri = FileUtility.PathUri(path);
             //Log.e("TAG", "IsUriPermissionGrantPrefix: " +uri + "|" + persistedUriPermission.getUri()+"="+persistedUriPermission.getUri().equals(uri));
-            if(uri.toString().startsWith(persistedUriPermission.getUri().toString()))
+            if((uri.toString() + "%2F").startsWith(persistedUriPermission.getUri().toString() + "%2F"))
                 return true;
         }
         return false;
@@ -636,7 +636,7 @@ public final class ContextUtility
             Uri uri = FileUtility.PathUri(path);
             //Log.e("TAG", "IsUriPermissionGrantPrefix: " +uri + "|" + persistedUriPermission.getUri()+"="+persistedUriPermission.getUri().equals(uri));
             Uri grantedUri = persistedUriPermission.getUri();
-            if(uri.toString().startsWith(grantedUri.toString()))
+            if((uri.toString() + "%2F").startsWith(grantedUri.toString() + "%2F"))
                 return grantedUri;
         }
         return null;

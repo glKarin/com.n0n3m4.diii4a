@@ -66,5 +66,92 @@ public abstract class ArrayAdapter_base<T> extends ArrayAdapter<T>
         addAll(list);
     }
 
+    public void Remove(int index, int num)
+    {
+        int count = getCount();
+        int i = index < 0 ? count + index : index;
+        if(i < 0 || i >= count)
+            return;
+        for(int m = 0; m < num; m++)
+        {
+            if(i >= getCount())
+                break;
+            remove(getItem(i));
+        }
+    }
+
+    public void RemoveRange(int index, int end)
+    {
+        int count = getCount();
+        int i = index < 0 ? count + index : index;
+        if(i < 0 || i >= count)
+            return;
+        int len = Math.min(end, count);
+        for(int m = i; m < len; m++)
+        {
+            if(i >= getCount())
+                break;
+            remove(getItem(i));
+        }
+    }
+
+    public void Insert(int index, T what)
+    {
+        int count = getCount();
+        int i = index < 0 ? count + index : index;
+        if(i < 0)
+            insert(what, 0);
+        else if(i >= count)
+            add(what);
+        else
+            insert(what, i);
+    }
+
+    public void Insert(int index, List<T> list)
+    {
+        int count = getCount();
+        int i = index < 0 ? count + index : index;
+        if(i < 0)
+        {
+            for(int m = 0; m < list.size(); m++)
+            {
+                insert(list.get(m), m);
+            }
+        }
+        else if(i >= count)
+        {
+            for(T t : list)
+                add(t);
+        }
+        else
+        {
+            for(int m = 0; m < list.size(); m++)
+            {
+                insert(list.get(m), m + i);
+            }
+        }
+    }
+
+    public void Update(int index)
+    {
+        int count = getCount();
+        int i = index < 0 ? count + index : index;
+        if(i < 0 || i >= count)
+            return;
+        T item = getItem(index);
+        remove(item);
+        insert(item, index);
+    }
+
+    public int FindIndex(T data)
+    {
+        for(int i = 0; i < getCount(); i++)
+        {
+            if(data == getItem(i))
+                return i;
+        }
+        return -1;
+    }
+
     public abstract View GenerateView(int position, View view, ViewGroup parent, T data);
 }

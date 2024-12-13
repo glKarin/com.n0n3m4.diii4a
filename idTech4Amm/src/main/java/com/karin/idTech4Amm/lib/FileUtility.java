@@ -20,7 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Local file IO utility
@@ -218,14 +220,69 @@ public final class FileUtility
         }
     }
 
+    public static String GetRealPath(String path)
+    {
+        Path p = Paths.get(path);
+        if(!Files.exists(p))
+            return null;
+
+        while(Files.isSymbolicLink(p))
+        {
+            try
+            {
+                p = Files.readSymbolicLink(p);
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+                break;
+            }
+        }
+        return p.toAbsolutePath().toString();
+    }
+
+    public static List<String> GetSymbolPaths(String path)
+    {
+        Path p = Paths.get(path);
+        if(!Files.exists(p))
+            return null;
+
+        List<String> list = new ArrayList<>();
+        list.add(p.toAbsolutePath().toString());
+        while(Files.isSymbolicLink(p))
+        {
+            try
+            {
+                p = Files.readSymbolicLink(p);
+                list.add(p.toAbsolutePath().toString());
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+                break;
+            }
+        }
+        return list;
+    }
+
+    public static List<String> GetSDCardPaths()
+    {
+        Set<String> set = new LinkedHashSet<>();
+        List<String> strings = GetSymbolPaths("/sdcard");
+        if(null != strings)
+            set.addAll(strings);
+        set.add(GetSDCardRoot());
+        set.add("/sdcard");
+        set.add("/storage/self/primary");
+        return new ArrayList<>(set);
+    }
+
     public static boolean IsSDCardPath(String path)
     {
-        if (path.startsWith("/sdcard"))
-            return true;
-        else
+        List<String> paths = GetSDCardPaths();
+        for(String p : paths)
         {
-            final String emuPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-            if (path.startsWith(emuPath))
+            if (path.startsWith(p))
                 return true;
         }
         return false;
@@ -233,15 +290,37 @@ public final class FileUtility
 
     public static String GetSDCardRelativePath(String path)
     {
-        if (path.startsWith("/sdcard"))
-            path = path.substring("/sdcard".length());
-        else
+        List<String> paths = GetSDCardPaths();
+        for(String p : paths)
         {
-            final String emuPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-            if (path.startsWith(emuPath))
-                path = path.substring(emuPath.length());
+            if (path.startsWith(p))
+            {
+                path = path.substring(p.length());
+                break;
+            }
         }
         return path;
+    }
+
+    public static String GetSDCardRoot()
+    {
+        return Environment.getExternalStorageDirectory().getAbsolutePath();
+    }
+
+    // /storage/self/primary
+    public static String NormalizeSDCardPath(String target)
+    {
+        String sdcard = GetSDCardRoot();
+        List<String> paths = GetSDCardPaths();
+        for(String p : paths)
+        {
+            if (target.startsWith(p))
+            {
+                target = sdcard + target.substring(p.length());
+                break;
+            }
+        }
+        return target;
     }
 
     public static Uri PathGrantUri(String dir)
@@ -292,7 +371,11 @@ public final class FileUtility
     public static String GetPathFromUri(Uri uri)
     {
         String path = uri.toString();
-        path = path.replaceAll("content://com\\.android\\.externalstorage\\.documents/tree/primary%3A", "/storage/emulated/0/");
+        final String DocPathPrefix = "content://com.android.externalstorage.documents/tree/primary%3A";
+        if(path.startsWith(DocPathPrefix))
+            path = GetSDCardRoot() + "/" + path.substring(DocPathPrefix.length());
+        else
+            path = path.replaceAll("content://com\\.android\\.externalstorage\\.documents/tree/primary%3A", GetSDCardRoot() + "/");
         path = path.replaceAll("%2F", "/");
         //Log.e("TAG", "GetPathFromUri: " + path);
         return path;
