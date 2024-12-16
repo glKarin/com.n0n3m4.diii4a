@@ -57,24 +57,53 @@ public class KKeyToolBar extends LinearLayout {
             if(null == obj)
                 return false;
             Key key = (Key)obj;
-            boolean down = false;
+            boolean down;
+            boolean send;
             switch (event.getActionMasked())
             {
                 case MotionEvent.ACTION_DOWN:
                 case MotionEvent.ACTION_POINTER_DOWN:
-                    key.state = Key.STATE_PRESSED;
-                    down = true;
+                    if(key.type == Key.TYPE_BUTTON)
+                    {
+                        key.state = Key.STATE_PRESSED;
+                        down = true;
+                        send = true;
+                    }
+                    else
+                    {
+                        down = false;
+                        send = false;
+                    }
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_POINTER_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    key.state = Key.STATE_RELEASED;
+                    send = true;
+                    if(key.type == Key.TYPE_BUTTON)
+                    {
+                        key.state = Key.STATE_RELEASED;
+                        down = false;
+                    }
+                    else
+                    {
+                        if(key.state == Key.STATE_RELEASED)
+                        {
+                            key.state = Key.STATE_PRESSED;
+                            down = true;
+                        }
+                        else
+                        {
+                            key.state = Key.STATE_RELEASED;
+                            down = false;
+                        }
+                    }
                     break;
                 default:
                     return false;
             }
             post(m_updateToolBar);
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(down, key.keyCode, 0);
+            if(send)
+                Q3EUtils.q3ei.callbackObj.sendKeyEvent(down, key.keyCode, 0);
             return true;
         }
     };
@@ -89,6 +118,7 @@ public class KKeyToolBar extends LinearLayout {
 
         setBackgroundColor(resources.getColor(R.color.toolbar_background));
         int[] keys = getResources().getIntArray(R.array.key_toolbar_codes);
+        int[] types = getResources().getIntArray(R.array.key_toolbar_types);
         String[] values = getResources().getStringArray(R.array.key_toolbar_names);
         List<Key> list = new ArrayList<>();
         Key key;
@@ -97,6 +127,7 @@ public class KKeyToolBar extends LinearLayout {
             key = new Key();
             key.name = values[i];
             key.keyCode = Q3EKeyCodes.GetRealKeyCode(keys[i]);
+            key.type = types[i];
             list.add(key);
         }
 
@@ -152,7 +183,11 @@ public class KKeyToolBar extends LinearLayout {
         public static final int STATE_PRESSED = 1;
         public static final int STATE_TOGGLED = 2;
 
+        public static final int TYPE_BUTTON = 1;
+        public static final int TYPE_TOGGLE = 2;
+
         public String name;
+        public int type;
         public int keyCode;
         public int state = STATE_RELEASED;
     }

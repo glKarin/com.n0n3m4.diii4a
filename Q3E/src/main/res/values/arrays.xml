@@ -11,6 +11,7 @@
         <item>PageDown</item>
         <item>PageUp</item>
         <item>End</item>
+        <item>Ctrl</item>
     </string-array>
 
     <integer-array name="key_toolbar_codes">
@@ -23,5 +24,19 @@
         <item>145</item>
         <item>146</item>
         <item>148</item>
+        <item>141</item>
+    </integer-array>
+
+    <integer-array name="key_toolbar_types">
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>2</item>
     </integer-array>
 </resources>

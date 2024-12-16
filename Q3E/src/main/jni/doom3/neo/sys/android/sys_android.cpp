@@ -450,11 +450,16 @@ void Sys_SyncState(void)
     }
 }
 
+static bool ctrl_state = false;
 void Q3E_KeyEvent(int state,int key,int character)
 {
+    if(key == K_CTRL)
+        ctrl_state = bool(state);
+
     Posix_QueEvent(SE_KEY, key, state, 0, NULL);
     if ((character != 0) && (state == 1))
     {
+        if(!ctrl_state || character == '\b')
         Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
     }
     Posix_AddKeyboardPollEvent(key, state);
