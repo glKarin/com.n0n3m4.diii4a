@@ -30,7 +30,7 @@ void Q3E_KeyEvent(int state,int key,int character)
             key = K_CONSOLE;
         qboolean isChar = isprint(character);
         Key_Event(key, state, !isChar);
-        if(state && isCharq && key != K_CONSOLE)
+        if(state && isChar && key != K_CONSOLE)
             Char_Event(character);
     }
 }
