@@ -9680,7 +9680,7 @@ void idPlayer::SetupViewBody( void ) {
 
         decl = static_cast< const idDeclEntityDef * >( declManager->FindType( DECL_ENTITYDEF, player_viewbody_classname, false ) );
         if ( !decl ) {
-            gameLocal.Warning( "entityDef not found: '%s'", player_viewbody_classname.c_str() );
+            gameLocal.Printf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
             if( idStr::Cmp(player_viewbody_classname, VIEW_BODY_DEFAULT_CLASSNAME) )
             {
                 player_viewbody_classname = VIEW_BODY_DEFAULT_CLASSNAME;
@@ -9688,7 +9688,7 @@ void idPlayer::SetupViewBody( void ) {
             }
         }
         if ( !decl ) {
-            gameLocal.Warning( "entityDef not found: '%s'", player_viewbody_classname.c_str() );
+            gameLocal.Printf( "entityDef not found: '%s'\n", player_viewbody_classname.c_str() );
             return;
         }
 

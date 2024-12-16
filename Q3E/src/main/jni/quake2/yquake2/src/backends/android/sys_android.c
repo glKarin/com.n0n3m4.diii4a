@@ -25,14 +25,14 @@ void Q3E_KeyEvent(int state,int key,int character)
 {
     if (key!=0)
     {
+        //printf("xxx %d %c | %d %c\n", key, key, character,character);
         if(key == '`' || key == '~')
             key = K_CONSOLE;
-        Key_Event(key, state, true);
+        qboolean isChar = isprint(character);
+        Key_Event(key, state, !isChar);
+        if(state && isCharq && key != K_CONSOLE)
+            Char_Event(character);
     }
- /*   if ((c >= ' ') && (c <= '~') && c != consoleKeyCode)
-    {
-        Char_Event(c);
-    }*/
 }
 
 extern float mouse_x, mouse_y;
