@@ -16,6 +16,10 @@
 // we have to include snd_main.h here only to get access to snd_renderbuffer->format.speed when writing the AVI headers
 #include "snd_main.h"
 
+#ifdef __ANDROID__ //karin: limit console max height
+extern int Android_GetConsoleMaxHeight(int height, int maxHeight);
+#endif
+
 cvar_t scr_viewsize = {CF_CLIENT | CF_ARCHIVE, "viewsize","100", "how large the view should be, 110 disables inventory bar, 120 disables status bar"};
 cvar_t scr_fov = {CF_CLIENT | CF_ARCHIVE, "fov","90", "field of vision, 1-170 degrees, default 90, some players use 110-130"};
 cvar_t scr_conalpha = {CF_CLIENT | CF_ARCHIVE, "scr_conalpha", "1", "opacity of console background gfx/conback"};
@@ -747,7 +751,11 @@ void SCR_DrawConsole (void)
 		Con_DrawConsole (vid_conheight.integer - scr_con_margin_bottom);
 	}
 	else if (scr_con_current)
+#ifdef __ANDROID__ //karin: limit console max height
+		Con_DrawConsole (Android_GetConsoleMaxHeight(min(scr_con_current, vid_conheight.integer - scr_con_margin_bottom), vid_conheight.integer - scr_con_margin_bottom));
+#else
 		Con_DrawConsole (min(scr_con_current, vid_conheight.integer - scr_con_margin_bottom));
+#endif
 	else
 		con_vislines = 0;
 }

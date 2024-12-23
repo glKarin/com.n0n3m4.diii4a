@@ -706,6 +706,35 @@ public class GameLauncher extends Activity
 			}
 		}
 	};
+
+	private final SeekBar.OnSeekBarChangeListener m_seekListener = new SeekBar.OnSeekBarChangeListener() {
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+		{
+			if(seekBar.getId() == V.consoleHeightFracValue.getId())
+			{
+				if(fromUser)
+				{
+					PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
+							.putInt(Q3EPreference.pref_harm_max_console_height_frac, progress)
+							.commit();
+					V.consoleHeightFracText.setText(GetConsoleHeightText(progress));
+				}
+			}
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar)
+		{
+
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar)
+		{
+
+		}
+	};
     private class SavePreferenceTextWatcher implements TextWatcher
     {
         private final String name;
@@ -1474,6 +1503,11 @@ public class GameLauncher extends Activity
 		boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
 		V.multithreading.setChecked(multithreading);
 		V.rg_r_autoAspectRatio.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		int consoleHeightFrac = mPrefs.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
+		V.consoleHeightFracValue.setProgress(consoleHeightFrac);
+		V.consoleHeightFracText.setText(GetConsoleHeightText(consoleHeightFrac));
+		V.consoleHeightFracValue.setOnSeekBarChangeListener(m_seekListener);
+
 		V.edt_cmdline.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView view, int id, KeyEvent ev)
 			{
@@ -2382,6 +2416,7 @@ public class GameLauncher extends Activity
 
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, V.gzdoom_load_lights_pk3.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, V.gzdoom_load_brightmaps_pk3.isChecked());
+		mEdtr.putInt(Q3EPreference.pref_harm_max_console_height_frac, V.consoleHeightFracValue.getProgress());
 		// mEdtr.putString(Q3EUtils.q3ei.GetGameModPreferenceKey(), V.edt_fs_game.getText().toString());
         mEdtr.commit();
     }
@@ -3730,6 +3765,14 @@ public class GameLauncher extends Activity
 		V.mods_container.setNestedScrollingEnabled(on);
 	}
 
+	private String GetConsoleHeightText(int progress)
+	{
+		if(progress <= 0 || progress >= 100)
+			return Q3ELang.tr(this, R.string.no_limit);
+		else
+			return progress + "%";
+	}
+
 
 
     private class ViewHolder
@@ -3862,6 +3905,8 @@ public class GameLauncher extends Activity
 		public Button gzdoom_choose_extras_file;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
+		public SeekBar consoleHeightFracValue;
+		public TextView consoleHeightFracText;
 
         public void Setup()
         {
@@ -3992,6 +4037,8 @@ public class GameLauncher extends Activity
 			gzdoom_choose_extras_file = findViewById(R.id.gzdoom_choose_extras_file);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
+			consoleHeightFracValue = findViewById(R.id.consoleHeightFracValue);
+			consoleHeightFracText = findViewById(R.id.consoleHeightFracText);
         }
     }
 }

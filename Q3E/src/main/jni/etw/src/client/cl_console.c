@@ -40,6 +40,10 @@
 #define CONSOLE_COLOR  COLOR_WHITE
 #define DEFAULT_CONSOLE_WIDTH   158
 
+#ifdef __ANDROID__ //karin: limit console max height
+extern float Android_GetConsoleMaxHeightFrac(float frac);
+#endif
+
 int smallCharWidth = SMALLCHAR_WIDTH;
 int smallCharHeight = SMALLCHAR_HEIGHT;
 
@@ -102,7 +106,11 @@ void Con_ToggleConsole_f(void)
 		// short console
 		if (ctrl && con.desiredFrac != shortConsole)
 		{
+#ifdef __ANDROID__ //karin: limit console max height
+            con.desiredFrac = Android_GetConsoleMaxHeightFrac(shortConsole);
+#else
 			con.desiredFrac = shortConsole;
+#endif
 		}
 		// full console
 		else if (alt && con.desiredFrac != fullConsole)
@@ -122,7 +130,11 @@ void Con_ToggleConsole_f(void)
 		// short console
 		if (ctrl)
 		{
-			con.desiredFrac = shortConsole;
+#ifdef __ANDROID__ //karin: limit console max height
+            con.desiredFrac = Android_GetConsoleMaxHeightFrac(shortConsole);
+#else
+            con.desiredFrac = shortConsole;
+#endif
 		}
 		// full console
 		else if (alt)
@@ -132,7 +144,11 @@ void Con_ToggleConsole_f(void)
 		// normal half-screen console
 		else
 		{
-			con.desiredFrac = normalConsole;
+#ifdef __ANDROID__ //karin: limit console max height
+            con.desiredFrac = Android_GetConsoleMaxHeightFrac(normalConsole);
+#else
+            con.desiredFrac = normalConsole;
+#endif
 		}
 	}
 }
@@ -1133,7 +1149,7 @@ void Con_RunConsole(void)
 	// short console support via shift+~
 	if (cls.keyCatchers & KEYCATCH_CONSOLE)
 	{
-		con.finalFrac = con.desiredFrac;
+        con.finalFrac = con.desiredFrac;
 	}
 	else
 	{

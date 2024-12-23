@@ -54,6 +54,7 @@ typedef struct
     const char *appHomeDir; // application home directory
     int refreshRate; // screen refresh rate
     int smoothJoystick; // smooth joystick
+    int consoleMaxHeightFrac; // max console height frac(0 - 100)
 
     ANativeWindow *window;
     int width;

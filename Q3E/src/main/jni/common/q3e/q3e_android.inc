@@ -198,6 +198,9 @@ int screen_height = 480;
 // Screen refresh rate
 int refresh_rate = 60;
 
+// max console height frac
+float console_max_height_frac = -1.0f;
+
 // Smooth joystick
 Q3Ebool smooth_joystick = Q3E_FALSE;
 
@@ -553,6 +556,19 @@ void Android_ExitFinish(void)
     exit_finish();
 }
 
+float Android_GetConsoleMaxHeightFrac(float frac)
+{
+    return console_max_height_frac > 0.0f && console_max_height_frac < frac ? console_max_height_frac : frac;
+}
+
+int Android_GetConsoleMaxHeight(int height, int maxHeight)
+{
+    if(console_max_height_frac <= 0.0f)
+        return height;
+    int h = console_max_height_frac * (float)maxHeight;
+    return h < height ? h : height;
+}
+
 const char * Sys_DLLDefaultPath(void)
 {
     return native_library_dir ? native_library_dir : _ANDROID_DLL_PATH;
@@ -661,6 +677,7 @@ void Q3E_SetInitialContext(const void *context)
     mouse_available = ptr->mouseAvailable ? Q3E_TRUE : Q3E_FALSE;
     refresh_rate = ptr->refreshRate <= 0 ? 60 : ptr->refreshRate;
     smooth_joystick = ptr->smoothJoystick ? Q3E_TRUE : Q3E_FALSE;
+    console_max_height_frac = ptr->consoleMaxHeightFrac > 0 && ptr->consoleMaxHeightFrac < 100 ? (float)ptr->consoleMaxHeightFrac / 100.0f : -1.0f;
 
     window = ptr->window;
     screen_width = ptr->width;

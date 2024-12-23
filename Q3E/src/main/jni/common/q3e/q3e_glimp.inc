@@ -222,7 +222,7 @@ static void Q3E_HandleEGLError(const char *func, Q3Ebool exit)
 			"EGL_BAD_SURFACE",
 			"EGL_CONTEXT_LOST",
 	};
-	GLint err = eglGetError();
+	EGLint err = eglGetError();
 	if(err == EGL_SUCCESS)
 		return;
 

@@ -30,6 +30,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
+            "Support setup max game console height(0 or 100 means not limit) on launcher `General` tab.",
         };
 	};
 

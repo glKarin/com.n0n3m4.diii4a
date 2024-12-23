@@ -43,6 +43,7 @@ public class Q3EJNI {
 			int refreshRate, // refresh rate,
 			String appHome, // app home path
 			boolean smoothJoystick, // is smooth joystick
+			int consoleMaxHeightFrac, // max console height frac(0 - 100)
             boolean continueNoGLContext
     );
 	public static native void sendKeyEvent(int state,int key,int character);

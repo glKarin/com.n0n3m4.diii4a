@@ -849,6 +849,7 @@ public class Q3EGameHelper
         int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
         boolean useExternalLibPath = preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false);
+        int consoleMaxHeightFrac = preferences.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
 
         String subdatadir = Q3EUtils.q3ei.subdatadir;
         // if(Q3EUtils.q3ei.isTDM) subdatadir = "dnf"; // Test a new game using TDM
@@ -884,6 +885,7 @@ public class Q3EGameHelper
                 refreshRate,
                 appHome,
                 Q3EUtils.q3ei.joystick_smooth,
+                consoleMaxHeightFrac,
                 runBackground > 0
         );
         if(res)

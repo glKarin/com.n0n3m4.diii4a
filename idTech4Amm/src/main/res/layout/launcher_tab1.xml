@@ -949,6 +949,35 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/console_height_frac"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/max_console_height_frac" />
+                    <TextView
+                        android:id="@+id/consoleHeightFracText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp" />
+                </LinearLayout>
+                <SeekBar
+                    android:id="@+id/consoleHeightFracValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="100"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/extras_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

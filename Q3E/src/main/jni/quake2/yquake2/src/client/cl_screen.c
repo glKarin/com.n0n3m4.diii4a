@@ -553,14 +553,24 @@ SCR_DrawConsole(void)
 	if ((cls.state != ca_active) || !cl.refresh_prepped)
 	{
 		/* connected, but can't render */
+#ifdef __ANDROID__ //karin: limit console max height
+		extern float Android_GetConsoleMaxHeightFrac(float frac);
+		Con_DrawConsole(Android_GetConsoleMaxHeightFrac(0.5f));
+#else
 		Con_DrawConsole(0.5);
+#endif
 		Draw_Fill(0, viddef.height / 2, viddef.width, viddef.height / 2, 0);
 		return;
 	}
 
 	if (scr_con_current)
 	{
+#ifdef __ANDROID__ //karin: limit console max height
+		extern float Android_GetConsoleMaxHeightFrac(float frac);
+		Con_DrawConsole(Android_GetConsoleMaxHeightFrac(scr_con_current));
+#else
 		Con_DrawConsole(scr_con_current);
+#endif
 	}
 	else
 	{

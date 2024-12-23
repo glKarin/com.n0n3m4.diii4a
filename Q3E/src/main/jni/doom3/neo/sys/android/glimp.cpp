@@ -162,7 +162,7 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 			"EGL_BAD_SURFACE",
 			"EGL_CONTEXT_LOST",
 	};
-	GLint err = eglGetError();
+	EGLint err = eglGetError();
 	if(err == EGL_SUCCESS)
 		return;
 

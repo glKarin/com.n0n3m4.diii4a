@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __QGL_H__
 #define __QGL_H__
 
-#ifdef __ANDROID__
+#ifdef __ANDROID__ //karin: OpenGL on Android
 #	include <EGL/egl.h>
 #	include <GLES/gl.h>
 #	include <GLES/glext.h>

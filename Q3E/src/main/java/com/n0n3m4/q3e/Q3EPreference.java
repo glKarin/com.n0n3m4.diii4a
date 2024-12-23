@@ -143,6 +143,7 @@ public final class Q3EPreference
     public static final String pref_harm_r_shadowMapPerforatedShadow  = "q3e_harm_r_shadowMapPerforatedShadow"; //k
     public static final String pref_harm_gzdoom_load_lights_pk3       = "harm_gzdoom_load_lights_pk3";
     public static final String pref_harm_gzdoom_load_brightmaps_pk3   = "harm_gzdoom_load_brightmaps_pk3";
+    public static final String pref_harm_max_console_height_frac      = "q3e_harm_max_console_height_frac"; //k
 
     public static final String RUN_BACKGROUND                = "harm_run_background";
     public static final String RENDER_MEM_STATUS             = "harm_render_mem_status";
