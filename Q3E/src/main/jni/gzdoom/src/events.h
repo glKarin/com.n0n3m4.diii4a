@@ -4,6 +4,7 @@
 #include "dobject.h"
 #include "serializer.h"
 #include "d_event.h"
+#include "p_local.h"
 #include "sbar.h"
 #include "info.h"
 #include "vm.h"
@@ -311,6 +312,10 @@ public:
 	void WorldThingRevived(AActor* actor);
 	void WorldThingDamaged(AActor* actor, AActor* inflictor, AActor* source, int damage, FName mod, int flags, DAngle angle);
 	void WorldThingDestroyed(AActor* actor);
+	bool WorldHitscanPreFired(AActor* actor, DAngle angle, double distance, DAngle pitch, int damage, FName damageType, PClassActor *pufftype, int flags, double sz, double offsetforward, double offsetside);
+	bool WorldRailgunPreFired(FName damageType, PClassActor* pufftype, FRailParams* param);
+	void WorldHitscanFired(AActor* actor, const DVector3& AttackPos, const DVector3& DamagePosition, AActor* Inflictor, int flags);
+	void WorldRailgunFired(AActor* actor, const DVector3& AttackPos, const DVector3& DamagePosition, AActor* Inflictor, int flags);
 	void WorldLinePreActivated(line_t* line, AActor* actor, int activationType, bool* shouldactivate);
 	void WorldLineActivated(line_t* line, AActor* actor, int activationType);
 	int WorldSectorDamaged(sector_t* sector, AActor* source, int damage, FName damagetype, int part, DVector3 position, bool isradius);
@@ -393,6 +398,16 @@ struct FWorldEvent
 	bool DamageIsRadius; // radius damage yes/no
 	int NewDamage = 0; // sector/line damaged. allows modifying damage
 	FState* CrushedState = nullptr; // custom crush state set in thingground
+	DVector3 AttackPos; //hitscan point of origin
+	DAngle AttackAngle;
+	DAngle AttackPitch;
+	double AttackDistance = 0;
+	double AttackOffsetForward = 0;
+	double AttackOffsetSide = 0;
+	double AttackZ = 0;
+	PClassActor* AttackPuffType = nullptr;
+	FRailParams RailParams;
+	int AttackLineFlags = 0;
 };
 
 struct FPlayerEvent
@@ -467,6 +482,14 @@ struct EventManager
 	void WorldThingSpawned(AActor* actor);
 	// called after AActor::Die of each actor.
 	void WorldThingDied(AActor* actor, AActor* inflictor);
+	// called when a hitscan attack is fired (can be overridden to block it)
+	bool WorldHitscanPreFired(AActor* actor, DAngle angle, double distance, DAngle pitch, int damage, FName damageType, PClassActor *pufftype, int flags, double sz, double offsetforward, double offsetside);
+	// called when a hitscan attack has been fired
+	void WorldHitscanFired(AActor* actor, const DVector3& AttackPos, const DVector3& DamagePosition, AActor* Inflictor, int flags);
+	// called when a railgun attack has been fired
+	void WorldRailgunFired(AActor* actor, const DVector3& AttackPos, const DVector3& DamagePosition, AActor* Inflictor, int flags);
+	// called when a railgun attack has been fired (can be overridden to block it)
+	bool WorldRailgunPreFired(FName damageType, PClassActor* pufftype, FRailParams* param);
 	// called inside AActor::Grind just before the corpse is destroyed
 	void WorldThingGround(AActor* actor, FState* st);
 	// called after AActor::Revive.

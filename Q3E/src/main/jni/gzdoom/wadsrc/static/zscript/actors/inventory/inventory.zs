@@ -261,24 +261,29 @@ class Inventory : Actor
 		}
 	}
 
+	virtual bool ShouldShareItem(Actor giver)
+	{
+		return false;
+	}
+
 	protected void ShareItemWithPlayers(Actor giver)
 	{
 		if (bSharingItem)
 			return;
 
-		class<Inventory> type = GetClass();
 		int skip = giver && giver.player ? giver.PlayerNumber() : -1;
-
 		for (int i; i < MAXPLAYERS; ++i)
 		{
 			if (!playerInGame[i] || i == skip)
 				continue;
 
-			let item = Inventory(Spawn(type));
-			if (!item)
+			let item = CreateLocalCopy(players[i].mo);
+			if (!item || item == self)
 				continue;
 
+			item.ClearCounters();
 			item.bSharingItem = true;
+			item.bDropped = item.bNeverLocal = true;
 			if (!item.CallTryPickup(players[i].mo))
 			{
 				item.Destroy();
@@ -288,14 +293,13 @@ class Inventory : Actor
 
 			if (!bQuiet)
 			{
-				PlayPickupSound(players[i].mo);
+				PrintPickupMessage(i == consoleplayer, item.PickupMessage());
+
+				item.PlayPickupSound(players[i].mo);
 				if (!bNoScreenFlash && players[i].PlayerState != PST_DEAD)
 					players[i].BonusCount = BONUSADD;
 			}
 		}
-
-		if (!bQuiet && consoleplayer != skip)
-			PrintPickupMessage(true, PickupMessage());
 	}
 
 	//===========================================================================
@@ -643,9 +647,10 @@ class Inventory : Actor
 		// unmorphed versions of a currently morphed actor cannot pick up anything. 
 		if (bUnmorphed) return false, null;
 
-		//[AA] starting with true, so that CanReceive can unset it,
+		// [AA] starting with true, so that CanReceive can unset it,
 		// if necessary:
 		bool res = true;
+		class<Inventory> cls = self.GetClass();
 		// [AA] CanReceive lets the actor receiving the item process it first.
 		if (!toucher.CanReceive(self))
 		{
@@ -692,10 +697,10 @@ class Inventory : Actor
 				}
 			}
 			// [AA] Let the toucher do something with the item they've just received:
-			toucher.HasReceived(self);
+			toucher.HasReceived(self, cls);
 
 			// If the item can be shared, make sure every player gets a copy.
-			if (multiplayer && !deathmatch && sv_coopsharekeys && bIsKeyItem)
+			if (multiplayer && !deathmatch && !bDropped && ShouldShareItem(toucher))
 				ShareItemWithPlayers(toucher);
 		}
 		return res, toucher;
@@ -844,6 +849,8 @@ class Inventory : Actor
 				return;
 
 			localPickUp = give != self;
+			if (localPickUp)
+				give.ClearCounters();
 		}
 
 		bool res;
@@ -864,13 +871,13 @@ class Inventory : Actor
 
 		if (!bQuiet)
 		{
-			PrintPickupMessage(localview, PickupMessage ());
+			PrintPickupMessage(localview, give.PickupMessage ());
 
 			// Special check so voodoo dolls picking up items cause the
 			// real player to make noise.
 			if (player != NULL)
 			{
-				PlayPickupSound (player.mo);
+				give.PlayPickupSound (player.mo);
 				if (!bNoScreenFlash && player.playerstate != PST_DEAD)
 				{
 					player.bonuscount = BONUSADD;
@@ -878,7 +885,7 @@ class Inventory : Actor
 			}
 			else
 			{
-				PlayPickupSound (toucher);
+				give.PlayPickupSound (toucher);
 			}
 		}							
 
@@ -1121,6 +1128,7 @@ class Inventory : Actor
 		int pNum = client.PlayerNumber();
 		pickedUp[pNum] = true;
 		DisableLocalRendering(pNum, true);
+		bCountItem = bCountSecret = false;
 	}
 
 	// Force spawn a new version of the item. This needs to use CreateCopy so that

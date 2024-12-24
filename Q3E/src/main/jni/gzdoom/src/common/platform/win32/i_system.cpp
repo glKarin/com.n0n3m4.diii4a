@@ -102,6 +102,7 @@
 // PUBLIC FUNCTION PROTOTYPES ----------------------------------------------
 
 void DestroyCustomCursor();
+bool isConsoleApp();
 
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
@@ -306,6 +307,7 @@ static void PrintToStdOut(const char *cpt, HANDLE StdOut)
 			else break;
 		}
 	}
+
 	DWORD bytes_written;
 	WriteFile(StdOut, printData.GetChars(), (DWORD)printData.Len(), &bytes_written, NULL);
 	if (terminal) 
@@ -353,7 +355,7 @@ static void SetQueryIWad(HWND dialog)
 //
 //==========================================================================
 
-int I_PickIWad(WadStuff *wads, int numwads, bool showwin, int defaultiwad, int& autoloadflags)
+int I_PickIWad(WadStuff *wads, int numwads, bool showwin, int defaultiwad, int& autoloadflags, FString &extraArgs)
 {
 	int vkey;
 	if (stricmp(queryiwad_key, "shift") == 0)
@@ -370,7 +372,7 @@ int I_PickIWad(WadStuff *wads, int numwads, bool showwin, int defaultiwad, int& 
 	}
 	if (showwin || (vkey != 0 && GetAsyncKeyState(vkey)))
 	{
-		return LauncherWindow::ExecModal(wads, numwads, defaultiwad, &autoloadflags);
+		return LauncherWindow::ExecModal(wads, numwads, defaultiwad, &autoloadflags, &extraArgs);
 	}
 	return defaultiwad;
 }

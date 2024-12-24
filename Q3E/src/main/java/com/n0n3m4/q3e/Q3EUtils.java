@@ -34,7 +34,6 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Process;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -951,7 +950,7 @@ public class Q3EUtils
         }
     }
 
-    public static boolean ExtractCopyDir(Context context, String assetFolderPath, String systemFolderPath, boolean overwrite, String...assetPaths)
+    public static boolean ExtractCopyDirFiles(Context context, String assetFolderPath, String systemFolderPath, boolean overwrite, String...assetPaths)
     {
         InputStream bis = null;
 
@@ -1039,6 +1038,37 @@ public class Q3EUtils
         }
     }
 
+    public static boolean ExtractCopyDir(Context context, String assetFolderPath, String systemFolderPath, boolean overwrite)
+    {
+        InputStream bis = null;
+
+        try
+        {
+            List<String> fileList = LsAssets(context, assetFolderPath);
+            if(null == fileList)
+                return false;
+
+            Q3EUtils.mkdir(systemFolderPath, true);
+
+            for (String assetPath : fileList)
+            {
+                String sourcePath = assetFolderPath + "/" + assetPath;
+                String entryName = systemFolderPath + "/" + assetPath;
+                ExtractCopyFile(context, sourcePath, entryName, overwrite);
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            Q3EUtils.Close(bis);
+        }
+    }
+
     public static boolean InMainThread(Context context)
     {
         return context.getMainLooper().getThread() == Thread.currentThread();
@@ -1062,5 +1092,46 @@ public class Q3EUtils
     public static void Post(Context context, Runnable runnable)
     {
         new Handler(context.getMainLooper()).post(runnable);
+    }
+
+    public static List<String> LsAssets(Context context, String assetFolderPath)
+    {
+        List<String> subList = new ArrayList<>();
+        if(LsAssets_r(context, assetFolderPath, "", subList))
+            return subList;
+        else
+            return null;
+    }
+
+    private static boolean LsAssets_r(Context context, String assetFolderPath, String prefix, List<String> res)
+    {
+        try
+        {
+            String[] list = context.getAssets().list(assetFolderPath);
+            if(null == list || list.length == 0)
+            {
+                return false;
+            }
+            for(String str : list)
+            {
+                String path = KStr.AppendPath(assetFolderPath, str);
+                System.err.println(path);
+                String subPrefix = KStr.IsBlank(prefix) ? str : KStr.AppendPath(prefix, str);
+                List<String> subList = new ArrayList<>();
+                if(LsAssets_r(context, path, subPrefix, subList))
+                {
+                    res.addAll(subList);
+                }
+                else
+                {
+                    res.add(subPrefix);
+                }
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 }

@@ -392,7 +392,7 @@ public class Q3EGameHelper
                     version = version.trim();
                 if(!apkVersion.equalsIgnoreCase(version))
                 {
-                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format(name + " file version is mismatch: %s != %s.", version, Q3EGlobals.RBDOOM3BFG_HLSL_SHADER_VERSION));
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format(name + " file version is mismatch: %s != %s.", version, apkVersion));
                     overwrite = true;
                 }
             }
@@ -407,6 +407,42 @@ public class Q3EGameHelper
             Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Check " + name + "(" + systemVersionPath + ") version file error.");
         }
         return overwrite;
+    }
+
+    private boolean CheckExtractResourceVersion(String systemVersionPath, String apkVersion, String name)
+    {
+        boolean change = false;
+
+        try
+        {
+            File versionFile = new File(systemVersionPath);
+            if(!versionFile.isFile() || !versionFile.canRead())
+            {
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, name + " file engine version not exists.");
+                change = true;
+            }
+            else
+            {
+                String version = Q3EUtils.file_get_contents(versionFile);
+                if(null != version)
+                    version = version.trim();
+                if(!apkVersion.equalsIgnoreCase(version))
+                {
+                    Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, String.format(name + " file engine version is mismatch: %s != %s.", version, apkVersion));
+                    change = true;
+                }
+            }
+            if(change)
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, name + " engine file will be change.");
+            else
+                Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, name + " engine file will keep exists version.");
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Check " + name + "(" + systemVersionPath + ") engine version file error.");
+        }
+        return change;
     }
 
     private void DumpExtractResourceVersion(String systemVersionPath, String apkVersion, String name)
@@ -457,15 +493,39 @@ public class Q3EGameHelper
 
     public void ExtractGZDOOMResource()
     {
+        String versionKey = Q3EUtils.q3ei.GetGameVersionPreferenceKey();
+        String gameVersion = PreferenceManager.getDefaultSharedPreferences(m_context).getString(versionKey, "");
+
+        Q3EGlobals.PatchResource gzdoomResource;
+        String versionCheckFile;
+        String versionName;
+        if("4.12.2".equals(gameVersion))
+        {
+            versionName = "4.12.2";
+            versionCheckFile = "idtech4amm.4.12.2.version";
+            gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE_4_12_2;
+        }
+        else
+        {
+            versionName = "4.14.0";
+            versionCheckFile = "idtech4amm.version";
+            gzdoomResource = Q3EGlobals.PatchResource.GZDOOM_RESOURCE;
+        }
+
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
-        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.version");
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", versionCheckFile);
+        final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
         final String version = Q3EGlobals.GZDOOM_VERSION;
         final String name = "GZDOOM game resource";
 
-        boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
-
-        if(manager.Fetch(Q3EGlobals.PatchResource.GZDOOM_RESOURCE, overwrite) != null)
+        boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
+        boolean overwrite = change || CheckExtractResourceOverwrite(versionFile, version, name);
+        if(manager.Fetch(gzdoomResource, overwrite) != null)
         {
+            if (change)
+            {
+                DumpExtractResourceVersion(engineVersionFile, versionName, name);
+            }
             if (overwrite)
             {
                 DumpExtractResourceVersion(versionFile, version, name);

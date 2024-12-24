@@ -21,7 +21,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
 #include "blargg_source.h"
 
 #ifdef HAVE_ZLIB_H
-#include <zlib.h>
+// [ZMusic] Use miniz.
+#include <miniz.h>
 #include <stdlib.h>
 #include <errno.h>
 static const unsigned char gz_magic[2] = {0x1f, 0x8b}; /* gzip magic header */

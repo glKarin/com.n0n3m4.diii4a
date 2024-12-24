@@ -31,13 +31,18 @@
 **---------------------------------------------------------------------------
 */
 
+#include "zmusic_internal.h"
+
+#ifdef HAVE_OPL
+
+#include <stdexcept>
+
 #include "streamsource.h"
 #include "oplsynth/opl.h"
 #include "oplsynth/opl_mus_player.h"
 #include "fileio.h"
 #include "zmusic/midiconfig.h"
 
-#ifdef HAVE_OPL
 //==========================================================================
 //
 // OPL file played by a software OPL2 synth and streamed through the sound system
@@ -51,7 +56,7 @@ public:
 	~OPLMUSSong ();
 	bool Start() override;
 	void ChangeSettingInt(const char *name, int value) override;
-	SoundStreamInfo GetFormat() override;
+	SoundStreamInfoEx GetFormatEx() override;
 
 protected:
 	bool GetData(void *buffer, size_t len) override;
@@ -90,10 +95,11 @@ OPLMUSSong::OPLMUSSong(MusicIO::FileInterface* reader, OPLConfig* config)
 //
 //==========================================================================
 
-SoundStreamInfo OPLMUSSong::GetFormat()
+SoundStreamInfoEx OPLMUSSong::GetFormatEx()
 {
 	int samples = int(OPL_SAMPLE_RATE / 14);
-	return { samples * 4, int(OPL_SAMPLE_RATE), current_opl_core == 0? 1:2  };
+	return { samples * 4, int(OPL_SAMPLE_RATE), SampleType_Float32,
+		current_opl_core == 0? ChannelConfig_Mono:ChannelConfig_Stereo };
 }
 
 //==========================================================================

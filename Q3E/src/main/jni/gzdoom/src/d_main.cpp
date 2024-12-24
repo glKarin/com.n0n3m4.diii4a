@@ -1,4 +1,5 @@
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Copyright 1993-1996 id Software
 // Copyright 1999-2016 Randy Heit
 // Copyright 2002-2016 Christoph Oelckers
@@ -160,6 +161,7 @@ bool M_SetSpecialMenu(FName& menu, int param);	// game specific checks
 
 const FIWADInfo *D_FindIWAD(TArray<FString> &wadfiles, const char *iwad, const char *basewad);
 void InitWidgetResources(const char* basewad);
+void CloseWidgetResources();
 
 // PUBLIC FUNCTION PROTOTYPES ----------------------------------------------
 
@@ -260,7 +262,7 @@ CUSTOM_CVAR (Int, fraglimit, 0, CVAR_SERVERINFO)
 		{
 			if (playeringame[i] && self <= D_GetFragCount(&players[i]))
 			{
-				Printf ("%s\n", GStrings("TXT_FRAGLIMIT"));
+				Printf ("%s\n", GStrings.GetString("TXT_FRAGLIMIT"));
 				primaryLevel->ExitLevel (0, false);
 				break;
 			}
@@ -660,6 +662,19 @@ CUSTOM_CVAR(Int, compatmode, 0, CVAR_ARCHIVE|CVAR_NOINITCALL)
 			COMPATF_NOTOSSDROPS | COMPATF_MUSHROOM | COMPATF_NO_PASSMOBJ | COMPATF_BOOMSCROLL | COMPATF_WALLRUN |
 			COMPATF_TRACE | COMPATF_HITSCAN | COMPATF_MISSILECLIP | COMPATF_MASKEDMIDTEX | COMPATF_SOUNDTARGET;
 		w = COMPATF2_POINTONLINE | COMPATF2_EXPLODE1 | COMPATF2_EXPLODE2 | COMPATF2_AVOID_HAZARDS | COMPATF2_STAYONLIFT | COMPATF2_NOMBF21;
+		break;
+
+	case 8: // MBF21 compat mode
+		v = COMPATF_TRACE | COMPATF_SOUNDTARGET | COMPATF_BOOMSCROLL | COMPATF_MISSILECLIP | COMPATF_CROSSDROPOFF |
+			COMPATF_MUSHROOM | COMPATF_MBFMONSTERMOVE | COMPATF_NOBLOCKFRIENDS | COMPATF_MASKEDMIDTEX;
+		w = COMPATF2_EXPLODE1 | COMPATF2_AVOID_HAZARDS | COMPATF2_STAYONLIFT;
+		break;
+
+	case 9: // Stricter MBF21 compatibility
+		v = COMPATF_NOBLOCKFRIENDS | COMPATF_MBFMONSTERMOVE | COMPATF_INVISIBILITY |
+			COMPATF_NOTOSSDROPS | COMPATF_MUSHROOM | COMPATF_NO_PASSMOBJ | COMPATF_BOOMSCROLL | COMPATF_WALLRUN |
+			COMPATF_TRACE | COMPATF_HITSCAN | COMPATF_MISSILECLIP | COMPATF_CROSSDROPOFF | COMPATF_MASKEDMIDTEX | COMPATF_SOUNDTARGET;
+		w = COMPATF2_POINTONLINE | COMPATF2_EXPLODE1 | COMPATF2_EXPLODE2 | COMPATF2_AVOID_HAZARDS | COMPATF2_STAYONLIFT;
 		break;
 	}
 	compatflags = v;
@@ -1107,7 +1122,7 @@ void D_Display ()
 				if (paused && multiplayer)
 				{
 					FFont *font = generic_ui? NewSmallFont : SmallFont;
-					FString pstring = GStrings("TXT_BY");
+					FString pstring = GStrings.GetString("TXT_BY");
 					pstring.Substitute("%s", players[paused - 1].userinfo.GetName());
 					DrawText(twod, font, CR_RED,
 						(twod->GetWidth() - font->StringWidth(pstring)*CleanXfac) / 2,
@@ -1238,6 +1253,8 @@ void D_DoomLoop ()
 			if(!q3e_running) // exit
 				throw CExitEvent(0);
 #endif
+
+			GStrings.SetDefaultGender(players[consoleplayer].userinfo.GetGender()); // cannot be done when the CVAR changes because we don't know if it's for the consoleplayer.
 			// frame syncronous IO operations
 			if (gametic > lasttic)
 			{
@@ -1336,7 +1353,7 @@ void D_PageDrawer (void)
 	if (Subtitle != nullptr)
 	{
 		FFont* font = generic_ui ? NewSmallFont : SmallFont;
-		DrawFullscreenSubtitle(font, GStrings[Subtitle]);
+		DrawFullscreenSubtitle(font, GStrings.CheckString(Subtitle));
 	}
 	if (Advisory.isValid())
 	{
@@ -1805,7 +1822,7 @@ bool ConsiderPatches (const char *arg)
 		if ( (f = BaseFileSearch(args[i].GetChars(), ".deh", false, GameConfig)) ||
 			 (f = BaseFileSearch(args[i].GetChars(), ".bex", false, GameConfig)) )
 		{
-			D_LoadDehFile(f);
+			D_LoadDehFile(f, 0);
 		}
 	}
 	return argc > 0;
@@ -1832,7 +1849,9 @@ static void GetCmdLineFiles(std::vector<std::string>& wadfiles)
 	int i, argc;
 
 	argc = Args->CheckParmList("-file", &args);
-	for (i = 0; i < argc; ++i)
+
+	// [RL0] Check for array size to only add new wads
+	for (i = wadfiles.size(); i < argc; ++i)
 	{
 		D_AddWildFile(wadfiles, args[i].GetChars(), ".wad", GameConfig);
 	}
@@ -2203,7 +2222,7 @@ static void CheckCmdLine()
 
 	if (devparm)
 	{
-		Printf ("%s", GStrings("D_DEVSTR"));
+		Printf ("%s", GStrings.GetString("D_DEVSTR"));
 	}
 
 	// turbo option  // [RH] (now a cvar)
@@ -2680,11 +2699,6 @@ void Mlook_ReleaseHandler()
 	}
 }
 
-int StrTable_GetGender()
-{
-	return players[consoleplayer].userinfo.GetGender();
-}
-
 bool StrTable_ValidFilter(const char* str)
 {
 	if (gameinfo.gametype == GAME_Strife && (gameinfo.flags & GI_SHAREWARE) && !stricmp(str, "strifeteaser")) return true;
@@ -3053,39 +3067,6 @@ static void System_HudScaleChanged()
 
 bool  CheckSkipGameOptionBlock(const char* str);
 
-//==========================================================================
-//
-//
-//
-//==========================================================================
-
-static FILE* D_GetHashFile()
-{
-	FILE *hashfile = nullptr;
-
-	if (Args->CheckParm("-hashfiles"))
-	{
-		const char *filename = "fileinfo.txt";
-		Printf("Hashing loaded content to: %s\n", filename);
-		hashfile = fopen(filename, "w");
-		if (hashfile)
-		{
-			Printf("Notice: File hashing is incredibly verbose. Expect loading files to take much longer than usual.\n");
-			fprintf(hashfile, "%s version %s (%s)\n", GAMENAME, GetVersionString(), GetGitHash());
-#ifdef __VERSION__
-			fprintf(hashfile, "Compiler version: %s\n", __VERSION__);
-#endif
-			fprintf(hashfile, "Command line:");
-			for (int i = 0; i < Args->NumArgs(); ++i)
-			{
-				fprintf(hashfile, " %s", Args->GetArg(i));
-			}
-			fprintf(hashfile, "\n");
-		}
-	}
-	return hashfile;
-}
-
 // checks if a file within a directory is allowed to be added to the file system.
 static bool FileNameCheck(const char* base, const char* path)
 {
@@ -3242,8 +3223,7 @@ static int D_InitGame(const FIWADInfo* iwad_info, std::vector<std::string>& allw
 	);
 
 	bool allowduplicates = Args->CheckParm("-allowduplicates");
-	auto hashfile = D_GetHashFile();
-	if (!fileSystem.InitMultipleFiles(allwads, &lfi, FileSystemPrintf, allowduplicates, hashfile))
+	if (!fileSystem.InitMultipleFiles(allwads, &lfi, FileSystemPrintf, allowduplicates))
 	{
 		I_FatalError("FileSystem: no files found");
 	}
@@ -3385,7 +3365,7 @@ static int D_InitGame(const FIWADInfo* iwad_info, std::vector<std::string>& allw
 
 	// [CW] Parse any TEAMINFO lumps.
 	if (!batchrun) Printf ("ParseTeamInfo: Load team definitions.\n");
-	TeamLibrary.ParseTeamInfo ();
+	FTeam::ParseTeamInfo ();
 
 	R_ParseTrnslate();
 	PClassActor::StaticInit ();
@@ -3422,7 +3402,7 @@ static int D_InitGame(const FIWADInfo* iwad_info, std::vector<std::string>& allw
 	auto numbasesounds = soundEngine->GetNumSounds();
 
 	// Load embedded Dehacked patches
-	D_LoadDehLumps(FromIWAD);
+	D_LoadDehLumps(FromIWAD, iwad_info->SkipBexStringsIfLanguage ? DEH_SKIP_BEX_STRINGS_IF_LANGUAGE : 0);
 
 	// [RH] Add any .deh and .bex files on the command line.
 	// If there are none, try adding any in the config file.
@@ -3439,13 +3419,13 @@ static int D_InitGame(const FIWADInfo* iwad_info, std::vector<std::string>& allw
 			if (stricmp (key, "Path") == 0 && FileExists (value))
 			{
 				if (!batchrun) Printf ("Applying patch %s\n", value);
-				D_LoadDehFile(value);
+				D_LoadDehFile(value, 0);
 			}
 		}
 	}
 
 	// Load embedded Dehacked patches
-	D_LoadDehLumps(FromPWADs);
+	D_LoadDehLumps(FromPWADs, 0);
 
 	// Create replacements for dehacked pickups
 	FinishDehPatch();
@@ -3497,7 +3477,7 @@ static int D_InitGame(const FIWADInfo* iwad_info, std::vector<std::string>& allw
 		for (int p = 0; p < 5; ++p)
 		{
 			// At this point we cannot use the player's gender info yet so force 'male' here.
-			const char *str = GStrings.GetString(startupString[p], nullptr, 0);
+			const char *str = GStrings.CheckString(startupString[p], nullptr, 0);
 			if (str != NULL && str[0] != '\0')
 			{
 				Printf("%s\n", str);
@@ -3661,6 +3641,7 @@ static int D_DoomMain_Internal (void)
 	const char *wad;
 	FIWadManager *iwad_man;
 
+	NetworkEntityManager::NetIDStart = MAXPLAYERS + 1;
 	GC::AddMarkerFunc(GC_MarkGameRoots);
 	VM_CastSpriteIDToString = Doom_CastSpriteIDToString;
 
@@ -3688,7 +3669,6 @@ static int D_DoomMain_Internal (void)
 		System_GetPlayerName,
 		System_DispatchEvent,
 		StrTable_ValidFilter,
-		StrTable_GetGender,
 		nullptr,
 		CheckSkipGameOptionBlock,
 		System_ConsoleToggled,
@@ -3792,6 +3772,9 @@ static int D_DoomMain_Internal (void)
 		std::vector<std::string> allwads;
 		
 		const FIWADInfo *iwad_info = iwad_man->FindIWAD(allwads, iwad.GetChars(), basewad.GetChars(), optionalwad.GetChars());
+
+		GetCmdLineFiles(pwads); // [RL0] Update with files passed on the launcher extra args
+
 		if (!iwad_info) return 0;	// user exited the selection popup via cancel button.
 		if ((iwad_info->flags & GI_SHAREWARE) && pwads.size() > 0)
 		{
@@ -3867,6 +3850,7 @@ int GameMain()
 	M_SaveDefaultsFinal();
 	DeleteStartupScreen();
 	C_UninitCVars(); // must come last so that nothing will access the CVARs anymore after deletion.
+	CloseWidgetResources();
 	delete Args;
 	Args = nullptr;
 	return ret;
@@ -3962,7 +3946,7 @@ void D_Cleanup()
 //
 //==========================================================================
 
-UNSAFE_CCMD(restart)
+UNSAFE_CCMD(debug_restart)
 {
 	// remove command line args that would get in the way during restart
 	Args->RemoveArgs("-iwad");
@@ -4061,7 +4045,7 @@ CCMD(fs_dir)
 		auto fnid = fileSystem.GetResourceId(i);
 		auto length = fileSystem.FileLength(i);
 		bool hidden = fileSystem.FindFile(fn1) != i;
-		Printf(PRINT_HIGH | PRINT_NONOTIFY, "%s%-64s %-15s (%5d) %10zd %s %s\n", hidden ? TEXTCOLOR_RED : TEXTCOLOR_UNTRANSLATED, fn1, fns, fnid, length, container, hidden ? "(h)" : "");
+		Printf(PRINT_HIGH | PRINT_NONOTIFY, "%s%-64s %-15s (%5d) %10d %s %s\n", hidden ? TEXTCOLOR_RED : TEXTCOLOR_UNTRANSLATED, fn1, fns, fnid, length, container, hidden ? "(h)" : "");
 	}
 }
 

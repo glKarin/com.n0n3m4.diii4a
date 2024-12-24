@@ -261,7 +261,7 @@ void CT_Drawer (void)
 			if (!!rv) return;
 		}
 
-		FStringf prompt("%s ", GStrings("TXT_SAY"));
+		FStringf prompt("%s ", GStrings.GetString("TXT_SAY"));
 		int x, scalex, y, promptwidth;
 
 		y = (viewactive || gamestate != GS_LEVEL) ? -displayfont->GetHeight()-2 : -displayfont->GetHeight() - 22;
@@ -436,7 +436,7 @@ static bool DoSubstitution (FString &out, const char *in)
 		{
 			if (strnicmp(a, "armor", 5) == 0)
 			{
-				auto armor = player->mo->FindInventory(NAME_BasicArmor);
+				auto armor = player->mo->FindInventory(NAME_BasicArmor, true);
 				out.AppendFormat("%d", armor != NULL ? armor->IntVar(NAME_Amount) : 0);
 			}
 		}

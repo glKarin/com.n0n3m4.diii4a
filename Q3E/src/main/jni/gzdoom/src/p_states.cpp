@@ -1100,7 +1100,7 @@ void DumpStateHelper(FStateLabels *StateList, const FString &prefix)
 			if (owner == NULL)
 			{
 				if (state->DehIndex >= 0)
-					Printf(PRINT_LOG, "%s: DehExtra %d\n", prefix.GetChars(), state->DehIndex);
+					Printf(PRINT_LOG, "%s%s: DehExtra %d\n", prefix.GetChars(), state->DehIndex);
 				else
 					Printf(PRINT_LOG, "%s%s: invalid\n", prefix.GetChars(), StateList->Labels[i].Label.GetChars());
 			}

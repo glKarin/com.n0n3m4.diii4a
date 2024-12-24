@@ -81,13 +81,13 @@ public class Q3EPatchResourceManager
         resourceList.add(rsc);
 
         rsc = new Q3EPatchResource(
-                Q3EGlobals.PatchResource.GZDOOM_RESOURCE,
-                Q3ELang.tr(context, R.string.gzdoom_builtin_resource),
-                Q3EGlobals.GZDOOM_VERSION,
+                Q3EGlobals.PatchResource.GZDOOM_RESOURCE_4_12_2,
+                Q3ELang.tr(context, R.string.gzdoom_builtin_resource) + "(4.12.2)",
+                Q3EGlobals.GZDOOM_4_12_2_VERSION,
                 Q3EGlobals.GAME_GZDOOM,
                 null,
                 Q3EPatchResource.COPY_DIR_FILES_TO_DIR,
-                "pak/gzdoom",
+                "pak/gzdoom/4.12.2",
                 "",
 
                 "brightmaps.pk3",
@@ -98,6 +98,18 @@ public class Q3EPatchResourceManager
                 "soundfonts/gzdoom.sf2",
                 "fm_banks/GENMIDI.GS.wopl",
                 "fm_banks/gs-by-papiezak-and-sneakernets.wopn"
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource(
+                Q3EGlobals.PatchResource.GZDOOM_RESOURCE,
+                Q3ELang.tr(context, R.string.gzdoom_builtin_resource) + "(4.14.0)",
+                Q3EGlobals.GZDOOM_VERSION,
+                Q3EGlobals.GAME_GZDOOM,
+                null,
+                Q3EPatchResource.COPY_DIR_TO_DIR,
+                "pak/gzdoom/4.14.0",
+                ""
         );
         resourceList.add(rsc);
     }

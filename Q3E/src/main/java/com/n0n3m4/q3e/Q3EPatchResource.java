@@ -1,8 +1,6 @@
 package com.n0n3m4.q3e;
 
-import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 
 import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
@@ -15,6 +13,7 @@ public class Q3EPatchResource
     public static final int COPY_FILE_TO_DIR      = 2; // copy assets/patch.pk4 -> dirname/
     public static final int COPY_DIR_FILES_TO_DIR = 3; // copy assets/ :: patch.pk4, other/other.pk4, ... -> dirname/
     public static final int EXTRACT_ZIP_TO_DIR    = 4; // extract assets/patch.zip -> dirname/
+    public static final int COPY_DIR_TO_DIR       = 5; // copy assets/ -> dirname/
 
     public final Q3EGlobals.PatchResource type;
     public final String                   name;
@@ -57,6 +56,8 @@ public class Q3EPatchResource
                 return CopyDirFilesToDir(context, overwrite, fsgame);
             case EXTRACT_ZIP_TO_DIR:
                 return ExtractZipToDir(context, overwrite, fsgame);
+            case COPY_DIR_TO_DIR:
+                return CopyDirToDir(context, overwrite, fsgame);
             default:
                 throw new RuntimeException("Unexcept extract type:" + extract);
         }
@@ -93,7 +94,7 @@ public class Q3EPatchResource
     {
         String toPath = MakeOutPath(fsgame);
         KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying directory '%s' files '%s' to directory '%s/'", assetPath, Arrays.toString(assetFiles), toPath);
-        return Q3EUtils.ExtractCopyDir(context, assetPath, toPath, overwrite, assetFiles) ? toPath : null;
+        return Q3EUtils.ExtractCopyDirFiles(context, assetPath, toPath, overwrite, assetFiles) ? toPath : null;
     }
 
     private String ExtractZipToDir(Context context, boolean overwrite, String...fsgame)
@@ -101,5 +102,12 @@ public class Q3EPatchResource
         String toPath = MakeOutPath(fsgame);
         KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Extracting zip file '%s' to directory '%s/'", assetPath, toPath);
         return Q3EUtils.ExtractZip(context, assetPath, toPath, overwrite) ? toPath : null;
+    }
+
+    private String CopyDirToDir(Context context, boolean overwrite, String...fsgame)
+    {
+        String toPath = MakeOutPath(fsgame);
+        KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying directory '%s' to directory '%s/'", assetPath, toPath);
+        return Q3EUtils.ExtractCopyDir(context, assetPath, toPath, overwrite) ? toPath : null;
     }
 }

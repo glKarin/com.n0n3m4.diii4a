@@ -919,11 +919,12 @@ public:
 	TDeletingArray(TDeletingArray<T,TT> &&other) : TArray<T,TT>(std::move(other)) {}
 	TDeletingArray<T,TT> &operator=(TDeletingArray<T,TT> &&other)
 	{
+		DeleteAndClear();
 		TArray<T,TT>::operator=(std::move(other));
 		return *this;
 	}
 
-	~TDeletingArray<T, TT> ()
+	~TDeletingArray()
 	{
 		for (unsigned int i = 0; i < TArray<T,TT>::Size(); ++i)
 		{

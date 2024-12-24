@@ -220,7 +220,7 @@ void FShaderProgram::SetUniformBufferLocation(int index, const char *name)
 
 void FShaderProgram::Bind()
 {
-	printf("BBB %s %s %d\n", mShaderNames[0].GetChars(), mShaderNames[1].GetChars(), mProgram);
+	//printf("Bind shader: %s %s %d\n", mShaderNames[0].GetChars(), mShaderNames[1].GetChars(), mProgram);
 	glUseProgram(mProgram);
 }
 

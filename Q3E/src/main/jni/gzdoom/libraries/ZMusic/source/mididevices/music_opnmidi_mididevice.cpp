@@ -34,6 +34,7 @@
 
 // HEADER FILES ------------------------------------------------------------
 
+#include <stdexcept>
 #include "mididevice.h"
 #include "zmusic/zmusic_internal.h"
 
@@ -46,7 +47,7 @@ class OPNMIDIDevice : public SoftSynthMIDIDevice
 {
 	struct OPN2_MIDIPlayer *Renderer;
 public:
-	OPNMIDIDevice(const char *bank);
+	OPNMIDIDevice(const OpnConfig *config);
 	~OPNMIDIDevice();
 	
 	
@@ -59,7 +60,7 @@ protected:
 	void ComputeOutput(float *buffer, int len) override;
 	
 private:
-	int LoadCustomBank(const char *bankfile);
+	int LoadCustomBank(const OpnConfig *config);
 };
 
 
@@ -82,25 +83,25 @@ enum
 //==========================================================================
 #include "data/xg.h"
 
-OPNMIDIDevice::OPNMIDIDevice(const char *bank)
+OPNMIDIDevice::OPNMIDIDevice(const OpnConfig *config)
 	:SoftSynthMIDIDevice(44100)
 {
 	Renderer = opn2_init(44100);	// todo: make it configurable
 	if (Renderer != nullptr)
 	{
-		if (!opnConfig.opn_use_custom_bank || !LoadCustomBank(opnConfig.opn_custom_bank.c_str()))
+		if (!LoadCustomBank(config))
 		{
-			if(opnConfig.default_bank.size() == 0)
+			if(config->default_bank.size() == 0)
 			{
-				opn2_openBankData(Renderer, xg_default, 62080);
+				opn2_openBankData(Renderer, xg_default, sizeof(xg_default));
 			}
-			else opn2_openBankData(Renderer, opnConfig.default_bank.data(), (long)opnConfig.default_bank.size());
+			else opn2_openBankData(Renderer, config->default_bank.data(), (long)config->default_bank.size());
 		}
 
-		opn2_switchEmulator(Renderer, (int)opnConfig.opn_emulator_id);
-		opn2_setRunAtPcmRate(Renderer, (int)opnConfig.opn_run_at_pcm_rate);
-		opn2_setNumChips(Renderer, opnConfig.opn_chips_count);
-		opn2_setSoftPanEnabled(Renderer, (int)opnConfig.opn_fullpan);
+		opn2_switchEmulator(Renderer, (int)config->opn_emulator_id);
+		opn2_setRunAtPcmRate(Renderer, (int)config->opn_run_at_pcm_rate);
+		opn2_setNumChips(Renderer, config->opn_chips_count);
+		opn2_setSoftPanEnabled(Renderer, (int)config->opn_fullpan);
 	}
 	else
 	{
@@ -133,9 +134,12 @@ OPNMIDIDevice::~OPNMIDIDevice()
 //==========================================================================
 
 
-int OPNMIDIDevice::LoadCustomBank(const char *bankfile)
+int OPNMIDIDevice::LoadCustomBank(const OpnConfig *config)
 {
-	if(!bankfile || !*bankfile)
+	const char *bankfile = config->opn_custom_bank.c_str();
+	if(!config->opn_use_custom_bank)
+		return 0;
+	if(!*bankfile)
 		return 0;
 	return (opn2_openBankFile(Renderer, bankfile) == 0);
 }
@@ -205,6 +209,7 @@ void OPNMIDIDevice::HandleEvent(int status, int parm1, int parm2)
 
 void OPNMIDIDevice::HandleLongEvent(const uint8_t *data, int len)
 {
+	opn2_rt_systemExclusive(Renderer, data, len);
 }
 
 static const OPNMIDI_AudioFormat audio_output_format =
@@ -235,17 +240,34 @@ void OPNMIDIDevice::ComputeOutput(float *buffer, int len)
 
 MIDIDevice *CreateOPNMIDIDevice(const char *Args)
 {
+	OpnConfig config = opnConfig;
+
 	const char* bank = Args && *Args ? Args : opnConfig.opn_use_custom_bank ? opnConfig.opn_custom_bank.c_str() : nullptr;
 	if (bank && *bank)
 	{
+		const char* info;
 		if (musicCallbacks.PathForSoundfont)
 		{ 
-			auto info = musicCallbacks.PathForSoundfont(bank, SF_WOPN);
-			if (info != nullptr) bank = info;
+			info = musicCallbacks.PathForSoundfont(bank, SF_WOPN);
+		}
+		else
+		{
+			info = bank;
+		}
+
+		if(info == nullptr)
+		{
+			config.opn_custom_bank = "";
+			config.opn_use_custom_bank = false;
+		}
+		else
+		{
+			config.opn_custom_bank = info;
+			config.opn_use_custom_bank = true;
 		}
 	}
 
-	return new OPNMIDIDevice(bank);
+	return new OPNMIDIDevice(&config);
 }
 
 #else

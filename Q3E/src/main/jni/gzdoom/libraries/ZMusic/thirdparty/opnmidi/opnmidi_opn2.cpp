@@ -1,8 +1,8 @@
 /*
- * libOPNMIDI is a free MIDI to WAV conversion library with OPN2 (YM2612) emulation
+ * libOPNMIDI is a free Software MIDI synthesizer library with OPN2 (YM2612) emulation
  *
  * MIDI parser and player (Original code from ADLMIDI): Copyright (c) 2010-2014 Joel Yliluoma <bisqwit@iki.fi>
- * OPNMIDI Library and YM2612 support:   Copyright (c) 2017-2018 Vitaly Novichkov <admin@wohlnet.ru>
+ * OPNMIDI Library and YM2612 support:   Copyright (c) 2017-2022 Vitaly Novichkov <admin@wohlnet.ru>
  *
  * Library is based on the ADLMIDI, a MIDI player for Linux and Windows with OPL3 emulation:
  * http://iki.fi/bisqwit/source/adlmidi.html
@@ -21,10 +21,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "opnmidi_opn2.hpp"
 #include "opnmidi_private.hpp"
 
 #if defined(OPNMIDI_DISABLE_NUKED_EMULATOR) && defined(OPNMIDI_DISABLE_MAME_EMULATOR) && \
-    defined(OPNMIDI_DISABLE_GENS_EMULATOR) && defined(OPNMIDI_DISABLE_GX_EMULATOR)
+    defined(OPNMIDI_DISABLE_GENS_EMULATOR) && defined(OPNMIDI_DISABLE_GX_EMULATOR) && \
+    defined(OPNMIDI_DISABLE_NP2_EMULATOR) && defined(OPNMIDI_DISABLE_MAME_2608_EMULATOR) && \
+    defined(OPNMIDI_DISABLE_PMDWIN_EMULATOR)
 #error "No emulators enabled. You must enable at least one emulator to use this library!"
 #endif
 
@@ -48,6 +51,26 @@
 #include "chips/gx_opn2.h"
 #endif
 
+// Neko Project II OPNA emulator
+#ifndef OPNMIDI_DISABLE_NP2_EMULATOR
+#include "chips/np2_opna.h"
+#endif
+
+// MAME YM2608 emulator
+#ifndef OPNMIDI_DISABLE_MAME_2608_EMULATOR
+#include "chips/mame_opna.h"
+#endif
+
+// PMDWin OPNA emulator
+#ifndef OPNMIDI_DISABLE_PMDWIN_EMULATOR
+#include "chips/pmdwin_opna.h"
+#endif
+
+// VGM File dumper
+#ifdef OPNMIDI_MIDI2VGM
+#include "chips/vgm_file_dumper.h"
+#endif
+
 static const unsigned opn2_emulatorSupport = 0
 #ifndef OPNMIDI_DISABLE_NUKED_EMULATOR
     | (1u << OPNMIDI_EMU_NUKED)
@@ -60,6 +83,18 @@ static const unsigned opn2_emulatorSupport = 0
 #endif
 #ifndef OPNMIDI_DISABLE_GX_EMULATOR
     | (1u << OPNMIDI_EMU_GX)
+#endif
+#ifndef OPNMIDI_DISABLE_NP2_EMULATOR
+    | (1u << OPNMIDI_EMU_NP2)
+#endif
+#ifndef OPNMIDI_DISABLE_MAME_2608_EMULATOR
+    | (1u << OPNMIDI_EMU_MAME_2608)
+#endif
+#ifndef OPNMIDI_DISABLE_PMDWIN_EMULATOR
+    | (1u << OPNMIDI_EMU_PMDWIN)
+#endif
+#ifdef OPNMIDI_MIDI2VGM
+    | (1u << OPNMIDI_VGM_DUMPER)
 #endif
 ;
 
@@ -91,6 +126,42 @@ int opn2_getLowestEmulator()
     return emu;
 }
 
+
+
+/***************************************************************
+ *                    Volume model tables                      *
+ ***************************************************************/
+
+// Mapping from MIDI volume level to OPL level value.
+
+static const uint_fast32_t s_dmx_volume_model[128] =
+{
+    0,  1,  3,  5,  6,  8,  10, 11,
+    13, 14, 16, 17, 19, 20, 22, 23,
+    25, 26, 27, 29, 30, 32, 33, 34,
+    36, 37, 39, 41, 43, 45, 47, 49,
+    50, 52, 54, 55, 57, 59, 60, 61,
+    63, 64, 66, 67, 68, 69, 71, 72,
+    73, 74, 75, 76, 77, 79, 80, 81,
+    82, 83, 84, 84, 85, 86, 87, 88,
+    89, 90, 91, 92, 92, 93, 94, 95,
+    96, 96, 97, 98, 99, 99, 100, 101,
+    101, 102, 103, 103, 104, 105, 105, 106,
+    107, 107, 108, 109, 109, 110, 110, 111,
+    112, 112, 113, 113, 114, 114, 115, 115,
+    116, 117, 117, 118, 118, 119, 119, 120,
+    120, 121, 121, 122, 122, 123, 123, 123,
+    124, 124, 125, 125, 126, 126, 127, 127,
+};
+
+static const uint_fast32_t W9X_volume_mapping_table[32] =
+{
+    63, 63, 40, 36, 32, 28, 23, 21,
+    19, 17, 15, 14, 13, 12, 11, 10,
+    9,  8,  7,  6,  5,  5,  4,  4,
+    3,  3,  2,  2,  1,  1,  0,  0
+};
+
 static const uint32_t g_noteChannelsMap[6] = { 0, 1, 2, 4, 5, 6 };
 
 static inline void getOpnChannel(size_t     in_channel,
@@ -104,15 +175,39 @@ static inline void getOpnChannel(size_t     in_channel,
     out_ch = static_cast<uint32_t>(ch4 % 3);
 }
 
-static opnInstMeta2 makeEmptyInstrument()
+
+/***************************************************************
+ *               Standard frequency formula                    *
+ * *************************************************************/
+
+static inline double s_commonFreq(double tone)
 {
-    opnInstMeta2 ins;
-    memset(&ins, 0, sizeof(opnInstMeta2));
-    ins.flags = opnInstMeta::Flag_NoSound;
+    return std::exp(0.057762265 * tone);
+}
+
+
+
+enum
+{
+    MasterVolumeDefault = 127
+};
+
+enum
+{
+    OPN_PANNING_LEFT  = 0x80,
+    OPN_PANNING_RIGHT = 0x40,
+    OPN_PANNING_BOTH  = 0xC0
+};
+
+static OpnInstMeta makeEmptyInstrument()
+{
+    OpnInstMeta ins;
+    memset(&ins, 0, sizeof(OpnInstMeta));
+    ins.flags = OpnInstMeta::Flag_NoSound;
     return ins;
 }
 
-const opnInstMeta2 OPN2::m_emptyInstrument = makeEmptyInstrument();
+const OpnInstMeta OPN2::m_emptyInstrument = makeEmptyInstrument();
 
 OPN2::OPN2() :
     m_regLFOSetup(0),
@@ -120,14 +215,19 @@ OPN2::OPN2() :
     m_scaleModulators(false),
     m_runAtPcmRate(false),
     m_softPanning(false),
+    m_masterVolume(MasterVolumeDefault),
     m_musicMode(MODE_MIDI),
     m_volumeScale(VOLUME_Generic),
+    m_channelAlloc(OPNMIDI_ChanAlloc_AUTO),
     m_lfoEnable(false),
-    m_lfoFrequency(0)
+    m_lfoFrequency(0),
+    m_chipFamily(OPNChip_OPN2)
 {
     m_insBankSetup.volumeModel = OPN2::VOLUME_Generic;
     m_insBankSetup.lfoEnable = false;
     m_insBankSetup.lfoFrequency = 0;
+    m_insBankSetup.chipType = OPNChip_OPN2;
+    m_insBankSetup.mt32defaults = false;
 
     // Initialize blank instruments banks
     m_insBanks.clear();
@@ -170,19 +270,32 @@ void OPN2::noteOff(size_t c)
     writeRegI(chip, 0, 0x28, g_noteChannelsMap[ch4]);
 }
 
-void OPN2::noteOn(size_t c, double hertz) // Hertz range: 0..131071
+void OPN2::noteOn(size_t c, double tone)
 {
+    // Hertz range: 0..131071
+    double hertz = s_commonFreq(tone);
+
+    if(hertz < 0) // Avoid infinite loop
+        return;
+
+    double coef;
+    switch(m_chipFamily)
+    {
+    case OPNChip_OPN2: default:
+        coef = 321.88557; break;
+    case OPNChip_OPNA:
+        coef = 309.12412; break;
+    }
+    hertz *= coef;
+
     size_t      chip;
     uint8_t     port;
     uint32_t    cc;
     size_t      ch4 = c % 6;
     getOpnChannel(c, chip, port, cc);
 
-    if(hertz < 0) // Avoid infinite loop
-        return;
-
     uint32_t octave = 0, ftone = 0, mul_offset = 0;
-    const opnInstData &adli = m_insCache[c];
+    const OpnTimbre &adli = m_insCache[c];
 
     //Basic range until max of octaves reaching
     while((hertz >= 1023.75) && (octave < 0x3800))
@@ -224,16 +337,20 @@ void OPN2::noteOn(size_t c, double hertz) // Hertz range: 0..131071
     writeRegI(chip, 0, 0x28, 0xF0 + g_noteChannelsMap[ch4]);
 }
 
-void OPN2::touchNote(size_t c, uint8_t volume, uint8_t brightness)
+void OPN2::touchNote(size_t c,
+                     uint_fast32_t velocity,
+                     uint_fast32_t channelVolume,
+                     uint_fast32_t channelExpression,
+                     uint8_t brightness)
 {
-    if(volume > 127) volume = 127;
-
     size_t      chip;
     uint8_t     port;
     uint32_t    cc;
     getOpnChannel(c, chip, port, cc);
 
-    const opnInstData &adli = m_insCache[c];
+    const OpnTimbre &adli = m_insCache[c];
+
+    uint_fast32_t volume = 0;
 
     uint8_t op_vol[4] =
     {
@@ -261,12 +378,90 @@ void OPN2::touchNote(size_t c, uint8_t volume, uint8_t brightness)
         {true ,true ,true ,true},//Algorithm #7:  W = 1 + 2 + 3 + 4
     };
 
+    switch(m_volumeScale)
+    {
+    default:
+    case Synth::VOLUME_Generic:
+    {
+        volume = velocity * m_masterVolume *
+                 channelVolume * channelExpression;
+
+        /* If the channel has arpeggio, the effective volume of
+             * *this* instrument is actually lower due to timesharing.
+             * To compensate, add extra volume that corresponds to the
+             * time this note is *not* heard.
+             * Empirical tests however show that a full equal-proportion
+             * increment sounds wrong. Therefore, using the square root.
+             */
+        //volume = (int)(volume * std::sqrt( (double) ch[c].users.size() ));
+        const double c1 = 11.541560327111707;
+        const double c2 = 1.601379199767093e+02;
+        const uint_fast32_t minVolume = 1108075; // 8725 * 127
+
+        // The formula below: SOLVE(V=127^4 * 2^( (A-63.49999) / 8), A)
+        if(volume > minVolume)
+        {
+            double lv = std::log(static_cast<double>(volume));
+            volume = static_cast<uint_fast32_t>(lv * c1 - c2) * 2;
+        }
+        else
+            volume = 0;
+    }
+    break;
+
+    case Synth::VOLUME_NATIVE:
+    {
+        volume = velocity * channelVolume * channelExpression;
+        //volume = volume * m_masterVolume / (127 * 127 * 127) / 2;
+        volume = (volume * m_masterVolume) / 4096766;
+
+        if(volume > 0)
+            volume += 64;//OPN has 0~127 range. As 0...63 is almost full silence, but at 64 to 127 is very closed to OPL3, just add 64.
+    }
+    break;
+
+    case Synth::VOLUME_DMX:
+    {
+        volume = (channelVolume * channelExpression * m_masterVolume) / 16129;
+        volume = (s_dmx_volume_model[volume] + 1) << 1;
+        volume = (s_dmx_volume_model[(velocity < 128) ? velocity : 127] * volume) >> 9;
+
+        if(volume > 0)
+            volume += 64;//OPN has 0~127 range. As 0...63 is almost full silence, but at 64 to 127 is very closed to OPL3, just add 64.
+    }
+    break;
+
+    case Synth::VOLUME_APOGEE:
+    {
+        volume = (channelVolume * channelExpression * m_masterVolume / 16129);
+        volume = ((64 * (velocity + 0x80)) * volume) >> 15;
+        //volume = ((63 * (vol + 0x80)) * Ch[MidCh].volume) >> 15;
+        if(volume > 0)
+            volume += 64;//OPN has 0~127 range. As 0...63 is almost full silence, but at 64 to 127 is very closed to OPL3, just add 64.
+    }
+    break;
+
+    case Synth::VOLUME_9X:
+    {
+        //volume = 63 - W9X_volume_mapping_table[(((vol * Ch[MidCh].volume /** Ch[MidCh].expression*/) * 127 / 16129 /*2048383*/) >> 2)];
+        volume = 63 - W9X_volume_mapping_table[((velocity * channelVolume * channelExpression * m_masterVolume / 2048383) >> 2)];
+        //volume = W9X_volume_mapping_table[vol >> 2] + volume;
+        if(volume > 0)
+            volume += 64;//OPN has 0~127 range. As 0...63 is almost full silence, but at 64 to 127 is very closed to OPL3, just add 64.
+    }
+    break;
+    }
+
+
+    if(volume > 127)
+        volume = 127;
+
     uint8_t alg = adli.fbalg & 0x07;
     for(uint8_t op = 0; op < 4; op++)
     {
         bool do_op = alg_do[alg][op] || m_scaleModulators;
         uint32_t x = op_vol[op];
-        uint32_t vol_res = do_op ? (127 - (static_cast<uint32_t>(volume) * (127 - (x & 127)))/127) : x;
+        uint32_t vol_res = do_op ? (127 - (static_cast<uint32_t>(volume) * (127 - (x & 127))) / 127) : x;
         if(brightness != 127)
         {
             brightness = static_cast<uint32_t>(::round(127.0 * ::sqrt((static_cast<double>(brightness)) * (1.0 / 127.0))));
@@ -283,7 +478,7 @@ void OPN2::touchNote(size_t c, uint8_t volume, uint8_t brightness)
     //   63 + chanvol * (instrvol / 63.0 - 1)
 }
 
-void OPN2::setPatch(size_t c, const opnInstData &instrument)
+void OPN2::setPatch(size_t c, const OpnTimbre &instrument)
 {
     size_t      chip;
     uint8_t     port;
@@ -307,7 +502,7 @@ void OPN2::setPan(size_t c, uint8_t value)
     uint8_t     port;
     uint32_t    cc;
     getOpnChannel(c, chip, port, cc);
-    const opnInstData &adli = m_insCache[c];
+    const OpnTimbre &adli = m_insCache[c];
     uint8_t val = 0;
     if(m_softPanning)
     {
@@ -348,6 +543,7 @@ void OPN2::setVolumeScaleModel(OPNMIDI_VolumeModels volumeModel)
 {
     switch(volumeModel)
     {
+    default:
     case OPNMIDI_VolumeModel_AUTO://Do nothing until restart playing
         break;
 
@@ -398,7 +594,7 @@ void OPN2::clearChips()
     m_chips.clear();
 }
 
-void OPN2::reset(int emulator, unsigned long PCM_RATE, void *audioTickHandler)
+void OPN2::reset(int emulator, unsigned long PCM_RATE, OPNFamily family, void *audioTickHandler)
 {
 #if !defined(ADLMIDI_AUDIO_TICK_HANDLER)
     ADL_UNUSED(audioTickHandler);
@@ -406,11 +602,23 @@ void OPN2::reset(int emulator, unsigned long PCM_RATE, void *audioTickHandler)
     clearChips();
     m_insCache.clear();
     m_regLFOSens.clear();
+#ifdef OPNMIDI_MIDI2VGM
+    if(emulator == OPNMIDI_VGM_DUMPER && (m_numChips > 2))
+        m_numChips = 2;// VGM Dumper can't work in multichip mode
+#endif
+    m_chips.clear();
     m_chips.resize(m_numChips, AdlMIDI_SPtr<OPNChipBase>());
+
+#ifdef OPNMIDI_MIDI2VGM
+    m_loopStartHook = NULL;
+    m_loopStartHookData = NULL;
+    m_loopEndHook = NULL;
+    m_loopEndHookData = NULL;
+#endif
 
     for(size_t i = 0; i < m_chips.size(); i++)
     {
-        OPNChipBase *chip;
+        OPNChipBase *chip = NULL;
 
         switch(emulator)
         {
@@ -419,55 +627,96 @@ void OPN2::reset(int emulator, unsigned long PCM_RATE, void *audioTickHandler)
             abort();
 #ifndef OPNMIDI_DISABLE_MAME_EMULATOR
         case OPNMIDI_EMU_MAME:
-            chip = new MameOPN2;
+            chip = new MameOPN2(family);
             break;
 #endif
 #ifndef OPNMIDI_DISABLE_NUKED_EMULATOR
         case OPNMIDI_EMU_NUKED:
-            chip = new NukedOPN2;
+            chip = new NukedOPN2(family);
             break;
 #endif
 #ifndef OPNMIDI_DISABLE_GENS_EMULATOR
         case OPNMIDI_EMU_GENS:
-            chip = new GensOPN2;
+            chip = new GensOPN2(family);
             break;
 #endif
 #ifndef OPNMIDI_DISABLE_GX_EMULATOR
         case OPNMIDI_EMU_GX:
-            chip = new GXOPN2;
+            chip = new GXOPN2(family);
+            break;
+#endif
+#ifndef OPNMIDI_DISABLE_NP2_EMULATOR
+        case OPNMIDI_EMU_NP2:
+            chip = new NP2OPNA<>(family);
+            break;
+#endif
+#ifndef OPNMIDI_DISABLE_MAME_2608_EMULATOR
+        case OPNMIDI_EMU_MAME_2608:
+            chip = new MameOPNA(family);
+            break;
+#endif
+#ifndef OPNMIDI_DISABLE_PMDWIN_EMULATOR
+        case OPNMIDI_EMU_PMDWIN:
+            chip = new PMDWinOPNA(family);
+            break;
+#endif
+#ifdef OPNMIDI_MIDI2VGM
+        case OPNMIDI_VGM_DUMPER:
+            chip = new VGMFileDumper(family, i, (i == 0 ? NULL : m_chips[0].get()));
+            if(i == 0)//Set hooks for first chip only
+            {
+                m_loopStartHook = &VGMFileDumper::loopStartHook;
+                m_loopStartHookData = chip;
+                m_loopEndHook  = &VGMFileDumper::loopEndHook;
+                m_loopEndHookData = chip;
+            }
             break;
 #endif
         }
+
         m_chips[i].reset(chip);
-        chip->setChipId((uint32_t)i);
-        chip->setRate((uint32_t)PCM_RATE, 7670454);
+        chip->setChipId(static_cast<uint32_t>(i));
+        chip->setRate(static_cast<uint32_t>(PCM_RATE), chip->nativeClockRate());
+
         if(m_runAtPcmRate)
             chip->setRunningAtPcmRate(true);
+
 #if defined(ADLMIDI_AUDIO_TICK_HANDLER)
         chip->setAudioTickHandlerInstance(audioTickHandler);
 #endif
+        family = chip->family();
     }
 
+    m_chipFamily = family;
     m_numChannels = m_numChips * 6;
-    m_insCache.resize(m_numChannels,   m_emptyInstrument.opn[0]);
+    m_insCache.resize(m_numChannels,   m_emptyInstrument.op[0]);
     m_regLFOSens.resize(m_numChannels,    0);
 
     uint8_t regLFOSetup = (m_lfoEnable ? 8 : 0) | (m_lfoFrequency & 7);
     m_regLFOSetup = regLFOSetup;
 
-    for(size_t card = 0; card < m_numChips; ++card)
+    for(size_t chip = 0; chip < m_numChips; ++chip)
     {
-        writeReg(card, 0, 0x22, regLFOSetup);//push current LFO state
-        writeReg(card, 0, 0x27, 0x00);  //set Channel 3 normal mode
-        writeReg(card, 0, 0x2B, 0x00);  //Disable DAC
+        writeReg(chip, 0, 0x22, regLFOSetup);//push current LFO state
+        writeReg(chip, 0, 0x27, 0x00);  //set Channel 3 normal mode
+        writeReg(chip, 0, 0x2B, 0x00);  //Disable DAC
         //Shut up all channels
-        writeReg(card, 0, 0x28, 0x00 ); //Note Off 0 channel
-        writeReg(card, 0, 0x28, 0x01 ); //Note Off 1 channel
-        writeReg(card, 0, 0x28, 0x02 ); //Note Off 2 channel
-        writeReg(card, 0, 0x28, 0x04 ); //Note Off 3 channel
-        writeReg(card, 0, 0x28, 0x05 ); //Note Off 4 channel
-        writeReg(card, 0, 0x28, 0x06 ); //Note Off 5 channel
+        writeReg(chip, 0, 0x28, 0x00); //Note Off 0 channel
+        writeReg(chip, 0, 0x28, 0x01); //Note Off 1 channel
+        writeReg(chip, 0, 0x28, 0x02); //Note Off 2 channel
+        writeReg(chip, 0, 0x28, 0x04); //Note Off 3 channel
+        writeReg(chip, 0, 0x28, 0x05); //Note Off 4 channel
+        writeReg(chip, 0, 0x28, 0x06); //Note Off 5 channel
     }
 
     silenceAll();
+#ifdef OPNMIDI_MIDI2VGM
+    if(m_loopStartHook) // Post-initialization Loop Start hook (fix for loop edge passing clicks)
+        m_loopStartHook(m_loopStartHookData);
+#endif
+}
+
+OPNFamily OPN2::chipFamily() const
+{
+    return m_chipFamily;
 }

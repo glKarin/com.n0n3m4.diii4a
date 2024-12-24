@@ -446,28 +446,28 @@ struct Key {
 	ptrdiff_t offset;
 };
 
-static int PatchThing (int);
-static int PatchSound (int);
-static int PatchFrame (int);
-static int PatchSprite (int);
-static int PatchAmmo (int);
-static int PatchWeapon (int);
-static int PatchPointer (int);
-static int PatchCheats (int);
-static int PatchMisc (int);
-static int PatchText (int);
-static int PatchStrings (int);
-static int PatchPars (int);
-static int PatchCodePtrs (int);
-static int PatchMusic (int);
-static int DoInclude (int);
-static int PatchSpriteNames(int);
-static int PatchSoundNames(int);
-static bool DoDehPatch();
+static int PatchThing (int, int);
+static int PatchSound (int, int);
+static int PatchFrame (int, int);
+static int PatchSprite (int, int);
+static int PatchAmmo (int, int);
+static int PatchWeapon (int, int);
+static int PatchPointer (int, int);
+static int PatchCheats (int, int);
+static int PatchMisc (int, int);
+static int PatchText (int, int);
+static int PatchStrings (int, int);
+static int PatchPars (int, int);
+static int PatchCodePtrs (int, int);
+static int PatchMusic (int, int);
+static int DoInclude (int, int);
+static int PatchSpriteNames(int, int);
+static int PatchSoundNames(int, int);
+static bool DoDehPatch(int);
 
 static const struct {
 	const char *name;
-	int (*func)(int);
+	int (*func)(int, int);
 } Modes[] = {
 	// These appear in .deh and .bex files
 	{ "Thing",		PatchThing },
@@ -491,7 +491,7 @@ static const struct {
 	{ NULL, NULL },
 };
 
-static int HandleMode (const char *mode, int num);
+static int HandleMode (const char *mode, int num, int flags);
 static bool HandleKey (const struct Key *keys, void *structure, const char *key, int value);
 static bool ReadChars (char **stuff, int size);
 static char *igets (void);
@@ -509,14 +509,14 @@ static void PushTouchedActor(PClassActor *cls)
 }
 
 
-static int HandleMode (const char *mode, int num)
+static int HandleMode (const char *mode, int num, int flags)
 {
 	int i = 0;
 	while (Modes[i].name && stricmp (Modes[i].name, mode))
 		i++;
 
 	if (Modes[i].name)
-		return Modes[i].func (num);
+		return Modes[i].func (num, flags);
 
 	// Handle unknown or unimplemented data
 	Printf ("Unknown chunk %s encountered. Skipping.\n", mode);
@@ -843,7 +843,7 @@ static void CreateScratchFunc(FunctionCallEmitter &emitters, int value1, int val
 // misc1 = sound, misc2 = attenuation none (true) or normal (false)
 static void CreatePlaySoundFunc(FunctionCallEmitter &emitters, int value1, int value2, MBFParamState* state)
 { // A_PlaySound
-	emitters.AddParameterIntConst(DehFindSound(value1 - 1, true).index());		// soundid
+	emitters.AddParameterIntConst(DehFindSound(value1 - 1, false).index());		// soundid
 	emitters.AddParameterIntConst(CHAN_BODY);							// channel
 	emitters.AddParameterFloatConst(1);									// volume
 	emitters.AddParameterIntConst(false);								// looping
@@ -1153,7 +1153,7 @@ static const struct DehFlags2 deh_mobjflags_mbf21[] = {
   {"NORADIUSDMG",    [](AActor* defaults) { defaults->flags3 |= MF3_NORADIUSDMG; }}, // doesn't take splash damage
   {"FORCERADIUSDMG", [](AActor* defaults) { defaults->flags4 |= MF4_FORCERADIUSDMG; }}, // causes splash damage even if target immune
   {"HIGHERMPROB",    [](AActor* defaults) { defaults->MinMissileChance = 160; }}, // higher missile attack probability
-  {"RANGEHALF",      [](AActor* defaults) { defaults->flags4 |= MF4_MISSILEMORE; }}, // use half distance for missile attack probability
+  {"RANGEHALF",      [](AActor* defaults) { defaults->missilechancemult = 0.5; }}, // use half distance for missile attack probability
   {"NOTHRESHOLD",    [](AActor* defaults) { defaults->flags4 |= MF4_QUICKTORETALIATE; }}, // no targeting threshold
   {"LONGMELEE",      [](AActor* defaults) { defaults->meleethreshold = 196; }}, // long melee range
   {"BOSS",           [](AActor* defaults) { defaults->flags2 |= MF2_BOSS; defaults->flags3 |= MF3_NORADIUSDMG; }}, // full volume see / death sound + splash immunity
@@ -1174,14 +1174,15 @@ static void ClearBits2Stuff(AActor* defaults)
 	defaults->maxtargetrange = 0;
 	defaults->MinMissileChance = 200;
 	defaults->meleethreshold = 0;
+	defaults->missilechancemult = 1;
 	defaults->flags2 &= ~(MF2_BOSS | MF2_RIP);
 	defaults->flags3 &= ~(MF3_NOTARGET | MF3_NORADIUSDMG | MF3_FULLVOLDEATH);
-	defaults->flags4 &= ~(MF4_MISSILEMORE | MF4_QUICKTORETALIATE | MF4_FORCERADIUSDMG);
+	defaults->flags4 &= ~(MF4_QUICKTORETALIATE | MF4_FORCERADIUSDMG);
 	defaults->flags8 &= ~(MF8_E1M8BOSS | MF8_E2M8BOSS | MF8_E3M8BOSS | MF8_E4M8BOSS | MF8_E4M6BOSS | MF8_MAP07BOSS1 | MF8_MAP07BOSS2 | MF8_FULLVOLSEE);
 }
 
 
-static int PatchThing (int thingy)
+static int PatchThing (int thingy, int flags)
 {
 	enum
 	{
@@ -1437,6 +1438,27 @@ static int PatchThing (int thingy)
 			}
 			DPrintf(DMSG_SPAMMY, "MBF21 Bits: %d (0x%08x)\n", info->flags.GetValue(), info->flags.GetValue());
 		}
+		// New fields from Crispy Doom
+		else if (!stricmp(Line1, "Melee threshold"))
+		{
+			info->meleethreshold = DEHToDouble(val);
+		}
+		else if (!stricmp(Line1, "Max target range"))
+		{
+			// [crispy] Maximum distance range to start shooting (zero for unlimited)
+			info->maxtargetrange = DEHToDouble(val);
+		}
+		else if (!stricmp(Line1, "Min missile chance"))
+		{
+			// [crispy] Minimum chance for firing a missile
+			info->MinMissileChance = DEHToDouble(val);
+		}
+		else if (!stricmp(Line1, "Missile chance multiplier"))
+		{
+			// [crispy] Multiplies the chance of firing a missile (65536 = normal chance)
+			info->missilechancemult = DEHToDouble(val);
+		}
+
 		else if (linelen > 6)
 		{
 			if (stricmp (Line1 + linelen - 6, " frame") == 0)
@@ -1776,7 +1798,7 @@ static int PatchThing (int thingy)
 // real benefit to doing this, and it would be very difficult for
 // me to emulate it, I have disabled them entirely.
 
-static int PatchSound (int soundNum)
+static int PatchSound (int soundNum, int flags)
 {
 	int result;
 
@@ -1833,7 +1855,7 @@ DehBits sbits[] = {
 };
 
 
-static int PatchFrame (int frameNum)
+static int PatchFrame (int frameNum, int flags)
 {
 	MBFArgs args{};
 	int result;
@@ -1983,7 +2005,7 @@ static int PatchFrame (int frameNum)
 	return result;
 }
 
-static int PatchSprite (int sprNum)
+static int PatchSprite (int sprNum, int flags)
 {
 	int result;
 	int offset = 0;
@@ -2025,7 +2047,7 @@ static int PatchSprite (int sprNum)
 	return result;
 }
 
-static int PatchAmmo (int ammoNum)
+static int PatchAmmo (int ammoNum, int flags)
 {
 	PClassActor *ammoType = NULL;
 	AActor *defaultAmmo = NULL;
@@ -2116,7 +2138,7 @@ DehBits wbits[] = {
 	{ "NOAUTOSWITCHTO", WIF_NOAUTOSWITCHTO }
 };
 
-static int PatchWeapon (int weapNum)
+static int PatchWeapon (int weapNum, int flags)
 {
 	int result;
 	PClassActor *type = nullptr;
@@ -2324,7 +2346,7 @@ static int SetPointer(FState *state, PFunction *sym, int frame = 0)
 	return -1;
 }
 
-static int PatchPointer (int ptrNum)
+static int PatchPointer (int ptrNum, int flags)
 {
 	int result;
 
@@ -2386,7 +2408,7 @@ static int PatchPointer (int ptrNum)
 	return result;
 }
 
-static int PatchCheats (int dummy)
+static int PatchCheats (int dummy, int flags)
 {
 	int result;
 
@@ -2398,7 +2420,7 @@ static int PatchCheats (int dummy)
 	return result;
 }
 
-static int PatchMisc (int dummy)
+static int PatchMisc (int dummy, int flags)
 {
 	static const struct Key keys[] = {
 		{ "Initial Health",			static_cast<ptrdiff_t>(myoffsetof(struct DehInfo,StartHealth)) },
@@ -2592,7 +2614,7 @@ static int PatchMisc (int dummy)
 	return result;
 }
 
-static int PatchPars (int dummy)
+static int PatchPars (int dummy, int flags)
 {
 	char *space, mapname[8], *moredata;
 	level_info_t *info;
@@ -2658,7 +2680,7 @@ static int PatchPars (int dummy)
 }
 
 								
-static int PatchCodePtrs (int dummy)
+static int PatchCodePtrs (int dummy, int flags)
 {
 	int result;
 
@@ -2733,7 +2755,7 @@ static int PatchCodePtrs (int dummy)
 	return result;
 }
 
-static int PatchMusic (int dummy)
+static int PatchMusic (int dummy, int flags)
 {
 	int result;
 
@@ -2788,7 +2810,7 @@ static void ReplaceSpriteInData(const char* oldStr, const char* newStr)
 		}
 	}
 
-static int PatchText (int oldSize)
+static int PatchText (int oldSize, int flags)
 {
 	int newSize;
 	char *oldStr;
@@ -2895,7 +2917,7 @@ donewithtext:
 	return result;
 }
 
-static int PatchStrings (int dummy)
+static int PatchStrings (int dummy, int flags)
 {
 	int result;
 
@@ -2919,6 +2941,8 @@ static int PatchStrings (int dummy)
 			}
 		} while (Line2 && *Line2);
 
+		if(!(flags & DEH_SKIP_BEX_STRINGS_IF_LANGUAGE))
+		{
 		ReplaceSpecialChars (holdstring.LockBuffer());
 		holdstring.UnlockBuffer();
 		// Account for a discrepancy between Boom's and ZDoom's name for the red skull key pickup message
@@ -2928,11 +2952,12 @@ static int PatchStrings (int dummy)
 		DehStrings.Insert(ll, te);
 		DPrintf (DMSG_SPAMMY, "%s set to:\n%s\n", Line1, holdstring.GetChars());
 	}
+	}
 
 	return result;
 }
 
-static int PatchSoundNames (int dummy)
+static int PatchSoundNames (int dummy, int flags)
 {
 	int result;
 
@@ -2943,13 +2968,13 @@ static int PatchSoundNames (int dummy)
 		stripwhite(Line2);
 		FString newname = skipwhite (Line2);
 		ReplaceSoundName((int)strtoll(Line1, nullptr, 10), newname.GetChars());
-		DPrintf (DMSG_SPAMMY, "Sound %s set to:\n%s\n", Line1, newname.GetChars());
+		DPrintf (DMSG_SPAMMY, "Sound %d set to:\n%s\n", Line1, newname.GetChars());
 	}
 
 	return result;
 }
 
-static int PatchSpriteNames (int dummy)
+static int PatchSpriteNames (int dummy, int flags)
 {
 		int result;
 		
@@ -2978,14 +3003,14 @@ static int PatchSpriteNames (int dummy)
 			int v = GetSpriteIndex(newname.GetChars());
 			memcpy(OrgSprNames[line1val].c, sprites[v].name, 5);
 
-			DPrintf (DMSG_SPAMMY, "Sprite %s set to:\n%s\n", Line1, newname.GetChars());
+			DPrintf (DMSG_SPAMMY, "Sprite %d set to:\n%s\n", Line1, newname.GetChars());
 		}
 		
 		return result;
 	}
 								  
 
-static int DoInclude (int dummy)
+static int DoInclude (int dummy, int flags)
 {
 	char *data;
 	int savedversion, savepversion, savepatchsize;
@@ -3047,7 +3072,7 @@ static int DoInclude (int dummy)
 			}
 		}
 
-		D_LoadDehFile(path);
+		D_LoadDehFile(path, flags);
 
 		if (data != path)
 		{
@@ -3080,7 +3105,7 @@ static bool isDehFile(int lumpnum)
 		&& (0 == stricmp(extension, ".deh") || 0 == stricmp(extension, ".bex"));
 }
 
-int D_LoadDehLumps(DehLumpSource source)
+int D_LoadDehLumps(DehLumpSource source, int flags)
 {
 	int lastlump = 0, lumpnum, count = 0;
 
@@ -3099,7 +3124,20 @@ int D_LoadDehLumps(DehLumpSource source)
 			continue;
 		}
 
-		count += D_LoadDehLump(lumpnum);
+		int filtered_flags = flags & ~DEH_SKIP_BEX_STRINGS_IF_LANGUAGE;
+
+		if((flags & DEH_SKIP_BEX_STRINGS_IF_LANGUAGE) && FromIWAD == source)
+		{
+			int iwadnum = fileSystem.GetIwadNum();
+			int lastlump2 = fileSystem.GetFirstEntry(iwadnum);
+			int lumpnum2 = fileSystem.FindLump("LANGUAGE", &lastlump2);
+
+			if(lumpnum2 >= 0 && fileSystem.GetFileContainer(lumpnum2) == iwadnum)
+			{
+				filtered_flags |= DEH_SKIP_BEX_STRINGS_IF_LANGUAGE;
+			}
+		}
+		count += D_LoadDehLump(lumpnum, filtered_flags);
 	}
 
 	if (FromPWADs == source && 0 == PatchSize && dehload > 0)
@@ -3112,7 +3150,7 @@ int D_LoadDehLumps(DehLumpSource source)
 			{
 				if (isDehFile(lumpnum))
 				{
-					count += D_LoadDehLump(lumpnum);
+					count += D_LoadDehLump(lumpnum, 0);
 				}
 			}
 		}
@@ -3122,7 +3160,7 @@ int D_LoadDehLumps(DehLumpSource source)
 			{
 				if (isDehFile(lumpnum))
 				{
-					count += D_LoadDehLump(lumpnum);
+					count += D_LoadDehLump(lumpnum, 0);
 					break;
 				}
 			}
@@ -3132,7 +3170,7 @@ int D_LoadDehLumps(DehLumpSource source)
 	return count;
 }
 
-bool D_LoadDehLump(int lumpnum)
+bool D_LoadDehLump(int lumpnum, int flags)
 {
 	auto ls = LumpFileNum;
 	LumpFileNum = fileSystem.GetFileContainer(lumpnum);
@@ -3143,13 +3181,13 @@ bool D_LoadDehLump(int lumpnum)
 	PatchFile = new char[PatchSize + 1];
 	fileSystem.ReadFile(lumpnum, PatchFile);
 	PatchFile[PatchSize] = '\0';		// terminate with a '\0' character
-	auto res = DoDehPatch();
+	auto res = DoDehPatch(flags);
 	LumpFileNum = ls;
 
 	return res;
 }
 
-bool D_LoadDehFile(const char *patchfile)
+bool D_LoadDehFile(const char *patchfile, int flags)
 {
 	FileReader fr;
 
@@ -3162,7 +3200,7 @@ bool D_LoadDehFile(const char *patchfile)
 		fr.Read(PatchFile, PatchSize);
 		fr.Close();
 		PatchFile[PatchSize] = '\0';		// terminate with a '\0' character
-		return DoDehPatch();
+		return DoDehPatch(flags);
 	}
 	else
 	{
@@ -3178,14 +3216,14 @@ bool D_LoadDehFile(const char *patchfile)
 		}
 		if (lumpnum >= 0)
 		{
-			return D_LoadDehLump(lumpnum);
+			return D_LoadDehLump(lumpnum, flags);
 		}
 	}
 	Printf ("Could not open DeHackEd patch \"%s\"\n", patchfile);
 	return false;
 }
 
-static bool DoDehPatch()
+static bool DoDehPatch(int flags)
 {
 	if (!batchrun) Printf("Adding dehacked patch %s\n", PatchName.GetChars());
 
@@ -3276,7 +3314,7 @@ static bool DoDehPatch()
 		}
 		else if (cont == 2)
 		{
-			cont = HandleMode (Line1, atoi (Line2));
+			cont = HandleMode (Line1, atoi (Line2), flags);
 		}
 	} while (cont);
 
@@ -3845,7 +3883,7 @@ struct FlagHandler
 #define F4(flag) { [](AActor* a) { a->flags4 |= flag; }, [](AActor* a) { a->flags4 &= ~flag; }, [](AActor* a)->bool { return a->flags4 & flag; } }
 #define F6(flag) { [](AActor* a) { a->flags6 |= flag; }, [](AActor* a) { a->flags6 &= ~flag; }, [](AActor* a)->bool { return a->flags6 & flag; } }
 #define F8(flag) { [](AActor* a) { a->flags8 |= flag; }, [](AActor* a) { a->flags8 &= ~flag; }, [](AActor* a)->bool { return a->flags8 & flag; } }
-#define DEPF(flag) { [](AActor* a) { HandleDeprecatedFlags(a, nullptr, true, flag); }, [](AActor* a) { HandleDeprecatedFlags(a, nullptr, false, flag); }, [](AActor* a)->bool { return CheckDeprecatedFlags(a, nullptr, flag); } }
+#define DEPF(flag) { [](AActor* a) { HandleDeprecatedFlags(a, true, flag); }, [](AActor* a) { HandleDeprecatedFlags(a, false, flag); }, [](AActor* a)->bool { return !!CheckDeprecatedFlags(a, flag); } }
 
 void SetNoSector(AActor* a) 
 { 
@@ -3914,7 +3952,7 @@ void ClearCountitem(AActor* a)
 {
 	if (a->flags & MF_COUNTITEM)
 	{
-		a->flags |= MF_COUNTITEM;
+		a->flags &= ~MF_COUNTITEM;
 		a->Level->total_items--;
 	}
 }
@@ -3923,6 +3961,7 @@ void SetFriendly(AActor* a)
 {
 	if (a->CountsAsKill() && a->health > 0) a->Level->total_monsters--;
 	a->flags |= MF_FRIENDLY;
+	a->flags3 |= MF3_NOBLOCKMONST;
 	if (a->CountsAsKill() && a->health > 0) a->Level->total_monsters++;
 }
 
@@ -3930,6 +3969,7 @@ void ClearFriendly(AActor* a)
 {
 	if (a->CountsAsKill() && a->health > 0) a->Level->total_monsters--;
 	a->flags &= ~MF_FRIENDLY;
+	a->flags3 &= ~MF3_NOBLOCKMONST;
 	if (a->CountsAsKill() && a->health > 0) a->Level->total_monsters++;
 }
 
@@ -4085,7 +4125,7 @@ static FlagHandler flag1handlers[32] = {
 	{ SetTranslation2, ClearTranslation2, CheckTranslation2 },
 	F6(MF6_TOUCHY),
 	{ SetBounces, ClearBounces, [](AActor* a)->bool { return a->BounceFlags & BOUNCE_DEH; } },
-	F(MF_FRIENDLY),
+	{ SetFriendly, ClearFriendly, [](AActor* a)->bool { return a->flags & MF_FRIENDLY; } },
 	{ SetTranslucent, ClearTranslucent, CheckTranslucent },
 };
 
@@ -4096,7 +4136,7 @@ static FlagHandler flag2handlers[32] = {
 	F3(MF3_NORADIUSDMG),
 	F4(MF4_FORCERADIUSDMG),
 	DEPF(DEPF_HIGHERMPROB),
-	F4(MF4_MISSILEMORE),
+	DEPF(DEPF_MISSILEMORE),
 	F4(MF4_QUICKTORETALIATE),
 	DEPF(DEPF_LONGMELEERANGE),
 	{ SetBoss, ClearBoss, [](AActor* a)->bool { return a->flags2 & MF2_BOSS; } },

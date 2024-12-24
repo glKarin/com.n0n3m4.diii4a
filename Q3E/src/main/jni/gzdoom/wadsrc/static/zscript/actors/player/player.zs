@@ -87,6 +87,8 @@ class PlayerPawn : Actor
 	flagdef CanSuperMorph: PlayerFlags, 1;
 	flagdef CrouchableMorph: PlayerFlags, 2;
 	flagdef WeaponLevel2Ended: PlayerFlags, 3;
+	//PF_VOODOO_ZOMBIE
+	flagdef MakeFootsteps: PlayerFlags, 5; //[inkoalawetrust] Use footstep system virtual.
 
 	enum EPrivatePlayerFlags
 	{
@@ -154,7 +156,7 @@ class PlayerPawn : Actor
 			if (health > 0) Height = FullHeight;
 		}
 
-		if (player && bWeaponLevel2Ended)
+		if (player && bWeaponLevel2Ended && !(player.cheats & CF_PREDICTING))
 		{
 			bWeaponLevel2Ended = false;
 			if (player.ReadyWeapon != NULL && player.ReadyWeapon.bPowered_Up)
@@ -179,6 +181,9 @@ class PlayerPawn : Actor
 
 	override void BeginPlay()
 	{
+		// Force create this since players can predict.
+		SetViewPos((0.0, 0.0, 0.0));
+
 		Super.BeginPlay ();
 		ChangeStatNum (STAT_PLAYER);
 		FullHeight = Height;
@@ -1687,6 +1692,7 @@ class PlayerPawn : Actor
 		CheckPitch();
 		HandleMovement();
 		CalcHeight ();
+		if (bMakeFootsteps) MakeFootsteps();
 
 		if (!(player.cheats & CF_PREDICTING))
 		{
@@ -1713,6 +1719,106 @@ class PlayerPawn : Actor
 			player.mo.CheckDegeneration();
 			player.mo.CheckAirSupply();
 		}
+	}
+
+	//---------------------------------------------------------------------------
+	//
+	// Handle player footstep sounds.
+	// Default footstep handling.
+	//
+	//---------------------------------------------------------------------------
+
+	int footstepCounter;
+	double footstepLength;
+	bool footstepFoot;
+
+	void DoFootstep(TerrainDef Ground)
+	{
+		Sound Step = Ground.StepSound;
+
+		//Generic foot-agnostic sound takes precedence.
+		if(!Step)
+		{
+			//Apparently most people walk with their right foot first, so assume that here.
+			if (!footstepFoot)
+			{
+				Step = Ground.LeftStepSound;
+			}
+			else
+			{
+				Step = Ground.RightStepSound;
+			}
+
+			footstepFoot = !footstepFoot;
+		}
+
+		if(Step)
+		{
+			A_StartSound(Step, flags: CHANF_OVERLAP, volume: Ground.StepVolume * snd_footstepvolume);
+		}
+
+		//Steps make splashes regardless.
+		bool Heavy = (Mass >= 200) ? 0 : THW_SMALL; //Big player makes big splash.
+		HitWater(CurSector, (Pos.XY, CurSector.FloorPlane.ZatPoint(Pos.XY)), true, false, flags: Heavy | THW_NOVEL);
+	}
+
+	virtual void MakeFootsteps()
+	{
+		if(pos.z > floorz) return;
+
+		let Ground = GetFloorTerrain();
+
+		if(Ground && (player.cmd.forwardMove != 0 || player.cmd.sideMove != 0))
+		{
+			int Delay = (player.cmd.buttons & BT_RUN) ? Ground.RunStepTics : Ground.WalkStepTics;
+
+			if((player.cmd.buttons ^ player.oldbuttons) & BT_RUN)
+			{ // zero out counters when starting/stopping a run
+				footstepCounter = 0;
+				footstepLength = Ground.StepDistance;
+			}
+
+			if(Ground.StepDistance > 0)
+			{ // distance-based terrain
+				footstepCounter = 0;
+
+				double moveVel = vel.xy.length();
+
+				if(moveVel > Ground.StepDistanceMinVel)
+				{
+					footstepLength += moveVel;
+
+					while(footstepLength > Ground.StepDistance)
+					{
+						footstepLength -= Ground.StepDistance;
+						DoFootstep(Ground);
+					}
+				}
+				else
+				{
+					footstepLength = Ground.StepDistance;
+				}
+
+			}
+			else if(Delay > 0)
+			{ // delay-based terrain
+				footstepLength = 0;
+				
+				if(footstepCounter % Delay == 0)
+				{
+					DoFootstep(Ground);
+				}
+
+				footstepCounter = (footstepCounter + 1) % Delay;
+			}
+		}
+		else
+		{
+			footstepCounter = 0;
+			footstepLength = Ground.StepDistance;
+			footstepFoot = false;
+		}
+
 	}
 
 	//---------------------------------------------------------------------------
@@ -1903,8 +2009,8 @@ class PlayerPawn : Actor
 		// it provides player class based protection that should not affect
 		// any other protection item.
 		let myclass = GetClass();
-		GiveInventoryType('HexenArmor');
-		let harmor = HexenArmor(FindInventory('HexenArmor'));
+		GiveInventoryType(GetHexenArmorClass());
+		let harmor = HexenArmor(FindInventory('HexenArmor', true));
 
 		harmor.Slots[4] = self.HexenArmor[0];
 		for (int i = 0; i < 4; ++i)
@@ -1915,7 +2021,7 @@ class PlayerPawn : Actor
 		// BasicArmor must come right after that. It should not affect any
 		// other protection item as well but needs to process the damage
 		// before the HexenArmor does.
-		GiveInventoryType('BasicArmor');
+		GiveInventoryType(GetBasicArmorClass());
 
 		// Now add the items from the DECORATE definition
 		let di = GetDropItems();
@@ -1942,6 +2048,7 @@ class PlayerPawn : Actor
 					{
 						item = Inventory(Spawn(ti));
 						item.bIgnoreSkill = true;	// no skill multipliers here
+						item.bDropped = item.bNeverLocal = true; // Avoid possible copies.
 						item.Amount = di.Amount;
 						let weap = Weapon(item);
 						if (weap)
@@ -2857,12 +2964,13 @@ struct PlayerInfo native play	// self is what internally is known as player_t
 	native void SetSubtitleNumber (int text, Sound sound_id = 0);
 	native bool Resurrect();
 
-	native clearscope String GetUserName() const;
+	native clearscope String GetUserName(uint charLimit = 0u) const;
 	native clearscope Color GetColor() const;
 	native clearscope Color GetDisplayColor() const;
 	native clearscope int GetColorSet() const;
 	native clearscope int GetPlayerClassNum() const;
 	native clearscope int GetSkin() const;
+	native clearscope int GetSkinCount() const;
 	native clearscope bool GetNeverSwitch() const;
 	native clearscope int GetGender() const;
 	native clearscope int GetTeam() const;
@@ -2874,6 +2982,7 @@ struct PlayerInfo native play	// self is what internally is known as player_t
 	native bool GetFViewBob() const;
 	native double GetStillBob() const;
 	native void SetFOV(float fov);
+	native int SetSkin(int skinIndex);
 	native clearscope bool GetClassicFlight() const;
 	native void SendPitchLimits();
 	native clearscope bool HasWeaponsInSlot(int slot) const;
@@ -2985,6 +3094,7 @@ struct Team native
 	native String mName;
 
 	native static bool IsValid(uint teamIndex);
+	native play static bool ChangeTeam(uint playerNumber, uint newTeamIndex);
 
 	native Color GetPlayerColor() const;
 	native int GetTextColor() const;

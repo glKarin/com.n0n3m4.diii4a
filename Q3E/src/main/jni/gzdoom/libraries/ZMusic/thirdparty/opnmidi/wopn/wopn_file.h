@@ -1,7 +1,7 @@
 /*
  * Wohlstand's OPN2 Bank File - a bank format to store OPN2 timbre data and setup
  *
- * Copyright (c) 2018 Vitaly Novichkov <admin@wohlnet.ru>
+ * Copyright (c) 2018-2022 Vitaly Novichkov <admin@wohlnet.ru>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -32,13 +32,36 @@
 extern "C" {
 #endif
 
-#if !defined(__STDC_VERSION__) || (defined(__STDC_VERSION__) && (__STDC_VERSION__ < 199901L)) \
-  || defined(__STRICT_ANSI__) || !defined(__cplusplus)
+/* Solaris defines the integer types regardless of what C/C++ standard is actually available,
+ * so avoid defining them at all by ourselves. */
+#if !defined(WOPN_STDINT_TYPEDEFS_NOT_NEEDED) && defined(__sun)
+#   define WOPN_STDINT_TYPEDEFS_NOT_NEEDED
+#endif
+
+#if !defined(WOPN_STDINT_TYPEDEFS_NEEDED) && !defined(WOPN_STDINT_TYPEDEFS_NOT_NEEDED)
+#   if !defined(__STDC_VERSION__) || \
+       (defined(__STDC_VERSION__) && (__STDC_VERSION__ < 199901L)) || \
+        defined(__STRICT_ANSI__) || \
+       !defined(__cplusplus)
+#       define WOPN_STDINT_TYPEDEFS_NEEDED
+#   endif
+#endif
+
+#ifdef WOPN_STDINT_TYPEDEFS_NEEDED
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef signed short int int16_t;
 typedef unsigned short int uint16_t;
 #endif
+
+/* Type of chip for which a bank has been designed */
+typedef enum WOPN_ChipType
+{
+    /* The Yamaha OPN2 chip, alias YM2612 YM3438 */
+    WOPN_Chip_OPN2 = 0,
+    /* The Yamaha OPNA chip, alias YM2608 */
+    WOPN_Chip_OPNA = 1
+} WOPN_ChipType;
 
 /* Volume scaling model implemented in the libOPNMIDI */
 typedef enum WOPN_VolumeModel
@@ -154,6 +177,8 @@ typedef struct WOPNFile
     uint16_t banks_count_percussion;
     /* Chip global LFO enable flag and frequency register data */
     uint8_t lfo_freq;
+    /* Chip type this bank is designed for */
+    uint8_t chip_type;
     /* Reserved (Enum WOPN_VolumeModel) */
     uint8_t volume_model;
     /* dynamically allocated data Melodic banks array */
@@ -199,7 +224,7 @@ extern WOPNFile *WOPN_LoadBankFromMem(void *mem, size_t length, int *error);
 /**
  * @brief Load WOPI instrument file from the memory.
  * You must allocate OPNIFile structure by yourself and give the pointer to it.
- * @param file Pointer to destinition OPNIFile structure to fill it with parsed data.
+ * @param file Pointer to destination OPNIFile structure to fill it with parsed data.
  * @param mem Pointer to memory block contains raw WOPI instrument file data
  * @param length Length of given memory block
  * @return 0 if no errors occouped, or an error code of WOPN_ErrorCodes enumeration
@@ -209,7 +234,7 @@ extern int WOPN_LoadInstFromMem(OPNIFile *file, void *mem, size_t length);
 /**
  * @brief Calculate the size of the output memory block
  * @param file Heap-allocated WOPN file data structure
- * @param version Destinition version of the file
+ * @param version Destination version of the file
  * @return Size of the raw WOPN file data
  */
 extern size_t WOPN_CalculateBankFileSize(WOPNFile *file, uint16_t version);
@@ -217,7 +242,7 @@ extern size_t WOPN_CalculateBankFileSize(WOPNFile *file, uint16_t version);
 /**
  * @brief Calculate the size of the output memory block
  * @param file Pointer to WOPI file data structure
- * @param version Destinition version of the file
+ * @param version Destination version of the file
  * @return Size of the raw WOPI file data
  */
 extern size_t WOPN_CalculateInstFileSize(OPNIFile *file, uint16_t version);
@@ -225,8 +250,8 @@ extern size_t WOPN_CalculateInstFileSize(OPNIFile *file, uint16_t version);
 /**
  * @brief Write raw WOPN into given memory block
  * @param file Heap-allocated WOPN file data structure
- * @param dest_mem Destinition memory block pointer
- * @param length Length of destinition memory block
+ * @param dest_mem Destination memory block pointer
+ * @param length Length of destination memory block
  * @param version Wanted WOPN version
  * @param force_gm Force GM set in saved bank file
  * @return Error code or 0 on success
@@ -236,8 +261,8 @@ extern int WOPN_SaveBankToMem(WOPNFile *file, void *dest_mem, size_t length, uin
 /**
  * @brief Write raw WOPI into given memory block
  * @param file Pointer to WOPI file data structure
- * @param dest_mem Destinition memory block pointer
- * @param length Length of destinition memory block
+ * @param dest_mem Destination memory block pointer
+ * @param length Length of destination memory block
  * @param version Wanted WOPI version
  * @return Error code or 0 on success
  */

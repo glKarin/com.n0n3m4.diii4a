@@ -381,6 +381,7 @@ enum //Key words
 	SBARINFO_MUGSHOT,
 	SBARINFO_CREATEPOPUP,
 	SBARINFO_PROTRUSION,
+	SBARINFO_APPENDSTATUSBAR,
 };
 
 enum //Bar types
@@ -410,6 +411,7 @@ static const char *SBarInfoTopLevel[] =
 	"mugshot",
 	"createpopup",
 	"protrusion",
+	"appendstatusbar",
 	NULL
 };
 
@@ -488,7 +490,9 @@ void SBarInfo::ParseSBarInfo(int lump)
 			continue;
 		}
 		int baselump = -2;
-		switch(sc.MustMatchString(SBarInfoTopLevel))
+		// Store the command, used for the switch statement and case SBARINFO_APPENDSTATUSBAR.
+		const int command = sc.MustMatchString(SBarInfoTopLevel);
+		switch(command)
 		{
 			case SBARINFO_BASE:
 				baseSet = true;
@@ -629,6 +633,7 @@ void SBarInfo::ParseSBarInfo(int lump)
 				sc.MustGetToken(';');
 				break;
 			case SBARINFO_STATUSBAR:
+			case SBARINFO_APPENDSTATUSBAR:
 			{
 				if(!baseSet) //If the user didn't explicitly define a base, do so now.
 					gameType = GAME_Any;
@@ -638,11 +643,19 @@ void SBarInfo::ParseSBarInfo(int lump)
 					sc.MustGetToken(TK_Identifier);
 					barNum = sc.MustMatchString(StatusBars);
 				}
+				// SBARINFO_APPENDSTATUSBAR shouldn't delete the old HUD if it exists.
+				if(command != SBARINFO_APPENDSTATUSBAR)
+				{
 				if (this->huds[barNum] != NULL)
 				{
 					delete this->huds[barNum];
 				}
 				this->huds[barNum] = new SBarInfoMainBlock(this);
+				}
+				else if(this->huds[barNum] == NULL)
+				{
+					sc.ScriptError("Status bar '%s' has not been created and cannot be appended to. Use 'StatusBar' instead.", StatusBars[barNum]);
+				}
 				if(barNum == STBAR_AUTOMAP)
 				{
 					automapbar = true;
@@ -1036,7 +1049,7 @@ public:
 		ammocount2 = ammo2 != nullptr ? ammo2->IntVar(NAME_Amount) : 0;
 
 		//prepare ammo counts
-		armor = CPlayer->mo->FindInventory(NAME_BasicArmor);
+		armor = CPlayer->mo->FindInventory(NAME_BasicArmor, true);
 	}
 
 	void _Draw (EHudState state)

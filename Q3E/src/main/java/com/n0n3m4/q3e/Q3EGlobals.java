@@ -225,6 +225,7 @@ public final class Q3EGlobals
         DOOM3BFG_HLSL_SHADER,
         TDM_GLSL_SHADER,
         GZDOOM_RESOURCE,
+        GZDOOM_RESOURCE_4_12_2,
     }
 
 /*
@@ -350,7 +351,13 @@ public final class Q3EGlobals
     // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
     public static final String TDM_GLSL_SHADER_VERSION        = "2.12.5"; // 5: change all shaders default precision from mediump to highp
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = "1.4.1";
-    public static final String GZDOOM_VERSION                 = "4.12.2.2";
+    public static final String GZDOOM_4_12_2_VERSION          = "4.12.2.2";
+    public static final String GZDOOM_VERSION                 = "4.14.0.0";
+
+    public static final String[] GZDOOM_VERSION_NAMES = {
+            "4.14.0",
+            "4.12.2",
+    };
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
 

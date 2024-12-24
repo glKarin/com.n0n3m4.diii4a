@@ -88,18 +88,19 @@ SoftSynthMIDIDevice::~SoftSynthMIDIDevice()
 
 //==========================================================================
 //
-// SoftSynthMIDIDevice :: GwrStreamInfo
+// SoftSynthMIDIDevice :: GetStreamInfoEx
 //
 //==========================================================================
 
-SoundStreamInfo SoftSynthMIDIDevice::GetStreamInfo() const
+SoundStreamInfoEx SoftSynthMIDIDevice::GetStreamInfoEx() const
 {
 	int chunksize = (SampleRate / StreamBlockSize) * 4;
 	if (!isMono)
 	{
 		chunksize *= 2;
 	}
-	return { chunksize, SampleRate, isMono? 1:2 };
+	return { chunksize, SampleRate, SampleType_Float32,
+		isMono ? ChannelConfig_Mono : ChannelConfig_Stereo };
 }
 
 //==========================================================================

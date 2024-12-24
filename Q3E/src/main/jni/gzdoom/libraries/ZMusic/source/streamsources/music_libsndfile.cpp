@@ -50,14 +50,13 @@ public:
 	SndFileSong(SoundDecoder *decoder, uint32_t loop_start, uint32_t loop_end, bool startass, bool endass);
 	~SndFileSong();
 	std::string GetStats() override;
-	SoundStreamInfo GetFormat() override;
+	SoundStreamInfoEx GetFormatEx() override;
 	bool GetData(void *buffer, size_t len) override;
 	
 protected:
 	SoundDecoder *Decoder;
-	int Channels;
-	int SampleRate;
-	
+	unsigned int FrameSize;
+
 	uint32_t Loop_Start;
 	uint32_t Loop_End;
 
@@ -322,18 +321,31 @@ static void FindOggComments(MusicIO::FileInterface *fr, uint32_t *loop_start, zm
 		if(fr->read(segsizes, ogg_segments) != ogg_segments)
 			break;
 
-		// Find the segment with the Vorbis Comment packet (type 3)
+		// Find the segment with the Vorbis Comment packet (type 3) or Opus tags.
+		bool vorbis_comments = false;
 		for(int i = 0; i < ogg_segments; ++i)
 		{
 			uint8_t segsize = segsizes[i];
 
 			if(segsize > 16)
 			{
-				uint8_t vorbhead[7];
-				if(fr->read(vorbhead, 7) != 7)
+				uint8_t vorbhead[8];
+				if(fr->read(vorbhead, 8) != 8)
 					return;
 
-				if(vorbhead[0] == 3 && memcmp(vorbhead+1, "vorbis", 6) == 0)
+				if(vorbhead[0] == 3 && memcmp(vorbhead + 1, "vorbis", 6) == 0)
+				{
+					// Seek back because the vorbis tag is only 7 bytes long.
+					if(fr->seek(-1, SEEK_CUR) == -1)
+						return;
+					segsize++;
+
+					vorbis_comments = true;
+				}
+				else if(memcmp(vorbhead, "OpusTags", 8) == 0)
+					vorbis_comments = true;
+
+				if(vorbis_comments)
 				{
 					// If the packet is 'laced', it spans multiple segments (a
 					// segment size of 255 indicates the next segment continues
@@ -355,7 +367,7 @@ static void FindOggComments(MusicIO::FileInterface *fr, uint32_t *loop_start, zm
 					return;
 				}
 
-				segsize -= 7;
+				segsize -= 8;
 			}
 			if(fr->seek(segsize, SEEK_CUR) == -1)
 				return;
@@ -421,25 +433,30 @@ static int32_t Scale(int32_t a, int32_t b, int32_t c)
 
 SndFileSong::SndFileSong(SoundDecoder *decoder, uint32_t loop_start, uint32_t loop_end, bool startass, bool endass)
 {
-	ChannelConfig iChannels;
-	SampleType Type;
-	
-	decoder->getInfo(&SampleRate, &iChannels, &Type);
+	ChannelConfig chanconf;
+	SampleType stype;
+	int srate;
 
-	if (!startass) loop_start = Scale(loop_start, SampleRate, 1000);
-	if (!endass) loop_end = Scale(loop_end, SampleRate, 1000);
+	decoder->getInfo(&srate, &chanconf, &stype);
+
+	if (!startass) loop_start = Scale(loop_start, srate, 1000);
+	if (!endass) loop_end = Scale(loop_end, srate, 1000);
 
 	const uint32_t sampleLength = (uint32_t)decoder->getSampleLength();
 	Loop_Start = loop_start;
 	Loop_End = sampleLength == 0 ? loop_end : std::min<uint32_t>(loop_end, sampleLength);
 	Decoder = decoder;
-	Channels = iChannels == ChannelConfig_Stereo? 2:1;
+	FrameSize = ZMusic_ChannelCount(chanconf) * ZMusic_SampleTypeSize(stype);
 }
 
-SoundStreamInfo SndFileSong::GetFormat()
+SoundStreamInfoEx SndFileSong::GetFormatEx()
 {
-	// deal with this once the configuration is handled better.
-	return { 64/*snd_streambuffersize*/ * 1024, SampleRate, -Channels };
+	ChannelConfig chanconf;
+	SampleType stype;
+	int srate;
+
+	Decoder->getInfo(&srate, &chanconf, &stype);
+	return { 64/*snd_streambuffersize*/ * 1024, srate, stype, chanconf };
 }
 
 //==========================================================================
@@ -466,14 +483,17 @@ std::string SndFileSong::GetStats()
 {
 	char out[80];
 	
-	size_t SamplePos;
+	ChannelConfig chanconf;
+	SampleType stype;
+	int srate;
+	Decoder->getInfo(&srate, &chanconf, &stype);
 	
-	SamplePos = Decoder->getSampleOffset();
-	int time = int (SamplePos / SampleRate);
+	size_t SamplePos = Decoder->getSampleOffset();
+	int time = int (SamplePos / srate);
 	
 	snprintf(out, 80,
 		"Track: %s, %dHz  Time: %02d:%02d",
-		Channels == 2? "Stereo" : "Mono", SampleRate,
+		ZMusic_ChannelConfigName(chanconf), srate,
 		time/60,
 		time % 60);
 	return out;
@@ -490,7 +510,7 @@ bool SndFileSong::GetData(void *vbuff, size_t len)
 	char *buff = (char*)vbuff;
 	
 	size_t currentpos = Decoder->getSampleOffset();
-	size_t framestoread = len / (Channels*2);
+	size_t framestoread = len / FrameSize;
 	bool err = false;
 	if (!m_Looping)
 	{
@@ -502,7 +522,7 @@ bool SndFileSong::GetData(void *vbuff, size_t len)
 		}
 		if (currentpos + framestoread > maxpos)
 		{
-			size_t got = Decoder->read(buff, (maxpos - currentpos) * Channels * 2);
+			size_t got = Decoder->read(buff, (maxpos - currentpos) * FrameSize);
 			memset(buff + got, 0, len - got);
 		}
 		else
@@ -519,7 +539,7 @@ bool SndFileSong::GetData(void *vbuff, size_t len)
 			// Loop can be very short, make sure the current position doesn't exceed it
 			if (currentpos < Loop_End)
 			{
-				size_t endblock = (Loop_End - currentpos) * Channels * 2;
+				size_t endblock = (Loop_End - currentpos) * FrameSize;
 				size_t endlen = Decoder->read(buff, endblock);
 
 				// Even if zero bytes was read give it a chance to start from the beginning

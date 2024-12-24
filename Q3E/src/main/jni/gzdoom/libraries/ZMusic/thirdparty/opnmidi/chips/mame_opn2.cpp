@@ -1,7 +1,7 @@
 /*
  * Interfaces over Yamaha OPN2 (YM2612) chip emulators
  *
- * Copyright (C) 2017-2018 Vitaly Novichkov (Wohlstand)
+ * Copyright (c) 2017-2022 Vitaly Novichkov (Wohlstand)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,8 @@
 #include <cstdlib>
 #include <assert.h>
 
-MameOPN2::MameOPN2()
+MameOPN2::MameOPN2(OPNFamily f)
+    : OPNChipBaseT(f)
 {
     chip = NULL;
     setRate(m_rate, m_clock);
@@ -39,7 +40,7 @@ void MameOPN2::setRate(uint32_t rate, uint32_t clock)
     OPNChipBaseT::setRate(rate, clock);
     if(chip)
         ym2612_shutdown(chip);
-    uint32_t chipRate = isRunningAtPcmRate() ? rate : static_cast<uint32_t>(nativeRate);
+    uint32_t chipRate = isRunningAtPcmRate() ? rate : nativeRate();
     chip = ym2612_init(NULL, (int)clock, (int)chipRate, NULL, NULL);
     ym2612_reset_chip(chip);
 }

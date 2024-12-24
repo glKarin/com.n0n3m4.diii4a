@@ -134,8 +134,8 @@ void MUSSong2::DoInitialSetup()
 {
 	for (int i = 0; i < 16; ++i)
 	{
-		LastVelocity[i] = 100;
-		ChannelVolumes[i] = 127;
+		LastVelocity[i] = 127;
+		ChannelVolumes[i] = 100;
 	}
 }
 

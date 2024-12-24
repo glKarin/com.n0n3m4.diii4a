@@ -64,7 +64,7 @@ public:
 	//bool SetPosition(int ms);
 	bool SetSubsong(int subsong) override;
 	bool Start() override;
-	SoundStreamInfo GetFormat() override;
+	SoundStreamInfoEx GetFormatEx() override;
 	void ChangeSettingNum(const char* setting, double val) override;
 	std::string GetStats() override;
 
@@ -885,6 +885,18 @@ StreamSource* MOD_OpenSong(MusicIO::FileInterface *reader, int samplerate)
 			duh = dumb_read_okt_quick(f);
 		}
 	}
+	else if (size >= 4 &&
+		 (dstart[0] == MAKE_ID('A','M','F','\xa') ||
+		 dstart[0] == MAKE_ID('A','M','F','\xb') ||
+		 dstart[0] == MAKE_ID('A','M','F','\xc') ||
+		 dstart[0] == MAKE_ID('A','M','F','\xd') ||
+		 dstart[0] == MAKE_ID('A','M','F','\xe')))
+	{
+		if ((f = dumb_read_allfile(&filestate, start, reader, headsize, size)))
+		{
+			duh = dumb_read_amf_quick(f);
+		}
+	}
 
 	if ( ! duh )
 	{
@@ -1004,7 +1016,7 @@ DumbSong::DumbSong(DUH* myduh, int samplerate)
 	written = 0;
 	length = 0;
 	start_order = 0;
-	MasterVolume = (float)dumbConfig.mod_dumb_mastervolume;
+	MasterVolume = (float)dumbConfig.mod_dumb_mastervolume * 4;
 	if (dumbConfig.mod_samplerate != 0)
 	{
 		srate = dumbConfig.mod_samplerate;
@@ -1030,13 +1042,13 @@ DumbSong::~DumbSong()
 
 //==========================================================================
 //
-// DumbSong GetFormat
+// DumbSong GetFormatEx
 //
 //==========================================================================
 
-SoundStreamInfo DumbSong::GetFormat()
+SoundStreamInfoEx DumbSong::GetFormatEx()
 {
-	return { 32*1024, srate, 2 };
+	return { 32*1024, srate, SampleType_Float32, ChannelConfig_Stereo };
 }
 
 //==========================================================================

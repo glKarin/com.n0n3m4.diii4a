@@ -33,13 +33,16 @@
 #define OPL_OPL3_H
 
 #include <inttypes.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+
 #define OPL_WRITEBUF_SIZE   1024
 #define OPL_WRITEBUF_DELAY  2
+#define OPL_FAST_WAVEGEN    1 /* optimized waveform generation */
 
 typedef uintptr_t       Bitu;
 typedef intptr_t        Bits;
@@ -86,6 +89,12 @@ struct _opl3_slot {
     Bit32u pg_phase;
     Bit16u pg_phase_out;
     Bit8u slot_num;
+
+#if OPL_FAST_WAVEGEN
+    Bit16u maskzero;
+    Bit8u  signpos;
+    Bit8u  phaseshift;
+#endif
 };
 
 struct _opl3_channel {

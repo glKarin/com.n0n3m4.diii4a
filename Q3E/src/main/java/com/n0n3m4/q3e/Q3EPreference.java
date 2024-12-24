@@ -96,6 +96,7 @@ public final class Q3EPreference
     public static final String pref_harm_gzdoom_user_mod       = "q3e_harm_gzdoom_user_mod"; //k
     public static final String pref_params_gzdoom              = "q3e_params_gzdoom"; //k
     public static final String pref_harm_gzdoom_command_record = "q3e_harm_gzdoom_command_record";
+    public static final String pref_harm_gzdoom_version        = "q3e_harm_gzdoom_version";
     // ETW
     public static final String pref_harm_etw_fs_game          = "q3e_harm_etw_fs_game"; //k
     public static final String pref_harm_etw_game_lib         = "q3e_harm_etw_game_lib"; //k

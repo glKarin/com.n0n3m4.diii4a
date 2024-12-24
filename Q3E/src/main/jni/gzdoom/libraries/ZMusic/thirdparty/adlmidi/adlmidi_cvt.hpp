@@ -1,8 +1,8 @@
 /*
- * libADLMIDI is a free MIDI to WAV conversion library with OPL3 emulation
+ * libADLMIDI is a free Software MIDI synthesizer library with OPL3 emulation
  *
  * Original ADLMIDI code: Copyright (c) 2010-2014 Joel Yliluoma <bisqwit@iki.fi>
- * ADLMIDI Library API:   Copyright (c) 2015-2018 Vitaly Novichkov <admin@wohlnet.ru>
+ * ADLMIDI Library API:   Copyright (c) 2015-2022 Vitaly Novichkov <admin@wohlnet.ru>
  *
  * Library is based on the ADLMIDI, a MIDI player for Linux and Windows with OPL3 emulation:
  * http://iki.fi/bisqwit/source/adlmidi.html
@@ -21,89 +21,80 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "adldata.hh"
+#include "oplinst.h"
 #include "wopl/wopl_file.h"
 #include <cmath>
 
 template <class WOPLI>
-static void cvt_generic_to_FMIns(adlinsdata2 &ins, const WOPLI &in)
+static void cvt_generic_to_FMIns(OplInstMeta &ins, const WOPLI &in)
 {
     ins.voice2_fine_tune = 0.0;
-    int8_t voice2_fine_tune = in.second_voice_detune;
+    int voice2_fine_tune = in.second_voice_detune;
+
     if(voice2_fine_tune != 0)
     {
-        if(voice2_fine_tune == 1)
-            ins.voice2_fine_tune = 0.000025;
-        else if(voice2_fine_tune == -1)
-            ins.voice2_fine_tune = -0.000025;
-        else
-            ins.voice2_fine_tune = voice2_fine_tune * (15.625 / 1000.0);
+        // Simulate behavior of DMX second voice detune
+        ins.voice2_fine_tune = (double)(((voice2_fine_tune + 128) >> 1) - 64) / 32.0;
     }
 
-    ins.midi_velocity_offset = in.midi_velocity_offset;
-    ins.tone = in.percussion_key_number;
-    ins.flags = (in.inst_flags & WOPL_Ins_4op) && (in.inst_flags & WOPL_Ins_Pseudo4op) ? adlinsdata::Flag_Pseudo4op : 0;
-    ins.flags|= (in.inst_flags & WOPL_Ins_4op) && ((in.inst_flags & WOPL_Ins_Pseudo4op) == 0) ? adlinsdata::Flag_Real4op : 0;
-    ins.flags|= (in.inst_flags & WOPL_Ins_IsBlank) ? adlinsdata::Flag_NoSound : 0;
+    ins.midiVelocityOffset = in.midi_velocity_offset;
+    ins.drumTone = in.percussion_key_number;
+    ins.flags = (in.inst_flags & WOPL_Ins_4op) && (in.inst_flags & WOPL_Ins_Pseudo4op) ? OplInstMeta::Flag_Pseudo4op : 0;
+    ins.flags|= (in.inst_flags & WOPL_Ins_4op) && ((in.inst_flags & WOPL_Ins_Pseudo4op) == 0) ? OplInstMeta::Flag_Real4op : 0;
+    ins.flags|= (in.inst_flags & WOPL_Ins_IsBlank) ? OplInstMeta::Flag_NoSound : 0;
     ins.flags|= in.inst_flags & WOPL_RhythmModeMask;
 
     for(size_t op = 0, slt = 0; op < 4; op++, slt++)
     {
-        ins.adl[slt].carrier_E862 =
+        ins.op[slt].carrier_E862 =
             ((static_cast<uint32_t>(in.operators[op].waveform_E0) << 24) & 0xFF000000) //WaveForm
             | ((static_cast<uint32_t>(in.operators[op].susrel_80) << 16) & 0x00FF0000) //SusRel
             | ((static_cast<uint32_t>(in.operators[op].atdec_60) << 8) & 0x0000FF00)   //AtDec
             | ((static_cast<uint32_t>(in.operators[op].avekf_20) << 0) & 0x000000FF);  //AVEKM
-        ins.adl[slt].carrier_40 = in.operators[op].ksl_l_40;//KSLL
+        ins.op[slt].carrier_40 = in.operators[op].ksl_l_40;//KSLL
 
         op++;
-        ins.adl[slt].modulator_E862 =
+        ins.op[slt].modulator_E862 =
             ((static_cast<uint32_t>(in.operators[op].waveform_E0) << 24) & 0xFF000000) //WaveForm
             | ((static_cast<uint32_t>(in.operators[op].susrel_80) << 16) & 0x00FF0000) //SusRel
             | ((static_cast<uint32_t>(in.operators[op].atdec_60) << 8) & 0x0000FF00)   //AtDec
             | ((static_cast<uint32_t>(in.operators[op].avekf_20) << 0) & 0x000000FF);  //AVEKM
-        ins.adl[slt].modulator_40 = in.operators[op].ksl_l_40;//KSLL
+        ins.op[slt].modulator_40 = in.operators[op].ksl_l_40;//KSLL
     }
 
-    ins.adl[0].finetune = static_cast<int8_t>(in.note_offset1);
-    ins.adl[0].feedconn = in.fb_conn1_C0;
-    ins.adl[1].finetune = static_cast<int8_t>(in.note_offset2);
-    ins.adl[1].feedconn = in.fb_conn2_C0;
+    ins.op[0].noteOffset = static_cast<int8_t>(in.note_offset1);
+    ins.op[0].feedconn = in.fb_conn1_C0;
+    ins.op[1].noteOffset = static_cast<int8_t>(in.note_offset2);
+    ins.op[1].feedconn = in.fb_conn2_C0;
 
-    ins.ms_sound_kon  = in.delay_on_ms;
-    ins.ms_sound_koff = in.delay_off_ms;
+    ins.soundKeyOnMs  = in.delay_on_ms;
+    ins.soundKeyOffMs = in.delay_off_ms;
 }
 
 template <class WOPLI>
-static void cvt_FMIns_to_generic(WOPLI &ins, const adlinsdata2 &in)
+static void cvt_FMIns_to_generic(WOPLI &ins, const OplInstMeta &in)
 {
     ins.second_voice_detune = 0;
     double voice2_fine_tune = in.voice2_fine_tune;
     if(voice2_fine_tune != 0)
     {
-        if(voice2_fine_tune > 0 && voice2_fine_tune <= 0.000025)
-            ins.second_voice_detune = 1;
-        else if(voice2_fine_tune < 0 && voice2_fine_tune >= -0.000025)
-            ins.second_voice_detune = -1;
-        else
-        {
-            long value = static_cast<long>(round(voice2_fine_tune * (1000.0 / 15.625)));
-            value = (value < -128) ? -128 : value;
-            value = (value > +127) ? +127 : value;
-            ins.second_voice_detune = static_cast<int8_t>(value);
-        }
+        int m = (int)(voice2_fine_tune * 32.0);
+        m += 64;
+        m <<= 1;
+        m -= 128;
+        ins.second_voice_detune = (uint8_t)m;
     }
 
-    ins.midi_velocity_offset = in.midi_velocity_offset;
-    ins.percussion_key_number = in.tone;
-    ins.inst_flags = (in.flags & (adlinsdata::Flag_Pseudo4op|adlinsdata::Flag_Real4op)) ? WOPL_Ins_4op : 0;
-    ins.inst_flags|= (in.flags & adlinsdata::Flag_Pseudo4op) ? WOPL_Ins_Pseudo4op : 0;
-    ins.inst_flags|= (in.flags & adlinsdata::Flag_NoSound) ? WOPL_Ins_IsBlank : 0;
-    ins.inst_flags |= in.flags & adlinsdata::Mask_RhythmMode;
+    ins.midi_velocity_offset = in.midiVelocityOffset;
+    ins.percussion_key_number = in.drumTone;
+    ins.inst_flags = (in.flags & (OplInstMeta::Flag_Pseudo4op|OplInstMeta::Flag_Real4op)) ? WOPL_Ins_4op : 0;
+    ins.inst_flags|= (in.flags & OplInstMeta::Flag_Pseudo4op) ? WOPL_Ins_Pseudo4op : 0;
+    ins.inst_flags|= (in.flags & OplInstMeta::Flag_NoSound) ? WOPL_Ins_IsBlank : 0;
+    ins.inst_flags |= in.flags & OplInstMeta::Mask_RhythmMode;
 
     for(size_t op = 0; op < 4; op++)
     {
-        const adldata &in2op = in.adl[(op < 2) ? 0 : 1];
+        const OplTimbre &in2op = in.op[(op < 2) ? 0 : 1];
         uint32_t regE862 = ((op & 1) == 0) ? in2op.carrier_E862 : in2op.modulator_E862;
         uint8_t reg40 = ((op & 1) == 0) ? in2op.carrier_40 : in2op.modulator_40;
 
@@ -114,11 +105,11 @@ static void cvt_FMIns_to_generic(WOPLI &ins, const adlinsdata2 &in)
         ins.operators[op].ksl_l_40 = reg40;
     }
 
-    ins.note_offset1 = in.adl[0].finetune;
-    ins.fb_conn1_C0 = in.adl[0].feedconn;
-    ins.note_offset2 = in.adl[1].finetune;
-    ins.fb_conn2_C0 = in.adl[1].feedconn;
+    ins.note_offset1 = in.op[0].noteOffset;
+    ins.fb_conn1_C0 = in.op[0].feedconn;
+    ins.note_offset2 = in.op[1].noteOffset;
+    ins.fb_conn2_C0 = in.op[1].feedconn;
 
-    ins.delay_on_ms = in.ms_sound_kon;
-    ins.delay_off_ms = in.ms_sound_koff;
+    ins.delay_on_ms = in.soundKeyOnMs;
+    ins.delay_off_ms = in.soundKeyOffMs;
 }

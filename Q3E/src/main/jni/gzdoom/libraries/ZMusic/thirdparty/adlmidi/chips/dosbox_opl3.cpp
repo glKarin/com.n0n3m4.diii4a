@@ -1,7 +1,7 @@
 /*
  * Interfaces over Yamaha OPL3 (YMF262) chip emulators
  *
- * Copyright (C) 2017-2018 Vitaly Novichkov (Wohlstand)
+ * Copyright (c) 2017-2022 Vitaly Novichkov (Wohlstand)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,6 +35,11 @@ DosBoxOPL3::~DosBoxOPL3()
 {
     DBOPL::Handler *chip_r = reinterpret_cast<DBOPL::Handler*>(m_chip);
     delete chip_r;
+}
+
+void DosBoxOPL3::globalPreInit()
+{
+    DBOPL::InitTables();
 }
 
 void DosBoxOPL3::setRate(uint32_t rate)
@@ -77,4 +82,9 @@ void DosBoxOPL3::nativeGenerateN(int16_t *output, size_t frames)
 const char *DosBoxOPL3::emulatorName()
 {
     return "DOSBox 0.74-r4111 OPL3";
+}
+
+OPLChipBase::ChipType DosBoxOPL3::chipType()
+{
+    return CHIPTYPE_OPL3;
 }

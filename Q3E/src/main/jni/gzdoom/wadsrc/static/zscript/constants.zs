@@ -267,6 +267,7 @@ enum EExplodeFlags
 	XF_THRUSTLESS = 64,
 	XF_NOALLIES = 128,
 	XF_CIRCULAR = 256,
+	XF_CIRCULARTHRUST = 512,
 };
 
 // Flags for A_RadiusThrust
@@ -276,6 +277,7 @@ enum ERadiusThrustFlags
 	RTF_NOIMPACTDAMAGE = 2,
 	RTF_NOTMISSILE = 4,
 	RTF_THRUSTZ = 16,
+	RTF_CIRCULARTHRUST = 512,
 };
 
 // Flags for A_RadiusDamageSelf
@@ -421,8 +423,10 @@ enum EActivationFlags
 // [MC] Flags for SetViewPos.
 enum EViewPosFlags
 {
-	VPSF_ABSOLUTEOFFSET =	1 << 1,			// Don't include angles.
-	VPSF_ABSOLUTEPOS =		1 << 2,			// Use absolute position.
+	VPSF_ABSOLUTEOFFSET =		1 << 1,			// Don't include angles.
+	VPSF_ABSOLUTEPOS =			1 << 2,			// Use absolute position.
+	VPSF_ALLOWOUTOFBOUNDS =	1 << 3,			// Allow viewpoint to go out of bounds (hardware renderer only).
+	VPSF_ORTHOGRAPHIC =		1 << 4,			// Use orthographic projection (hardware renderer only).
 };
 
 // Flags for A_TakeInventory and A_TakeFromTarget
@@ -714,6 +718,11 @@ enum EParticleFlags
 	SPF_REPLACE					= 1 << 7,
 	SPF_NO_XY_BILLBOARD			= 1 << 8,
 	SPF_LOCAL_ANIM				= 1 << 9,
+	SPF_NEGATIVE_FADESTEP		= 1 << 10,
+	SPF_FACECAMERA				= 1 << 11,
+	SPF_NOFACECAMERA			= 1 << 12,
+	SPF_ROLLCENTER				= 1 << 13,
+	SPF_STRETCHPIXELS			= 1 << 14,
 
 	SPF_RELATIVE				= SPF_RELPOS|SPF_RELVEL|SPF_RELACCEL|SPF_RELANG
 };
@@ -1017,6 +1026,7 @@ enum ESkillProperty
 	SKILLP_PlayerRespawn,
 	SKILLP_SpawnMulti,
 	SKILLP_InstantReaction,
+	SKILLP_SpawnMultiCoopOnly,
 };
 enum EFSkillProperty	// floating point properties
 {
@@ -1246,7 +1256,8 @@ enum RadiusDamageFlags
 	RADF_OLDRADIUSDAMAGE = 32,
 	RADF_THRUSTLESS = 64,
 	RADF_NOALLIES = 128,
-	RADF_CIRCULAR = 256
+	RADF_CIRCULAR = 256,
+	RADF_CIRCULARTHRUST = 512,
 };
 
 enum IntermissionSequenceType
@@ -1398,6 +1409,8 @@ enum ELevelFlags
 	LEVEL3_AVOIDMELEE			= 0x00020000,	// global flag needed for proper MBF support.
 	LEVEL3_NOJUMPDOWN			= 0x00040000,	// only for MBF21. Inverse of MBF's dog_jumping flag.
 	LEVEL3_LIGHTCREATED			= 0x00080000,	// a light had been created in the last frame
+	LEVEL3_NOFOGOFWAR			= 0x00100000,	// disables effect of r_radarclipper CVAR on this map
+	LEVEL3_SECRET				= 0x00200000,	// level is a secret level
 };
 
 // [RH] Compatibility flags.
@@ -1455,6 +1468,12 @@ enum ECompatFlags
 	COMPATF2_VOODOO_ZOMBIES = 1 << 15,  // allow playerinfo, playerpawn, and voodoo health to all be different, and allow monster targetting of 'dead' players that have positive health
 };
 
+enum HitWaterFlags
+{
+	THW_SMALL	= 1 << 0,
+	THW_NOVEL	= 1 << 1,
+};
+
 const M_E        = 2.7182818284590452354;  // e
 const M_LOG2E    = 1.4426950408889634074;  // log_2 e
 const M_LOG10E   = 0.43429448190325182765; // log_10 e
@@ -1496,4 +1515,14 @@ enum EModelFlags
 	MDL_MODELSAREATTACHMENTS		= 1<<12,	// any model index after 0 is treated as an attachment, and therefore will use the bone results of index 0
 	MDL_CORRECTPIXELSTRETCH			= 1<<13,	// ensure model does not distort with pixel stretch when pitch/roll is applied
 	MDL_FORCECULLBACKFACES			= 1<<14,
+};
+
+enum EVisualThinkerFlags
+{
+	VTF_FlipOffsetX		= 1 << 0,
+	VTF_FlipOffsetY		= 1 << 1,
+	VTF_FlipX			= 1 << 2,
+	VTF_FlipY			= 1 << 3, // flip the sprite on the x/y axis.
+	VTF_DontInterpolate	= 1 << 4, // disable all interpolation
+	VTF_AddLightLevel	= 1 << 5, // adds sector light level to 'LightLevel'
 };

@@ -41,21 +41,21 @@ const char *GetVersionString();
 
 /** Lots of different version numbers **/
 
-#define VERSIONSTR "4.12.2"
+#define VERSIONSTR "4.14.0"
 
 // The version as seen in the Windows resource
-#define RC_FILEVERSION 4,12,2,0
-#define RC_PRODUCTVERSION 4,12,2,0
+#define RC_FILEVERSION 4,14,0,0
+#define RC_PRODUCTVERSION 4,14,0,0
 #define RC_PRODUCTVERSION2 VERSIONSTR
 // These are for content versioning.
 #define VER_MAJOR 4
-#define VER_MINOR 12
-#define VER_REVISION 2
+#define VER_MINOR 14
+#define VER_REVISION 0
 
 // This should always refer to the GZDoom version a derived port is based on and not reflect the derived port's version number!
 #define ENG_MAJOR 4
-#define ENG_MINOR 12
-#define ENG_REVISION 2
+#define ENG_MINOR 14
+#define ENG_REVISION 0
 
 // Version identifier for network games.
 // Bump it every time you do a release unless you're certain you
@@ -93,6 +93,7 @@ const char *GetVersionString();
 // This is so that derivates can use the same savegame versions without worrying about engine compatibility
 #define GAMESIG "GZDOOM"
 #define BASEWAD "gzdoom.pk3"
+// Set OPTIONALWAD to "" (null) to disable searching for it
 #define OPTIONALWAD "game_support.pk3"
 #define GZDOOM 1
 #define VR3D_ENABLED
@@ -101,8 +102,11 @@ const char *GetVersionString();
 #define GAMENAME "GZDoom"
 #define WGAMENAME L"GZDoom"
 #define GAMENAMELOWERCASE "gzdoom"
+#define QUERYIWADDEFAULT true
 #define FORUM_URL "http://forum.zdoom.org/"
 #define BUGS_FORUM_URL	"http://forum.zdoom.org/viewforum.php?f=2"
+// For QUERYIWADDEFAULT: Set to 'true' to always show dialog box on startup by default, 'false' to disable.
+// Should set to 'false' for standalone games, and set to 'true' for regular source port forks that are meant to run any game.
 
 #if defined(__APPLE__) || defined(_WIN32)
 #define GAME_DIR GAMENAME

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Alexey Khokholov (Nuke.YKT)
+ * Copyright (C) 2017-2018 Alexey Khokholov (Nuke.YKT)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
  *      OPLx decapsulated(Matthew Gambrell, Olli Niemitalo):
  *          OPL2 ROMs.
  *
- * version: 1.0.7
+ * version: 1.0.9
  */
 
 #ifndef YM3438_H
@@ -39,9 +39,8 @@ extern "C" {
 #define OPN_WRITEBUF_DELAY 15
 
 enum {
-    ym3438_type_discrete = 0,   /* Discrete YM3438 (Teradrive)          */
-    ym3438_type_asic = 1,       /* ASIC YM3438 (MD1 VA7, MD2, MD3, etc) */
-    ym3438_type_ym2612 = 2      /* YM2612 (MD1, MD2 VA2)                */
+    ym3438_mode_ym2612 = 0x01,      /* Enables YM2612 emulation (MD1, MD2 VA2) */
+    ym3438_mode_readmode = 0x02     /* Enables status read on any port (TeraDrive, MD1 VA7, MD2, etc) */
 };
 
 #include <stdint.h>
@@ -80,7 +79,7 @@ typedef struct
     Bit8u write_busy_cnt;
     Bit8u write_fm_address;
     Bit8u write_fm_data;
-    Bit8u write_fm_mode_a;
+    Bit16u write_fm_mode_a;
     Bit16u address;
     Bit8u data;
     Bit8u pin_test_in;
@@ -205,6 +204,8 @@ typedef struct
     Bit8u pan_l[6], pan_r[6];
     Bit8u ams[6];
     Bit8u pms[6];
+    Bit8u status;
+    Bit32u status_time;
 
     /*EXTRA*/
     Bit32u mute[7];
@@ -240,7 +241,6 @@ void OPN2_Generate(ym3438_t *chip, Bit16s *buf);
 void OPN2_GenerateResampled(ym3438_t *chip, Bit16s *buf);
 void OPN2_GenerateStream(ym3438_t *chip, Bit16s *output, Bit32u numsamples);
 void OPN2_GenerateStreamMix(ym3438_t *chip, Bit16s *output, Bit32u numsamples);
-void OPN2_SetOptions(Bit8u flags);
 void OPN2_SetMute(ym3438_t *chip, Bit32u mute);
 
 #ifdef __cplusplus

@@ -1,7 +1,7 @@
 /*
  * Interfaces over Yamaha OPN2 (YM2612) chip emulators
  *
- * Copyright (C) 2017-2018 Vitaly Novichkov (Wohlstand)
+ * Copyright (c) 2017-2022 Vitaly Novichkov (Wohlstand)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,7 @@
 #ifndef ONP_CHIP_BASE_H
 #define ONP_CHIP_BASE_H
 
+#include "opn_chip_family.h"
 #include <stdint.h>
 #include <stddef.h>
 
@@ -39,15 +40,18 @@ extern void opn2_audioTickHandler(void *instance, uint32_t chipId, uint32_t rate
 
 class OPNChipBase
 {
-public:
-    enum { nativeRate = 53267 };
 protected:
     uint32_t m_id;
     uint32_t m_rate;
     uint32_t m_clock;
+    OPNFamily m_family;
 public:
-    OPNChipBase();
+    explicit OPNChipBase(OPNFamily f);
     virtual ~OPNChipBase();
+
+    virtual OPNFamily family() const = 0;
+    uint32_t clockRate() const;
+    virtual uint32_t nativeClockRate() const = 0;
 
     uint32_t chipId() const { return m_id; }
     void setChipId(uint32_t id) { m_id = id; }
@@ -61,6 +65,7 @@ public:
 
     virtual void setRate(uint32_t rate, uint32_t clock) = 0;
     virtual uint32_t effectiveRate() const = 0;
+    virtual uint32_t nativeRate() const = 0;
     virtual void reset() = 0;
     virtual void writeReg(uint32_t port, uint16_t addr, uint8_t data) = 0;
 
@@ -88,8 +93,11 @@ template <class T>
 class OPNChipBaseT : public OPNChipBase
 {
 public:
-    OPNChipBaseT();
+    explicit OPNChipBaseT(OPNFamily f);
     virtual ~OPNChipBaseT();
+
+    OPNFamily family() const override;
+    uint32_t nativeClockRate() const override;
 
     bool isRunningAtPcmRate() const override;
     bool setRunningAtPcmRate(bool r) override;
@@ -99,6 +107,7 @@ public:
 
     virtual void setRate(uint32_t rate, uint32_t clock) override;
     uint32_t effectiveRate() const override;
+    uint32_t nativeRate() const override;
     virtual void reset() override;
     void generate(int16_t *output, size_t frames) override;
     void generateAndMix(int16_t *output, size_t frames) override;
@@ -134,10 +143,11 @@ template <class T, unsigned Buffer = 256>
 class OPNChipBaseBufferedT : public OPNChipBaseT<T>
 {
 public:
-    OPNChipBaseBufferedT()
-        : OPNChipBaseT<T>(), m_bufferIndex(0) {}
+    explicit OPNChipBaseBufferedT(OPNFamily f)
+        : OPNChipBaseT<T>(f), m_bufferIndex(0) {}
     virtual ~OPNChipBaseBufferedT()
         {}
+    enum { buffer_size = Buffer };
 public:
     void reset() override;
     void nativeGenerate(int16_t *frame) override;

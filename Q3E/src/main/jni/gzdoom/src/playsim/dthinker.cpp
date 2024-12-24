@@ -46,6 +46,8 @@
 #include "g_cvars.h"
 #include "d_main.h"
 
+#include "p_visualthinker.h"
+
 static int ThinkCount;
 static cycle_t ThinkCycles;
 extern cycle_t BotSupportCycles;
@@ -132,7 +134,7 @@ void FThinkerCollection::RunThinkers(FLevelLocals *Level)
 				if (dolights) ac->SetDynamicLights();
 			}
 			// This was merged from P_RunEffects to eliminate the costly duplicate ThinkerIterator loop.
-			if ((ac->effects || ac->fountaincolor) && !Level->isFrozen())
+			if ((ac->effects || ac->fountaincolor) && ac->ShouldRenderLocally() && !Level->isFrozen())
 			{
 				P_RunEffect(ac, ac->effects);
 			}

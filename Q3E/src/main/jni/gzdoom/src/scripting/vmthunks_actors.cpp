@@ -1851,8 +1851,9 @@ DEFINE_ACTION_FUNCTION(AActor, BouncePlane)
 {
 	PARAM_SELF_PROLOGUE(AActor);
 	PARAM_POINTER(plane, secplane_t);
+	PARAM_BOOL(is3DFloor);
 
-	ACTION_RETURN_BOOL(self->FloorBounceMissile(*plane));
+	ACTION_RETURN_BOOL(self->FloorBounceMissile(*plane, is3DFloor));
 }
 
 DEFINE_ACTION_FUNCTION(AActor, PlayBounceSound)
@@ -2005,6 +2006,7 @@ DEFINE_FIELD(AActor, strafecount)
 DEFINE_FIELD(AActor, target)
 DEFINE_FIELD(AActor, master)
 DEFINE_FIELD(AActor, tracer)
+DEFINE_FIELD(AActor, damagesource)
 DEFINE_FIELD(AActor, LastHeard)
 DEFINE_FIELD(AActor, lastenemy)
 DEFINE_FIELD(AActor, LastLookActor)
@@ -2035,6 +2037,7 @@ DEFINE_FIELD(AActor, DamageType)
 DEFINE_FIELD(AActor, DamageTypeReceived)
 DEFINE_FIELD(AActor, FloatBobPhase)
 DEFINE_FIELD(AActor, FloatBobStrength)
+DEFINE_FIELD(AActor, FloatBobFactor)
 DEFINE_FIELD(AActor, RipperLevel)
 DEFINE_FIELD(AActor, RipLevelMin)
 DEFINE_FIELD(AActor, RipLevelMax)
@@ -2042,6 +2045,7 @@ DEFINE_FIELD(AActor, Species)
 DEFINE_FIELD(AActor, alternative)
 DEFINE_FIELD(AActor, goal)
 DEFINE_FIELD(AActor, MinMissileChance)
+DEFINE_FIELD(AActor, missilechancemult)
 DEFINE_FIELD(AActor, LastLookPlayerNumber)
 DEFINE_FIELD(AActor, SpawnFlags)
 DEFINE_FIELD(AActor, meleethreshold)

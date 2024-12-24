@@ -854,7 +854,7 @@ void SprayDecal(AActor *shooter, const char *name, double distance, DVector3 off
 	{
 		if (trace.HitType == TRACE_HitWall)
 		{
-			DImpactDecal::StaticCreate(shooter->Level, name, trace.HitPos, trace.Line->sidedef[trace.Side], NULL, entry, bloodTrans);
+			DImpactDecal::StaticCreate(shooter->Level, name, trace.HitPos, trace.Line->sidedef[trace.Side], trace.ffloor, entry, bloodTrans);
 		}
 	}
 }
@@ -933,4 +933,21 @@ DEFINE_ACTION_FUNCTION_NATIVE(ADecal, SpawnDecal, SpawnDecal)
 	PARAM_SELF_PROLOGUE(AActor);
 	SpawnDecal(self);
 	return 0;
+}
+
+//----------------------------------------------------------------------------
+//
+//
+//
+//----------------------------------------------------------------------------
+
+static int GetDecalName(AActor* self)
+{
+	return self->DecalGenerator != nullptr ? self->DecalGenerator->GetDecalName().GetIndex() : NAME_None;
+}
+
+DEFINE_ACTION_FUNCTION_NATIVE(AActor, GetDecalName, GetDecalName)
+{
+	PARAM_SELF_PROLOGUE(AActor);
+	ACTION_RETURN_INT(GetDecalName(self));
 }

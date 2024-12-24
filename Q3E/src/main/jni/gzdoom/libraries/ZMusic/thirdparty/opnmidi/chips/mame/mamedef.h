@@ -17,14 +17,19 @@ typedef signed int							INT32;
 #endif
 
 /* 64-bit values */
-#ifndef _WINDOWS_H
-#ifdef _MSC_VER
+#if !defined(_WINDOWS_H) && defined(RSM_ENABLE)
+#	ifdef _MSC_VER
 typedef signed __int64						INT64;
 typedef unsigned __int64					UINT64;
-#else
-__extension__ typedef unsigned long long	UINT64;
-__extension__ typedef signed long long		INT64;
-#endif
+#	else
+#		if (__WORDSIZE == 64) || defined(_WIN64)
+typedef signed long int						INT64;
+typedef unsigned long int					UINT64;
+#		else
+__extension__ typedef signed long long int	INT64;
+__extension__ typedef unsigned long long int UINT64;
+#		endif
+#	endif
 #endif
 
 /* offsets and addresses are 32-bit (for now...) */
@@ -42,7 +47,7 @@ typedef INT16 stream_sample_t;
 #endif
 
 #if defined(_MSC_VER)
-//#define INLINE	static __forceinline
+/* #define INLINE	static __forceinline */
 #define INLINE	static __inline
 #elif defined(__GNUC__)
 #define INLINE	static __inline__

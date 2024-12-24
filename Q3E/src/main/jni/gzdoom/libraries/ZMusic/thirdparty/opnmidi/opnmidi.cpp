@@ -1,8 +1,8 @@
 /*
- * libOPNMIDI is a free MIDI to WAV conversion library with OPN2 (YM2612) emulation
+ * libOPNMIDI is a free Software MIDI synthesizer library with OPN2 (YM2612) emulation
  *
  * MIDI parser and player (Original code from ADLMIDI): Copyright (c) 2010-2014 Joel Yliluoma <bisqwit@iki.fi>
- * OPNMIDI Library and YM2612 support:   Copyright (c) 2017-2018 Vitaly Novichkov <admin@wohlnet.ru>
+ * OPNMIDI Library and YM2612 support:   Copyright (c) 2017-2022 Vitaly Novichkov <admin@wohlnet.ru>
  *
  * Library is based on the ADLMIDI, a MIDI player for Linux and Windows with OPL3 emulation:
  * http://iki.fi/bisqwit/source/adlmidi.html
@@ -21,7 +21,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "opnmidi_midiplay.hpp"
+#include "opnmidi_opn2.hpp"
 #include "opnmidi_private.hpp"
+#include "chips/opn_chip_base.h"
+#ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
+#include "midi_sequencer.hpp"
+#endif
 
 /* Unify MIDI player casting and interface between ADLMIDI and OPNMIDI */
 #define GET_MIDI_PLAYER(device) reinterpret_cast<OPNMIDIplay *>((device)->opn2_midiPlayer)
@@ -73,23 +79,24 @@ OPNMIDI_EXPORT int opn2_setDeviceIdentifier(OPN2_MIDIPlayer *device, unsigned id
     return 0;
 }
 
-OPNMIDI_EXPORT int opn2_setNumChips(OPN2_MIDIPlayer *device, int numCards)
+OPNMIDI_EXPORT int opn2_setNumChips(OPN2_MIDIPlayer *device, int numChips)
 {
     if(device == NULL)
         return -2;
 
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    play->m_setup.numChips = static_cast<unsigned int>(numCards);
+    play->m_setup.numChips = static_cast<unsigned int>(numChips);
     if(play->m_setup.numChips < 1 || play->m_setup.numChips > OPN_MAX_CHIPS)
     {
         play->setErrorString("number of chips may only be 1.." OPN_MAX_CHIPS_STR ".\n");
         return -1;
     }
 
-    if(!play->m_synth.setupLocked())
+    Synth &synth = *play->m_synth;
+    if(!synth.setupLocked())
     {
-        play->m_synth.m_numChips = play->m_setup.numChips;
+        synth.m_numChips = play->m_setup.numChips;
         play->partialReset();
     }
 
@@ -111,7 +118,7 @@ OPNMIDI_EXPORT int opn2_getNumChipsObtained(struct OPN2_MIDIPlayer *device)
         return -2;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return (int)play->m_synth.m_numChips;
+    return (int)play->m_synth->m_numChips;
 }
 
 
@@ -121,7 +128,7 @@ OPNMIDI_EXPORT int opn2_reserveBanks(OPN2_MIDIPlayer *device, unsigned banks)
         return -1;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    OPN2::BankMap &map = play->m_synth.m_insBanks;
+    Synth::BankMap &map = play->m_synth->m_insBanks;
     map.reserve(banks);
     return (int)map.capacity();
 }
@@ -134,13 +141,13 @@ OPNMIDI_EXPORT int opn2_getBank(OPN2_MIDIPlayer *device, const OPN2_BankId *idp,
     OPN2_BankId id = *idp;
     if(id.lsb > 127 || id.msb > 127 || id.percussive > 1)
         return -1;
-    size_t idnumber = ((id.msb << 8) | id.lsb | (id.percussive ? size_t(OPN2::PercussionTag) : 0));
+    size_t idnumber = ((id.msb << 8) | id.lsb | (id.percussive ? size_t(Synth::PercussionTag) : 0));
 
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    OPN2::BankMap &map = play->m_synth.m_insBanks;
+    Synth::BankMap &map = play->m_synth->m_insBanks;
 
-    OPN2::BankMap::iterator it;
+    Synth::BankMap::iterator it;
     if(!(flags & OPNMIDI_Bank_Create))
     {
         it = map.find(idnumber);
@@ -149,16 +156,16 @@ OPNMIDI_EXPORT int opn2_getBank(OPN2_MIDIPlayer *device, const OPN2_BankId *idp,
     }
     else
     {
-        std::pair<size_t, OPN2::Bank> value;
+        std::pair<size_t, Synth::Bank> value;
         value.first = idnumber;
         memset(&value.second, 0, sizeof(value.second));
         for (unsigned i = 0; i < 128; ++i)
-            value.second.ins[i].flags = opnInstMeta::Flag_NoSound;
+            value.second.ins[i].flags = OpnInstMeta::Flag_NoSound;
 
-        std::pair<OPN2::BankMap::iterator, bool> ir;
-        if(flags & OPNMIDI_Bank_CreateRt)
+        std::pair<Synth::BankMap::iterator, bool> ir;
+        if((flags & OPNMIDI_Bank_CreateRt) == OPNMIDI_Bank_CreateRt)
         {
-            ir = map.insert(value, OPN2::BankMap::do_not_expand_t());
+            ir = map.insert(value, Synth::BankMap::do_not_expand_t());
             if(ir.first == map.end())
                 return -1;
         }
@@ -176,11 +183,11 @@ OPNMIDI_EXPORT int opn2_getBankId(OPN2_MIDIPlayer *device, const OPN2_Bank *bank
     if(!device || !bank)
         return -1;
 
-    OPN2::BankMap::iterator it = OPN2::BankMap::iterator::from_ptrs(bank->pointer);
-    OPN2::BankMap::key_type idnumber = it->first;
+    Synth::BankMap::iterator it = Synth::BankMap::iterator::from_ptrs(bank->pointer);
+    Synth::BankMap::key_type idnumber = it->first;
     id->msb = (idnumber >> 8) & 127;
     id->lsb = idnumber & 127;
-    id->percussive = (idnumber & OPN2::PercussionTag) ? 1 : 0;
+    id->percussive = (idnumber & Synth::PercussionTag) ? 1 : 0;
     return 0;
 }
 
@@ -191,8 +198,8 @@ OPNMIDI_EXPORT int opn2_removeBank(OPN2_MIDIPlayer *device, OPN2_Bank *bank)
 
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    OPN2::BankMap &map = play->m_synth.m_insBanks;
-    OPN2::BankMap::iterator it = OPN2::BankMap::iterator::from_ptrs(bank->pointer);
+    Synth::BankMap &map = play->m_synth->m_insBanks;
+    Synth::BankMap::iterator it = Synth::BankMap::iterator::from_ptrs(bank->pointer);
     size_t size = map.size();
     map.erase(it);
     return (map.size() != size) ? 0 : -1;
@@ -205,9 +212,9 @@ OPNMIDI_EXPORT int opn2_getFirstBank(OPN2_MIDIPlayer *device, OPN2_Bank *bank)
 
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    OPN2::BankMap &map = play->m_synth.m_insBanks;
+    Synth::BankMap &map = play->m_synth->m_insBanks;
 
-    OPN2::BankMap::iterator it = map.begin();
+    Synth::BankMap::iterator it = map.begin();
     if(it == map.end())
         return -1;
 
@@ -222,9 +229,9 @@ OPNMIDI_EXPORT int opn2_getNextBank(OPN2_MIDIPlayer *device, OPN2_Bank *bank)
 
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    OPN2::BankMap &map = play->m_synth.m_insBanks;
+    Synth::BankMap &map = play->m_synth->m_insBanks;
 
-    OPN2::BankMap::iterator it = OPN2::BankMap::iterator::from_ptrs(bank->pointer);
+    Synth::BankMap::iterator it = Synth::BankMap::iterator::from_ptrs(bank->pointer);
     if(++it == map.end())
         return -1;
 
@@ -237,7 +244,7 @@ OPNMIDI_EXPORT int opn2_getInstrument(OPN2_MIDIPlayer *device, const OPN2_Bank *
     if(!device || !bank || index > 127 || !ins)
         return -1;
 
-    OPN2::BankMap::iterator it = OPN2::BankMap::iterator::from_ptrs(bank->pointer);
+    Synth::BankMap::iterator it = Synth::BankMap::iterator::from_ptrs(bank->pointer);
     cvt_FMIns_to_OPNI(*ins, it->second.ins[index]);
     ins->version = 0;
     return 0;
@@ -251,7 +258,7 @@ OPNMIDI_EXPORT int opn2_setInstrument(OPN2_MIDIPlayer *device, OPN2_Bank *bank, 
     if(ins->version != 0)
         return -1;
 
-    OPN2::BankMap::iterator it = OPN2::BankMap::iterator::from_ptrs(bank->pointer);
+    Synth::BankMap::iterator it = Synth::BankMap::iterator::from_ptrs(bank->pointer);
     cvt_OPNI_to_FMIns(it->second.ins[index], *ins);
     return 0;
 }
@@ -303,11 +310,12 @@ OPNMIDI_EXPORT void opn2_setLfoEnabled(struct OPN2_MIDIPlayer *device, int lfoEn
     if(!device) return;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
+    Synth &synth = *play->m_synth;
     play->m_setup.lfoEnable = lfoEnable;
-    play->m_synth.m_lfoEnable = (lfoEnable < 0 ?
-                                play->m_synth.m_insBankSetup.lfoEnable :
-                                play->m_setup.lfoEnable) != 0;
-    play->m_synth.commitLFOSetup();
+    synth.m_lfoEnable = (lfoEnable < 0 ?
+                         synth.m_insBankSetup.lfoEnable :
+                         play->m_setup.lfoEnable) != 0;
+    synth.commitLFOSetup();
 }
 
 OPNMIDI_EXPORT int opn2_getLfoEnabled(struct OPN2_MIDIPlayer *device)
@@ -315,7 +323,7 @@ OPNMIDI_EXPORT int opn2_getLfoEnabled(struct OPN2_MIDIPlayer *device)
     if(!device) return -1;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_synth.m_lfoEnable;
+    return play->m_synth->m_lfoEnable;
 }
 
 OPNMIDI_EXPORT void opn2_setLfoFrequency(struct OPN2_MIDIPlayer *device, int lfoFrequency)
@@ -323,11 +331,12 @@ OPNMIDI_EXPORT void opn2_setLfoFrequency(struct OPN2_MIDIPlayer *device, int lfo
     if(!device) return;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
+    Synth &synth = *play->m_synth;
     play->m_setup.lfoFrequency = lfoFrequency;
-    play->m_synth.m_lfoFrequency = lfoFrequency < 0 ?
-                                   play->m_synth.m_insBankSetup.lfoFrequency :
+    synth.m_lfoFrequency = lfoFrequency < 0 ?
+                                   synth.m_insBankSetup.lfoFrequency :
                                    (uint8_t)play->m_setup.lfoFrequency;
-    play->m_synth.commitLFOSetup();
+    synth.commitLFOSetup();
 }
 
 OPNMIDI_EXPORT int opn2_getLfoFrequency(struct OPN2_MIDIPlayer *device)
@@ -335,7 +344,26 @@ OPNMIDI_EXPORT int opn2_getLfoFrequency(struct OPN2_MIDIPlayer *device)
     if(!device) return -1;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_synth.m_lfoFrequency;
+    return play->m_synth->m_lfoFrequency;
+}
+
+/*Override chip type. -1 - use bank default state*/
+OPNMIDI_EXPORT void opn2_setChipType(struct OPN2_MIDIPlayer *device, int chipType)
+{
+    if(!device) return;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    play->m_setup.chipType = chipType;
+    play->applySetup();
+}
+
+/*Get the chip type*/
+OPNMIDI_EXPORT int opn2_getChipType(struct OPN2_MIDIPlayer *device)
+{
+    if(!device) return -1;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    return play->m_synth->chipFamily();
 }
 
 OPNMIDI_EXPORT void opn2_setScaleModulators(OPN2_MIDIPlayer *device, int smod)
@@ -345,7 +373,7 @@ OPNMIDI_EXPORT void opn2_setScaleModulators(OPN2_MIDIPlayer *device, int smod)
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
     play->m_setup.ScaleModulators = smod;
-    play->m_synth.m_scaleModulators = (play->m_setup.ScaleModulators != 0);
+    play->m_synth->m_scaleModulators = (play->m_setup.ScaleModulators != 0);
 }
 
 OPNMIDI_EXPORT void opn2_setFullRangeBrightness(struct OPN2_MIDIPlayer *device, int fr_brightness)
@@ -357,16 +385,63 @@ OPNMIDI_EXPORT void opn2_setFullRangeBrightness(struct OPN2_MIDIPlayer *device, 
     play->m_setup.fullRangeBrightnessCC74 = (fr_brightness != 0);
 }
 
-OPNMIDI_EXPORT void opn2_setLoopEnabled(OPN2_MIDIPlayer *device, int loopEn)
+OPNMIDI_EXPORT void opn2_setAutoArpeggio(OPN2_MIDIPlayer *device, int aaEn)
 {
     if(!device)
         return;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    play->m_setup.enableAutoArpeggio = (aaEn != 0);
+}
+
+OPNMIDI_EXPORT int opn2_getAutoArpeggio(OPN2_MIDIPlayer *device)
+{
+    if(!device)
+        return 0;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    return play->m_setup.enableAutoArpeggio ? 1 : 0;
+}
+
+OPNMIDI_EXPORT void opn2_setLoopEnabled(OPN2_MIDIPlayer *device, int loopEn)
+{
 #ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
-	MidiPlayer *play = GET_MIDI_PLAYER(device);
-	assert(play);
-    play->m_sequencer.setLoopEnabled(loopEn != 0);
+    if(!device)
+        return;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    play->m_sequencer->setLoopEnabled(loopEn != 0);
 #else
+    ADL_UNUSED(device);
     ADL_UNUSED(loopEn);
+#endif
+}
+
+OPNMIDI_EXPORT void opn2_setLoopCount(OPN2_MIDIPlayer *device, int loopCount)
+{
+#ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
+    if(!device)
+        return;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    play->m_sequencer->setLoopsCount(loopCount);
+#else
+    ADL_UNUSED(device);
+    ADL_UNUSED(loopCount);
+#endif
+}
+
+OPNMIDI_EXPORT void opn2_setLoopHooksOnly(OPN2_MIDIPlayer *device, int loopHooksOnly)
+{
+#ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
+    if(!device)
+        return;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    play->m_sequencer->setLoopHooksOnly(loopHooksOnly);
+#else
+    ADL_UNUSED(device);
+    ADL_UNUSED(loopHooksOnly);
 #endif
 }
 
@@ -376,7 +451,7 @@ OPNMIDI_EXPORT void opn2_setSoftPanEnabled(OPN2_MIDIPlayer *device, int softPanE
         return;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    play->m_synth.m_softPanning = (softPanEn != 0);
+    play->m_synth->m_softPanning = (softPanEn != 0);
 }
 
 /* !!!DEPRECATED!!! */
@@ -386,30 +461,53 @@ OPNMIDI_EXPORT void opn2_setLogarithmicVolumes(struct OPN2_MIDIPlayer *device, i
         return;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
+    Synth &synth = *play->m_synth;
     play->m_setup.LogarithmicVolumes = static_cast<unsigned int>(logvol);
-    if(!play->m_synth.setupLocked())
+    if(!synth.setupLocked())
     {
         if(play->m_setup.LogarithmicVolumes != 0)
-            play->m_synth.setVolumeScaleModel(OPNMIDI_VolumeModel_NativeOPN2);
+            synth.setVolumeScaleModel(OPNMIDI_VolumeModel_NativeOPN2);
         else
-            play->m_synth.setVolumeScaleModel(static_cast<OPNMIDI_VolumeModels>(play->m_setup.VolumeModel));
+            synth.setVolumeScaleModel(static_cast<OPNMIDI_VolumeModels>(play->m_setup.VolumeModel));
     }
 }
 
-OPNMIDI_EXPORT void opn2_setVolumeRangeModel(OPN2_MIDIPlayer *device, int volumeModel)
+OPNMIDI_EXPORT void opn2_setVolumeRangeModel(struct OPN2_MIDIPlayer *device, int volumeModel)
 {
     if(!device)
         return;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
+    Synth &synth = *play->m_synth;
     play->m_setup.VolumeModel = volumeModel;
-    if(!play->m_synth.setupLocked())
+    if(!synth.setupLocked())
     {
         if(play->m_setup.VolumeModel == OPNMIDI_VolumeModel_AUTO)//Use bank default volume model
-            play->m_synth.m_volumeScale = (OPN2::VolumesScale)play->m_synth.m_insBankSetup.volumeModel;
+            synth.m_volumeScale = (Synth::VolumesScale)synth.m_insBankSetup.volumeModel;
         else
-            play->m_synth.setVolumeScaleModel(static_cast<OPNMIDI_VolumeModels>(volumeModel));
+            synth.setVolumeScaleModel(static_cast<OPNMIDI_VolumeModels>(volumeModel));
     }
+}
+
+OPNMIDI_EXPORT void opn2_setChannelAllocMode(struct OPN2_MIDIPlayer *device, int chanalloc)
+{
+    if(!device)
+        return;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    Synth &synth = *play->m_synth;
+    if(chanalloc < -1 || chanalloc >= OPNMIDI_ChanAlloc_Count)
+        chanalloc = OPNMIDI_ChanAlloc_AUTO;
+    synth.m_channelAlloc = static_cast<OPNMIDI_ChannelAlloc>(chanalloc);
+}
+
+OPNMIDI_EXPORT int opn2_getChannelAllocMode(struct OPN2_MIDIPlayer *device)
+{
+    if(!device)
+        return -1;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    return static_cast<int>(play->m_synth->m_channelAlloc);
 }
 
 OPNMIDI_EXPORT int opn2_getVolumeRangeModel(struct OPN2_MIDIPlayer *device)
@@ -418,7 +516,7 @@ OPNMIDI_EXPORT int opn2_getVolumeRangeModel(struct OPN2_MIDIPlayer *device)
         return -1;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_synth.getVolumeScaleModel();
+    return play->m_synth->getVolumeScaleModel();
 }
 
 OPNMIDI_EXPORT int opn2_openFile(OPN2_MIDIPlayer *device, const char *filePath)
@@ -476,6 +574,36 @@ OPNMIDI_EXPORT int opn2_openData(OPN2_MIDIPlayer *device, const void *mem, unsig
     return -1;
 }
 
+OPNMIDI_EXPORT void opn2_selectSongNum(struct OPN2_MIDIPlayer *device, int songNumber)
+{
+#ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
+    if(!device)
+        return;
+
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    play->m_sequencer->setSongNum(songNumber);
+#else
+    ADL_UNUSED(device);
+    ADL_UNUSED(songNumber);
+#endif
+}
+
+OPNMIDI_EXPORT int opn2_getSongsCount(struct OPN2_MIDIPlayer *device)
+{
+#ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
+    if(!device)
+        return 0;
+
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    return play->m_sequencer->getSongsCount();
+#else
+    ADL_UNUSED(device);
+    return 0;
+#endif
+}
+
 OPNMIDI_EXPORT const char *opn2_emulatorName()
 {
     return "<opn2_emulatorName() is deprecated! Use opn2_chipEmulatorName() instead!>";
@@ -487,8 +615,9 @@ OPNMIDI_EXPORT const char *opn2_chipEmulatorName(struct OPN2_MIDIPlayer *device)
     {
         MidiPlayer *play = GET_MIDI_PLAYER(device);
         assert(play);
-        if(!play->m_synth.m_chips.empty())
-            return play->m_synth.m_chips[0]->emulatorName();
+        Synth &synth = *play->m_synth;
+        if(!synth.m_chips.empty())
+            return synth.m_chips[0]->emulatorName();
     }
     return "Unknown";
 }
@@ -517,8 +646,9 @@ OPNMIDI_EXPORT int opn2_setRunAtPcmRate(OPN2_MIDIPlayer *device, int enabled)
     {
         MidiPlayer *play = GET_MIDI_PLAYER(device);
         assert(play);
+        Synth &synth = *play->m_synth;
         play->m_setup.runAtPcmRate = (enabled != 0);
-        if(!play->m_synth.setupLocked())
+        if(!synth.setupLocked())
             play->partialReset();
         return 0;
     }
@@ -584,7 +714,7 @@ OPNMIDI_EXPORT double opn2_totalTimeLength(struct OPN2_MIDIPlayer *device)
         return -1.0;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.timeLength();
+    return play->m_sequencer->timeLength();
 #else
     ADL_UNUSED(device);
     return -1.0;
@@ -598,7 +728,7 @@ OPNMIDI_EXPORT double opn2_loopStartTime(struct OPN2_MIDIPlayer *device)
         return -1.0;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.getLoopStart();
+    return play->m_sequencer->getLoopStart();
 #else
     ADL_UNUSED(device);
     return -1.0;
@@ -612,7 +742,7 @@ OPNMIDI_EXPORT double opn2_loopEndTime(struct OPN2_MIDIPlayer *device)
         return -1.0;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.getLoopEnd();
+    return play->m_sequencer->getLoopEnd();
 #else
     ADL_UNUSED(device);
     return -1.0;
@@ -626,7 +756,7 @@ OPNMIDI_EXPORT double opn2_positionTell(struct OPN2_MIDIPlayer *device)
         return -1.0;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.tell();
+    return play->m_sequencer->tell();
 #else
     ADL_UNUSED(device);
     return -1.0;
@@ -643,7 +773,7 @@ OPNMIDI_EXPORT void opn2_positionSeek(struct OPN2_MIDIPlayer *device, double sec
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
     play->realTime_panic();
-    play->m_setup.delay = play->m_sequencer.seek(seconds, play->m_setup.mindelay);
+    play->m_setup.delay = play->m_sequencer->seek(seconds, play->m_setup.mindelay);
     play->m_setup.carry = 0.0;
 #else
     ADL_UNUSED(device);
@@ -659,7 +789,7 @@ OPNMIDI_EXPORT void opn2_positionRewind(struct OPN2_MIDIPlayer *device)
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
     play->realTime_panic();
-    play->m_sequencer.rewind();
+    play->m_sequencer->rewind();
 #else
     ADL_UNUSED(device);
 #endif
@@ -672,7 +802,7 @@ OPNMIDI_EXPORT void opn2_setTempo(struct OPN2_MIDIPlayer *device, double tempo)
         return;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    play->m_sequencer.setTempo(tempo);
+    play->m_sequencer->setTempo(tempo);
 #else
     ADL_UNUSED(device);
     ADL_UNUSED(tempo);
@@ -698,7 +828,7 @@ OPNMIDI_EXPORT const char *opn2_metaMusicTitle(struct OPN2_MIDIPlayer *device)
         return "";
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.getMusicTitle().c_str();
+    return play->m_sequencer->getMusicTitle().c_str();
 #else
     ADL_UNUSED(device);
     return "";
@@ -713,7 +843,7 @@ OPNMIDI_EXPORT const char *opn2_metaMusicCopyright(struct OPN2_MIDIPlayer *devic
         return "";
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.getMusicCopyright().c_str();
+    return play->m_sequencer->getMusicCopyright().c_str();
 #else
     ADL_UNUSED(device);
     return 0;
@@ -727,7 +857,7 @@ OPNMIDI_EXPORT size_t opn2_metaTrackTitleCount(struct OPN2_MIDIPlayer *device)
         return 0;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.getTrackTitles().size();
+    return play->m_sequencer->getTrackTitles().size();
 #else
     ADL_UNUSED(device);
     return 0;
@@ -741,7 +871,7 @@ OPNMIDI_EXPORT const char *opn2_metaTrackTitle(struct OPN2_MIDIPlayer *device, s
         return "";
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    const std::vector<std::string> &titles = play->m_sequencer.getTrackTitles();
+    const std::vector<std::string> &titles = play->m_sequencer->getTrackTitles();
     if(index >= titles.size())
         return "INVALID";
     return titles[index].c_str();
@@ -760,7 +890,7 @@ OPNMIDI_EXPORT size_t opn2_metaMarkerCount(struct OPN2_MIDIPlayer *device)
         return 0;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.getMarkers().size();
+    return play->m_sequencer->getMarkers().size();
 #else
     ADL_UNUSED(device);
     return 0;
@@ -783,7 +913,7 @@ OPNMIDI_EXPORT Opn2_MarkerEntry opn2_metaMarker(struct OPN2_MIDIPlayer *device, 
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
 
-    const std::vector<MidiSequencer::MIDI_MarkerEntry> &markers = play->m_sequencer.getMarkers();
+    const std::vector<MidiSequencer::MIDI_MarkerEntry> &markers = play->m_sequencer->getMarkers();
     if(index >= markers.size())
     {
         marker.label = "INVALID";
@@ -812,8 +942,8 @@ OPNMIDI_EXPORT void opn2_setRawEventHook(struct OPN2_MIDIPlayer *device, OPN2_Ra
         return;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    play->m_sequencerInterface.onEvent = rawEventHook;
-    play->m_sequencerInterface.onEvent_userData = userData;
+    play->m_sequencerInterface->onEvent = rawEventHook;
+    play->m_sequencerInterface->onEvent_userData = userData;
 #else
     ADL_UNUSED(device);
     ADL_UNUSED(rawEventHook);
@@ -842,10 +972,41 @@ OPNMIDI_EXPORT void opn2_setDebugMessageHook(struct OPN2_MIDIPlayer *device, OPN
     play->hooks.onDebugMessage = debugMessageHook;
     play->hooks.onDebugMessage_userData = userData;
 #ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
-    play->m_sequencerInterface.onDebugMessage = debugMessageHook;
-    play->m_sequencerInterface.onDebugMessage_userData = userData;
+    play->m_sequencerInterface->onDebugMessage = debugMessageHook;
+    play->m_sequencerInterface->onDebugMessage_userData = userData;
 #endif
 }
+
+/* Set loop start hook */
+OPNMIDI_EXPORT void opn2_setLoopStartHook(struct OPN2_MIDIPlayer *device, OPN2_LoopPointHook loopStartHook, void *userData)
+{
+    if(!device)
+        return;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    play->hooks.onLoopStart = loopStartHook;
+    play->hooks.onLoopStart_userData = userData;
+#ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
+    play->m_sequencerInterface->onloopStart = loopStartHook;
+    play->m_sequencerInterface->onloopStart_userData = userData;
+#endif
+}
+
+/* Set loop end hook */
+OPNMIDI_EXPORT void opn2_setLoopEndHook(struct OPN2_MIDIPlayer *device, OPN2_LoopPointHook loopEndHook, void *userData)
+{
+    if(!device)
+        return;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    play->hooks.onLoopEnd = loopEndHook;
+    play->hooks.onLoopEnd_userData = userData;
+#ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
+    play->m_sequencerInterface->onloopEnd = loopEndHook;
+    play->m_sequencerInterface->onloopEnd_userData = userData;
+#endif
+}
+
 
 
 template <class Dst>
@@ -1010,66 +1171,65 @@ OPNMIDI_EXPORT int opn2_playFormat(OPN2_MIDIPlayer *device, int sampleCount,
 
     while(left > 0)
     {
-        {//
-            const double eat_delay = setup.delay < setup.maxdelay ? setup.delay : setup.maxdelay;
-            if(hasSkipped)
-            {
-                size_t samples = setup.tick_skip_samples_delay > sampleCount ? sampleCount : setup.tick_skip_samples_delay;
-                n_periodCountStereo = samples / 2;
-            }
-            else
-            {
-                setup.delay -= eat_delay;
-                setup.carry += double(setup.PCM_RATE) * eat_delay;
-                n_periodCountStereo = static_cast<ssize_t>(setup.carry);
-                setup.carry -= double(n_periodCountStereo);
-            }
+        const double eat_delay = setup.delay < setup.maxdelay ? setup.delay : setup.maxdelay;
+        if(hasSkipped)
+        {
+            size_t samples = setup.tick_skip_samples_delay > sampleCount ? sampleCount : setup.tick_skip_samples_delay;
+            n_periodCountStereo = samples / 2;
+        }
+        else
+        {
+            setup.delay -= eat_delay;
+            setup.carry += double(setup.PCM_RATE) * eat_delay;
+            n_periodCountStereo = static_cast<ssize_t>(setup.carry);
+            setup.carry -= double(n_periodCountStereo);
+        }
 
-            //if(setup.SkipForward > 0)
-            //    setup.SkipForward -= 1;
-            //else
-            {
-                if((player->m_sequencer.positionAtEnd()) && (setup.delay <= 0.0))
-                    break;//Stop to fetch samples at reaching the song end with disabled loop
+        //if(setup.SkipForward > 0)
+        //    setup.SkipForward -= 1;
+        //else
+        {
+            if((player->m_sequencer->positionAtEnd()) && (setup.delay <= 0.0))
+                break;//Stop to fetch samples at reaching the song end with disabled loop
 
-                ssize_t leftSamples = left / 2;
-                if(n_periodCountStereo > leftSamples)
-                {
-                    setup.tick_skip_samples_delay = (n_periodCountStereo - leftSamples) * 2;
-                    n_periodCountStereo = leftSamples;
-                }
-                //! Count of stereo samples
-                ssize_t in_generatedStereo = (n_periodCountStereo > 512) ? 512 : n_periodCountStereo;
-                //! Total count of samples
-                ssize_t in_generatedPhys = in_generatedStereo * 2;
-                //! Unsigned total sample count
-                //fill buffer with zeros
-                int32_t *out_buf = player->m_outBuf;
-                std::memset(out_buf, 0, static_cast<size_t>(in_generatedPhys) * sizeof(out_buf[0]));
-                unsigned int chips = player->m_synth.m_numChips;
-                if(chips == 1)
-                    player->m_synth.m_chips[0]->generate32(out_buf, (size_t)in_generatedStereo);
-                else/* if(n_periodCountStereo > 0)*/
-                {
-                    /* Generate data from every chip and mix result */
-                    for(size_t card = 0; card < chips; ++card)
-                        player->m_synth.m_chips[card]->generateAndMix32(out_buf, (size_t)in_generatedStereo);
-                }
-                /* Process it */
-                if(SendStereoAudio(sampleCount, in_generatedStereo, out_buf, gotten_len, out_left, out_right, format) == -1)
-                    return 0;
-
-                left -= (int)in_generatedPhys;
-                gotten_len += (in_generatedPhys) /* - setup.stored_samples*/;
-            }
-            if(hasSkipped)
+            ssize_t leftSamples = left / 2;
+            if(n_periodCountStereo > leftSamples)
             {
-                setup.tick_skip_samples_delay -= n_periodCountStereo * 2;
-                hasSkipped = setup.tick_skip_samples_delay > 0;
+                setup.tick_skip_samples_delay = (n_periodCountStereo - leftSamples) * 2;
+                n_periodCountStereo = leftSamples;
             }
-            else
-                setup.delay = player->Tick(eat_delay, setup.mindelay);
-        }//
+            //! Count of stereo samples
+            ssize_t in_generatedStereo = (n_periodCountStereo > 512) ? 512 : n_periodCountStereo;
+            //! Total count of samples
+            ssize_t in_generatedPhys = in_generatedStereo * 2;
+            //! Unsigned total sample count
+            //fill buffer with zeros
+            int32_t *out_buf = player->m_outBuf;
+            std::memset(out_buf, 0, static_cast<size_t>(in_generatedPhys) * sizeof(out_buf[0]));
+            Synth &synth = *player->m_synth;
+            unsigned int chips = synth.m_numChips;
+            if(chips == 1)
+                synth.m_chips[0]->generate32(out_buf, (size_t)in_generatedStereo);
+            else/* if(n_periodCountStereo > 0)*/
+            {
+                /* Generate data from every chip and mix result */
+                for(size_t card = 0; card < chips; ++card)
+                    synth.m_chips[card]->generateAndMix32(out_buf, (size_t)in_generatedStereo);
+            }
+            /* Process it */
+            if(SendStereoAudio(sampleCount, in_generatedStereo, out_buf, gotten_len, out_left, out_right, format) == -1)
+                return 0;
+
+            left -= (int)in_generatedPhys;
+            gotten_len += (in_generatedPhys) /* - setup.stored_samples*/;
+        }
+        if(hasSkipped)
+        {
+            setup.tick_skip_samples_delay -= n_periodCountStereo * 2;
+            hasSkipped = setup.tick_skip_samples_delay > 0;
+        }
+        else
+            setup.delay = player->Tick(eat_delay, setup.mindelay);
     }
 
     return static_cast<int>(gotten_len);
@@ -1100,48 +1260,49 @@ OPNMIDI_EXPORT int opn2_generateFormat(struct OPN2_MIDIPlayer *device, int sampl
     ssize_t n_periodCountStereo = 512;
 
     int     left = sampleCount;
-    double  delay = double(sampleCount) / double(setup.PCM_RATE);
+    double  delay = double(sampleCount / 2) / double(setup.PCM_RATE);
 
     while(left > 0)
     {
-        {//
-            const double eat_delay = delay < setup.maxdelay ? delay : setup.maxdelay;
-            delay -= eat_delay;
-            setup.carry += double(setup.PCM_RATE) * eat_delay;
-            n_periodCountStereo = static_cast<ssize_t>(setup.carry);
-            setup.carry -= double(n_periodCountStereo);
+        if(delay <= 0.0)
+            delay = double(left / 2) / double(setup.PCM_RATE);
+        const double eat_delay = delay < setup.maxdelay ? delay : setup.maxdelay;
+        delay -= eat_delay;
+        setup.carry += double(setup.PCM_RATE) * eat_delay;
+        n_periodCountStereo = static_cast<ssize_t>(setup.carry);
+        setup.carry -= double(n_periodCountStereo);
 
+        {
+            ssize_t leftSamples = left / 2;
+            if(n_periodCountStereo > leftSamples)
+                n_periodCountStereo = leftSamples;
+            //! Count of stereo samples
+            ssize_t in_generatedStereo = (n_periodCountStereo > 512) ? 512 : n_periodCountStereo;
+            //! Total count of samples
+            ssize_t in_generatedPhys = in_generatedStereo * 2;
+            //! Unsigned total sample count
+            //fill buffer with zeros
+            int32_t *out_buf = player->m_outBuf;
+            std::memset(out_buf, 0, static_cast<size_t>(in_generatedPhys) * sizeof(out_buf[0]));
+            Synth &synth = *player->m_synth;
+            unsigned int chips = synth.m_numChips;
+            if(chips == 1)
+                synth.m_chips[0]->generate32(out_buf, (size_t)in_generatedStereo);
+            else/* if(n_periodCountStereo > 0)*/
             {
-                ssize_t leftSamples = left / 2;
-                if(n_periodCountStereo > leftSamples)
-                    n_periodCountStereo = leftSamples;
-                //! Count of stereo samples
-                ssize_t in_generatedStereo = (n_periodCountStereo > 512) ? 512 : n_periodCountStereo;
-                //! Total count of samples
-                ssize_t in_generatedPhys = in_generatedStereo * 2;
-                //! Unsigned total sample count
-                //fill buffer with zeros
-                int32_t *out_buf = player->m_outBuf;
-                std::memset(out_buf, 0, static_cast<size_t>(in_generatedPhys) * sizeof(out_buf[0]));
-                unsigned int chips = player->m_synth.m_numChips;
-                if(chips == 1)
-                    player->m_synth.m_chips[0]->generate32(out_buf, (size_t)in_generatedStereo);
-                else/* if(n_periodCountStereo > 0)*/
-                {
-                    /* Generate data from every chip and mix result */
-                    for(size_t card = 0; card < chips; ++card)
-                        player->m_synth.m_chips[card]->generateAndMix32(out_buf, (size_t)in_generatedStereo);
-                }
-                /* Process it */
-                if(SendStereoAudio(sampleCount, in_generatedStereo, out_buf, gotten_len, out_left, out_right, format) == -1)
-                    return 0;
-
-                left -= (int)in_generatedPhys;
-                gotten_len += (in_generatedPhys) /* - setup.stored_samples*/;
+                /* Generate data from every chip and mix result */
+                for(size_t card = 0; card < chips; ++card)
+                    synth.m_chips[card]->generateAndMix32(out_buf, (size_t)in_generatedStereo);
             }
+            /* Process it */
+            if(SendStereoAudio(sampleCount, in_generatedStereo, out_buf, gotten_len, out_left, out_right, format) == -1)
+                return 0;
 
-            player->TickIterators(eat_delay);
-        }//...
+            left -= (int)in_generatedPhys;
+            gotten_len += (in_generatedPhys) /* - setup.stored_samples*/;
+        }
+
+        player->TickIterators(eat_delay);
     }
 
     return static_cast<int>(gotten_len);
@@ -1170,7 +1331,7 @@ OPNMIDI_EXPORT int opn2_atEnd(struct OPN2_MIDIPlayer *device)
         return 1;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return (int)play->m_sequencer.positionAtEnd();
+    return (int)play->m_sequencer->positionAtEnd();
 #else
     ADL_UNUSED(device);
     return 1;
@@ -1184,7 +1345,7 @@ OPNMIDI_EXPORT size_t opn2_trackCount(struct OPN2_MIDIPlayer *device)
         return 0;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    return play->m_sequencer.getTrackCount();
+    return play->m_sequencer->getTrackCount();
 #else
     ADL_UNUSED(device);
     return 0;
@@ -1198,7 +1359,7 @@ OPNMIDI_EXPORT int opn2_setTrackOptions(struct OPN2_MIDIPlayer *device, size_t t
         return -1;
     MidiPlayer *play = GET_MIDI_PLAYER(device);
     assert(play);
-    MidiSequencer &seq = play->m_sequencer;
+    MidiSequencer &seq = *play->m_sequencer;
 
     unsigned enableFlag = trackOptions & 3;
     trackOptions &= ~3u;
@@ -1228,6 +1389,25 @@ OPNMIDI_EXPORT int opn2_setTrackOptions(struct OPN2_MIDIPlayer *device, size_t t
     ADL_UNUSED(device);
     ADL_UNUSED(trackNumber);
     ADL_UNUSED(trackOptions);
+    return -1;
+#endif
+}
+
+OPNMIDI_EXPORT int opn2_setChannelEnabled(struct OPN2_MIDIPlayer *device, size_t channelNumber, int enabled)
+{
+#ifndef OPNMIDI_DISABLE_MIDI_SEQUENCER
+    if(!device)
+        return -1;
+    MidiPlayer *play = GET_MIDI_PLAYER(device);
+    assert(play);
+    MidiSequencer &seq = *play->m_sequencer;
+    if(!seq.setChannelEnabled(channelNumber, (bool)enabled))
+        return -1;
+    return 0;
+#else
+    ADL_UNUSED(device);
+    ADL_UNUSED(channelNumber);
+    ADL_UNUSED(enabled);
     return -1;
 #endif
 }

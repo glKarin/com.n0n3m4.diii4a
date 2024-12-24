@@ -178,16 +178,29 @@ MIDISong2::MIDISong2 (const uint8_t* data, size_t len)
 //
 //==========================================================================
 
+enum
+{
+	EMIDI_GeneralMIDI  = 0,
+	EMIDI_SoundCanvas  = 1,
+	EMIDI_AWE32        = 2,
+	EMIDI_WaveBlaster  = 3,
+	EMIDI_SoundBlaster = 4,
+	EMIDI_ProAudio     = 5,
+	EMIDI_SoundMan16   = 6,
+	EMIDI_Adlib        = 7,
+	EMIDI_Soundscape   = 8,
+	EMIDI_Ultrasound   = 9,
+};
+
 void MIDISong2::CheckCaps(int tech)
 {
-	DesignationMask = 0xFF0F;
 	if (tech == MIDIDEV_FMSYNTH)
 	{
-		DesignationMask = 0x00F0;
+		DesignationMask = 1 << EMIDI_Adlib;
 	}
-	else if (tech == MIDIDEV_MIDIPORT)
+	else
 	{
-		DesignationMask = 0x0001;
+		DesignationMask = 1 << EMIDI_GeneralMIDI;
 	}
 }
 
@@ -443,7 +456,12 @@ uint32_t *MIDISong2::SendCommand (uint32_t *events, TrackInfo *track, uint32_t d
 			case 111:	// EMIDI Track Exclusion - InitBeat only
 				if (track->PlayedTime < (uint32_t)Division)
 				{
-					if (track->Designated && data2 <= 9)
+					if (!track->Designated)
+					{
+						track->Designation = ~0;
+						track->Designated = true;
+					}
+					if (data2 <= 9)
 					{
 						track->Designation &= ~(1 << data2);
 					}
